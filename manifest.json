@@ -1,49 +1,21 @@
 {
-  "name": "CHANGE THIS : Extension boilerplate",
-  "version": "0.0.1.6",
-  "manifest_version": 2,
-  "description": "This extension was created with the awesome extensionizr.com",
-  "homepage_url": "http://extensionizr.com",
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  },
-  "default_locale": "en",
+  "name": "Pinboarder",
+  "version": "0.0.1222.11",
+  "author": "Fareed Stevenson",
+  "description": "Pinboard Overlay",
   "background": {
+    "persistent": false,
     "scripts": [
       "src/shared/config.js",
       "src/options_custom/lib/store.js",
       "src/bg/background.js"
-    ],
-    "persistent": true
+    ]
   },
-  "options_page": "src/options_custom/index.html",
   "browser_action": {
     "default_icon": "icons/icon19.png",
     "default_title": "browser action demo",
     "default_popup": "src/browser_action/browser_action.html"
   },
-  "permissions": [
-    "bookmarks",
-    "chrome://favicon/",
-    "clipboardRead",
-    "clipboardWrite",
-    "contentSettings",
-    "contextMenus",
-    "cookies",
-    // "fileBrowserHandler",
-    "tts",
-    "ttsEngine",
-    "history",
-    "idle",
-    "management",
-    "notifications",
-    "tabs",
-    "geolocation",
-    "http://*/*",
-    "https://*/*"
-  ],
   "content_scripts": [
     {
       "matches": [
@@ -57,5 +29,37 @@
         "src/inject/inject.js"
       ]
     }
+  ],
+  "default_locale": "en",
+  "homepage_url": "https://phomento.com",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "manifest_version": 2,
+  "options_page": "src/options_custom/index.html",
+  "permissions": [
+    "alarms",
+    "bookmarks",
+    "chrome://favicon/",
+    "clipboardRead",
+    "clipboardWrite",
+    "contentSettings",
+    "contextMenus",
+    "cookies",
+    // "fileBrowserHandler",
+    "geolocation",
+    "history",
+    "http://*/*",
+    "https://*/*",
+    "idle",
+    "management",
+    "notifications",
+    "storage",
+    "tabs",
+    "tts",
+    "ttsEngine",
+    "webNavigation"
   ]
 }
