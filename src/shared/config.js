@@ -20,10 +20,12 @@ const log_make_site_tags_row_element = true; //d:f
 const log_pin_on_load = true; //d:f
 const log_pin_on_save = true; //d:f
 const log_pin_on_store = true; //d:f
+const log_pinurl_on_tag_delete = false;
 const log_read_current_response = true; //d:f
 const log_site_url_on_pin_delete = true; //d:f
 const log_site_url_on_pin_save = true; //d:f
 const log_site_url_on_site_load = true; //d:f
+const log_site_url_on_tag_delete = true; //d:f
 const log_title_on_pin_load = true; //d:f
 const log_version_on_extn_install = true; //d:f
 const log_version_on_page_load = true; //d:f
@@ -40,8 +42,6 @@ const ux_recent_row_with_input = true;
 // constants
 //
 const msg_b2f_clicked_browser_action = "b2f_clicked_browser_action";
-// const msg_b2f_block_url = 'b2f_block_url';
-const msg_f2b_block_url = "f2b_block_url";
 const msg_f2b_delete_pin = "f2b_delete_pin";
 const msg_f2b_delete_tag = "f2b_delete_tag";
 const msg_f2b_inhibit_url_append = "f2b_update_inhibit"
