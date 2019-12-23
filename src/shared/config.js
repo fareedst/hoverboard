@@ -1,3 +1,5 @@
+const api_path = 'https://api.pinboard.in/v1/';
+
 const display_overlay_headings = true; // default: true
 const display_overlay_on_page_load = true;
 const display_overlay_on_page_load_only_if_not_tagged = false;
@@ -18,6 +20,7 @@ const log_make_site_tags_row_element = true;  ///
 const log_pin_on_load = true; //d:f
 const log_pin_on_store = true; //d:f
 const log_read_current_response = true;
+const log_site_url_on_pin_delete = false;
 const log_site_url_on_site_load = true; //d:f
 const log_title_on_pin_load = true; //d:f
 const log_version_on_extn_install = true; //d:f

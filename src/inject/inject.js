@@ -12,72 +12,12 @@ const svg_av_production_ic_not_interested_24px = "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy
 const svg_content_production_ic_clear_24px = 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBkPSJNMTkgNi40MUwxNy41OSA1IDEyIDEwLjU5IDYuNDEgNSA1IDYuNDEgMTAuNTkgMTIgNSAxNy41OSA2LjQxIDE5IDEyIDEzLjQxIDE3LjU5IDE5IDE5IDE3LjU5IDEzLjQxIDEyeiIvPjwvc3ZnPg==';
 // const svg_content_production_ic_clear_24px_green = 'PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0Ij4KCTxnIGNvbG9yPSJncmVlbiI+CiAgCQk8cGF0aCBkPSJNMTkgNi40MUwxNy41OSA1IDEyIDEwLjU5IDYuNDEgNSA1IDYuNDEgMTAuNTkgMTIgNSAxNy41OSA2LjQxIDE5IDEyIDEzLjQxIDE3LjU5IDE5IDE5IDE3LjU5IDEzLjQxIDEyeiIvPgoJPC9nPgo8L3N2Zz4=';
 
-async function read_local_settings() {
-  if (noisy_settings) { console.log('read_local_settings()'); }
-  return new Promise(async (resolve, reject) => {
-    chrome.runtime.sendMessage(
-      { action: msg_f2b_read_options },
-      response => {
-        if (noisy_settings) { console.log('msg_f2b_read_options response:'); console.dir(response); }
-        resolve(response);
-      }
-    );
-  });
-}
-
-chrome.extension.sendMessage(
-  { action: msg_inject_on_complete },
-  response => {
-  	const readyStateCheckInterval = setInterval(async () => {
-    	if (document.readyState === "complete") {
-    		clearInterval(readyStateCheckInterval);
-    		if (noisy) { console.log("Hello. This message was sent from scripts/inject.js"); console.dir(document); }
-
-        await new Promise(async (resolve, reject) => {
-          let auth_settings = await read_local_settings();
-          if (noisy_auth) { console.log('msg_inject_on_complete auth_settings:'); console.dir(auth_settings); }
-
-          // chrome.runtime.sendMessage(
-          //   { action: msg_f2b_inhibit_url_append,
-          //     inhibit: '1' },
-          //   response => {
-          //     if (noisy_settings) { console.log('msg_f2b_inhibit_url_append response:'); console.dir(response); }
-          //     resolve(response);
-          //   }
-          // );
-
-          // chrome.runtime.sendMessage(
-          //   { action: msg_f2b_read_pin },
-          //   response => {
-          //     if (noisy_settings) { console.log('msg_f2b_read_pin response:'); console.dir(response); }
-          //     resolve(response);
-          //   }
-          // );
-
-          if (log_version_on_page_load) {
-            let manifestData = chrome.runtime.getManifest();
-            console.log(manifestData.name + ' version: ' + manifestData.version);
-            // console.log(manifestData.default_locale);
-          }
-          if (noisy) { console.dir(response); }
-
-          if (noisy) { console.log('inject.js sendMessage document complete'); }
-          if (noisy) { console.log(document.location.href.replace(/#.#$/, '')); }
-          // chrome.pageAction.show(sender.tab.id);
-
-          if (log_site_url_on_site_load) console.log('url: ' + document.location.href);
-
-          if (display_overlay_on_page_load) {
-            load_site_ux(true, inhibit_sites_on_page_load);
-          }
-          resolve();
-        });
-      }
-    }, 10);
-  }
-);
-
 var allit;
+
+function better_description(description, document_title) {
+  if (description == '' || description == 'no title') return document_title;
+  return description;
+}
 
 function load_site_ux(page_load, use_block) {
   if (noisy) { console.log('inject.js load_site_ux(page_load: ' + page_load + ', use_block: ' + use_block + ')'); }
@@ -222,6 +162,7 @@ function make_recent_anchor(description, time, extended, shared, toread, tags, u
 
     }
     else if ($(event.target).hasClass('current_delete_pin')) {
+      if (noisy) { console.log('inject.js current_delete_pin click()'); }
       chrome.runtime.sendMessage(
         {
           action: msg_f2b_delete_pin,
@@ -236,7 +177,7 @@ function make_recent_anchor(description, time, extended, shared, toread, tags, u
           value: value
         },
         response => {
-          if (noisy) { console.log('inject.js current_delete_pin click()'); console.dir(response); }
+          if (noisy) { console.log('inject.js current_delete_pin response:'); console.dir(response); }
           $(event.target).attr('class', 'current_normal_pin');
           refresh_it(url);
         }
@@ -507,3 +448,75 @@ function place_in_header(doc, list) {
   header.appendChild(wrap);
   if (noisy) { console.log('<- place_in_header()'); }
 }
+
+async function read_local_settings() {
+  if (noisy_settings) { console.log('read_local_settings()'); }
+  return new Promise(async (resolve, reject) => {
+    chrome.runtime.sendMessage(
+      { action: msg_f2b_read_options },
+      response => {
+        if (noisy_settings) { console.log('msg_f2b_read_options response:'); console.dir(response); }
+        resolve(response);
+      }
+    );
+  });
+}
+
+function refresh_it(url) {
+  if (noisy) { console.log('refresh_it()'); }
+
+  $('#overlay').remove();
+  load_site_ux(false, false);
+}
+
+chrome.extension.sendMessage(
+  { action: msg_inject_on_complete },
+  response => {
+    const readyStateCheckInterval = setInterval(async () => {
+      if (document.readyState === "complete") {
+        clearInterval(readyStateCheckInterval);
+        if (noisy) { console.log("Hello. This message was sent from scripts/inject.js"); console.dir(document); }
+
+        await new Promise(async (resolve, reject) => {
+          let auth_settings = await read_local_settings();
+          if (noisy_auth) { console.log('msg_inject_on_complete auth_settings:'); console.dir(auth_settings); }
+
+          // chrome.runtime.sendMessage(
+          //   { action: msg_f2b_inhibit_url_append,
+          //     inhibit: '1' },
+          //   response => {
+          //     if (noisy_settings) { console.log('msg_f2b_inhibit_url_append response:'); console.dir(response); }
+          //     resolve(response);
+          //   }
+          // );
+
+          // chrome.runtime.sendMessage(
+          //   { action: msg_f2b_read_pin },
+          //   response => {
+          //     if (noisy_settings) { console.log('msg_f2b_read_pin response:'); console.dir(response); }
+          //     resolve(response);
+          //   }
+          // );
+
+          if (log_version_on_page_load) {
+            let manifestData = chrome.runtime.getManifest();
+            console.log(manifestData.name + ' version: ' + manifestData.version);
+            // console.log(manifestData.default_locale);
+          }
+          if (noisy) { console.dir(response); }
+
+          if (noisy) { console.log('inject.js sendMessage document complete'); }
+          if (noisy) { console.log(document.location.href.replace(/#.#$/, '')); }
+          // chrome.pageAction.show(sender.tab.id);
+
+          if (log_site_url_on_site_load) console.log('url: ' + document.location.href);
+
+          if (display_overlay_on_page_load) {
+            load_site_ux(true, inhibit_sites_on_page_load);
+          }
+          resolve();
+        });
+      }
+    }, 10);
+  }
+);

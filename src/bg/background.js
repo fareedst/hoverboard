@@ -47,6 +47,23 @@ chrome.extension.onMessage.addListener(
     } else if (request.action === msg_inject_on_complete) {
       sendResponse(true);
 
+    } else if (request.action === msg_f2b_delete_pin) {
+      if (log_site_url_on_pin_delete) { console.log('log_site_url_on_pin_delete: ' + request.url); }
+      var args = 'url=' + encodeURIComponent(request.url);
+      var pinurl = api_path + 'posts/delete?' + args + '&' + auth_token_set();
+      if (noisy) { console.log('pinurl: ' + pinurl); }
+      var xhr = new XMLHttpRequest(); 
+      xhr.open('GET', pinurl);
+      xhr.onreadystatechange = (event) => {
+        if (noisy) { console.log('background.js GET delete xhr.onreadystatechange()'); }
+        if (event.target.readyState == 4 && event.target.status == 200) {
+          var data = xhr.responseXML;
+          if (noisy) { console.dir(data); }
+          sendResponse(data);
+        }
+      }
+      xhr.send();
+
     } else if (request. action === msg_f2b_inhibit_url_append) {
       let settings = new Store('settings');
       g_auth_settings = {
