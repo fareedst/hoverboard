@@ -7,10 +7,10 @@
     "persistent": false,
     "scripts": [
       "src/shared/jquery-3.4.1.slim.min.js",
-      "src/options_custom/lib/store.js",
       "src/shared/config.js",
       "src/options_custom/lib/store.js",
-      "src/bg/background.js"
+      "src/bg/background.js",
+      "src/bg/pinboard.js"
     ]
   },
   "browser_action": {
