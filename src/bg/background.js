@@ -64,7 +64,7 @@ chrome.extension.onMessage.addListener(
       }
       xhr.send();
 
-    } else if (request. action === msg_f2b_inhibit_url_append) {
+    } else if (request.action === msg_f2b_inhibit_url_append) {
       let settings = new Store('settings');
       g_auth_settings = {
         inhibit: (settings.get('inhibit') || '') + '\n' + request.inhibit,

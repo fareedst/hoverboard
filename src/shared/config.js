@@ -87,11 +87,11 @@ function make_recent_anchor(description, time, extended, shared, toread, tags, u
     else if ($(event.target).hasClass('current_block_url')) {
       chrome.runtime.sendMessage(
         {
-          action: msg_f2b_block_url,
-          url: url
+          action: msg_f2b_inhibit_url_append,
+          inhibit: url
         },
         response => {
-          if (noisy) { console.log('inject.js msg_f2b_block_url response:'); console.dir(response); }
+          if (noisy) { console.log('inject.js msg_f2b_inhibit_url_append response:'); console.dir(response); }
           $('#overlay').remove();
           // $(event.target).attr('class', 'current_normal_url');
           // refresh_it(url);
