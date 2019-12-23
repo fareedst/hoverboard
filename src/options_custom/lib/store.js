@@ -18,6 +18,7 @@
     };
     
     Store.prototype.get = function (name) {
+        if (noisy_store) { console.log('get(name: ' + name + ')'); }
         name = "store." + this.name + "." + name;
         if (localStorage.getItem(name) === null) { return undefined; }
         try {
@@ -28,6 +29,7 @@
     };
     
     Store.prototype.set = function (name, value) {
+        if (noisy_store) { console.log('set(name: ' + name + ', value)'); console.dir(value); }
         if (value === undefined) {
             this.remove(name);
         } else {

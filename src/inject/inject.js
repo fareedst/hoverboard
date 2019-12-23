@@ -10,6 +10,10 @@ chrome.extension.sendMessage({}, response => {
         console.log("Hello. This message was sent from scripts/inject.js");
   		  console.dir(document);
       }
+
+      new Promise(async (resolve, reject) => {
+        resolve();
+      });
     }
   }, 10);
 });
