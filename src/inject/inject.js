@@ -19,6 +19,44 @@ function better_description(description, document_title) {
   return description;
 }
 
+function display_heading_tags() {
+  if (noisy) { console.log('allit:');  console.dir(allit); }
+  var tagstr = $('h1,h2,h3,h4').map(function() {
+    return $(this).text();
+  }).get();
+  tagstr += ' ' + document.title;
+  if (noisy) console.log('tagstr:' + tagstr);
+
+  var tags = tagstr.replace(',', ' ').split(/([^\w]+)/).filter( e => e.length > 1);
+  if (noisy) { console.log('tags'); console.dir(tags); }
+  tags = tags.flatMap(s => (s == s.toLowerCase() ? [s] : [s, s.toLowerCase()]));
+  if (noisy) { console.log('tags'); console.dir(tags); }
+  oc = occurrence(tags);
+  if (noisy) { console.log('oc'); console.dir(oc); }
+  ok1 = Object.keys(oc).map(k => [k, oc[k].length]);
+  if (noisy) { console.log('ok1'); console.dir(ok1); }
+  ok2 = ok1.sort((a, b) => b[1] - a[1]);
+  if (noisy) { console.log('ok2'); console.dir(ok2); }
+  ok = ok2.map(x => x[0]);
+  if (noisy) { console.log('ok'); console.dir(ok); }
+
+  response = {
+    action: "read_heading_tags",
+    description: allit.description,
+    time: allit.time,
+    hash: allit.hash,
+    extended: allit.extended,
+    shared: allit.shared,
+    toread: allit.toread,
+    site_tags: Object.assign([], allit.site_tags),
+    tags: Object.assign([], ok),
+    url: allit.url
+  };
+  if (noisy) { console.log('inject.js read_heading_tags response:'); console.dir(response); }
+
+  tablify_response('Headings:', response, allit.tags);
+}
+
 function load_site_ux(page_load, use_block) {
   if (noisy) { console.log('inject.js load_site_ux(page_load: ' + page_load + ', use_block: ' + use_block + ')'); }
   chrome.runtime.sendMessage(
@@ -95,142 +133,6 @@ console.log('in.js 372')
     }
   );
 console.log('in.js 380')
-}
-
-function make_recent_anchor(description, time, extended, shared, toread, tags, url, value) {
-  if (noisy) { console.log('inject.js make_recent_anchor()'); }
-  if (log_anchor_on_create) { console.log('log_anchor_on_create() description: ' + description); console.log('time: ' + time); console.log('extended: ' + extended); console.log('shared: ' + shared); console.log('toread: ' + toread); console.log('tags: ' + tags); console.log('url: ' + url); console.log('value: ' + value); }
-  // var anchor = document.createElement('a');
-
-  var clickable;
-  if (typeof value === 'string') {
-// console.log('value is string');
-    var anchor = document.createElement('a');
-    anchor.textContent = value;
-    clickable = anchor;
-  } else {
-// console.log('value is object');
-// console.dir(value);
-    clickable = value;
-    value = '';
-  }
-
-  if (recent_in_horizontal_menu) { clickable.setAttribute('class', 'pure-menu-link'); }
-  $(clickable).click(event => {
-    if (noisy) { console.log('make_recent_anchor anchor.click()'); console.dir(event); }
-    event.preventDefault();
-// console.dir(event.target);
-// console.dir($(event.target)[0]);
-// console.log('dt'+ $(event.target).hasClass('current_delete_tag'));
-// console.log('nt'+ $(event.target).hasClass('current_normal_tag'));
-    if ($(event.target).hasClass('current_normal_pin')) {
-      $(event.target).attr('class', 'current_delete_pin');
-    }
-    else if ($(event.target).hasClass('current_normal_url')) {
-      $(event.target).attr('class', 'current_block_url');
-    }
-    else if ($(event.target).hasClass('current_block_url')) {
-      chrome.runtime.sendMessage(
-        {
-          action: msg_f2b_block_url,
-          url: url
-        },
-        response => {
-          if (noisy) { console.log('inject.js msg_f2b_block_url response:'); console.dir(response); }
-          $('#overlay').remove();
-          // $(event.target).attr('class', 'current_normal_url');
-          // refresh_it(url);
-        }
-      );
-
-      // settings = new Store("settings");
-      // let block = settings.get('inhibit');
-      // block += '\n' + url;
-      // settings.set('inhibit', block);
-      // // load_site_ux(false, false);
-      // refresh_it(url);
-
-      // // Send a message to the active tab
-      // chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-      //   if (noisy) { console.log('bg.js browserAction.onClicked'); }
-      //   var activeTab = tabs[0];
-      //   chrome.tabs.sendMessage(activeTab.id, {
-      //     message: msg_b2f_block_url,
-      //     url: url 
-      //   });
-      // });
-
-    }
-    else if ($(event.target).hasClass('current_delete_pin')) {
-      if (noisy) { console.log('inject.js current_delete_pin click()'); }
-      chrome.runtime.sendMessage(
-        {
-          action: msg_f2b_delete_pin,
-          description: better_description(description, document.title),
-          time: time,
-          hash: "", /// hash,
-          extended: extended,
-          shared: shared,
-          toread: toread,
-          tags: tags,
-          url: url,
-          value: value
-        },
-        response => {
-          if (noisy) { console.log('inject.js current_delete_pin response:'); console.dir(response); }
-          $(event.target).attr('class', 'current_normal_pin');
-          refresh_it(url);
-        }
-      );
-    }
-    else if ($(event.target).hasClass('current_normal_tag')) {
-      $(event.target).attr('class', 'current_delete_tag');
-    }
-    else if ($(event.target).hasClass('current_delete_tag')) {
-      $(event.target).attr('class', 'current_normal_tag');
-      chrome.runtime.sendMessage(
-        {
-          action: msg_f2b_delete_tag,
-          description: better_description(description, document.title),
-          time: time,
-          hash: "", /// hash,
-          extended: extended,
-          shared: shared,
-          toread: toread,
-          tags: tags,
-          url: url,
-          value: value
-        },
-        response => {
-          if (noisy) { console.log('inject.js current_delete_tag click()'); console.dir(response); }
-          refresh_it(url);
-        }
-      );
-    }
-    else {
-      if (log_anchor_on_click) { console.log('description: ' + description); console.log('time: ' + time); console.log('extended: ' + extended); console.log('shared: ' + shared); console.log('toread: ' + toread); console.log('tags: ' + tags); console.log('url: ' + url); console.log('value: ' + value); }
-
-      chrome.runtime.sendMessage(
-        {
-          action: msg_f2b_save_tag,
-          description: better_description(description, document.title),
-          time: time,
-          hash: "", /// hash,
-          extended: extended,
-          shared: shared,
-          toread: toread,
-          tags: tags,
-          url: url,
-          value: value
-        },
-        response => {
-          if (noisy) { console.log('inject.js make_recent_anchor anchor click()'); console.dir(response); }
-          refresh_it(url);
-        }
-      );
-    }
-  });
-  return clickable;
 }
 
 function make_site_tags_row_element(arr, allit) {
@@ -333,7 +235,7 @@ function make_site_tags_row_element(arr, allit) {
               refresh_it(allit.url);
             }
           );
-          return false;
+          return true; // keep port open
         }
     });
     tr1.appendChild(input);
@@ -408,6 +310,24 @@ function make_site_tags_row_element(arr, allit) {
   return table;
 }
 
+function occurrence(array) {
+    "use strict";
+    var result = {};
+    if (array instanceof Array) {
+        array.forEach(function (v, i) {
+            if (!result[v]) {
+                result[v] = [i];
+            } else {
+                result[v].push(i);
+            }
+        });
+        Object.keys(result).forEach(function (v) {
+            result[v] = {"index": result[v], "length": result[v].length};
+        });
+    }
+    return result;
+};
+
 function place_in_header(doc, list) {
   // var body = $('body');
   if (noisy) { console.log('place_in_header()'); }
@@ -467,6 +387,90 @@ function refresh_it(url) {
 
   $('#overlay').remove();
   load_site_ux(false, false);
+}
+
+function tablify_into_container(response, container, known_list) {
+  var tags = response.tags;
+  var added = 0;
+  // var dlisst = [];  
+  tags.forEach((value, index) => {
+    if (noisy) console.log('inject.js read_recent_tags response cb() tags ' + index + ':' + value);
+    if (added < recent_tags_count_max) {
+
+      // var known_list = []; ///tags ? tags.split(' ') : [];
+      // var curr_tags, url;
+
+      const matched = (known_list.indexOf(value) >= 0);
+      if (!matched) {
+        added++;
+        var cell;
+        if (recent_as_table) {
+          cell = document.createElement('td');
+        } else {
+          cell = document.createElement('li');
+        }
+        container.appendChild(cell);
+
+        if (recent_in_horizontal_menu) { cell.setAttribute('class', 'pure-menu-item'); }
+
+        var tag;
+        if (true) {
+          // console.log('allit:');
+          // console.dir(allit);
+          tag = make_recent_anchor(response.description, response.time, response.extended, response.shared, response.toread, response.site_tags, response.url, value);
+        }
+        else {
+          if (noisy) console.log('make_tag_text()');
+          // console.log('description: ' + description); // console.log('time: ' + time); // console.log('extended: ' + extended); // console.log('shared: ' + shared); // console.log('toread: ' + toread); // console.log('tags: ' + tags); // console.log('url: ' + url); // console.log('value: ' + value);
+          tag = document.createElement('div');
+          // if (recent_in_horizontal_menu) { tag.setAttribute('class', 'pure-menu-link'); }
+          tag.textContent = value;
+        }
+
+        cell.appendChild(tag)
+        // dlisst.push(value);
+      }
+    }
+  });
+}
+
+function tablify_response(name, response, known_list) {
+  var tags = response.tags;
+  if (noisy) { console.log('tags:'); console.dir(tags); }
+  if (noisy) { console.log('tags_html:'); console.dir(response.tags_html); }
+
+  if (tags && tags.length > 0) {
+    if (noisy) { console.log('inject.js read_recent_tags response cb() tags'); }
+
+    var container;
+    var major;
+    if (recent_as_table) {
+      var table = document.createElement('table');
+      table.setAttribute('class', 'pure-table pure-table-horizontal');
+      var tbody = document.createElement('tbody');
+      tbody.setAttribute('class', '');
+      var tr1 = document.createElement('tr');
+      tr1.setAttribute('class', 'pure-table-odd');
+      tbody.appendChild(tr1);
+      table.appendChild(tbody);
+
+      var td = document.createElement('td');
+      $(td).attr('class', 'row_heading');
+      td.textContent = name;
+      tr1.appendChild(td);
+
+      container = tr1;
+      major = table;
+    } else {
+      container = document.createElement('ul');
+      major = container;
+    }
+    container.setAttribute('id', 'recent_list');
+    if (recent_in_horizontal_menu) { container.setAttribute('class', 'pure-menu-list'); }
+    // var known_list = [];
+    tablify_into_container(response, container, known_list);
+    place_in_header(document, major);
+  }
 }
 
 chrome.extension.sendMessage(

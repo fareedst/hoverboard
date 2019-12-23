@@ -215,8 +215,64 @@ if (noisy) { console.log("bg.js 111"); }
           });
         });
       }
+
+    } else if (request.action === msg_f2b_read_recent) {
+      if (noisy) { console.log(msg_f2b_read_recent + ' request:'); }
+      if (noisy) { console.dir(request); }
+      read_recent_tags(request.description, request.time, request.extended, request.shared, request.tags, request.toread, sender.tab.url)
+        .then(data => {
+          if (noisy) { console.log('background.js ' + msg_f2b_read_recent + ' cb()\ndata:'); }
+          if (noisy) { console.dir(data); }
+          if (noisy) { console.log('background.js ' + msg_f2b_read_recent + ' responding'); }
+          sendResponse(Object.assign(
+            {
+              description: request.description || "",
+              time: request.time || "",
+              hash: request.hash || "",
+              extended: request.extended || "",
+              shared: request.shared || "",
+              tags: request.tags || "",
+              toread: request.toread || "",
+              url: request.url || ""
+            },
+            data));
+          if (noisy) { console.log('<- background.js ' + msg_f2b_read_recent + ' cb()'); }
+        });
+
+    } else if (request.action === msg_f2b_save_tag) {
+      // alert('@' + value);
+      if (log_site_url_on_pin_save) { console.log('site_url_on_pin_save: ' + request.url); }
+      if (log_pin_on_save) { console.log('log_pin_on_save:'); console.dir(request); }
+
+      var args = 'replace=yes';
+      args = args + '&url=' + encodeURIComponent(request.url);
+      if (request.description !== '') args = args + '&description=' + encodeURIComponent(request.description);
+      // args = args + '&tags=' + (tags + ' ' + value).replace(' ', '%20').replace('\n', '%20').replace('\r', '');
+      args = args + '&tags=' + encodeURIComponent(
+        (request.tags ? request.tags : '') + (request.value ? ' ' + request.value : '')
+      );
+      if (request.time) args = args + '&dt=' + encodeURIComponent(request.time);
+      if (request.shared) args = args + '&shared=' + encodeURIComponent(request.shared);
+      if (request.toread) args = args + '&toread=' + encodeURIComponent(request.toread);
+      args = args + '&extended=' + encodeURIComponent(request.extended);
+      if (noisy) { console.log('args: ' + args); }
+      var pinurl = api_path + "posts/add?" + args + "&" + auth_token_set();
+      if (noisy) { console.log('pinurl: ' + pinurl); }
+      var xhr = new XMLHttpRequest(); 
+      xhr.open('POST', pinurl);
+      xhr.onreadystatechange = function (event) {   
+        if (noisy) { console.log('background.js POST xhr.onreadystatechange()'); }
+        if (event.target.readyState == 4 && event.target.status == 200) {
+          var data = xhr.responseXML;
+          if (noisy) { console.dir(data); }
+          sendResponse(data);
+        }
+      }
+      xhr.send();
+
     } else {
 if (noisy) { console.log("bg.js 127"); }
+      console.error('unrecognized request.action: ' + request.action);
       sendResponse(false);
     }
     return true; // keep port open
