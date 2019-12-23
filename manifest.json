@@ -6,6 +6,7 @@
   "background": {
     "persistent": false,
     "scripts": [
+      "src/shared/jquery-3.4.1.slim.min.js",
       "src/shared/config.js",
       "src/options_custom/lib/store.js",
       "src/bg/background.js"
@@ -22,9 +23,11 @@
         "<all_urls>"
       ],
       "css": [
+        "src/inject/pure-min.css",
         "src/inject/inject.css"
       ],
       "js": [
+        "src/shared/jquery-3.4.1.slim.min.js",
         "src/shared/config.js",
         "src/inject/inject.js"
       ]
