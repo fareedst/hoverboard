@@ -1,3 +1,201 @@
-/**
- * Place your custom CSS styles here.
- **/
+:root {
+  --main-position: fixed;
+  --main-hot_invert: 50%;
+  /*--main-hot: invert(50%) sepia(50%) saturate(2) hue-rotate(45deg);*/
+}
+
+#overlay {
+  all: initial;
+  * {
+    all: unset;
+  }
+
+  margin-bottom: 0;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: auto;
+  align-items: start;
+  justify-content: center;
+  color: black;
+  /*font-size: larger;*/
+  font-weight: 400;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255,255,255,0.10);
+  z-index: 9999;
+  cursor: pointer;
+
+
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+  html, body, div, span, applet, object, iframe,
+  h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+  a, abbr, acronym, address, big, cite, code,
+  del, dfn, em, img, ins, kbd, q, s, samp,
+  small, strike, strong, sub, sup, tt, var,
+  b, u, i, center,
+  dl, dt, dd, ol, ul, li,
+  fieldset, form, label, legend,
+  table, caption, tbody, tfoot, thead, tr, th, td,
+  article, aside, canvas, details, embed, 
+  figure, figcaption, footer, header, hgroup, 
+  menu, nav, output, ruby, section, summary,
+  time, mark, audio, video {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    font-size: 100%;
+    font: inherit;
+    vertical-align: baseline;
+  }
+  /* HTML5 display-role reset for older browsers */
+  article, aside, details, figcaption, figure, 
+  footer, header, hgroup, menu, nav, section {
+    display: block;
+  }
+  body {
+    line-height: 1;
+  }
+  ol, ul {
+    list-style: none;
+  }
+  blockquote, q {
+    quotes: none;
+  }
+  blockquote:before, blockquote:after,
+  q:before, q:after {
+    content: '';
+    content: none;
+  }
+  table {
+    border-collapse: collapse;
+    border-spacing: 0;
+  }
+
+
+
+  border: 2px green dashed;
+  position: fixed;
+  /*position: var(--main-position);*/
+/*  max-width: 33%;
+  max-height: 40%;
+  min-width: 12em;
+  min-height: 12em;
+*/
+  height: 7em;
+  /*left: 10%;*/
+  width: 100%;
+
+
+  a, td {
+    color: black;
+    font-family: 'Futura PT'; 
+  }
+
+  a, td {
+    /*color: #222222;*/
+    font-weight: 600;
+    /*text-shadow: 1px 1px #eeeeee;*/
+  }
+
+  .tags_list {
+    font-size: larger;
+    font-weight: 900;
+  }
+
+  .current_delete_tag {
+    color: red;
+  }
+
+  .current_normal_tag {
+    color: #90ee90;
+  }
+
+  v.row_heading {
+    color: purple;
+  }
+
+  #recent_list {
+    color: green;
+    font-size: smaller;
+    font-weight: 900;
+  }
+
+  /*.pure-menu-horizontal.pure-menu-scrollable {
+    padding-bottom: 0;
+    padding-top: 0;
+  }
+
+  .pure-menu-link {
+    padding-bottom: 0;
+    padding-top: 0;
+  }
+
+  .pure-table {
+    bottom: 0;
+    position: absolute;
+  } 
+  */
+/*  .pure-table > tbody > tr > td {
+    bottom: 0;
+    padding-bottom: 0;
+    padding-top: 0;
+  } 
+*/
+  /*path {
+    fill: blue;
+  }*/
+  /*.svg {
+      filter: invert(.5) sepia(1) saturate(5) hue-rotate(175deg);
+  }
+  */
+
+
+  /*.colorize-pink {
+    filter: brightness(0.5) sepia(1) hue-rotate(-70deg) saturate(5);
+  }
+
+  .colorize-navy {
+    filter: brightness(0.2) sepia(1) hue-rotate(180deg) saturate(5);
+  }
+
+  .colorize-blue {
+    filter: brightness(0.5) sepia(1) hue-rotate(140deg) saturate(6);
+  }
+
+  :root {
+    --main-bg-color: coral;
+  }
+
+  #div1 {
+    background-color: var(--main-bg-color);
+  }
+  */
+}
+
+/* why do these need to be outside of #overlay id? */
+.pure-table > tbody > tr > td {
+  bottom: 0;
+  padding-bottom: 0;
+  padding-top: 0;
+} 
+
+table.pure-table > tbody > tr > input {
+  margin: 0;
+  padding: 2px !important;
+}
+
+.current_normal_pin, .current_normal_tag, .current_normal_url, .svg-cold {
+  /*filter: invert(.5) sepia(1) saturate(3) hue-rotate(85deg);*/
+  filter: invert(50%) sepia(50%) saturate(2) hue-rotate(45deg);
+}
+
+.current_block_url, .current_delete_pin, .current_delete_tag, .svg-hot {  
+  /*filter: invert(50%) sepia(50%) saturate(5) hue-rotate(90deg);*/
+  filter: invert(40%) sepia(75%) saturate(5) hue-rotate(240deg);
+}

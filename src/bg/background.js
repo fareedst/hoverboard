@@ -16,7 +16,9 @@ function auth_token_set() {
   return 'auth_token=' + g_auth_settings.username + ':' + g_auth_settings.token;
 }
 
-function url_is_allowed(request, url) {
+// restrict specific domains
+//
+function url_is_allowed(request, url, sendResponse) {
   let allowed = true;
   if (request.use_block) {
     let settings = new Store('settings');
@@ -57,6 +59,56 @@ chrome.extension.onMessage.addListener(
       // if (log_auth_sent_to_fg) { console.log('g_auth_settings:'); console.dir(g_auth_settings); }
       sendResponse(g_auth_settings);
 
+    } else if (request.action === msg_f2b_read_current) {
+      let url = sender.tab.url;
+      if (url_is_allowed(request, url, sendResponse)) {
+        // clean URL by removing trailing hash data
+        //
+        if (log_site_url_on_site_load) { console.log('url: ' + url); }
+        url = url.replace(/#.*$/, '');
+        if (log_site_url_on_site_load) { console.log('url: ' + url); }
+
+        // process url
+        // 
+        read_current_tags(url).then(data => {
+          if (noisy) { console.log('background.js read_current_tags cb()\ndata:'); }
+          if (noisy) { console.dir(data); }
+          if (noisy) { console.log('background.js read_current_tags responding'); }
+          if (log_site_url_on_site_load) { console.log('url: ' + data.url); }
+
+          let response = Object.assign(
+            // {},
+            {
+              description: data.description || request.title,
+              time: data.time || "",
+              hash: data.hash || "",
+              extended: data.extended || "",
+              tags: data.tags || [],
+              shared: data.shared || "",
+              toread: data.toread || "",
+              url: data.url || ""
+            }
+          );
+          if (log_pin_on_load) { console.log('log_pin_on_load:'); console.dir(response); }
+          sendResponse(response);
+
+          if (noisy) { console.log('<- background.js read_current_tags cb()'); }
+        })
+        .catch(error => {
+          console.log('bg.js 199 error: ' + error.toString());
+          sendResponse({
+            description: "",
+            time: "",
+            hash: "",
+            extended: "",
+            tags: [],
+            shared: "",
+            toread: "",
+            url: ""
+          });
+        });
+      }
+
     } else if (request. action === msg_f2b_read_options) {
       let settings = new Store('settings');
       g_auth_settings = {
@@ -71,7 +123,7 @@ chrome.extension.onMessage.addListener(
     //     sendResponse({});
     } else if (request.action === msg_f2b_read_pin) {
       let url = sender.tab.url;
-      if (url_is_allowed(request, url)) {
+      if (url_is_allowed(request, url, sendResponse)) {
         // clean URL by removing trailing hash data
         //
         if (log_site_url_on_site_load) { console.log('url: ' + url); }
