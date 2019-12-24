@@ -355,10 +355,7 @@ function make_site_tags_row_element(arr, allit) {
   }
 
   arr.forEach((value, index) => {
-    let td1 = document.createElement('td');
-    // $(td1).attr('class', 'current_normal_tag');
     if (typeof value === 'string') {
-      // td1.textContent = value;
       tag = make_recent_anchor(allit.description, allit.time, allit.extended, allit.shared, allit.toread, allit.site_tags, allit.url, value);
       $(tag).attr('class', 'current_normal_tag');
       if (pin_tags_as_list) {
@@ -367,7 +364,7 @@ function make_site_tags_row_element(arr, allit) {
         cell.appendChild(tag);
         container.appendChild(cell);
       } else {
-        // let td1 = document.createElement('td');
+        let td1 = document.createElement('td');
         td1.appendChild(tag);  
         container.appendChild(td1);
       }
@@ -384,8 +381,6 @@ function make_site_tags_row_element(arr, allit) {
       }
     }
   });
-  // tbody.appendChild(tr1);
-  // table.appendChild(tbody);
 
   // // #tags
   // var tags_div = document.createElement('div');
@@ -567,6 +562,11 @@ function tablify_response(name, response, known_list) {
       container = document.createElement('div');
       container.setAttribute('class', 'scrollmenu');
       major = container;
+
+      var title = document.createElement('span');
+      title.setAttribute('class', 'tiny');
+      title.textContent = name;
+      container.appendChild(title);
     } else if (recent_as_table) {
       var table = document.createElement('table');
       table.setAttribute('class', 'pure-table pure-table-horizontal');

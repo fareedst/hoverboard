@@ -144,6 +144,12 @@ class Pb {
             list.setAttribute('id', 'recent_list');
             if (recent_in_horizontal_menu) { list.setAttribute('class', 'pure-menu-list'); }
             var added = 0;
+
+            let title = document.createElement('li');
+            title.setAttribute('class', 'tiny');
+            title.textContent = "Recent:";
+            list.appendChild(title);
+
             tags_list.forEach((value, index) => {
               if (added < recent_tags_count_max) {
                 const matched = (known_list.indexOf(value) >= 0);
