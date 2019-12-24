@@ -40,6 +40,16 @@ function url_is_allowed(request, url, sendResponse) {
   return allowed;
 }
 
+// Called when the user clicks on the browser action.
+chrome.browserAction.onClicked.addListener(tab => {
+  // Send a message to the active tab
+  chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+    if (noisy) { console.log('bg.js browserAction.onClicked'); }
+    var activeTab = tabs[0];
+    chrome.tabs.sendMessage(activeTab.id, {"message": msg_b2f_clicked_browser_action});
+  });
+});
+
 chrome.extension.onMessage.addListener(
   (request, sender, sendResponse) => {
     if (noisy_background_msg_listener) { console.log('background_msg_listener() request:'); console.dir(request); }
@@ -88,7 +98,7 @@ chrome.extension.onMessage.addListener(
       if (log_pinurl_on_tag_delete) { console.log('pinurl: ' + pinurl); }
       var xhr = new XMLHttpRequest(); 
       xhr.open('POST', pinurl);
-      xhr.onreadystatechange = function (event) {   
+      xhr.onreadystatechange = event => {
         if (noisy) { console.log('background.js POST xhr.onreadystatechange()'); }
         if (event.target.readyState == 4 && event.target.status == 200) {
           var data = xhr.responseXML;
@@ -293,7 +303,7 @@ if (noisy) { console.log("bg.js 111"); }
       if (noisy) { console.log('pinurl: ' + pinurl); }
       var xhr = new XMLHttpRequest(); 
       xhr.open('POST', pinurl);
-      xhr.onreadystatechange = function (event) {   
+      xhr.onreadystatechange = event => {   
         if (noisy) { console.log('background.js POST xhr.onreadystatechange()'); }
         if (event.target.readyState == 4 && event.target.status == 200) {
           var data = xhr.responseXML;

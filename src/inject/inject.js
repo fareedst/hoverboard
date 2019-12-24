@@ -22,7 +22,7 @@ function better_description(description, document_title) {
 
 function display_heading_tags() {
   if (noisy) { console.log('allit:');  console.dir(allit); }
-  var tagstr = $('h1,h2,h3,h4').map(function() {
+  var tagstr = $('h1,h2,h3,h4').map(() => {
     return $(this).text();
   }).get();
   tagstr += ' ' + document.title;
@@ -400,14 +400,14 @@ function occurrence(array) {
     "use strict";
     var result = {};
     if (array instanceof Array) {
-        array.forEach(function (v, i) {
+        array.forEach((v, i) => {
             if (!result[v]) {
                 result[v] = [i];
             } else {
                 result[v].push(i);
             }
         });
-        Object.keys(result).forEach(function (v) {
+        Object.keys(result).forEach(v => {
             result[v] = {"index": result[v], "length": result[v].length};
         });
     }
@@ -645,5 +645,23 @@ chrome.extension.sendMessage(
         });
       }
     }, 10);
+  }
+);
+
+chrome.runtime.onMessage.addListener(
+  (request, sender, sendResponse) => {
+    if (request.message === msg_b2f_clicked_browser_action) {
+      if (false) {
+        $("#overlay").toggle(); 
+      } else if ($('#overlay').length) {
+        $('#overlay').remove();
+      } else {
+        /// load without block list
+        load_site_ux(false, false);
+      }
+    }
+    else {
+      console.error('unrecognized request.message: ' + request.message);
+    }
   }
 );

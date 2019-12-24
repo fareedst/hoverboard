@@ -34,7 +34,7 @@ this.i18n = {
         "en": "N characters"
     },
     "description": {
-        "en": "These credentials are provided by Pinboard."
+        "en": "These credentials are available on the Pinboard site."
     },
     "inhibit_description": {
         "en": "These are the URLs to block."
