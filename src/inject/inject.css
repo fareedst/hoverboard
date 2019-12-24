@@ -87,7 +87,7 @@
   min-width: 12em;
   min-height: 12em;
 */
-  height: 7em;
+  height: 9em;
   /*left: 10%;*/
   width: 100%;
 
@@ -178,6 +178,14 @@
   */
 }
 
+div#overlay:hover {
+  background-color: #ccc;
+}
+
+div#overlay span.tiny {
+  padding: 0.2em 1em 1em 1em;
+}
+
 /* why do these need to be outside of #overlay id? */
 .pure-table > tbody > tr > td {
   bottom: 0;
@@ -199,3 +207,38 @@ table.pure-table > tbody > tr > input {
   /*filter: invert(50%) sepia(50%) saturate(5) hue-rotate(90deg);*/
   filter: invert(40%) sepia(75%) saturate(5) hue-rotate(240deg);
 }
+
+div.scrollmenu {
+  /*background-color: #333;*/
+  overflow: auto;
+  white-space: nowrap;
+}
+
+div.scrollmenu span {
+  display: inline-block;
+  /*color: white;*/
+  text-align: center;
+  padding: 14px;
+  text-decoration: none;
+}
+
+div.scrollmenu span:hover {
+  /*background-color: #777;*/
+}
+
+/*.horizontal-scroll-wrapper {
+  width: 100px;
+  height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transform-origin: right top;
+  transform: rotate(-90deg) translateY(-100px);
+}
+
+.horizontal-scroll-wrapper > div {
+  width: 100px;
+  height: 100px;
+  transform: rotate(90deg);
+  transform-origin: right top;
+}
+*/

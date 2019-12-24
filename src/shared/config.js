@@ -5,6 +5,7 @@ const display_overlay_on_page_load = true;
 const display_overlay_on_page_load_only_if_not_tagged = false;
 const display_overlay_on_page_load_only_if_tagged = false;
 const display_overlay_recent = true; // default: true
+// const display_overlay_test = true; // default: false
 const inhibit_sites_on_page_load = true;
 
 const noisy = false;   //d:f
@@ -32,7 +33,8 @@ const log_version_on_page_load = false; //d:f
 
 // features
 //
-const recent_tags_count_max = 22;
+const recent_tags_count_max = 24;
+const ux_recent_row_with_block = true;
 const ux_recent_row_with_bookmark_button = true;
 const ux_recent_row_with_close_button = true;
 const ux_recent_row_with_private_button = true;
