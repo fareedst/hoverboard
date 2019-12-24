@@ -7,28 +7,28 @@ const display_overlay_on_page_load_only_if_tagged = false;
 const display_overlay_recent = true; // default: true
 const inhibit_sites_on_page_load = true;
 
-const noisy = true;   //d:f
-const noisy_auth = true;   //d:f
-const noisy_background_msg_listener = true;   //d:f
-const noisy_settings = true;   //d:f
-const noisy_store = true;   //d:f
+const noisy = false;   //d:f
+const noisy_auth = false;   //d:f
+const noisy_background_msg_listener = false;   //d:f
+const noisy_settings = false;   //d:f
+const noisy_store = false;   //d:f
 
-const log_anchor_on_click = true; //d:f
-const log_anchor_on_create = true; //d:f
-const log_auth_sent_to_fg = true;   //d:f
-const log_make_site_tags_row_element = true; //d:f
-const log_pin_on_load = true; //d:f
-const log_pin_on_save = true; //d:f
-const log_pin_on_store = true; //d:f
+const log_anchor_on_click = false; //d:f
+const log_anchor_on_create = false; //d:f
+const log_auth_sent_to_fg = false;   //d:f
+const log_make_site_tags_row_element = false; //d:f
+const log_pin_on_load = false; //d:f
+const log_pin_on_save = false; //d:f
+const log_pin_on_store = false; //d:f
 const log_pinurl_on_tag_delete = false;
-const log_read_current_response = true; //d:f
-const log_site_url_on_pin_delete = true; //d:f
-const log_site_url_on_pin_save = true; //d:f
-const log_site_url_on_site_load = true; //d:f
-const log_site_url_on_tag_delete = true; //d:f
-const log_title_on_pin_load = true; //d:f
-const log_version_on_extn_install = true; //d:f
-const log_version_on_page_load = true; //d:f
+const log_read_current_response = false; //d:f
+const log_site_url_on_pin_delete = false; //d:f
+const log_site_url_on_pin_save = false; //d:f
+const log_site_url_on_site_load = false; //d:f
+const log_site_url_on_tag_delete = false; //d:f
+const log_title_on_pin_load = false; //d:f
+const log_version_on_extn_install = false; //d:f
+const log_version_on_page_load = false; //d:f
 
 // features
 //

@@ -405,14 +405,15 @@ async function read_recent_tags(description, time, extended, shared, tags, torea
       pb.read_recent(description, time, extended, shared, tags, toread, url_neat).then(data => {
         if (noisy) { console.log('src/bg/pinboard.js read_recent_tags\ndata:'); }
         if (noisy) { console.dir(data); }
-        console.log("src/bg/pinboard.js pb.getUrl");
-        console.log(pb.getUrl());
-        resolve(pb.getPost());
-        console.log("src/bg/pinboard.js pb.getPost");
-        let pp = pb.getPost();
-        console.log("src/bg/pinboard.js pp");
-        console.dir(pp);
-        resolve(pp);
+        resolve(data);
+        // console.log("src/bg/pinboard.js pb.getUrl");
+        // console.log(pb.getUrl());
+
+        // console.log("src/bg/pinboard.js pb.getPost");
+        // let pp = pb.getPost();
+        // console.log("src/bg/pinboard.js pp");
+        // console.dir(pp);
+        // resolve(pp);
       });
     } catch(e) {
       if (noisy) { console.log("src/bg/pinboard.js read_recent_tags promise catch"); }

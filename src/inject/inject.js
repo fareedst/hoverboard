@@ -68,11 +68,11 @@ function load_site_ux(page_load, use_block) {
     response => {
       if (log_read_current_response) { console.log('log_read_current_response:'); console.dir(response); }
       if (noisy) { console.log('inject.js load_site_ux read_current_url cb()\nresponse:'); console.dir(response); }
-console.log('in.js 316')
+// console.log('in.js 316')
       if (response) {
-console.log('in.js 318')
+// console.log('in.js 318')
         if (response.url) {
-console.log('in.js 320')
+// console.log('in.js 320')
           var tags = response.tags;
           if (log_title_on_pin_load) { console.log('log_title_on_pin_load: ' + response.description); }
           if (tags) {
@@ -90,15 +90,15 @@ console.log('in.js 320')
             };
             if (noisy) { console.log('inject.js read_recent_tags allit:'); console.dir(allit); }
 
-console.log('tags.length:' + tags.length)
+// console.log('tags.length:' + tags.length)
             let show = true;
-console.log('page_load:' + page_load)
-console.log('show:' + show)
+// console.log('page_load:' + page_load)
+// console.log('show:' + show)
             // show &= !page_load || (display_overlay_on_page_load_if_not_tagged || tags.length);
             show = show && (!page_load || !display_overlay_on_page_load_only_if_not_tagged || !tags.length);
-console.log('show:' + show)
+// console.log('show:' + show)
             show = show && (!page_load || !display_overlay_on_page_load_only_if_tagged || !!tags.length);
-console.log('show:' + show)
+// console.log('show:' + show)
             if (show) {
               place_in_header(document, make_site_tags_row_element(tags, allit));
     
@@ -124,7 +124,7 @@ console.log('show:' + show)
             }
           }
         } else {
-console.log('in.js 372')
+// console.log('in.js 372')
           cell = document.createElement('span');
           cell.textContent = "Credentials missing!";
           place_in_header(document, cell);
@@ -132,7 +132,7 @@ console.log('in.js 372')
       }
     }
   );
-console.log('in.js 380')
+// console.log('in.js 380')
 }
 
 function make_site_tags_row_element(arr, allit) {
@@ -390,18 +390,29 @@ function refresh_it(url) {
 }
 
 function tablify_into_container(response, container, known_list) {
+  if (noisy) {
+    console.log('inject.js tablify_into_container() response:'); console.dir(response);
+    console.log('container:'); console.dir(container);
+    console.log('known_list:'); console.dir(known_list);
+  }
   var tags = response.tags;
   var added = 0;
   // var dlisst = [];  
   tags.forEach((value, index) => {
-    if (noisy) console.log('inject.js read_recent_tags response cb() tags ' + index + ':' + value);
+    if (noisy) {
+      console.log('inject.js read_recent_tags response cb() tags ' + index + ':' + value);
+      console.log('recent_tags_count_max: ' + recent_tags_count_max.toString());
+    }
     if (added < recent_tags_count_max) {
 
       // var known_list = []; ///tags ? tags.split(' ') : [];
       // var curr_tags, url;
 
       const matched = (known_list.indexOf(value) >= 0);
-      if (!matched) {
+      if (matched) {
+        if (noisy) console.log('is matched');
+      } else {
+        if (noisy) console.log('is new');
         added++;
         var cell;
         if (recent_as_table) {
@@ -425,6 +436,10 @@ function tablify_into_container(response, container, known_list) {
           tag = document.createElement('div');
           // if (recent_in_horizontal_menu) { tag.setAttribute('class', 'pure-menu-link'); }
           tag.textContent = value;
+        }
+        if (noisy) {
+          console.log('tag:'); console.dir(tag);
+          console.log('cell:'); console.dir(cell);
         }
 
         cell.appendChild(tag)

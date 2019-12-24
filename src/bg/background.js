@@ -251,8 +251,7 @@ if (noisy) { console.log("bg.js 111"); }
       }
 
     } else if (request.action === msg_f2b_read_recent) {
-      if (noisy) { console.log(msg_f2b_read_recent + ' request:'); }
-      if (noisy) { console.dir(request); }
+      if (noisy) { console.log(msg_f2b_read_recent + ' request:'); console.dir(request); }
       read_recent_tags(request.description, request.time, request.extended, request.shared, request.tags, request.toread, sender.tab.url)
         .then(data => {
           if (noisy) { console.log('background.js ' + msg_f2b_read_recent + ' cb()\ndata:'); }
