@@ -61,7 +61,7 @@ chrome.extension.onMessage.addListener(
       if (log_site_url_on_pin_delete) { console.log('log_site_url_on_pin_delete: ' + request.url); }
       var args = 'url=' + encodeURIComponent(request.url);
       var pinurl = api_path + 'posts/delete?' + args + '&' + auth_token_set();
-      if (noisy) { console.log('pinurl: ' + pinurl); }
+      if (noisy_pinboard_url) { console.log('pinurl: ' + pinurl); }
       var xhr = new XMLHttpRequest(); 
       xhr.open('GET', pinurl);
       xhr.onreadystatechange = (event) => {
@@ -95,7 +95,7 @@ chrome.extension.onMessage.addListener(
       args = args + '&extended=' + encodeURIComponent(request.extended);
       if (noisy) { console.log('args: ' + args); }
       var pinurl = api_path + "posts/add?" + args + "&" + auth_token_set();
-      if (log_pinurl_on_tag_delete) { console.log('pinurl: ' + pinurl); }
+      if (noisy_pinboard_url || log_pinurl_on_tag_delete) { console.log('pinurl: ' + pinurl); }
       var xhr = new XMLHttpRequest(); 
       xhr.open('POST', pinurl);
       xhr.onreadystatechange = event => {
@@ -287,6 +287,12 @@ if (noisy) { console.log("bg.js 111"); }
       if (log_site_url_on_pin_save) { console.log('site_url_on_pin_save: ' + request.url); }
       if (log_pin_on_save) { console.log('log_pin_on_save:'); console.dir(request); }
 
+      if (request.value) {
+        let trt = new ThrottledRecentTags();
+        console.log('trt bg.js 292')
+        trt.appendTag(request.value);
+      }
+ 
       var args = 'replace=yes';
       args = args + '&url=' + encodeURIComponent(request.url);
       if (request.description !== '') args = args + '&description=' + encodeURIComponent(request.description);
@@ -300,7 +306,7 @@ if (noisy) { console.log("bg.js 111"); }
       args = args + '&extended=' + encodeURIComponent(request.extended);
       if (noisy) { console.log('args: ' + args); }
       var pinurl = api_path + "posts/add?" + args + "&" + auth_token_set();
-      if (noisy) { console.log('pinurl: ' + pinurl); }
+      if (noisy_pinboard_url) { console.log('pinurl: ' + pinurl); }
       var xhr = new XMLHttpRequest(); 
       xhr.open('POST', pinurl);
       xhr.onreadystatechange = event => {   
@@ -321,3 +327,99 @@ if (noisy) { console.log("bg.js 127"); }
     return true; // keep port open
   }
 );
+
+class ThrottledRecentTags {
+  tags;
+  timestamp;
+
+  constructor() {
+console.log('ThrottledRecentTags constructor()');
+    let settings = new Store('settings');
+    this.recentTagTimestamp = settings.get('recentTagsTimestamp');
+console.log('this.recentTagTimestamp:' + this.recentTagTimestamp);
+    this.tags = settings.get('recentTags');
+console.log('this.tags:' + this.tags);
+  }
+
+  get delaySeconds() {
+    return 60;
+  }
+
+  appendTag(tag) {
+    let settings = new Store('settings');
+    this.timestamp = settings.get('recentTagsTimestamp');
+    this.tags = settings.get('recentTags');
+
+    // prepend new tag, remove duplicates
+    this.tags = [tag].concat(this.tags.filter(t => t !== tag));
+
+    this.timestamp = Date.now();
+    console.log('ThrottledRecentTags.appendTag this.timestamp: ' + this.timestamp);
+    console.log('ThrottledRecentTags.appendTag this.tags: ' + this.tags);
+    settings.set('recentTagsTimestamp', this.timestamp);
+    settings.set('recentTags', this.tags);
+  }
+
+  async readTags(description, time, extended, shared, tags, toread, url) {
+    console.log('ThrottledRecentTags readTags()');
+    return new Promise((resolve, reject) => {
+      let now = Date.now();
+      console.log('ThrottledRecentTags.readTags now: ' + now);
+
+      let settings = new Store('settings');
+      this.timestamp = settings.get('recentTagsTimestamp');
+      console.log('ThrottledRecentTags.readTags this.timestamp: ' + this.timestamp);
+      this.tags = settings.get('recentTags');
+      console.log('ThrottledRecentTags.readTags this.tags: ' + this.tags);
+
+      if ((typeof this.timestamp !== 'undefined') && (this.timestamp !== null)) {
+        let diff = (now - this.timestamp) / 1000;
+        console.log('ThrottledRecentTags.readTags diff: ' + diff);
+      }
+
+      if ((typeof this.timestamp === 'undefined')
+          || (this.timestamp === null) 
+          || (((now - this.timestamp) / 1000) > this.delaySeconds)) {
+        if (log_throttled_get_fresh) { console.log('ThrottledRecentTags readTags get new'); }        
+        this.timestamp = now;
+        // this.tags = [1];
+        let pb = new Pb(url);
+        pb.read_recent(description, time, extended, shared, tags, toread, url).then(data => {
+          // if (noisy) { console.log('src/bg/pinboard.js read_recent_tags\ndata:'); console.dir(data); }
+          this.tags = Object.assign([], data.tags);
+          settings.set('recentTagsTimestamp', this.timestamp);
+          settings.set('recentTags', this.tags);
+          console.log('ThrottledRecentTags return tags: ' + this.tags);
+          resolve(data);
+          // console.log("src/bg/pinboard.js pb.getUrl");
+          // console.log(pb.getUrl());
+
+          // console.log("src/bg/pinboard.js pb.getPost");
+          // let pp = pb.getPost();
+          // console.log("src/bg/pinboard.js pp");
+          // console.dir(pp);
+          // resolve(pp);
+        })
+        .catch(error => {
+            { console.log('src/bg/pinboard.js read_recent_tags\n error:'); console.dir(error); }
+          reject(error)
+        });
+      } else {
+        if (log_throttled_get_cache) {
+          console.log('ThrottledRecentTags readTags return existing');
+          console.log('ThrottledRecentTags return tags: ' + this.tags);
+        }
+        resolve({
+          description: description,
+          time: time,
+          hash: '',
+          extended: extended,
+          shared: shared,
+          tags: this.tags,
+          toread: toread,
+          url: url
+        });
+      }
+    });
+  }
+}

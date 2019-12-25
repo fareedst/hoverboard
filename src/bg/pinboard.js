@@ -110,9 +110,9 @@ class Pb {
 
   read_recent = async (description, time, extended, shared, tags, toread, url) => {
     const self = this;
-    return new Promise( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       var pinurl = this.getRecentUrl();
-      if (noisy) { console.log("read_recent() pinurl: " + pinurl); }
+      if (noisy_pinboard_url) { console.log("read_recent() pinurl: " + pinurl); }
       var xhr = new XMLHttpRequest(); 
       xhr.open('GET', pinurl, true);
       xhr.onreadystatechange = async event => {
@@ -220,7 +220,7 @@ if (noisy) { console.log("pb.js ap 209"); }
 
 if (noisy) { console.log("pb.js ap 215"); }
         var pinurl = this.getPostsUrl();
-        if (noisy) { console.log("analyze_page() pinurl: " + pinurl); }
+        if (noisy_pinboard_url) { console.log("analyze_page() pinurl: " + pinurl); }
 // resolve({});
         var xhr = new XMLHttpRequest(); 
         xhr.open('GET', pinurl, true);
@@ -406,20 +406,19 @@ async function read_recent_tags(description, time, extended, shared, tags, torea
   return new Promise(async (resolve, reject) => {
     if (noisy) { console.log("src/bg/pinboard.js read_recent_tags promise"); }
     try {
-      let url_neat = url.replace(/#.#$/, '');
-      let pb = new Pb(url_neat);
-      pb.read_recent(description, time, extended, shared, tags, toread, url_neat).then(data => {
-        if (noisy) { console.log('src/bg/pinboard.js read_recent_tags\ndata:'); }
-        if (noisy) { console.dir(data); }
-        resolve(data);
-        // console.log("src/bg/pinboard.js pb.getUrl");
-        // console.log(pb.getUrl());
 
-        // console.log("src/bg/pinboard.js pb.getPost");
-        // let pp = pb.getPost();
-        // console.log("src/bg/pinboard.js pp");
-        // console.dir(pp);
-        // resolve(pp);
+      let url_neat = url.replace(/#.#$/, '');
+
+      console.log('trt pb.js 412')
+      let trt = new ThrottledRecentTags();
+      console.log('trt pb.js 414')
+      trt.readTags(description, time, extended, shared, tags, toread, url_neat).then(data => {
+        console.log('data:'); console.dir(data);
+        resolve(data);
+      })
+      .catch(error => {
+        console.log('error:'); console.dir(error);
+        reject(error);
       });
     } catch(e) {
       if (noisy) { console.log("src/bg/pinboard.js read_recent_tags promise catch"); }

@@ -11,6 +11,7 @@ const inhibit_sites_on_page_load = true;
 const noisy = false;   //d:f
 const noisy_auth = false;   //d:f
 const noisy_background_msg_listener = false;   //d:f
+const noisy_pinboard_url = true;   //d:f
 const noisy_settings = false;   //d:f
 const noisy_store = false;   //d:f
 
@@ -30,6 +31,8 @@ const log_site_url_on_tag_delete = false; //d:f
 const log_title_on_pin_load = false; //d:f
 const log_version_on_extn_install = false; //d:f
 const log_version_on_page_load = false; //d:f
+const log_throttled_get_cache = true;   //d:f
+const log_throttled_get_fresh = true;   //d:f
 
 // features
 //

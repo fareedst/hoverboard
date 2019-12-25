@@ -1,8 +1,8 @@
 {
-  "name": "Pinboarder",
-  "version": "0.0.1222.11",
+  "name": "Hoverboard",
+  "version": "0.0.1224.15",
   "author": "Fareed Stevenson",
-  "description": "Pinboard Overlay",
+  "description": "Hoverboard",
   "background": {
     "persistent": false,
     "scripts": [
@@ -15,8 +15,7 @@
   },
   "browser_action": {
     "default_icon": "icons/icon19.png",
-    "default_title": "browser action demo",
-    "default_popup": "src/browser_action/browser_action.html"
+    "default_title": "Hoverboard"
   },
   "content_scripts": [
     {
