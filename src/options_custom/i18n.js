@@ -31,10 +31,10 @@ this.i18n = {
         "en": "10 - 18 characters"
     },
     "x-characters-token": {
-        "en": "N characters"
+        "en": "username:secret"
     },
     "description": {
-        "en": "These credentials are available on the Pinboard site."
+        "en": "Your API token is available on the Pinboard site at https://pinboard.in/settings/password."
     },
     "inhibit_description": {
         "en": "These are the URLs to block."

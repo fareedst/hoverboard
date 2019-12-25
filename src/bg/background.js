@@ -8,12 +8,12 @@
 var g_auth_settings;
 
 function auth_token_exists() {
-  return (g_auth_settings.username !== "") && (g_auth_settings.token !== "")
+  return g_auth_settings.token !== ""
 }
 
 function auth_token_set() {
   if (noisy) { console.log('auth_token_set()'); }
-  return 'auth_token=' + g_auth_settings.username + ':' + g_auth_settings.token;
+  return 'auth_token=' + g_auth_settings.token;
 }
 
 // restrict specific domains
@@ -112,8 +112,7 @@ chrome.extension.onMessage.addListener(
       let settings = new Store('settings');
       g_auth_settings = {
         inhibit: (settings.get('inhibit') || '') + '\n' + request.inhibit,
-        token: settings.get('token') || '',
-        username: settings.get('username') || ''
+        token: settings.get('token') || ''
       };
       // g_auth_settings.inhibit = request.inhibit;
       settings.set('inhibit', g_auth_settings.inhibit);
@@ -174,8 +173,7 @@ chrome.extension.onMessage.addListener(
       let settings = new Store('settings');
       g_auth_settings = {
         inhibit: settings.get('inhibit') || '',
-        token: settings.get('token') || '',
-        username: settings.get('username') || ''
+        token: settings.get('token') || ''
       };
       if (log_auth_sent_to_fg) { console.log('g_auth_settings:'); console.dir(g_auth_settings); }
       sendResponse(g_auth_settings);

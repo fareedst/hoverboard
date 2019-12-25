@@ -1,16 +1,15 @@
-// SAMPLE
 this.manifest = {
-    "name": "My Extension",
+    "name": "Hoverboard",
     "icon": "icon.png",
     "settings": [
-        {
-            "tab": i18n.get("information"),
-            "group": i18n.get("login"),
-            "name": "username",
-            "type": "text",
-            "label": i18n.get("username"),
-            "text": i18n.get("x-characters")
-        },
+        // {
+        //     "tab": i18n.get("information"),
+        //     "group": i18n.get("login"),
+        //     "name": "username",
+        //     "type": "text",
+        //     "label": i18n.get("username"),
+        //     "text": i18n.get("x-characters")
+        // },
         // {
         //     "tab": i18n.get("information"),
         //     "group": i18n.get("login"),
@@ -27,7 +26,7 @@ this.manifest = {
             "type": "text",
             "label": i18n.get("token"),
             "text": i18n.get("x-characters-token"),
-            "masked": false
+            "masked": true
         },
         {
             "tab": i18n.get("information"),
@@ -142,7 +141,7 @@ this.manifest = {
     ],
     "alignment": [
         [
-            "username",
+            // "username",
             // "password",
             "token"
         // ],
