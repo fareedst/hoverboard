@@ -1,22 +1,17 @@
 /**
  * Popup JavaScript - Hoverboard Extension
- * Modern ES6+ module-based popup functionality
+ * Modern ES6+ module-based popup functionality with integrated UI system
  */
 
-import { PopupController } from './PopupController.js';
-import { UIManager } from './UIManager.js';
-import { KeyboardManager } from './KeyboardManager.js';
-import { StateManager } from './StateManager.js';
+import { ui } from '../index.js';
 import { ErrorHandler } from '../../shared/ErrorHandler.js';
 
 class HoverboardPopup {
   constructor() {
     this.isInitialized = false;
-    this.controller = null;
-    this.uiManager = null;
-    this.keyboardManager = null;
-    this.stateManager = null;
+    this.popupComponents = null;
     this.errorHandler = null;
+    this.uiSystem = null;
     
     // Bind context
     this.init = this.init.bind(this);
@@ -33,38 +28,34 @@ class HoverboardPopup {
       this.errorHandler = new ErrorHandler();
       this.errorHandler.onError = this.handleError;
 
-      // Initialize state manager
-      this.stateManager = new StateManager();
-      
-      // Initialize UI manager
-      this.uiManager = new UIManager({
+      // Initialize UI system
+      this.uiSystem = await ui.init({
+        enableThemes: true,
+        enableIcons: true,
+        enableAssets: true,
+        preloadCriticalAssets: true
+      });
+
+      // Create popup with integrated UI system
+      this.popupComponents = ui.popup({
         errorHandler: this.errorHandler,
-        stateManager: this.stateManager
-      });
-
-      // Initialize keyboard manager
-      this.keyboardManager = new KeyboardManager({
-        uiManager: this.uiManager
-      });
-
-      // Initialize main controller
-      this.controller = new PopupController({
-        uiManager: this.uiManager,
-        stateManager: this.stateManager,
-        errorHandler: this.errorHandler
+        enableKeyboard: true,
+        enableState: true
       });
 
       // Load initial data
-      await this.controller.loadInitialData();
+      await this.popupComponents.controller.loadInitialData();
       
       // Setup UI
-      this.uiManager.setupEventListeners();
-      this.keyboardManager.setupKeyboardNavigation();
+      this.popupComponents.uiManager.setupEventListeners();
+      if (this.popupComponents.keyboardManager) {
+        this.popupComponents.keyboardManager.setupKeyboardNavigation();
+      }
       
       // Mark as initialized
       this.isInitialized = true;
       
-      console.log('Hoverboard popup initialized successfully');
+      console.log('Hoverboard popup initialized successfully with modern UI system');
       
     } catch (error) {
       this.handleError('Failed to initialize popup', error);
@@ -77,8 +68,8 @@ class HoverboardPopup {
   handleError(message, error = null) {
     console.error('Popup Error:', message, error);
     
-    if (this.uiManager) {
-      this.uiManager.showError(message);
+    if (this.popupComponents?.uiManager) {
+      this.popupComponents.uiManager.showError(message);
     } else {
       // Fallback error display if UI manager not available
       const errorToast = document.getElementById('errorToast');
@@ -99,16 +90,22 @@ class HoverboardPopup {
    * Cleanup resources when popup is closed
    */
   cleanup() {
-    if (this.keyboardManager) {
-      this.keyboardManager.cleanup();
+    if (this.popupComponents) {
+      if (this.popupComponents.keyboardManager) {
+        this.popupComponents.keyboardManager.cleanup();
+      }
+      
+      if (this.popupComponents.uiManager) {
+        this.popupComponents.uiManager.cleanup();
+      }
+      
+      if (this.popupComponents.controller) {
+        this.popupComponents.controller.cleanup();
+      }
     }
     
-    if (this.uiManager) {
-      this.uiManager.cleanup();
-    }
-    
-    if (this.controller) {
-      this.controller.cleanup();
+    if (this.uiSystem) {
+      this.uiSystem.cleanup();
     }
     
     this.isInitialized = false;
