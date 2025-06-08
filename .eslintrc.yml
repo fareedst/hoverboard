@@ -1,0 +1,15 @@
+---
+env:
+  browser: true
+  es2021: true
+extends:
+  - standard
+parserOptions:
+  ecmaVersion: 12
+rules:
+  no-constant-condition: off
+  no-undef: off
+  no-undefined: off
+  no-unused-vars: off
+  no-async-promise-executor: off  # 2021-01-14 disable noisy but relevant
+  prefer-promise-reject-errors: off  # 2021-01-14 disable noisy but relevant

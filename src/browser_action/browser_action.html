@@ -1,17 +1,22 @@
-<!doctype html>
-<style type="text/css">
-	#mainPopup {
-		padding: 10px;
-		height: 200px;
-		width: 400px;
-		font-family: Helvetica, Ubuntu, Arial, sans-serif;
-	}
-	h1 {
-		font-size: 2em;
-	}
-</style>
+<!DOCTYPE html>
+<html>
+<head>
+  <link href="browser_action.css" rel="stylesheet" type="text/css">
+  <link href="../shared/icons.css" rel="stylesheet" type="text/css">
+  <link href="../inject/inject.css" rel="stylesheet" type="text/css">
+  <script type="application/javascript" src="../shared/browser-polyfill.js"></script>
+  <script src="../shared/jquery-3.4.1.slim.shady.js"></script>
+  <script src="../shared/debug.js"></script>
+  <script src="../shared/config.js"></script>
+  <script src="../shared/icons.js"></script>
+  <script src="../shared/tools.js"></script>
+  <script src="ba_overlay.js"></script>
+  <script src="browser_action.js"></script>
+</head>
 
-<div id="mainPopup">
-<h1>Hello extensionizr!</h1>
-<p>To shut this popup down, edit the manifest file and remove the "default popup" key. To edit it, just edit ext/browser_action/browser_action.html. The CSS is there, too.</p>
-</div>
+<body id="mainPopup">
+  <!-- <button class="menuButton" id="itemReadLater">Read Later</button> -->
+  <!-- <image class="menuIcon" id="itemReadLater" /> -->
+  <!-- <button class="menuButton" id="checkPage">Show Hoverboard</button> -->
+</body>
+</html>

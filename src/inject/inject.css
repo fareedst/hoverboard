@@ -24,7 +24,7 @@
   right: 0;
   bottom: 0;
   background-color: rgba(255,255,255,0.10);
-  z-index: 9999;
+  z-index: 9998;
   cursor: pointer;
 
 
@@ -108,11 +108,11 @@
     font-weight: 900;
   }
 
-  .current_delete_tag {
+  .iconTagDeleteActive {
     color: red;
   }
 
-  .current_normal_tag {
+  .iconTagDeleteInactive {
     color: #90ee90;
   }
 
@@ -183,7 +183,7 @@ div#overlay:hover {
 }
 
 div#overlay span.tiny {
-  padding: 0.2em 1em 1em 1em;
+  padding: 0.2em 0.5em 0.8em 0.5em;
 }
 
 /* why do these need to be outside of #overlay id? */
@@ -196,16 +196,6 @@ div#overlay span.tiny {
 table.pure-table > tbody > tr > input {
   margin: 0;
   padding: 2px !important;
-}
-
-.current_normal_pin, .current_normal_tag, .current_normal_url, .svg-cold {
-  /*filter: invert(.5) sepia(1) saturate(3) hue-rotate(85deg);*/
-  filter: invert(50%) sepia(50%) saturate(2) hue-rotate(45deg);
-}
-
-.current_block_url, .current_delete_pin, .current_delete_tag, .svg-hot {  
-  /*filter: invert(50%) sepia(50%) saturate(5) hue-rotate(90deg);*/
-  filter: invert(40%) sepia(75%) saturate(5) hue-rotate(240deg);
 }
 
 div.scrollmenu {
@@ -242,3 +232,30 @@ div.scrollmenu span:hover {
   transform-origin: right top;
 }
 */
+
+.tooltip { /* Container for our tooltip */
+    position: relative;   
+    display: inline-block;
+}
+
+.tooltip .tooltiptext { /* This is for the tooltip text */
+  font-size: smaller;
+  visibility: hidden;
+  width: 10em;
+  background-color: #8512d5;
+  color: white;
+  text-align: center;
+  padding: 10px;
+  border-radius: 10px;  /* This defines tooltip text position */
+  position: absolute;
+  z-index: 9999;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+} 
+
+.tooltip:hover .tooltiptext { /* Makes tooltip text visible when text is hovered on */
+  visibility: visible;
+  opacity: 1;
+}

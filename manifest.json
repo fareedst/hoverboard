@@ -1,20 +1,26 @@
 {
   "name": "Hoverboard",
-  "version": "0.0.1224.15",
+  "version": "0.2.05.85",
   "author": "Fareed Stevenson",
   "description": "Hoverboard",
   "background": {
     "persistent": false,
     "scripts": [
+      "src/shared/browser-polyfill.js",
       "src/shared/jquery-3.4.1.slim.min.js",
+      "src/shared/debug.js",
       "src/shared/config.js",
+      "src/shared/console.js",
+      "src/shared/tools.js",
       "src/options_custom/lib/store.js",
       "src/bg/background.js",
+      "src/bg/throttled_recent_tags.js",
       "src/bg/pinboard.js"
     ]
   },
   "browser_action": {
-    "default_icon": "icons/icon19.png",
+    "default_icon": "icons/hoverboard_19.png",
+    "default_popup": "src/browser_action/browser_action.html",
     "default_title": "Hoverboard"
   },
   "content_scripts": [
@@ -23,46 +29,54 @@
         "<all_urls>"
       ],
       "css": [
+        "src/shared/icons.css",
         "src/inject/pure-min.css",
         "src/inject/inject.css"
       ],
       "js": [
-        "src/shared/jquery-3.4.1.slim.min.js",
+        "src/shared/browser-polyfill.js",
+        "src/shared/jquery-3.4.1.slim.shady.js",
+        "src/shared/debug.js",
         "src/shared/config.js",
+        "src/shared/console.js",
+        "src/shared/icons.js",
+        "src/shared/tools.js",
+        "src/inject/hoverInjector.js",
+        "src/inject/in_overlay.js",
         "src/inject/inject.js"
       ]
     }
   ],
   "default_locale": "en",
-  "homepage_url": "https://phomento.com",
+  // "homepage_url": "https://phomento.com",
   "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
+    "16": "icons/hoverboard_16.png",
+    "48": "icons/hoverboard_48.png",
+    "128": "icons/hoverboard_128.png"
   },
   "manifest_version": 2,
   "options_page": "src/options_custom/index.html",
   "permissions": [
-    "alarms",
-    "bookmarks",
+    // "alarms",
+    // "bookmarks",
     "chrome://favicon/",
-    "clipboardRead",
-    "clipboardWrite",
+    // "clipboardRead",
+    // "clipboardWrite",
     "contentSettings",
     "contextMenus",
-    "cookies",
+    // "cookies",
     // "fileBrowserHandler",
-    "geolocation",
-    "history",
+    // "geolocation",
+    // "history",
     "http://*/*",
     "https://*/*",
-    "idle",
-    "management",
-    "notifications",
+    // "idle",
+    // "management",
+    // "notifications",
     "storage",
-    "tabs",
-    "tts",
-    "ttsEngine",
-    "webNavigation"
+    "tabs"
+    // "tts",
+    // "ttsEngine",
+    // "webNavigation"
   ]
 }

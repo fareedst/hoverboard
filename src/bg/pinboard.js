@@ -1,446 +1,391 @@
-if (noisy) { console.log("src/bg/pinboard.js load"); }
+if (noisy) { console.log('pb', 'BOF') }
 
-// const current_in_horizontal_menu = true; // use: pure-menu pure-menu-horizontal pure-menu-scrollable
-const recent_in_horizontal_menu = true; // use: pure-menu pure-menu-horizontal pure-menu-scrollable
-
-// function make_recent_anchor(description, time, extended, shared, toread, tags, url, value) {
-//   if (noisy) { console.log('make_recent_anchor()'); }
-//   // console.log('description: ' + description); // console.log('time: ' + time); // console.log('extended: ' + extended); // console.log('shared: ' + shared); // console.log('toread: ' + toread); // console.log('tags: ' + tags); // console.log('url: ' + url); // console.log('value: ' + value);
-//   var anchor = document.createElement('a');
-//   if (recent_in_horizontal_menu) { anchor.setAttribute('class', 'pure-menu-link'); }
-//   if (typeof value === 'string') {
-//     anchor.textContent = value;
-//   } else {
-//     anchor.appendChild(value);
-//     value = "";
-//   }
-
-//   $(anchor).click(event => {
-//     if (noisy) { console.log('make_recent_anchor anchor.click()'); }
-//     if (noisy) { console.dir(event); }
-//     event.preventDefault();
-
-//     chrome.runtime.sendMessage(
-//       {
-//         action: msg_f2b_save_tag,
-//         description: description,
-//         time: time,
-//         hash: "", /// hash,
-//         extended: extended,
-//         shared: shared,
-//         toread: toread,
-//         tags: tags,
-//         url: url,
-//         value: value
-//       },
-//       response => {
-//         if (noisy) { console.log('pinboard.js make_recent_anchor anchor click()'); console.dir(response); }
-//       }
-//     );
-//   });
-//   return anchor;
-// }
+// const currentInHorizontalMenu = true; // use: pure-menu pure-menu-horizontal pure-menu-scrollable
+const recentInHorizontalMenu = true // use: pure-menu pure-menu-horizontal pure-menu-scrollable
 
 class Pb {
-  description;
-  hash;
-  time;
-  extended;
-  tag;
-  tags;
-  shared;
-  toread;
-  url;
+  constructor (url) {
+    if (noisy) { log('Pb(url: ' + url + ')') }
+    this.url = url
+    const _apiPath = 'https://api.pinboard.in/v1/'
+    let _description
+    const _url = url
 
-  getPost = () => {
-    if (noisy) { console.log('Pb.getPost() this: '); }
-    if (noisy) { console.dir(this); }
-    if (noisy) { console.dir(Object.keys(this)); }
-    return {
-      description: this.description,
-      time: this.time,
-      hash: this.hash,
-      extended: this.extended,
-      tags: Object.assign([], this.tags),
-      shared: this.shared,
-      toread: this.toread,
-      url: this.url
-    };
-  };
+    this.getApiPath = () => _apiPath
+    // this.getAuthTokenSet = () => _gAuth_settings.tokenAsVar;
+    this.getAuthTokenSet = () => {
+      return gAuthSettings.tokenAsVar()
+    }
 
-  constructor(url) {
-    if (noisy) { console.log("Pb(url: " + url + ")"); }
-    this.url = url;
-    let _api_path = 'https://api.pinboard.in/v1/';
-    let _description;
-    let _url = url;
-
-    this.getApiPath = () => _api_path;
-    // this.getAuthTokenSet = () => _auth_token_set;
-    this.getAuthTokenSet = () => auth_token_set();
-
-    this.getPostsUrl = () =>
-      this.getApiPath() + "posts/get?url=" + this.getUrl() + "&" + this.getAuthTokenSet();
+    this.getPinsUrl = () =>
+      this.getApiPath() + 'posts/get?url=' + encodeURIComponent(this.getUrl()) + '&' + this.getAuthTokenSet()
 
     this.getRecentUrl = () =>
-      this.getApiPath() + "posts/recent?count=32&" + this.getAuthTokenSet();
+      this.getApiPath() + 'posts/recent?count=' + gAuthSettings.getOptions().recentPostsCount.toString() + '&' + this.getAuthTokenSet()
 
-    this.getUrl = () => { return _url; };
+    this.getUrl = () => { return _url }
 
-    this.hasAuth = () => auth_token_exists();
+    this.hasAuth = () => gAuthSettings.tokenExists()
 
     this.storePost = resPost => {
-      if (noisy) { console.log('Pb.storePost() this: '); }
-      if (noisy) { console.dir(this); }
-      if (log_pin_on_store) { console.log('log_pin_on_store:'); console.dir(resPost); }
-      if (noisy) { console.dir(resPost.description); }
-      this.description = resPost.description;
-      this.hash = resPost.hash;
-      this.time = resPost.time;
-      this.extended = resPost.extended;
-      this.tag = resPost.tag;
-      this.tags = resPost.tags;
-      this.shared = resPost.shared;
-      this.toread = resPost.toread;
-      this.url = resPost.url;
-      if (noisy) { console.log('Pb.storePost() after: '); }
-      if (noisy) { console.dir(this); }
-    };
-  }
+      if (noisy) { log('Pb.storePost()') }
+      if (logPinOnStore) { log('logPinOnStore:', resPost) }
+      if (noisy) { log(resPost.description) }
+      this.description = resPost.description
+      this.hash = resPost.hash
+      this.time = resPost.time
+      this.extended = resPost.extended
+      this.tag = resPost.tag
+      this.tags = resPost.tags
+      this.shared = resPost.shared
+      this.toread = resPost.toread
+      this.url = resPost.url
+    }
 
-  read_recent = async (description, time, extended, shared, tags, toread, url) => {
-    const self = this;
-    return new Promise((resolve, reject) => {
-      var pinurl = this.getRecentUrl();
-      if (noisy_pinboard_url) { console.log("read_recent() pinurl: " + pinurl); }
-      var xhr = new XMLHttpRequest(); 
-      xhr.open('GET', pinurl, true);
-      xhr.onreadystatechange = async event => {
-        if (noisy) { console.log('pinboard.js read_recent() xhr.onreadystatechange()'); }
-        if (noisy) { console.log(event); }
-        if (noisy) { console.log(this); }
-        if (noisy) { console.log(self); }
-        if (event.target.readyState == 4 && event.target.status == 200) {
-          if (noisy) { console.log(xhr.responseURL); }
-          var data = xhr.responseXML;
-          if (noisy) { console.log(data); }
+    this.analyzePage = (url) => {
+      if (noisyAnalyze) { log('analyzePage()', 'url:', url) }
+      return this.fetchPin({
+        pinurl: this.getPinsUrl(),
+        play: this.analyzePageCore,
+        url: url,
+        verb: 'GET'
+      });
+    }
 
-          // var description, time, extended, shared, tags, toread;
+    this.analyzePageCore = (action, data, resolve, reject) => {
+      if (noisyAnalyze) { log('Pb#analyzePageCore', 'action.url:', action.url) }
+      let post
+      if (!data) {
+        post = newPin({
+          shared: true,
+          toread: false,
+          url: action.url
+        })
+      } else {
+        const resPost = data.getElementsByTagName('post')
+        if (noisyAnalyze) { log('resPost', 'tags:', $(resPost).attr('tag')) }
 
-          var known_list = tags ? ((typeof tags == 'string') ? tags.split(' ') : tags) : [];
-          var suggested_list = new Array();
-          // var time = data.getElementsByTagName('posts')[0].getAttribute('time');
-          var posts = data.getElementsByTagName("post");
+        if (noisyAnalyze) { log(resPost) }
 
-          const tags_list = posts_get_tags(posts);
-          if (noisy) { console.dir(tags_list); }
-          // resolve(tags_list.sort(compare).map(x => x.));
-          // resolve(tags_list);
-
-          var last_tags;
-          if (tags_list.length > 0) {
-            var dlisst = [];
-            var list = document.createElement('ul');
-            list.setAttribute('id', 'recent_list');
-            if (recent_in_horizontal_menu) { list.setAttribute('class', 'pure-menu-list'); }
-            var added = 0;
-
-            let title = document.createElement('li');
-            title.setAttribute('class', 'tiny');
-            title.textContent = "Recent:";
-            list.appendChild(title);
-
-            tags_list.forEach((value, index) => {
-              if (added < recent_tags_count_max) {
-                const matched = (known_list.indexOf(value) >= 0);
-                if (!matched) {
-                  added++;
-                  var li = document.createElement('li');
-                  if (recent_in_horizontal_menu) { li.setAttribute('class', 'pure-menu-item'); }
-
-                  var tag;
-                  if (true) {
-                    tag = make_recent_anchor(description, time, extended, shared, toread, tags, url, value);
-                  }
-                  else {
-                    if (noisy) { console.log('make_tag_text()'); }
-                    // console.log('description: ' + description); // console.log('time: ' + time); // console.log('extended: ' + extended); // console.log('shared: ' + shared); // console.log('toread: ' + toread); // console.log('tags: ' + tags); // console.log('url: ' + url); // console.log('value: ' + value);
-                    tag = document.createElement('div');
-                    // if (recent_in_horizontal_menu) { tag.setAttribute('class', 'pure-menu-link'); }
-                    tag.textContent = value;
-                  }
-
-                  li.appendChild(tag)
-                  list.appendChild(li);
-                  dlisst.push(value);
-                }
-              }
-            });
-            last_tags = dlisst;
-          }
-          else
-            last_tags = [];
-          resolve({
-            description: description,
-            hash: "",
-            time: time,
-            extended: extended,
-            site_tags: tags,
-            shared: shared,
-            toread: toread,
-            url: url,
-            tags: last_tags,
-            tags_html: document.createElement('ul') /// list
-          });
+        let description = $(resPost).attr('description')
+        const hash = $(resPost).attr('hash')
+        const time = $(resPost).attr('time')
+        let extended = $(resPost).attr('extended')
+        const tag = $(resPost).attr('tag')
+        const tags = tag ? tag.split(' ') : []
+        const shared = $(resPost).attr('shared')
+        const toread = $(resPost).attr('toread')
+        if (typeof description === 'undefined') {
+          description = ''
+          // description = document.title || '';
         }
-      };
-      xhr.send();
-    });
-  }
+        if (typeof extended === 'undefined') {
+          extended = ''
+        }
+        if (noisyAnalyze) { log(tags) }
 
-  analyze_page0 = async (url) => {
-    if (noisy) { console.log("analyze_page() url: " + url); }
-    return new Promise((resolve, reject) => {
-      resolve({});
-    });
-  }
-
-  analyze_page = async (url) => {
-    if (noisy) { console.log("analyze_page() url: " + url); }
-    const self = this;
-    return new Promise((resolve, reject) => {
-      // resolve({});
-
-      if (!this.hasAuth()) {
-if (noisy) { console.log("pb.js ap 209"); }
-        reject('not logged in');
+        post = {
+          description: description,
+          hash: hash,
+          time: time,
+          // title: title,
+          extended: extended,
+          tag: tag,
+          tags: tags,
+          shared: shared,
+          toread: toread,
+          url: action.url
+        }
       }
-      else {
-        // resolve({});
-
-if (noisy) { console.log("pb.js ap 215"); }
-        var pinurl = this.getPostsUrl();
-        if (noisy_pinboard_url) { console.log("analyze_page() pinurl: " + pinurl); }
-// resolve({});
-        var xhr = new XMLHttpRequest(); 
-        xhr.open('GET', pinurl, true);
-        xhr.onreadystatechange = analyze_page_cb.bind(self, url, xhr, resolve, reject);
-        xhr.send();
-       }
-    });
-  }
-};
-
-// function analyze_page_cb(url, xhr, resolve, reject, event) {
-//   resolve({});
-// };
-
-function analyze_page_cb(url, xhr, resolve, reject, event) {
-  if (noisy) {
-    console.log("analyze_page_cb()");
-    console.dir(this);
-    console.dir(url);
-    console.dir(xhr);
-    console.dir(resolve);
-    console.dir(reject);
-    console.dir(event);
-  }
-  // resolve({});
-
-  if (noisy) { console.log('analyze_page() xhr.onreadystatechange()'); }
-  if (noisy) { console.log(event); }
-  if (noisy) { console.log(this); }
-  if (event.target.readyState == 4 && event.target.status == 401) {
-    if (noisy) { console.log("pb.js ap 216"); }
-    reject(event.target.status);
-  } else if (event.target.readyState == 4 && event.target.status == 200) {
-    if (noisy) { console.log("pb.js ap 219"); }
-    // resolve({});
-
-    if (noisy) { console.log(xhr.responseURL); }
-    var data = xhr.responseXML;
-    if (noisy) { console.log(data); }
-    if (!data) {
-      if (noisy) { console.log("pb.js ap 224"); }
-      // resolve({});
-
-      if (noisy) { console.log('null data, xhr:'); }
-      if (noisy) { console.dir(xhr); }
-      let post = {
-        description: '',
-        hash: '',
-        time: '',
-        // title: title,
-        extended: '',
-        tag: '',
-        tags: [],
-        shared: true,
-        toread: false,
-        url: url
-      }
-      if (noisy) { console.dir(post); }
-
-      self.storePost(post);
-      resolve(post);
-    } else {
-      if (noisy) { console.log("pb.js ap 244"); }
-      // resolve({});
-
-      var resPost = data.getElementsByTagName("post");
-      if (noisy) { console.log("resPost tags: " + $(resPost).attr("tag")); }
-
-      if (noisy) { console.dir(resPost); }
-
-      let description = $(resPost).attr("description");
-      let hash = $(resPost).attr("hash");
-      let time = $(resPost).attr("time");
-      let extended = $(resPost).attr("extended");
-      let tag = $(resPost).attr('tag');
-      let tags = tag ? tag.split(' ') : [];
-      let shared = $(resPost).attr("shared");
-      let toread = $(resPost).attr("toread");
-      if (typeof description === 'undefined') {
-        description = '';
-        // description = document.title || '';
-      }
-      if (typeof extended === 'undefined') {
-        extended = '';
-      }
-      if (noisy) { console.dir(tags); }
-
-      let post = {
-        description: description,
-        hash: hash,
-        time: time,
-        // title: title,
-        extended: extended,
-        tag: tag,
-        tags: tags,
-        shared: shared,
-        toread: toread,
-        url: url
-      }
-      if (noisy) { console.dir(post); }
-
-      this.storePost(post);
-      resolve(post);
+      if (noisyAnalyze) { log(post) }
+      this.storePost(post)
+      resolve(post)
     }
-  }
-}
 
-function occurrence(array) {
-    "use strict";
-    var result = {};
-    if (array instanceof Array) {
-        array.forEach(function (v, i) {
-            if (!result[v]) {
-                result[v] = [i];
-            } else {
-                result[v].push(i);
+    this.deletePin = (url, eventTarget) => {
+      if (logSiteUrlOnPinDelete) { log('Pb.deletePin()', 'url:', url) }
+      return this.fetchPin({
+        pinurl: this.deletePinUrl(url),
+        play: this.deletePinCore,
+        url: url,
+        verb: 'GET'
+      });
+    }
+
+    this.deletePinCore = (_action, httpResult, resolve, _reject) => {
+      if (noisy) { log('deletePinCore()'); console.dir(httpResult) }
+      setTimeout(() => resolve(httpResult), 3000);
+    }
+
+    this.deletePinUrl = (url) => {
+      const args = 'url=' + encodeURIComponent(url)
+      const pinurl = pinboardApiPath + 'posts/delete?' + args + '&' + gAuthSettings.tokenAsVar()
+      return pinurl
+    }
+
+    this.deleteTag = (request) => {
+      if (logSiteUrlOnTagDelete) { log('Pb.deleteTag()', 'request:', request) }
+      return this.fetchPin({
+        pinurl: this.deleteTagUrl(request),
+        play: this.deleteTagCore,
+        url: request.url,
+        verb: 'POST'
+      });
+    }
+
+    this.deleteTagCore = (_action, httpResult, resolve, _reject) => {
+      if (noisy) { log('deleteTagCore()', 'httpResult:', httpResult) }
+      setTimeout(() => resolve(httpResult), 3000);
+    }
+
+    this.deleteTagUrl = (request) => {
+      let args = 'replace=yes'
+      args = args + '&url=' + encodeURIComponent(request.url)
+      if (request.description !== '') args = args + '&description=' + encodeURIComponent(request.description)
+
+      // args = args + '&tags=' + (tags + ' ' + value).replace(' ', '%20').replace('\n', '%20').replace('\r', '');
+      // args = args + '&tags=' + encodeURIComponent((request.tags ? request.tags : '') + (request.value ? ' ' + request.value : '') );
+      args = args + '&tags=' + encodeURIComponent(
+        (request.tags ? request.tags.filter(x => x !== request.value).join(' ') : '')
+      )
+      // args = args + '&tags=' + request.tags.replace(request.value, '');
+
+      if (request.time) args = args + '&dt=' + encodeURIComponent(request.time)
+      if (request.shared) args = args + '&shared=' + encodeURIComponent(request.shared)
+      if (request.toread) args = args + '&toread=' + encodeURIComponent(request.toread)
+      args = args + '&extended=' + encodeURIComponent(request.extended)
+      if (noisy) { console.log('args: ' + args) }
+      const pinurl = pinboardApiPath + 'posts/add?' + args + '&' + gAuthSettings.tokenAsVar()
+      if (noisyPinboardUrl || logPinurlOnTagDelete) { console.log('pinurl: ' + unurl(pinurl)) }
+      return pinurl
+    }
+
+    this.fetchPin = (action) => {
+      // log('fetchPin()', 'action:', action);
+      return this.fetchPinRetry(action, 0)
+        .then(arg => {
+          if (noisyFetchPin) { log('fetchPin()', 'Resolved with', arg) }
+          return arg
+        })
+        .catch(arg => {
+          if (noisyFetchPin) { log('fetchPin()', 'Rejected with', arg) }
+          return arg
+        })
+    }
+
+    this.fetchPinRetry = (action, retries) => {
+      if (noisyFetchPin) { log('fetchPinRetry()', 'action:', action, 'retries:', retries) }
+      const self = this
+      return new Promise((resolve, reject) => {
+        try {
+          if (!this.hasAuth()) {
+            reject('not logged in')
+          } else {
+            if (noisyPinboardUrl) { log('fetchPinRetry()', 'action.pinurl:', unurl(action.pinurl)) }
+
+            const xhr = new XMLHttpRequest()
+            xhr.open(action.verb, action.pinurl, true);
+            xhr.onreadystatechange = ((retries, event) => {
+              if (noisyFetchPin) { console.log('analyzePageResponse()'); console.dir(this); console.dir(action.url); console.dir(xhr); console.dir(resolve); console.dir(reject); console.dir(event) }
+              if (noisyAsyncIn) { log('fetchPinRetry() on xhr.onreadystatechange', 'retries:', retries, 'event:', event) }
+              // console.log('retries: ' + retries);
+
+              if (retries > 2) {
+                reject('Too many retries')
+              } else if (event && event.target && event.target.readyState === 4 && event.target.status === 429) {
+                setTimeout(() => {
+                  resolve(self.fetchPinRetry(action, retries + 1));
+                }, retries * 10e3)
+              } else if (event && event.target && event.target.readyState === 4 && event.target.status === 401) {
+                reject(event.target.status)
+              } else if (event && event.target && event.target.readyState === 4 && event.target.status === 200) {
+                const httpResult = xhr.responseXML;
+                action.play(action, httpResult, resolve, reject); // analyzePageCore
+              } else if (event && event.target && event.target.readyState === 2) {
+                // console.dir(event);
+              } else if (event && event.target && event.target.readyState === 3) {
+                // console.dir(event);
+              } else {
+                // console.dir(event);
+                // console.err('unrecognized event, normal');
+              }
+            }).bind(self, retries)
+            xhr.send()
+          }
+        } catch (error) {
+          console.error(error)
+          reject(error)
+        }
+      })
+    }
+
+    this.getPin = () => {
+      if (noisy) { console.log('Pb.getPin() this: ') }
+      if (noisy) { console.dir(this) }
+      if (noisy) { console.dir(Object.keys(this)) }
+      return newPin(this);
+    }
+
+    this.readFreshRecentTags = (excludeTags) => {
+      // log('readFreshRecentTags()', 'excludeTags:', excludeTags);
+      try {
+        return this.fetchPin({
+          excludeTags: excludeTags,
+          pinurl: this.getRecentUrl(),
+          play: this.readFreshRecentTagsCore,
+          verb: 'GET'
+        })
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    this.readFreshRecentTagsCore = (action, httpResult, resolve, reject) => {
+      if (noisy) { log('Pb', 'readFreshRecentTagsCore') }
+      let posts = httpResult.getElementsByTagName('post');
+      const tags = postsGetTags(posts);
+      if (noisy) { log('Pb', 'readFreshRecentTagsCore', 'tags:', tags) }
+
+    // var excludeTags = tags ? ((typeof tags == 'string') ? tags.split(' ') : tags) : [];
+    var excludeTags = action.excludeTags;
+    var suggestedList = [];
+      posts = httpResult.getElementsByTagName('post');
+      const tagsList = postsGetTags(posts);
+      if (noisy) { log('Pb', 'readFreshRecentTagsCore', 'tagsList:', tagsList) }
+
+      let lastTags
+      if (tagsList.length > 0) {
+        const dlisst = []
+        tagsList.forEach((value, index) => {
+          if (dlisst.length < recentTagsCountMax) {
+            if (excludeTags.indexOf(value) < 0) {
+              dlisst.push(value)
             }
-        });
-        Object.keys(result).forEach(function (v) {
-            result[v] = {"index": result[v], "length": result[v].length};
-        });
-    }
-    return result;
-};
+          }
+        })
+        lastTags = dlisst
+      } else { lastTags = [] }
 
-function posts_get_tags(posts) {
-  if (noisy) { console.log('posts_get_tags()'); }
-  var tags = [];
+      resolve(lastTags)
+    }
+
+    this.saveTag = (request) => {
+      if (logPinOnSave || logSiteUrlOnPinSave) { log('Pb.saveTag()', 'request:', request) }
+
+      if (request.value) {
+        const trt = new ThrottledRecentTags()
+        trt.appendTag(request.value)
+      }
+
+      let args = 'replace=yes'
+      args = args + '&url=' + encodeURIComponent(request.url)
+      if (request.description !== '') args = args + '&description=' + encodeURIComponent(request.description)
+
+      let tags = request.tags
+      if (noisy) { log('typeof tags:', typeof tags, tags) }
+      // if (typeof tags == 'undefined') { console.error('msgBackSaveTag undefined tags'); }
+      // if ((typeof tags == 'string') && (tags == '')) { console.error('msgBackSaveTag empty tags'); }
+      // if ((typeof tags == 'object') && (tags.length == 0)) { console.error('msgBackSaveTag no tags'); }
+      if (typeof tags === 'object') {
+        tags = tags.join(',')
+      }
+
+      // args = args + '&tags=' + (tags + ' ' + value).replace(' ', '%20').replace('\n', '%20').replace('\r', '');
+      args += '&tags=' + encodeURIComponent(
+        // (request.tags ? request.tags : '') + (request.value ? ' ' + request.value : '')
+        tags + (request.value ? (tags === '' ? '' : ' ') + request.value : '')
+      )
+      if (request.time) args = args + '&dt=' + encodeURIComponent(request.time)
+      if (request.shared) args = args + '&shared=' + encodeURIComponent(request.shared)
+      if (request.toread) args = args + '&toread=' + encodeURIComponent(request.toread)
+      args = args + '&extended=' + encodeURIComponent(request.extended)
+      if (noisy) { console.log('args: ' + args) }
+      const pinurl = pinboardApiPath + 'posts/add?' + args + '&' + gAuthSettings.tokenAsVar()
+      if (noisyPinboardUrl) { console.log('msgBackSaveTag pinurl: ' + unurl(pinurl)) }
+
+      return this.fetchPin({
+        pinurl: pinurl,
+        play: this.saveTagCore,
+        url: request.url,
+        verb: 'POST'
+      })
+    }
+
+    this.saveTagCore = (_action, httpResult, resolve, _reject) => {
+      if (noisy) { log('saveTagCore()', httpResult) }
+      resolve(httpResult);
+    }
+  }
+}
+
+function postsGetTags(posts) {
+  if (noisy) { console.log('postsGetTags()') }
+  const tags = []
   if (posts.length > 0) {
-    // var txt = ""; //posts.length.toString();
-    for (var i = 0; i < posts.length; i++) {
-      var post = posts[i];
-      var suggested = post.getAttribute('tag');
-      if (suggested != '') {
-        // txt = txt + ' ' + suggested;
-        // var tag_list = suggested.split(' ');
+    for (let i = 0; i < posts.length; i++) {
+      const post = posts[i]
+      const suggested = post.getAttribute('tag')
+      if (suggested !== '') {
         suggested.split(' ').forEach((value, index) => {
-          tags.push(value);
-        });
+          tags.push(value)
+        })
       }
     }
   }
-  if (noisy) { console.log('tags'); }
-  if (noisy) { console.dir(tags); }
-  oc = occurrence(tags);
-  if (noisy) { console.log('oc'); }
-  if (noisy) { console.dir(oc); }
-  ok1 = Object.keys(oc).map(k => [k, oc[k].length]);
-  if (noisy) { console.log('ok1'); }
-  if (noisy) { console.dir(ok1); }
-  ok2 = ok1.sort((a, b) => b[1] - a[1]);
-  if (noisy) { console.log('ok2'); }
-  if (noisy) { console.dir(ok2); }
-  ok = ok2.map(x => x[0]);
-  if (noisy) { console.log('ok'); }
-  if (noisy) { console.dir(ok); }
-  return ok;
+  if (noisy) { log('tags', tags) }
+  return sortArrayByFrequency(tags)
 }
 
-async function read_current_tags(url) {
-  if (noisy) { console.log("src/bg/pinboard.js read_current_tags()"); }
-  return new Promise(async (resolve, reject) => {
-    if (noisy) { console.log("src/bg/pinboard.js read_current_tags promise"); }
+function fetchPinForUrl(url) {
+  return new Promise((resolve, reject) => {
+    if (noisy) { log('pb', 'fetchPinForUrl', 'Promise') }
     try {
-      let url_neat = url.replace(/#.#$/, '');
-      let pb = new Pb(url_neat);
-      pb.analyze_page(url_neat).then(data => {
-        resolve(pb.getPost());
+      const urlNeat = urlForBookmark(url)
+      const pb = new Pb(urlNeat)
+      pb.analyzePage(urlNeat, 0).then(data => {
+        resolve(pb.getPin())
       })
-      .catch(error => {
+        .catch(error => {
         // console.error('Error during service worker:', error);
-        reject(error);
-      });
-    } catch(e) {
-      if (noisy) { console.log("src/bg/pinboard.js read_current_tags promise catch"); }
-      reject(e);
+          reject(error)
+        })
+    } catch (error) {
+      if (noisy) { log('pb', 'fetchPinForUrl', 'error:', error) }
+      reject(error)
     }
-  });
+  })
 }
 
-async function read_recent_tags(description, time, extended, shared, tags, toread, url) {
-  if (noisy) { console.log("src/bg/pinboard.js read_recent_tags()"); }
+async function readRecentTags(description, time, extended, shared, tags, toread, url) {
   return new Promise(async (resolve, reject) => {
-    if (noisy) { console.log("src/bg/pinboard.js read_recent_tags promise"); }
+    if (noisy) { log('pb', 'readRecentTags', 'Promise') }
     try {
-
-      let url_neat = url.replace(/#.#$/, '');
-
-      console.log('trt pb.js 412')
-      let trt = new ThrottledRecentTags();
-      console.log('trt pb.js 414')
-      trt.readTags(description, time, extended, shared, tags, toread, url_neat).then(data => {
-        console.log('data:'); console.dir(data);
-        resolve(data);
+      const urlNeat = urlForBookmark(url);
+      const trt = new ThrottledRecentTags()
+      trt.readTags(description, time, extended, shared, tags, toread, urlNeat).then(data => {
+        if (noisy) { log('pb', 'readRecentTags', 'readTags', 'data:', data) }
+        resolve(data)
       })
-      .catch(error => {
-        console.log('error:'); console.dir(error);
-        reject(error);
-      });
-    } catch(e) {
-      if (noisy) { console.log("src/bg/pinboard.js read_recent_tags promise catch"); }
-      reject(e);
+        .catch(error => {
+          if (noisy) { log('pb', 'readRecentTags', 'error:', error) }
+          reject(error)
+        })
+    } catch (error) {
+      if (noisy) { log('pb', 'readRecentTags', 'error:', error) }
+      reject(error)
     }
-  });
+  })
 }
 
-if (log_version_on_extn_install) {
-  let manifestData = chrome.runtime.getManifest();
-  // console.log(manifestData.name + ' version: ' + manifestData.version);
-  // console.log(manifestData.default_locale);
+if (logVersionOnExtnInstall) {
+  const manifestData = chrome.runtime.getManifest();
+  console.log(manifestData.name + ' version: ' + manifestData.version)
+  log(manifestData.name, manifestData.version)
+  // console.log(manifestData.defaultLocale);
 }
 
-// if (false) {			// on extension install
-//   setTimeout(
-//     () => {
-//       read_current_tags().then(data => {
-//         console.log('src/bg/pinboard.js on load\ndata:');
-//         console.dir(data);
-//       });
-//     },
-//     1000
-//   );
-// }
+// on extension install
+//
+initOptions()
+
+if (noisy) { console.log('pb', 'EOF') }

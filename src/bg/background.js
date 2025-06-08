@@ -1,32 +1,207 @@
-// if you checked "fancy-settings" in extensionizr.com, uncomment this lines
-
-// var settings = new Store("settings", {
-//     "sample_setting": "This is how you use Store.js to remember values"
-// });
+if (noisy) { console.log('bg', 'BOF'); }
+log('bg', 'load time:', Date.now())
 
 
-var g_auth_settings;
+async function getPinForUrl(url, title) {
+  if (noisy) { log('bg', 'getPinForUrl', 'url:', url) }
 
-function auth_token_exists() {
-  return g_auth_settings.token !== ""
+  try {
+    let data = await fetchPinForUrl(url);
+    if (logSiteUrlOnSiteLoad) { log('bg', 'fetchPinForUrl', 'url:', url, 'data:', data) }
+
+    return minEmpty(data, title);
+  }
+  catch (error) {
+    if (noisy) { log('bg', 'fetchPinForUrl', 'url:', url, 'error:', error.toString()) }
+    return newPin();
+  }
 }
 
-function auth_token_set() {
-  if (noisy) { console.log('auth_token_set()'); }
-  return 'auth_token=' + g_auth_settings.token;
+class Action {
+  constructor(request) {
+    if (noisy) { log('Action#constructor', 'request:', request) }
+    this.request = Object.assign(request)
+  }
+
+  readRecentTags(senderTabUrl, sendResponse) {
+    let request = this.request;
+    readRecentTags(
+      request.description,
+      request.time,
+      request.extended,
+      request.shared,
+      request.tags,
+      request.toread,
+      senderTabUrl
+    ).then(data => {
+      if (noisy) { log('Action#readRecentTags', 'data:', data); }
+      sendResponse(
+        newPin(
+          minEmpty(request),
+          data
+        )
+      );
+    });    
+  }
+}
+
+class AuthSettings {
+  constructor() {
+    if (noisyAuth) { console.log('AuthSettings#constructor'); }
+    this.token = "fareed:FC8FFFF0E8CA1EE01FDD"; ///
+  }
+
+  getOptions() {
+    if (noisyAuth) { console.log('AuthSettings#getOptions'); }
+    let settings = new Store('settings');
+    this.setInhibit(settings.get('inhibit') || '');
+    this.setToken(settings.get('token') || '');
+    // if (logAuthSentToFg) { log('gAuthSettings:', gAuthSettings) }
+    let options = {
+      'badgeTextIfBookmarkedNoTags': settings.get('badgeTextIfBookmarkedNoTags'),
+      'badgeTextIfNotBookmarked': settings.get('badgeTextIfNotBookmarked'),
+      'badgeTextIfPrivate': settings.get('badgeTextIfPrivate'),
+      'badgeTextIfQueued': settings.get('badgeTextIfQueued'),
+      'recentPostsCount': settings.get('recentPostsCount'),
+      'showHoverOnPageLoad': settings.get('showHoverOnPageLoad'),
+      'hoverShowTooltips': settings.get('hoverShowTooltips')
+    };
+    if (logOptionsSentToFg) { log('options:', options) }
+    return options;
+  }
+
+  getResponse() {
+    if (noisyAuth) { console.log('AuthSettings#getResponse'); }
+    return {
+      inhibit: this.inhibit,
+      token: this.token
+    }
+  }
+
+  getToken() {
+    if (noisyAuth) { console.log('AuthSettings#getToken'); }
+    return this.token;
+  }
+
+  inhibitUrl(url) {
+    if (noisyAuth) { console.log('AuthSettings#inhibitUrl'); }
+    let settings = new Store('settings');
+    this.setInhibit((settings.get('inhibit') || '') + '\n' + url);
+    this.setToken(settings.get('token'));
+    // this.inhibit = request.inhibit;
+    settings.set('inhibit', this.inhibit);
+    // if (logAuthSentToFg) { log('gAuthSettings:', this) }
+    return this.getResponse();
+  }
+
+  setInhibit(inhibit) {
+    if (noisyAuth) { console.log('AuthSettings#setInhibit'); }
+    this.inhibit = inhibit;
+  }
+
+  setToken(token) {
+    if (noisyAuth) { console.log('AuthSettings#setToken'); }
+    this.token = token;
+  }
+
+  tokenAsVar() {
+    if (noisyAuth) { console.log('AuthSettings#tokenAsVar'); }
+    return 'auth_token=' + this.token;
+  }
+
+  tokenExists() {
+    if (noisyAuth) { console.log('AuthSettings#tokenExists'); }
+    return this.token.length > 0;
+  }
+}
+
+class BadgeAttributes {
+  constructor(badgeTextIfNotBookmarked, badgeTextIfPrivate, badgeTextIfQueued, numTags, saved, shared, toread) {
+    // console.log('BadgeAttributes#constructor');
+    this.badgeTextIfNotBookmarked = badgeTextIfNotBookmarked;
+    this.badgeTextIfPrivate = badgeTextIfPrivate;
+    this.badgeTextIfQueued =  badgeTextIfQueued;
+    this.numTags = numTags;
+    this.saved = saved;
+    this.shared = shared;
+    this.toread = toread;
+    // console.log('BadgeAttributes ' + this.numTags + ',' + this.saved + ',' + this.shared + ',' + this.toRead + '')
+  }
+
+  backgroundColor() {
+    return this.saved ? "#000" : "#222";
+  }
+
+  badgeIcon() {
+    return this.saved ? "icons/hoverboard_19b.png" : "icons/hoverboard_19.png";
+  }
+
+  badgeText(settings) {
+    /// text if blocked
+    if (!this.saved) return this.badgeTextIfNotBookmarked;
+
+    // if (this.numTags == 0) return gOptions.badgeTextIfBookmarkedNoTags;
+    let text = '';
+    if (this.shared === 'no') text += this.badgeTextIfPrivate;
+    text += this.numTags.toString();
+    if (this.toread === 'yes') text += this.badgeTextIfQueued;
+    return text;
+  }
+
+  badgeTitle() {
+    return '';
+  }
+}
+
+function initOptions() {
+  // console.log('initOptions()');
+  let settings = new Store('settings');
+  settings.set('badgeTextIfBookmarkedNoTags', '0');
+  settings.set('badgeTextIfNotBookmarked', '-');
+  settings.set('badgeTextIfPrivate', ' * ');
+  settings.set('badgeTextIfQueued', ' ! ');
+  settings.set('recentPostsCount', initRecentPostsCount);
+  settings.set('showHoverOnPageLoad', showHoverOnPageLoad);
+  settings.set('hoverShowTooltips', hoverShowTooltips);
+}
+
+function paintBadge(senderTabId, saved, numTags, shared, toread) {
+  if (noisy) { log('update browserAction icon', 'senderTabId:', senderTabId) }
+  let settings = new Store('settings');
+  let badge = new BadgeAttributes(
+    settings.get('badgeTextIfNotBookmarked'),
+    settings.get('badgeTextIfPrivate'),
+    settings.get('badgeTextIfQueued'),
+    numTags, saved, shared, toread);
+  chrome.browserAction.setBadgeBackgroundColor({
+    color: badge.backgroundColor(),
+    tabId: senderTabId
+  });
+  chrome.browserAction.setBadgeText({
+    text: badge.badgeText(),
+    tabId: senderTabId
+  });
+  chrome.browserAction.setIcon({
+    path: badge.badgeIcon(),
+    tabId: senderTabId
+  });
+  chrome.browserAction.setTitle({
+    title: badge.badgeTitle(),
+    tabId: senderTabId
+  });
 }
 
 // restrict specific domains
 //
-function url_is_allowed(request, url, sendResponse) {
+function urlIsAllowed(request, url, sendResponse) {
   let allowed = true;
-  if (request.use_block) {
+  if (request.useBlock) {
     let settings = new Store('settings');
     let inhibit = settings.get('inhibit');
     if (!inhibit) {
       allowed = true;
     } else {
-      let block = inhibit.split('\n').filter(s => s != '');
+      let block = inhibit.split('\n').filter(s => s !== '');
       if (block.some(item => url.startsWith(item))) {
         if (noisy) { console.log('url blocked'); }
         allowed = false;
@@ -40,283 +215,231 @@ function url_is_allowed(request, url, sendResponse) {
   return allowed;
 }
 
-// Called when the user clicks on the browser action.
-chrome.browserAction.onClicked.addListener(tab => {
-  // Send a message to the active tab
-  chrome.tabs.query({active: true, currentWindow: true}, tabs => {
-    if (noisy) { console.log('bg.js browserAction.onClicked'); }
-    var activeTab = tabs[0];
-    chrome.tabs.sendMessage(activeTab.id, {"message": msg_b2f_clicked_browser_action});
+var lastSearchText = '';
+var lastSearchMatchedTabId = 0;
+
+function backSearchTitle(actionTabId, value) {
+  if (noisy) { log('bg', 'backSearchTitle', 'actionTabId:', actionTabId, 'value:', value) }
+  let normalized = value.toLowerCase();
+  if (noisy) { log('bg', 'backSearchTitle', 'normalized:', normalized) }
+
+  let ret = 0;
+  // set to continue or start search
+  //
+  let restartTabId;
+  if (lastSearchText === normalized) {
+    restartTabId = lastSearchMatchedTabId;
+  } else {
+    restartTabId = actionTabId;
+    lastSearchText = normalized;
+  }
+  if (noisy) { log('bg', 'backSearchTitle', 'restartTabId:', restartTabId) }
+
+  return new Promise((resolve, reject) => {
+    if (noisy) { log('bg', 'backSearchTitle', 'promise', 'BOF') }
+    // let obj = {currentWindow: true};
+    let obj = {};
+    chrome.tabs.query(obj, tabs => {
+      // if (noisy) { log('bg', 'backSearchTitle', 'tabs:', tabs) }
+
+      // collect tabs that match criteria
+      //
+      let selt = [];
+      tabs.forEach(tab => {
+        // if (noisyDev) { log('bg', 'backSearchTitle', 'tab:', tab, 'tab title:', tab.title) }
+        let ttl = tab.title.toLowerCase();
+        let tti = ttl.includes(normalized);
+        // if (noisyDev) { log('bg', 'backSearchTitle', 'ttl:', ttl, 'tti:', tti) }
+
+        if (tab.title.toLowerCase().includes(normalized)) {
+          selt.push(tab)
+        }
+        // chrome.tabs.remove(tab.id, () => {})
+        // if (false) { sendToTab(tab.id, { message: msgTabCloseIfToRead, pin: pin, tabId: actionTabId }) }
+      })
+      if (noisyDev) { log('bg', 'backSearchTitle', 'selt.length:', selt.length) }
+      // if (noisy) { log('bg', 'backSearchTitle', 'selt:', selt) }
+
+      // get next larger than initial tabId or lowest in order
+      //
+      let firstOrNext = 0;
+      let matchWindowId;
+      let matchTabId = restartTabId;
+      selt.forEach(tab => {
+        if (noisyDev) { log('bg', 'backSearchTitle', 'selt', 'tab title:', tab.title, 'tab id:', tab.id) }
+        if (firstOrNext === 0) {
+          if (tab.id > restartTabId) {
+            // first potential next
+            firstOrNext = 1;
+            matchTabId = tab.id;
+            matchWindowId = tab.windowId;
+          } else if (tab.id < matchTabId) {
+            // new lowest
+            matchTabId = tab.id;
+            matchWindowId = tab.windowId;
+          }
+        } else {
+          if (tab.id > restartTabId && tab.id < matchTabId) {
+            // lower potential next
+            matchTabId = tab.id;
+            matchWindowId = tab.windowId;
+          }
+        }
+      })
+      if (noisyDev) { log('bg', 'backSearchTitle', 'selt', 'restartTabId:', restartTabId, 'firstOrNext:', firstOrNext, 'matchTabId:', matchTabId) }
+      if (matchTabId !== restartTabId) {
+        lastSearchMatchedTabId = matchTabId;
+        /// display found tab
+        chrome.tabs.update(matchTabId, {active: true});
+        chrome.windows.update(matchWindowId, {focused: true});
+      }
+      resolve(selt.length);
+      if (noisy) { log('bg', 'backSearchTitle', 'promise', 'EOF') }
+    });
   });
+}
+
+function backSearchTitleRepeat() {
+  if (noisy) { log('bg', 'backSearchTitleRepeat') }
+  return backSearchTitle(lastSearchMatchedTabId, lastSearchText);
+}
+
+// Called when the user clicks on the browser action if the popup is not enabled (per manifest)
+chrome.browserAction.onClicked.addListener(tab => {
+  if (noisy) { log('bg', 'c.ba.onClk', 'tab:', tab) }
+  sendToActiveTab({ "message": msgTabCheckPage });
 });
 
 chrome.extension.onMessage.addListener(
   (request, sender, sendResponse) => {
-    if (noisy_background_msg_listener) { console.log('background_msg_listener() request:'); console.dir(request); }
+    if (noisyBackgroundChromeExtensionOnMessageListener) { log('bg', 'c.e.onMsg', 'request:', request, 'sender:', sender) }
+    if (noisy) { log('bg', 'c.e.onMsg', 'action:', request.action) }
     if (false) {
-    } else if (request.action === msg_inject_on_complete) {
+    // } else if (request.action === 'getPin' ) {
+    //   // synch with popup
+    //   //
+    //   let pinp = { pin: gPin, tabId: gTabId }
+    //   if (noisy) { log('chrome.extension.onMessage listener() getPin', 'pinp:', pinp); }
+    //   sendResponse({ pin: gPin, tabId: gTabId });
+
+    // } else if (request.action === 'echo' ) {
+    //   if (noisy) { log('chrome.extension.onMessage listener() echo', 'data:', request.data); }
+    //   sendResponse({});
+    } else if (request.action === msgBackGetTabId ) {
+      if (noisy) { log('bg', 'c.e.onMsg', 'msgBackGetTabId', 'sender.tab:', sender.tab) }
+      sendResponse({ tabId: sender.tab.id });
+
+    } else if (request.action === msgBackInjectOnComplete) {
       sendResponse(true);
 
-    } else if (request.action === msg_f2b_delete_pin) {
-      if (log_site_url_on_pin_delete) { console.log('log_site_url_on_pin_delete: ' + request.url); }
-      var args = 'url=' + encodeURIComponent(request.url);
-      var pinurl = api_path + 'posts/delete?' + args + '&' + auth_token_set();
-      if (noisy_pinboard_url) { console.log('pinurl: ' + pinurl); }
-      var xhr = new XMLHttpRequest(); 
-      xhr.open('GET', pinurl);
-      xhr.onreadystatechange = (event) => {
-        if (noisy) { console.log('background.js GET delete xhr.onreadystatechange()'); }
-        if (event.target.readyState == 4 && event.target.status == 200) {
-          var data = xhr.responseXML;
-          if (noisy) { console.dir(data); }
-          sendResponse(data);
-        }
-      }
-      xhr.send();
+    } else if (request.action === msgBackEcho) {
+      // if (noisyDev) { log('bg ceom', msgBackEcho, 'request.data:', request.data); }
+      if (noisyAction) { log('. . .', request.data); }
+      sendResponse(request);
 
-    } else if (request.action === msg_f2b_delete_tag) {
-      if (log_site_url_on_tag_delete) { console.log('log_site_url_on_tag_delete: ' + request.url); }
-      if (log_pin_on_save) { console.log('log_pin_on_save:'); console.dir(request); }
+    } else if (request.action === msgBackDeletePin) {
+      sendResponse((new Pb(request.url)).deletePin(request.url));
 
-      var args = 'replace=yes';
-      args = args + '&url=' + encodeURIComponent(request.url);
-      if (request.description !== '') args = args + '&description=' + encodeURIComponent(request.description);
+    } else if (request.action === msgBackDeleteTag) {
+      sendResponse((new Pb(request.url)).deleteTag(request));
 
-      // args = args + '&tags=' + (tags + ' ' + value).replace(' ', '%20').replace('\n', '%20').replace('\r', '');
-      // args = args + '&tags=' + encodeURIComponent((request.tags ? request.tags : '') + (request.value ? ' ' + request.value : '') );
-      args = args + '&tags=' + encodeURIComponent(
-        (request.tags ? request.tags.filter(x => x != request.value).join(' ') : '')
-      );
-      // args = args + '&tags=' + request.tags.replace(request.value, '');
+    } else if (request.action === msgBackInhibitUrlAppend) {
+      sendResponse(gAuthSettings.inhibitUrl(request.inhibit));
 
-      if (request.time) args = args + '&dt=' + encodeURIComponent(request.time);
-      if (request.shared) args = args + '&shared=' + encodeURIComponent(request.shared);
-      if (request.toread) args = args + '&toread=' + encodeURIComponent(request.toread);
-      args = args + '&extended=' + encodeURIComponent(request.extended);
-      if (noisy) { console.log('args: ' + args); }
-      var pinurl = api_path + "posts/add?" + args + "&" + auth_token_set();
-      if (noisy_pinboard_url || log_pinurl_on_tag_delete) { console.log('pinurl: ' + pinurl); }
-      var xhr = new XMLHttpRequest(); 
-      xhr.open('POST', pinurl);
-      xhr.onreadystatechange = event => {
-        if (noisy) { console.log('background.js POST xhr.onreadystatechange()'); }
-        if (event.target.readyState == 4 && event.target.status == 200) {
-          var data = xhr.responseXML;
-          if (noisy) { console.dir(data); }
-          sendResponse(data);
-        }
-      }
-      xhr.send();
-
-    } else if (request.action === msg_f2b_inhibit_url_append) {
-      let settings = new Store('settings');
-      g_auth_settings = {
-        inhibit: (settings.get('inhibit') || '') + '\n' + request.inhibit,
-        token: settings.get('token') || ''
-      };
-      // g_auth_settings.inhibit = request.inhibit;
-      settings.set('inhibit', g_auth_settings.inhibit);
-      // if (log_auth_sent_to_fg) { console.log('g_auth_settings:'); console.dir(g_auth_settings); }
-      sendResponse(g_auth_settings);
-
-    } else if (request.action === msg_f2b_read_current) {
-      let url = sender.tab.url;
-      if (url_is_allowed(request, url, sendResponse)) {
-        // clean URL by removing trailing hash data
-        //
-        if (log_site_url_on_site_load) { console.log('url: ' + url); }
-        url = url.replace(/#.*$/, '');
-        if (log_site_url_on_site_load) { console.log('url: ' + url); }
+    } else if (request.action === msgBackReadCurrent) {
+      if (noisy) { log('bg', 'c.e.onMsg', 'action', 'msgBackReadCurrent', 'request:', request) }
+      let url = request.url;
+      let fgTabId = request.tabId;
+      if (urlIsAllowed(request, url, sendResponse)) {
+        url = urlForBookmark(url);
+        if (logSiteUrlOnSiteLoad) { log('url:', url) }
 
         // process url
         // 
-        read_current_tags(url).then(data => {
-          if (noisy) { console.log('background.js read_current_tags cb()\ndata:'); }
-          if (noisy) { console.dir(data); }
-          if (noisy) { console.log('background.js read_current_tags responding'); }
-          if (log_site_url_on_site_load) { console.log('url: ' + data.url); }
+        fetchPinForUrl(url).then(data => {
+          if (logPinOnLoad) { log('bg', 'c.e.onMsg', 'fetchPinForUrl', 'data:', data) }
 
-          let response = Object.assign(
-            // {},
-            {
-              description: data.description || request.title,
-              time: data.time || "",
-              hash: data.hash || "",
-              extended: data.extended || "",
-              tags: data.tags || [],
-              shared: data.shared || "",
-              toread: data.toread || "",
-              url: data.url || ""
-            }
-          );
-          if (log_pin_on_load) { console.log('log_pin_on_load:'); console.dir(response); }
-          sendResponse(response);
+          // normalize binary values
+          //
+          if (data.shared !== 'yes' && data.shared !== 'no') data.shared = 'yes';
+          if (data.toread !== 'yes' && data.toread !== 'no') data.toread = 'no';
 
-          if (noisy) { console.log('<- background.js read_current_tags cb()'); }
+          let pin = minEmpty(data, request.title);
+          if (logPinOnLoad) { log('logPinOnLoad:', pin) }
+          if (setIconOnLoad) {
+            if (noisy) { log('data:', data, 'sender:', sender, 'fgTabId:', fgTabId) }
+            paintBadge(fgTabId, pin.hash.length > 0, pin.tags.length, pin.shared, pin.toread);
+          }
+          sendResponse(pin);
+
+          if (noisy) { console.log('<- background.js fetchPinForUrl cb()'); }
         })
         .catch(error => {
-          console.log('bg.js 199 error: ' + error.toString());
-          sendResponse({
-            description: "",
-            time: "",
-            hash: "",
-            extended: "",
-            tags: [],
-            shared: "",
-            toread: "",
-            url: ""
-          });
+          console.log('bg msg error: ' + error.toString());
+          sendResponse(newPin());
         });
       }
 
-    } else if (request. action === msg_f2b_read_options) {
-      let settings = new Store('settings');
-      g_auth_settings = {
-        inhibit: settings.get('inhibit') || '',
-        token: settings.get('token') || ''
-      };
-      if (log_auth_sent_to_fg) { console.log('g_auth_settings:'); console.dir(g_auth_settings); }
-      sendResponse(g_auth_settings);
+    } else if (request.action === msgBackReadOptions) {
+      sendResponse(gAuthSettings.getOptions());
 
-    // } else if (request.action === msg_f2b_read_pin) {
-    //     sendResponse({});
-    } else if (request.action === msg_f2b_read_pin) {
-      let url = sender.tab.url;
-      if (url_is_allowed(request, url, sendResponse)) {
-        // clean URL by removing trailing hash data
-        //
-        if (log_site_url_on_site_load) { console.log('url: ' + url); }
-        url = url.replace(/#.*$/, '');
-        if (log_site_url_on_site_load) { console.log('url: ' + url); }
+    } else if (request.action === msgBackSearchTitleText) {
+if (noisy) { log('request.action:', request.action, 'lastSearchText:', lastSearchText) }
+      sendResponse(lastSearchText);
 
-        // sendResponse({});
+    } else if (request.action === msgBackReadPin) {
+      // let url = sender.tab.url;
+      let url = request.url;
+      if (urlIsAllowed(request, url, sendResponse)) {
+        (async () => {
+          // clean URL by removing trailing hash data
+          // process url
+          // 
+          sendResponse(await getPinForUrl(urlForBookmark(url), request.title));
+        })();
+      }
 
-        // process url
-        // 
-if (noisy) { console.log("bg.js 84"); }
-let er = {
-  description: "",
-  time: "",
-  hash: "",
-  extended: "",
-  tags: [],
-  shared: "",
-  toread: "",
-  url: ""
-};
+    } else if (request.action === msgBackReadRecent) {
+      if (noisy) { log(msgBackReadRecent, 'request:', request); }
+      (new Action(request)).readRecentTags(sender.tab.url, sendResponse);
 
-//           read_current_tags(url).then(data => {
-// if (noisy) { console.log("bg.js 97"); }
-//             sendResponse(er);
-//           })
-//           .catch(error => {
-// if (noisy) { console.log("bg.js 101"); }
-//             sendResponse(er);
-//           });
-// if (noisy) { console.log("bg.js 104"); }
+    } else if (request.action === msgBackSaveTag) {
+log('request:', request)
+      sendResponse((new Pb(request.url)).saveTag(request));
 
+    } else if (request.action === msgBackSearchTitle) {
+      if (noisy) { log('bg', 'c.e.onMsg', msgBackSearchTitle) }
+      let cnt;
+      if (request.value === undefined) {
+        cnt = backSearchTitleRepeat();
+      } else {
+        cnt = backSearchTitle(request.tabId, request.value);
+      }
+      if (noisy) { log('bg', 'c.e.onMsg', msgBackSearchTitle, 'cnt:', cnt) }
+      sendResponse(cnt) //tabId);this.spanSearchCount
 
-        read_current_tags(url).then(data => {
-if (noisy) { console.log("bg.js 86"); }
-          // sendResponse({});
+    } else if (request.action === msgBackDev) {
+      // dev
+      //
+      if (noisyDev) { log(' * * *', 'bg ceom', 'request:', request) }
+      if (false) {
+        chrome.tabs.query({active: false, currentWindow: true}, tabs => {
+          tabs.forEach(tab => {
+            if (noisyDev) { log(' * * *', 'bg ceom', 'tab:', tab, 'tab title:', tab.title) }
 
-          if (noisy) { console.log('background.js read_current_tags cb()\ndata:'); }
-          if (noisy) { console.dir(data); }
-          if (noisy) { console.log('background.js read_current_tags responding'); }
-          if (log_site_url_on_site_load) { console.log('url: ' + data.url); }
+            // chrome.tabs.remove(tab.id, () => {})
 
-          let response = Object.assign(
-            {
-              description: data.description || request.title || "",
-              time: data.time || "",
-              hash: data.hash || "",
-              extended: data.extended || "",
-              tags: data.tags || [],
-              shared: data.shared || "",
-              toread: data.toread || "",
-              url: data.url || ""
+            if (true) {
+              sendToTab(tab.id, {
+                message: msgTabCloseIfToRead,
+                pin: pin,
+                tabId: tabId
+              })
             }
-          );
-          if (log_pin_on_load) { console.log('log_pin_on_load:'); console.dir(response); }
-          sendResponse(response);
-
-          if (noisy) { console.log('<- background.js read_current_tags cb()'); }
-        })
-        .catch(error => {
-if (noisy) { console.log("bg.js 111"); }
-          console.log('bg.js 199 error: ' + error.toString());
-          sendResponse({
-            description: "",
-            time: "",
-            hash: "",
-            extended: "",
-            tags: [],
-            shared: "",
-            toread: "",
-            url: ""
-          });
+          })
         });
+        sendResponse(tabId);
       }
-
-    } else if (request.action === msg_f2b_read_recent) {
-      if (noisy) { console.log(msg_f2b_read_recent + ' request:'); console.dir(request); }
-      read_recent_tags(request.description, request.time, request.extended, request.shared, request.tags, request.toread, sender.tab.url)
-        .then(data => {
-          if (noisy) { console.log('background.js ' + msg_f2b_read_recent + ' cb()\ndata:'); }
-          if (noisy) { console.dir(data); }
-          if (noisy) { console.log('background.js ' + msg_f2b_read_recent + ' responding'); }
-          sendResponse(Object.assign(
-            {
-              description: request.description || "",
-              time: request.time || "",
-              hash: request.hash || "",
-              extended: request.extended || "",
-              shared: request.shared || "",
-              tags: request.tags || "",
-              toread: request.toread || "",
-              url: request.url || ""
-            },
-            data));
-          if (noisy) { console.log('<- background.js ' + msg_f2b_read_recent + ' cb()'); }
-        });
-
-    } else if (request.action === msg_f2b_save_tag) {
-      // alert('@' + value);
-      if (log_site_url_on_pin_save) { console.log('site_url_on_pin_save: ' + request.url); }
-      if (log_pin_on_save) { console.log('log_pin_on_save:'); console.dir(request); }
-
-      if (request.value) {
-        let trt = new ThrottledRecentTags();
-        console.log('trt bg.js 292')
-        trt.appendTag(request.value);
-      }
- 
-      var args = 'replace=yes';
-      args = args + '&url=' + encodeURIComponent(request.url);
-      if (request.description !== '') args = args + '&description=' + encodeURIComponent(request.description);
-      // args = args + '&tags=' + (tags + ' ' + value).replace(' ', '%20').replace('\n', '%20').replace('\r', '');
-      args = args + '&tags=' + encodeURIComponent(
-        (request.tags ? request.tags : '') + (request.value ? ' ' + request.value : '')
-      );
-      if (request.time) args = args + '&dt=' + encodeURIComponent(request.time);
-      if (request.shared) args = args + '&shared=' + encodeURIComponent(request.shared);
-      if (request.toread) args = args + '&toread=' + encodeURIComponent(request.toread);
-      args = args + '&extended=' + encodeURIComponent(request.extended);
-      if (noisy) { console.log('args: ' + args); }
-      var pinurl = api_path + "posts/add?" + args + "&" + auth_token_set();
-      if (noisy_pinboard_url) { console.log('pinurl: ' + pinurl); }
-      var xhr = new XMLHttpRequest(); 
-      xhr.open('POST', pinurl);
-      xhr.onreadystatechange = event => {   
-        if (noisy) { console.log('background.js POST xhr.onreadystatechange()'); }
-        if (event.target.readyState == 4 && event.target.status == 200) {
-          var data = xhr.responseXML;
-          if (noisy) { console.dir(data); }
-          sendResponse(data);
-        }
-      }
-      xhr.send();
-
     } else {
 if (noisy) { console.log("bg.js 127"); }
       console.error('unrecognized request.action: ' + request.action);
@@ -326,98 +449,96 @@ if (noisy) { console.log("bg.js 127"); }
   }
 );
 
-class ThrottledRecentTags {
-  tags;
-  timestamp;
+if (false) { // deprecated
+  // Fired when a request is sent from either an extension process or a content script.
+  //
+  chrome.extension.onRequest.addListener((request, sender, sendResponse) => {
+    if (noisy) { log('bg', 'ceor', 'onRequest') }
+  });
 
-  constructor() {
-console.log('ThrottledRecentTags constructor()');
-    let settings = new Store('settings');
-    this.recentTagTimestamp = settings.get('recentTagsTimestamp');
-console.log('this.recentTagTimestamp:' + this.recentTagTimestamp);
-    this.tags = settings.get('recentTags');
-console.log('this.tags:' + this.tags);
-  }
+  // Fired when a request is sent from another extension.
+  //
+  chrome.extension.onRequestExternal.addListener((request, sender, sendResponse) => {
+    if (noisy) { log('bg', 'ce', 'onRequestExternal') }
+  });
 
-  get delaySeconds() {
-    return 60;
-  }
+  // Fired when a connection is made from either an extension process or a content script (by connect).
+  //
+  chrome.runtime.onConnect.addListener(port => {
+    if (noisy) { log('bg', 'cr', 'onConnect', 'port:', port) }
+  });
 
-  appendTag(tag) {
-    let settings = new Store('settings');
-    this.timestamp = settings.get('recentTagsTimestamp');
-    this.tags = settings.get('recentTags');
+  // Fired when a connection is made from another extension (by connect).
+  //
+  chrome.runtime.onConnectExternal.addListener(port => {
+    if (noisy) { log('bg', 'cr', 'onConnectExternal', 'port:', port) }
+  });
 
-    // prepend new tag, remove duplicates
-    this.tags = [tag].concat(this.tags.filter(t => t !== tag));
+  // Fired when the extension is first installed, when the extension is updated to a new version, and when Chrome is updated to a new version.Fired when the extension is first installed, when the extension is updated to a new version, and when Chrome is updated to a new version.
+  //
+  chrome.runtime.onInstalled.addListener(details => {
+    if (noisy) { log('bg', 'cr', 'onInstalled', 'details:', details) }
+    // chrome.contextMenus.create({
+    //   "id": "sampleContextMenu",
+    //   "title": "Sample Context Menu",
+    //   "contexts": ["selection"]
+    // });
+  });
 
-    this.timestamp = Date.now();
-    console.log('ThrottledRecentTags.appendTag this.timestamp: ' + this.timestamp);
-    console.log('ThrottledRecentTags.appendTag this.tags: ' + this.tags);
-    settings.set('recentTagsTimestamp', this.timestamp);
-    settings.set('recentTags', this.tags);
-  }
+  // Fired when a message is sent from either an extension process (by sendMessage) or a content script (by tabs.sendMessage).
+  //
+  chrome.runtime.onMessage.addListener((message, sender, senderResponse) => {
+    if (noisyBackgroundChromeRuntimeOnMessageListener) { log('bg', 'cr', 'onMessage') }
+  });
 
-  async readTags(description, time, extended, shared, tags, toread, url) {
-    console.log('ThrottledRecentTags readTags()');
-    return new Promise((resolve, reject) => {
-      let now = Date.now();
-      console.log('ThrottledRecentTags.readTags now: ' + now);
+  // Fired when a message is sent from another extension/app (by sendMessage). Cannot be used in a content script.
+  //
+  chrome.runtime.onMessageExternal.addListener((message, sender, senderResponse) => {
+    if (noisy) { log('bg', 'cr', 'onMessageExternal') }
+  });
 
-      let settings = new Store('settings');
-      this.timestamp = settings.get('recentTagsTimestamp');
-      console.log('ThrottledRecentTags.readTags this.timestamp: ' + this.timestamp);
-      this.tags = settings.get('recentTags');
-      console.log('ThrottledRecentTags.readTags this.tags: ' + this.tags);
+  // Fired when a profile that has this extension installed first starts up. This event is not fired when an incognito profile is started, even if this extension is operating in 'split' incognito mode.
+  //
+  chrome.runtime.onStartup.addListener(() => {
+    if (noisy) { log('bg', 'cr', 'onStartup') }
+  });
 
-      if ((typeof this.timestamp !== 'undefined') && (this.timestamp !== null)) {
-        let diff = (now - this.timestamp) / 1000;
-        console.log('ThrottledRecentTags.readTags diff: ' + diff);
-      }
+  // Sent to the event page just before it is unloaded.
+  //
+  chrome.runtime.onSuspend.addListener(() => {
+    if (noisy) { log('bg', 'cr', 'onSuspend') }
+    // chrome.storage.local.set({variable: '2'});
+    // chrome.browserAction.setBadgeText({text: ""});
+  });
 
-      if ((typeof this.timestamp === 'undefined')
-          || (this.timestamp === null) 
-          || (((now - this.timestamp) / 1000) > this.delaySeconds)) {
-        if (log_throttled_get_fresh) { console.log('ThrottledRecentTags readTags get new'); }        
-        this.timestamp = now;
-        // this.tags = [1];
-        let pb = new Pb(url);
-        pb.read_recent(description, time, extended, shared, tags, toread, url).then(data => {
-          // if (noisy) { console.log('src/bg/pinboard.js read_recent_tags\ndata:'); console.dir(data); }
-          this.tags = Object.assign([], data.tags);
-          settings.set('recentTagsTimestamp', this.timestamp);
-          settings.set('recentTags', this.tags);
-          console.log('ThrottledRecentTags return tags: ' + this.tags);
-          resolve(data);
-          // console.log("src/bg/pinboard.js pb.getUrl");
-          // console.log(pb.getUrl());
+  // Sent after onSuspend to indicate that the app won't be unloaded after all.
+  //
+  chrome.runtime.onSuspendCanceled.addListener(() => {
+    if (noisy) { log('bg', 'cr', 'onSuspendCanceled') }
+  });
 
-          // console.log("src/bg/pinboard.js pb.getPost");
-          // let pp = pb.getPost();
-          // console.log("src/bg/pinboard.js pp");
-          // console.dir(pp);
-          // resolve(pp);
-        })
-        .catch(error => {
-            { console.log('src/bg/pinboard.js read_recent_tags\n error:'); console.dir(error); }
-          reject(error)
-        });
-      } else {
-        if (log_throttled_get_cache) {
-          console.log('ThrottledRecentTags readTags return existing');
-          console.log('ThrottledRecentTags return tags: ' + this.tags);
-        }
-        resolve({
-          description: description,
-          time: time,
-          hash: '',
-          extended: extended,
-          shared: shared,
-          tags: this.tags,
-          toread: toread,
-          url: url
-        });
-      }
-    });
-  }
+  //
+  //
+  chrome.runtime.onUpdateAvailable.addListener(details => {
+    if (noisy) { log('bg', 'cr', 'onUpdateAvailable') }
+  });
+
+  // this will run when a bookmark is created
+  //
+  chrome.bookmarks.onCreated.addListener(() => {
+    if (noisy) { log('bg', 'cb', 'onCreated') }
+  });
+
+  // chrome.storage.local.set({ variable: '1' });
+  chrome.webNavigation.onCompleted.addListener(function() {
+    alert("This is my favorite website!");
+  }, {url: [{urlMatches : 'http://fareed.org/'}]});
 }
+
+// chrome.runtime.onMessage.addListener(function(message, sender, reply) {
+//   chrome.runtime.onMessage.removeListener(event);
+// });
+
+const gAuthSettings = new AuthSettings();
+
+if (noisy) { console.log('bg', 'EOF'); }

@@ -1,0 +1,7 @@
+src/options_custom/js/classes/fancy-settings.js
+src/options_custom/js/classes/search.js
+src/options_custom/js/classes/setting.js
+src/options_custom/js/i18n.js
+src/options_custom/lib/mootools-core.js
+src/shared/browser-polyfill.js
+src/shared/jquery*.js
