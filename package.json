@@ -1,18 +1,30 @@
 {
   "name": "hoverboard",
   "version": "1.0.0",
-  "description": "A tagging interface for Pinboard.",
-  "main": "src/browser_action/browser_action.js",
+  "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run build:dev",
+    "build:dev": "npm run validate && cp manifest.v3.json dist/manifest.json",
+    "build:prod": "npm run validate && npm run minify && cp manifest.v3.json dist/manifest.json",
+    "validate": "npm run lint && npm run validate:manifest",
+    "lint": "eslint src-new/**/*.js",
+    "lint:fix": "eslint src-new/**/*.js --fix",
+    "validate:manifest": "node scripts/validate-manifest.js",
+    "minify": "echo 'Minification placeholder - add webpack/rollup if needed'",
+    "dev": "npm run build:dev && npm run watch",
+    "watch": "chokidar 'src-new/**/*' manifest.v3.json -c 'npm run build:dev'",
+    "test": "echo 'Tests will be added in Phase 4'",
+    "clean": "rm -rf dist/*"
   },
   "author": "Fareed Stevenson",
   "license": "ISC",
   "devDependencies": {
-    "eslint": "^7.16.0",
-    "eslint-config-standard": "^16.0.2",
-    "eslint-plugin-import": "^2.22.1",
+    "eslint": "^8.0.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1"
+    "eslint-plugin-promise": "^6.0.0",
+    "chokidar-cli": "^3.0.0"
   }
 }
