@@ -1,0 +1,68 @@
+{
+  "manifest_version": 3,
+  "name": "Hoverboard",
+  "version": "1.0.0",
+  "author": "Fareed Stevenson",
+  "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
+  
+  "background": {
+    "service_worker": "src/core/service-worker.js"
+  },
+  
+  "action": {
+    "default_icon": {
+      "16": "icons/hoverboard_16.png",
+      "48": "icons/hoverboard_48.png",
+      "128": "icons/hoverboard_128.png"
+    },
+    "default_popup": "src/ui/popup/popup.html",
+    "default_title": "Hoverboard - Pinboard Integration"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": [
+        "src/ui/styles/content.css"
+      ],
+      "js": [
+        "src/features/content/content-main.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "options_page": "src/ui/options/options.html",
+  
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "contextMenus",
+    "scripting"
+  ],
+  
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  
+  "icons": {
+    "16": "icons/hoverboard_16.png",
+    "48": "icons/hoverboard_48.png",
+    "128": "icons/hoverboard_128.png"
+  },
+  
+  "default_locale": "en",
+  
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/ui/styles/*.css",
+        "icons/*.png",
+        "icons/*.svg"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ]
+} 
