@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Transparency Controls - Hoverboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .content {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .test-button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-button:hover {
+            background: #005a9e;
+        }
+        .instructions {
+            background: #f0f8ff;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+            margin: 20px 0;
+        }
+        .feature-list {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .feature-list h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .feature-list ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .feature-list li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>🎨 Hoverboard Transparency Controls Test</h1>
+        
+        <div class="instructions">
+            <h3>📋 How to Test the Transparency Controls:</h3>
+            <ol>
+                <li><strong>Load Extension:</strong> Make sure the Hoverboard extension is loaded in your browser</li>
+                <li><strong>Trigger Overlay:</strong> Click "Show Hoverboard Overlay" button below</li>
+                <li><strong>Find Controls:</strong> Look for the transparency controls section in the overlay (labeled "👁️ Overlay:")</li>
+                <li><strong>Test Modes:</strong> Click the transparency mode buttons (●, ◐, ○)</li>
+                <li><strong>Adjust Opacity:</strong> Use the opacity slider for fine-tuning (when not in opaque mode)</li>
+            </ol>
+        </div>
+
+        <div class="feature-list">
+            <h3>🎯 Expected Transparency Controls Features:</h3>
+            <ul>
+                <li><strong>Mode Buttons:</strong> Three buttons for Opaque (●), Nearly Transparent (◐), and Fully Transparent (○)</li>
+                <li><strong>Opacity Slider:</strong> Appears when transparent modes are selected</li>
+                <li><strong>Real-time Updates:</strong> Changes apply immediately to the overlay</li>
+                <li><strong>Visual Feedback:</strong> Active mode button is highlighted in blue</li>
+                <li><strong>Percentage Display:</strong> Shows current opacity percentage</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="test-button" onclick="triggerHoverboard()">
+                🚀 Show Hoverboard Overlay
+            </button>
+            <button class="test-button" onclick="hideHoverboard()">
+                ❌ Hide Overlay
+            </button>
+        </div>
+
+        <div class="feature-list">
+            <h3>🔧 What the Controls Should Do:</h3>
+            <ul>
+                <li><strong>Opaque Mode (●):</strong> Makes overlay fully visible (normal behavior)</li>
+                <li><strong>Nearly Transparent (◐):</strong> Makes overlay very transparent (~5% opacity by default)</li>
+                <li><strong>Fully Transparent (○):</strong> Makes overlay almost invisible (~1% opacity by default)</li>
+                <li><strong>Opacity Slider:</strong> Fine-tune transparency from 1% to 100%</li>
+                <li><strong>Hover Enhancement:</strong> Overlay becomes more visible when you hover over it</li>
+            </ul>
+        </div>
+
+        <p style="background: #fff3cd; padding: 10px; border-radius: 5px; border-left: 4px solid #ffc107;">
+            <strong>Note:</strong> The transparency controls are now embedded directly within the overlay itself, 
+            not in the extension popup. Look for the gray section with transparency buttons when the overlay appears.
+        </p>
+
+        <h2>📖 Sample Content for Testing</h2>
+        <p>This page provides sample content to test the Hoverboard overlay transparency controls. 
+        The overlay should appear at the bottom of the page when triggered, and you should be able 
+        to adjust its transparency using the built-in controls.</p>
+        
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt 
+        ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco 
+        laboris nisi ut aliquip ex ea commodo consequat.</p>
+        
+        <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat 
+        nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia 
+        deserunt mollit anim id est laborum.</p>
+    </div>
+
+    <script>
+        function triggerHoverboard() {
+            // Simulate extension trigger - in real usage, this would be handled by the extension
+            console.log('Triggering Hoverboard overlay...');
+            
+            // Send message to content script if available
+            if (window.postMessage) {
+                window.postMessage({ type: 'SHOW_HOVERBOARD_TEST' }, '*');
+            }
+            
+            // For manual testing, you can also press the extension button or use keyboard shortcuts
+            alert('Click the Hoverboard extension icon or use the keyboard shortcut to show the overlay with transparency controls!');
+        }
+        
+        function hideHoverboard() {
+            console.log('Hiding Hoverboard overlay...');
+            if (window.postMessage) {
+                window.postMessage({ type: 'HIDE_HOVERBOARD_TEST' }, '*');
+            }
+        }
+        
+        // Add some visual feedback
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎨 Transparency Controls Test Page Loaded');
+            console.log('Ready to test Hoverboard transparency controls!');
+        });
+    </script>
+</body>
+</html> 

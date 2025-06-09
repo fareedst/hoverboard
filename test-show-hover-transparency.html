@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Show Hover Transparency Test</title>
+  <!-- ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system -->
+  <link rel="stylesheet" href="src/features/content/overlay-styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: white;
+    }
+    
+    .test-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .demo-buttons {
+      display: flex;
+      gap: 15px;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+    
+    .demo-button {
+      padding: 12px 24px;
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background-color 0.2s;
+    }
+    
+    .demo-button:hover {
+      background: #45a049;
+    }
+    
+    .demo-button.secondary {
+      background: #2196F3;
+    }
+    
+    .demo-button.secondary:hover {
+      background: #1976D2;
+    }
+    
+    .status {
+      margin: 15px 0;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 5px;
+      font-family: monospace;
+    }
+    
+    .test-content {
+      margin: 30px 0;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 8px;
+      border-left: 4px solid #4CAF50;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <h1>🚀 Show Hover Transparency Test</h1>
+    
+    <div class="test-content">
+      <h2>Test Instructions</h2>
+      <ol>
+        <li><strong>Load Extension</strong>: Make sure Hoverboard extension is loaded in your browser</li>
+        <li><strong>Test Show Hover</strong>: Click the "Show Hover" button in the Hoverboard popup</li>
+        <li><strong>Compare Overlays</strong>: The overlay should now be transparent and positioned at the bottom</li>
+        <li><strong>Test Transparency</strong>: Use the buttons below to test different transparency modes</li>
+      </ol>
+    </div>
+    
+    <div class="demo-buttons">
+      <button class="demo-button" onclick="simulateShowHover()">Simulate Show Hover Overlay</button>
+      <button class="demo-button secondary" onclick="toggleTransparencyMode()">Toggle Transparency</button>
+      <button class="demo-button secondary" onclick="togglePositionMode()">Toggle Position</button>
+      <button class="demo-button secondary" onclick="hideOverlay()">Hide Overlay</button>
+    </div>
+    
+    <div class="status" id="status">
+      Status: Ready to test transparency features
+    </div>
+    
+    <div class="test-content">
+      <h2>Expected Behavior</h2>
+      <ul>
+        <li><strong>Nearly Transparent</strong>: Overlay should be 95% transparent with subtle blur effect</li>
+        <li><strong>Bottom Fixed</strong>: Overlay should span full width at bottom of viewport</li>
+        <li><strong>Hover Enhancement</strong>: Overlay should become more visible on mouse hover</li>
+        <li><strong>Adaptive Visibility</strong>: Overlay should respond to mouse proximity</li>
+      </ul>
+      
+      <h2>Technical Details</h2>
+      <ul>
+        <li><strong>Transparency Mode</strong>: <code>nearly-transparent</code> (95% transparent)</li>
+        <li><strong>Position Mode</strong>: <code>bottom-fixed</code> (full width at bottom)</li>
+        <li><strong>Opacity Levels</strong>: Normal: 0.05, Hover: 0.15, Focus: 0.25</li>
+        <li><strong>Blur Effect</strong>: 2px backdrop blur for depth</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module">
+    // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
+    // Import the actual overlay manager for testing
+    import { OverlayManager } from './src/features/content/overlay-manager.js';
+    
+    let overlayManager;
+    let currentTransparencyMode = 'nearly-transparent';
+    let currentPositionMode = 'bottom-fixed';
+    
+    // Initialize overlay manager with transparency settings
+    function initializeOverlayManager() {
+      overlayManager = new OverlayManager(document, {
+        overlayPosition: 'top-right',
+        messageTimeout: 3000,
+        showRecentTags: true,
+        maxRecentTags: 10,
+        overlayAnimations: true,
+        overlayDraggable: false,
+        // Transparency settings
+        overlayTransparencyMode: currentTransparencyMode,
+        overlayPositionMode: currentPositionMode,
+        overlayOpacityNormal: 0.05,
+        overlayOpacityHover: 0.15,
+        overlayOpacityFocus: 0.25,
+        overlayAdaptiveVisibility: true,
+        overlayBlurAmount: 2
+      });
+      
+      // Set transparency properties
+      overlayManager.transparencyMode = currentTransparencyMode;
+      overlayManager.positionMode = currentPositionMode;
+      overlayManager.adaptiveVisibility = true;
+      
+      updateStatus(`Overlay manager initialized with ${currentTransparencyMode} mode`);
+    }
+    
+    // Simulate the Show Hover functionality
+    window.simulateShowHover = function() {
+      if (!overlayManager) {
+        initializeOverlayManager();
+      }
+      
+      // Simulate bookmark data
+      const mockBookmark = {
+        url: window.location.href,
+        description: 'Test Bookmark for Transparency Demo',
+        tags: ['test', 'transparency', 'ui-005'],
+        extended: 'This is a test bookmark to demonstrate the transparent overlay functionality. The overlay should be nearly transparent with bottom-fixed positioning.',
+        hash: 'abc123',
+        shared: 'no',
+        toread: 'no'
+      };
+      
+      overlayManager.show({
+        bookmark: mockBookmark,
+        pageTitle: document.title,
+        pageUrl: window.location.href,
+        tabId: 1,
+        userTriggered: true
+      });
+      
+      updateStatus(`Show Hover overlay displayed with ${currentTransparencyMode} transparency`);
+    };
+    
+    // Toggle transparency mode
+    window.toggleTransparencyMode = function() {
+      const modes = ['nearly-transparent', 'fully-transparent', 'opaque'];
+      const currentIndex = modes.indexOf(currentTransparencyMode);
+      currentTransparencyMode = modes[(currentIndex + 1) % modes.length];
+      
+      if (overlayManager) {
+        overlayManager.transparencyMode = currentTransparencyMode;
+        overlayManager.config.overlayTransparencyMode = currentTransparencyMode;
+        
+        // Re-apply transparency if overlay is visible
+        if (overlayManager.isVisible) {
+          overlayManager.applyTransparencyMode();
+        }
+      }
+      
+      updateStatus(`Transparency mode changed to: ${currentTransparencyMode}`);
+    };
+    
+    // Toggle position mode
+    window.togglePositionMode = function() {
+      const modes = ['default', 'bottom-fixed'];
+      const currentIndex = modes.indexOf(currentPositionMode);
+      currentPositionMode = modes[(currentIndex + 1) % modes.length];
+      
+      if (overlayManager) {
+        overlayManager.positionMode = currentPositionMode;
+        overlayManager.config.overlayPositionMode = currentPositionMode;
+        
+        // Re-apply positioning if overlay is visible
+        if (overlayManager.isVisible) {
+          overlayManager.applyBottomFixedPositioning();
+        }
+      }
+      
+      updateStatus(`Position mode changed to: ${currentPositionMode}`);
+    };
+    
+    // Hide overlay
+    window.hideOverlay = function() {
+      if (overlayManager && overlayManager.isVisible) {
+        overlayManager.hide();
+        updateStatus('Overlay hidden');
+      } else {
+        updateStatus('No overlay to hide');
+      }
+    };
+    
+    // Update status display
+    function updateStatus(message) {
+      const statusElement = document.getElementById('status');
+      const timestamp = new Date().toLocaleTimeString();
+      statusElement.textContent = `[${timestamp}] ${message}`;
+    }
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      updateStatus('Page loaded - Ready to test Show Hover transparency');
+    });
+  </script>
+</body>
+</html> 

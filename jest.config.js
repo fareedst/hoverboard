@@ -19,10 +19,10 @@ export default {
   
   // Coverage configuration
   collectCoverageFrom: [
-    'src-new/**/*.js',
-    '!src-new/**/*.test.js',
-    '!src-new/**/*.integration.test.js',
-    '!src-new/**/*.e2e.test.js',
+    'src/**/*.js',
+    '!src/**/*.test.js',
+    '!src/**/*.integration.test.js',
+    '!src/**/*.e2e.test.js',
     '!**/node_modules/**'
   ],
   
@@ -39,7 +39,7 @@ export default {
   
   // Module name mapping for aliases
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/src-new/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1'
   },
   

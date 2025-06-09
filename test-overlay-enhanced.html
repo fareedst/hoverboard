@@ -234,6 +234,32 @@
             <button class="btn danger" onclick="clearData()">🗑️ Clear Data</button>
             <button class="btn secondary" onclick="toggleDebug()">🐛 Toggle Debug</button>
         </div>
+
+        <!-- ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system -->
+        <div class="input-group" style="margin-top: 20px;">
+            <label>🎨 Transparency Mode (UI-005 Feature):</label>
+            <div class="controls-row">
+                <button class="btn" onclick="setTransparencyMode('opaque')" id="opaque-btn">🔳 Opaque (Default)</button>
+                <button class="btn" onclick="setTransparencyMode('nearly-transparent')" id="transparent-btn">🔲 Nearly Transparent</button>
+                <button class="btn" onclick="setTransparencyMode('fully-transparent')" id="invisible-btn">⬜ Fully Transparent</button>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>📍 Position Mode:</label>
+            <div class="controls-row">
+                <button class="btn secondary" onclick="setPositionMode('default')" id="default-pos-btn">📌 Default Position</button>
+                <button class="btn secondary" onclick="setPositionMode('bottom-fixed')" id="bottom-pos-btn">⬇️ Bottom Fixed</button>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>🎯 Adaptive Features:</label>
+            <div class="controls-row">
+                <button class="btn secondary" onclick="toggleAdaptiveVisibility()" id="adaptive-btn">👁️ Toggle Adaptive Visibility</button>
+                <button class="btn secondary" onclick="testProximityEffect()" id="proximity-btn">🖱️ Test Proximity Effect</button>
+            </div>
+        </div>
         
         <details style="margin-top: 20px;">
             <summary style="cursor: pointer; font-weight: 600; color: #007cba;">Current Bookmark Data</summary>
@@ -519,10 +545,23 @@
             testArea.innerHTML = '';
             
             const overlay = createOverlayElement();
+            
+            // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
+            // Apply current transparency and positioning settings
+            applyTransparencyToOverlay(overlay, transparencyMode);
+            applyPositioningToOverlay(overlay, positionMode);
+            
+            // Setup adaptive visibility if enabled
+            if (adaptiveVisibility) {
+                setupProximityDetection();
+            }
+            
             testArea.appendChild(overlay);
             
             debugLog('Overlay shown with data', currentBookmark);
-            showStatus('Overlay displayed successfully', 'success', 2000);
+            debugLog('Applied transparency mode', transparencyMode);
+            debugLog('Applied position mode', positionMode);
+            showStatus(`Overlay displayed with ${transparencyMode} transparency and ${positionMode} positioning`, 'success', 3000);
         }
         
         function hideOverlay() {
@@ -809,6 +848,193 @@
             debugMode = !debugMode;
             showStatus(`Debug mode ${debugMode ? 'enabled' : 'disabled'}`, 'info', 2000);
             console.log(`Hoverboard debug mode: ${debugMode}`);
+        }
+
+        // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
+        // Global transparency settings
+        let transparencyMode = 'opaque';
+        let positionMode = 'default';
+        let adaptiveVisibility = false;
+
+        function setTransparencyMode(mode) {
+            transparencyMode = mode;
+            
+            // Update button states
+            document.querySelectorAll('[id$="-btn"]').forEach(btn => {
+                if (btn.id.includes('opaque') || btn.id.includes('transparent') || btn.id.includes('invisible')) {
+                    btn.classList.remove('success');
+                }
+            });
+            
+            const activeBtn = document.getElementById(mode === 'opaque' ? 'opaque-btn' : 
+                                                   mode === 'nearly-transparent' ? 'transparent-btn' : 'invisible-btn');
+            if (activeBtn) activeBtn.classList.add('success');
+            
+            // Apply transparency to existing overlay
+            const overlay = document.getElementById('overlay');
+            if (overlay) {
+                applyTransparencyToOverlay(overlay, mode);
+            }
+            
+            showStatus(`Transparency mode: ${mode}`, 'success', 2000);
+            debugLog('Transparency mode changed', mode);
+        }
+
+        function setPositionMode(mode) {
+            positionMode = mode;
+            
+            // Update button states
+            document.getElementById('default-pos-btn').classList.remove('success');
+            document.getElementById('bottom-pos-btn').classList.remove('success');
+            document.getElementById(mode === 'default' ? 'default-pos-btn' : 'bottom-pos-btn').classList.add('success');
+            
+            // Apply positioning to existing overlay
+            const overlay = document.getElementById('overlay');
+            if (overlay) {
+                applyPositioningToOverlay(overlay, mode);
+            }
+            
+            showStatus(`Position mode: ${mode}`, 'success', 2000);
+            debugLog('Position mode changed', mode);
+        }
+
+        function toggleAdaptiveVisibility() {
+            adaptiveVisibility = !adaptiveVisibility;
+            const btn = document.getElementById('adaptive-btn');
+            
+            if (adaptiveVisibility) {
+                btn.classList.add('success');
+                btn.textContent = '👁️ Adaptive Visibility ON';
+                setupProximityDetection();
+            } else {
+                btn.classList.remove('success');
+                btn.textContent = '👁️ Adaptive Visibility OFF';
+                removeProximityDetection();
+            }
+            
+            showStatus(`Adaptive visibility ${adaptiveVisibility ? 'enabled' : 'disabled'}`, 'info', 2000);
+            debugLog('Adaptive visibility toggled', adaptiveVisibility);
+        }
+
+        function testProximityEffect() {
+            const overlay = document.getElementById('overlay');
+            if (!overlay) {
+                showStatus('Show overlay first to test proximity effect', 'error', 3000);
+                return;
+            }
+            
+            // Simulate proximity effect
+            overlay.classList.add('proximity-active');
+            showStatus('Proximity effect activated! Move mouse away from bottom to deactivate.', 'info', 3000);
+            
+            setTimeout(() => {
+                overlay.classList.remove('proximity-active');
+            }, 3000);
+        }
+
+        // 🔺 UI-005: Transparency manager - 🔧 Opacity and positioning control
+        function applyTransparencyToOverlay(overlay, mode) {
+            // Remove existing transparency classes
+            overlay.classList.remove('hoverboard-overlay-transparent', 'hoverboard-overlay-invisible');
+            
+            switch (mode) {
+                case 'nearly-transparent':
+                    overlay.classList.add('hoverboard-overlay-transparent');
+                    overlay.style.background = 'rgba(255, 255, 255, 0.05)';
+                    overlay.style.backdropFilter = 'blur(2px)';
+                    overlay.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                    overlay.style.color = '#333333';
+                    break;
+                case 'fully-transparent':
+                    overlay.classList.add('hoverboard-overlay-invisible');
+                    overlay.style.background = 'transparent';
+                    overlay.style.backdropFilter = 'blur(1px)';
+                    overlay.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                    overlay.style.color = '#333333';
+                    break;
+                default: // opaque
+                    overlay.style.background = 'rgba(255,255,255,0.95)';
+                    overlay.style.backdropFilter = 'none';
+                    overlay.style.border = '2px solid #90ee90';
+                    overlay.style.color = '#333';
+                    break;
+            }
+        }
+
+        // 🔺 UI-005: Transparent overlay positioning - 🎨 Bottom-fixed transparency
+        function applyPositioningToOverlay(overlay, mode) {
+            overlay.classList.remove('hoverboard-overlay-bottom');
+            
+            if (mode === 'bottom-fixed') {
+                overlay.classList.add('hoverboard-overlay-bottom');
+                overlay.style.position = 'fixed';
+                overlay.style.bottom = '0';
+                overlay.style.left = '0';
+                overlay.style.width = '100vw';
+                overlay.style.maxWidth = 'none';
+                overlay.style.minWidth = '100vw';
+                overlay.style.height = 'auto';
+                overlay.style.minHeight = '48px';
+                overlay.style.maxHeight = '200px';
+                overlay.style.borderRadius = '0';
+                overlay.style.borderTop = '1px solid rgba(255, 255, 255, 0.2)';
+                overlay.style.borderLeft = 'none';
+                overlay.style.borderRight = 'none';
+                overlay.style.borderBottom = 'none';
+            } else {
+                // Reset to default positioning
+                overlay.style.position = 'fixed';
+                overlay.style.bottom = 'auto';
+                overlay.style.left = '20px';
+                overlay.style.top = '20px';
+                overlay.style.width = 'auto';
+                overlay.style.maxWidth = '400px';
+                overlay.style.minWidth = '300px';
+                overlay.style.height = 'auto';
+                overlay.style.minHeight = 'auto';
+                overlay.style.maxHeight = '80vh';
+                overlay.style.borderRadius = '6px';
+                overlay.style.border = '2px solid #90ee90';
+            }
+        }
+
+        // 🔶 UI-005: Adaptive visibility - 🎯 Context-aware transparency
+        let proximityListener = null;
+
+        function setupProximityDetection() {
+            if (proximityListener) {
+                document.removeEventListener('mousemove', proximityListener);
+            }
+            
+            proximityListener = (e) => {
+                const overlay = document.getElementById('overlay');
+                if (!overlay) return;
+                
+                const distanceFromBottom = window.innerHeight - e.clientY;
+                
+                if (distanceFromBottom < 100) {
+                    overlay.classList.add('proximity-active');
+                } else if (distanceFromBottom > 200) {
+                    overlay.classList.remove('proximity-active');
+                }
+            };
+            
+            document.addEventListener('mousemove', proximityListener);
+            debugLog('Proximity detection enabled');
+        }
+
+        function removeProximityDetection() {
+            if (proximityListener) {
+                document.removeEventListener('mousemove', proximityListener);
+                proximityListener = null;
+            }
+            
+            const overlay = document.getElementById('overlay');
+            if (overlay) {
+                overlay.classList.remove('proximity-active');
+            }
+            
+            debugLog('Proximity detection disabled');
         }
         
                 // Add additional overlay styles

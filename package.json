@@ -7,15 +7,16 @@
     "build": "npm run build:dev",
     "build:dev": "npm run validate && node scripts/build.js",
     "build:prod": "npm run validate && npm run minify && node scripts/build.js",
-    "build:sw": "esbuild src-new/core/service-worker.js --bundle --outfile=dist/src-new/core/service-worker.js --format=esm --platform=browser",
-    "build:options": "esbuild src-new/ui/options/options.js --bundle --outfile=dist/src-new/ui/options/options.js --format=esm --platform=browser",
+    "build:sw": "esbuild src/core/service-worker.js --bundle --outfile=dist/src/core/service-worker.js --format=esm --platform=browser",
+    "build:options": "esbuild src/ui/options/options.js --bundle --outfile=dist/src/ui/options/options.js --format=esm --platform=browser",
+    "build:content": "esbuild src/features/content/content-main.js --bundle --outfile=dist/src/features/content/content-main.js --format=iife --platform=browser",
     "validate": "npm run lint && npm run validate:manifest && npm run security:check",
-    "lint": "eslint src-new/**/*.js",
-    "lint:fix": "eslint src-new/**/*.js --fix",
+    "lint": "eslint src/**/*.js",
+    "lint:fix": "eslint src/**/*.js --fix",
     "validate:manifest": "node scripts/validate-manifest.js",
     "minify": "echo 'Minification placeholder - add webpack/rollup if needed'",
     "dev": "npm run build:dev && npm run watch",
-    "watch": "chokidar 'src-new/**/*' manifest.v3.json -c 'npm run build:dev'",
+    "watch": "chokidar 'src/**/*' manifest.json -c 'npm run build:dev'",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -65,7 +66,7 @@
     }
   },
   "lint-staged": {
-    "src-new/**/*.js": [
+    "src/**/*.js": [
       "eslint --fix",
       "jest --findRelatedTests --passWithNoTests"
     ]

@@ -1,82 +1,71 @@
 {
+  "manifest_version": 3,
   "name": "Hoverboard",
-  "version": "0.2.05.85",
+  "version": "1.0.0",
   "author": "Fareed Stevenson",
-  "description": "Hoverboard",
+  "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
+  
   "background": {
-    "persistent": false,
-    "scripts": [
-      "src/shared/browser-polyfill.js",
-      "src/shared/jquery-3.4.1.slim.min.js",
-      "src/shared/debug.js",
-      "src/shared/config.js",
-      "src/shared/console.js",
-      "src/shared/tools.js",
-      "src/options_custom/lib/store.js",
-      "src/bg/background.js",
-      "src/bg/throttled_recent_tags.js",
-      "src/bg/pinboard.js"
-    ]
+    "service_worker": "./src/core/service-worker.js",
+    "type": "module"
   },
-  "browser_action": {
-    "default_icon": "icons/hoverboard_19.png",
-    "default_popup": "src/browser_action/browser_action.html",
-    "default_title": "Hoverboard"
+  
+  "action": {
+    "default_icon": {
+      "16": "icons/hoverboard_16.png",
+      "19": "icons/hoverboard_19.png",
+      "32": "icons/hoverboard_32.png",
+      "48": "icons/hoverboard_48.png",
+      "128": "icons/hoverboard_128.png"
+    },
+    "default_popup": "./src/ui/popup/popup.html",
+    "default_title": "Hoverboard - Pinboard Integration"
   },
+  
   "content_scripts": [
     {
-      "matches": [
-        "<all_urls>"
-      ],
+      "matches": ["<all_urls>"],
       "css": [
-        "src/shared/icons.css",
-        "src/inject/pure-min.css",
-        "src/inject/inject.css"
+        "./src/features/content/overlay-styles.css"
       ],
       "js": [
-        "src/shared/browser-polyfill.js",
-        "src/shared/jquery-3.4.1.slim.shady.js",
-        "src/shared/debug.js",
-        "src/shared/config.js",
-        "src/shared/console.js",
-        "src/shared/icons.js",
-        "src/shared/tools.js",
-        "src/inject/hoverInjector.js",
-        "src/inject/in_overlay.js",
-        "src/inject/inject.js"
-      ]
+        "./src/features/content/content-main.js"
+      ],
+      "run_at": "document_end"
     }
   ],
-  "default_locale": "en",
-  // "homepage_url": "https://phomento.com",
+  
+  "options_page": "./src/ui/options/options.html",
+  
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "contextMenus",
+    "scripting"
+  ],
+  
+  "host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  
   "icons": {
     "16": "icons/hoverboard_16.png",
     "48": "icons/hoverboard_48.png",
     "128": "icons/hoverboard_128.png"
   },
-  "manifest_version": 2,
-  "options_page": "src/options_custom/index.html",
-  "permissions": [
-    // "alarms",
-    // "bookmarks",
-    "chrome://favicon/",
-    // "clipboardRead",
-    // "clipboardWrite",
-    "contentSettings",
-    "contextMenus",
-    // "cookies",
-    // "fileBrowserHandler",
-    // "geolocation",
-    // "history",
-    "http://*/*",
-    "https://*/*",
-    // "idle",
-    // "management",
-    // "notifications",
-    "storage",
-    "tabs"
-    // "tts",
-    // "ttsEngine",
-    // "webNavigation"
+  
+  "default_locale": "en",
+  
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "src/features/content/*.css",
+        "icons/*.png",
+        "icons/*.svg"
+      ],
+      "matches": ["<all_urls>"]
+    }
   ]
-}
+} 

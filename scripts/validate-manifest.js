@@ -12,7 +12,7 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const MANIFEST_PATH = join(__dirname, '..', 'manifest.v3.json');
+const MANIFEST_PATH = join(__dirname, '..', 'manifest.json');
 
 function validateManifest() {
   try {

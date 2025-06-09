@@ -1,53 +1,96 @@
-# to do
-reload site data menu
-fix reload after save
-for chrome, safari, ff
-close all tagged tabs
-close all untagged tabs
-close all to-read tabs
-close all duplicate tabs
-easy to-read
-open tags page
-pop-up UI to edit
-tag all tabs in window with ... except search, tagged, untagged, matching, ...
+# 🚀 Hoverboard - Modern Pinboard Browser Extension
 
+A modern Manifest V3 browser extension that provides seamless Pinboard integration with hover overlays and enhanced bookmark management.
 
+## ✨ Features
 
-# 2020-12-30 ESLint
-eslint --ext .js --fix-dry-run src/
+- **Hover Overlays**: View bookmark information by hovering over links
+- **Modern UI**: Clean, responsive popup interface
+- **Quick Actions**: Toggle privacy, read-later status, and manage tags
+- **Tag Management**: Add, remove, and organize bookmark tags
+- **Search Integration**: Search through your bookmarks
+- **Cross-Browser**: Compatible with Chrome, Firefox, and Edge
 
+## 🏗️ Architecture
 
+This extension is built with modern Manifest V3 architecture:
 
+```
+src/
+├── core/                 # Service worker and core functionality
+├── ui/                   # User interface components
+│   ├── popup/           # Browser action popup
+│   ├── options/         # Extension options page
+│   └── styles/          # Shared CSS and design tokens
+├── features/            # Feature modules
+│   └── content/         # Content scripts and overlays  
+├── shared/              # Shared utilities and libraries
+└── config/              # Configuration files
+```
 
-open -n -a /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --args --user-data-dir="/tmp/chrome_dev_test" --disable-web-security
+## 🔧 Development
 
-/Documents/dev/browser/material-design-icons (master) $ base64 -in /Users/fareed/Documents/dev/browser/material-design-icons/content/svg/production/ic_clear_24px_green.svg | pbcopy
-base64 -in /Users/fareed/Documents/dev/browser/material-design-icons/action/svg/production/ic_delete_24px.svg | pbcopy
-base64 -in icons/hoverboard_32.png | pbcopy
-base64 -in icons/search_title_24.png | pbcopy
-base64 -in icons/bluepin_16.png | pbcopy
-base64 -in icons/push-pin_24.png | pbcopy
-base64 -in icons/push-pin.svg | pbcopy
-base64 -in icons/reload.svg | pbcopy
+### Prerequisites
 
-TO DO
-handle API clients check for 429 Too Many Requests
-reset to defaults
-export settings
-import settings
-alternate action to badge click
-explain overlay
-rename overlay
-fix overlay css
-unit testing
-accept cross-extension update info
-fix permissions
-use https://api.pinboard.in/v1/posts/suggest Returns a list of popular tags and recommended tags for a given URL. Popular tags are tags used site-wide for the url; recommended tags are drawn from the user's own tags.
-use https://api.pinboard.in/v1/tags/get Returns a full list of the user's tags along with the number of times they were used.
-use https://api.pinboard.in/v1/posts/update Returns the most recent time a bookmark was added, updated or deleted.
+- Node.js 18+
+- Chrome/Firefox Developer Mode enabled
 
-# icons
-<www.flaticon.com>
-<https://www.flaticon.com/free-icons/magnifying-glass/7>
-## online svg editor
-<https://editor.method.ac/>
+### Setup
+
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Run tests: `npm test`
+4. Build extension: `npm run build`
+
+### Loading the Extension
+
+1. Open Chrome/Firefox extension management page
+2. Enable "Developer mode"
+3. Click "Load unpacked" and select this directory
+4. The extension will use `manifest.json` (Manifest V3)
+
+## 📖 Configuration
+
+Configure your Pinboard API token in the extension options page:
+
+1. Right-click the extension icon
+2. Select "Options"
+3. Enter your Pinboard API token
+4. Save settings
+
+## 🧪 Testing
+
+- Run unit tests: `npm test`
+- Run linting: `npm run lint`
+- Run all checks: `npm run validate`
+
+## 📚 Documentation
+
+Comprehensive migration and development documentation is available in the `/docs` folder:
+
+- [Migration Plan](docs/migration-plan.md)
+- [File Migration Matrix](docs/file-migration-matrix.md)
+- [Development Framework](docs/structured-development-framework.md)
+
+## 🤝 Contributing
+
+1. Follow the coding standards in `.eslintrc.yml`
+2. Write tests for new features
+3. Update documentation as needed
+4. Submit pull requests with clear descriptions
+
+## 📄 License
+
+MIT License - see LICENSE file for details
+
+## 🔗 Links
+
+- [Pinboard API Documentation](https://pinboard.in/api/)
+- [Chrome Extension Documentation](https://developer.chrome.com/docs/extensions/)
+- [Manifest V3 Migration Guide](https://developer.chrome.com/docs/extensions/mv3/intro/)
+
+---
+
+**Version**: 1.0.0  
+**Manifest**: V3  
+**Author**: Fareed Stevenson

@@ -6,7 +6,7 @@
   "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
   
   "background": {
-    "service_worker": "./src-new/core/service-worker.js",
+    "service_worker": "./src/core/service-worker.js",
     "type": "module"
   },
   
@@ -18,7 +18,7 @@
       "48": "icons/hoverboard_48.png",
       "128": "icons/hoverboard_128.png"
     },
-    "default_popup": "./src-new/ui/popup/popup.html",
+    "default_popup": "./src/ui/popup/popup.html",
     "default_title": "Hoverboard - Pinboard Integration"
   },
   
@@ -26,17 +26,16 @@
     {
       "matches": ["<all_urls>"],
       "css": [
-        "./src-new/features/content/overlay-styles.css"
+        "./src/features/content/overlay-styles.css"
       ],
       "js": [
-        "./src-new/features/content/content-main.js"
+        "./src/features/content/content-main.js"
       ],
-      "run_at": "document_end",
-      "type": "module"
+      "run_at": "document_end"
     }
   ],
   
-  "options_page": "./src-new/ui/options/options.html",
+  "options_page": "./src/ui/options/options.html",
   
   "permissions": [
     "storage",
@@ -62,7 +61,7 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "src-new/features/content/*.css",
+        "src/features/content/*.css",
         "icons/*.png",
         "icons/*.svg"
       ],

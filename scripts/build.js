@@ -20,9 +20,13 @@ execSync('npm run build:sw', { stdio: 'inherit' });
 console.log('Building options page...');
 execSync('npm run build:options', { stdio: 'inherit' });
 
+// Build content scripts with dependencies
+console.log('Building content scripts...');
+execSync('npm run build:content', { stdio: 'inherit' });
+
 // Copy manifest
 fs.copyFileSync(
-    path.join(rootDir, 'manifest.v3.json'),
+    path.join(rootDir, 'manifest.json'),
     path.join(rootDir, 'dist', 'manifest.json')
 );
 
@@ -44,13 +48,14 @@ const copyDir = (src, dest) => {
             // Skip files that are built separately
             if (entry.name === 'service-worker.js') continue;
             if (srcPath.includes('ui/options/options.js')) continue;
+            if (srcPath.includes('features/content/content-main.js')) continue;
             fs.copyFileSync(srcPath, destPath);
         }
     }
 };
 
 // Copy necessary directories
-copyDir(path.join(rootDir, 'src-new'), path.join(rootDir, 'dist', 'src-new'));
+  copyDir(path.join(rootDir, 'src'), path.join(rootDir, 'dist', 'src'));
 copyDir(path.join(rootDir, 'icons'), path.join(rootDir, 'dist', 'icons'));
 copyDir(path.join(rootDir, '_locales'), path.join(rootDir, 'dist', '_locales'));
 

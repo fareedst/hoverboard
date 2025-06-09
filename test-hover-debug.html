@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Hoverboard Show Hover Functionality</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        .instructions {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196f3;
+            margin: 20px 0;
+        }
+        .debug-info {
+            background: #fff3e0;
+            padding: 15px;
+            border-left: 4px solid #ff9800;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 Hoverboard Show Hover Test Page</h1>
+    
+    <div class="instructions">
+        <h3>📋 Test Instructions:</h3>
+        <ol>
+            <li>Make sure the Hoverboard extension is loaded and enabled</li>
+            <li>Open the browser's Developer Console (F12)</li>
+            <li>Click on the Hoverboard extension icon in the toolbar</li>
+            <li>Click the "Show Hover" button in the popup</li>
+            <li>Check the console for debug messages starting with 🔍 and 🎨</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>📖 Test Content</h2>
+        <p>This is a test page to verify that the Hoverboard extension's "Show Hover" functionality works correctly and displays bookmark data in the overlay.</p>
+        
+        <p>The page contains some sample content that can be bookmarked. When you click "Show Hover" in the popup, it should:</p>
+        <ul>
+            <li>Display an overlay with bookmark information</li>
+            <li>Show the page title and URL</li>
+            <li>Display any existing tags for this bookmark</li>
+            <li>Allow adding new tags</li>
+            <li>Show debug information in the console</li>
+        </ul>
+    </div>
+
+    <div class="debug-info">
+        <h3>🔍 Debug Information to Look For:</h3>
+        <p><strong>In Console:</strong></p>
+        <ul>
+            <li>🔍 [Debug] Bookmark data structure</li>
+            <li>🎨 [Overlay Debug] Content received</li>
+            <li>Tags type and array status</li>
+            <li>Bookmark properties (URL, description, tags, etc.)</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h2>🏷️ Sample Tags for Testing</h2>
+        <p>If you want to test with some tags, try adding these to a bookmark of this page:</p>
+        <ul>
+            <li>test</li>
+            <li>hoverboard</li>
+            <li>extension</li>
+            <li>debugging</li>
+            <li>browser-extension</li>
+        </ul>
+    </div>
+
+    <script>
+        // Enable debug mode for Hoverboard
+        window.HOVERBOARD_DEBUG = true;
+        
+        // Log page load
+        console.log('🚀 Test page loaded - Hoverboard debug mode enabled');
+        console.log('📄 Page URL:', window.location.href);
+        console.log('📄 Page Title:', document.title);
+        
+        // Add some test data to window for debugging
+        window.testData = {
+            url: window.location.href,
+            title: document.title,
+            timestamp: new Date().toISOString()
+        };
+        
+        console.log('🧪 Test data available in window.testData:', window.testData);
+    </script>
+</body>
+</html> 
