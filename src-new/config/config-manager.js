@@ -276,3 +276,8 @@ export class ConfigManager {
     }
   }
 }
+
+// Support CommonJS for testing
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = { ConfigManager };
+}
