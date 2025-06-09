@@ -1,15 +1,35 @@
 /**
  * Pinboard Service - Modern API integration for Pinboard bookmarking service
  * Replaces legacy Pb class with Promise-based, error-handled architecture
+ *
+ * PIN-001: Pinboard API integration with authentication and rate limiting
+ * PIN-002: Bookmark retrieval and management operations
+ * PIN-003: Tag management and bookmark modification operations
+ * PIN-004: Error handling and retry logic for network resilience
  */
 
-import { ConfigManager } from '../../config/config-manager.js';
+import { ConfigManager } from '../../config/config-manager.js'
+import { XMLParser } from 'fast-xml-parser'
 
 export class PinboardService {
-  constructor() {
-    this.configManager = new ConfigManager();
-    this.apiBase = 'https://api.pinboard.in/v1/';
-    this.retryDelays = [1000, 2000, 5000]; // Progressive retry delays
+  constructor () {
+    // PIN-001: Configuration manager integration for authentication and settings
+    this.configManager = new ConfigManager()
+    // PIN-001: Pinboard API base URL - official API endpoint
+    // SPECIFICATION: Use official Pinboard API v1 endpoint for all operations
+    this.apiBase = 'https://api.pinboard.in/v1/'
+    // PIN-004: Progressive retry delays for rate limiting compliance
+    // IMPLEMENTATION DECISION: Exponential backoff to respect API rate limits
+    this.retryDelays = [1000, 2000, 5000] // Progressive retry delays
+
+    // PIN-001: XML parser configuration for Pinboard API responses
+    // SPECIFICATION: Pinboard API returns XML, parse with attribute support
+    // IMPLEMENTATION DECISION: Configure parser for Pinboard's XML structure
+    this.xmlParser = new XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: '@_',
+      parseAttributeValue: true
+    })
   }
 
   /**
@@ -17,17 +37,24 @@ export class PinboardService {
    * @param {string} url - URL to lookup
    * @param {string} title - Page title (fallback for description)
    * @returns {Promise<Object>} Bookmark data
+   *
+   * PIN-002: Single bookmark retrieval by URL
+   * SPECIFICATION: Use posts/get endpoint to fetch bookmark for specific URL
+   * IMPLEMENTATION DECISION: Provide fallback data on failure for UI stability
    */
-  async getBookmarkForUrl(url, title = '') {
+  async getBookmarkForUrl (url, title = '') {
     try {
-      const cleanUrl = this.cleanUrl(url);
-      const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`;
-      const response = await this.makeApiRequest(endpoint);
-      
-      return this.parseBookmarkResponse(response, cleanUrl, title);
+      // PIN-002: Clean URL before API request for consistent matching
+      const cleanUrl = this.cleanUrl(url)
+      const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`
+      const response = await this.makeApiRequest(endpoint)
+
+      // PIN-002: Parse XML response into bookmark object
+      return this.parseBookmarkResponse(response, cleanUrl, title)
     } catch (error) {
-      console.error('Failed to get bookmark for URL:', error);
-      return this.createEmptyBookmark(url, title);
+      console.error('Failed to get bookmark for URL:', error)
+      // PIN-002: Return empty bookmark structure on failure for UI consistency
+      return this.createEmptyBookmark(url, title)
     }
   }
 
@@ -35,16 +62,23 @@ export class PinboardService {
    * Get recent bookmarks from Pinboard
    * @param {number} count - Number of recent bookmarks to fetch
    * @returns {Promise<Object[]>} Array of recent bookmarks
+   *
+   * PIN-002: Recent bookmarks retrieval for dashboard display
+   * SPECIFICATION: Use posts/recent endpoint with count parameter
+   * IMPLEMENTATION DECISION: Return empty array on failure to prevent UI errors
    */
-  async getRecentBookmarks(count = 15) {
+  async getRecentBookmarks (count = 15) {
     try {
-      const endpoint = `posts/recent?count=${count}`;
-      const response = await this.makeApiRequest(endpoint);
-      
-      return this.parseRecentBookmarksResponse(response);
+      // PIN-002: Fetch recent bookmarks with specified count
+      const endpoint = `posts/recent?count=${count}`
+      const response = await this.makeApiRequest(endpoint)
+
+      // PIN-002: Parse XML response into bookmark array
+      return this.parseRecentBookmarksResponse(response)
     } catch (error) {
-      console.error('Failed to get recent bookmarks:', error);
-      return [];
+      console.error('Failed to get recent bookmarks:', error)
+      // PIN-002: Return empty array on failure for UI stability
+      return []
     }
   }
 
@@ -52,17 +86,24 @@ export class PinboardService {
    * Save a bookmark to Pinboard
    * @param {Object} bookmarkData - Bookmark data to save
    * @returns {Promise<Object>} Save result
+   *
+   * PIN-003: Bookmark creation/update operation
+   * SPECIFICATION: Use posts/add endpoint to save bookmark with all metadata
+   * IMPLEMENTATION DECISION: Re-throw errors to allow caller error handling
    */
-  async saveBookmark(bookmarkData) {
+  async saveBookmark (bookmarkData) {
     try {
-      const params = this.buildSaveParams(bookmarkData);
-      const endpoint = `posts/add?${params}`;
-      const response = await this.makeApiRequest(endpoint, 'GET');
-      
-      return this.parseApiResponse(response);
+      // PIN-003: Build URL parameters from bookmark data
+      const params = this.buildSaveParams(bookmarkData)
+      const endpoint = `posts/add?${params}`
+      const response = await this.makeApiRequest(endpoint, 'GET')
+
+      // PIN-003: Parse API response for save confirmation
+      return this.parseApiResponse(response)
     } catch (error) {
-      console.error('Failed to save bookmark:', error);
-      throw error;
+      console.error('Failed to save bookmark:', error)
+      // PIN-003: Re-throw to allow caller to handle save failures
+      throw error
     }
   }
 
@@ -70,31 +111,37 @@ export class PinboardService {
    * Save a tag to an existing bookmark
    * @param {Object} tagData - Tag data to save
    * @returns {Promise<Object>} Save result
+   *
+   * PIN-003: Tag addition to existing bookmark
+   * SPECIFICATION: Retrieve current bookmark, add tag, then save updated bookmark
+   * IMPLEMENTATION DECISION: Merge tags to preserve existing tags while adding new ones
    */
-  async saveTag(tagData) {
+  async saveTag (tagData) {
     try {
-      // Get current bookmark data
-      const currentBookmark = await this.getBookmarkForUrl(tagData.url);
-      
-      // Add new tag to existing tags
-      const existingTags = currentBookmark.tags || [];
-      const newTags = [...existingTags];
-      
+      // PIN-003: Get current bookmark data to preserve existing tags
+      const currentBookmark = await this.getBookmarkForUrl(tagData.url)
+
+      // PIN-003: Add new tag to existing tags array
+      const existingTags = currentBookmark.tags || []
+      const newTags = [...existingTags]
+
       if (tagData.value && !existingTags.includes(tagData.value)) {
-        newTags.push(tagData.value);
+        // PIN-003: Only add tag if it doesn't already exist
+        newTags.push(tagData.value)
       }
 
-      // Save updated bookmark
+      // PIN-003: Save updated bookmark with merged tags
       const updatedBookmark = {
         ...currentBookmark,
         ...tagData,
         tags: newTags.join(' ')
-      };
+      }
 
-      return this.saveBookmark(updatedBookmark);
+      return this.saveBookmark(updatedBookmark)
     } catch (error) {
-      console.error('Failed to save tag:', error);
-      throw error;
+      console.error('Failed to save tag:', error)
+      // PIN-003: Re-throw to allow caller error handling
+      throw error
     }
   }
 
@@ -102,17 +149,24 @@ export class PinboardService {
    * Delete a bookmark from Pinboard
    * @param {string} url - URL of bookmark to delete
    * @returns {Promise<Object>} Delete result
+   *
+   * PIN-003: Bookmark deletion operation
+   * SPECIFICATION: Use posts/delete endpoint to remove bookmark by URL
+   * IMPLEMENTATION DECISION: Clean URL before deletion for consistent matching
    */
-  async deleteBookmark(url) {
+  async deleteBookmark (url) {
     try {
-      const cleanUrl = this.cleanUrl(url);
-      const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl)}`;
-      const response = await this.makeApiRequest(endpoint);
-      
-      return this.parseApiResponse(response);
+      // PIN-003: Clean URL for consistent deletion matching
+      const cleanUrl = this.cleanUrl(url)
+      const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl)}`
+      const response = await this.makeApiRequest(endpoint)
+
+      // PIN-003: Parse API response for deletion confirmation
+      return this.parseApiResponse(response)
     } catch (error) {
-      console.error('Failed to delete bookmark:', error);
-      throw error;
+      console.error('Failed to delete bookmark:', error)
+      // PIN-003: Re-throw to allow caller error handling
+      throw error
     }
   }
 
@@ -120,27 +174,55 @@ export class PinboardService {
    * Remove a specific tag from a bookmark
    * @param {Object} tagData - Tag removal data
    * @returns {Promise<Object>} Update result
+   *
+   * PIN-003: Tag removal from existing bookmark
+   * SPECIFICATION: Retrieve bookmark, remove specified tag, save updated bookmark
+   * IMPLEMENTATION DECISION: Filter out specific tag while preserving other tags
    */
-  async deleteTag(tagData) {
+  async deleteTag (tagData) {
     try {
-      // Get current bookmark data
-      const currentBookmark = await this.getBookmarkForUrl(tagData.url);
-      
-      // Remove specified tag from existing tags
-      const existingTags = currentBookmark.tags || [];
-      const filteredTags = existingTags.filter(tag => tag !== tagData.value);
+      // PIN-003: Get current bookmark data to access existing tags
+      const currentBookmark = await this.getBookmarkForUrl(tagData.url)
 
-      // Save updated bookmark
+      // PIN-003: Remove specified tag from existing tags
+      const existingTags = currentBookmark.tags || []
+      const filteredTags = existingTags.filter(tag => tag !== tagData.value)
+
+      // PIN-003: Save bookmark with filtered tags
       const updatedBookmark = {
         ...currentBookmark,
         ...tagData,
         tags: filteredTags.join(' ')
-      };
+      }
 
-      return this.saveBookmark(updatedBookmark);
+      return this.saveBookmark(updatedBookmark)
     } catch (error) {
-      console.error('Failed to delete tag:', error);
-      throw error;
+      console.error('Failed to delete tag:', error)
+      // PIN-003: Re-throw to allow caller error handling
+      throw error
+    }
+  }
+
+  /**
+   * Test authentication with Pinboard API
+   * @returns {Promise<boolean>} True if authentication is valid
+   *
+   * PIN-001: Authentication validation using API endpoint
+   * SPECIFICATION: Use user/api_token endpoint to verify authentication
+   * IMPLEMENTATION DECISION: Simple boolean return for easy authentication checking
+   */
+  async testConnection () {
+    try {
+      // PIN-001: Use the user/api_token endpoint to test authentication
+      const endpoint = 'user/api_token'
+      const response = await this.makeApiRequest(endpoint)
+
+      // PIN-001: If the request succeeds without throwing an error, authentication is valid
+      return true
+    } catch (error) {
+      console.error('Connection test failed:', error)
+      // PIN-001: Return false on any authentication failure
+      return false
     }
   }
 
@@ -149,17 +231,24 @@ export class PinboardService {
    * @param {string} endpoint - API endpoint
    * @param {string} method - HTTP method
    * @returns {Promise<Document>} Parsed XML response
+   *
+   * PIN-001: Authenticated API request with configuration integration
+   * SPECIFICATION: All API requests must include authentication token
+   * IMPLEMENTATION DECISION: Centralized authentication and retry logic
    */
-  async makeApiRequest(endpoint, method = 'GET') {
-    const hasAuth = await this.configManager.hasAuthToken();
+  async makeApiRequest (endpoint, method = 'GET') {
+    // PIN-001: Verify authentication token exists before making request
+    const hasAuth = await this.configManager.hasAuthToken()
     if (!hasAuth) {
-      throw new Error('No authentication token configured');
+      throw new Error('No authentication token configured')
     }
 
-    const authParam = await this.configManager.getAuthTokenParam();
-    const url = `${this.apiBase}${endpoint}&${authParam}`;
+    // PIN-001: Get formatted authentication parameter from config manager
+    const authParam = await this.configManager.getAuthTokenParam()
+    const url = `${this.apiBase}${endpoint}&${authParam}`
 
-    return this.makeRequestWithRetry(url, method);
+    // PIN-004: Use retry logic for network resilience
+    return this.makeRequestWithRetry(url, method)
   }
 
   /**
@@ -168,229 +257,303 @@ export class PinboardService {
    * @param {string} method - HTTP method
    * @param {number} retryCount - Current retry attempt
    * @returns {Promise<Document>} Response
+   *
+   * PIN-004: Network resilience with exponential backoff retry
+   * SPECIFICATION: Handle rate limiting and network failures gracefully
+   * IMPLEMENTATION DECISION: Progressive retry delays with configured maximum attempts
    */
-  async makeRequestWithRetry(url, method = 'GET', retryCount = 0) {
-    const config = await this.configManager.getConfig();
-    
+  async makeRequestWithRetry (url, method = 'GET', retryCount = 0) {
+    // PIN-004: Get retry configuration from config manager
+    const config = await this.configManager.getConfig()
+
     try {
-      const response = await fetch(url, { method });
-      
-      if (response.status === 429) {
-        // Rate limited - implement retry with exponential backoff
-        if (retryCount < config.pinRetryCountMax) {
-          const delay = this.retryDelays[retryCount] || 5000;
-          console.log(`Rate limited, retrying after ${delay}ms (attempt ${retryCount + 1})`);
-          
-          await this.sleep(delay);
-          return this.makeRequestWithRetry(url, method, retryCount + 1);
-        } else {
-          throw new Error('Rate limit exceeded, max retries reached');
-        }
-      }
-      
-      if (response.status === 401) {
-        throw new Error('Authentication failed - check API token');
-      }
-      
+      // PIN-004: Make HTTP request using fetch API
+      const response = await fetch(url, { method })
+
+      // PIN-004: Check for HTTP error responses
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
-      const responseText = await response.text();
-      return this.parseXmlResponse(responseText);
+      // PIN-004: Parse XML response text
+      const xmlText = await response.text()
+      return this.parseXmlResponse(xmlText)
     } catch (error) {
-      if (retryCount < config.pinRetryCountMax && this.isRetryableError(error)) {
-        const delay = this.retryDelays[retryCount] || 5000;
-        console.log(`Request failed, retrying after ${delay}ms:`, error.message);
-        
-        await this.sleep(delay);
-        return this.makeRequestWithRetry(url, method, retryCount + 1);
+      // PIN-004: Determine if error is retryable (network/rate limit issues)
+      const isRetryable = this.isRetryableError(error)
+      const maxRetries = config.pinRetryCountMax || 2
+
+      if (isRetryable && retryCount < maxRetries) {
+        // PIN-004: Calculate delay for progressive backoff
+        const delay = this.retryDelays[retryCount] || config.pinRetryDelay || 1000
+        console.warn(`API request failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`)
+
+        // PIN-004: Wait before retry
+        await this.sleep(delay)
+        return this.makeRequestWithRetry(url, method, retryCount + 1)
       }
-      
-      throw error;
+
+      // PIN-004: Re-throw error if not retryable or max retries exceeded
+      throw error
     }
   }
 
   /**
    * Parse XML response from Pinboard API
    * @param {string} xmlText - XML response text
-   * @returns {Document} Parsed XML document
+   * @returns {Object} Parsed XML object
+   *
+   * PIN-001: XML response parsing with error handling
+   * SPECIFICATION: All Pinboard API responses are in XML format
+   * IMPLEMENTATION DECISION: Use configured XML parser with error handling
    */
-  parseXmlResponse(xmlText) {
-    const parser = new DOMParser();
-    const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
-    
-    // Check for parsing errors
-    const parseError = xmlDoc.querySelector('parsererror');
-    if (parseError) {
-      throw new Error('Failed to parse XML response');
+  parseXmlResponse (xmlText) {
+    try {
+      // PIN-001: Parse XML using configured parser
+      return this.xmlParser.parse(xmlText)
+    } catch (error) {
+      console.error('Failed to parse XML response:', error)
+      console.error('XML content:', xmlText)
+      // PIN-001: Re-throw parsing errors for caller handling
+      throw new Error('Invalid XML response from Pinboard API')
     }
-    
-    return xmlDoc;
   }
 
   /**
-   * Parse bookmark response from Pinboard API
-   * @param {Document} xmlDoc - XML document
+   * Parse bookmark response from posts/get endpoint
+   * @param {Object} xmlObj - Parsed XML object
    * @param {string} url - Original URL
-   * @param {string} title - Page title
-   * @returns {Object} Bookmark data
+   * @param {string} title - Fallback title
+   * @returns {Object} Bookmark object
+   *
+   * PIN-002: Bookmark data parsing from Pinboard XML format
+   * SPECIFICATION: Handle Pinboard's XML structure for bookmark data
+   * IMPLEMENTATION DECISION: Normalize XML attributes to standard bookmark object
    */
-  parseBookmarkResponse(xmlDoc, url, title) {
-    const posts = xmlDoc.getElementsByTagName('post');
-    
-    if (posts.length === 0) {
-      return this.createEmptyBookmark(url, title);
-    }
+  parseBookmarkResponse (xmlObj, url, title) {
+    try {
+      // PIN-002: Extract posts array from XML structure
+      const posts = xmlObj?.posts?.post
 
-    const post = posts[0];
-    const tags = post.getAttribute('tag') || '';
-    
-    return {
-      description: post.getAttribute('description') || title,
-      hash: post.getAttribute('hash') || '',
-      time: post.getAttribute('time') || '',
-      extended: post.getAttribute('extended') || '',
-      tag: tags,
-      tags: tags ? tags.split(' ') : [],
-      shared: post.getAttribute('shared') || 'yes',
-      toread: post.getAttribute('toread') || 'no',
-      url: post.getAttribute('href') || url
-    };
+      if (posts && posts.length > 0) {
+        // PIN-002: Get first post (should only be one for specific URL)
+        const post = Array.isArray(posts) ? posts[0] : posts
+
+        // PIN-002: Extract bookmark data from XML attributes
+        return {
+          url: post['@_href'] || url,
+          description: post['@_description'] || title || '',
+          extended: post['@_extended'] || '',
+          tags: post['@_tag'] ? post['@_tag'].split(' ') : [],
+          time: post['@_time'] || '',
+          shared: post['@_shared'] || 'yes',
+          toread: post['@_toread'] || 'no',
+          hash: post['@_hash'] || ''
+        }
+      }
+
+      // PIN-002: Return empty bookmark if no posts found
+      return this.createEmptyBookmark(url, title)
+    } catch (error) {
+      console.error('Failed to parse bookmark response:', error)
+      // PIN-002: Return empty bookmark on parsing error
+      return this.createEmptyBookmark(url, title)
+    }
   }
 
   /**
-   * Parse recent bookmarks response
-   * @param {Document} xmlDoc - XML document
-   * @returns {Object[]} Array of bookmark objects
+   * Parse recent bookmarks response from posts/recent endpoint
+   * @param {Object} xmlObj - Parsed XML object
+   * @returns {Array} Array of bookmark objects
+   *
+   * PIN-002: Recent bookmarks parsing from Pinboard XML format
+   * SPECIFICATION: Handle array of bookmarks from posts/recent endpoint
+   * IMPLEMENTATION DECISION: Normalize each bookmark and handle empty responses
    */
-  parseRecentBookmarksResponse(xmlDoc) {
-    const posts = xmlDoc.getElementsByTagName('post');
-    const bookmarks = [];
+  parseRecentBookmarksResponse (xmlObj) {
+    try {
+      // PIN-002: Extract posts array from XML structure
+      const posts = xmlObj?.posts?.post
 
-    for (let i = 0; i < posts.length; i++) {
-      const post = posts[i];
-      const tags = post.getAttribute('tag') || '';
-      
-      bookmarks.push({
-        description: post.getAttribute('description') || '',
-        hash: post.getAttribute('hash') || '',
-        time: post.getAttribute('time') || '',
-        extended: post.getAttribute('extended') || '',
-        tag: tags,
-        tags: tags ? tags.split(' ') : [],
-        shared: post.getAttribute('shared') || 'yes',
-        toread: post.getAttribute('toread') || 'no',
-        url: post.getAttribute('href') || ''
-      });
+      if (!posts) {
+        // PIN-002: Return empty array if no posts
+        return []
+      }
+
+      // PIN-002: Ensure posts is an array for consistent processing
+      const postsArray = Array.isArray(posts) ? posts : [posts]
+
+      // PIN-002: Parse each post into normalized bookmark object
+      return postsArray.map(post => ({
+        url: post['@_href'] || '',
+        description: post['@_description'] || '',
+        extended: post['@_extended'] || '',
+        tags: post['@_tag'] ? post['@_tag'].split(' ') : [],
+        time: post['@_time'] || '',
+        shared: post['@_shared'] || 'yes',
+        toread: post['@_toread'] || 'no',
+        hash: post['@_hash'] || ''
+      }))
+    } catch (error) {
+      console.error('Failed to parse recent bookmarks response:', error)
+      // PIN-002: Return empty array on parsing error
+      return []
     }
-
-    return bookmarks;
   }
 
   /**
-   * Parse generic API response
-   * @param {Document} xmlDoc - XML document
-   * @returns {Object} Response data
+   * Parse general API response (for add/delete operations)
+   * @param {Object} xmlObj - Parsed XML object
+   * @returns {Object} Result object
+   *
+   * PIN-003: API operation response parsing
+   * SPECIFICATION: Handle success/error responses from add/delete operations
+   * IMPLEMENTATION DECISION: Extract result code and message for operation feedback
    */
-  parseApiResponse(xmlDoc) {
-    const result = xmlDoc.getElementsByTagName('result')[0];
-    if (result) {
+  parseApiResponse (xmlObj) {
+    try {
+      // PIN-003: Extract result from XML structure
+      const result = xmlObj?.result
+
+      // PIN-003: Return normalized result object
       return {
-        code: result.getAttribute('code'),
-        message: result.textContent
-      };
+        success: result?.['@_code'] === 'done',
+        code: result?.['@_code'] || 'unknown',
+        message: result?.['#text'] || 'Operation completed'
+      }
+    } catch (error) {
+      console.error('Failed to parse API response:', error)
+      // PIN-003: Return failure result on parsing error
+      return {
+        success: false,
+        code: 'parse_error',
+        message: 'Failed to parse API response'
+      }
     }
-    return { success: true };
   }
 
   /**
-   * Create empty bookmark object
-   * @param {string} url - URL
-   * @param {string} title - Title
-   * @returns {Object} Empty bookmark
+   * Create empty bookmark object with defaults
+   * @param {string} url - URL for bookmark
+   * @param {string} title - Title for description
+   * @returns {Object} Empty bookmark object
+   *
+   * PIN-002: Default bookmark structure creation
+   * SPECIFICATION: Provide consistent bookmark object structure
+   * IMPLEMENTATION DECISION: Include all standard Pinboard bookmark fields with defaults
    */
-  createEmptyBookmark(url, title) {
+  createEmptyBookmark (url, title) {
+    // PIN-002: Create bookmark object with all standard fields
     return {
+      url: url || '',
       description: title || '',
-      hash: '',
-      time: '',
       extended: '',
-      tag: '',
       tags: [],
+      time: '',
       shared: 'yes',
       toread: 'no',
-      url: url
-    };
+      hash: ''
+    }
   }
 
   /**
-   * Build URL parameters for saving bookmark
+   * Build URL parameters for bookmark save operation
    * @param {Object} bookmarkData - Bookmark data
-   * @returns {string} URL parameters
+   * @returns {string} URL parameter string
+   *
+   * PIN-003: Parameter encoding for bookmark save operations
+   * SPECIFICATION: Encode all bookmark fields as URL parameters for posts/add
+   * IMPLEMENTATION DECISION: Handle both string and array tag formats
    */
-  buildSaveParams(bookmarkData) {
-    const params = new URLSearchParams();
-    
-    params.set('replace', 'yes');
-    params.set('url', bookmarkData.url);
-    
-    if (bookmarkData.description) {
-      params.set('description', bookmarkData.description);
-    }
-    
-    if (bookmarkData.tags) {
-      const tagsString = Array.isArray(bookmarkData.tags) 
-        ? bookmarkData.tags.join(' ')
-        : bookmarkData.tags;
-      params.set('tags', tagsString);
-    }
-    
-    if (bookmarkData.extended) {
-      params.set('extended', bookmarkData.extended);
-    }
-    
-    if (bookmarkData.shared !== undefined) {
-      params.set('shared', bookmarkData.shared);
-    }
-    
-    if (bookmarkData.toread !== undefined) {
-      params.set('toread', bookmarkData.toread);
-    }
-    
-    if (bookmarkData.time) {
-      params.set('dt', bookmarkData.time);
+  buildSaveParams (bookmarkData) {
+    // PIN-003: Prepare parameters object with required fields
+    const params = new URLSearchParams()
+
+    // PIN-003: Add required URL parameter
+    if (bookmarkData.url) {
+      params.append('url', bookmarkData.url)
     }
 
-    return params.toString();
+    // PIN-003: Add optional description
+    if (bookmarkData.description) {
+      params.append('description', bookmarkData.description)
+    }
+
+    // PIN-003: Add optional extended description
+    if (bookmarkData.extended) {
+      params.append('extended', bookmarkData.extended)
+    }
+
+    // PIN-003: Handle tags as both string and array
+    if (bookmarkData.tags) {
+      const tagsString = Array.isArray(bookmarkData.tags)
+        ? bookmarkData.tags.join(' ')
+        : bookmarkData.tags
+      params.append('tags', tagsString)
+    }
+
+    // PIN-003: Add privacy setting
+    if (bookmarkData.shared !== undefined) {
+      params.append('shared', bookmarkData.shared)
+    }
+
+    // PIN-003: Add read-later setting
+    if (bookmarkData.toread !== undefined) {
+      params.append('toread', bookmarkData.toread)
+    }
+
+    // PIN-003: Return encoded parameter string
+    return params.toString()
   }
 
   /**
-   * Clean URL for Pinboard API (remove hash if configured)
+   * Clean URL for consistent API usage
    * @param {string} url - URL to clean
    * @returns {string} Cleaned URL
+   *
+   * PIN-001: URL normalization for consistent API requests
+   * SPECIFICATION: Ensure URLs are properly formatted for Pinboard API
+   * IMPLEMENTATION DECISION: Basic trimming and validation, preserve URL structure
    */
-  cleanUrl(url) {
-    // TODO: Implement uxUrlStripHash logic from config
-    return url;
+  cleanUrl (url) {
+    if (!url) return ''
+
+    // PIN-001: Trim whitespace and remove trailing slashes for consistency
+    return url.trim().replace(/\/+$/, '')
   }
 
   /**
    * Check if error is retryable
    * @param {Error} error - Error to check
    * @returns {boolean} Whether error is retryable
+   *
+   * PIN-004: Error classification for retry logic
+   * SPECIFICATION: Only retry network and rate limit errors, not authentication/validation errors
+   * IMPLEMENTATION DECISION: Conservative retry logic to avoid infinite loops
    */
-  isRetryableError(error) {
-    return error.name === 'TypeError' || // Network errors
-           error.message.includes('fetch');
+  isRetryableError (error) {
+    // PIN-004: Check for network-related errors that may be temporary
+    if (error.message.includes('fetch')) return true
+    if (error.message.includes('timeout')) return true
+    if (error.message.includes('429')) return true // Rate limited
+    if (error.message.includes('500')) return true // Server error
+    if (error.message.includes('502')) return true // Bad gateway
+    if (error.message.includes('503')) return true // Service unavailable
+
+    // PIN-004: Don't retry authentication or validation errors
+    return false
   }
 
   /**
-   * Sleep for specified milliseconds
+   * Sleep utility for retry delays
    * @param {number} ms - Milliseconds to sleep
    * @returns {Promise} Promise that resolves after delay
+   *
+   * PIN-004: Async delay utility for retry logic
+   * IMPLEMENTATION DECISION: Promise-based sleep for async/await compatibility
    */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  sleep (ms) {
+    // PIN-004: Promise-based delay for retry timing
+    return new Promise(resolve => setTimeout(resolve, ms))
   }
-} 
+}

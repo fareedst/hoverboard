@@ -34,6 +34,9 @@ export const MESSAGE_TYPES = {
   SEARCH_TITLE: 'searchTitle',
   SEARCH_TITLE_TEXT: 'searchTitleText',
 
+  // Content script lifecycle
+  CONTENT_SCRIPT_READY: 'contentScriptReady',
+
   // Development/debug
   DEV_COMMAND: 'devCommand',
   ECHO: 'echo'
@@ -90,6 +93,9 @@ export class MessageHandler {
       case MESSAGE_TYPES.GET_TAB_ID:
         return { tabId }
 
+      case MESSAGE_TYPES.CONTENT_SCRIPT_READY:
+        return this.handleContentScriptReady(data, tabId, url)
+
       case MESSAGE_TYPES.ECHO:
         return { echo: data, timestamp: Date.now() }
 
@@ -99,18 +105,44 @@ export class MessageHandler {
   }
 
   async handleGetCurrentBookmark (data, url, tabId) {
-    if (!url) {
+    // Use URL from data if sender doesn't have tab context (e.g., popup messages)
+    const targetUrl = url || data?.url
+    if (!targetUrl) {
       throw new Error('No URL provided')
     }
 
+    console.log('Getting bookmark for URL:', targetUrl)
+
     // Check if URL is allowed (not in inhibit list)
-    const isAllowed = await this.configManager.isUrlAllowed(url)
+    console.log('Checking if URL is allowed...')
+    const isAllowed = await this.configManager.isUrlAllowed(targetUrl)
     if (!isAllowed) {
-      return { blocked: true, url }
+      return { blocked: true, url: targetUrl }
+    }
+    console.log('URL is allowed, getting bookmark data...')
+
+    // Check if auth token is available
+    const hasAuth = await this.configManager.hasAuthToken()
+    if (!hasAuth) {
+      console.log('No auth token available, returning empty bookmark')
+      return {
+        description: data?.title || '',
+        hash: '',
+        time: '',
+        extended: '',
+        tag: '',
+        tags: [],
+        shared: 'yes',
+        toread: 'no',
+        url: targetUrl,
+        needsAuth: true
+      }
     }
 
     // Get bookmark data from Pinboard
-    const bookmark = await this.pinboardService.getBookmarkForUrl(url, data.title)
+    console.log('Getting bookmark data from Pinboard...')
+    const bookmark = await this.pinboardService.getBookmarkForUrl(targetUrl, data?.title)
+    console.log('Bookmark data retrieved:', bookmark)
 
     // Update browser badge if configured
     const config = await this.configManager.getConfig()
@@ -166,6 +198,12 @@ export class MessageHandler {
     // TODO: Implement title search functionality
     // This was a complex feature in the original code
     return { searchCount: 0, tabId }
+  }
+
+  async handleContentScriptReady (data, tabId, url) {
+    // Handle content script ready notification
+    console.log('Content script ready:', { tabId, url, data })
+    return { acknowledged: true, tabId, timestamp: Date.now() }
   }
 
   /**

@@ -1,349 +1,2740 @@
-/**
- * Options Page Controller - Modern settings management
- * Handles user configuration with validation and persistence
- */
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __commonJS = (cb, mod) => function __require() {
+  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
 
-import { ConfigManager } from '../../config/config-manager.js';
-import { PinboardService } from '../../features/pinboard/pinboard-service.js';
+// node_modules/fast-xml-parser/src/util.js
+var require_util = __commonJS({
+  "node_modules/fast-xml-parser/src/util.js"(exports) {
+    "use strict";
+    var nameStartChar = ":A-Za-z_\\u00C0-\\u00D6\\u00D8-\\u00F6\\u00F8-\\u02FF\\u0370-\\u037D\\u037F-\\u1FFF\\u200C-\\u200D\\u2070-\\u218F\\u2C00-\\u2FEF\\u3001-\\uD7FF\\uF900-\\uFDCF\\uFDF0-\\uFFFD";
+    var nameChar = nameStartChar + "\\-.\\d\\u00B7\\u0300-\\u036F\\u203F-\\u2040";
+    var nameRegexp = "[" + nameStartChar + "][" + nameChar + "]*";
+    var regexName = new RegExp("^" + nameRegexp + "$");
+    var getAllMatches = function(string, regex) {
+      const matches = [];
+      let match = regex.exec(string);
+      while (match) {
+        const allmatches = [];
+        allmatches.startIndex = regex.lastIndex - match[0].length;
+        const len = match.length;
+        for (let index = 0; index < len; index++) {
+          allmatches.push(match[index]);
+        }
+        matches.push(allmatches);
+        match = regex.exec(string);
+      }
+      return matches;
+    };
+    var isName = function(string) {
+      const match = regexName.exec(string);
+      return !(match === null || typeof match === "undefined");
+    };
+    exports.isExist = function(v) {
+      return typeof v !== "undefined";
+    };
+    exports.isEmptyObject = function(obj) {
+      return Object.keys(obj).length === 0;
+    };
+    exports.merge = function(target, a, arrayMode) {
+      if (a) {
+        const keys = Object.keys(a);
+        const len = keys.length;
+        for (let i = 0; i < len; i++) {
+          if (arrayMode === "strict") {
+            target[keys[i]] = [a[keys[i]]];
+          } else {
+            target[keys[i]] = a[keys[i]];
+          }
+        }
+      }
+    };
+    exports.getValue = function(v) {
+      if (exports.isExist(v)) {
+        return v;
+      } else {
+        return "";
+      }
+    };
+    exports.isName = isName;
+    exports.getAllMatches = getAllMatches;
+    exports.nameRegexp = nameRegexp;
+  }
+});
 
-class OptionsController {
+// node_modules/fast-xml-parser/src/validator.js
+var require_validator = __commonJS({
+  "node_modules/fast-xml-parser/src/validator.js"(exports) {
+    "use strict";
+    var util = require_util();
+    var defaultOptions = {
+      allowBooleanAttributes: false,
+      //A tag can have attributes without any value
+      unpairedTags: []
+    };
+    exports.validate = function(xmlData, options) {
+      options = Object.assign({}, defaultOptions, options);
+      const tags = [];
+      let tagFound = false;
+      let reachedRoot = false;
+      if (xmlData[0] === "\uFEFF") {
+        xmlData = xmlData.substr(1);
+      }
+      for (let i = 0; i < xmlData.length; i++) {
+        if (xmlData[i] === "<" && xmlData[i + 1] === "?") {
+          i += 2;
+          i = readPI(xmlData, i);
+          if (i.err) return i;
+        } else if (xmlData[i] === "<") {
+          let tagStartPos = i;
+          i++;
+          if (xmlData[i] === "!") {
+            i = readCommentAndCDATA(xmlData, i);
+            continue;
+          } else {
+            let closingTag = false;
+            if (xmlData[i] === "/") {
+              closingTag = true;
+              i++;
+            }
+            let tagName = "";
+            for (; i < xmlData.length && xmlData[i] !== ">" && xmlData[i] !== " " && xmlData[i] !== "	" && xmlData[i] !== "\n" && xmlData[i] !== "\r"; i++) {
+              tagName += xmlData[i];
+            }
+            tagName = tagName.trim();
+            if (tagName[tagName.length - 1] === "/") {
+              tagName = tagName.substring(0, tagName.length - 1);
+              i--;
+            }
+            if (!validateTagName(tagName)) {
+              let msg;
+              if (tagName.trim().length === 0) {
+                msg = "Invalid space after '<'.";
+              } else {
+                msg = "Tag '" + tagName + "' is an invalid name.";
+              }
+              return getErrorObject("InvalidTag", msg, getLineNumberForPosition(xmlData, i));
+            }
+            const result = readAttributeStr(xmlData, i);
+            if (result === false) {
+              return getErrorObject("InvalidAttr", "Attributes for '" + tagName + "' have open quote.", getLineNumberForPosition(xmlData, i));
+            }
+            let attrStr = result.value;
+            i = result.index;
+            if (attrStr[attrStr.length - 1] === "/") {
+              const attrStrStart = i - attrStr.length;
+              attrStr = attrStr.substring(0, attrStr.length - 1);
+              const isValid = validateAttributeString(attrStr, options);
+              if (isValid === true) {
+                tagFound = true;
+              } else {
+                return getErrorObject(isValid.err.code, isValid.err.msg, getLineNumberForPosition(xmlData, attrStrStart + isValid.err.line));
+              }
+            } else if (closingTag) {
+              if (!result.tagClosed) {
+                return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' doesn't have proper closing.", getLineNumberForPosition(xmlData, i));
+              } else if (attrStr.trim().length > 0) {
+                return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' can't have attributes or invalid starting.", getLineNumberForPosition(xmlData, tagStartPos));
+              } else if (tags.length === 0) {
+                return getErrorObject("InvalidTag", "Closing tag '" + tagName + "' has not been opened.", getLineNumberForPosition(xmlData, tagStartPos));
+              } else {
+                const otg = tags.pop();
+                if (tagName !== otg.tagName) {
+                  let openPos = getLineNumberForPosition(xmlData, otg.tagStartPos);
+                  return getErrorObject(
+                    "InvalidTag",
+                    "Expected closing tag '" + otg.tagName + "' (opened in line " + openPos.line + ", col " + openPos.col + ") instead of closing tag '" + tagName + "'.",
+                    getLineNumberForPosition(xmlData, tagStartPos)
+                  );
+                }
+                if (tags.length == 0) {
+                  reachedRoot = true;
+                }
+              }
+            } else {
+              const isValid = validateAttributeString(attrStr, options);
+              if (isValid !== true) {
+                return getErrorObject(isValid.err.code, isValid.err.msg, getLineNumberForPosition(xmlData, i - attrStr.length + isValid.err.line));
+              }
+              if (reachedRoot === true) {
+                return getErrorObject("InvalidXml", "Multiple possible root nodes found.", getLineNumberForPosition(xmlData, i));
+              } else if (options.unpairedTags.indexOf(tagName) !== -1) {
+              } else {
+                tags.push({ tagName, tagStartPos });
+              }
+              tagFound = true;
+            }
+            for (i++; i < xmlData.length; i++) {
+              if (xmlData[i] === "<") {
+                if (xmlData[i + 1] === "!") {
+                  i++;
+                  i = readCommentAndCDATA(xmlData, i);
+                  continue;
+                } else if (xmlData[i + 1] === "?") {
+                  i = readPI(xmlData, ++i);
+                  if (i.err) return i;
+                } else {
+                  break;
+                }
+              } else if (xmlData[i] === "&") {
+                const afterAmp = validateAmpersand(xmlData, i);
+                if (afterAmp == -1)
+                  return getErrorObject("InvalidChar", "char '&' is not expected.", getLineNumberForPosition(xmlData, i));
+                i = afterAmp;
+              } else {
+                if (reachedRoot === true && !isWhiteSpace(xmlData[i])) {
+                  return getErrorObject("InvalidXml", "Extra text at the end", getLineNumberForPosition(xmlData, i));
+                }
+              }
+            }
+            if (xmlData[i] === "<") {
+              i--;
+            }
+          }
+        } else {
+          if (isWhiteSpace(xmlData[i])) {
+            continue;
+          }
+          return getErrorObject("InvalidChar", "char '" + xmlData[i] + "' is not expected.", getLineNumberForPosition(xmlData, i));
+        }
+      }
+      if (!tagFound) {
+        return getErrorObject("InvalidXml", "Start tag expected.", 1);
+      } else if (tags.length == 1) {
+        return getErrorObject("InvalidTag", "Unclosed tag '" + tags[0].tagName + "'.", getLineNumberForPosition(xmlData, tags[0].tagStartPos));
+      } else if (tags.length > 0) {
+        return getErrorObject("InvalidXml", "Invalid '" + JSON.stringify(tags.map((t) => t.tagName), null, 4).replace(/\r?\n/g, "") + "' found.", { line: 1, col: 1 });
+      }
+      return true;
+    };
+    function isWhiteSpace(char) {
+      return char === " " || char === "	" || char === "\n" || char === "\r";
+    }
+    function readPI(xmlData, i) {
+      const start = i;
+      for (; i < xmlData.length; i++) {
+        if (xmlData[i] == "?" || xmlData[i] == " ") {
+          const tagname = xmlData.substr(start, i - start);
+          if (i > 5 && tagname === "xml") {
+            return getErrorObject("InvalidXml", "XML declaration allowed only at the start of the document.", getLineNumberForPosition(xmlData, i));
+          } else if (xmlData[i] == "?" && xmlData[i + 1] == ">") {
+            i++;
+            break;
+          } else {
+            continue;
+          }
+        }
+      }
+      return i;
+    }
+    function readCommentAndCDATA(xmlData, i) {
+      if (xmlData.length > i + 5 && xmlData[i + 1] === "-" && xmlData[i + 2] === "-") {
+        for (i += 3; i < xmlData.length; i++) {
+          if (xmlData[i] === "-" && xmlData[i + 1] === "-" && xmlData[i + 2] === ">") {
+            i += 2;
+            break;
+          }
+        }
+      } else if (xmlData.length > i + 8 && xmlData[i + 1] === "D" && xmlData[i + 2] === "O" && xmlData[i + 3] === "C" && xmlData[i + 4] === "T" && xmlData[i + 5] === "Y" && xmlData[i + 6] === "P" && xmlData[i + 7] === "E") {
+        let angleBracketsCount = 1;
+        for (i += 8; i < xmlData.length; i++) {
+          if (xmlData[i] === "<") {
+            angleBracketsCount++;
+          } else if (xmlData[i] === ">") {
+            angleBracketsCount--;
+            if (angleBracketsCount === 0) {
+              break;
+            }
+          }
+        }
+      } else if (xmlData.length > i + 9 && xmlData[i + 1] === "[" && xmlData[i + 2] === "C" && xmlData[i + 3] === "D" && xmlData[i + 4] === "A" && xmlData[i + 5] === "T" && xmlData[i + 6] === "A" && xmlData[i + 7] === "[") {
+        for (i += 8; i < xmlData.length; i++) {
+          if (xmlData[i] === "]" && xmlData[i + 1] === "]" && xmlData[i + 2] === ">") {
+            i += 2;
+            break;
+          }
+        }
+      }
+      return i;
+    }
+    var doubleQuote = '"';
+    var singleQuote = "'";
+    function readAttributeStr(xmlData, i) {
+      let attrStr = "";
+      let startChar = "";
+      let tagClosed = false;
+      for (; i < xmlData.length; i++) {
+        if (xmlData[i] === doubleQuote || xmlData[i] === singleQuote) {
+          if (startChar === "") {
+            startChar = xmlData[i];
+          } else if (startChar !== xmlData[i]) {
+          } else {
+            startChar = "";
+          }
+        } else if (xmlData[i] === ">") {
+          if (startChar === "") {
+            tagClosed = true;
+            break;
+          }
+        }
+        attrStr += xmlData[i];
+      }
+      if (startChar !== "") {
+        return false;
+      }
+      return {
+        value: attrStr,
+        index: i,
+        tagClosed
+      };
+    }
+    var validAttrStrRegxp = new RegExp(`(\\s*)([^\\s=]+)(\\s*=)?(\\s*(['"])(([\\s\\S])*?)\\5)?`, "g");
+    function validateAttributeString(attrStr, options) {
+      const matches = util.getAllMatches(attrStr, validAttrStrRegxp);
+      const attrNames = {};
+      for (let i = 0; i < matches.length; i++) {
+        if (matches[i][1].length === 0) {
+          return getErrorObject("InvalidAttr", "Attribute '" + matches[i][2] + "' has no space in starting.", getPositionFromMatch(matches[i]));
+        } else if (matches[i][3] !== void 0 && matches[i][4] === void 0) {
+          return getErrorObject("InvalidAttr", "Attribute '" + matches[i][2] + "' is without value.", getPositionFromMatch(matches[i]));
+        } else if (matches[i][3] === void 0 && !options.allowBooleanAttributes) {
+          return getErrorObject("InvalidAttr", "boolean attribute '" + matches[i][2] + "' is not allowed.", getPositionFromMatch(matches[i]));
+        }
+        const attrName = matches[i][2];
+        if (!validateAttrName(attrName)) {
+          return getErrorObject("InvalidAttr", "Attribute '" + attrName + "' is an invalid name.", getPositionFromMatch(matches[i]));
+        }
+        if (!attrNames.hasOwnProperty(attrName)) {
+          attrNames[attrName] = 1;
+        } else {
+          return getErrorObject("InvalidAttr", "Attribute '" + attrName + "' is repeated.", getPositionFromMatch(matches[i]));
+        }
+      }
+      return true;
+    }
+    function validateNumberAmpersand(xmlData, i) {
+      let re = /\d/;
+      if (xmlData[i] === "x") {
+        i++;
+        re = /[\da-fA-F]/;
+      }
+      for (; i < xmlData.length; i++) {
+        if (xmlData[i] === ";")
+          return i;
+        if (!xmlData[i].match(re))
+          break;
+      }
+      return -1;
+    }
+    function validateAmpersand(xmlData, i) {
+      i++;
+      if (xmlData[i] === ";")
+        return -1;
+      if (xmlData[i] === "#") {
+        i++;
+        return validateNumberAmpersand(xmlData, i);
+      }
+      let count = 0;
+      for (; i < xmlData.length; i++, count++) {
+        if (xmlData[i].match(/\w/) && count < 20)
+          continue;
+        if (xmlData[i] === ";")
+          break;
+        return -1;
+      }
+      return i;
+    }
+    function getErrorObject(code, message, lineNumber) {
+      return {
+        err: {
+          code,
+          msg: message,
+          line: lineNumber.line || lineNumber,
+          col: lineNumber.col
+        }
+      };
+    }
+    function validateAttrName(attrName) {
+      return util.isName(attrName);
+    }
+    function validateTagName(tagname) {
+      return util.isName(tagname);
+    }
+    function getLineNumberForPosition(xmlData, index) {
+      const lines = xmlData.substring(0, index).split(/\r?\n/);
+      return {
+        line: lines.length,
+        // column number is last line's length + 1, because column numbering starts at 1:
+        col: lines[lines.length - 1].length + 1
+      };
+    }
+    function getPositionFromMatch(match) {
+      return match.startIndex + match[1].length;
+    }
+  }
+});
+
+// node_modules/fast-xml-parser/src/xmlparser/OptionsBuilder.js
+var require_OptionsBuilder = __commonJS({
+  "node_modules/fast-xml-parser/src/xmlparser/OptionsBuilder.js"(exports) {
+    var defaultOptions = {
+      preserveOrder: false,
+      attributeNamePrefix: "@_",
+      attributesGroupName: false,
+      textNodeName: "#text",
+      ignoreAttributes: true,
+      removeNSPrefix: false,
+      // remove NS from tag name or attribute name if true
+      allowBooleanAttributes: false,
+      //a tag can have attributes without any value
+      //ignoreRootElement : false,
+      parseTagValue: true,
+      parseAttributeValue: false,
+      trimValues: true,
+      //Trim string values of tag and attributes
+      cdataPropName: false,
+      numberParseOptions: {
+        hex: true,
+        leadingZeros: true,
+        eNotation: true
+      },
+      tagValueProcessor: function(tagName, val) {
+        return val;
+      },
+      attributeValueProcessor: function(attrName, val) {
+        return val;
+      },
+      stopNodes: [],
+      //nested tags will not be parsed even for errors
+      alwaysCreateTextNode: false,
+      isArray: () => false,
+      commentPropName: false,
+      unpairedTags: [],
+      processEntities: true,
+      htmlEntities: false,
+      ignoreDeclaration: false,
+      ignorePiTags: false,
+      transformTagName: false,
+      transformAttributeName: false,
+      updateTag: function(tagName, jPath, attrs) {
+        return tagName;
+      }
+      // skipEmptyListItem: false
+    };
+    var buildOptions = function(options) {
+      return Object.assign({}, defaultOptions, options);
+    };
+    exports.buildOptions = buildOptions;
+    exports.defaultOptions = defaultOptions;
+  }
+});
+
+// node_modules/fast-xml-parser/src/xmlparser/xmlNode.js
+var require_xmlNode = __commonJS({
+  "node_modules/fast-xml-parser/src/xmlparser/xmlNode.js"(exports, module) {
+    "use strict";
+    var XmlNode = class {
+      constructor(tagname) {
+        this.tagname = tagname;
+        this.child = [];
+        this[":@"] = {};
+      }
+      add(key, val) {
+        if (key === "__proto__") key = "#__proto__";
+        this.child.push({ [key]: val });
+      }
+      addChild(node) {
+        if (node.tagname === "__proto__") node.tagname = "#__proto__";
+        if (node[":@"] && Object.keys(node[":@"]).length > 0) {
+          this.child.push({ [node.tagname]: node.child, [":@"]: node[":@"] });
+        } else {
+          this.child.push({ [node.tagname]: node.child });
+        }
+      }
+    };
+    module.exports = XmlNode;
+  }
+});
+
+// node_modules/fast-xml-parser/src/xmlparser/DocTypeReader.js
+var require_DocTypeReader = __commonJS({
+  "node_modules/fast-xml-parser/src/xmlparser/DocTypeReader.js"(exports, module) {
+    var util = require_util();
+    function readDocType(xmlData, i) {
+      const entities = {};
+      if (xmlData[i + 3] === "O" && xmlData[i + 4] === "C" && xmlData[i + 5] === "T" && xmlData[i + 6] === "Y" && xmlData[i + 7] === "P" && xmlData[i + 8] === "E") {
+        i = i + 9;
+        let angleBracketsCount = 1;
+        let hasBody = false, comment = false;
+        let exp = "";
+        for (; i < xmlData.length; i++) {
+          if (xmlData[i] === "<" && !comment) {
+            if (hasBody && isEntity(xmlData, i)) {
+              i += 7;
+              let entityName, val;
+              [entityName, val, i] = readEntityExp(xmlData, i + 1);
+              if (val.indexOf("&") === -1)
+                entities[validateEntityName(entityName)] = {
+                  regx: RegExp(`&${entityName};`, "g"),
+                  val
+                };
+            } else if (hasBody && isElement(xmlData, i)) i += 8;
+            else if (hasBody && isAttlist(xmlData, i)) i += 8;
+            else if (hasBody && isNotation(xmlData, i)) i += 9;
+            else if (isComment) comment = true;
+            else throw new Error("Invalid DOCTYPE");
+            angleBracketsCount++;
+            exp = "";
+          } else if (xmlData[i] === ">") {
+            if (comment) {
+              if (xmlData[i - 1] === "-" && xmlData[i - 2] === "-") {
+                comment = false;
+                angleBracketsCount--;
+              }
+            } else {
+              angleBracketsCount--;
+            }
+            if (angleBracketsCount === 0) {
+              break;
+            }
+          } else if (xmlData[i] === "[") {
+            hasBody = true;
+          } else {
+            exp += xmlData[i];
+          }
+        }
+        if (angleBracketsCount !== 0) {
+          throw new Error(`Unclosed DOCTYPE`);
+        }
+      } else {
+        throw new Error(`Invalid Tag instead of DOCTYPE`);
+      }
+      return { entities, i };
+    }
+    function readEntityExp(xmlData, i) {
+      let entityName = "";
+      for (; i < xmlData.length && (xmlData[i] !== "'" && xmlData[i] !== '"'); i++) {
+        entityName += xmlData[i];
+      }
+      entityName = entityName.trim();
+      if (entityName.indexOf(" ") !== -1) throw new Error("External entites are not supported");
+      const startChar = xmlData[i++];
+      let val = "";
+      for (; i < xmlData.length && xmlData[i] !== startChar; i++) {
+        val += xmlData[i];
+      }
+      return [entityName, val, i];
+    }
+    function isComment(xmlData, i) {
+      if (xmlData[i + 1] === "!" && xmlData[i + 2] === "-" && xmlData[i + 3] === "-") return true;
+      return false;
+    }
+    function isEntity(xmlData, i) {
+      if (xmlData[i + 1] === "!" && xmlData[i + 2] === "E" && xmlData[i + 3] === "N" && xmlData[i + 4] === "T" && xmlData[i + 5] === "I" && xmlData[i + 6] === "T" && xmlData[i + 7] === "Y") return true;
+      return false;
+    }
+    function isElement(xmlData, i) {
+      if (xmlData[i + 1] === "!" && xmlData[i + 2] === "E" && xmlData[i + 3] === "L" && xmlData[i + 4] === "E" && xmlData[i + 5] === "M" && xmlData[i + 6] === "E" && xmlData[i + 7] === "N" && xmlData[i + 8] === "T") return true;
+      return false;
+    }
+    function isAttlist(xmlData, i) {
+      if (xmlData[i + 1] === "!" && xmlData[i + 2] === "A" && xmlData[i + 3] === "T" && xmlData[i + 4] === "T" && xmlData[i + 5] === "L" && xmlData[i + 6] === "I" && xmlData[i + 7] === "S" && xmlData[i + 8] === "T") return true;
+      return false;
+    }
+    function isNotation(xmlData, i) {
+      if (xmlData[i + 1] === "!" && xmlData[i + 2] === "N" && xmlData[i + 3] === "O" && xmlData[i + 4] === "T" && xmlData[i + 5] === "A" && xmlData[i + 6] === "T" && xmlData[i + 7] === "I" && xmlData[i + 8] === "O" && xmlData[i + 9] === "N") return true;
+      return false;
+    }
+    function validateEntityName(name) {
+      if (util.isName(name))
+        return name;
+      else
+        throw new Error(`Invalid entity name ${name}`);
+    }
+    module.exports = readDocType;
+  }
+});
+
+// node_modules/strnum/strnum.js
+var require_strnum = __commonJS({
+  "node_modules/strnum/strnum.js"(exports, module) {
+    var hexRegex = /^[-+]?0x[a-fA-F0-9]+$/;
+    var numRegex = /^([\-\+])?(0*)([0-9]*(\.[0-9]*)?)$/;
+    var consider = {
+      hex: true,
+      // oct: false,
+      leadingZeros: true,
+      decimalPoint: ".",
+      eNotation: true
+      //skipLike: /regex/
+    };
+    function toNumber(str, options = {}) {
+      options = Object.assign({}, consider, options);
+      if (!str || typeof str !== "string") return str;
+      let trimmedStr = str.trim();
+      if (options.skipLike !== void 0 && options.skipLike.test(trimmedStr)) return str;
+      else if (str === "0") return 0;
+      else if (options.hex && hexRegex.test(trimmedStr)) {
+        return parse_int(trimmedStr, 16);
+      } else if (trimmedStr.search(/[eE]/) !== -1) {
+        const notation = trimmedStr.match(/^([-\+])?(0*)([0-9]*(\.[0-9]*)?[eE][-\+]?[0-9]+)$/);
+        if (notation) {
+          if (options.leadingZeros) {
+            trimmedStr = (notation[1] || "") + notation[3];
+          } else {
+            if (notation[2] === "0" && notation[3][0] === ".") {
+            } else {
+              return str;
+            }
+          }
+          return options.eNotation ? Number(trimmedStr) : str;
+        } else {
+          return str;
+        }
+      } else {
+        const match = numRegex.exec(trimmedStr);
+        if (match) {
+          const sign = match[1];
+          const leadingZeros = match[2];
+          let numTrimmedByZeros = trimZeros(match[3]);
+          if (!options.leadingZeros && leadingZeros.length > 0 && sign && trimmedStr[2] !== ".") return str;
+          else if (!options.leadingZeros && leadingZeros.length > 0 && !sign && trimmedStr[1] !== ".") return str;
+          else if (options.leadingZeros && leadingZeros === str) return 0;
+          else {
+            const num = Number(trimmedStr);
+            const numStr = "" + num;
+            if (numStr.search(/[eE]/) !== -1) {
+              if (options.eNotation) return num;
+              else return str;
+            } else if (trimmedStr.indexOf(".") !== -1) {
+              if (numStr === "0" && numTrimmedByZeros === "") return num;
+              else if (numStr === numTrimmedByZeros) return num;
+              else if (sign && numStr === "-" + numTrimmedByZeros) return num;
+              else return str;
+            }
+            if (leadingZeros) {
+              return numTrimmedByZeros === numStr || sign + numTrimmedByZeros === numStr ? num : str;
+            } else {
+              return trimmedStr === numStr || trimmedStr === sign + numStr ? num : str;
+            }
+          }
+        } else {
+          return str;
+        }
+      }
+    }
+    function trimZeros(numStr) {
+      if (numStr && numStr.indexOf(".") !== -1) {
+        numStr = numStr.replace(/0+$/, "");
+        if (numStr === ".") numStr = "0";
+        else if (numStr[0] === ".") numStr = "0" + numStr;
+        else if (numStr[numStr.length - 1] === ".") numStr = numStr.substr(0, numStr.length - 1);
+        return numStr;
+      }
+      return numStr;
+    }
+    function parse_int(numStr, base) {
+      if (parseInt) return parseInt(numStr, base);
+      else if (Number.parseInt) return Number.parseInt(numStr, base);
+      else if (window && window.parseInt) return window.parseInt(numStr, base);
+      else throw new Error("parseInt, Number.parseInt, window.parseInt are not supported");
+    }
+    module.exports = toNumber;
+  }
+});
+
+// node_modules/fast-xml-parser/src/ignoreAttributes.js
+var require_ignoreAttributes = __commonJS({
+  "node_modules/fast-xml-parser/src/ignoreAttributes.js"(exports, module) {
+    function getIgnoreAttributesFn(ignoreAttributes) {
+      if (typeof ignoreAttributes === "function") {
+        return ignoreAttributes;
+      }
+      if (Array.isArray(ignoreAttributes)) {
+        return (attrName) => {
+          for (const pattern of ignoreAttributes) {
+            if (typeof pattern === "string" && attrName === pattern) {
+              return true;
+            }
+            if (pattern instanceof RegExp && pattern.test(attrName)) {
+              return true;
+            }
+          }
+        };
+      }
+      return () => false;
+    }
+    module.exports = getIgnoreAttributesFn;
+  }
+});
+
+// node_modules/fast-xml-parser/src/xmlparser/OrderedObjParser.js
+var require_OrderedObjParser = __commonJS({
+  "node_modules/fast-xml-parser/src/xmlparser/OrderedObjParser.js"(exports, module) {
+    "use strict";
+    var util = require_util();
+    var xmlNode = require_xmlNode();
+    var readDocType = require_DocTypeReader();
+    var toNumber = require_strnum();
+    var getIgnoreAttributesFn = require_ignoreAttributes();
+    var OrderedObjParser = class {
+      constructor(options) {
+        this.options = options;
+        this.currentNode = null;
+        this.tagsNodeStack = [];
+        this.docTypeEntities = {};
+        this.lastEntities = {
+          "apos": { regex: /&(apos|#39|#x27);/g, val: "'" },
+          "gt": { regex: /&(gt|#62|#x3E);/g, val: ">" },
+          "lt": { regex: /&(lt|#60|#x3C);/g, val: "<" },
+          "quot": { regex: /&(quot|#34|#x22);/g, val: '"' }
+        };
+        this.ampEntity = { regex: /&(amp|#38|#x26);/g, val: "&" };
+        this.htmlEntities = {
+          "space": { regex: /&(nbsp|#160);/g, val: " " },
+          // "lt" : { regex: /&(lt|#60);/g, val: "<" },
+          // "gt" : { regex: /&(gt|#62);/g, val: ">" },
+          // "amp" : { regex: /&(amp|#38);/g, val: "&" },
+          // "quot" : { regex: /&(quot|#34);/g, val: "\"" },
+          // "apos" : { regex: /&(apos|#39);/g, val: "'" },
+          "cent": { regex: /&(cent|#162);/g, val: "\xA2" },
+          "pound": { regex: /&(pound|#163);/g, val: "\xA3" },
+          "yen": { regex: /&(yen|#165);/g, val: "\xA5" },
+          "euro": { regex: /&(euro|#8364);/g, val: "\u20AC" },
+          "copyright": { regex: /&(copy|#169);/g, val: "\xA9" },
+          "reg": { regex: /&(reg|#174);/g, val: "\xAE" },
+          "inr": { regex: /&(inr|#8377);/g, val: "\u20B9" },
+          "num_dec": { regex: /&#([0-9]{1,7});/g, val: (_, str) => String.fromCharCode(Number.parseInt(str, 10)) },
+          "num_hex": { regex: /&#x([0-9a-fA-F]{1,6});/g, val: (_, str) => String.fromCharCode(Number.parseInt(str, 16)) }
+        };
+        this.addExternalEntities = addExternalEntities;
+        this.parseXml = parseXml;
+        this.parseTextData = parseTextData;
+        this.resolveNameSpace = resolveNameSpace;
+        this.buildAttributesMap = buildAttributesMap;
+        this.isItStopNode = isItStopNode;
+        this.replaceEntitiesValue = replaceEntitiesValue;
+        this.readStopNodeData = readStopNodeData;
+        this.saveTextToParentTag = saveTextToParentTag;
+        this.addChild = addChild;
+        this.ignoreAttributesFn = getIgnoreAttributesFn(this.options.ignoreAttributes);
+      }
+    };
+    function addExternalEntities(externalEntities) {
+      const entKeys = Object.keys(externalEntities);
+      for (let i = 0; i < entKeys.length; i++) {
+        const ent = entKeys[i];
+        this.lastEntities[ent] = {
+          regex: new RegExp("&" + ent + ";", "g"),
+          val: externalEntities[ent]
+        };
+      }
+    }
+    function parseTextData(val, tagName, jPath, dontTrim, hasAttributes, isLeafNode, escapeEntities) {
+      if (val !== void 0) {
+        if (this.options.trimValues && !dontTrim) {
+          val = val.trim();
+        }
+        if (val.length > 0) {
+          if (!escapeEntities) val = this.replaceEntitiesValue(val);
+          const newval = this.options.tagValueProcessor(tagName, val, jPath, hasAttributes, isLeafNode);
+          if (newval === null || newval === void 0) {
+            return val;
+          } else if (typeof newval !== typeof val || newval !== val) {
+            return newval;
+          } else if (this.options.trimValues) {
+            return parseValue(val, this.options.parseTagValue, this.options.numberParseOptions);
+          } else {
+            const trimmedVal = val.trim();
+            if (trimmedVal === val) {
+              return parseValue(val, this.options.parseTagValue, this.options.numberParseOptions);
+            } else {
+              return val;
+            }
+          }
+        }
+      }
+    }
+    function resolveNameSpace(tagname) {
+      if (this.options.removeNSPrefix) {
+        const tags = tagname.split(":");
+        const prefix = tagname.charAt(0) === "/" ? "/" : "";
+        if (tags[0] === "xmlns") {
+          return "";
+        }
+        if (tags.length === 2) {
+          tagname = prefix + tags[1];
+        }
+      }
+      return tagname;
+    }
+    var attrsRegx = new RegExp(`([^\\s=]+)\\s*(=\\s*(['"])([\\s\\S]*?)\\3)?`, "gm");
+    function buildAttributesMap(attrStr, jPath, tagName) {
+      if (this.options.ignoreAttributes !== true && typeof attrStr === "string") {
+        const matches = util.getAllMatches(attrStr, attrsRegx);
+        const len = matches.length;
+        const attrs = {};
+        for (let i = 0; i < len; i++) {
+          const attrName = this.resolveNameSpace(matches[i][1]);
+          if (this.ignoreAttributesFn(attrName, jPath)) {
+            continue;
+          }
+          let oldVal = matches[i][4];
+          let aName = this.options.attributeNamePrefix + attrName;
+          if (attrName.length) {
+            if (this.options.transformAttributeName) {
+              aName = this.options.transformAttributeName(aName);
+            }
+            if (aName === "__proto__") aName = "#__proto__";
+            if (oldVal !== void 0) {
+              if (this.options.trimValues) {
+                oldVal = oldVal.trim();
+              }
+              oldVal = this.replaceEntitiesValue(oldVal);
+              const newVal = this.options.attributeValueProcessor(attrName, oldVal, jPath);
+              if (newVal === null || newVal === void 0) {
+                attrs[aName] = oldVal;
+              } else if (typeof newVal !== typeof oldVal || newVal !== oldVal) {
+                attrs[aName] = newVal;
+              } else {
+                attrs[aName] = parseValue(
+                  oldVal,
+                  this.options.parseAttributeValue,
+                  this.options.numberParseOptions
+                );
+              }
+            } else if (this.options.allowBooleanAttributes) {
+              attrs[aName] = true;
+            }
+          }
+        }
+        if (!Object.keys(attrs).length) {
+          return;
+        }
+        if (this.options.attributesGroupName) {
+          const attrCollection = {};
+          attrCollection[this.options.attributesGroupName] = attrs;
+          return attrCollection;
+        }
+        return attrs;
+      }
+    }
+    var parseXml = function(xmlData) {
+      xmlData = xmlData.replace(/\r\n?/g, "\n");
+      const xmlObj = new xmlNode("!xml");
+      let currentNode = xmlObj;
+      let textData = "";
+      let jPath = "";
+      for (let i = 0; i < xmlData.length; i++) {
+        const ch = xmlData[i];
+        if (ch === "<") {
+          if (xmlData[i + 1] === "/") {
+            const closeIndex = findClosingIndex(xmlData, ">", i, "Closing Tag is not closed.");
+            let tagName = xmlData.substring(i + 2, closeIndex).trim();
+            if (this.options.removeNSPrefix) {
+              const colonIndex = tagName.indexOf(":");
+              if (colonIndex !== -1) {
+                tagName = tagName.substr(colonIndex + 1);
+              }
+            }
+            if (this.options.transformTagName) {
+              tagName = this.options.transformTagName(tagName);
+            }
+            if (currentNode) {
+              textData = this.saveTextToParentTag(textData, currentNode, jPath);
+            }
+            const lastTagName = jPath.substring(jPath.lastIndexOf(".") + 1);
+            if (tagName && this.options.unpairedTags.indexOf(tagName) !== -1) {
+              throw new Error(`Unpaired tag can not be used as closing tag: </${tagName}>`);
+            }
+            let propIndex = 0;
+            if (lastTagName && this.options.unpairedTags.indexOf(lastTagName) !== -1) {
+              propIndex = jPath.lastIndexOf(".", jPath.lastIndexOf(".") - 1);
+              this.tagsNodeStack.pop();
+            } else {
+              propIndex = jPath.lastIndexOf(".");
+            }
+            jPath = jPath.substring(0, propIndex);
+            currentNode = this.tagsNodeStack.pop();
+            textData = "";
+            i = closeIndex;
+          } else if (xmlData[i + 1] === "?") {
+            let tagData = readTagExp(xmlData, i, false, "?>");
+            if (!tagData) throw new Error("Pi Tag is not closed.");
+            textData = this.saveTextToParentTag(textData, currentNode, jPath);
+            if (this.options.ignoreDeclaration && tagData.tagName === "?xml" || this.options.ignorePiTags) {
+            } else {
+              const childNode = new xmlNode(tagData.tagName);
+              childNode.add(this.options.textNodeName, "");
+              if (tagData.tagName !== tagData.tagExp && tagData.attrExpPresent) {
+                childNode[":@"] = this.buildAttributesMap(tagData.tagExp, jPath, tagData.tagName);
+              }
+              this.addChild(currentNode, childNode, jPath);
+            }
+            i = tagData.closeIndex + 1;
+          } else if (xmlData.substr(i + 1, 3) === "!--") {
+            const endIndex = findClosingIndex(xmlData, "-->", i + 4, "Comment is not closed.");
+            if (this.options.commentPropName) {
+              const comment = xmlData.substring(i + 4, endIndex - 2);
+              textData = this.saveTextToParentTag(textData, currentNode, jPath);
+              currentNode.add(this.options.commentPropName, [{ [this.options.textNodeName]: comment }]);
+            }
+            i = endIndex;
+          } else if (xmlData.substr(i + 1, 2) === "!D") {
+            const result = readDocType(xmlData, i);
+            this.docTypeEntities = result.entities;
+            i = result.i;
+          } else if (xmlData.substr(i + 1, 2) === "![") {
+            const closeIndex = findClosingIndex(xmlData, "]]>", i, "CDATA is not closed.") - 2;
+            const tagExp = xmlData.substring(i + 9, closeIndex);
+            textData = this.saveTextToParentTag(textData, currentNode, jPath);
+            let val = this.parseTextData(tagExp, currentNode.tagname, jPath, true, false, true, true);
+            if (val == void 0) val = "";
+            if (this.options.cdataPropName) {
+              currentNode.add(this.options.cdataPropName, [{ [this.options.textNodeName]: tagExp }]);
+            } else {
+              currentNode.add(this.options.textNodeName, val);
+            }
+            i = closeIndex + 2;
+          } else {
+            let result = readTagExp(xmlData, i, this.options.removeNSPrefix);
+            let tagName = result.tagName;
+            const rawTagName = result.rawTagName;
+            let tagExp = result.tagExp;
+            let attrExpPresent = result.attrExpPresent;
+            let closeIndex = result.closeIndex;
+            if (this.options.transformTagName) {
+              tagName = this.options.transformTagName(tagName);
+            }
+            if (currentNode && textData) {
+              if (currentNode.tagname !== "!xml") {
+                textData = this.saveTextToParentTag(textData, currentNode, jPath, false);
+              }
+            }
+            const lastTag = currentNode;
+            if (lastTag && this.options.unpairedTags.indexOf(lastTag.tagname) !== -1) {
+              currentNode = this.tagsNodeStack.pop();
+              jPath = jPath.substring(0, jPath.lastIndexOf("."));
+            }
+            if (tagName !== xmlObj.tagname) {
+              jPath += jPath ? "." + tagName : tagName;
+            }
+            if (this.isItStopNode(this.options.stopNodes, jPath, tagName)) {
+              let tagContent = "";
+              if (tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1) {
+                if (tagName[tagName.length - 1] === "/") {
+                  tagName = tagName.substr(0, tagName.length - 1);
+                  jPath = jPath.substr(0, jPath.length - 1);
+                  tagExp = tagName;
+                } else {
+                  tagExp = tagExp.substr(0, tagExp.length - 1);
+                }
+                i = result.closeIndex;
+              } else if (this.options.unpairedTags.indexOf(tagName) !== -1) {
+                i = result.closeIndex;
+              } else {
+                const result2 = this.readStopNodeData(xmlData, rawTagName, closeIndex + 1);
+                if (!result2) throw new Error(`Unexpected end of ${rawTagName}`);
+                i = result2.i;
+                tagContent = result2.tagContent;
+              }
+              const childNode = new xmlNode(tagName);
+              if (tagName !== tagExp && attrExpPresent) {
+                childNode[":@"] = this.buildAttributesMap(tagExp, jPath, tagName);
+              }
+              if (tagContent) {
+                tagContent = this.parseTextData(tagContent, tagName, jPath, true, attrExpPresent, true, true);
+              }
+              jPath = jPath.substr(0, jPath.lastIndexOf("."));
+              childNode.add(this.options.textNodeName, tagContent);
+              this.addChild(currentNode, childNode, jPath);
+            } else {
+              if (tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1) {
+                if (tagName[tagName.length - 1] === "/") {
+                  tagName = tagName.substr(0, tagName.length - 1);
+                  jPath = jPath.substr(0, jPath.length - 1);
+                  tagExp = tagName;
+                } else {
+                  tagExp = tagExp.substr(0, tagExp.length - 1);
+                }
+                if (this.options.transformTagName) {
+                  tagName = this.options.transformTagName(tagName);
+                }
+                const childNode = new xmlNode(tagName);
+                if (tagName !== tagExp && attrExpPresent) {
+                  childNode[":@"] = this.buildAttributesMap(tagExp, jPath, tagName);
+                }
+                this.addChild(currentNode, childNode, jPath);
+                jPath = jPath.substr(0, jPath.lastIndexOf("."));
+              } else {
+                const childNode = new xmlNode(tagName);
+                this.tagsNodeStack.push(currentNode);
+                if (tagName !== tagExp && attrExpPresent) {
+                  childNode[":@"] = this.buildAttributesMap(tagExp, jPath, tagName);
+                }
+                this.addChild(currentNode, childNode, jPath);
+                currentNode = childNode;
+              }
+              textData = "";
+              i = closeIndex;
+            }
+          }
+        } else {
+          textData += xmlData[i];
+        }
+      }
+      return xmlObj.child;
+    };
+    function addChild(currentNode, childNode, jPath) {
+      const result = this.options.updateTag(childNode.tagname, jPath, childNode[":@"]);
+      if (result === false) {
+      } else if (typeof result === "string") {
+        childNode.tagname = result;
+        currentNode.addChild(childNode);
+      } else {
+        currentNode.addChild(childNode);
+      }
+    }
+    var replaceEntitiesValue = function(val) {
+      if (this.options.processEntities) {
+        for (let entityName in this.docTypeEntities) {
+          const entity = this.docTypeEntities[entityName];
+          val = val.replace(entity.regx, entity.val);
+        }
+        for (let entityName in this.lastEntities) {
+          const entity = this.lastEntities[entityName];
+          val = val.replace(entity.regex, entity.val);
+        }
+        if (this.options.htmlEntities) {
+          for (let entityName in this.htmlEntities) {
+            const entity = this.htmlEntities[entityName];
+            val = val.replace(entity.regex, entity.val);
+          }
+        }
+        val = val.replace(this.ampEntity.regex, this.ampEntity.val);
+      }
+      return val;
+    };
+    function saveTextToParentTag(textData, currentNode, jPath, isLeafNode) {
+      if (textData) {
+        if (isLeafNode === void 0) isLeafNode = currentNode.child.length === 0;
+        textData = this.parseTextData(
+          textData,
+          currentNode.tagname,
+          jPath,
+          false,
+          currentNode[":@"] ? Object.keys(currentNode[":@"]).length !== 0 : false,
+          isLeafNode
+        );
+        if (textData !== void 0 && textData !== "")
+          currentNode.add(this.options.textNodeName, textData);
+        textData = "";
+      }
+      return textData;
+    }
+    function isItStopNode(stopNodes, jPath, currentTagName) {
+      const allNodesExp = "*." + currentTagName;
+      for (const stopNodePath in stopNodes) {
+        const stopNodeExp = stopNodes[stopNodePath];
+        if (allNodesExp === stopNodeExp || jPath === stopNodeExp) return true;
+      }
+      return false;
+    }
+    function tagExpWithClosingIndex(xmlData, i, closingChar = ">") {
+      let attrBoundary;
+      let tagExp = "";
+      for (let index = i; index < xmlData.length; index++) {
+        let ch = xmlData[index];
+        if (attrBoundary) {
+          if (ch === attrBoundary) attrBoundary = "";
+        } else if (ch === '"' || ch === "'") {
+          attrBoundary = ch;
+        } else if (ch === closingChar[0]) {
+          if (closingChar[1]) {
+            if (xmlData[index + 1] === closingChar[1]) {
+              return {
+                data: tagExp,
+                index
+              };
+            }
+          } else {
+            return {
+              data: tagExp,
+              index
+            };
+          }
+        } else if (ch === "	") {
+          ch = " ";
+        }
+        tagExp += ch;
+      }
+    }
+    function findClosingIndex(xmlData, str, i, errMsg) {
+      const closingIndex = xmlData.indexOf(str, i);
+      if (closingIndex === -1) {
+        throw new Error(errMsg);
+      } else {
+        return closingIndex + str.length - 1;
+      }
+    }
+    function readTagExp(xmlData, i, removeNSPrefix, closingChar = ">") {
+      const result = tagExpWithClosingIndex(xmlData, i + 1, closingChar);
+      if (!result) return;
+      let tagExp = result.data;
+      const closeIndex = result.index;
+      const separatorIndex = tagExp.search(/\s/);
+      let tagName = tagExp;
+      let attrExpPresent = true;
+      if (separatorIndex !== -1) {
+        tagName = tagExp.substring(0, separatorIndex);
+        tagExp = tagExp.substring(separatorIndex + 1).trimStart();
+      }
+      const rawTagName = tagName;
+      if (removeNSPrefix) {
+        const colonIndex = tagName.indexOf(":");
+        if (colonIndex !== -1) {
+          tagName = tagName.substr(colonIndex + 1);
+          attrExpPresent = tagName !== result.data.substr(colonIndex + 1);
+        }
+      }
+      return {
+        tagName,
+        tagExp,
+        closeIndex,
+        attrExpPresent,
+        rawTagName
+      };
+    }
+    function readStopNodeData(xmlData, tagName, i) {
+      const startIndex = i;
+      let openTagCount = 1;
+      for (; i < xmlData.length; i++) {
+        if (xmlData[i] === "<") {
+          if (xmlData[i + 1] === "/") {
+            const closeIndex = findClosingIndex(xmlData, ">", i, `${tagName} is not closed`);
+            let closeTagName = xmlData.substring(i + 2, closeIndex).trim();
+            if (closeTagName === tagName) {
+              openTagCount--;
+              if (openTagCount === 0) {
+                return {
+                  tagContent: xmlData.substring(startIndex, i),
+                  i: closeIndex
+                };
+              }
+            }
+            i = closeIndex;
+          } else if (xmlData[i + 1] === "?") {
+            const closeIndex = findClosingIndex(xmlData, "?>", i + 1, "StopNode is not closed.");
+            i = closeIndex;
+          } else if (xmlData.substr(i + 1, 3) === "!--") {
+            const closeIndex = findClosingIndex(xmlData, "-->", i + 3, "StopNode is not closed.");
+            i = closeIndex;
+          } else if (xmlData.substr(i + 1, 2) === "![") {
+            const closeIndex = findClosingIndex(xmlData, "]]>", i, "StopNode is not closed.") - 2;
+            i = closeIndex;
+          } else {
+            const tagData = readTagExp(xmlData, i, ">");
+            if (tagData) {
+              const openTagName = tagData && tagData.tagName;
+              if (openTagName === tagName && tagData.tagExp[tagData.tagExp.length - 1] !== "/") {
+                openTagCount++;
+              }
+              i = tagData.closeIndex;
+            }
+          }
+        }
+      }
+    }
+    function parseValue(val, shouldParse, options) {
+      if (shouldParse && typeof val === "string") {
+        const newval = val.trim();
+        if (newval === "true") return true;
+        else if (newval === "false") return false;
+        else return toNumber(val, options);
+      } else {
+        if (util.isExist(val)) {
+          return val;
+        } else {
+          return "";
+        }
+      }
+    }
+    module.exports = OrderedObjParser;
+  }
+});
+
+// node_modules/fast-xml-parser/src/xmlparser/node2json.js
+var require_node2json = __commonJS({
+  "node_modules/fast-xml-parser/src/xmlparser/node2json.js"(exports) {
+    "use strict";
+    function prettify(node, options) {
+      return compress(node, options);
+    }
+    function compress(arr, options, jPath) {
+      let text;
+      const compressedObj = {};
+      for (let i = 0; i < arr.length; i++) {
+        const tagObj = arr[i];
+        const property = propName(tagObj);
+        let newJpath = "";
+        if (jPath === void 0) newJpath = property;
+        else newJpath = jPath + "." + property;
+        if (property === options.textNodeName) {
+          if (text === void 0) text = tagObj[property];
+          else text += "" + tagObj[property];
+        } else if (property === void 0) {
+          continue;
+        } else if (tagObj[property]) {
+          let val = compress(tagObj[property], options, newJpath);
+          const isLeaf = isLeafTag(val, options);
+          if (tagObj[":@"]) {
+            assignAttributes(val, tagObj[":@"], newJpath, options);
+          } else if (Object.keys(val).length === 1 && val[options.textNodeName] !== void 0 && !options.alwaysCreateTextNode) {
+            val = val[options.textNodeName];
+          } else if (Object.keys(val).length === 0) {
+            if (options.alwaysCreateTextNode) val[options.textNodeName] = "";
+            else val = "";
+          }
+          if (compressedObj[property] !== void 0 && compressedObj.hasOwnProperty(property)) {
+            if (!Array.isArray(compressedObj[property])) {
+              compressedObj[property] = [compressedObj[property]];
+            }
+            compressedObj[property].push(val);
+          } else {
+            if (options.isArray(property, newJpath, isLeaf)) {
+              compressedObj[property] = [val];
+            } else {
+              compressedObj[property] = val;
+            }
+          }
+        }
+      }
+      if (typeof text === "string") {
+        if (text.length > 0) compressedObj[options.textNodeName] = text;
+      } else if (text !== void 0) compressedObj[options.textNodeName] = text;
+      return compressedObj;
+    }
+    function propName(obj) {
+      const keys = Object.keys(obj);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (key !== ":@") return key;
+      }
+    }
+    function assignAttributes(obj, attrMap, jpath, options) {
+      if (attrMap) {
+        const keys = Object.keys(attrMap);
+        const len = keys.length;
+        for (let i = 0; i < len; i++) {
+          const atrrName = keys[i];
+          if (options.isArray(atrrName, jpath + "." + atrrName, true, true)) {
+            obj[atrrName] = [attrMap[atrrName]];
+          } else {
+            obj[atrrName] = attrMap[atrrName];
+          }
+        }
+      }
+    }
+    function isLeafTag(obj, options) {
+      const { textNodeName } = options;
+      const propCount = Object.keys(obj).length;
+      if (propCount === 0) {
+        return true;
+      }
+      if (propCount === 1 && (obj[textNodeName] || typeof obj[textNodeName] === "boolean" || obj[textNodeName] === 0)) {
+        return true;
+      }
+      return false;
+    }
+    exports.prettify = prettify;
+  }
+});
+
+// node_modules/fast-xml-parser/src/xmlparser/XMLParser.js
+var require_XMLParser = __commonJS({
+  "node_modules/fast-xml-parser/src/xmlparser/XMLParser.js"(exports, module) {
+    var { buildOptions } = require_OptionsBuilder();
+    var OrderedObjParser = require_OrderedObjParser();
+    var { prettify } = require_node2json();
+    var validator = require_validator();
+    var XMLParser2 = class {
+      constructor(options) {
+        this.externalEntities = {};
+        this.options = buildOptions(options);
+      }
+      /**
+       * Parse XML dats to JS object 
+       * @param {string|Buffer} xmlData 
+       * @param {boolean|Object} validationOption 
+       */
+      parse(xmlData, validationOption) {
+        if (typeof xmlData === "string") {
+        } else if (xmlData.toString) {
+          xmlData = xmlData.toString();
+        } else {
+          throw new Error("XML data is accepted in String or Bytes[] form.");
+        }
+        if (validationOption) {
+          if (validationOption === true) validationOption = {};
+          const result = validator.validate(xmlData, validationOption);
+          if (result !== true) {
+            throw Error(`${result.err.msg}:${result.err.line}:${result.err.col}`);
+          }
+        }
+        const orderedObjParser = new OrderedObjParser(this.options);
+        orderedObjParser.addExternalEntities(this.externalEntities);
+        const orderedResult = orderedObjParser.parseXml(xmlData);
+        if (this.options.preserveOrder || orderedResult === void 0) return orderedResult;
+        else return prettify(orderedResult, this.options);
+      }
+      /**
+       * Add Entity which is not by default supported by this library
+       * @param {string} key 
+       * @param {string} value 
+       */
+      addEntity(key, value) {
+        if (value.indexOf("&") !== -1) {
+          throw new Error("Entity value can't have '&'");
+        } else if (key.indexOf("&") !== -1 || key.indexOf(";") !== -1) {
+          throw new Error("An entity must be set without '&' and ';'. Eg. use '#xD' for '&#xD;'");
+        } else if (value === "&") {
+          throw new Error("An entity with value '&' is not permitted");
+        } else {
+          this.externalEntities[key] = value;
+        }
+      }
+    };
+    module.exports = XMLParser2;
+  }
+});
+
+// node_modules/fast-xml-parser/src/xmlbuilder/orderedJs2Xml.js
+var require_orderedJs2Xml = __commonJS({
+  "node_modules/fast-xml-parser/src/xmlbuilder/orderedJs2Xml.js"(exports, module) {
+    var EOL = "\n";
+    function toXml(jArray, options) {
+      let indentation = "";
+      if (options.format && options.indentBy.length > 0) {
+        indentation = EOL;
+      }
+      return arrToStr(jArray, options, "", indentation);
+    }
+    function arrToStr(arr, options, jPath, indentation) {
+      let xmlStr = "";
+      let isPreviousElementTag = false;
+      for (let i = 0; i < arr.length; i++) {
+        const tagObj = arr[i];
+        const tagName = propName(tagObj);
+        if (tagName === void 0) continue;
+        let newJPath = "";
+        if (jPath.length === 0) newJPath = tagName;
+        else newJPath = `${jPath}.${tagName}`;
+        if (tagName === options.textNodeName) {
+          let tagText = tagObj[tagName];
+          if (!isStopNode(newJPath, options)) {
+            tagText = options.tagValueProcessor(tagName, tagText);
+            tagText = replaceEntitiesValue(tagText, options);
+          }
+          if (isPreviousElementTag) {
+            xmlStr += indentation;
+          }
+          xmlStr += tagText;
+          isPreviousElementTag = false;
+          continue;
+        } else if (tagName === options.cdataPropName) {
+          if (isPreviousElementTag) {
+            xmlStr += indentation;
+          }
+          xmlStr += `<![CDATA[${tagObj[tagName][0][options.textNodeName]}]]>`;
+          isPreviousElementTag = false;
+          continue;
+        } else if (tagName === options.commentPropName) {
+          xmlStr += indentation + `<!--${tagObj[tagName][0][options.textNodeName]}-->`;
+          isPreviousElementTag = true;
+          continue;
+        } else if (tagName[0] === "?") {
+          const attStr2 = attr_to_str(tagObj[":@"], options);
+          const tempInd = tagName === "?xml" ? "" : indentation;
+          let piTextNodeName = tagObj[tagName][0][options.textNodeName];
+          piTextNodeName = piTextNodeName.length !== 0 ? " " + piTextNodeName : "";
+          xmlStr += tempInd + `<${tagName}${piTextNodeName}${attStr2}?>`;
+          isPreviousElementTag = true;
+          continue;
+        }
+        let newIdentation = indentation;
+        if (newIdentation !== "") {
+          newIdentation += options.indentBy;
+        }
+        const attStr = attr_to_str(tagObj[":@"], options);
+        const tagStart = indentation + `<${tagName}${attStr}`;
+        const tagValue = arrToStr(tagObj[tagName], options, newJPath, newIdentation);
+        if (options.unpairedTags.indexOf(tagName) !== -1) {
+          if (options.suppressUnpairedNode) xmlStr += tagStart + ">";
+          else xmlStr += tagStart + "/>";
+        } else if ((!tagValue || tagValue.length === 0) && options.suppressEmptyNode) {
+          xmlStr += tagStart + "/>";
+        } else if (tagValue && tagValue.endsWith(">")) {
+          xmlStr += tagStart + `>${tagValue}${indentation}</${tagName}>`;
+        } else {
+          xmlStr += tagStart + ">";
+          if (tagValue && indentation !== "" && (tagValue.includes("/>") || tagValue.includes("</"))) {
+            xmlStr += indentation + options.indentBy + tagValue + indentation;
+          } else {
+            xmlStr += tagValue;
+          }
+          xmlStr += `</${tagName}>`;
+        }
+        isPreviousElementTag = true;
+      }
+      return xmlStr;
+    }
+    function propName(obj) {
+      const keys = Object.keys(obj);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (!obj.hasOwnProperty(key)) continue;
+        if (key !== ":@") return key;
+      }
+    }
+    function attr_to_str(attrMap, options) {
+      let attrStr = "";
+      if (attrMap && !options.ignoreAttributes) {
+        for (let attr in attrMap) {
+          if (!attrMap.hasOwnProperty(attr)) continue;
+          let attrVal = options.attributeValueProcessor(attr, attrMap[attr]);
+          attrVal = replaceEntitiesValue(attrVal, options);
+          if (attrVal === true && options.suppressBooleanAttributes) {
+            attrStr += ` ${attr.substr(options.attributeNamePrefix.length)}`;
+          } else {
+            attrStr += ` ${attr.substr(options.attributeNamePrefix.length)}="${attrVal}"`;
+          }
+        }
+      }
+      return attrStr;
+    }
+    function isStopNode(jPath, options) {
+      jPath = jPath.substr(0, jPath.length - options.textNodeName.length - 1);
+      let tagName = jPath.substr(jPath.lastIndexOf(".") + 1);
+      for (let index in options.stopNodes) {
+        if (options.stopNodes[index] === jPath || options.stopNodes[index] === "*." + tagName) return true;
+      }
+      return false;
+    }
+    function replaceEntitiesValue(textValue, options) {
+      if (textValue && textValue.length > 0 && options.processEntities) {
+        for (let i = 0; i < options.entities.length; i++) {
+          const entity = options.entities[i];
+          textValue = textValue.replace(entity.regex, entity.val);
+        }
+      }
+      return textValue;
+    }
+    module.exports = toXml;
+  }
+});
+
+// node_modules/fast-xml-parser/src/xmlbuilder/json2xml.js
+var require_json2xml = __commonJS({
+  "node_modules/fast-xml-parser/src/xmlbuilder/json2xml.js"(exports, module) {
+    "use strict";
+    var buildFromOrderedJs = require_orderedJs2Xml();
+    var getIgnoreAttributesFn = require_ignoreAttributes();
+    var defaultOptions = {
+      attributeNamePrefix: "@_",
+      attributesGroupName: false,
+      textNodeName: "#text",
+      ignoreAttributes: true,
+      cdataPropName: false,
+      format: false,
+      indentBy: "  ",
+      suppressEmptyNode: false,
+      suppressUnpairedNode: true,
+      suppressBooleanAttributes: true,
+      tagValueProcessor: function(key, a) {
+        return a;
+      },
+      attributeValueProcessor: function(attrName, a) {
+        return a;
+      },
+      preserveOrder: false,
+      commentPropName: false,
+      unpairedTags: [],
+      entities: [
+        { regex: new RegExp("&", "g"), val: "&amp;" },
+        //it must be on top
+        { regex: new RegExp(">", "g"), val: "&gt;" },
+        { regex: new RegExp("<", "g"), val: "&lt;" },
+        { regex: new RegExp("'", "g"), val: "&apos;" },
+        { regex: new RegExp('"', "g"), val: "&quot;" }
+      ],
+      processEntities: true,
+      stopNodes: [],
+      // transformTagName: false,
+      // transformAttributeName: false,
+      oneListGroup: false
+    };
+    function Builder(options) {
+      this.options = Object.assign({}, defaultOptions, options);
+      if (this.options.ignoreAttributes === true || this.options.attributesGroupName) {
+        this.isAttribute = function() {
+          return false;
+        };
+      } else {
+        this.ignoreAttributesFn = getIgnoreAttributesFn(this.options.ignoreAttributes);
+        this.attrPrefixLen = this.options.attributeNamePrefix.length;
+        this.isAttribute = isAttribute;
+      }
+      this.processTextOrObjNode = processTextOrObjNode;
+      if (this.options.format) {
+        this.indentate = indentate;
+        this.tagEndChar = ">\n";
+        this.newLine = "\n";
+      } else {
+        this.indentate = function() {
+          return "";
+        };
+        this.tagEndChar = ">";
+        this.newLine = "";
+      }
+    }
+    Builder.prototype.build = function(jObj) {
+      if (this.options.preserveOrder) {
+        return buildFromOrderedJs(jObj, this.options);
+      } else {
+        if (Array.isArray(jObj) && this.options.arrayNodeName && this.options.arrayNodeName.length > 1) {
+          jObj = {
+            [this.options.arrayNodeName]: jObj
+          };
+        }
+        return this.j2x(jObj, 0, []).val;
+      }
+    };
+    Builder.prototype.j2x = function(jObj, level, ajPath) {
+      let attrStr = "";
+      let val = "";
+      const jPath = ajPath.join(".");
+      for (let key in jObj) {
+        if (!Object.prototype.hasOwnProperty.call(jObj, key)) continue;
+        if (typeof jObj[key] === "undefined") {
+          if (this.isAttribute(key)) {
+            val += "";
+          }
+        } else if (jObj[key] === null) {
+          if (this.isAttribute(key)) {
+            val += "";
+          } else if (key === this.options.cdataPropName) {
+            val += "";
+          } else if (key[0] === "?") {
+            val += this.indentate(level) + "<" + key + "?" + this.tagEndChar;
+          } else {
+            val += this.indentate(level) + "<" + key + "/" + this.tagEndChar;
+          }
+        } else if (jObj[key] instanceof Date) {
+          val += this.buildTextValNode(jObj[key], key, "", level);
+        } else if (typeof jObj[key] !== "object") {
+          const attr = this.isAttribute(key);
+          if (attr && !this.ignoreAttributesFn(attr, jPath)) {
+            attrStr += this.buildAttrPairStr(attr, "" + jObj[key]);
+          } else if (!attr) {
+            if (key === this.options.textNodeName) {
+              let newval = this.options.tagValueProcessor(key, "" + jObj[key]);
+              val += this.replaceEntitiesValue(newval);
+            } else {
+              val += this.buildTextValNode(jObj[key], key, "", level);
+            }
+          }
+        } else if (Array.isArray(jObj[key])) {
+          const arrLen = jObj[key].length;
+          let listTagVal = "";
+          let listTagAttr = "";
+          for (let j = 0; j < arrLen; j++) {
+            const item = jObj[key][j];
+            if (typeof item === "undefined") {
+            } else if (item === null) {
+              if (key[0] === "?") val += this.indentate(level) + "<" + key + "?" + this.tagEndChar;
+              else val += this.indentate(level) + "<" + key + "/" + this.tagEndChar;
+            } else if (typeof item === "object") {
+              if (this.options.oneListGroup) {
+                const result = this.j2x(item, level + 1, ajPath.concat(key));
+                listTagVal += result.val;
+                if (this.options.attributesGroupName && item.hasOwnProperty(this.options.attributesGroupName)) {
+                  listTagAttr += result.attrStr;
+                }
+              } else {
+                listTagVal += this.processTextOrObjNode(item, key, level, ajPath);
+              }
+            } else {
+              if (this.options.oneListGroup) {
+                let textValue = this.options.tagValueProcessor(key, item);
+                textValue = this.replaceEntitiesValue(textValue);
+                listTagVal += textValue;
+              } else {
+                listTagVal += this.buildTextValNode(item, key, "", level);
+              }
+            }
+          }
+          if (this.options.oneListGroup) {
+            listTagVal = this.buildObjectNode(listTagVal, key, listTagAttr, level);
+          }
+          val += listTagVal;
+        } else {
+          if (this.options.attributesGroupName && key === this.options.attributesGroupName) {
+            const Ks = Object.keys(jObj[key]);
+            const L = Ks.length;
+            for (let j = 0; j < L; j++) {
+              attrStr += this.buildAttrPairStr(Ks[j], "" + jObj[key][Ks[j]]);
+            }
+          } else {
+            val += this.processTextOrObjNode(jObj[key], key, level, ajPath);
+          }
+        }
+      }
+      return { attrStr, val };
+    };
+    Builder.prototype.buildAttrPairStr = function(attrName, val) {
+      val = this.options.attributeValueProcessor(attrName, "" + val);
+      val = this.replaceEntitiesValue(val);
+      if (this.options.suppressBooleanAttributes && val === "true") {
+        return " " + attrName;
+      } else return " " + attrName + '="' + val + '"';
+    };
+    function processTextOrObjNode(object, key, level, ajPath) {
+      const result = this.j2x(object, level + 1, ajPath.concat(key));
+      if (object[this.options.textNodeName] !== void 0 && Object.keys(object).length === 1) {
+        return this.buildTextValNode(object[this.options.textNodeName], key, result.attrStr, level);
+      } else {
+        return this.buildObjectNode(result.val, key, result.attrStr, level);
+      }
+    }
+    Builder.prototype.buildObjectNode = function(val, key, attrStr, level) {
+      if (val === "") {
+        if (key[0] === "?") return this.indentate(level) + "<" + key + attrStr + "?" + this.tagEndChar;
+        else {
+          return this.indentate(level) + "<" + key + attrStr + this.closeTag(key) + this.tagEndChar;
+        }
+      } else {
+        let tagEndExp = "</" + key + this.tagEndChar;
+        let piClosingChar = "";
+        if (key[0] === "?") {
+          piClosingChar = "?";
+          tagEndExp = "";
+        }
+        if ((attrStr || attrStr === "") && val.indexOf("<") === -1) {
+          return this.indentate(level) + "<" + key + attrStr + piClosingChar + ">" + val + tagEndExp;
+        } else if (this.options.commentPropName !== false && key === this.options.commentPropName && piClosingChar.length === 0) {
+          return this.indentate(level) + `<!--${val}-->` + this.newLine;
+        } else {
+          return this.indentate(level) + "<" + key + attrStr + piClosingChar + this.tagEndChar + val + this.indentate(level) + tagEndExp;
+        }
+      }
+    };
+    Builder.prototype.closeTag = function(key) {
+      let closeTag = "";
+      if (this.options.unpairedTags.indexOf(key) !== -1) {
+        if (!this.options.suppressUnpairedNode) closeTag = "/";
+      } else if (this.options.suppressEmptyNode) {
+        closeTag = "/";
+      } else {
+        closeTag = `></${key}`;
+      }
+      return closeTag;
+    };
+    Builder.prototype.buildTextValNode = function(val, key, attrStr, level) {
+      if (this.options.cdataPropName !== false && key === this.options.cdataPropName) {
+        return this.indentate(level) + `<![CDATA[${val}]]>` + this.newLine;
+      } else if (this.options.commentPropName !== false && key === this.options.commentPropName) {
+        return this.indentate(level) + `<!--${val}-->` + this.newLine;
+      } else if (key[0] === "?") {
+        return this.indentate(level) + "<" + key + attrStr + "?" + this.tagEndChar;
+      } else {
+        let textValue = this.options.tagValueProcessor(key, val);
+        textValue = this.replaceEntitiesValue(textValue);
+        if (textValue === "") {
+          return this.indentate(level) + "<" + key + attrStr + this.closeTag(key) + this.tagEndChar;
+        } else {
+          return this.indentate(level) + "<" + key + attrStr + ">" + textValue + "</" + key + this.tagEndChar;
+        }
+      }
+    };
+    Builder.prototype.replaceEntitiesValue = function(textValue) {
+      if (textValue && textValue.length > 0 && this.options.processEntities) {
+        for (let i = 0; i < this.options.entities.length; i++) {
+          const entity = this.options.entities[i];
+          textValue = textValue.replace(entity.regex, entity.val);
+        }
+      }
+      return textValue;
+    };
+    function indentate(level) {
+      return this.options.indentBy.repeat(level);
+    }
+    function isAttribute(name) {
+      if (name.startsWith(this.options.attributeNamePrefix) && name !== this.options.textNodeName) {
+        return name.substr(this.attrPrefixLen);
+      } else {
+        return false;
+      }
+    }
+    module.exports = Builder;
+  }
+});
+
+// node_modules/fast-xml-parser/src/fxp.js
+var require_fxp = __commonJS({
+  "node_modules/fast-xml-parser/src/fxp.js"(exports, module) {
+    "use strict";
+    var validator = require_validator();
+    var XMLParser2 = require_XMLParser();
+    var XMLBuilder = require_json2xml();
+    module.exports = {
+      XMLParser: XMLParser2,
+      XMLValidator: validator,
+      XMLBuilder
+    };
+  }
+});
+
+// src-new/config/config-manager.js
+var ConfigManager = class {
+  constructor() {
+    this.storageKeys = {
+      AUTH_TOKEN: "hoverboard_auth_token",
+      SETTINGS: "hoverboard_settings",
+      INHIBIT_URLS: "hoverboard_inhibit_urls"
+    };
+    this.defaultConfig = this.getDefaultConfiguration();
+  }
+  /**
+   * Get default configuration values
+   * Migrated from src/shared/config.js
+   *
+   * CFG-003: Feature flags and UI behavior control defaults
+   * SPECIFICATION: Each setting controls specific extension behavior
+   * IMPLEMENTATION DECISION: Conservative defaults favor user privacy and minimal intrusion
+   */
+  getDefaultConfiguration() {
+    return {
+      // CFG-003: Feature flags - Core functionality toggles
+      // IMPLEMENTATION DECISION: Enable helpful features by default, disable potentially intrusive ones
+      hoverShowRecentTags: true,
+      // Show recent tags in hover overlay
+      hoverShowTooltips: false,
+      // Tooltips disabled by default to avoid visual clutter
+      showHoverOnPageLoad: false,
+      // No automatic hover to respect user intent
+      showHoverOPLOnlyIfNoTags: true,
+      // Smart overlay display logic
+      showHoverOPLOnlyIfSomeTags: false,
+      // Complementary to above setting
+      inhibitSitesOnPageLoad: true,
+      // Respect site-specific inhibition settings
+      setIconOnLoad: true,
+      // Update extension icon to reflect bookmark status
+      // CFG-003: UI behavior settings - User experience configuration
+      // IMPLEMENTATION DECISION: Reasonable limits that balance functionality with performance
+      recentTagsCountMax: 32,
+      // Maximum recent tags to track
+      initRecentPostsCount: 15,
+      // Initial recent posts to load
+      uxAutoCloseTimeout: 0,
+      // in ms, 0 to disable auto-close (user control)
+      uxRecentRowWithBlock: true,
+      // Show block button in recent rows
+      uxRecentRowWithBookmarkButton: true,
+      // Show bookmark button
+      uxRecentRowWithCloseButton: true,
+      // Show close button for user control
+      uxRecentRowWithPrivateButton: true,
+      // Privacy control in interface
+      uxRecentRowWithDeletePin: true,
+      // Allow pin deletion from interface
+      uxRecentRowWithInput: true,
+      // Enable input controls
+      uxUrlStripHash: false,
+      // Preserve URL hash by default (maintain full URL context)
+      // CFG-003: Badge configuration - Extension icon indicator settings
+      // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
+      badgeTextIfNotBookmarked: "-",
+      // Clear indication of non-bookmarked state
+      badgeTextIfPrivate: "*",
+      // Privacy indicator
+      badgeTextIfQueued: "!",
+      // Pending action indicator
+      badgeTextIfBookmarkedNoTags: "0",
+      // Zero tags indicator
+      // CFG-002: API retry configuration - Network resilience settings
+      // IMPLEMENTATION DECISION: Conservative retry strategy to avoid API rate limiting
+      pinRetryCountMax: 2,
+      // Maximum retry attempts
+      pinRetryDelay: 1e3
+      // in ms - delay between retries
+    };
+  }
+  /**
+   * Initialize default settings on first installation
+   *
+   * CFG-003: First-run initialization ensures extension works immediately
+   * IMPLEMENTATION DECISION: Only initialize if no settings exist to preserve user customizations
+   */
+  async initializeDefaults() {
+    const existingSettings = await this.getStoredSettings();
+    if (!existingSettings || Object.keys(existingSettings).length === 0) {
+      await this.saveSettings(this.defaultConfig);
+    }
+  }
+  /**
+   * Get complete configuration object
+   * @returns {Promise<Object>} Configuration object
+   *
+   * CFG-003: Configuration resolution with default fallback
+   * IMPLEMENTATION DECISION: Merge defaults with stored settings to handle partial configurations
+   */
+  async getConfig() {
+    const stored = await this.getStoredSettings();
+    return { ...this.defaultConfig, ...stored };
+  }
+  /**
+   * Get user-configurable options (subset of config for UI)
+   * @returns {Promise<Object>} Options object
+   *
+   * CFG-003: UI-specific configuration subset
+   * IMPLEMENTATION DECISION: Only expose user-relevant settings to avoid configuration complexity
+   */
+  async getOptions() {
+    const config = await this.getConfig();
+    return {
+      badgeTextIfBookmarkedNoTags: config.badgeTextIfBookmarkedNoTags,
+      badgeTextIfNotBookmarked: config.badgeTextIfNotBookmarked,
+      badgeTextIfPrivate: config.badgeTextIfPrivate,
+      badgeTextIfQueued: config.badgeTextIfQueued,
+      recentPostsCount: config.initRecentPostsCount,
+      showHoverOnPageLoad: config.showHoverOnPageLoad,
+      hoverShowTooltips: config.hoverShowTooltips
+    };
+  }
+  /**
+   * Update specific configuration values
+   * @param {Object} updates - Configuration updates
+   *
+   * CFG-003: Partial configuration updates with persistence
+   * IMPLEMENTATION DECISION: Merge updates to preserve unmodified settings
+   */
+  async updateConfig(updates) {
+    const current = await this.getConfig();
+    const updated = { ...current, ...updates };
+    await this.saveSettings(updated);
+  }
+  /**
+   * Get authentication token
+   * @returns {Promise<string>} Auth token or empty string
+   *
+   * CFG-002: Secure authentication token retrieval
+   * IMPLEMENTATION DECISION: Return empty string on failure to ensure graceful degradation
+   */
+  async getAuthToken() {
+    try {
+      const result = await chrome.storage.sync.get(this.storageKeys.AUTH_TOKEN);
+      return result[this.storageKeys.AUTH_TOKEN] || "";
+    } catch (error) {
+      console.error("Failed to get auth token:", error);
+      return "";
+    }
+  }
+  /**
+   * Set authentication token
+   * @param {string} token - Pinboard API token
+   *
+   * CFG-002: Secure authentication token storage
+   * IMPLEMENTATION DECISION: Use sync storage for cross-device authentication
+   */
+  async setAuthToken(token) {
+    try {
+      await chrome.storage.sync.set({
+        [this.storageKeys.AUTH_TOKEN]: token
+      });
+    } catch (error) {
+      console.error("Failed to set auth token:", error);
+      throw error;
+    }
+  }
+  /**
+   * Check if authentication token exists
+   * @returns {Promise<boolean>} Whether token exists
+   *
+   * CFG-002: Authentication state validation
+   * IMPLEMENTATION DECISION: Simple boolean check for authentication state
+   */
+  async hasAuthToken() {
+    const token = await this.getAuthToken();
+    return token.length > 0;
+  }
+  /**
+   * Get authentication token formatted for API requests
+   * @returns {Promise<string>} Token formatted as URL parameter
+   *
+   * CFG-002: API-ready authentication parameter formatting
+   * IMPLEMENTATION DECISION: Pre-format token for consistent API usage
+   */
+  async getAuthTokenParam() {
+    const token = await this.getAuthToken();
+    return `auth_token=${token}`;
+  }
+  /**
+   * Get inhibited URLs list
+   * @returns {Promise<string[]>} Array of inhibited URLs
+   *
+   * CFG-004: Site-specific behavior control through URL inhibition
+   * IMPLEMENTATION DECISION: Store URLs as newline-separated string for user editing convenience
+   */
+  async getInhibitUrls() {
+    try {
+      const result = await chrome.storage.sync.get(this.storageKeys.INHIBIT_URLS);
+      const inhibitString = result[this.storageKeys.INHIBIT_URLS] || "";
+      return inhibitString.split("\n").filter((url) => url.trim().length > 0);
+    } catch (error) {
+      console.error("Failed to get inhibit URLs:", error);
+      return [];
+    }
+  }
+  /**
+   * Add URL to inhibit list
+   * @param {string} url - URL to inhibit
+   *
+   * CFG-004: Dynamic inhibition list management
+   * IMPLEMENTATION DECISION: Check for duplicates to maintain clean inhibition list
+   */
+  async addInhibitUrl(url) {
+    try {
+      const current = await this.getInhibitUrls();
+      if (!current.includes(url)) {
+        current.push(url);
+        const inhibitString = current.join("\n");
+        await chrome.storage.sync.set({
+          [this.storageKeys.INHIBIT_URLS]: inhibitString
+        });
+      }
+      return { inhibit: current.join("\n") };
+    } catch (error) {
+      console.error("Failed to add inhibit URL:", error);
+      throw error;
+    }
+  }
+  /**
+   * Set inhibit URLs list (replaces existing list)
+   * @param {string[]} urls - Array of URLs to inhibit
+   *
+   * CFG-004: Complete inhibition list replacement
+   * IMPLEMENTATION DECISION: Allow bulk replacement for configuration import/reset scenarios
+   */
+  async setInhibitUrls(urls) {
+    try {
+      const inhibitString = urls.join("\n");
+      await chrome.storage.sync.set({
+        [this.storageKeys.INHIBIT_URLS]: inhibitString
+      });
+    } catch (error) {
+      console.error("Failed to set inhibit URLs:", error);
+      throw error;
+    }
+  }
+  /**
+   * Check if URL is allowed (not in inhibit list)
+   * @param {string} url - URL to check
+   * @returns {Promise<boolean>} Whether URL is allowed
+   *
+   * CFG-004: URL filtering logic for site-specific behavior
+   * IMPLEMENTATION DECISION: Bidirectional substring matching for flexible URL patterns
+   */
+  async isUrlAllowed(url) {
+    try {
+      const inhibitUrls = await this.getInhibitUrls();
+      return !inhibitUrls.some(
+        (inhibitUrl) => url.includes(inhibitUrl) || inhibitUrl.includes(url)
+      );
+    } catch (error) {
+      console.error("Failed to check URL allowance:", error);
+      return true;
+    }
+  }
+  /**
+   * Get stored settings from storage
+   * @returns {Promise<Object>} Stored settings
+   *
+   * CFG-003: Core settings retrieval with error handling
+   * IMPLEMENTATION DECISION: Return empty object on failure to allow default merging
+   */
+  async getStoredSettings() {
+    try {
+      const result = await chrome.storage.sync.get(this.storageKeys.SETTINGS);
+      return result[this.storageKeys.SETTINGS] || {};
+    } catch (error) {
+      console.error("Failed to get stored settings:", error);
+      return {};
+    }
+  }
+  /**
+   * Save settings to storage
+   * @param {Object} settings - Settings to save
+   *
+   * CFG-003: Settings persistence with error propagation
+   * IMPLEMENTATION DECISION: Let errors propagate to caller for proper error handling
+   */
+  async saveSettings(settings) {
+    try {
+      await chrome.storage.sync.set({
+        [this.storageKeys.SETTINGS]: settings
+      });
+    } catch (error) {
+      console.error("Failed to save settings:", error);
+      throw error;
+    }
+  }
+  /**
+   * Reset all settings to defaults
+   *
+   * CFG-003: Configuration reset functionality
+   * IMPLEMENTATION DECISION: Simple replacement with defaults for clean reset
+   */
+  async resetToDefaults() {
+    await this.saveSettings(this.defaultConfig);
+  }
+  /**
+   * Export configuration for backup
+   * @returns {Promise<Object>} Complete configuration export
+   *
+   * CFG-001: Configuration backup and portability
+   * IMPLEMENTATION DECISION: Include all configuration data with metadata for validation
+   */
+  async exportConfig() {
+    const [settings, token, inhibitUrls] = await Promise.all([
+      this.getStoredSettings(),
+      this.getAuthToken(),
+      this.getInhibitUrls()
+    ]);
+    return {
+      settings,
+      authToken: token,
+      inhibitUrls,
+      exportDate: (/* @__PURE__ */ new Date()).toISOString(),
+      version: "1.0.0"
+      // Version for import compatibility checking
+    };
+  }
+  /**
+   * Import configuration from backup
+   * @param {Object} configData - Configuration data to import
+   *
+   * CFG-001: Configuration restoration from backup
+   * IMPLEMENTATION DECISION: Selective import allows partial configuration restoration
+   */
+  async importConfig(configData) {
+    if (configData.settings) {
+      await this.saveSettings(configData.settings);
+    }
+    if (configData.authToken) {
+      await this.setAuthToken(configData.authToken);
+    }
+    if (configData.inhibitUrls) {
+      const inhibitString = configData.inhibitUrls.join("\n");
+      await chrome.storage.sync.set({
+        [this.storageKeys.INHIBIT_URLS]: inhibitString
+      });
+    }
+  }
+};
+
+// src-new/features/pinboard/pinboard-service.js
+var import_fast_xml_parser = __toESM(require_fxp(), 1);
+var PinboardService = class {
+  constructor() {
+    this.configManager = new ConfigManager();
+    this.apiBase = "https://api.pinboard.in/v1/";
+    this.retryDelays = [1e3, 2e3, 5e3];
+    this.xmlParser = new import_fast_xml_parser.XMLParser({
+      ignoreAttributes: false,
+      attributeNamePrefix: "@_",
+      parseAttributeValue: true
+    });
+  }
+  /**
+   * Get bookmark data for a specific URL
+   * @param {string} url - URL to lookup
+   * @param {string} title - Page title (fallback for description)
+   * @returns {Promise<Object>} Bookmark data
+   *
+   * PIN-002: Single bookmark retrieval by URL
+   * SPECIFICATION: Use posts/get endpoint to fetch bookmark for specific URL
+   * IMPLEMENTATION DECISION: Provide fallback data on failure for UI stability
+   */
+  async getBookmarkForUrl(url, title = "") {
+    try {
+      const cleanUrl = this.cleanUrl(url);
+      const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`;
+      const response = await this.makeApiRequest(endpoint);
+      return this.parseBookmarkResponse(response, cleanUrl, title);
+    } catch (error) {
+      console.error("Failed to get bookmark for URL:", error);
+      return this.createEmptyBookmark(url, title);
+    }
+  }
+  /**
+   * Get recent bookmarks from Pinboard
+   * @param {number} count - Number of recent bookmarks to fetch
+   * @returns {Promise<Object[]>} Array of recent bookmarks
+   *
+   * PIN-002: Recent bookmarks retrieval for dashboard display
+   * SPECIFICATION: Use posts/recent endpoint with count parameter
+   * IMPLEMENTATION DECISION: Return empty array on failure to prevent UI errors
+   */
+  async getRecentBookmarks(count = 15) {
+    try {
+      const endpoint = `posts/recent?count=${count}`;
+      const response = await this.makeApiRequest(endpoint);
+      return this.parseRecentBookmarksResponse(response);
+    } catch (error) {
+      console.error("Failed to get recent bookmarks:", error);
+      return [];
+    }
+  }
+  /**
+   * Save a bookmark to Pinboard
+   * @param {Object} bookmarkData - Bookmark data to save
+   * @returns {Promise<Object>} Save result
+   *
+   * PIN-003: Bookmark creation/update operation
+   * SPECIFICATION: Use posts/add endpoint to save bookmark with all metadata
+   * IMPLEMENTATION DECISION: Re-throw errors to allow caller error handling
+   */
+  async saveBookmark(bookmarkData) {
+    try {
+      const params = this.buildSaveParams(bookmarkData);
+      const endpoint = `posts/add?${params}`;
+      const response = await this.makeApiRequest(endpoint, "GET");
+      return this.parseApiResponse(response);
+    } catch (error) {
+      console.error("Failed to save bookmark:", error);
+      throw error;
+    }
+  }
+  /**
+   * Save a tag to an existing bookmark
+   * @param {Object} tagData - Tag data to save
+   * @returns {Promise<Object>} Save result
+   *
+   * PIN-003: Tag addition to existing bookmark
+   * SPECIFICATION: Retrieve current bookmark, add tag, then save updated bookmark
+   * IMPLEMENTATION DECISION: Merge tags to preserve existing tags while adding new ones
+   */
+  async saveTag(tagData) {
+    try {
+      const currentBookmark = await this.getBookmarkForUrl(tagData.url);
+      const existingTags = currentBookmark.tags || [];
+      const newTags = [...existingTags];
+      if (tagData.value && !existingTags.includes(tagData.value)) {
+        newTags.push(tagData.value);
+      }
+      const updatedBookmark = {
+        ...currentBookmark,
+        ...tagData,
+        tags: newTags.join(" ")
+      };
+      return this.saveBookmark(updatedBookmark);
+    } catch (error) {
+      console.error("Failed to save tag:", error);
+      throw error;
+    }
+  }
+  /**
+   * Delete a bookmark from Pinboard
+   * @param {string} url - URL of bookmark to delete
+   * @returns {Promise<Object>} Delete result
+   *
+   * PIN-003: Bookmark deletion operation
+   * SPECIFICATION: Use posts/delete endpoint to remove bookmark by URL
+   * IMPLEMENTATION DECISION: Clean URL before deletion for consistent matching
+   */
+  async deleteBookmark(url) {
+    try {
+      const cleanUrl = this.cleanUrl(url);
+      const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl)}`;
+      const response = await this.makeApiRequest(endpoint);
+      return this.parseApiResponse(response);
+    } catch (error) {
+      console.error("Failed to delete bookmark:", error);
+      throw error;
+    }
+  }
+  /**
+   * Remove a specific tag from a bookmark
+   * @param {Object} tagData - Tag removal data
+   * @returns {Promise<Object>} Update result
+   *
+   * PIN-003: Tag removal from existing bookmark
+   * SPECIFICATION: Retrieve bookmark, remove specified tag, save updated bookmark
+   * IMPLEMENTATION DECISION: Filter out specific tag while preserving other tags
+   */
+  async deleteTag(tagData) {
+    try {
+      const currentBookmark = await this.getBookmarkForUrl(tagData.url);
+      const existingTags = currentBookmark.tags || [];
+      const filteredTags = existingTags.filter((tag) => tag !== tagData.value);
+      const updatedBookmark = {
+        ...currentBookmark,
+        ...tagData,
+        tags: filteredTags.join(" ")
+      };
+      return this.saveBookmark(updatedBookmark);
+    } catch (error) {
+      console.error("Failed to delete tag:", error);
+      throw error;
+    }
+  }
+  /**
+   * Test authentication with Pinboard API
+   * @returns {Promise<boolean>} True if authentication is valid
+   *
+   * PIN-001: Authentication validation using API endpoint
+   * SPECIFICATION: Use user/api_token endpoint to verify authentication
+   * IMPLEMENTATION DECISION: Simple boolean return for easy authentication checking
+   */
+  async testConnection() {
+    try {
+      const endpoint = "user/api_token";
+      const response = await this.makeApiRequest(endpoint);
+      return true;
+    } catch (error) {
+      console.error("Connection test failed:", error);
+      return false;
+    }
+  }
+  /**
+   * Make API request with authentication and retry logic
+   * @param {string} endpoint - API endpoint
+   * @param {string} method - HTTP method
+   * @returns {Promise<Document>} Parsed XML response
+   *
+   * PIN-001: Authenticated API request with configuration integration
+   * SPECIFICATION: All API requests must include authentication token
+   * IMPLEMENTATION DECISION: Centralized authentication and retry logic
+   */
+  async makeApiRequest(endpoint, method = "GET") {
+    const hasAuth = await this.configManager.hasAuthToken();
+    if (!hasAuth) {
+      throw new Error("No authentication token configured");
+    }
+    const authParam = await this.configManager.getAuthTokenParam();
+    const url = `${this.apiBase}${endpoint}&${authParam}`;
+    return this.makeRequestWithRetry(url, method);
+  }
+  /**
+   * Make HTTP request with retry logic for rate limiting
+   * @param {string} url - Request URL
+   * @param {string} method - HTTP method
+   * @param {number} retryCount - Current retry attempt
+   * @returns {Promise<Document>} Response
+   *
+   * PIN-004: Network resilience with exponential backoff retry
+   * SPECIFICATION: Handle rate limiting and network failures gracefully
+   * IMPLEMENTATION DECISION: Progressive retry delays with configured maximum attempts
+   */
+  async makeRequestWithRetry(url, method = "GET", retryCount = 0) {
+    const config = await this.configManager.getConfig();
+    try {
+      const response = await fetch(url, { method });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      const xmlText = await response.text();
+      return this.parseXmlResponse(xmlText);
+    } catch (error) {
+      const isRetryable = this.isRetryableError(error);
+      const maxRetries = config.pinRetryCountMax || 2;
+      if (isRetryable && retryCount < maxRetries) {
+        const delay = this.retryDelays[retryCount] || config.pinRetryDelay || 1e3;
+        console.warn(`API request failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+        await this.sleep(delay);
+        return this.makeRequestWithRetry(url, method, retryCount + 1);
+      }
+      throw error;
+    }
+  }
+  /**
+   * Parse XML response from Pinboard API
+   * @param {string} xmlText - XML response text
+   * @returns {Object} Parsed XML object
+   *
+   * PIN-001: XML response parsing with error handling
+   * SPECIFICATION: All Pinboard API responses are in XML format
+   * IMPLEMENTATION DECISION: Use configured XML parser with error handling
+   */
+  parseXmlResponse(xmlText) {
+    try {
+      return this.xmlParser.parse(xmlText);
+    } catch (error) {
+      console.error("Failed to parse XML response:", error);
+      console.error("XML content:", xmlText);
+      throw new Error("Invalid XML response from Pinboard API");
+    }
+  }
+  /**
+   * Parse bookmark response from posts/get endpoint
+   * @param {Object} xmlObj - Parsed XML object
+   * @param {string} url - Original URL
+   * @param {string} title - Fallback title
+   * @returns {Object} Bookmark object
+   *
+   * PIN-002: Bookmark data parsing from Pinboard XML format
+   * SPECIFICATION: Handle Pinboard's XML structure for bookmark data
+   * IMPLEMENTATION DECISION: Normalize XML attributes to standard bookmark object
+   */
+  parseBookmarkResponse(xmlObj, url, title) {
+    try {
+      const posts = xmlObj?.posts?.post;
+      if (posts && posts.length > 0) {
+        const post = Array.isArray(posts) ? posts[0] : posts;
+        return {
+          url: post["@_href"] || url,
+          description: post["@_description"] || title || "",
+          extended: post["@_extended"] || "",
+          tags: post["@_tag"] ? post["@_tag"].split(" ") : [],
+          time: post["@_time"] || "",
+          shared: post["@_shared"] || "yes",
+          toread: post["@_toread"] || "no",
+          hash: post["@_hash"] || ""
+        };
+      }
+      return this.createEmptyBookmark(url, title);
+    } catch (error) {
+      console.error("Failed to parse bookmark response:", error);
+      return this.createEmptyBookmark(url, title);
+    }
+  }
+  /**
+   * Parse recent bookmarks response from posts/recent endpoint
+   * @param {Object} xmlObj - Parsed XML object
+   * @returns {Array} Array of bookmark objects
+   *
+   * PIN-002: Recent bookmarks parsing from Pinboard XML format
+   * SPECIFICATION: Handle array of bookmarks from posts/recent endpoint
+   * IMPLEMENTATION DECISION: Normalize each bookmark and handle empty responses
+   */
+  parseRecentBookmarksResponse(xmlObj) {
+    try {
+      const posts = xmlObj?.posts?.post;
+      if (!posts) {
+        return [];
+      }
+      const postsArray = Array.isArray(posts) ? posts : [posts];
+      return postsArray.map((post) => ({
+        url: post["@_href"] || "",
+        description: post["@_description"] || "",
+        extended: post["@_extended"] || "",
+        tags: post["@_tag"] ? post["@_tag"].split(" ") : [],
+        time: post["@_time"] || "",
+        shared: post["@_shared"] || "yes",
+        toread: post["@_toread"] || "no",
+        hash: post["@_hash"] || ""
+      }));
+    } catch (error) {
+      console.error("Failed to parse recent bookmarks response:", error);
+      return [];
+    }
+  }
+  /**
+   * Parse general API response (for add/delete operations)
+   * @param {Object} xmlObj - Parsed XML object
+   * @returns {Object} Result object
+   *
+   * PIN-003: API operation response parsing
+   * SPECIFICATION: Handle success/error responses from add/delete operations
+   * IMPLEMENTATION DECISION: Extract result code and message for operation feedback
+   */
+  parseApiResponse(xmlObj) {
+    try {
+      const result = xmlObj?.result;
+      return {
+        success: result?.["@_code"] === "done",
+        code: result?.["@_code"] || "unknown",
+        message: result?.["#text"] || "Operation completed"
+      };
+    } catch (error) {
+      console.error("Failed to parse API response:", error);
+      return {
+        success: false,
+        code: "parse_error",
+        message: "Failed to parse API response"
+      };
+    }
+  }
+  /**
+   * Create empty bookmark object with defaults
+   * @param {string} url - URL for bookmark
+   * @param {string} title - Title for description
+   * @returns {Object} Empty bookmark object
+   *
+   * PIN-002: Default bookmark structure creation
+   * SPECIFICATION: Provide consistent bookmark object structure
+   * IMPLEMENTATION DECISION: Include all standard Pinboard bookmark fields with defaults
+   */
+  createEmptyBookmark(url, title) {
+    return {
+      url: url || "",
+      description: title || "",
+      extended: "",
+      tags: [],
+      time: "",
+      shared: "yes",
+      toread: "no",
+      hash: ""
+    };
+  }
+  /**
+   * Build URL parameters for bookmark save operation
+   * @param {Object} bookmarkData - Bookmark data
+   * @returns {string} URL parameter string
+   *
+   * PIN-003: Parameter encoding for bookmark save operations
+   * SPECIFICATION: Encode all bookmark fields as URL parameters for posts/add
+   * IMPLEMENTATION DECISION: Handle both string and array tag formats
+   */
+  buildSaveParams(bookmarkData) {
+    const params = new URLSearchParams();
+    if (bookmarkData.url) {
+      params.append("url", bookmarkData.url);
+    }
+    if (bookmarkData.description) {
+      params.append("description", bookmarkData.description);
+    }
+    if (bookmarkData.extended) {
+      params.append("extended", bookmarkData.extended);
+    }
+    if (bookmarkData.tags) {
+      const tagsString = Array.isArray(bookmarkData.tags) ? bookmarkData.tags.join(" ") : bookmarkData.tags;
+      params.append("tags", tagsString);
+    }
+    if (bookmarkData.shared !== void 0) {
+      params.append("shared", bookmarkData.shared);
+    }
+    if (bookmarkData.toread !== void 0) {
+      params.append("toread", bookmarkData.toread);
+    }
+    return params.toString();
+  }
+  /**
+   * Clean URL for consistent API usage
+   * @param {string} url - URL to clean
+   * @returns {string} Cleaned URL
+   *
+   * PIN-001: URL normalization for consistent API requests
+   * SPECIFICATION: Ensure URLs are properly formatted for Pinboard API
+   * IMPLEMENTATION DECISION: Basic trimming and validation, preserve URL structure
+   */
+  cleanUrl(url) {
+    if (!url) return "";
+    return url.trim().replace(/\/+$/, "");
+  }
+  /**
+   * Check if error is retryable
+   * @param {Error} error - Error to check
+   * @returns {boolean} Whether error is retryable
+   *
+   * PIN-004: Error classification for retry logic
+   * SPECIFICATION: Only retry network and rate limit errors, not authentication/validation errors
+   * IMPLEMENTATION DECISION: Conservative retry logic to avoid infinite loops
+   */
+  isRetryableError(error) {
+    if (error.message.includes("fetch")) return true;
+    if (error.message.includes("timeout")) return true;
+    if (error.message.includes("429")) return true;
+    if (error.message.includes("500")) return true;
+    if (error.message.includes("502")) return true;
+    if (error.message.includes("503")) return true;
+    return false;
+  }
+  /**
+   * Sleep utility for retry delays
+   * @param {number} ms - Milliseconds to sleep
+   * @returns {Promise} Promise that resolves after delay
+   *
+   * PIN-004: Async delay utility for retry logic
+   * IMPLEMENTATION DECISION: Promise-based sleep for async/await compatibility
+   */
+  sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+};
+
+// src-new/ui/options/options.js
+var OptionsController = class {
   constructor() {
     this.configManager = new ConfigManager();
     this.pinboardService = new PinboardService();
     this.elements = {};
     this.isLoading = false;
-    
     this.init();
   }
-
   async init() {
     this.bindElements();
     this.attachEventListeners();
     await this.loadSettings();
   }
-
   bindElements() {
-    // Authentication
-    this.elements.authToken = document.getElementById('auth-token');
-    this.elements.testAuth = document.getElementById('test-auth');
-    
-    // Display settings
-    this.elements.showHoverOnLoad = document.getElementById('show-hover-on-load');
-    this.elements.hoverShowTooltips = document.getElementById('hover-show-tooltips');
-    this.elements.recentPostsCount = document.getElementById('recent-posts-count');
-    
-    // Badge settings
-    this.elements.badgeNotBookmarked = document.getElementById('badge-not-bookmarked');
-    this.elements.badgeNoTags = document.getElementById('badge-no-tags');
-    this.elements.badgePrivate = document.getElementById('badge-private');
-    this.elements.badgeToRead = document.getElementById('badge-to-read');
-    
-    // Site management
-    this.elements.inhibitUrls = document.getElementById('inhibit-urls');
-    
-    // Advanced settings
-    this.elements.stripUrlHash = document.getElementById('strip-url-hash');
-    this.elements.autoCloseTimeout = document.getElementById('auto-close-timeout');
-    
-    // Actions
-    this.elements.saveSettings = document.getElementById('save-settings');
-    this.elements.resetSettings = document.getElementById('reset-settings');
-    this.elements.exportSettings = document.getElementById('export-settings');
-    this.elements.importSettings = document.getElementById('import-settings');
-    this.elements.importFile = document.getElementById('import-file');
-    
-    // Status
-    this.elements.statusMessage = document.getElementById('status-message');
+    this.elements.authToken = document.getElementById("auth-token");
+    this.elements.testAuth = document.getElementById("test-auth");
+    this.elements.showHoverOnLoad = document.getElementById("show-hover-on-load");
+    this.elements.hoverShowTooltips = document.getElementById("hover-show-tooltips");
+    this.elements.recentPostsCount = document.getElementById("recent-posts-count");
+    this.elements.badgeNotBookmarked = document.getElementById("badge-not-bookmarked");
+    this.elements.badgeNoTags = document.getElementById("badge-no-tags");
+    this.elements.badgePrivate = document.getElementById("badge-private");
+    this.elements.badgeToRead = document.getElementById("badge-to-read");
+    this.elements.inhibitUrls = document.getElementById("inhibit-urls");
+    this.elements.stripUrlHash = document.getElementById("strip-url-hash");
+    this.elements.autoCloseTimeout = document.getElementById("auto-close-timeout");
+    this.elements.saveSettings = document.getElementById("save-settings");
+    this.elements.resetSettings = document.getElementById("reset-settings");
+    this.elements.exportSettings = document.getElementById("export-settings");
+    this.elements.importSettings = document.getElementById("import-settings");
+    this.elements.importFile = document.getElementById("import-file");
+    this.elements.statusMessage = document.getElementById("status-message");
   }
-
   attachEventListeners() {
-    // Authentication
-    this.elements.testAuth.addEventListener('click', () => this.testAuthentication());
-    
-    // Actions
-    this.elements.saveSettings.addEventListener('click', () => this.saveSettings());
-    this.elements.resetSettings.addEventListener('click', () => this.resetSettings());
-    this.elements.exportSettings.addEventListener('click', () => this.exportSettings());
-    this.elements.importSettings.addEventListener('click', () => this.elements.importFile.click());
-    this.elements.importFile.addEventListener('change', (e) => this.importSettings(e));
-    
-    // Auto-save on input changes (debounced)
-    const inputs = document.querySelectorAll('input, textarea');
-    inputs.forEach(input => {
-      input.addEventListener('input', this.debounce(() => this.autoSave(), 1000));
+    this.elements.testAuth.addEventListener("click", () => this.testAuthentication());
+    this.elements.saveSettings.addEventListener("click", () => this.saveSettings());
+    this.elements.resetSettings.addEventListener("click", () => this.resetSettings());
+    this.elements.exportSettings.addEventListener("click", () => this.exportSettings());
+    this.elements.importSettings.addEventListener("click", () => this.elements.importFile.click());
+    this.elements.importFile.addEventListener("change", (e) => this.importSettings(e));
+    const inputs = document.querySelectorAll("input, textarea");
+    inputs.forEach((input) => {
+      input.addEventListener("input", this.debounce(() => this.autoSave(), 1e3));
     });
   }
-
   async loadSettings() {
     try {
       this.setLoading(true);
-      
-      // Load configuration
+      await this.configManager.initializeDefaults();
       const config = await this.configManager.getConfig();
       const authToken = await this.configManager.getAuthToken();
       const inhibitUrls = await this.configManager.getInhibitUrls();
-      
-      // Populate form fields
       this.elements.authToken.value = authToken;
       this.elements.showHoverOnLoad.checked = config.showHoverOnPageLoad;
       this.elements.hoverShowTooltips.checked = config.hoverShowTooltips;
       this.elements.recentPostsCount.value = config.initRecentPostsCount;
-      
       this.elements.badgeNotBookmarked.value = config.badgeTextIfNotBookmarked;
       this.elements.badgeNoTags.value = config.badgeTextIfBookmarkedNoTags;
       this.elements.badgePrivate.value = config.badgeTextIfPrivate;
       this.elements.badgeToRead.value = config.badgeTextIfQueued;
-      
-      this.elements.inhibitUrls.value = inhibitUrls.join('\n');
-      
+      this.elements.inhibitUrls.value = inhibitUrls.join("\n");
       this.elements.stripUrlHash.checked = config.uxUrlStripHash;
       this.elements.autoCloseTimeout.value = config.uxAutoCloseTimeout;
-      
-      this.showStatus('Settings loaded successfully', 'success');
-      
+      this.showStatus("Settings loaded successfully", "success");
     } catch (error) {
-      console.error('Failed to load settings:', error);
-      this.showStatus('Failed to load settings: ' + error.message, 'error');
+      console.error("Failed to load settings:", error);
+      this.showStatus("Failed to load settings: " + error.message, "error");
     } finally {
       this.setLoading(false);
     }
   }
-
   async saveSettings() {
     try {
       this.setLoading(true);
-      
-      // Validate inputs
       const validation = this.validateInputs();
       if (!validation.valid) {
-        this.showStatus(validation.message, 'error');
+        this.showStatus(validation.message, "error");
         return;
       }
-      
-      // Collect settings
       const settings = {
         showHoverOnPageLoad: this.elements.showHoverOnLoad.checked,
         hoverShowTooltips: this.elements.hoverShowTooltips.checked,
         initRecentPostsCount: parseInt(this.elements.recentPostsCount.value),
-        
         badgeTextIfNotBookmarked: this.elements.badgeNotBookmarked.value,
         badgeTextIfBookmarkedNoTags: this.elements.badgeNoTags.value,
         badgeTextIfPrivate: this.elements.badgePrivate.value,
         badgeTextIfQueued: this.elements.badgeToRead.value,
-        
         uxUrlStripHash: this.elements.stripUrlHash.checked,
         uxAutoCloseTimeout: parseInt(this.elements.autoCloseTimeout.value)
       };
-      
-      // Save configuration
       await this.configManager.updateConfig(settings);
-      
-      // Save auth token
       const authToken = this.elements.authToken.value.trim();
       if (authToken) {
         await this.configManager.setAuthToken(authToken);
       }
-      
-      // Save inhibit URLs
-      const inhibitUrls = this.elements.inhibitUrls.value
-        .split('\n')
-        .map(url => url.trim())
-        .filter(url => url.length > 0);
-      
-      // Clear existing and add new URLs
-      const currentInhibitUrls = await this.configManager.getInhibitUrls();
-      // Note: This is a simplified approach. In a full implementation,
-      // you'd want to properly manage the inhibit list
-      
-      this.showStatus('Settings saved successfully!', 'success');
-      
+      const inhibitUrls = this.elements.inhibitUrls.value.split("\n").map((url) => url.trim()).filter((url) => url.length > 0);
+      await this.configManager.setInhibitUrls(inhibitUrls);
+      this.showStatus("Settings saved successfully!", "success");
     } catch (error) {
-      console.error('Failed to save settings:', error);
-      this.showStatus('Failed to save settings: ' + error.message, 'error');
+      console.error("Failed to save settings:", error);
+      this.showStatus("Failed to save settings: " + error.message, "error");
     } finally {
       this.setLoading(false);
     }
   }
-
   async resetSettings() {
-    if (!confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
+    if (!confirm("Are you sure you want to reset all settings to defaults? This cannot be undone.")) {
       return;
     }
-    
     try {
       this.setLoading(true);
-      
       await this.configManager.resetToDefaults();
       await this.loadSettings();
-      
-      this.showStatus('Settings reset to defaults', 'success');
-      
+      this.showStatus("Settings reset to defaults", "success");
     } catch (error) {
-      console.error('Failed to reset settings:', error);
-      this.showStatus('Failed to reset settings: ' + error.message, 'error');
+      console.error("Failed to reset settings:", error);
+      this.showStatus("Failed to reset settings: " + error.message, "error");
     } finally {
       this.setLoading(false);
     }
   }
-
   async testAuthentication() {
     const authToken = this.elements.authToken.value.trim();
-    
     if (!authToken) {
-      this.showStatus('Please enter an API token first', 'warning');
+      this.showStatus("Please enter an API token first", "warning");
       return;
     }
-    
     try {
       this.setLoading(true);
-      
-      // Temporarily set the token for testing
+      this.showStatus("Testing connection...", "info");
       await this.configManager.setAuthToken(authToken);
-      
-      // Test the connection
+      console.log("Testing Pinboard connection...");
       const isValid = await this.pinboardService.testConnection();
-      
+      console.log("Connection test result:", isValid);
       if (isValid) {
-        this.showStatus('Authentication successful! ✓', 'success');
+        this.showStatus("Authentication successful! \u2713", "success");
       } else {
-        this.showStatus('Authentication failed. Please check your token.', 'error');
+        this.showStatus("Authentication failed. Please check your token.", "error");
       }
-      
     } catch (error) {
-      console.error('Authentication test failed:', error);
-      this.showStatus('Authentication test failed: ' + error.message, 'error');
+      console.error("Authentication test failed:", error);
+      this.showStatus("Authentication test failed: " + error.message, "error");
     } finally {
       this.setLoading(false);
     }
   }
-
   async exportSettings() {
     try {
       const config = await this.configManager.exportConfig();
-      
       const blob = new Blob([JSON.stringify(config, null, 2)], {
-        type: 'application/json'
+        type: "application/json"
       });
-      
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
-      a.download = `hoverboard-settings-${new Date().toISOString().split('T')[0]}.json`;
+      a.download = `hoverboard-settings-${(/* @__PURE__ */ new Date()).toISOString().split("T")[0]}.json`;
       a.click();
-      
       URL.revokeObjectURL(url);
-      
-      this.showStatus('Settings exported successfully', 'success');
-      
+      this.showStatus("Settings exported successfully", "success");
     } catch (error) {
-      console.error('Failed to export settings:', error);
-      this.showStatus('Failed to export settings: ' + error.message, 'error');
+      console.error("Failed to export settings:", error);
+      this.showStatus("Failed to export settings: " + error.message, "error");
     }
   }
-
   async importSettings(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
     try {
       this.setLoading(true);
-      
       const text = await file.text();
       const config = JSON.parse(text);
-      
       await this.configManager.importConfig(config);
       await this.loadSettings();
-      
-      this.showStatus('Settings imported successfully', 'success');
-      
+      this.showStatus("Settings imported successfully", "success");
     } catch (error) {
-      console.error('Failed to import settings:', error);
-      this.showStatus('Failed to import settings: ' + error.message, 'error');
+      console.error("Failed to import settings:", error);
+      this.showStatus("Failed to import settings: " + error.message, "error");
     } finally {
       this.setLoading(false);
-      // Clear the file input
-      event.target.value = '';
+      event.target.value = "";
     }
   }
-
   async autoSave() {
     if (this.isLoading) return;
-    
     try {
       await this.saveSettings();
     } catch (error) {
-      // Silent fail for auto-save
-      console.warn('Auto-save failed:', error);
+      console.warn("Auto-save failed:", error);
     }
   }
-
   validateInputs() {
-    // Validate recent posts count
     const recentPostsCount = parseInt(this.elements.recentPostsCount.value);
     if (isNaN(recentPostsCount) || recentPostsCount < 5 || recentPostsCount > 50) {
       return {
         valid: false,
-        message: 'Recent posts count must be between 5 and 50'
+        message: "Recent posts count must be between 5 and 50"
       };
     }
-    
-    // Validate auto-close timeout
     const autoCloseTimeout = parseInt(this.elements.autoCloseTimeout.value);
     if (isNaN(autoCloseTimeout) || autoCloseTimeout < 0) {
       return {
         valid: false,
-        message: 'Auto-close timeout must be 0 or greater'
+        message: "Auto-close timeout must be 0 or greater"
       };
     }
-    
-    // Validate badge text lengths
     const badgeFields = [
       this.elements.badgeNotBookmarked,
       this.elements.badgeNoTags,
       this.elements.badgePrivate,
       this.elements.badgeToRead
     ];
-    
     for (const field of badgeFields) {
       if (field.value.length > 4) {
         return {
           valid: false,
-          message: 'Badge text must be 4 characters or less'
+          message: "Badge text must be 4 characters or less"
         };
       }
     }
-    
     return { valid: true };
   }
-
   setLoading(loading) {
     this.isLoading = loading;
-    
-    const buttons = document.querySelectorAll('.btn');
-    const inputs = document.querySelectorAll('input, textarea');
-    
-    buttons.forEach(btn => {
+    const buttons = document.querySelectorAll(".btn");
+    const inputs = document.querySelectorAll("input, textarea");
+    buttons.forEach((btn) => {
       btn.disabled = loading;
-      btn.classList.toggle('loading', loading);
+      btn.classList.toggle("loading", loading);
     });
-    
-    inputs.forEach(input => {
+    inputs.forEach((input) => {
       input.disabled = loading;
     });
   }
-
-  showStatus(message, type = 'info') {
+  showStatus(message, type = "info") {
     this.elements.statusMessage.textContent = message;
     this.elements.statusMessage.className = `status ${type}`;
-    
-    // Auto-hide success messages after 3 seconds
-    if (type === 'success') {
+    if (type === "success") {
       setTimeout(() => {
-        this.elements.statusMessage.className = 'status';
-      }, 3000);
+        this.elements.statusMessage.textContent = "";
+        this.elements.statusMessage.className = "status";
+      }, 5e3);
+    }
+    if (type === "info") {
+      setTimeout(() => {
+        this.elements.statusMessage.textContent = "";
+        this.elements.statusMessage.className = "status";
+      }, 3e3);
     }
   }
-
   debounce(func, wait) {
     let timeout;
     return function executedFunction(...args) {
@@ -355,11 +2746,11 @@ class OptionsController {
       timeout = setTimeout(later, wait);
     };
   }
-}
-
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => new OptionsController());
+};
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    new OptionsController();
+  });
 } else {
   new OptionsController();
-} 
+}

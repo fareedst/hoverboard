@@ -1,3 +1,344 @@
+/* MV3-003: Overlay styles for V3 content script injection */
+/* Modern CSS for Hoverboard hover overlay functionality */
+
+/* MV3-003: Base overlay container */
+.hoverboard-overlay {
+  position: fixed;
+  z-index: 999999;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #ffffff;
+  min-width: 320px;
+  max-width: 400px;
+  animation: hoverboard-fade-in 0.2s ease-out;
+}
+
+/* MV3-003: Overlay fade-in animation */
+@keyframes hoverboard-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* MV3-003: Overlay content container */
+.hoverboard-overlay-content {
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* MV3-003: Overlay header */
+.hoverboard-overlay-header {
+  background: #2c3e50;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #34495e;
+}
+
+/* MV3-003: Overlay title */
+.hoverboard-overlay-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #ffffff;
+  margin: 0;
+}
+
+/* MV3-003: Close button */
+.hoverboard-overlay-close {
+  background: none;
+  border: none;
+  color: #bdc3c7;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.hoverboard-overlay-close:hover {
+  background: #e74c3c;
+  color: #ffffff;
+}
+
+/* MV3-003: Overlay body */
+.hoverboard-overlay-body {
+  padding: 16px;
+  background: #34495e;
+}
+
+/* MV3-003: Form inputs */
+.hoverboard-overlay input,
+.hoverboard-overlay textarea {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  border: 1px solid #4a5f7a;
+  border-radius: 4px;
+  background: #2c3e50;
+  color: #ffffff;
+  font-size: 14px;
+  font-family: inherit;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease;
+}
+
+.hoverboard-overlay input:focus,
+.hoverboard-overlay textarea:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+.hoverboard-overlay input::placeholder,
+.hoverboard-overlay textarea::placeholder {
+  color: #95a5a6;
+}
+
+/* MV3-003: URL input */
+.hoverboard-url-input {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+}
+
+/* MV3-003: Title input */
+.hoverboard-title-input {
+  font-weight: 500;
+}
+
+/* MV3-003: Description textarea */
+.hoverboard-description-input {
+  min-height: 60px;
+  resize: vertical;
+}
+
+/* MV3-003: Tags input */
+.hoverboard-tags-input {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 13px;
+}
+
+/* MV3-003: Actions container */
+.hoverboard-overlay-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+/* MV3-003: Save button */
+.hoverboard-save-button {
+  background: #27ae60;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.hoverboard-save-button:hover {
+  background: #229954;
+}
+
+.hoverboard-save-button:active {
+  background: #1e8449;
+}
+
+/* MV3-003: Private label and checkbox */
+.hoverboard-private-label {
+  display: flex;
+  align-items: center;
+  color: #bdc3c7;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.hoverboard-private-checkbox {
+  margin-right: 6px !important;
+  margin-bottom: 0 !important;
+  width: auto !important;
+  cursor: pointer;
+}
+
+/* MV3-003: Loading state */
+.hoverboard-overlay.loading {
+  pointer-events: none;
+}
+
+.hoverboard-overlay.loading .hoverboard-save-button {
+  background: #7f8c8d;
+  cursor: not-allowed;
+}
+
+.hoverboard-overlay.loading .hoverboard-save-button::after {
+  content: '...';
+  animation: hoverboard-loading-dots 1.5s infinite;
+}
+
+/* MV3-003: Loading animation */
+@keyframes hoverboard-loading-dots {
+  0%, 20% { content: ''; }
+  40% { content: '.'; }
+  60% { content: '..'; }
+  80%, 100% { content: '...'; }
+}
+
+/* MV3-003: Error state */
+.hoverboard-overlay.error {
+  border: 2px solid #e74c3c;
+}
+
+.hoverboard-overlay.error .hoverboard-overlay-header {
+  background: #c0392b;
+}
+
+/* MV3-003: Success state */
+.hoverboard-overlay.success {
+  border: 2px solid #27ae60;
+}
+
+.hoverboard-overlay.success .hoverboard-overlay-header {
+  background: #229954;
+}
+
+/* MV3-003: Responsive design for smaller screens */
+@media (max-width: 480px) {
+  .hoverboard-overlay {
+    min-width: 280px;
+    max-width: 90vw;
+    left: 5vw !important;
+    right: 5vw !important;
+  }
+  
+  .hoverboard-overlay-actions {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .hoverboard-save-button {
+    width: 100%;
+  }
+  
+  .hoverboard-private-label {
+    justify-content: center;
+  }
+}
+
+/* MV3-003: High contrast mode support */
+@media (prefers-contrast: high) {
+  .hoverboard-overlay {
+    background: #000000;
+    border: 2px solid #ffffff;
+  }
+  
+  .hoverboard-overlay-header {
+    background: #000000;
+    border-bottom: 2px solid #ffffff;
+  }
+  
+  .hoverboard-overlay-body {
+    background: #000000;
+  }
+  
+  .hoverboard-overlay input,
+  .hoverboard-overlay textarea {
+    background: #000000;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+  }
+}
+
+/* MV3-003: Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .hoverboard-overlay {
+    animation: none;
+  }
+  
+  .hoverboard-overlay-close,
+  .hoverboard-save-button,
+  .hoverboard-overlay input,
+  .hoverboard-overlay textarea {
+    transition: none;
+  }
+}
+
+/* MV3-003: Dark mode support (if system preference) */
+@media (prefers-color-scheme: dark) {
+  .hoverboard-overlay {
+    background: rgba(0, 0, 0, 0.9);
+  }
+  
+  .hoverboard-overlay-header {
+    background: #1a1a1a;
+    border-bottom-color: #333333;
+  }
+  
+  .hoverboard-overlay-body {
+    background: #2a2a2a;
+  }
+  
+  .hoverboard-overlay input,
+  .hoverboard-overlay textarea {
+    background: #1a1a1a;
+    border-color: #444444;
+    color: #ffffff;
+  }
+}
+
+/* MV3-003: Focus management for accessibility */
+.hoverboard-overlay:focus-within {
+  outline: 2px solid #3498db;
+  outline-offset: 2px;
+}
+
+/* MV3-003: Ensure overlay doesn't interfere with page content */
+.hoverboard-overlay * {
+  box-sizing: border-box;
+}
+
+/* MV3-003: Prevent overlay from being affected by page styles */
+.hoverboard-overlay,
+.hoverboard-overlay * {
+  all: unset;
+  display: revert;
+  box-sizing: border-box;
+}
+
+/* MV3-003: Re-apply necessary styles after reset */
+.hoverboard-overlay {
+  position: fixed !important;
+  z-index: 999999 !important;
+  background: rgba(0, 0, 0, 0.8) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-size: 14px !important;
+  line-height: 1.4 !important;
+  color: #ffffff !important;
+  min-width: 320px !important;
+  max-width: 400px !important;
+}
+
 /* Hoverboard Overlay Styles - Modern CSS for bookmark overlay display */
 
 .hoverboard-overlay {

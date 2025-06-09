@@ -163,7 +163,7 @@ export class StateManager {
     this.setState({
       currentPin: pinInfo,
       tags: tags,
-      isPrivate: pinInfo?.private === 'yes'
+      isPrivate: pinInfo?.shared === 'no'
     });
   }
 

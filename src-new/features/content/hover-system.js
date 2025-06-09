@@ -3,332 +3,328 @@
  * Manages hover display, tag rendering, and user interactions
  */
 
-import { MessageService } from '../../core/message-service.js';
-import { Logger } from '../../shared/logger.js';
-import { TagRenderer } from './tag-renderer.js';
-import { PinUtils } from '../../shared/pin-utils.js';
+import { MessageService } from '../../core/message-service.js'
+import { Logger } from '../../shared/logger.js'
+import { TagRenderer } from './tag-renderer.js'
+import { PinUtils } from '../../shared/pin-utils.js'
 
 class HoverSystem {
-  constructor(document, config, overlayManager) {
-    this.document = document;
-    this.config = config;
-    this.overlayManager = overlayManager;
-    this.messageService = new MessageService();
-    this.logger = new Logger('HoverSystem');
-    this.tagRenderer = new TagRenderer(config);
-    
-    this.currentPin = null;
-    this.isVisible = false;
-    this.autoCloseTimer = null;
+  constructor (document, config, overlayManager) {
+    this.document = document
+    this.config = config
+    this.overlayManager = overlayManager
+    this.messageService = new MessageService()
+    this.logger = new Logger('HoverSystem')
+    this.tagRenderer = new TagRenderer(config)
+
+    this.currentPin = null
+    this.isVisible = false
+    this.autoCloseTimer = null
   }
 
   /**
    * Display hover with pin data
    */
-  async displayHover(hoverConfig) {
+  async displayHover (hoverConfig) {
     try {
-      this.logger.debug('Displaying hover with config:', hoverConfig);
-      
+      this.logger.debug('Displaying hover with config:', hoverConfig)
+
       if (this.isVisible) {
-        this.hideHover();
+        this.hideHover()
       }
 
       // Get pin data for current page
-      const pinData = await this.loadSiteData(hoverConfig);
-      
+      const pinData = await this.loadSiteData(hoverConfig)
+
       if (!pinData) {
-        this.overlayManager.showMessage("No data available");
-        return;
+        this.overlayManager.showMessage('No data available')
+        return
       }
 
-      this.currentPin = pinData;
-      
+      this.currentPin = pinData
+
       // Build hover content
-      const hoverContent = await this.buildHoverContent(pinData);
-      
+      const hoverContent = await this.buildHoverContent(pinData)
+
       // Display in overlay
-      this.overlayManager.show(hoverContent);
-      this.isVisible = true;
-      
+      this.overlayManager.show(hoverContent)
+      this.isVisible = true
+
       // Set up auto-close timer if configured
       if (this.config.autoCloseTimeout > 0 && hoverConfig.pageLoad) {
-        this.setAutoCloseTimer(this.config.autoCloseTimeout);
+        this.setAutoCloseTimer(this.config.autoCloseTimeout)
       }
-      
-      this.logger.debug('Hover displayed successfully');
-      
+
+      this.logger.debug('Hover displayed successfully')
     } catch (error) {
-      this.logger.error('Error displaying hover:', error);
-      this.overlayManager.showMessage("Error loading data");
+      this.logger.error('Error displaying hover:', error)
+      this.overlayManager.showMessage('Error loading data')
     }
   }
 
   /**
    * Hide the hover overlay
    */
-  hideHover() {
+  hideHover () {
     if (this.isVisible) {
-      this.overlayManager.hide();
-      this.isVisible = false;
-      this.currentPin = null;
-      this.clearAutoCloseTimer();
-      this.logger.debug('Hover hidden');
+      this.overlayManager.hide()
+      this.isVisible = false
+      this.currentPin = null
+      this.clearAutoCloseTimer()
+      this.logger.debug('Hover hidden')
     }
   }
 
   /**
    * Toggle hover visibility
    */
-  async toggleHover() {
+  async toggleHover () {
     if (this.isVisible) {
-      this.hideHover();
+      this.hideHover()
     } else {
       await this.displayHover({
         displayNow: true,
         pageLoad: false,
         useBlock: false
-      });
+      })
     }
   }
 
   /**
    * Refresh hover with updated data
    */
-  async refreshHover() {
+  async refreshHover () {
     if (this.isVisible) {
       const hoverConfig = {
         displayNow: true,
         pageLoad: false,
         useBlock: false
-      };
-      await this.displayHover(hoverConfig);
+      }
+      await this.displayHover(hoverConfig)
     }
   }
 
   /**
    * Check if hover is currently visible
    */
-  isHoverVisible() {
-    return this.isVisible;
+  isHoverVisible () {
+    return this.isVisible
   }
 
   /**
    * Load site data from background
    */
-  async loadSiteData(hoverConfig) {
+  async loadSiteData (hoverConfig) {
     try {
       const response = await this.messageService.sendMessage('getCurrentPin', {
         tabId: hoverConfig.tabId,
         title: this.document.title,
         url: window.location.href,
         useBlock: hoverConfig.useBlock || false
-      });
+      })
 
       if (!response || !response.url) {
-        this.logger.warn('No pin data received');
-        return null;
+        this.logger.warn('No pin data received')
+        return null
       }
 
       // Enhance pin data with additional properties
       const pin = PinUtils.createPin(response, {
         siteTags: [...(response.tags || [])],
         tags: [...(response.tags || [])]
-      });
+      })
 
-      this.logger.debug('Site data loaded:', pin);
-      return pin;
-      
+      this.logger.debug('Site data loaded:', pin)
+      return pin
     } catch (error) {
-      this.logger.error('Error loading site data:', error);
-      return null;
+      this.logger.error('Error loading site data:', error)
+      return null
     }
   }
 
   /**
    * Build hover content structure
    */
-  async buildHoverContent(pin) {
-    const container = this.document.createElement('div');
-    container.className = 'hoverboard-container';
+  async buildHoverContent (pin) {
+    const container = this.document.createElement('div')
+    container.className = 'hoverboard-container'
 
     // Add current tags section
     if (pin.tags && pin.tags.length > 0) {
-      const currentSection = await this.buildCurrentTagsSection(pin);
-      container.appendChild(currentSection);
+      const currentSection = await this.buildCurrentTagsSection(pin)
+      container.appendChild(currentSection)
     }
 
     // Add recent tags section if enabled
     if (this.config.showRecentTags) {
-      const recentSection = await this.buildRecentTagsSection(pin);
+      const recentSection = await this.buildRecentTagsSection(pin)
       if (recentSection) {
-        container.appendChild(recentSection);
+        container.appendChild(recentSection)
       }
     }
 
     // Add content tags section if enabled
     if (this.config.showContentTags) {
-      const contentSection = await this.buildContentTagsSection(pin);
+      const contentSection = await this.buildContentTagsSection(pin)
       if (contentSection) {
-        container.appendChild(contentSection);
+        container.appendChild(contentSection)
       }
     }
 
     // Add action buttons
-    const actionsSection = this.buildActionsSection(pin);
-    container.appendChild(actionsSection);
+    const actionsSection = this.buildActionsSection(pin)
+    container.appendChild(actionsSection)
 
-    return container;
+    return container
   }
 
   /**
    * Build current tags section
    */
-  async buildCurrentTagsSection(pin) {
-    const section = this.document.createElement('div');
-    section.className = 'hoverboard-section current-tags';
+  async buildCurrentTagsSection (pin) {
+    const section = this.document.createElement('div')
+    section.className = 'hoverboard-section current-tags'
 
     // Section header
-    const header = this.document.createElement('div');
-    header.className = 'section-header';
-    header.textContent = 'Current:';
+    const header = this.document.createElement('div')
+    header.className = 'section-header'
+    header.textContent = 'Current:'
     if (this.config.showTooltips) {
-      header.title = 'Tags for this Bookmark (2-click-delete)';
+      header.title = 'Tags for this Bookmark (2-click-delete)'
     }
-    section.appendChild(header);
+    section.appendChild(header)
 
     // Tags container
-    const tagsContainer = this.document.createElement('div');
-    tagsContainer.className = 'tags-container';
-    section.appendChild(tagsContainer);
+    const tagsContainer = this.document.createElement('div')
+    tagsContainer.className = 'tags-container'
+    section.appendChild(tagsContainer)
 
     // Render current tags
     pin.tags.forEach(tag => {
       const tagElement = this.tagRenderer.createCurrentTag(tag, pin, (tagToDelete) => {
-        this.handleDeleteTag(pin, tagToDelete);
-      });
-      tagsContainer.appendChild(tagElement);
-    });
+        this.handleDeleteTag(pin, tagToDelete)
+      })
+      tagsContainer.appendChild(tagElement)
+    })
 
-    return section;
+    return section
   }
 
   /**
    * Build recent tags section
    */
-  async buildRecentTagsSection(pin) {
+  async buildRecentTagsSection (pin) {
     try {
       const recentTags = await this.messageService.sendMessage('getRecentTags', {
         limit: this.config.recentTagsLimit || 20
-      });
+      })
 
       if (!recentTags || recentTags.length === 0) {
-        return null;
+        return null
       }
 
-      const section = this.document.createElement('div');
-      section.className = 'hoverboard-section recent-tags';
+      const section = this.document.createElement('div')
+      section.className = 'hoverboard-section recent-tags'
 
       // Section header
-      const header = this.document.createElement('div');
-      header.className = 'section-header';
-      header.textContent = 'Recent:';
+      const header = this.document.createElement('div')
+      header.className = 'section-header'
+      header.textContent = 'Recent:'
       if (this.config.showTooltips) {
-        header.title = 'Recent Tags (click to tag)';
+        header.title = 'Recent Tags (click to tag)'
       }
-      section.appendChild(header);
+      section.appendChild(header)
 
       // Tags container
-      const tagsContainer = this.document.createElement('div');
-      tagsContainer.className = 'tags-container';
-      section.appendChild(tagsContainer);
+      const tagsContainer = this.document.createElement('div')
+      tagsContainer.className = 'tags-container'
+      section.appendChild(tagsContainer)
 
       // Filter out tags that are already on this pin
-      const currentTags = pin.tags || [];
-      const availableTags = recentTags.filter(tag => !currentTags.includes(tag));
+      const currentTags = pin.tags || []
+      const availableTags = recentTags.filter(tag => !currentTags.includes(tag))
 
       // Render recent tags (limited count)
-      const displayCount = Math.min(availableTags.length, this.config.recentTagsDisplayLimit || 10);
+      const displayCount = Math.min(availableTags.length, this.config.recentTagsDisplayLimit || 10)
       for (let i = 0; i < displayCount; i++) {
-        const tag = availableTags[i];
+        const tag = availableTags[i]
         const tagElement = this.tagRenderer.createRecentTag(tag, pin, (tagToAdd) => {
-          this.handleAddTag(pin, tagToAdd);
-        });
-        tagsContainer.appendChild(tagElement);
+          this.handleAddTag(pin, tagToAdd)
+        })
+        tagsContainer.appendChild(tagElement)
       }
 
-      return section;
-      
+      return section
     } catch (error) {
-      this.logger.error('Error building recent tags section:', error);
-      return null;
+      this.logger.error('Error building recent tags section:', error)
+      return null
     }
   }
 
   /**
    * Build content tags section
    */
-  async buildContentTagsSection(pin) {
+  async buildContentTagsSection (pin) {
     try {
       const contentTags = await this.messageService.sendMessage('getContentTags', {
         url: pin.url,
         title: pin.description || this.document.title
-      });
+      })
 
       if (!contentTags || contentTags.length === 0) {
-        return null;
+        return null
       }
 
-      const section = this.document.createElement('div');
-      section.className = 'hoverboard-section content-tags';
+      const section = this.document.createElement('div')
+      section.className = 'hoverboard-section content-tags'
 
       // Section header
-      const header = this.document.createElement('div');
-      header.className = 'section-header';
-      header.textContent = 'Suggested:';
+      const header = this.document.createElement('div')
+      header.className = 'section-header'
+      header.textContent = 'Suggested:'
       if (this.config.showTooltips) {
-        header.title = 'Content-based Tag Suggestions';
+        header.title = 'Content-based Tag Suggestions'
       }
-      section.appendChild(header);
+      section.appendChild(header)
 
       // Tags container
-      const tagsContainer = this.document.createElement('div');
-      tagsContainer.className = 'tags-container';
-      section.appendChild(tagsContainer);
+      const tagsContainer = this.document.createElement('div')
+      tagsContainer.className = 'tags-container'
+      section.appendChild(tagsContainer)
 
       // Filter out existing tags
-      const currentTags = pin.tags || [];
-      const availableTags = contentTags.filter(tag => !currentTags.includes(tag));
+      const currentTags = pin.tags || []
+      const availableTags = contentTags.filter(tag => !currentTags.includes(tag))
 
       // Render content tags
       availableTags.forEach(tag => {
         const tagElement = this.tagRenderer.createContentTag(tag, pin, (tagToAdd) => {
-          this.handleAddTag(pin, tagToAdd);
-        });
-        tagsContainer.appendChild(tagElement);
-      });
+          this.handleAddTag(pin, tagToAdd)
+        })
+        tagsContainer.appendChild(tagElement)
+      })
 
-      return section;
-      
+      return section
     } catch (error) {
-      this.logger.error('Error building content tags section:', error);
-      return null;
+      this.logger.error('Error building content tags section:', error)
+      return null
     }
   }
 
   /**
    * Build actions section
    */
-  buildActionsSection(pin) {
-    const section = this.document.createElement('div');
-    section.className = 'hoverboard-section actions';
+  buildActionsSection (pin) {
+    const section = this.document.createElement('div')
+    section.className = 'hoverboard-section actions'
 
     // Close button
     if (this.config.showCloseButton) {
       const closeBtn = this.createActionButton('✕', 'Close Hoverboard', () => {
-        this.hideHover();
-      });
-      closeBtn.className += ' close-button';
-      section.appendChild(closeBtn);
+        this.hideHover()
+      })
+      closeBtn.className += ' close-button'
+      section.appendChild(closeBtn)
     }
 
     // Private/Public toggle
@@ -337,8 +333,8 @@ class HoverSystem {
         pin.shared === 'no' ? '🔒' : '🌐',
         pin.shared === 'no' ? 'Make Public' : 'Make Private',
         () => this.handleTogglePrivacy(pin)
-      );
-      section.appendChild(privateBtn);
+      )
+      section.appendChild(privateBtn)
     }
 
     // Read Later toggle
@@ -347,238 +343,232 @@ class HoverSystem {
         pin.toread === 'yes' ? '📖' : '📋',
         pin.toread === 'yes' ? 'Mark as Read' : 'Mark to Read',
         () => this.handleToggleReadLater(pin)
-      );
-      section.appendChild(readBtn);
+      )
+      section.appendChild(readBtn)
     }
 
     // Add tag input
     if (this.config.showAddTagInput) {
-      const inputContainer = this.createAddTagInput(pin);
-      section.appendChild(inputContainer);
+      const inputContainer = this.createAddTagInput(pin)
+      section.appendChild(inputContainer)
     }
 
     // Delete pin button
     if (this.config.showDeleteButton && pin.hash) {
       const deleteBtn = this.createActionButton('🗑️', 'Delete Bookmark', () => {
-        this.handleDeletePin(pin);
-      });
-      deleteBtn.className += ' delete-button';
-      section.appendChild(deleteBtn);
+        this.handleDeletePin(pin)
+      })
+      deleteBtn.className += ' delete-button'
+      section.appendChild(deleteBtn)
     }
 
     // Block URL button
     if (this.config.showBlockButton) {
       const blockBtn = this.createActionButton('🚫', 'Block this URL', () => {
-        this.handleBlockUrl(pin.url);
-      });
-      section.appendChild(blockBtn);
+        this.handleBlockUrl(pin.url)
+      })
+      section.appendChild(blockBtn)
     }
 
-    return section;
+    return section
   }
 
   /**
    * Create action button
    */
-  createActionButton(text, title, onClick) {
-    const button = this.document.createElement('button');
-    button.textContent = text;
-    button.title = title;
-    button.className = 'action-button';
-    button.addEventListener('click', onClick);
-    return button;
+  createActionButton (text, title, onClick) {
+    const button = this.document.createElement('button')
+    button.textContent = text
+    button.title = title
+    button.className = 'action-button'
+    button.addEventListener('click', onClick)
+    return button
   }
 
   /**
    * Create add tag input
    */
-  createAddTagInput(pin) {
-    const container = this.document.createElement('div');
-    container.className = 'add-tag-container';
+  createAddTagInput (pin) {
+    const container = this.document.createElement('div')
+    container.className = 'add-tag-container'
 
-    const input = this.document.createElement('input');
-    input.type = 'text';
-    input.placeholder = 'Add new tag...';
-    input.className = 'add-tag-input';
+    const input = this.document.createElement('input')
+    input.type = 'text'
+    input.placeholder = 'Add new tag...'
+    input.className = 'add-tag-input'
 
-    const button = this.document.createElement('button');
-    button.textContent = '+';
-    button.className = 'add-tag-button';
-    button.title = 'Add Tag';
+    const button = this.document.createElement('button')
+    button.textContent = '+'
+    button.className = 'add-tag-button'
+    button.title = 'Add Tag'
 
     const addTag = () => {
-      const tag = input.value.trim();
+      const tag = input.value.trim()
       if (tag) {
-        this.handleAddTag(pin, tag);
-        input.value = '';
+        this.handleAddTag(pin, tag)
+        input.value = ''
       }
-    };
+    }
 
-    button.addEventListener('click', addTag);
+    button.addEventListener('click', addTag)
     input.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
-        addTag();
+        addTag()
       }
-    });
+    })
 
-    container.appendChild(input);
-    container.appendChild(button);
-    return container;
+    container.appendChild(input)
+    container.appendChild(button)
+    return container
   }
 
   /**
    * Handle adding a tag
    */
-  async handleAddTag(pin, tag) {
+  async handleAddTag (pin, tag) {
     try {
-      this.logger.debug('Adding tag:', tag);
-      
-      await this.messageService.sendMessage('addTag', {
-        pin: pin,
-        tag: tag,
-        description: pin.description || this.document.title
-      });
+      this.logger.debug('Adding tag:', tag)
 
-      setTimeout(() => this.refreshHover(), 500);
-      
+      await this.messageService.sendMessage('addTag', {
+        pin,
+        tag,
+        description: pin.description || this.document.title
+      })
+
+      setTimeout(() => this.refreshHover(), 500)
     } catch (error) {
-      this.logger.error('Error adding tag:', error);
+      this.logger.error('Error adding tag:', error)
     }
   }
 
   /**
    * Handle deleting a tag
    */
-  async handleDeleteTag(pin, tag) {
+  async handleDeleteTag (pin, tag) {
     try {
-      this.logger.debug('Deleting tag:', tag);
-      
-      await this.messageService.sendMessage('deleteTag', {
-        pin: pin,
-        tag: tag,
-        description: pin.description || this.document.title
-      });
+      this.logger.debug('Deleting tag:', tag)
 
-      setTimeout(() => this.refreshHover(), 500);
-      
+      await this.messageService.sendMessage('deleteTag', {
+        pin,
+        tag,
+        description: pin.description || this.document.title
+      })
+
+      setTimeout(() => this.refreshHover(), 500)
     } catch (error) {
-      this.logger.error('Error deleting tag:', error);
+      this.logger.error('Error deleting tag:', error)
     }
   }
 
   /**
    * Handle toggling privacy
    */
-  async handleTogglePrivacy(pin) {
+  async handleTogglePrivacy (pin) {
     try {
-      const newShared = pin.shared === 'no' ? 'yes' : 'no';
-      this.logger.debug('Toggling privacy to:', newShared);
-      
+      const newShared = pin.shared === 'no' ? 'yes' : 'no'
+      this.logger.debug('Toggling privacy to:', newShared)
+
       await this.messageService.sendMessage('updatePin', {
         pin: { ...pin, shared: newShared }
-      });
+      })
 
-      setTimeout(() => this.refreshHover(), 500);
-      
+      setTimeout(() => this.refreshHover(), 500)
     } catch (error) {
-      this.logger.error('Error toggling privacy:', error);
+      this.logger.error('Error toggling privacy:', error)
     }
   }
 
   /**
    * Handle toggling read later status
    */
-  async handleToggleReadLater(pin) {
+  async handleToggleReadLater (pin) {
     try {
-      const newToRead = pin.toread === 'yes' ? 'no' : 'yes';
-      this.logger.debug('Toggling read later to:', newToRead);
-      
+      const newToRead = pin.toread === 'yes' ? 'no' : 'yes'
+      this.logger.debug('Toggling read later to:', newToRead)
+
       await this.messageService.sendMessage('updatePin', {
         pin: { ...pin, toread: newToRead }
-      });
+      })
 
-      setTimeout(() => this.refreshHover(), 500);
-      
+      setTimeout(() => this.refreshHover(), 500)
     } catch (error) {
-      this.logger.error('Error toggling read later:', error);
+      this.logger.error('Error toggling read later:', error)
     }
   }
 
   /**
    * Handle deleting a pin
    */
-  async handleDeletePin(pin) {
+  async handleDeletePin (pin) {
     try {
       if (!confirm('Are you sure you want to delete this bookmark?')) {
-        return;
+        return
       }
 
-      this.logger.debug('Deleting pin:', pin.url);
-      
+      this.logger.debug('Deleting pin:', pin.url)
+
       await this.messageService.sendMessage('deletePin', {
         url: pin.url
-      });
+      })
 
-      this.hideHover();
-      
+      this.hideHover()
     } catch (error) {
-      this.logger.error('Error deleting pin:', error);
+      this.logger.error('Error deleting pin:', error)
     }
   }
 
   /**
    * Handle blocking URL
    */
-  async handleBlockUrl(url) {
+  async handleBlockUrl (url) {
     try {
-      this.logger.debug('Blocking URL:', url);
-      
-      await this.messageService.sendMessage('blockUrl', {
-        url: url
-      });
+      this.logger.debug('Blocking URL:', url)
 
-      this.hideHover();
-      
+      await this.messageService.sendMessage('blockUrl', {
+        url
+      })
+
+      this.hideHover()
     } catch (error) {
-      this.logger.error('Error blocking URL:', error);
+      this.logger.error('Error blocking URL:', error)
     }
   }
 
   /**
    * Set auto-close timer
    */
-  setAutoCloseTimer(timeout) {
-    this.clearAutoCloseTimer();
+  setAutoCloseTimer (timeout) {
+    this.clearAutoCloseTimer()
     this.autoCloseTimer = setTimeout(() => {
-      this.hideHover();
-    }, timeout);
+      this.hideHover()
+    }, timeout)
   }
 
   /**
    * Clear auto-close timer
    */
-  clearAutoCloseTimer() {
+  clearAutoCloseTimer () {
     if (this.autoCloseTimer) {
-      clearTimeout(this.autoCloseTimer);
-      this.autoCloseTimer = null;
+      clearTimeout(this.autoCloseTimer)
+      this.autoCloseTimer = null
     }
   }
 
   /**
    * Update configuration
    */
-  updateConfig(newConfig) {
-    this.config = newConfig;
-    this.tagRenderer.updateConfig(newConfig);
+  updateConfig (newConfig) {
+    this.config = newConfig
+    this.tagRenderer.updateConfig(newConfig)
   }
 
   /**
    * Cleanup resources
    */
-  destroy() {
-    this.clearAutoCloseTimer();
-    this.hideHover();
+  destroy () {
+    this.clearAutoCloseTimer()
+    this.hideHover()
   }
 }
 
-export { HoverSystem }; 
+export { HoverSystem }

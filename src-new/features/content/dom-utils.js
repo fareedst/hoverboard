@@ -8,14 +8,14 @@ export class DOMUtils {
    * Wait for DOM to be ready
    * @returns {Promise} Promise that resolves when DOM is ready
    */
-  waitForDOM() {
+  waitForDOM () {
     return new Promise((resolve) => {
       if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        resolve();
+        resolve()
       } else {
-        document.addEventListener('DOMContentLoaded', resolve);
+        document.addEventListener('DOMContentLoaded', resolve)
       }
-    });
+    })
   }
 
   /**
@@ -24,8 +24,8 @@ export class DOMUtils {
    * @param {Element} context - Context element (default: document)
    * @returns {Element|null} First matching element
    */
-  $(selector, context = document) {
-    return context.querySelector(selector);
+  $ (selector, context = document) {
+    return context.querySelector(selector)
   }
 
   /**
@@ -34,8 +34,8 @@ export class DOMUtils {
    * @param {Element} context - Context element (default: document)
    * @returns {NodeList} All matching elements
    */
-  $$(selector, context = document) {
-    return context.querySelectorAll(selector);
+  $$ (selector, context = document) {
+    return context.querySelectorAll(selector)
   }
 
   /**
@@ -45,20 +45,20 @@ export class DOMUtils {
    * @param {Object} properties - Element properties
    * @returns {Element} Created element
    */
-  createElement(tagName, attributes = {}, properties = {}) {
-    const element = document.createElement(tagName);
-    
+  createElement (tagName, attributes = {}, properties = {}) {
+    const element = document.createElement(tagName)
+
     // Set attributes
     Object.entries(attributes).forEach(([key, value]) => {
-      element.setAttribute(key, value);
-    });
-    
+      element.setAttribute(key, value)
+    })
+
     // Set properties
     Object.entries(properties).forEach(([key, value]) => {
-      element[key] = value;
-    });
-    
-    return element;
+      element[key] = value
+    })
+
+    return element
   }
 
   /**
@@ -69,25 +69,25 @@ export class DOMUtils {
    * @param {string} delegateSelector - Delegate selector for event delegation
    * @returns {Function} Cleanup function
    */
-  on(target, event, handler, delegateSelector = null) {
-    const element = typeof target === 'string' ? this.$(target) : target;
-    if (!element) return () => {};
+  on (target, event, handler, delegateSelector = null) {
+    const element = typeof target === 'string' ? this.$(target) : target
+    if (!element) return () => {}
 
     if (delegateSelector) {
       // Event delegation
       const delegatedHandler = (e) => {
-        const delegatedTarget = e.target.closest(delegateSelector);
+        const delegatedTarget = e.target.closest(delegateSelector)
         if (delegatedTarget && element.contains(delegatedTarget)) {
-          handler.call(delegatedTarget, e);
+          handler.call(delegatedTarget, e)
         }
-      };
-      
-      element.addEventListener(event, delegatedHandler);
-      return () => element.removeEventListener(event, delegatedHandler);
+      }
+
+      element.addEventListener(event, delegatedHandler)
+      return () => element.removeEventListener(event, delegatedHandler)
     } else {
       // Direct event listener
-      element.addEventListener(event, handler);
-      return () => element.removeEventListener(event, handler);
+      element.addEventListener(event, handler)
+      return () => element.removeEventListener(event, handler)
     }
   }
 
@@ -95,10 +95,10 @@ export class DOMUtils {
    * Remove element from DOM
    * @param {Element|string} target - Target element or selector
    */
-  remove(target) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  remove (target) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element && element.parentNode) {
-      element.parentNode.removeChild(element);
+      element.parentNode.removeChild(element)
     }
   }
 
@@ -107,10 +107,10 @@ export class DOMUtils {
    * @param {Element|string} parent - Parent element or selector
    * @param {Element} child - Child element to append
    */
-  append(parent, child) {
-    const parentElement = typeof parent === 'string' ? this.$(parent) : parent;
+  append (parent, child) {
+    const parentElement = typeof parent === 'string' ? this.$(parent) : parent
     if (parentElement && child) {
-      parentElement.appendChild(child);
+      parentElement.appendChild(child)
     }
   }
 
@@ -119,10 +119,10 @@ export class DOMUtils {
    * @param {Element|string} parent - Parent element or selector
    * @param {Element} child - Child element to prepend
    */
-  prepend(parent, child) {
-    const parentElement = typeof parent === 'string' ? this.$(parent) : parent;
+  prepend (parent, child) {
+    const parentElement = typeof parent === 'string' ? this.$(parent) : parent
     if (parentElement && child) {
-      parentElement.insertBefore(child, parentElement.firstChild);
+      parentElement.insertBefore(child, parentElement.firstChild)
     }
   }
 
@@ -133,21 +133,21 @@ export class DOMUtils {
    * @param {string} value - Attribute value (if attr is string)
    * @returns {string|void} Attribute value if getting, void if setting
    */
-  attr(target, attr, value = null) {
-    const element = typeof target === 'string' ? this.$(target) : target;
-    if (!element) return;
+  attr (target, attr, value = null) {
+    const element = typeof target === 'string' ? this.$(target) : target
+    if (!element) return
 
     if (typeof attr === 'object') {
       // Set multiple attributes
       Object.entries(attr).forEach(([key, val]) => {
-        element.setAttribute(key, val);
-      });
+        element.setAttribute(key, val)
+      })
     } else if (value !== null) {
       // Set single attribute
-      element.setAttribute(attr, value);
+      element.setAttribute(attr, value)
     } else {
       // Get attribute
-      return element.getAttribute(attr);
+      return element.getAttribute(attr)
     }
   }
 
@@ -156,10 +156,10 @@ export class DOMUtils {
    * @param {Element|string} target - Target element or selector
    * @param {string} className - Class name to add
    */
-  addClass(target, className) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  addClass (target, className) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
-      element.classList.add(className);
+      element.classList.add(className)
     }
   }
 
@@ -168,10 +168,10 @@ export class DOMUtils {
    * @param {Element|string} target - Target element or selector
    * @param {string} className - Class name to remove
    */
-  removeClass(target, className) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  removeClass (target, className) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
-      element.classList.remove(className);
+      element.classList.remove(className)
     }
   }
 
@@ -181,12 +181,12 @@ export class DOMUtils {
    * @param {string} className - Class name to toggle
    * @returns {boolean} Whether class is now present
    */
-  toggleClass(target, className) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  toggleClass (target, className) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
-      return element.classList.toggle(className);
+      return element.classList.toggle(className)
     }
-    return false;
+    return false
   }
 
   /**
@@ -195,9 +195,9 @@ export class DOMUtils {
    * @param {string} className - Class name to check
    * @returns {boolean} Whether element has class
    */
-  hasClass(target, className) {
-    const element = typeof target === 'string' ? this.$(target) : target;
-    return element ? element.classList.contains(className) : false;
+  hasClass (target, className) {
+    const element = typeof target === 'string' ? this.$(target) : target
+    return element ? element.classList.contains(className) : false
   }
 
   /**
@@ -207,21 +207,21 @@ export class DOMUtils {
    * @param {string} value - Style value (if prop is string)
    * @returns {string|void} Style value if getting, void if setting
    */
-  css(target, prop, value = null) {
-    const element = typeof target === 'string' ? this.$(target) : target;
-    if (!element) return;
+  css (target, prop, value = null) {
+    const element = typeof target === 'string' ? this.$(target) : target
+    if (!element) return
 
     if (typeof prop === 'object') {
       // Set multiple styles
       Object.entries(prop).forEach(([key, val]) => {
-        element.style[key] = val;
-      });
+        element.style[key] = val
+      })
     } else if (value !== null) {
       // Set single style
-      element.style[prop] = value;
+      element.style[prop] = value
     } else {
       // Get computed style
-      return window.getComputedStyle(element)[prop];
+      return window.getComputedStyle(element)[prop]
     }
   }
 
@@ -229,10 +229,10 @@ export class DOMUtils {
    * Show element
    * @param {Element|string} target - Target element or selector
    */
-  show(target) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  show (target) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
-      element.style.display = '';
+      element.style.display = ''
     }
   }
 
@@ -240,10 +240,10 @@ export class DOMUtils {
    * Hide element
    * @param {Element|string} target - Target element or selector
    */
-  hide(target) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  hide (target) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
-      element.style.display = 'none';
+      element.style.display = 'none'
     }
   }
 
@@ -252,21 +252,21 @@ export class DOMUtils {
    * @param {Element|string} target - Target element or selector
    * @returns {boolean} Whether element is now visible
    */
-  toggle(target) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  toggle (target) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
-      const isHidden = element.style.display === 'none' || 
-                      window.getComputedStyle(element).display === 'none';
-      
+      const isHidden = element.style.display === 'none' ||
+                      window.getComputedStyle(element).display === 'none'
+
       if (isHidden) {
-        this.show(element);
-        return true;
+        this.show(element)
+        return true
       } else {
-        this.hide(element);
-        return false;
+        this.hide(element)
+        return false
       }
     }
-    return false;
+    return false
   }
 
   /**
@@ -274,9 +274,9 @@ export class DOMUtils {
    * @param {Element|string} target - Target element or selector
    * @returns {string} Text content
    */
-  text(target) {
-    const element = typeof target === 'string' ? this.$(target) : target;
-    return element ? element.textContent : '';
+  text (target) {
+    const element = typeof target === 'string' ? this.$(target) : target
+    return element ? element.textContent : ''
   }
 
   /**
@@ -284,10 +284,10 @@ export class DOMUtils {
    * @param {Element|string} target - Target element or selector
    * @param {string} text - Text to set
    */
-  setText(target, text) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  setText (target, text) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
-      element.textContent = text;
+      element.textContent = text
     }
   }
 
@@ -297,14 +297,14 @@ export class DOMUtils {
    * @param {string} html - HTML to set (optional)
    * @returns {string|void} HTML content if getting, void if setting
    */
-  html(target, html = null) {
-    const element = typeof target === 'string' ? this.$(target) : target;
-    if (!element) return;
+  html (target, html = null) {
+    const element = typeof target === 'string' ? this.$(target) : target
+    if (!element) return
 
     if (html !== null) {
-      element.innerHTML = html;
+      element.innerHTML = html
     } else {
-      return element.innerHTML;
+      return element.innerHTML
     }
   }
 
@@ -313,14 +313,14 @@ export class DOMUtils {
    * @param {Element|string} target - Target element or selector
    * @returns {boolean} Whether element exists and is visible
    */
-  isVisible(target) {
-    const element = typeof target === 'string' ? this.$(target) : target;
-    if (!element) return false;
+  isVisible (target) {
+    const element = typeof target === 'string' ? this.$(target) : target
+    if (!element) return false
 
-    const style = window.getComputedStyle(element);
-    return style.display !== 'none' && 
-           style.visibility !== 'hidden' && 
-           style.opacity !== '0';
+    const style = window.getComputedStyle(element)
+    return style.display !== 'none' &&
+           style.visibility !== 'hidden' &&
+           style.opacity !== '0'
   }
 
   /**
@@ -328,11 +328,11 @@ export class DOMUtils {
    * @param {Element|string} target - Target element or selector
    * @returns {Object} Position object with top, left, right, bottom
    */
-  getPosition(target) {
-    const element = typeof target === 'string' ? this.$(target) : target;
-    if (!element) return { top: 0, left: 0, right: 0, bottom: 0 };
+  getPosition (target) {
+    const element = typeof target === 'string' ? this.$(target) : target
+    if (!element) return { top: 0, left: 0, right: 0, bottom: 0 }
 
-    return element.getBoundingClientRect();
+    return element.getBoundingClientRect()
   }
 
   /**
@@ -340,15 +340,15 @@ export class DOMUtils {
    * @param {Element|string} target - Target element or selector
    * @param {Object} options - Scroll options
    */
-  scrollTo(target, options = {}) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  scrollTo (target, options = {}) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
       element.scrollIntoView({
         behavior: 'smooth',
         block: 'start',
         inline: 'nearest',
         ...options
-      });
+      })
     }
   }
 
@@ -358,12 +358,12 @@ export class DOMUtils {
    * @param {number} delay - Delay in milliseconds
    * @returns {Function} Debounced function
    */
-  debounce(func, delay) {
-    let timeoutId;
+  debounce (func, delay) {
+    let timeoutId
     return function (...args) {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => func.apply(this, args), delay);
-    };
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => func.apply(this, args), delay)
+    }
   }
 
   /**
@@ -372,15 +372,15 @@ export class DOMUtils {
    * @param {number} delay - Delay in milliseconds
    * @returns {Function} Throttled function
    */
-  throttle(func, delay) {
-    let lastCall = 0;
+  throttle (func, delay) {
+    let lastCall = 0
     return function (...args) {
-      const now = Date.now();
+      const now = Date.now()
       if (now - lastCall >= delay) {
-        lastCall = now;
-        func.apply(this, args);
+        lastCall = now
+        func.apply(this, args)
       }
-    };
+    }
   }
 
   /**
@@ -389,20 +389,20 @@ export class DOMUtils {
    * @param {number} threshold - Threshold percentage (0-1)
    * @returns {boolean} Whether element is in viewport
    */
-  isInViewport(target, threshold = 0) {
-    const element = typeof target === 'string' ? this.$(target) : target;
-    if (!element) return false;
+  isInViewport (target, threshold = 0) {
+    const element = typeof target === 'string' ? this.$(target) : target
+    if (!element) return false
 
-    const rect = element.getBoundingClientRect();
-    const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-    const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+    const rect = element.getBoundingClientRect()
+    const windowHeight = window.innerHeight || document.documentElement.clientHeight
+    const windowWidth = window.innerWidth || document.documentElement.clientWidth
 
-    const vertInView = (rect.top <= windowHeight * (1 - threshold)) && 
-                       ((rect.top + rect.height) >= windowHeight * threshold);
-    const horInView = (rect.left <= windowWidth * (1 - threshold)) && 
-                      ((rect.left + rect.width) >= windowWidth * threshold);
+    const vertInView = (rect.top <= windowHeight * (1 - threshold)) &&
+                       ((rect.top + rect.height) >= windowHeight * threshold)
+    const horInView = (rect.left <= windowWidth * (1 - threshold)) &&
+                      ((rect.left + rect.width) >= windowWidth * threshold)
 
-    return vertInView && horInView;
+    return vertInView && horInView
   }
 
   /**
@@ -411,12 +411,12 @@ export class DOMUtils {
    * @param {string} text - Tooltip text
    * @param {boolean} wide - Whether tooltip should be wide
    */
-  addTooltip(target, text, wide = false) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  addTooltip (target, text, wide = false) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
-      element.setAttribute('title', text);
-      element.setAttribute('data-tooltip', wide ? 'wide' : 'normal');
-      this.addClass(element, 'has-tooltip');
+      element.setAttribute('title', text)
+      element.setAttribute('data-tooltip', wide ? 'wide' : 'normal')
+      this.addClass(element, 'has-tooltip')
     }
   }
 
@@ -424,12 +424,12 @@ export class DOMUtils {
    * Remove tooltip from element
    * @param {Element|string} target - Target element or selector
    */
-  removeTooltip(target) {
-    const element = typeof target === 'string' ? this.$(target) : target;
+  removeTooltip (target) {
+    const element = typeof target === 'string' ? this.$(target) : target
     if (element) {
-      element.removeAttribute('title');
-      element.removeAttribute('data-tooltip');
-      this.removeClass(element, 'has-tooltip');
+      element.removeAttribute('title')
+      element.removeAttribute('data-tooltip')
+      this.removeClass(element, 'has-tooltip')
     }
   }
-} 
+}

@@ -1,136 +1,185 @@
 /**
  * Popup JavaScript - Hoverboard Extension
- * Modern ES6+ module-based popup functionality
+ * Modern ES6+ module-based popup functionality with integrated UI system
  */
 
-import { PopupController } from './PopupController.js';
-import { UIManager } from './UIManager.js';
-import { KeyboardManager } from './KeyboardManager.js';
-import { StateManager } from './StateManager.js';
-import { ErrorHandler } from '../../shared/ErrorHandler.js';
+import { ui } from '../index.js'
+import { ErrorHandler } from '../../shared/ErrorHandler.js'
 
 class HoverboardPopup {
-  constructor() {
-    this.isInitialized = false;
-    this.controller = null;
-    this.uiManager = null;
-    this.keyboardManager = null;
-    this.stateManager = null;
-    this.errorHandler = null;
-    
+  constructor () {
+    this.isInitialized = false
+    this.popupComponents = null
+    this.errorHandler = null
+    this.uiSystem = null
+
     // Bind context
-    this.init = this.init.bind(this);
-    this.handleError = this.handleError.bind(this);
-    this.cleanup = this.cleanup.bind(this);
+    this.init = this.init.bind(this)
+    this.handleError = this.handleError.bind(this)
+    this.cleanup = this.cleanup.bind(this)
   }
 
   /**
    * Initialize the popup application
    */
-  async init() {
+  async init () {
     try {
+      console.log('Initializing Hoverboard popup...')
+
       // Initialize error handler first
-      this.errorHandler = new ErrorHandler();
-      this.errorHandler.onError = this.handleError;
+      this.errorHandler = new ErrorHandler()
+      this.errorHandler.onError = (message, errorInfo) => {
+        this.handleError(message, errorInfo)
+      }
 
-      // Initialize state manager
-      this.stateManager = new StateManager();
-      
-      // Initialize UI manager
-      this.uiManager = new UIManager({
+      console.log('Error handler initialized')
+
+      // Initialize UI system
+      this.uiSystem = await ui.init({
+        enableThemes: true,
+        enableIcons: true,
+        enableAssets: true,
+        preloadCriticalAssets: true
+      })
+
+      console.log('UI system initialized')
+
+      // Create popup with integrated UI system
+      this.popupComponents = ui.popup({
         errorHandler: this.errorHandler,
-        stateManager: this.stateManager
-      });
+        enableKeyboard: true,
+        enableState: true
+      })
 
-      // Initialize keyboard manager
-      this.keyboardManager = new KeyboardManager({
-        uiManager: this.uiManager
-      });
-
-      // Initialize main controller
-      this.controller = new PopupController({
-        uiManager: this.uiManager,
-        stateManager: this.stateManager,
-        errorHandler: this.errorHandler
-      });
+      console.log('Popup components created')
 
       // Load initial data
-      await this.controller.loadInitialData();
-      
+      await this.popupComponents.controller.loadInitialData()
+
+      console.log('Initial data loaded')
+
       // Setup UI
-      this.uiManager.setupEventListeners();
-      this.keyboardManager.setupKeyboardNavigation();
-      
+      this.popupComponents.uiManager.setupEventListeners()
+      if (this.popupComponents.keyboardManager) {
+        this.popupComponents.keyboardManager.setupKeyboardNavigation()
+      }
+
+      console.log('Event listeners setup complete')
+
       // Mark as initialized
-      this.isInitialized = true;
-      
-      console.log('Hoverboard popup initialized successfully');
-      
+      this.isInitialized = true
+
+      console.log('Hoverboard popup initialized successfully with modern UI system')
     } catch (error) {
-      this.handleError('Failed to initialize popup', error);
+      console.error('Failed to initialize popup:', error)
+      this.handleError('Failed to initialize popup', error)
     }
   }
 
   /**
    * Handle errors from any component
    */
-  handleError(message, error = null) {
-    console.error('Popup Error:', message, error);
-    
-    if (this.uiManager) {
-      this.uiManager.showError(message);
-    } else {
-      // Fallback error display if UI manager not available
-      const errorToast = document.getElementById('errorToast');
-      const errorContent = document.getElementById('errorContent');
-      
-      if (errorToast && errorContent) {
-        errorContent.textContent = message;
-        errorToast.hidden = false;
-        
-        setTimeout(() => {
-          errorToast.hidden = true;
-        }, 5000);
+  async handleError (message, errorInfo = null) {
+    // Handle different parameter formats
+    let errorMessage = message
+    let actualError = errorInfo
+
+    // If first parameter is an error object, adjust parameters
+    if (typeof message === 'object' && message !== null) {
+      actualError = message
+      errorMessage = actualError.message || 'An unexpected error occurred'
+    }
+
+    console.error('Popup Error:', errorMessage, actualError)
+
+    // Check if this is an auth error
+    const authErrorMessages = [
+      'No authentication token configured',
+      'Authentication failed',
+      'Invalid API token'
+    ]
+
+    if (authErrorMessages.some(msg => errorMessage.includes(msg))) {
+      if (this.popupComponents && this.popupComponents.uiManager) {
+        this.popupComponents.uiManager.showError('Please configure your Pinboard API token in the extension options.')
       }
+      return
+    }
+
+    // Check for network errors
+    if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+      if (this.popupComponents && this.popupComponents.uiManager) {
+        this.popupComponents.uiManager.showError('Network error. Please check your connection and try again.')
+      }
+      return
+    }
+
+    // Check for permission errors
+    if (errorMessage.includes('permission') || errorMessage.includes('denied')) {
+      if (this.popupComponents && this.popupComponents.uiManager) {
+        this.popupComponents.uiManager.showError('Permission denied. Please check extension permissions.')
+      }
+      return
+    }
+
+    // Generic error fallback
+    if (this.popupComponents && this.popupComponents.uiManager) {
+      this.popupComponents.uiManager.showError('An unexpected error occurred. Please try again.')
     }
   }
 
   /**
    * Cleanup resources when popup is closed
    */
-  cleanup() {
-    if (this.keyboardManager) {
-      this.keyboardManager.cleanup();
+  cleanup () {
+    if (this.popupComponents) {
+      if (this.popupComponents.keyboardManager) {
+        this.popupComponents.keyboardManager.cleanup()
+      }
+
+      if (this.popupComponents.uiManager) {
+        this.popupComponents.uiManager.cleanup()
+      }
+
+      if (this.popupComponents.controller) {
+        this.popupComponents.controller.cleanup()
+      }
     }
-    
-    if (this.uiManager) {
-      this.uiManager.cleanup();
+
+    if (this.uiSystem) {
+      this.uiSystem.cleanup()
     }
-    
-    if (this.controller) {
-      this.controller.cleanup();
-    }
-    
-    this.isInitialized = false;
+
+    this.isInitialized = false
   }
 }
 
 // Application instance
-let app = null;
+let app = null
 
 /**
  * Initialize the application when DOM is ready
  */
-function initializeApp() {
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeApp);
-    return;
+function initializeApp () {
+  try {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeApp)
+      return
+    }
+
+    console.log('DOM ready, creating Hoverboard popup...')
+    app = new HoverboardPopup()
+    app.init().catch(error => {
+      console.error('Failed to initialize Hoverboard popup:', error)
+
+      // Try to show error in UI if possible
+      if (app && app.popupComponents && app.popupComponents.uiManager) {
+        app.popupComponents.uiManager.showError('Failed to initialize popup. Please try reloading the extension.')
+      }
+    })
+  } catch (error) {
+    console.error('Critical error during popup initialization:', error)
   }
-  
-  app = new HoverboardPopup();
-  app.init().catch(error => {
-    console.error('Failed to initialize Hoverboard popup:', error);
-  });
 }
 
 /**
@@ -138,21 +187,21 @@ function initializeApp() {
  */
 window.addEventListener('beforeunload', () => {
   if (app) {
-    app.cleanup();
+    app.cleanup()
   }
-});
+})
 
 /**
  * Handle extension reload
  */
 window.addEventListener('unload', () => {
   if (app) {
-    app.cleanup();
+    app.cleanup()
   }
-});
+})
 
 // Start the application
-initializeApp();
+initializeApp()
 
 // Export for debugging
-window.HoverboardPopup = { app }; 
+window.HoverboardPopup = { app }

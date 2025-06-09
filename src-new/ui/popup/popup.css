@@ -46,7 +46,7 @@
   --font-size-lg: 16px;
   --font-size-xl: 18px;
   
-  --popup-width: 380px;
+  --popup-width: 450px;
   --popup-max-height: 600px;
 }
 
@@ -286,7 +286,7 @@ section:last-child {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  padding: var(--spacing-md);
+  padding: calc(var(--spacing-md) / 2);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-medium);
   background: var(--bg-primary);
@@ -306,6 +306,17 @@ section:last-child {
 .action-card:active {
   transform: translateY(0);
   background: var(--bg-active);
+}
+
+.action-card.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.action-card.active:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
 }
 
 .action-card.danger {
@@ -498,7 +509,7 @@ section:last-child {
 
 /* Buttons */
 .button {
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: calc(var(--spacing-sm) / 2) calc(var(--spacing-md) / 2);
   border: 1px solid transparent;
   border-radius: var(--radius-medium);
   font-size: var(--font-size-sm);
@@ -553,7 +564,7 @@ section:last-child {
 }
 
 .icon-button {
-  padding: var(--spacing-xs);
+  padding: calc(var(--spacing-xs) / 2);
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -571,7 +582,7 @@ section:last-child {
 }
 
 .text-button {
-  padding: var(--spacing-xs) var(--spacing-sm);
+  padding: calc(var(--spacing-xs) / 2) calc(var(--spacing-sm) / 2);
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -629,7 +640,7 @@ section:last-child {
 /* Responsive design */
 @media (max-width: 320px) {
   :root {
-    --popup-width: 300px;
+    --popup-width: 450px;
   }
   
   .action-grid {
@@ -692,5 +703,4 @@ section:last-child {
     background: white !important;
     color: black !important;
   }
-} 
 } 

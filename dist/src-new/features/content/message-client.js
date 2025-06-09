@@ -4,11 +4,11 @@
  */
 
 export class MessageClient {
-  constructor() {
-    this.pendingMessages = new Map();
-    this.messageTimeout = 10000; // 10 seconds timeout
-    this.retryAttempts = 3;
-    this.retryDelay = 1000; // 1 second
+  constructor () {
+    this.pendingMessages = new Map()
+    this.messageTimeout = 10000 // 10 seconds timeout
+    this.retryAttempts = 3
+    this.retryDelay = 1000 // 1 second
   }
 
   /**
@@ -17,15 +17,15 @@ export class MessageClient {
    * @param {Object} options - Send options
    * @returns {Promise} Promise that resolves with response
    */
-  async sendMessage(message, options = {}) {
+  async sendMessage (message, options = {}) {
     const messageOptions = {
       timeout: options.timeout || this.messageTimeout,
       retries: options.retries !== undefined ? options.retries : this.retryAttempts,
       retryDelay: options.retryDelay || this.retryDelay,
       ...options
-    };
+    }
 
-    return this.sendMessageWithRetry(message, messageOptions, 0);
+    return this.sendMessageWithRetry(message, messageOptions, 0)
   }
 
   /**
@@ -35,16 +35,16 @@ export class MessageClient {
    * @param {number} attempt - Current attempt number
    * @returns {Promise} Promise that resolves with response
    */
-  async sendMessageWithRetry(message, options, attempt) {
+  async sendMessageWithRetry (message, options, attempt) {
     try {
-      return await this.sendSingleMessage(message, options);
+      return await this.sendSingleMessage(message, options)
     } catch (error) {
       if (attempt < options.retries && this.isRetryableError(error)) {
-        console.warn(`Message failed (attempt ${attempt + 1}), retrying:`, error.message);
-        await this.sleep(options.retryDelay * (attempt + 1));
-        return this.sendMessageWithRetry(message, options, attempt + 1);
+        console.warn(`Message failed (attempt ${attempt + 1}), retrying:`, error.message)
+        await this.sleep(options.retryDelay * (attempt + 1))
+        return this.sendMessageWithRetry(message, options, attempt + 1)
       } else {
-        throw error;
+        throw error
       }
     }
   }
@@ -55,20 +55,20 @@ export class MessageClient {
    * @param {Object} options - Send options
    * @returns {Promise} Promise that resolves with response
    */
-  sendSingleMessage(message, options) {
+  sendSingleMessage (message, options) {
     return new Promise((resolve, reject) => {
-      const messageId = this.generateMessageId();
+      const messageId = this.generateMessageId()
       const fullMessage = {
         ...message,
         messageId,
         timestamp: Date.now()
-      };
+      }
 
       // Set up timeout
       const timeoutId = setTimeout(() => {
-        this.pendingMessages.delete(messageId);
-        reject(new Error(`Message timeout after ${options.timeout}ms`));
-      }, options.timeout);
+        this.pendingMessages.delete(messageId)
+        reject(new Error(`Message timeout after ${options.timeout}ms`))
+      }, options.timeout)
 
       // Store pending message info
       this.pendingMessages.set(messageId, {
@@ -76,17 +76,17 @@ export class MessageClient {
         reject,
         timeoutId,
         message: fullMessage
-      });
+      })
 
       try {
         chrome.runtime.sendMessage(fullMessage, (response) => {
-          this.handleMessageResponse(messageId, response);
-        });
+          this.handleMessageResponse(messageId, response)
+        })
       } catch (error) {
-        this.cleanupPendingMessage(messageId);
-        reject(error);
+        this.cleanupPendingMessage(messageId)
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -94,32 +94,32 @@ export class MessageClient {
    * @param {string} messageId - Message ID
    * @param {Object} response - Response object
    */
-  handleMessageResponse(messageId, response) {
-    const pendingMessage = this.pendingMessages.get(messageId);
-    if (!pendingMessage) return;
+  handleMessageResponse (messageId, response) {
+    const pendingMessage = this.pendingMessages.get(messageId)
+    if (!pendingMessage) return
 
-    const { resolve, reject, timeoutId } = pendingMessage;
+    const { resolve, reject, timeoutId } = pendingMessage
 
     // Clear timeout
-    clearTimeout(timeoutId);
-    this.pendingMessages.delete(messageId);
+    clearTimeout(timeoutId)
+    this.pendingMessages.delete(messageId)
 
     // Check for Chrome runtime errors
     if (chrome.runtime.lastError) {
-      reject(new Error(chrome.runtime.lastError.message));
-      return;
+      reject(new Error(chrome.runtime.lastError.message))
+      return
     }
 
     // Check response format
     if (!response) {
-      reject(new Error('No response received from background script'));
-      return;
+      reject(new Error('No response received from background script'))
+      return
     }
 
     if (response.success) {
-      resolve(response.data);
+      resolve(response.data)
     } else {
-      reject(new Error(response.error || 'Unknown error from background script'));
+      reject(new Error(response.error || 'Unknown error from background script'))
     }
   }
 
@@ -129,20 +129,20 @@ export class MessageClient {
    * @param {Object} message - Message object
    * @returns {Promise} Promise that resolves with response
    */
-  async sendMessageToTab(tabId, message) {
+  async sendMessageToTab (tabId, message) {
     return new Promise((resolve, reject) => {
       try {
         chrome.tabs.sendMessage(tabId, message, (response) => {
           if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
+            reject(new Error(chrome.runtime.lastError.message))
           } else {
-            resolve(response);
+            resolve(response)
           }
-        });
+        })
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
@@ -150,19 +150,19 @@ export class MessageClient {
    * @param {Object} message - Message to broadcast
    * @returns {Promise} Promise that resolves when all messages sent
    */
-  async broadcastMessage(message) {
+  async broadcastMessage (message) {
     try {
-      const tabs = await this.getAllTabs();
-      const promises = tabs.map(tab => 
+      const tabs = await this.getAllTabs()
+      const promises = tabs.map(tab =>
         this.sendMessageToTab(tab.id, message).catch(() => {
           // Ignore errors for inactive tabs
         })
-      );
-      
-      await Promise.all(promises);
+      )
+
+      await Promise.all(promises)
     } catch (error) {
-      console.error('Failed to broadcast message:', error);
-      throw error;
+      console.error('Failed to broadcast message:', error)
+      throw error
     }
   }
 
@@ -170,28 +170,28 @@ export class MessageClient {
    * Get all open tabs
    * @returns {Promise<Array>} Promise that resolves with tab array
    */
-  getAllTabs() {
+  getAllTabs () {
     return new Promise((resolve, reject) => {
       try {
         chrome.tabs.query({}, (tabs) => {
           if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
+            reject(new Error(chrome.runtime.lastError.message))
           } else {
-            resolve(tabs);
+            resolve(tabs)
           }
-        });
+        })
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
    * Generate unique message ID
    * @returns {string} Unique message ID
    */
-  generateMessageId() {
-    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  generateMessageId () {
+    return `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
   }
 
   /**
@@ -199,28 +199,28 @@ export class MessageClient {
    * @param {Error} error - Error to check
    * @returns {boolean} Whether error should be retried
    */
-  isRetryableError(error) {
+  isRetryableError (error) {
     const retryableMessages = [
       'Could not establish connection',
       'Extension context invalidated',
       'Message timeout',
       'The message port closed before a response was received'
-    ];
+    ]
 
-    return retryableMessages.some(msg => 
+    return retryableMessages.some(msg =>
       error.message.includes(msg)
-    );
+    )
   }
 
   /**
    * Clean up pending message
    * @param {string} messageId - Message ID to clean up
    */
-  cleanupPendingMessage(messageId) {
-    const pendingMessage = this.pendingMessages.get(messageId);
+  cleanupPendingMessage (messageId) {
+    const pendingMessage = this.pendingMessages.get(messageId)
     if (pendingMessage) {
-      clearTimeout(pendingMessage.timeoutId);
-      this.pendingMessages.delete(messageId);
+      clearTimeout(pendingMessage.timeoutId)
+      this.pendingMessages.delete(messageId)
     }
   }
 
@@ -229,20 +229,20 @@ export class MessageClient {
    * @param {number} ms - Milliseconds to sleep
    * @returns {Promise} Promise that resolves after delay
    */
-  sleep(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  sleep (ms) {
+    return new Promise(resolve => setTimeout(resolve, ms))
   }
 
   /**
    * Check if background script is available
    * @returns {Promise<boolean>} Whether background script responds
    */
-  async isBackgroundAvailable() {
+  async isBackgroundAvailable () {
     try {
-      await this.sendMessage({ type: 'PING' }, { timeout: 1000, retries: 0 });
-      return true;
+      await this.sendMessage({ type: 'PING' }, { timeout: 1000, retries: 0 })
+      return true
     } catch (error) {
-      return false;
+      return false
     }
   }
 
@@ -250,23 +250,23 @@ export class MessageClient {
    * Get extension info
    * @returns {Object} Extension information
    */
-  getExtensionInfo() {
+  getExtensionInfo () {
     return {
       id: chrome.runtime.id,
       version: chrome.runtime.getManifest().version,
       url: chrome.runtime.getURL(''),
       isIncognito: chrome.extension.inIncognitoContext
-    };
+    }
   }
 
   /**
    * Open extension options page
    */
-  openOptionsPage() {
+  openOptionsPage () {
     if (chrome.runtime.openOptionsPage) {
-      chrome.runtime.openOptionsPage();
+      chrome.runtime.openOptionsPage()
     } else {
-      window.open(chrome.runtime.getURL('src/ui/options/options.html'));
+      window.open(chrome.runtime.getURL('src/ui/options/options.html'))
     }
   }
 
@@ -274,50 +274,50 @@ export class MessageClient {
    * Get current tab information
    * @returns {Promise<Object>} Current tab info
    */
-  async getCurrentTab() {
+  async getCurrentTab () {
     return new Promise((resolve, reject) => {
       try {
         chrome.tabs.getCurrent((tab) => {
           if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message));
+            reject(new Error(chrome.runtime.lastError.message))
           } else {
-            resolve(tab);
+            resolve(tab)
           }
-        });
+        })
       } catch (error) {
-        reject(error);
+        reject(error)
       }
-    });
+    })
   }
 
   /**
    * Clean up all pending messages (for when script unloads)
    */
-  cleanup() {
+  cleanup () {
     for (const [messageId, pendingMessage] of this.pendingMessages) {
-      clearTimeout(pendingMessage.timeoutId);
-      pendingMessage.reject(new Error('Content script unloading'));
+      clearTimeout(pendingMessage.timeoutId)
+      pendingMessage.reject(new Error('Content script unloading'))
     }
-    this.pendingMessages.clear();
+    this.pendingMessages.clear()
   }
 
   /**
    * Get statistics about message client
    * @returns {Object} Statistics object
    */
-  getStats() {
+  getStats () {
     return {
       pendingMessages: this.pendingMessages.size,
       messageTimeout: this.messageTimeout,
       retryAttempts: this.retryAttempts,
       retryDelay: this.retryDelay
-    };
+    }
   }
 }
 
 // Set up cleanup on page unload
 window.addEventListener('beforeunload', () => {
   if (window.hoverboardMessageClient) {
-    window.hoverboardMessageClient.cleanup();
+    window.hoverboardMessageClient.cleanup()
   }
-}); 
+})

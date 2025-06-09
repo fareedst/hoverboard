@@ -5,9 +5,20 @@
 
 export class BadgeManager {
   constructor () {
+    // Use chrome.runtime.getURL to get proper extension URLs
     this.iconPaths = {
-      default: 'icons/hoverboard_19.png',
-      bookmarked: 'icons/hoverboard_19b.png'
+      default: {
+        16: chrome.runtime.getURL('icons/hoverboard_16.png'),
+        19: chrome.runtime.getURL('icons/hoverboard_19.png'),
+        32: chrome.runtime.getURL('icons/hoverboard_32.png'),
+        48: chrome.runtime.getURL('icons/hoverboard_48.png')
+      },
+      bookmarked: {
+        16: chrome.runtime.getURL('icons/hoverboard_16.png'),
+        19: chrome.runtime.getURL('icons/hoverboard_19b.png'),
+        32: chrome.runtime.getURL('icons/hoverboard_32.png'),
+        48: chrome.runtime.getURL('icons/hoverboard_48.png')
+      }
     }
   }
 
@@ -132,7 +143,7 @@ export class BadgeManager {
   /**
    * Set browser action icon for a tab
    * @param {number} tabId - Tab ID
-   * @param {string} iconPath - Path to icon file
+   * @param {Object|string} iconPath - Icon path object or string
    */
   async setIcon (tabId, iconPath) {
     return chrome.action.setIcon({

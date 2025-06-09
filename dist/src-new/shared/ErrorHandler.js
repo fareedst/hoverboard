@@ -76,12 +76,12 @@ export class ErrorHandler {
   createErrorInfo (message, error, type, context) {
     const errorInfo = {
       id: this.generateErrorId(),
-      message: message,
-      type: type,
+      message,
+      type,
       timestamp: new Date().toISOString(),
       url: window.location.href,
       userAgent: navigator.userAgent,
-      context: context
+      context
     }
 
     // Extract error details

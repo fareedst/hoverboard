@@ -280,6 +280,13 @@ textarea {
   display: none;
 }
 
+.status.info {
+  background-color: rgb(59 130 246 / 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgb(59 130 246 / 0.2);
+  display: block;
+}
+
 .status.success {
   background-color: rgb(16 185 129 / 0.1);
   color: var(--success-color);
