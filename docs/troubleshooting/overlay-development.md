@@ -148,7 +148,7 @@ GET /api/pinboard/posts/all?auth_token=<TOKEN>&tag=<TAG>&count=<COUNT>
   "url": "https://example.com",
   "tags": ["tag1", "tag2", "tag3"],  // Always normalized to array
   "shared": "yes|no",                // "no" = private
-  "toread": "yes|no",               // "yes" = to read
+  "toread": "yes|no",               // "yes" = read later
   "hash": "unique_bookmark_id",      // Pinboard's internal ID
   "time": "2023-12-07T10:30:00Z"    // ISO timestamp
 }

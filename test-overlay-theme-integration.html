@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlay Theme Integration Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .test-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .test-controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .control-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+        
+        .control-label {
+            font-weight: 600;
+            min-width: 150px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        button:hover {
+            background: #f8f9fa;
+        }
+        
+        button.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        
+        input[type="range"] {
+            width: 200px;
+        }
+        
+        .test-overlay {
+            position: relative;
+            border-radius: 8px;
+            padding: 0;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-height: 400px;
+            overflow: hidden;
+            /* Simulated overlay base styling */
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #90ee90;
+            font-family: 'Futura PT', system-ui, -apple-system, sans-serif;
+            font-size: 14px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .overlay-content {
+            padding: 20px;
+        }
+        
+        .sample-section {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .sample-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .current-settings {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .settings-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .setting-item {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .setting-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        
+        .setting-value {
+            color: #007bff;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+        
+        .instructions {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎨 Overlay Theme Integration Test</h1>
+            <p>This page tests the complete overlay theme integration system with all element types responding to VisibilityControls settings.</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>🧪 Test Coverage:</h3>
+            <p><strong>Theme Variables:</strong> CSS custom properties for both light-on-dark and dark-on-light themes</p>
+            <p><strong>Element Integration:</strong> Tags, buttons, inputs, containers, and labels all respond to theme changes</p>
+            <p><strong>Transparency Integration:</strong> Dynamic opacity with enhanced contrast for low-opacity scenarios</p>
+            <p><strong>Real-time Updates:</strong> All changes apply immediately without page refresh</p>
+        </div>
+        
+        <div class="test-controls">
+            <h3>🎛️ Theme Controls</h3>
+            
+            <div class="control-group">
+                <div class="control-label">Text Theme:</div>
+                <button id="lightOnDarkBtn" class="theme-btn" data-theme="light-on-dark">
+                    🌙 Light on Dark
+                </button>
+                <button id="darkOnLightBtn" class="theme-btn active" data-theme="dark-on-light">
+                    ☀️ Dark on Light
+                </button>
+            </div>
+            
+            <div class="control-group">
+                <div class="control-label">Transparency Mode:</div>
+                <button id="transparencyBtn" class="transparency-btn" data-enabled="false">
+                    🔘 Disabled
+                </button>
+            </div>
+            
+            <div class="control-group">
+                <div class="control-label">Background Opacity:</div>
+                <input type="range" id="opacitySlider" min="10" max="100" value="90" disabled>
+                <span id="opacityValue">90%</span>
+            </div>
+        </div>
+        
+        <div class="test-overlay" id="testOverlay">
+            <div class="overlay-content">
+                <!-- Tags Container Section -->
+                <div class="sample-section">
+                    <div class="section-title">📋 Tags Container (.scrollmenu)</div>
+                    <div class="scrollmenu" style="padding: 8px; margin-bottom: 8px; border-radius: 4px;">
+                        <span class="close-button" style="float: right; margin: 2px;">✕</span>
+                        <span class="label-primary" style="padding: 0.2em 0.5em; margin-right: 4px;">Current:</span>
+                        <span class="tag-element">javascript</span>
+                        <span class="tag-element">web-development</span>
+                        <span class="tag-element">ui-testing</span>
+                        <input class="tag-input" placeholder="New Tag" style="margin: 2px; width: 80px;">
+                    </div>
+                </div>
+                
+                <!-- Recent Tags Section -->
+                <div class="sample-section">
+                    <div class="section-title">🕒 Recent Tags (.recent-container)</div>
+                    <div class="scrollmenu recent-container" style="padding: 4px; background: #f9f9f9; border-radius: 4px; font-size: smaller; font-weight: 900;">
+                        <span class="label-secondary" style="padding: 0.2em 0.5em; margin-right: 4px;">Recent:</span>
+                        <span class="tag-element">development</span>
+                        <span class="tag-element">tutorial</span>
+                        <span class="tag-element">reference</span>
+                    </div>
+                </div>
+                
+                <!-- Form Elements Section -->
+                <div class="sample-section">
+                    <div class="section-title">📝 Form Elements</div>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 10px;">
+                        <input class="add-tag-input" placeholder="Add new tag" value="sample-tag">
+                        <button class="add-tag-button">Add Tag</button>
+                    </div>
+                </div>
+                
+                <!-- Action Buttons Section -->
+                <div class="sample-section">
+                    <div class="section-title">🔘 Action Buttons</div>
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <button class="action-button">Standard Button</button>
+                        <button class="action-button active">Active Button</button>
+                        <button class="action-button private-active">Private Active</button>
+                        <button class="action-button read-later-active">Read Later Active</button>
+                    </div>
+                </div>
+                
+                <!-- Text Elements Section -->
+                <div class="sample-section">
+                    <div class="section-title">📝 Text Elements</div>
+                    <div class="label-primary" style="display: block; margin-bottom: 5px;">Primary Label Text</div>
+                    <div class="label-secondary" style="display: block; margin-bottom: 5px;">Secondary Label Text</div>
+                    <div class="text-muted" style="display: block; margin-bottom: 5px;">Muted Text Content</div>
+                    <div class="tiny" style="display: block;">Tiny Text Element</div>
+                </div>
+                
+                <!-- Page Info Section -->
+                <div class="sample-section">
+                    <div class="section-title">📄 Page Info</div>
+                    <div class="page-info" style="padding: 8px; border-radius: 4px;">
+                        <div class="text-muted">Page: Test Overlay Theme Integration</div>
+                        <div class="text-muted">URL: test-overlay-theme-integration.html</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="current-settings">
+            <h3>📊 Current Theme Settings</h3>
+            <div class="settings-display">
+                <div class="setting-item">
+                    <div class="setting-label">Text Theme</div>
+                    <div class="setting-value" id="currentTheme">dark-on-light</div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">Theme Class Applied</div>
+                    <div class="setting-value" id="currentThemeClass">hoverboard-theme-dark-on-light</div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">Transparency Mode</div>
+                    <div class="setting-value" id="currentTransparency">disabled</div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">Background Opacity</div>
+                    <div class="setting-value" id="currentOpacity">90%</div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">Opacity Level</div>
+                    <div class="setting-value" id="currentOpacityLevel">high</div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">CSS Variables Active</div>
+                    <div class="setting-value" id="cssVariablesActive">✅ Working</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Add the theme CSS (from our implementation)
+        const themeCSS = `
+            /* Base theme variables */
+            .test-overlay {
+                --theme-opacity: 0.9;
+                --theme-text-opacity: 1.0;
+                --theme-border-opacity: 0.8;
+                --theme-transition: all 0.2s ease-in-out;
+            }
+
+            /* Light-on-Dark Theme (Dark Theme) */
+            .hoverboard-theme-light-on-dark {
+                --theme-text-primary: #ffffff;
+                --theme-text-secondary: #e0e0e0;
+                --theme-text-muted: #b0b0b0;
+                --theme-background-primary: #2c3e50;
+                --theme-background-secondary: #34495e;
+                --theme-background-tertiary: #455a64;
+                --theme-button-bg: rgba(255, 255, 255, 0.15);
+                --theme-button-hover: rgba(255, 255, 255, 0.25);
+                --theme-button-active: rgba(255, 255, 255, 0.35);
+                --theme-input-bg: rgba(255, 255, 255, 0.1);
+                --theme-input-border: rgba(255, 255, 255, 0.3);
+                --theme-input-focus: rgba(255, 255, 255, 0.5);
+                --theme-success: #27ae60;
+                --theme-warning: #f39c12;
+                --theme-danger: #e74c3c;
+                --theme-info: #3498db;
+                --theme-tag-bg: rgba(39, 174, 96, 0.2);
+                --theme-tag-text: #2ecc71;
+                --theme-tag-border: rgba(39, 174, 96, 0.4);
+                --theme-border: rgba(255, 255, 255, 0.2);
+                --theme-separator: rgba(255, 255, 255, 0.1);
+                --theme-bg-rgb: 44, 62, 80;
+            }
+
+            /* Dark-on-Light Theme (Light Theme) */
+            .hoverboard-theme-dark-on-light {
+                --theme-text-primary: #333333;
+                --theme-text-secondary: #666666;
+                --theme-text-muted: #999999;
+                --theme-background-primary: #ffffff;
+                --theme-background-secondary: #f8f9fa;
+                --theme-background-tertiary: #e9ecef;
+                --theme-button-bg: rgba(0, 0, 0, 0.05);
+                --theme-button-hover: rgba(0, 0, 0, 0.1);
+                --theme-button-active: rgba(0, 0, 0, 0.15);
+                --theme-input-bg: rgba(255, 255, 255, 0.8);
+                --theme-input-border: rgba(0, 0, 0, 0.2);
+                --theme-input-focus: rgba(0, 100, 200, 0.3);
+                --theme-success: #28a745;
+                --theme-warning: #ffc107;
+                --theme-danger: #dc3545;
+                --theme-info: #17a2b8;
+                --theme-tag-bg: rgba(40, 167, 69, 0.1);
+                --theme-tag-text: #28a745;
+                --theme-tag-border: rgba(40, 167, 69, 0.3);
+                --theme-border: rgba(0, 0, 0, 0.1);
+                --theme-separator: rgba(0, 0, 0, 0.05);
+                --theme-bg-rgb: 255, 255, 255;
+            }
+
+            /* Transparency Mode */
+            .test-overlay.transparency-mode {
+                background: rgba(var(--theme-bg-rgb), var(--theme-opacity)) !important;
+                backdrop-filter: blur(2px);
+            }
+
+            .test-overlay.transparency-mode[data-opacity-level="low"] {
+                --theme-text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+            }
+
+            .test-overlay.transparency-mode[data-opacity-level="medium"] {
+                --theme-text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+            }
+
+            .test-overlay.transparency-mode * {
+                text-shadow: var(--theme-text-shadow, none);
+            }
+
+            /* Theme-aware element styling */
+            .test-overlay .scrollmenu,
+            .test-overlay .tags-container {
+                background: var(--theme-background-secondary);
+                color: var(--theme-text-primary);
+                border: 1px solid var(--theme-border);
+                transition: var(--theme-transition);
+            }
+
+            .test-overlay .page-info {
+                background: var(--theme-background-tertiary);
+                color: var(--theme-text-secondary);
+                border-top: 1px solid var(--theme-separator);
+            }
+
+            .test-overlay .tiny {
+                color: var(--theme-text-secondary);
+            }
+
+            .test-overlay .label-primary {
+                color: var(--theme-text-primary);
+                font-weight: 600;
+            }
+
+            .test-overlay .label-secondary {
+                color: var(--theme-text-secondary);
+                font-weight: 500;
+            }
+
+            .test-overlay .text-muted {
+                color: var(--theme-text-muted);
+            }
+
+            .test-overlay .tag-element {
+                background: var(--theme-tag-bg);
+                color: var(--theme-tag-text);
+                border: 1px solid var(--theme-tag-border);
+                transition: var(--theme-transition);
+                padding: 0.2em 0.5em;
+                margin: 2px;
+                border-radius: 3px;
+                cursor: pointer;
+                display: inline-block;
+            }
+
+            .test-overlay .tag-element:hover {
+                background: var(--theme-button-hover);
+                transform: translateY(-1px);
+                border-color: var(--theme-input-focus);
+            }
+
+            .test-overlay .tag-input {
+                background: var(--theme-input-bg);
+                color: var(--theme-text-primary);
+                border: 1px solid var(--theme-input-border);
+                transition: var(--theme-transition);
+            }
+
+            .test-overlay .tag-input:focus {
+                border-color: var(--theme-input-focus);
+                box-shadow: 0 0 0 2px rgba(var(--theme-input-focus), 0.2);
+            }
+
+            .test-overlay .tag-input::placeholder {
+                color: var(--theme-text-muted);
+            }
+
+            .test-overlay .action-button {
+                background: var(--theme-button-bg);
+                color: var(--theme-text-primary);
+                border: 1px solid var(--theme-border);
+                transition: var(--theme-transition);
+            }
+
+            .test-overlay .action-button:hover {
+                background: var(--theme-button-hover);
+                border-color: var(--theme-input-focus);
+            }
+
+            .test-overlay .action-button.active {
+                background: var(--theme-button-active);
+                border-color: var(--theme-info);
+            }
+
+            .test-overlay .close-button {
+                background: var(--theme-danger);
+                color: white;
+                border: none;
+                transition: var(--theme-transition);
+                padding: 0.2em 0.5em;
+                border-radius: 3px;
+                cursor: pointer;
+                font-weight: 900;
+            }
+
+            .test-overlay .close-button:hover {
+                background: color-mix(in srgb, var(--theme-danger) 80%, black);
+                transform: scale(1.05);
+            }
+
+            .test-overlay .action-button.private-active {
+                background: color-mix(in srgb, var(--theme-warning) 20%, var(--theme-button-bg));
+                border-color: var(--theme-warning);
+            }
+
+            .test-overlay .action-button.read-later-active {
+                background: color-mix(in srgb, var(--theme-info) 20%, var(--theme-button-bg));
+                border-color: var(--theme-info);
+            }
+
+            .test-overlay .add-tag-input {
+                background: var(--theme-input-bg);
+                color: var(--theme-text-primary);
+                border: 1px solid var(--theme-input-border);
+                transition: var(--theme-transition);
+            }
+
+            .test-overlay .add-tag-input:focus {
+                border-color: var(--theme-input-focus);
+                box-shadow: 0 0 0 2px rgba(var(--theme-input-focus), 0.2);
+            }
+
+            .test-overlay .add-tag-input::placeholder {
+                color: var(--theme-text-muted);
+            }
+
+            .test-overlay .add-tag-button {
+                background: var(--theme-success);
+                color: white;
+                border: 1px solid var(--theme-success);
+                transition: var(--theme-transition);
+            }
+
+            .test-overlay .add-tag-button:hover {
+                background: color-mix(in srgb, var(--theme-success) 80%, black);
+                border-color: color-mix(in srgb, var(--theme-success) 80%, black);
+            }
+        `;
+        
+        // Inject the theme CSS
+        const styleElement = document.createElement('style');
+        styleElement.textContent = themeCSS;
+        document.head.appendChild(styleElement);
+        
+        // Initial state
+        let currentSettings = {
+            textTheme: 'dark-on-light',
+            transparencyEnabled: false,
+            backgroundOpacity: 90
+        };
+        
+        const testOverlay = document.getElementById('testOverlay');
+        
+        // Apply initial theme
+        applyTheme(currentSettings);
+        
+        // Theme button handlers
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Update active state
+                document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                // Update settings
+                currentSettings.textTheme = btn.dataset.theme;
+                applyTheme(currentSettings);
+            });
+        });
+        
+        // Transparency toggle
+        const transparencyBtn = document.getElementById('transparencyBtn');
+        const opacitySlider = document.getElementById('opacitySlider');
+        
+        transparencyBtn.addEventListener('click', () => {
+            currentSettings.transparencyEnabled = !currentSettings.transparencyEnabled;
+            transparencyBtn.textContent = currentSettings.transparencyEnabled ? '🔵 Enabled' : '🔘 Disabled';
+            transparencyBtn.dataset.enabled = currentSettings.transparencyEnabled;
+            opacitySlider.disabled = !currentSettings.transparencyEnabled;
+            applyTheme(currentSettings);
+        });
+        
+        // Opacity slider
+        opacitySlider.addEventListener('input', (e) => {
+            currentSettings.backgroundOpacity = parseInt(e.target.value);
+            document.getElementById('opacityValue').textContent = currentSettings.backgroundOpacity + '%';
+            applyTheme(currentSettings);
+        });
+        
+        function applyTheme(settings) {
+            // Remove existing classes
+            testOverlay.classList.remove(
+                'hoverboard-theme-light-on-dark', 
+                'hoverboard-theme-dark-on-light',
+                'transparency-mode'
+            );
+            
+            // Apply theme class
+            testOverlay.classList.add(`hoverboard-theme-${settings.textTheme}`);
+            
+            // Apply transparency if enabled
+            if (settings.transparencyEnabled) {
+                testOverlay.classList.add('transparency-mode');
+                
+                const opacity = settings.backgroundOpacity / 100;
+                let opacityLevel = 'high';
+                if (opacity < 0.4) opacityLevel = 'low';
+                else if (opacity < 0.7) opacityLevel = 'medium';
+                
+                testOverlay.setAttribute('data-opacity-level', opacityLevel);
+                testOverlay.style.setProperty('--theme-opacity', opacity);
+                
+                // Update current settings display
+                document.getElementById('currentOpacityLevel').textContent = opacityLevel;
+            } else {
+                testOverlay.removeAttribute('data-opacity-level');
+                testOverlay.style.removeProperty('--theme-opacity');
+                document.getElementById('currentOpacityLevel').textContent = 'n/a';
+            }
+            
+            // Update settings display
+            document.getElementById('currentTheme').textContent = settings.textTheme;
+            document.getElementById('currentThemeClass').textContent = `hoverboard-theme-${settings.textTheme}`;
+            document.getElementById('currentTransparency').textContent = settings.transparencyEnabled ? 'enabled' : 'disabled';
+            document.getElementById('currentOpacity').textContent = settings.backgroundOpacity + '%';
+            
+            // Test CSS variables are working
+            const computedStyle = getComputedStyle(testOverlay);
+            const testVar = computedStyle.getPropertyValue('--theme-text-primary').trim();
+            document.getElementById('cssVariablesActive').textContent = testVar ? '✅ Working' : '❌ Failed';
+            
+            console.log('🎨 Theme applied:', settings);
+            console.log('🎨 CSS Variable --theme-text-primary:', testVar);
+        }
+    </script>
+</body>
+</html> 

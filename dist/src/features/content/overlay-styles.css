@@ -17,75 +17,9 @@
   animation: hoverboard-fade-in 0.2s ease-out;
 }
 
-/* ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system */
-/* Nearly transparent overlay option - Primary transparency mode */
-.hoverboard-overlay-transparent {
-  background: rgba(255, 255, 255, 0.05) !important; /* 95% transparent white */
-  backdrop-filter: blur(2px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #333333;
-  transition: background-color 0.2s ease-in-out;
-}
-
-/* Fully transparent overlay option - Maximum transparency */
-.hoverboard-overlay-invisible {
-  background: transparent !important; /* Completely transparent */
-  backdrop-filter: blur(1px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #333333;
-  transition: background-color 0.2s ease-in-out;
-}
-
-/* 🔺 UI-005: Transparent overlay positioning - 🎨 Bottom-fixed transparency */
-/* Bottom-fixed positioning for transparent overlays */
-.hoverboard-overlay-bottom {
-  position: fixed !important;
-  bottom: 0 !important;
-  left: 0 !important;
-  width: 100vw !important; /* Full viewport width */
-  height: auto !important; /* Dynamic height based on content */
-  min-height: 48px; /* Minimum touch target size */
-  max-height: 200px; /* Prevent excessive vertical space usage */
-  max-width: none !important; /* Override default max-width */
-  min-width: 100vw !important; /* Full width */
-  border-radius: 0 !important; /* No border radius for edge-to-edge */
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  border-left: none;
-  border-right: none;
-  border-bottom: none;
-  animation: hoverboard-slide-up 0.3s ease-out;
-}
-
-/* Hover state - Increased visibility on interaction */
-.hoverboard-overlay-transparent:hover,
-.hoverboard-overlay-invisible:hover {
-  background: rgba(255, 255, 255, 0.15) !important; /* 85% transparent on hover */
-}
-
-/* Focus state - Enhanced visibility for accessibility */
-.hoverboard-overlay-transparent:focus-within,
-.hoverboard-overlay-invisible:focus-within {
-  background: rgba(255, 255, 255, 0.25) !important; /* 75% transparent when focused */
-}
-
-/* 🔶 UI-005: Adaptive visibility - 🎯 Context-aware transparency */
-/* Adaptive visibility classes for mouse proximity */
-.hoverboard-overlay-transparent.proximity-active,
-.hoverboard-overlay-invisible.proximity-active {
-  background: rgba(255, 255, 255, 0.2) !important; /* Increased visibility on proximity */
-}
-
-/* Slide-up animation for bottom-fixed overlays */
-@keyframes hoverboard-slide-up {
-  from {
-    transform: translateY(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
+/* UI-VIS-001/002: User-controlled overlay visibility - superseded UI-005 */
+/* Note: Overlay transparency is now controlled via VisibilityControls component */
+/* See: src/ui/components/VisibilityControls.js for user-controlled transparency */
 
 /* MV3-003: Overlay fade-in animation */
 @keyframes hoverboard-fade-in {
@@ -337,13 +271,7 @@
     color: #ffffff;
   }
 
-  /* 🔺 UI-005: High contrast transparency - ♿ Accessibility compliance */
-  .hoverboard-overlay-transparent,
-  .hoverboard-overlay-invisible {
-    background: rgba(0, 0, 0, 0.8) !important; /* High contrast background */
-    color: #ffffff !important;
-    border: 2px solid #ffffff !important;
-  }
+  /* UI-VIS-001/002: High contrast support handled by VisibilityControls */
 }
 
 /* MV3-003: Reduced motion support */
@@ -734,14 +662,7 @@
     width: 100%;
   }
 
-  /* 🔺 UI-005: Mobile responsive - 📱 Touch-friendly transparency controls */
-  .hoverboard-overlay-bottom {
-    min-height: 56px !important; /* Larger touch targets on mobile */
-    max-height: 150px !important; /* Reduce max height on small screens */
-    font-size: 16px; /* Larger text for mobile readability */
-    left: 0 !important; /* Override the desktop left positioning */
-    right: auto !important; /* Remove right constraint */
-  }
+  /* UI-VIS-001/002: Mobile responsiveness handled by VisibilityControls */
 }
 
 /* Dark mode support */

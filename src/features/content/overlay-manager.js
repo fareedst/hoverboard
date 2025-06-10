@@ -4,6 +4,7 @@
  */
 
 import { Logger } from '../../shared/logger.js'
+import { VisibilityControls } from '../../ui/components/VisibilityControls.js'
 
 // Debug logging utility
 const debugLog = (message, data = null) => {
@@ -36,6 +37,13 @@ class OverlayManager {
     this.positionMode = config?.overlayPositionMode || 'default'
     this.adaptiveVisibility = config?.overlayAdaptiveVisibility || false
     this.proximityListener = null
+
+    // UI-VIS-001: Initialize VisibilityControls component
+    this.visibilityControls = null
+    this.visibilityControlsCallback = (settings) => {
+      debugLog('Visibility settings changed', settings)
+      this.applyVisibilitySettings(settings)
+    }
 
     debugLog('OverlayManager initialized', { config, transparencyMode: this.transparencyMode })
   }
@@ -73,26 +81,19 @@ class OverlayManager {
 
       // Create current tags section (matching desired overlay)
       const currentTagsContainer = this.document.createElement('div')
-      currentTagsContainer.className = 'scrollmenu'
+      currentTagsContainer.className = 'scrollmenu tags-container'
       currentTagsContainer.style.cssText = `
         margin-bottom: 8px;
         padding: 4px;
-        background: white;
         border-radius: 4px;
       `
 
       // Close button (matching desired overlay style)
       const closeBtn = this.document.createElement('span')
-      closeBtn.className = 'tiny'
+      closeBtn.className = 'close-button'
       closeBtn.innerHTML = '✕'
       closeBtn.style.cssText = `
         float: right;
-        cursor: pointer;
-        padding: 0.2em 0.5em;
-        color: red;
-        font-weight: 900;
-        background: rgba(255,255,255,0.8);
-        border-radius: 3px;
         margin: 2px;
       `
       closeBtn.onclick = () => this.hide()
@@ -100,7 +101,7 @@ class OverlayManager {
 
       // Current tags label
       const currentLabel = this.document.createElement('span')
-      currentLabel.className = 'tiny'
+      currentLabel.className = 'label-primary tiny'
       currentLabel.textContent = 'Current:'
       currentLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
       currentTagsContainer.appendChild(currentLabel)
@@ -110,17 +111,9 @@ class OverlayManager {
         debugLog('Adding tags', { tags: content.bookmark.tags })
         content.bookmark.tags.forEach(tag => {
           const tagElement = this.document.createElement('span')
-          tagElement.className = 'tiny iconTagDeleteInactive'
+          tagElement.className = 'tag-element tiny iconTagDeleteInactive'
           tagElement.textContent = tag
           tagElement.title = 'Double-click to remove'
-          tagElement.style.cssText = `
-            padding: 0.2em 0.5em;
-            margin: 2px;
-            background: #f0f8f0;
-            border-radius: 3px;
-            cursor: pointer;
-            color: #90ee90;
-          `
           // Add double-click to remove functionality
           tagElement.ondblclick = () => {
             // Remove tag from current content
@@ -148,8 +141,6 @@ class OverlayManager {
         padding: 2px !important;
         font-size: 12px;
         width: 80px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
       `
       tagInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
@@ -170,19 +161,17 @@ class OverlayManager {
 
       // Recent tags section (matching desired overlay)
       const recentContainer = this.document.createElement('div')
-      recentContainer.className = 'scrollmenu'
+      recentContainer.className = 'scrollmenu recent-container'
       recentContainer.style.cssText = `
         margin-bottom: 8px;
         padding: 4px;
-        background: #f9f9f9;
         border-radius: 4px;
         font-size: smaller;
         font-weight: 900;
-        color: green;
       `
 
       const recentLabel = this.document.createElement('span')
-      recentLabel.className = 'tiny'
+      recentLabel.className = 'label-secondary tiny'
       recentLabel.textContent = 'Recent:'
       recentLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
       recentContainer.appendChild(recentLabel)
@@ -192,16 +181,8 @@ class OverlayManager {
       sampleRecentTags.slice(0, 3).forEach(tag => {
         if (!content.bookmark?.tags?.includes(tag)) {
           const tagElement = this.document.createElement('span')
-          tagElement.className = 'tiny'
+          tagElement.className = 'tag-element tiny'
           tagElement.textContent = tag
-          tagElement.style.cssText = `
-            padding: 0.2em 0.5em;
-            margin: 2px;
-            background: #f0f8f0;
-            border-radius: 3px;
-            cursor: pointer;
-            color: green;
-          `
           tagElement.onclick = () => {
             if (content.bookmark) {
               if (!content.bookmark.tags) content.bookmark.tags = []
@@ -217,129 +198,23 @@ class OverlayManager {
         }
       })
 
-      // Transparency controls section
-      const transparencyContainer = this.document.createElement('div')
-      transparencyContainer.className = 'transparency-controls'
-      transparencyContainer.style.cssText = `
-        margin-bottom: 8px;
-        padding: 4px 8px;
-        background: #f0f0f0;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-      `
-
-      // Transparency label
-      const transparencyLabel = this.document.createElement('span')
-      transparencyLabel.textContent = '👁️ Overlay:'
-      transparencyLabel.style.cssText = `
-        font-weight: 600;
-        color: #555;
-        font-size: 11px;
-      `
-      transparencyContainer.appendChild(transparencyLabel)
-
-      // Transparency mode buttons
-      const modes = [
-        { mode: 'opaque', label: '●', title: 'Opaque' },
-        { mode: 'nearly-transparent', label: '◐', title: 'Nearly Transparent' },
-        { mode: 'fully-transparent', label: '○', title: 'Fully Transparent' }
-      ]
-
-      modes.forEach(({ mode, label, title }) => {
-        const modeBtn = this.document.createElement('button')
-        modeBtn.textContent = label
-        modeBtn.title = title
-        modeBtn.style.cssText = `
-          padding: 2px 6px;
-          font-size: 14px;
-          border: 1px solid #ccc;
-          border-radius: 3px;
-          background: ${this.transparencyMode === mode ? '#007acc' : '#fff'};
-          color: ${this.transparencyMode === mode ? '#fff' : '#333'};
-          cursor: pointer;
-          font-weight: 600;
-        `
-        modeBtn.onclick = () => {
-          this.transparencyMode = mode
-          this.applyTransparencyMode()
-          // Update button styles
-          transparencyContainer.querySelectorAll('button').forEach(btn => {
-            btn.style.background = '#fff'
-            btn.style.color = '#333'
-          })
-          modeBtn.style.background = '#007acc'
-          modeBtn.style.color = '#fff'
-          debugLog('Transparency mode changed', mode)
-        }
-        transparencyContainer.appendChild(modeBtn)
-      })
-
-      // Opacity slider (only show for transparent modes)
-      if (this.transparencyMode !== 'opaque') {
-        const opacityLabel = this.document.createElement('span')
-        opacityLabel.textContent = 'Opacity:'
-        opacityLabel.style.cssText = `
-          font-size: 11px;
-          color: #555;
-          margin-left: 8px;
-        `
-        transparencyContainer.appendChild(opacityLabel)
-
-        const opacitySlider = this.document.createElement('input')
-        opacitySlider.type = 'range'
-        opacitySlider.min = '0.01'
-        opacitySlider.max = '1'
-        opacitySlider.step = '0.01'
-        opacitySlider.value = this.config?.overlayOpacityNormal || 0.05
-        opacitySlider.style.cssText = `
-          width: 60px;
-          height: 16px;
-        `
-        
-        const opacityValue = this.document.createElement('span')
-        opacityValue.textContent = Math.round((this.config?.overlayOpacityNormal || 0.05) * 100) + '%'
-        opacityValue.style.cssText = `
-          font-size: 10px;
-          color: #555;
-          min-width: 25px;
-          text-align: right;
-        `
-
-        opacitySlider.oninput = () => {
-          const opacity = parseFloat(opacitySlider.value)
-          opacityValue.textContent = Math.round(opacity * 100) + '%'
-          
-          // Update configuration with new opacity
-          this.config = { 
-            ...this.config, 
-            overlayOpacityNormal: opacity,
-            overlayOpacityHover: Math.min(opacity + 0.1, 1),
-            overlayOpacityFocus: Math.min(opacity + 0.2, 1)
-          }
-          
-          // Apply transparency changes through the proper system
-          this.applyTransparencyMode()
-          
-          debugLog('Opacity changed and applied', { 
-            opacity, 
-            mode: this.transparencyMode,
-            config: this.config 
-          })
-        }
-
-        transparencyContainer.appendChild(opacitySlider)
-        transparencyContainer.appendChild(opacityValue)
+      // UI-VIS-001: VisibilityControls component - Replace legacy transparency controls
+      let visibilityControlsContainer = null
+      if (!this.visibilityControls) {
+        // Initialize VisibilityControls component
+        this.visibilityControls = new VisibilityControls(this.document, this.visibilityControlsCallback)
+        debugLog('VisibilityControls component initialized')
       }
+      
+      // Create the visibility controls UI
+      visibilityControlsContainer = this.visibilityControls.createControls()
+      debugLog('VisibilityControls UI created')
 
       // Action buttons section (matching desired overlay)
       const actionsContainer = this.document.createElement('div')
+      actionsContainer.className = 'actions'
       actionsContainer.style.cssText = `
         padding: 4px;
-        background: white;
         border-radius: 4px;
         text-align: center;
       `
@@ -347,14 +222,9 @@ class OverlayManager {
       // Privacy toggle button
       const privateBtn = this.document.createElement('button')
       const isPrivate = content.bookmark?.shared === 'no'
+      privateBtn.className = `action-button privacy-button ${isPrivate ? 'private-active' : ''}`
       privateBtn.style.cssText = `
         margin: 2px;
-        padding: 4px 8px;
-        font-size: 12px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        background: ${isPrivate ? '#ffeeee' : '#eeffee'};
-        cursor: pointer;
         font-weight: 600;
       `
       privateBtn.textContent = isPrivate ? '🔒 Private' : '🌐 Public'
@@ -370,17 +240,12 @@ class OverlayManager {
       // Read status toggle button
       const readBtn = this.document.createElement('button')
       const isToRead = content.bookmark?.toread === 'yes'
+      readBtn.className = `action-button read-button ${isToRead ? 'read-later-active' : ''}`
       readBtn.style.cssText = `
         margin: 2px;
-        padding: 4px 8px;
-        font-size: 12px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        background: ${isToRead ? '#ffffee' : '#eeeeff'};
-        cursor: pointer;
         font-weight: 600;
       `
-      readBtn.textContent = isToRead ? '📖 To Read' : '📋 Read'
+      readBtn.textContent = isToRead ? '📖 Read Later' : '📋 Not marked'
       readBtn.onclick = () => {
         if (content.bookmark) {
           content.bookmark.toread = content.bookmark.toread === 'yes' ? 'no' : 'yes'
@@ -395,20 +260,19 @@ class OverlayManager {
 
       // Page info section (matching desired overlay)
       const pageInfo = this.document.createElement('div')
+      pageInfo.className = 'page-info'
       pageInfo.style.cssText = `
         padding: 4px;
         font-size: 11px;
-        color: #666;
-        background: #f9f9f9;
         border-radius: 4px;
         margin-top: 4px;
         word-break: break-all;
       `
       pageInfo.innerHTML = `
-        <div style="font-weight: bold; margin-bottom: 2px;">
+        <div class="label-primary" style="font-weight: bold; margin-bottom: 2px;">
           ${content.bookmark?.description || content.pageTitle || 'No Title'}
         </div>
-        <div>${content.bookmark?.url || content.pageUrl || ''}</div>
+        <div class="text-muted">${content.bookmark?.url || content.pageUrl || ''}</div>
       `
 
       debugLog('Overlay structure created with enhanced styling')
@@ -416,7 +280,9 @@ class OverlayManager {
       // Assemble the overlay (matching desired structure)
       mainContainer.appendChild(currentTagsContainer)
       mainContainer.appendChild(recentContainer)
-      mainContainer.appendChild(transparencyContainer)
+      if (visibilityControlsContainer) {
+        mainContainer.appendChild(visibilityControlsContainer)
+      }
       mainContainer.appendChild(actionsContainer)
       mainContainer.appendChild(pageInfo)
 
@@ -1019,7 +885,16 @@ class OverlayManager {
 
     const style = this.document.createElement('style')
     style.id = styleId
-    style.textContent = this.getOverlayCSS()
+    
+    // Combine overlay CSS with VisibilityControls CSS
+    let cssContent = this.getOverlayCSS()
+    
+    // UI-VIS-001: Add VisibilityControls CSS
+    if (this.visibilityControls) {
+      cssContent += '\n' + this.visibilityControls.getControlsCSS()
+    }
+    
+    style.textContent = cssContent
 
     this.document.head.appendChild(style)
   }
@@ -1029,6 +904,7 @@ class OverlayManager {
    */
   getOverlayCSS () {
     return `
+      /* Base overlay styling with theme-aware defaults */
       .hoverboard-overlay {
         position: fixed !important;
         z-index: 9998 !important;
@@ -1053,43 +929,207 @@ class OverlayManager {
         min-height: auto;
         opacity: 0;
         transform: scale(0.9) translateY(-10px);
+        
+        /* Default theme variables and transition timing */
+        --theme-opacity: 0.9;
+        --theme-text-opacity: 1.0;
+        --theme-border-opacity: 0.8;
+        --theme-transition: all 0.2s ease-in-out;
+      }
+
+      /* 🎨 Theme Variables - Light-on-Dark Theme (Dark Theme) */
+      .hoverboard-theme-light-on-dark {
+        /* Primary text colors */
+        --theme-text-primary: #ffffff;
+        --theme-text-secondary: #e0e0e0;
+        --theme-text-muted: #b0b0b0;
+        
+        /* Special text colors for light backgrounds in dark theme */
+        --theme-text-on-light: #333333;
+        --theme-text-secondary-on-light: #666666;
+        
+        /* Background colors */
+        --theme-background-primary: #2c3e50;
+        --theme-background-secondary: #34495e;
+        --theme-background-tertiary: #455a64;
+        
+        /* Interactive element colors - Dark backgrounds for light-on-dark */
+        --theme-button-bg: #34495e;
+        --theme-button-hover: #455a64;
+        --theme-button-active: #546e7a;
+        
+        /* Input styling - Dark backgrounds for light-on-dark */
+        --theme-input-bg: #34495e;
+        --theme-input-border: #455a64;
+        --theme-input-focus: #74b9ff;
+        
+        /* Status and semantic colors - optimized for dark backgrounds */
+        --theme-success: #2ecc71;
+        --theme-warning: #f1c40f;
+        --theme-danger: #e74c3c;
+        --theme-info: #74b9ff;
+        
+        /* Tag-specific styling - softer colors for dark theme */
+        --theme-tag-bg: rgba(46, 204, 113, 0.15);
+        --theme-tag-text: #7bed9f;
+        --theme-tag-border: rgba(46, 204, 113, 0.3);
+        
+        /* Borders and separators */
+        --theme-border: rgba(255, 255, 255, 0.2);
+        --theme-separator: rgba(255, 255, 255, 0.1);
+        
+        /* RGB values for dynamic transparency - Dark theme uses dark RGB */
+        --theme-bg-rgb: 44, 62, 80;
+      }
+
+      /* 🎨 Theme Variables - Dark-on-Light Theme (Light Theme) */
+      .hoverboard-theme-dark-on-light {
+        /* Primary text colors */
+        --theme-text-primary: #333333;
+        --theme-text-secondary: #666666;
+        --theme-text-muted: #999999;
+        
+        /* Text colors for consistency (same as primary in light theme) */
+        --theme-text-on-light: #333333;
+        --theme-text-secondary-on-light: #666666;
+        
+        /* Background colors */
+        --theme-background-primary: #ffffff;
+        --theme-background-secondary: #f8f9fa;
+        --theme-background-tertiary: #e9ecef;
+        
+        /* Interactive element colors */
+        --theme-button-bg: rgba(0, 0, 0, 0.05);
+        --theme-button-hover: rgba(0, 0, 0, 0.1);
+        --theme-button-active: rgba(0, 0, 0, 0.15);
+        
+        /* Input styling */
+        --theme-input-bg: rgba(255, 255, 255, 0.8);
+        --theme-input-border: rgba(0, 0, 0, 0.2);
+        --theme-input-focus: rgba(0, 100, 200, 0.3);
+        
+        /* Status and semantic colors */
+        --theme-success: #28a745;
+        --theme-warning: #ffc107;
+        --theme-danger: #dc3545;
+        --theme-info: #17a2b8;
+        
+        /* Tag-specific styling */
+        --theme-tag-bg: rgba(40, 167, 69, 0.1);
+        --theme-tag-text: #28a745;
+        --theme-tag-border: rgba(40, 167, 69, 0.3);
+        
+        /* Borders and separators */
+        --theme-border: rgba(0, 0, 0, 0.1);
+        --theme-separator: rgba(0, 0, 0, 0.05);
+        
+        /* RGB values for dynamic transparency */
+        --theme-bg-rgb: 255, 255, 255;
+      }
+
+      /* 🔧 Transparency Mode Integration */
+      .hoverboard-overlay.transparency-mode {
+        background: rgba(var(--theme-bg-rgb), var(--theme-opacity)) !important;
+        backdrop-filter: blur(2px);
+      }
+
+      /* Enhanced contrast for low opacity scenarios */
+      .hoverboard-overlay.transparency-mode[data-opacity-level="low"] {
+        --theme-text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+      }
+
+      .hoverboard-overlay.transparency-mode[data-opacity-level="medium"] {
+        --theme-text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+      }
+
+      .hoverboard-overlay.transparency-mode * {
+        text-shadow: var(--theme-text-shadow, none);
       }
       
       .hoverboard-overlay * {
         box-sizing: border-box;
       }
 
-      /* Desired overlay styling components */
-      .scrollmenu {
+      /* 🎨 Theme-Aware Element Styling */
+      
+      /* Container elements */
+      .hoverboard-overlay .scrollmenu,
+      .hoverboard-overlay .tags-container {
+        background: var(--theme-background-secondary);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-border);
+        transition: var(--theme-transition);
         overflow-x: auto;
         white-space: nowrap;
       }
 
-      .tiny {
+      .hoverboard-overlay .page-info {
+        background: var(--theme-background-tertiary);
+        color: var(--theme-text-secondary);
+        border-top: 1px solid var(--theme-separator);
+      }
+
+      /* Text elements */
+      .hoverboard-overlay .tiny {
         font-size: 12px;
+        display: inline-block;
+        color: var(--theme-text-secondary);
+      }
+
+      .hoverboard-overlay .label-primary {
+        color: var(--theme-text-primary);
+        font-weight: 600;
+      }
+
+      .hoverboard-overlay .label-secondary {
+        color: var(--theme-text-secondary);
+        font-weight: 500;
+      }
+
+      .hoverboard-overlay .text-muted {
+        color: var(--theme-text-muted);
+      }
+
+      /* Tag elements */
+      .hoverboard-overlay .tag-element,
+      .hoverboard-overlay .iconTagDeleteInactive {
+        background: var(--theme-tag-bg);
+        color: var(--theme-tag-text);
+        border: 1px solid var(--theme-tag-border);
+        transition: var(--theme-transition);
+        padding: 0.2em 0.5em;
+        margin: 2px;
+        border-radius: 3px;
+        cursor: pointer;
         display: inline-block;
       }
 
-      .iconTagDeleteInactive {
-        transition: all 0.2s ease;
+      .hoverboard-overlay .tag-element:hover,
+      .hoverboard-overlay .iconTagDeleteInactive:hover {
+        background: var(--theme-button-hover);
+        transform: translateY(-1px);
+        border-color: var(--theme-input-focus);
       }
 
-      .iconTagDeleteInactive:hover {
-        background: #e0f0e0 !important;
-        color: #60c060 !important;
-      }
-
-      .tag-input {
+      /* Input elements */
+      .hoverboard-overlay .tag-input {
+        background: var(--theme-input-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-input-border);
+        transition: var(--theme-transition);
         outline: none;
-        border: 1px solid #ccc;
         border-radius: 3px;
         padding: 2px 4px;
         font-size: 12px;
       }
 
-      .tag-input:focus {
-        border-color: #90ee90;
-        box-shadow: 0 0 0 2px rgba(144, 238, 144, 0.2);
+      .hoverboard-overlay .tag-input:focus {
+        border-color: var(--theme-input-focus);
+        box-shadow: 0 0 0 2px rgba(var(--theme-input-focus), 0.2);
+      }
+
+      .hoverboard-overlay .tag-input::placeholder {
+        color: var(--theme-text-muted);
       }
       
       .hoverboard-container {
@@ -1122,30 +1162,143 @@ class OverlayManager {
         margin-bottom: 12px;
       }
       
-      .action-button {
+      /* Button elements */
+      .hoverboard-overlay .action-button {
+        background: var(--theme-button-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-border);
+        transition: var(--theme-transition);
         padding: 4px 8px;
-        border: 1px solid #ddd;
         border-radius: 4px;
-        background: white;
         cursor: pointer;
         font-size: 12px;
-        transition: all 0.2s ease;
-        color: #333;
       }
       
-      .action-button:hover {
-        background: #f5f5f5;
-        border-color: #999;
+      .hoverboard-overlay .action-button:hover {
+        background: var(--theme-button-hover);
+        border-color: var(--theme-input-focus);
+      }
+
+      .hoverboard-overlay .action-button.active {
+        background: var(--theme-button-active);
+        border-color: var(--theme-info);
       }
       
-      .action-button.close-button {
-        background: #f44336;
+      /* Close button - uses danger color */
+      .hoverboard-overlay .close-button {
+        background: var(--theme-danger);
         color: white;
-        border-color: #f44336;
+        border: none;
+        transition: var(--theme-transition);
+        padding: 0.2em 0.5em;
+        border-radius: 3px;
+        cursor: pointer;
+        font-weight: 900;
       }
       
-      .action-button.close-button:hover {
-        background: #d32f2f;
+      .hoverboard-overlay .close-button:hover {
+        background: color-mix(in srgb, var(--theme-danger) 80%, black);
+        transform: scale(1.05);
+      }
+
+      /* State-specific button styling */
+      .hoverboard-overlay .action-button.private-active {
+        background: color-mix(in srgb, var(--theme-warning) 20%, var(--theme-button-bg));
+        border-color: var(--theme-warning);
+      }
+
+      .hoverboard-overlay .action-button.read-later-active {
+        background: color-mix(in srgb, var(--theme-info) 20%, var(--theme-button-bg));
+        border-color: var(--theme-info);
+      }
+
+      /* 🎨 Light-on-Dark Theme Comprehensive Overrides - ALL interactive elements get dark backgrounds */
+      
+      /* Main overlay container - Override inline styles with highest specificity */
+      .hoverboard-overlay.hoverboard-theme-light-on-dark,
+      #hoverboard-overlay.hoverboard-theme-light-on-dark,
+      .hoverboard-theme-light-on-dark.hoverboard-overlay.solid-background {
+        background: var(--theme-background-primary) !important;
+        border: 2px solid var(--theme-border) !important;
+        color: var(--theme-text-primary) !important;
+      }
+
+      /* Main overlay container in transparency mode - Override inline styles */
+      .hoverboard-overlay.hoverboard-theme-light-on-dark.transparency-mode,
+      .hoverboard-overlay.hoverboard-theme-light-on-dark.hoverboard-overlay-transparent,
+      #hoverboard-overlay.hoverboard-theme-light-on-dark.hoverboard-overlay-transparent {
+        background: rgba(var(--theme-bg-rgb), var(--theme-opacity)) !important;
+        backdrop-filter: blur(2px) !important;
+        border: 2px solid var(--theme-border) !important;
+      }
+
+      /* All buttons */
+      .hoverboard-theme-light-on-dark button,
+      .hoverboard-theme-light-on-dark .action-button,
+      .hoverboard-theme-light-on-dark .add-tag-button {
+        color: var(--theme-text-primary) !important;
+        background: var(--theme-button-bg) !important;
+        border: 1px solid var(--theme-input-border) !important;
+      }
+
+      .hoverboard-theme-light-on-dark button:hover,
+      .hoverboard-theme-light-on-dark .action-button:hover,
+      .hoverboard-theme-light-on-dark .add-tag-button:hover {
+        background: var(--theme-button-hover) !important;
+      }
+
+      /* All text inputs */
+      .hoverboard-theme-light-on-dark input,
+      .hoverboard-theme-light-on-dark .tag-input,
+      .hoverboard-theme-light-on-dark .add-tag-input {
+        color: var(--theme-text-primary) !important;
+        background: var(--theme-input-bg) !important;
+        border: 1px solid var(--theme-input-border) !important;
+      }
+
+      .hoverboard-theme-light-on-dark input:focus,
+      .hoverboard-theme-light-on-dark .tag-input:focus,
+      .hoverboard-theme-light-on-dark .add-tag-input:focus {
+        border-color: var(--theme-input-focus) !important;
+        box-shadow: 0 0 0 2px rgba(116, 185, 255, 0.2) !important;
+      }
+
+      .hoverboard-theme-light-on-dark input::placeholder,
+      .hoverboard-theme-light-on-dark .tag-input::placeholder,
+      .hoverboard-theme-light-on-dark .add-tag-input::placeholder {
+        color: var(--theme-text-muted) !important;
+      }
+
+      /* All labels */
+      .hoverboard-theme-light-on-dark .label-primary {
+        color: var(--theme-text-primary) !important;
+        background: var(--theme-background-secondary);
+        padding: 0.2em 0.5em;
+        border-radius: 3px;
+      }
+
+      .hoverboard-theme-light-on-dark .label-secondary {
+        color: var(--theme-text-secondary) !important;
+        background: var(--theme-background-tertiary);
+        padding: 0.2em 0.5em;
+        border-radius: 3px;
+      }
+
+      /* Special button states */
+      .hoverboard-theme-light-on-dark .action-button.private-active {
+        background: color-mix(in srgb, var(--theme-warning) 30%, var(--theme-button-bg)) !important;
+        color: var(--theme-text-primary) !important;
+      }
+
+      .hoverboard-theme-light-on-dark .action-button.read-later-active {
+        background: color-mix(in srgb, var(--theme-info) 30%, var(--theme-button-bg)) !important;
+        color: var(--theme-text-primary) !important;
+      }
+
+      /* Close button override */
+      .hoverboard-theme-light-on-dark .close-button {
+        background: var(--theme-danger) !important;
+        color: white !important;
       }
       
       .add-tag-container {
@@ -1154,34 +1307,43 @@ class OverlayManager {
         align-items: center;
       }
       
-      .add-tag-input {
+      /* Form elements */
+      .hoverboard-overlay .add-tag-input {
+        background: var(--theme-input-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-input-border);
+        transition: var(--theme-transition);
         padding: 6px 8px;
-        border: 1px solid #ddd;
         border-radius: 4px;
         font-size: 13px;
         width: 140px;
         outline: none;
       }
       
-      .add-tag-input:focus {
-        border-color: #2196f3;
-        box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+      .hoverboard-overlay .add-tag-input:focus {
+        border-color: var(--theme-input-focus);
+        box-shadow: 0 0 0 2px rgba(var(--theme-input-focus), 0.2);
+      }
+
+      .hoverboard-overlay .add-tag-input::placeholder {
+        color: var(--theme-text-muted);
       }
       
-      .add-tag-button {
-        padding: 6px 12px;
-        border: 1px solid #4caf50;
-        border-radius: 4px;
-        background: #4caf50;
+      .hoverboard-overlay .add-tag-button {
+        background: var(--theme-success);
         color: white;
+        border: 1px solid var(--theme-success);
+        transition: var(--theme-transition);
+        padding: 6px 12px;
+        border-radius: 4px;
         cursor: pointer;
         font-size: 13px;
         font-weight: 500;
-        transition: all 0.2s ease;
       }
       
-      .add-tag-button:hover {
-        background: #45a049;
+      .hoverboard-overlay .add-tag-button:hover {
+        background: color-mix(in srgb, var(--theme-success) 80%, black);
+        border-color: color-mix(in srgb, var(--theme-success) 80%, black);
       }
       
       .actions {
@@ -1371,6 +1533,64 @@ class OverlayManager {
   }
 
   /**
+   * Apply visibility settings from VisibilityControls component
+   * UI-VIS-001: Callback for VisibilityControls component
+   * Enhanced with comprehensive theme integration
+   */
+  applyVisibilitySettings (settings) {
+    debugLog('Applying comprehensive visibility settings', settings)
+    
+    if (this.overlayElement) {
+      // Remove existing theme and transparency classes
+      this.overlayElement.classList.remove(
+        'hoverboard-theme-light-on-dark', 
+        'hoverboard-theme-dark-on-light',
+        'transparency-mode',
+        'solid-background'
+      )
+      
+      // Apply new theme class
+      this.overlayElement.classList.add(`hoverboard-theme-${settings.textTheme}`)
+      
+      // Apply transparency mode if enabled
+      if (settings.transparencyEnabled) {
+        this.overlayElement.classList.add('transparency-mode')
+        
+        // Set dynamic opacity level for enhanced styling
+        const opacity = settings.backgroundOpacity / 100
+        let opacityLevel = 'high'
+        if (opacity < 0.4) opacityLevel = 'low'
+        else if (opacity < 0.7) opacityLevel = 'medium'
+        
+        this.overlayElement.setAttribute('data-opacity-level', opacityLevel)
+        this.overlayElement.style.setProperty('--theme-opacity', opacity)
+        
+        // Apply theme-aware background with dynamic opacity
+        if (settings.textTheme === 'light-on-dark') {
+          this.overlayElement.style.background = `rgba(44, 62, 80, ${opacity})`
+        } else {
+          this.overlayElement.style.background = `rgba(255, 255, 255, ${opacity})`
+        }
+        this.overlayElement.style.backdropFilter = 'blur(2px)'
+        
+        debugLog(`Applied transparency: ${settings.textTheme} with ${settings.backgroundOpacity}% opacity (${opacityLevel} level)`)
+      } else {
+        // Solid theme mode
+        this.overlayElement.classList.add('solid-background')
+        this.overlayElement.removeAttribute('data-opacity-level')
+        this.overlayElement.style.removeProperty('--theme-opacity')
+        this.overlayElement.style.background = ''
+        this.overlayElement.style.backdropFilter = 'none'
+        
+        debugLog(`Applied solid theme: ${settings.textTheme}`)
+      }
+      
+      // Force CSS recalculation for immediate visual update
+      this.overlayElement.offsetHeight
+    }
+  }
+
+  /**
    * Update configuration
    */
   updateConfig (newConfig) {
@@ -1406,6 +1626,12 @@ class OverlayManager {
     if (this.proximityListener) {
       this.document.removeEventListener('mousemove', this.proximityListener)
       this.proximityListener = null
+    }
+
+    // UI-VIS-001: Clean up VisibilityControls component
+    if (this.visibilityControls) {
+      this.visibilityControls.destroy()
+      this.visibilityControls = null
     }
 
     // Remove injected styles

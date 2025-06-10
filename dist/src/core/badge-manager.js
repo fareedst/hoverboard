@@ -110,7 +110,7 @@ export class BadgeManager {
     }
 
     if (bookmark.toread === 'yes') {
-      parts.push('(To Read)')
+      parts.push('(Read Later)')
     }
 
     return parts.join(' | ')

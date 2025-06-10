@@ -204,7 +204,7 @@ function calculateIconState(bookmark) {
     
     // Title tooltip
     title: hasBookmark ? 
-      `${bookmark.description || 'Bookmarked'} • ${tagCount} tags${isPrivate ? ' • Private' : ''}${isToRead ? ' • To Read' : ''}` :
+      `${bookmark.description || 'Bookmarked'} • ${tagCount} tags${isPrivate ? ' • Private' : ''}${isToRead ? ' • Read Later' : ''}` :
       "Not bookmarked • Click to add"
   };
 }

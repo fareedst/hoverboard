@@ -1779,8 +1779,481 @@
   };
   var logger = new Logger();
 
-  // src/features/content/overlay-manager.js
+  // src/shared/logger-browser.js
+  var Logger2 = class {
+    constructor(context = "Browser") {
+      this.context = context;
+      this.logLevel = "debug";
+    }
+    getLogLevel() {
+      return "debug";
+    }
+    shouldLog(level) {
+      const levels = { debug: 0, info: 1, warn: 2, error: 3 };
+      return levels[level] >= levels[this.logLevel];
+    }
+    formatMessage(level, message, ...args) {
+      const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+      const prefix = `[${timestamp}] [${this.context}] [${level.toUpperCase()}]`;
+      return [prefix, message, ...args];
+    }
+    debug(message, ...args) {
+      if (this.shouldLog("debug")) {
+        console.log(...this.formatMessage("debug", message, ...args));
+      }
+    }
+    info(message, ...args) {
+      if (this.shouldLog("info")) {
+        console.info(...this.formatMessage("info", message, ...args));
+      }
+    }
+    warn(message, ...args) {
+      if (this.shouldLog("warn")) {
+        console.warn(...this.formatMessage("warn", message, ...args));
+      }
+    }
+    error(message, ...args) {
+      if (this.shouldLog("error")) {
+        console.error(...this.formatMessage("error", message, ...args));
+      }
+    }
+    log(context, ...args) {
+      this.debug(`[${context}]`, ...args);
+    }
+  };
+  var logger2 = new Logger2();
+
+  // src/ui/components/VisibilityControls.js
   var debugLog = (message, data = null) => {
+    if (window.HOVERBOARD_DEBUG) {
+      if (data) {
+        console.log(`[Hoverboard VisibilityControls Debug] ${message}`, data);
+      } else {
+        console.log(`[Hoverboard VisibilityControls Debug] ${message}`);
+      }
+    }
+  };
+  var VisibilityControls = class {
+    constructor(document2, onSettingsChange) {
+      this.document = document2;
+      this.onSettingsChange = onSettingsChange || (() => {
+      });
+      this.logger = new Logger2("VisibilityControls");
+      this.settings = {
+        textTheme: "light-on-dark",
+        // 'light-on-dark' | 'dark-on-light' - Dark theme default
+        transparencyEnabled: false,
+        backgroundOpacity: 90
+        // 0-100%
+      };
+      this.controlsElement = null;
+      this.isCollapsed = true;
+      debugLog("VisibilityControls initialized", this.settings);
+    }
+    /**
+     * Create the visibility controls UI
+     * @returns {HTMLElement} Controls container element
+     */
+    createControls() {
+      const container = this.document.createElement("div");
+      container.className = "hoverboard-visibility-controls";
+      container.innerHTML = this.getControlsHTML();
+      this.controlsElement = container;
+      this.attachEventListeners();
+      this.updateControlsState();
+      debugLog("Controls created");
+      return container;
+    }
+    /**
+     * Generate HTML for the controls
+     * @returns {string} HTML string
+     */
+    getControlsHTML() {
+      return `
+      <div class="visibility-controls-header">
+        <span class="controls-title">Display</span>
+        <button class="controls-toggle" title="Toggle visibility controls">
+          <span class="toggle-icon">${this.isCollapsed ? "\u2699\uFE0F" : "\u2715"}</span>
+        </button>
+      </div>
+      <div class="visibility-controls-panel ${this.isCollapsed ? "collapsed" : ""}">
+        <div class="control-group">
+          <label class="control-label">
+            <span class="label-text">Theme:</span>
+            <button class="theme-toggle" title="Switch between light and dark themes">
+              <span class="theme-icon">${this.settings.textTheme === "light-on-dark" ? "\u{1F319}" : "\u2600\uFE0F"}</span>
+              <span class="theme-text">${this.settings.textTheme === "light-on-dark" ? "Dark" : "Light"}</span>
+            </button>
+          </label>
+        </div>
+        
+        <div class="control-group">
+          <label class="control-label">
+            <input type="checkbox" class="transparency-toggle" ${this.settings.transparencyEnabled ? "checked" : ""}>
+            <span class="label-text">Transparency</span>
+          </label>
+        </div>
+        
+        <div class="control-group opacity-group ${!this.settings.transparencyEnabled ? "disabled" : ""}">
+          <label class="control-label">
+            <span class="label-text">Opacity:</span>
+            <div class="slider-container">
+              <input type="range" 
+                     class="opacity-slider" 
+                     min="10" 
+                     max="100" 
+                     value="${this.settings.backgroundOpacity}"
+                     ${!this.settings.transparencyEnabled ? "disabled" : ""}>
+              <span class="opacity-value">${this.settings.backgroundOpacity}%</span>
+            </div>
+          </label>
+        </div>
+      </div>
+    `;
+    }
+    /**
+     * Attach event listeners to control elements
+     */
+    attachEventListeners() {
+      if (!this.controlsElement) return;
+      const toggleButton = this.controlsElement.querySelector(".controls-toggle");
+      toggleButton?.addEventListener("click", () => {
+        this.toggleControlsPanel();
+      });
+      const themeToggle = this.controlsElement.querySelector(".theme-toggle");
+      themeToggle?.addEventListener("click", () => {
+        this.toggleTheme();
+      });
+      const transparencyToggle = this.controlsElement.querySelector(".transparency-toggle");
+      transparencyToggle?.addEventListener("change", (e) => {
+        this.setTransparencyEnabled(e.target.checked);
+      });
+      const opacitySlider = this.controlsElement.querySelector(".opacity-slider");
+      opacitySlider?.addEventListener("input", (e) => {
+        this.setBackgroundOpacity(parseInt(e.target.value));
+      });
+      debugLog("Event listeners attached");
+    }
+    /**
+     * Toggle the controls panel visibility
+     */
+    toggleControlsPanel() {
+      this.isCollapsed = !this.isCollapsed;
+      const panel = this.controlsElement?.querySelector(".visibility-controls-panel");
+      const toggleIcon = this.controlsElement?.querySelector(".toggle-icon");
+      if (panel) {
+        panel.classList.toggle("collapsed", this.isCollapsed);
+      }
+      if (toggleIcon) {
+        toggleIcon.textContent = this.isCollapsed ? "\u2699\uFE0F" : "\u2715";
+      }
+      debugLog("Controls panel toggled", { collapsed: this.isCollapsed });
+    }
+    /**
+     * Toggle between light and dark themes
+     */
+    toggleTheme() {
+      this.settings.textTheme = this.settings.textTheme === "light-on-dark" ? "dark-on-light" : "light-on-dark";
+      this.updateThemeDisplay();
+      this.notifySettingsChange();
+      debugLog("Theme toggled", { theme: this.settings.textTheme });
+    }
+    /**
+     * Set transparency enabled state
+     * @param {boolean} enabled 
+     */
+    setTransparencyEnabled(enabled) {
+      this.settings.transparencyEnabled = enabled;
+      this.updateOpacityControlState();
+      this.notifySettingsChange();
+      debugLog("Transparency toggled", { enabled });
+    }
+    /**
+     * Set background opacity value
+     * @param {number} opacity - Opacity value 0-100
+     */
+    setBackgroundOpacity(opacity) {
+      this.settings.backgroundOpacity = Math.max(10, Math.min(100, opacity));
+      this.updateOpacityDisplay();
+      this.notifySettingsChange();
+      debugLog("Opacity changed", { opacity: this.settings.backgroundOpacity });
+    }
+    /**
+     * Update theme display elements
+     */
+    updateThemeDisplay() {
+      const themeIcon = this.controlsElement?.querySelector(".theme-icon");
+      const themeText = this.controlsElement?.querySelector(".theme-text");
+      if (themeIcon && themeText) {
+        const isLightOnDark = this.settings.textTheme === "light-on-dark";
+        themeIcon.textContent = isLightOnDark ? "\u{1F319}" : "\u2600\uFE0F";
+        themeText.textContent = isLightOnDark ? "Dark" : "Light";
+      }
+    }
+    /**
+     * Update opacity control state and display
+     */
+    updateOpacityControlState() {
+      const opacityGroup = this.controlsElement?.querySelector(".opacity-group");
+      const opacitySlider = this.controlsElement?.querySelector(".opacity-slider");
+      if (opacityGroup) {
+        opacityGroup.classList.toggle("disabled", !this.settings.transparencyEnabled);
+      }
+      if (opacitySlider) {
+        opacitySlider.disabled = !this.settings.transparencyEnabled;
+      }
+    }
+    /**
+     * Update opacity value display
+     */
+    updateOpacityDisplay() {
+      const opacityValue = this.controlsElement?.querySelector(".opacity-value");
+      const opacitySlider = this.controlsElement?.querySelector(".opacity-slider");
+      if (opacityValue) {
+        opacityValue.textContent = `${this.settings.backgroundOpacity}%`;
+      }
+      if (opacitySlider) {
+        opacitySlider.value = this.settings.backgroundOpacity;
+      }
+    }
+    /**
+     * Update all control states to match current settings
+     */
+    updateControlsState() {
+      this.updateThemeDisplay();
+      this.updateOpacityControlState();
+      this.updateOpacityDisplay();
+      const transparencyToggle = this.controlsElement?.querySelector(".transparency-toggle");
+      if (transparencyToggle) {
+        transparencyToggle.checked = this.settings.transparencyEnabled;
+      }
+    }
+    /**
+     * Get current visibility settings
+     * @returns {Object} Current settings object
+     */
+    getSettings() {
+      return { ...this.settings };
+    }
+    /**
+     * Set visibility settings
+     * @param {Object} newSettings - Settings to apply
+     */
+    setSettings(newSettings) {
+      this.settings = { ...this.settings, ...newSettings };
+      this.updateControlsState();
+      debugLog("Settings updated", this.settings);
+    }
+    /**
+     * Notify parent component of settings change
+     */
+    notifySettingsChange() {
+      this.onSettingsChange(this.getSettings());
+    }
+    /**
+     * Get CSS styles for the controls
+     * @returns {string} CSS styles
+     */
+    getControlsCSS() {
+      return `
+      .hoverboard-visibility-controls {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        min-width: 160px;
+      }
+      
+      .visibility-controls-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 8px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        border-radius: 5px 5px 0 0;
+      }
+      
+      .controls-title {
+        font-weight: 600;
+        color: #495057;
+      }
+      
+      .controls-toggle {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 2px 4px;
+        border-radius: 3px;
+        font-size: 14px;
+        line-height: 1;
+      }
+      
+      .controls-toggle:hover {
+        background: rgba(0, 0, 0, 0.1);
+      }
+      
+      .visibility-controls-panel {
+        padding: 8px;
+        transition: all 0.2s ease;
+        max-height: 200px;
+        overflow: hidden;
+      }
+      
+      .visibility-controls-panel.collapsed {
+        max-height: 0;
+        padding: 0 8px;
+      }
+      
+      .control-group {
+        margin-bottom: 8px;
+      }
+      
+      .control-group:last-child {
+        margin-bottom: 0;
+      }
+      
+      .control-group.disabled {
+        opacity: 0.5;
+        pointer-events: none;
+      }
+      
+      .control-label {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        padding: 2px 0;
+      }
+      
+      .label-text {
+        font-weight: 500;
+        color: #495057;
+      }
+      
+      .theme-toggle {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        background: #e9ecef;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 11px;
+        transition: all 0.15s ease;
+      }
+      
+      .theme-toggle:hover {
+        background: #dee2e6;
+        border-color: #adb5bd;
+      }
+      
+      .theme-icon {
+        font-size: 12px;
+      }
+      
+      .transparency-toggle {
+        cursor: pointer;
+      }
+      
+      .slider-container {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      
+      .opacity-slider {
+        width: 80px;
+        height: 4px;
+        background: #e9ecef;
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+      }
+      
+      .opacity-slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 12px;
+        height: 12px;
+        background: #007bff;
+        border-radius: 50%;
+        cursor: pointer;
+      }
+      
+      .opacity-slider::-moz-range-thumb {
+        width: 12px;
+        height: 12px;
+        background: #007bff;
+        border-radius: 50%;
+        cursor: pointer;
+        border: none;
+      }
+      
+      .opacity-value {
+        font-size: 10px;
+        color: #6c757d;
+        min-width: 30px;
+        text-align: right;
+      }
+      
+      /* Dark theme styles */
+      .hoverboard-theme-light-on-dark .hoverboard-visibility-controls {
+        background: rgba(33, 37, 41, 0.95);
+        border-color: #495057;
+        color: #f8f9fa;
+      }
+      
+      .hoverboard-theme-light-on-dark .visibility-controls-header {
+        background: #343a40;
+        border-color: #495057;
+      }
+      
+      .hoverboard-theme-light-on-dark .controls-title,
+      .hoverboard-theme-light-on-dark .label-text {
+        color: #f8f9fa;
+      }
+      
+      .hoverboard-theme-light-on-dark .theme-toggle {
+        background: #495057;
+        border-color: #6c757d;
+        color: #f8f9fa;
+      }
+      
+      .hoverboard-theme-light-on-dark .theme-toggle:hover {
+        background: #5a6268;
+        border-color: #adb5bd;
+      }
+      
+      .hoverboard-theme-light-on-dark .opacity-slider {
+        background: #495057;
+      }
+      
+      .hoverboard-theme-light-on-dark .opacity-value {
+        color: #adb5bd;
+      }
+    `;
+    }
+    /**
+     * Destroy the controls and clean up
+     */
+    destroy() {
+      if (this.controlsElement) {
+        this.controlsElement.remove();
+        this.controlsElement = null;
+      }
+      debugLog("VisibilityControls destroyed");
+    }
+  };
+
+  // src/features/content/overlay-manager.js
+  var debugLog2 = (message, data = null) => {
     if (window.HOVERBOARD_DEBUG) {
       if (data) {
         console.log(`[Hoverboard Overlay Debug] ${message}`, data);
@@ -1804,14 +2277,19 @@
       this.positionMode = config?.overlayPositionMode || "default";
       this.adaptiveVisibility = config?.overlayAdaptiveVisibility || false;
       this.proximityListener = null;
-      debugLog("OverlayManager initialized", { config, transparencyMode: this.transparencyMode });
+      this.visibilityControls = null;
+      this.visibilityControlsCallback = (settings) => {
+        debugLog2("Visibility settings changed", settings);
+        this.applyVisibilitySettings(settings);
+      };
+      debugLog2("OverlayManager initialized", { config, transparencyMode: this.transparencyMode });
     }
     /**
      * Show overlay with content
      */
     show(content) {
       try {
-        debugLog("Showing overlay", { content });
+        debugLog2("Showing overlay", { content });
         console.log("\u{1F3A8} [Overlay Debug] Content received:");
         console.log("\u{1F3A8} [Overlay Debug] - Full content:", content);
         console.log("\u{1F3A8} [Overlay Debug] - Bookmark:", content.bookmark);
@@ -1821,56 +2299,41 @@
         console.log("\u{1F3A8} [Overlay Debug] - Page title:", content.pageTitle);
         console.log("\u{1F3A8} [Overlay Debug] - Page URL:", content.pageUrl);
         if (!this.overlayElement) {
-          debugLog("Creating new overlay element");
+          debugLog2("Creating new overlay element");
           this.createOverlay();
         }
         this.clearContent();
-        debugLog("Content cleared");
+        debugLog2("Content cleared");
         const mainContainer = this.document.createElement("div");
         mainContainer.style.cssText = "padding: 8px;";
         const currentTagsContainer = this.document.createElement("div");
-        currentTagsContainer.className = "scrollmenu";
+        currentTagsContainer.className = "scrollmenu tags-container";
         currentTagsContainer.style.cssText = `
         margin-bottom: 8px;
         padding: 4px;
-        background: white;
         border-radius: 4px;
       `;
         const closeBtn = this.document.createElement("span");
-        closeBtn.className = "tiny";
+        closeBtn.className = "close-button";
         closeBtn.innerHTML = "\u2715";
         closeBtn.style.cssText = `
         float: right;
-        cursor: pointer;
-        padding: 0.2em 0.5em;
-        color: red;
-        font-weight: 900;
-        background: rgba(255,255,255,0.8);
-        border-radius: 3px;
         margin: 2px;
       `;
         closeBtn.onclick = () => this.hide();
         currentTagsContainer.appendChild(closeBtn);
         const currentLabel = this.document.createElement("span");
-        currentLabel.className = "tiny";
+        currentLabel.className = "label-primary tiny";
         currentLabel.textContent = "Current:";
         currentLabel.style.cssText = "padding: 0.2em 0.5em; margin-right: 4px;";
         currentTagsContainer.appendChild(currentLabel);
         if (content.bookmark?.tags) {
-          debugLog("Adding tags", { tags: content.bookmark.tags });
+          debugLog2("Adding tags", { tags: content.bookmark.tags });
           content.bookmark.tags.forEach((tag) => {
             const tagElement = this.document.createElement("span");
-            tagElement.className = "tiny iconTagDeleteInactive";
+            tagElement.className = "tag-element tiny iconTagDeleteInactive";
             tagElement.textContent = tag;
             tagElement.title = "Double-click to remove";
-            tagElement.style.cssText = `
-            padding: 0.2em 0.5em;
-            margin: 2px;
-            background: #f0f8f0;
-            border-radius: 3px;
-            cursor: pointer;
-            color: #90ee90;
-          `;
             tagElement.ondblclick = () => {
               if (content.bookmark && content.bookmark.tags) {
                 const index = content.bookmark.tags.indexOf(tag);
@@ -1883,7 +2346,7 @@
             currentTagsContainer.appendChild(tagElement);
           });
         } else {
-          debugLog("No tags found in bookmark data");
+          debugLog2("No tags found in bookmark data");
         }
         const tagInput = this.document.createElement("input");
         tagInput.className = "tag-input";
@@ -1893,8 +2356,6 @@
         padding: 2px !important;
         font-size: 12px;
         width: 80px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
       `;
         tagInput.addEventListener("keypress", (e) => {
           if (e.key === "Enter") {
@@ -1905,25 +2366,23 @@
                 content.bookmark.tags.push(tagText);
                 tagInput.value = "";
                 this.show(content);
-                debugLog("Tag added", tagText);
+                debugLog2("Tag added", tagText);
               }
             }
           }
         });
         currentTagsContainer.appendChild(tagInput);
         const recentContainer = this.document.createElement("div");
-        recentContainer.className = "scrollmenu";
+        recentContainer.className = "scrollmenu recent-container";
         recentContainer.style.cssText = `
         margin-bottom: 8px;
         padding: 4px;
-        background: #f9f9f9;
         border-radius: 4px;
         font-size: smaller;
         font-weight: 900;
-        color: green;
       `;
         const recentLabel = this.document.createElement("span");
-        recentLabel.className = "tiny";
+        recentLabel.className = "label-secondary tiny";
         recentLabel.textContent = "Recent:";
         recentLabel.style.cssText = "padding: 0.2em 0.5em; margin-right: 4px;";
         recentContainer.appendChild(recentLabel);
@@ -1931,145 +2390,40 @@
         sampleRecentTags.slice(0, 3).forEach((tag) => {
           if (!content.bookmark?.tags?.includes(tag)) {
             const tagElement = this.document.createElement("span");
-            tagElement.className = "tiny";
+            tagElement.className = "tag-element tiny";
             tagElement.textContent = tag;
-            tagElement.style.cssText = `
-            padding: 0.2em 0.5em;
-            margin: 2px;
-            background: #f0f8f0;
-            border-radius: 3px;
-            cursor: pointer;
-            color: green;
-          `;
             tagElement.onclick = () => {
               if (content.bookmark) {
                 if (!content.bookmark.tags) content.bookmark.tags = [];
                 if (!content.bookmark.tags.includes(tag)) {
                   content.bookmark.tags.push(tag);
                   this.show(content);
-                  debugLog("Tag added from recent", tag);
+                  debugLog2("Tag added from recent", tag);
                 }
               }
             };
             recentContainer.appendChild(tagElement);
           }
         });
-        const transparencyContainer = this.document.createElement("div");
-        transparencyContainer.className = "transparency-controls";
-        transparencyContainer.style.cssText = `
-        margin-bottom: 8px;
-        padding: 4px 8px;
-        background: #f0f0f0;
-        border-radius: 4px;
-        border: 1px solid #ddd;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 12px;
-      `;
-        const transparencyLabel = this.document.createElement("span");
-        transparencyLabel.textContent = "\u{1F441}\uFE0F Overlay:";
-        transparencyLabel.style.cssText = `
-        font-weight: 600;
-        color: #555;
-        font-size: 11px;
-      `;
-        transparencyContainer.appendChild(transparencyLabel);
-        const modes = [
-          { mode: "opaque", label: "\u25CF", title: "Opaque" },
-          { mode: "nearly-transparent", label: "\u25D0", title: "Nearly Transparent" },
-          { mode: "fully-transparent", label: "\u25CB", title: "Fully Transparent" }
-        ];
-        modes.forEach(({ mode, label, title }) => {
-          const modeBtn = this.document.createElement("button");
-          modeBtn.textContent = label;
-          modeBtn.title = title;
-          modeBtn.style.cssText = `
-          padding: 2px 6px;
-          font-size: 14px;
-          border: 1px solid #ccc;
-          border-radius: 3px;
-          background: ${this.transparencyMode === mode ? "#007acc" : "#fff"};
-          color: ${this.transparencyMode === mode ? "#fff" : "#333"};
-          cursor: pointer;
-          font-weight: 600;
-        `;
-          modeBtn.onclick = () => {
-            this.transparencyMode = mode;
-            this.applyTransparencyMode();
-            transparencyContainer.querySelectorAll("button").forEach((btn) => {
-              btn.style.background = "#fff";
-              btn.style.color = "#333";
-            });
-            modeBtn.style.background = "#007acc";
-            modeBtn.style.color = "#fff";
-            debugLog("Transparency mode changed", mode);
-          };
-          transparencyContainer.appendChild(modeBtn);
-        });
-        if (this.transparencyMode !== "opaque") {
-          const opacityLabel = this.document.createElement("span");
-          opacityLabel.textContent = "Opacity:";
-          opacityLabel.style.cssText = `
-          font-size: 11px;
-          color: #555;
-          margin-left: 8px;
-        `;
-          transparencyContainer.appendChild(opacityLabel);
-          const opacitySlider = this.document.createElement("input");
-          opacitySlider.type = "range";
-          opacitySlider.min = "0.01";
-          opacitySlider.max = "1";
-          opacitySlider.step = "0.01";
-          opacitySlider.value = this.config?.overlayOpacityNormal || 0.05;
-          opacitySlider.style.cssText = `
-          width: 60px;
-          height: 16px;
-        `;
-          const opacityValue = this.document.createElement("span");
-          opacityValue.textContent = Math.round((this.config?.overlayOpacityNormal || 0.05) * 100) + "%";
-          opacityValue.style.cssText = `
-          font-size: 10px;
-          color: #555;
-          min-width: 25px;
-          text-align: right;
-        `;
-          opacitySlider.oninput = () => {
-            const opacity = parseFloat(opacitySlider.value);
-            opacityValue.textContent = Math.round(opacity * 100) + "%";
-            this.config = {
-              ...this.config,
-              overlayOpacityNormal: opacity,
-              overlayOpacityHover: Math.min(opacity + 0.1, 1),
-              overlayOpacityFocus: Math.min(opacity + 0.2, 1)
-            };
-            this.applyTransparencyMode();
-            debugLog("Opacity changed and applied", {
-              opacity,
-              mode: this.transparencyMode,
-              config: this.config
-            });
-          };
-          transparencyContainer.appendChild(opacitySlider);
-          transparencyContainer.appendChild(opacityValue);
+        let visibilityControlsContainer = null;
+        if (!this.visibilityControls) {
+          this.visibilityControls = new VisibilityControls(this.document, this.visibilityControlsCallback);
+          debugLog2("VisibilityControls component initialized");
         }
+        visibilityControlsContainer = this.visibilityControls.createControls();
+        debugLog2("VisibilityControls UI created");
         const actionsContainer = this.document.createElement("div");
+        actionsContainer.className = "actions";
         actionsContainer.style.cssText = `
         padding: 4px;
-        background: white;
         border-radius: 4px;
         text-align: center;
       `;
         const privateBtn = this.document.createElement("button");
         const isPrivate = content.bookmark?.shared === "no";
+        privateBtn.className = `action-button privacy-button ${isPrivate ? "private-active" : ""}`;
         privateBtn.style.cssText = `
         margin: 2px;
-        padding: 4px 8px;
-        font-size: 12px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        background: ${isPrivate ? "#ffeeee" : "#eeffee"};
-        cursor: pointer;
         font-weight: 600;
       `;
         privateBtn.textContent = isPrivate ? "\u{1F512} Private" : "\u{1F310} Public";
@@ -2077,60 +2431,56 @@
           if (content.bookmark) {
             content.bookmark.shared = content.bookmark.shared === "no" ? "yes" : "no";
             this.show(content);
-            debugLog("Privacy toggled", content.bookmark.shared);
+            debugLog2("Privacy toggled", content.bookmark.shared);
           }
         };
         const readBtn = this.document.createElement("button");
         const isToRead = content.bookmark?.toread === "yes";
+        readBtn.className = `action-button read-button ${isToRead ? "read-later-active" : ""}`;
         readBtn.style.cssText = `
         margin: 2px;
-        padding: 4px 8px;
-        font-size: 12px;
-        border: 1px solid #ccc;
-        border-radius: 3px;
-        background: ${isToRead ? "#ffffee" : "#eeeeff"};
-        cursor: pointer;
         font-weight: 600;
       `;
-        readBtn.textContent = isToRead ? "\u{1F4D6} To Read" : "\u{1F4CB} Read";
+        readBtn.textContent = isToRead ? "\u{1F4D6} Read Later" : "\u{1F4CB} Not marked";
         readBtn.onclick = () => {
           if (content.bookmark) {
             content.bookmark.toread = content.bookmark.toread === "yes" ? "no" : "yes";
             this.show(content);
-            debugLog("Read status toggled", content.bookmark.toread);
+            debugLog2("Read status toggled", content.bookmark.toread);
           }
         };
         actionsContainer.appendChild(privateBtn);
         actionsContainer.appendChild(readBtn);
         const pageInfo = this.document.createElement("div");
+        pageInfo.className = "page-info";
         pageInfo.style.cssText = `
         padding: 4px;
         font-size: 11px;
-        color: #666;
-        background: #f9f9f9;
         border-radius: 4px;
         margin-top: 4px;
         word-break: break-all;
       `;
         pageInfo.innerHTML = `
-        <div style="font-weight: bold; margin-bottom: 2px;">
+        <div class="label-primary" style="font-weight: bold; margin-bottom: 2px;">
           ${content.bookmark?.description || content.pageTitle || "No Title"}
         </div>
-        <div>${content.bookmark?.url || content.pageUrl || ""}</div>
+        <div class="text-muted">${content.bookmark?.url || content.pageUrl || ""}</div>
       `;
-        debugLog("Overlay structure created with enhanced styling");
+        debugLog2("Overlay structure created with enhanced styling");
         mainContainer.appendChild(currentTagsContainer);
         mainContainer.appendChild(recentContainer);
-        mainContainer.appendChild(transparencyContainer);
+        if (visibilityControlsContainer) {
+          mainContainer.appendChild(visibilityControlsContainer);
+        }
         mainContainer.appendChild(actionsContainer);
         mainContainer.appendChild(pageInfo);
         this.overlayElement.appendChild(mainContainer);
         this.currentContent = content;
-        debugLog("Overlay structure assembled");
+        debugLog2("Overlay structure assembled");
         this.positionOverlay();
         this.overlayElement.style.display = "block";
         this.isVisible = true;
-        debugLog("Overlay positioned and displayed");
+        debugLog2("Overlay positioned and displayed");
         console.log("\u{1F3A8} [Overlay Debug] Overlay element styles:", {
           display: this.overlayElement.style.display,
           position: this.overlayElement.style.position,
@@ -2143,7 +2493,7 @@
         this.setupOverlayInteractions();
         this.applyTransparencyMode();
         this.addShowAnimation();
-        debugLog("Overlay shown successfully");
+        debugLog2("Overlay shown successfully");
         console.log("\u{1F3A8} [Overlay Debug] Final overlay visibility check:", {
           isVisible: this.isVisible,
           elementExists: !!this.overlayElement,
@@ -2153,7 +2503,7 @@
         });
       } catch (error) {
         this.logger.error("Error showing overlay:", error);
-        debugLog("Error showing overlay", { error });
+        debugLog2("Error showing overlay", { error });
       }
     }
     /**
@@ -2161,11 +2511,11 @@
      */
     hide() {
       if (!this.isVisible || !this.overlayElement) {
-        debugLog("Hide called but overlay not visible");
+        debugLog2("Hide called but overlay not visible");
         return;
       }
       try {
-        debugLog("Hiding overlay");
+        debugLog2("Hiding overlay");
         this.addHideAnimation(() => {
           if (this.overlayElement) {
             this.overlayElement.style.display = "none";
@@ -2173,11 +2523,11 @@
           }
           this.isVisible = false;
           this.currentContent = null;
-          debugLog("Overlay hidden successfully");
+          debugLog2("Overlay hidden successfully");
         });
       } catch (error) {
         this.logger.error("Error hiding overlay:", error);
-        debugLog("Error hiding overlay", { error });
+        debugLog2("Error hiding overlay", { error });
       }
     }
     /**
@@ -2252,7 +2602,7 @@
       this.overlayElement.style.left = "auto";
       this.overlayElement.style.bottom = "auto";
       this.overlayElement.style.zIndex = "9998";
-      debugLog("Overlay positioned in top-right corner");
+      debugLog2("Overlay positioned in top-right corner");
     }
     /**
      * Calculate optimal position for overlay
@@ -2373,7 +2723,7 @@
       this.overlayElement.style.maxHeight = "200px";
       this.overlayElement.style.borderRadius = "0";
       this.overlayElement.style.zIndex = "999999";
-      debugLog("Applied bottom-fixed positioning");
+      debugLog2("Applied bottom-fixed positioning");
     }
     /**
      * 🔺 UI-005: Transparency manager - 🔧 Opacity and positioning control
@@ -2396,7 +2746,7 @@
           this.overlayElement.style.backdropFilter = `blur(${blurAmount}px)`;
           this.overlayElement.style.border = "1px solid rgba(255, 255, 255, 0.2)";
           this.setupTransparencyInteractions();
-          debugLog("Applied nearly-transparent mode with opacity:", normalOpacity);
+          debugLog2("Applied nearly-transparent mode with opacity:", normalOpacity);
           break;
         case "fully-transparent":
           this.overlayElement.classList.add("hoverboard-overlay-invisible");
@@ -2404,13 +2754,13 @@
           this.overlayElement.style.backdropFilter = `blur(${Math.max(1, blurAmount - 1)}px)`;
           this.overlayElement.style.border = "1px solid rgba(255, 255, 255, 0.1)";
           this.setupTransparencyInteractions();
-          debugLog("Applied fully-transparent mode with opacity:", normalOpacity * 0.5);
+          debugLog2("Applied fully-transparent mode with opacity:", normalOpacity * 0.5);
           break;
         default:
           this.overlayElement.style.background = "white";
           this.overlayElement.style.backdropFilter = "none";
           this.overlayElement.style.border = "1px solid #ccc";
-          debugLog("Using default opaque mode");
+          debugLog2("Using default opaque mode");
           break;
       }
       if (this.positionMode === "bottom-fixed") {
@@ -2421,7 +2771,7 @@
       }
     }
     /**
-     * 🔶 UI-005: Adaptive visibility - 🎯 Context-aware transparency
+     * Legacy adaptive visibility - superseded by UI-VIS-001/002
      * Setup adaptive visibility based on mouse proximity
      */
     setupAdaptiveVisibility() {
@@ -2437,10 +2787,10 @@
         }
       };
       this.document.addEventListener("mousemove", this.proximityListener);
-      debugLog("Adaptive visibility enabled");
+      debugLog2("Adaptive visibility enabled");
     }
     /**
-     * 🔺 UI-005: Transparency manager - 🔧 Interaction enhancement setup
+     * Legacy transparency interactions - superseded by UI-VIS-001/002
      * Setup hover and focus interactions for transparent overlays
      */
     setupTransparencyInteractions() {
@@ -2457,7 +2807,7 @@
         } else if (this.transparencyMode === "fully-transparent") {
           this.overlayElement.style.background = `rgba(255, 255, 255, ${hoverOpacity * 0.5})`;
         }
-        debugLog("Overlay hover - increasing visibility to:", hoverOpacity);
+        debugLog2("Overlay hover - increasing visibility to:", hoverOpacity);
       });
       this.overlayElement.addEventListener("mouseleave", () => {
         if (this.transparencyMode === "nearly-transparent") {
@@ -2465,7 +2815,7 @@
         } else if (this.transparencyMode === "fully-transparent") {
           this.overlayElement.style.background = `rgba(255, 255, 255, ${normalOpacity * 0.5})`;
         }
-        debugLog("Overlay leave - resetting visibility to:", normalOpacity);
+        debugLog2("Overlay leave - resetting visibility to:", normalOpacity);
       });
       this.overlayElement.addEventListener("focusin", () => {
         if (this.transparencyMode === "nearly-transparent") {
@@ -2473,7 +2823,7 @@
         } else if (this.transparencyMode === "fully-transparent") {
           this.overlayElement.style.background = `rgba(255, 255, 255, ${focusOpacity * 0.5})`;
         }
-        debugLog("Overlay focus - enhancing visibility for accessibility to:", focusOpacity);
+        debugLog2("Overlay focus - enhancing visibility for accessibility to:", focusOpacity);
       });
       this.overlayElement.addEventListener("focusout", () => {
         if (this.transparencyMode === "nearly-transparent") {
@@ -2481,7 +2831,7 @@
         } else if (this.transparencyMode === "fully-transparent") {
           this.overlayElement.style.background = `rgba(255, 255, 255, ${normalOpacity * 0.5})`;
         }
-        debugLog("Overlay blur - resetting focus visibility to:", normalOpacity);
+        debugLog2("Overlay blur - resetting focus visibility to:", normalOpacity);
       });
     }
     /**
@@ -2591,7 +2941,11 @@
       }
       const style = this.document.createElement("style");
       style.id = styleId;
-      style.textContent = this.getOverlayCSS();
+      let cssContent = this.getOverlayCSS();
+      if (this.visibilityControls) {
+        cssContent += "\n" + this.visibilityControls.getControlsCSS();
+      }
+      style.textContent = cssContent;
       this.document.head.appendChild(style);
     }
     /**
@@ -2599,6 +2953,7 @@
      */
     getOverlayCSS() {
       return `
+      /* Base overlay styling with theme-aware defaults */
       .hoverboard-overlay {
         position: fixed !important;
         z-index: 9998 !important;
@@ -2623,43 +2978,207 @@
         min-height: auto;
         opacity: 0;
         transform: scale(0.9) translateY(-10px);
+        
+        /* Default theme variables and transition timing */
+        --theme-opacity: 0.9;
+        --theme-text-opacity: 1.0;
+        --theme-border-opacity: 0.8;
+        --theme-transition: all 0.2s ease-in-out;
+      }
+
+      /* \u{1F3A8} Theme Variables - Light-on-Dark Theme (Dark Theme) */
+      .hoverboard-theme-light-on-dark {
+        /* Primary text colors */
+        --theme-text-primary: #ffffff;
+        --theme-text-secondary: #e0e0e0;
+        --theme-text-muted: #b0b0b0;
+        
+        /* Special text colors for light backgrounds in dark theme */
+        --theme-text-on-light: #333333;
+        --theme-text-secondary-on-light: #666666;
+        
+        /* Background colors */
+        --theme-background-primary: #2c3e50;
+        --theme-background-secondary: #34495e;
+        --theme-background-tertiary: #455a64;
+        
+        /* Interactive element colors - Dark backgrounds for light-on-dark */
+        --theme-button-bg: #34495e;
+        --theme-button-hover: #455a64;
+        --theme-button-active: #546e7a;
+        
+        /* Input styling - Dark backgrounds for light-on-dark */
+        --theme-input-bg: #34495e;
+        --theme-input-border: #455a64;
+        --theme-input-focus: #74b9ff;
+        
+        /* Status and semantic colors - optimized for dark backgrounds */
+        --theme-success: #2ecc71;
+        --theme-warning: #f1c40f;
+        --theme-danger: #e74c3c;
+        --theme-info: #74b9ff;
+        
+        /* Tag-specific styling - softer colors for dark theme */
+        --theme-tag-bg: rgba(46, 204, 113, 0.15);
+        --theme-tag-text: #7bed9f;
+        --theme-tag-border: rgba(46, 204, 113, 0.3);
+        
+        /* Borders and separators */
+        --theme-border: rgba(255, 255, 255, 0.2);
+        --theme-separator: rgba(255, 255, 255, 0.1);
+        
+        /* RGB values for dynamic transparency - Dark theme uses dark RGB */
+        --theme-bg-rgb: 44, 62, 80;
+      }
+
+      /* \u{1F3A8} Theme Variables - Dark-on-Light Theme (Light Theme) */
+      .hoverboard-theme-dark-on-light {
+        /* Primary text colors */
+        --theme-text-primary: #333333;
+        --theme-text-secondary: #666666;
+        --theme-text-muted: #999999;
+        
+        /* Text colors for consistency (same as primary in light theme) */
+        --theme-text-on-light: #333333;
+        --theme-text-secondary-on-light: #666666;
+        
+        /* Background colors */
+        --theme-background-primary: #ffffff;
+        --theme-background-secondary: #f8f9fa;
+        --theme-background-tertiary: #e9ecef;
+        
+        /* Interactive element colors */
+        --theme-button-bg: rgba(0, 0, 0, 0.05);
+        --theme-button-hover: rgba(0, 0, 0, 0.1);
+        --theme-button-active: rgba(0, 0, 0, 0.15);
+        
+        /* Input styling */
+        --theme-input-bg: rgba(255, 255, 255, 0.8);
+        --theme-input-border: rgba(0, 0, 0, 0.2);
+        --theme-input-focus: rgba(0, 100, 200, 0.3);
+        
+        /* Status and semantic colors */
+        --theme-success: #28a745;
+        --theme-warning: #ffc107;
+        --theme-danger: #dc3545;
+        --theme-info: #17a2b8;
+        
+        /* Tag-specific styling */
+        --theme-tag-bg: rgba(40, 167, 69, 0.1);
+        --theme-tag-text: #28a745;
+        --theme-tag-border: rgba(40, 167, 69, 0.3);
+        
+        /* Borders and separators */
+        --theme-border: rgba(0, 0, 0, 0.1);
+        --theme-separator: rgba(0, 0, 0, 0.05);
+        
+        /* RGB values for dynamic transparency */
+        --theme-bg-rgb: 255, 255, 255;
+      }
+
+      /* \u{1F527} Transparency Mode Integration */
+      .hoverboard-overlay.transparency-mode {
+        background: rgba(var(--theme-bg-rgb), var(--theme-opacity)) !important;
+        backdrop-filter: blur(2px);
+      }
+
+      /* Enhanced contrast for low opacity scenarios */
+      .hoverboard-overlay.transparency-mode[data-opacity-level="low"] {
+        --theme-text-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+      }
+
+      .hoverboard-overlay.transparency-mode[data-opacity-level="medium"] {
+        --theme-text-shadow: 0 0 1px rgba(0, 0, 0, 0.5);
+      }
+
+      .hoverboard-overlay.transparency-mode * {
+        text-shadow: var(--theme-text-shadow, none);
       }
       
       .hoverboard-overlay * {
         box-sizing: border-box;
       }
 
-      /* Desired overlay styling components */
-      .scrollmenu {
+      /* \u{1F3A8} Theme-Aware Element Styling */
+      
+      /* Container elements */
+      .hoverboard-overlay .scrollmenu,
+      .hoverboard-overlay .tags-container {
+        background: var(--theme-background-secondary);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-border);
+        transition: var(--theme-transition);
         overflow-x: auto;
         white-space: nowrap;
       }
 
-      .tiny {
+      .hoverboard-overlay .page-info {
+        background: var(--theme-background-tertiary);
+        color: var(--theme-text-secondary);
+        border-top: 1px solid var(--theme-separator);
+      }
+
+      /* Text elements */
+      .hoverboard-overlay .tiny {
         font-size: 12px;
+        display: inline-block;
+        color: var(--theme-text-secondary);
+      }
+
+      .hoverboard-overlay .label-primary {
+        color: var(--theme-text-primary);
+        font-weight: 600;
+      }
+
+      .hoverboard-overlay .label-secondary {
+        color: var(--theme-text-secondary);
+        font-weight: 500;
+      }
+
+      .hoverboard-overlay .text-muted {
+        color: var(--theme-text-muted);
+      }
+
+      /* Tag elements */
+      .hoverboard-overlay .tag-element,
+      .hoverboard-overlay .iconTagDeleteInactive {
+        background: var(--theme-tag-bg);
+        color: var(--theme-tag-text);
+        border: 1px solid var(--theme-tag-border);
+        transition: var(--theme-transition);
+        padding: 0.2em 0.5em;
+        margin: 2px;
+        border-radius: 3px;
+        cursor: pointer;
         display: inline-block;
       }
 
-      .iconTagDeleteInactive {
-        transition: all 0.2s ease;
+      .hoverboard-overlay .tag-element:hover,
+      .hoverboard-overlay .iconTagDeleteInactive:hover {
+        background: var(--theme-button-hover);
+        transform: translateY(-1px);
+        border-color: var(--theme-input-focus);
       }
 
-      .iconTagDeleteInactive:hover {
-        background: #e0f0e0 !important;
-        color: #60c060 !important;
-      }
-
-      .tag-input {
+      /* Input elements */
+      .hoverboard-overlay .tag-input {
+        background: var(--theme-input-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-input-border);
+        transition: var(--theme-transition);
         outline: none;
-        border: 1px solid #ccc;
         border-radius: 3px;
         padding: 2px 4px;
         font-size: 12px;
       }
 
-      .tag-input:focus {
-        border-color: #90ee90;
-        box-shadow: 0 0 0 2px rgba(144, 238, 144, 0.2);
+      .hoverboard-overlay .tag-input:focus {
+        border-color: var(--theme-input-focus);
+        box-shadow: 0 0 0 2px rgba(var(--theme-input-focus), 0.2);
+      }
+
+      .hoverboard-overlay .tag-input::placeholder {
+        color: var(--theme-text-muted);
       }
       
       .hoverboard-container {
@@ -2692,30 +3211,143 @@
         margin-bottom: 12px;
       }
       
-      .action-button {
+      /* Button elements */
+      .hoverboard-overlay .action-button {
+        background: var(--theme-button-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-border);
+        transition: var(--theme-transition);
         padding: 4px 8px;
-        border: 1px solid #ddd;
         border-radius: 4px;
-        background: white;
         cursor: pointer;
         font-size: 12px;
-        transition: all 0.2s ease;
-        color: #333;
       }
       
-      .action-button:hover {
-        background: #f5f5f5;
-        border-color: #999;
+      .hoverboard-overlay .action-button:hover {
+        background: var(--theme-button-hover);
+        border-color: var(--theme-input-focus);
+      }
+
+      .hoverboard-overlay .action-button.active {
+        background: var(--theme-button-active);
+        border-color: var(--theme-info);
       }
       
-      .action-button.close-button {
-        background: #f44336;
+      /* Close button - uses danger color */
+      .hoverboard-overlay .close-button {
+        background: var(--theme-danger);
         color: white;
-        border-color: #f44336;
+        border: none;
+        transition: var(--theme-transition);
+        padding: 0.2em 0.5em;
+        border-radius: 3px;
+        cursor: pointer;
+        font-weight: 900;
       }
       
-      .action-button.close-button:hover {
-        background: #d32f2f;
+      .hoverboard-overlay .close-button:hover {
+        background: color-mix(in srgb, var(--theme-danger) 80%, black);
+        transform: scale(1.05);
+      }
+
+      /* State-specific button styling */
+      .hoverboard-overlay .action-button.private-active {
+        background: color-mix(in srgb, var(--theme-warning) 20%, var(--theme-button-bg));
+        border-color: var(--theme-warning);
+      }
+
+      .hoverboard-overlay .action-button.read-later-active {
+        background: color-mix(in srgb, var(--theme-info) 20%, var(--theme-button-bg));
+        border-color: var(--theme-info);
+      }
+
+      /* \u{1F3A8} Light-on-Dark Theme Comprehensive Overrides - ALL interactive elements get dark backgrounds */
+      
+      /* Main overlay container - Override inline styles with highest specificity */
+      .hoverboard-overlay.hoverboard-theme-light-on-dark,
+      #hoverboard-overlay.hoverboard-theme-light-on-dark,
+      .hoverboard-theme-light-on-dark.hoverboard-overlay.solid-background {
+        background: var(--theme-background-primary) !important;
+        border: 2px solid var(--theme-border) !important;
+        color: var(--theme-text-primary) !important;
+      }
+
+      /* Main overlay container in transparency mode - Override inline styles */
+      .hoverboard-overlay.hoverboard-theme-light-on-dark.transparency-mode,
+      .hoverboard-overlay.hoverboard-theme-light-on-dark.hoverboard-overlay-transparent,
+      #hoverboard-overlay.hoverboard-theme-light-on-dark.hoverboard-overlay-transparent {
+        background: rgba(var(--theme-bg-rgb), var(--theme-opacity)) !important;
+        backdrop-filter: blur(2px) !important;
+        border: 2px solid var(--theme-border) !important;
+      }
+
+      /* All buttons */
+      .hoverboard-theme-light-on-dark button,
+      .hoverboard-theme-light-on-dark .action-button,
+      .hoverboard-theme-light-on-dark .add-tag-button {
+        color: var(--theme-text-primary) !important;
+        background: var(--theme-button-bg) !important;
+        border: 1px solid var(--theme-input-border) !important;
+      }
+
+      .hoverboard-theme-light-on-dark button:hover,
+      .hoverboard-theme-light-on-dark .action-button:hover,
+      .hoverboard-theme-light-on-dark .add-tag-button:hover {
+        background: var(--theme-button-hover) !important;
+      }
+
+      /* All text inputs */
+      .hoverboard-theme-light-on-dark input,
+      .hoverboard-theme-light-on-dark .tag-input,
+      .hoverboard-theme-light-on-dark .add-tag-input {
+        color: var(--theme-text-primary) !important;
+        background: var(--theme-input-bg) !important;
+        border: 1px solid var(--theme-input-border) !important;
+      }
+
+      .hoverboard-theme-light-on-dark input:focus,
+      .hoverboard-theme-light-on-dark .tag-input:focus,
+      .hoverboard-theme-light-on-dark .add-tag-input:focus {
+        border-color: var(--theme-input-focus) !important;
+        box-shadow: 0 0 0 2px rgba(116, 185, 255, 0.2) !important;
+      }
+
+      .hoverboard-theme-light-on-dark input::placeholder,
+      .hoverboard-theme-light-on-dark .tag-input::placeholder,
+      .hoverboard-theme-light-on-dark .add-tag-input::placeholder {
+        color: var(--theme-text-muted) !important;
+      }
+
+      /* All labels */
+      .hoverboard-theme-light-on-dark .label-primary {
+        color: var(--theme-text-primary) !important;
+        background: var(--theme-background-secondary);
+        padding: 0.2em 0.5em;
+        border-radius: 3px;
+      }
+
+      .hoverboard-theme-light-on-dark .label-secondary {
+        color: var(--theme-text-secondary) !important;
+        background: var(--theme-background-tertiary);
+        padding: 0.2em 0.5em;
+        border-radius: 3px;
+      }
+
+      /* Special button states */
+      .hoverboard-theme-light-on-dark .action-button.private-active {
+        background: color-mix(in srgb, var(--theme-warning) 30%, var(--theme-button-bg)) !important;
+        color: var(--theme-text-primary) !important;
+      }
+
+      .hoverboard-theme-light-on-dark .action-button.read-later-active {
+        background: color-mix(in srgb, var(--theme-info) 30%, var(--theme-button-bg)) !important;
+        color: var(--theme-text-primary) !important;
+      }
+
+      /* Close button override */
+      .hoverboard-theme-light-on-dark .close-button {
+        background: var(--theme-danger) !important;
+        color: white !important;
       }
       
       .add-tag-container {
@@ -2724,34 +3356,43 @@
         align-items: center;
       }
       
-      .add-tag-input {
+      /* Form elements */
+      .hoverboard-overlay .add-tag-input {
+        background: var(--theme-input-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-input-border);
+        transition: var(--theme-transition);
         padding: 6px 8px;
-        border: 1px solid #ddd;
         border-radius: 4px;
         font-size: 13px;
         width: 140px;
         outline: none;
       }
       
-      .add-tag-input:focus {
-        border-color: #2196f3;
-        box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
+      .hoverboard-overlay .add-tag-input:focus {
+        border-color: var(--theme-input-focus);
+        box-shadow: 0 0 0 2px rgba(var(--theme-input-focus), 0.2);
+      }
+
+      .hoverboard-overlay .add-tag-input::placeholder {
+        color: var(--theme-text-muted);
       }
       
-      .add-tag-button {
-        padding: 6px 12px;
-        border: 1px solid #4caf50;
-        border-radius: 4px;
-        background: #4caf50;
+      .hoverboard-overlay .add-tag-button {
+        background: var(--theme-success);
         color: white;
+        border: 1px solid var(--theme-success);
+        transition: var(--theme-transition);
+        padding: 6px 12px;
+        border-radius: 4px;
         cursor: pointer;
         font-size: 13px;
         font-weight: 500;
-        transition: all 0.2s ease;
       }
       
-      .add-tag-button:hover {
-        background: #45a049;
+      .hoverboard-overlay .add-tag-button:hover {
+        background: color-mix(in srgb, var(--theme-success) 80%, black);
+        border-color: color-mix(in srgb, var(--theme-success) 80%, black);
       }
       
       .actions {
@@ -2939,6 +3580,47 @@
       this.lastMousePosition = { x, y };
     }
     /**
+     * Apply visibility settings from VisibilityControls component
+     * UI-VIS-001: Callback for VisibilityControls component
+     * Enhanced with comprehensive theme integration
+     */
+    applyVisibilitySettings(settings) {
+      debugLog2("Applying comprehensive visibility settings", settings);
+      if (this.overlayElement) {
+        this.overlayElement.classList.remove(
+          "hoverboard-theme-light-on-dark",
+          "hoverboard-theme-dark-on-light",
+          "transparency-mode",
+          "solid-background"
+        );
+        this.overlayElement.classList.add(`hoverboard-theme-${settings.textTheme}`);
+        if (settings.transparencyEnabled) {
+          this.overlayElement.classList.add("transparency-mode");
+          const opacity = settings.backgroundOpacity / 100;
+          let opacityLevel = "high";
+          if (opacity < 0.4) opacityLevel = "low";
+          else if (opacity < 0.7) opacityLevel = "medium";
+          this.overlayElement.setAttribute("data-opacity-level", opacityLevel);
+          this.overlayElement.style.setProperty("--theme-opacity", opacity);
+          if (settings.textTheme === "light-on-dark") {
+            this.overlayElement.style.background = `rgba(44, 62, 80, ${opacity})`;
+          } else {
+            this.overlayElement.style.background = `rgba(255, 255, 255, ${opacity})`;
+          }
+          this.overlayElement.style.backdropFilter = "blur(2px)";
+          debugLog2(`Applied transparency: ${settings.textTheme} with ${settings.backgroundOpacity}% opacity (${opacityLevel} level)`);
+        } else {
+          this.overlayElement.classList.add("solid-background");
+          this.overlayElement.removeAttribute("data-opacity-level");
+          this.overlayElement.style.removeProperty("--theme-opacity");
+          this.overlayElement.style.background = "";
+          this.overlayElement.style.backdropFilter = "none";
+          debugLog2(`Applied solid theme: ${settings.textTheme}`);
+        }
+        this.overlayElement.offsetHeight;
+      }
+    }
+    /**
      * Update configuration
      */
     updateConfig(newConfig) {
@@ -2952,7 +3634,7 @@
       if (newConfig.overlayAdaptiveVisibility !== void 0) {
         this.adaptiveVisibility = newConfig.overlayAdaptiveVisibility;
       }
-      debugLog("Configuration updated", {
+      debugLog2("Configuration updated", {
         transparencyMode: this.transparencyMode,
         positionMode: this.positionMode,
         adaptiveVisibility: this.adaptiveVisibility,
@@ -2967,6 +3649,10 @@
       if (this.proximityListener) {
         this.document.removeEventListener("mousemove", this.proximityListener);
         this.proximityListener = null;
+      }
+      if (this.visibilityControls) {
+        this.visibilityControls.destroy();
+        this.visibilityControls = null;
       }
       const styleElement = this.document.getElementById("hoverboard-overlay-styles");
       if (styleElement) {
@@ -3673,7 +4359,7 @@
 
   // src/features/content/content-main.js
   window.HOVERBOARD_DEBUG = true;
-  var debugLog2 = (message, data = null) => {
+  var debugLog3 = (message, data = null) => {
     if (window.HOVERBOARD_DEBUG) {
       if (data) {
         console.log(`[Hoverboard Debug] ${message}`, data);
@@ -3713,30 +4399,30 @@
     }
     async init() {
       try {
-        debugLog2("Initializing content script");
+        debugLog3("Initializing content script");
         await this.domUtils.waitForDOM();
-        debugLog2("DOM ready");
+        debugLog3("DOM ready");
         this.setupMessageListeners();
-        debugLog2("Message listeners set up");
+        debugLog3("Message listeners set up");
         await this.initializeTabId();
-        debugLog2("Tab ID initialized:", this.tabId);
+        debugLog3("Tab ID initialized:", this.tabId);
         await this.loadConfiguration();
-        debugLog2("Options loaded:", this.config);
+        debugLog3("Options loaded:", this.config);
         this.overlayManager.config = { ...this.overlayManager.config, ...this.config };
         this.overlayManager.transparencyMode = this.config.overlayTransparencyMode || "nearly-transparent";
         this.overlayManager.positionMode = this.config.overlayPositionMode || "bottom-fixed";
         this.overlayManager.adaptiveVisibility = this.config.overlayAdaptiveVisibility || true;
-        debugLog2("Overlay manager configured with transparency settings", {
+        debugLog3("Overlay manager configured with transparency settings", {
           transparencyMode: this.overlayManager.transparencyMode,
           positionMode: this.overlayManager.positionMode,
           adaptiveVisibility: this.overlayManager.adaptiveVisibility
         });
         await this.notifyReady();
-        debugLog2("Ready notification sent");
+        debugLog3("Ready notification sent");
         await this.loadCurrentPageData();
-        debugLog2("Current page data loaded:", this.currentBookmark);
+        debugLog3("Current page data loaded:", this.currentBookmark);
         this.isInitialized = true;
-        debugLog2("Content script initialization complete");
+        debugLog3("Content script initialization complete");
       } catch (error) {
         console.error("Hoverboard: Failed to initialize content script:", error);
       }
@@ -3864,8 +4550,8 @@
     }
     async loadCurrentPageData() {
       try {
-        debugLog2("Loading current page data");
-        debugLog2("Request data:", {
+        debugLog3("Loading current page data");
+        debugLog3("Request data:", {
           url: this.pageUrl,
           title: this.pageTitle,
           tabId: this.tabId
@@ -3878,22 +4564,22 @@
             tabId: this.tabId
           }
         });
-        debugLog2("Received response:", response);
+        debugLog3("Received response:", response);
         if (response.blocked) {
-          debugLog2("Site is blocked from processing");
+          debugLog3("Site is blocked from processing");
           return;
         }
         this.currentBookmark = response;
-        debugLog2("Current bookmark set:", this.currentBookmark);
+        debugLog3("Current bookmark set:", this.currentBookmark);
         const options = await this.getOptions();
-        debugLog2("Options for page load:", options);
+        debugLog3("Options for page load:", options);
         if (options.showHoverOnPageLoad) {
-          debugLog2("Showing hover on page load");
+          debugLog3("Showing hover on page load");
           await this.showHoverWithDelay(options);
         }
       } catch (error) {
         console.error("Failed to load current page data:", error);
-        debugLog2("Error loading page data:", error);
+        debugLog3("Error loading page data:", error);
       }
     }
     async showHoverWithDelay(options) {
@@ -3930,17 +4616,17 @@
     }
     async showHover(userTriggered = false) {
       try {
-        debugLog2("Showing hover", { userTriggered });
+        debugLog3("Showing hover", { userTriggered });
         if (userTriggered) {
-          debugLog2("Refreshing bookmark data for user-triggered display");
+          debugLog3("Refreshing bookmark data for user-triggered display");
           await this.loadCurrentPageData();
         }
         if (!this.currentBookmark) {
-          debugLog2("No bookmark data available");
+          debugLog3("No bookmark data available");
           console.warn("No bookmark data available for hover display");
           return;
         }
-        debugLog2("Current bookmark data:", this.currentBookmark);
+        debugLog3("Current bookmark data:", this.currentBookmark);
         console.log("\u{1F50D} [Debug] Bookmark data structure:");
         console.log("\u{1F50D} [Debug] - URL:", this.currentBookmark.url);
         console.log("\u{1F50D} [Debug] - Description:", this.currentBookmark.description);
@@ -3958,10 +4644,10 @@
           tabId: this.tabId,
           userTriggered
         });
-        debugLog2("Overlay display request sent");
+        debugLog3("Overlay display request sent");
       } catch (error) {
         console.error("Failed to show hover:", error);
-        debugLog2("Error showing hover:", error);
+        debugLog3("Error showing hover:", error);
       }
     }
     async refreshData() {
@@ -3982,7 +4668,7 @@
     }
     handleCloseIfToRead(data) {
       if (this.currentBookmark && this.currentBookmark.toread === "yes") {
-        console.log('Closing tab - bookmark is marked "to read"');
+        console.log('Closing tab - bookmark is marked "read later"');
         window.close();
       }
     }

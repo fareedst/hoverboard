@@ -39,6 +39,13 @@ safety_gates:
     command: "npm test"
     override: "NEVER"
     
+  protected_features:
+    rule: "UI-005 Transparent Overlay System is PROTECTED"
+    files: "src/features/content/overlay-manager.js, src/features/content/content-main.js"
+    restriction: "NO modifications without explicit human approval"
+    documentation: "docs/development/ai-development/UI-005-PROTECTION.md"
+    override: "NEVER"
+    
   backward_compatibility: 
     rule: "Preserve all existing functionality"
     validation: "No breaking changes to public APIs"

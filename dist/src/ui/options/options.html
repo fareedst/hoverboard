@@ -56,6 +56,48 @@
         </div>
       </section>
 
+      <!-- Visibility Defaults -->
+      <section class="section">
+        <h2>🎨 Overlay Visibility Defaults</h2>
+        <p class="help-text">Set global default appearance for overlay visibility controls. These can be overridden per-window during use.</p>
+        
+        <div class="visibility-defaults-container">
+          <div class="form-group">
+            <label>Default Theme</label>
+            <button id="default-theme-toggle" class="theme-toggle-btn" title="Switch between light and dark themes">
+              <span class="theme-icon">☀️</span>
+              <span class="theme-text">Light</span>
+            </button>
+            <p class="help-text">Choose between light text on dark background or dark text on light background</p>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="default-transparency-enabled">
+              <span class="checkmark"></span>
+              Enable transparency by default
+            </label>
+          </div>
+
+          <div class="form-group opacity-setting">
+            <label for="default-background-opacity">Default background opacity (%)</label>
+            <div class="slider-container">
+              <input type="range" id="default-background-opacity" min="10" max="100" value="90">
+              <span class="opacity-value">90%</span>
+            </div>
+            <p class="help-text">Background opacity when transparency is enabled (10% = very transparent, 100% = opaque)</p>
+          </div>
+
+          <div class="preview-container">
+            <div class="preview-overlay" id="visibility-preview">
+              <div class="preview-content">
+                <strong>Preview:</strong> This shows how the overlay will appear with your default settings
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Badge Settings -->
       <section class="section">
         <h2>Badge Settings</h2>

@@ -1789,22 +1789,16 @@ var ConfigManager = class {
       // Maximum retry attempts
       pinRetryDelay: 1e3,
       // in ms - delay between retries
-      // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
-      // IMPLEMENTATION DECISION: Nearly transparent as default for minimal interference
-      overlayTransparencyMode: "nearly-transparent",
-      // 'nearly-transparent' | 'fully-transparent' | 'opaque'
-      overlayPositionMode: "default",
-      // 'default' | 'bottom-fixed'
-      overlayOpacityNormal: 0.05,
-      // Normal transparency level (95% transparent)
-      overlayOpacityHover: 0.15,
-      // Hover transparency level (85% transparent)
-      overlayOpacityFocus: 0.25,
-      // Focus transparency level (75% transparent)
-      overlayAdaptiveVisibility: true,
-      // Enable proximity-based visibility enhancement
-      overlayBlurAmount: 2
-      // Backdrop blur in pixels for definition
+      // ⭐ UI-006: Visibility Controls - 🎨 Per-window overlay appearance defaults
+      // IMPLEMENTATION DECISION: Conservative defaults for broad compatibility and readability
+      defaultVisibilityTheme: "light-on-dark",
+      // 'light-on-dark' | 'dark-on-light' - Dark theme default
+      defaultTransparencyEnabled: false,
+      // Conservative default - solid background for readability
+      defaultBackgroundOpacity: 90,
+      // 10-100% - High opacity default for good contrast
+      overlayPositionMode: "default"
+      // 'default' | 'bottom-fixed' - Keep existing position setting
     };
   }
   /**
@@ -1846,7 +1840,11 @@ var ConfigManager = class {
       badgeTextIfQueued: config.badgeTextIfQueued,
       recentPostsCount: config.initRecentPostsCount,
       showHoverOnPageLoad: config.showHoverOnPageLoad,
-      hoverShowTooltips: config.hoverShowTooltips
+      hoverShowTooltips: config.hoverShowTooltips,
+      // UI-006: Visibility defaults for configuration UI
+      defaultVisibilityTheme: config.defaultVisibilityTheme,
+      defaultTransparencyEnabled: config.defaultTransparencyEnabled,
+      defaultBackgroundOpacity: config.defaultBackgroundOpacity
     };
   }
   /**
@@ -1860,6 +1858,41 @@ var ConfigManager = class {
     const current = await this.getConfig();
     const updated = { ...current, ...updates };
     await this.saveSettings(updated);
+  }
+  /**
+   * Get visibility default settings
+   * @returns {Promise<Object>} Visibility defaults object
+   *
+   * UI-006: Visibility defaults retrieval
+   * IMPLEMENTATION DECISION: Dedicated method for overlay visibility configuration
+   */
+  async getVisibilityDefaults() {
+    const config = await this.getConfig();
+    return {
+      textTheme: config.defaultVisibilityTheme,
+      transparencyEnabled: config.defaultTransparencyEnabled,
+      backgroundOpacity: config.defaultBackgroundOpacity
+    };
+  }
+  /**
+   * Update visibility default settings
+   * @param {Object} visibilitySettings - New visibility defaults
+   *
+   * UI-006: Visibility defaults update
+   * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
+   */
+  async updateVisibilityDefaults(visibilitySettings) {
+    const updates = {};
+    if (visibilitySettings.textTheme !== void 0) {
+      updates.defaultVisibilityTheme = visibilitySettings.textTheme;
+    }
+    if (visibilitySettings.transparencyEnabled !== void 0) {
+      updates.defaultTransparencyEnabled = visibilitySettings.transparencyEnabled;
+    }
+    if (visibilitySettings.backgroundOpacity !== void 0) {
+      updates.defaultBackgroundOpacity = visibilitySettings.backgroundOpacity;
+    }
+    await this.updateConfig(updates);
   }
   /**
    * Get authentication token
@@ -2566,6 +2599,12 @@ var OptionsController = class {
     this.elements.showHoverOnLoad = document.getElementById("show-hover-on-load");
     this.elements.hoverShowTooltips = document.getElementById("hover-show-tooltips");
     this.elements.recentPostsCount = document.getElementById("recent-posts-count");
+    this.elements.defaultThemeToggle = document.getElementById("default-theme-toggle");
+    this.elements.defaultTransparencyEnabled = document.getElementById("default-transparency-enabled");
+    this.elements.defaultBackgroundOpacity = document.getElementById("default-background-opacity");
+    this.elements.visibilityPreview = document.getElementById("visibility-preview");
+    this.elements.opacityValue = document.querySelector(".opacity-value");
+    this.elements.opacitySetting = document.querySelector(".opacity-setting");
     this.elements.badgeNotBookmarked = document.getElementById("badge-not-bookmarked");
     this.elements.badgeNoTags = document.getElementById("badge-no-tags");
     this.elements.badgePrivate = document.getElementById("badge-private");
@@ -2582,6 +2621,9 @@ var OptionsController = class {
   }
   attachEventListeners() {
     this.elements.testAuth.addEventListener("click", () => this.testAuthentication());
+    this.elements.defaultThemeToggle.addEventListener("click", () => this.toggleDefaultTheme());
+    this.elements.defaultTransparencyEnabled.addEventListener("change", () => this.updateTransparencyState());
+    this.elements.defaultBackgroundOpacity.addEventListener("input", () => this.updateOpacityDisplay());
     this.elements.saveSettings.addEventListener("click", () => this.saveSettings());
     this.elements.resetSettings.addEventListener("click", () => this.resetSettings());
     this.elements.exportSettings.addEventListener("click", () => this.exportSettings());
@@ -2610,6 +2652,13 @@ var OptionsController = class {
       this.elements.inhibitUrls.value = inhibitUrls.join("\n");
       this.elements.stripUrlHash.checked = config.uxUrlStripHash;
       this.elements.autoCloseTimeout.value = config.uxAutoCloseTimeout;
+      this.elements.defaultTransparencyEnabled.checked = config.defaultTransparencyEnabled;
+      this.elements.defaultBackgroundOpacity.value = config.defaultBackgroundOpacity;
+      this.currentTheme = config.defaultVisibilityTheme;
+      this.updateThemeDisplay();
+      this.updateTransparencyState();
+      this.updateOpacityDisplay();
+      this.updateVisibilityPreview();
       this.showStatus("Settings loaded successfully", "success");
     } catch (error) {
       console.error("Failed to load settings:", error);
@@ -2635,7 +2684,11 @@ var OptionsController = class {
         badgeTextIfPrivate: this.elements.badgePrivate.value,
         badgeTextIfQueued: this.elements.badgeToRead.value,
         uxUrlStripHash: this.elements.stripUrlHash.checked,
-        uxAutoCloseTimeout: parseInt(this.elements.autoCloseTimeout.value)
+        uxAutoCloseTimeout: parseInt(this.elements.autoCloseTimeout.value),
+        // Visibility defaults
+        defaultVisibilityTheme: this.currentTheme,
+        defaultTransparencyEnabled: this.elements.defaultTransparencyEnabled.checked,
+        defaultBackgroundOpacity: parseInt(this.elements.defaultBackgroundOpacity.value)
       };
       await this.configManager.updateConfig(settings);
       const authToken = this.elements.authToken.value.trim();
@@ -2806,6 +2859,50 @@ var OptionsController = class {
       clearTimeout(timeout);
       timeout = setTimeout(later, wait);
     };
+  }
+  // Visibility controls methods
+  toggleDefaultTheme() {
+    this.currentTheme = this.currentTheme === "light-on-dark" ? "dark-on-light" : "light-on-dark";
+    this.updateThemeDisplay();
+    this.updateVisibilityPreview();
+  }
+  updateThemeDisplay() {
+    const themeIcon = this.elements.defaultThemeToggle.querySelector(".theme-icon");
+    const themeText = this.elements.defaultThemeToggle.querySelector(".theme-text");
+    if (themeIcon && themeText) {
+      const isLightOnDark = this.currentTheme === "light-on-dark";
+      themeIcon.textContent = isLightOnDark ? "\u{1F319}" : "\u2600\uFE0F";
+      themeText.textContent = isLightOnDark ? "Dark" : "Light";
+    }
+  }
+  updateTransparencyState() {
+    const isEnabled = this.elements.defaultTransparencyEnabled.checked;
+    this.elements.opacitySetting.classList.toggle("disabled", !isEnabled);
+    this.elements.defaultBackgroundOpacity.disabled = !isEnabled;
+    this.updateVisibilityPreview();
+  }
+  updateOpacityDisplay() {
+    const opacity = this.elements.defaultBackgroundOpacity.value;
+    this.elements.opacityValue.textContent = `${opacity}%`;
+    this.updateVisibilityPreview();
+  }
+  updateVisibilityPreview() {
+    const preview = this.elements.visibilityPreview;
+    const isTransparent = this.elements.defaultTransparencyEnabled.checked;
+    const opacity = parseInt(this.elements.defaultBackgroundOpacity.value) / 100;
+    preview.classList.remove("theme-light-on-dark", "theme-dark-on-light");
+    preview.classList.add(`theme-${this.currentTheme}`);
+    if (isTransparent) {
+      if (this.currentTheme === "light-on-dark") {
+        preview.style.background = `rgba(44, 62, 80, ${opacity})`;
+      } else {
+        preview.style.background = `rgba(255, 255, 255, ${opacity})`;
+      }
+      preview.style.backdropFilter = "blur(2px)";
+    } else {
+      preview.style.background = "";
+      preview.style.backdropFilter = "none";
+    }
   }
 };
 if (document.readyState === "loading") {

@@ -341,7 +341,7 @@ class HoverSystem {
     if (this.config.showReadLaterButton) {
       const readBtn = this.createActionButton(
         pin.toread === 'yes' ? '📖' : '📋',
-        pin.toread === 'yes' ? 'Mark as Read' : 'Mark to Read',
+        pin.toread === 'yes' ? 'Remove from Read Later' : 'Mark for Read Later',
         () => this.handleToggleReadLater(pin)
       )
       section.appendChild(readBtn)

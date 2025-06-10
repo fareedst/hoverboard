@@ -404,7 +404,7 @@ class HoverboardContentScript {
 
   handleCloseIfToRead (data) {
     if (this.currentBookmark && this.currentBookmark.toread === 'yes') {
-      console.log('Closing tab - bookmark is marked "to read"')
+      console.log('Closing tab - bookmark is marked "read later"')
       window.close()
     }
   }

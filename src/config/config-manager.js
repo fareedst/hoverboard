@@ -70,7 +70,7 @@ export class ConfigManager {
 
       // ⭐ UI-006: Visibility Controls - 🎨 Per-window overlay appearance defaults
       // IMPLEMENTATION DECISION: Conservative defaults for broad compatibility and readability
-      defaultVisibilityTheme: 'dark-on-light', // 'light-on-dark' | 'dark-on-light'
+      defaultVisibilityTheme: 'light-on-dark', // 'light-on-dark' | 'dark-on-light' - Dark theme default
       defaultTransparencyEnabled: false, // Conservative default - solid background for readability
       defaultBackgroundOpacity: 90, // 10-100% - High opacity default for good contrast
       overlayPositionMode: 'default' // 'default' | 'bottom-fixed' - Keep existing position setting
@@ -168,7 +168,7 @@ export class ConfigManager {
    */
   async updateVisibilityDefaults (visibilitySettings) {
     const updates = {}
-    
+
     if (visibilitySettings.textTheme !== undefined) {
       updates.defaultVisibilityTheme = visibilitySettings.textTheme
     }
@@ -178,7 +178,7 @@ export class ConfigManager {
     if (visibilitySettings.backgroundOpacity !== undefined) {
       updates.defaultBackgroundOpacity = visibilitySettings.backgroundOpacity
     }
-    
+
     await this.updateConfig(updates)
   }
 

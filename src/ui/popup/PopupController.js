@@ -587,7 +587,7 @@ export class PopupController {
                     cursor: pointer;
                     font-weight: 600;
                   `
-                  readBtn.textContent = isToRead ? '📖 To Read' : '📋 Read'
+                  readBtn.textContent = isToRead ? '📖 Read Later' : '📋 Not marked'
                   readBtn.onclick = async () => {
                     chrome.runtime.sendMessage({
                       type: 'saveBookmark',
