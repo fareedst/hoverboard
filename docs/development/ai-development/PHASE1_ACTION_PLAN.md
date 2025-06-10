@@ -3,7 +3,7 @@
 ## 📋 Overview
 Phase 1 establishes the critical foundation for the modern Hoverboard extension architecture with integrated AI-first development practices modeled after proven systems. This phase includes comprehensive feature tracking, documentation synchronization, and quality enforcement mechanisms.
 
-> **🤖 CRITICAL FOR AI ASSISTANTS**: This plan now integrates a comprehensive AI-first development framework. All work must follow the protocols in [`docs/context/README.md`](docs/context/README.md) and use the feature tracking system in [`docs/context/feature-tracking.md`](docs/context/feature-tracking.md).
+> **🤖 CRITICAL FOR AI ASSISTANTS**: This plan now integrates a comprehensive AI-first development framework. All work must follow the protocols in [`docs/reference/README.md`](../../reference/README.md) and use the feature tracking system in [`docs/reference/feature-tracking.md`](../../reference/feature-tracking.md).
 
 ## 🎯 Phase 1 Objectives
 - ✅ **AI-First Development Framework** - Comprehensive feature tracking and documentation synchronization
@@ -18,10 +18,10 @@ Phase 1 establishes the critical foundation for the modern Hoverboard extension 
 ### **🛡️ Foundation Documentation System**
 Before any code implementation, the following context documentation has been established:
 
-- **📋 [Master Context Index](docs/context/README.md)** - AI assistant navigation hub
-- **🛡️ [Immutable Requirements](docs/context/immutable.md)** - Unchangeable core specifications  
-- **📋 [Feature Tracking Matrix](docs/context/feature-tracking.md)** - Complete feature registry with implementation tokens
-- **⭐ [AI Assistant Protocol](docs/context/ai-assistant-protocol.md)** - Structured change procedures
+- **📋 [Master Context Index](../../reference/README.md)** - AI assistant navigation hub
+- **🛡️ [Immutable Requirements](../../reference/immutable.md)** - Unchangeable core specifications  
+- **📋 [Feature Tracking Matrix](../../reference/feature-tracking.md)** - Complete feature registry with implementation tokens
+- **⭐ [AI Assistant Protocol](../../reference/ai-assistant-protocol.md)** - Structured change procedures
 - **🔍 Documentation-Code Synchronization** - Automatic enforcement of code-documentation alignment
 
 ### **🎯 Feature ID System**
@@ -45,12 +45,12 @@ Every code modification must include implementation tokens:
 ### **STEP 1: Manifest V3 Migration** ⭐ **CRITICAL** 
 **Priority**: Must be first - everything depends on this  
 **Effort**: 4-6 hours  
-**Feature ID**: **MV3-001** (see [Feature Tracking](docs/context/feature-tracking.md#mv3-001))  
+**Feature ID**: **MV3-001** (see [Feature Tracking](../../reference/feature-tracking.md#mv3-001))  
 **Files**: `manifest.json` → `manifest.v3.json` → Update to V3
 
 **🤖 AI Assistant Requirements:**
-- **📋 Follow Protocol**: [NEW FEATURE Protocol](docs/context/ai-assistant-protocol.md#-new-feature-protocol-priority-critical)
-- **🛡️ Immutable Check**: Verify no conflicts with [core requirements](docs/context/immutable.md)
+- **📋 Follow Protocol**: [NEW FEATURE Protocol](../../reference/ai-assistant-protocol.md#-new-feature-protocol-priority-critical)
+- **🛡️ Immutable Check**: Verify no conflicts with [core requirements](../../reference/immutable.md)
 - **🏷️ Implementation Tokens**: Add `// MV3-001: [description]` to all modified code
 
 **Tasks:**
@@ -83,8 +83,8 @@ Every code modification must include implementation tokens:
 **Files**: `src/shared/config.js` → `src-new/config/config-manager.js` (✅ CFG-001 complete)
 
 **🤖 AI Assistant Requirements:**
-- **📋 Follow Protocol**: [MODIFICATION Protocol](docs/context/ai-assistant-protocol.md#-modification-protocol-priority-critical) 
-- **🛡️ Immutable Check**: Preserve [configuration compatibility](docs/context/immutable.md#configuration-system-preserve-compatibility)
+- **📋 Follow Protocol**: [MODIFICATION Protocol](../../reference/ai-assistant-protocol.md#-modification-protocol-priority-critical) 
+- **🛡️ Immutable Check**: Preserve [configuration compatibility](../../reference/immutable.md#configuration-system-preserve-compatibility)
 - **🏷️ Implementation Tokens**: Add `// CFG-002: [description]` for migration features
 
 **Tasks:**

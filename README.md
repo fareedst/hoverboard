@@ -66,11 +66,15 @@ Configure your Pinboard API token in the extension options page:
 
 ## 📚 Documentation
 
-Comprehensive migration and development documentation is available in the `/docs` folder:
+Comprehensive documentation is available in the `/docs` folder:
 
-- [Migration Plan](docs/migration-plan.md)
-- [File Migration Matrix](docs/file-migration-matrix.md)
-- [Development Framework](docs/structured-development-framework.md)
+- [Getting Started Guide](docs/getting-started/README.md) - Setup and installation
+- [Migration Documentation](docs/migration/README.md) - Manifest V3 migration project
+- [Development Guide](docs/development/README.md) - Development workflow and standards
+- [Architecture Overview](docs/architecture/README.md) - System design and components
+- [Troubleshooting Guide](docs/troubleshooting/README.md) - Problem resolution
+
+**📖 [Complete Documentation Index](docs/README.md)** - Full documentation structure and navigation
 
 ## 🤝 Contributing
 

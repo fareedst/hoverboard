@@ -5,9 +5,9 @@
 ## 🎯 Purpose
 This document serves as a master index linking features across all documentation layers to ensure no unplanned changes occur during development.
 
-> **🤖 For AI Assistants**: See [`ai-assistant-compliance.md`](ai-assistant-compliance.md) for mandatory token referencing requirements and compliance guidelines when making code changes.
+> **🤖 For AI Assistants**: See the AI Assistant Compliance documentation for mandatory token referencing requirements and compliance guidelines when making code changes.
 > 
-> **🔧 For Validation Tools**: See [`validation-automation.md`](validation-automation.md) for comprehensive validation scripts, automation tools, and AI assistant compliance requirements.
+> **🔧 For Validation Tools**: See the Validation Automation documentation for comprehensive validation scripts, automation tools, and AI assistant compliance requirements.
 
 > **🚨 CRITICAL NOTE FOR AI ASSISTANTS**: When marking a task as completed in the feature registry table, you MUST also update the detailed subtask blocks to show all subtasks as completed with checkmarks [x]. Failure to update both locations creates documentation inconsistency and violates documentation enforcement requirements.
 
@@ -46,19 +46,19 @@ This document serves as a master index linking features across all documentation
 
 ### 📋 MANDATORY CONTEXT FILE CHECKLIST
 
-See the detailed [Context File Checklist](context-file-checklist.md) for comprehensive guidelines on managing code changes across all documentation layers.
+See the detailed Context File Checklist for comprehensive guidelines on managing code changes across all documentation layers.
 
 ### 🔒 ENFORCEMENT MECHANISMS
 
-See the detailed [Enforcement Mechanisms](enforcement-mechanisms.md) for comprehensive validation rules and manual review requirements.
+See the detailed Enforcement Mechanisms for comprehensive validation rules and manual review requirements.
 
 ### 🚫 CHANGE REJECTION CRITERIA
 
-See the detailed [Change Rejection Criteria](change-rejection-criteria.md) for comprehensive guidelines on common rejection scenarios and how to avoid them.
+See the detailed Change Rejection Criteria for comprehensive guidelines on common rejection scenarios and how to avoid them.
 
 ## 📋 Documentation Standards
 
-For detailed guidelines on how to document and track features, please refer to [Feature Documentation Standards](feature-documentation-standards.md).
+For detailed guidelines on how to document and track features, please refer to the Feature Documentation Standards.
 
 ## 🎯 Current Feature Registry (AI Priority-Ordered)
 

@@ -9,10 +9,10 @@ The Hoverboard extension project has been successfully enhanced with a comprehen
 ### **🛡️ Foundation Documentation System**
 
 #### **Master Context Documentation**
-- **📋 [Master Context Index](docs/context/README.md)** - Complete AI assistant navigation hub
-- **🛡️ [Immutable Requirements](docs/context/immutable.md)** - Unchangeable core specifications established
-- **📋 [Feature Tracking Matrix](docs/context/feature-tracking.md)** - Comprehensive feature registry with implementation tokens
-- **⭐ [AI Assistant Protocol](docs/context/ai-assistant-protocol.md)** - Structured change procedures for all development work
+- **📋 [Master Context Index](../../reference/README.md)** - Complete AI assistant navigation hub
+- **🛡️ [Immutable Requirements](../../reference/immutable.md)** - Unchangeable core specifications established
+- **📋 [Feature Tracking Matrix](../../reference/feature-tracking.md)** - Comprehensive feature registry with implementation tokens
+- **⭐ [AI Assistant Protocol](../../reference/ai-assistant-protocol.md)** - Structured change procedures for all development work
 
 #### **Key Framework Features**
 - **🎯 Standardized Icon System** - Consistent priority and process indicators

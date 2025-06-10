@@ -410,8 +410,8 @@ npm run package
 
 ## 📚 Additional Resources
 
-- [Manifest V3 Migration Guide](./MIGRATION.md)
-- [Development Setup Guide](./DEVELOPMENT.md)
-- [API Documentation](./API.md)
-- [Troubleshooting Guide](./TROUBLESHOOTING.md)
-- [Contributing Guidelines](./CONTRIBUTING.md) 
+- [Migration Documentation](../migration/README.md)
+- [Development Setup Guide](../development/README.md)
+- [Troubleshooting Guide](../troubleshooting/README.md)
+- [Getting Started Guide](../getting-started/README.md)
+- [Reference Documentation](../reference/README.md) 

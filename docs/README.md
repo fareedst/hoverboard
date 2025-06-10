@@ -1,34 +1,60 @@
 # 📚 Hoverboard Extension Migration Documentation
 
 ## 📑 Purpose
-This directory contains comprehensive documentation for migrating the Hoverboard browser extension from its current Manifest V2 architecture to a modern, structured Manifest V3 framework. The migration follows proven development patterns inspired by the BkpDir project's structured approach to software architecture and documentation.
+This directory contains comprehensive documentation for the Hoverboard browser extension, organized into a structured hierarchy for easy navigation and maintenance. The documentation covers everything from getting started to advanced development topics.
 
-## 🗂️ Documentation Index
+## 🗂️ Documentation Structure
 
-### 🚀 **Primary Migration Documents**
+### 🚀 **Getting Started**
+- **[Getting Started Guide](getting-started/README.md)** - Setup, installation, and initial configuration
+- **[Setup Guide](getting-started/setup-guide.md)** - Detailed Pinboard integration setup
 
-| Document | Purpose | Priority | Usage |
-|----------|---------|----------|-------|
-| **[Migration Plan](migration-plan.md)** | Master migration strategy and phase breakdown | ⭐ CRITICAL | Start here - overall project roadmap |
-| **[File Migration Matrix](file-migration-matrix.md)** | Detailed file-by-file migration mapping | 🔺 HIGH | Implementation reference during coding |
-| **[Structured Development Framework](structured-development-framework.md)** | Development standards and process enforcement | 🔺 HIGH | Development guidelines and quality standards |
+### 🏗️ **Architecture & Design**
+- **[Architecture Overview](architecture/README.md)** - System design and technical components
+- **[Architecture Details](architecture/overview.md)** - Complete technical architecture
+- **[Popup Architecture](architecture/popup-architecture.md)** - UI component design
 
-### 📊 **Quick Navigation by Role**
+### 🔄 **Migration Documentation**
+- **[Migration Overview](migration/README.md)** - Manifest V3 migration project
+- **[Migration Plan](migration/migration-plan.md)** - Master migration strategy
+- **[File Migration Matrix](migration/file-migration-matrix.md)** - Detailed implementation mapping
+- **[Development Framework](migration/structured-development-framework.md)** - Standards and processes
+
+### 👨‍💻 **Development**
+- **[Development Guide](development/README.md)** - Complete development workflow
+- **[AI-First Development](development/ai-development/README.md)** - AI-assisted development approach
+- **[Testing Documentation](development/testing/README.md)** - Testing procedures and results
+
+### 🔧 **Troubleshooting**
+- **[Troubleshooting Guide](troubleshooting/README.md)** - Problem resolution and fixes
+
+### 📚 **Reference Materials**
+- **[Reference Documentation](reference/README.md)** - Context, requirements, and specifications
+
+### 📝 **Development Sessions**
+- **[Session Logs](development-sessions/README.md)** - Development session documentation and AI interactions
+
+## 📊 **Quick Navigation by Role**
+
+#### **🚀 For New Users**
+- **Start with**: [Getting Started](getting-started/README.md) - Setup and installation
+- **Need help?**: [Troubleshooting](troubleshooting/README.md) - Common issues and solutions
 
 #### **🏗️ For Project Managers**
-- **Start with**: [Migration Plan](migration-plan.md) - Overview, phases, timeline
-- **Track progress**: File Migration Matrix - Detailed task breakdown
-- **Monitor quality**: Structured Development Framework - Standards and metrics
+- **Project overview**: [Migration Overview](migration/README.md) - Migration project status
+- **Track progress**: [Migration Progress](migration/progress/) - Detailed progress reports
+- **Monitor quality**: [Development Framework](migration/structured-development-framework.md) - Standards and metrics
 
 #### **👨‍💻 For Developers**
-- **Implementation guide**: [File Migration Matrix](file-migration-matrix.md) - What to migrate and how
-- **Coding standards**: [Structured Development Framework](structured-development-framework.md) - Development patterns
-- **Architecture reference**: Migration Plan - Target architecture overview
+- **Start here**: [Development Guide](development/README.md) - Complete development workflow
+- **Architecture**: [Architecture Overview](architecture/README.md) - System design understanding
+- **Implementation**: [Migration Documentation](migration/README.md) - Migration-specific development
+- **AI Development**: [AI-First Development](development/ai-development/README.md) - AI-assisted development
 
 #### **🧪 For QA Engineers**
-- **Testing strategy**: Structured Development Framework - Testing requirements
-- **Quality metrics**: File Migration Matrix - Success criteria
-- **Validation process**: Migration Plan - Phase validation checklists
+- **Testing**: [Testing Documentation](development/testing/README.md) - Test procedures and results
+- **Quality standards**: [Development Framework](migration/structured-development-framework.md) - Testing requirements
+- **Issue resolution**: [Troubleshooting](troubleshooting/README.md) - Known issues and fixes
 
 ## ⭐ CRITICAL MIGRATION OVERVIEW
 
@@ -155,7 +181,7 @@ BEFORE (Legacy)                    AFTER (Modern)
 
 ---
 
-**🚀 Ready to Begin?** Start with the [Migration Plan](migration-plan.md) to understand the overall strategy, then dive into the [File Migration Matrix](file-migration-matrix.md) for implementation details.
+**🚀 Ready to Begin?** Start with the [Getting Started Guide](getting-started/README.md) for setup, or jump to the [Migration Overview](migration/README.md) for migration-specific work.
 
 **📅 Last Updated**: January 2025
 **📝 Version**: 1.0.0

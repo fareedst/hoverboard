@@ -54,35 +54,35 @@ Before making ANY code changes, AI assistants MUST:
 
 1. **🛡️ [Immutable Requirements Check](immutable.md)** - Verify no conflicts with unchangeable specifications
 2. **📋 [Feature Tracking Registry](feature-tracking.md)** - Find or create Feature ID for your task
-3. **🔍 [AI Assistant Compliance](ai-assistant-compliance.md)** - Review token requirements and response format
+3. **🔍 AI Assistant Compliance** - Review token requirements and response format
 4. **⭐ [AI Assistant Protocol](ai-assistant-protocol.md)** - Follow the appropriate change protocol
 
 ### ⚡ PHASE 2: CORE DOCUMENTATION [Execute SECOND - HIGH PRIORITY]
 
 For understanding and implementing changes:
 
-5. **🏗️ [Architecture](architecture.md)** - System design and technical components
-6. **📝 [Requirements](requirements.md)** - Implementation requirements and constraints  
-7. **🧪 [Testing](testing.md)** - Test coverage requirements and validation standards
-8. **📖 [Specification](specification.md)** - User-facing features and behaviors
+5. **🏗️ Architecture** - System design and technical components (see [Architecture Overview](../architecture/README.md))
+6. **📝 Requirements** - Implementation requirements and constraints  
+7. **🧪 Testing** - Test coverage requirements and validation standards (see [Testing Documentation](../development/testing/README.md))
+8. **📖 Specification** - User-facing features and behaviors
 
 ### 🔄 PHASE 3: CONDITIONAL REFERENCES [Execute THIRD - MEDIUM PRIORITY]
 
 Reference only if your changes affect these areas:
 
-9. **⚙️ [Implementation Decisions](implementation-decisions.md)** - IF making architectural decisions
-10. **🔧 [Validation Automation](validation-automation.md)** - IF adding validation processes
-11. **🔄 [Migration Status](migration-status.md)** - For tracking migration progress
-12. **📈 [Implementation Status](implementation-status.md)** - For progress tracking
+9. **⚙️ Implementation Decisions** - IF making architectural decisions
+10. **🔧 Validation Automation** - IF adding validation processes
+11. **🔄 Migration Status** - For tracking migration progress (see [Migration Progress](../migration/progress/))
+12. **📈 Implementation Status** - For progress tracking
 
 ### 🏁 PHASE 4: PROCESS REFERENCES [Execute LAST - LOW PRIORITY]
 
 Reference only for process understanding (NEVER modify):
 
-13. **📋 [Context File Checklist](context-file-checklist.md)** - File update guidelines
-14. **🔒 [Enforcement Mechanisms](enforcement-mechanisms.md)** - Validation rules
-15. **🚫 [Change Rejection Criteria](change-rejection-criteria.md)** - Common rejection scenarios
-16. **📚 [Feature Documentation Standards](feature-documentation-standards.md)** - Documentation guidelines
+13. **📋 Context File Checklist** - File update guidelines
+14. **🔒 Enforcement Mechanisms** - Validation rules
+15. **🚫 Change Rejection Criteria** - Common rejection scenarios
+16. **📚 Feature Documentation Standards** - Documentation guidelines
 
 ## ⭐ AI Assistant Priority Matrix
 
@@ -124,14 +124,14 @@ When you know your change type, jump directly to the protocol:
 
 | Change Type | Icon | Protocol Section | Priority | Documentation Impact |
 |-------------|------|------------------|----------|---------------------|
-| **New Feature** | 🆕 | [NEW FEATURE Protocol](ai-assistant-protocol.md#-new-feature-protocol-priority-critical) | ⭐ CRITICAL | Full documentation cascade |
-| **Modify Existing** | 🔧 | [MODIFICATION Protocol](ai-assistant-protocol.md#-modification-protocol-priority-critical) | ⭐ CRITICAL | Impact analysis required |
-| **Bug Fix** | 🐛 | [BUG FIX Protocol](ai-assistant-protocol.md#-bug-fix-protocol-priority-medium) | 🔶 MEDIUM | Minimal documentation |
-| **Config Change** | ⚙️ | [CONFIG CHANGE Protocol](ai-assistant-protocol.md#-config-change-protocol-priority-medium) | 🔶 MEDIUM | Configuration focus |
-| **API/Interface** | 🔌 | [API CHANGE Protocol](ai-assistant-protocol.md#-api-change-protocol-priority-critical) | ⭐ CRITICAL | Interface documentation |
-| **Test Only** | 🧪 | [TEST ADDITION Protocol](ai-assistant-protocol.md#-test-addition-protocol-priority-low) | 🔻 LOW | Testing documentation |
-| **Performance** | 🚀 | [PERFORMANCE Protocol](ai-assistant-protocol.md#-performance-protocol-priority-medium) | 🔶 MEDIUM | Architecture documentation |
-| **Refactoring** | 🔄 | [REFACTORING Protocol](ai-assistant-protocol.md#-refactoring-protocol-priority-low) | 🔻 LOW | Structural documentation |
+| **New Feature** | 🆕 | NEW FEATURE Protocol (see [AI Assistant Protocol](ai-assistant-protocol.md)) | ⭐ CRITICAL | Full documentation cascade |
+| **Modify Existing** | 🔧 | MODIFICATION Protocol (see [AI Assistant Protocol](ai-assistant-protocol.md)) | ⭐ CRITICAL | Impact analysis required |
+| **Bug Fix** | 🐛 | BUG FIX Protocol (see [AI Assistant Protocol](ai-assistant-protocol.md)) | 🔶 MEDIUM | Minimal documentation |
+| **Config Change** | ⚙️ | CONFIG CHANGE Protocol (see [AI Assistant Protocol](ai-assistant-protocol.md)) | 🔶 MEDIUM | Configuration focus |
+| **API/Interface** | 🔌 | API CHANGE Protocol (see [AI Assistant Protocol](ai-assistant-protocol.md)) | ⭐ CRITICAL | Interface documentation |
+| **Test Only** | 🧪 | TEST ADDITION Protocol (see [AI Assistant Protocol](ai-assistant-protocol.md)) | 🔻 LOW | Testing documentation |
+| **Performance** | 🚀 | PERFORMANCE Protocol (see [AI Assistant Protocol](ai-assistant-protocol.md)) | 🔶 MEDIUM | Architecture documentation |
+| **Refactoring** | 🔄 | REFACTORING Protocol (see [AI Assistant Protocol](ai-assistant-protocol.md)) | 🔻 LOW | Structural documentation |
 
 ## 🔍 Token Search Quick Commands
 
