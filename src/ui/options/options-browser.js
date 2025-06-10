@@ -1,10 +1,10 @@
 /**
- * Options Page Controller - Modern settings management
- * Handles user configuration with validation and persistence
+ * Options Page Controller - Browser-compatible version for testing
+ * Uses mock services to avoid Node.js dependencies
  */
 
 import { ConfigManager } from '../../config/config-manager.js'
-import { PinboardService } from '../../features/pinboard/pinboard-service.js'
+import { PinboardService } from '../../features/pinboard/pinboard-service-browser.js'
 
 class OptionsController {
   constructor () {
@@ -229,18 +229,16 @@ class OptionsController {
       await this.configManager.setAuthToken(authToken)
 
       // Test the connection
-      console.log('Testing Pinboard connection...')
       const isValid = await this.pinboardService.testConnection()
-      console.log('Connection test result:', isValid)
 
       if (isValid) {
-        this.showStatus('Authentication successful! ✓', 'success')
+        this.showStatus('✅ Connection successful! Token is valid.', 'success')
       } else {
-        this.showStatus('Authentication failed. Please check your token.', 'error')
+        this.showStatus('❌ Connection failed. Please check your token.', 'error')
       }
     } catch (error) {
       console.error('Authentication test failed:', error)
-      this.showStatus('Authentication test failed: ' + error.message, 'error')
+      this.showStatus('❌ Connection test failed: ' + error.message, 'error')
     } finally {
       this.setLoading(false)
     }
@@ -248,24 +246,24 @@ class OptionsController {
 
   async exportSettings () {
     try {
+      this.setLoading(true)
+      
       const config = await this.configManager.exportConfig()
-
-      const blob = new Blob([JSON.stringify(config, null, 2)], {
-        type: 'application/json'
-      })
-
+      
+      const blob = new Blob([config], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = `hoverboard-settings-${new Date().toISOString().split('T')[0]}.json`
       a.click()
-
+      
       URL.revokeObjectURL(url)
-
       this.showStatus('Settings exported successfully', 'success')
     } catch (error) {
       console.error('Failed to export settings:', error)
       this.showStatus('Failed to export settings: ' + error.message, 'error')
+    } finally {
+      this.setLoading(false)
     }
   }
 
@@ -275,46 +273,35 @@ class OptionsController {
 
     try {
       this.setLoading(true)
-
+      
       const text = await file.text()
-      const config = JSON.parse(text)
-
-      await this.configManager.importConfig(config)
+      await this.configManager.importConfig(text)
       await this.loadSettings()
-
+      
       this.showStatus('Settings imported successfully', 'success')
     } catch (error) {
       console.error('Failed to import settings:', error)
       this.showStatus('Failed to import settings: ' + error.message, 'error')
     } finally {
       this.setLoading(false)
-      // Clear the file input
-      event.target.value = ''
+      event.target.value = '' // Reset file input
     }
   }
 
   async autoSave () {
-    if (this.isLoading) return
-
-    try {
-      await this.saveSettings()
-    } catch (error) {
-      // Silent fail for auto-save
-      console.warn('Auto-save failed:', error)
-    }
+    // Auto-save implementation here if needed
+    console.log('Auto-save triggered (not implemented in browser version)')
   }
 
   validateInputs () {
-    // Validate recent posts count
-    const recentPostsCount = parseInt(this.elements.recentPostsCount.value)
-    if (isNaN(recentPostsCount) || recentPostsCount < 5 || recentPostsCount > 50) {
+    const recentCount = parseInt(this.elements.recentPostsCount.value)
+    if (isNaN(recentCount) || recentCount < 5 || recentCount > 50) {
       return {
         valid: false,
         message: 'Recent posts count must be between 5 and 50'
       }
     }
 
-    // Validate auto-close timeout
     const autoCloseTimeout = parseInt(this.elements.autoCloseTimeout.value)
     if (isNaN(autoCloseTimeout) || autoCloseTimeout < 0) {
       return {
@@ -323,20 +310,11 @@ class OptionsController {
       }
     }
 
-    // Validate badge text lengths
-    const badgeFields = [
-      this.elements.badgeNotBookmarked,
-      this.elements.badgeNoTags,
-      this.elements.badgePrivate,
-      this.elements.badgeToRead
-    ]
-
-    for (const field of badgeFields) {
-      if (field.value.length > 4) {
-        return {
-          valid: false,
-          message: 'Badge text must be 4 characters or less'
-        }
+    const opacity = parseInt(this.elements.defaultBackgroundOpacity.value)
+    if (isNaN(opacity) || opacity < 10 || opacity > 100) {
+      return {
+        valid: false,
+        message: 'Background opacity must be between 10% and 100%'
       }
     }
 
@@ -345,38 +323,36 @@ class OptionsController {
 
   setLoading (loading) {
     this.isLoading = loading
-
+    
+    // Update UI loading state
     const buttons = document.querySelectorAll('.btn')
     const inputs = document.querySelectorAll('input, textarea')
-
+    
     buttons.forEach(btn => {
       btn.disabled = loading
       btn.classList.toggle('loading', loading)
     })
-
+    
     inputs.forEach(input => {
       input.disabled = loading
     })
+    
+    document.body.classList.toggle('loading', loading)
   }
 
   showStatus (message, type = 'info') {
-    this.elements.statusMessage.textContent = message
-    this.elements.statusMessage.className = `status ${type}`
+    const statusEl = this.elements.statusMessage
+    if (!statusEl) return
 
-    // Auto-hide success messages after 5 seconds
-    if (type === 'success') {
+    statusEl.textContent = message
+    statusEl.className = `status ${type}`
+    statusEl.style.display = 'block'
+
+    // Auto-hide after 5 seconds for success/info messages
+    if (type === 'success' || type === 'info') {
       setTimeout(() => {
-        this.elements.statusMessage.textContent = ''
-        this.elements.statusMessage.className = 'status'
+        statusEl.style.display = 'none'
       }, 5000)
-    }
-
-    // Auto-hide info messages after 3 seconds
-    if (type === 'info') {
-      setTimeout(() => {
-        this.elements.statusMessage.textContent = ''
-        this.elements.statusMessage.className = 'status'
-      }, 3000)
     }
   }
 
@@ -447,13 +423,7 @@ class OptionsController {
   }
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    // eslint-disable-next-line no-new
-    new OptionsController()
-  })
-} else {
-  // eslint-disable-next-line no-new
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', () => {
   new OptionsController()
-}
+}) 

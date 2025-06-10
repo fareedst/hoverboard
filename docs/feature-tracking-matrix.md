@@ -180,40 +180,36 @@
 
 ---
 
-### **🔺 UI-005: Transparent Overlay System**
-- **Priority**: 🔺 HIGH | **Status**: ✅ Completed | **Owner**: AI Development Team
-- **Files**: `src/features/content/overlay-styles.css`, `src/features/content/overlay-manager.js`
-- **Implementation Token**: `// 🔺 UI-005: Transparent overlay - 🎨 Bottom-fixed transparency system`
+### **✅ UI-VIS-001/002: Overlay Visibility Controls - SUPERSEDED UI-005**
+- **Priority**: 🔺 HIGH | **Status**: ✅ Implemented | **Owner**: AI Development Team
+- **Files**: `src/ui/components/VisibilityControls.js`, `src/config/config-manager.js`, `src/ui/options/options.js`
+- **Implementation Token**: `// 🔺 UI-VIS-001: Visibility controls`, `// 🔺 UI-VIS-002: Global visibility defaults`
 
-**📑 Purpose**: Implement nearly transparent or fully transparent overlay that hovers at the bottom of tab windows with full width positioning.
+**📑 Purpose**: User-controlled overlay visibility with theme toggle, transparency controls, and opacity slider. Supersedes planned UI-005 fixed transparency with superior user-controlled approach.
 
 **🔗 Dependencies**:
-- **Depends On**: UI-004 (Overlay System), UI-002 (Content Script System), EXT-002 (Message Handling)
-- **Used By**: UI-001 (Popup Interface), API-001 (Pinboard Integration)
-- **Affects**: User experience on all web pages, overlay visual hierarchy, content accessibility
+- **Depends On**: ConfigManager (configuration backend), Options page (UI)
+- **Used By**: Per-window overlay customization, Global default settings
+- **Affects**: All overlay interactions, user experience customization
 
-**📋 Subtasks**:
-- [x] **CSS Architecture Enhancement** - Update overlay-styles.css with transparency classes
-- [x] **Configuration System** - Add transparency configuration options
-- [x] **Base Manager Enhancement** - Enhance OverlayManager with transparency methods
-- [x] **Transparent Rendering** - Implement near-transparent and fully transparent modes
-- [x] **Bottom Positioning** - Full-width bottom positioning implementation
-- [x] **Interaction Enhancement** - Hover and focus visibility improvements
-- [x] **Content Protection** - Click-through and content interference prevention
-- [x] **Adaptive Visibility** - Context-aware transparency adjustments
-- [x] **Accessibility Features** - High contrast mode and keyboard navigation
-- [x] **Performance Optimization** - Minimize rendering impact
-- [x] **Cross-browser Testing** - Ensure compatibility across supported browsers
-- [x] **Feature Integration** - Integration with Show Hover and content script system
+**📋 Delivered Features**:
+- [x] **VisibilityControls Component** - Full-featured UI component with theme toggle and transparency controls
+- [x] **Global Configuration System** - ConfigManager backend with visibility defaults API
+- [x] **Options Page Integration** - Complete options page with real-time preview
+- [x] **Per-Window Settings** - Non-persistent per-window customization
+- [x] **Theme Toggle System** - Light-on-dark / dark-on-light theme switching
+- [x] **Transparency Controls** - User-controlled 10-100% opacity slider
+- [x] **Real-time Preview** - Immediate visual feedback of all changes
+- [x] **Cross-browser Support** - Tested browser compatibility layer
 
 **🧪 Testing**:
-- `tests/visual/transparent-overlay.test.js` - Visual and transparency testing
-- `tests/accessibility/overlay-a11y.test.js` - Accessibility compliance testing
-- `tests/performance/overlay-performance.test.js` - Performance impact testing
+- `test-visibility-controls.html` - Component testing environment
+- `options-browser-test.html` - Options page functionality testing
+- `test-config-visibility.html` - ConfigManager backend testing
 
 **📖 Documentation**:
-- **Specification**: `docs/OVERLAY_TRANSPARENCY_SPECIFICATION.md`
-- **Implementation**: TBD - Implementation files to be created
+- **Implementation**: Complete task tracking in `docs/context/feature-tracking.md` (UI-VIS-001/002)
+- **Status**: ✅ Phase 1 Complete, Ready for Phase 2 (WindowStateManager integration)
 
 ---
 

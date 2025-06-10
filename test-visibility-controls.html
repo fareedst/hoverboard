@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visibility Controls Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .test-header {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .test-overlay {
+            position: relative;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-height: 300px;
+        }
+        
+        .overlay-content {
+            padding: 10px;
+        }
+        
+        .current-settings {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+        
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        
+        .setting-item {
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .setting-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+        
+        .setting-value {
+            color: #007bff;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .demo-text {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        .demo-tags {
+            margin: 10px 0;
+        }
+        
+        .demo-tag {
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 12px;
+        }
+        
+        /* Theme classes for testing */
+        .hoverboard-theme-light-on-dark {
+            color: #ecf0f1 !important;
+        }
+        
+        .hoverboard-theme-light-on-dark.solid-background {
+            background: #2c3e50 !important;
+        }
+        
+        .hoverboard-theme-dark-on-light.solid-background {
+            background: white !important;
+        }
+        
+        .hoverboard-theme-light-on-dark .demo-text {
+            color: #ecf0f1;
+        }
+        
+        .hoverboard-theme-light-on-dark .demo-tag {
+            background: #34495e;
+            color: #3498db;
+        }
+        
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .instructions h3 {
+            margin-top: 0;
+            color: #856404;
+        }
+        
+        .instructions ul {
+            margin-bottom: 0;
+        }
+        
+        .instructions li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🎛️ Visibility Controls Component Test</h1>
+            <p>This page tests the VisibilityControls component functionality in a simulated overlay environment.</p>
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Test Instructions:</h3>
+            <ul>
+                <li><strong>Theme Toggle:</strong> Click the sun/moon button to switch between light and dark themes</li>
+                <li><strong>Transparency Toggle:</strong> Check/uncheck to enable/disable transparency mode</li>
+                <li><strong>Opacity Slider:</strong> Adjust background opacity (only active when transparency is enabled)</li>
+                <li><strong>Settings Display:</strong> Watch the current settings update in real-time below</li>
+            </ul>
+        </div>
+        
+        <div class="test-overlay" id="testOverlay">
+            <!-- Visibility controls will be injected here -->
+            
+            <div class="overlay-content">
+                <h3>📌 Sample Overlay Content</h3>
+                <div class="demo-text">
+                    This is a sample overlay with some content to test the visibility controls.
+                    You can see how the theme changes affect the text and background colors.
+                </div>
+                
+                <div class="demo-tags">
+                    <span class="demo-tag">javascript</span>
+                    <span class="demo-tag">web-development</span>
+                    <span class="demo-tag">ui-components</span>
+                </div>
+                
+                <div class="demo-text">
+                    Adjust the controls in the top-right corner to see how they affect the overlay appearance.
+                    The transparency and opacity settings will change the background transparency.
+                </div>
+            </div>
+        </div>
+        
+        <div class="current-settings">
+            <h3>📊 Current Settings</h3>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <div class="setting-label">Text Theme</div>
+                    <div class="setting-value" id="currentTheme">dark-on-light</div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">Transparency</div>
+                    <div class="setting-value" id="currentTransparency">false</div>
+                </div>
+                <div class="setting-item">
+                    <div class="setting-label">Background Opacity</div>
+                    <div class="setting-value" id="currentOpacity">90%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Enable debug mode
+        window.HOVERBOARD_DEBUG = true;
+        
+        // Mock Logger class for browser testing
+        class Logger {
+            constructor(context = 'Test') {
+                this.context = context;
+                this.logLevel = 'debug'; // Always debug in tests
+            }
+            
+            getLogLevel() {
+                return 'debug';
+            }
+            
+            shouldLog(level) {
+                const levels = { debug: 0, info: 1, warn: 2, error: 3 };
+                return levels[level] >= levels[this.logLevel];
+            }
+            
+            formatMessage(level, message, ...args) {
+                const timestamp = new Date().toISOString();
+                const prefix = `[${timestamp}] [${this.context}] [${level.toUpperCase()}]`;
+                return [prefix, message, ...args];
+            }
+            
+            debug(message, ...args) {
+                if (this.shouldLog('debug')) {
+                    console.log(...this.formatMessage('debug', message, ...args));
+                }
+            }
+            
+            info(message, ...args) {
+                if (this.shouldLog('info')) {
+                    console.info(...this.formatMessage('info', message, ...args));
+                }
+            }
+            
+            warn(message, ...args) {
+                if (this.shouldLog('warn')) {
+                    console.warn(...this.formatMessage('warn', message, ...args));
+                }
+            }
+            
+            error(message, ...args) {
+                if (this.shouldLog('error')) {
+                    console.error(...this.formatMessage('error', message, ...args));
+                }
+            }
+            
+            log(context, ...args) {
+                this.debug(`[${context}]`, ...args);
+            }
+        }
+        
+        // Create browser-compatible logger and export it
+        window.Logger = Logger;
+        window.logger = new Logger();
+        window.createLogger = (context) => new Logger(context);
+    </script>
+    
+    <script type="module">
+        // Import the VisibilityControls component
+        import { VisibilityControls } from './src/ui/components/VisibilityControls.js';
+        
+        // Initialize the component
+        const testOverlay = document.getElementById('testOverlay');
+        
+        // Settings change handler
+        function onSettingsChange(settings) {
+            console.log('Settings changed:', settings);
+            
+            // Update display values
+            document.getElementById('currentTheme').textContent = settings.textTheme;
+            document.getElementById('currentTransparency').textContent = settings.transparencyEnabled;
+            document.getElementById('currentOpacity').textContent = `${settings.backgroundOpacity}%`;
+            
+            // Apply theme class to overlay
+            testOverlay.classList.remove('hoverboard-theme-light-on-dark', 'hoverboard-theme-dark-on-light', 'solid-background');
+            testOverlay.classList.add(`hoverboard-theme-${settings.textTheme}`);
+            
+            // Apply transparency and opacity
+            if (settings.transparencyEnabled) {
+                // Remove solid background class to allow transparent styling
+                testOverlay.classList.remove('solid-background');
+                const opacity = settings.backgroundOpacity / 100;
+                if (settings.textTheme === 'light-on-dark') {
+                    testOverlay.style.background = `rgba(44, 62, 80, ${opacity})`;
+                } else {
+                    testOverlay.style.background = `rgba(255, 255, 255, ${opacity})`;
+                }
+                testOverlay.style.backdropFilter = 'blur(2px)';
+                console.log(`🎨 Applied transparency: ${settings.textTheme} with ${settings.backgroundOpacity}% opacity`);
+            } else {
+                // Use CSS class for solid backgrounds to avoid conflicts
+                testOverlay.classList.add('solid-background');
+                testOverlay.style.background = '';  // Clear inline style
+                testOverlay.style.backdropFilter = 'none';
+                console.log(`🎨 Applied solid theme: ${settings.textTheme}`);
+            }
+        }
+        
+        // Create controls instance
+        const visibilityControls = new VisibilityControls(document, onSettingsChange);
+        
+        // Create and add controls to overlay
+        const controlsElement = visibilityControls.createControls();
+        testOverlay.appendChild(controlsElement);
+        
+        // Inject CSS styles
+        const styleElement = document.createElement('style');
+        styleElement.textContent = visibilityControls.getControlsCSS();
+        document.head.appendChild(styleElement);
+        
+        // Initialize with default settings
+        onSettingsChange(visibilityControls.getSettings());
+        
+        console.log('✅ VisibilityControls test initialized successfully!');
+        console.log('🎛️ Use the controls in the top-right corner of the overlay to test functionality');
+    </script>
+</body>
+</html> 

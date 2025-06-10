@@ -102,6 +102,14 @@ For detailed guidelines on how to document and track features, please refer to [
 | PIN-003 | Bookmark operations | CRUD operations | Bookmark service | TestBookmarkOps | 📋 Planned | `// PIN-003: Bookmark ops` | 🔺 HIGH |
 | PIN-004 | Tag management | Tag operations | Tag service | TestTagManagement | 📋 Planned | `// PIN-004: Tag management` | 🔺 HIGH |
 
+### 🎨 Overlay Visibility Controls [PRIORITY: HIGH]
+| Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
+|------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
+| UI-VIS-001 | Visibility controls component | Per-window overlay controls | VisibilityControls class | TestVisibilityControls | ✅ Implemented | `// UI-VIS-001: Visibility controls` | 🔺 HIGH |
+| UI-VIS-002 | Global visibility defaults | Options page integration | ConfigManager integration | TestVisibilityDefaults | ✅ Implemented | `// UI-VIS-002: Global defaults` | 🔺 HIGH |
+| UI-VIS-003 | Window state management | Per-window state system | WindowStateManager | TestWindowState | 📋 Planned | `// UI-VIS-003: Window state` | 🔺 HIGH |
+| UI-VIS-004 | Production integration | OverlayManager integration | Integration layer | TestProduction | 📋 Planned | `// UI-VIS-004: Production ready` | 🔺 HIGH |
+
 ### 🎨 User Interface [PRIORITY: MEDIUM]
 | Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
 |------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
@@ -238,18 +246,212 @@ For detailed guidelines on how to document and track features, please refer to [
 - **Authentication**: Token management system ✅
 - **Settings Migration**: Support for legacy settings ✅
 
-## 🚨 Current Phase 1 Priorities (EXECUTE IN ORDER)
+### **✅ UI-VIS-001: Visibility Controls Component - ✅ Implemented**
 
-### **Week 1-2: Foundation (CRITICAL - DO FIRST)**
-1. **🚨 MV3-001**: Complete Manifest V3 migration (BLOCKING)
-2. **🚨 CFG-002**: Implement configuration migration system
-3. **🔺 UTIL-001 to UTIL-005**: Modularize shared utilities
-4. **🔺 LOG-001 to LOG-003**: Implement logging infrastructure
+**Status**: ✅ **IMPLEMENTED (6/6 Subtasks)** - Phase 1 Complete
 
-### **Week 3-4: Services (HIGH PRIORITY)**
-1. **🔺 PIN-001 to PIN-004**: Modernize Pinboard integration
-2. **🔶 TEST-001 to TEST-003**: Establish testing framework
-3. **🔶 UI-001**: Begin UI modernization
+**📑 Purpose**: Implement per-window overlay visibility controls with theme toggle, transparency toggle, and opacity slider.
+
+**🔧 Implementation Summary**: **🔺 UI-VIS-001: Complete visibility controls component for per-window overlay customization.** Full-featured component with light/dark theme toggle, transparency control, opacity slider, and real-time visual feedback. Non-persistent per-window settings with self-contained styling.
+
+**🔧 UI-VIS-001 Subtasks:**
+
+1. **[x] Core Component Architecture** (⭐ CRITICAL) - **COMPLETED**
+   - [x] **Settings object structure** - { textTheme, transparencyEnabled, backgroundOpacity } ✅
+   - [x] **Event handling system** - onChange callbacks for all controls ✅
+   - [x] **Self-contained styling** - Theme-aware CSS with proper contrast ✅
+   - [x] **Real-time visual feedback** - Immediate preview of changes ✅
+   - **Rationale**: Foundation for all visibility functionality
+   - **Status**: COMPLETED
+   - **Priority**: CRITICAL - Core functionality ⭐
+   - **Implementation Areas**: src/ui/components/VisibilityControls.js
+   - **Dependencies**: None (self-contained)
+   - **Implementation Tokens**: `// ⭐ UI-VIS-001: Component architecture`
+   - **Expected Outcomes**: Functional visibility controls component ✅
+
+2. **[x] Theme Toggle System** (🔺 HIGH) - **COMPLETED**
+   - [x] **Light-on-dark/dark-on-light themes** - Two theme modes with visual icons ✅
+   - [x] **Theme-aware styling** - CSS adapts to selected theme ✅
+   - [x] **Visual feedback** - Sun/moon icons with smooth transitions ✅
+   - [x] **Real-time preview** - Immediate theme changes ✅
+   - **Rationale**: Essential for text readability in different contexts
+   - **Status**: COMPLETED
+   - **Priority**: HIGH - User experience critical 🔺
+   - **Implementation Areas**: VisibilityControls.js theme handling
+   - **Dependencies**: Subtask 1 (core architecture) ✅
+   - **Implementation Tokens**: `// 🔺 UI-VIS-001: Theme toggle`
+   - **Expected Outcomes**: Working theme toggle with visual feedback ✅
+
+3. **[x] Transparency Controls** (🔺 HIGH) - **COMPLETED**
+   - [x] **Transparency toggle** - Enable/disable background transparency ✅
+   - [x] **Opacity slider** - 10-100% background opacity control ✅
+   - [x] **Visual feedback** - Real-time opacity changes ✅
+   - [x] **Value validation** - Proper range enforcement ✅
+   - **Rationale**: Core transparency functionality for overlay visibility
+   - **Status**: COMPLETED
+   - **Priority**: HIGH - Essential feature 🔺
+   - **Implementation Areas**: VisibilityControls.js transparency logic
+   - **Dependencies**: Subtask 1 (core architecture) ✅
+   - **Implementation Tokens**: `// 🔺 UI-VIS-001: Transparency controls`
+   - **Expected Outcomes**: Working transparency and opacity controls ✅
+
+4. **[x] Collapsible UI Design** (🔶 MEDIUM) - **COMPLETED**
+   - [x] **Gear icon trigger** - Clickable settings icon ✅
+   - [x] **Smooth expand/collapse** - Animated panel transitions ✅
+   - [x] **Space-efficient layout** - Minimal UI footprint ✅
+   - [x] **Accessibility support** - Keyboard navigation and screen reader support ✅
+   - **Rationale**: Clean UI that doesn't obstruct content
+   - **Status**: COMPLETED
+   - **Priority**: MEDIUM - UI/UX enhancement 🔶
+   - **Implementation Areas**: VisibilityControls.js UI layout
+   - **Dependencies**: Subtasks 1-3 (core functionality) ✅
+   - **Implementation Tokens**: `// 🔶 UI-VIS-001: Collapsible UI`
+   - **Expected Outcomes**: Smooth collapsible interface ✅
+
+5. **[x] Browser Compatibility** (🔶 MEDIUM) - **COMPLETED**
+   - [x] **Cross-browser CSS** - Compatible styling across browsers ✅
+   - [x] **Event handling** - Cross-browser event compatibility ✅
+   - [x] **Performance optimization** - Efficient DOM updates ✅
+   - [x] **Logger integration** - Browser-compatible logging ✅
+   - **Rationale**: Ensure functionality across all target browsers
+   - **Status**: COMPLETED
+   - **Priority**: MEDIUM - Compatibility assurance 🔶
+   - **Implementation Areas**: VisibilityControls.js compatibility layer
+   - **Dependencies**: Subtasks 1-4 (implementation complete) ✅
+   - **Implementation Tokens**: `// 🔶 UI-VIS-001: Browser compatibility`
+   - **Expected Outcomes**: Cross-browser compatible component ✅
+
+6. **[x] Testing and Validation** (🔶 MEDIUM) - **COMPLETED**
+   - [x] **Component testing** - Standalone test environment ✅
+   - [x] **Theme validation** - Both light/dark themes tested ✅
+   - [x] **Transparency validation** - All opacity levels tested ✅
+   - [x] **User acceptance** - Confirmed working by user ✅
+   - **Rationale**: Ensure component quality and reliability
+   - **Status**: COMPLETED
+   - **Priority**: MEDIUM - Quality assurance 🔶
+   - **Implementation Areas**: test-visibility-controls.html
+   - **Dependencies**: Subtasks 1-5 (full implementation) ✅
+   - **Implementation Tokens**: `// 🔶 UI-VIS-001: Testing`
+   - **Expected Outcomes**: Comprehensive test validation ✅
+
+**🎯 UI-VIS-001 Success Criteria:**
+- ✅ **Theme Toggle**: Working light/dark theme toggle with visual feedback
+- ✅ **Transparency Control**: Functional transparency toggle and opacity slider
+- ✅ **Visual Feedback**: Real-time preview of all changes
+- ✅ **Collapsible UI**: Space-efficient collapsible interface
+- ✅ **Browser Compatibility**: Cross-browser compatible implementation
+- ✅ **User Validation**: Confirmed working by end user
+
+### **✅ UI-VIS-002: Global Visibility Defaults - ✅ Implemented**
+
+**Status**: ✅ **IMPLEMENTED (6/6 Subtasks)** - Phase 1 Complete
+
+**📑 Purpose**: Implement global default visibility settings configurable via options page.
+
+**🔧 Implementation Summary**: **🔺 UI-VIS-002: Complete global visibility defaults system with options page integration.** ConfigManager backend with visibility API, full options page UI with real-time preview, and comprehensive browser compatibility layer.
+
+**🔧 UI-VIS-002 Subtasks:**
+
+1. **[x] ConfigManager Integration** (⭐ CRITICAL) - **COMPLETED**
+   - [x] **Visibility defaults API** - getVisibilityDefaults() and updateVisibilityDefaults() ✅
+   - [x] **Storage integration** - Chrome storage with proper defaults ✅
+   - [x] **Configuration migration** - Replaced old transparency settings ✅
+   - [x] **Validation system** - Proper value validation and error handling ✅
+   - **Rationale**: Backend foundation for global settings
+   - **Status**: COMPLETED
+   - **Priority**: CRITICAL - Core functionality ⭐
+   - **Implementation Areas**: src/config/config-manager.js
+   - **Dependencies**: None (foundational)
+   - **Implementation Tokens**: `// ⭐ UI-VIS-002: ConfigManager integration`
+   - **Expected Outcomes**: Working visibility defaults backend ✅
+
+2. **[x] Options Page UI** (🔺 HIGH) - **COMPLETED**
+   - [x] **Settings section** - "🎨 Overlay Visibility Defaults" section ✅
+   - [x] **Theme toggle control** - Light/dark theme selector ✅
+   - [x] **Transparency controls** - Toggle and opacity slider ✅
+   - [x] **Real-time preview** - Live preview with backdrop blur ✅
+   - **Rationale**: User interface for global configuration
+   - **Status**: COMPLETED
+   - **Priority**: HIGH - User experience 🔺
+   - **Implementation Areas**: src/ui/options/options.html, options.css, options.js
+   - **Dependencies**: Subtask 1 (ConfigManager backend) ✅
+   - **Implementation Tokens**: `// 🔺 UI-VIS-002: Options UI`
+   - **Expected Outcomes**: Working options page with visibility defaults ✅
+
+3. **[x] Real-time Preview System** (🔺 HIGH) - **COMPLETED**
+   - [x] **Live preview panel** - Visual demonstration of settings ✅
+   - [x] **Theme switching** - Immediate theme changes in preview ✅
+   - [x] **Transparency effects** - Real-time opacity and blur changes ✅
+   - [x] **Visual feedback** - Clear indication of selected settings ✅
+   - **Rationale**: Essential for user understanding of settings impact
+   - **Status**: COMPLETED
+   - **Priority**: HIGH - User experience 🔺
+   - **Implementation Areas**: options.js preview functionality
+   - **Dependencies**: Subtasks 1-2 (backend and UI) ✅
+   - **Implementation Tokens**: `// 🔺 UI-VIS-002: Real-time preview`
+   - **Expected Outcomes**: Working real-time settings preview ✅
+
+4. **[x] Browser Compatibility Layer** (🔶 MEDIUM) - **COMPLETED**
+   - [x] **Mock Chrome storage** - Browser testing with storage simulation ✅
+   - [x] **Mock services** - Browser-compatible service mocks ✅
+   - [x] **Dependency resolution** - Fixed fast-xml-parser issues ✅
+   - [x] **Test environments** - Dedicated browser test pages ✅
+   - **Rationale**: Enable testing and development in browser environment
+   - **Status**: COMPLETED
+   - **Priority**: MEDIUM - Development support 🔶
+   - **Implementation Areas**: Browser mock services and test pages
+   - **Dependencies**: Subtasks 1-3 (core functionality) ✅
+   - **Implementation Tokens**: `// 🔶 UI-VIS-002: Browser compatibility`
+   - **Expected Outcomes**: Browser-testable implementation ✅
+
+5. **[x] Settings Persistence** (🔶 MEDIUM) - **COMPLETED**
+   - [x] **Storage operations** - Save/load visibility defaults ✅
+   - [x] **Default values** - Proper fallback defaults ✅
+   - [x] **Error handling** - Graceful failure handling ✅
+   - [x] **Data validation** - Input validation and sanitization ✅
+   - **Rationale**: Reliable persistence of user preferences
+   - **Status**: COMPLETED
+   - **Priority**: MEDIUM - Data integrity 🔶
+   - **Implementation Areas**: ConfigManager storage operations
+   - **Dependencies**: Subtask 1 (ConfigManager backend) ✅
+   - **Implementation Tokens**: `// 🔶 UI-VIS-002: Settings persistence`
+   - **Expected Outcomes**: Reliable settings storage and retrieval ✅
+
+6. **[x] Testing and Validation** (🔶 MEDIUM) - **COMPLETED**
+   - [x] **ConfigManager testing** - Backend API validation ✅
+   - [x] **Options page testing** - Full UI functionality testing ✅
+   - [x] **Browser compatibility testing** - Cross-browser validation ✅
+   - [x] **User acceptance** - Confirmed working by user ✅
+   - **Rationale**: Ensure system reliability and quality
+   - **Status**: COMPLETED
+   - **Priority**: MEDIUM - Quality assurance 🔶
+   - **Implementation Areas**: Multiple test environments
+   - **Dependencies**: Subtasks 1-5 (full implementation) ✅
+   - **Implementation Tokens**: `// 🔶 UI-VIS-002: Testing`
+   - **Expected Outcomes**: Comprehensive test validation ✅
+
+**🎯 UI-VIS-002 Success Criteria:**
+- ✅ **Backend Integration**: ConfigManager with visibility defaults API
+- ✅ **Options Page UI**: Complete options page with all controls
+- ✅ **Real-time Preview**: Working preview system with visual feedback
+- ✅ **Browser Compatibility**: Cross-browser testing capability
+- ✅ **Settings Persistence**: Reliable storage and retrieval
+- ✅ **User Validation**: Confirmed working by end user
+
+## 🚨 Current Development Status
+
+### **✅ COMPLETED PHASE 1 TASKS**
+1. **✅ MV3-001**: Manifest V3 migration - COMPLETED ✅
+2. **✅ CFG-001**: Modern configuration manager - COMPLETED ✅
+3. **✅ UI-VIS-001**: Visibility controls component - COMPLETED ✅
+4. **✅ UI-VIS-002**: Global visibility defaults - COMPLETED ✅
+5. **✅ Multiple utilities and services**: Core functionality established ✅
+
+### **📋 NEXT PHASE 2 PRIORITIES (HIGH PRIORITY)**
+1. **🔺 UI-VIS-003**: Window state management (IN PROGRESS)
+2. **🔺 UI-VIS-004**: Production integration with OverlayManager (PLANNED)
+3. **🔺 PIN-001 to PIN-004**: Complete Pinboard integration modernization
+4. **🔶 TEST-001 to TEST-003**: Comprehensive testing framework
 
 ## 🎯 Success Metrics for Feature Tracking
 
@@ -292,6 +494,34 @@ For detailed guidelines on how to document and track features, please refer to [
 4. 📋 Mark feature complete in both locations
 
 **🚨 CRITICAL**: Every code change must have a Feature ID and implementation tokens. No exceptions.
+
+## 🎨 Overlay Visibility Controls - Implementation Summary
+
+### **📋 COMPLETED DELIVERABLES**
+- **✅ VisibilityControls Component**: Full-featured UI component with theme toggle, transparency controls, and opacity slider
+- **✅ Global Configuration System**: ConfigManager backend with visibility defaults API and options page integration
+- **✅ Testing Infrastructure**: Comprehensive test environments with browser compatibility layers
+- **✅ Quality Assurance**: User-validated functionality across multiple test scenarios
+
+### **🔧 IMPLEMENTATION TOKENS USED**
+- `// ⭐ UI-VIS-001: Component architecture` - Core visibility controls component
+- `// 🔺 UI-VIS-001: Theme toggle` - Light/dark theme switching system
+- `// 🔺 UI-VIS-001: Transparency controls` - Background transparency and opacity
+- `// ⭐ UI-VIS-002: ConfigManager integration` - Backend visibility defaults system
+- `// 🔺 UI-VIS-002: Options UI` - Options page interface and controls
+- `// 🔺 UI-VIS-002: Real-time preview` - Live settings preview functionality
+
+### **🎯 KEY ACHIEVEMENTS**
+- **Per-Window Controls**: Non-persistent settings for individual window customization
+- **Global Configuration**: Persistent defaults configurable via options page
+- **Real-Time Feedback**: Immediate visual preview of all setting changes
+- **Cross-Browser Support**: Tested and validated browser compatibility
+- **Quality Documentation**: Complete task tracking with detailed subtask breakdown
+
+### **📋 READY FOR PHASE 2**
+The overlay visibility controls foundation is complete and ready for:
+1. **Window State Management** (UI-VIS-003) - Per-window state persistence
+2. **Production Integration** (UI-VIS-004) - Integration with existing OverlayManager system
 
 ## 📋 Quick Reference
 

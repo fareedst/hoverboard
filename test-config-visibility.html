@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConfigManager Visibility Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f7fa;
+        }
+        
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+        }
+        
+        .test-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .test-button:hover {
+            background: #0056b3;
+        }
+        
+        .test-output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        
+        .success {
+            color: #28a745;
+        }
+        
+        .error {
+            color: #dc3545;
+        }
+        
+        .info {
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 ConfigManager Visibility Settings Test</h1>
+        <p>Test the new visibility defaults functionality in ConfigManager</p>
+        
+        <div class="test-section">
+            <h3>📖 Read Default Visibility Settings</h3>
+            <button class="test-button" onclick="testGetDefaults()">Get Default Settings</button>
+            <button class="test-button" onclick="testGetConfig()">Get Full Config</button>
+            <div class="test-output" id="output-read"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>✏️ Update Visibility Defaults</h3>
+            <button class="test-button" onclick="testUpdateTheme()">Set Dark Theme</button>
+            <button class="test-button" onclick="testEnableTransparency()">Enable Transparency</button>
+            <button class="test-button" onclick="testSetOpacity()">Set 60% Opacity</button>
+            <button class="test-button" onclick="testBulkUpdate()">Bulk Update All</button>
+            <div class="test-output" id="output-update"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🔄 Reset & Validation</h3>
+            <button class="test-button" onclick="testResetDefaults()">Reset to Defaults</button>
+            <button class="test-button" onclick="testValidation()">Test Validation</button>
+            <div class="test-output" id="output-reset"></div>
+        </div>
+    </div>
+
+    <script>
+        // Mock chrome.storage for testing
+        window.chrome = {
+            storage: {
+                sync: {
+                    data: {},
+                    get: async function(keys) {
+                        if (typeof keys === 'string') {
+                            return { [keys]: this.data[keys] };
+                        }
+                        const result = {};
+                        if (Array.isArray(keys)) {
+                            keys.forEach(key => {
+                                if (this.data[key] !== undefined) {
+                                    result[key] = this.data[key];
+                                }
+                            });
+                        } else if (keys === null || keys === undefined) {
+                            return { ...this.data };
+                        }
+                        return result;
+                    },
+                    set: async function(data) {
+                        Object.assign(this.data, data);
+                        return Promise.resolve();
+                    },
+                    clear: async function() {
+                        this.data = {};
+                        return Promise.resolve();
+                    }
+                }
+            }
+        };
+    </script>
+    
+    <script type="module">
+        import { ConfigManager } from './src/config/config-manager.js';
+        
+        // Make ConfigManager globally available for test functions
+        window.configManager = new ConfigManager();
+        
+        // Test functions
+        window.testGetDefaults = async function() {
+            const output = document.getElementById('output-read');
+            try {
+                output.innerHTML = '<span class="info">⏳ Loading default visibility settings...</span>';
+                
+                const defaults = await window.configManager.getVisibilityDefaults();
+                output.innerHTML = `<span class="success">✅ Default visibility settings:</span>\n${JSON.stringify(defaults, null, 2)}`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        };
+        
+        window.testGetConfig = async function() {
+            const output = document.getElementById('output-read');
+            try {
+                output.innerHTML = '<span class="info">⏳ Loading full configuration...</span>';
+                
+                const config = await window.configManager.getConfig();
+                const visibilityConfig = {
+                    defaultVisibilityTheme: config.defaultVisibilityTheme,
+                    defaultTransparencyEnabled: config.defaultTransparencyEnabled,
+                    defaultBackgroundOpacity: config.defaultBackgroundOpacity
+                };
+                
+                output.innerHTML = `<span class="success">✅ Visibility config from full settings:</span>\n${JSON.stringify(visibilityConfig, null, 2)}`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        };
+        
+        window.testUpdateTheme = async function() {
+            const output = document.getElementById('output-update');
+            try {
+                output.innerHTML = '<span class="info">⏳ Updating theme to light-on-dark...</span>';
+                
+                await window.configManager.updateVisibilityDefaults({
+                    textTheme: 'light-on-dark'
+                });
+                
+                const updated = await window.configManager.getVisibilityDefaults();
+                output.innerHTML = `<span class="success">✅ Theme updated:</span>\n${JSON.stringify(updated, null, 2)}`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        };
+        
+        window.testEnableTransparency = async function() {
+            const output = document.getElementById('output-update');
+            try {
+                output.innerHTML = '<span class="info">⏳ Enabling transparency...</span>';
+                
+                await window.configManager.updateVisibilityDefaults({
+                    transparencyEnabled: true
+                });
+                
+                const updated = await window.configManager.getVisibilityDefaults();
+                output.innerHTML = `<span class="success">✅ Transparency enabled:</span>\n${JSON.stringify(updated, null, 2)}`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        };
+        
+        window.testSetOpacity = async function() {
+            const output = document.getElementById('output-update');
+            try {
+                output.innerHTML = '<span class="info">⏳ Setting opacity to 60%...</span>';
+                
+                await window.configManager.updateVisibilityDefaults({
+                    backgroundOpacity: 60
+                });
+                
+                const updated = await window.configManager.getVisibilityDefaults();
+                output.innerHTML = `<span class="success">✅ Opacity set:</span>\n${JSON.stringify(updated, null, 2)}`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        };
+        
+        window.testBulkUpdate = async function() {
+            const output = document.getElementById('output-update');
+            try {
+                output.innerHTML = '<span class="info">⏳ Bulk updating all visibility settings...</span>';
+                
+                await window.configManager.updateVisibilityDefaults({
+                    textTheme: 'dark-on-light',
+                    transparencyEnabled: true,
+                    backgroundOpacity: 75
+                });
+                
+                const updated = await window.configManager.getVisibilityDefaults();
+                output.innerHTML = `<span class="success">✅ Bulk update complete:</span>\n${JSON.stringify(updated, null, 2)}`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        };
+        
+        window.testResetDefaults = async function() {
+            const output = document.getElementById('output-reset');
+            try {
+                output.innerHTML = '<span class="info">⏳ Resetting to defaults...</span>';
+                
+                await window.configManager.resetToDefaults();
+                const defaults = await window.configManager.getVisibilityDefaults();
+                
+                output.innerHTML = `<span class="success">✅ Reset to defaults:</span>\n${JSON.stringify(defaults, null, 2)}`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        };
+        
+        window.testValidation = async function() {
+            const output = document.getElementById('output-reset');
+            try {
+                output.innerHTML = '<span class="info">⏳ Testing validation...</span>';
+                
+                // Test invalid theme
+                await window.configManager.updateVisibilityDefaults({
+                    textTheme: 'invalid-theme'
+                });
+                
+                // Test invalid opacity
+                await window.configManager.updateVisibilityDefaults({
+                    backgroundOpacity: 150
+                });
+                
+                const result = await window.configManager.getVisibilityDefaults();
+                output.innerHTML = `<span class="success">✅ Validation test complete:</span>\n${JSON.stringify(result, null, 2)}\n\n<span class="info">Note: Invalid values were stored as-is. Consider adding validation if needed.</span>`;
+            } catch (error) {
+                output.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        };
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            console.log('🧪 ConfigManager Visibility Test loaded');
+            console.log('📝 Click the buttons to test functionality');
+            
+            // Initialize with defaults
+            testGetDefaults();
+        });
+    </script>
+</body>
+</html> 

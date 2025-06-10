@@ -68,15 +68,12 @@ export class ConfigManager {
       pinRetryCountMax: 2, // Maximum retry attempts
       pinRetryDelay: 1000, // in ms - delay between retries
 
-      // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
-      // IMPLEMENTATION DECISION: Nearly transparent as default for minimal interference
-      overlayTransparencyMode: 'nearly-transparent', // 'nearly-transparent' | 'fully-transparent' | 'opaque'
-      overlayPositionMode: 'default', // 'default' | 'bottom-fixed'
-      overlayOpacityNormal: 0.05, // Normal transparency level (95% transparent)
-      overlayOpacityHover: 0.15, // Hover transparency level (85% transparent)
-      overlayOpacityFocus: 0.25, // Focus transparency level (75% transparent)
-      overlayAdaptiveVisibility: true, // Enable proximity-based visibility enhancement
-      overlayBlurAmount: 2 // Backdrop blur in pixels for definition
+      // ⭐ UI-006: Visibility Controls - 🎨 Per-window overlay appearance defaults
+      // IMPLEMENTATION DECISION: Conservative defaults for broad compatibility and readability
+      defaultVisibilityTheme: 'dark-on-light', // 'light-on-dark' | 'dark-on-light'
+      defaultTransparencyEnabled: false, // Conservative default - solid background for readability
+      defaultBackgroundOpacity: 90, // 10-100% - High opacity default for good contrast
+      overlayPositionMode: 'default' // 'default' | 'bottom-fixed' - Keep existing position setting
     }
   }
 
@@ -124,7 +121,11 @@ export class ConfigManager {
       badgeTextIfQueued: config.badgeTextIfQueued,
       recentPostsCount: config.initRecentPostsCount,
       showHoverOnPageLoad: config.showHoverOnPageLoad,
-      hoverShowTooltips: config.hoverShowTooltips
+      hoverShowTooltips: config.hoverShowTooltips,
+      // UI-006: Visibility defaults for configuration UI
+      defaultVisibilityTheme: config.defaultVisibilityTheme,
+      defaultTransparencyEnabled: config.defaultTransparencyEnabled,
+      defaultBackgroundOpacity: config.defaultBackgroundOpacity
     }
   }
 
@@ -140,6 +141,45 @@ export class ConfigManager {
     const updated = { ...current, ...updates }
     // CFG-003: Persist merged configuration
     await this.saveSettings(updated)
+  }
+
+  /**
+   * Get visibility default settings
+   * @returns {Promise<Object>} Visibility defaults object
+   *
+   * UI-006: Visibility defaults retrieval
+   * IMPLEMENTATION DECISION: Dedicated method for overlay visibility configuration
+   */
+  async getVisibilityDefaults () {
+    const config = await this.getConfig()
+    return {
+      textTheme: config.defaultVisibilityTheme,
+      transparencyEnabled: config.defaultTransparencyEnabled,
+      backgroundOpacity: config.defaultBackgroundOpacity
+    }
+  }
+
+  /**
+   * Update visibility default settings
+   * @param {Object} visibilitySettings - New visibility defaults
+   *
+   * UI-006: Visibility defaults update
+   * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
+   */
+  async updateVisibilityDefaults (visibilitySettings) {
+    const updates = {}
+    
+    if (visibilitySettings.textTheme !== undefined) {
+      updates.defaultVisibilityTheme = visibilitySettings.textTheme
+    }
+    if (visibilitySettings.transparencyEnabled !== undefined) {
+      updates.defaultTransparencyEnabled = visibilitySettings.transparencyEnabled
+    }
+    if (visibilitySettings.backgroundOpacity !== undefined) {
+      updates.defaultBackgroundOpacity = visibilitySettings.backgroundOpacity
+    }
+    
+    await this.updateConfig(updates)
   }
 
   /**

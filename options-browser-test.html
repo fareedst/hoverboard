@@ -3,20 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hoverboard Options</title>
-  <link rel="stylesheet" href="options.css">
+  <title>Hoverboard Options (Browser Test)</title>
+  <link rel="stylesheet" href="src/ui/options/options.css">
+  <style>
+    /* Additional styles for browser testing */
+    .browser-notice {
+      background: #fff3cd;
+      border: 1px solid #ffeaa7;
+      border-radius: 6px;
+      padding: 15px;
+      margin-bottom: 20px;
+      color: #856404;
+    }
+    
+    .browser-notice h3 {
+      margin-top: 0;
+      color: #856404;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <header class="header">
       <h1>
-        <img src="../../../icons/hoverboard_48.png" alt="Hoverboard" class="logo">
-        Hoverboard Settings
+        <img src="icons/hoverboard_48.png" alt="Hoverboard" class="logo">
+        Hoverboard Settings (Browser Test)
       </h1>
       <p class="subtitle">Configure your Pinboard integration and extension behavior</p>
     </header>
 
     <main class="main">
+      <div class="browser-notice">
+        <h3>🧪 Browser Test Mode</h3>
+        <p>This is a browser-compatible test version with mock services. Use this to test the new <strong>Overlay Visibility Defaults</strong> functionality without Node.js dependencies.</p>
+      </div>
+
       <!-- Authentication Section -->
       <section class="section">
         <h2>Authentication</h2>
@@ -27,7 +48,7 @@
             Get your API token from <a href="https://pinboard.in/settings/password" target="_blank">Pinboard Settings</a>
           </p>
         </div>
-        <button id="test-auth" class="btn btn-secondary">Test Connection</button>
+        <button id="test-auth" class="btn btn-secondary">Test Connection (Mock)</button>
       </section>
 
       <!-- Display Settings -->
@@ -167,11 +188,47 @@
       <div class="status" id="status-message"></div>
       
       <div class="info">
-        <p>Hoverboard v1.0.0 | <a href="https://github.com/your-repo/hoverboard" target="_blank">GitHub</a></p>
+        <p>Hoverboard v1.0.0 | <a href="https://github.com/your-repo/hoverboard" target="_blank">GitHub</a> | Browser Test Mode</p>
       </div>
     </footer>
   </div>
 
-  <script type="module" src="options.js"></script>
+  <script>
+    // Mock chrome.storage for browser testing
+    window.chrome = {
+      storage: {
+        sync: {
+          data: {},
+          get: async function(keys) {
+            if (typeof keys === 'string') {
+              return { [keys]: this.data[keys] };
+            }
+            const result = {};
+            if (Array.isArray(keys)) {
+              keys.forEach(key => {
+                if (this.data[key] !== undefined) {
+                  result[key] = this.data[key];
+                }
+              });
+            } else if (keys === null || keys === undefined) {
+              return { ...this.data };
+            }
+            return result;
+          },
+          set: async function(data) {
+            Object.assign(this.data, data);
+            console.log('🔧 Chrome storage mock: Data saved', data);
+            return Promise.resolve();
+          },
+          clear: async function() {
+            this.data = {};
+            return Promise.resolve();
+          }
+        }
+      }
+    };
+  </script>
+  
+  <script type="module" src="src/ui/options/options-browser.js"></script>
 </body>
 </html> 

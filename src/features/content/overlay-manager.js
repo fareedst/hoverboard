@@ -30,7 +30,8 @@ class OverlayManager {
     this.overlayId = 'hoverboard-overlay'
     this.overlayClass = 'hoverboard-overlay'
 
-    // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
+    // UI-VIS-001/002: Transparency now controlled by VisibilityControls component
+    // Legacy transparency properties maintained for compatibility
     this.transparencyMode = config?.overlayTransparencyMode || 'opaque'
     this.positionMode = config?.overlayPositionMode || 'default'
     this.adaptiveVisibility = config?.overlayAdaptiveVisibility || false
@@ -803,7 +804,7 @@ class OverlayManager {
   }
 
   /**
-   * 🔶 UI-005: Adaptive visibility - 🎯 Context-aware transparency
+   * Legacy adaptive visibility - superseded by UI-VIS-001/002
    * Setup adaptive visibility based on mouse proximity
    */
   setupAdaptiveVisibility () {
@@ -826,7 +827,7 @@ class OverlayManager {
   }
 
   /**
-   * 🔺 UI-005: Transparency manager - 🔧 Interaction enhancement setup
+   * Legacy transparency interactions - superseded by UI-VIS-001/002
    * Setup hover and focus interactions for transparent overlays
    */
   setupTransparencyInteractions () {
