@@ -5,14 +5,15 @@
   "type": "module",
   "scripts": {
     "build": "npm run build:dev",
-    "build:dev": "npm run validate && node scripts/build.js",
-    "build:prod": "npm run validate && npm run minify && node scripts/build.js",
+    "build:dev": "npm run style:fix && npm run validate && node scripts/build.js",
+    "build:prod": "npm run style:fix && npm run validate && npm run minify && node scripts/build.js",
     "build:sw": "esbuild src/core/service-worker.js --bundle --outfile=dist/src/core/service-worker.js --format=esm --platform=browser",
     "build:options": "esbuild src/ui/options/options.js --bundle --outfile=dist/src/ui/options/options.js --format=esm --platform=browser",
     "build:content": "esbuild src/features/content/content-main.js --bundle --outfile=dist/src/features/content/content-main.js --format=iife --platform=browser",
     "validate": "npm run lint && npm run validate:manifest && npm run security:check",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
+    "style:fix": "npm run lint:fix && find src -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\;",
     "validate:manifest": "node scripts/validate-manifest.js",
     "minify": "echo 'Minification placeholder - add webpack/rollup if needed'",
     "dev": "npm run build:dev && npm run watch",
@@ -73,6 +74,7 @@
   "lint-staged": {
     "src/**/*.js": [
       "eslint --fix",
+      "sed -i '' 's/[[:space:]]*$//'",
       "jest --findRelatedTests --passWithNoTests"
     ]
   }
