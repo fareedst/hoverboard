@@ -61,6 +61,7 @@ This document establishes the core, unchangeable requirements for the Hoverboard
 - **Tag Suggestions**: Smart tag completion and suggestions
 - **Tag Storage**: Maintain tag history in sync storage
 - **Tag Display**: Show recent tags in bookmark interface
+- **Tag Addition to Recent**: When a tag is added to a record, it shall be added to the Recent Tags list (but not displayed on the current tab if it is a duplicate of an existing tag) `[IMMUTABLE-REQ-TAG-001]`
 
 ### **Configuration System (PRESERVE COMPATIBILITY)**
 - **User Settings**: All current user-configurable options must remain

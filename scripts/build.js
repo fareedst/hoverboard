@@ -58,5 +58,8 @@ const copyDir = (src, dest) => {
   copyDir(path.join(rootDir, 'src'), path.join(rootDir, 'dist', 'src'));
 copyDir(path.join(rootDir, 'icons'), path.join(rootDir, 'dist', 'icons'));
 copyDir(path.join(rootDir, '_locales'), path.join(rootDir, 'dist', '_locales'));
+// Copy UI root-level HTML and assets for extension
+copyDir(path.join(rootDir, 'src/ui/popup'), path.join(rootDir, 'dist/ui/popup'));
+copyDir(path.join(rootDir, 'src/ui/options'), path.join(rootDir, 'dist/ui/options'));
 
 console.log('Build completed successfully!'); 

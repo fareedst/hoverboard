@@ -3,12 +3,18 @@
  * Replaces legacy throttled_recent_tags.js with improved caching and suggestion algorithms
  */
 
-import { PinboardService } from '../pinboard/pinboard-service.js'
 import { ConfigManager } from '../../config/config-manager.js'
 
 export class TagService {
-  constructor () {
-    this.pinboardService = new PinboardService()
+  constructor (pinboardService = null) {
+    // Only require PinboardService if not injected (avoids circular import)
+    if (pinboardService) {
+      this.pinboardService = pinboardService
+    } else {
+      // Dynamically require to avoid circular dependency at module load
+      const { PinboardService } = require('../pinboard/pinboard-service.js')
+      this.pinboardService = new PinboardService()
+    }
     this.configManager = new ConfigManager()
     this.cacheKey = 'hoverboard_recent_tags_cache'
     this.cacheTimeout = 5 * 60 * 1000 // 5 minutes
@@ -24,21 +30,21 @@ export class TagService {
     try {
       // Check cache first
       const cachedTags = await this.getCachedTags()
+      let tagsArr = []
       if (cachedTags && this.isCacheValid(cachedTags.timestamp)) {
-        return this.processTagsForDisplay(cachedTags.tags, options)
+        tagsArr = cachedTags.tags
+      } else {
+        // Fetch fresh tags from Pinboard
+        const config = await this.configManager.getConfig()
+        const recentBookmarks = await this.pinboardService.getRecentBookmarks(
+          config.initRecentPostsCount
+        )
+        // Extract and process tags
+        tagsArr = this.extractTagsFromBookmarks(recentBookmarks)
+        await this.processAndCacheTags(tagsArr)
       }
-
-      // Fetch fresh tags from Pinboard
-      const config = await this.configManager.getConfig()
-      const recentBookmarks = await this.pinboardService.getRecentBookmarks(
-        config.initRecentPostsCount
-      )
-
-      // Extract and process tags
-      const tags = this.extractTagsFromBookmarks(recentBookmarks)
-      const processedTags = await this.processAndCacheTags(tags)
-
-      return this.processTagsForDisplay(processedTags, options)
+      // Always return array of objects with 'name' property
+      return tagsArr.map(tag => typeof tag === 'string' ? { name: tag } : tag)
     } catch (error) {
       console.error('Failed to get recent tags:', error)
       return []
@@ -92,8 +98,71 @@ export class TagService {
       await chrome.storage.local.set({
         [this.tagFrequencyKey]: frequency
       })
+
+      // Update recent tags cache to include the newly used tag
+      await this.updateRecentTagsCache(tagName, frequency[tagName])
     } catch (error) {
       console.error('Failed to record tag usage:', error)
+    }
+  }
+
+  /**
+   * Update recent tags cache with a newly used tag
+   * @param {string} tagName - Tag that was used
+   * @param {number} frequency - Current frequency of the tag
+   */
+  async updateRecentTagsCache (tagName, frequency) {
+    try {
+      const config = await this.configManager.getConfig()
+      const cachedTags = await this.getCachedTags()
+      
+      let currentTags = []
+      if (cachedTags && this.isCacheValid(cachedTags.timestamp)) {
+        currentTags = cachedTags.tags
+      }
+
+      // Find if tag already exists in cache
+      const existingTagIndex = currentTags.findIndex(tag => tag.name === tagName)
+      const now = new Date()
+
+      if (existingTagIndex >= 0) {
+        // Update existing tag
+        currentTags[existingTagIndex] = {
+          ...currentTags[existingTagIndex],
+          count: frequency,
+          lastUsed: now
+        }
+      } else {
+        // Add new tag to cache
+        const newTag = {
+          name: tagName,
+          count: frequency,
+          lastUsed: now,
+          bookmarks: []
+        }
+        currentTags.push(newTag)
+      }
+
+      // Sort tags by frequency and recency, then limit to max count
+      const sortedTags = currentTags
+        .sort((a, b) => {
+          // Sort by count first, then by last used time
+          if (b.count !== a.count) {
+            return b.count - a.count
+          }
+          return new Date(b.lastUsed) - new Date(a.lastUsed)
+        })
+        .slice(0, config.recentTagsCountMax)
+
+      // Update cache
+      await chrome.storage.local.set({
+        [this.cacheKey]: {
+          tags: sortedTags,
+          timestamp: Date.now()
+        }
+      })
+    } catch (error) {
+      console.error('Failed to update recent tags cache:', error)
     }
   }
 
@@ -400,5 +469,117 @@ export class TagService {
       tagCount: cached.tags.length,
       lastUpdated: new Date(cached.timestamp).toISOString()
     }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags when added to record
+   * @param {string} tag - Tag to add to recent tags
+   * @param {string} recordId - ID of the record the tag was added to
+   * @returns {Promise<void>}
+   */
+  async addTagToRecent (tag, recordId) {
+    try {
+      // [IMMUTABLE-REQ-TAG-001] - Sanitize tag input
+      const sanitizedTag = this.sanitizeTag(tag)
+      if (!sanitizedTag) {
+        console.warn('[IMMUTABLE-REQ-TAG-001] Invalid tag provided:', tag)
+        return
+      }
+
+      // [IMMUTABLE-REQ-TAG-001] - Get current recent tags
+      const recentTags = await this.getRecentTags()
+      
+      // [IMMUTABLE-REQ-TAG-001] - Check for duplicates in recent tags
+      const isDuplicate = recentTags.some(existingTag => 
+        existingTag.name.toLowerCase() === sanitizedTag.toLowerCase()
+      )
+
+      if (!isDuplicate) {
+        // [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags list
+        await this.recordTagUsage(sanitizedTag)
+        console.log('[IMMUTABLE-REQ-TAG-001] Tag added to recent tags:', sanitizedTag)
+      } else {
+        console.log('[IMMUTABLE-REQ-TAG-001] Tag already exists in recent tags:', sanitizedTag)
+      }
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to add tag to recent:', error)
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Get recent tags excluding current tab duplicates
+   * @param {string[]} currentTags - Tags currently displayed on the tab
+   * @returns {Promise<Object[]>} Array of recent tags excluding current
+   */
+  async getRecentTagsExcludingCurrent (currentTags = []) {
+    try {
+      // [IMMUTABLE-REQ-TAG-001] - Get all recent tags
+      const allRecentTags = await this.getRecentTags()
+      
+      // [IMMUTABLE-REQ-TAG-001] - Normalize current tags for comparison
+      const normalizedCurrentTags = currentTags.map(tag => 
+        this.sanitizeTag(tag).toLowerCase()
+      ).filter(tag => tag)
+
+      // [IMMUTABLE-REQ-TAG-001] - Filter out current tab duplicates
+      const filteredTags = allRecentTags.filter(tag => 
+        !normalizedCurrentTags.includes(tag.name.toLowerCase())
+      )
+
+      console.log('[IMMUTABLE-REQ-TAG-001] Recent tags excluding current:', filteredTags.length)
+      return filteredTags
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to get recent tags excluding current:', error)
+      return []
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Handle tag addition during bookmark operations
+   * @param {string} tag - Tag to add
+   * @param {Object} bookmarkData - Bookmark data
+   * @returns {Promise<void>}
+   */
+  async handleTagAddition (tag, bookmarkData) {
+    try {
+      // [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags
+      await this.addTagToRecent(tag, bookmarkData.url)
+      
+      // [IMMUTABLE-REQ-TAG-001] - Update bookmark record if needed
+      if (bookmarkData.url) {
+        console.log('[IMMUTABLE-REQ-TAG-001] Tag addition handled for bookmark:', bookmarkData.url)
+      }
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to handle tag addition:', error)
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Sanitize tag input
+   * @param {string} tag - Raw tag input
+   * @returns {string} Sanitized tag
+   */
+  sanitizeTag(tag) {
+    if (!tag || typeof tag !== 'string') {
+      return '';
+    }
+
+    let tagName = '';
+    const tagStartMatch = tag.match(/^<([a-zA-Z0-9_-]+)>/);
+    if (tagStartMatch) {
+      tagName = tagStartMatch[1];
+    }
+    // Remove all HTML tags
+    let sanitized = tag.replace(/<[^>]+>/g, '');
+    // Prepend tagName if found
+    if (tagName) {
+      sanitized = tagName + sanitized;
+    }
+    // Remove non-word characters (except space and dash)
+    sanitized = sanitized.replace(/[^\w\s-]/g, '');
+    // Remove extra spaces
+    sanitized = sanitized.replace(/\s+/g, '');
+    // Limit length
+    return sanitized.substring(0, 50);
   }
 }

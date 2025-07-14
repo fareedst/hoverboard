@@ -3,13 +3,15 @@
  * Tests complete workflows including configuration, services, and UI
  */
 
-import { ConfigManager } from '../../src-new/config/config-manager.js';
+import { ConfigManager } from '../../src/config/config-manager.js';
 
 describe('Extension Workflow Integration', () => {
   let configManager;
+  let inhibitUrlsStorage = '';
 
   beforeEach(() => {
     configManager = new ConfigManager();
+    inhibitUrlsStorage = '';
     
     // Setup comprehensive chrome API mocks
     global.chrome.storage.sync.get.mockImplementation((keys) => {
@@ -21,7 +23,7 @@ describe('Extension Workflow Integration', () => {
           recentTagsCountMax: 10,
           initRecentPostsCount: 5,
         },
-        hoverboard_inhibit_urls: '',
+        hoverboard_inhibit_urls: inhibitUrlsStorage,
       };
       
       if (typeof keys === 'string') {
@@ -30,7 +32,12 @@ describe('Extension Workflow Integration', () => {
       return Promise.resolve(mockData);
     });
 
-    global.chrome.storage.sync.set.mockResolvedValue();
+    global.chrome.storage.sync.set.mockImplementation((data) => {
+      if (data.hoverboard_inhibit_urls !== undefined) {
+        inhibitUrlsStorage = data.hoverboard_inhibit_urls;
+      }
+      return Promise.resolve();
+    });
     global.chrome.tabs.query.mockResolvedValue([
       { id: 1, url: 'https://example.com', title: 'Test Page' }
     ]);
@@ -113,9 +120,8 @@ describe('Extension Workflow Integration', () => {
 
   describe('Authentication and API Integration', () => {
     test('should complete authentication setup workflow', async () => {
-      const testToken = 'user:abcdef123456';
-      
-      // Set authentication token
+      // Simulate user entering auth token
+      const testToken = 'user-test-token:123456';
       await configManager.setAuthToken(testToken);
       
       // Verify token was stored
@@ -299,9 +305,14 @@ describe('Extension Workflow Integration', () => {
       // Import configuration (e.g. on new device)
       await configManager.importConfig(exported);
       
+      // Accept multiple calls to set for different keys
       expect(global.chrome.storage.sync.set).toHaveBeenCalledWith(
         expect.objectContaining({
-          hoverboard_settings: exported.settings,
+          hoverboard_settings: exported.settings
+        })
+      );
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith(
+        expect.objectContaining({
           hoverboard_auth_token: exported.authToken
         })
       );

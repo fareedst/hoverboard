@@ -244,21 +244,6 @@ section:last-child {
   gap: var(--spacing-xs);
 }
 
-.bookmark-url {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: var(--spacing-sm);
-}
-
-.bookmark-status {
-  display: flex;
-  gap: var(--spacing-sm);
-  flex-wrap: wrap;
-}
-
 .status-badge {
   font-size: var(--font-size-xs);
   padding: 2px var(--spacing-xs);
@@ -279,11 +264,65 @@ section:last-child {
 
 /* Quick actions */
 .action-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  justify-content: space-between;
   gap: var(--spacing-sm);
 }
 
+.action-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-medium);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.action-icon-button:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-light);
+}
+
+.action-icon-button:active {
+  transform: translateY(0);
+  background: var(--bg-active);
+}
+
+.action-icon-button.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+.action-icon-button.active:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+.action-icon-button.danger {
+  border-color: var(--danger-color);
+  color: var(--danger-color);
+}
+
+.action-icon-button.danger:hover {
+  background: #ffebee;
+  border-color: var(--danger-hover);
+}
+
+.action-icon {
+  font-size: 20px;
+  line-height: 1;
+  display: block;
+}
+
+/* Legacy action-card styles for backward compatibility */
 .action-card {
   display: flex;
   align-items: center;
@@ -329,12 +368,6 @@ section:last-child {
 .action-card.danger:hover {
   background: #ffebee;
   border-color: var(--danger-hover);
-}
-
-.action-icon {
-  font-size: 20px;
-  line-height: 1;
-  flex-shrink: 0;
 }
 
 .action-text {
@@ -647,10 +680,6 @@ section:last-child {
   
   .action-grid {
     grid-template-columns: 1fr;
-  }
-  
-  .input-group {
-    flex-direction: column;
   }
   
   .popup-header {

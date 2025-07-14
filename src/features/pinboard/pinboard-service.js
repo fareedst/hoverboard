@@ -9,12 +9,15 @@
  */
 
 import { ConfigManager } from '../../config/config-manager.js'
+import { TagService } from '../tagging/tag-service.js' // [IMMUTABLE-REQ-TAG-001] - Import TagService
 import { XMLParser } from 'fast-xml-parser'
 
 export class PinboardService {
-  constructor () {
+  constructor (tagService = null) {
     // PIN-001: Configuration manager integration for authentication and settings
     this.configManager = new ConfigManager()
+    // [IMMUTABLE-REQ-TAG-001] - Tag service integration for tag tracking
+    this.tagService = tagService || new TagService(this)
     // PIN-001: Pinboard API base URL - official API endpoint
     // SPECIFICATION: Use official Pinboard API v1 endpoint for all operations
     this.apiBase = 'https://api.pinboard.in/v1/'
@@ -109,6 +112,7 @@ export class PinboardService {
    * PIN-003: Bookmark creation/update operation
    * SPECIFICATION: Use posts/add endpoint to save bookmark with all metadata
    * IMPLEMENTATION DECISION: Re-throw errors to allow caller error handling
+   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking
    */
   async saveBookmark (bookmarkData) {
     try {
@@ -116,6 +120,9 @@ export class PinboardService {
       const params = this.buildSaveParams(bookmarkData)
       const endpoint = `posts/add?${params}`
       const response = await this.makeApiRequest(endpoint, 'GET')
+
+      // [IMMUTABLE-REQ-TAG-001] - Track tags after successful save
+      await this.trackBookmarkTags(bookmarkData)
 
       // PIN-003: Parse API response for save confirmation
       return this.parseApiResponse(response)
@@ -134,6 +141,7 @@ export class PinboardService {
    * PIN-003: Tag addition to existing bookmark
    * SPECIFICATION: Retrieve current bookmark, add tag, then save updated bookmark
    * IMPLEMENTATION DECISION: Merge tags to preserve existing tags while adding new ones
+   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking
    */
   async saveTag (tagData) {
     try {
@@ -154,6 +162,11 @@ export class PinboardService {
         ...currentBookmark,
         ...tagData,
         tags: newTags.join(' ')
+      }
+
+      // [IMMUTABLE-REQ-TAG-001] - Track the new tag specifically
+      if (tagData.value) {
+        await this.tagService.handleTagAddition(tagData.value, updatedBookmark)
       }
 
       return this.saveBookmark(updatedBookmark)
@@ -187,6 +200,103 @@ export class PinboardService {
       // PIN-003: Re-throw to allow caller error handling
       throw error
     }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Track tags from bookmark data
+   * @param {Object} bookmarkData - Bookmark data containing tags
+   * @returns {Promise<void>}
+   */
+  async trackBookmarkTags (bookmarkData) {
+    try {
+      // [IMMUTABLE-REQ-TAG-001] - Extract tags from bookmark data
+      const tags = this.extractTagsFromBookmarkData(bookmarkData)
+      // Sanitize, deduplicate, and filter empty tags
+      const sanitizedTags = Array.from(new Set(tags.map(tag => this.tagService.sanitizeTag(tag)).filter(Boolean)))
+      if (sanitizedTags.length > 0) {
+        // [IMMUTABLE-REQ-TAG-001] - Track each tag individually
+        for (const sanitizedTag of sanitizedTags) {
+          await this.tagService.handleTagAddition(sanitizedTag, bookmarkData)
+        }
+        console.log('[IMMUTABLE-REQ-TAG-001] Tracked tags for bookmark:', sanitizedTags)
+      }
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to track bookmark tags:', error)
+      // [IMMUTABLE-REQ-TAG-001] - Don't throw error to avoid breaking bookmark save
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Enhanced error handling for tag operations
+   * @param {Error} error - The error that occurred
+   * @param {string} operation - The operation that failed
+   * @param {Object} context - Additional context data
+   * @returns {Promise<void>}
+   */
+  async handleTagError (error, operation, context = {}) {
+    // [IMMUTABLE-REQ-TAG-001] - Log error with context
+    console.error(`[IMMUTABLE-REQ-TAG-001] Tag operation failed: ${operation}`, {
+      error: error.message,
+      stack: error.stack,
+      context
+    })
+
+    // [IMMUTABLE-REQ-TAG-001] - Attempt recovery based on error type
+    if (error.name === 'QuotaExceededError') {
+      try {
+        await this.tagService.cleanupOldTags()
+        console.log('[IMMUTABLE-REQ-TAG-001] Attempted cleanup after quota exceeded')
+      } catch (cleanupError) {
+        console.error('[IMMUTABLE-REQ-TAG-001] Cleanup also failed:', cleanupError)
+      }
+    }
+
+    // [IMMUTABLE-REQ-TAG-001] - Notify user of tag operation failure
+    try {
+      await this.notifyUserOfTagError(operation, error.message)
+    } catch (notificationError) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to notify user:', notificationError)
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Notify user of tag operation errors
+   * @param {string} operation - The operation that failed
+   * @param {string} errorMessage - The error message
+   * @returns {Promise<void>}
+   */
+  async notifyUserOfTagError (operation, errorMessage) {
+    // [IMMUTABLE-REQ-TAG-001] - Create user-friendly error message
+    const userMessage = `Tag ${operation} failed, but bookmark was saved. Error: ${errorMessage}`
+    
+    // [IMMUTABLE-REQ-TAG-001] - Log user notification
+    console.warn('[IMMUTABLE-REQ-TAG-001] User notification:', userMessage)
+    
+    // [IMMUTABLE-REQ-TAG-001] - Could be extended to show browser notification
+    // For now, just log the message
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Extract tags from bookmark data
+   * @param {Object} bookmarkData - Bookmark data
+   * @returns {string[]} Array of tags
+   */
+  extractTagsFromBookmarkData (bookmarkData) {
+    const tags = []
+    
+    // [IMMUTABLE-REQ-TAG-001] - Extract tags from tags field
+    if (bookmarkData.tags) {
+      if (typeof bookmarkData.tags === 'string') {
+        // [IMMUTABLE-REQ-TAG-001] - Split space-separated tags
+        const tagArray = bookmarkData.tags.split(/\s+/).filter(tag => tag.trim())
+        tags.push(...tagArray)
+      } else if (Array.isArray(bookmarkData.tags)) {
+        // [IMMUTABLE-REQ-TAG-001] - Use array of tags directly
+        tags.push(...bookmarkData.tags.filter(tag => tag && tag.trim()))
+      }
+    }
+    
+    return tags
   }
 
   /**

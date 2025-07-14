@@ -94,20 +94,48 @@ export class UIManager {
       this.emit('openOptions')
     })
 
-    // Input handling
+    // [IMMUTABLE-REQ-TAG-001] - Enhanced input handling with validation
     this.elements.addTagBtn?.addEventListener('click', () => {
       const tagText = this.elements.newTagInput?.value
-      if (tagText) {
+      if (tagText && this.isValidTag(tagText)) {
         this.emit('addTag', tagText)
+        // [IMMUTABLE-REQ-TAG-001] - Clear input after successful addition
+        this.elements.newTagInput.value = ''
+      } else if (tagText && !this.isValidTag(tagText)) {
+        // [IMMUTABLE-REQ-TAG-001] - Show validation error
+        this.showError('Invalid tag format')
       }
     })
 
     this.elements.newTagInput?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         const tagText = this.elements.newTagInput?.value
-        if (tagText) {
+        if (tagText && this.isValidTag(tagText)) {
           this.emit('addTag', tagText)
+          // [IMMUTABLE-REQ-TAG-001] - Clear input after successful addition
+          this.elements.newTagInput.value = ''
+        } else if (tagText && !this.isValidTag(tagText)) {
+          // [IMMUTABLE-REQ-TAG-001] - Show validation error
+          this.showError('Invalid tag format')
         }
+      }
+    })
+
+    // [IMMUTABLE-REQ-TAG-001] - Add input validation on blur
+    this.elements.newTagInput?.addEventListener('blur', () => {
+      const tagText = this.elements.newTagInput?.value
+      if (tagText && !this.isValidTag(tagText)) {
+        this.showError('Invalid tag format')
+      }
+    })
+
+    // [IMMUTABLE-REQ-TAG-001] - Add input validation on input change
+    this.elements.newTagInput?.addEventListener('input', () => {
+      const tagText = this.elements.newTagInput?.value
+      if (tagText && !this.isValidTag(tagText)) {
+        this.elements.newTagInput.classList.add('invalid')
+      } else {
+        this.elements.newTagInput.classList.remove('invalid')
       }
     })
 
@@ -286,6 +314,46 @@ export class UIManager {
       const tagElement = this.createTagElement(tag)
       this.elements.currentTagsContainer.appendChild(tagElement)
     })
+  }
+
+  /**
+   * Update recent tags display
+   */
+  updateRecentTags (recentTags) {
+    if (!this.elements.recentTagsContainer) return
+
+    // Clear existing recent tags
+    this.elements.recentTagsContainer.innerHTML = ''
+
+    // If no recent tags, show empty state
+    if (!recentTags || recentTags.length === 0) {
+      this.elements.recentTagsContainer.innerHTML = '<div class="no-tags">No recent tags</div>'
+      return
+    }
+
+    // Create recent tag elements (clickable to add)
+    recentTags.forEach(tag => {
+      const tagElement = this.createRecentTagElement(tag)
+      this.elements.recentTagsContainer.appendChild(tagElement)
+    })
+  }
+
+  /**
+   * Create a recent tag element (clickable to add)
+   */
+  createRecentTagElement (tag) {
+    const tagElement = document.createElement('div')
+    tagElement.className = 'tag recent clickable'
+    tagElement.innerHTML = `
+      <span class="tag-text">${this.escapeHtml(tag)}</span>
+    `
+
+    // Add click handler to add this tag
+    tagElement.addEventListener('click', () => {
+      this.emit('addTag', tag)
+    })
+
+    return tagElement
   }
 
   /**
@@ -482,6 +550,36 @@ export class UIManager {
     } else {
       this.elements.popupContainer?.classList.remove('compact')
     }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Validate tag input
+   * @param {string} tag - Tag to validate
+   * @returns {boolean} Whether tag is valid
+   */
+  isValidTag (tag) {
+    if (!tag || typeof tag !== 'string') {
+      return false
+    }
+
+    const trimmedTag = tag.trim()
+    if (trimmedTag.length === 0 || trimmedTag.length > 50) {
+      return false
+    }
+
+    // [IMMUTABLE-REQ-TAG-001] - Check for invalid characters
+    const invalidChars = /[<>]/g
+    if (invalidChars.test(trimmedTag)) {
+      return false
+    }
+
+    // [IMMUTABLE-REQ-TAG-001] - Check for only safe characters
+    const safeChars = /^[\w\s-]+$/
+    if (!safeChars.test(trimmedTag)) {
+      return false
+    }
+
+    return true
   }
 
   /**

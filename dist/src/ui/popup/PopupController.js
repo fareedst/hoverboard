@@ -105,6 +105,9 @@ export class PopupController {
       const hasReadLaterStatus = this.currentPin?.toread === 'yes'
       this.uiManager.updateReadLaterStatus(hasReadLaterStatus)
 
+      // Load recent tags
+      await this.loadRecentTags()
+
       // Set version info
       const manifest = chrome.runtime.getManifest()
       this.uiManager.updateVersionInfo(manifest.version)
@@ -117,6 +120,86 @@ export class PopupController {
     } finally {
       this.setLoading(false)
     }
+  }
+
+  /**
+   * Load recent tags from the tag service
+   * [IMMUTABLE-REQ-TAG-001] - Enhanced recent tags loading with current tag exclusion
+   */
+  async loadRecentTags () {
+    try {
+      // [IMMUTABLE-REQ-TAG-001] - Get current tags to exclude from recent tags
+      const currentTags = this.normalizeTags(this.currentPin?.tags || [])
+      
+      const response = await this.sendMessage({
+        type: 'getRecentBookmarks',
+        data: {
+          description: this.currentPin?.description || this.currentTab?.title,
+          time: this.currentPin?.time || new Date().toISOString(),
+          extended: this.currentPin?.extended || '',
+          shared: this.currentPin?.shared || 'yes',
+          tags: currentTags,
+          toread: this.currentPin?.toread || 'no',
+          senderUrl: this.currentTab?.url
+        }
+      })
+
+      if (response && response.recentTags) {
+        // [IMMUTABLE-REQ-TAG-001] - Extract tag names from recent tags data
+        // Handle both string arrays and object arrays
+        const recentTagNames = response.recentTags.map(tag => {
+          if (typeof tag === 'string') {
+            return tag
+          } else if (tag && typeof tag === 'object' && tag.name) {
+            return tag.name
+          } else {
+            return String(tag)
+          }
+        })
+        
+        // [IMMUTABLE-REQ-TAG-001] - Filter out current tags to avoid duplicates
+        const filteredRecentTags = recentTagNames.filter(tag => 
+          !currentTags.includes(tag)
+        )
+        
+        this.uiManager.updateRecentTags(filteredRecentTags)
+      } else {
+        this.uiManager.updateRecentTags([])
+      }
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to load recent tags:', error)
+      this.uiManager.updateRecentTags([])
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Validate tag input
+   * @param {string} tag - Tag to validate
+   * @returns {boolean} Whether tag is valid
+   */
+  isValidTag (tag) {
+    if (!tag || typeof tag !== 'string') {
+      return false
+    }
+
+    const trimmedTag = tag.trim()
+    if (trimmedTag.length === 0 || trimmedTag.length > 50) {
+      return false
+    }
+
+    // [IMMUTABLE-REQ-TAG-001] - Check for invalid characters
+    const invalidChars = /[<>]/g
+    if (invalidChars.test(trimmedTag)) {
+      return false
+    }
+
+    // [IMMUTABLE-REQ-TAG-001] - Check for only safe characters
+    const safeChars = /^[\w\s-]+$/
+    if (!safeChars.test(trimmedTag)) {
+      return false
+    }
+
+    return true
   }
 
   /**
@@ -769,6 +852,7 @@ export class PopupController {
 
   /**
    * Handle add tag action
+   * [IMMUTABLE-REQ-TAG-001] - Enhanced tag handling with recent tags tracking
    */
   async handleAddTag (tagText) {
     if (!tagText || !tagText.trim()) {
@@ -779,23 +863,42 @@ export class PopupController {
     try {
       this.setLoading(true)
 
+      // [IMMUTABLE-REQ-TAG-001] - Sanitize and validate tags
       const newTags = tagText.trim().split(/\s+/).filter(tag => tag.length > 0)
+      
+      // [IMMUTABLE-REQ-TAG-001] - Validate each tag
+      for (const tag of newTags) {
+        if (!this.isValidTag(tag)) {
+          this.errorHandler.handleError(`Invalid tag: ${tag}`)
+          return
+        }
+      }
 
       if (this.currentPin) {
-        // Add tags to existing bookmark
+        // [IMMUTABLE-REQ-TAG-001] - Add tags to existing bookmark
         const currentTagsArray = this.normalizeTags(this.currentPin.tags)
         const allTags = [...new Set([...currentTagsArray, ...newTags])]
 
         await this.addTagsToBookmark(allTags)
       } else {
-        // Create new bookmark with tags
+        // [IMMUTABLE-REQ-TAG-001] - Create new bookmark with tags
         await this.createBookmark(newTags)
       }
 
-      // Clear the input
+      // [IMMUTABLE-REQ-TAG-001] - Clear the input
       this.uiManager.clearTagInput()
+      
+      // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after adding a tag
+      await this.loadRecentTags()
     } catch (error) {
       this.errorHandler.handleError('Failed to add tags', error)
+      
+      // [IMMUTABLE-REQ-TAG-001] - Even on failure, update UI with current tags and recent tags
+      if (this.currentPin) {
+        const currentTagsArray = this.normalizeTags(this.currentPin.tags)
+        this.uiManager.updateCurrentTags(currentTagsArray)
+      }
+      await this.loadRecentTags()
     } finally {
       this.setLoading(false)
     }
@@ -816,6 +919,8 @@ export class PopupController {
       const tagsArray = this.normalizeTags(this.currentPin.tags).filter(tag => tag !== tagToRemove)
 
       await this.addTagsToBookmark(tagsArray)
+      
+      // Recent tags are refreshed in addTagsToBookmark
     } catch (error) {
       this.errorHandler.handleError('Failed to remove tag', error)
     } finally {
@@ -825,8 +930,17 @@ export class PopupController {
 
   /**
    * Add tags to bookmark
+   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking and validation
    */
   async addTagsToBookmark (tags) {
+    // [IMMUTABLE-REQ-TAG-001] - Validate all tags before saving
+    for (const tag of tags) {
+      if (!this.isValidTag(tag)) {
+        this.errorHandler.handleError(`Invalid tag: ${tag}`)
+        return
+      }
+    }
+
     const tagsString = tags.join(' ')
 
     const pinData = {
@@ -840,16 +954,29 @@ export class PopupController {
       data: pinData
     })
 
+    // [IMMUTABLE-REQ-TAG-001] - Update current pin with new tags
     this.currentPin.tags = tagsString
     this.stateManager.setState({ currentPin: this.currentPin })
     this.uiManager.updateCurrentTags(tags)
     this.uiManager.showSuccess('Tags updated successfully')
+    
+    // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after updating bookmark
+    await this.loadRecentTags()
   }
 
   /**
    * Create new bookmark
+   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking and validation
    */
   async createBookmark (tags, sharedStatus = 'yes', toreadStatus = 'no') {
+    // [IMMUTABLE-REQ-TAG-001] - Validate all tags before creating bookmark
+    for (const tag of tags) {
+      if (!this.isValidTag(tag)) {
+        this.errorHandler.handleError(`Invalid tag: ${tag}`)
+        return
+      }
+    }
+
     const tagsString = tags.join(' ')
 
     const pinData = {
@@ -865,10 +992,14 @@ export class PopupController {
       data: pinData
     })
 
+    // [IMMUTABLE-REQ-TAG-001] - Update current pin with new bookmark data
     this.currentPin = pinData
     this.stateManager.setState({ currentPin: this.currentPin })
     this.uiManager.updateCurrentTags(tags)
     this.uiManager.showSuccess('Bookmark created successfully')
+    
+    // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after creating bookmark
+    await this.loadRecentTags()
   }
 
   /**

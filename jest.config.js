@@ -10,11 +10,16 @@ export default {
   // Setup files
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
   
-  // Test patterns
+  // Test patterns - exclude Playwright tests
   testMatch: [
     '<rootDir>/tests/**/*.test.js',
-    '<rootDir>/tests/**/*.integration.test.js',
-    '<rootDir>/tests/**/*.e2e.test.js'
+    '<rootDir>/tests/**/*.integration.test.js'
+  ],
+  
+  // Exclude Playwright tests from Jest
+  testPathIgnorePatterns: [
+    '<rootDir>/tests/e2e/',
+    '<rootDir>/tests/uat/'
   ],
   
   // Coverage configuration
@@ -48,5 +53,15 @@ export default {
   
   // Clear mocks between tests
   clearMocks: true,
-  restoreMocks: true
+  restoreMocks: true,
+  
+  // Transform configuration for ES modules
+  transform: {
+    '^.+\\.js$': 'babel-jest'
+  },
+  
+  // Transform ignore patterns
+  transformIgnorePatterns: [
+    'node_modules/(?!(puppeteer|@testing-library)/)'
+  ]
 }; 

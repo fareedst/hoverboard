@@ -15,7 +15,9 @@ export class ConfigManager {
     this.storageKeys = {
       AUTH_TOKEN: 'hoverboard_auth_token',
       SETTINGS: 'hoverboard_settings',
-      INHIBIT_URLS: 'hoverboard_inhibit_urls'
+      INHIBIT_URLS: 'hoverboard_inhibit_urls',
+      RECENT_TAGS: 'hoverboard_recent_tags', // [IMMUTABLE-REQ-TAG-001] - Tag storage key
+      TAG_FREQUENCY: 'hoverboard_tag_frequency' // [IMMUTABLE-REQ-TAG-001] - Tag frequency storage key
     }
 
     // CFG-003: Default configuration provides baseline behavior
@@ -100,6 +102,10 @@ export class ConfigManager {
    */
   async getConfig () {
     const stored = await this.getStoredSettings()
+    // If stored is not a plain object, treat as corrupted and use defaults
+    if (!stored || typeof stored !== 'object' || Array.isArray(stored)) {
+      return { ...this.defaultConfig }
+    }
     // CFG-003: Defaults ensure all required configuration keys are present
     return { ...this.defaultConfig, ...stored }
   }
@@ -277,10 +283,12 @@ export class ConfigManager {
    */
   async addInhibitUrl (url) {
     try {
+      // Normalize: strip protocol (http/https) for matching
+      const normalizedUrl = url.replace(/^https?:\/\//, '')
       const current = await this.getInhibitUrls()
-      if (!current.includes(url)) {
+      if (!current.includes(normalizedUrl)) {
         // CFG-004: Add URL only if not already present
-        current.push(url)
+        current.push(normalizedUrl)
         const inhibitString = current.join('\n')
         // CFG-004: Store updated inhibition list
         await chrome.storage.sync.set({
@@ -326,9 +334,11 @@ export class ConfigManager {
   async isUrlAllowed (url) {
     try {
       const inhibitUrls = await this.getInhibitUrls()
+      // Normalize: strip protocol for matching
+      const normalizedUrl = url.replace(/^https?:\/\//, '')
       // CFG-004: Check both directions for substring matching (flexible pattern matching)
       return !inhibitUrls.some(inhibitUrl =>
-        url.includes(inhibitUrl) || inhibitUrl.includes(url)
+        normalizedUrl.includes(inhibitUrl) || inhibitUrl.includes(normalizedUrl)
       )
     } catch (error) {
       console.error('Failed to check URL allowance:', error)
@@ -348,7 +358,19 @@ export class ConfigManager {
     try {
       // CFG-003: Retrieve settings from sync storage
       const result = await chrome.storage.sync.get(this.storageKeys.SETTINGS)
-      return result[this.storageKeys.SETTINGS] || {}
+      const stored = result[this.storageKeys.SETTINGS]
+
+      // CFG-003: Handle corrupted data (string instead of object)
+      if (typeof stored === 'string') {
+        try {
+          return JSON.parse(stored)
+        } catch (parseError) {
+          console.error('Failed to parse stored settings:', parseError)
+          return {}
+        }
+      }
+
+      return stored || {}
     } catch (error) {
       console.error('Failed to get stored settings:', error)
       // CFG-003: Return empty object to trigger default configuration usage
@@ -436,6 +458,127 @@ export class ConfigManager {
       await chrome.storage.sync.set({
         [this.storageKeys.INHIBIT_URLS]: inhibitString
       })
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Enhanced tag storage management
+   * @param {string[]} tags - Array of tags to store
+   * @returns {Promise<void>}
+   */
+  async updateRecentTags (tags) {
+    try {
+      // [IMMUTABLE-REQ-TAG-001] - Validate tags array
+      if (!Array.isArray(tags)) {
+        console.warn('[IMMUTABLE-REQ-TAG-001] Invalid tags array provided')
+        return
+      }
+
+      // [IMMUTABLE-REQ-TAG-001] - Enforce storage limits
+      const config = await this.getConfig()
+      const maxTags = config.recentTagsCountMax || 50
+      const limitedTags = tags.slice(0, maxTags)
+
+      // [IMMUTABLE-REQ-TAG-001] - Store tags with timestamp
+      await chrome.storage.sync.set({
+        [this.storageKeys.RECENT_TAGS]: {
+          tags: limitedTags,
+          timestamp: Date.now(),
+          count: limitedTags.length
+        }
+      })
+
+      console.log('[IMMUTABLE-REQ-TAG-001] Recent tags updated:', limitedTags.length)
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to update recent tags:', error)
+
+      // [IMMUTABLE-REQ-TAG-001] - Fallback to local storage
+      try {
+        await chrome.storage.local.set({
+          [this.storageKeys.RECENT_TAGS]: {
+            tags: tags.slice(0, 50),
+            timestamp: Date.now(),
+            count: Math.min(tags.length, 50)
+          }
+        })
+        console.log('[IMMUTABLE-REQ-TAG-001] Fallback to local storage successful')
+      } catch (fallbackError) {
+        console.error('[IMMUTABLE-REQ-TAG-001] Fallback storage also failed:', fallbackError)
+      }
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Get recent tags with deduplication
+   * @returns {Promise<string[]>} Array of recent tags
+   */
+  async getRecentTags () {
+    try {
+      // [IMMUTABLE-REQ-TAG-001] - Try sync storage first
+      const syncResult = await chrome.storage.sync.get(this.storageKeys.RECENT_TAGS)
+      if (syncResult[this.storageKeys.RECENT_TAGS]) {
+        return syncResult[this.storageKeys.RECENT_TAGS].tags || []
+      }
+
+      // [IMMUTABLE-REQ-TAG-001] - Fallback to local storage
+      const localResult = await chrome.storage.local.get(this.storageKeys.RECENT_TAGS)
+      if (localResult[this.storageKeys.RECENT_TAGS]) {
+        return localResult[this.storageKeys.RECENT_TAGS].tags || []
+      }
+
+      return []
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to get recent tags:', error)
+      return []
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Get tag frequency data
+   * @returns {Promise<Object>} Tag frequency map
+   */
+  async getTagFrequency () {
+    try {
+      const result = await chrome.storage.local.get(this.storageKeys.TAG_FREQUENCY)
+      return result[this.storageKeys.TAG_FREQUENCY] || {}
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to get tag frequency:', error)
+      return {}
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Update tag frequency
+   * @param {Object} frequency - Updated frequency map
+   * @returns {Promise<void>}
+   */
+  async updateTagFrequency (frequency) {
+    try {
+      await chrome.storage.local.set({
+        [this.storageKeys.TAG_FREQUENCY]: frequency
+      })
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to update tag frequency:', error)
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Clean up old tags to manage storage
+   * @returns {Promise<void>}
+   */
+  async cleanupOldTags () {
+    try {
+      const config = await this.getConfig()
+      const maxTags = config.recentTagsCountMax || 50
+
+      const recentTags = await this.getRecentTags()
+      if (recentTags.length > maxTags) {
+        const trimmedTags = recentTags.slice(0, maxTags)
+        await this.updateRecentTags(trimmedTags)
+        console.log('[IMMUTABLE-REQ-TAG-001] Cleaned up old tags, kept:', trimmedTags.length)
+      }
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-001] Failed to cleanup old tags:', error)
     }
   }
 }

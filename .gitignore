@@ -24,3 +24,6 @@ yarn-error.log*
 docs/prompts/
 todo.yml
 docs/development-sessions/prompts
+
+# distribution
+/dist/

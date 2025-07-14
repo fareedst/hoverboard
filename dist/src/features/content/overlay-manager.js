@@ -106,33 +106,38 @@ class OverlayManager {
       currentLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
       currentTagsContainer.appendChild(currentLabel)
 
-      // Add current tags
+      // [IMMUTABLE-REQ-TAG-001] - Add current tags with enhanced validation
       if (content.bookmark?.tags) {
         debugLog('Adding tags', { tags: content.bookmark.tags })
         content.bookmark.tags.forEach(tag => {
-          const tagElement = this.document.createElement('span')
-          tagElement.className = 'tag-element tiny iconTagDeleteInactive'
-          tagElement.textContent = tag
-          tagElement.title = 'Double-click to remove'
-          // Add double-click to remove functionality
-          tagElement.ondblclick = () => {
-            // Remove tag from current content
-            if (content.bookmark && content.bookmark.tags) {
-              const index = content.bookmark.tags.indexOf(tag)
-              if (index > -1) {
-                content.bookmark.tags.splice(index, 1)
-                // Refresh overlay
-                this.show(content)
+          // [IMMUTABLE-REQ-TAG-001] - Validate tag before displaying
+          if (this.isValidTag(tag)) {
+            const tagElement = this.document.createElement('span')
+            tagElement.className = 'tag-element tiny iconTagDeleteInactive'
+            tagElement.textContent = tag
+            tagElement.title = 'Double-click to remove'
+            // [IMMUTABLE-REQ-TAG-001] - Add double-click to remove functionality
+            tagElement.ondblclick = () => {
+              // Remove tag from current content
+              if (content.bookmark && content.bookmark.tags) {
+                const index = content.bookmark.tags.indexOf(tag)
+                if (index > -1) {
+                  content.bookmark.tags.splice(index, 1)
+                  // [IMMUTABLE-REQ-TAG-001] - Refresh overlay
+                  this.show(content)
+                }
               }
             }
+            currentTagsContainer.appendChild(tagElement)
+          } else {
+            debugLog('[IMMUTABLE-REQ-TAG-001] Invalid tag found:', tag)
           }
-          currentTagsContainer.appendChild(tagElement)
         })
       } else {
         debugLog('No tags found in bookmark data')
       }
 
-      // Add tag input (matching desired overlay style)
+      // [IMMUTABLE-REQ-TAG-001] - Add tag input with validation
       const tagInput = this.document.createElement('input')
       tagInput.className = 'tag-input'
       tagInput.placeholder = 'New Tag'
@@ -145,15 +150,23 @@ class OverlayManager {
       tagInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
           const tagText = tagInput.value.trim()
-          if (tagText && content.bookmark) {
+          // [IMMUTABLE-REQ-TAG-001] - Validate tag before adding
+          if (tagText && this.isValidTag(tagText) && content.bookmark) {
             if (!content.bookmark.tags) content.bookmark.tags = []
+            // [IMMUTABLE-REQ-TAG-001] - Check for duplicates
             if (!content.bookmark.tags.includes(tagText)) {
               content.bookmark.tags.push(tagText)
               tagInput.value = ''
-              // Refresh overlay
+              // [IMMUTABLE-REQ-TAG-001] - Refresh overlay
               this.show(content)
-              debugLog('Tag added', tagText)
+              debugLog('[IMMUTABLE-REQ-TAG-001] Tag added', tagText)
+            } else {
+              debugLog('[IMMUTABLE-REQ-TAG-001] Duplicate tag prevented:', tagText)
             }
+          } else if (tagText && !this.isValidTag(tagText)) {
+            debugLog('[IMMUTABLE-REQ-TAG-001] Invalid tag rejected:', tagText)
+            // [IMMUTABLE-REQ-TAG-001] - Show error feedback
+            this.showMessage('Invalid tag format', 'error')
           }
         }
       })
@@ -176,9 +189,10 @@ class OverlayManager {
       recentLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
       recentContainer.appendChild(recentLabel)
 
-      // Add sample recent tags
+      // [IMMUTABLE-REQ-TAG-001] - Add recent tags with duplicate prevention
       const sampleRecentTags = ['development', 'web', 'tutorial', 'javascript', 'reference']
       sampleRecentTags.slice(0, 3).forEach(tag => {
+        // [IMMUTABLE-REQ-TAG-001] - Only show tags not already in current tags
         if (!content.bookmark?.tags?.includes(tag)) {
           const tagElement = this.document.createElement('span')
           tagElement.className = 'tag-element tiny'
@@ -186,11 +200,14 @@ class OverlayManager {
           tagElement.onclick = () => {
             if (content.bookmark) {
               if (!content.bookmark.tags) content.bookmark.tags = []
+              // [IMMUTABLE-REQ-TAG-001] - Check for duplicates before adding
               if (!content.bookmark.tags.includes(tag)) {
                 content.bookmark.tags.push(tag)
-                // Refresh overlay
+                // [IMMUTABLE-REQ-TAG-001] - Refresh overlay
                 this.show(content)
-                debugLog('Tag added from recent', tag)
+                debugLog('[IMMUTABLE-REQ-TAG-001] Tag added from recent', tag)
+              } else {
+                debugLog('[IMMUTABLE-REQ-TAG-001] Duplicate tag prevented from recent:', tag)
               }
             }
           }
@@ -1613,6 +1630,36 @@ class OverlayManager {
       adaptiveVisibility: this.adaptiveVisibility,
       newConfig 
     })
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-001] - Validate tag input
+   * @param {string} tag - Tag to validate
+   * @returns {boolean} Whether tag is valid
+   */
+  isValidTag (tag) {
+    if (!tag || typeof tag !== 'string') {
+      return false
+    }
+
+    const trimmedTag = tag.trim()
+    if (trimmedTag.length === 0 || trimmedTag.length > 50) {
+      return false
+    }
+
+    // [IMMUTABLE-REQ-TAG-001] - Check for invalid characters
+    const invalidChars = /[<>]/g
+    if (invalidChars.test(trimmedTag)) {
+      return false
+    }
+
+    // [IMMUTABLE-REQ-TAG-001] - Check for only safe characters
+    const safeChars = /^[\w\s-]+$/
+    if (!safeChars.test(trimmedTag)) {
+      return false
+    }
+
+    return true
   }
 
   /**

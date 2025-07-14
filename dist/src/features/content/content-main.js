@@ -5,6 +5,9 @@
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
   var __commonJS = (cb, mod) => function __require() {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
@@ -24,6 +27,19 @@
     isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
     mod
   ));
+
+  // src/config/config-manager.js
+  var init_config_manager = __esm({
+    "src/config/config-manager.js"() {
+    }
+  });
+
+  // src/features/tagging/tag-service.js
+  var init_tag_service = __esm({
+    "src/features/tagging/tag-service.js"() {
+      init_config_manager();
+    }
+  });
 
   // node_modules/fast-xml-parser/src/util.js
   var require_util = __commonJS({
@@ -1716,6 +1732,16 @@
     }
   });
 
+  // src/features/pinboard/pinboard-service.js
+  var import_fast_xml_parser;
+  var init_pinboard_service = __esm({
+    "src/features/pinboard/pinboard-service.js"() {
+      init_config_manager();
+      init_tag_service();
+      import_fast_xml_parser = __toESM(require_fxp(), 1);
+    }
+  });
+
   // src/shared/logger.js
   var Logger = class {
     constructor(context = "Hoverboard") {
@@ -2330,20 +2356,24 @@
         if (content.bookmark?.tags) {
           debugLog2("Adding tags", { tags: content.bookmark.tags });
           content.bookmark.tags.forEach((tag) => {
-            const tagElement = this.document.createElement("span");
-            tagElement.className = "tag-element tiny iconTagDeleteInactive";
-            tagElement.textContent = tag;
-            tagElement.title = "Double-click to remove";
-            tagElement.ondblclick = () => {
-              if (content.bookmark && content.bookmark.tags) {
-                const index = content.bookmark.tags.indexOf(tag);
-                if (index > -1) {
-                  content.bookmark.tags.splice(index, 1);
-                  this.show(content);
+            if (this.isValidTag(tag)) {
+              const tagElement = this.document.createElement("span");
+              tagElement.className = "tag-element tiny iconTagDeleteInactive";
+              tagElement.textContent = tag;
+              tagElement.title = "Double-click to remove";
+              tagElement.ondblclick = () => {
+                if (content.bookmark && content.bookmark.tags) {
+                  const index = content.bookmark.tags.indexOf(tag);
+                  if (index > -1) {
+                    content.bookmark.tags.splice(index, 1);
+                    this.show(content);
+                  }
                 }
-              }
-            };
-            currentTagsContainer.appendChild(tagElement);
+              };
+              currentTagsContainer.appendChild(tagElement);
+            } else {
+              debugLog2("[IMMUTABLE-REQ-TAG-001] Invalid tag found:", tag);
+            }
           });
         } else {
           debugLog2("No tags found in bookmark data");
@@ -2360,14 +2390,19 @@
         tagInput.addEventListener("keypress", (e) => {
           if (e.key === "Enter") {
             const tagText = tagInput.value.trim();
-            if (tagText && content.bookmark) {
+            if (tagText && this.isValidTag(tagText) && content.bookmark) {
               if (!content.bookmark.tags) content.bookmark.tags = [];
               if (!content.bookmark.tags.includes(tagText)) {
                 content.bookmark.tags.push(tagText);
                 tagInput.value = "";
                 this.show(content);
-                debugLog2("Tag added", tagText);
+                debugLog2("[IMMUTABLE-REQ-TAG-001] Tag added", tagText);
+              } else {
+                debugLog2("[IMMUTABLE-REQ-TAG-001] Duplicate tag prevented:", tagText);
               }
+            } else if (tagText && !this.isValidTag(tagText)) {
+              debugLog2("[IMMUTABLE-REQ-TAG-001] Invalid tag rejected:", tagText);
+              this.showMessage("Invalid tag format", "error");
             }
           }
         });
@@ -2398,7 +2433,9 @@
                 if (!content.bookmark.tags.includes(tag)) {
                   content.bookmark.tags.push(tag);
                   this.show(content);
-                  debugLog2("Tag added from recent", tag);
+                  debugLog2("[IMMUTABLE-REQ-TAG-001] Tag added from recent", tag);
+                } else {
+                  debugLog2("[IMMUTABLE-REQ-TAG-001] Duplicate tag prevented from recent:", tag);
                 }
               }
             };
@@ -3642,6 +3679,29 @@
       });
     }
     /**
+     * [IMMUTABLE-REQ-TAG-001] - Validate tag input
+     * @param {string} tag - Tag to validate
+     * @returns {boolean} Whether tag is valid
+     */
+    isValidTag(tag) {
+      if (!tag || typeof tag !== "string") {
+        return false;
+      }
+      const trimmedTag = tag.trim();
+      if (trimmedTag.length === 0 || trimmedTag.length > 50) {
+        return false;
+      }
+      const invalidChars = /[<>]/g;
+      if (invalidChars.test(trimmedTag)) {
+        return false;
+      }
+      const safeChars = /^[\w\s-]+$/;
+      if (!safeChars.test(trimmedTag)) {
+        return false;
+      }
+      return true;
+    }
+    /**
      * Cleanup resources
      */
     destroy() {
@@ -4322,10 +4382,10 @@
     }
   };
 
-  // src/features/pinboard/pinboard-service.js
-  var import_fast_xml_parser = __toESM(require_fxp(), 1);
-
   // src/core/message-handler.js
+  init_pinboard_service();
+  init_tag_service();
+  init_config_manager();
   var MESSAGE_TYPES = {
     // Data retrieval
     GET_CURRENT_BOOKMARK: "getCurrentBookmark",

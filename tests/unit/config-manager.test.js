@@ -3,7 +3,7 @@
  * Tests configuration management, authentication, and storage functionality
  */
 
-const { ConfigManager } = require('../../src-new/config/config-manager.js');
+import { ConfigManager } from '../../src/config/config-manager.js';
 
 describe('ConfigManager', () => {
   let configManager;
@@ -48,7 +48,9 @@ describe('ConfigManager', () => {
       expect(configManager.storageKeys).toEqual({
         AUTH_TOKEN: 'hoverboard_auth_token',
         SETTINGS: 'hoverboard_settings',
-        INHIBIT_URLS: 'hoverboard_inhibit_urls'
+        INHIBIT_URLS: 'hoverboard_inhibit_urls',
+        RECENT_TAGS: 'hoverboard_recent_tags',
+        TAG_FREQUENCY: 'hoverboard_tag_frequency'
       });
     });
 
@@ -205,9 +207,7 @@ describe('ConfigManager', () => {
     test('should not add duplicate URLs to inhibit list', async () => {
       await configManager.addInhibitUrl('example.com');
       
-      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
-        hoverboard_inhibit_urls: 'example.com\ntest.com'
-      });
+      expect(global.chrome.storage.sync.set).not.toHaveBeenCalled();
     });
 
     test('should check if URL is allowed', async () => {
@@ -231,8 +231,8 @@ describe('ConfigManager', () => {
     test('should export configuration', async () => {
       const exported = await configManager.exportConfig();
       
-      expect(exported).toHaveProperty('version', '1.0');
-      expect(exported).toHaveProperty('timestamp');
+      expect(exported).toHaveProperty('version', '1.0.0');
+      expect(exported).toHaveProperty('exportDate');
       expect(exported).toHaveProperty('settings');
       expect(exported).toHaveProperty('authToken', 'test-token');
       expect(exported).toHaveProperty('inhibitUrls', ['example.com', 'test.com']);
@@ -240,7 +240,7 @@ describe('ConfigManager', () => {
 
     test('should import configuration', async () => {
       const importData = {
-        version: '1.0',
+        version: '1.0.0',
         settings: { hoverShowRecentTags: true },
         authToken: 'imported-token',
         inhibitUrls: ['imported.com']
@@ -248,9 +248,15 @@ describe('ConfigManager', () => {
       
       await configManager.importConfig(importData);
       
+      // importConfig makes separate calls to saveSettings() and setAuthToken()
+      // Each calls chrome.storage.sync.set() individually
       expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
-        hoverboard_settings: importData.settings,
-        hoverboard_auth_token: importData.authToken,
+        hoverboard_settings: importData.settings
+      });
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_auth_token: importData.authToken
+      });
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
         hoverboard_inhibit_urls: 'imported.com'
       });
     });

@@ -47,9 +47,9 @@ export const MESSAGE_TYPES = {
 }
 
 export class MessageHandler {
-  constructor () {
-    this.pinboardService = new PinboardService()
-    this.tagService = new TagService()
+  constructor (pinboardService = null, tagService = null) {
+    this.pinboardService = pinboardService || new PinboardService()
+    this.tagService = tagService || new TagService()
     this.configManager = new ConfigManager()
   }
 
@@ -185,7 +185,28 @@ export class MessageHandler {
   }
 
   async handleSaveBookmark (data) {
-    return this.pinboardService.saveBookmark(data)
+    // Fetch previous bookmark to get previous tags
+    const previousBookmark = await this.pinboardService.getBookmarkForUrl(data.url)
+    const previousTags = previousBookmark?.tags || []
+    const newTags = Array.isArray(data.tags) ? data.tags : data.tags.split(' ').filter(tag => tag.trim())
+    // Compute which tags are newly added
+    const addedTags = newTags.filter(tag => !previousTags.includes(tag))
+
+    const result = await this.pinboardService.saveBookmark(data)
+
+    // [IMMUTABLE-REQ-TAG-001] - Only track newly added tags
+    for (const tag of addedTags) {
+      if (tag.trim()) {
+        try {
+          await this.tagService.handleTagAddition(tag.trim(), data)
+        } catch (error) {
+          console.error(`[IMMUTABLE-REQ-TAG-001] Failed to track tag "${tag}":`, error)
+          // Don't fail the entire operation if tag tracking fails
+        }
+      }
+    }
+
+    return result
   }
 
   async handleDeleteBookmark (data) {
@@ -193,7 +214,19 @@ export class MessageHandler {
   }
 
   async handleSaveTag (data) {
-    return this.pinboardService.saveTag(data)
+    const result = await this.pinboardService.saveTag(data)
+
+    // [IMMUTABLE-REQ-TAG-001] - Enhanced tag tracking for tag save
+    if (data.value && data.value.trim()) {
+      try {
+        await this.tagService.handleTagAddition(data.value.trim(), data)
+      } catch (error) {
+        console.error(`[IMMUTABLE-REQ-TAG-001] Failed to track tag "${data.value}":`, error)
+        // Don't fail the entire operation if tag tracking fails
+      }
+    }
+
+    return result
   }
 
   async handleDeleteTag (data) {
