@@ -86,12 +86,12 @@ class HoverboardContentScript {
       // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
       // Update overlay manager config with options and transparency settings
       this.overlayManager.config = { ...this.overlayManager.config, ...this.config }
-      
+
       // Update overlay manager transparency properties
       this.overlayManager.transparencyMode = this.config.overlayTransparencyMode || 'nearly-transparent'
       this.overlayManager.positionMode = this.config.overlayPositionMode || 'bottom-fixed'
       this.overlayManager.adaptiveVisibility = this.config.overlayAdaptiveVisibility || true
-      
+
       debugLog('Overlay manager configured with transparency settings', {
         transparencyMode: this.overlayManager.transparencyMode,
         positionMode: this.overlayManager.positionMode,
@@ -209,7 +209,7 @@ class HoverboardContentScript {
       const response = await this.messageClient.sendMessage({
         type: MESSAGE_TYPES.GET_OPTIONS
       })
-      
+
       if (response) {
         this.config = { ...this.getDefaultConfig(), ...response }
         console.log('📋 Configuration loaded:', this.config)
@@ -355,7 +355,7 @@ class HoverboardContentScript {
       }
 
       debugLog('Current bookmark data:', this.currentBookmark)
-      
+
       // Enhanced debugging for bookmark structure
       console.log('🔍 [Debug] Bookmark data structure:')
       console.log('🔍 [Debug] - URL:', this.currentBookmark.url)
@@ -593,20 +593,20 @@ class HoverboardContentScript {
   handleUpdateOverlayTransparency (config) {
     try {
       console.log('Updating overlay transparency configuration:', config)
-      
+
       // Update local configuration
       this.config = { ...this.config, ...config }
-      
+
       // Update overlay manager configuration
       if (this.overlayManager) {
         this.overlayManager.updateConfig(config)
-        
+
         // Apply transparency changes immediately if overlay is visible
         if (this.overlayManager.isVisible) {
           this.overlayManager.applyTransparencyMode()
         }
       }
-      
+
       console.log('Overlay transparency configuration updated successfully')
     } catch (error) {
       console.error('Failed to update overlay transparency:', error)

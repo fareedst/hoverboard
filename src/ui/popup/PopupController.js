@@ -2,14 +2,20 @@
  * PopupController - Main business logic controller for the popup
  */
 
+import { UIManager } from './UIManager.js'
+import { StateManager } from './StateManager.js'
+import { ErrorHandler } from '../../shared/ErrorHandler.js'
+import { debugLog, debugError } from '../../shared/utils.js'
+
 export class PopupController {
-  constructor ({ uiManager, stateManager, errorHandler }) {
-    this.uiManager = uiManager
-    this.stateManager = stateManager
-    this.errorHandler = errorHandler
+  constructor (dependencies = {}) {
+    this.uiManager = dependencies.uiManager || new UIManager()
+    this.stateManager = dependencies.stateManager || new StateManager()
+    this.errorHandler = dependencies.errorHandler || new ErrorHandler()
 
     this.currentTab = null
     this.currentPin = null
+    this.isInitialized = false
     this.isLoading = false
 
     // Bind methods
@@ -24,7 +30,7 @@ export class PopupController {
     this.handleReloadExtension = this.handleReloadExtension.bind(this)
     this.handleOpenOptions = this.handleOpenOptions.bind(this)
     this.normalizeTags = this.normalizeTags.bind(this)
-    
+
     this.setupEventListeners()
   }
 
@@ -57,6 +63,7 @@ export class PopupController {
     this.uiManager.on('addTag', this.handleAddTag)
     this.uiManager.on('removeTag', this.handleRemoveTag)
     this.uiManager.on('search', this.handleSearch)
+
     this.uiManager.on('deletePin', this.handleDeletePin)
     this.uiManager.on('reloadExtension', this.handleReloadExtension)
     this.uiManager.on('openOptions', this.handleOpenOptions)
@@ -87,10 +94,10 @@ export class PopupController {
       this.stateManager.setState({ currentPin: this.currentPin })
 
       // Debug: Log the bookmark data structure
-      console.log('Bookmark data received:', this.currentPin)
+      debugLog('Bookmark data received:', this.currentPin)
       if (this.currentPin?.tags) {
-        console.log('Tags data type:', typeof this.currentPin.tags)
-        console.log('Tags data:', this.currentPin.tags)
+        debugLog('Tags data type:', typeof this.currentPin.tags)
+        debugLog('Tags data:', this.currentPin.tags)
       }
 
       // Process and normalize tags
@@ -111,8 +118,12 @@ export class PopupController {
       // Set version info
       const manifest = chrome.runtime.getManifest()
       this.uiManager.updateVersionInfo(manifest.version)
+
+      // Mark as initialized
+      this.isInitialized = true
+      debugLog('[POPUP-CONTROLLER] Popup initialization completed')
     } catch (error) {
-      console.error('Failed to load initial data:', error)
+      debugError('Failed to load initial data:', error)
       if (this.errorHandler) {
         this.errorHandler.handleError('Failed to load initial data', error)
       }
@@ -128,9 +139,12 @@ export class PopupController {
    */
   async loadRecentTags () {
     try {
+      debugLog('[POPUP-CONTROLLER] Loading recent tags')
+
       // [IMMUTABLE-REQ-TAG-001] - Get current tags to exclude from recent tags
       const currentTags = this.normalizeTags(this.currentPin?.tags || [])
-      
+      debugLog('[POPUP-CONTROLLER] Current tags to exclude:', currentTags)
+
       const response = await this.sendMessage({
         type: 'getRecentBookmarks',
         data: {
@@ -144,7 +158,11 @@ export class PopupController {
         }
       })
 
+      debugLog('[POPUP-CONTROLLER] Recent bookmarks response received:', response)
+
       if (response && response.recentTags) {
+        debugLog('[POPUP-CONTROLLER] Recent tags from response:', response.recentTags)
+
         // [IMMUTABLE-REQ-TAG-001] - Extract tag names from recent tags data
         // Handle both string arrays and object arrays
         const recentTagNames = response.recentTags.map(tag => {
@@ -156,18 +174,23 @@ export class PopupController {
             return String(tag)
           }
         })
-        
+
+        debugLog('[POPUP-CONTROLLER] Extracted recent tag names:', recentTagNames)
+
         // [IMMUTABLE-REQ-TAG-001] - Filter out current tags to avoid duplicates
-        const filteredRecentTags = recentTagNames.filter(tag => 
+        const filteredRecentTags = recentTagNames.filter(tag =>
           !currentTags.includes(tag)
         )
-        
+
+        debugLog('[POPUP-CONTROLLER] Filtered recent tags (excluding current):', filteredRecentTags)
+
         this.uiManager.updateRecentTags(filteredRecentTags)
       } else {
+        debugLog('[POPUP-CONTROLLER] No recent tags in response, updating with empty array')
         this.uiManager.updateRecentTags([])
       }
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to load recent tags:', error)
+      debugError('[POPUP-CONTROLLER] Failed to load recent tags:', error)
       this.uiManager.updateRecentTags([])
     }
   }
@@ -286,15 +309,15 @@ export class PopupController {
         if (chrome.runtime.lastError) {
           // If content script isn't loaded, try to inject it
           if (chrome.runtime.lastError.message.includes('Receiving end does not exist')) {
-            console.log('Content script not found, attempting injection...')
+            debugLog('Content script not found, attempting injection...')
             this.injectContentScript(this.currentTab.id)
               .then(() => {
-                console.log('Content script injected, waiting for initialization...')
+                debugLog('Content script injected, waiting for initialization...')
                 // Wait a bit for the content script to initialize before retrying
                 setTimeout(() => {
                   chrome.tabs.sendMessage(this.currentTab.id, message, (retryResponse) => {
                     if (chrome.runtime.lastError) {
-                      console.error('Retry failed, trying fallback injection:', chrome.runtime.lastError.message)
+                      debugError('Retry failed, trying fallback injection:', chrome.runtime.lastError.message)
                       // ES6 module injection failed, try fallback approach
                       this.injectFallbackContentScript(this.currentTab.id)
                         .then(() => {
@@ -302,28 +325,28 @@ export class PopupController {
                           setTimeout(() => {
                             chrome.tabs.sendMessage(this.currentTab.id, message, (fallbackResponse) => {
                               if (chrome.runtime.lastError) {
-                                console.error('Fallback also failed:', chrome.runtime.lastError.message)
+                                debugError('Fallback also failed:', chrome.runtime.lastError.message)
                                 reject(new Error(chrome.runtime.lastError.message))
                                 return
                               }
-                              console.log('Message sent successfully after fallback injection')
+                              debugLog('Message sent successfully after fallback injection')
                               resolve(fallbackResponse)
                             })
                           }, 500)
                         })
                         .catch(fallbackError => {
-                          console.error('Fallback injection failed:', fallbackError)
+                          debugError('Fallback injection failed:', fallbackError)
                           reject(new Error(`Both injection methods failed: ${fallbackError.message}`))
                         })
                       return
                     }
-                    console.log('Message sent successfully after injection')
+                    debugLog('Message sent successfully after injection')
                     resolve(retryResponse)
                   })
                 }, 1000) // Wait 1 second for content script to initialize
               })
               .catch(error => {
-                console.error('Content script injection failed:', error)
+                debugError('Content script injection failed:', error)
                 reject(new Error(`Failed to inject content script: ${error.message}`))
               })
             return
@@ -353,7 +376,7 @@ export class PopupController {
    */
   async injectContentScript (tabId) {
     try {
-      console.log('Injecting content script into tab:', tabId)
+      debugLog('Injecting content script into tab:', tabId)
 
       // First inject the CSS
       await chrome.scripting.insertCSS({
@@ -367,10 +390,10 @@ export class PopupController {
         files: ['dist/src/features/content/content-main.js']
       })
 
-      console.log('Content script injection completed:', results)
+      debugLog('Content script injection completed:', results)
       return results
     } catch (error) {
-      console.error('Content script injection error:', error)
+      debugError('Content script injection error:', error)
       throw error
     }
   }
@@ -380,7 +403,7 @@ export class PopupController {
    */
   async injectFallbackContentScript (tabId) {
     try {
-      console.log('Injecting fallback content script into tab:', tabId)
+      debugLog('Injecting fallback content script into tab:', tabId)
 
       const results = await chrome.scripting.executeScript({
         target: { tabId },
@@ -414,12 +437,12 @@ export class PopupController {
                   })
                 }
               } catch (error) {
-                console.error('Failed to refresh overlay:', error)
+                debugError('Failed to refresh overlay:', error)
               }
             }
 
             chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-              console.log('Hoverboard content script received message:', message)
+              debugLog('Hoverboard content script received message:', message)
 
               if (message.type === 'TOGGLE_HOVER') {
                 let overlay = document.getElementById('hoverboard-overlay')
@@ -727,10 +750,10 @@ export class PopupController {
         }
       })
 
-      console.log('Fallback content script injection completed:', results)
+      debugLog('Fallback content script injection completed:', results)
       return results
     } catch (error) {
-      console.error('Fallback content script injection error:', error)
+      debugError('Fallback content script injection error:', error)
       throw error
     }
   }
@@ -748,7 +771,7 @@ export class PopupController {
    */
   async handleShowHoverboard () {
     try {
-      console.log('Attempting to show hoverboard on tab:', this.currentTab)
+      debugLog('Attempting to show hoverboard on tab:', this.currentTab)
 
       // Check if we can inject into this tab
       if (!this.canInjectIntoTab(this.currentTab)) {
@@ -764,7 +787,7 @@ export class PopupController {
       })
       this.closePopup()
     } catch (error) {
-      console.error('Show hoverboard error:', error)
+      debugError('Show hoverboard error:', error)
       this.errorHandler.handleError('Failed to toggle hoverboard', error)
     }
   }
@@ -865,7 +888,7 @@ export class PopupController {
 
       // [IMMUTABLE-REQ-TAG-001] - Sanitize and validate tags
       const newTags = tagText.trim().split(/\s+/).filter(tag => tag.length > 0)
-      
+
       // [IMMUTABLE-REQ-TAG-001] - Validate each tag
       for (const tag of newTags) {
         if (!this.isValidTag(tag)) {
@@ -887,12 +910,12 @@ export class PopupController {
 
       // [IMMUTABLE-REQ-TAG-001] - Clear the input
       this.uiManager.clearTagInput()
-      
+
       // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after adding a tag
       await this.loadRecentTags()
     } catch (error) {
       this.errorHandler.handleError('Failed to add tags', error)
-      
+
       // [IMMUTABLE-REQ-TAG-001] - Even on failure, update UI with current tags and recent tags
       if (this.currentPin) {
         const currentTagsArray = this.normalizeTags(this.currentPin.tags)
@@ -919,7 +942,7 @@ export class PopupController {
       const tagsArray = this.normalizeTags(this.currentPin.tags).filter(tag => tag !== tagToRemove)
 
       await this.addTagsToBookmark(tagsArray)
-      
+
       // Recent tags are refreshed in addTagsToBookmark
     } catch (error) {
       this.errorHandler.handleError('Failed to remove tag', error)
@@ -959,7 +982,7 @@ export class PopupController {
     this.stateManager.setState({ currentPin: this.currentPin })
     this.uiManager.updateCurrentTags(tags)
     this.uiManager.showSuccess('Tags updated successfully')
-    
+
     // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after updating bookmark
     await this.loadRecentTags()
   }
@@ -997,36 +1020,74 @@ export class PopupController {
     this.stateManager.setState({ currentPin: this.currentPin })
     this.uiManager.updateCurrentTags(tags)
     this.uiManager.showSuccess('Bookmark created successfully')
-    
+
     // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after creating bookmark
     await this.loadRecentTags()
   }
 
   /**
-   * Handle search action
+   * Handle search action - now uses tab search functionality
    */
   async handleSearch (searchText) {
+    debugLog('[SEARCH-UI] Starting search:', { searchText, currentTab: this.currentTab })
+
     if (!searchText || !searchText.trim()) {
       this.errorHandler.handleError('Please enter search terms')
+      return
+    }
+
+    // Check if popup is still initializing
+    if (!this.isInitialized) {
+      debugLog('[SEARCH-UI] Popup not yet initialized, waiting...')
+      this.errorHandler.handleError('Please wait for popup to finish loading')
+      return
+    }
+
+    // If currentTab is not available, try to get it
+    if (!this.currentTab || !this.currentTab.id) {
+      debugLog('[SEARCH-UI] No current tab available, attempting to get current tab')
+      try {
+        this.currentTab = await this.getCurrentTab()
+        debugLog('[SEARCH-UI] Retrieved current tab:', this.currentTab)
+      } catch (error) {
+        debugError('[SEARCH-UI] Failed to get current tab:', error)
+        this.errorHandler.handleError('Unable to get current tab information')
+        return
+      }
+    }
+
+    if (!this.currentTab || !this.currentTab.id) {
+      this.errorHandler.handleError('No current tab available')
       return
     }
 
     try {
       this.setLoading(true)
 
+      debugLog('[SEARCH-UI] Sending search message with tab ID:', this.currentTab.id)
       const response = await this.sendMessage({
-        type: 'searchTitle',
+        type: 'searchTabs',
         data: { searchText: searchText.trim() }
       })
 
-      this.uiManager.showSuccess('Search completed')
-      // Could potentially show search results in a separate view
+      debugLog('[SEARCH-UI] Received response:', response)
+
+      if (response.success) {
+        this.uiManager.showSuccess(`Found ${response.matchCount} matching tabs - navigating to "${response.tabTitle}"`)
+      } else {
+        this.uiManager.showError(response.message || 'No matching tabs found')
+      }
     } catch (error) {
-      this.errorHandler.handleError('Failed to search', error)
+      debugError('[SEARCH-UI] Search error:', error)
+      this.errorHandler.handleError('Failed to search tabs', error)
     } finally {
       this.setLoading(false)
     }
   }
+
+
+
+
 
   /**
    * Handle delete bookmark action

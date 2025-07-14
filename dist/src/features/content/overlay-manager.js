@@ -54,7 +54,7 @@ class OverlayManager {
   show (content) {
     try {
       debugLog('Showing overlay', { content })
-      
+
       // Enhanced debugging for overlay content
       console.log('🎨 [Overlay Debug] Content received:')
       console.log('🎨 [Overlay Debug] - Full content:', content)
@@ -222,7 +222,7 @@ class OverlayManager {
         this.visibilityControls = new VisibilityControls(this.document, this.visibilityControlsCallback)
         debugLog('VisibilityControls component initialized')
       }
-      
+
       // Create the visibility controls UI
       visibilityControlsContainer = this.visibilityControls.createControls()
       debugLog('VisibilityControls UI created')
@@ -294,6 +294,9 @@ class OverlayManager {
 
       debugLog('Overlay structure created with enhanced styling')
 
+      // [IMMUTABLE-REQ-TAG-002] Add tab search section to overlay
+      this.addTabSearchSection(mainContainer)
+
       // Assemble the overlay (matching desired structure)
       mainContainer.appendChild(currentTagsContainer)
       mainContainer.appendChild(recentContainer)
@@ -330,7 +333,7 @@ class OverlayManager {
       // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
       // Apply transparency and positioning modes
       this.applyTransparencyMode()
-      
+
       // Add CSS animations
       this.addShowAnimation()
 
@@ -609,7 +612,7 @@ class OverlayManager {
 
     // Apply bottom-fixed positioning class
     this.overlayElement.classList.add('hoverboard-overlay-bottom')
-    
+
     // Override base positioning styles
     this.overlayElement.style.position = 'fixed'
     this.overlayElement.style.bottom = '0'
@@ -680,7 +683,7 @@ class OverlayManager {
     }
 
     // Setup adaptive visibility if enabled
-    if (this.adaptiveVisibility && 
+    if (this.adaptiveVisibility &&
         (this.transparencyMode === 'nearly-transparent' || this.transparencyMode === 'fully-transparent')) {
       this.setupAdaptiveVisibility()
     }
@@ -697,7 +700,7 @@ class OverlayManager {
 
     this.proximityListener = (e) => {
       const distanceFromBottom = window.innerHeight - e.clientY
-      
+
       if (distanceFromBottom < 100) {
         this.overlayElement.classList.add('proximity-active')
       } else if (distanceFromBottom > 200) {
@@ -902,18 +905,81 @@ class OverlayManager {
 
     const style = this.document.createElement('style')
     style.id = styleId
-    
+
     // Combine overlay CSS with VisibilityControls CSS
     let cssContent = this.getOverlayCSS()
-    
+
     // UI-VIS-001: Add VisibilityControls CSS
     if (this.visibilityControls) {
       cssContent += '\n' + this.visibilityControls.getControlsCSS()
     }
-    
+
     style.textContent = cssContent
 
     this.document.head.appendChild(style)
+  }
+
+  /**
+   * [TAB-SEARCH-UI] Add tab search section to overlay
+   */
+  addTabSearchSection (mainContainer) {
+    const searchContainer = this.document.createElement('div')
+    searchContainer.className = 'tab-search-container'
+    searchContainer.style.cssText = `
+      margin-bottom: 8px;
+      padding: 4px;
+      border-radius: 4px;
+    `
+
+    const searchLabel = this.document.createElement('span')
+    searchLabel.className = 'label-primary tiny'
+    searchLabel.textContent = 'Search Tabs:'
+    searchLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
+    searchContainer.appendChild(searchLabel)
+
+    const searchInput = this.document.createElement('input')
+    searchInput.className = 'tab-search-input'
+    searchInput.placeholder = 'Enter tab title...'
+    searchInput.style.cssText = `
+      margin: 2px;
+      padding: 2px 4px;
+      font-size: 12px;
+      width: 120px;
+    `
+
+    // [TAB-SEARCH-UI] Add search input event handlers
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        const searchText = searchInput.value.trim()
+        if (searchText) {
+          this.handleTabSearch(searchText)
+        }
+      }
+    })
+
+    searchContainer.appendChild(searchInput)
+    mainContainer.appendChild(searchContainer)
+  }
+
+  /**
+   * [TAB-SEARCH-UI] Handle tab search from overlay
+   */
+  async handleTabSearch (searchText) {
+    try {
+      const response = await chrome.runtime.sendMessage({
+        type: 'searchTabs',
+        data: { searchText }
+      })
+
+      if (response.success) {
+        this.showMessage(`Found ${response.matchCount} tabs - navigating to "${response.tabTitle}"`, 'success')
+      } else {
+        this.showMessage(response.message || 'No matching tabs found', 'error')
+      }
+    } catch (error) {
+      console.error('[TAB-SEARCH-UI] Tab search error:', error)
+      this.showMessage('Failed to search tabs', 'error')
+    }
   }
 
   /**
@@ -946,7 +1012,7 @@ class OverlayManager {
         min-height: auto;
         opacity: 0;
         transform: scale(0.9) translateY(-10px);
-        
+
         /* Default theme variables and transition timing */
         --theme-opacity: 0.9;
         --theme-text-opacity: 1.0;
@@ -960,41 +1026,41 @@ class OverlayManager {
         --theme-text-primary: #ffffff;
         --theme-text-secondary: #e0e0e0;
         --theme-text-muted: #b0b0b0;
-        
+
         /* Special text colors for light backgrounds in dark theme */
         --theme-text-on-light: #333333;
         --theme-text-secondary-on-light: #666666;
-        
+
         /* Background colors */
         --theme-background-primary: #2c3e50;
         --theme-background-secondary: #34495e;
         --theme-background-tertiary: #455a64;
-        
+
         /* Interactive element colors - Dark backgrounds for light-on-dark */
         --theme-button-bg: #34495e;
         --theme-button-hover: #455a64;
         --theme-button-active: #546e7a;
-        
+
         /* Input styling - Dark backgrounds for light-on-dark */
         --theme-input-bg: #34495e;
         --theme-input-border: #455a64;
         --theme-input-focus: #74b9ff;
-        
+
         /* Status and semantic colors - optimized for dark backgrounds */
         --theme-success: #2ecc71;
         --theme-warning: #f1c40f;
         --theme-danger: #e74c3c;
         --theme-info: #74b9ff;
-        
+
         /* Tag-specific styling - softer colors for dark theme */
         --theme-tag-bg: rgba(46, 204, 113, 0.15);
         --theme-tag-text: #7bed9f;
         --theme-tag-border: rgba(46, 204, 113, 0.3);
-        
+
         /* Borders and separators */
         --theme-border: rgba(255, 255, 255, 0.2);
         --theme-separator: rgba(255, 255, 255, 0.1);
-        
+
         /* RGB values for dynamic transparency - Dark theme uses dark RGB */
         --theme-bg-rgb: 44, 62, 80;
       }
@@ -1005,41 +1071,41 @@ class OverlayManager {
         --theme-text-primary: #333333;
         --theme-text-secondary: #666666;
         --theme-text-muted: #999999;
-        
+
         /* Text colors for consistency (same as primary in light theme) */
         --theme-text-on-light: #333333;
         --theme-text-secondary-on-light: #666666;
-        
+
         /* Background colors */
         --theme-background-primary: #ffffff;
         --theme-background-secondary: #f8f9fa;
         --theme-background-tertiary: #e9ecef;
-        
+
         /* Interactive element colors */
         --theme-button-bg: rgba(0, 0, 0, 0.05);
         --theme-button-hover: rgba(0, 0, 0, 0.1);
         --theme-button-active: rgba(0, 0, 0, 0.15);
-        
+
         /* Input styling */
         --theme-input-bg: rgba(255, 255, 255, 0.8);
         --theme-input-border: rgba(0, 0, 0, 0.2);
         --theme-input-focus: rgba(0, 100, 200, 0.3);
-        
+
         /* Status and semantic colors */
         --theme-success: #28a745;
         --theme-warning: #ffc107;
         --theme-danger: #dc3545;
         --theme-info: #17a2b8;
-        
+
         /* Tag-specific styling */
         --theme-tag-bg: rgba(40, 167, 69, 0.1);
         --theme-tag-text: #28a745;
         --theme-tag-border: rgba(40, 167, 69, 0.3);
-        
+
         /* Borders and separators */
         --theme-border: rgba(0, 0, 0, 0.1);
         --theme-separator: rgba(0, 0, 0, 0.05);
-        
+
         /* RGB values for dynamic transparency */
         --theme-bg-rgb: 255, 255, 255;
       }
@@ -1062,13 +1128,13 @@ class OverlayManager {
       .hoverboard-overlay.transparency-mode * {
         text-shadow: var(--theme-text-shadow, none);
       }
-      
+
       .hoverboard-overlay * {
         box-sizing: border-box;
       }
 
       /* 🎨 Theme-Aware Element Styling */
-      
+
       /* Container elements */
       .hoverboard-overlay .scrollmenu,
       .hoverboard-overlay .tags-container {
@@ -1148,37 +1214,37 @@ class OverlayManager {
       .hoverboard-overlay .tag-input::placeholder {
         color: var(--theme-text-muted);
       }
-      
+
       .hoverboard-container {
         display: flex;
         flex-direction: column;
         gap: 16px;
       }
-      
+
       .hoverboard-section {
         border-bottom: 1px solid #eee;
         padding-bottom: 12px;
       }
-      
+
       .hoverboard-section:last-child {
         border-bottom: none;
         padding-bottom: 0;
       }
-      
+
       .section-header {
         font-weight: 600;
         font-size: 14px;
         color: #2c3e50;
         margin-bottom: 8px;
       }
-      
+
       .tags-container {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
         margin-bottom: 12px;
       }
-      
+
       /* Button elements */
       .hoverboard-overlay .action-button {
         background: var(--theme-button-bg);
@@ -1190,7 +1256,7 @@ class OverlayManager {
         cursor: pointer;
         font-size: 12px;
       }
-      
+
       .hoverboard-overlay .action-button:hover {
         background: var(--theme-button-hover);
         border-color: var(--theme-input-focus);
@@ -1200,7 +1266,7 @@ class OverlayManager {
         background: var(--theme-button-active);
         border-color: var(--theme-info);
       }
-      
+
       /* Close button - uses danger color */
       .hoverboard-overlay .close-button {
         background: var(--theme-danger);
@@ -1212,7 +1278,7 @@ class OverlayManager {
         cursor: pointer;
         font-weight: 900;
       }
-      
+
       .hoverboard-overlay .close-button:hover {
         background: color-mix(in srgb, var(--theme-danger) 80%, black);
         transform: scale(1.05);
@@ -1230,7 +1296,7 @@ class OverlayManager {
       }
 
       /* 🎨 Light-on-Dark Theme Comprehensive Overrides - ALL interactive elements get dark backgrounds */
-      
+
       /* Main overlay container - Override inline styles with highest specificity */
       .hoverboard-overlay.hoverboard-theme-light-on-dark,
       #hoverboard-overlay.hoverboard-theme-light-on-dark,
@@ -1317,13 +1383,13 @@ class OverlayManager {
         background: var(--theme-danger) !important;
         color: white !important;
       }
-      
+
       .add-tag-container {
         display: flex;
         gap: 8px;
         align-items: center;
       }
-      
+
       /* Form elements */
       .hoverboard-overlay .add-tag-input {
         background: var(--theme-input-bg);
@@ -1336,7 +1402,7 @@ class OverlayManager {
         width: 140px;
         outline: none;
       }
-      
+
       .hoverboard-overlay .add-tag-input:focus {
         border-color: var(--theme-input-focus);
         box-shadow: 0 0 0 2px rgba(var(--theme-input-focus), 0.2);
@@ -1345,7 +1411,7 @@ class OverlayManager {
       .hoverboard-overlay .add-tag-input::placeholder {
         color: var(--theme-text-muted);
       }
-      
+
       .hoverboard-overlay .add-tag-button {
         background: var(--theme-success);
         color: white;
@@ -1357,29 +1423,29 @@ class OverlayManager {
         font-size: 13px;
         font-weight: 500;
       }
-      
+
       .hoverboard-overlay .add-tag-button:hover {
         background: color-mix(in srgb, var(--theme-success) 80%, black);
         border-color: color-mix(in srgb, var(--theme-success) 80%, black);
       }
-      
+
       .actions {
         display: flex;
         justify-content: flex-end;
         gap: 8px;
       }
-      
+
       @media (max-width: 480px) {
         .hoverboard-overlay {
           min-width: 280px;
           max-width: 90vw;
           font-size: 13px;
         }
-        
+
         .tags-container {
           gap: 4px;
         }
-        
+
         .actions {
           gap: 6px;
         }
@@ -1489,21 +1555,21 @@ class OverlayManager {
           flex-direction: column;
           gap: 8px;
         }
-        
+
         .hoverboard-overlay-bottom .hoverboard-section {
           min-width: unset;
           width: 100%;
         }
-        
+
         .hoverboard-overlay-bottom .add-tag-container {
           flex-direction: row;
           justify-content: space-between;
         }
-        
+
         .hoverboard-overlay-bottom .add-tag-input {
           max-width: 200px;
         }
-        
+
         .hoverboard-overlay-bottom .actions {
           gap: 8px;
           justify-content: center;
@@ -1556,32 +1622,32 @@ class OverlayManager {
    */
   applyVisibilitySettings (settings) {
     debugLog('Applying comprehensive visibility settings', settings)
-    
+
     if (this.overlayElement) {
       // Remove existing theme and transparency classes
       this.overlayElement.classList.remove(
-        'hoverboard-theme-light-on-dark', 
+        'hoverboard-theme-light-on-dark',
         'hoverboard-theme-dark-on-light',
         'transparency-mode',
         'solid-background'
       )
-      
+
       // Apply new theme class
       this.overlayElement.classList.add(`hoverboard-theme-${settings.textTheme}`)
-      
+
       // Apply transparency mode if enabled
       if (settings.transparencyEnabled) {
         this.overlayElement.classList.add('transparency-mode')
-        
+
         // Set dynamic opacity level for enhanced styling
         const opacity = settings.backgroundOpacity / 100
         let opacityLevel = 'high'
         if (opacity < 0.4) opacityLevel = 'low'
         else if (opacity < 0.7) opacityLevel = 'medium'
-        
+
         this.overlayElement.setAttribute('data-opacity-level', opacityLevel)
         this.overlayElement.style.setProperty('--theme-opacity', opacity)
-        
+
         // Apply theme-aware background with dynamic opacity
         if (settings.textTheme === 'light-on-dark') {
           this.overlayElement.style.background = `rgba(44, 62, 80, ${opacity})`
@@ -1589,7 +1655,7 @@ class OverlayManager {
           this.overlayElement.style.background = `rgba(255, 255, 255, ${opacity})`
         }
         this.overlayElement.style.backdropFilter = 'blur(2px)'
-        
+
         debugLog(`Applied transparency: ${settings.textTheme} with ${settings.backgroundOpacity}% opacity (${opacityLevel} level)`)
       } else {
         // Solid theme mode
@@ -1598,10 +1664,10 @@ class OverlayManager {
         this.overlayElement.style.removeProperty('--theme-opacity')
         this.overlayElement.style.background = ''
         this.overlayElement.style.backdropFilter = 'none'
-        
+
         debugLog(`Applied solid theme: ${settings.textTheme}`)
       }
-      
+
       // Force CSS recalculation for immediate visual update
       this.overlayElement.offsetHeight
     }
@@ -1612,7 +1678,7 @@ class OverlayManager {
    */
   updateConfig (newConfig) {
     this.config = { ...this.config, ...newConfig }
-    
+
     // Update transparency-related properties
     if (newConfig.overlayTransparencyMode !== undefined) {
       this.transparencyMode = newConfig.overlayTransparencyMode
@@ -1623,12 +1689,12 @@ class OverlayManager {
     if (newConfig.overlayAdaptiveVisibility !== undefined) {
       this.adaptiveVisibility = newConfig.overlayAdaptiveVisibility
     }
-    
-    debugLog('Configuration updated', { 
+
+    debugLog('Configuration updated', {
       transparencyMode: this.transparencyMode,
       positionMode: this.positionMode,
       adaptiveVisibility: this.adaptiveVisibility,
-      newConfig 
+      newConfig
     })
   }
 
@@ -1668,7 +1734,7 @@ class OverlayManager {
   destroy () {
     this.removeOverlay()
 
-    // 🔻 UI-005: Content protection - 🛡️ Page interaction safeguards  
+    // 🔻 UI-005: Content protection - 🛡️ Page interaction safeguards
     // Clean up transparency-related listeners
     if (this.proximityListener) {
       this.document.removeEventListener('mousemove', this.proximityListener)

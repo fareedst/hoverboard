@@ -11,6 +11,7 @@
 import { ConfigManager } from '../../config/config-manager.js'
 import { TagService } from '../tagging/tag-service.js' // [IMMUTABLE-REQ-TAG-001] - Import TagService
 import { XMLParser } from 'fast-xml-parser'
+import { debugLog, debugError } from '../../shared/utils.js'
 
 export class PinboardService {
   constructor (tagService = null) {
@@ -50,32 +51,32 @@ export class PinboardService {
       // PIN-002: Clean URL before API request for consistent matching
       const cleanUrl = this.cleanUrl(url)
       const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`
-      
-      console.log('🔍 Making Pinboard API request:', {
+
+      debugLog('🔍 Making Pinboard API request:', {
         endpoint,
         cleanUrl,
         originalUrl: url
       })
-      
+
       const response = await this.makeApiRequest(endpoint)
-      
-      console.log('📥 Pinboard API response received:', response)
+
+      debugLog('📥 Pinboard API response received:', response)
 
       // PIN-002: Parse XML response into bookmark object
       const parsed = this.parseBookmarkResponse(response, cleanUrl, title)
-      
-      console.log('📋 Parsed bookmark result:', parsed)
-      
+
+      debugLog('📋 Parsed bookmark result:', parsed)
+
       return parsed
     } catch (error) {
-      console.error('❌ Failed to get bookmark for URL:', error)
-      console.error('❌ Error details:', error.message)
-      console.error('❌ Full error:', error)
-      
+      debugError('❌ Failed to get bookmark for URL:', error)
+      debugError('❌ Error details:', error.message)
+      debugError('❌ Full error:', error)
+
       // PIN-002: Return empty bookmark structure on failure for UI consistency
       const emptyBookmark = this.createEmptyBookmark(url, title)
-      console.log('📝 Returning empty bookmark due to error:', emptyBookmark)
-      
+      debugLog('📝 Returning empty bookmark due to error:', emptyBookmark)
+
       return emptyBookmark
     }
   }
@@ -91,14 +92,25 @@ export class PinboardService {
    */
   async getRecentBookmarks (count = 15) {
     try {
+      debugLog('[PINBOARD-SERVICE] Getting recent bookmarks, count:', count)
+
       // PIN-002: Fetch recent bookmarks with specified count
       const endpoint = `posts/recent?count=${count}`
       const response = await this.makeApiRequest(endpoint)
 
+      debugLog('[PINBOARD-SERVICE] Raw API response received')
+
       // PIN-002: Parse XML response into bookmark array
-      return this.parseRecentBookmarksResponse(response)
+      const result = this.parseRecentBookmarksResponse(response)
+      debugLog('[PINBOARD-SERVICE] Parsed recent bookmarks:', result.map(b => ({
+        url: b.url,
+        description: b.description,
+        tags: b.tags
+      })))
+
+      return result
     } catch (error) {
-      console.error('Failed to get recent bookmarks:', error)
+      debugError('[PINBOARD-SERVICE] Failed to get recent bookmarks:', error)
       // PIN-002: Return empty array on failure for UI stability
       return []
     }
@@ -127,7 +139,7 @@ export class PinboardService {
       // PIN-003: Parse API response for save confirmation
       return this.parseApiResponse(response)
     } catch (error) {
-      console.error('Failed to save bookmark:', error)
+      debugError('Failed to save bookmark:', error)
       // PIN-003: Re-throw to allow caller to handle save failures
       throw error
     }
@@ -171,7 +183,7 @@ export class PinboardService {
 
       return this.saveBookmark(updatedBookmark)
     } catch (error) {
-      console.error('Failed to save tag:', error)
+      debugError('Failed to save tag:', error)
       // PIN-003: Re-throw to allow caller error handling
       throw error
     }
@@ -196,7 +208,7 @@ export class PinboardService {
       // PIN-003: Parse API response for deletion confirmation
       return this.parseApiResponse(response)
     } catch (error) {
-      console.error('Failed to delete bookmark:', error)
+      debugError('Failed to delete bookmark:', error)
       // PIN-003: Re-throw to allow caller error handling
       throw error
     }
@@ -218,10 +230,10 @@ export class PinboardService {
         for (const sanitizedTag of sanitizedTags) {
           await this.tagService.handleTagAddition(sanitizedTag, bookmarkData)
         }
-        console.log('[IMMUTABLE-REQ-TAG-001] Tracked tags for bookmark:', sanitizedTags)
+        debugLog('[IMMUTABLE-REQ-TAG-001] Tracked tags for bookmark:', sanitizedTags)
       }
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to track bookmark tags:', error)
+      debugError('[IMMUTABLE-REQ-TAG-001] Failed to track bookmark tags:', error)
       // [IMMUTABLE-REQ-TAG-001] - Don't throw error to avoid breaking bookmark save
     }
   }
@@ -235,7 +247,7 @@ export class PinboardService {
    */
   async handleTagError (error, operation, context = {}) {
     // [IMMUTABLE-REQ-TAG-001] - Log error with context
-    console.error(`[IMMUTABLE-REQ-TAG-001] Tag operation failed: ${operation}`, {
+    debugError(`[IMMUTABLE-REQ-TAG-001] Tag operation failed: ${operation}`, {
       error: error.message,
       stack: error.stack,
       context
@@ -245,9 +257,9 @@ export class PinboardService {
     if (error.name === 'QuotaExceededError') {
       try {
         await this.tagService.cleanupOldTags()
-        console.log('[IMMUTABLE-REQ-TAG-001] Attempted cleanup after quota exceeded')
+        debugLog('[IMMUTABLE-REQ-TAG-001] Attempted cleanup after quota exceeded')
       } catch (cleanupError) {
-        console.error('[IMMUTABLE-REQ-TAG-001] Cleanup also failed:', cleanupError)
+        debugError('[IMMUTABLE-REQ-TAG-001] Cleanup also failed:', cleanupError)
       }
     }
 
@@ -255,7 +267,7 @@ export class PinboardService {
     try {
       await this.notifyUserOfTagError(operation, error.message)
     } catch (notificationError) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to notify user:', notificationError)
+      debugError('[IMMUTABLE-REQ-TAG-001] Failed to notify user:', notificationError)
     }
   }
 
@@ -268,10 +280,10 @@ export class PinboardService {
   async notifyUserOfTagError (operation, errorMessage) {
     // [IMMUTABLE-REQ-TAG-001] - Create user-friendly error message
     const userMessage = `Tag ${operation} failed, but bookmark was saved. Error: ${errorMessage}`
-    
+
     // [IMMUTABLE-REQ-TAG-001] - Log user notification
-    console.warn('[IMMUTABLE-REQ-TAG-001] User notification:', userMessage)
-    
+    debugWarn('[IMMUTABLE-REQ-TAG-001] User notification:', userMessage)
+
     // [IMMUTABLE-REQ-TAG-001] - Could be extended to show browser notification
     // For now, just log the message
   }
@@ -283,7 +295,7 @@ export class PinboardService {
    */
   extractTagsFromBookmarkData (bookmarkData) {
     const tags = []
-    
+
     // [IMMUTABLE-REQ-TAG-001] - Extract tags from tags field
     if (bookmarkData.tags) {
       if (typeof bookmarkData.tags === 'string') {
@@ -295,7 +307,7 @@ export class PinboardService {
         tags.push(...bookmarkData.tags.filter(tag => tag && tag.trim()))
       }
     }
-    
+
     return tags
   }
 
@@ -326,7 +338,7 @@ export class PinboardService {
 
       return this.saveBookmark(updatedBookmark)
     } catch (error) {
-      console.error('Failed to delete tag:', error)
+      debugError('Failed to delete tag:', error)
       // PIN-003: Re-throw to allow caller error handling
       throw error
     }
@@ -349,7 +361,7 @@ export class PinboardService {
       // PIN-001: If the request succeeds without throwing an error, authentication is valid
       return true
     } catch (error) {
-      console.error('Connection test failed:', error)
+      debugError('Connection test failed:', error)
       // PIN-001: Return false on any authentication failure
       return false
     }
@@ -368,8 +380,8 @@ export class PinboardService {
   async makeApiRequest (endpoint, method = 'GET') {
     // PIN-001: Verify authentication token exists before making request
     const hasAuth = await this.configManager.hasAuthToken()
-    console.log('🔐 Auth token check:', hasAuth)
-    
+    debugLog('🔐 Auth token check:', hasAuth)
+
     if (!hasAuth) {
       throw new Error('No authentication token configured')
     }
@@ -377,8 +389,8 @@ export class PinboardService {
     // PIN-001: Get formatted authentication parameter from config manager
     const authParam = await this.configManager.getAuthTokenParam()
     const url = `${this.apiBase}${endpoint}&${authParam}`
-    
-    console.log('🌐 Making API request to:', url.replace(/auth_token=[^&]+/, 'auth_token=***HIDDEN***'))
+
+    debugLog('🌐 Making API request to:', url.replace(/auth_token=[^&]+/, 'auth_token=***HIDDEN***'))
 
     // PIN-004: Use retry logic for network resilience
     return this.makeRequestWithRetry(url, method)
@@ -400,12 +412,12 @@ export class PinboardService {
     const config = await this.configManager.getConfig()
 
     try {
-      console.log(`🚀 Attempting HTTP ${method} request (attempt ${retryCount + 1})`)
-      
+      debugLog(`🚀 Attempting HTTP ${method} request (attempt ${retryCount + 1})`)
+
       // PIN-004: Make HTTP request using fetch API
       const response = await fetch(url, { method })
-      
-      console.log(`📡 HTTP response status: ${response.status} ${response.statusText}`)
+
+      debugLog(`📡 HTTP response status: ${response.status} ${response.statusText}`)
 
       // PIN-004: Check for HTTP error responses
       if (!response.ok) {
@@ -414,15 +426,15 @@ export class PinboardService {
 
       // PIN-004: Parse XML response text
       const xmlText = await response.text()
-      console.log('📄 Raw XML response:', xmlText.substring(0, 500) + (xmlText.length > 500 ? '...' : ''))
-      
+      debugLog('📄 Raw XML response:', xmlText.substring(0, 500) + (xmlText.length > 500 ? '...' : ''))
+
       const parsed = this.parseXmlResponse(xmlText)
-      console.log('✅ Successfully parsed XML response')
-      
+      debugLog('✅ Successfully parsed XML response')
+
       return parsed
     } catch (error) {
-      console.error(`💥 HTTP request failed:`, error.message)
-      
+      debugError(`💥 HTTP request failed:`, error.message)
+
       // PIN-004: Determine if error is retryable (network/rate limit issues)
       const isRetryable = this.isRetryableError(error)
       const maxRetries = config.pinRetryCountMax || 2
@@ -430,15 +442,15 @@ export class PinboardService {
       if (isRetryable && retryCount < maxRetries) {
         // PIN-004: Calculate delay for progressive backoff
         const delay = this.retryDelays[retryCount] || config.pinRetryDelay || 1000
-        console.warn(`🔄 API request failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`)
+        debugWarn(`🔄 API request failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`)
 
         // PIN-004: Wait before retry
         await this.sleep(delay)
         return this.makeRequestWithRetry(url, method, retryCount + 1)
       }
 
-      console.error(`❌ Max retries exceeded or non-retryable error. Giving up.`)
-      
+      debugError(`❌ Max retries exceeded or non-retryable error. Giving up.`)
+
       // PIN-004: Re-throw error if not retryable or max retries exceeded
       throw error
     }
@@ -458,8 +470,8 @@ export class PinboardService {
       // PIN-001: Parse XML using configured parser
       return this.xmlParser.parse(xmlText)
     } catch (error) {
-      console.error('Failed to parse XML response:', error)
-      console.error('XML content:', xmlText)
+      debugError('Failed to parse XML response:', error)
+      debugError('XML content:', xmlText)
       // PIN-001: Re-throw parsing errors for caller handling
       throw new Error('Invalid XML response from Pinboard API')
     }
@@ -478,21 +490,21 @@ export class PinboardService {
    */
   parseBookmarkResponse (xmlObj, url, title) {
     try {
-      console.log('🔍 Parsing XML object structure:', JSON.stringify(xmlObj, null, 2))
-      
+      debugLog('🔍 Parsing XML object structure:', JSON.stringify(xmlObj, null, 2))
+
       // PIN-002: Extract posts array from XML structure
       const posts = xmlObj?.posts?.post
-      
-      console.log('📋 Posts extracted:', posts)
-      console.log('📋 Posts type:', typeof posts)
-      console.log('📋 Posts is array:', Array.isArray(posts))
-      console.log('📋 Posts length:', posts?.length)
+
+      debugLog('📋 Posts extracted:', posts)
+      debugLog('📋 Posts type:', typeof posts)
+      debugLog('📋 Posts is array:', Array.isArray(posts))
+      debugLog('📋 Posts length:', posts?.length)
 
       if (posts && posts.length > 0) {
         // PIN-002: Get first post (should only be one for specific URL)
         const post = Array.isArray(posts) ? posts[0] : posts
-        
-        console.log('📄 Processing post:', post)
+
+        debugLog('📄 Processing post:', post)
 
         // PIN-002: Extract bookmark data from XML attributes
         const result = {
@@ -505,15 +517,15 @@ export class PinboardService {
           toread: post['@_toread'] || 'no',
           hash: post['@_hash'] || ''
         }
-        
-        console.log('✅ Successfully parsed bookmark:', result)
+
+        debugLog('✅ Successfully parsed bookmark:', result)
         return result
       }
 
       if (posts && !Array.isArray(posts)) {
         // Handle case where posts is a single object, not array
-        console.log('📄 Single post object found, processing directly:', posts)
-        
+        debugLog('📄 Single post object found, processing directly:', posts)
+
         const result = {
           url: posts['@_href'] || url,
           description: posts['@_description'] || title || '',
@@ -524,16 +536,16 @@ export class PinboardService {
           toread: posts['@_toread'] || 'no',
           hash: posts['@_hash'] || ''
         }
-        
-        console.log('✅ Successfully parsed single bookmark:', result)
+
+        debugLog('✅ Successfully parsed single bookmark:', result)
         return result
       }
 
-      console.log('⚠️ No posts found in XML structure')
+      debugLog('⚠️ No posts found in XML structure')
       // PIN-002: Return empty bookmark if no posts found
       return this.createEmptyBookmark(url, title)
     } catch (error) {
-      console.error('❌ Failed to parse bookmark response:', error)
+      debugError('❌ Failed to parse bookmark response:', error)
       // PIN-002: Return empty bookmark on parsing error
       return this.createEmptyBookmark(url, title)
     }
@@ -550,30 +562,55 @@ export class PinboardService {
    */
   parseRecentBookmarksResponse (xmlObj) {
     try {
+      debugLog('[PINBOARD-SERVICE] Parsing recent bookmarks XML object')
+      debugLog('[PINBOARD-SERVICE] XML object structure:', JSON.stringify(xmlObj, null, 2))
+
       // PIN-002: Extract posts array from XML structure
       const posts = xmlObj?.posts?.post
 
       if (!posts) {
+        debugLog('[PINBOARD-SERVICE] No posts found in XML response')
         // PIN-002: Return empty array if no posts
         return []
       }
 
       // PIN-002: Ensure posts is an array for consistent processing
       const postsArray = Array.isArray(posts) ? posts : [posts]
+      debugLog('[PINBOARD-SERVICE] Processing posts array, count:', postsArray.length)
 
       // PIN-002: Parse each post into normalized bookmark object
-      return postsArray.map(post => ({
-        url: post['@_href'] || '',
-        description: post['@_description'] || '',
-        extended: post['@_extended'] || '',
-        tags: post['@_tag'] ? post['@_tag'].split(' ') : [],
-        time: post['@_time'] || '',
-        shared: post['@_shared'] || 'yes',
-        toread: post['@_toread'] || 'no',
-        hash: post['@_hash'] || ''
-      }))
+      const result = postsArray.map((post, index) => {
+        debugLog(`[PINBOARD-SERVICE] Processing post ${index + 1}:`, {
+          href: post['@_href'],
+          description: post['@_description'],
+          tag: post['@_tag'],
+          time: post['@_time']
+        })
+
+        const tags = post['@_tag'] ? post['@_tag'].split(' ') : []
+        debugLog(`[PINBOARD-SERVICE] Post ${index + 1} tags after split:`, tags)
+
+        return {
+          url: post['@_href'] || '',
+          description: post['@_description'] || '',
+          extended: post['@_extended'] || '',
+          tags: tags,
+          time: post['@_time'] || '',
+          shared: post['@_shared'] || 'yes',
+          toread: post['@_toread'] || 'no',
+          hash: post['@_hash'] || ''
+        }
+      })
+
+      debugLog('[PINBOARD-SERVICE] Final parsed bookmarks:', result.map(b => ({
+        url: b.url,
+        description: b.description,
+        tags: b.tags
+      })))
+
+      return result
     } catch (error) {
-      console.error('Failed to parse recent bookmarks response:', error)
+      debugError('[PINBOARD-SERVICE] Failed to parse recent bookmarks response:', error)
       // PIN-002: Return empty array on parsing error
       return []
     }
@@ -600,7 +637,7 @@ export class PinboardService {
         message: result?.['#text'] || 'Operation completed'
       }
     } catch (error) {
-      console.error('Failed to parse API response:', error)
+      debugError('Failed to parse API response:', error)
       // PIN-003: Return failure result on parsing error
       return {
         success: false,

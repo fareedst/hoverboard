@@ -31,6 +31,7 @@ class OptionsController {
     this.elements.showHoverOnLoad = document.getElementById('show-hover-on-load')
     this.elements.hoverShowTooltips = document.getElementById('hover-show-tooltips')
     this.elements.recentPostsCount = document.getElementById('recent-posts-count')
+    this.elements.showSectionLabels = document.getElementById('show-section-labels')
 
     // Visibility defaults
     this.elements.defaultThemeToggle = document.getElementById('default-theme-toggle')
@@ -104,6 +105,7 @@ class OptionsController {
       this.elements.showHoverOnLoad.checked = config.showHoverOnPageLoad
       this.elements.hoverShowTooltips.checked = config.hoverShowTooltips
       this.elements.recentPostsCount.value = config.initRecentPostsCount
+      this.elements.showSectionLabels.checked = config.uxShowSectionLabels
 
       this.elements.badgeNotBookmarked.value = config.badgeTextIfNotBookmarked
       this.elements.badgeNoTags.value = config.badgeTextIfBookmarkedNoTags
@@ -118,7 +120,7 @@ class OptionsController {
       // Load visibility defaults
       this.elements.defaultTransparencyEnabled.checked = config.defaultTransparencyEnabled
       this.elements.defaultBackgroundOpacity.value = config.defaultBackgroundOpacity
-      
+
       // Update visibility UI
       this.currentTheme = config.defaultVisibilityTheme
       this.updateThemeDisplay()
@@ -151,6 +153,7 @@ class OptionsController {
         showHoverOnPageLoad: this.elements.showHoverOnLoad.checked,
         hoverShowTooltips: this.elements.hoverShowTooltips.checked,
         initRecentPostsCount: parseInt(this.elements.recentPostsCount.value),
+        uxShowSectionLabels: this.elements.showSectionLabels.checked,
 
         badgeTextIfNotBookmarked: this.elements.badgeNotBookmarked.value,
         badgeTextIfBookmarkedNoTags: this.elements.badgeNoTags.value,
@@ -402,7 +405,7 @@ class OptionsController {
   updateThemeDisplay () {
     const themeIcon = this.elements.defaultThemeToggle.querySelector('.theme-icon')
     const themeText = this.elements.defaultThemeToggle.querySelector('.theme-text')
-    
+
     if (themeIcon && themeText) {
       const isLightOnDark = this.currentTheme === 'light-on-dark'
       themeIcon.textContent = isLightOnDark ? '🌙' : '☀️'
@@ -427,11 +430,11 @@ class OptionsController {
     const preview = this.elements.visibilityPreview
     const isTransparent = this.elements.defaultTransparencyEnabled.checked
     const opacity = parseInt(this.elements.defaultBackgroundOpacity.value) / 100
-    
+
     // Remove existing theme classes
     preview.classList.remove('theme-light-on-dark', 'theme-dark-on-light')
     preview.classList.add(`theme-${this.currentTheme}`)
-    
+
     // Apply transparency and opacity
     if (isTransparent) {
       if (this.currentTheme === 'light-on-dark') {

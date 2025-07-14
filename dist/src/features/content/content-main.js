@@ -28,9 +28,87 @@
     mod
   ));
 
+  // src/shared/logger.js
+  var Logger, logger;
+  var init_logger = __esm({
+    "src/shared/logger.js"() {
+      Logger = class {
+        constructor(context = "Hoverboard") {
+          this.context = context;
+          this.logLevel = this.getLogLevel();
+        }
+        // LOG-002: Environment-based log level determination
+        // SPECIFICATION: Production builds should minimize console output for performance
+        // IMPLEMENTATION DECISION: Debug logs in development, warnings+ in production
+        getLogLevel() {
+          if (typeof process === "undefined" || !process.env) {
+            return "debug";
+          }
+          return false ? "warn" : "debug";
+        }
+        // LOG-001: Log level filtering logic
+        // IMPLEMENTATION DECISION: Numeric level comparison for efficient filtering
+        shouldLog(level) {
+          const levels = { debug: 0, info: 1, warn: 2, error: 3 };
+          return levels[level] >= levels[this.logLevel];
+        }
+        // LOG-001: Consistent message formatting with metadata
+        // SPECIFICATION: Include timestamp, context, and level for log analysis
+        // IMPLEMENTATION DECISION: ISO timestamp format for precise timing and parsing
+        formatMessage(level, message, ...args) {
+          const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+          const prefix = `[${timestamp}] [${this.context}] [${level.toUpperCase()}]`;
+          return [prefix, message, ...args];
+        }
+        // LOG-001: Debug level logging - Development information
+        // IMPLEMENTATION DECISION: Use console.log for debug to distinguish from info
+        debug(message, ...args) {
+          if (this.shouldLog("debug")) {
+            console.log(...this.formatMessage("debug", message, ...args));
+          }
+        }
+        // LOG-001: Info level logging - General information
+        // IMPLEMENTATION DECISION: Use console.info for semantic clarity
+        info(message, ...args) {
+          if (this.shouldLog("info")) {
+            console.info(...this.formatMessage("info", message, ...args));
+          }
+        }
+        // LOG-001: Warning level logging - Non-critical issues
+        // IMPLEMENTATION DECISION: Use console.warn for proper browser developer tools integration
+        warn(message, ...args) {
+          if (this.shouldLog("warn")) {
+            console.warn(...this.formatMessage("warn", message, ...args));
+          }
+        }
+        // LOG-001: Error level logging - Critical issues
+        // IMPLEMENTATION DECISION: Use console.error for proper error tracking and debugging
+        error(message, ...args) {
+          if (this.shouldLog("error")) {
+            console.error(...this.formatMessage("error", message, ...args));
+          }
+        }
+        // LOG-003: Legacy compatibility methods
+        // SPECIFICATION: Maintain backward compatibility during gradual migration
+        // IMPLEMENTATION DECISION: Map legacy log calls to debug level
+        log(context, ...args) {
+          this.debug(`[${context}]`, ...args);
+        }
+      };
+      logger = new Logger();
+    }
+  });
+
   // src/config/config-manager.js
   var init_config_manager = __esm({
     "src/config/config-manager.js"() {
+    }
+  });
+
+  // src/shared/utils.js
+  var init_utils = __esm({
+    "src/shared/utils.js"() {
+      init_logger();
     }
   });
 
@@ -38,6 +116,7 @@
   var init_tag_service = __esm({
     "src/features/tagging/tag-service.js"() {
       init_config_manager();
+      init_utils();
     }
   });
 
@@ -1739,71 +1818,12 @@
       init_config_manager();
       init_tag_service();
       import_fast_xml_parser = __toESM(require_fxp(), 1);
+      init_utils();
     }
   });
 
-  // src/shared/logger.js
-  var Logger = class {
-    constructor(context = "Hoverboard") {
-      this.context = context;
-      this.logLevel = this.getLogLevel();
-    }
-    // LOG-002: Environment-based log level determination
-    // SPECIFICATION: Production builds should minimize console output for performance
-    // IMPLEMENTATION DECISION: Debug logs in development, warnings+ in production
-    getLogLevel() {
-      return false ? "warn" : "debug";
-    }
-    // LOG-001: Log level filtering logic
-    // IMPLEMENTATION DECISION: Numeric level comparison for efficient filtering
-    shouldLog(level) {
-      const levels = { debug: 0, info: 1, warn: 2, error: 3 };
-      return levels[level] >= levels[this.logLevel];
-    }
-    // LOG-001: Consistent message formatting with metadata
-    // SPECIFICATION: Include timestamp, context, and level for log analysis
-    // IMPLEMENTATION DECISION: ISO timestamp format for precise timing and parsing
-    formatMessage(level, message, ...args) {
-      const timestamp = (/* @__PURE__ */ new Date()).toISOString();
-      const prefix = `[${timestamp}] [${this.context}] [${level.toUpperCase()}]`;
-      return [prefix, message, ...args];
-    }
-    // LOG-001: Debug level logging - Development information
-    // IMPLEMENTATION DECISION: Use console.log for debug to distinguish from info
-    debug(message, ...args) {
-      if (this.shouldLog("debug")) {
-        console.log(...this.formatMessage("debug", message, ...args));
-      }
-    }
-    // LOG-001: Info level logging - General information
-    // IMPLEMENTATION DECISION: Use console.info for semantic clarity
-    info(message, ...args) {
-      if (this.shouldLog("info")) {
-        console.info(...this.formatMessage("info", message, ...args));
-      }
-    }
-    // LOG-001: Warning level logging - Non-critical issues
-    // IMPLEMENTATION DECISION: Use console.warn for proper browser developer tools integration
-    warn(message, ...args) {
-      if (this.shouldLog("warn")) {
-        console.warn(...this.formatMessage("warn", message, ...args));
-      }
-    }
-    // LOG-001: Error level logging - Critical issues
-    // IMPLEMENTATION DECISION: Use console.error for proper error tracking and debugging
-    error(message, ...args) {
-      if (this.shouldLog("error")) {
-        console.error(...this.formatMessage("error", message, ...args));
-      }
-    }
-    // LOG-003: Legacy compatibility methods
-    // SPECIFICATION: Maintain backward compatibility during gradual migration
-    // IMPLEMENTATION DECISION: Map legacy log calls to debug level
-    log(context, ...args) {
-      this.debug(`[${context}]`, ...args);
-    }
-  };
-  var logger = new Logger();
+  // src/features/content/overlay-manager.js
+  init_logger();
 
   // src/shared/logger-browser.js
   var Logger2 = class {
@@ -1912,22 +1932,22 @@
             </button>
           </label>
         </div>
-        
+
         <div class="control-group">
           <label class="control-label">
             <input type="checkbox" class="transparency-toggle" ${this.settings.transparencyEnabled ? "checked" : ""}>
             <span class="label-text">Transparency</span>
           </label>
         </div>
-        
+
         <div class="control-group opacity-group ${!this.settings.transparencyEnabled ? "disabled" : ""}">
           <label class="control-label">
             <span class="label-text">Opacity:</span>
             <div class="slider-container">
-              <input type="range" 
-                     class="opacity-slider" 
-                     min="10" 
-                     max="100" 
+              <input type="range"
+                     class="opacity-slider"
+                     min="10"
+                     max="100"
                      value="${this.settings.backgroundOpacity}"
                      ${!this.settings.transparencyEnabled ? "disabled" : ""}>
               <span class="opacity-value">${this.settings.backgroundOpacity}%</span>
@@ -1986,7 +2006,7 @@
     }
     /**
      * Set transparency enabled state
-     * @param {boolean} enabled 
+     * @param {boolean} enabled
      */
     setTransparencyEnabled(enabled) {
       this.settings.transparencyEnabled = enabled;
@@ -2095,7 +2115,7 @@
         z-index: 1000;
         min-width: 160px;
       }
-      
+
       .visibility-controls-header {
         display: flex;
         align-items: center;
@@ -2105,12 +2125,12 @@
         border-bottom: 1px solid #e9ecef;
         border-radius: 5px 5px 0 0;
       }
-      
+
       .controls-title {
         font-weight: 600;
         color: #495057;
       }
-      
+
       .controls-toggle {
         background: none;
         border: none;
@@ -2120,36 +2140,36 @@
         font-size: 14px;
         line-height: 1;
       }
-      
+
       .controls-toggle:hover {
         background: rgba(0, 0, 0, 0.1);
       }
-      
+
       .visibility-controls-panel {
         padding: 8px;
         transition: all 0.2s ease;
         max-height: 200px;
         overflow: hidden;
       }
-      
+
       .visibility-controls-panel.collapsed {
         max-height: 0;
         padding: 0 8px;
       }
-      
+
       .control-group {
         margin-bottom: 8px;
       }
-      
+
       .control-group:last-child {
         margin-bottom: 0;
       }
-      
+
       .control-group.disabled {
         opacity: 0.5;
         pointer-events: none;
       }
-      
+
       .control-label {
         display: flex;
         align-items: center;
@@ -2157,12 +2177,12 @@
         cursor: pointer;
         padding: 2px 0;
       }
-      
+
       .label-text {
         font-weight: 500;
         color: #495057;
       }
-      
+
       .theme-toggle {
         display: flex;
         align-items: center;
@@ -2175,26 +2195,26 @@
         font-size: 11px;
         transition: all 0.15s ease;
       }
-      
+
       .theme-toggle:hover {
         background: #dee2e6;
         border-color: #adb5bd;
       }
-      
+
       .theme-icon {
         font-size: 12px;
       }
-      
+
       .transparency-toggle {
         cursor: pointer;
       }
-      
+
       .slider-container {
         display: flex;
         align-items: center;
         gap: 6px;
       }
-      
+
       .opacity-slider {
         width: 80px;
         height: 4px;
@@ -2203,7 +2223,7 @@
         outline: none;
         cursor: pointer;
       }
-      
+
       .opacity-slider::-webkit-slider-thumb {
         appearance: none;
         width: 12px;
@@ -2212,7 +2232,7 @@
         border-radius: 50%;
         cursor: pointer;
       }
-      
+
       .opacity-slider::-moz-range-thumb {
         width: 12px;
         height: 12px;
@@ -2221,46 +2241,46 @@
         cursor: pointer;
         border: none;
       }
-      
+
       .opacity-value {
         font-size: 10px;
         color: #6c757d;
         min-width: 30px;
         text-align: right;
       }
-      
+
       /* Dark theme styles */
       .hoverboard-theme-light-on-dark .hoverboard-visibility-controls {
         background: rgba(33, 37, 41, 0.95);
         border-color: #495057;
         color: #f8f9fa;
       }
-      
+
       .hoverboard-theme-light-on-dark .visibility-controls-header {
         background: #343a40;
         border-color: #495057;
       }
-      
+
       .hoverboard-theme-light-on-dark .controls-title,
       .hoverboard-theme-light-on-dark .label-text {
         color: #f8f9fa;
       }
-      
+
       .hoverboard-theme-light-on-dark .theme-toggle {
         background: #495057;
         border-color: #6c757d;
         color: #f8f9fa;
       }
-      
+
       .hoverboard-theme-light-on-dark .theme-toggle:hover {
         background: #5a6268;
         border-color: #adb5bd;
       }
-      
+
       .hoverboard-theme-light-on-dark .opacity-slider {
         background: #495057;
       }
-      
+
       .hoverboard-theme-light-on-dark .opacity-value {
         color: #adb5bd;
       }
@@ -2504,6 +2524,7 @@
         <div class="text-muted">${content.bookmark?.url || content.pageUrl || ""}</div>
       `;
         debugLog2("Overlay structure created with enhanced styling");
+        this.addTabSearchSection(mainContainer);
         mainContainer.appendChild(currentTagsContainer);
         mainContainer.appendChild(recentContainer);
         if (visibilityControlsContainer) {
@@ -2986,6 +3007,61 @@
       this.document.head.appendChild(style);
     }
     /**
+     * [TAB-SEARCH-UI] Add tab search section to overlay
+     */
+    addTabSearchSection(mainContainer) {
+      const searchContainer = this.document.createElement("div");
+      searchContainer.className = "tab-search-container";
+      searchContainer.style.cssText = `
+      margin-bottom: 8px;
+      padding: 4px;
+      border-radius: 4px;
+    `;
+      const searchLabel = this.document.createElement("span");
+      searchLabel.className = "label-primary tiny";
+      searchLabel.textContent = "Search Tabs:";
+      searchLabel.style.cssText = "padding: 0.2em 0.5em; margin-right: 4px;";
+      searchContainer.appendChild(searchLabel);
+      const searchInput = this.document.createElement("input");
+      searchInput.className = "tab-search-input";
+      searchInput.placeholder = "Enter tab title...";
+      searchInput.style.cssText = `
+      margin: 2px;
+      padding: 2px 4px;
+      font-size: 12px;
+      width: 120px;
+    `;
+      searchInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+          const searchText = searchInput.value.trim();
+          if (searchText) {
+            this.handleTabSearch(searchText);
+          }
+        }
+      });
+      searchContainer.appendChild(searchInput);
+      mainContainer.appendChild(searchContainer);
+    }
+    /**
+     * [TAB-SEARCH-UI] Handle tab search from overlay
+     */
+    async handleTabSearch(searchText) {
+      try {
+        const response = await chrome.runtime.sendMessage({
+          type: "searchTabs",
+          data: { searchText }
+        });
+        if (response.success) {
+          this.showMessage(`Found ${response.matchCount} tabs - navigating to "${response.tabTitle}"`, "success");
+        } else {
+          this.showMessage(response.message || "No matching tabs found", "error");
+        }
+      } catch (error) {
+        console.error("[TAB-SEARCH-UI] Tab search error:", error);
+        this.showMessage("Failed to search tabs", "error");
+      }
+    }
+    /**
      * Get overlay CSS styles
      */
     getOverlayCSS() {
@@ -3015,7 +3091,7 @@
         min-height: auto;
         opacity: 0;
         transform: scale(0.9) translateY(-10px);
-        
+
         /* Default theme variables and transition timing */
         --theme-opacity: 0.9;
         --theme-text-opacity: 1.0;
@@ -3029,41 +3105,41 @@
         --theme-text-primary: #ffffff;
         --theme-text-secondary: #e0e0e0;
         --theme-text-muted: #b0b0b0;
-        
+
         /* Special text colors for light backgrounds in dark theme */
         --theme-text-on-light: #333333;
         --theme-text-secondary-on-light: #666666;
-        
+
         /* Background colors */
         --theme-background-primary: #2c3e50;
         --theme-background-secondary: #34495e;
         --theme-background-tertiary: #455a64;
-        
+
         /* Interactive element colors - Dark backgrounds for light-on-dark */
         --theme-button-bg: #34495e;
         --theme-button-hover: #455a64;
         --theme-button-active: #546e7a;
-        
+
         /* Input styling - Dark backgrounds for light-on-dark */
         --theme-input-bg: #34495e;
         --theme-input-border: #455a64;
         --theme-input-focus: #74b9ff;
-        
+
         /* Status and semantic colors - optimized for dark backgrounds */
         --theme-success: #2ecc71;
         --theme-warning: #f1c40f;
         --theme-danger: #e74c3c;
         --theme-info: #74b9ff;
-        
+
         /* Tag-specific styling - softer colors for dark theme */
         --theme-tag-bg: rgba(46, 204, 113, 0.15);
         --theme-tag-text: #7bed9f;
         --theme-tag-border: rgba(46, 204, 113, 0.3);
-        
+
         /* Borders and separators */
         --theme-border: rgba(255, 255, 255, 0.2);
         --theme-separator: rgba(255, 255, 255, 0.1);
-        
+
         /* RGB values for dynamic transparency - Dark theme uses dark RGB */
         --theme-bg-rgb: 44, 62, 80;
       }
@@ -3074,41 +3150,41 @@
         --theme-text-primary: #333333;
         --theme-text-secondary: #666666;
         --theme-text-muted: #999999;
-        
+
         /* Text colors for consistency (same as primary in light theme) */
         --theme-text-on-light: #333333;
         --theme-text-secondary-on-light: #666666;
-        
+
         /* Background colors */
         --theme-background-primary: #ffffff;
         --theme-background-secondary: #f8f9fa;
         --theme-background-tertiary: #e9ecef;
-        
+
         /* Interactive element colors */
         --theme-button-bg: rgba(0, 0, 0, 0.05);
         --theme-button-hover: rgba(0, 0, 0, 0.1);
         --theme-button-active: rgba(0, 0, 0, 0.15);
-        
+
         /* Input styling */
         --theme-input-bg: rgba(255, 255, 255, 0.8);
         --theme-input-border: rgba(0, 0, 0, 0.2);
         --theme-input-focus: rgba(0, 100, 200, 0.3);
-        
+
         /* Status and semantic colors */
         --theme-success: #28a745;
         --theme-warning: #ffc107;
         --theme-danger: #dc3545;
         --theme-info: #17a2b8;
-        
+
         /* Tag-specific styling */
         --theme-tag-bg: rgba(40, 167, 69, 0.1);
         --theme-tag-text: #28a745;
         --theme-tag-border: rgba(40, 167, 69, 0.3);
-        
+
         /* Borders and separators */
         --theme-border: rgba(0, 0, 0, 0.1);
         --theme-separator: rgba(0, 0, 0, 0.05);
-        
+
         /* RGB values for dynamic transparency */
         --theme-bg-rgb: 255, 255, 255;
       }
@@ -3131,13 +3207,13 @@
       .hoverboard-overlay.transparency-mode * {
         text-shadow: var(--theme-text-shadow, none);
       }
-      
+
       .hoverboard-overlay * {
         box-sizing: border-box;
       }
 
       /* \u{1F3A8} Theme-Aware Element Styling */
-      
+
       /* Container elements */
       .hoverboard-overlay .scrollmenu,
       .hoverboard-overlay .tags-container {
@@ -3217,37 +3293,37 @@
       .hoverboard-overlay .tag-input::placeholder {
         color: var(--theme-text-muted);
       }
-      
+
       .hoverboard-container {
         display: flex;
         flex-direction: column;
         gap: 16px;
       }
-      
+
       .hoverboard-section {
         border-bottom: 1px solid #eee;
         padding-bottom: 12px;
       }
-      
+
       .hoverboard-section:last-child {
         border-bottom: none;
         padding-bottom: 0;
       }
-      
+
       .section-header {
         font-weight: 600;
         font-size: 14px;
         color: #2c3e50;
         margin-bottom: 8px;
       }
-      
+
       .tags-container {
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
         margin-bottom: 12px;
       }
-      
+
       /* Button elements */
       .hoverboard-overlay .action-button {
         background: var(--theme-button-bg);
@@ -3259,7 +3335,7 @@
         cursor: pointer;
         font-size: 12px;
       }
-      
+
       .hoverboard-overlay .action-button:hover {
         background: var(--theme-button-hover);
         border-color: var(--theme-input-focus);
@@ -3269,7 +3345,7 @@
         background: var(--theme-button-active);
         border-color: var(--theme-info);
       }
-      
+
       /* Close button - uses danger color */
       .hoverboard-overlay .close-button {
         background: var(--theme-danger);
@@ -3281,7 +3357,7 @@
         cursor: pointer;
         font-weight: 900;
       }
-      
+
       .hoverboard-overlay .close-button:hover {
         background: color-mix(in srgb, var(--theme-danger) 80%, black);
         transform: scale(1.05);
@@ -3299,7 +3375,7 @@
       }
 
       /* \u{1F3A8} Light-on-Dark Theme Comprehensive Overrides - ALL interactive elements get dark backgrounds */
-      
+
       /* Main overlay container - Override inline styles with highest specificity */
       .hoverboard-overlay.hoverboard-theme-light-on-dark,
       #hoverboard-overlay.hoverboard-theme-light-on-dark,
@@ -3386,13 +3462,13 @@
         background: var(--theme-danger) !important;
         color: white !important;
       }
-      
+
       .add-tag-container {
         display: flex;
         gap: 8px;
         align-items: center;
       }
-      
+
       /* Form elements */
       .hoverboard-overlay .add-tag-input {
         background: var(--theme-input-bg);
@@ -3405,7 +3481,7 @@
         width: 140px;
         outline: none;
       }
-      
+
       .hoverboard-overlay .add-tag-input:focus {
         border-color: var(--theme-input-focus);
         box-shadow: 0 0 0 2px rgba(var(--theme-input-focus), 0.2);
@@ -3414,7 +3490,7 @@
       .hoverboard-overlay .add-tag-input::placeholder {
         color: var(--theme-text-muted);
       }
-      
+
       .hoverboard-overlay .add-tag-button {
         background: var(--theme-success);
         color: white;
@@ -3426,29 +3502,29 @@
         font-size: 13px;
         font-weight: 500;
       }
-      
+
       .hoverboard-overlay .add-tag-button:hover {
         background: color-mix(in srgb, var(--theme-success) 80%, black);
         border-color: color-mix(in srgb, var(--theme-success) 80%, black);
       }
-      
+
       .actions {
         display: flex;
         justify-content: flex-end;
         gap: 8px;
       }
-      
+
       @media (max-width: 480px) {
         .hoverboard-overlay {
           min-width: 280px;
           max-width: 90vw;
           font-size: 13px;
         }
-        
+
         .tags-container {
           gap: 4px;
         }
-        
+
         .actions {
           gap: 6px;
         }
@@ -3558,21 +3634,21 @@
           flex-direction: column;
           gap: 8px;
         }
-        
+
         .hoverboard-overlay-bottom .hoverboard-section {
           min-width: unset;
           width: 100%;
         }
-        
+
         .hoverboard-overlay-bottom .add-tag-container {
           flex-direction: row;
           justify-content: space-between;
         }
-        
+
         .hoverboard-overlay-bottom .add-tag-input {
           max-width: 200px;
         }
-        
+
         .hoverboard-overlay-bottom .actions {
           gap: 8px;
           justify-content: center;
@@ -4386,6 +4462,7 @@
   init_pinboard_service();
   init_tag_service();
   init_config_manager();
+  init_utils();
   var MESSAGE_TYPES = {
     // Data retrieval
     GET_CURRENT_BOOKMARK: "getCurrentBookmark",
@@ -4407,6 +4484,10 @@
     // Search operations
     SEARCH_TITLE: "searchTitle",
     SEARCH_TITLE_TEXT: "searchTitleText",
+    // [IMMUTABLE-REQ-TAG-002] Tab search operations
+    SEARCH_TABS: "searchTabs",
+    GET_SEARCH_HISTORY: "getSearchHistory",
+    CLEAR_SEARCH_STATE: "clearSearchState",
     // Content script lifecycle
     CONTENT_SCRIPT_READY: "contentScriptReady",
     // Overlay configuration
@@ -4419,7 +4500,7 @@
 
   // src/features/content/content-main.js
   window.HOVERBOARD_DEBUG = true;
-  var debugLog3 = (message, data = null) => {
+  var debugLog4 = (message, data = null) => {
     if (window.HOVERBOARD_DEBUG) {
       if (data) {
         console.log(`[Hoverboard Debug] ${message}`, data);
@@ -4459,30 +4540,30 @@
     }
     async init() {
       try {
-        debugLog3("Initializing content script");
+        debugLog4("Initializing content script");
         await this.domUtils.waitForDOM();
-        debugLog3("DOM ready");
+        debugLog4("DOM ready");
         this.setupMessageListeners();
-        debugLog3("Message listeners set up");
+        debugLog4("Message listeners set up");
         await this.initializeTabId();
-        debugLog3("Tab ID initialized:", this.tabId);
+        debugLog4("Tab ID initialized:", this.tabId);
         await this.loadConfiguration();
-        debugLog3("Options loaded:", this.config);
+        debugLog4("Options loaded:", this.config);
         this.overlayManager.config = { ...this.overlayManager.config, ...this.config };
         this.overlayManager.transparencyMode = this.config.overlayTransparencyMode || "nearly-transparent";
         this.overlayManager.positionMode = this.config.overlayPositionMode || "bottom-fixed";
         this.overlayManager.adaptiveVisibility = this.config.overlayAdaptiveVisibility || true;
-        debugLog3("Overlay manager configured with transparency settings", {
+        debugLog4("Overlay manager configured with transparency settings", {
           transparencyMode: this.overlayManager.transparencyMode,
           positionMode: this.overlayManager.positionMode,
           adaptiveVisibility: this.overlayManager.adaptiveVisibility
         });
         await this.notifyReady();
-        debugLog3("Ready notification sent");
+        debugLog4("Ready notification sent");
         await this.loadCurrentPageData();
-        debugLog3("Current page data loaded:", this.currentBookmark);
+        debugLog4("Current page data loaded:", this.currentBookmark);
         this.isInitialized = true;
-        debugLog3("Content script initialization complete");
+        debugLog4("Content script initialization complete");
       } catch (error) {
         console.error("Hoverboard: Failed to initialize content script:", error);
       }
@@ -4610,8 +4691,8 @@
     }
     async loadCurrentPageData() {
       try {
-        debugLog3("Loading current page data");
-        debugLog3("Request data:", {
+        debugLog4("Loading current page data");
+        debugLog4("Request data:", {
           url: this.pageUrl,
           title: this.pageTitle,
           tabId: this.tabId
@@ -4624,22 +4705,22 @@
             tabId: this.tabId
           }
         });
-        debugLog3("Received response:", response);
+        debugLog4("Received response:", response);
         if (response.blocked) {
-          debugLog3("Site is blocked from processing");
+          debugLog4("Site is blocked from processing");
           return;
         }
         this.currentBookmark = response;
-        debugLog3("Current bookmark set:", this.currentBookmark);
+        debugLog4("Current bookmark set:", this.currentBookmark);
         const options = await this.getOptions();
-        debugLog3("Options for page load:", options);
+        debugLog4("Options for page load:", options);
         if (options.showHoverOnPageLoad) {
-          debugLog3("Showing hover on page load");
+          debugLog4("Showing hover on page load");
           await this.showHoverWithDelay(options);
         }
       } catch (error) {
         console.error("Failed to load current page data:", error);
-        debugLog3("Error loading page data:", error);
+        debugLog4("Error loading page data:", error);
       }
     }
     async showHoverWithDelay(options) {
@@ -4676,17 +4757,17 @@
     }
     async showHover(userTriggered = false) {
       try {
-        debugLog3("Showing hover", { userTriggered });
+        debugLog4("Showing hover", { userTriggered });
         if (userTriggered) {
-          debugLog3("Refreshing bookmark data for user-triggered display");
+          debugLog4("Refreshing bookmark data for user-triggered display");
           await this.loadCurrentPageData();
         }
         if (!this.currentBookmark) {
-          debugLog3("No bookmark data available");
+          debugLog4("No bookmark data available");
           console.warn("No bookmark data available for hover display");
           return;
         }
-        debugLog3("Current bookmark data:", this.currentBookmark);
+        debugLog4("Current bookmark data:", this.currentBookmark);
         console.log("\u{1F50D} [Debug] Bookmark data structure:");
         console.log("\u{1F50D} [Debug] - URL:", this.currentBookmark.url);
         console.log("\u{1F50D} [Debug] - Description:", this.currentBookmark.description);
@@ -4704,10 +4785,10 @@
           tabId: this.tabId,
           userTriggered
         });
-        debugLog3("Overlay display request sent");
+        debugLog4("Overlay display request sent");
       } catch (error) {
         console.error("Failed to show hover:", error);
-        debugLog3("Error showing hover:", error);
+        debugLog4("Error showing hover:", error);
       }
     }
     async refreshData() {

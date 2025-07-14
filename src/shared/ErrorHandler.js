@@ -31,12 +31,25 @@ export class ErrorHandler {
   setupGlobalHandlers () {
     // Handle unhandled promise rejections
     window.addEventListener('unhandledrejection', (event) => {
+      console.error('Unhandled Promise Rejection Details:', {
+        reason: event.reason,
+        promise: event.promise,
+        stack: event.reason?.stack,
+        message: event.reason?.message
+      })
       this.handleError('Unhandled Promise Rejection', event.reason, this.errorTypes.RUNTIME)
       event.preventDefault()
     })
 
     // Handle global errors
     window.addEventListener('error', (event) => {
+      console.error('Global Error Details:', {
+        error: event.error,
+        message: event.message,
+        filename: event.filename,
+        lineno: event.lineno,
+        colno: event.colno
+      })
       this.handleError('Global Error', event.error || event.message, this.errorTypes.RUNTIME)
     })
   }

@@ -439,3 +439,66 @@ export function minEmpty (data, title = '') {
     toread: data?.toread || 'no'
   }
 }
+
+/**
+ * Global debug configuration
+ * Controls debug output throughout the application
+ */
+export const DEBUG_CONFIG = {
+  enabled: true, // Set to false to disable all debug output
+  prefix: '[HOVERBOARD-DEBUG]'
+}
+
+/**
+ * Debug logging utility
+ * Only outputs to console when DEBUG_CONFIG.enabled is true
+ * @param {string} component - Component name for the log
+ * @param {string} message - Debug message
+ * @param {...any} args - Additional arguments to log
+ */
+export function debugLog (component, message, ...args) {
+  if (DEBUG_CONFIG.enabled) {
+    const prefix = `${DEBUG_CONFIG.prefix} [${component}]`
+    if (args.length > 0) {
+      console.log(prefix, message, ...args)
+    } else {
+      console.log(prefix, message)
+    }
+  }
+}
+
+/**
+ * Debug error logging utility
+ * Only outputs to console when DEBUG_CONFIG.enabled is true
+ * @param {string} component - Component name for the log
+ * @param {string} message - Debug message
+ * @param {...any} args - Additional arguments to log
+ */
+export function debugError (component, message, ...args) {
+  if (DEBUG_CONFIG.enabled) {
+    const prefix = `${DEBUG_CONFIG.prefix} [${component}]`
+    if (args.length > 0) {
+      console.error(prefix, message, ...args)
+    } else {
+      console.error(prefix, message)
+    }
+  }
+}
+
+/**
+ * Debug warning logging utility
+ * Only outputs to console when DEBUG_CONFIG.enabled is true
+ * @param {string} component - Component name for the log
+ * @param {string} message - Debug message
+ * @param {...any} args - Additional arguments to log
+ */
+export function debugWarn (component, message, ...args) {
+  if (DEBUG_CONFIG.enabled) {
+    const prefix = `${DEBUG_CONFIG.prefix} [${component}]`
+    if (args.length > 0) {
+      console.warn(prefix, message, ...args)
+    } else {
+      console.warn(prefix, message)
+    }
+  }
+}

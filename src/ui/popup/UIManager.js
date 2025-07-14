@@ -3,19 +3,47 @@
  */
 
 export class UIManager {
-  constructor ({ errorHandler, stateManager }) {
+  constructor ({ errorHandler, stateManager, config = {} }) {
     this.errorHandler = errorHandler
     this.stateManager = stateManager
+    this.config = config
     this.eventHandlers = new Map()
 
     // Cache DOM elements
     this.elements = {}
     this.cacheElements()
 
+    // Apply configuration-based UI settings
+    this.applyConfiguration()
+
     // Bind methods
     this.emit = this.emit.bind(this)
     this.on = this.on.bind(this)
     this.off = this.off.bind(this)
+  }
+
+  /**
+   * Apply configuration-based UI settings
+   */
+  applyConfiguration () {
+    // Apply section labels visibility setting
+    if (this.config.uxShowSectionLabels !== undefined) {
+      this.updateSectionLabelsVisibility(this.config.uxShowSectionLabels)
+    }
+  }
+
+  /**
+   * Update section labels visibility based on configuration
+   */
+  updateSectionLabelsVisibility (showLabels) {
+    const sectionTitles = document.querySelectorAll('.section-title')
+    sectionTitles.forEach(title => {
+      if (showLabels) {
+        title.style.display = ''
+      } else {
+        title.style.display = 'none'
+      }
+    })
   }
 
   /**
@@ -48,6 +76,11 @@ export class UIManager {
       addTagBtn: document.getElementById('addTagBtn'),
       searchInput: document.getElementById('searchInput'),
       searchBtn: document.getElementById('searchBtn'),
+
+      // Search elements
+      searchInput: document.getElementById('searchInput'),
+      searchBtn: document.getElementById('searchBtn'),
+      searchSuggestions: document.getElementById('searchSuggestions'),
 
       // Tag display
       currentTagsContainer: document.getElementById('currentTagsContainer'),
@@ -154,6 +187,8 @@ export class UIManager {
         }
       }
     })
+
+
 
     // Error handling
     this.elements.retryBtn?.addEventListener('click', () => {
@@ -594,5 +629,54 @@ export class UIManager {
 
     // Clear timeouts if any
     // (In a full implementation, you'd track and clear timeouts)
+  }
+
+  /**
+   * [TAB-SEARCH-UI] Show tab search results
+   */
+  showTabSearchResults (results) {
+    const resultsContainer = this.elements.tabSearchResults
+    if (!resultsContainer) return
+
+    if (results.success) {
+      resultsContainer.innerHTML = `
+        <div class="search-result">
+          <span class="result-count">${results.currentMatch} of ${results.matchCount}</span>
+          <span class="result-title">${results.tabTitle}</span>
+        </div>
+      `
+      resultsContainer.classList.remove('hidden')
+    } else {
+      resultsContainer.innerHTML = `
+        <div class="search-result no-matches">
+          <span class="result-message">${results.message}</span>
+        </div>
+      `
+      resultsContainer.classList.remove('hidden')
+    }
+  }
+
+  /**
+   * [TAB-SEARCH-UI] Update search history display
+   */
+  updateSearchHistory (history) {
+    const historyContainer = this.elements.tabSearchHistory
+    if (!historyContainer || !history.length) return
+
+    const historyHTML = history.map(term => `
+      <button class="history-item" data-term="${term}">
+        ${term}
+      </button>
+    `).join('')
+
+    historyContainer.innerHTML = historyHTML
+    historyContainer.classList.remove('hidden')
+  }
+
+  /**
+   * [TAB-SEARCH-UI] Focus tab search input
+   */
+  focusTabSearchInput () {
+    this.elements.tabSearchInput?.focus()
   }
 }

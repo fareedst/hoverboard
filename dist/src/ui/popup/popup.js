@@ -5,6 +5,7 @@
 
 import { init, popup } from '../index.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
+import { ConfigManager } from '../../config/config-manager.js'
 
 class HoverboardPopup {
   constructor () {
@@ -12,6 +13,7 @@ class HoverboardPopup {
     this.popupComponents = null
     this.errorHandler = null
     this.uiSystem = null
+    this.configManager = new ConfigManager()
 
     // Bind context
     this.init = this.init.bind(this)
@@ -44,11 +46,16 @@ class HoverboardPopup {
 
       console.log('UI system initialized')
 
+      // Load configuration
+      const config = await this.configManager.getConfig()
+      console.log('Configuration loaded:', config)
+
       // Create popup with integrated UI system
       this.popupComponents = popup({
         errorHandler: this.errorHandler,
         enableKeyboard: true,
-        enableState: true
+        enableState: true,
+        config: config
       })
 
       console.log('Popup components created')

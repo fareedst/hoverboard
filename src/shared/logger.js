@@ -20,7 +20,13 @@ export class Logger {
   // SPECIFICATION: Production builds should minimize console output for performance
   // IMPLEMENTATION DECISION: Debug logs in development, warnings+ in production
   getLogLevel () {
-    // In development, show all logs. In production, show warnings and errors only.
+    // Check if we're in a browser environment
+    if (typeof process === 'undefined' || !process.env) {
+      // Browser environment - use debug level for development
+      return 'debug'
+    }
+
+    // Node.js environment - check NODE_ENV
     return process.env.NODE_ENV === 'production' ? 'warn' : 'debug'
   }
 

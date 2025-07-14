@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Functionality Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-title {
+            color: #333;
+            border-bottom: 2px solid #007cba;
+            padding-bottom: 10px;
+        }
+        .test-description {
+            color: #666;
+            margin: 10px 0;
+        }
+        .test-steps {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .test-steps ol {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .test-steps li {
+            margin: 5px 0;
+        }
+        .expected-result {
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #28a745;
+            margin: 10px 0;
+        }
+        .warning {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Search Functionality Test</h1>
+    
+    <div class="test-section">
+        <h2 class="test-title">Test: Tab Search Functionality</h2>
+        <div class="test-description">
+            This test verifies that the search functionality in the Hoverboard extension popup works correctly.
+        </div>
+        
+        <div class="test-steps">
+            <h3>Test Steps:</h3>
+            <ol>
+                <li>Open multiple tabs with different titles (e.g., "Google", "GitHub", "Stack Overflow")</li>
+                <li>Click the Hoverboard extension icon to open the popup</li>
+                <li>In the "Search Tabs" section, enter a search term that matches one of your tab titles</li>
+                <li>Click the "Search" button or press Enter</li>
+                <li>Observe the behavior and check the browser console for logs</li>
+            </ol>
+        </div>
+        
+        <div class="expected-result">
+            <strong>Expected Result:</strong>
+            <ul>
+                <li>The extension should find matching tabs</li>
+                <li>It should navigate to the first matching tab</li>
+                <li>You should see a success message showing the number of matches and the tab title</li>
+                <li>The browser console should show detailed logs about the search process</li>
+            </ul>
+        </div>
+        
+        <div class="warning">
+            <strong>Note:</strong> If you see "Search completed" without navigation, it means the old placeholder search was being used. 
+            The fix should now use the proper tab search functionality.
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">Test: Console Logs</h2>
+        <div class="test-description">
+            Check the browser console for these log messages to verify the search is working:
+        </div>
+        
+        <div class="test-steps">
+            <h3>Expected Console Logs:</h3>
+            <ol>
+                <li><code>[SEARCH-UI] Starting search: {searchText: "...", currentTab: {...}}</code></li>
+                <li><code>[SEARCH-UI] Sending search message with tab ID: [number]</code></li>
+                <li><code>[TAB-SEARCH-CORE] Starting tab search: {searchText: "...", tabId: [number]}</code></li>
+                <li><code>[TAB-SEARCH-CORE] Found tabs: [number]</code></li>
+                <li><code>[TAB-SEARCH-CORE] Matching tabs: [number]</code></li>
+                <li><code>[TAB-SEARCH-CORE] Search completed successfully: {...}</code></li>
+                <li><code>[SEARCH-UI] Received response: {...}</code></li>
+            </ol>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2 class="test-title">Troubleshooting</h2>
+        <div class="test-description">
+            If the search is not working as expected:
+        </div>
+        
+        <div class="test-steps">
+            <ol>
+                <li>Check that the extension is properly loaded</li>
+                <li>Verify that you have multiple tabs open with different titles</li>
+                <li>Check the browser console for any error messages</li>
+                <li>Try refreshing the extension by going to chrome://extensions and clicking "Reload"</li>
+                <li>Make sure the search term matches part of a tab title (case-insensitive)</li>
+            </ol>
+        </div>
+    </div>
+    
+    <script>
+        // Add some test data to help with testing
+        console.log('🔍 Search Functionality Test Page Loaded');
+        console.log('📋 Test Instructions:');
+        console.log('1. Open multiple tabs with different titles');
+        console.log('2. Open the Hoverboard extension popup');
+        console.log('3. Use the search functionality to find tabs');
+        console.log('4. Check this console for expected log messages');
+    </script>
+</body>
+</html> 

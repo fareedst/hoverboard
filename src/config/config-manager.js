@@ -57,6 +57,7 @@ export class ConfigManager {
       uxRecentRowWithDeletePin: true, // Allow pin deletion from interface
       uxRecentRowWithInput: true, // Enable input controls
       uxUrlStripHash: false, // Preserve URL hash by default (maintain full URL context)
+      uxShowSectionLabels: false, // Show section labels in popup (Quick Actions, Search Tabs)
 
       // CFG-003: Badge configuration - Extension icon indicator settings
       // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
@@ -131,7 +132,9 @@ export class ConfigManager {
       // UI-006: Visibility defaults for configuration UI
       defaultVisibilityTheme: config.defaultVisibilityTheme,
       defaultTransparencyEnabled: config.defaultTransparencyEnabled,
-      defaultBackgroundOpacity: config.defaultBackgroundOpacity
+      defaultBackgroundOpacity: config.defaultBackgroundOpacity,
+      // Popup UI settings
+      uxShowSectionLabels: config.uxShowSectionLabels
     }
   }
 

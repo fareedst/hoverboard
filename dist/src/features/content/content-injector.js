@@ -57,15 +57,15 @@ class ContentInjector {
       .hoverboard-hidden {
         display: none !important;
       }
-      
+
       .hoverboard-invisible {
         visibility: hidden !important;
       }
-      
+
       .hoverboard-no-pointer {
         pointer-events: none !important;
       }
-      
+
       .hoverboard-overlay-backdrop {
         position: fixed;
         top: 0;
@@ -76,56 +76,56 @@ class ContentInjector {
         z-index: 2147483646;
         pointer-events: none;
       }
-      
+
       /* Animation classes */
       .hoverboard-fade-in {
         animation: hoverboardFadeIn 0.2s ease-out;
       }
-      
+
       .hoverboard-fade-out {
         animation: hoverboardFadeOut 0.15s ease-in;
       }
-      
+
       .hoverboard-slide-in {
         animation: hoverboardSlideIn 0.3s ease-out;
       }
-      
+
       .hoverboard-slide-out {
         animation: hoverboardSlideOut 0.2s ease-in;
       }
-      
+
       @keyframes hoverboardFadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
       }
-      
+
       @keyframes hoverboardFadeOut {
         from { opacity: 1; }
         to { opacity: 0; }
       }
-      
+
       @keyframes hoverboardSlideIn {
-        from { 
-          opacity: 0; 
-          transform: translateY(-10px) scale(0.95); 
+        from {
+          opacity: 0;
+          transform: translateY(-10px) scale(0.95);
         }
-        to { 
-          opacity: 1; 
-          transform: translateY(0) scale(1); 
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
         }
       }
-      
+
       @keyframes hoverboardSlideOut {
-        from { 
-          opacity: 1; 
-          transform: translateY(0) scale(1); 
+        from {
+          opacity: 1;
+          transform: translateY(0) scale(1);
         }
-        to { 
-          opacity: 0; 
-          transform: translateY(-5px) scale(0.98); 
+        to {
+          opacity: 0;
+          transform: translateY(-5px) scale(0.98);
         }
       }
-      
+
       /* Accessibility improvements */
       .hoverboard-sr-only {
         position: absolute !important;
@@ -138,23 +138,23 @@ class ContentInjector {
         white-space: nowrap !important;
         border: 0 !important;
       }
-      
+
       .hoverboard-focus-visible:focus {
         outline: 2px solid #0066cc;
         outline-offset: 2px;
       }
-      
+
       /* High contrast mode support */
       @media (prefers-contrast: high) {
         .hoverboard-overlay {
           border: 2px solid !important;
         }
-        
+
         .tag {
           border-width: 2px !important;
         }
       }
-      
+
       /* Reduced motion support */
       @media (prefers-reduced-motion: reduce) {
         .hoverboard-fade-in,
@@ -163,13 +163,13 @@ class ContentInjector {
         .hoverboard-slide-out {
           animation: none;
         }
-        
+
         .tag,
         .action-button {
           transition: none !important;
         }
       }
-      
+
       /* Dark mode support */
       @media (prefers-color-scheme: dark) {
         .hoverboard-overlay {
@@ -177,33 +177,33 @@ class ContentInjector {
           color: #e0e0e0 !important;
           border-color: #555 !important;
         }
-        
+
         .action-button {
           background: #3d3d3d !important;
           color: #e0e0e0 !important;
           border-color: #555 !important;
         }
-        
+
         .action-button:hover {
           background: #4d4d4d !important;
         }
-        
+
         .tag {
           background: #3d3d3d !important;
           color: #e0e0e0 !important;
           border-color: #555 !important;
         }
-        
+
         .tag.current-tag {
           background: #1e3a8a !important;
           color: #93c5fd !important;
         }
-        
+
         .tag.recent-tag {
           background: #581c87 !important;
           color: #c084fc !important;
         }
-        
+
         .tag.content-tag {
           background: #14532d !important;
           color: #86efac !important;
@@ -620,11 +620,11 @@ class ContentInjector {
         border-color: #404040 !important;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
       }
-      
+
       .section-header {
         color: #b0b0b0 !important;
       }
-      
+
       .hoverboard-section {
         border-color: #404040 !important;
       }

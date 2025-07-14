@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Section Labels</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    .test-header {
+      background: #007acc;
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .test-content {
+      padding: 20px;
+    }
+    .section {
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+      color: #333;
+    }
+    .section-title.hidden {
+      display: none;
+    }
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .action-icon-button {
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      background: #f9f9f9;
+      cursor: pointer;
+      text-align: center;
+    }
+    .search-container {
+      display: flex;
+      gap: 10px;
+    }
+    .search-input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .button {
+      padding: 8px 16px;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .toggle-btn {
+      margin-bottom: 20px;
+      padding: 10px 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="test-container">
+    <div class="test-header">
+      <h2>Section Labels Test</h2>
+      <p>Testing popup section labels visibility</p>
+    </div>
+    
+    <div class="test-content">
+      <button class="toggle-btn" onclick="toggleLabels()">Toggle Section Labels</button>
+      
+      <!-- Quick Actions Section -->
+      <section class="section">
+        <h3 class="section-title" id="quickActionsTitle">Quick Actions</h3>
+        <div class="action-grid">
+          <button class="action-icon-button">👁️</button>
+          <button class="action-icon-button">🔒</button>
+          <button class="action-icon-button">📋</button>
+          <button class="action-icon-button">🗑️</button>
+        </div>
+      </section>
+
+      <!-- Search Tabs Section -->
+      <section class="section">
+        <h3 class="section-title" id="searchTabsTitle">Search Tabs</h3>
+        <div class="search-container">
+          <input type="text" class="search-input" placeholder="Search tabs by title...">
+          <button class="button">Search</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    // Simulate the default behavior (labels hidden)
+    document.addEventListener('DOMContentLoaded', function() {
+      // Hide section labels by default (matching the new setting)
+      const sectionTitles = document.querySelectorAll('.section-title');
+      sectionTitles.forEach(title => {
+        title.style.display = 'none';
+      });
+    });
+
+    function toggleLabels() {
+      const sectionTitles = document.querySelectorAll('.section-title');
+      sectionTitles.forEach(title => {
+        if (title.style.display === 'none') {
+          title.style.display = '';
+        } else {
+          title.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html> 

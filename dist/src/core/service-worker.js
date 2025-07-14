@@ -30,7 +30,6 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // src/config/config-manager.js
 var ConfigManager;
@@ -97,6 +96,8 @@ var init_config_manager = __esm({
           // Enable input controls
           uxUrlStripHash: false,
           // Preserve URL hash by default (maintain full URL context)
+          uxShowSectionLabels: false,
+          // Show section labels in popup (Quick Actions, Search Tabs)
           // CFG-003: Badge configuration - Extension icon indicator settings
           // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
           badgeTextIfNotBookmarked: "-",
@@ -171,7 +172,9 @@ var init_config_manager = __esm({
           // UI-006: Visibility defaults for configuration UI
           defaultVisibilityTheme: config.defaultVisibilityTheme,
           defaultTransparencyEnabled: config.defaultTransparencyEnabled,
-          defaultBackgroundOpacity: config.defaultBackgroundOpacity
+          defaultBackgroundOpacity: config.defaultBackgroundOpacity,
+          // Popup UI settings
+          uxShowSectionLabels: config.uxShowSectionLabels
         };
       }
       /**
@@ -556,23 +559,144 @@ var init_config_manager = __esm({
   }
 });
 
+// src/shared/logger.js
+var Logger, logger;
+var init_logger = __esm({
+  "src/shared/logger.js"() {
+    Logger = class {
+      constructor(context = "Hoverboard") {
+        this.context = context;
+        this.logLevel = this.getLogLevel();
+      }
+      // LOG-002: Environment-based log level determination
+      // SPECIFICATION: Production builds should minimize console output for performance
+      // IMPLEMENTATION DECISION: Debug logs in development, warnings+ in production
+      getLogLevel() {
+        if (typeof process === "undefined" || !process.env) {
+          return "debug";
+        }
+        return false ? "warn" : "debug";
+      }
+      // LOG-001: Log level filtering logic
+      // IMPLEMENTATION DECISION: Numeric level comparison for efficient filtering
+      shouldLog(level) {
+        const levels = { debug: 0, info: 1, warn: 2, error: 3 };
+        return levels[level] >= levels[this.logLevel];
+      }
+      // LOG-001: Consistent message formatting with metadata
+      // SPECIFICATION: Include timestamp, context, and level for log analysis
+      // IMPLEMENTATION DECISION: ISO timestamp format for precise timing and parsing
+      formatMessage(level, message, ...args) {
+        const timestamp = (/* @__PURE__ */ new Date()).toISOString();
+        const prefix = `[${timestamp}] [${this.context}] [${level.toUpperCase()}]`;
+        return [prefix, message, ...args];
+      }
+      // LOG-001: Debug level logging - Development information
+      // IMPLEMENTATION DECISION: Use console.log for debug to distinguish from info
+      debug(message, ...args) {
+        if (this.shouldLog("debug")) {
+          console.log(...this.formatMessage("debug", message, ...args));
+        }
+      }
+      // LOG-001: Info level logging - General information
+      // IMPLEMENTATION DECISION: Use console.info for semantic clarity
+      info(message, ...args) {
+        if (this.shouldLog("info")) {
+          console.info(...this.formatMessage("info", message, ...args));
+        }
+      }
+      // LOG-001: Warning level logging - Non-critical issues
+      // IMPLEMENTATION DECISION: Use console.warn for proper browser developer tools integration
+      warn(message, ...args) {
+        if (this.shouldLog("warn")) {
+          console.warn(...this.formatMessage("warn", message, ...args));
+        }
+      }
+      // LOG-001: Error level logging - Critical issues
+      // IMPLEMENTATION DECISION: Use console.error for proper error tracking and debugging
+      error(message, ...args) {
+        if (this.shouldLog("error")) {
+          console.error(...this.formatMessage("error", message, ...args));
+        }
+      }
+      // LOG-003: Legacy compatibility methods
+      // SPECIFICATION: Maintain backward compatibility during gradual migration
+      // IMPLEMENTATION DECISION: Map legacy log calls to debug level
+      log(context, ...args) {
+        this.debug(`[${context}]`, ...args);
+      }
+    };
+    logger = new Logger();
+  }
+});
+
+// src/shared/utils.js
+function debugLog(component, message, ...args) {
+  if (DEBUG_CONFIG.enabled) {
+    const prefix = `${DEBUG_CONFIG.prefix} [${component}]`;
+    if (args.length > 0) {
+      console.log(prefix, message, ...args);
+    } else {
+      console.log(prefix, message);
+    }
+  }
+}
+function debugError(component, message, ...args) {
+  if (DEBUG_CONFIG.enabled) {
+    const prefix = `${DEBUG_CONFIG.prefix} [${component}]`;
+    if (args.length > 0) {
+      console.error(prefix, message, ...args);
+    } else {
+      console.error(prefix, message);
+    }
+  }
+}
+var DEBUG_CONFIG;
+var init_utils = __esm({
+  "src/shared/utils.js"() {
+    init_logger();
+    DEBUG_CONFIG = {
+      enabled: true,
+      // Set to false to disable all debug output
+      prefix: "[HOVERBOARD-DEBUG]"
+    };
+  }
+});
+
 // src/features/tagging/tag-service.js
 var TagService;
 var init_tag_service = __esm({
   "src/features/tagging/tag-service.js"() {
     init_config_manager();
+    init_utils();
     TagService = class {
       constructor(pinboardService = null) {
         if (pinboardService) {
           this.pinboardService = pinboardService;
         } else {
-          const { PinboardService: PinboardService2 } = (init_pinboard_service(), __toCommonJS(pinboard_service_exports));
-          this.pinboardService = new PinboardService2();
+          this.pinboardService = null;
+          this._pinboardServicePromise = null;
         }
         this.configManager = new ConfigManager();
         this.cacheKey = "hoverboard_recent_tags_cache";
         this.cacheTimeout = 5 * 60 * 1e3;
         this.tagFrequencyKey = "hoverboard_tag_frequency";
+      }
+      /**
+       * Get PinboardService instance (lazy loading to avoid circular dependency)
+       * @returns {Promise<PinboardService>} PinboardService instance
+       */
+      async getPinboardService() {
+        if (this.pinboardService) {
+          return this.pinboardService;
+        }
+        if (!this._pinboardServicePromise) {
+          this._pinboardServicePromise = Promise.resolve().then(() => (init_pinboard_service(), pinboard_service_exports)).then((module) => {
+            this.pinboardService = new module.PinboardService(this);
+            return this.pinboardService;
+          });
+        }
+        return this._pinboardServicePromise;
       }
       /**
        * Get recent tags with caching and throttling
@@ -581,21 +705,36 @@ var init_tag_service = __esm({
        */
       async getRecentTags(options = {}) {
         try {
+          debugLog("TAG-SERVICE", "Getting recent tags with options:", options);
           const cachedTags = await this.getCachedTags();
           let tagsArr = [];
+          debugLog("TAG-SERVICE", "Cached tags result:", cachedTags);
           if (cachedTags && this.isCacheValid(cachedTags.timestamp)) {
+            debugLog("TAG-SERVICE", "Using cached tags, count:", cachedTags.tags.length);
             tagsArr = cachedTags.tags;
           } else {
+            debugLog("TAG-SERVICE", "Cache invalid or empty, fetching fresh tags from Pinboard");
             const config = await this.configManager.getConfig();
-            const recentBookmarks = await this.pinboardService.getRecentBookmarks(
+            debugLog("TAG-SERVICE", "Fetching recent bookmarks with count:", config.initRecentPostsCount);
+            const pinboardService = await this.getPinboardService();
+            const recentBookmarks = await pinboardService.getRecentBookmarks(
               config.initRecentPostsCount
             );
+            debugLog("TAG-SERVICE", "Recent bookmarks received:", recentBookmarks.length);
+            debugLog("TAG-SERVICE", "Recent bookmarks details:", recentBookmarks.map((b) => ({
+              url: b.url,
+              description: b.description,
+              tags: b.tags
+            })));
             tagsArr = this.extractTagsFromBookmarks(recentBookmarks);
+            debugLog("TAG-SERVICE", "Extracted tags:", tagsArr.map((t) => ({ name: t.name, count: t.count })));
             await this.processAndCacheTags(tagsArr);
           }
-          return tagsArr.map((tag) => typeof tag === "string" ? { name: tag } : tag);
+          const result = tagsArr.map((tag) => typeof tag === "string" ? { name: tag } : tag);
+          debugLog("TAG-SERVICE", "Final recent tags result:", result.map((t) => t.name));
+          return result;
         } catch (error) {
-          console.error("Failed to get recent tags:", error);
+          debugError("TAG-SERVICE", "Failed to get recent tags:", error);
           return [];
         }
       }
@@ -716,10 +855,13 @@ var init_tag_service = __esm({
        */
       async getCachedTags() {
         try {
+          debugLog("TAG-SERVICE", "Getting cached tags from storage");
           const result = await chrome.storage.local.get(this.cacheKey);
-          return result[this.cacheKey] || null;
+          const cachedData = result[this.cacheKey] || null;
+          debugLog("TAG-SERVICE", "Cached data retrieved:", cachedData);
+          return cachedData;
         } catch (error) {
-          console.error("Failed to get cached tags:", error);
+          debugError("TAG-SERVICE", "Failed to get cached tags:", error);
           return null;
         }
       }
@@ -729,7 +871,15 @@ var init_tag_service = __esm({
        * @returns {boolean} Whether cache is valid
        */
       isCacheValid(timestamp) {
-        return Date.now() - timestamp < this.cacheTimeout;
+        const isValid = Date.now() - timestamp < this.cacheTimeout;
+        debugLog("TAG-SERVICE", "Cache validity check:", {
+          timestamp,
+          currentTime: Date.now(),
+          age: Date.now() - timestamp,
+          timeout: this.cacheTimeout,
+          isValid
+        });
+        return isValid;
       }
       /**
        * Extract unique tags from bookmarks
@@ -737,10 +887,17 @@ var init_tag_service = __esm({
        * @returns {Object[]} Array of tag objects with metadata
        */
       extractTagsFromBookmarks(bookmarks) {
+        debugLog("TAG-SERVICE", "Extracting tags from bookmarks, count:", bookmarks.length);
         const tagMap = /* @__PURE__ */ new Map();
-        bookmarks.forEach((bookmark) => {
+        bookmarks.forEach((bookmark, index) => {
+          debugLog("TAG-SERVICE", `Processing bookmark ${index + 1}:`, {
+            url: bookmark.url,
+            description: bookmark.description,
+            tags: bookmark.tags
+          });
           if (bookmark.tags && bookmark.tags.length > 0) {
             bookmark.tags.forEach((tagName) => {
+              debugLog("TAG-SERVICE", `Processing tag: "${tagName}"`);
               if (tagName.trim()) {
                 const existing = tagMap.get(tagName) || {
                   name: tagName,
@@ -759,11 +916,18 @@ var init_tag_service = __esm({
                   existing.lastUsed = bookmarkTime;
                 }
                 tagMap.set(tagName, existing);
+                debugLog("TAG-SERVICE", `Added/updated tag "${tagName}" (count: ${existing.count})`);
+              } else {
+                debugLog("TAG-SERVICE", `Skipping empty tag: "${tagName}"`);
               }
             });
+          } else {
+            debugLog("TAG-SERVICE", `Bookmark has no tags`);
           }
         });
-        return Array.from(tagMap.values());
+        const result = Array.from(tagMap.values());
+        debugLog("TAG-SERVICE", "Final extracted tags:", result.map((t) => ({ name: t.name, count: t.count })));
+        return result;
       }
       /**
        * Process tags and update cache
@@ -772,6 +936,8 @@ var init_tag_service = __esm({
        */
       async processAndCacheTags(tags) {
         try {
+          debugLog("TAG-SERVICE", "Processing and caching tags, input count:", tags.length);
+          debugLog("TAG-SERVICE", "Input tags:", tags.map((t) => ({ name: t.name, count: t.count })));
           const config = await this.configManager.getConfig();
           const sortedTags = tags.sort((a, b) => {
             if (b.count !== a.count) {
@@ -779,15 +945,19 @@ var init_tag_service = __esm({
             }
             return new Date(b.lastUsed) - new Date(a.lastUsed);
           }).slice(0, config.recentTagsCountMax);
+          debugLog("TAG-SERVICE", "Sorted and limited tags:", sortedTags.map((t) => ({ name: t.name, count: t.count })));
+          const cacheData = {
+            tags: sortedTags,
+            timestamp: Date.now()
+          };
+          debugLog("TAG-SERVICE", "Caching data:", cacheData);
           await chrome.storage.local.set({
-            [this.cacheKey]: {
-              tags: sortedTags,
-              timestamp: Date.now()
-            }
+            [this.cacheKey]: cacheData
           });
+          debugLog("TAG-SERVICE", "Cache updated successfully");
           return sortedTags;
         } catch (error) {
-          console.error("Failed to process and cache tags:", error);
+          debugError("TAG-SERVICE", "Failed to process and cache tags:", error);
           return tags;
         }
       }
@@ -961,12 +1131,12 @@ var init_tag_service = __esm({
           );
           if (!isDuplicate) {
             await this.recordTagUsage(sanitizedTag);
-            console.log("[IMMUTABLE-REQ-TAG-001] Tag added to recent tags:", sanitizedTag);
+            debugLog("IMMUTABLE-REQ-TAG-001", "Tag added to recent tags:", sanitizedTag);
           } else {
-            console.log("[IMMUTABLE-REQ-TAG-001] Tag already exists in recent tags:", sanitizedTag);
+            debugLog("IMMUTABLE-REQ-TAG-001", "Tag already exists in recent tags:", sanitizedTag);
           }
         } catch (error) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to add tag to recent:", error);
+          debugError("IMMUTABLE-REQ-TAG-001", "Failed to add tag to recent:", error);
         }
       }
       /**
@@ -983,10 +1153,10 @@ var init_tag_service = __esm({
           const filteredTags = allRecentTags.filter(
             (tag) => !normalizedCurrentTags.includes(tag.name.toLowerCase())
           );
-          console.log("[IMMUTABLE-REQ-TAG-001] Recent tags excluding current:", filteredTags.length);
+          debugLog("IMMUTABLE-REQ-TAG-001", "Recent tags excluding current:", filteredTags.length);
           return filteredTags;
         } catch (error) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to get recent tags excluding current:", error);
+          debugError("IMMUTABLE-REQ-TAG-001", "Failed to get recent tags excluding current:", error);
           return [];
         }
       }
@@ -1000,10 +1170,10 @@ var init_tag_service = __esm({
         try {
           await this.addTagToRecent(tag, bookmarkData.url);
           if (bookmarkData.url) {
-            console.log("[IMMUTABLE-REQ-TAG-001] Tag addition handled for bookmark:", bookmarkData.url);
+            debugLog("IMMUTABLE-REQ-TAG-001", "Tag addition handled for bookmark:", bookmarkData.url);
           }
         } catch (error) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to handle tag addition:", error);
+          debugError("IMMUTABLE-REQ-TAG-001", "Failed to handle tag addition:", error);
         }
       }
       /**
@@ -2734,6 +2904,7 @@ var init_pinboard_service = __esm({
     init_config_manager();
     init_tag_service();
     import_fast_xml_parser = __toESM(require_fxp(), 1);
+    init_utils();
     PinboardService = class {
       constructor(tagService = null) {
         this.configManager = new ConfigManager();
@@ -2760,22 +2931,22 @@ var init_pinboard_service = __esm({
         try {
           const cleanUrl = this.cleanUrl(url);
           const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`;
-          console.log("\u{1F50D} Making Pinboard API request:", {
+          debugLog("\u{1F50D} Making Pinboard API request:", {
             endpoint,
             cleanUrl,
             originalUrl: url
           });
           const response = await this.makeApiRequest(endpoint);
-          console.log("\u{1F4E5} Pinboard API response received:", response);
+          debugLog("\u{1F4E5} Pinboard API response received:", response);
           const parsed = this.parseBookmarkResponse(response, cleanUrl, title);
-          console.log("\u{1F4CB} Parsed bookmark result:", parsed);
+          debugLog("\u{1F4CB} Parsed bookmark result:", parsed);
           return parsed;
         } catch (error) {
-          console.error("\u274C Failed to get bookmark for URL:", error);
-          console.error("\u274C Error details:", error.message);
-          console.error("\u274C Full error:", error);
+          debugError("\u274C Failed to get bookmark for URL:", error);
+          debugError("\u274C Error details:", error.message);
+          debugError("\u274C Full error:", error);
           const emptyBookmark = this.createEmptyBookmark(url, title);
-          console.log("\u{1F4DD} Returning empty bookmark due to error:", emptyBookmark);
+          debugLog("\u{1F4DD} Returning empty bookmark due to error:", emptyBookmark);
           return emptyBookmark;
         }
       }
@@ -2790,11 +2961,19 @@ var init_pinboard_service = __esm({
        */
       async getRecentBookmarks(count = 15) {
         try {
+          debugLog("[PINBOARD-SERVICE] Getting recent bookmarks, count:", count);
           const endpoint = `posts/recent?count=${count}`;
           const response = await this.makeApiRequest(endpoint);
-          return this.parseRecentBookmarksResponse(response);
+          debugLog("[PINBOARD-SERVICE] Raw API response received");
+          const result = this.parseRecentBookmarksResponse(response);
+          debugLog("[PINBOARD-SERVICE] Parsed recent bookmarks:", result.map((b) => ({
+            url: b.url,
+            description: b.description,
+            tags: b.tags
+          })));
+          return result;
         } catch (error) {
-          console.error("Failed to get recent bookmarks:", error);
+          debugError("[PINBOARD-SERVICE] Failed to get recent bookmarks:", error);
           return [];
         }
       }
@@ -2816,7 +2995,7 @@ var init_pinboard_service = __esm({
           await this.trackBookmarkTags(bookmarkData);
           return this.parseApiResponse(response);
         } catch (error) {
-          console.error("Failed to save bookmark:", error);
+          debugError("Failed to save bookmark:", error);
           throw error;
         }
       }
@@ -2848,7 +3027,7 @@ var init_pinboard_service = __esm({
           }
           return this.saveBookmark(updatedBookmark);
         } catch (error) {
-          console.error("Failed to save tag:", error);
+          debugError("Failed to save tag:", error);
           throw error;
         }
       }
@@ -2868,7 +3047,7 @@ var init_pinboard_service = __esm({
           const response = await this.makeApiRequest(endpoint);
           return this.parseApiResponse(response);
         } catch (error) {
-          console.error("Failed to delete bookmark:", error);
+          debugError("Failed to delete bookmark:", error);
           throw error;
         }
       }
@@ -2885,10 +3064,10 @@ var init_pinboard_service = __esm({
             for (const sanitizedTag of sanitizedTags) {
               await this.tagService.handleTagAddition(sanitizedTag, bookmarkData);
             }
-            console.log("[IMMUTABLE-REQ-TAG-001] Tracked tags for bookmark:", sanitizedTags);
+            debugLog("[IMMUTABLE-REQ-TAG-001] Tracked tags for bookmark:", sanitizedTags);
           }
         } catch (error) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to track bookmark tags:", error);
+          debugError("[IMMUTABLE-REQ-TAG-001] Failed to track bookmark tags:", error);
         }
       }
       /**
@@ -2899,7 +3078,7 @@ var init_pinboard_service = __esm({
        * @returns {Promise<void>}
        */
       async handleTagError(error, operation, context = {}) {
-        console.error(`[IMMUTABLE-REQ-TAG-001] Tag operation failed: ${operation}`, {
+        debugError(`[IMMUTABLE-REQ-TAG-001] Tag operation failed: ${operation}`, {
           error: error.message,
           stack: error.stack,
           context
@@ -2907,15 +3086,15 @@ var init_pinboard_service = __esm({
         if (error.name === "QuotaExceededError") {
           try {
             await this.tagService.cleanupOldTags();
-            console.log("[IMMUTABLE-REQ-TAG-001] Attempted cleanup after quota exceeded");
+            debugLog("[IMMUTABLE-REQ-TAG-001] Attempted cleanup after quota exceeded");
           } catch (cleanupError) {
-            console.error("[IMMUTABLE-REQ-TAG-001] Cleanup also failed:", cleanupError);
+            debugError("[IMMUTABLE-REQ-TAG-001] Cleanup also failed:", cleanupError);
           }
         }
         try {
           await this.notifyUserOfTagError(operation, error.message);
         } catch (notificationError) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to notify user:", notificationError);
+          debugError("[IMMUTABLE-REQ-TAG-001] Failed to notify user:", notificationError);
         }
       }
       /**
@@ -2926,7 +3105,7 @@ var init_pinboard_service = __esm({
        */
       async notifyUserOfTagError(operation, errorMessage) {
         const userMessage = `Tag ${operation} failed, but bookmark was saved. Error: ${errorMessage}`;
-        console.warn("[IMMUTABLE-REQ-TAG-001] User notification:", userMessage);
+        debugWarn("[IMMUTABLE-REQ-TAG-001] User notification:", userMessage);
       }
       /**
        * [IMMUTABLE-REQ-TAG-001] - Extract tags from bookmark data
@@ -2966,7 +3145,7 @@ var init_pinboard_service = __esm({
           };
           return this.saveBookmark(updatedBookmark);
         } catch (error) {
-          console.error("Failed to delete tag:", error);
+          debugError("Failed to delete tag:", error);
           throw error;
         }
       }
@@ -2984,7 +3163,7 @@ var init_pinboard_service = __esm({
           const response = await this.makeApiRequest(endpoint);
           return true;
         } catch (error) {
-          console.error("Connection test failed:", error);
+          debugError("Connection test failed:", error);
           return false;
         }
       }
@@ -3000,13 +3179,13 @@ var init_pinboard_service = __esm({
        */
       async makeApiRequest(endpoint, method = "GET") {
         const hasAuth = await this.configManager.hasAuthToken();
-        console.log("\u{1F510} Auth token check:", hasAuth);
+        debugLog("\u{1F510} Auth token check:", hasAuth);
         if (!hasAuth) {
           throw new Error("No authentication token configured");
         }
         const authParam = await this.configManager.getAuthTokenParam();
         const url = `${this.apiBase}${endpoint}&${authParam}`;
-        console.log("\u{1F310} Making API request to:", url.replace(/auth_token=[^&]+/, "auth_token=***HIDDEN***"));
+        debugLog("\u{1F310} Making API request to:", url.replace(/auth_token=[^&]+/, "auth_token=***HIDDEN***"));
         return this.makeRequestWithRetry(url, method);
       }
       /**
@@ -3023,28 +3202,28 @@ var init_pinboard_service = __esm({
       async makeRequestWithRetry(url, method = "GET", retryCount = 0) {
         const config = await this.configManager.getConfig();
         try {
-          console.log(`\u{1F680} Attempting HTTP ${method} request (attempt ${retryCount + 1})`);
+          debugLog(`\u{1F680} Attempting HTTP ${method} request (attempt ${retryCount + 1})`);
           const response = await fetch(url, { method });
-          console.log(`\u{1F4E1} HTTP response status: ${response.status} ${response.statusText}`);
+          debugLog(`\u{1F4E1} HTTP response status: ${response.status} ${response.statusText}`);
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
           }
           const xmlText = await response.text();
-          console.log("\u{1F4C4} Raw XML response:", xmlText.substring(0, 500) + (xmlText.length > 500 ? "..." : ""));
+          debugLog("\u{1F4C4} Raw XML response:", xmlText.substring(0, 500) + (xmlText.length > 500 ? "..." : ""));
           const parsed = this.parseXmlResponse(xmlText);
-          console.log("\u2705 Successfully parsed XML response");
+          debugLog("\u2705 Successfully parsed XML response");
           return parsed;
         } catch (error) {
-          console.error(`\u{1F4A5} HTTP request failed:`, error.message);
+          debugError(`\u{1F4A5} HTTP request failed:`, error.message);
           const isRetryable = this.isRetryableError(error);
           const maxRetries = config.pinRetryCountMax || 2;
           if (isRetryable && retryCount < maxRetries) {
             const delay = this.retryDelays[retryCount] || config.pinRetryDelay || 1e3;
-            console.warn(`\u{1F504} API request failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+            debugWarn(`\u{1F504} API request failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
             await this.sleep(delay);
             return this.makeRequestWithRetry(url, method, retryCount + 1);
           }
-          console.error(`\u274C Max retries exceeded or non-retryable error. Giving up.`);
+          debugError(`\u274C Max retries exceeded or non-retryable error. Giving up.`);
           throw error;
         }
       }
@@ -3061,8 +3240,8 @@ var init_pinboard_service = __esm({
         try {
           return this.xmlParser.parse(xmlText);
         } catch (error) {
-          console.error("Failed to parse XML response:", error);
-          console.error("XML content:", xmlText);
+          debugError("Failed to parse XML response:", error);
+          debugError("XML content:", xmlText);
           throw new Error("Invalid XML response from Pinboard API");
         }
       }
@@ -3079,15 +3258,15 @@ var init_pinboard_service = __esm({
        */
       parseBookmarkResponse(xmlObj, url, title) {
         try {
-          console.log("\u{1F50D} Parsing XML object structure:", JSON.stringify(xmlObj, null, 2));
+          debugLog("\u{1F50D} Parsing XML object structure:", JSON.stringify(xmlObj, null, 2));
           const posts = xmlObj?.posts?.post;
-          console.log("\u{1F4CB} Posts extracted:", posts);
-          console.log("\u{1F4CB} Posts type:", typeof posts);
-          console.log("\u{1F4CB} Posts is array:", Array.isArray(posts));
-          console.log("\u{1F4CB} Posts length:", posts?.length);
+          debugLog("\u{1F4CB} Posts extracted:", posts);
+          debugLog("\u{1F4CB} Posts type:", typeof posts);
+          debugLog("\u{1F4CB} Posts is array:", Array.isArray(posts));
+          debugLog("\u{1F4CB} Posts length:", posts?.length);
           if (posts && posts.length > 0) {
             const post = Array.isArray(posts) ? posts[0] : posts;
-            console.log("\u{1F4C4} Processing post:", post);
+            debugLog("\u{1F4C4} Processing post:", post);
             const result = {
               url: post["@_href"] || url,
               description: post["@_description"] || title || "",
@@ -3098,11 +3277,11 @@ var init_pinboard_service = __esm({
               toread: post["@_toread"] || "no",
               hash: post["@_hash"] || ""
             };
-            console.log("\u2705 Successfully parsed bookmark:", result);
+            debugLog("\u2705 Successfully parsed bookmark:", result);
             return result;
           }
           if (posts && !Array.isArray(posts)) {
-            console.log("\u{1F4C4} Single post object found, processing directly:", posts);
+            debugLog("\u{1F4C4} Single post object found, processing directly:", posts);
             const result = {
               url: posts["@_href"] || url,
               description: posts["@_description"] || title || "",
@@ -3113,13 +3292,13 @@ var init_pinboard_service = __esm({
               toread: posts["@_toread"] || "no",
               hash: posts["@_hash"] || ""
             };
-            console.log("\u2705 Successfully parsed single bookmark:", result);
+            debugLog("\u2705 Successfully parsed single bookmark:", result);
             return result;
           }
-          console.log("\u26A0\uFE0F No posts found in XML structure");
+          debugLog("\u26A0\uFE0F No posts found in XML structure");
           return this.createEmptyBookmark(url, title);
         } catch (error) {
-          console.error("\u274C Failed to parse bookmark response:", error);
+          debugError("\u274C Failed to parse bookmark response:", error);
           return this.createEmptyBookmark(url, title);
         }
       }
@@ -3134,23 +3313,43 @@ var init_pinboard_service = __esm({
        */
       parseRecentBookmarksResponse(xmlObj) {
         try {
+          debugLog("[PINBOARD-SERVICE] Parsing recent bookmarks XML object");
+          debugLog("[PINBOARD-SERVICE] XML object structure:", JSON.stringify(xmlObj, null, 2));
           const posts = xmlObj?.posts?.post;
           if (!posts) {
+            debugLog("[PINBOARD-SERVICE] No posts found in XML response");
             return [];
           }
           const postsArray = Array.isArray(posts) ? posts : [posts];
-          return postsArray.map((post) => ({
-            url: post["@_href"] || "",
-            description: post["@_description"] || "",
-            extended: post["@_extended"] || "",
-            tags: post["@_tag"] ? post["@_tag"].split(" ") : [],
-            time: post["@_time"] || "",
-            shared: post["@_shared"] || "yes",
-            toread: post["@_toread"] || "no",
-            hash: post["@_hash"] || ""
-          }));
+          debugLog("[PINBOARD-SERVICE] Processing posts array, count:", postsArray.length);
+          const result = postsArray.map((post, index) => {
+            debugLog(`[PINBOARD-SERVICE] Processing post ${index + 1}:`, {
+              href: post["@_href"],
+              description: post["@_description"],
+              tag: post["@_tag"],
+              time: post["@_time"]
+            });
+            const tags = post["@_tag"] ? post["@_tag"].split(" ") : [];
+            debugLog(`[PINBOARD-SERVICE] Post ${index + 1} tags after split:`, tags);
+            return {
+              url: post["@_href"] || "",
+              description: post["@_description"] || "",
+              extended: post["@_extended"] || "",
+              tags,
+              time: post["@_time"] || "",
+              shared: post["@_shared"] || "yes",
+              toread: post["@_toread"] || "no",
+              hash: post["@_hash"] || ""
+            };
+          });
+          debugLog("[PINBOARD-SERVICE] Final parsed bookmarks:", result.map((b) => ({
+            url: b.url,
+            description: b.description,
+            tags: b.tags
+          })));
+          return result;
         } catch (error) {
-          console.error("Failed to parse recent bookmarks response:", error);
+          debugError("[PINBOARD-SERVICE] Failed to parse recent bookmarks response:", error);
           return [];
         }
       }
@@ -3172,7 +3371,7 @@ var init_pinboard_service = __esm({
             message: result?.["#text"] || "Operation completed"
           };
         } catch (error) {
-          console.error("Failed to parse API response:", error);
+          debugError("Failed to parse API response:", error);
           return {
             success: false,
             code: "parse_error",
@@ -3284,6 +3483,163 @@ var init_pinboard_service = __esm({
 init_pinboard_service();
 init_tag_service();
 init_config_manager();
+
+// src/features/search/tab-search-service.js
+var TabSearchService = class {
+  constructor() {
+    this.lastSearchText = null;
+    this.lastMatchedTabId = null;
+    this.searchHistory = [];
+  }
+  /**
+   * [TAB-SEARCH-CORE] Search tabs by title and navigate to next match
+   * @param {string} searchText - Search string to find in tab titles
+   * @param {number} currentTabId - ID of the current active tab
+   * @returns {Promise<Object>} Search results with navigation info
+   */
+  async searchAndNavigate(searchText, currentTabId) {
+    try {
+      console.log("[TAB-SEARCH-CORE] Starting search with:", { searchText, currentTabId });
+      const normalizedSearch = searchText.toLowerCase().trim();
+      console.log("[TAB-SEARCH-CORE] Normalized search:", normalizedSearch);
+      const isNewSearch = this.lastSearchText !== normalizedSearch;
+      const restartTabId = isNewSearch ? currentTabId : this.lastMatchedTabId || currentTabId;
+      console.log("[TAB-SEARCH-CORE] Search state:", { isNewSearch, restartTabId, lastSearchText: this.lastSearchText, lastMatchedTabId: this.lastMatchedTabId });
+      console.log("[TAB-SEARCH-CORE] Querying all tabs...");
+      const allTabs = await this.getAllTabs();
+      console.log("[TAB-SEARCH-CORE] Found tabs:", allTabs.length);
+      const matchingTabs = allTabs.filter(
+        (tab) => tab.title.toLowerCase().includes(normalizedSearch)
+      );
+      console.log("[TAB-SEARCH-CORE] Matching tabs:", matchingTabs.length, matchingTabs.map((t) => ({ id: t.id, title: t.title })));
+      const nextTab = this.findNextTab(matchingTabs, restartTabId);
+      console.log("[TAB-SEARCH-CORE] Next tab:", nextTab ? { id: nextTab.id, title: nextTab.title } : null);
+      if (nextTab && nextTab.id !== restartTabId) {
+        console.log("[TAB-SEARCH-CORE] Activating tab:", nextTab.id);
+        await this.activateTab(nextTab.id);
+        console.log("[TAB-SEARCH-CORE] Focusing window:", nextTab.windowId);
+        await this.focusWindow(nextTab.windowId);
+        this.lastSearchText = normalizedSearch;
+        this.lastMatchedTabId = nextTab.id;
+        this.addToSearchHistory(normalizedSearch);
+        const result = {
+          success: true,
+          matchCount: matchingTabs.length,
+          currentMatch: matchingTabs.findIndex((tab) => tab.id === nextTab.id) + 1,
+          tabId: nextTab.id,
+          tabTitle: nextTab.title
+        };
+        console.log("[TAB-SEARCH-CORE] Search completed successfully:", result);
+        return result;
+      } else {
+        const result = {
+          success: false,
+          matchCount: matchingTabs.length,
+          message: matchingTabs.length === 0 ? "No matching tabs found" : "Already on last match"
+        };
+        console.log("[TAB-SEARCH-CORE] Search completed with no navigation:", result);
+        return result;
+      }
+    } catch (error) {
+      console.error("[TAB-SEARCH-CORE] Search error:", error);
+      console.error("[TAB-SEARCH-CORE] Error stack:", error.stack);
+      throw new Error(`Tab search failed: ${error.message}`);
+    }
+  }
+  /**
+   * [TAB-SEARCH-CORE] Get all browser tabs
+   * @returns {Promise<Array>} Array of tab objects
+   */
+  async getAllTabs() {
+    return new Promise((resolve, reject) => {
+      console.log("[TAB-SEARCH-SERVICE] Querying all tabs");
+      chrome.tabs.query({}, (tabs) => {
+        if (chrome.runtime.lastError) {
+          console.error("[TAB-SEARCH-SERVICE] Chrome API error:", chrome.runtime.lastError);
+          reject(new Error(chrome.runtime.lastError.message));
+        } else {
+          console.log("[TAB-SEARCH-SERVICE] Found tabs:", tabs.length);
+          resolve(tabs);
+        }
+      });
+    });
+  }
+  /**
+   * [TAB-SEARCH-NAV] Find next tab in circular sequence
+   * @param {Array} matchingTabs - Array of matching tab objects
+   * @param {number} restartTabId - Tab ID to start search from
+   * @returns {Object|null} Next tab object or null
+   */
+  findNextTab(matchingTabs, restartTabId) {
+    if (matchingTabs.length === 0) return null;
+    const nextTab = matchingTabs.find((tab) => tab.id > restartTabId);
+    return nextTab || matchingTabs[0];
+  }
+  /**
+   * [TAB-SEARCH-NAV] Activate a specific tab
+   * @param {number} tabId - Tab ID to activate
+   */
+  async activateTab(tabId) {
+    return new Promise((resolve, reject) => {
+      console.log("[TAB-SEARCH-SERVICE] Activating tab:", tabId);
+      chrome.tabs.update(tabId, { active: true }, (tab) => {
+        if (chrome.runtime.lastError) {
+          console.error("[TAB-SEARCH-SERVICE] Tab activation error:", chrome.runtime.lastError);
+          reject(new Error(chrome.runtime.lastError.message));
+        } else {
+          console.log("[TAB-SEARCH-SERVICE] Tab activated successfully:", tabId);
+          resolve(tab);
+        }
+      });
+    });
+  }
+  /**
+   * [TAB-SEARCH-NAV] Focus the window containing the tab
+   * @param {number} windowId - Window ID to focus
+   */
+  async focusWindow(windowId) {
+    return new Promise((resolve, reject) => {
+      console.log("[TAB-SEARCH-SERVICE] Focusing window:", windowId);
+      chrome.windows.update(windowId, { focused: true }, (window2) => {
+        if (chrome.runtime.lastError) {
+          console.error("[TAB-SEARCH-SERVICE] Window focus error:", chrome.runtime.lastError);
+          reject(new Error(chrome.runtime.lastError.message));
+        } else {
+          console.log("[TAB-SEARCH-SERVICE] Window focused successfully:", windowId);
+          resolve(window2);
+        }
+      });
+    });
+  }
+  /**
+   * [TAB-SEARCH-STATE] Add search term to history
+   * @param {string} searchText - Search term to add
+   */
+  addToSearchHistory(searchText) {
+    if (!searchText || searchText.trim().length === 0) return;
+    const trimmedText = searchText.trim();
+    const currentHistory = this.searchHistory;
+    const filteredHistory = currentHistory.filter((term) => term !== trimmedText);
+    this.searchHistory = [trimmedText, ...filteredHistory].slice(0, 10);
+  }
+  /**
+   * [TAB-SEARCH-STATE] Get search history
+   * @returns {Array} Array of recent search terms
+   */
+  getSearchHistory() {
+    return [...this.searchHistory];
+  }
+  /**
+   * [TAB-SEARCH-STATE] Clear search state
+   */
+  clearSearchState() {
+    this.lastSearchText = null;
+    this.lastMatchedTabId = null;
+  }
+};
+
+// src/core/message-handler.js
+init_utils();
 var MESSAGE_TYPES = {
   // Data retrieval
   GET_CURRENT_BOOKMARK: "getCurrentBookmark",
@@ -3305,6 +3661,10 @@ var MESSAGE_TYPES = {
   // Search operations
   SEARCH_TITLE: "searchTitle",
   SEARCH_TITLE_TEXT: "searchTitleText",
+  // [IMMUTABLE-REQ-TAG-002] Tab search operations
+  SEARCH_TABS: "searchTabs",
+  GET_SEARCH_HISTORY: "getSearchHistory",
+  CLEAR_SEARCH_STATE: "clearSearchState",
   // Content script lifecycle
   CONTENT_SCRIPT_READY: "contentScriptReady",
   // Overlay configuration
@@ -3319,6 +3679,7 @@ var MessageHandler = class {
     this.pinboardService = pinboardService || new PinboardService();
     this.tagService = tagService || new TagService();
     this.configManager = new ConfigManager();
+    this.tabSearchService = new TabSearchService();
   }
   /**
    * Process incoming messages with modern async/await pattern
@@ -3328,9 +3689,45 @@ var MessageHandler = class {
    */
   async processMessage(message, sender) {
     const { type, data } = message;
-    const tabId = sender.tab?.id;
-    const url = sender.tab?.url;
-    console.log(`Processing message: ${type}`, { data, tabId, url });
+    let tabId = sender.tab?.id;
+    let url = sender.tab?.url;
+    if (!tabId && (type === MESSAGE_TYPES.SEARCH_TABS || type === MESSAGE_TYPES.GET_CURRENT_BOOKMARK)) {
+      try {
+        debugLog("[MESSAGE-HANDLER] Getting current active tab for popup request");
+        let tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        debugLog("[MESSAGE-HANDLER] Found tabs (current window):", tabs.length);
+        if (tabs.length === 0) {
+          debugLog("[MESSAGE-HANDLER] No tabs in current window, trying all windows");
+          tabs = await chrome.tabs.query({ active: true });
+          debugLog("[MESSAGE-HANDLER] Found tabs (all windows):", tabs.length);
+        }
+        if (tabs.length === 0) {
+          debugLog("[MESSAGE-HANDLER] No active tabs found, trying any tab");
+          tabs = await chrome.tabs.query({});
+          debugLog("[MESSAGE-HANDLER] Found total tabs:", tabs.length);
+          if (tabs.length > 0) {
+            tabId = tabs[0].id;
+            url = tabs[0].url;
+            debugLog("[MESSAGE-HANDLER] Using first available tab:", { tabId, url });
+          }
+        } else {
+          tabId = tabs[0].id;
+          url = tabs[0].url;
+          debugLog("[MESSAGE-HANDLER] Using active tab:", { tabId, url });
+        }
+        if (!tabId) {
+          debugError("[MESSAGE-HANDLER] No tabs available at all");
+        }
+      } catch (error) {
+        debugError("[MESSAGE-HANDLER] Failed to get current tab:", error);
+        debugError("[MESSAGE-HANDLER] Error details:", {
+          message: error.message,
+          stack: error.stack,
+          chromeError: chrome.runtime.lastError
+        });
+      }
+    }
+    debugLog(`Processing message: ${type}`, { data, tabId, url });
     switch (type) {
       case MESSAGE_TYPES.GET_CURRENT_BOOKMARK:
         return this.handleGetCurrentBookmark(data, url, tabId);
@@ -3350,6 +3747,13 @@ var MessageHandler = class {
         return this.handleInhibitUrl(data);
       case MESSAGE_TYPES.SEARCH_TITLE:
         return this.handleSearchTitle(data, tabId);
+      // [IMMUTABLE-REQ-TAG-002] Handle tab search messages
+      case MESSAGE_TYPES.SEARCH_TABS:
+        return this.handleSearchTabs(data, tabId);
+      case MESSAGE_TYPES.GET_SEARCH_HISTORY:
+        return this.handleGetSearchHistory();
+      case MESSAGE_TYPES.CLEAR_SEARCH_STATE:
+        return this.handleClearSearchState();
       case MESSAGE_TYPES.GET_TAB_ID:
         return { tabId };
       case MESSAGE_TYPES.CONTENT_SCRIPT_READY:
@@ -3369,16 +3773,16 @@ var MessageHandler = class {
     if (!targetUrl) {
       throw new Error("No URL provided");
     }
-    console.log("Getting bookmark for URL:", targetUrl);
-    console.log("Checking if URL is allowed...");
+    debugLog("Getting bookmark for URL:", targetUrl);
+    debugLog("Checking if URL is allowed...");
     const isAllowed = await this.configManager.isUrlAllowed(targetUrl);
     if (!isAllowed) {
       return { blocked: true, url: targetUrl };
     }
-    console.log("URL is allowed, getting bookmark data...");
+    debugLog("URL is allowed, getting bookmark data...");
     const hasAuth = await this.configManager.hasAuthToken();
     if (!hasAuth) {
-      console.log("No auth token available, returning empty bookmark");
+      debugLog("No auth token available, returning empty bookmark");
       return {
         description: data?.title || "",
         hash: "",
@@ -3392,15 +3796,17 @@ var MessageHandler = class {
         needsAuth: true
       };
     }
-    console.log("Getting bookmark data from Pinboard...");
+    debugLog("Getting bookmark data from Pinboard...");
     const bookmark = await this.pinboardService.getBookmarkForUrl(targetUrl, data?.title);
-    console.log("Bookmark data retrieved:", bookmark);
+    debugLog("Bookmark data retrieved:", bookmark);
     const config = await this.configManager.getConfig();
     if (config.setIconOnLoad && tabId) {
     }
     return bookmark;
   }
   async handleGetRecentBookmarks(data, senderUrl) {
+    debugLog("[MESSAGE-HANDLER] Handling getRecentBookmarks request:", data);
+    debugLog("[MESSAGE-HANDLER] Sender URL:", senderUrl);
     const recentTags = await this.tagService.getRecentTags({
       description: data.description,
       time: data.time,
@@ -3410,10 +3816,13 @@ var MessageHandler = class {
       toread: data.toread,
       senderUrl
     });
-    return {
+    debugLog("[MESSAGE-HANDLER] Recent tags from tag service:", recentTags);
+    const response = {
       ...data,
       recentTags
     };
+    debugLog("[MESSAGE-HANDLER] Returning response:", response);
+    return response;
   }
   async handleGetOptions() {
     return this.configManager.getOptions();
@@ -3429,7 +3838,7 @@ var MessageHandler = class {
         try {
           await this.tagService.handleTagAddition(tag.trim(), data);
         } catch (error) {
-          console.error(`[IMMUTABLE-REQ-TAG-001] Failed to track tag "${tag}":`, error);
+          debugError(`[IMMUTABLE-REQ-TAG-001] Failed to track tag "${tag}":`, error);
         }
       }
     }
@@ -3444,7 +3853,7 @@ var MessageHandler = class {
       try {
         await this.tagService.handleTagAddition(data.value.trim(), data);
       } catch (error) {
-        console.error(`[IMMUTABLE-REQ-TAG-001] Failed to track tag "${data.value}":`, error);
+        debugError(`[IMMUTABLE-REQ-TAG-001] Failed to track tag "${data.value}":`, error);
       }
     }
     return result;
@@ -3458,8 +3867,54 @@ var MessageHandler = class {
   async handleSearchTitle(data, tabId) {
     return { searchCount: 0, tabId };
   }
+  /**
+   * [TAB-SEARCH-CORE] Handle tab search request
+   */
+  async handleSearchTabs(data, tabId) {
+    try {
+      const { searchText } = data;
+      debugLog("[TAB-SEARCH-CORE] Starting tab search:", { searchText, tabId });
+      if (!searchText || !searchText.trim()) {
+        throw new Error("Search text is required");
+      }
+      if (!tabId) {
+        throw new Error("Current tab ID is required");
+      }
+      debugLog("[TAB-SEARCH-CORE] Calling tabSearchService.searchAndNavigate");
+      const result = await this.tabSearchService.searchAndNavigate(searchText, tabId);
+      debugLog("[TAB-SEARCH-CORE] Search result:", result);
+      return result;
+    } catch (error) {
+      debugError("[TAB-SEARCH-CORE] Search tabs error:", error);
+      throw error;
+    }
+  }
+  /**
+   * [TAB-SEARCH-STATE] Handle get search history request
+   */
+  async handleGetSearchHistory() {
+    try {
+      const history = this.tabSearchService.getSearchHistory();
+      return { history };
+    } catch (error) {
+      debugError("[TAB-SEARCH-STATE] Get search history error:", error);
+      throw error;
+    }
+  }
+  /**
+   * [TAB-SEARCH-STATE] Handle clear search state request
+   */
+  async handleClearSearchState() {
+    try {
+      this.tabSearchService.clearSearchState();
+      return { success: true };
+    } catch (error) {
+      debugError("[TAB-SEARCH-STATE] Clear search state error:", error);
+      throw error;
+    }
+  }
   async handleContentScriptReady(data, tabId, url) {
-    console.log("Content script ready:", { tabId, url, data });
+    debugLog("Content script ready:", { tabId, url, data });
     return { acknowledged: true, tabId, timestamp: Date.now() };
   }
   async handleUpdateOverlayConfig(data) {
@@ -3471,7 +3926,7 @@ var MessageHandler = class {
       });
       return { success: true, updated: data };
     } catch (error) {
-      console.error("Failed to update overlay config:", error);
+      debugError("Failed to update overlay config:", error);
       throw new Error("Failed to update overlay configuration");
     }
   }
@@ -3488,7 +3943,7 @@ var MessageHandler = class {
         overlayBlurAmount: config.overlayBlurAmount
       };
     } catch (error) {
-      console.error("Failed to get overlay config:", error);
+      debugError("Failed to get overlay config:", error);
       throw new Error("Failed to get overlay configuration");
     }
   }
@@ -3501,7 +3956,7 @@ var MessageHandler = class {
     try {
       await chrome.tabs.sendMessage(tabId, message);
     } catch (error) {
-      console.error("Failed to send message to tab:", error);
+      debugError("Failed to send message to tab:", error);
     }
   }
   /**
@@ -3517,7 +3972,7 @@ var MessageHandler = class {
       );
       await Promise.all(promises);
     } catch (error) {
-      console.error("Failed to broadcast message:", error);
+      debugError("Failed to broadcast message:", error);
     }
   }
 };

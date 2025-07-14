@@ -123,6 +123,20 @@ describe('ConfigManager', () => {
         hoverboard_settings: configManager.defaultConfig
       });
     });
+
+    test('should handle uxShowSectionLabels option correctly', async () => {
+      // Test that the default value is false
+      const defaultConfig = await configManager.getConfig();
+      expect(defaultConfig).toHaveProperty('uxShowSectionLabels', false);
+      
+      // Test updating the value
+      const updates = {
+        uxShowSectionLabels: true
+      };
+      await configManager.updateConfig(updates);
+      const updatedConfig = await configManager.getConfig();
+      expect(updatedConfig).toHaveProperty('uxShowSectionLabels', true);
+    });
   });
 
   describe('Authentication Management', () => {

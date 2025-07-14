@@ -282,7 +282,7 @@ export class KeyboardManager {
         outline: 2px solid var(--color-primary-500) !important;
         outline-offset: 2px !important;
       }
-      
+
       .keyboard-navigation button:focus,
       .keyboard-navigation input:focus {
         box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;

@@ -118,7 +118,7 @@ class OptionsController {
       // Load visibility defaults
       this.elements.defaultTransparencyEnabled.checked = config.defaultTransparencyEnabled
       this.elements.defaultBackgroundOpacity.value = config.defaultBackgroundOpacity
-      
+
       // Update visibility UI
       this.currentTheme = config.defaultVisibilityTheme
       this.updateThemeDisplay()
@@ -247,16 +247,16 @@ class OptionsController {
   async exportSettings () {
     try {
       this.setLoading(true)
-      
+
       const config = await this.configManager.exportConfig()
-      
+
       const blob = new Blob([config], { type: 'application/json' })
       const url = URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url
       a.download = `hoverboard-settings-${new Date().toISOString().split('T')[0]}.json`
       a.click()
-      
+
       URL.revokeObjectURL(url)
       this.showStatus('Settings exported successfully', 'success')
     } catch (error) {
@@ -273,11 +273,11 @@ class OptionsController {
 
     try {
       this.setLoading(true)
-      
+
       const text = await file.text()
       await this.configManager.importConfig(text)
       await this.loadSettings()
-      
+
       this.showStatus('Settings imported successfully', 'success')
     } catch (error) {
       console.error('Failed to import settings:', error)
@@ -323,20 +323,20 @@ class OptionsController {
 
   setLoading (loading) {
     this.isLoading = loading
-    
+
     // Update UI loading state
     const buttons = document.querySelectorAll('.btn')
     const inputs = document.querySelectorAll('input, textarea')
-    
+
     buttons.forEach(btn => {
       btn.disabled = loading
       btn.classList.toggle('loading', loading)
     })
-    
+
     inputs.forEach(input => {
       input.disabled = loading
     })
-    
+
     document.body.classList.toggle('loading', loading)
   }
 
@@ -378,7 +378,7 @@ class OptionsController {
   updateThemeDisplay () {
     const themeIcon = this.elements.defaultThemeToggle.querySelector('.theme-icon')
     const themeText = this.elements.defaultThemeToggle.querySelector('.theme-text')
-    
+
     if (themeIcon && themeText) {
       const isLightOnDark = this.currentTheme === 'light-on-dark'
       themeIcon.textContent = isLightOnDark ? '🌙' : '☀️'
@@ -403,11 +403,11 @@ class OptionsController {
     const preview = this.elements.visibilityPreview
     const isTransparent = this.elements.defaultTransparencyEnabled.checked
     const opacity = parseInt(this.elements.defaultBackgroundOpacity.value) / 100
-    
+
     // Remove existing theme classes
     preview.classList.remove('theme-light-on-dark', 'theme-dark-on-light')
     preview.classList.add(`theme-${this.currentTheme}`)
-    
+
     // Apply transparency and opacity
     if (isTransparent) {
       if (this.currentTheme === 'light-on-dark') {
@@ -426,4 +426,4 @@ class OptionsController {
 // Initialize when page loads
 document.addEventListener('DOMContentLoaded', () => {
   new OptionsController()
-}) 
+})

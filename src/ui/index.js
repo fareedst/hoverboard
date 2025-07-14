@@ -132,7 +132,11 @@ export class UISystem {
 
     // UI-004: Create popup component instances based on options
     const stateManager = enableState ? new StateManager() : null
-    const uiManager = new UIManager(popupOptions)
+    const uiManager = new UIManager({
+      errorHandler: popupOptions.errorHandler,
+      stateManager,
+      config: popupOptions.config || {}
+    })
     const keyboardManager = enableKeyboard ? new KeyboardManager({ uiManager }) : null
     const controller = new PopupController({
       uiManager,

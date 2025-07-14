@@ -4,6 +4,7 @@
  */
 
 import { ConfigManager } from '../../config/config-manager.js'
+import { debugLog, debugError } from '../../shared/utils.js'
 
 export class TagService {
   constructor (pinboardService = null) {
@@ -11,14 +12,35 @@ export class TagService {
     if (pinboardService) {
       this.pinboardService = pinboardService
     } else {
-      // Dynamically require to avoid circular dependency at module load
-      const { PinboardService } = require('../pinboard/pinboard-service.js')
-      this.pinboardService = new PinboardService()
+      // Dynamically import to avoid circular dependency at module load
+      // This will be resolved when needed
+      this.pinboardService = null
+      this._pinboardServicePromise = null
     }
     this.configManager = new ConfigManager()
     this.cacheKey = 'hoverboard_recent_tags_cache'
     this.cacheTimeout = 5 * 60 * 1000 // 5 minutes
     this.tagFrequencyKey = 'hoverboard_tag_frequency'
+  }
+
+  /**
+   * Get PinboardService instance (lazy loading to avoid circular dependency)
+   * @returns {Promise<PinboardService>} PinboardService instance
+   */
+  async getPinboardService() {
+    if (this.pinboardService) {
+      return this.pinboardService
+    }
+
+    if (!this._pinboardServicePromise) {
+      this._pinboardServicePromise = import('../pinboard/pinboard-service.js')
+        .then(module => {
+          this.pinboardService = new module.PinboardService(this)
+          return this.pinboardService
+        })
+    }
+
+    return this._pinboardServicePromise
   }
 
   /**
@@ -28,25 +50,50 @@ export class TagService {
    */
   async getRecentTags (options = {}) {
     try {
+      debugLog('TAG-SERVICE', 'Getting recent tags with options:', options)
+
       // Check cache first
       const cachedTags = await this.getCachedTags()
       let tagsArr = []
+
+      debugLog('TAG-SERVICE', 'Cached tags result:', cachedTags)
+
       if (cachedTags && this.isCacheValid(cachedTags.timestamp)) {
+        debugLog('TAG-SERVICE', 'Using cached tags, count:', cachedTags.tags.length)
         tagsArr = cachedTags.tags
       } else {
+        debugLog('TAG-SERVICE', 'Cache invalid or empty, fetching fresh tags from Pinboard')
+
         // Fetch fresh tags from Pinboard
         const config = await this.configManager.getConfig()
-        const recentBookmarks = await this.pinboardService.getRecentBookmarks(
+        debugLog('TAG-SERVICE', 'Fetching recent bookmarks with count:', config.initRecentPostsCount)
+
+        const pinboardService = await this.getPinboardService()
+        const recentBookmarks = await pinboardService.getRecentBookmarks(
           config.initRecentPostsCount
         )
+
+        debugLog('TAG-SERVICE', 'Recent bookmarks received:', recentBookmarks.length)
+        debugLog('TAG-SERVICE', 'Recent bookmarks details:', recentBookmarks.map(b => ({
+          url: b.url,
+          description: b.description,
+          tags: b.tags
+        })))
+
         // Extract and process tags
         tagsArr = this.extractTagsFromBookmarks(recentBookmarks)
+        debugLog('TAG-SERVICE', 'Extracted tags:', tagsArr.map(t => ({ name: t.name, count: t.count })))
+
         await this.processAndCacheTags(tagsArr)
       }
+
       // Always return array of objects with 'name' property
-      return tagsArr.map(tag => typeof tag === 'string' ? { name: tag } : tag)
+      const result = tagsArr.map(tag => typeof tag === 'string' ? { name: tag } : tag)
+      debugLog('TAG-SERVICE', 'Final recent tags result:', result.map(t => t.name))
+
+      return result
     } catch (error) {
-      console.error('Failed to get recent tags:', error)
+      debugError('TAG-SERVICE', 'Failed to get recent tags:', error)
       return []
     }
   }
@@ -115,7 +162,7 @@ export class TagService {
     try {
       const config = await this.configManager.getConfig()
       const cachedTags = await this.getCachedTags()
-      
+
       let currentTags = []
       if (cachedTags && this.isCacheValid(cachedTags.timestamp)) {
         currentTags = cachedTags.tags
@@ -202,10 +249,13 @@ export class TagService {
    */
   async getCachedTags () {
     try {
+      debugLog('TAG-SERVICE', 'Getting cached tags from storage')
       const result = await chrome.storage.local.get(this.cacheKey)
-      return result[this.cacheKey] || null
+      const cachedData = result[this.cacheKey] || null
+      debugLog('TAG-SERVICE', 'Cached data retrieved:', cachedData)
+      return cachedData
     } catch (error) {
-      console.error('Failed to get cached tags:', error)
+      debugError('TAG-SERVICE', 'Failed to get cached tags:', error)
       return null
     }
   }
@@ -216,7 +266,15 @@ export class TagService {
    * @returns {boolean} Whether cache is valid
    */
   isCacheValid (timestamp) {
-    return Date.now() - timestamp < this.cacheTimeout
+    const isValid = Date.now() - timestamp < this.cacheTimeout
+    debugLog('TAG-SERVICE', 'Cache validity check:', {
+      timestamp,
+      currentTime: Date.now(),
+      age: Date.now() - timestamp,
+      timeout: this.cacheTimeout,
+      isValid
+    })
+    return isValid
   }
 
   /**
@@ -225,11 +283,21 @@ export class TagService {
    * @returns {Object[]} Array of tag objects with metadata
    */
   extractTagsFromBookmarks (bookmarks) {
+    debugLog('TAG-SERVICE', 'Extracting tags from bookmarks, count:', bookmarks.length)
+
     const tagMap = new Map()
 
-    bookmarks.forEach(bookmark => {
+    bookmarks.forEach((bookmark, index) => {
+      debugLog('TAG-SERVICE', `Processing bookmark ${index + 1}:`, {
+        url: bookmark.url,
+        description: bookmark.description,
+        tags: bookmark.tags
+      })
+
       if (bookmark.tags && bookmark.tags.length > 0) {
         bookmark.tags.forEach(tagName => {
+          debugLog('TAG-SERVICE', `Processing tag: "${tagName}"`)
+
           if (tagName.trim()) {
             const existing = tagMap.get(tagName) || {
               name: tagName,
@@ -252,12 +320,20 @@ export class TagService {
             }
 
             tagMap.set(tagName, existing)
+            debugLog('TAG-SERVICE', `Added/updated tag "${tagName}" (count: ${existing.count})`)
+          } else {
+            debugLog('TAG-SERVICE', `Skipping empty tag: "${tagName}"`)
           }
         })
+      } else {
+        debugLog('TAG-SERVICE', `Bookmark has no tags`)
       }
     })
 
-    return Array.from(tagMap.values())
+    const result = Array.from(tagMap.values())
+    debugLog('TAG-SERVICE', 'Final extracted tags:', result.map(t => ({ name: t.name, count: t.count })))
+
+    return result
   }
 
   /**
@@ -267,6 +343,9 @@ export class TagService {
    */
   async processAndCacheTags (tags) {
     try {
+      debugLog('TAG-SERVICE', 'Processing and caching tags, input count:', tags.length)
+      debugLog('TAG-SERVICE', 'Input tags:', tags.map(t => ({ name: t.name, count: t.count })))
+
       const config = await this.configManager.getConfig()
 
       // Sort tags by usage and recency
@@ -280,17 +359,24 @@ export class TagService {
         })
         .slice(0, config.recentTagsCountMax)
 
+      debugLog('TAG-SERVICE', 'Sorted and limited tags:', sortedTags.map(t => ({ name: t.name, count: t.count })))
+
       // Cache the processed tags
+      const cacheData = {
+        tags: sortedTags,
+        timestamp: Date.now()
+      }
+
+      debugLog('TAG-SERVICE', 'Caching data:', cacheData)
+
       await chrome.storage.local.set({
-        [this.cacheKey]: {
-          tags: sortedTags,
-          timestamp: Date.now()
-        }
+        [this.cacheKey]: cacheData
       })
 
+      debugLog('TAG-SERVICE', 'Cache updated successfully')
       return sortedTags
     } catch (error) {
-      console.error('Failed to process and cache tags:', error)
+      debugError('TAG-SERVICE', 'Failed to process and cache tags:', error)
       return tags
     }
   }
@@ -488,21 +574,21 @@ export class TagService {
 
       // [IMMUTABLE-REQ-TAG-001] - Get current recent tags
       const recentTags = await this.getRecentTags()
-      
+
       // [IMMUTABLE-REQ-TAG-001] - Check for duplicates in recent tags
-      const isDuplicate = recentTags.some(existingTag => 
+      const isDuplicate = recentTags.some(existingTag =>
         existingTag.name.toLowerCase() === sanitizedTag.toLowerCase()
       )
 
       if (!isDuplicate) {
         // [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags list
         await this.recordTagUsage(sanitizedTag)
-        console.log('[IMMUTABLE-REQ-TAG-001] Tag added to recent tags:', sanitizedTag)
+        debugLog('IMMUTABLE-REQ-TAG-001', 'Tag added to recent tags:', sanitizedTag)
       } else {
-        console.log('[IMMUTABLE-REQ-TAG-001] Tag already exists in recent tags:', sanitizedTag)
+        debugLog('IMMUTABLE-REQ-TAG-001', 'Tag already exists in recent tags:', sanitizedTag)
       }
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to add tag to recent:', error)
+      debugError('IMMUTABLE-REQ-TAG-001', 'Failed to add tag to recent:', error)
     }
   }
 
@@ -515,21 +601,21 @@ export class TagService {
     try {
       // [IMMUTABLE-REQ-TAG-001] - Get all recent tags
       const allRecentTags = await this.getRecentTags()
-      
+
       // [IMMUTABLE-REQ-TAG-001] - Normalize current tags for comparison
-      const normalizedCurrentTags = currentTags.map(tag => 
+      const normalizedCurrentTags = currentTags.map(tag =>
         this.sanitizeTag(tag).toLowerCase()
       ).filter(tag => tag)
 
       // [IMMUTABLE-REQ-TAG-001] - Filter out current tab duplicates
-      const filteredTags = allRecentTags.filter(tag => 
+      const filteredTags = allRecentTags.filter(tag =>
         !normalizedCurrentTags.includes(tag.name.toLowerCase())
       )
 
-      console.log('[IMMUTABLE-REQ-TAG-001] Recent tags excluding current:', filteredTags.length)
+      debugLog('IMMUTABLE-REQ-TAG-001', 'Recent tags excluding current:', filteredTags.length)
       return filteredTags
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to get recent tags excluding current:', error)
+      debugError('IMMUTABLE-REQ-TAG-001', 'Failed to get recent tags excluding current:', error)
       return []
     }
   }
@@ -544,13 +630,13 @@ export class TagService {
     try {
       // [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags
       await this.addTagToRecent(tag, bookmarkData.url)
-      
+
       // [IMMUTABLE-REQ-TAG-001] - Update bookmark record if needed
       if (bookmarkData.url) {
-        console.log('[IMMUTABLE-REQ-TAG-001] Tag addition handled for bookmark:', bookmarkData.url)
+        debugLog('IMMUTABLE-REQ-TAG-001', 'Tag addition handled for bookmark:', bookmarkData.url)
       }
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to handle tag addition:', error)
+      debugError('IMMUTABLE-REQ-TAG-001', 'Failed to handle tag addition:', error)
     }
   }
 
