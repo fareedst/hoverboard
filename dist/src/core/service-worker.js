@@ -1150,7 +1150,16 @@ var init_tag_service = __esm({
        */
       isRecentTag(lastUsed) {
         if (!lastUsed) return false;
-        const daysSinceUsed = (Date.now() - lastUsed.getTime()) / (1e3 * 60 * 60 * 24);
+        let lastUsedDate = lastUsed;
+        if (!(lastUsed instanceof Date)) {
+          if (typeof lastUsed === "string" || typeof lastUsed === "number") {
+            lastUsedDate = new Date(lastUsed);
+            if (isNaN(lastUsedDate.getTime())) return false;
+          } else {
+            return false;
+          }
+        }
+        const daysSinceUsed = (Date.now() - lastUsedDate.getTime()) / (1e3 * 60 * 60 * 24);
         return daysSinceUsed <= 7;
       }
       /**
@@ -3317,6 +3326,7 @@ var init_pinboard_service = __esm({
        * PIN-003: Tag removal from existing bookmark
        * SPECIFICATION: Retrieve bookmark, remove specified tag, save updated bookmark
        * IMPLEMENTATION DECISION: Filter out specific tag while preserving other tags
+       * [action:delete] [sync:site-record] [arch:atomic-sync]
        */
       async deleteTag(tagData) {
         try {
@@ -3841,6 +3851,10 @@ var MESSAGE_TYPES = {
   HIDE_OVERLAY: "hideOverlay",
   REFRESH_DATA: "refreshData",
   REFRESH_HOVER: "refreshHover",
+  BOOKMARK_UPDATED: "bookmarkUpdated",
+  // [TOGGLE-SYNC-MESSAGE-001] - New message type
+  TAG_UPDATED: "TAG_UPDATED",
+  // [TAG-SYNC-MESSAGE-001] - New message type for tag synchronization
   // Site management
   INHIBIT_URL: "inhibitUrl",
   // Search operations
@@ -3958,6 +3972,13 @@ var MessageHandler = class {
         return this.handleUpdateOverlayConfig(data);
       case MESSAGE_TYPES.GET_OVERLAY_CONFIG:
         return this.handleGetOverlayConfig();
+      // [TOGGLE-SYNC-MESSAGE-001] - Handle bookmark updates across interfaces
+      case MESSAGE_TYPES.BOOKMARK_UPDATED:
+        debugLog("[MessageHandler] BOOKMARK_UPDATED message received", { data, tabId });
+        return this.handleBookmarkUpdated(data, tabId);
+      // [TAG-SYNC-MESSAGE-001] - Handle tag updates across interfaces
+      case MESSAGE_TYPES.TAG_UPDATED:
+        return this.handleTagUpdated(data, tabId);
       case MESSAGE_TYPES.ECHO:
         return { echo: data, timestamp: Date.now() };
       default:
@@ -4221,6 +4242,53 @@ var MessageHandler = class {
     } catch (error) {
       debugError("Failed to get overlay config:", error);
       throw new Error("Failed to get overlay configuration");
+    }
+  }
+  /**
+   * [TOGGLE-SYNC-MESSAGE-001] - Handle bookmark updates across interfaces
+   * @param {Object} data - Bookmark data
+   * @param {number} tabId - Tab ID
+   */
+  async handleBookmarkUpdated(data, tabId) {
+    try {
+      debugLog("[MessageHandler] handleBookmarkUpdated called", { data, tabId });
+      const result = await this.pinboardService.saveBookmark(data);
+      debugLog("[MessageHandler] Bookmark updated via pinboardService.saveBookmark", { result });
+      await this.broadcastToAllTabs({
+        type: "BOOKMARK_UPDATED",
+        data
+      });
+      debugLog("[MessageHandler] BOOKMARK_UPDATED broadcasted to all tabs", { data });
+      return { success: true, updated: data };
+    } catch (error) {
+      debugError("[TOGGLE-SYNC-MESSAGE-001] Failed to handle bookmark update:", error);
+      throw new Error("Failed to update bookmark across interfaces");
+    }
+  }
+  /**
+   * [TAG-SYNC-MESSAGE-001] - Handle tag updates across interfaces
+   * @param {Object} data - Tag update data
+   * @param {number} tabId - Tab ID
+   */
+  async handleTagUpdated(data, tabId) {
+    try {
+      debugLog("[TAG-SYNC-MESSAGE-001] Handling tag update:", data);
+      if (!data || !data.url || !Array.isArray(data.tags)) {
+        throw new Error("Invalid tag update data");
+      }
+      await this.broadcastToAllTabs({
+        type: "TAG_UPDATED",
+        data
+      });
+      debugLog("[TAG-SYNC-MESSAGE-001] Tag update broadcasted successfully");
+      return { success: true, updated: data };
+    } catch (error) {
+      debugError("[TAG-SYNC-MESSAGE-001] Failed to handle tag update:", error);
+      if (error && error.message === "Invalid tag update data") {
+        throw error;
+      } else {
+        throw new Error("Failed to update tags across interfaces");
+      }
     }
   }
   /**

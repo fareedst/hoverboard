@@ -88,6 +88,11 @@ class ContentScript {
     this.messageService.onMessage('configUpdated', async (config) => {
       await this.handleConfigUpdate(config)
     })
+
+    // [TAG-SYNC-CONTENT-001] - Handle tag update notifications from popup
+    this.messageService.onMessage('TAG_UPDATED', async (data) => {
+      await this.handleTagUpdate(data)
+    })
   }
 
   /**
@@ -242,6 +247,47 @@ class ContentScript {
       }
     } catch (error) {
       this.logger.error('Error handling config update:', error)
+    }
+  }
+
+  /**
+   * [TAG-SYNC-CONTENT-001] - Handle tag update notifications from popup
+   * @param {Object} data - Tag update data
+   */
+  async handleTagUpdate (data) {
+    try {
+      this.logger.debug('[TAG-SYNC-CONTENT-001] Handling tag update:', data)
+
+      // [TAG-SYNC-CONTENT-001] - Validate tag update data
+      if (!data || !data.url || !Array.isArray(data.tags)) {
+        this.logger.warn('[TAG-SYNC-CONTENT-001] Invalid tag update data:', data)
+        return
+      }
+
+      // [TAG-SYNC-CONTENT-001] - Check if update is for current page
+      if (data.url !== this.currentTab.url) {
+        this.logger.debug('[TAG-SYNC-CONTENT-001] Tag update is for different URL, ignoring')
+        return
+      }
+
+      // [TAG-SYNC-CONTENT-001] - Update overlay if visible
+      if (this.overlayManager && this.hoverSystem.isHoverVisible()) {
+        const updatedContent = {
+          bookmark: {
+            url: data.url,
+            description: data.description || this.currentTab.title,
+            tags: data.tags
+          },
+          pageTitle: this.currentTab.title,
+          pageUrl: this.currentTab.url
+        }
+
+        // [TAG-SYNC-CONTENT-001] - Refresh overlay with updated content
+        await this.overlayManager.show(updatedContent)
+        this.logger.debug('[TAG-SYNC-CONTENT-001] Overlay refreshed with updated tags')
+      }
+    } catch (error) {
+      this.logger.error('[TAG-SYNC-CONTENT-001] Failed to handle tag update:', error)
     }
   }
 

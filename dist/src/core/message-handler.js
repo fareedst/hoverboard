@@ -28,6 +28,8 @@ export const MESSAGE_TYPES = {
   HIDE_OVERLAY: 'hideOverlay',
   REFRESH_DATA: 'refreshData',
   REFRESH_HOVER: 'refreshHover',
+  BOOKMARK_UPDATED: 'bookmarkUpdated', // [TOGGLE-SYNC-MESSAGE-001] - New message type
+  TAG_UPDATED: 'TAG_UPDATED', // [TAG-SYNC-MESSAGE-001] - New message type for tag synchronization
 
   // Site management
   INHIBIT_URL: 'inhibitUrl',
@@ -187,6 +189,15 @@ export class MessageHandler {
 
       case MESSAGE_TYPES.GET_OVERLAY_CONFIG:
         return this.handleGetOverlayConfig()
+
+      // [TOGGLE-SYNC-MESSAGE-001] - Handle bookmark updates across interfaces
+      case MESSAGE_TYPES.BOOKMARK_UPDATED:
+        debugLog('[MessageHandler] BOOKMARK_UPDATED message received', { data, tabId })
+        return this.handleBookmarkUpdated(data, tabId)
+
+      // [TAG-SYNC-MESSAGE-001] - Handle tag updates across interfaces
+      case MESSAGE_TYPES.TAG_UPDATED:
+        return this.handleTagUpdated(data, tabId)
 
       case MESSAGE_TYPES.ECHO:
         return { echo: data, timestamp: Date.now() }
@@ -533,6 +544,62 @@ export class MessageHandler {
     } catch (error) {
       debugError('Failed to get overlay config:', error)
       throw new Error('Failed to get overlay configuration')
+    }
+  }
+
+  /**
+   * [TOGGLE-SYNC-MESSAGE-001] - Handle bookmark updates across interfaces
+   * @param {Object} data - Bookmark data
+   * @param {number} tabId - Tab ID
+   */
+  async handleBookmarkUpdated (data, tabId) {
+    try {
+      debugLog('[MessageHandler] handleBookmarkUpdated called', { data, tabId })
+      // Update the bookmark with new privacy setting or other changes
+      const result = await this.pinboardService.saveBookmark(data)
+      debugLog('[MessageHandler] Bookmark updated via pinboardService.saveBookmark', { result })
+      // Optionally broadcast to all tabs if needed
+      await this.broadcastToAllTabs({
+        type: 'BOOKMARK_UPDATED',
+        data
+      })
+      debugLog('[MessageHandler] BOOKMARK_UPDATED broadcasted to all tabs', { data })
+      return { success: true, updated: data }
+    } catch (error) {
+      debugError('[TOGGLE-SYNC-MESSAGE-001] Failed to handle bookmark update:', error)
+      throw new Error('Failed to update bookmark across interfaces')
+    }
+  }
+
+  /**
+   * [TAG-SYNC-MESSAGE-001] - Handle tag updates across interfaces
+   * @param {Object} data - Tag update data
+   * @param {number} tabId - Tab ID
+   */
+  async handleTagUpdated (data, tabId) {
+    try {
+      debugLog('[TAG-SYNC-MESSAGE-001] Handling tag update:', data)
+
+      // [TAG-SYNC-MESSAGE-001] - Validate tag update data
+      if (!data || !data.url || !Array.isArray(data.tags)) {
+        throw new Error('Invalid tag update data')
+      }
+
+      // [TAG-SYNC-MESSAGE-001] - Broadcast tag update to all tabs
+      await this.broadcastToAllTabs({
+        type: 'TAG_UPDATED',
+        data
+      })
+
+      debugLog('[TAG-SYNC-MESSAGE-001] Tag update broadcasted successfully')
+      return { success: true, updated: data }
+    } catch (error) {
+      debugError('[TAG-SYNC-MESSAGE-001] Failed to handle tag update:', error)
+      if (error && error.message === 'Invalid tag update data') {
+        throw error
+      } else {
+        throw new Error('Failed to update tags across interfaces')
+      }
     }
   }
 

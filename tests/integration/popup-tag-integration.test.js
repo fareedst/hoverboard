@@ -152,6 +152,9 @@ describe('Popup Tag Integration Tests', () => {
       }
     })
 
+    // [TAG-SYNC-TEST-002] Mock sendToTab to resolve immediately for tag sync
+    PopupController.prototype.sendToTab = jest.fn().mockResolvedValue({ success: true })
+
     // Create mock instances
     uiManager = new UIManager(mockElements)
     stateManager = new StateManager()

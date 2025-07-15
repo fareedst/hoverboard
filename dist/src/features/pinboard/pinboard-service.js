@@ -319,26 +319,28 @@ export class PinboardService {
    * PIN-003: Tag removal from existing bookmark
    * SPECIFICATION: Retrieve bookmark, remove specified tag, save updated bookmark
    * IMPLEMENTATION DECISION: Filter out specific tag while preserving other tags
+   * [action:delete] [sync:site-record] [arch:atomic-sync]
    */
   async deleteTag (tagData) {
     try {
-      // PIN-003: Get current bookmark data to access existing tags
+      // [sync:site-record] - Get current bookmark data to access existing tags
       const currentBookmark = await this.getBookmarkForUrl(tagData.url)
 
-      // PIN-003: Remove specified tag from existing tags
+      // [action:delete] - Remove specified tag from existing tags
       const existingTags = currentBookmark.tags || []
       const filteredTags = existingTags.filter(tag => tag !== tagData.value)
 
-      // PIN-003: Save bookmark with filtered tags
+      // [arch:atomic-sync] - Save bookmark with filtered tags
       const updatedBookmark = {
         ...currentBookmark,
         ...tagData,
         tags: filteredTags.join(' ')
       }
 
+      // [arch:atomic-sync] [test:tag-deletion] - Save updated bookmark to persistent storage
       return this.saveBookmark(updatedBookmark)
     } catch (error) {
-      debugError('Failed to delete tag:', error)
+      debugError('Failed to delete tag:', error) // [test:tag-deletion]
       // PIN-003: Re-throw to allow caller error handling
       throw error
     }

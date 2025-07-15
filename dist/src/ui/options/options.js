@@ -1150,7 +1150,16 @@ var init_tag_service = __esm({
        */
       isRecentTag(lastUsed) {
         if (!lastUsed) return false;
-        const daysSinceUsed = (Date.now() - lastUsed.getTime()) / (1e3 * 60 * 60 * 24);
+        let lastUsedDate = lastUsed;
+        if (!(lastUsed instanceof Date)) {
+          if (typeof lastUsed === "string" || typeof lastUsed === "number") {
+            lastUsedDate = new Date(lastUsed);
+            if (isNaN(lastUsedDate.getTime())) return false;
+          } else {
+            return false;
+          }
+        }
+        const daysSinceUsed = (Date.now() - lastUsedDate.getTime()) / (1e3 * 60 * 60 * 24);
         return daysSinceUsed <= 7;
       }
       /**
@@ -3317,6 +3326,7 @@ var init_pinboard_service = __esm({
        * PIN-003: Tag removal from existing bookmark
        * SPECIFICATION: Retrieve bookmark, remove specified tag, save updated bookmark
        * IMPLEMENTATION DECISION: Filter out specific tag while preserving other tags
+       * [action:delete] [sync:site-record] [arch:atomic-sync]
        */
       async deleteTag(tagData) {
         try {

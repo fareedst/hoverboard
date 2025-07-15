@@ -32,6 +32,31 @@ export class PopupController {
     this.normalizeTags = this.normalizeTags.bind(this)
 
     this.setupEventListeners()
+
+    // [TOGGLE_SYNC_POPUP] Listen for BOOKMARK_UPDATED to sync popup UI with shared state
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+      chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+        if (message.type === 'BOOKMARK_UPDATED') {
+          try {
+            // [TOGGLE_SYNC_POPUP] Fetch latest bookmark data for current tab
+            if (this.currentTab && this.currentTab.url) {
+              const updatedPin = await this.getBookmarkData(this.currentTab.url)
+              this.currentPin = updatedPin
+              this.stateManager.setState({ currentPin: this.currentPin })
+              // [TOGGLE_SYNC_POPUP] Update UI to reflect new state
+              this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
+              this.uiManager.updateReadLaterStatus(this.currentPin?.toread === 'yes')
+              const normalizedTags = this.normalizeTags(this.currentPin?.tags)
+              this.uiManager.updateCurrentTags(normalizedTags)
+              // Optionally, show a message to the user
+              this.uiManager.showSuccess('Bookmark updated from another window')
+            }
+          } catch (error) {
+            debugError('[TOGGLE_SYNC_POPUP] Failed to update popup on BOOKMARK_UPDATED:', error)
+          }
+        }
+      })
+    }
   }
 
   /**
@@ -814,6 +839,17 @@ export class PopupController {
         this.stateManager.setState({ currentPin: this.currentPin })
         this.uiManager.updatePrivateStatus(newSharedStatus === 'no')
         this.uiManager.showSuccess(`Bookmark is now ${isPrivate ? 'public' : 'private'}`)
+
+        // [TOGGLE-SYNC-POPUP-001] - Notify overlay of changes (if visible)
+        try {
+          await this.sendToTab({
+            type: 'BOOKMARK_UPDATED',
+            data: updatedPin
+          })
+        } catch (error) {
+          debugError('[TOGGLE-SYNC-POPUP-001] Failed to notify overlay:', error)
+          // Don't fail the entire operation if overlay notification fails
+        }
       } else {
         // Create new bookmark with private status set to 'yes' (private by default when toggling)
         await this.createBookmark([], 'yes')
@@ -856,6 +892,17 @@ export class PopupController {
 
         const statusMessage = newToReadStatus === 'yes' ? 'Added to read later' : 'Removed from read later'
         this.uiManager.showSuccess(statusMessage)
+
+        // [TOGGLE-SYNC-POPUP-001] - Notify overlay of changes (if visible)
+        try {
+          await this.sendToTab({
+            type: 'BOOKMARK_UPDATED',
+            data: updatedPin
+          })
+        } catch (error) {
+          debugError('[TOGGLE-SYNC-POPUP-001] Failed to notify overlay:', error)
+          // Don't fail the entire operation if overlay notification fails
+        }
       } else {
         // Create new bookmark with toread status
         await this.createBookmark([], 'yes', 'yes')
@@ -997,6 +1044,41 @@ export class PopupController {
 
     // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after updating bookmark
     await this.loadRecentTags()
+
+    // [TAG-SYNC-POPUP-001] - Notify overlay of tag changes
+    await this.notifyOverlayOfTagChanges(tags)
+
+    // [TAG-SYNC-POPUP-001] - Also send BOOKMARK_UPDATED to ensure overlay updates tags
+    try {
+      await this.sendToTab({
+        type: 'BOOKMARK_UPDATED',
+        data: pinData
+      })
+    } catch (error) {
+      debugError('[TAG-SYNC-POPUP-001] Failed to notify overlay of BOOKMARK_UPDATED after tag change:', error)
+    }
+  }
+
+  /**
+   * [TAG-SYNC-POPUP-001] - Notify overlay of tag changes
+   * @param {string[]} tags - Array of updated tags
+   */
+  async notifyOverlayOfTagChanges(tags) {
+    try {
+      // [TAG-SYNC-POPUP-001] Send TAG_UPDATED message to overlay/content script
+      const updatedBookmark = {
+        url: this.currentTab?.url,
+        description: this.currentTab?.title,
+        tags: tags
+      }
+      await this.sendToTab({
+        type: 'TAG_UPDATED',
+        data: updatedBookmark
+      })
+    } catch (error) {
+      debugError('[TAG-SYNC-POPUP-001] Failed to notify overlay of TAG_UPDATED:', error)
+      // Don't fail the entire operation if overlay notification fails
+    }
   }
 
   /**

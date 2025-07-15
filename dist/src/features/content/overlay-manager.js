@@ -66,7 +66,8 @@ class OverlayManager {
   /**
    * Show overlay with content
    */
-  show (content) {
+  async show (content) {
+    debugLog('[OverlayManager] show() called', { content })
     try {
       debugLog('Showing overlay', { content })
 
@@ -82,7 +83,7 @@ class OverlayManager {
 
       // Create overlay if it doesn't exist
       if (!this.overlayElement) {
-        debugLog('Creating new overlay element')
+        debugLog('[OverlayManager] Creating new overlay element')
         this.createOverlay()
       }
 
@@ -131,16 +132,32 @@ class OverlayManager {
             tagElement.className = 'tag-element tiny iconTagDeleteInactive'
             tagElement.textContent = tag
             tagElement.title = 'Double-click to remove'
-            // [IMMUTABLE-REQ-TAG-001] - Add double-click to remove functionality
-            tagElement.ondblclick = () => {
-              // Remove tag from current content
-              if (content.bookmark && content.bookmark.tags) {
-                const index = content.bookmark.tags.indexOf(tag)
-                if (index > -1) {
-                  content.bookmark.tags.splice(index, 1)
-                  // [IMMUTABLE-REQ-TAG-001] - Refresh overlay
-                  this.show(content)
+            // [event:double-click] [action:delete] [tag:current]
+            tagElement.ondblclick = async () => {
+              try {
+                // Remove tag from current content (UI)
+                if (content.bookmark && content.bookmark.tags) {
+                  const index = content.bookmark.tags.indexOf(tag)
+                  if (index > -1) {
+                    content.bookmark.tags.splice(index, 1)
+                  }
                 }
+                // [sync:site-record] [arch:atomic-sync] - Delete tag from persistent storage
+                if (content.bookmark && content.bookmark.url) {
+                  await this.messageService.sendMessage({
+                    type: 'deleteTag', // [sync:site-record] [action:delete]
+                    data: {
+                      url: content.bookmark.url,
+                      value: tag
+                    }
+                  })
+                }
+                // [arch:atomic-sync] - Refresh overlay with updated content
+                this.show(content)
+                this.showMessage('Tag deleted successfully', 'success') // [test:tag-deletion]
+              } catch (error) {
+                debugError('[event:double-click] [action:delete] [sync:site-record] Failed to delete tag:', error) // [test:tag-deletion]
+                this.showMessage('Failed to delete tag', 'error')
               }
             }
             currentTagsContainer.appendChild(tagElement)
@@ -218,46 +235,97 @@ class OverlayManager {
       recentLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
       recentContainer.appendChild(recentLabel)
 
-      // [IMMUTABLE-REQ-TAG-004] - Enhanced recent tags with persistence
-      const sampleRecentTags = ['development', 'web', 'tutorial', 'javascript', 'reference']
-      sampleRecentTags.slice(0, 3).forEach(tag => {
-        // [IMMUTABLE-REQ-TAG-004] - Only show tags not already in current tags
-        if (!content.bookmark?.tags?.includes(tag)) {
-          const tagElement = this.document.createElement('span')
-          tagElement.className = 'tag-element tiny'
-          tagElement.textContent = tag
-          tagElement.onclick = async () => {
-            if (content.bookmark) {
-              try {
-                // [IMMUTABLE-REQ-TAG-004] - Send saveTag message for persistence
-                await this.messageService.sendMessage({
-                  type: 'saveTag',
-                  data: {
-                    url: content.bookmark.url || window.location.href,
-                    value: tag,
-                    description: content.bookmark.description || document.title
+      // [TAG-SYNC-OVERLAY-001] - Load dynamic recent tags from shared memory
+      try {
+        const recentTags = await this.loadRecentTagsForOverlay(content)
+
+        if (recentTags && recentTags.length > 0) {
+          // [TAG-SYNC-OVERLAY-001] - Display dynamic recent tags
+          recentTags.slice(0, 3).forEach(tag => {
+            // [TAG-SYNC-OVERLAY-001] - Only show tags not already in current tags
+            if (!content.bookmark?.tags?.includes(tag)) {
+              const tagElement = this.document.createElement('span')
+              tagElement.className = 'tag-element tiny'
+              tagElement.textContent = tag
+              tagElement.onclick = async () => {
+                if (content.bookmark) {
+                  try {
+                    // [TAG-SYNC-OVERLAY-001] - Send saveTag message for persistence
+                    await this.messageService.sendMessage({
+                      type: 'saveTag',
+                      data: {
+                        url: content.bookmark.url || window.location.href,
+                        value: tag,
+                        description: content.bookmark.description || document.title
+                      }
+                    })
+
+                    // [TAG-SYNC-OVERLAY-001] - Update local content immediately for display
+                    if (!content.bookmark.tags) content.bookmark.tags = []
+                    if (!content.bookmark.tags.includes(tag)) {
+                      content.bookmark.tags.push(tag)
+                    }
+
+                    // [TAG-SYNC-OVERLAY-001] - Refresh overlay with updated local content
+                    this.show(content) // Refresh overlay with updated local content
+                    debugLog('[TAG-SYNC-OVERLAY-001] Tag persisted from recent', tag)
+                    this.showMessage('Tag saved successfully', 'success')
+                  } catch (error) {
+                    debugError('[TAG-SYNC-OVERLAY-001] Failed to persist tag from recent:', error)
+                    this.showMessage('Failed to save tag', 'error')
                   }
-                })
-
-                // [IMMUTABLE-REQ-TAG-004] - Update local content immediately for display
-                if (!content.bookmark.tags) content.bookmark.tags = []
-                if (!content.bookmark.tags.includes(tag)) {
-                  content.bookmark.tags.push(tag)
                 }
+              }
+              recentContainer.appendChild(tagElement)
+            }
+          })
+        } else {
+          // [TAG-SYNC-OVERLAY-001] - Show empty state for recent tags
+          const emptyState = this.document.createElement('span')
+          emptyState.className = 'empty-state tiny'
+          emptyState.textContent = 'No recent tags'
+          emptyState.style.cssText = 'color: #999; font-style: italic;'
+          recentContainer.appendChild(emptyState)
+        }
+      } catch (error) {
+        debugError('[TAG-SYNC-OVERLAY-001] Failed to load recent tags:', error)
+        // [TAG-SYNC-OVERLAY-001] - Fallback to static tags on error
+        const fallbackTags = ['development', 'web', 'tutorial']
+        fallbackTags.forEach(tag => {
+          if (!content.bookmark?.tags?.includes(tag)) {
+            const tagElement = this.document.createElement('span')
+            tagElement.className = 'tag-element tiny'
+            tagElement.textContent = tag
+            tagElement.onclick = async () => {
+              if (content.bookmark) {
+                try {
+                  await this.messageService.sendMessage({
+                    type: 'saveTag',
+                    data: {
+                      url: content.bookmark.url || window.location.href,
+                      value: tag,
+                      description: content.bookmark.description || document.title
+                    }
+                  })
 
-                // [IMMUTABLE-REQ-TAG-004] - Refresh overlay with updated local content
-                this.show(content) // Refresh overlay with updated local content
-                debugLog('[IMMUTABLE-REQ-TAG-004] Tag persisted from recent', tag)
-                this.showMessage('Tag saved successfully', 'success')
-              } catch (error) {
-                debugError('[IMMUTABLE-REQ-TAG-004] Failed to persist tag from recent:', error)
-                this.showMessage('Failed to save tag', 'error')
+                  if (!content.bookmark.tags) content.bookmark.tags = []
+                  if (!content.bookmark.tags.includes(tag)) {
+                    content.bookmark.tags.push(tag)
+                  }
+
+                  this.show(content)
+                  debugLog('[TAG-SYNC-OVERLAY-001] Fallback tag persisted', tag)
+                  this.showMessage('Tag saved successfully', 'success')
+                } catch (error) {
+                  debugError('[TAG-SYNC-OVERLAY-001] Failed to persist fallback tag:', error)
+                  this.showMessage('Failed to save tag', 'error')
+                }
               }
             }
+            recentContainer.appendChild(tagElement)
           }
-          recentContainer.appendChild(tagElement)
-        }
-      })
+        })
+      }
 
       // UI-VIS-001: VisibilityControls component - Replace legacy transparency controls
       let visibilityControlsContainer = null
@@ -298,12 +366,45 @@ class OverlayManager {
         font-weight: 600;
       `
       privateBtn.textContent = isPrivate ? '🔒 Private' : '🌐 Public'
-      privateBtn.onclick = () => {
+      // [TOGGLE-SYNC-OVERLAY-001] - Fix privacy toggle in overlay
+      privateBtn.onclick = async () => {
         if (content.bookmark) {
-          content.bookmark.shared = content.bookmark.shared === 'no' ? 'yes' : 'no'
-          // Refresh overlay
-          this.show(content)
-          debugLog('Privacy toggled', content.bookmark.shared)
+          try {
+            const isPrivate = content.bookmark.shared === 'no'
+            const newSharedStatus = isPrivate ? 'yes' : 'no'
+
+            const updatedBookmark = {
+              ...content.bookmark,
+              shared: newSharedStatus
+            }
+
+            // [TOGGLE-SYNC-OVERLAY-001] - Send saveBookmark message for persistence
+            await this.messageService.sendMessage({
+              type: 'saveBookmark',
+              data: updatedBookmark
+            })
+
+            // [TOGGLE-SYNC-OVERLAY-001] - Update local content immediately for display
+            content.bookmark.shared = newSharedStatus
+            this.show(content) // Refresh overlay with updated local content
+
+            // [TOGGLE-SYNC-OVERLAY-001] - Show success message
+            this.showMessage(`Bookmark is now ${isPrivate ? 'public' : 'private'}`, 'success')
+
+            // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
+            debugLog('[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background', updatedBookmark)
+            chrome.runtime.sendMessage({
+              type: 'BOOKMARK_UPDATED',
+              data: updatedBookmark
+            }, (response) => {
+              debugLog('[TOGGLE-SYNC-OVERLAY-001] BOOKMARK_UPDATED response', response)
+            })
+
+            debugLog('[TOGGLE-SYNC-OVERLAY-001] Privacy toggled', content.bookmark.shared)
+          } catch (error) {
+            debugError('[TOGGLE-SYNC-OVERLAY-001] Failed to toggle privacy:', error)
+            this.showMessage('Failed to update privacy setting', 'error')
+          }
         }
       }
 
@@ -316,12 +417,47 @@ class OverlayManager {
         font-weight: 600;
       `
       readBtn.textContent = isToRead ? '📖 Read Later' : '📋 Not marked'
-      readBtn.onclick = () => {
+      // [TOGGLE-SYNC-OVERLAY-001] - Fix read later toggle in overlay
+      readBtn.onclick = async () => {
         if (content.bookmark) {
-          content.bookmark.toread = content.bookmark.toread === 'yes' ? 'no' : 'yes'
-          // Refresh overlay
-          this.show(content)
-          debugLog('Read status toggled', content.bookmark.toread)
+          try {
+            const isCurrentlyToRead = content.bookmark.toread === 'yes'
+            const newToReadStatus = isCurrentlyToRead ? 'no' : 'yes'
+
+            const updatedBookmark = {
+              ...content.bookmark,
+              toread: newToReadStatus,
+              description: content.bookmark.description || document.title
+            }
+
+            // [TOGGLE-SYNC-OVERLAY-001] - Send saveBookmark message for persistence
+            await this.messageService.sendMessage({
+              type: 'saveBookmark',
+              data: updatedBookmark
+            })
+
+            // [TOGGLE-SYNC-OVERLAY-001] - Update local content immediately for display
+            content.bookmark.toread = newToReadStatus
+            this.show(content) // Refresh overlay with updated local content
+
+            // [TOGGLE-SYNC-OVERLAY-001] - Show success message
+            const statusMessage = newToReadStatus === 'yes' ? 'Added to read later' : 'Removed from read later'
+            this.showMessage(statusMessage, 'success')
+
+            // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
+            debugLog('[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background', updatedBookmark)
+            chrome.runtime.sendMessage({
+              type: 'BOOKMARK_UPDATED',
+              data: updatedBookmark
+            }, (response) => {
+              debugLog('[TOGGLE-SYNC-OVERLAY-001] BOOKMARK_UPDATED response', response)
+            })
+
+            debugLog('[TOGGLE-SYNC-OVERLAY-001] Read status toggled', content.bookmark.toread)
+          } catch (error) {
+            debugError('[TOGGLE-SYNC-OVERLAY-001] Failed to toggle read later status:', error)
+            this.showMessage('Failed to update read later status', 'error')
+          }
         }
       }
 
@@ -366,31 +502,13 @@ class OverlayManager {
 
       // Position and show overlay
       this.positionOverlay()
+      debugLog('[OverlayManager] Setting overlay display to block')
       this.overlayElement.style.display = 'block'
+      debugLog('[OverlayManager] Setting overlay opacity to 1')
+      this.overlayElement.style.opacity = '1'
       this.isVisible = true
 
       debugLog('Overlay positioned and displayed')
-      console.log('🎨 [Overlay Debug] Overlay element styles:', {
-        display: this.overlayElement.style.display,
-        position: this.overlayElement.style.position,
-        left: this.overlayElement.style.left,
-        top: this.overlayElement.style.top,
-        zIndex: this.overlayElement.style.zIndex,
-        opacity: this.overlayElement.style.opacity,
-        transform: this.overlayElement.style.transform
-      })
-
-      // Set up event handlers
-      this.setupOverlayInteractions()
-
-      // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
-      // Apply transparency and positioning modes
-      this.applyTransparencyMode()
-
-      // Add CSS animations
-      this.addShowAnimation()
-
-      debugLog('Overlay shown successfully')
       console.log('🎨 [Overlay Debug] Final overlay visibility check:', {
         isVisible: this.isVisible,
         elementExists: !!this.overlayElement,
@@ -408,6 +526,7 @@ class OverlayManager {
    * Hide overlay
    */
   hide () {
+    debugLog('[OverlayManager] hide() called', { stack: new Error().stack })
     if (!this.isVisible || !this.overlayElement) {
       debugLog('Hide called but overlay not visible')
       return
@@ -419,7 +538,10 @@ class OverlayManager {
       // Add hide animation
       this.addHideAnimation(() => {
         if (this.overlayElement) {
+          debugLog('[OverlayManager] Setting overlay display to none')
           this.overlayElement.style.display = 'none'
+          debugLog('[OverlayManager] Setting overlay opacity to 0')
+          this.overlayElement.style.opacity = '0'
           this.clearContent()
         }
         this.isVisible = false
@@ -506,6 +628,49 @@ class OverlayManager {
       }
     } catch (error) {
       debugError('[IMMUTABLE-REQ-TAG-004] Failed to refresh overlay content:', error)
+    }
+  }
+
+  /**
+   * [TAG-SYNC-OVERLAY-001] - Load recent tags from shared memory for overlay
+   * @param {Object} content - Content object with bookmark data
+   * @returns {Promise<string[]>} Array of recent tag names
+   */
+  async loadRecentTagsForOverlay(content) {
+    try {
+      debugLog('[TAG-SYNC-OVERLAY-001] Loading recent tags for overlay')
+
+      const response = await this.messageService.sendMessage({
+        type: 'getRecentBookmarks',
+        data: {
+          currentTags: content.bookmark?.tags || [],
+          senderUrl: content.bookmark?.url || window.location.href
+        }
+      })
+
+      debugLog('[TAG-SYNC-OVERLAY-001] Recent tags response:', response)
+
+      if (response && response.recentTags) {
+        // [TAG-SYNC-OVERLAY-001] - Extract tag names from recent tags data
+        const recentTagNames = response.recentTags.map(tag => {
+          if (typeof tag === 'string') {
+            return tag
+          } else if (tag && typeof tag === 'object' && tag.name) {
+            return tag.name
+          } else {
+            return String(tag)
+          }
+        })
+
+        debugLog('[TAG-SYNC-OVERLAY-001] Extracted recent tag names:', recentTagNames)
+        return recentTagNames
+      }
+
+      debugLog('[TAG-SYNC-OVERLAY-001] No recent tags found')
+      return []
+    } catch (error) {
+      debugError('[TAG-SYNC-OVERLAY-001] Failed to load recent tags:', error)
+      return []
     }
   }
 

@@ -599,7 +599,17 @@ export class TagService {
    */
   isRecentTag (lastUsed) {
     if (!lastUsed) return false
-    const daysSinceUsed = (Date.now() - lastUsed.getTime()) / (1000 * 60 * 60 * 24)
+    // [TAG-SYNC-FIX-001] Ensure lastUsed is a Date object
+    let lastUsedDate = lastUsed
+    if (!(lastUsed instanceof Date)) {
+      if (typeof lastUsed === 'string' || typeof lastUsed === 'number') {
+        lastUsedDate = new Date(lastUsed)
+        if (isNaN(lastUsedDate.getTime())) return false // Invalid date
+      } else {
+        return false
+      }
+    }
+    const daysSinceUsed = (Date.now() - lastUsedDate.getTime()) / (1000 * 60 * 60 * 24)
     return daysSinceUsed <= 7 // Consider recent if used within 7 days
   }
 

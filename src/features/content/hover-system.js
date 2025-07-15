@@ -6,7 +6,6 @@
 import { MessageService } from '../../core/message-service.js'
 import { Logger } from '../../shared/logger.js'
 import { TagRenderer } from './tag-renderer.js'
-import { PinUtils } from '../../shared/pin-utils.js'
 
 class HoverSystem {
   constructor (document, config, overlayManager) {
@@ -129,11 +128,7 @@ class HoverSystem {
       }
 
       // Enhance pin data with additional properties
-      const pin = PinUtils.createPin(response, {
-        siteTags: [...(response.tags || [])],
-        tags: [...(response.tags || [])]
-      })
-
+      const pin = response;
       this.logger.debug('Site data loaded:', pin)
       return pin
     } catch (error) {

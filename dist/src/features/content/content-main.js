@@ -2592,7 +2592,7 @@
       }
     }
   };
-  var debugError = (message, error = null) => {
+  var debugError2 = (message, error = null) => {
     if (window.HOVERBOARD_DEBUG) {
       if (error) {
         console.error(`[Hoverboard Overlay Debug] ${message}`, error);
@@ -2627,7 +2627,8 @@
     /**
      * Show overlay with content
      */
-    show(content) {
+    async show(content) {
+      debugLog2("[OverlayManager] show() called", { content });
       try {
         debugLog2("Showing overlay", { content });
         console.log("\u{1F3A8} [Overlay Debug] Content received:");
@@ -2639,7 +2640,7 @@
         console.log("\u{1F3A8} [Overlay Debug] - Page title:", content.pageTitle);
         console.log("\u{1F3A8} [Overlay Debug] - Page URL:", content.pageUrl);
         if (!this.overlayElement) {
-          debugLog2("Creating new overlay element");
+          debugLog2("[OverlayManager] Creating new overlay element");
           this.createOverlay();
         }
         this.clearContent();
@@ -2675,13 +2676,29 @@
               tagElement.className = "tag-element tiny iconTagDeleteInactive";
               tagElement.textContent = tag;
               tagElement.title = "Double-click to remove";
-              tagElement.ondblclick = () => {
-                if (content.bookmark && content.bookmark.tags) {
-                  const index = content.bookmark.tags.indexOf(tag);
-                  if (index > -1) {
-                    content.bookmark.tags.splice(index, 1);
-                    this.show(content);
+              tagElement.ondblclick = async () => {
+                try {
+                  if (content.bookmark && content.bookmark.tags) {
+                    const index = content.bookmark.tags.indexOf(tag);
+                    if (index > -1) {
+                      content.bookmark.tags.splice(index, 1);
+                    }
                   }
+                  if (content.bookmark && content.bookmark.url) {
+                    await this.messageService.sendMessage({
+                      type: "deleteTag",
+                      // [sync:site-record] [action:delete]
+                      data: {
+                        url: content.bookmark.url,
+                        value: tag
+                      }
+                    });
+                  }
+                  this.show(content);
+                  this.showMessage("Tag deleted successfully", "success");
+                } catch (error) {
+                  debugError2("[event:double-click] [action:delete] [sync:site-record] Failed to delete tag:", error);
+                  this.showMessage("Failed to delete tag", "error");
                 }
               };
               currentTagsContainer.appendChild(tagElement);
@@ -2723,7 +2740,7 @@
                 debugLog2("[IMMUTABLE-REQ-TAG-004] Tag persisted successfully", tagText);
                 this.showMessage("Tag saved successfully", "success");
               } catch (error) {
-                debugError("[IMMUTABLE-REQ-TAG-004] Failed to persist tag:", error);
+                debugError2("[IMMUTABLE-REQ-TAG-004] Failed to persist tag:", error);
                 this.showMessage("Failed to save tag", "error");
               }
             } else if (tagText && !this.isValidTag(tagText)) {
@@ -2747,39 +2764,84 @@
         recentLabel.textContent = "Recent:";
         recentLabel.style.cssText = "padding: 0.2em 0.5em; margin-right: 4px;";
         recentContainer.appendChild(recentLabel);
-        const sampleRecentTags = ["development", "web", "tutorial", "javascript", "reference"];
-        sampleRecentTags.slice(0, 3).forEach((tag) => {
-          if (!content.bookmark?.tags?.includes(tag)) {
-            const tagElement = this.document.createElement("span");
-            tagElement.className = "tag-element tiny";
-            tagElement.textContent = tag;
-            tagElement.onclick = async () => {
-              if (content.bookmark) {
-                try {
-                  await this.messageService.sendMessage({
-                    type: "saveTag",
-                    data: {
-                      url: content.bookmark.url || window.location.href,
-                      value: tag,
-                      description: content.bookmark.description || document.title
+        try {
+          const recentTags = await this.loadRecentTagsForOverlay(content);
+          if (recentTags && recentTags.length > 0) {
+            recentTags.slice(0, 3).forEach((tag) => {
+              if (!content.bookmark?.tags?.includes(tag)) {
+                const tagElement = this.document.createElement("span");
+                tagElement.className = "tag-element tiny";
+                tagElement.textContent = tag;
+                tagElement.onclick = async () => {
+                  if (content.bookmark) {
+                    try {
+                      await this.messageService.sendMessage({
+                        type: "saveTag",
+                        data: {
+                          url: content.bookmark.url || window.location.href,
+                          value: tag,
+                          description: content.bookmark.description || document.title
+                        }
+                      });
+                      if (!content.bookmark.tags) content.bookmark.tags = [];
+                      if (!content.bookmark.tags.includes(tag)) {
+                        content.bookmark.tags.push(tag);
+                      }
+                      this.show(content);
+                      debugLog2("[TAG-SYNC-OVERLAY-001] Tag persisted from recent", tag);
+                      this.showMessage("Tag saved successfully", "success");
+                    } catch (error) {
+                      debugError2("[TAG-SYNC-OVERLAY-001] Failed to persist tag from recent:", error);
+                      this.showMessage("Failed to save tag", "error");
                     }
-                  });
-                  if (!content.bookmark.tags) content.bookmark.tags = [];
-                  if (!content.bookmark.tags.includes(tag)) {
-                    content.bookmark.tags.push(tag);
                   }
-                  this.show(content);
-                  debugLog2("[IMMUTABLE-REQ-TAG-004] Tag persisted from recent", tag);
-                  this.showMessage("Tag saved successfully", "success");
-                } catch (error) {
-                  debugError("[IMMUTABLE-REQ-TAG-004] Failed to persist tag from recent:", error);
-                  this.showMessage("Failed to save tag", "error");
-                }
+                };
+                recentContainer.appendChild(tagElement);
               }
-            };
-            recentContainer.appendChild(tagElement);
+            });
+          } else {
+            const emptyState = this.document.createElement("span");
+            emptyState.className = "empty-state tiny";
+            emptyState.textContent = "No recent tags";
+            emptyState.style.cssText = "color: #999; font-style: italic;";
+            recentContainer.appendChild(emptyState);
           }
-        });
+        } catch (error) {
+          debugError2("[TAG-SYNC-OVERLAY-001] Failed to load recent tags:", error);
+          const fallbackTags = ["development", "web", "tutorial"];
+          fallbackTags.forEach((tag) => {
+            if (!content.bookmark?.tags?.includes(tag)) {
+              const tagElement = this.document.createElement("span");
+              tagElement.className = "tag-element tiny";
+              tagElement.textContent = tag;
+              tagElement.onclick = async () => {
+                if (content.bookmark) {
+                  try {
+                    await this.messageService.sendMessage({
+                      type: "saveTag",
+                      data: {
+                        url: content.bookmark.url || window.location.href,
+                        value: tag,
+                        description: content.bookmark.description || document.title
+                      }
+                    });
+                    if (!content.bookmark.tags) content.bookmark.tags = [];
+                    if (!content.bookmark.tags.includes(tag)) {
+                      content.bookmark.tags.push(tag);
+                    }
+                    this.show(content);
+                    debugLog2("[TAG-SYNC-OVERLAY-001] Fallback tag persisted", tag);
+                    this.showMessage("Tag saved successfully", "success");
+                  } catch (error2) {
+                    debugError2("[TAG-SYNC-OVERLAY-001] Failed to persist fallback tag:", error2);
+                    this.showMessage("Failed to save tag", "error");
+                  }
+                }
+              };
+              recentContainer.appendChild(tagElement);
+            }
+          });
+        }
         let visibilityControlsContainer = null;
         if (!this.visibilityControls) {
           this.visibilityControls = new VisibilityControls(this.document, this.visibilityControlsCallback);
@@ -2807,11 +2869,34 @@
         font-weight: 600;
       `;
         privateBtn.textContent = isPrivate ? "\u{1F512} Private" : "\u{1F310} Public";
-        privateBtn.onclick = () => {
+        privateBtn.onclick = async () => {
           if (content.bookmark) {
-            content.bookmark.shared = content.bookmark.shared === "no" ? "yes" : "no";
-            this.show(content);
-            debugLog2("Privacy toggled", content.bookmark.shared);
+            try {
+              const isPrivate2 = content.bookmark.shared === "no";
+              const newSharedStatus = isPrivate2 ? "yes" : "no";
+              const updatedBookmark = {
+                ...content.bookmark,
+                shared: newSharedStatus
+              };
+              await this.messageService.sendMessage({
+                type: "saveBookmark",
+                data: updatedBookmark
+              });
+              content.bookmark.shared = newSharedStatus;
+              this.show(content);
+              this.showMessage(`Bookmark is now ${isPrivate2 ? "public" : "private"}`, "success");
+              debugLog2("[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background", updatedBookmark);
+              chrome.runtime.sendMessage({
+                type: "BOOKMARK_UPDATED",
+                data: updatedBookmark
+              }, (response) => {
+                debugLog2("[TOGGLE-SYNC-OVERLAY-001] BOOKMARK_UPDATED response", response);
+              });
+              debugLog2("[TOGGLE-SYNC-OVERLAY-001] Privacy toggled", content.bookmark.shared);
+            } catch (error) {
+              debugError2("[TOGGLE-SYNC-OVERLAY-001] Failed to toggle privacy:", error);
+              this.showMessage("Failed to update privacy setting", "error");
+            }
           }
         };
         const readBtn = this.document.createElement("button");
@@ -2822,11 +2907,36 @@
         font-weight: 600;
       `;
         readBtn.textContent = isToRead ? "\u{1F4D6} Read Later" : "\u{1F4CB} Not marked";
-        readBtn.onclick = () => {
+        readBtn.onclick = async () => {
           if (content.bookmark) {
-            content.bookmark.toread = content.bookmark.toread === "yes" ? "no" : "yes";
-            this.show(content);
-            debugLog2("Read status toggled", content.bookmark.toread);
+            try {
+              const isCurrentlyToRead = content.bookmark.toread === "yes";
+              const newToReadStatus = isCurrentlyToRead ? "no" : "yes";
+              const updatedBookmark = {
+                ...content.bookmark,
+                toread: newToReadStatus,
+                description: content.bookmark.description || document.title
+              };
+              await this.messageService.sendMessage({
+                type: "saveBookmark",
+                data: updatedBookmark
+              });
+              content.bookmark.toread = newToReadStatus;
+              this.show(content);
+              const statusMessage = newToReadStatus === "yes" ? "Added to read later" : "Removed from read later";
+              this.showMessage(statusMessage, "success");
+              debugLog2("[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background", updatedBookmark);
+              chrome.runtime.sendMessage({
+                type: "BOOKMARK_UPDATED",
+                data: updatedBookmark
+              }, (response) => {
+                debugLog2("[TOGGLE-SYNC-OVERLAY-001] BOOKMARK_UPDATED response", response);
+              });
+              debugLog2("[TOGGLE-SYNC-OVERLAY-001] Read status toggled", content.bookmark.toread);
+            } catch (error) {
+              debugError2("[TOGGLE-SYNC-OVERLAY-001] Failed to toggle read later status:", error);
+              this.showMessage("Failed to update read later status", "error");
+            }
           }
         };
         actionsContainer.appendChild(privateBtn);
@@ -2859,22 +2969,12 @@
         this.currentContent = content;
         debugLog2("Overlay structure assembled");
         this.positionOverlay();
+        debugLog2("[OverlayManager] Setting overlay display to block");
         this.overlayElement.style.display = "block";
+        debugLog2("[OverlayManager] Setting overlay opacity to 1");
+        this.overlayElement.style.opacity = "1";
         this.isVisible = true;
         debugLog2("Overlay positioned and displayed");
-        console.log("\u{1F3A8} [Overlay Debug] Overlay element styles:", {
-          display: this.overlayElement.style.display,
-          position: this.overlayElement.style.position,
-          left: this.overlayElement.style.left,
-          top: this.overlayElement.style.top,
-          zIndex: this.overlayElement.style.zIndex,
-          opacity: this.overlayElement.style.opacity,
-          transform: this.overlayElement.style.transform
-        });
-        this.setupOverlayInteractions();
-        this.applyTransparencyMode();
-        this.addShowAnimation();
-        debugLog2("Overlay shown successfully");
         console.log("\u{1F3A8} [Overlay Debug] Final overlay visibility check:", {
           isVisible: this.isVisible,
           elementExists: !!this.overlayElement,
@@ -2891,6 +2991,7 @@
      * Hide overlay
      */
     hide() {
+      debugLog2("[OverlayManager] hide() called", { stack: new Error().stack });
       if (!this.isVisible || !this.overlayElement) {
         debugLog2("Hide called but overlay not visible");
         return;
@@ -2899,7 +3000,10 @@
         debugLog2("Hiding overlay");
         this.addHideAnimation(() => {
           if (this.overlayElement) {
+            debugLog2("[OverlayManager] Setting overlay display to none");
             this.overlayElement.style.display = "none";
+            debugLog2("[OverlayManager] Setting overlay opacity to 0");
+            this.overlayElement.style.opacity = "0";
             this.clearContent();
           }
           this.isVisible = false;
@@ -2946,7 +3050,7 @@
         }, 3e3);
         debugLog2("[IMMUTABLE-REQ-TAG-004] Message displayed:", { message, type });
       } catch (error) {
-        debugError("[IMMUTABLE-REQ-TAG-004] Failed to show message:", error);
+        debugError2("[IMMUTABLE-REQ-TAG-004] Failed to show message:", error);
       }
     }
     /**
@@ -2970,7 +3074,43 @@
           debugLog2("[IMMUTABLE-REQ-TAG-004] Overlay refreshed with updated content");
         }
       } catch (error) {
-        debugError("[IMMUTABLE-REQ-TAG-004] Failed to refresh overlay content:", error);
+        debugError2("[IMMUTABLE-REQ-TAG-004] Failed to refresh overlay content:", error);
+      }
+    }
+    /**
+     * [TAG-SYNC-OVERLAY-001] - Load recent tags from shared memory for overlay
+     * @param {Object} content - Content object with bookmark data
+     * @returns {Promise<string[]>} Array of recent tag names
+     */
+    async loadRecentTagsForOverlay(content) {
+      try {
+        debugLog2("[TAG-SYNC-OVERLAY-001] Loading recent tags for overlay");
+        const response = await this.messageService.sendMessage({
+          type: "getRecentBookmarks",
+          data: {
+            currentTags: content.bookmark?.tags || [],
+            senderUrl: content.bookmark?.url || window.location.href
+          }
+        });
+        debugLog2("[TAG-SYNC-OVERLAY-001] Recent tags response:", response);
+        if (response && response.recentTags) {
+          const recentTagNames = response.recentTags.map((tag) => {
+            if (typeof tag === "string") {
+              return tag;
+            } else if (tag && typeof tag === "object" && tag.name) {
+              return tag.name;
+            } else {
+              return String(tag);
+            }
+          });
+          debugLog2("[TAG-SYNC-OVERLAY-001] Extracted recent tag names:", recentTagNames);
+          return recentTagNames;
+        }
+        debugLog2("[TAG-SYNC-OVERLAY-001] No recent tags found");
+        return [];
+      } catch (error) {
+        debugError2("[TAG-SYNC-OVERLAY-001] Failed to load recent tags:", error);
+        return [];
       }
     }
     /**
@@ -4585,6 +4725,10 @@
     HIDE_OVERLAY: "hideOverlay",
     REFRESH_DATA: "refreshData",
     REFRESH_HOVER: "refreshHover",
+    BOOKMARK_UPDATED: "bookmarkUpdated",
+    // [TOGGLE-SYNC-MESSAGE-001] - New message type
+    TAG_UPDATED: "TAG_UPDATED",
+    // [TAG-SYNC-MESSAGE-001] - New message type for tag synchronization
     // Site management
     INHIBIT_URL: "inhibitUrl",
     // Search operations
@@ -4732,6 +4876,15 @@
             sendResponse({ success: true, data: pageState });
             break;
           }
+          // [TOGGLE-SYNC-CONTENT-001] - Handle bookmark updates from external sources
+          case "BOOKMARK_UPDATED":
+            await this.handleBookmarkUpdated(message.data);
+            sendResponse({ success: true });
+            break;
+          case "TAG_UPDATED":
+            await this.handleTagUpdated(message.data);
+            sendResponse({ success: true });
+            break;
           default:
             console.warn("Unknown message type:", message.type);
             sendResponse({ success: false, error: "Unknown message type" });
@@ -5076,6 +5229,50 @@
         overlayActive: this.overlayActive,
         isInitialized: this.isInitialized
       };
+    }
+    // [TOGGLE-SYNC-CONTENT-001] - Handle bookmark updates from external sources
+    async handleBookmarkUpdated(bookmarkData) {
+      try {
+        if (!bookmarkData || !bookmarkData.url || !bookmarkData.tags) {
+          console.warn("[TOGGLE-SYNC-CONTENT-001] Ignoring malformed bookmark update:", bookmarkData);
+          return;
+        }
+        this.currentBookmark = bookmarkData;
+        if (this.overlayManager.isVisible) {
+          const updatedContent = {
+            bookmark: bookmarkData,
+            pageTitle: this.pageTitle,
+            pageUrl: this.pageUrl
+          };
+          this.overlayManager.show(updatedContent);
+        }
+        debugLog4("[TOGGLE-SYNC-CONTENT-001] Bookmark updated from external source", bookmarkData);
+      } catch (error) {
+        debugError("[TOGGLE-SYNC-CONTENT-001] Failed to handle bookmark update:", error);
+      }
+    }
+    // [TAG-SYNC-CONTENT-001] - Handle tag updates from popup or other sources
+    async handleTagUpdated(tagUpdateData) {
+      try {
+        if (!tagUpdateData || !tagUpdateData.url || !Array.isArray(tagUpdateData.tags)) {
+          console.warn("[TAG-SYNC-CONTENT-001] Ignoring malformed tag update:", tagUpdateData);
+          return;
+        }
+        if (this.currentBookmark && this.currentBookmark.url === tagUpdateData.url) {
+          this.currentBookmark.tags = tagUpdateData.tags;
+          if (this.overlayManager.isVisible) {
+            const updatedContent = {
+              bookmark: this.currentBookmark,
+              pageTitle: this.pageTitle,
+              pageUrl: this.pageUrl
+            };
+            this.overlayManager.show(updatedContent);
+          }
+          debugLog4("[TAG-SYNC-CONTENT-001] Overlay updated with new tags", tagUpdateData.tags);
+        }
+      } catch (error) {
+        debugError("[TAG-SYNC-CONTENT-001] Failed to handle tag update:", error);
+      }
     }
     handleUpdateOverlayTransparency(config) {
       try {

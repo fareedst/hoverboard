@@ -180,6 +180,18 @@ class HoverboardContentScript {
           break
         }
 
+        // [TOGGLE-SYNC-CONTENT-001] - Handle bookmark updates from external sources
+        case 'BOOKMARK_UPDATED':
+          await this.handleBookmarkUpdated(message.data)
+          sendResponse({ success: true })
+          break
+
+        case 'TAG_UPDATED':
+          // [TAG-SYNC-CONTENT-001] Handle tag updates from popup or other sources
+          await this.handleTagUpdated(message.data)
+          sendResponse({ success: true })
+          break
+
         default:
           console.warn('Unknown message type:', message.type)
           sendResponse({ success: false, error: 'Unknown message type' })
@@ -587,6 +599,60 @@ class HoverboardContentScript {
       title: document.title,
       overlayActive: this.overlayActive,
       isInitialized: this.isInitialized
+    }
+  }
+
+  // [TOGGLE-SYNC-CONTENT-001] - Handle bookmark updates from external sources
+  async handleBookmarkUpdated(bookmarkData) {
+    try {
+      // [TOGGLE-SYNC-CONTENT-001] Robustness: Validate bookmarkData before updating overlay
+      if (!bookmarkData || !bookmarkData.url || !bookmarkData.tags) {
+        console.warn('[TOGGLE-SYNC-CONTENT-001] Ignoring malformed bookmark update:', bookmarkData)
+        return
+      }
+      // [TOGGLE-SYNC-CONTENT-001] - Update current bookmark data
+      this.currentBookmark = bookmarkData
+
+      // [TOGGLE-SYNC-CONTENT-001] - Refresh overlay if visible
+      if (this.overlayManager.isVisible) {
+        const updatedContent = {
+          bookmark: bookmarkData,
+          pageTitle: this.pageTitle,
+          pageUrl: this.pageUrl
+        }
+        this.overlayManager.show(updatedContent)
+      }
+
+      debugLog('[TOGGLE-SYNC-CONTENT-001] Bookmark updated from external source', bookmarkData)
+    } catch (error) {
+      debugError('[TOGGLE-SYNC-CONTENT-001] Failed to handle bookmark update:', error)
+    }
+  }
+
+  // [TAG-SYNC-CONTENT-001] - Handle tag updates from popup or other sources
+  async handleTagUpdated(tagUpdateData) {
+    try {
+      // [TAG-SYNC-CONTENT-001] Validate tag update data
+      if (!tagUpdateData || !tagUpdateData.url || !Array.isArray(tagUpdateData.tags)) {
+        console.warn('[TAG-SYNC-CONTENT-001] Ignoring malformed tag update:', tagUpdateData)
+        return
+      }
+      // [TAG-SYNC-CONTENT-001] Update current bookmark tags if URL matches
+      if (this.currentBookmark && this.currentBookmark.url === tagUpdateData.url) {
+        this.currentBookmark.tags = tagUpdateData.tags
+        // [TAG-SYNC-CONTENT-001] Refresh overlay if visible
+        if (this.overlayManager.isVisible) {
+          const updatedContent = {
+            bookmark: this.currentBookmark,
+            pageTitle: this.pageTitle,
+            pageUrl: this.pageUrl
+          }
+          this.overlayManager.show(updatedContent)
+        }
+        debugLog('[TAG-SYNC-CONTENT-001] Overlay updated with new tags', tagUpdateData.tags)
+      }
+    } catch (error) {
+      debugError('[TAG-SYNC-CONTENT-001] Failed to handle tag update:', error)
     }
   }
 
