@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[IMMUTABLE-REQ-TAG-004] Overlay Tag Persistence Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .overlay-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            z-index: 10000;
+            font-weight: 600;
+        }
+        .overlay-message-success {
+            background: #2ecc71;
+        }
+        .overlay-message-error {
+            background: #e74c3c;
+        }
+        .overlay-message-info {
+            background: #3498db;
+        }
+    </style>
+</head>
+<body>
+    <h1>[IMMUTABLE-REQ-TAG-004] Overlay Tag Persistence Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Manual Tests</h2>
+        <button onclick="testMessageDisplay()">Test Message Display</button>
+        <button onclick="testTagValidation()">Test Tag Validation</button>
+        <button onclick="testMessageService()">Test Message Service</button>
+        <button onclick="testTagDisplay()">Test Tag Display</button>
+    </div>
+
+    <script>
+        // [IMMUTABLE-REQ-TAG-004] - Test utilities
+        function logTest(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Mock MessageClient for testing
+        class MockMessageClient {
+            constructor() {
+                this.sentMessages = [];
+            }
+
+            async sendMessage(message) {
+                this.sentMessages.push(message);
+                logTest(`Message sent: ${JSON.stringify(message)}`, 'info');
+                
+                // Simulate successful response
+                return {
+                    success: true,
+                    data: { result_code: 'done' }
+                };
+            }
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Mock showMessage function
+        function showMessage(message, type = 'info') {
+            const messageElement = document.createElement('div');
+            messageElement.className = `overlay-message overlay-message-${type}`;
+            messageElement.textContent = message;
+            document.body.appendChild(messageElement);
+            
+            logTest(`Message displayed: "${message}" (${type})`, 'success');
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                if (messageElement.parentNode) {
+                    messageElement.parentNode.removeChild(messageElement);
+                }
+            }, 3000);
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Tag validation function
+        function isValidTag(tag) {
+            if (!tag || typeof tag !== 'string') return false;
+            const trimmed = tag.trim();
+            if (trimmed.length === 0 || trimmed.length > 50) return false;
+            
+            // Check for invalid characters
+            const invalidChars = /[<>{}]/;
+            if (invalidChars.test(trimmed)) return false;
+            
+            return true;
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Test message display
+        function testMessageDisplay() {
+            logTest('Testing message display...', 'info');
+            
+            showMessage('Tag saved successfully', 'success');
+            showMessage('Failed to save tag', 'error');
+            showMessage('Invalid tag format', 'error');
+            
+            logTest('Message display test completed', 'success');
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Test tag validation
+        function testTagValidation() {
+            logTest('Testing tag validation...', 'info');
+            
+            const testCases = [
+                { tag: 'valid-tag', expected: true },
+                { tag: 'another_tag', expected: true },
+                { tag: 'tag with spaces', expected: true },
+                { tag: '', expected: false },
+                { tag: '   ', expected: false },
+                { tag: 'tag<with>invalid', expected: false },
+                { tag: 'a'.repeat(51), expected: false },
+                { tag: null, expected: false },
+                { tag: undefined, expected: false }
+            ];
+            
+            testCases.forEach(({ tag, expected }) => {
+                const result = isValidTag(tag);
+                const status = result === expected ? 'success' : 'error';
+                logTest(`Tag validation: "${tag}" -> ${result} (expected: ${expected})`, status);
+            });
+            
+            logTest('Tag validation test completed', 'success');
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Test message service
+        async function testMessageService() {
+            logTest('Testing message service...', 'info');
+            
+            const messageService = new MockMessageClient();
+            
+            try {
+                // Test saveTag message
+                const response = await messageService.sendMessage({
+                    type: 'saveTag',
+                    data: {
+                        url: 'https://example.com',
+                        value: 'test-tag',
+                        description: 'Test Page'
+                    }
+                });
+                
+                logTest(`Message service response: ${JSON.stringify(response)}`, 'success');
+                
+                // Test getCurrentBookmark message
+                const bookmarkResponse = await messageService.sendMessage({
+                    type: 'getCurrentBookmark',
+                    data: {
+                        url: 'https://example.com'
+                    }
+                });
+                
+                logTest(`Bookmark response: ${JSON.stringify(bookmarkResponse)}`, 'success');
+                
+            } catch (error) {
+                logTest(`Message service error: ${error.message}`, 'error');
+            }
+            
+            logTest('Message service test completed', 'success');
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Test tag display functionality
+        function testTagDisplay() {
+            logTest('Testing tag display functionality...', 'info');
+            
+            // Simulate adding a tag to local content
+            const mockContent = {
+                bookmark: {
+                    url: 'https://example.com',
+                    description: 'Test Page',
+                    tags: ['existing-tag']
+                }
+            };
+            
+            // Simulate adding a new tag
+            const newTag = 'new-test-tag';
+            if (!mockContent.bookmark.tags.includes(newTag)) {
+                mockContent.bookmark.tags.push(newTag);
+                logTest(`Tag "${newTag}" added to local content`, 'success');
+                logTest(`Current tags: ${mockContent.bookmark.tags.join(', ')}`, 'info');
+            }
+            
+            logTest('Tag display test completed', 'success');
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Initialize test
+        logTest('[IMMUTABLE-REQ-TAG-004] Overlay Tag Persistence Test initialized', 'info');
+        logTest('Ready to run tests. Click the buttons above to test functionality.', 'info');
+    </script>
+</body>
+</html> 

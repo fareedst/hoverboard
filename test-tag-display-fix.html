@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[IMMUTABLE-REQ-TAG-004] Tag Display Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .tag-element {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 2px 8px;
+            margin: 2px;
+            border-radius: 12px;
+            font-size: 12px;
+            color: #495057;
+        }
+        .tag-input {
+            margin: 2px;
+            padding: 2px 4px;
+            font-size: 12px;
+            width: 80px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .current-tags {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>[IMMUTABLE-REQ-TAG-004] Tag Display Fix Test</h1>
+    
+    <div class="test-section">
+        <h2>Current Tags Display</h2>
+        <div class="current-tags">
+            <strong>Current:</strong>
+            <div id="current-tags-container">
+                <!-- Tags will be displayed here -->
+            </div>
+            <input type="text" id="tag-input" class="tag-input" placeholder="New Tag">
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Manual Test</h2>
+        <button onclick="addTag()">Add Tag</button>
+        <button onclick="clearTags()">Clear Tags</button>
+        <button onclick="testTagDisplay()">Test Tag Display Logic</button>
+    </div>
+
+    <script>
+        // [IMMUTABLE-REQ-TAG-004] - Simulate overlay content
+        let overlayContent = {
+            bookmark: {
+                url: 'https://example.com',
+                description: 'Test Page',
+                tags: ['existing-tag']
+            }
+        };
+
+        // [IMMUTABLE-REQ-TAG-004] - Display current tags
+        function displayCurrentTags() {
+            const container = document.getElementById('current-tags-container');
+            container.innerHTML = '';
+            
+            if (overlayContent.bookmark.tags && overlayContent.bookmark.tags.length > 0) {
+                overlayContent.bookmark.tags.forEach(tag => {
+                    const tagElement = document.createElement('span');
+                    tagElement.className = 'tag-element';
+                    tagElement.textContent = tag;
+                    container.appendChild(tagElement);
+                });
+            }
+            
+            logTest(`Displayed ${overlayContent.bookmark.tags.length} tags: ${overlayContent.bookmark.tags.join(', ')}`, 'info');
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Add tag function (simulates the fixed implementation)
+        function addTag() {
+            const input = document.getElementById('tag-input');
+            const tagText = input.value.trim();
+            
+            if (tagText && isValidTag(tagText)) {
+                // Simulate the fixed implementation
+                if (!overlayContent.bookmark.tags) overlayContent.bookmark.tags = []
+                if (!overlayContent.bookmark.tags.includes(tagText)) {
+                    overlayContent.bookmark.tags.push(tagText);
+                    logTest(`✅ Tag "${tagText}" added to local content and displayed immediately`, 'success');
+                } else {
+                    logTest(`⚠️ Tag "${tagText}" already exists`, 'info');
+                }
+                
+                input.value = '';
+                displayCurrentTags();
+            } else {
+                logTest(`❌ Invalid tag: "${tagText}"`, 'error');
+            }
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Tag validation
+        function isValidTag(tag) {
+            if (!tag || typeof tag !== 'string') return false;
+            const trimmed = tag.trim();
+            if (trimmed.length === 0 || trimmed.length > 50) return false;
+            
+            // Check for invalid characters
+            const invalidChars = /[<>{}]/;
+            if (invalidChars.test(trimmed)) return false;
+            
+            return true;
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Clear tags
+        function clearTags() {
+            overlayContent.bookmark.tags = [];
+            displayCurrentTags();
+            logTest('Tags cleared', 'info');
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Test tag display logic
+        function testTagDisplay() {
+            logTest('Testing tag display logic...', 'info');
+            
+            // Test 1: Add valid tag
+            const testTag = 'test-tag-' + Date.now();
+            if (!overlayContent.bookmark.tags) overlayContent.bookmark.tags = []
+            overlayContent.bookmark.tags.push(testTag);
+            displayCurrentTags();
+            
+            // Test 2: Verify immediate display
+            const tagElements = document.querySelectorAll('#current-tags-container .tag-element');
+            const tagTexts = Array.from(tagElements).map(el => el.textContent);
+            
+            if (tagTexts.includes(testTag)) {
+                logTest('✅ Tag immediately displayed in Current tags list', 'success');
+            } else {
+                logTest('❌ Tag not displayed in Current tags list', 'error');
+            }
+            
+            logTest('Tag display test completed', 'info');
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Log test results
+        function logTest(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const div = document.createElement('div');
+            div.className = type;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Handle Enter key in tag input
+        document.getElementById('tag-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addTag();
+            }
+        });
+
+        // [IMMUTABLE-REQ-TAG-004] - Initialize
+        displayCurrentTags();
+        logTest('[IMMUTABLE-REQ-TAG-004] Tag Display Fix Test initialized', 'info');
+        logTest('Type a tag and press Enter, or click "Add Tag" to test the fix', 'info');
+    </script>
+</body>
+</html> 

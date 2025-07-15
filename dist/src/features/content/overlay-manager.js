@@ -5,6 +5,7 @@
 
 import { Logger } from '../../shared/logger.js'
 import { VisibilityControls } from '../../ui/components/VisibilityControls.js'
+import { MessageClient } from './message-client.js'
 
 // Debug logging utility
 const debugLog = (message, data = null) => {
@@ -13,6 +14,17 @@ const debugLog = (message, data = null) => {
       console.log(`[Hoverboard Overlay Debug] ${message}`, data)
     } else {
       console.log(`[Hoverboard Overlay Debug] ${message}`)
+    }
+  }
+}
+
+// Debug error utility
+const debugError = (message, error = null) => {
+  if (window.HOVERBOARD_DEBUG) {
+    if (error) {
+      console.error(`[Hoverboard Overlay Debug] ${message}`, error)
+    } else {
+      console.error(`[Hoverboard Overlay Debug] ${message}`)
     }
   }
 }
@@ -44,6 +56,9 @@ class OverlayManager {
       debugLog('Visibility settings changed', settings)
       this.applyVisibilitySettings(settings)
     }
+
+    // [IMMUTABLE-REQ-TAG-004] - Initialize message service for tag persistence
+    this.messageService = new MessageClient()
 
     debugLog('OverlayManager initialized', { config, transparencyMode: this.transparencyMode })
   }
@@ -137,7 +152,7 @@ class OverlayManager {
         debugLog('No tags found in bookmark data')
       }
 
-      // [IMMUTABLE-REQ-TAG-001] - Add tag input with validation
+      // [IMMUTABLE-REQ-TAG-004] - Enhanced tag input with persistence
       const tagInput = this.document.createElement('input')
       tagInput.className = 'tag-input'
       tagInput.placeholder = 'New Tag'
@@ -147,25 +162,39 @@ class OverlayManager {
         font-size: 12px;
         width: 80px;
       `
-      tagInput.addEventListener('keypress', (e) => {
+      tagInput.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter') {
           const tagText = tagInput.value.trim()
-          // [IMMUTABLE-REQ-TAG-001] - Validate tag before adding
+          // [IMMUTABLE-REQ-TAG-004] - Validate tag before adding
           if (tagText && this.isValidTag(tagText) && content.bookmark) {
-            if (!content.bookmark.tags) content.bookmark.tags = []
-            // [IMMUTABLE-REQ-TAG-001] - Check for duplicates
-            if (!content.bookmark.tags.includes(tagText)) {
-              content.bookmark.tags.push(tagText)
+            try {
+              // [IMMUTABLE-REQ-TAG-004] - Send saveTag message for persistence
+              await this.messageService.sendMessage({
+                type: 'saveTag',
+                data: {
+                  url: content.bookmark.url || window.location.href,
+                  value: tagText,
+                  description: content.bookmark.description || document.title
+                }
+              })
+
+              // [IMMUTABLE-REQ-TAG-004] - Update local content immediately for display
+              if (!content.bookmark.tags) content.bookmark.tags = []
+              if (!content.bookmark.tags.includes(tagText)) {
+                content.bookmark.tags.push(tagText)
+              }
+
+              // [IMMUTABLE-REQ-TAG-004] - Clear input and refresh overlay with updated content
               tagInput.value = ''
-              // [IMMUTABLE-REQ-TAG-001] - Refresh overlay
-              this.show(content)
-              debugLog('[IMMUTABLE-REQ-TAG-001] Tag added', tagText)
-            } else {
-              debugLog('[IMMUTABLE-REQ-TAG-001] Duplicate tag prevented:', tagText)
+              this.show(content) // Refresh overlay with updated local content
+              debugLog('[IMMUTABLE-REQ-TAG-004] Tag persisted successfully', tagText)
+              this.showMessage('Tag saved successfully', 'success')
+            } catch (error) {
+              debugError('[IMMUTABLE-REQ-TAG-004] Failed to persist tag:', error)
+              this.showMessage('Failed to save tag', 'error')
             }
           } else if (tagText && !this.isValidTag(tagText)) {
-            debugLog('[IMMUTABLE-REQ-TAG-001] Invalid tag rejected:', tagText)
-            // [IMMUTABLE-REQ-TAG-001] - Show error feedback
+            debugLog('[IMMUTABLE-REQ-TAG-004] Invalid tag rejected:', tagText)
             this.showMessage('Invalid tag format', 'error')
           }
         }
@@ -189,25 +218,40 @@ class OverlayManager {
       recentLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
       recentContainer.appendChild(recentLabel)
 
-      // [IMMUTABLE-REQ-TAG-001] - Add recent tags with duplicate prevention
+      // [IMMUTABLE-REQ-TAG-004] - Enhanced recent tags with persistence
       const sampleRecentTags = ['development', 'web', 'tutorial', 'javascript', 'reference']
       sampleRecentTags.slice(0, 3).forEach(tag => {
-        // [IMMUTABLE-REQ-TAG-001] - Only show tags not already in current tags
+        // [IMMUTABLE-REQ-TAG-004] - Only show tags not already in current tags
         if (!content.bookmark?.tags?.includes(tag)) {
           const tagElement = this.document.createElement('span')
           tagElement.className = 'tag-element tiny'
           tagElement.textContent = tag
-          tagElement.onclick = () => {
+          tagElement.onclick = async () => {
             if (content.bookmark) {
-              if (!content.bookmark.tags) content.bookmark.tags = []
-              // [IMMUTABLE-REQ-TAG-001] - Check for duplicates before adding
-              if (!content.bookmark.tags.includes(tag)) {
-                content.bookmark.tags.push(tag)
-                // [IMMUTABLE-REQ-TAG-001] - Refresh overlay
-                this.show(content)
-                debugLog('[IMMUTABLE-REQ-TAG-001] Tag added from recent', tag)
-              } else {
-                debugLog('[IMMUTABLE-REQ-TAG-001] Duplicate tag prevented from recent:', tag)
+              try {
+                // [IMMUTABLE-REQ-TAG-004] - Send saveTag message for persistence
+                await this.messageService.sendMessage({
+                  type: 'saveTag',
+                  data: {
+                    url: content.bookmark.url || window.location.href,
+                    value: tag,
+                    description: content.bookmark.description || document.title
+                  }
+                })
+
+                // [IMMUTABLE-REQ-TAG-004] - Update local content immediately for display
+                if (!content.bookmark.tags) content.bookmark.tags = []
+                if (!content.bookmark.tags.includes(tag)) {
+                  content.bookmark.tags.push(tag)
+                }
+
+                // [IMMUTABLE-REQ-TAG-004] - Refresh overlay with updated local content
+                this.show(content) // Refresh overlay with updated local content
+                debugLog('[IMMUTABLE-REQ-TAG-004] Tag persisted from recent', tag)
+                this.showMessage('Tag saved successfully', 'success')
+              } catch (error) {
+                debugError('[IMMUTABLE-REQ-TAG-004] Failed to persist tag from recent:', error)
+                this.showMessage('Failed to save tag', 'error')
               }
             }
           }
@@ -389,20 +433,79 @@ class OverlayManager {
   }
 
   /**
-   * Show a simple message in overlay
+   * [IMMUTABLE-REQ-TAG-004] - Enhanced message display for tag operations
    */
   showMessage (message, type = 'info') {
-    const messageElement = this.document.createElement('div')
-    messageElement.className = `hoverboard-message ${type}`
-    messageElement.textContent = message
+    try {
+      // [IMMUTABLE-REQ-TAG-004] - Create message element with enhanced styling
+      const messageElement = this.document.createElement('div')
+      messageElement.className = `overlay-message overlay-message-${type}`
+      messageElement.textContent = message
+      messageElement.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        color: white;
+        font-size: 12px;
+        z-index: 10000;
+        animation: slideIn 0.3s ease-out;
+        font-weight: 600;
+      `
 
-    this.show(messageElement)
+      // [IMMUTABLE-REQ-TAG-004] - Style based on message type
+      if (type === 'error') {
+        messageElement.style.background = 'var(--theme-danger, #e74c3c)'
+      } else if (type === 'success') {
+        messageElement.style.background = 'var(--theme-success, #2ecc71)'
+      } else {
+        messageElement.style.background = 'var(--theme-info, #3498db)'
+      }
 
-    // Auto-hide message after timeout
-    if (this.config.messageTimeout > 0) {
+      // [IMMUTABLE-REQ-TAG-004] - Add to document
+      this.document.body.appendChild(messageElement)
+
+      // [IMMUTABLE-REQ-TAG-004] - Auto-remove after 3 seconds
       setTimeout(() => {
-        this.hide()
-      }, this.config.messageTimeout || 3000)
+        if (messageElement.parentNode) {
+          messageElement.parentNode.removeChild(messageElement)
+        }
+      }, 3000)
+
+      debugLog('[IMMUTABLE-REQ-TAG-004] Message displayed:', { message, type })
+    } catch (error) {
+      debugError('[IMMUTABLE-REQ-TAG-004] Failed to show message:', error)
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-004] - Refresh overlay content with latest bookmark data
+   */
+  async refreshOverlayContent() {
+    try {
+      // [IMMUTABLE-REQ-TAG-004] - Get updated bookmark data
+      const response = await this.messageService.sendMessage({
+        type: 'getCurrentBookmark',
+        data: {
+          url: window.location.href
+        }
+      })
+
+      if (response && response.success && response.data) {
+        // [IMMUTABLE-REQ-TAG-004] - Update content with fresh bookmark data
+        const updatedContent = {
+          bookmark: response.data,
+          pageTitle: document.title,
+          pageUrl: window.location.href
+        }
+
+        // [IMMUTABLE-REQ-TAG-004] - Refresh overlay with updated content
+        this.show(updatedContent)
+        debugLog('[IMMUTABLE-REQ-TAG-004] Overlay refreshed with updated content')
+      }
+    } catch (error) {
+      debugError('[IMMUTABLE-REQ-TAG-004] Failed to refresh overlay content:', error)
     }
   }
 
@@ -1621,6 +1724,18 @@ class OverlayManager {
         }
         to {
           transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      /* [IMMUTABLE-REQ-TAG-004] - Slide-in animation for messages */
+      @keyframes slideIn {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
           opacity: 1;
         }
       }
