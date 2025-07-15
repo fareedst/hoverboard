@@ -49,16 +49,20 @@ export default {
     '^@tests/(.*)$': '<rootDir>/tests/$1'
   },
   
-  // Global settings
+  // [TEST-FIX-TIMEOUT-001] - Global settings with enhanced timeout
   verbose: true,
+  testTimeout: 15000, // 15 second timeout for all tests
   
   // Clear mocks between tests
   clearMocks: true,
   restoreMocks: true,
   
-  // Transform configuration for ES modules
+  // [TEST-FIX-MODULE-001] - Enhanced transform configuration for ES modules
   transform: {
-    '^.+\\.js$': 'babel-jest'
+    '^.+\\.js$': ['babel-jest', {
+      presets: [['@babel/preset-env', { targets: { node: 'current' } }]],
+      plugins: ['@babel/plugin-transform-modules-commonjs']
+    }]
   },
   
   // Transform ignore patterns

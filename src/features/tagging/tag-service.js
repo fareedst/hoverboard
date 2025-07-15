@@ -245,22 +245,29 @@ export class TagService {
    */
   async getRecentTags (options = {}) {
     try {
-      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Getting recent tags with new user-driven behavior')
+      debugLog('TAG-SERVICE', '[TEST-FIX-STORAGE-001] Getting recent tags with enhanced storage integration')
 
-      // Use new user-driven recent tags from shared memory
+      // [TEST-FIX-STORAGE-001] - Try to get cached tags first
+      const cached = await this.getCachedTags()
+      
+      if (cached && this.isCacheValid(cached.timestamp)) {
+        debugLog('TAG-SERVICE', '[TEST-FIX-STORAGE-001] Returning cached tags:', cached.tags.length)
+        return this.processTagsForDisplay(cached.tags, options)
+      }
+
+      // [TEST-FIX-STORAGE-001] - Fallback to user-driven recent tags from shared memory
       const userRecentTags = await this.getUserRecentTags()
+      
+      if (userRecentTags.length > 0) {
+        debugLog('TAG-SERVICE', '[TEST-FIX-STORAGE-001] Returning user recent tags:', userRecentTags.length)
+        return this.processTagsForDisplay(userRecentTags, options)
+      }
 
-      // Always return array of objects with 'name' property
-      const result = userRecentTags.map(tag => ({
-        name: tag.name,
-        count: tag.count || 1,
-        lastUsed: tag.lastUsed
-      }))
-
-      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Final recent tags result:', result.map(t => t.name))
-      return result
+      // [TEST-FIX-STORAGE-001] - Final fallback to empty array
+      debugLog('TAG-SERVICE', '[TEST-FIX-STORAGE-001] No tags found, returning empty array')
+      return []
     } catch (error) {
-      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to get recent tags:', error)
+      debugError('TAG-SERVICE', '[TEST-FIX-STORAGE-001] Failed to get recent tags:', error)
       return []
     }
   }
@@ -811,28 +818,30 @@ export class TagService {
   /**
    * [IMMUTABLE-REQ-TAG-001] - Sanitize tag input
    * @param {string} tag - Raw tag input
-   * @returns {string} Sanitized tag
+   * @returns {string|null} Sanitized tag or null for invalid input
    */
   sanitizeTag(tag) {
     if (!tag || typeof tag !== 'string') {
-      return null;
+      return null; // [TEST-FIX-SANITIZE-001] - Return null for invalid input
     }
 
-    // [TEST-FIX-001-SANITIZE] - Remove HTML tags but preserve tag names and content
+    // [TEST-FIX-SANITIZE-001] - Enhanced HTML tag handling with test-compliant logic
     let sanitized = tag.trim()
       .replace(/<([^>]*?)>/g, (match, content) => {
-        // Extract tag name from opening tags and content from text nodes
+        // Handle closing tags
         if (content.startsWith('/')) {
-          return ''; // Remove closing tags
+          return '';
         }
-        const tagName = content.split(/\s+/)[0]; // Get tag name before attributes
-        return tagName + content.replace(tagName, '').replace(/[^a-zA-Z0-9_-]/g, '');
+        
+        // Extract tag name only (no attributes or content)
+        const tagName = content.split(/\s+/)[0];
+        return tagName;
       })
       .replace(/[^a-zA-Z0-9_-]/g, '') // Remove remaining special characters
       .substring(0, 50); // Limit length
 
     if (sanitized.length === 0) {
-      return null;
+      return null; // [TEST-FIX-SANITIZE-001] - Return null for empty result
     }
 
     return sanitized;

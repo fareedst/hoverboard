@@ -129,25 +129,111 @@ global.chrome = {
   },
   storage: {
     local: {
-      get: jest.fn().mockResolvedValue({}),
-      set: jest.fn().mockResolvedValue(),
-      remove: jest.fn().mockResolvedValue(),
-      clear: jest.fn().mockResolvedValue(),
+      get: jest.fn().mockImplementation((keys, callback) => {
+        // [TEST-FIX-STORAGE-001] - Enhanced local storage mock with realistic data
+        const mockData = {
+          hoverboard_recent_tags_cache: {
+            tags: [
+              { name: 'test-tag-1', lastUsed: Date.now() },
+              { name: 'test-tag-2', lastUsed: Date.now() - 1000 },
+              { name: 'test-tag-3', lastUsed: Date.now() - 2000 }
+            ],
+            timestamp: Date.now()
+          },
+          hoverboard_tag_frequency: {
+            'test-tag-1': 5,
+            'test-tag-2': 3,
+            'test-tag-3': 2
+          }
+        };
+        
+        const result = {};
+        if (Array.isArray(keys)) {
+          keys.forEach(key => {
+            result[key] = mockData[key] || null;
+          });
+        } else {
+          result[keys] = mockData[keys] || null;
+        }
+        
+        if (callback) {
+          callback(result);
+        } else {
+          return Promise.resolve(result);
+        }
+      }),
+      set: jest.fn().mockImplementation((data, callback) => {
+        if (callback) {
+          callback();
+        } else {
+          return Promise.resolve();
+        }
+      }),
+      remove: jest.fn().mockImplementation((keys, callback) => {
+        if (callback) {
+          callback();
+        } else {
+          return Promise.resolve();
+        }
+      }),
+      clear: jest.fn().mockImplementation((callback) => {
+        if (callback) {
+          callback();
+        } else {
+          return Promise.resolve();
+        }
+      }),
     },
     sync: {
-      get: jest.fn().mockResolvedValue({
-        hoverboard_settings: {
-          recentTagsCountMax: 10,
-          initRecentPostsCount: 20,
-          showHoverOnPageLoad: true,
-          hoverShowRecentTags: true
-        },
-        hoverboard_auth_token: 'user-test-token:123456',
-        hoverboard_inhibit_urls: ''
+      get: jest.fn().mockImplementation((keys, callback) => {
+        // [TEST-FIX-STORAGE-001] - Enhanced sync storage mock
+        const mockData = {
+          hoverboard_settings: {
+            recentTagsCountMax: 10,
+            initRecentPostsCount: 20,
+            showHoverOnPageLoad: true,
+            hoverShowRecentTags: true
+          },
+          hoverboard_auth_token: 'user-test-token:123456',
+          hoverboard_inhibit_urls: ''
+        };
+        
+        const result = {};
+        if (Array.isArray(keys)) {
+          keys.forEach(key => {
+            result[key] = mockData[key] || null;
+          });
+        } else {
+          result[keys] = mockData[keys] || null;
+        }
+        
+        if (callback) {
+          callback(result);
+        } else {
+          return Promise.resolve(result);
+        }
       }),
-      set: jest.fn().mockResolvedValue(),
-      remove: jest.fn().mockResolvedValue(),
-      clear: jest.fn().mockResolvedValue(),
+      set: jest.fn().mockImplementation((data, callback) => {
+        if (callback) {
+          callback();
+        } else {
+          return Promise.resolve();
+        }
+      }),
+      remove: jest.fn().mockImplementation((keys, callback) => {
+        if (callback) {
+          callback();
+        } else {
+          return Promise.resolve();
+        }
+      }),
+      clear: jest.fn().mockImplementation((callback) => {
+        if (callback) {
+          callback();
+        } else {
+          return Promise.resolve();
+        }
+      }),
     },
   },
   tabs: {
@@ -185,6 +271,17 @@ Object.defineProperty(window, 'location', {
 // Mock fetch for API calls
 global.fetch = jest.fn();
 
+// [TEST-FIX-STORAGE-001] - Mock shared memory for service worker context
+global.recentTagsMemory = {
+  getRecentTags: jest.fn().mockReturnValue([
+    { name: 'test-tag-1', lastUsed: Date.now() },
+    { name: 'test-tag-2', lastUsed: Date.now() - 1000 },
+    { name: 'test-tag-3', lastUsed: Date.now() - 2000 }
+  ]),
+  addTag: jest.fn().mockReturnValue(true),
+  clear: jest.fn()
+};
+
 // Mock StateManager popupState to prevent undefined errors
 global.popupState = {
   loadPersistedState: jest.fn().mockResolvedValue({}),
@@ -192,14 +289,14 @@ global.popupState = {
   clearPersistedState: jest.fn().mockResolvedValue(),
 };
 
-// [TEST-FIX-001] - Enhanced test setup with better error handling
+// [TEST-FIX-ENV-001] - Enhanced test setup with better error handling
 beforeEach(() => {
   jest.clearAllMocks();
   
   // Reset fetch mock
   fetch.mockClear();
   
-  // [TEST-FIX-001] - Enhanced Chrome API mock reset
+  // [TEST-FIX-ENV-001] - Enhanced Chrome API mock reset
   if (global.chrome && global.chrome.runtime) {
     Object.values(global.chrome.runtime).forEach(mock => {
       if (typeof mock?.mockClear === 'function') {
@@ -224,7 +321,14 @@ beforeEach(() => {
     });
   }
   
-  // [TEST-FIX-001] - Reset error mocks
+  // [TEST-FIX-STORAGE-001] - Reset shared memory mocks
+  if (global.recentTagsMemory) {
+    global.recentTagsMemory.getRecentTags.mockClear();
+    global.recentTagsMemory.addTag.mockClear();
+    global.recentTagsMemory.clear.mockClear();
+  }
+  
+  // [TEST-FIX-ENV-001] - Reset error mocks
   if (global.chrome && global.chrome.runtime && global.chrome.runtime.lastError) {
     global.chrome.runtime.lastError = null;
   }
