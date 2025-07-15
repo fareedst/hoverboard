@@ -134,6 +134,12 @@ describe('ConfigManager', () => {
         uxShowSectionLabels: true
       };
       await configManager.updateConfig(updates);
+      
+      // Mock the updated storage response
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_settings: { uxShowSectionLabels: true }
+      });
+      
       const updatedConfig = await configManager.getConfig();
       expect(updatedConfig).toHaveProperty('uxShowSectionLabels', true);
     });

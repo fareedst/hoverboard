@@ -2469,6 +2469,11 @@
         }
         visibilityControlsContainer = this.visibilityControls.createControls();
         debugLog2("VisibilityControls UI created");
+        this.injectCSS();
+        debugLog2("CSS re-injected with VisibilityControls styles");
+        const initialSettings = this.visibilityControls.getSettings();
+        this.applyVisibilitySettings(initialSettings);
+        debugLog2("Initial visibility settings applied", initialSettings);
         const actionsContainer = this.document.createElement("div");
         actionsContainer.className = "actions";
         actionsContainer.style.cssText = `
@@ -2623,6 +2628,11 @@
       this.applyOverlayStyles();
       this.document.body.appendChild(this.overlayElement);
       this.injectCSS();
+      if (this.visibilityControls) {
+        const initialSettings = this.visibilityControls.getSettings();
+        this.applyVisibilitySettings(initialSettings);
+        debugLog2("Initial theme applied in createOverlay", initialSettings);
+      }
     }
     /**
      * Remove overlay from DOM
@@ -2994,8 +3004,9 @@
      */
     injectCSS() {
       const styleId = "hoverboard-overlay-styles";
-      if (this.document.getElementById(styleId)) {
-        return;
+      const existingStyle = this.document.getElementById(styleId);
+      if (existingStyle) {
+        existingStyle.remove();
       }
       const style = this.document.createElement("style");
       style.id = styleId;
@@ -3005,6 +3016,7 @@
       }
       style.textContent = cssContent;
       this.document.head.appendChild(style);
+      debugLog2("CSS injected", { hasVisibilityControls: !!this.visibilityControls });
     }
     /**
      * [TAB-SEARCH-UI] Add tab search section to overlay

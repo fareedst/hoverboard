@@ -227,6 +227,15 @@ class OverlayManager {
       visibilityControlsContainer = this.visibilityControls.createControls()
       debugLog('VisibilityControls UI created')
 
+      // Re-inject CSS to include VisibilityControls styles
+      this.injectCSS()
+      debugLog('CSS re-injected with VisibilityControls styles')
+
+      // Apply initial theme settings to ensure correct initial display
+      const initialSettings = this.visibilityControls.getSettings()
+      this.applyVisibilitySettings(initialSettings)
+      debugLog('Initial visibility settings applied', initialSettings)
+
       // Action buttons section (matching desired overlay)
       const actionsContainer = this.document.createElement('div')
       actionsContainer.className = 'actions'
@@ -430,6 +439,13 @@ class OverlayManager {
 
     // Inject CSS styles if not already present
     this.injectCSS()
+
+    // Apply initial theme if VisibilityControls are available
+    if (this.visibilityControls) {
+      const initialSettings = this.visibilityControls.getSettings()
+      this.applyVisibilitySettings(initialSettings)
+      debugLog('Initial theme applied in createOverlay', initialSettings)
+    }
   }
 
   /**
@@ -899,8 +915,10 @@ class OverlayManager {
   injectCSS () {
     const styleId = 'hoverboard-overlay-styles'
 
-    if (this.document.getElementById(styleId)) {
-      return // Already injected
+    // Remove existing styles to allow re-injection
+    const existingStyle = this.document.getElementById(styleId)
+    if (existingStyle) {
+      existingStyle.remove()
     }
 
     const style = this.document.createElement('style')
@@ -909,7 +927,7 @@ class OverlayManager {
     // Combine overlay CSS with VisibilityControls CSS
     let cssContent = this.getOverlayCSS()
 
-    // UI-VIS-001: Add VisibilityControls CSS
+    // UI-VIS-001: Add VisibilityControls CSS if available
     if (this.visibilityControls) {
       cssContent += '\n' + this.visibilityControls.getControlsCSS()
     }
@@ -917,6 +935,7 @@ class OverlayManager {
     style.textContent = cssContent
 
     this.document.head.appendChild(style)
+    debugLog('CSS injected', { hasVisibilityControls: !!this.visibilityControls })
   }
 
   /**
