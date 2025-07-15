@@ -3,9 +3,11 @@
  * Replaces legacy sendToExtension/BRSendMessage with Promise-based messaging
  */
 
+// [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+
 export class MessageClient {
   constructor () {
-    this.pendingMessages = new Map()
     this.messageTimeout = 10000 // 10 seconds timeout
     this.retryAttempts = 3
     this.retryDelay = 1000 // 1 second
@@ -55,38 +57,20 @@ export class MessageClient {
    * @param {Object} options - Send options
    * @returns {Promise} Promise that resolves with response
    */
-  sendSingleMessage (message, options) {
-    return new Promise((resolve, reject) => {
-      const messageId = this.generateMessageId()
-      const fullMessage = {
-        ...message,
-        messageId,
-        timestamp: Date.now()
-      }
-
-      // Set up timeout
-      const timeoutId = setTimeout(() => {
-        this.pendingMessages.delete(messageId)
-        reject(new Error(`Message timeout after ${options.timeout}ms`))
-      }, options.timeout)
-
-      // Store pending message info
-      this.pendingMessages.set(messageId, {
-        resolve,
-        reject,
-        timeoutId,
-        message: fullMessage
-      })
-
-      try {
-        chrome.runtime.sendMessage(fullMessage, (response) => {
-          this.handleMessageResponse(messageId, response)
-        })
-      } catch (error) {
-        this.cleanupPendingMessage(messageId)
-        reject(error)
-      }
-    })
+  // [SAFARI-EXT-SHIM-001] Refactor sendSingleMessage to use await directly
+  async sendSingleMessage(message, options) {
+    const messageId = this.generateMessageId();
+    const fullMessage = { ...message, messageId };
+    try {
+      console.log('🔍 [MessageClient] Sending message:', fullMessage);
+      const response = await browser.runtime.sendMessage(fullMessage);
+      console.log('🔍 [MessageClient] Received response:', response);
+      // Optionally process response here if needed
+      return response;
+    } catch (error) {
+      console.error('🔍 [MessageClient] Message send failed:', error);
+      throw error;
+    }
   }
 
   /**
@@ -95,32 +79,9 @@ export class MessageClient {
    * @param {Object} response - Response object
    */
   handleMessageResponse (messageId, response) {
-    const pendingMessage = this.pendingMessages.get(messageId)
-    if (!pendingMessage) return
-
-    const { resolve, reject, timeoutId } = pendingMessage
-
-    // Clear timeout
-    clearTimeout(timeoutId)
-    this.pendingMessages.delete(messageId)
-
-    // Check for Chrome runtime errors
-    if (chrome.runtime.lastError) {
-      reject(new Error(chrome.runtime.lastError.message))
-      return
-    }
-
-    // Check response format
-    if (!response) {
-      reject(new Error('No response received from background script'))
-      return
-    }
-
-    if (response.success) {
-      resolve(response.data)
-    } else {
-      reject(new Error(response.error || 'Unknown error from background script'))
-    }
+    // No-op or just log/handle response if needed
+    // Previously this would resolve a Promise, but now we just return the response directly
+    // Optionally, you can remove this method if not needed
   }
 
   /**
@@ -129,20 +90,14 @@ export class MessageClient {
    * @param {Object} message - Message object
    * @returns {Promise} Promise that resolves with response
    */
-  async sendMessageToTab (tabId, message) {
-    return new Promise((resolve, reject) => {
-      try {
-        chrome.tabs.sendMessage(tabId, message, (response) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message))
-          } else {
-            resolve(response)
-          }
-        })
-      } catch (error) {
-        reject(error)
-      }
-    })
+  // [SAFARI-EXT-SHIM-001] Refactor sendMessageToTab to use await directly
+  async sendMessageToTab(tabId, message) {
+    try {
+      const response = await browser.tabs.sendMessage(tabId, message);
+      return response;
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
@@ -173,9 +128,9 @@ export class MessageClient {
   getAllTabs () {
     return new Promise((resolve, reject) => {
       try {
-        chrome.tabs.query({}, (tabs) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message))
+        browser.tabs.query({}, (tabs) => {
+          if (browser.runtime.lastError) {
+            reject(new Error(browser.runtime.lastError.message))
           } else {
             resolve(tabs)
           }
@@ -217,11 +172,7 @@ export class MessageClient {
    * @param {string} messageId - Message ID to clean up
    */
   cleanupPendingMessage (messageId) {
-    const pendingMessage = this.pendingMessages.get(messageId)
-    if (pendingMessage) {
-      clearTimeout(pendingMessage.timeoutId)
-      this.pendingMessages.delete(messageId)
-    }
+    // No-op or remove if not needed
   }
 
   /**
@@ -252,10 +203,10 @@ export class MessageClient {
    */
   getExtensionInfo () {
     return {
-      id: chrome.runtime.id,
-      version: chrome.runtime.getManifest().version,
-      url: chrome.runtime.getURL(''),
-      isIncognito: chrome.extension.inIncognitoContext
+      id: browser.runtime.id,
+      version: browser.runtime.getManifest().version,
+      url: browser.runtime.getURL(''),
+      isIncognito: browser.extension.inIncognitoContext
     }
   }
 
@@ -263,10 +214,10 @@ export class MessageClient {
    * Open extension options page
    */
   openOptionsPage () {
-    if (chrome.runtime.openOptionsPage) {
-      chrome.runtime.openOptionsPage()
+    if (browser.runtime.openOptionsPage) {
+      browser.runtime.openOptionsPage()
     } else {
-      window.open(chrome.runtime.getURL('src/ui/options/options.html'))
+      window.open(browser.runtime.getURL('src/ui/options/options.html'))
     }
   }
 
@@ -277,9 +228,9 @@ export class MessageClient {
   async getCurrentTab () {
     return new Promise((resolve, reject) => {
       try {
-        chrome.tabs.getCurrent((tab) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message))
+        browser.tabs.getCurrent((tab) => {
+          if (browser.runtime.lastError) {
+            reject(new Error(browser.runtime.lastError.message))
           } else {
             resolve(tab)
           }
@@ -294,11 +245,7 @@ export class MessageClient {
    * Clean up all pending messages (for when script unloads)
    */
   cleanup () {
-    for (const [messageId, pendingMessage] of this.pendingMessages) {
-      clearTimeout(pendingMessage.timeoutId)
-      pendingMessage.reject(new Error('Content script unloading'))
-    }
-    this.pendingMessages.clear()
+    // No-op or remove if not needed
   }
 
   /**
@@ -307,7 +254,6 @@ export class MessageClient {
    */
   getStats () {
     return {
-      pendingMessages: this.pendingMessages.size,
       messageTimeout: this.messageTimeout,
       retryAttempts: this.retryAttempts,
       retryDelay: this.retryDelay

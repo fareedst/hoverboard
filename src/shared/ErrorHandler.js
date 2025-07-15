@@ -2,8 +2,6 @@
  * ErrorHandler - Centralized error handling for the extension
  */
 
-import { browser } from './utils'; // [SAFARI-EXT-SHIM-001]
-
 export class ErrorHandler {
   constructor () {
     this.errorLog = []
@@ -113,10 +111,10 @@ export class ErrorHandler {
     }
 
     // Add Chrome extension specific info
-    if (typeof browser !== 'undefined' && browser.runtime) {
-      errorInfo.extensionId = browser.runtime.id
-      if (browser.runtime.lastError) {
-        errorInfo.chromeError = browser.runtime.lastError.message
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      errorInfo.extensionId = chrome.runtime.id
+      if (chrome.runtime.lastError) {
+        errorInfo.chromeError = chrome.runtime.lastError.message
       }
     }
 
@@ -198,7 +196,7 @@ export class ErrorHandler {
    */
   async storeErrorLocally (errorInfo) {
     try {
-      const result = await browser.storage.local.get(['errorLog'])
+      const result = await chrome.storage.local.get(['errorLog'])
       const existingLog = result.errorLog || []
 
       existingLog.unshift(errorInfo)
@@ -206,7 +204,7 @@ export class ErrorHandler {
       // Keep only recent errors
       const trimmedLog = existingLog.slice(0, 50)
 
-      await browser.storage.local.set({ errorLog: trimmedLog })
+      await chrome.storage.local.set({ errorLog: trimmedLog })
     } catch (storageError) {
       console.warn('Failed to store error locally:', storageError)
     }
@@ -216,10 +214,10 @@ export class ErrorHandler {
    * Handle Chrome extension API errors
    */
   handleChromeError (operation, context = {}) {
-    if (browser.runtime.lastError) {
+    if (chrome.runtime.lastError) {
       this.handleError(
         `Chrome API Error in ${operation}`,
-        browser.runtime.lastError.message,
+        chrome.runtime.lastError.message,
         this.errorTypes.RUNTIME,
         context
       )

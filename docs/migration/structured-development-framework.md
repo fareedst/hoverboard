@@ -11,7 +11,7 @@ These requirements CANNOT be changed during migration:
 1. **Feature Parity**: All existing functionality must be preserved
 2. **User Data**: No loss of user settings, bookmarks, or configuration
 3. **API Compatibility**: Pinboard API integration must remain functional
-4. **Cross-Browser**: Support for Chrome, Firefox, and Edge browsers
+4. **Cross-Browser**: Support for Chrome, Firefox, Edge, and future Safari support via a unified browser API abstraction ([SAFARI-EXT-SHIM-001]).
 5. **Performance**: No degradation in extension load times or responsiveness
 6. **Security**: Maintain or improve current security posture
 
@@ -21,7 +21,7 @@ These requirements CANNOT be changed during migration:
 1. **🔍 Feature Analysis**: Document what feature you're implementing
 2. **📝 Impact Assessment**: Identify all affected components
 3. **🧪 Test Requirements**: Define testing criteria for changes
-4. **📖 Documentation Update**: Plan required documentation updates
+4. **📖 Documentation Update**: Plan required documentation updates, including semantic tokens for new cross-browser features and debug logging ([SAFARI-EXT-SHIM-001]).
 
 #### **⭐ Change Type Classification**
 | Change Type | Icon | Documentation Required | Testing Required |

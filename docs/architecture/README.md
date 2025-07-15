@@ -22,7 +22,8 @@ This directory contains comprehensive documentation about the system architectur
 - **Manifest V3 Compliance** - Modern extension architecture
 - **Modular Design** - Clean separation of concerns
 - **Performance Optimization** - Efficient resource usage
-- **Cross-Browser Compatibility** - Chrome, Firefox, and Edge support
+- **Cross-Browser Compatibility** - Chrome, Firefox, Edge, and future Safari support via unified browser API abstraction ([SAFARI-EXT-SHIM-001]).
+- See also: [Architecture Overview](overview.md#cross-browser-api-abstraction-and-debug-logging-safari-ext-shim-001-2025-07-15) and `src/shared/utils.js` for implementation details.
 
 ## 🔗 Related Documentation
 

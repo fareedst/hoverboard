@@ -99,16 +99,258 @@
     }
   });
 
-  // src/config/config-manager.js
-  var init_config_manager = __esm({
-    "src/config/config-manager.js"() {
+  // src/shared/safari-shim.js
+  function initializeBrowserAPI() {
+    if (typeof chrome !== "undefined") {
+      browser = chrome;
+      if (logger && logger.debug) {
+        logger.debug("[SAFARI-EXT-SHIM-001] Using Chrome API");
+      }
+      return;
+    }
+    try {
+      if (typeof window !== "undefined" && window.browser) {
+        browser = window.browser;
+        if (logger && logger.debug) {
+          logger.debug("[SAFARI-EXT-SHIM-001] Using webextension-polyfill");
+        }
+        return;
+      }
+    } catch (polyfillError) {
+    }
+    browser = createMinimalBrowserAPI();
+    if (logger && logger.warn) {
+      logger.warn("[SAFARI-EXT-SHIM-001] No browser API available, using minimal mock");
+    }
+  }
+  function createMinimalBrowserAPI() {
+    return {
+      runtime: {
+        id: "mock-extension-id",
+        getManifest: () => ({ version: "1.0.0" }),
+        sendMessage: () => Promise.resolve(),
+        onMessage: { addListener: () => {
+        } },
+        onInstalled: { addListener: () => {
+        } }
+      },
+      storage: {
+        sync: {
+          get: () => Promise.resolve({}),
+          set: () => Promise.resolve(),
+          remove: () => Promise.resolve()
+        },
+        local: {
+          get: () => Promise.resolve({}),
+          set: () => Promise.resolve(),
+          remove: () => Promise.resolve()
+        }
+      },
+      tabs: {
+        query: () => Promise.resolve([]),
+        sendMessage: () => Promise.resolve()
+      }
+    };
+  }
+  var browser, safariEnhancements;
+  var init_safari_shim = __esm({
+    "src/shared/safari-shim.js"() {
+      init_logger();
+      initializeBrowserAPI();
+      safariEnhancements = {
+        // Safari storage quota management
+        storage: {
+          ...browser.storage,
+          // [SAFARI-EXT-STORAGE-001] Safari storage quota management
+          getQuotaUsage: async () => {
+            try {
+              if ("storage" in navigator && "estimate" in navigator.storage) {
+                const estimate = await navigator.storage.estimate();
+                return {
+                  used: estimate.usage || 0,
+                  quota: estimate.quota || 0,
+                  usagePercent: estimate.quota ? estimate.usage / estimate.quota * 100 : 0
+                };
+              }
+              return { used: 0, quota: 0, usagePercent: 0 };
+            } catch (error) {
+              if (logger && logger.error) {
+                logger.error("[SAFARI-EXT-STORAGE-001] Storage quota check failed:", error);
+              }
+              return { used: 0, quota: 0, usagePercent: 0 };
+            }
+          },
+          // [SAFARI-EXT-STORAGE-001] Safari-optimized storage operations
+          sync: {
+            ...browser.storage.sync,
+            // Safari sync storage with quota management
+            get: async (keys) => {
+              try {
+                const result = await browser.storage.sync.get(keys);
+                const quotaUsage = await safariEnhancements.storage.getQuotaUsage();
+                if (quotaUsage.usagePercent > 80) {
+                  if (logger && logger.warn) {
+                    logger.warn("[SAFARI-EXT-STORAGE-001] Storage quota usage high:", quotaUsage.usagePercent + "%");
+                  }
+                }
+                return result;
+              } catch (error) {
+                if (logger && logger.error) {
+                  logger.error("[SAFARI-EXT-STORAGE-001] Sync storage get failed:", error);
+                }
+                throw error;
+              }
+            }
+          }
+        },
+        // Safari message passing optimizations
+        runtime: {
+          ...browser.runtime,
+          // [SAFARI-EXT-MESSAGING-001] Safari-optimized message passing
+          sendMessage: async (message) => {
+            try {
+              const enhancedMessage = {
+                ...message,
+                timestamp: Date.now(),
+                version: browser.runtime.getManifest().version
+              };
+              if (typeof safari !== "undefined") {
+                enhancedMessage.platform = "safari";
+              }
+              if (logger && logger.debug) {
+                logger.debug("[SAFARI-EXT-MESSAGING-001] Sending message:", enhancedMessage);
+              }
+              return new Promise((resolve, reject) => {
+                chrome.runtime.sendMessage(enhancedMessage, (response) => {
+                  if (chrome.runtime.lastError) {
+                    reject(new Error(chrome.runtime.lastError.message));
+                  } else {
+                    resolve(response);
+                  }
+                });
+              });
+            } catch (error) {
+              if (logger && logger.error) {
+                logger.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error);
+              }
+              throw error;
+            }
+          },
+          // [SAFARI-EXT-MESSAGING-001] Safari message listener with error handling
+          onMessage: {
+            ...browser.runtime.onMessage,
+            addListener: (callback) => {
+              const wrappedCallback = (message, sender, sendResponse) => {
+                try {
+                  if (logger && logger.debug) {
+                    logger.debug("[SAFARI-EXT-MESSAGING-001] Received message:", message);
+                  }
+                  const result = callback(message, sender, sendResponse);
+                  if (result && typeof result.then === "function") {
+                    result.then((response) => {
+                      if (logger && logger.debug) {
+                        logger.debug("[SAFARI-EXT-MESSAGING-001] Async response:", response);
+                      }
+                    }).catch((error) => {
+                      if (logger && logger.error) {
+                        logger.error("[SAFARI-EXT-MESSAGING-001] Message handler error:", error);
+                      }
+                    });
+                  }
+                  return result;
+                } catch (error) {
+                  if (logger && logger.error) {
+                    logger.error("[SAFARI-EXT-MESSAGING-001] Message handler error:", error);
+                  }
+                  throw error;
+                }
+              };
+              return chrome.runtime.onMessage.addListener(wrappedCallback);
+            }
+          }
+        },
+        // Safari tabs API enhancements
+        tabs: {
+          ...browser.tabs,
+          // [SAFARI-EXT-CONTENT-001] Safari-optimized tab querying
+          query: async (queryInfo) => {
+            try {
+              const tabs = await browser.tabs.query(queryInfo);
+              if (typeof safari !== "undefined") {
+                return tabs.filter((tab) => !tab.url.startsWith("safari-extension://"));
+              }
+              return tabs;
+            } catch (error) {
+              if (logger && logger.error) {
+                logger.error("[SAFARI-EXT-CONTENT-001] Tab query failed:", error);
+              }
+              throw error;
+            }
+          },
+          // [SAFARI-EXT-MESSAGING-001] Safari-optimized tab message sending
+          sendMessage: async (tabId, message) => {
+            try {
+              if (logger && logger.debug) {
+                logger.debug("[SAFARI-EXT-MESSAGING-001] Sending message to tab:", { tabId, message });
+              }
+              return new Promise((resolve, reject) => {
+                chrome.tabs.sendMessage(tabId, message, (response) => {
+                  if (chrome.runtime.lastError) {
+                    reject(new Error(chrome.runtime.lastError.message));
+                  } else {
+                    resolve(response);
+                  }
+                });
+              });
+            } catch (error) {
+              if (logger && logger.error) {
+                logger.error("[SAFARI-EXT-MESSAGING-001] Tab message send failed:", error);
+              }
+              throw error;
+            }
+          }
+        }
+      };
     }
   });
 
   // src/shared/utils.js
+  function debugLog2(component, message, ...args) {
+    if (DEBUG_CONFIG.enabled) {
+      const prefix = `${DEBUG_CONFIG.prefix} [${component}]`;
+      if (args.length > 0) {
+        console.log(prefix, message, ...args);
+      } else {
+        console.log(prefix, message);
+      }
+    }
+  }
+  function debugError(component, message, ...args) {
+    if (DEBUG_CONFIG.enabled) {
+      const prefix = `${DEBUG_CONFIG.prefix} [${component}]`;
+      if (args.length > 0) {
+        console.error(prefix, message, ...args);
+      } else {
+        console.error(prefix, message);
+      }
+    }
+  }
+  var DEBUG_CONFIG;
   var init_utils = __esm({
     "src/shared/utils.js"() {
       init_logger();
+      init_safari_shim();
+      DEBUG_CONFIG = {
+        enabled: true,
+        // Set to false to disable all debug output
+        prefix: "[HOVERBOARD-DEBUG]"
+      };
+    }
+  });
+
+  // src/config/config-manager.js
+  var init_config_manager = __esm({
+    "src/config/config-manager.js"() {
     }
   });
 
@@ -117,6 +359,7 @@
     "src/features/tagging/tag-service.js"() {
       init_config_manager();
       init_utils();
+      debugLog2("[SAFARI-EXT-SHIM-001] tag-service.js: module loaded");
     }
   });
 
@@ -1819,6 +2062,7 @@
       init_tag_service();
       import_fast_xml_parser = __toESM(require_fxp(), 1);
       init_utils();
+      debugLog2("[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded");
     }
   });
 
@@ -2299,9 +2543,9 @@
   };
 
   // src/features/content/message-client.js
+  init_utils();
   var MessageClient = class {
     constructor() {
-      this.pendingMessages = /* @__PURE__ */ new Map();
       this.messageTimeout = 1e4;
       this.retryAttempts = 3;
       this.retryDelay = 1e3;
@@ -2347,33 +2591,19 @@
      * @param {Object} options - Send options
      * @returns {Promise} Promise that resolves with response
      */
-    sendSingleMessage(message, options) {
-      return new Promise((resolve, reject) => {
-        const messageId = this.generateMessageId();
-        const fullMessage = {
-          ...message,
-          messageId,
-          timestamp: Date.now()
-        };
-        const timeoutId = setTimeout(() => {
-          this.pendingMessages.delete(messageId);
-          reject(new Error(`Message timeout after ${options.timeout}ms`));
-        }, options.timeout);
-        this.pendingMessages.set(messageId, {
-          resolve,
-          reject,
-          timeoutId,
-          message: fullMessage
-        });
-        try {
-          chrome.runtime.sendMessage(fullMessage, (response) => {
-            this.handleMessageResponse(messageId, response);
-          });
-        } catch (error) {
-          this.cleanupPendingMessage(messageId);
-          reject(error);
-        }
-      });
+    // [SAFARI-EXT-SHIM-001] Refactor sendSingleMessage to use await directly
+    async sendSingleMessage(message, options) {
+      const messageId = this.generateMessageId();
+      const fullMessage = { ...message, messageId };
+      try {
+        console.log("\u{1F50D} [MessageClient] Sending message:", fullMessage);
+        const response = await safariEnhancements.runtime.sendMessage(fullMessage);
+        console.log("\u{1F50D} [MessageClient] Received response:", response);
+        return response;
+      } catch (error) {
+        console.error("\u{1F50D} [MessageClient] Message send failed:", error);
+        throw error;
+      }
     }
     /**
      * Handle response from background script
@@ -2381,24 +2611,6 @@
      * @param {Object} response - Response object
      */
     handleMessageResponse(messageId, response) {
-      const pendingMessage = this.pendingMessages.get(messageId);
-      if (!pendingMessage) return;
-      const { resolve, reject, timeoutId } = pendingMessage;
-      clearTimeout(timeoutId);
-      this.pendingMessages.delete(messageId);
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      if (!response) {
-        reject(new Error("No response received from background script"));
-        return;
-      }
-      if (response.success) {
-        resolve(response.data);
-      } else {
-        reject(new Error(response.error || "Unknown error from background script"));
-      }
     }
     /**
      * Send message to specific tab
@@ -2406,20 +2618,14 @@
      * @param {Object} message - Message object
      * @returns {Promise} Promise that resolves with response
      */
+    // [SAFARI-EXT-SHIM-001] Refactor sendMessageToTab to use await directly
     async sendMessageToTab(tabId, message) {
-      return new Promise((resolve, reject) => {
-        try {
-          chrome.tabs.sendMessage(tabId, message, (response) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message));
-            } else {
-              resolve(response);
-            }
-          });
-        } catch (error) {
-          reject(error);
-        }
-      });
+      try {
+        const response = await safariEnhancements.tabs.sendMessage(tabId, message);
+        return response;
+      } catch (error) {
+        throw error;
+      }
     }
     /**
      * Broadcast message to all tabs
@@ -2446,9 +2652,9 @@
     getAllTabs() {
       return new Promise((resolve, reject) => {
         try {
-          chrome.tabs.query({}, (tabs) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message));
+          safariEnhancements.tabs.query({}, (tabs) => {
+            if (safariEnhancements.runtime.lastError) {
+              reject(new Error(safariEnhancements.runtime.lastError.message));
             } else {
               resolve(tabs);
             }
@@ -2486,11 +2692,6 @@
      * @param {string} messageId - Message ID to clean up
      */
     cleanupPendingMessage(messageId) {
-      const pendingMessage = this.pendingMessages.get(messageId);
-      if (pendingMessage) {
-        clearTimeout(pendingMessage.timeoutId);
-        this.pendingMessages.delete(messageId);
-      }
     }
     /**
      * Sleep for specified milliseconds
@@ -2518,20 +2719,20 @@
      */
     getExtensionInfo() {
       return {
-        id: chrome.runtime.id,
-        version: chrome.runtime.getManifest().version,
-        url: chrome.runtime.getURL(""),
-        isIncognito: chrome.extension.inIncognitoContext
+        id: safariEnhancements.runtime.id,
+        version: safariEnhancements.runtime.getManifest().version,
+        url: safariEnhancements.runtime.getURL(""),
+        isIncognito: safariEnhancements.extension.inIncognitoContext
       };
     }
     /**
      * Open extension options page
      */
     openOptionsPage() {
-      if (chrome.runtime.openOptionsPage) {
-        chrome.runtime.openOptionsPage();
+      if (safariEnhancements.runtime.openOptionsPage) {
+        safariEnhancements.runtime.openOptionsPage();
       } else {
-        window.open(chrome.runtime.getURL("src/ui/options/options.html"));
+        window.open(safariEnhancements.runtime.getURL("src/ui/options/options.html"));
       }
     }
     /**
@@ -2541,9 +2742,9 @@
     async getCurrentTab() {
       return new Promise((resolve, reject) => {
         try {
-          chrome.tabs.getCurrent((tab) => {
-            if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message));
+          safariEnhancements.tabs.getCurrent((tab) => {
+            if (safariEnhancements.runtime.lastError) {
+              reject(new Error(safariEnhancements.runtime.lastError.message));
             } else {
               resolve(tab);
             }
@@ -2557,11 +2758,6 @@
      * Clean up all pending messages (for when script unloads)
      */
     cleanup() {
-      for (const [messageId, pendingMessage] of this.pendingMessages) {
-        clearTimeout(pendingMessage.timeoutId);
-        pendingMessage.reject(new Error("Content script unloading"));
-      }
-      this.pendingMessages.clear();
     }
     /**
      * Get statistics about message client
@@ -2569,7 +2765,6 @@
      */
     getStats() {
       return {
-        pendingMessages: this.pendingMessages.size,
         messageTimeout: this.messageTimeout,
         retryAttempts: this.retryAttempts,
         retryDelay: this.retryDelay
@@ -2583,7 +2778,8 @@
   });
 
   // src/features/content/overlay-manager.js
-  var debugLog2 = (message, data = null) => {
+  init_utils();
+  var debugLog3 = (message, data = null) => {
     if (window.HOVERBOARD_DEBUG) {
       if (data) {
         console.log(`[Hoverboard Overlay Debug] ${message}`, data);
@@ -2618,19 +2814,30 @@
       this.proximityListener = null;
       this.visibilityControls = null;
       this.visibilityControlsCallback = (settings) => {
-        debugLog2("Visibility settings changed", settings);
+        debugLog3("Visibility settings changed", settings);
         this.applyVisibilitySettings(settings);
       };
       this.messageService = new MessageClient();
-      debugLog2("OverlayManager initialized", { config, transparencyMode: this.transparencyMode });
+      debugLog3("OverlayManager initialized", { config, transparencyMode: this.transparencyMode });
     }
     /**
      * Show overlay with content
      */
     async show(content) {
-      debugLog2("[OverlayManager] show() called", { content });
+      debugLog3("[OverlayManager] show() called", { content });
+      debugLog3("[CHROME-DEBUG-001] OverlayManager.show called", { platform: navigator.userAgent });
+      if (typeof chrome !== "undefined" && chrome.runtime) {
+        debugLog3("[CHROME-DEBUG-001] Detected Chrome runtime in OverlayManager");
+      } else if (typeof safariEnhancements !== "undefined" && safariEnhancements.runtime) {
+        debugLog3("[CHROME-DEBUG-001] Detected browser polyfill runtime in OverlayManager");
+      } else {
+        debugError2("[CHROME-DEBUG-001] No recognized extension runtime detected in OverlayManager");
+      }
+      if (!debugLog3 || !debugError2) {
+        console.error("[CHROME-DEBUG-001] utils.js functions missing in OverlayManager");
+      }
       try {
-        debugLog2("Showing overlay", { content });
+        debugLog3("Showing overlay", { content });
         console.log("\u{1F3A8} [Overlay Debug] Content received:");
         console.log("\u{1F3A8} [Overlay Debug] - Full content:", content);
         console.log("\u{1F3A8} [Overlay Debug] - Bookmark:", content.bookmark);
@@ -2639,12 +2846,13 @@
         console.log("\u{1F3A8} [Overlay Debug] - Tags is array:", Array.isArray(content.bookmark?.tags));
         console.log("\u{1F3A8} [Overlay Debug] - Page title:", content.pageTitle);
         console.log("\u{1F3A8} [Overlay Debug] - Page URL:", content.pageUrl);
+        debugLog3("[OVERLAY-DATA-FIX-001] Using original content data");
         if (!this.overlayElement) {
-          debugLog2("[OverlayManager] Creating new overlay element");
+          debugLog3("[OverlayManager] Creating new overlay element");
           this.createOverlay();
         }
         this.clearContent();
-        debugLog2("Content cleared");
+        debugLog3("Content cleared");
         const mainContainer = this.document.createElement("div");
         mainContainer.style.cssText = "padding: 8px;";
         const currentTagsContainer = this.document.createElement("div");
@@ -2668,8 +2876,15 @@
         currentLabel.textContent = "Current:";
         currentLabel.style.cssText = "padding: 0.2em 0.5em; margin-right: 4px;";
         currentTagsContainer.appendChild(currentLabel);
+        debugLog3("[OVERLAY-DEBUG] Checking for tags in content:", {
+          hasBookmark: !!content.bookmark,
+          bookmarkKeys: content.bookmark ? Object.keys(content.bookmark) : [],
+          tags: content.bookmark?.tags,
+          tagsType: typeof content.bookmark?.tags,
+          tagsIsArray: Array.isArray(content.bookmark?.tags)
+        });
         if (content.bookmark?.tags) {
-          debugLog2("Adding tags", { tags: content.bookmark.tags });
+          debugLog3("Adding tags", { tags: content.bookmark.tags });
           content.bookmark.tags.forEach((tag) => {
             if (this.isValidTag(tag)) {
               const tagElement = this.document.createElement("span");
@@ -2703,11 +2918,11 @@
               };
               currentTagsContainer.appendChild(tagElement);
             } else {
-              debugLog2("[IMMUTABLE-REQ-TAG-001] Invalid tag found:", tag);
+              debugLog3("[IMMUTABLE-REQ-TAG-001] Invalid tag found:", tag);
             }
           });
         } else {
-          debugLog2("No tags found in bookmark data");
+          debugLog3("No tags found in bookmark data");
         }
         const tagInput = this.document.createElement("input");
         tagInput.className = "tag-input";
@@ -2737,14 +2952,14 @@
                 }
                 tagInput.value = "";
                 this.show(content);
-                debugLog2("[IMMUTABLE-REQ-TAG-004] Tag persisted successfully", tagText);
+                debugLog3("[IMMUTABLE-REQ-TAG-004] Tag persisted successfully", tagText);
                 this.showMessage("Tag saved successfully", "success");
               } catch (error) {
                 debugError2("[IMMUTABLE-REQ-TAG-004] Failed to persist tag:", error);
                 this.showMessage("Failed to save tag", "error");
               }
             } else if (tagText && !this.isValidTag(tagText)) {
-              debugLog2("[IMMUTABLE-REQ-TAG-004] Invalid tag rejected:", tagText);
+              debugLog3("[IMMUTABLE-REQ-TAG-004] Invalid tag rejected:", tagText);
               this.showMessage("Invalid tag format", "error");
             }
           }
@@ -2788,7 +3003,7 @@
                         content.bookmark.tags.push(tag);
                       }
                       this.show(content);
-                      debugLog2("[TAG-SYNC-OVERLAY-001] Tag persisted from recent", tag);
+                      debugLog3("[TAG-SYNC-OVERLAY-001] Tag persisted from recent", tag);
                       this.showMessage("Tag saved successfully", "success");
                     } catch (error) {
                       debugError2("[TAG-SYNC-OVERLAY-001] Failed to persist tag from recent:", error);
@@ -2830,7 +3045,7 @@
                       content.bookmark.tags.push(tag);
                     }
                     this.show(content);
-                    debugLog2("[TAG-SYNC-OVERLAY-001] Fallback tag persisted", tag);
+                    debugLog3("[TAG-SYNC-OVERLAY-001] Fallback tag persisted", tag);
                     this.showMessage("Tag saved successfully", "success");
                   } catch (error2) {
                     debugError2("[TAG-SYNC-OVERLAY-001] Failed to persist fallback tag:", error2);
@@ -2845,15 +3060,15 @@
         let visibilityControlsContainer = null;
         if (!this.visibilityControls) {
           this.visibilityControls = new VisibilityControls(this.document, this.visibilityControlsCallback);
-          debugLog2("VisibilityControls component initialized");
+          debugLog3("VisibilityControls component initialized");
         }
         visibilityControlsContainer = this.visibilityControls.createControls();
-        debugLog2("VisibilityControls UI created");
+        debugLog3("VisibilityControls UI created");
         this.injectCSS();
-        debugLog2("CSS re-injected with VisibilityControls styles");
+        debugLog3("CSS re-injected with VisibilityControls styles");
         const initialSettings = this.visibilityControls.getSettings();
         this.applyVisibilitySettings(initialSettings);
-        debugLog2("Initial visibility settings applied", initialSettings);
+        debugLog3("Initial visibility settings applied", initialSettings);
         const actionsContainer = this.document.createElement("div");
         actionsContainer.className = "actions";
         actionsContainer.style.cssText = `
@@ -2885,14 +3100,12 @@
               content.bookmark.shared = newSharedStatus;
               this.show(content);
               this.showMessage(`Bookmark is now ${isPrivate2 ? "public" : "private"}`, "success");
-              debugLog2("[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background", updatedBookmark);
-              chrome.runtime.sendMessage({
+              debugLog3("[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background", updatedBookmark);
+              await safariEnhancements.runtime.sendMessage({
                 type: "BOOKMARK_UPDATED",
                 data: updatedBookmark
-              }, (response) => {
-                debugLog2("[TOGGLE-SYNC-OVERLAY-001] BOOKMARK_UPDATED response", response);
               });
-              debugLog2("[TOGGLE-SYNC-OVERLAY-001] Privacy toggled", content.bookmark.shared);
+              debugLog3("[TOGGLE-SYNC-OVERLAY-001] Privacy toggled", content.bookmark.shared);
             } catch (error) {
               debugError2("[TOGGLE-SYNC-OVERLAY-001] Failed to toggle privacy:", error);
               this.showMessage("Failed to update privacy setting", "error");
@@ -2925,14 +3138,12 @@
               this.show(content);
               const statusMessage = newToReadStatus === "yes" ? "Added to read later" : "Removed from read later";
               this.showMessage(statusMessage, "success");
-              debugLog2("[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background", updatedBookmark);
-              chrome.runtime.sendMessage({
+              debugLog3("[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background", updatedBookmark);
+              await safariEnhancements.runtime.sendMessage({
                 type: "BOOKMARK_UPDATED",
                 data: updatedBookmark
-              }, (response) => {
-                debugLog2("[TOGGLE-SYNC-OVERLAY-001] BOOKMARK_UPDATED response", response);
               });
-              debugLog2("[TOGGLE-SYNC-OVERLAY-001] Read status toggled", content.bookmark.toread);
+              debugLog3("[TOGGLE-SYNC-OVERLAY-001] Read status toggled", content.bookmark.toread);
             } catch (error) {
               debugError2("[TOGGLE-SYNC-OVERLAY-001] Failed to toggle read later status:", error);
               this.showMessage("Failed to update read later status", "error");
@@ -2956,7 +3167,7 @@
         </div>
         <div class="text-muted">${content.bookmark?.url || content.pageUrl || ""}</div>
       `;
-        debugLog2("Overlay structure created with enhanced styling");
+        debugLog3("Overlay structure created with enhanced styling");
         this.addTabSearchSection(mainContainer);
         mainContainer.appendChild(currentTagsContainer);
         mainContainer.appendChild(recentContainer);
@@ -2967,14 +3178,14 @@
         mainContainer.appendChild(pageInfo);
         this.overlayElement.appendChild(mainContainer);
         this.currentContent = content;
-        debugLog2("Overlay structure assembled");
+        debugLog3("Overlay structure assembled");
         this.positionOverlay();
-        debugLog2("[OverlayManager] Setting overlay display to block");
+        debugLog3("[OverlayManager] Setting overlay display to block");
         this.overlayElement.style.display = "block";
-        debugLog2("[OverlayManager] Setting overlay opacity to 1");
+        debugLog3("[OverlayManager] Setting overlay opacity to 1");
         this.overlayElement.style.opacity = "1";
         this.isVisible = true;
-        debugLog2("Overlay positioned and displayed");
+        debugLog3("Overlay positioned and displayed");
         console.log("\u{1F3A8} [Overlay Debug] Final overlay visibility check:", {
           isVisible: this.isVisible,
           elementExists: !!this.overlayElement,
@@ -2984,35 +3195,35 @@
         });
       } catch (error) {
         this.logger.error("Error showing overlay:", error);
-        debugLog2("Error showing overlay", { error });
+        debugLog3("Error showing overlay", { error });
       }
     }
     /**
      * Hide overlay
      */
     hide() {
-      debugLog2("[OverlayManager] hide() called", { stack: new Error().stack });
+      debugLog3("[OverlayManager] hide() called", { stack: new Error().stack });
       if (!this.isVisible || !this.overlayElement) {
-        debugLog2("Hide called but overlay not visible");
+        debugLog3("Hide called but overlay not visible");
         return;
       }
       try {
-        debugLog2("Hiding overlay");
+        debugLog3("Hiding overlay");
         this.addHideAnimation(() => {
           if (this.overlayElement) {
-            debugLog2("[OverlayManager] Setting overlay display to none");
+            debugLog3("[OverlayManager] Setting overlay display to none");
             this.overlayElement.style.display = "none";
-            debugLog2("[OverlayManager] Setting overlay opacity to 0");
+            debugLog3("[OverlayManager] Setting overlay opacity to 0");
             this.overlayElement.style.opacity = "0";
             this.clearContent();
           }
           this.isVisible = false;
           this.currentContent = null;
-          debugLog2("Overlay hidden successfully");
+          debugLog3("Overlay hidden successfully");
         });
       } catch (error) {
         this.logger.error("Error hiding overlay:", error);
-        debugLog2("Error hiding overlay", { error });
+        debugLog3("Error hiding overlay", { error });
       }
     }
     /**
@@ -3048,7 +3259,7 @@
             messageElement.parentNode.removeChild(messageElement);
           }
         }, 3e3);
-        debugLog2("[IMMUTABLE-REQ-TAG-004] Message displayed:", { message, type });
+        debugLog3("[IMMUTABLE-REQ-TAG-004] Message displayed:", { message, type });
       } catch (error) {
         debugError2("[IMMUTABLE-REQ-TAG-004] Failed to show message:", error);
       }
@@ -3058,11 +3269,15 @@
      */
     async refreshOverlayContent() {
       try {
+        const refreshData = {
+          url: window.location.href,
+          title: document.title,
+          tabId: this.content?.tabId || null
+        };
+        debugLog3("[OVERLAY-DEBUG] Refresh request data:", refreshData);
         const response = await this.messageService.sendMessage({
           type: "getCurrentBookmark",
-          data: {
-            url: window.location.href
-          }
+          data: refreshData
         });
         if (response && response.success && response.data) {
           const updatedContent = {
@@ -3070,12 +3285,20 @@
             pageTitle: document.title,
             pageUrl: window.location.href
           };
-          this.show(updatedContent);
-          debugLog2("[IMMUTABLE-REQ-TAG-004] Overlay refreshed with updated content");
+          debugLog3("[IMMUTABLE-REQ-TAG-004] Overlay content refreshed with updated data");
+          debugLog3("[OVERLAY-DEBUG] Refreshed bookmark data:", {
+            responseData: response.data,
+            responseDataKeys: Object.keys(response.data),
+            hasTags: !!response.data.tags,
+            tagsValue: response.data.tags,
+            tagsType: typeof response.data.tags
+          });
+          return updatedContent;
         }
       } catch (error) {
         debugError2("[IMMUTABLE-REQ-TAG-004] Failed to refresh overlay content:", error);
       }
+      return null;
     }
     /**
      * [TAG-SYNC-OVERLAY-001] - Load recent tags from shared memory for overlay
@@ -3084,7 +3307,7 @@
      */
     async loadRecentTagsForOverlay(content) {
       try {
-        debugLog2("[TAG-SYNC-OVERLAY-001] Loading recent tags for overlay");
+        debugLog3("[TAG-SYNC-OVERLAY-001] Loading recent tags for overlay");
         const response = await this.messageService.sendMessage({
           type: "getRecentBookmarks",
           data: {
@@ -3092,7 +3315,7 @@
             senderUrl: content.bookmark?.url || window.location.href
           }
         });
-        debugLog2("[TAG-SYNC-OVERLAY-001] Recent tags response:", response);
+        debugLog3("[TAG-SYNC-OVERLAY-001] Recent tags response:", response);
         if (response && response.recentTags) {
           const recentTagNames = response.recentTags.map((tag) => {
             if (typeof tag === "string") {
@@ -3103,10 +3326,10 @@
               return String(tag);
             }
           });
-          debugLog2("[TAG-SYNC-OVERLAY-001] Extracted recent tag names:", recentTagNames);
+          debugLog3("[TAG-SYNC-OVERLAY-001] Extracted recent tag names:", recentTagNames);
           return recentTagNames;
         }
-        debugLog2("[TAG-SYNC-OVERLAY-001] No recent tags found");
+        debugLog3("[TAG-SYNC-OVERLAY-001] No recent tags found");
         return [];
       } catch (error) {
         debugError2("[TAG-SYNC-OVERLAY-001] Failed to load recent tags:", error);
@@ -3137,7 +3360,7 @@
       if (this.visibilityControls) {
         const initialSettings = this.visibilityControls.getSettings();
         this.applyVisibilitySettings(initialSettings);
-        debugLog2("Initial theme applied in createOverlay", initialSettings);
+        debugLog3("Initial theme applied in createOverlay", initialSettings);
       }
     }
     /**
@@ -3176,7 +3399,7 @@
       this.overlayElement.style.left = "auto";
       this.overlayElement.style.bottom = "auto";
       this.overlayElement.style.zIndex = "9998";
-      debugLog2("Overlay positioned in top-right corner");
+      debugLog3("Overlay positioned in top-right corner");
     }
     /**
      * Calculate optimal position for overlay
@@ -3297,7 +3520,7 @@
       this.overlayElement.style.maxHeight = "200px";
       this.overlayElement.style.borderRadius = "0";
       this.overlayElement.style.zIndex = "999999";
-      debugLog2("Applied bottom-fixed positioning");
+      debugLog3("Applied bottom-fixed positioning");
     }
     /**
      * 🔺 UI-005: Transparency manager - 🔧 Opacity and positioning control
@@ -3320,7 +3543,7 @@
           this.overlayElement.style.backdropFilter = `blur(${blurAmount}px)`;
           this.overlayElement.style.border = "1px solid rgba(255, 255, 255, 0.2)";
           this.setupTransparencyInteractions();
-          debugLog2("Applied nearly-transparent mode with opacity:", normalOpacity);
+          debugLog3("Applied nearly-transparent mode with opacity:", normalOpacity);
           break;
         case "fully-transparent":
           this.overlayElement.classList.add("hoverboard-overlay-invisible");
@@ -3328,13 +3551,13 @@
           this.overlayElement.style.backdropFilter = `blur(${Math.max(1, blurAmount - 1)}px)`;
           this.overlayElement.style.border = "1px solid rgba(255, 255, 255, 0.1)";
           this.setupTransparencyInteractions();
-          debugLog2("Applied fully-transparent mode with opacity:", normalOpacity * 0.5);
+          debugLog3("Applied fully-transparent mode with opacity:", normalOpacity * 0.5);
           break;
         default:
           this.overlayElement.style.background = "white";
           this.overlayElement.style.backdropFilter = "none";
           this.overlayElement.style.border = "1px solid #ccc";
-          debugLog2("Using default opaque mode");
+          debugLog3("Using default opaque mode");
           break;
       }
       if (this.positionMode === "bottom-fixed") {
@@ -3361,7 +3584,7 @@
         }
       };
       this.document.addEventListener("mousemove", this.proximityListener);
-      debugLog2("Adaptive visibility enabled");
+      debugLog3("Adaptive visibility enabled");
     }
     /**
      * Legacy transparency interactions - superseded by UI-VIS-001/002
@@ -3381,7 +3604,7 @@
         } else if (this.transparencyMode === "fully-transparent") {
           this.overlayElement.style.background = `rgba(255, 255, 255, ${hoverOpacity * 0.5})`;
         }
-        debugLog2("Overlay hover - increasing visibility to:", hoverOpacity);
+        debugLog3("Overlay hover - increasing visibility to:", hoverOpacity);
       });
       this.overlayElement.addEventListener("mouseleave", () => {
         if (this.transparencyMode === "nearly-transparent") {
@@ -3389,7 +3612,7 @@
         } else if (this.transparencyMode === "fully-transparent") {
           this.overlayElement.style.background = `rgba(255, 255, 255, ${normalOpacity * 0.5})`;
         }
-        debugLog2("Overlay leave - resetting visibility to:", normalOpacity);
+        debugLog3("Overlay leave - resetting visibility to:", normalOpacity);
       });
       this.overlayElement.addEventListener("focusin", () => {
         if (this.transparencyMode === "nearly-transparent") {
@@ -3397,7 +3620,7 @@
         } else if (this.transparencyMode === "fully-transparent") {
           this.overlayElement.style.background = `rgba(255, 255, 255, ${focusOpacity * 0.5})`;
         }
-        debugLog2("Overlay focus - enhancing visibility for accessibility to:", focusOpacity);
+        debugLog3("Overlay focus - enhancing visibility for accessibility to:", focusOpacity);
       });
       this.overlayElement.addEventListener("focusout", () => {
         if (this.transparencyMode === "nearly-transparent") {
@@ -3405,7 +3628,7 @@
         } else if (this.transparencyMode === "fully-transparent") {
           this.overlayElement.style.background = `rgba(255, 255, 255, ${normalOpacity * 0.5})`;
         }
-        debugLog2("Overlay blur - resetting focus visibility to:", normalOpacity);
+        debugLog3("Overlay blur - resetting focus visibility to:", normalOpacity);
       });
     }
     /**
@@ -3522,7 +3745,7 @@
       }
       style.textContent = cssContent;
       this.document.head.appendChild(style);
-      debugLog2("CSS injected", { hasVisibilityControls: !!this.visibilityControls });
+      debugLog3("CSS injected", { hasVisibilityControls: !!this.visibilityControls });
     }
     /**
      * [TAB-SEARCH-UI] Add tab search section to overlay
@@ -3565,7 +3788,7 @@
      */
     async handleTabSearch(searchText) {
       try {
-        const response = await chrome.runtime.sendMessage({
+        const response = await safariEnhancements.runtime.sendMessage({
           type: "searchTabs",
           data: { searchText }
         });
@@ -4228,7 +4451,7 @@
      * Enhanced with comprehensive theme integration
      */
     applyVisibilitySettings(settings) {
-      debugLog2("Applying comprehensive visibility settings", settings);
+      debugLog3("Applying comprehensive visibility settings", settings);
       if (this.overlayElement) {
         this.overlayElement.classList.remove(
           "hoverboard-theme-light-on-dark",
@@ -4251,14 +4474,14 @@
             this.overlayElement.style.background = `rgba(255, 255, 255, ${opacity})`;
           }
           this.overlayElement.style.backdropFilter = "blur(2px)";
-          debugLog2(`Applied transparency: ${settings.textTheme} with ${settings.backgroundOpacity}% opacity (${opacityLevel} level)`);
+          debugLog3(`Applied transparency: ${settings.textTheme} with ${settings.backgroundOpacity}% opacity (${opacityLevel} level)`);
         } else {
           this.overlayElement.classList.add("solid-background");
           this.overlayElement.removeAttribute("data-opacity-level");
           this.overlayElement.style.removeProperty("--theme-opacity");
           this.overlayElement.style.background = "";
           this.overlayElement.style.backdropFilter = "none";
-          debugLog2(`Applied solid theme: ${settings.textTheme}`);
+          debugLog3(`Applied solid theme: ${settings.textTheme}`);
         }
         this.overlayElement.offsetHeight;
       }
@@ -4277,7 +4500,7 @@
       if (newConfig.overlayAdaptiveVisibility !== void 0) {
         this.adaptiveVisibility = newConfig.overlayAdaptiveVisibility;
       }
-      debugLog2("Configuration updated", {
+      debugLog3("Configuration updated", {
         transparencyMode: this.transparencyMode,
         positionMode: this.positionMode,
         adaptiveVisibility: this.adaptiveVisibility,
@@ -4753,16 +4976,8 @@
   };
 
   // src/features/content/content-main.js
+  init_utils();
   window.HOVERBOARD_DEBUG = true;
-  var debugLog4 = (message, data = null) => {
-    if (window.HOVERBOARD_DEBUG) {
-      if (data) {
-        console.log(`[Hoverboard Debug] ${message}`, data);
-      } else {
-        console.log(`[Hoverboard Debug] ${message}`);
-      }
-    }
-  };
   var HoverboardContentScript = class {
     constructor() {
       this.tabId = null;
@@ -4794,36 +5009,36 @@
     }
     async init() {
       try {
-        debugLog4("Initializing content script");
+        debugLog2("CONTENT-SCRIPT", "Initializing content script");
         await this.domUtils.waitForDOM();
-        debugLog4("DOM ready");
+        debugLog2("CONTENT-SCRIPT", "DOM ready");
         this.setupMessageListeners();
-        debugLog4("Message listeners set up");
+        debugLog2("CONTENT-SCRIPT", "Message listeners set up");
         await this.initializeTabId();
-        debugLog4("Tab ID initialized:", this.tabId);
+        debugLog2("CONTENT-SCRIPT", "Tab ID initialized:", this.tabId);
         await this.loadConfiguration();
-        debugLog4("Options loaded:", this.config);
+        debugLog2("CONTENT-SCRIPT", "Options loaded:", this.config);
         this.overlayManager.config = { ...this.overlayManager.config, ...this.config };
         this.overlayManager.transparencyMode = this.config.overlayTransparencyMode || "nearly-transparent";
         this.overlayManager.positionMode = this.config.overlayPositionMode || "bottom-fixed";
         this.overlayManager.adaptiveVisibility = this.config.overlayAdaptiveVisibility || true;
-        debugLog4("Overlay manager configured with transparency settings", {
+        debugLog2("CONTENT-SCRIPT", "Overlay manager configured with transparency settings", {
           transparencyMode: this.overlayManager.transparencyMode,
           positionMode: this.overlayManager.positionMode,
           adaptiveVisibility: this.overlayManager.adaptiveVisibility
         });
         await this.notifyReady();
-        debugLog4("Ready notification sent");
+        debugLog2("CONTENT-SCRIPT", "Ready notification sent");
         await this.loadCurrentPageData();
-        debugLog4("Current page data loaded:", this.currentBookmark);
+        debugLog2("CONTENT-SCRIPT", "Current page data loaded:", this.currentBookmark);
         this.isInitialized = true;
-        debugLog4("Content script initialization complete");
+        debugLog2("CONTENT-SCRIPT", "Content script initialization complete");
       } catch (error) {
         console.error("Hoverboard: Failed to initialize content script:", error);
       }
     }
     setupMessageListeners() {
-      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      safariEnhancements.runtime.onMessage.addListener((message, sender, sendResponse) => {
         this.handleMessage(message, sender, sendResponse);
         return true;
       });
@@ -4900,7 +5115,8 @@
           type: MESSAGE_TYPES.GET_TAB_ID,
           data: { url: this.pageUrl }
         });
-        this.tabId = response.tabId;
+        const actualResponse = response.success ? response.data : response;
+        this.tabId = actualResponse.tabId;
         console.log("Content script tab ID:", this.tabId);
       } catch (error) {
         console.error("Failed to get tab ID:", error);
@@ -4911,8 +5127,9 @@
         const response = await this.messageClient.sendMessage({
           type: MESSAGE_TYPES.GET_OPTIONS
         });
-        if (response) {
-          this.config = { ...this.getDefaultConfig(), ...response };
+        const actualResponse = response.success ? response.data : response;
+        if (actualResponse) {
+          this.config = { ...this.getDefaultConfig(), ...actualResponse };
           console.log("\u{1F4CB} Configuration loaded:", this.config);
         } else {
           this.config = this.getDefaultConfig();
@@ -4954,8 +5171,8 @@
     }
     async loadCurrentPageData() {
       try {
-        debugLog4("Loading current page data");
-        debugLog4("Request data:", {
+        debugLog2("CONTENT-SCRIPT", "Loading current page data");
+        debugLog2("CONTENT-SCRIPT", "Request data:", {
           url: this.pageUrl,
           title: this.pageTitle,
           tabId: this.tabId
@@ -4968,22 +5185,26 @@
             tabId: this.tabId
           }
         });
-        debugLog4("Received response:", response);
-        if (response.blocked) {
-          debugLog4("Site is blocked from processing");
+        debugLog2("CONTENT-SCRIPT", "Received response:", response);
+        const actualResponse = response.success ? response.data : response;
+        if (actualResponse.blocked) {
+          debugLog2("CONTENT-SCRIPT", "Site is blocked from processing");
           return;
         }
-        this.currentBookmark = response;
-        debugLog4("Current bookmark set:", this.currentBookmark);
+        console.log("\u{1F50D} [Debug] Response structure:", response);
+        console.log("\u{1F50D} [Debug] Actual response:", actualResponse);
+        console.log("\u{1F50D} [Debug] Actual response type:", typeof actualResponse);
+        this.currentBookmark = actualResponse.data || actualResponse;
+        debugLog2("CONTENT-SCRIPT", "Current bookmark set:", this.currentBookmark);
         const options = await this.getOptions();
-        debugLog4("Options for page load:", options);
+        debugLog2("CONTENT-SCRIPT", "Options for page load:", options);
         if (options.showHoverOnPageLoad) {
-          debugLog4("Showing hover on page load");
+          debugLog2("CONTENT-SCRIPT", "Showing hover on page load");
           await this.showHoverWithDelay(options);
         }
       } catch (error) {
         console.error("Failed to load current page data:", error);
-        debugLog4("Error loading page data:", error);
+        debugLog2("CONTENT-SCRIPT", "Error loading page data:", error);
       }
     }
     async showHoverWithDelay(options) {
@@ -5020,17 +5241,28 @@
     }
     async showHover(userTriggered = false) {
       try {
-        debugLog4("Showing hover", { userTriggered });
+        debugLog2("CONTENT-SCRIPT", "[CHROME-DEBUG-001] showHover called", { userTriggered, platform: navigator.userAgent });
+        if (typeof chrome !== "undefined" && chrome.runtime) {
+          debugLog2("CONTENT-SCRIPT", "[CHROME-DEBUG-001] Detected Chrome runtime");
+        } else if (typeof safariEnhancements !== "undefined" && safariEnhancements.runtime) {
+          debugLog2("CONTENT-SCRIPT", "[CHROME-DEBUG-001] Detected browser polyfill runtime");
+        } else {
+          debugError("CONTENT-SCRIPT", "[CHROME-DEBUG-001] No recognized extension runtime detected");
+        }
+        if (!debugLog2 || !debugError) {
+          console.error("[CHROME-DEBUG-001] utils.js functions missing");
+        }
+        debugLog2("CONTENT-SCRIPT", "Showing hover", { userTriggered });
         if (userTriggered) {
-          debugLog4("Refreshing bookmark data for user-triggered display");
+          debugLog2("CONTENT-SCRIPT", "Refreshing bookmark data for user-triggered display");
           await this.loadCurrentPageData();
         }
         if (!this.currentBookmark) {
-          debugLog4("No bookmark data available");
+          debugLog2("CONTENT-SCRIPT", "No bookmark data available");
           console.warn("No bookmark data available for hover display");
           return;
         }
-        debugLog4("Current bookmark data:", this.currentBookmark);
+        debugLog2("CONTENT-SCRIPT", "Current bookmark data:", this.currentBookmark);
         console.log("\u{1F50D} [Debug] Bookmark data structure:");
         console.log("\u{1F50D} [Debug] - URL:", this.currentBookmark.url);
         console.log("\u{1F50D} [Debug] - Description:", this.currentBookmark.description);
@@ -5048,10 +5280,10 @@
           tabId: this.tabId,
           userTriggered
         });
-        debugLog4("Overlay display request sent");
+        debugLog2("CONTENT-SCRIPT", "Overlay display request sent");
       } catch (error) {
         console.error("Failed to show hover:", error);
-        debugLog4("Error showing hover:", error);
+        debugLog2("CONTENT-SCRIPT", "Error showing hover:", error);
       }
     }
     async refreshData() {
@@ -5197,7 +5429,7 @@
         const description = overlay.querySelector(".hoverboard-description-input").value;
         const tags = overlay.querySelector(".hoverboard-tags-input").value;
         const isPrivate = overlay.querySelector(".hoverboard-private-checkbox").checked;
-        const response = await chrome.runtime.sendMessage({
+        const response = await safariEnhancements.runtime.sendMessage({
           type: "SAVE_BOOKMARK",
           data: { url, title, description, tags, private: isPrivate }
         });
@@ -5216,7 +5448,8 @@
         const response = await this.messageClient.sendMessage({
           type: MESSAGE_TYPES.GET_OPTIONS
         });
-        return response;
+        const actualResponse = response.success ? response.data : response;
+        return actualResponse;
       } catch (error) {
         console.error("Failed to get options:", error);
         return {};
@@ -5246,9 +5479,9 @@
           };
           this.overlayManager.show(updatedContent);
         }
-        debugLog4("[TOGGLE-SYNC-CONTENT-001] Bookmark updated from external source", bookmarkData);
+        debugLog2("CONTENT-SCRIPT", "[TOGGLE-SYNC-CONTENT-001] Bookmark updated from external source", bookmarkData);
       } catch (error) {
-        debugError("[TOGGLE-SYNC-CONTENT-001] Failed to handle bookmark update:", error);
+        debugError("CONTENT-SCRIPT", "[TOGGLE-SYNC-CONTENT-001] Failed to handle bookmark update:", error);
       }
     }
     // [TAG-SYNC-CONTENT-001] - Handle tag updates from popup or other sources
@@ -5268,10 +5501,10 @@
             };
             this.overlayManager.show(updatedContent);
           }
-          debugLog4("[TAG-SYNC-CONTENT-001] Overlay updated with new tags", tagUpdateData.tags);
+          debugLog2("CONTENT-SCRIPT", "[TAG-SYNC-CONTENT-001] Overlay updated with new tags", tagUpdateData.tags);
         }
       } catch (error) {
-        debugError("[TAG-SYNC-CONTENT-001] Failed to handle tag update:", error);
+        debugError("CONTENT-SCRIPT", "[TAG-SYNC-CONTENT-001] Failed to handle tag update:", error);
       }
     }
     handleUpdateOverlayTransparency(config) {

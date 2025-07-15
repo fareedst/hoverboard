@@ -76,6 +76,13 @@ Comprehensive documentation is available in the `/docs` folder:
 
 **📖 [Complete Documentation Index](docs/README.md)** - Full documentation structure and navigation
 
+## 📋 Recent Updates
+
+- **2025-07-15**: Overlay data display fix implementation - Fixed overlay bookmark data display to match popup and badge
+- **2025-07-15**: Safari extension architecture implementation - Added Safari extension support and cross-platform compatibility
+- **2025-07-14**: Toggle synchronization feature implementation - Synchronized toggle states between popup and overlay
+- **2025-07-14**: Tag synchronization architectural decisions - Implemented tag management across UI components
+
 ## 🤝 Contributing
 
 1. Follow the coding standards in `.eslintrc.yml`

@@ -3,8 +3,6 @@
  * Handles dark mode, theme switching, CSS variables, and system preferences
  */
 
-import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
-
 export class ThemeManager {
   constructor () {
     this.currentTheme = 'auto'
@@ -129,9 +127,9 @@ export class ThemeManager {
    */
   async loadThemePreference () {
     return new Promise((resolve) => {
-      browser.storage.local.get([this.storageKey], (result) => {
-        if (browser.runtime.lastError) {
-          console.warn('Failed to load theme preference:', browser.runtime.lastError)
+      chrome.storage.local.get([this.storageKey], (result) => {
+        if (chrome.runtime.lastError) {
+          console.warn('Failed to load theme preference:', chrome.runtime.lastError)
           resolve()
           return
         }
@@ -151,11 +149,11 @@ export class ThemeManager {
    */
   async saveThemePreference () {
     return new Promise((resolve) => {
-      browser.storage.local.set({
+      chrome.storage.local.set({
         [this.storageKey]: this.currentTheme
       }, () => {
-        if (browser.runtime.lastError) {
-          console.warn('Failed to save theme preference:', browser.runtime.lastError)
+        if (chrome.runtime.lastError) {
+          console.warn('Failed to save theme preference:', chrome.runtime.lastError)
         }
         resolve()
       })

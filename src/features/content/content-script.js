@@ -9,7 +9,6 @@ import { ContentInjector } from './content-injector.js'
 import { MessageService } from '../../core/message-service.js'
 import { ConfigService } from '../../config/config-service.js'
 import { Logger } from '../../shared/logger.js'
-import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
 class ContentScript {
   constructor () {

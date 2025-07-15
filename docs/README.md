@@ -27,6 +27,7 @@ This directory contains comprehensive documentation for the Hoverboard browser e
 
 ### 🔧 **Troubleshooting**
 - **[Troubleshooting Guide](troubleshooting/README.md)** - Problem resolution and fixes
+- **[Messaging Fixes Summary](troubleshooting/messaging-fixes-2025-07-15.md)** - Critical messaging fixes for Chrome/Safari compatibility
 
 ### 📚 **Reference Materials**
 - **[Reference Documentation](reference/README.md)** - Context, requirements, and specifications
@@ -87,6 +88,12 @@ BEFORE (Legacy)                    AFTER (Modern)
 | **Phase 3** | UI Migration | Week 4-5 | 🔶 MEDIUM | Content scripts, popup interface |
 | **Phase 4** | Testing & Polish | Week 6 | 🔻 LOW | Testing infrastructure, deployment |
 
+### ✅ **Recent Critical Fixes (2025-07-15)**
+- **Messaging System**: Fixed "message port closed" errors between content scripts and service worker
+- **Cross-Browser Compatibility**: Enhanced Safari shim with proper Promise-based message handling
+- **Service Worker Architecture**: Implemented native Chrome API usage for reliable async responses
+- **Debugging**: Added comprehensive logging for troubleshooting messaging issues
+
 ## 📋 **Getting Started Checklist**
 
 ### 🚀 **Before You Begin**
@@ -109,7 +116,7 @@ BEFORE (Legacy)                    AFTER (Modern)
 1. **Feature Parity**: All existing functionality must be preserved
 2. **User Data Safety**: No loss of user settings or bookmarks
 3. **Performance**: No degradation in extension responsiveness
-4. **Cross-Browser**: Maintain Chrome, Firefox, and Edge support
+4. **Cross-Browser**: Maintain Chrome, Firefox, Edge support, and enable future Safari support via a unified browser API abstraction ([SAFARI-EXT-SHIM-001]).
 5. **API Compatibility**: Pinboard integration must remain functional
 
 ### 🔺 **High Priority Goals**
@@ -142,7 +149,7 @@ BEFORE (Legacy)                    AFTER (Modern)
 2. **Impact Assessment** - Identify affected components
 3. **Implementation** - Follow coding standards and patterns
 4. **Testing** - Write comprehensive tests
-5. **Documentation** - Update relevant documentation
+5. **Documentation** - Update relevant documentation and cross-reference semantic tokens (e.g., [SAFARI-EXT-SHIM-001]) for new cross-browser features and debug logging.
 6. **Review** - Code review and validation
 7. **Integration** - Merge and deploy
 

@@ -9,7 +9,8 @@ import { MessageHandler } from './message-handler.js'
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
-import { browser } from '../shared/utils'; // [SAFARI-EXT-SHIM-001]
+// [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
+import { browser } from '../shared/utils' // [SAFARI-EXT-SHIM-001]
 
 /**
  * [IMMUTABLE-REQ-TAG-003] - Recent Tags Memory Manager
@@ -135,28 +136,42 @@ class HoverboardServiceWorker {
   // MV3-001: Set up all V3 service worker event listeners
   setupEventListeners () {
     // MV3-001: Handle extension installation and updates
-    browser.runtime.onInstalled.addListener((details) => {
+    chrome.runtime.onInstalled.addListener((details) => {
       this.handleInstall(details)
     })
 
     // MV3-001: Handle messages from content scripts and popup
-    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      this.handleMessage(message, sender, sendResponse)
-      return true // Keep message channel open for async responses
+    // Use Chrome API directly for message handling to avoid Safari shim interference
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      console.log('[SERVICE-WORKER] Received message:', message)
+
+      // Handle async response properly for Manifest V3
+      this.handleMessage(message, sender)
+        .then(response => {
+          console.log('[SERVICE-WORKER] Sending response:', response)
+          sendResponse(response)
+        })
+        .catch(error => {
+          console.error('[SERVICE-WORKER] Message error:', error)
+          sendResponse({ success: false, error: error.message })
+        })
+
+      // Return true to indicate we will respond asynchronously
+      return true
     })
 
     // MV3-001: Handle tab activation for badge updates
-    browser.tabs.onActivated.addListener((activeInfo) => {
+    chrome.tabs.onActivated.addListener((activeInfo) => {
       this.handleTabActivated(activeInfo)
     })
 
     // MV3-001: Handle tab updates for badge management
-    browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       this.handleTabUpdated(tabId, changeInfo, tab)
     })
 
     // [IMMUTABLE-REQ-TAG-003] - Handle extension reload to clear shared memory
-    browser.runtime.onStartup.addListener(() => {
+    chrome.runtime.onStartup.addListener(() => {
       this.handleExtensionStartup()
     })
   }
@@ -180,19 +195,21 @@ class HoverboardServiceWorker {
     }
   }
 
-  async handleMessage (message, sender, sendResponse) {
+  async handleMessage (message, sender) {
     try {
+      console.log('[SERVICE-WORKER] Processing message:', message.type)
       const response = await this.messageHandler.processMessage(message, sender)
-      sendResponse({ success: true, data: response })
+      console.log('[SERVICE-WORKER] Message processed successfully:', response)
+      return { success: true, data: response }
     } catch (error) {
       console.error('Service worker message error:', error)
-      sendResponse({ success: false, error: error.message })
+      return { success: false, error: error.message }
     }
   }
 
   async handleTabActivated (activeInfo) {
     try {
-      const tab = await browser.tabs.get(activeInfo.tabId)
+      const tab = await chrome.tabs.get(activeInfo.tabId)
       if (tab.url) {
         await this.updateBadgeForTab(tab)
       }

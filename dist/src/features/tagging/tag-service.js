@@ -6,6 +6,8 @@
 import { ConfigManager } from '../../config/config-manager.js'
 import { debugLog, debugError } from '../../shared/utils.js'
 
+debugLog('[SAFARI-EXT-SHIM-001] tag-service.js: module loaded');
+
 export class TagService {
   constructor (pinboardService = null) {
     // Only require PinboardService if not injected (avoids circular import)

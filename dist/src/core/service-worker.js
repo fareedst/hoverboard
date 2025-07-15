@@ -642,6 +642,221 @@ var init_logger = __esm({
   }
 });
 
+// src/shared/safari-shim.js
+function initializeBrowserAPI() {
+  if (typeof chrome !== "undefined") {
+    browser = chrome;
+    if (logger && logger.debug) {
+      logger.debug("[SAFARI-EXT-SHIM-001] Using Chrome API");
+    }
+    return;
+  }
+  try {
+    if (typeof window !== "undefined" && window.browser) {
+      browser = window.browser;
+      if (logger && logger.debug) {
+        logger.debug("[SAFARI-EXT-SHIM-001] Using webextension-polyfill");
+      }
+      return;
+    }
+  } catch (polyfillError) {
+  }
+  browser = createMinimalBrowserAPI();
+  if (logger && logger.warn) {
+    logger.warn("[SAFARI-EXT-SHIM-001] No browser API available, using minimal mock");
+  }
+}
+function createMinimalBrowserAPI() {
+  return {
+    runtime: {
+      id: "mock-extension-id",
+      getManifest: () => ({ version: "1.0.0" }),
+      sendMessage: () => Promise.resolve(),
+      onMessage: { addListener: () => {
+      } },
+      onInstalled: { addListener: () => {
+      } }
+    },
+    storage: {
+      sync: {
+        get: () => Promise.resolve({}),
+        set: () => Promise.resolve(),
+        remove: () => Promise.resolve()
+      },
+      local: {
+        get: () => Promise.resolve({}),
+        set: () => Promise.resolve(),
+        remove: () => Promise.resolve()
+      }
+    },
+    tabs: {
+      query: () => Promise.resolve([]),
+      sendMessage: () => Promise.resolve()
+    }
+  };
+}
+var browser, safariEnhancements;
+var init_safari_shim = __esm({
+  "src/shared/safari-shim.js"() {
+    init_logger();
+    initializeBrowserAPI();
+    safariEnhancements = {
+      // Safari storage quota management
+      storage: {
+        ...browser.storage,
+        // [SAFARI-EXT-STORAGE-001] Safari storage quota management
+        getQuotaUsage: async () => {
+          try {
+            if ("storage" in navigator && "estimate" in navigator.storage) {
+              const estimate = await navigator.storage.estimate();
+              return {
+                used: estimate.usage || 0,
+                quota: estimate.quota || 0,
+                usagePercent: estimate.quota ? estimate.usage / estimate.quota * 100 : 0
+              };
+            }
+            return { used: 0, quota: 0, usagePercent: 0 };
+          } catch (error) {
+            if (logger && logger.error) {
+              logger.error("[SAFARI-EXT-STORAGE-001] Storage quota check failed:", error);
+            }
+            return { used: 0, quota: 0, usagePercent: 0 };
+          }
+        },
+        // [SAFARI-EXT-STORAGE-001] Safari-optimized storage operations
+        sync: {
+          ...browser.storage.sync,
+          // Safari sync storage with quota management
+          get: async (keys) => {
+            try {
+              const result = await browser.storage.sync.get(keys);
+              const quotaUsage = await safariEnhancements.storage.getQuotaUsage();
+              if (quotaUsage.usagePercent > 80) {
+                if (logger && logger.warn) {
+                  logger.warn("[SAFARI-EXT-STORAGE-001] Storage quota usage high:", quotaUsage.usagePercent + "%");
+                }
+              }
+              return result;
+            } catch (error) {
+              if (logger && logger.error) {
+                logger.error("[SAFARI-EXT-STORAGE-001] Sync storage get failed:", error);
+              }
+              throw error;
+            }
+          }
+        }
+      },
+      // Safari message passing optimizations
+      runtime: {
+        ...browser.runtime,
+        // [SAFARI-EXT-MESSAGING-001] Safari-optimized message passing
+        sendMessage: async (message) => {
+          try {
+            const enhancedMessage = {
+              ...message,
+              timestamp: Date.now(),
+              version: browser.runtime.getManifest().version
+            };
+            if (typeof safari !== "undefined") {
+              enhancedMessage.platform = "safari";
+            }
+            if (logger && logger.debug) {
+              logger.debug("[SAFARI-EXT-MESSAGING-001] Sending message:", enhancedMessage);
+            }
+            return new Promise((resolve, reject) => {
+              chrome.runtime.sendMessage(enhancedMessage, (response) => {
+                if (chrome.runtime.lastError) {
+                  reject(new Error(chrome.runtime.lastError.message));
+                } else {
+                  resolve(response);
+                }
+              });
+            });
+          } catch (error) {
+            if (logger && logger.error) {
+              logger.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error);
+            }
+            throw error;
+          }
+        },
+        // [SAFARI-EXT-MESSAGING-001] Safari message listener with error handling
+        onMessage: {
+          ...browser.runtime.onMessage,
+          addListener: (callback) => {
+            const wrappedCallback = (message, sender, sendResponse) => {
+              try {
+                if (logger && logger.debug) {
+                  logger.debug("[SAFARI-EXT-MESSAGING-001] Received message:", message);
+                }
+                const result = callback(message, sender, sendResponse);
+                if (result && typeof result.then === "function") {
+                  result.then((response) => {
+                    if (logger && logger.debug) {
+                      logger.debug("[SAFARI-EXT-MESSAGING-001] Async response:", response);
+                    }
+                  }).catch((error) => {
+                    if (logger && logger.error) {
+                      logger.error("[SAFARI-EXT-MESSAGING-001] Message handler error:", error);
+                    }
+                  });
+                }
+                return result;
+              } catch (error) {
+                if (logger && logger.error) {
+                  logger.error("[SAFARI-EXT-MESSAGING-001] Message handler error:", error);
+                }
+                throw error;
+              }
+            };
+            return chrome.runtime.onMessage.addListener(wrappedCallback);
+          }
+        }
+      },
+      // Safari tabs API enhancements
+      tabs: {
+        ...browser.tabs,
+        // [SAFARI-EXT-CONTENT-001] Safari-optimized tab querying
+        query: async (queryInfo) => {
+          try {
+            const tabs = await browser.tabs.query(queryInfo);
+            if (typeof safari !== "undefined") {
+              return tabs.filter((tab) => !tab.url.startsWith("safari-extension://"));
+            }
+            return tabs;
+          } catch (error) {
+            if (logger && logger.error) {
+              logger.error("[SAFARI-EXT-CONTENT-001] Tab query failed:", error);
+            }
+            throw error;
+          }
+        },
+        // [SAFARI-EXT-MESSAGING-001] Safari-optimized tab message sending
+        sendMessage: async (tabId, message) => {
+          try {
+            if (logger && logger.debug) {
+              logger.debug("[SAFARI-EXT-MESSAGING-001] Sending message to tab:", { tabId, message });
+            }
+            return new Promise((resolve, reject) => {
+              chrome.tabs.sendMessage(tabId, message, (response) => {
+                if (chrome.runtime.lastError) {
+                  reject(new Error(chrome.runtime.lastError.message));
+                } else {
+                  resolve(response);
+                }
+              });
+            });
+          } catch (error) {
+            if (logger && logger.error) {
+              logger.error("[SAFARI-EXT-MESSAGING-001] Tab message send failed:", error);
+            }
+            throw error;
+          }
+        }
+      }
+    };
+  }
+});
+
 // src/shared/utils.js
 function debugLog(component, message, ...args) {
   if (DEBUG_CONFIG.enabled) {
@@ -677,6 +892,7 @@ var DEBUG_CONFIG;
 var init_utils = __esm({
   "src/shared/utils.js"() {
     init_logger();
+    init_safari_shim();
     DEBUG_CONFIG = {
       enabled: true,
       // Set to false to disable all debug output
@@ -691,6 +907,7 @@ var init_tag_service = __esm({
   "src/features/tagging/tag-service.js"() {
     init_config_manager();
     init_utils();
+    debugLog("[SAFARI-EXT-SHIM-001] tag-service.js: module loaded");
     TagService = class {
       constructor(pinboardService = null) {
         if (pinboardService) {
@@ -3099,6 +3316,7 @@ var init_pinboard_service = __esm({
     init_tag_service();
     import_fast_xml_parser = __toESM(require_fxp(), 1);
     init_utils();
+    debugLog("[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded");
     PinboardService = class {
       constructor(tagService = null) {
         this.configManager = new ConfigManager();
@@ -3897,16 +4115,16 @@ var MessageHandler = class {
     if (!tabId && (type === MESSAGE_TYPES.SEARCH_TABS || type === MESSAGE_TYPES.GET_CURRENT_BOOKMARK)) {
       try {
         debugLog("[MESSAGE-HANDLER] Getting current active tab for popup request");
-        let tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        let tabs = await safariEnhancements.tabs.query({ active: true, currentWindow: true });
         debugLog("[MESSAGE-HANDLER] Found tabs (current window):", tabs.length);
         if (tabs.length === 0) {
           debugLog("[MESSAGE-HANDLER] No tabs in current window, trying all windows");
-          tabs = await chrome.tabs.query({ active: true });
+          tabs = await safariEnhancements.tabs.query({ active: true });
           debugLog("[MESSAGE-HANDLER] Found tabs (all windows):", tabs.length);
         }
         if (tabs.length === 0) {
           debugLog("[MESSAGE-HANDLER] No active tabs found, trying any tab");
-          tabs = await chrome.tabs.query({});
+          tabs = await safariEnhancements.tabs.query({});
           debugLog("[MESSAGE-HANDLER] Found total tabs:", tabs.length);
           if (tabs.length > 0) {
             tabId = tabs[0].id;
@@ -3926,7 +4144,7 @@ var MessageHandler = class {
         debugError("[MESSAGE-HANDLER] Error details:", {
           message: error.message,
           stack: error.stack,
-          chromeError: chrome.runtime.lastError
+          chromeError: safariEnhancements.runtime.lastError
         });
       }
     }
@@ -3965,6 +4183,22 @@ var MessageHandler = class {
       case MESSAGE_TYPES.GET_SHARED_MEMORY_STATUS:
         return this.handleGetSharedMemoryStatus();
       case MESSAGE_TYPES.GET_TAB_ID:
+        debugLog("[MESSAGE-HANDLER] Processing GET_TAB_ID, current tabId:", tabId);
+        if (!tabId) {
+          try {
+            debugLog("[MESSAGE-HANDLER] Getting current active tab for GET_TAB_ID");
+            const tabs = await safariEnhancements.tabs.query({ active: true, currentWindow: true });
+            if (tabs.length > 0) {
+              tabId = tabs[0].id;
+              debugLog("[MESSAGE-HANDLER] Found active tab:", tabId);
+            } else {
+              debugLog("[MESSAGE-HANDLER] No active tab found, using sender tab");
+            }
+          } catch (error) {
+            debugError("[MESSAGE-HANDLER] Error getting active tab:", error);
+          }
+        }
+        debugLog("[MESSAGE-HANDLER] Returning tabId:", tabId);
         return { tabId };
       case MESSAGE_TYPES.CONTENT_SCRIPT_READY:
         return this.handleContentScriptReady(data, tabId, url);
@@ -3990,27 +4224,30 @@ var MessageHandler = class {
     if (!targetUrl) {
       throw new Error("No URL provided");
     }
-    debugLog("Getting bookmark for URL:", targetUrl);
+    debugLog("[MESSAGE-HANDLER] Getting bookmark for URL:", targetUrl);
     debugLog("Checking if URL is allowed...");
     const isAllowed = await this.configManager.isUrlAllowed(targetUrl);
     if (!isAllowed) {
-      return { blocked: true, url: targetUrl };
+      return { success: true, data: { blocked: true, url: targetUrl } };
     }
     debugLog("URL is allowed, getting bookmark data...");
     const hasAuth = await this.configManager.hasAuthToken();
     if (!hasAuth) {
       debugLog("No auth token available, returning empty bookmark");
       return {
-        description: data?.title || "",
-        hash: "",
-        time: "",
-        extended: "",
-        tag: "",
-        tags: [],
-        shared: "yes",
-        toread: "no",
-        url: targetUrl,
-        needsAuth: true
+        success: true,
+        data: {
+          description: data?.title || "",
+          hash: "",
+          time: "",
+          extended: "",
+          tag: "",
+          tags: [],
+          shared: "yes",
+          toread: "no",
+          url: targetUrl,
+          needsAuth: true
+        }
       };
     }
     debugLog("Getting bookmark data from Pinboard...");
@@ -4019,7 +4256,7 @@ var MessageHandler = class {
     const config = await this.configManager.getConfig();
     if (config.setIconOnLoad && tabId) {
     }
-    return bookmark;
+    return { success: true, data: bookmark };
   }
   async handleGetRecentBookmarks(data, senderUrl) {
     debugLog("[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Handling getRecentBookmarks request:", data);
@@ -4106,7 +4343,10 @@ var MessageHandler = class {
     }
   }
   async handleGetOptions() {
-    return this.configManager.getOptions();
+    debugLog("[MESSAGE-HANDLER] Processing GET_OPTIONS");
+    const options = await this.configManager.getOptions();
+    debugLog("[MESSAGE-HANDLER] Returning options:", options);
+    return options;
   }
   async handleSaveBookmark(data) {
     const previousBookmark = await this.pinboardService.getBookmarkForUrl(data.url);
@@ -4298,7 +4538,7 @@ var MessageHandler = class {
    */
   async sendToTab(tabId, message) {
     try {
-      await chrome.tabs.sendMessage(tabId, message);
+      await safariEnhancements.tabs.sendMessage(tabId, message);
     } catch (error) {
       debugError("Failed to send message to tab:", error);
     }
@@ -4309,7 +4549,7 @@ var MessageHandler = class {
    */
   async broadcastToAllTabs(message) {
     try {
-      const tabs = await chrome.tabs.query({});
+      const tabs = await safariEnhancements.tabs.query({});
       const promises = tabs.map(
         (tab) => this.sendToTab(tab.id, message).catch(() => {
         })
@@ -4491,6 +4731,7 @@ var BadgeManager = class {
 };
 
 // src/core/service-worker.js
+init_utils();
 var RecentTagsMemoryManager = class {
   constructor() {
     this.recentTags = [];
@@ -4589,7 +4830,14 @@ var HoverboardServiceWorker = class {
       this.handleInstall(details);
     });
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      this.handleMessage(message, sender, sendResponse);
+      console.log("[SERVICE-WORKER] Received message:", message);
+      this.handleMessage(message, sender).then((response) => {
+        console.log("[SERVICE-WORKER] Sending response:", response);
+        sendResponse(response);
+      }).catch((error) => {
+        console.error("[SERVICE-WORKER] Message error:", error);
+        sendResponse({ success: false, error: error.message });
+      });
       return true;
     });
     chrome.tabs.onActivated.addListener((activeInfo) => {
@@ -4615,13 +4863,15 @@ var HoverboardServiceWorker = class {
       this.setupContextMenus();
     }
   }
-  async handleMessage(message, sender, sendResponse) {
+  async handleMessage(message, sender) {
     try {
+      console.log("[SERVICE-WORKER] Processing message:", message.type);
       const response = await this.messageHandler.processMessage(message, sender);
-      sendResponse({ success: true, data: response });
+      console.log("[SERVICE-WORKER] Message processed successfully:", response);
+      return { success: true, data: response };
     } catch (error) {
       console.error("Service worker message error:", error);
-      sendResponse({ success: false, error: error.message });
+      return { success: false, error: error.message };
     }
   }
   async handleTabActivated(activeInfo) {

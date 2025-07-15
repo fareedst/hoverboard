@@ -7,6 +7,8 @@ import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
 import { debugLog, debugError } from '../../shared/utils.js'
 
+debugLog('[SAFARI-EXT-SHIM-001] PopupController.js: module loaded');
+
 export class PopupController {
   constructor (dependencies = {}) {
     this.uiManager = dependencies.uiManager || new UIManager()
@@ -57,6 +59,19 @@ export class PopupController {
         }
       })
     }
+    debugLog('[CHROME-DEBUG-001] PopupController constructor called', { platform: navigator.userAgent });
+    // Platform detection
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      debugLog('[CHROME-DEBUG-001] Detected Chrome runtime in PopupController');
+    } else if (typeof browser !== 'undefined' && browser.runtime) {
+      debugLog('[CHROME-DEBUG-001] Detected browser polyfill runtime in PopupController');
+    } else {
+      debugError('[CHROME-DEBUG-001] No recognized extension runtime detected in PopupController');
+    }
+    // Check utils.js access
+    if (!debugLog || !debugError) {
+      console.error('[CHROME-DEBUG-001] utils.js functions missing in PopupController');
+    }
   }
 
   /**
@@ -98,11 +113,14 @@ export class PopupController {
    * Load initial data when popup opens
    */
   async loadInitialData () {
+    debugLog('[CHROME-DEBUG-001] loadInitialData: start');
     try {
       this.setLoading(true)
 
       // Get current tab information
+      debugLog('[CHROME-DEBUG-001] loadInitialData: calling getCurrentTab');
       this.currentTab = await this.getCurrentTab()
+      debugLog('[CHROME-DEBUG-001] loadInitialData: got currentTab', this.currentTab);
       if (!this.currentTab) {
         throw new Error('Unable to get current tab information')
       }
@@ -115,7 +133,9 @@ export class PopupController {
       })
 
       // Get bookmark data for current URL
+      debugLog('[CHROME-DEBUG-001] loadInitialData: calling getBookmarkData', this.currentTab.url);
       this.currentPin = await this.getBookmarkData(this.currentTab.url)
+      debugLog('[CHROME-DEBUG-001] loadInitialData: got currentPin', this.currentPin);
       this.stateManager.setState({ currentPin: this.currentPin })
 
       // Debug: Log the bookmark data structure
@@ -250,9 +270,12 @@ export class PopupController {
    * Get current active tab
    */
   async getCurrentTab () {
+    debugLog('[CHROME-DEBUG-001] getCurrentTab: calling chrome.tabs.query');
     return new Promise((resolve, reject) => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        debugLog('[CHROME-DEBUG-001] getCurrentTab: chrome.tabs.query callback', tabs, chrome.runtime.lastError);
         if (chrome.runtime.lastError) {
+          debugError('[CHROME-DEBUG-001] getCurrentTab: chrome.runtime.lastError', chrome.runtime.lastError);
           reject(new Error(chrome.runtime.lastError.message))
           return
         }
@@ -260,6 +283,7 @@ export class PopupController {
         if (tabs && tabs.length > 0) {
           resolve(tabs[0])
         } else {
+          debugError('[CHROME-DEBUG-001] getCurrentTab: No active tab found');
           reject(new Error('No active tab found'))
         }
       })
@@ -270,6 +294,7 @@ export class PopupController {
    * Get bookmark data for a URL
    */
   async getBookmarkData (url) {
+    debugLog('[CHROME-DEBUG-001] getBookmarkData: calling chrome.runtime.sendMessage', url);
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
@@ -277,14 +302,17 @@ export class PopupController {
           data: { url }
         },
         (response) => {
+          debugLog('[CHROME-DEBUG-001] getBookmarkData: chrome.runtime.sendMessage callback', response, chrome.runtime.lastError);
           if (chrome.runtime.lastError) {
+            debugError('[CHROME-DEBUG-001] getBookmarkData: chrome.runtime.lastError', chrome.runtime.lastError);
             reject(new Error(chrome.runtime.lastError.message))
             return
           }
 
           if (response && response.success) {
-            resolve(response.data)
+            resolve(response.data.data)
           } else {
+            debugError('[CHROME-DEBUG-001] getBookmarkData: Failed to get bookmark data', response);
             reject(new Error(response?.error || 'Failed to get bookmark data'))
           }
         }
@@ -796,7 +824,8 @@ export class PopupController {
 
       // Check if we can inject into this tab
       if (!this.canInjectIntoTab(this.currentTab)) {
-        throw new Error(`Cannot show hoverboard on this type of page: ${this.currentTab.url}`)
+        this.uiManager.showError('Hoverboard is not available on this page (e.g., Chrome Web Store, New Tab, or Settings).');
+        return;
       }
 
       await this.sendToTab({

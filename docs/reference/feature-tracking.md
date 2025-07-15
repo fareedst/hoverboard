@@ -110,6 +110,13 @@ For detailed guidelines on how to document and track features, please refer to t
 | UI-VIS-003 | Window state management | Per-window state system | WindowStateManager | TestWindowState | 📋 Planned | `// UI-VIS-003: Window state` | 🔺 HIGH |
 | UI-VIS-004 | Production integration | OverlayManager integration | Integration layer | TestProduction | 📋 Planned | `// UI-VIS-004: Production ready` | 🔺 HIGH |
 
+### 🎨 Overlay Data Display [PRIORITY: HIGH]
+| Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
+|------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
+| UI-OVERLAY-001 | Overlay data display fix | Content script response handling | OverlayManager integration | TestOverlayData | ✅ Implemented | `// UI-OVERLAY-001: Data display fix` | 🔺 HIGH |
+| UI-OVERLAY-002 | Overlay content refresh | Data refresh mechanism | Overlay refresh system | TestOverlayRefresh | ✅ Implemented | `// UI-OVERLAY-002: Content refresh` | 🔺 HIGH |
+| UI-OVERLAY-003 | Data structure validation | Bookmark data validation | Data validation system | TestDataValidation | ✅ Implemented | `// UI-OVERLAY-003: Data validation` | 🔺 HIGH |
+
 ### 🎨 User Interface [PRIORITY: MEDIUM]
 | Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
 |------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
@@ -198,6 +205,55 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Rationale**: Ensure V3 migration maintains quality and functionality
    - **Status**: COMPLETED
    - **Priority**: MEDIUM - Quality assurance 🔶
+
+### **✅ UI-OVERLAY-001: Overlay Data Display Fix - ✅ Implemented**
+
+**Status**: ✅ **IMPLEMENTED (3/3 Subtasks)** - Overlay Data Display Complete
+
+**📑 Purpose**: Fix overlay data display to ensure overlay shows same bookmark data as popup and badge.
+
+**🔧 Implementation Summary**: **🔺 UI-OVERLAY-001: Critical overlay data display fix for consistent bookmark data across all UI components.** Fixed content script response handling and disabled problematic automatic refresh mechanism to ensure overlay displays correct bookmark information.
+
+**🔧 UI-OVERLAY-001 Subtasks:**
+
+1. **[x] Content Script Response Handling** (⭐ CRITICAL) - **COMPLETED**
+   - [x] **Fix response data extraction** - Extract bookmark data from response object ✅
+   - [x] **Update currentBookmark assignment** - Use actualResponse.data instead of actualResponse ✅
+   - [x] **Add fallback handling** - Use actualResponse.data || actualResponse ✅
+   - [x] **Test data structure consistency** - Verify bookmark data integrity ✅
+   - **Rationale**: Content script was setting entire response object instead of bookmark data
+   - **Status**: COMPLETED
+   - **Priority**: CRITICAL - Core data flow fix ⭐
+   - **Implementation Areas**: src/features/content/content-main.js
+   - **Dependencies**: None (standalone fix)
+   - **Implementation Tokens**: `// ⭐ UI-OVERLAY-001: Content script response fix`
+   - **Expected Outcomes**: Overlay displays correct bookmark data ✅
+
+2. **[x] Overlay Content Refresh Mechanism** (🔺 HIGH) - **COMPLETED**
+   - [x] **Disable automatic refresh** - Prevent data loss from refresh mechanism ✅
+   - [x] **Use original content data** - Leverage already correct bookmark data ✅
+   - [x] **Add debug logging** - Enhanced debugging for content flow ✅
+   - [x] **Validate data consistency** - Ensure overlay matches popup/badge data ✅
+   - **Rationale**: Automatic refresh was returning incomplete bookmark data
+   - **Status**: COMPLETED
+   - **Priority**: HIGH - Data integrity fix 🔺
+   - **Implementation Areas**: src/features/content/overlay-manager.js
+   - **Dependencies**: Subtask 1 (response handling fix) ✅
+   - **Implementation Tokens**: `// 🔺 UI-OVERLAY-001: Content refresh fix`
+   - **Expected Outcomes**: No data loss during overlay display ✅
+
+3. **[x] Data Structure Validation** (🔶 MEDIUM) - **COMPLETED**
+   - [x] **Add enhanced debugging** - Comprehensive debug logging for data flow ✅
+   - [x] **Validate bookmark structure** - Ensure tags and other data present ✅
+   - [x] **Cross-reference with popup** - Verify overlay matches popup data ✅
+   - [x] **Test Safari compatibility** - Ensure fix works across platforms ✅
+   - **Rationale**: Ensure data structure consistency across all components
+   - **Status**: COMPLETED
+   - **Priority**: MEDIUM - Quality assurance 🔶
+   - **Implementation Areas**: Debug logging, validation tests
+   - **Dependencies**: Subtasks 1-2 (core fixes complete) ✅
+   - **Implementation Tokens**: `// 🔶 UI-OVERLAY-001: Data validation`
+   - **Expected Outcomes**: Consistent data display across all UI components ✅
    - **Implementation Areas**: Existing test infrastructure validated
    - **Dependencies**: Subtasks 1-4 (implementation complete) ✅
    - **Implementation Tokens**: `// 🔶 MV3-001: Testing`

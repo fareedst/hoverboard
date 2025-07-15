@@ -145,7 +145,7 @@ applyVisibilitySettings(settings) {
 - [ ] **Test**: Screen reader compatibility maintained
 
 ### Task 4.4: Cross-browser Compatibility
-- [ ] **Browsers**: Chrome, Firefox, Safari, Edge
+- [ ] **Browsers**: Chrome, Firefox, Safari, Edge (via unified browser API abstraction [SAFARI-EXT-SHIM-001])
 - [ ] **Check**: CSS custom properties work correctly
 - [ ] **Verify**: Theme rendering consistency
 - [ ] **Test**: No browser-specific styling issues
@@ -178,7 +178,7 @@ tagElement.className = 'tag-element'  // ✅ CSS handles all styling
 3. **✅ Transparency Integration**: Opacity changes affect all elements appropriately
 4. **✅ Immediate Updates**: Theme changes apply without overlay refresh
 5. **✅ Accessibility Compliance**: Color contrasts meet WCAG standards
-6. **✅ Cross-browser Consistency**: Identical appearance across browsers
+6. **✅ Cross-browser Consistency**: Identical appearance and functionality across browsers, enabled by the new browser API abstraction ([SAFARI-EXT-SHIM-001]).
 
 ## 📁 Files Modified Summary
 

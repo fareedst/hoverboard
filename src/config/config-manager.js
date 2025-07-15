@@ -8,8 +8,6 @@
  * CFG-004: URL inhibition management for site-specific behavior
  */
 
-import { browser } from '../shared/utils'; // [SAFARI-EXT-SHIM-001]
-
 export class ConfigManager {
   constructor () {
     // CFG-001: Standardized storage key naming convention
@@ -211,7 +209,7 @@ export class ConfigManager {
   async getAuthToken () {
     try {
       // CFG-002: Use sync storage for authentication data synchronization across devices
-      const result = await browser.storage.sync.get(this.storageKeys.AUTH_TOKEN)
+      const result = await chrome.storage.sync.get(this.storageKeys.AUTH_TOKEN)
       return result[this.storageKeys.AUTH_TOKEN] || ''
     } catch (error) {
       console.error('Failed to get auth token:', error)
@@ -230,7 +228,7 @@ export class ConfigManager {
   async setAuthToken (token) {
     try {
       // CFG-002: Store token in sync storage for device synchronization
-      await browser.storage.sync.set({
+      await chrome.storage.sync.set({
         [this.storageKeys.AUTH_TOKEN]: token
       })
     } catch (error) {
@@ -276,7 +274,7 @@ export class ConfigManager {
   async getInhibitUrls () {
     try {
       // CFG-004: Retrieve inhibition list from storage
-      const result = await browser.storage.sync.get(this.storageKeys.INHIBIT_URLS)
+      const result = await chrome.storage.sync.get(this.storageKeys.INHIBIT_URLS)
       const inhibitString = result[this.storageKeys.INHIBIT_URLS] || ''
       // CFG-004: Parse newline-separated URLs and filter empty entries
       return inhibitString.split('\n').filter(url => url.trim().length > 0)
@@ -304,7 +302,7 @@ export class ConfigManager {
         current.push(normalizedUrl)
         const inhibitString = current.join('\n')
         // CFG-004: Store updated inhibition list
-        await browser.storage.sync.set({
+        await chrome.storage.sync.set({
           [this.storageKeys.INHIBIT_URLS]: inhibitString
         })
       }
@@ -327,7 +325,7 @@ export class ConfigManager {
     try {
       // CFG-004: Replace entire inhibition list
       const inhibitString = urls.join('\n')
-      await browser.storage.sync.set({
+      await chrome.storage.sync.set({
         [this.storageKeys.INHIBIT_URLS]: inhibitString
       })
     } catch (error) {
@@ -370,7 +368,7 @@ export class ConfigManager {
   async getStoredSettings () {
     try {
       // CFG-003: Retrieve settings from sync storage
-      const result = await browser.storage.sync.get(this.storageKeys.SETTINGS)
+      const result = await chrome.storage.sync.get(this.storageKeys.SETTINGS)
       const stored = result[this.storageKeys.SETTINGS]
 
       // CFG-003: Handle corrupted data (string instead of object)
@@ -401,7 +399,7 @@ export class ConfigManager {
   async saveSettings (settings) {
     try {
       // CFG-003: Store settings in sync storage for cross-device synchronization
-      await browser.storage.sync.set({
+      await chrome.storage.sync.set({
         [this.storageKeys.SETTINGS]: settings
       })
     } catch (error) {
@@ -468,7 +466,7 @@ export class ConfigManager {
     // CFG-004: Import inhibition list if present
     if (configData.inhibitUrls) {
       const inhibitString = configData.inhibitUrls.join('\n')
-      await browser.storage.sync.set({
+      await chrome.storage.sync.set({
         [this.storageKeys.INHIBIT_URLS]: inhibitString
       })
     }
@@ -493,7 +491,7 @@ export class ConfigManager {
       const limitedTags = tags.slice(0, maxTags)
 
       // [IMMUTABLE-REQ-TAG-001] - Store tags with timestamp
-      await browser.storage.sync.set({
+      await chrome.storage.sync.set({
         [this.storageKeys.RECENT_TAGS]: {
           tags: limitedTags,
           timestamp: Date.now(),
@@ -507,7 +505,7 @@ export class ConfigManager {
 
       // [IMMUTABLE-REQ-TAG-001] - Fallback to local storage
       try {
-        await browser.storage.local.set({
+        await chrome.storage.local.set({
           [this.storageKeys.RECENT_TAGS]: {
             tags: tags.slice(0, 50),
             timestamp: Date.now(),
@@ -528,13 +526,13 @@ export class ConfigManager {
   async getRecentTags () {
     try {
       // [IMMUTABLE-REQ-TAG-001] - Try sync storage first
-      const syncResult = await browser.storage.sync.get(this.storageKeys.RECENT_TAGS)
+      const syncResult = await chrome.storage.sync.get(this.storageKeys.RECENT_TAGS)
       if (syncResult[this.storageKeys.RECENT_TAGS]) {
         return syncResult[this.storageKeys.RECENT_TAGS].tags || []
       }
 
       // [IMMUTABLE-REQ-TAG-001] - Fallback to local storage
-      const localResult = await browser.storage.local.get(this.storageKeys.RECENT_TAGS)
+      const localResult = await chrome.storage.local.get(this.storageKeys.RECENT_TAGS)
       if (localResult[this.storageKeys.RECENT_TAGS]) {
         return localResult[this.storageKeys.RECENT_TAGS].tags || []
       }
@@ -552,7 +550,7 @@ export class ConfigManager {
    */
   async getTagFrequency () {
     try {
-      const result = await browser.storage.local.get(this.storageKeys.TAG_FREQUENCY)
+      const result = await chrome.storage.local.get(this.storageKeys.TAG_FREQUENCY)
       return result[this.storageKeys.TAG_FREQUENCY] || {}
     } catch (error) {
       console.error('[IMMUTABLE-REQ-TAG-001] Failed to get tag frequency:', error)
@@ -567,7 +565,7 @@ export class ConfigManager {
    */
   async updateTagFrequency (frequency) {
     try {
-      await browser.storage.local.set({
+      await chrome.storage.local.set({
         [this.storageKeys.TAG_FREQUENCY]: frequency
       })
     } catch (error) {

@@ -1,6 +1,41 @@
 # 🔧 Overlay Theming Technical Specification
 
-*Created: [Current Date]*
+**Semantic Token:** [OVERLAY-THEMING-001]
+**Cross-References:** [OVERLAY-DATA-DISPLAY-001], [TOGGLE_SYNC_OVERLAY], [TAG_SYNC_OVERLAY], [SAFARI-EXT-SHIM-001]
+**Date:** 2025-07-15
+**Status:** Active Implementation
+
+---
+
+## 🎯 Technical Overview
+
+This document provides detailed technical specifications for implementing complete theme integration in the hoverboard-overlay system, ensuring all elements respond to VisibilityControls settings. The specification also includes data display fixes that ensure overlay content matches popup and badge data.
+
+## 📊 Data Display Architecture
+
+### **Overlay Data Display Fix**
+**[OVERLAY-DATA-DISPLAY-001]** - Master semantic token for overlay data display functionality
+
+#### Content Script Response Handling
+**[OVERLAY-DATA-FIX-001]** - Content script response handling fix
+- **Issue**: Content script was setting `this.currentBookmark = actualResponse` but `actualResponse` was the entire response object `{ success: true, data: { ... } }`
+- **Fix**: Changed to `this.currentBookmark = actualResponse.data || actualResponse` to extract actual bookmark data
+- **Impact**: Fixed overlay data display to show correct bookmark information
+
+#### Overlay Content Refresh Mechanism
+**[OVERLAY-DATA-REFRESH-001]** - Overlay content refresh mechanism
+- **Issue**: Automatic refresh was causing data loss by returning incomplete bookmark data
+- **Decision**: Disabled automatic refresh to prevent data loss
+- **Rationale**: Original content data is already correct and complete
+- **Implementation**: Use original bookmark data instead of refreshing
+
+#### Data Structure Validation
+**[OVERLAY-DATA-STRUCTURE-001]** - Bookmark data structure validation
+- **Requirement**: Overlay must display same data as popup and badge
+- **Validation**: Enhanced debugging to verify data structure consistency
+- **Cross-Reference**: Coordinates with `[TOGGLE_SYNC_OVERLAY]` and `[TAG_SYNC_OVERLAY]`
+
+## 📊 Current vs Target Architecture
 
 ## 🎯 Technical Overview
 

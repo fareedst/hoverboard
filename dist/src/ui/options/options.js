@@ -642,6 +642,221 @@ var init_logger = __esm({
   }
 });
 
+// src/shared/safari-shim.js
+function initializeBrowserAPI() {
+  if (typeof chrome !== "undefined") {
+    browser = chrome;
+    if (logger && logger.debug) {
+      logger.debug("[SAFARI-EXT-SHIM-001] Using Chrome API");
+    }
+    return;
+  }
+  try {
+    if (typeof window !== "undefined" && window.browser) {
+      browser = window.browser;
+      if (logger && logger.debug) {
+        logger.debug("[SAFARI-EXT-SHIM-001] Using webextension-polyfill");
+      }
+      return;
+    }
+  } catch (polyfillError) {
+  }
+  browser = createMinimalBrowserAPI();
+  if (logger && logger.warn) {
+    logger.warn("[SAFARI-EXT-SHIM-001] No browser API available, using minimal mock");
+  }
+}
+function createMinimalBrowserAPI() {
+  return {
+    runtime: {
+      id: "mock-extension-id",
+      getManifest: () => ({ version: "1.0.0" }),
+      sendMessage: () => Promise.resolve(),
+      onMessage: { addListener: () => {
+      } },
+      onInstalled: { addListener: () => {
+      } }
+    },
+    storage: {
+      sync: {
+        get: () => Promise.resolve({}),
+        set: () => Promise.resolve(),
+        remove: () => Promise.resolve()
+      },
+      local: {
+        get: () => Promise.resolve({}),
+        set: () => Promise.resolve(),
+        remove: () => Promise.resolve()
+      }
+    },
+    tabs: {
+      query: () => Promise.resolve([]),
+      sendMessage: () => Promise.resolve()
+    }
+  };
+}
+var browser, safariEnhancements;
+var init_safari_shim = __esm({
+  "src/shared/safari-shim.js"() {
+    init_logger();
+    initializeBrowserAPI();
+    safariEnhancements = {
+      // Safari storage quota management
+      storage: {
+        ...browser.storage,
+        // [SAFARI-EXT-STORAGE-001] Safari storage quota management
+        getQuotaUsage: async () => {
+          try {
+            if ("storage" in navigator && "estimate" in navigator.storage) {
+              const estimate = await navigator.storage.estimate();
+              return {
+                used: estimate.usage || 0,
+                quota: estimate.quota || 0,
+                usagePercent: estimate.quota ? estimate.usage / estimate.quota * 100 : 0
+              };
+            }
+            return { used: 0, quota: 0, usagePercent: 0 };
+          } catch (error) {
+            if (logger && logger.error) {
+              logger.error("[SAFARI-EXT-STORAGE-001] Storage quota check failed:", error);
+            }
+            return { used: 0, quota: 0, usagePercent: 0 };
+          }
+        },
+        // [SAFARI-EXT-STORAGE-001] Safari-optimized storage operations
+        sync: {
+          ...browser.storage.sync,
+          // Safari sync storage with quota management
+          get: async (keys) => {
+            try {
+              const result = await browser.storage.sync.get(keys);
+              const quotaUsage = await safariEnhancements.storage.getQuotaUsage();
+              if (quotaUsage.usagePercent > 80) {
+                if (logger && logger.warn) {
+                  logger.warn("[SAFARI-EXT-STORAGE-001] Storage quota usage high:", quotaUsage.usagePercent + "%");
+                }
+              }
+              return result;
+            } catch (error) {
+              if (logger && logger.error) {
+                logger.error("[SAFARI-EXT-STORAGE-001] Sync storage get failed:", error);
+              }
+              throw error;
+            }
+          }
+        }
+      },
+      // Safari message passing optimizations
+      runtime: {
+        ...browser.runtime,
+        // [SAFARI-EXT-MESSAGING-001] Safari-optimized message passing
+        sendMessage: async (message) => {
+          try {
+            const enhancedMessage = {
+              ...message,
+              timestamp: Date.now(),
+              version: browser.runtime.getManifest().version
+            };
+            if (typeof safari !== "undefined") {
+              enhancedMessage.platform = "safari";
+            }
+            if (logger && logger.debug) {
+              logger.debug("[SAFARI-EXT-MESSAGING-001] Sending message:", enhancedMessage);
+            }
+            return new Promise((resolve, reject) => {
+              chrome.runtime.sendMessage(enhancedMessage, (response) => {
+                if (chrome.runtime.lastError) {
+                  reject(new Error(chrome.runtime.lastError.message));
+                } else {
+                  resolve(response);
+                }
+              });
+            });
+          } catch (error) {
+            if (logger && logger.error) {
+              logger.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error);
+            }
+            throw error;
+          }
+        },
+        // [SAFARI-EXT-MESSAGING-001] Safari message listener with error handling
+        onMessage: {
+          ...browser.runtime.onMessage,
+          addListener: (callback) => {
+            const wrappedCallback = (message, sender, sendResponse) => {
+              try {
+                if (logger && logger.debug) {
+                  logger.debug("[SAFARI-EXT-MESSAGING-001] Received message:", message);
+                }
+                const result = callback(message, sender, sendResponse);
+                if (result && typeof result.then === "function") {
+                  result.then((response) => {
+                    if (logger && logger.debug) {
+                      logger.debug("[SAFARI-EXT-MESSAGING-001] Async response:", response);
+                    }
+                  }).catch((error) => {
+                    if (logger && logger.error) {
+                      logger.error("[SAFARI-EXT-MESSAGING-001] Message handler error:", error);
+                    }
+                  });
+                }
+                return result;
+              } catch (error) {
+                if (logger && logger.error) {
+                  logger.error("[SAFARI-EXT-MESSAGING-001] Message handler error:", error);
+                }
+                throw error;
+              }
+            };
+            return chrome.runtime.onMessage.addListener(wrappedCallback);
+          }
+        }
+      },
+      // Safari tabs API enhancements
+      tabs: {
+        ...browser.tabs,
+        // [SAFARI-EXT-CONTENT-001] Safari-optimized tab querying
+        query: async (queryInfo) => {
+          try {
+            const tabs = await browser.tabs.query(queryInfo);
+            if (typeof safari !== "undefined") {
+              return tabs.filter((tab) => !tab.url.startsWith("safari-extension://"));
+            }
+            return tabs;
+          } catch (error) {
+            if (logger && logger.error) {
+              logger.error("[SAFARI-EXT-CONTENT-001] Tab query failed:", error);
+            }
+            throw error;
+          }
+        },
+        // [SAFARI-EXT-MESSAGING-001] Safari-optimized tab message sending
+        sendMessage: async (tabId, message) => {
+          try {
+            if (logger && logger.debug) {
+              logger.debug("[SAFARI-EXT-MESSAGING-001] Sending message to tab:", { tabId, message });
+            }
+            return new Promise((resolve, reject) => {
+              chrome.tabs.sendMessage(tabId, message, (response) => {
+                if (chrome.runtime.lastError) {
+                  reject(new Error(chrome.runtime.lastError.message));
+                } else {
+                  resolve(response);
+                }
+              });
+            });
+          } catch (error) {
+            if (logger && logger.error) {
+              logger.error("[SAFARI-EXT-MESSAGING-001] Tab message send failed:", error);
+            }
+            throw error;
+          }
+        }
+      }
+    };
+  }
+});
+
 // src/shared/utils.js
 function debugLog(component, message, ...args) {
   if (DEBUG_CONFIG.enabled) {
@@ -677,6 +892,7 @@ var DEBUG_CONFIG;
 var init_utils = __esm({
   "src/shared/utils.js"() {
     init_logger();
+    init_safari_shim();
     DEBUG_CONFIG = {
       enabled: true,
       // Set to false to disable all debug output
@@ -691,6 +907,7 @@ var init_tag_service = __esm({
   "src/features/tagging/tag-service.js"() {
     init_config_manager();
     init_utils();
+    debugLog("[SAFARI-EXT-SHIM-001] tag-service.js: module loaded");
     TagService = class {
       constructor(pinboardService = null) {
         if (pinboardService) {
@@ -3099,6 +3316,7 @@ var init_pinboard_service = __esm({
     init_tag_service();
     import_fast_xml_parser = __toESM(require_fxp(), 1);
     init_utils();
+    debugLog("[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded");
     PinboardService = class {
       constructor(tagService = null) {
         this.configManager = new ConfigManager();

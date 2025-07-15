@@ -3,8 +3,6 @@
  * Handles icon optimization, responsive images, asset preloading, and resource management
  */
 
-import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
-
 export class VisualAssetsManager {
   constructor () {
     this.assetCache = new Map()
@@ -79,7 +77,7 @@ export class VisualAssetsManager {
     const url = asset[size] || asset[format] || asset.svg || Object.values(asset)[0]
 
     if (url) {
-      return browser.runtime.getURL(url)
+      return chrome.runtime.getURL(url)
     }
 
     return null
@@ -486,7 +484,7 @@ export class VisualAssetsManager {
       Object.entries(extensionAsset).forEach(([size, path]) => {
         if (!isNaN(size)) {
           manifest.icons.push({
-            src: browser.runtime.getURL(path),
+            src: chrome.runtime.getURL(path),
             sizes: `${size}x${size}`,
             type: 'image/png'
           })

@@ -185,19 +185,32 @@ features/bookmark/
 
 ### 🔄 Message Passing
 
-Use the centralized message router for component communication:
+**Critical Note:** The extension uses a hybrid approach for message passing to ensure cross-browser compatibility:
+
+- **Service Workers:** Use native `chrome` API for all event listeners
+- **Content Scripts/Popups:** Use Safari shim (`browser` API) for cross-browser compatibility
 
 ```javascript
-// Sending messages
-chrome.runtime.sendMessage({
+// Service Worker (use native Chrome API)
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  this.handleMessage(message, sender)
+    .then(response => {
+      sendResponse(response)
+    })
+    .catch(error => {
+      sendResponse({ success: false, error: error.message })
+    })
+  return true // Keep message port alive for async response
+});
+
+// Content Script (use Safari shim for cross-browser compatibility)
+const response = await browser.runtime.sendMessage({
   type: 'GET_BOOKMARK_STATUS',
   payload: { url: 'https://example.com' }
 });
+```
 
-// Handling messages in service worker
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'GET_BOOKMARK_STATUS') {
-    // Handle the message
+**Related Documentation:** [Messaging Fixes Summary](../troubleshooting/messaging-fixes-2025-07-15.md)
     handleBookmarkStatusRequest(message.payload);
   }
 });

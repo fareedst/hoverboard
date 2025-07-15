@@ -7,7 +7,7 @@ import { PinboardService } from '../features/pinboard/pinboard-service.js'
 import { TagService } from '../features/tagging/tag-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { TabSearchService } from '../features/search/tab-search-service.js'
-import { debugLog, debugError } from '../shared/utils.js'
+import { debugLog, debugError, browser } from '../shared/utils.js'
 
 // Message type constants - migrated from config.js
 export const MESSAGE_TYPES = {
@@ -87,20 +87,20 @@ export class MessageHandler {
         debugLog('[MESSAGE-HANDLER] Getting current active tab for popup request')
 
         // Try multiple strategies to get the current tab
-        let tabs = await chrome.tabs.query({ active: true, currentWindow: true })
+        let tabs = await browser.tabs.query({ active: true, currentWindow: true })
         debugLog('[MESSAGE-HANDLER] Found tabs (current window):', tabs.length)
 
         // If no tabs found in current window, try all windows
         if (tabs.length === 0) {
           debugLog('[MESSAGE-HANDLER] No tabs in current window, trying all windows')
-          tabs = await chrome.tabs.query({ active: true })
+          tabs = await browser.tabs.query({ active: true })
           debugLog('[MESSAGE-HANDLER] Found tabs (all windows):', tabs.length)
         }
 
         // If still no tabs, try getting any tab
         if (tabs.length === 0) {
           debugLog('[MESSAGE-HANDLER] No active tabs found, trying any tab')
-          tabs = await chrome.tabs.query({})
+          tabs = await browser.tabs.query({})
           debugLog('[MESSAGE-HANDLER] Found total tabs:', tabs.length)
 
           // Use the first tab if available
@@ -123,7 +123,7 @@ export class MessageHandler {
         debugError('[MESSAGE-HANDLER] Error details:', {
           message: error.message,
           stack: error.stack,
-          chromeError: chrome.runtime.lastError
+          chromeError: browser.runtime.lastError
         })
       }
     }
@@ -179,6 +179,24 @@ export class MessageHandler {
         return this.handleGetSharedMemoryStatus()
 
       case MESSAGE_TYPES.GET_TAB_ID:
+        // For content scripts, the tabId should come from sender.tab.id
+        // For popup/background, we need to get the current active tab
+        debugLog('[MESSAGE-HANDLER] Processing GET_TAB_ID, current tabId:', tabId)
+        if (!tabId) {
+          try {
+            debugLog('[MESSAGE-HANDLER] Getting current active tab for GET_TAB_ID')
+            const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+            if (tabs.length > 0) {
+              tabId = tabs[0].id
+              debugLog('[MESSAGE-HANDLER] Found active tab:', tabId)
+            } else {
+              debugLog('[MESSAGE-HANDLER] No active tab found, using sender tab')
+            }
+          } catch (error) {
+            debugError('[MESSAGE-HANDLER] Error getting active tab:', error)
+          }
+        }
+        debugLog('[MESSAGE-HANDLER] Returning tabId:', tabId)
         return { tabId }
 
       case MESSAGE_TYPES.CONTENT_SCRIPT_READY:
@@ -214,13 +232,13 @@ export class MessageHandler {
       throw new Error('No URL provided')
     }
 
-    debugLog('Getting bookmark for URL:', targetUrl)
+    debugLog('[MESSAGE-HANDLER] Getting bookmark for URL:', targetUrl)
 
     // Check if URL is allowed (not in inhibit list)
     debugLog('Checking if URL is allowed...')
     const isAllowed = await this.configManager.isUrlAllowed(targetUrl)
     if (!isAllowed) {
-      return { blocked: true, url: targetUrl }
+      return { success: true, data: { blocked: true, url: targetUrl } }
     }
     debugLog('URL is allowed, getting bookmark data...')
 
@@ -229,16 +247,19 @@ export class MessageHandler {
     if (!hasAuth) {
       debugLog('No auth token available, returning empty bookmark')
       return {
-        description: data?.title || '',
-        hash: '',
-        time: '',
-        extended: '',
-        tag: '',
-        tags: [],
-        shared: 'yes',
-        toread: 'no',
-        url: targetUrl,
-        needsAuth: true
+        success: true,
+        data: {
+          description: data?.title || '',
+          hash: '',
+          time: '',
+          extended: '',
+          tag: '',
+          tags: [],
+          shared: 'yes',
+          toread: 'no',
+          url: targetUrl,
+          needsAuth: true
+        }
       }
     }
 
@@ -253,7 +274,7 @@ export class MessageHandler {
       // Badge update handled by service worker
     }
 
-    return bookmark
+    return { success: true, data: bookmark }
   }
 
   async handleGetRecentBookmarks (data, senderUrl) {
@@ -368,7 +389,10 @@ export class MessageHandler {
   }
 
   async handleGetOptions () {
-    return this.configManager.getOptions()
+    debugLog('[MESSAGE-HANDLER] Processing GET_OPTIONS')
+    const options = await this.configManager.getOptions()
+    debugLog('[MESSAGE-HANDLER] Returning options:', options)
+    return options
   }
 
   async handleSaveBookmark (data) {
@@ -610,7 +634,7 @@ export class MessageHandler {
    */
   async sendToTab (tabId, message) {
     try {
-      await chrome.tabs.sendMessage(tabId, message)
+      await browser.tabs.sendMessage(tabId, message)
     } catch (error) {
       debugError('Failed to send message to tab:', error)
     }
@@ -622,7 +646,7 @@ export class MessageHandler {
    */
   async broadcastToAllTabs (message) {
     try {
-      const tabs = await chrome.tabs.query({})
+      const tabs = await browser.tabs.query({})
       const promises = tabs.map(tab =>
         this.sendToTab(tab.id, message).catch(() => {
           // Ignore errors for inactive tabs

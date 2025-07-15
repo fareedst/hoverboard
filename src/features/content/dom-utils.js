@@ -3,8 +3,6 @@
  * Replaces jQuery functionality with optimized, lightweight alternatives
  */
 
-import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
-
 export class DOMUtils {
   /**
    * Wait for DOM to be ready

@@ -223,9 +223,10 @@
 - **Expected**: Smooth transitions, no layout shifts
 
 ### **Test 5: Cross-browser Compatibility**
-- **Browsers**: Chrome, Firefox, Safari, Edge
+- **Browsers**: Chrome, Firefox, Safari, Edge (via unified browser API abstraction [SAFARI-EXT-SHIM-001])
 - **Check**: CSS variable support, theme rendering consistency
 - **Expected**: Identical appearance across browsers
+- **Debug Logging**: All major modules log their loading and browser API resolution ([SAFARI-EXT-SHIM-001]).
 
 ## 📊 Implementation Checklist
 

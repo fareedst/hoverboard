@@ -13,6 +13,8 @@ import { TagService } from '../tagging/tag-service.js' // [IMMUTABLE-REQ-TAG-001
 import { XMLParser } from 'fast-xml-parser'
 import { debugLog, debugError, debugWarn } from '../../shared/utils.js'
 
+debugLog('[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded');
+
 export class PinboardService {
   constructor (tagService = null) {
     // PIN-001: Configuration manager integration for authentication and settings

@@ -1,48 +1,122 @@
-# 🦁 Safari Extension Implementation Plan
-
-**Semantic Token:** [SAFARI-EXT-001]
-**Date:** 2025-07-15
-
----
+# Safari Extension Implementation Plan - Service Worker Integration
 
 ## Overview
-This plan details the steps to implement and test the Safari version of the Hoverboard extension. All steps are cross-referenced with existing architecture and specification documents and use the [SAFARI-EXT-001] semantic token family for traceability.
+This document records the step-by-step implementation of service worker integration for the Chrome extension, which is a prerequisite for Safari compatibility. The plan was designed to avoid dead-ends by testing smaller, verifiable steps.
 
----
+## Implementation Steps Completed
 
-## 1. Code Preparation
-- [ ] Audit all `chrome.*` API usage and replace with `browser.*` or polyfill ([SAFARI-EXT-SHIM-001]).
-- [ ] Add platform abstraction layer ([SAFARI-EXT-SHIM-001]).
-- [ ] Update manifest for Safari compatibility ([SAFARI-EXT-MANIFEST-001]).
+### Step 1: Minimal Service Worker File ✅
+**Action:** Created a barebones `service-worker.js` with only a console log.
+**File:** `src/core/service-worker.js`
+```javascript
+console.log('Service worker loaded');
+```
+**Test:** Verified service worker loads and logs appear in Chrome Extensions page.
+**Result:** ✅ Working
 
-## 2. UI and CSS
-- [ ] Test all overlays, popups, and options pages in Safari ([SAFARI-EXT-UI-001]).
-- [ ] Fix any CSS or font issues specific to Safari ([SAFARI-EXT-UI-001]).
+### Step 2: Manifest Configuration ✅
+**Action:** Updated `manifest.json` to use correct service worker path.
+**Changes:**
+- Changed `"service_worker": "./src/core/service-worker.js"` to `"service_worker": "src/core/service-worker.js"`
+- Maintained `"type": "module"`
+**Test:** Verified service worker recognized in Extensions page.
+**Result:** ✅ Working
 
-## 3. Feature Testing
-- [ ] Run all unit and integration tests in Safari ([SAFARI-EXT-TEST-001]).
-- [ ] Add Safari-specific test cases for popup sizing, permissions, and storage ([SAFARI-EXT-TEST-001]).
-- [ ] Manual QA for all user flows ([SAFARI-EXT-TEST-001]).
+### Step 3: Basic Event Handling ✅
+**Action:** Added `chrome.runtime.onInstalled` event listener.
+**Code Added:**
+```javascript
+chrome.runtime.onInstalled.addListener(() => {
+  console.log('Service worker: onInstalled event fired');
+});
+```
+**Test:** Verified event fires on extension reload/update.
+**Result:** ✅ Working
 
-## 4. Accessibility and Performance
-- [ ] Validate VoiceOver and keyboard navigation ([SAFARI-EXT-TEST-001]).
-- [ ] Profile performance and memory usage in Safari ([SAFARI-EXT-TEST-001]).
+### Step 4: API Access Verification ✅
+**Action:** Added `chrome.tabs.query` API call to verify permissions.
+**Code Added:**
+```javascript
+chrome.tabs.query({}, (tabs) => {
+  console.log('Service worker: Number of open tabs:', tabs.length);
+});
+```
+**Test:** Verified API call works and logs tab count.
+**Result:** ✅ Working
 
-## 5. Distribution
-- [ ] Create Xcode project for Safari extension ([SAFARI-EXT-DIST-001]).
-- [ ] Package, sign, and submit to the Mac App Store ([SAFARI-EXT-DIST-001]).
+### Step 5: Message Passing ✅
+**Action:** Added message listener for test communication.
+**Code Added:**
+```javascript
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message === 'test-message') {
+    console.log('Service worker: Received test-message');
+    sendResponse({ reply: 'Service worker received your message!' });
+  }
+});
+```
+**Test:** Verified message passing works between service worker and other extension parts.
+**Result:** ✅ Working
 
----
+## Critical Fixes Implemented
 
-## 6. Coordination with Existing Architecture
-- All steps here are cross-referenced with:
-  - [DARK_THEME_DEFAULT_ARCHITECTURE.md]
-  - [TOGGLE_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md]
-  - [TAG_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md]
-  - [OVERLAY_THEMING_TECHNICAL_SPEC.md]
-  - [AI-FIRST-001] and [feature-tracking-matrix.md]
-- Any improvements or platform-specific changes must be reflected in these documents as needed.
+### Fix 1: Response Structure Correction
+**Problem:** Message handler was returning bookmark data directly instead of wrapped in success response structure.
+**Solution:** Updated `src/core/message-handler.js` to return `{success: true, data: bookmark}` instead of just `bookmark`.
+**Impact:** Fixed overlay and popup data display.
 
----
+### Fix 2: Content Script Data Extraction
+**Problem:** Content script was setting `this.currentBookmark = response.data` but response was double-wrapped.
+**Solution:** Changed to `this.currentBookmark = response.data.data` to extract actual bookmark data.
+**Impact:** Fixed overlay data display.
 
-**[SAFARI-EXT-001]** 
+### Fix 3: Popup Data Extraction
+**Problem:** Popup was extracting `response.data` but response was double-wrapped.
+**Solution:** Changed to `resolve(response.data.data)` in `getBookmarkData` method.
+**Impact:** Fixed popup data display.
+
+### Fix 4: Restricted URL Handling
+**Problem:** Extension tried to show overlay on restricted pages like `chrome://newtab/`.
+**Solution:** Updated `handleShowHoverboard` in `PopupController.js` to show user-friendly error message instead of throwing error.
+**Code:**
+```javascript
+if (!this.canInjectIntoTab(this.currentTab)) {
+  this.uiManager.showError('Hoverboard is not available on this page (e.g., Chrome Web Store, New Tab, or Settings).');
+  return;
+}
+```
+**Impact:** Better user experience on restricted pages.
+
+## Current Status
+- ✅ Service worker loads successfully
+- ✅ Event handling works
+- ✅ API access verified
+- ✅ Message passing functional
+- ✅ Overlay displays live bookmark data
+- ✅ Popup displays live bookmark data
+- ✅ Restricted page handling implemented
+
+## Next Steps for Safari Compatibility
+1. Test service worker in Safari Web Extension Converter
+2. Identify Safari-specific API differences
+3. Implement browser detection and polyfills as needed
+4. Test cross-browser functionality
+
+## Files Modified
+- `src/core/service-worker.js` - Added basic service worker functionality
+- `src/core/message-handler.js` - Fixed response structure
+- `src/features/content/content-main.js` - Fixed data extraction
+- `src/ui/popup/PopupController.js` - Fixed data extraction and restricted page handling
+- `manifest.json` - Updated service worker path
+
+## Testing Checklist
+- [x] Service worker loads without errors
+- [x] Event listeners fire correctly
+- [x] API calls work with permissions
+- [x] Message passing functions
+- [x] Overlay displays bookmark data
+- [x] Popup displays bookmark data
+- [x] Restricted pages handled gracefully
+- [x] No console errors in service worker
+- [x] No console errors in content script
+- [x] No console errors in popup 

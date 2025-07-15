@@ -18,6 +18,12 @@ export class MessageService {
   setupMessageListener () {
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message === 'test-message') {
+          console.log('Service worker: Received test-message')
+          sendResponse({ reply: 'Service worker received your message!' })
+          return true // if you use async, otherwise omit
+        }
+
         this.handleIncomingMessage(message, sender, sendResponse)
         return true // Keep message channel open for async response
       })

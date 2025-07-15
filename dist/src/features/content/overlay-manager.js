@@ -6,6 +6,8 @@
 import { Logger } from '../../shared/logger.js'
 import { VisibilityControls } from '../../ui/components/VisibilityControls.js'
 import { MessageClient } from './message-client.js'
+// [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
 // Debug logging utility
 const debugLog = (message, data = null) => {
@@ -68,6 +70,19 @@ class OverlayManager {
    */
   async show (content) {
     debugLog('[OverlayManager] show() called', { content })
+    debugLog('[CHROME-DEBUG-001] OverlayManager.show called', { platform: navigator.userAgent });
+    // Platform detection
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      debugLog('[CHROME-DEBUG-001] Detected Chrome runtime in OverlayManager');
+    } else if (typeof browser !== 'undefined' && browser.runtime) {
+      debugLog('[CHROME-DEBUG-001] Detected browser polyfill runtime in OverlayManager');
+    } else {
+      debugError('[CHROME-DEBUG-001] No recognized extension runtime detected in OverlayManager');
+    }
+    // Check utils.js access
+    if (!debugLog || !debugError) {
+      console.error('[CHROME-DEBUG-001] utils.js functions missing in OverlayManager');
+    }
     try {
       debugLog('Showing overlay', { content })
 
@@ -80,6 +95,9 @@ class OverlayManager {
       console.log('🎨 [Overlay Debug] - Tags is array:', Array.isArray(content.bookmark?.tags))
       console.log('🎨 [Overlay Debug] - Page title:', content.pageTitle)
       console.log('🎨 [Overlay Debug] - Page URL:', content.pageUrl)
+
+      // [OVERLAY-DATA-FIX-001] - Use original content (refresh was causing data loss)
+      debugLog('[OVERLAY-DATA-FIX-001] Using original content data')
 
       // Create overlay if it doesn't exist
       if (!this.overlayElement) {
@@ -123,6 +141,14 @@ class OverlayManager {
       currentTagsContainer.appendChild(currentLabel)
 
       // [IMMUTABLE-REQ-TAG-001] - Add current tags with enhanced validation
+      debugLog('[OVERLAY-DEBUG] Checking for tags in content:', {
+        hasBookmark: !!content.bookmark,
+        bookmarkKeys: content.bookmark ? Object.keys(content.bookmark) : [],
+        tags: content.bookmark?.tags,
+        tagsType: typeof content.bookmark?.tags,
+        tagsIsArray: Array.isArray(content.bookmark?.tags)
+      })
+
       if (content.bookmark?.tags) {
         debugLog('Adding tags', { tags: content.bookmark.tags })
         content.bookmark.tags.forEach(tag => {
@@ -393,11 +419,9 @@ class OverlayManager {
 
             // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
             debugLog('[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background', updatedBookmark)
-            chrome.runtime.sendMessage({
+            await browser.runtime.sendMessage({
               type: 'BOOKMARK_UPDATED',
               data: updatedBookmark
-            }, (response) => {
-              debugLog('[TOGGLE-SYNC-OVERLAY-001] BOOKMARK_UPDATED response', response)
             })
 
             debugLog('[TOGGLE-SYNC-OVERLAY-001] Privacy toggled', content.bookmark.shared)
@@ -446,11 +470,9 @@ class OverlayManager {
 
             // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
             debugLog('[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background', updatedBookmark)
-            chrome.runtime.sendMessage({
+            await browser.runtime.sendMessage({
               type: 'BOOKMARK_UPDATED',
               data: updatedBookmark
-            }, (response) => {
-              debugLog('[TOGGLE-SYNC-OVERLAY-001] BOOKMARK_UPDATED response', response)
             })
 
             debugLog('[TOGGLE-SYNC-OVERLAY-001] Read status toggled', content.bookmark.toread)
@@ -606,12 +628,18 @@ class OverlayManager {
    */
   async refreshOverlayContent() {
     try {
-      // [IMMUTABLE-REQ-TAG-004] - Get updated bookmark data
+            // [IMMUTABLE-REQ-TAG-004] - Get updated bookmark data
+      const refreshData = {
+        url: window.location.href,
+        title: document.title,
+        tabId: this.content?.tabId || null
+      }
+
+      debugLog('[OVERLAY-DEBUG] Refresh request data:', refreshData)
+
       const response = await this.messageService.sendMessage({
         type: 'getCurrentBookmark',
-        data: {
-          url: window.location.href
-        }
+        data: refreshData
       })
 
       if (response && response.success && response.data) {
@@ -622,13 +650,20 @@ class OverlayManager {
           pageUrl: window.location.href
         }
 
-        // [IMMUTABLE-REQ-TAG-004] - Refresh overlay with updated content
-        this.show(updatedContent)
-        debugLog('[IMMUTABLE-REQ-TAG-004] Overlay refreshed with updated content')
+        debugLog('[IMMUTABLE-REQ-TAG-004] Overlay content refreshed with updated data')
+        debugLog('[OVERLAY-DEBUG] Refreshed bookmark data:', {
+          responseData: response.data,
+          responseDataKeys: Object.keys(response.data),
+          hasTags: !!response.data.tags,
+          tagsValue: response.data.tags,
+          tagsType: typeof response.data.tags
+        })
+        return updatedContent
       }
     } catch (error) {
       debugError('[IMMUTABLE-REQ-TAG-004] Failed to refresh overlay content:', error)
     }
+    return null
   }
 
   /**
@@ -1253,7 +1288,7 @@ class OverlayManager {
    */
   async handleTabSearch (searchText) {
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await browser.runtime.sendMessage({
         type: 'searchTabs',
         data: { searchText }
       })

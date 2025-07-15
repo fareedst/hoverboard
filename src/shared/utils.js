@@ -9,7 +9,15 @@
  * UTIL-005: DOM utilities for extension content scripts
  */
 
+// [SAFARI-EXT-SHIM-001] 2025-07-15: Safari/Firefox/Chrome browser API abstraction for cross-browser extension support
+// This module provides a unified browser API using webextension-polyfill for cross-browser compatibility.
+// All extension code should import { browser } from './utils' instead of using chrome.* directly.
+
 import { logger } from './logger.js'
+import { browser } from './safari-shim.js'
+
+// [SAFARI-EXT-SHIM-001] Export browser API from Safari shim
+export { browser }
 
 /**
  * URL utilities
@@ -502,11 +510,3 @@ export function debugWarn (component, message, ...args) {
     }
   }
 }
-
-// [SAFARI-EXT-SHIM-001] Safari/Firefox/Chrome browser API abstraction
-// This module provides a unified browser API using webextension-polyfill for cross-browser compatibility.
-// All extension code should import { browser } from './utils' instead of using chrome.* directly.
-
-import browser from 'webextension-polyfill';
-
-export { browser };

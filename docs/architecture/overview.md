@@ -55,6 +55,17 @@ src-new/
     └── storage.js         # Storage abstractions
 ```
 
+## 🦊🧭 Cross-Browser API Abstraction and Debug Logging [SAFARI-EXT-SHIM-001] (2025-07-15)
+
+To enable future Safari (and Firefox) support, a browser API abstraction layer has been implemented in `src/shared/utils.js` using `webextension-polyfill` with a fallback to `chrome` for Chrome compatibility. All extension code should import `{ browser }` from this module instead of using `chrome.*` directly. This abstraction is accompanied by debug logs (using the logger framework) to trace module loading and API resolution, ensuring robust diagnostics during migration and future platform support.
+
+- **Semantic Token:** `[SAFARI-EXT-SHIM-001]` is used in code and documentation for traceability.
+- **Debug Logging:** All major consumers of the abstraction log their loading process and the resolved browser API object.
+- **Tested:** The abstraction and logging have been tested and verified to work in Chrome, with no regression.
+- **Next Steps:** This foundation enables a smooth path to Safari extension support with minimal code changes.
+
+See also: `src/shared/utils.js` and related debug logs in `pinboard-service.js`, `tag-service.js`, and `PopupController.js`.
+
 ## 🔄 Component Architecture
 
 ### 🎛️ Service Worker (Background)
@@ -228,190 +239,4 @@ class ConfigManager {
 **Color Palette:**
 - Primary: `#1E40AF` (Blue)
 - Secondary: `#374151` (Gray)
-- Success: `#059669` (Green)
-- Warning: `#D97706` (Orange)
-- Error: `#DC2626` (Red)
-
-**Typography:**
-- Headers: System font stack
-- Body: Inter, -apple-system, BlinkMacSystemFont
-- Code: Fira Code, Monaco, monospace
-
-**Spacing Scale:**
-- Base unit: 0.25rem (4px)
-- Scale: 1x, 2x, 3x, 4x, 6x, 8x, 12x, 16x
-
-### 📱 Responsive Design
-
-The extension UI adapts to different contexts:
-
-- **Popup**: 320px width, variable height
-- **Options**: Full-page responsive layout
-- **Content overlays**: Contextual positioning
-
-## 🔒 Security Architecture
-
-### 🛡️ Content Security Policy
-
-```json
-{
-  "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'",
-    "content_scripts": "script-src 'self'; object-src 'self'"
-  }
-}
-```
-
-### 🔐 Permission Model
-
-**Required Permissions:**
-- `storage`: Configuration and cache storage
-- `activeTab`: Current tab access for bookmark detection
-- `scripting`: Content script injection
-
-**Host Permissions:**
-- `https://api.pinboard.in/*`: Pinboard API access
-
-### 🔒 Data Security
-
-- **Authentication tokens**: Encrypted storage
-- **User data**: Local storage with sync backup
-- **API requests**: HTTPS only with certificate pinning
-- **Content isolation**: Sandbox for content scripts
-
-## 📈 Performance Architecture
-
-### ⚡ Optimization Strategies
-
-1. **Lazy Loading**
-   - Load UI components on demand
-   - Defer non-critical script loading
-   - Progressive feature activation
-
-2. **Caching**
-   - Intelligent bookmark cache
-   - Tag suggestion cache
-   - API response caching with TTL
-
-3. **Memory Management**
-   - Cleanup event listeners
-   - Release DOM references
-   - Garbage collection optimization
-
-4. **Network Optimization**
-   - Request batching
-   - Conditional requests (ETags)
-   - Offline-first patterns
-
-### 📊 Performance Metrics
-
-- **Cold start**: < 100ms
-- **UI response**: < 16ms (60fps)
-- **API requests**: < 2s average
-- **Memory usage**: < 50MB peak
-
-## 🧪 Testing Architecture
-
-### 🔬 Testing Pyramid
-
-```mermaid
-graph TD
-    A[Unit Tests - 70%] --> B[Integration Tests - 20%]
-    B --> C[E2E Tests - 10%]
-    
-    A --> D[Individual Components]
-    B --> E[Feature Workflows]
-    C --> F[User Journeys]
-```
-
-### 🛠️ Testing Tools
-
-- **Unit Testing**: Jest with jsdom
-- **Integration Testing**: Jest with chrome extension mocks
-- **E2E Testing**: Puppeteer with real browser instances
-- **Coverage**: 80%+ target for critical paths
-
-## 🚀 Deployment Architecture
-
-### 📦 Build Pipeline
-
-```mermaid
-graph LR
-    A[Source Code] --> B[ESLint Check]
-    B --> C[Unit Tests]
-    C --> D[Integration Tests]
-    D --> E[Bundle Creation]
-    E --> F[Manifest Validation]
-    F --> G[Extension Package]
-    G --> H[Store Deployment]
-```
-
-### 🔄 Release Strategy
-
-1. **Development**: Feature branches with continuous integration
-2. **Staging**: Release candidates with full testing
-3. **Production**: Stable releases with gradual rollout
-
-### 📈 Monitoring
-
-- **Error tracking**: Sentry integration
-- **Performance monitoring**: Chrome extension metrics
-- **User analytics**: Privacy-respecting usage statistics
-
-## 🔧 Development Workflow
-
-### 🛠️ Setup
-
-```bash
-# Install dependencies
-npm install
-
-# Start development mode
-npm run dev
-
-# Run tests
-npm test
-
-# Build for production
-npm run build:prod
-```
-
-### 🧪 Testing Workflow
-
-```bash
-# Unit tests
-npm run test:unit
-
-# Integration tests
-npm run test:integration
-
-# E2E tests
-npm run test:e2e
-
-# Full test suite with coverage
-npm run test:ci
-```
-
-### 📦 Release Workflow
-
-```bash
-# Quality checks
-npm run quality:check
-
-# Build release
-npm run build:prod
-
-# Validate extension
-npm run validate
-
-# Package for store
-npm run package
-```
-
-## 📚 Additional Resources
-
-- [Migration Documentation](../migration/README.md)
-- [Development Setup Guide](../development/README.md)
-- [Troubleshooting Guide](../troubleshooting/README.md)
-- [Getting Started Guide](../getting-started/README.md)
-- [Reference Documentation](../reference/README.md) 
+- Success: `

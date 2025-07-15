@@ -8,6 +8,7 @@ This directory contains comprehensive troubleshooting guides, fix summaries, and
 |----------|------------|----------|--------|
 | **[Debugging Live Data Issue](debugging-live-data-issue.md)** | Data synchronization problems | ⭐ HIGH | Resolved |
 | **[Message Handler Fix](message-handler-fix.md)** | Inter-component communication | 🔺 MEDIUM | Fixed |
+| **[Messaging Fixes Summary](messaging-fixes-2025-07-15.md)** | Chrome/Safari messaging compatibility | ⭐ CRITICAL | Fixed |
 | **[Extension Loading Fix](extension-loading-fix.md)** | Extension initialization | ⭐ HIGH | Resolved |
 | **[Content Script Fix](content-script-fix.md)** | Page interaction issues | 🔶 MEDIUM | Fixed |
 | **[Show Hover Fix Summary](show-hover-fix-summary.md)** | Hover functionality problems | 🔺 MEDIUM | Resolved |
@@ -21,6 +22,7 @@ This directory contains comprehensive troubleshooting guides, fix summaries, and
 - Related: Extension loading and initialization issues
 
 ### 💬 **Communication Issues**
+- **[Messaging Fixes Summary](messaging-fixes-2025-07-15.md)** - Critical Chrome/Safari messaging compatibility fixes
 - **[Message Handler Fix](message-handler-fix.md)** - Background script communication
 - **[Content Script Fix](content-script-fix.md)** - Page script interaction
 
@@ -46,9 +48,10 @@ This directory contains comprehensive troubleshooting guides, fix summaries, and
 3. **Hover not working?** → [Show Hover Fix Summary](show-hover-fix-summary.md)
 
 ### 👨‍💻 **For Developers**
-1. **Communication errors?** → [Message Handler Fix](message-handler-fix.md)
-2. **Content script issues?** → [Content Script Fix](content-script-fix.md)
-3. **UI rendering problems?** → [Overlay Fix Summary](overlay-fix-summary.md)
+1. **"Message port closed" errors?** → [Messaging Fixes Summary](messaging-fixes-2025-07-15.md)
+2. **Communication errors?** → [Message Handler Fix](message-handler-fix.md)
+3. **Content script issues?** → [Content Script Fix](content-script-fix.md)
+4. **UI rendering problems?** → [Overlay Fix Summary](overlay-fix-summary.md)
 
 ## 📋 Issue Resolution Process
 

@@ -9,21 +9,11 @@ import { OverlayManager } from './overlay-manager.js'
 import { MessageClient } from './message-client.js'
 import { DOMUtils } from './dom-utils.js'
 import { MESSAGE_TYPES } from '../../core/message-handler.js'
-import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+// [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
+import { browser, debugLog, debugError } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
 // Global debug flag
 window.HOVERBOARD_DEBUG = true
-
-// Debug logging utility
-const debugLog = (message, data = null) => {
-  if (window.HOVERBOARD_DEBUG) {
-    if (data) {
-      console.log(`[Hoverboard Debug] ${message}`, data)
-    } else {
-      console.log(`[Hoverboard Debug] ${message}`)
-    }
-  }
-}
 
 // MV3-003: Main content script class for V3 architecture
 class HoverboardContentScript {
@@ -66,23 +56,23 @@ class HoverboardContentScript {
 
   async init () {
     try {
-      debugLog('Initializing content script')
+      debugLog('CONTENT-SCRIPT', 'Initializing content script')
 
       // Wait for DOM to be ready
       await this.domUtils.waitForDOM()
-      debugLog('DOM ready')
+      debugLog('CONTENT-SCRIPT', 'DOM ready')
 
       // Set up message listeners
       this.setupMessageListeners()
-      debugLog('Message listeners set up')
+      debugLog('CONTENT-SCRIPT', 'Message listeners set up')
 
       // Get tab ID from background
       await this.initializeTabId()
-      debugLog('Tab ID initialized:', this.tabId)
+      debugLog('CONTENT-SCRIPT', 'Tab ID initialized:', this.tabId)
 
       // Get configuration and options
       await this.loadConfiguration()
-      debugLog('Options loaded:', this.config)
+      debugLog('CONTENT-SCRIPT', 'Options loaded:', this.config)
 
       // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
       // Update overlay manager config with options and transparency settings
@@ -93,7 +83,7 @@ class HoverboardContentScript {
       this.overlayManager.positionMode = this.config.overlayPositionMode || 'bottom-fixed'
       this.overlayManager.adaptiveVisibility = this.config.overlayAdaptiveVisibility || true
 
-      debugLog('Overlay manager configured with transparency settings', {
+      debugLog('CONTENT-SCRIPT', 'Overlay manager configured with transparency settings', {
         transparencyMode: this.overlayManager.transparencyMode,
         positionMode: this.overlayManager.positionMode,
         adaptiveVisibility: this.overlayManager.adaptiveVisibility
@@ -101,14 +91,14 @@ class HoverboardContentScript {
 
       // Notify background that content script is ready
       await this.notifyReady()
-      debugLog('Ready notification sent')
+      debugLog('CONTENT-SCRIPT', 'Ready notification sent')
 
       // Load current page bookmark data
       await this.loadCurrentPageData()
-      debugLog('Current page data loaded:', this.currentBookmark)
+      debugLog('CONTENT-SCRIPT', 'Current page data loaded:', this.currentBookmark)
 
       this.isInitialized = true
-      debugLog('Content script initialization complete')
+      debugLog('CONTENT-SCRIPT', 'Content script initialization complete')
     } catch (error) {
       console.error('Hoverboard: Failed to initialize content script:', error)
     }
@@ -210,7 +200,9 @@ class HoverboardContentScript {
         data: { url: this.pageUrl }
       })
 
-      this.tabId = response.tabId
+      // Handle wrapped response from service worker
+      const actualResponse = response.success ? response.data : response
+      this.tabId = actualResponse.tabId
       console.log('Content script tab ID:', this.tabId)
     } catch (error) {
       console.error('Failed to get tab ID:', error)
@@ -223,8 +215,11 @@ class HoverboardContentScript {
         type: MESSAGE_TYPES.GET_OPTIONS
       })
 
-      if (response) {
-        this.config = { ...this.getDefaultConfig(), ...response }
+      // Handle wrapped response from service worker
+      const actualResponse = response.success ? response.data : response
+
+      if (actualResponse) {
+        this.config = { ...this.getDefaultConfig(), ...actualResponse }
         console.log('📋 Configuration loaded:', this.config)
       } else {
         this.config = this.getDefaultConfig()
@@ -269,8 +264,8 @@ class HoverboardContentScript {
 
   async loadCurrentPageData () {
     try {
-      debugLog('Loading current page data')
-      debugLog('Request data:', {
+      debugLog('CONTENT-SCRIPT', 'Loading current page data')
+      debugLog('CONTENT-SCRIPT', 'Request data:', {
         url: this.pageUrl,
         title: this.pageTitle,
         tabId: this.tabId
@@ -285,27 +280,36 @@ class HoverboardContentScript {
         }
       })
 
-      debugLog('Received response:', response)
+      debugLog('CONTENT-SCRIPT', 'Received response:', response)
 
-      if (response.blocked) {
-        debugLog('Site is blocked from processing')
+      // Handle wrapped response from service worker
+      const actualResponse = response.success ? response.data : response
+
+      if (actualResponse.blocked) {
+        debugLog('CONTENT-SCRIPT', 'Site is blocked from processing')
         return
       }
 
-      this.currentBookmark = response
-      debugLog('Current bookmark set:', this.currentBookmark)
+      // Debug the response structure
+      console.log('🔍 [Debug] Response structure:', response)
+      console.log('🔍 [Debug] Actual response:', actualResponse)
+      console.log('🔍 [Debug] Actual response type:', typeof actualResponse)
+
+      // Extract the actual bookmark data from the response
+      this.currentBookmark = actualResponse.data || actualResponse
+      debugLog('CONTENT-SCRIPT', 'Current bookmark set:', this.currentBookmark)
 
       // Check if we should show hover on page load
       const options = await this.getOptions()
-      debugLog('Options for page load:', options)
+      debugLog('CONTENT-SCRIPT', 'Options for page load:', options)
 
       if (options.showHoverOnPageLoad) {
-        debugLog('Showing hover on page load')
+        debugLog('CONTENT-SCRIPT', 'Showing hover on page load')
         await this.showHoverWithDelay(options)
       }
     } catch (error) {
       console.error('Failed to load current page data:', error)
-      debugLog('Error loading page data:', error)
+      debugLog('CONTENT-SCRIPT', 'Error loading page data:', error)
     }
   }
 
@@ -353,21 +357,34 @@ class HoverboardContentScript {
 
   async showHover (userTriggered = false) {
     try {
-      debugLog('Showing hover', { userTriggered })
+      debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] showHover called', { userTriggered, platform: navigator.userAgent });
+      // Platform detection
+      if (typeof chrome !== 'undefined' && chrome.runtime) {
+        debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] Detected Chrome runtime');
+      } else if (typeof browser !== 'undefined' && browser.runtime) {
+        debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] Detected browser polyfill runtime');
+      } else {
+        debugError('CONTENT-SCRIPT', '[CHROME-DEBUG-001] No recognized extension runtime detected');
+      }
+      // Check utils.js access
+      if (!debugLog || !debugError) {
+        console.error('[CHROME-DEBUG-001] utils.js functions missing');
+      }
+      debugLog('CONTENT-SCRIPT', 'Showing hover', { userTriggered })
 
       // Refresh bookmark data for user-triggered displays
       if (userTriggered) {
-        debugLog('Refreshing bookmark data for user-triggered display')
+        debugLog('CONTENT-SCRIPT', 'Refreshing bookmark data for user-triggered display')
         await this.loadCurrentPageData()
       }
 
       if (!this.currentBookmark) {
-        debugLog('No bookmark data available')
+        debugLog('CONTENT-SCRIPT', 'No bookmark data available')
         console.warn('No bookmark data available for hover display')
         return
       }
 
-      debugLog('Current bookmark data:', this.currentBookmark)
+      debugLog('CONTENT-SCRIPT', 'Current bookmark data:', this.currentBookmark)
 
       // Enhanced debugging for bookmark structure
       console.log('🔍 [Debug] Bookmark data structure:')
@@ -390,10 +407,10 @@ class HoverboardContentScript {
         userTriggered
       })
 
-      debugLog('Overlay display request sent')
+      debugLog('CONTENT-SCRIPT', 'Overlay display request sent')
     } catch (error) {
       console.error('Failed to show hover:', error)
-      debugLog('Error showing hover:', error)
+      debugLog('CONTENT-SCRIPT', 'Error showing hover:', error)
     }
   }
 
@@ -587,7 +604,9 @@ class HoverboardContentScript {
         type: MESSAGE_TYPES.GET_OPTIONS
       })
 
-      return response
+      // Handle wrapped response from service worker
+      const actualResponse = response.success ? response.data : response
+      return actualResponse
     } catch (error) {
       console.error('Failed to get options:', error)
       return {}
@@ -624,9 +643,9 @@ class HoverboardContentScript {
         this.overlayManager.show(updatedContent)
       }
 
-      debugLog('[TOGGLE-SYNC-CONTENT-001] Bookmark updated from external source', bookmarkData)
+      debugLog('CONTENT-SCRIPT', '[TOGGLE-SYNC-CONTENT-001] Bookmark updated from external source', bookmarkData)
     } catch (error) {
-      debugError('[TOGGLE-SYNC-CONTENT-001] Failed to handle bookmark update:', error)
+              debugError('CONTENT-SCRIPT', '[TOGGLE-SYNC-CONTENT-001] Failed to handle bookmark update:', error)
     }
   }
 
@@ -650,10 +669,10 @@ class HoverboardContentScript {
           }
           this.overlayManager.show(updatedContent)
         }
-        debugLog('[TAG-SYNC-CONTENT-001] Overlay updated with new tags', tagUpdateData.tags)
+        debugLog('CONTENT-SCRIPT', '[TAG-SYNC-CONTENT-001] Overlay updated with new tags', tagUpdateData.tags)
       }
     } catch (error) {
-      debugError('[TAG-SYNC-CONTENT-001] Failed to handle tag update:', error)
+              debugError('CONTENT-SCRIPT', '[TAG-SYNC-CONTENT-001] Failed to handle tag update:', error)
     }
   }
 

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Passing Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .log {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            border: none;
+            border-radius: 3px;
+            background: #007cba;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a87;
+        }
+        .success { color: green; }
+        .error { color: red; }
+        .info { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Hoverboard Extension - Message Passing Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="testGetTabId()">Test GET_TAB_ID</button>
+        <button onclick="testGetOptions()">Test GET_OPTIONS</button>
+        <button onclick="testGetCurrentBookmark()">Test GET_CURRENT_BOOKMARK</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toISOString();
+            const logEntry = `[${timestamp}] ${type.toUpperCase()}: ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            console.log(logEntry.trim());
+        }
+
+        function clearLog() {
+            document.getElementById('log').textContent = '';
+        }
+
+        async function testGetTabId() {
+            try {
+                log('Testing GET_TAB_ID message...', 'info');
+                
+                const response = await chrome.runtime.sendMessage({
+                    type: 'getTabId',
+                    data: { url: window.location.href }
+                });
+                
+                log(`GET_TAB_ID response: ${JSON.stringify(response, null, 2)}`, 'success');
+            } catch (error) {
+                log(`GET_TAB_ID error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetOptions() {
+            try {
+                log('Testing GET_OPTIONS message...', 'info');
+                
+                const response = await chrome.runtime.sendMessage({
+                    type: 'getOptions'
+                });
+                
+                log(`GET_OPTIONS response: ${JSON.stringify(response, null, 2)}`, 'success');
+            } catch (error) {
+                log(`GET_OPTIONS error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testGetCurrentBookmark() {
+            try {
+                log('Testing GET_CURRENT_BOOKMARK message...', 'info');
+                
+                const response = await chrome.runtime.sendMessage({
+                    type: 'getCurrentBookmark',
+                    data: {
+                        url: window.location.href,
+                        title: document.title
+                    }
+                });
+                
+                log(`GET_CURRENT_BOOKMARK response: ${JSON.stringify(response, null, 2)}`, 'success');
+            } catch (error) {
+                log(`GET_CURRENT_BOOKMARK error: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-test on page load
+        window.addEventListener('load', () => {
+            log('Page loaded, extension should be active', 'info');
+            log('Click the test buttons above to verify message passing', 'info');
+        });
+    </script>
+</body>
+</html> 
