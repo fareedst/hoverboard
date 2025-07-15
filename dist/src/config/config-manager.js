@@ -59,6 +59,14 @@ export class ConfigManager {
       uxUrlStripHash: false, // Preserve URL hash by default (maintain full URL context)
       uxShowSectionLabels: false, // Show section labels in popup (Quick Actions, Search Tabs)
 
+      // [IMMUTABLE-REQ-TAG-003] - Recent tags configuration
+      // IMPLEMENTATION DECISION: Conservative defaults for shared memory management
+      recentTagsMaxListSize: 50, // Maximum recent tags in shared memory
+      recentTagsMaxDisplayCount: 10, // Maximum tags to display in UI
+      recentTagsSharedMemoryKey: 'hoverboard_recent_tags_shared', // Shared memory key
+      recentTagsEnableUserDriven: true, // Enable user-driven recent tags
+      recentTagsClearOnReload: true, // Clear shared memory on extension reload
+
       // CFG-003: Badge configuration - Extension icon indicator settings
       // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
       badgeTextIfNotBookmarked: '-', // Clear indication of non-bookmarked state

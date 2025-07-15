@@ -10,6 +10,111 @@ import { PinboardService } from '../features/pinboard/pinboard-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
 
+/**
+ * [IMMUTABLE-REQ-TAG-003] - Recent Tags Memory Manager
+ * Manages shared memory for user-driven recent tags across extension windows
+ */
+class RecentTagsMemoryManager {
+  constructor () {
+    // [IMMUTABLE-REQ-TAG-003] - Shared memory for recent tags
+    this.recentTags = []
+    this.maxListSize = 50 // Configurable maximum list size
+    this.lastUpdated = null
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Get all recent tags from shared memory
+   * @returns {Array} Array of recent tag objects
+   */
+  getRecentTags () {
+    return [...this.recentTags] // Return copy to prevent external modification
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Add tag to recent list (current site only)
+   * @param {string} tagName - Tag name to add
+   * @param {string} currentSiteUrl - Current site URL for scope validation
+   * @returns {boolean} Success status
+   */
+  addTag (tagName, currentSiteUrl) {
+    try {
+      if (!tagName || !currentSiteUrl) {
+        console.error('[IMMUTABLE-REQ-TAG-003] Invalid parameters for addTag:', { tagName, currentSiteUrl })
+        return false
+      }
+
+      const now = new Date()
+
+      // Check if tag already exists in list
+      const existingTagIndex = this.recentTags.findIndex(tag => tag.name === tagName)
+
+      if (existingTagIndex >= 0) {
+        // Update existing tag
+        this.recentTags[existingTagIndex] = {
+          ...this.recentTags[existingTagIndex],
+          count: (this.recentTags[existingTagIndex].count || 0) + 1,
+          lastUsed: now.toISOString()
+        }
+      } else {
+        // Add new tag to list
+        const newTag = {
+          name: tagName,
+          count: 1,
+          lastUsed: now.toISOString(),
+          addedFromSite: currentSiteUrl
+        }
+        this.recentTags.push(newTag)
+      }
+
+      // Sort by lastUsed timestamp (most recent first) and limit list size
+      this.recentTags.sort((a, b) => {
+        const dateA = new Date(a.lastUsed)
+        const dateB = new Date(b.lastUsed)
+        return dateB - dateA
+      })
+
+      // Limit list size
+      if (this.recentTags.length > this.maxListSize) {
+        this.recentTags = this.recentTags.slice(0, this.maxListSize)
+      }
+
+      this.lastUpdated = now.toISOString()
+
+      console.log('[IMMUTABLE-REQ-TAG-003] Successfully added tag to shared memory:', { tagName, currentSiteUrl })
+      return true
+    } catch (error) {
+      console.error('[IMMUTABLE-REQ-TAG-003] Error adding tag to shared memory:', error)
+      return false
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Clear all recent tags (called on extension reload)
+   */
+  clearRecentTags () {
+    this.recentTags = []
+    this.lastUpdated = null
+    console.log('[IMMUTABLE-REQ-TAG-003] Cleared recent tags from shared memory')
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Get memory status for debugging
+   * @returns {Object} Memory status information
+   */
+  getMemoryStatus () {
+    return {
+      tagCount: this.recentTags.length,
+      maxListSize: this.maxListSize,
+      lastUpdated: this.lastUpdated,
+      tags: this.recentTags.map(tag => ({
+        name: tag.name,
+        count: tag.count,
+        lastUsed: tag.lastUsed
+      }))
+    }
+  }
+}
+
 // MV3-001: Main service worker class for V3 architecture
 class HoverboardServiceWorker {
   constructor () {
@@ -18,6 +123,9 @@ class HoverboardServiceWorker {
     this.pinboardService = new PinboardService()
     this.configManager = new ConfigManager()
     this.badgeManager = new BadgeManager()
+
+    // [IMMUTABLE-REQ-TAG-003] - Initialize shared memory for recent tags
+    this.recentTagsMemory = new RecentTagsMemoryManager()
 
     // MV3-001: Set up V3 event listeners
     this.setupEventListeners()
@@ -45,6 +153,17 @@ class HoverboardServiceWorker {
     chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       this.handleTabUpdated(tabId, changeInfo, tab)
     })
+
+    // [IMMUTABLE-REQ-TAG-003] - Handle extension reload to clear shared memory
+    chrome.runtime.onStartup.addListener(() => {
+      this.handleExtensionStartup()
+    })
+  }
+
+  // [IMMUTABLE-REQ-TAG-003] - Handle extension startup (clears shared memory)
+  async handleExtensionStartup () {
+    console.log('[IMMUTABLE-REQ-TAG-003] Extension startup - clearing recent tags shared memory')
+    this.recentTagsMemory.clearRecentTags()
   }
 
   // MV3-001: Handle extension installation and updates
@@ -115,6 +234,12 @@ class HoverboardServiceWorker {
 
 // MV3-001: Initialize the service worker for V3 architecture
 const serviceWorker = new HoverboardServiceWorker()
+
+// [IMMUTABLE-REQ-TAG-003] - Make shared memory accessible globally
+if (serviceWorker.recentTagsMemory) {
+  self.recentTagsMemory = serviceWorker.recentTagsMemory
+  globalThis.recentTagsMemory = serviceWorker.recentTagsMemory
+}
 
 // MV3-001: Export for testing and external access
 export { HoverboardServiceWorker }

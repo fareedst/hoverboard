@@ -211,14 +211,19 @@ class HoverSystem {
   }
 
   /**
-   * Build recent tags section
+   * [IMMUTABLE-REQ-TAG-003] - Build recent tags section with user-driven behavior
    */
   async buildRecentTagsSection (pin) {
     try {
-      const recentTags = await this.messageService.sendMessage('getRecentTags', {
-        limit: this.config.recentTagsLimit || 20
+      // [IMMUTABLE-REQ-TAG-003] - Get user recent tags excluding current site
+      const response = await this.messageService.sendMessage('getRecentBookmarks', {
+        currentTags: pin.tags || [], // Pass current tags for exclusion
+        senderUrl: pin.url
       })
 
+      const recentTags = response?.recentTags || []
+
+      // [IMMUTABLE-REQ-TAG-003] - Show empty state for user-driven recent tags
       if (!recentTags || recentTags.length === 0) {
         return null
       }
@@ -231,7 +236,7 @@ class HoverSystem {
       header.className = 'section-header'
       header.textContent = 'Recent:'
       if (this.config.showTooltips) {
-        header.title = 'Recent Tags (click to tag)'
+        header.title = 'Recent Tags (click to add to current site)'
       }
       section.appendChild(header)
 
@@ -240,15 +245,16 @@ class HoverSystem {
       tagsContainer.className = 'tags-container'
       section.appendChild(tagsContainer)
 
-      // Filter out tags that are already on this pin
+      // [IMMUTABLE-REQ-TAG-003] - Tags are already filtered by the service, but double-check
       const currentTags = pin.tags || []
       const availableTags = recentTags.filter(tag => !currentTags.includes(tag))
 
-      // Render recent tags (limited count)
+      // [IMMUTABLE-REQ-TAG-003] - Render recent tags (limited count)
       const displayCount = Math.min(availableTags.length, this.config.recentTagsDisplayLimit || 10)
       for (let i = 0; i < displayCount; i++) {
         const tag = availableTags[i]
         const tagElement = this.tagRenderer.createRecentTag(tag, pin, (tagToAdd) => {
+          // [IMMUTABLE-REQ-TAG-003] - Add tag to current site only
           this.handleAddTag(pin, tagToAdd)
         })
         tagsContainer.appendChild(tagElement)
@@ -256,7 +262,7 @@ class HoverSystem {
 
       return section
     } catch (error) {
-      this.logger.error('Error building recent tags section:', error)
+      this.logger.error('[IMMUTABLE-REQ-TAG-003] Error building recent tags section:', error)
       return null
     }
   }
@@ -423,21 +429,33 @@ class HoverSystem {
   }
 
   /**
-   * Handle adding a tag
+   * [IMMUTABLE-REQ-TAG-003] - Handle adding a tag to current site only
    */
   async handleAddTag (pin, tag) {
     try {
-      this.logger.debug('Adding tag:', tag)
+      this.logger.debug('[IMMUTABLE-REQ-TAG-003] Adding tag to current site:', tag)
 
+      // [IMMUTABLE-REQ-TAG-003] - Add tag to bookmark
       await this.messageService.sendMessage('addTag', {
         pin,
         tag,
         description: pin.description || this.document.title
       })
 
+      // [IMMUTABLE-REQ-TAG-003] - Track tag addition for current site only
+      try {
+        await this.messageService.sendMessage('addTagToRecent', {
+          tagName: tag,
+          currentSiteUrl: pin.url
+        })
+      } catch (error) {
+        this.logger.error('[IMMUTABLE-REQ-TAG-003] Failed to track tag addition:', error)
+        // Don't fail the entire operation if tag tracking fails
+      }
+
       setTimeout(() => this.refreshHover(), 500)
     } catch (error) {
-      this.logger.error('Error adding tag:', error)
+      this.logger.error('[IMMUTABLE-REQ-TAG-003] Error adding tag:', error)
     }
   }
 

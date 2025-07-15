@@ -4488,6 +4488,10 @@
     SEARCH_TABS: "searchTabs",
     GET_SEARCH_HISTORY: "getSearchHistory",
     CLEAR_SEARCH_STATE: "clearSearchState",
+    // [IMMUTABLE-REQ-TAG-003] Recent tags operations
+    ADD_TAG_TO_RECENT: "addTagToRecent",
+    GET_USER_RECENT_TAGS: "getUserRecentTags",
+    GET_SHARED_MEMORY_STATUS: "getSharedMemoryStatus",
     // Content script lifecycle
     CONTENT_SCRIPT_READY: "contentScriptReady",
     // Overlay configuration

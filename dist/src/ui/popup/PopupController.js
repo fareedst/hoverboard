@@ -134,36 +134,32 @@ export class PopupController {
   }
 
   /**
-   * Load recent tags from the tag service
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced recent tags loading with current tag exclusion
+   * [IMMUTABLE-REQ-TAG-003] - Load user-driven recent tags from shared memory
+   * Excludes tags already assigned to the current site
    */
   async loadRecentTags () {
     try {
-      debugLog('[POPUP-CONTROLLER] Loading recent tags')
+      debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Loading user-driven recent tags')
 
-      // [IMMUTABLE-REQ-TAG-001] - Get current tags to exclude from recent tags
+      // [IMMUTABLE-REQ-TAG-003] - Get current tags to exclude from recent tags
       const currentTags = this.normalizeTags(this.currentPin?.tags || [])
-      debugLog('[POPUP-CONTROLLER] Current tags to exclude:', currentTags)
+      debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Current tags to exclude:', currentTags)
 
+      // [IMMUTABLE-REQ-TAG-003] - Get user recent tags excluding current site
       const response = await this.sendMessage({
         type: 'getRecentBookmarks',
         data: {
-          description: this.currentPin?.description || this.currentTab?.title,
-          time: this.currentPin?.time || new Date().toISOString(),
-          extended: this.currentPin?.extended || '',
-          shared: this.currentPin?.shared || 'yes',
-          tags: currentTags,
-          toread: this.currentPin?.toread || 'no',
+          currentTags: currentTags, // Pass current tags for exclusion
           senderUrl: this.currentTab?.url
         }
       })
 
-      debugLog('[POPUP-CONTROLLER] Recent bookmarks response received:', response)
+      debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Recent bookmarks response received:', response)
 
       if (response && response.recentTags) {
-        debugLog('[POPUP-CONTROLLER] Recent tags from response:', response.recentTags)
+        debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Recent tags from response:', response.recentTags)
 
-        // [IMMUTABLE-REQ-TAG-001] - Extract tag names from recent tags data
+        // [IMMUTABLE-REQ-TAG-003] - Extract tag names from recent tags data
         // Handle both string arrays and object arrays
         const recentTagNames = response.recentTags.map(tag => {
           if (typeof tag === 'string') {
@@ -175,22 +171,22 @@ export class PopupController {
           }
         })
 
-        debugLog('[POPUP-CONTROLLER] Extracted recent tag names:', recentTagNames)
+        debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Extracted recent tag names:', recentTagNames)
 
-        // [IMMUTABLE-REQ-TAG-001] - Filter out current tags to avoid duplicates
+        // [IMMUTABLE-REQ-TAG-003] - Tags are already filtered by the service, but double-check
         const filteredRecentTags = recentTagNames.filter(tag =>
           !currentTags.includes(tag)
         )
 
-        debugLog('[POPUP-CONTROLLER] Filtered recent tags (excluding current):', filteredRecentTags)
+        debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Final filtered recent tags:', filteredRecentTags)
 
         this.uiManager.updateRecentTags(filteredRecentTags)
       } else {
-        debugLog('[POPUP-CONTROLLER] No recent tags in response, updating with empty array')
+        debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] No recent tags in response, updating with empty array')
         this.uiManager.updateRecentTags([])
       }
     } catch (error) {
-      debugError('[POPUP-CONTROLLER] Failed to load recent tags:', error)
+      debugError('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Failed to load recent tags:', error)
       this.uiManager.updateRecentTags([])
     }
   }
@@ -875,7 +871,7 @@ export class PopupController {
 
   /**
    * Handle add tag action
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced tag handling with recent tags tracking
+   * [IMMUTABLE-REQ-TAG-003] - Enhanced with user-driven recent tags tracking
    */
   async handleAddTag (tagText) {
     if (!tagText || !tagText.trim()) {
@@ -908,10 +904,26 @@ export class PopupController {
         await this.createBookmark(newTags)
       }
 
+      // [IMMUTABLE-REQ-TAG-003] - Track newly added tags for current site only
+      for (const tag of newTags) {
+        try {
+          await this.sendMessage({
+            type: 'addTagToRecent',
+            data: {
+              tagName: tag,
+              currentSiteUrl: this.currentTab?.url
+            }
+          })
+        } catch (error) {
+          debugError('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Failed to track tag addition:', error)
+          // Don't fail the entire operation if tag tracking fails
+        }
+      }
+
       // [IMMUTABLE-REQ-TAG-001] - Clear the input
       this.uiManager.clearTagInput()
 
-      // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after adding a tag
+      // [IMMUTABLE-REQ-TAG-003] - Refresh recent tags after adding a tag
       await this.loadRecentTags()
     } catch (error) {
       this.errorHandler.handleError('Failed to add tags', error)
@@ -1084,10 +1096,6 @@ export class PopupController {
       this.setLoading(false)
     }
   }
-
-
-
-
 
   /**
    * Handle delete bookmark action

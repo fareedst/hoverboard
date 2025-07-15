@@ -352,7 +352,8 @@ export class UIManager {
   }
 
   /**
-   * Update recent tags display
+   * [IMMUTABLE-REQ-TAG-003] - Update recent tags display with user-driven behavior
+   * @param {string[]} recentTags - Array of recent tag names
    */
   updateRecentTags (recentTags) {
     if (!this.elements.recentTagsContainer) return
@@ -360,13 +361,13 @@ export class UIManager {
     // Clear existing recent tags
     this.elements.recentTagsContainer.innerHTML = ''
 
-    // If no recent tags, show empty state
+    // [IMMUTABLE-REQ-TAG-003] - Show empty state for user-driven recent tags
     if (!recentTags || recentTags.length === 0) {
       this.elements.recentTagsContainer.innerHTML = '<div class="no-tags">No recent tags</div>'
       return
     }
 
-    // Create recent tag elements (clickable to add)
+    // [IMMUTABLE-REQ-TAG-003] - Create recent tag elements (clickable to add to current site only)
     recentTags.forEach(tag => {
       const tagElement = this.createRecentTagElement(tag)
       this.elements.recentTagsContainer.appendChild(tagElement)
@@ -374,7 +375,9 @@ export class UIManager {
   }
 
   /**
-   * Create a recent tag element (clickable to add)
+   * [IMMUTABLE-REQ-TAG-003] - Create a recent tag element (clickable to add to current site only)
+   * @param {string} tag - Tag name
+   * @returns {HTMLElement} Tag element
    */
   createRecentTagElement (tag) {
     const tagElement = document.createElement('div')
@@ -383,7 +386,7 @@ export class UIManager {
       <span class="tag-text">${this.escapeHtml(tag)}</span>
     `
 
-    // Add click handler to add this tag
+    // [IMMUTABLE-REQ-TAG-003] - Add click handler to add this tag to current site only
     tagElement.addEventListener('click', () => {
       this.emit('addTag', tag)
     })

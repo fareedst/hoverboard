@@ -41,6 +41,11 @@ export const MESSAGE_TYPES = {
   GET_SEARCH_HISTORY: 'getSearchHistory',
   CLEAR_SEARCH_STATE: 'clearSearchState',
 
+  // [IMMUTABLE-REQ-TAG-003] Recent tags operations
+  ADD_TAG_TO_RECENT: 'addTagToRecent',
+  GET_USER_RECENT_TAGS: 'getUserRecentTags',
+  GET_SHARED_MEMORY_STATUS: 'getSharedMemoryStatus',
+
   // Content script lifecycle
   CONTENT_SCRIPT_READY: 'contentScriptReady',
 
@@ -161,6 +166,16 @@ export class MessageHandler {
       case MESSAGE_TYPES.CLEAR_SEARCH_STATE:
         return this.handleClearSearchState()
 
+      // [IMMUTABLE-REQ-TAG-003] Handle recent tags messages
+      case MESSAGE_TYPES.ADD_TAG_TO_RECENT:
+        return this.handleAddTagToRecent(data)
+
+      case MESSAGE_TYPES.GET_USER_RECENT_TAGS:
+        return this.handleGetUserRecentTags(data)
+
+      case MESSAGE_TYPES.GET_SHARED_MEMORY_STATUS:
+        return this.handleGetSharedMemoryStatus()
+
       case MESSAGE_TYPES.GET_TAB_ID:
         return { tabId }
 
@@ -231,28 +246,114 @@ export class MessageHandler {
   }
 
   async handleGetRecentBookmarks (data, senderUrl) {
-    debugLog('[MESSAGE-HANDLER] Handling getRecentBookmarks request:', data)
-    debugLog('[MESSAGE-HANDLER] Sender URL:', senderUrl)
+    debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Handling getRecentBookmarks request:', data)
+    debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Sender URL:', senderUrl)
 
-    const recentTags = await this.tagService.getRecentTags({
-      description: data.description,
-      time: data.time,
-      extended: data.extended,
-      shared: data.shared,
-      tags: data.tags,
-      toread: data.toread,
-      senderUrl
-    })
+    // [IMMUTABLE-REQ-TAG-003] - Get user recent tags excluding current site
+    const recentTags = await this.tagService.getUserRecentTagsExcludingCurrent(data.currentTags || [])
 
-    debugLog('[MESSAGE-HANDLER] Recent tags from tag service:', recentTags)
+    debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] User recent tags (excluding current):', recentTags)
 
     const response = {
       ...data,
       recentTags
     }
 
-    debugLog('[MESSAGE-HANDLER] Returning response:', response)
+    debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Returning response:', response)
     return response
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Handle tag addition to recent list (current site only)
+   * @param {Object} data - Message data containing tagName and currentSiteUrl
+   * @returns {Promise<Object>} Success status
+   */
+  async handleAddTagToRecent (data) {
+    try {
+      const { tagName, currentSiteUrl } = data
+
+      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Adding tag to recent list:', { tagName, currentSiteUrl })
+
+      if (!tagName || !currentSiteUrl) {
+        throw new Error('tagName and currentSiteUrl are required')
+      }
+
+      // Add tag to user recent list for current site only
+      const success = await this.tagService.addTagToUserRecentList(tagName, currentSiteUrl)
+
+      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Tag addition result:', success)
+
+      return { success }
+    } catch (error) {
+      debugError('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Error adding tag to recent:', error)
+      return { success: false, error: error.message }
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Handle get user recent tags request
+   * @param {Object} data - Message data
+   * @returns {Promise<Object>} Recent tags data
+   */
+  async handleGetUserRecentTags (data) {
+    try {
+      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Getting user recent tags')
+
+      const recentTags = await this.tagService.getUserRecentTags()
+
+      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] User recent tags:', recentTags)
+
+      return { recentTags }
+    } catch (error) {
+      debugError('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Error getting user recent tags:', error)
+      return { recentTags: [], error: error.message }
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Handle get shared memory status request
+   * @returns {Promise<Object>} Shared memory status
+   */
+  async handleGetSharedMemoryStatus () {
+    try {
+      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Getting shared memory status')
+
+      // Get the service worker instance to access shared memory
+      const serviceWorker = await this.getServiceWorker()
+      if (serviceWorker && serviceWorker.recentTagsMemory) {
+        const status = serviceWorker.recentTagsMemory.getMemoryStatus()
+        return { recentTagsMemory: serviceWorker.recentTagsMemory, status }
+      }
+
+      return { recentTagsMemory: null, status: 'not_available' }
+    } catch (error) {
+      debugError('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Error getting shared memory status:', error)
+      return { recentTagsMemory: null, status: 'error', error: error.message }
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Get service worker instance
+   * @returns {Promise<Object|null>} Service worker instance or null
+   */
+  async getServiceWorker () {
+    try {
+      // In Manifest V3, we need to access the service worker instance
+      // This is a bit tricky since we're already in the service worker context
+      if (typeof self !== 'undefined' && self.recentTagsMemory) {
+        return self
+      }
+
+      // Try to get it from the global scope
+      if (typeof globalThis !== 'undefined' && globalThis.recentTagsMemory) {
+        return globalThis
+      }
+
+      return null
+    } catch (error) {
+      debugError('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Error getting service worker:', error)
+      return null
+    }
   }
 
   async handleGetOptions () {
@@ -281,6 +382,18 @@ export class MessageHandler {
       }
     }
 
+    // [IMMUTABLE-REQ-TAG-003] - Track newly added tags for current site only
+    for (const tag of addedTags) {
+      if (tag.trim()) {
+        try {
+          await this.tagService.addTagToUserRecentList(tag.trim(), data.url)
+        } catch (error) {
+          debugError(`[IMMUTABLE-REQ-TAG-003] Failed to add tag "${tag}" to user recent list:`, error)
+          // Don't fail the entire operation if tag tracking fails
+        }
+      }
+    }
+
     return result
   }
 
@@ -297,6 +410,16 @@ export class MessageHandler {
         await this.tagService.handleTagAddition(data.value.trim(), data)
       } catch (error) {
         debugError(`[IMMUTABLE-REQ-TAG-001] Failed to track tag "${data.value}":`, error)
+        // Don't fail the entire operation if tag tracking fails
+      }
+    }
+
+    // [IMMUTABLE-REQ-TAG-003] - Track tag addition for current site only
+    if (data.value && data.value.trim() && data.url) {
+      try {
+        await this.tagService.addTagToUserRecentList(data.value.trim(), data.url)
+      } catch (error) {
+        debugError(`[IMMUTABLE-REQ-TAG-003] Failed to add tag "${data.value}" to user recent list:`, error)
         // Don't fail the entire operation if tag tracking fails
       }
     }

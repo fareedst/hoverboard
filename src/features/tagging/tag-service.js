@@ -21,6 +21,9 @@ export class TagService {
     this.cacheKey = 'hoverboard_recent_tags_cache'
     this.cacheTimeout = 5 * 60 * 1000 // 5 minutes
     this.tagFrequencyKey = 'hoverboard_tag_frequency'
+
+    // [IMMUTABLE-REQ-TAG-003] - Shared memory key for user-driven recent tags
+    this.sharedMemoryKey = 'hoverboard_recent_tags_shared'
   }
 
   /**
@@ -44,56 +47,220 @@ export class TagService {
   }
 
   /**
-   * Get recent tags with caching and throttling
+   * [IMMUTABLE-REQ-TAG-003] - Get user-driven recent tags from shared memory
+   * @returns {Promise<Object[]>} Array of recent tag objects sorted by lastUsed timestamp
+   */
+  async getUserRecentTags() {
+    try {
+      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Getting user recent tags from shared memory')
+
+      // First try to access shared memory directly (service worker context)
+      const directMemory = this.getDirectSharedMemory()
+      if (directMemory) {
+        const recentTags = directMemory.getRecentTags()
+        debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from direct shared memory:', recentTags.length)
+
+        // Sort by lastUsed timestamp (most recent first)
+        const sortedTags = recentTags.sort((a, b) => {
+          const dateA = new Date(a.lastUsed)
+          const dateB = new Date(b.lastUsed)
+          return dateB - dateA
+        })
+
+        return sortedTags
+      }
+
+      // Fallback to background page access
+      const backgroundPage = await this.getBackgroundPage()
+      if (!backgroundPage || !backgroundPage.recentTagsMemory) {
+        debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] No shared memory found, returning empty array')
+        return []
+      }
+
+      const recentTags = backgroundPage.recentTagsMemory.getRecentTags()
+      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from shared memory:', recentTags.length)
+
+      // Sort by lastUsed timestamp (most recent first)
+      const sortedTags = recentTags.sort((a, b) => {
+        const dateA = new Date(a.lastUsed)
+        const dateB = new Date(b.lastUsed)
+        return dateB - dateA
+      })
+
+      return sortedTags
+    } catch (error) {
+      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to get user recent tags:', error)
+      return []
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Get direct access to shared memory (service worker context)
+   * @returns {Object|null} Shared memory object or null
+   */
+  getDirectSharedMemory() {
+    try {
+      // Try to access shared memory directly from global scope
+      if (typeof self !== 'undefined' && self.recentTagsMemory) {
+        return self.recentTagsMemory
+      }
+
+      if (typeof globalThis !== 'undefined' && globalThis.recentTagsMemory) {
+        return globalThis.recentTagsMemory
+      }
+
+      return null
+    } catch (error) {
+      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Error getting direct shared memory:', error)
+      return null
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Add tag to user recent list (current site only)
+   * @param {string} tagName - Tag name to add
+   * @param {string} currentSiteUrl - Current site URL for scope validation
+   * @returns {Promise<boolean>} Success status
+   */
+  async addTagToUserRecentList(tagName, currentSiteUrl) {
+    try {
+      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Adding tag to user recent list:', { tagName, currentSiteUrl })
+
+      // Sanitize tag name
+      const sanitizedTag = this.sanitizeTag(tagName)
+      if (!sanitizedTag) {
+        debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Invalid tag name:', tagName)
+        return false
+      }
+
+      // First try to access shared memory directly (service worker context)
+      const directMemory = this.getDirectSharedMemory()
+      if (directMemory) {
+        const success = directMemory.addTag(sanitizedTag, currentSiteUrl)
+
+        if (success) {
+          debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Successfully added tag to user recent list via direct access')
+          // Update tag frequency for suggestions
+          await this.recordTagUsage(sanitizedTag)
+        } else {
+          debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to add tag to user recent list via direct access')
+        }
+
+        return success
+      }
+
+      // Fallback to background page access
+      const backgroundPage = await this.getBackgroundPage()
+      if (!backgroundPage || !backgroundPage.recentTagsMemory) {
+        debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Shared memory not available')
+        return false
+      }
+
+      // Add tag to shared memory (current site only)
+      const success = backgroundPage.recentTagsMemory.addTag(sanitizedTag, currentSiteUrl)
+
+      if (success) {
+        debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Successfully added tag to user recent list')
+        // Update tag frequency for suggestions
+        await this.recordTagUsage(sanitizedTag)
+      } else {
+        debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to add tag to user recent list')
+      }
+
+      return success
+    } catch (error) {
+      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Error adding tag to user recent list:', error)
+      return false
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Get recent tags excluding current site
+   * @param {string[]} currentTags - Tags currently assigned to the current site
+   * @returns {Promise<Object[]>} Filtered array of recent tags
+   */
+  async getUserRecentTagsExcludingCurrent(currentTags = []) {
+    try {
+      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Getting recent tags excluding current:', currentTags)
+
+      // Get all user recent tags from shared memory
+      const allRecentTags = await this.getUserRecentTags()
+
+      // [IMMUTABLE-REQ-TAG-003] - Filter out tags already on current site (case-insensitive)
+      const normalizedCurrentTags = currentTags.map(tag => tag.toLowerCase())
+      const filteredTags = allRecentTags.filter(tag =>
+        !normalizedCurrentTags.includes(tag.name.toLowerCase())
+      )
+
+      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Filtered recent tags:', filteredTags.length)
+      return filteredTags
+    } catch (error) {
+      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Error getting filtered recent tags:', error)
+      return []
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Get background page for shared memory access
+   * @returns {Promise<Object|null>} Background page object or null
+   */
+  async getBackgroundPage() {
+    try {
+      // In Manifest V3, the service worker is the background page
+      // We need to access the shared memory directly from the service worker
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getBackgroundPage) {
+        // Try the traditional method first (for backward compatibility)
+        const backgroundPage = await chrome.runtime.getBackgroundPage()
+        return backgroundPage
+      } else {
+        // In service worker context, we need to access the shared memory directly
+        // The service worker instance should have the recentTagsMemory property
+        if (typeof self !== 'undefined' && self.recentTagsMemory) {
+          return { recentTagsMemory: self.recentTagsMemory }
+        }
+
+        // If we're in a content script or popup, try to get the service worker
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+          // Send a message to get the shared memory status
+          const response = await chrome.runtime.sendMessage({
+            type: 'getSharedMemoryStatus'
+          })
+          if (response && response.recentTagsMemory) {
+            return { recentTagsMemory: response.recentTagsMemory }
+          }
+        }
+
+        return null
+      }
+    } catch (error) {
+      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to get background page:', error)
+      return null
+    }
+  }
+
+  /**
+   * [IMMUTABLE-REQ-TAG-003] - Get recent tags with new user-driven behavior
    * @param {Object} options - Tag retrieval options
    * @returns {Promise<Object[]>} Array of recent tag objects
    */
   async getRecentTags (options = {}) {
     try {
-      debugLog('TAG-SERVICE', 'Getting recent tags with options:', options)
+      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Getting recent tags with new user-driven behavior')
 
-      // Check cache first
-      const cachedTags = await this.getCachedTags()
-      let tagsArr = []
-
-      debugLog('TAG-SERVICE', 'Cached tags result:', cachedTags)
-
-      if (cachedTags && this.isCacheValid(cachedTags.timestamp)) {
-        debugLog('TAG-SERVICE', 'Using cached tags, count:', cachedTags.tags.length)
-        tagsArr = cachedTags.tags
-      } else {
-        debugLog('TAG-SERVICE', 'Cache invalid or empty, fetching fresh tags from Pinboard')
-
-        // Fetch fresh tags from Pinboard
-        const config = await this.configManager.getConfig()
-        debugLog('TAG-SERVICE', 'Fetching recent bookmarks with count:', config.initRecentPostsCount)
-
-        const pinboardService = await this.getPinboardService()
-        const recentBookmarks = await pinboardService.getRecentBookmarks(
-          config.initRecentPostsCount
-        )
-
-        debugLog('TAG-SERVICE', 'Recent bookmarks received:', recentBookmarks.length)
-        debugLog('TAG-SERVICE', 'Recent bookmarks details:', recentBookmarks.map(b => ({
-          url: b.url,
-          description: b.description,
-          tags: b.tags
-        })))
-
-        // Extract and process tags
-        tagsArr = this.extractTagsFromBookmarks(recentBookmarks)
-        debugLog('TAG-SERVICE', 'Extracted tags:', tagsArr.map(t => ({ name: t.name, count: t.count })))
-
-        await this.processAndCacheTags(tagsArr)
-      }
+      // Use new user-driven recent tags from shared memory
+      const userRecentTags = await this.getUserRecentTags()
 
       // Always return array of objects with 'name' property
-      const result = tagsArr.map(tag => typeof tag === 'string' ? { name: tag } : tag)
-      debugLog('TAG-SERVICE', 'Final recent tags result:', result.map(t => t.name))
+      const result = userRecentTags.map(tag => ({
+        name: tag.name,
+        count: tag.count || 1,
+        lastUsed: tag.lastUsed
+      }))
 
+      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Final recent tags result:', result.map(t => t.name))
       return result
     } catch (error) {
-      debugError('TAG-SERVICE', 'Failed to get recent tags:', error)
+      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to get recent tags:', error)
       return []
     }
   }
@@ -109,7 +276,7 @@ export class TagService {
       const recentTags = await this.getRecentTags()
       const frequency = await this.getTagFrequency()
 
-      // Filter tags that start with input
+      // [IMMUTABLE-REQ-TAG-003] - Filter tags that start with input (case-insensitive)
       const filtered = recentTags
         .filter(tag => tag.name.toLowerCase().startsWith(input.toLowerCase()))
         .map(tag => ({
@@ -575,7 +742,7 @@ export class TagService {
       // [IMMUTABLE-REQ-TAG-001] - Get current recent tags
       const recentTags = await this.getRecentTags()
 
-      // [IMMUTABLE-REQ-TAG-001] - Check for duplicates in recent tags
+      // [IMMUTABLE-REQ-TAG-001] - Check for duplicates in recent tags (case-insensitive)
       const isDuplicate = recentTags.some(existingTag =>
         existingTag.name.toLowerCase() === sanitizedTag.toLowerCase()
       )
@@ -602,12 +769,13 @@ export class TagService {
       // [IMMUTABLE-REQ-TAG-001] - Get all recent tags
       const allRecentTags = await this.getRecentTags()
 
-      // [IMMUTABLE-REQ-TAG-001] - Normalize current tags for comparison
-      const normalizedCurrentTags = currentTags.map(tag =>
-        this.sanitizeTag(tag).toLowerCase()
-      ).filter(tag => tag)
+      // [IMMUTABLE-REQ-TAG-001] - Normalize current tags for comparison (case-insensitive)
+      const normalizedCurrentTags = currentTags.map(tag => {
+        const sanitized = this.sanitizeTag(tag)
+        return sanitized ? sanitized.toLowerCase() : null
+      }).filter(tag => tag)
 
-      // [IMMUTABLE-REQ-TAG-001] - Filter out current tab duplicates
+      // [IMMUTABLE-REQ-TAG-001] - Filter out current tab duplicates (case-insensitive)
       const filteredTags = allRecentTags.filter(tag =>
         !normalizedCurrentTags.includes(tag.name.toLowerCase())
       )
@@ -647,25 +815,16 @@ export class TagService {
    */
   sanitizeTag(tag) {
     if (!tag || typeof tag !== 'string') {
-      return '';
+      return null;
     }
 
-    let tagName = '';
-    const tagStartMatch = tag.match(/^<([a-zA-Z0-9_-]+)>/);
-    if (tagStartMatch) {
-      tagName = tagStartMatch[1];
+    // [IMMUTABLE-REQ-TAG-003] - Preserve original case, only trim and remove invalid characters
+    const sanitized = tag.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+
+    if (sanitized.length === 0) {
+      return null;
     }
-    // Remove all HTML tags
-    let sanitized = tag.replace(/<[^>]+>/g, '');
-    // Prepend tagName if found
-    if (tagName) {
-      sanitized = tagName + sanitized;
-    }
-    // Remove non-word characters (except space and dash)
-    sanitized = sanitized.replace(/[^\w\s-]/g, '');
-    // Remove extra spaces
-    sanitized = sanitized.replace(/\s+/g, '');
-    // Limit length
+
     return sanitized.substring(0, 50);
   }
 }

@@ -27,3 +27,4 @@ docs/development-sessions/prompts
 
 # distribution
 /dist/
+/increment-version.sh
