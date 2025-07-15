@@ -5,6 +5,7 @@
 
 import { ConfigManager } from '../../config/config-manager.js'
 import { debugLog, debugError } from '../../shared/utils.js'
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
 export class TagService {
   constructor (pinboardService = null) {
@@ -214,9 +215,9 @@ export class TagService {
     try {
       // In Manifest V3, the service worker is the background page
       // We need to access the shared memory directly from the service worker
-      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.getBackgroundPage) {
+      if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.getBackgroundPage) {
         // Try the traditional method first (for backward compatibility)
-        const backgroundPage = await chrome.runtime.getBackgroundPage()
+        const backgroundPage = await browser.runtime.getBackgroundPage()
         return backgroundPage
       } else {
         // In service worker context, we need to access the shared memory directly
@@ -226,9 +227,9 @@ export class TagService {
         }
 
         // If we're in a content script or popup, try to get the service worker
-        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+        if (typeof browser !== 'undefined' && browser.runtime && browser.runtime.sendMessage) {
           // Send a message to get the shared memory status
-          const response = await chrome.runtime.sendMessage({
+          const response = await browser.runtime.sendMessage({
             type: 'getSharedMemoryStatus'
           })
           if (response && response.recentTagsMemory) {
@@ -325,7 +326,7 @@ export class TagService {
       const frequency = await this.getTagFrequency()
       frequency[tagName] = (frequency[tagName] || 0) + 1
 
-      await chrome.storage.local.set({
+      await browser.storage.local.set({
         [this.tagFrequencyKey]: frequency
       })
 
@@ -385,7 +386,7 @@ export class TagService {
         .slice(0, config.recentTagsCountMax)
 
       // Update cache
-      await chrome.storage.local.set({
+      await browser.storage.local.set({
         [this.cacheKey]: {
           tags: sortedTags,
           timestamp: Date.now()
@@ -420,7 +421,7 @@ export class TagService {
    */
   async clearCache () {
     try {
-      await chrome.storage.local.remove(this.cacheKey)
+      await browser.storage.local.remove(this.cacheKey)
     } catch (error) {
       console.error('Failed to clear tag cache:', error)
     }
@@ -433,7 +434,7 @@ export class TagService {
   async getCachedTags () {
     try {
       debugLog('TAG-SERVICE', 'Getting cached tags from storage')
-      const result = await chrome.storage.local.get(this.cacheKey)
+      const result = await browser.storage.local.get(this.cacheKey)
       const cachedData = result[this.cacheKey] || null
       debugLog('TAG-SERVICE', 'Cached data retrieved:', cachedData)
       return cachedData
@@ -552,7 +553,7 @@ export class TagService {
 
       debugLog('TAG-SERVICE', 'Caching data:', cacheData)
 
-      await chrome.storage.local.set({
+      await browser.storage.local.set({
         [this.cacheKey]: cacheData
       })
 
@@ -656,7 +657,7 @@ export class TagService {
    */
   async getTagFrequency () {
     try {
-      const result = await chrome.storage.local.get(this.tagFrequencyKey)
+      const result = await browser.storage.local.get(this.tagFrequencyKey)
       return result[this.tagFrequencyKey] || {}
     } catch (error) {
       console.error('Failed to get tag frequency:', error)
@@ -669,7 +670,7 @@ export class TagService {
    */
   async resetTagFrequency () {
     try {
-      await chrome.storage.local.remove(this.tagFrequencyKey)
+      await browser.storage.local.remove(this.tagFrequencyKey)
     } catch (error) {
       console.error('Failed to reset tag frequency:', error)
     }

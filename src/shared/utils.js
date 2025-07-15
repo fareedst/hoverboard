@@ -502,3 +502,11 @@ export function debugWarn (component, message, ...args) {
     }
   }
 }
+
+// [SAFARI-EXT-SHIM-001] Safari/Firefox/Chrome browser API abstraction
+// This module provides a unified browser API using webextension-polyfill for cross-browser compatibility.
+// All extension code should import { browser } from './utils' instead of using chrome.* directly.
+
+import browser from 'webextension-polyfill';
+
+export { browser };

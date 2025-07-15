@@ -9,6 +9,7 @@ import { OverlayManager } from './overlay-manager.js'
 import { MessageClient } from './message-client.js'
 import { DOMUtils } from './dom-utils.js'
 import { MESSAGE_TYPES } from '../../core/message-handler.js'
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
 // Global debug flag
 window.HOVERBOARD_DEBUG = true
@@ -114,7 +115,7 @@ class HoverboardContentScript {
   }
 
   setupMessageListeners () {
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       this.handleMessage(message, sender, sendResponse)
       return true // Keep message channel open for async responses
     })
@@ -564,7 +565,7 @@ class HoverboardContentScript {
       const tags = overlay.querySelector('.hoverboard-tags-input').value
       const isPrivate = overlay.querySelector('.hoverboard-private-checkbox').checked
 
-      const response = await chrome.runtime.sendMessage({
+      const response = await browser.runtime.sendMessage({
         type: 'SAVE_BOOKMARK',
         data: { url, title, description, tags, private: isPrivate }
       })

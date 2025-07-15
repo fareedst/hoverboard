@@ -9,6 +9,7 @@ import { MessageHandler } from './message-handler.js'
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
+import { browser } from '../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
 /**
  * [IMMUTABLE-REQ-TAG-003] - Recent Tags Memory Manager
@@ -134,28 +135,28 @@ class HoverboardServiceWorker {
   // MV3-001: Set up all V3 service worker event listeners
   setupEventListeners () {
     // MV3-001: Handle extension installation and updates
-    chrome.runtime.onInstalled.addListener((details) => {
+    browser.runtime.onInstalled.addListener((details) => {
       this.handleInstall(details)
     })
 
     // MV3-001: Handle messages from content scripts and popup
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       this.handleMessage(message, sender, sendResponse)
       return true // Keep message channel open for async responses
     })
 
     // MV3-001: Handle tab activation for badge updates
-    chrome.tabs.onActivated.addListener((activeInfo) => {
+    browser.tabs.onActivated.addListener((activeInfo) => {
       this.handleTabActivated(activeInfo)
     })
 
     // MV3-001: Handle tab updates for badge management
-    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       this.handleTabUpdated(tabId, changeInfo, tab)
     })
 
     // [IMMUTABLE-REQ-TAG-003] - Handle extension reload to clear shared memory
-    chrome.runtime.onStartup.addListener(() => {
+    browser.runtime.onStartup.addListener(() => {
       this.handleExtensionStartup()
     })
   }
@@ -191,7 +192,7 @@ class HoverboardServiceWorker {
 
   async handleTabActivated (activeInfo) {
     try {
-      const tab = await chrome.tabs.get(activeInfo.tabId)
+      const tab = await browser.tabs.get(activeInfo.tabId)
       if (tab.url) {
         await this.updateBadgeForTab(tab)
       }
@@ -224,7 +225,7 @@ class HoverboardServiceWorker {
 
   setupContextMenus () {
     // Add context menu items if needed
-    // chrome.contextMenus.create({
+    // browser.contextMenus.create({
     //   id: 'hoverboard-bookmark',
     //   title: 'Bookmark with Hoverboard',
     //   contexts: ['page']

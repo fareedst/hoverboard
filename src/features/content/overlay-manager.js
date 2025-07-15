@@ -6,6 +6,7 @@
 import { Logger } from '../../shared/logger.js'
 import { VisibilityControls } from '../../ui/components/VisibilityControls.js'
 import { MessageClient } from './message-client.js'
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
 // Debug logging utility
 const debugLog = (message, data = null) => {
@@ -393,7 +394,7 @@ class OverlayManager {
 
             // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
             debugLog('[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background', updatedBookmark)
-            chrome.runtime.sendMessage({
+            browser.runtime.sendMessage({
               type: 'BOOKMARK_UPDATED',
               data: updatedBookmark
             }, (response) => {
@@ -446,7 +447,7 @@ class OverlayManager {
 
             // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
             debugLog('[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background', updatedBookmark)
-            chrome.runtime.sendMessage({
+            browser.runtime.sendMessage({
               type: 'BOOKMARK_UPDATED',
               data: updatedBookmark
             }, (response) => {
@@ -1253,7 +1254,7 @@ class OverlayManager {
    */
   async handleTabSearch (searchText) {
     try {
-      const response = await chrome.runtime.sendMessage({
+      const response = await browser.runtime.sendMessage({
         type: 'searchTabs',
         data: { searchText }
       })

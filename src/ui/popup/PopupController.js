@@ -5,7 +5,7 @@
 import { UIManager } from './UIManager.js'
 import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
-import { debugLog, debugError } from '../../shared/utils.js'
+import { debugLog, debugError, browser } from '../../shared/utils.js' // [SAFARI-EXT-SHIM-001]
 
 export class PopupController {
   constructor (dependencies = {}) {

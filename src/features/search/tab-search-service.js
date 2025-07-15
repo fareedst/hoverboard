@@ -3,6 +3,8 @@
  * Handles tab discovery, filtering, and navigation logic
  */
 
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+
 export class TabSearchService {
   constructor() {
     this.lastSearchText = null
@@ -91,10 +93,10 @@ export class TabSearchService {
   async getAllTabs() {
     return new Promise((resolve, reject) => {
       console.log('[TAB-SEARCH-SERVICE] Querying all tabs')
-      chrome.tabs.query({}, (tabs) => {
-        if (chrome.runtime.lastError) {
-          console.error('[TAB-SEARCH-SERVICE] Chrome API error:', chrome.runtime.lastError)
-          reject(new Error(chrome.runtime.lastError.message))
+      browser.tabs.query({}, (tabs) => {
+        if (browser.runtime.lastError) {
+          console.error('[TAB-SEARCH-SERVICE] Chrome API error:', browser.runtime.lastError)
+          reject(new Error(browser.runtime.lastError.message))
         } else {
           console.log('[TAB-SEARCH-SERVICE] Found tabs:', tabs.length)
           resolve(tabs)
@@ -126,10 +128,10 @@ export class TabSearchService {
   async activateTab(tabId) {
     return new Promise((resolve, reject) => {
       console.log('[TAB-SEARCH-SERVICE] Activating tab:', tabId)
-      chrome.tabs.update(tabId, { active: true }, (tab) => {
-        if (chrome.runtime.lastError) {
-          console.error('[TAB-SEARCH-SERVICE] Tab activation error:', chrome.runtime.lastError)
-          reject(new Error(chrome.runtime.lastError.message))
+      browser.tabs.update(tabId, { active: true }, (tab) => {
+        if (browser.runtime.lastError) {
+          console.error('[TAB-SEARCH-SERVICE] Tab activation error:', browser.runtime.lastError)
+          reject(new Error(browser.runtime.lastError.message))
         } else {
           console.log('[TAB-SEARCH-SERVICE] Tab activated successfully:', tabId)
           resolve(tab)
@@ -145,10 +147,10 @@ export class TabSearchService {
   async focusWindow(windowId) {
     return new Promise((resolve, reject) => {
       console.log('[TAB-SEARCH-SERVICE] Focusing window:', windowId)
-      chrome.windows.update(windowId, { focused: true }, (window) => {
-        if (chrome.runtime.lastError) {
-          console.error('[TAB-SEARCH-SERVICE] Window focus error:', chrome.runtime.lastError)
-          reject(new Error(chrome.runtime.lastError.message))
+      browser.windows.update(windowId, { focused: true }, (window) => {
+        if (browser.runtime.lastError) {
+          console.error('[TAB-SEARCH-SERVICE] Window focus error:', browser.runtime.lastError)
+          reject(new Error(browser.runtime.lastError.message))
         } else {
           console.log('[TAB-SEARCH-SERVICE] Window focused successfully:', windowId)
           resolve(window)

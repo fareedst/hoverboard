@@ -3,6 +3,8 @@
  * Replaces legacy sendToExtension/BRSendMessage with Promise-based messaging
  */
 
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+
 export class MessageClient {
   constructor () {
     this.pendingMessages = new Map()
@@ -79,7 +81,7 @@ export class MessageClient {
       })
 
       try {
-        chrome.runtime.sendMessage(fullMessage, (response) => {
+        browser.runtime.sendMessage(fullMessage, (response) => {
           this.handleMessageResponse(messageId, response)
         })
       } catch (error) {
@@ -105,8 +107,8 @@ export class MessageClient {
     this.pendingMessages.delete(messageId)
 
     // Check for Chrome runtime errors
-    if (chrome.runtime.lastError) {
-      reject(new Error(chrome.runtime.lastError.message))
+    if (browser.runtime.lastError) {
+      reject(new Error(browser.runtime.lastError.message))
       return
     }
 
@@ -132,9 +134,9 @@ export class MessageClient {
   async sendMessageToTab (tabId, message) {
     return new Promise((resolve, reject) => {
       try {
-        chrome.tabs.sendMessage(tabId, message, (response) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message))
+        browser.tabs.sendMessage(tabId, message, (response) => {
+          if (browser.runtime.lastError) {
+            reject(new Error(browser.runtime.lastError.message))
           } else {
             resolve(response)
           }
@@ -173,9 +175,9 @@ export class MessageClient {
   getAllTabs () {
     return new Promise((resolve, reject) => {
       try {
-        chrome.tabs.query({}, (tabs) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message))
+        browser.tabs.query({}, (tabs) => {
+          if (browser.runtime.lastError) {
+            reject(new Error(browser.runtime.lastError.message))
           } else {
             resolve(tabs)
           }
@@ -252,10 +254,10 @@ export class MessageClient {
    */
   getExtensionInfo () {
     return {
-      id: chrome.runtime.id,
-      version: chrome.runtime.getManifest().version,
-      url: chrome.runtime.getURL(''),
-      isIncognito: chrome.extension.inIncognitoContext
+      id: browser.runtime.id,
+      version: browser.runtime.getManifest().version,
+      url: browser.runtime.getURL(''),
+      isIncognito: browser.extension.inIncognitoContext
     }
   }
 
@@ -263,10 +265,10 @@ export class MessageClient {
    * Open extension options page
    */
   openOptionsPage () {
-    if (chrome.runtime.openOptionsPage) {
-      chrome.runtime.openOptionsPage()
+    if (browser.runtime.openOptionsPage) {
+      browser.runtime.openOptionsPage()
     } else {
-      window.open(chrome.runtime.getURL('src/ui/options/options.html'))
+      window.open(browser.runtime.getURL('src/ui/options/options.html'))
     }
   }
 
@@ -277,9 +279,9 @@ export class MessageClient {
   async getCurrentTab () {
     return new Promise((resolve, reject) => {
       try {
-        chrome.tabs.getCurrent((tab) => {
-          if (chrome.runtime.lastError) {
-            reject(new Error(chrome.runtime.lastError.message))
+        browser.tabs.getCurrent((tab) => {
+          if (browser.runtime.lastError) {
+            reject(new Error(browser.runtime.lastError.message))
           } else {
             resolve(tab)
           }

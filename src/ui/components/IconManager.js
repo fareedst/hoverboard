@@ -3,6 +3,8 @@
  * Handles scalable icons, dynamic theming, and provides clean API
  */
 
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+
 export class IconManager {
   constructor () {
     this.iconCache = new Map()
@@ -262,7 +264,7 @@ export class IconManager {
     } = options
 
     const img = document.createElement('img')
-    img.src = chrome.runtime.getURL(imageSrc)
+    img.src = browser.runtime.getURL(imageSrc)
     img.width = size
     img.height = size
     img.className = `hb-icon hb-icon--${iconName} ${className}`.trim()
@@ -378,7 +380,7 @@ export class IconManager {
       const img = new Image()
       img.onload = resolve
       img.onerror = reject
-      img.src = chrome.runtime.getURL(src)
+      img.src = browser.runtime.getURL(src)
     })
   }
 

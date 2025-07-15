@@ -2,6 +2,8 @@
  * StateManager - Manages application state for the popup
  */
 
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+
 export class StateManager {
   constructor () {
     this.state = {
@@ -218,7 +220,7 @@ export class StateManager {
    */
   async loadPersistedState () {
     try {
-      const result = await chrome.storage.local.get(['popupState'])
+      const result = await browser.storage.local.get(['popupState'])
 
       if (result.popupState) {
         const persistedState = result.popupState
@@ -245,7 +247,7 @@ export class StateManager {
         timestamp: Date.now()
       }
 
-      await chrome.storage.local.set({
+      await browser.storage.local.set({
         popupState: stateToPersist
       })
     } catch (error) {
@@ -328,7 +330,7 @@ export class StateManager {
    */
   async clearPersistedState () {
     try {
-      await chrome.storage.local.remove(['popupState'])
+      await browser.storage.local.remove(['popupState'])
       this.setState({
         searchHistory: [],
         preferences: {}

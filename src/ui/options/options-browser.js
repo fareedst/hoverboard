@@ -5,6 +5,7 @@
 
 import { ConfigManager } from '../../config/config-manager.js'
 import { PinboardService } from '../../features/pinboard/pinboard-service-browser.js'
+import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
 class OptionsController {
   constructor () {
