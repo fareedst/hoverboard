@@ -192,14 +192,14 @@ global.popupState = {
   clearPersistedState: jest.fn().mockResolvedValue(),
 };
 
-// Reset all mocks before each test
+// [TEST-FIX-001] - Enhanced test setup with better error handling
 beforeEach(() => {
   jest.clearAllMocks();
   
   // Reset fetch mock
   fetch.mockClear();
   
-  // Reset chrome API mocks
+  // [TEST-FIX-001] - Enhanced Chrome API mock reset
   if (global.chrome && global.chrome.runtime) {
     Object.values(global.chrome.runtime).forEach(mock => {
       if (typeof mock?.mockClear === 'function') {
@@ -222,6 +222,11 @@ beforeEach(() => {
         mock.mockClear();
       }
     });
+  }
+  
+  // [TEST-FIX-001] - Reset error mocks
+  if (global.chrome && global.chrome.runtime && global.chrome.runtime.lastError) {
+    global.chrome.runtime.lastError = null;
   }
 });
 

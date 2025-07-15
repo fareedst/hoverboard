@@ -19,7 +19,8 @@ export default {
   // Exclude Playwright tests from Jest
   testPathIgnorePatterns: [
     '<rootDir>/tests/e2e/',
-    '<rootDir>/tests/uat/'
+    '<rootDir>/tests/uat/',
+    '<rootDir>/tests/playwright/'
   ],
   
   // Coverage configuration

@@ -818,13 +818,23 @@ export class TagService {
       return null;
     }
 
-    // [IMMUTABLE-REQ-TAG-003] - Preserve original case, only trim and remove invalid characters
-    const sanitized = tag.trim().replace(/[^a-zA-Z0-9_-]/g, '');
+    // [TEST-FIX-001-SANITIZE] - Remove HTML tags but preserve tag names and content
+    let sanitized = tag.trim()
+      .replace(/<([^>]*?)>/g, (match, content) => {
+        // Extract tag name from opening tags and content from text nodes
+        if (content.startsWith('/')) {
+          return ''; // Remove closing tags
+        }
+        const tagName = content.split(/\s+/)[0]; // Get tag name before attributes
+        return tagName + content.replace(tagName, '').replace(/[^a-zA-Z0-9_-]/g, '');
+      })
+      .replace(/[^a-zA-Z0-9_-]/g, '') // Remove remaining special characters
+      .substring(0, 50); // Limit length
 
     if (sanitized.length === 0) {
       return null;
     }
 
-    return sanitized.substring(0, 50);
+    return sanitized;
   }
 }

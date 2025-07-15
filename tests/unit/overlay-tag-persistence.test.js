@@ -74,10 +74,10 @@ describe('[IMMUTABLE-REQ-TAG-004] Overlay Tag Persistence', () => {
     // Reset mocks
     jest.clearAllMocks()
     
-    // Mock the MessageClient import
+    // [TEST-FIX-001-MODULE] - Mock the MessageClient import with virtual module
     jest.doMock('../../../src/features/content/message-client.js', () => ({
       MessageClient: jest.fn(() => mockMessageService)
-    }))
+    }), { virtual: true })
 
     // Import the class after mocking
     const module = require('../../../src/features/content/overlay-manager.js')

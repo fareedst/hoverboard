@@ -11,7 +11,7 @@
 import { ConfigManager } from '../../config/config-manager.js'
 import { TagService } from '../tagging/tag-service.js' // [IMMUTABLE-REQ-TAG-001] - Import TagService
 import { XMLParser } from 'fast-xml-parser'
-import { debugLog, debugError } from '../../shared/utils.js'
+import { debugLog, debugError, debugWarn } from '../../shared/utils.js'
 
 export class PinboardService {
   constructor (tagService = null) {
