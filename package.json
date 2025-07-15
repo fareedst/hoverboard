@@ -1,6 +1,6 @@
 {
   "name": "hoverboard",
-  "version": "1.0.5.13",
+  "version": "1.0.5.15",
   "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
   "type": "module",
   "scripts": {

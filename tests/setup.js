@@ -1,11 +1,10 @@
+import '@testing-library/jest-dom';
+import 'jest-webextension-mock';
+
 /**
  * Jest Test Setup Configuration
  * Sets up the testing environment for Hoverboard browser extension
  */
-
-// Import testing utilities
-require('@testing-library/jest-dom');
-require('jest-webextension-mock');
 
 // Global test configuration
 global.console = {
@@ -18,17 +17,18 @@ global.console = {
   error: jest.fn(),
 };
 
-// Mock chrome extension APIs
+// [TEST-FIX-IMPL-2025-07-14] - Enhanced Chrome extension API mocks
 global.chrome = {
   runtime: {
     sendMessage: jest.fn(),
+    getBackgroundPage: jest.fn().mockImplementation(() => Promise.resolve(global.mockBackgroundPage)),
     onMessage: {
       addListener: jest.fn(),
       removeListener: jest.fn(),
     },
     getURL: jest.fn((path) => `chrome-extension://test-id/${path}`),
     id: 'test-extension-id',
-    // Add missing properties to prevent Object.values error
+    // [TEST-FIX-IMPL-2025-07-14] - Add missing properties to prevent Object.values error
     connect: jest.fn(),
     disconnect: jest.fn(),
     onConnect: {
@@ -79,53 +79,9 @@ global.chrome = {
     reload: jest.fn(),
     connectNative: jest.fn(),
     sendNativeMessage: jest.fn(),
-    getBackgroundPage: jest.fn(),
-    openOptionsPage: jest.fn(),
-    setUninstallURL: jest.fn(),
-    getPackageDirectoryEntry: jest.fn(),
-    getPlatformInfo: jest.fn(),
-    getManifest: jest.fn(),
-    requestUpdateCheck: jest.fn(),
-    restart: jest.fn(),
-    reload: jest.fn(),
-    connectNative: jest.fn(),
-    sendNativeMessage: jest.fn(),
-    getBackgroundPage: jest.fn(),
     openOptionsPage: jest.fn(),
     setUninstallURL: jest.fn(),
     lastError: null,
-    onStartup: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onInstalled: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onUpdateAvailable: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onSuspend: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onSuspendCanceled: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onRestartRequired: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onConnectExternal: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    },
-    onMessageExternal: {
-      addListener: jest.fn(),
-      removeListener: jest.fn(),
-    }
   },
   storage: {
     local: {
@@ -186,7 +142,7 @@ global.chrome = {
     },
     sync: {
       get: jest.fn().mockImplementation((keys, callback) => {
-        // [TEST-FIX-STORAGE-001] - Enhanced sync storage mock
+        // [TEST-FIX-STORAGE-2025-07-14] - Enhanced sync storage mock
         const mockData = {
           hoverboard_settings: {
             recentTagsCountMax: 10,
@@ -257,30 +213,70 @@ global.chrome = {
 global.browser = global.chrome;
 
 // Mock DOM APIs commonly used in browser extensions
-Object.defineProperty(window, 'location', {
-  value: {
-    href: 'https://example.com',
-    hostname: 'example.com',
-    pathname: '/',
-    search: '',
-    hash: '',
-  },
-  writable: true,
-});
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'location', {
+    value: {
+      href: 'https://example.com',
+      hostname: 'example.com',
+      pathname: '/',
+      search: '',
+      hash: '',
+    },
+    writable: true,
+  });
+}
+
+// [TEST-FIX-MOCK-2025-07-14] - Mock background page for recent tags functionality
+global.mockBackgroundPage = {
+  recentTagsMemory: {
+    getRecentTags: jest.fn().mockReturnValue([
+      { name: 'test-tag-1', lastUsed: Date.now() },
+      { name: 'test-tag-2', lastUsed: Date.now() - 1000 },
+      { name: 'test-tag-3', lastUsed: Date.now() - 2000 }
+    ]),
+    addTag: jest.fn().mockReturnValue(true),
+    clearRecentTags: jest.fn().mockReturnValue(true),
+    getMemoryStatus: jest.fn().mockReturnValue({ status: 'active' })
+  }
+};
+
+// [TEST-FIX-MOCK-2025-07-14] - Mock message service for overlay functionality
+global.mockMessageService = {
+  sendMessage: jest.fn().mockResolvedValue({ success: true }),
+  onMessage: jest.fn(),
+  removeListener: jest.fn()
+};
 
 // Mock fetch for API calls
 global.fetch = jest.fn();
 
-// [TEST-FIX-STORAGE-001] - Mock shared memory for service worker context
-global.recentTagsMemory = {
-  getRecentTags: jest.fn().mockReturnValue([
-    { name: 'test-tag-1', lastUsed: Date.now() },
-    { name: 'test-tag-2', lastUsed: Date.now() - 1000 },
-    { name: 'test-tag-3', lastUsed: Date.now() - 2000 }
-  ]),
-  addTag: jest.fn().mockReturnValue(true),
-  clear: jest.fn()
-};
+// [TEST-FIX-IMPL-2025-07-14] - Global state management for shared memory
+// Only add properties to globalThis, never overwrite it
+if (!globalThis.recentTagsMemory) {
+  globalThis.recentTagsMemory = {
+    getRecentTags: jest.fn().mockReturnValue([
+      { name: 'test-tag-1', lastUsed: Date.now() },
+      { name: 'test-tag-2', lastUsed: Date.now() - 1000 },
+      { name: 'test-tag-3', lastUsed: Date.now() - 2000 }
+    ]),
+    addTag: jest.fn().mockReturnValue(true),
+    clearRecentTags: jest.fn().mockReturnValue(true),
+    getMemoryStatus: jest.fn().mockReturnValue({ status: 'active' })
+  };
+}
+
+// [TEST-FIX-IMPL-2025-07-14] - Service worker context simulation
+if (!globalThis.self) {
+  globalThis.self = globalThis;
+}
+
+if (!globalThis.self.recentTagsMemory) {
+  globalThis.self.recentTagsMemory = globalThis.recentTagsMemory;
+}
+
+// [TEST-FIX-MOCK-2025-07-14] - Enhanced shared memory mock for service worker context
+// In test environment, we want to use background page mock instead of direct access
+global.recentTagsMemory = null; // Disable direct access in tests
 
 // Mock StateManager popupState to prevent undefined errors
 global.popupState = {
@@ -321,11 +317,22 @@ beforeEach(() => {
     });
   }
   
-  // [TEST-FIX-STORAGE-001] - Reset shared memory mocks
-  if (global.recentTagsMemory) {
-    global.recentTagsMemory.getRecentTags.mockClear();
-    global.recentTagsMemory.addTag.mockClear();
-    global.recentTagsMemory.clear.mockClear();
+  // [TEST-FIX-MOCK-2025-07-14] - Reset shared memory mocks (disabled in tests)
+  // global.recentTagsMemory is null in test environment
+  
+  // [TEST-FIX-MOCK-2025-07-14] - Reset background page mocks
+  if (global.mockBackgroundPage && global.mockBackgroundPage.recentTagsMemory) {
+    global.mockBackgroundPage.recentTagsMemory.getRecentTags.mockClear();
+    global.mockBackgroundPage.recentTagsMemory.addTag.mockClear();
+    global.mockBackgroundPage.recentTagsMemory.clearRecentTags.mockClear();
+    global.mockBackgroundPage.recentTagsMemory.getMemoryStatus.mockClear();
+  }
+  
+  // [TEST-FIX-MOCK-2025-07-14] - Reset message service mocks
+  if (global.mockMessageService) {
+    global.mockMessageService.sendMessage.mockClear();
+    global.mockMessageService.onMessage.mockClear();
+    global.mockMessageService.removeListener.mockClear();
   }
   
   // [TEST-FIX-ENV-001] - Reset error mocks

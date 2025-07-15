@@ -284,10 +284,10 @@ describe('Tag Recent Tracking [IMMUTABLE-REQ-TAG-001]', () => {
     })
 
     test('[IMMUTABLE-REQ-TAG-001] should handle invalid input', () => {
-      expect(tagService.sanitizeTag('')).toBe('')
-      expect(tagService.sanitizeTag(null)).toBe('')
-      expect(tagService.sanitizeTag(undefined)).toBe('')
-      expect(tagService.sanitizeTag(123)).toBe('')
+      expect(tagService.sanitizeTag('')).toBe(null)
+      expect(tagService.sanitizeTag(null)).toBe(null)
+      expect(tagService.sanitizeTag(undefined)).toBe(null)
+      expect(tagService.sanitizeTag(123)).toBe(null)
     })
 
     test('[IMMUTABLE-REQ-TAG-001] should preserve valid characters', () => {

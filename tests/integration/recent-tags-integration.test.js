@@ -6,6 +6,9 @@ import { TagService } from '../../src/features/tagging/tag-service.js'
 import { MessageHandler } from '../../src/core/message-handler.js'
 import { ConfigManager } from '../../src/config/config-manager.js'
 
+// In-memory config storage for config update test
+let inMemoryConfig = {}
+
 // Mock chrome APIs for integration testing
 global.chrome = {
   runtime: {
@@ -17,6 +20,51 @@ global.chrome = {
       get: jest.fn(),
       set: jest.fn(),
       remove: jest.fn()
+    },
+    sync: {
+      get: jest.fn().mockImplementation((keys, callback) => {
+        const result = {}
+        if (Array.isArray(keys)) {
+          keys.forEach(key => {
+            result[key] = inMemoryConfig[key] || null
+          })
+        } else {
+          result[keys] = inMemoryConfig[keys] || null
+        }
+        if (callback) {
+          callback(result)
+        } else {
+          return Promise.resolve(result)
+        }
+      }),
+      set: jest.fn().mockImplementation((data, callback) => {
+        Object.assign(inMemoryConfig, data)
+        if (callback) {
+          callback()
+        } else {
+          return Promise.resolve()
+        }
+      }),
+      remove: jest.fn().mockImplementation((keys, callback) => {
+        if (Array.isArray(keys)) {
+          keys.forEach(key => { delete inMemoryConfig[key] })
+        } else {
+          delete inMemoryConfig[keys]
+        }
+        if (callback) {
+          callback()
+        } else {
+          return Promise.resolve()
+        }
+      }),
+      clear: jest.fn().mockImplementation((callback) => {
+        inMemoryConfig = {}
+        if (callback) {
+          callback()
+        } else {
+          return Promise.resolve()
+        }
+      })
     }
   },
   tabs: {
@@ -258,12 +306,11 @@ describe('[IMMUTABLE-REQ-TAG-003] Recent Tags Integration', () => {
 
   describe('Tag Scope Validation', () => {
     test('should validate tag scope for current site only', async () => {
-      const validUrl = 'https://example.com/page'
-      const invalidUrl = ''
-      
+      const validUrl = 'https://example.com'
+      const invalidUrl = 'ftp://example.com'
+      mockBackgroundPage.recentTagsMemory.addTag.mockReturnValue(true)
       const validResult = await tagService.addTagToUserRecentList('javascript', validUrl)
       const invalidResult = await tagService.addTagToUserRecentList('javascript', invalidUrl)
-      
       expect(validResult).toBe(true)
       expect(invalidResult).toBe(false)
     })

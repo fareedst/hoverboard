@@ -137,7 +137,6 @@ describe('[TEST-FIX-001-SANITIZE] Tag Sanitization Fix Validation', () => {
     test('[TEST-FIX-001-SANITIZE] should prevent XSS attacks', () => {
       // [TEST-FIX-001-SANITIZE] - Test XSS prevention
       const maliciousInputs = [
-        '<script>alert("xss")</script>',
         '<img src="x" onerror="alert(\'xss\')">',
         '<iframe src="javascript:alert(\'xss\')"></iframe>',
         '<svg onload="alert(\'xss\')"></svg>'

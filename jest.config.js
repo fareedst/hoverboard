@@ -57,12 +57,9 @@ export default {
   clearMocks: true,
   restoreMocks: true,
   
-  // [TEST-FIX-MODULE-001] - Enhanced transform configuration for ES modules
+  // Transform for ESM support
   transform: {
-    '^.+\\.js$': ['babel-jest', {
-      presets: [['@babel/preset-env', { targets: { node: 'current' } }]],
-      plugins: ['@babel/plugin-transform-modules-commonjs']
-    }]
+    "^.+\\.js$": "babel-jest"
   },
   
   // Transform ignore patterns
