@@ -735,6 +735,7 @@ var init_safari_shim = __esm({
                 if (logger && logger.warn) {
                   logger.warn("[SAFARI-EXT-STORAGE-001] Storage quota usage high:", quotaUsage.usagePercent + "%");
                 }
+                console.warn("[SAFARI-EXT-STORAGE-001] Storage quota usage high:", quotaUsage.usagePercent + "%");
               }
               return result;
             } catch (error) {
@@ -766,7 +767,12 @@ var init_safari_shim = __esm({
             return new Promise((resolve, reject) => {
               chrome.runtime.sendMessage(enhancedMessage, (response) => {
                 if (chrome.runtime.lastError) {
-                  reject(new Error(chrome.runtime.lastError.message));
+                  const error = new Error(chrome.runtime.lastError.message);
+                  if (logger && logger.error) {
+                    logger.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error);
+                  }
+                  console.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error.message);
+                  reject(error);
                 } else {
                   resolve(response);
                 }
@@ -776,6 +782,7 @@ var init_safari_shim = __esm({
             if (logger && logger.error) {
               logger.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error);
             }
+            console.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error.message);
             throw error;
           }
         },
@@ -820,13 +827,18 @@ var init_safari_shim = __esm({
           try {
             const tabs = await browser.tabs.query(queryInfo);
             if (typeof safari !== "undefined") {
-              return tabs.filter((tab) => !tab.url.startsWith("safari-extension://"));
+              const filteredTabs = tabs.filter((tab) => !tab.url.startsWith("safari-extension://"));
+              if (logger && logger.debug) {
+                logger.debug("[SAFARI-EXT-CONTENT-001] Filtered tabs:", { original: tabs.length, filtered: filteredTabs.length });
+              }
+              return filteredTabs;
             }
             return tabs;
           } catch (error) {
             if (logger && logger.error) {
               logger.error("[SAFARI-EXT-CONTENT-001] Tab query failed:", error);
             }
+            console.error("[SAFARI-EXT-CONTENT-001] Tab query failed:", error.message);
             throw error;
           }
         },
@@ -4224,16 +4236,16 @@ var MessageHandler = class {
     if (!targetUrl) {
       throw new Error("No URL provided");
     }
-    debugLog("[MESSAGE-HANDLER] Getting bookmark for URL:", targetUrl);
-    debugLog("Checking if URL is allowed...");
+    debugLog("[POPUP-DATA-FLOW-001] Getting bookmark for URL:", targetUrl);
+    debugLog("[POPUP-DATA-FLOW-001] Checking if URL is allowed...");
     const isAllowed = await this.configManager.isUrlAllowed(targetUrl);
     if (!isAllowed) {
       return { success: true, data: { blocked: true, url: targetUrl } };
     }
-    debugLog("URL is allowed, getting bookmark data...");
+    debugLog("[POPUP-DATA-FLOW-001] URL is allowed, getting bookmark data...");
     const hasAuth = await this.configManager.hasAuthToken();
     if (!hasAuth) {
-      debugLog("No auth token available, returning empty bookmark");
+      debugLog("[POPUP-DATA-FLOW-001] No auth token available, returning empty bookmark");
       return {
         success: true,
         data: {
@@ -4250,13 +4262,25 @@ var MessageHandler = class {
         }
       };
     }
-    debugLog("Getting bookmark data from Pinboard...");
+    debugLog("[POPUP-DATA-FLOW-001] Getting bookmark data from Pinboard...");
     const bookmark = await this.pinboardService.getBookmarkForUrl(targetUrl, data?.title);
-    debugLog("Bookmark data retrieved:", bookmark);
+    debugLog("[POPUP-DATA-FLOW-001] Bookmark data retrieved:", bookmark);
+    const response = { success: true, data: bookmark };
+    debugLog("[POPUP-DATA-FLOW-001] Service worker response structure:", {
+      success: response.success,
+      dataType: typeof response.data,
+      dataKeys: response.data ? Object.keys(response.data) : null,
+      hasUrl: !!response.data?.url,
+      hasTags: !!response.data?.tags,
+      tagCount: response.data?.tags ? Array.isArray(response.data.tags) ? response.data.tags.length : "not-array" : 0,
+      hasDescription: !!response.data?.description,
+      hasShared: response.data?.shared !== void 0,
+      hasToread: response.data?.toread !== void 0
+    });
     const config = await this.configManager.getConfig();
     if (config.setIconOnLoad && tabId) {
     }
-    return { success: true, data: bookmark };
+    return response;
   }
   async handleGetRecentBookmarks(data, senderUrl) {
     debugLog("[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Handling getRecentBookmarks request:", data);

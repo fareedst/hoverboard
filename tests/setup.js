@@ -212,6 +212,92 @@ global.chrome = {
 // Mock browser APIs for cross-browser compatibility
 global.browser = global.chrome;
 
+// [SAFARI-EXT-TEST-001] - Safari-specific mocks for testing
+global.safari = {
+  extension: {
+    globalPage: {
+      contentWindow: {
+        recentTagsMemory: {
+          getRecentTags: jest.fn().mockReturnValue([
+            { name: 'safari-test-tag-1', lastUsed: Date.now() },
+            { name: 'safari-test-tag-2', lastUsed: Date.now() - 1000 }
+          ]),
+          addTag: jest.fn().mockReturnValue(true),
+          clearRecentTags: jest.fn().mockReturnValue(true)
+        }
+      }
+    }
+  },
+  extension: {
+    settings: {
+      get: jest.fn().mockReturnValue({}),
+      set: jest.fn().mockReturnValue(true)
+    }
+  }
+};
+
+// [SAFARI-EXT-TEST-001] - Mock navigator.storage for Safari storage tests
+if (!global.navigator) global.navigator = {};
+global.navigator.storage = {
+  estimate: jest.fn().mockResolvedValue({
+    usage: 1024 * 1024, // 1MB
+    quota: 10 * 1024 * 1024 // 10MB
+  })
+};
+
+// [SAFARI-EXT-TEST-001] - Mock setTimeout and setInterval only if not already mocked
+if (!global._realSetTimeout) {
+  global._realSetTimeout = setTimeout;
+}
+global.setTimeout = global._realSetTimeout;
+if (!global._realSetInterval) {
+  global._realSetInterval = setInterval;
+}
+global.setInterval = global._realSetInterval;
+
+// [SAFARI-EXT-TEST-001] - Mock clearTimeout and clearInterval
+if (!global._realClearTimeout) {
+  global._realClearTimeout = clearTimeout;
+}
+global.clearTimeout = global._realClearTimeout;
+if (!global._realClearInterval) {
+  global._realClearInterval = clearInterval;
+}
+global.clearInterval = global._realClearInterval;
+
+// [SAFARI-EXT-TEST-001] - Mock Math.random for consistent testing
+global.Math.random = jest.fn(() => 0.5);
+
+// [SAFARI-EXT-TEST-001] - Mock Date.now for consistent testing
+const originalDateNow = Date.now;
+global.Date.now = jest.fn(() => 1640995200000); // 2022-01-01 00:00:00 UTC
+
+// [SAFARI-EXT-TEST-001] - Reset mocks before each test
+beforeEach(() => {
+  jest.clearAllMocks();
+  if (global.chrome && global.chrome.runtime) {
+    global.chrome.runtime.lastError = null;
+  }
+  // Only clear console mocks if they exist and are Jest mocks
+  if (global.console.warn && typeof global.console.warn.mockClear === 'function') {
+    global.console.warn.mockClear();
+  }
+  if (global.console.error && typeof global.console.error.mockClear === 'function') {
+    global.console.error.mockClear();
+  }
+  if (global.console.debug && typeof global.console.debug.mockClear === 'function') {
+    global.console.debug.mockClear();
+  }
+  if (global.console.log && typeof global.console.log.mockClear === 'function') {
+    global.console.log.mockClear();
+  }
+});
+
+// [SAFARI-EXT-TEST-001] - Restore original Date.now after tests
+afterAll(() => {
+  global.Date.now = originalDateNow;
+});
+
 // Mock DOM APIs commonly used in browser extensions
 if (typeof window !== 'undefined') {
   Object.defineProperty(window, 'location', {

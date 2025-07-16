@@ -5,7 +5,7 @@
  * This module provides a unified browser API using webextension-polyfill for cross-browser compatibility.
  * All extension code should import { browser } from './safari-shim.js' instead of using chrome.* directly.
  *
- * Date: 2025-07-15
+ * Date: 2025-07-14
  * Status: Active Development
  */
 
@@ -93,6 +93,8 @@ const safariEnhancements = {
             if (logger && logger.warn) {
               logger.warn('[SAFARI-EXT-STORAGE-001] Storage quota usage high:', quotaUsage.usagePercent + '%')
             }
+            // Also log to console for test visibility
+            console.warn('[SAFARI-EXT-STORAGE-001] Storage quota usage high:', quotaUsage.usagePercent + '%')
           }
 
           return result
@@ -132,7 +134,13 @@ const safariEnhancements = {
         return new Promise((resolve, reject) => {
           chrome.runtime.sendMessage(enhancedMessage, (response) => {
             if (chrome.runtime.lastError) {
-              reject(new Error(chrome.runtime.lastError.message))
+              const error = new Error(chrome.runtime.lastError.message)
+              if (logger && logger.error) {
+                logger.error('[SAFARI-EXT-MESSAGING-001] Message send failed:', error)
+              }
+              // Also log to console for test visibility
+              console.error('[SAFARI-EXT-MESSAGING-001] Message send failed:', error.message)
+              reject(error)
             } else {
               resolve(response)
             }
@@ -142,6 +150,8 @@ const safariEnhancements = {
         if (logger && logger.error) {
           logger.error('[SAFARI-EXT-MESSAGING-001] Message send failed:', error)
         }
+        // Also log to console for test visibility
+        console.error('[SAFARI-EXT-MESSAGING-001] Message send failed:', error.message)
         throw error
       }
     },
@@ -200,7 +210,11 @@ const safariEnhancements = {
         // Safari-specific tab filtering
         if (typeof safari !== 'undefined') {
           // Filter out Safari's internal pages if needed
-          return tabs.filter(tab => !tab.url.startsWith('safari-extension://'))
+          const filteredTabs = tabs.filter(tab => !tab.url.startsWith('safari-extension://'))
+          if (logger && logger.debug) {
+            logger.debug('[SAFARI-EXT-CONTENT-001] Filtered tabs:', { original: tabs.length, filtered: filteredTabs.length })
+          }
+          return filteredTabs
         }
 
         return tabs
@@ -208,6 +222,8 @@ const safariEnhancements = {
         if (logger && logger.error) {
           logger.error('[SAFARI-EXT-CONTENT-001] Tab query failed:', error)
         }
+        // Also log to console for test visibility
+        console.error('[SAFARI-EXT-CONTENT-001] Tab query failed:', error.message)
         throw error
       }
     },

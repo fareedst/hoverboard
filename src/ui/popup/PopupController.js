@@ -11,9 +11,16 @@ debugLog('[SAFARI-EXT-SHIM-001] PopupController.js: module loaded');
 
 export class PopupController {
   constructor (dependencies = {}) {
-    this.uiManager = dependencies.uiManager || new UIManager()
-    this.stateManager = dependencies.stateManager || new StateManager()
+    // [DEP-INJ-001] Proper dependency injection with fallback creation
     this.errorHandler = dependencies.errorHandler || new ErrorHandler()
+    this.stateManager = dependencies.stateManager || new StateManager()
+
+    // [DEP-INJ-001] UIManager with proper dependency injection
+    this.uiManager = dependencies.uiManager || new UIManager({
+      errorHandler: this.errorHandler,
+      stateManager: this.stateManager,
+      config: {}
+    })
 
     this.currentTab = null
     this.currentPin = null
@@ -35,11 +42,16 @@ export class PopupController {
 
     this.setupEventListeners()
 
+    // [POPUP-REFRESH-001] Setup refresh mechanisms
+    this.setupAutoRefresh()
+    this.setupRealTimeUpdates()
+
     // [TOGGLE_SYNC_POPUP] Listen for BOOKMARK_UPDATED to sync popup UI with shared state
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
       chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         if (message.type === 'BOOKMARK_UPDATED') {
           try {
+            debugLog('[POPUP-REFRESH-001] Received BOOKMARK_UPDATED, refreshing data')
             // [TOGGLE_SYNC_POPUP] Fetch latest bookmark data for current tab
             if (this.currentTab && this.currentTab.url) {
               const updatedPin = await this.getBookmarkData(this.currentTab.url)
@@ -78,17 +90,54 @@ export class PopupController {
    * Normalize tags to array format regardless of input type
    */
   normalizeTags (tags) {
-    if (!tags) return []
+    // [DEBUG-FIX-001] Add debug logs for normalizeTags
+    console.log('🔍 [DEBUG-FIX-001] normalizeTags called with:', tags);
+    debugLog('[DEBUG-FIX-001] normalizeTags: input:', {
+      tags: tags,
+      tagsType: typeof tags,
+      tagsIsArray: Array.isArray(tags),
+      tagsLength: tags ? (Array.isArray(tags) ? tags.length : tags.toString().length) : 0
+    });
+
+    if (!tags) {
+      console.log('🔍 [DEBUG-FIX-001] normalizeTags: no tags provided, returning empty array');
+      debugLog('[DEBUG-FIX-001] normalizeTags: no tags provided, returning empty array');
+      return []
+    }
 
     if (typeof tags === 'string') {
       // If tags is a string, split by spaces and filter out empty strings
-      return tags.split(' ').filter(tag => tag.trim())
+      const result = tags.split(' ').filter(tag => tag.trim())
+      console.log('🔍 [DEBUG-FIX-001] normalizeTags: string input processed:', {
+        originalString: tags,
+        splitResult: result,
+        resultLength: result.length
+      });
+      debugLog('[DEBUG-FIX-001] normalizeTags: string input processed:', {
+        originalString: tags,
+        splitResult: result,
+        resultLength: result.length
+      });
+      return result
     } else if (Array.isArray(tags)) {
       // If tags is already an array, filter out empty or non-string values
-      return tags.filter(tag => tag && typeof tag === 'string' && tag.trim())
+      const result = tags.filter(tag => tag && typeof tag === 'string' && tag.trim())
+      console.log('🔍 [DEBUG-FIX-001] normalizeTags: array input processed:', {
+        originalArray: tags,
+        filteredResult: result,
+        resultLength: result.length
+      });
+      debugLog('[DEBUG-FIX-001] normalizeTags: array input processed:', {
+        originalArray: tags,
+        filteredResult: result,
+        resultLength: result.length
+      });
+      return result
     }
 
     // For any other type, return empty array
+    console.log('🔍 [DEBUG-FIX-001] normalizeTags: unknown input type, returning empty array');
+    debugLog('[DEBUG-FIX-001] normalizeTags: unknown input type, returning empty array');
     return []
   }
 
@@ -107,20 +156,24 @@ export class PopupController {
     this.uiManager.on('deletePin', this.handleDeletePin)
     this.uiManager.on('reloadExtension', this.handleReloadExtension)
     this.uiManager.on('openOptions', this.handleOpenOptions)
+
+    // [POPUP-REFRESH-001] Add refresh event handler
+    this.uiManager.on('refreshData', this.refreshPopupData.bind(this))
   }
 
   /**
    * Load initial data when popup opens
+   * [POPUP-DATA-FLOW-001] Enhanced data flow validation
    */
   async loadInitialData () {
-    debugLog('[CHROME-DEBUG-001] loadInitialData: start');
+    debugLog('[POPUP-DATA-FLOW-001] loadInitialData: start');
     try {
       this.setLoading(true)
 
       // Get current tab information
-      debugLog('[CHROME-DEBUG-001] loadInitialData: calling getCurrentTab');
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getCurrentTab');
       this.currentTab = await this.getCurrentTab()
-      debugLog('[CHROME-DEBUG-001] loadInitialData: got currentTab', this.currentTab);
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentTab', this.currentTab);
       if (!this.currentTab) {
         throw new Error('Unable to get current tab information')
       }
@@ -132,23 +185,52 @@ export class PopupController {
         title: this.currentTab.title
       })
 
-      // Get bookmark data for current URL
-      debugLog('[CHROME-DEBUG-001] loadInitialData: calling getBookmarkData', this.currentTab.url);
+      // [POPUP-DATA-FLOW-001] Get and validate bookmark data
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getBookmarkData', this.currentTab.url);
       this.currentPin = await this.getBookmarkData(this.currentTab.url)
-      debugLog('[CHROME-DEBUG-001] loadInitialData: got currentPin', this.currentPin);
-      this.stateManager.setState({ currentPin: this.currentPin })
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentPin', this.currentPin);
 
-      // Debug: Log the bookmark data structure
-      debugLog('Bookmark data received:', this.currentPin)
-      if (this.currentPin?.tags) {
-        debugLog('Tags data type:', typeof this.currentPin.tags)
-        debugLog('Tags data:', this.currentPin.tags)
+      // [POPUP-DATA-FLOW-001] Handle both bookmarked and non-bookmarked sites
+      if (!this.currentPin) {
+        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: No bookmark data, creating empty bookmark for current site');
+        this.currentPin = {
+          url: this.currentTab.url,
+          description: this.currentTab.title || '',
+          tags: [],
+          shared: 'yes',
+          toread: 'no',
+          time: '',
+          extended: '',
+          hash: ''
+        }
+        // [POPUP-DATA-FLOW-001] Log the created empty bookmark for test compatibility
+        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: created empty bookmark', this.currentPin);
       }
 
-      // Process and normalize tags
-      const normalizedTags = this.normalizeTags(this.currentPin?.tags)
+      this.stateManager.setState({ currentPin: this.currentPin })
 
-      // Update UI with loaded data
+      // [POPUP-DATA-FLOW-001] Enhanced debug logging for bookmark data
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: bookmark data validation:', {
+        hasBookmark: !!this.currentPin,
+        url: this.currentPin?.url,
+        description: this.currentPin?.description,
+        tagCount: this.currentPin?.tags?.length || 0,
+        isPrivate: this.currentPin?.shared === 'no',
+        isReadLater: this.currentPin?.toread === 'yes'
+      });
+
+      // [POPUP-DATA-FLOW-001] Process and validate tags
+      const normalizedTags = this.normalizeTags(this.currentPin?.tags)
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: tags processing:', {
+        originalTags: this.currentPin?.tags,
+        originalTagsType: typeof this.currentPin?.tags,
+        normalizedTags: normalizedTags,
+        normalizedTagsLength: normalizedTags.length,
+        normalizedTagsIsArray: Array.isArray(normalizedTags)
+      });
+
+      // [POPUP-DATA-FLOW-001] Update UI with validated data
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling updateCurrentTags with:', normalizedTags);
       this.uiManager.updateCurrentTags(normalizedTags)
       this.uiManager.updateConnectionStatus(true)
       this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
@@ -166,13 +248,15 @@ export class PopupController {
 
       // Mark as initialized
       this.isInitialized = true
-      debugLog('[POPUP-CONTROLLER] Popup initialization completed')
+      debugLog('[POPUP-DATA-FLOW-001] Popup initialization completed successfully')
     } catch (error) {
-      debugError('Failed to load initial data:', error)
+      debugError('[POPUP-DATA-FLOW-001] Failed to load initial data:', error)
       if (this.errorHandler) {
         this.errorHandler.handleError('Failed to load initial data', error)
       }
       this.uiManager.updateConnectionStatus(false)
+      // Re-throw the error so it can be caught by the calling method
+      throw error
     } finally {
       this.setLoading(false)
     }
@@ -292,9 +376,10 @@ export class PopupController {
 
   /**
    * Get bookmark data for a URL
+   * [POPUP-DATA-FLOW-001] Enhanced data extraction with validation
    */
   async getBookmarkData (url) {
-    debugLog('[CHROME-DEBUG-001] getBookmarkData: calling chrome.runtime.sendMessage', url);
+    debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: calling chrome.runtime.sendMessage', url);
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
@@ -302,22 +387,94 @@ export class PopupController {
           data: { url }
         },
         (response) => {
-          debugLog('[CHROME-DEBUG-001] getBookmarkData: chrome.runtime.sendMessage callback', response, chrome.runtime.lastError);
+          debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.sendMessage callback', response, chrome.runtime.lastError);
           if (chrome.runtime.lastError) {
-            debugError('[CHROME-DEBUG-001] getBookmarkData: chrome.runtime.lastError', chrome.runtime.lastError);
+            debugError('[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.lastError', chrome.runtime.lastError);
             reject(new Error(chrome.runtime.lastError.message))
             return
           }
 
           if (response && response.success) {
-            resolve(response.data.data)
+            // [POPUP-DATA-FLOW-001] Enhanced response structure validation
+            debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: response structure:', {
+              response: response,
+              responseSuccess: response.success,
+              responseData: response.data,
+              responseDataType: typeof response.data,
+              responseDataKeys: response.data ? Object.keys(response.data) : null,
+              hasUrl: response.data?.url ? true : false,
+              hasTags: response.data?.tags ? true : false,
+              tagCount: response.data?.tags ? (Array.isArray(response.data.tags) ? response.data.tags.length : 'not-array') : 0
+            });
+
+            // [POPUP-DATA-FLOW-001] Extract and validate bookmark data
+            const bookmarkData = response.data;
+
+            // [POPUP-DATA-FLOW-001] Handle blocked URLs or no auth
+            if (bookmarkData?.blocked || bookmarkData?.needsAuth) {
+              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: URL blocked or needs auth', bookmarkData);
+              resolve(null);
+              return;
+            }
+
+            // [POPUP-DATA-FLOW-001] Validate extracted data
+            const isValid = this.validateBookmarkData(bookmarkData);
+            if (!isValid) {
+              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: Invalid bookmark data structure, treating as no bookmark', bookmarkData);
+              resolve(null);
+              return;
+            }
+
+            // [POPUP-DATA-FLOW-001] Extract the actual bookmark data (handle both direct and nested structures)
+            const extractedData = bookmarkData?.data || bookmarkData;
+            debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: extracted and validated bookmark data:', extractedData);
+            resolve(extractedData)
           } else {
-            debugError('[CHROME-DEBUG-001] getBookmarkData: Failed to get bookmark data', response);
+            debugError('[POPUP-DATA-FLOW-001] getBookmarkData: Failed to get bookmark data', response);
             reject(new Error(response?.error || 'Failed to get bookmark data'))
           }
         }
       )
     })
+  }
+
+  /**
+   * [POPUP-DEBUG-001] Validate bookmark data structure
+   * @param {Object} bookmarkData - Bookmark data to validate
+   * @returns {boolean} Whether the data is valid
+   */
+  validateBookmarkData(bookmarkData) {
+    // Handle null and undefined inputs
+    if (bookmarkData === null || bookmarkData === undefined) {
+      return false;
+    }
+
+    // Handle both direct bookmark data and response structure
+    const data = bookmarkData?.data || bookmarkData;
+
+    // [POPUP-DEBUG-001] Maintain backward compatibility with existing test requirements
+    // Original requirement: tags must be an array and present
+    const isValid = data &&
+                    typeof data === 'object' &&
+                    data.url &&
+                    Array.isArray(data.tags) // Must be an array, not just truthy
+
+    debugLog('[POPUP-DEBUG-001] Bookmark data validation:', {
+      isValid,
+      hasUrl: !!data?.url,
+      hasTags: Array.isArray(data?.tags),
+      tagCount: data?.tags?.length || 0,
+      hasDescription: !!data?.description,
+      hasShared: data?.shared !== undefined,
+      hasToread: data?.toread !== undefined,
+      dataStructure: {
+        hasDataProperty: !!bookmarkData?.data,
+        directData: !!bookmarkData?.url,
+        dataKeys: data ? Object.keys(data) : null
+      }
+    })
+
+    return isValid
   }
 
   /**
@@ -1305,5 +1462,113 @@ export class PopupController {
     this.uiManager?.off('deletePin', this.handleDeletePin)
     this.uiManager?.off('reloadExtension', this.handleReloadExtension)
     this.uiManager?.off('openOptions', this.handleOpenOptions)
+  }
+
+  /**
+   * [POPUP-REFRESH-001] Manual refresh capability
+   */
+  async refreshPopupData() {
+    debugLog('[POPUP-REFRESH-001] Starting manual refresh')
+    try {
+      this.setLoading(true)
+      await this.loadInitialData()
+      this.uiManager.showSuccess('Data refreshed successfully')
+      debugLog('[POPUP-REFRESH-001] Manual refresh completed successfully')
+    } catch (error) {
+      debugError('[POPUP-REFRESH-001] Refresh failed:', error)
+      this.uiManager.showError('Failed to refresh data')
+    } finally {
+      this.setLoading(false)
+    }
+  }
+
+  /**
+   * [POPUP-REFRESH-001] Setup auto-refresh on focus
+   */
+  setupAutoRefresh() {
+    window.addEventListener('focus', () => {
+      if (this.isInitialized && !this.isLoading) {
+        debugLog('[POPUP-REFRESH-001] Auto-refresh on focus triggered')
+        this.refreshPopupData()
+      }
+    })
+  }
+
+  /**
+   * [POPUP-REFRESH-001] Enhanced real-time update handling
+   */
+  setupRealTimeUpdates() {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+      chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
+        if (message.type === 'BOOKMARK_UPDATED') {
+          debugLog('[POPUP-REFRESH-001] Received BOOKMARK_UPDATED, refreshing data')
+          try {
+            await this.refreshPopupData()
+          } catch (error) {
+            debugError('[POPUP-REFRESH-001] Failed to refresh on update:', error)
+          }
+        }
+      })
+    }
+  }
+
+  /**
+   * [POPUP-SYNC-001] Ensure popup and badge show same data
+   */
+  async validateBadgeSynchronization() {
+    try {
+      const currentTab = await this.getCurrentTab()
+      const popupData = this.currentPin
+      const badgeData = await this.sendMessage({
+        type: 'getCurrentBookmark',
+        data: { url: currentTab.url }
+      })
+
+      debugLog('[POPUP-SYNC-001] Badge synchronization check:', {
+        popupTags: popupData?.tags,
+        badgeTags: badgeData?.tags,
+        popupTagCount: popupData?.tags?.length || 0,
+        badgeTagCount: badgeData?.tags?.length || 0,
+        synchronized: JSON.stringify(popupData) === JSON.stringify(badgeData)
+      })
+
+      return {
+        synchronized: JSON.stringify(popupData) === JSON.stringify(badgeData),
+        popupData,
+        badgeData
+      }
+    } catch (error) {
+      debugError('[POPUP-SYNC-001] Badge synchronization check failed:', error)
+      return { synchronized: false, error: error.message }
+    }
+  }
+
+  /**
+   * [POPUP-SYNC-001] Ensure popup and overlay show same data
+   */
+  async validateOverlaySynchronization() {
+    try {
+      const overlayData = await this.sendToTab({
+        type: 'getCurrentBookmark',
+        data: { url: this.currentTab.url }
+      })
+
+      debugLog('[POPUP-SYNC-001] Overlay synchronization check:', {
+        popupData: this.currentPin,
+        overlayData: overlayData,
+        popupTagCount: this.currentPin?.tags?.length || 0,
+        overlayTagCount: overlayData?.tags?.length || 0,
+        synchronized: JSON.stringify(this.currentPin) === JSON.stringify(overlayData)
+      })
+
+      return {
+        synchronized: JSON.stringify(this.currentPin) === JSON.stringify(overlayData),
+        popupData: this.currentPin,
+        overlayData: overlayData
+      }
+    } catch (error) {
+      debugError('[POPUP-SYNC-001] Overlay synchronization check failed:', error)
+      return { synchronized: false, error: error.message }
+    }
   }
 }

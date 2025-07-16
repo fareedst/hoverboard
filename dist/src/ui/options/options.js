@@ -735,6 +735,7 @@ var init_safari_shim = __esm({
                 if (logger && logger.warn) {
                   logger.warn("[SAFARI-EXT-STORAGE-001] Storage quota usage high:", quotaUsage.usagePercent + "%");
                 }
+                console.warn("[SAFARI-EXT-STORAGE-001] Storage quota usage high:", quotaUsage.usagePercent + "%");
               }
               return result;
             } catch (error) {
@@ -766,7 +767,12 @@ var init_safari_shim = __esm({
             return new Promise((resolve, reject) => {
               chrome.runtime.sendMessage(enhancedMessage, (response) => {
                 if (chrome.runtime.lastError) {
-                  reject(new Error(chrome.runtime.lastError.message));
+                  const error = new Error(chrome.runtime.lastError.message);
+                  if (logger && logger.error) {
+                    logger.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error);
+                  }
+                  console.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error.message);
+                  reject(error);
                 } else {
                   resolve(response);
                 }
@@ -776,6 +782,7 @@ var init_safari_shim = __esm({
             if (logger && logger.error) {
               logger.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error);
             }
+            console.error("[SAFARI-EXT-MESSAGING-001] Message send failed:", error.message);
             throw error;
           }
         },
@@ -820,13 +827,18 @@ var init_safari_shim = __esm({
           try {
             const tabs = await browser.tabs.query(queryInfo);
             if (typeof safari !== "undefined") {
-              return tabs.filter((tab) => !tab.url.startsWith("safari-extension://"));
+              const filteredTabs = tabs.filter((tab) => !tab.url.startsWith("safari-extension://"));
+              if (logger && logger.debug) {
+                logger.debug("[SAFARI-EXT-CONTENT-001] Filtered tabs:", { original: tabs.length, filtered: filteredTabs.length });
+              }
+              return filteredTabs;
             }
             return tabs;
           } catch (error) {
             if (logger && logger.error) {
               logger.error("[SAFARI-EXT-CONTENT-001] Tab query failed:", error);
             }
+            console.error("[SAFARI-EXT-CONTENT-001] Tab query failed:", error.message);
             throw error;
           }
         },

@@ -116,6 +116,9 @@ export class UIManager {
     })
 
     this.elements.reloadBtn?.addEventListener('click', () => {
+      // [POPUP-REFRESH-001] Emit refreshData event for manual refresh
+      this.emit('refreshData')
+      // Also emit reloadExtension for backward compatibility
       this.emit('reloadExtension')
     })
 

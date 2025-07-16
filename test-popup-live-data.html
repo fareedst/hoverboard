@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup Live Data Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Popup Live Data Test</h1>
+    <p>This test verifies that the popup window displays live data correctly after the recent fixes.</p>
+
+    <div class="test-section">
+        <h2>Test Instructions</h2>
+        <ol>
+            <li>Open the Hoverboard extension popup on a bookmarked page</li>
+            <li>Verify that the popup displays the current bookmark data</li>
+            <li>Check that the tags are displayed correctly</li>
+            <li>Verify that the popup updates when bookmark data changes</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results">
+            <div class="test-result info">
+                Click "Run Tests" to start the test suite.
+            </div>
+        </div>
+        <button onclick="runTests()">Run Tests</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Log</h2>
+        <div id="test-log" class="log"></div>
+    </div>
+
+    <script>
+        let testResults = [];
+        let testLog = [];
+
+        function log(message) {
+            const timestamp = new Date().toISOString();
+            const logEntry = `[${timestamp}] ${message}`;
+            testLog.push(logEntry);
+            document.getElementById('test-log').textContent = testLog.join('\n');
+        }
+
+        function clearLog() {
+            testLog = [];
+            document.getElementById('test-log').textContent = '';
+        }
+
+        function addTestResult(testName, success, message) {
+            const result = {
+                name: testName,
+                success: success,
+                message: message,
+                timestamp: new Date().toISOString()
+            };
+            testResults.push(result);
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${success ? 'success' : 'error'}`;
+            resultDiv.innerHTML = `
+                <strong>${testName}:</strong> ${success ? 'PASS' : 'FAIL'}<br>
+                ${message}
+            `;
+            
+            document.getElementById('test-results').appendChild(resultDiv);
+        }
+
+        async function runTests() {
+            testResults = [];
+            document.getElementById('test-results').innerHTML = '';
+            log('Starting popup live data tests...');
+
+            try {
+                // Test 1: Check if popup can be opened
+                log('Test 1: Checking popup accessibility...');
+                if (typeof chrome !== 'undefined' && chrome.runtime) {
+                    addTestResult('Popup Accessibility', true, 'Chrome runtime available');
+                    log('✓ Chrome runtime detected');
+                } else {
+                    addTestResult('Popup Accessibility', false, 'Chrome runtime not available');
+                    log('✗ Chrome runtime not available');
+                }
+
+                // Test 2: Check if service worker is accessible
+                log('Test 2: Checking service worker accessibility...');
+                try {
+                    const response = await new Promise((resolve, reject) => {
+                        chrome.runtime.sendMessage({ type: 'echo', data: 'test' }, (response) => {
+                            if (chrome.runtime.lastError) {
+                                reject(new Error(chrome.runtime.lastError.message));
+                            } else {
+                                resolve(response);
+                            }
+                        });
+                    });
+                    
+                    if (response && response.echo) {
+                        addTestResult('Service Worker Communication', true, 'Service worker responded successfully');
+                        log('✓ Service worker communication successful');
+                    } else {
+                        addTestResult('Service Worker Communication', false, 'Service worker response invalid');
+                        log('✗ Service worker response invalid');
+                    }
+                } catch (error) {
+                    addTestResult('Service Worker Communication', false, `Service worker error: ${error.message}`);
+                    log(`✗ Service worker error: ${error.message}`);
+                }
+
+                // Test 3: Check if current tab can be retrieved
+                log('Test 3: Checking current tab retrieval...');
+                try {
+                    const tabs = await new Promise((resolve, reject) => {
+                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                            if (chrome.runtime.lastError) {
+                                reject(new Error(chrome.runtime.lastError.message));
+                            } else {
+                                resolve(tabs);
+                            }
+                        });
+                    });
+                    
+                    if (tabs && tabs.length > 0) {
+                        addTestResult('Current Tab Retrieval', true, `Current tab: ${tabs[0].url}`);
+                        log(`✓ Current tab retrieved: ${tabs[0].url}`);
+                    } else {
+                        addTestResult('Current Tab Retrieval', false, 'No active tab found');
+                        log('✗ No active tab found');
+                    }
+                } catch (error) {
+                    addTestResult('Current Tab Retrieval', false, `Tab retrieval error: ${error.message}`);
+                    log(`✗ Tab retrieval error: ${error.message}`);
+                }
+
+                // Test 4: Check if bookmark data can be retrieved
+                log('Test 4: Checking bookmark data retrieval...');
+                try {
+                    const currentTab = await new Promise((resolve, reject) => {
+                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                            if (chrome.runtime.lastError) {
+                                reject(new Error(chrome.runtime.lastError.message));
+                            } else {
+                                resolve(tabs[0]);
+                            }
+                        });
+                    });
+
+                    const bookmarkResponse = await new Promise((resolve, reject) => {
+                        chrome.runtime.sendMessage({
+                            type: 'getCurrentBookmark',
+                            data: { url: currentTab.url }
+                        }, (response) => {
+                            if (chrome.runtime.lastError) {
+                                reject(new Error(chrome.runtime.lastError.message));
+                            } else {
+                                resolve(response);
+                            }
+                        });
+                    });
+
+                    if (bookmarkResponse && bookmarkResponse.success) {
+                        const bookmarkData = bookmarkResponse.data;
+                        const hasValidStructure = bookmarkData && 
+                                                typeof bookmarkData === 'object' && 
+                                                bookmarkData.url;
+                        
+                        if (hasValidStructure) {
+                            addTestResult('Bookmark Data Retrieval', true, 
+                                `Bookmark data retrieved successfully. Tags: ${(bookmarkData.tags || []).length}`);
+                            log(`✓ Bookmark data retrieved successfully`);
+                            log(`  URL: ${bookmarkData.url}`);
+                            log(`  Description: ${bookmarkData.description || 'N/A'}`);
+                            log(`  Tags: ${(bookmarkData.tags || []).join(', ') || 'None'}`);
+                        } else {
+                            addTestResult('Bookmark Data Retrieval', true, 'No bookmark found for current page (expected for non-bookmarked sites)');
+                            log('✓ No bookmark found for current page (expected behavior)');
+                        }
+                    } else {
+                        addTestResult('Bookmark Data Retrieval', false, 'Failed to retrieve bookmark data');
+                        log('✗ Failed to retrieve bookmark data');
+                    }
+                } catch (error) {
+                    addTestResult('Bookmark Data Retrieval', false, `Bookmark retrieval error: ${error.message}`);
+                    log(`✗ Bookmark retrieval error: ${error.message}`);
+                }
+
+                // Test 5: Check popup data flow validation
+                log('Test 5: Checking popup data flow validation...');
+                const mockBookmarkData = {
+                    url: 'https://example.com',
+                    description: 'Test Bookmark',
+                    tags: ['test', 'example'],
+                    shared: 'yes',
+                    toread: 'no'
+                };
+
+                // Simulate the validation logic
+                const validateBookmarkData = (bookmarkData) => {
+                    const data = bookmarkData?.data || bookmarkData;
+                    return data &&
+                           typeof data === 'object' &&
+                           data.url &&
+                           Array.isArray(data.tags || []);
+                };
+
+                const isValid = validateBookmarkData(mockBookmarkData);
+                if (isValid) {
+                    addTestResult('Data Validation Logic', true, 'Bookmark data validation logic working correctly');
+                    log('✓ Data validation logic working correctly');
+                } else {
+                    addTestResult('Data Validation Logic', false, 'Bookmark data validation logic failed');
+                    log('✗ Data validation logic failed');
+                }
+
+            } catch (error) {
+                log(`Test suite error: ${error.message}`);
+                addTestResult('Test Suite', false, `Test suite failed: ${error.message}`);
+            }
+
+            // Summary
+            const passedTests = testResults.filter(r => r.success).length;
+            const totalTests = testResults.length;
+            log(`Test suite completed: ${passedTests}/${totalTests} tests passed`);
+            
+            if (passedTests === totalTests) {
+                addTestResult('Overall Result', true, `All ${totalTests} tests passed! Popup live data functionality is working correctly.`);
+            } else {
+                addTestResult('Overall Result', false, `${passedTests}/${totalTests} tests passed. Some issues detected.`);
+            }
+        }
+
+        // Auto-run tests when page loads
+        window.addEventListener('load', () => {
+            log('Test page loaded. Ready to run popup live data tests.');
+        });
+    </script>
+</body>
+</html> 

@@ -232,20 +232,20 @@ export class MessageHandler {
       throw new Error('No URL provided')
     }
 
-    debugLog('[MESSAGE-HANDLER] Getting bookmark for URL:', targetUrl)
+    debugLog('[POPUP-DATA-FLOW-001] Getting bookmark for URL:', targetUrl)
 
     // Check if URL is allowed (not in inhibit list)
-    debugLog('Checking if URL is allowed...')
+    debugLog('[POPUP-DATA-FLOW-001] Checking if URL is allowed...')
     const isAllowed = await this.configManager.isUrlAllowed(targetUrl)
     if (!isAllowed) {
       return { success: true, data: { blocked: true, url: targetUrl } }
     }
-    debugLog('URL is allowed, getting bookmark data...')
+    debugLog('[POPUP-DATA-FLOW-001] URL is allowed, getting bookmark data...')
 
     // Check if auth token is available
     const hasAuth = await this.configManager.hasAuthToken()
     if (!hasAuth) {
-      debugLog('No auth token available, returning empty bookmark')
+      debugLog('[POPUP-DATA-FLOW-001] No auth token available, returning empty bookmark')
       return {
         success: true,
         data: {
@@ -264,9 +264,23 @@ export class MessageHandler {
     }
 
     // Get bookmark data from Pinboard
-    debugLog('Getting bookmark data from Pinboard...')
+    debugLog('[POPUP-DATA-FLOW-001] Getting bookmark data from Pinboard...')
     const bookmark = await this.pinboardService.getBookmarkForUrl(targetUrl, data?.title)
-    debugLog('Bookmark data retrieved:', bookmark)
+    debugLog('[POPUP-DATA-FLOW-001] Bookmark data retrieved:', bookmark)
+
+    // [POPUP-DATA-FLOW-001] Enhanced response structure validation
+    const response = { success: true, data: bookmark }
+    debugLog('[POPUP-DATA-FLOW-001] Service worker response structure:', {
+      success: response.success,
+      dataType: typeof response.data,
+      dataKeys: response.data ? Object.keys(response.data) : null,
+      hasUrl: !!response.data?.url,
+      hasTags: !!response.data?.tags,
+      tagCount: response.data?.tags ? (Array.isArray(response.data.tags) ? response.data.tags.length : 'not-array') : 0,
+      hasDescription: !!response.data?.description,
+      hasShared: response.data?.shared !== undefined,
+      hasToread: response.data?.toread !== undefined
+    })
 
     // Update browser badge if configured
     const config = await this.configManager.getConfig()
@@ -274,7 +288,7 @@ export class MessageHandler {
       // Badge update handled by service worker
     }
 
-    return { success: true, data: bookmark }
+    return response
   }
 
   async handleGetRecentBookmarks (data, senderUrl) {

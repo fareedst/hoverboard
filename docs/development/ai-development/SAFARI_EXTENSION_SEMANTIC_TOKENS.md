@@ -1,168 +1,267 @@
-# 🦁 Safari Extension Semantic Tokens
+# Safari Extension Semantic Tokens
 
-**Semantic Token:** [SAFARI-EXT-TOKENS-001]
-**Date:** 2025-07-15
-**Status:** Active Development
+**Date:** 2025-07-14  
+**Status:** Active Development  
+**Semantic Tokens:** `SAFARI-EXT-TOKENS-001`, `SAFARI-EXT-CROSS-REF-001`
 
----
+## Overview
 
-## Token Registry
+This document defines all semantic tokens used for Safari extension development in the Hoverboard project. All tokens are designed to provide complete cross-referencing across code, tests, and documentation.
 
-| Token Name                    | Description                                                | Usage Scope                        | Priority |
-|-------------------------------|------------------------------------------------------------|------------------------------------|----------|
-| `SAFARI-EXT-TOKENS-001`       | Master semantic tokens registry for Safari extension      | All Safari documentation           | Core     |
-| `SAFARI-EXT-ARCH-001`         | Architectural decisions for Safari extension              | Architecture docs, decisions       | Core     |
-| `SAFARI-EXT-PLAN-001`         | Master implementation plan for Safari extension           | Implementation docs, tasks         | Core     |
-| `SAFARI-EXT-DEBUG-001`        | Debug logging framework for Safari extension              | Debug, logging, diagnostics        | Core     |
-| `SAFARI-EXT-SHIM-001`         | Browser API abstraction layer for cross-platform support | Code, abstractions, polyfills      | Core     |
-| `SAFARI-EXT-MANIFEST-001`     | Manifest and permissions configuration for Safari         | Manifest files, permissions        | Core     |
-| `SAFARI-EXT-BUILD-001`        | Build system and packaging for Safari extension           | Build scripts, packaging           | Core     |
-| `SAFARI-EXT-TEST-001`         | Test framework and cases for Safari-specific features     | Test files, validation             | Core     |
-| `SAFARI-EXT-UI-001`           | UI components and theming for Safari compatibility        | UI code, CSS, theming             | Feature  |
-| `SAFARI-EXT-CONTENT-001`      | Content script adaptations for Safari                     | Content scripts, injection         | Feature  |
-| `SAFARI-EXT-POPUP-001`        | Popup component Safari compatibility                      | Popup code, sizing, behavior       | Feature  |
-| `SAFARI-EXT-BACKGROUND-001`   | Background script/service worker for Safari               | Background/service worker code     | Feature  |
-| `SAFARI-EXT-STORAGE-001`      | Storage API compatibility for Safari                      | Storage, persistence, sync         | Feature  |
-| `SAFARI-EXT-MESSAGING-001`    | Messaging system compatibility for Safari                 | Message passing, communication     | Feature  |
-| `SAFARI-EXT-PERMISSIONS-001`  | Permissions management for Safari                         | Permissions, security, access      | Feature  |
-| `SAFARI-EXT-ICONS-001`        | Icon and asset management for Safari                      | Icons, assets, resources           | Feature  |
-| `SAFARI-EXT-THEMES-001`       | Theme system compatibility for Safari                     | Themes, CSS variables, styling     | Feature  |
-| `SAFARI-EXT-OVERLAY-001`      | Overlay system adaptations for Safari                     | Overlays, hover system, positioning| Feature  |
-| `SAFARI-EXT-TAGS-001`         | Tag system compatibility for Safari                       | Tags, suggestions, management      | Feature  |
-| `SAFARI-EXT-SEARCH-001`       | Search functionality for Safari                           | Search, filtering, results         | Feature  |
-| `SAFARI-EXT-DIST-001`         | Distribution and app store packaging for Safari           | Distribution, signing, app store   | Deploy   |
-| `SAFARI-EXT-XCODE-001`        | Xcode project configuration for Safari extension          | Xcode, native wrapper, signing     | Deploy   |
-| `SAFARI-EXT-CODESIGN-001`     | Code signing and notarization for Safari                  | Code signing, notarization, certs  | Deploy   |
-| `SAFARI-EXT-APPSTORE-001`     | App Store submission and review process                   | App Store, review, submission      | Deploy   |
-| `SAFARI-EXT-COMPAT-001`       | Browser compatibility testing and validation              | Compatibility, testing, validation | Quality  |
-| `SAFARI-EXT-PERF-001`         | Performance optimization for Safari                       | Performance, optimization, profiling| Quality  |
-| `SAFARI-EXT-A11Y-001`         | Accessibility compliance for Safari                       | Accessibility, VoiceOver, keyboard | Quality  |
-| `SAFARI-EXT-SECURITY-001`     | Security considerations for Safari                        | Security, CSP, permissions         | Quality  |
-| `SAFARI-EXT-MIGRATE-001`      | Migration tools and utilities for Safari                 | Migration, data transfer, upgrade   | Tools    |
-| `SAFARI-EXT-TOOLS-001`        | Development tools for Safari extension                   | Dev tools, debugging, utilities     | Tools    |
+## [SAFARI-EXT-TOKENS-001] Core Semantic Tokens
 
----
+### Architecture Tokens
 
-## Token Categories
+| Token | Description | Usage | Cross-References |
+|-------|-------------|-------|------------------|
+| `SAFARI-EXT-ARCH-001` | Safari architecture decisions | Architecture documents, design decisions | `SAFARI-EXT-API-001`, `SAFARI-EXT-IMPL-001` |
+| `SAFARI-EXT-API-001` | Browser API abstraction | Safari shim implementation, API compatibility | `SAFARI-EXT-SHIM-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-COORD-001` | Architecture coordination | Cross-architecture coordination | All architecture documents |
+| `SAFARI-EXT-IMPL-001` | Safari implementation details | All Safari-specific code | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
 
-### Core Tokens
-Essential tokens for fundamental Safari extension functionality:
-- `SAFARI-EXT-TOKENS-001`: Master registry
-- `SAFARI-EXT-ARCH-001`: Architecture decisions  
-- `SAFARI-EXT-PLAN-001`: Implementation plan
-- `SAFARI-EXT-DEBUG-001`: Debug framework
-- `SAFARI-EXT-SHIM-001`: Browser abstraction
-- `SAFARI-EXT-MANIFEST-001`: Manifest configuration
-- `SAFARI-EXT-BUILD-001`: Build system
-- `SAFARI-EXT-TEST-001`: Test framework
+### Implementation Tokens
 
-### Feature Tokens
-Tokens for specific feature implementations:
-- UI/UX: `SAFARI-EXT-UI-001`, `SAFARI-EXT-THEMES-001`, `SAFARI-EXT-ICONS-001`
-- Content: `SAFARI-EXT-CONTENT-001`, `SAFARI-EXT-OVERLAY-001`
-- Background: `SAFARI-EXT-BACKGROUND-001`, `SAFARI-EXT-MESSAGING-001`
-- Data: `SAFARI-EXT-STORAGE-001`, `SAFARI-EXT-TAGS-001`, `SAFARI-EXT-SEARCH-001`
+| Token | Description | Usage | Cross-References |
+|-------|-------------|-------|------------------|
+| `SAFARI-EXT-SHIM-001` | Platform detection utilities | Browser detection, feature support | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-STORAGE-001` | Storage quota management | Storage monitoring, quota handling | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-MESSAGING-001` | Message passing enhancements | Cross-component communication | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-CONTENT-001` | Tab querying and filtering | Content script injection, tab management | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-UI-001` | UI and overlay system | Popup styling, overlay management | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-PERF-001` | Performance optimizations | Memory management, performance monitoring | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-ERROR-001` | Error handling and recovery | Error scenarios, graceful degradation | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-COMPAT-001` | Cross-browser compatibility | Browser compatibility testing | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
 
-### Deployment Tokens
-Tokens for distribution and packaging:
-- `SAFARI-EXT-DIST-001`: Distribution
-- `SAFARI-EXT-XCODE-001`: Xcode integration
-- `SAFARI-EXT-CODESIGN-001`: Code signing
-- `SAFARI-EXT-APPSTORE-001`: App Store submission
+### Testing Tokens
 
-### Quality Tokens
-Tokens for quality assurance:
-- `SAFARI-EXT-COMPAT-001`: Compatibility testing
-- `SAFARI-EXT-PERF-001`: Performance
-- `SAFARI-EXT-A11Y-001`: Accessibility
-- `SAFARI-EXT-SECURITY-001`: Security
+| Token | Description | Usage | Cross-References |
+|-------|-------------|-------|------------------|
+| `SAFARI-EXT-TEST-001` | Safari-specific tests | All Safari test files | `SAFARI-EXT-API-001`, `SAFARI-EXT-IMPL-001` |
+| `SAFARI-EXT-INTEGRATION-001` | Integration tests | Cross-component testing | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-PERF-001` | Performance tests | Performance benchmarking | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-ERROR-001` | Error handling tests | Error scenario testing | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-COMPAT-001` | Cross-browser compatibility tests | Browser compatibility validation | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-UI-001` | UI responsiveness tests | UI performance testing | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-ACCESS-001` | Accessibility tests | VoiceOver, keyboard navigation | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
 
----
+### Documentation Tokens
 
-## Usage Guidelines
+| Token | Description | Usage | Cross-References |
+|-------|-------------|-------|------------------|
+| `SAFARI-EXT-DOC-001` | Documentation strategy | All documentation files | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-ARCH-001` |
+| `SAFARI-EXT-CROSS-REF-001` | Cross-reference management | Token coordination | All tokens |
 
-### Token Placement
-- **File headers**: All Safari-related files must include primary token
-- **Code comments**: Use tokens for Safari-specific code sections
-- **Documentation**: Reference tokens in all Safari documentation
-- **Test cases**: Include tokens in test descriptions and setup
+## [SAFARI-EXT-CROSS-REF-001] Cross-Reference Management
 
-### Cross-Reference Requirements
-- All tokens must cross-reference with existing architecture tokens
-- Coordinate with: `[DARK_THEME_DEFAULT_ARCHITECTURE]`, `[TOGGLE_SYNC_*]`, `[TAG_SYNC_*]`
-- Maintain compatibility with: `[AI-FIRST-001]`, `[OVERLAY-THEMING-*]`
+### Token Usage Guidelines
 
-### Token Evolution
-- Tokens may be deprecated but never removed
-- New sub-tokens follow pattern: `SAFARI-EXT-{CATEGORY}-{NUMBER}`
-- Major versions create new token families
+**Token Placement:**
+- All code files must include relevant semantic tokens in comments
+- All test files must include semantic tokens in test descriptions
+- All documentation files must include semantic tokens in headers
+- All architectural decisions must reference relevant tokens
 
----
-
-## Examples
-
-### Documentation Headers
-```markdown
-# Safari Extension Architecture
-**Semantic Token:** [SAFARI-EXT-ARCH-001]
-**Cross-References:** [DARK_THEME_DEFAULT_ARCHITECTURE], [TOGGLE_SYNC_ARCH]
-**Date:** 2025-07-15
+**Token Format:**
+```javascript
+// [SAFARI-EXT-API-001] Browser API abstraction implementation
+// [SAFARI-EXT-STORAGE-001] Storage quota management
+// [SAFARI-EXT-MESSAGING-001] Message passing enhancements
 ```
 
-### Code Comments
+**Test Token Format:**
 ```javascript
-// [SAFARI-EXT-SHIM-001] Safari browser API abstraction
-import { browser } from '../shared/safari-shim.js';
+test('[SAFARI-EXT-API-001] should load webextension-polyfill successfully', () => {
+  // Test implementation
+});
+```
 
-// [SAFARI-EXT-POPUP-001] Safari-specific popup sizing
-const safariPopupConfig = {
-  width: 400,
-  height: 600
+**Documentation Token Format:**
+```markdown
+## [SAFARI-EXT-ARCH-001] Safari Architecture Decisions
+
+This section outlines the architectural decisions for Safari extension support.
+```
+
+### Cross-Reference Matrix
+
+| Token | Code Files | Test Files | Documentation |
+|-------|------------|------------|---------------|
+| `SAFARI-EXT-ARCH-001` | Architecture decisions | Architecture validation | Architecture docs |
+| `SAFARI-EXT-API-001` | safari-shim.js | safari-shim.test.js | API documentation |
+| `SAFARI-EXT-IMPL-001` | All Safari code | All Safari tests | Implementation docs |
+| `SAFARI-EXT-SHIM-001` | safari-shim.js | safari-shim.test.js | Shim documentation |
+| `SAFARI-EXT-STORAGE-001` | tag-service.js, safari-shim.js | tag-storage.test.js | Storage documentation |
+| `SAFARI-EXT-MESSAGING-001` | message-handler.js, safari-shim.js | message-handler.test.js | Message documentation |
+| `SAFARI-EXT-CONTENT-001` | content-main.js, safari-shim.js | content tests | Content documentation |
+| `SAFARI-EXT-UI-001` | popup.js, overlay-manager.js | UI tests | UI documentation |
+| `SAFARI-EXT-PERF-001` | Performance-critical code | performance tests | Performance documentation |
+| `SAFARI-EXT-ERROR-001` | ErrorHandler.js, debug-logger.js | error tests | Error documentation |
+| `SAFARI-EXT-COMPAT-001` | All core extension files | compatibility tests | Compatibility documentation |
+| `SAFARI-EXT-TEST-001` | Test setup files | All Safari test files | Test documentation |
+| `SAFARI-EXT-INTEGRATION-001` | Integration code | integration tests | Integration documentation |
+| `SAFARI-EXT-DOC-001` | Documentation files | Documentation tests | Documentation standards |
+
+## Token Implementation Examples
+
+### Code Implementation
+
+**File:** `src/shared/safari-shim.js`
+```javascript
+// [SAFARI-EXT-API-001] Browser API abstraction implementation
+// [SAFARI-EXT-SHIM-001] Platform detection utilities
+// [SAFARI-EXT-STORAGE-001] Storage quota management
+// [SAFARI-EXT-MESSAGING-001] Message passing enhancements
+
+import browser from 'webextension-polyfill';
+
+// [SAFARI-EXT-SHIM-001] Platform detection
+const isSafari = typeof safari !== 'undefined';
+const isChrome = typeof chrome !== 'undefined' && !isSafari;
+
+// [SAFARI-EXT-API-001] Browser API abstraction
+export const browserAPI = {
+  // [SAFARI-EXT-STORAGE-001] Storage quota management
+  storage: {
+    ...browser.storage,
+    getQuotaUsage: async () => {
+      const estimate = await navigator.storage.estimate();
+      return {
+        used: estimate.usage,
+        quota: estimate.quota
+      };
+    }
+  },
+  
+  // [SAFARI-EXT-MESSAGING-001] Message passing enhancements
+  runtime: {
+    ...browser.runtime,
+    sendMessage: async (message) => {
+      const enhancedMessage = {
+        ...message,
+        platform: isSafari ? 'safari' : 'chrome',
+        timestamp: Date.now()
+      };
+      return browser.runtime.sendMessage(enhancedMessage);
+    }
+  }
 };
 ```
 
-### Test Cases  
+### Test Implementation
+
+**File:** `tests/unit/safari-shim.test.js`
 ```javascript
-// [SAFARI-EXT-TEST-001] Safari extension loading test
-describe('Safari Extension Loading', () => {
-  it('[SAFARI-EXT-SHIM-001] should load browser abstraction', () => {
-    // Test Safari browser API abstraction
+// [SAFARI-EXT-TEST-001] Safari-specific tests
+// [SAFARI-EXT-API-001] Browser API abstraction tests
+// [SAFARI-EXT-SHIM-001] Platform detection tests
+
+describe('[SAFARI-EXT-API-001] Safari Browser Shim', () => {
+  test('[SAFARI-EXT-SHIM-001] should detect Safari platform', () => {
+    // Test implementation
+  });
+  
+  test('[SAFARI-EXT-STORAGE-001] should provide storage quota management', () => {
+    // Test implementation
+  });
+  
+  test('[SAFARI-EXT-MESSAGING-001] should enhance messages with platform info', () => {
+    // Test implementation
   });
 });
 ```
 
----
+### Documentation Implementation
 
-## Maintenance
+**File:** `docs/architecture/safari-extension-architecture.md`
+```markdown
+# Safari Extension Architecture
 
-### Token Auditing
-- Monthly review of token usage
-- Quarterly cleanup of unused tokens
-- Annual token consolidation review
+**Date:** 2025-07-14  
+**Status:** Active Development  
+**Semantic Tokens:** `SAFARI-EXT-ARCH-001`, `SAFARI-EXT-API-001`, `SAFARI-EXT-COORD-001`
 
-### Documentation Updates
-- All token usage must be documented
-- Changes require documentation updates
-- Deprecations need migration guides
+## [SAFARI-EXT-ARCH-001] Core Architectural Decisions
 
----
+### Browser API Abstraction Strategy
 
-## Coordination with Existing Architecture
+**Decision:** Use a unified browser API shim to abstract differences between Chrome, Firefox, and Safari.
 
-### Primary Cross-References
-- `[DARK_THEME_DEFAULT_ARCHITECTURE.md]` - Theme system compatibility
-- `[TOGGLE_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md]` - State management
-- `[TAG_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md]` - Tag system integration
-- `[OVERLAY_THEMING_TECHNICAL_SPEC.md]` - Overlay system compatibility
-- `[OVERLAY_DATA_DISPLAY_SEMANTIC_TOKENS.md]` - Overlay data display functionality
-- `[AI-FIRST-001]` - AI-first development framework
-- `[feature-tracking-matrix.md]` - Feature tracking integration
+**Implementation:** `src/shared/safari-shim.js` provides a unified `browser` API that wraps platform-specific implementations.
 
-### Update Requirements
-- All Safari-specific improvements must be reflected in existing architecture docs
-- Platform-specific decisions require cross-platform impact analysis
-- New features need compatibility assessment with existing systems
+**Cross-References:**
+- `SAFARI-EXT-API-001`: Browser API abstraction implementation
+- `SAFARI-EXT-TEST-001`: Test coverage for API abstraction
+- `SAFARI-EXT-IMPL-001`: Safari-specific implementation details
+```
 
----
+## Token Validation Rules
 
-**[SAFARI-EXT-TOKENS-001]** - Master semantic tokens registry for Safari extension implementation 
+### Required Token Usage
+
+1. **All Safari-specific code must include relevant tokens**
+2. **All test files must include tokens in test descriptions**
+3. **All documentation must include tokens in headers**
+4. **All architectural decisions must reference relevant tokens**
+
+### Token Validation
+
+**Automated Validation:**
+```javascript
+// [SAFARI-EXT-TEST-001] Token validation tests
+describe('Semantic Token Validation', () => {
+  test('[SAFARI-EXT-CROSS-REF-001] should validate token usage in code files', () => {
+    // Validate that all Safari-specific code files include relevant tokens
+  });
+  
+  test('[SAFARI-EXT-CROSS-REF-001] should validate token usage in test files', () => {
+    // Validate that all Safari test files include relevant tokens
+  });
+  
+  test('[SAFARI-EXT-CROSS-REF-001] should validate token usage in documentation', () => {
+    // Validate that all Safari documentation includes relevant tokens
+  });
+});
+```
+
+## Token Maintenance
+
+### Token Lifecycle
+
+1. **Creation:** New tokens must be defined in this document
+2. **Usage:** Tokens must be used consistently across code, tests, and documentation
+3. **Validation:** Automated validation ensures proper token usage
+4. **Deprecation:** Unused tokens should be deprecated and removed
+
+### Token Updates
+
+**When to Update Tokens:**
+- New Safari-specific functionality is added
+- New test categories are created
+- New documentation sections are added
+- Architectural decisions change
+
+**Update Process:**
+1. Update this document with new tokens
+2. Update all relevant code files
+3. Update all relevant test files
+4. Update all relevant documentation
+5. Run validation to ensure consistency
+
+## Cross-Reference Summary
+
+| Category | Tokens | Files | Status |
+|----------|--------|-------|--------|
+| Architecture | `SAFARI-EXT-ARCH-001`, `SAFARI-EXT-API-001`, `SAFARI-EXT-COORD-001` | Architecture docs, safari-shim.js | ✅ Complete |
+| Implementation | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-SHIM-001`, `SAFARI-EXT-STORAGE-001`, `SAFARI-EXT-MESSAGING-001`, `SAFARI-EXT-CONTENT-001` | All Safari code | ✅ Complete |
+| Testing | `SAFARI-EXT-TEST-001`, `SAFARI-EXT-INTEGRATION-001`, `SAFARI-EXT-PERF-001`, `SAFARI-EXT-ERROR-001`, `SAFARI-EXT-COMPAT-001`, `SAFARI-EXT-UI-001`, `SAFARI-EXT-ACCESS-001` | All Safari tests | 🔄 In Progress |
+| Documentation | `SAFARI-EXT-DOC-001`, `SAFARI-EXT-CROSS-REF-001` | All documentation | ✅ Complete |
+
+## Related Documents
+
+- `docs/architecture/safari-extension-architecture.md`: Architecture decisions
+- `docs/development/ai-development/SAFARI_EXTENSION_IMPLEMENTATION_PLAN.md`: Implementation plan
+- `docs/development/ai-development/SAFARI_EXTENSION_TEST_PLAN.md`: Test plan
+- `docs/architecture/overview.md`: Overall architecture
+- `docs/development/ai-development/OVERLAY_THEMING_TECHNICAL_SPEC.md`: Overlay theming
+- `docs/development/ai-development/TAG_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Tag synchronization
+- `docs/development/ai-development/TOGGLE_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Toggle synchronization 

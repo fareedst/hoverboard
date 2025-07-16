@@ -149,12 +149,14 @@ describe('Tag Storage and Cross-Instance Availability', () => {
       })
 
       // Simulate popup reopening and getting bookmark data
-      const bookmark = await messageHandler.handleGetCurrentBookmark(
+      const response = await messageHandler.handleGetCurrentBookmark(
         { url: testUrl },
         testUrl
       )
 
-      expect(bookmark.tags).toEqual(expectedTags)
+      // The response should have the structure { success: true, data: bookmark }
+      expect(response.success).toBe(true)
+      expect(response.data.tags).toEqual(expectedTags)
     })
 
     test('should handle multiple tag additions and preserve existing tags', async () => {

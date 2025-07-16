@@ -1,242 +1,132 @@
-# 🏗️ Hoverboard Extension Architecture
+# Hoverboard Extension Architecture Overview
 
-## 📋 Overview
+**Date:** 2025-07-14  
+**Status:** Active Development  
+**Semantic Tokens:** `ARCH-OVERVIEW-001`, `SAFARI-EXT-COORD-001`
 
-This document provides a comprehensive overview of the Hoverboard browser extension architecture, following modern extension development patterns with Manifest V3 compliance and feature-based organization.
+## Overview
 
-## 🎯 Architecture Principles
+This document provides a high-level overview of the Hoverboard browser extension architecture, including cross-browser support with a focus on Safari compatibility. All architectural decisions are coordinated across all supported platforms.
 
-### 🔐 Security First
-- Manifest V3 compliance with service workers
-- Content Security Policy (CSP) compliance
-- Minimal permissions with declarative patterns
-- Secure data storage and transmission
+## [ARCH-OVERVIEW-001] Core Architecture Principles
 
-### 🧩 Modular Design
-- Feature-based code organization
-- Single responsibility principle
-- Dependency injection patterns
-- Clean separation of concerns
+### Cross-Browser Compatibility
 
-### ⚡ Performance Optimized
-- Lazy loading of components
-- Efficient memory management
-- Minimal DOM manipulation
-- Optimized network requests
+**Principle:** The extension must work identically across Chrome, Firefox, and Safari while leveraging platform-specific optimizations.
 
-### 🔧 Maintainable Codebase
-- TypeScript-style documentation
-- Comprehensive error handling
-- Unit and integration testing
-- Standardized coding patterns
+**Implementation:**
+- Unified browser API abstraction (`SAFARI-EXT-API-001`)
+- Platform detection utilities (`SAFARI-EXT-SHIM-001`)
+- Cross-browser testing strategy (`SAFARI-EXT-TEST-001`)
 
-## 📁 Project Structure
+**Cross-References:**
+- `docs/architecture/safari-extension-architecture.md`: Safari-specific architecture
+- `SAFARI-EXT-COORD-001`: Architecture coordination
 
-```
-src-new/
-├── core/                    # Core extension services
-│   ├── service-worker.js    # Background service worker (Manifest V3)
-│   ├── message-router.js    # Inter-component communication
-│   └── error-handler.js     # Global error handling
-├── config/                  # Configuration management
-│   └── config-manager.js    # Settings and authentication
-├── features/               # Feature modules
-│   ├── bookmark/           # Bookmark management
-│   ├── tagging/           # Tag management and suggestions
-│   ├── hover/             # Hover overlay functionality
-│   └── api/               # Pinboard API integration
-├── ui/                    # User interface components
-│   ├── popup/             # Extension popup
-│   ├── options/           # Options/settings page
-│   └── content/           # Content script UI
-└── shared/                # Shared utilities
-    ├── utils.js           # Common utility functions
-    ├── constants.js       # Application constants
-    └── storage.js         # Storage abstractions
-```
+### State Management Strategy
 
-## 🦊🧭 Cross-Browser API Abstraction and Debug Logging [SAFARI-EXT-SHIM-001] (2025-07-15)
+**Principle:** State must be managed consistently across all supported browsers, with special handling for platform-specific constraints.
 
-To enable future Safari (and Firefox) support, a browser API abstraction layer has been implemented in `src/shared/utils.js` using `webextension-polyfill` with a fallback to `chrome` for Chrome compatibility. All extension code should import `{ browser }` from this module instead of using `chrome.*` directly. This abstraction is accompanied by debug logs (using the logger framework) to trace module loading and API resolution, ensuring robust diagnostics during migration and future platform support.
+**Implementation:**
+- Shared memory management for recent tags (`SAFARI-EXT-STORAGE-001`)
+- Cross-popup state synchronization (`SAFARI-EXT-IMPL-001`)
+- Storage quota monitoring for Safari (`SAFARI-EXT-STORAGE-001`)
 
-- **Semantic Token:** `[SAFARI-EXT-SHIM-001]` is used in code and documentation for traceability.
-- **Debug Logging:** All major consumers of the abstraction log their loading process and the resolved browser API object.
-- **Tested:** The abstraction and logging have been tested and verified to work in Chrome, with no regression.
-- **Next Steps:** This foundation enables a smooth path to Safari extension support with minimal code changes.
+**Cross-References:**
+- `docs/development/ai-development/TAG_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Tag synchronization
+- `docs/development/ai-development/TOGGLE_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Toggle synchronization
 
-See also: `src/shared/utils.js` and related debug logs in `pinboard-service.js`, `tag-service.js`, and `PopupController.js`.
+### Testability Strategy
 
-## 🔄 Component Architecture
+**Principle:** All platform-specific code paths must be testable via dependency injection or global mocks.
 
-### 🎛️ Service Worker (Background)
+**Implementation:**
+- Comprehensive mocking in `tests/setup.js` (`SAFARI-EXT-TEST-001`)
+- Unit tests for platform-specific functionality
+- Integration tests for cross-browser compatibility
 
-The service worker serves as the central coordinator for the extension:
+**Cross-References:**
+- `docs/development/ai-development/SAFARI_EXTENSION_TEST_PLAN.md`: Safari test plan
+- `SAFARI-EXT-TEST-001`: Safari-specific tests
 
-```mermaid
-graph TD
-    A[Service Worker] --> B[Message Router]
-    A --> C[API Service]
-    A --> D[Storage Manager]
-    A --> E[Tab Manager]
-    
-    B --> F[Content Scripts]
-    B --> G[Popup UI]
-    B --> H[Options Page]
-    
-    C --> I[Pinboard API]
-    D --> J[Chrome Storage]
-    E --> K[Active Tabs]
-```
+## [SAFARI-EXT-COORD-001] Safari Architecture Coordination
 
-**Responsibilities:**
-- Manage extension lifecycle
-- Handle background tasks and timers
-- Coordinate communication between components
-- Manage API authentication and requests
-- Handle storage operations
+### Browser API Abstraction
 
-### 📄 Content Scripts
+**Coordination:** Safari extension uses a unified browser API shim to abstract differences between platforms.
 
-Content scripts handle page-level functionality:
+**Cross-References:**
+- `SAFARI-EXT-API-001`: Browser API abstraction implementation
+- `SAFARI-EXT-SHIM-001`: Platform detection utilities
 
-```mermaid
-graph LR
-    A[Content Script] --> B[DOM Observer]
-    A --> C[Hover Handler]
-    A --> D[UI Injector]
-    
-    B --> E[Page Changes]
-    C --> F[Overlay Display]
-    D --> G[Bookmark UI]
-```
+### Storage and State Management
 
-**Responsibilities:**
-- Inject hover overlays
-- Handle user interactions on web pages
-- Communicate bookmark status to service worker
-- Manage content-specific UI elements
+**Coordination:** Safari extension implements storage quota monitoring and cross-popup state management.
 
-### 🎨 User Interface Components
+**Cross-References:**
+- `SAFARI-EXT-STORAGE-001`: Storage quota management
+- `SAFARI-EXT-IMPL-001`: Safari implementation details
 
-#### Popup Interface
-- Quick bookmark actions
-- Tag suggestions and management
-- Settings shortcuts
-- Status indicators
+### Message Passing and Communication
 
-#### Options Page
-- Authentication configuration
-- Feature toggles and preferences
-- Import/export functionality
-- Advanced settings
+**Coordination:** Safari extension enhances message passing with platform info and error handling.
 
-## 🔗 Data Flow Architecture
+**Cross-References:**
+- `SAFARI-EXT-MESSAGING-001`: Message passing enhancements
+- `SAFARI-EXT-ERROR-001`: Error handling and recovery
 
-### 📊 State Management
+### UI and Overlay System
 
-```mermaid
-sequenceDiagram
-    participant P as Popup
-    participant SW as Service Worker
-    participant CS as Content Script
-    participant API as Pinboard API
-    participant S as Storage
-    
-    P->>SW: Get bookmark status
-    SW->>S: Retrieve cached data
-    S-->>SW: Return cached data
-    SW->>API: Fetch if needed
-    API-->>SW: Bookmark data
-    SW->>S: Update cache
-    SW-->>P: Return status
-    
-    CS->>SW: Page navigation
-    SW->>API: Check bookmark
-    SW-->>CS: Update UI
-```
+**Coordination:** Safari extension adapts UI components and overlay system for platform-specific requirements.
 
-### 🔄 Message Passing System
+**Cross-References:**
+- `docs/development/ai-development/OVERLAY_THEMING_TECHNICAL_SPEC.md`: Overlay theming
+- `docs/architecture/DARK_THEME_DEFAULT_ARCHITECTURE.md`: Dark theme architecture
+- `SAFARI-EXT-UI-001`: UI and overlay system
 
-```javascript
-// Message types and routing
-const MessageTypes = {
-  // Bookmark operations
-  GET_BOOKMARK_STATUS: 'get_bookmark_status',
-  ADD_BOOKMARK: 'add_bookmark',
-  UPDATE_BOOKMARK: 'update_bookmark',
-  DELETE_BOOKMARK: 'delete_bookmark',
-  
-  // Configuration
-  GET_CONFIG: 'get_config',
-  UPDATE_CONFIG: 'update_config',
-  
-  // Tag management
-  GET_TAGS: 'get_tags',
-  GET_TAG_SUGGESTIONS: 'get_tag_suggestions',
-  
-  // UI updates
-  UPDATE_BADGE: 'update_badge',
-  SHOW_NOTIFICATION: 'show_notification'
-};
-```
+## Architecture Components
 
-## 🏭 Service Architecture
+### Core Components
 
-### 🔧 Configuration Service
+| Component | Description | Safari Coordination |
+|-----------|-------------|-------------------|
+| Browser API Abstraction | Unified API for cross-browser compatibility | `SAFARI-EXT-API-001` |
+| Storage Management | Cross-browser storage with quota monitoring | `SAFARI-EXT-STORAGE-001` |
+| Message Passing | Enhanced messaging with platform info | `SAFARI-EXT-MESSAGING-001` |
+| State Management | Cross-popup and cross-instance state | `SAFARI-EXT-IMPL-001` |
+| UI Components | Platform-specific UI adaptations | `SAFARI-EXT-UI-001` |
+| Overlay System | Platform-specific overlay management | `SAFARI-EXT-UI-001` |
 
-**File:** `src-new/config/config-manager.js`
+### Testing Components
 
-```javascript
-class ConfigManager {
-  // Default configuration
-  getDefaultConfiguration()
-  
-  // Configuration management
-  getConfig()
-  updateConfig(updates)
-  resetToDefaults()
-  
-  // Authentication
-  getAuthToken()
-  setAuthToken(token)
-  hasAuthToken()
-  
-  // URL inhibition
-  getInhibitUrls()
-  addInhibitUrl(url)
-  isUrlAllowed(url)
-}
-```
+| Component | Description | Safari Coordination |
+|-----------|-------------|-------------------|
+| Unit Tests | Platform-specific functionality testing | `SAFARI-EXT-TEST-001` |
+| Integration Tests | Cross-component testing | `SAFARI-EXT-INTEGRATION-001` |
+| Performance Tests | Performance benchmarking | `SAFARI-EXT-PERF-001` |
+| Error Handling Tests | Error scenario testing | `SAFARI-EXT-ERROR-001` |
+| Compatibility Tests | Cross-browser compatibility | `SAFARI-EXT-COMPAT-001` |
 
-### 🔖 Bookmark Service
+## Cross-Reference Summary
 
-**Features:**
-- CRUD operations for bookmarks
-- Batch operations
-- Conflict resolution
-- Offline support with sync
+| Semantic Token | Description | Files | Status |
+|----------------|-------------|-------|--------|
+| `ARCH-OVERVIEW-001` | Architecture overview | This document | ✅ Complete |
+| `SAFARI-EXT-COORD-001` | Safari architecture coordination | All architecture docs | ✅ Complete |
+| `SAFARI-EXT-API-001` | Browser API abstraction | safari-shim.js | ✅ Complete |
+| `SAFARI-EXT-STORAGE-001` | Storage quota management | tag-service.js, safari-shim.js | ✅ Complete |
+| `SAFARI-EXT-MESSAGING-001` | Message passing enhancements | message-handler.js, safari-shim.js | ✅ Complete |
+| `SAFARI-EXT-IMPL-001` | Safari implementation details | All Safari-specific code | 🔄 In Progress |
+| `SAFARI-EXT-UI-001` | UI and overlay system | popup.js, overlay-manager.js | 📋 Planned |
+| `SAFARI-EXT-TEST-001` | Safari-specific tests | All Safari test files | 🔄 In Progress |
 
-### 🏷️ Tag Management Service
+## Related Documents
 
-**Features:**
-- Tag suggestion algorithms
-- Recent tags caching
-- Tag frequency analysis
-- Auto-completion support
-
-### 🌐 API Integration Service
-
-**Features:**
-- Pinboard API wrapper
-- Rate limiting and retry logic
-- Request batching
-- Error handling and fallbacks
-
-## 🎨 User Interface Architecture
-
-### 🎭 Design System
-
-**Color Palette:**
-- Primary: `#1E40AF` (Blue)
-- Secondary: `#374151` (Gray)
-- Success: `
+- `docs/architecture/safari-extension-architecture.md`: Safari architecture decisions
+- `docs/development/ai-development/SAFARI_EXTENSION_IMPLEMENTATION_PLAN.md`: Safari implementation plan
+- `docs/development/ai-development/SAFARI_EXTENSION_TEST_PLAN.md`: Safari test plan
+- `docs/development/ai-development/SAFARI_EXTENSION_SEMANTIC_TOKENS.md`: Safari semantic tokens
+- `docs/architecture/DARK_THEME_DEFAULT_ARCHITECTURE.md`: Dark theme architecture
+- `docs/development/ai-development/OVERLAY_THEMING_TECHNICAL_SPEC.md`: Overlay theming
+- `docs/development/ai-development/TAG_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Tag synchronization
+- `docs/development/ai-development/TOGGLE_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Toggle synchronization
