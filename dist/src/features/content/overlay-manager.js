@@ -122,6 +122,49 @@ class OverlayManager {
         border-radius: 4px;
       `
 
+      // [OVERLAY-REFRESH-UI-001] Add refresh button to overlay structure with enhanced styling
+      const refreshBtn = this.document.createElement('button')
+      refreshBtn.className = 'refresh-button'
+      refreshBtn.innerHTML = '🔄'
+      refreshBtn.title = 'Refresh Data'
+      refreshBtn.setAttribute('aria-label', 'Refresh Data')
+      refreshBtn.setAttribute('role', 'button')
+      refreshBtn.setAttribute('tabindex', '0')
+      refreshBtn.style.cssText = `
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: var(--theme-button-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-border);
+        border-radius: 4px;
+        padding: 4px 6px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1;
+        transition: var(--theme-transition);
+        min-width: 24px;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `
+
+      // [OVERLAY-REFRESH-HANDLER-001] Add click handler
+      refreshBtn.onclick = async () => {
+        await this.handleRefreshButtonClick()
+      }
+
+      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Add keyboard event handlers
+      refreshBtn.addEventListener('keydown', async (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          await this.handleRefreshButtonClick()
+        }
+      })
+
+      currentTagsContainer.appendChild(refreshBtn)
+
       // Close button (matching desired overlay style)
       const closeBtn = this.document.createElement('span')
       closeBtn.className = 'close-button'
@@ -626,31 +669,34 @@ class OverlayManager {
   /**
    * [IMMUTABLE-REQ-TAG-004] - Refresh overlay content with latest bookmark data
    */
+  // [OVERLAY-REFRESH-INTEGRATION-001] Refresh overlay content with latest bookmark data
+  // Coordinates with [OVERLAY-DATA-DISPLAY-001] for data refresh mechanism
   async refreshOverlayContent() {
     try {
-            // [IMMUTABLE-REQ-TAG-004] - Get updated bookmark data
+      // [OVERLAY-REFRESH-INTEGRATION-001] Prepare refresh request data
       const refreshData = {
         url: window.location.href,
         title: document.title,
         tabId: this.content?.tabId || null
       }
 
-      debugLog('[OVERLAY-DEBUG] Refresh request data:', refreshData)
+      debugLog('[OVERLAY-REFRESH-INTEGRATION-001] Refresh request data:', refreshData)
 
+      // [OVERLAY-REFRESH-INTEGRATION-001] Get updated bookmark data via message service
       const response = await this.messageService.sendMessage({
         type: 'getCurrentBookmark',
         data: refreshData
       })
 
       if (response && response.success && response.data) {
-        // [IMMUTABLE-REQ-TAG-004] - Update content with fresh bookmark data
+        // [OVERLAY-REFRESH-INTEGRATION-001] Create updated content object with fresh data
         const updatedContent = {
           bookmark: response.data,
           pageTitle: document.title,
           pageUrl: window.location.href
         }
 
-        debugLog('[IMMUTABLE-REQ-TAG-004] Overlay content refreshed with updated data')
+        debugLog('[OVERLAY-REFRESH-INTEGRATION-001] Overlay content refreshed with updated data')
         debugLog('[OVERLAY-DEBUG] Refreshed bookmark data:', {
           responseData: response.data,
           responseDataKeys: Object.keys(response.data),
@@ -659,11 +705,59 @@ class OverlayManager {
           tagsType: typeof response.data.tags
         })
         return updatedContent
+      } else {
+        // [OVERLAY-REFRESH-ERROR-001] Handle invalid response structure
+        debugError('[OVERLAY-REFRESH-INTEGRATION-001] Invalid response structure:', response)
       }
     } catch (error) {
-      debugError('[IMMUTABLE-REQ-TAG-004] Failed to refresh overlay content:', error)
+      // [OVERLAY-REFRESH-ERROR-001] Handle message service communication errors
+      debugError('[OVERLAY-REFRESH-INTEGRATION-001] Failed to refresh overlay content:', error)
     }
     return null
+  }
+
+  /**
+   * [OVERLAY-REFRESH-HANDLER-001] Refresh button click handler
+   */
+  // [OVERLAY-REFRESH-HANDLER-001] Handle refresh button click with comprehensive error handling and loading state
+  async handleRefreshButtonClick() {
+    const refreshButton = this.document.querySelector('.refresh-button')
+
+    try {
+      debugLog('[OVERLAY-REFRESH-HANDLER-001] Refresh button clicked')
+
+      // [OVERLAY-REFRESH-HANDLER-001] Add loading state to button
+      if (refreshButton) {
+        refreshButton.classList.add('loading')
+        refreshButton.disabled = true
+      }
+
+      // [OVERLAY-REFRESH-HANDLER-001] Show loading state for user feedback
+      this.showMessage('Refreshing data...', 'info')
+
+      // [OVERLAY-REFRESH-INTEGRATION-001] Get fresh bookmark data via message service
+      const updatedContent = await this.refreshOverlayContent()
+
+      if (updatedContent) {
+        // [OVERLAY-REFRESH-INTEGRATION-001] Update overlay with fresh data
+        this.show(updatedContent)
+        this.showMessage('Data refreshed successfully', 'success')
+        debugLog('[OVERLAY-REFRESH-HANDLER-001] Overlay refreshed successfully')
+      } else {
+        // [OVERLAY-REFRESH-ERROR-001] Handle case where no data was returned
+        throw new Error('Failed to get updated data')
+      }
+    } catch (error) {
+      // [OVERLAY-REFRESH-ERROR-001] Comprehensive error handling with user feedback
+      debugError('[OVERLAY-REFRESH-HANDLER-001] Refresh failed:', error)
+      this.showMessage('Failed to refresh data', 'error')
+    } finally {
+      // [OVERLAY-REFRESH-HANDLER-001] Remove loading state from button
+      if (refreshButton) {
+        refreshButton.classList.remove('loading')
+        refreshButton.disabled = false
+      }
+    }
   }
 
   /**
@@ -1589,6 +1683,38 @@ class OverlayManager {
         border-color: var(--theme-info);
       }
 
+      /* [OVERLAY-REFRESH-UI-001] Refresh button styling */
+      .hoverboard-overlay .refresh-button {
+        background: var(--theme-button-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-border);
+        border-radius: 4px;
+        padding: 4px 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: var(--theme-transition);
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        z-index: 1;
+      }
+
+      .hoverboard-overlay .refresh-button:hover {
+        background: var(--theme-button-hover);
+        border-color: var(--theme-input-focus);
+        transform: scale(1.05);
+      }
+
+      .hoverboard-overlay .refresh-button:active {
+        background: var(--theme-button-active);
+        transform: scale(0.95);
+      }
+
+      .hoverboard-overlay .refresh-button:focus {
+        outline: 2px solid var(--theme-input-focus);
+        outline-offset: 2px;
+      }
+
       /* Close button - uses danger color */
       .hoverboard-overlay .close-button {
         background: var(--theme-danger);
@@ -1640,7 +1766,8 @@ class OverlayManager {
       /* All buttons */
       .hoverboard-theme-light-on-dark button,
       .hoverboard-theme-light-on-dark .action-button,
-      .hoverboard-theme-light-on-dark .add-tag-button {
+      .hoverboard-theme-light-on-dark .add-tag-button,
+      .hoverboard-theme-light-on-dark .refresh-button {
         color: var(--theme-text-primary) !important;
         background: var(--theme-button-bg) !important;
         border: 1px solid var(--theme-input-border) !important;
@@ -1648,7 +1775,8 @@ class OverlayManager {
 
       .hoverboard-theme-light-on-dark button:hover,
       .hoverboard-theme-light-on-dark .action-button:hover,
-      .hoverboard-theme-light-on-dark .add-tag-button:hover {
+      .hoverboard-theme-light-on-dark .add-tag-button:hover,
+      .hoverboard-theme-light-on-dark .refresh-button:hover {
         background: var(--theme-button-hover) !important;
       }
 
@@ -1781,6 +1909,65 @@ class OverlayManager {
         color: #000000;
         text-shadow: 0 0 2px rgba(255, 255, 255, 0.8);
         transition: background-color 0.2s ease-in-out;
+      }
+
+      /* [OVERLAY-REFRESH-THEME-001] Refresh button theme-aware styling */
+      .hoverboard-overlay .refresh-button {
+        position: absolute;
+        top: 8px;
+        left: 8px;
+        background: var(--theme-button-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-border);
+        border-radius: 4px;
+        padding: 4px 6px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1;
+        transition: var(--theme-transition);
+        min-width: 24px;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .hoverboard-overlay .refresh-button:hover {
+        background: var(--theme-button-hover);
+        border-color: var(--theme-input-focus);
+        transform: scale(1.05);
+      }
+
+      .hoverboard-overlay .refresh-button:active {
+        background: var(--theme-button-active);
+        transform: scale(0.95);
+      }
+
+      .hoverboard-overlay .refresh-button:focus {
+        outline: 2px solid var(--theme-input-focus);
+        outline-offset: 2px;
+      }
+
+      /* [OVERLAY-REFRESH-THEME-001] Loading state for refresh button */
+      .hoverboard-overlay .refresh-button.loading {
+        opacity: 0.7;
+        pointer-events: none;
+      }
+
+      .hoverboard-overlay .refresh-button.loading::after {
+        content: '';
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border: 2px solid transparent;
+        border-top: 2px solid var(--theme-text-primary);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
 
       .hoverboard-overlay-invisible {
