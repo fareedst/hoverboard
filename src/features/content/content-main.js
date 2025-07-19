@@ -118,7 +118,12 @@ class HoverboardContentScript {
       switch (message.type) {
         case 'TOGGLE_HOVER':
           await this.toggleHover()
-          sendResponse({ success: true })
+          // [POPUP-CLOSE-BEHAVIOR-ARCH-012] - Return overlay state after toggle
+          const newState = {
+            isVisible: this.overlayActive,
+            hasBookmark: !!this.currentBookmark
+          }
+          sendResponse({ success: true, data: newState })
           break
 
         case 'HIDE_OVERLAY':
@@ -181,6 +186,16 @@ class HoverboardContentScript {
           // [TAG-SYNC-CONTENT-001] Handle tag updates from popup or other sources
           await this.handleTagUpdated(message.data)
           sendResponse({ success: true })
+          break
+
+        // [POPUP-CLOSE-BEHAVIOR-ARCH-012] - Handle overlay state queries from popup
+        case 'GET_OVERLAY_STATE':
+          const overlayState = {
+            isVisible: this.overlayActive,
+            hasBookmark: !!this.currentBookmark,
+            overlayElement: !!document.getElementById('hoverboard-overlay')
+          }
+          sendResponse({ success: true, data: overlayState })
           break
 
         default:

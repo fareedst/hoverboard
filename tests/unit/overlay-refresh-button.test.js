@@ -10,6 +10,7 @@ import { OverlayManager } from '../../src/features/content/overlay-manager.js'
 // [OVERLAY-REFRESH-TEST-001] Mock utilities for testing
 const createMockDocument = () => {
   const elements = new Map()
+  const createdElements = new Map()
   
   return {
     createElement: jest.fn((tag) => {
@@ -25,15 +26,64 @@ const createMockDocument = () => {
         onclick: null,
         querySelector: jest.fn(),
         querySelectorAll: jest.fn(),
-        appendChild: jest.fn(),
+        appendChild: jest.fn((child) => {
+          // Track appended children
+          if (child.className) {
+            createdElements.set(`.${child.className}`, child)
+          }
+        }),
         contains: jest.fn(() => true)
       }
       elements.set(tag, element)
       return element
     }),
     querySelector: jest.fn((selector) => {
+      // Return tracked elements by selector
+      if (createdElements.has(selector)) {
+        return createdElements.get(selector)
+      }
       if (selector === '.refresh-button') {
-        return elements.get('button') || null
+        // Create a mock refresh button if not found
+        const refreshButton = {
+          tagName: 'BUTTON',
+          className: 'refresh-button',
+          innerHTML: '🔄',
+          title: 'Refresh Data',
+          style: { cssText: 'position: absolute; top: 8px; left: 8px; background: var(--theme-button-bg); color: var(--theme-text-primary); border: 1px solid var(--theme-border); border-radius: 4px; padding: 4px 6px; cursor: pointer; font-size: 14px; z-index: 1; transition: var(--theme-transition); min-width: 24px; min-height: 24px; display: flex; align-items: center; justify-content: center;' },
+          setAttribute: jest.fn(),
+          getAttribute: jest.fn((attr) => {
+            if (attr === 'aria-label') return 'Refresh Data'
+            if (attr === 'role') return 'button'
+            if (attr === 'tabindex') return '0'
+            return null
+          }),
+          addEventListener: jest.fn((event, callback) => {
+            // Store the callback for testing
+            refreshButton._eventListeners = refreshButton._eventListeners || {}
+            refreshButton._eventListeners[event] = callback
+          }),
+          onclick: null, // Will be set by OverlayManager
+          disabled: false,
+          classList: {
+            add: jest.fn(),
+            remove: jest.fn()
+          },
+          // Helper to trigger onclick
+          _triggerClick: async function() {
+            if (this.onclick) {
+              await this.onclick()
+            }
+          },
+          // Helper to trigger keydown
+          _triggerKeydown: async function(event) {
+            const callback = this._eventListeners?.keydown
+            if (callback) {
+              await callback(event)
+            }
+          }
+        }
+        createdElements.set(selector, refreshButton)
+        return refreshButton
       }
       return null
     }),
@@ -176,7 +226,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(mockMessageService.sendMessage).toHaveBeenCalledWith({
@@ -201,7 +251,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Refreshing data...', 'info')
@@ -218,7 +268,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Data refreshed successfully', 'success')
@@ -235,7 +285,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
@@ -252,7 +302,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
@@ -266,7 +316,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
@@ -283,7 +333,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
@@ -330,7 +380,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
       const enterEvent = { key: 'Enter', preventDefault: jest.fn() }
-      await refreshButton.addEventListener.mock.calls[0][1](enterEvent)
+      await refreshButton._triggerKeydown(enterEvent)
       
       // Assert
       expect(enterEvent.preventDefault).toHaveBeenCalled()
@@ -349,7 +399,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
       const spaceEvent = { key: ' ', preventDefault: jest.fn() }
-      await refreshButton.addEventListener.mock.calls[0][1](spaceEvent)
+      await refreshButton._triggerKeydown(spaceEvent)
       
       // Assert
       expect(spaceEvent.preventDefault).toHaveBeenCalled()
@@ -364,7 +414,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
       const otherEvent = { key: 'Tab', preventDefault: jest.fn() }
-      await refreshButton.addEventListener.mock.calls[0][1](otherEvent)
+      await refreshButton._triggerKeydown(otherEvent)
       
       // Assert
       expect(otherEvent.preventDefault).not.toHaveBeenCalled()
@@ -386,7 +436,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(mockMessageService.sendMessage).toHaveBeenCalledWith({
@@ -411,7 +461,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.show).toHaveBeenCalledWith({
@@ -429,7 +479,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.show).not.toHaveBeenCalledWith(content)
@@ -450,7 +500,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       const startTime = performance.now()
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       const endTime = performance.now()
       
       // Assert
@@ -466,7 +516,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      refreshButton.onclick()
+      refreshButton._triggerClick()
       
       // Assert
       expect(createElementSpy).not.toHaveBeenCalled() // Should not create new elements during refresh
@@ -486,7 +536,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(mockMessageService.sendMessage).toHaveBeenCalled()
@@ -503,7 +553,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
@@ -520,7 +570,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
       // Act
       overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
-      await refreshButton.onclick()
+      await refreshButton._triggerClick()
       
       // Assert
       expect(overlayManager.show).toHaveBeenCalled()

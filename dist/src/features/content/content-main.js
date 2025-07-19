@@ -2991,7 +2991,7 @@
                   data: {
                     url: content.bookmark.url || window.location.href,
                     value: tagText,
-                    description: content.bookmark.description || document.title
+                    description: content.bookmark.description || this.document.title
                   }
                 });
                 if (!content.bookmark.tags) content.bookmark.tags = [];
@@ -3043,7 +3043,7 @@
                         data: {
                           url: content.bookmark.url || window.location.href,
                           value: tag,
-                          description: content.bookmark.description || document.title
+                          description: content.bookmark.description || this.document.title
                         }
                       });
                       if (!content.bookmark.tags) content.bookmark.tags = [];
@@ -3085,7 +3085,7 @@
                       data: {
                         url: content.bookmark.url || window.location.href,
                         value: tag,
-                        description: content.bookmark.description || document.title
+                        description: content.bookmark.description || this.document.title
                       }
                     });
                     if (!content.bookmark.tags) content.bookmark.tags = [];
@@ -3176,7 +3176,7 @@
               const updatedBookmark = {
                 ...content.bookmark,
                 toread: newToReadStatus,
-                description: content.bookmark.description || document.title
+                description: content.bookmark.description || this.document.title
               };
               await this.messageService.sendMessage({
                 type: "saveBookmark",
@@ -3237,7 +3237,7 @@
         console.log("\u{1F3A8} [Overlay Debug] Final overlay visibility check:", {
           isVisible: this.isVisible,
           elementExists: !!this.overlayElement,
-          elementInDOM: document.body.contains(this.overlayElement),
+          elementInDOM: this.document.body.contains(this.overlayElement),
           computedDisplay: window.getComputedStyle(this.overlayElement).display,
           computedOpacity: window.getComputedStyle(this.overlayElement).opacity
         });
@@ -3321,7 +3321,7 @@
       try {
         const refreshData = {
           url: window.location.href,
-          title: document.title,
+          title: this.document.title,
           tabId: this.content?.tabId || null
         };
         debugLog3("[OVERLAY-REFRESH-INTEGRATION-001] Refresh request data:", refreshData);
@@ -3332,7 +3332,7 @@
         if (response && response.success && response.data) {
           const updatedContent = {
             bookmark: response.data,
-            pageTitle: document.title,
+            pageTitle: this.document.title,
             pageUrl: window.location.href
           };
           debugLog3("[OVERLAY-REFRESH-INTEGRATION-001] Overlay content refreshed with updated data");
@@ -5225,7 +5225,11 @@
         switch (message.type) {
           case "TOGGLE_HOVER":
             await this.toggleHover();
-            sendResponse({ success: true });
+            const newState = {
+              isVisible: this.overlayActive,
+              hasBookmark: !!this.currentBookmark
+            };
+            sendResponse({ success: true, data: newState });
             break;
           case "HIDE_OVERLAY":
             this.overlayManager.hide();
@@ -5275,6 +5279,15 @@
           case "TAG_UPDATED":
             await this.handleTagUpdated(message.data);
             sendResponse({ success: true });
+            break;
+          // [POPUP-CLOSE-BEHAVIOR-ARCH-012] - Handle overlay state queries from popup
+          case "GET_OVERLAY_STATE":
+            const overlayState = {
+              isVisible: this.overlayActive,
+              hasBookmark: !!this.currentBookmark,
+              overlayElement: !!document.getElementById("hoverboard-overlay")
+            };
+            sendResponse({ success: true, data: overlayState });
             break;
           default:
             console.warn("Unknown message type:", message.type);

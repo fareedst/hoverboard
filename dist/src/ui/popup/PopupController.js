@@ -975,6 +975,10 @@ export class PopupController {
   /**
    * Handle show/hide hoverboard action
    */
+  /**
+   * [POPUP-CLOSE-BEHAVIOR-004] Handle show/hide hoverboard action
+   * Modified to NOT close popup after toggling overlay visibility
+   */
   async handleShowHoverboard () {
     try {
       debugLog('Attempting to show hoverboard on tab:', this.currentTab)
@@ -985,14 +989,23 @@ export class PopupController {
         return;
       }
 
-      await this.sendToTab({
+      const toggleResponse = await this.sendToTab({
         type: 'TOGGLE_HOVER',
         data: {
           bookmark: this.currentPin,
           tab: this.currentTab
         }
       })
-      this.closePopup()
+
+      // [POPUP-CLOSE-BEHAVIOR-004] Remove closePopup() call and add overlay state tracking
+      // [POPUP-CLOSE-BEHAVIOR-ARCH-004] Use response data for immediate UI update
+      if (toggleResponse && toggleResponse.data) {
+        this.uiManager.updateShowHoverButtonState(toggleResponse.data.isVisible)
+        debugLog('[POPUP-CLOSE-BEHAVIOR-ARCH-004] Updated UI with toggle response:', toggleResponse.data)
+      } else {
+        // Fallback to querying overlay state
+        await this.updateOverlayState()
+      }
     } catch (error) {
       debugError('Show hoverboard error:', error)
       this.errorHandler.handleError('Failed to toggle hoverboard', error)
@@ -1366,7 +1379,8 @@ export class PopupController {
   }
 
   /**
-   * Handle delete bookmark action
+   * [POPUP-CLOSE-BEHAVIOR-FIX-001] Handle delete bookmark action
+   * Modified to NOT close popup after deletion - popup stays open for continued interaction
    */
   async handleDeletePin () {
     if (!this.currentPin) {
@@ -1391,12 +1405,12 @@ export class PopupController {
       this.stateManager.setState({ currentPin: null })
       this.uiManager.updateCurrentTags([])
       this.uiManager.updatePrivateStatus(false)
-      this.uiManager.showSuccess('Bookmark deleted')
+      this.uiManager.showSuccess('Bookmark deleted successfully')
 
       // Refresh hover data
       await this.sendToTab({ message: 'refreshData' })
 
-      this.closePopup()
+      // [POPUP-CLOSE-BEHAVIOR-FIX-001] Popup stays open - user can continue working
     } catch (error) {
       this.errorHandler.handleError('Failed to delete bookmark', error)
     } finally {
@@ -1405,7 +1419,8 @@ export class PopupController {
   }
 
   /**
-   * Handle reload extension action
+   * [POPUP-CLOSE-BEHAVIOR-FIX-001] Handle reload extension action
+   * Modified to NOT close popup after reload - popup stays open for continued interaction
    */
   async handleReloadExtension () {
     try {
@@ -1413,19 +1428,22 @@ export class PopupController {
       if (this.currentTab) {
         await chrome.tabs.reload(this.currentTab.id)
       }
-      this.closePopup()
+      this.uiManager.showSuccess('Extension reloaded successfully')
+      // [POPUP-CLOSE-BEHAVIOR-FIX-001] Popup stays open - user can continue working
     } catch (error) {
       this.errorHandler.handleError('Failed to reload extension', error)
     }
   }
 
   /**
-   * Handle open options action
+   * [POPUP-CLOSE-BEHAVIOR-FIX-001] Handle open options action
+   * Modified to NOT close popup after opening options - popup stays open for continued interaction
    */
   async handleOpenOptions () {
     try {
       chrome.runtime.openOptionsPage()
-      this.closePopup()
+      this.uiManager.showSuccess('Options page opened in new tab')
+      // [POPUP-CLOSE-BEHAVIOR-FIX-001] Popup stays open - user can continue working
     } catch (error) {
       this.errorHandler.handleError('Failed to open options', error)
     }
@@ -1446,6 +1464,30 @@ export class PopupController {
    */
   closePopup () {
     setTimeout(() => window.close(), 100)
+  }
+
+  /**
+   * [POPUP-CLOSE-BEHAVIOR-005] Update popup UI to reflect overlay state
+   */
+  async updateOverlayState() {
+    try {
+      // Query overlay state from content script
+      const overlayState = await this.sendToTab({
+        type: 'GET_OVERLAY_STATE'
+      })
+
+      // [POPUP-CLOSE-BEHAVIOR-005] Handle response data structure
+      const stateData = overlayState.data || overlayState
+
+      // Update button appearance based on overlay visibility
+      this.uiManager.updateShowHoverButtonState(stateData.isVisible)
+
+      debugLog('[POPUP-CLOSE-BEHAVIOR-005] Updated overlay state:', stateData)
+    } catch (error) {
+      debugError('[POPUP-CLOSE-BEHAVIOR-005] Failed to update overlay state:', error)
+      // [POPUP-CLOSE-BEHAVIOR-ARCH-005] Graceful degradation - fallback to default state
+      this.uiManager.updateShowHoverButtonState(false)
+    }
   }
 
   /**
@@ -1472,6 +1514,10 @@ export class PopupController {
     try {
       this.setLoading(true)
       await this.loadInitialData()
+
+      // [POPUP-CLOSE-BEHAVIOR-ARCH-007] Update overlay state after refresh
+      await this.updateOverlayState()
+
       this.uiManager.showSuccess('Data refreshed successfully')
       debugLog('[POPUP-REFRESH-001] Manual refresh completed successfully')
     } catch (error) {
@@ -1504,6 +1550,8 @@ export class PopupController {
           debugLog('[POPUP-REFRESH-001] Received BOOKMARK_UPDATED, refreshing data')
           try {
             await this.refreshPopupData()
+            // [POPUP-CLOSE-BEHAVIOR-ARCH-008] Update overlay state after bookmark changes
+            await this.updateOverlayState()
           } catch (error) {
             debugError('[POPUP-REFRESH-001] Failed to refresh on update:', error)
           }

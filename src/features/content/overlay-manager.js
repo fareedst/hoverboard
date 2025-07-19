@@ -260,7 +260,7 @@ class OverlayManager {
                 data: {
                   url: content.bookmark.url || window.location.href,
                   value: tagText,
-                  description: content.bookmark.description || document.title
+                  description: content.bookmark.description || this.document.title
                 }
               })
 
@@ -325,7 +325,7 @@ class OverlayManager {
                       data: {
                         url: content.bookmark.url || window.location.href,
                         value: tag,
-                        description: content.bookmark.description || document.title
+                        description: content.bookmark.description || this.document.title
                       }
                     })
 
@@ -373,7 +373,7 @@ class OverlayManager {
                     data: {
                       url: content.bookmark.url || window.location.href,
                       value: tag,
-                      description: content.bookmark.description || document.title
+                      description: content.bookmark.description || this.document.title
                     }
                   })
 
@@ -494,7 +494,7 @@ class OverlayManager {
             const updatedBookmark = {
               ...content.bookmark,
               toread: newToReadStatus,
-              description: content.bookmark.description || document.title
+              description: content.bookmark.description || this.document.title
             }
 
             // [TOGGLE-SYNC-OVERLAY-001] - Send saveBookmark message for persistence
@@ -577,7 +577,7 @@ class OverlayManager {
       console.log('🎨 [Overlay Debug] Final overlay visibility check:', {
         isVisible: this.isVisible,
         elementExists: !!this.overlayElement,
-        elementInDOM: document.body.contains(this.overlayElement),
+        elementInDOM: this.document.body.contains(this.overlayElement),
         computedDisplay: window.getComputedStyle(this.overlayElement).display,
         computedOpacity: window.getComputedStyle(this.overlayElement).opacity
       })
@@ -676,7 +676,7 @@ class OverlayManager {
       // [OVERLAY-REFRESH-INTEGRATION-001] Prepare refresh request data
       const refreshData = {
         url: window.location.href,
-        title: document.title,
+        title: this.document.title,
         tabId: this.content?.tabId || null
       }
 
@@ -692,7 +692,7 @@ class OverlayManager {
         // [OVERLAY-REFRESH-INTEGRATION-001] Create updated content object with fresh data
         const updatedContent = {
           bookmark: response.data,
-          pageTitle: document.title,
+          pageTitle: this.document.title,
           pageUrl: window.location.href
         }
 

@@ -545,6 +545,27 @@ export class UIManager {
   }
 
   /**
+   * [POPUP-CLOSE-BEHAVIOR-005] Update Show Hover button state
+   * @param {boolean} isOverlayVisible - Whether the overlay is currently visible
+   */
+  updateShowHoverButtonState(isOverlayVisible) {
+    const showHoverBtn = this.elements.showHoverBtn
+    if (showHoverBtn) {
+      const actionIcon = showHoverBtn.querySelector('.action-icon')
+
+      if (isOverlayVisible) {
+        actionIcon.textContent = '🙈'
+        showHoverBtn.title = 'Hide hoverboard overlay'
+        showHoverBtn.setAttribute('aria-label', 'Hide hoverboard overlay')
+      } else {
+        actionIcon.textContent = '👁️'
+        showHoverBtn.title = 'Show hoverboard overlay'
+        showHoverBtn.setAttribute('aria-label', 'Show hoverboard overlay')
+      }
+    }
+  }
+
+  /**
    * Set popup theme (light/dark)
    */
   setTheme (theme) {
