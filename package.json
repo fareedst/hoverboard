@@ -31,7 +31,14 @@
     "precommit": "npm run quality:check",
     "clean": "rm -rf dist/* coverage/",
     "dev:server": "node dev-server.js",
-    "dev:overlay": "npm run dev:server"
+    "dev:overlay": "npm run dev:server",
+    "safari:setup": "node scripts/safari-setup.js",
+    "safari:validate": "node scripts/safari-validate.js",
+    "safari:build": "node scripts/safari-build.js",
+    "safari:package": "node scripts/safari-build.js package",
+    "safari:deploy": "node scripts/safari-deploy.js",
+    "safari:appstore": "node scripts/safari-deploy.js appstore",
+    "safari:xcode": "node scripts/safari-deploy.js xcode"
   },
   "author": "Fareed Stevenson",
   "license": "ISC",

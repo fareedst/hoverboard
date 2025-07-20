@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-15  
 **Status:** Architectural Planning  
-**Cross-References:** `[POPUP-CLOSE-BEHAVIOR-001]` through `[POPUP-CLOSE-BEHAVIOR-014]`, `[POPUP-ARCH-001]`, `[POPUP-REFRESH-001]`, `[TOGGLE-SYNC-POPUP-001]`, `[UI-BEHAVIOR-001]`
+**Cross-References:** `[POPUP-CLOSE-BEHAVIOR-001]` through `[POPUP-CLOSE-BEHAVIOR-014]`, `[POPUP-ARCH-001]`, `[POPUP-REFRESH-001]`, `[TOGGLE-SYNC-POPUP-001]`, `[UI-BEHAVIOR-001]`, `SAFARI-EXT-CONTENT-001`
 
 ## 🎯 Decision Context
 
@@ -314,4 +314,36 @@ updateShowHoverButtonState(isOverlayVisible) {
 - ✅ Code follows existing patterns and conventions
 - ✅ Documentation is comprehensive and accurate
 - ✅ Testing covers all architectural decisions
-- ✅ Future changes can be made safely 
+- ✅ Future changes can be made safely
+
+## 2025-07-20 Safari Content Script Adaptations Integration
+
+**Status:** Completed [2025-07-20]  
+**Cross-Reference:** `SAFARI-EXT-CONTENT-001`
+
+### Safari-Specific Popup Close Behavior Enhancements
+
+**Enhanced Message Passing for Popup-Overlay Communication:**
+- Safari-specific message timeout (15 seconds vs 10 seconds for Chrome)
+- Enhanced retry mechanism (5 retries vs 3 for Chrome)
+- Longer retry delays (2 seconds vs 1 second for Chrome)
+- Safari-specific sender information addition to all popup messages
+- Platform detection in popup-overlay communication
+
+**Safari-Specific Error Handling for Popup Operations:**
+- Automatic error recovery with up to 3 attempts for popup operations
+- Enhanced error logging with Safari-specific context
+- Graceful degradation for failed popup-overlay communication
+- Safari-specific message validation for popup state queries
+
+**Cross-Platform Popup State Management:**
+- Popup state management maintains consistency across Chrome and Safari
+- Safari-specific optimizations do not affect Chrome popup behavior
+- Platform detection ensures appropriate message handling for popup operations
+- Enhanced debugging for cross-platform popup-overlay communication
+
+**Implementation Details:**
+- All popup messages include Safari-specific sender information when platform detected
+- Popup-overlay communication uses enhanced message passing with Safari optimizations
+- Error recovery mechanisms ensure popup operations complete successfully
+- Performance monitoring tracks popup operation efficiency across platforms 

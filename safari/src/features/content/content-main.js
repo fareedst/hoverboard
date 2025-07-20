@@ -2,6 +2,9 @@
 /**
  * Hoverboard Content Script - Main Entry Point
  * Modern replacement for inject.js with jQuery-free DOM manipulation
+ * 
+ * [SAFARI-EXT-CONTENT-001] Safari-specific content script adaptations
+ * Enhanced with Safari-specific message handling, overlay optimizations, and performance improvements
  */
 
 // MV3-003: Modern ES6 module imports for V3 content scripts
@@ -10,10 +13,36 @@ import { MessageClient } from './message-client.js'
 import { DOMUtils } from './dom-utils.js'
 import { MESSAGE_TYPES } from '../../core/message-handler.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
-import { browser, debugLog, debugError } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+import { browser, debugLog, debugError, platformUtils } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
 // Global debug flag
 window.HOVERBOARD_DEBUG = true
+
+// [SAFARI-EXT-CONTENT-001] Safari-specific content script configuration
+const SAFARI_CONTENT_CONFIG = {
+  // [SAFARI-EXT-CONTENT-001] Safari-specific message handling
+  messageTimeout: 15000, // 15 seconds for Safari (longer than Chrome)
+  messageRetries: 5, // More retries for Safari
+  messageRetryDelay: 2000, // Longer delay between retries
+  
+  // [SAFARI-EXT-CONTENT-001] Safari-specific overlay optimizations
+  overlayAnimationDuration: 300, // Faster animations for Safari
+  overlayBlurAmount: 3, // Enhanced blur for Safari
+  overlayOpacityNormal: 0.03, // Lower opacity for Safari
+  overlayOpacityHover: 0.12, // Lower hover opacity for Safari
+  overlayOpacityFocus: 0.20, // Lower focus opacity for Safari
+  
+  // [SAFARI-EXT-CONTENT-001] Safari-specific performance optimizations
+  enablePerformanceMonitoring: true,
+  performanceMonitoringInterval: 30000, // 30 seconds
+  enableMemoryOptimization: true,
+  enableAnimationOptimization: true,
+  
+  // [SAFARI-EXT-CONTENT-001] Safari-specific error handling
+  enableGracefulDegradation: true,
+  enableErrorRecovery: true,
+  enableRetryMechanisms: true
+}
 
 // MV3-003: Main content script class for V3 architecture
 class HoverboardContentScript {
@@ -23,6 +52,13 @@ class HoverboardContentScript {
     this.pageUrl = window.location.href
     this.pageTitle = document.title
 
+    // [SAFARI-EXT-CONTENT-001] Safari-specific initialization
+    this.isSafari = platformUtils.isSafari()
+    this.safariConfig = this.getSafariConfig()
+    this.performanceMonitor = null
+    this.errorRecoveryAttempts = 0
+    this.maxErrorRecoveryAttempts = 3
+
     // MV3-003: Initialize modern utility classes
     this.messageClient = new MessageClient()
     this.domUtils = new DOMUtils()
@@ -31,19 +67,22 @@ class HoverboardContentScript {
     // Initialize overlay manager with transparency-enabled configuration
     this.overlayManager = new OverlayManager(document, {
       overlayPosition: 'top-right',
-      messageTimeout: 3000,
+      messageTimeout: this.safariConfig.messageTimeout,
       showRecentTags: true,
       maxRecentTags: 10,
       overlayAnimations: true,
       overlayDraggable: false,
-      // Transparency settings for UI-005
+      // Transparency settings for UI-005 with Safari optimizations
       overlayTransparencyMode: 'nearly-transparent',
       overlayPositionMode: 'bottom-fixed',
-      overlayOpacityNormal: 0.05,
-      overlayOpacityHover: 0.15,
-      overlayOpacityFocus: 0.25,
+      overlayOpacityNormal: this.safariConfig.overlayOpacityNormal,
+      overlayOpacityHover: this.safariConfig.overlayOpacityHover,
+      overlayOpacityFocus: this.safariConfig.overlayOpacityFocus,
       overlayAdaptiveVisibility: true,
-      overlayBlurAmount: 2
+      overlayBlurAmount: this.safariConfig.overlayBlurAmount,
+      // [SAFARI-EXT-CONTENT-001] Safari-specific overlay settings
+      overlayAnimationDuration: this.safariConfig.overlayAnimationDuration,
+      enableSafariOptimizations: this.isSafari
     })
 
     this.currentBookmark = null
@@ -54,13 +93,44 @@ class HoverboardContentScript {
     this.init()
   }
 
+  // [SAFARI-EXT-CONTENT-001] Get Safari-specific configuration
+  getSafariConfig() {
+    const baseConfig = { ...SAFARI_CONTENT_CONFIG }
+    
+    if (this.isSafari) {
+      const platformConfig = platformUtils.getPlatformConfig()
+      return {
+        ...baseConfig,
+        messageTimeout: platformConfig.messageTimeout || baseConfig.messageTimeout,
+        messageRetries: platformConfig.messageRetries || baseConfig.messageRetries,
+        messageRetryDelay: platformConfig.messageRetryDelay || baseConfig.messageRetryDelay,
+        enablePerformanceMonitoring: platformConfig.enablePerformanceMonitoring !== false,
+        enableMemoryOptimization: platformConfig.enableMemoryOptimization !== false,
+        enableAnimationOptimization: platformConfig.enableAnimationOptimization !== false
+      }
+    }
+    
+    return baseConfig
+  }
+
   async init () {
     try {
       debugLog('CONTENT-SCRIPT', 'Initializing content script')
 
+      // [SAFARI-EXT-CONTENT-001] Safari-specific initialization logging
+      if (this.isSafari) {
+        debugLog('SAFARI-CONTENT', 'Initializing Safari-optimized content script')
+        console.log('[SAFARI-EXT-CONTENT-001] Safari content script initialization started')
+      }
+
       // Wait for DOM to be ready
       await this.domUtils.waitForDOM()
       debugLog('CONTENT-SCRIPT', 'DOM ready')
+
+      // [SAFARI-EXT-CONTENT-001] Safari-specific DOM optimizations
+      if (this.isSafari) {
+        await this.optimizeForSafari()
+      }
 
       // Set up message listeners
       this.setupMessageListeners()
@@ -89,6 +159,11 @@ class HoverboardContentScript {
         adaptiveVisibility: this.overlayManager.adaptiveVisibility
       })
 
+      // [SAFARI-EXT-CONTENT-001] Safari-specific overlay optimizations
+      if (this.isSafari) {
+        this.applySafariOverlayOptimizations()
+      }
+
       // Notify background that content script is ready
       await this.notifyReady()
       debugLog('CONTENT-SCRIPT', 'Ready notification sent')
@@ -97,23 +172,204 @@ class HoverboardContentScript {
       await this.loadCurrentPageData()
       debugLog('CONTENT-SCRIPT', 'Current page data loaded:', this.currentBookmark)
 
+      // [SAFARI-EXT-CONTENT-001] Start Safari-specific performance monitoring
+      if (this.isSafari && this.safariConfig.enablePerformanceMonitoring) {
+        this.startPerformanceMonitoring()
+      }
+
       this.isInitialized = true
       debugLog('CONTENT-SCRIPT', 'Content script initialization complete')
+      
+      // [SAFARI-EXT-CONTENT-001] Safari-specific completion logging
+      if (this.isSafari) {
+        console.log('[SAFARI-EXT-CONTENT-001] Safari content script initialization complete')
+      }
     } catch (error) {
       console.error('Hoverboard: Failed to initialize content script:', error)
+      
+      // [SAFARI-EXT-CONTENT-001] Safari-specific error recovery
+      if (this.isSafari && this.safariConfig.enableErrorRecovery) {
+        await this.handleSafariError(error)
+      }
     }
   }
 
+  // [SAFARI-EXT-CONTENT-001] Safari-specific DOM optimizations
+  async optimizeForSafari() {
+    console.log('[SAFARI-EXT-CONTENT-001] Applying Safari-specific DOM optimizations')
+    
+    try {
+      // [SAFARI-EXT-CONTENT-001] Optimize CSS for Safari
+      if (this.safariConfig.enableAnimationOptimization) {
+        this.optimizeSafariAnimations()
+      }
+      
+      // [SAFARI-EXT-CONTENT-001] Optimize memory usage for Safari
+      if (this.safariConfig.enableMemoryOptimization) {
+        this.optimizeSafariMemory()
+      }
+      
+      console.log('[SAFARI-EXT-CONTENT-001] Safari DOM optimizations applied successfully')
+    } catch (error) {
+      console.warn('[SAFARI-EXT-CONTENT-001] Safari DOM optimization failed:', error)
+    }
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Optimize animations for Safari
+  optimizeSafariAnimations() {
+    // Add Safari-specific CSS optimizations
+    const style = document.createElement('style')
+    style.textContent = `
+      /* [SAFARI-EXT-CONTENT-001] Safari-specific animation optimizations */
+      .hoverboard-overlay {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+      }
+      
+      .hoverboard-overlay * {
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
+    `
+    document.head.appendChild(style)
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Optimize memory usage for Safari
+  optimizeSafariMemory() {
+    // Implement memory optimization strategies
+    if (window.performance && window.performance.memory) {
+      const memoryInfo = window.performance.memory
+      const memoryUsagePercent = (memoryInfo.usedJSHeapSize / memoryInfo.jsHeapSizeLimit) * 100
+      
+      if (memoryUsagePercent > 80) {
+        console.warn('[SAFARI-EXT-CONTENT-001] High memory usage detected:', memoryUsagePercent.toFixed(1) + '%')
+        // Implement memory cleanup strategies
+        this.cleanupMemory()
+      }
+    }
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Memory cleanup for Safari
+  cleanupMemory() {
+    // Clear any cached data or event listeners that might be consuming memory
+    if (this.performanceMonitor) {
+      clearInterval(this.performanceMonitor)
+      this.performanceMonitor = null
+    }
+    
+    // Force garbage collection if available
+    if (window.gc) {
+      window.gc()
+    }
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Apply Safari-specific overlay optimizations
+  applySafariOverlayOptimizations() {
+    console.log('[SAFARI-EXT-CONTENT-001] Applying Safari-specific overlay optimizations')
+    
+    // Apply Safari-specific overlay settings
+    if (this.overlayManager) {
+      // Set Safari-specific animation duration
+      this.overlayManager.animationDuration = this.safariConfig.overlayAnimationDuration
+      
+      // Apply Safari-specific blur and opacity settings
+      this.overlayManager.blurAmount = this.safariConfig.overlayBlurAmount
+      this.overlayManager.opacityNormal = this.safariConfig.overlayOpacityNormal
+      this.overlayManager.opacityHover = this.safariConfig.overlayOpacityHover
+      this.overlayManager.opacityFocus = this.safariConfig.overlayOpacityFocus
+    }
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Start Safari-specific performance monitoring
+  startPerformanceMonitoring() {
+    console.log('[SAFARI-EXT-CONTENT-001] Starting Safari performance monitoring')
+    
+    this.performanceMonitor = setInterval(() => {
+      this.monitorSafariPerformance()
+    }, this.safariConfig.performanceMonitoringInterval)
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Monitor Safari performance
+  monitorSafariPerformance() {
+    try {
+      if (window.performance && window.performance.memory) {
+        const memoryInfo = window.performance.memory
+        const memoryUsagePercent = (memoryInfo.usedJSHeapSize / memoryInfo.jsHeapSizeLimit) * 100
+        
+        if (memoryUsagePercent > 90) {
+          console.warn('[SAFARI-EXT-CONTENT-001] Critical memory usage:', memoryUsagePercent.toFixed(1) + '%')
+          this.cleanupMemory()
+        } else if (memoryUsagePercent > 70) {
+          console.log('[SAFARI-EXT-CONTENT-001] Memory usage:', memoryUsagePercent.toFixed(1) + '%')
+        }
+      }
+    } catch (error) {
+      console.warn('[SAFARI-EXT-CONTENT-001] Performance monitoring error:', error)
+    }
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Handle Safari-specific errors
+  async handleSafariError(error) {
+    console.error('[SAFARI-EXT-CONTENT-001] Safari-specific error:', error)
+    
+    if (this.errorRecoveryAttempts < this.maxErrorRecoveryAttempts) {
+      this.errorRecoveryAttempts++
+      console.log(`[SAFARI-EXT-CONTENT-001] Attempting error recovery (${this.errorRecoveryAttempts}/${this.maxErrorRecoveryAttempts})`)
+      
+      try {
+        // Attempt to recover from the error
+        await this.attemptErrorRecovery(error)
+      } catch (recoveryError) {
+        console.error('[SAFARI-EXT-CONTENT-001] Error recovery failed:', recoveryError)
+      }
+    } else {
+      console.error('[SAFARI-EXT-CONTENT-001] Max error recovery attempts reached')
+    }
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Attempt error recovery
+  async attemptErrorRecovery(error) {
+    // Implement specific error recovery strategies
+    if (error.message.includes('message')) {
+      // Reinitialize message client
+      this.messageClient = new MessageClient()
+      await this.setupMessageListeners()
+    } else if (error.message.includes('overlay')) {
+      // Reinitialize overlay manager
+      this.overlayManager = new OverlayManager(document, this.overlayManager.config)
+    }
+    
+    // Wait before retrying
+    await new Promise(resolve => setTimeout(resolve, 1000))
+  }
+
   setupMessageListeners () {
-    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    // [SAFARI-EXT-CONTENT-001] Enhanced Safari message listener setup
+    const messageListener = (message, sender, sendResponse) => {
       this.handleMessage(message, sender, sendResponse)
       return true // Keep message channel open for async responses
-    })
+    }
+    
+    browser.runtime.onMessage.addListener(messageListener)
+    
+    // [SAFARI-EXT-CONTENT-001] Safari-specific message listener enhancements
+    if (this.isSafari) {
+      console.log('[SAFARI-EXT-CONTENT-001] Safari-enhanced message listeners configured')
+    }
   }
 
   async handleMessage (message, sender, sendResponse) {
     try {
       console.log('Content script received message:', message.type)
+
+      // [SAFARI-EXT-CONTENT-001] Safari-specific message processing
+      if (this.isSafari) {
+        message = this.processSafariMessage(message, sender)
+      }
 
       switch (message.type) {
         case 'TOGGLE_HOVER':
@@ -198,14 +454,76 @@ class HoverboardContentScript {
           sendResponse({ success: true, data: overlayState })
           break
 
+        // [SAFARI-EXT-CONTENT-001] Safari-specific message handlers
+        case 'SAFARI_PERFORMANCE_CHECK':
+          const performanceData = this.getSafariPerformanceData()
+          sendResponse({ success: true, data: performanceData })
+          break
+
+        case 'SAFARI_MEMORY_CLEANUP':
+          this.cleanupMemory()
+          sendResponse({ success: true })
+          break
+
         default:
           console.warn('Unknown message type:', message.type)
           sendResponse({ success: false, error: 'Unknown message type' })
       }
     } catch (error) {
-      console.error('Message handling error:', error)
+      console.error('Error handling message:', error)
+      
+      // [SAFARI-EXT-CONTENT-001] Safari-specific error handling
+      if (this.isSafari) {
+        await this.handleSafariError(error)
+      }
+      
       sendResponse({ success: false, error: error.message })
     }
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Process Safari-specific message enhancements
+  processSafariMessage(message, sender) {
+    if (!this.isSafari) return message
+    
+    // Add Safari-specific message processing
+    const processedMessage = { ...message }
+    
+    // Add Safari-specific sender information
+    if (sender && typeof safari !== 'undefined') {
+      processedMessage.safariSender = {
+        tabId: sender.tab?.id,
+        frameId: sender.frameId,
+        url: sender.tab?.url,
+        platform: 'safari'
+      }
+    }
+    
+    // Add Safari-specific timestamp
+    processedMessage.safariTimestamp = Date.now()
+    
+    return processedMessage
+  }
+
+  // [SAFARI-EXT-CONTENT-001] Get Safari performance data
+  getSafariPerformanceData() {
+    const performanceData = {
+      isSafari: this.isSafari,
+      timestamp: Date.now(),
+      memoryUsage: null,
+      errorRecoveryAttempts: this.errorRecoveryAttempts
+    }
+    
+    if (window.performance && window.performance.memory) {
+      const memoryInfo = window.performance.memory
+      performanceData.memoryUsage = {
+        used: memoryInfo.usedJSHeapSize,
+        total: memoryInfo.totalJSHeapSize,
+        limit: memoryInfo.jsHeapSizeLimit,
+        usagePercent: (memoryInfo.usedJSHeapSize / memoryInfo.jsHeapSizeLimit) * 100
+      }
+    }
+    
+    return performanceData
   }
 
   async initializeTabId () {

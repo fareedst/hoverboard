@@ -7,8 +7,9 @@ import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
 import { debugLog, debugError } from '../../shared/utils.js'
 import { ConfigManager } from '../../config/config-manager.js'
+import { platformUtils } from '../../shared/safari-shim.js'
 
-debugLog('[SAFARI-EXT-SHIM-001] PopupController.js: module loaded');
+debugLog('[SAFARI-EXT-POPUP-001] PopupController.js: module loaded with Safari optimizations');
 
 export class PopupController {
   constructor (dependencies = {}) {
@@ -17,11 +18,21 @@ export class PopupController {
     this.stateManager = dependencies.stateManager || new StateManager()
     this.configManager = dependencies.configManager || new ConfigManager()
 
-    // [DEP-INJ-001] UIManager with proper dependency injection
+    // [SAFARI-EXT-POPUP-001] Safari-specific initialization
+    this.isSafari = platformUtils.isSafari()
+    this.safariConfig = this.getSafariPopupConfig()
+    this.performanceMonitor = null
+    this.errorRecoveryAttempts = 0
+    this.maxErrorRecoveryAttempts = 3
+
+    // [DEP-INJ-001] UIManager with proper dependency injection and Safari optimizations
     this.uiManager = dependencies.uiManager || new UIManager({
       errorHandler: this.errorHandler,
       stateManager: this.stateManager,
-      config: {}
+      config: {},
+      // Safari-specific UI optimizations
+      enableSafariOptimizations: this.isSafari,
+      safariConfig: this.safariConfig
     })
 
     this.currentTab = null
@@ -43,6 +54,9 @@ export class PopupController {
     this.normalizeTags = this.normalizeTags.bind(this)
 
     this.setupEventListeners()
+
+    // [SAFARI-EXT-POPUP-001] Safari-specific setup
+    this.setupSafariOptimizations()
 
     // [POPUP-REFRESH-001] Setup refresh mechanisms
     this.setupAutoRefresh()
@@ -73,18 +87,204 @@ export class PopupController {
         }
       })
     }
-    debugLog('[CHROME-DEBUG-001] PopupController constructor called', { platform: navigator.userAgent });
+    debugLog('[SAFARI-EXT-POPUP-001] PopupController constructor called', { platform: navigator.userAgent, isSafari: this.isSafari });
     // Platform detection
     if (typeof chrome !== 'undefined' && chrome.runtime) {
-      debugLog('[CHROME-DEBUG-001] Detected Chrome runtime in PopupController');
+      debugLog('[SAFARI-EXT-POPUP-001] Detected Chrome runtime in PopupController');
     } else if (typeof browser !== 'undefined' && browser.runtime) {
-      debugLog('[CHROME-DEBUG-001] Detected browser polyfill runtime in PopupController');
+      debugLog('[SAFARI-EXT-POPUP-001] Detected browser polyfill runtime in PopupController');
     } else {
-      debugError('[CHROME-DEBUG-001] No recognized extension runtime detected in PopupController');
+      debugError('[SAFARI-EXT-POPUP-001] No recognized extension runtime detected in PopupController');
     }
     // Check utils.js access
     if (!debugLog || !debugError) {
-      console.error('[CHROME-DEBUG-001] utils.js functions missing in PopupController');
+      console.error('[SAFARI-EXT-POPUP-001] utils.js functions missing in PopupController');
+    }
+  }
+
+  /**
+   * [SAFARI-EXT-POPUP-001] Get Safari-specific popup configuration
+   */
+  getSafariPopupConfig() {
+    return {
+      // Safari-specific performance settings
+      enablePerformanceMonitoring: true,
+      performanceMonitoringInterval: 30000, // 30 seconds
+      enableMemoryOptimization: true,
+      enableAnimationOptimization: true,
+      
+      // Safari-specific error handling
+      enableErrorRecovery: true,
+      enableGracefulDegradation: true,
+      maxErrorRecoveryAttempts: 3,
+      errorRecoveryDelay: 1000,
+      
+      // Safari-specific UI optimizations
+      enableSafariUIOptimizations: true,
+      enableSafariAccessibility: true,
+      enableSafariAnimationOptimizations: true,
+      
+      // Safari-specific message handling
+      messageTimeout: 15000, // 15 seconds for Safari
+      messageRetries: 5, // More retries for Safari
+      messageRetryDelay: 2000, // Longer delay between retries
+      
+      // Safari-specific overlay settings
+      overlayAnimationDuration: 300, // Faster animations for Safari
+      overlayBlurAmount: 3, // Enhanced blur for Safari
+      overlayOpacityNormal: 0.03, // Lower opacity for Safari
+      overlayOpacityHover: 0.12, // Lower hover opacity for Safari
+      overlayOpacityFocus: 0.20, // Lower focus opacity for Safari
+      
+      // Safari-specific platform detection
+      enablePlatformDetection: true,
+      enableFeatureDetection: true,
+      enablePerformanceDetection: true
+    }
+  }
+
+  /**
+   * [SAFARI-EXT-POPUP-001] Setup Safari-specific optimizations
+   */
+  setupSafariOptimizations() {
+    try {
+      debugLog('[SAFARI-EXT-POPUP-001] Setting up Safari-specific optimizations...')
+
+      // Add Safari-specific CSS classes to body
+      if (this.isSafari) {
+        document.body.classList.add('safari-platform-detected')
+        document.body.classList.add('safari-performance-monitoring')
+        document.body.classList.add('safari-error-handling')
+        document.body.classList.add('safari-graceful-degradation')
+        
+        // Add Safari-specific feature detection classes
+        if (CSS.supports('backdrop-filter', 'blur(10px)')) {
+          document.body.classList.add('safari-feature-supported')
+        } else {
+          document.body.classList.add('safari-feature-unsupported')
+        }
+        
+        debugLog('[SAFARI-EXT-POPUP-001] Safari-specific CSS classes added')
+      }
+
+      // Start Safari performance monitoring
+      if (this.safariConfig.enablePerformanceMonitoring) {
+        this.performanceMonitor = setInterval(this.monitorSafariPerformance.bind(this), this.safariConfig.performanceMonitoringInterval)
+        debugLog('[SAFARI-EXT-POPUP-001] Safari performance monitoring started')
+      }
+
+      debugLog('[SAFARI-EXT-POPUP-001] Safari-specific optimizations setup completed')
+    } catch (error) {
+      debugError('[SAFARI-EXT-POPUP-001] Failed to setup Safari optimizations:', error)
+    }
+  }
+
+  /**
+   * [SAFARI-EXT-POPUP-001] Monitor Safari performance
+   */
+  monitorSafariPerformance() {
+    try {
+      if (window.performance && window.performance.memory) {
+        const memoryInfo = window.performance.memory
+        const memoryUsagePercent = (memoryInfo.usedJSHeapSize / memoryInfo.jsHeapSizeLimit) * 100
+        
+        if (memoryUsagePercent > 90) {
+          console.warn('[SAFARI-EXT-POPUP-001] Critical Safari popup memory usage:', memoryUsagePercent.toFixed(1) + '%')
+          this.handleSafariError('Safari Critical Memory Usage', `Memory usage: ${memoryUsagePercent.toFixed(1)}%`)
+        } else if (memoryUsagePercent > 70) {
+          debugLog('[SAFARI-EXT-POPUP-001] High Safari popup memory usage:', memoryUsagePercent.toFixed(1) + '%')
+        }
+      }
+    } catch (error) {
+      debugError('[SAFARI-EXT-POPUP-001] Safari performance monitoring failed:', error)
+    }
+  }
+
+  /**
+   * [SAFARI-EXT-POPUP-001] Handle Safari-specific errors
+   */
+  async handleSafariError(message, errorInfo = null) {
+    try {
+      debugError('[SAFARI-EXT-POPUP-001] Safari Popup Error:', message, errorInfo)
+
+      // Safari-specific error categorization
+      let errorType = 'general'
+      if (message.includes('network') || message.includes('fetch')) {
+        errorType = 'network'
+      } else if (message.includes('permission') || message.includes('denied')) {
+        errorType = 'permission'
+      } else if (message.includes('auth') || message.includes('token')) {
+        errorType = 'auth'
+      } else if (message.includes('memory') || message.includes('performance')) {
+        errorType = 'performance'
+      }
+
+      // Safari-specific error recovery
+      if (this.safariConfig.enableErrorRecovery && errorType !== 'auth') {
+        const recoverySuccessful = await this.attemptSafariErrorRecovery({ type: errorType, error: errorInfo })
+        if (recoverySuccessful) {
+          debugLog('[SAFARI-EXT-POPUP-001] Safari error recovery successful, continuing...')
+          return
+        }
+      }
+
+      // Safari-specific error messages
+      let userMessage = 'An unexpected error occurred. Please try again.'
+      
+      if (errorType === 'auth') {
+        userMessage = 'Please configure your Pinboard API token in the extension options.'
+      } else if (errorType === 'network') {
+        userMessage = 'Network error. Please check your connection and try again.'
+      } else if (errorType === 'permission') {
+        userMessage = 'Permission denied. Please check extension permissions.'
+      } else if (errorType === 'performance') {
+        userMessage = 'Performance issue detected. Please try refreshing the popup.'
+      }
+
+      // Show error in UI if possible
+      if (this.uiManager) {
+        this.uiManager.showError(userMessage)
+      }
+    } catch (error) {
+      debugError('[SAFARI-EXT-POPUP-001] Failed to handle Safari error:', error)
+    }
+  }
+
+  /**
+   * [SAFARI-EXT-POPUP-001] Attempt Safari error recovery
+   */
+  async attemptSafariErrorRecovery(errorInfo) {
+    try {
+      if (this.errorRecoveryAttempts >= this.safariConfig.maxErrorRecoveryAttempts) {
+        debugLog('[SAFARI-EXT-POPUP-001] Max Safari popup error recovery attempts reached')
+        return false
+      }
+      
+      this.errorRecoveryAttempts++
+      debugLog(`[SAFARI-EXT-POPUP-001] Attempting Safari popup error recovery (${this.errorRecoveryAttempts}/${this.safariConfig.maxErrorRecoveryAttempts})`)
+      
+      // Wait before attempting recovery
+      await new Promise(resolve => setTimeout(resolve, this.safariConfig.errorRecoveryDelay))
+      
+      // Attempt recovery based on error type
+      if (errorInfo.type === 'initialization') {
+        // Reinitialize popup components
+        await this.loadInitialData()
+      } else if (errorInfo.type === 'ui') {
+        // Reinitialize UI system
+        this.uiManager.setupEventListeners()
+      } else if (errorInfo.type === 'message') {
+        // Reinitialize message handling
+        await this.loadInitialData()
+      }
+      
+      debugLog('[SAFARI-EXT-POPUP-001] Safari popup error recovery successful')
+      this.errorRecoveryAttempts = 0
+      return true
+      
+    } catch (error) {
+      debugError('[SAFARI-EXT-POPUP-001] Safari popup error recovery failed:', error)
+      return false
     }
   }
 
@@ -1499,9 +1699,29 @@ export class PopupController {
   }
 
   /**
-   * Cleanup resources
+   * Cleanup resources with Safari-specific cleanup
    */
   cleanup () {
+    debugLog('[SAFARI-EXT-POPUP-001] PopupController cleanup called with Safari optimizations')
+    
+    // [SAFARI-EXT-POPUP-001] Stop Safari performance monitoring
+    if (this.performanceMonitor) {
+      clearInterval(this.performanceMonitor)
+      this.performanceMonitor = null
+      debugLog('[SAFARI-EXT-POPUP-001] Safari performance monitoring stopped')
+    }
+    
+    // [SAFARI-EXT-POPUP-001] Cleanup Safari-specific CSS classes
+    if (this.isSafari) {
+      document.body.classList.remove('safari-platform-detected')
+      document.body.classList.remove('safari-performance-monitoring')
+      document.body.classList.remove('safari-error-handling')
+      document.body.classList.remove('safari-graceful-degradation')
+      document.body.classList.remove('safari-feature-supported')
+      document.body.classList.remove('safari-feature-unsupported')
+      debugLog('[SAFARI-EXT-POPUP-001] Safari-specific CSS classes removed')
+    }
+    
     // Remove event listeners if needed
     this.uiManager?.off('showHoverboard', this.handleShowHoverboard)
     this.uiManager?.off('togglePrivate', this.handleTogglePrivate)
@@ -1512,6 +1732,11 @@ export class PopupController {
     this.uiManager?.off('deletePin', this.handleDeletePin)
     this.uiManager?.off('reloadExtension', this.handleReloadExtension)
     this.uiManager?.off('openOptions', this.handleOpenOptions)
+    
+    // [SAFARI-EXT-POPUP-001] Reset Safari-specific state
+    this.errorRecoveryAttempts = 0
+    
+    debugLog('[SAFARI-EXT-POPUP-001] PopupController cleanup completed with Safari optimizations')
   }
 
   /**
