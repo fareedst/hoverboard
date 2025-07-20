@@ -90,7 +90,10 @@ export class UIManager {
       privateIcon: document.getElementById('privateIcon'),
       privateStatus: document.getElementById('privateStatus'),
       readIcon: document.getElementById('readIcon'),
-      readStatus: document.getElementById('readStatus')
+      readStatus: document.getElementById('readStatus'),
+
+      // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
+      showHoverOnPageLoad: document.getElementById('showHoverOnPageLoad')
     }
   }
 
@@ -196,6 +199,11 @@ export class UIManager {
     // Error handling
     this.elements.retryBtn?.addEventListener('click', () => {
       this.emit('retry')
+    })
+
+    // [SHOW-HOVER-CHECKBOX-UIMANAGER-002] - Add checkbox event listener
+    this.elements.showHoverOnPageLoad?.addEventListener('change', () => {
+      this.emit('showHoverOnPageLoadChange')
     })
   }
 

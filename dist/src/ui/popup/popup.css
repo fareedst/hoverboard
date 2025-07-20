@@ -269,6 +269,78 @@ section:last-child {
   gap: var(--spacing-sm);
 }
 
+/* [SHOW-HOVER-CHECKBOX-CSS-001] - Show hover controls layout */
+.show-hover-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+/* [SHOW-HOVER-CHECKBOX-CSS-002] - Page load checkbox styling */
+.page-load-checkbox {
+  display: flex;
+  align-items: center;
+}
+
+.page-load-checkbox .checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.page-load-checkbox .checkbox-label input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  width: 0;
+  height: 0;
+}
+
+.page-load-checkbox .checkmark {
+  position: relative;
+  width: 16px;
+  height: 16px;
+  background-color: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  border-radius: var(--radius-small);
+  margin-right: var(--spacing-sm);
+  transition: all 0.2s;
+}
+
+.page-load-checkbox .checkbox-label:hover .checkmark {
+  border-color: var(--primary-color);
+}
+
+.page-load-checkbox .checkbox-label input[type="checkbox"]:checked ~ .checkmark {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.page-load-checkbox .checkmark::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 1px 1px 0;
+  transform: rotate(45deg);
+}
+
+.page-load-checkbox .checkbox-label input[type="checkbox"]:checked ~ .checkmark::after {
+  display: block;
+}
+
+.page-load-checkbox .checkbox-text {
+  margin-left: var(--spacing-sm);
+  white-space: nowrap;
+}
+
 .action-icon-button {
   display: flex;
   align-items: center;

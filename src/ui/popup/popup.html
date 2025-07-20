@@ -48,9 +48,19 @@
       <section class="quick-actions">
         <h3 class="section-title">Quick Actions</h3>
         <div class="action-grid">
-          <button id="showHoverBtn" class="action-icon-button" title="Show Hover - Display bookmark overlay" aria-label="Show hoverboard overlay">
-            <span class="action-icon">👁️</span>
-          </button>
+          <div class="show-hover-controls">
+            <button id="showHoverBtn" class="action-icon-button" title="Show Hover - Display bookmark overlay" aria-label="Show hoverboard overlay">
+              <span class="action-icon">👁️</span>
+            </button>
+            
+            <div class="page-load-checkbox">
+              <label class="checkbox-label">
+                <input type="checkbox" id="showHoverOnPageLoad" title="Show hover overlay automatically when pages load">
+                <span class="checkmark"></span>
+                <span class="checkbox-text">Show on page load</span>
+              </label>
+            </div>
+          </div>
           
           <button id="togglePrivateBtn" class="action-icon-button" title="Toggle Privacy" aria-label="Toggle privacy setting">
             <span class="action-icon" id="privateIcon">🔒</span>

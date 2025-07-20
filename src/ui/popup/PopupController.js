@@ -6,6 +6,7 @@ import { UIManager } from './UIManager.js'
 import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
 import { debugLog, debugError } from '../../shared/utils.js'
+import { ConfigManager } from '../../config/config-manager.js'
 
 debugLog('[SAFARI-EXT-SHIM-001] PopupController.js: module loaded');
 
@@ -14,6 +15,7 @@ export class PopupController {
     // [DEP-INJ-001] Proper dependency injection with fallback creation
     this.errorHandler = dependencies.errorHandler || new ErrorHandler()
     this.stateManager = dependencies.stateManager || new StateManager()
+    this.configManager = dependencies.configManager || new ConfigManager()
 
     // [DEP-INJ-001] UIManager with proper dependency injection
     this.uiManager = dependencies.uiManager || new UIManager({
@@ -159,6 +161,9 @@ export class PopupController {
 
     // [POPUP-REFRESH-001] Add refresh event handler
     this.uiManager.on('refreshData', this.refreshPopupData.bind(this))
+
+    // [SHOW-HOVER-CHECKBOX-CONTROLLER-001] - Add checkbox event handler binding
+    this.uiManager.on('showHoverOnPageLoadChange', this.handleShowHoverOnPageLoadChange.bind(this))
   }
 
   /**
@@ -241,6 +246,9 @@ export class PopupController {
 
       // Load recent tags
       await this.loadRecentTags()
+
+      // [SHOW-HOVER-CHECKBOX-CONTROLLER-002] - Load checkbox state
+      await this.loadShowHoverOnPageLoadSetting()
 
       // Set version info
       const manifest = chrome.runtime.getManifest()
@@ -1617,6 +1625,69 @@ export class PopupController {
     } catch (error) {
       debugError('[POPUP-SYNC-001] Overlay synchronization check failed:', error)
       return { synchronized: false, error: error.message }
+    }
+  }
+
+  /**
+   * [SHOW-HOVER-CHECKBOX-CONTROLLER-003] - Handle checkbox state change
+   */
+  async handleShowHoverOnPageLoadChange() {
+    try {
+      const isChecked = this.uiManager.elements.showHoverOnPageLoad.checked
+
+      // Update configuration
+      await this.configManager.updateConfig({
+        showHoverOnPageLoad: isChecked
+      })
+
+      // Provide user feedback
+      this.uiManager.showSuccess(
+        isChecked ? 'Hover will show on page load' : 'Hover will not show on page load'
+      )
+
+      // Broadcast to content scripts
+      await this.broadcastConfigUpdate()
+
+    } catch (error) {
+      this.errorHandler.handleError('Failed to update page load setting', error)
+    }
+  }
+
+  /**
+   * [SHOW-HOVER-CHECKBOX-CONTROLLER-004] - Load checkbox state from configuration
+   */
+  async loadShowHoverOnPageLoadSetting() {
+    try {
+      const config = await this.configManager.getConfig()
+      this.uiManager.elements.showHoverOnPageLoad.checked = config.showHoverOnPageLoad
+    } catch (error) {
+      this.errorHandler.handleError('Failed to load page load setting', error)
+    }
+  }
+
+    /**
+   * [SHOW-HOVER-CHECKBOX-CONTROLLER-005] - Broadcast configuration updates to content scripts
+   */
+  async broadcastConfigUpdate() {
+    try {
+      const config = await this.configManager.getConfig()
+
+      // Send to current tab if available
+      if (this.currentTab) {
+        await this.sendToTab({
+          type: 'UPDATE_CONFIG',
+          data: { showHoverOnPageLoad: config.showHoverOnPageLoad }
+        })
+      }
+
+      // Broadcast to all tabs using the existing UPDATE_OVERLAY_CONFIG message type
+      await this.sendMessage({
+        type: 'updateOverlayConfig',
+        data: { showHoverOnPageLoad: config.showHoverOnPageLoad }
+      })
+
+    } catch (error) {
+      this.errorHandler.handleError('Failed to broadcast config update', error)
     }
   }
 }
