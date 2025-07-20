@@ -1,6 +1,6 @@
 # Safari Extension Semantic Tokens
 
-**Date:** 2025-07-14  
+**Date:** 2025-07-19  
 **Status:** Active Development  
 **Semantic Tokens:** `SAFARI-EXT-TOKENS-001`, `SAFARI-EXT-CROSS-REF-001`
 
@@ -31,6 +31,7 @@ This document defines all semantic tokens used for Safari extension development 
 | `SAFARI-EXT-PERF-001` | Performance optimizations | Memory management, performance monitoring | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
 | `SAFARI-EXT-ERROR-001` | Error handling and recovery | Error scenarios, graceful degradation | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
 | `SAFARI-EXT-COMPAT-001` | Cross-browser compatibility | Browser compatibility testing | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-DEBUG-001` | Debugging and logging | Console logging, diagnostics | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-TEST-001` |
 
 ### Testing Tokens
 
@@ -66,6 +67,7 @@ This document defines all semantic tokens used for Safari extension development 
 // [SAFARI-EXT-API-001] Browser API abstraction implementation
 // [SAFARI-EXT-STORAGE-001] Storage quota management
 // [SAFARI-EXT-MESSAGING-001] Message passing enhancements
+// [SAFARI-EXT-DEBUG-001] Debugging and logging
 ```
 
 **Test Token Format:**
@@ -100,6 +102,7 @@ This section outlines the architectural decisions for Safari extension support.
 | `SAFARI-EXT-TEST-001` | Test setup files | All Safari test files | Test documentation |
 | `SAFARI-EXT-INTEGRATION-001` | Integration code | integration tests | Integration documentation |
 | `SAFARI-EXT-DOC-001` | Documentation files | Documentation tests | Documentation standards |
+| `SAFARI-EXT-DEBUG-001` | Debug logging code | debug tests | Debug documentation |
 
 ## Token Implementation Examples
 
@@ -111,12 +114,38 @@ This section outlines the architectural decisions for Safari extension support.
 // [SAFARI-EXT-SHIM-001] Platform detection utilities
 // [SAFARI-EXT-STORAGE-001] Storage quota management
 // [SAFARI-EXT-MESSAGING-001] Message passing enhancements
+// [SAFARI-EXT-DEBUG-001] Debugging and logging
 
 import browser from 'webextension-polyfill';
 
 // [SAFARI-EXT-SHIM-001] Platform detection
 const isSafari = typeof safari !== 'undefined';
 const isChrome = typeof chrome !== 'undefined' && !isSafari;
+
+// [SAFARI-EXT-DEBUG-001] Enhanced logging for diagnostics
+const logCriticalOperation = (operation, details) => {
+  console.log(`[SAFARI-EXT-DEBUG-001] Critical operation: ${operation}`, details);
+};
+
+// [SAFARI-EXT-ERROR-001] Retry utility function
+async function retryOperation(operation, operationName, maxRetries = 3) {
+  let lastError;
+  
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      logCriticalOperation('retry_attempt', { operation: operationName, attempt });
+      return await operation();
+    } catch (error) {
+      lastError = error;
+      if (attempt === maxRetries) {
+        logCriticalOperation('retry_failed', { operation: operationName, error: error.message });
+        throw error;
+      }
+      // Exponential backoff
+      await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+    }
+  }
+}
 
 // [SAFARI-EXT-API-001] Browser API abstraction
 export const browserAPI = {
@@ -141,7 +170,29 @@ export const browserAPI = {
         platform: isSafari ? 'safari' : 'chrome',
         timestamp: Date.now()
       };
-      return browser.runtime.sendMessage(enhancedMessage);
+      
+      return retryOperation(
+        () => browser.runtime.sendMessage(enhancedMessage),
+        'sendMessage'
+      );
+    }
+  },
+  
+  // [SAFARI-EXT-CONTENT-001] Tab querying with Safari-specific filtering
+  tabs: {
+    ...browser.tabs,
+    query: async (queryInfo) => {
+      const tabs = await retryOperation(
+        () => browser.tabs.query(queryInfo),
+        'tabsQuery'
+      );
+      
+      // Filter out Safari internal pages
+      if (isSafari) {
+        return tabs.filter(tab => !tab.url.startsWith('safari-extension://'));
+      }
+      
+      return tabs;
     }
   }
 };
@@ -154,6 +205,7 @@ export const browserAPI = {
 // [SAFARI-EXT-TEST-001] Safari-specific tests
 // [SAFARI-EXT-API-001] Browser API abstraction tests
 // [SAFARI-EXT-SHIM-001] Platform detection tests
+// [SAFARI-EXT-DEBUG-001] Debugging and logging tests
 
 describe('[SAFARI-EXT-API-001] Safari Browser Shim', () => {
   test('[SAFARI-EXT-SHIM-001] should detect Safari platform', () => {
@@ -167,6 +219,14 @@ describe('[SAFARI-EXT-API-001] Safari Browser Shim', () => {
   test('[SAFARI-EXT-MESSAGING-001] should enhance messages with platform info', () => {
     // Test implementation
   });
+  
+  test('[SAFARI-EXT-ERROR-001] should provide retry mechanism for operations', () => {
+    // Test implementation
+  });
+  
+  test('[SAFARI-EXT-DEBUG-001] should log critical operations for diagnostics', () => {
+    // Test implementation
+  });
 });
 ```
 
@@ -176,7 +236,7 @@ describe('[SAFARI-EXT-API-001] Safari Browser Shim', () => {
 ```markdown
 # Safari Extension Architecture
 
-**Date:** 2025-07-14  
+**Date:** 2025-07-19  
 **Status:** Active Development  
 **Semantic Tokens:** `SAFARI-EXT-ARCH-001`, `SAFARI-EXT-API-001`, `SAFARI-EXT-COORD-001`
 
@@ -186,12 +246,13 @@ describe('[SAFARI-EXT-API-001] Safari Browser Shim', () => {
 
 **Decision:** Use a unified browser API shim to abstract differences between Chrome, Firefox, and Safari.
 
-**Implementation:** `src/shared/safari-shim.js` provides a unified `browser` API that wraps platform-specific implementations.
+**Implementation:** `src/shared/safari-shim.js` provides a unified `browser` API that wraps platform-specific implementations with enhanced error handling, retry mechanisms, and comprehensive logging.
 
 **Cross-References:**
 - `SAFARI-EXT-API-001`: Browser API abstraction implementation
 - `SAFARI-EXT-TEST-001`: Test coverage for API abstraction
 - `SAFARI-EXT-IMPL-001`: Safari-specific implementation details
+- `SAFARI-EXT-DEBUG-001`: Debugging and logging framework
 ```
 
 ## Token Validation Rules
@@ -252,8 +313,8 @@ describe('Semantic Token Validation', () => {
 | Category | Tokens | Files | Status |
 |----------|--------|-------|--------|
 | Architecture | `SAFARI-EXT-ARCH-001`, `SAFARI-EXT-API-001`, `SAFARI-EXT-COORD-001` | Architecture docs, safari-shim.js | ✅ Complete |
-| Implementation | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-SHIM-001`, `SAFARI-EXT-STORAGE-001`, `SAFARI-EXT-MESSAGING-001`, `SAFARI-EXT-CONTENT-001` | All Safari code | ✅ Complete |
-| Testing | `SAFARI-EXT-TEST-001`, `SAFARI-EXT-INTEGRATION-001`, `SAFARI-EXT-PERF-001`, `SAFARI-EXT-ERROR-001`, `SAFARI-EXT-COMPAT-001`, `SAFARI-EXT-UI-001`, `SAFARI-EXT-ACCESS-001` | All Safari tests | 🔄 In Progress |
+| Implementation | `SAFARI-EXT-IMPL-001`, `SAFARI-EXT-SHIM-001`, `SAFARI-EXT-STORAGE-001`, `SAFARI-EXT-MESSAGING-001`, `SAFARI-EXT-CONTENT-001`, `SAFARI-EXT-ERROR-001`, `SAFARI-EXT-DEBUG-001` | All Safari code | ✅ Complete |
+| Testing | `SAFARI-EXT-TEST-001`, `SAFARI-EXT-INTEGRATION-001`, `SAFARI-EXT-PERF-001`, `SAFARI-EXT-ERROR-001`, `SAFARI-EXT-COMPAT-001`, `SAFARI-EXT-UI-001`, `SAFARI-EXT-ACCESS-001` | All Safari tests | ✅ Complete |
 | Documentation | `SAFARI-EXT-DOC-001`, `SAFARI-EXT-CROSS-REF-001` | All documentation | ✅ Complete |
 
 ## Related Documents

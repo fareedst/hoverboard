@@ -1,6 +1,6 @@
 # Safari Extension Architecture
 
-**Date:** 2025-07-14  
+**Date:** 2025-01-27  
 **Status:** Active Development  
 **Semantic Tokens:** `SAFARI-EXT-ARCH-001`, `SAFARI-EXT-API-001`, `SAFARI-EXT-COORD-001`
 
@@ -8,50 +8,76 @@
 
 This document outlines the architectural decisions and implementation strategy for Safari browser extension support in the Hoverboard project. All architectural decisions are coordinated with existing architecture documents and use semantic tokens for complete cross-referencing.
 
+**Current Status:** The Chrome extension has evolved significantly since the original Safari plan was documented. This document has been updated to reflect the current Manifest V3 implementation and prioritize changes that can be executed while the extension is still only a Chrome extension.
+
 ## [SAFARI-EXT-ARCH-001] Core Architectural Decisions
 
 ### Browser API Abstraction Strategy
 
 **Decision:** Use a unified browser API shim to abstract differences between Chrome, Firefox, and Safari.
 
-**Implementation:** `src/shared/safari-shim.js` provides a unified `browser` API that wraps platform-specific implementations.
+**Current Implementation:** `src/shared/safari-shim.js` provides a unified `browser` API that wraps platform-specific implementations. The current implementation includes:
+- Promise-based message passing
+- Storage API abstraction with quota management
+- Tab querying with Safari-specific filtering
+- Platform detection utilities
+- Enhanced error handling for Safari-specific issues
 
 **Cross-References:**
 - `SAFARI-EXT-API-001`: Browser API abstraction implementation
 - `SAFARI-EXT-TEST-001`: Test coverage for API abstraction
 - `SAFARI-EXT-IMPL-001`: Safari-specific implementation details
 
-### State Management Strategy
+### Manifest V3 Service Worker Strategy
 
-**Decision:** Cross-popup and cross-instance state must be managed consistently across all supported browsers, with special handling for Safari's storage and messaging quirks.
+**Decision:** Safari extension must support Manifest V3 service worker architecture, which is already implemented in the Chrome version.
 
-**Implementation:** 
-- Shared memory management for recent tags (`SAFARI-EXT-IMPL-001`)
-- Storage quota monitoring for Safari (`SAFARI-EXT-STORAGE-001`)
-- Message passing enhancements for Safari (`SAFARI-EXT-MESSAGING-001`)
+**Current Implementation:** `src/core/service-worker.js` uses Manifest V3 patterns:
+- Service worker as background script
+- Modern ES6 module imports
+- Promise-based async/await patterns
+- Event-driven architecture
+- Shared memory management for recent tags
 
 **Cross-References:**
 - `docs/architecture/overview.md`: Overall state management strategy
 - `docs/development/ai-development/TAG_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Tag synchronization
 
+### Content Script Architecture
+
+**Decision:** Safari extension must support the current content script architecture with overlay system and transparency controls.
+
+**Current Implementation:** `src/features/content/content-main.js` includes:
+- Modern ES6 module architecture
+- Overlay manager with transparency controls
+- Message client for communication
+- DOM utilities for manipulation
+- Browser API abstraction integration
+
+**Cross-References:**
+- `docs/development/ai-development/OVERLAY_THEMING_TECHNICAL_SPEC.md`: Overlay theming
+- `SAFARI-EXT-IMPL-001`: Content script implementation in Safari
+
 ### Testability Strategy
 
 **Decision:** All platform-specific code paths must be testable via dependency injection or global mocks, with tests for both success and failure/error conditions.
 
-**Implementation:**
+**Current Implementation:**
 - Comprehensive mocking in `tests/setup.js` (`SAFARI-EXT-TEST-001`)
 - Unit tests for Safari-specific functionality (`tests/unit/safari-shim.test.js`)
 - Integration tests for cross-browser compatibility (`tests/integration/popup-tag-integration.test.js`)
+- Performance testing infrastructure (`tests/performance/`)
 
 ## [SAFARI-EXT-API-001] Browser API Abstraction
 
 ### Chrome API Compatibility
 
 The Safari shim provides Chrome API compatibility through:
-- Promise-based message passing
-- Storage API abstraction
+- Promise-based message passing with enhanced error handling
+- Storage API abstraction with quota monitoring
 - Tab querying with Safari-specific filtering
 - Platform detection utilities
+- Enhanced message passing with platform info
 
 ### Safari-Specific Enhancements
 
@@ -59,22 +85,31 @@ The Safari shim provides Chrome API compatibility through:
 - Real-time storage usage monitoring
 - Warning system for high usage (>80%)
 - Graceful fallback for unsupported features
+- Enhanced error handling for storage failures
 
 **Message Passing:**
-- Enhanced messages with platform info
+- Enhanced messages with platform info and timestamps
 - Error handling for Safari-specific issues
 - Async/await compatibility
+- Promise-based message sending for proper async handling
 
 **Tab Querying:**
 - Filtering of Safari internal pages
 - Error handling for tab query failures
 - Cross-browser compatibility
+- Enhanced debugging and logging
 
-## [SAFARI-EXT-COORD-001] Coordination with Existing Architecture
+## [SAFARI-EXT-COORD-001] Coordination with Current Architecture
 
 ### Dark Theme Architecture
 
 **Coordination:** Safari extension must support the dark theme default implementation.
+
+**Current Implementation:** The Chrome extension includes:
+- Theme manager in `src/ui/components/ThemeManager.js`
+- Design tokens in `src/ui/styles/design-tokens.css`
+- Dark theme default configuration
+- Theme persistence and synchronization
 
 **Cross-References:**
 - `docs/architecture/DARK_THEME_DEFAULT_ARCHITECTURE.md`
@@ -84,6 +119,12 @@ The Safari shim provides Chrome API compatibility through:
 
 **Coordination:** Safari extension must support the overlay theming and functionality.
 
+**Current Implementation:** The Chrome extension includes:
+- Overlay manager with transparency controls
+- Position and visibility management
+- Animation and interaction handling
+- Theme integration
+
 **Cross-References:**
 - `docs/development/ai-development/OVERLAY_THEMING_TECHNICAL_SPEC.md`
 - `SAFARI-EXT-IMPL-001`: Overlay implementation in Safari
@@ -92,36 +133,106 @@ The Safari shim provides Chrome API compatibility through:
 
 **Coordination:** Safari extension must support the tag synchronization architecture.
 
+**Current Implementation:** The Chrome extension includes:
+- Recent tags memory manager in service worker
+- Tag service with storage abstraction
+- Cross-popup tag availability
+- Tag persistence and frequency tracking
+
 **Cross-References:**
 - `docs/development/ai-development/TAG_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`
 - `SAFARI-EXT-IMPL-001`: Tag synchronization in Safari
 
-### Toggle Synchronization
+### Popup Architecture
 
-**Coordination:** Safari extension must support the toggle synchronization architecture.
+**Coordination:** Safari extension must support the current popup architecture.
+
+**Current Implementation:** The Chrome extension includes:
+- Modern popup interface with quick actions
+- Tag management with recent tags
+- Search tabs functionality
+- Settings and options integration
+- Live data updates and state management
 
 **Cross-References:**
-- `docs/development/ai-development/TOGGLE_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`
-- `SAFARI-EXT-IMPL-001`: Toggle synchronization in Safari
+- `docs/development/ai-development/POPUP_CLOSE_BEHAVIOR_ARCHITECTURAL_DECISIONS.md`
+- `SAFARI-EXT-IMPL-001`: Popup implementation in Safari
 
 ## Implementation Status
 
-### Completed
+### Completed (Chrome Extension Foundation)
 - [x] Basic Safari shim implementation (`SAFARI-EXT-API-001`)
 - [x] Storage quota management (`SAFARI-EXT-STORAGE-001`)
 - [x] Message passing enhancements (`SAFARI-EXT-MESSAGING-001`)
 - [x] Tab querying with filtering (`SAFARI-EXT-CONTENT-001`)
 - [x] Platform detection utilities (`SAFARI-EXT-SHIM-001`)
+- [x] Manifest V3 service worker architecture
+- [x] Content script with overlay system
+- [x] Popup interface with modern UI
+- [x] Tag synchronization system
+- [x] Dark theme implementation
+- [x] Test infrastructure with comprehensive mocking
 
-### In Progress
-- [ ] Test coverage improvements (`SAFARI-EXT-TEST-001`)
-- [ ] Cross-popup state management (`SAFARI-EXT-IMPL-001`)
-- [ ] Error handling enhancements (`SAFARI-EXT-IMPL-001`)
-
-### Planned
+### In Progress (Safari-Specific Implementation)
+- [ ] Safari App Extension manifest creation
 - [ ] Safari-specific UI optimizations
-- [ ] Performance optimizations for Safari
-- [ ] Safari App Extension support (if needed)
+- [ ] Safari storage quota optimizations
+- [ ] Safari message passing optimizations
+- [ ] Safari content script adaptations
+- [ ] Safari popup adaptations
+
+### Planned (Safari Integration)
+- [ ] Safari App Extension packaging
+- [ ] Safari-specific error handling
+- [ ] Safari performance optimizations
+- [ ] Safari accessibility improvements
+- [ ] Safari-specific testing
+- [ ] Safari deployment pipeline
+
+## Priority Implementation Tasks (Chrome Extension Phase)
+
+### High Priority (Can be implemented now)
+1. **Enhanced Safari Shim Testing** (`SAFARI-EXT-TEST-001`)
+   - Expand unit test coverage for Safari shim
+   - Add integration tests for cross-browser scenarios
+   - Implement error handling test coverage
+
+2. **Storage Quota Management** (`SAFARI-EXT-STORAGE-001`)
+   - Enhance storage quota monitoring
+   - Implement graceful degradation for storage failures
+   - Add storage performance optimizations
+
+3. **Message Passing Enhancements** (`SAFARI-EXT-MESSAGING-001`)
+   - Improve error handling for Safari-specific issues
+   - Add message retry mechanisms
+   - Implement message validation
+
+4. **Platform Detection Improvements** (`SAFARI-EXT-SHIM-001`)
+   - Enhance platform detection utilities
+   - Add feature support detection
+   - Implement platform-specific optimizations
+
+### Medium Priority (Can be prepared now)
+1. **Safari App Extension Structure** (`SAFARI-EXT-IMPL-001`)
+   - Create Safari App Extension manifest template
+   - Prepare Safari-specific build configuration
+   - Set up Safari development environment
+
+2. **UI Adaptations** (`SAFARI-EXT-UI-001`)
+   - Prepare Safari-specific UI components
+   - Adapt overlay system for Safari
+   - Prepare theme system for Safari
+
+3. **Error Handling Framework** (`SAFARI-EXT-ERROR-001`)
+   - Implement Safari-specific error handling
+   - Add graceful degradation strategies
+   - Prepare error reporting system
+
+### Low Priority (Safari-specific)
+1. **Safari App Extension Integration**
+2. **Safari-specific Performance Optimizations**
+3. **Safari Accessibility Improvements**
+4. **Safari Deployment Pipeline**
 
 ## Cross-Reference Summary
 
@@ -136,6 +247,8 @@ The Safari shim provides Chrome API compatibility through:
 | `SAFARI-EXT-CONTENT-001` | Tab querying and filtering | safari-shim.js, content tests |
 | `SAFARI-EXT-SHIM-001` | Platform detection utilities | safari-shim.js, platform tests |
 | `SAFARI-EXT-COORD-001` | Architecture coordination | All architecture documents |
+| `SAFARI-EXT-UI-001` | Safari UI adaptations | UI components, popup, overlay |
+| `SAFARI-EXT-ERROR-001` | Safari error handling | Error handling framework |
 
 ## Related Documents
 
@@ -143,6 +256,6 @@ The Safari shim provides Chrome API compatibility through:
 - `docs/architecture/DARK_THEME_DEFAULT_ARCHITECTURE.md`: Dark theme architecture
 - `docs/development/ai-development/OVERLAY_THEMING_TECHNICAL_SPEC.md`: Overlay theming
 - `docs/development/ai-development/TAG_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Tag synchronization
-- `docs/development/ai-development/TOGGLE_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Toggle synchronization
+- `docs/development/ai-development/POPUP_CLOSE_BEHAVIOR_ARCHITECTURAL_DECISIONS.md`: Popup behavior
 - `docs/development/ai-development/SAFARI_EXTENSION_IMPLEMENTATION_PLAN.md`: Implementation plan
 - `docs/development/ai-development/SAFARI_EXTENSION_TEST_PLAN.md`: Test plan 
