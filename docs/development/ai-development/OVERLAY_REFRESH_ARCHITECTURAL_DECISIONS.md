@@ -327,7 +327,7 @@ Leverages existing theme system for consistent styling:
 .refresh-button {
   position: absolute;
   top: 8px;
-  left: 8px;
+  left: 40px;  /* Positioned to right of close button */
   background: var(--theme-button-bg);
   color: var(--theme-text-primary);
   border: 1px solid var(--theme-border);

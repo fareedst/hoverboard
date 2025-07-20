@@ -8,15 +8,16 @@ This document summarizes the complete implementation of the overlay refresh butt
 
 ### Feature Summary
 
-A refresh data button with tooltip and meaningful icon has been successfully implemented in the top-left corner of the overlay window. The feature provides:
+A refresh data button with tooltip and meaningful icon has been successfully implemented in the top-left area of the overlay window, positioned to the right of the close button. The feature provides:
 
 - **Visual Design**: Refresh icon (🔄) with tooltip "Refresh Data"
-- **Positioning**: Top-left corner of overlay window
+- **Positioning**: Top-left area at `left: 40px` relative to overlay element, to the right of close button
 - **Functionality**: Fetches fresh bookmark data and updates overlay content
 - **User Feedback**: Loading states, success/error messages
 - **Accessibility**: Full ARIA support, keyboard navigation
 - **Theme Integration**: Theme-aware styling with dark/light mode support
 - **Error Handling**: Comprehensive error handling with user feedback
+- **Button Grouping**: Logically grouped with close button for better UX
 
 ## [OVERLAY-REFRESH-001] Completed Components
 
@@ -126,7 +127,7 @@ if (refreshButton) {
 .hoverboard-overlay .refresh-button {
   position: absolute;
   top: 8px;
-  left: 8px;
+  left: 40px;  /* Positioned to right of close button */
   background: var(--theme-button-bg);
   color: var(--theme-text-primary);
   border: 1px solid var(--theme-border);

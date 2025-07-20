@@ -18,17 +18,19 @@ This document outlines the architectural decisions made for implementing the ove
 ### **Decision 1: Button Placement Strategy**
 **[OVERLAY-REFRESH-POSITION-001]** - Refresh button positioning
 
-**Decision**: Place refresh button in top-left corner of overlay window
+**Decision**: Place refresh button at `left: 40px` in top-left area of overlay window, to the right of close button
 **Status**: Accepted
 **Date**: 2025-01-27
+**Updated**: 2025-07-19 - Adjusted positioning to accommodate close button
 
-**Context**: The overlay window currently has a close button (✕) in the top-right corner. We need to add a refresh button that doesn't conflict with existing UI elements.
+**Context**: The overlay window has both a close button (✕) at `left: 8px` and a refresh button (🔄) at `left: 40px` in the top-left corner area. The refresh button is positioned to the right of the close button with appropriate spacing.
 
 **Options Considered**:
-1. **Top-left corner** (✅ Selected)
-   - Follows common UI patterns for refresh buttons
-   - Clear visual separation from close button
-   - Consistent with existing overlay structure
+1. **Top-left area with close button** (✅ Selected)
+   - Groups control buttons together logically
+   - Clear visual separation between buttons (32px spacing)
+   - Consistent with overlay-relative positioning approach
+   - Follows common UI patterns for control button grouping
    
 2. **Top-right corner, next to close button**
    - Would create visual clutter
@@ -41,10 +43,11 @@ This document outlines the architectural decisions made for implementing the ove
    - Poor UX for primary action
 
 **Consequences**:
-- ✅ Maintains clear visual hierarchy
-- ✅ Follows established UI patterns
+- ✅ Maintains clear visual hierarchy with grouped control buttons
+- ✅ Follows established UI patterns for button grouping
 - ✅ Coordinates with `[OVERLAY-THEMING-001]` for styling
-- ⚠️ Requires absolute positioning to avoid layout conflicts
+- ✅ Uses overlay-relative positioning for better stability
+- ✅ Provides adequate spacing (32px) between buttons for accessibility
 
 **Cross-References**:
 - Coordinates with `[OVERLAY-THEMING-001]` for theme integration

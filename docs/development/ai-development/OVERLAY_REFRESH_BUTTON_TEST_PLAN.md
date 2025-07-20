@@ -100,7 +100,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
       expect(mockButton.title).toBe('Refresh Data')
       expect(mockButton.style.cssText).toContain('position: absolute')
       expect(mockButton.style.cssText).toContain('top: 8px')
-      expect(mockButton.style.cssText).toContain('left: 8px')
+      expect(mockButton.style.cssText).toContain('left: 40px')
     })
 
     test('should apply theme-aware styling', () => {

@@ -2866,7 +2866,7 @@
         this.clearContent();
         debugLog3("Content cleared");
         const mainContainer = this.document.createElement("div");
-        mainContainer.style.cssText = "padding: 8px;";
+        mainContainer.style.cssText = "padding: 8px; padding-top: 40px;";
         const currentTagsContainer = this.document.createElement("div");
         currentTagsContainer.className = "scrollmenu tags-container";
         currentTagsContainer.style.cssText = `
@@ -2884,7 +2884,7 @@
         refreshBtn.style.cssText = `
         position: absolute;
         top: 8px;
-        left: 8px;
+        left: 40px;  // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Position relative to overlay
         background: var(--theme-button-bg);
         color: var(--theme-text-primary);
         border: 1px solid var(--theme-border);
@@ -2909,16 +2909,41 @@
             await this.handleRefreshButtonClick();
           }
         });
-        currentTagsContainer.appendChild(refreshBtn);
         const closeBtn = this.document.createElement("span");
         closeBtn.className = "close-button";
         closeBtn.innerHTML = "\u2715";
+        closeBtn.title = "Close Overlay";
+        closeBtn.setAttribute("aria-label", "Close Overlay");
+        closeBtn.setAttribute("role", "button");
+        closeBtn.setAttribute("tabindex", "0");
         closeBtn.style.cssText = `
-        float: right;
-        margin: 2px;
+        position: absolute;
+        top: 8px;
+        left: 8px;  // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Position relative to overlay
+        background: var(--theme-button-bg);
+        color: var(--theme-text-primary);
+        border: 1px solid var(--theme-border);
+        border-radius: 4px;
+        padding: 4px 6px;
+        cursor: pointer;
+        font-size: 14px;
+        z-index: 1;
+        transition: var(--theme-transition);
+        min-width: 24px;
+        min-height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       `;
         closeBtn.onclick = () => this.hide();
-        currentTagsContainer.appendChild(closeBtn);
+        closeBtn.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            this.hide();
+          }
+        });
+        this.overlayElement.appendChild(closeBtn);
+        this.overlayElement.appendChild(refreshBtn);
         const currentLabel = this.document.createElement("span");
         currentLabel.className = "label-primary tiny";
         currentLabel.textContent = "Current:";
