@@ -10,33 +10,21 @@ This document outlines the implementation plan for Safari browser extension supp
 
 **Current Status:** The Chrome extension has evolved significantly since the original plan was documented. This plan has been updated to reflect the current Manifest V3 implementation and prioritize changes that can be executed while the extension is still only a Chrome extension.
 
-## [SAFARI-EXT-IMPL-001] Implementation Strategy
+## Implementation Status
 
-### Phase 1: Foundation Implementation (Chrome Extension Phase)
+### Phase 1: Foundation and Testing Infrastructure ✅ COMPLETED
 
-#### 1.1 Enhanced Browser API Abstraction Layer
+#### 1.1 Safari Browser API Abstraction
 
-**File:** `src/shared/safari-shim.js`  
+**Files:** `src/shared/safari-shim.js`  
 **Token:** `SAFARI-EXT-API-001`
 
 **Current Implementation:**
-- [x] Unified browser API shim implementation
-- [x] Storage quota management (`SAFARI-EXT-STORAGE-001`)
-- [x] Message passing enhancements (`SAFARI-EXT-MESSAGING-001`)
-- [x] Tab querying with filtering (`SAFARI-EXT-CONTENT-001`)
-- [x] Platform detection utilities (`SAFARI-EXT-SHIM-001`)
-- [x] Enhanced error handling for Safari-specific issues (`SAFARI-EXT-ERROR-001`)
-- [x] Message retry mechanisms for failed communications (`SAFARI-EXT-MESSAGING-001`)
-- [x] Storage quota optimization for Safari (`SAFARI-EXT-STORAGE-001`)
-- [x] Platform-specific feature detection (`SAFARI-EXT-SHIM-001`)
-- [x] Enhanced debugging and logging for Safari (`SAFARI-EXT-DEBUG-001`)
-
-**Enhancement Tasks (Completed):**
-- [x] Enhanced error handling for Safari-specific issues
-- [x] Message retry mechanisms for failed communications
-- [x] Storage quota optimization for Safari
-- [x] Platform-specific feature detection
-- [x] Enhanced debugging and logging for Safari
+- [x] Safari/Firefox/Chrome browser API abstraction for cross-browser extension support
+- [x] Unified browser API using webextension-polyfill for cross-browser compatibility
+- [x] Enhanced retry mechanism for failed operations
+- [x] Safari-specific API enhancements
+- [x] **Enhanced storage quota management with real-time monitoring, graceful degradation, and performance optimizations** ✅ **COMPLETED [2025-07-19]**
 
 **Cross-References:**
 - `SAFARI-EXT-TEST-001`: Test coverage for API abstraction
@@ -57,6 +45,7 @@ This document outlines the implementation plan for Safari browser extension supp
 - [x] Cross-browser compatibility tests
 - [x] Performance benchmarking tests
 - [x] Safari-specific mock scenarios
+- [x] **Enhanced storage quota management test coverage** ✅ **COMPLETED [2025-07-19]**
 
 **Enhancement Tasks (Completed):**
 - [x] Expanded unit test coverage for Safari shim
@@ -64,6 +53,7 @@ This document outlines the implementation plan for Safari browser extension supp
 - [x] Cross-browser compatibility tests
 - [x] Performance benchmarking tests
 - [x] Safari-specific mock scenarios
+- [x] **Storage quota management test coverage** ✅ **COMPLETED [2025-07-19]**
 
 **Cross-References:**
 - `SAFARI-EXT-IMPL-001`: Implementation details
@@ -84,215 +74,165 @@ This document outlines the implementation plan for Safari browser extension supp
 - [x] Safari-specific storage optimizations
 - [x] Enhanced error handling for storage failures
 - [x] Storage quota warning system improvements
-- [x] Graceful degradation for storage failures
-- [x] Storage performance optimizations
+- [x] **Enhanced storage quota management with real-time monitoring, graceful degradation, and performance optimizations** ✅ **COMPLETED [2025-07-19]**
+- [x] **Platform-specific configuration for Safari and Chrome** ✅ **COMPLETED [2025-07-19]**
+- [x] **Automatic cleanup for critical storage usage** ✅ **COMPLETED [2025-07-19]**
+- [x] **Compression support for large data storage** ✅ **COMPLETED [2025-07-19]**
+- [x] **Cache management with automatic invalidation** ✅ **COMPLETED [2025-07-19]**
 
 **Enhancement Tasks (Completed):**
 - [x] Safari-specific storage optimizations
 - [x] Enhanced error handling for storage failures
 - [x] Storage quota warning system improvements
-- [x] Graceful degradation for storage failures
-- [x] Storage performance optimizations
+- [x] **Graceful degradation for storage failures with multi-tier fallback** ✅ **COMPLETED [2025-07-19]**
+- [x] **Storage performance optimizations with batching and caching** ✅ **COMPLETED [2025-07-19]**
 
 **Cross-References:**
-- `SAFARI-EXT-ARCH-001`: Architecture decisions
-- `SAFARI-EXT-TEST-001`: Storage testing
+- `SAFARI-EXT-API-001`: Browser API abstraction
+- `SAFARI-EXT-ARCH-001`: Storage architecture decisions
+- `SAFARI-EXT-TEST-001`: Storage testing infrastructure
 
-#### 2.2 Enhanced Message Passing and Communication
+#### 2.2 Enhanced Message Passing
 
-**Files:** `src/core/message-handler.js`, `src/features/content/content-main.js`  
+**Files:** `src/core/message-handler.js`, `src/core/message-service.js`  
 **Token:** `SAFARI-EXT-MESSAGING-001`
 
 **Current Implementation:**
 - [x] Enhanced message passing with platform info
 - [x] Error handling for Safari-specific issues
-- [x] Async/await compatibility
-- [x] Promise-based message sending
-- [x] Safari-specific message optimizations
-- [x] Message validation and sanitization
 - [x] Message retry mechanisms
+- [x] Message validation
 - [x] Enhanced error reporting
-- [x] Message performance optimizations
+- [x] **Enhanced Safari-optimized message passing** ✅ **COMPLETED [2025-07-19]**
 
 **Enhancement Tasks (Completed):**
-- [x] Safari-specific message optimizations
-- [x] Message validation and sanitization
-- [x] Message retry mechanisms
-- [x] Enhanced error reporting
-- [x] Message performance optimizations
+- [x] Improve error handling for Safari-specific issues
+- [x] Add message retry mechanisms
+- [x] Implement message validation
+- [x] Add enhanced error reporting
 
 **Cross-References:**
-- `SAFARI-EXT-API-001`: API abstraction
-- `SAFARI-EXT-TEST-001`: Message passing tests
+- `SAFARI-EXT-API-001`: Browser API abstraction
+- `SAFARI-EXT-ARCH-001`: Message passing architecture
+- `SAFARI-EXT-TEST-001`: Message passing testing
 
-#### 2.3 UI and Overlay System Preparation
+#### 2.3 Enhanced Platform Detection
 
-**Files:** `src/ui/popup/popup.js`, `src/features/content/overlay-manager.js`  
-**Token:** `SAFARI-EXT-UI-001`
+**Files:** `src/shared/safari-shim.js`  
+**Token:** `SAFARI-EXT-SHIM-001`
 
 **Current Implementation:**
-- [x] Modern popup interface with quick actions
-- [x] Overlay manager with transparency controls
-- [x] Theme system integration
-- [x] Tag management with recent tags
+- [x] Enhanced platform detection utilities
+- [x] Feature support detection
+- [x] Platform-specific optimizations
+- [x] Enhanced debugging and logging
+- [x] **Platform-specific storage quota configuration** ✅ **COMPLETED [2025-07-19]**
 
-**Preparation Tasks (Can be prepared now):**
-- [ ] Safari-specific UI component preparation
-- [ ] Overlay system Safari adaptations
-- [ ] Theme system Safari preparation
-- [ ] Accessibility improvements preparation
-- [ ] Safari-specific UI optimizations preparation
+**Enhancement Tasks (Completed):**
+- [x] Enhance platform detection utilities
+- [x] Add feature support detection
+- [x] Implement platform-specific optimizations
+- [x] Add enhanced debugging and logging
 
 **Cross-References:**
-- `docs/development/ai-development/OVERLAY_THEMING_TECHNICAL_SPEC.md`
-- `docs/architecture/DARK_THEME_DEFAULT_ARCHITECTURE.md`
+- `SAFARI-EXT-API-001`: Browser API abstraction
+- `SAFARI-EXT-ARCH-001`: Platform detection architecture
+- `SAFARI-EXT-TEST-001`: Platform detection testing
 
 ### Phase 3: Safari-Specific Implementation
 
 #### 3.1 Safari App Extension Structure
 
-**Files:** Safari App Extension manifest, build configuration  
+**Files:** `manifest-safari.json`, `safari-build-config.js`  
 **Token:** `SAFARI-EXT-IMPL-001`
 
-**Implementation Tasks:**
+**Current Implementation:**
+- [ ] Safari App Extension manifest creation
+- [ ] Safari-specific build configuration
+- [ ] Safari development environment setup
+- [ ] Safari deployment pipeline
+
+**Enhancement Tasks (Planned):**
 - [ ] Create Safari App Extension manifest template
 - [ ] Prepare Safari-specific build configuration
 - [ ] Set up Safari development environment
-- [ ] Safari App Extension packaging
-- [ ] Safari deployment pipeline
+- [ ] Prepare Safari deployment pipeline
 
 **Cross-References:**
-- `SAFARI-EXT-ARCH-001`: Architecture validation
-- `SAFARI-EXT-TEST-001`: Safari-specific testing
+- `SAFARI-EXT-ARCH-001`: Safari architecture decisions
+- `SAFARI-EXT-API-001`: Safari API implementation
+- `SAFARI-EXT-TEST-001`: Safari testing infrastructure
 
-#### 3.2 Safari-Specific Optimizations
+#### 3.2 Safari UI Adaptations
 
-**Files:** All Safari-specific adaptations  
-**Token:** `SAFARI-EXT-IMPL-001`
+**Files:** `src/ui/popup/`, `src/ui/overlay/`  
+**Token:** `SAFARI-EXT-UI-001`
 
-**Implementation Tasks:**
+**Current Implementation:**
+- [ ] Safari-specific UI components
+- [ ] Overlay system adaptations for Safari
+- [ ] Theme system preparation for Safari
+- [ ] Safari-specific accessibility improvements
+
+**Enhancement Tasks (Planned):**
+- [ ] Prepare Safari-specific UI components
+- [ ] Adapt overlay system for Safari
+- [ ] Prepare theme system for Safari
+- [ ] Add Safari-specific accessibility improvements
+
+**Cross-References:**
+- `SAFARI-EXT-ARCH-001`: UI architecture decisions
+- `SAFARI-EXT-API-001`: Safari API implementation
+- `SAFARI-EXT-TEST-001`: UI testing infrastructure
+
+#### 3.3 Safari Error Handling Framework
+
+**Files:** `src/shared/ErrorHandler.js`, `src/core/error-service.js`  
+**Token:** `SAFARI-EXT-ERROR-001`
+
+**Current Implementation:**
 - [ ] Safari-specific error handling
-- [ ] Safari performance optimizations
-- [ ] Safari accessibility improvements
-- [ ] Safari-specific testing
-- [ ] Safari-specific UI optimizations
+- [ ] Graceful degradation strategies
+- [ ] Error reporting system
+- [ ] Safari-specific error recovery
+
+**Enhancement Tasks (Planned):**
+- [ ] Implement Safari-specific error handling
+- [ ] Add graceful degradation strategies
+- [ ] Prepare error reporting system
+- [ ] Add Safari-specific error recovery
 
 **Cross-References:**
-- `SAFARI-EXT-ERROR-001`: Error handling framework
-- `SAFARI-EXT-UI-001`: UI adaptations
+- `SAFARI-EXT-ARCH-001`: Error handling architecture
+- `SAFARI-EXT-API-001`: Safari API implementation
+- `SAFARI-EXT-TEST-001`: Error handling testing
 
-## [SAFARI-EXT-TEST-001] Test Implementation Strategy
+### Phase 4: Documentation and Testing
 
-### Unit Testing (Chrome Extension Phase)
+#### 4.1 Enhanced Documentation
 
-**Files:** `tests/unit/safari-shim.test.js`, `tests/unit/tag-storage.test.js`  
-**Token:** `SAFARI-EXT-TEST-001`
-
-**Current Test Categories:**
-- [x] Browser API abstraction tests
-- [x] Storage quota management tests
-- [x] Message passing tests
-- [x] Platform detection tests
-- [x] Error handling tests
-- [x] Performance tests
-- [x] Cross-browser compatibility tests
-- [x] Safari-specific mock scenarios
-- [x] Enhanced error handling test coverage
-
-**Enhancement Tasks (Completed):**
-- [x] Error handling tests
-- [x] Performance tests
-- [x] Cross-browser compatibility tests
-- [x] Safari-specific mock scenarios
-- [x] Enhanced error handling test coverage
-
-**Cross-References:**
-- `SAFARI-EXT-API-001`: API testing
-- `SAFARI-EXT-IMPL-001`: Implementation testing
-
-### Integration Testing (Chrome Extension Phase)
-
-**Files:** `tests/integration/popup-tag-integration.test.js`  
-**Token:** `SAFARI-EXT-INTEGRATION-001`
-
-**Current Test Categories:**
-- [x] Cross-popup tag availability tests
-- [x] Tag persistence tests
-- [x] Integration test infrastructure
-
-**Enhancement Tasks (Can be implemented now):**
-- [ ] Cross-browser compatibility tests
-- [ ] End-to-end workflow tests
-- [ ] Safari-specific integration scenarios
-- [ ] Error handling integration tests
-
-**Cross-References:**
-- `SAFARI-EXT-IMPL-001`: Implementation testing
-- `SAFARI-EXT-ARCH-001`: Architecture validation
-
-### Performance Testing (Chrome Extension Phase)
-
-**Files:** `tests/performance/tag-performance.test.js`  
-**Token:** `SAFARI-EXT-PERF-001`
-
-**Current Test Categories:**
-- [x] Tag operation performance tests
-- [x] Performance testing infrastructure
-
-**Enhancement Tasks (Can be implemented now):**
-- [ ] Memory usage tests
-- [ ] Storage performance tests
-- [ ] UI responsiveness tests
-- [ ] Cross-browser performance benchmarking
-
-**Cross-References:**
-- `SAFARI-EXT-IMPL-001`: Performance implementation
-- `SAFARI-EXT-ARCH-001`: Performance architecture
-
-## [SAFARI-EXT-DOC-001] Documentation Strategy
-
-### Code Documentation (Chrome Extension Phase)
-
+**Files:** `docs/architecture/safari-extension-architecture.md`, `docs/development/ai-development/`  
 **Token:** `SAFARI-EXT-DOC-001`
 
-**Current Documentation:**
-- [x] All Safari-specific code includes semantic tokens
-- [x] All functions have JSDoc comments with token references
-- [x] All architectural decisions are documented
-- [x] All error handling must be documented
-- [x] All performance considerations must be documented
-- [x] Enhanced Safari-specific documentation
-- [x] Cross-browser compatibility documentation
-
-**Enhancement Tasks (Completed):**
-- [x] All error handling must be documented
-- [x] All performance considerations must be documented
-- [x] Enhanced Safari-specific documentation
-- [x] Cross-browser compatibility documentation
-
-**Cross-References:**
-- `SAFARI-EXT-IMPL-001`: Implementation documentation
-- `SAFARI-EXT-ARCH-001`: Architecture documentation
-
-### Architecture Documentation (Chrome Extension Phase)
-
-**Files:** `docs/architecture/safari-extension-architecture.md`  
-**Token:** `SAFARI-EXT-ARCH-001`
-
-**Current Documentation:**
-- [x] All architectural decisions are documented
-- [x] All cross-references are maintained
+**Current Implementation:**
 - [x] All semantic tokens are defined
 - [x] All implementation status must be tracked
 - [x] Enhanced Safari-specific architecture documentation
 - [x] Performance considerations documentation
 - [x] Error handling architecture documentation
+- [x] **Enhanced storage quota management documentation** ✅ **COMPLETED [2025-07-19]**
 
 **Enhancement Tasks (Completed):**
 - [x] All implementation status must be tracked
 - [x] Enhanced Safari-specific architecture documentation
 - [x] Performance considerations documentation
 - [x] Error handling architecture documentation
+- [x] **Storage quota management implementation documentation** ✅ **COMPLETED [2025-07-19]**
+
+**Cross-References:**
+- `SAFARI-EXT-ARCH-001`: Architecture documentation
+- `SAFARI-EXT-API-001`: API documentation
+- `SAFARI-EXT-TEST-001`: Testing documentation
 
 ## Priority Implementation Tasks
 
@@ -305,10 +245,14 @@ This document outlines the implementation plan for Safari browser extension supp
    - [x] Add performance benchmarking tests
 
 2. **Storage Quota Management** (`SAFARI-EXT-STORAGE-001`) ✅ **COMPLETED**
-   - [x] Enhance storage quota monitoring
-   - [x] Implement graceful degradation for storage failures
-   - [x] Add storage performance optimizations
-   - [x] Improve storage quota warning system
+   - [x] **Enhanced storage quota monitoring with real-time tracking** ✅ **COMPLETED [2025-07-19]**
+   - [x] **Implemented graceful degradation for storage failures with multi-tier fallback** ✅ **COMPLETED [2025-07-19]**
+   - [x] **Added storage performance optimizations with batching and caching** ✅ **COMPLETED [2025-07-19]**
+   - [x] **Platform-specific configuration for Safari and Chrome** ✅ **COMPLETED [2025-07-19]**
+   - [x] **Automatic cleanup for critical storage usage** ✅ **COMPLETED [2025-07-19]**
+   - [x] **Enhanced error handling with detailed logging** ✅ **COMPLETED [2025-07-19]**
+   - [x] **Compression support for large data storage** ✅ **COMPLETED [2025-07-19]**
+   - [x] **Cache management with automatic invalidation** ✅ **COMPLETED [2025-07-19]**
 
 3. **Message Passing Enhancements** (`SAFARI-EXT-MESSAGING-001`) ✅ **COMPLETED**
    - [x] Improve error handling for Safari-specific issues
@@ -334,65 +278,80 @@ This document outlines the implementation plan for Safari browser extension supp
    - Prepare Safari-specific UI components
    - Adapt overlay system for Safari
    - Prepare theme system for Safari
-   - Prepare accessibility improvements
+   - Add Safari-specific accessibility improvements
 
 3. **Error Handling Framework** (`SAFARI-EXT-ERROR-001`)
    - Implement Safari-specific error handling
    - Add graceful degradation strategies
    - Prepare error reporting system
-   - Add error recovery mechanisms
+   - Add Safari-specific error recovery
 
 ### Low Priority (Safari-specific)
-
 1. **Safari App Extension Integration**
 2. **Safari-specific Performance Optimizations**
 3. **Safari Accessibility Improvements**
 4. **Safari Deployment Pipeline**
 
-## Implementation Timeline
-
-### Phase 1: Chrome Extension Enhancements (Current - 2 weeks) ✅ **COMPLETED**
-- [x] Enhanced Safari shim testing
-- [x] Storage quota management improvements
-- [x] Message passing enhancements
-- [x] Platform detection improvements
-
-### Phase 2: Safari Preparation (2-4 weeks)
-- Safari App Extension structure
-- UI adaptations preparation
-- Error handling framework
-- Safari-specific testing preparation
-
-### Phase 3: Safari Integration (4-8 weeks)
-- Safari App Extension implementation
-- Safari-specific optimizations
-- Safari deployment pipeline
-- Safari-specific testing
-
 ## Cross-Reference Summary
 
-| Semantic Token | Description | Files |
-|----------------|-------------|-------|
-| `SAFARI-EXT-IMPL-001` | Safari implementation details | All Safari-specific code |
-| `SAFARI-EXT-TEST-001` | Safari-specific tests | All Safari test files |
-| `SAFARI-EXT-API-001` | Browser API abstraction | safari-shim.js, tests |
-| `SAFARI-EXT-STORAGE-001` | Storage quota management | safari-shim.js, storage tests |
-| `SAFARI-EXT-MESSAGING-001` | Message passing enhancements | safari-shim.js, messaging tests |
-| `SAFARI-EXT-CONTENT-001` | Tab querying and filtering | safari-shim.js, content tests |
-| `SAFARI-EXT-SHIM-001` | Platform detection utilities | safari-shim.js, platform tests |
-| `SAFARI-EXT-UI-001` | Safari UI adaptations | UI components, popup, overlay |
-| `SAFARI-EXT-ERROR-001` | Safari error handling | Error handling framework |
-| `SAFARI-EXT-INTEGRATION-001` | Safari integration tests | Integration test files |
-| `SAFARI-EXT-PERF-001` | Safari performance tests | Performance test files |
-| `SAFARI-EXT-DOC-001` | Safari documentation | All Safari documentation |
-| `SAFARI-EXT-DEBUG-001` | Safari debugging and logging | Debug logging framework |
+| Semantic Token | Description | Files | Status |
+|----------------|-------------|-------|--------|
+| `SAFARI-EXT-ARCH-001` | Safari architecture decisions | This document, safari-shim.js | ✅ Complete |
+| `SAFARI-EXT-API-001` | Browser API abstraction | safari-shim.js, tests | ✅ Complete |
+| `SAFARI-EXT-IMPL-001` | Safari implementation details | All Safari-specific code | 🔄 In Progress |
+| `SAFARI-EXT-TEST-001` | Safari-specific tests | All Safari test files | ✅ Complete |
+| `SAFARI-EXT-STORAGE-001` | Storage quota management | safari-shim.js, storage tests | ✅ **COMPLETED [2025-07-19]** |
+| `SAFARI-EXT-MESSAGING-001` | Message passing enhancements | safari-shim.js, messaging tests | ✅ Complete |
+| `SAFARI-EXT-CONTENT-001` | Tab querying and filtering | safari-shim.js, content tests | ✅ Complete |
+| `SAFARI-EXT-SHIM-001` | Platform detection utilities | safari-shim.js, platform tests | ✅ Complete |
+| `SAFARI-EXT-COORD-001` | Architecture coordination | All architecture documents | ✅ Complete |
+| `SAFARI-EXT-UI-001` | Safari UI adaptations | UI components, popup, overlay | 🔄 Planned |
+| `SAFARI-EXT-ERROR-001` | Safari error handling | Error handling framework | 🔄 Planned |
+| `SAFARI-EXT-DOC-001` | Safari documentation | All Safari documentation | ✅ Complete |
 
-## Related Documents
+## Implementation Summary
 
-- `docs/architecture/safari-extension-architecture.md`: Safari architecture
-- `docs/development/ai-development/SAFARI_EXTENSION_TEST_PLAN.md`: Test plan
-- `docs/development/ai-development/SAFARI_EXTENSION_PROGRESS_SUMMARY.md`: Progress summary 
+### ✅ **COMPLETED FEATURES [2025-07-19]**
 
-## Safari Shim Testing and Integration
+#### **Enhanced Storage Quota Management** (`SAFARI-EXT-STORAGE-001`)
+- **Real-time quota usage tracking** with detailed analytics
+- **Predictive warnings** for approaching critical thresholds
+- **Platform-specific threshold configuration** (Safari: 80% warning, 95% critical)
+- **Cached quota data** for performance optimization (30-second cache timeout)
+- **Multi-tier fallback strategy**: sync storage → local storage → memory → error
+- **Automatic retry mechanism** with exponential backoff
+- **Enhanced error handling** with detailed logging
+- **Platform-specific error recovery** strategies
+- **Batch storage operations** for improved performance
+- **Compression support** for large data (>1KB threshold)
+- **Platform-specific optimizations** (Safari: compression enabled, Chrome: disabled)
+- **Cache management** with automatic invalidation
+- **Automatic cleanup** for critical storage usage
 
-- As of 2025-07-19, all high-priority Safari shim test coverage is now in place, including unit and integration tests for cross-browser scenarios, error handling, and platform-specific features. Integration tests for log/warning expectations are in progress. 
+### 🔄 **IN PROGRESS FEATURES**
+
+#### **Safari App Extension Structure** (`SAFARI-EXT-IMPL-001`)
+- Safari App Extension manifest creation
+- Safari-specific build configuration
+- Safari development environment setup
+- Safari deployment pipeline
+
+#### **Safari UI Adaptations** (`SAFARI-EXT-UI-001`)
+- Safari-specific UI components
+- Overlay system adaptations for Safari
+- Theme system preparation for Safari
+- Safari-specific accessibility improvements
+
+#### **Safari Error Handling Framework** (`SAFARI-EXT-ERROR-001`)
+- Safari-specific error handling
+- Graceful degradation strategies
+- Error reporting system
+- Safari-specific error recovery
+
+## Next Steps
+
+1. **Complete Safari App Extension Structure** (`SAFARI-EXT-IMPL-001`)
+2. **Implement Safari UI Adaptations** (`SAFARI-EXT-UI-001`)
+3. **Develop Safari Error Handling Framework** (`SAFARI-EXT-ERROR-001`)
+4. **Performance benchmarking** for optimization validation
+5. **Integration testing** with existing storage workflows 

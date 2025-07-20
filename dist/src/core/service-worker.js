@@ -723,7 +723,7 @@ function createMinimalBrowserAPI() {
     }
   };
 }
-var browser, retryConfig, safariEnhancements;
+var browser, retryConfig, storageQuotaConfig, quotaCache, storageQueue, storageQueueTimeout, storageQuotaUtils, safariEnhancements, platformUtils;
 var init_safari_shim = __esm({
   "src/shared/safari-shim.js"() {
     init_logger();
@@ -734,34 +734,251 @@ var init_safari_shim = __esm({
       maxDelay: 1e3,
       backoffMultiplier: 2
     };
+    storageQuotaConfig = {
+      warningThreshold: 80,
+      // Percentage threshold for warnings
+      criticalThreshold: 95,
+      // Percentage threshold for critical warnings
+      cleanupThreshold: 90,
+      // Percentage threshold for automatic cleanup
+      maxRetries: 3,
+      cacheTimeout: 3e4,
+      // 30 seconds cache timeout
+      batchSize: 10,
+      // Number of operations to batch
+      compressionThreshold: 1024,
+      // Minimum size for compression (1KB)
+      fallbackStrategies: ["local", "memory", "none"]
+    };
+    quotaCache = {
+      data: null,
+      timestamp: 0,
+      isValid: () => {
+        return quotaCache.data && Date.now() - quotaCache.timestamp < storageQuotaConfig.cacheTimeout;
+      }
+    };
+    storageQueue = [];
+    storageQueueTimeout = null;
+    storageQuotaUtils = {
+      // [SAFARI-EXT-STORAGE-001] Get platform-specific quota configuration
+      getQuotaConfig: () => {
+        const platform = platformUtils.getPlatform();
+        const platformConfig = platformUtils.getPlatformConfig();
+        return {
+          ...storageQuotaConfig,
+          warningThreshold: platformConfig.storageQuotaWarning || storageQuotaConfig.warningThreshold,
+          criticalThreshold: platformConfig.storageQuotaCritical || storageQuotaConfig.criticalThreshold,
+          cleanupThreshold: platformConfig.storageQuotaCleanup || storageQuotaConfig.cleanupThreshold,
+          maxRetries: platformConfig.maxRetries || storageQuotaConfig.maxRetries,
+          cacheTimeout: platformConfig.storageCacheTimeout || storageQuotaConfig.cacheTimeout,
+          batchSize: platformConfig.storageBatchSize || storageQuotaConfig.batchSize,
+          enableBatching: platformConfig.enableStorageBatching !== false,
+          enableCompression: platformConfig.enableStorageCompression !== false
+        };
+      },
+      // [SAFARI-EXT-STORAGE-001] Enhanced quota usage monitoring with caching
+      getQuotaUsage: async (forceRefresh = false) => {
+        console.log("[SAFARI-EXT-STORAGE-001] Getting storage quota usage (forceRefresh:", forceRefresh, ")");
+        if (!forceRefresh && quotaCache.isValid()) {
+          console.log("[SAFARI-EXT-STORAGE-001] Using cached quota data:", quotaCache.data);
+          return quotaCache.data;
+        }
+        try {
+          if ("storage" in navigator && "estimate" in navigator.storage) {
+            const estimate = await navigator.storage.estimate();
+            const quotaUsage = {
+              used: estimate.usage || 0,
+              quota: estimate.quota || 0,
+              usagePercent: estimate.quota ? estimate.usage / estimate.quota * 100 : 0,
+              available: estimate.quota ? estimate.quota - estimate.usage : 0,
+              timestamp: Date.now()
+            };
+            quotaCache.data = quotaUsage;
+            quotaCache.timestamp = Date.now();
+            console.log("[SAFARI-EXT-STORAGE-001] Storage quota usage:", quotaUsage);
+            await storageQuotaUtils.monitorQuotaUsage(quotaUsage);
+            return quotaUsage;
+          }
+          console.warn("[SAFARI-EXT-STORAGE-001] Storage API not available, returning default values");
+          const defaultUsage = { used: 0, quota: 0, usagePercent: 0, available: 0, timestamp: Date.now() };
+          quotaCache.data = defaultUsage;
+          quotaCache.timestamp = Date.now();
+          return defaultUsage;
+        } catch (error) {
+          console.error("[SAFARI-EXT-STORAGE-001] Storage quota check failed:", error);
+          if (logger && logger.error) {
+            logger.error("[SAFARI-EXT-STORAGE-001] Storage quota check failed:", error);
+          }
+          const fallbackUsage = { used: 0, quota: 0, usagePercent: 0, available: 0, timestamp: Date.now() };
+          quotaCache.data = fallbackUsage;
+          quotaCache.timestamp = Date.now();
+          return fallbackUsage;
+        }
+      },
+      // [SAFARI-EXT-STORAGE-001] Enhanced quota monitoring with predictive warnings
+      monitorQuotaUsage: async (quotaUsage) => {
+        const config = storageQuotaUtils.getQuotaConfig();
+        if (quotaUsage.usagePercent >= config.criticalThreshold) {
+          const criticalWarning = `[SAFARI-EXT-STORAGE-001] CRITICAL: Storage quota usage at ${quotaUsage.usagePercent.toFixed(1)}%`;
+          console.error(criticalWarning);
+          if (logger && logger.error) {
+            logger.error(criticalWarning);
+          }
+          await storageQuotaUtils.triggerAutomaticCleanup();
+        } else if (quotaUsage.usagePercent >= config.warningThreshold) {
+          const warning = `[SAFARI-EXT-STORAGE-001] Storage quota usage high: ${quotaUsage.usagePercent.toFixed(1)}%`;
+          console.warn(warning);
+          if (logger && logger.warn) {
+            logger.warn(warning);
+          }
+          if (quotaUsage.usagePercent >= config.cleanupThreshold) {
+            const predictiveWarning = "[SAFARI-EXT-STORAGE-001] Approaching critical threshold, consider cleanup";
+            console.warn(predictiveWarning);
+            if (logger && logger.warn) {
+              logger.warn(predictiveWarning);
+            }
+          }
+        }
+      },
+      // [SAFARI-EXT-STORAGE-001] Automatic cleanup for storage quota management
+      triggerAutomaticCleanup: async () => {
+        console.log("[SAFARI-EXT-STORAGE-001] Triggering automatic storage cleanup");
+        try {
+          const storageData = await browser.storage.sync.get(null);
+          const cleanupCandidates = [];
+          for (const [key, value] of Object.entries(storageData)) {
+            const dataSize = JSON.stringify(value).length;
+            const dataAge = value.timestamp ? Date.now() - value.timestamp : 0;
+            if (dataSize > storageQuotaConfig.compressionThreshold || dataAge > 7 * 24 * 60 * 60 * 1e3) {
+              cleanupCandidates.push({ key, size: dataSize, age: dataAge });
+            }
+          }
+          cleanupCandidates.sort((a, b) => b.size - a.size || b.age - a.age);
+          const config = storageQuotaUtils.getQuotaConfig();
+          let removedCount = 0;
+          for (const candidate of cleanupCandidates) {
+            if (removedCount >= 5) break;
+            try {
+              await browser.storage.sync.remove(candidate.key);
+              console.log(`[SAFARI-EXT-STORAGE-001] Cleaned up storage key: ${candidate.key} (${candidate.size} bytes)`);
+              removedCount++;
+            } catch (error) {
+              console.error(`[SAFARI-EXT-STORAGE-001] Failed to cleanup ${candidate.key}:`, error);
+            }
+          }
+          if (removedCount > 0) {
+            console.log(`[SAFARI-EXT-STORAGE-001] Automatic cleanup completed: removed ${removedCount} items`);
+            quotaCache.data = null;
+            await storageQuotaUtils.getQuotaUsage(true);
+          }
+        } catch (error) {
+          console.error("[SAFARI-EXT-STORAGE-001] Automatic cleanup failed:", error);
+          if (logger && logger.error) {
+            logger.error("[SAFARI-EXT-STORAGE-001] Automatic cleanup failed:", error);
+          }
+        }
+      },
+      // [SAFARI-EXT-STORAGE-001] Graceful degradation for storage failures
+      handleStorageFailure: async (error, operation, fallbackData = null) => {
+        console.error(`[SAFARI-EXT-STORAGE-001] Storage operation failed: ${operation}`, error);
+        if (logger && logger.error) {
+          logger.error(`[SAFARI-EXT-STORAGE-001] Storage operation failed: ${operation}`, error);
+        }
+        const config = storageQuotaUtils.getQuotaConfig();
+        for (const strategy of config.fallbackStrategies) {
+          try {
+            switch (strategy) {
+              case "local":
+                console.log("[SAFARI-EXT-STORAGE-001] Trying local storage fallback");
+                if (operation === "get") {
+                  return await browser.storage.local.get(fallbackData);
+                } else if (operation === "set") {
+                  return await browser.storage.local.set(fallbackData);
+                }
+                break;
+              case "memory":
+                console.log("[SAFARI-EXT-STORAGE-001] Using memory fallback");
+                return fallbackData;
+              case "none":
+                console.log("[SAFARI-EXT-STORAGE-001] No fallback available, throwing error");
+                throw error;
+            }
+          } catch (fallbackError) {
+            console.warn(`[SAFARI-EXT-STORAGE-001] Fallback strategy '${strategy}' failed:`, fallbackError);
+            continue;
+          }
+        }
+        throw error;
+      },
+      // [SAFARI-EXT-STORAGE-001] Batch storage operations for performance
+      queueStorageOperation: (operation) => {
+        storageQueue.push(operation);
+        if (storageQueue.length >= storageQuotaConfig.batchSize) {
+          storageQuotaUtils.processStorageQueue();
+        } else if (!storageQueueTimeout) {
+          storageQueueTimeout = setTimeout(() => {
+            storageQuotaUtils.processStorageQueue();
+          }, 100);
+        }
+      },
+      // [SAFARI-EXT-STORAGE-001] Process batched storage operations
+      processStorageQueue: async () => {
+        if (storageQueue.length === 0) return;
+        const operations = [...storageQueue];
+        storageQueue = [];
+        storageQueueTimeout = null;
+        console.log(`[SAFARI-EXT-STORAGE-001] Processing ${operations.length} batched storage operations`);
+        try {
+          const getOps = operations.filter((op) => op.type === "get");
+          const setOps = operations.filter((op) => op.type === "set");
+          const removeOps = operations.filter((op) => op.type === "remove");
+          const results = [];
+          if (getOps.length > 0) {
+            const keys = getOps.flatMap((op) => op.keys || []);
+            const result = await browser.storage.sync.get(keys);
+            results.push(...getOps.map((op) => ({ ...op, result })));
+          }
+          if (setOps.length > 0) {
+            const data = Object.assign({}, ...setOps.map((op) => op.data));
+            const result = await browser.storage.sync.set(data);
+            results.push(...setOps.map((op) => ({ ...op, result })));
+          }
+          if (removeOps.length > 0) {
+            const keys = removeOps.flatMap((op) => op.keys || []);
+            const result = await browser.storage.sync.remove(keys);
+            results.push(...removeOps.map((op) => ({ ...op, result })));
+          }
+          console.log(`[SAFARI-EXT-STORAGE-001] Successfully processed ${operations.length} batched operations`);
+          await storageQuotaUtils.getQuotaUsage(true);
+        } catch (error) {
+          console.error("[SAFARI-EXT-STORAGE-001] Batch storage operations failed:", error);
+          if (logger && logger.error) {
+            logger.error("[SAFARI-EXT-STORAGE-001] Batch storage operations failed:", error);
+          }
+          for (const operation of operations) {
+            try {
+              await retryOperation(async () => {
+                if (operation.type === "get") {
+                  return await browser.storage.sync.get(operation.keys);
+                } else if (operation.type === "set") {
+                  return await browser.storage.sync.set(operation.data);
+                } else if (operation.type === "remove") {
+                  return await browser.storage.sync.remove(operation.keys);
+                }
+              }, `individual ${operation.type} operation`);
+            } catch (individualError) {
+              console.error("[SAFARI-EXT-STORAGE-001] Individual operation failed:", individualError);
+            }
+          }
+        }
+      }
+    };
     safariEnhancements = {
       // Safari storage quota management
       storage: {
         ...browser.storage,
         // [SAFARI-EXT-STORAGE-001] Enhanced Safari storage quota management
-        getQuotaUsage: async () => {
-          console.log("[SAFARI-EXT-STORAGE-001] Checking storage quota usage");
-          try {
-            if ("storage" in navigator && "estimate" in navigator.storage) {
-              const estimate = await navigator.storage.estimate();
-              const quotaUsage = {
-                used: estimate.usage || 0,
-                quota: estimate.quota || 0,
-                usagePercent: estimate.quota ? estimate.usage / estimate.quota * 100 : 0
-              };
-              console.log("[SAFARI-EXT-STORAGE-001] Storage quota usage:", quotaUsage);
-              return quotaUsage;
-            }
-            console.warn("[SAFARI-EXT-STORAGE-001] Storage API not available, returning default values");
-            return { used: 0, quota: 0, usagePercent: 0 };
-          } catch (error) {
-            console.error("[SAFARI-EXT-STORAGE-001] Storage quota check failed:", error);
-            if (logger && logger.error) {
-              logger.error("[SAFARI-EXT-STORAGE-001] Storage quota check failed:", error);
-            }
-            return { used: 0, quota: 0, usagePercent: 0 };
-          }
-        },
+        getQuotaUsage: storageQuotaUtils.getQuotaUsage,
         // [SAFARI-EXT-STORAGE-001] Enhanced Safari-optimized storage operations
         sync: {
           ...browser.storage.sync,
@@ -772,48 +989,107 @@ var init_safari_shim = __esm({
               try {
                 const result = await browser.storage.sync.get(keys);
                 console.log("[SAFARI-EXT-STORAGE-001] Sync storage get successful:", result);
-                const quotaUsage = await safariEnhancements.storage.getQuotaUsage();
-                if (quotaUsage.usagePercent > 80) {
-                  const warning = `[SAFARI-EXT-STORAGE-001] Storage quota usage high: ${quotaUsage.usagePercent.toFixed(1)}%`;
-                  console.warn(warning);
-                  if (logger && logger.warn) {
-                    logger.warn(warning);
-                  }
-                }
+                await storageQuotaUtils.getQuotaUsage();
                 return result;
               } catch (error) {
                 console.error("[SAFARI-EXT-STORAGE-001] Sync storage get failed:", error);
                 if (logger && logger.error) {
                   logger.error("[SAFARI-EXT-STORAGE-001] Sync storage get failed:", error);
                 }
-                throw error;
+                return await storageQuotaUtils.handleStorageFailure(error, "get", keys);
               }
             }, "sync storage get");
           },
-          // Enhanced set operation with retry logic
+          // Enhanced set operation with retry logic and graceful degradation
           set: async (data) => {
             console.log("[SAFARI-EXT-STORAGE-001] Setting sync storage:", data);
             return retryOperation(async () => {
               try {
                 const result = await browser.storage.sync.set(data);
                 console.log("[SAFARI-EXT-STORAGE-001] Sync storage set successful");
-                const quotaUsage = await safariEnhancements.storage.getQuotaUsage();
-                if (quotaUsage.usagePercent > 80) {
-                  const warning = `[SAFARI-EXT-STORAGE-001] Storage quota usage high: ${quotaUsage.usagePercent.toFixed(1)}%`;
-                  console.warn(warning);
-                  if (logger && logger.warn) {
-                    logger.warn(warning);
-                  }
-                }
+                await storageQuotaUtils.getQuotaUsage();
                 return result;
               } catch (error) {
                 console.error("[SAFARI-EXT-STORAGE-001] Sync storage set failed:", error);
                 if (logger && logger.error) {
                   logger.error("[SAFARI-EXT-STORAGE-001] Sync storage set failed:", error);
                 }
-                throw error;
+                return await storageQuotaUtils.handleStorageFailure(error, "set", data);
               }
             }, "sync storage set");
+          },
+          // [SAFARI-EXT-STORAGE-001] Enhanced remove operation with graceful degradation
+          remove: async (keys) => {
+            console.log("[SAFARI-EXT-STORAGE-001] Removing sync storage keys:", keys);
+            return retryOperation(async () => {
+              try {
+                const result = await browser.storage.sync.remove(keys);
+                console.log("[SAFARI-EXT-STORAGE-001] Sync storage remove successful");
+                await storageQuotaUtils.getQuotaUsage();
+                return result;
+              } catch (error) {
+                console.error("[SAFARI-EXT-STORAGE-001] Sync storage remove failed:", error);
+                if (logger && logger.error) {
+                  logger.error("[SAFARI-EXT-STORAGE-001] Sync storage remove failed:", error);
+                }
+                return await storageQuotaUtils.handleStorageFailure(error, "remove", keys);
+              }
+            }, "sync storage remove");
+          }
+        },
+        // [SAFARI-EXT-STORAGE-001] Enhanced local storage with quota management
+        local: {
+          ...browser.storage.local,
+          get: async (keys) => {
+            console.log("[SAFARI-EXT-STORAGE-001] Getting local storage:", keys);
+            return retryOperation(async () => {
+              try {
+                const result = await browser.storage.local.get(keys);
+                console.log("[SAFARI-EXT-STORAGE-001] Local storage get successful:", result);
+                await storageQuotaUtils.getQuotaUsage();
+                return result;
+              } catch (error) {
+                console.error("[SAFARI-EXT-STORAGE-001] Local storage get failed:", error);
+                if (logger && logger.error) {
+                  logger.error("[SAFARI-EXT-STORAGE-001] Local storage get failed:", error);
+                }
+                return await storageQuotaUtils.handleStorageFailure(error, "get", keys);
+              }
+            }, "local storage get");
+          },
+          set: async (data) => {
+            console.log("[SAFARI-EXT-STORAGE-001] Setting local storage:", data);
+            return retryOperation(async () => {
+              try {
+                const result = await browser.storage.local.set(data);
+                console.log("[SAFARI-EXT-STORAGE-001] Local storage set successful");
+                await storageQuotaUtils.getQuotaUsage();
+                return result;
+              } catch (error) {
+                console.error("[SAFARI-EXT-STORAGE-001] Local storage set failed:", error);
+                if (logger && logger.error) {
+                  logger.error("[SAFARI-EXT-STORAGE-001] Local storage set failed:", error);
+                }
+                return await storageQuotaUtils.handleStorageFailure(error, "set", data);
+              }
+            }, "local storage set");
+          },
+          remove: async (keys) => {
+            console.log("[SAFARI-EXT-STORAGE-001] Removing local storage keys:", keys);
+            return retryOperation(async () => {
+              try {
+                const result = await browser.storage.local.remove(keys);
+                console.log("[SAFARI-EXT-STORAGE-001] Local storage remove successful");
+                await storageQuotaUtils.getQuotaUsage();
+                return result;
+              } catch (error) {
+                console.error("[SAFARI-EXT-STORAGE-001] Local storage remove failed:", error);
+                if (logger && logger.error) {
+                  logger.error("[SAFARI-EXT-STORAGE-001] Local storage remove failed:", error);
+                }
+                return await storageQuotaUtils.handleStorageFailure(error, "remove", keys);
+              }
+            }, "local storage remove");
           }
         }
       },
@@ -956,6 +1232,118 @@ var init_safari_shim = __esm({
             }
           }, "tabs sendMessage");
         }
+      }
+    };
+    platformUtils = {
+      isSafari: () => {
+        const isSafari = typeof safari !== "undefined";
+        console.log("[SAFARI-EXT-SHIM-001] Safari detection:", isSafari);
+        return isSafari;
+      },
+      isChrome: () => {
+        const isChrome = typeof chrome !== "undefined" && !platformUtils.isSafari();
+        console.log("[SAFARI-EXT-SHIM-001] Chrome detection:", isChrome);
+        return isChrome;
+      },
+      isFirefox: () => {
+        const isFirefox = typeof browser !== "undefined" && browser.runtime.getBrowserInfo;
+        console.log("[SAFARI-EXT-SHIM-001] Firefox detection:", isFirefox);
+        return isFirefox;
+      },
+      // [SAFARI-EXT-SHIM-001] Get current platform for feature detection
+      getPlatform: () => {
+        if (platformUtils.isSafari()) return "safari";
+        if (platformUtils.isChrome()) return "chrome";
+        if (platformUtils.isFirefox()) return "firefox";
+        return "unknown";
+      },
+      // [SAFARI-EXT-SHIM-001] Enhanced feature support detection
+      supportsFeature: (feature) => {
+        const platform = platformUtils.getPlatform();
+        console.log(`[SAFARI-EXT-SHIM-001] Checking feature support: ${feature} on ${platform}`);
+        const featureSupport = {
+          backdropFilter: {
+            safari: true,
+            chrome: true,
+            firefox: false
+          },
+          webkitBackdropFilter: {
+            safari: true,
+            chrome: false,
+            firefox: false
+          },
+          visualViewport: {
+            safari: true,
+            chrome: true,
+            firefox: false
+          },
+          // [SAFARI-EXT-SHIM-001] Add Safari-specific features
+          safariExtensions: {
+            safari: true,
+            chrome: false,
+            firefox: false
+          },
+          storageQuota: {
+            safari: true,
+            chrome: true,
+            firefox: true
+          },
+          messageRetry: {
+            safari: true,
+            chrome: true,
+            firefox: true
+          }
+        };
+        const isSupported = featureSupport[feature]?.[platform] || false;
+        console.log(`[SAFARI-EXT-SHIM-001] Feature ${feature} supported on ${platform}:`, isSupported);
+        return isSupported;
+      },
+      // [SAFARI-EXT-SHIM-001] Get platform-specific configuration
+      getPlatformConfig: () => {
+        const platform = platformUtils.getPlatform();
+        console.log("[SAFARI-EXT-SHIM-001] Getting platform config for:", platform);
+        const platformConfigs = {
+          safari: {
+            maxRetries: 3,
+            baseDelay: 150,
+            maxDelay: 1500,
+            storageQuotaWarning: 80,
+            storageQuotaCritical: 95,
+            storageQuotaCleanup: 90,
+            enableTabFiltering: true,
+            enableStorageBatching: true,
+            enableStorageCompression: true,
+            storageCacheTimeout: 3e4,
+            storageBatchSize: 10
+          },
+          chrome: {
+            maxRetries: 2,
+            baseDelay: 100,
+            maxDelay: 1e3,
+            storageQuotaWarning: 90,
+            storageQuotaCritical: 98,
+            storageQuotaCleanup: 95,
+            enableTabFiltering: false,
+            enableStorageBatching: true,
+            enableStorageCompression: false,
+            storageCacheTimeout: 3e4,
+            storageBatchSize: 15
+          },
+          firefox: {
+            maxRetries: 3,
+            baseDelay: 200,
+            maxDelay: 2e3,
+            storageQuotaWarning: 85,
+            storageQuotaCritical: 95,
+            storageQuotaCleanup: 90,
+            enableTabFiltering: false,
+            enableStorageBatching: true,
+            enableStorageCompression: true,
+            storageCacheTimeout: 45e3,
+            storageBatchSize: 8
+          }
+        };
+        return platformConfigs[platform] || platformConfigs.chrome;
       }
     };
   }

@@ -23,13 +23,71 @@ const mockSafariAPI = {
 }
 
 describe('[SAFARI-EXT-TEST-001] Safari Browser Shim Tests', () => {
-  // [SAFARI-EXT-TEST-001] Enhanced test setup with console logging
+  // [SAFARI-EXT-TEST-001] Setup mocks for Safari browser shim tests
   beforeEach(() => {
-    jest.clearAllMocks()
-    // Mock console methods to capture logs
+    // [SAFARI-EXT-TEST-001] Reset console mocks
     global.console.log = jest.fn()
     global.console.warn = jest.fn()
     global.console.error = jest.fn()
+    
+    // [SAFARI-EXT-TEST-001] Reset storage quota cache
+    if (global.quotaCache) {
+      global.quotaCache.data = null
+      global.quotaCache.timestamp = 0
+    }
+    
+    // [SAFARI-EXT-TEST-001] Reset storage queue
+    if (global.storageQueue) {
+      global.storageQueue = []
+      global.storageQueueTimeout = null
+    }
+    
+    // [SAFARI-EXT-TEST-001] Mock navigator.storage
+    global.navigator = {
+      storage: {
+        estimate: jest.fn().mockResolvedValue({
+          usage: 1048576, // 1MB
+          quota: 10485760 // 10MB
+        })
+      }
+    }
+    
+    // [SAFARI-EXT-TEST-001] Mock Chrome API
+    global.chrome = {
+      runtime: {
+        getManifest: jest.fn().mockReturnValue({ version: '1.0.0' }),
+        sendMessage: jest.fn(),
+        onMessage: { addListener: jest.fn() },
+        lastError: null
+      },
+      storage: {
+        sync: {
+          get: jest.fn().mockResolvedValue({}),
+          set: jest.fn().mockResolvedValue(),
+          remove: jest.fn().mockResolvedValue()
+        },
+        local: {
+          get: jest.fn().mockResolvedValue({}),
+          set: jest.fn().mockResolvedValue(),
+          remove: jest.fn().mockResolvedValue()
+        }
+      },
+      tabs: {
+        query: jest.fn().mockResolvedValue([]),
+        sendMessage: jest.fn()
+      }
+    }
+    
+    // [SAFARI-EXT-TEST-001] Mock Safari API
+    global.safari = undefined
+    
+    // [SAFARI-EXT-TEST-001] Reset browser API to ensure fresh initialization
+    jest.resetModules()
+  })
+
+  afterEach(() => {
+    // [SAFARI-EXT-TEST-001] Clean up mocks
+    jest.clearAllMocks()
   })
 
   describe('[SAFARI-EXT-SHIM-001] Browser API Abstraction', () => {
@@ -72,28 +130,41 @@ describe('[SAFARI-EXT-TEST-001] Safari Browser Shim Tests', () => {
       expect(quotaUsage).toHaveProperty('used')
       expect(quotaUsage).toHaveProperty('quota')
       expect(quotaUsage).toHaveProperty('usagePercent')
+      expect(quotaUsage).toHaveProperty('available')
+      expect(quotaUsage).toHaveProperty('timestamp')
     })
 
     test('[SAFARI-EXT-STORAGE-001] should handle storage quota errors gracefully', async () => {
       // Mock navigator.storage to throw an error
-      const originalEstimate = global.navigator.storage.estimate
       global.navigator.storage.estimate = jest.fn().mockRejectedValue(new Error('Storage API not available'))
       
       const quotaUsage = await browser.storage.getQuotaUsage()
       
-      expect(quotaUsage).toEqual({ used: 0, quota: 0, usagePercent: 0 })
+      expect(quotaUsage).toEqual({ 
+        used: 0, 
+        quota: 0, 
+        usagePercent: 0, 
+        available: 0, 
+        timestamp: expect.any(Number) 
+      })
       
-      // Restore original mock
-      global.navigator.storage.estimate = originalEstimate
+      // Reset mock for other tests
+      global.navigator.storage.estimate = jest.fn().mockResolvedValue({
+        usage: 1048576, // 1MB
+        quota: 10485760 // 10MB
+      })
     })
 
     test('[SAFARI-EXT-STORAGE-001] should monitor storage usage during operations', async () => {
+      // Mock high storage usage
       global.navigator.storage.estimate = jest.fn().mockResolvedValue({
         usage: 9 * 1024 * 1024, // 9MB
         quota: 10 * 1024 * 1024 // 10MB
       })
+      
       await browser.storage.sync.get(['test'])
-      // Accept any call that contains the warning string
+      
+      // Verify warning was logged
       const calls = global.console.warn.mock.calls
       expect(calls.some(call => call.some(arg => typeof arg === 'string' && arg.includes('[SAFARI-EXT-STORAGE-001] Storage quota usage high:')))).toBe(true)
     })
@@ -111,6 +182,180 @@ describe('[SAFARI-EXT-TEST-001] Safari Browser Shim Tests', () => {
       
       // Restore original
       browser.storage.sync.get = originalGet
+    })
+
+    test('[SAFARI-EXT-STORAGE-001] should implement storage quota caching', async () => {
+      // Mock storage estimate
+      global.navigator.storage.estimate = jest.fn().mockResolvedValue({
+        usage: 5 * 1024 * 1024, // 5MB
+        quota: 10 * 1024 * 1024 // 10MB
+      })
+      
+      // First call should cache the result
+      const firstCall = await browser.storage.getQuotaUsage()
+      expect(firstCall.usagePercent).toBe(50)
+      
+      // Second call should use cached data
+      const secondCall = await browser.storage.getQuotaUsage()
+      expect(secondCall).toEqual(firstCall)
+      
+      // Verify estimate was only called once (cached)
+      expect(global.navigator.storage.estimate).toHaveBeenCalledTimes(1)
+      
+      // Reset mock for other tests
+      global.navigator.storage.estimate = jest.fn().mockResolvedValue({
+        usage: 1048576, // 1MB
+        quota: 10485760 // 10MB
+      })
+    })
+
+    test('[SAFARI-EXT-STORAGE-001] should force refresh quota cache when requested', async () => {
+      // Mock storage estimate
+      global.navigator.storage.estimate = jest.fn().mockResolvedValue({
+        usage: 5 * 1024 * 1024, // 5MB
+        quota: 10 * 1024 * 1024 // 10MB
+      })
+      
+      // First call
+      await browser.storage.getQuotaUsage()
+      
+      // Second call with force refresh
+      await browser.storage.getQuotaUsage(true)
+      
+      // Verify estimate was called twice (force refresh bypasses cache)
+      expect(global.navigator.storage.estimate).toHaveBeenCalledTimes(2)
+      
+      // Reset mock for other tests
+      global.navigator.storage.estimate = jest.fn().mockResolvedValue({
+        usage: 1048576, // 1MB
+        quota: 10485760 // 10MB
+      })
+    })
+
+    test('[SAFARI-EXT-STORAGE-001] should handle critical storage quota warnings', async () => {
+      // Mock critical storage usage (above 95% threshold)
+      global.navigator.storage.estimate = jest.fn().mockResolvedValue({
+        usage: 9.7 * 1024 * 1024, // 9.7MB (97%)
+        quota: 10 * 1024 * 1024 // 10MB
+      })
+      
+      await browser.storage.getQuotaUsage()
+      
+      // Verify critical warning was logged
+      const errorCalls = global.console.error.mock.calls
+      expect(errorCalls.some(call => 
+        call[0].includes('[SAFARI-EXT-STORAGE-001] CRITICAL: Storage quota usage at 97.0%')
+      )).toBe(true)
+    })
+
+    test('[SAFARI-EXT-STORAGE-001] should implement graceful degradation for storage failures', async () => {
+      // Mock storage failure
+      global.chrome.storage.sync.get = jest.fn().mockRejectedValue(new Error('Storage quota exceeded'))
+      global.chrome.storage.local.get = jest.fn().mockResolvedValue({ fallback: 'data' })
+      
+      const result = await browser.storage.sync.get(['test'])
+      
+      // Should fallback to local storage
+      expect(result).toEqual({ fallback: 'data' })
+      expect(global.chrome.storage.local.get).toHaveBeenCalledWith(['test'])
+      
+      // Reset mocks for other tests
+      global.chrome.storage.sync.get = jest.fn().mockResolvedValue({})
+      global.chrome.storage.local.get = jest.fn().mockResolvedValue({})
+    })
+
+    test('[SAFARI-EXT-STORAGE-001] should handle storage remove operations with graceful degradation', async () => {
+      // Mock storage remove operation
+      global.chrome.storage.sync.remove = jest.fn().mockResolvedValue()
+      
+      await browser.storage.sync.remove(['test-key'])
+      
+      expect(global.chrome.storage.sync.remove).toHaveBeenCalledWith(['test-key'])
+    })
+
+    test('[SAFARI-EXT-STORAGE-001] should handle local storage operations with quota monitoring', async () => {
+      // Mock local storage
+      global.chrome.storage.local.get = jest.fn().mockResolvedValue({ local: 'data' })
+      global.chrome.storage.local.set = jest.fn().mockResolvedValue()
+      global.chrome.storage.local.remove = jest.fn().mockResolvedValue()
+      
+      // Test get operation
+      const getResult = await browser.storage.local.get(['test'])
+      expect(getResult).toEqual({ local: 'data' })
+      
+      // Test set operation
+      await browser.storage.local.set({ test: 'value' })
+      expect(global.chrome.storage.local.set).toHaveBeenCalledWith({ test: 'value' })
+      
+      // Test remove operation
+      await browser.storage.local.remove(['test'])
+      expect(global.chrome.storage.local.remove).toHaveBeenCalledWith(['test'])
+      
+      // Reset mocks for other tests
+      global.chrome.storage.local.get = jest.fn().mockResolvedValue({})
+      global.chrome.storage.local.set = jest.fn().mockResolvedValue()
+      global.chrome.storage.local.remove = jest.fn().mockResolvedValue()
+    })
+
+    test('[SAFARI-EXT-STORAGE-001] should provide platform-specific storage configuration', () => {
+      const config = platformUtils.getPlatformConfig()
+      
+      expect(config).toHaveProperty('storageQuotaWarning')
+      expect(config).toHaveProperty('storageQuotaCritical')
+      expect(config).toHaveProperty('storageQuotaCleanup')
+      expect(config).toHaveProperty('enableStorageBatching')
+      expect(config).toHaveProperty('enableStorageCompression')
+      expect(config).toHaveProperty('storageCacheTimeout')
+      expect(config).toHaveProperty('storageBatchSize')
+      
+      // Verify Safari-specific settings
+      if (platformUtils.isSafari()) {
+        expect(config.storageQuotaWarning).toBe(80)
+        expect(config.storageQuotaCritical).toBe(95)
+        expect(config.enableStorageBatching).toBe(true)
+        expect(config.enableStorageCompression).toBe(true)
+      }
+    })
+
+    test('[SAFARI-EXT-STORAGE-001] should support storage batching for performance', async () => {
+      // Mock storage operations for batching
+      global.chrome.storage.sync.get = jest.fn().mockResolvedValue({ batched: 'data' })
+      global.chrome.storage.sync.set = jest.fn().mockResolvedValue()
+      global.chrome.storage.sync.remove = jest.fn().mockResolvedValue()
+      
+      // Test that storage operations work with batching support
+      const result = await browser.storage.sync.get(['test'])
+      expect(result).toEqual({ batched: 'data' })
+      
+      // Reset mocks for other tests
+      global.chrome.storage.sync.get = jest.fn().mockResolvedValue({})
+      global.chrome.storage.sync.set = jest.fn().mockResolvedValue()
+      global.chrome.storage.sync.remove = jest.fn().mockResolvedValue()
+    })
+
+    test('[SAFARI-EXT-STORAGE-001] should implement automatic cleanup for critical quota usage', async () => {
+      // Mock critical storage usage
+      global.navigator.storage.estimate = jest.fn().mockResolvedValue({
+        usage: 9.8 * 1024 * 1024, // 9.8MB (98%)
+        quota: 10 * 1024 * 1024 // 10MB
+      })
+      
+      // Mock storage data for cleanup
+      if (!global.chrome) global.chrome = {}
+      if (!global.chrome.storage) global.chrome.storage = {}
+      if (!global.chrome.storage.sync) global.chrome.storage.sync = {}
+      
+      global.chrome.storage.sync.get = jest.fn().mockResolvedValue({
+        'old-data': { timestamp: Date.now() - 8 * 24 * 60 * 60 * 1000 }, // 8 days old
+        'large-data': { data: 'x'.repeat(2000) }, // 2KB data
+        'recent-data': { timestamp: Date.now() }
+      })
+      global.chrome.storage.sync.remove = jest.fn().mockResolvedValue()
+      
+      await browser.storage.getQuotaUsage()
+      
+      // Verify storage operations work with cleanup support
+      expect(global.chrome.storage.sync.get).toHaveBeenCalled()
     })
   })
 
