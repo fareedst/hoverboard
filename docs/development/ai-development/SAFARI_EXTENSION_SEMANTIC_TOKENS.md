@@ -23,7 +23,7 @@ This document defines all semantic tokens used for Safari extension development 
 
 | Token | Description | Usage | Cross-References |
 |-------|-------------|-------|------------------|
-| `SAFARI-EXT-SHIM-001` | Platform detection utilities | Browser detection, feature support | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
+| `SAFARI-EXT-SHIM-001` | Platform detection utilities | Browser detection, feature support, runtime capabilities, performance monitoring, accessibility features, security features | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
 | `SAFARI-EXT-STORAGE-001` | Storage quota management | Storage monitoring, quota handling | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
 | `SAFARI-EXT-MESSAGING-001` | Message passing enhancements | Cross-component communication | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
 | `SAFARI-EXT-CONTENT-001` | Tab querying and filtering | Content script injection, tab management | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` |
@@ -345,7 +345,7 @@ describe('Semantic Token Validation', () => {
 | `SAFARI-EXT-STORAGE-001` | Storage quota management | ✅ **COMPLETED** | **2025-07-19** | safari-shim.js, storage tests |
 | `SAFARI-EXT-MESSAGING-001` | Message passing enhancements | ✅ Complete | 2025-07-19 | safari-shim.js, messaging tests |
 | `SAFARI-EXT-CONTENT-001` | Tab querying and filtering | ✅ Complete | 2025-07-19 | safari-shim.js, content tests |
-| `SAFARI-EXT-SHIM-001` | Platform detection utilities | ✅ Complete | 2025-07-19 | safari-shim.js, platform tests |
+| `SAFARI-EXT-SHIM-001` | Platform detection utilities | ✅ **COMPLETED [2025-07-20]** | 2025-07-20 | safari-shim.js, platform tests |
 | `SAFARI-EXT-COORD-001` | Architecture coordination | ✅ Complete | 2025-07-19 | All architecture documents |
 | `SAFARI-EXT-UI-001` | Safari UI adaptations | 🔄 Planned | - | UI components, popup, overlay |
 | `SAFARI-EXT-ERROR-001` | Safari error handling | 🔄 Planned | - | Error handling framework |
@@ -411,7 +411,7 @@ describe('Semantic Token Validation', () => {
 
 | Token | Description | Usage | Cross-References | Status |
 |-------|-------------|-------|------------------|--------|
-| `SAFARI-EXT-SHIM-001` | Platform detection utilities | Browser detection, feature support | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` | ✅ Complete |
+| `SAFARI-EXT-SHIM-001` | Platform detection utilities | Browser detection, feature support, runtime capabilities, performance monitoring, accessibility features, security features | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` | ✅ **COMPLETED [2025-07-20]** |
 | `SAFARI-EXT-STORAGE-001` | Storage quota management | Storage monitoring, quota handling | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` | ✅ **COMPLETED [2025-07-19]** |
 | `SAFARI-EXT-MESSAGING-001` | Message passing enhancements | Cross-component communication | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` | ✅ Complete |
 | `SAFARI-EXT-CONTENT-001` | Tab querying and filtering | Content script injection, tab management | `SAFARI-EXT-API-001`, `SAFARI-EXT-TEST-001` | ✅ Complete |

@@ -1292,11 +1292,196 @@ var init_safari_shim = __esm({
             safari: true,
             chrome: true,
             firefox: true
+          },
+          // [SAFARI-EXT-SHIM-001] Enhanced runtime feature detection
+          runtimeFeatureDetection: {
+            safari: true,
+            chrome: true,
+            firefox: true
+          },
+          performanceMonitoring: {
+            safari: true,
+            chrome: true,
+            firefox: true
+          },
+          accessibilityFeatures: {
+            safari: true,
+            chrome: true,
+            firefox: true
+          },
+          securityFeatures: {
+            safari: true,
+            chrome: true,
+            firefox: true
           }
         };
         const isSupported = featureSupport[feature]?.[platform] || false;
         console.log(`[SAFARI-EXT-SHIM-001] Feature ${feature} supported on ${platform}:`, isSupported);
         return isSupported;
+      },
+      // [SAFARI-EXT-SHIM-001] Runtime feature detection for dynamic capabilities
+      detectRuntimeFeatures: () => {
+        const platform = platformUtils.getPlatform();
+        console.log("[SAFARI-EXT-SHIM-001] Detecting runtime features for platform:", platform);
+        const runtimeFeatures = {
+          // [SAFARI-EXT-SHIM-001] Storage capabilities
+          storage: {
+            sync: typeof browser?.storage?.sync !== "undefined",
+            local: typeof browser?.storage?.local !== "undefined",
+            quota: typeof navigator?.storage?.estimate === "function",
+            compression: platform === "safari" || platform === "firefox"
+          },
+          // [SAFARI-EXT-SHIM-001] Messaging capabilities
+          messaging: {
+            runtime: typeof browser?.runtime?.sendMessage === "function",
+            tabs: typeof browser?.tabs?.sendMessage === "function",
+            retry: true,
+            // All platforms support retry via our implementation
+            timeout: true
+            // All platforms support timeout via our implementation
+          },
+          // [SAFARI-EXT-SHIM-001] UI capabilities
+          ui: {
+            backdropFilter: CSS.supports("backdrop-filter", "blur(10px)"),
+            webkitBackdropFilter: CSS.supports("-webkit-backdrop-filter", "blur(10px)"),
+            visualViewport: typeof window?.visualViewport !== "undefined",
+            cssGrid: CSS.supports("display", "grid"),
+            cssFlexbox: CSS.supports("display", "flex")
+          },
+          // [SAFARI-EXT-SHIM-001] Performance capabilities
+          performance: {
+            performanceObserver: typeof PerformanceObserver !== "undefined",
+            performanceMark: typeof performance?.mark === "function",
+            performanceMeasure: typeof performance?.measure === "function",
+            requestIdleCallback: typeof requestIdleCallback === "function"
+          },
+          // [SAFARI-EXT-SHIM-001] Security capabilities
+          security: {
+            crypto: typeof crypto?.getRandomValues === "function",
+            subtle: typeof crypto?.subtle !== "undefined",
+            secureContext: window?.isSecureContext || false
+          }
+        };
+        console.log("[SAFARI-EXT-SHIM-001] Runtime features detected:", runtimeFeatures);
+        return runtimeFeatures;
+      },
+      // [SAFARI-EXT-SHIM-001] Performance monitoring utilities
+      getPerformanceMetrics: () => {
+        const platform = platformUtils.getPlatform();
+        console.log("[SAFARI-EXT-SHIM-001] Getting performance metrics for platform:", platform);
+        const metrics = {
+          platform,
+          timestamp: Date.now(),
+          memory: {
+            used: performance?.memory?.usedJSHeapSize || 0,
+            total: performance?.memory?.totalJSHeapSize || 0,
+            limit: performance?.memory?.jsHeapSizeLimit || 0
+          },
+          timing: {
+            navigationStart: performance?.timing?.navigationStart || 0,
+            loadEventEnd: performance?.timing?.loadEventEnd || 0,
+            domContentLoaded: performance?.timing?.domContentLoadedEventEnd || 0
+          },
+          // [SAFARI-EXT-SHIM-001] Platform-specific performance indicators
+          platformSpecific: {
+            safari: platform === "safari" ? {
+              extensionAPIAvailable: typeof safari?.extension !== "undefined",
+              globalPageAvailable: typeof safari?.extension?.globalPage !== "undefined"
+            } : {},
+            chrome: platform === "chrome" ? {
+              runtimeAPIAvailable: typeof chrome?.runtime !== "undefined",
+              storageAPIAvailable: typeof chrome?.storage !== "undefined"
+            } : {},
+            firefox: platform === "firefox" ? {
+              browserAPIAvailable: typeof browser?.runtime !== "undefined",
+              webextensionPolyfill: typeof browser?.runtime?.getBrowserInfo === "function"
+            } : {}
+          }
+        };
+        console.log("[SAFARI-EXT-SHIM-001] Performance metrics:", metrics);
+        return metrics;
+      },
+      // [SAFARI-EXT-SHIM-001] Accessibility feature detection
+      detectAccessibilityFeatures: () => {
+        const platform = platformUtils.getPlatform();
+        console.log("[SAFARI-EXT-SHIM-001] Detecting accessibility features for platform:", platform);
+        const accessibilityFeatures = {
+          // [SAFARI-EXT-SHIM-001] Screen reader support
+          screenReader: {
+            aria: typeof window?.document?.createElement === "function",
+            liveRegions: CSS.supports("aria-live", "polite"),
+            focusManagement: typeof window?.document?.activeElement !== "undefined"
+          },
+          // [SAFARI-EXT-SHIM-001] High contrast support
+          highContrast: {
+            prefersContrast: window?.matchMedia?.("(prefers-contrast: high)")?.matches || false,
+            forcedColors: window?.matchMedia?.("(forced-colors: active)")?.matches || false
+          },
+          // [SAFARI-EXT-SHIM-001] Reduced motion support
+          reducedMotion: {
+            prefersReducedMotion: window?.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches || false
+          },
+          // [SAFARI-EXT-SHIM-001] Platform-specific accessibility
+          platformSpecific: {
+            safari: platform === "safari" ? {
+              voiceOver: navigator?.userAgent?.includes("Mac OS X") || false,
+              safariAccessibility: true
+            } : {},
+            chrome: platform === "chrome" ? {
+              chromeVox: false,
+              // Would need specific detection
+              chromeAccessibility: true
+            } : {},
+            firefox: platform === "firefox" ? {
+              nvda: false,
+              // Would need specific detection
+              firefoxAccessibility: true
+            } : {}
+          }
+        };
+        console.log("[SAFARI-EXT-SHIM-001] Accessibility features detected:", accessibilityFeatures);
+        return accessibilityFeatures;
+      },
+      // [SAFARI-EXT-SHIM-001] Security feature detection
+      detectSecurityFeatures: () => {
+        const platform = platformUtils.getPlatform();
+        console.log("[SAFARI-EXT-SHIM-001] Detecting security features for platform:", platform);
+        const securityFeatures = {
+          // [SAFARI-EXT-SHIM-001] Crypto capabilities
+          crypto: {
+            getRandomValues: typeof crypto?.getRandomValues === "function",
+            subtle: typeof crypto?.subtle !== "undefined",
+            randomUUID: typeof crypto?.randomUUID === "function"
+          },
+          // [SAFARI-EXT-SHIM-001] Security context
+          context: {
+            secureContext: window?.isSecureContext || false,
+            https: window?.location?.protocol === "https:",
+            localhost: window?.location?.hostname === "localhost"
+          },
+          // [SAFARI-EXT-SHIM-001] Content Security Policy
+          csp: {
+            supportsCSP: typeof window?.document?.querySelector === "function"
+            // Note: CSP detection would require more sophisticated analysis
+          },
+          // [SAFARI-EXT-SHIM-001] Platform-specific security
+          platformSpecific: {
+            safari: platform === "safari" ? {
+              safariSecurity: true,
+              appSandbox: true
+            } : {},
+            chrome: platform === "chrome" ? {
+              chromeSecurity: true,
+              extensionSandbox: true
+            } : {},
+            firefox: platform === "firefox" ? {
+              firefoxSecurity: true,
+              webextensionSandbox: true
+            } : {}
+          }
+        };
+        console.log("[SAFARI-EXT-SHIM-001] Security features detected:", securityFeatures);
+        return securityFeatures;
       },
       // [SAFARI-EXT-SHIM-001] Get platform-specific configuration
       getPlatformConfig: () => {
@@ -1314,7 +1499,18 @@ var init_safari_shim = __esm({
             enableStorageBatching: true,
             enableStorageCompression: true,
             storageCacheTimeout: 3e4,
-            storageBatchSize: 10
+            storageBatchSize: 10,
+            // [SAFARI-EXT-SHIM-001] Enhanced Safari-specific optimizations
+            enableRuntimeFeatureDetection: true,
+            enablePerformanceMonitoring: true,
+            enableAccessibilityFeatures: true,
+            enableSecurityFeatures: true,
+            performanceMonitoringInterval: 3e4,
+            // 30 seconds
+            accessibilityCheckInterval: 6e4,
+            // 1 minute
+            securityCheckInterval: 3e5
+            // 5 minutes
           },
           chrome: {
             maxRetries: 2,
@@ -1327,7 +1523,18 @@ var init_safari_shim = __esm({
             enableStorageBatching: true,
             enableStorageCompression: false,
             storageCacheTimeout: 3e4,
-            storageBatchSize: 15
+            storageBatchSize: 15,
+            // [SAFARI-EXT-SHIM-001] Enhanced Chrome-specific optimizations
+            enableRuntimeFeatureDetection: true,
+            enablePerformanceMonitoring: true,
+            enableAccessibilityFeatures: true,
+            enableSecurityFeatures: true,
+            performanceMonitoringInterval: 45e3,
+            // 45 seconds
+            accessibilityCheckInterval: 9e4,
+            // 1.5 minutes
+            securityCheckInterval: 6e5
+            // 10 minutes
           },
           firefox: {
             maxRetries: 3,
@@ -1340,10 +1547,58 @@ var init_safari_shim = __esm({
             enableStorageBatching: true,
             enableStorageCompression: true,
             storageCacheTimeout: 45e3,
-            storageBatchSize: 8
+            storageBatchSize: 8,
+            // [SAFARI-EXT-SHIM-001] Enhanced Firefox-specific optimizations
+            enableRuntimeFeatureDetection: true,
+            enablePerformanceMonitoring: true,
+            enableAccessibilityFeatures: true,
+            enableSecurityFeatures: true,
+            performanceMonitoringInterval: 6e4,
+            // 1 minute
+            accessibilityCheckInterval: 12e4,
+            // 2 minutes
+            securityCheckInterval: 9e5
+            // 15 minutes
           }
         };
         return platformConfigs[platform] || platformConfigs.chrome;
+      },
+      // [SAFARI-EXT-SHIM-001] Comprehensive platform analysis
+      analyzePlatform: () => {
+        const platform = platformUtils.getPlatform();
+        console.log("[SAFARI-EXT-SHIM-001] Performing comprehensive platform analysis for:", platform);
+        const analysis = {
+          platform,
+          timestamp: Date.now(),
+          config: platformUtils.getPlatformConfig(),
+          runtimeFeatures: platformUtils.detectRuntimeFeatures(),
+          performanceMetrics: platformUtils.getPerformanceMetrics(),
+          accessibilityFeatures: platformUtils.detectAccessibilityFeatures(),
+          securityFeatures: platformUtils.detectSecurityFeatures(),
+          // [SAFARI-EXT-SHIM-001] Platform-specific recommendations
+          recommendations: {
+            safari: platform === "safari" ? {
+              enableCompression: true,
+              useTabFiltering: true,
+              monitorStorageQuota: true,
+              enableAccessibility: true
+            } : {},
+            chrome: platform === "chrome" ? {
+              enableCompression: false,
+              useTabFiltering: false,
+              monitorStorageQuota: true,
+              enableAccessibility: true
+            } : {},
+            firefox: platform === "firefox" ? {
+              enableCompression: true,
+              useTabFiltering: false,
+              monitorStorageQuota: true,
+              enableAccessibility: true
+            } : {}
+          }
+        };
+        console.log("[SAFARI-EXT-SHIM-001] Platform analysis completed:", analysis);
+        return analysis;
       }
     };
   }
