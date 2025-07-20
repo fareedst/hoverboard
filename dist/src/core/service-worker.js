@@ -5235,7 +5235,7 @@ var BadgeManager = class {
 };
 
 // src/core/service-worker.js
-init_utils();
+init_safari_shim();
 var RecentTagsMemoryManager = class {
   constructor() {
     this.recentTags = [];
@@ -5330,10 +5330,10 @@ var HoverboardServiceWorker = class {
   }
   // MV3-001: Set up all V3 service worker event listeners
   setupEventListeners() {
-    chrome.runtime.onInstalled.addListener((details) => {
+    safariEnhancements.runtime.onInstalled.addListener((details) => {
       this.handleInstall(details);
     });
-    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    safariEnhancements.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("[SERVICE-WORKER] Received message:", message);
       this.handleMessage(message, sender).then((response) => {
         console.log("[SERVICE-WORKER] Sending response:", response);
@@ -5344,13 +5344,13 @@ var HoverboardServiceWorker = class {
       });
       return true;
     });
-    chrome.tabs.onActivated.addListener((activeInfo) => {
+    safariEnhancements.tabs.onActivated.addListener((activeInfo) => {
       this.handleTabActivated(activeInfo);
     });
-    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    safariEnhancements.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       this.handleTabUpdated(tabId, changeInfo, tab);
     });
-    chrome.runtime.onStartup.addListener(() => {
+    safariEnhancements.runtime.onStartup.addListener(() => {
       this.handleExtensionStartup();
     });
   }
@@ -5380,7 +5380,7 @@ var HoverboardServiceWorker = class {
   }
   async handleTabActivated(activeInfo) {
     try {
-      const tab = await chrome.tabs.get(activeInfo.tabId);
+      const tab = await safariEnhancements.tabs.get(activeInfo.tabId);
       if (tab.url) {
         await this.updateBadgeForTab(tab);
       }

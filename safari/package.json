@@ -1,0 +1,14 @@
+{
+  "name": "hoverboard-safari",
+  "version": "1.0.6.65",
+  "description": "Hoverboard Safari Extension",
+  "author": "Fareed Stevenson",
+  "scripts": {
+    "build": "node ../scripts/safari-build.js",
+    "validate": "node ../scripts/safari-validate.js",
+    "test": "npm run validate"
+  },
+  "devDependencies": {
+    "web-ext": "^7.0.0"
+  }
+}

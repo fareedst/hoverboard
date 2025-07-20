@@ -1,0 +1,83 @@
+{
+  "manifest_version": 2,
+  "name": "Hoverboard",
+  "version": "1.0.6.65",
+  "author": "Fareed Stevenson",
+  "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
+  
+  "background": {
+    "scripts": [
+      "src/shared/safari-shim.js",
+      "src/shared/logger.js",
+      "src/shared/utils.js",
+      "src/config/config-manager.js",
+      "src/config/config-service.js",
+      "src/core/badge-manager.js",
+      "src/core/message-handler.js",
+      "src/core/message-service.js",
+      "src/core/service-worker.js"
+    ],
+    "persistent": false
+  },
+  
+  "browser_action": {
+    "default_icon": {
+      "16": "icons/hoverboard_16.png",
+      "19": "icons/hoverboard_19.png",
+      "32": "icons/hoverboard_32.png",
+      "48": "icons/hoverboard_48.png",
+      "128": "icons/hoverboard_128.png"
+    },
+    "default_popup": "src/ui/popup/popup.html",
+    "default_title": "Hoverboard - Pinboard Integration"
+  },
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "css": [
+        "src/features/content/overlay-styles.css"
+      ],
+      "js": [
+        "src/shared/safari-shim.js",
+        "src/shared/logger.js",
+        "src/shared/utils.js",
+        "src/features/content/content-main.js"
+      ],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "options_page": "src/ui/options/options.html",
+  
+  "permissions": [
+    "storage",
+    "tabs",
+    "activeTab",
+    "contextMenus",
+    "http://*/*",
+    "https://*/*"
+  ],
+  
+  "icons": {
+    "16": "icons/hoverboard_16.png",
+    "48": "icons/hoverboard_48.png",
+    "128": "icons/hoverboard_128.png"
+  },
+  
+  "default_locale": "en",
+  
+  "web_accessible_resources": [
+    "src/features/content/*.css",
+    "icons/*.png",
+    "icons/*.svg"
+  ],
+  
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
+  
+  "applications": {
+    "gecko": {
+      "id": "hoverboard@fareedstevenson.com"
+    }
+  }
+} 
