@@ -572,10 +572,14 @@ const safariEnhancements = {
 
       return retryOperation(async () => {
         try {
+          // [SAFARI-EXT-MESSAGING-001] Enhanced message validation
+          const validatedMessage = validateMessage(message)
+          
           const enhancedMessage = {
-            ...message,
+            ...validatedMessage,
             timestamp: Date.now(),
-            version: browser.runtime.getManifest().version
+            version: browser.runtime.getManifest().version,
+            messageId: generateMessageId()
           }
 
           // [SAFARI-EXT-MESSAGING-001] Only add platform property if actually running in Safari
@@ -590,7 +594,15 @@ const safariEnhancements = {
 
           // [SAFARI-EXT-MESSAGING-001] Use Promise-based message sending for proper async handling
           return new Promise((resolve, reject) => {
+            const timeoutId = setTimeout(() => {
+              const timeoutError = new Error('[SAFARI-EXT-MESSAGING-001] Message timeout after 10 seconds')
+              console.error('[SAFARI-EXT-MESSAGING-001] Message timeout:', timeoutError.message)
+              reject(timeoutError)
+            }, 10000) // 10 second timeout
+
             chrome.runtime.sendMessage(enhancedMessage, (response) => {
+              clearTimeout(timeoutId)
+              
               if (chrome.runtime.lastError) {
                 const error = new Error(chrome.runtime.lastError.message)
                 console.error('[SAFARI-EXT-MESSAGING-001] Message send failed:', error.message)
@@ -629,8 +641,14 @@ const safariEnhancements = {
               logger.debug('[SAFARI-EXT-MESSAGING-001] Received message:', message)
             }
 
+            // [SAFARI-EXT-MESSAGING-001] Validate incoming message
+            const validatedMessage = validateIncomingMessage(message)
+            
+            // [SAFARI-EXT-MESSAGING-001] Add Safari-specific message processing
+            const processedMessage = processSafariMessage(validatedMessage, sender)
+
             // Handle async callback properly
-            const result = callback(message, sender, sendResponse)
+            const result = callback(processedMessage, sender, sendResponse)
 
             // If the callback returns a Promise, handle it properly
             if (result && typeof result.then === 'function') {
@@ -705,16 +723,44 @@ const safariEnhancements = {
 
       return retryOperation(async () => {
         try {
-          if (logger && logger.debug) {
-            logger.debug('[SAFARI-EXT-MESSAGING-001] Sending message to tab:', { tabId, message })
+          // [SAFARI-EXT-MESSAGING-001] Validate tab message
+          const validatedMessage = validateMessage(message)
+          
+          const enhancedMessage = {
+            ...validatedMessage,
+            timestamp: Date.now(),
+            version: browser.runtime.getManifest().version,
+            messageId: generateMessageId(),
+            targetTabId: tabId
           }
 
-          // Use Promise-based message sending for proper async handling
+          // [SAFARI-EXT-MESSAGING-001] Add Safari-specific platform info
+          if (typeof safari !== 'undefined') {
+            enhancedMessage.platform = 'safari'
+            console.log('[SAFARI-EXT-MESSAGING-001] Safari platform detected for tab message')
+          }
+
+          if (logger && logger.debug) {
+            logger.debug('[SAFARI-EXT-MESSAGING-001] Sending message to tab:', { tabId, enhancedMessage })
+          }
+
+          // [SAFARI-EXT-MESSAGING-001] Use Promise-based message sending for proper async handling
           return new Promise((resolve, reject) => {
-            chrome.tabs.sendMessage(tabId, message, (response) => {
+            const timeoutId = setTimeout(() => {
+              const timeoutError = new Error(`[SAFARI-EXT-MESSAGING-001] Tab message timeout after 10 seconds for tab ${tabId}`)
+              console.error('[SAFARI-EXT-MESSAGING-001] Tab message timeout:', timeoutError.message)
+              reject(timeoutError)
+            }, 10000) // 10 second timeout
+
+            chrome.tabs.sendMessage(tabId, enhancedMessage, (response) => {
+              clearTimeout(timeoutId)
+              
               if (chrome.runtime.lastError) {
                 const error = new Error(chrome.runtime.lastError.message)
                 console.error('[SAFARI-EXT-MESSAGING-001] Tab message send failed:', error.message)
+                if (logger && logger.error) {
+                  logger.error('[SAFARI-EXT-MESSAGING-001] Tab message send failed:', error)
+                }
                 reject(error)
               } else {
                 console.log('[SAFARI-EXT-MESSAGING-001] Tab message sent successfully:', response)
@@ -763,6 +809,70 @@ function createMinimalBrowserAPI () {
       sendMessage: () => Promise.resolve()
     }
   }
+}
+
+// [SAFARI-EXT-MESSAGING-001] Message validation and processing utilities
+let messageIdCounter = 0
+
+function validateMessage(message) {
+  if (!message || typeof message !== 'object') {
+    throw new Error('[SAFARI-EXT-MESSAGING-001] Invalid message: must be an object')
+  }
+
+  if (!message.type || typeof message.type !== 'string') {
+    throw new Error('[SAFARI-EXT-MESSAGING-001] Invalid message: type is required and must be a string')
+  }
+
+  // [SAFARI-EXT-MESSAGING-001] Validate message size for Safari compatibility
+  const messageSize = JSON.stringify(message).length
+  const maxMessageSize = 1024 * 1024 // 1MB limit for Safari
+  if (messageSize > maxMessageSize) {
+    throw new Error(`[SAFARI-EXT-MESSAGING-001] Message too large: ${messageSize} bytes (max: ${maxMessageSize})`)
+  }
+
+  return message
+}
+
+function validateIncomingMessage(message) {
+  if (!message || typeof message !== 'object') {
+    console.warn('[SAFARI-EXT-MESSAGING-001] Invalid incoming message:', message)
+    return { type: 'INVALID_MESSAGE', data: null }
+  }
+
+  // [SAFARI-EXT-MESSAGING-001] Check for required fields
+  if (!message.type) {
+    console.warn('[SAFARI-EXT-MESSAGING-001] Message missing type:', message)
+    return { type: 'INVALID_MESSAGE', data: null }
+  }
+
+  return message
+}
+
+function processSafariMessage(message, sender) {
+  // [SAFARI-EXT-MESSAGING-001] Add Safari-specific message processing
+  const processedMessage = { ...message }
+
+  // [SAFARI-EXT-MESSAGING-001] Add Safari-specific sender information
+  if (typeof safari !== 'undefined' && sender) {
+    processedMessage.safariSender = {
+      tabId: sender.tab?.id,
+      frameId: sender.frameId,
+      url: sender.tab?.url,
+      platform: 'safari'
+    }
+  }
+
+  // [SAFARI-EXT-MESSAGING-001] Add message processing timestamp
+  processedMessage.processedAt = Date.now()
+
+  return processedMessage
+}
+
+function generateMessageId() {
+  const timestamp = Date.now()
+  const random = Math.random().toString(36).substr(2, 9)
+  messageIdCounter++
+  return `msg_${timestamp}_${random}_${messageIdCounter}`
 }
 
 // [SAFARI-EXT-SHIM-001] Export enhanced browser API

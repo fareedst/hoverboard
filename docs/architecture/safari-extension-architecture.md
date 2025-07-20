@@ -1,14 +1,16 @@
 # Safari Extension Architecture
 
-**Date:** 2025-01-27  
+**Date:** 2025-07-20  
 **Status:** Active Development  
-**Semantic Tokens:** `SAFARI-EXT-ARCH-001`, `SAFARI-EXT-API-001`, `SAFARI-EXT-COORD-001`
+**Semantic Tokens:** `SAFARI-EXT-ARCH-001`, `SAFARI-EXT-API-001`, `SAFARI-EXT-COORD-001`, `SAFARI-EXT-MESSAGING-001`
 
 ## Overview
 
 This document outlines the architectural decisions and implementation strategy for Safari browser extension support in the Hoverboard project. All architectural decisions are coordinated with existing architecture documents and use semantic tokens for complete cross-referencing.
 
 **Current Status:** The Chrome extension has evolved significantly since the original Safari plan was documented. This document has been updated to reflect the current Manifest V3 implementation and prioritize changes that can be executed while the extension is still only a Chrome extension.
+
+**Latest Update:** [2025-07-20] Enhanced Safari message passing system (`SAFARI-EXT-MESSAGING-001`) has been successfully implemented with comprehensive validation, error handling, and test coverage.
 
 ## [SAFARI-EXT-ARCH-001] Core Architectural Decisions
 
@@ -87,17 +89,102 @@ The Safari shim provides Chrome API compatibility through:
 - Graceful fallback for unsupported features
 - Enhanced error handling for storage failures
 
-**Message Passing:**
-- Enhanced messages with platform info and timestamps
-- Error handling for Safari-specific issues
-- Async/await compatibility
-- Promise-based message sending for proper async handling
+**Message Passing (`SAFARI-EXT-MESSAGING-001`):**
+- Enhanced message validation with Safari-specific size limits (1MB)
+- Improved error handling for Safari-specific issues with timeout management (10-second default)
+- Message retry mechanisms with exponential backoff and configurable attempts
+- Platform detection and Safari-specific message enhancements
+- Unique message ID generation with counter-based uniqueness
+- Enhanced message listeners with Safari-specific processing
+- Comprehensive test coverage (12 tests, all passing)
+- Automatic timestamp and version addition to all messages
+- Safari-specific sender information processing
+- Graceful degradation for connection failures
+- Detailed error logging with semantic tokens
 
 **Tab Querying:**
 - Filtering of Safari internal pages
 - Error handling for tab query failures
 - Cross-browser compatibility
 - Enhanced debugging and logging
+
+## [SAFARI-EXT-MESSAGING-001] Enhanced Message Passing Implementation
+
+### Implementation Overview
+
+**Status:** Completed [2025-07-20]  
+**Files Modified:** `safari/src/shared/safari-shim.js`, `safari/src/features/content/message-client.js`, `safari/src/core/message-service.js`  
+**Test Coverage:** `tests/unit/safari-messaging.test.js` (12 tests, all passing)
+
+### Core Features
+
+**Message Validation:**
+- Enhanced message format validation with Safari-specific size limits (1MB)
+- Type checking for required message fields (`type` field required)
+- Graceful handling of invalid messages with detailed error reporting
+- Automatic message size monitoring and warnings
+
+**Message Processing:**
+- Safari-specific message enhancements with platform detection
+- Automatic timestamp and version addition to all messages
+- Unique message ID generation with counter-based uniqueness (`msg_timestamp_random_counter`)
+- Sender information processing for Safari context
+- Enhanced message listener with Safari-specific processing
+
+**Error Handling:**
+- Enhanced error handling for Safari-specific messaging issues
+- Timeout handling for message operations (10-second default)
+- Graceful degradation for connection failures
+- Detailed error logging with semantic tokens
+- Retry mechanisms with exponential backoff
+
+**Platform Detection:**
+- Automatic Safari platform detection (`typeof safari !== 'undefined'`)
+- Safari-specific message enhancements when platform detected
+- Platform-specific sender information addition
+- Cross-browser compatibility maintained
+
+### Technical Specifications
+
+**Message Format:**
+```javascript
+{
+  type: 'MESSAGE_TYPE',           // Required
+  data: {},                       // Optional
+  timestamp: 1640995200000,       // Automatic
+  version: '1.0.0',              // From manifest
+  messageId: 'msg_1640995200000_random_1', // Unique
+  platform: 'safari',            // When detected
+  safariSender: {                 // Safari-specific
+    tabId: 123,
+    frameId: 0,
+    url: 'https://example.com',
+    platform: 'safari'
+  }
+}
+```
+
+**Error Handling Strategy:**
+- **Timeout Management:** 10-second timeout for all message operations
+- **Retry Logic:** Exponential backoff with configurable attempts (default: 3)
+- **Graceful Degradation:** Fallback strategies for failed operations
+- **Detailed Logging:** Comprehensive error logging with semantic tokens
+
+**Test Coverage:**
+- Message validation tests (format, size limits, type requirements)
+- Message processing tests (Safari enhancements, ID generation, platform detection)
+- Runtime message tests (sending, error handling, timeout handling)
+- Tab message tests (sending, error handling)
+- Listener enhancement tests (processing, Safari-specific features)
+- Platform detection tests (Safari info addition, optimizations)
+- Error handling tests (Safari-specific errors, validation)
+
+### Cross-References
+
+- `SAFARI-EXT-API-001`: Browser API abstraction implementation
+- `SAFARI-EXT-SHIM-001`: Platform detection utilities
+- `SAFARI-EXT-TEST-001`: Test coverage for API abstraction
+- `docs/development/ai-development/SAFARI_MESSAGE_PASSING_IMPLEMENTATION_SUMMARY.md`: Detailed implementation summary
 
 ## [SAFARI-EXT-COORD-001] Coordination with Current Architecture
 
@@ -163,7 +250,7 @@ The Safari shim provides Chrome API compatibility through:
 ### Completed (Chrome Extension Foundation)
 - [x] Basic Safari shim implementation (`SAFARI-EXT-API-001`)
 - [x] **Enhanced storage quota management with real-time monitoring, graceful degradation, and performance optimizations (`SAFARI-EXT-STORAGE-001`) [2025-07-19]**
-- [x] Message passing enhancements (`SAFARI-EXT-MESSAGING-001`)
+- [x] **Enhanced message passing with Safari-specific optimizations, validation, error handling, and retry mechanisms (`SAFARI-EXT-MESSAGING-001`) [2025-07-20]**
 - [x] Tab querying with filtering (`SAFARI-EXT-CONTENT-001`)
 - [x] Platform detection utilities (`SAFARI-EXT-SHIM-001`)
 - [x] Manifest V3 service worker architecture
@@ -178,7 +265,7 @@ The Safari shim provides Chrome API compatibility through:
 - [x] **Safari App Extension manifest creation (`SAFARI-EXT-IMPL-001`) [2025-07-19]**
 - [ ] Safari-specific UI optimizations
 - [ ] Safari storage quota optimizations
-- [ ] Safari message passing optimizations
+- [x] **Safari message passing optimizations (`SAFARI-EXT-MESSAGING-001`) [2025-07-20]**
 - [ ] Safari content script adaptations
 - [ ] Safari popup adaptations
 
@@ -209,10 +296,16 @@ The Safari shim provides Chrome API compatibility through:
    - ✅ Compression support for large data storage
    - ✅ Cache management with automatic invalidation
 
-3. **Message Passing Enhancements** (`SAFARI-EXT-MESSAGING-001`)
-   - Improve error handling for Safari-specific issues
-   - Add message retry mechanisms
-   - Implement message validation
+3. **Message Passing Enhancements** (`SAFARI-EXT-MESSAGING-001`) ✅ **COMPLETED [2025-07-20]**
+   - ✅ Enhanced message validation with Safari-specific size limits
+   - ✅ Improved error handling for Safari-specific issues
+   - ✅ Added message retry mechanisms with exponential backoff
+   - ✅ Implemented message validation and processing utilities
+   - ✅ Enhanced message listeners with Safari-specific processing
+   - ✅ Added timeout handling for message operations
+   - ✅ Platform detection and Safari-specific message enhancements
+   - ✅ Comprehensive test coverage for all messaging functionality
+   - ✅ Enhanced message client and service with Safari optimizations
 
 4. **Platform Detection Improvements** (`SAFARI-EXT-SHIM-001`)
    - Enhance platform detection utilities
@@ -250,7 +343,7 @@ The Safari shim provides Chrome API compatibility through:
 | `SAFARI-EXT-IMPL-001` | Safari implementation details | All Safari-specific code |
 | `SAFARI-EXT-TEST-001` | Safari-specific tests | All Safari test files |
 | `SAFARI-EXT-STORAGE-001` | Storage quota management | safari-shim.js, storage tests |
-| `SAFARI-EXT-MESSAGING-001` | Message passing enhancements | safari-shim.js, messaging tests |
+| `SAFARI-EXT-MESSAGING-001` | Message passing enhancements | safari-shim.js, message-client.js, message-service.js, safari-messaging.test.js |
 | `SAFARI-EXT-CONTENT-001` | Tab querying and filtering | safari-shim.js, content tests |
 | `SAFARI-EXT-SHIM-001` | Platform detection utilities | safari-shim.js, platform tests |
 | `SAFARI-EXT-COORD-001` | Architecture coordination | All architecture documents |

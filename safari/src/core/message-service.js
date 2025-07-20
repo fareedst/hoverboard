@@ -24,6 +24,7 @@ export class MessageService {
           return true // if you use async, otherwise omit
         }
 
+        // [SAFARI-EXT-MESSAGING-001] Enhanced message handling with Safari-specific processing
         this.handleIncomingMessage(message, sender, sendResponse)
         return true // Keep message channel open for async response
       })
@@ -36,28 +37,77 @@ export class MessageService {
   handleIncomingMessage (message, sender, sendResponse) {
     const { type, data } = message
 
+    // [SAFARI-EXT-MESSAGING-001] Enhanced message validation for Safari
+    if (!message || typeof message !== 'object') {
+      console.warn('[SAFARI-EXT-MESSAGING-001] Invalid message received:', message)
+      sendResponse({ success: false, error: 'Invalid message format' })
+      return
+    }
+
+    if (!type) {
+      console.warn('[SAFARI-EXT-MESSAGING-001] Message missing type:', message)
+      sendResponse({ success: false, error: 'Message type is required' })
+      return
+    }
+
+    // [SAFARI-EXT-MESSAGING-001] Add Safari-specific message processing
+    const processedMessage = this.processSafariMessage(message, sender)
+
     if (this.messageListeners.has(type)) {
       const listeners = this.messageListeners.get(type)
       listeners.forEach(listener => {
         try {
-          const result = listener(data, sender)
+          const result = listener(processedMessage, sender)
           if (result instanceof Promise) {
             result.then(sendResponse).catch(error => {
-              console.error('Message listener error:', error)
+              console.error('[SAFARI-EXT-MESSAGING-001] Message listener error:', error)
               sendResponse({ success: false, error: error.message })
             })
           } else {
             sendResponse({ success: true, data: result })
           }
         } catch (error) {
-          console.error('Message listener error:', error)
+          console.error('[SAFARI-EXT-MESSAGING-001] Message listener error:', error)
           sendResponse({ success: false, error: error.message })
         }
       })
     } else {
       // No listeners for this message type
+      console.warn('[SAFARI-EXT-MESSAGING-001] No listeners for message type:', type)
       sendResponse({ success: false, error: 'No listeners for message type: ' + type })
     }
+  }
+
+  /**
+   * [SAFARI-EXT-MESSAGING-001] Process Safari-specific message enhancements
+   * @param {Object} message - Original message
+   * @param {Object} sender - Message sender info
+   * @returns {Object} Processed message
+   */
+  processSafariMessage(message, sender) {
+    const processedMessage = { ...message }
+
+    // [SAFARI-EXT-MESSAGING-001] Add Safari-specific sender information
+    if (typeof safari !== 'undefined' && sender) {
+      processedMessage.safariSender = {
+        tabId: sender.tab?.id,
+        frameId: sender.frameId,
+        url: sender.tab?.url,
+        platform: 'safari'
+      }
+    }
+
+    // [SAFARI-EXT-MESSAGING-001] Add message processing timestamp
+    processedMessage.processedAt = Date.now()
+
+    // [SAFARI-EXT-MESSAGING-001] Add message validation info
+    processedMessage.validationInfo = {
+      isValid: true,
+      processedBy: 'safari-message-service',
+      timestamp: Date.now()
+    }
+
+    return processedMessage
   }
 
   /**

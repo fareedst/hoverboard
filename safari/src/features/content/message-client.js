@@ -57,18 +57,36 @@ export class MessageClient {
    * @param {Object} options - Send options
    * @returns {Promise} Promise that resolves with response
    */
-  // [SAFARI-EXT-SHIM-001] Refactor sendSingleMessage to use await directly
+  // [SAFARI-EXT-MESSAGING-001] Enhanced sendSingleMessage with Safari-specific optimizations
   async sendSingleMessage(message, options) {
     const messageId = this.generateMessageId();
     const fullMessage = { ...message, messageId };
+    
     try {
       console.log('🔍 [MessageClient] Sending message:', fullMessage);
+      
+      // [SAFARI-EXT-MESSAGING-001] Use enhanced Safari shim for better error handling
       const response = await browser.runtime.sendMessage(fullMessage);
+      
       console.log('🔍 [MessageClient] Received response:', response);
-      // Optionally process response here if needed
+      
+      // [SAFARI-EXT-MESSAGING-001] Validate response for Safari compatibility
+      if (response && typeof response === 'object') {
+        // Check for Safari-specific response format
+        if (response.safariResponse) {
+          console.log('🔍 [MessageClient] Safari-specific response detected:', response.safariResponse);
+        }
+      }
+      
       return response;
     } catch (error) {
       console.error('🔍 [MessageClient] Message send failed:', error);
+      
+      // [SAFARI-EXT-MESSAGING-001] Enhanced error handling for Safari-specific issues
+      if (error.message.includes('SAFARI-EXT-MESSAGING-001')) {
+        console.error('🔍 [MessageClient] Safari-specific messaging error:', error.message);
+      }
+      
       throw error;
     }
   }
