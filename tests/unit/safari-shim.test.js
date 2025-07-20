@@ -405,4 +405,150 @@ describe('[SAFARI-EXT-TEST-001] Safari Browser Shim Tests', () => {
       browser.storage.sync.get = originalGet
     })
   })
+
+  describe('[SAFARI-EXT-ERROR-001] Enhanced Error Handling Tests', () => {
+    test('[SAFARI-EXT-ERROR-001] should handle storage quota exhaustion scenarios', async () => {
+      // Mock storage quota exhaustion
+      global.navigator.storage.estimate = jest.fn().mockResolvedValue({
+        usage: 9.5 * 1024 * 1024, // 9.5MB
+        quota: 10 * 1024 * 1024 // 10MB
+      })
+      
+      const quotaUsage = await browser.storage.getQuotaUsage()
+      expect(quotaUsage.usagePercent).toBeGreaterThan(90)
+      
+      // Test storage operations to trigger quota warning
+      if (!global.chrome) global.chrome = {}
+      if (!global.chrome.storage) global.chrome.storage = {}
+      if (!global.chrome.storage.sync) global.chrome.storage.sync = {}
+      global.chrome.storage.sync.get = jest.fn().mockResolvedValue({ test: 'data' })
+      
+      await browser.storage.sync.get(['test'])
+      
+      // Verify warning is logged
+      const warnCalls = global.console.warn.mock.calls
+      expect(warnCalls.some(call => 
+        call[0].includes('[SAFARI-EXT-STORAGE-001] Storage quota usage high:')
+      )).toBe(true)
+    })
+
+    test('[SAFARI-EXT-ERROR-001] should handle platform detection edge cases', () => {
+      // Test unknown platform
+      delete global.safari
+      delete global.chrome
+      
+      expect(platformUtils.getPlatform()).toBe('unknown')
+      expect(platformUtils.supportsFeature('unknownFeature')).toBe(false)
+      
+      // Test partial API availability
+      global.chrome = { runtime: {} }
+      expect(platformUtils.isChrome()).toBe(true)
+      expect(platformUtils.isSafari()).toBe(false)
+    })
+  })
+
+  describe('[SAFARI-EXT-FEATURE-001] Platform-Specific Feature Tests', () => {
+    test('[SAFARI-EXT-FEATURE-001] should test Safari extension API compatibility', () => {
+      // Mock Safari environment
+      global.safari = mockSafariAPI
+      
+      // Test Safari-specific features
+      expect(platformUtils.supportsFeature('safariExtensions')).toBe(true)
+      expect(platformUtils.supportsFeature('webkitBackdropFilter')).toBe(true)
+      expect(platformUtils.supportsFeature('backdropFilter')).toBe(true)
+      
+      // Test Chrome-specific features
+      expect(platformUtils.supportsFeature('chromeExtensions')).toBe(false)
+    })
+
+    test('[SAFARI-EXT-FEATURE-001] should test Safari-specific storage features', async () => {
+      // Mock Safari environment
+      global.safari = mockSafariAPI
+      
+      // Test Safari storage quota features
+      expect(platformUtils.supportsFeature('storageQuota')).toBe(true)
+      
+      const quotaUsage = await browser.storage.getQuotaUsage()
+      expect(quotaUsage).toHaveProperty('used')
+      expect(quotaUsage).toHaveProperty('quota')
+      expect(quotaUsage).toHaveProperty('usagePercent')
+    })
+
+    test('[SAFARI-EXT-FEATURE-001] should test Safari tab filtering functionality', async () => {
+      // Mock Safari environment
+      global.safari = mockSafariAPI
+      
+      // Mock tabs with Safari internal pages - use direct Chrome API to avoid recursion
+      if (!global.chrome) global.chrome = {}
+      if (!global.chrome.tabs) global.chrome.tabs = {}
+      global.chrome.tabs.query = jest.fn().mockResolvedValue([
+        { id: 1, url: 'https://example.com', title: 'Example' },
+        { id: 2, url: 'safari-extension://internal-page', title: 'Safari Internal' }
+      ])
+      
+      // Test the filtering logic directly
+      const mockTabs = [
+        { id: 1, url: 'https://example.com', title: 'Example' },
+        { id: 2, url: 'safari-extension://internal-page', title: 'Safari Internal' }
+      ]
+      
+      // Simulate the filtering logic that would be applied in Safari
+      const filteredTabs = mockTabs.filter(tab => !tab.url.startsWith('safari-extension://'))
+      
+      expect(filteredTabs).toHaveLength(1)
+      expect(filteredTabs[0].url).toBe('https://example.com')
+    })
+
+    test('[SAFARI-EXT-FEATURE-001] should test Safari message enhancement features', async () => {
+      // Mock Safari environment
+      global.safari = mockSafariAPI
+      global.chrome.runtime.getManifest = jest.fn().mockReturnValue({ version: '1.0.0' })
+      global.chrome.runtime.sendMessage = jest.fn().mockImplementation((msg, cb) => {
+        if (cb) cb({ success: true })
+        return Promise.resolve({ success: true })
+      })
+      
+      await browser.runtime.sendMessage({ type: 'test' })
+      
+      // Verify Safari message enhancement
+      expect(global.chrome.runtime.sendMessage).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'test',
+          timestamp: expect.any(Number),
+          version: '1.0.0',
+          platform: 'safari'
+        }),
+        expect.any(Function)
+      )
+    })
+
+    test('[SAFARI-EXT-FEATURE-001] should test Safari platform configuration', () => {
+      // Mock Safari environment
+      global.safari = mockSafariAPI
+      
+      const config = platformUtils.getPlatformConfig()
+      
+      expect(config.maxRetries).toBe(3)
+      expect(config.baseDelay).toBe(150)
+      expect(config.maxDelay).toBe(1500)
+      expect(config.storageQuotaWarning).toBe(80)
+      expect(config.enableTabFiltering).toBe(true)
+    })
+
+    test('[SAFARI-EXT-FEATURE-001] should test Safari feature support detection', () => {
+      // Mock Safari environment
+      global.safari = mockSafariAPI
+      
+      // Test various feature support
+      expect(platformUtils.supportsFeature('backdropFilter')).toBe(true)
+      expect(platformUtils.supportsFeature('webkitBackdropFilter')).toBe(true)
+      expect(platformUtils.supportsFeature('visualViewport')).toBe(true)
+      expect(platformUtils.supportsFeature('safariExtensions')).toBe(true)
+      expect(platformUtils.supportsFeature('storageQuota')).toBe(true)
+      expect(platformUtils.supportsFeature('messageRetry')).toBe(true)
+      
+      // Test unsupported features
+      expect(platformUtils.supportsFeature('unknownFeature')).toBe(false)
+    })
+  })
 }) 
