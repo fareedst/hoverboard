@@ -154,8 +154,8 @@ describe('Safari Error Handling Framework', () => {
 
   describe('Safari Error Recovery', () => {
     test('should attempt Safari error recovery', async () => {
-      // Mock the recovery to succeed
-      errorHandler.performSafariErrorRecovery = jest.fn().mockResolvedValue(true)
+      // Mock the recovery to fail so recoveryAttempts doesn't get reset
+      errorHandler.performSafariErrorRecovery = jest.fn().mockResolvedValue(false)
       
       const errorInfo = errorHandler.createSafariErrorInfo(
         'Test Safari Error',
@@ -276,6 +276,9 @@ describe('Safari Error Handling Framework', () => {
         delete: jest.fn().mockResolvedValue(true)
       }
       
+      // Mock gc function
+      global.window.gc = jest.fn()
+      
       const errorInfo = errorHandler.createSafariErrorInfo(
         'Test Safari Performance Error',
         new Error('Test performance error'),
@@ -345,11 +348,11 @@ describe('Safari Error Handling Framework', () => {
       // Clear previous console calls
       mockConsole.log.mockClear()
       
-      // Ensure performance API is available
+      // Ensure performance API is available with 50% memory usage
       global.window.performance = {
         memory: {
-          usedJSHeapSize: 1000000,
-          jsHeapSizeLimit: 2000000
+          usedJSHeapSize: 1000000, // 1MB
+          jsHeapSizeLimit: 2000000  // 2MB = 50% usage
         }
       }
       

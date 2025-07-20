@@ -1104,7 +1104,7 @@ var init_safari_shim = __esm({
               const enhancedMessage = {
                 ...message,
                 timestamp: Date.now(),
-                version: browser.runtime.getManifest().version
+                version: browser.runtime.getManifest?.()?.version || "1.0.0"
               };
               if (typeof safari !== "undefined") {
                 enhancedMessage.platform = "safari";

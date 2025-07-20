@@ -384,30 +384,40 @@ class SafariPerformanceManager {
       return
     }
     
-    // Add hardware acceleration styles to document
-    const style = document.createElement('style')
-    style.textContent = `
-      .hoverboard-optimized {
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-        -webkit-perspective: 1000px;
-        perspective: 1000px;
-        will-change: transform;
-      }
-      
-      .hoverboard-overlay {
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-        -webkit-backface-visibility: hidden;
-        backface-visibility: hidden;
-        will-change: opacity, transform;
-      }
-    `
+    // Check if document is available
+    if (typeof document === 'undefined' || !document) {
+      console.warn('[SAFARI-EXT-PERFORMANCE-001] Document not available for hardware acceleration')
+      return
+    }
     
-    if (document.head) {
-      document.head.appendChild(style)
+    try {
+      // Add hardware acceleration styles to document
+      const style = document.createElement('style')
+      style.textContent = `
+        .hoverboard-optimized {
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          -webkit-perspective: 1000px;
+          perspective: 1000px;
+          will-change: transform;
+        }
+        
+        .hoverboard-overlay {
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+          -webkit-backface-visibility: hidden;
+          backface-visibility: hidden;
+          will-change: opacity, transform;
+        }
+      `
+      
+      if (document.head) {
+        document.head.appendChild(style)
+      }
+    } catch (error) {
+      console.warn('[SAFARI-EXT-PERFORMANCE-001] Failed to apply hardware acceleration:', error)
     }
   }
   
@@ -466,26 +476,36 @@ class SafariPerformanceManager {
       return
     }
     
-    // Add optimized animation styles
-    const style = document.createElement('style')
-    style.textContent = `
-      .hoverboard-animation {
-        transition-duration: ${this.config.animationOptimization.animationDuration}ms;
-        transition-timing-function: ${this.config.animationOptimization.easingFunction};
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-      }
-      
-      @media (prefers-reduced-motion: reduce) {
-        .hoverboard-animation {
-          transition-duration: 0ms;
-          animation-duration: 0ms;
-        }
-      }
-    `
+    // Check if document is available
+    if (typeof document === 'undefined' || !document) {
+      console.warn('[SAFARI-EXT-PERFORMANCE-001] Document not available for animation optimizations')
+      return
+    }
     
-    if (document.head) {
-      document.head.appendChild(style)
+    try {
+      // Add optimized animation styles
+      const style = document.createElement('style')
+      style.textContent = `
+        .hoverboard-animation {
+          transition-duration: ${this.config.animationOptimization.animationDuration}ms;
+          transition-timing-function: ${this.config.animationOptimization.easingFunction};
+          -webkit-transform: translateZ(0);
+          transform: translateZ(0);
+        }
+        
+        @media (prefers-reduced-motion: reduce) {
+          .hoverboard-animation {
+            transition-duration: 0ms;
+            animation-duration: 0ms;
+          }
+        }
+      `
+      
+      if (document.head) {
+        document.head.appendChild(style)
+      }
+    } catch (error) {
+      console.warn('[SAFARI-EXT-PERFORMANCE-001] Failed to apply animation optimizations:', error)
     }
   }
   
