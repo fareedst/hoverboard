@@ -2,7 +2,7 @@
 
 **Semantic Token:** [OVERLAY-DATA-DISPLAY-001]
 **Date:** 2025-07-15
-**Status:** Active Implementation
+**Status:** ✅ **IMPLEMENTED** - Enhanced Testing Support
 
 ---
 
@@ -73,18 +73,41 @@ Tokens for specific feature implementations:
 this.currentBookmark = actualResponse.data || actualResponse
 
 // [OVERLAY-DATA-REFRESH-001] Disabled automatic refresh to prevent data loss
-debugLog('[OVERLAY-DATA-FIX-001] Using original content data')
+this.logger.log('DEBUG', 'OverlayManager', 'Using original content data')
 
-// [OVERLAY-DATA-DEBUG-001] Enhanced debugging for overlay content
-console.log('🎨 [Overlay Debug] Content received:', content)
+// [OVERLAY-DATA-DEBUG-001] Enhanced debugging for overlay content with structured logging
+this.logger.log('DEBUG', 'OverlayManager', 'Content analysis', {
+  hasBookmark: !!content.bookmark,
+  bookmarkTags: content.bookmark?.tags,
+  tagsType: typeof content.bookmark?.tags,
+  tagsIsArray: Array.isArray(content.bookmark?.tags),
+  pageTitle: content.pageTitle,
+  pageUrl: content.pageUrl
+})
 ```
 
 ### Test Cases  
 ```javascript
-// [OVERLAY-DATA-TEST-001] Overlay data display test
+// [OVERLAY-DATA-TEST-001] Overlay data display test with enhanced mock DOM
 describe('Overlay Data Display', () => {
   it('[OVERLAY-DATA-FIX-001] should display bookmark tags correctly', () => {
+    // [OVERLAY-TEST-MOCK-001] Enhanced mock DOM provides proper element registration
+    const tagElements = mockDocument.querySelectorAll('.tag-element')
+    expect(tagElements.length).toBeGreaterThan(0)
+    
     // Test overlay tag display functionality
+  });
+  
+  it('[OVERLAY-DATA-DEBUG-001] should log critical information during content analysis', async () => {
+    // [OVERLAY-TEST-LOG-001] Enhanced debug logging for troubleshooting
+    const logSpy = jest.spyOn(overlayManager.logger, 'log')
+    
+    await overlayManager.show(content)
+    
+    // Verify content analysis was logged
+    expect(logSpy).toHaveBeenCalledWith('DEBUG', 'OverlayManager', 'Content analysis', expect.any(Object))
+    
+    logSpy.mockRestore()
   });
 });
 ```

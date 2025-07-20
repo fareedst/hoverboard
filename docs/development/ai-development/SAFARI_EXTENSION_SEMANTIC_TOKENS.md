@@ -1,7 +1,7 @@
 # Safari Extension Semantic Tokens
 
 **Date:** 2025-07-19  
-**Status:** Active Development  
+**Status:** ✅ **IMPLEMENTED** - Enhanced Debugging Support  
 **Semantic Tokens:** `SAFARI-EXT-TOKENS-001`, `SAFARI-EXT-CROSS-REF-001`
 
 ## Overview
@@ -122,9 +122,16 @@ import browser from 'webextension-polyfill';
 const isSafari = typeof safari !== 'undefined';
 const isChrome = typeof chrome !== 'undefined' && !isSafari;
 
-// [SAFARI-EXT-DEBUG-001] Enhanced logging for diagnostics
+// [SAFARI-EXT-DEBUG-001] Enhanced logging for diagnostics with structured output
 const logCriticalOperation = (operation, details) => {
-  console.log(`[SAFARI-EXT-DEBUG-001] Critical operation: ${operation}`, details);
+  const timestamp = new Date().toISOString()
+  const platform = isSafari ? 'safari' : 'chrome'
+  console.log(`[${timestamp}] [SAFARI-EXT-DEBUG-001] Critical operation: ${operation}`, {
+    platform,
+    operation,
+    details,
+    userAgent: navigator.userAgent
+  })
 };
 
 // [SAFARI-EXT-ERROR-001] Retry utility function

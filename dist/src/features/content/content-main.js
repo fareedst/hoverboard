@@ -3316,37 +3316,38 @@
      * Show overlay with content
      */
     async show(content) {
-      debugLog3("[OverlayManager] show() called", { content });
-      debugLog3("[CHROME-DEBUG-001] OverlayManager.show called", { platform: navigator.userAgent });
+      this.logger.log("INFO", "OverlayManager", "show() called", { content });
+      this.logger.log("DEBUG", "OverlayManager", "Platform detection", { platform: navigator.userAgent });
       if (typeof chrome !== "undefined" && chrome.runtime) {
-        debugLog3("[CHROME-DEBUG-001] Detected Chrome runtime in OverlayManager");
+        this.logger.log("DEBUG", "OverlayManager", "Detected Chrome runtime");
       } else if (typeof safariEnhancements !== "undefined" && safariEnhancements.runtime) {
-        debugLog3("[CHROME-DEBUG-001] Detected browser polyfill runtime in OverlayManager");
+        this.logger.log("DEBUG", "OverlayManager", "Detected browser polyfill runtime");
       } else {
-        debugError2("[CHROME-DEBUG-001] No recognized extension runtime detected in OverlayManager");
-      }
-      if (!debugLog3 || !debugError2) {
-        console.error("[CHROME-DEBUG-001] utils.js functions missing in OverlayManager");
+        this.logger.log("ERROR", "OverlayManager", "No recognized extension runtime detected");
       }
       try {
-        debugLog3("Showing overlay", { content });
-        console.log("\u{1F3A8} [Overlay Debug] Content received:");
-        console.log("\u{1F3A8} [Overlay Debug] - Full content:", content);
-        console.log("\u{1F3A8} [Overlay Debug] - Bookmark:", content.bookmark);
-        console.log("\u{1F3A8} [Overlay Debug] - Bookmark tags:", content.bookmark?.tags);
-        console.log("\u{1F3A8} [Overlay Debug] - Tags type:", typeof content.bookmark?.tags);
-        console.log("\u{1F3A8} [Overlay Debug] - Tags is array:", Array.isArray(content.bookmark?.tags));
-        console.log("\u{1F3A8} [Overlay Debug] - Page title:", content.pageTitle);
-        console.log("\u{1F3A8} [Overlay Debug] - Page URL:", content.pageUrl);
-        debugLog3("[OVERLAY-DATA-FIX-001] Using original content data");
+        this.logger.log("DEBUG", "OverlayManager", "Starting overlay creation process");
+        this.logger.log("DEBUG", "OverlayManager", "Content analysis", {
+          hasBookmark: !!content.bookmark,
+          bookmarkTags: content.bookmark?.tags,
+          tagsType: typeof content.bookmark?.tags,
+          tagsIsArray: Array.isArray(content.bookmark?.tags),
+          pageTitle: content.pageTitle,
+          pageUrl: content.pageUrl
+        });
+        this.logger.log("DEBUG", "OverlayManager", "Using original content data");
         if (!this.overlayElement) {
-          debugLog3("[OverlayManager] Creating new overlay element");
+          this.logger.log("DEBUG", "OverlayManager", "Creating new overlay element");
           this.createOverlay();
+        } else {
+          this.logger.log("DEBUG", "OverlayManager", "Using existing overlay element");
         }
         this.clearContent();
-        debugLog3("Content cleared");
+        this.logger.log("DEBUG", "OverlayManager", "Content cleared");
+        this.logger.log("DEBUG", "OverlayManager", "Creating main container");
         const mainContainer = this.document.createElement("div");
         mainContainer.style.cssText = "padding: 8px; padding-top: 40px;";
+        this.logger.log("DEBUG", "OverlayManager", "Creating tags container");
         const currentTagsContainer = this.document.createElement("div");
         currentTagsContainer.className = "scrollmenu tags-container";
         currentTagsContainer.style.cssText = `
@@ -3354,6 +3355,7 @@
         padding: 4px;
         border-radius: 4px;
       `;
+        this.logger.log("DEBUG", "OverlayManager", "Creating refresh button");
         const refreshBtn = this.document.createElement("button");
         refreshBtn.className = "refresh-button";
         refreshBtn.innerHTML = "\u{1F504}";
@@ -3380,15 +3382,18 @@
         align-items: center;
         justify-content: center;
       `;
+        this.logger.log("DEBUG", "OverlayManager", "Adding refresh button click handler");
         refreshBtn.onclick = async () => {
           await this.handleRefreshButtonClick();
         };
+        this.logger.log("DEBUG", "OverlayManager", "Adding refresh button keyboard handlers");
         refreshBtn.addEventListener("keydown", async (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             await this.handleRefreshButtonClick();
           }
         });
+        this.logger.log("DEBUG", "OverlayManager", "Creating close button");
         const closeBtn = this.document.createElement("span");
         closeBtn.className = "close-button";
         closeBtn.innerHTML = "\u2715";
@@ -3416,20 +3421,23 @@
         justify-content: center;
       `;
         closeBtn.onclick = () => this.hide();
+        this.logger.log("DEBUG", "OverlayManager", "Adding close button keyboard handlers");
         closeBtn.addEventListener("keydown", (e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             this.hide();
           }
         });
+        this.logger.log("DEBUG", "OverlayManager", "Appending buttons to overlay");
         this.overlayElement.appendChild(closeBtn);
         this.overlayElement.appendChild(refreshBtn);
+        this.logger.log("DEBUG", "OverlayManager", "Creating current tags label");
         const currentLabel = this.document.createElement("span");
         currentLabel.className = "label-primary tiny";
         currentLabel.textContent = "Current:";
         currentLabel.style.cssText = "padding: 0.2em 0.5em; margin-right: 4px;";
         currentTagsContainer.appendChild(currentLabel);
-        debugLog3("[OVERLAY-DEBUG] Checking for tags in content:", {
+        this.logger.log("DEBUG", "OverlayManager", "Processing current tags", {
           hasBookmark: !!content.bookmark,
           bookmarkKeys: content.bookmark ? Object.keys(content.bookmark) : [],
           tags: content.bookmark?.tags,
@@ -3437,15 +3445,17 @@
           tagsIsArray: Array.isArray(content.bookmark?.tags)
         });
         if (content.bookmark?.tags) {
-          debugLog3("Adding tags", { tags: content.bookmark.tags });
+          this.logger.log("DEBUG", "OverlayManager", "Adding current tags", { tags: content.bookmark.tags });
           content.bookmark.tags.forEach((tag) => {
             if (this.isValidTag(tag)) {
+              this.logger.log("DEBUG", "OverlayManager", "Creating tag element", { tag });
               const tagElement = this.document.createElement("span");
               tagElement.className = "tag-element tiny iconTagDeleteInactive";
               tagElement.textContent = tag;
               tagElement.title = "Double-click to remove";
               tagElement.ondblclick = async () => {
                 try {
+                  this.logger.log("DEBUG", "OverlayManager", "Tag double-clicked", { tag });
                   if (content.bookmark && content.bookmark.tags) {
                     const index = content.bookmark.tags.indexOf(tag);
                     if (index > -1) {
@@ -3465,17 +3475,17 @@
                   this.show(content);
                   this.showMessage("Tag deleted successfully", "success");
                 } catch (error) {
-                  debugError2("[event:double-click] [action:delete] [sync:site-record] Failed to delete tag:", error);
+                  this.logger.log("ERROR", "OverlayManager", "Failed to delete tag", { tag, error });
                   this.showMessage("Failed to delete tag", "error");
                 }
               };
               currentTagsContainer.appendChild(tagElement);
             } else {
-              debugLog3("[IMMUTABLE-REQ-TAG-001] Invalid tag found:", tag);
+              this.logger.log("WARN", "OverlayManager", "Invalid tag found", { tag });
             }
           });
         } else {
-          debugLog3("No tags found in bookmark data");
+          this.logger.log("DEBUG", "OverlayManager", "No tags found in bookmark data");
         }
         const tagInput = this.document.createElement("input");
         tagInput.className = "tag-input";
@@ -3862,27 +3872,33 @@
      */
     // [OVERLAY-REFRESH-HANDLER-001] Handle refresh button click with comprehensive error handling and loading state
     async handleRefreshButtonClick() {
+      this.logger.log("INFO", "OverlayManager", "Refresh button clicked");
       const refreshButton = this.document.querySelector(".refresh-button");
+      this.logger.log("DEBUG", "OverlayManager", "Found refresh button", { found: !!refreshButton });
       try {
-        debugLog3("[OVERLAY-REFRESH-HANDLER-001] Refresh button clicked");
         if (refreshButton) {
+          this.logger.log("DEBUG", "OverlayManager", "Adding loading state to refresh button");
           refreshButton.classList.add("loading");
           refreshButton.disabled = true;
         }
         this.showMessage("Refreshing data...", "info");
+        this.logger.log("DEBUG", "OverlayManager", "Starting overlay content refresh");
         const updatedContent = await this.refreshOverlayContent();
         if (updatedContent) {
+          this.logger.log("DEBUG", "OverlayManager", "Content refresh successful", { updatedContent });
           this.show(updatedContent);
           this.showMessage("Data refreshed successfully", "success");
-          debugLog3("[OVERLAY-REFRESH-HANDLER-001] Overlay refreshed successfully");
+          this.logger.log("INFO", "OverlayManager", "Overlay refreshed successfully");
         } else {
+          this.logger.log("ERROR", "OverlayManager", "No updated content received");
           throw new Error("Failed to get updated data");
         }
       } catch (error) {
-        debugError2("[OVERLAY-REFRESH-HANDLER-001] Refresh failed:", error);
+        this.logger.log("ERROR", "OverlayManager", "Refresh failed", { error });
         this.showMessage("Failed to refresh data", "error");
       } finally {
         if (refreshButton) {
+          this.logger.log("DEBUG", "OverlayManager", "Removing loading state from refresh button");
           refreshButton.classList.remove("loading");
           refreshButton.disabled = false;
         }

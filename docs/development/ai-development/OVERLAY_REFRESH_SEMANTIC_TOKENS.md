@@ -3,7 +3,7 @@
 **Semantic Token:** [OVERLAY-REFRESH-001]
 **Cross-References:** [OVERLAY-DATA-DISPLAY-001], [OVERLAY-THEMING-001], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
 **Date:** 2025-01-27
-**Status:** Active Implementation
+**Status:** ✅ **IMPLEMENTED** - Enhanced Testing Support
 
 ---
 
@@ -102,22 +102,28 @@ refreshBtn.addEventListener('keydown', async (e) => {
   }
 })
 
-// [OVERLAY-REFRESH-INTEGRATION-001] Handle refresh button click
+// [OVERLAY-REFRESH-INTEGRATION-001] Handle refresh button click with enhanced logging
 async handleRefreshButtonClick() {
+  // [OVERLAY-TEST-LOG-001] Enhanced debug logging for refresh button click
+  this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
+  
   try {
-    debugLog('[OVERLAY-REFRESH-HANDLER-001] Refresh button clicked')
+    this.logger.log('DEBUG', 'OverlayManager', 'Starting overlay content refresh')
     this.showMessage('Refreshing data...', 'info')
     
     const updatedContent = await this.refreshOverlayContent()
     
     if (updatedContent) {
+      this.logger.log('DEBUG', 'OverlayManager', 'Content refresh successful', { updatedContent })
       this.show(updatedContent)
       this.showMessage('Data refreshed successfully', 'success')
+      this.logger.log('INFO', 'OverlayManager', 'Overlay refreshed successfully')
     } else {
+      this.logger.log('ERROR', 'OverlayManager', 'No updated content received')
       throw new Error('Failed to get updated data')
     }
   } catch (error) {
-    debugError('[OVERLAY-REFRESH-HANDLER-001] Refresh failed:', error)
+    this.logger.log('ERROR', 'OverlayManager', 'Refresh failed', { error })
     this.showMessage('Failed to refresh data', 'error')
   }
 }
@@ -153,33 +159,56 @@ async handleRefreshButtonClick() {
 
 ### Test Cases
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Refresh button functionality tests
+// [OVERLAY-REFRESH-TEST-001] Refresh button functionality tests with enhanced mock DOM
 describe('Overlay Refresh Button', () => {
   test('[OVERLAY-REFRESH-UI-001] Should render refresh button correctly', () => {
+    // [OVERLAY-TEST-MOCK-001] Enhanced mock DOM provides proper element registration
+    const refreshButton = mockDocument.querySelector('.refresh-button')
+    expect(refreshButton).not.toBeNull()
+    
     // Test button element creation
     // Test positioning and styling
     // Test accessibility attributes
   })
 
-  test('[OVERLAY-REFRESH-HANDLER-001] Should handle refresh button click', async () => {
+  test('[OVERLAY-REFRESH-HANDLER-001] Should handle refresh button click with enhanced logging', async () => {
+    // [OVERLAY-TEST-LOG-001] Enhanced debug logging for troubleshooting
+    const logSpy = jest.spyOn(overlayManager.logger, 'log')
+    
+    await overlayManager.handleRefreshButtonClick()
+    
+    // Verify refresh process was logged
+    expect(logSpy).toHaveBeenCalledWith('INFO', 'OverlayManager', 'Refresh button clicked')
+    expect(logSpy).toHaveBeenCalledWith('DEBUG', 'OverlayManager', 'Starting overlay content refresh')
+    
+    logSpy.mockRestore()
+    
     // Test successful refresh operation
     // Test error handling
     // Test user feedback
   })
 
   test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should support keyboard navigation', () => {
+    // [OVERLAY-TEST-ARIA-001] Verify ARIA attributes were set
+    const refreshButton = mockDocument.querySelector('.refresh-button')
+    expect(refreshButton.setAttribute).toHaveBeenCalledWith('aria-label', 'Refresh Data')
+    expect(refreshButton.setAttribute).toHaveBeenCalledWith('role', 'button')
+    expect(refreshButton.setAttribute).toHaveBeenCalledWith('tabindex', '0')
+    
     // Test keyboard event handling
     // Test focus management
     // Test ARIA attributes
   })
 
   test('[OVERLAY-REFRESH-INTEGRATION-001] Should integrate with message service', async () => {
+    // [OVERLAY-TEST-MOCK-001] Enhanced mock DOM enables proper integration testing
     // Test message service communication
     // Test data flow coordination
     // Test overlay content updates
   })
 
   test('[OVERLAY-REFRESH-ERROR-001] Should handle refresh errors gracefully', async () => {
+    // [OVERLAY-TEST-ERROR-001] Enhanced error handling with detailed logging
     // Test network failure scenarios
     // Test invalid data responses
     // Test user error feedback

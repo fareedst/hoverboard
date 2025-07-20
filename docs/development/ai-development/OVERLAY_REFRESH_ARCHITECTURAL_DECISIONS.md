@@ -18,6 +18,8 @@ This document outlines the architectural decisions made for the overlay refresh 
 - ✅ **Accessibility**: ARIA labels and keyboard support
 - ✅ **Theme Integration**: Uses theme-aware CSS variables
 - ✅ **Error Handling**: Graceful error handling with user feedback
+- ✅ **Enhanced Testing**: Comprehensive mock DOM and debug logging support
+- ✅ **Debug Logging**: Structured logging for critical operations and branching decisions
 
 ---
 
@@ -86,23 +88,27 @@ const response = await this.messageService.sendMessage({
 
 ### [OVERLAY-REFRESH-ARCH-003] User Feedback System
 
-**Decision**: Use existing `showMessage()` system for user feedback
+**Decision**: Use existing `showMessage()` system for user feedback with enhanced debug logging
 
 **Rationale**:
 - **Consistency**: Consistent with other overlay operations (tag management, toggle buttons)
 - **Theme Integration**: Provides theme-aware styling through existing system
 - **Auto-dismissal**: Messages auto-dismiss after 3 seconds, preventing UI clutter
 - **Error States**: Supports different message types (success, error, info)
+- **Debug Logging**: Enhanced logging provides comprehensive troubleshooting capabilities
 
 **Implementation Details**:
 ```javascript
-// [OVERLAY-REFRESH-HANDLER-001] Show loading state
+// [OVERLAY-REFRESH-HANDLER-001] Show loading state with enhanced logging
+this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
 this.showMessage('Refreshing data...', 'info')
 
-// [OVERLAY-REFRESH-HANDLER-001] Show success state
+// [OVERLAY-REFRESH-HANDLER-001] Show success state with enhanced logging
+this.logger.log('DEBUG', 'OverlayManager', 'Content refresh successful', { updatedContent })
 this.showMessage('Data refreshed successfully', 'success')
 
-// [OVERLAY-REFRESH-ERROR-001] Show error state
+// [OVERLAY-REFRESH-ERROR-001] Show error state with enhanced logging
+this.logger.log('ERROR', 'OverlayManager', 'Refresh failed', { error })
 this.showMessage('Failed to refresh data', 'error')
 ```
 
@@ -227,22 +233,28 @@ refreshBtn.addEventListener('keydown', async (e) => {
 
 **Implementation Details**:
 ```javascript
-// [OVERLAY-REFRESH-ERROR-001] Comprehensive error handling
+// [OVERLAY-REFRESH-ERROR-001] Comprehensive error handling with enhanced logging
 async handleRefreshButtonClick() {
+  // [OVERLAY-TEST-LOG-001] Enhanced debug logging for refresh button click
+  this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
+  
   try {
-    debugLog('[OVERLAY-REFRESH-HANDLER-001] Refresh button clicked')
+    this.logger.log('DEBUG', 'OverlayManager', 'Starting overlay content refresh')
     this.showMessage('Refreshing data...', 'info')
     
     const updatedContent = await this.refreshOverlayContent()
     
     if (updatedContent) {
+      this.logger.log('DEBUG', 'OverlayManager', 'Content refresh successful', { updatedContent })
       this.show(updatedContent)
       this.showMessage('Data refreshed successfully', 'success')
+      this.logger.log('INFO', 'OverlayManager', 'Overlay refreshed successfully')
     } else {
+      this.logger.log('ERROR', 'OverlayManager', 'No updated content received')
       throw new Error('Failed to get updated data')
     }
   } catch (error) {
-    debugError('[OVERLAY-REFRESH-HANDLER-001] Refresh failed:', error)
+    this.logger.log('ERROR', 'OverlayManager', 'Refresh failed', { error })
     this.showMessage('Failed to refresh data', 'error')
   }
 }

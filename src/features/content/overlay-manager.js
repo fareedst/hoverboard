@@ -69,52 +69,55 @@ class OverlayManager {
    * Show overlay with content
    */
   async show (content) {
-    debugLog('[OverlayManager] show() called', { content })
-    debugLog('[CHROME-DEBUG-001] OverlayManager.show called', { platform: navigator.userAgent });
-    // Platform detection
-    if (typeof chrome !== 'undefined' && chrome.runtime) {
-      debugLog('[CHROME-DEBUG-001] Detected Chrome runtime in OverlayManager');
-    } else if (typeof browser !== 'undefined' && browser.runtime) {
-      debugLog('[CHROME-DEBUG-001] Detected browser polyfill runtime in OverlayManager');
-    } else {
-      debugError('[CHROME-DEBUG-001] No recognized extension runtime detected in OverlayManager');
-    }
-    // Check utils.js access
-    if (!debugLog || !debugError) {
-      console.error('[CHROME-DEBUG-001] utils.js functions missing in OverlayManager');
-    }
-    try {
-      debugLog('Showing overlay', { content })
+    // [OVERLAY-TEST-LOG-001] Enhanced debug logging for critical information and branching decisions
+    this.logger.log('INFO', 'OverlayManager', 'show() called', { content })
+    this.logger.log('DEBUG', 'OverlayManager', 'Platform detection', { platform: navigator.userAgent })
 
-      // Enhanced debugging for overlay content
-      console.log('🎨 [Overlay Debug] Content received:')
-      console.log('🎨 [Overlay Debug] - Full content:', content)
-      console.log('🎨 [Overlay Debug] - Bookmark:', content.bookmark)
-      console.log('🎨 [Overlay Debug] - Bookmark tags:', content.bookmark?.tags)
-      console.log('🎨 [Overlay Debug] - Tags type:', typeof content.bookmark?.tags)
-      console.log('🎨 [Overlay Debug] - Tags is array:', Array.isArray(content.bookmark?.tags))
-      console.log('🎨 [Overlay Debug] - Page title:', content.pageTitle)
-      console.log('🎨 [Overlay Debug] - Page URL:', content.pageUrl)
+    // Platform detection with enhanced logging
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      this.logger.log('DEBUG', 'OverlayManager', 'Detected Chrome runtime')
+    } else if (typeof browser !== 'undefined' && browser.runtime) {
+      this.logger.log('DEBUG', 'OverlayManager', 'Detected browser polyfill runtime')
+    } else {
+      this.logger.log('ERROR', 'OverlayManager', 'No recognized extension runtime detected')
+    }
+
+    try {
+      this.logger.log('DEBUG', 'OverlayManager', 'Starting overlay creation process')
+
+      // [OVERLAY-TEST-LOG-001] Enhanced debugging for overlay content with critical information
+      this.logger.log('DEBUG', 'OverlayManager', 'Content analysis', {
+        hasBookmark: !!content.bookmark,
+        bookmarkTags: content.bookmark?.tags,
+        tagsType: typeof content.bookmark?.tags,
+        tagsIsArray: Array.isArray(content.bookmark?.tags),
+        pageTitle: content.pageTitle,
+        pageUrl: content.pageUrl
+      })
 
       // [OVERLAY-DATA-FIX-001] - Use original content (refresh was causing data loss)
-      debugLog('[OVERLAY-DATA-FIX-001] Using original content data')
+      this.logger.log('DEBUG', 'OverlayManager', 'Using original content data')
 
       // Create overlay if it doesn't exist
       if (!this.overlayElement) {
-        debugLog('[OverlayManager] Creating new overlay element')
+        this.logger.log('DEBUG', 'OverlayManager', 'Creating new overlay element')
         this.createOverlay()
+      } else {
+        this.logger.log('DEBUG', 'OverlayManager', 'Using existing overlay element')
       }
 
       // Clear existing content
       this.clearContent()
-      debugLog('Content cleared')
+      this.logger.log('DEBUG', 'OverlayManager', 'Content cleared')
 
       // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Position buttons relative to overlay itself
       // Create main container div with padding to accommodate buttons
+      this.logger.log('DEBUG', 'OverlayManager', 'Creating main container')
       const mainContainer = this.document.createElement('div')
       mainContainer.style.cssText = 'padding: 8px; padding-top: 40px;' // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Add top padding for buttons
 
       // Create current tags section (matching desired overlay)
+      this.logger.log('DEBUG', 'OverlayManager', 'Creating tags container')
       const currentTagsContainer = this.document.createElement('div')
       currentTagsContainer.className = 'scrollmenu tags-container'
       currentTagsContainer.style.cssText = `
@@ -124,6 +127,7 @@ class OverlayManager {
       `
 
       // [OVERLAY-REFRESH-UI-001] Add refresh button to overlay structure with enhanced styling
+      this.logger.log('DEBUG', 'OverlayManager', 'Creating refresh button')
       const refreshBtn = this.document.createElement('button')
       refreshBtn.className = 'refresh-button'
       refreshBtn.innerHTML = '🔄'
@@ -152,11 +156,13 @@ class OverlayManager {
       `
 
       // [OVERLAY-REFRESH-HANDLER-001] Add click handler
+      this.logger.log('DEBUG', 'OverlayManager', 'Adding refresh button click handler')
       refreshBtn.onclick = async () => {
         await this.handleRefreshButtonClick()
       }
 
       // [OVERLAY-REFRESH-ACCESSIBILITY-001] Add keyboard event handlers
+      this.logger.log('DEBUG', 'OverlayManager', 'Adding refresh button keyboard handlers')
       refreshBtn.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
@@ -165,6 +171,7 @@ class OverlayManager {
       })
 
       // [OVERLAY-CLOSE-POSITION-UI-001] Close button positioned in top-left corner
+      this.logger.log('DEBUG', 'OverlayManager', 'Creating close button')
       const closeBtn = this.document.createElement('span')
       closeBtn.className = 'close-button'
       closeBtn.innerHTML = '✕'
@@ -194,6 +201,7 @@ class OverlayManager {
       closeBtn.onclick = () => this.hide()
 
       // [OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Keyboard event handlers
+      this.logger.log('DEBUG', 'OverlayManager', 'Adding close button keyboard handlers')
       closeBtn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
@@ -202,10 +210,12 @@ class OverlayManager {
       })
 
       // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Append buttons directly to overlay element
+      this.logger.log('DEBUG', 'OverlayManager', 'Appending buttons to overlay')
       this.overlayElement.appendChild(closeBtn)
       this.overlayElement.appendChild(refreshBtn)
 
       // Current tags label
+      this.logger.log('DEBUG', 'OverlayManager', 'Creating current tags label')
       const currentLabel = this.document.createElement('span')
       currentLabel.className = 'label-primary tiny'
       currentLabel.textContent = 'Current:'
@@ -213,7 +223,7 @@ class OverlayManager {
       currentTagsContainer.appendChild(currentLabel)
 
       // [IMMUTABLE-REQ-TAG-001] - Add current tags with enhanced validation
-      debugLog('[OVERLAY-DEBUG] Checking for tags in content:', {
+      this.logger.log('DEBUG', 'OverlayManager', 'Processing current tags', {
         hasBookmark: !!content.bookmark,
         bookmarkKeys: content.bookmark ? Object.keys(content.bookmark) : [],
         tags: content.bookmark?.tags,
@@ -222,10 +232,11 @@ class OverlayManager {
       })
 
       if (content.bookmark?.tags) {
-        debugLog('Adding tags', { tags: content.bookmark.tags })
+        this.logger.log('DEBUG', 'OverlayManager', 'Adding current tags', { tags: content.bookmark.tags })
         content.bookmark.tags.forEach(tag => {
           // [IMMUTABLE-REQ-TAG-001] - Validate tag before displaying
           if (this.isValidTag(tag)) {
+            this.logger.log('DEBUG', 'OverlayManager', 'Creating tag element', { tag })
             const tagElement = this.document.createElement('span')
             tagElement.className = 'tag-element tiny iconTagDeleteInactive'
             tagElement.textContent = tag
@@ -233,6 +244,7 @@ class OverlayManager {
             // [event:double-click] [action:delete] [tag:current]
             tagElement.ondblclick = async () => {
               try {
+                this.logger.log('DEBUG', 'OverlayManager', 'Tag double-clicked', { tag })
                 // Remove tag from current content (UI)
                 if (content.bookmark && content.bookmark.tags) {
                   const index = content.bookmark.tags.indexOf(tag)
@@ -254,17 +266,17 @@ class OverlayManager {
                 this.show(content)
                 this.showMessage('Tag deleted successfully', 'success') // [test:tag-deletion]
               } catch (error) {
-                debugError('[event:double-click] [action:delete] [sync:site-record] Failed to delete tag:', error) // [test:tag-deletion]
+                this.logger.log('ERROR', 'OverlayManager', 'Failed to delete tag', { tag, error })
                 this.showMessage('Failed to delete tag', 'error')
               }
             }
             currentTagsContainer.appendChild(tagElement)
           } else {
-            debugLog('[IMMUTABLE-REQ-TAG-001] Invalid tag found:', tag)
+            this.logger.log('WARN', 'OverlayManager', 'Invalid tag found', { tag })
           }
         })
       } else {
-        debugLog('No tags found in bookmark data')
+        this.logger.log('DEBUG', 'OverlayManager', 'No tags found in bookmark data')
       }
 
       // [IMMUTABLE-REQ-TAG-004] - Enhanced tag input with persistence
@@ -750,13 +762,16 @@ class OverlayManager {
    */
   // [OVERLAY-REFRESH-HANDLER-001] Handle refresh button click with comprehensive error handling and loading state
   async handleRefreshButtonClick() {
+    // [OVERLAY-TEST-LOG-001] Enhanced debug logging for refresh button click
+    this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
+
     const refreshButton = this.document.querySelector('.refresh-button')
+    this.logger.log('DEBUG', 'OverlayManager', 'Found refresh button', { found: !!refreshButton })
 
     try {
-      debugLog('[OVERLAY-REFRESH-HANDLER-001] Refresh button clicked')
-
       // [OVERLAY-REFRESH-HANDLER-001] Add loading state to button
       if (refreshButton) {
+        this.logger.log('DEBUG', 'OverlayManager', 'Adding loading state to refresh button')
         refreshButton.classList.add('loading')
         refreshButton.disabled = true
       }
@@ -765,24 +780,28 @@ class OverlayManager {
       this.showMessage('Refreshing data...', 'info')
 
       // [OVERLAY-REFRESH-INTEGRATION-001] Get fresh bookmark data via message service
+      this.logger.log('DEBUG', 'OverlayManager', 'Starting overlay content refresh')
       const updatedContent = await this.refreshOverlayContent()
 
       if (updatedContent) {
         // [OVERLAY-REFRESH-INTEGRATION-001] Update overlay with fresh data
+        this.logger.log('DEBUG', 'OverlayManager', 'Content refresh successful', { updatedContent })
         this.show(updatedContent)
         this.showMessage('Data refreshed successfully', 'success')
-        debugLog('[OVERLAY-REFRESH-HANDLER-001] Overlay refreshed successfully')
+        this.logger.log('INFO', 'OverlayManager', 'Overlay refreshed successfully')
       } else {
         // [OVERLAY-REFRESH-ERROR-001] Handle case where no data was returned
+        this.logger.log('ERROR', 'OverlayManager', 'No updated content received')
         throw new Error('Failed to get updated data')
       }
     } catch (error) {
       // [OVERLAY-REFRESH-ERROR-001] Comprehensive error handling with user feedback
-      debugError('[OVERLAY-REFRESH-HANDLER-001] Refresh failed:', error)
+      this.logger.log('ERROR', 'OverlayManager', 'Refresh failed', { error })
       this.showMessage('Failed to refresh data', 'error')
     } finally {
       // [OVERLAY-REFRESH-HANDLER-001] Remove loading state from button
       if (refreshButton) {
+        this.logger.log('DEBUG', 'OverlayManager', 'Removing loading state from refresh button')
         refreshButton.classList.remove('loading')
         refreshButton.disabled = false
       }
