@@ -1,10 +1,32 @@
 # Hoverboard Browser Extension
 
+[![Build Status](https://github.com/fareedst/hoverboard/workflows/Build%20and%20Test/badge.svg)](https://github.com/fareedst/hoverboard/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
+[![Safari Extension](https://img.shields.io/badge/Safari-Extension-orange.svg)](https://apps.apple.com)
+
 A modern browser extension for efficient bookmark management and web page tagging, with cross-browser support for Chrome and Safari.
 
-## Status
+## 🚀 Quick Start
 
-**Current Version:** 1.0.0  
+### Install from GitHub Releases
+
+1. **Download** the latest release from [Releases](https://github.com/fareedst/hoverboard/releases)
+2. **Chrome**: Extract and load as unpacked extension
+3. **Safari**: Double-click the `.safariextz` file
+
+### Build from Source
+
+```bash
+git clone https://github.com/fareedst/hoverboard.git
+cd hoverboard
+npm install
+npm run build:dev
+```
+
+## 📋 Status
+
+**Current Version:** 1.0.6.80  
 **Last Updated:** 2025-07-20  
 **Safari Extension Status:** Phase 1 Complete - Safari App Extension Integration
 

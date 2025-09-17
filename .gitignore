@@ -28,3 +28,17 @@ docs/development-sessions/prompts
 # distribution
 /dist/
 /increment-version.sh
+
+# GitHub releases
+*.zip
+*.safariextz
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+.DS_Store

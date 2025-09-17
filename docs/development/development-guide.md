@@ -17,7 +17,7 @@ This guide provides comprehensive instructions for setting up your development e
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/hoverboard.git
+git clone https://github.com/fareedst/hoverboard.git
 cd hoverboard
 
 # Install dependencies

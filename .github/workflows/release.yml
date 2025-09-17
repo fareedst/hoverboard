@@ -1,0 +1,76 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build Chrome extension
+      run: npm run build:prod
+    
+    - name: Create Chrome extension zip
+      run: |
+        cd dist
+        zip -r ../hoverboard-chrome-extension.zip .
+        cd ..
+    
+    - name: Upload Chrome extension to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./hoverboard-chrome-extension.zip
+        asset_name: hoverboard-chrome-extension.zip
+        asset_content_type: application/zip
+
+  create-safari-release:
+    runs-on: macos-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Build Safari extension
+      run: npm run safari:build
+    
+    - name: Create Safari extension zip
+      run: |
+        cd safari/dist
+        zip -r ../../hoverboard-safari-extension.zip .
+        cd ../..
+    
+    - name: Upload Safari extension to release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./hoverboard-safari-extension.zip
+        asset_name: hoverboard-safari-extension.zip
+        asset_content_type: application/zip

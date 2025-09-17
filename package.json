@@ -1,6 +1,6 @@
 {
   "name": "hoverboard",
-  "version": "1.0.6.62",
+  "version": "1.0.6.80",
   "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
   "type": "module",
   "scripts": {
@@ -38,7 +38,11 @@
     "safari:package": "node scripts/safari-build.js package",
     "safari:deploy": "node scripts/safari-deploy.js",
     "safari:appstore": "node scripts/safari-deploy.js appstore",
-    "safari:xcode": "node scripts/safari-deploy.js xcode"
+    "safari:xcode": "node scripts/safari-deploy.js xcode",
+    "release": "node scripts/create-release.js",
+    "release:chrome": "npm run build:prod && node scripts/create-release.js",
+    "release:safari": "npm run safari:build && node scripts/create-release.js",
+    "github:setup": "node scripts/github-setup.js"
   },
   "author": "Fareed Stevenson",
   "license": "ISC",
@@ -50,9 +54,10 @@
     "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.28.0",
+    "@babel/core": "^7.28.4",
+    "@babel/plugin-syntax-import-meta": "^7.10.4",
     "@babel/plugin-transform-modules-commonjs": "^7.27.1",
-    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-env": "^7.28.3",
     "@jest/globals": "^29.7.0",
     "@playwright/test": "^1.40.0",
     "@testing-library/dom": "^9.3.3",
