@@ -42,37 +42,19 @@ jobs:
         echo "tag=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
     
     - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.get_version.tag }}
-        release_name: Hoverboard ${{ steps.get_version.tag }}
+        name: Hoverboard ${{ steps.get_version.tag }}
         body: |
           Release ${{ steps.get_version.tag }}
           
           See [CHANGELOG.md](CHANGELOG.md) for details.
+        files: |
+          hoverboard-chrome-extension.zip
+          hoverboard-source.zip
         draft: false
         prerelease: false
-    
-    - name: Upload Chrome extension to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./hoverboard-chrome-extension.zip
-        asset_name: hoverboard-chrome-extension-v${{ steps.get_version.version }}.zip
-        asset_content_type: application/zip
-    
-    - name: Upload source zip to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./hoverboard-source.zip
-        asset_name: hoverboard-source-v${{ steps.get_version.version }}.zip
-        asset_content_type: application/zip
 
