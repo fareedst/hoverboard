@@ -1,51 +1,55 @@
 # 🔍 Hoverboard Extension Feature Analysis
 
+> **⚠️ NOTE**: This document provides historical feature analysis. For current requirements, architecture decisions, and implementation details, see the STDD files.
+
+## 🔗 STDD Reference
+
+**All requirements, architecture decisions, and implementation decisions are now coordinated through the STDD folder:**
+
+- **Requirements**: See `stdd/requirements.md`
+  - `[REQ:PINBOARD_COMPATIBILITY]` - Pinboard API Compatibility
+  - `[REQ:SMART_BOOKMARKING]` - Smart Bookmarking
+  - `[REQ:TAG_MANAGEMENT]` - Tag Management
+  - `[REQ:OVERLAY_SYSTEM]` - Overlay System
+  - `[REQ:RECENT_TAGS_SYSTEM]` - Recent Tags System
+
+- **Architecture Decisions**: See `stdd/architecture-decisions.md`
+  - `[ARCH:PINBOARD_API]` - Pinboard API Integration Architecture
+  - `[ARCH:MESSAGE_HANDLING]` - Message Handling Architecture
+  - `[ARCH:OVERLAY]` - Overlay System Architecture
+  - `[ARCH:TAG_SYSTEM]` - Tag System Architecture
+
+- **Implementation Decisions**: See `stdd/implementation-decisions.md`
+  - `[IMPL:PINBOARD_API]` - Pinboard API Service Implementation
+  - `[IMPL:MESSAGE_HANDLING]` - Message Handling System Implementation
+  - `[IMPL:CONTENT_SCRIPT]` - Content Script Injection Implementation
+  - `[IMPL:TAG_SYSTEM]` - Tag Service Implementation
+
+- **Semantic Tokens**: See `stdd/semantic-tokens.md` for complete token registry
+- **Tasks**: See `stdd/tasks.md` for active task tracking
+
 ## 📊 Core Feature Mapping Matrix
 
+> **Historical Reference**: The following feature analysis is preserved for historical context. For current implementation details, see STDD files above.
+
 ### 🎯 **FEATURE 1: Pinboard API Integration**
+**STDD Reference**: `[REQ:PINBOARD_COMPATIBILITY]`, `[ARCH:PINBOARD_API]`, `[IMPL:PINBOARD_API]`
+
 **Files:** `src/bg/pinboard.js` (392 lines), `src/bg/background.js` (auth portions)
-**Functionality:**
-- Authentication management with API tokens
-- Bookmark retrieval via `/posts/get` endpoint  
-- Recent posts fetching via `/posts/recent` endpoint
-- Bookmark creation/update via `/posts/add` endpoint
-- Bookmark deletion via `/posts/delete` endpoint
-- Tag management and manipulation
-- Rate limiting and retry logic (429 status handling)
-- Error handling for authentication (401 status)
 
 **Key Classes:**
 - `Pb` - Main Pinboard API wrapper class
 - `AuthSettings` - Authentication and token management
 
 ### 🎯 **FEATURE 2: Background Service & Message Handling**
-**Files:** `src/bg/background.js` (545 lines)
-**Functionality:**
-- Central message routing system with 15+ message types
-- Browser action badge management and visual indicators
-- Tab-specific state management
-- URL filtering and site blocking system
-- Authentication state persistence
-- Options/settings management
-- Search functionality for titles and content
+**STDD Reference**: `[ARCH:MESSAGE_HANDLING]`, `[IMPL:MESSAGE_HANDLING]`
 
-**Key Message Types:**
-- `msgBackReadCurrent` - Get current page bookmark data
-- `msgBackReadRecent` - Fetch recent bookmarks
-- `msgBackSaveTag` - Save new tags to bookmark
-- `msgBackDeletePin` - Delete bookmark
-- `msgBackDeleteTag` - Remove specific tag
-- `msgBackInhibitUrlAppend` - Block site from processing
+**Files:** `src/bg/background.js` (545 lines)
 
 ### 🎯 **FEATURE 3: Content Script Injection System**
+**STDD Reference**: `[REQ:OVERLAY_SYSTEM]`, `[ARCH:OVERLAY]`, `[IMPL:CONTENT_SCRIPT]`
+
 **Files:** `src/inject/inject.js` (533 lines), `src/inject/hoverInjector.js` (248 lines)
-**Functionality:**
-- Dynamic overlay injection on all pages
-- Hover trigger system with configurable delays
-- DOM manipulation for bookmark interface
-- Event handling for user interactions
-- Responsive design with Pure CSS framework
-- Accessibility features and keyboard navigation
 
 **Key Components:**
 - `displayHover()` - Main overlay display logic
@@ -54,21 +58,14 @@
 - `Buttoner` class - Interactive button creation
 
 ### 🎯 **FEATURE 4: User Interface Components**
+**STDD Reference**: `[REQ:SMART_BOOKMARKING]`, `[REQ:TAG_MANAGEMENT]`, `[REQ:OVERLAY_SYSTEM]`
+
 **Files:** `src/inject/in_overlay.js` (122 lines), `src/browser_action/` directory
-**Functionality:**
-- Popup interface for quick access
-- Overlay system for in-page interaction
-- Tag input and suggestion system
-- Visual feedback for bookmark states
-- Configuration options interface
 
 ### 🎯 **FEATURE 5: Tag Management System**
+**STDD Reference**: `[REQ:RECENT_TAGS_SYSTEM]`, `[REQ:TAG_MANAGEMENT]`, `[ARCH:TAG_SYSTEM]`, `[IMPL:TAG_SYSTEM]`
+
 **Files:** `src/bg/throttled_recent_tags.js` (103 lines)
-**Functionality:**
-- Recent tags caching with throttling
-- Tag suggestion algorithms
-- Tag frequency tracking
-- Memory optimization for tag storage
 
 ### 🎯 **FEATURE 6: Configuration & Options**
 **Files:** `src/shared/config.js` (63 lines), `src/options_custom/` directory

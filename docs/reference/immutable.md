@@ -6,68 +6,38 @@
 
 This document establishes the core, unchangeable requirements for the Hoverboard extension that must be preserved across all development phases and iterations.
 
-## 🛡️ Core Extension Identity
+## 🔗 STDD Requirements Reference
 
-### **Extension Metadata (NEVER CHANGE)**
-- **Name**: "Hoverboard"
-- **Purpose**: Pinboard.in bookmarking interface enhancement
-- **Target Platform**: Chrome/Chromium-based browsers
-- **Architecture**: Browser extension with content script injection
+**⚠️ IMPORTANT**: All immutable requirements are now documented in the STDD requirements file. This file serves as a quick reference and compliance checklist.
 
-### **Core User Experience (PRESERVE)**
-- **Primary Function**: Enhance Pinboard.in bookmarking workflow
-- **Hover Interface**: Non-intrusive overlay on webpage hover
-- **Quick Actions**: Add/edit bookmarks without leaving current page
-- **Tag Management**: Recent tags and quick tag insertion
-- **Private Bookmarking**: Support for private bookmark management
+👉 **See `stdd/requirements.md` for complete immutable requirements:**
 
-## 🔧 Technical Immutable Requirements
+### Immutable Requirements (Major Version Change Required)
+- `[REQ:EXTENSION_IDENTITY]` - Extension Identity Preservation
+- `[REQ:CORE_UX_PRESERVATION]` - Core User Experience Preservation
+- `[REQ:MANIFEST_V3_MIGRATION]` - Manifest V3 Migration
+- `[REQ:PINBOARD_COMPATIBILITY]` - Pinboard API Compatibility
+- `[REQ:CHROME_STORAGE_USAGE]` - Chrome Storage API Usage
+- `[REQ:RECENT_TAGS_SYSTEM]` - Recent Tags System
 
-### **Manifest V3 Migration (CRITICAL)**
-- **Target**: Manifest V3 compliance (current: V2)
-- **Service Worker**: Replace background scripts with service worker
-- **Permissions**: Maintain current functionality while using V3 permissions
-- **Content Scripts**: Preserve injection patterns and functionality
+### Core Functional Requirements
+- `[REQ:SMART_BOOKMARKING]` - Smart Bookmarking
+- `[REQ:TAG_MANAGEMENT]` - Tag Management
+- `[REQ:DARK_THEME]` - Dark Theme Support
+- `[REQ:OVERLAY_SYSTEM]` - Overlay System
+- `[REQ:BADGE_INDICATORS]` - Badge Indicators
+- `[REQ:SITE_MANAGEMENT]` - Site Management
+- `[REQ:SEARCH_FUNCTIONALITY]` - Search Functionality
+- `[REQ:PRIVACY_CONTROLS]` - Privacy Controls
 
-### **API Integration (PRESERVE)**
-- **Pinboard API**: Maintain compatibility with Pinboard.in API
-- **Authentication**: Token-based authentication (preserve current method)
-- **API Endpoints**: Preserve all current Pinboard API integrations
-- **Rate Limiting**: Respect Pinboard API rate limits
+**For architecture decisions that fulfill these requirements:**
+👉 See `stdd/architecture-decisions.md`
 
-### **Data Storage (MAINTAIN)**
-- **Chrome Storage API**: Use chrome.storage.sync for user settings
-- **Local Storage**: Use chrome.storage.local for temporary data
-- **Configuration**: Preserve user configuration migration capability
-- **Privacy**: No external data collection or tracking
+**For implementation details:**
+👉 See `stdd/implementation-decisions.md`
 
-## 🎯 Feature Immutable Specifications
-
-### **Hover Interface (CORE FUNCTIONALITY)**
-- **Trigger**: Mouse hover activation on webpage elements
-- **Overlay**: Semi-transparent overlay with bookmark interface
-- **Non-Intrusive**: Must not interfere with normal webpage interaction
-- **Responsive**: Adapt to different screen sizes and page layouts
-
-### **Bookmark Management (PRESERVE ALL)**
-- **Add Bookmarks**: Quick bookmark creation with URL, title, description, tags
-- **Edit Bookmarks**: Modify existing bookmark details
-- **Tag Management**: Display recent tags, add new tags, tag suggestions
-- **Private Toggle**: Support for private/public bookmark settings
-- **Delete/Archive**: Support for bookmark removal and archiving
-
-### **Recent Tags System (MAINTAIN)**
-- **Tag History**: Preserve recently used tags across sessions
-- **Tag Suggestions**: Smart tag completion and suggestions
-- **Tag Storage**: Maintain tag history in sync storage
-- **Tag Display**: Show recent tags in bookmark interface
-- **Tag Addition to Recent**: When a tag is added to a record, it shall be added to the Recent Tags list (but not displayed on the current tab if it is a duplicate of an existing tag) `[IMMUTABLE-REQ-TAG-001]`
-
-### **Configuration System (PRESERVE COMPATIBILITY)**
-- **User Settings**: All current user-configurable options must remain
-- **Migration**: Support migration from V2 configuration to V3
-- **Backwards Compatibility**: Preserve existing user settings during updates
-- **Reset Functionality**: Allow users to reset to default configuration
+**For semantic token registry:**
+👉 See `stdd/semantic-tokens.md`
 
 ## 🚨 Security Immutable Requirements
 
@@ -148,18 +118,20 @@ This document establishes the core, unchangeable requirements for the Hoverboard
 
 ## ✅ Compliance Validation
 
-All AI assistants and developers must validate their changes against these immutable requirements:
+All AI assistants and developers must validate their changes against the immutable requirements in `stdd/requirements.md`:
 
-- [ ] **Extension Identity**: Preserves core extension purpose and branding
-- [ ] **Core Functionality**: Maintains all essential user features
-- [ ] **API Integration**: Preserves Pinboard API compatibility
-- [ ] **Security Standards**: Meets all security and privacy requirements
-- [ ] **Migration Compatibility**: Supports smooth V2 to V3 transition
-- [ ] **Performance Standards**: Maintains or improves performance
-- [ ] **Code Quality**: Meets all quality and documentation standards
+- [ ] **Extension Identity**: Preserves core extension purpose and branding (`[REQ:EXTENSION_IDENTITY]`)
+- [ ] **Core Functionality**: Maintains all essential user features (`[REQ:CORE_UX_PRESERVATION]`, `[REQ:SMART_BOOKMARKING]`-`[REQ:PRIVACY_CONTROLS]`)
+- [ ] **API Integration**: Preserves Pinboard API compatibility (`[REQ:PINBOARD_COMPATIBILITY]`)
+- [ ] **Security Standards**: Meets all security and privacy requirements (`[REQ:CHROME_STORAGE_USAGE]`, `[REQ:PRIVACY_CONTROLS]`)
+- [ ] **Migration Compatibility**: Supports smooth V2 to V3 transition (`[REQ:MANIFEST_V3_MIGRATION]`)
+- [ ] **Performance Standards**: Maintains or improves performance (see architecture decisions)
+- [ ] **Code Quality**: Meets all quality and documentation standards (see STDD principles)
 
 ## 🛡️ Final Notice
 
 **These requirements form the immutable foundation of the Hoverboard extension. Any proposed changes that conflict with these requirements must be rejected or require formal override procedures.**
 
-**🤖 AI Assistants**: Always validate your planned changes against this document before implementation. If conflicts exist, stop and request clarification rather than proceeding with conflicting changes. 
+**🤖 AI Assistants**: Always validate your planned changes against `stdd/requirements.md` before implementation. If conflicts exist, stop and request clarification rather than proceeding with conflicting changes.
+
+**📚 STDD Coordination**: All requirements, architecture decisions, and implementation decisions are coordinated through the `stdd/` folder. Always reference STDD files for the authoritative source of truth. 

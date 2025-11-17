@@ -71,7 +71,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 
 The screenshot above demonstrates Hoverboard in action on the Pinboard.in website, showcasing:
 
-- **Extension Badge**: The Hoverboard icon in the browser toolbar displays "3!" indicating 3 tags are associated with the current page and the site is marked as "To-Be-Read"
+- **Extension Badge**: The Hoverboard icon in the browser toolbar displays "3!" indicating 3 tags are associated with the current page and the site is marked as "Read Later"
 - **Transparent Overlay**: A dark overlay appears at the bottom of the page showing the current bookmark status with tags "Pinboard," "Social," and "Bookmarking"
 - **Popup Interface**: The main Hoverboard popup window provides:
   - **Visibility Controls**: Eye icon and "Show on page load" checkbox for overlay display
@@ -88,7 +88,6 @@ The configuration page provides comprehensive settings for customizing the exten
 - **Overlay Visibility Defaults**: 
   - Dark/Light theme selection with live preview
   - Transparency controls with opacity slider (currently set to 90%)
-  - Global defaults that can be overridden per-window
 
 - **Badge Settings**: 
   - Customizable text indicators for different bookmark states

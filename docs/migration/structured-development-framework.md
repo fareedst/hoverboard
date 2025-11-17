@@ -5,13 +5,33 @@ This document establishes the development framework, documentation standards, an
 
 ## ⭐ CRITICAL DEVELOPMENT PRINCIPLES
 
-### 🛡️ Immutable Requirements
-These requirements CANNOT be changed during migration:
+### 🔗 STDD Reference
 
+**⚠️ IMPORTANT**: All requirements, architecture decisions, and implementation decisions are now coordinated through the STDD folder:
+
+- **Requirements**: See `stdd/requirements.md` for all immutable and functional requirements
+- **Architecture Decisions**: See `stdd/architecture-decisions.md` for architectural choices
+- **Implementation Decisions**: See `stdd/implementation-decisions.md` for implementation details
+- **Semantic Tokens**: See `stdd/semantic-tokens.md` for token registry
+- **Tasks**: See `stdd/tasks.md` for active task tracking
+- **AI Principles**: See `stdd/ai-principles.md` for development process
+
+### 🛡️ Immutable Requirements
+
+**All immutable requirements are documented in `stdd/requirements.md`:**
+
+- `[REQ:EXTENSION_IDENTITY]` - Extension Identity Preservation
+- `[REQ:CORE_UX_PRESERVATION]` - Core User Experience Preservation
+- `[REQ:MANIFEST_V3_MIGRATION]` - Manifest V3 Migration
+- `[REQ:PINBOARD_COMPATIBILITY]` - Pinboard API Compatibility
+- `[REQ:CHROME_STORAGE_USAGE]` - Chrome Storage API Usage
+- `[REQ:RECENT_TAGS_SYSTEM]` - Recent Tags System
+
+**Key principles that cannot be changed:**
 1. **Feature Parity**: All existing functionality must be preserved
 2. **User Data**: No loss of user settings, bookmarks, or configuration
 3. **API Compatibility**: Pinboard API integration must remain functional
-4. **Cross-Browser**: Support for Chrome, Firefox, Edge, and future Safari support via a unified browser API abstraction ([SAFARI-EXT-SHIM-001]).
+4. **Cross-Browser**: Support for Chrome, Firefox, Edge, and future Safari support via unified browser API abstraction
 5. **Performance**: No degradation in extension load times or responsiveness
 6. **Security**: Maintain or improve current security posture
 
