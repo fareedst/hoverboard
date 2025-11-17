@@ -98,6 +98,9 @@ class OverlayManager {
       // [OVERLAY-DATA-FIX-001] - Use original content (refresh was causing data loss)
       this.logger.log('DEBUG', 'OverlayManager', 'Using original content data')
 
+      // Store content for refresh operations
+      this.currentContent = content
+
       // Create overlay if it doesn't exist
       if (!this.overlayElement) {
         this.logger.log('DEBUG', 'OverlayManager', 'Creating new overlay element')
@@ -135,6 +138,8 @@ class OverlayManager {
       refreshBtn.setAttribute('aria-label', 'Refresh Data')
       refreshBtn.setAttribute('role', 'button')
       refreshBtn.setAttribute('tabindex', '0')
+      refreshBtn.tabIndex = 0
+      refreshBtn.disabled = false
       refreshBtn.style.cssText = `
         position: absolute;
         top: 8px;
@@ -153,6 +158,8 @@ class OverlayManager {
         display: flex;
         align-items: center;
         justify-content: center;
+        outline: 2px solid transparent;
+        box-shadow: 0 0 0 2px transparent;
       `
 
       // [OVERLAY-REFRESH-HANDLER-001] Add click handler
@@ -179,6 +186,7 @@ class OverlayManager {
       closeBtn.setAttribute('aria-label', 'Close Overlay')
       closeBtn.setAttribute('role', 'button')
       closeBtn.setAttribute('tabindex', '0')
+      closeBtn.tabIndex = 0
       closeBtn.style.cssText = `
         position: absolute;
         top: 8px;
@@ -715,10 +723,12 @@ class OverlayManager {
   async refreshOverlayContent() {
     try {
       // [OVERLAY-REFRESH-INTEGRATION-001] Prepare refresh request data
+      // Use content.pageTitle if available, fallback to document.title
+      const pageTitle = this.currentContent?.pageTitle || this.document.title || ''
       const refreshData = {
-        url: window.location.href,
-        title: this.document.title,
-        tabId: this.content?.tabId || null
+        url: this.currentContent?.pageUrl || window.location.href,
+        title: pageTitle,
+        tabId: this.currentContent?.tabId || null
       }
 
       debugLog('[OVERLAY-REFRESH-INTEGRATION-001] Refresh request data:', refreshData)
@@ -731,10 +741,11 @@ class OverlayManager {
 
       if (response && response.success && response.data) {
         // [OVERLAY-REFRESH-INTEGRATION-001] Create updated content object with fresh data
+        // Preserve pageTitle and pageUrl from original content
         const updatedContent = {
           bookmark: response.data,
-          pageTitle: this.document.title,
-          pageUrl: window.location.href
+          pageTitle: this.currentContent?.pageTitle || this.document.title || '',
+          pageUrl: this.currentContent?.pageUrl || window.location.href
         }
 
         debugLog('[OVERLAY-REFRESH-INTEGRATION-001] Overlay content refreshed with updated data')

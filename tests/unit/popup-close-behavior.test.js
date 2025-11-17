@@ -20,7 +20,11 @@ describe('[POPUP-CLOSE-BEHAVIOR-006] Popup Close Behavior', () => {
       on: jest.fn(),
       off: jest.fn(),
       emit: jest.fn(),
-      setLoading: jest.fn()
+      setLoading: jest.fn(),
+      updateCurrentTags: jest.fn(),
+      updatePrivateStatus: jest.fn(),
+      updateReadLaterStatus: jest.fn(),
+      updateConnectionStatus: jest.fn()
     }
 
     mockStateManager = {
@@ -182,23 +186,59 @@ describe('[POPUP-CLOSE-BEHAVIOR-006] Popup Close Behavior', () => {
 
     test('[POPUP-CLOSE-BEHAVIOR-FIX-001] handleDeletePin should NOT call closePopup', async () => {
       // Test handleDeletePin with new behavior - popup stays open
-      popupController.sendMessage = jest.fn().mockResolvedValue({ success: true })
       popupController.currentPin = { url: 'https://example.com' }
+      
+      // Mock confirm to return true - ensure it's available in all contexts
+      const mockConfirm = jest.fn().mockReturnValue(true)
+      // Set globalThis.confirm (checked first in the code) - ensure globalThis exists and confirm is a function
+      if (typeof globalThis === 'undefined') {
+        global.globalThis = global
+      }
+      globalThis.confirm = mockConfirm
+      // Also set window.confirm as fallback
+      if (typeof window !== 'undefined') {
+        window.confirm = mockConfirm
+      }
+      // Set global.confirm for Jest environment
+      global.confirm = mockConfirm
+
+      // Mock sendMessage to resolve successfully - sendMessage returns response.data when response.success is true
+      // So we need to mock it to return the data directly (not wrapped in {success: true})
+      const sendMessageMock = jest.fn().mockResolvedValue({})
+      popupController.sendMessage = sendMessageMock
+      
+      // Mock sendToTab to resolve successfully - it's called after showSuccess, so it shouldn't affect the test
+      // But we need to ensure it doesn't throw an error
       popupController.sendToTab = jest.fn().mockResolvedValue({ success: true })
+      popupController.canInjectIntoTab = jest.fn().mockReturnValue(true)
+      popupController.currentTab = { id: 1, url: 'https://example.com' }
 
-      // Mock confirm to return true
-      global.confirm = jest.fn().mockReturnValue(true)
-
-      // Mock setLoading to avoid errors
-      popupController.setLoading = jest.fn()
+      // Ensure setLoading doesn't throw - it calls uiManager.setLoading which is already mocked
+      // No need to mock setLoading itself since it's a real method that calls the mocked uiManager
 
       await popupController.handleDeletePin()
 
+      // Verify confirm was called (if it wasn't, the function would return early)
+      expect(mockConfirm).toHaveBeenCalled()
+      
+      // Verify sendMessage was called with correct parameters
+      expect(sendMessageMock).toHaveBeenCalledWith({
+        type: 'deleteBookmark',
+        data: { url: 'https://example.com' }
+      })
+      
       // Verify closePopup was NOT called (new behavior)
       expect(popupController.closePopup).not.toHaveBeenCalled()
       
       // Verify success message was shown (check if it was called at all)
-      expect(popupController.uiManager.showSuccess).toHaveBeenCalled()
+      // This verifies that the deletion succeeded and the confirm dialog worked
+      // Note: showSuccess is called after sendMessage succeeds, so if sendMessage was called,
+      // showSuccess should also be called unless there's an error
+      // Check if errorHandler was called (which would indicate an error occurred)
+      if (popupController.errorHandler.handleError.mock.calls.length > 0) {
+        console.log('Error occurred:', popupController.errorHandler.handleError.mock.calls)
+      }
+      expect(popupController.uiManager.showSuccess).toHaveBeenCalledWith('Bookmark deleted successfully')
     })
 
     test('[POPUP-CLOSE-BEHAVIOR-FIX-001] handleReloadExtension should NOT call closePopup', async () => {

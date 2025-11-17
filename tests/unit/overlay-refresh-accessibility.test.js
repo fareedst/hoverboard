@@ -8,6 +8,29 @@
 import { OverlayManager } from '../../src/features/content/overlay-manager.js'
 const { createMockDocument } = require('../utils/mock-dom')
 
+const respondWithRecentTags = () => ({ recentTags: [] })
+
+const mockRefreshResponse = (mockMessageService, { bookmark, rawResponse, error } = {}) => {
+  mockMessageService.sendMessage.mockImplementation(async (payload) => {
+    if (payload?.type === 'getRecentBookmarks') {
+      return respondWithRecentTags()
+    }
+    if (payload?.type === 'getCurrentBookmark') {
+      if (error) {
+        throw error
+      }
+      if (rawResponse) {
+        return rawResponse
+      }
+      return {
+        success: true,
+        data: bookmark || { url: 'https://example.com', tags: ['test'] }
+      }
+    }
+    return { success: true }
+  })
+}
+
 // [OVERLAY-REFRESH-TEST-001] Accessibility test suite for overlay refresh button
 describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
   let overlayManager
@@ -23,17 +46,17 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
     overlayManager = new OverlayManager(mockDocument, {})
     overlayManager.messageService = mockMessageService
     overlayManager.showMessage = jest.fn()
-    // Remove the mock for show() so it calls the real implementation
-    overlayManager.refreshOverlayContent = jest.fn().mockResolvedValue({
-      bookmark: { url: 'https://example.com', tags: ['test'] },
-      pageTitle: 'Test Page',
-      pageUrl: 'https://example.com'
+    mockRefreshResponse(mockMessageService, {
+      bookmark: { url: 'https://example.com', tags: ['test'] }
     })
   })
 
   afterEach(() => {
     // [OVERLAY-REFRESH-TEST-001] Cleanup accessibility test environment
     jest.clearAllMocks()
+    if (mockDocument.reset) {
+      mockDocument.reset()
+    }
   })
 
   // Simple test to verify mock document is working
@@ -54,22 +77,10 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
       pageUrl: 'https://example.com'
     }
     
-    console.error('Before overlayManager.show()')
     await overlayManager.show(content)
-    console.error('After overlayManager.show()')
-    
-    // Check if overlay element was created
-    console.error('overlayElement:', overlayManager.overlayElement)
-    
-    // Check all tracked elements
-    console.error('All tracked elements:', mockDocument._allElements)
-    console.error('Tracked classes:', Array.from(mockDocument._elementsByClass.entries()))
-    
     const refreshButton = mockDocument.querySelector('.refresh-button')
-    console.error('refreshButton found:', refreshButton)
-    
-    // For now, just expect that the show() method doesn't throw
     expect(overlayManager.overlayElement).toBeDefined()
+    expect(refreshButton).not.toBeNull()
   })
 
   // Debug test to diagnose refresh button registration
@@ -182,7 +193,9 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
       const refreshButton = mockDocument.querySelector('.refresh-button')
       expect(refreshButton).not.toBeNull()
       // Assert
+      const role = refreshButton.getAttribute('role')
       expect(refreshButton.getAttribute).toHaveBeenCalledWith('role')
+      expect(role).toBe('button')
       expect(refreshButton.setAttribute).toHaveBeenCalledWith('role', 'button')
     })
   })
@@ -219,10 +232,11 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
       expect(refreshButton).not.toBeNull()
       // Act
       const enterEvent = { key: 'Enter', preventDefault: jest.fn() }
+      const initialCalls = mockMessageService.sendMessage.mock.calls.length
       await refreshButton._triggerKeydown(enterEvent)
       // Assert
       expect(enterEvent.preventDefault).toHaveBeenCalled()
-      expect(mockMessageService.sendMessage).toHaveBeenCalled()
+      expect(mockMessageService.sendMessage.mock.calls.length).toBeGreaterThan(initialCalls)
     })
 
     test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should respond to Space key', async () => {
@@ -238,10 +252,11 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
       expect(refreshButton).not.toBeNull()
       // Act
       const spaceEvent = { key: ' ', preventDefault: jest.fn() }
+      const initialCalls = mockMessageService.sendMessage.mock.calls.length
       await refreshButton._triggerKeydown(spaceEvent)
       // Assert
       expect(spaceEvent.preventDefault).toHaveBeenCalled()
-      expect(mockMessageService.sendMessage).toHaveBeenCalled()
+      expect(mockMessageService.sendMessage.mock.calls.length).toBeGreaterThan(initialCalls)
     })
 
     test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should not respond to other keys', async () => {
@@ -257,10 +272,11 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
       expect(refreshButton).not.toBeNull()
       // Act
       const otherEvent = { key: 'A', preventDefault: jest.fn() }
+      const initialCalls = mockMessageService.sendMessage.mock.calls.length
       await refreshButton._triggerKeydown(otherEvent)
       // Assert
       expect(otherEvent.preventDefault).not.toHaveBeenCalled()
-      expect(mockMessageService.sendMessage).not.toHaveBeenCalled()
+      expect(mockMessageService.sendMessage.mock.calls.length).toBe(initialCalls)
     })
 
     test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should prevent default on Enter key', async () => {
@@ -380,7 +396,7 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
         pageUrl: 'https://example.com'
       }
       
-      overlayManager.refreshOverlayContent.mockRejectedValueOnce(new Error('fail'))
+      mockRefreshResponse(mockMessageService, { error: new Error('fail') })
       await overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
       expect(refreshButton).not.toBeNull()
@@ -454,9 +470,10 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
       const refreshButton = mockDocument.querySelector('.refresh-button')
       expect(refreshButton).not.toBeNull()
       // Act
-      await refreshButton._triggerClick()
-      // Assert
+      const clickPromise = refreshButton._triggerClick()
+      // Assert loading state before await
       expect(refreshButton.disabled).toBe(true)
+      await clickPromise
     })
 
     test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should re-enable button after completion', async () => {
@@ -484,7 +501,7 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
         pageUrl: 'https://example.com'
       }
       
-      overlayManager.refreshOverlayContent.mockRejectedValueOnce(new Error('fail'))
+      mockRefreshResponse(mockMessageService, { error: new Error('fail') })
       await overlayManager.show(content)
       const refreshButton = mockDocument.querySelector('.refresh-button')
       expect(refreshButton).not.toBeNull()

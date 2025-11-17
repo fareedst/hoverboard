@@ -320,3 +320,20 @@ When documenting architecture decisions, use this format:
 **Cross-References**: [REQ:SAFARI_ADAPTATION], [ARCH:CROSS_BROWSER], [ARCH:OVERLAY], [ARCH:MESSAGE_HANDLING]
 
 ---
+
+### 17. Overlay Test Harness Architecture [ARCH:OVERLAY_TESTABILITY] [REQ:OVERLAY_SYSTEM] [REQ:OVERLAY_CONTROL_LAYOUT]
+
+**Decision**: Maintain a purpose-built mock DOM for overlay/unit suites that mirrors key browser behaviors—including automatic element registration whenever `className` or `id` mutate through direct assignments, classList operations, or attribute setters—so overlay buttons, ARIA metadata, and keyboard handlers remain discoverable without relying on a real document.
+
+**Rationale:**
+- Overlay verification depends on deterministic discovery of refresh/close controls and tag containers without loading an actual page DOM.
+- Direct property assignments (`element.className = ...`) occur frequently inside overlay code; missing hooks caused stale registries and false negatives in `[OVERLAY-TEST-UNIT-001]`.
+- Automated class/id re-registration ensures accessibility-specific selectors (`.refresh-button`, `.close-button`) and integration tests (`querySelectorAll`) stay aligned with `[REQ:OVERLAY_CONTROL_LAYOUT]` invariants.
+
+**Alternatives Considered:**
+- Rely solely on `setAttribute`-based registration: Rejected because overlay code and tests set `className`/`id` directly, leaving registries stale.
+- Swap to jsdom for all overlay suites: Rejected to keep tests lightweight and deterministic without full DOM emulation overhead.
+
+**Cross-References**: [REQ:OVERLAY_SYSTEM], [REQ:OVERLAY_CONTROL_LAYOUT], [ARCH:OVERLAY], [ARCH:OVERLAY_CONTROLS]
+
+---

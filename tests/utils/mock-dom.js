@@ -17,6 +17,81 @@ const mockLogger = {
   }
 }
 
+// [IMPL:OVERLAY_TEST_HARNESS] [ARCH:OVERLAY_TESTABILITY] [REQ:OVERLAY_SYSTEM]
+// Ensure direct property assignments update selector registries just like setAttribute/classList operations
+function attachTrackedProperties (element, registerElement) {
+  let classNameValue = typeof element.className === 'string' ? element.className : ''
+  let idValue = typeof element.id === 'string' ? element.id : ''
+
+  const normalize = (value) => (value === undefined || value === null) ? '' : String(value)
+  const registerTracked = (propName, value) => {
+    mockLogger.log('DEBUG', 'MockDOM', 'Tracked property mutation', { propName, value })
+    registerElement(element)
+  }
+
+  Object.defineProperty(element, 'className', {
+    get () {
+      return classNameValue
+    },
+    set (value) {
+      classNameValue = normalize(value)
+      registerTracked('className', classNameValue)
+    },
+    configurable: true,
+    enumerable: true
+  })
+
+  Object.defineProperty(element, 'id', {
+    get () {
+      return idValue
+    },
+    set (value) {
+      idValue = normalize(value)
+      registerTracked('id', idValue)
+    },
+    configurable: true,
+    enumerable: true
+  })
+}
+
+function getClassTokens (value) {
+  if (!value) {
+    return []
+  }
+  return value
+    .split(/\s+/)
+    .map(cls => cls.trim())
+    .filter(Boolean)
+}
+
+function createMockClassList (element) {
+  const tagName = () => (element?.tagName || 'ELEMENT')
+  return {
+    add: jest.fn((cls) => {
+      mockLogger.log('DEBUG', 'MockDOM', `${tagName()} classList.add called`, { class: cls })
+      const tokens = new Set(getClassTokens(element.className))
+      if (!cls || tokens.has(cls)) {
+        return
+      }
+      tokens.add(cls)
+      element.className = Array.from(tokens).join(' ')
+    }),
+    remove: jest.fn((cls) => {
+      mockLogger.log('DEBUG', 'MockDOM', `${tagName()} classList.remove called`, { class: cls })
+      if (!cls) {
+        return
+      }
+      const tokens = getClassTokens(element.className).filter(token => token !== cls)
+      element.className = tokens.join(' ')
+    }),
+    contains: jest.fn((cls) => {
+      const contains = getClassTokens(element.className).includes(cls)
+      mockLogger.log('DEBUG', 'MockDOM', `${tagName()} classList.contains called`, { class: cls, contains })
+      return contains
+    })
+  }
+}
+
 function createMockButton(className = '', id = '', registerElement) {
   // [OVERLAY-TEST-ELEMENT-001] Enhanced button creation with debug logging
   mockLogger.log('DEBUG', 'MockDOM', 'Creating button element', { className, id })
@@ -64,16 +139,6 @@ function createMockButton(className = '', id = '', registerElement) {
     blur: jest.fn(),
     disabled: false,
     tabIndex: 0,
-    classList: {
-      add: jest.fn(function (cls) {
-        // [OVERLAY-TEST-CLASS-001] Enhanced classList.add with debug logging
-        mockLogger.log('DEBUG', 'MockDOM', 'Button classList.add called', { class: cls })
-        this.className += ` ${cls}`
-        registerElement(this)
-      }),
-      remove: jest.fn(),
-      contains: jest.fn()
-    },
     _eventListeners: eventListeners,
     _triggerClick: async function () {
       // [OVERLAY-TEST-ELEMENT-001] Enhanced click simulation with debug logging
@@ -87,14 +152,17 @@ function createMockButton(className = '', id = '', registerElement) {
       if (typeof this.onkeydown === 'function') await this.onkeydown(event)
       if (eventListeners['keydown']) await eventListeners['keydown'](event)
     },
-    appendChild: jest.fn((child) => {
+    appendChild: jest.fn(function (child) {
       // [OVERLAY-TEST-APPEND-001] Enhanced appendChild with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'Button appendChild called', { child })
+      child.parentNode = this
     }),
     contains: jest.fn(() => true),
     querySelector: jest.fn(),
     querySelectorAll: jest.fn(() => []),
   }
+  attachTrackedProperties(button, registerElement)
+  button.classList = createMockClassList(button)
   // Always register on creation
   registerElement(button)
   mockLogger.log('DEBUG', 'MockDOM', 'Button element created and registered', { className, id })
@@ -138,17 +206,9 @@ function createMockInput(className = '', id = '', registerElement) {
     dispatchEvent: jest.fn(),
     focus: jest.fn(),
     blur: jest.fn(),
-    classList: { 
-      add: jest.fn(function (cls) {
-        // [OVERLAY-TEST-CLASS-001] Enhanced classList.add for input
-        mockLogger.log('DEBUG', 'MockDOM', 'Input classList.add called', { class: cls })
-        this.className += ` ${cls}`
-        registerElement(this)
-      }), 
-      remove: jest.fn(), 
-      contains: jest.fn() 
-    },
   }
+  attachTrackedProperties(input, registerElement)
+  input.classList = createMockClassList(input)
   registerElement(input)
   mockLogger.log('DEBUG', 'MockDOM', 'Input element created and registered', { className, id })
   return input
@@ -157,7 +217,8 @@ function createMockInput(className = '', id = '', registerElement) {
 function createMockSpan(className = '', id = '', registerElement) {
   // [OVERLAY-TEST-ELEMENT-001] Enhanced span creation with debug logging
   mockLogger.log('DEBUG', 'MockDOM', 'Creating span element', { className, id })
-  
+
+  const eventListeners = {}
   const span = {
     tagName: 'SPAN',
     className,
@@ -187,19 +248,31 @@ function createMockSpan(className = '', id = '', registerElement) {
     addEventListener: jest.fn((event, cb) => {
       // [OVERLAY-TEST-ELEMENT-001] Enhanced event listener tracking for span
       mockLogger.log('DEBUG', 'MockDOM', 'Span addEventListener called', { event })
+      eventListeners[event] = cb
     }),
     dispatchEvent: jest.fn(),
-    classList: { 
-      add: jest.fn(function (cls) {
-        // [OVERLAY-TEST-CLASS-001] Enhanced classList.add for span
-        mockLogger.log('DEBUG', 'MockDOM', 'Span classList.add called', { class: cls })
-        this.className += ` ${cls}`
-        registerElement(this)
-      }), 
-      remove: jest.fn(), 
-      contains: jest.fn() 
+    _eventListeners: eventListeners,
+    _triggerClick: async function () {
+      mockLogger.log('DEBUG', 'MockDOM', 'Span click triggered')
+      if (typeof this.onclick === 'function') {
+        await this.onclick({ preventDefault: jest.fn() })
+      }
+      if (eventListeners.click) {
+        await eventListeners.click({ preventDefault: jest.fn() })
+      }
     },
+    _triggerKeydown: async function (event) {
+      mockLogger.log('DEBUG', 'MockDOM', 'Span keydown triggered', { key: event?.key })
+      if (typeof this.onkeydown === 'function') {
+        await this.onkeydown(event)
+      }
+      if (eventListeners.keydown) {
+        await eventListeners.keydown(event)
+      }
+    }
   }
+  attachTrackedProperties(span, registerElement)
+  span.classList = createMockClassList(span)
   registerElement(span)
   mockLogger.log('DEBUG', 'MockDOM', 'Span element created and registered', { className, id })
   return span
@@ -241,7 +314,7 @@ function createMockDiv(className = '', id = '', registerElement) {
       mockLogger.log('DEBUG', 'MockDOM', 'Div addEventListener called', { event })
     }),
     dispatchEvent: jest.fn(),
-    appendChild: jest.fn((child) => {
+    appendChild: jest.fn(function (child) {
       // [OVERLAY-TEST-APPEND-001] Enhanced appendChild for div with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'Div appendChild called', { child })
       // Register the child element
@@ -250,17 +323,9 @@ function createMockDiv(className = '', id = '', registerElement) {
       child.parentNode = this
       mockLogger.log('DEBUG', 'MockDOM', 'Child registered and parent set for div')
     }),
-    classList: { 
-      add: jest.fn(function (cls) {
-        // [OVERLAY-TEST-CLASS-001] Enhanced classList.add for div
-        mockLogger.log('DEBUG', 'MockDOM', 'Div classList.add called', { class: cls })
-        this.className += ` ${cls}`
-        registerElement(this)
-      }), 
-      remove: jest.fn(), 
-      contains: jest.fn() 
-    },
   }
+  attachTrackedProperties(div, registerElement)
+  div.classList = createMockClassList(div)
   registerElement(div)
   mockLogger.log('DEBUG', 'MockDOM', 'Div element created and registered', { className, id })
   return div
@@ -276,31 +341,61 @@ function createMockDocument() {
 
   function registerElement(el) {
     // [OVERLAY-TEST-CLASS-001] Enhanced element registration with debug logging
-    mockLogger.log('DEBUG', 'MockDOM', 'Registering element', { 
-      tagName: el.tagName, 
-      className: el.className, 
-      id: el.id 
+    mockLogger.log('DEBUG', 'MockDOM', 'Registering element', {
+      tagName: el.tagName,
+      className: el.className,
+      id: el.id
     })
-    
-    // Register by class
-    if (el.className) {
-      el.className.split(' ').forEach(cls => {
-        if (!cls) return
-        if (!elementsByClass.has(cls)) {
-          elementsByClass.set(cls, [])
-          mockLogger.log('DEBUG', 'MockDOM', 'Created new class registry', { class: cls })
+
+    const currentClassTokens = new Set(getClassTokens(el.className))
+    const trackedClasses = el.__mockTrackedClasses || new Set()
+
+    // Remove stale class references
+    trackedClasses.forEach(cls => {
+      if (!currentClassTokens.has(cls)) {
+        const existing = elementsByClass.get(cls)
+        if (existing) {
+          const filtered = existing.filter(item => item !== el)
+          if (filtered.length) {
+            elementsByClass.set(cls, filtered)
+          } else {
+            elementsByClass.delete(cls)
+            mockLogger.log('DEBUG', 'MockDOM', 'Removed empty class registry', { class: cls })
+          }
         }
-        if (!elementsByClass.get(cls).includes(el)) {
-          elementsByClass.get(cls).push(el)
-          mockLogger.log('DEBUG', 'MockDOM', 'Added element to class', { class: cls, element: el.tagName })
-        }
-      })
+      }
+    })
+
+    // Register current class references
+    currentClassTokens.forEach(cls => {
+      if (!elementsByClass.has(cls)) {
+        elementsByClass.set(cls, [])
+        mockLogger.log('DEBUG', 'MockDOM', 'Created new class registry', { class: cls })
+      }
+      const bucket = elementsByClass.get(cls)
+      if (!bucket.includes(el)) {
+        bucket.push(el)
+        mockLogger.log('DEBUG', 'MockDOM', 'Added element to class', { class: cls, element: el.tagName })
+      }
+    })
+    el.__mockTrackedClasses = currentClassTokens
+
+    // Register by id with stale removal
+    const previousId = el.__mockTrackedId
+    if (previousId && previousId !== el.id && elementsById.get(previousId) === el) {
+      elementsById.delete(previousId)
+      mockLogger.log('DEBUG', 'MockDOM', 'Removed stale id registration', { id: previousId })
     }
-    // Register by id
     if (el.id) {
       elementsById.set(el.id, el)
+      el.__mockTrackedId = el.id
       mockLogger.log('DEBUG', 'MockDOM', 'Registered element by id', { id: el.id, element: el.tagName })
+    } else if (el.__mockTrackedId && elementsById.get(el.__mockTrackedId) === el) {
+      elementsById.delete(el.__mockTrackedId)
+      mockLogger.log('DEBUG', 'MockDOM', 'Cleared id registration', { id: el.__mockTrackedId })
+      el.__mockTrackedId = ''
     }
+
     if (!allElements.includes(el)) {
       allElements.push(el)
       mockLogger.log('DEBUG', 'MockDOM', 'Added element to all elements list', { element: el.tagName })
@@ -336,12 +431,10 @@ function createMockDocument() {
             
             if (attr === 'class') {
               this.className = value
-              registerElement(this)
               mockLogger.log('DEBUG', 'MockDOM', 'Generic element class registered', { tag, className: value })
             }
             if (attr === 'id') {
               this.id = value
-              registerElement(this)
               mockLogger.log('DEBUG', 'MockDOM', 'Generic element id registered', { tag, id: value })
             }
             this[attr] = value
@@ -356,23 +449,15 @@ function createMockDocument() {
             mockLogger.log('DEBUG', 'MockDOM', 'Generic element addEventListener called', { tag, event })
           }),
           dispatchEvent: jest.fn(),
-          appendChild: jest.fn((child) => {
+          appendChild: jest.fn(function (child) {
             // [OVERLAY-TEST-APPEND-001] Enhanced appendChild for generic elements
             mockLogger.log('DEBUG', 'MockDOM', 'Generic element appendChild called', { tag, child })
             registerElement(child)
             child.parentNode = this
-          }),
-          classList: { 
-            add: jest.fn(function (cls) {
-              // [OVERLAY-TEST-CLASS-001] Enhanced classList.add for generic elements
-              mockLogger.log('DEBUG', 'MockDOM', 'Generic element classList.add called', { tag, class: cls })
-              this.className += ` ${cls}`
-              registerElement(this)
-            }), 
-            remove: jest.fn(), 
-            contains: jest.fn() 
-          },
+          })
         }
+        el.classList = createMockClassList(el)
+        attachTrackedProperties(el, registerElement)
         registerElement(el)
       }
       
@@ -453,12 +538,22 @@ function createMockDocument() {
         // [OVERLAY-TEST-APPEND-001] Enhanced body.appendChild with debug logging
         mockLogger.log('DEBUG', 'MockDOM', 'body.appendChild called', { element: el.tagName })
         registerElement(el)
+        el.parentNode = 'body'
         mockLogger.log('DEBUG', 'MockDOM', 'Element registered in body')
       }),
       removeChild: jest.fn((el) => {
         // [OVERLAY-TEST-ELEMENT-001] Enhanced body.removeChild with debug logging
         mockLogger.log('DEBUG', 'MockDOM', 'body.removeChild called', { element: el.tagName })
       }),
+      contains: jest.fn((el) => allElements.includes(el)),
+    },
+    head: {
+      appendChild: jest.fn((el) => {
+        mockLogger.log('DEBUG', 'MockDOM', 'head.appendChild called', { element: el.tagName })
+        registerElement(el)
+        el.parentNode = 'head'
+      }),
+      removeChild: jest.fn()
     },
     
     // [OVERLAY-TEST-RESET-001] Enhanced reset functionality for test isolation

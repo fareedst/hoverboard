@@ -575,7 +575,7 @@ const safariEnhancements = {
           const enhancedMessage = {
             ...message,
             timestamp: Date.now(),
-            version: browser.runtime.getManifest?.()?.version || '1.0.0'
+            version: browser.runtime.getManifest().version
           }
 
           // [SAFARI-EXT-MESSAGING-001] Only add platform property if actually running in Safari

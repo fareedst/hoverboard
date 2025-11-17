@@ -136,13 +136,14 @@ class HoverboardServiceWorker {
   // MV3-001: Set up all V3 service worker event listeners
   setupEventListeners () {
     // MV3-001: Handle extension installation and updates
-    browser.runtime.onInstalled.addListener((details) => {
+    // [SAFARI-EXT-SERVICE-001] Use native Chrome API for service worker event listeners
+    chrome.runtime.onInstalled.addListener((details) => {
       this.handleInstall(details)
     })
 
     // MV3-001: Handle messages from content scripts and popup
-    // [SAFARI-EXT-IMPL-001] Use browser API for cross-browser compatibility
-    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    // [SAFARI-EXT-SERVICE-001] Use native Chrome API for proper async message handling
+    chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log('[SERVICE-WORKER] Received message:', message)
 
       // Handle async response properly for Manifest V3
@@ -161,17 +162,20 @@ class HoverboardServiceWorker {
     })
 
     // MV3-001: Handle tab activation for badge updates
-    browser.tabs.onActivated.addListener((activeInfo) => {
+    // [SAFARI-EXT-SERVICE-001] Use native Chrome API for tab event listeners
+    chrome.tabs.onActivated.addListener((activeInfo) => {
       this.handleTabActivated(activeInfo)
     })
 
     // MV3-EXT-IMPL-001: Handle tab updates for badge management
-    browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+    // [SAFARI-EXT-SERVICE-001] Use native Chrome API for tab event listeners
+    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       this.handleTabUpdated(tabId, changeInfo, tab)
     })
 
     // [IMMUTABLE-REQ-TAG-003] - Handle extension reload to clear shared memory
-    browser.runtime.onStartup.addListener(() => {
+    // [SAFARI-EXT-SERVICE-001] Use native Chrome API for runtime event listeners
+    chrome.runtime.onStartup.addListener(() => {
       this.handleExtensionStartup()
     })
   }
@@ -209,7 +213,8 @@ class HoverboardServiceWorker {
 
   async handleTabActivated (activeInfo) {
     try {
-      const tab = await browser.tabs.get(activeInfo.tabId)
+      // [SAFARI-EXT-SERVICE-001] Use native Chrome API for tab operations
+      const tab = await chrome.tabs.get(activeInfo.tabId)
       if (tab.url) {
         await this.updateBadgeForTab(tab)
       }
@@ -234,6 +239,7 @@ class HoverboardServiceWorker {
 
     try {
       const bookmark = await this.pinboardService.getBookmarkForUrl(tab.url)
+      // [SAFARI-EXT-SERVICE-001] Use native Chrome API for badge operations
       await this.badgeManager.updateBadge(tab.id, bookmark)
     } catch (error) {
       console.error('Badge update error:', error)

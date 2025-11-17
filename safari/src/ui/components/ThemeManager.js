@@ -1,16 +1,7 @@
 /**
  * ThemeManager - Modern theme management system for Hoverboard Extension
  * Handles dark mode, theme switching, CSS variables, and system preferences
- * 
- * [SAFARI-EXT-UI-001] Safari-specific UI optimizations including:
- * - Platform detection and Safari-specific theme adaptations
- * - Safari-specific accessibility features (VoiceOver, high contrast, reduced motion)
- * - Safari-specific performance optimizations
- * - Safari-specific backdrop-filter and visual effects
  */
-
-// [SAFARI-EXT-UI-001] Import platform utilities for Safari-specific optimizations
-import { platformUtils } from '../../shared/safari-shim.js'
 
 export class ThemeManager {
   constructor () {
@@ -20,23 +11,7 @@ export class ThemeManager {
     this.listeners = new Set()
     this.storageKey = 'hoverboard_theme'
 
-    // [SAFARI-EXT-UI-001] Safari-specific platform detection
-    this.platform = platformUtils.getPlatform()
-    this.platformConfig = platformUtils.getPlatformConfig()
-    this.isSafari = this.platform === 'safari'
-    this.runtimeFeatures = platformUtils.detectRuntimeFeatures()
-
-    // [SAFARI-EXT-UI-001] Safari-specific accessibility features
-    this.accessibilityFeatures = platformUtils.detectAccessibilityFeatures()
-    this.supportsVoiceOver = this.isSafari && this.accessibilityFeatures.platformSpecific.safari?.voiceOver
-    this.supportsHighContrast = this.accessibilityFeatures.highContrast.prefersContrast || this.accessibilityFeatures.highContrast.forcedColors
-    this.supportsReducedMotion = this.accessibilityFeatures.reducedMotion.prefersReducedMotion
-
-    // [SAFARI-EXT-UI-001] Safari-specific performance monitoring
-    this.performanceMetrics = platformUtils.getPerformanceMetrics()
-    this.monitoringInterval = null
-
-    // Theme definitions with Safari-specific optimizations
+    // Theme definitions
     this.themes = {
       light: {
         name: 'Light',
@@ -114,11 +89,6 @@ export class ThemeManager {
       }
     }
 
-    // [SAFARI-EXT-UI-001] Safari-specific theme enhancements
-    if (this.isSafari) {
-      this.enhanceThemesForSafari()
-    }
-
     // Bind methods
     this.init = this.init.bind(this)
     this.setTheme = this.setTheme.bind(this)
@@ -128,110 +98,23 @@ export class ThemeManager {
     this.applyTheme = this.applyTheme.bind(this)
     this.addListener = this.addListener.bind(this)
     this.removeListener = this.removeListener.bind(this)
-    
-    // [SAFARI-EXT-UI-001] Safari-specific method bindings
-    this.enhanceThemesForSafari = this.enhanceThemesForSafari.bind(this)
-    this.applySafariSpecificOptimizations = this.applySafariSpecificOptimizations.bind(this)
-    this.startPerformanceMonitoring = this.startPerformanceMonitoring.bind(this)
-    this.stopPerformanceMonitoring = this.stopPerformanceMonitoring.bind(this)
-    this.updateAccessibilityFeatures = this.updateAccessibilityFeatures.bind(this)
   }
 
   /**
-   * [SAFARI-EXT-UI-001] Enhance themes with Safari-specific optimizations
-   */
-  enhanceThemesForSafari() {
-    console.log('[SAFARI-EXT-UI-001] Enhancing themes for Safari platform')
-
-    // [SAFARI-EXT-UI-001] Safari-specific backdrop-filter support
-    const backdropFilterSupport = this.runtimeFeatures.ui.webkitBackdropFilter || this.runtimeFeatures.ui.backdropFilter
-    const backdropFilterValue = backdropFilterSupport ? 'blur(10px) saturate(180%)' : 'none'
-
-    // [SAFARI-EXT-UI-001] Safari-specific high contrast adjustments
-    const highContrastMultiplier = this.supportsHighContrast ? 1.2 : 1.0
-
-    // [SAFARI-EXT-UI-001] Safari-specific reduced motion adjustments
-    const motionMultiplier = this.supportsReducedMotion ? 0.5 : 1.0
-
-    // [SAFARI-EXT-UI-001] Apply Safari-specific enhancements to both themes
-    Object.keys(this.themes).forEach(themeName => {
-      const theme = this.themes[themeName]
-      
-      // [SAFARI-EXT-UI-001] Add Safari-specific CSS variables
-      theme.variables['--hb-backdrop-filter'] = backdropFilterValue
-      theme.variables['--hb-high-contrast-multiplier'] = highContrastMultiplier.toString()
-      theme.variables['--hb-motion-multiplier'] = motionMultiplier.toString()
-      
-      // [SAFARI-EXT-UI-001] Safari-specific shadow adjustments for better performance
-      if (this.isSafari) {
-        theme.variables['--hb-shadow-1'] = theme.variables['--hb-shadow-1'].replace(/,\s*0\s*1px\s*3px\s*1px/, '')
-        theme.variables['--hb-shadow-2'] = theme.variables['--hb-shadow-2'].replace(/,\s*0\s*2px\s*6px\s*2px/, '')
-      }
-
-      // [SAFARI-EXT-UI-001] Safari-specific color adjustments for better contrast
-      if (this.supportsHighContrast) {
-        const contrastBoost = 0.1
-        Object.keys(theme.variables).forEach(key => {
-          if (key.includes('--hb-text-') || key.includes('--hb-border-')) {
-            const color = theme.variables[key]
-            if (color.startsWith('#')) {
-              // Simple contrast boost for hex colors
-              theme.variables[key] = this.adjustColorContrast(color, contrastBoost)
-            }
-          }
-        })
-      }
-    })
-
-    console.log('[SAFARI-EXT-UI-001] Safari theme enhancements applied')
-  }
-
-  /**
-   * [SAFARI-EXT-UI-001] Adjust color contrast for accessibility
-   */
-  adjustColorContrast(hexColor, boost) {
-    // Simple contrast adjustment - in production, use a proper color library
-    const r = parseInt(hexColor.slice(1, 3), 16)
-    const g = parseInt(hexColor.slice(3, 5), 16)
-    const b = parseInt(hexColor.slice(5, 7), 16)
-    
-    const adjustedR = Math.min(255, Math.max(0, r + (r > 128 ? boost * 255 : -boost * 255)))
-    const adjustedG = Math.min(255, Math.max(0, g + (g > 128 ? boost * 255 : -boost * 255)))
-    const adjustedB = Math.min(255, Math.max(0, b + (b > 128 ? boost * 255 : -boost * 255)))
-    
-    return `#${Math.round(adjustedR).toString(16).padStart(2, '0')}${Math.round(adjustedG).toString(16).padStart(2, '0')}${Math.round(adjustedB).toString(16).padStart(2, '0')}`
-  }
-
-  /**
-   * Initialize theme manager with Safari-specific optimizations
+   * Initialize theme manager
    */
   async init () {
     try {
-      console.log('[SAFARI-EXT-UI-001] Initializing ThemeManager for platform:', this.platform)
-
-      // [SAFARI-EXT-UI-001] Start Safari-specific performance monitoring
-      if (this.isSafari) {
-        this.startPerformanceMonitoring()
-      }
-
       // Load saved theme preference
       await this.loadThemePreference()
 
       // Setup system theme detection
       this.setupSystemThemeDetection()
 
-      // [SAFARI-EXT-UI-001] Update accessibility features
-      this.updateAccessibilityFeatures()
-
       // Apply initial theme
       this.resolveAndApplyTheme()
 
-      // [SAFARI-EXT-UI-001] Apply Safari-specific optimizations
-      if (this.isSafari) {
-        this.applySafariSpecificOptimizations()
-      }
-
-      console.log('ThemeManager initialized with theme:', this.resolvedTheme, 'on platform:', this.platform)
+      console.log('ThemeManager initialized with theme:', this.resolvedTheme)
     } catch (error) {
       console.error('Failed to initialize ThemeManager:', error)
       this.resolvedTheme = 'light'
@@ -445,14 +328,10 @@ export class ThemeManager {
       try {
         callback({
           theme: this.currentTheme,
-          resolvedTheme: this.resolvedTheme,
-          // [SAFARI-EXT-UI-001] Include Safari-specific information in notifications
-          platform: this.platform,
-          isSafari: this.isSafari,
-          accessibilityFeatures: this.accessibilityFeatures
+          resolvedTheme: this.resolvedTheme
         })
       } catch (error) {
-        console.error('Theme change listener error:', error)
+        console.error('Error in theme listener:', error)
       }
     })
   }
@@ -461,25 +340,26 @@ export class ThemeManager {
    * Get available themes
    */
   getAvailableThemes () {
-    return Object.keys(this.themes).map(key => ({
-      id: key,
-      name: this.themes[key].name
-    }))
+    return [
+      { value: 'light', label: 'Light' },
+      { value: 'dark', label: 'Dark' },
+      { value: 'auto', label: 'System' }
+    ]
   }
 
   /**
-   * Check if system theme is supported
+   * Check if system supports dark mode detection
    */
   supportsSystemTheme () {
     return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)')
   }
 
   /**
-   * Get current system theme
+   * Get system theme preference
    */
   getSystemTheme () {
-    if (this.supportsSystemTheme()) {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    if (this.mediaQuery && this.mediaQuery.matches) {
+      return 'dark'
     }
     return 'light'
   }
@@ -489,86 +369,90 @@ export class ThemeManager {
    */
   createThemeSwitcher (options = {}) {
     const {
-      container = document.body,
-      showSystem = true,
+      className = '',
       showLabels = true,
-      className = 'hb-theme-switcher'
+      compact = false
     } = options
 
-    const switcher = document.createElement('div')
-    switcher.className = className
-    switcher.setAttribute('role', 'radiogroup')
-    switcher.setAttribute('aria-label', 'Theme selection')
+    const container = document.createElement('div')
+    container.className = `hb-theme-switcher ${className}`.trim()
+
+    if (compact) {
+      container.classList.add('hb-theme-switcher--compact')
+    }
 
     const themes = this.getAvailableThemes()
-    if (showSystem) {
-      themes.push({ id: 'auto', name: 'System' })
-    }
 
     themes.forEach(theme => {
       const button = document.createElement('button')
       button.type = 'button'
-      button.className = 'hb-theme-option'
-      button.setAttribute('role', 'radio')
-      button.setAttribute('aria-checked', this.currentTheme === theme.id ? 'true' : 'false')
-      button.setAttribute('data-theme', theme.id)
+      button.className = 'hb-theme-switcher__option'
+      button.setAttribute('data-theme', theme.value)
+      button.setAttribute('aria-label', `Switch to ${theme.label} theme`)
 
       if (showLabels) {
-        button.textContent = theme.name
+        button.textContent = theme.label
+      }
+
+      // Update active state
+      if (theme.value === this.currentTheme) {
+        button.classList.add('hb-theme-switcher__option--active')
+        button.setAttribute('aria-pressed', 'true')
+      } else {
+        button.setAttribute('aria-pressed', 'false')
       }
 
       button.addEventListener('click', () => {
-        this.setTheme(theme.id)
-        this.updateThemeSwitcher(switcher)
+        this.setTheme(theme.value)
+        this.updateThemeSwitcher(container)
       })
 
-      switcher.appendChild(button)
+      container.appendChild(button)
     })
 
-    container.appendChild(switcher)
-    return switcher
+    return container
   }
 
   /**
-   * Update theme switcher state
+   * Update theme switcher active state
    */
   updateThemeSwitcher (switcher) {
-    const buttons = switcher.querySelectorAll('.hb-theme-option')
+    const buttons = switcher.querySelectorAll('.hb-theme-switcher__option')
     buttons.forEach(button => {
-      const theme = button.getAttribute('data-theme')
-      button.setAttribute('aria-checked', this.currentTheme === theme ? 'true' : 'false')
-      button.classList.toggle('active', this.currentTheme === theme)
+      const isActive = button.getAttribute('data-theme') === this.currentTheme
+      button.classList.toggle('hb-theme-switcher__option--active', isActive)
+      button.setAttribute('aria-pressed', isActive ? 'true' : 'false')
     })
   }
 
   /**
-   * Detect preferred theme based on system and user preferences
+   * Detect user's preferred theme from various sources
    */
   detectPreferredTheme () {
-    // [SAFARI-EXT-UI-001] Safari-specific theme detection
-    if (this.isSafari) {
-      // [SAFARI-EXT-UI-001] Consider Safari-specific accessibility preferences
-      if (this.supportsHighContrast) {
-        console.log('[SAFARI-EXT-UI-001] High contrast detected, preferring dark theme')
-        return 'dark'
-      }
+    // Check for saved preference
+    if (this.currentTheme !== 'auto') {
+      return this.currentTheme
     }
 
-    // Default detection logic
+    // Check system preference
     if (this.supportsSystemTheme()) {
       return this.getSystemTheme()
     }
 
+    // Default to light
     return 'light'
   }
 
   /**
-   * Apply theme styles to specific element
+   * Apply theme-specific styles to element
    */
   applyThemeStyles (element, styles) {
-    if (!element || !styles) return
+    if (!element || typeof styles !== 'object') {
+      return
+    }
 
-    Object.entries(styles).forEach(([property, value]) => {
+    const themeStyles = styles[this.resolvedTheme] || styles.light || {}
+    Object.entries(themeStyles).forEach(([property, value]) => {
       element.style.setProperty(property, value)
     })
   }
@@ -577,219 +461,10 @@ export class ThemeManager {
    * Cleanup theme manager
    */
   cleanup () {
-    // [SAFARI-EXT-UI-001] Stop Safari-specific performance monitoring
-    this.stopPerformanceMonitoring()
-
-    // Remove media query listener
     if (this.mediaQuery) {
       this.mediaQuery.removeEventListener('change', this.handleSystemThemeChange)
-      this.mediaQuery = null
     }
 
-    // Clear listeners
     this.listeners.clear()
-
-    console.log('[SAFARI-EXT-UI-001] ThemeManager cleanup completed')
-  }
-
-  /**
-   * [SAFARI-EXT-UI-001] Get Safari-specific theme information
-   */
-  getSafariThemeInfo() {
-    return {
-      platform: this.platform,
-      isSafari: this.isSafari,
-      platformConfig: this.platformConfig,
-      runtimeFeatures: this.runtimeFeatures,
-      accessibilityFeatures: this.accessibilityFeatures,
-      performanceMetrics: this.performanceMetrics,
-      currentTheme: this.currentTheme,
-      resolvedTheme: this.resolvedTheme,
-      supportsVoiceOver: this.supportsVoiceOver,
-      supportsHighContrast: this.supportsHighContrast,
-      supportsReducedMotion: this.supportsReducedMotion
-    }
-  }
-
-  /**
-   * [SAFARI-EXT-UI-001] Apply Safari-specific theme optimizations
-   */
-  applySafariThemeOptimizations() {
-    if (!this.isSafari) return
-
-    console.log('[SAFARI-EXT-UI-001] Applying Safari-specific theme optimizations')
-
-    const root = document.documentElement
-
-    // [SAFARI-EXT-UI-001] Safari-specific rendering optimizations
-    root.style.setProperty('--hb-safari-rendering', 'optimizeSpeed')
-    root.style.setProperty('--hb-safari-text-rendering', 'optimizeLegibility')
-
-    // [SAFARI-EXT-UI-001] Safari-specific backdrop-filter optimizations
-    if (this.runtimeFeatures.ui.webkitBackdropFilter) {
-      root.style.setProperty('--hb-backdrop-filter', 'blur(10px) saturate(180%)')
-    } else if (this.runtimeFeatures.ui.backdropFilter) {
-      root.style.setProperty('--hb-backdrop-filter', 'blur(10px) saturate(180%)')
-    } else {
-      root.style.setProperty('--hb-backdrop-filter', 'none')
-    }
-
-    // [SAFARI-EXT-UI-001] Safari-specific accessibility optimizations
-    if (this.supportsVoiceOver) {
-      root.setAttribute('data-voiceover-optimized', 'true')
-    }
-
-    if (this.supportsHighContrast) {
-      root.setAttribute('data-high-contrast', 'true')
-    }
-
-    if (this.supportsReducedMotion) {
-      root.setAttribute('data-reduced-motion', 'true')
-    }
-
-    console.log('[SAFARI-EXT-UI-001] Safari theme optimizations applied')
-  }
-
-  /**
-   * [SAFARI-EXT-UI-001] Update Safari-specific theme features
-   */
-  updateSafariThemeFeatures() {
-    if (!this.isSafari) return
-
-    console.log('[SAFARI-EXT-UI-001] Updating Safari-specific theme features')
-
-    // [SAFARI-EXT-UI-001] Update runtime features
-    this.runtimeFeatures = platformUtils.detectRuntimeFeatures()
-
-    // [SAFARI-EXT-UI-001] Update accessibility features
-    this.updateAccessibilityFeatures()
-
-    // [SAFARI-EXT-UI-001] Update performance metrics
-    this.performanceMetrics = platformUtils.getPerformanceMetrics()
-
-    // [SAFARI-EXT-UI-001] Re-apply Safari-specific optimizations
-    this.applySafariThemeOptimizations()
-
-    console.log('[SAFARI-EXT-UI-001] Safari theme features updated')
-  }
-
-  /**
-   * [SAFARI-EXT-UI-001] Start Safari-specific performance monitoring
-   */
-  startPerformanceMonitoring() {
-    if (this.monitoringInterval) {
-      clearInterval(this.monitoringInterval)
-    }
-
-    const interval = this.platformConfig.performanceMonitoringInterval || 30000
-    this.monitoringInterval = setInterval(() => {
-      const metrics = platformUtils.getPerformanceMetrics()
-      console.log('[SAFARI-EXT-UI-001] Performance metrics:', metrics)
-      
-      // [SAFARI-EXT-UI-001] Adjust theme performance based on metrics
-      if (metrics.memory.used > metrics.memory.limit * 0.8) {
-        console.warn('[SAFARI-EXT-UI-001] High memory usage detected, applying performance optimizations')
-        this.applyPerformanceOptimizations()
-      }
-    }, interval)
-
-    console.log('[SAFARI-EXT-UI-001] Performance monitoring started with interval:', interval)
-  }
-
-  /**
-   * [SAFARI-EXT-UI-001] Stop Safari-specific performance monitoring
-   */
-  stopPerformanceMonitoring() {
-    if (this.monitoringInterval) {
-      clearInterval(this.monitoringInterval)
-      this.monitoringInterval = null
-      console.log('[SAFARI-EXT-UI-001] Performance monitoring stopped')
-    }
-  }
-
-  /**
-   * [SAFARI-EXT-UI-001] Apply Safari-specific performance optimizations
-   */
-  applyPerformanceOptimizations() {
-    console.log('[SAFARI-EXT-UI-001] Applying Safari-specific performance optimizations')
-
-    // [SAFARI-EXT-UI-001] Reduce shadow complexity for better performance
-    const root = document.documentElement
-    root.style.setProperty('--hb-shadow-1', '0 1px 2px 0 rgba(0,0,0,0.1)')
-    root.style.setProperty('--hb-shadow-2', '0 1px 3px 0 rgba(0,0,0,0.1)')
-    root.style.setProperty('--hb-shadow-3', '0 2px 4px 0 rgba(0,0,0,0.1)')
-    root.style.setProperty('--hb-shadow-4', '0 3px 6px 0 rgba(0,0,0,0.1)')
-
-    // [SAFARI-EXT-UI-001] Disable backdrop-filter for better performance
-    if (this.runtimeFeatures.ui.webkitBackdropFilter || this.runtimeFeatures.ui.backdropFilter) {
-      root.style.setProperty('--hb-backdrop-filter', 'none')
-    }
-
-    console.log('[SAFARI-EXT-UI-001] Performance optimizations applied')
-  }
-
-  /**
-   * [SAFARI-EXT-UI-001] Update accessibility features
-   */
-  updateAccessibilityFeatures() {
-    console.log('[SAFARI-EXT-UI-001] Updating accessibility features')
-
-    // [SAFARI-EXT-UI-001] Update accessibility features from platform detection
-    this.accessibilityFeatures = platformUtils.detectAccessibilityFeatures()
-    this.supportsVoiceOver = this.isSafari && this.accessibilityFeatures.platformSpecific.safari?.voiceOver
-    this.supportsHighContrast = this.accessibilityFeatures.highContrast.prefersContrast || this.accessibilityFeatures.highContrast.forcedColors
-    this.supportsReducedMotion = this.accessibilityFeatures.reducedMotion.prefersReducedMotion
-
-    // [SAFARI-EXT-UI-001] Apply accessibility-specific theme adjustments
-    if (this.supportsHighContrast || this.supportsReducedMotion) {
-      this.enhanceThemesForSafari()
-      this.resolveAndApplyTheme()
-    }
-
-    console.log('[SAFARI-EXT-UI-001] Accessibility features updated:', {
-      voiceOver: this.supportsVoiceOver,
-      highContrast: this.supportsHighContrast,
-      reducedMotion: this.supportsReducedMotion
-    })
-  }
-
-  /**
-   * [SAFARI-EXT-UI-001] Apply Safari-specific optimizations
-   */
-  applySafariSpecificOptimizations() {
-    console.log('[SAFARI-EXT-UI-001] Applying Safari-specific optimizations')
-
-    const root = document.documentElement
-
-    // [SAFARI-EXT-UI-001] Safari-specific CSS optimizations
-    if (this.isSafari) {
-      // [SAFARI-EXT-UI-001] Enable Safari-specific rendering optimizations
-      root.style.setProperty('--hb-safari-optimized', 'true')
-      
-      // [SAFARI-EXT-UI-001] Safari-specific font rendering
-      root.style.setProperty('--hb-font-smoothing', '-webkit-font-smoothing: antialiased')
-      
-      // [SAFARI-EXT-UI-001] Safari-specific transform optimizations
-      root.style.setProperty('--hb-transform-optimized', 'translateZ(0)')
-    }
-
-    // [SAFARI-EXT-UI-001] Apply accessibility optimizations
-    if (this.supportsVoiceOver) {
-      root.style.setProperty('--hb-voiceover-optimized', 'true')
-      root.setAttribute('aria-live', 'polite')
-    }
-
-    if (this.supportsHighContrast) {
-      root.style.setProperty('--hb-high-contrast', 'true')
-    }
-
-    if (this.supportsReducedMotion) {
-      root.style.setProperty('--hb-reduced-motion', 'true')
-      // [SAFARI-EXT-UI-001] Disable animations for reduced motion
-      root.style.setProperty('--hb-animation-duration', '0s')
-      root.style.setProperty('--hb-transition-duration', '0s')
-    }
-
-    console.log('[SAFARI-EXT-UI-001] Safari-specific optimizations applied')
   }
 }

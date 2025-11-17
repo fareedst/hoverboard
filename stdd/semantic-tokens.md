@@ -88,6 +88,7 @@ When referencing other tokens:
 - `[ARCH:POPUP_SESSION]` - Popup Session Persistence Architecture
 - `[ARCH:BOOKMARK_STATE_SYNC]` - Bookmark State Synchronization Architecture
 - `[ARCH:OVERLAY_CONTROLS]` - Overlay Control Layout Architecture
+- `[ARCH:OVERLAY_TESTABILITY]` - Overlay Test Harness Architecture
 - `[ARCH:SAFARI_ADAPTATION]` - Safari Adaptive Architecture
 
 ## Implementation Tokens Registry
@@ -116,6 +117,8 @@ When referencing other tokens:
 - `[IMPL:POPUP_SESSION]` - Popup Session Persistence Implementation
 - `[IMPL:BOOKMARK_STATE_SYNC]` - Bookmark State Synchronization Implementation
 - `[IMPL:OVERLAY_CONTROLS]` - Overlay Control Layout Implementation
+- `[IMPL:OVERLAY_TEST_HARNESS]` - Overlay Test Harness Implementation
+- `[IMPL:POPUP_MESSAGE_TIMEOUT]` - Popup Tab Messaging Timeout Implementation
 - `[IMPL:SAFARI_ADAPTATION]` - Safari Adaptive Implementation
 
 ## Token Relationships
