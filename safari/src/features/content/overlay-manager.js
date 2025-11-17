@@ -6,6 +6,7 @@
 import { Logger } from '../../shared/logger.js'
 import { VisibilityControls } from '../../ui/components/VisibilityControls.js'
 import { MessageClient } from './message-client.js'
+import { TagService } from '../tagging/tag-service.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
 import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
 
@@ -61,6 +62,9 @@ class OverlayManager {
 
     // [IMMUTABLE-REQ-TAG-004] - Initialize message service for tag persistence
     this.messageService = new MessageClient()
+
+    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] - Initialize tag service for suggested tags extraction
+    this.tagService = new TagService()
 
     debugLog('OverlayManager initialized', { config, transparencyMode: this.transparencyMode })
   }
@@ -595,6 +599,87 @@ class OverlayManager {
       // Assemble the overlay (matching desired structure)
       mainContainer.appendChild(currentTagsContainer)
       mainContainer.appendChild(recentContainer)
+
+      // [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS] - Display suggested tags section
+      const suggestedContainer = this.document.createElement('div')
+      suggestedContainer.className = 'scrollmenu suggested-container'
+      suggestedContainer.style.cssText = `
+        margin-bottom: 8px;
+        padding: 4px;
+        border-radius: 4px;
+        font-size: smaller;
+        font-weight: 900;
+      `
+
+      const suggestedLabel = this.document.createElement('span')
+      suggestedLabel.className = 'label-secondary tiny'
+      suggestedLabel.textContent = 'Suggested:'
+      suggestedLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
+      suggestedContainer.appendChild(suggestedLabel)
+
+      try {
+        // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags from multiple page sources
+        const suggestedTags = this.tagService.extractSuggestedTagsFromContent(this.document, window.location.href, 10)
+
+        if (suggestedTags && suggestedTags.length > 0) {
+          // [REQ:SUGGESTED_TAGS_DEDUPLICATION] [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] - Prepare current tags for case-insensitive comparison
+          const currentTags = content.bookmark?.tags || []
+          const currentTagsLower = new Set(currentTags.map(t => t.toLowerCase()))
+
+          // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Display suggested tags (limit to 5 for UI)
+          suggestedTags.slice(0, 5).forEach(tag => {
+            // [REQ:SUGGESTED_TAGS_DEDUPLICATION] - Filter using case-insensitive comparison
+            const tagLower = tag.toLowerCase()
+            if (!currentTagsLower.has(tagLower)) {
+              const tagElement = this.document.createElement('span')
+              tagElement.className = 'tag-element tiny'
+              tagElement.textContent = tag
+              tagElement.onclick = async () => {
+                if (content.bookmark) {
+                  try {
+                    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Send saveTag message for persistence
+                    await this.messageService.sendMessage({
+                      type: 'saveTag',
+                      data: {
+                        url: content.bookmark.url || window.location.href,
+                        value: tag,
+                        description: content.bookmark.description || this.document.title
+                      }
+                    })
+
+                    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Update local content immediately for display
+                    if (!content.bookmark.tags) content.bookmark.tags = []
+                    if (!content.bookmark.tags.includes(tag)) {
+                      content.bookmark.tags.push(tag)
+                    }
+
+                    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Refresh overlay with updated local content
+                    this.show(content)
+                    debugLog('[REQ:SUGGESTED_TAGS_FROM_CONTENT] Tag persisted from suggested', tag)
+                    this.showMessage('Tag saved successfully', 'success')
+                  } catch (error) {
+                    debugError('[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to persist tag from suggested:', error)
+                    this.showMessage('Failed to save tag', 'error')
+                  }
+                }
+              }
+              suggestedContainer.appendChild(tagElement)
+            }
+          })
+        } else {
+          // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Hide suggested container when no suggestions
+          suggestedContainer.style.display = 'none'
+        }
+      } catch (error) {
+        debugError('[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:', error)
+        suggestedContainer.style.display = 'none'
+      }
+
+      // Only append suggested container if it has content (more than just the label)
+      if (suggestedContainer.children.length > 1) {
+        mainContainer.appendChild(suggestedContainer)
+      }
+
       if (visibilityControlsContainer) {
         mainContainer.appendChild(visibilityControlsContainer)
       }

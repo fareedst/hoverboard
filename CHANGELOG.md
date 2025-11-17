@@ -5,19 +5,16 @@ All notable changes to the Hoverboard Browser Extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.0.7] - 2025-11-17
 
 ### Added
-- GitHub Actions CI/CD workflows
-- Automated release process
-- Comprehensive installation guides
-- Contribution guidelines and code of conduct
-- Issue and pull request templates
+
+- Suggested tags offer words from various elements on the page.
 
 ### Changed
-- Updated README with GitHub badges and quick start guide
-- Improved project structure for open source distribution
-- Enhanced documentation for contributors
+
+- Converted to STDD methodology.
+- Removed Safari integration.
 
 ## [1.0.6.80] - 2025-07-20
 

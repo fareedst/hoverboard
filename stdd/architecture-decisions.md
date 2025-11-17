@@ -337,3 +337,34 @@ When documenting architecture decisions, use this format:
 **Cross-References**: [REQ:OVERLAY_SYSTEM], [REQ:OVERLAY_CONTROL_LAYOUT], [ARCH:OVERLAY], [ARCH:OVERLAY_CONTROLS]
 
 ---
+
+### 18. Suggested Tags from Page Content Architecture [ARCH:SUGGESTED_TAGS] [REQ:SUGGESTED_TAGS_FROM_CONTENT] [REQ:TAG_INPUT_SANITIZATION]
+
+**Decision**: Extend the tag system to extract suggested tags from multiple page content sources: document title, URL path segments, H1/H2/H3 headings, top-level navigation elements, breadcrumb navigation, first 5 images' alt text, and first 10 anchor links within main content area. The system combines text from all sources, filters noise words, counts word frequency across all sources, sorts by frequency, and displays suggestions below recent tags in both popup and overlay interfaces. Suggested tags reuse existing tag sanitization infrastructure and follow the same click-to-add behavior as recent tags.
+
+**Rationale**:
+- Multi-source extraction provides richer, more comprehensive tag suggestions than single-source approaches
+- Title tag contains concise page description keywords
+- URL path segments often reflect content hierarchy and categorization
+- Headings provide semantically meaningful suggestions since they contain key page topics
+- Navigation elements contain site structure keywords
+- Breadcrumbs provide hierarchical context keywords
+- Image alt text provides descriptive keywords for visual content
+- Link text within main content provides contextual keywords
+- Combining all sources with frequency analysis surfaces the most important keywords across the entire page
+- Filtering noise words ensures only relevant, meaningful tags are suggested
+- Frequency sorting prioritizes the most important keywords
+- Reusing sanitization ensures consistency with existing tag validation
+- Displaying below recent tags maintains UI consistency and discoverability
+
+**Alternatives Considered**:
+- Extracting from headings only: Rejected - too limited, misses valuable keywords from other sources
+- Extracting from all page text: Rejected - too noisy, structured sources are more semantically meaningful
+- Using external APIs for tag suggestions: Rejected - privacy concerns, adds latency
+- Extracting from JSON-LD structured data: Considered but deferred - more complex parsing, lower priority
+- Extracting from list elements: Considered but deferred - may be noisy, lower priority
+- Storing suggested tags in cache: Considered but deferred - can be added later for performance
+
+**Cross-References**: [REQ:SUGGESTED_TAGS_FROM_CONTENT], [REQ:TAG_INPUT_SANITIZATION], [ARCH:TAG_SYSTEM], [IMPL:SUGGESTED_TAGS]
+
+---

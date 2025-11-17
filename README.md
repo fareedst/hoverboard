@@ -67,7 +67,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 
 ### Extension Interface on Pinboard.in
 
-![Hoverboard Extension on Pinboard.in](images/Hoverboard_v1.0.6.80_Chrome_Pinboard.png)
+![Hoverboard Extension on Pinboard.in](images/Hoverboard_v1.0.7.0_Chrome_Pinboard.png)
 
 The screenshot above demonstrates Hoverboard in action on the Pinboard.in website, showcasing:
 
@@ -81,7 +81,7 @@ The screenshot above demonstrates Hoverboard in action on the Pinboard.in websit
 
 ### Extension Configuration Options
 
-![Hoverboard Extension Options](images/Hoverboard_v1.0.6.80_Chrome_Options.png)
+![Hoverboard Extension Options](images/Hoverboard_v1.0.7.0_Chrome_Options.png)
 
 The configuration page provides comprehensive settings for customizing the extension experience:
 

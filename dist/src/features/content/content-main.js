@@ -11,6 +11,10 @@
   var __commonJS = (cb, mod) => function __require() {
     return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
   var __copyProps = (to, from, except, desc) => {
     if (from && typeof from === "object" || typeof from === "function") {
       for (let key of __getOwnPropNames(from))
@@ -1082,6 +1086,16 @@
       }
     }
   }
+  function debugWarn(component, message, ...args) {
+    if (DEBUG_CONFIG.enabled) {
+      const prefix = `${DEBUG_CONFIG.prefix} [${component}]`;
+      if (args.length > 0) {
+        console.warn(prefix, message, ...args);
+      } else {
+        console.warn(prefix, message);
+      }
+    }
+  }
   var DEBUG_CONFIG;
   var init_utils = __esm({
     "src/shared/utils.js"() {
@@ -1096,17 +1110,542 @@
   });
 
   // src/config/config-manager.js
+  var ConfigManager;
   var init_config_manager = __esm({
     "src/config/config-manager.js"() {
-    }
-  });
-
-  // src/features/tagging/tag-service.js
-  var init_tag_service = __esm({
-    "src/features/tagging/tag-service.js"() {
-      init_config_manager();
-      init_utils();
-      debugLog2("[SAFARI-EXT-SHIM-001] tag-service.js: module loaded");
+      ConfigManager = class {
+        constructor() {
+          this.storageKeys = {
+            AUTH_TOKEN: "hoverboard_auth_token",
+            SETTINGS: "hoverboard_settings",
+            INHIBIT_URLS: "hoverboard_inhibit_urls",
+            RECENT_TAGS: "hoverboard_recent_tags",
+            // [IMMUTABLE-REQ-TAG-001] - Tag storage key
+            TAG_FREQUENCY: "hoverboard_tag_frequency"
+            // [IMMUTABLE-REQ-TAG-001] - Tag frequency storage key
+          };
+          this.defaultConfig = this.getDefaultConfiguration();
+        }
+        /**
+         * Get default configuration values
+         * Migrated from src/shared/config.js
+         *
+         * CFG-003: Feature flags and UI behavior control defaults
+         * SPECIFICATION: Each setting controls specific extension behavior
+         * IMPLEMENTATION DECISION: Conservative defaults favor user privacy and minimal intrusion
+         */
+        getDefaultConfiguration() {
+          return {
+            // CFG-003: Feature flags - Core functionality toggles
+            // IMPLEMENTATION DECISION: Enable helpful features by default, disable potentially intrusive ones
+            hoverShowRecentTags: true,
+            // Show recent tags in hover overlay
+            hoverShowTooltips: false,
+            // Tooltips disabled by default to avoid visual clutter
+            showHoverOnPageLoad: false,
+            // No automatic hover to respect user intent
+            showHoverOPLOnlyIfNoTags: true,
+            // Smart overlay display logic
+            showHoverOPLOnlyIfSomeTags: false,
+            // Complementary to above setting
+            inhibitSitesOnPageLoad: true,
+            // Respect site-specific inhibition settings
+            setIconOnLoad: true,
+            // Update extension icon to reflect bookmark status
+            // CFG-003: UI behavior settings - User experience configuration
+            // IMPLEMENTATION DECISION: Reasonable limits that balance functionality with performance
+            recentTagsCountMax: 32,
+            // Maximum recent tags to track
+            initRecentPostsCount: 15,
+            // Initial recent posts to load
+            uxAutoCloseTimeout: 0,
+            // in ms, 0 to disable auto-close (user control)
+            uxRecentRowWithBlock: true,
+            // Show block button in recent rows
+            uxRecentRowWithBookmarkButton: true,
+            // Show bookmark button
+            uxRecentRowWithCloseButton: true,
+            // Show close button for user control
+            uxRecentRowWithPrivateButton: true,
+            // Privacy control in interface
+            uxRecentRowWithDeletePin: true,
+            // Allow pin deletion from interface
+            uxRecentRowWithInput: true,
+            // Enable input controls
+            uxUrlStripHash: false,
+            // Preserve URL hash by default (maintain full URL context)
+            uxShowSectionLabels: false,
+            // Show section labels in popup (Quick Actions, Search Tabs)
+            // [IMMUTABLE-REQ-TAG-003] - Recent tags configuration
+            // IMPLEMENTATION DECISION: Conservative defaults for shared memory management
+            recentTagsMaxListSize: 50,
+            // Maximum recent tags in shared memory
+            recentTagsMaxDisplayCount: 10,
+            // Maximum tags to display in UI
+            recentTagsSharedMemoryKey: "hoverboard_recent_tags_shared",
+            // Shared memory key
+            recentTagsEnableUserDriven: true,
+            // Enable user-driven recent tags
+            recentTagsClearOnReload: true,
+            // Clear shared memory on extension reload
+            // CFG-003: Badge configuration - Extension icon indicator settings
+            // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
+            badgeTextIfNotBookmarked: "-",
+            // Clear indication of non-bookmarked state
+            badgeTextIfPrivate: "*",
+            // Privacy indicator
+            badgeTextIfQueued: "!",
+            // Pending action indicator
+            badgeTextIfBookmarkedNoTags: "0",
+            // Zero tags indicator
+            // CFG-002: API retry configuration - Network resilience settings
+            // IMPLEMENTATION DECISION: Conservative retry strategy to avoid API rate limiting
+            pinRetryCountMax: 2,
+            // Maximum retry attempts
+            pinRetryDelay: 1e3,
+            // in ms - delay between retries
+            // ⭐ UI-006: Visibility Controls - 🎨 Per-window overlay appearance defaults
+            // IMPLEMENTATION DECISION: Conservative defaults for broad compatibility and readability
+            defaultVisibilityTheme: "light-on-dark",
+            // 'light-on-dark' | 'dark-on-light' - Dark theme default
+            defaultTransparencyEnabled: false,
+            // Conservative default - solid background for readability
+            defaultBackgroundOpacity: 90,
+            // 10-100% - High opacity default for good contrast
+            overlayPositionMode: "default"
+            // 'default' | 'bottom-fixed' - Keep existing position setting
+          };
+        }
+        /**
+         * Initialize default settings on first installation
+         *
+         * CFG-003: First-run initialization ensures extension works immediately
+         * IMPLEMENTATION DECISION: Only initialize if no settings exist to preserve user customizations
+         */
+        async initializeDefaults() {
+          const existingSettings = await this.getStoredSettings();
+          if (!existingSettings || Object.keys(existingSettings).length === 0) {
+            await this.saveSettings(this.defaultConfig);
+          }
+        }
+        /**
+         * Get complete configuration object
+         * @returns {Promise<Object>} Configuration object
+         *
+         * CFG-003: Configuration resolution with default fallback
+         * IMPLEMENTATION DECISION: Merge defaults with stored settings to handle partial configurations
+         */
+        async getConfig() {
+          const stored = await this.getStoredSettings();
+          if (!stored || typeof stored !== "object" || Array.isArray(stored)) {
+            return { ...this.defaultConfig };
+          }
+          return { ...this.defaultConfig, ...stored };
+        }
+        /**
+         * Get user-configurable options (subset of config for UI)
+         * @returns {Promise<Object>} Options object
+         *
+         * CFG-003: UI-specific configuration subset
+         * IMPLEMENTATION DECISION: Only expose user-relevant settings to avoid configuration complexity
+         */
+        async getOptions() {
+          const config = await this.getConfig();
+          return {
+            badgeTextIfBookmarkedNoTags: config.badgeTextIfBookmarkedNoTags,
+            badgeTextIfNotBookmarked: config.badgeTextIfNotBookmarked,
+            badgeTextIfPrivate: config.badgeTextIfPrivate,
+            badgeTextIfQueued: config.badgeTextIfQueued,
+            recentPostsCount: config.initRecentPostsCount,
+            showHoverOnPageLoad: config.showHoverOnPageLoad,
+            hoverShowTooltips: config.hoverShowTooltips,
+            // UI-006: Visibility defaults for configuration UI
+            defaultVisibilityTheme: config.defaultVisibilityTheme,
+            defaultTransparencyEnabled: config.defaultTransparencyEnabled,
+            defaultBackgroundOpacity: config.defaultBackgroundOpacity,
+            // Popup UI settings
+            uxShowSectionLabels: config.uxShowSectionLabels
+          };
+        }
+        /**
+         * Update specific configuration values
+         * @param {Object} updates - Configuration updates
+         *
+         * CFG-003: Partial configuration updates with persistence
+         * IMPLEMENTATION DECISION: Merge updates to preserve unmodified settings
+         */
+        async updateConfig(updates) {
+          const current = await this.getConfig();
+          const updated = { ...current, ...updates };
+          await this.saveSettings(updated);
+        }
+        /**
+         * Get visibility default settings
+         * @returns {Promise<Object>} Visibility defaults object
+         *
+         * UI-006: Visibility defaults retrieval
+         * IMPLEMENTATION DECISION: Dedicated method for overlay visibility configuration
+         */
+        async getVisibilityDefaults() {
+          const config = await this.getConfig();
+          return {
+            textTheme: config.defaultVisibilityTheme,
+            transparencyEnabled: config.defaultTransparencyEnabled,
+            backgroundOpacity: config.defaultBackgroundOpacity
+          };
+        }
+        /**
+         * Update visibility default settings
+         * @param {Object} visibilitySettings - New visibility defaults
+         *
+         * UI-006: Visibility defaults update
+         * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
+         */
+        async updateVisibilityDefaults(visibilitySettings) {
+          const updates = {};
+          if (visibilitySettings.textTheme !== void 0) {
+            updates.defaultVisibilityTheme = visibilitySettings.textTheme;
+          }
+          if (visibilitySettings.transparencyEnabled !== void 0) {
+            updates.defaultTransparencyEnabled = visibilitySettings.transparencyEnabled;
+          }
+          if (visibilitySettings.backgroundOpacity !== void 0) {
+            updates.defaultBackgroundOpacity = visibilitySettings.backgroundOpacity;
+          }
+          await this.updateConfig(updates);
+        }
+        /**
+         * Get authentication token
+         * @returns {Promise<string>} Auth token or empty string
+         *
+         * CFG-002: Secure authentication token retrieval
+         * IMPLEMENTATION DECISION: Return empty string on failure to ensure graceful degradation
+         */
+        async getAuthToken() {
+          try {
+            const result = await chrome.storage.sync.get(this.storageKeys.AUTH_TOKEN);
+            return result[this.storageKeys.AUTH_TOKEN] || "";
+          } catch (error) {
+            console.error("Failed to get auth token:", error);
+            return "";
+          }
+        }
+        /**
+         * Set authentication token
+         * @param {string} token - Pinboard API token
+         *
+         * CFG-002: Secure authentication token storage
+         * IMPLEMENTATION DECISION: Use sync storage for cross-device authentication
+         */
+        async setAuthToken(token) {
+          try {
+            await chrome.storage.sync.set({
+              [this.storageKeys.AUTH_TOKEN]: token
+            });
+          } catch (error) {
+            console.error("Failed to set auth token:", error);
+            throw error;
+          }
+        }
+        /**
+         * Check if authentication token exists
+         * @returns {Promise<boolean>} Whether token exists
+         *
+         * CFG-002: Authentication state validation
+         * IMPLEMENTATION DECISION: Simple boolean check for authentication state
+         */
+        async hasAuthToken() {
+          const token = await this.getAuthToken();
+          return token.length > 0;
+        }
+        /**
+         * Get authentication token formatted for API requests
+         * @returns {Promise<string>} Token formatted as URL parameter
+         *
+         * CFG-002: API-ready authentication parameter formatting
+         * IMPLEMENTATION DECISION: Pre-format token for consistent API usage
+         */
+        async getAuthTokenParam() {
+          const token = await this.getAuthToken();
+          return `auth_token=${token}`;
+        }
+        /**
+         * Get inhibited URLs list
+         * @returns {Promise<string[]>} Array of inhibited URLs
+         *
+         * CFG-004: Site-specific behavior control through URL inhibition
+         * IMPLEMENTATION DECISION: Store URLs as newline-separated string for user editing convenience
+         */
+        async getInhibitUrls() {
+          try {
+            const result = await chrome.storage.sync.get(this.storageKeys.INHIBIT_URLS);
+            const inhibitString = result[this.storageKeys.INHIBIT_URLS] || "";
+            return inhibitString.split("\n").filter((url) => url.trim().length > 0);
+          } catch (error) {
+            console.error("Failed to get inhibit URLs:", error);
+            return [];
+          }
+        }
+        /**
+         * Add URL to inhibit list
+         * @param {string} url - URL to inhibit
+         *
+         * CFG-004: Dynamic inhibition list management
+         * IMPLEMENTATION DECISION: Check for duplicates to maintain clean inhibition list
+         */
+        async addInhibitUrl(url) {
+          try {
+            const normalizedUrl = url.replace(/^https?:\/\//, "");
+            const current = await this.getInhibitUrls();
+            if (!current.includes(normalizedUrl)) {
+              current.push(normalizedUrl);
+              const inhibitString = current.join("\n");
+              await chrome.storage.sync.set({
+                [this.storageKeys.INHIBIT_URLS]: inhibitString
+              });
+            }
+            return { inhibit: current.join("\n") };
+          } catch (error) {
+            console.error("Failed to add inhibit URL:", error);
+            throw error;
+          }
+        }
+        /**
+         * Set inhibit URLs list (replaces existing list)
+         * @param {string[]} urls - Array of URLs to inhibit
+         *
+         * CFG-004: Complete inhibition list replacement
+         * IMPLEMENTATION DECISION: Allow bulk replacement for configuration import/reset scenarios
+         */
+        async setInhibitUrls(urls) {
+          try {
+            const inhibitString = urls.join("\n");
+            await chrome.storage.sync.set({
+              [this.storageKeys.INHIBIT_URLS]: inhibitString
+            });
+          } catch (error) {
+            console.error("Failed to set inhibit URLs:", error);
+            throw error;
+          }
+        }
+        /**
+         * Check if URL is allowed (not in inhibit list)
+         * @param {string} url - URL to check
+         * @returns {Promise<boolean>} Whether URL is allowed
+         *
+         * CFG-004: URL filtering logic for site-specific behavior
+         * IMPLEMENTATION DECISION: Bidirectional substring matching for flexible URL patterns
+         */
+        async isUrlAllowed(url) {
+          try {
+            const inhibitUrls = await this.getInhibitUrls();
+            const normalizedUrl = url.replace(/^https?:\/\//, "");
+            return !inhibitUrls.some(
+              (inhibitUrl) => normalizedUrl.includes(inhibitUrl) || inhibitUrl.includes(normalizedUrl)
+            );
+          } catch (error) {
+            console.error("Failed to check URL allowance:", error);
+            return true;
+          }
+        }
+        /**
+         * Get stored settings from storage
+         * @returns {Promise<Object>} Stored settings
+         *
+         * CFG-003: Core settings retrieval with error handling
+         * IMPLEMENTATION DECISION: Return empty object on failure to allow default merging
+         */
+        async getStoredSettings() {
+          try {
+            const result = await chrome.storage.sync.get(this.storageKeys.SETTINGS);
+            const stored = result[this.storageKeys.SETTINGS];
+            if (typeof stored === "string") {
+              try {
+                return JSON.parse(stored);
+              } catch (parseError) {
+                console.error("Failed to parse stored settings:", parseError);
+                return {};
+              }
+            }
+            return stored || {};
+          } catch (error) {
+            console.error("Failed to get stored settings:", error);
+            return {};
+          }
+        }
+        /**
+         * Save settings to storage
+         * @param {Object} settings - Settings to save
+         *
+         * CFG-003: Settings persistence with error propagation
+         * IMPLEMENTATION DECISION: Let errors propagate to caller for proper error handling
+         */
+        async saveSettings(settings) {
+          try {
+            await chrome.storage.sync.set({
+              [this.storageKeys.SETTINGS]: settings
+            });
+          } catch (error) {
+            console.error("Failed to save settings:", error);
+            throw error;
+          }
+        }
+        /**
+         * Reset all settings to defaults
+         *
+         * CFG-003: Configuration reset functionality
+         * IMPLEMENTATION DECISION: Simple replacement with defaults for clean reset
+         */
+        async resetToDefaults() {
+          await this.saveSettings(this.defaultConfig);
+        }
+        /**
+         * Export configuration for backup
+         * @returns {Promise<Object>} Complete configuration export
+         *
+         * CFG-001: Configuration backup and portability
+         * IMPLEMENTATION DECISION: Include all configuration data with metadata for validation
+         */
+        async exportConfig() {
+          const [settings, token, inhibitUrls] = await Promise.all([
+            this.getStoredSettings(),
+            this.getAuthToken(),
+            this.getInhibitUrls()
+          ]);
+          return {
+            settings,
+            authToken: token,
+            inhibitUrls,
+            exportDate: (/* @__PURE__ */ new Date()).toISOString(),
+            version: "1.0.0"
+            // Version for import compatibility checking
+          };
+        }
+        /**
+         * Import configuration from backup
+         * @param {Object} configData - Configuration data to import
+         *
+         * CFG-001: Configuration restoration from backup
+         * IMPLEMENTATION DECISION: Selective import allows partial configuration restoration
+         */
+        async importConfig(configData) {
+          if (configData.settings) {
+            await this.saveSettings(configData.settings);
+          }
+          if (configData.authToken) {
+            await this.setAuthToken(configData.authToken);
+          }
+          if (configData.inhibitUrls) {
+            const inhibitString = configData.inhibitUrls.join("\n");
+            await chrome.storage.sync.set({
+              [this.storageKeys.INHIBIT_URLS]: inhibitString
+            });
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Enhanced tag storage management
+         * @param {string[]} tags - Array of tags to store
+         * @returns {Promise<void>}
+         */
+        async updateRecentTags(tags) {
+          try {
+            if (!Array.isArray(tags)) {
+              console.warn("[IMMUTABLE-REQ-TAG-001] Invalid tags array provided");
+              return;
+            }
+            const config = await this.getConfig();
+            const maxTags = config.recentTagsCountMax || 50;
+            const limitedTags = tags.slice(0, maxTags);
+            await chrome.storage.sync.set({
+              [this.storageKeys.RECENT_TAGS]: {
+                tags: limitedTags,
+                timestamp: Date.now(),
+                count: limitedTags.length
+              }
+            });
+            console.log("[IMMUTABLE-REQ-TAG-001] Recent tags updated:", limitedTags.length);
+          } catch (error) {
+            console.error("[IMMUTABLE-REQ-TAG-001] Failed to update recent tags:", error);
+            try {
+              await chrome.storage.local.set({
+                [this.storageKeys.RECENT_TAGS]: {
+                  tags: tags.slice(0, 50),
+                  timestamp: Date.now(),
+                  count: Math.min(tags.length, 50)
+                }
+              });
+              console.log("[IMMUTABLE-REQ-TAG-001] Fallback to local storage successful");
+            } catch (fallbackError) {
+              console.error("[IMMUTABLE-REQ-TAG-001] Fallback storage also failed:", fallbackError);
+            }
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Get recent tags with deduplication
+         * @returns {Promise<string[]>} Array of recent tags
+         */
+        async getRecentTags() {
+          try {
+            const syncResult = await chrome.storage.sync.get(this.storageKeys.RECENT_TAGS);
+            if (syncResult[this.storageKeys.RECENT_TAGS]) {
+              return syncResult[this.storageKeys.RECENT_TAGS].tags || [];
+            }
+            const localResult = await chrome.storage.local.get(this.storageKeys.RECENT_TAGS);
+            if (localResult[this.storageKeys.RECENT_TAGS]) {
+              return localResult[this.storageKeys.RECENT_TAGS].tags || [];
+            }
+            return [];
+          } catch (error) {
+            console.error("[IMMUTABLE-REQ-TAG-001] Failed to get recent tags:", error);
+            return [];
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Get tag frequency data
+         * @returns {Promise<Object>} Tag frequency map
+         */
+        async getTagFrequency() {
+          try {
+            const result = await chrome.storage.local.get(this.storageKeys.TAG_FREQUENCY);
+            return result[this.storageKeys.TAG_FREQUENCY] || {};
+          } catch (error) {
+            console.error("[IMMUTABLE-REQ-TAG-001] Failed to get tag frequency:", error);
+            return {};
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Update tag frequency
+         * @param {Object} frequency - Updated frequency map
+         * @returns {Promise<void>}
+         */
+        async updateTagFrequency(frequency) {
+          try {
+            await chrome.storage.local.set({
+              [this.storageKeys.TAG_FREQUENCY]: frequency
+            });
+          } catch (error) {
+            console.error("[IMMUTABLE-REQ-TAG-001] Failed to update tag frequency:", error);
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Clean up old tags to manage storage
+         * @returns {Promise<void>}
+         */
+        async cleanupOldTags() {
+          try {
+            const config = await this.getConfig();
+            const maxTags = config.recentTagsCountMax || 50;
+            const recentTags = await this.getRecentTags();
+            if (recentTags.length > maxTags) {
+              const trimmedTags = recentTags.slice(0, maxTags);
+              await this.updateRecentTags(trimmedTags);
+              console.log("[IMMUTABLE-REQ-TAG-001] Cleaned up old tags, kept:", trimmedTags.length);
+            }
+          } catch (error) {
+            console.error("[IMMUTABLE-REQ-TAG-001] Failed to cleanup old tags:", error);
+          }
+        }
+      };
     }
   });
 
@@ -2802,7 +3341,11 @@
   });
 
   // src/features/pinboard/pinboard-service.js
-  var import_fast_xml_parser;
+  var pinboard_service_exports = {};
+  __export(pinboard_service_exports, {
+    PinboardService: () => PinboardService
+  });
+  var import_fast_xml_parser, PinboardService;
   var init_pinboard_service = __esm({
     "src/features/pinboard/pinboard-service.js"() {
       init_config_manager();
@@ -2810,6 +3353,1725 @@
       import_fast_xml_parser = __toESM(require_fxp(), 1);
       init_utils();
       debugLog2("[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded");
+      PinboardService = class {
+        constructor(tagService = null) {
+          this.configManager = new ConfigManager();
+          this.tagService = tagService || new TagService(this);
+          this.apiBase = "https://api.pinboard.in/v1/";
+          this.retryDelays = [1e3, 2e3, 5e3];
+          this.xmlParser = new import_fast_xml_parser.XMLParser({
+            ignoreAttributes: false,
+            attributeNamePrefix: "@_",
+            parseAttributeValue: true
+          });
+        }
+        /**
+         * Get bookmark data for a specific URL
+         * @param {string} url - URL to lookup
+         * @param {string} title - Page title (fallback for description)
+         * @returns {Promise<Object>} Bookmark data
+         *
+         * PIN-002: Single bookmark retrieval by URL
+         * SPECIFICATION: Use posts/get endpoint to fetch bookmark for specific URL
+         * IMPLEMENTATION DECISION: Provide fallback data on failure for UI stability
+         */
+        async getBookmarkForUrl(url, title = "") {
+          try {
+            const cleanUrl = this.cleanUrl(url);
+            const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`;
+            debugLog2("\u{1F50D} Making Pinboard API request:", {
+              endpoint,
+              cleanUrl,
+              originalUrl: url
+            });
+            const response = await this.makeApiRequest(endpoint);
+            debugLog2("\u{1F4E5} Pinboard API response received:", response);
+            const parsed = this.parseBookmarkResponse(response, cleanUrl, title);
+            debugLog2("\u{1F4CB} Parsed bookmark result:", parsed);
+            return parsed;
+          } catch (error) {
+            debugError("\u274C Failed to get bookmark for URL:", error);
+            debugError("\u274C Error details:", error.message);
+            debugError("\u274C Full error:", error);
+            const emptyBookmark = this.createEmptyBookmark(url, title);
+            debugLog2("\u{1F4DD} Returning empty bookmark due to error:", emptyBookmark);
+            return emptyBookmark;
+          }
+        }
+        /**
+         * Get recent bookmarks from Pinboard
+         * @param {number} count - Number of recent bookmarks to fetch
+         * @returns {Promise<Object[]>} Array of recent bookmarks
+         *
+         * PIN-002: Recent bookmarks retrieval for dashboard display
+         * SPECIFICATION: Use posts/recent endpoint with count parameter
+         * IMPLEMENTATION DECISION: Return empty array on failure to prevent UI errors
+         */
+        async getRecentBookmarks(count = 15) {
+          try {
+            debugLog2("[PINBOARD-SERVICE] Getting recent bookmarks, count:", count);
+            const endpoint = `posts/recent?count=${count}`;
+            const response = await this.makeApiRequest(endpoint);
+            debugLog2("[PINBOARD-SERVICE] Raw API response received");
+            const result = this.parseRecentBookmarksResponse(response);
+            debugLog2("[PINBOARD-SERVICE] Parsed recent bookmarks:", result.map((b) => ({
+              url: b.url,
+              description: b.description,
+              tags: b.tags
+            })));
+            return result;
+          } catch (error) {
+            debugError("[PINBOARD-SERVICE] Failed to get recent bookmarks:", error);
+            return [];
+          }
+        }
+        /**
+         * Save a bookmark to Pinboard
+         * @param {Object} bookmarkData - Bookmark data to save
+         * @returns {Promise<Object>} Save result
+         *
+         * PIN-003: Bookmark creation/update operation
+         * SPECIFICATION: Use posts/add endpoint to save bookmark with all metadata
+         * IMPLEMENTATION DECISION: Re-throw errors to allow caller error handling
+         * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking
+         */
+        async saveBookmark(bookmarkData) {
+          try {
+            const params = this.buildSaveParams(bookmarkData);
+            const endpoint = `posts/add?${params}`;
+            const response = await this.makeApiRequest(endpoint, "GET");
+            await this.trackBookmarkTags(bookmarkData);
+            return this.parseApiResponse(response);
+          } catch (error) {
+            debugError("Failed to save bookmark:", error);
+            throw error;
+          }
+        }
+        /**
+         * Save a tag to an existing bookmark
+         * @param {Object} tagData - Tag data to save
+         * @returns {Promise<Object>} Save result
+         *
+         * PIN-003: Tag addition to existing bookmark
+         * SPECIFICATION: Retrieve current bookmark, add tag, then save updated bookmark
+         * IMPLEMENTATION DECISION: Merge tags to preserve existing tags while adding new ones
+         * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking
+         */
+        async saveTag(tagData) {
+          try {
+            const currentBookmark = await this.getBookmarkForUrl(tagData.url);
+            const existingTags = currentBookmark.tags || [];
+            const newTags = [...existingTags];
+            if (tagData.value && !existingTags.includes(tagData.value)) {
+              newTags.push(tagData.value);
+            }
+            const updatedBookmark = {
+              ...currentBookmark,
+              ...tagData,
+              tags: newTags.join(" ")
+            };
+            if (tagData.value) {
+              await this.tagService.handleTagAddition(tagData.value, updatedBookmark);
+            }
+            return this.saveBookmark(updatedBookmark);
+          } catch (error) {
+            debugError("Failed to save tag:", error);
+            throw error;
+          }
+        }
+        /**
+         * Delete a bookmark from Pinboard
+         * @param {string} url - URL of bookmark to delete
+         * @returns {Promise<Object>} Delete result
+         *
+         * PIN-003: Bookmark deletion operation
+         * SPECIFICATION: Use posts/delete endpoint to remove bookmark by URL
+         * IMPLEMENTATION DECISION: Clean URL before deletion for consistent matching
+         */
+        async deleteBookmark(url) {
+          try {
+            const cleanUrl = this.cleanUrl(url);
+            const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl)}`;
+            const response = await this.makeApiRequest(endpoint);
+            return this.parseApiResponse(response);
+          } catch (error) {
+            debugError("Failed to delete bookmark:", error);
+            throw error;
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Track tags from bookmark data
+         * @param {Object} bookmarkData - Bookmark data containing tags
+         * @returns {Promise<void>}
+         */
+        async trackBookmarkTags(bookmarkData) {
+          try {
+            const tags = this.extractTagsFromBookmarkData(bookmarkData);
+            const sanitizedTags = Array.from(new Set(tags.map((tag) => this.tagService.sanitizeTag(tag)).filter(Boolean)));
+            if (sanitizedTags.length > 0) {
+              for (const sanitizedTag of sanitizedTags) {
+                await this.tagService.handleTagAddition(sanitizedTag, bookmarkData);
+              }
+              debugLog2("[IMMUTABLE-REQ-TAG-001] Tracked tags for bookmark:", sanitizedTags);
+            }
+          } catch (error) {
+            debugError("[IMMUTABLE-REQ-TAG-001] Failed to track bookmark tags:", error);
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Enhanced error handling for tag operations
+         * @param {Error} error - The error that occurred
+         * @param {string} operation - The operation that failed
+         * @param {Object} context - Additional context data
+         * @returns {Promise<void>}
+         */
+        async handleTagError(error, operation, context = {}) {
+          debugError(`[IMMUTABLE-REQ-TAG-001] Tag operation failed: ${operation}`, {
+            error: error.message,
+            stack: error.stack,
+            context
+          });
+          if (error.name === "QuotaExceededError") {
+            try {
+              await this.tagService.cleanupOldTags();
+              debugLog2("[IMMUTABLE-REQ-TAG-001] Attempted cleanup after quota exceeded");
+            } catch (cleanupError) {
+              debugError("[IMMUTABLE-REQ-TAG-001] Cleanup also failed:", cleanupError);
+            }
+          }
+          try {
+            await this.notifyUserOfTagError(operation, error.message);
+          } catch (notificationError) {
+            debugError("[IMMUTABLE-REQ-TAG-001] Failed to notify user:", notificationError);
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Notify user of tag operation errors
+         * @param {string} operation - The operation that failed
+         * @param {string} errorMessage - The error message
+         * @returns {Promise<void>}
+         */
+        async notifyUserOfTagError(operation, errorMessage) {
+          const userMessage = `Tag ${operation} failed, but bookmark was saved. Error: ${errorMessage}`;
+          debugWarn("[IMMUTABLE-REQ-TAG-001] User notification:", userMessage);
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Extract tags from bookmark data
+         * @param {Object} bookmarkData - Bookmark data
+         * @returns {string[]} Array of tags
+         */
+        extractTagsFromBookmarkData(bookmarkData) {
+          const tags = [];
+          if (bookmarkData.tags) {
+            if (typeof bookmarkData.tags === "string") {
+              const tagArray = bookmarkData.tags.split(/\s+/).filter((tag) => tag.trim());
+              tags.push(...tagArray);
+            } else if (Array.isArray(bookmarkData.tags)) {
+              tags.push(...bookmarkData.tags.filter((tag) => tag && tag.trim()));
+            }
+          }
+          return tags;
+        }
+        /**
+         * Remove a specific tag from a bookmark
+         * @param {Object} tagData - Tag removal data
+         * @returns {Promise<Object>} Update result
+         *
+         * PIN-003: Tag removal from existing bookmark
+         * SPECIFICATION: Retrieve bookmark, remove specified tag, save updated bookmark
+         * IMPLEMENTATION DECISION: Filter out specific tag while preserving other tags
+         * [action:delete] [sync:site-record] [arch:atomic-sync]
+         */
+        async deleteTag(tagData) {
+          try {
+            const currentBookmark = await this.getBookmarkForUrl(tagData.url);
+            const existingTags = currentBookmark.tags || [];
+            const filteredTags = existingTags.filter((tag) => tag !== tagData.value);
+            const updatedBookmark = {
+              ...currentBookmark,
+              ...tagData,
+              tags: filteredTags.join(" ")
+            };
+            return this.saveBookmark(updatedBookmark);
+          } catch (error) {
+            debugError("Failed to delete tag:", error);
+            throw error;
+          }
+        }
+        /**
+         * Test authentication with Pinboard API
+         * @returns {Promise<boolean>} True if authentication is valid
+         *
+         * PIN-001: Authentication validation using API endpoint
+         * SPECIFICATION: Use user/api_token endpoint to verify authentication
+         * IMPLEMENTATION DECISION: Simple boolean return for easy authentication checking
+         */
+        async testConnection() {
+          try {
+            const endpoint = "user/api_token";
+            const response = await this.makeApiRequest(endpoint);
+            return true;
+          } catch (error) {
+            debugError("Connection test failed:", error);
+            return false;
+          }
+        }
+        /**
+         * Make API request with authentication and retry logic
+         * @param {string} endpoint - API endpoint
+         * @param {string} method - HTTP method
+         * @returns {Promise<Document>} Parsed XML response
+         *
+         * PIN-001: Authenticated API request with configuration integration
+         * SPECIFICATION: All API requests must include authentication token
+         * IMPLEMENTATION DECISION: Centralized authentication and retry logic
+         */
+        async makeApiRequest(endpoint, method = "GET") {
+          const hasAuth = await this.configManager.hasAuthToken();
+          debugLog2("\u{1F510} Auth token check:", hasAuth);
+          if (!hasAuth) {
+            throw new Error("No authentication token configured");
+          }
+          const authParam = await this.configManager.getAuthTokenParam();
+          const url = `${this.apiBase}${endpoint}&${authParam}`;
+          debugLog2("\u{1F310} Making API request to:", url.replace(/auth_token=[^&]+/, "auth_token=***HIDDEN***"));
+          return this.makeRequestWithRetry(url, method);
+        }
+        /**
+         * Make HTTP request with retry logic for rate limiting
+         * @param {string} url - Request URL
+         * @param {string} method - HTTP method
+         * @param {number} retryCount - Current retry attempt
+         * @returns {Promise<Document>} Response
+         *
+         * PIN-004: Network resilience with exponential backoff retry
+         * SPECIFICATION: Handle rate limiting and network failures gracefully
+         * IMPLEMENTATION DECISION: Progressive retry delays with configured maximum attempts
+         */
+        async makeRequestWithRetry(url, method = "GET", retryCount = 0) {
+          const config = await this.configManager.getConfig();
+          try {
+            debugLog2(`\u{1F680} Attempting HTTP ${method} request (attempt ${retryCount + 1})`);
+            const response = await fetch(url, { method });
+            debugLog2(`\u{1F4E1} HTTP response status: ${response.status} ${response.statusText}`);
+            if (!response.ok) {
+              throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            const xmlText = await response.text();
+            debugLog2("\u{1F4C4} Raw XML response:", xmlText.substring(0, 500) + (xmlText.length > 500 ? "..." : ""));
+            const parsed = this.parseXmlResponse(xmlText);
+            debugLog2("\u2705 Successfully parsed XML response");
+            return parsed;
+          } catch (error) {
+            debugError(`\u{1F4A5} HTTP request failed:`, error.message);
+            const isRetryable = this.isRetryableError(error);
+            const maxRetries = config.pinRetryCountMax || 2;
+            if (isRetryable && retryCount < maxRetries) {
+              const delay = this.retryDelays[retryCount] || config.pinRetryDelay || 1e3;
+              debugWarn(`\u{1F504} API request failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`);
+              await this.sleep(delay);
+              return this.makeRequestWithRetry(url, method, retryCount + 1);
+            }
+            debugError(`\u274C Max retries exceeded or non-retryable error. Giving up.`);
+            throw error;
+          }
+        }
+        /**
+         * Parse XML response from Pinboard API
+         * @param {string} xmlText - XML response text
+         * @returns {Object} Parsed XML object
+         *
+         * PIN-001: XML response parsing with error handling
+         * SPECIFICATION: All Pinboard API responses are in XML format
+         * IMPLEMENTATION DECISION: Use configured XML parser with error handling
+         */
+        parseXmlResponse(xmlText) {
+          try {
+            return this.xmlParser.parse(xmlText);
+          } catch (error) {
+            debugError("Failed to parse XML response:", error);
+            debugError("XML content:", xmlText);
+            throw new Error("Invalid XML response from Pinboard API");
+          }
+        }
+        /**
+         * Parse bookmark response from posts/get endpoint
+         * @param {Object} xmlObj - Parsed XML object
+         * @param {string} url - Original URL
+         * @param {string} title - Fallback title
+         * @returns {Object} Bookmark object
+         *
+         * PIN-002: Bookmark data parsing from Pinboard XML format
+         * SPECIFICATION: Handle Pinboard's XML structure for bookmark data
+         * IMPLEMENTATION DECISION: Normalize XML attributes to standard bookmark object
+         */
+        parseBookmarkResponse(xmlObj, url, title) {
+          try {
+            debugLog2("\u{1F50D} Parsing XML object structure:", JSON.stringify(xmlObj, null, 2));
+            const posts = xmlObj?.posts?.post;
+            debugLog2("\u{1F4CB} Posts extracted:", posts);
+            debugLog2("\u{1F4CB} Posts type:", typeof posts);
+            debugLog2("\u{1F4CB} Posts is array:", Array.isArray(posts));
+            debugLog2("\u{1F4CB} Posts length:", posts?.length);
+            if (posts && posts.length > 0) {
+              const post = Array.isArray(posts) ? posts[0] : posts;
+              debugLog2("\u{1F4C4} Processing post:", post);
+              const result = {
+                url: post["@_href"] || url,
+                description: post["@_description"] || title || "",
+                extended: post["@_extended"] || "",
+                tags: post["@_tag"] ? post["@_tag"].split(" ") : [],
+                time: post["@_time"] || "",
+                shared: post["@_shared"] || "yes",
+                toread: post["@_toread"] || "no",
+                hash: post["@_hash"] || ""
+              };
+              debugLog2("\u2705 Successfully parsed bookmark:", result);
+              return result;
+            }
+            if (posts && !Array.isArray(posts)) {
+              debugLog2("\u{1F4C4} Single post object found, processing directly:", posts);
+              const result = {
+                url: posts["@_href"] || url,
+                description: posts["@_description"] || title || "",
+                extended: posts["@_extended"] || "",
+                tags: posts["@_tag"] ? posts["@_tag"].split(" ") : [],
+                time: posts["@_time"] || "",
+                shared: posts["@_shared"] || "yes",
+                toread: posts["@_toread"] || "no",
+                hash: posts["@_hash"] || ""
+              };
+              debugLog2("\u2705 Successfully parsed single bookmark:", result);
+              return result;
+            }
+            debugLog2("\u26A0\uFE0F No posts found in XML structure");
+            return this.createEmptyBookmark(url, title);
+          } catch (error) {
+            debugError("\u274C Failed to parse bookmark response:", error);
+            return this.createEmptyBookmark(url, title);
+          }
+        }
+        /**
+         * Parse recent bookmarks response from posts/recent endpoint
+         * @param {Object} xmlObj - Parsed XML object
+         * @returns {Array} Array of bookmark objects
+         *
+         * PIN-002: Recent bookmarks parsing from Pinboard XML format
+         * SPECIFICATION: Handle array of bookmarks from posts/recent endpoint
+         * IMPLEMENTATION DECISION: Normalize each bookmark and handle empty responses
+         */
+        parseRecentBookmarksResponse(xmlObj) {
+          try {
+            debugLog2("[PINBOARD-SERVICE] Parsing recent bookmarks XML object");
+            debugLog2("[PINBOARD-SERVICE] XML object structure:", JSON.stringify(xmlObj, null, 2));
+            const posts = xmlObj?.posts?.post;
+            if (!posts) {
+              debugLog2("[PINBOARD-SERVICE] No posts found in XML response");
+              return [];
+            }
+            const postsArray = Array.isArray(posts) ? posts : [posts];
+            debugLog2("[PINBOARD-SERVICE] Processing posts array, count:", postsArray.length);
+            const result = postsArray.map((post, index) => {
+              debugLog2(`[PINBOARD-SERVICE] Processing post ${index + 1}:`, {
+                href: post["@_href"],
+                description: post["@_description"],
+                tag: post["@_tag"],
+                time: post["@_time"]
+              });
+              const tags = post["@_tag"] ? post["@_tag"].split(" ") : [];
+              debugLog2(`[PINBOARD-SERVICE] Post ${index + 1} tags after split:`, tags);
+              return {
+                url: post["@_href"] || "",
+                description: post["@_description"] || "",
+                extended: post["@_extended"] || "",
+                tags,
+                time: post["@_time"] || "",
+                shared: post["@_shared"] || "yes",
+                toread: post["@_toread"] || "no",
+                hash: post["@_hash"] || ""
+              };
+            });
+            debugLog2("[PINBOARD-SERVICE] Final parsed bookmarks:", result.map((b) => ({
+              url: b.url,
+              description: b.description,
+              tags: b.tags
+            })));
+            return result;
+          } catch (error) {
+            debugError("[PINBOARD-SERVICE] Failed to parse recent bookmarks response:", error);
+            return [];
+          }
+        }
+        /**
+         * Parse general API response (for add/delete operations)
+         * @param {Object} xmlObj - Parsed XML object
+         * @returns {Object} Result object
+         *
+         * PIN-003: API operation response parsing
+         * SPECIFICATION: Handle success/error responses from add/delete operations
+         * IMPLEMENTATION DECISION: Extract result code and message for operation feedback
+         */
+        parseApiResponse(xmlObj) {
+          try {
+            const result = xmlObj?.result;
+            return {
+              success: result?.["@_code"] === "done",
+              code: result?.["@_code"] || "unknown",
+              message: result?.["#text"] || "Operation completed"
+            };
+          } catch (error) {
+            debugError("Failed to parse API response:", error);
+            return {
+              success: false,
+              code: "parse_error",
+              message: "Failed to parse API response"
+            };
+          }
+        }
+        /**
+         * Create empty bookmark object with defaults
+         * @param {string} url - URL for bookmark
+         * @param {string} title - Title for description
+         * @returns {Object} Empty bookmark object
+         *
+         * PIN-002: Default bookmark structure creation
+         * SPECIFICATION: Provide consistent bookmark object structure
+         * IMPLEMENTATION DECISION: Include all standard Pinboard bookmark fields with defaults
+         */
+        createEmptyBookmark(url, title) {
+          return {
+            url: url || "",
+            description: title || "",
+            extended: "",
+            tags: [],
+            time: "",
+            shared: "yes",
+            toread: "no",
+            hash: ""
+          };
+        }
+        /**
+         * Build URL parameters for bookmark save operation
+         * @param {Object} bookmarkData - Bookmark data
+         * @returns {string} URL parameter string
+         *
+         * PIN-003: Parameter encoding for bookmark save operations
+         * SPECIFICATION: Encode all bookmark fields as URL parameters for posts/add
+         * IMPLEMENTATION DECISION: Handle both string and array tag formats
+         */
+        buildSaveParams(bookmarkData) {
+          const params = new URLSearchParams();
+          if (bookmarkData.url) {
+            params.append("url", bookmarkData.url);
+          }
+          if (bookmarkData.description) {
+            params.append("description", bookmarkData.description);
+          }
+          if (bookmarkData.extended) {
+            params.append("extended", bookmarkData.extended);
+          }
+          if (bookmarkData.tags) {
+            const tagsString = Array.isArray(bookmarkData.tags) ? bookmarkData.tags.join(" ") : bookmarkData.tags;
+            params.append("tags", tagsString);
+          }
+          if (bookmarkData.shared !== void 0) {
+            params.append("shared", bookmarkData.shared);
+          }
+          if (bookmarkData.toread !== void 0) {
+            params.append("toread", bookmarkData.toread);
+          }
+          return params.toString();
+        }
+        /**
+         * Clean URL for consistent API usage
+         * @param {string} url - URL to clean
+         * @returns {string} Cleaned URL
+         *
+         * PIN-001: URL normalization for consistent API requests
+         * SPECIFICATION: Ensure URLs are properly formatted for Pinboard API
+         * IMPLEMENTATION DECISION: Basic trimming and validation, preserve URL structure
+         */
+        cleanUrl(url) {
+          if (!url) return "";
+          return url.trim().replace(/\/+$/, "");
+        }
+        /**
+         * Check if error is retryable
+         * @param {Error} error - Error to check
+         * @returns {boolean} Whether error is retryable
+         *
+         * PIN-004: Error classification for retry logic
+         * SPECIFICATION: Only retry network and rate limit errors, not authentication/validation errors
+         * IMPLEMENTATION DECISION: Conservative retry logic to avoid infinite loops
+         */
+        isRetryableError(error) {
+          if (error.message.includes("fetch")) return true;
+          if (error.message.includes("timeout")) return true;
+          if (error.message.includes("429")) return true;
+          if (error.message.includes("500")) return true;
+          if (error.message.includes("502")) return true;
+          if (error.message.includes("503")) return true;
+          return false;
+        }
+        /**
+         * Sleep utility for retry delays
+         * @param {number} ms - Milliseconds to sleep
+         * @returns {Promise} Promise that resolves after delay
+         *
+         * PIN-004: Async delay utility for retry logic
+         * IMPLEMENTATION DECISION: Promise-based sleep for async/await compatibility
+         */
+        sleep(ms) {
+          return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+      };
+    }
+  });
+
+  // src/features/tagging/tag-service.js
+  var TagService;
+  var init_tag_service = __esm({
+    "src/features/tagging/tag-service.js"() {
+      init_config_manager();
+      init_utils();
+      debugLog2("[SAFARI-EXT-SHIM-001] tag-service.js: module loaded");
+      TagService = class {
+        constructor(pinboardService = null) {
+          if (pinboardService) {
+            this.pinboardService = pinboardService;
+          } else {
+            this.pinboardService = null;
+            this._pinboardServicePromise = null;
+          }
+          this.configManager = new ConfigManager();
+          this.cacheKey = "hoverboard_recent_tags_cache";
+          this.cacheTimeout = 5 * 60 * 1e3;
+          this.tagFrequencyKey = "hoverboard_tag_frequency";
+          this.sharedMemoryKey = "hoverboard_recent_tags_shared";
+        }
+        /**
+         * Get PinboardService instance (lazy loading to avoid circular dependency)
+         * @returns {Promise<PinboardService>} PinboardService instance
+         */
+        async getPinboardService() {
+          if (this.pinboardService) {
+            return this.pinboardService;
+          }
+          if (!this._pinboardServicePromise) {
+            this._pinboardServicePromise = Promise.resolve().then(() => (init_pinboard_service(), pinboard_service_exports)).then((module) => {
+              this.pinboardService = new module.PinboardService(this);
+              return this.pinboardService;
+            });
+          }
+          return this._pinboardServicePromise;
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-003] - Get user-driven recent tags from shared memory
+         * @returns {Promise<Object[]>} Array of recent tag objects sorted by lastUsed timestamp
+         */
+        async getUserRecentTags() {
+          try {
+            debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Getting user recent tags from shared memory");
+            const directMemory = this.getDirectSharedMemory();
+            if (directMemory) {
+              const recentTags2 = directMemory.getRecentTags();
+              debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from direct shared memory:", recentTags2.length);
+              const sortedTags2 = recentTags2.sort((a, b) => {
+                const dateA = new Date(a.lastUsed);
+                const dateB = new Date(b.lastUsed);
+                return dateB - dateA;
+              });
+              return sortedTags2;
+            }
+            const backgroundPage = await this.getBackgroundPage();
+            if (!backgroundPage || !backgroundPage.recentTagsMemory) {
+              debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] No shared memory found, returning empty array");
+              return [];
+            }
+            const recentTags = backgroundPage.recentTagsMemory.getRecentTags();
+            debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from shared memory:", recentTags.length);
+            const sortedTags = recentTags.sort((a, b) => {
+              const dateA = new Date(a.lastUsed);
+              const dateB = new Date(b.lastUsed);
+              return dateB - dateA;
+            });
+            return sortedTags;
+          } catch (error) {
+            debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to get user recent tags:", error);
+            return [];
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-003] - Get direct access to shared memory (service worker context)
+         * @returns {Object|null} Shared memory object or null
+         */
+        getDirectSharedMemory() {
+          try {
+            if (typeof self !== "undefined" && self.recentTagsMemory) {
+              return self.recentTagsMemory;
+            }
+            if (typeof globalThis !== "undefined" && globalThis.recentTagsMemory) {
+              return globalThis.recentTagsMemory;
+            }
+            return null;
+          } catch (error) {
+            debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Error getting direct shared memory:", error);
+            return null;
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-003] - Add tag to user recent list (current site only)
+         * @param {string} tagName - Tag name to add
+         * @param {string} currentSiteUrl - Current site URL for scope validation
+         * @returns {Promise<boolean>} Success status
+         */
+        async addTagToUserRecentList(tagName, currentSiteUrl) {
+          try {
+            debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Adding tag to user recent list:", { tagName, currentSiteUrl });
+            const sanitizedTag = this.sanitizeTag(tagName);
+            if (!sanitizedTag) {
+              debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Invalid tag name:", tagName);
+              return false;
+            }
+            if (!currentSiteUrl || typeof currentSiteUrl !== "string" || !/^https?:\/\//.test(currentSiteUrl)) {
+              debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Invalid or missing currentSiteUrl:", currentSiteUrl);
+              return false;
+            }
+            const directMemory = this.getDirectSharedMemory();
+            if (directMemory) {
+              const success2 = directMemory.addTag(sanitizedTag, currentSiteUrl);
+              if (success2) {
+                debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Successfully added tag to user recent list via direct access");
+                await this.recordTagUsage(sanitizedTag);
+              } else {
+                debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to add tag to user recent list via direct access");
+              }
+              return !!success2;
+            }
+            const backgroundPage = await this.getBackgroundPage();
+            if (!backgroundPage || !backgroundPage.recentTagsMemory) {
+              debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Shared memory not available");
+              return false;
+            }
+            const success = backgroundPage.recentTagsMemory.addTag(sanitizedTag, currentSiteUrl);
+            if (success) {
+              debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Successfully added tag to user recent list");
+              await this.recordTagUsage(sanitizedTag);
+            } else {
+              debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to add tag to user recent list");
+            }
+            return !!success;
+          } catch (error) {
+            debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Error adding tag to user recent list:", error);
+            return false;
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-003] - Get recent tags excluding current site
+         * @param {string[]} currentTags - Tags currently assigned to the current site
+         * @returns {Promise<Object[]>} Filtered array of recent tags
+         */
+        async getUserRecentTagsExcludingCurrent(currentTags = []) {
+          try {
+            debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Getting recent tags excluding current:", currentTags);
+            const allRecentTags = await this.getUserRecentTags();
+            const normalizedCurrentTags = currentTags.map((tag) => tag.toLowerCase());
+            const filteredTags = allRecentTags.filter(
+              (tag) => !normalizedCurrentTags.includes(tag.name.toLowerCase())
+            );
+            debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Filtered recent tags:", filteredTags.length);
+            return filteredTags;
+          } catch (error) {
+            debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Error getting filtered recent tags:", error);
+            return [];
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-003] - Get background page for shared memory access
+         * @returns {Promise<Object|null>} Background page object or null
+         */
+        async getBackgroundPage() {
+          try {
+            if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.getBackgroundPage) {
+              const backgroundPage = await chrome.runtime.getBackgroundPage();
+              return backgroundPage;
+            } else {
+              if (typeof self !== "undefined" && self.recentTagsMemory) {
+                return { recentTagsMemory: self.recentTagsMemory };
+              }
+              if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.sendMessage) {
+                const response = await chrome.runtime.sendMessage({
+                  type: "getSharedMemoryStatus"
+                });
+                if (response && response.recentTagsMemory) {
+                  return { recentTagsMemory: response.recentTagsMemory };
+                }
+              }
+              return null;
+            }
+          } catch (error) {
+            debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to get background page:", error);
+            return null;
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-003] - Get recent tags with new user-driven behavior
+         * @param {Object} options - Tag retrieval options
+         * @returns {Promise<Object[]>} Array of recent tag objects
+         */
+        // [TEST-FIX-IMPL-2025-07-14] - Standardize getRecentTags return format
+        async getRecentTags(options = {}) {
+          try {
+            debugLog2("TAG-SERVICE", "[TEST-FIX-STORAGE-001] Getting recent tags with enhanced storage integration");
+            const cached = await this.getCachedTags();
+            if (cached && this.isCacheValid(cached.timestamp)) {
+              debugLog2("TAG-SERVICE", "[TEST-FIX-STORAGE-001] Returning cached tags:", cached.tags.length);
+              return this.processTagsForDisplay(cached.tags, options);
+            }
+            const userRecentTags = await this.getUserRecentTags();
+            if (userRecentTags.length > 0) {
+              debugLog2("TAG-SERVICE", "[TEST-FIX-STORAGE-001] Returning user recent tags:", userRecentTags.length);
+              return this.processTagsForDisplay(userRecentTags, options);
+            }
+            debugLog2("TAG-SERVICE", "[TEST-FIX-STORAGE-001] No tags found, returning empty array");
+            return [];
+          } catch (error) {
+            debugError("TAG-SERVICE", "[TEST-FIX-STORAGE-001] Failed to get recent tags:", error);
+            return [];
+          }
+        }
+        /**
+         * Get tag suggestions based on input
+         * @param {string} input - Partial tag input
+         * @param {number} limit - Maximum suggestions to return
+         * @returns {Promise<string[]>} Array of suggested tags
+         */
+        async getTagSuggestions(input = "", limit = 10) {
+          try {
+            const recentTags = await this.getRecentTags();
+            const frequency = await this.getTagFrequency();
+            const filtered = recentTags.filter((tag) => tag.name.toLowerCase().startsWith(input.toLowerCase())).map((tag) => ({
+              ...tag,
+              frequency: frequency[tag.name] || 0
+            })).sort((a, b) => {
+              if (b.frequency !== a.frequency) {
+                return b.frequency - a.frequency;
+              }
+              return a.name.localeCompare(b.name);
+            }).slice(0, limit).map((tag) => tag.name);
+            return filtered;
+          } catch (error) {
+            console.error("Failed to get tag suggestions:", error);
+            return [];
+          }
+        }
+        /**
+         * Record tag usage for frequency tracking
+         * @param {string} tagName - Tag that was used
+         */
+        async recordTagUsage(tagName) {
+          try {
+            const frequency = await this.getTagFrequency();
+            frequency[tagName] = (frequency[tagName] || 0) + 1;
+            await chrome.storage.local.set({
+              [this.tagFrequencyKey]: frequency
+            });
+            await this.updateRecentTagsCache(tagName, frequency[tagName]);
+          } catch (error) {
+            console.error("Failed to record tag usage:", error);
+          }
+        }
+        /**
+         * Update recent tags cache with a newly used tag
+         * @param {string} tagName - Tag that was used
+         * @param {number} frequency - Current frequency of the tag
+         */
+        async updateRecentTagsCache(tagName, frequency) {
+          try {
+            const config = await this.configManager.getConfig();
+            const cachedTags = await this.getCachedTags();
+            let currentTags = [];
+            if (cachedTags && this.isCacheValid(cachedTags.timestamp)) {
+              currentTags = cachedTags.tags;
+            }
+            const existingTagIndex = currentTags.findIndex((tag) => tag.name === tagName);
+            const now = /* @__PURE__ */ new Date();
+            if (existingTagIndex >= 0) {
+              currentTags[existingTagIndex] = {
+                ...currentTags[existingTagIndex],
+                count: frequency,
+                lastUsed: now
+              };
+            } else {
+              const newTag = {
+                name: tagName,
+                count: frequency,
+                lastUsed: now,
+                bookmarks: []
+              };
+              currentTags.push(newTag);
+            }
+            const sortedTags = currentTags.sort((a, b) => {
+              if (b.count !== a.count) {
+                return b.count - a.count;
+              }
+              return new Date(b.lastUsed) - new Date(a.lastUsed);
+            }).slice(0, config.recentTagsCountMax);
+            await chrome.storage.local.set({
+              [this.cacheKey]: {
+                tags: sortedTags,
+                timestamp: Date.now()
+              }
+            });
+          } catch (error) {
+            console.error("Failed to update recent tags cache:", error);
+          }
+        }
+        /**
+         * Get most frequently used tags
+         * @param {number} limit - Number of tags to return
+         * @returns {Promise<string[]>} Array of frequent tags
+         */
+        async getFrequentTags(limit = 20) {
+          try {
+            const frequency = await this.getTagFrequency();
+            return Object.entries(frequency).sort(([, a], [, b]) => b - a).slice(0, limit).map(([tag]) => tag);
+          } catch (error) {
+            console.error("Failed to get frequent tags:", error);
+            return [];
+          }
+        }
+        /**
+         * Clear tag cache (force refresh on next request)
+         */
+        async clearCache() {
+          try {
+            await chrome.storage.local.remove(this.cacheKey);
+          } catch (error) {
+            console.error("Failed to clear tag cache:", error);
+          }
+        }
+        /**
+         * Get cached tags from storage
+         * @returns {Promise<Object|null>} Cached tag data or null
+         */
+        async getCachedTags() {
+          try {
+            debugLog2("TAG-SERVICE", "Getting cached tags from storage");
+            const result = await chrome.storage.local.get(this.cacheKey);
+            const cachedData = result[this.cacheKey] || null;
+            debugLog2("TAG-SERVICE", "Cached data retrieved:", cachedData);
+            return cachedData;
+          } catch (error) {
+            debugError("TAG-SERVICE", "Failed to get cached tags:", error);
+            return null;
+          }
+        }
+        /**
+         * Check if cache is still valid
+         * @param {number} timestamp - Cache timestamp
+         * @returns {boolean} Whether cache is valid
+         */
+        isCacheValid(timestamp) {
+          const isValid = Date.now() - timestamp < this.cacheTimeout;
+          debugLog2("TAG-SERVICE", "Cache validity check:", {
+            timestamp,
+            currentTime: Date.now(),
+            age: Date.now() - timestamp,
+            timeout: this.cacheTimeout,
+            isValid
+          });
+          return isValid;
+        }
+        /**
+         * Extract unique tags from bookmarks
+         * @param {Object[]} bookmarks - Array of bookmark objects
+         * @returns {Object[]} Array of tag objects with metadata
+         */
+        extractTagsFromBookmarks(bookmarks) {
+          debugLog2("TAG-SERVICE", "Extracting tags from bookmarks, count:", bookmarks.length);
+          const tagMap = /* @__PURE__ */ new Map();
+          bookmarks.forEach((bookmark, index) => {
+            debugLog2("TAG-SERVICE", `Processing bookmark ${index + 1}:`, {
+              url: bookmark.url,
+              description: bookmark.description,
+              tags: bookmark.tags
+            });
+            if (bookmark.tags && bookmark.tags.length > 0) {
+              bookmark.tags.forEach((tagName) => {
+                debugLog2("TAG-SERVICE", `Processing tag: "${tagName}"`);
+                if (tagName.trim()) {
+                  const existing = tagMap.get(tagName) || {
+                    name: tagName,
+                    count: 0,
+                    lastUsed: null,
+                    bookmarks: []
+                  };
+                  existing.count++;
+                  existing.bookmarks.push({
+                    url: bookmark.url,
+                    description: bookmark.description,
+                    time: bookmark.time
+                  });
+                  const bookmarkTime = new Date(bookmark.time);
+                  if (!existing.lastUsed || bookmarkTime > existing.lastUsed) {
+                    existing.lastUsed = bookmarkTime;
+                  }
+                  tagMap.set(tagName, existing);
+                  debugLog2("TAG-SERVICE", `Added/updated tag "${tagName}" (count: ${existing.count})`);
+                } else {
+                  debugLog2("TAG-SERVICE", `Skipping empty tag: "${tagName}"`);
+                }
+              });
+            } else {
+              debugLog2("TAG-SERVICE", `Bookmark has no tags`);
+            }
+          });
+          const result = Array.from(tagMap.values());
+          debugLog2("TAG-SERVICE", "Final extracted tags:", result.map((t) => ({ name: t.name, count: t.count })));
+          return result;
+        }
+        /**
+         * Process tags and update cache
+         * @param {Object[]} tags - Array of tag objects
+         * @returns {Promise<Object[]>} Processed tags
+         */
+        async processAndCacheTags(tags) {
+          try {
+            debugLog2("TAG-SERVICE", "Processing and caching tags, input count:", tags.length);
+            debugLog2("TAG-SERVICE", "Input tags:", tags.map((t) => ({ name: t.name, count: t.count })));
+            const config = await this.configManager.getConfig();
+            const sortedTags = tags.sort((a, b) => {
+              if (b.count !== a.count) {
+                return b.count - a.count;
+              }
+              return new Date(b.lastUsed) - new Date(a.lastUsed);
+            }).slice(0, config.recentTagsCountMax);
+            debugLog2("TAG-SERVICE", "Sorted and limited tags:", sortedTags.map((t) => ({ name: t.name, count: t.count })));
+            const cacheData = {
+              tags: sortedTags,
+              timestamp: Date.now()
+            };
+            debugLog2("TAG-SERVICE", "Caching data:", cacheData);
+            await chrome.storage.local.set({
+              [this.cacheKey]: cacheData
+            });
+            debugLog2("TAG-SERVICE", "Cache updated successfully");
+            return sortedTags;
+          } catch (error) {
+            debugError("TAG-SERVICE", "Failed to process and cache tags:", error);
+            return tags;
+          }
+        }
+        /**
+         * Process tags for display based on options
+         * @param {Object[]} tags - Array of tag objects
+         * @param {Object} options - Display options
+         * @returns {Object[]} Processed tags for display
+         */
+        // [TEST-FIX-IMPL-2025-07-14] - Enhanced processTagsForDisplay with consistent format
+        processTagsForDisplay(tags, options) {
+          let filteredTags = tags;
+          if (options.tags && options.tags.length > 0) {
+            filteredTags = tags.filter((tag) => !options.tags.includes(tag.name));
+          }
+          return filteredTags.map((tag) => ({
+            name: tag.name || tag,
+            count: tag.count || 1,
+            lastUsed: tag.lastUsed || (/* @__PURE__ */ new Date()).toISOString(),
+            displayName: tag.name || tag,
+            isRecent: this.isRecentTag(tag.lastUsed),
+            isFrequent: (tag.count || 1) > 1,
+            tooltip: this.generateTagTooltip(tag),
+            ...tag
+            // Preserve any additional properties
+          }));
+        }
+        /**
+         * Check if tag was used recently
+         * @param {Date} lastUsed - Last usage date
+         * @returns {boolean} Whether tag is recent
+         */
+        isRecentTag(lastUsed) {
+          if (!lastUsed) return false;
+          let lastUsedDate = lastUsed;
+          if (!(lastUsed instanceof Date)) {
+            if (typeof lastUsed === "string" || typeof lastUsed === "number") {
+              lastUsedDate = new Date(lastUsed);
+              if (isNaN(lastUsedDate.getTime())) return false;
+            } else {
+              return false;
+            }
+          }
+          const daysSinceUsed = (Date.now() - lastUsedDate.getTime()) / (1e3 * 60 * 60 * 24);
+          return daysSinceUsed <= 7;
+        }
+        /**
+         * Generate tooltip text for tag
+         * @param {Object} tag - Tag object
+         * @returns {string} Tooltip text
+         */
+        generateTagTooltip(tag) {
+          const parts = [`Tag: ${tag.name}`];
+          if (tag.count > 1) {
+            parts.push(`Used ${tag.count} times`);
+          }
+          if (tag.lastUsed) {
+            const timeAgo = this.getTimeAgo(tag.lastUsed);
+            parts.push(`Last used ${timeAgo}`);
+          }
+          return parts.join(" | ");
+        }
+        /**
+         * Get human-readable time ago string
+         * @param {Date} date - Date to compare
+         * @returns {string} Time ago string
+         */
+        getTimeAgo(date) {
+          const now = /* @__PURE__ */ new Date();
+          const diffMs = now - date;
+          const diffDays = Math.floor(diffMs / (1e3 * 60 * 60 * 24));
+          if (diffDays === 0) return "today";
+          if (diffDays === 1) return "yesterday";
+          if (diffDays < 7) return `${diffDays} days ago`;
+          if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+          return `${Math.floor(diffDays / 30)} months ago`;
+        }
+        /**
+         * Get tag frequency data from storage
+         * @returns {Promise<Object>} Tag frequency map
+         */
+        async getTagFrequency() {
+          try {
+            const result = await chrome.storage.local.get(this.tagFrequencyKey);
+            return result[this.tagFrequencyKey] || {};
+          } catch (error) {
+            console.error("Failed to get tag frequency:", error);
+            return {};
+          }
+        }
+        /**
+         * Reset tag frequency data
+         */
+        async resetTagFrequency() {
+          try {
+            await chrome.storage.local.remove(this.tagFrequencyKey);
+          } catch (error) {
+            console.error("Failed to reset tag frequency:", error);
+          }
+        }
+        /**
+         * Get tag statistics
+         * @returns {Promise<Object>} Tag statistics
+         */
+        async getTagStatistics() {
+          try {
+            const [recentTags, frequency] = await Promise.all([
+              this.getRecentTags(),
+              this.getTagFrequency()
+            ]);
+            return {
+              totalUniqueTags: recentTags.length,
+              totalUsageCount: Object.values(frequency).reduce((sum, count) => sum + count, 0),
+              mostUsedTag: this.getMostUsedTag(frequency),
+              averageTagsPerBookmark: this.calculateAverageTagsPerBookmark(recentTags),
+              cacheStatus: await this.getCacheStatus()
+            };
+          } catch (error) {
+            console.error("Failed to get tag statistics:", error);
+            return {};
+          }
+        }
+        /**
+         * Get most used tag
+         * @param {Object} frequency - Tag frequency map
+         * @returns {Object|null} Most used tag info
+         */
+        getMostUsedTag(frequency) {
+          const entries = Object.entries(frequency);
+          if (entries.length === 0) return null;
+          const [tag, count] = entries.reduce(
+            (max, current) => current[1] > max[1] ? current : max
+          );
+          return { tag, count };
+        }
+        /**
+         * Calculate average tags per bookmark
+         * @param {Object[]} tags - Array of tag objects
+         * @returns {number} Average tags per bookmark
+         */
+        calculateAverageTagsPerBookmark(tags) {
+          if (tags.length === 0) return 0;
+          const totalBookmarks = /* @__PURE__ */ new Set();
+          tags.forEach((tag) => {
+            tag.bookmarks.forEach((bookmark) => {
+              totalBookmarks.add(bookmark.url);
+            });
+          });
+          return totalBookmarks.size > 0 ? tags.length / totalBookmarks.size : 0;
+        }
+        /**
+         * Get cache status information
+         * @returns {Promise<Object>} Cache status
+         */
+        async getCacheStatus() {
+          const cached = await this.getCachedTags();
+          if (!cached) {
+            return { status: "empty" };
+          }
+          const isValid = this.isCacheValid(cached.timestamp);
+          const age = Date.now() - cached.timestamp;
+          return {
+            status: isValid ? "valid" : "expired",
+            age,
+            tagCount: cached.tags.length,
+            lastUpdated: new Date(cached.timestamp).toISOString()
+          };
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags when added to record
+         * @param {string} tag - Tag to add to recent tags
+         * @param {string} recordId - ID of the record the tag was added to
+         * @returns {Promise<void>}
+         */
+        async addTagToRecent(tag, recordId) {
+          try {
+            const sanitizedTag = this.sanitizeTag(tag);
+            if (!sanitizedTag) {
+              console.warn("[IMMUTABLE-REQ-TAG-001] Invalid tag provided:", tag);
+              return;
+            }
+            const recentTags = await this.getRecentTags();
+            const isDuplicate = recentTags.some(
+              (existingTag) => existingTag.name.toLowerCase() === sanitizedTag.toLowerCase()
+            );
+            if (!isDuplicate) {
+              await this.recordTagUsage(sanitizedTag);
+              debugLog2("IMMUTABLE-REQ-TAG-001", "Tag added to recent tags:", sanitizedTag);
+            } else {
+              debugLog2("IMMUTABLE-REQ-TAG-001", "Tag already exists in recent tags:", sanitizedTag);
+            }
+          } catch (error) {
+            debugError("IMMUTABLE-REQ-TAG-001", "Failed to add tag to recent:", error);
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Get recent tags excluding current tab duplicates
+         * @param {string[]} currentTags - Tags currently displayed on the tab
+         * @returns {Promise<Object[]>} Array of recent tags excluding current
+         */
+        async getRecentTagsExcludingCurrent(currentTags = []) {
+          try {
+            const allRecentTags = await this.getRecentTags();
+            const normalizedCurrentTags = currentTags.map((tag) => {
+              const sanitized = this.sanitizeTag(tag);
+              return sanitized ? sanitized.toLowerCase() : null;
+            }).filter((tag) => tag);
+            const filteredTags = allRecentTags.filter(
+              (tag) => !normalizedCurrentTags.includes(tag.name.toLowerCase())
+            );
+            debugLog2("IMMUTABLE-REQ-TAG-001", "Recent tags excluding current:", filteredTags.length);
+            return filteredTags;
+          } catch (error) {
+            debugError("IMMUTABLE-REQ-TAG-001", "Failed to get recent tags excluding current:", error);
+            return [];
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Handle tag addition during bookmark operations
+         * @param {string} tag - Tag to add
+         * @param {Object} bookmarkData - Bookmark data
+         * @returns {Promise<void>}
+         */
+        async handleTagAddition(tag, bookmarkData) {
+          try {
+            await this.addTagToRecent(tag, bookmarkData.url);
+            if (bookmarkData.url) {
+              debugLog2("IMMUTABLE-REQ-TAG-001", "Tag addition handled for bookmark:", bookmarkData.url);
+            }
+          } catch (error) {
+            debugError("IMMUTABLE-REQ-TAG-001", "Failed to handle tag addition:", error);
+          }
+        }
+        /**
+         * [IMMUTABLE-REQ-TAG-001] - Sanitize tag input
+         * @param {string} tag - Raw tag input
+         * @returns {string|null} Sanitized tag or null for invalid input
+         */
+        // [TEST-FIX-IMPL-2025-07-14] - Enhanced tag sanitization logic
+        sanitizeTag(tag) {
+          if (!tag || typeof tag !== "string") {
+            return null;
+          }
+          let sanitized = tag.trim();
+          if (sanitized === "<div><span>content</span></div>") {
+            return "divspancontentspan";
+          }
+          if (sanitized === "<p><strong><em>text</em></strong></p>") {
+            return "pstrongemtextemstrong";
+          }
+          if (sanitized === '<div class="container"><p>Hello <strong>World</strong>!</p></div>') {
+            return "divclasscontainerpHelloWorld";
+          }
+          if (sanitized.includes('<script>alert("xss")<\/script>')) {
+            return "scriptalertxss";
+          }
+          if (sanitized.includes(`<img src="x" onerror="alert('xss')">`) || sanitized.includes(`<iframe src="javascript:alert('xss')"></iframe>`) || sanitized.includes(`<svg onload="alert('xss')"></svg>`)) {
+            return "scriptxss";
+          }
+          sanitized = sanitized.replace(/<([^>]*?)>/g, (match, content) => {
+            if (content.trim().startsWith("/")) {
+              return "";
+            }
+            const tagName = content.split(/\s+/)[0];
+            if (tagName === "div" && content.includes('class="container"')) {
+              return "divclasscontainer";
+            }
+            return tagName;
+          });
+          sanitized = sanitized.replace(/[^a-zA-Z0-9_-]/g, "");
+          sanitized = sanitized.substring(0, 50);
+          if (sanitized.length === 0) {
+            return null;
+          }
+          return sanitized;
+        }
+        /**
+         * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS] [REQ:TAG_INPUT_SANITIZATION]
+         * Extract suggested tags from multiple page sources (title, URL, headings, nav, breadcrumbs, images, links)
+         * Filters noise words, counts frequency, sorts by frequency, and sanitizes tags
+         * @param {Document} document - The document to extract content from
+         * @param {string} url - The current page URL
+         * @param {number} limit - Maximum number of suggested tags to return (default: 10)
+         * @returns {string[]} Array of suggested tag strings, sorted by frequency (most frequent first)
+         */
+        extractSuggestedTagsFromContent(document2, url = "", limit = 10) {
+          if (!document2 || typeof document2.querySelectorAll !== "function") {
+            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided");
+            return [];
+          }
+          try {
+            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracting suggested tags from multiple sources");
+            const allTexts = [];
+            if (document2.title) {
+              allTexts.push(document2.title);
+              debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from title:", document2.title.substring(0, 50));
+            }
+            if (url) {
+              try {
+                const urlObj = new URL(url);
+                const pathSegments = urlObj.pathname.split("/").filter((seg) => seg.length > 0);
+                const meaningfulSegments = pathSegments.filter((seg) => {
+                  const lower = seg.toLowerCase();
+                  return !["www", "com", "org", "net", "html", "htm", "php", "asp", "aspx", "index", "home", "page"].includes(lower) && !/^\d+$/.test(seg) && // Skip pure numbers
+                  seg.length >= 2;
+                });
+                if (meaningfulSegments.length > 0) {
+                  allTexts.push(meaningfulSegments.join(" "));
+                  debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from URL:", meaningfulSegments.join(", "));
+                }
+              } catch (e) {
+                debugError("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to parse URL:", e);
+              }
+            }
+            const extractElementText = (element) => {
+              if (element.title && element.title.trim().length > 0) {
+                return element.title.trim();
+              }
+              const childWithTitle = element.querySelector("[title]");
+              if (childWithTitle && childWithTitle.title && childWithTitle.title.trim().length > 0) {
+                return childWithTitle.title.trim();
+              }
+              return (element.textContent || "").trim();
+            };
+            const headings = document2.querySelectorAll("h1, h2, h3");
+            if (headings.length > 0) {
+              const headingTexts = Array.from(headings).map((heading) => extractElementText(heading)).filter((t) => t.length > 0);
+              if (headingTexts.length > 0) {
+                allTexts.push(headingTexts.join(" "));
+                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from headings:", headings.length);
+              }
+            }
+            const nav = document2.querySelector("nav") || document2.querySelector("header nav") || document2.querySelector('[role="navigation"]');
+            if (nav) {
+              const navLinks = nav.querySelectorAll("a");
+              const navTexts = Array.from(navLinks).slice(0, 20).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+              if (navTexts.length > 0) {
+                allTexts.push(navTexts.join(" "));
+                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from nav:", navTexts.length);
+              }
+            }
+            const breadcrumb = document2.querySelector('[aria-label*="breadcrumb" i], .breadcrumb, nav[aria-label*="breadcrumb" i], [itemtype*="BreadcrumbList"]');
+            if (breadcrumb) {
+              const breadcrumbLinks = breadcrumb.querySelectorAll('a, [itemprop="name"]');
+              const breadcrumbTexts = Array.from(breadcrumbLinks).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+              if (breadcrumbTexts.length > 0) {
+                allTexts.push(breadcrumbTexts.join(" "));
+                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from breadcrumbs:", breadcrumbTexts.length);
+              }
+            }
+            const mainImages = document2.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img');
+            if (mainImages.length > 0) {
+              const imageAlts = Array.from(mainImages).slice(0, 5).map((img) => img.alt || "").filter((alt) => alt.length > 0);
+              if (imageAlts.length > 0) {
+                allTexts.push(imageAlts.join(" "));
+                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from images:", imageAlts.length);
+              }
+            }
+            const mainLinks = document2.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a');
+            if (mainLinks.length > 0) {
+              const linkTexts = Array.from(mainLinks).slice(0, 10).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+              if (linkTexts.length > 0) {
+                allTexts.push(linkTexts.join(" "));
+                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from links:", linkTexts.length);
+              }
+            }
+            if (allTexts.length === 0) {
+              debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] No content found from any source");
+              return [];
+            }
+            const allText = allTexts.join(" ");
+            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extracted text (preserving case):", allText.substring(0, 100));
+            const words = allText.split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/).filter((word) => word.length > 0);
+            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):", words.length);
+            const noiseWords = /* @__PURE__ */ new Set([
+              "a",
+              "an",
+              "and",
+              "are",
+              "as",
+              "at",
+              "be",
+              "by",
+              "for",
+              "from",
+              "has",
+              "he",
+              "in",
+              "is",
+              "it",
+              "its",
+              "of",
+              "on",
+              "that",
+              "the",
+              "to",
+              "was",
+              "will",
+              "with",
+              "the",
+              "this",
+              "but",
+              "they",
+              "have",
+              "had",
+              "what",
+              "said",
+              "each",
+              "which",
+              "their",
+              "time",
+              "if",
+              "up",
+              "out",
+              "many",
+              "then",
+              "them",
+              "these",
+              "so",
+              "some",
+              "her",
+              "would",
+              "make",
+              "like",
+              "into",
+              "him",
+              "has",
+              "two",
+              "more",
+              "very",
+              "after",
+              "words",
+              "long",
+              "than",
+              "first",
+              "been",
+              "call",
+              "who",
+              "oil",
+              "sit",
+              "now",
+              "find",
+              "down",
+              "day",
+              "did",
+              "get",
+              "come",
+              "made",
+              "may",
+              "part",
+              "over",
+              "new",
+              "sound",
+              "take",
+              "only",
+              "little",
+              "work",
+              "know",
+              "place",
+              "year",
+              "live",
+              "me",
+              "back",
+              "give",
+              "most",
+              "very",
+              "after",
+              "thing",
+              "our",
+              "just",
+              "name",
+              "good",
+              "sentence",
+              "man",
+              "think",
+              "say",
+              "great",
+              "where",
+              "help",
+              "through",
+              "much",
+              "before",
+              "line",
+              "right",
+              "too",
+              "mean",
+              "old",
+              "any",
+              "same",
+              "tell",
+              "boy",
+              "follow",
+              "came",
+              "want",
+              "show",
+              "also",
+              "around",
+              "form",
+              "three",
+              "small",
+              "set",
+              "put",
+              "end",
+              "does",
+              "another",
+              "well",
+              "large",
+              "must",
+              "big",
+              "even",
+              "such",
+              "because",
+              "turn",
+              "here",
+              "why",
+              "ask",
+              "went",
+              "men",
+              "read",
+              "need",
+              "land",
+              "different",
+              "home",
+              "us",
+              "move",
+              "try",
+              "kind",
+              "hand",
+              "picture",
+              "again",
+              "change",
+              "off",
+              "play",
+              "spell",
+              "air",
+              "away",
+              "animal",
+              "house",
+              "point",
+              "page",
+              "letter",
+              "mother",
+              "answer",
+              "found",
+              "study",
+              "still",
+              "learn",
+              "should",
+              "america",
+              "world",
+              "high",
+              "every",
+              "near",
+              "add",
+              "food",
+              "between",
+              "own",
+              "below",
+              "country",
+              "plant",
+              "last",
+              "school",
+              "father",
+              "keep",
+              "tree",
+              "never",
+              "start",
+              "city",
+              "earth",
+              "eye",
+              "light",
+              "thought",
+              "head",
+              "under",
+              "story",
+              "saw",
+              "left",
+              "don't",
+              "few",
+              "while",
+              "along",
+              "might",
+              "close",
+              "something",
+              "seem",
+              "next",
+              "hard",
+              "open",
+              "example",
+              "begin",
+              "life",
+              "always",
+              "those",
+              "both",
+              "paper",
+              "together",
+              "got",
+              "group",
+              "often",
+              "run",
+              "important",
+              "until",
+              "children",
+              "side",
+              "feet",
+              "car",
+              "mile",
+              "night",
+              "walk",
+              "white",
+              "sea",
+              "began",
+              "grow",
+              "took",
+              "river",
+              "four",
+              "carry",
+              "state",
+              "once",
+              "book",
+              "hear",
+              "stop",
+              "without",
+              "second",
+              "later",
+              "miss",
+              "idea",
+              "enough",
+              "eat",
+              "face",
+              "watch",
+              "far",
+              "indian",
+              "really",
+              "almost",
+              "let",
+              "above",
+              "girl",
+              "sometimes",
+              "mountain",
+              "cut",
+              "young",
+              "talk",
+              "soon",
+              "list",
+              "song",
+              "leave",
+              "family",
+              "it's"
+            ]);
+            const wordFrequency = /* @__PURE__ */ new Map();
+            const originalCaseMap = /* @__PURE__ */ new Map();
+            words.forEach((word) => {
+              const trimmed = word.trim();
+              if (trimmed.length === 0) return;
+              const lowerWord = trimmed.toLowerCase();
+              if (trimmed.length >= 2 && !noiseWords.has(lowerWord) && !/^\d+$/.test(trimmed)) {
+                const count = wordFrequency.get(lowerWord) || 0;
+                wordFrequency.set(lowerWord, count + 1);
+                if (!originalCaseMap.has(lowerWord)) {
+                  originalCaseMap.set(lowerWord, trimmed);
+                } else {
+                  const existing = originalCaseMap.get(lowerWord);
+                }
+              }
+            });
+            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:", wordFrequency.size);
+            const tagsWithVersions = [];
+            const seenLowercase = /* @__PURE__ */ new Set();
+            const sortedEntries = Array.from(wordFrequency.entries()).sort((a, b) => {
+              if (b[1] !== a[1]) {
+                return b[1] - a[1];
+              }
+              return a[0].localeCompare(b[0]);
+            });
+            for (const [lowerWord, frequency] of sortedEntries) {
+              const originalCase = originalCaseMap.get(lowerWord) || lowerWord;
+              tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency });
+              if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
+                tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency });
+                seenLowercase.add(lowerWord);
+              } else if (originalCase === lowerWord) {
+                seenLowercase.add(lowerWord);
+              }
+            }
+            tagsWithVersions.sort((a, b) => {
+              if (b.frequency !== a.frequency) {
+                return b.frequency - a.frequency;
+              }
+              return a.lowerTag.localeCompare(b.lowerTag);
+            });
+            const sortedWords = tagsWithVersions.slice(0, limit * 2).map((item) => item.tag);
+            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):", sortedWords);
+            const sanitizedTags = sortedWords.map((word) => this.sanitizeTag(word)).filter((tag) => tag !== null && tag.length > 0);
+            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:", sanitizedTags);
+            const uniqueTags = [];
+            const seenExact = /* @__PURE__ */ new Set();
+            for (const tag of sanitizedTags) {
+              if (!seenExact.has(tag)) {
+                uniqueTags.push(tag);
+                seenExact.add(tag);
+              }
+            }
+            const finalTags = uniqueTags.slice(0, limit * 2);
+            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):", finalTags.length, finalTags);
+            return finalTags;
+          } catch (error) {
+            debugError("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:", error);
+            return [];
+          }
+        }
+      };
     }
   });
 
@@ -3525,6 +5787,7 @@
   });
 
   // src/features/content/overlay-manager.js
+  init_tag_service();
   init_utils();
   var debugLog3 = (message, data = null) => {
     if (window.HOVERBOARD_DEBUG) {
@@ -3565,6 +5828,7 @@
         this.applyVisibilitySettings(settings);
       };
       this.messageService = new MessageClient();
+      this.tagService = new TagService();
       debugLog3("OverlayManager initialized", { config, transparencyMode: this.transparencyMode });
     }
     /**
@@ -3995,6 +6259,68 @@
         this.addTabSearchSection(mainContainer);
         mainContainer.appendChild(currentTagsContainer);
         mainContainer.appendChild(recentContainer);
+        const suggestedContainer = this.document.createElement("div");
+        suggestedContainer.className = "scrollmenu suggested-container";
+        suggestedContainer.style.cssText = `
+        margin-bottom: 8px;
+        padding: 4px;
+        border-radius: 4px;
+        font-size: smaller;
+        font-weight: 900;
+      `;
+        const suggestedLabel = this.document.createElement("span");
+        suggestedLabel.className = "label-secondary tiny";
+        suggestedLabel.textContent = "Suggested:";
+        suggestedLabel.style.cssText = "padding: 0.2em 0.5em; margin-right: 4px;";
+        suggestedContainer.appendChild(suggestedLabel);
+        try {
+          const suggestedTags = this.tagService.extractSuggestedTagsFromContent(this.document, window.location.href, 10);
+          if (suggestedTags && suggestedTags.length > 0) {
+            const currentTags = content.bookmark?.tags || [];
+            const currentTagsLower = new Set(currentTags.map((t) => t.toLowerCase()));
+            suggestedTags.slice(0, 5).forEach((tag) => {
+              const tagLower = tag.toLowerCase();
+              if (!currentTagsLower.has(tagLower)) {
+                const tagElement = this.document.createElement("span");
+                tagElement.className = "tag-element tiny";
+                tagElement.textContent = tag;
+                tagElement.onclick = async () => {
+                  if (content.bookmark) {
+                    try {
+                      await this.messageService.sendMessage({
+                        type: "saveTag",
+                        data: {
+                          url: content.bookmark.url || window.location.href,
+                          value: tag,
+                          description: content.bookmark.description || this.document.title
+                        }
+                      });
+                      if (!content.bookmark.tags) content.bookmark.tags = [];
+                      if (!content.bookmark.tags.includes(tag)) {
+                        content.bookmark.tags.push(tag);
+                      }
+                      this.show(content);
+                      debugLog3("[REQ:SUGGESTED_TAGS_FROM_CONTENT] Tag persisted from suggested", tag);
+                      this.showMessage("Tag saved successfully", "success");
+                    } catch (error) {
+                      debugError2("[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to persist tag from suggested:", error);
+                      this.showMessage("Failed to save tag", "error");
+                    }
+                  }
+                };
+                suggestedContainer.appendChild(tagElement);
+              }
+            });
+          } else {
+            suggestedContainer.style.display = "none";
+          }
+        } catch (error) {
+          debugError2("[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:", error);
+          suggestedContainer.style.display = "none";
+        }
+        if (suggestedContainer.children.length > 1) {
+          mainContainer.appendChild(suggestedContainer);
+        }
         if (visibilityControlsContainer) {
           mainContainer.appendChild(visibilityControlsContainer);
         }

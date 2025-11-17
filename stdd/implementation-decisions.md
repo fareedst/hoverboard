@@ -420,3 +420,38 @@ When documenting implementation decisions, use this format:
 **Code Markers**: `tests/unit/overlay-test-debug.test.js` (close button keyboard event test)
 
 **Cross-References**: [ARCH:OVERLAY_TESTABILITY], [REQ:OVERLAY_CONTROL_LAYOUT], [REQ:OVERLAY_SYSTEM], [IMPL:OVERLAY_TEST_HARNESS]
+
+---
+
+### 18. Suggested Tags from Page Content Implementation [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS] [REQ:SUGGESTED_TAGS_FROM_CONTENT] [REQ:TAG_INPUT_SANITIZATION]
+
+**Decision**: Add `extractSuggestedTagsFromContent` method to `TagService` that extracts words from multiple sources: document title, URL path segments, H1/H2/H3 headings, top-level navigation elements, breadcrumb navigation, first 5 images' alt text, and first 10 anchor links within main content area. The method tokenizes text from all sources, filters noise words (stop words, single characters, numbers), counts frequency across all sources, sorts by frequency descending, and applies `sanitizeTag` to each candidate. Overlay and popup UI components call this method when rendering tag sections and display results in a "Suggested:" section below "Recent:" tags with identical click-to-add behavior.
+
+**Rationale**:
+- Extending `TagService` keeps tag-related logic centralized and reusable
+- Reusing `sanitizeTag` ensures consistency with existing validation rules
+- Noise word filtering improves tag quality by removing common words that don't add semantic value
+- Frequency sorting surfaces the most relevant keywords first
+- UI placement below recent tags maintains visual hierarchy and discoverability
+
+**Implementation Approach**:
+- `TagService.extractSuggestedTagsFromContent(document, url)` - extracts from multiple sources:
+  - Document title: `document.title`
+  - URL segments: parse URL path, extract meaningful segments (skip common segments like "www", "com", etc.)
+  - Headings: `document.querySelectorAll('h1, h2, h3')`
+  - Top-level nav: `document.querySelector('nav')` or `document.querySelector('header nav')`, extract link text
+  - Breadcrumbs: `document.querySelector('[aria-label*="breadcrumb" i], .breadcrumb, nav[aria-label*="breadcrumb" i]')`, extract link text
+  - Images: `document.querySelectorAll('main img, article img, [role="main"] img')` (first 5), extract `alt` text
+  - Links: `document.querySelectorAll('main a, article a, [role="main"] a')` (first 10), extract link text
+- All sources are combined, tokenized into words, filtered for noise, counted for frequency, sorted, sanitized, returns array of tag strings
+- Noise word list includes common English stop words (the, a, an, and, or, but, in, on, at, to, for, of, with, by, etc.), single characters, numbers, and words shorter than 2 characters
+- `OverlayManager.show()` - calls `tagService.extractSuggestedTagsFromContent(this.document, window.location.href)`, renders "Suggested:" section below "Recent:" section with same styling/behavior
+- `UIManager.updateSuggestedTags(suggestedTags)` - renders suggested tags in popup, called from `PopupController` after fetching page content
+- Click handlers reuse existing tag save logic (`messageService.sendMessage({ type: 'saveTag' })`)
+- Tests: unit tests for extraction from all sources, filtering, sorting; integration tests for UI display
+
+**Code Markers**: `src/features/tagging/tag-service.js` (`extractSuggestedTagsFromContent`), `src/features/content/overlay-manager.js` (suggested tags rendering), `src/ui/popup/UIManager.js` (`updateSuggestedTags`), `src/ui/popup/PopupController.js` (suggested tags fetching)
+
+**Cross-References**: [ARCH:SUGGESTED_TAGS], [REQ:SUGGESTED_TAGS_FROM_CONTENT], [REQ:TAG_INPUT_SANITIZATION], [IMPL:TAG_SYSTEM]
+
+---

@@ -1,6 +1,6 @@
 {
   "name": "hoverboard",
-  "version": "1.0.6.75",
+  "version": "1.0.7",
   "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
   "type": "module",
   "scripts": {
@@ -31,7 +31,8 @@
     "precommit": "npm run quality:check",
     "clean": "rm -rf dist/* coverage/",
     "dev:server": "node dev-server.js",
-    "dev:overlay": "npm run dev:server"
+    "dev:overlay": "npm run dev:server",
+    "version:set": "bash scripts/set-version.sh"
   },
   "author": "Fareed Stevenson",
   "license": "ISC",

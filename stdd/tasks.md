@@ -270,6 +270,47 @@ This document tracks all tasks and subtasks for implementing this project. Tasks
 
 ---
 
+### P1: Implement suggested tags from page content [REQ:SUGGESTED_TAGS_FROM_CONTENT] [ARCH:TAG_SYSTEM] [IMPL:TAG_SYSTEM]
+
+**Status**: ✅ Complete
+
+**Description**: Add suggested tags feature that extracts unique, non-noise words from multiple page sources (title, URL segments, H1/H2/H3 headings, top-level navigation, breadcrumbs, first 5 images' alt text, first 10 anchor links in main content), combines them, sorts by frequency, and displays them below recent tags in both popup and overlay interfaces.
+
+**Dependencies**: [REQ:TAG_MANAGEMENT], [REQ:TAG_INPUT_SANITIZATION], [REQ:OVERLAY_SYSTEM]
+
+**Subtasks**:
+- [x] Create tag extraction service that parses multiple sources from DOM [REQ:SUGGESTED_TAGS_FROM_CONTENT] [ARCH:TAG_SYSTEM]
+  - [x] Extract from document title
+  - [x] Extract from URL path segments (filtered for meaningful segments)
+  - [x] Extract from H1/H2/H3 headings
+  - [x] Extract from top-level navigation (first 20 links)
+  - [x] Extract from breadcrumbs (multiple selector patterns)
+  - [x] Extract from first 5 images' alt text (within main content)
+  - [x] Extract from first 10 anchor links (within main content)
+- [x] Implement noise word filtering (stop words, single characters, numbers, etc.) [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:TAG_SYSTEM]
+- [x] Implement frequency counting and sorting across all sources (most frequent first) [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:TAG_SYSTEM]
+- [x] Apply tag sanitization to suggested tags (reuse `TagService.sanitizeTag`) [REQ:SUGGESTED_TAGS_FROM_CONTENT] [REQ:TAG_INPUT_SANITIZATION]
+- [x] Add suggested tags section to overlay UI below recent tags [REQ:SUGGESTED_TAGS_FROM_CONTENT] [REQ:OVERLAY_SYSTEM]
+- [x] Add suggested tags section to popup UI below recent tags [REQ:SUGGESTED_TAGS_FROM_CONTENT] [REQ:TAG_MANAGEMENT]
+- [x] Implement click handler to add suggested tags to bookmarks [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:TAG_SYSTEM]
+- [x] Update both Chrome and Safari versions of overlay-manager [REQ:SUGGESTED_TAGS_FROM_CONTENT]
+- [ ] Write unit tests for multi-source extraction, noise filtering, and frequency sorting [REQ:SUGGESTED_TAGS_FROM_CONTENT]
+- [ ] Write integration tests for popup and overlay suggested tags display [REQ:SUGGESTED_TAGS_FROM_CONTENT]
+
+**Completion Criteria**:
+- [x] Suggested tags appear in both popup and overlay below recent tags
+- [x] Tags are extracted from multiple sources: title, URL, headings, nav, breadcrumbs, images, links
+- [x] Noise words are filtered out
+- [x] Tags are sorted by frequency (most frequent first) across all sources
+- [x] Tag sanitization is applied
+- [x] Clicking suggested tags adds them to bookmarks
+- [x] Documentation updated with semantic tokens
+- [ ] Unit and integration tests pass
+
+**Priority Rationale**: P1 - Enhances tag management UX by providing intelligent suggestions from multiple page content sources, reducing manual tag entry and improving bookmark organization.
+
+---
+
 ## Completed Tasks (Historical Record)
 
 ### ✅ P0: Core Extension Features Implementation [REQ:SMART_BOOKMARKING] [REQ:TAG_MANAGEMENT] [REQ:OVERLAY_SYSTEM] [REQ:BADGE_INDICATORS] [REQ:SITE_MANAGEMENT] [REQ:SEARCH_FUNCTIONALITY] [REQ:PRIVACY_CONTROLS]

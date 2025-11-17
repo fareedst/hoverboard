@@ -63,6 +63,9 @@ When referencing other tokens:
 - `[REQ:SEARCH_FUNCTIONALITY]` - Search Functionality
 - `[REQ:PRIVACY_CONTROLS]` - Privacy Controls
 - `[REQ:OVERLAY_CONTROL_LAYOUT]` - Overlay Control Layout
+- `[REQ:SUGGESTED_TAGS_FROM_CONTENT]` - Suggested Tags from Page Content
+- `[REQ:SUGGESTED_TAGS_DEDUPLICATION]` - Suggested Tags Deduplication
+- `[REQ:SUGGESTED_TAGS_CASE_PRESERVATION]` - Suggested Tags Case Preservation
 
 ### Non-Functional Requirements
 - `[REQ:CONFIG_PORTABILITY]` - Configuration Import/Export
@@ -90,6 +93,7 @@ When referencing other tokens:
 - `[ARCH:OVERLAY_CONTROLS]` - Overlay Control Layout Architecture
 - `[ARCH:OVERLAY_TESTABILITY]` - Overlay Test Harness Architecture
 - `[ARCH:SAFARI_ADAPTATION]` - Safari Adaptive Architecture
+- `[ARCH:SUGGESTED_TAGS]` - Suggested Tags from Page Content Architecture
 
 ## Implementation Tokens Registry
 
@@ -120,6 +124,7 @@ When referencing other tokens:
 - `[IMPL:OVERLAY_TEST_HARNESS]` - Overlay Test Harness Implementation
 - `[IMPL:POPUP_MESSAGE_TIMEOUT]` - Popup Tab Messaging Timeout Implementation
 - `[IMPL:SAFARI_ADAPTATION]` - Safari Adaptive Implementation
+- `[IMPL:SUGGESTED_TAGS]` - Suggested Tags from Page Content Implementation
 
 ## Token Relationships
 

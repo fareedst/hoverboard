@@ -908,4 +908,294 @@ export class TagService {
 
     return sanitized;
   }
+
+  /**
+   * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS] [REQ:TAG_INPUT_SANITIZATION]
+   * Extract suggested tags from multiple page sources (title, URL, headings, nav, breadcrumbs, images, links)
+   * Filters noise words, counts frequency, sorts by frequency, and sanitizes tags
+   * @param {Document} document - The document to extract content from
+   * @param {string} url - The current page URL
+   * @param {number} limit - Maximum number of suggested tags to return (default: 10)
+   * @returns {string[]} Array of suggested tag strings, sorted by frequency (most frequent first)
+   */
+  extractSuggestedTagsFromContent(document, url = '', limit = 10) {
+    if (!document || typeof document.querySelectorAll !== 'function') {
+      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided')
+      return []
+    }
+
+    try {
+      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracting suggested tags from multiple sources')
+
+      const allTexts = []
+
+      // 1. Extract from document title
+      if (document.title) {
+        allTexts.push(document.title)
+        debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from title:', document.title.substring(0, 50))
+      }
+
+      // 2. Extract from URL path segments
+      if (url) {
+        try {
+          const urlObj = new URL(url)
+          const pathSegments = urlObj.pathname.split('/').filter(seg => seg.length > 0)
+          // Filter out common non-meaningful segments
+          const meaningfulSegments = pathSegments.filter(seg => {
+            const lower = seg.toLowerCase()
+            return !['www', 'com', 'org', 'net', 'html', 'htm', 'php', 'asp', 'aspx', 'index', 'home', 'page'].includes(lower) &&
+                   !/^\d+$/.test(seg) && // Skip pure numbers
+                   seg.length >= 2
+          })
+          if (meaningfulSegments.length > 0) {
+            allTexts.push(meaningfulSegments.join(' '))
+            debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from URL:', meaningfulSegments.join(', '))
+          }
+        } catch (e) {
+          debugError('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to parse URL:', e)
+        }
+      }
+
+      // [REQ:SUGGESTED_TAGS_FROM_CONTENT] Helper function to extract text from element, preferring title attribute
+      const extractElementText = (element) => {
+        // Check for title attribute on the element itself
+        if (element.title && element.title.trim().length > 0) {
+          return element.title.trim()
+        }
+        // Check for title attribute on child elements (e.g., yt-formatted-string inside h1)
+        const childWithTitle = element.querySelector('[title]')
+        if (childWithTitle && childWithTitle.title && childWithTitle.title.trim().length > 0) {
+          return childWithTitle.title.trim()
+        }
+        // Fall back to textContent
+        return (element.textContent || '').trim()
+      }
+
+      // 3. Extract from H1, H2, H3 headings
+      const headings = document.querySelectorAll('h1, h2, h3')
+      if (headings.length > 0) {
+        const headingTexts = Array.from(headings).map(heading => extractElementText(heading)).filter(t => t.length > 0)
+        if (headingTexts.length > 0) {
+          allTexts.push(headingTexts.join(' '))
+          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from headings:', headings.length)
+        }
+      }
+
+      // 4. Extract from top-level navigation
+      const nav = document.querySelector('nav') || document.querySelector('header nav') || document.querySelector('[role="navigation"]')
+      if (nav) {
+        const navLinks = nav.querySelectorAll('a')
+        const navTexts = Array.from(navLinks).slice(0, 20).map(link => extractElementText(link)).filter(t => t.length > 0)
+        if (navTexts.length > 0) {
+          allTexts.push(navTexts.join(' '))
+          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from nav:', navTexts.length)
+        }
+      }
+
+      // 5. Extract from breadcrumbs
+      const breadcrumb = document.querySelector('[aria-label*="breadcrumb" i], .breadcrumb, nav[aria-label*="breadcrumb" i], [itemtype*="BreadcrumbList"]')
+      if (breadcrumb) {
+        const breadcrumbLinks = breadcrumb.querySelectorAll('a, [itemprop="name"]')
+        const breadcrumbTexts = Array.from(breadcrumbLinks).map(link => extractElementText(link)).filter(t => t.length > 0)
+        if (breadcrumbTexts.length > 0) {
+          allTexts.push(breadcrumbTexts.join(' '))
+          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from breadcrumbs:', breadcrumbTexts.length)
+        }
+      }
+
+      // 6. Extract from first 5 images' alt text (within main content)
+      const mainImages = document.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img')
+      if (mainImages.length > 0) {
+        const imageAlts = Array.from(mainImages).slice(0, 5).map(img => img.alt || '').filter(alt => alt.length > 0)
+        if (imageAlts.length > 0) {
+          allTexts.push(imageAlts.join(' '))
+          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from images:', imageAlts.length)
+        }
+      }
+
+      // 7. Extract from first 10 anchor links within main content
+      const mainLinks = document.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a')
+      if (mainLinks.length > 0) {
+        const linkTexts = Array.from(mainLinks).slice(0, 10).map(link => extractElementText(link)).filter(t => t.length > 0)
+        if (linkTexts.length > 0) {
+          allTexts.push(linkTexts.join(' '))
+          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from links:', linkTexts.length)
+        }
+      }
+
+      if (allTexts.length === 0) {
+        debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] No content found from any source')
+        return []
+      }
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Preserve original case from content
+      const allText = allTexts.join(' ')
+
+      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extracted text (preserving case):', allText.substring(0, 100))
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
+      const words = allText
+        .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/)
+        .filter(word => word.length > 0)
+
+      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):', words.length)
+
+      // Noise word list (common English stop words) - lowercase for case-insensitive matching
+      const noiseWords = new Set([
+        'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
+        'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
+        'to', 'was', 'will', 'with', 'the', 'this', 'but', 'they', 'have',
+        'had', 'what', 'said', 'each', 'which', 'their', 'time', 'if', 'up',
+        'out', 'many', 'then', 'them', 'these', 'so', 'some', 'her', 'would',
+        'make', 'like', 'into', 'him', 'has', 'two', 'more', 'very', 'after',
+        'words', 'long', 'than', 'first', 'been', 'call', 'who', 'oil', 'sit',
+        'now', 'find', 'down', 'day', 'did', 'get', 'come', 'made', 'may',
+        'part', 'over', 'new', 'sound', 'take', 'only', 'little', 'work', 'know',
+        'place', 'year', 'live', 'me', 'back', 'give', 'most', 'very', 'after',
+        'thing', 'our', 'just', 'name', 'good', 'sentence', 'man', 'think', 'say',
+        'great', 'where', 'help', 'through', 'much', 'before', 'line', 'right',
+        'too', 'mean', 'old', 'any', 'same', 'tell', 'boy', 'follow', 'came',
+        'want', 'show', 'also', 'around', 'form', 'three', 'small', 'set', 'put',
+        'end', 'does', 'another', 'well', 'large', 'must', 'big', 'even', 'such',
+        'because', 'turn', 'here', 'why', 'ask', 'went', 'men', 'read', 'need',
+        'land', 'different', 'home', 'us', 'move', 'try', 'kind', 'hand', 'picture',
+        'again', 'change', 'off', 'play', 'spell', 'air', 'away', 'animal', 'house',
+        'point', 'page', 'letter', 'mother', 'answer', 'found', 'study', 'still',
+        'learn', 'should', 'america', 'world', 'high', 'every', 'near', 'add',
+        'food', 'between', 'own', 'below', 'country', 'plant', 'last', 'school',
+        'father', 'keep', 'tree', 'never', 'start', 'city', 'earth', 'eye', 'light',
+        'thought', 'head', 'under', 'story', 'saw', 'left', 'don\'t', 'few', 'while',
+        'along', 'might', 'close', 'something', 'seem', 'next', 'hard', 'open',
+        'example', 'begin', 'life', 'always', 'those', 'both', 'paper', 'together',
+        'got', 'group', 'often', 'run', 'important', 'until', 'children', 'side',
+        'feet', 'car', 'mile', 'night', 'walk', 'white', 'sea', 'began', 'grow',
+        'took', 'river', 'four', 'carry', 'state', 'once', 'book', 'hear', 'stop',
+        'without', 'second', 'later', 'miss', 'idea', 'enough', 'eat', 'face',
+        'watch', 'far', 'indian', 'really', 'almost', 'let', 'above', 'girl',
+        'sometimes', 'mountain', 'cut', 'young', 'talk', 'soon', 'list', 'song',
+        'leave', 'family', 'it\'s'
+      ])
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Track original case variants and frequency using lowercase keys
+      // Map structure: lowercaseWord -> { original: Set of original case variants, frequency: count }
+      const wordFrequency = new Map()
+      const originalCaseMap = new Map() // lowercase -> most common original case variant
+
+      words.forEach(word => {
+        const trimmed = word.trim()
+        if (trimmed.length === 0) return
+
+        // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Generate lowercase version for case-insensitive operations
+        const lowerWord = trimmed.toLowerCase()
+
+        // Filter: not a noise word, length >= 2, not a number
+        if (
+          trimmed.length >= 2 &&
+          !noiseWords.has(lowerWord) &&
+          !/^\d+$/.test(trimmed)
+        ) {
+          // Track frequency using lowercase key (groups case variants together)
+          const count = wordFrequency.get(lowerWord) || 0
+          wordFrequency.set(lowerWord, count + 1)
+
+          // Track original case variants - keep the first occurrence of each original case
+          if (!originalCaseMap.has(lowerWord)) {
+            originalCaseMap.set(lowerWord, trimmed)
+          } else {
+            // If we've seen this lowercase word before, prefer the original case we've seen most
+            // For now, keep the first one; could be enhanced to track which original case appears most
+            const existing = originalCaseMap.get(lowerWord)
+            // If the new one matches the existing, keep it; otherwise keep existing
+            // This simple approach preserves the first original case we encounter
+          }
+        }
+      })
+
+      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:', wordFrequency.size)
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Build list of tags with both original case and lowercase versions
+      // For words with uppercase letters, include both versions as separate tags
+      // For words already lowercase, include only once
+      const tagsWithVersions = []
+      const seenLowercase = new Set() // Track lowercase versions we've already added
+
+      // Sort by frequency (descending), then alphabetically for ties
+      const sortedEntries = Array.from(wordFrequency.entries())
+        .sort((a, b) => {
+          // Primary sort: frequency (descending)
+          if (b[1] !== a[1]) {
+            return b[1] - a[1]
+          }
+          // Secondary sort: alphabetically (ascending) using lowercase
+          return a[0].localeCompare(b[0])
+        })
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] For each word, add original case version and lowercase version (if different)
+      for (const [lowerWord, frequency] of sortedEntries) {
+        const originalCase = originalCaseMap.get(lowerWord) || lowerWord
+        
+        // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Add original case version
+        tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency })
+
+        // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] If word contains uppercase letters, also add lowercase version
+        // Only add lowercase version if it's different from original and we haven't seen it yet
+        if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
+          tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency })
+          seenLowercase.add(lowerWord)
+        } else if (originalCase === lowerWord) {
+          // Word is already lowercase, mark it as seen
+          seenLowercase.add(lowerWord)
+        }
+      }
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sort all tags (both versions) by frequency, then alphabetically
+      // This ensures both "Git" and "git" are sorted appropriately
+      tagsWithVersions.sort((a, b) => {
+        // Primary sort: frequency (descending)
+        if (b.frequency !== a.frequency) {
+          return b.frequency - a.frequency
+        }
+        // Secondary sort: alphabetically (ascending) using lowercase
+        return a.lowerTag.localeCompare(b.lowerTag)
+      })
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extract tags and apply limit
+      const sortedWords = tagsWithVersions
+        .slice(0, limit * 2) // Allow more entries since we're adding lowercase versions
+        .map(item => item.tag)
+
+      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):', sortedWords)
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sanitize each tag using existing sanitization logic
+      // Sanitization may change case, so we preserve what we can
+      const sanitizedTags = sortedWords
+        .map(word => this.sanitizeTag(word))
+        .filter(tag => tag !== null && tag.length > 0)
+
+      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:', sanitizedTags)
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Remove exact duplicates (same string) while preserving both "Git" and "git"
+      // Use a Set to track exact strings we've seen, but allow both "Git" and "git" since they're different strings
+      const uniqueTags = []
+      const seenExact = new Set() // Track exact strings to avoid true duplicates
+      
+      for (const tag of sanitizedTags) {
+        // Only skip if we've seen this exact string before
+        if (!seenExact.has(tag)) {
+          uniqueTags.push(tag)
+          seenExact.add(tag)
+        }
+      }
+
+      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Apply final limit to ensure we don't exceed reasonable bounds
+      const finalTags = uniqueTags.slice(0, limit * 2)
+
+      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):', finalTags.length, finalTags)
+
+      return finalTags
+    } catch (error) {
+      debugError('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:', error)
+      return []
+    }
+  }
 }

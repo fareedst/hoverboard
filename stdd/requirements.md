@@ -42,6 +42,9 @@ Each requirement includes:
 | `[REQ:SITE_MANAGEMENT]` | Site Management | P1 | ✅ Implemented | [ARCH:SITE_MGMT] | [IMPL:SITE_MGMT] |
 | `[REQ:SEARCH_FUNCTIONALITY]` | Search Functionality | P1 | ✅ Implemented | [ARCH:SEARCH] | [IMPL:SEARCH] |
 | `[REQ:OVERLAY_CONTROL_LAYOUT]` | Overlay Control Layout | P1 | ✅ Implemented | [ARCH:OVERLAY] | [IMPL:OVERLAY] |
+| `[REQ:SUGGESTED_TAGS_FROM_CONTENT]` | Suggested Tags from Page Content | P1 | ✅ Implemented | [ARCH:SUGGESTED_TAGS] | [IMPL:SUGGESTED_TAGS] |
+| `[REQ:SUGGESTED_TAGS_DEDUPLICATION]` | Suggested Tags Deduplication | P1 | ✅ Implemented | [ARCH:SUGGESTED_TAGS] | [IMPL:SUGGESTED_TAGS] |
+| `[REQ:SUGGESTED_TAGS_CASE_PRESERVATION]` | Suggested Tags Case Preservation | P1 | ✅ Implemented | [ARCH:SUGGESTED_TAGS] | [IMPL:SUGGESTED_TAGS] |
 
 ### Non-Functional Requirements
 
@@ -533,5 +536,88 @@ The following features are documented but marked as future enhancements:
   - `tests/unit/safari-error-handling.test.js`, `tests/unit/safari-messaging.test.js`, `tests/unit/safari-popup-adaptations.test.js`, and `tests/unit/safari-performance.test.js` confirm platform detection, recovery attempts, degraded-mode toggles, messaging retries, and UI reinitialization logic.
 - **Architecture**: See `architecture-decisions.md` § Cross-Browser Compatibility [ARCH:CROSS_BROWSER]
 - **Implementation**: See `implementation-decisions.md` § Cross-Browser API Shim [IMPL:CROSS_BROWSER]
+
+**Status**: ✅ Implemented
+
+#### [REQ:SUGGESTED_TAGS_FROM_CONTENT] Suggested Tags from Page Content
+
+**Priority**: P1 (Important)
+
+- **Description**: Both popup and overlay interfaces must display a "suggested tags" section below the "recent tags" list. Suggested tags are intelligently gathered from multiple sources on the current page. The system extracts unique "non-noise" words from: page title tag, URL path segments, headings (H1, H2, H3), top-level navigation elements, breadcrumb navigation, first N images' alt text, and first N anchor links within the main content area. When extracting text from elements (headings, links, navigation items), the system prioritizes attribute text (such as the `title` attribute) over visible text content, as attributes often contain the full, untruncated text while visible content may be truncated. If an element or its child elements have a `title` attribute with content, that attribute value is used; otherwise, the element's `textContent` is used. All extracted words are combined, filtered for noise, counted for frequency, and sorted by frequency with most frequent words appearing first.
+- **Rationale**: Suggested tags help users quickly identify relevant tags for bookmarking by analyzing page content from multiple structured sources. Extracting words from title, URL, headings, navigation, breadcrumbs, images, and links provides comprehensive, semantically meaningful suggestions since these sources typically contain the most important keywords describing the page content. Combining multiple sources with frequency analysis ensures the most relevant keywords surface, while filtering noise words maintains tag quality. This reduces manual tag entry and improves bookmark organization.
+- **Satisfaction Criteria**:
+  - Popup interface displays "Suggested:" section below "Recent:" tags section with clickable tag elements
+  - Overlay interface displays "Suggested:" section below "Recent:" tags section with clickable tag elements
+  - Suggested tags are extracted from multiple sources: title tag, URL path segments, H1/H2/H3 headings, top-level navigation, breadcrumbs, first 5 images' alt text, and first 10 anchor links within main content
+  - When extracting from elements (headings, links, navigation), the system checks for `title` attributes (on the element or its children) and uses attribute text when available, falling back to `textContent` otherwise
+  - Words are filtered to remove "noise" words (common stop words, single characters, numbers, etc.)
+  - Tags are deduplicated (unique words only)
+  - Tags are sorted by frequency (most frequent first)
+  - Suggested tags respect tag sanitization rules (same as `[REQ:TAG_INPUT_SANITIZATION]`)
+  - Clicking a suggested tag adds it to the bookmark (same behavior as recent tags)
+  - Suggested tags section is hidden when no suggestions are available
+- **Validation Criteria**:
+  - Unit tests verify extraction from all sources (title, URL, headings, nav, breadcrumbs, images, links) from mock DOM structures
+  - Unit tests verify title attribute extraction from elements and child elements (e.g., title attribute on yt-formatted-string inside h1)
+  - Unit tests verify fallback to textContent when title attributes are not available
+  - Unit tests verify noise word filtering and frequency sorting across all sources
+  - Unit tests verify tag sanitization is applied to suggested tags
+  - Integration tests verify suggested tags appear in both popup and overlay
+  - Integration tests verify clicking suggested tags adds them to bookmarks
+  - Manual testing confirms suggested tags reflect page content accurately from multiple sources, including full text from title attributes
+- **Architecture**: See `architecture-decisions.md` § Suggested Tags from Page Content Architecture [ARCH:SUGGESTED_TAGS]
+- **Implementation**: See `implementation-decisions.md` § Suggested Tags from Page Content Implementation [IMPL:SUGGESTED_TAGS]
+
+**Status**: ✅ Implemented
+
+#### [REQ:SUGGESTED_TAGS_DEDUPLICATION] Suggested Tags Deduplication
+
+**Priority**: P1 (Important)
+
+- **Description**: Suggested tags must be filtered to exclude any tags that are already present in the Current Tags list. The comparison must be case-insensitive, meaning "Tag" and "tag" are considered the same tag. Tags present in Current Tags (case-insensitive match) must not appear in the Suggested Tags section in both popup and overlay interfaces. This requirement works in conjunction with `[REQ:SUGGESTED_TAGS_CASE_PRESERVATION]` to preserve original case while enabling case-insensitive deduplication.
+- **Rationale**: Displaying tags in Suggested Tags that are already in Current Tags creates confusion and redundancy. Users should only see suggestions for tags they haven't already added. Case-insensitive comparison ensures that tags with different capitalization (e.g., "JavaScript" vs "javascript") are treated as the same tag, preventing duplicate suggestions while preserving the original case for display purposes.
+- **Satisfaction Criteria**:
+  - Suggested tags are filtered before display to exclude tags already in Current Tags
+  - Comparison is case-insensitive (e.g., "Tag" = "tag" for deduplication purposes)
+  - Filtering applies in both popup and overlay interfaces
+  - Filtering occurs after tag extraction and sanitization but before display
+  - If all suggested tags are filtered out, the Suggested Tags section is hidden
+  - Case-insensitive comparison uses lowercase versions of both suggested tags and current tags
+- **Validation Criteria**:
+  - Unit tests verify suggested tags are filtered when they match Current Tags (case-insensitive)
+  - Unit tests verify tags with different case (e.g., "Tag" vs "tag") are filtered if either is in Current Tags
+  - Integration tests verify filtering works in both popup and overlay interfaces
+  - Manual testing confirms suggested tags section hides tags already in Current Tags (case-insensitive)
+- **Architecture**: See `architecture-decisions.md` § Suggested Tags from Page Content Architecture [ARCH:SUGGESTED_TAGS]
+- **Implementation**: See `implementation-decisions.md` § Suggested Tags from Page Content Implementation [IMPL:SUGGESTED_TAGS]
+
+**Status**: ✅ Implemented
+
+#### [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Suggested Tags Case Preservation
+
+**Priority**: P1 (Important)
+
+- **Description**: When extracting suggested tags from page content, the system must preserve the original case of words as they appear in the source content. For words that contain uppercase letters (i.e., are not all lowercase), the system must include BOTH the original case-preserved version AND the lowercase version as separate suggested tags. For example, if an H2 element contains "Git clones", the system should suggest both "Git" (original case) and "git" (lowercase version) as separate tags, along with "clones" (which is already lowercase). Both versions are displayed to users as separate suggested tags, giving users flexibility to choose the capitalization style they prefer. The lowercase version is also used internally for case-insensitive deduplication with Current Tags (as specified in `[REQ:SUGGESTED_TAGS_DEDUPLICATION]`). Words that are already all lowercase do not generate a duplicate lowercase version (e.g., "clones" only appears once).
+- **Rationale**: Preserving original case maintains the semantic meaning and visual context of words as they appear in the source content (e.g., "JavaScript", "API", "HTML"). Including both the original case and lowercase versions as separate suggested tags gives users flexibility - some may prefer "Git" (proper noun/tool name) while others may prefer "git" (lowercase convention). This dual-suggestion approach accommodates different tagging conventions while preserving the original context. The lowercase version also enables efficient case-insensitive deduplication without losing the original case information, allowing the system to filter duplicates while still displaying both capitalization options.
+- **Satisfaction Criteria**:
+  - Words extracted from content preserve their original case (e.g., "JavaScript" remains "JavaScript", not "javascript")
+  - For words that contain uppercase letters (e.g., "Git", "JavaScript", "API"), BOTH the original case version AND the lowercase version are included as separate suggested tags
+  - Words that are already all lowercase (e.g., "clones", "javascript") appear only once (no duplicate lowercase version)
+  - Both the original case-preserved version and lowercase version (when different) are displayed in the Suggested Tags section as separate clickable tags
+  - The lowercase version is used internally for case-insensitive comparison with Current Tags (if either "Git" or "git" is in Current Tags, both are filtered from Suggested Tags)
+  - Case preservation applies to all extraction sources: title, URL segments, headings, navigation, breadcrumbs, images, and links
+  - Frequency counting and sorting consider both versions independently (each version maintains its own frequency count)
+  - Example: For H2 element with text "Git clones", suggested tags include: "Git", "git", and "clones" (if none exist in Current Tags)
+- **Validation Criteria**:
+  - Unit tests verify words extracted from content preserve original case
+  - Unit tests verify both original case and lowercase versions are generated for mixed-case words (e.g., "Git" → ["Git", "git"])
+  - Unit tests verify all-lowercase words do not generate duplicate lowercase versions (e.g., "clones" → ["clones"] only)
+  - Unit tests verify both versions appear as separate suggested tags in the output
+  - Unit tests verify case-insensitive deduplication filters both versions when either matches Current Tags
+  - Integration tests verify both original case and lowercase versions display in both popup and overlay interfaces
+  - Manual testing confirms suggested tags include both "Git" and "git" for H2 element with text "Git clones"
+  - Manual testing confirms suggested tags reflect original capitalization from page content while also providing lowercase alternatives
+- **Architecture**: See `architecture-decisions.md` § Suggested Tags from Page Content Architecture [ARCH:SUGGESTED_TAGS]
+- **Implementation**: See `implementation-decisions.md` § Suggested Tags from Page Content Implementation [IMPL:SUGGESTED_TAGS]
 
 **Status**: ✅ Implemented

@@ -251,6 +251,9 @@ export class PopupController {
       // Load recent tags
       await this.loadRecentTags()
 
+      // [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] - Load suggested tags from page content
+      await this.loadSuggestedTags()
+
       // [SHOW-HOVER-CHECKBOX-CONTROLLER-002] - Load checkbox state
       await this.loadShowHoverOnPageLoadSetting()
 
@@ -329,6 +332,288 @@ export class PopupController {
     } catch (error) {
       debugError('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Failed to load recent tags:', error)
       this.uiManager.updateRecentTags([])
+    }
+  }
+
+  /**
+   * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS]
+   * Load suggested tags from page headings
+   */
+  async loadSuggestedTags () {
+    try {
+      debugLog('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] Loading suggested tags from page content')
+
+      if (!this.currentTab || !this.currentTab.id) {
+        debugLog('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] No current tab, skipping suggested tags')
+        this.uiManager.updateSuggestedTags([])
+        return
+      }
+
+      // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags using content script injection
+      // Import TagService dynamically to avoid circular dependencies
+      const { TagService } = await import('../../features/tagging/tag-service.js')
+      const tagService = new TagService()
+
+      // Execute script in tab to extract suggested tags
+      try {
+        const results = await chrome.scripting.executeScript({
+          target: { tabId: this.currentTab.id },
+          func: () => {
+            // Extract tags from multiple sources in the page context
+            const allTexts = []
+
+            // [REQ:SUGGESTED_TAGS_FROM_CONTENT] Helper function to extract text from element, preferring title attribute
+            const extractElementText = (element) => {
+              // Check for title attribute on the element itself
+              if (element.title && element.title.trim().length > 0) {
+                return element.title.trim()
+              }
+              // Check for title attribute on child elements (e.g., yt-formatted-string inside h1)
+              const childWithTitle = element.querySelector('[title]')
+              if (childWithTitle && childWithTitle.title && childWithTitle.title.trim().length > 0) {
+                return childWithTitle.title.trim()
+              }
+              // Fall back to textContent
+              return (element.textContent || '').trim()
+            }
+
+            // 1. Document title
+            if (document.title) {
+              allTexts.push(document.title)
+            }
+
+            // 2. URL path segments
+            try {
+              const urlObj = new URL(window.location.href)
+              const pathSegments = urlObj.pathname.split('/').filter(seg => seg.length > 0)
+              const meaningfulSegments = pathSegments.filter(seg => {
+                const lower = seg.toLowerCase()
+                return !['www', 'com', 'org', 'net', 'html', 'htm', 'php', 'asp', 'aspx', 'index', 'home', 'page'].includes(lower) &&
+                       !/^\d+$/.test(seg) && seg.length >= 2
+              })
+              if (meaningfulSegments.length > 0) {
+                allTexts.push(meaningfulSegments.join(' '))
+              }
+            } catch (e) {
+              // Ignore URL parsing errors
+            }
+
+            // 3. Headings
+            const headings = document.querySelectorAll('h1, h2, h3')
+            if (headings.length > 0) {
+              const headingTexts = Array.from(headings).map(h => extractElementText(h)).filter(t => t.length > 0)
+              if (headingTexts.length > 0) {
+                allTexts.push(headingTexts.join(' '))
+              }
+            }
+
+            // 4. Top-level navigation
+            const nav = document.querySelector('nav') || document.querySelector('header nav') || document.querySelector('[role="navigation"]')
+            if (nav) {
+              const navLinks = nav.querySelectorAll('a')
+              const navTexts = Array.from(navLinks).slice(0, 20).map(link => extractElementText(link)).filter(t => t.length > 0)
+              if (navTexts.length > 0) {
+                allTexts.push(navTexts.join(' '))
+              }
+            }
+
+            // 5. Breadcrumbs
+            const breadcrumb = document.querySelector('[aria-label*="breadcrumb" i], .breadcrumb, nav[aria-label*="breadcrumb" i], [itemtype*="BreadcrumbList"]')
+            if (breadcrumb) {
+              const breadcrumbLinks = breadcrumb.querySelectorAll('a, [itemprop="name"]')
+              const breadcrumbTexts = Array.from(breadcrumbLinks).map(link => extractElementText(link)).filter(t => t.length > 0)
+              if (breadcrumbTexts.length > 0) {
+                allTexts.push(breadcrumbTexts.join(' '))
+              }
+            }
+
+            // 6. First 5 images' alt text
+            const mainImages = document.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img')
+            if (mainImages.length > 0) {
+              const imageAlts = Array.from(mainImages).slice(0, 5).map(img => img.alt || '').filter(alt => alt.length > 0)
+              if (imageAlts.length > 0) {
+                allTexts.push(imageAlts.join(' '))
+              }
+            }
+
+            // 7. First 10 anchor links within main content
+            const mainLinks = document.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a')
+            if (mainLinks.length > 0) {
+              const linkTexts = Array.from(mainLinks).slice(0, 10).map(link => extractElementText(link)).filter(t => t.length > 0)
+              if (linkTexts.length > 0) {
+                allTexts.push(linkTexts.join(' '))
+              }
+            }
+
+            if (allTexts.length === 0) return []
+
+            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Preserve original case from content
+            const allText = allTexts.join(' ')
+
+            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
+            const words = allText
+              .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/)
+              .filter(word => word.length > 0)
+
+            // Noise word list (common English stop words) - lowercase for case-insensitive matching
+            const noiseWords = new Set([
+              'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
+              'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
+              'to', 'was', 'will', 'with', 'this', 'but', 'they', 'have',
+              'had', 'what', 'said', 'each', 'which', 'their', 'time', 'if', 'up',
+              'out', 'many', 'then', 'them', 'these', 'so', 'some', 'her', 'would',
+              'make', 'like', 'into', 'him', 'two', 'more', 'very', 'after',
+              'words', 'long', 'than', 'first', 'been', 'call', 'who', 'oil', 'sit',
+              'now', 'find', 'down', 'day', 'did', 'get', 'come', 'made', 'may',
+              'part', 'over', 'new', 'sound', 'take', 'only', 'little', 'work', 'know',
+              'place', 'year', 'live', 'me', 'back', 'give', 'most', 'thing', 'our',
+              'just', 'name', 'good', 'sentence', 'man', 'think', 'say', 'great',
+              'where', 'help', 'through', 'much', 'before', 'line', 'right', 'too',
+              'mean', 'old', 'any', 'same', 'tell', 'boy', 'follow', 'came', 'want',
+              'show', 'also', 'around', 'form', 'three', 'small', 'set', 'put', 'end',
+              'does', 'another', 'well', 'large', 'must', 'big', 'even', 'such',
+              'because', 'turn', 'here', 'why', 'ask', 'went', 'men', 'read', 'need',
+              'land', 'different', 'home', 'us', 'move', 'try', 'kind', 'hand', 'picture',
+              'again', 'change', 'off', 'play', 'spell', 'air', 'away', 'animal', 'house',
+              'point', 'page', 'letter', 'mother', 'answer', 'found', 'study', 'still',
+              'learn', 'should', 'america', 'world', 'high', 'every', 'near', 'add',
+              'food', 'between', 'own', 'below', 'country', 'plant', 'last', 'school',
+              'father', 'keep', 'tree', 'never', 'start', 'city', 'earth', 'eye', 'light',
+              'thought', 'head', 'under', 'story', 'saw', 'left', 'don\'t', 'few', 'while',
+              'along', 'might', 'close', 'something', 'seem', 'next', 'hard', 'open',
+              'example', 'begin', 'life', 'always', 'those', 'both', 'paper', 'together',
+              'got', 'group', 'often', 'run', 'important', 'until', 'children', 'side',
+              'feet', 'car', 'mile', 'night', 'walk', 'white', 'sea', 'began', 'grow',
+              'took', 'river', 'four', 'carry', 'state', 'once', 'book', 'hear', 'stop',
+              'without', 'second', 'later', 'miss', 'idea', 'enough', 'eat', 'face',
+              'watch', 'far', 'indian', 'really', 'almost', 'let', 'above', 'girl',
+              'sometimes', 'mountain', 'cut', 'young', 'talk', 'soon', 'list', 'song',
+              'leave', 'family', 'it\'s'
+            ])
+
+            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Track original case variants and frequency using lowercase keys
+            const wordFrequency = new Map()
+            const originalCaseMap = new Map() // lowercase -> most common original case variant
+
+            words.forEach(word => {
+              const trimmed = word.trim()
+              if (trimmed.length === 0) return
+
+              // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Generate lowercase version for case-insensitive operations
+              const lowerWord = trimmed.toLowerCase()
+
+              // Filter: not a noise word, length >= 2, not a number
+              if (
+                trimmed.length >= 2 &&
+                !noiseWords.has(lowerWord) &&
+                !/^\d+$/.test(trimmed)
+              ) {
+                // Track frequency using lowercase key (groups case variants together)
+                const count = wordFrequency.get(lowerWord) || 0
+                wordFrequency.set(lowerWord, count + 1)
+
+                // Track original case variants - keep the first occurrence of each original case
+                if (!originalCaseMap.has(lowerWord)) {
+                  originalCaseMap.set(lowerWord, trimmed)
+                }
+              }
+            })
+
+            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Build list of tags with both original case and lowercase versions
+            // For words with uppercase letters, include both versions as separate tags
+            // For words already lowercase, include only once
+            const tagsWithVersions = []
+            const seenLowercase = new Set() // Track lowercase versions we've already added
+
+            // Sort by frequency (descending), then alphabetically for ties
+            const sortedEntries = Array.from(wordFrequency.entries())
+              .sort((a, b) => {
+                // Primary sort: frequency (descending)
+                if (b[1] !== a[1]) {
+                  return b[1] - a[1]
+                }
+                // Secondary sort: alphabetically (ascending) using lowercase
+                return a[0].localeCompare(b[0])
+              })
+
+            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] For each word, add original case version and lowercase version (if different)
+            for (const [lowerWord, frequency] of sortedEntries) {
+              const originalCase = originalCaseMap.get(lowerWord) || lowerWord
+
+              // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Add original case version
+              tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency })
+
+              // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] If word contains uppercase letters, also add lowercase version
+              // Only add lowercase version if it's different from original and we haven't seen it yet
+              if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
+                tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency })
+                seenLowercase.add(lowerWord)
+              } else if (originalCase === lowerWord) {
+                // Word is already lowercase, mark it as seen
+                seenLowercase.add(lowerWord)
+              }
+            }
+
+            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sort all tags (both versions) by frequency, then alphabetically
+            tagsWithVersions.sort((a, b) => {
+              // Primary sort: frequency (descending)
+              if (b.frequency !== a.frequency) {
+                return b.frequency - a.frequency
+              }
+              // Secondary sort: alphabetically (ascending) using lowercase
+              return a.lowerTag.localeCompare(b.lowerTag)
+            })
+
+            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extract tags and apply limit
+            const sortedWords = tagsWithVersions
+              .slice(0, 20) // Allow more entries since we're adding lowercase versions
+              .map(item => item.tag)
+
+            // Simple sanitization (remove special chars, limit length)
+            const sanitizedTags = sortedWords
+              .map(word => word.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 50))
+              .filter(tag => tag !== null && tag.length > 0)
+
+            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Remove exact duplicates (same string) while preserving both "Git" and "git"
+            const uniqueTags = []
+            const seenExact = new Set() // Track exact strings to avoid true duplicates
+
+            for (const tag of sanitizedTags) {
+              // Only skip if we've seen this exact string before
+              if (!seenExact.has(tag)) {
+                uniqueTags.push(tag)
+                seenExact.add(tag)
+              }
+            }
+
+            return uniqueTags.slice(0, 20) // Final limit
+          }
+        })
+
+        if (results && results[0] && results[0].result) {
+          const suggestedTags = results[0].result
+          const currentTags = this.normalizeTags(this.currentPin?.tags || [])
+
+          // [REQ:SUGGESTED_TAGS_DEDUPLICATION] [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] - Filter using case-insensitive comparison
+          const currentTagsLower = new Set(currentTags.map(t => t.toLowerCase()))
+          const filteredSuggestedTags = suggestedTags.filter(tag =>
+            tag && !currentTagsLower.has(tag.toLowerCase())
+          )
+
+          debugLog('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted suggested tags:', filteredSuggestedTags)
+          this.uiManager.updateSuggestedTags(filteredSuggestedTags)
+        } else {
+          debugLog('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] No suggested tags extracted')
+          this.uiManager.updateSuggestedTags([])
+        }
+      } catch (scriptError) {
+        // Script injection might fail on certain pages (chrome://, extension pages, etc.)
+        debugError('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:', scriptError)
+        this.uiManager.updateSuggestedTags([])
+      }
+    } catch (error) {
+      debugError('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to load suggested tags:', error)
+      this.uiManager.updateSuggestedTags([])
     }
   }
 

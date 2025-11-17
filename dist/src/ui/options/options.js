@@ -2356,6 +2356,441 @@ var init_tag_service = __esm({
         }
         return sanitized;
       }
+      /**
+       * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS] [REQ:TAG_INPUT_SANITIZATION]
+       * Extract suggested tags from multiple page sources (title, URL, headings, nav, breadcrumbs, images, links)
+       * Filters noise words, counts frequency, sorts by frequency, and sanitizes tags
+       * @param {Document} document - The document to extract content from
+       * @param {string} url - The current page URL
+       * @param {number} limit - Maximum number of suggested tags to return (default: 10)
+       * @returns {string[]} Array of suggested tag strings, sorted by frequency (most frequent first)
+       */
+      extractSuggestedTagsFromContent(document2, url = "", limit = 10) {
+        if (!document2 || typeof document2.querySelectorAll !== "function") {
+          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided");
+          return [];
+        }
+        try {
+          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracting suggested tags from multiple sources");
+          const allTexts = [];
+          if (document2.title) {
+            allTexts.push(document2.title);
+            debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from title:", document2.title.substring(0, 50));
+          }
+          if (url) {
+            try {
+              const urlObj = new URL(url);
+              const pathSegments = urlObj.pathname.split("/").filter((seg) => seg.length > 0);
+              const meaningfulSegments = pathSegments.filter((seg) => {
+                const lower = seg.toLowerCase();
+                return !["www", "com", "org", "net", "html", "htm", "php", "asp", "aspx", "index", "home", "page"].includes(lower) && !/^\d+$/.test(seg) && // Skip pure numbers
+                seg.length >= 2;
+              });
+              if (meaningfulSegments.length > 0) {
+                allTexts.push(meaningfulSegments.join(" "));
+                debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from URL:", meaningfulSegments.join(", "));
+              }
+            } catch (e) {
+              debugError("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to parse URL:", e);
+            }
+          }
+          const extractElementText = (element) => {
+            if (element.title && element.title.trim().length > 0) {
+              return element.title.trim();
+            }
+            const childWithTitle = element.querySelector("[title]");
+            if (childWithTitle && childWithTitle.title && childWithTitle.title.trim().length > 0) {
+              return childWithTitle.title.trim();
+            }
+            return (element.textContent || "").trim();
+          };
+          const headings = document2.querySelectorAll("h1, h2, h3");
+          if (headings.length > 0) {
+            const headingTexts = Array.from(headings).map((heading) => extractElementText(heading)).filter((t) => t.length > 0);
+            if (headingTexts.length > 0) {
+              allTexts.push(headingTexts.join(" "));
+              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from headings:", headings.length);
+            }
+          }
+          const nav = document2.querySelector("nav") || document2.querySelector("header nav") || document2.querySelector('[role="navigation"]');
+          if (nav) {
+            const navLinks = nav.querySelectorAll("a");
+            const navTexts = Array.from(navLinks).slice(0, 20).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+            if (navTexts.length > 0) {
+              allTexts.push(navTexts.join(" "));
+              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from nav:", navTexts.length);
+            }
+          }
+          const breadcrumb = document2.querySelector('[aria-label*="breadcrumb" i], .breadcrumb, nav[aria-label*="breadcrumb" i], [itemtype*="BreadcrumbList"]');
+          if (breadcrumb) {
+            const breadcrumbLinks = breadcrumb.querySelectorAll('a, [itemprop="name"]');
+            const breadcrumbTexts = Array.from(breadcrumbLinks).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+            if (breadcrumbTexts.length > 0) {
+              allTexts.push(breadcrumbTexts.join(" "));
+              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from breadcrumbs:", breadcrumbTexts.length);
+            }
+          }
+          const mainImages = document2.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img');
+          if (mainImages.length > 0) {
+            const imageAlts = Array.from(mainImages).slice(0, 5).map((img) => img.alt || "").filter((alt) => alt.length > 0);
+            if (imageAlts.length > 0) {
+              allTexts.push(imageAlts.join(" "));
+              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from images:", imageAlts.length);
+            }
+          }
+          const mainLinks = document2.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a');
+          if (mainLinks.length > 0) {
+            const linkTexts = Array.from(mainLinks).slice(0, 10).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+            if (linkTexts.length > 0) {
+              allTexts.push(linkTexts.join(" "));
+              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from links:", linkTexts.length);
+            }
+          }
+          if (allTexts.length === 0) {
+            debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] No content found from any source");
+            return [];
+          }
+          const allText = allTexts.join(" ");
+          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extracted text (preserving case):", allText.substring(0, 100));
+          const words = allText.split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/).filter((word) => word.length > 0);
+          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):", words.length);
+          const noiseWords = /* @__PURE__ */ new Set([
+            "a",
+            "an",
+            "and",
+            "are",
+            "as",
+            "at",
+            "be",
+            "by",
+            "for",
+            "from",
+            "has",
+            "he",
+            "in",
+            "is",
+            "it",
+            "its",
+            "of",
+            "on",
+            "that",
+            "the",
+            "to",
+            "was",
+            "will",
+            "with",
+            "the",
+            "this",
+            "but",
+            "they",
+            "have",
+            "had",
+            "what",
+            "said",
+            "each",
+            "which",
+            "their",
+            "time",
+            "if",
+            "up",
+            "out",
+            "many",
+            "then",
+            "them",
+            "these",
+            "so",
+            "some",
+            "her",
+            "would",
+            "make",
+            "like",
+            "into",
+            "him",
+            "has",
+            "two",
+            "more",
+            "very",
+            "after",
+            "words",
+            "long",
+            "than",
+            "first",
+            "been",
+            "call",
+            "who",
+            "oil",
+            "sit",
+            "now",
+            "find",
+            "down",
+            "day",
+            "did",
+            "get",
+            "come",
+            "made",
+            "may",
+            "part",
+            "over",
+            "new",
+            "sound",
+            "take",
+            "only",
+            "little",
+            "work",
+            "know",
+            "place",
+            "year",
+            "live",
+            "me",
+            "back",
+            "give",
+            "most",
+            "very",
+            "after",
+            "thing",
+            "our",
+            "just",
+            "name",
+            "good",
+            "sentence",
+            "man",
+            "think",
+            "say",
+            "great",
+            "where",
+            "help",
+            "through",
+            "much",
+            "before",
+            "line",
+            "right",
+            "too",
+            "mean",
+            "old",
+            "any",
+            "same",
+            "tell",
+            "boy",
+            "follow",
+            "came",
+            "want",
+            "show",
+            "also",
+            "around",
+            "form",
+            "three",
+            "small",
+            "set",
+            "put",
+            "end",
+            "does",
+            "another",
+            "well",
+            "large",
+            "must",
+            "big",
+            "even",
+            "such",
+            "because",
+            "turn",
+            "here",
+            "why",
+            "ask",
+            "went",
+            "men",
+            "read",
+            "need",
+            "land",
+            "different",
+            "home",
+            "us",
+            "move",
+            "try",
+            "kind",
+            "hand",
+            "picture",
+            "again",
+            "change",
+            "off",
+            "play",
+            "spell",
+            "air",
+            "away",
+            "animal",
+            "house",
+            "point",
+            "page",
+            "letter",
+            "mother",
+            "answer",
+            "found",
+            "study",
+            "still",
+            "learn",
+            "should",
+            "america",
+            "world",
+            "high",
+            "every",
+            "near",
+            "add",
+            "food",
+            "between",
+            "own",
+            "below",
+            "country",
+            "plant",
+            "last",
+            "school",
+            "father",
+            "keep",
+            "tree",
+            "never",
+            "start",
+            "city",
+            "earth",
+            "eye",
+            "light",
+            "thought",
+            "head",
+            "under",
+            "story",
+            "saw",
+            "left",
+            "don't",
+            "few",
+            "while",
+            "along",
+            "might",
+            "close",
+            "something",
+            "seem",
+            "next",
+            "hard",
+            "open",
+            "example",
+            "begin",
+            "life",
+            "always",
+            "those",
+            "both",
+            "paper",
+            "together",
+            "got",
+            "group",
+            "often",
+            "run",
+            "important",
+            "until",
+            "children",
+            "side",
+            "feet",
+            "car",
+            "mile",
+            "night",
+            "walk",
+            "white",
+            "sea",
+            "began",
+            "grow",
+            "took",
+            "river",
+            "four",
+            "carry",
+            "state",
+            "once",
+            "book",
+            "hear",
+            "stop",
+            "without",
+            "second",
+            "later",
+            "miss",
+            "idea",
+            "enough",
+            "eat",
+            "face",
+            "watch",
+            "far",
+            "indian",
+            "really",
+            "almost",
+            "let",
+            "above",
+            "girl",
+            "sometimes",
+            "mountain",
+            "cut",
+            "young",
+            "talk",
+            "soon",
+            "list",
+            "song",
+            "leave",
+            "family",
+            "it's"
+          ]);
+          const wordFrequency = /* @__PURE__ */ new Map();
+          const originalCaseMap = /* @__PURE__ */ new Map();
+          words.forEach((word) => {
+            const trimmed = word.trim();
+            if (trimmed.length === 0) return;
+            const lowerWord = trimmed.toLowerCase();
+            if (trimmed.length >= 2 && !noiseWords.has(lowerWord) && !/^\d+$/.test(trimmed)) {
+              const count = wordFrequency.get(lowerWord) || 0;
+              wordFrequency.set(lowerWord, count + 1);
+              if (!originalCaseMap.has(lowerWord)) {
+                originalCaseMap.set(lowerWord, trimmed);
+              } else {
+                const existing = originalCaseMap.get(lowerWord);
+              }
+            }
+          });
+          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:", wordFrequency.size);
+          const tagsWithVersions = [];
+          const seenLowercase = /* @__PURE__ */ new Set();
+          const sortedEntries = Array.from(wordFrequency.entries()).sort((a, b) => {
+            if (b[1] !== a[1]) {
+              return b[1] - a[1];
+            }
+            return a[0].localeCompare(b[0]);
+          });
+          for (const [lowerWord, frequency] of sortedEntries) {
+            const originalCase = originalCaseMap.get(lowerWord) || lowerWord;
+            tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency });
+            if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
+              tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency });
+              seenLowercase.add(lowerWord);
+            } else if (originalCase === lowerWord) {
+              seenLowercase.add(lowerWord);
+            }
+          }
+          tagsWithVersions.sort((a, b) => {
+            if (b.frequency !== a.frequency) {
+              return b.frequency - a.frequency;
+            }
+            return a.lowerTag.localeCompare(b.lowerTag);
+          });
+          const sortedWords = tagsWithVersions.slice(0, limit * 2).map((item) => item.tag);
+          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):", sortedWords);
+          const sanitizedTags = sortedWords.map((word) => this.sanitizeTag(word)).filter((tag) => tag !== null && tag.length > 0);
+          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:", sanitizedTags);
+          const uniqueTags = [];
+          const seenExact = /* @__PURE__ */ new Set();
+          for (const tag of sanitizedTags) {
+            if (!seenExact.has(tag)) {
+              uniqueTags.push(tag);
+              seenExact.add(tag);
+            }
+          }
+          const finalTags = uniqueTags.slice(0, limit * 2);
+          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):", finalTags.length, finalTags);
+          return finalTags;
+        } catch (error) {
+          debugError("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:", error);
+          return [];
+        }
+      }
     };
   }
 });
