@@ -1198,7 +1198,7 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       - "Context-aware suggestions"
   satisfaction_criteria:
     - criterion: "Suggested tags section below recent tags"
-    - criterion: "Extracts from title, URL, headings, nav, breadcrumbs, images, links"
+    - criterion: "Extracts from title, URL, meta tags, headings, emphasis elements, definition terms, table headers, nav, breadcrumbs, images, links"
     - criterion: "Prioritizes title attribute over textContent"
     - criterion: "Filters noise, counts frequency, sorts by frequency"
   validation_criteria:
@@ -1228,7 +1228,7 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
     last_updated:
       date: 2026-02-13
       author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
+      reason: "Enhanced with meta tags, emphasis elements, and structured content extraction"
 
 REQ-SUGGESTED_TAGS_DEDUPLICATION:
   name: Suggested Tags Deduplication

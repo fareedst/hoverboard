@@ -643,9 +643,9 @@ ARCH-SUGGESTED_TAGS:
       - "Context-aware suggestions"
   alternatives_considered: []
   implementation_approach:
-    summary: "Extract from multiple page sources, frequency sort, case preservation"
+    summary: "Extract from multiple page sources including meta tags, emphasis elements, and structured content; frequency sort; case preservation"
     details:
-      - "Extract from title, URL, headings, nav, breadcrumbs, images, links"
+      - "Extract from title, URL, meta tags, headings, emphasis elements (strong/em/mark/dfn/cite/kbd/code), definition terms, table headers, nav, breadcrumbs, images, links"
       - "Prioritize title attribute over textContent"
       - "Frequency counting and sorting"
       - "Case-insensitive deduplication"
@@ -674,7 +674,7 @@ ARCH-SUGGESTED_TAGS:
     last_updated:
       date: 2026-02-13
       author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
+      reason: "Enhanced with meta tags, emphasis elements, and structured content extraction"
 
 ARCH-MV3_MIGRATION:
   name: Manifest V3 Migration Strategy

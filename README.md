@@ -25,16 +25,18 @@ npm run build:dev
 
 ## 📋 Status
 
-**Current Version:** 1.0.6.80  
-**Last Updated:** 2025-07-20  
+**Current Version:** 1.0.8 (development)  
+**Last Updated:** 2026-02-13  
 **Chrome Extension Status:** Production Ready
+
+**Latest Enhancement:** Intelligent tag suggestions now extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers for significantly improved tag quality.
 
 ### Chrome Extension Features
 
 Hoverboard is a fully-featured Chrome extension that provides seamless bookmark management with Pinboard.in integration:
 
 #### **Core Features:**
-- ✅ **Smart Bookmarking** - Save pages with intelligent tag suggestions
+- ✅ **Smart Bookmarking** - Save pages with intelligent tag suggestions from 11 content sources (title, URL, meta tags, headings, emphasis elements, definition terms, table headers, navigation, breadcrumbs, images, links)
 - ✅ **Tag Management** - Organize bookmarks with custom tags and categories
 - ✅ **Recent Tags** - Quick access to frequently used tags
 - ✅ **Dark Theme Support** - Modern UI with dark theme default
@@ -52,7 +54,19 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 ## Features
 
 ### Core Functionality
-- **Smart Bookmarking:** Save pages with intelligent tag suggestions
+
+#### Smart Bookmarking
+Intelligent tag suggestions extracted from multiple page content sources:
+- **Meta Tags**: Keywords and descriptions from `<meta>` tags
+- **Emphasis Elements**: Bold, italic, highlighted, and code terms (`<strong>`, `<em>`, `<mark>`, `<code>`, etc.)
+- **Structured Content**: Definition terms (`<dt>`) and table headers (`<th>`, `<caption>`)
+- **Semantic Elements**: Headings (H1-H3), navigation links, breadcrumbs
+- **Media**: Image alt text and anchor link text
+- **Frequency-Based Ranking**: Most frequently mentioned terms appear first
+- **Case Preservation**: Both original case (e.g., "GitHub") and lowercase variants offered
+- **Smart Deduplication**: Filters out tags already applied to current bookmark
+
+#### Additional Features
 - **Tag Management:** Organize bookmarks with custom tags and categories
 - **Recent Tags:** Quick access to frequently used tags
 - **Pinboard Integration:** Direct API integration with Pinboard.in bookmarking service
@@ -200,6 +214,13 @@ npm run create-release
 
 ## Documentation
 
+### TIED Documentation (Token-Integrated Engineering & Development)
+This project follows the TIED methodology for comprehensive requirements tracking and traceability:
+- **Requirements**: [`tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md`](tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md) - Detailed tag extraction requirements and validation criteria
+- **Architecture**: [`tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md`](tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md) - Multi-source extraction architecture and design decisions
+- **Implementation**: [`tied/implementation-decisions/IMPL-SUGGESTED_TAGS.md`](tied/implementation-decisions/IMPL-SUGGESTED_TAGS.md) - Implementation details, modifiable decisions, and performance considerations
+- **Implementation Map**: [`tied/docs/suggested-tags-implementation-map.md`](tied/docs/suggested-tags-implementation-map.md) - Quick reference mapping TIED tokens to code locations
+
 ### Architecture Documents
 - [Chrome Extension Architecture](docs/architecture/chrome-extension-architecture.md) - Core architectural decisions and implementation strategy
 - [Development Guide](docs/development/development-guide.md) - Development setup and guidelines
@@ -223,7 +244,7 @@ The Chrome extension provides comprehensive bookmark management with the followi
 | Feature | Description | Status |
 |---------|-------------|--------|
 | `CHROME-BOOKMARK-001` | Pinboard.in API integration | ✅ Complete |
-| `CHROME-TAG-001` | Tag management and suggestions | ✅ Complete |
+| `CHROME-TAG-001` | Tag management and suggestions (enhanced 2026-02-13 with meta tags, emphasis elements, structured content) | ✅ Complete |
 | `CHROME-OVERLAY-001` | Visual overlay system | ✅ Complete |
 | `CHROME-BADGE-001` | Extension badge indicators | ✅ Complete |
 | `CHROME-STORAGE-001` | Chrome storage API integration | ✅ Complete |

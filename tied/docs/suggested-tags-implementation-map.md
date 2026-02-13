@@ -12,7 +12,7 @@
 
 #### [REQ-SUGGESTED_TAGS_FROM_CONTENT]
 
-**What**: Intelligent tag suggestions from page content (title, URL, headings, nav, breadcrumbs, images, links)
+**What**: Intelligent tag suggestions from page content (title, URL, meta tags, headings, emphasis elements, structured content, nav, breadcrumbs, images, links)
 
 **Detail File**: [tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md](../requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md)
 
@@ -20,12 +20,12 @@
 
 | File | Function/Section | Lines | Description |
 |------|------------------|-------|-------------|
-| `src/features/tagging/tag-service.js` | `extractSuggestedTagsFromContent()` | ~913-1200 | Core extraction algorithm (overlay) |
+| `src/features/tagging/tag-service.js` | `extractSuggestedTagsFromContent()` | ~921-1240 | Core extraction algorithm with meta, emphasis, structured content (overlay) |
 | `src/features/content/overlay-manager.js` | Suggested section in `show()` | ~611-686 | Overlay display, click handler |
-| `src/ui/popup/PopupController.js` | `loadSuggestedTags()` + inlined | ~339-620 | Popup extraction via script injection |
+| `src/ui/popup/PopupController.js` | `loadSuggestedTags()` + inlined | ~342-650 | Popup extraction via script injection (includes all new sources) |
 | `src/ui/popup/UIManager.js` | `updateSuggestedTags()` | ~410-440 | Popup display |
 
-**Safari Mirrors**: `safari/src/features/tagging/tag-service.js`, `safari/src/features/content/overlay-manager.js`
+**Safari Mirrors**: `safari/src/features/tagging/tag-service.js` (~921-1240), `safari/src/features/content/overlay-manager.js` (~603-678)
 
 **Tests**: ❌ None (see [REQ-SUGGESTED_TAGS_FROM_CONTENT.md](../requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md) "Current Test Gap")
 
@@ -74,8 +74,8 @@
 **Detail File**: [tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md](../architecture-decisions/ARCH-SUGGESTED_TAGS.md)
 
 **Key Design Decisions**:
-- Extraction sources and order (title → URL → headings → nav → breadcrumbs → images → links)
-- Numeric limits (10/20 extraction, 5 display for overlay)
+- Extraction sources and order (title → URL → meta keywords/description → headings → emphasis elements → definition terms/table headers → nav → breadcrumbs → images → links)
+- Numeric limits (10/20 extraction, 30 emphasis elements, 20 definition terms, 20 table headers, 5 display for overlay)
 - Noise word filtering (~200 English stop words)
 - Title attribute priority over textContent
 - Case preservation rules (first occurrence, dual-version for capitalized)

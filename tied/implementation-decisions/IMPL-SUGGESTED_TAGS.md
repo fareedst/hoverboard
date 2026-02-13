@@ -1,7 +1,7 @@
 # [IMPL-SUGGESTED_TAGS] Suggested Tags Implementation
 
 **Cross-References**: [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]  
-**Status**: Active  
+**Status**: Active (Enhanced 2026-02-13)  
 **Created**: 2025-07-14  
 **Last Updated**: 2026-02-13
 
@@ -18,7 +18,7 @@ Implement suggested tags with two extraction paths: TagService for overlay (cont
 ### Why This Implementation
 
 - **Realizes [ARCH-SUGGESTED_TAGS]**: Multi-source extraction with frequency sorting and case preservation
-- **Meets [REQ-SUGGESTED_TAGS_FROM_CONTENT]**: Extracts from title, URL, headings, nav, breadcrumbs, images, links
+- **Meets [REQ-SUGGESTED_TAGS_FROM_CONTENT]**: Extracts from title, URL, meta tags, headings, emphasis elements, structured content (definition terms, table headers), nav, breadcrumbs, images, links
 - **Meets [REQ-SUGGESTED_TAGS_DEDUPLICATION]**: Case-insensitive filtering against current tags
 - **Meets [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]**: Preserves original case, provides lowercase variants
 
@@ -54,11 +54,16 @@ function extractSuggestedTags(document, url, limit) {
   allTexts = []
   allTexts.push(document.title)
   allTexts.push(extractURLSegments(url))
-  allTexts.push(extractHeadings(document))  // h1, h2, h3
-  allTexts.push(extractNav(document))       // first 20 nav links
+  allTexts.push(extractMetaKeywords(document))      // meta[name="keywords"]
+  allTexts.push(extractMetaDescription(document))   // meta[name="description"]
+  allTexts.push(extractHeadings(document))          // h1, h2, h3
+  allTexts.push(extractEmphasisElements(document))  // first 30: strong, b, em, i, mark, dfn, cite, kbd, code
+  allTexts.push(extractDefinitionTerms(document))   // first 20: dl dt
+  allTexts.push(extractTableHeaders(document))      // first 20: th, caption
+  allTexts.push(extractNav(document))               // first 20 nav links
   allTexts.push(extractBreadcrumbs(document))
-  allTexts.push(extractImages(document))    // first 5 main images alt
-  allTexts.push(extractLinks(document))     // first 10 main links
+  allTexts.push(extractImages(document))            // first 5 main images alt
+  allTexts.push(extractLinks(document))             // first 10 main links
   
   // 2. Tokenize
   words = tokenize(allTexts.join(' '))
@@ -122,8 +127,8 @@ function extractElementText(element) {
 
 | File | Function/Method | Lines | Description |
 |------|----------------|-------|-------------|
-| `src/features/tagging/tag-service.js` | `extractSuggestedTagsFromContent(document, url, limit)` | ~913-1200 | **Primary extraction** for overlay path; limit default 10; comprehensive algorithm with TagService sanitization |
-| `src/ui/popup/PopupController.js` | `loadSuggestedTags()` | ~339-620 | **Popup extraction** via chrome.scripting.executeScript; inlined function duplicates algorithm; limit 20; simple sanitization |
+| `src/features/tagging/tag-service.js` | `extractSuggestedTagsFromContent(document, url, limit)` | ~921-1240 | **Primary extraction** for overlay path; limit default 10; includes meta, emphasis, structured content; comprehensive algorithm with TagService sanitization |
+| `src/ui/popup/PopupController.js` | `loadSuggestedTags()` | ~342-650 | **Popup extraction** via chrome.scripting.executeScript; inlined function duplicates algorithm with all new sources; limit 20; simple sanitization |
 
 ### Display Components
 
@@ -137,7 +142,7 @@ function extractElementText(element) {
 
 | File | Description |
 |------|-------------|
-| `safari/src/features/tagging/tag-service.js` | Mirror of TagService extraction (~913-1200) |
+| `safari/src/features/tagging/tag-service.js` | Mirror of TagService extraction (~921-1240); includes all new sources |
 | `safari/src/features/content/overlay-manager.js` | Mirror of overlay display (~603-678) |
 
 ---
@@ -146,29 +151,39 @@ function extractElementText(element) {
 
 ### 1. Extraction Sources and Order
 
-**Current Order**: Title → URL path → Headings → Nav → Breadcrumbs → Images → Links
+**Current Order**: Title → URL path → Meta keywords/description → Headings → Emphasis elements → Definition terms/Table headers → Nav → Breadcrumbs → Images → Links
 
 **Code Locations**:
-- TagService: Lines ~930-1022
-- PopupController inlined: Lines ~365-436
+- TagService: Lines ~932-1064
+- PopupController inlined: Lines ~380-490
 
 **How to Modify**:
 - Add new source: Insert extraction code in both TagService and PopupController
 - Reorder: Change sequence of `allTexts.push()` calls
 - Remove source: Comment out or delete extraction section
+- Adjust limits: Change `.slice(0, n)` values for emphasis elements (30), definition terms (20), table headers (20)
 
 **Sync Requirement**: Changes must be made in **both** TagService and PopupController inlined script.
+
+**New Sources Added (2026-02-13)**:
+- **Meta keywords/description** (lines ~959-969 TagService, ~415-425 PopupController): Extracts from `<meta name="keywords">` and `<meta name="description">` tags
+- **Emphasis elements** (lines ~996-1004 TagService, ~428-436 PopupController): Extracts first 30 `<strong>`, `<b>`, `<em>`, `<i>`, `<mark>`, `<dfn>`, `<cite>`, `<kbd>`, `<code>` from main content
+- **Definition terms** (lines ~1007-1014 TagService, ~439-446 PopupController): Extracts first 20 `<dt>` elements from `<dl>` lists
+- **Table headers/captions** (lines ~1015-1022 TagService, ~447-454 PopupController): Extracts first 20 `<th>` and `<caption>` elements from tables
 
 ### 2. Numeric Limits
 
 | Component | Limit | Code Location | How to Modify |
 |-----------|-------|---------------|---------------|
 | Overlay extraction | 10 | `tag-service.js` line ~921 (default parameter) | Change `limit = 10` to desired value |
-| Popup extraction | 20 | `PopupController.js` line ~590 (`.slice(0, 20)`) | Change `20` to desired value |
+| Popup extraction | 20 | `PopupController.js` line ~628 (`.slice(0, 20)`) | Change `20` to desired value |
+| Emphasis elements | 30 | `tag-service.js` line ~999, `PopupController.js` line ~431 (`.slice(0, 30)`) | Change `30` to desired value in both locations |
+| Definition terms | 20 | `tag-service.js` line ~1009, `PopupController.js` line ~442 (`.slice(0, 20)`) | Change `20` to desired value in both locations |
+| Table headers/captions | 20 | `tag-service.js` line ~1017, `PopupController.js` line ~450 (`.slice(0, 20)`) | Change `20` to desired value in both locations |
 | Overlay display | 5 | `overlay-manager.js` line ~637 (`.slice(0, 5)`) | Change `5` to desired value |
-| Popup display | No cap | `PopupController.js` ~596-604 (shows all filtered) | Add `.slice(0, n)` before `updateSuggestedTags()` |
+| Popup display | No cap | `PopupController.js` ~634-642 (shows all filtered) | Add `.slice(0, n)` before `updateSuggestedTags()` |
 
-**Considerations**: Higher limits increase computational cost; lower limits may miss relevant suggestions.
+**Considerations**: Higher limits increase computational cost; lower limits may miss relevant suggestions. Emphasis/definition/table limits balance coverage with noise reduction.
 
 ### 3. URL Path Segment Filtering
 
@@ -380,6 +395,54 @@ currentTags.forEach(currentTag => {
 
 ---
 
+## Performance Considerations
+
+### DOM Query Impact
+
+**New sources (as of 2026-02-13)** add ~4 DOM queries:
+1. Meta keywords: `document.querySelector('meta[name="keywords"]')`
+2. Meta description: `document.querySelector('meta[name="description"]')`
+3. Emphasis elements: `document.querySelectorAll('main strong, main b, ...')` (30+ selectors)
+4. Definition terms: `document.querySelectorAll('main dl dt, ...')` (5 selectors)
+5. Table headers: `document.querySelectorAll('main th, main caption, ...')` (10 selectors)
+
+**Original sources**: ~7 DOM queries (title, URL, headings, nav, breadcrumbs, images, links)
+
+**Total**: ~11 DOM queries per extraction
+
+### Processing Limits
+
+Limits prevent excessive DOM traversal and processing:
+- **Emphasis elements**: First 30 only (capped with `.slice(0, 30)`)
+- **Definition terms**: First 20 only (capped with `.slice(0, 20)`)
+- **Table headers**: First 20 only (capped with `.slice(0, 20)`)
+- **Navigation links**: First 20 only (existing)
+- **Images**: First 5 only (existing)
+- **Main links**: First 10 only (existing)
+
+### Scope Restrictions
+
+All new sources limited to **main content areas** to reduce noise and processing:
+- `main`, `article`, `[role="main"]`, `.main`, `.content`
+- Excludes nav, footer, sidebar, ads
+
+### Estimated Performance Impact
+
+- **DOM queries**: +4 queries (~2-3ms on typical pages)
+- **Element iteration**: +70 max elements (30+20+20) beyond existing limits
+- **Text extraction**: Same `extractElementText()` helper (no change)
+- **Tokenization/sorting**: Marginally more text (~10-20% increase)
+
+**Total estimated overhead**: ~5-10ms on typical pages; <20ms on complex pages with many tables/lists
+
+### Backward Compatibility
+
+- **No breaking changes**: All existing sources unchanged
+- **Same pipeline**: Frequency sorting, noise filtering, case preservation unchanged
+- **Same sanitization**: No changes to tag validation or storage
+
+---
+
 ## Testing Strategy
 
 ### Current State
@@ -474,6 +537,74 @@ Tests expected:
 | 2025-07-14 | Initial | ✅ Implemented | Feature implemented with dual extraction paths |
 | 2026-02-13 | Migration | ✅ Documented | Migrated from STDD to TIED format |
 | 2026-02-13 | Detail file | ✅ Documented | Created IMPL detail file with all modifiable decisions |
+| 2026-02-13 | Enhancement | ✅ Implemented | Added meta tags, emphasis elements, definition terms, and table headers extraction |
+
+---
+
+## Future Enhancements (Not Implemented)
+
+The following extraction sources were identified during enhancement analysis but not yet implemented. These remain as potential improvements if the current sources prove insufficient:
+
+### 1. Class/Attribute Hints (Medium Priority)
+
+**Description**: Extract text from elements with common class patterns or data attributes that indicate importance.
+
+**Potential Sources**:
+- Class patterns: `.highlight`, `.keyword`, `.tag`, `.label`, `.badge`, `.term`, `.emphasis`, `.important`
+- Attribute selectors: `[class*="keyword"]`, `[class*="tag"]`, `[class*="label"]`
+- ARIA labels: `[aria-label]` on non-interactive elements (beyond current title attribute support)
+- Data attributes: `[data-term]`, `[data-keyword]`
+
+**Implementation Approach**:
+- Query fixed set of selectors with node cap
+- Scope to main content areas to avoid nav/ads
+- Start with small common set, expand based on empirical value
+
+**Risk**: Site-specific class names; may need ongoing refinement
+
+### 2. Lead/First Paragraph (Low Priority, Optional)
+
+**Description**: Extract text from the first paragraph(s) as they often summarize page topics.
+
+**Potential Sources**:
+- `main p:first-of-type`
+- `article > p:first-of-type`
+- First 1-2 `<p>` elements in main content
+
+**Implementation Approach**:
+- Simple query and text extraction
+- Low cost, may add redundant but useful terms
+
+**Benefit**: Captures introductory/summary terms that may not appear in headings
+
+### 3. Computed Style Heuristics (Experimental, Use with Care)
+
+**Description**: Detect visual emphasis via computed CSS properties.
+
+**Potential Sources**:
+- **Font weight**: `getComputedStyle(el).fontWeight >= 600` or `=== 'bold'`
+- **Background color**: Non-transparent background on inline/block elements (highlight detection)
+- **Font size**: Noticeably larger than sibling or parent text
+
+**Implementation Approach**:
+- Walk main-content text nodes or inline elements
+- Call `getComputedStyle` on candidates
+- Start with single heuristic (e.g., bold only)
+- Limit scope (e.g., first 20 bold spans in main)
+
+**Trade-offs**:
+- Higher computational cost (requires style computation)
+- More fragile (sites vary widely in styling)
+- Recommend only if semantic + class + meta sources insufficient
+
+**Risk**: Performance impact; false positives from design elements
+
+### Implementation Priority
+
+If additional sources are needed:
+1. **First**: Class/attribute hints (semantic meaning, medium cost)
+2. **Second**: Lead paragraph (low cost, quick win)
+3. **Last**: Computed style (experimental, document as opt-in or experimental feature)
 
 ---
 

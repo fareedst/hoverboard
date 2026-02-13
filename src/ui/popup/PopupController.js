@@ -398,12 +398,47 @@ export class PopupController {
               // Ignore URL parsing errors
             }
 
+            // 2.5. Meta keywords and description
+            const metaKeywords = document.querySelector('meta[name="keywords"]')
+            if (metaKeywords && metaKeywords.content && metaKeywords.content.trim().length > 0) {
+              allTexts.push(metaKeywords.content.trim())
+            }
+            const metaDescription = document.querySelector('meta[name="description"]')
+            if (metaDescription && metaDescription.content && metaDescription.content.trim().length > 0) {
+              allTexts.push(metaDescription.content.trim())
+            }
+
             // 3. Headings
             const headings = document.querySelectorAll('h1, h2, h3')
             if (headings.length > 0) {
               const headingTexts = Array.from(headings).map(h => extractElementText(h)).filter(t => t.length > 0)
               if (headingTexts.length > 0) {
                 allTexts.push(headingTexts.join(' '))
+              }
+            }
+
+            // 3.5. Semantic emphasis elements within main content
+            const emphasisElements = document.querySelectorAll('main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code, article strong, article b, article em, article i, article mark, article dfn, article cite, article kbd, article code, [role="main"] strong, [role="main"] b, [role="main"] em, [role="main"] i, [role="main"] mark, [role="main"] dfn, [role="main"] cite, [role="main"] kbd, [role="main"] code, .main strong, .main b, .main em, .main i, .main mark, .main dfn, .main cite, .main kbd, .main code, .content strong, .content b, .content em, .content i, .content mark, .content dfn, .content cite, .content kbd, .content code')
+            if (emphasisElements.length > 0) {
+              const emphasisTexts = Array.from(emphasisElements).slice(0, 30).map(el => extractElementText(el)).filter(t => t.length > 0)
+              if (emphasisTexts.length > 0) {
+                allTexts.push(emphasisTexts.join(' '))
+              }
+            }
+
+            // 3.6. Definition lists and table headers
+            const definitionTerms = document.querySelectorAll('main dl dt, article dl dt, [role="main"] dl dt, .main dl dt, .content dl dt')
+            if (definitionTerms.length > 0) {
+              const dtTexts = Array.from(definitionTerms).slice(0, 20).map(dt => extractElementText(dt)).filter(t => t.length > 0)
+              if (dtTexts.length > 0) {
+                allTexts.push(dtTexts.join(' '))
+              }
+            }
+            const tableHeaders = document.querySelectorAll('main th, main caption, article th, article caption, [role="main"] th, [role="main"] caption, .main th, .main caption, .content th, .content caption')
+            if (tableHeaders.length > 0) {
+              const thTexts = Array.from(tableHeaders).slice(0, 20).map(th => extractElementText(th)).filter(t => t.length > 0)
+              if (thTexts.length > 0) {
+                allTexts.push(thTexts.join(' '))
               }
             }
 

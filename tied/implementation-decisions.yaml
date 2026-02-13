@@ -626,9 +626,9 @@ IMPL-SUGGESTED_TAGS:
       - "Smart suggestions"
       - "Faster tagging"
   implementation_approach:
-    summary: "Extract from title/URL/headings/nav/breadcrumbs/images/links, frequency sort, case preserve"
+    summary: "Extract from title/URL/meta/headings/emphasis/structured content/nav/breadcrumbs/images/links, frequency sort, case preserve"
     details:
-      - "Multi-source extraction"
+      - "Multi-source extraction including meta tags, emphasis elements (strong/em/mark/dfn/cite/kbd/code), definition terms, and table headers"
       - "Title attribute priority"
       - "Noise filtering"
       - "Frequency counting and sorting"
@@ -680,7 +680,7 @@ IMPL-SUGGESTED_TAGS:
     last_updated:
       date: 2026-02-13
       author: "AI Agent"
-      reason: "Fixed function name and added complete code locations"
+      reason: "Enhanced with meta tags, emphasis elements, and structured content extraction"
 
 IMPL-OVERLAY_TEST_HARNESS:
   name: Overlay Test Harness Implementation

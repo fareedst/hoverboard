@@ -1,7 +1,7 @@
 # [ARCH-SUGGESTED_TAGS] Suggested Tags from Page Content Architecture
 
 **Cross-References**: [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]  
-**Status**: Active  
+**Status**: Active (Enhanced 2026-02-13)  
 **Created**: 2025-07-14  
 **Last Updated**: 2026-02-13
 
@@ -9,7 +9,7 @@
 
 ## Decision
 
-Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, headings, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, preserving original case with lowercase variants, and deduplicating against current tags.
+Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, preserving original case with lowercase variants, and deduplicating against current tags.
 
 ---
 
@@ -44,7 +44,7 @@ No formal alternatives were documented. The current multi-source extraction appr
 
 **Extract → Filter → Rank → Deduplicate → Display**
 
-1. **Extract text** from multiple page sources (title, URL segments, headings, nav, breadcrumbs, images, links)
+1. **Extract text** from multiple page sources (title, URL segments, meta tags, headings, emphasis elements, definition terms, table headers, nav, breadcrumbs, images, links)
 2. **Tokenize and filter** (remove noise words, short words, pure numbers)
 3. **Rank by frequency** (count occurrences, sort descending)
 4. **Preserve case** (track original case, generate lowercase variants for capitalized words)
@@ -60,7 +60,12 @@ No formal alternatives were documented. The current multi-source extraction appr
 |--------|----------------|-------|----------|
 | Document title | `document.title` | Full text | High |
 | URL path segments | `URL.pathname.split('/')` | All segments (filtered) | High |
+| Meta keywords | `meta[name="keywords"]` | Full content | High |
+| Meta description | `meta[name="description"]` | Full content | High |
 | H1/H2/H3 headings | `querySelectorAll('h1, h2, h3')` | All headings | High |
+| Emphasis elements | `main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code` (+ article, [role="main"], .main, .content) | First 30 elements | Medium-High |
+| Definition terms | `main dl dt` (+ article, [role="main"], .main, .content) | First 20 terms | Medium |
+| Table headers/captions | `main th, main caption` (+ article, [role="main"], .main, .content) | First 20 headers | Medium |
 | Navigation links | `nav a`, `header nav a`, `[role="navigation"] a` | First 20 links | Medium |
 | Breadcrumbs | `[aria-label*="breadcrumb"]`, `.breadcrumb`, etc. | All breadcrumb links | Medium |
 | Main images | `main img`, `article img`, etc. | First 5 images (alt text) | Low |
@@ -157,19 +162,22 @@ These design choices are implementation details that can be changed without brea
 
 ### 1. Extraction Sources and Order
 
-**Current**: Title → URL → Headings → Nav → Breadcrumbs → Images → Links
+**Current**: Title → URL → Meta keywords/description → Headings → Emphasis elements → Definition terms/Table headers → Nav → Breadcrumbs → Images → Links
 
-**Modifiable**: Reorder sources based on empirical value; add new sources (meta keywords, structured data, page categories); remove low-value sources (links, images if not useful).
+**Modifiable**: Reorder sources based on empirical value; add new sources (JSON-LD structured data, class-based hints, first paragraph); remove low-value sources (links, images if not useful); adjust limits for emphasis elements (currently 30), definition terms (currently 20), table headers (currently 20).
 
 ### 2. Numeric Limits
 
 **Current**:
 - Overlay extraction limit: 10 (TagService default parameter)
 - Popup extraction limit: 20 (inlined script)
+- Emphasis elements: 30 (first 30 elements)
+- Definition terms: 20 (first 20 terms)
+- Table headers/captions: 20 (first 20 elements)
 - Overlay display limit: 5 (hard-coded slice)
 - Popup display limit: no cap (all filtered suggestions shown)
 
-**Modifiable**: Adjust limits based on user testing; unify extraction limits between overlay and popup; add configurable limits in settings.
+**Modifiable**: Adjust limits based on user testing and performance; unify extraction limits between overlay and popup; adjust emphasis/definition/table caps based on empirical value; add configurable limits in settings.
 
 ### 3. URL Path Filtering
 
