@@ -637,15 +637,26 @@ IMPL-SUGGESTED_TAGS:
   code_locations:
     files:
       - path: "src/features/tagging/tag-service.js"
-        description: "Tag service"
+        description: "Tag service with core extraction algorithm"
       - path: "src/features/content/overlay-manager.js"
-        description: "Overlay manager"
+        description: "Overlay display with suggested section"
       - path: "src/ui/popup/PopupController.js"
-        description: "Popup controller"
+        description: "Popup extraction with inlined script"
+      - path: "src/ui/popup/UIManager.js"
+        description: "Popup display of suggested tags"
     functions:
-      - name: "extractSuggestedTagsFromDocument"
-        description: "Tag extraction"
+      - name: "extractSuggestedTagsFromContent"
+        description: "Core extraction algorithm (overlay path)"
         file: "src/features/tagging/tag-service.js"
+      - name: "loadSuggestedTags"
+        description: "Popup extraction via script injection"
+        file: "src/ui/popup/PopupController.js"
+      - name: "Inlined extraction function"
+        description: "Duplicated extraction logic in executeScript"
+        file: "src/ui/popup/PopupController.js"
+      - name: "updateSuggestedTags"
+        description: "Render suggested tags in popup UI"
+        file: "src/ui/popup/UIManager.js"
   traceability:
     architecture:
       - ARCH-SUGGESTED_TAGS
@@ -669,7 +680,7 @@ IMPL-SUGGESTED_TAGS:
     last_updated:
       date: 2026-02-13
       author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
+      reason: "Fixed function name and added complete code locations"
 
 IMPL-OVERLAY_TEST_HARNESS:
   name: Overlay Test Harness Implementation
