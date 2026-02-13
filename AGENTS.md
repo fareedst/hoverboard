@@ -66,6 +66,8 @@ This document centralizes every instruction AI coding assistants must follow whi
 - [ ] Tests reference their corresponding semantic tokens
 - [ ] Module validation status is documented
 - [ ] All documentation matches the implemented state (no drift)
+- [ ] Verify all code and tests are consistently linked to requirements and decisions; update code and documentation where necessary
+- [ ] Do not create a stand-alone summary document for the session (e.g. no SESSION_SUMMARY.md or similar)
 
 ---
 

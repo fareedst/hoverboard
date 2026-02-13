@@ -773,6 +773,8 @@ This project follows AI-First Principles. Before making changes:
 - [ ] **MANDATORY**: Post-change validation checklist completed (see Change Impact Tracking section)
 - [ ] **MANDATORY**: Behavioral contracts documented for critical features
 - [ ] **MANDATORY**: Dependencies mapped and documented
+- [ ] **MANDATORY**: Verify all code and tests are consistently linked to requirements and decisions; update code and documentation where necessary
+- [ ] **MANDATORY**: Do not create a stand-alone summary document for the session (e.g. no SESSION_SUMMARY.md or similar)
 
 ---
 
