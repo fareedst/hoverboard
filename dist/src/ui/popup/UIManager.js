@@ -30,6 +30,32 @@ export class UIManager {
     if (this.config.uxShowSectionLabels !== undefined) {
       this.updateSectionLabelsVisibility(this.config.uxShowSectionLabels)
     }
+
+    // Apply font size configuration
+    this.applyFontSizeConfig()
+  }
+
+  /**
+   * Apply font size configuration using CSS variables
+   */
+  applyFontSizeConfig () {
+    const root = document.documentElement
+
+    // Apply font sizes from config or use defaults
+    const fontSizes = {
+      suggestedTags: this.config.fontSizeSuggestedTags || 10,
+      labels: this.config.fontSizeLabels || 12,
+      tags: this.config.fontSizeTags || 12,
+      base: this.config.fontSizeBase || 14,
+      inputs: this.config.fontSizeInputs || 14
+    }
+
+    // Set CSS custom properties
+    root.style.setProperty('--font-size-suggested-tags', `${fontSizes.suggestedTags}px`)
+    root.style.setProperty('--font-size-labels', `${fontSizes.labels}px`)
+    root.style.setProperty('--font-size-tags', `${fontSizes.tags}px`)
+    root.style.setProperty('--font-size-base-custom', `${fontSizes.base}px`)
+    root.style.setProperty('--font-size-inputs-custom', `${fontSizes.inputs}px`)
   }
 
   /**
@@ -407,7 +433,7 @@ export class UIManager {
   }
 
   /**
-   * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS]
+   * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS]
    * Update suggested tags display
    * @param {string[]} suggestedTags - Array of suggested tag names
    */
@@ -417,7 +443,7 @@ export class UIManager {
     // Clear existing suggested tags
     this.elements.suggestedTagsContainer.innerHTML = ''
 
-    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Show empty state or hide when no suggestions
+    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Show empty state or hide when no suggestions
     if (!suggestedTags || suggestedTags.length === 0) {
       const suggestedTagsSection = document.getElementById('suggestedTags')
       if (suggestedTagsSection) {
@@ -432,7 +458,7 @@ export class UIManager {
       suggestedTagsSection.style.display = 'block'
     }
 
-    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Create suggested tag elements (clickable to add to current site)
+    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Create suggested tag elements (clickable to add to current site)
     suggestedTags.forEach(tag => {
       const tagElement = this.createRecentTagElement(tag) // Reuse same styling/behavior as recent tags
       this.elements.suggestedTagsContainer.appendChild(tagElement)

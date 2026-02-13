@@ -76,6 +76,7 @@ Intelligent tag suggestions extracted from multiple page content sources:
 - **Site Management:** Disable extension on specific domains
 - **Search Functionality:** Search through bookmarked tabs by title
 - **Privacy Controls:** Mark bookmarks as private or to-read
+- **Customizable Font Sizes:** Configure font sizes for suggested tags, labels, tags, and UI elements via options page
 
 ## 📸 Screenshots
 
@@ -102,6 +103,12 @@ The configuration page provides comprehensive settings for customizing the exten
 - **Overlay Visibility Defaults**: 
   - Dark/Light theme selection with live preview
   - Transparency controls with opacity slider (currently set to 90%)
+
+- **Font Size Settings**:
+  - Customizable font sizes for suggested tags (default: 10px, smaller for less visual intrusion)
+  - Configurable sizes for labels, tag elements, base UI text, and input fields
+  - Recommended ranges: 8-20px for suggested tags, 10-16px for labels/tags, 12-18px for UI/inputs
+  - Accessibility-friendly: increase sizes for better readability
 
 - **Badge Settings**: 
   - Customizable text indicators for different bookmark states

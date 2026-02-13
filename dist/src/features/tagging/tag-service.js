@@ -910,29 +910,29 @@ export class TagService {
   }
 
   /**
-   * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS] [REQ:TAG_INPUT_SANITIZATION]
+   * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-TAG_INPUT_SANITIZATION]
    * Extract suggested tags from multiple page sources (title, URL, headings, nav, breadcrumbs, images, links)
    * Filters noise words, counts frequency, sorts by frequency, and sanitizes tags
    * @param {Document} document - The document to extract content from
    * @param {string} url - The current page URL
-   * @param {number} limit - Maximum number of suggested tags to return (default: 10)
+   * @param {number} limit - Maximum number of suggested tags to return (default: 30)
    * @returns {string[]} Array of suggested tag strings, sorted by frequency (most frequent first)
    */
-  extractSuggestedTagsFromContent(document, url = '', limit = 10) {
+  extractSuggestedTagsFromContent(document, url = '', limit = 30) {
     if (!document || typeof document.querySelectorAll !== 'function') {
-      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided')
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided')
       return []
     }
 
     try {
-      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracting suggested tags from multiple sources')
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracting suggested tags from multiple sources')
 
       const allTexts = []
 
       // 1. Extract from document title
       if (document.title) {
         allTexts.push(document.title)
-        debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from title:', document.title.substring(0, 50))
+        debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from title:', document.title.substring(0, 50))
       }
 
       // 2. Extract from URL path segments
@@ -949,14 +949,26 @@ export class TagService {
           })
           if (meaningfulSegments.length > 0) {
             allTexts.push(meaningfulSegments.join(' '))
-            debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from URL:', meaningfulSegments.join(', '))
+            debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from URL:', meaningfulSegments.join(', '))
           }
         } catch (e) {
-          debugError('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to parse URL:', e)
+          debugError('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to parse URL:', e)
         }
       }
 
-      // [REQ:SUGGESTED_TAGS_FROM_CONTENT] Helper function to extract text from element, preferring title attribute
+      // 2.5. Extract from meta keywords and description
+      const metaKeywords = document.querySelector('meta[name="keywords"]')
+      if (metaKeywords && metaKeywords.content && metaKeywords.content.trim().length > 0) {
+        allTexts.push(metaKeywords.content.trim())
+        debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from meta keywords:', metaKeywords.content.substring(0, 50))
+      }
+      const metaDescription = document.querySelector('meta[name="description"]')
+      if (metaDescription && metaDescription.content && metaDescription.content.trim().length > 0) {
+        allTexts.push(metaDescription.content.trim())
+        debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from meta description:', metaDescription.content.substring(0, 50))
+      }
+
+      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] Helper function to extract text from element, preferring title attribute
       const extractElementText = (element) => {
         // Check for title attribute on the element itself
         if (element.title && element.title.trim().length > 0) {
@@ -977,7 +989,35 @@ export class TagService {
         const headingTexts = Array.from(headings).map(heading => extractElementText(heading)).filter(t => t.length > 0)
         if (headingTexts.length > 0) {
           allTexts.push(headingTexts.join(' '))
-          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from headings:', headings.length)
+          debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from headings:', headings.length)
+        }
+      }
+
+      // 3.5. Extract from semantic emphasis elements within main content
+      const emphasisElements = document.querySelectorAll('main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code, article strong, article b, article em, article i, article mark, article dfn, article cite, article kbd, article code, [role="main"] strong, [role="main"] b, [role="main"] em, [role="main"] i, [role="main"] mark, [role="main"] dfn, [role="main"] cite, [role="main"] kbd, [role="main"] code, .main strong, .main b, .main em, .main i, .main mark, .main dfn, .main cite, .main kbd, .main code, .content strong, .content b, .content em, .content i, .content mark, .content dfn, .content cite, .content kbd, .content code')
+      if (emphasisElements.length > 0) {
+        const emphasisTexts = Array.from(emphasisElements).slice(0, 60).map(el => extractElementText(el)).filter(t => t.length > 0)
+        if (emphasisTexts.length > 0) {
+          allTexts.push(emphasisTexts.join(' '))
+          debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from emphasis elements:', emphasisTexts.length)
+        }
+      }
+
+      // 3.6. Extract from definition lists and table headers
+      const definitionTerms = document.querySelectorAll('main dl dt, article dl dt, [role="main"] dl dt, .main dl dt, .content dl dt')
+      if (definitionTerms.length > 0) {
+        const dtTexts = Array.from(definitionTerms).slice(0, 40).map(dt => extractElementText(dt)).filter(t => t.length > 0)
+        if (dtTexts.length > 0) {
+          allTexts.push(dtTexts.join(' '))
+          debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from definition terms:', dtTexts.length)
+        }
+      }
+      const tableHeaders = document.querySelectorAll('main th, main caption, article th, article caption, [role="main"] th, [role="main"] caption, .main th, .main caption, .content th, .content caption')
+      if (tableHeaders.length > 0) {
+        const thTexts = Array.from(tableHeaders).slice(0, 40).map(th => extractElementText(th)).filter(t => t.length > 0)
+        if (thTexts.length > 0) {
+          allTexts.push(thTexts.join(' '))
+          debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from table headers:', thTexts.length)
         }
       }
 
@@ -985,10 +1025,10 @@ export class TagService {
       const nav = document.querySelector('nav') || document.querySelector('header nav') || document.querySelector('[role="navigation"]')
       if (nav) {
         const navLinks = nav.querySelectorAll('a')
-        const navTexts = Array.from(navLinks).slice(0, 20).map(link => extractElementText(link)).filter(t => t.length > 0)
+        const navTexts = Array.from(navLinks).slice(0, 40).map(link => extractElementText(link)).filter(t => t.length > 0)
         if (navTexts.length > 0) {
           allTexts.push(navTexts.join(' '))
-          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from nav:', navTexts.length)
+          debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from nav:', navTexts.length)
         }
       }
 
@@ -999,46 +1039,46 @@ export class TagService {
         const breadcrumbTexts = Array.from(breadcrumbLinks).map(link => extractElementText(link)).filter(t => t.length > 0)
         if (breadcrumbTexts.length > 0) {
           allTexts.push(breadcrumbTexts.join(' '))
-          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from breadcrumbs:', breadcrumbTexts.length)
+          debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from breadcrumbs:', breadcrumbTexts.length)
         }
       }
 
-      // 6. Extract from first 5 images' alt text (within main content)
+      // 6. Extract from first 10 images' alt text (within main content)
       const mainImages = document.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img')
       if (mainImages.length > 0) {
-        const imageAlts = Array.from(mainImages).slice(0, 5).map(img => img.alt || '').filter(alt => alt.length > 0)
+        const imageAlts = Array.from(mainImages).slice(0, 10).map(img => img.alt || '').filter(alt => alt.length > 0)
         if (imageAlts.length > 0) {
           allTexts.push(imageAlts.join(' '))
-          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from images:', imageAlts.length)
+          debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from images:', imageAlts.length)
         }
       }
 
-      // 7. Extract from first 10 anchor links within main content
+      // 7. Extract from first 20 anchor links within main content
       const mainLinks = document.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a')
       if (mainLinks.length > 0) {
-        const linkTexts = Array.from(mainLinks).slice(0, 10).map(link => extractElementText(link)).filter(t => t.length > 0)
+        const linkTexts = Array.from(mainLinks).slice(0, 20).map(link => extractElementText(link)).filter(t => t.length > 0)
         if (linkTexts.length > 0) {
           allTexts.push(linkTexts.join(' '))
-          debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from links:', linkTexts.length)
+          debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from links:', linkTexts.length)
         }
       }
 
       if (allTexts.length === 0) {
-        debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] No content found from any source')
+        debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] No content found from any source')
         return []
       }
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Preserve original case from content
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Preserve original case from content
       const allText = allTexts.join(' ')
 
-      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extracted text (preserving case):', allText.substring(0, 100))
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Extracted text (preserving case):', allText.substring(0, 100))
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
       const words = allText
         .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/)
         .filter(word => word.length > 0)
 
-      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):', words.length)
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):', words.length)
 
       // Noise word list (common English stop words) - lowercase for case-insensitive matching
       const noiseWords = new Set([
@@ -1076,7 +1116,7 @@ export class TagService {
         'leave', 'family', 'it\'s'
       ])
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Track original case variants and frequency using lowercase keys
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Track original case variants and frequency using lowercase keys
       // Map structure: lowercaseWord -> { original: Set of original case variants, frequency: count }
       const wordFrequency = new Map()
       const originalCaseMap = new Map() // lowercase -> most common original case variant
@@ -1085,7 +1125,7 @@ export class TagService {
         const trimmed = word.trim()
         if (trimmed.length === 0) return
 
-        // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Generate lowercase version for case-insensitive operations
+        // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Generate lowercase version for case-insensitive operations
         const lowerWord = trimmed.toLowerCase()
 
         // Filter: not a noise word, length >= 2, not a number
@@ -1111,9 +1151,9 @@ export class TagService {
         }
       })
 
-      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:', wordFrequency.size)
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:', wordFrequency.size)
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Build list of tags with both original case and lowercase versions
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Build list of tags with both original case and lowercase versions
       // For words with uppercase letters, include both versions as separate tags
       // For words already lowercase, include only once
       const tagsWithVersions = []
@@ -1130,14 +1170,14 @@ export class TagService {
           return a[0].localeCompare(b[0])
         })
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] For each word, add original case version and lowercase version (if different)
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] For each word, add original case version and lowercase version (if different)
       for (const [lowerWord, frequency] of sortedEntries) {
         const originalCase = originalCaseMap.get(lowerWord) || lowerWord
 
-        // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Add original case version
+        // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Add original case version
         tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency })
 
-        // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] If word contains uppercase letters, also add lowercase version
+        // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] If word contains uppercase letters, also add lowercase version
         // Only add lowercase version if it's different from original and we haven't seen it yet
         if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
           tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency })
@@ -1148,7 +1188,7 @@ export class TagService {
         }
       }
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sort all tags (both versions) by frequency, then alphabetically
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sort all tags (both versions) by frequency, then alphabetically
       // This ensures both "Git" and "git" are sorted appropriately
       tagsWithVersions.sort((a, b) => {
         // Primary sort: frequency (descending)
@@ -1159,22 +1199,22 @@ export class TagService {
         return a.lowerTag.localeCompare(b.lowerTag)
       })
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extract tags and apply limit
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Extract tags and apply limit
       const sortedWords = tagsWithVersions
         .slice(0, limit * 2) // Allow more entries since we're adding lowercase versions
         .map(item => item.tag)
 
-      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):', sortedWords)
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):', sortedWords)
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sanitize each tag using existing sanitization logic
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sanitize each tag using existing sanitization logic
       // Sanitization may change case, so we preserve what we can
       const sanitizedTags = sortedWords
         .map(word => this.sanitizeTag(word))
         .filter(tag => tag !== null && tag.length > 0)
 
-      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:', sanitizedTags)
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:', sanitizedTags)
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Remove exact duplicates (same string) while preserving both "Git" and "git"
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Remove exact duplicates (same string) while preserving both "Git" and "git"
       // Use a Set to track exact strings we've seen, but allow both "Git" and "git" since they're different strings
       const uniqueTags = []
       const seenExact = new Set() // Track exact strings to avoid true duplicates
@@ -1187,14 +1227,14 @@ export class TagService {
         }
       }
 
-      // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Apply final limit to ensure we don't exceed reasonable bounds
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Apply final limit to ensure we don't exceed reasonable bounds
       const finalTags = uniqueTags.slice(0, limit * 2)
 
-      debugLog('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):', finalTags.length, finalTags)
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):', finalTags.length, finalTags)
 
       return finalTags
     } catch (error) {
-      debugError('TAG-SERVICE', '[REQ:SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:', error)
+      debugError('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:', error)
       return []
     }
   }

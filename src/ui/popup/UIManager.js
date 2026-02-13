@@ -30,6 +30,32 @@ export class UIManager {
     if (this.config.uxShowSectionLabels !== undefined) {
       this.updateSectionLabelsVisibility(this.config.uxShowSectionLabels)
     }
+
+    // Apply font size configuration
+    this.applyFontSizeConfig()
+  }
+
+  /**
+   * Apply font size configuration using CSS variables
+   */
+  applyFontSizeConfig () {
+    const root = document.documentElement
+
+    // Apply font sizes from config or use defaults
+    const fontSizes = {
+      suggestedTags: this.config.fontSizeSuggestedTags || 10,
+      labels: this.config.fontSizeLabels || 12,
+      tags: this.config.fontSizeTags || 12,
+      base: this.config.fontSizeBase || 14,
+      inputs: this.config.fontSizeInputs || 14
+    }
+
+    // Set CSS custom properties
+    root.style.setProperty('--font-size-suggested-tags', `${fontSizes.suggestedTags}px`)
+    root.style.setProperty('--font-size-labels', `${fontSizes.labels}px`)
+    root.style.setProperty('--font-size-tags', `${fontSizes.tags}px`)
+    root.style.setProperty('--font-size-base-custom', `${fontSizes.base}px`)
+    root.style.setProperty('--font-size-inputs-custom', `${fontSizes.inputs}px`)
   }
 
   /**

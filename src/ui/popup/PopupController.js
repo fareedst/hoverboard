@@ -420,7 +420,7 @@ export class PopupController {
             // 3.5. Semantic emphasis elements within main content
             const emphasisElements = document.querySelectorAll('main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code, article strong, article b, article em, article i, article mark, article dfn, article cite, article kbd, article code, [role="main"] strong, [role="main"] b, [role="main"] em, [role="main"] i, [role="main"] mark, [role="main"] dfn, [role="main"] cite, [role="main"] kbd, [role="main"] code, .main strong, .main b, .main em, .main i, .main mark, .main dfn, .main cite, .main kbd, .main code, .content strong, .content b, .content em, .content i, .content mark, .content dfn, .content cite, .content kbd, .content code')
             if (emphasisElements.length > 0) {
-              const emphasisTexts = Array.from(emphasisElements).slice(0, 30).map(el => extractElementText(el)).filter(t => t.length > 0)
+              const emphasisTexts = Array.from(emphasisElements).slice(0, 60).map(el => extractElementText(el)).filter(t => t.length > 0)
               if (emphasisTexts.length > 0) {
                 allTexts.push(emphasisTexts.join(' '))
               }
@@ -429,14 +429,14 @@ export class PopupController {
             // 3.6. Definition lists and table headers
             const definitionTerms = document.querySelectorAll('main dl dt, article dl dt, [role="main"] dl dt, .main dl dt, .content dl dt')
             if (definitionTerms.length > 0) {
-              const dtTexts = Array.from(definitionTerms).slice(0, 20).map(dt => extractElementText(dt)).filter(t => t.length > 0)
+              const dtTexts = Array.from(definitionTerms).slice(0, 40).map(dt => extractElementText(dt)).filter(t => t.length > 0)
               if (dtTexts.length > 0) {
                 allTexts.push(dtTexts.join(' '))
               }
             }
             const tableHeaders = document.querySelectorAll('main th, main caption, article th, article caption, [role="main"] th, [role="main"] caption, .main th, .main caption, .content th, .content caption')
             if (tableHeaders.length > 0) {
-              const thTexts = Array.from(tableHeaders).slice(0, 20).map(th => extractElementText(th)).filter(t => t.length > 0)
+              const thTexts = Array.from(tableHeaders).slice(0, 40).map(th => extractElementText(th)).filter(t => t.length > 0)
               if (thTexts.length > 0) {
                 allTexts.push(thTexts.join(' '))
               }
@@ -446,7 +446,7 @@ export class PopupController {
             const nav = document.querySelector('nav') || document.querySelector('header nav') || document.querySelector('[role="navigation"]')
             if (nav) {
               const navLinks = nav.querySelectorAll('a')
-              const navTexts = Array.from(navLinks).slice(0, 20).map(link => extractElementText(link)).filter(t => t.length > 0)
+              const navTexts = Array.from(navLinks).slice(0, 40).map(link => extractElementText(link)).filter(t => t.length > 0)
               if (navTexts.length > 0) {
                 allTexts.push(navTexts.join(' '))
               }
@@ -462,19 +462,19 @@ export class PopupController {
               }
             }
 
-            // 6. First 5 images' alt text
+            // 6. First 10 images' alt text
             const mainImages = document.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img')
             if (mainImages.length > 0) {
-              const imageAlts = Array.from(mainImages).slice(0, 5).map(img => img.alt || '').filter(alt => alt.length > 0)
+              const imageAlts = Array.from(mainImages).slice(0, 10).map(img => img.alt || '').filter(alt => alt.length > 0)
               if (imageAlts.length > 0) {
                 allTexts.push(imageAlts.join(' '))
               }
             }
 
-            // 7. First 10 anchor links within main content
+            // 7. First 20 anchor links within main content
             const mainLinks = document.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a')
             if (mainLinks.length > 0) {
-              const linkTexts = Array.from(mainLinks).slice(0, 10).map(link => extractElementText(link)).filter(t => t.length > 0)
+              const linkTexts = Array.from(mainLinks).slice(0, 20).map(link => extractElementText(link)).filter(t => t.length > 0)
               if (linkTexts.length > 0) {
                 allTexts.push(linkTexts.join(' '))
               }
@@ -601,7 +601,7 @@ export class PopupController {
 
             // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Extract tags and apply limit
             const sortedWords = tagsWithVersions
-              .slice(0, 20) // Allow more entries since we're adding lowercase versions
+              .slice(0, 60) // Allow more entries since we're adding lowercase versions
               .map(item => item.tag)
 
             // Simple sanitization (remove special chars, limit length)
@@ -621,7 +621,7 @@ export class PopupController {
               }
             }
 
-            return uniqueTags.slice(0, 20) // Final limit
+            return uniqueTags.slice(0, 60) // Final limit
           }
         })
 

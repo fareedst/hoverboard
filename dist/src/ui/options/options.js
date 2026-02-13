@@ -134,8 +134,20 @@ var init_config_manager = __esm({
           // Conservative default - solid background for readability
           defaultBackgroundOpacity: 90,
           // 10-100% - High opacity default for good contrast
-          overlayPositionMode: "default"
+          overlayPositionMode: "default",
           // 'default' | 'bottom-fixed' - Keep existing position setting
+          // Font size configuration - User-customizable text sizes across UI
+          // IMPLEMENTATION DECISION: Reasonable defaults with customization for accessibility
+          fontSizeSuggestedTags: 10,
+          // Suggested tags font size in pixels (smaller for less intrusion)
+          fontSizeLabels: 12,
+          // Label text (Current, Recent, Suggested) in pixels
+          fontSizeTags: 12,
+          // Current and recent tag elements in pixels
+          fontSizeBase: 14,
+          // Base UI text size in pixels
+          fontSizeInputs: 14
+          // Input fields and buttons font size in pixels
         };
       }
       /**
@@ -186,7 +198,13 @@ var init_config_manager = __esm({
           defaultTransparencyEnabled: config.defaultTransparencyEnabled,
           defaultBackgroundOpacity: config.defaultBackgroundOpacity,
           // Popup UI settings
-          uxShowSectionLabels: config.uxShowSectionLabels
+          uxShowSectionLabels: config.uxShowSectionLabels,
+          // Font size configuration
+          fontSizeSuggestedTags: config.fontSizeSuggestedTags,
+          fontSizeLabels: config.fontSizeLabels,
+          fontSizeTags: config.fontSizeTags,
+          fontSizeBase: config.fontSizeBase,
+          fontSizeInputs: config.fontSizeInputs
         };
       }
       /**
@@ -2357,25 +2375,25 @@ var init_tag_service = __esm({
         return sanitized;
       }
       /**
-       * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS] [REQ:TAG_INPUT_SANITIZATION]
+       * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-TAG_INPUT_SANITIZATION]
        * Extract suggested tags from multiple page sources (title, URL, headings, nav, breadcrumbs, images, links)
        * Filters noise words, counts frequency, sorts by frequency, and sanitizes tags
        * @param {Document} document - The document to extract content from
        * @param {string} url - The current page URL
-       * @param {number} limit - Maximum number of suggested tags to return (default: 10)
+       * @param {number} limit - Maximum number of suggested tags to return (default: 30)
        * @returns {string[]} Array of suggested tag strings, sorted by frequency (most frequent first)
        */
-      extractSuggestedTagsFromContent(document2, url = "", limit = 10) {
+      extractSuggestedTagsFromContent(document2, url = "", limit = 30) {
         if (!document2 || typeof document2.querySelectorAll !== "function") {
-          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided");
+          debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided");
           return [];
         }
         try {
-          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracting suggested tags from multiple sources");
+          debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracting suggested tags from multiple sources");
           const allTexts = [];
           if (document2.title) {
             allTexts.push(document2.title);
-            debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from title:", document2.title.substring(0, 50));
+            debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from title:", document2.title.substring(0, 50));
           }
           if (url) {
             try {
@@ -2388,11 +2406,21 @@ var init_tag_service = __esm({
               });
               if (meaningfulSegments.length > 0) {
                 allTexts.push(meaningfulSegments.join(" "));
-                debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from URL:", meaningfulSegments.join(", "));
+                debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from URL:", meaningfulSegments.join(", "));
               }
             } catch (e) {
-              debugError("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to parse URL:", e);
+              debugError("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to parse URL:", e);
             }
+          }
+          const metaKeywords = document2.querySelector('meta[name="keywords"]');
+          if (metaKeywords && metaKeywords.content && metaKeywords.content.trim().length > 0) {
+            allTexts.push(metaKeywords.content.trim());
+            debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from meta keywords:", metaKeywords.content.substring(0, 50));
+          }
+          const metaDescription = document2.querySelector('meta[name="description"]');
+          if (metaDescription && metaDescription.content && metaDescription.content.trim().length > 0) {
+            allTexts.push(metaDescription.content.trim());
+            debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from meta description:", metaDescription.content.substring(0, 50));
           }
           const extractElementText = (element) => {
             if (element.title && element.title.trim().length > 0) {
@@ -2409,16 +2437,40 @@ var init_tag_service = __esm({
             const headingTexts = Array.from(headings).map((heading) => extractElementText(heading)).filter((t) => t.length > 0);
             if (headingTexts.length > 0) {
               allTexts.push(headingTexts.join(" "));
-              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from headings:", headings.length);
+              debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from headings:", headings.length);
+            }
+          }
+          const emphasisElements = document2.querySelectorAll('main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code, article strong, article b, article em, article i, article mark, article dfn, article cite, article kbd, article code, [role="main"] strong, [role="main"] b, [role="main"] em, [role="main"] i, [role="main"] mark, [role="main"] dfn, [role="main"] cite, [role="main"] kbd, [role="main"] code, .main strong, .main b, .main em, .main i, .main mark, .main dfn, .main cite, .main kbd, .main code, .content strong, .content b, .content em, .content i, .content mark, .content dfn, .content cite, .content kbd, .content code');
+          if (emphasisElements.length > 0) {
+            const emphasisTexts = Array.from(emphasisElements).slice(0, 60).map((el) => extractElementText(el)).filter((t) => t.length > 0);
+            if (emphasisTexts.length > 0) {
+              allTexts.push(emphasisTexts.join(" "));
+              debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from emphasis elements:", emphasisTexts.length);
+            }
+          }
+          const definitionTerms = document2.querySelectorAll('main dl dt, article dl dt, [role="main"] dl dt, .main dl dt, .content dl dt');
+          if (definitionTerms.length > 0) {
+            const dtTexts = Array.from(definitionTerms).slice(0, 40).map((dt) => extractElementText(dt)).filter((t) => t.length > 0);
+            if (dtTexts.length > 0) {
+              allTexts.push(dtTexts.join(" "));
+              debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from definition terms:", dtTexts.length);
+            }
+          }
+          const tableHeaders = document2.querySelectorAll('main th, main caption, article th, article caption, [role="main"] th, [role="main"] caption, .main th, .main caption, .content th, .content caption');
+          if (tableHeaders.length > 0) {
+            const thTexts = Array.from(tableHeaders).slice(0, 40).map((th) => extractElementText(th)).filter((t) => t.length > 0);
+            if (thTexts.length > 0) {
+              allTexts.push(thTexts.join(" "));
+              debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from table headers:", thTexts.length);
             }
           }
           const nav = document2.querySelector("nav") || document2.querySelector("header nav") || document2.querySelector('[role="navigation"]');
           if (nav) {
             const navLinks = nav.querySelectorAll("a");
-            const navTexts = Array.from(navLinks).slice(0, 20).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+            const navTexts = Array.from(navLinks).slice(0, 40).map((link) => extractElementText(link)).filter((t) => t.length > 0);
             if (navTexts.length > 0) {
               allTexts.push(navTexts.join(" "));
-              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from nav:", navTexts.length);
+              debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from nav:", navTexts.length);
             }
           }
           const breadcrumb = document2.querySelector('[aria-label*="breadcrumb" i], .breadcrumb, nav[aria-label*="breadcrumb" i], [itemtype*="BreadcrumbList"]');
@@ -2427,33 +2479,33 @@ var init_tag_service = __esm({
             const breadcrumbTexts = Array.from(breadcrumbLinks).map((link) => extractElementText(link)).filter((t) => t.length > 0);
             if (breadcrumbTexts.length > 0) {
               allTexts.push(breadcrumbTexts.join(" "));
-              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from breadcrumbs:", breadcrumbTexts.length);
+              debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from breadcrumbs:", breadcrumbTexts.length);
             }
           }
           const mainImages = document2.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img');
           if (mainImages.length > 0) {
-            const imageAlts = Array.from(mainImages).slice(0, 5).map((img) => img.alt || "").filter((alt) => alt.length > 0);
+            const imageAlts = Array.from(mainImages).slice(0, 10).map((img) => img.alt || "").filter((alt) => alt.length > 0);
             if (imageAlts.length > 0) {
               allTexts.push(imageAlts.join(" "));
-              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from images:", imageAlts.length);
+              debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from images:", imageAlts.length);
             }
           }
           const mainLinks = document2.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a');
           if (mainLinks.length > 0) {
-            const linkTexts = Array.from(mainLinks).slice(0, 10).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+            const linkTexts = Array.from(mainLinks).slice(0, 20).map((link) => extractElementText(link)).filter((t) => t.length > 0);
             if (linkTexts.length > 0) {
               allTexts.push(linkTexts.join(" "));
-              debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from links:", linkTexts.length);
+              debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from links:", linkTexts.length);
             }
           }
           if (allTexts.length === 0) {
-            debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] No content found from any source");
+            debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] No content found from any source");
             return [];
           }
           const allText = allTexts.join(" ");
-          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extracted text (preserving case):", allText.substring(0, 100));
+          debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Extracted text (preserving case):", allText.substring(0, 100));
           const words = allText.split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/).filter((word) => word.length > 0);
-          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):", words.length);
+          debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):", words.length);
           const noiseWords = /* @__PURE__ */ new Set([
             "a",
             "an",
@@ -2746,7 +2798,7 @@ var init_tag_service = __esm({
               }
             }
           });
-          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:", wordFrequency.size);
+          debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:", wordFrequency.size);
           const tagsWithVersions = [];
           const seenLowercase = /* @__PURE__ */ new Set();
           const sortedEntries = Array.from(wordFrequency.entries()).sort((a, b) => {
@@ -2772,9 +2824,9 @@ var init_tag_service = __esm({
             return a.lowerTag.localeCompare(b.lowerTag);
           });
           const sortedWords = tagsWithVersions.slice(0, limit * 2).map((item) => item.tag);
-          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):", sortedWords);
+          debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):", sortedWords);
           const sanitizedTags = sortedWords.map((word) => this.sanitizeTag(word)).filter((tag) => tag !== null && tag.length > 0);
-          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:", sanitizedTags);
+          debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:", sanitizedTags);
           const uniqueTags = [];
           const seenExact = /* @__PURE__ */ new Set();
           for (const tag of sanitizedTags) {
@@ -2784,10 +2836,10 @@ var init_tag_service = __esm({
             }
           }
           const finalTags = uniqueTags.slice(0, limit * 2);
-          debugLog("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):", finalTags.length, finalTags);
+          debugLog("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):", finalTags.length, finalTags);
           return finalTags;
         } catch (error) {
-          debugError("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:", error);
+          debugError("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:", error);
           return [];
         }
       }
@@ -5103,6 +5155,11 @@ var OptionsController = class {
     this.elements.visibilityPreview = document.getElementById("visibility-preview");
     this.elements.opacityValue = document.querySelector(".opacity-value");
     this.elements.opacitySetting = document.querySelector(".opacity-setting");
+    this.elements.fontSizeSuggestedTags = document.getElementById("font-size-suggested-tags");
+    this.elements.fontSizeLabels = document.getElementById("font-size-labels");
+    this.elements.fontSizeTags = document.getElementById("font-size-tags");
+    this.elements.fontSizeBase = document.getElementById("font-size-base");
+    this.elements.fontSizeInputs = document.getElementById("font-size-inputs");
     this.elements.badgeNotBookmarked = document.getElementById("badge-not-bookmarked");
     this.elements.badgeNoTags = document.getElementById("badge-no-tags");
     this.elements.badgePrivate = document.getElementById("badge-private");
@@ -5153,6 +5210,11 @@ var OptionsController = class {
       this.elements.autoCloseTimeout.value = config.uxAutoCloseTimeout;
       this.elements.defaultTransparencyEnabled.checked = config.defaultTransparencyEnabled;
       this.elements.defaultBackgroundOpacity.value = config.defaultBackgroundOpacity;
+      this.elements.fontSizeSuggestedTags.value = config.fontSizeSuggestedTags || 10;
+      this.elements.fontSizeLabels.value = config.fontSizeLabels || 12;
+      this.elements.fontSizeTags.value = config.fontSizeTags || 12;
+      this.elements.fontSizeBase.value = config.fontSizeBase || 14;
+      this.elements.fontSizeInputs.value = config.fontSizeInputs || 14;
       this.currentTheme = config.defaultVisibilityTheme;
       this.updateThemeDisplay();
       this.updateTransparencyState();
@@ -5188,7 +5250,13 @@ var OptionsController = class {
         // Visibility defaults
         defaultVisibilityTheme: this.currentTheme,
         defaultTransparencyEnabled: this.elements.defaultTransparencyEnabled.checked,
-        defaultBackgroundOpacity: parseInt(this.elements.defaultBackgroundOpacity.value)
+        defaultBackgroundOpacity: parseInt(this.elements.defaultBackgroundOpacity.value),
+        // Font size settings
+        fontSizeSuggestedTags: parseInt(this.elements.fontSizeSuggestedTags.value),
+        fontSizeLabels: parseInt(this.elements.fontSizeLabels.value),
+        fontSizeTags: parseInt(this.elements.fontSizeTags.value),
+        fontSizeBase: parseInt(this.elements.fontSizeBase.value),
+        fontSizeInputs: parseInt(this.elements.fontSizeInputs.value)
       };
       await this.configManager.updateConfig(settings);
       const authToken = this.elements.authToken.value.trim();

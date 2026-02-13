@@ -161,29 +161,32 @@ function extractElementText(element) {
 - Add new source: Insert extraction code in both TagService and PopupController
 - Reorder: Change sequence of `allTexts.push()` calls
 - Remove source: Comment out or delete extraction section
-- Adjust limits: Change `.slice(0, n)` values for emphasis elements (30), definition terms (20), table headers (20)
+- Adjust limits: Change `.slice(0, n)` values for emphasis elements (60), definition terms (40), table headers (40), nav links (40), images (10), main content links (20)
 
 **Sync Requirement**: Changes must be made in **both** TagService and PopupController inlined script.
 
 **New Sources Added (2026-02-13)**:
 - **Meta keywords/description** (lines ~959-969 TagService, ~415-425 PopupController): Extracts from `<meta name="keywords">` and `<meta name="description">` tags
-- **Emphasis elements** (lines ~996-1004 TagService, ~428-436 PopupController): Extracts first 30 `<strong>`, `<b>`, `<em>`, `<i>`, `<mark>`, `<dfn>`, `<cite>`, `<kbd>`, `<code>` from main content
-- **Definition terms** (lines ~1007-1014 TagService, ~439-446 PopupController): Extracts first 20 `<dt>` elements from `<dl>` lists
-- **Table headers/captions** (lines ~1015-1022 TagService, ~447-454 PopupController): Extracts first 20 `<th>` and `<caption>` elements from tables
+- **Emphasis elements** (lines ~996-1004 TagService, ~428-436 PopupController): Extracts first 60 `<strong>`, `<b>`, `<em>`, `<i>`, `<mark>`, `<dfn>`, `<cite>`, `<kbd>`, `<code>` from main content
+- **Definition terms** (lines ~1007-1014 TagService, ~439-446 PopupController): Extracts first 40 `<dt>` elements from `<dl>` lists
+- **Table headers/captions** (lines ~1015-1022 TagService, ~447-454 PopupController): Extracts first 40 `<th>` and `<caption>` elements from tables
 
 ### 2. Numeric Limits
 
 | Component | Limit | Code Location | How to Modify |
 |-----------|-------|---------------|---------------|
-| Overlay extraction | 10 | `tag-service.js` line ~921 (default parameter) | Change `limit = 10` to desired value |
-| Popup extraction | 20 | `PopupController.js` line ~628 (`.slice(0, 20)`) | Change `20` to desired value |
-| Emphasis elements | 30 | `tag-service.js` line ~999, `PopupController.js` line ~431 (`.slice(0, 30)`) | Change `30` to desired value in both locations |
-| Definition terms | 20 | `tag-service.js` line ~1009, `PopupController.js` line ~442 (`.slice(0, 20)`) | Change `20` to desired value in both locations |
-| Table headers/captions | 20 | `tag-service.js` line ~1017, `PopupController.js` line ~450 (`.slice(0, 20)`) | Change `20` to desired value in both locations |
-| Overlay display | 5 | `overlay-manager.js` line ~637 (`.slice(0, 5)`) | Change `5` to desired value |
+| Overlay extraction | 30 | `tag-service.js` line ~921 (default parameter) | Change `limit = 30` to desired value |
+| Popup extraction | 60 | `PopupController.js` line ~628 (`.slice(0, 60)`) | Change `60` to desired value |
+| Emphasis elements | 60 | `tag-service.js` line ~999, `PopupController.js` line ~431 (`.slice(0, 60)`) | Change `60` to desired value in both locations |
+| Definition terms | 40 | `tag-service.js` line ~1009, `PopupController.js` line ~442 (`.slice(0, 40)`) | Change `40` to desired value in both locations |
+| Table headers/captions | 40 | `tag-service.js` line ~1017, `PopupController.js` line ~450 (`.slice(0, 40)`) | Change `40` to desired value in both locations |
+| Nav links | 40 | `tag-service.js` line ~1028, `PopupController.js` line ~459 (`.slice(0, 40)`) | Change `40` to desired value in both locations |
+| Images alt | 10 | `tag-service.js` line ~1049, `PopupController.js` line ~478 (`.slice(0, 10)`) | Change `10` to desired value in both locations |
+| Main content links | 20 | `tag-service.js` line ~1059, `PopupController.js` line ~487 (`.slice(0, 20)`) | Change `20` to desired value in both locations |
+| Overlay display | 15 | `overlay-manager.js` line ~637 (`.slice(0, 15)`) | Change `15` to desired value |
 | Popup display | No cap | `PopupController.js` ~634-642 (shows all filtered) | Add `.slice(0, n)` before `updateSuggestedTags()` |
 
-**Considerations**: Higher limits increase computational cost; lower limits may miss relevant suggestions. Emphasis/definition/table limits balance coverage with noise reduction.
+**Considerations**: Higher limits increase computational cost; lower limits may miss relevant suggestions. Per-source limits balance coverage with noise reduction. Limits increased 100-200% on 2026-02-13 to provide more tag candidates from all sources.
 
 ### 3. URL Path Segment Filtering
 

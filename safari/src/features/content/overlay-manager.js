@@ -619,15 +619,15 @@ class OverlayManager {
 
       try {
         // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags from multiple page sources
-        const suggestedTags = this.tagService.extractSuggestedTagsFromContent(this.document, window.location.href, 10)
+        const suggestedTags = this.tagService.extractSuggestedTagsFromContent(this.document, window.location.href, 30)
 
         if (suggestedTags && suggestedTags.length > 0) {
           // [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] - Prepare current tags for case-insensitive comparison
           const currentTags = content.bookmark?.tags || []
           const currentTagsLower = new Set(currentTags.map(t => t.toLowerCase()))
 
-          // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Display suggested tags (limit to 5 for UI)
-          suggestedTags.slice(0, 5).forEach(tag => {
+          // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Display suggested tags (limit to 15 for UI)
+          suggestedTags.slice(0, 15).forEach(tag => {
             // [REQ-SUGGESTED_TAGS_DEDUPLICATION] - Filter using case-insensitive comparison
             const tagLower = tag.toLowerCase()
             if (!currentTagsLower.has(tagLower)) {
@@ -1703,7 +1703,7 @@ class OverlayManager {
 
       /* Text elements */
       .hoverboard-overlay .tiny {
-        font-size: 12px;
+        font-size: ${this.config.fontSizeLabels || 12}px;
         display: inline-block;
         color: var(--theme-text-secondary);
       }
@@ -1734,6 +1734,12 @@ class OverlayManager {
         border-radius: 3px;
         cursor: pointer;
         display: inline-block;
+        font-size: ${this.config.fontSizeTags || 12}px;
+      }
+
+      /* Suggested tags - smaller font size */
+      .hoverboard-overlay .suggested-container .tag-element {
+        font-size: ${this.config.fontSizeSuggestedTags || 10}px;
       }
 
       .hoverboard-overlay .tag-element:hover,
@@ -1752,7 +1758,7 @@ class OverlayManager {
         outline: none;
         border-radius: 3px;
         padding: 2px 4px;
-        font-size: 12px;
+        font-size: ${this.config.fontSizeInputs || 14}px;
       }
 
       .hoverboard-overlay .tag-input:focus {

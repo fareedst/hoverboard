@@ -84,7 +84,15 @@ export class ConfigManager {
       defaultVisibilityTheme: 'light-on-dark', // 'light-on-dark' | 'dark-on-light' - Dark theme default
       defaultTransparencyEnabled: false, // Conservative default - solid background for readability
       defaultBackgroundOpacity: 90, // 10-100% - High opacity default for good contrast
-      overlayPositionMode: 'default' // 'default' | 'bottom-fixed' - Keep existing position setting
+      overlayPositionMode: 'default', // 'default' | 'bottom-fixed' - Keep existing position setting
+
+      // Font size configuration - User-customizable text sizes across UI
+      // IMPLEMENTATION DECISION: Reasonable defaults with customization for accessibility
+      fontSizeSuggestedTags: 10, // Suggested tags font size in pixels (smaller for less intrusion)
+      fontSizeLabels: 12, // Label text (Current, Recent, Suggested) in pixels
+      fontSizeTags: 12, // Current and recent tag elements in pixels
+      fontSizeBase: 14, // Base UI text size in pixels
+      fontSizeInputs: 14 // Input fields and buttons font size in pixels
     }
   }
 
@@ -142,7 +150,13 @@ export class ConfigManager {
       defaultTransparencyEnabled: config.defaultTransparencyEnabled,
       defaultBackgroundOpacity: config.defaultBackgroundOpacity,
       // Popup UI settings
-      uxShowSectionLabels: config.uxShowSectionLabels
+      uxShowSectionLabels: config.uxShowSectionLabels,
+      // Font size configuration
+      fontSizeSuggestedTags: config.fontSizeSuggestedTags,
+      fontSizeLabels: config.fontSizeLabels,
+      fontSizeTags: config.fontSizeTags,
+      fontSizeBase: config.fontSizeBase,
+      fontSizeInputs: config.fontSizeInputs
     }
   }
 

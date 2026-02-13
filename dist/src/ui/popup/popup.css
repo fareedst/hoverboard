@@ -468,7 +468,7 @@ section:last-child {
 }
 
 .tags-subtitle {
-  font-size: var(--font-size-xs);
+  font-size: var(--font-size-labels, var(--font-size-xs));
   font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: var(--spacing-xs);
@@ -500,7 +500,7 @@ section:last-child {
   gap: var(--spacing-xs);
   padding: 2px var(--spacing-sm);
   border-radius: var(--radius-small);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-tags, var(--font-size-sm));
   line-height: 1.2;
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -529,6 +529,11 @@ section:last-child {
   background: #f3e5f5;
   color: #7b1fa2;
   border-color: #e1bee7;
+}
+
+/* Suggested tags - smaller font */
+#suggestedTagsContainer .tag {
+  font-size: var(--font-size-suggested-tags, 10px);
 }
 
 .tag-remove {
@@ -660,7 +665,7 @@ section:last-child {
   padding: var(--spacing-sm) var(--spacing-md);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-medium);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-inputs-custom, var(--font-size-sm));
   background: var(--bg-primary);
   color: var(--text-primary);
   transition: all 0.2s ease;

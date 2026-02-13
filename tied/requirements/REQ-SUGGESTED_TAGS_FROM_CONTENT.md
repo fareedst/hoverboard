@@ -158,12 +158,15 @@ The following design choices are documented in [IMPL-SUGGESTED_TAGS] and can be 
 1. **Extraction sources and order**: Current order is title → URL → meta keywords/description → headings → emphasis elements → definition terms/table headers → nav → breadcrumbs → images → links. Reordering or adding sources requires changes to both TagService and PopupController inlined script.
 
 2. **Numeric limits**:
-   - Overlay extraction limit: 10 (TagService parameter)
-   - Popup extraction limit: 20 (inlined script)
-   - Emphasis elements cap: 30 (first 30 elements)
-   - Definition terms cap: 20 (first 20 terms)
-   - Table headers cap: 20 (first 20 headers/captions)
-   - Overlay display limit: 5 (slice in overlay-manager.js)
+   - Overlay extraction limit: 30 (TagService parameter)
+   - Popup extraction limit: 60 (inlined script)
+   - Emphasis elements cap: 60 (first 60 elements)
+   - Definition terms cap: 40 (first 40 terms)
+   - Table headers cap: 40 (first 40 headers/captions)
+   - Nav links cap: 40 (first 40 links)
+   - Images alt cap: 10 (first 10 images)
+   - Main content links cap: 20 (first 20 links)
+   - Overlay display limit: 15 (slice in overlay-manager.js)
    - Popup display limit: no explicit cap (all filtered suggestions shown)
 
 3. **URL path filtering**: Excluded segments include `www`, `com`, `org`, `net`, `html`, `htm`, `php`, `asp`, `aspx`, `index`, `home`, `page`, pure numeric segments, and segments shorter than 2 characters.
@@ -176,4 +179,4 @@ The following design choices are documented in [IMPL-SUGGESTED_TAGS] and can be 
 
 ---
 
-*Last validated: 2026-02-13 by AI agent*
+*Last validated: 2026-02-13 by AI agent (limits increased 100-200%)*

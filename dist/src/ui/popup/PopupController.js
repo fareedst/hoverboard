@@ -29,7 +29,7 @@ export class PopupController {
     this.isInitialized = false
     this.isLoading = false
 
-    // [IMPL:POPUP_MESSAGE_TIMEOUT] Preserve predictable refresh behavior in tests and runtime
+    // [IMPL-POPUP_MESSAGE_TIMEOUT] Preserve predictable refresh behavior in tests and runtime
     const isTestEnv = typeof process !== 'undefined' && process?.env?.JEST_WORKER_ID
     this.tabMessageTimeoutMs = dependencies.tabMessageTimeoutMs ?? (isTestEnv ? 100 : 2000)
 
@@ -251,7 +251,7 @@ export class PopupController {
       // Load recent tags
       await this.loadRecentTags()
 
-      // [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] - Load suggested tags from page content
+      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] - Load suggested tags from page content
       await this.loadSuggestedTags()
 
       // [SHOW-HOVER-CHECKBOX-CONTROLLER-002] - Load checkbox state
@@ -336,20 +336,20 @@ export class PopupController {
   }
 
   /**
-   * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS]
+   * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS]
    * Load suggested tags from page headings
    */
   async loadSuggestedTags () {
     try {
-      debugLog('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] Loading suggested tags from page content')
+      debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Loading suggested tags from page content')
 
       if (!this.currentTab || !this.currentTab.id) {
-        debugLog('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] No current tab, skipping suggested tags')
+        debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] No current tab, skipping suggested tags')
         this.uiManager.updateSuggestedTags([])
         return
       }
 
-      // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags using content script injection
+      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags using content script injection
       // Import TagService dynamically to avoid circular dependencies
       const { TagService } = await import('../../features/tagging/tag-service.js')
       const tagService = new TagService()
@@ -362,7 +362,7 @@ export class PopupController {
             // Extract tags from multiple sources in the page context
             const allTexts = []
 
-            // [REQ:SUGGESTED_TAGS_FROM_CONTENT] Helper function to extract text from element, preferring title attribute
+            // [REQ-SUGGESTED_TAGS_FROM_CONTENT] Helper function to extract text from element, preferring title attribute
             const extractElementText = (element) => {
               // Check for title attribute on the element itself
               if (element.title && element.title.trim().length > 0) {
@@ -398,6 +398,16 @@ export class PopupController {
               // Ignore URL parsing errors
             }
 
+            // 2.5. Meta keywords and description
+            const metaKeywords = document.querySelector('meta[name="keywords"]')
+            if (metaKeywords && metaKeywords.content && metaKeywords.content.trim().length > 0) {
+              allTexts.push(metaKeywords.content.trim())
+            }
+            const metaDescription = document.querySelector('meta[name="description"]')
+            if (metaDescription && metaDescription.content && metaDescription.content.trim().length > 0) {
+              allTexts.push(metaDescription.content.trim())
+            }
+
             // 3. Headings
             const headings = document.querySelectorAll('h1, h2, h3')
             if (headings.length > 0) {
@@ -407,11 +417,36 @@ export class PopupController {
               }
             }
 
+            // 3.5. Semantic emphasis elements within main content
+            const emphasisElements = document.querySelectorAll('main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code, article strong, article b, article em, article i, article mark, article dfn, article cite, article kbd, article code, [role="main"] strong, [role="main"] b, [role="main"] em, [role="main"] i, [role="main"] mark, [role="main"] dfn, [role="main"] cite, [role="main"] kbd, [role="main"] code, .main strong, .main b, .main em, .main i, .main mark, .main dfn, .main cite, .main kbd, .main code, .content strong, .content b, .content em, .content i, .content mark, .content dfn, .content cite, .content kbd, .content code')
+            if (emphasisElements.length > 0) {
+              const emphasisTexts = Array.from(emphasisElements).slice(0, 60).map(el => extractElementText(el)).filter(t => t.length > 0)
+              if (emphasisTexts.length > 0) {
+                allTexts.push(emphasisTexts.join(' '))
+              }
+            }
+
+            // 3.6. Definition lists and table headers
+            const definitionTerms = document.querySelectorAll('main dl dt, article dl dt, [role="main"] dl dt, .main dl dt, .content dl dt')
+            if (definitionTerms.length > 0) {
+              const dtTexts = Array.from(definitionTerms).slice(0, 40).map(dt => extractElementText(dt)).filter(t => t.length > 0)
+              if (dtTexts.length > 0) {
+                allTexts.push(dtTexts.join(' '))
+              }
+            }
+            const tableHeaders = document.querySelectorAll('main th, main caption, article th, article caption, [role="main"] th, [role="main"] caption, .main th, .main caption, .content th, .content caption')
+            if (tableHeaders.length > 0) {
+              const thTexts = Array.from(tableHeaders).slice(0, 40).map(th => extractElementText(th)).filter(t => t.length > 0)
+              if (thTexts.length > 0) {
+                allTexts.push(thTexts.join(' '))
+              }
+            }
+
             // 4. Top-level navigation
             const nav = document.querySelector('nav') || document.querySelector('header nav') || document.querySelector('[role="navigation"]')
             if (nav) {
               const navLinks = nav.querySelectorAll('a')
-              const navTexts = Array.from(navLinks).slice(0, 20).map(link => extractElementText(link)).filter(t => t.length > 0)
+              const navTexts = Array.from(navLinks).slice(0, 40).map(link => extractElementText(link)).filter(t => t.length > 0)
               if (navTexts.length > 0) {
                 allTexts.push(navTexts.join(' '))
               }
@@ -427,19 +462,19 @@ export class PopupController {
               }
             }
 
-            // 6. First 5 images' alt text
+            // 6. First 10 images' alt text
             const mainImages = document.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img')
             if (mainImages.length > 0) {
-              const imageAlts = Array.from(mainImages).slice(0, 5).map(img => img.alt || '').filter(alt => alt.length > 0)
+              const imageAlts = Array.from(mainImages).slice(0, 10).map(img => img.alt || '').filter(alt => alt.length > 0)
               if (imageAlts.length > 0) {
                 allTexts.push(imageAlts.join(' '))
               }
             }
 
-            // 7. First 10 anchor links within main content
+            // 7. First 20 anchor links within main content
             const mainLinks = document.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a')
             if (mainLinks.length > 0) {
-              const linkTexts = Array.from(mainLinks).slice(0, 10).map(link => extractElementText(link)).filter(t => t.length > 0)
+              const linkTexts = Array.from(mainLinks).slice(0, 20).map(link => extractElementText(link)).filter(t => t.length > 0)
               if (linkTexts.length > 0) {
                 allTexts.push(linkTexts.join(' '))
               }
@@ -447,10 +482,10 @@ export class PopupController {
 
             if (allTexts.length === 0) return []
 
-            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Preserve original case from content
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Preserve original case from content
             const allText = allTexts.join(' ')
 
-            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
             const words = allText
               .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/)
               .filter(word => word.length > 0)
@@ -491,7 +526,7 @@ export class PopupController {
               'leave', 'family', 'it\'s'
             ])
 
-            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Track original case variants and frequency using lowercase keys
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Track original case variants and frequency using lowercase keys
             const wordFrequency = new Map()
             const originalCaseMap = new Map() // lowercase -> most common original case variant
 
@@ -499,7 +534,7 @@ export class PopupController {
               const trimmed = word.trim()
               if (trimmed.length === 0) return
 
-              // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Generate lowercase version for case-insensitive operations
+              // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Generate lowercase version for case-insensitive operations
               const lowerWord = trimmed.toLowerCase()
 
               // Filter: not a noise word, length >= 2, not a number
@@ -519,7 +554,7 @@ export class PopupController {
               }
             })
 
-            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Build list of tags with both original case and lowercase versions
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Build list of tags with both original case and lowercase versions
             // For words with uppercase letters, include both versions as separate tags
             // For words already lowercase, include only once
             const tagsWithVersions = []
@@ -536,14 +571,14 @@ export class PopupController {
                 return a[0].localeCompare(b[0])
               })
 
-            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] For each word, add original case version and lowercase version (if different)
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] For each word, add original case version and lowercase version (if different)
             for (const [lowerWord, frequency] of sortedEntries) {
               const originalCase = originalCaseMap.get(lowerWord) || lowerWord
 
-              // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Add original case version
+              // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Add original case version
               tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency })
 
-              // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] If word contains uppercase letters, also add lowercase version
+              // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] If word contains uppercase letters, also add lowercase version
               // Only add lowercase version if it's different from original and we haven't seen it yet
               if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
                 tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency })
@@ -554,7 +589,7 @@ export class PopupController {
               }
             }
 
-            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sort all tags (both versions) by frequency, then alphabetically
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sort all tags (both versions) by frequency, then alphabetically
             tagsWithVersions.sort((a, b) => {
               // Primary sort: frequency (descending)
               if (b.frequency !== a.frequency) {
@@ -564,9 +599,9 @@ export class PopupController {
               return a.lowerTag.localeCompare(b.lowerTag)
             })
 
-            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extract tags and apply limit
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Extract tags and apply limit
             const sortedWords = tagsWithVersions
-              .slice(0, 20) // Allow more entries since we're adding lowercase versions
+              .slice(0, 60) // Allow more entries since we're adding lowercase versions
               .map(item => item.tag)
 
             // Simple sanitization (remove special chars, limit length)
@@ -574,7 +609,7 @@ export class PopupController {
               .map(word => word.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 50))
               .filter(tag => tag !== null && tag.length > 0)
 
-            // [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Remove exact duplicates (same string) while preserving both "Git" and "git"
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Remove exact duplicates (same string) while preserving both "Git" and "git"
             const uniqueTags = []
             const seenExact = new Set() // Track exact strings to avoid true duplicates
 
@@ -586,7 +621,7 @@ export class PopupController {
               }
             }
 
-            return uniqueTags.slice(0, 20) // Final limit
+            return uniqueTags.slice(0, 60) // Final limit
           }
         })
 
@@ -594,25 +629,25 @@ export class PopupController {
           const suggestedTags = results[0].result
           const currentTags = this.normalizeTags(this.currentPin?.tags || [])
 
-          // [REQ:SUGGESTED_TAGS_DEDUPLICATION] [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] - Filter using case-insensitive comparison
+          // [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] - Filter using case-insensitive comparison
           const currentTagsLower = new Set(currentTags.map(t => t.toLowerCase()))
           const filteredSuggestedTags = suggestedTags.filter(tag =>
             tag && !currentTagsLower.has(tag.toLowerCase())
           )
 
-          debugLog('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted suggested tags:', filteredSuggestedTags)
+          debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted suggested tags:', filteredSuggestedTags)
           this.uiManager.updateSuggestedTags(filteredSuggestedTags)
         } else {
-          debugLog('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] No suggested tags extracted')
+          debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] No suggested tags extracted')
           this.uiManager.updateSuggestedTags([])
         }
       } catch (scriptError) {
         // Script injection might fail on certain pages (chrome://, extension pages, etc.)
-        debugError('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:', scriptError)
+        debugError('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:', scriptError)
         this.uiManager.updateSuggestedTags([])
       }
     } catch (error) {
-      debugError('[POPUP-CONTROLLER] [REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to load suggested tags:', error)
+      debugError('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to load suggested tags:', error)
       this.uiManager.updateSuggestedTags([])
     }
   }
@@ -817,7 +852,7 @@ export class PopupController {
           return
         }
         settled = true
-        debugError('[IMPL:POPUP_MESSAGE_TIMEOUT] sendToTab timed out', {
+        debugError('[IMPL-POPUP_MESSAGE_TIMEOUT] sendToTab timed out', {
           timeoutMs,
           messageType: message?.type
         })
@@ -921,14 +956,14 @@ export class PopupController {
           return
         }
 
-        // [IMPL:POPUP_MESSAGE_TIMEOUT] Support Promise-based mocks that skip callbacks in Jest
+        // [IMPL-POPUP_MESSAGE_TIMEOUT] Support Promise-based mocks that skip callbacks in Jest
         if (maybePromise && typeof maybePromise.then === 'function') {
           maybePromise
             .then((response) => {
               handleResponse(response)
             })
             .catch((error) => {
-              debugError('[IMPL:POPUP_MESSAGE_TIMEOUT] Promise-based sendMessage failed', error)
+              debugError('[IMPL-POPUP_MESSAGE_TIMEOUT] Promise-based sendMessage failed', error)
               rejectOnce(error instanceof Error ? error : new Error(String(error)))
             })
         }

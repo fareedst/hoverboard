@@ -41,6 +41,13 @@ class OptionsController {
     this.elements.opacityValue = document.querySelector('.opacity-value')
     this.elements.opacitySetting = document.querySelector('.opacity-setting')
 
+    // Font size settings
+    this.elements.fontSizeSuggestedTags = document.getElementById('font-size-suggested-tags')
+    this.elements.fontSizeLabels = document.getElementById('font-size-labels')
+    this.elements.fontSizeTags = document.getElementById('font-size-tags')
+    this.elements.fontSizeBase = document.getElementById('font-size-base')
+    this.elements.fontSizeInputs = document.getElementById('font-size-inputs')
+
     // Badge settings
     this.elements.badgeNotBookmarked = document.getElementById('badge-not-bookmarked')
     this.elements.badgeNoTags = document.getElementById('badge-no-tags')
@@ -121,6 +128,13 @@ class OptionsController {
       this.elements.defaultTransparencyEnabled.checked = config.defaultTransparencyEnabled
       this.elements.defaultBackgroundOpacity.value = config.defaultBackgroundOpacity
 
+      // Load font size settings
+      this.elements.fontSizeSuggestedTags.value = config.fontSizeSuggestedTags || 10
+      this.elements.fontSizeLabels.value = config.fontSizeLabels || 12
+      this.elements.fontSizeTags.value = config.fontSizeTags || 12
+      this.elements.fontSizeBase.value = config.fontSizeBase || 14
+      this.elements.fontSizeInputs.value = config.fontSizeInputs || 14
+
       // Update visibility UI
       this.currentTheme = config.defaultVisibilityTheme
       this.updateThemeDisplay()
@@ -166,7 +180,14 @@ class OptionsController {
         // Visibility defaults
         defaultVisibilityTheme: this.currentTheme,
         defaultTransparencyEnabled: this.elements.defaultTransparencyEnabled.checked,
-        defaultBackgroundOpacity: parseInt(this.elements.defaultBackgroundOpacity.value)
+        defaultBackgroundOpacity: parseInt(this.elements.defaultBackgroundOpacity.value),
+
+        // Font size settings
+        fontSizeSuggestedTags: parseInt(this.elements.fontSizeSuggestedTags.value),
+        fontSizeLabels: parseInt(this.elements.fontSizeLabels.value),
+        fontSizeTags: parseInt(this.elements.fontSizeTags.value),
+        fontSizeBase: parseInt(this.elements.fontSizeBase.value),
+        fontSizeInputs: parseInt(this.elements.fontSizeInputs.value)
       }
 
       // Save configuration

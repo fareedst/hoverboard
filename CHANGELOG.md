@@ -7,17 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2026-02-13
 
+### Added
+
+- **Customizable Font Sizes** (`CFG-FONT-SIZE-001`) - User-configurable font sizes for all UI text elements:
+  - **Suggested Tags**: Default 10px (smaller for less visual intrusion), configurable 8-20px
+  - **Labels**: Default 12px (Current, Recent, Suggested), configurable 10-16px
+  - **Tag Elements**: Default 12px (current and recent tags), configurable 10-16px
+  - **Base UI Text**: Default 14px (general UI text), configurable 12-18px
+  - **Input Fields & Buttons**: Default 14px, configurable 12-18px
+  - Accessibility-friendly: users can increase sizes for better readability
+  - Settings persist via chrome.storage and apply to both overlay and popup interfaces
+  - New "📝 Font Size Settings" section in options page with helpful guidance
+
 ### Enhanced
 
-- **Intelligent Tag Suggestions** (`REQ-SUGGESTED_TAGS_FROM_CONTENT`) - Significantly improved tag extraction algorithm with new content sources:
+- **Intelligent Tag Suggestions** (`REQ-SUGGESTED_TAGS_FROM_CONTENT`) - Increased tag extraction capacity:
+  - **Overlay**: Now extracts 30 tags (was 10), displays 15 (was 5) - 200% increase
+  - **Popup**: Now extracts 60 tags (was 20) - 200% increase
+  - **Per-Source Caps**: Doubled to ensure top tags from all sources can contribute:
+    - Emphasis elements: 60 (was 30)
+    - Definition terms: 40 (was 20)
+    - Table headers: 40 (was 20)
+    - Nav links: 40 (was 20)
+    - Images alt: 10 (was 5)
+    - Main content links: 20 (was 10)
+  - All sources can now contribute more candidates before frequency ranking
+  - No algorithm changes - still uses frequency sorting, case preservation, deduplication
+
+- **Tag Extraction Sources** - Significantly improved tag extraction algorithm with new content sources:
   - **Meta Tags**: Extract from `<meta name="keywords">` and `<meta name="description">` for author-specified topics
-  - **Emphasis Elements**: Extract from `<strong>`, `<b>`, `<em>`, `<i>`, `<mark>`, `<dfn>`, `<cite>`, `<kbd>`, `<code>` (first 30 in main content)
-  - **Definition Terms**: Extract from `<dt>` elements in definition lists (first 20)
-  - **Table Headers**: Extract from `<th>` and `<caption>` elements (first 20)
+  - **Emphasis Elements**: Extract from `<strong>`, `<b>`, `<em>`, `<i>`, `<mark>`, `<dfn>`, `<cite>`, `<kbd>`, `<code>` (first 60 in main content)
+  - **Definition Terms**: Extract from `<dt>` elements in definition lists (first 40)
+  - **Table Headers**: Extract from `<th>` and `<caption>` elements (first 40)
   - All new sources scoped to main content areas (main, article, [role="main"]) to reduce noise
 
 ### Technical Details
 
+- **Font Configuration**: Stored in `ConfigManager` with defaults in `getDefaultConfiguration()`
+- **CSS Implementation**: Dynamic CSS variables in popup, template literals in overlay injection
 - **Sources**: 11 total extraction sources (was 7): title, URL, meta keywords, meta description, headings, emphasis elements, definition terms, table headers, navigation, breadcrumbs, images, links
 - **Performance**: Minimal impact (~5-10ms typical, <20ms complex pages)
 - **Backward Compatible**: No breaking changes, all existing functionality preserved
@@ -25,11 +52,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Benefits
 
-- Better tag suggestions on technical documentation (code terms, definitions)
-- Improved extraction from glossaries and dictionaries (definition terms)
-- Enhanced suggestions on data-heavy pages (table headers)
-- More accurate topic identification from meta tags
-- Pages that emphasize important text visually now provide better suggestions
+- **Customization**: Users can adjust font sizes for personal preference and accessibility needs
+- **Reduced Visual Clutter**: Suggested tags now smaller by default (10px vs 12px)
+- **Consistency**: Font sizes apply uniformly across overlay and popup interfaces
+- **More Tag Suggestions**: 100-200% increase in suggested tags provides more options from all content sources
+- **Better Tag Quality**: More candidates from each source means top tags from all sources can contribute
+- **Better Extraction**: Technical documentation, glossaries, data-heavy pages, meta-tagged content now provide richer suggestions
+- **Pages with Visual Emphasis**: Bold/italic/highlighted/code terms now contribute to suggestions
 
 ## [1.0.7] - 2025-11-17
 

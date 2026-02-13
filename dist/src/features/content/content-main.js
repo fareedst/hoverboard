@@ -1212,8 +1212,20 @@
             // Conservative default - solid background for readability
             defaultBackgroundOpacity: 90,
             // 10-100% - High opacity default for good contrast
-            overlayPositionMode: "default"
+            overlayPositionMode: "default",
             // 'default' | 'bottom-fixed' - Keep existing position setting
+            // Font size configuration - User-customizable text sizes across UI
+            // IMPLEMENTATION DECISION: Reasonable defaults with customization for accessibility
+            fontSizeSuggestedTags: 10,
+            // Suggested tags font size in pixels (smaller for less intrusion)
+            fontSizeLabels: 12,
+            // Label text (Current, Recent, Suggested) in pixels
+            fontSizeTags: 12,
+            // Current and recent tag elements in pixels
+            fontSizeBase: 14,
+            // Base UI text size in pixels
+            fontSizeInputs: 14
+            // Input fields and buttons font size in pixels
           };
         }
         /**
@@ -1264,7 +1276,13 @@
             defaultTransparencyEnabled: config.defaultTransparencyEnabled,
             defaultBackgroundOpacity: config.defaultBackgroundOpacity,
             // Popup UI settings
-            uxShowSectionLabels: config.uxShowSectionLabels
+            uxShowSectionLabels: config.uxShowSectionLabels,
+            // Font size configuration
+            fontSizeSuggestedTags: config.fontSizeSuggestedTags,
+            fontSizeLabels: config.fontSizeLabels,
+            fontSizeTags: config.fontSizeTags,
+            fontSizeBase: config.fontSizeBase,
+            fontSizeInputs: config.fontSizeInputs
           };
         }
         /**
@@ -4637,25 +4655,25 @@
           return sanitized;
         }
         /**
-         * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS] [REQ:TAG_INPUT_SANITIZATION]
+         * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-TAG_INPUT_SANITIZATION]
          * Extract suggested tags from multiple page sources (title, URL, headings, nav, breadcrumbs, images, links)
          * Filters noise words, counts frequency, sorts by frequency, and sanitizes tags
          * @param {Document} document - The document to extract content from
          * @param {string} url - The current page URL
-         * @param {number} limit - Maximum number of suggested tags to return (default: 10)
+         * @param {number} limit - Maximum number of suggested tags to return (default: 30)
          * @returns {string[]} Array of suggested tag strings, sorted by frequency (most frequent first)
          */
-        extractSuggestedTagsFromContent(document2, url = "", limit = 10) {
+        extractSuggestedTagsFromContent(document2, url = "", limit = 30) {
           if (!document2 || typeof document2.querySelectorAll !== "function") {
-            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided");
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided");
             return [];
           }
           try {
-            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracting suggested tags from multiple sources");
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracting suggested tags from multiple sources");
             const allTexts = [];
             if (document2.title) {
               allTexts.push(document2.title);
-              debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from title:", document2.title.substring(0, 50));
+              debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from title:", document2.title.substring(0, 50));
             }
             if (url) {
               try {
@@ -4668,11 +4686,21 @@
                 });
                 if (meaningfulSegments.length > 0) {
                   allTexts.push(meaningfulSegments.join(" "));
-                  debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from URL:", meaningfulSegments.join(", "));
+                  debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from URL:", meaningfulSegments.join(", "));
                 }
               } catch (e) {
-                debugError("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to parse URL:", e);
+                debugError("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to parse URL:", e);
               }
+            }
+            const metaKeywords = document2.querySelector('meta[name="keywords"]');
+            if (metaKeywords && metaKeywords.content && metaKeywords.content.trim().length > 0) {
+              allTexts.push(metaKeywords.content.trim());
+              debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from meta keywords:", metaKeywords.content.substring(0, 50));
+            }
+            const metaDescription = document2.querySelector('meta[name="description"]');
+            if (metaDescription && metaDescription.content && metaDescription.content.trim().length > 0) {
+              allTexts.push(metaDescription.content.trim());
+              debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from meta description:", metaDescription.content.substring(0, 50));
             }
             const extractElementText = (element) => {
               if (element.title && element.title.trim().length > 0) {
@@ -4689,16 +4717,40 @@
               const headingTexts = Array.from(headings).map((heading) => extractElementText(heading)).filter((t) => t.length > 0);
               if (headingTexts.length > 0) {
                 allTexts.push(headingTexts.join(" "));
-                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from headings:", headings.length);
+                debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from headings:", headings.length);
+              }
+            }
+            const emphasisElements = document2.querySelectorAll('main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code, article strong, article b, article em, article i, article mark, article dfn, article cite, article kbd, article code, [role="main"] strong, [role="main"] b, [role="main"] em, [role="main"] i, [role="main"] mark, [role="main"] dfn, [role="main"] cite, [role="main"] kbd, [role="main"] code, .main strong, .main b, .main em, .main i, .main mark, .main dfn, .main cite, .main kbd, .main code, .content strong, .content b, .content em, .content i, .content mark, .content dfn, .content cite, .content kbd, .content code');
+            if (emphasisElements.length > 0) {
+              const emphasisTexts = Array.from(emphasisElements).slice(0, 60).map((el) => extractElementText(el)).filter((t) => t.length > 0);
+              if (emphasisTexts.length > 0) {
+                allTexts.push(emphasisTexts.join(" "));
+                debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from emphasis elements:", emphasisTexts.length);
+              }
+            }
+            const definitionTerms = document2.querySelectorAll('main dl dt, article dl dt, [role="main"] dl dt, .main dl dt, .content dl dt');
+            if (definitionTerms.length > 0) {
+              const dtTexts = Array.from(definitionTerms).slice(0, 40).map((dt) => extractElementText(dt)).filter((t) => t.length > 0);
+              if (dtTexts.length > 0) {
+                allTexts.push(dtTexts.join(" "));
+                debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from definition terms:", dtTexts.length);
+              }
+            }
+            const tableHeaders = document2.querySelectorAll('main th, main caption, article th, article caption, [role="main"] th, [role="main"] caption, .main th, .main caption, .content th, .content caption');
+            if (tableHeaders.length > 0) {
+              const thTexts = Array.from(tableHeaders).slice(0, 40).map((th) => extractElementText(th)).filter((t) => t.length > 0);
+              if (thTexts.length > 0) {
+                allTexts.push(thTexts.join(" "));
+                debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from table headers:", thTexts.length);
               }
             }
             const nav = document2.querySelector("nav") || document2.querySelector("header nav") || document2.querySelector('[role="navigation"]');
             if (nav) {
               const navLinks = nav.querySelectorAll("a");
-              const navTexts = Array.from(navLinks).slice(0, 20).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+              const navTexts = Array.from(navLinks).slice(0, 40).map((link) => extractElementText(link)).filter((t) => t.length > 0);
               if (navTexts.length > 0) {
                 allTexts.push(navTexts.join(" "));
-                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from nav:", navTexts.length);
+                debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from nav:", navTexts.length);
               }
             }
             const breadcrumb = document2.querySelector('[aria-label*="breadcrumb" i], .breadcrumb, nav[aria-label*="breadcrumb" i], [itemtype*="BreadcrumbList"]');
@@ -4707,33 +4759,33 @@
               const breadcrumbTexts = Array.from(breadcrumbLinks).map((link) => extractElementText(link)).filter((t) => t.length > 0);
               if (breadcrumbTexts.length > 0) {
                 allTexts.push(breadcrumbTexts.join(" "));
-                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from breadcrumbs:", breadcrumbTexts.length);
+                debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from breadcrumbs:", breadcrumbTexts.length);
               }
             }
             const mainImages = document2.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img');
             if (mainImages.length > 0) {
-              const imageAlts = Array.from(mainImages).slice(0, 5).map((img) => img.alt || "").filter((alt) => alt.length > 0);
+              const imageAlts = Array.from(mainImages).slice(0, 10).map((img) => img.alt || "").filter((alt) => alt.length > 0);
               if (imageAlts.length > 0) {
                 allTexts.push(imageAlts.join(" "));
-                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from images:", imageAlts.length);
+                debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from images:", imageAlts.length);
               }
             }
             const mainLinks = document2.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a');
             if (mainLinks.length > 0) {
-              const linkTexts = Array.from(mainLinks).slice(0, 10).map((link) => extractElementText(link)).filter((t) => t.length > 0);
+              const linkTexts = Array.from(mainLinks).slice(0, 20).map((link) => extractElementText(link)).filter((t) => t.length > 0);
               if (linkTexts.length > 0) {
                 allTexts.push(linkTexts.join(" "));
-                debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Extracted from links:", linkTexts.length);
+                debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted from links:", linkTexts.length);
               }
             }
             if (allTexts.length === 0) {
-              debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] No content found from any source");
+              debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] No content found from any source");
               return [];
             }
             const allText = allTexts.join(" ");
-            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Extracted text (preserving case):", allText.substring(0, 100));
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Extracted text (preserving case):", allText.substring(0, 100));
             const words = allText.split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/).filter((word) => word.length > 0);
-            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):", words.length);
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):", words.length);
             const noiseWords = /* @__PURE__ */ new Set([
               "a",
               "an",
@@ -5026,7 +5078,7 @@
                 }
               }
             });
-            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:", wordFrequency.size);
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:", wordFrequency.size);
             const tagsWithVersions = [];
             const seenLowercase = /* @__PURE__ */ new Set();
             const sortedEntries = Array.from(wordFrequency.entries()).sort((a, b) => {
@@ -5052,9 +5104,9 @@
               return a.lowerTag.localeCompare(b.lowerTag);
             });
             const sortedWords = tagsWithVersions.slice(0, limit * 2).map((item) => item.tag);
-            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):", sortedWords);
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):", sortedWords);
             const sanitizedTags = sortedWords.map((word) => this.sanitizeTag(word)).filter((tag) => tag !== null && tag.length > 0);
-            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:", sanitizedTags);
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:", sanitizedTags);
             const uniqueTags = [];
             const seenExact = /* @__PURE__ */ new Set();
             for (const tag of sanitizedTags) {
@@ -5064,10 +5116,10 @@
               }
             }
             const finalTags = uniqueTags.slice(0, limit * 2);
-            debugLog2("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):", finalTags.length, finalTags);
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):", finalTags.length, finalTags);
             return finalTags;
           } catch (error) {
-            debugError("TAG-SERVICE", "[REQ:SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:", error);
+            debugError("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:", error);
             return [];
           }
         }
@@ -6274,11 +6326,11 @@
         suggestedLabel.style.cssText = "padding: 0.2em 0.5em; margin-right: 4px;";
         suggestedContainer.appendChild(suggestedLabel);
         try {
-          const suggestedTags = this.tagService.extractSuggestedTagsFromContent(this.document, window.location.href, 10);
+          const suggestedTags = this.tagService.extractSuggestedTagsFromContent(this.document, window.location.href, 30);
           if (suggestedTags && suggestedTags.length > 0) {
             const currentTags = content.bookmark?.tags || [];
             const currentTagsLower = new Set(currentTags.map((t) => t.toLowerCase()));
-            suggestedTags.slice(0, 5).forEach((tag) => {
+            suggestedTags.slice(0, 15).forEach((tag) => {
               const tagLower = tag.toLowerCase();
               if (!currentTagsLower.has(tagLower)) {
                 const tagElement = this.document.createElement("span");
@@ -6300,10 +6352,10 @@
                         content.bookmark.tags.push(tag);
                       }
                       this.show(content);
-                      debugLog3("[REQ:SUGGESTED_TAGS_FROM_CONTENT] Tag persisted from suggested", tag);
+                      debugLog3("[REQ-SUGGESTED_TAGS_FROM_CONTENT] Tag persisted from suggested", tag);
                       this.showMessage("Tag saved successfully", "success");
                     } catch (error) {
-                      debugError2("[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to persist tag from suggested:", error);
+                      debugError2("[REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to persist tag from suggested:", error);
                       this.showMessage("Failed to save tag", "error");
                     }
                   }
@@ -6315,7 +6367,7 @@
             suggestedContainer.style.display = "none";
           }
         } catch (error) {
-          debugError2("[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:", error);
+          debugError2("[REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:", error);
           suggestedContainer.style.display = "none";
         }
         if (suggestedContainer.children.length > 1) {
@@ -7166,7 +7218,7 @@
 
       /* Text elements */
       .hoverboard-overlay .tiny {
-        font-size: 12px;
+        font-size: ${this.config.fontSizeLabels || 12}px;
         display: inline-block;
         color: var(--theme-text-secondary);
       }
@@ -7197,6 +7249,12 @@
         border-radius: 3px;
         cursor: pointer;
         display: inline-block;
+        font-size: ${this.config.fontSizeTags || 12}px;
+      }
+
+      /* Suggested tags - smaller font size */
+      .hoverboard-overlay .suggested-container .tag-element {
+        font-size: ${this.config.fontSizeSuggestedTags || 10}px;
       }
 
       .hoverboard-overlay .tag-element:hover,
@@ -7215,7 +7273,7 @@
         outline: none;
         border-radius: 3px;
         padding: 2px 4px;
-        font-size: 12px;
+        font-size: ${this.config.fontSizeInputs || 14}px;
       }
 
       .hoverboard-overlay .tag-input:focus {

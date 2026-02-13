@@ -63,7 +63,7 @@ class OverlayManager {
     // [IMMUTABLE-REQ-TAG-004] - Initialize message service for tag persistence
     this.messageService = new MessageClient()
 
-    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] - Initialize tag service for suggested tags extraction
+    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] - Initialize tag service for suggested tags extraction
     this.tagService = new TagService()
 
     debugLog('OverlayManager initialized', { config, transparencyMode: this.transparencyMode })
@@ -608,7 +608,7 @@ class OverlayManager {
       mainContainer.appendChild(currentTagsContainer)
       mainContainer.appendChild(recentContainer)
 
-      // [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS] - Display suggested tags section
+      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] - Display suggested tags section
       const suggestedContainer = this.document.createElement('div')
       suggestedContainer.className = 'scrollmenu suggested-container'
       suggestedContainer.style.cssText = `
@@ -626,17 +626,17 @@ class OverlayManager {
       suggestedContainer.appendChild(suggestedLabel)
 
       try {
-        // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags from multiple page sources
-        const suggestedTags = this.tagService.extractSuggestedTagsFromContent(this.document, window.location.href, 10)
+        // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags from multiple page sources
+        const suggestedTags = this.tagService.extractSuggestedTagsFromContent(this.document, window.location.href, 30)
 
         if (suggestedTags && suggestedTags.length > 0) {
-          // [REQ:SUGGESTED_TAGS_DEDUPLICATION] [REQ:SUGGESTED_TAGS_CASE_PRESERVATION] - Prepare current tags for case-insensitive comparison
+          // [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] - Prepare current tags for case-insensitive comparison
           const currentTags = content.bookmark?.tags || []
           const currentTagsLower = new Set(currentTags.map(t => t.toLowerCase()))
 
-          // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Display suggested tags (limit to 5 for UI)
-          suggestedTags.slice(0, 5).forEach(tag => {
-            // [REQ:SUGGESTED_TAGS_DEDUPLICATION] - Filter using case-insensitive comparison
+          // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Display suggested tags (limit to 15 for UI)
+          suggestedTags.slice(0, 15).forEach(tag => {
+            // [REQ-SUGGESTED_TAGS_DEDUPLICATION] - Filter using case-insensitive comparison
             const tagLower = tag.toLowerCase()
             if (!currentTagsLower.has(tagLower)) {
               const tagElement = this.document.createElement('span')
@@ -645,7 +645,7 @@ class OverlayManager {
               tagElement.onclick = async () => {
                 if (content.bookmark) {
                   try {
-                    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Send saveTag message for persistence
+                    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Send saveTag message for persistence
                     await this.messageService.sendMessage({
                       type: 'saveTag',
                       data: {
@@ -655,18 +655,18 @@ class OverlayManager {
                       }
                     })
 
-                    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Update local content immediately for display
+                    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Update local content immediately for display
                     if (!content.bookmark.tags) content.bookmark.tags = []
                     if (!content.bookmark.tags.includes(tag)) {
                       content.bookmark.tags.push(tag)
                     }
 
-                    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Refresh overlay with updated local content
+                    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Refresh overlay with updated local content
                     this.show(content)
-                    debugLog('[REQ:SUGGESTED_TAGS_FROM_CONTENT] Tag persisted from suggested', tag)
+                    debugLog('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Tag persisted from suggested', tag)
                     this.showMessage('Tag saved successfully', 'success')
                   } catch (error) {
-                    debugError('[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to persist tag from suggested:', error)
+                    debugError('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to persist tag from suggested:', error)
                     this.showMessage('Failed to save tag', 'error')
                   }
                 }
@@ -675,11 +675,11 @@ class OverlayManager {
             }
           })
         } else {
-          // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Hide suggested container when no suggestions
+          // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Hide suggested container when no suggestions
           suggestedContainer.style.display = 'none'
         }
       } catch (error) {
-        debugError('[REQ:SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:', error)
+        debugError('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:', error)
         suggestedContainer.style.display = 'none'
       }
 
@@ -1714,7 +1714,7 @@ class OverlayManager {
 
       /* Text elements */
       .hoverboard-overlay .tiny {
-        font-size: 12px;
+        font-size: ${this.config.fontSizeLabels || 12}px;
         display: inline-block;
         color: var(--theme-text-secondary);
       }
@@ -1745,6 +1745,12 @@ class OverlayManager {
         border-radius: 3px;
         cursor: pointer;
         display: inline-block;
+        font-size: ${this.config.fontSizeTags || 12}px;
+      }
+
+      /* Suggested tags - smaller font size */
+      .hoverboard-overlay .suggested-container .tag-element {
+        font-size: ${this.config.fontSizeSuggestedTags || 10}px;
       }
 
       .hoverboard-overlay .tag-element:hover,
@@ -1763,7 +1769,7 @@ class OverlayManager {
         outline: none;
         border-radius: 3px;
         padding: 2px 4px;
-        font-size: 12px;
+        font-size: ${this.config.fontSizeInputs || 14}px;
       }
 
       .hoverboard-overlay .tag-input:focus {
