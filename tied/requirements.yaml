@@ -1,0 +1,1377 @@
+# Requirements Index (YAML Database)
+#
+# This YAML file serves as the central index/registry for all requirements in the project.
+# Each top-level key is a semantic token (e.g., REQ-TIED_SETUP).
+#
+# To append a new requirement:
+# 1. Copy the template block at the bottom of this file (REQ-IDENTIFIER)
+# 2. Paste it at the end with a blank line before it
+# 3. Replace REQ-IDENTIFIER with your new token
+# 4. Fill in all fields
+# 5. Update the detail_file path to match your new .md file in requirements/ directory
+#
+# Field descriptions:
+#   name: Short descriptive name of the requirement
+#   category: Functional | Non-Functional | Immutable
+#   priority: P0 (Critical) | P1 (Important) | P2 (Nice-to-have) | P3 (Future)
+#   status: "Implemented" | "Planned" | "Template"
+#   rationale: Structured explanation with why, problems_solved, benefits
+#   satisfaction_criteria: List of criterion items with optional metrics
+#   validation_criteria: List of validation method items with coverage details
+#   traceability: Structured links to architecture, implementation, tests, code_annotations
+#   related_requirements: Lists of depends_on, related_to, supersedes (YAML lists or [])
+#   detail_file: Path to the detailed .md file in requirements/ directory
+#   metadata: Structured metadata with created, last_updated, last_validated info
+
+---
+
+REQ-TIED_SETUP:
+  name: TIED Methodology Setup
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "To ensure traceability of intent from requirements to code and to maintain a consistent development process"
+    problems_solved:
+      - "Loss of intent during development lifecycle"
+      - "Difficulty tracking requirements through architecture to implementation"
+      - "Inconsistent documentation practices across projects"
+    benefits:
+      - "Complete traceability from requirements to code"
+      - "Consistent development methodology"
+      - "AI-friendly documentation structure"
+  satisfaction_criteria:
+    - criterion: "tied/ directory exists with proper structure"
+    - criterion: "All required documentation files exist and are populated from templates"
+      metric: "requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml, semantic-tokens.md, processes.md all present"
+    - criterion: "Base files properly configured"
+      metric: ".cursorrules contains TIED rules, AGENTS.md contains canonical AI agent instructions"
+    - criterion: "Detail directories exist"
+      metric: "requirements/, architecture-decisions/, implementation-decisions/ directories present"
+  validation_criteria:
+    - method: "Manual verification"
+      coverage: "File existence checks for all required files and directories"
+    - method: "AI agent acknowledgment"
+      coverage: "Agent responds with 'Observing AI principles!' confirming rules are loaded"
+    - method: "Structure validation"
+      coverage: "All index files have corresponding detail directories with proper naming"
+  traceability:
+    architecture:
+      - ARCH-TIED_STRUCTURE
+    implementation:
+      - IMPL-TIED_FILES
+    tests:
+      - Manual verification checklists
+    code_annotations:
+      - IMPL-TIED_FILES
+      - ARCH-TIED_STRUCTURE
+      - REQ-TIED_SETUP
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-TIED_SETUP.md
+  metadata:
+    created:
+      date: 2025-11-08
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-06
+      author: "AI Agent"
+      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+    last_validated:
+      date: 2026-02-06
+      validator: "AI Agent"
+      result: "pass"
+
+REQ-MODULE_VALIDATION:
+  name: Independent Module Validation Before Integration
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "To eliminate bugs related to code complexity by ensuring each module works correctly in isolation before combining with other modules"
+    problems_solved:
+      - "Integration complexity causing difficult-to-debug issues"
+      - "Bugs discovered too late in the development cycle"
+      - "Module contracts not properly validated before integration"
+    benefits:
+      - "Bugs caught early before integration"
+      - "Reduced integration complexity"
+      - "Clear module boundaries and contracts"
+      - "Easier debugging by isolating issues to specific modules"
+  satisfaction_criteria:
+    - criterion: "All logical modules identified and documented with clear boundaries before development"
+    - criterion: "Module interfaces and contracts defined and documented"
+    - criterion: "Module validation criteria specified for each module"
+      metric: "What 'validated' means is explicitly defined"
+    - criterion: "Each module developed independently"
+    - criterion: "Each module passes independent validation before integration"
+      metric: "Unit tests with mocks, integration tests with test doubles, contract validation, edge case testing, error handling validation all passing"
+    - criterion: "Module validation results documented"
+    - criterion: "Integration tasks separate from module development tasks"
+    - criterion: "Integration only occurs after module validation passes"
+  validation_criteria:
+    - method: "Manual verification"
+      coverage: "Modules identified and documented before development starts"
+    - method: "Automated testing"
+      coverage: "Module validation tests exist and pass before integration"
+    - method: "Code review"
+      coverage: "Integration code references validated modules"
+    - method: "Documentation review"
+      coverage: "Module validation results are documented"
+    - method: "Integration testing"
+      coverage: "Integration tests validate combined behavior of validated modules"
+  traceability:
+    architecture:
+      - ARCH-MODULE_VALIDATION
+    implementation:
+      - IMPL-MODULE_VALIDATION
+    tests:
+      - testModuleName_IndependentValidation_REQ_MODULE_VALIDATION
+    code_annotations:
+      - REQ-MODULE_VALIDATION
+      - IMPL-MODULE_VALIDATION
+  related_requirements:
+    depends_on:
+      - REQ-TIED_SETUP
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-MODULE_VALIDATION.md
+  metadata:
+    created:
+      date: 2025-01-27
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-06
+      author: "AI Agent"
+      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+    last_validated:
+      date: 2026-02-06
+      validator: "AI Agent"
+      result: "pass"
+
+REQ-EXTENSION_IDENTITY:
+  name: Extension Identity Preservation
+  category: Immutable
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Core extension identity is fundamental to user recognition and brand consistency"
+    problems_solved:
+      - "Risk of breaking user expectations through rebranding"
+      - "Loss of established brand identity"
+    benefits:
+      - "Consistent user experience across versions"
+      - "Maintained brand recognition"
+  satisfaction_criteria:
+    - criterion: "Extension name remains Hoverboard in all contexts"
+    - criterion: "Purpose remains Pinboard.in bookmarking interface enhancement"
+    - criterion: "Target platform remains Chrome/Chromium-based browsers"
+    - criterion: "Architecture remains browser extension with content script injection"
+  validation_criteria:
+    - method: "Manifest validation"
+      coverage: "Manifest.json name field validation"
+    - method: "Documentation consistency checks"
+      coverage: "All documentation and user-facing interfaces"
+    - method: "Branding audit"
+      coverage: "All user-facing interfaces"
+  traceability:
+    architecture:
+      - ARCH-EXT_IDENTITY
+    implementation:
+      - IMPL-EXT_IDENTITY
+    tests:
+      - "Manifest validation tests"
+      - "Branding consistency tests"
+    code_annotations:
+      - REQ-EXTENSION_IDENTITY
+      - ARCH-EXT_IDENTITY
+      - IMPL-EXT_IDENTITY
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-EXTENSION_IDENTITY.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-CORE_UX_PRESERVATION:
+  name: Core User Experience Preservation
+  category: Immutable
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "These features define the essential user experience"
+    problems_solved:
+      - "Risk of breaking user workflows"
+      - "Loss of core functionality"
+    benefits:
+      - "Preserved user workflows"
+      - "Maintained feature expectations"
+  satisfaction_criteria:
+    - criterion: "Hover interface activates on webpage hover"
+    - criterion: "Overlay is semi-transparent and non-intrusive"
+    - criterion: "Quick bookmark actions available without page navigation"
+    - criterion: "Recent tags system functional"
+    - criterion: "Private bookmark toggle available"
+  validation_criteria:
+    - method: "User acceptance testing"
+      coverage: "All core UX workflows"
+    - method: "Workflow validation"
+      coverage: "Critical user paths"
+    - method: "Feature parity testing"
+      coverage: "All essential features"
+  traceability:
+    architecture:
+      - ARCH-UX_CORE
+    implementation:
+      - IMPL-UX_CORE
+    tests:
+      - "UX workflow tests"
+    code_annotations:
+      - REQ-CORE_UX_PRESERVATION
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-OVERLAY_SYSTEM
+      - REQ-RECENT_TAGS_SYSTEM
+    supersedes: []
+  detail_file: requirements/REQ-CORE_UX_PRESERVATION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-PINBOARD_COMPATIBILITY:
+  name: Pinboard API Compatibility
+  category: Immutable
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Pinboard API is the core data source"
+    problems_solved:
+      - "Risk of non-functional extension"
+      - "API breaking changes"
+    benefits:
+      - "Maintained data access"
+      - "Reliable bookmarking"
+  satisfaction_criteria:
+    - criterion: "All current API endpoints functional"
+    - criterion: "Token-based authentication working"
+    - criterion: "Rate limiting respected"
+    - criterion: "Error handling for API failures"
+  validation_criteria:
+    - method: "API integration tests"
+      coverage: "All endpoints"
+    - method: "Rate limit compliance testing"
+      coverage: "API request throttling"
+    - method: "Authentication flow validation"
+      coverage: "Token-based auth"
+  traceability:
+    architecture:
+      - ARCH-PINBOARD_API
+    implementation:
+      - IMPL-PINBOARD_API
+    tests:
+      - "API integration tests"
+    code_annotations:
+      - REQ-PINBOARD_COMPATIBILITY
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-PINBOARD_COMPATIBILITY.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-MANIFEST_V3_MIGRATION:
+  name: Manifest V3 Migration
+  category: Immutable
+  priority: P0
+  status: "Planned"
+  rationale:
+    why: "Manifest V2 is deprecated and V3 is required for Chrome Web Store"
+    problems_solved:
+      - "Extension will be delisted from Chrome Web Store"
+      - "Loss of future browser compatibility"
+    benefits:
+      - "Continued Chrome Web Store support"
+      - "Modern extension architecture"
+  satisfaction_criteria:
+    - criterion: "Service worker replaces background scripts"
+    - criterion: "All V2 functionality preserved in V3"
+    - criterion: "Content script injection patterns maintained"
+    - criterion: "Permissions model updated to V3"
+  validation_criteria:
+    - method: "Manifest validation"
+      coverage: "V3 schema compliance"
+    - method: "Feature parity testing"
+      coverage: "All existing features"
+    - method: "Performance benchmarking"
+      coverage: "Service worker performance"
+  traceability:
+    architecture:
+      - ARCH-MV3_MIGRATION
+    implementation:
+      - IMPL-MV3_MIGRATION
+    tests: []
+    code_annotations:
+      - REQ-MANIFEST_V3_MIGRATION
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-MANIFEST_V3_MIGRATION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-CHROME_STORAGE_USAGE:
+  name: Chrome Storage API Usage
+  category: Immutable
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Storage API is required for persistence and privacy is a core value"
+    problems_solved:
+      - "Data loss across sessions"
+      - "Privacy violations from external tracking"
+    benefits:
+      - "Persistent user settings"
+      - "Privacy-preserving architecture"
+  satisfaction_criteria:
+    - criterion: "User settings persist across sessions"
+    - criterion: "Configuration migration works"
+    - criterion: "No external data collection"
+    - criterion: "Privacy policy compliance"
+  validation_criteria:
+    - method: "Storage API tests"
+      coverage: "Read/write operations"
+    - method: "Migration testing"
+      coverage: "Configuration portability"
+    - method: "Privacy audit"
+      coverage: "No external data transmission"
+  traceability:
+    architecture:
+      - ARCH-STORAGE
+    implementation:
+      - IMPL-STORAGE
+    tests:
+      - "Storage API tests"
+    code_annotations:
+      - REQ-CHROME_STORAGE_USAGE
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-CONFIG_PORTABILITY
+    supersedes: []
+  detail_file: requirements/REQ-CHROME_STORAGE_USAGE.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-RECENT_TAGS_SYSTEM:
+  name: Recent Tags System
+  category: Immutable
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Recent tags are core to efficient bookmarking workflow"
+    problems_solved:
+      - "Slow tag entry"
+      - "Difficult tag reuse"
+    benefits:
+      - "Fast bookmarking"
+      - "Efficient tag reuse"
+  satisfaction_criteria:
+    - criterion: "Recent tags displayed in tag input"
+    - criterion: "Tag history persisted"
+    - criterion: "Quick tag selection available"
+  validation_criteria:
+    - method: "Tag system tests"
+      coverage: "Recent tag retrieval and display"
+  traceability:
+    architecture:
+      - ARCH-TAG_SYSTEM
+    implementation:
+      - IMPL-TAG_SYSTEM
+    tests:
+      - "Recent tags tests"
+    code_annotations:
+      - REQ-RECENT_TAGS_SYSTEM
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-TAG_MANAGEMENT
+    supersedes: []
+  detail_file: requirements/REQ-RECENT_TAGS_SYSTEM.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-SMART_BOOKMARKING:
+  name: Smart Bookmarking
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Primary function of the extension"
+    problems_solved:
+      - "Slow bookmark creation"
+      - "Context switching required"
+    benefits:
+      - "Fast in-page bookmarking"
+      - "Maintained browsing flow"
+  satisfaction_criteria:
+    - criterion: "Bookmark creation without leaving page"
+    - criterion: "Auto-populated fields from page metadata"
+    - criterion: "Tag suggestions available"
+  validation_criteria:
+    - method: "Bookmarking workflow tests"
+      coverage: "All bookmark operations"
+  traceability:
+    architecture:
+      - ARCH-UX_CORE
+    implementation:
+      - IMPL-BOOKMARKING
+    tests:
+      - "Bookmark creation tests"
+    code_annotations:
+      - REQ-SMART_BOOKMARKING
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-TAG_MANAGEMENT
+      - REQ-OVERLAY_SYSTEM
+    supersedes: []
+  detail_file: requirements/REQ-SMART_BOOKMARKING.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-TAG_MANAGEMENT:
+  name: Tag Management
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Tags are essential for bookmark organization"
+    problems_solved:
+      - "Difficult bookmark organization"
+      - "Inconsistent tagging"
+    benefits:
+      - "Organized bookmarks"
+      - "Efficient retrieval"
+  satisfaction_criteria:
+    - criterion: "Tag input with suggestions"
+    - criterion: "Tag editing capabilities"
+    - criterion: "Tag sanitization"
+  validation_criteria:
+    - method: "Tag management tests"
+      coverage: "All tag operations"
+  traceability:
+    architecture:
+      - ARCH-TAG_SYSTEM
+    implementation:
+      - IMPL-TAG_SYSTEM
+    tests:
+      - "Tag management tests"
+    code_annotations:
+      - REQ-TAG_MANAGEMENT
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-RECENT_TAGS_SYSTEM
+      - REQ-TAG_INPUT_SANITIZATION
+    supersedes: []
+  detail_file: requirements/REQ-TAG_MANAGEMENT.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-OVERLAY_SYSTEM:
+  name: Overlay System
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Non-intrusive interface is core to UX"
+    problems_solved:
+      - "Intrusive bookmark dialogs"
+      - "Context switching"
+    benefits:
+      - "Seamless bookmarking experience"
+      - "No page disruption"
+  satisfaction_criteria:
+    - criterion: "Overlay displays on hover/activation"
+    - criterion: "Semi-transparent design"
+    - criterion: "Non-intrusive positioning"
+  validation_criteria:
+    - method: "Overlay display tests"
+      coverage: "All activation scenarios"
+  traceability:
+    architecture:
+      - ARCH-OVERLAY
+    implementation:
+      - IMPL-OVERLAY
+    tests:
+      - "Overlay tests"
+    code_annotations:
+      - REQ-OVERLAY_SYSTEM
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-OVERLAY_AUTO_SHOW_CONTROL
+      - REQ-OVERLAY_REFRESH_ACTION
+      - REQ-OVERLAY_CONTROL_LAYOUT
+    supersedes: []
+  detail_file: requirements/REQ-OVERLAY_SYSTEM.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-DARK_THEME:
+  name: Dark Theme Support
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "User preference for dark mode"
+    problems_solved:
+      - "Eye strain in dark environments"
+      - "Inconsistent UI appearance"
+    benefits:
+      - "Comfortable viewing"
+      - "Consistent theme support"
+  satisfaction_criteria:
+    - criterion: "Dark theme available"
+    - criterion: "Theme switches without restart"
+  validation_criteria:
+    - method: "Theme tests"
+      coverage: "Dark theme rendering"
+  traceability:
+    architecture:
+      - ARCH-THEME
+    implementation:
+      - IMPL-THEME
+    tests:
+      - "Theme tests"
+    code_annotations:
+      - REQ-DARK_THEME
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-DARK_THEME.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-BADGE_INDICATORS:
+  name: Badge Indicators
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Quick visual feedback for bookmark status"
+    problems_solved:
+      - "Unclear bookmark state"
+      - "No at-a-glance status"
+    benefits:
+      - "Instant status visibility"
+      - "Better user awareness"
+  satisfaction_criteria:
+    - criterion: "Badge shows bookmark status"
+    - criterion: "Tag count displayed"
+    - criterion: "State indicators clear"
+  validation_criteria:
+    - method: "Badge update tests"
+      coverage: "State indicator logic"
+  traceability:
+    architecture:
+      - ARCH-BADGE
+    implementation:
+      - IMPL-BADGE
+    tests:
+      - "Badge tests"
+    code_annotations:
+      - REQ-BADGE_INDICATORS
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-BADGE_INDICATORS.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-SITE_MANAGEMENT:
+  name: Site Management
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "User control over extension behavior per site"
+    problems_solved:
+      - "Unwanted extension activation on certain sites"
+      - "No per-site control"
+    benefits:
+      - "Granular site control"
+      - "Improved user experience"
+  satisfaction_criteria:
+    - criterion: "Sites can be disabled"
+    - criterion: "Disabled sites list persists"
+    - criterion: "Extension respects disabled sites"
+  validation_criteria:
+    - method: "Site blocking tests"
+      coverage: "Disable/enable functionality"
+    - method: "Persistence tests"
+      coverage: "List storage"
+  traceability:
+    architecture:
+      - ARCH-SITE_MGMT
+    implementation:
+      - IMPL-SITE_MGMT
+    tests:
+      - "Site management tests"
+    code_annotations:
+      - REQ-SITE_MANAGEMENT
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-SITE_MANAGEMENT.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-SEARCH_FUNCTIONALITY:
+  name: Search Functionality
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "User need to find existing bookmarks"
+    problems_solved:
+      - "Difficult bookmark retrieval"
+      - "No search capability"
+    benefits:
+      - "Fast bookmark lookup"
+      - "Better organization"
+  satisfaction_criteria:
+    - criterion: "Search works"
+    - criterion: "Title search functional"
+    - criterion: "Results displayed"
+  validation_criteria:
+    - method: "Search algorithm tests"
+      coverage: "Query processing"
+    - method: "UI interaction tests"
+      coverage: "Results display"
+  traceability:
+    architecture:
+      - ARCH-SEARCH
+    implementation:
+      - IMPL-SEARCH
+    tests:
+      - "Search tests"
+    code_annotations:
+      - REQ-SEARCH_FUNCTIONALITY
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-SEARCH_FUNCTIONALITY.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-PRIVACY_CONTROLS:
+  name: Privacy Controls
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "User privacy and organization needs"
+    problems_solved:
+      - "No private bookmark support"
+      - "No to-read marking"
+    benefits:
+      - "Privacy preservation"
+      - "Better organization"
+  satisfaction_criteria:
+    - criterion: "Private toggle works"
+    - criterion: "To-read toggle works"
+    - criterion: "State persists"
+  validation_criteria:
+    - method: "Toggle functionality tests"
+      coverage: "Private and to-read states"
+    - method: "State persistence tests"
+      coverage: "Storage and retrieval"
+  traceability:
+    architecture:
+      - ARCH-PRIVACY
+    implementation:
+      - IMPL-PRIVACY
+    tests:
+      - "Privacy control tests"
+    code_annotations:
+      - REQ-PRIVACY_CONTROLS
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-PRIVACY_CONTROLS.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-OVERLAY_AUTO_SHOW_CONTROL:
+  name: Hover Auto-Show Controls
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Configurable automation for power users while keeping default non-intrusive"
+    problems_solved:
+      - "Manual overlay activation required"
+      - "No auto-show option"
+    benefits:
+      - "Immediate access for frequent sites"
+      - "User-controlled automation"
+  satisfaction_criteria:
+    - criterion: "showHoverOnPageLoad checkbox in popup and options"
+    - criterion: "Configuration persists via ConfigManager"
+    - criterion: "Content scripts respect inhibit list and conditions"
+    - criterion: "Updates broadcast to active tabs"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Checkbox state loading, saving, broadcasting"
+    - method: "Integration tests"
+      coverage: "Cross-browser consistency"
+    - method: "Manual verification"
+      coverage: "Inhibited URLs and tag-conditional rules"
+  traceability:
+    architecture:
+      - ARCH-OVERLAY
+    implementation:
+      - IMPL-OVERLAY
+    tests:
+      - "Popup checkbox tests"
+      - "Safari cross-browser integration tests"
+    code_annotations:
+      - REQ-OVERLAY_AUTO_SHOW_CONTROL
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-OVERLAY_SYSTEM
+    supersedes: []
+  detail_file: requirements/REQ-OVERLAY_AUTO_SHOW_CONTROL.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-OVERLAY_REFRESH_ACTION:
+  name: Overlay Refresh Control
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Users edit bookmarks from multiple contexts; refresh prevents stale data"
+    problems_solved:
+      - "Stale bookmark data in overlay"
+      - "No way to refresh without closing"
+    benefits:
+      - "Current data without closing"
+      - "Better multi-context editing"
+  satisfaction_criteria:
+    - criterion: "Overlay renders refresh button with tooltip, ARIA label, keyboard handlers"
+    - criterion: "Clicking/keybinding requests updated data and re-renders"
+    - criterion: "Errors surface non-destructive messaging"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Rendering, handler logic, error handling, accessibility"
+    - method: "Manual tests"
+      coverage: "Refresh after remote edits, layout consistency"
+  traceability:
+    architecture:
+      - ARCH-OVERLAY
+    implementation:
+      - IMPL-OVERLAY
+    tests:
+      - "Overlay refresh button tests"
+      - "Overlay refresh accessibility tests"
+    code_annotations:
+      - REQ-OVERLAY_REFRESH_ACTION
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-OVERLAY_SYSTEM
+      - REQ-OVERLAY_CONTROL_LAYOUT
+    supersedes: []
+  detail_file: requirements/REQ-OVERLAY_REFRESH_ACTION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-POPUP_PERSISTENT_SESSION:
+  name: Popup Session Persistence
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Multi-action workflows without reopening UI"
+    problems_solved:
+      - "Popup closes after each action"
+      - "Tedious repeated opening"
+    benefits:
+      - "Chained actions possible"
+      - "Better workflow efficiency"
+  satisfaction_criteria:
+    - criterion: "handleShowHoverboard never closes popup, updates button state"
+    - criterion: "Privacy/read-later/delete/reload/options handlers keep popup open"
+    - criterion: "UI state updates after successful messaging"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Handler paths never call closePopup, update overlay state, handle errors"
+    - method: "Live data tests"
+      coverage: "Session remains active while updating status"
+  traceability:
+    architecture:
+      - ARCH-UX_CORE
+    implementation:
+      - IMPL-UX_CORE
+    tests:
+      - "Popup close behavior tests"
+      - "Popup live data tests"
+    code_annotations:
+      - REQ-POPUP_PERSISTENT_SESSION
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-CORE_UX_PRESERVATION
+    supersedes: []
+  detail_file: requirements/REQ-POPUP_PERSISTENT_SESSION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-BOOKMARK_STATE_SYNCHRONIZATION:
+  name: Bookmark State Synchronization
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Prevent desynchronized states across UI surfaces"
+    problems_solved:
+      - "Conflicting bookmark states"
+      - "Confusing UI feedback"
+    benefits:
+      - "Consistent state everywhere"
+      - "Reliable synchronization"
+  satisfaction_criteria:
+    - criterion: "Overlay toggles persist via saveBookmark, broadcast BOOKMARK_UPDATED"
+    - criterion: "Popup listens for broadcast, re-fetches data, updates UI"
+    - criterion: "Badge logic compares states, detects mismatches"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Toggle synchronization, broadcast handling"
+    - method: "Live data tests"
+      coverage: "Cross-surface updates"
+  traceability:
+    architecture:
+      - ARCH-MESSAGE_HANDLING
+    implementation:
+      - IMPL-MESSAGE_HANDLING
+    tests:
+      - "Toggle synchronization tests"
+      - "Popup live data tests"
+    code_annotations:
+      - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-POPUP_PERSISTENT_SESSION
+    supersedes: []
+  detail_file: requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-OVERLAY_CONTROL_LAYOUT:
+  name: Overlay Control Layout
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Predictable placement and accessibility for non-intrusive controls"
+    problems_solved:
+      - "Unclear control locations"
+      - "Accessibility issues"
+    benefits:
+      - "Consistent layout"
+      - "Full accessibility"
+  satisfaction_criteria:
+    - criterion: "Close button at top: 8px; left: 8px; refresh at top: 8px; left: 40px"
+    - criterion: "32px spacing, 24px minimum touch targets"
+    - criterion: "Theme-aware styling with CSS variables"
+    - criterion: "Full accessibility metadata (title, aria-label, role, tabindex, keyboard handlers)"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Positioning, spacing, styling, accessibility attributes"
+    - method: "Refresh button tests"
+      coverage: "Layout consistency with refresh control"
+  traceability:
+    architecture:
+      - ARCH-OVERLAY
+    implementation:
+      - IMPL-OVERLAY
+    tests:
+      - "Overlay close button positioning tests"
+      - "Overlay refresh button tests"
+    code_annotations:
+      - REQ-OVERLAY_CONTROL_LAYOUT
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-OVERLAY_SYSTEM
+      - REQ-OVERLAY_REFRESH_ACTION
+    supersedes: []
+  detail_file: requirements/REQ-OVERLAY_CONTROL_LAYOUT.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-CONFIG_PORTABILITY:
+  name: Configuration Import/Export
+  category: Non-Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Portable configuration reduces friction for backups and multi-device sync"
+    problems_solved:
+      - "Lost configuration on device changes"
+      - "Difficult multi-device setup"
+    benefits:
+      - "Easy backup and restore"
+      - "Seamless device migration"
+  satisfaction_criteria:
+    - criterion: "exportConfig returns version, date, settings, auth token, inhibit URLs"
+    - criterion: "importConfig accepts full or partial payloads"
+    - criterion: "Operations reuse existing storage keys"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Data fidelity, partial imports, error handling"
+    - method: "Manual QA"
+      coverage: "Cross-profile migration"
+  traceability:
+    architecture:
+      - ARCH-STORAGE
+    implementation:
+      - IMPL-STORAGE
+    tests:
+      - "Config manager tests"
+    code_annotations:
+      - REQ-CONFIG_PORTABILITY
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-CHROME_STORAGE_USAGE
+    supersedes: []
+  detail_file: requirements/REQ-CONFIG_PORTABILITY.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-TAG_INPUT_SANITIZATION:
+  name: Tag Input Sanitization
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Prevent XSS, ensure data integrity, avoid sync pollution"
+    problems_solved:
+      - "XSS vulnerabilities"
+      - "Invalid tag data"
+    benefits:
+      - "Secure tag handling"
+      - "Data integrity"
+  satisfaction_criteria:
+    - criterion: "sanitizeTag eliminates HTML, encoded markup, special characters"
+    - criterion: "Returns null for invalid inputs"
+    - criterion: "Enforces 50-character max length"
+    - criterion: "Allows safe characters only"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "HTML stripping, special character removal, length enforcement"
+    - method: "Overlay interaction tests"
+      coverage: "Sanitized tags propagate without breaking layout"
+  traceability:
+    architecture:
+      - ARCH-TAG_SYSTEM
+    implementation:
+      - IMPL-TAG_SYSTEM
+    tests:
+      - "Tag sanitization tests"
+      - "Tag recent behavior tests"
+    code_annotations:
+      - REQ-TAG_INPUT_SANITIZATION
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-TAG_MANAGEMENT
+    supersedes: []
+  detail_file: requirements/REQ-TAG_INPUT_SANITIZATION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-SAFARI_ADAPTATION:
+  name: Safari Adaptive Behavior
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Safari requires explicit adaptations for stability and performance"
+    problems_solved:
+      - "Sluggish overlay on Safari"
+      - "Memory spikes crash tabs"
+      - "Messaging failures"
+    benefits:
+      - "Stable Safari experience"
+      - "Maintained cross-browser identity"
+  satisfaction_criteria:
+    - criterion: "Safari detection injects configuration (timeouts, retries, opacity)"
+    - criterion: "Content scripts apply Safari DOM/animation optimizations"
+    - criterion: "Safari error handler tracks recovery, enables degraded mode"
+    - criterion: "Messaging enriched with Safari metadata, retries"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Config loading, optimizations, monitoring, error handling, messaging"
+    - method: "Safari-specific test suites"
+      coverage: "Platform detection, recovery, degraded mode, retries"
+  traceability:
+    architecture:
+      - ARCH-CROSS_BROWSER
+    implementation:
+      - IMPL-CROSS_BROWSER
+    tests:
+      - "Safari content adaptations tests"
+      - "Safari error handling tests"
+      - "Safari messaging tests"
+      - "Safari performance tests"
+    code_annotations:
+      - REQ-SAFARI_ADAPTATION
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-EXTENSION_IDENTITY
+    supersedes: []
+  detail_file: requirements/REQ-SAFARI_ADAPTATION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-SUGGESTED_TAGS_FROM_CONTENT:
+  name: Suggested Tags from Page Content
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Intelligent tag suggestions speed up bookmarking workflow"
+    problems_solved:
+      - "Manual tag entry required"
+      - "No context-aware suggestions"
+    benefits:
+      - "Faster tagging"
+      - "Context-aware suggestions"
+  satisfaction_criteria:
+    - criterion: "Suggested tags section below recent tags"
+    - criterion: "Extracts from title, URL, headings, nav, breadcrumbs, images, links"
+    - criterion: "Prioritizes title attribute over textContent"
+    - criterion: "Filters noise, counts frequency, sorts by frequency"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Extraction algorithm, frequency sorting, noise filtering"
+  traceability:
+    architecture:
+      - ARCH-SUGGESTED_TAGS
+    implementation:
+      - IMPL-SUGGESTED_TAGS
+    tests:
+      - "Suggested tags tests"
+    code_annotations:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+      - REQ-TAG_MANAGEMENT
+    supersedes: []
+  detail_file: requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-SUGGESTED_TAGS_DEDUPLICATION:
+  name: Suggested Tags Deduplication
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Prevent duplicate suggestions already in current tags"
+    problems_solved:
+      - "Redundant tag suggestions"
+      - "Cluttered suggestions list"
+    benefits:
+      - "Clean suggestions"
+      - "Relevant-only tags"
+  satisfaction_criteria:
+    - criterion: "Case-insensitive comparison with current tags"
+    - criterion: "Tags present in current list excluded from suggestions"
+    - criterion: "Works in both popup and overlay"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Case-insensitive filtering logic"
+  traceability:
+    architecture:
+      - ARCH-SUGGESTED_TAGS
+    implementation:
+      - IMPL-SUGGESTED_TAGS
+    tests:
+      - "Suggested tags deduplication tests"
+    code_annotations:
+      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+    supersedes: []
+  detail_file: requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
+  name: Suggested Tags Case Preservation
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Give users flexibility to choose capitalization style"
+    problems_solved:
+      - "Lost original case from content"
+      - "No capitalization choice"
+    benefits:
+      - "Preserved original case"
+      - "User choice in capitalization"
+  satisfaction_criteria:
+    - criterion: "Preserves original case from content"
+    - criterion: "For words with uppercase, includes both original and lowercase versions as separate tags"
+    - criterion: "All-lowercase words appear once"
+    - criterion: "Both versions displayed to users"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Case preservation logic, dual-version generation"
+  traceability:
+    architecture:
+      - ARCH-SUGGESTED_TAGS
+    implementation:
+      - IMPL-SUGGESTED_TAGS
+    tests:
+      - "Suggested tags case preservation tests"
+    code_annotations:
+      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+    supersedes: []
+  detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+# ---
+# Template Record - Copy this block to create new requirements
+# ---
+#
+# REQ-IDENTIFIER:
+#   name: Requirement Name
+#   category: Functional
+#   priority: P1
+#   status: "Planned"
+#   rationale:
+#     why: "Primary reason for this requirement"
+#     problems_solved:
+#       - "Problem 1"
+#       - "Problem 2"
+#     benefits:
+#       - "Benefit 1"
+#       - "Benefit 2"
+#   satisfaction_criteria:
+#     - criterion: "Criterion description 1"
+#       metric: "Measurable target (optional)"
+#     - criterion: "Criterion description 2"
+#   validation_criteria:
+#     - method: "Unit tests"
+#       coverage: "All core functions"
+#     - method: "Integration tests"
+#       coverage: "End-to-end flows"
+#     - method: "Manual testing"
+#       coverage: "QA checklist"
+#   traceability:
+#     architecture:
+#       - ARCH-IDENTIFIER
+#     implementation:
+#       - IMPL-IDENTIFIER
+#     tests:
+#       - testFeatureName_REQ_IDENTIFIER
+#     code_annotations:
+#       - REQ-IDENTIFIER
+#   related_requirements:
+#     depends_on: []
+#     related_to: []
+#     supersedes: []
+#   detail_file: requirements/REQ-IDENTIFIER.md
+#   metadata:
+#     created:
+#       date: YYYY-MM-DD
+#       author: "agent/contributor"
+#     last_updated:
+#       date: YYYY-MM-DD
+#       author: "agent/contributor"
+#       reason: "Initial creation"
+#     last_validated:
+#       date: YYYY-MM-DD
+#       validator: "agent/contributor"
+#       result: "pass"

@@ -1,0 +1,1094 @@
+# Implementation Decisions Index (YAML Database)
+#
+# This YAML file serves as the central index/registry for all implementation decisions in the project.
+# Each top-level key is a semantic token (e.g., IMPL-MODULE_VALIDATION).
+#
+# To append a new implementation decision:
+# 1. Copy the template block at the bottom of this file (IMPL-IDENTIFIER)
+# 2. Paste it at the end with a blank line before it
+# 3. Replace IMPL-IDENTIFIER with your new token
+# 4. Fill in all fields
+# 5. Update the detail_file path to match your new .md file in implementation-decisions/ directory
+#
+# Field descriptions:
+#   name: Short descriptive name of the decision
+#   status: Active | Deprecated | Template | Superseded
+#   cross_references: List of ARCH-* and REQ-* tokens this decision implements
+#   rationale: Structured explanation with why, problems_solved, benefits
+#   implementation_approach: Structured approach with summary and details
+#   code_locations: Structured code locations with files and functions
+#   traceability: Structured links to architecture, requirements, tests, code_annotations
+#   related_decisions: Lists of depends_on, supersedes, see_also (YAML lists or [])
+#   detail_file: Path to the detailed .md file in implementation-decisions/ directory
+#   metadata: Structured metadata with created, last_updated, last_validated info
+
+---
+
+IMPL-TIED_FILES:
+  name: TIED File Creation
+  status: Active
+  cross_references:
+    - ARCH-TIED_STRUCTURE
+    - REQ-TIED_SETUP
+  rationale:
+    why: "Implements ARCH-TIED_STRUCTURE and realizes REQ-TIED_SETUP by creating the foundational TIED directory structure and files"
+    problems_solved:
+      - "Manual setup of TIED structure is error-prone"
+      - "Inconsistent project structure across implementations"
+      - "Missing required TIED files and directories"
+    benefits:
+      - "Automated, consistent TIED setup"
+      - "All required files and directories created correctly"
+      - "Easy project bootstrapping with single command"
+  implementation_approach:
+    summary: "Bootstrap script that creates tied/ directory, copies template files, and sets up base files"
+    details:
+      - "Create tied/ directory at project root"
+      - "Copy YAML index files from templates (requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml)"
+      - "Copy guide files from templates (semantic-tokens.md, processes.md)"
+      - "Create detail subdirectories (requirements/, architecture-decisions/, implementation-decisions/)"
+      - "Copy base files to project root (.cursorrules, AGENTS.md, ai-principles.md)"
+  code_locations:
+    files:
+      - path: "copy_files.sh"
+        description: "Bootstrap script that sets up TIED structure"
+        lines: [1, 163]
+    functions:
+      - name: "setup_tied_structure"
+        file: "copy_files.sh"
+        description: "Creates directories and copies template files (if implemented as function)"
+  traceability:
+    architecture:
+      - ARCH-TIED_STRUCTURE
+    requirements:
+      - REQ-TIED_SETUP
+    tests:
+      - Manual verification checklists
+    code_annotations:
+      - IMPL-TIED_FILES
+      - ARCH-TIED_STRUCTURE
+      - REQ-TIED_SETUP
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - ARCH-TIED_STRUCTURE
+      - REQ-TIED_SETUP
+  detail_file: implementation-decisions/IMPL-TIED_FILES.md
+  metadata:
+    created:
+      date: 2025-12-18
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-06
+      author: "AI Agent"
+      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+    last_validated:
+      date: 2026-02-06
+      validator: "AI Agent"
+      result: "pass"
+
+IMPL-MODULE_VALIDATION:
+  name: Module Validation Implementation
+  status: Active
+  cross_references:
+    - ARCH-MODULE_VALIDATION
+    - REQ-MODULE_VALIDATION
+  rationale:
+    why: "Implements REQ-MODULE_VALIDATION requirement and ARCH-MODULE_VALIDATION strategy to ensure modules are validated independently before integration"
+    problems_solved:
+      - "Complexity-related bugs discovered too late"
+      - "Difficult to debug integration issues"
+      - "Module contracts not validated before integration"
+    benefits:
+      - "Bugs caught early in development cycle"
+      - "Easier debugging by isolating issues to specific modules"
+      - "Clear validation criteria for each module"
+      - "Reduced integration complexity"
+  implementation_approach:
+    summary: "Five-phase approach: module identification, independent development, independent validation, documentation, and integration"
+    details:
+      - "Phase 1: Identify modules and document boundaries, interfaces, contracts, dependencies, validation criteria"
+      - "Phase 2: Develop module independently with dependency injection"
+      - "Phase 3: Validate independently with unit tests (mocked dependencies), contract validation, edge cases, error handling, integration tests with test doubles"
+      - "Phase 4: Document validation results including passed tests, limitations, assumptions"
+      - "Phase 5: Integrate only after validation passes, with integration tests validating combined behavior"
+  code_locations:
+    files:
+      - path: "*_module_test.[ext]"
+        description: "Module validation test files"
+      - path: "*_validation_test.[ext]"
+        description: "Module validation test files (alternate pattern)"
+      - path: "*_integration_test.[ext]"
+        description: "Integration test files"
+    functions:
+      - name: "testModuleName_IndependentValidation_REQ_MODULE_VALIDATION"
+        file: "various test files"
+        description: "Module validation test function pattern"
+  traceability:
+    architecture:
+      - ARCH-MODULE_VALIDATION
+    requirements:
+      - REQ-MODULE_VALIDATION
+    tests:
+      - testModuleName_IndependentValidation_REQ_MODULE_VALIDATION
+    code_annotations:
+      - IMPL-MODULE_VALIDATION
+      - REQ-MODULE_VALIDATION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - ARCH-MODULE_VALIDATION
+      - REQ-MODULE_VALIDATION
+  detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.md
+  metadata:
+    created:
+      date: 2025-12-18
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-06
+      author: "AI Agent"
+      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+    last_validated:
+      date: 2026-02-06
+      validator: "AI Agent"
+      result: "pass"
+
+# ---
+# Product Implementation Decisions - Hoverboard Extension
+# Migrated from stdd/implementation-decisions.md
+# ---
+
+IMPL-PINBOARD_API:
+  name: Pinboard API Service Implementation
+  status: Active
+  cross_references:
+    - ARCH-PINBOARD_API
+    - REQ-PINBOARD_COMPATIBILITY
+  rationale:
+    why: "Concrete API integration with error handling"
+    problems_solved:
+      - "API communication complexity"
+      - "Rate limiting issues"
+    benefits:
+      - "Reliable API access"
+      - "Proper error handling"
+  implementation_approach:
+    summary: "Token-based auth with endpoint wrappers, rate limiting, retry logic"
+    details:
+      - "API endpoints: /posts/get, /posts/recent, /posts/add, /posts/delete"
+      - "Token authentication"
+      - "429 retry logic"
+      - "401 error handling"
+  code_locations:
+    files:
+      - path: "src/bg/pinboard.js"
+        description: "Pinboard API service"
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-PINBOARD_API
+    requirements:
+      - REQ-PINBOARD_COMPATIBILITY
+    tests: []
+    code_annotations:
+      - IMPL-PINBOARD_API
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-PINBOARD_API.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-MESSAGE_HANDLING:
+  name: Message Handling System Implementation
+  status: Active
+  cross_references:
+    - ARCH-MESSAGE_HANDLING
+    - REQ-SMART_BOOKMARKING
+  rationale:
+    why: "Concrete message routing and handling"
+    problems_solved:
+      - "Complex routing logic"
+      - "Message validation"
+    benefits:
+      - "Centralized communication"
+      - "Type-safe messages"
+  implementation_approach:
+    summary: "Message service with type validation, routing, error handling"
+    details:
+      - "Standardized message types"
+      - "Async request/response"
+      - "Error handling"
+      - "Input validation"
+  code_locations:
+    files:
+      - path: "src/core/message-service.js"
+        description: "Message service"
+      - path: "src/core/message-handler.js"
+        description: "Message handler"
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-MESSAGE_HANDLING
+    requirements:
+      - REQ-SMART_BOOKMARKING
+      - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+    tests: []
+    code_annotations:
+      - IMPL-MESSAGE_HANDLING
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-MESSAGE_HANDLING.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-OVERLAY:
+  name: Overlay Implementation
+  status: Active
+  cross_references:
+    - ARCH-OVERLAY
+    - REQ-OVERLAY_SYSTEM
+  rationale:
+    why: "Concrete overlay rendering and interaction"
+    problems_solved:
+      - "Overlay display complexity"
+      - "Interaction handling"
+    benefits:
+      - "Working overlay"
+      - "Proper lifecycle"
+  implementation_approach:
+    summary: "Overlay manager with show/hide, content rendering, control creation"
+    details:
+      - "Overlay DOM injection"
+      - "Transparency controls"
+      - "Auto-show logic"
+      - "Refresh control"
+      - "Theme integration"
+  code_locations:
+    files:
+      - path: "src/features/content/overlay-manager.js"
+        description: "Overlay manager"
+    functions:
+      - name: "show"
+        description: "Display overlay"
+        file: "src/features/content/overlay-manager.js"
+      - name: "hide"
+        description: "Hide overlay"
+        file: "src/features/content/overlay-manager.js"
+      - name: "createCloseButton"
+        description: "Create close control"
+        file: "src/features/content/overlay-manager.js"
+      - name: "createRefreshButton"
+        description: "Create refresh control"
+        file: "src/features/content/overlay-manager.js"
+  traceability:
+    architecture:
+      - ARCH-OVERLAY
+    requirements:
+      - REQ-OVERLAY_SYSTEM
+      - REQ-OVERLAY_AUTO_SHOW_CONTROL
+      - REQ-OVERLAY_REFRESH_ACTION
+    tests: []
+    code_annotations:
+      - IMPL-OVERLAY
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-OVERLAY_CONTROLS
+  detail_file: implementation-decisions/IMPL-OVERLAY.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-TAG_SYSTEM:
+  name: Tag Service Implementation
+  status: Active
+  cross_references:
+    - ARCH-TAG_SYSTEM
+    - REQ-RECENT_TAGS_SYSTEM
+    - REQ-TAG_INPUT_SANITIZATION
+  rationale:
+    why: "Concrete tag management logic"
+    problems_solved:
+      - "Tag sanitization"
+      - "Recent tags tracking"
+    benefits:
+      - "Secure tag handling"
+      - "Fast tag reuse"
+  implementation_approach:
+    summary: "TagService with sanitization, recent tags caching, suggestions"
+    details:
+      - "sanitizeTag function"
+      - "Recent tags TTL caching"
+      - "Tag history persistence"
+      - "Suggestion algorithm"
+  code_locations:
+    files:
+      - path: "src/features/tagging/tag-service.js"
+        description: "Tag service"
+    functions:
+      - name: "sanitizeTag"
+        description: "Tag sanitization"
+        file: "src/features/tagging/tag-service.js"
+      - name: "getRecentTags"
+        description: "Recent tags retrieval"
+        file: "src/features/tagging/tag-service.js"
+  traceability:
+    architecture:
+      - ARCH-TAG_SYSTEM
+    requirements:
+      - REQ-RECENT_TAGS_SYSTEM
+      - REQ-TAG_MANAGEMENT
+      - REQ-TAG_INPUT_SANITIZATION
+    tests: []
+    code_annotations:
+      - IMPL-TAG_SYSTEM
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-SUGGESTED_TAGS
+  detail_file: implementation-decisions/IMPL-TAG_SYSTEM.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-POPUP_SESSION:
+  name: Popup Session Persistence Implementation
+  status: Active
+  cross_references:
+    - ARCH-POPUP_SESSION
+    - REQ-POPUP_PERSISTENT_SESSION
+  rationale:
+    why: "Multi-action workflows without reopening"
+    problems_solved:
+      - "Popup closing interrupts work"
+      - "State management complexity"
+    benefits:
+      - "Continuous workflows"
+      - "Better UX"
+  implementation_approach:
+    summary: "PopupController routing with StateManager, UIManager, no window.close"
+    details:
+      - "PopupController handlers await async work"
+      - "StateManager mutations"
+      - "UIManager updates"
+      - "GET_OVERLAY_STATE fallback"
+      - "Inline notifications"
+  code_locations:
+    files:
+      - path: "src/ui/popup/PopupController.js"
+        description: "Popup controller"
+      - path: "src/ui/popup/UIManager.js"
+        description: "UI manager"
+    functions:
+      - name: "handleShowHoverboard"
+        description: "Overlay toggle handler"
+        file: "src/ui/popup/PopupController.js"
+      - name: "handleTogglePrivate"
+        description: "Privacy toggle"
+        file: "src/ui/popup/PopupController.js"
+      - name: "updateShowHoverButtonState"
+        description: "Button state updater"
+        file: "src/ui/popup/UIManager.js"
+  traceability:
+    architecture:
+      - ARCH-POPUP_SESSION
+    requirements:
+      - REQ-POPUP_PERSISTENT_SESSION
+    tests: []
+    code_annotations:
+      - IMPL-POPUP_SESSION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-MESSAGE_HANDLING
+  detail_file: implementation-decisions/IMPL-POPUP_SESSION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-BOOKMARK_STATE_SYNC:
+  name: Bookmark State Synchronization Implementation
+  status: Active
+  cross_references:
+    - ARCH-BOOKMARK_STATE_SYNC
+    - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+  rationale:
+    why: "Consistent state across surfaces"
+    problems_solved:
+      - "State divergence"
+      - "Race conditions"
+    benefits:
+      - "Reliable sync"
+      - "Observable contract"
+  implementation_approach:
+    summary: "BOOKMARK_UPDATED broadcast with overlay persist, popup refresh, badge update"
+    details:
+      - "Overlay toggle handlers persist via saveBookmark"
+      - "BOOKMARK_UPDATED broadcast"
+      - "PopupController listener refreshes data"
+      - "Badge compares states"
+  code_locations:
+    files:
+      - path: "src/features/content/overlay-manager.js"
+        description: "Overlay manager"
+      - path: "src/ui/popup/PopupController.js"
+        description: "Popup controller"
+      - path: "src/core/badge-manager.js"
+        description: "Badge manager"
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-BOOKMARK_STATE_SYNC
+    requirements:
+      - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+    tests: []
+    code_annotations:
+      - IMPL-BOOKMARK_STATE_SYNC
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-MESSAGE_HANDLING
+  detail_file: implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-OVERLAY_CONTROLS:
+  name: Overlay Control Layout Implementation
+  status: Active
+  cross_references:
+    - ARCH-OVERLAY_CONTROLS
+    - REQ-OVERLAY_CONTROL_LAYOUT
+  rationale:
+    why: "Deterministic control placement"
+    problems_solved:
+      - "Positioning inconsistency"
+      - "Accessibility gaps"
+    benefits:
+      - "Predictable layout"
+      - "Full accessibility"
+  implementation_approach:
+    summary: "Helper functions with inline styles, theme variables, ARIA metadata"
+    details:
+      - "Fixed absolute positioning"
+      - "24px min touch targets"
+      - "Theme CSS variables"
+      - "ARIA metadata"
+      - "Keyboard handlers"
+  code_locations:
+    files:
+      - path: "src/features/content/overlay-manager.js"
+        description: "Overlay manager"
+    functions:
+      - name: "createCloseButton"
+        description: "Close control creator"
+        file: "src/features/content/overlay-manager.js"
+      - name: "createRefreshButton"
+        description: "Refresh control creator"
+        file: "src/features/content/overlay-manager.js"
+  traceability:
+    architecture:
+      - ARCH-OVERLAY_CONTROLS
+    requirements:
+      - REQ-OVERLAY_CONTROL_LAYOUT
+    tests: []
+    code_annotations:
+      - IMPL-OVERLAY_CONTROLS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-OVERLAY
+  detail_file: implementation-decisions/IMPL-OVERLAY_CONTROLS.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-SAFARI_ADAPTATION:
+  name: Safari Adaptive Implementation
+  status: Active
+  cross_references:
+    - ARCH-SAFARI_ADAPTATION
+    - REQ-SAFARI_ADAPTATION
+  rationale:
+    why: "Safari stability and performance"
+    problems_solved:
+      - "Safari memory issues"
+      - "Messaging failures"
+    benefits:
+      - "Stable Safari support"
+      - "Bounded recovery"
+  implementation_approach:
+    summary: "Safari shim, content optimizations, error handler with degraded mode"
+    details:
+      - "Platform detection"
+      - "Safari config (timeouts, retries)"
+      - "Animation/memory optimizations"
+      - "Error handler with recovery"
+      - "Degraded mode"
+  code_locations:
+    files:
+      - path: "src/shared/safari-shim.js"
+        description: "Safari shim"
+      - path: "safari/src/shared/ErrorHandler.js"
+        description: "Safari error handler"
+    functions:
+      - name: "getSafariConfig"
+        description: "Safari config"
+        file: "src/shared/safari-shim.js"
+      - name: "optimizeSafariAnimations"
+        description: "Animation optimization"
+        file: "src/shared/safari-shim.js"
+  traceability:
+    architecture:
+      - ARCH-SAFARI_ADAPTATION
+    requirements:
+      - REQ-SAFARI_ADAPTATION
+    tests: []
+    code_annotations:
+      - IMPL-SAFARI_ADAPTATION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-CROSS_BROWSER
+  detail_file: implementation-decisions/IMPL-SAFARI_ADAPTATION.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-SUGGESTED_TAGS:
+  name: Suggested Tags Implementation
+  status: Active
+  cross_references:
+    - ARCH-SUGGESTED_TAGS
+    - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    - REQ-SUGGESTED_TAGS_DEDUPLICATION
+    - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+  rationale:
+    why: "Multi-source extraction with intelligent filtering"
+    problems_solved:
+      - "Manual tag entry"
+      - "No context awareness"
+    benefits:
+      - "Smart suggestions"
+      - "Faster tagging"
+  implementation_approach:
+    summary: "Extract from title/URL/headings/nav/breadcrumbs/images/links, frequency sort, case preserve"
+    details:
+      - "Multi-source extraction"
+      - "Title attribute priority"
+      - "Noise filtering"
+      - "Frequency counting and sorting"
+      - "Case preservation (both versions)"
+      - "Case-insensitive deduplication"
+  code_locations:
+    files:
+      - path: "src/features/tagging/tag-service.js"
+        description: "Tag service"
+      - path: "src/features/content/overlay-manager.js"
+        description: "Overlay manager"
+      - path: "src/ui/popup/PopupController.js"
+        description: "Popup controller"
+    functions:
+      - name: "extractSuggestedTagsFromDocument"
+        description: "Tag extraction"
+        file: "src/features/tagging/tag-service.js"
+  traceability:
+    architecture:
+      - ARCH-SUGGESTED_TAGS
+    requirements:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+    tests: []
+    code_annotations:
+      - IMPL-SUGGESTED_TAGS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-TAG_SYSTEM
+  detail_file: implementation-decisions/IMPL-SUGGESTED_TAGS.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-OVERLAY_TEST_HARNESS:
+  name: Overlay Test Harness Implementation
+  status: Active
+  cross_references:
+    - ARCH-OVERLAY_TESTABILITY
+    - REQ-OVERLAY_SYSTEM
+  rationale:
+    why: "Mock DOM for deterministic overlay testing"
+    problems_solved:
+      - "Stale test registries"
+      - "Heavy DOM emulation"
+    benefits:
+      - "Lightweight tests"
+      - "Auto-registration"
+  implementation_approach:
+    summary: "Mock DOM with className/id auto-registration, classList/attribute hooks"
+    details:
+      - "Auto-register on property assignments"
+      - "classList operations tracking"
+      - "Lightweight verification"
+  code_locations:
+    files:
+      - path: "tests/utils/mock-dom.js"
+        description: "Mock DOM utilities"
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-OVERLAY_TESTABILITY
+    requirements:
+      - REQ-OVERLAY_SYSTEM
+      - REQ-OVERLAY_CONTROL_LAYOUT
+    tests: []
+    code_annotations:
+      - IMPL-OVERLAY_TEST_HARNESS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-OVERLAY
+  detail_file: implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+IMPL-POPUP_MESSAGE_TIMEOUT:
+  name: Popup Message Timeout Implementation
+  status: Active
+  cross_references: []
+  rationale:
+    why: "Predictable refresh behavior in tests and runtime"
+    problems_solved:
+      - "Hanging messages"
+      - "Test timeouts"
+    benefits:
+      - "Reliable messaging"
+      - "Testable timeouts"
+  implementation_approach:
+    summary: "Promise-based message sending with timeout handling"
+    details:
+      - "Timeout logic"
+      - "Error handling"
+      - "Test mock support"
+  code_locations:
+    files:
+      - path: "src/ui/popup/PopupController.js"
+        description: "Popup controller"
+    functions: []
+  traceability:
+    architecture: []
+    requirements: []
+    tests: []
+    code_annotations:
+      - IMPL-POPUP_MESSAGE_TIMEOUT
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-MESSAGE_HANDLING
+  detail_file: implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.md
+  metadata:
+    created:
+      date: 2025-07-14
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Migrated from STDD to TIED format"
+
+# NOTE: Additional IMPL tokens from stdd/implementation-decisions.md may remain:
+# IMPL-STORAGE, IMPL-BADGE, IMPL-CROSS_BROWSER, IMPL-SERVICE_WORKER,
+# IMPL-CONTENT_SCRIPT, IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-MV3_MIGRATION,
+# IMPL-THEME, IMPL-BOOKMARKING (and others not yet in stdd file)
+# Follow established pattern above.
+
+IMPL-CONFIG_STRUCT:
+  name: Configuration Structure
+  status: Template
+  cross_references:
+    - ARCH-CONFIG_STRUCTURE
+    - REQ-CONFIGURATION
+  rationale:
+    why: "Why this configuration structure was chosen"
+    problems_solved:
+      - "Problem 1"
+    benefits:
+      - "Benefit 1"
+  implementation_approach:
+    summary: "Configuration structure implementation approach"
+    details:
+      - "Specific technical detail 1"
+      - "Code structure or pattern"
+      - "API design decision"
+  code_locations:
+    files:
+      - path: "path/to/config.ext"
+        description: "Configuration implementation"
+    functions:
+      - name: "loadConfig"
+        file: "path/to/config.ext"
+        description: "Configuration loading logic"
+  traceability:
+    architecture:
+      - ARCH-CONFIG_STRUCTURE
+    requirements:
+      - REQ-CONFIGURATION
+    tests:
+      - testConfiguration_IMPL_CONFIG_STRUCT
+    code_annotations:
+      - IMPL-CONFIG_STRUCT
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-CONFIG_STRUCT.md
+  metadata:
+    created:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+    last_updated:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+      reason: "Initial creation"
+    last_validated:
+      date: YYYY-MM-DD
+      validator: "agent/contributor"
+      result: "pass"
+
+IMPL-EXAMPLE_IMPLEMENTATION:
+  name: Core Implementation Example
+  status: Template
+  cross_references:
+    - ARCH-EXAMPLE_DECISION
+    - REQ-EXAMPLE_FEATURE
+  rationale:
+    why: "Why this implementation approach was chosen"
+    problems_solved:
+      - "Problem 1 that implementation solves"
+    benefits:
+      - "Benefit 1 of implementation"
+  implementation_approach:
+    summary: "Main implementation approach"
+    details:
+      - "Specific technical detail 1"
+      - "Code structure or pattern"
+      - "API design decision"
+  code_locations:
+    files:
+      - path: "path/to/implementation.ext"
+        description: "Main implementation"
+        lines: [10, 50]
+    functions:
+      - name: "exampleFunction"
+        file: "path/to/implementation.ext"
+        description: "What it does"
+  traceability:
+    architecture:
+      - ARCH-EXAMPLE_DECISION
+    requirements:
+      - REQ-EXAMPLE_FEATURE
+    tests:
+      - testFeatureName_REQ_EXAMPLE_FEATURE
+    code_annotations:
+      - IMPL-EXAMPLE_IMPLEMENTATION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.md
+  metadata:
+    created:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+    last_updated:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+      reason: "Initial creation"
+    last_validated:
+      date: YYYY-MM-DD
+      validator: "agent/contributor"
+      result: "pass"
+
+IMPL-ERROR_HANDLING:
+  name: Error Handling Implementation
+  status: Template
+  cross_references:
+    - ARCH-ERROR_HANDLING
+    - REQ-ERROR_HANDLING
+  rationale:
+    why: "Why this error handling implementation was chosen"
+    problems_solved:
+      - "Problem 1"
+    benefits:
+      - "Benefit 1"
+  implementation_approach:
+    summary: "Error handling implementation approach"
+    details:
+      - "Specific error handling pattern"
+      - "Error propagation strategy"
+      - "Error logging and reporting"
+  code_locations:
+    files:
+      - path: "path/to/error_handler.ext"
+        description: "Error handling implementation"
+    functions:
+      - name: "handleError"
+        file: "path/to/error_handler.ext"
+        description: "Error handling logic"
+  traceability:
+    architecture:
+      - ARCH-ERROR_HANDLING
+    requirements:
+      - REQ-ERROR_HANDLING
+    tests:
+      - testErrorHandling_IMPL_ERROR_HANDLING
+    code_annotations:
+      - IMPL-ERROR_HANDLING
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-ERROR_HANDLING.md
+  metadata:
+    created:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+    last_updated:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+      reason: "Initial creation"
+    last_validated:
+      date: YYYY-MM-DD
+      validator: "agent/contributor"
+      result: "pass"
+
+IMPL-TESTING:
+  name: Testing Implementation
+  status: Template
+  cross_references:
+    - ARCH-TESTING_STRATEGY
+  rationale:
+    why: "Why this testing implementation was chosen"
+    problems_solved:
+      - "Problem 1"
+    benefits:
+      - "Benefit 1"
+  implementation_approach:
+    summary: "Testing implementation approach"
+    details:
+      - "Unit testing implementation details"
+      - "Integration testing implementation details"
+      - "Test utilities and helpers"
+      - "Test coverage tools"
+  code_locations:
+    files:
+      - path: "*_test.ext"
+        description: "Test files"
+    functions:
+      - name: "setupTestEnvironment"
+        file: "test_helpers.ext"
+        description: "Test setup logic"
+  traceability:
+    architecture:
+      - ARCH-TESTING_STRATEGY
+    requirements:
+      - REQ-*
+    tests:
+      - All test files implement this strategy
+    code_annotations:
+      - IMPL-TESTING
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-TESTING.md
+  metadata:
+    created:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+    last_updated:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+      reason: "Initial creation"
+    last_validated:
+      date: YYYY-MM-DD
+      validator: "agent/contributor"
+      result: "pass"
+
+IMPL-CODE_STYLE:
+  name: Code Style and Conventions
+  status: Template
+  cross_references: []
+  rationale:
+    why: "Why these code style conventions were chosen"
+    problems_solved:
+      - "Problem 1"
+    benefits:
+      - "Benefit 1 - improved maintainability"
+  implementation_approach:
+    summary: "Code style and conventions implementation"
+    details:
+      - "Naming conventions"
+      - "Code formatting rules"
+      - "Documentation standards"
+      - "Code organization patterns"
+  code_locations:
+    files:
+      - path: ".editorconfig"
+        description: "Editor configuration"
+      - path: ".prettierrc"
+        description: "Code formatter configuration (or similar)"
+  traceability:
+    architecture:
+      - ARCH-*
+    requirements:
+      - REQ-MAINTAINABILITY
+    tests:
+      - Code style tests or linter checks
+    code_annotations:
+      - All source files follow these conventions
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-CODE_STYLE.md
+  metadata:
+    created:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+    last_updated:
+      date: YYYY-MM-DD
+      author: "agent/contributor"
+      reason: "Initial creation"
+    last_validated:
+      date: YYYY-MM-DD
+      validator: "agent/contributor"
+      result: "pass"
+
+# ---
+# Template Record - Copy this block to create new implementation decisions
+# ---
+#
+# IMPL-IDENTIFIER:
+#   name: Implementation Title
+#   status: Active
+#   cross_references:
+#     - ARCH-RELATED_ARCHITECTURE
+#     - REQ-RELATED_REQUIREMENT
+#   rationale:
+#     why: "Primary reason for this implementation approach"
+#     problems_solved:
+#       - "Problem 1"
+#       - "Problem 2"
+#     benefits:
+#       - "Benefit 1"
+#       - "Benefit 2"
+#   implementation_approach:
+#     summary: "High-level description of implementation"
+#     details:
+#       - "Specific technical detail 1"
+#       - "Code structure or pattern"
+#       - "API design decision"
+#   code_locations:
+#     files:
+#       - path: "path/to/file.ext"
+#         description: "Description of what's implemented there"
+#         lines: [10, 50]  # optional line range
+#     functions:
+#       - name: "exampleFunction"
+#         file: "path/to/file.ext"
+#         description: "What it does"
+#   traceability:
+#     architecture:
+#       - ARCH-IDENTIFIER
+#     requirements:
+#       - REQ-IDENTIFIER
+#     tests:
+#       - testFeatureName_REQ_IDENTIFIER
+#     code_annotations:
+#       - IMPL-IDENTIFIER
+#   related_decisions:
+#     depends_on: []
+#     supersedes: []
+#     see_also: []
+#   detail_file: implementation-decisions/IMPL-IDENTIFIER.md
+#   metadata:
+#     created:
+#       date: YYYY-MM-DD
+#       author: "agent/contributor"
+#     last_updated:
+#       date: YYYY-MM-DD
+#       author: "agent/contributor"
+#       reason: "Initial creation"
+#     last_validated:
+#       date: YYYY-MM-DD
+#       validator: "agent/contributor"
+#       result: "pass"

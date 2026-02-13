@@ -17,7 +17,7 @@ const mockLogger = {
   }
 }
 
-// [IMPL:OVERLAY_TEST_HARNESS] [ARCH:OVERLAY_TESTABILITY] [REQ:OVERLAY_SYSTEM]
+// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM]
 // Ensure direct property assignments update selector registries just like setAttribute/classList operations
 function attachTrackedProperties (element, registerElement) {
   let classNameValue = typeof element.className === 'string' ? element.className : ''

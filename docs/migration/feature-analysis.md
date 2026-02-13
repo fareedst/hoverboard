@@ -1,39 +1,39 @@
 # 🔍 Hoverboard Extension Feature Analysis
 
-> **⚠️ NOTE**: This document provides historical feature analysis. For current requirements, architecture decisions, and implementation details, see the STDD files.
+> **⚠️ NOTE**: This document provides historical feature analysis. For current requirements, architecture decisions, and implementation details, see the TIED files.
 
-## 🔗 STDD Reference
+## 🔗 TIED Reference
 
-**All requirements, architecture decisions, and implementation decisions are now coordinated through the STDD folder:**
+**All requirements, architecture decisions, and implementation decisions are now coordinated through the TIED folder:**
 
-- **Requirements**: See `stdd/requirements.md`
-  - `[REQ:PINBOARD_COMPATIBILITY]` - Pinboard API Compatibility
-  - `[REQ:SMART_BOOKMARKING]` - Smart Bookmarking
-  - `[REQ:TAG_MANAGEMENT]` - Tag Management
-  - `[REQ:OVERLAY_SYSTEM]` - Overlay System
-  - `[REQ:RECENT_TAGS_SYSTEM]` - Recent Tags System
+- **Requirements**: See `tied/requirements.yaml` and `tied/requirements/`
+  - `[REQ-PINBOARD_COMPATIBILITY]` - Pinboard API Compatibility
+  - `[REQ-SMART_BOOKMARKING]` - Smart Bookmarking
+  - `[REQ-TAG_MANAGEMENT]` - Tag Management
+  - `[REQ-OVERLAY_SYSTEM]` - Overlay System
+  - `[REQ-RECENT_TAGS_SYSTEM]` - Recent Tags System
 
-- **Architecture Decisions**: See `stdd/architecture-decisions.md`
-  - `[ARCH:PINBOARD_API]` - Pinboard API Integration Architecture
-  - `[ARCH:MESSAGE_HANDLING]` - Message Handling Architecture
-  - `[ARCH:OVERLAY]` - Overlay System Architecture
-  - `[ARCH:TAG_SYSTEM]` - Tag System Architecture
+- **Architecture Decisions**: See `tied/architecture-decisions.yaml` and `tied/architecture-decisions/`
+  - `[ARCH-PINBOARD_API]` - Pinboard API Integration Architecture
+  - `[ARCH-MESSAGE_HANDLING]` - Message Handling Architecture
+  - `[ARCH-OVERLAY]` - Overlay System Architecture
+  - `[ARCH-TAG_SYSTEM]` - Tag System Architecture
 
-- **Implementation Decisions**: See `stdd/implementation-decisions.md`
-  - `[IMPL:PINBOARD_API]` - Pinboard API Service Implementation
-  - `[IMPL:MESSAGE_HANDLING]` - Message Handling System Implementation
-  - `[IMPL:CONTENT_SCRIPT]` - Content Script Injection Implementation
-  - `[IMPL:TAG_SYSTEM]` - Tag Service Implementation
+- **Implementation Decisions**: See `tied/implementation-decisions.yaml` and `tied/implementation-decisions/`
+  - `[IMPL-PINBOARD_API]` - Pinboard API Service Implementation
+  - `[IMPL-MESSAGE_HANDLING]` - Message Handling System Implementation
+  - `[IMPL-CONTENT_SCRIPT]` - Content Script Injection Implementation
+  - `[IMPL-TAG_SYSTEM]` - Tag Service Implementation
 
-- **Semantic Tokens**: See `stdd/semantic-tokens.md` for complete token registry
-- **Tasks**: See `stdd/tasks.md` for active task tracking
+- **Semantic Tokens**: See `tied/semantic-tokens.yaml` and `tied/semantic-tokens.md` for complete token registry
+- **Tasks**: See `tied/tasks.md` for active task tracking
 
 ## 📊 Core Feature Mapping Matrix
 
-> **Historical Reference**: The following feature analysis is preserved for historical context. For current implementation details, see STDD files above.
+> **Historical Reference**: The following feature analysis is preserved for historical context. For current implementation details, see TIED files above.
 
 ### 🎯 **FEATURE 1: Pinboard API Integration**
-**STDD Reference**: `[REQ:PINBOARD_COMPATIBILITY]`, `[ARCH:PINBOARD_API]`, `[IMPL:PINBOARD_API]`
+**TIED Reference**: `[REQ-PINBOARD_COMPATIBILITY]`, `[ARCH-PINBOARD_API]`, `[IMPL-PINBOARD_API]`
 
 **Files:** `src/bg/pinboard.js` (392 lines), `src/bg/background.js` (auth portions)
 
@@ -42,12 +42,12 @@
 - `AuthSettings` - Authentication and token management
 
 ### 🎯 **FEATURE 2: Background Service & Message Handling**
-**STDD Reference**: `[ARCH:MESSAGE_HANDLING]`, `[IMPL:MESSAGE_HANDLING]`
+**TIED Reference**: `[ARCH-MESSAGE_HANDLING]`, `[IMPL-MESSAGE_HANDLING]`
 
 **Files:** `src/bg/background.js` (545 lines)
 
 ### 🎯 **FEATURE 3: Content Script Injection System**
-**STDD Reference**: `[REQ:OVERLAY_SYSTEM]`, `[ARCH:OVERLAY]`, `[IMPL:CONTENT_SCRIPT]`
+**TIED Reference**: `[REQ-OVERLAY_SYSTEM]`, `[ARCH-OVERLAY]`, `[IMPL-CONTENT_SCRIPT]`
 
 **Files:** `src/inject/inject.js` (533 lines), `src/inject/hoverInjector.js` (248 lines)
 
@@ -58,12 +58,12 @@
 - `Buttoner` class - Interactive button creation
 
 ### 🎯 **FEATURE 4: User Interface Components**
-**STDD Reference**: `[REQ:SMART_BOOKMARKING]`, `[REQ:TAG_MANAGEMENT]`, `[REQ:OVERLAY_SYSTEM]`
+**TIED Reference**: `[REQ-SMART_BOOKMARKING]`, `[REQ-TAG_MANAGEMENT]`, `[REQ-OVERLAY_SYSTEM]`
 
 **Files:** `src/inject/in_overlay.js` (122 lines), `src/browser_action/` directory
 
 ### 🎯 **FEATURE 5: Tag Management System**
-**STDD Reference**: `[REQ:RECENT_TAGS_SYSTEM]`, `[REQ:TAG_MANAGEMENT]`, `[ARCH:TAG_SYSTEM]`, `[IMPL:TAG_SYSTEM]`
+**TIED Reference**: `[REQ-RECENT_TAGS_SYSTEM]`, `[REQ-TAG_MANAGEMENT]`, `[ARCH-TAG_SYSTEM]`, `[IMPL-TAG_SYSTEM]`
 
 **Files:** `src/bg/throttled_recent_tags.js` (103 lines)
 

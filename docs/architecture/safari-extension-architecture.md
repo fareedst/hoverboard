@@ -12,21 +12,21 @@ This document outlines the architectural decisions and implementation strategy f
 
 **Latest Update:** [2025-07-20] Safari App Extension Integration (`SAFARI-EXT-IMPL-001`) has been successfully implemented with comprehensive Safari extension packaging, deployment pipeline, and App Store preparation capabilities.
 
-## 🔗 STDD Reference
+## 🔗 TIED Reference
 
-**⚠️ IMPORTANT**: General architecture decisions are now documented in the STDD architecture decisions file. This document focuses on Safari-specific architecture:
+**⚠️ IMPORTANT**: General architecture decisions are now documented in the TIED architecture decisions file. This document focuses on Safari-specific architecture:
 
-- **General Architecture Decisions**: See `stdd/architecture-decisions.md`
-  - `[ARCH:CROSS_BROWSER]` - Cross-Browser Compatibility Architecture (includes Safari considerations)
-  - `[ARCH:SERVICE_WORKER]` - Service Worker Architecture
-  - `[ARCH:STORAGE]` - Storage Strategy
+- **General Architecture Decisions**: See `tied/architecture-decisions.yaml` and `tied/architecture-decisions/`
+  - `[ARCH-CROSS_BROWSER]` - Cross-Browser Compatibility Architecture (includes Safari considerations)
+  - `[ARCH-SERVICE_WORKER]` - Service Worker Architecture
+  - `[ARCH-STORAGE]` - Storage Strategy
   - And more...
 
-- **Requirements**: See `stdd/requirements.md` for requirements
-- **Implementation Decisions**: See `stdd/implementation-decisions.md` for implementation details
-- **Semantic Tokens**: See `stdd/semantic-tokens.md` for complete token registry
+- **Requirements**: See `tied/requirements.yaml` and `tied/requirements/` for requirements
+- **Implementation Decisions**: See `tied/implementation-decisions.yaml` and `tied/implementation-decisions/` for implementation details
+- **Semantic Tokens**: See `tied/semantic-tokens.yaml` and `tied/semantic-tokens.md` for complete token registry
 
-**For coordination of architecture decisions, always reference STDD files as the authoritative source. This document provides Safari-specific extensions and details.**
+**For coordination of architecture decisions, always reference TIED files as the authoritative source. This document provides Safari-specific extensions and details.**
 
 ## [SAFARI-EXT-ARCH-001] Core Architectural Decisions
 

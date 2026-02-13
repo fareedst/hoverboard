@@ -1,0 +1,979 @@
+# Semantic Tokens Index (YAML Database)
+#
+# This YAML file serves as the central registry for all semantic tokens in the project.
+# Each top-level key is a semantic token (e.g., REQ-TIED_SETUP, ARCH-TIED_STRUCTURE, IMPL-MODULE_VALIDATION).
+#
+# To append a new token:
+# 1. Copy the template block at the bottom of this file (TOKEN-IDENTIFIER)
+# 2. Paste it at the end with a blank line before it
+# 3. Replace TOKEN-IDENTIFIER with your new token
+# 4. Fill in all fields
+# 5. Update the detail_file path if a detail file exists
+#
+# Field descriptions:
+#   type: REQ | ARCH | IMPL | TEST | PROC
+#   name: Short descriptive name of the token
+#   category: Sub-category (e.g., "Core Functional", "Non-Functional" for REQ; free-form for others; optional)
+#   status: Active | Deprecated | Template | Planned
+#   description: One-line description of what this token represents
+#   cross_references: List of related tokens (traceability chain)
+#   source_index: Path to the YAML index that holds the full record (e.g., requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, processes.md)
+#   detail_file: Path to the detailed .md file (if one exists)
+#   metadata: Structured metadata with registered and last_updated dates
+
+---
+
+REQ-TIED_SETUP:
+  type: REQ
+  name: TIED Methodology Setup
+  category: Core Functional
+  status: Active
+  description: "TIED methodology setup requirement"
+  cross_references:
+    - ARCH-TIED_STRUCTURE
+    - IMPL-TIED_FILES
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-TIED_SETUP.md
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+REQ-MODULE_VALIDATION:
+  type: REQ
+  name: Independent Module Validation Before Integration
+  category: Core Functional
+  status: Active
+  description: "Independent module validation before integration requirement"
+  cross_references:
+    - ARCH-MODULE_VALIDATION
+    - IMPL-MODULE_VALIDATION
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-MODULE_VALIDATION.md
+  metadata:
+    registered: 2025-01-27
+    last_updated: 2026-02-08
+
+REQ-EXAMPLE_FEATURE:
+  type: REQ
+  name: Example Feature Requirement
+  category: Core Functional
+  status: Template
+  description: "Example feature requirement (template)"
+  cross_references:
+    - ARCH-EXAMPLE_DECISION
+    - IMPL-EXAMPLE_IMPLEMENTATION
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-IDENTIFIER.md
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+REQ-PERFORMANCE:
+  type: REQ
+  name: Performance Requirements
+  category: Non-Functional
+  status: Template
+  description: "Performance requirements"
+  cross_references: []
+  source_index: requirements.yaml
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+REQ-RELIABILITY:
+  type: REQ
+  name: Reliability Requirements
+  category: Non-Functional
+  status: Template
+  description: "Reliability requirements"
+  cross_references: []
+  source_index: requirements.yaml
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+REQ-MAINTAINABILITY:
+  type: REQ
+  name: Maintainability Requirements
+  category: Non-Functional
+  status: Template
+  description: "Maintainability requirements"
+  cross_references: []
+  source_index: requirements.yaml
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+REQ-USABILITY:
+  type: REQ
+  name: Usability Requirements
+  category: Non-Functional
+  status: Template
+  description: "Usability requirements"
+  cross_references: []
+  source_index: requirements.yaml
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+ARCH-LANGUAGE_SELECTION:
+  type: ARCH
+  name: Language and Runtime Selection
+  status: Template
+  description: "Language and runtime selection decision"
+  cross_references: []
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.md
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+ARCH-PROJECT_STRUCTURE:
+  type: ARCH
+  name: Project Structure Decision
+  status: Template
+  description: "Project structure decision"
+  cross_references: []
+  source_index: architecture-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+ARCH-TIED_STRUCTURE:
+  type: ARCH
+  name: TIED Project Structure
+  status: Active
+  description: "TIED project structure decision"
+  cross_references:
+    - REQ-TIED_SETUP
+    - IMPL-TIED_FILES
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.md
+  metadata:
+    registered: 2025-12-18
+    last_updated: 2026-02-08
+
+ARCH-MODULE_VALIDATION:
+  type: ARCH
+  name: Module Validation Strategy
+  status: Active
+  description: "Module validation strategy decision"
+  cross_references:
+    - REQ-MODULE_VALIDATION
+    - IMPL-MODULE_VALIDATION
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.md
+  metadata:
+    registered: 2025-12-18
+    last_updated: 2026-02-08
+
+ARCH-EXAMPLE_DECISION:
+  type: ARCH
+  name: Core Architecture Example
+  status: Template
+  description: "Example architecture decision (template)"
+  cross_references:
+    - REQ-EXAMPLE_FEATURE
+    - IMPL-EXAMPLE_IMPLEMENTATION
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-EXAMPLE_DECISION.md
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+IMPL-CONFIG_STRUCT:
+  type: IMPL
+  name: Configuration Structure
+  status: Template
+  description: "Configuration structure implementation"
+  cross_references:
+    - ARCH-CONFIG_STRUCTURE
+    - REQ-CONFIGURATION
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-CONFIG_STRUCT.md
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+IMPL-TIED_FILES:
+  type: IMPL
+  name: TIED File Creation
+  status: Active
+  description: "TIED file creation implementation"
+  cross_references:
+    - ARCH-TIED_STRUCTURE
+    - REQ-TIED_SETUP
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-TIED_FILES.md
+  metadata:
+    registered: 2025-12-18
+    last_updated: 2026-02-08
+
+IMPL-MODULE_VALIDATION:
+  type: IMPL
+  name: Module Validation Implementation
+  status: Active
+  description: "Module validation implementation"
+  cross_references:
+    - ARCH-MODULE_VALIDATION
+    - REQ-MODULE_VALIDATION
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.md
+  metadata:
+    registered: 2025-12-18
+    last_updated: 2026-02-08
+
+IMPL-EXAMPLE_IMPLEMENTATION:
+  type: IMPL
+  name: Core Implementation Example
+  status: Template
+  description: "Example implementation (template)"
+  cross_references:
+    - ARCH-EXAMPLE_DECISION
+    - REQ-EXAMPLE_FEATURE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.md
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+PROC-PROJECT_SURVEY_AND_SETUP:
+  type: PROC
+  name: Project Survey and Setup Process
+  status: Active
+  description: "Survey and readiness process supporting REQ-TIED_SETUP and ARCH-TIED_STRUCTURE"
+  cross_references:
+    - REQ-TIED_SETUP
+    - ARCH-TIED_STRUCTURE
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+PROC-BUILD_PIPELINE_VALIDATION:
+  type: PROC
+  name: Build Pipeline Validation Process
+  status: Active
+  description: "Build/deploy validation tied to REQ-MODULE_VALIDATION"
+  cross_references:
+    - REQ-MODULE_VALIDATION
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+PROC-TOKEN_AUDIT:
+  type: PROC
+  name: Token Audit Process
+  status: Active
+  description: "Mandatory checklist ensuring every requirement → architecture → implementation → code/test path is annotated and documented"
+  cross_references: []
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+PROC-TOKEN_VALIDATION:
+  type: PROC
+  name: Token Validation Process
+  status: Active
+  description: "Automated validation workflow that proves all referenced tokens exist in the registry"
+  cross_references: []
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+PROC-YAML_DB_OPERATIONS:
+  type: PROC
+  name: YAML Database Operations Process
+  status: Active
+  description: "YAML database operations for reading, writing, querying, and validating YAML index files"
+  cross_references:
+    - REQ-TIED_SETUP
+    - ARCH-TIED_STRUCTURE
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: 2025-11-08
+    last_updated: 2026-02-08
+
+# ---
+# Product Requirements (Hoverboard Extension)
+# Migrated from stdd/requirements.md to TIED format
+# ---
+
+REQ-EXTENSION_IDENTITY:
+  type: REQ
+  name: Extension Identity Preservation
+  category: Immutable
+  status: Active
+  description: "Extension maintains core identity as Hoverboard Pinboard.in bookmarking interface"
+  cross_references:
+    - ARCH-EXT_IDENTITY
+    - IMPL-EXT_IDENTITY
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-EXTENSION_IDENTITY.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-CORE_UX_PRESERVATION:
+  type: REQ
+  name: Core User Experience Preservation
+  category: Immutable
+  status: Active
+  description: "Core UX preserved: hover interface, quick actions, tag management, private bookmarking"
+  cross_references:
+    - ARCH-UX_CORE
+    - IMPL-UX_CORE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-CORE_UX_PRESERVATION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-PINBOARD_COMPATIBILITY:
+  type: REQ
+  name: Pinboard API Compatibility
+  category: Immutable
+  status: Active
+  description: "Maintains compatibility with Pinboard.in API including auth, endpoints, rate limits"
+  cross_references:
+    - ARCH-PINBOARD_API
+    - IMPL-PINBOARD_API
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-PINBOARD_COMPATIBILITY.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-MANIFEST_V3_MIGRATION:
+  type: REQ
+  name: Manifest V3 Migration
+  category: Immutable
+  status: Planned
+  description: "Migrate to Manifest V3 with service worker, maintaining functionality"
+  cross_references:
+    - ARCH-MV3_MIGRATION
+    - IMPL-MV3_MIGRATION
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-MANIFEST_V3_MIGRATION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-CHROME_STORAGE_USAGE:
+  type: REQ
+  name: Chrome Storage API Usage
+  category: Immutable
+  status: Active
+  description: "Uses chrome.storage for persistence, no external data collection"
+  cross_references:
+    - ARCH-STORAGE
+    - IMPL-STORAGE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-CHROME_STORAGE_USAGE.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-RECENT_TAGS_SYSTEM:
+  type: REQ
+  name: Recent Tags System
+  category: Immutable
+  status: Active
+  description: "Recent tags system for efficient bookmarking workflow"
+  cross_references:
+    - ARCH-TAG_SYSTEM
+    - IMPL-TAG_SYSTEM
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-RECENT_TAGS_SYSTEM.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-SMART_BOOKMARKING:
+  type: REQ
+  name: Smart Bookmarking
+  category: Functional
+  status: Active
+  description: "Fast in-page bookmarking without context switching"
+  cross_references:
+    - ARCH-UX_CORE
+    - IMPL-BOOKMARKING
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SMART_BOOKMARKING.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-TAG_MANAGEMENT:
+  type: REQ
+  name: Tag Management
+  category: Functional
+  status: Active
+  description: "Tag input, editing, sanitization, and suggestions"
+  cross_references:
+    - ARCH-TAG_SYSTEM
+    - IMPL-TAG_SYSTEM
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-TAG_MANAGEMENT.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-OVERLAY_SYSTEM:
+  type: REQ
+  name: Overlay System
+  category: Functional
+  status: Active
+  description: "Non-intrusive hover overlay for bookmarking"
+  cross_references:
+    - ARCH-OVERLAY
+    - IMPL-OVERLAY
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-OVERLAY_SYSTEM.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-DARK_THEME:
+  type: REQ
+  name: Dark Theme Support
+  category: Functional
+  status: Active
+  description: "Dark theme for comfortable viewing"
+  cross_references:
+    - ARCH-THEME
+    - IMPL-THEME
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-DARK_THEME.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-BADGE_INDICATORS:
+  type: REQ
+  name: Badge Indicators
+  category: Functional
+  status: Active
+  description: "Visual status indicators showing bookmark state and tag count"
+  cross_references:
+    - ARCH-BADGE
+    - IMPL-BADGE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-BADGE_INDICATORS.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-SITE_MANAGEMENT:
+  type: REQ
+  name: Site Management
+  category: Functional
+  status: Active
+  description: "Allow users to disable extension on specific domains"
+  cross_references:
+    - ARCH-SITE_MGMT
+    - IMPL-SITE_MGMT
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SITE_MANAGEMENT.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-SEARCH_FUNCTIONALITY:
+  type: REQ
+  name: Search Functionality
+  category: Functional
+  status: Active
+  description: "Search through bookmarked tabs by title"
+  cross_references:
+    - ARCH-SEARCH
+    - IMPL-SEARCH
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SEARCH_FUNCTIONALITY.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-PRIVACY_CONTROLS:
+  type: REQ
+  name: Privacy Controls
+  category: Functional
+  status: Active
+  description: "Mark bookmarks as private or to-read"
+  cross_references:
+    - ARCH-PRIVACY
+    - IMPL-PRIVACY
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-PRIVACY_CONTROLS.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-OVERLAY_AUTO_SHOW_CONTROL:
+  type: REQ
+  name: Hover Auto-Show Controls
+  category: Functional
+  status: Active
+  description: "Configurable auto-display of hover overlay on page load"
+  cross_references:
+    - ARCH-OVERLAY
+    - IMPL-OVERLAY
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-OVERLAY_AUTO_SHOW_CONTROL.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-OVERLAY_REFRESH_ACTION:
+  type: REQ
+  name: Overlay Refresh Control
+  category: Functional
+  status: Active
+  description: "Dedicated refresh control to re-fetch bookmark data in overlay"
+  cross_references:
+    - ARCH-OVERLAY
+    - IMPL-OVERLAY
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-OVERLAY_REFRESH_ACTION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-POPUP_PERSISTENT_SESSION:
+  type: REQ
+  name: Popup Session Persistence
+  category: Functional
+  status: Active
+  description: "Popup stays open during multi-action workflows"
+  cross_references:
+    - ARCH-UX_CORE
+    - IMPL-UX_CORE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-POPUP_PERSISTENT_SESSION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-BOOKMARK_STATE_SYNCHRONIZATION:
+  type: REQ
+  name: Bookmark State Synchronization
+  category: Functional
+  status: Active
+  description: "Bookmark state propagates across overlay, popup, badge via BOOKMARK_UPDATED"
+  cross_references:
+    - ARCH-MESSAGE_HANDLING
+    - IMPL-MESSAGE_HANDLING
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-OVERLAY_CONTROL_LAYOUT:
+  type: REQ
+  name: Overlay Control Layout
+  category: Functional
+  status: Active
+  description: "Close and refresh controls pinned with fixed spacing, accessible design"
+  cross_references:
+    - ARCH-OVERLAY
+    - IMPL-OVERLAY
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-OVERLAY_CONTROL_LAYOUT.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-CONFIG_PORTABILITY:
+  type: REQ
+  name: Configuration Import/Export
+  category: Non-Functional
+  status: Active
+  description: "Export and import user configuration for backup and migration"
+  cross_references:
+    - ARCH-STORAGE
+    - IMPL-STORAGE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-CONFIG_PORTABILITY.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-TAG_INPUT_SANITIZATION:
+  type: REQ
+  name: Tag Input Sanitization
+  category: Functional
+  status: Active
+  description: "Sanitize tag inputs to prevent XSS and ensure data integrity"
+  cross_references:
+    - ARCH-TAG_SYSTEM
+    - IMPL-TAG_SYSTEM
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-TAG_INPUT_SANITIZATION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-SAFARI_ADAPTATION:
+  type: REQ
+  name: Safari Adaptive Behavior
+  category: Functional
+  status: Active
+  description: "Safari-specific adaptations for stability and performance"
+  cross_references:
+    - ARCH-CROSS_BROWSER
+    - IMPL-CROSS_BROWSER
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SAFARI_ADAPTATION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-SUGGESTED_TAGS_FROM_CONTENT:
+  type: REQ
+  name: Suggested Tags from Page Content
+  category: Functional
+  status: Active
+  description: "Intelligent tag suggestions from page title, URL, headings, nav, etc."
+  cross_references:
+    - ARCH-SUGGESTED_TAGS
+    - IMPL-SUGGESTED_TAGS
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-SUGGESTED_TAGS_DEDUPLICATION:
+  type: REQ
+  name: Suggested Tags Deduplication
+  category: Functional
+  status: Active
+  description: "Case-insensitive filtering of suggestions already in current tags"
+  cross_references:
+    - ARCH-SUGGESTED_TAGS
+    - IMPL-SUGGESTED_TAGS
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
+  type: REQ
+  name: Suggested Tags Case Preservation
+  category: Functional
+  status: Active
+  description: "Preserve original case, provide both original and lowercase versions"
+  cross_references:
+    - ARCH-SUGGESTED_TAGS
+    - IMPL-SUGGESTED_TAGS
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-EXT_IDENTITY:
+  type: ARCH
+  name: Extension Identity Architecture
+  status: Active
+  description: "Browser extension architecture with content script injection for Pinboard"
+  cross_references:
+    - REQ-EXTENSION_IDENTITY
+    - IMPL-EXT_IDENTITY
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-EXT_IDENTITY.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-PINBOARD_API:
+  type: ARCH
+  name: Pinboard API Integration Architecture
+  status: Active
+  description: "Token-based auth with rate limiting and error handling"
+  cross_references:
+    - REQ-PINBOARD_COMPATIBILITY
+    - IMPL-PINBOARD_API
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-PINBOARD_API.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-STORAGE:
+  type: ARCH
+  name: Storage Strategy
+  status: Active
+  description: "chrome.storage.sync for settings, local for temp, export/import workflows"
+  cross_references:
+    - REQ-CHROME_STORAGE_USAGE
+    - REQ-CONFIG_PORTABILITY
+    - IMPL-STORAGE
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-STORAGE.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-TAG_SYSTEM:
+  type: ARCH
+  name: Tag System Architecture
+  status: Active
+  description: "Recent tags with TTL caching, sanitization, sync storage"
+  cross_references:
+    - REQ-RECENT_TAGS_SYSTEM
+    - REQ-TAG_MANAGEMENT
+    - REQ-TAG_INPUT_SANITIZATION
+    - IMPL-TAG_SYSTEM
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-TAG_SYSTEM.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-OVERLAY:
+  type: ARCH
+  name: Overlay System Architecture
+  status: Active
+  description: "Semi-transparent overlay with hover activation, auto-show, refresh"
+  cross_references:
+    - REQ-OVERLAY_SYSTEM
+    - REQ-OVERLAY_AUTO_SHOW_CONTROL
+    - REQ-OVERLAY_REFRESH_ACTION
+    - IMPL-OVERLAY
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-OVERLAY.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-UX_CORE:
+  type: ARCH
+  name: User Experience Architecture
+  status: Active
+  description: "Popup session persistence with multi-action workflows"
+  cross_references:
+    - REQ-CORE_UX_PRESERVATION
+    - REQ-POPUP_PERSISTENT_SESSION
+    - IMPL-UX_CORE
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-UX_CORE.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-SUGGESTED_TAGS:
+  type: ARCH
+  name: Suggested Tags Architecture
+  status: Active
+  description: "Multi-source extraction with frequency sorting and case preservation"
+  cross_references:
+    - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    - REQ-SUGGESTED_TAGS_DEDUPLICATION
+    - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+    - IMPL-SUGGESTED_TAGS
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-MV3_MIGRATION:
+  type: ARCH
+  name: Manifest V3 Migration Strategy
+  status: Active
+  description: "Service worker replacement for background scripts with V3 permissions"
+  cross_references:
+    - REQ-MANIFEST_V3_MIGRATION
+    - IMPL-MV3_MIGRATION
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-MV3_MIGRATION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-BADGE:
+  type: ARCH
+  name: Badge System Architecture
+  status: Active
+  description: "Dynamic badge with color-coded states, tab-specific management"
+  cross_references:
+    - REQ-BADGE_INDICATORS
+    - IMPL-BADGE
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-BADGE.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-CROSS_BROWSER:
+  type: ARCH
+  name: Cross-Browser Compatibility Architecture
+  status: Active
+  description: "Unified browser API shim with Safari adaptations"
+  cross_references:
+    - REQ-EXTENSION_IDENTITY
+    - REQ-SAFARI_ADAPTATION
+    - IMPL-CROSS_BROWSER
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-CROSS_BROWSER.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-SERVICE_WORKER:
+  type: ARCH
+  name: Service Worker Architecture
+  status: Active
+  description: "Manifest V3 service worker with lifecycle management"
+  cross_references:
+    - REQ-MANIFEST_V3_MIGRATION
+    - IMPL-SERVICE_WORKER
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SERVICE_WORKER.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-MESSAGE_HANDLING:
+  type: ARCH
+  name: Message Handling Architecture
+  status: Active
+  description: "Centralized routing with standardized format, BOOKMARK_UPDATED broadcasts"
+  cross_references:
+    - REQ-SMART_BOOKMARKING
+    - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+    - IMPL-MESSAGE_HANDLING
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-MESSAGE_HANDLING.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-THEME:
+  type: ARCH
+  name: Theme System Architecture
+  status: Active
+  description: "Dark theme default with toggle and persisted preference"
+  cross_references:
+    - REQ-DARK_THEME
+    - IMPL-THEME
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-THEME.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-POPUP_SESSION:
+  type: ARCH
+  name: Popup Session Persistence Architecture
+  status: Active
+  description: "PopupController routing to keep popup open during multi-action workflows"
+  cross_references:
+    - REQ-POPUP_PERSISTENT_SESSION
+    - IMPL-POPUP_SESSION
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-POPUP_SESSION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-BOOKMARK_STATE_SYNC:
+  type: ARCH
+  name: Bookmark State Synchronization Architecture
+  status: Active
+  description: "BOOKMARK_UPDATED broadcast pattern for cross-surface state sync"
+  cross_references:
+    - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+    - IMPL-BOOKMARK_STATE_SYNC
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-BOOKMARK_STATE_SYNC.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-OVERLAY_CONTROLS:
+  type: ARCH
+  name: Overlay Control Layout Architecture
+  status: Active
+  description: "Fixed absolute positioning with accessibility, theme-aware styling"
+  cross_references:
+    - REQ-OVERLAY_CONTROL_LAYOUT
+    - REQ-OVERLAY_REFRESH_ACTION
+    - IMPL-OVERLAY_CONTROLS
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-OVERLAY_CONTROLS.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-OVERLAY_TESTABILITY:
+  type: ARCH
+  name: Overlay Test Harness Architecture
+  status: Active
+  description: "Mock DOM with auto-registration for overlay verification"
+  cross_references:
+    - REQ-OVERLAY_SYSTEM
+    - REQ-OVERLAY_CONTROL_LAYOUT
+    - IMPL-OVERLAY_TEST_HARNESS
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-OVERLAY_TESTABILITY.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+ARCH-SAFARI_ADAPTATION:
+  type: ARCH
+  name: Safari Adaptive Architecture
+  status: Active
+  description: "Safari-specific config, optimizations, error handler with degraded mode"
+  cross_references:
+    - REQ-SAFARI_ADAPTATION
+    - IMPL-SAFARI_ADAPTATION
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SAFARI_ADAPTATION.md
+  metadata:
+    registered: 2025-07-14
+    last_updated: 2026-02-13
+
+# NOTE: Implementation tokens from stdd/implementation-decisions.md remain to be migrated
+# IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-PINBOARD_API, IMPL-MV3_MIGRATION,
+# IMPL-STORAGE, IMPL-TAG_SYSTEM, IMPL-OVERLAY, IMPL-THEME, IMPL-BOOKMARKING, IMPL-BADGE,
+# IMPL-CROSS_BROWSER, IMPL-SERVICE_WORKER, IMPL-MESSAGE_HANDLING, IMPL-POPUP_SESSION,
+# IMPL-BOOKMARK_STATE_SYNC, IMPL-OVERLAY_CONTROLS, IMPL-SAFARI_ADAPTATION, IMPL-SUGGESTED_TAGS,
+# IMPL-OVERLAY_TEST_HARNESS, and others
+# Follow the established pattern above.
+
+# ---
+# Template Record - Copy this block to create new tokens
+# ---
+#
+# TOKEN-IDENTIFIER:
+#   type: REQ | ARCH | IMPL | TEST | PROC
+#   name: Token Name
+#   category: Optional category (e.g., Core Functional, Non-Functional for REQ)
+#   status: Active | Deprecated | Template | Planned
+#   description: "One-line description of what this token represents"
+#   cross_references:
+#     - RELATED-TOKEN-1
+#     - RELATED-TOKEN-2
+#   source_index: requirements.yaml | architecture-decisions.yaml | implementation-decisions.yaml | processes.md
+#   detail_file: path/to/detail/file.md | null
+#   metadata:
+#     registered: YYYY-MM-DD
+#     last_updated: YYYY-MM-DD

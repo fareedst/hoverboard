@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Converted to STDD methodology.
+- Converted to TIED methodology.
 - Removed Safari integration.
 
 ## [1.0.6.80] - 2025-07-20

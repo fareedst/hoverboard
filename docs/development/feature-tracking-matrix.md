@@ -7,18 +7,18 @@
 
 > 🤖 **AI Assistant Note**: This document serves as the **single source of truth** for all project features. Before making ANY code changes, AI assistants must consult this registry to understand feature relationships, dependencies, and implementation status.
 
-## 🔗 STDD Cross-References
+## 🔗 TIED Cross-References
 
-**⚠️ IMPORTANT**: This feature tracking matrix complements the STDD documentation. All requirements, architecture decisions, and implementation decisions are coordinated through the STDD folder:
+**⚠️ IMPORTANT**: This feature tracking matrix complements the TIED documentation. All requirements, architecture decisions, and implementation decisions are coordinated through the TIED folder:
 
-- **Requirements**: See `stdd/requirements.md` for requirement definitions with semantic tokens
-- **Architecture Decisions**: See `stdd/architecture-decisions.md` for architectural choices
-- **Implementation Decisions**: See `stdd/implementation-decisions.md` for implementation details
-- **Tasks**: See `stdd/tasks.md` for active task tracking
-- **Semantic Tokens**: See `stdd/semantic-tokens.md` for complete token registry
-- **AI Principles**: See `stdd/ai-principles.md` for development process
+- **Requirements**: See `tied/requirements.yaml` and `tied/requirements/` for requirement definitions with semantic tokens
+- **Architecture Decisions**: See `tied/architecture-decisions.yaml` and `tied/architecture-decisions/` for architectural choices
+- **Implementation Decisions**: See `tied/implementation-decisions.yaml` and `tied/implementation-decisions/` for implementation details
+- **Tasks**: See `tied/tasks.md` for active task tracking
+- **Semantic Tokens**: See `tied/semantic-tokens.yaml` and `tied/semantic-tokens.md` for complete token registry
+- **AI Principles**: See `ai-principles.md` for development process
 
-**For coordination of requirements, architecture, and implementation, always reference STDD files as the authoritative source.**
+**For coordination of requirements, architecture, and implementation, always reference TIED files as the authoritative source.**
 
 ---
 

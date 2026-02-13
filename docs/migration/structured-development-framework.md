@@ -5,27 +5,27 @@ This document establishes the development framework, documentation standards, an
 
 ## ⭐ CRITICAL DEVELOPMENT PRINCIPLES
 
-### 🔗 STDD Reference
+### 🔗 TIED Reference
 
-**⚠️ IMPORTANT**: All requirements, architecture decisions, and implementation decisions are now coordinated through the STDD folder:
+**⚠️ IMPORTANT**: All requirements, architecture decisions, and implementation decisions are now coordinated through the TIED folder:
 
-- **Requirements**: See `stdd/requirements.md` for all immutable and functional requirements
-- **Architecture Decisions**: See `stdd/architecture-decisions.md` for architectural choices
-- **Implementation Decisions**: See `stdd/implementation-decisions.md` for implementation details
-- **Semantic Tokens**: See `stdd/semantic-tokens.md` for token registry
-- **Tasks**: See `stdd/tasks.md` for active task tracking
-- **AI Principles**: See `stdd/ai-principles.md` for development process
+- **Requirements**: See `tied/requirements.yaml` and `tied/requirements/` for all immutable and functional requirements
+- **Architecture Decisions**: See `tied/architecture-decisions.yaml` and `tied/architecture-decisions/` for architectural choices
+- **Implementation Decisions**: See `tied/implementation-decisions.yaml` and `tied/implementation-decisions/` for implementation details
+- **Semantic Tokens**: See `tied/semantic-tokens.yaml` and `tied/semantic-tokens.md` for token registry
+- **Tasks**: See `tied/tasks.md` for active task tracking
+- **AI Principles**: See `ai-principles.md` for development process
 
 ### 🛡️ Immutable Requirements
 
-**All immutable requirements are documented in `stdd/requirements.md`:**
+**All immutable requirements are documented in `tied/requirements.yaml`:**
 
-- `[REQ:EXTENSION_IDENTITY]` - Extension Identity Preservation
-- `[REQ:CORE_UX_PRESERVATION]` - Core User Experience Preservation
-- `[REQ:MANIFEST_V3_MIGRATION]` - Manifest V3 Migration
-- `[REQ:PINBOARD_COMPATIBILITY]` - Pinboard API Compatibility
-- `[REQ:CHROME_STORAGE_USAGE]` - Chrome Storage API Usage
-- `[REQ:RECENT_TAGS_SYSTEM]` - Recent Tags System
+- `[REQ-EXTENSION_IDENTITY]` - Extension Identity Preservation
+- `[REQ-CORE_UX_PRESERVATION]` - Core User Experience Preservation
+- `[REQ-MANIFEST_V3_MIGRATION]` - Manifest V3 Migration
+- `[REQ-PINBOARD_COMPATIBILITY]` - Pinboard API Compatibility
+- `[REQ-CHROME_STORAGE_USAGE]` - Chrome Storage API Usage
+- `[REQ-RECENT_TAGS_SYSTEM]` - Recent Tags System
 
 **Key principles that cannot be changed:**
 1. **Feature Parity**: All existing functionality must be preserved

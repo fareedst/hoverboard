@@ -407,7 +407,7 @@ export class UIManager {
   }
 
   /**
-   * [REQ:SUGGESTED_TAGS_FROM_CONTENT] [IMPL:SUGGESTED_TAGS] [ARCH:SUGGESTED_TAGS]
+   * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS]
    * Update suggested tags display
    * @param {string[]} suggestedTags - Array of suggested tag names
    */
@@ -417,7 +417,7 @@ export class UIManager {
     // Clear existing suggested tags
     this.elements.suggestedTagsContainer.innerHTML = ''
 
-    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Show empty state or hide when no suggestions
+    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Show empty state or hide when no suggestions
     if (!suggestedTags || suggestedTags.length === 0) {
       const suggestedTagsSection = document.getElementById('suggestedTags')
       if (suggestedTagsSection) {
@@ -432,7 +432,7 @@ export class UIManager {
       suggestedTagsSection.style.display = 'block'
     }
 
-    // [REQ:SUGGESTED_TAGS_FROM_CONTENT] - Create suggested tag elements (clickable to add to current site)
+    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Create suggested tag elements (clickable to add to current site)
     suggestedTags.forEach(tag => {
       const tagElement = this.createRecentTagElement(tag) // Reuse same styling/behavior as recent tags
       this.elements.suggestedTagsContainer.appendChild(tagElement)

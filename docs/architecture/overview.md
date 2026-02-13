@@ -8,30 +8,30 @@
 
 This document provides a high-level overview of the Hoverboard browser extension architecture, including cross-browser support with a focus on Safari compatibility. All architectural decisions are coordinated across all supported platforms.
 
-## 🔗 STDD Reference
+## 🔗 TIED Reference
 
-**⚠️ IMPORTANT**: All architecture decisions are now documented in the STDD architecture decisions file:
+**⚠️ IMPORTANT**: All architecture decisions are now documented in the TIED architecture decisions file:
 
-- **Architecture Decisions**: See `stdd/architecture-decisions.md` for all architectural choices
-  - `[ARCH:CROSS_BROWSER]` - Cross-Browser Compatibility Architecture
-  - `[ARCH:STORAGE]` - Storage Strategy
-  - `[ARCH:SERVICE_WORKER]` - Service Worker Architecture
-  - `[ARCH:MESSAGE_HANDLING]` - Message Handling Architecture
-  - `[ARCH:OVERLAY]` - Overlay System (auto-show + refresh controls)
-  - `[ARCH:TAG_SYSTEM]` - Tag System (sanitization + recent tags)
+- **Architecture Decisions**: See `tied/architecture-decisions.yaml` and `tied/architecture-decisions/` for all architectural choices
+  - `[ARCH-CROSS_BROWSER]` - Cross-Browser Compatibility Architecture
+  - `[ARCH-STORAGE]` - Storage Strategy
+  - `[ARCH-SERVICE_WORKER]` - Service Worker Architecture
+  - `[ARCH-MESSAGE_HANDLING]` - Message Handling Architecture
+  - `[ARCH-OVERLAY]` - Overlay System (auto-show + refresh controls)
+  - `[ARCH-TAG_SYSTEM]` - Tag System (sanitization + recent tags)
   - And more...
 
-- **Requirements**: See `stdd/requirements.md` for requirements that drive architecture
-- **Implementation Decisions**: See `stdd/implementation-decisions.md` for implementation details
-- **Semantic Tokens**: See `stdd/semantic-tokens.md` for complete token registry
+- **Requirements**: See `tied/requirements.yaml` and `tied/requirements/` for requirements that drive architecture
+- **Implementation Decisions**: See `tied/implementation-decisions.yaml` and `tied/implementation-decisions/` for implementation details
+- **Semantic Tokens**: See `tied/semantic-tokens.yaml` and `tied/semantic-tokens.md` for complete token registry
 
-**For coordination of architecture decisions, always reference STDD files as the authoritative source.**
+**For coordination of architecture decisions, always reference TIED files as the authoritative source.**
 
 ### Recent Requirement-to-Architecture Links
 
-- `[REQ:OVERLAY_AUTO_SHOW_CONTROL]` and `[REQ:OVERLAY_REFRESH_ACTION]` are fulfilled by `[ARCH:OVERLAY]` and implemented in `PopupController`, `ConfigManager`, and `overlay-manager` refresh handlers.
-- `[REQ:CONFIG_PORTABILITY]` is fulfilled by `[ARCH:STORAGE]` and implemented via `ConfigManager.exportConfig()` / `importConfig()`.
-- `[REQ:TAG_INPUT_SANITIZATION]` is fulfilled by `[ARCH:TAG_SYSTEM]` with validation centralized in `TagService.sanitizeTag`.
+- `[REQ-OVERLAY_AUTO_SHOW_CONTROL]` and `[REQ-OVERLAY_REFRESH_ACTION]` are fulfilled by `[ARCH-OVERLAY]` and implemented in `PopupController`, `ConfigManager`, and `overlay-manager` refresh handlers.
+- `[REQ-CONFIG_PORTABILITY]` is fulfilled by `[ARCH-STORAGE]` and implemented via `ConfigManager.exportConfig()` / `importConfig()`.
+- `[REQ-TAG_INPUT_SANITIZATION]` is fulfilled by `[ARCH-TAG_SYSTEM]` with validation centralized in `TagService.sanitizeTag`.
 
 ## [ARCH-OVERVIEW-001] Core Architecture Principles
 
@@ -61,7 +61,7 @@ This document provides a high-level overview of the Hoverboard browser extension
 **Cross-References:**
 - `docs/development/ai-development/TAG_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Tag synchronization
 - `docs/development/ai-development/TOGGLE_SYNCHRONIZATION_ARCHITECTURAL_DECISIONS.md`: Toggle synchronization
-- `stdd/requirements.md`: `[REQ:TAG_INPUT_SANITIZATION]`
+- `tied/requirements.yaml`: `[REQ-TAG_INPUT_SANITIZATION]`
 
 ### Testability Strategy
 
