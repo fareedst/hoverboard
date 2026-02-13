@@ -131,6 +131,37 @@ describe('Tag Storage and Cross-Instance Availability', () => {
       expect(bookmark.tags).toContain(newTag)
     })
 
+    test('should save tag with special characters (#, +, .) with percent-encoded URL', async () => {
+      const testUrl = 'https://example.com'
+      const tagWithSpecialChars = 'C#+plus.node'
+
+      global.fetch.mockResolvedValueOnce({
+        ok: true,
+        text: () => Promise.resolve(`
+          <?xml version="1.0" encoding="UTF-8"?>
+          <result code="done" />
+        `)
+      })
+
+      const tagData = {
+        url: testUrl,
+        value: tagWithSpecialChars,
+        description: 'Test Bookmark'
+      }
+
+      const result = await pinboardService.saveTag(tagData)
+
+      expect(result).toBeDefined()
+      const addCall = global.fetch.mock.calls.find(call => call[0].includes('posts/add'))
+      expect(addCall).toBeDefined()
+      const fetchUrl = addCall[0]
+      // Tags parameter must be percent-encoded: # -> %23, + -> %2B so the API request is not broken
+      expect(fetchUrl).toContain('%23')
+      expect(fetchUrl).toContain('%2B')
+      expect(fetchUrl).not.toMatch(/\btags=[^&]*#/)
+      expect(fetchUrl).not.toMatch(/\btags=[^&]*\+[^&]*&/)
+    })
+
     test('should retrieve saved tags when popup is reopened', async () => {
       const testUrl = 'https://example.com'
       const expectedTags = ['test', 'tag1', 'tag2', 'newly-added-tag']

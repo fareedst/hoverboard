@@ -5056,29 +5056,30 @@ var init_pinboard_service = __esm({
        * PIN-003: Parameter encoding for bookmark save operations
        * SPECIFICATION: Encode all bookmark fields as URL parameters for posts/add
        * IMPLEMENTATION DECISION: Handle both string and array tag formats
+       * Explicit encodeURIComponent so tags (and other fields) containing #, +, ., etc. do not break the API request.
        */
       buildSaveParams(bookmarkData) {
-        const params = new URLSearchParams();
+        const pairs = [];
         if (bookmarkData.url) {
-          params.append("url", bookmarkData.url);
+          pairs.push(`url=${encodeURIComponent(bookmarkData.url)}`);
         }
         if (bookmarkData.description) {
-          params.append("description", bookmarkData.description);
+          pairs.push(`description=${encodeURIComponent(bookmarkData.description)}`);
         }
         if (bookmarkData.extended) {
-          params.append("extended", bookmarkData.extended);
+          pairs.push(`extended=${encodeURIComponent(bookmarkData.extended)}`);
         }
         if (bookmarkData.tags) {
           const tagsString = Array.isArray(bookmarkData.tags) ? bookmarkData.tags.join(" ") : bookmarkData.tags;
-          params.append("tags", tagsString);
+          pairs.push(`tags=${encodeURIComponent(tagsString)}`);
         }
         if (bookmarkData.shared !== void 0) {
-          params.append("shared", bookmarkData.shared);
+          pairs.push(`shared=${encodeURIComponent(String(bookmarkData.shared))}`);
         }
         if (bookmarkData.toread !== void 0) {
-          params.append("toread", bookmarkData.toread);
+          pairs.push(`toread=${encodeURIComponent(String(bookmarkData.toread))}`);
         }
-        return params.toString();
+        return pairs.join("&");
       }
       /**
        * Clean URL for consistent API usage

@@ -1048,6 +1048,60 @@ IMPL-CODE_STYLE:
 # Template Record - Copy this block to create new implementation decisions
 # ---
 #
+IMPL-PINBOARD_POSTS_ADD_ENCODING:
+  name: Pinboard posts/add query parameter encoding
+  status: Active
+  cross_references:
+    - IMPL-PINBOARD_API
+    - IMPL-TAG_SYSTEM
+  rationale:
+    why: "Store-tag API calls fail when tags contain #, +, or . unless query parameters are percent-encoded"
+    problems_solved:
+      - "Unencoded # breaks the request URL (fragment delimiter); auth_token and other params can be lost"
+      - "Unencoded + is interpreted as space in application/x-www-form-urlencoded"
+      - "Pinboard API requires all arguments to be URL-encoded"
+    benefits:
+      - "Tags (and description, extended, url) with #, +, ., &, = etc. can be stored without breaking the API call"
+      - "Explicit encodeURIComponent guarantees correct encoding across extension and Safari runtimes"
+  implementation_approach:
+    summary: "Build posts/add query string with encodeURIComponent for every user-controlled parameter value"
+    details:
+      - "buildSaveParams builds key=encodeURIComponent(value) pairs and join('&') instead of URLSearchParams"
+      - "Applied to url, description, extended, tags, shared, toread in src and safari pinboard-service"
+      - "Same logic in safari/src/features/pinboard/pinboard-service.js for consistency"
+  code_locations:
+    files:
+      - path: "src/features/pinboard/pinboard-service.js"
+        description: "buildSaveParams uses encodeURIComponent for all params"
+      - path: "safari/src/features/pinboard/pinboard-service.js"
+        description: "Mirror buildSaveParams encoding"
+    functions:
+      - name: "buildSaveParams"
+        file: "src/features/pinboard/pinboard-service.js"
+        description: "Builds encoded query string for posts/add"
+  traceability:
+    architecture: []
+    requirements: []
+    tests:
+      - "tag-storage.test.js: should save tag with special characters (#, +, .) with percent-encoded URL"
+    code_annotations:
+      - "PIN-003 (parameter encoding comment in buildSaveParams)"
+  related_decisions:
+    depends_on:
+      - IMPL-PINBOARD_API
+    supersedes: []
+    see_also:
+      - IMPL-TAG_SYSTEM
+  detail_file: implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.md
+  metadata:
+    created:
+      date: "2026-02-13"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-13"
+      author: "AI Agent"
+      reason: "Bug fix: tag storage fails when special characters in tag"
+
 # IMPL-IDENTIFIER:
 #   name: Implementation Title
 #   status: Active

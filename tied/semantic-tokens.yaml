@@ -242,6 +242,20 @@ IMPL-EXAMPLE_IMPLEMENTATION:
     registered: 2025-11-08
     last_updated: 2026-02-08
 
+IMPL-PINBOARD_POSTS_ADD_ENCODING:
+  type: IMPL
+  name: Pinboard posts/add query parameter encoding
+  status: Active
+  description: "Explicit percent-encoding of posts/add params so tags and other fields with #, +, . do not break the API call"
+  cross_references:
+    - IMPL-PINBOARD_API
+    - IMPL-TAG_SYSTEM
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
 PROC-PROJECT_SURVEY_AND_SETUP:
   type: PROC
   name: Project Survey and Setup Process

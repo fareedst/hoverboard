@@ -643,8 +643,8 @@ export class UIManager {
       return false
     }
 
-    // [IMMUTABLE-REQ-TAG-001] - Check for only safe characters
-    const safeChars = /^[\w\s-]+$/
+    // [IMMUTABLE-REQ-TAG-001] - Check for only safe characters (allow #, +, . for e.g. C#, node.js; API encodes via buildSaveParams)
+    const safeChars = /^[\w\s.#+-]+$/
     if (!safeChars.test(trimmedTag)) {
       return false
     }

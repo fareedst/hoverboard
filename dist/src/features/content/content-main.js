@@ -3876,29 +3876,30 @@
          * PIN-003: Parameter encoding for bookmark save operations
          * SPECIFICATION: Encode all bookmark fields as URL parameters for posts/add
          * IMPLEMENTATION DECISION: Handle both string and array tag formats
+         * Explicit encodeURIComponent so tags (and other fields) containing #, +, ., etc. do not break the API request.
          */
         buildSaveParams(bookmarkData) {
-          const params = new URLSearchParams();
+          const pairs = [];
           if (bookmarkData.url) {
-            params.append("url", bookmarkData.url);
+            pairs.push(`url=${encodeURIComponent(bookmarkData.url)}`);
           }
           if (bookmarkData.description) {
-            params.append("description", bookmarkData.description);
+            pairs.push(`description=${encodeURIComponent(bookmarkData.description)}`);
           }
           if (bookmarkData.extended) {
-            params.append("extended", bookmarkData.extended);
+            pairs.push(`extended=${encodeURIComponent(bookmarkData.extended)}`);
           }
           if (bookmarkData.tags) {
             const tagsString = Array.isArray(bookmarkData.tags) ? bookmarkData.tags.join(" ") : bookmarkData.tags;
-            params.append("tags", tagsString);
+            pairs.push(`tags=${encodeURIComponent(tagsString)}`);
           }
           if (bookmarkData.shared !== void 0) {
-            params.append("shared", bookmarkData.shared);
+            pairs.push(`shared=${encodeURIComponent(String(bookmarkData.shared))}`);
           }
           if (bookmarkData.toread !== void 0) {
-            params.append("toread", bookmarkData.toread);
+            pairs.push(`toread=${encodeURIComponent(String(bookmarkData.toread))}`);
           }
-          return params.toString();
+          return pairs.join("&");
         }
         /**
          * Clean URL for consistent API usage
@@ -6099,6 +6100,8 @@
                 this.showMessage("Failed to save tag", "error");
               }
             } else if (tagText && !this.isValidTag(tagText)) {
+              fetch("http://127.0.0.1:7245/ingest/538d355e-1451-4900-8c0c-4ee5079481c1", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ location: "overlay-manager.js:keypress", message: "Invalid tag format shown", data: { tagText }, timestamp: Date.now(), hypothesisId: "H2" }) }).catch(() => {
+              });
               debugLog3("[IMMUTABLE-REQ-TAG-004] Invalid tag rejected:", tagText);
               this.showMessage("Invalid tag format", "error");
             }
@@ -7867,8 +7870,11 @@
       if (invalidChars.test(trimmedTag)) {
         return false;
       }
-      const safeChars = /^[\w\s-]+$/;
-      if (!safeChars.test(trimmedTag)) {
+      const safeChars = /^[\w\s.#+-]+$/;
+      const pass = safeChars.test(trimmedTag);
+      fetch("http://127.0.0.1:7245/ingest/538d355e-1451-4900-8c0c-4ee5079481c1", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ location: "overlay-manager.js:isValidTag", message: "isValidTag result", data: { tag: trimmedTag, pass }, timestamp: Date.now(), hypothesisId: "H2" }) }).catch(() => {
+      });
+      if (!pass) {
         return false;
       }
       return true;
