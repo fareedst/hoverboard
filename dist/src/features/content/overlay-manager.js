@@ -333,9 +333,6 @@ class OverlayManager {
               this.showMessage('Failed to save tag', 'error')
             }
           } else if (tagText && !this.isValidTag(tagText)) {
-            // #region agent log
-            fetch('http://127.0.0.1:7245/ingest/538d355e-1451-4900-8c0c-4ee5079481c1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'overlay-manager.js:keypress', message: 'Invalid tag format shown', data: { tagText }, timestamp: Date.now(), hypothesisId: 'H2' }) }).catch(() => {})
-            // #endregion
             debugLog('[IMMUTABLE-REQ-TAG-004] Invalid tag rejected:', tagText)
             this.showMessage('Invalid tag format', 'error')
           }
@@ -2395,11 +2392,7 @@ class OverlayManager {
 
     // [IMMUTABLE-REQ-TAG-001] - Check for only safe characters (allow #, +, . for e.g. C#, node.js; API encodes via buildSaveParams)
     const safeChars = /^[\w\s.#+-]+$/
-    const pass = safeChars.test(trimmedTag)
-    // #region agent log
-    fetch('http://127.0.0.1:7245/ingest/538d355e-1451-4900-8c0c-4ee5079481c1', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'overlay-manager.js:isValidTag', message: 'isValidTag result', data: { tag: trimmedTag, pass }, timestamp: Date.now(), hypothesisId: 'H2' }) }).catch(() => {})
-    // #endregion
-    if (!pass) {
+    if (!safeChars.test(trimmedTag)) {
       return false
     }
 

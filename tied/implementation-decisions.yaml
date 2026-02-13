@@ -1102,6 +1102,62 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
       author: "AI Agent"
       reason: "Bug fix: tag storage fails when special characters in tag"
 
+IMPL-RECENT_TAGS_POPUP_REFRESH:
+  name: Recent Tags refresh on every popup display
+  status: Active
+  cross_references:
+    - REQ-RECENT_TAGS_SYSTEM
+    - ARCH-POPUP_SESSION
+  rationale:
+    why: "Ensure Recent Tags list is refreshed whenever the popup is displayed, including when the document is reused without full reload"
+    problems_solved:
+      - "Popup might be shown again without loadInitialData running (e.g. document reuse)"
+      - "Recent Tags could appear stale after saving a tag in another window"
+    benefits:
+      - "Recent Tags always reflect service worker shared memory when user sees the popup"
+      - "Tags saved in one window appear in Recent Tags when popup is displayed in any window"
+  implementation_approach:
+    summary: "Add document.visibilitychange listener in PopupController that calls loadRecentTags() when document becomes visible and popup is initialized"
+    details:
+      - "Listener registered in setupAutoRefresh() alongside existing focus listener"
+      - "Guard: only run when document.visibilityState === 'visible', isInitialized, and !isLoading"
+      - "loadRecentTags() fetches from service worker (getRecentBookmarks) and updates UI via uiManager.updateRecentTags()"
+  code_locations:
+    files:
+      - path: "src/ui/popup/PopupController.js"
+        description: "visibilitychange listener and loadRecentTags call"
+    functions:
+      - name: "setupAutoRefresh"
+        file: "src/ui/popup/PopupController.js"
+        description: "Registers visibilitychange listener for Recent Tags refresh"
+  traceability:
+    architecture:
+      - ARCH-POPUP_SESSION
+    requirements:
+      - REQ-RECENT_TAGS_SYSTEM
+    tests: []
+    code_annotations:
+      - IMPL-RECENT_TAGS_POPUP_REFRESH
+      - IMMUTABLE-REQ-TAG-003
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-TAG_SYSTEM
+  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md
+  metadata:
+    created:
+      date: "2026-02-13"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-13"
+      author: "AI Agent"
+      reason: "Recent Tags refresh on every popup display per plan"
+    last_validated:
+      date: "2026-02-13"
+      validator: "AI Agent"
+      result: "pass"
+
 # IMPL-IDENTIFIER:
 #   name: Implementation Title
 #   status: Active

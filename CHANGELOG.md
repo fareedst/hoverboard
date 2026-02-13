@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Recent Tags refresh on popup display** (`IMPL-RECENT_TAGS_POPUP_REFRESH`) - Recent Tags list now refreshes every time the popup is displayed:
+  - Popup listens for `document.visibilitychange` and refetches Recent Tags from the service worker when the popup becomes visible
+  - Ensures the list is up to date even when the popup document is reused without a full reload
+  - Tags saved in one browser window appear in the Recent Tags list when the popup or overlay is opened in this or any other window (shared state via service worker)
+  - Overlay already refreshed recent tags on each show; no overlay code change required
+
 - **Customizable Font Sizes** (`CFG-FONT-SIZE-001`) - User-configurable font sizes for all UI text elements:
   - **Suggested Tags**: Default 10px (smaller for less visual intrusion), configurable 8-20px
   - **Labels**: Default 12px (Current, Recent, Suggested), configurable 10-16px

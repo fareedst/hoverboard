@@ -1941,12 +1941,21 @@ export class PopupController {
 
   /**
    * [POPUP-REFRESH-001] Setup auto-refresh on focus
+   * [IMMUTABLE-REQ-TAG-003] [IMPL-RECENT_TAGS_POPUP_REFRESH] Refresh Recent Tags when popup becomes visible
    */
   setupAutoRefresh() {
     window.addEventListener('focus', () => {
       if (this.isInitialized && !this.isLoading) {
         debugLog('[POPUP-REFRESH-001] Auto-refresh on focus triggered')
         this.refreshPopupData()
+      }
+    })
+
+    // [IMMUTABLE-REQ-TAG-003] [IMPL-RECENT_TAGS_POPUP_REFRESH] Refresh Recent Tags every time popup is displayed
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && this.isInitialized && !this.isLoading) {
+        debugLog('[IMPL-RECENT_TAGS_POPUP_REFRESH] Popup visible, refreshing recent tags')
+        this.loadRecentTags()
       }
     })
   }

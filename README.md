@@ -29,7 +29,7 @@ npm run build:dev
 **Last Updated:** 2026-02-13  
 **Chrome Extension Status:** Production Ready
 
-**Latest Enhancement:** Intelligent tag suggestions now extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers for significantly improved tag quality.
+**Latest Enhancement:** Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows—tags saved in one window appear in Recent Tags when you open the popup or overlay in any window. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
 
 ### Chrome Extension Features
 
@@ -38,7 +38,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 #### **Core Features:**
 - ✅ **Smart Bookmarking** - Save pages with intelligent tag suggestions from 11 content sources (title, URL, meta tags, headings, emphasis elements, definition terms, table headers, navigation, breadcrumbs, images, links)
 - ✅ **Tag Management** - Organize bookmarks with custom tags and categories
-- ✅ **Recent Tags** - Quick access to frequently used tags
+- ✅ **Recent Tags** - Quick access to frequently used tags; list refreshes every time the popup is displayed and syncs across windows
 - ✅ **Dark Theme Support** - Modern UI with dark theme default
 - ✅ **Overlay System** - Visual feedback with transparency controls
 - ✅ **Pinboard Integration** - Direct integration with Pinboard.in API
@@ -68,7 +68,7 @@ Intelligent tag suggestions extracted from multiple page content sources:
 
 #### Additional Features
 - **Tag Management:** Organize bookmarks with custom tags and categories
-- **Recent Tags:** Quick access to frequently used tags
+- **Recent Tags:** Quick access to frequently used tags; refreshes on every popup display and syncs across windows so tags saved in one window appear in any other
 - **Pinboard Integration:** Direct API integration with Pinboard.in bookmarking service
 - **Dark Theme Support:** Modern UI with dark theme default
 - **Overlay System:** Visual feedback with transparency controls
@@ -226,6 +226,7 @@ This project follows the TIED methodology for comprehensive requirements trackin
 - **Requirements**: [`tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md`](tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md) - Detailed tag extraction requirements and validation criteria
 - **Architecture**: [`tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md`](tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md) - Multi-source extraction architecture and design decisions
 - **Implementation**: [`tied/implementation-decisions/IMPL-SUGGESTED_TAGS.md`](tied/implementation-decisions/IMPL-SUGGESTED_TAGS.md) - Implementation details, modifiable decisions, and performance considerations
+- **Recent Tags Refresh**: [`tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md`](tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md) - Refresh Recent Tags on every popup display and cross-window sync
 - **Implementation Map**: [`tied/docs/suggested-tags-implementation-map.md`](tied/docs/suggested-tags-implementation-map.md) - Quick reference mapping TIED tokens to code locations
 
 ### Architecture Documents

@@ -965,6 +965,21 @@ ARCH-SAFARI_ADAPTATION:
     registered: 2025-07-14
     last_updated: 2026-02-13
 
+IMPL-RECENT_TAGS_POPUP_REFRESH:
+  type: IMPL
+  name: Recent Tags refresh on popup display
+  category: Popup / Tags
+  status: Active
+  description: "Refresh Recent Tags list whenever the popup document becomes visible (visibilitychange)"
+  cross_references:
+    - REQ-RECENT_TAGS_SYSTEM
+    - ARCH-POPUP_SESSION
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
 # NOTE: Implementation tokens from stdd/implementation-decisions.md remain to be migrated
 # IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-PINBOARD_API, IMPL-MV3_MIGRATION,
 # IMPL-STORAGE, IMPL-TAG_SYSTEM, IMPL-OVERLAY, IMPL-THEME, IMPL-BOOKMARKING, IMPL-BADGE,
