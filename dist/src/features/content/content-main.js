@@ -8301,6 +8301,12 @@
 
   // src/core/message-handler.js
   init_pinboard_service();
+
+  // src/features/storage/local-bookmark-service.js
+  init_tag_service();
+  init_utils();
+
+  // src/core/message-handler.js
   init_tag_service();
   init_config_manager();
   init_utils();
@@ -8308,6 +8314,8 @@
     // Data retrieval
     GET_CURRENT_BOOKMARK: "getCurrentBookmark",
     GET_RECENT_BOOKMARKS: "getRecentBookmarks",
+    GET_LOCAL_BOOKMARKS_FOR_INDEX: "getLocalBookmarksForIndex",
+    // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
     GET_OPTIONS: "getOptions",
     GET_TAB_ID: "getTabId",
     // Bookmark operations

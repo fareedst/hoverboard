@@ -4,6 +4,7 @@
  */
 
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
+import { LocalBookmarkService } from '../features/storage/local-bookmark-service.js'
 import { TagService } from '../features/tagging/tag-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { TabSearchService } from '../features/search/tab-search-service.js'
@@ -14,6 +15,7 @@ export const MESSAGE_TYPES = {
   // Data retrieval
   GET_CURRENT_BOOKMARK: 'getCurrentBookmark',
   GET_RECENT_BOOKMARKS: 'getRecentBookmarks',
+  GET_LOCAL_BOOKMARKS_FOR_INDEX: 'getLocalBookmarksForIndex', // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
   GET_OPTIONS: 'getOptions',
   GET_TAB_ID: 'getTabId',
 
@@ -149,6 +151,9 @@ export class MessageHandler {
 
       case MESSAGE_TYPES.GET_RECENT_BOOKMARKS:
         return this.handleGetRecentBookmarks(data, url)
+
+      case MESSAGE_TYPES.GET_LOCAL_BOOKMARKS_FOR_INDEX:
+        return this.handleGetLocalBookmarksForIndex()
 
       case MESSAGE_TYPES.GET_OPTIONS:
         return this.handleGetOptions()
@@ -320,6 +325,23 @@ export class MessageHandler {
 
     debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Returning response:', response)
     return response
+  }
+
+  /**
+   * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
+   * Return all bookmarks from local storage only. Always uses LocalBookmarkService, not bookmarkProvider.
+   * @returns {Promise<{ bookmarks: Array }>}
+   */
+  async handleGetLocalBookmarksForIndex () {
+    try {
+      const localService = new LocalBookmarkService(this.tagService)
+      const bookmarks = await localService.getAllBookmarks()
+      debugLog('[MESSAGE-HANDLER] [IMPL-LOCAL_BOOKMARKS_INDEX] getLocalBookmarksForIndex:', bookmarks.length)
+      return { bookmarks }
+    } catch (error) {
+      debugError('[MESSAGE-HANDLER] [IMPL-LOCAL_BOOKMARKS_INDEX] getLocalBookmarksForIndex failed:', error)
+      return { bookmarks: [], error: error.message }
+    }
   }
 
   /**

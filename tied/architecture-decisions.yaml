@@ -1481,6 +1481,116 @@ ARCH-LOCAL_STORAGE_PROVIDER:
       validator: "AI Agent"
       result: "pass"
 
+ARCH-LOCAL_BOOKMARKS_INDEX:
+  name: Local Bookmarks Index Architecture
+  status: Active
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX
+  rationale:
+    why: "Provide a dedicated page for browsing and searching locally stored bookmarks only"
+    problems_solved:
+      - "No single view of all local bookmarks"
+      - "Users cannot search/filter/sort local bookmarks in one place"
+    benefits:
+      - "Full index of local bookmarks with search, filter, sort, and launch"
+      - "Data source always local (LocalBookmarkService); independent of storage mode"
+      - "Client-side search/filter/sort for responsiveness"
+  alternatives_considered:
+    - name: "Use current provider (Pinboard or local)"
+      pros:
+        - "Single code path"
+      cons:
+        - "Index would show Pinboard data when in Pinboard mode; plan requires local-only"
+      rejected_reason: "Requirement is local-only index"
+    - name: "Server-side or background search/filter"
+      pros: []
+      cons:
+        - "More messages; client has full list for sort/filter anyway"
+      rejected_reason: "Client-side is simpler and sufficient"
+  implementation_approach:
+    summary: "Dedicated extension HTML page opened via chrome.tabs.create; data from getLocalBookmarksForIndex only; LocalBookmarkService used directly for this message; client-side search/filter/sort; URL column as link"
+    details:
+      - "Single extension page (e.g. bookmarks-table.html) with table, search input, filter controls"
+      - "Message getLocalBookmarksForIndex always calls LocalBookmarkService.getAllBookmarks(), not bookmarkProvider"
+      - "Page receives full bookmark array; implements search (title/URL/tags/extended), filters (tag, toread, shared), sortable columns (default time desc)"
+      - "URL column renders as <a target=_blank> for launch"
+      - "Empty state when no local bookmarks"
+  traceability:
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    tests: []
+    code_annotations:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+  related_decisions:
+    depends_on:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    informs:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    see_also:
+      - ARCH-LOCAL_STORAGE_PROVIDER
+      - ARCH-MESSAGE_HANDLING
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md
+  metadata:
+    created:
+      date: "2026-02-13"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-13"
+      author: "AI Agent"
+      reason: "Phase 3: implementation complete"
+
+ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  name: Local Bookmarks Index Export Architecture
+  status: Active
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  rationale:
+    why: "Allow backup and portability of index data without adding backend complexity"
+    problems_solved:
+      - "Users cannot export index data"
+    benefits:
+      - "Client-side only; uses existing allBookmarks and filteredBookmarks"
+      - "No new message or backend; download via Blob and anchor"
+  alternatives_considered:
+    - name: "Backend export message"
+      pros:
+        - "Could stream large datasets"
+      cons:
+        - "Data already on page; unnecessary round-trip"
+      rejected_reason: "Client has full data; client-side is sufficient"
+  implementation_approach:
+    summary: "Export implemented entirely on index page; data from allBookmarks (all) or filteredBookmarks (displayed); serialize to CSV (and optionally JSON); trigger download via Blob + temporary anchor with download attribute"
+    details:
+      - "No new background message; use in-memory arrays already on page"
+      - "CSV: columns Title, URL, Tags, Time, Shared, To read, Notes; quoted fields, escaped quotes"
+      - "Optional JSON: full bookmark objects"
+      - "Filename e.g. hoverboard-bookmarks-{all|displayed}-{ISO date}.csv"
+  traceability:
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+    tests: []
+    code_annotations:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+  related_decisions:
+    depends_on: []
+    informs:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  metadata:
+    created:
+      date: "2026-02-13"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-13"
+      author: "AI Agent"
+      reason: "Implementation complete"
+
 # ---
 # Template Record - Copy this block to create new architecture decisions
 # ---

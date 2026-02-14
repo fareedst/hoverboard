@@ -39,7 +39,7 @@ npm run build:dev
 **Last Updated:** 2026-02-13  
 **Chrome Extension Status:** Production Ready
 
-**Latest Enhancement:** Bookmarks are stored **locally in your browser by default**—no account or API required. Switch to Pinboard (Options > Storage Mode) for cloud sync. Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
+**Latest Enhancement:** A **Local Bookmarks Index** page lets you browse, search, filter, sort, and open all locally stored bookmarks in one place (popup → "Bookmarks index" or Options → "Local bookmarks index"). Bookmarks are stored **locally in your browser by default**—no account or API required. Switch to Pinboard (Options > Storage Mode) for cloud sync. Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
 
 ### Chrome Extension Features
 
@@ -52,6 +52,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - ✅ **Recent Tags** - Quick access to frequently used tags; list refreshes every time the popup is displayed and syncs across windows
 - ✅ **Dark Theme Support** - Modern UI with dark theme default
 - ✅ **Overlay System** - Visual feedback with transparency controls
+- ✅ **Local Bookmarks Index** - Full-page index of locally stored bookmarks: search (title, URL, tags, notes), filter (by tag, to-read, private), sortable columns, clickable URLs to open in a new tab, and Export all / Export displayed to CSV (see screenshot below). Open from popup ("Bookmarks index") or Options ("Local bookmarks index"). Data is local-only (chrome.storage.local); not shown when using Pinboard.
 - ✅ **Optional Pinboard integration** - Use Storage Mode in Options to sync with Pinboard.in (requires API token)
 - ✅ **Badge Indicators** - Visual status indicators in the extension icon
 - ✅ **Site Management** - Disable extension on specific domains
@@ -82,6 +83,7 @@ Intelligent tag suggestions extracted from multiple page content sources:
 - **Optional—Pinboard:** In Options > Storage Mode, choose "Pinboard (cloud)" to sync with Pinboard.in. Requires an API token (Options > Authentication).
 
 #### Additional Features
+- **Local Bookmarks Index:** Browse all locally stored bookmarks in a dedicated page. Search by title, URL, tags, or notes; filter by tag, to-read, or private; sort by column (default: newest first); click a URL to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index"). Shows only local storage data (empty when using Pinboard).
 - **Tag Management:** Organize bookmarks with custom tags and categories
 - **Recent Tags:** Quick access to frequently used tags; refreshes on every popup display and syncs across windows so tags saved in one window appear in any other
 - **Optional Pinboard integration:** Use Storage Mode in Options to sync with Pinboard.in bookmarking service (requires API token)
@@ -139,6 +141,18 @@ The configuration page provides comprehensive settings for customizing the exten
   - URL hash stripping when saving bookmarks
   - Auto-close timeout configuration (currently disabled at 0ms)
 
+### Local Bookmarks Index
+
+![Local Bookmarks Index](images/local-bookmarks-index.png)
+
+The snapshot above shows the dedicated full-page view of all locally stored bookmarks:
+
+- **Header:** Hoverboard logo and extension name, with "Local Bookmarks Index" title and subtitle
+- **Search and filters:** Search box (title, URL, tags, notes), Clear button, tag filter (comma-separated), "To read only" and "Private only" checkboxes
+- **Export:** "Export all" and "Export displayed" buttons download the current set as CSV
+- **Table:** Columns Title, URL, Tags, Time, Shared, To read; URL column is clickable (opens in new tab)
+- **Footer:** Row count (e.g. "N bookmarks")
+
 ## Architecture
 
 ### Chrome Extension Architecture
@@ -152,6 +166,7 @@ The configuration page provides comprehensive settings for customizing the exten
 - **Service Worker:** Background script handling bookmark operations and API calls
 - **Content Scripts:** Overlay system with transparency controls and visual feedback
 - **Popup Interface:** Modern UI with quick actions and tag management
+- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) for searching, filtering, sorting, and opening local bookmarks; data from `getLocalBookmarksForIndex` (LocalBookmarkService only)
 - **Storage System:** Local state management with Chrome storage API
 - **Error Handling:** Comprehensive error recovery and user feedback
 - **Badge Management:** Visual indicators in the extension icon
@@ -244,6 +259,7 @@ This project follows the TIED methodology for comprehensive requirements trackin
 - **Architecture**: [`tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md`](tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md) - Multi-source extraction architecture and design decisions
 - **Implementation**: [`tied/implementation-decisions/IMPL-SUGGESTED_TAGS.md`](tied/implementation-decisions/IMPL-SUGGESTED_TAGS.md) - Implementation details, modifiable decisions, and performance considerations
 - **Recent Tags Refresh**: [`tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md`](tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md) - Refresh Recent Tags on every popup display and cross-window sync
+- **Local Bookmarks Index**: [`tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.md`](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.md), [`tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md`](tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md), [`tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md`](tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md) - Full-page index of local bookmarks (search, filter, sort, launch)
 - **Implementation Map**: [`tied/docs/suggested-tags-implementation-map.md`](tied/docs/suggested-tags-implementation-map.md) - Quick reference mapping TIED tokens to code locations
 
 ### Architecture Documents
@@ -276,6 +292,7 @@ The Chrome extension provides comprehensive bookmark management with the followi
 | `CHROME-UI-001` | Modern popup interface | ✅ Complete |
 | `CHROME-ERROR-001` | Error handling and recovery | ✅ Complete |
 | `CHROME-SEARCH-001` | Tab search functionality | ✅ Complete |
+| `CHROME-INDEX-001` | Local bookmarks index (search, filter, sort, launch) | ✅ Complete |
 | `CHROME-SETTINGS-001` | Configuration and preferences | ✅ Complete |
 | `CHROME-ACCESSIBILITY-001` | Accessibility features | ✅ Complete |
 

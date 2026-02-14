@@ -5168,6 +5168,9 @@ var OptionsController = class {
   }
   async init() {
     this.bindElements();
+    if (this.elements.bookmarksIndexLink && typeof chrome !== "undefined" && chrome.runtime) {
+      this.elements.bookmarksIndexLink.href = chrome.runtime.getURL("src/ui/bookmarks-table/bookmarks-table.html");
+    }
     this.attachEventListeners();
     await this.loadSettings();
   }
@@ -5205,6 +5208,7 @@ var OptionsController = class {
     this.elements.importSettings = document.getElementById("import-settings");
     this.elements.importFile = document.getElementById("import-file");
     this.elements.statusMessage = document.getElementById("status-message");
+    this.elements.bookmarksIndexLink = document.getElementById("bookmarks-index-link");
   }
   attachEventListeners() {
     this.elements.storageModePinboard.addEventListener("change", () => this.onStorageModeChange("pinboard"));

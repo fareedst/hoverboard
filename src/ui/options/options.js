@@ -18,6 +18,9 @@ class OptionsController {
 
   async init () {
     this.bindElements()
+    if (this.elements.bookmarksIndexLink && typeof chrome !== 'undefined' && chrome.runtime) {
+      this.elements.bookmarksIndexLink.href = chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html')
+    }
     this.attachEventListeners()
     await this.loadSettings()
   }
@@ -75,6 +78,9 @@ class OptionsController {
 
     // Status
     this.elements.statusMessage = document.getElementById('status-message')
+
+    // [REQ-LOCAL_BOOKMARKS_INDEX] Local bookmarks index link
+    this.elements.bookmarksIndexLink = document.getElementById('bookmarks-index-link')
   }
 
   attachEventListeners () {

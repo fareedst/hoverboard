@@ -44,6 +44,7 @@ export class PopupController {
     this.handleDeletePin = this.handleDeletePin.bind(this)
     this.handleReloadExtension = this.handleReloadExtension.bind(this)
     this.handleOpenOptions = this.handleOpenOptions.bind(this)
+    this.handleOpenBookmarksIndex = this.handleOpenBookmarksIndex.bind(this)
     this.normalizeTags = this.normalizeTags.bind(this)
 
     this.setupEventListeners()
@@ -162,6 +163,7 @@ export class PopupController {
     this.uiManager.on('deletePin', this.handleDeletePin)
     this.uiManager.on('reloadExtension', this.handleReloadExtension)
     this.uiManager.on('openOptions', this.handleOpenOptions)
+    this.uiManager.on('openBookmarksIndex', this.handleOpenBookmarksIndex)
 
     // [POPUP-REFRESH-001] Add refresh event handler
     this.uiManager.on('refreshData', this.refreshPopupData.bind(this))
@@ -1861,6 +1863,20 @@ export class PopupController {
   }
 
   /**
+   * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
+   * Open the local bookmarks index page in a new tab.
+   */
+  handleOpenBookmarksIndex () {
+    try {
+      const url = chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html')
+      chrome.tabs.create({ url })
+      this.uiManager.showSuccess('Bookmarks index opened in new tab')
+    } catch (error) {
+      this.errorHandler.handleError('Failed to open bookmarks index', error)
+    }
+  }
+
+  /**
    * Get better description for bookmark
    */
   getBetterDescription (currentDescription, pageTitle) {
@@ -1915,6 +1931,7 @@ export class PopupController {
     this.uiManager?.off('deletePin', this.handleDeletePin)
     this.uiManager?.off('reloadExtension', this.handleReloadExtension)
     this.uiManager?.off('openOptions', this.handleOpenOptions)
+    this.uiManager?.off('openBookmarksIndex', this.handleOpenBookmarksIndex)
   }
 
   /**

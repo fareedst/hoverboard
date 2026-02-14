@@ -828,6 +828,140 @@ IMPL-BADGE_REFRESH:
       author: "AI Agent"
       reason: "Badge refresh on tag and private/toread changes"
 
+IMPL-LOCAL_BOOKMARKS_INDEX:
+  name: Local Bookmarks Index Implementation
+  status: Active
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX
+    - REQ-LOCAL_BOOKMARKS_INDEX
+  rationale:
+    why: "Implement full index of local bookmarks with search, filter, sort, launch"
+    problems_solved:
+      - "No single view of local bookmarks"
+    benefits:
+      - "getAllBookmarks() on LocalBookmarkService; getLocalBookmarksForIndex message; table page"
+  implementation_approach:
+    summary: "LocalBookmarkService.getAllBookmarks(); message getLocalBookmarksForIndex and handler using LocalBookmarkService only; bookmarks-table.html + .js + .css with search/filter/sort/launch; entry point from popup/options"
+    details:
+      - "LocalBookmarkService: public getAllBookmarks() using _getAllBookmarks + _normalizeBookmark, sorted by time desc"
+      - "MessageHandler: handleGetLocalBookmarksForIndex instantiates LocalBookmarkService, returns getAllBookmarks()"
+      - "src/ui/bookmarks-table/: HTML (search, filters, table container), JS (fetch data, render table, search/filter/sort, URL links), CSS (table, sort indicators)"
+      - "Popup: bookmarksIndexBtn emits openBookmarksIndex; PopupController.handleOpenBookmarksIndex opens tab. Options: bookmarks-index-link href set to extension URL"
+  code_locations:
+    files:
+      - path: "src/features/storage/local-bookmark-service.js"
+        description: "getAllBookmarks() method"
+      - path: "src/core/message-handler.js"
+        description: "MESSAGE_TYPES.GET_LOCAL_BOOKMARKS_FOR_INDEX, handleGetLocalBookmarksForIndex"
+      - path: "src/ui/bookmarks-table/bookmarks-table.html"
+        description: "Index page layout"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "loadBookmarks, applySearchAndFilter, renderTableBody, setSort"
+      - path: "src/ui/bookmarks-table/bookmarks-table.css"
+        description: "Table and toolbar styles"
+      - path: "src/ui/popup/popup.html"
+        description: "bookmarksIndexBtn entry point"
+      - path: "src/ui/popup/PopupController.js"
+        description: "handleOpenBookmarksIndex"
+      - path: "src/ui/popup/UIManager.js"
+        description: "bookmarksIndexBtn click emits openBookmarksIndex"
+      - path: "src/ui/options/options.html"
+        description: "bookmarks-index-link in footer"
+      - path: "src/ui/options/options.js"
+        description: "bookmarksIndexLink href set in init()"
+    functions:
+      - name: "getAllBookmarks"
+        file: "src/features/storage/local-bookmark-service.js"
+        description: "Returns full normalized array of local bookmarks, sorted by time desc"
+      - name: "handleGetLocalBookmarksForIndex"
+        file: "src/core/message-handler.js"
+        description: "Uses LocalBookmarkService, returns { bookmarks }"
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    tests: []
+    code_annotations:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+  related_decisions:
+    depends_on:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md
+  metadata:
+    created:
+      date: 2026-02-13
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Phase 3: implementation complete; code_locations updated"
+    last_validated:
+      date: 2026-02-13
+      validator: "AI Agent"
+      result: "pass"
+
+IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  name: Local Bookmarks Index Export Implementation
+  status: Active
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+    - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  rationale:
+    why: "Implement export UI and download using existing in-memory data"
+    problems_solved:
+      - "No export path for index data"
+    benefits:
+      - "Two buttons: Export all, Export displayed; CSV download"
+  implementation_approach:
+    summary: "Export controls in bookmarks-table toolbar; exportBookmarks(scope) with scope 'all' or 'displayed'; serialize to CSV; Blob + object URL + <a download> click; revoke URL"
+    details:
+      - "bookmarks-table.html: Export all and Export displayed buttons in toolbar"
+      - "bookmarks-table.js: elements.exportAll, elements.exportDisplayed; exportBookmarks(scope); get allBookmarks or filteredBookmarks; build CSV (header + rows, quoted fields); filename hoverboard-bookmarks-{all|displayed}-{date}.csv; trigger download"
+      - "Disable Export displayed when filteredBookmarks.length === 0; disable Export all when allBookmarks.length === 0"
+  code_locations:
+    files:
+      - path: "src/ui/bookmarks-table/bookmarks-table.html"
+        description: "Export all / Export displayed buttons"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "exportBookmarks(scope), CSV build, download trigger, init bindings"
+      - path: "src/ui/bookmarks-table/bookmarks-table.css"
+        description: "Export button styles (if any)"
+    functions:
+      - name: "exportBookmarks"
+        file: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "Exports given scope (all|displayed) to CSV and triggers download"
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+    tests: []
+    code_annotations:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+  related_decisions:
+    depends_on:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  metadata:
+    created:
+      date: 2026-02-13
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Implementation complete; CSV export in bookmarks-table"
+    last_validated:
+      date: 2026-02-13
+      validator: "AI Agent"
+      result: "pass"
+
 # NOTE: Additional IMPL tokens from stdd/implementation-decisions.md may remain:
 # IMPL-STORAGE, IMPL-BADGE, IMPL-CROSS_BROWSER, IMPL-SERVICE_WORKER,
 # IMPL-CONTENT_SCRIPT, IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-MV3_MIGRATION,

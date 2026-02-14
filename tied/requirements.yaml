@@ -1368,6 +1368,106 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
       author: "AI Agent"
       reason: "Migrated from STDD to TIED format"
 
+REQ-LOCAL_BOOKMARKS_INDEX:
+  name: Local Bookmarks Index Page
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Provide a full index of locally stored bookmarks with search, filter, sort, and launch"
+    problems_solved:
+      - "No way to browse or search all local bookmarks in one place"
+      - "Users need to find and open bookmarks without leaving the extension"
+    benefits:
+      - "Single-page index of all local bookmarks"
+      - "Searchable, filterable, sortable, and launchable (open URL in tab)"
+      - "Live data only from chrome.storage.local; no Pinboard, no static data"
+  satisfaction_criteria:
+    - criterion: "LocalBookmarkService exposes getAllBookmarks() returning full normalized array"
+    - criterion: "Message getLocalBookmarksForIndex always uses LocalBookmarkService (not current provider)"
+    - criterion: "Dedicated extension page displays table with search (title/URL/tags/notes), filters (tag, toread, shared), sortable columns (default time desc), URL as link"
+    - criterion: "Entry point from popup and/or options opens the index page in a new tab"
+  validation_criteria:
+    - method: "Manual verification"
+      coverage: "Index page loads, displays local bookmarks, search/filter/sort/launch work"
+    - method: "Unit tests (optional)"
+      coverage: "getAllBookmarks returns normalized list; handler returns local data only"
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    tests: []
+    code_annotations:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-STORAGE_MODE_DEFAULT
+      - REQ-CHROME_STORAGE_USAGE
+    supersedes: []
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.md
+  metadata:
+    created:
+      date: 2026-02-13
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Phase 3: implementation complete"
+    last_validated:
+      date: 2026-02-13
+      validator: "AI Agent"
+      result: "pass"
+
+REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  name: Local Bookmarks Index Export
+  category: Functional
+  priority: P2
+  status: "Implemented"
+  rationale:
+    why: "Allow users to export index data for backup or use outside the extension"
+    problems_solved:
+      - "No way to get index data out of the extension"
+      - "Users may want to backup or share filtered subsets"
+    benefits:
+      - "Downloadable file (CSV at minimum) for all or currently displayed bookmarks"
+      - "Client-side only; no backend changes"
+  satisfaction_criteria:
+    - criterion: "Export control(s) in index page UI with clear scope (all vs displayed)"
+    - criterion: "User can export all records (full local list) to a downloadable file"
+    - criterion: "User can export currently displayed records (filtered/sorted subset) to a downloadable file"
+    - criterion: "At least one format (CSV); download triggered client-side"
+  validation_criteria:
+    - method: "Manual verification"
+      coverage: "Export all and Export displayed produce correct CSV; file downloads"
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+    tests: []
+    code_annotations:
+      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  metadata:
+    created:
+      date: 2026-02-13
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Phase 3: implementation complete"
+    last_validated:
+      date: 2026-02-13
+      validator: "AI Agent"
+      result: "pass"
+
 # ---
 # Template Record - Copy this block to create new requirements
 # ---

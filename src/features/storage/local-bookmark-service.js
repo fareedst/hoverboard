@@ -122,6 +122,26 @@ export class LocalBookmarkService {
     }
   }
 
+  /**
+   * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
+   * Return full normalized array of all local bookmarks, sorted by time descending.
+   * Used by the local bookmarks index page; no count limit.
+   */
+  async getAllBookmarks () {
+    try {
+      const all = await this._getAllBookmarks()
+      const list = Object.entries(all)
+        .map(([url, b]) => this._normalizeBookmark({ ...b, url }))
+        .filter(b => b && b.url)
+        .sort((a, b) => (b.time || '').localeCompare(a.time || ''))
+      debugLog('[IMPL-LOCAL_BOOKMARKS_INDEX] getAllBookmarks:', list.length)
+      return list
+    } catch (error) {
+      debugError('[IMPL-LOCAL_BOOKMARKS_INDEX] getAllBookmarks failed:', error)
+      return []
+    }
+  }
+
   async saveBookmark (bookmarkData) {
     try {
       const url = bookmarkData?.url ? this.cleanUrl(bookmarkData.url) : ''

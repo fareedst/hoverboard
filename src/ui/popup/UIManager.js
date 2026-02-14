@@ -95,6 +95,7 @@ export class UIManager {
       deleteBtn: document.getElementById('deleteBtn'),
       reloadBtn: document.getElementById('reloadBtn'),
       optionsBtn: document.getElementById('optionsBtn'),
+      bookmarksIndexBtn: document.getElementById('bookmarksIndexBtn'),
       settingsBtn: document.getElementById('settingsBtn'),
 
       // Input elements
@@ -154,6 +155,10 @@ export class UIManager {
 
     this.elements.optionsBtn?.addEventListener('click', () => {
       this.emit('openOptions')
+    })
+
+    this.elements.bookmarksIndexBtn?.addEventListener('click', () => {
+      this.emit('openBookmarksIndex')
     })
 
     this.elements.settingsBtn?.addEventListener('click', () => {

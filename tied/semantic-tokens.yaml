@@ -1043,6 +1043,97 @@ IMPL-BADGE_REFRESH:
     registered: 2026-02-13
     last_updated: 2026-02-13
 
+REQ-LOCAL_BOOKMARKS_INDEX:
+  type: REQ
+  name: Local Bookmarks Index Page
+  category: Functional
+  status: Active
+  description: "Full searchable, filterable, sortable, launchable index of locally stored bookmarks only"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX
+    - IMPL-LOCAL_BOOKMARKS_INDEX
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
+ARCH-LOCAL_BOOKMARKS_INDEX:
+  type: ARCH
+  name: Local Bookmarks Index Architecture
+  category: Storage / UI
+  status: Active
+  description: "Dedicated extension page, local-only data source, client-side search/filter/sort, launchable URLs"
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX
+    - IMPL-LOCAL_BOOKMARKS_INDEX
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
+IMPL-LOCAL_BOOKMARKS_INDEX:
+  type: IMPL
+  name: Local Bookmarks Index Implementation
+  category: Storage / UI
+  status: Active
+  description: "getAllBookmarks, getLocalBookmarksForIndex message, bookmarks-table page and script"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX
+    - REQ-LOCAL_BOOKMARKS_INDEX
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
+REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  type: REQ
+  name: Local Bookmarks Index Export
+  category: Functional
+  status: Active
+  description: "Export from index page: scope all or displayed, downloadable file (CSV/JSON)"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+    - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+    - REQ-LOCAL_BOOKMARKS_INDEX
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
+ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  type: ARCH
+  name: Local Bookmarks Index Export Architecture
+  category: Storage / UI
+  status: Active
+  description: "Client-side export only; use existing allBookmarks/filteredBookmarks; CSV and/or JSON"
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+    - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
+IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  type: IMPL
+  name: Local Bookmarks Index Export Implementation
+  category: Storage / UI
+  status: Active
+  description: "Export UI in bookmarks-table toolbar; serialize scope to CSV; trigger download"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+    - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
 # NOTE: Implementation tokens from stdd/implementation-decisions.md remain to be migrated
 # IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-PINBOARD_API, IMPL-MV3_MIGRATION,
 # IMPL-STORAGE, IMPL-TAG_SYSTEM, IMPL-OVERLAY, IMPL-THEME, IMPL-BOOKMARKING, IMPL-BADGE,

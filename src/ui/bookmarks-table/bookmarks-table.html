@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Local Bookmarks Index – Hoverboard</title>
+  <link rel="stylesheet" href="../styles/design-tokens.css">
+  <link rel="stylesheet" href="bookmarks-table.css">
+</head>
+<body>
+  <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] -->
+  <div class="container">
+    <header class="header">
+      <div class="header-brand">
+        <img src="../../../icons/hoverboard_48.png" alt="Hoverboard" class="logo">
+        <span class="extension-name">Hoverboard</span>
+      </div>
+      <h1>Local Bookmarks Index</h1>
+      <p class="subtitle">Search, filter, sort, and open your locally stored bookmarks</p>
+    </header>
+
+    <div class="toolbar">
+      <div class="search-row">
+        <label for="search-input" class="sr-only">Search</label>
+        <input type="text" id="search-input" class="search-input" placeholder="Search title, URL, tags, notes…" autocomplete="off">
+        <button type="button" id="search-clear" class="btn btn-secondary btn-sm" title="Clear search" aria-label="Clear search">Clear</button>
+      </div>
+      <div class="filters-row">
+        <label for="filter-tags">Tags (comma-separated, include):</label>
+        <input type="text" id="filter-tags" class="filter-input" placeholder="e.g. work, dev" autocomplete="off">
+        <label class="filter-checkbox">
+          <input type="checkbox" id="filter-toread" value="1">
+          <span>To read only</span>
+        </label>
+        <label class="filter-checkbox">
+          <input type="checkbox" id="filter-private" value="1">
+          <span>Private only</span>
+        </label>
+      </div>
+      <!-- [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] -->
+      <div class="export-row">
+        <button type="button" id="export-all" class="btn btn-secondary btn-sm" title="Export all local bookmarks to CSV" aria-label="Export all bookmarks">Export all</button>
+        <button type="button" id="export-displayed" class="btn btn-secondary btn-sm" title="Export currently displayed (filtered) bookmarks to CSV" aria-label="Export displayed bookmarks">Export displayed</button>
+      </div>
+    </div>
+
+    <div id="empty-state" class="empty-state hidden">
+      <p>No local bookmarks. This index shows only bookmarks stored locally. Switch to Local Storage in Options and add bookmarks to see them here.</p>
+    </div>
+
+    <div id="table-wrapper" class="table-wrapper">
+      <table class="bookmarks-table" id="bookmarks-table">
+        <thead>
+          <tr>
+            <th data-sort="description" class="sortable">Title <span class="sort-icon" aria-hidden="true"></span></th>
+            <th data-sort="url" class="sortable">URL <span class="sort-icon" aria-hidden="true"></span></th>
+            <th data-sort="tags" class="sortable">Tags <span class="sort-icon" aria-hidden="true"></span></th>
+            <th data-sort="time" class="sortable sort-active sort-desc">Time <span class="sort-icon" aria-hidden="true">↓</span></th>
+            <th data-sort="shared" class="sortable">Shared <span class="sort-icon" aria-hidden="true"></span></th>
+            <th data-sort="toread" class="sortable">To read <span class="sort-icon" aria-hidden="true"></span></th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="footer-info">
+      <span id="row-count">0 bookmarks</span>
+    </div>
+  </div>
+
+  <script type="module" src="bookmarks-table.js"></script>
+</body>
+</html>

@@ -5,7 +5,7 @@ All notable changes to the Hoverboard Browser Extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] - 2026-02-13
+## [1.0.8] - 2026-02-13
 
 ### Changed
 
@@ -15,6 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Existing users keep their current choice; stored `storageMode` is unchanged
 
 ### Added
+
+- **Local Bookmarks Index** (`REQ-LOCAL_BOOKMARKS_INDEX`, `ARCH-LOCAL_BOOKMARKS_INDEX`, `IMPL-LOCAL_BOOKMARKS_INDEX`) - A dedicated full-page index of **locally stored bookmarks only**:
+  - **Open from:** Popup footer ("Bookmarks index" button) or Options page ("Local bookmarks index" link); opens in a new tab
+  - **Search:** Single text box over title, URL, tags, and notes (case-insensitive)
+  - **Filter:** By tag (comma-separated include), "To read only", "Private only"
+  - **Sort:** Click column headers (Title, URL, Tags, Time, Shared, To read); default sort is Time descending
+  - **Launch:** URL column is a link that opens the page in a new tab
+  - **Export:** "Export all" and "Export displayed" buttons download the current set (all local bookmarks or the filtered/sorted view) as CSV (`REQ-LOCAL_BOOKMARKS_INDEX_EXPORT`, `IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT`)
+  - Data is **live** from `chrome.storage.local` via `getLocalBookmarksForIndex` (always uses LocalBookmarkService; not Pinboard). When storage mode is Pinboard, the index may be empty with an explanatory message
+  - Implemented in `src/ui/bookmarks-table/` (HTML, JS, CSS); backend: `LocalBookmarkService.getAllBookmarks()`, message handler returns `{ bookmarks }`
 
 - **Recent Tags refresh on popup display** (`IMPL-RECENT_TAGS_POPUP_REFRESH`) - Recent Tags list now refreshes every time the popup is displayed:
   - Popup listens for `document.visibilitychange` and refetches Recent Tags from the service worker when the popup becomes visible
