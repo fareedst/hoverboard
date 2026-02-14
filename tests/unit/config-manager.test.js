@@ -48,6 +48,7 @@ describe('ConfigManager', () => {
       expect(configManager.storageKeys).toEqual({
         AUTH_TOKEN: 'hoverboard_auth_token',
         SETTINGS: 'hoverboard_settings',
+        STORAGE_MODE: 'hoverboard_storage_mode',
         INHIBIT_URLS: 'hoverboard_inhibit_urls',
         RECENT_TAGS: 'hoverboard_recent_tags',
         TAG_FREQUENCY: 'hoverboard_tag_frequency'
@@ -56,11 +57,12 @@ describe('ConfigManager', () => {
 
     test('should have default configuration', () => {
       const defaults = configManager.getDefaultConfiguration();
-      
+
       expect(defaults).toHaveProperty('hoverShowRecentTags', true);
       expect(defaults).toHaveProperty('recentTagsCountMax', 32);
       expect(defaults).toHaveProperty('badgeTextIfNotBookmarked', '-');
       expect(defaults).toHaveProperty('pinRetryCountMax', 2);
+      expect(defaults).toHaveProperty('storageMode', 'local'); // [REQ-STORAGE_MODE_DEFAULT]
     });
 
     test('should initialize defaults on first run', async () => {
@@ -142,6 +144,48 @@ describe('ConfigManager', () => {
       
       const updatedConfig = await configManager.getConfig();
       expect(updatedConfig).toHaveProperty('uxShowSectionLabels', true);
+    });
+  });
+
+  describe('Storage Mode [REQ-STORAGE_MODE_DEFAULT]', () => {
+    test('getStorageMode returns local when no stored override', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({ hoverboard_settings: {} });
+      const mode = await configManager.getStorageMode();
+      expect(mode).toBe('local');
+    });
+
+    test('getStorageMode returns pinboard when stored has storageMode pinboard', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_settings: { storageMode: 'pinboard' }
+      });
+      const mode = await configManager.getStorageMode();
+      expect(mode).toBe('pinboard');
+    });
+
+    test('getStorageMode returns pinboard when stored value is invalid (fallback)', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_settings: { storageMode: 'invalid' }
+      });
+      const mode = await configManager.getStorageMode();
+      expect(mode).toBe('pinboard');
+    });
+
+    test('setStorageMode accepts local and calls updateConfig', async () => {
+      await configManager.setStorageMode('local');
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_settings: expect.objectContaining({ storageMode: 'local' })
+      });
+    });
+
+    test('setStorageMode accepts pinboard and calls updateConfig', async () => {
+      await configManager.setStorageMode('pinboard');
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_settings: expect.objectContaining({ storageMode: 'pinboard' })
+      });
+    });
+
+    test('setStorageMode throws on invalid mode', async () => {
+      await expect(configManager.setStorageMode('invalid')).rejects.toThrow('Invalid storage mode');
     });
   });
 

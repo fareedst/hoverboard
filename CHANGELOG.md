@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased] - 2026-02-13
 
+### Changed
+
+- **Default storage mode is now Local Storage** (`REQ-STORAGE_MODE_DEFAULT`) - Local storage is preferable for most users:
+  - New installs and users without a saved storage preference use **local-only** bookmarks (no account or API required)
+  - Pinboard remains available via **Options > Storage Mode > "Pinboard (cloud)"**
+  - Existing users keep their current choice; stored `storageMode` is unchanged
+
 ### Added
 
 - **Recent Tags refresh on popup display** (`IMPL-RECENT_TAGS_POPUP_REFRESH`) - Recent Tags list now refreshes every time the popup is displayed:
@@ -65,6 +72,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Better Tag Quality**: More candidates from each source means top tags from all sources can contribute
 - **Better Extraction**: Technical documentation, glossaries, data-heavy pages, meta-tagged content now provide richer suggestions
 - **Pages with Visual Emphasis**: Bold/italic/highlighted/code terms now contribute to suggestions
+
+### Documentation
+
+- **README and TIED** - Dual storage (local default, optional Pinboard) is now documented:
+  - README: local-first intro, Storage Mode in Options, Storage subsection, architecture note, prerequisites (Pinboard optional)
+  - New requirement `REQ-STORAGE_MODE_DEFAULT`; architecture and implementation decisions updated with default choice and rationale
+  - Unit tests for ConfigManager default `storageMode`, `getStorageMode`, and `setStorageMode` (see `tests/unit/config-manager.test.js`)
 
 ## [1.0.7] - 2025-11-17
 

@@ -1413,6 +1413,74 @@ ARCH-TESTING_STRATEGY:
       validator: "agent/contributor"
       result: "pass"
 
+ARCH-LOCAL_STORAGE_PROVIDER:
+  name: Local Storage Bookmark Provider (Strategy Pattern)
+  status: Active
+  cross_references:
+    - REQ-STORAGE_MODE_DEFAULT
+    - ARCH-STORAGE
+    - ARCH-PINBOARD_API
+  rationale:
+    why: "Allow extension to work without external API; user choice between Pinboard (cloud) and local-only bookmarks"
+    problems_solved:
+      - "Single point of dependency on Pinboard API"
+      - "No offline-only option"
+    benefits:
+      - "Default is local (preferable for most users; no account or API required)"
+      - "User can choose local-only storage (chrome.storage.local) or Pinboard (cloud)"
+      - "Same UI and message contract; provider swapped by config"
+      - "Runtime switch without extension reload (SWITCH_STORAGE_MODE)"
+  alternatives_considered:
+    - name: "Hybrid per-bookmark local/remote"
+      pros:
+        - "Per-bookmark control"
+      cons:
+        - "More complex UI and state"
+      rejected_reason: "Plan specified full mode switch only"
+    - name: "Fallback only when offline"
+      pros:
+        - "Automatic"
+      cons:
+        - "Two sources of truth; sync complexity"
+      rejected_reason: "Plan specified explicit mode switch"
+  implementation_approach:
+    summary: "Strategy pattern: MessageHandler delegates to bookmarkProvider; provider chosen from config (storageMode: pinboard | local)."
+    details:
+      - "Default storageMode is 'local' (REQ-STORAGE_MODE_DEFAULT)"
+      - "ConfigManager: storageMode in settings, getStorageMode/setStorageMode"
+      - "LocalBookmarkService implements same contract as PinboardService, backed by chrome.storage.local"
+      - "Service worker resolves provider from config (lazy init); handles SWITCH_STORAGE_MODE to swap at runtime"
+      - "Options page: Storage Mode radios; auth section disabled when local"
+  traceability:
+    requirements:
+      - REQ-STORAGE_MODE_DEFAULT
+    implementation:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+    tests: []
+    code_annotations:
+      - ARCH-LOCAL_STORAGE_PROVIDER
+  related_decisions:
+    depends_on:
+      - ARCH-STORAGE
+      - ARCH-PINBOARD_API
+    informs:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+    see_also:
+      - ARCH-MESSAGE_HANDLING
+  detail_file: architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.md
+  metadata:
+    created:
+      date: "2026-02-13"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-13"
+      author: "AI Agent"
+      reason: "Local storage mode implementation per plan"
+    last_validated:
+      date: "2026-02-13"
+      validator: "AI Agent"
+      result: "pass"
+
 # ---
 # Template Record - Copy this block to create new architecture decisions
 # ---

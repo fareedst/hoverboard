@@ -40,6 +40,8 @@ var init_config_manager = __esm({
         this.storageKeys = {
           AUTH_TOKEN: "hoverboard_auth_token",
           SETTINGS: "hoverboard_settings",
+          STORAGE_MODE: "hoverboard_storage_mode",
+          // [ARCH-LOCAL_STORAGE_PROVIDER] - Bookmark storage mode (pinboard | local)
           INHIBIT_URLS: "hoverboard_inhibit_urls",
           RECENT_TAGS: "hoverboard_recent_tags",
           // [IMMUTABLE-REQ-TAG-001] - Tag storage key
@@ -58,6 +60,8 @@ var init_config_manager = __esm({
        */
       getDefaultConfiguration() {
         return {
+          // [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] - Default local: preferable for most users (no account/API required)
+          storageMode: "local",
           // CFG-003: Feature flags - Core functionality toggles
           // IMPLEMENTATION DECISION: Enable helpful features by default, disable potentially intrusive ones
           hoverShowRecentTags: true,
@@ -218,6 +222,30 @@ var init_config_manager = __esm({
         const current = await this.getConfig();
         const updated = { ...current, ...updates };
         await this.saveSettings(updated);
+      }
+      /**
+       * Get bookmark storage mode
+       * @returns {Promise<string>} 'pinboard' or 'local'
+       *
+       * [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode for bookmark provider selection
+       * IMPLEMENTATION DECISION: Stored in settings blob; default from getDefaultConfiguration is 'local'; invalid values fall back to 'pinboard'
+       */
+      async getStorageMode() {
+        const config = await this.getConfig();
+        const mode = config.storageMode;
+        return mode === "local" || mode === "pinboard" ? mode : "pinboard";
+      }
+      /**
+       * Set bookmark storage mode
+       * @param {string} mode - 'pinboard' or 'local'
+       *
+       * [ARCH-LOCAL_STORAGE_PROVIDER] Persist storage mode for provider selection
+       */
+      async setStorageMode(mode) {
+        if (mode !== "pinboard" && mode !== "local") {
+          throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard' or 'local'.`);
+        }
+        await this.updateConfig({ storageMode: mode });
       }
       /**
        * Get visibility default settings
@@ -5144,6 +5172,9 @@ var OptionsController = class {
     await this.loadSettings();
   }
   bindElements() {
+    this.elements.storageModePinboard = document.getElementById("storage-mode-pinboard");
+    this.elements.storageModeLocal = document.getElementById("storage-mode-local");
+    this.elements.authSection = document.getElementById("auth-section");
     this.elements.authToken = document.getElementById("auth-token");
     this.elements.testAuth = document.getElementById("test-auth");
     this.elements.showHoverOnLoad = document.getElementById("show-hover-on-load");
@@ -5176,6 +5207,8 @@ var OptionsController = class {
     this.elements.statusMessage = document.getElementById("status-message");
   }
   attachEventListeners() {
+    this.elements.storageModePinboard.addEventListener("change", () => this.onStorageModeChange("pinboard"));
+    this.elements.storageModeLocal.addEventListener("change", () => this.onStorageModeChange("local"));
     this.elements.testAuth.addEventListener("click", () => this.testAuthentication());
     this.elements.defaultThemeToggle.addEventListener("click", () => this.toggleDefaultTheme());
     this.elements.defaultTransparencyEnabled.addEventListener("change", () => this.updateTransparencyState());
@@ -5197,6 +5230,10 @@ var OptionsController = class {
       const config = await this.configManager.getConfig();
       const authToken = await this.configManager.getAuthToken();
       const inhibitUrls = await this.configManager.getInhibitUrls();
+      const storageMode = config.storageMode === "local" ? "local" : "pinboard";
+      this.elements.storageModePinboard.checked = storageMode === "pinboard";
+      this.elements.storageModeLocal.checked = storageMode === "local";
+      this.updateAuthSectionVisibility(storageMode);
       this.elements.authToken.value = authToken;
       this.elements.showHoverOnLoad.checked = config.showHoverOnPageLoad;
       this.elements.hoverShowTooltips.checked = config.hoverShowTooltips;
@@ -5237,7 +5274,9 @@ var OptionsController = class {
         this.showStatus(validation.message, "error");
         return;
       }
+      const storageMode = this.elements.storageModeLocal.checked ? "local" : "pinboard";
       const settings = {
+        storageMode,
         showHoverOnPageLoad: this.elements.showHoverOnLoad.checked,
         hoverShowTooltips: this.elements.hoverShowTooltips.checked,
         initRecentPostsCount: parseInt(this.elements.recentPostsCount.value),
@@ -5288,6 +5327,34 @@ var OptionsController = class {
       this.showStatus("Failed to reset settings: " + error.message, "error");
     } finally {
       this.setLoading(false);
+    }
+  }
+  /**
+   * [ARCH-LOCAL_STORAGE_PROVIDER] Update auth section visibility based on storage mode.
+   * @param {string} mode - 'pinboard' or 'local'
+   */
+  updateAuthSectionVisibility(mode) {
+    if (!this.elements.authSection) return;
+    if (mode === "local") {
+      this.elements.authSection.classList.add("auth-section--disabled");
+    } else {
+      this.elements.authSection.classList.remove("auth-section--disabled");
+    }
+  }
+  /**
+   * [ARCH-LOCAL_STORAGE_PROVIDER] Handle storage mode radio change: persist and notify service worker.
+   * @param {string} mode - 'pinboard' or 'local'
+   */
+  async onStorageModeChange(mode) {
+    try {
+      await this.configManager.setStorageMode(mode);
+      this.updateAuthSectionVisibility(mode);
+      chrome.runtime.sendMessage({ type: "switchStorageMode" }).catch(() => {
+      });
+      this.showStatus("Storage mode updated. Using " + (mode === "local" ? "local storage" : "Pinboard") + ".", "success");
+    } catch (error) {
+      console.error("Storage mode change failed:", error);
+      this.showStatus("Failed to update storage mode: " + error.message, "error");
     }
   }
   async testAuthentication() {

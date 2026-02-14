@@ -1118,6 +1118,8 @@
           this.storageKeys = {
             AUTH_TOKEN: "hoverboard_auth_token",
             SETTINGS: "hoverboard_settings",
+            STORAGE_MODE: "hoverboard_storage_mode",
+            // [ARCH-LOCAL_STORAGE_PROVIDER] - Bookmark storage mode (pinboard | local)
             INHIBIT_URLS: "hoverboard_inhibit_urls",
             RECENT_TAGS: "hoverboard_recent_tags",
             // [IMMUTABLE-REQ-TAG-001] - Tag storage key
@@ -1136,6 +1138,8 @@
          */
         getDefaultConfiguration() {
           return {
+            // [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] - Default local: preferable for most users (no account/API required)
+            storageMode: "local",
             // CFG-003: Feature flags - Core functionality toggles
             // IMPLEMENTATION DECISION: Enable helpful features by default, disable potentially intrusive ones
             hoverShowRecentTags: true,
@@ -1296,6 +1300,30 @@
           const current = await this.getConfig();
           const updated = { ...current, ...updates };
           await this.saveSettings(updated);
+        }
+        /**
+         * Get bookmark storage mode
+         * @returns {Promise<string>} 'pinboard' or 'local'
+         *
+         * [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode for bookmark provider selection
+         * IMPLEMENTATION DECISION: Stored in settings blob; default from getDefaultConfiguration is 'local'; invalid values fall back to 'pinboard'
+         */
+        async getStorageMode() {
+          const config = await this.getConfig();
+          const mode = config.storageMode;
+          return mode === "local" || mode === "pinboard" ? mode : "pinboard";
+        }
+        /**
+         * Set bookmark storage mode
+         * @param {string} mode - 'pinboard' or 'local'
+         *
+         * [ARCH-LOCAL_STORAGE_PROVIDER] Persist storage mode for provider selection
+         */
+        async setStorageMode(mode) {
+          if (mode !== "pinboard" && mode !== "local") {
+            throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard' or 'local'.`);
+          }
+          await this.updateConfig({ storageMode: mode });
         }
         /**
          * Get visibility default settings
@@ -8287,6 +8315,8 @@
     DELETE_BOOKMARK: "deleteBookmark",
     SAVE_TAG: "saveTag",
     DELETE_TAG: "deleteTag",
+    // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode switch (handled by service worker)
+    SWITCH_STORAGE_MODE: "switchStorageMode",
     // UI operations
     TOGGLE_HOVER: "toggleHover",
     HIDE_OVERLAY: "hideOverlay",

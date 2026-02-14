@@ -397,6 +397,51 @@ REQ-CHROME_STORAGE_USAGE:
       author: "AI Agent"
       reason: "Migrated from STDD to TIED format"
 
+REQ-STORAGE_MODE_DEFAULT:
+  name: Storage Mode Default and Dual-Use
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "Most users prefer to use the extension without an account or API; local storage is the preferable default"
+    problems_solved:
+      - "Friction for new users requiring Pinboard signup"
+      - "No out-of-box experience without external service"
+    benefits:
+      - "Extension works immediately with no account or API token"
+      - "Optional Pinboard for users who want cloud sync"
+      - "Clear dual-use: local default, Pinboard selectable in Options"
+  satisfaction_criteria:
+    - criterion: "Default config has storageMode 'local'"
+    - criterion: "Options page allows switching between Local Storage and Pinboard (cloud)"
+    - criterion: "Service worker uses active provider from config; no external service required for default path"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "ConfigManager default storageMode, getStorageMode, setStorageMode (tests/unit/config-manager.test.js)"
+  traceability:
+    architecture:
+      - ARCH-LOCAL_STORAGE_PROVIDER
+    implementation:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+    tests:
+      - "ConfigManager Storage Mode describe block"
+    code_annotations:
+      - REQ-STORAGE_MODE_DEFAULT
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-CHROME_STORAGE_USAGE
+    supersedes: []
+  detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.md
+  metadata:
+    created:
+      date: "2026-02-13"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-13"
+      author: "AI Agent"
+      reason: "Default to local storage; document dual-use"
+
 REQ-RECENT_TAGS_SYSTEM:
   name: Recent Tags System
   category: Immutable

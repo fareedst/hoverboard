@@ -1158,6 +1158,60 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
       validator: "AI Agent"
       result: "pass"
 
+IMPL-LOCAL_BOOKMARK_SERVICE:
+  name: Local Bookmark Service
+  status: Active
+  cross_references:
+    - REQ-STORAGE_MODE_DEFAULT
+    - ARCH-LOCAL_STORAGE_PROVIDER
+    - ARCH-STORAGE
+  rationale:
+    why: "Implement bookmark provider contract using chrome.storage.local for local-only mode"
+    problems_solved:
+      - "No local bookmark storage implementation"
+    benefits:
+      - "Default storage mode is local (ConfigManager default storageMode: 'local'); Pinboard selectable in Options"
+      - "Same method signatures as PinboardService (getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag, getRecentBookmarks, testConnection)"
+      - "Bookmarks keyed by URL in hoverboard_local_bookmarks; recent by time sort"
+  implementation_approach:
+    summary: "LocalBookmarkService class in src/features/storage/local-bookmark-service.js; TagService integration for tag tracking."
+    details:
+      - "Default provider is local (ConfigManager getDefaultConfiguration().storageMode: 'local')"
+      - "Storage key: hoverboard_local_bookmarks (object keyed by URL)"
+      - "Normalized bookmark shape matches PinboardService (url, description, extended, tags, time, shared, toread, hash)"
+      - "trackBookmarkTags and extractTagsFromBookmarkData for recent-tag integration"
+  code_locations:
+    files:
+      - path: "src/features/storage/local-bookmark-service.js"
+        description: "LocalBookmarkService implementation"
+  traceability:
+    architecture:
+      - ARCH-LOCAL_STORAGE_PROVIDER
+    requirements:
+      - REQ-STORAGE_MODE_DEFAULT
+    tests: []
+    code_annotations:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+  related_decisions:
+    depends_on:
+      - ARCH-LOCAL_STORAGE_PROVIDER
+    supersedes: []
+    see_also:
+      - ARCH-STORAGE
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.md
+  metadata:
+    created:
+      date: "2026-02-13"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-13"
+      author: "AI Agent"
+      reason: "Local storage mode implementation per plan"
+    last_validated:
+      date: "2026-02-13"
+      validator: "AI Agent"
+      result: "pass"
+
 # IMPL-IDENTIFIER:
 #   name: Implementation Title
 #   status: Active

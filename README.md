@@ -4,15 +4,25 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
 
-A modern Chrome extension for efficient bookmark management and web page tagging with Pinboard.in integration.
+A modern Chrome extension for local-first bookmark management and web page tagging with optional Pinboard.in integration.
+
+## Supported Browsers
+
+This extension uses the Chrome (Manifest V3) extension format and works in:
+
+- **Chrome** – Primary target; full support
+- **Brave** – Works with Brave Browser; load the unpacked extension the same way as in Chrome (Brave supports Chrome extensions)
+- **Other Chromium-based browsers** – Any browser that supports Chrome extensions (e.g. Microsoft Edge, Opera, Vivaldi) can typically load and run the extension; install as an unpacked extension from the built files
+
+Safari is not currently supported (legacy Safari extension format is no longer maintained for this project).
 
 ## 🚀 Quick Start
 
 ### Install from GitHub Releases
 
 1. **Download** the latest release from [Releases](https://github.com/fareedst/hoverboard/releases)
-2. **Chrome**: Extract and load as unpacked extension
-3. **Safari**: Double-click the `.safariextz` file
+2. **Chrome or Brave**: Extract the package and load as an unpacked extension (Chrome: `chrome://extensions` → Developer mode → Load unpacked; Brave: `brave://extensions` → same steps)
+3. **Other Chromium-based browsers**: Use that browser’s extension management page and load the unpacked folder
 
 ### Build from Source
 
@@ -29,19 +39,20 @@ npm run build:dev
 **Last Updated:** 2026-02-13  
 **Chrome Extension Status:** Production Ready
 
-**Latest Enhancement:** Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows—tags saved in one window appear in Recent Tags when you open the popup or overlay in any window. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
+**Latest Enhancement:** Bookmarks are stored **locally in your browser by default**—no account or API required. Switch to Pinboard (Options > Storage Mode) for cloud sync. Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
 
 ### Chrome Extension Features
 
-Hoverboard is a fully-featured Chrome extension that provides seamless bookmark management with Pinboard.in integration:
+Hoverboard is a fully-featured Chrome extension that provides seamless bookmark management with local-first storage and optional Pinboard sync:
 
 #### **Core Features:**
+- ✅ **Local-first storage** - Bookmarks stored in your browser by default; no account or API required. Switch to Pinboard in Options for cloud sync.
 - ✅ **Smart Bookmarking** - Save pages with intelligent tag suggestions from 11 content sources (title, URL, meta tags, headings, emphasis elements, definition terms, table headers, navigation, breadcrumbs, images, links)
 - ✅ **Tag Management** - Organize bookmarks with custom tags and categories
 - ✅ **Recent Tags** - Quick access to frequently used tags; list refreshes every time the popup is displayed and syncs across windows
 - ✅ **Dark Theme Support** - Modern UI with dark theme default
 - ✅ **Overlay System** - Visual feedback with transparency controls
-- ✅ **Pinboard Integration** - Direct integration with Pinboard.in API
+- ✅ **Optional Pinboard integration** - Use Storage Mode in Options to sync with Pinboard.in (requires API token)
 - ✅ **Badge Indicators** - Visual status indicators in the extension icon
 - ✅ **Site Management** - Disable extension on specific domains
 
@@ -66,10 +77,14 @@ Intelligent tag suggestions extracted from multiple page content sources:
 - **Case Preservation**: Both original case (e.g., "GitHub") and lowercase variants offered
 - **Smart Deduplication**: Filters out tags already applied to current bookmark
 
+#### Storage (dual-use)
+- **Default—local:** Bookmarks are stored locally in your browser (`chrome.storage.local`). No account or API token is required; the extension works out of the box. Local storage is preferable for most users.
+- **Optional—Pinboard:** In Options > Storage Mode, choose "Pinboard (cloud)" to sync with Pinboard.in. Requires an API token (Options > Authentication).
+
 #### Additional Features
 - **Tag Management:** Organize bookmarks with custom tags and categories
 - **Recent Tags:** Quick access to frequently used tags; refreshes on every popup display and syncs across windows so tags saved in one window appear in any other
-- **Pinboard Integration:** Direct API integration with Pinboard.in bookmarking service
+- **Optional Pinboard integration:** Use Storage Mode in Options to sync with Pinboard.in bookmarking service (requires API token)
 - **Dark Theme Support:** Modern UI with dark theme default
 - **Overlay System:** Visual feedback with transparency controls
 - **Badge Indicators:** Visual status indicators showing bookmark state and tag count
@@ -100,6 +115,7 @@ The screenshot above demonstrates Hoverboard in action on the Pinboard.in websit
 
 The configuration page provides comprehensive settings for customizing the extension experience:
 
+- **Storage Mode:** Choose **Local Storage (offline)**—default, no account needed—or **Pinboard (cloud)** for Pinboard.in sync (Authentication section is used when Pinboard is selected).
 - **Overlay Visibility Defaults**: 
   - Dark/Light theme selection with live preview
   - Transparency controls with opacity slider (currently set to 90%)
@@ -127,8 +143,9 @@ The configuration page provides comprehensive settings for customizing the exten
 
 ### Chrome Extension Architecture
 - **Manifest V3:** Modern Chrome extension architecture with service workers
-- **Pinboard API Integration:** Direct integration with Pinboard.in bookmarking service
-- **Chrome Storage API:** Efficient local storage for extension state and settings
+- **Dual storage modes:** Local (default) or Pinboard; active provider selected in Options (Storage Mode). No external service required for the default path.
+- **Pinboard API Integration:** Optional; used when Storage Mode is set to Pinboard (cloud)
+- **Chrome Storage API:** Efficient local storage for extension state, settings, and local bookmarks
 - **Chrome Tabs API:** Tab management and search functionality
 
 ### Core Components
@@ -144,7 +161,7 @@ The configuration page provides comprehensive settings for customizing the exten
 ### Prerequisites
 - Node.js 18+ and npm
 - Chrome browser for development and testing
-- Pinboard.in account for API testing
+- Pinboard.in account optional (only needed if using Pinboard storage mode)
 
 ### Setup
 ```bash

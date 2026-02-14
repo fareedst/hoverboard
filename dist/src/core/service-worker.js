@@ -40,6 +40,8 @@ var init_config_manager = __esm({
         this.storageKeys = {
           AUTH_TOKEN: "hoverboard_auth_token",
           SETTINGS: "hoverboard_settings",
+          STORAGE_MODE: "hoverboard_storage_mode",
+          // [ARCH-LOCAL_STORAGE_PROVIDER] - Bookmark storage mode (pinboard | local)
           INHIBIT_URLS: "hoverboard_inhibit_urls",
           RECENT_TAGS: "hoverboard_recent_tags",
           // [IMMUTABLE-REQ-TAG-001] - Tag storage key
@@ -58,6 +60,8 @@ var init_config_manager = __esm({
        */
       getDefaultConfiguration() {
         return {
+          // [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] - Default local: preferable for most users (no account/API required)
+          storageMode: "local",
           // CFG-003: Feature flags - Core functionality toggles
           // IMPLEMENTATION DECISION: Enable helpful features by default, disable potentially intrusive ones
           hoverShowRecentTags: true,
@@ -218,6 +222,30 @@ var init_config_manager = __esm({
         const current = await this.getConfig();
         const updated = { ...current, ...updates };
         await this.saveSettings(updated);
+      }
+      /**
+       * Get bookmark storage mode
+       * @returns {Promise<string>} 'pinboard' or 'local'
+       *
+       * [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode for bookmark provider selection
+       * IMPLEMENTATION DECISION: Stored in settings blob; default from getDefaultConfiguration is 'local'; invalid values fall back to 'pinboard'
+       */
+      async getStorageMode() {
+        const config = await this.getConfig();
+        const mode = config.storageMode;
+        return mode === "local" || mode === "pinboard" ? mode : "pinboard";
+      }
+      /**
+       * Set bookmark storage mode
+       * @param {string} mode - 'pinboard' or 'local'
+       *
+       * [ARCH-LOCAL_STORAGE_PROVIDER] Persist storage mode for provider selection
+       */
+      async setStorageMode(mode) {
+        if (mode !== "pinboard" && mode !== "local") {
+          throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard' or 'local'.`);
+        }
+        await this.updateConfig({ storageMode: mode });
       }
       /**
        * Get visibility default settings
@@ -5299,6 +5327,8 @@ var MESSAGE_TYPES = {
   DELETE_BOOKMARK: "deleteBookmark",
   SAVE_TAG: "saveTag",
   DELETE_TAG: "deleteTag",
+  // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode switch (handled by service worker)
+  SWITCH_STORAGE_MODE: "switchStorageMode",
   // UI operations
   TOGGLE_HOVER: "toggleHover",
   HIDE_OVERLAY: "hideOverlay",
@@ -5331,11 +5361,19 @@ var MESSAGE_TYPES = {
   ECHO: "echo"
 };
 var MessageHandler = class {
-  constructor(pinboardService = null, tagService = null) {
-    this.pinboardService = pinboardService || new PinboardService();
-    this.tagService = tagService || new TagService();
+  constructor(bookmarkProvider = null, tagService = null) {
+    this.bookmarkProvider = bookmarkProvider || new PinboardService();
+    this.tagService = tagService || new TagService(this.bookmarkProvider);
     this.configManager = new ConfigManager();
     this.tabSearchService = new TabSearchService();
+  }
+  /**
+   * [ARCH-LOCAL_STORAGE_PROVIDER] Swap the active bookmark provider at runtime (e.g. after storage mode change).
+   * @param {Object} provider - PinboardService or LocalBookmarkService instance
+   */
+  setBookmarkProvider(provider) {
+    this.bookmarkProvider = provider;
+    this.tagService.pinboardService = provider;
   }
   /**
    * Process incoming messages with modern async/await pattern
@@ -5485,8 +5523,8 @@ var MessageHandler = class {
         }
       };
     }
-    debugLog("[POPUP-DATA-FLOW-001] Getting bookmark data from Pinboard...");
-    const bookmark = await this.pinboardService.getBookmarkForUrl(targetUrl, data?.title);
+    debugLog("[POPUP-DATA-FLOW-001] Getting bookmark data from provider...");
+    const bookmark = await this.bookmarkProvider.getBookmarkForUrl(targetUrl, data?.title);
     debugLog("[POPUP-DATA-FLOW-001] Bookmark data retrieved:", bookmark);
     const response = { success: true, data: bookmark };
     debugLog("[POPUP-DATA-FLOW-001] Service worker response structure:", {
@@ -5596,11 +5634,11 @@ var MessageHandler = class {
     return options;
   }
   async handleSaveBookmark(data) {
-    const previousBookmark = await this.pinboardService.getBookmarkForUrl(data.url);
+    const previousBookmark = await this.bookmarkProvider.getBookmarkForUrl(data.url);
     const previousTags = previousBookmark?.tags || [];
     const newTags = Array.isArray(data.tags) ? data.tags : data.tags.split(" ").filter((tag) => tag.trim());
     const addedTags = newTags.filter((tag) => !previousTags.includes(tag));
-    const result = await this.pinboardService.saveBookmark(data);
+    const result = await this.bookmarkProvider.saveBookmark(data);
     for (const tag of addedTags) {
       if (tag.trim()) {
         try {
@@ -5622,10 +5660,10 @@ var MessageHandler = class {
     return result;
   }
   async handleDeleteBookmark(data) {
-    return this.pinboardService.deleteBookmark(data.url);
+    return this.bookmarkProvider.deleteBookmark(data.url);
   }
   async handleSaveTag(data) {
-    const result = await this.pinboardService.saveTag(data);
+    const result = await this.bookmarkProvider.saveTag(data);
     if (data.value && data.value.trim()) {
       try {
         await this.tagService.handleTagAddition(data.value.trim(), data);
@@ -5643,7 +5681,7 @@ var MessageHandler = class {
     return result;
   }
   async handleDeleteTag(data) {
-    return this.pinboardService.deleteTag(data);
+    return this.bookmarkProvider.deleteTag(data);
   }
   async handleInhibitUrl(data) {
     return this.configManager.addInhibitUrl(data.url);
@@ -5739,8 +5777,8 @@ var MessageHandler = class {
   async handleBookmarkUpdated(data, tabId) {
     try {
       debugLog("[MessageHandler] handleBookmarkUpdated called", { data, tabId });
-      const result = await this.pinboardService.saveBookmark(data);
-      debugLog("[MessageHandler] Bookmark updated via pinboardService.saveBookmark", { result });
+      const result = await this.bookmarkProvider.saveBookmark(data);
+      debugLog("[MessageHandler] Bookmark updated via bookmarkProvider.saveBookmark", { result });
       await this.broadcastToAllTabs({
         type: "BOOKMARK_UPDATED",
         data
@@ -5810,6 +5848,217 @@ var MessageHandler = class {
 
 // src/core/service-worker.js
 init_pinboard_service();
+
+// src/features/storage/local-bookmark-service.js
+init_tag_service();
+init_utils();
+var STORAGE_KEY = "hoverboard_local_bookmarks";
+var LocalBookmarkService = class {
+  constructor(tagService = null) {
+    this.tagService = tagService || new TagService(this);
+  }
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Normalize URL for storage key (match PinboardService.cleanUrl behavior). */
+  cleanUrl(url) {
+    if (!url) return "";
+    return url.trim().replace(/\/+$/, "");
+  }
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Empty bookmark shape (match PinboardService.createEmptyBookmark). */
+  createEmptyBookmark(url, title) {
+    return {
+      url: url || "",
+      description: title || "",
+      extended: "",
+      tags: [],
+      time: "",
+      shared: "yes",
+      toread: "no",
+      hash: ""
+    };
+  }
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Read all bookmarks from chrome.storage.local. */
+  async _getAllBookmarks() {
+    try {
+      const result = await chrome.storage.local.get(STORAGE_KEY);
+      const raw = result[STORAGE_KEY];
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+      return raw;
+    } catch (e) {
+      debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] _getAllBookmarks failed:", e);
+      return {};
+    }
+  }
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Write full bookmarks map to chrome.storage.local. */
+  async _setAllBookmarks(map) {
+    await chrome.storage.local.set({ [STORAGE_KEY]: map });
+  }
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Normalize bookmark for return: tags as array. */
+  _normalizeBookmark(b) {
+    if (!b) return null;
+    const tags = b.tags == null ? [] : Array.isArray(b.tags) ? b.tags : String(b.tags).split(/\s+/).filter(Boolean);
+    return {
+      url: b.url || "",
+      description: b.description || "",
+      extended: b.extended || "",
+      tags,
+      time: b.time || "",
+      shared: b.shared === "no" ? "no" : "yes",
+      toread: b.toread === "yes" ? "yes" : "no",
+      hash: b.hash || ""
+    };
+  }
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Generate a stable local hash for a URL. */
+  _localHash(url) {
+    let h = 0;
+    const s = String(url);
+    for (let i = 0; i < s.length; i++) {
+      h = (h << 5) - h + s.charCodeAt(i);
+      h |= 0;
+    }
+    return "local-" + Math.abs(h).toString(36);
+  }
+  async getBookmarkForUrl(url, title = "") {
+    try {
+      const cleanUrl = this.cleanUrl(url);
+      const all = await this._getAllBookmarks();
+      const b = all[cleanUrl];
+      if (b) {
+        debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] getBookmarkForUrl found:", cleanUrl);
+        return this._normalizeBookmark({ ...b, url: cleanUrl });
+      }
+      debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] getBookmarkForUrl not found, returning empty:", cleanUrl);
+      return this.createEmptyBookmark(url, title);
+    } catch (error) {
+      debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] getBookmarkForUrl failed:", error);
+      return this.createEmptyBookmark(url, title);
+    }
+  }
+  async getRecentBookmarks(count = 15) {
+    try {
+      const all = await this._getAllBookmarks();
+      const list = Object.values(all).map((b) => this._normalizeBookmark(b)).filter((b) => b && b.time).sort((a, b) => (b.time || "").localeCompare(a.time || "")).slice(0, count);
+      debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] getRecentBookmarks:", list.length);
+      return list;
+    } catch (error) {
+      debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] getRecentBookmarks failed:", error);
+      return [];
+    }
+  }
+  async saveBookmark(bookmarkData) {
+    try {
+      const url = bookmarkData?.url ? this.cleanUrl(bookmarkData.url) : "";
+      if (!url) {
+        return { success: false, code: "invalid", message: "URL is required" };
+      }
+      const tags = bookmarkData.tags == null ? [] : Array.isArray(bookmarkData.tags) ? bookmarkData.tags : String(bookmarkData.tags).split(/\s+/).filter(Boolean);
+      const now = (/* @__PURE__ */ new Date()).toISOString();
+      const all = await this._getAllBookmarks();
+      const existing = all[url];
+      const bookmark = {
+        url,
+        description: bookmarkData.description ?? existing?.description ?? "",
+        extended: bookmarkData.extended ?? existing?.extended ?? "",
+        tags,
+        time: bookmarkData.time ?? existing?.time ?? now,
+        shared: bookmarkData.shared !== void 0 ? String(bookmarkData.shared) : existing?.shared ?? "yes",
+        toread: bookmarkData.toread !== void 0 ? String(bookmarkData.toread) : existing?.toread ?? "no",
+        hash: existing?.hash ?? this._localHash(url)
+      };
+      all[url] = bookmark;
+      await this._setAllBookmarks(all);
+      await this.trackBookmarkTags(bookmark);
+      debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] saveBookmark ok:", url);
+      return { success: true, code: "done", message: "Operation completed" };
+    } catch (error) {
+      debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] saveBookmark failed:", error);
+      throw error;
+    }
+  }
+  async saveTag(tagData) {
+    try {
+      const currentBookmark = await this.getBookmarkForUrl(tagData.url);
+      const existingTags = currentBookmark.tags || [];
+      const newTags = [...existingTags];
+      if (tagData.value && !existingTags.includes(tagData.value)) {
+        newTags.push(tagData.value);
+      }
+      const updatedBookmark = {
+        ...currentBookmark,
+        ...tagData,
+        tags: newTags.join(" ")
+      };
+      if (tagData.value) {
+        await this.tagService.handleTagAddition(tagData.value, updatedBookmark);
+      }
+      return this.saveBookmark(updatedBookmark);
+    } catch (error) {
+      debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] saveTag failed:", error);
+      throw error;
+    }
+  }
+  async deleteBookmark(url) {
+    try {
+      const cleanUrl = this.cleanUrl(url);
+      const all = await this._getAllBookmarks();
+      if (!(cleanUrl in all)) {
+        debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] deleteBookmark URL not found:", cleanUrl);
+        return { success: true, code: "done", message: "Operation completed" };
+      }
+      delete all[cleanUrl];
+      await this._setAllBookmarks(all);
+      debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] deleteBookmark ok:", cleanUrl);
+      return { success: true, code: "done", message: "Operation completed" };
+    } catch (error) {
+      debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] deleteBookmark failed:", error);
+      throw error;
+    }
+  }
+  async deleteTag(tagData) {
+    try {
+      const currentBookmark = await this.getBookmarkForUrl(tagData.url);
+      const existingTags = currentBookmark.tags || [];
+      const filteredTags = existingTags.filter((tag) => tag !== tagData.value);
+      const updatedBookmark = {
+        ...currentBookmark,
+        ...tagData,
+        tags: filteredTags.join(" ")
+      };
+      return this.saveBookmark(updatedBookmark);
+    } catch (error) {
+      debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] deleteTag failed:", error);
+      throw error;
+    }
+  }
+  async testConnection() {
+    return true;
+  }
+  async trackBookmarkTags(bookmarkData) {
+    try {
+      const tags = this.extractTagsFromBookmarkData(bookmarkData);
+      const sanitizedTags = Array.from(new Set(tags.map((tag) => this.tagService.sanitizeTag(tag)).filter(Boolean)));
+      if (sanitizedTags.length > 0) {
+        for (const sanitizedTag of sanitizedTags) {
+          await this.tagService.handleTagAddition(sanitizedTag, bookmarkData);
+        }
+        debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] Tracked tags for bookmark:", sanitizedTags);
+      }
+    } catch (error) {
+      debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] Failed to track bookmark tags:", error);
+    }
+  }
+  extractTagsFromBookmarkData(bookmarkData) {
+    const tags = [];
+    if (bookmarkData.tags) {
+      if (typeof bookmarkData.tags === "string") {
+        tags.push(...bookmarkData.tags.split(/\s+/).filter((tag) => tag.trim()));
+      } else if (Array.isArray(bookmarkData.tags)) {
+        tags.push(...bookmarkData.tags.filter((tag) => tag && tag.trim()));
+      }
+    }
+    return tags;
+  }
+};
+
+// src/core/service-worker.js
 init_config_manager();
 
 // src/core/badge-manager.js
@@ -6065,11 +6314,25 @@ var RecentTagsMemoryManager = class {
 var HoverboardServiceWorker = class {
   constructor() {
     this.messageHandler = new MessageHandler();
-    this.pinboardService = new PinboardService();
     this.configManager = new ConfigManager();
     this.badgeManager = new BadgeManager();
+    this.bookmarkProvider = this.messageHandler.bookmarkProvider;
     this.recentTagsMemory = new RecentTagsMemoryManager();
+    this._providerInitialized = false;
     this.setupEventListeners();
+  }
+  /**
+   * [ARCH-LOCAL_STORAGE_PROVIDER] Create the active bookmark provider from config and wire MessageHandler.
+   */
+  async initBookmarkProvider() {
+    const mode = await this.configManager.getStorageMode();
+    const tagService = this.messageHandler.tagService;
+    const provider = mode === "local" ? new LocalBookmarkService(tagService) : new PinboardService(tagService);
+    tagService.pinboardService = provider;
+    this.bookmarkProvider = provider;
+    this.messageHandler.setBookmarkProvider(provider);
+    this._providerInitialized = true;
+    console.log("[SERVICE-WORKER] [ARCH-LOCAL_STORAGE_PROVIDER] Bookmark provider initialized:", mode);
   }
   // MV3-001: Set up all V3 service worker event listeners
   setupEventListeners() {
@@ -6112,6 +6375,13 @@ var HoverboardServiceWorker = class {
   }
   async handleMessage(message, sender) {
     try {
+      if (!this._providerInitialized) {
+        await this.initBookmarkProvider();
+      }
+      if (message.type === MESSAGE_TYPES.SWITCH_STORAGE_MODE) {
+        await this.initBookmarkProvider();
+        return { success: true, data: { switched: true } };
+      }
       console.log("[SERVICE-WORKER] Processing message:", message.type);
       const response = await this.messageHandler.processMessage(message, sender);
       console.log("[SERVICE-WORKER] Message processed successfully:", response);
@@ -6144,7 +6414,10 @@ var HoverboardServiceWorker = class {
     const config = await this.configManager.getConfig();
     if (!config.setIconOnLoad) return;
     try {
-      const bookmark = await this.pinboardService.getBookmarkForUrl(tab.url);
+      if (!this._providerInitialized) {
+        await this.initBookmarkProvider();
+      }
+      const bookmark = await this.bookmarkProvider.getBookmarkForUrl(tab.url);
       await this.badgeManager.updateBadge(tab.id, bookmark);
     } catch (error) {
       console.error("Badge update error:", error);

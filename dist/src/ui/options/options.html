@@ -17,8 +17,27 @@
     </header>
 
     <main class="main">
-      <!-- Authentication Section -->
-      <section class="section">
+      <!-- Storage Mode: [ARCH-LOCAL_STORAGE_PROVIDER] -->
+      <section class="section" id="storage-mode-section">
+        <h2>Storage Mode</h2>
+        <div class="form-group">
+          <label class="radio-label">
+            <input type="radio" name="storage-mode" id="storage-mode-pinboard" value="pinboard">
+            <span>Pinboard (cloud)</span>
+          </label>
+          <p class="help-text">Sync bookmarks with Pinboard.in. Requires API token below.</p>
+        </div>
+        <div class="form-group">
+          <label class="radio-label">
+            <input type="radio" name="storage-mode" id="storage-mode-local" value="local">
+            <span>Local Storage (offline)</span>
+          </label>
+          <p class="help-text">Bookmarks will be stored locally in your browser. No external service is used.</p>
+        </div>
+      </section>
+
+      <!-- Authentication Section (used when Storage Mode is Pinboard) -->
+      <section class="section" id="auth-section">
         <h2>Authentication</h2>
         <div class="form-group">
           <label for="auth-token">Pinboard API Token</label>

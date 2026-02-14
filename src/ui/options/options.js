@@ -23,6 +23,11 @@ class OptionsController {
   }
 
   bindElements () {
+    // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode
+    this.elements.storageModePinboard = document.getElementById('storage-mode-pinboard')
+    this.elements.storageModeLocal = document.getElementById('storage-mode-local')
+    this.elements.authSection = document.getElementById('auth-section')
+
     // Authentication
     this.elements.authToken = document.getElementById('auth-token')
     this.elements.testAuth = document.getElementById('test-auth')
@@ -73,6 +78,10 @@ class OptionsController {
   }
 
   attachEventListeners () {
+    // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode change: save and notify service worker
+    this.elements.storageModePinboard.addEventListener('change', () => this.onStorageModeChange('pinboard'))
+    this.elements.storageModeLocal.addEventListener('change', () => this.onStorageModeChange('local'))
+
     // Authentication
     this.elements.testAuth.addEventListener('click', () => this.testAuthentication())
 
@@ -106,6 +115,12 @@ class OptionsController {
       const config = await this.configManager.getConfig()
       const authToken = await this.configManager.getAuthToken()
       const inhibitUrls = await this.configManager.getInhibitUrls()
+
+      // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode
+      const storageMode = config.storageMode === 'local' ? 'local' : 'pinboard'
+      this.elements.storageModePinboard.checked = (storageMode === 'pinboard')
+      this.elements.storageModeLocal.checked = (storageMode === 'local')
+      this.updateAuthSectionVisibility(storageMode)
 
       // Populate form fields
       this.elements.authToken.value = authToken
@@ -163,7 +178,9 @@ class OptionsController {
       }
 
       // Collect settings
+      const storageMode = this.elements.storageModeLocal.checked ? 'local' : 'pinboard'
       const settings = {
+        storageMode,
         showHoverOnPageLoad: this.elements.showHoverOnLoad.checked,
         hoverShowTooltips: this.elements.hoverShowTooltips.checked,
         initRecentPostsCount: parseInt(this.elements.recentPostsCount.value),
@@ -234,6 +251,35 @@ class OptionsController {
       this.showStatus('Failed to reset settings: ' + error.message, 'error')
     } finally {
       this.setLoading(false)
+    }
+  }
+
+  /**
+   * [ARCH-LOCAL_STORAGE_PROVIDER] Update auth section visibility based on storage mode.
+   * @param {string} mode - 'pinboard' or 'local'
+   */
+  updateAuthSectionVisibility (mode) {
+    if (!this.elements.authSection) return
+    if (mode === 'local') {
+      this.elements.authSection.classList.add('auth-section--disabled')
+    } else {
+      this.elements.authSection.classList.remove('auth-section--disabled')
+    }
+  }
+
+  /**
+   * [ARCH-LOCAL_STORAGE_PROVIDER] Handle storage mode radio change: persist and notify service worker.
+   * @param {string} mode - 'pinboard' or 'local'
+   */
+  async onStorageModeChange (mode) {
+    try {
+      await this.configManager.setStorageMode(mode)
+      this.updateAuthSectionVisibility(mode)
+      chrome.runtime.sendMessage({ type: 'switchStorageMode' }).catch(() => {})
+      this.showStatus('Storage mode updated. Using ' + (mode === 'local' ? 'local storage' : 'Pinboard') + '.', 'success')
+    } catch (error) {
+      console.error('Storage mode change failed:', error)
+      this.showStatus('Failed to update storage mode: ' + error.message, 'error')
     }
   }
 

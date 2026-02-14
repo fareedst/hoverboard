@@ -23,6 +23,9 @@ export const MESSAGE_TYPES = {
   SAVE_TAG: 'saveTag',
   DELETE_TAG: 'deleteTag',
 
+  // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode switch (handled by service worker)
+  SWITCH_STORAGE_MODE: 'switchStorageMode',
+
   // UI operations
   TOGGLE_HOVER: 'toggleHover',
   HIDE_OVERLAY: 'hideOverlay',
@@ -61,13 +64,23 @@ export const MESSAGE_TYPES = {
 }
 
 export class MessageHandler {
-  constructor (pinboardService = null, tagService = null) {
-    this.pinboardService = pinboardService || new PinboardService()
-    this.tagService = tagService || new TagService()
+  constructor (bookmarkProvider = null, tagService = null) {
+    // [ARCH-LOCAL_STORAGE_PROVIDER] Use active bookmark provider (PinboardService or LocalBookmarkService)
+    this.bookmarkProvider = bookmarkProvider || new PinboardService()
+    this.tagService = tagService || new TagService(this.bookmarkProvider)
     this.configManager = new ConfigManager()
 
     // [IMMUTABLE-REQ-TAG-002] Initialize tab search service
     this.tabSearchService = new TabSearchService()
+  }
+
+  /**
+   * [ARCH-LOCAL_STORAGE_PROVIDER] Swap the active bookmark provider at runtime (e.g. after storage mode change).
+   * @param {Object} provider - PinboardService or LocalBookmarkService instance
+   */
+  setBookmarkProvider (provider) {
+    this.bookmarkProvider = provider
+    this.tagService.pinboardService = provider
   }
 
   /**
@@ -263,9 +276,9 @@ export class MessageHandler {
       }
     }
 
-    // Get bookmark data from Pinboard
-    debugLog('[POPUP-DATA-FLOW-001] Getting bookmark data from Pinboard...')
-    const bookmark = await this.pinboardService.getBookmarkForUrl(targetUrl, data?.title)
+    // Get bookmark data from active provider (Pinboard or local)
+    debugLog('[POPUP-DATA-FLOW-001] Getting bookmark data from provider...')
+    const bookmark = await this.bookmarkProvider.getBookmarkForUrl(targetUrl, data?.title)
     debugLog('[POPUP-DATA-FLOW-001] Bookmark data retrieved:', bookmark)
 
     // [POPUP-DATA-FLOW-001] Enhanced response structure validation
@@ -411,13 +424,13 @@ export class MessageHandler {
 
   async handleSaveBookmark (data) {
     // Fetch previous bookmark to get previous tags
-    const previousBookmark = await this.pinboardService.getBookmarkForUrl(data.url)
+    const previousBookmark = await this.bookmarkProvider.getBookmarkForUrl(data.url)
     const previousTags = previousBookmark?.tags || []
     const newTags = Array.isArray(data.tags) ? data.tags : data.tags.split(' ').filter(tag => tag.trim())
     // Compute which tags are newly added
     const addedTags = newTags.filter(tag => !previousTags.includes(tag))
 
-    const result = await this.pinboardService.saveBookmark(data)
+    const result = await this.bookmarkProvider.saveBookmark(data)
 
     // [IMMUTABLE-REQ-TAG-001] - Only track newly added tags
     for (const tag of addedTags) {
@@ -447,11 +460,11 @@ export class MessageHandler {
   }
 
   async handleDeleteBookmark (data) {
-    return this.pinboardService.deleteBookmark(data.url)
+    return this.bookmarkProvider.deleteBookmark(data.url)
   }
 
   async handleSaveTag (data) {
-    const result = await this.pinboardService.saveTag(data)
+    const result = await this.bookmarkProvider.saveTag(data)
 
     // [IMMUTABLE-REQ-TAG-001] - Enhanced tag tracking for tag save
     if (data.value && data.value.trim()) {
@@ -477,7 +490,7 @@ export class MessageHandler {
   }
 
   async handleDeleteTag (data) {
-    return this.pinboardService.deleteTag(data)
+    return this.bookmarkProvider.deleteTag(data)
   }
 
   async handleInhibitUrl (data) {
@@ -594,8 +607,8 @@ export class MessageHandler {
     try {
       debugLog('[MessageHandler] handleBookmarkUpdated called', { data, tabId })
       // Update the bookmark with new privacy setting or other changes
-      const result = await this.pinboardService.saveBookmark(data)
-      debugLog('[MessageHandler] Bookmark updated via pinboardService.saveBookmark', { result })
+      const result = await this.bookmarkProvider.saveBookmark(data)
+      debugLog('[MessageHandler] Bookmark updated via bookmarkProvider.saveBookmark', { result })
       // Optionally broadcast to all tabs if needed
       await this.broadcastToAllTabs({
         type: 'BOOKMARK_UPDATED',

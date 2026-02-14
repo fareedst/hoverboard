@@ -980,6 +980,54 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
     registered: 2026-02-13
     last_updated: 2026-02-13
 
+REQ-STORAGE_MODE_DEFAULT:
+  type: REQ
+  name: Storage Mode Default and Dual-Use
+  category: Functional
+  status: Active
+  description: "Default storage mode is local; dual-use (local / Pinboard) configurable in Options; local preferable for most users"
+  cross_references:
+    - ARCH-LOCAL_STORAGE_PROVIDER
+    - IMPL-LOCAL_BOOKMARK_SERVICE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
+ARCH-LOCAL_STORAGE_PROVIDER:
+  type: ARCH
+  name: Local Storage Bookmark Provider
+  category: Storage / Bookmarking
+  status: Active
+  description: "Strategy pattern for bookmark storage: Pinboard (API) or Local (chrome.storage.local) selectable by user"
+  cross_references:
+    - REQ-STORAGE_MODE_DEFAULT
+    - IMPL-LOCAL_BOOKMARK_SERVICE
+    - ARCH-STORAGE
+    - ARCH-PINBOARD_API
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
+IMPL-LOCAL_BOOKMARK_SERVICE:
+  type: IMPL
+  name: Local Bookmark Service implementation
+  category: Storage / Bookmarking
+  status: Active
+  description: "LocalBookmarkService implementing bookmark provider contract using chrome.storage.local"
+  cross_references:
+    - REQ-STORAGE_MODE_DEFAULT
+    - ARCH-LOCAL_STORAGE_PROVIDER
+    - ARCH-STORAGE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
 # NOTE: Implementation tokens from stdd/implementation-decisions.md remain to be migrated
 # IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-PINBOARD_API, IMPL-MV3_MIGRATION,
 # IMPL-STORAGE, IMPL-TAG_SYSTEM, IMPL-OVERLAY, IMPL-THEME, IMPL-BOOKMARKING, IMPL-BADGE,

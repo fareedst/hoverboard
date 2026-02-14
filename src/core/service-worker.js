@@ -5,8 +5,9 @@
  */
 
 // MV3-001: Modern ES6 module imports for V3 architecture
-import { MessageHandler } from './message-handler.js'
+import { MessageHandler, MESSAGE_TYPES } from './message-handler.js'
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
+import { LocalBookmarkService } from '../features/storage/local-bookmark-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
@@ -120,17 +121,36 @@ class RecentTagsMemoryManager {
 // MV3-001: Main service worker class for V3 architecture
 class HoverboardServiceWorker {
   constructor () {
-    // MV3-001: Initialize core service components
+    // MV3-001: Initialize core service components (default provider until async init)
     this.messageHandler = new MessageHandler()
-    this.pinboardService = new PinboardService()
     this.configManager = new ConfigManager()
     this.badgeManager = new BadgeManager()
+    // [ARCH-LOCAL_STORAGE_PROVIDER] Active bookmark provider (set by initBookmarkProvider)
+    this.bookmarkProvider = this.messageHandler.bookmarkProvider
 
     // [IMMUTABLE-REQ-TAG-003] - Initialize shared memory for recent tags
     this.recentTagsMemory = new RecentTagsMemoryManager()
 
+    this._providerInitialized = false
+
     // MV3-001: Set up V3 event listeners
     this.setupEventListeners()
+  }
+
+  /**
+   * [ARCH-LOCAL_STORAGE_PROVIDER] Create the active bookmark provider from config and wire MessageHandler.
+   */
+  async initBookmarkProvider () {
+    const mode = await this.configManager.getStorageMode()
+    const tagService = this.messageHandler.tagService
+    const provider = mode === 'local'
+      ? new LocalBookmarkService(tagService)
+      : new PinboardService(tagService)
+    tagService.pinboardService = provider
+    this.bookmarkProvider = provider
+    this.messageHandler.setBookmarkProvider(provider)
+    this._providerInitialized = true
+    console.log('[SERVICE-WORKER] [ARCH-LOCAL_STORAGE_PROVIDER] Bookmark provider initialized:', mode)
   }
 
   // MV3-001: Set up all V3 service worker event listeners
@@ -197,6 +217,17 @@ class HoverboardServiceWorker {
 
   async handleMessage (message, sender) {
     try {
+      // [ARCH-LOCAL_STORAGE_PROVIDER] Lazy-init provider from config (storage mode)
+      if (!this._providerInitialized) {
+        await this.initBookmarkProvider()
+      }
+
+      // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode switch: re-init provider and respond (no processMessage)
+      if (message.type === MESSAGE_TYPES.SWITCH_STORAGE_MODE) {
+        await this.initBookmarkProvider()
+        return { success: true, data: { switched: true } }
+      }
+
       console.log('[SERVICE-WORKER] Processing message:', message.type)
       const response = await this.messageHandler.processMessage(message, sender)
       console.log('[SERVICE-WORKER] Message processed successfully:', response)
@@ -233,7 +264,10 @@ class HoverboardServiceWorker {
     if (!config.setIconOnLoad) return
 
     try {
-      const bookmark = await this.pinboardService.getBookmarkForUrl(tab.url)
+      if (!this._providerInitialized) {
+        await this.initBookmarkProvider()
+      }
+      const bookmark = await this.bookmarkProvider.getBookmarkForUrl(tab.url)
       await this.badgeManager.updateBadge(tab.id, bookmark)
     } catch (error) {
       console.error('Badge update error:', error)
