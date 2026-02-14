@@ -1028,6 +1028,21 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
     registered: 2026-02-13
     last_updated: 2026-02-13
 
+IMPL-BADGE_REFRESH:
+  type: IMPL
+  name: Badge refresh on overlay and popup changes
+  category: Badge / Service worker
+  status: Active
+  description: "Service worker refreshes badge after saveTag, deleteTag, saveBookmark so tag count and private/toread flags update immediately"
+  cross_references:
+    - REQ-BADGE_INDICATORS
+    - ARCH-BADGE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-BADGE_REFRESH.md
+  metadata:
+    registered: 2026-02-13
+    last_updated: 2026-02-13
+
 # NOTE: Implementation tokens from stdd/implementation-decisions.md remain to be migrated
 # IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-PINBOARD_API, IMPL-MV3_MIGRATION,
 # IMPL-STORAGE, IMPL-TAG_SYSTEM, IMPL-OVERLAY, IMPL-THEME, IMPL-BOOKMARKING, IMPL-BADGE,

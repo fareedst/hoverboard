@@ -681,6 +681,8 @@ REQ-BADGE_INDICATORS:
     - criterion: "Badge shows bookmark status"
     - criterion: "Tag count displayed"
     - criterion: "State indicators clear"
+    - criterion: "Badge refreshes immediately when tags are added or removed from overlay or popup"
+    - criterion: "Badge refreshes immediately when private or to-read toggle is changed from overlay or popup"
   validation_criteria:
     - method: "Badge update tests"
       coverage: "State indicator logic"

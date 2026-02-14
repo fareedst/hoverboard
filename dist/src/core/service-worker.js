@@ -6385,6 +6385,15 @@ var HoverboardServiceWorker = class {
       console.log("[SERVICE-WORKER] Processing message:", message.type);
       const response = await this.messageHandler.processMessage(message, sender);
       console.log("[SERVICE-WORKER] Message processed successfully:", response);
+      const badgeRefreshTypes = [MESSAGE_TYPES.SAVE_TAG, MESSAGE_TYPES.DELETE_TAG, MESSAGE_TYPES.SAVE_BOOKMARK];
+      if (badgeRefreshTypes.includes(message.type)) {
+        let tab = sender.tab;
+        if (!tab && message.type === MESSAGE_TYPES.SAVE_BOOKMARK) {
+          const tabs = await safariEnhancements.tabs.query({ active: true, currentWindow: true });
+          if (tabs.length > 0) tab = tabs[0];
+        }
+        if (tab) await this.updateBadgeForTab(tab);
+      }
       return { success: true, data: response };
     } catch (error) {
       console.error("Service worker message error:", error);

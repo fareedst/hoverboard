@@ -775,6 +775,59 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
       author: "AI Agent"
       reason: "Migrated from STDD to TIED format"
 
+IMPL-BADGE_REFRESH:
+  name: Badge refresh on overlay and popup changes
+  status: Active
+  cross_references:
+    - ARCH-BADGE
+    - REQ-BADGE_INDICATORS
+  rationale:
+    why: "Badge must reflect tag count and private/toread flags as soon as user changes them in overlay or popup"
+    problems_solved:
+      - "Badge not updating after overlay tag add/remove"
+      - "Badge not updating after overlay or popup private/toread toggle"
+    benefits:
+      - "Immediate visual feedback"
+      - "Consistent state across icon, overlay, and popup"
+  implementation_approach:
+    summary: "Service worker refreshes badge after saveTag, deleteTag, and saveBookmark when message succeeds"
+    details:
+      - "Chrome and Safari service workers: after processMessage success, if message type is saveTag, deleteTag, or saveBookmark, resolve tab (sender.tab or for saveBookmark query active tab) and call updateBadgeForTab(tab)"
+      - "Covers overlay-originated and popup-originated changes"
+  code_locations:
+    files:
+      - path: "src/core/service-worker.js"
+        description: "Chrome service worker handleMessage badge refresh"
+      - path: "safari/src/core/service-worker.js"
+        description: "Safari service worker handleMessage badge refresh"
+    functions:
+      - name: "handleMessage"
+        file: "src/core/service-worker.js"
+        description: "Calls updateBadgeForTab after saveTag/deleteTag/saveBookmark"
+  traceability:
+    architecture:
+      - ARCH-BADGE
+    requirements:
+      - REQ-BADGE_INDICATORS
+    tests:
+      - "tests/unit/badge-refresh-service-worker.test.js"
+    code_annotations:
+      - "[REQ-BADGE_INDICATORS] in service-worker.js"
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-BOOKMARK_STATE_SYNC
+  detail_file: implementation-decisions/IMPL-BADGE_REFRESH.md
+  metadata:
+    created:
+      date: 2026-02-13
+      author: "AI Agent"
+    last_updated:
+      date: 2026-02-13
+      author: "AI Agent"
+      reason: "Badge refresh on tag and private/toread changes"
+
 # NOTE: Additional IMPL tokens from stdd/implementation-decisions.md may remain:
 # IMPL-STORAGE, IMPL-BADGE, IMPL-CROSS_BROWSER, IMPL-SERVICE_WORKER,
 # IMPL-CONTENT_SCRIPT, IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-MV3_MIGRATION,

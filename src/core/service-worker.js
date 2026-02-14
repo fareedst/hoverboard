@@ -231,6 +231,18 @@ class HoverboardServiceWorker {
       console.log('[SERVICE-WORKER] Processing message:', message.type)
       const response = await this.messageHandler.processMessage(message, sender)
       console.log('[SERVICE-WORKER] Message processed successfully:', response)
+
+      // [REQ-BADGE_INDICATORS] Refresh badge when overlay/popup change tags or private/toread so count and flags update immediately
+      const badgeRefreshTypes = [MESSAGE_TYPES.SAVE_TAG, MESSAGE_TYPES.DELETE_TAG, MESSAGE_TYPES.SAVE_BOOKMARK]
+      if (badgeRefreshTypes.includes(message.type)) {
+        let tab = sender.tab
+        if (!tab && message.type === MESSAGE_TYPES.SAVE_BOOKMARK) {
+          const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+          if (tabs.length > 0) tab = tabs[0]
+        }
+        if (tab) await this.updateBadgeForTab(tab)
+      }
+
       return { success: true, data: response }
     } catch (error) {
       console.error('Service worker message error:', error)
