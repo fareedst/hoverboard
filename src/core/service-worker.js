@@ -8,6 +8,11 @@
 import { MessageHandler, MESSAGE_TYPES } from './message-handler.js'
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
 import { LocalBookmarkService } from '../features/storage/local-bookmark-service.js'
+import { FileBookmarkService } from '../features/storage/file-bookmark-service.js'
+import { InMemoryFileBookmarkAdapter } from '../features/storage/file-bookmark-storage-adapter.js'
+import { MessageFileBookmarkAdapter, ensureOffscreenDocument } from '../features/storage/message-file-bookmark-adapter.js'
+import { StorageIndex } from '../features/storage/storage-index.js'
+import { BookmarkRouter } from '../features/storage/bookmark-router.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
@@ -138,19 +143,44 @@ class HoverboardServiceWorker {
   }
 
   /**
-   * [ARCH-LOCAL_STORAGE_PROVIDER] Create the active bookmark provider from config and wire MessageHandler.
+   * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Create three providers, storage index, router; wire MessageHandler.
+   * FileBookmarkService uses MessageFileBookmarkAdapter when user has selected a folder (offscreen doc); else InMemoryFileBookmarkAdapter.
    */
   async initBookmarkProvider () {
-    const mode = await this.configManager.getStorageMode()
     const tagService = this.messageHandler.tagService
-    const provider = mode === 'local'
-      ? new LocalBookmarkService(tagService)
-      : new PinboardService(tagService)
-    tagService.pinboardService = provider
-    this.bookmarkProvider = provider
-    this.messageHandler.setBookmarkProvider(provider)
+    const pinboardProvider = new PinboardService(tagService)
+    const localProvider = new LocalBookmarkService(tagService)
+
+    let fileAdapter = new InMemoryFileBookmarkAdapter()
+    const fileStorageConfigured = await chrome.storage.local.get(['hoverboard_file_storage_configured']).then(r => !!r.hoverboard_file_storage_configured)
+    if (fileStorageConfigured && typeof chrome.offscreen !== 'undefined') {
+      try {
+        await ensureOffscreenDocument()
+        fileAdapter = new MessageFileBookmarkAdapter()
+      } catch (e) {
+        console.warn('[SERVICE-WORKER] File storage offscreen not available, using in-memory:', e.message)
+      }
+    }
+    const fileProvider = new FileBookmarkService(fileAdapter, tagService)
+
+    const storageIndex = new StorageIndex()
+    await storageIndex.ensureMigrationFromLocal(localProvider)
+
+    const getDefaultStorageMode = () => this.configManager.getStorageMode()
+    const router = new BookmarkRouter(
+      pinboardProvider,
+      localProvider,
+      fileProvider,
+      storageIndex,
+      getDefaultStorageMode
+    )
+
+    tagService.pinboardService = router
+    this.bookmarkProvider = router
+    this.messageHandler.setBookmarkProvider(router)
     this._providerInitialized = true
-    console.log('[SERVICE-WORKER] [ARCH-LOCAL_STORAGE_PROVIDER] Bookmark provider initialized:', mode)
+    const mode = await this.configManager.getStorageMode()
+    console.log('[SERVICE-WORKER] [ARCH-STORAGE_INDEX_AND_ROUTER] Bookmark router initialized; default mode:', mode)
   }
 
   // MV3-001: Set up all V3 service worker event listeners

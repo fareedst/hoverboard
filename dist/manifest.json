@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Hoverboard",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "author": "Fareed Stevenson",
   "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
   
@@ -42,7 +42,8 @@
     "tabs",
     "activeTab",
     "contextMenus",
-    "scripting"
+    "scripting",
+    "offscreen"
   ],
   
   "host_permissions": [

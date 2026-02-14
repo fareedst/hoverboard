@@ -90,6 +90,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New requirement `REQ-STORAGE_MODE_DEFAULT`; architecture and implementation decisions updated with default choice and rationale
   - Unit tests for ConfigManager default `storageMode`, `getStorageMode`, and `setStorageMode` (see `tests/unit/config-manager.test.js`)
 
+## [1.0.9] - 2026-02-14
+
+### Added
+
+- **File-based bookmark storage** – Third storage backend: bookmarks in a **single file** (`hoverboard-bookmarks.json`) in a **user-chosen folder**. Important for **privacy** (data stays in a location you control, no third-party service) and **sharing** (e.g. put the folder in Dropbox/Drive for sync, or share the file with others). Options: "Select folder" (File System Access); directory handle stored in IndexedDB; offscreen document performs file read/write.
+
+- **Per-bookmark storage** – Each bookmark is tagged with a storage method (Pinboard, Local, or File). A storage index maps URL → backend; **default storage for new bookmarks** is configurable in Options (three-way: Pinboard, Local, File). Bookmark operations are routed to the correct backend per URL.
+
+- **Move bookmark between storages** – In the popup, a **Storage** control shows where the current bookmark is saved and lets you **move** it to Pinboard, Local, or File (copy to target, delete from source, update index).
+
+- **Local bookmarks index: Storage column** – The index page now shows **local and file** bookmarks together, with a **Storage** column (Local | File). Uses `getAggregatedBookmarksForIndex`; CSV export includes Storage.
+
+### Technical Details
+
+- **StorageIndex** (`hoverboard_storage_index` in chrome.storage.local) maps URL → backend; **BookmarkRouter** delegates get/save/delete to Pinboard, Local, or File provider; **MessageFileBookmarkAdapter** and offscreen document for file I/O.
+
+### Benefits
+
+- **Privacy:** Keep bookmarks in a folder you control; no need to send data to Pinboard or any other service for file-backed bookmarks.
+- **Sharing:** Use a cloud-synced folder to sync across devices, or share the single JSON file with others for ad-hoc collaboration.
+
 ## [1.0.7] - 2025-11-17
 
 ### Added

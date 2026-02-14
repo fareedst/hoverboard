@@ -121,7 +121,10 @@ export class UIManager {
       readStatus: document.getElementById('readStatus'),
 
       // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
-      showHoverOnPageLoad: document.getElementById('showHoverOnPageLoad')
+      showHoverOnPageLoad: document.getElementById('showHoverOnPageLoad'),
+
+      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend select
+      storageBackendSelect: document.getElementById('storageBackendSelect')
     }
   }
 
@@ -159,6 +162,12 @@ export class UIManager {
 
     this.elements.bookmarksIndexBtn?.addEventListener('click', () => {
       this.emit('openBookmarksIndex')
+    })
+
+    // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend change
+    this.elements.storageBackendSelect?.addEventListener('change', (e) => {
+      const target = e.target?.value
+      if (target) this.emit('storageBackendChange', target)
     })
 
     this.elements.settingsBtn?.addEventListener('click', () => {
@@ -356,6 +365,15 @@ export class UIManager {
           this.elements.readStatus.textContent = 'Not marked'
         }
       }
+    }
+  }
+
+  /**
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Update storage backend select value (pinboard | local | file).
+   */
+  updateStorageBackendValue (backend) {
+    if (this.elements.storageBackendSelect && backend) {
+      this.elements.storageBackendSelect.value = backend
     }
   }
 

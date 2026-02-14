@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Chrome Web Store](https://img.shields.io/badge/Chrome-Extension-blue.svg)](https://chrome.google.com/webstore)
 
-A modern Chrome extension for local-first bookmark management and web page tagging with optional Pinboard.in integration.
+A modern Chrome extension for local-first bookmark management and web page tagging with optional Pinboard.in integration and optional file-based storage for privacy and sharing.
 
 ## Supported Browsers
 
@@ -35,24 +35,26 @@ npm run build:dev
 
 ## 📋 Status
 
-**Current Version:** 1.0.8 (development)  
-**Last Updated:** 2026-02-13  
+**Current Version:** 1.0.9 (development)  
+**Last Updated:** 2026-02-14  
 **Chrome Extension Status:** Production Ready
 
-**Latest Enhancement:** A **Local Bookmarks Index** page lets you browse, search, filter, sort, and open all locally stored bookmarks in one place (popup → "Bookmarks index" or Options → "Local bookmarks index"). Bookmarks are stored **locally in your browser by default**—no account or API required. Switch to Pinboard (Options > Storage Mode) for cloud sync. Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
+**Latest Enhancement:** The extension now supports **three storage options** (Local, Pinboard, **File**). File storage keeps bookmarks in a **single file** in a **folder you choose**—important for **privacy** (your data, your folder; no third-party service) and **sharing** (e.g. cloud-sync the folder or share the file with others). A **Local Bookmarks Index** page lets you browse, search, filter, sort, and open local and file-stored bookmarks (with a Storage column). Bookmarks are stored **locally in your browser by default**—no account or API required. Move bookmarks between Pinboard, Local, and File from the popup (Storage dropdown). Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
 
 ### Chrome Extension Features
 
 Hoverboard is a fully-featured Chrome extension that provides seamless bookmark management with local-first storage and optional Pinboard sync:
 
 #### **Core Features:**
-- ✅ **Local-first storage** - Bookmarks stored in your browser by default; no account or API required. Switch to Pinboard in Options for cloud sync.
+- ✅ **Local-first storage** - Bookmarks stored in your browser by default; no account or API required. Switch to Pinboard or File in Options.
+- ✅ **File-based storage** - Store bookmarks in a **file in a folder you choose** (e.g. cloud-synced). Important for **privacy** (your data, your folder) and **sharing** (sync via Dropbox/Drive or share the file). Options: Storage Mode > File, then "Select folder".
+- ✅ **Per-bookmark storage and move** - Each bookmark has a storage location (Pinboard, Local, or File). **Move** a bookmark between storages from the popup (Storage dropdown).
 - ✅ **Smart Bookmarking** - Save pages with intelligent tag suggestions from 11 content sources (title, URL, meta tags, headings, emphasis elements, definition terms, table headers, navigation, breadcrumbs, images, links)
 - ✅ **Tag Management** - Organize bookmarks with custom tags and categories
 - ✅ **Recent Tags** - Quick access to frequently used tags; list refreshes every time the popup is displayed and syncs across windows
 - ✅ **Dark Theme Support** - Modern UI with dark theme default
 - ✅ **Overlay System** - Visual feedback with transparency controls
-- ✅ **Local Bookmarks Index** - Full-page index of locally stored bookmarks: search (title, URL, tags, notes), filter (by tag, to-read, private), sortable columns, clickable URLs to open in a new tab, and Export all / Export displayed to CSV (see screenshot below). Open from popup ("Bookmarks index") or Options ("Local bookmarks index"). Data is local-only (chrome.storage.local); not shown when using Pinboard.
+- ✅ **Local Bookmarks Index** - Full-page index of **local and file** bookmarks with a **Storage** column (Local | File): search (title, URL, tags, notes), filter (by tag, to-read, private), sortable columns, clickable URLs, Export all / Export displayed to CSV. Open from popup ("Bookmarks index") or Options ("Local bookmarks index").
 - ✅ **Optional Pinboard integration** - Use Storage Mode in Options to sync with Pinboard.in (requires API token)
 - ✅ **Badge Indicators** - Visual status indicators in the extension icon
 - ✅ **Site Management** - Disable extension on specific domains
@@ -78,12 +80,13 @@ Intelligent tag suggestions extracted from multiple page content sources:
 - **Case Preservation**: Both original case (e.g., "GitHub") and lowercase variants offered
 - **Smart Deduplication**: Filters out tags already applied to current bookmark
 
-#### Storage (dual-use)
+#### Storage (three options)
 - **Default—local:** Bookmarks are stored locally in your browser (`chrome.storage.local`). No account or API token is required; the extension works out of the box. Local storage is preferable for most users.
 - **Optional—Pinboard:** In Options > Storage Mode, choose "Pinboard (cloud)" to sync with Pinboard.in. Requires an API token (Options > Authentication).
+- **Optional—File (privacy and sharing):** Store bookmarks in a **single file** in a **folder you choose** (Options > Storage Mode > File, then "Select folder"). The file can live in a cloud-synced folder (e.g. Dropbox, Google Drive) for sync, or you can share the file with others. Keeps data in a location you control—no third-party bookmark service required.
 
 #### Additional Features
-- **Local Bookmarks Index:** Browse all locally stored bookmarks in a dedicated page. Search by title, URL, tags, or notes; filter by tag, to-read, or private; sort by column (default: newest first); click a URL to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index"). Shows only local storage data (empty when using Pinboard).
+- **Local Bookmarks Index:** Browse all **local and file** bookmarks in a dedicated page with a **Storage** column (Local | File). Search by title, URL, tags, or notes; filter by tag, to-read, or private; sort by column (default: newest first); click a URL to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index").
 - **Tag Management:** Organize bookmarks with custom tags and categories
 - **Recent Tags:** Quick access to frequently used tags; refreshes on every popup display and syncs across windows so tags saved in one window appear in any other
 - **Optional Pinboard integration:** Use Storage Mode in Options to sync with Pinboard.in bookmarking service (requires API token)
@@ -157,7 +160,7 @@ The snapshot above shows the dedicated full-page view of all locally stored book
 
 ### Chrome Extension Architecture
 - **Manifest V3:** Modern Chrome extension architecture with service workers
-- **Dual storage modes:** Local (default) or Pinboard; active provider selected in Options (Storage Mode). No external service required for the default path.
+- **Three storage modes:** Local (default), Pinboard (cloud), or **File** (user-chosen directory; single JSON file). Per-bookmark routing via storage index and BookmarkRouter; default storage for new bookmarks configurable in Options. File I/O via offscreen document; directory handle in IndexedDB. No external service required for local or file path.
 - **Pinboard API Integration:** Optional; used when Storage Mode is set to Pinboard (cloud)
 - **Chrome Storage API:** Efficient local storage for extension state, settings, and local bookmarks
 - **Chrome Tabs API:** Tab management and search functionality
@@ -166,7 +169,7 @@ The snapshot above shows the dedicated full-page view of all locally stored book
 - **Service Worker:** Background script handling bookmark operations and API calls
 - **Content Scripts:** Overlay system with transparency controls and visual feedback
 - **Popup Interface:** Modern UI with quick actions and tag management
-- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) for searching, filtering, sorting, and opening local bookmarks; data from `getLocalBookmarksForIndex` (LocalBookmarkService only)
+- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) for searching, filtering, sorting, and opening local and file bookmarks (Storage column); data from `getAggregatedBookmarksForIndex` (local + file)
 - **Storage System:** Local state management with Chrome storage API
 - **Error Handling:** Comprehensive error recovery and user feedback
 - **Badge Management:** Visual indicators in the extension icon
@@ -289,6 +292,7 @@ The Chrome extension provides comprehensive bookmark management with the followi
 | `CHROME-OVERLAY-001` | Visual overlay system | ✅ Complete |
 | `CHROME-BADGE-001` | Extension badge indicators | ✅ Complete |
 | `CHROME-STORAGE-001` | Chrome storage API integration | ✅ Complete |
+| File storage and per-bookmark routing | File-based storage in user-chosen folder; per-bookmark storage (Pinboard, Local, File); move between storages; privacy and sharing | ✅ Complete |
 | `CHROME-UI-001` | Modern popup interface | ✅ Complete |
 | `CHROME-ERROR-001` | Error handling and recovery | ✅ Complete |
 | `CHROME-SEARCH-001` | Tab search functionality | ✅ Complete |

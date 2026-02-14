@@ -269,6 +269,29 @@ section:last-child {
   gap: var(--spacing-sm);
 }
 
+/* [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage section */
+.storage-section {
+  margin-top: var(--spacing-sm);
+}
+.storage-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+.storage-control label {
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+}
+.storage-select {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 4px;
+  background: var(--bg-primary, #fff);
+}
+
 /* [SHOW-HOVER-CHECKBOX-CSS-001] - Show hover controls layout */
 .show-hover-controls {
   display: flex;

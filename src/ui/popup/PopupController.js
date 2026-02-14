@@ -45,6 +45,7 @@ export class PopupController {
     this.handleReloadExtension = this.handleReloadExtension.bind(this)
     this.handleOpenOptions = this.handleOpenOptions.bind(this)
     this.handleOpenBookmarksIndex = this.handleOpenBookmarksIndex.bind(this)
+    this.handleStorageBackendChange = this.handleStorageBackendChange.bind(this)
     this.normalizeTags = this.normalizeTags.bind(this)
 
     this.setupEventListeners()
@@ -165,6 +166,9 @@ export class PopupController {
     this.uiManager.on('openOptions', this.handleOpenOptions)
     this.uiManager.on('openBookmarksIndex', this.handleOpenBookmarksIndex)
 
+    // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend change (move bookmark)
+    this.uiManager.on('storageBackendChange', this.handleStorageBackendChange)
+
     // [POPUP-REFRESH-001] Add refresh event handler
     this.uiManager.on('refreshData', this.refreshPopupData.bind(this))
 
@@ -262,6 +266,10 @@ export class PopupController {
       // Set version info
       const manifest = chrome.runtime.getManifest()
       this.uiManager.updateVersionInfo(manifest.version)
+
+      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Load current storage backend for URL
+      const storageBackend = await this.getStorageBackendForUrl(this.currentTab?.url)
+      this.uiManager.updateStorageBackendValue(storageBackend || 'local')
 
       // Mark as initialized
       this.isInitialized = true
@@ -770,6 +778,55 @@ export class PopupController {
         }
       )
     })
+  }
+
+  /**
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Get storage backend for URL (pinboard | local | file).
+   */
+  async getStorageBackendForUrl (url) {
+    if (!url || typeof chrome?.runtime?.sendMessage !== 'function') return 'local'
+    return new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        { type: 'getStorageBackendForUrl', data: { url } },
+        (response) => {
+          if (chrome.runtime.lastError || response === undefined) {
+            resolve('local')
+            return
+          }
+          const backend = response?.data ?? response
+          resolve(typeof backend === 'string' ? backend : 'local')
+        }
+      )
+    })
+  }
+
+  /**
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Move current bookmark to target storage backend.
+   */
+  async handleStorageBackendChange (targetBackend) {
+    if (!this.currentTab?.url) return
+    try {
+      const response = await new Promise((resolve, reject) => {
+        chrome.runtime.sendMessage(
+          { type: 'moveBookmarkToStorage', data: { url: this.currentTab.url, targetBackend } },
+          (r) => (chrome.runtime.lastError ? reject(new Error(chrome.runtime.lastError.message)) : resolve(r))
+        )
+      })
+      if (response?.success) {
+        this.uiManager.showSuccess('Bookmark moved to ' + targetBackend)
+        const updated = await this.getBookmarkData(this.currentTab.url)
+        this.currentPin = updated
+        this.stateManager.setState({ currentPin: this.currentPin })
+        this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
+        this.uiManager.updateReadLaterStatus(this.currentPin?.toread === 'yes')
+        this.uiManager.updateCurrentTags(this.normalizeTags(this.currentPin?.tags))
+      } else {
+        this.uiManager.showError(response?.message || 'Move failed')
+      }
+    } catch (e) {
+      debugError('[IMPL-MOVE_BOOKMARK_UI] handleStorageBackendChange failed:', e)
+      this.uiManager.showError(e.message || 'Move failed')
+    }
   }
 
   /**

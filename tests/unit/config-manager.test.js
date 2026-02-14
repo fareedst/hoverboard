@@ -162,12 +162,12 @@ describe('ConfigManager', () => {
       expect(mode).toBe('pinboard');
     });
 
-    test('getStorageMode returns pinboard when stored value is invalid (fallback)', async () => {
+    test('getStorageMode returns local when stored value is invalid (fallback) [ARCH-STORAGE_INDEX_AND_ROUTER]', async () => {
       global.chrome.storage.sync.get.mockResolvedValue({
         hoverboard_settings: { storageMode: 'invalid' }
       });
       const mode = await configManager.getStorageMode();
-      expect(mode).toBe('pinboard');
+      expect(mode).toBe('local');
     });
 
     test('setStorageMode accepts local and calls updateConfig', async () => {
@@ -181,6 +181,13 @@ describe('ConfigManager', () => {
       await configManager.setStorageMode('pinboard');
       expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
         hoverboard_settings: expect.objectContaining({ storageMode: 'pinboard' })
+      });
+    });
+
+    test('setStorageMode accepts file and calls updateConfig [ARCH-STORAGE_INDEX_AND_ROUTER]', async () => {
+      await configManager.setStorageMode('file');
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_settings: expect.objectContaining({ storageMode: 'file' })
       });
     });
 

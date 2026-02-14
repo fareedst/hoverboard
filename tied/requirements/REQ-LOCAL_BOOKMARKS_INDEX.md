@@ -1,34 +1,35 @@
 # [REQ-LOCAL_BOOKMARKS_INDEX] Local Bookmarks Index Page
 
 **Status**: Implemented  
-**Cross-references**: ARCH-LOCAL_BOOKMARKS_INDEX, IMPL-LOCAL_BOOKMARKS_INDEX
+**Cross-references**: ARCH-LOCAL_BOOKMARKS_INDEX, IMPL-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER
 
 ---
 
 ## Summary
 
-A dedicated extension page shows **only locally stored bookmarks** (chrome.storage.local via LocalBookmarkService). Data is **live only**—no static or hardcoded bookmark data. The page must be **searchable** (text across title, URL, tags, notes), **filterable** (by tag, to-read, private), **sortable** (column click, default time descending), and **launchable** (URL opens in new tab).
+A dedicated extension page shows **local and file-stored bookmarks** (chrome.storage.local via LocalBookmarkService, plus file-backed bookmarks from a user-chosen folder). Data is **live only**—no static or hardcoded bookmark data. The page must be **searchable** (text across title, URL, tags, notes), **filterable** (by tag, to-read, private), **sortable** (column click, including a **Storage** column Local | File; default time descending), and **launchable** (URL opens in new tab). Pinboard data is not shown in this index.
 
 ## Purpose
 
-- Give users a single place to browse and search all local bookmarks.
+- Give users a single place to browse and search all non-Pinboard bookmarks (local + file).
 - Support finding and opening bookmarks without leaving the extension.
-- Keep the index local-only; Pinboard data is not shown in this index.
+- Show where each bookmark is stored (Local vs File) via a Storage column.
 
 ## Satisfaction criteria
 
-- **Backend**: LocalBookmarkService exposes `getAllBookmarks()` returning the full normalized array (sorted by time desc). Message `getLocalBookmarksForIndex` always uses LocalBookmarkService (not the current provider), so the index reflects local storage even when storage mode is Pinboard.
-- **Table page**: Implements search (single input, case-insensitive match on description, url, tags, extended), filters (tag include/exclude, toread only, shared/private), sortable columns (Title, URL, Tags, Time, Shared, To read; default sort time desc), and URL column as links (`target="_blank"`).
+- **Backend**: Primary data via message `getAggregatedBookmarksForIndex` (BookmarkRouter aggregates LocalBookmarkService + FileBookmarkService, each item tagged with `storage: 'local'` or `'file'`). Fallback: `getLocalBookmarksForIndex` uses LocalBookmarkService only (all items tagged `storage: 'local'`) when aggregated is unavailable.
+- **Table page**: Implements search (single input, case-insensitive match on description, url, tags, extended), filters (tag include, toread only, shared/private), sortable columns (Title, URL, Tags, Time, **Storage** (Local | File), Shared, To read; default sort time desc), and URL column as links (`target="_blank"`).
 - **Entry point**: Popup and/or options provide a link/button that opens the index page in a new tab via `chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html') })`.
 
 ## How validated
 
-- Manual: Open index page, confirm local bookmarks load; run search, filters, sort; click URL to open in new tab.
-- Optional unit tests: `getAllBookmarks()` returns normalized list; handler for `getLocalBookmarksForIndex` uses LocalBookmarkService only.
+- Manual: Open index page, confirm local and file bookmarks load (Storage column shows Local | File); run search, filters, sort; click URL to open in new tab.
+- Optional unit tests: `getAllBookmarks()` returns normalized list; handler for `getLocalBookmarksForIndex` uses LocalBookmarkService only; `getAggregatedBookmarksForIndex` returns merged local + file with storage field.
 
 ## Related
 
-- ARCH-LOCAL_BOOKMARKS_INDEX (architecture for dedicated page and local-only data source)
-- IMPL-LOCAL_BOOKMARKS_INDEX (getAllBookmarks, message handler, bookmarks-table UI)
-- REQ-STORAGE_MODE_DEFAULT (local vs Pinboard mode)
+- ARCH-LOCAL_BOOKMARKS_INDEX (architecture for dedicated page and aggregated local + file data source)
+- IMPL-LOCAL_BOOKMARKS_INDEX (getAggregatedBookmarksForIndex / getLocalBookmarksForIndex, message handler, bookmarks-table UI with Storage column)
+- ARCH-STORAGE_INDEX_AND_ROUTER (BookmarkRouter.getAllBookmarksForIndex)
+- REQ-STORAGE_MODE_DEFAULT (local vs Pinboard vs File mode)
 - REQ-CHROME_STORAGE_USAGE (chrome.storage.local)

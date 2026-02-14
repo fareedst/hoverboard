@@ -1048,37 +1048,39 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Page
   category: Functional
   status: Active
-  description: "Full searchable, filterable, sortable, launchable index of locally stored bookmarks only"
+  description: "Full searchable, filterable, sortable index of local and file bookmarks with Storage column (Local | File); launchable URLs"
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX
     - IMPL-LOCAL_BOOKMARKS_INDEX
+    - ARCH-STORAGE_INDEX_AND_ROUTER
   source_index: requirements.yaml
   detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.md
   metadata:
     registered: 2026-02-13
-    last_updated: 2026-02-13
+    last_updated: 2026-02-14
 
 ARCH-LOCAL_BOOKMARKS_INDEX:
   type: ARCH
   name: Local Bookmarks Index Architecture
   category: Storage / UI
   status: Active
-  description: "Dedicated extension page, local-only data source, client-side search/filter/sort, launchable URLs"
+  description: "Dedicated extension page; getAggregatedBookmarksForIndex (local + file) with Storage column; fallback getLocalBookmarksForIndex; client-side search/filter/sort; launchable URLs"
   cross_references:
     - REQ-LOCAL_BOOKMARKS_INDEX
     - IMPL-LOCAL_BOOKMARKS_INDEX
+    - ARCH-STORAGE_INDEX_AND_ROUTER
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md
   metadata:
     registered: 2026-02-13
-    last_updated: 2026-02-13
+    last_updated: 2026-02-14
 
 IMPL-LOCAL_BOOKMARKS_INDEX:
   type: IMPL
   name: Local Bookmarks Index Implementation
   category: Storage / UI
   status: Active
-  description: "getAllBookmarks, getLocalBookmarksForIndex message, bookmarks-table page and script"
+  description: "getAggregatedBookmarksForIndex and getLocalBookmarksForIndex; BookmarkRouter.getAllBookmarksForIndex; bookmarks-table page with Storage column"
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX
     - REQ-LOCAL_BOOKMARKS_INDEX
@@ -1086,14 +1088,14 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md
   metadata:
     registered: 2026-02-13
-    last_updated: 2026-02-13
+    last_updated: 2026-02-14
 
 REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
   type: REQ
   name: Local Bookmarks Index Export
   category: Functional
   status: Active
-  description: "Export from index page: scope all or displayed, downloadable file (CSV/JSON)"
+  description: "Export from index page: scope all or displayed, CSV includes Storage column (Local | File), downloadable file"
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
     - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
@@ -1102,14 +1104,14 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
   detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.md
   metadata:
     registered: 2026-02-13
-    last_updated: 2026-02-13
+    last_updated: 2026-02-14
 
 ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
   type: ARCH
   name: Local Bookmarks Index Export Architecture
   category: Storage / UI
   status: Active
-  description: "Client-side export only; use existing allBookmarks/filteredBookmarks; CSV and/or JSON"
+  description: "Client-side export only; use existing allBookmarks/filteredBookmarks (local + file); CSV includes Storage column; and/or JSON"
   cross_references:
     - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
     - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
@@ -1117,14 +1119,14 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.md
   metadata:
     registered: 2026-02-13
-    last_updated: 2026-02-13
+    last_updated: 2026-02-14
 
 IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
   type: IMPL
   name: Local Bookmarks Index Export Implementation
   category: Storage / UI
   status: Active
-  description: "Export UI in bookmarks-table toolbar; serialize scope to CSV; trigger download"
+  description: "Export UI in bookmarks-table toolbar; serialize scope to CSV (including Storage column); trigger download"
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
     - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
@@ -1132,7 +1134,159 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.md
   metadata:
     registered: 2026-02-13
-    last_updated: 2026-02-13
+    last_updated: 2026-02-14
+
+REQ-FILE_BOOKMARK_STORAGE:
+  type: REQ
+  name: File-Based Bookmark Storage
+  category: Functional
+  status: Active
+  description: "Bookmarks stored in single directory, one file, cloud-sync friendly format"
+  cross_references:
+    - ARCH-FILE_BOOKMARK_PROVIDER
+    - IMPL-FILE_BOOKMARK_SERVICE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-FILE_BOOKMARK_STORAGE.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+ARCH-FILE_BOOKMARK_PROVIDER:
+  type: ARCH
+  name: File-Based Bookmark Provider
+  category: Storage
+  status: Active
+  description: "File-based provider; same contract as local/Pinboard; file I/O via adapter in document context"
+  cross_references:
+    - REQ-FILE_BOOKMARK_STORAGE
+    - IMPL-FILE_BOOKMARK_SERVICE
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+IMPL-FILE_BOOKMARK_SERVICE:
+  type: IMPL
+  name: File Bookmark Service
+  category: Storage
+  status: Active
+  description: "FileBookmarkService and FileBookmarkStorageAdapter; file format version 1"
+  cross_references:
+    - REQ-FILE_BOOKMARK_STORAGE
+    - ARCH-FILE_BOOKMARK_PROVIDER
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+REQ-PER_BOOKMARK_STORAGE_BACKEND:
+  type: REQ
+  name: Per-Bookmark Storage Backend
+  category: Functional
+  status: Active
+  description: "Bookmarks tagged with storage method; index URL -> backend; router delegates; default for new"
+  cross_references:
+    - ARCH-STORAGE_INDEX_AND_ROUTER
+    - IMPL-STORAGE_INDEX
+    - IMPL-BOOKMARK_ROUTER
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+ARCH-STORAGE_INDEX_AND_ROUTER:
+  type: ARCH
+  name: Storage Index and Bookmark Router
+  category: Storage
+  status: Active
+  description: "Per-URL index; router delegates to pinboard/local/file; getRecentBookmarks aggregates"
+  cross_references:
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - IMPL-STORAGE_INDEX
+    - IMPL-BOOKMARK_ROUTER
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+IMPL-STORAGE_INDEX:
+  type: IMPL
+  name: Storage Index
+  category: Storage
+  status: Active
+  description: "hoverboard_storage_index in chrome.storage.local; getIndex, setBackendForUrl, getBackendForUrl, removeUrl"
+  cross_references:
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - ARCH-STORAGE_INDEX_AND_ROUTER
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-STORAGE_INDEX.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+IMPL-BOOKMARK_ROUTER:
+  type: IMPL
+  name: Bookmark Router
+  category: Storage
+  status: Active
+  description: "Router with three providers; delegate by URL; getStorageBackendForUrl, moveBookmarkToStorage"
+  cross_references:
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - ARCH-STORAGE_INDEX_AND_ROUTER
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+REQ-MOVE_BOOKMARK_STORAGE_UI:
+  type: REQ
+  name: Move Bookmark Storage UI
+  category: Functional
+  status: Active
+  description: "UI to show and change bookmark storage (Pinboard, Local, File)"
+  cross_references:
+    - ARCH-MOVE_BOOKMARK_UI
+    - IMPL-MOVE_BOOKMARK_UI
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+ARCH-MOVE_BOOKMARK_UI:
+  type: ARCH
+  name: Move Bookmark Storage UI
+  category: UI
+  status: Active
+  description: "Popup shows current storage; move = copy + delete + update index"
+  cross_references:
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
+    - IMPL-MOVE_BOOKMARK_UI
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-MOVE_BOOKMARK_UI.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+IMPL-MOVE_BOOKMARK_UI:
+  type: IMPL
+  name: Move Bookmark Storage UI
+  category: UI
+  status: Active
+  description: "Popup storage select; getStorageBackendForUrl, moveBookmarkToStorage"
+  cross_references:
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
+    - ARCH-MOVE_BOOKMARK_UI
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
 
 # NOTE: Implementation tokens from stdd/implementation-decisions.md remain to be migrated
 # IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-PINBOARD_API, IMPL-MV3_MIGRATION,

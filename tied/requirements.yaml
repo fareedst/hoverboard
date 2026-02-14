@@ -1374,27 +1374,27 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   priority: P1
   status: "Implemented"
   rationale:
-    why: "Provide a full index of locally stored bookmarks with search, filter, sort, and launch"
+    why: "Provide a full index of local and file-stored bookmarks with search, filter, sort, Storage column, and launch"
     problems_solved:
-      - "No way to browse or search all local bookmarks in one place"
+      - "No way to browse or search all non-Pinboard bookmarks (local + file) in one place"
       - "Users need to find and open bookmarks without leaving the extension"
     benefits:
-      - "Single-page index of all local bookmarks"
-      - "Searchable, filterable, sortable, and launchable (open URL in tab)"
-      - "Live data only from chrome.storage.local; no Pinboard, no static data"
+      - "Single-page index of local and file bookmarks with Storage column (Local | File)"
+      - "Searchable, filterable, sortable (including by Storage), and launchable (open URL in tab)"
+      - "Live data from getAggregatedBookmarksForIndex (local + file) or getLocalBookmarksForIndex fallback; no Pinboard in index"
   satisfaction_criteria:
-    - criterion: "LocalBookmarkService exposes getAllBookmarks() returning full normalized array"
-    - criterion: "Message getLocalBookmarksForIndex always uses LocalBookmarkService (not current provider)"
-    - criterion: "Dedicated extension page displays table with search (title/URL/tags/notes), filters (tag, toread, shared), sortable columns (default time desc), URL as link"
+    - criterion: "Primary data via getAggregatedBookmarksForIndex (local + file with storage field); fallback getLocalBookmarksForIndex (LocalBookmarkService only)"
+    - criterion: "Dedicated extension page displays table with search (title/URL/tags/notes), filters (tag, toread, shared), sortable columns including Storage (Local | File), default time desc, URL as link"
     - criterion: "Entry point from popup and/or options opens the index page in a new tab"
   validation_criteria:
     - method: "Manual verification"
-      coverage: "Index page loads, displays local bookmarks, search/filter/sort/launch work"
+      coverage: "Index page loads, displays local and file bookmarks with Storage column, search/filter/sort/launch work"
     - method: "Unit tests (optional)"
-      coverage: "getAllBookmarks returns normalized list; handler returns local data only"
+      coverage: "getAllBookmarks returns normalized list; getAggregatedBookmarksForIndex returns local + file with storage field"
   traceability:
     architecture:
       - ARCH-LOCAL_BOOKMARKS_INDEX
+      - ARCH-STORAGE_INDEX_AND_ROUTER
     implementation:
       - IMPL-LOCAL_BOOKMARKS_INDEX
     tests: []
@@ -1412,9 +1412,9 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       date: 2026-02-13
       author: "AI Agent"
     last_updated:
-      date: 2026-02-13
+      date: 2026-02-14
       author: "AI Agent"
-      reason: "Phase 3: implementation complete"
+      reason: "Index shows local + file bookmarks with Storage column; getAggregatedBookmarksForIndex"
     last_validated:
       date: 2026-02-13
       validator: "AI Agent"
@@ -1426,18 +1426,18 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
   priority: P2
   status: "Implemented"
   rationale:
-    why: "Allow users to export index data for backup or use outside the extension"
+    why: "Allow users to export index data (local + file bookmarks) for backup or use outside the extension"
     problems_solved:
       - "No way to get index data out of the extension"
-      - "Users may want to backup or share filtered subsets"
+      - "Users may want to backup or share filtered subsets, including Storage column"
     benefits:
-      - "Downloadable file (CSV at minimum) for all or currently displayed bookmarks"
+      - "Downloadable file (CSV at minimum) for all or currently displayed bookmarks; CSV includes Storage column (Local | File)"
       - "Client-side only; no backend changes"
   satisfaction_criteria:
     - criterion: "Export control(s) in index page UI with clear scope (all vs displayed)"
-    - criterion: "User can export all records (full local list) to a downloadable file"
+    - criterion: "User can export all records (full local + file list) to a downloadable file"
     - criterion: "User can export currently displayed records (filtered/sorted subset) to a downloadable file"
-    - criterion: "At least one format (CSV); download triggered client-side"
+    - criterion: "At least one format (CSV) with columns including Title, URL, Tags, Time, Storage, Shared, To read, Notes; download triggered client-side"
   validation_criteria:
     - method: "Manual verification"
       coverage: "Export all and Export displayed produce correct CSV; file downloads"
@@ -1460,13 +1460,150 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
       date: 2026-02-13
       author: "AI Agent"
     last_updated:
-      date: 2026-02-13
+      date: 2026-02-14
       author: "AI Agent"
-      reason: "Phase 3: implementation complete"
+      reason: "Export includes Storage column; index data is local + file"
     last_validated:
       date: 2026-02-13
       validator: "AI Agent"
       result: "pass"
+
+REQ-FILE_BOOKMARK_STORAGE:
+  name: File-Based Bookmark Storage
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Allow bookmarks to be stored in a single directory as a file for cloud-sync and ad-hoc sharing"
+    problems_solved:
+      - "No way to store bookmarks in a folder that can be cloud-synchronized"
+      - "Users cannot share bookmark files with ad-hoc groups"
+    benefits:
+      - "Single directory, single file format (e.g. hoverboard-bookmarks.json) suitable for cloud sync"
+      - "Same bookmark shape as local/Pinboard; file format versioned for future compatibility"
+  satisfaction_criteria:
+    - criterion: "File-based provider implements same contract as LocalBookmarkService/PinboardService"
+    - criterion: "File format: { version: 1, bookmarks: { url: bookmark } }; one file in user-chosen directory"
+    - criterion: "File I/O behind abstraction so module is testable with mocked adapter"
+  validation_criteria:
+    - method: "Unit tests with mocked adapter"
+      coverage: "FileBookmarkService save/get/delete, getRecentBookmarks, saveTag/deleteTag, edge cases"
+  traceability:
+    architecture:
+      - ARCH-FILE_BOOKMARK_PROVIDER
+    implementation:
+      - IMPL-FILE_BOOKMARK_SERVICE
+    tests:
+      - "tests/unit/file-bookmark-service.test.js"
+    code_annotations:
+      - REQ-FILE_BOOKMARK_STORAGE
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-STORAGE_MODE_DEFAULT
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+  detail_file: requirements/REQ-FILE_BOOKMARK_STORAGE.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "File-based storage feature per plan"
+
+REQ-PER_BOOKMARK_STORAGE_BACKEND:
+  name: Per-Bookmark Storage Backend
+  category: Functional
+  priority: P0
+  status: "Implemented"
+  rationale:
+    why: "Each bookmark is tagged with a storage method (pinboard | local | file); routing by URL enables move and default for new bookmarks"
+    problems_solved:
+      - "Single global storage mode prevents mixing backends"
+      - "No way to move a bookmark from one storage to another"
+    benefits:
+      - "Storage index maps URL -> backend; default backend for new bookmarks from config"
+      - "Router delegates get/save/delete to correct provider per URL"
+      - "Enables move UI (copy to target, delete from source, update index)"
+  satisfaction_criteria:
+    - criterion: "Storage index in chrome.storage.local (hoverboard_storage_index): url -> pinboard|local|file"
+    - criterion: "BookmarkRouter holds three providers; getBookmarkForUrl/saveBookmark/deleteBookmark use index or default"
+    - criterion: "getRecentBookmarks aggregates from all three providers, sorted by time"
+    - criterion: "Migration: existing local bookmarks get index entry 'local'"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Index get/set/remove; router delegates to correct provider; default used when URL not in index"
+  traceability:
+    architecture:
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    implementation:
+      - IMPL-STORAGE_INDEX
+      - IMPL-BOOKMARK_ROUTER
+    tests:
+      - "tests/unit/storage-index.test.js"
+      - "tests/unit/bookmark-router.test.js"
+    code_annotations:
+      - REQ-PER_BOOKMARK_STORAGE_BACKEND
+  related_requirements:
+    depends_on:
+      - REQ-FILE_BOOKMARK_STORAGE
+    related_to:
+      - REQ-STORAGE_MODE_DEFAULT
+      - REQ-MOVE_BOOKMARK_STORAGE_UI
+    supersedes: []
+  detail_file: requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "Per-bookmark storage and router per plan"
+
+REQ-MOVE_BOOKMARK_STORAGE_UI:
+  name: Move Bookmark Storage UI
+  category: Functional
+  priority: P1
+  status: "Implemented"
+  rationale:
+    why: "User can move a bookmark from one storage method to another (Pinboard, Local, File)"
+    problems_solved:
+      - "No way to change where a bookmark is stored after saving"
+    benefits:
+      - "UI shows current storage and allows moving to another backend"
+      - "Move = copy to target + delete from source + update index"
+  satisfaction_criteria:
+    - criterion: "Popup shows current bookmark storage (Pinboard | Local | File) and control to move"
+    - criterion: "Message getStorageBackendForUrl and moveBookmarkToStorage implemented"
+    - criterion: "Options explains default storage for new bookmarks (three-way choice)"
+  validation_criteria:
+    - method: "Unit test moveBookmarkToStorage (mock providers)"
+    - method: "Manual: move bookmark from popup"
+  traceability:
+    architecture:
+      - ARCH-MOVE_BOOKMARK_UI
+    implementation:
+      - IMPL-MOVE_BOOKMARK_UI
+    tests: []
+    code_annotations:
+      - REQ-MOVE_BOOKMARK_STORAGE_UI
+  related_requirements:
+    depends_on:
+      - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "Move bookmark UI per plan"
 
 # ---
 # Template Record - Copy this block to create new requirements

@@ -1,10 +1,11 @@
 /**
  * Local Bookmarks Index - [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
- * Loads local bookmarks via getLocalBookmarksForIndex, renders table with search, filter, sort, launch.
+ * Loads local + file bookmarks via getAggregatedBookmarksForIndex (Storage column). Fallback: getLocalBookmarksForIndex.
  * Export: [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]
  */
 
-const MESSAGE_TYPE = 'getLocalBookmarksForIndex'
+const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
+const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
 
 let allBookmarks = []
 let filteredBookmarks = []
@@ -81,6 +82,10 @@ function compare (a, b) {
     const cmp = sa.localeCompare(sb)
     return sortAsc ? cmp : -cmp
   }
+  if (sortKey === 'storage') {
+    const cmp = String(va || '').localeCompare(String(vb || ''))
+    return sortAsc ? cmp : -cmp
+  }
   const sa = String(va ?? '').toLowerCase()
   const sb = String(vb ?? '').toLowerCase()
   const cmp = sa.localeCompare(sb)
@@ -102,6 +107,7 @@ function renderTableBody () {
     const time = escapeHtml(b.time ? new Date(b.time).toLocaleString() : '')
     const shared = b.shared === 'no' ? 'Private' : 'Public'
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
+    const storage = escapeHtml((b.storage === 'file' ? 'File' : 'Local'))
     const urlLink = b.url
       ? `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" class="url-link">${url}</a>`
       : url
@@ -110,6 +116,7 @@ function renderTableBody () {
       <td class="col-url">${urlLink}</td>
       <td class="col-tags">${tagsEsc}</td>
       <td class="col-time">${time}</td>
+      <td class="col-storage">${storage}</td>
       <td class="col-shared">${shared}</td>
       <td class="col-toread">${toread}</td>
     `
@@ -160,19 +167,20 @@ function escapeCsvField (str) {
 }
 
 /**
- * [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Build CSV string from bookmark array. Columns: Title, URL, Tags, Time, Shared, To read, Notes.
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Build CSV string from bookmark array. Columns: Title, URL, Tags, Time, Storage, Shared, To read, Notes.
  */
 function buildCsv (bookmarks) {
-  const header = 'Title,URL,Tags,Time,Shared,To read,Notes'
+  const header = 'Title,URL,Tags,Time,Storage,Shared,To read,Notes'
   const rows = bookmarks.map(b => {
     const title = b.description ?? ''
     const url = b.url ?? ''
     const tags = Array.isArray(b.tags) ? b.tags.join(', ') : String(b.tags ?? '')
     const time = b.time ? new Date(b.time).toISOString() : ''
+    const storage = b.storage === 'file' ? 'File' : 'Local'
     const shared = b.shared === 'no' ? 'Private' : 'Public'
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
     const notes = b.extended ?? ''
-    return [escapeCsvField(title), escapeCsvField(url), escapeCsvField(tags), escapeCsvField(time), escapeCsvField(shared), escapeCsvField(toread), escapeCsvField(notes)].join(',')
+    return [escapeCsvField(title), escapeCsvField(url), escapeCsvField(tags), escapeCsvField(time), escapeCsvField(storage), escapeCsvField(shared), escapeCsvField(toread), escapeCsvField(notes)].join(',')
   })
   return [header, ...rows].join('\r\n')
 }
@@ -216,8 +224,13 @@ function updateExportButtonState () {
 
 async function loadBookmarks () {
   try {
-    const response = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE })
-    const list = response?.data?.bookmarks ?? response?.bookmarks
+    const response = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_AGGREGATED })
+    let list = response?.data?.bookmarks ?? response?.bookmarks
+    if (!Array.isArray(list)) {
+      const fallback = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_LOCAL })
+      list = fallback?.data?.bookmarks ?? fallback?.bookmarks ?? []
+      list = list.map(b => ({ ...b, storage: 'local' }))
+    }
     allBookmarks = Array.isArray(list) ? list : []
     applySearchAndFilter()
     toggleEmptyState()

@@ -76,6 +76,19 @@
         </div>
       </section>
 
+      <!-- [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage: move bookmark to Pinboard, Local, or File -->
+      <section class="storage-section" id="storageSection">
+        <h3 class="section-title">Storage</h3>
+        <div class="storage-control">
+          <label for="storageBackendSelect">Save to:</label>
+          <select id="storageBackendSelect" class="storage-select" aria-label="Bookmark storage location">
+            <option value="pinboard">Pinboard (cloud)</option>
+            <option value="local">Local (browser)</option>
+            <option value="file">File (folder)</option>
+          </select>
+        </div>
+      </section>
+
       <!-- Tag Management -->
       <section class="tag-management">
         

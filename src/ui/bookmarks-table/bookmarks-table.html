@@ -16,7 +16,7 @@
         <span class="extension-name">Hoverboard</span>
       </div>
       <h1>Local Bookmarks Index</h1>
-      <p class="subtitle">Search, filter, sort, and open your locally stored bookmarks</p>
+      <p class="subtitle">Search, filter, sort, and open bookmarks stored locally or in a file (Storage column: Local | File)</p>
     </header>
 
     <div class="toolbar">
@@ -39,13 +39,13 @@
       </div>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] -->
       <div class="export-row">
-        <button type="button" id="export-all" class="btn btn-secondary btn-sm" title="Export all local bookmarks to CSV" aria-label="Export all bookmarks">Export all</button>
+        <button type="button" id="export-all" class="btn btn-secondary btn-sm" title="Export all bookmarks to CSV" aria-label="Export all bookmarks">Export all</button>
         <button type="button" id="export-displayed" class="btn btn-secondary btn-sm" title="Export currently displayed (filtered) bookmarks to CSV" aria-label="Export displayed bookmarks">Export displayed</button>
       </div>
     </div>
 
     <div id="empty-state" class="empty-state hidden">
-      <p>No local bookmarks. This index shows only bookmarks stored locally. Switch to Local Storage in Options and add bookmarks to see them here.</p>
+      <p>No local or file bookmarks. This index shows bookmarks stored in your browser (Local) or in a file you chose (File). Use Options to set Storage Mode and add bookmarks to see them here.</p>
     </div>
 
     <div id="table-wrapper" class="table-wrapper">
@@ -56,6 +56,7 @@
             <th data-sort="url" class="sortable">URL <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="tags" class="sortable">Tags <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="time" class="sortable sort-active sort-desc">Time <span class="sort-icon" aria-hidden="true">↓</span></th>
+            <th data-sort="storage" class="sortable">Storage <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="shared" class="sortable">Shared <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="toread" class="sortable">To read <span class="sort-icon" aria-hidden="true"></span></th>
           </tr>

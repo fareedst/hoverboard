@@ -16,6 +16,7 @@ export const MESSAGE_TYPES = {
   GET_CURRENT_BOOKMARK: 'getCurrentBookmark',
   GET_RECENT_BOOKMARKS: 'getRecentBookmarks',
   GET_LOCAL_BOOKMARKS_FOR_INDEX: 'getLocalBookmarksForIndex', // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
+  GET_AGGREGATED_BOOKMARKS_FOR_INDEX: 'getAggregatedBookmarksForIndex', // [ARCH-STORAGE_INDEX_AND_ROUTER] local + file with storage column
   GET_OPTIONS: 'getOptions',
   GET_TAB_ID: 'getTabId',
 
@@ -27,6 +28,10 @@ export const MESSAGE_TYPES = {
 
   // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode switch (handled by service worker)
   SWITCH_STORAGE_MODE: 'switchStorageMode',
+
+  // [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTER] Per-bookmark storage (move UI)
+  GET_STORAGE_BACKEND_FOR_URL: 'getStorageBackendForUrl',
+  MOVE_BOOKMARK_TO_STORAGE: 'moveBookmarkToStorage',
 
   // UI operations
   TOGGLE_HOVER: 'toggleHover',
@@ -155,6 +160,9 @@ export class MessageHandler {
       case MESSAGE_TYPES.GET_LOCAL_BOOKMARKS_FOR_INDEX:
         return this.handleGetLocalBookmarksForIndex()
 
+      case MESSAGE_TYPES.GET_AGGREGATED_BOOKMARKS_FOR_INDEX:
+        return this.handleGetAggregatedBookmarksForIndex()
+
       case MESSAGE_TYPES.GET_OPTIONS:
         return this.handleGetOptions()
 
@@ -169,6 +177,12 @@ export class MessageHandler {
 
       case MESSAGE_TYPES.DELETE_TAG:
         return this.handleDeleteTag(data)
+
+      case MESSAGE_TYPES.GET_STORAGE_BACKEND_FOR_URL:
+        return this.handleGetStorageBackendForUrl(data)
+
+      case MESSAGE_TYPES.MOVE_BOOKMARK_TO_STORAGE:
+        return this.handleMoveBookmarkToStorage(data)
 
       case MESSAGE_TYPES.INHIBIT_URL:
         return this.handleInhibitUrl(data)
@@ -345,6 +359,26 @@ export class MessageHandler {
   }
 
   /**
+   * [ARCH-STORAGE_INDEX_AND_ROUTER] Return local + file bookmarks with storage field (for index page with Storage column).
+   * @returns {Promise<{ bookmarks: Array<{ ...bookmark, storage: 'local'|'file' }> }>}
+   */
+  async handleGetAggregatedBookmarksForIndex () {
+    try {
+      if (typeof this.bookmarkProvider.getAllBookmarksForIndex === 'function') {
+        const bookmarks = await this.bookmarkProvider.getAllBookmarksForIndex()
+        debugLog('[MESSAGE-HANDLER] getAggregatedBookmarksForIndex:', bookmarks.length)
+        return { bookmarks }
+      }
+      const localService = new LocalBookmarkService(this.tagService)
+      const bookmarks = (await localService.getAllBookmarks()).map(b => ({ ...b, storage: 'local' }))
+      return { bookmarks }
+    } catch (error) {
+      debugError('[MESSAGE-HANDLER] getAggregatedBookmarksForIndex failed:', error)
+      return { bookmarks: [], error: error.message }
+    }
+  }
+
+  /**
    * [IMMUTABLE-REQ-TAG-003] - Handle tag addition to recent list (current site only)
    * @param {Object} data - Message data containing tagName and currentSiteUrl
    * @returns {Promise<Object>} Success status
@@ -513,6 +547,31 @@ export class MessageHandler {
 
   async handleDeleteTag (data) {
     return this.bookmarkProvider.deleteTag(data)
+  }
+
+  /**
+   * [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTER] Get storage backend for URL (for move UI).
+   */
+  async handleGetStorageBackendForUrl (data) {
+    if (typeof this.bookmarkProvider.getStorageBackendForUrl === 'function') {
+      return this.bookmarkProvider.getStorageBackendForUrl(data?.url || '')
+    }
+    return this.configManager.getStorageMode()
+  }
+
+  /**
+   * [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTER] Move bookmark to target storage.
+   */
+  async handleMoveBookmarkToStorage (data) {
+    if (typeof this.bookmarkProvider.moveBookmarkToStorage !== 'function') {
+      return { success: false, code: 'unsupported', message: 'Move not supported' }
+    }
+    const url = data?.url
+    const targetBackend = data?.targetBackend
+    if (!url || !targetBackend) {
+      return { success: false, code: 'invalid', message: 'url and targetBackend required' }
+    }
+    return this.bookmarkProvider.moveBookmarkToStorage(url, targetBackend)
   }
 
   async handleInhibitUrl (data) {

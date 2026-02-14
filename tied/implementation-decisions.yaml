@@ -834,25 +834,28 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX
     - REQ-LOCAL_BOOKMARKS_INDEX
+    - ARCH-STORAGE_INDEX_AND_ROUTER
   rationale:
-    why: "Implement full index of local bookmarks with search, filter, sort, launch"
+    why: "Implement full index of local and file bookmarks with Storage column, search, filter, sort, launch"
     problems_solved:
-      - "No single view of local bookmarks"
+      - "No single view of local and file bookmarks"
     benefits:
-      - "getAllBookmarks() on LocalBookmarkService; getLocalBookmarksForIndex message; table page"
+      - "getAggregatedBookmarksForIndex (router aggregates local + file) with fallback getLocalBookmarksForIndex; table page with Storage column"
   implementation_approach:
-    summary: "LocalBookmarkService.getAllBookmarks(); message getLocalBookmarksForIndex and handler using LocalBookmarkService only; bookmarks-table.html + .js + .css with search/filter/sort/launch; entry point from popup/options"
+    summary: "Index page sends getAggregatedBookmarksForIndex first (BookmarkRouter.getAllBookmarksForIndex), fallback getLocalBookmarksForIndex; bookmarks-table with Storage column (Local | File), search/filter/sort/launch; entry point from popup/options"
     details:
-      - "LocalBookmarkService: public getAllBookmarks() using _getAllBookmarks + _normalizeBookmark, sorted by time desc"
-      - "MessageHandler: handleGetLocalBookmarksForIndex instantiates LocalBookmarkService, returns getAllBookmarks()"
-      - "src/ui/bookmarks-table/: HTML (search, filters, table container), JS (fetch data, render table, search/filter/sort, URL links), CSS (table, sort indicators)"
+      - "MessageHandler: handleGetAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() when available; handleGetLocalBookmarksForIndex uses LocalBookmarkService only (fallback)"
+      - "BookmarkRouter.getAllBookmarksForIndex(): aggregates localProvider.getAllBookmarks() and fileProvider.getAllBookmarks(), adds storage 'local'|'file', merges and sorts by time desc"
+      - "src/ui/bookmarks-table/: HTML (search, filters, table with Storage column, empty state), JS (loadBookmarks uses aggregated then fallback, renderTableBody shows Storage, sort by storage), CSS (table, sort indicators)"
       - "Popup: bookmarksIndexBtn emits openBookmarksIndex; PopupController.handleOpenBookmarksIndex opens tab. Options: bookmarks-index-link href set to extension URL"
   code_locations:
     files:
       - path: "src/features/storage/local-bookmark-service.js"
         description: "getAllBookmarks() method"
       - path: "src/core/message-handler.js"
-        description: "MESSAGE_TYPES.GET_LOCAL_BOOKMARKS_FOR_INDEX, handleGetLocalBookmarksForIndex"
+        description: "GET_AGGREGATED_BOOKMARKS_FOR_INDEX, GET_LOCAL_BOOKMARKS_FOR_INDEX, handleGetAggregatedBookmarksForIndex, handleGetLocalBookmarksForIndex"
+      - path: "src/features/storage/bookmark-router.js"
+        description: "getAllBookmarksForIndex() aggregates local + file with storage field"
       - path: "src/ui/bookmarks-table/bookmarks-table.html"
         description: "Index page layout"
       - path: "src/ui/bookmarks-table/bookmarks-table.js"
@@ -875,10 +878,14 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
         description: "Returns full normalized array of local bookmarks, sorted by time desc"
       - name: "handleGetLocalBookmarksForIndex"
         file: "src/core/message-handler.js"
-        description: "Uses LocalBookmarkService, returns { bookmarks }"
+        description: "Uses LocalBookmarkService, returns { bookmarks } (fallback)"
+      - name: "getAllBookmarksForIndex"
+        file: "src/features/storage/bookmark-router.js"
+        description: "Aggregates local + file bookmarks with storage field, sorted by time desc"
   traceability:
     architecture:
       - ARCH-LOCAL_BOOKMARKS_INDEX
+      - ARCH-STORAGE_INDEX_AND_ROUTER
     requirements:
       - REQ-LOCAL_BOOKMARKS_INDEX
     tests: []
@@ -890,15 +897,16 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     supersedes: []
     see_also:
       - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-BOOKMARK_ROUTER
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md
   metadata:
     created:
       date: 2026-02-13
       author: "AI Agent"
     last_updated:
-      date: 2026-02-13
+      date: 2026-02-14
       author: "AI Agent"
-      reason: "Phase 3: implementation complete; code_locations updated"
+      reason: "Index shows local + file with Storage column; getAggregatedBookmarksForIndex; router.getAllBookmarksForIndex"
     last_validated:
       date: 2026-02-13
       validator: "AI Agent"
@@ -917,10 +925,10 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     benefits:
       - "Two buttons: Export all, Export displayed; CSV download"
   implementation_approach:
-    summary: "Export controls in bookmarks-table toolbar; exportBookmarks(scope) with scope 'all' or 'displayed'; serialize to CSV; Blob + object URL + <a download> click; revoke URL"
+    summary: "Export controls in bookmarks-table toolbar; exportBookmarks(scope) with scope 'all' or 'displayed'; serialize to CSV including Storage column; Blob + object URL + <a download> click; revoke URL"
     details:
       - "bookmarks-table.html: Export all and Export displayed buttons in toolbar"
-      - "bookmarks-table.js: elements.exportAll, elements.exportDisplayed; exportBookmarks(scope); get allBookmarks or filteredBookmarks; build CSV (header + rows, quoted fields); filename hoverboard-bookmarks-{all|displayed}-{date}.csv; trigger download"
+      - "bookmarks-table.js: elements.exportAll, elements.exportDisplayed; exportBookmarks(scope); get allBookmarks or filteredBookmarks (local + file with storage field); build CSV (header + rows including Storage Local|File, quoted fields); filename hoverboard-bookmarks-{all|displayed}-{date}.csv; trigger download"
       - "Disable Export displayed when filteredBookmarks.length === 0; disable Export all when allBookmarks.length === 0"
   code_locations:
     files:
@@ -954,9 +962,9 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
       date: 2026-02-13
       author: "AI Agent"
     last_updated:
-      date: 2026-02-13
+      date: 2026-02-14
       author: "AI Agent"
-      reason: "Implementation complete; CSV export in bookmarks-table"
+      reason: "CSV includes Storage column; index data is local + file"
     last_validated:
       date: 2026-02-13
       validator: "AI Agent"
@@ -1398,6 +1406,204 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       date: "2026-02-13"
       validator: "AI Agent"
       result: "pass"
+
+IMPL-FILE_BOOKMARK_SERVICE:
+  name: File Bookmark Service
+  status: Active
+  cross_references:
+    - REQ-FILE_BOOKMARK_STORAGE
+    - ARCH-FILE_BOOKMARK_PROVIDER
+  rationale:
+    why: "Implement file-based bookmark provider with same contract as Local/Pinboard; testable via adapter abstraction"
+    problems_solved:
+      - "No file-based storage implementation"
+    benefits:
+      - "FileBookmarkStorageAdapter: readBookmarksFile(), writeBookmarksFile(data); mockable for tests"
+      - "FileBookmarkService: getBookmarkForUrl, getRecentBookmarks, saveBookmark, deleteBookmark, saveTag, deleteTag, testConnection"
+      - "File format: { version: 1, bookmarks: { url: bookmark } }; same bookmark shape as local"
+  implementation_approach:
+    summary: "FileBookmarkService in src/features/storage/file-bookmark-service.js; adapter interface; in-memory adapter for tests; real adapter (file I/O) for production."
+    details:
+      - "Adapter methods: readBookmarksFile() -> Promise<{ version, bookmarks }>, writeBookmarksFile(data) -> Promise<void>"
+      - "Normalize URL and bookmark shape to match LocalBookmarkService (url, description, extended, tags, time, shared, toread, hash)"
+      - "Filename in directory: hoverboard-bookmarks.json"
+  code_locations:
+    files:
+      - path: "src/features/storage/file-bookmark-service.js"
+        description: "FileBookmarkService and adapter usage"
+      - path: "src/features/storage/file-bookmark-storage-adapter.js"
+        description: "Adapter interface and in-memory implementation"
+  traceability:
+    architecture:
+      - ARCH-FILE_BOOKMARK_PROVIDER
+    requirements:
+      - REQ-FILE_BOOKMARK_STORAGE
+    tests:
+      - "tests/unit/file-bookmark-service.test.js"
+    code_annotations:
+      - IMPL-FILE_BOOKMARK_SERVICE
+  related_decisions:
+    depends_on:
+      - ARCH-FILE_BOOKMARK_PROVIDER
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+  detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "File-based storage module per plan"
+    last_validated:
+      date: "2026-02-14"
+      validator: "AI Agent"
+      result: "pass"
+
+IMPL-STORAGE_INDEX:
+  name: Storage Index
+  status: Active
+  cross_references:
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - ARCH-STORAGE_INDEX_AND_ROUTER
+  rationale:
+    why: "Persist per-URL storage backend (pinboard|local|file) in chrome.storage.local"
+    problems_solved:
+      - "Need to know which backend owns each URL"
+    benefits:
+      - "getIndex(), setBackendForUrl(url, backend), getBackendForUrl(url), removeUrl(url)"
+      - "Key: hoverboard_storage_index"
+  implementation_approach:
+    summary: "StorageIndex class in src/features/storage/storage-index.js; chrome.storage.local."
+    details:
+      - "Index shape: { url: 'pinboard'|'local'|'file' }"
+      - "Migration: on first use, seed from LocalBookmarkService.getAllBookmarks() -> setBackendForUrl(url, 'local')"
+  code_locations:
+    files:
+      - path: "src/features/storage/storage-index.js"
+        description: "StorageIndex implementation"
+  traceability:
+    architecture:
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    requirements:
+      - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    tests:
+      - "tests/unit/storage-index.test.js"
+    code_annotations:
+      - IMPL-STORAGE_INDEX
+  related_decisions:
+    depends_on:
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    supersedes: []
+    see_also:
+      - IMPL-BOOKMARK_ROUTER
+  detail_file: implementation-decisions/IMPL-STORAGE_INDEX.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "Storage index per plan"
+
+IMPL-BOOKMARK_ROUTER:
+  name: Bookmark Router
+  status: Active
+  cross_references:
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - ARCH-STORAGE_INDEX_AND_ROUTER
+  rationale:
+    why: "Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks"
+    problems_solved:
+      - "Single provider cannot support per-bookmark backends"
+    benefits:
+      - "getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL"
+      - "getRecentBookmarks aggregates pinboard + local + file, sorted by time"
+      - "getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI"
+  implementation_approach:
+    summary: "BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, storageIndex, defaultStorageMode."
+    details:
+      - "Resolve provider: getBackendForUrl(url) || defaultStorageMode; map to one of three providers"
+      - "moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index"
+  code_locations:
+    files:
+      - path: "src/features/storage/bookmark-router.js"
+        description: "BookmarkRouter implementation"
+  traceability:
+    architecture:
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    requirements:
+      - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    tests:
+      - "tests/unit/bookmark-router.test.js"
+    code_annotations:
+      - IMPL-BOOKMARK_ROUTER
+  related_decisions:
+    depends_on:
+      - IMPL-STORAGE_INDEX
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-FILE_BOOKMARK_SERVICE
+  detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "Bookmark router per plan"
+
+IMPL-MOVE_BOOKMARK_UI:
+  name: Move Bookmark Storage UI
+  status: Active
+  cross_references:
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
+    - ARCH-MOVE_BOOKMARK_UI
+  rationale:
+    why: "Popup control to show and change current bookmark storage backend"
+    problems_solved:
+      - "User cannot move bookmark between backends"
+    benefits:
+      - "Storage dropdown in popup; getStorageBackendForUrl + moveBookmarkToStorage messages"
+  implementation_approach:
+    summary: "Popup: storage section with <select> Pinboard/Local/File; load backend on data load; on change send moveBookmarkToStorage."
+    details:
+      - "PopupController: on load get storage backend for current URL; set select value"
+      - "On select change: send moveBookmarkToStorage(url, targetBackend); refresh bookmark data"
+  code_locations:
+    files:
+      - path: "src/ui/popup/popup.html"
+        description: "Storage select markup"
+      - path: "src/ui/popup/PopupController.js"
+        description: "Load backend, handle move"
+  traceability:
+    architecture:
+      - ARCH-MOVE_BOOKMARK_UI
+    requirements:
+      - REQ-MOVE_BOOKMARK_STORAGE_UI
+    code_annotations:
+      - IMPL-MOVE_BOOKMARK_UI
+  related_decisions:
+    depends_on:
+      - ARCH-MOVE_BOOKMARK_UI
+    supersedes: []
+    see_also:
+      - IMPL-BOOKMARK_ROUTER
+  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "Move bookmark UI per plan"
 
 # IMPL-IDENTIFIER:
 #   name: Implementation Title

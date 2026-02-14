@@ -141,4 +141,31 @@ This document tracks all tasks and subtasks for implementing this project. Tasks
 - [ ] All documentation updated
 - [ ] Token audit + validation logged
 
+## File-Based Storage and Per-Bookmark Routing (Plan)
+
+### P0: File-based storage module [REQ-FILE_BOOKMARK_STORAGE] [ARCH-FILE_BOOKMARK_PROVIDER] [IMPL-FILE_BOOKMARK_SERVICE]
+**Status**: ✅ Complete  
+**Description**: File-based bookmark provider; single directory, single JSON file; file I/O behind adapter; unit tests with mocked adapter.  
+**Priority Rationale**: P0 — Foundation; tested before UI (REQ-MODULE_VALIDATION).
+
+### P0: Storage index and bookmark router [REQ-PER_BOOKMARK_STORAGE_BACKEND] [ARCH-STORAGE_INDEX_AND_ROUTER] [IMPL-STORAGE_INDEX] [IMPL-BOOKMARK_ROUTER]
+**Status**: ✅ Complete  
+**Description**: Per-URL storage index; BookmarkRouter delegates to pinboard/local/file; getRecentBookmarks aggregates; migration from local bookmarks.  
+**Priority Rationale**: P0 — Core behavior; required before move UI.
+
+### P1: File I/O context and directory picker [REQ-FILE_BOOKMARK_STORAGE] [ARCH-FILE_BOOKMARK_PROVIDER] [IMPL-FILE_BOOKMARK_SERVICE]
+**Status**: ✅ Complete  
+**Description**: Options "Select folder"; directory handle in IndexedDB; offscreen document for read/write; MessageFileBookmarkAdapter.  
+**Priority Rationale**: P1 — Real file persistence.
+
+### P1: Move bookmark UI [REQ-MOVE_BOOKMARK_STORAGE_UI] [ARCH-MOVE_BOOKMARK_UI] [IMPL-MOVE_BOOKMARK_UI]
+**Status**: ✅ Complete  
+**Description**: Popup Storage select (Pinboard | Local | File); getStorageBackendForUrl, moveBookmarkToStorage.  
+**Priority Rationale**: P1 — Per-bookmark storage and move between methods.
+
+### P2: Local bookmarks index and “all bookmarks” view [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX]
+**Status**: ✅ Complete  
+**Description**: Index page uses getAggregatedBookmarksForIndex; Storage column (Local | File); CSV export includes Storage.  
+**Priority Rationale**: P2 — Consistency of “where are my bookmarks”.
+
 

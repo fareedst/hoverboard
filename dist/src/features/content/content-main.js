@@ -1302,26 +1302,26 @@
           await this.saveSettings(updated);
         }
         /**
-         * Get bookmark storage mode
-         * @returns {Promise<string>} 'pinboard' or 'local'
+         * Get bookmark storage mode (default backend for new bookmarks when using router).
+         * @returns {Promise<string>} 'pinboard', 'local', or 'file'
          *
-         * [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode for bookmark provider selection
-         * IMPLEMENTATION DECISION: Stored in settings blob; default from getDefaultConfiguration is 'local'; invalid values fall back to 'pinboard'
+         * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Storage mode for provider selection and default for new bookmarks
+         * IMPLEMENTATION DECISION: Stored in settings blob; invalid values fall back to 'local'
          */
         async getStorageMode() {
           const config = await this.getConfig();
           const mode = config.storageMode;
-          return mode === "local" || mode === "pinboard" ? mode : "pinboard";
+          return mode === "local" || mode === "pinboard" || mode === "file" ? mode : "local";
         }
         /**
          * Set bookmark storage mode
-         * @param {string} mode - 'pinboard' or 'local'
+         * @param {string} mode - 'pinboard', 'local', or 'file'
          *
-         * [ARCH-LOCAL_STORAGE_PROVIDER] Persist storage mode for provider selection
+         * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Persist storage mode
          */
         async setStorageMode(mode) {
-          if (mode !== "pinboard" && mode !== "local") {
-            throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard' or 'local'.`);
+          if (mode !== "pinboard" && mode !== "local" && mode !== "file") {
+            throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', or 'file'.`);
           }
           await this.updateConfig({ storageMode: mode });
         }
@@ -8316,6 +8316,8 @@
     GET_RECENT_BOOKMARKS: "getRecentBookmarks",
     GET_LOCAL_BOOKMARKS_FOR_INDEX: "getLocalBookmarksForIndex",
     // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
+    GET_AGGREGATED_BOOKMARKS_FOR_INDEX: "getAggregatedBookmarksForIndex",
+    // [ARCH-STORAGE_INDEX_AND_ROUTER] local + file with storage column
     GET_OPTIONS: "getOptions",
     GET_TAB_ID: "getTabId",
     // Bookmark operations
@@ -8325,6 +8327,9 @@
     DELETE_TAG: "deleteTag",
     // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode switch (handled by service worker)
     SWITCH_STORAGE_MODE: "switchStorageMode",
+    // [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTER] Per-bookmark storage (move UI)
+    GET_STORAGE_BACKEND_FOR_URL: "getStorageBackendForUrl",
+    MOVE_BOOKMARK_TO_STORAGE: "moveBookmarkToStorage",
     // UI operations
     TOGGLE_HOVER: "toggleHover",
     HIDE_OVERLAY: "hideOverlay",

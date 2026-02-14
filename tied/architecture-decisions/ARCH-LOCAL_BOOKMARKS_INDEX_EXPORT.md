@@ -11,12 +11,12 @@ Export is implemented **entirely on the index page** (client-side). Data comes f
 
 ## Data source
 
-- **allBookmarks**: Full list returned by getLocalBookmarksForIndex; used for "Export all".
+- **allBookmarks**: Full list returned by getAggregatedBookmarksForIndex (or getLocalBookmarksForIndex fallback); used for "Export all". Items include `storage` field ('local' | 'file').
 - **filteredBookmarks**: Result of applying search and filters (and current sort); used for "Export displayed".
 
 ## Export format
 
-- **CSV**: Header row (Title, URL, Tags, Time, Shared, To read, Notes). Data rows: quoted fields; internal double-quotes escaped as `""`; tags joined (e.g. comma). Enables use in spreadsheets.
+- **CSV**: Header row (Title, URL, Tags, Time, Storage, Shared, To read, Notes). Data rows: quoted fields; internal double-quotes escaped as `""`; tags joined (e.g. comma); Storage column (Local | File). Enables use in spreadsheets.
 - **JSON** (optional): Array of bookmark objects as returned from the index (description, url, tags, time, shared, toread, extended, etc.).
 
 ## Download mechanism
