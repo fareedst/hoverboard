@@ -168,6 +168,8 @@ export class PopupController {
 
     // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend change (move bookmark)
     this.uiManager.on('storageBackendChange', this.handleStorageBackendChange)
+    // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser one-click toggle reuses same move handler
+    this.uiManager.on('storageLocalToggle', (targetBackend) => this.handleStorageBackendChange(targetBackend))
 
     // [POPUP-REFRESH-001] Add refresh event handler
     this.uiManager.on('refreshData', this.refreshPopupData.bind(this))
@@ -270,6 +272,8 @@ export class PopupController {
       // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Load current storage backend for URL
       const storageBackend = await this.getStorageBackendForUrl(this.currentTab?.url)
       this.uiManager.updateStorageBackendValue(storageBackend || 'local')
+      // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser toggle: show only when bookmark exists and is local or file
+      this.uiManager.updateStorageLocalToggle(storageBackend || 'local', !!this.currentPin)
 
       // Mark as initialized
       this.isInitialized = true
@@ -804,24 +808,30 @@ export class PopupController {
    * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Move current bookmark to target storage backend.
    */
   async handleStorageBackendChange (targetBackend) {
-    if (!this.currentTab?.url) return
+    // Use bookmark's URL when available so move uses same key as storage (avoids URL mismatch e.g. with query string).
+    const url = this.currentPin?.url || this.currentTab?.url
+    if (!url) return
     try {
       const response = await new Promise((resolve, reject) => {
         chrome.runtime.sendMessage(
-          { type: 'moveBookmarkToStorage', data: { url: this.currentTab.url, targetBackend } },
+          { type: 'moveBookmarkToStorage', data: { url, targetBackend } },
           (r) => (chrome.runtime.lastError ? reject(new Error(chrome.runtime.lastError.message)) : resolve(r))
         )
       })
-      if (response?.success) {
+      // [REQ-MOVE_BOOKMARK_STORAGE_UI] Use inner result: service worker wraps as { success: true, data: routerResult }.
+      const result = response?.data ?? response
+      if (result?.success) {
         this.uiManager.showSuccess('Bookmark moved to ' + targetBackend)
-        const updated = await this.getBookmarkData(this.currentTab.url)
+        const updated = await this.getBookmarkData(this.currentTab?.url || url)
         this.currentPin = updated
         this.stateManager.setState({ currentPin: this.currentPin })
+        this.uiManager.updateStorageBackendValue(targetBackend)
+        this.uiManager.updateStorageLocalToggle(targetBackend, true)
         this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
         this.uiManager.updateReadLaterStatus(this.currentPin?.toread === 'yes')
         this.uiManager.updateCurrentTags(this.normalizeTags(this.currentPin?.tags))
       } else {
-        this.uiManager.showError(response?.message || 'Move failed')
+        this.uiManager.showError(result?.message || 'Move failed')
       }
     } catch (e) {
       debugError('[IMPL-MOVE_BOOKMARK_UI] handleStorageBackendChange failed:', e)

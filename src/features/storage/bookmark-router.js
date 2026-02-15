@@ -139,7 +139,7 @@ export class BookmarkRouter {
   }
 
   /**
-   * [IMPL-BOOKMARK_ROUTER] Move bookmark to target storage (copy to target, delete from source, update index).
+   * [IMPL-BOOKMARK_ROUTER] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move bookmark to target storage (copy to target, delete from source, update index).
    * @param {string} url
    * @param {string} targetBackend - 'pinboard'|'local'|'file'
    */
@@ -152,10 +152,12 @@ export class BookmarkRouter {
     const sourceProvider = this._providerFor(sourceBackend)
     const targetProvider = this._providerFor(targetBackend)
     const bookmark = await sourceProvider.getBookmarkForUrl(url)
-    if (!bookmark || !bookmark.time) {
+    if (!bookmark || !bookmark.url) {
       return { success: false, code: 'not_found', message: 'Bookmark not found in source' }
     }
-    const saveResult = await targetProvider.saveBookmark(bookmark)
+    // [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Allow move when bookmark has url but missing time.
+    const toSave = bookmark.time ? bookmark : { ...bookmark, time: new Date().toISOString() }
+    const saveResult = await targetProvider.saveBookmark(toSave)
     if (!saveResult.success) {
       debugError('[IMPL-BOOKMARK_ROUTER] moveBookmarkToStorage save to target failed:', saveResult)
       return saveResult

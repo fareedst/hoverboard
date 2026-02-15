@@ -6683,10 +6683,11 @@ var BookmarkRouter = class {
     const sourceProvider = this._providerFor(sourceBackend);
     const targetProvider = this._providerFor(targetBackend);
     const bookmark = await sourceProvider.getBookmarkForUrl(url);
-    if (!bookmark || !bookmark.time) {
+    if (!bookmark || !bookmark.url) {
       return { success: false, code: "not_found", message: "Bookmark not found in source" };
     }
-    const saveResult = await targetProvider.saveBookmark(bookmark);
+    const toSave = bookmark.time ? bookmark : { ...bookmark, time: (/* @__PURE__ */ new Date()).toISOString() };
+    const saveResult = await targetProvider.saveBookmark(toSave);
     if (!saveResult.success) {
       debugError("[IMPL-BOOKMARK_ROUTER] moveBookmarkToStorage save to target failed:", saveResult);
       return saveResult;

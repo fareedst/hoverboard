@@ -1577,16 +1577,20 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
       - "Move = copy to target + delete from source + update index"
   satisfaction_criteria:
     - criterion: "Popup shows current bookmark storage (Pinboard | Local | File) and control to move"
+    - criterion: "UI reflects actual move result (popup uses inner result; no false success)"
+    - criterion: "Move uses bookmark URL when available; router allows bookmark without time"
     - criterion: "Message getStorageBackendForUrl and moveBookmarkToStorage implemented"
     - criterion: "Options explains default storage for new bookmarks (three-way choice)"
   validation_criteria:
     - method: "Unit test moveBookmarkToStorage (mock providers)"
+    - method: "Unit test move when source bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]"
     - method: "Manual: move bookmark from popup"
   traceability:
     architecture:
       - ARCH-MOVE_BOOKMARK_UI
     implementation:
       - IMPL-MOVE_BOOKMARK_UI
+      - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
     tests: []
     code_annotations:
       - REQ-MOVE_BOOKMARK_STORAGE_UI

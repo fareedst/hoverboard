@@ -69,7 +69,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 #### **Core Features:**
 - ✅ **Local-first storage** - Bookmarks stored in your browser by default; no account or API required. Switch to Pinboard or File in Options.
 - ✅ **File-based storage** - Store bookmarks in a **file in a folder you choose** (e.g. cloud-synced). Important for **privacy** (your data, your folder) and **sharing** (sync via Dropbox/Drive or share the file). Options: Storage Mode > File, then "Select folder".
-- ✅ **Per-bookmark storage and move** - Each bookmark has a storage location (Pinboard, Local, or File). **Move** a bookmark between storages from the popup (Storage dropdown).
+- ✅ **Per-bookmark storage and move** - Each bookmark has a storage location (Pinboard, Local, or File). **Move** a bookmark between storages from the popup (Storage dropdown). When the bookmark is in **Local** or **File**, a one-click **"Move to File"** or **"Move to browser"** button toggles between file and browser storage; the UI reflects the actual move result and uses the bookmark’s URL so moves succeed even when the tab URL differs (e.g. query string).
 - ✅ **Smart Bookmarking** - Save pages with intelligent tag suggestions from 11 content sources (title, URL, meta tags, headings, emphasis elements, definition terms, table headers, navigation, breadcrumbs, images, links)
 - ✅ **Tag Management** - Organize bookmarks with custom tags and categories
 - ✅ **Recent Tags** - Quick access to frequently used tags; list refreshes every time the popup is displayed and syncs across windows
@@ -82,7 +82,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - ✅ **Site Management** - Disable extension on specific domains
 
 #### **Test Coverage:**
-- **365 tests** across 24 test suites (364 passing)
+- **367 tests** across 24 test suites (366 passing)
 - **Complete Chrome extension testing** with Manifest V3 compliance
 - **Native host tests** – Go tests for protocol and ping-pong; Jest tests for NATIVE_PING and `pingNativeHost`
 - **Pinboard API integration testing** for reliable bookmark management
@@ -108,6 +108,7 @@ Intelligent tag suggestions extracted from multiple page content sources:
 - **Optional—File (privacy and sharing):** Store bookmarks in a **single file** in a **folder you choose** (Options > Storage Mode > File, then "Select folder"). The file can live in a cloud-synced folder (e.g. Dropbox, Google Drive) for sync, or you can share the file with others. Keeps data in a location you control—no third-party bookmark service required.
 
 #### Additional Features
+- **Move bookmark (Storage):** In the popup, the **Storage** section shows where the current bookmark is saved (Pinboard, Local, or File) and lets you move it via the dropdown. When the bookmark is in Local or File, a **"Move to File"** or **"Move to browser"** button appears for one-click switching; the UI shows success or error based on the actual move result, and moves use the bookmark’s stored URL so they work even when the page URL differs (e.g. query parameters).
 - **Local Bookmarks Index:** Browse all **local and file** bookmarks in a dedicated page with a **Storage** column (Local | File). Search by title, URL, tags, or notes; filter by tag, to-read, or private; sort by column (default: newest first); click a URL to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index").
 - **Tag Management:** Organize bookmarks with custom tags and categories
 - **Recent Tags:** Quick access to frequently used tags; refreshes on every popup display and syncs across windows so tags saved in one window appear in any other

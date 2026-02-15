@@ -5,6 +5,20 @@ All notable changes to the Hoverboard Browser Extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Move bookmark UI and persistence** (`IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL`) – Move-to-storage now updates the UI only when the move actually succeeds, and the stored bookmark is moved correctly:
+  - **Popup uses inner result:** The service worker wraps handler responses as `{ success: true, data: routerResult }`. The popup now uses the inner result (`response.data`) for success/error, so failed moves (e.g. "Bookmark not found in source") show an error message instead of a false success.
+  - **Move uses bookmark URL:** When sending a move request, the popup uses the current bookmark’s URL (`currentPin.url`) when available so the move key matches storage; this fixes moves failing when the tab URL differed (e.g. with or without query string).
+  - **Router allows bookmark without time:** The router no longer requires `bookmark.time` to consider a bookmark valid for move; if `time` is missing, it is set when saving to the target so legacy or provider-returned bookmarks without time can be moved.
+
+### Technical Details
+
+- **Requirements:** `REQ-MOVE_BOOKMARK_STORAGE_UI` satisfaction criteria extended; new implementation decision `IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL`.
+- **Tests:** New unit test `moveBookmarkToStorage succeeds when bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]` in `bookmark-router.test.js`.
+
 ## [1.0.8] - 2026-02-13
 
 ### Changed

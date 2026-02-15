@@ -292,6 +292,27 @@ section:last-child {
   background: var(--bg-primary, #fff);
 }
 
+/* [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser one-click toggle */
+.storage-local-toggle-wrap {
+  margin-top: var(--spacing-xs);
+}
+.storage-local-toggle-wrap.hidden {
+  display: none;
+}
+.storage-local-toggle-btn {
+  font-size: 12px;
+  padding: 2px 8px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 4px;
+  background: var(--bg-secondary, #f5f5f5);
+  color: var(--text-secondary, #666);
+  cursor: pointer;
+}
+.storage-local-toggle-btn:hover {
+  background: var(--bg-hover, #eee);
+  color: var(--text-primary, #333);
+}
+
 /* [SHOW-HOVER-CHECKBOX-CSS-001] - Show hover controls layout */
 .show-hover-controls {
   display: flex;

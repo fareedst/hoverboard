@@ -87,6 +87,12 @@
             <option value="file">File (folder)</option>
           </select>
         </div>
+        <!-- [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser toggle: one-click move when bookmark is in local or file -->
+        <div class="storage-local-toggle-wrap hidden" id="storageLocalToggleWrap">
+          <button type="button" id="storageLocalToggleBtn" class="storage-local-toggle-btn" aria-label="Switch between file and browser storage">
+            <span id="storageLocalToggleLabel"></span>
+          </button>
+        </div>
       </section>
 
       <!-- Tag Management -->

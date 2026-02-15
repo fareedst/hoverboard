@@ -124,7 +124,11 @@ export class UIManager {
       showHoverOnPageLoad: document.getElementById('showHoverOnPageLoad'),
 
       // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend select
-      storageBackendSelect: document.getElementById('storageBackendSelect')
+      storageBackendSelect: document.getElementById('storageBackendSelect'),
+      // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser toggle (show when bookmark is local or file)
+      storageLocalToggleWrap: document.getElementById('storageLocalToggleWrap'),
+      storageLocalToggleBtn: document.getElementById('storageLocalToggleBtn'),
+      storageLocalToggleLabel: document.getElementById('storageLocalToggleLabel')
     }
   }
 
@@ -168,6 +172,12 @@ export class UIManager {
     this.elements.storageBackendSelect?.addEventListener('change', (e) => {
       const target = e.target?.value
       if (target) this.emit('storageBackendChange', target)
+    })
+
+    // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser toggle: one-click move to file or local
+    this.elements.storageLocalToggleBtn?.addEventListener('click', () => {
+      const target = this.elements.storageLocalToggleBtn?.dataset?.targetBackend
+      if (target) this.emit('storageLocalToggle', target)
     })
 
     this.elements.settingsBtn?.addEventListener('click', () => {
@@ -374,6 +384,31 @@ export class UIManager {
   updateStorageBackendValue (backend) {
     if (this.elements.storageBackendSelect && backend) {
       this.elements.storageBackendSelect.value = backend
+    }
+  }
+
+  /**
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] Update file ↔ browser toggle: show "Move to File" when backend is local,
+   * "Move to browser" when backend is file; hide when pinboard or no bookmark.
+   * @param {string} backend - 'pinboard'|'local'|'file'
+   * @param {boolean} hasBookmark - whether current URL has a saved bookmark
+   */
+  updateStorageLocalToggle (backend, hasBookmark) {
+    const wrap = this.elements.storageLocalToggleWrap
+    const btn = this.elements.storageLocalToggleBtn
+    if (!wrap || !btn) return
+    const show = hasBookmark && (backend === 'local' || backend === 'file')
+    if (!show) {
+      wrap.classList.add('hidden')
+      return
+    }
+    wrap.classList.remove('hidden')
+    if (backend === 'local') {
+      if (this.elements.storageLocalToggleLabel) this.elements.storageLocalToggleLabel.textContent = 'Move to File'
+      btn.dataset.targetBackend = 'file'
+    } else {
+      if (this.elements.storageLocalToggleLabel) this.elements.storageLocalToggleLabel.textContent = 'Move to browser'
+      btn.dataset.targetBackend = 'local'
     }
   }
 

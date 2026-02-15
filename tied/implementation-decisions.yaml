@@ -1605,6 +1605,42 @@ IMPL-MOVE_BOOKMARK_UI:
       author: "AI Agent"
       reason: "Move bookmark UI per plan"
 
+IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
+  name: Move Bookmark Response Handling and URL
+  status: Active
+  cross_references:
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
+    - IMPL-MOVE_BOOKMARK_UI
+    - IMPL-BOOKMARK_ROUTER
+  rationale:
+    why: "UI must reflect actual move result; move must use bookmark URL and allow bookmark without time"
+    problems_solved:
+      - "Popup showed success when move failed (service worker wraps response)"
+      - "Move failed when tab URL differed from stored bookmark URL"
+      - "Move failed when source bookmark had no time field"
+  implementation_approach:
+    summary: "Popup uses inner result (response.data); move URL from currentPin when available; router accepts bookmark.url and sets time when missing."
+  code_locations:
+    files:
+      - path: "src/ui/popup/PopupController.js"
+        description: "handleStorageBackendChange: url from currentPin, result from response.data"
+      - path: "src/features/storage/bookmark-router.js"
+        description: "moveBookmarkToStorage: check bookmark.url, toSave with time if missing"
+  traceability:
+    requirements:
+      - REQ-MOVE_BOOKMARK_STORAGE_UI
+    code_annotations:
+      - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
+  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "Move bookmark fix: inner result, bookmark URL, allow no-time"
+
 IMPL-NATIVE_HOST_WRAPPER:
   name: Native Host Wrapper Implementation
   status: Active

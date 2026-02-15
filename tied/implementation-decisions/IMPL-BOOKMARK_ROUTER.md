@@ -7,7 +7,7 @@
 
 ## Summary
 
-**BookmarkRouter** holds pinboardProvider, localProvider, fileProvider, storageIndex, and defaultStorageMode (from config). Implements provider contract: getBookmarkForUrl(url), getRecentBookmarks(count), saveBookmark(data), deleteBookmark(url), saveTag(data), deleteTag(data), testConnection(). Resolves provider per URL via getBackendForUrl(url) or defaultStorageMode. getRecentBookmarks fetches from all three providers, merges, sorts by time descending, slices to count. Extra methods for move UI: getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) (get from current, save to target, delete from source, update index).
+**BookmarkRouter** holds pinboardProvider, localProvider, fileProvider, storageIndex, and defaultStorageMode (from config). Implements provider contract: getBookmarkForUrl(url), getRecentBookmarks(count), saveBookmark(data), deleteBookmark(url), saveTag(data), deleteTag(data), testConnection(). Resolves provider per URL via getBackendForUrl(url) or defaultStorageMode. getRecentBookmarks fetches from all three providers, merges, sorts by time descending, slices to count. Extra methods for move UI: getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) (get from current, save to target, delete from source, update index). Move treats bookmark as found when it has `bookmark.url`; if `bookmark.time` is missing, it is set when saving to target ([IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL](IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.md)).
 
 ## Code locations
 

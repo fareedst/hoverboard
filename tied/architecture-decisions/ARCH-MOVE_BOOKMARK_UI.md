@@ -7,7 +7,7 @@
 
 ## Summary
 
-Popup displays the **current storage backend** for the current tab's bookmark and allows the user to **move** it to another backend (Pinboard, Local, File). Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index.
+Popup displays the **current storage backend** for the current tab's bookmark and allows the user to **move** it to another backend (Pinboard, Local, File). Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. When the bookmark is in Local or File, a dedicated control (file ↔ browser toggle) offers one-click move between those two backends; the same move path is used (moveBookmarkToStorage).
 
 ## Related
 
