@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select folder – Hoverboard</title>
+  <link rel="stylesheet" href="options.css">
+  <style>
+    body { padding: 2rem; max-width: 28rem; margin: 0 auto; }
+    .picker-status { margin-top: 1rem; min-height: 1.5em; }
+  </style>
+</head>
+<body>
+  <p>Choose the folder where Hoverboard will store <code>hoverboard-bookmarks.json</code> (e.g. a cloud-synced folder).</p>
+  <button type="button" id="select-folder" class="btn btn-primary">Select folder</button>
+  <p id="picker-status" class="picker-status help-text"></p>
+  <script type="module" src="folder-picker.js"></script>
+</body>
+</html>

@@ -1605,6 +1605,94 @@ IMPL-MOVE_BOOKMARK_UI:
       author: "AI Agent"
       reason: "Move bookmark UI per plan"
 
+IMPL-NATIVE_HOST_WRAPPER:
+  name: Native Host Wrapper Implementation
+  status: Active
+  cross_references:
+    - ARCH-NATIVE_HOST
+    - REQ-NATIVE_HOST_WRAPPER
+  rationale:
+    why: "Thin host speaks Chrome protocol and delegates to helper in same dir"
+    problems_solved:
+      - "Host cannot use extension path"
+    benefits:
+      - "Go binary; ping/pong; helper.sh or helper.ps1 in same dir"
+  implementation_approach:
+    summary: "native_host/main.go: readMessage/writeMessage, install dir from os.Executable(), callHelper for helper.sh/helper.ps1/helper.exe"
+    details:
+      - "Protocol: 4-byte native byte order length + JSON"
+      - "Helper: stdin = message JSON, stdout = response JSON"
+  code_locations:
+    files:
+      - path: "native_host/main.go"
+      - path: "native_host/helper.sh"
+      - path: "native_host/helper.ps1"
+  traceability:
+    architecture:
+      - ARCH-NATIVE_HOST
+    requirements:
+      - REQ-NATIVE_HOST_WRAPPER
+    code_annotations:
+      - IMPL-NATIVE_HOST_WRAPPER
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-NATIVE_HOST_INSTALLER
+  detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "Native host wrapper per plan"
+
+IMPL-NATIVE_HOST_INSTALLER:
+  name: Native Host Installer Implementation
+  status: Active
+  cross_references:
+    - ARCH-NATIVE_HOST
+    - REQ-NATIVE_HOST_WRAPPER
+  rationale:
+    why: "Copy wrapper and helper to fixed path and register with Chrome"
+    problems_solved:
+      - "Chrome needs manifest path and (Windows) registry"
+    benefits:
+      - "install.sh (macOS/Linux), install.ps1 (Windows); user-level install dir"
+  implementation_approach:
+    summary: "install.sh and install.ps1 copy binaries, generate manifest with path and allowed_origins, write to NativeMessagingHosts dir; Windows: registry key"
+    details:
+      - "Install dir: ~/.hoverboard or %LOCALAPPDATA%\\Hoverboard"
+      - "Manifest: com.hoverboard.native_host.json.template with {{PATH}} and {{ALLOWED_ORIGINS}}"
+  code_locations:
+    files:
+      - path: "native_host/install.sh"
+      - path: "native_host/install.ps1"
+      - path: "native_host/com.hoverboard.native_host.json.template"
+  traceability:
+    architecture:
+      - ARCH-NATIVE_HOST
+    requirements:
+      - REQ-NATIVE_HOST_WRAPPER
+    code_annotations:
+      - IMPL-NATIVE_HOST_INSTALLER
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-NATIVE_HOST_WRAPPER
+  detail_file: implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "Native host installer per plan"
+
 # IMPL-IDENTIFIER:
 #   name: Implementation Title
 #   status: Active

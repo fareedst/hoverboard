@@ -1296,6 +1296,65 @@ IMPL-MOVE_BOOKMARK_UI:
 # IMPL-OVERLAY_TEST_HARNESS, and others
 # Follow the established pattern above.
 
+REQ-NATIVE_HOST_WRAPPER:
+  type: REQ
+  name: Native Host Wrapper
+  category: Functional
+  status: Active
+  description: "Native host is thin wrapper; real logic from code installed next to wrapper via installer; no loading from extension path"
+  cross_references:
+    - ARCH-NATIVE_HOST
+    - IMPL-NATIVE_HOST_WRAPPER
+    - IMPL-NATIVE_HOST_INSTALLER
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-NATIVE_HOST_WRAPPER.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+ARCH-NATIVE_HOST:
+  type: ARCH
+  name: Native Host Architecture
+  status: Active
+  description: "Thin wrapper + helper in same dir; installer copies to fixed path; stdio protocol"
+  cross_references:
+    - REQ-NATIVE_HOST_WRAPPER
+    - IMPL-NATIVE_HOST_WRAPPER
+    - IMPL-NATIVE_HOST_INSTALLER
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-NATIVE_HOST.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+IMPL-NATIVE_HOST_WRAPPER:
+  type: IMPL
+  name: Native Host Wrapper Implementation
+  status: Active
+  description: "Go wrapper: stdio protocol, install dir, helper spawn, ping/pong"
+  cross_references:
+    - ARCH-NATIVE_HOST
+    - REQ-NATIVE_HOST_WRAPPER
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+IMPL-NATIVE_HOST_INSTALLER:
+  type: IMPL
+  name: Native Host Installer Implementation
+  status: Active
+  description: "install.sh (macOS/Linux) and install.ps1 (Windows); copy to fixed path, write manifest and registry"
+  cross_references:
+    - ARCH-NATIVE_HOST
+    - REQ-NATIVE_HOST_WRAPPER
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.md
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
 # ---
 # Template Record - Copy this block to create new tokens
 # ---

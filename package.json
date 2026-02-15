@@ -10,6 +10,7 @@
     "build:sw": "esbuild src/core/service-worker.js --bundle --outfile=dist/src/core/service-worker.js --format=esm --platform=browser",
     "build:options": "esbuild src/ui/options/options.js --bundle --outfile=dist/src/ui/options/options.js --format=esm --platform=browser",
     "build:content": "esbuild src/features/content/content-main.js --bundle --outfile=dist/src/features/content/content-main.js --format=iife --platform=browser",
+    "build:native": "node scripts/build-native.js",
     "validate": "npm run lint && npm run validate:manifest && npm run security:check",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",

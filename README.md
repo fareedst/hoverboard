@@ -33,13 +33,34 @@ npm install
 npm run build:dev
 ```
 
+### Optional: Native messaging host
+
+For features that need to run local code (e.g. outside the browser sandbox), the extension can talk to a **native messaging host**. The host is a thin wrapper that runs code installed next to it (not from the extension folder). You install it once:
+
+1. **Build the native host** (requires [Go](https://go.dev/)):
+   ```bash
+   cd native_host && go build -o native_host . && cd ..
+   ```
+   Or use `npm run build:native` to build and copy into `dist/native_host/`.
+
+2. **Run the installer** from the `native_host` directory (or from `dist/native_host/` after a build):
+   - **macOS/Linux**: `./install.sh [SOURCE_DIR] [EXTENSION_ID] [chrome|chromium]`  
+     Example: `./install.sh . $(cat dist/.extension-id 2>/dev/null || echo "YOUR_EXTENSION_ID")`
+   - **Windows**: `.\install.ps1 -ExtensionId "YOUR_EXTENSION_ID"`
+
+   Get your extension ID from `chrome://extensions` (Developer mode on, then copy the ID under the extension).
+
+3. **Test**: Open the extension Options page and click **Test native host**. You should see "Native host OK (pong)" if the host is installed and allowed for your extension.
+
+Install directory: `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\` (Windows). The installer writes the Chrome/Chromium native messaging manifest so the browser can start the host.
+
 ## 📋 Status
 
-**Current Version:** 1.0.9 (development)  
+**Current Version:** 1.0.10 (development)  
 **Last Updated:** 2026-02-14  
 **Chrome Extension Status:** Production Ready
 
-**Latest Enhancement:** The extension now supports **three storage options** (Local, Pinboard, **File**). File storage keeps bookmarks in a **single file** in a **folder you choose**—important for **privacy** (your data, your folder; no third-party service) and **sharing** (e.g. cloud-sync the folder or share the file with others). A **Local Bookmarks Index** page lets you browse, search, filter, sort, and open local and file-stored bookmarks (with a Storage column). Bookmarks are stored **locally in your browser by default**—no account or API required. Move bookmarks between Pinboard, Local, and File from the popup (Storage dropdown). Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
+**Latest Enhancement:** Optional **native messaging host** for running local code: thin Go wrapper plus installer scripts; one-time install to a fixed directory; test from Options. The extension also supports **three storage options** (Local, Pinboard, **File**). File storage keeps bookmarks in a **single file** in a **folder you choose**—important for **privacy** (your data, your folder; no third-party service) and **sharing** (e.g. cloud-sync the folder or share the file with others). A **Local Bookmarks Index** page lets you browse, search, filter, sort, and open local and file-stored bookmarks (with a Storage column). Bookmarks are stored **locally in your browser by default**—no account or API required. Move bookmarks between Pinboard, Local, and File from the popup (Storage dropdown). Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
 
 ### Chrome Extension Features
 
@@ -56,13 +77,14 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - ✅ **Overlay System** - Visual feedback with transparency controls
 - ✅ **Local Bookmarks Index** - Full-page index of **local and file** bookmarks with a **Storage** column (Local | File): search (title, URL, tags, notes), filter (by tag, to-read, private), sortable columns, clickable URLs, Export all / Export displayed to CSV. Open from popup ("Bookmarks index") or Options ("Local bookmarks index").
 - ✅ **Optional Pinboard integration** - Use Storage Mode in Options to sync with Pinboard.in (requires API token)
+- ✅ **Optional native messaging host** - For features that need local code: thin Go wrapper + helper scripts; one-time install to `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\` (Windows); test from Options ("Test native host"). See [Optional: Native messaging host](#optional-native-messaging-host) below.
 - ✅ **Badge Indicators** - Visual status indicators in the extension icon
 - ✅ **Site Management** - Disable extension on specific domains
 
 #### **Test Coverage:**
-- **252 comprehensive tests** across 8 test suites
-- **211 passing tests** (84% success rate)
+- **365 tests** across 24 test suites (364 passing)
 - **Complete Chrome extension testing** with Manifest V3 compliance
+- **Native host tests** – Go tests for protocol and ping-pong; Jest tests for NATIVE_PING and `pingNativeHost`
 - **Pinboard API integration testing** for reliable bookmark management
 
 ## Features

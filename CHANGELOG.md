@@ -90,6 +90,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - New requirement `REQ-STORAGE_MODE_DEFAULT`; architecture and implementation decisions updated with default choice and rationale
   - Unit tests for ConfigManager default `storageMode`, `getStorageMode`, and `setStorageMode` (see `tests/unit/config-manager.test.js`)
 
+## [1.0.10] - 2026-02-14
+
+### Added
+
+- **Optional native messaging host** (`REQ-NATIVE_HOST_WRAPPER`, `ARCH-NATIVE_HOST`, `IMPL-NATIVE_HOST_WRAPPER`, `IMPL-NATIVE_HOST_INSTALLER`) – The extension can communicate with a native host for features that need local code (outside the browser sandbox). The host is a **thin wrapper** that does not run code from the extension folder; instead, an installer copies the wrapper and helper to a fixed path, and the wrapper runs only from that directory.
+  - **Wrapper**: Go binary in `native_host/` implementing Chrome native messaging protocol (stdio, length-prefixed JSON). Responds to `ping` with `pong`; delegates other messages to a helper script in the same directory (`helper.sh` on macOS/Linux, `helper.ps1` or `helper.exe` on Windows).
+  - **Installer**: `install.sh` (macOS/Linux) and `install.ps1` (Windows) copy the wrapper and helpers to `~/.hoverboard/` or `%LOCALAPPDATA%\Hoverboard\`, generate the native messaging manifest with the extension ID, and (on Windows) create the registry key for Chrome.
+  - **Extension**: `nativeMessaging` permission; Options page has a "Native host" section with "Test native host" button; service worker handles `NATIVE_PING` and calls `pingNativeHost()`.
+  - **Build**: `npm run build:native` builds the Go binary and copies artifacts to `dist/native_host/`.
+  - **Tests**: Go tests in `native_host/main_test.go` (protocol read/write, findHelper, ping-pong integration); Jest tests in `tests/unit/native-host-ping.test.js` (NATIVE_PING handling and pingNativeHost).
+
+### Technical Details
+
+- **Manifest**: Added `nativeMessaging` to `permissions`.
+- **Host name**: `com.hoverboard.native_host`; manifest template `com.hoverboard.native_host.json.template` with `{{PATH}}` and `{{ALLOWED_ORIGINS}}` placeholders.
+
+---
+
 ## [1.0.9] - 2026-02-14
 
 ### Added

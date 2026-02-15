@@ -7041,6 +7041,10 @@ var HoverboardServiceWorker = class {
   }
   async handleMessage(message, sender) {
     try {
+      if (message.type === "NATIVE_PING") {
+        const pingResult = await this.pingNativeHost();
+        return { success: true, data: pingResult };
+      }
       if (!this._providerInitialized) {
         await this.initBookmarkProvider();
       }
@@ -7065,6 +7069,24 @@ var HoverboardServiceWorker = class {
       console.error("Service worker message error:", error);
       return { success: false, error: error.message };
     }
+  }
+  /**
+   * [REQ-NATIVE_HOST_WRAPPER] Ping native messaging host to verify connectivity.
+   * @returns {Promise<{pong?: boolean, error?: string}>}
+   */
+  async pingNativeHost() {
+    if (typeof chrome === "undefined" || !chrome.runtime?.sendNativeMessage) {
+      return { error: "Native messaging not available" };
+    }
+    return new Promise((resolve) => {
+      chrome.runtime.sendNativeMessage("com.hoverboard.native_host", { type: "ping" }, (response) => {
+        if (chrome.runtime.lastError) {
+          resolve({ error: chrome.runtime.lastError.message });
+          return;
+        }
+        resolve(response || { error: "No response" });
+      });
+    });
   }
   async handleTabActivated(activeInfo) {
     try {

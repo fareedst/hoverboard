@@ -43,7 +43,8 @@
     "activeTab",
     "contextMenus",
     "scripting",
-    "offscreen"
+    "offscreen",
+    "nativeMessaging"
   ],
   
   "host_permissions": [

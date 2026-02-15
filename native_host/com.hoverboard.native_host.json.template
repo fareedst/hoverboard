@@ -1,0 +1,7 @@
+{
+  "name": "com.hoverboard.native_host",
+  "description": "Hoverboard native messaging host (wrapper)",
+  "path": "{{PATH}}",
+  "type": "stdio",
+  "allowed_origins": {{ALLOWED_ORIGINS}}
+}

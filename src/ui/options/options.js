@@ -84,6 +84,10 @@ class OptionsController {
 
     // [REQ-LOCAL_BOOKMARKS_INDEX] Local bookmarks index link
     this.elements.bookmarksIndexLink = document.getElementById('bookmarks-index-link')
+
+    // [REQ-NATIVE_HOST_WRAPPER] Native host test
+    this.elements.testNativeHost = document.getElementById('test-native-host')
+    this.elements.nativeHostStatus = document.getElementById('native-host-status')
   }
 
   attachEventListeners () {
@@ -97,6 +101,11 @@ class OptionsController {
 
     // Authentication
     this.elements.testAuth.addEventListener('click', () => this.testAuthentication())
+
+    // [REQ-NATIVE_HOST_WRAPPER] Native host ping test
+    if (this.elements.testNativeHost) {
+      this.elements.testNativeHost.addEventListener('click', () => this.testNativeHost())
+    }
 
     // Visibility defaults
     this.elements.defaultThemeToggle.addEventListener('click', () => this.toggleDefaultTheme())
@@ -288,8 +297,9 @@ class OptionsController {
   }
 
   async selectFileStorageFolder () {
-    if (!window.showDirectoryPicker) {
-      this.showStatus('File folder selection is not supported in this browser.', 'error')
+    const hasPicker = typeof window.showDirectoryPicker === 'function'
+    if (!hasPicker) {
+      this.showStatus('File-based storage (folder picker) is not supported in this browser. Chrome does not expose it on extension pages. Use Local storage or Pinboard instead.', 'error')
       return
     }
     try {
@@ -377,6 +387,28 @@ class OptionsController {
       this.showStatus('Authentication test failed: ' + error.message, 'error')
     } finally {
       this.setLoading(false)
+    }
+  }
+
+  /** [REQ-NATIVE_HOST_WRAPPER] Send NATIVE_PING to service worker and show result. */
+  async testNativeHost () {
+    if (!this.elements.nativeHostStatus) return
+    this.elements.nativeHostStatus.textContent = 'Testing…'
+    try {
+      const response = await chrome.runtime.sendMessage({ type: 'NATIVE_PING' })
+      if (response?.success && response?.data) {
+        if (response.data.error) {
+          this.elements.nativeHostStatus.textContent = `Error: ${response.data.error}`
+        } else if (response.data.type === 'pong') {
+          this.elements.nativeHostStatus.textContent = 'Native host OK (pong)'
+        } else {
+          this.elements.nativeHostStatus.textContent = JSON.stringify(response.data)
+        }
+      } else {
+        this.elements.nativeHostStatus.textContent = response?.error || 'No response'
+      }
+    } catch (e) {
+      this.elements.nativeHostStatus.textContent = `Error: ${e.message}`
     }
   }
 

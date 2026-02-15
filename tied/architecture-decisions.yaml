@@ -1740,6 +1740,46 @@ ARCH-MOVE_BOOKMARK_UI:
       author: "AI Agent"
       reason: "Move bookmark UI per plan"
 
+ARCH-NATIVE_HOST:
+  name: Native Host Architecture
+  status: Active
+  cross_references:
+    - REQ-NATIVE_HOST_WRAPPER
+  rationale:
+    why: "Chrome does not pass extension path to native host; host must load only from its own install directory"
+    problems_solved:
+      - "Cannot run code from extension folder at runtime"
+    benefits:
+      - "Thin wrapper + helper installed to fixed path by installer; wrapper delegates to helper in same dir"
+  implementation_approach:
+    summary: "Go wrapper (stdio protocol, install-dir resolution), helper script/binary in same dir, installer scripts per OS"
+    details:
+      - "Wrapper: 4-byte length + JSON; ping→pong; else invoke helper in same dir"
+      - "Installer: copy to ~/.hoverboard or %LOCALAPPDATA%\\Hoverboard; write manifest and (Windows) registry"
+  traceability:
+    requirements:
+      - REQ-NATIVE_HOST_WRAPPER
+    implementation:
+      - IMPL-NATIVE_HOST_WRAPPER
+      - IMPL-NATIVE_HOST_INSTALLER
+    code_annotations:
+      - ARCH-NATIVE_HOST
+  related_decisions:
+    depends_on: []
+    informs:
+      - IMPL-NATIVE_HOST_WRAPPER
+      - IMPL-NATIVE_HOST_INSTALLER
+    see_also: []
+  detail_file: architecture-decisions/ARCH-NATIVE_HOST.md
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-14"
+      author: "AI Agent"
+      reason: "Native host wrapper and installer per plan"
+
 # ---
 # Template Record - Copy this block to create new architecture decisions
 # ---
