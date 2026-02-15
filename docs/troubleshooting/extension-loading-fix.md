@@ -133,6 +133,10 @@ The manifest.json was using an absolute path that included `./dist/` in the file
 
 **Explanation**: When loading the extension from the `dist` directory, the manifest paths are resolved relative to the `dist` directory, so `./src/features/content/content-main.js` correctly points to `dist/src/features/content/content-main.js`.
 
+### Programmatic injection (popup)
+
+When the extension is loaded from the **dist** directory, `chrome.scripting.executeScript({ files: [...] })` and `chrome.scripting.insertCSS({ files: [...] })` also resolve paths relative to the extension root (dist). Use the same path as the manifest: `src/features/content/content-main.js` (do **not** use `dist/src/...` or the runtime will look for `dist/dist/src/...` and fail with "Could not load file").
+
 ## Success Metrics
 
 - ✅ Extension loads without JavaScript errors

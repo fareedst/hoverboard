@@ -7,7 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **File storage with typed path** (`IMPL-FILE_STORAGE_TYPED_PATH`) – File-based bookmarks can use a **user-typed path** instead of the folder picker:
+  - **Options:** New "Path (directory for bookmark file)" input; default `~/.hoverboard`. Path is saved to `chrome.storage.local` and used when storage mode is File.
+  - **Native host:** Helper scripts (`helper.sh`, `helper.ps1`) handle `readBookmarksFile` and `writeBookmarksFile` messages with a `path` field: expand `~` to home, use `path/hoverboard-bookmarks.json` (or path as file if it ends with `.json`), create directory on first write.
+  - **Extension:** `NativeHostFileBookmarkAdapter` reads the path from storage and sends read/write to the native host; no offscreen document or folder handle needed.
+  - **Service worker:** When storage mode is File and a path is set, the service worker uses the native-host path adapter; otherwise the existing picker-based flow (MessageFileBookmarkAdapter) is used.
+  - Requires the native host to be installed; no folder picker needed for the path-based flow.
+
 ### Fixed
+
+- **File storage helper path normalization** (`IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE`) – When the native host runs with `HOME` set with a trailing slash (e.g. by Chrome’s environment), the helper now normalizes it so `~/.hoverboard` resolves to a path without a double slash; the bookmark file is created at `~/.hoverboard/hoverboard-bookmarks.json` as expected. The helper also verifies the file exists and is non-empty after writing before returning success.
 
 - **Move bookmark UI and persistence** (`IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL`) – Move-to-storage now updates the UI only when the move actually succeeds, and the stored bookmark is moved correctly:
   - **Popup uses inner result:** The service worker wraps handler responses as `{ success: true, data: routerResult }`. The popup now uses the inner result (`response.data`) for success/error, so failed moves (e.g. "Bookmark not found in source") show an error message instead of a false success.
@@ -17,7 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Details
 
 - **Requirements:** `REQ-MOVE_BOOKMARK_STORAGE_UI` satisfaction criteria extended; new implementation decision `IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL`.
-- **Tests:** New unit test `moveBookmarkToStorage succeeds when bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]` in `bookmark-router.test.js`.
+- **Implementation:** New decision `IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE` (helper `expand_tilde` uses `${HOME%/}`; post-write file verification).
+- **Tests:** New unit test `moveBookmarkToStorage succeeds when bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]` in `bookmark-router.test.js`; new suite `helper-path-normalize.test.js` for `writeBookmarksFile with HOME with trailing slash` [IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE].
 
 ## [1.0.8] - 2026-02-13
 

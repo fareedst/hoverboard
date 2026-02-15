@@ -68,7 +68,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 
 #### **Core Features:**
 - ✅ **Local-first storage** - Bookmarks stored in your browser by default; no account or API required. Switch to Pinboard or File in Options.
-- ✅ **File-based storage** - Store bookmarks in a **file in a folder you choose** (e.g. cloud-synced). Important for **privacy** (your data, your folder) and **sharing** (sync via Dropbox/Drive or share the file). Options: Storage Mode > File, then "Select folder".
+- ✅ **File-based storage** - Store bookmarks in a **file** (e.g. cloud-synced). Options: Storage Mode > File, then either **enter a path** (default `~/.hoverboard`; the native host reads/writes `hoverboard-bookmarks.json` there—no folder picker, native host required). The helper normalizes the path so the file is created correctly even when the system sets `HOME` with a trailing slash (`IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE`). Alternatively use **"Select folder"** (browser picker) for the classic flow.
 - ✅ **Per-bookmark storage and move** - Each bookmark has a storage location (Pinboard, Local, or File). **Move** a bookmark between storages from the popup (Storage dropdown). When the bookmark is in **Local** or **File**, a one-click **"Move to File"** or **"Move to browser"** button toggles between file and browser storage; the UI reflects the actual move result and uses the bookmark’s URL so moves succeed even when the tab URL differs (e.g. query string).
 - ✅ **Smart Bookmarking** - Save pages with intelligent tag suggestions from 11 content sources (title, URL, meta tags, headings, emphasis elements, definition terms, table headers, navigation, breadcrumbs, images, links)
 - ✅ **Tag Management** - Organize bookmarks with custom tags and categories
@@ -82,7 +82,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - ✅ **Site Management** - Disable extension on specific domains
 
 #### **Test Coverage:**
-- **367 tests** across 24 test suites (366 passing)
+- **368 tests** across 25 test suites
 - **Complete Chrome extension testing** with Manifest V3 compliance
 - **Native host tests** – Go tests for protocol and ping-pong; Jest tests for NATIVE_PING and `pingNativeHost`
 - **Pinboard API integration testing** for reliable bookmark management

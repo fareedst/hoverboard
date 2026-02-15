@@ -1371,6 +1371,38 @@ IMPL-NATIVE_HOST_INSTALLER:
     registered: 2026-02-14
     last_updated: 2026-02-14
 
+IMPL-FILE_STORAGE_TYPED_PATH:
+  type: IMPL
+  name: File Storage User-Typed Path
+  category: Storage
+  status: Active
+  description: "Path-based file storage via native host; user types path (default ~/.hoverboard); no folder picker; helper read/write hoverboard-bookmarks.json"
+  cross_references:
+    - REQ-FILE_BOOKMARK_STORAGE
+    - ARCH-FILE_BOOKMARK_PROVIDER
+    - IMPL-NATIVE_HOST_WRAPPER
+    - IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
+IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
+  type: IMPL
+  name: File Storage Helper Path Normalization
+  category: Storage
+  status: Active
+  description: "Helper normalizes HOME (no trailing slash) when expanding ~ so path-based file write succeeds; post-write verification before returning success"
+  cross_references:
+    - IMPL-FILE_STORAGE_TYPED_PATH
+    - REQ-FILE_BOOKMARK_STORAGE
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: 2026-02-14
+    last_updated: 2026-02-14
+
 # ---
 # Template Record - Copy this block to create new tokens
 # ---

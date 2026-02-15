@@ -39,10 +39,14 @@
             <input type="radio" name="storage-mode" id="storage-mode-file" value="file">
             <span>File (cloud-sync folder)</span>
           </label>
-          <p class="help-text">Bookmarks stored in a file in a folder you choose (e.g. cloud-synced). Select folder below.</p>
+          <p class="help-text">Bookmarks stored in a file. Enter a path (directory); the native host reads/writes <code>hoverboard-bookmarks.json</code> there. Default: <code>~/.hoverboard</code>. Requires native host installed.</p>
+        </div>
+        <div class="form-group" id="file-storage-path-group">
+          <label for="file-storage-path">Path (directory for bookmark file)</label>
+          <input type="text" id="file-storage-path" class="input-text" placeholder="~/.hoverboard" aria-label="File storage path">
         </div>
         <div class="form-group" id="file-storage-folder-group">
-          <button type="button" id="select-file-storage-folder" class="btn btn-secondary">Select folder</button>
+          <button type="button" id="select-file-storage-folder" class="btn btn-secondary">Select folder (browser picker)</button>
           <span id="file-storage-folder-name" class="help-text" style="margin-left: 0.5em;"></span>
         </div>
       </section>

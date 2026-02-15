@@ -11,6 +11,7 @@ import { LocalBookmarkService } from '../features/storage/local-bookmark-service
 import { FileBookmarkService } from '../features/storage/file-bookmark-service.js'
 import { InMemoryFileBookmarkAdapter } from '../features/storage/file-bookmark-storage-adapter.js'
 import { MessageFileBookmarkAdapter, ensureOffscreenDocument } from '../features/storage/message-file-bookmark-adapter.js'
+import { NativeHostFileBookmarkAdapter } from '../features/storage/native-host-file-bookmark-adapter.js'
 import { StorageIndex } from '../features/storage/storage-index.js'
 import { BookmarkRouter } from '../features/storage/bookmark-router.js'
 import { ConfigManager } from '../config/config-manager.js'
@@ -143,8 +144,9 @@ class HoverboardServiceWorker {
   }
 
   /**
-   * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Create three providers, storage index, router; wire MessageHandler.
-   * FileBookmarkService uses MessageFileBookmarkAdapter when user has selected a folder (offscreen doc); else InMemoryFileBookmarkAdapter.
+   * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [IMPL-FILE_STORAGE_TYPED_PATH]
+   * Create three providers, storage index, router; wire MessageHandler.
+   * File adapter: path set → NativeHostFileBookmarkAdapter; else picker configured → MessageFileBookmarkAdapter; else InMemoryFileBookmarkAdapter.
    */
   async initBookmarkProvider () {
     const tagService = this.messageHandler.tagService
@@ -152,8 +154,14 @@ class HoverboardServiceWorker {
     const localProvider = new LocalBookmarkService(tagService)
 
     let fileAdapter = new InMemoryFileBookmarkAdapter()
-    const fileStorageConfigured = await chrome.storage.local.get(['hoverboard_file_storage_configured']).then(r => !!r.hoverboard_file_storage_configured)
-    if (fileStorageConfigured && typeof chrome.offscreen !== 'undefined') {
+    const storage = await chrome.storage.local.get(['hoverboard_file_storage_configured', 'hoverboard_file_storage_path'])
+    const pathSet = !!(storage.hoverboard_file_storage_path && String(storage.hoverboard_file_storage_path).trim())
+    const fileStorageConfigured = !!storage.hoverboard_file_storage_configured
+
+    if (pathSet) {
+      fileAdapter = new NativeHostFileBookmarkAdapter()
+      console.log('[SERVICE-WORKER] [IMPL-FILE_STORAGE_TYPED_PATH] File storage using native host path:', storage.hoverboard_file_storage_path)
+    } else if (fileStorageConfigured && typeof chrome.offscreen !== 'undefined') {
       try {
         await ensureOffscreenDocument()
         fileAdapter = new MessageFileBookmarkAdapter()

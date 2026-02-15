@@ -5173,6 +5173,17 @@ var OptionsController = class {
     }
     this.attachEventListeners();
     await this.loadSettings();
+    if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
+      chrome.storage.onChanged.addListener((changes, areaName) => {
+        if (areaName !== "local") return;
+        if (changes.hoverboard_file_storage_configured || changes.hoverboard_file_storage_name) {
+          this.loadFileStorageFolderName();
+        }
+        if (changes.hoverboard_file_storage_path && this.elements.fileStoragePath) {
+          this.elements.fileStoragePath.value = changes.hoverboard_file_storage_path.newValue || "~/.hoverboard";
+        }
+      });
+    }
   }
   bindElements() {
     this.elements.storageModePinboard = document.getElementById("storage-mode-pinboard");
@@ -5180,6 +5191,7 @@ var OptionsController = class {
     this.elements.storageModeFile = document.getElementById("storage-mode-file");
     this.elements.selectFileStorageFolder = document.getElementById("select-file-storage-folder");
     this.elements.fileStorageFolderName = document.getElementById("file-storage-folder-name");
+    this.elements.fileStoragePath = document.getElementById("file-storage-path");
     this.elements.authSection = document.getElementById("auth-section");
     this.elements.authToken = document.getElementById("auth-token");
     this.elements.testAuth = document.getElementById("test-auth");
@@ -5222,6 +5234,9 @@ var OptionsController = class {
     if (this.elements.selectFileStorageFolder) {
       this.elements.selectFileStorageFolder.addEventListener("click", () => this.selectFileStorageFolder());
     }
+    if (this.elements.fileStoragePath) {
+      this.elements.fileStoragePath.addEventListener("blur", () => this.persistFileStoragePath());
+    }
     this.elements.testAuth.addEventListener("click", () => this.testAuthentication());
     if (this.elements.testNativeHost) {
       this.elements.testNativeHost.addEventListener("click", () => this.testNativeHost());
@@ -5252,6 +5267,10 @@ var OptionsController = class {
       this.elements.storageModeFile.checked = storageMode === "file";
       this.updateAuthSectionVisibility(storageMode);
       await this.loadFileStorageFolderName();
+      const pathResult = await chrome.storage.local.get("hoverboard_file_storage_path");
+      if (this.elements.fileStoragePath) {
+        this.elements.fileStoragePath.value = pathResult.hoverboard_file_storage_path && pathResult.hoverboard_file_storage_path.trim() || "~/.hoverboard";
+      }
       this.elements.authToken.value = authToken;
       this.elements.showHoverOnLoad.checked = config.showHoverOnPageLoad;
       this.elements.hoverShowTooltips.checked = config.hoverShowTooltips;
@@ -5323,6 +5342,12 @@ var OptionsController = class {
       }
       const inhibitUrls = this.elements.inhibitUrls.value.split("\n").map((url) => url.trim()).filter((url) => url.length > 0);
       await this.configManager.setInhibitUrls(inhibitUrls);
+      const path = this.elements.fileStoragePath ? this.elements.fileStoragePath.value.trim() : "";
+      const pathToSave = path || "~/.hoverboard";
+      await chrome.storage.local.set({
+        hoverboard_file_storage_path: pathToSave,
+        ...storageMode === "file" && pathToSave ? { hoverboard_file_storage_configured: true } : {}
+      });
       this.showStatus("Settings saved successfully!", "success");
     } catch (error) {
       console.error("Failed to save settings:", error);
@@ -5364,40 +5389,31 @@ var OptionsController = class {
       this.elements.fileStorageFolderName.textContent = "";
     }
   }
+  /**
+   * [IMPL-FILE_STORAGE_TYPED_PATH] Persist typed path to chrome.storage.local and set file storage configured when in file mode.
+   */
+  async persistFileStoragePath() {
+    if (!this.elements.fileStoragePath) return;
+    const path = this.elements.fileStoragePath.value.trim() || "~/.hoverboard";
+    const storageMode = this.elements.storageModeFile?.checked ? "file" : this.elements.storageModeLocal?.checked ? "local" : "pinboard";
+    await chrome.storage.local.set({
+      hoverboard_file_storage_path: path,
+      ...storageMode === "file" && path ? { hoverboard_file_storage_configured: true } : {}
+    });
+  }
   async selectFileStorageFolder() {
-    const hasPicker = typeof window.showDirectoryPicker === "function";
-    if (!hasPicker) {
-      this.showStatus("File-based storage (folder picker) is not supported in this browser. Chrome does not expose it on extension pages. Use Local storage or Pinboard instead.", "error");
+    const pickerUrl = typeof chrome !== "undefined" && chrome.runtime ? chrome.runtime.getURL("src/ui/options/folder-picker.html") : "";
+    if (pickerUrl) {
+      this.showStatus("Opening folder picker in a new tab\u2026", "info");
+      try {
+        await chrome.tabs.create({ url: pickerUrl });
+        this.showStatus("Use the new tab to choose the folder. After selecting, return here\u2014the folder name will update.", "info");
+      } catch (e) {
+        this.showStatus("Could not open folder picker: " + (e.message || "Unknown error"), "error");
+      }
       return;
     }
-    try {
-      const dirHandle = await window.showDirectoryPicker();
-      const db = await new Promise((resolve, reject) => {
-        const req = indexedDB.open("hoverboard_file_storage", 1);
-        req.onerror = () => reject(req.error);
-        req.onsuccess = () => resolve(req.result);
-        req.onupgradeneeded = (e) => {
-          e.target.result.createObjectStore("handles");
-        };
-      });
-      await new Promise((resolve, reject) => {
-        const tx = db.transaction("handles", "readwrite");
-        tx.objectStore("handles").put(dirHandle, "directory_handle");
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-      });
-      await chrome.storage.local.set({
-        hoverboard_file_storage_configured: true,
-        hoverboard_file_storage_name: dirHandle.name || "Selected folder"
-      });
-      this.elements.fileStorageFolderName.textContent = dirHandle.name || "Selected folder";
-      chrome.runtime.sendMessage({ type: "switchStorageMode" }).catch(() => {
-      });
-      this.showStatus("Folder selected. New file-storage bookmarks will use this folder.", "success");
-    } catch (e) {
-      if (e.name === "AbortError") return;
-      this.showStatus("Could not save folder: " + (e.message || "Unknown error"), "error");
-    }
+    this.showStatus("Folder picker is not available in this context.", "error");
   }
   updateAuthSectionVisibility(mode) {
     if (!this.elements.authSection) return;

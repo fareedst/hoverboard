@@ -805,10 +805,10 @@ export class PopupController {
   }
 
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Move current bookmark to target storage backend.
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move current bookmark to target storage backend.
    */
   async handleStorageBackendChange (targetBackend) {
-    // Use bookmark's URL when available so move uses same key as storage (avoids URL mismatch e.g. with query string).
+    // [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Use bookmark URL when available so move uses same key as storage.
     const url = this.currentPin?.url || this.currentTab?.url
     if (!url) return
     try {
@@ -818,7 +818,7 @@ export class PopupController {
           (r) => (chrome.runtime.lastError ? reject(new Error(chrome.runtime.lastError.message)) : resolve(r))
         )
       })
-      // [REQ-MOVE_BOOKMARK_STORAGE_UI] Use inner result: service worker wraps as { success: true, data: routerResult }.
+      // [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Use inner result: service worker wraps as { success: true, data: routerResult }.
       const result = response?.data ?? response
       if (result?.success) {
         this.uiManager.showSuccess('Bookmark moved to ' + targetBackend)
@@ -1070,7 +1070,7 @@ export class PopupController {
       // Try to inject the bundled content script (without ES6 export issues)
       const results = await chrome.scripting.executeScript({
         target: { tabId },
-        files: ['dist/src/features/content/content-main.js']
+        files: ['src/features/content/content-main.js']
       })
 
       debugLog('Content script injection completed:', results)

@@ -621,7 +621,7 @@ export class PopupController {
       // Try to inject the bundled content script (without ES6 export issues)
       const results = await chrome.scripting.executeScript({
         target: { tabId },
-        files: ['dist/src/features/content/content-main.js']
+        files: ['src/features/content/content-main.js']
       })
 
       debugLog('Content script injection completed:', results)
