@@ -269,48 +269,48 @@ section:last-child {
   gap: var(--spacing-sm);
 }
 
-/* [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage section */
+/* [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage section: select-one buttons */
 .storage-section {
   margin-top: var(--spacing-sm);
 }
 .storage-control {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-sm);
 }
-.storage-control label {
+.storage-label {
   font-size: 12px;
   color: var(--text-secondary, #666);
+  flex-shrink: 0;
 }
-.storage-select {
-  flex: 1;
-  min-width: 0;
+.storage-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+.storage-backend-btn {
+  font-size: 12px;
   padding: 4px 8px;
-  font-size: 12px;
-  border: 1px solid var(--border-color, #ccc);
-  border-radius: 4px;
-  background: var(--bg-primary, #fff);
-}
-
-/* [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser one-click toggle */
-.storage-local-toggle-wrap {
-  margin-top: var(--spacing-xs);
-}
-.storage-local-toggle-wrap.hidden {
-  display: none;
-}
-.storage-local-toggle-btn {
-  font-size: 12px;
-  padding: 2px 8px;
   border: 1px solid var(--border-color, #ccc);
   border-radius: 4px;
   background: var(--bg-secondary, #f5f5f5);
   color: var(--text-secondary, #666);
   cursor: pointer;
 }
-.storage-local-toggle-btn:hover {
+.storage-backend-btn:hover {
   background: var(--bg-hover, #eee);
   color: var(--text-primary, #333);
+}
+.storage-backend-btn[aria-pressed="true"] {
+  background: var(--primary-color, #1976d2);
+  color: #fff;
+  border-color: var(--primary-color, #1976d2);
+}
+.storage-backend-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 /* [SHOW-HOVER-CHECKBOX-CSS-001] - Show hover controls layout */

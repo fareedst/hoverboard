@@ -59,12 +59,14 @@ describe('StorageIndex [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-STORAGE_INDEX]',
     await expect(index.setBackendForUrl('https://x.com', 'invalid')).rejects.toThrow('Invalid backend')
   })
 
-  test('accepts pinboard, local, file [REQ-PER_BOOKMARK_STORAGE_BACKEND]', async () => {
+  test('accepts pinboard, local, file, sync [REQ-PER_BOOKMARK_STORAGE_BACKEND] [ARCH-SYNC_STORAGE_PROVIDER]', async () => {
     await index.setBackendForUrl('https://a.com', 'pinboard')
     await index.setBackendForUrl('https://b.com', 'local')
     await index.setBackendForUrl('https://c.com', 'file')
+    await index.setBackendForUrl('https://d.com', 'sync')
     expect(await index.getBackendForUrl('https://a.com')).toBe('pinboard')
     expect(await index.getBackendForUrl('https://b.com')).toBe('local')
     expect(await index.getBackendForUrl('https://c.com')).toBe('file')
+    expect(await index.getBackendForUrl('https://d.com')).toBe('sync')
   })
 })

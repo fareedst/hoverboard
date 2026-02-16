@@ -7,7 +7,7 @@
 import { debugLog, debugError } from '../../shared/utils.js'
 
 const STORAGE_INDEX_KEY = 'hoverboard_storage_index'
-const VALID_BACKENDS = ['pinboard', 'local', 'file']
+const VALID_BACKENDS = ['pinboard', 'local', 'file', 'sync']
 
 function cleanUrl (url) {
   if (!url) return ''
@@ -17,7 +17,7 @@ function cleanUrl (url) {
 export class StorageIndex {
   /**
    * [IMPL-STORAGE_INDEX] Get full index from chrome.storage.local.
-   * @returns {Promise<Object>} { [url]: 'pinboard'|'local'|'file' }
+   * @returns {Promise<Object>} { [url]: 'pinboard'|'local'|'file'|'sync' }
    */
   async getIndex () {
     try {
@@ -34,11 +34,11 @@ export class StorageIndex {
   /**
    * [IMPL-STORAGE_INDEX] Set backend for URL.
    * @param {string} url
-   * @param {string} backend - 'pinboard'|'local'|'file'
+   * @param {string} backend - 'pinboard'|'local'|'file'|'sync'
    */
   async setBackendForUrl (url, backend) {
     if (!VALID_BACKENDS.includes(backend)) {
-      throw new Error(`Invalid backend: ${backend}. Use pinboard, local, or file.`)
+      throw new Error(`Invalid backend: ${backend}. Use pinboard, local, file, or sync.`)
     }
     const key = cleanUrl(url)
     if (!key) return
@@ -51,7 +51,7 @@ export class StorageIndex {
   /**
    * [IMPL-STORAGE_INDEX] Get backend for URL, or null if not in index.
    * @param {string} url
-   * @returns {Promise<string|null>} 'pinboard'|'local'|'file' or null
+   * @returns {Promise<string|null>} 'pinboard'|'local'|'file'|'sync' or null
    */
   async getBackendForUrl (url) {
     const index = await this.getIndex()

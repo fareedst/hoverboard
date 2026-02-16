@@ -123,12 +123,8 @@ export class UIManager {
       // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
       showHoverOnPageLoad: document.getElementById('showHoverOnPageLoad'),
 
-      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend select
-      storageBackendSelect: document.getElementById('storageBackendSelect'),
-      // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser toggle (show when bookmark is local or file)
-      storageLocalToggleWrap: document.getElementById('storageLocalToggleWrap'),
-      storageLocalToggleBtn: document.getElementById('storageLocalToggleBtn'),
-      storageLocalToggleLabel: document.getElementById('storageLocalToggleLabel')
+      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend select-one buttons (pinboard | file | local | sync)
+      storageBackendButtons: document.getElementById('storageBackendButtons')
     }
   }
 
@@ -168,16 +164,13 @@ export class UIManager {
       this.emit('openBookmarksIndex')
     })
 
-    // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend change
-    this.elements.storageBackendSelect?.addEventListener('change', (e) => {
-      const target = e.target?.value
-      if (target) this.emit('storageBackendChange', target)
-    })
-
-    // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser toggle: one-click move to file or local
-    this.elements.storageLocalToggleBtn?.addEventListener('click', () => {
-      const target = this.elements.storageLocalToggleBtn?.dataset?.targetBackend
-      if (target) this.emit('storageLocalToggle', target)
+    // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend buttons: click emits storageBackendChange (move when non-API to non-API)
+    const storageBtns = this.elements.storageBackendButtons?.querySelectorAll('.storage-backend-btn')
+    storageBtns?.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const target = btn.getAttribute('data-backend')
+        if (target) this.emit('storageBackendChange', target)
+      })
     })
 
     this.elements.settingsBtn?.addEventListener('click', () => {
@@ -379,37 +372,40 @@ export class UIManager {
   }
 
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Update storage backend select value (pinboard | local | file).
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Update storage backend buttons: set aria-pressed on the selected backend (pinboard | local | file | sync).
    */
   updateStorageBackendValue (backend) {
-    if (this.elements.storageBackendSelect && backend) {
-      this.elements.storageBackendSelect.value = backend
-    }
+    const container = this.elements.storageBackendButtons
+    if (!container || !backend) return
+    const buttons = container.querySelectorAll('.storage-backend-btn')
+    buttons.forEach(btn => {
+      const isSelected = btn.getAttribute('data-backend') === backend
+      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false')
+    })
   }
 
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] Update file ↔ browser toggle: show "Move to File" when backend is local,
-   * "Move to browser" when backend is file; hide when pinboard or no bookmark.
-   * @param {string} backend - 'pinboard'|'local'|'file'
-   * @param {boolean} hasBookmark - whether current URL has a saved bookmark
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] No-op: move is done via storage backend buttons. Kept for API compatibility.
+   * @param {string} _backend - 'pinboard'|'local'|'file'|'sync'
+   * @param {boolean} _hasBookmark - whether current URL has a saved bookmark
    */
-  updateStorageLocalToggle (backend, hasBookmark) {
-    const wrap = this.elements.storageLocalToggleWrap
-    const btn = this.elements.storageLocalToggleBtn
-    if (!wrap || !btn) return
-    const show = hasBookmark && (backend === 'local' || backend === 'file')
-    if (!show) {
-      wrap.classList.add('hidden')
-      return
-    }
-    wrap.classList.remove('hidden')
-    if (backend === 'local') {
-      if (this.elements.storageLocalToggleLabel) this.elements.storageLocalToggleLabel.textContent = 'Move to File'
-      btn.dataset.targetBackend = 'file'
-    } else {
-      if (this.elements.storageLocalToggleLabel) this.elements.storageLocalToggleLabel.textContent = 'Move to browser'
-      btn.dataset.targetBackend = 'local'
-    }
+  updateStorageLocalToggle (_backend, _hasBookmark) {
+    // Toggle removed; all moves via select-one buttons
+  }
+
+  /**
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable or disable Pinboard storage button based on API key configuration.
+   * When disabled, button cannot be selected; title hints user to configure token in Options.
+   * @param {boolean} hasApiKey - whether a Pinboard API token is configured
+   */
+  updateStoragePinboardEnabled (hasApiKey) {
+    const container = this.elements.storageBackendButtons
+    if (!container) return
+    const btn = container.querySelector('.storage-backend-btn[data-backend="pinboard"]')
+    if (!btn) return
+    btn.disabled = !hasApiKey
+    btn.title = hasApiKey ? 'Pinboard (cloud)' : 'Configure API token in Options to use Pinboard'
+    btn.setAttribute('aria-label', hasApiKey ? 'Pinboard (cloud)' : 'Pinboard (cloud). Configure API token in Options to use.')
   }
 
   /**

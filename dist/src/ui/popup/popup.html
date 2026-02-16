@@ -76,22 +76,17 @@
         </div>
       </section>
 
-      <!-- [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage: move bookmark to Pinboard, Local, or File -->
+      <!-- [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage: select-one buttons (P, F, L, S); click moves when non-API to non-API -->
       <section class="storage-section" id="storageSection">
         <h3 class="section-title">Storage</h3>
-        <div class="storage-control">
-          <label for="storageBackendSelect">Save to:</label>
-          <select id="storageBackendSelect" class="storage-select" aria-label="Bookmark storage location">
-            <option value="pinboard">Pinboard (cloud)</option>
-            <option value="local">Local (browser)</option>
-            <option value="file">File (folder)</option>
-          </select>
-        </div>
-        <!-- [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser toggle: one-click move when bookmark is in local or file -->
-        <div class="storage-local-toggle-wrap hidden" id="storageLocalToggleWrap">
-          <button type="button" id="storageLocalToggleBtn" class="storage-local-toggle-btn" aria-label="Switch between file and browser storage">
-            <span id="storageLocalToggleLabel"></span>
-          </button>
+        <div class="storage-control" role="group" aria-label="Bookmark storage location">
+          <span class="storage-label">Save to:</span>
+          <div class="storage-buttons" id="storageBackendButtons">
+            <button type="button" class="storage-backend-btn" data-backend="pinboard" aria-pressed="false" aria-label="Pinboard (cloud)">Pinboard</button>
+            <button type="button" class="storage-backend-btn" data-backend="file" aria-pressed="false" aria-label="File (folder)">File</button>
+            <button type="button" class="storage-backend-btn" data-backend="local" aria-pressed="false" aria-label="Local (browser)">Local</button>
+            <button type="button" class="storage-backend-btn" data-backend="sync" aria-pressed="false" aria-label="Sync (browser, synced)">Sync</button>
+          </div>
         </div>
       </section>
 

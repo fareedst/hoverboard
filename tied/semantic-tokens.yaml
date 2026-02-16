@@ -1403,6 +1403,38 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
     registered: 2026-02-14
     last_updated: 2026-02-14
 
+ARCH-SYNC_STORAGE_PROVIDER:
+  type: ARCH
+  name: Sync Storage Bookmark Provider
+  category: Storage
+  status: Active
+  description: "Fourth storage backend: chrome.storage.sync; synced across Chrome profile; ~100 KB quota"
+  cross_references:
+    - REQ-STORAGE_MODE_DEFAULT
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - ARCH-STORAGE_INDEX_AND_ROUTER
+    - IMPL-SYNC_BOOKMARK_SERVICE
+  source_index: architecture-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: 2026-02-15
+    last_updated: 2026-02-15
+
+IMPL-SYNC_BOOKMARK_SERVICE:
+  type: IMPL
+  name: Sync Bookmark Service
+  category: Storage
+  status: Active
+  description: "Bookmark provider backed by chrome.storage.sync; same contract as LocalBookmarkService; key hoverboard_sync_bookmarks"
+  cross_references:
+    - ARCH-SYNC_STORAGE_PROVIDER
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: 2026-02-15
+    last_updated: 2026-02-15
+
 # ---
 # Template Record - Copy this block to create new tokens
 # ---

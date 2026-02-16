@@ -359,8 +359,8 @@ export class MessageHandler {
   }
 
   /**
-   * [ARCH-STORAGE_INDEX_AND_ROUTER] Return local + file bookmarks with storage field (for index page with Storage column).
-   * @returns {Promise<{ bookmarks: Array<{ ...bookmark, storage: 'local'|'file' }> }>}
+   * [ARCH-STORAGE_INDEX_AND_ROUTER] Return local + file + sync bookmarks with storage field (for index page with Storage column).
+   * @returns {Promise<{ bookmarks: Array<{ ...bookmark, storage: 'local'|'file'|'sync' }> }>}
    */
   async handleGetAggregatedBookmarksForIndex () {
     try {

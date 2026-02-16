@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Fourth storage option: chrome.storage.sync** (`ARCH-SYNC_STORAGE_PROVIDER`, `IMPL-SYNC_BOOKMARK_SERVICE`) – Bookmarks can be stored in **Sync** so they sync across devices signed into the same Chrome profile. Options: Storage Mode > "Sync (browser, synced)". **Quota ~100 KB**; documented in Options and README. Local bookmarks index and CSV export include a "Sync" storage column.
+
+- **Popup storage: select-one buttons** (`REQ-MOVE_BOOKMARK_STORAGE_UI`, `IMPL-MOVE_BOOKMARK_UI`) – The popup Storage section uses four **select-one buttons** (Pinboard, File, Local, Sync) instead of a dropdown. The current storage is **highlighted**; clicking another option moves the bookmark when moving between non-API backends (Local, File, Sync). Pinboard button is **disabled** when no API token is configured (`updateStoragePinboardEnabled`).
+
 - **File storage with typed path** (`IMPL-FILE_STORAGE_TYPED_PATH`) – File-based bookmarks can use a **user-typed path** instead of the folder picker:
   - **Options:** New "Path (directory for bookmark file)" input; default `~/.hoverboard`. Path is saved to `chrome.storage.local` and used when storage mode is File.
   - **Native host:** Helper scripts (`helper.sh`, `helper.ps1`) handle `readBookmarksFile` and `writeBookmarksFile` messages with a `path` field: expand `~` to home, use `path/hoverboard-bookmarks.json` (or path as file if it ends with `.json`), create directory on first write.
@@ -17,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Requires the native host to be installed; no folder picker needed for the path-based flow.
 
 ### Fixed
+
+- **Pinboard API key can be cleared** – The Options page previously only called `setAuthToken` when the token field was non-empty, so clearing the field and saving left the old token in storage. Save now always persists the current field value; **clear the Pinboard API Token field and click Save** to disable Pinboard. Help text in Options: "Leave empty and save to disable Pinboard." Same fix in `options.js` and `options-browser.js`.
 
 - **File storage helper path normalization** (`IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE`) – When the native host runs with `HOME` set with a trailing slash (e.g. by Chrome’s environment), the helper now normalizes it so `~/.hoverboard` resolves to a path without a double slash; the bookmark file is created at `~/.hoverboard/hoverboard-bookmarks.json` as expected. The helper also verifies the file exists and is non-empty after writing before returning success.
 
@@ -27,9 +33,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Technical Details
 
+- **Storage:** Four backends: Pinboard (P), File (F), Local (L, default), Sync (S). `VALID_BACKENDS` and BookmarkRouter include `sync`; ConfigManager and Options support `storageMode: 'sync'`. Sync uses `chrome.storage.sync` key `hoverboard_sync_bookmarks`. TIED: `ARCH-SYNC_STORAGE_PROVIDER`, `IMPL-SYNC_BOOKMARK_SERVICE` in semantic-tokens and implementation-decisions.
+- **Popup:** UIManager `updateStorageBackendValue(backend)` and `updateStoragePinboardEnabled(hasApiKey)`; PopupController loads auth token and disables Pinboard button when empty. Implementation decision: Pinboard option disabled when no API token.
+- **Auth:** Options save flow always calls `setAuthToken(authToken)` (including empty string) so user can clear token to disable Pinboard.
 - **Requirements:** `REQ-MOVE_BOOKMARK_STORAGE_UI` satisfaction criteria extended; new implementation decision `IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL`.
 - **Implementation:** New decision `IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE` (helper `expand_tilde` uses `${HOME%/}`; post-write file verification).
-- **Tests:** New unit test `moveBookmarkToStorage succeeds when bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]` in `bookmark-router.test.js`; new suite `helper-path-normalize.test.js` for `writeBookmarksFile with HOME with trailing slash` [IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE].
+- **Tests:** ConfigManager `getStorageMode`/`setStorageMode` for `sync`; StorageIndex accepts `sync`; BookmarkRouter four providers and `getAllBookmarksForIndex` including sync; SyncBookmarkService unit tests; `moveBookmarkToStorage succeeds when bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]`; `helper-path-normalize.test.js` for [IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE]. Auth: test that `setAuthToken('')` persists empty token.
 
 ## [1.0.8] - 2026-02-13
 

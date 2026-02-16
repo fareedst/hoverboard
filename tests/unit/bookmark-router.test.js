@@ -10,6 +10,7 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
   let pinboard
   let local
   let file
+  let sync
   let storageIndex
   let defaultMode
 
@@ -23,6 +24,7 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
           return store[u] ? { ...store[u] } : { ...empty, url: u }
         }),
         getRecentBookmarks: jest.fn(async () => Object.values(store).sort((a, b) => (b.time || '').localeCompare(a.time || ''))),
+        getAllBookmarks: jest.fn(async () => Object.values(store).sort((a, b) => (b.time || '').localeCompare(a.time || ''))),
         saveBookmark: jest.fn(async (data) => {
           const u = (data.url || '').replace(/\/+$/, '')
           store[u] = { ...data, url: u, time: store[u]?.time || new Date().toISOString() }
@@ -41,6 +43,7 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
     pinboard = makeProvider('pinboard')
     local = makeProvider('local')
     file = makeProvider('file')
+    sync = makeProvider('sync')
 
     let stored = {}
     global.chrome.storage.local.get.mockImplementation(async (key) => {
@@ -57,7 +60,7 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
     })
     storageIndex = new StorageIndex()
     defaultMode = jest.fn().mockResolvedValue('local')
-    router = new BookmarkRouter(pinboard, local, file, storageIndex, defaultMode)
+    router = new BookmarkRouter(pinboard, local, file, sync, storageIndex, defaultMode)
   })
 
   test('getBookmarkForUrl uses default provider when URL not in index [REQ-PER_BOOKMARK_STORAGE_BACKEND]', async () => {
@@ -96,15 +99,17 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
     expect(backend).toBe(null)
   })
 
-  test('getRecentBookmarks aggregates all three providers [IMPL-BOOKMARK_ROUTER]', async () => {
+  test('getRecentBookmarks aggregates all four providers [IMPL-BOOKMARK_ROUTER]', async () => {
     await pinboard.saveBookmark({ url: 'https://p.com', description: 'P', time: '2026-02-14T10:00:00.000Z' })
     await local.saveBookmark({ url: 'https://l.com', description: 'L', time: '2026-02-14T11:00:00.000Z' })
     await file.saveBookmark({ url: 'https://f.com', description: 'F', time: '2026-02-14T12:00:00.000Z' })
+    await sync.saveBookmark({ url: 'https://s.com', description: 'S', time: '2026-02-14T13:00:00.000Z' })
     const list = await router.getRecentBookmarks(10)
-    expect(list.length).toBe(3)
+    expect(list.length).toBe(4)
     expect(pinboard.getRecentBookmarks).toHaveBeenCalled()
     expect(local.getRecentBookmarks).toHaveBeenCalled()
     expect(file.getRecentBookmarks).toHaveBeenCalled()
+    expect(sync.getRecentBookmarks).toHaveBeenCalled()
   })
 
   test('getStorageBackendForUrl returns index or default', async () => {
@@ -154,6 +159,19 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
     expect(file.deleteBookmark).toHaveBeenCalledWith('https://example.com/fl')
     const backend = await storageIndex.getBackendForUrl('https://example.com/fl')
     expect(backend).toBe('local')
+  })
+
+  test('getAllBookmarksForIndex includes local, file, and sync [REQ-LOCAL_BOOKMARKS_INDEX]', async () => {
+    await local.saveBookmark({ url: 'https://l.com', description: 'L', time: '2026-02-14T11:00:00.000Z' })
+    await file.saveBookmark({ url: 'https://f.com', description: 'F', time: '2026-02-14T12:00:00.000Z' })
+    await sync.saveBookmark({ url: 'https://s.com', description: 'S', time: '2026-02-14T13:00:00.000Z' })
+    const list = await router.getAllBookmarksForIndex()
+    expect(list.some(b => b.storage === 'local')).toBe(true)
+    expect(list.some(b => b.storage === 'file')).toBe(true)
+    expect(list.some(b => b.storage === 'sync')).toBe(true)
+    expect(local.getAllBookmarks).toHaveBeenCalled()
+    expect(file.getAllBookmarks).toHaveBeenCalled()
+    expect(sync.getAllBookmarks).toHaveBeenCalled()
   })
 
   // [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move succeeds when source bookmark has url but no time

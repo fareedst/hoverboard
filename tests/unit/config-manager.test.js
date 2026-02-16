@@ -191,6 +191,21 @@ describe('ConfigManager', () => {
       });
     });
 
+    test('getStorageMode returns sync when stored has storageMode sync [ARCH-SYNC_STORAGE_PROVIDER]', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_settings: { storageMode: 'sync' }
+      });
+      const mode = await configManager.getStorageMode();
+      expect(mode).toBe('sync');
+    });
+
+    test('setStorageMode accepts sync and calls updateConfig [ARCH-SYNC_STORAGE_PROVIDER]', async () => {
+      await configManager.setStorageMode('sync');
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_settings: expect.objectContaining({ storageMode: 'sync' })
+      });
+    });
+
     test('setStorageMode throws on invalid mode', async () => {
       await expect(configManager.setStorageMode('invalid')).rejects.toThrow('Invalid storage mode');
     });
@@ -217,6 +232,13 @@ describe('ConfigManager', () => {
       
       expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
         hoverboard_auth_token: 'new-token'
+      });
+    });
+
+    test('should allow clearing auth token with empty string (disable Pinboard) [CFG-002]', async () => {
+      await configManager.setAuthToken('');
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_auth_token: ''
       });
     });
 

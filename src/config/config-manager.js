@@ -180,7 +180,7 @@ export class ConfigManager {
 
   /**
    * Get bookmark storage mode (default backend for new bookmarks when using router).
-   * @returns {Promise<string>} 'pinboard', 'local', or 'file'
+   * @returns {Promise<string>} 'pinboard', 'local', 'file', or 'sync'
    *
    * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Storage mode for provider selection and default for new bookmarks
    * IMPLEMENTATION DECISION: Stored in settings blob; invalid values fall back to 'local'
@@ -188,18 +188,18 @@ export class ConfigManager {
   async getStorageMode () {
     const config = await this.getConfig()
     const mode = config.storageMode
-    return (mode === 'local' || mode === 'pinboard' || mode === 'file') ? mode : 'local'
+    return (mode === 'local' || mode === 'pinboard' || mode === 'file' || mode === 'sync') ? mode : 'local'
   }
 
   /**
    * Set bookmark storage mode
-   * @param {string} mode - 'pinboard', 'local', or 'file'
+   * @param {string} mode - 'pinboard', 'local', 'file', or 'sync'
    *
    * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Persist storage mode
    */
   async setStorageMode (mode) {
-    if (mode !== 'pinboard' && mode !== 'local' && mode !== 'file') {
-      throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', or 'file'.`)
+    if (mode !== 'pinboard' && mode !== 'local' && mode !== 'file' && mode !== 'sync') {
+      throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', 'file', or 'sync'.`)
     }
     await this.updateConfig({ storageMode: mode })
   }

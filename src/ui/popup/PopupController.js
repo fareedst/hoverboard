@@ -269,11 +269,13 @@ export class PopupController {
       const manifest = chrome.runtime.getManifest()
       this.uiManager.updateVersionInfo(manifest.version)
 
-      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Load current storage backend for URL
+      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Load current storage backend for URL (pinboard | local | file | sync)
       const storageBackend = await this.getStorageBackendForUrl(this.currentTab?.url)
       this.uiManager.updateStorageBackendValue(storageBackend || 'local')
-      // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser toggle: show only when bookmark exists and is local or file
       this.uiManager.updateStorageLocalToggle(storageBackend || 'local', !!this.currentPin)
+      // [REQ-MOVE_BOOKMARK_STORAGE_UI] Disable Pinboard storage option when no API token configured
+      const token = await this.configManager.getAuthToken()
+      this.uiManager.updateStoragePinboardEnabled(!!(token && token.trim()))
 
       // Mark as initialized
       this.isInitialized = true
@@ -785,7 +787,7 @@ export class PopupController {
   }
 
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Get storage backend for URL (pinboard | local | file).
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Get storage backend for URL (pinboard | local | file | sync).
    */
   async getStorageBackendForUrl (url) {
     if (!url || typeof chrome?.runtime?.sendMessage !== 'function') return 'local'

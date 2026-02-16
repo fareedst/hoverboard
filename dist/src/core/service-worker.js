@@ -225,7 +225,7 @@ var init_config_manager = __esm({
       }
       /**
        * Get bookmark storage mode (default backend for new bookmarks when using router).
-       * @returns {Promise<string>} 'pinboard', 'local', or 'file'
+       * @returns {Promise<string>} 'pinboard', 'local', 'file', or 'sync'
        *
        * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Storage mode for provider selection and default for new bookmarks
        * IMPLEMENTATION DECISION: Stored in settings blob; invalid values fall back to 'local'
@@ -233,17 +233,17 @@ var init_config_manager = __esm({
       async getStorageMode() {
         const config = await this.getConfig();
         const mode = config.storageMode;
-        return mode === "local" || mode === "pinboard" || mode === "file" ? mode : "local";
+        return mode === "local" || mode === "pinboard" || mode === "file" || mode === "sync" ? mode : "local";
       }
       /**
        * Set bookmark storage mode
-       * @param {string} mode - 'pinboard', 'local', or 'file'
+       * @param {string} mode - 'pinboard', 'local', 'file', or 'sync'
        *
        * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Persist storage mode
        */
       async setStorageMode(mode) {
-        if (mode !== "pinboard" && mode !== "local" && mode !== "file") {
-          throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', or 'file'.`);
+        if (mode !== "pinboard" && mode !== "local" && mode !== "file" && mode !== "sync") {
+          throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', 'file', or 'sync'.`);
         }
         await this.updateConfig({ storageMode: mode });
       }
@@ -5814,8 +5814,8 @@ var MessageHandler = class {
     }
   }
   /**
-   * [ARCH-STORAGE_INDEX_AND_ROUTER] Return local + file bookmarks with storage field (for index page with Storage column).
-   * @returns {Promise<{ bookmarks: Array<{ ...bookmark, storage: 'local'|'file' }> }>}
+   * [ARCH-STORAGE_INDEX_AND_ROUTER] Return local + file + sync bookmarks with storage field (for index page with Storage column).
+   * @returns {Promise<{ bookmarks: Array<{ ...bookmark, storage: 'local'|'file'|'sync' }> }>}
    */
   async handleGetAggregatedBookmarksForIndex() {
     try {
@@ -6148,6 +6148,231 @@ var MessageHandler = class {
 
 // src/core/service-worker.js
 init_pinboard_service();
+
+// src/features/storage/sync-bookmark-service.js
+init_tag_service();
+init_utils();
+var STORAGE_KEY2 = "hoverboard_sync_bookmarks";
+var SyncBookmarkService = class {
+  constructor(tagService = null) {
+    this.tagService = tagService || new TagService(this);
+  }
+  /** [IMPL-SYNC_BOOKMARK_SERVICE] Normalize URL for storage key (match PinboardService.cleanUrl behavior). */
+  cleanUrl(url) {
+    if (!url) return "";
+    return url.trim().replace(/\/+$/, "");
+  }
+  /** [IMPL-SYNC_BOOKMARK_SERVICE] Empty bookmark shape (match PinboardService.createEmptyBookmark). */
+  createEmptyBookmark(url, title) {
+    return {
+      url: url || "",
+      description: title || "",
+      extended: "",
+      tags: [],
+      time: "",
+      shared: "yes",
+      toread: "no",
+      hash: ""
+    };
+  }
+  /** [IMPL-SYNC_BOOKMARK_SERVICE] Read all bookmarks from chrome.storage.sync. */
+  async _getAllBookmarks() {
+    try {
+      const result = await chrome.storage.sync.get(STORAGE_KEY2);
+      const raw = result[STORAGE_KEY2];
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) return {};
+      return raw;
+    } catch (e) {
+      debugError("[IMPL-SYNC_BOOKMARK_SERVICE] _getAllBookmarks failed:", e);
+      return {};
+    }
+  }
+  /** [IMPL-SYNC_BOOKMARK_SERVICE] Write full bookmarks map to chrome.storage.sync. */
+  async _setAllBookmarks(map) {
+    await chrome.storage.sync.set({ [STORAGE_KEY2]: map });
+  }
+  /** [IMPL-SYNC_BOOKMARK_SERVICE] Normalize bookmark for return: tags as array. */
+  _normalizeBookmark(b) {
+    if (!b) return null;
+    const tags = b.tags == null ? [] : Array.isArray(b.tags) ? b.tags : String(b.tags).split(/\s+/).filter(Boolean);
+    return {
+      url: b.url || "",
+      description: b.description || "",
+      extended: b.extended || "",
+      tags,
+      time: b.time || "",
+      shared: b.shared === "no" ? "no" : "yes",
+      toread: b.toread === "yes" ? "yes" : "no",
+      hash: b.hash || ""
+    };
+  }
+  /** [IMPL-SYNC_BOOKMARK_SERVICE] Generate a stable sync hash for a URL. */
+  _syncHash(url) {
+    let h = 0;
+    const s = String(url);
+    for (let i = 0; i < s.length; i++) {
+      h = (h << 5) - h + s.charCodeAt(i);
+      h |= 0;
+    }
+    return "sync-" + Math.abs(h).toString(36);
+  }
+  async getBookmarkForUrl(url, title = "") {
+    try {
+      const cleanUrl3 = this.cleanUrl(url);
+      const all = await this._getAllBookmarks();
+      const b = all[cleanUrl3];
+      if (b) {
+        debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] getBookmarkForUrl found:", cleanUrl3);
+        return this._normalizeBookmark({ ...b, url: cleanUrl3 });
+      }
+      debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] getBookmarkForUrl not found, returning empty:", cleanUrl3);
+      return this.createEmptyBookmark(url, title);
+    } catch (error) {
+      debugError("[IMPL-SYNC_BOOKMARK_SERVICE] getBookmarkForUrl failed:", error);
+      return this.createEmptyBookmark(url, title);
+    }
+  }
+  async getRecentBookmarks(count = 15) {
+    try {
+      const all = await this._getAllBookmarks();
+      const list = Object.values(all).map((b) => this._normalizeBookmark(b)).filter((b) => b && b.time).sort((a, b) => (b.time || "").localeCompare(a.time || "")).slice(0, count);
+      debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] getRecentBookmarks:", list.length);
+      return list;
+    } catch (error) {
+      debugError("[IMPL-SYNC_BOOKMARK_SERVICE] getRecentBookmarks failed:", error);
+      return [];
+    }
+  }
+  /**
+   * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
+   * Return full normalized array of all sync bookmarks, sorted by time descending.
+   * Used by the local bookmarks index page; no count limit.
+   */
+  async getAllBookmarks() {
+    try {
+      const all = await this._getAllBookmarks();
+      const list = Object.entries(all).map(([url, b]) => this._normalizeBookmark({ ...b, url })).filter((b) => b && b.url).sort((a, b) => (b.time || "").localeCompare(a.time || ""));
+      debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] getAllBookmarks:", list.length);
+      return list;
+    } catch (error) {
+      debugError("[IMPL-SYNC_BOOKMARK_SERVICE] getAllBookmarks failed:", error);
+      return [];
+    }
+  }
+  async saveBookmark(bookmarkData) {
+    try {
+      const url = bookmarkData?.url ? this.cleanUrl(bookmarkData.url) : "";
+      if (!url) {
+        return { success: false, code: "invalid", message: "URL is required" };
+      }
+      const tags = bookmarkData.tags == null ? [] : Array.isArray(bookmarkData.tags) ? bookmarkData.tags : String(bookmarkData.tags).split(/\s+/).filter(Boolean);
+      const now = (/* @__PURE__ */ new Date()).toISOString();
+      const all = await this._getAllBookmarks();
+      const existing = all[url];
+      const bookmark = {
+        url,
+        description: bookmarkData.description ?? existing?.description ?? "",
+        extended: bookmarkData.extended ?? existing?.extended ?? "",
+        tags,
+        time: bookmarkData.time ?? existing?.time ?? now,
+        shared: bookmarkData.shared !== void 0 ? String(bookmarkData.shared) : existing?.shared ?? "yes",
+        toread: bookmarkData.toread !== void 0 ? String(bookmarkData.toread) : existing?.toread ?? "no",
+        hash: existing?.hash ?? this._syncHash(url)
+      };
+      all[url] = bookmark;
+      await this._setAllBookmarks(all);
+      await this.trackBookmarkTags(bookmark);
+      debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] saveBookmark ok:", url);
+      return { success: true, code: "done", message: "Operation completed" };
+    } catch (error) {
+      debugError("[IMPL-SYNC_BOOKMARK_SERVICE] saveBookmark failed:", error);
+      throw error;
+    }
+  }
+  async saveTag(tagData) {
+    try {
+      const currentBookmark = await this.getBookmarkForUrl(tagData.url);
+      const existingTags = currentBookmark.tags || [];
+      const newTags = [...existingTags];
+      if (tagData.value && !existingTags.includes(tagData.value)) {
+        newTags.push(tagData.value);
+      }
+      const updatedBookmark = {
+        ...currentBookmark,
+        ...tagData,
+        tags: newTags.join(" ")
+      };
+      if (tagData.value) {
+        await this.tagService.handleTagAddition(tagData.value, updatedBookmark);
+      }
+      return this.saveBookmark(updatedBookmark);
+    } catch (error) {
+      debugError("[IMPL-SYNC_BOOKMARK_SERVICE] saveTag failed:", error);
+      throw error;
+    }
+  }
+  async deleteBookmark(url) {
+    try {
+      const cleanUrl3 = this.cleanUrl(url);
+      const all = await this._getAllBookmarks();
+      if (!(cleanUrl3 in all)) {
+        debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] deleteBookmark URL not found:", cleanUrl3);
+        return { success: true, code: "done", message: "Operation completed" };
+      }
+      delete all[cleanUrl3];
+      await this._setAllBookmarks(all);
+      debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] deleteBookmark ok:", cleanUrl3);
+      return { success: true, code: "done", message: "Operation completed" };
+    } catch (error) {
+      debugError("[IMPL-SYNC_BOOKMARK_SERVICE] deleteBookmark failed:", error);
+      throw error;
+    }
+  }
+  async deleteTag(tagData) {
+    try {
+      const currentBookmark = await this.getBookmarkForUrl(tagData.url);
+      const existingTags = currentBookmark.tags || [];
+      const filteredTags = existingTags.filter((tag) => tag !== tagData.value);
+      const updatedBookmark = {
+        ...currentBookmark,
+        ...tagData,
+        tags: filteredTags.join(" ")
+      };
+      return this.saveBookmark(updatedBookmark);
+    } catch (error) {
+      debugError("[IMPL-SYNC_BOOKMARK_SERVICE] deleteTag failed:", error);
+      throw error;
+    }
+  }
+  async testConnection() {
+    return true;
+  }
+  async trackBookmarkTags(bookmarkData) {
+    try {
+      const tags = this.extractTagsFromBookmarkData(bookmarkData);
+      const sanitizedTags = Array.from(new Set(tags.map((tag) => this.tagService.sanitizeTag(tag)).filter(Boolean)));
+      if (sanitizedTags.length > 0) {
+        for (const sanitizedTag of sanitizedTags) {
+          await this.tagService.handleTagAddition(sanitizedTag, bookmarkData);
+        }
+        debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] Tracked tags for bookmark:", sanitizedTags);
+      }
+    } catch (error) {
+      debugError("[IMPL-SYNC_BOOKMARK_SERVICE] Failed to track bookmark tags:", error);
+    }
+  }
+  extractTagsFromBookmarkData(bookmarkData) {
+    const tags = [];
+    if (bookmarkData.tags) {
+      if (typeof bookmarkData.tags === "string") {
+        tags.push(...bookmarkData.tags.split(/\s+/).filter((tag) => tag.trim()));
+      } else if (Array.isArray(bookmarkData.tags)) {
+        tags.push(...bookmarkData.tags.filter((tag) => tag && tag.trim()));
+      }
+    }
+    return tags;
+  }
+};
 
 // src/features/storage/file-bookmark-service.js
 init_tag_service();
@@ -6505,7 +6730,7 @@ var NativeHostFileBookmarkAdapter = class extends FileBookmarkStorageAdapter {
 // src/features/storage/storage-index.js
 init_utils();
 var STORAGE_INDEX_KEY = "hoverboard_storage_index";
-var VALID_BACKENDS = ["pinboard", "local", "file"];
+var VALID_BACKENDS = ["pinboard", "local", "file", "sync"];
 function cleanUrl(url) {
   if (!url) return "";
   return url.trim().replace(/\/+$/, "");
@@ -6513,7 +6738,7 @@ function cleanUrl(url) {
 var StorageIndex = class {
   /**
    * [IMPL-STORAGE_INDEX] Get full index from chrome.storage.local.
-   * @returns {Promise<Object>} { [url]: 'pinboard'|'local'|'file' }
+   * @returns {Promise<Object>} { [url]: 'pinboard'|'local'|'file'|'sync' }
    */
   async getIndex() {
     try {
@@ -6529,11 +6754,11 @@ var StorageIndex = class {
   /**
    * [IMPL-STORAGE_INDEX] Set backend for URL.
    * @param {string} url
-   * @param {string} backend - 'pinboard'|'local'|'file'
+   * @param {string} backend - 'pinboard'|'local'|'file'|'sync'
    */
   async setBackendForUrl(url, backend) {
     if (!VALID_BACKENDS.includes(backend)) {
-      throw new Error(`Invalid backend: ${backend}. Use pinboard, local, or file.`);
+      throw new Error(`Invalid backend: ${backend}. Use pinboard, local, file, or sync.`);
     }
     const key = cleanUrl(url);
     if (!key) return;
@@ -6545,7 +6770,7 @@ var StorageIndex = class {
   /**
    * [IMPL-STORAGE_INDEX] Get backend for URL, or null if not in index.
    * @param {string} url
-   * @returns {Promise<string|null>} 'pinboard'|'local'|'file' or null
+   * @returns {Promise<string|null>} 'pinboard'|'local'|'file'|'sync' or null
    */
   async getBackendForUrl(url) {
     const index = await this.getIndex();
@@ -6601,13 +6826,15 @@ var BookmarkRouter = class {
    * @param {Object} pinboardProvider - getBookmarkForUrl, saveBookmark, deleteBookmark, getRecentBookmarks, saveTag, deleteTag, testConnection
    * @param {Object} localProvider - same contract
    * @param {Object} fileProvider - same contract
+   * @param {Object} syncProvider - same contract
    * @param {StorageIndex} storageIndex
-   * @param {() => Promise<string>} getDefaultStorageMode - async returns 'pinboard'|'local'|'file'
+   * @param {() => Promise<string>} getDefaultStorageMode - async returns 'pinboard'|'local'|'file'|'sync'
    */
-  constructor(pinboardProvider, localProvider, fileProvider, storageIndex, getDefaultStorageMode) {
+  constructor(pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, getDefaultStorageMode) {
     this.pinboardProvider = pinboardProvider;
     this.localProvider = localProvider;
     this.fileProvider = fileProvider;
+    this.syncProvider = syncProvider;
     this.storageIndex = storageIndex;
     this.getDefaultStorageMode = getDefaultStorageMode;
   }
@@ -6615,6 +6842,7 @@ var BookmarkRouter = class {
     if (backend === "pinboard") return this.pinboardProvider;
     if (backend === "local") return this.localProvider;
     if (backend === "file") return this.fileProvider;
+    if (backend === "sync") return this.syncProvider;
     return this.localProvider;
   }
   async _backendForUrl(url) {
@@ -6630,12 +6858,13 @@ var BookmarkRouter = class {
     return provider.getBookmarkForUrl(url, title);
   }
   async getRecentBookmarks(count = 15) {
-    const [pin, local, file] = await Promise.all([
+    const [pin, local, file, sync] = await Promise.all([
       this.pinboardProvider.getRecentBookmarks(count),
       this.localProvider.getRecentBookmarks(count),
-      this.fileProvider.getRecentBookmarks(count)
+      this.fileProvider.getRecentBookmarks(count),
+      this.syncProvider.getRecentBookmarks(count)
     ]);
-    const merged = [...pin, ...local, ...file];
+    const merged = [...pin, ...local, ...file, ...sync];
     const byTime = merged.sort((a, b) => (b.time || "").localeCompare(a.time || ""));
     const list = byTime.slice(0, count);
     debugLog("[IMPL-BOOKMARK_ROUTER] getRecentBookmarks aggregated:", list.length);
@@ -6686,24 +6915,26 @@ var BookmarkRouter = class {
     return provider.testConnection();
   }
   /**
-   * [REQ-LOCAL_BOOKMARKS_INDEX] Return all bookmarks from local and file providers with storage field (for index page).
-   * @returns {Promise<Array<{ ...bookmark, storage: 'local'|'file' }>>}
+   * [REQ-LOCAL_BOOKMARKS_INDEX] Return all bookmarks from local, file, and sync providers with storage field (for index page).
+   * @returns {Promise<Array<{ ...bookmark, storage: 'local'|'file'|'sync' }>>}
    */
   async getAllBookmarksForIndex() {
-    const [localList, fileList] = await Promise.all([
+    const [localList, fileList, syncList] = await Promise.all([
       this.localProvider.getAllBookmarks ? this.localProvider.getAllBookmarks() : [],
-      this.fileProvider.getAllBookmarks ? this.fileProvider.getAllBookmarks() : []
+      this.fileProvider.getAllBookmarks ? this.fileProvider.getAllBookmarks() : [],
+      this.syncProvider.getAllBookmarks ? this.syncProvider.getAllBookmarks() : []
     ]);
     const withSource = [
       ...localList.map((b) => ({ ...b, storage: "local" })),
-      ...fileList.map((b) => ({ ...b, storage: "file" }))
+      ...fileList.map((b) => ({ ...b, storage: "file" })),
+      ...syncList.map((b) => ({ ...b, storage: "sync" }))
     ];
     return withSource.sort((a, b) => (b.time || "").localeCompare(a.time || ""));
   }
   /**
    * [IMPL-BOOKMARK_ROUTER] Get storage backend for URL (for move UI).
    * @param {string} url
-   * @returns {Promise<string>} 'pinboard'|'local'|'file'
+   * @returns {Promise<string>} 'pinboard'|'local'|'file'|'sync'
    */
   async getStorageBackendForUrl(url) {
     const backend = await this.storageIndex.getBackendForUrl(url);
@@ -6713,7 +6944,7 @@ var BookmarkRouter = class {
   /**
    * [IMPL-BOOKMARK_ROUTER] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move bookmark to target storage (copy to target, delete from source, update index).
    * @param {string} url
-   * @param {string} targetBackend - 'pinboard'|'local'|'file'
+   * @param {string} targetBackend - 'pinboard'|'local'|'file'|'sync'
    */
   async moveBookmarkToStorage(url, targetBackend) {
     const key = cleanUrl2(url);
@@ -7015,6 +7246,7 @@ var HoverboardServiceWorker = class {
     const tagService = this.messageHandler.tagService;
     const pinboardProvider = new PinboardService(tagService);
     const localProvider = new LocalBookmarkService(tagService);
+    const syncProvider = new SyncBookmarkService(tagService);
     let fileAdapter = new InMemoryFileBookmarkAdapter();
     const storage = await chrome.storage.local.get(["hoverboard_file_storage_configured", "hoverboard_file_storage_path"]);
     const pathSet = !!(storage.hoverboard_file_storage_path && String(storage.hoverboard_file_storage_path).trim());
@@ -7038,6 +7270,7 @@ var HoverboardServiceWorker = class {
       pinboardProvider,
       localProvider,
       fileProvider,
+      syncProvider,
       storageIndex,
       getDefaultStorageMode
     );

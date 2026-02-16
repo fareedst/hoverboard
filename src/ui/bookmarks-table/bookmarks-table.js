@@ -107,7 +107,7 @@ function renderTableBody () {
     const time = escapeHtml(b.time ? new Date(b.time).toLocaleString() : '')
     const shared = b.shared === 'no' ? 'Private' : 'Public'
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
-    const storage = escapeHtml((b.storage === 'file' ? 'File' : 'Local'))
+    const storage = escapeHtml(b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local'))
     const urlLink = b.url
       ? `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" class="url-link">${url}</a>`
       : url
@@ -176,7 +176,7 @@ function buildCsv (bookmarks) {
     const url = b.url ?? ''
     const tags = Array.isArray(b.tags) ? b.tags.join(', ') : String(b.tags ?? '')
     const time = b.time ? new Date(b.time).toISOString() : ''
-    const storage = b.storage === 'file' ? 'File' : 'Local'
+    const storage = b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local')
     const shared = b.shared === 'no' ? 'Private' : 'Public'
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
     const notes = b.extended ?? ''

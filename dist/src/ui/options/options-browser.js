@@ -169,11 +169,9 @@ class OptionsController {
       // Save configuration
       await this.configManager.updateConfig(settings)
 
-      // Save auth token
+      // Save auth token (empty value clears token and disables Pinboard) [CFG-002]
       const authToken = this.elements.authToken.value.trim()
-      if (authToken) {
-        await this.configManager.setAuthToken(authToken)
-      }
+      await this.configManager.setAuthToken(authToken)
 
       // Save inhibit URLs
       const inhibitUrls = this.elements.inhibitUrls.value

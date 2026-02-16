@@ -1481,6 +1481,35 @@ ARCH-LOCAL_STORAGE_PROVIDER:
       validator: "AI Agent"
       result: "pass"
 
+ARCH-SYNC_STORAGE_PROVIDER:
+  name: Sync Storage Bookmark Provider (Fourth Backend)
+  status: Active
+  cross_references:
+    - REQ-STORAGE_MODE_DEFAULT
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - ARCH-STORAGE_INDEX_AND_ROUTER
+  rationale:
+    why: "Offer bookmarks synced across Chrome profile devices without external API; same provider contract as local/file"
+    problems_solved:
+      - "No built-in sync option besides Pinboard"
+    benefits:
+      - "Sync across devices signed into same Chrome profile"
+      - "Quota ~100 KB; documented so users can choose"
+  implementation_approach:
+    summary: "SyncBookmarkService mirrors LocalBookmarkService using chrome.storage.sync and key hoverboard_sync_bookmarks; VALID_BACKENDS and BookmarkRouter extended with sync."
+  traceability:
+    requirements:
+      - REQ-STORAGE_MODE_DEFAULT
+      - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    implementation:
+      - IMPL-SYNC_BOOKMARK_SERVICE
+  detail_file: null
+  metadata:
+    created:
+      date: "2026-02-15"
+    last_updated:
+      date: "2026-02-15"
+
 ARCH-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Architecture
   status: Active
