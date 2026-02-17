@@ -1,10 +1,11 @@
 /**
  * Bookmark Router - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER]
  * Delegates bookmark operations to the correct provider (pinboard, local, file, sync) per URL using storage index.
- * [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+ * [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-URL_TAGS_DISPLAY] Tag shape (string/array) via url-tags-manager.
  */
 
 import { debugLog, debugError } from '../../shared/utils.js'
+import { normalizeBookmarkForDisplay } from './url-tags-manager.js'
 
 function cleanUrl (url) {
   if (!url) return ''
@@ -45,11 +46,62 @@ export class BookmarkRouter {
     return this.getDefaultStorageMode()
   }
 
+  /**
+   * [IMPL-BOOKMARK_ROUTER] Treat as empty when bookmark is the stub shape (no time, no tags, no description).
+   * [IMPL-URL_TAGS_DISPLAY] Uses normalizeBookmarkForDisplay so tag shape (string/array) is consistent with display.
+   */
+  _isEmptyBookmark (bookmark) {
+    if (!bookmark || !bookmark.url) return true
+    const norm = normalizeBookmarkForDisplay(bookmark)
+    const hasTime = !!(norm.time && norm.time.trim())
+    const hasTags = norm.tags.length > 0
+    const hasDescription = !!(norm.description && norm.description.trim())
+    return !hasTime && !hasTags && !hasDescription
+  }
+
+  /**
+   * [IMPL-URL_TAGS_DISPLAY] Same tag contract as url-tags-manager (normalized array).
+   */
+  _hasTags (bookmark) {
+    return normalizeBookmarkForDisplay(bookmark).tags.length > 0
+  }
+
   async getBookmarkForUrl (url, title = '') {
-    const backend = await this._backendForUrl(url)
-    const provider = this._providerFor(backend)
-    debugLog('[IMPL-BOOKMARK_ROUTER] getBookmarkForUrl backend:', backend)
-    return provider.getBookmarkForUrl(url, title)
+    const key = cleanUrl(url)
+    const pinPromise = this.pinboardProvider.getBookmarkForUrl(url, title).catch(() => null)
+    const [pinB, localB, fileB, syncB] = await Promise.all([
+      pinPromise,
+      this.localProvider.getBookmarkForUrl(url, title),
+      this.fileProvider.getBookmarkForUrl(url, title),
+      this.syncProvider.getBookmarkForUrl(url, title)
+    ])
+    const candidates = [
+      { backend: 'pinboard', bookmark: pinB },
+      { backend: 'local', bookmark: localB },
+      { backend: 'file', bookmark: fileB },
+      { backend: 'sync', bookmark: syncB }
+    ].filter(c => c.bookmark && !this._isEmptyBookmark(c.bookmark))
+    if (candidates.length === 0) {
+      const fromIndex = await this.storageIndex.getBackendForUrl(key)
+      const backend = fromIndex || await this.getDefaultStorageMode()
+      const provider = this._providerFor(backend)
+      return provider.getBookmarkForUrl(url, title)
+    }
+    const best = candidates.reduce((acc, c) => {
+      const hasTags = this._hasTags(c.bookmark)
+      const accHasTags = this._hasTags(acc.bookmark)
+      if (hasTags && !accHasTags) return c
+      if (!hasTags && accHasTags) return acc
+      const accTime = acc.bookmark.time || ''
+      const cTime = c.bookmark.time || ''
+      return cTime > accTime ? c : acc
+    })
+    const fromIndex = await this.storageIndex.getBackendForUrl(key)
+    if (!fromIndex || fromIndex !== best.backend) {
+      debugLog('[IMPL-BOOKMARK_ROUTER] getBookmarkForUrl using:', best.backend, 'hasTags:', this._hasTags(best.bookmark))
+      await this.storageIndex.setBackendForUrl(key, best.backend)
+    }
+    return best.bookmark
   }
 
   async getRecentBookmarks (count = 15) {

@@ -313,7 +313,7 @@ class PinboardService {
 
 #### **ESLint Configuration**
 ```javascript
-// .eslintrc.js - EXT-001: Code quality standards
+// eslint.config.js (flat config) - EXT-001: Code quality standards
 module.exports = {
   extends: [
     'eslint:recommended',

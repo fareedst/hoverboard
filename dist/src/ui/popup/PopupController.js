@@ -245,7 +245,6 @@ export class PopupController {
         normalizedTagsLength: normalizedTags.length,
         normalizedTagsIsArray: Array.isArray(normalizedTags)
       });
-
       // [POPUP-DATA-FLOW-001] Update UI with validated data
       debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling updateCurrentTags with:', normalizedTags);
       this.uiManager.updateCurrentTags(normalizedTags)
@@ -758,9 +757,9 @@ export class PopupController {
             // [POPUP-DATA-FLOW-001] Extract and validate bookmark data
             const bookmarkData = response.data;
 
-            // [POPUP-DATA-FLOW-001] Handle blocked URLs or no auth
-            if (bookmarkData?.blocked || bookmarkData?.needsAuth) {
-              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: URL blocked or needs auth', bookmarkData);
+            // [POPUP-DATA-FLOW-001] Only treat as no bookmark when URL is blocked; needsAuth still has bookmark from local/file/sync
+            if (bookmarkData?.blocked) {
+              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: URL blocked', bookmarkData);
               resolve(null);
               return;
             }
@@ -855,13 +854,19 @@ export class PopupController {
     // Handle both direct bookmark data and response structure
     const data = bookmarkData?.data || bookmarkData;
 
-    // [POPUP-DEBUG-001] Maintain backward compatibility with existing test requirements
-    // Original requirement: tags must be an array and present
-    const isValid = data &&
-                    typeof data === 'object' &&
-                    data.url &&
-                    Array.isArray(data.tags) // Must be an array, not just truthy
+    if (!data || typeof data !== 'object' || !data.url) {
+      debugLog('[POPUP-DEBUG-001] Bookmark data validation: missing url or invalid object');
+      return false;
+    }
 
+    // [IMPL-URL_TAGS_DISPLAY] Normalize tags to array instead of rejecting (defensive; backend now returns normalized)
+    if (!Array.isArray(data.tags)) {
+      data.tags = data.tags == null
+        ? []
+        : (typeof data.tags === 'string' ? data.tags.split(/\s+/).filter(t => t.trim()) : []);
+    }
+
+    const isValid = true;
     debugLog('[POPUP-DEBUG-001] Bookmark data validation:', {
       isValid,
       hasUrl: !!data?.url,
@@ -1619,10 +1624,20 @@ export class PopupController {
       }
 
       if (this.currentPin) {
-        // [IMMUTABLE-REQ-TAG-001] - Add tags to existing bookmark
-        const currentTagsArray = this.normalizeTags(this.currentPin.tags)
+        // [IMPL-URL_TAGS_DISPLAY] Re-fetch current tags from backend and merge so prior tags are never lost
+        const url = this.currentTab?.url || this.currentPin?.url
+        let currentTagsArray = this.normalizeTags(this.currentPin.tags)
+        if (url) {
+          try {
+            const fresh = await this.getBookmarkData(url)
+            if (fresh && (fresh.tags?.length || this.currentPin?.tags?.length)) {
+              currentTagsArray = this.normalizeTags(fresh.tags)
+            }
+          } catch (e) {
+            debugError('[IMPL-URL_TAGS_DISPLAY] getBookmarkData before add tag failed, using currentPin', e)
+          }
+        }
         const allTags = [...new Set([...currentTagsArray, ...newTags])]
-
         await this.addTagsToBookmark(allTags)
       } else {
         // [IMMUTABLE-REQ-TAG-001] - Create new bookmark with tags
@@ -1676,8 +1691,18 @@ export class PopupController {
     try {
       this.setLoading(true)
 
-      const tagsArray = this.normalizeTags(this.currentPin.tags).filter(tag => tag !== tagToRemove)
-
+      // [IMPL-URL_TAGS_DISPLAY] Re-fetch current tags so we remove from authoritative list
+      const url = this.currentTab?.url || this.currentPin?.url
+      let currentTagsArray = this.normalizeTags(this.currentPin.tags)
+      if (url) {
+        try {
+          const fresh = await this.getBookmarkData(url)
+          if (fresh?.tags?.length) currentTagsArray = this.normalizeTags(fresh.tags)
+        } catch (e) {
+          debugError('[IMPL-URL_TAGS_DISPLAY] getBookmarkData before remove tag failed', e)
+        }
+      }
+      const tagsArray = currentTagsArray.filter(tag => tag !== tagToRemove)
       await this.addTagsToBookmark(tagsArray)
 
       // Recent tags are refreshed in addTagsToBookmark
@@ -1708,7 +1733,6 @@ export class PopupController {
       tags: tagsString,
       description: this.getBetterDescription(this.currentPin?.description, this.currentTab?.title)
     }
-
     const response = await this.sendMessage({
       type: 'saveBookmark',
       data: pinData

@@ -1,7 +1,10 @@
 /**
  * Badge Manager - Modern badge and icon management for browser action
  * Replaces legacy BadgeAttributes class with Promise-based architecture
+ * [REQ-BADGE_INDICATORS] [IMPL-URL_TAGS_DISPLAY] Uses getBadgeDisplayValue for single source of badge text/count.
  */
+
+import { getBadgeDisplayValue } from '../features/storage/url-tags-manager.js'
 
 export class BadgeManager {
   constructor () {
@@ -44,76 +47,34 @@ export class BadgeManager {
   }
 
   /**
-   * Calculate badge appearance based on bookmark status
-   * @param {Object} bookmark - Bookmark data
+   * Calculate badge appearance based on bookmark status.
+   * [IMPL-URL_TAGS_DISPLAY] Badge text/count/title from single source (getBadgeDisplayValue).
+   * @param {Object} bookmark - Bookmark data (raw or normalized)
    * @param {Object} config - Extension configuration
    * @returns {Object} Badge display data
    */
   calculateBadgeData (bookmark, config) {
-    const isBookmarked = bookmark && bookmark.hash && bookmark.hash.length > 0
-    const tagCount = bookmark?.tags?.length || 0
-    const isPrivate = bookmark?.shared === 'no'
-    const isToRead = bookmark?.toread === 'yes'
-
-    let text = ''
-    const backgroundColor = isBookmarked ? '#000' : '#222'
-    const iconPath = isBookmarked ? this.iconPaths.bookmarked : this.iconPaths.default
-
-    if (!isBookmarked) {
-      text = config.badgeTextIfNotBookmarked || '-'
-    } else {
-      // Build badge text
-      if (isPrivate) {
-        text += config.badgeTextIfPrivate || '*'
-      }
-
-      text += tagCount.toString()
-
-      if (isToRead) {
-        text += config.badgeTextIfQueued || '!'
-      }
-    }
-
-    const title = this.generateTitle(bookmark, isBookmarked)
-
+    const badgeValue = getBadgeDisplayValue(bookmark, config)
+    const backgroundColor = badgeValue.isBookmarked ? '#000' : '#222'
+    const iconPath = badgeValue.isBookmarked ? this.iconPaths.bookmarked : this.iconPaths.default
     return {
-      text,
+      text: badgeValue.text,
       backgroundColor,
       iconPath,
-      title
+      title: badgeValue.title
     }
   }
 
   /**
-   * Generate tooltip title for browser action
+   * Generate tooltip title for browser action.
+   * [IMPL-URL_TAGS_DISPLAY] Delegates to getBadgeDisplayValue for consistency; kept for callers that pass (bookmark, isBookmarked).
    * @param {Object} bookmark - Bookmark data
    * @param {boolean} isBookmarked - Whether page is bookmarked
    * @returns {string} Title text
    */
   generateTitle (bookmark, isBookmarked) {
-    if (!isBookmarked) {
-      return 'Hoverboard - Page not bookmarked'
-    }
-
-    const parts = ['Hoverboard']
-
-    if (bookmark.description) {
-      parts.push(`"${bookmark.description}"`)
-    }
-
-    if (bookmark.tags && bookmark.tags.length > 0) {
-      parts.push(`Tags: ${bookmark.tags.join(', ')}`)
-    }
-
-    if (bookmark.shared === 'no') {
-      parts.push('(Private)')
-    }
-
-    if (bookmark.toread === 'yes') {
-      parts.push('(Read Later)')
-    }
-
-    return parts.join(' | ')
+    const badgeValue = getBadgeDisplayValue(bookmark || {}, this.getConfig ? {} : {})
+    return badgeValue.title
   }
 
   /**

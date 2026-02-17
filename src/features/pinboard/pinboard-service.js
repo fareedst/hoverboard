@@ -50,6 +50,13 @@ export class PinboardService {
    */
   async getBookmarkForUrl (url, title = '') {
     try {
+      // PIN-001: Do not call Pinboard API when credentials are not present
+      const hasAuth = await this.configManager.hasAuthToken()
+      if (!hasAuth) {
+        debugLog('[PINBOARD-SERVICE] No auth token configured, returning empty bookmark without API call')
+        return this.createEmptyBookmark(url, title)
+      }
+
       // PIN-002: Clean URL before API request for consistent matching
       const cleanUrl = this.cleanUrl(url)
       const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`
@@ -94,6 +101,13 @@ export class PinboardService {
    */
   async getRecentBookmarks (count = 15) {
     try {
+      // PIN-001: Do not call Pinboard API when credentials are not present
+      const hasAuth = await this.configManager.hasAuthToken()
+      if (!hasAuth) {
+        debugLog('[PINBOARD-SERVICE] No auth token configured, returning empty recent list without API call')
+        return []
+      }
+
       debugLog('[PINBOARD-SERVICE] Getting recent bookmarks, count:', count)
 
       // PIN-002: Fetch recent bookmarks with specified count
@@ -130,6 +144,13 @@ export class PinboardService {
    */
   async saveBookmark (bookmarkData) {
     try {
+      // PIN-001: Do not call Pinboard API when credentials are not present
+      const hasAuth = await this.configManager.hasAuthToken()
+      if (!hasAuth) {
+        debugLog('[PINBOARD-SERVICE] No auth token configured, skipping save without API call')
+        return { success: false, code: 'no_auth', message: 'No authentication token configured' }
+      }
+
       // PIN-003: Build URL parameters from bookmark data
       const params = this.buildSaveParams(bookmarkData)
       const endpoint = `posts/add?${params}`
@@ -202,6 +223,13 @@ export class PinboardService {
    */
   async deleteBookmark (url) {
     try {
+      // PIN-001: Do not call Pinboard API when credentials are not present
+      const hasAuth = await this.configManager.hasAuthToken()
+      if (!hasAuth) {
+        debugLog('[PINBOARD-SERVICE] No auth token configured, skipping delete without API call')
+        return { success: false, code: 'no_auth', message: 'No authentication token configured' }
+      }
+
       // PIN-003: Clean URL for consistent deletion matching
       const cleanUrl = this.cleanUrl(url)
       const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl)}`
@@ -358,6 +386,13 @@ export class PinboardService {
    */
   async testConnection () {
     try {
+      // PIN-001: Do not call Pinboard API when credentials are not present
+      const hasAuth = await this.configManager.hasAuthToken()
+      if (!hasAuth) {
+        debugLog('[PINBOARD-SERVICE] No auth token configured, testConnection returns false without API call')
+        return false
+      }
+
       // PIN-001: Use the user/api_token endpoint to test authentication
       const endpoint = 'user/api_token'
       const response = await this.makeApiRequest(endpoint)

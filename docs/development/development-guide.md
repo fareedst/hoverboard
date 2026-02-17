@@ -69,7 +69,7 @@ hoverboard/
 - **`manifest.v3.json`**: Extension manifest (Manifest V3)
 - **`package.json`**: Dependencies and scripts
 - **`jest.config.js`**: Testing configuration
-- **`.eslintrc.yml`**: Code quality rules
+- **`eslint.config.mjs`**: ESLint 9 flat config (code quality rules)
 - **`src-new/config/config-manager.js`**: Configuration system
 
 ## 🧪 Development Workflow

@@ -3423,6 +3423,11 @@
          */
         async getBookmarkForUrl(url, title = "") {
           try {
+            const hasAuth = await this.configManager.hasAuthToken();
+            if (!hasAuth) {
+              debugLog2("[PINBOARD-SERVICE] No auth token configured, returning empty bookmark without API call");
+              return this.createEmptyBookmark(url, title);
+            }
             const cleanUrl = this.cleanUrl(url);
             const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`;
             debugLog2("\u{1F50D} Making Pinboard API request:", {
@@ -3455,6 +3460,11 @@
          */
         async getRecentBookmarks(count = 15) {
           try {
+            const hasAuth = await this.configManager.hasAuthToken();
+            if (!hasAuth) {
+              debugLog2("[PINBOARD-SERVICE] No auth token configured, returning empty recent list without API call");
+              return [];
+            }
             debugLog2("[PINBOARD-SERVICE] Getting recent bookmarks, count:", count);
             const endpoint = `posts/recent?count=${count}`;
             const response = await this.makeApiRequest(endpoint);
@@ -3483,6 +3493,11 @@
          */
         async saveBookmark(bookmarkData) {
           try {
+            const hasAuth = await this.configManager.hasAuthToken();
+            if (!hasAuth) {
+              debugLog2("[PINBOARD-SERVICE] No auth token configured, skipping save without API call");
+              return { success: false, code: "no_auth", message: "No authentication token configured" };
+            }
             const params = this.buildSaveParams(bookmarkData);
             const endpoint = `posts/add?${params}`;
             const response = await this.makeApiRequest(endpoint, "GET");
@@ -3536,6 +3551,11 @@
          */
         async deleteBookmark(url) {
           try {
+            const hasAuth = await this.configManager.hasAuthToken();
+            if (!hasAuth) {
+              debugLog2("[PINBOARD-SERVICE] No auth token configured, skipping delete without API call");
+              return { success: false, code: "no_auth", message: "No authentication token configured" };
+            }
             const cleanUrl = this.cleanUrl(url);
             const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl)}`;
             const response = await this.makeApiRequest(endpoint);
@@ -3654,6 +3674,11 @@
          */
         async testConnection() {
           try {
+            const hasAuth = await this.configManager.hasAuthToken();
+            if (!hasAuth) {
+              debugLog2("[PINBOARD-SERVICE] No auth token configured, testConnection returns false without API call");
+              return false;
+            }
             const endpoint = "user/api_token";
             const response = await this.makeApiRequest(endpoint);
             return true;
@@ -8313,6 +8338,8 @@
   var MESSAGE_TYPES = {
     // Data retrieval
     GET_CURRENT_BOOKMARK: "getCurrentBookmark",
+    GET_TAGS_FOR_URL: "getTagsForUrl",
+    // [IMPL-URL_TAGS_DISPLAY] Centralized tag storage for tests and UI
     GET_RECENT_BOOKMARKS: "getRecentBookmarks",
     GET_LOCAL_BOOKMARKS_FOR_INDEX: "getLocalBookmarksForIndex",
     // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]

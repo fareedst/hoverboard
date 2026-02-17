@@ -1,67 +1,41 @@
-# Architecture Decisions Index (YAML Database)
-#
-# This YAML file serves as the central index/registry for all architecture decisions in the project.
-# Each top-level key is a semantic token (e.g., ARCH-TIED_STRUCTURE).
-#
-# To append a new architecture decision:
-# 1. Copy the template block at the bottom of this file (ARCH-IDENTIFIER)
-# 2. Paste it at the end with a blank line before it
-# 3. Replace ARCH-IDENTIFIER with your new token
-# 4. Fill in all fields
-# 5. Update the detail_file path to match your new .md file in architecture-decisions/ directory
-#
-# Field descriptions:
-#   name: Short descriptive name of the decision
-#   status: Active | Deprecated | Template | Superseded
-#   cross_references: List of REQ-* tokens this decision fulfills
-#   rationale: Structured explanation with why, problems_solved, benefits
-#   alternatives_considered: List of alternative items with pros, cons, rejected_reason
-#   implementation_approach: Structured approach with summary and details
-#   traceability: Structured links to requirements, implementation, tests, code_annotations
-#   related_decisions: Lists of depends_on, informs, see_also (YAML lists or [])
-#   detail_file: Path to the detailed .md file in architecture-decisions/ directory
-#   metadata: Structured metadata with created, last_updated, last_validated info
-
----
-
 ARCH-TIED_STRUCTURE:
   name: TIED Project Structure
   status: Active
   cross_references:
     - REQ-TIED_SETUP
   rationale:
-    why: "Keeps documentation close to code but organized in a dedicated namespace"
+    why: Keeps documentation close to code but organized in a dedicated namespace
     problems_solved:
-      - "Documentation scattered across project"
-      - "Difficulty finding all context in one place"
-      - "Meta-documentation mixed with source code"
+      - Documentation scattered across project
+      - Difficulty finding all context in one place
+      - Meta-documentation mixed with source code
     benefits:
-      - "Clear separation of concerns"
-      - "Standard project layout for AI agents"
-      - "Easy discovery of all TIED documentation"
-      - "Testable and maintainable structure"
+      - Clear separation of concerns
+      - Standard project layout for AI agents
+      - Easy discovery of all TIED documentation
+      - Testable and maintainable structure
   alternatives_considered:
-    - name: "Root-level files"
+    - name: Root-level files
       pros:
-        - "Immediately visible in repository root"
+        - Immediately visible in repository root
       cons:
-        - "Clutters the root directory"
-        - "No clear organization"
-      rejected_reason: "Creates too much clutter at project root"
-    - name: ".github or .docs folder"
+        - Clutters the root directory
+        - No clear organization
+      rejected_reason: Creates too much clutter at project root
+    - name: .github or .docs folder
       pros:
-        - "Common convention for documentation"
+        - Common convention for documentation
       cons:
-        - "Too generic for methodology-specific files"
-        - ".github is typically for GitHub workflows"
-      rejected_reason: "tied/ is more specific to the methodology"
+        - Too generic for methodology-specific files
+        - .github is typically for GitHub workflows
+      rejected_reason: tied/ is more specific to the methodology
   implementation_approach:
-    summary: "Create dedicated tied/ directory with YAML indexes and detail subdirectories"
+    summary: Create dedicated tied/ directory with YAML indexes and detail subdirectories
     details:
-      - "Create tied/ directory at project root"
-      - "Populate with YAML index files: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml"
-      - "Create detail subdirectories: requirements/, architecture-decisions/, implementation-decisions/"
-      - "Add guide files: semantic-tokens.md, processes.md"
+      - Create tied/ directory at project root
+      - 'Populate with YAML index files: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml'
+      - 'Create detail subdirectories: requirements/, architecture-decisions/, implementation-decisions/'
+      - 'Add guide files: semantic-tokens.md, processes.md'
   traceability:
     requirements:
       - REQ-TIED_SETUP
@@ -82,69 +56,68 @@ ARCH-TIED_STRUCTURE:
   detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.md
   metadata:
     created:
-      date: 2025-12-18
-      author: "AI Agent"
+      date: 2025-12-18T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-06
-      author: "AI Agent"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+      date: 2026-02-06T00:00:00.000Z
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
     last_validated:
-      date: 2026-02-06
-      validator: "AI Agent"
-      result: "pass"
-
+      date: 2026-02-06T00:00:00.000Z
+      validator: AI Agent
+      result: pass
 ARCH-MODULE_VALIDATION:
   name: Module Validation Strategy
   status: Active
   cross_references:
     - REQ-MODULE_VALIDATION
   rationale:
-    why: "To eliminate bugs related to code complexity by ensuring each module works correctly in isolation"
+    why: To eliminate bugs related to code complexity by ensuring each module works correctly in isolation
     problems_solved:
-      - "Integration complexity causing difficult-to-debug issues"
-      - "Bugs discovered too late in development cycle"
-      - "Module contracts not properly validated"
+      - Integration complexity causing difficult-to-debug issues
+      - Bugs discovered too late in development cycle
+      - Module contracts not properly validated
     benefits:
-      - "Bugs caught early before integration"
-      - "Reduced integration complexity"
-      - "Easier debugging by isolating issues"
-      - "Enables parallel module development"
-      - "Clear module boundaries and contracts"
+      - Bugs caught early before integration
+      - Reduced integration complexity
+      - Easier debugging by isolating issues
+      - Enables parallel module development
+      - Clear module boundaries and contracts
   alternatives_considered:
-    - name: "Big Bang Integration"
+    - name: Big Bang Integration
       pros:
-        - "Faster initial integration"
+        - Faster initial integration
       cons:
-        - "Too complex to debug"
-        - "Bugs compound during integration"
-        - "Difficult to isolate issues"
-      rejected_reason: "Makes debugging too difficult and bugs compound"
-    - name: "Minimal Validation"
+        - Too complex to debug
+        - Bugs compound during integration
+        - Difficult to isolate issues
+      rejected_reason: Makes debugging too difficult and bugs compound
+    - name: Minimal Validation
       pros:
-        - "Faster development cycle"
+        - Faster development cycle
       cons:
-        - "Insufficient to catch complexity bugs"
-        - "Doesn't validate contracts properly"
-      rejected_reason: "Insufficient validation leads to integration issues"
-    - name: "Post-Integration Validation Only"
+        - Insufficient to catch complexity bugs
+        - Doesn't validate contracts properly
+      rejected_reason: Insufficient validation leads to integration issues
+    - name: Post-Integration Validation Only
       pros:
-        - "All validation done at once"
+        - All validation done at once
       cons:
-        - "Doesn't catch module-level bugs early"
-        - "Increases debugging complexity"
-      rejected_reason: "Bugs discovered too late, making fixes expensive"
+        - Doesn't catch module-level bugs early
+        - Increases debugging complexity
+      rejected_reason: Bugs discovered too late, making fixes expensive
   implementation_approach:
-    summary: "Independent module validation before integration with comprehensive testing strategy"
+    summary: Independent module validation before integration with comprehensive testing strategy
     details:
-      - "Identify modules and document boundaries before development"
-      - "Define module interfaces and contracts explicitly"
-      - "Specify validation criteria for each module"
-      - "Unit test modules with mocked dependencies"
-      - "Integration test with test doubles (mocks, stubs, fakes)"
-      - "Validate contracts (input/output validation)"
-      - "Test edge cases and error handling"
-      - "Document validation results before integration"
-      - "Only integrate after validation passes"
+      - Identify modules and document boundaries before development
+      - Define module interfaces and contracts explicitly
+      - Specify validation criteria for each module
+      - Unit test modules with mocked dependencies
+      - Integration test with test doubles (mocks, stubs, fakes)
+      - Validate contracts (input/output validation)
+      - Test edge cases and error handling
+      - Document validation results before integration
+      - Only integrate after validation passes
   traceability:
     requirements:
       - REQ-MODULE_VALIDATION
@@ -164,45 +137,44 @@ ARCH-MODULE_VALIDATION:
   detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.md
   metadata:
     created:
-      date: 2025-12-18
-      author: "AI Agent"
+      date: 2025-12-18T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-06
-      author: "AI Agent"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+      date: 2026-02-06T00:00:00.000Z
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
     last_validated:
-      date: 2026-02-06
-      validator: "AI Agent"
-      result: "pass"
-
+      date: 2026-02-06T00:00:00.000Z
+      validator: AI Agent
+      result: pass
 ARCH-LANGUAGE_SELECTION:
   name: Language and Runtime Selection
   status: Template
   cross_references: []
   rationale:
-    why: "Why this language/runtime was chosen for the project"
+    why: Why this language/runtime was chosen for the project
     problems_solved:
-      - "Problem 1 that language solves"
+      - Problem 1 that language solves
     benefits:
-      - "Benefit 1 of chosen language"
+      - Benefit 1 of chosen language
   alternatives_considered:
-    - name: "Language A"
+    - name: Language A
       pros:
-        - "Pro 1"
+        - Pro 1
       cons:
-        - "Con 1"
-      rejected_reason: "Why it was rejected"
-    - name: "Language B"
+        - Con 1
+      rejected_reason: Why it was rejected
+    - name: Language B
       pros:
-        - "Pro 1"
+        - Pro 1
       cons:
-        - "Con 1"
-      rejected_reason: "Why it was rejected"
+        - Con 1
+      rejected_reason: Why it was rejected
   implementation_approach:
-    summary: "How the selected language/runtime will be used in the project"
+    summary: How the selected language/runtime will be used in the project
     details:
-      - "Detail 1"
-      - "Detail 2"
+      - Detail 1
+      - Detail 2
   traceability:
     requirements:
       - REQ-*
@@ -220,48 +192,47 @@ ARCH-LANGUAGE_SELECTION:
   metadata:
     created:
       date: YYYY-MM-DD
-      author: "agent/contributor"
+      author: agent/contributor
     last_updated:
       date: YYYY-MM-DD
-      author: "agent/contributor"
-      reason: "Initial creation"
+      author: agent/contributor
+      reason: Initial creation
     last_validated:
       date: YYYY-MM-DD
-      validator: "agent/contributor"
-      result: "pass"
-
+      validator: agent/contributor
+      result: pass
 ARCH-EXAMPLE_DECISION:
   name: Core Architecture Example
   status: Template
   cross_references:
     - REQ-EXAMPLE_FEATURE
   rationale:
-    why: "Why this architectural decision was made"
+    why: Why this architectural decision was made
     problems_solved:
-      - "Problem 1 that this decision solves"
-      - "Problem 2"
+      - Problem 1 that this decision solves
+      - Problem 2
     benefits:
-      - "Benefit 1 of this decision"
-      - "Benefit 2"
+      - Benefit 1 of this decision
+      - Benefit 2
   alternatives_considered:
-    - name: "Alternative 1"
+    - name: Alternative 1
       pros:
-        - "Pro 1"
+        - Pro 1
       cons:
-        - "Con 1"
-      rejected_reason: "Why it was rejected"
-    - name: "Alternative 2"
+        - Con 1
+      rejected_reason: Why it was rejected
+    - name: Alternative 2
       pros:
-        - "Pro 1"
+        - Pro 1
       cons:
-        - "Con 1"
-      rejected_reason: "Why it was rejected"
+        - Con 1
+      rejected_reason: Why it was rejected
   implementation_approach:
-    summary: "High-level description of the architectural approach"
+    summary: High-level description of the architectural approach
     details:
-      - "Key component 1"
-      - "Key component 2"
-      - "Integration point 1"
+      - Key component 1
+      - Key component 2
+      - Integration point 1
   traceability:
     requirements:
       - REQ-EXAMPLE_FEATURE
@@ -281,53 +252,47 @@ ARCH-EXAMPLE_DECISION:
   metadata:
     created:
       date: YYYY-MM-DD
-      author: "agent/contributor"
+      author: agent/contributor
     last_updated:
       date: YYYY-MM-DD
-      author: "agent/contributor"
-      reason: "Initial creation"
+      author: agent/contributor
+      reason: Initial creation
     last_validated:
       date: YYYY-MM-DD
-      validator: "agent/contributor"
-      result: "pass"
-
-# ---
-# Product Architecture Decisions - Hoverboard Extension
-# Migrated from stdd/architecture-decisions.md
-# ---
-
+      validator: agent/contributor
+      result: pass
 ARCH-EXT_IDENTITY:
   name: Extension Identity Architecture
   status: Active
   cross_references:
     - REQ-EXTENSION_IDENTITY
   rationale:
-    why: "Core extension identity fundamental to user recognition"
+    why: Core extension identity fundamental to user recognition
     problems_solved:
-      - "Brand consistency risk"
-      - "User expectation breaks"
+      - Brand consistency risk
+      - User expectation breaks
     benefits:
-      - "Consistent identity"
-      - "Clear value proposition"
+      - Consistent identity
+      - Clear value proposition
   alternatives_considered:
-    - name: "Multi-platform native apps"
+    - name: Multi-platform native apps
       pros:
-        - "Deep OS integration"
+        - Deep OS integration
       cons:
-        - "Loss of browser integration benefits"
-      rejected_reason: "Browser extension provides better integration"
-    - name: "Web app approach"
+        - Loss of browser integration benefits
+      rejected_reason: Browser extension provides better integration
+    - name: Web app approach
       pros:
-        - "No extension store requirements"
+        - No extension store requirements
       cons:
-        - "Loses browser integration"
-      rejected_reason: "Cannot inject into pages"
+        - Loses browser integration
+      rejected_reason: Cannot inject into pages
   implementation_approach:
-    summary: "Browser extension with content script injection for Pinboard integration"
+    summary: Browser extension with content script injection for Pinboard integration
     details:
-      - "Chrome/Chromium target platform"
-      - "Content script injection for non-intrusive interaction"
-      - "Pinboard.in bookmarking interface"
+      - Chrome/Chromium target platform
+      - Content script injection for non-intrusive interaction
+      - Pinboard.in bookmarking interface
   traceability:
     requirements:
       - REQ-EXTENSION_IDENTITY
@@ -344,13 +309,12 @@ ARCH-EXT_IDENTITY:
   detail_file: architecture-decisions/ARCH-EXT_IDENTITY.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-PINBOARD_API:
   name: Pinboard API Integration Architecture
   status: Active
@@ -358,32 +322,32 @@ ARCH-PINBOARD_API:
     - REQ-PINBOARD_COMPATIBILITY
     - REQ-SMART_BOOKMARKING
   rationale:
-    why: "Pinboard API is core data source"
+    why: Pinboard API is core data source
     problems_solved:
-      - "Data access reliability"
-      - "Rate limiting issues"
+      - Data access reliability
+      - Rate limiting issues
     benefits:
-      - "Secure token auth"
-      - "Reliable API access"
+      - Secure token auth
+      - Reliable API access
   alternatives_considered:
-    - name: "OAuth"
+    - name: OAuth
       pros:
-        - "More complex auth"
+        - More complex auth
       cons:
-        - "Pinboard uses token auth"
-      rejected_reason: "Pinboard API standard is token-based"
-    - name: "Caching only"
+        - Pinboard uses token auth
+      rejected_reason: Pinboard API standard is token-based
+    - name: Caching only
       pros:
-        - "Reduced API calls"
+        - Reduced API calls
       cons:
-        - "Stale data"
-      rejected_reason: "Real-time sync required"
+        - Stale data
+      rejected_reason: Real-time sync required
   implementation_approach:
-    summary: "Token-based auth with rate limiting, retry logic, error handling"
+    summary: Token-based auth with rate limiting, retry logic, error handling
     details:
-      - "Endpoints: /posts/get, /posts/recent, /posts/add, /posts/delete"
-      - "429 status retry logic"
-      - "401 auth error handling"
+      - 'Endpoints: /posts/get, /posts/recent, /posts/add, /posts/delete'
+      - 429 status retry logic
+      - 401 auth error handling
   traceability:
     requirements:
       - REQ-PINBOARD_COMPATIBILITY
@@ -401,13 +365,12 @@ ARCH-PINBOARD_API:
   detail_file: architecture-decisions/ARCH-PINBOARD_API.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-STORAGE:
   name: Storage Strategy
   status: Active
@@ -415,32 +378,32 @@ ARCH-STORAGE:
     - REQ-CHROME_STORAGE_USAGE
     - REQ-CONFIG_PORTABILITY
   rationale:
-    why: "Cross-device sync and privacy preservation"
+    why: Cross-device sync and privacy preservation
     problems_solved:
-      - "Settings lost across devices"
-      - "Privacy violations"
+      - Settings lost across devices
+      - Privacy violations
     benefits:
-      - "Cross-device settings"
-      - "Data portability"
+      - Cross-device settings
+      - Data portability
   alternatives_considered:
-    - name: "All local storage"
+    - name: All local storage
       pros:
-        - "Simpler"
+        - Simpler
       cons:
-        - "No cross-device sync"
-      rejected_reason: "Users need settings sync"
-    - name: "External storage"
+        - No cross-device sync
+      rejected_reason: Users need settings sync
+    - name: External storage
       pros:
-        - "More capacity"
+        - More capacity
       cons:
-        - "Privacy concerns"
-      rejected_reason: "Privacy is core value"
+        - Privacy concerns
+      rejected_reason: Privacy is core value
   implementation_approach:
-    summary: "chrome.storage.sync for settings, local for temp data, export/import workflows"
+    summary: chrome.storage.sync for settings, local for temp data, export/import workflows
     details:
-      - "Sync storage for user settings"
-      - "Local storage for temporary data"
-      - "Export/import for config portability"
+      - Sync storage for user settings
+      - Local storage for temporary data
+      - Export/import for config portability
   traceability:
     requirements:
       - REQ-CHROME_STORAGE_USAGE
@@ -458,13 +421,12 @@ ARCH-STORAGE:
   detail_file: architecture-decisions/ARCH-STORAGE.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-TAG_SYSTEM:
   name: Tag System Architecture
   status: Active
@@ -473,32 +435,32 @@ ARCH-TAG_SYSTEM:
     - REQ-TAG_MANAGEMENT
     - REQ-TAG_INPUT_SANITIZATION
   rationale:
-    why: "Recent tags improve productivity, sanitization prevents XSS"
+    why: Recent tags improve productivity, sanitization prevents XSS
     problems_solved:
-      - "Slow tag entry"
-      - "XSS vulnerabilities"
+      - Slow tag entry
+      - XSS vulnerabilities
     benefits:
-      - "Fast tag reuse"
-      - "Secure tag handling"
+      - Fast tag reuse
+      - Secure tag handling
   alternatives_considered:
-    - name: "No caching"
+    - name: No caching
       pros:
-        - "Simpler"
+        - Simpler
       cons:
-        - "Too many API calls"
-      rejected_reason: "Performance issues"
-    - name: "Local-only tags"
+        - Too many API calls
+      rejected_reason: Performance issues
+    - name: Local-only tags
       pros:
-        - "Faster access"
+        - Faster access
       cons:
-        - "No cross-device sync"
-      rejected_reason: "Users need sync"
+        - No cross-device sync
+      rejected_reason: Users need sync
   implementation_approach:
-    summary: "Recent tags with 5-min TTL, sanitization, sync storage"
+    summary: Recent tags with 5-min TTL, sanitization, sync storage
     details:
-      - "5-minute TTL caching"
-      - "Tag suggestions algorithm"
-      - "Strict sanitization before persistence/rendering"
+      - 5-minute TTL caching
+      - Tag suggestions algorithm
+      - Strict sanitization before persistence/rendering
   traceability:
     requirements:
       - REQ-RECENT_TAGS_SYSTEM
@@ -517,13 +479,12 @@ ARCH-TAG_SYSTEM:
   detail_file: architecture-decisions/ARCH-TAG_SYSTEM.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-OVERLAY:
   name: Overlay System Architecture
   status: Active
@@ -533,28 +494,28 @@ ARCH-OVERLAY:
     - REQ-OVERLAY_REFRESH_ACTION
     - REQ-OVERLAY_CONTROL_LAYOUT
   rationale:
-    why: "Non-intrusive bookmarking interface"
+    why: Non-intrusive bookmarking interface
     problems_solved:
-      - "Intrusive bookmark dialogs"
-      - "Context switching"
+      - Intrusive bookmark dialogs
+      - Context switching
     benefits:
-      - "Seamless experience"
-      - "No page disruption"
+      - Seamless experience
+      - No page disruption
   alternatives_considered:
-    - name: "Modal dialogs"
+    - name: Modal dialogs
       pros:
-        - "Simpler"
+        - Simpler
       cons:
-        - "Intrusive"
-      rejected_reason: "Breaks flow"
+        - Intrusive
+      rejected_reason: Breaks flow
   implementation_approach:
-    summary: "Semi-transparent overlay with hover activation, auto-show controls, refresh action"
+    summary: Semi-transparent overlay with hover activation, auto-show controls, refresh action
     details:
-      - "Transparency controls"
-      - "Hover-based activation"
-      - "Configurable auto-show on page load"
-      - "Refresh control for current data"
-      - "Fixed control layout (8px, 40px spacing)"
+      - Transparency controls
+      - Hover-based activation
+      - Configurable auto-show on page load
+      - Refresh control for current data
+      - Fixed control layout (8px, 40px spacing)
   traceability:
     requirements:
       - REQ-OVERLAY_SYSTEM
@@ -574,13 +535,12 @@ ARCH-OVERLAY:
   detail_file: architecture-decisions/ARCH-OVERLAY.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-UX_CORE:
   name: User Experience Architecture
   status: Active
@@ -588,20 +548,20 @@ ARCH-UX_CORE:
     - REQ-CORE_UX_PRESERVATION
     - REQ-POPUP_PERSISTENT_SESSION
   rationale:
-    why: "Preserve essential user workflows"
+    why: Preserve essential user workflows
     problems_solved:
-      - "Popup closes after actions"
-      - "Tedious workflows"
+      - Popup closes after actions
+      - Tedious workflows
     benefits:
-      - "Multi-action workflows"
-      - "Persistent popup"
+      - Multi-action workflows
+      - Persistent popup
   alternatives_considered: []
   implementation_approach:
-    summary: "Popup session persistence, multi-action support"
+    summary: Popup session persistence, multi-action support
     details:
-      - "Popup stays open during actions"
-      - "State updates without closing"
-      - "Overlay visibility reflected"
+      - Popup stays open during actions
+      - State updates without closing
+      - Overlay visibility reflected
   traceability:
     requirements:
       - REQ-CORE_UX_PRESERVATION
@@ -619,13 +579,12 @@ ARCH-UX_CORE:
   detail_file: architecture-decisions/ARCH-UX_CORE.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-SUGGESTED_TAGS:
   name: Suggested Tags from Page Content Architecture
   status: Active
@@ -634,22 +593,22 @@ ARCH-SUGGESTED_TAGS:
     - REQ-SUGGESTED_TAGS_DEDUPLICATION
     - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
   rationale:
-    why: "Intelligent suggestions speed up bookmarking"
+    why: Intelligent suggestions speed up bookmarking
     problems_solved:
-      - "Manual tag entry"
-      - "No context awareness"
+      - Manual tag entry
+      - No context awareness
     benefits:
-      - "Faster tagging"
-      - "Context-aware suggestions"
+      - Faster tagging
+      - Context-aware suggestions
   alternatives_considered: []
   implementation_approach:
-    summary: "Extract from multiple page sources including meta tags, emphasis elements, and structured content; frequency sort; case preservation"
+    summary: Extract from multiple page sources including meta tags, emphasis elements, and structured content; frequency sort; case preservation
     details:
-      - "Extract from title, URL, meta tags, headings, emphasis elements (strong/em/mark/dfn/cite/kbd/code), definition terms, table headers, nav, breadcrumbs, images, links"
-      - "Prioritize title attribute over textContent"
-      - "Frequency counting and sorting"
-      - "Case-insensitive deduplication"
-      - "Both original and lowercase versions for capitalized words"
+      - Extract from title, URL, meta tags, headings, emphasis elements (strong/em/mark/dfn/cite/kbd/code), definition terms, table headers, nav, breadcrumbs, images, links
+      - Prioritize title attribute over textContent
+      - Frequency counting and sorting
+      - Case-insensitive deduplication
+      - Both original and lowercase versions for capitalized words
   traceability:
     requirements:
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
@@ -669,44 +628,43 @@ ARCH-SUGGESTED_TAGS:
   detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Enhanced with meta tags, emphasis elements, and structured content extraction"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Enhanced with meta tags, emphasis elements, and structured content extraction
 ARCH-MV3_MIGRATION:
   name: Manifest V3 Migration Strategy
   status: Active
   cross_references:
     - REQ-MANIFEST_V3_MIGRATION
   rationale:
-    why: "V3 required for Chrome Web Store, better security/performance"
+    why: V3 required for Chrome Web Store, better security/performance
     problems_solved:
-      - "V2 deprecation"
-      - "Future compatibility"
+      - V2 deprecation
+      - Future compatibility
     benefits:
-      - "Continued store support"
-      - "Modern architecture"
+      - Continued store support
+      - Modern architecture
   alternatives_considered:
-    - name: "Stay on V2"
+    - name: Stay on V2
       pros: []
       cons:
-        - "Will be unsupported"
-      rejected_reason: "V2 deprecated"
-    - name: "Complete rewrite"
+        - Will be unsupported
+      rejected_reason: V2 deprecated
+    - name: Complete rewrite
       pros:
-        - "Clean slate"
+        - Clean slate
       cons:
-        - "Too risky"
-      rejected_reason: "Prefer incremental migration"
+        - Too risky
+      rejected_reason: Prefer incremental migration
   implementation_approach:
-    summary: "Replace background scripts with service worker, maintain functionality"
+    summary: Replace background scripts with service worker, maintain functionality
     details:
-      - "Service worker for background tasks"
-      - "V3 permissions model"
-      - "Preserved content script injection"
+      - Service worker for background tasks
+      - V3 permissions model
+      - Preserved content script injection
   traceability:
     requirements:
       - REQ-MANIFEST_V3_MIGRATION
@@ -724,44 +682,43 @@ ARCH-MV3_MIGRATION:
   detail_file: architecture-decisions/ARCH-MV3_MIGRATION.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-BADGE:
   name: Badge System Architecture
   status: Active
   cross_references:
     - REQ-BADGE_INDICATORS
   rationale:
-    why: "Visual feedback improves UX"
+    why: Visual feedback improves UX
     problems_solved:
-      - "Unclear bookmark status"
-      - "No at-a-glance info"
+      - Unclear bookmark status
+      - No at-a-glance info
     benefits:
-      - "Quick status visibility"
-      - "Tab-specific state"
+      - Quick status visibility
+      - Tab-specific state
   alternatives_considered:
-    - name: "No badges"
+    - name: No badges
       pros: []
       cons:
-        - "Loses visual feedback"
-      rejected_reason: "Important for UX"
-    - name: "Static badges"
+        - Loses visual feedback
+      rejected_reason: Important for UX
+    - name: Static badges
       pros:
-        - "Simpler"
+        - Simpler
       cons:
-        - "Not informative"
-      rejected_reason: "Need dynamic state"
+        - Not informative
+      rejected_reason: Need dynamic state
   implementation_approach:
-    summary: "Dynamic badge text with color coding, tab-specific management"
+    summary: Dynamic badge text with color coding, tab-specific management
     details:
-      - "Bookmark status indicators"
-      - "Color-coded states"
-      - "Tab-specific badges"
+      - Bookmark status indicators
+      - Color-coded states
+      - Tab-specific badges
   traceability:
     requirements:
       - REQ-BADGE_INDICATORS
@@ -778,13 +735,66 @@ ARCH-BADGE:
   detail_file: architecture-decisions/ARCH-BADGE.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
+ARCH-URL_TAGS_DISPLAY:
+  name: URL Tags and Badge Single Source
+  status: Active
+  cross_references:
+    - REQ-URL_TAGS_DISPLAY
+    - REQ-BADGE_INDICATORS
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+  rationale:
+    why: Single logical module for 'tags for URL' and 'badge display value' so badge, popup, and overlay never diverge
+    problems_solved:
+      - Popup showing no tags while badge showed correct count
+      - Adding a tag overwriting prior tags when popup state was stale
+      - Inconsistent tags shape (string vs array) across four storage providers
+      - Popup empty when no Pinboard auth although bookmark in local/file/sync
+    benefits:
+      - Normalization at the boundary; all consumers get tags as array and same badge value
+      - Message handler and service worker use same normalization; popup re-fetches and merges on add/remove
+      - getCurrentBookmark always queries router (no early return for no auth); popup and badge share same data source
+      - getTagsForUrl message exposes centralized tag storage for tests and UI
+  implementation_approach:
+    summary: 'URL-tags-manager module on top of BookmarkRouter: normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue; MessageHandler always uses router for getCurrentBookmark; getTagsForUrl message for central access.'
+    details:
+      - Router and four providers own storage; URL-tags module owns display normalization and badge value derivation
+      - handleGetCurrentBookmark always calls router (no short-circuit when no Pinboard auth); returns normalized bookmark; set needsAuth on result when !hasAuth
+      - Popup getBookmarkData only treats as no bookmark when blocked; when needsAuth still uses returned bookmark and tags
+      - GET_TAGS_FOR_URL message and handleGetTagsForUrl return tags from getTagsForUrl(bookmarkProvider, url)
+      - updateBadgeForTab normalizes before BadgeManager; popup re-fetches current tags before add/remove tag and merges
+  traceability:
+    requirements:
+      - REQ-URL_TAGS_DISPLAY
+      - REQ-BADGE_INDICATORS
+    implementation:
+      - IMPL-URL_TAGS_DISPLAY
+    tests:
+      - tests/unit/url-tags-manager.test.js
+    code_annotations:
+      - ARCH-URL_TAGS_DISPLAY
+      - IMPL-URL_TAGS_DISPLAY
+  related_decisions:
+    depends_on: []
+    informs:
+      - IMPL-URL_TAGS_DISPLAY
+    see_also:
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+      - ARCH-BADGE
+  detail_file: architecture-decisions/ARCH-URL_TAGS_DISPLAY.md
+  metadata:
+    created:
+      date: '2026-02-17'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-17'
+      author: AI Agent
+      reason: 'Fixes: getCurrentBookmark always from router; getTagsForUrl message; popup use bookmark when needsAuth'
 ARCH-CROSS_BROWSER:
   name: Cross-Browser Compatibility Architecture
   status: Active
@@ -792,32 +802,32 @@ ARCH-CROSS_BROWSER:
     - REQ-EXTENSION_IDENTITY
     - REQ-SAFARI_ADAPTATION
   rationale:
-    why: "Expand user base, provide Safari support"
+    why: Expand user base, provide Safari support
     problems_solved:
-      - "Platform-specific code duplication"
-      - "Safari quirks"
+      - Platform-specific code duplication
+      - Safari quirks
     benefits:
-      - "Broader reach"
-      - "Unified codebase"
+      - Broader reach
+      - Unified codebase
   alternatives_considered:
-    - name: "Platform-specific code"
+    - name: Platform-specific code
       pros: []
       cons:
-        - "Too much duplication"
-      rejected_reason: "Maintenance burden"
-    - name: "Chrome-only"
+        - Too much duplication
+      rejected_reason: Maintenance burden
+    - name: Chrome-only
       pros:
-        - "Simpler"
+        - Simpler
       cons:
-        - "Limited audience"
-      rejected_reason: "Users want Safari support"
+        - Limited audience
+      rejected_reason: Users want Safari support
   implementation_approach:
-    summary: "Unified browser API shim with platform detection and Safari adaptations"
+    summary: Unified browser API shim with platform detection and Safari adaptations
     details:
-      - "Platform detection utilities"
-      - "Promise-based message passing"
-      - "Storage API abstraction"
-      - "Safari-specific optimizations"
+      - Platform detection utilities
+      - Promise-based message passing
+      - Storage API abstraction
+      - Safari-specific optimizations
   traceability:
     requirements:
       - REQ-EXTENSION_IDENTITY
@@ -836,38 +846,37 @@ ARCH-CROSS_BROWSER:
   detail_file: architecture-decisions/ARCH-CROSS_BROWSER.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-SERVICE_WORKER:
   name: Service Worker Architecture
   status: Active
   cross_references:
     - REQ-MANIFEST_V3_MIGRATION
   rationale:
-    why: "V3 requirement, modern async patterns"
+    why: V3 requirement, modern async patterns
     problems_solved:
-      - "Background script deprecation"
-      - "V3 compliance"
+      - Background script deprecation
+      - V3 compliance
     benefits:
-      - "Modern architecture"
-      - "Better performance"
+      - Modern architecture
+      - Better performance
   alternatives_considered:
-    - name: "Background scripts"
+    - name: Background scripts
       pros: []
       cons:
-        - "V3 doesn't support"
-      rejected_reason: "Not V3 compatible"
+        - V3 doesn't support
+      rejected_reason: Not V3 compatible
   implementation_approach:
-    summary: "Service worker with lifecycle management, message routing, async patterns"
+    summary: Service worker with lifecycle management, message routing, async patterns
     details:
-      - "Install/activate/update events"
-      - "Message routing"
-      - "Extension context integration"
+      - Install/activate/update events
+      - Message routing
+      - Extension context integration
   traceability:
     requirements:
       - REQ-MANIFEST_V3_MIGRATION
@@ -885,13 +894,12 @@ ARCH-SERVICE_WORKER:
   detail_file: architecture-decisions/ARCH-SERVICE_WORKER.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-MESSAGE_HANDLING:
   name: Message Handling Architecture
   status: Active
@@ -899,32 +907,32 @@ ARCH-MESSAGE_HANDLING:
     - REQ-SMART_BOOKMARKING
     - REQ-BOOKMARK_STATE_SYNCHRONIZATION
   rationale:
-    why: "Centralized communication across extension contexts"
+    why: Centralized communication across extension contexts
     problems_solved:
-      - "Complex context communication"
-      - "Inconsistent messaging"
+      - Complex context communication
+      - Inconsistent messaging
     benefits:
-      - "Simplified routing"
-      - "Reliable communication"
+      - Simplified routing
+      - Reliable communication
   alternatives_considered:
-    - name: "Direct function calls"
+    - name: Direct function calls
       pros: []
       cons:
-        - "Doesn't work across contexts"
-      rejected_reason: "Extension contexts are isolated"
-    - name: "Event-based only"
+        - Doesn't work across contexts
+      rejected_reason: Extension contexts are isolated
+    - name: Event-based only
       pros:
-        - "Decoupled"
+        - Decoupled
       cons:
-        - "No request/response"
-      rejected_reason: "Need synchronous responses"
+        - No request/response
+      rejected_reason: Need synchronous responses
   implementation_approach:
-    summary: "Centralized routing with standardized message format, async handling, BOOKMARK_UPDATED broadcasts"
+    summary: Centralized routing with standardized message format, async handling, BOOKMARK_UPDATED broadcasts
     details:
-      - "Standardized message types"
-      - "Request/response pattern"
-      - "Error handling and retry"
-      - "BOOKMARK_UPDATED synchronization"
+      - Standardized message types
+      - Request/response pattern
+      - Error handling and retry
+      - BOOKMARK_UPDATED synchronization
   traceability:
     requirements:
       - REQ-SMART_BOOKMARKING
@@ -942,33 +950,32 @@ ARCH-MESSAGE_HANDLING:
   detail_file: architecture-decisions/ARCH-MESSAGE_HANDLING.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-THEME:
   name: Theme System Architecture
   status: Active
   cross_references:
     - REQ-DARK_THEME
   rationale:
-    why: "Dark theme is modern UI expectation"
+    why: Dark theme is modern UI expectation
     problems_solved:
-      - "Eye strain"
-      - "No theme choice"
+      - Eye strain
+      - No theme choice
     benefits:
-      - "User comfort"
-      - "Modern appearance"
+      - User comfort
+      - Modern appearance
   alternatives_considered: []
   implementation_approach:
-    summary: "Dark theme default with toggle, persisted preference"
+    summary: Dark theme default with toggle, persisted preference
     details:
-      - "Dark theme default"
-      - "Theme toggle"
-      - "Preference persistence"
+      - Dark theme default
+      - Theme toggle
+      - Preference persistence
   traceability:
     requirements:
       - REQ-DARK_THEME
@@ -985,51 +992,50 @@ ARCH-THEME:
   detail_file: architecture-decisions/ARCH-THEME.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-POPUP_SESSION:
   name: Popup Session Persistence Architecture
   status: Active
   cross_references:
     - REQ-POPUP_PERSISTENT_SESSION
   rationale:
-    why: "Multi-action workflows without popup reopening"
+    why: Multi-action workflows without popup reopening
     problems_solved:
-      - "Popup closes after each action"
-      - "Workflow interruption"
+      - Popup closes after each action
+      - Workflow interruption
     benefits:
-      - "Chained operations"
-      - "Better UX"
+      - Chained operations
+      - Better UX
   alternatives_considered:
-    - name: "Auto-close after actions"
+    - name: Auto-close after actions
       pros: []
       cons:
-        - "Interrupts workflows"
-      rejected_reason: "Contradicts test expectations"
-    - name: "Direct DOM manipulation"
+        - Interrupts workflows
+      rejected_reason: Contradicts test expectations
+    - name: Direct DOM manipulation
       pros: []
       cons:
-        - "Duplicated logic"
-      rejected_reason: "Inconsistent error handling"
+        - Duplicated logic
+      rejected_reason: Inconsistent error handling
   implementation_approach:
-    summary: "Route actions through PopupController, update state without closing"
+    summary: Route actions through PopupController, update state without closing
     details:
-      - "PopupController handlers await async work"
-      - "State manager updates"
-      - "UIManager updates without close"
-      - "Overlay toggle with GET_OVERLAY_STATE fallback"
+      - PopupController handlers await async work
+      - State manager updates
+      - UIManager updates without close
+      - Overlay toggle with GET_OVERLAY_STATE fallback
   traceability:
     requirements:
       - REQ-POPUP_PERSISTENT_SESSION
     implementation:
       - IMPL-POPUP_SESSION
     tests:
-      - "Popup close behavior tests"
+      - Popup close behavior tests
     code_annotations:
       - ARCH-POPUP_SESSION
   related_decisions:
@@ -1042,52 +1048,51 @@ ARCH-POPUP_SESSION:
   detail_file: architecture-decisions/ARCH-POPUP_SESSION.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-BOOKMARK_STATE_SYNC:
   name: Bookmark State Synchronization Architecture
   status: Active
   cross_references:
     - REQ-BOOKMARK_STATE_SYNCHRONIZATION
   rationale:
-    why: "Prevent desynchronized states across UI surfaces"
+    why: Prevent desynchronized states across UI surfaces
     problems_solved:
-      - "Conflicting bookmark states"
-      - "Race conditions"
+      - Conflicting bookmark states
+      - Race conditions
     benefits:
-      - "Consistent state"
-      - "Observable contract"
+      - Consistent state
+      - Observable contract
   alternatives_considered:
-    - name: "Polling Pinboard"
+    - name: Polling Pinboard
       pros: []
       cons:
-        - "High latency"
-        - "Rate limits"
-      rejected_reason: "Too slow"
-    - name: "Separate local stores"
+        - High latency
+        - Rate limits
+      rejected_reason: Too slow
+    - name: Separate local stores
       pros: []
       cons:
-        - "Race conditions"
-      rejected_reason: "Inconsistent UX"
+        - Race conditions
+      rejected_reason: Inconsistent UX
   implementation_approach:
-    summary: "BOOKMARK_UPDATED broadcast pattern with normalized payloads"
+    summary: BOOKMARK_UPDATED broadcast pattern with normalized payloads
     details:
-      - "Overlay persists via saveBookmark"
-      - "Broadcast BOOKMARK_UPDATED"
-      - "Popup listens and refreshes"
-      - "Badge updates from payload"
+      - Overlay persists via saveBookmark
+      - Broadcast BOOKMARK_UPDATED
+      - Popup listens and refreshes
+      - Badge updates from payload
   traceability:
     requirements:
       - REQ-BOOKMARK_STATE_SYNCHRONIZATION
     implementation:
       - IMPL-BOOKMARK_STATE_SYNC
     tests:
-      - "Toggle synchronization tests"
+      - Toggle synchronization tests
     code_annotations:
       - ARCH-BOOKMARK_STATE_SYNC
   related_decisions:
@@ -1101,13 +1106,12 @@ ARCH-BOOKMARK_STATE_SYNC:
   detail_file: architecture-decisions/ARCH-BOOKMARK_STATE_SYNC.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-OVERLAY_CONTROLS:
   name: Overlay Control Layout Architecture
   status: Active
@@ -1115,32 +1119,32 @@ ARCH-OVERLAY_CONTROLS:
     - REQ-OVERLAY_CONTROL_LAYOUT
     - REQ-OVERLAY_REFRESH_ACTION
   rationale:
-    why: "Predictable, accessible control placement"
+    why: Predictable, accessible control placement
     problems_solved:
-      - "Control overlaps"
-      - "Accessibility issues"
+      - Control overlaps
+      - Accessibility issues
     benefits:
-      - "Consistent layout"
-      - "Full accessibility"
+      - Consistent layout
+      - Full accessibility
   alternatives_considered:
-    - name: "Dynamic positioning"
+    - name: Dynamic positioning
       pros: []
       cons:
-        - "Risk of overlaps"
-      rejected_reason: "Complex pages cause issues"
-    - name: "CSS-only"
+        - Risk of overlaps
+      rejected_reason: Complex pages cause issues
+    - name: CSS-only
       pros: []
       cons:
-        - "Host styles override"
-      rejected_reason: "Need JS enforcement"
+        - Host styles override
+      rejected_reason: Need JS enforcement
   implementation_approach:
-    summary: "Fixed absolute positioning with inline styles, theme variables, accessibility metadata"
+    summary: Fixed absolute positioning with inline styles, theme variables, accessibility metadata
     details:
-      - "Close at top: 8px; left: 8px"
-      - "Refresh at top: 8px; left: 40px"
-      - "32px spacing, 24px min touch targets"
-      - "Theme CSS variables"
-      - "Full ARIA metadata"
+      - 'Close at top: 8px; left: 8px'
+      - 'Refresh at top: 8px; left: 40px'
+      - 32px spacing, 24px min touch targets
+      - Theme CSS variables
+      - Full ARIA metadata
   traceability:
     requirements:
       - REQ-OVERLAY_CONTROL_LAYOUT
@@ -1148,8 +1152,8 @@ ARCH-OVERLAY_CONTROLS:
     implementation:
       - IMPL-OVERLAY_CONTROLS
     tests:
-      - "Overlay close button positioning tests"
-      - "Overlay refresh button tests"
+      - Overlay close button positioning tests
+      - Overlay refresh button tests
     code_annotations:
       - ARCH-OVERLAY_CONTROLS
   related_decisions:
@@ -1161,13 +1165,12 @@ ARCH-OVERLAY_CONTROLS:
   detail_file: architecture-decisions/ARCH-OVERLAY_CONTROLS.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-OVERLAY_TESTABILITY:
   name: Overlay Test Harness Architecture
   status: Active
@@ -1175,31 +1178,31 @@ ARCH-OVERLAY_TESTABILITY:
     - REQ-OVERLAY_SYSTEM
     - REQ-OVERLAY_CONTROL_LAYOUT
   rationale:
-    why: "Deterministic overlay verification without real DOM"
+    why: Deterministic overlay verification without real DOM
     problems_solved:
-      - "Stale test registries"
-      - "False negatives"
+      - Stale test registries
+      - False negatives
     benefits:
-      - "Lightweight tests"
-      - "Deterministic discovery"
+      - Lightweight tests
+      - Deterministic discovery
   alternatives_considered:
-    - name: "setAttribute-only registration"
+    - name: setAttribute-only registration
       pros: []
       cons:
-        - "Misses direct assignments"
-      rejected_reason: "Code uses className/id directly"
-    - name: "jsdom"
+        - Misses direct assignments
+      rejected_reason: Code uses className/id directly
+    - name: jsdom
       pros:
-        - "Full DOM"
+        - Full DOM
       cons:
-        - "Heavy, non-deterministic"
-      rejected_reason: "Tests need to be lightweight"
+        - Heavy, non-deterministic
+      rejected_reason: Tests need to be lightweight
   implementation_approach:
-    summary: "Mock DOM with automatic element registration on className/id changes"
+    summary: Mock DOM with automatic element registration on className/id changes
     details:
-      - "Auto-register on property assignments"
-      - "classList/attribute hooks"
-      - "Lightweight verification"
+      - Auto-register on property assignments
+      - classList/attribute hooks
+      - Lightweight verification
   traceability:
     requirements:
       - REQ-OVERLAY_SYSTEM
@@ -1207,7 +1210,7 @@ ARCH-OVERLAY_TESTABILITY:
     implementation:
       - IMPL-OVERLAY_TEST_HARNESS
     tests:
-      - "All overlay tests"
+      - All overlay tests
     code_annotations:
       - ARCH-OVERLAY_TESTABILITY
   related_decisions:
@@ -1220,54 +1223,53 @@ ARCH-OVERLAY_TESTABILITY:
   detail_file: architecture-decisions/ARCH-OVERLAY_TESTABILITY.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-SAFARI_ADAPTATION:
   name: Safari Adaptive Architecture
   status: Active
   cross_references:
     - REQ-SAFARI_ADAPTATION
   rationale:
-    why: "Safari requires explicit adaptations for stability"
+    why: Safari requires explicit adaptations for stability
     problems_solved:
-      - "Safari memory limits"
-      - "Messaging quirks"
-      - "Performance issues"
+      - Safari memory limits
+      - Messaging quirks
+      - Performance issues
     benefits:
-      - "Stable Safari experience"
-      - "Cross-browser identity"
+      - Stable Safari experience
+      - Cross-browser identity
   alternatives_considered:
-    - name: "Treat Safari like Chrome"
+    - name: Treat Safari like Chrome
       pros: []
       cons:
-        - "Known instability"
-      rejected_reason: "Safari needs adaptations"
-    - name: "Separate Safari codebase"
+        - Known instability
+      rejected_reason: Safari needs adaptations
+    - name: Separate Safari codebase
       pros:
-        - "Independent optimization"
+        - Independent optimization
       cons:
-        - "Duplicated logic"
-      rejected_reason: "High maintenance cost"
+        - Duplicated logic
+      rejected_reason: High maintenance cost
   implementation_approach:
-    summary: "Safari-specific config, optimizations, error handler with degraded mode"
+    summary: Safari-specific config, optimizations, error handler with degraded mode
     details:
-      - "Safari config (timeouts, retries, opacity)"
-      - "Animation/memory optimizations"
-      - "Categorized error handler"
-      - "Bounded recovery, degraded mode"
-      - "Performance monitoring"
+      - Safari config (timeouts, retries, opacity)
+      - Animation/memory optimizations
+      - Categorized error handler
+      - Bounded recovery, degraded mode
+      - Performance monitoring
   traceability:
     requirements:
       - REQ-SAFARI_ADAPTATION
     implementation:
       - IMPL-SAFARI_ADAPTATION
     tests:
-      - "Safari unit test suites"
+      - Safari unit test suites
     code_annotations:
       - ARCH-SAFARI_ADAPTATION
   related_decisions:
@@ -1281,51 +1283,48 @@ ARCH-SAFARI_ADAPTATION:
   detail_file: architecture-decisions/ARCH-SAFARI_ADAPTATION.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
-# All product ARCH tokens from stdd/architecture-decisions.md have been migrated.
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 ARCH-ERROR_HANDLING:
   name: Error Handling Strategy
   status: Template
   cross_references:
     - REQ-ERROR_HANDLING
   rationale:
-    why: "Why this error handling approach was chosen"
+    why: Why this error handling approach was chosen
     problems_solved:
-      - "Problem 1 with error handling"
+      - Problem 1 with error handling
     benefits:
-      - "Benefit 1 of this approach"
+      - Benefit 1 of this approach
   alternatives_considered:
-    - name: "Exceptions"
+    - name: Exceptions
       pros:
-        - "Pro 1"
+        - Pro 1
       cons:
-        - "Con 1"
-      rejected_reason: "Why rejected or why chosen"
-    - name: "Error codes"
+        - Con 1
+      rejected_reason: Why rejected or why chosen
+    - name: Error codes
       pros:
-        - "Pro 1"
+        - Pro 1
       cons:
-        - "Con 1"
-      rejected_reason: "Why rejected or why chosen"
-    - name: "Result types"
+        - Con 1
+      rejected_reason: Why rejected or why chosen
+    - name: Result types
       pros:
-        - "Pro 1"
+        - Pro 1
       cons:
-        - "Con 1"
-      rejected_reason: "Why rejected or why chosen"
+        - Con 1
+      rejected_reason: Why rejected or why chosen
   implementation_approach:
-    summary: "How errors will be handled throughout the application"
+    summary: How errors will be handled throughout the application
     details:
-      - "Error propagation strategy"
-      - "Error logging approach"
-      - "User-facing error messages"
+      - Error propagation strategy
+      - Error logging approach
+      - User-facing error messages
   traceability:
     requirements:
       - REQ-ERROR_HANDLING
@@ -1345,46 +1344,45 @@ ARCH-ERROR_HANDLING:
   metadata:
     created:
       date: YYYY-MM-DD
-      author: "agent/contributor"
+      author: agent/contributor
     last_updated:
       date: YYYY-MM-DD
-      author: "agent/contributor"
-      reason: "Initial creation"
+      author: agent/contributor
+      reason: Initial creation
     last_validated:
       date: YYYY-MM-DD
-      validator: "agent/contributor"
-      result: "pass"
-
+      validator: agent/contributor
+      result: pass
 ARCH-TESTING_STRATEGY:
   name: Testing Strategy
   status: Template
   cross_references: []
   rationale:
-    why: "Why this testing strategy was chosen"
+    why: Why this testing strategy was chosen
     problems_solved:
-      - "Problem 1 with testing"
+      - Problem 1 with testing
     benefits:
-      - "Benefit 1 of this strategy"
+      - Benefit 1 of this strategy
   alternatives_considered:
-    - name: "Test Approach 1"
+    - name: Test Approach 1
       pros:
-        - "Pro 1"
+        - Pro 1
       cons:
-        - "Con 1"
-      rejected_reason: "Why rejected or why chosen"
-    - name: "Test Approach 2"
+        - Con 1
+      rejected_reason: Why rejected or why chosen
+    - name: Test Approach 2
       pros:
-        - "Pro 1"
+        - Pro 1
       cons:
-        - "Con 1"
-      rejected_reason: "Why rejected or why chosen"
+        - Con 1
+      rejected_reason: Why rejected or why chosen
   implementation_approach:
-    summary: "Overall testing strategy for the project"
+    summary: Overall testing strategy for the project
     details:
-      - "Unit testing approach"
-      - "Integration testing approach"
-      - "End-to-end testing approach"
-      - "Test coverage goals"
+      - Unit testing approach
+      - Integration testing approach
+      - End-to-end testing approach
+      - Test coverage goals
   traceability:
     requirements:
       - REQ-*
@@ -1403,16 +1401,15 @@ ARCH-TESTING_STRATEGY:
   metadata:
     created:
       date: YYYY-MM-DD
-      author: "agent/contributor"
+      author: agent/contributor
     last_updated:
       date: YYYY-MM-DD
-      author: "agent/contributor"
-      reason: "Initial creation"
+      author: agent/contributor
+      reason: Initial creation
     last_validated:
       date: YYYY-MM-DD
-      validator: "agent/contributor"
-      result: "pass"
-
+      validator: agent/contributor
+      result: pass
 ARCH-LOCAL_STORAGE_PROVIDER:
   name: Local Storage Bookmark Provider (Strategy Pattern)
   status: Active
@@ -1421,36 +1418,36 @@ ARCH-LOCAL_STORAGE_PROVIDER:
     - ARCH-STORAGE
     - ARCH-PINBOARD_API
   rationale:
-    why: "Allow extension to work without external API; user choice between Pinboard (cloud) and local-only bookmarks"
+    why: Allow extension to work without external API; user choice between Pinboard (cloud) and local-only bookmarks
     problems_solved:
-      - "Single point of dependency on Pinboard API"
-      - "No offline-only option"
+      - Single point of dependency on Pinboard API
+      - No offline-only option
     benefits:
-      - "Default is local (preferable for most users; no account or API required)"
-      - "User can choose local-only storage (chrome.storage.local) or Pinboard (cloud)"
-      - "Same UI and message contract; provider swapped by config"
-      - "Runtime switch without extension reload (SWITCH_STORAGE_MODE)"
+      - Default is local (preferable for most users; no account or API required)
+      - User can choose local-only storage (chrome.storage.local) or Pinboard (cloud)
+      - Same UI and message contract; provider swapped by config
+      - Runtime switch without extension reload (SWITCH_STORAGE_MODE)
   alternatives_considered:
-    - name: "Hybrid per-bookmark local/remote"
+    - name: Hybrid per-bookmark local/remote
       pros:
-        - "Per-bookmark control"
+        - Per-bookmark control
       cons:
-        - "More complex UI and state"
-      rejected_reason: "Plan specified full mode switch only"
-    - name: "Fallback only when offline"
+        - More complex UI and state
+      rejected_reason: Plan specified full mode switch only
+    - name: Fallback only when offline
       pros:
-        - "Automatic"
+        - Automatic
       cons:
-        - "Two sources of truth; sync complexity"
-      rejected_reason: "Plan specified explicit mode switch"
+        - Two sources of truth; sync complexity
+      rejected_reason: Plan specified explicit mode switch
   implementation_approach:
-    summary: "Strategy pattern: MessageHandler delegates to bookmarkProvider; provider chosen from config (storageMode: pinboard | local)."
+    summary: 'Strategy pattern: MessageHandler delegates to bookmarkProvider; provider chosen from config (storageMode: pinboard | local).'
     details:
-      - "Default storageMode is 'local' (REQ-STORAGE_MODE_DEFAULT)"
-      - "ConfigManager: storageMode in settings, getStorageMode/setStorageMode"
-      - "LocalBookmarkService implements same contract as PinboardService, backed by chrome.storage.local"
-      - "Service worker resolves provider from config (lazy init); handles SWITCH_STORAGE_MODE to swap at runtime"
-      - "Options page: Storage Mode radios; auth section disabled when local"
+      - Default storageMode is 'local' (REQ-STORAGE_MODE_DEFAULT)
+      - 'ConfigManager: storageMode in settings, getStorageMode/setStorageMode'
+      - LocalBookmarkService implements same contract as PinboardService, backed by chrome.storage.local
+      - Service worker resolves provider from config (lazy init); handles SWITCH_STORAGE_MODE to swap at runtime
+      - 'Options page: Storage Mode radios; auth section disabled when local'
   traceability:
     requirements:
       - REQ-STORAGE_MODE_DEFAULT
@@ -1470,17 +1467,16 @@ ARCH-LOCAL_STORAGE_PROVIDER:
   detail_file: architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.md
   metadata:
     created:
-      date: "2026-02-13"
-      author: "AI Agent"
+      date: '2026-02-13'
+      author: AI Agent
     last_updated:
-      date: "2026-02-13"
-      author: "AI Agent"
-      reason: "Local storage mode implementation per plan"
+      date: '2026-02-13'
+      author: AI Agent
+      reason: Local storage mode implementation per plan
     last_validated:
-      date: "2026-02-13"
-      validator: "AI Agent"
-      result: "pass"
-
+      date: '2026-02-13'
+      validator: AI Agent
+      result: pass
 ARCH-SYNC_STORAGE_PROVIDER:
   name: Sync Storage Bookmark Provider (Fourth Backend)
   status: Active
@@ -1489,14 +1485,14 @@ ARCH-SYNC_STORAGE_PROVIDER:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - ARCH-STORAGE_INDEX_AND_ROUTER
   rationale:
-    why: "Offer bookmarks synced across Chrome profile devices without external API; same provider contract as local/file"
+    why: Offer bookmarks synced across Chrome profile devices without external API; same provider contract as local/file
     problems_solved:
-      - "No built-in sync option besides Pinboard"
+      - No built-in sync option besides Pinboard
     benefits:
-      - "Sync across devices signed into same Chrome profile"
-      - "Quota ~100 KB; documented so users can choose"
+      - Sync across devices signed into same Chrome profile
+      - Quota ~100 KB; documented so users can choose
   implementation_approach:
-    summary: "SyncBookmarkService mirrors LocalBookmarkService using chrome.storage.sync and key hoverboard_sync_bookmarks; VALID_BACKENDS and BookmarkRouter extended with sync."
+    summary: SyncBookmarkService mirrors LocalBookmarkService using chrome.storage.sync and key hoverboard_sync_bookmarks; VALID_BACKENDS and BookmarkRouter extended with sync.
   traceability:
     requirements:
       - REQ-STORAGE_MODE_DEFAULT
@@ -1506,10 +1502,9 @@ ARCH-SYNC_STORAGE_PROVIDER:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-15"
+      date: '2026-02-15'
     last_updated:
-      date: "2026-02-15"
-
+      date: '2026-02-15'
 ARCH-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Architecture
   status: Active
@@ -1517,34 +1512,34 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
     - REQ-LOCAL_BOOKMARKS_INDEX
     - ARCH-STORAGE_INDEX_AND_ROUTER
   rationale:
-    why: "Provide a dedicated page for browsing and searching local and file-stored bookmarks (non-Pinboard)"
+    why: Provide a dedicated page for browsing and searching local and file-stored bookmarks (non-Pinboard)
     problems_solved:
-      - "No single view of all non-Pinboard bookmarks (local + file)"
-      - "Users cannot search/filter/sort local and file bookmarks in one place"
+      - No single view of all non-Pinboard bookmarks (local + file)
+      - Users cannot search/filter/sort local and file bookmarks in one place
     benefits:
-      - "Full index of local and file bookmarks with Storage column (Local | File), search, filter, sort, and launch"
-      - "Primary data from getAggregatedBookmarksForIndex (BookmarkRouter); fallback getLocalBookmarksForIndex (LocalBookmarkService only)"
-      - "Client-side search/filter/sort for responsiveness"
+      - Full index of local and file bookmarks with Storage column (Local | File), search, filter, sort, and launch
+      - Primary data from getAggregatedBookmarksForIndex (BookmarkRouter); fallback getLocalBookmarksForIndex (LocalBookmarkService only)
+      - Client-side search/filter/sort for responsiveness
   alternatives_considered:
-    - name: "Use current provider (Pinboard or local)"
+    - name: Use current provider (Pinboard or local)
       pros:
-        - "Single code path"
+        - Single code path
       cons:
-        - "Index would show Pinboard data when in Pinboard mode; plan requires non-Pinboard index"
-      rejected_reason: "Requirement is local + file index only (no Pinboard)"
-    - name: "Server-side or background search/filter"
+        - Index would show Pinboard data when in Pinboard mode; plan requires non-Pinboard index
+      rejected_reason: Requirement is local + file index only (no Pinboard)
+    - name: Server-side or background search/filter
       pros: []
       cons:
-        - "More messages; client has full list for sort/filter anyway"
-      rejected_reason: "Client-side is simpler and sufficient"
+        - More messages; client has full list for sort/filter anyway
+      rejected_reason: Client-side is simpler and sufficient
   implementation_approach:
-    summary: "Dedicated extension HTML page; data from getAggregatedBookmarksForIndex (local + file with storage field), fallback getLocalBookmarksForIndex; table includes Storage column; client-side search/filter/sort; URL column as link"
+    summary: Dedicated extension HTML page; data from getAggregatedBookmarksForIndex (local + file with storage field), fallback getLocalBookmarksForIndex; table includes Storage column; client-side search/filter/sort; URL column as link
     details:
-      - "Single extension page (e.g. bookmarks-table.html) with table, search input, filter controls, Storage column (Local | File)"
-      - "Message getAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() (BookmarkRouter aggregates local + file); fallback getLocalBookmarksForIndex uses LocalBookmarkService only"
-      - "Page receives full bookmark array with storage field; implements search (title/URL/tags/extended), filters (tag, toread, shared), sortable columns including Storage (default time desc)"
-      - "URL column renders as <a target=_blank> for launch"
-      - "Empty state when no local or file bookmarks"
+      - Single extension page (e.g. bookmarks-table.html) with table, search input, filter controls, Storage column (Local | File)
+      - Message getAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() (BookmarkRouter aggregates local + file); fallback getLocalBookmarksForIndex uses LocalBookmarkService only
+      - Page receives full bookmark array with storage field; implements search (title/URL/tags/extended), filters (tag, toread, shared), sortable columns including Storage (default time desc)
+      - URL column renders as <a target=_blank> for launch
+      - Empty state when no local or file bookmarks
   traceability:
     requirements:
       - REQ-LOCAL_BOOKMARKS_INDEX
@@ -1564,39 +1559,38 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md
   metadata:
     created:
-      date: "2026-02-13"
-      author: "AI Agent"
+      date: '2026-02-13'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Index shows local + file with Storage column; getAggregatedBookmarksForIndex"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Index shows local + file with Storage column; getAggregatedBookmarksForIndex
 ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
   name: Local Bookmarks Index Export Architecture
   status: Active
   cross_references:
     - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
   rationale:
-    why: "Allow backup and portability of index data without adding backend complexity"
+    why: Allow backup and portability of index data without adding backend complexity
     problems_solved:
-      - "Users cannot export index data"
+      - Users cannot export index data
     benefits:
-      - "Client-side only; uses existing allBookmarks and filteredBookmarks"
-      - "No new message or backend; download via Blob and anchor"
+      - Client-side only; uses existing allBookmarks and filteredBookmarks
+      - No new message or backend; download via Blob and anchor
   alternatives_considered:
-    - name: "Backend export message"
+    - name: Backend export message
       pros:
-        - "Could stream large datasets"
+        - Could stream large datasets
       cons:
-        - "Data already on page; unnecessary round-trip"
-      rejected_reason: "Client has full data; client-side is sufficient"
+        - Data already on page; unnecessary round-trip
+      rejected_reason: Client has full data; client-side is sufficient
   implementation_approach:
-    summary: "Export implemented entirely on index page; data from allBookmarks (all) or filteredBookmarks (displayed); serialize to CSV including Storage column; trigger download via Blob + temporary anchor with download attribute"
+    summary: Export implemented entirely on index page; data from allBookmarks (all) or filteredBookmarks (displayed); serialize to CSV including Storage column; trigger download via Blob + temporary anchor with download attribute
     details:
-      - "No new background message; use in-memory arrays already on page (local + file bookmarks with storage field)"
-      - "CSV: columns Title, URL, Tags, Time, Storage (Local | File), Shared, To read, Notes; quoted fields, escaped quotes"
-      - "Optional JSON: full bookmark objects"
-      - "Filename e.g. hoverboard-bookmarks-{all|displayed}-{ISO date}.csv"
+      - No new background message; use in-memory arrays already on page (local + file bookmarks with storage field)
+      - 'CSV: columns Title, URL, Tags, Time, Storage (Local | File), Shared, To read, Notes; quoted fields, escaped quotes'
+      - 'Optional JSON: full bookmark objects'
+      - Filename e.g. hoverboard-bookmarks-{all|displayed}-{ISO date}.csv
   traceability:
     requirements:
       - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
@@ -1614,13 +1608,12 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.md
   metadata:
     created:
-      date: "2026-02-13"
-      author: "AI Agent"
+      date: '2026-02-13'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Implementation complete"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Implementation complete
 ARCH-FILE_BOOKMARK_PROVIDER:
   name: File-Based Bookmark Provider
   status: Active
@@ -1628,34 +1621,34 @@ ARCH-FILE_BOOKMARK_PROVIDER:
     - REQ-FILE_BOOKMARK_STORAGE
     - ARCH-LOCAL_STORAGE_PROVIDER
   rationale:
-    why: "Add third storage backend: file-based, single directory, one file, cloud-sync friendly"
+    why: 'Add third storage backend: file-based, single directory, one file, cloud-sync friendly'
     problems_solved:
-      - "No way to store bookmarks in a cloud-synced folder"
-      - "Cannot share bookmark file with ad-hoc groups"
+      - No way to store bookmarks in a cloud-synced folder
+      - Cannot share bookmark file with ad-hoc groups
     benefits:
-      - "Same provider contract as PinboardService/LocalBookmarkService"
-      - "File I/O in offscreen or options context (MV3 service worker cannot use File System Access)"
-      - "Directory handle stored in IndexedDB; single JSON file in chosen directory"
+      - Same provider contract as PinboardService/LocalBookmarkService
+      - File I/O in offscreen or options context (MV3 service worker cannot use File System Access)
+      - Directory handle stored in IndexedDB; single JSON file in chosen directory
   alternatives_considered:
-    - name: "Multiple files per bookmark"
+    - name: Multiple files per bookmark
       pros:
-        - "Merge-friendly for sync"
+        - Merge-friendly for sync
       cons:
-        - "More complex; single file is sufficient for many users"
-      rejected_reason: "Plan specifies single file in single directory"
+        - More complex; single file is sufficient for many users
+      rejected_reason: Plan specifies single file in single directory
   implementation_approach:
-    summary: "FileBookmarkService implements provider contract; file I/O behind adapter (readBookmarksFile, writeBookmarksFile); real adapter uses File System Access in document context."
+    summary: FileBookmarkService implements provider contract; file I/O behind adapter (readBookmarksFile, writeBookmarksFile); real adapter uses File System Access in document context.
     details:
-      - "File format: { version: 1, bookmarks: { url: bookmark } }"
-      - "Adapter abstraction allows unit tests with in-memory mock"
-      - "Real adapter: directory handle + getFileHandle + createWritable/read; used from offscreen or options"
+      - 'File format: { version: 1, bookmarks: { url: bookmark } }'
+      - Adapter abstraction allows unit tests with in-memory mock
+      - 'Real adapter: directory handle + getFileHandle + createWritable/read; used from offscreen or options'
   traceability:
     requirements:
       - REQ-FILE_BOOKMARK_STORAGE
     implementation:
       - IMPL-FILE_BOOKMARK_SERVICE
     tests:
-      - "file-bookmark-service.test.js"
+      - file-bookmark-service.test.js
     code_annotations:
       - ARCH-FILE_BOOKMARK_PROVIDER
   related_decisions:
@@ -1668,13 +1661,12 @@ ARCH-FILE_BOOKMARK_PROVIDER:
   detail_file: architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.md
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "File-based storage per plan"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: File-based storage per plan
 ARCH-STORAGE_INDEX_AND_ROUTER:
   name: Storage Index and Bookmark Router
   status: Active
@@ -1683,21 +1675,22 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
     - ARCH-LOCAL_STORAGE_PROVIDER
     - ARCH-FILE_BOOKMARK_PROVIDER
   rationale:
-    why: "Per-URL storage backend and router so bookmarks can live in pinboard, local, or file; default for new bookmarks from config"
+    why: Per-URL storage backend and router so bookmarks can live in pinboard, local, or file; default for new bookmarks from config
     problems_solved:
-      - "Single global provider prevents mixing backends"
-      - "Need to route operations by URL to correct backend"
+      - Single global provider prevents mixing backends
+      - Need to route operations by URL to correct backend
     benefits:
-      - "Storage index (chrome.storage.local) maps URL -> pinboard|local|file"
-      - "BookmarkRouter delegates get/save/delete to correct provider; getRecentBookmarks aggregates all three"
-      - "Default storage mode for new bookmarks (config); migration seeds index from existing local bookmarks"
+      - Storage index (chrome.storage.local) maps URL -> pinboard|local|file|sync
+      - BookmarkRouter delegates get/save/delete to correct provider; getRecentBookmarks aggregates all four
+      - Default storage mode for new bookmarks (config); migration seeds index from existing local bookmarks
+      - URL-tags/badge module on top of router provides display normalization and single source for tag list and badge value
   implementation_approach:
-    summary: "StorageIndex module; BookmarkRouter holds three providers and index; MessageHandler uses router as bookmarkProvider (duck-typed)."
+    summary: StorageIndex module; BookmarkRouter holds four providers (pinboard, local, file, sync) and index; MessageHandler uses router as bookmarkProvider (duck-typed). URL-tags-manager normalizes for display.
     details:
-      - "Index key: hoverboard_storage_index; getIndex, setBackendForUrl, getBackendForUrl, removeUrl"
-      - "Router: getBookmarkForUrl/saveBookmark/deleteBookmark use getBackendForUrl(url) or defaultStorageMode"
-      - "getRecentBookmarks: fetch from all three, merge, sort by time, slice"
-      - "ConfigManager getStorageMode/setStorageMode allow 'file'; invalid/missing fallback to 'local'"
+      - 'Index key: hoverboard_storage_index; getIndex, setBackendForUrl, getBackendForUrl, removeUrl'
+      - 'Router: getBookmarkForUrl/saveBookmark/deleteBookmark use getBackendForUrl(url) or defaultStorageMode'
+      - 'getRecentBookmarks: fetch from all four, merge, sort by time, slice'
+      - ConfigManager getStorageMode/setStorageMode allow 'file'; invalid/missing fallback to 'local'
   traceability:
     requirements:
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
@@ -1705,8 +1698,8 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
       - IMPL-STORAGE_INDEX
       - IMPL-BOOKMARK_ROUTER
     tests:
-      - "storage-index.test.js"
-      - "bookmark-router.test.js"
+      - storage-index.test.js
+      - bookmark-router.test.js
     code_annotations:
       - ARCH-STORAGE_INDEX_AND_ROUTER
   related_decisions:
@@ -1721,13 +1714,12 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
   detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.md
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Per-bookmark storage and router per plan"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Per-bookmark storage and router per plan
 ARCH-MOVE_BOOKMARK_UI:
   name: Move Bookmark Storage UI
   status: Active
@@ -1735,17 +1727,17 @@ ARCH-MOVE_BOOKMARK_UI:
     - REQ-MOVE_BOOKMARK_STORAGE_UI
     - ARCH-STORAGE_INDEX_AND_ROUTER
   rationale:
-    why: "Let user move current bookmark to another storage backend from popup"
+    why: Let user move current bookmark to another storage backend from popup
     problems_solved:
-      - "No way to change storage after saving"
+      - No way to change storage after saving
     benefits:
-      - "Popup shows current storage and dropdown/buttons to move to Pinboard, Local, or File"
-      - "Move = copy to target + delete from source + update index (router)"
+      - Popup shows current storage and dropdown/buttons to move to Pinboard, Local, or File
+      - Move = copy to target + delete from source + update index (router)
   implementation_approach:
-    summary: "Popup: getStorageBackendForUrl on load; select or buttons for storage; on change call moveBookmarkToStorage."
+    summary: 'Popup: getStorageBackendForUrl on load; select or buttons for storage; on change call moveBookmarkToStorage.'
     details:
-      - "MessageHandler already has getStorageBackendForUrl and moveBookmarkToStorage handlers"
-      - "When not bookmarked: show default storage or disable"
+      - MessageHandler already has getStorageBackendForUrl and moveBookmarkToStorage handlers
+      - 'When not bookmarked: show default storage or disable'
   traceability:
     requirements:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
@@ -1762,29 +1754,28 @@ ARCH-MOVE_BOOKMARK_UI:
   detail_file: architecture-decisions/ARCH-MOVE_BOOKMARK_UI.md
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Move bookmark UI per plan"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Move bookmark UI per plan
 ARCH-NATIVE_HOST:
   name: Native Host Architecture
   status: Active
   cross_references:
     - REQ-NATIVE_HOST_WRAPPER
   rationale:
-    why: "Chrome does not pass extension path to native host; host must load only from its own install directory"
+    why: Chrome does not pass extension path to native host; host must load only from its own install directory
     problems_solved:
-      - "Cannot run code from extension folder at runtime"
+      - Cannot run code from extension folder at runtime
     benefits:
-      - "Thin wrapper + helper installed to fixed path by installer; wrapper delegates to helper in same dir"
+      - Thin wrapper + helper installed to fixed path by installer; wrapper delegates to helper in same dir
   implementation_approach:
-    summary: "Go wrapper (stdio protocol, install-dir resolution), helper script/binary in same dir, installer scripts per OS"
+    summary: Go wrapper (stdio protocol, install-dir resolution), helper script/binary in same dir, installer scripts per OS
     details:
-      - "Wrapper: 4-byte length + JSON; ping→pong; else invoke helper in same dir"
-      - "Installer: copy to ~/.hoverboard or %LOCALAPPDATA%\\Hoverboard; write manifest and (Windows) registry"
+      - 'Wrapper: 4-byte length + JSON; ping→pong; else invoke helper in same dir'
+      - 'Installer: copy to ~/.hoverboard or %LOCALAPPDATA%\Hoverboard; write manifest and (Windows) registry'
   traceability:
     requirements:
       - REQ-NATIVE_HOST_WRAPPER
@@ -1802,72 +1793,69 @@ ARCH-NATIVE_HOST:
   detail_file: architecture-decisions/ARCH-NATIVE_HOST.md
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Native host wrapper and installer per plan"
-
-# ---
-# Template Record - Copy this block to create new architecture decisions
-# ---
-#
-# ARCH-IDENTIFIER:
-#   name: Architecture Decision Title
-#   status: Active
-#   cross_references:
-#     - REQ-RELATED_REQUIREMENT
-#   rationale:
-#     why: "Primary reason for this decision"
-#     problems_solved:
-#       - "Problem 1"
-#       - "Problem 2"
-#     benefits:
-#       - "Benefit 1"
-#       - "Benefit 2"
-#   alternatives_considered:
-#     - name: "Alternative 1"
-#       pros:
-#         - "Pro 1"
-#       cons:
-#         - "Con 1"
-#       rejected_reason: "Why it was rejected"
-#     - name: "Alternative 2"
-#       pros:
-#         - "Pro 1"
-#       cons:
-#         - "Con 1"
-#       rejected_reason: "Why it was rejected"
-#   implementation_approach:
-#     summary: "High-level description of the approach"
-#     details:
-#       - "Key component 1"
-#       - "Key component 2"
-#       - "Integration point 1"
-#   traceability:
-#     requirements:
-#       - REQ-IDENTIFIER
-#     implementation:
-#       - IMPL-IDENTIFIER
-#     tests:
-#       - testFeatureName_ARCH_IDENTIFIER
-#     code_annotations:
-#       - ARCH-IDENTIFIER
-#   related_decisions:
-#     depends_on: []
-#     informs: []
-#     see_also: []
-#   detail_file: architecture-decisions/ARCH-IDENTIFIER.md
-#   metadata:
-#     created:
-#       date: YYYY-MM-DD
-#       author: "agent/contributor"
-#     last_updated:
-#       date: YYYY-MM-DD
-#       author: "agent/contributor"
-#       reason: "Initial creation"
-#     last_validated:
-#       date: YYYY-MM-DD
-#       validator: "agent/contributor"
-#       result: "pass"
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Native host wrapper and installer per plan
+ARCH-CODE_QUALITY:
+  name: Code Quality Tooling (ESLint and Security Audit)
+  status: Active
+  cross_references:
+    - REQ-CODE_QUALITY
+  rationale:
+    why: Use ESLint 9 flat config with Standard preset for linting; run security audit at high severity so builds do not fail on unfixable moderate transitive deps
+    problems_solved:
+      - Legacy eslintrc and .eslintignore no longer supported in ESLint 9
+      - Moderate vulnerabilities in ESLint compat stack (e.g. ajv) block build if audit-level=moderate
+    benefits:
+      - Single flat config file (eslint.config.mjs); ignores in config
+      - Build passes while high/critical audit findings still fail validate
+  alternatives_considered:
+    - name: Keep ESLint 8 and eslintrc
+      pros:
+        - No migration
+      cons:
+        - ESLint 8 deprecated; flat config is default in v9
+      rejected_reason: ESLint 9 and flat config are the supported path
+    - name: npm audit fix --force to clear moderate
+      pros:
+        - Zero audit findings
+      cons:
+        - Downgrades ESLint to 4.x and breaks flat config
+      rejected_reason: Unacceptable; would undo migration
+  implementation_approach:
+    summary: ESLint 9 with eslint.config.mjs (Standard via FlatCompat); Node engines >= 18.18.0; security:check with --audit-level=high
+    details:
+      - 'eslint.config.mjs: globalIgnores, fixupConfigRules(compat.extends(''standard'')), languageOptions and rule overrides for src/**/*.js'
+      - package.json engines.node >= 18.18.0
+      - package.json security:check script uses npm audit --audit-level=high
+  traceability:
+    requirements:
+      - REQ-CODE_QUALITY
+    implementation:
+      - IMPL-CODE_STYLE
+    tests:
+      - npm run lint; npm run validate
+    code_annotations:
+      - IMPL-CODE_STYLE
+  related_decisions:
+    depends_on:
+      - REQ-CODE_QUALITY
+    informs:
+      - IMPL-CODE_STYLE
+    see_also: []
+  detail_file: architecture-decisions/ARCH-CODE_QUALITY.yaml
+  metadata:
+    created:
+      date: '2025-02-17'
+      author: agent
+    last_updated:
+      date: '2025-02-17'
+      author: agent
+      reason: ESLint 9 flat config migration and security check level
+    last_validated:
+      date: '2025-02-17'
+      validator: agent
+      result: pass

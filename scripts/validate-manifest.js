@@ -58,7 +58,8 @@ function validateManifest() {
     // Permissions validation
     if (manifest.permissions) {
       const v3Permissions = [
-        'storage', 'tabs', 'activeTab', 'contextMenus', 'scripting'
+        'storage', 'tabs', 'activeTab', 'contextMenus', 'scripting',
+        'offscreen', 'nativeMessaging'
       ];
       
       manifest.permissions.forEach(permission => {

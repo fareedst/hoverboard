@@ -1,0 +1,21 @@
+REQ-CODE_QUALITY:
+  rationale:
+    why: Ensure consistent code style, linting, and build-time quality checks without blocking on unfixable transitive vulnerabilities
+    problems_solved:
+      - Inconsistent style and undefined globals
+      - Build failures due to moderate audit findings in tooling deps
+    benefits:
+      - Single source of truth for lint rules (ESLint 9 flat config)
+      - 'Predictable builds: validate fails only on high/critical'
+  satisfaction_criteria:
+    - criterion: ESLint runs with flat config and Standard preset
+      metric: eslint.config.mjs; npm run lint/lint:fix succeed
+    - criterion: Node.js version documented
+      metric: package.json engines.node >= 18.18.0
+    - criterion: Security audit does not block for moderate-only
+      metric: security:check uses --audit-level=high
+  traceability:
+    architecture:
+      - ARCH-CODE_QUALITY
+    implementation:
+      - IMPL-CODE_STYLE

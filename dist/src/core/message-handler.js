@@ -5,6 +5,7 @@
 
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
 import { LocalBookmarkService } from '../features/storage/local-bookmark-service.js'
+import { getBookmarkForDisplay, getTagsForUrl } from '../features/storage/url-tags-manager.js'
 import { TagService } from '../features/tagging/tag-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { TabSearchService } from '../features/search/tab-search-service.js'
@@ -14,6 +15,7 @@ import { debugLog, debugError, browser } from '../shared/utils.js'
 export const MESSAGE_TYPES = {
   // Data retrieval
   GET_CURRENT_BOOKMARK: 'getCurrentBookmark',
+  GET_TAGS_FOR_URL: 'getTagsForUrl', // [IMPL-URL_TAGS_DISPLAY] Centralized tag storage for tests and UI
   GET_RECENT_BOOKMARKS: 'getRecentBookmarks',
   GET_LOCAL_BOOKMARKS_FOR_INDEX: 'getLocalBookmarksForIndex', // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
   GET_AGGREGATED_BOOKMARKS_FOR_INDEX: 'getAggregatedBookmarksForIndex', // [ARCH-STORAGE_INDEX_AND_ROUTER] local + file with storage column
@@ -154,6 +156,9 @@ export class MessageHandler {
       case MESSAGE_TYPES.GET_CURRENT_BOOKMARK:
         return this.handleGetCurrentBookmark(data, url, tabId)
 
+      case MESSAGE_TYPES.GET_TAGS_FOR_URL:
+        return this.handleGetTagsForUrl(data)
+
       case MESSAGE_TYPES.GET_RECENT_BOOKMARKS:
         return this.handleGetRecentBookmarks(data, url)
 
@@ -274,34 +279,17 @@ export class MessageHandler {
     }
     debugLog('[POPUP-DATA-FLOW-001] URL is allowed, getting bookmark data...')
 
-    // Check if auth token is available
+    // [IMPL-URL_TAGS_DISPLAY] Single source: getBookmarkForDisplay (router + normalize); do not short-circuit when no Pinboard auth so local/file/sync bookmarks and tags are shown
     const hasAuth = await this.configManager.hasAuthToken()
-    if (!hasAuth) {
-      debugLog('[POPUP-DATA-FLOW-001] No auth token available, returning empty bookmark')
-      return {
-        success: true,
-        data: {
-          description: data?.title || '',
-          hash: '',
-          time: '',
-          extended: '',
-          tag: '',
-          tags: [],
-          shared: 'yes',
-          toread: 'no',
-          url: targetUrl,
-          needsAuth: true
-        }
-      }
-    }
+    debugLog('[POPUP-DATA-FLOW-001] Getting bookmark data from provider (router)...')
+    const normalized = await getBookmarkForDisplay(this.bookmarkProvider, targetUrl, data?.title)
+    debugLog('[POPUP-DATA-FLOW-001] Bookmark data retrieved:', normalized)
 
-    // Get bookmark data from active provider (Pinboard or local)
-    debugLog('[POPUP-DATA-FLOW-001] Getting bookmark data from provider...')
-    const bookmark = await this.bookmarkProvider.getBookmarkForUrl(targetUrl, data?.title)
-    debugLog('[POPUP-DATA-FLOW-001] Bookmark data retrieved:', bookmark)
+    normalized.url = normalized.url || targetUrl
+    if (!hasAuth) normalized.needsAuth = true
 
     // [POPUP-DATA-FLOW-001] Enhanced response structure validation
-    const response = { success: true, data: bookmark }
+    const response = { success: true, data: normalized }
     debugLog('[POPUP-DATA-FLOW-001] Service worker response structure:', {
       success: response.success,
       dataType: typeof response.data,
@@ -321,6 +309,21 @@ export class MessageHandler {
     }
 
     return response
+  }
+
+  /**
+   * [IMPL-URL_TAGS_DISPLAY] Centralized tag storage: return tags array for URL from same source as badge/popup.
+   * @param {Object} data - { url: string }
+   * @returns {Promise<{ tags: string[] }>}
+   */
+  async handleGetTagsForUrl (data) {
+    const targetUrl = data?.url
+    if (!targetUrl) {
+      return { tags: [] }
+    }
+    const tags = await getTagsForUrl(this.bookmarkProvider, targetUrl)
+    debugLog('[MESSAGE-HANDLER] [IMPL-URL_TAGS_DISPLAY] getTagsForUrl:', targetUrl, 'tags:', tags?.length)
+    return { tags: tags || [] }
   }
 
   async handleGetRecentBookmarks (data, senderUrl) {
@@ -479,10 +482,9 @@ export class MessageHandler {
   }
 
   async handleSaveBookmark (data) {
-    // Fetch previous bookmark to get previous tags
-    const previousBookmark = await this.bookmarkProvider.getBookmarkForUrl(data.url)
-    const previousTags = previousBookmark?.tags || []
-    const newTags = Array.isArray(data.tags) ? data.tags : data.tags.split(' ').filter(tag => tag.trim())
+    // [IMPL-URL_TAGS_DISPLAY] Previous tags from same source as badge/popup (getTagsForUrl returns normalized array)
+    const previousTags = await getTagsForUrl(this.bookmarkProvider, data.url)
+    const newTags = Array.isArray(data.tags) ? data.tags : (data.tags ? String(data.tags).split(' ').filter(tag => tag.trim()) : [])
     // Compute which tags are newly added
     const addedTags = newTags.filter(tag => !previousTags.includes(tag))
 

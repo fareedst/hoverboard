@@ -249,7 +249,7 @@ module.exports = {
 ```
 
 **Cross-References**:
-- `.eslintrc.js`: ESLint configuration
+- `eslint.config.mjs`: ESLint 9 flat config
 - `package.json`: Lint script configuration
 
 #### **Decision 3: Jest for Testing Framework** `[JEST-FRAMEWORK-STRAT-001]`

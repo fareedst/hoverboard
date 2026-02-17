@@ -828,6 +828,81 @@ IMPL-BADGE_REFRESH:
       author: "AI Agent"
       reason: "Badge refresh on tag and private/toread changes"
 
+IMPL-URL_TAGS_DISPLAY:
+  name: URL Tags and Badge Display Module
+  status: Active
+  cross_references:
+    - ARCH-URL_TAGS_DISPLAY
+    - REQ-URL_TAGS_DISPLAY
+    - REQ-BADGE_INDICATORS
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+  rationale:
+    why: "Single source for tags-for-URL and badge display value; normalization at boundary so badge, popup, overlay use same contract"
+    problems_solved:
+      - "Popup showing no tags when badge correct; adding tag losing prior tags"
+      - "Tags string vs array inconsistency across providers"
+      - "Popup empty when no Pinboard auth although bookmark in local/file/sync"
+    benefits:
+      - "normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue in one module"
+      - "Message handler and service worker use it; popup re-fetches and merges when adding/removing tag"
+      - "getTagsForUrl message centralizes tag storage for tests and UI"
+  implementation_approach:
+    summary: "url-tags-manager.js; handleGetCurrentBookmark always uses router (no early return for no auth), normalizes, sets needsAuth when !hasAuth; GET_TAGS_FOR_URL message and handleGetTagsForUrl; popup getBookmarkData only null when blocked."
+    details:
+      - "normalizeBookmarkForDisplay(bookmark): tags always array, required fields defaulted"
+      - "getBookmarkForDisplay(provider, url, title): async, returns normalized bookmark"
+      - "getTagsForUrl(provider, url): async, returns tags array"
+      - "getBadgeDisplayValue(bookmark, config): text, tagCount, isPrivate, isToRead, isBookmarked, title"
+      - "handleGetCurrentBookmark: use getBookmarkForDisplay(bookmarkProvider, targetUrl, data?.title); set normalized.needsAuth when !hasAuth"
+      - "handleSaveBookmark: previous tags from getTagsForUrl(bookmarkProvider, data.url) (same source as badge/popup)"
+      - "GET_TAGS_FOR_URL message and handleGetTagsForUrl(data): return { tags } from getTagsForUrl(bookmarkProvider, data.url)"
+      - "BookmarkRouter: _hasTags and _isEmptyBookmark use normalizeBookmarkForDisplay for tag shape"
+      - "PopupController getBookmarkData: resolve(null) only when bookmarkData.blocked; when needsAuth still return bookmark (with tags)"
+      - "PopupController: re-fetch before add/remove tag; validateBookmarkData normalizes tags to array"
+  code_locations:
+    files:
+      - path: "src/features/storage/url-tags-manager.js"
+        description: "URL tags manager module"
+      - path: "src/core/message-handler.js"
+        description: "handleGetCurrentBookmark always from router; handleGetTagsForUrl"
+      - path: "src/core/service-worker.js"
+        description: "updateBadgeForTab normalizes bookmark"
+      - path: "src/core/badge-manager.js"
+        description: "calculateBadgeData uses getBadgeDisplayValue"
+      - path: "src/ui/popup/PopupController.js"
+        description: "getBookmarkData only null when blocked; re-fetch and merge on add/remove tag"
+      - path: "src/features/storage/bookmark-router.js"
+        description: "_hasTags and _isEmptyBookmark use normalizeBookmarkForDisplay"
+  traceability:
+    architecture:
+      - ARCH-URL_TAGS_DISPLAY
+    requirements:
+      - REQ-URL_TAGS_DISPLAY
+      - REQ-BADGE_INDICATORS
+    tests:
+      - "tests/unit/url-tags-manager.test.js"
+      - "tests/unit/popup-live-data.test.js"
+      - "tests/unit/message-handler-url-tags.test.js"
+      - "tests/unit/bookmark-router.test.js"
+    code_annotations:
+      - IMPL-URL_TAGS_DISPLAY
+      - ARCH-URL_TAGS_DISPLAY
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-BADGE_REFRESH
+  detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.md
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: "AI Agent"
+    last_updated:
+      date: "2026-02-17"
+      author: "AI Agent"
+      reason: "Fixes: getCurrentBookmark always router; getTagsForUrl message; popup use bookmark when needsAuth"
+
 IMPL-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Implementation
   status: Active
@@ -1191,52 +1266,61 @@ IMPL-TESTING:
 
 IMPL-CODE_STYLE:
   name: Code Style and Conventions
-  status: Template
-  cross_references: []
+  status: Active
+  cross_references:
+    - ARCH-CODE_QUALITY
+    - REQ-CODE_QUALITY
   rationale:
-    why: "Why these code style conventions were chosen"
+    why: "Enforce consistent JavaScript style and quality via ESLint 9 flat config (Standard preset) and avoid build failure on moderate audit findings in tooling deps"
     problems_solved:
-      - "Problem 1"
+      - "Legacy .eslintrc.yml and .eslintignore no longer used"
+      - "Build failing on moderate vulnerabilities in @eslint/eslintrc (ajv) with no safe fix"
     benefits:
-      - "Benefit 1 - improved maintainability"
+      - "Single eslint.config.mjs; Standard via FlatCompat; ignores in config"
+      - "security:check uses --audit-level=high so build succeeds"
   implementation_approach:
-    summary: "Code style and conventions implementation"
+    summary: "ESLint 9 flat config, Standard preset, Node engines, security audit level"
     details:
-      - "Naming conventions"
-      - "Code formatting rules"
-      - "Documentation standards"
-      - "Code organization patterns"
+      - "eslint.config.mjs: globalIgnores from former .eslintignore, fixupConfigRules(compat.extends('standard')), files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides"
+      - "package.json engines.node >= 18.18.0"
+      - "package.json security:check: npm audit --audit-level=high"
   code_locations:
     files:
       - path: ".editorconfig"
         description: "Editor configuration"
       - path: ".prettierrc"
         description: "Code formatter configuration (or similar)"
+      - path: "eslint.config.mjs"
+        description: "ESLint 9 flat config (Standard via FlatCompat)"
+      - path: "package.json"
+        description: "engines.node, scripts.lint/lint:fix/validate/security:check"
   traceability:
     architecture:
-      - ARCH-*
+      - ARCH-CODE_QUALITY
     requirements:
-      - REQ-MAINTAINABILITY
+      - REQ-CODE_QUALITY
     tests:
-      - Code style tests or linter checks
+      - npm run lint; npm run lint:fix; npm run validate
     code_annotations:
       - All source files follow these conventions
   related_decisions:
-    depends_on: []
+    depends_on:
+      - ARCH-CODE_QUALITY
     supersedes: []
-    see_also: []
+    see_also:
+      - REQ-MAINTAINABILITY
   detail_file: implementation-decisions/IMPL-CODE_STYLE.md
   metadata:
     created:
       date: YYYY-MM-DD
       author: "agent/contributor"
     last_updated:
-      date: YYYY-MM-DD
-      author: "agent/contributor"
-      reason: "Initial creation"
+      date: "2025-02-17"
+      author: "agent"
+      reason: "ESLint 9 flat config migration; security:check audit-level=high; REQ/ARCH traceability"
     last_validated:
-      date: YYYY-MM-DD
-      validator: "agent/contributor"
+      date: "2025-02-17"
+      validator: "agent"
       result: "pass"
 
 # ---
@@ -1521,7 +1605,7 @@ IMPL-BOOKMARK_ROUTER:
       - "Single provider cannot support per-bookmark backends"
     benefits:
       - "getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL"
-      - "getRecentBookmarks aggregates pinboard + local + file, sorted by time"
+      - "getRecentBookmarks aggregates pinboard + local + file + sync, sorted by time"
       - "getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI"
   implementation_approach:
     summary: "BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, defaultStorageMode."

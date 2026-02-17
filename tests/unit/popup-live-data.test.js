@@ -93,6 +93,33 @@ describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
       expect(result.tags).toEqual(['test', 'example'])
     })
 
+    test('should return bookmark with tags when needsAuth is true (bookmark from local/file/sync)', async () => {
+      const mockBookmarkWithTags = {
+        url: 'https://example.com',
+        description: 'Local bookmark',
+        tags: ['saved-tag'],
+        shared: 'yes',
+        toread: 'no',
+        needsAuth: true
+      }
+      chrome.runtime.sendMessage.mockImplementation((message, callback) => {
+        callback({ success: true, data: mockBookmarkWithTags })
+      })
+      const result = await popupController.getBookmarkData('https://example.com')
+      expect(result).not.toBeNull()
+      expect(result.tags).toEqual(['saved-tag'])
+      expect(result.needsAuth).toBe(true)
+    })
+
+    // [IMPL-URL_TAGS_DISPLAY] getBookmarkData only resolves null when blocked
+    test('should return null when response.data.blocked is true [REQ-URL_TAGS_DISPLAY]', async () => {
+      chrome.runtime.sendMessage.mockImplementation((message, callback) => {
+        callback({ success: true, data: { blocked: true, url: 'https://example.com' } })
+      })
+      const result = await popupController.getBookmarkData('https://example.com')
+      expect(result).toBeNull()
+    })
+
     test('should validate bookmark data structure correctly', () => {
       const validBookmark = {
         url: 'https://example.com',
@@ -101,15 +128,22 @@ describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
         shared: 'yes',
         toread: 'no'
       }
-      
-      const invalidBookmark = {
+      // [IMPL-URL_TAGS_DISPLAY] Missing tags is normalized to [] and accepted
+      const bookmarkWithMissingTags = {
         url: 'https://example.com',
-        // Missing tags array
         shared: 'yes'
       }
-      
+      const bookmarkWithStringTags = {
+        url: 'https://example.com',
+        tags: 'a b c',
+        shared: 'yes'
+      }
+
       expect(popupController.validateBookmarkData(validBookmark)).toBe(true)
-      expect(popupController.validateBookmarkData(invalidBookmark)).toBe(false)
+      expect(popupController.validateBookmarkData(bookmarkWithMissingTags)).toBe(true)
+      expect(bookmarkWithMissingTags.tags).toEqual([])
+      expect(popupController.validateBookmarkData(bookmarkWithStringTags)).toBe(true)
+      expect(bookmarkWithStringTags.tags).toEqual(['a', 'b', 'c'])
       expect(popupController.validateBookmarkData(null)).toBe(false)
       expect(popupController.validateBookmarkData(undefined)).toBe(false)
     })

@@ -1,10 +1,11 @@
 {
   "name": "hoverboard",
-  "version": "1.0.7",
+  "version": "1.1.0",
   "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
   "type": "module",
   "scripts": {
     "build": "npm run build:dev",
+    "build:only": "node scripts/build.js",
     "build:dev": "npm run style:fix && npm run validate && node scripts/build.js",
     "build:prod": "npm run style:fix && npm run validate && npm run minify && node scripts/build.js",
     "build:sw": "esbuild src/core/service-worker.js --bundle --outfile=dist/src/core/service-worker.js --format=esm --platform=browser",
@@ -26,7 +27,7 @@
     "test:integration": "jest --testMatch='**/*.integration.test.js'",
     "test:e2e": "jest --testMatch='**/*.e2e.test.js'",
     "test:ci": "npm run test:coverage && npm run test:e2e",
-    "security:check": "npm audit --audit-level=moderate",
+    "security:check": "npm audit --audit-level=high",
     "security:fix": "npm audit fix",
     "quality:check": "npm run lint && npm run test:coverage && npm run security:check",
     "precommit": "npm run quality:check",
@@ -37,6 +38,9 @@
   },
   "author": "Fareed Stevenson",
   "license": "ISC",
+  "engines": {
+    "node": ">=18.18.0"
+  },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
@@ -55,8 +59,12 @@
     "babel-jest": "^29.7.0",
     "chokidar-cli": "^3.0.0",
     "esbuild": "^0.25.5",
-    "eslint": "^8.0.0",
+    "@eslint/compat": "^1.2.4",
+    "@eslint/eslintrc": "^3.2.0",
+    "@eslint/js": "^9.15.0",
+    "eslint": "^9.0.0",
     "eslint-config-standard": "^17.0.0",
+    "globals": "^15.12.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.0.0",

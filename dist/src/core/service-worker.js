@@ -4603,6 +4603,11 @@ var init_pinboard_service = __esm({
        */
       async getBookmarkForUrl(url, title = "") {
         try {
+          const hasAuth = await this.configManager.hasAuthToken();
+          if (!hasAuth) {
+            debugLog("[PINBOARD-SERVICE] No auth token configured, returning empty bookmark without API call");
+            return this.createEmptyBookmark(url, title);
+          }
           const cleanUrl3 = this.cleanUrl(url);
           const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl3)}`;
           debugLog("\u{1F50D} Making Pinboard API request:", {
@@ -4635,6 +4640,11 @@ var init_pinboard_service = __esm({
        */
       async getRecentBookmarks(count = 15) {
         try {
+          const hasAuth = await this.configManager.hasAuthToken();
+          if (!hasAuth) {
+            debugLog("[PINBOARD-SERVICE] No auth token configured, returning empty recent list without API call");
+            return [];
+          }
           debugLog("[PINBOARD-SERVICE] Getting recent bookmarks, count:", count);
           const endpoint = `posts/recent?count=${count}`;
           const response = await this.makeApiRequest(endpoint);
@@ -4663,6 +4673,11 @@ var init_pinboard_service = __esm({
        */
       async saveBookmark(bookmarkData) {
         try {
+          const hasAuth = await this.configManager.hasAuthToken();
+          if (!hasAuth) {
+            debugLog("[PINBOARD-SERVICE] No auth token configured, skipping save without API call");
+            return { success: false, code: "no_auth", message: "No authentication token configured" };
+          }
           const params = this.buildSaveParams(bookmarkData);
           const endpoint = `posts/add?${params}`;
           const response = await this.makeApiRequest(endpoint, "GET");
@@ -4716,6 +4731,11 @@ var init_pinboard_service = __esm({
        */
       async deleteBookmark(url) {
         try {
+          const hasAuth = await this.configManager.hasAuthToken();
+          if (!hasAuth) {
+            debugLog("[PINBOARD-SERVICE] No auth token configured, skipping delete without API call");
+            return { success: false, code: "no_auth", message: "No authentication token configured" };
+          }
           const cleanUrl3 = this.cleanUrl(url);
           const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl3)}`;
           const response = await this.makeApiRequest(endpoint);
@@ -4834,6 +4854,11 @@ var init_pinboard_service = __esm({
        */
       async testConnection() {
         try {
+          const hasAuth = await this.configManager.hasAuthToken();
+          if (!hasAuth) {
+            debugLog("[PINBOARD-SERVICE] No auth token configured, testConnection returns false without API call");
+            return false;
+          }
           const endpoint = "user/api_token";
           const response = await this.makeApiRequest(endpoint);
           return true;
@@ -5383,6 +5408,75 @@ var LocalBookmarkService = class {
   }
 };
 
+// src/features/storage/url-tags-manager.js
+function normalizeBookmarkForDisplay(bookmark) {
+  if (!bookmark || typeof bookmark !== "object") {
+    return {
+      url: "",
+      description: "",
+      extended: "",
+      tags: [],
+      time: "",
+      shared: "yes",
+      toread: "no",
+      hash: ""
+    };
+  }
+  const tags = bookmark.tags == null ? [] : Array.isArray(bookmark.tags) ? bookmark.tags.filter((t) => t != null && String(t).trim()) : String(bookmark.tags).split(/\s+/).filter(Boolean);
+  return {
+    url: bookmark.url ?? "",
+    description: bookmark.description ?? "",
+    extended: bookmark.extended ?? "",
+    tags,
+    time: bookmark.time ?? "",
+    shared: bookmark.shared === "no" ? "no" : "yes",
+    toread: bookmark.toread === "yes" ? "yes" : "no",
+    hash: bookmark.hash ?? ""
+  };
+}
+async function getBookmarkForDisplay(bookmarkProvider, url, title = "") {
+  if (!bookmarkProvider || typeof bookmarkProvider.getBookmarkForUrl !== "function") {
+    return normalizeBookmarkForDisplay(null);
+  }
+  const raw = await bookmarkProvider.getBookmarkForUrl(url, title);
+  return normalizeBookmarkForDisplay(raw);
+}
+async function getTagsForUrl(bookmarkProvider, url) {
+  const bookmark = await getBookmarkForDisplay(bookmarkProvider, url);
+  return bookmark.tags || [];
+}
+var DEFAULT_BADGE_CONFIG = {
+  badgeTextIfNotBookmarked: "-",
+  badgeTextIfPrivate: "*",
+  badgeTextIfQueued: "!",
+  badgeTextIfBookmarkedNoTags: "0"
+};
+function getBadgeDisplayValue(bookmark, config = {}) {
+  const cfg = { ...DEFAULT_BADGE_CONFIG, ...config };
+  const norm = normalizeBookmarkForDisplay(bookmark);
+  const isBookmarked = !!(norm.hash && norm.hash.length > 0);
+  const tagCount = norm.tags ? norm.tags.length : 0;
+  const isPrivate = norm.shared === "no";
+  const isToRead = norm.toread === "yes";
+  let text = "";
+  if (!isBookmarked) {
+    text = cfg.badgeTextIfNotBookmarked || "-";
+  } else {
+    if (isPrivate) text += cfg.badgeTextIfPrivate || "*";
+    text += String(tagCount);
+    if (isToRead) text += cfg.badgeTextIfQueued || "!";
+  }
+  const title = isBookmarked ? ["Hoverboard"].concat(norm.description ? [`"${norm.description}"`] : []).concat(norm.tags && norm.tags.length ? [`Tags: ${norm.tags.join(", ")}`] : []).concat(isPrivate ? ["(Private)"] : []).concat(isToRead ? ["(Read Later)"] : []).join(" | ") : "Hoverboard - Page not bookmarked";
+  return {
+    text,
+    tagCount,
+    isPrivate,
+    isToRead,
+    isBookmarked,
+    title
+  };
+}
+
 // src/core/message-handler.js
 init_tag_service();
 init_config_manager();
@@ -5546,6 +5640,8 @@ init_utils();
 var MESSAGE_TYPES = {
   // Data retrieval
   GET_CURRENT_BOOKMARK: "getCurrentBookmark",
+  GET_TAGS_FOR_URL: "getTagsForUrl",
+  // [IMPL-URL_TAGS_DISPLAY] Centralized tag storage for tests and UI
   GET_RECENT_BOOKMARKS: "getRecentBookmarks",
   GET_LOCAL_BOOKMARKS_FOR_INDEX: "getLocalBookmarksForIndex",
   // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
@@ -5659,6 +5755,8 @@ var MessageHandler = class {
     switch (type) {
       case MESSAGE_TYPES.GET_CURRENT_BOOKMARK:
         return this.handleGetCurrentBookmark(data, url, tabId);
+      case MESSAGE_TYPES.GET_TAGS_FOR_URL:
+        return this.handleGetTagsForUrl(data);
       case MESSAGE_TYPES.GET_RECENT_BOOKMARKS:
         return this.handleGetRecentBookmarks(data, url);
       case MESSAGE_TYPES.GET_LOCAL_BOOKMARKS_FOR_INDEX:
@@ -5747,28 +5845,12 @@ var MessageHandler = class {
     }
     debugLog("[POPUP-DATA-FLOW-001] URL is allowed, getting bookmark data...");
     const hasAuth = await this.configManager.hasAuthToken();
-    if (!hasAuth) {
-      debugLog("[POPUP-DATA-FLOW-001] No auth token available, returning empty bookmark");
-      return {
-        success: true,
-        data: {
-          description: data?.title || "",
-          hash: "",
-          time: "",
-          extended: "",
-          tag: "",
-          tags: [],
-          shared: "yes",
-          toread: "no",
-          url: targetUrl,
-          needsAuth: true
-        }
-      };
-    }
-    debugLog("[POPUP-DATA-FLOW-001] Getting bookmark data from provider...");
-    const bookmark = await this.bookmarkProvider.getBookmarkForUrl(targetUrl, data?.title);
-    debugLog("[POPUP-DATA-FLOW-001] Bookmark data retrieved:", bookmark);
-    const response = { success: true, data: bookmark };
+    debugLog("[POPUP-DATA-FLOW-001] Getting bookmark data from provider (router)...");
+    const normalized = await getBookmarkForDisplay(this.bookmarkProvider, targetUrl, data?.title);
+    debugLog("[POPUP-DATA-FLOW-001] Bookmark data retrieved:", normalized);
+    normalized.url = normalized.url || targetUrl;
+    if (!hasAuth) normalized.needsAuth = true;
+    const response = { success: true, data: normalized };
     debugLog("[POPUP-DATA-FLOW-001] Service worker response structure:", {
       success: response.success,
       dataType: typeof response.data,
@@ -5784,6 +5866,20 @@ var MessageHandler = class {
     if (config.setIconOnLoad && tabId) {
     }
     return response;
+  }
+  /**
+   * [IMPL-URL_TAGS_DISPLAY] Centralized tag storage: return tags array for URL from same source as badge/popup.
+   * @param {Object} data - { url: string }
+   * @returns {Promise<{ tags: string[] }>}
+   */
+  async handleGetTagsForUrl(data) {
+    const targetUrl = data?.url;
+    if (!targetUrl) {
+      return { tags: [] };
+    }
+    const tags = await getTagsForUrl(this.bookmarkProvider, targetUrl);
+    debugLog("[MESSAGE-HANDLER] [IMPL-URL_TAGS_DISPLAY] getTagsForUrl:", targetUrl, "tags:", tags?.length);
+    return { tags: tags || [] };
   }
   async handleGetRecentBookmarks(data, senderUrl) {
     debugLog("[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Handling getRecentBookmarks request:", data);
@@ -5911,9 +6007,8 @@ var MessageHandler = class {
     return options;
   }
   async handleSaveBookmark(data) {
-    const previousBookmark = await this.bookmarkProvider.getBookmarkForUrl(data.url);
-    const previousTags = previousBookmark?.tags || [];
-    const newTags = Array.isArray(data.tags) ? data.tags : data.tags.split(" ").filter((tag) => tag.trim());
+    const previousTags = await getTagsForUrl(this.bookmarkProvider, data.url);
+    const newTags = Array.isArray(data.tags) ? data.tags : data.tags ? String(data.tags).split(" ").filter((tag) => tag.trim()) : [];
     const addedTags = newTags.filter((tag) => !previousTags.includes(tag));
     const result = await this.bookmarkProvider.saveBookmark(data);
     for (const tag of addedTags) {
@@ -6851,11 +6946,60 @@ var BookmarkRouter = class {
     if (backend) return backend;
     return this.getDefaultStorageMode();
   }
+  /**
+   * [IMPL-BOOKMARK_ROUTER] Treat as empty when bookmark is the stub shape (no time, no tags, no description).
+   * [IMPL-URL_TAGS_DISPLAY] Uses normalizeBookmarkForDisplay so tag shape (string/array) is consistent with display.
+   */
+  _isEmptyBookmark(bookmark) {
+    if (!bookmark || !bookmark.url) return true;
+    const norm = normalizeBookmarkForDisplay(bookmark);
+    const hasTime = !!(norm.time && norm.time.trim());
+    const hasTags = norm.tags.length > 0;
+    const hasDescription = !!(norm.description && norm.description.trim());
+    return !hasTime && !hasTags && !hasDescription;
+  }
+  /**
+   * [IMPL-URL_TAGS_DISPLAY] Same tag contract as url-tags-manager (normalized array).
+   */
+  _hasTags(bookmark) {
+    return normalizeBookmarkForDisplay(bookmark).tags.length > 0;
+  }
   async getBookmarkForUrl(url, title = "") {
-    const backend = await this._backendForUrl(url);
-    const provider = this._providerFor(backend);
-    debugLog("[IMPL-BOOKMARK_ROUTER] getBookmarkForUrl backend:", backend);
-    return provider.getBookmarkForUrl(url, title);
+    const key = cleanUrl2(url);
+    const pinPromise = this.pinboardProvider.getBookmarkForUrl(url, title).catch(() => null);
+    const [pinB, localB, fileB, syncB] = await Promise.all([
+      pinPromise,
+      this.localProvider.getBookmarkForUrl(url, title),
+      this.fileProvider.getBookmarkForUrl(url, title),
+      this.syncProvider.getBookmarkForUrl(url, title)
+    ]);
+    const candidates = [
+      { backend: "pinboard", bookmark: pinB },
+      { backend: "local", bookmark: localB },
+      { backend: "file", bookmark: fileB },
+      { backend: "sync", bookmark: syncB }
+    ].filter((c) => c.bookmark && !this._isEmptyBookmark(c.bookmark));
+    if (candidates.length === 0) {
+      const fromIndex2 = await this.storageIndex.getBackendForUrl(key);
+      const backend = fromIndex2 || await this.getDefaultStorageMode();
+      const provider = this._providerFor(backend);
+      return provider.getBookmarkForUrl(url, title);
+    }
+    const best = candidates.reduce((acc, c) => {
+      const hasTags = this._hasTags(c.bookmark);
+      const accHasTags = this._hasTags(acc.bookmark);
+      if (hasTags && !accHasTags) return c;
+      if (!hasTags && accHasTags) return acc;
+      const accTime = acc.bookmark.time || "";
+      const cTime = c.bookmark.time || "";
+      return cTime > accTime ? c : acc;
+    });
+    const fromIndex = await this.storageIndex.getBackendForUrl(key);
+    if (!fromIndex || fromIndex !== best.backend) {
+      debugLog("[IMPL-BOOKMARK_ROUTER] getBookmarkForUrl using:", best.backend, "hasTags:", this._hasTags(best.bookmark));
+      await this.storageIndex.setBackendForUrl(key, best.backend);
+    }
+    return best.bookmark;
   }
   async getRecentBookmarks(count = 15) {
     const [pin, local, file, sync] = await Promise.all([
@@ -7015,62 +7159,33 @@ var BadgeManager = class {
     }
   }
   /**
-   * Calculate badge appearance based on bookmark status
-   * @param {Object} bookmark - Bookmark data
+   * Calculate badge appearance based on bookmark status.
+   * [IMPL-URL_TAGS_DISPLAY] Badge text/count/title from single source (getBadgeDisplayValue).
+   * @param {Object} bookmark - Bookmark data (raw or normalized)
    * @param {Object} config - Extension configuration
    * @returns {Object} Badge display data
    */
   calculateBadgeData(bookmark, config) {
-    const isBookmarked = bookmark && bookmark.hash && bookmark.hash.length > 0;
-    const tagCount = bookmark?.tags?.length || 0;
-    const isPrivate = bookmark?.shared === "no";
-    const isToRead = bookmark?.toread === "yes";
-    let text = "";
-    const backgroundColor = isBookmarked ? "#000" : "#222";
-    const iconPath = isBookmarked ? this.iconPaths.bookmarked : this.iconPaths.default;
-    if (!isBookmarked) {
-      text = config.badgeTextIfNotBookmarked || "-";
-    } else {
-      if (isPrivate) {
-        text += config.badgeTextIfPrivate || "*";
-      }
-      text += tagCount.toString();
-      if (isToRead) {
-        text += config.badgeTextIfQueued || "!";
-      }
-    }
-    const title = this.generateTitle(bookmark, isBookmarked);
+    const badgeValue = getBadgeDisplayValue(bookmark, config);
+    const backgroundColor = badgeValue.isBookmarked ? "#000" : "#222";
+    const iconPath = badgeValue.isBookmarked ? this.iconPaths.bookmarked : this.iconPaths.default;
     return {
-      text,
+      text: badgeValue.text,
       backgroundColor,
       iconPath,
-      title
+      title: badgeValue.title
     };
   }
   /**
-   * Generate tooltip title for browser action
+   * Generate tooltip title for browser action.
+   * [IMPL-URL_TAGS_DISPLAY] Delegates to getBadgeDisplayValue for consistency; kept for callers that pass (bookmark, isBookmarked).
    * @param {Object} bookmark - Bookmark data
    * @param {boolean} isBookmarked - Whether page is bookmarked
    * @returns {string} Title text
    */
   generateTitle(bookmark, isBookmarked) {
-    if (!isBookmarked) {
-      return "Hoverboard - Page not bookmarked";
-    }
-    const parts = ["Hoverboard"];
-    if (bookmark.description) {
-      parts.push(`"${bookmark.description}"`);
-    }
-    if (bookmark.tags && bookmark.tags.length > 0) {
-      parts.push(`Tags: ${bookmark.tags.join(", ")}`);
-    }
-    if (bookmark.shared === "no") {
-      parts.push("(Private)");
-    }
-    if (bookmark.toread === "yes") {
-      parts.push("(Read Later)");
-    }
-    return parts.join(" | ");
+    const badgeValue = getBadgeDisplayValue(bookmark || {}, this.getConfig ? {} : {});
+    return badgeValue.title;
   }
   /**
    * Set badge text for a tab
@@ -7395,7 +7510,9 @@ var HoverboardServiceWorker = class {
       if (!this._providerInitialized) {
         await this.initBookmarkProvider();
       }
-      const bookmark = await this.bookmarkProvider.getBookmarkForUrl(tab.url);
+      const raw = await this.bookmarkProvider.getBookmarkForUrl(tab.url);
+      const bookmark = normalizeBookmarkForDisplay(raw);
+      if (!bookmark.url) bookmark.url = tab.url;
       await this.badgeManager.updateBadge(tab.id, bookmark);
     } catch (error) {
       console.error("Badge update error:", error);

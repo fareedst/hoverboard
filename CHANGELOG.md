@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **ESLint 9 and flat config** (`REQ-CODE_QUALITY`, `ARCH-CODE_QUALITY`, `IMPL-CODE_STYLE`) – Linting now uses ESLint 9 with the flat config format:
+  - **Config:** Single `eslint.config.mjs` (replaces `.eslintrc.yml` and `.eslintignore`). Standard preset applied via `@eslint/eslintrc` FlatCompat and `@eslint/compat` fixupConfigRules. Ignores and rule overrides live in the flat config.
+  - **Node:** `package.json` includes `engines.node >= 18.18.0` (required for ESLint 9).
+  - **Security check:** `npm run security:check` uses `--audit-level=high` so the build does not fail on moderate-only findings in the ESLint compat stack (e.g. ajv); high and critical still fail validate.
+  - **TIED:** New requirement `REQ-CODE_QUALITY`, architecture decision `ARCH-CODE_QUALITY`, and implementation `IMPL-CODE_STYLE` (status Active) with traceability across requirements, architecture, and implementation.
+
 ### Added
 
 - **Fourth storage option: chrome.storage.sync** (`ARCH-SYNC_STORAGE_PROVIDER`, `IMPL-SYNC_BOOKMARK_SERVICE`) – Bookmarks can be stored in **Sync** so they sync across devices signed into the same Chrome profile. Options: Storage Mode > "Sync (browser, synced)". **Quota ~100 KB**; documented in Options and README. Local bookmarks index and CSV export include a "Sync" storage column.

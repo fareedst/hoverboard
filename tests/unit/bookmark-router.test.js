@@ -27,7 +27,7 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
         getAllBookmarks: jest.fn(async () => Object.values(store).sort((a, b) => (b.time || '').localeCompare(a.time || ''))),
         saveBookmark: jest.fn(async (data) => {
           const u = (data.url || '').replace(/\/+$/, '')
-          store[u] = { ...data, url: u, time: store[u]?.time || new Date().toISOString() }
+          store[u] = { ...data, url: u, time: data.time || store[u]?.time || new Date().toISOString() }
           return { success: true, code: 'done', message: 'Operation completed' }
         }),
         deleteBookmark: jest.fn(async (url) => {
@@ -67,7 +67,8 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
     await router.getBookmarkForUrl('https://example.com/new')
     expect(defaultMode).toHaveBeenCalled()
     expect(local.getBookmarkForUrl).toHaveBeenCalledWith('https://example.com/new', '')
-    expect(pinboard.getBookmarkForUrl).not.toHaveBeenCalled()
+    expect(file.getBookmarkForUrl).toHaveBeenCalledWith('https://example.com/new', '')
+    expect(sync.getBookmarkForUrl).toHaveBeenCalledWith('https://example.com/new', '')
   })
 
   test('getBookmarkForUrl uses index when URL in index [IMPL-BOOKMARK_ROUTER]', async () => {
@@ -76,6 +77,48 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
     const b = await router.getBookmarkForUrl('https://example.com/p')
     expect(pinboard.getBookmarkForUrl).toHaveBeenCalled()
     expect(b.description).toBe('Pin')
+  })
+
+  // [IMPL-BOOKMARK_ROUTER] [REQ-URL_TAGS_DISPLAY] Best candidate: prefer backend with tags, then most recent
+  test('getBookmarkForUrl prefers candidate with tags over newer without tags and updates index [IMPL-BOOKMARK_ROUTER]', async () => {
+    const url = 'https://example.com/best'
+    await local.saveBookmark({
+      url,
+      description: 'With tags',
+      tags: ['a', 'b'],
+      time: '2026-02-14T10:00:00.000Z'
+    })
+    await file.saveBookmark({
+      url,
+      description: 'Newer no tags',
+      time: '2026-02-14T12:00:00.000Z'
+    })
+    const b = await router.getBookmarkForUrl(url)
+    expect(b.description).toBe('With tags')
+    expect(b.tags).toEqual(['a', 'b'])
+    const backend = await storageIndex.getBackendForUrl(url)
+    expect(backend).toBe('local')
+  })
+
+  test('getBookmarkForUrl prefers newer time when both candidates have tags [IMPL-BOOKMARK_ROUTER]', async () => {
+    const url = 'https://example.com/both'
+    await local.saveBookmark({
+      url,
+      description: 'Older',
+      tags: ['x'],
+      time: '2026-02-14T10:00:00.000Z'
+    })
+    await file.saveBookmark({
+      url,
+      description: 'Newer',
+      tags: ['y'],
+      time: '2026-02-14T12:00:00.000Z'
+    })
+    const b = await router.getBookmarkForUrl(url)
+    expect(b.description).toBe('Newer')
+    expect(b.time).toBe('2026-02-14T12:00:00.000Z')
+    const backend = await storageIndex.getBackendForUrl(url)
+    expect(backend).toBe('file')
   })
 
   test('saveBookmark updates index and uses default when new [IMPL-BOOKMARK_ROUTER]', async () => {

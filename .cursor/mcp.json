@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "tied-yaml": {
+      "command": "node",
+      "args": ["/Users/fareed/Documents/dev/chatgpt/stdd/mcp-server/dist/index.js"],
+      "env": {
+        "TIED_BASE_PATH": "/Users/fareed/Documents/dev/browser/hoverboard/tied"
+      }
+    }
+  }
+}

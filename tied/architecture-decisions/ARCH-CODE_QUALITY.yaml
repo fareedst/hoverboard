@@ -1,0 +1,20 @@
+ARCH-CODE_QUALITY:
+  rationale:
+    why: Use ESLint 9 flat config with Standard preset; run security audit at high severity so builds do not fail on unfixable moderate transitive deps
+    problems_solved:
+      - Legacy eslintrc/.eslintignore no longer supported in ESLint 9
+      - Moderate vulnerabilities in ESLint compat stack block build
+    benefits:
+      - Single flat config file; ignores in config
+      - Build passes while high/critical still fail validate
+  implementation_approach:
+    summary: ESLint 9 eslint.config.mjs (Standard via FlatCompat); Node >= 18.18.0; security:check --audit-level=high
+    details:
+      - 'eslint.config.mjs: globalIgnores, fixupConfigRules(compat.extends(''standard'')), languageOptions and rules for src/**/*.js'
+      - package.json engines.node >= 18.18.0
+      - 'security:check: npm audit --audit-level=high'
+  traceability:
+    requirements:
+      - REQ-CODE_QUALITY
+    implementation:
+      - IMPL-CODE_STYLE

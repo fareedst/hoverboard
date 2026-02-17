@@ -15,6 +15,7 @@ import { MessageFileBookmarkAdapter, ensureOffscreenDocument } from '../features
 import { NativeHostFileBookmarkAdapter } from '../features/storage/native-host-file-bookmark-adapter.js'
 import { StorageIndex } from '../features/storage/storage-index.js'
 import { BookmarkRouter } from '../features/storage/bookmark-router.js'
+import { normalizeBookmarkForDisplay } from '../features/storage/url-tags-manager.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
@@ -345,7 +346,10 @@ class HoverboardServiceWorker {
       if (!this._providerInitialized) {
         await this.initBookmarkProvider()
       }
-      const bookmark = await this.bookmarkProvider.getBookmarkForUrl(tab.url)
+      const raw = await this.bookmarkProvider.getBookmarkForUrl(tab.url)
+      // [IMPL-URL_TAGS_DISPLAY] Normalize so badge and popup use same display contract (tags array)
+      const bookmark = normalizeBookmarkForDisplay(raw)
+      if (!bookmark.url) bookmark.url = tab.url
       await this.badgeManager.updateBadge(tab.id, bookmark)
     } catch (error) {
       console.error('Badge update error:', error)

@@ -107,6 +107,21 @@ REQ-MAINTAINABILITY:
     registered: 2025-11-08
     last_updated: 2026-02-08
 
+REQ-CODE_QUALITY:
+  type: REQ
+  name: Code Quality and Tooling
+  category: Non-Functional
+  status: Active
+  description: "Code quality via ESLint 9 flat config and security audit at high severity"
+  cross_references:
+    - ARCH-CODE_QUALITY
+    - IMPL-CODE_STYLE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-CODE_QUALITY.yaml
+  metadata:
+    registered: 2025-02-17
+    last_updated: 2025-02-17
+
 REQ-USABILITY:
   type: REQ
   name: Usability Requirements
@@ -186,6 +201,20 @@ ARCH-EXAMPLE_DECISION:
     registered: 2025-11-08
     last_updated: 2026-02-08
 
+ARCH-CODE_QUALITY:
+  type: ARCH
+  name: Code Quality Tooling (ESLint and Security Audit)
+  status: Active
+  description: "ESLint 9 flat config with Standard preset; security audit --audit-level=high"
+  cross_references:
+    - REQ-CODE_QUALITY
+    - IMPL-CODE_STYLE
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-CODE_QUALITY.yaml
+  metadata:
+    registered: 2025-02-17
+    last_updated: 2025-02-17
+
 IMPL-CONFIG_STRUCT:
   type: IMPL
   name: Configuration Structure
@@ -199,6 +228,20 @@ IMPL-CONFIG_STRUCT:
   metadata:
     registered: 2025-11-08
     last_updated: 2026-02-08
+
+IMPL-CODE_STYLE:
+  type: IMPL
+  name: Code Style and Conventions
+  status: Active
+  description: "ESLint 9 flat config (Standard via FlatCompat), Node engines, security:check audit-level=high"
+  cross_references:
+    - ARCH-CODE_QUALITY
+    - REQ-CODE_QUALITY
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-CODE_STYLE.md
+  metadata:
+    registered: 2025-02-17
+    last_updated: 2025-02-17
 
 IMPL-TIED_FILES:
   type: IMPL
@@ -490,6 +533,23 @@ REQ-BADGE_INDICATORS:
   metadata:
     registered: 2025-07-14
     last_updated: 2026-02-13
+
+REQ-URL_TAGS_DISPLAY:
+  type: REQ
+  name: URL Tags and Badge Single Source
+  category: Functional
+  status: Active
+  description: "Single source for tags-for-URL and badge display value; getCurrentBookmark always from router; getTagsForUrl message; popup use bookmark when needsAuth"
+  cross_references:
+    - ARCH-URL_TAGS_DISPLAY
+    - IMPL-URL_TAGS_DISPLAY
+    - REQ-BADGE_INDICATORS
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-URL_TAGS_DISPLAY.md
+  metadata:
+    registered: 2026-02-17
+    last_updated: 2026-02-17
 
 REQ-SITE_MANAGEMENT:
   type: REQ
@@ -835,6 +895,21 @@ ARCH-BADGE:
     registered: 2025-07-14
     last_updated: 2026-02-13
 
+ARCH-URL_TAGS_DISPLAY:
+  type: ARCH
+  name: URL Tags and Badge Single Source
+  status: Active
+  description: "Single module for tags-for-URL and badge value; getCurrentBookmark always from router; getTagsForUrl message; popup use bookmark when needsAuth"
+  cross_references:
+    - REQ-URL_TAGS_DISPLAY
+    - REQ-BADGE_INDICATORS
+    - IMPL-URL_TAGS_DISPLAY
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-URL_TAGS_DISPLAY.md
+  metadata:
+    registered: 2026-02-17
+    last_updated: 2026-02-17
+
 ARCH-CROSS_BROWSER:
   type: ARCH
   name: Cross-Browser Compatibility Architecture
@@ -1043,6 +1118,22 @@ IMPL-BADGE_REFRESH:
     registered: 2026-02-13
     last_updated: 2026-02-13
 
+IMPL-URL_TAGS_DISPLAY:
+  type: IMPL
+  name: URL Tags and Badge Display Module
+  category: Storage / Badge
+  status: Active
+  description: "url-tags-manager; handleGetCurrentBookmark always router; GET_TAGS_FOR_URL message; popup getBookmarkData only null when blocked"
+  cross_references:
+    - ARCH-URL_TAGS_DISPLAY
+    - REQ-URL_TAGS_DISPLAY
+    - REQ-BADGE_INDICATORS
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.md
+  metadata:
+    registered: 2026-02-17
+    last_updated: 2026-02-17
+
 REQ-LOCAL_BOOKMARKS_INDEX:
   type: REQ
   name: Local Bookmarks Index Page
@@ -1202,7 +1293,7 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
   name: Storage Index and Bookmark Router
   category: Storage
   status: Active
-  description: "Per-URL index; router delegates to pinboard/local/file; getRecentBookmarks aggregates"
+  description: "Per-URL index; router delegates to pinboard/local/file/sync; getRecentBookmarks aggregates all four; URL-tags module on top for display normalization"
   cross_references:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - IMPL-STORAGE_INDEX
@@ -1211,7 +1302,7 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
   detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.md
   metadata:
     registered: 2026-02-14
-    last_updated: 2026-02-14
+    last_updated: 2026-02-17
 
 IMPL-STORAGE_INDEX:
   type: IMPL
@@ -1233,7 +1324,7 @@ IMPL-BOOKMARK_ROUTER:
   name: Bookmark Router
   category: Storage
   status: Active
-  description: "Router with three providers; delegate by URL; getStorageBackendForUrl, moveBookmarkToStorage"
+  description: "Router with four providers (pinboard, local, file, sync); delegate by URL; getStorageBackendForUrl, moveBookmarkToStorage"
   cross_references:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - ARCH-STORAGE_INDEX_AND_ROUTER
@@ -1241,7 +1332,7 @@ IMPL-BOOKMARK_ROUTER:
   detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.md
   metadata:
     registered: 2026-02-14
-    last_updated: 2026-02-14
+    last_updated: 2026-02-17
 
 REQ-MOVE_BOOKMARK_STORAGE_UI:
   type: REQ
