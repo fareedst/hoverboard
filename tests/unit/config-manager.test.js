@@ -235,7 +235,7 @@ describe('ConfigManager', () => {
       });
     });
 
-    test('should allow clearing auth token with empty string (disable Pinboard) [CFG-002]', async () => {
+    test('should allow clearing auth token with empty string (disable Pinboard) [IMPL-CONFIG_MIGRATION]', async () => {
       await configManager.setAuthToken('');
       expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
         hoverboard_auth_token: ''

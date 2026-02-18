@@ -1749,3 +1749,56 @@ REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
     created: "2026-02-17"
     last_updated: "2026-02-17"
     author: AI Agent
+REQ-SHARED_UTILITIES:
+  name: Shared Utilities
+  category: Non-Functional
+  priority: P2
+  status: Implemented
+  rationale:
+    why: Centralize URL, text, array/object, time/async, and DOM utilities for bookmark management and UI
+    problems_solved:
+      - Duplicated URL and text logic across features
+      - Inconsistent DOM and timing helpers
+    benefits:
+      - Single source for URL validation, text truncation, chunking, timing, DOM helpers
+  satisfaction_criteria:
+    - criterion: urlUtils, stringUtils, arrayUtils, objectUtils, timeUtils, domUtils in src/shared/utils.js
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    implementation:
+      - IMPL-URL_UTILITIES
+      - IMPL-TEXT_UTILITIES
+      - IMPL-ARRAY_OBJECT_UTILITIES
+      - IMPL-TIME_ASYNC_UTILITIES
+      - IMPL-DOM_UTILITIES
+  detail_file: requirements/REQ-SHARED_UTILITIES.yaml
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent
+REQ-STRUCTURED_LOGGING:
+  name: Structured Logging
+  category: Non-Functional
+  priority: P2
+  status: Implemented
+  rationale:
+    why: Provide consistent, level-filtered logging with context for debugging and diagnostics
+    problems_solved:
+      - Ad-hoc console.log and inconsistent log levels
+    benefits:
+      - Context-based log attribution; environment-aware level; legacy compatibility
+  satisfaction_criteria:
+    - criterion: Logger class with context, levels, createLogger; legacy log() and noisy
+  traceability:
+    architecture:
+      - ARCH-STRUCTURED_LOGGING
+    implementation:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOG_LEVEL_CONFIG
+      - IMPL-LOGGER_LEGACY
+  detail_file: requirements/REQ-STRUCTURED_LOGGING.yaml
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent

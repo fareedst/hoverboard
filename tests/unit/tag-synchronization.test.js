@@ -145,7 +145,7 @@ describe('Tag Synchronization', () => {
 
   describe('Phase 2: Popup-to-Overlay Notification', () => {
     test('should notify overlay when tags are updated', async () => {
-      // [TAG-SYNC-TEST-001] Provide required dependencies to PopupController
+      // [TEST-TAG_SYNC] Provide required dependencies to PopupController
       const mockUIManager = { clearTagInput: jest.fn(), updateCurrentTags: jest.fn(), updateRecentTags: jest.fn(), showSuccess: jest.fn(), updateConnectionStatus: jest.fn(), updatePrivateStatus: jest.fn(), updateReadLaterStatus: jest.fn(), updateVersionInfo: jest.fn(), on: jest.fn() }
       const mockStateManager = { setState: jest.fn() }
       const mockErrorHandler = { handleError: jest.fn() }
@@ -346,7 +346,7 @@ describe('Tag Synchronization', () => {
 
   describe('Integration Tests', () => {
     test('should synchronize tags from popup to overlay', async () => {
-      // [TAG-SYNC-TEST-001] Provide required dependencies and mock sendToTab
+      // [TEST-TAG_SYNC] Provide required dependencies and mock sendToTab
       const mockUIManager = { clearTagInput: jest.fn(), updateCurrentTags: jest.fn(), updateRecentTags: jest.fn(), showSuccess: jest.fn(), updateConnectionStatus: jest.fn(), updatePrivateStatus: jest.fn(), updateReadLaterStatus: jest.fn(), updateVersionInfo: jest.fn(), on: jest.fn() }
       const mockStateManager = { setState: jest.fn() }
       const mockErrorHandler = { handleError: jest.fn() }

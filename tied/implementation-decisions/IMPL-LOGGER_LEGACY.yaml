@@ -1,0 +1,40 @@
+# [IMPL-LOGGER_LEGACY] Legacy logging compatibility (LOG-003)
+name: Logger Legacy Compatibility
+status: Active
+cross_references:
+  - REQ-STRUCTURED_LOGGING
+  - ARCH-STRUCTURED_LOGGING
+rationale:
+  why: log(context, ...args) and noisy export for gradual migration from legacy debug/console
+  problems_solved: []
+  benefits: []
+implementation_approach:
+  summary: src/shared/logger.js — log() maps to debug; export noisy
+  details: []
+code_locations:
+  files:
+    - path: src/shared/logger.js
+      description: log(), noisy
+  functions: []
+traceability:
+  architecture:
+    - ARCH-STRUCTURED_LOGGING
+  requirements:
+    - REQ-STRUCTURED_LOGGING
+  code_annotations:
+    - IMPL-LOGGER_LEGACY
+related_decisions:
+  depends_on: []
+  supersedes: []
+  see_also:
+    - IMPL-LOGGER_CONTEXT_LEVELS
+    - IMPL-LOG_LEVEL_CONFIG
+detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
+metadata:
+  created:
+    date: "2026-02-17"
+    author: AI Agent
+  last_updated:
+    date: "2026-02-17"
+    author: AI Agent
+    reason: Numbered token reinterpretation (LOG-003)

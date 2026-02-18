@@ -1,0 +1,39 @@
+# [IMPL-ARRAY_OBJECT_UTILITIES] Array and object manipulation (UTIL-003)
+name: Array and Object Utilities
+status: Active
+cross_references:
+  - REQ-SHARED_UTILITIES
+  - ARCH-SHARED_UTILITIES
+rationale:
+  why: unique, chunk, compact; deepClone, isEmpty, pick for data processing and state
+  problems_solved: []
+  benefits: []
+implementation_approach:
+  summary: arrayUtils and objectUtils in src/shared/utils.js
+  details: []
+code_locations:
+  files:
+    - path: src/shared/utils.js
+      description: arrayUtils, objectUtils
+  functions: []
+traceability:
+  architecture:
+    - ARCH-SHARED_UTILITIES
+  requirements:
+    - REQ-SHARED_UTILITIES
+  code_annotations:
+    - IMPL-ARRAY_OBJECT_UTILITIES
+related_decisions:
+  depends_on: []
+  supersedes: []
+  see_also:
+    - IMPL-URL_UTILITIES
+detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
+metadata:
+  created:
+    date: "2026-02-17"
+    author: AI Agent
+  last_updated:
+    date: "2026-02-17"
+    author: AI Agent
+    reason: Numbered token reinterpretation (UTIL-003)

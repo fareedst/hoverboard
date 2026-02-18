@@ -1672,6 +1672,296 @@ IMPL-POPUP_BUNDLE:
     registered: "2026-02-17"
     last_updated: "2026-02-17"
 
+REQ-SHARED_UTILITIES:
+  type: REQ
+  name: Shared Utilities
+  category: Non-Functional
+  status: Active
+  description: "URL, text, array/object, time/async, DOM utilities for extension"
+  cross_references:
+    - ARCH-SHARED_UTILITIES
+    - IMPL-URL_UTILITIES
+    - IMPL-TEXT_UTILITIES
+    - IMPL-ARRAY_OBJECT_UTILITIES
+    - IMPL-TIME_ASYNC_UTILITIES
+    - IMPL-DOM_UTILITIES
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SHARED_UTILITIES.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+REQ-STRUCTURED_LOGGING:
+  type: REQ
+  name: Structured Logging
+  category: Non-Functional
+  status: Active
+  description: "Structured logging with context and levels; environment-aware; legacy compatibility"
+  cross_references:
+    - ARCH-STRUCTURED_LOGGING
+    - IMPL-LOGGER_CONTEXT_LEVELS
+    - IMPL-LOG_LEVEL_CONFIG
+    - IMPL-LOGGER_LEGACY
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-STRUCTURED_LOGGING.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+ARCH-SHARED_UTILITIES:
+  type: ARCH
+  name: Shared Utilities Module
+  status: Active
+  description: "Shared utils module for URL, text, array/object, time, DOM"
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - IMPL-URL_UTILITIES
+    - IMPL-TEXT_UTILITIES
+    - IMPL-ARRAY_OBJECT_UTILITIES
+    - IMPL-TIME_ASYNC_UTILITIES
+    - IMPL-DOM_UTILITIES
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SHARED_UTILITIES.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+ARCH-STRUCTURED_LOGGING:
+  type: ARCH
+  name: Structured Logging
+  status: Active
+  description: "Context-based logging with level filtering; environment-aware; legacy compatibility"
+  cross_references:
+    - REQ-STRUCTURED_LOGGING
+    - IMPL-LOGGER_CONTEXT_LEVELS
+    - IMPL-LOG_LEVEL_CONFIG
+    - IMPL-LOGGER_LEGACY
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-STRUCTURED_LOGGING.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-CONFIG_BACKUP_RESTORE:
+  type: IMPL
+  name: Config Backup and Restore
+  status: Active
+  description: "exportConfig/importConfig for backup and portability (CFG-001)"
+  cross_references:
+    - REQ-CONFIG_PORTABILITY
+    - ARCH-CONFIG_STRUCTURE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-CONFIG_MIGRATION:
+  type: IMPL
+  name: Config Migration and Auth
+  status: Active
+  description: "Auth token storage, validation, API retry (CFG-002)"
+  cross_references:
+    - REQ-CONFIG_PORTABILITY
+    - ARCH-CONFIG_STRUCTURE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-CONFIG_MIGRATION.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-FEATURE_FLAGS:
+  type: IMPL
+  name: Feature Flags and Settings
+  status: Active
+  description: "Feature flags, UI behavior, settings persistence (CFG-003)"
+  cross_references:
+    - REQ-CONFIG_PORTABILITY
+    - ARCH-CONFIG_STRUCTURE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-FEATURE_FLAGS.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-URL_INHIBITION:
+  type: IMPL
+  name: URL Inhibition
+  status: Active
+  description: "Site-specific behavior via URL inhibition list (CFG-004)"
+  cross_references:
+    - REQ-SITE_MANAGEMENT
+    - ARCH-CONFIG_STRUCTURE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-URL_INHIBITION.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-URL_UTILITIES:
+  type: IMPL
+  name: URL Utilities
+  status: Active
+  description: "processUrl, isValidUrl, getDomain (UTIL-001)"
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-URL_UTILITIES.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-TEXT_UTILITIES:
+  type: IMPL
+  name: Text Utilities
+  status: Active
+  description: "truncate, normalizeText, escapeHtml (UTIL-002)"
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-TEXT_UTILITIES.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-ARRAY_OBJECT_UTILITIES:
+  type: IMPL
+  name: Array and Object Utilities
+  status: Active
+  description: "unique, chunk, compact; deepClone, isEmpty, pick (UTIL-003)"
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-TIME_ASYNC_UTILITIES:
+  type: IMPL
+  name: Time and Async Utilities
+  status: Active
+  description: "delay, formatTimestamp, getRelativeTime (UTIL-004)"
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-DOM_UTILITIES:
+  type: IMPL
+  name: DOM Utilities
+  status: Active
+  description: "waitForElement, createElement; legacy createPinFromFormData, validatePinFormData (UTIL-005)"
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-LOGGER_CONTEXT_LEVELS:
+  type: IMPL
+  name: Logger Context and Levels
+  status: Active
+  description: "Logger context, levels, formatMessage, debug/info/warn/error (LOG-001)"
+  cross_references:
+    - REQ-STRUCTURED_LOGGING
+    - ARCH-STRUCTURED_LOGGING
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-LOG_LEVEL_CONFIG:
+  type: IMPL
+  name: Log Level Configuration
+  status: Active
+  description: "getLogLevel from NODE_ENV (LOG-002)"
+  cross_references:
+    - REQ-STRUCTURED_LOGGING
+    - ARCH-STRUCTURED_LOGGING
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-LOGGER_LEGACY:
+  type: IMPL
+  name: Logger Legacy Compatibility
+  status: Active
+  description: "log(context, ...args), noisy (LOG-003)"
+  cross_references:
+    - REQ-STRUCTURED_LOGGING
+    - ARCH-STRUCTURED_LOGGING
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+TEST-OVERLAY_REFRESH:
+  type: TEST
+  name: Overlay Refresh Button Tests
+  status: Active
+  description: "Test suite for overlay refresh button (replaces OVERLAY-REFRESH-TEST-001)"
+  cross_references:
+    - REQ-OVERLAY_REFRESH_ACTION
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+TEST-TAG_SYNC:
+  type: TEST
+  name: Tag Synchronization Tests
+  status: Active
+  description: "Test suite for tag synchronization (replaces TAG-SYNC-TEST-001)"
+  cross_references:
+    - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+TEST-SHOW_HOVER_CHECKBOX:
+  type: TEST
+  name: Show Hover Checkbox Tests
+  status: Active
+  description: "Test suite for show-hover checkbox (replaces SHOW-HOVER-CHECKBOX-TEST-001/002/003)"
+  cross_references:
+    - REQ-OVERLAY_AUTO_SHOW_CONTROL
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+TEST-POPUP_CLOSE_BEHAVIOR:
+  type: TEST
+  name: Popup Close Behavior Tests
+  status: Active
+  description: "Test suite for popup close behavior (replaces POPUP-CLOSE-BEHAVIOR-TEST-001/002)"
+  cross_references:
+    - REQ-POPUP_PERSISTENT_SESSION
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
 # ---
 # Template Record - Copy this block to create new tokens
 # ---

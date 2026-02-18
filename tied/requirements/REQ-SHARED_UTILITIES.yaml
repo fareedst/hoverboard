@@ -1,0 +1,50 @@
+# [REQ-SHARED_UTILITIES] Shared utilities for extension
+# Migrated from legacy UTIL-001..005 (numbered-token-mapping)
+name: Shared Utilities
+category: Non-Functional
+priority: P2
+status: Implemented
+rationale:
+  why: Centralize URL, text, array/object, time/async, and DOM utilities for bookmark management and UI
+  problems_solved:
+    - Duplicated URL and text logic across features
+    - Inconsistent DOM and timing helpers
+  benefits:
+    - Single source for URL validation, text truncation, chunking, timing, DOM helpers
+    - Consistent behavior and testability
+satisfaction_criteria:
+  - criterion: urlUtils (processUrl, isValidUrl, getDomain) in src/shared/utils.js
+  - criterion: stringUtils (truncate, normalizeText, escapeHtml)
+  - criterion: arrayUtils (unique, chunk, compact) and objectUtils (deepClone, isEmpty, pick)
+  - criterion: timeUtils (delay, formatTimestamp, getRelativeTime) and domUtils (waitForElement, createElement)
+validation_criteria:
+  - method: Unit tests
+    coverage: Utils used by overlay, popup, config; no regressions
+traceability:
+  architecture:
+    - ARCH-SHARED_UTILITIES
+  implementation:
+    - IMPL-URL_UTILITIES
+    - IMPL-TEXT_UTILITIES
+    - IMPL-ARRAY_OBJECT_UTILITIES
+    - IMPL-TIME_ASYNC_UTILITIES
+    - IMPL-DOM_UTILITIES
+  code_annotations:
+    - IMPL-URL_UTILITIES
+    - IMPL-TEXT_UTILITIES
+    - IMPL-ARRAY_OBJECT_UTILITIES
+    - IMPL-TIME_ASYNC_UTILITIES
+    - IMPL-DOM_UTILITIES
+related_requirements:
+  depends_on: []
+  related_to: []
+  supersedes: []
+detail_file: requirements/REQ-SHARED_UTILITIES.yaml
+metadata:
+  created:
+    date: "2026-02-17"
+    author: AI Agent
+  last_updated:
+    date: "2026-02-17"
+    author: AI Agent
+    reason: Numbered token reinterpretation (UTIL-001..005)

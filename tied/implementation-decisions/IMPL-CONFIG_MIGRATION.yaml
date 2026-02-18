@@ -1,0 +1,41 @@
+# [IMPL-CONFIG_MIGRATION] Auth token storage, validation, API retry (CFG-002)
+name: Config Migration and Auth
+status: Active
+cross_references:
+  - REQ-CONFIG_PORTABILITY
+  - ARCH-CONFIG_STRUCTURE
+rationale:
+  why: Secure auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam; API retry config
+  problems_solved: []
+  benefits: []
+implementation_approach:
+  summary: ConfigManager auth token methods; sync storage for auth; graceful degradation on missing storage
+  details: []
+code_locations:
+  files:
+    - path: src/config/config-manager.js
+      description: getAuthToken, setAuthToken, hasAuth, getAuthParam; default config retry
+    - path: src/ui/options/options.js
+      description: Save auth token on save settings
+  functions: []
+traceability:
+  architecture:
+    - ARCH-CONFIG_STRUCTURE
+  requirements:
+    - REQ-CONFIG_PORTABILITY
+  code_annotations:
+    - IMPL-CONFIG_MIGRATION
+related_decisions:
+  depends_on: []
+  supersedes: []
+  see_also:
+    - IMPL-CONFIG_BACKUP_RESTORE
+detail_file: implementation-decisions/IMPL-CONFIG_MIGRATION.yaml
+metadata:
+  created:
+    date: "2026-02-17"
+    author: AI Agent
+  last_updated:
+    date: "2026-02-17"
+    author: AI Agent
+    reason: Numbered token reinterpretation (CFG-002)

@@ -257,7 +257,7 @@ class OptionsController {
       // Save configuration
       await this.configManager.updateConfig(settings)
 
-      // Save auth token (empty value clears token and disables Pinboard) [CFG-002]
+      // [IMPL-CONFIG_MIGRATION] Save auth token (empty value clears token and disables Pinboard)
       const authToken = this.elements.authToken.value.trim()
       await this.configManager.setAuthToken(authToken)
 

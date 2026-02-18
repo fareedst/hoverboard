@@ -1914,3 +1914,85 @@ ARCH-CODE_QUALITY:
       date: '2025-02-17'
       validator: agent
       result: pass
+ARCH-SHARED_UTILITIES:
+  name: Shared Utilities Module
+  status: Active
+  cross_references:
+    - REQ-SHARED_UTILITIES
+  rationale:
+    why: Single shared module for URL, text, array/object, time, DOM utilities
+    problems_solved: []
+    benefits:
+      - Consistent behavior and single place to test
+  implementation_approach:
+    summary: src/shared/utils.js exports urlUtils, stringUtils, arrayUtils, objectUtils, timeUtils, domUtils
+    details: []
+  traceability:
+    requirements:
+      - REQ-SHARED_UTILITIES
+    implementation:
+      - IMPL-URL_UTILITIES
+      - IMPL-TEXT_UTILITIES
+      - IMPL-ARRAY_OBJECT_UTILITIES
+      - IMPL-TIME_ASYNC_UTILITIES
+      - IMPL-DOM_UTILITIES
+    code_annotations:
+      - ARCH-SHARED_UTILITIES
+  related_decisions:
+    depends_on:
+      - REQ-SHARED_UTILITIES
+    informs:
+      - IMPL-URL_UTILITIES
+      - IMPL-TEXT_UTILITIES
+      - IMPL-ARRAY_OBJECT_UTILITIES
+      - IMPL-TIME_ASYNC_UTILITIES
+      - IMPL-DOM_UTILITIES
+    see_also: []
+  detail_file: architecture-decisions/ARCH-SHARED_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation
+ARCH-STRUCTURED_LOGGING:
+  name: Structured Logging
+  status: Active
+  cross_references:
+    - REQ-STRUCTURED_LOGGING
+  rationale:
+    why: Context-based logging with level filtering; environment-aware; legacy compatibility
+    problems_solved: []
+    benefits:
+      - Clear log attribution and level control
+  implementation_approach:
+    summary: src/shared/logger.js Logger class, createLogger, legacy log() and noisy
+    details: []
+  traceability:
+    requirements:
+      - REQ-STRUCTURED_LOGGING
+    implementation:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOG_LEVEL_CONFIG
+      - IMPL-LOGGER_LEGACY
+    code_annotations:
+      - ARCH-STRUCTURED_LOGGING
+  related_decisions:
+    depends_on:
+      - REQ-STRUCTURED_LOGGING
+    informs:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOG_LEVEL_CONFIG
+      - IMPL-LOGGER_LEGACY
+    see_also: []
+  detail_file: architecture-decisions/ARCH-STRUCTURED_LOGGING.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation

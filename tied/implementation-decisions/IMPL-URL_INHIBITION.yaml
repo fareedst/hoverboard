@@ -1,0 +1,39 @@
+# [IMPL-URL_INHIBITION] Site-specific behavior via URL inhibition list (CFG-004)
+name: URL Inhibition
+status: Active
+cross_references:
+  - REQ-SITE_MANAGEMENT
+  - ARCH-CONFIG_STRUCTURE
+rationale:
+  why: getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited; site-specific behavior control
+  problems_solved: []
+  benefits: []
+implementation_approach:
+  summary: ConfigManager getInhibitUrls (newline-separated), addInhibitUrl, setInhibitUrls; isUrlInhibited substring matching
+  details: []
+code_locations:
+  files:
+    - path: src/config/config-manager.js
+      description: getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited
+  functions: []
+traceability:
+  architecture:
+    - ARCH-CONFIG_STRUCTURE
+  requirements:
+    - REQ-SITE_MANAGEMENT
+  code_annotations:
+    - IMPL-URL_INHIBITION
+related_decisions:
+  depends_on: []
+  supersedes: []
+  see_also:
+    - IMPL-CONFIG_BACKUP_RESTORE
+detail_file: implementation-decisions/IMPL-URL_INHIBITION.yaml
+metadata:
+  created:
+    date: "2026-02-17"
+    author: AI Agent
+  last_updated:
+    date: "2026-02-17"
+    author: AI Agent
+    reason: Numbered token reinterpretation (CFG-004)

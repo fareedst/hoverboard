@@ -1,0 +1,39 @@
+# [IMPL-DOM_UTILITIES] DOM utilities for content scripts (UTIL-005)
+name: DOM Utilities
+status: Active
+cross_references:
+  - REQ-SHARED_UTILITIES
+  - ARCH-SHARED_UTILITIES
+rationale:
+  why: waitForElement (MutationObserver), createElement; legacy createPinFromFormData, validatePinFormData
+  problems_solved: []
+  benefits: []
+implementation_approach:
+  summary: domUtils in src/shared/utils.js — waitForElement, createElement; createPinFromFormData, validatePinFormData
+  details: []
+code_locations:
+  files:
+    - path: src/shared/utils.js
+      description: domUtils, createPinFromFormData, validatePinFormData
+  functions: []
+traceability:
+  architecture:
+    - ARCH-SHARED_UTILITIES
+  requirements:
+    - REQ-SHARED_UTILITIES
+  code_annotations:
+    - IMPL-DOM_UTILITIES
+related_decisions:
+  depends_on: []
+  supersedes: []
+  see_also:
+    - IMPL-TIME_ASYNC_UTILITIES
+detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
+metadata:
+  created:
+    date: "2026-02-17"
+    author: AI Agent
+  last_updated:
+    date: "2026-02-17"
+    author: AI Agent
+    reason: Numbered token reinterpretation (UTIL-005)

@@ -1,0 +1,50 @@
+# [ARCH-SHARED_UTILITIES] Shared utils module (URL, text, array/object, time, DOM)
+# Migrated from UTIL-001..005
+name: Shared Utilities Module
+status: Active
+cross_references:
+  - REQ-SHARED_UTILITIES
+rationale:
+  why: Single shared module for URL validation, text processing, arrays/objects, timing, DOM helpers used by overlay, popup, config
+  problems_solved:
+    - Scattered duplicate logic
+  benefits:
+    - Consistent behavior and single place to test
+implementation_approach:
+  summary: src/shared/utils.js exports urlUtils, stringUtils, arrayUtils, objectUtils, timeUtils, domUtils
+  details:
+    - URL: processUrl, isValidUrl, getDomain (native URL constructor)
+    - Text: truncate, normalizeText, escapeHtml (textContent for XSS)
+    - Array: unique (Set), chunk, compact; Object: deepClone, isEmpty, pick
+    - Time: delay (Promise), formatTimestamp, getRelativeTime
+    - DOM: waitForElement (MutationObserver), createElement, legacy createPinFromFormData / validatePinFormData
+traceability:
+  requirements:
+    - REQ-SHARED_UTILITIES
+  implementation:
+    - IMPL-URL_UTILITIES
+    - IMPL-TEXT_UTILITIES
+    - IMPL-ARRAY_OBJECT_UTILITIES
+    - IMPL-TIME_ASYNC_UTILITIES
+    - IMPL-DOM_UTILITIES
+  code_annotations:
+    - ARCH-SHARED_UTILITIES
+related_decisions:
+  depends_on:
+    - REQ-SHARED_UTILITIES
+  informs:
+    - IMPL-URL_UTILITIES
+    - IMPL-TEXT_UTILITIES
+    - IMPL-ARRAY_OBJECT_UTILITIES
+    - IMPL-TIME_ASYNC_UTILITIES
+    - IMPL-DOM_UTILITIES
+  see_also: []
+detail_file: architecture-decisions/ARCH-SHARED_UTILITIES.yaml
+metadata:
+  created:
+    date: "2026-02-17"
+    author: AI Agent
+  last_updated:
+    date: "2026-02-17"
+    author: AI Agent
+    reason: Numbered token reinterpretation

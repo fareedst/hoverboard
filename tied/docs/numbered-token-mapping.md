@@ -1,0 +1,61 @@
+# Numbered Token to TIED Mapping
+
+**Purpose**: Maps legacy numbered semantic tokens (e.g. CFG-001, UTIL-001) to TIED tokens (REQ/ARCH/IMPL/TEST) for traceability. Use this table for find/replace and audit.
+
+**SAFARI-*** tokens are out of scope (prior Safari-extension effort); leave unmodified in source and docs.
+
+---
+
+## Configuration (CFG)
+
+| Old Token | New REQ | New ARCH | New IMPL |
+|-----------|---------|----------|----------|
+| CFG-001 | REQ-CONFIG_PORTABILITY | ARCH-CONFIG_STRUCTURE | IMPL-CONFIG_BACKUP_RESTORE |
+| CFG-002 | REQ-CONFIG_PORTABILITY | ARCH-CONFIG_STRUCTURE | IMPL-CONFIG_MIGRATION (auth token, API retry) |
+| CFG-003 | REQ-CONFIG_PORTABILITY | ARCH-CONFIG_STRUCTURE | IMPL-FEATURE_FLAGS (settings, persistence, validation) |
+| CFG-004 | REQ-SITE_MANAGEMENT | ARCH-CONFIG_STRUCTURE | IMPL-URL_INHIBITION |
+
+---
+
+## Shared utilities (UTIL)
+
+| Old Token | New REQ | New ARCH | New IMPL |
+|-----------|---------|----------|----------|
+| UTIL-001 | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | IMPL-URL_UTILITIES |
+| UTIL-002 | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | IMPL-TEXT_UTILITIES |
+| UTIL-003 | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | IMPL-ARRAY_OBJECT_UTILITIES |
+| UTIL-004 | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | IMPL-TIME_ASYNC_UTILITIES |
+| UTIL-005 | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | IMPL-DOM_UTILITIES |
+
+---
+
+## Logging (LOG)
+
+| Old Token | New REQ | New ARCH | New IMPL |
+|-----------|---------|----------|----------|
+| LOG-001 | REQ-STRUCTURED_LOGGING | ARCH-STRUCTURED_LOGGING | IMPL-LOGGER_CONTEXT_LEVELS |
+| LOG-002 | REQ-STRUCTURED_LOGGING | ARCH-STRUCTURED_LOGGING | IMPL-LOG_LEVEL_CONFIG |
+| LOG-003 | REQ-STRUCTURED_LOGGING | ARCH-STRUCTURED_LOGGING | IMPL-LOGGER_LEGACY |
+
+---
+
+## Overlay / Popup / Show-Hover (Phase 2)
+
+| Old Token | New REQ | New TEST |
+|-----------|---------|----------|
+| OVERLAY-REFRESH-TEST-001 | REQ-OVERLAY_REFRESH_ACTION | TEST-OVERLAY_REFRESH |
+| TAG-SYNC-TEST-001 | REQ-BOOKMARK_STATE_SYNCHRONIZATION | TEST-TAG_SYNC |
+| SHOW-HOVER-CHECKBOX-TEST-001/002/003 | REQ-OVERLAY_AUTO_SHOW_CONTROL | TEST-SHOW_HOVER_CHECKBOX |
+| POPUP-CLOSE-BEHAVIOR-TEST-001/002 | REQ-POPUP_PERSISTENT_SESSION | TEST-POPUP_CLOSE_BEHAVIOR |
+
+---
+
+## Doc-only (Phase 3)
+
+| Old Token | Suggested TIED |
+|-----------|----------------|
+| TEST-001 | TEST-UNIT_FRAMEWORK (or PROC) |
+| TEST-002 | TEST-INTEGRATION |
+| TEST-003 | TEST-MOCK_SERVICES |
+| DOC-001–004 | PROC or ARCH/IMPL for documentation |
+| ARCH-DOC-001, TEST-DOC-001 | PROC or doc-specific tokens |

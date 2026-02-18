@@ -1,5 +1,5 @@
 /**
- * [OVERLAY-REFRESH-TEST-001] Overlay Refresh Button Unit Tests
+ * [TEST-OVERLAY_REFRESH] Overlay Refresh Button Unit Tests
  * 
  * Comprehensive unit tests for the overlay refresh button functionality
  * Tests button rendering, click handling, error scenarios, accessibility, and theme integration
@@ -65,7 +65,7 @@ const mockRefreshResponse = (mockMessageService, { bookmark, rawResponse, error 
   })
 }
 
-// [OVERLAY-REFRESH-TEST-001] Test suite for overlay refresh button
+// [TEST-OVERLAY_REFRESH] Test suite for overlay refresh button
 describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
   let overlayManager
   let mockMessageService
@@ -73,7 +73,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
   let showSpy
 
   beforeEach(() => {
-    // [OVERLAY-REFRESH-TEST-001] Setup test environment
+    // [TEST-OVERLAY_REFRESH] Setup test environment
     mockDocument = createMockDocument()
     mockMessageService = createMockMessageService()
     overlayManager = new OverlayManager(mockDocument, {})
@@ -95,7 +95,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
   })
 
   afterEach(() => {
-    // [OVERLAY-REFRESH-TEST-001] Cleanup test environment
+    // [TEST-OVERLAY_REFRESH] Cleanup test environment
     showSpy?.mockRestore()
     jest.clearAllMocks()
     if (mockDocument.reset) {
@@ -103,7 +103,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
     }
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Button rendering tests
+  // [TEST-OVERLAY_REFRESH] Button rendering tests
   describe('Button Rendering', () => {
     test('[OVERLAY-REFRESH-UI-001] Should render refresh button correctly', async () => {
       // Arrange
@@ -164,7 +164,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Click handler tests
+  // [TEST-OVERLAY_REFRESH] Click handler tests
   describe('Click Handler', () => {
     test('[OVERLAY-REFRESH-HANDLER-001] Should handle successful refresh', async () => {
       // Arrange
@@ -226,7 +226,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Error handling tests
+  // [TEST-OVERLAY_REFRESH] Error handling tests
   describe('Error Handling', () => {
     test('[OVERLAY-REFRESH-ERROR-001] Should handle network errors gracefully', async () => {
       // Arrange
@@ -285,7 +285,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Accessibility tests
+  // [TEST-OVERLAY_REFRESH] Accessibility tests
   describe('Accessibility', () => {
     test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have correct ARIA attributes', async () => {
       // Arrange
@@ -364,7 +364,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Integration tests
+  // [TEST-OVERLAY_REFRESH] Integration tests
   describe('Integration', () => {
     test('[OVERLAY-REFRESH-INTEGRATION-001] Should integrate with message service', async () => {
       // Arrange
@@ -427,7 +427,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Performance tests
+  // [TEST-OVERLAY_REFRESH] Performance tests
   describe('Performance', () => {
     test('[OVERLAY-REFRESH-PERFORMANCE-001] Should complete refresh within reasonable time', async () => {
       // Arrange
@@ -471,7 +471,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Edge case tests
+  // [TEST-OVERLAY_REFRESH] Edge case tests
   describe('Edge Cases', () => {
     test('[OVERLAY-REFRESH-ERROR-001] Should handle undefined content', async () => {
       // Arrange
@@ -546,7 +546,7 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
   })
 })
 
-// [OVERLAY-REFRESH-TEST-001] Export test utilities for other test files
+// [TEST-OVERLAY_REFRESH] Export test utilities for other test files
 export {
   createMockDocument,
   createMockMessageService,

@@ -71,28 +71,34 @@ For detailed guidelines on how to document and track features, please refer to t
 | MV3-004 | Permission migration | V3 permissions | Permission System | TestPermissions | 📋 Planned | `// MV3-004: V3 permissions` | 🚨 CRITICAL |
 
 ### 🔧 Configuration System [PRIORITY: CRITICAL]
-| Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
-|------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
-| CFG-001 | Modern config manager | Config modernization | ConfigManager class | TestConfigManager | ✅ Implemented | `// CFG-001: Config manager` | 🚨 CRITICAL |
-| CFG-002 | Legacy config migration | Settings migration | Migration utilities | TestConfigMigration | 📋 Planned | `// CFG-002: Config migration` | 🚨 CRITICAL |
-| CFG-003 | Config validation | Schema validation | Validation system | TestConfigValidation | 📋 Planned | `// CFG-003: Config validation` | 🔺 HIGH |
-| CFG-004 | Config backup/restore | Config persistence | Backup utilities | TestConfigBackup | 📋 Planned | `// CFG-004: Config backup` | 🔺 HIGH |
+| Feature ID (TIED) | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
+|-------------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
+| IMPL-CONFIG_BACKUP_RESTORE | Config backup/restore | REQ-CONFIG_PORTABILITY | ARCH-CONFIG_STRUCTURE | Config manager tests | ✅ Implemented | `[IMPL-CONFIG_BACKUP_RESTORE]` | 🚨 CRITICAL |
+| IMPL-CONFIG_MIGRATION | Auth token, migration | REQ-CONFIG_PORTABILITY | ARCH-CONFIG_STRUCTURE | TestConfigMigration | ✅ Implemented | `[IMPL-CONFIG_MIGRATION]` | 🚨 CRITICAL |
+| IMPL-FEATURE_FLAGS | Settings, validation | REQ-CONFIG_PORTABILITY | ARCH-CONFIG_STRUCTURE | TestConfigValidation | ✅ Implemented | `[IMPL-FEATURE_FLAGS]` | 🔺 HIGH |
+| IMPL-URL_INHIBITION | URL inhibition | REQ-SITE_MANAGEMENT | ARCH-CONFIG_STRUCTURE | TestConfigBackup | ✅ Implemented | `[IMPL-URL_INHIBITION]` | 🔺 HIGH |
+
+*Legacy IDs (CFG-001–004) mapped to TIED tokens; see `tied/docs/numbered-token-mapping.md`.*
 
 ### 🛠️ Shared Utilities [PRIORITY: HIGH]
-| Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
-|------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
-| UTIL-001 | DOM utilities | Modern DOM utils | DOMUtils class | TestDOMUtils | 📋 Planned | `// UTIL-001: DOM utilities` | 🔺 HIGH |
-| UTIL-002 | URL utilities | URL manipulation | URLUtils class | TestURLUtils | 📋 Planned | `// UTIL-002: URL utilities` | 🔺 HIGH |
-| UTIL-003 | String utilities | String operations | StringUtils class | TestStringUtils | 📋 Planned | `// UTIL-003: String utilities` | 🔺 HIGH |
-| UTIL-004 | Date utilities | Date formatting | DateUtils class | TestDateUtils | 📋 Planned | `// UTIL-004: Date utilities` | 🔺 HIGH |
-| UTIL-005 | Validation utilities | Data validation | ValidationUtils class | TestValidationUtils | 📋 Planned | `// UTIL-005: Validation utilities` | 🔺 HIGH |
+| Feature ID (TIED) | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
+|-------------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
+| IMPL-URL_UTILITIES | URL processing | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | TestURLUtils | ✅ Implemented | `[IMPL-URL_UTILITIES]` | 🔺 HIGH |
+| IMPL-TEXT_UTILITIES | String operations | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | TestStringUtils | ✅ Implemented | `[IMPL-TEXT_UTILITIES]` | 🔺 HIGH |
+| IMPL-ARRAY_OBJECT_UTILITIES | Array/object utils | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | TestArrayUtils | ✅ Implemented | `[IMPL-ARRAY_OBJECT_UTILITIES]` | 🔺 HIGH |
+| IMPL-TIME_ASYNC_UTILITIES | Time/async utils | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | TestDateUtils | ✅ Implemented | `[IMPL-TIME_ASYNC_UTILITIES]` | 🔺 HIGH |
+| IMPL-DOM_UTILITIES | DOM utilities | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | TestDOMUtils | ✅ Implemented | `[IMPL-DOM_UTILITIES]` | 🔺 HIGH |
+
+*Legacy IDs (UTIL-001–005) mapped to TIED; see `tied/docs/numbered-token-mapping.md`.*
 
 ### 📊 Logging & Debugging [PRIORITY: HIGH]
-| Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
-|------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
-| LOG-001 | Modern logging system | Structured logging | Logger class | TestLogger | 📋 Planned | `// LOG-001: Logging system` | 🔺 HIGH |
-| LOG-002 | Debug utilities | Development tools | Debug utilities | TestDebugUtils | 📋 Planned | `// LOG-002: Debug utilities` | 🔺 HIGH |
-| LOG-003 | Error tracking | Error management | Error tracker | TestErrorTracking | 📋 Planned | `// LOG-003: Error tracking` | 🔺 HIGH |
+| Feature ID (TIED) | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
+|-------------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
+| IMPL-LOGGER_CONTEXT_LEVELS | Structured logging | REQ-STRUCTURED_LOGGING | ARCH-STRUCTURED_LOGGING | TestLogger | ✅ Implemented | `[IMPL-LOGGER_CONTEXT_LEVELS]` | 🔺 HIGH |
+| IMPL-LOG_LEVEL_CONFIG | Log level config | REQ-STRUCTURED_LOGGING | ARCH-STRUCTURED_LOGGING | TestDebugUtils | ✅ Implemented | `[IMPL-LOG_LEVEL_CONFIG]` | 🔺 HIGH |
+| IMPL-LOGGER_LEGACY | Legacy compatibility | REQ-STRUCTURED_LOGGING | ARCH-STRUCTURED_LOGGING | TestErrorTracking | ✅ Implemented | `[IMPL-LOGGER_LEGACY]` | 🔺 HIGH |
+
+*Legacy IDs (LOG-001–003) mapped to TIED; see `tied/docs/numbered-token-mapping.md`.*
 
 ### 🔗 Pinboard Integration [PRIORITY: HIGH]
 | Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |

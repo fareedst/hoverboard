@@ -2057,3 +2057,427 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
       date: '2026-02-14'
       author: AI Agent
       reason: Helper path normalization and post-write verification
+IMPL-CONFIG_BACKUP_RESTORE:
+  name: Config Backup and Restore
+  status: Active
+  cross_references:
+    - REQ-CONFIG_PORTABILITY
+    - ARCH-CONFIG_STRUCTURE
+  rationale:
+    why: exportConfig/importConfig for backup and portability
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: ConfigManager.exportConfig(), importConfig()
+    details: []
+  code_locations:
+    files:
+      - path: src/config/config-manager.js
+        description: exportConfig, importConfig
+  traceability:
+    architecture:
+      - ARCH-CONFIG_STRUCTURE
+    requirements:
+      - REQ-CONFIG_PORTABILITY
+    code_annotations:
+      - IMPL-CONFIG_BACKUP_RESTORE
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-CONFIG_MIGRATION
+  detail_file: implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (CFG-001)
+IMPL-CONFIG_MIGRATION:
+  name: Config Migration and Auth
+  status: Active
+  cross_references:
+    - REQ-CONFIG_PORTABILITY
+    - ARCH-CONFIG_STRUCTURE
+  rationale:
+    why: Auth token storage, validation, API retry config
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: getAuthToken, setAuthToken, hasAuth, getAuthParam; retry in default config
+    details: []
+  code_locations:
+    files:
+      - path: src/config/config-manager.js
+      - path: src/ui/options/options.js
+  traceability:
+    architecture:
+      - ARCH-CONFIG_STRUCTURE
+    requirements:
+      - REQ-CONFIG_PORTABILITY
+    code_annotations:
+      - IMPL-CONFIG_MIGRATION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-CONFIG_MIGRATION.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (CFG-002)
+IMPL-FEATURE_FLAGS:
+  name: Feature Flags and Settings
+  status: Active
+  cross_references:
+    - REQ-CONFIG_PORTABILITY
+    - ARCH-CONFIG_STRUCTURE
+  rationale:
+    why: Default config, getConfigForUI, updateConfig, getSettings, setSettings, resetToDefaults
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: Feature flags, UI behavior, badge config; ensureDefaults; getSettings/setSettings
+    details: []
+  code_locations:
+    files:
+      - path: src/config/config-manager.js
+  traceability:
+    architecture:
+      - ARCH-CONFIG_STRUCTURE
+    requirements:
+      - REQ-CONFIG_PORTABILITY
+    code_annotations:
+      - IMPL-FEATURE_FLAGS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-FEATURE_FLAGS.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (CFG-003)
+IMPL-URL_INHIBITION:
+  name: URL Inhibition
+  status: Active
+  cross_references:
+    - REQ-SITE_MANAGEMENT
+    - ARCH-CONFIG_STRUCTURE
+  rationale:
+    why: getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: Inhibition list in storage; substring matching for isUrlInhibited
+    details: []
+  code_locations:
+    files:
+      - path: src/config/config-manager.js
+  traceability:
+    architecture:
+      - ARCH-CONFIG_STRUCTURE
+    requirements:
+      - REQ-SITE_MANAGEMENT
+    code_annotations:
+      - IMPL-URL_INHIBITION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-URL_INHIBITION.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (CFG-004)
+IMPL-URL_UTILITIES:
+  name: URL Utilities
+  status: Active
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  rationale:
+    why: processUrl, isValidUrl, getDomain
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: urlUtils in src/shared/utils.js
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/utils.js
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    requirements:
+      - REQ-SHARED_UTILITIES
+    code_annotations:
+      - IMPL-URL_UTILITIES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-URL_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (UTIL-001)
+IMPL-TEXT_UTILITIES:
+  name: Text Utilities
+  status: Active
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  rationale:
+    why: truncate, normalizeText, escapeHtml
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: stringUtils in src/shared/utils.js
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/utils.js
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    requirements:
+      - REQ-SHARED_UTILITIES
+    code_annotations:
+      - IMPL-TEXT_UTILITIES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-TEXT_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (UTIL-002)
+IMPL-ARRAY_OBJECT_UTILITIES:
+  name: Array and Object Utilities
+  status: Active
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  rationale:
+    why: unique, chunk, compact; deepClone, isEmpty, pick
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: arrayUtils, objectUtils in src/shared/utils.js
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/utils.js
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    requirements:
+      - REQ-SHARED_UTILITIES
+    code_annotations:
+      - IMPL-ARRAY_OBJECT_UTILITIES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (UTIL-003)
+IMPL-TIME_ASYNC_UTILITIES:
+  name: Time and Async Utilities
+  status: Active
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  rationale:
+    why: delay, formatTimestamp, getRelativeTime
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: timeUtils in src/shared/utils.js
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/utils.js
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    requirements:
+      - REQ-SHARED_UTILITIES
+    code_annotations:
+      - IMPL-TIME_ASYNC_UTILITIES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (UTIL-004)
+IMPL-DOM_UTILITIES:
+  name: DOM Utilities
+  status: Active
+  cross_references:
+    - REQ-SHARED_UTILITIES
+    - ARCH-SHARED_UTILITIES
+  rationale:
+    why: waitForElement, createElement; createPinFromFormData, validatePinFormData
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: domUtils and legacy helpers in src/shared/utils.js
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/utils.js
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    requirements:
+      - REQ-SHARED_UTILITIES
+    code_annotations:
+      - IMPL-DOM_UTILITIES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (UTIL-005)
+IMPL-LOGGER_CONTEXT_LEVELS:
+  name: Logger Context and Levels
+  status: Active
+  cross_references:
+    - REQ-STRUCTURED_LOGGING
+    - ARCH-STRUCTURED_LOGGING
+  rationale:
+    why: Logger context, shouldLog, formatMessage, debug/info/warn/error; createLogger
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: Logger class, logger, createLogger in src/shared/logger.js
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/logger.js
+  traceability:
+    architecture:
+      - ARCH-STRUCTURED_LOGGING
+    requirements:
+      - REQ-STRUCTURED_LOGGING
+    code_annotations:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (LOG-001)
+IMPL-LOG_LEVEL_CONFIG:
+  name: Log Level Configuration
+  status: Active
+  cross_references:
+    - REQ-STRUCTURED_LOGGING
+    - ARCH-STRUCTURED_LOGGING
+  rationale:
+    why: getLogLevel from NODE_ENV; debug in dev, warn in production
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: getLogLevel() in src/shared/logger.js
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/logger.js
+  traceability:
+    architecture:
+      - ARCH-STRUCTURED_LOGGING
+    requirements:
+      - REQ-STRUCTURED_LOGGING
+    code_annotations:
+      - IMPL-LOG_LEVEL_CONFIG
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (LOG-002)
+IMPL-LOGGER_LEGACY:
+  name: Logger Legacy Compatibility
+  status: Active
+  cross_references:
+    - REQ-STRUCTURED_LOGGING
+    - ARCH-STRUCTURED_LOGGING
+  rationale:
+    why: log(context, ...args), noisy export
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: log(), noisy in src/shared/logger.js
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/logger.js
+  traceability:
+    architecture:
+      - ARCH-STRUCTURED_LOGGING
+    requirements:
+      - REQ-STRUCTURED_LOGGING
+    code_annotations:
+      - IMPL-LOGGER_LEGACY
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Numbered token reinterpretation (LOG-003)

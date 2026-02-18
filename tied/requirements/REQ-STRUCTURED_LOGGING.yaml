@@ -1,0 +1,45 @@
+# [REQ-STRUCTURED_LOGGING] Structured logging with context and levels
+# Migrated from legacy LOG-001..003 (numbered-token-mapping)
+name: Structured Logging
+category: Non-Functional
+priority: P2
+status: Implemented
+rationale:
+  why: Provide consistent, level-filtered logging with context for debugging and diagnostics
+  problems_solved:
+    - Ad-hoc console.log and inconsistent log levels
+    - No component identification in logs
+  benefits:
+    - Context-based log attribution; environment-aware level (debug in dev, warn+ in prod)
+    - Legacy log() compatibility during migration
+satisfaction_criteria:
+  - criterion: Logger class with context, getLogLevel, shouldLog, formatMessage, debug/info/warn/error
+  - criterion: createLogger(context) factory; legacy log(context, ...args) and noisy flag
+validation_criteria:
+  - method: Manual/unit
+    coverage: Log level filtering and formatting
+traceability:
+  architecture:
+    - ARCH-STRUCTURED_LOGGING
+  implementation:
+    - IMPL-LOGGER_CONTEXT_LEVELS
+    - IMPL-LOG_LEVEL_CONFIG
+    - IMPL-LOGGER_LEGACY
+  code_annotations:
+    - IMPL-LOGGER_CONTEXT_LEVELS
+    - IMPL-LOG_LEVEL_CONFIG
+    - IMPL-LOGGER_LEGACY
+related_requirements:
+  depends_on: []
+  related_to:
+    - REQ-MAINTAINABILITY
+  supersedes: []
+detail_file: requirements/REQ-STRUCTURED_LOGGING.yaml
+metadata:
+  created:
+    date: "2026-02-17"
+    author: AI Agent
+  last_updated:
+    date: "2026-02-17"
+    author: AI Agent
+    reason: Numbered token reinterpretation (LOG-001..003)
