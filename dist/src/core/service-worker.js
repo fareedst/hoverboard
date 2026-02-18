@@ -31,7 +31,7 @@ var init_config_manager = __esm({
        * Get default configuration values
        * Migrated from src/shared/config.js
        *
-       * CFG-003: Feature flags and UI behavior control defaults
+       * IMPL-FEATURE_FLAGS: Feature flags and UI behavior control defaults
        * SPECIFICATION: Each setting controls specific extension behavior
        * IMPLEMENTATION DECISION: Conservative defaults favor user privacy and minimal intrusion
        */
@@ -39,7 +39,7 @@ var init_config_manager = __esm({
         return {
           // [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] - Default local: preferable for most users (no account/API required)
           storageMode: "local",
-          // CFG-003: Feature flags - Core functionality toggles
+          // IMPL-FEATURE_FLAGS: Feature flags - Core functionality toggles
           // IMPLEMENTATION DECISION: Enable helpful features by default, disable potentially intrusive ones
           hoverShowRecentTags: true,
           // Show recent tags in hover overlay
@@ -55,7 +55,7 @@ var init_config_manager = __esm({
           // Respect site-specific inhibition settings
           setIconOnLoad: true,
           // Update extension icon to reflect bookmark status
-          // CFG-003: UI behavior settings - User experience configuration
+          // IMPL-FEATURE_FLAGS: UI behavior settings - User experience configuration
           // IMPLEMENTATION DECISION: Reasonable limits that balance functionality with performance
           recentTagsCountMax: 32,
           // Maximum recent tags to track
@@ -91,7 +91,7 @@ var init_config_manager = __esm({
           // Enable user-driven recent tags
           recentTagsClearOnReload: true,
           // Clear shared memory on extension reload
-          // CFG-003: Badge configuration - Extension icon indicator settings
+          // IMPL-FEATURE_FLAGS: Badge configuration - Extension icon indicator settings
           // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
           badgeTextIfNotBookmarked: "-",
           // Clear indication of non-bookmarked state
@@ -101,7 +101,7 @@ var init_config_manager = __esm({
           // Pending action indicator
           badgeTextIfBookmarkedNoTags: "0",
           // Zero tags indicator
-          // CFG-002: API retry configuration - Network resilience settings
+          // IMPL-CONFIG_MIGRATION: API retry configuration - Network resilience settings
           // IMPLEMENTATION DECISION: Conservative retry strategy to avoid API rate limiting
           pinRetryCountMax: 2,
           // Maximum retry attempts
@@ -134,7 +134,7 @@ var init_config_manager = __esm({
       /**
        * Initialize default settings on first installation
        *
-       * CFG-003: First-run initialization ensures extension works immediately
+       * IMPL-FEATURE_FLAGS: First-run initialization ensures extension works immediately
        * IMPLEMENTATION DECISION: Only initialize if no settings exist to preserve user customizations
        */
       async initializeDefaults() {
@@ -147,7 +147,7 @@ var init_config_manager = __esm({
        * Get complete configuration object
        * @returns {Promise<Object>} Configuration object
        *
-       * CFG-003: Configuration resolution with default fallback
+       * IMPL-FEATURE_FLAGS: Configuration resolution with default fallback
        * IMPLEMENTATION DECISION: Merge defaults with stored settings to handle partial configurations
        */
       async getConfig() {
@@ -161,7 +161,7 @@ var init_config_manager = __esm({
        * Get user-configurable options (subset of config for UI)
        * @returns {Promise<Object>} Options object
        *
-       * CFG-003: UI-specific configuration subset
+       * IMPL-FEATURE_FLAGS: UI-specific configuration subset
        * IMPLEMENTATION DECISION: Only expose user-relevant settings to avoid configuration complexity
        */
       async getOptions() {
@@ -192,7 +192,7 @@ var init_config_manager = __esm({
        * Update specific configuration values
        * @param {Object} updates - Configuration updates
        *
-       * CFG-003: Partial configuration updates with persistence
+       * IMPL-FEATURE_FLAGS: Partial configuration updates with persistence
        * IMPLEMENTATION DECISION: Merge updates to preserve unmodified settings
        */
       async updateConfig(updates) {
@@ -263,7 +263,7 @@ var init_config_manager = __esm({
        * Get authentication token
        * @returns {Promise<string>} Auth token or empty string
        *
-       * CFG-002: Secure authentication token retrieval
+       * IMPL-CONFIG_MIGRATION: Secure authentication token retrieval
        * IMPLEMENTATION DECISION: Return empty string on failure to ensure graceful degradation
        */
       async getAuthToken() {
@@ -279,7 +279,7 @@ var init_config_manager = __esm({
        * Set authentication token
        * @param {string} token - Pinboard API token
        *
-       * CFG-002: Secure authentication token storage
+       * IMPL-CONFIG_MIGRATION: Secure authentication token storage
        * IMPLEMENTATION DECISION: Use sync storage for cross-device authentication
        */
       async setAuthToken(token) {
@@ -296,7 +296,7 @@ var init_config_manager = __esm({
        * Check if authentication token exists
        * @returns {Promise<boolean>} Whether token exists
        *
-       * CFG-002: Authentication state validation
+       * IMPL-CONFIG_MIGRATION: Authentication state validation
        * IMPLEMENTATION DECISION: Simple boolean check for authentication state
        */
       async hasAuthToken() {
@@ -307,7 +307,7 @@ var init_config_manager = __esm({
        * Get authentication token formatted for API requests
        * @returns {Promise<string>} Token formatted as URL parameter
        *
-       * CFG-002: API-ready authentication parameter formatting
+       * IMPL-CONFIG_MIGRATION: API-ready authentication parameter formatting
        * IMPLEMENTATION DECISION: Pre-format token for consistent API usage
        */
       async getAuthTokenParam() {
@@ -318,7 +318,7 @@ var init_config_manager = __esm({
        * Get inhibited URLs list
        * @returns {Promise<string[]>} Array of inhibited URLs
        *
-       * CFG-004: Site-specific behavior control through URL inhibition
+       * IMPL-URL_INHIBITION: Site-specific behavior control through URL inhibition
        * IMPLEMENTATION DECISION: Store URLs as newline-separated string for user editing convenience
        */
       async getInhibitUrls() {
@@ -335,7 +335,7 @@ var init_config_manager = __esm({
        * Add URL to inhibit list
        * @param {string} url - URL to inhibit
        *
-       * CFG-004: Dynamic inhibition list management
+       * IMPL-URL_INHIBITION: Dynamic inhibition list management
        * IMPLEMENTATION DECISION: Check for duplicates to maintain clean inhibition list
        */
       async addInhibitUrl(url) {
@@ -359,7 +359,7 @@ var init_config_manager = __esm({
        * Set inhibit URLs list (replaces existing list)
        * @param {string[]} urls - Array of URLs to inhibit
        *
-       * CFG-004: Complete inhibition list replacement
+       * IMPL-URL_INHIBITION: Complete inhibition list replacement
        * IMPLEMENTATION DECISION: Allow bulk replacement for configuration import/reset scenarios
        */
       async setInhibitUrls(urls) {
@@ -378,7 +378,7 @@ var init_config_manager = __esm({
        * @param {string} url - URL to check
        * @returns {Promise<boolean>} Whether URL is allowed
        *
-       * CFG-004: URL filtering logic for site-specific behavior
+       * IMPL-URL_INHIBITION: URL filtering logic for site-specific behavior
        * IMPLEMENTATION DECISION: Bidirectional substring matching for flexible URL patterns
        */
       async isUrlAllowed(url) {
@@ -397,7 +397,7 @@ var init_config_manager = __esm({
        * Get stored settings from storage
        * @returns {Promise<Object>} Stored settings
        *
-       * CFG-003: Core settings retrieval with error handling
+       * IMPL-FEATURE_FLAGS: Core settings retrieval with error handling
        * IMPLEMENTATION DECISION: Return empty object on failure to allow default merging
        */
       async getStoredSettings() {
@@ -422,7 +422,7 @@ var init_config_manager = __esm({
        * Save settings to storage
        * @param {Object} settings - Settings to save
        *
-       * CFG-003: Settings persistence with error propagation
+       * IMPL-FEATURE_FLAGS: Settings persistence with error propagation
        * IMPLEMENTATION DECISION: Let errors propagate to caller for proper error handling
        */
       async saveSettings(settings) {
@@ -438,7 +438,7 @@ var init_config_manager = __esm({
       /**
        * Reset all settings to defaults
        *
-       * CFG-003: Configuration reset functionality
+       * IMPL-FEATURE_FLAGS: Configuration reset functionality
        * IMPLEMENTATION DECISION: Simple replacement with defaults for clean reset
        */
       async resetToDefaults() {
@@ -448,7 +448,7 @@ var init_config_manager = __esm({
        * Export configuration for backup
        * @returns {Promise<Object>} Complete configuration export
        *
-       * CFG-001: Configuration backup and portability
+       * IMPL-CONFIG_BACKUP_RESTORE: Configuration backup and portability
        * IMPLEMENTATION DECISION: Include all configuration data with metadata for validation
        */
       async exportConfig() {
@@ -470,7 +470,7 @@ var init_config_manager = __esm({
        * Import configuration from backup
        * @param {Object} configData - Configuration data to import
        *
-       * CFG-001: Configuration restoration from backup
+       * IMPL-CONFIG_BACKUP_RESTORE: Configuration restoration from backup
        * IMPLEMENTATION DECISION: Selective import allows partial configuration restoration
        */
       async importConfig(configData) {
@@ -603,7 +603,7 @@ var init_logger = __esm({
         this.context = context;
         this.logLevel = this.getLogLevel();
       }
-      // LOG-002: Environment-based log level determination
+      // IMPL-LOG_LEVEL_CONFIG: Environment-based log level determination
       // SPECIFICATION: Production builds should minimize console output for performance
       // IMPLEMENTATION DECISION: Debug logs in development, warnings+ in production
       getLogLevel() {
@@ -612,13 +612,13 @@ var init_logger = __esm({
         }
         return false ? "warn" : "debug";
       }
-      // LOG-001: Log level filtering logic
+      // IMPL-LOGGER_CONTEXT_LEVELS: Log level filtering logic
       // IMPLEMENTATION DECISION: Numeric level comparison for efficient filtering
       shouldLog(level) {
         const levels = { debug: 0, info: 1, warn: 2, error: 3 };
         return levels[level] >= levels[this.logLevel];
       }
-      // LOG-001: Consistent message formatting with metadata
+      // IMPL-LOGGER_CONTEXT_LEVELS: Consistent message formatting with metadata
       // SPECIFICATION: Include timestamp, context, and level for log analysis
       // IMPLEMENTATION DECISION: ISO timestamp format for precise timing and parsing
       formatMessage(level, message, ...args) {
@@ -626,35 +626,35 @@ var init_logger = __esm({
         const prefix = `[${timestamp}] [${this.context}] [${level.toUpperCase()}]`;
         return [prefix, message, ...args];
       }
-      // LOG-001: Debug level logging - Development information
+      // IMPL-LOGGER_CONTEXT_LEVELS: Debug level logging - Development information
       // IMPLEMENTATION DECISION: Use console.log for debug to distinguish from info
       debug(message, ...args) {
         if (this.shouldLog("debug")) {
           console.log(...this.formatMessage("debug", message, ...args));
         }
       }
-      // LOG-001: Info level logging - General information
+      // IMPL-LOGGER_CONTEXT_LEVELS: Info level logging - General information
       // IMPLEMENTATION DECISION: Use console.info for semantic clarity
       info(message, ...args) {
         if (this.shouldLog("info")) {
           console.info(...this.formatMessage("info", message, ...args));
         }
       }
-      // LOG-001: Warning level logging - Non-critical issues
+      // IMPL-LOGGER_CONTEXT_LEVELS: Warning level logging - Non-critical issues
       // IMPLEMENTATION DECISION: Use console.warn for proper browser developer tools integration
       warn(message, ...args) {
         if (this.shouldLog("warn")) {
           console.warn(...this.formatMessage("warn", message, ...args));
         }
       }
-      // LOG-001: Error level logging - Critical issues
+      // IMPL-LOGGER_CONTEXT_LEVELS: Error level logging - Critical issues
       // IMPLEMENTATION DECISION: Use console.error for proper error tracking and debugging
       error(message, ...args) {
         if (this.shouldLog("error")) {
           console.error(...this.formatMessage("error", message, ...args));
         }
       }
-      // LOG-003: Legacy compatibility methods
+      // IMPL-LOGGER_LEGACY: Legacy compatibility methods
       // SPECIFICATION: Maintain backward compatibility during gradual migration
       // IMPLEMENTATION DECISION: Map legacy log calls to debug level
       log(context, ...args) {
@@ -7174,8 +7174,12 @@ var BookmarkRouter = class {
     if (!url) {
       return { success: false, code: "invalid", message: "URL is required" };
     }
-    let backend = await this.storageIndex.getBackendForUrl(url);
-    if (!backend) backend = await this.getDefaultStorageMode();
+    const VALID_BACKENDS2 = ["pinboard", "local", "file", "sync"];
+    const fromIndex = await this.storageIndex.getBackendForUrl(url);
+    const defaultMode = await this.getDefaultStorageMode();
+    const preferred = bookmarkData?.preferredBackend ?? bookmarkData?.backend;
+    const usePreferred = preferred && VALID_BACKENDS2.includes(preferred);
+    const backend = (usePreferred ? preferred : null) || fromIndex || defaultMode;
     const provider = this._providerFor(backend);
     const result = await provider.saveBookmark(bookmarkData);
     if (result.success) {

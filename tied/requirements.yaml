@@ -381,6 +381,7 @@ REQ-STORAGE_MODE_DEFAULT:
     - criterion: Default config has storageMode 'local'
     - criterion: Options page allows switching between Local Storage and Pinboard (cloud)
     - criterion: Service worker uses active provider from config; no external service required for default path
+    - criterion: When popup shows a storage backend as selected, saving a bookmark uses that backend (save follows the highlight)
   validation_criteria:
     - method: Unit tests
       coverage: ConfigManager default storageMode, getStorageMode, setStorageMode (tests/unit/config-manager.test.js)
@@ -404,9 +405,9 @@ REQ-STORAGE_MODE_DEFAULT:
       date: '2026-02-13'
       author: AI Agent
     last_updated:
-      date: '2026-02-13'
+      date: '2026-02-18'
       author: AI Agent
-      reason: Default to local storage; document dual-use
+      reason: Save-follows-highlight criterion
 REQ-RECENT_TAGS_SYSTEM:
   name: Recent Tags System
   category: Immutable
@@ -1523,6 +1524,7 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
     - criterion: Move uses bookmark URL when available; router allows bookmark without time
     - criterion: Message getStorageBackendForUrl and moveBookmarkToStorage implemented
     - criterion: Options explains default storage for new bookmarks (three-way choice)
+    - criterion: Save follows the highlight: creating/updating a bookmark from the popup uses the currently selected storage backend (popup sends preferredBackend, router honors it)
   validation_criteria:
     - method: Unit test moveBookmarkToStorage (mock providers)
     - method: Unit test move when source bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]
@@ -1530,9 +1532,11 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
   traceability:
     architecture:
       - ARCH-MOVE_BOOKMARK_UI
+      - ARCH-STORAGE_INDEX_AND_ROUTER
     implementation:
       - IMPL-MOVE_BOOKMARK_UI
       - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
+      - IMPL-BOOKMARK_ROUTER
     tests: []
     code_annotations:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
@@ -1547,9 +1551,9 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
       date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: '2026-02-18'
       author: AI Agent
-      reason: Move bookmark UI per plan
+      reason: Save-follows-highlight criterion and traceability
 REQ-URL_TAGS_DISPLAY:
   name: URL Tags and Badge Single Source
   category: Functional

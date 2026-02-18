@@ -1727,25 +1727,29 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
   status: Active
   cross_references:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - REQ-STORAGE_MODE_DEFAULT
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
     - ARCH-LOCAL_STORAGE_PROVIDER
     - ARCH-FILE_BOOKMARK_PROVIDER
   rationale:
-    why: Per-URL storage backend and router so bookmarks can live in pinboard, local, or file; default for new bookmarks from config
+    why: Per-URL storage backend and router so bookmarks can live in pinboard, local, or file; default for new bookmarks from config; popup can send preferred backend so save follows highlight
     problems_solved:
       - Single global provider prevents mixing backends
       - Need to route operations by URL to correct backend
+      - Save not following popup-highlighted storage on create/update
     benefits:
       - Storage index (chrome.storage.local) maps URL -> pinboard|local|file|sync
-      - BookmarkRouter delegates get/save/delete to correct provider; getRecentBookmarks aggregates all four
+      - BookmarkRouter delegates get/save/delete to correct provider; when popup sends preferredBackend, router uses it so save follows the highlight (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)
+      - getRecentBookmarks aggregates all four
       - Default storage mode for new bookmarks (config); migration seeds index from existing local bookmarks
       - URL-tags/badge module on top of router provides display normalization and single source for tag list and badge value
   implementation_approach:
-    summary: StorageIndex module; BookmarkRouter holds four providers (pinboard, local, file, sync) and index; MessageHandler uses router as bookmarkProvider (duck-typed). URL-tags-manager normalizes for display.
+    summary: StorageIndex module; BookmarkRouter holds four providers (pinboard, local, file, sync) and index; MessageHandler uses router as bookmarkProvider (duck-typed). Popup sends preferredBackend on save so save follows highlight. URL-tags-manager normalizes for display.
     details:
       - 'Index key: hoverboard_storage_index; getIndex, setBackendForUrl, getBackendForUrl, removeUrl'
-      - 'Router: getBookmarkForUrl/saveBookmark/deleteBookmark use getBackendForUrl(url) or defaultStorageMode'
+      - 'Router: saveBookmark uses valid data.preferredBackend when provided, else getBackendForUrl(url) or defaultStorageMode'
       - 'getRecentBookmarks: fetch from all four, merge, sort by time, slice'
-      - ConfigManager getStorageMode/setStorageMode allow 'file'; invalid/missing fallback to 'local'
+      - ConfigManager getStorageMode/setStorageMode allow pinboard|local|file|sync; invalid/missing fallback to 'local'
   traceability:
     requirements:
       - REQ-PER_BOOKMARK_STORAGE_BACKEND

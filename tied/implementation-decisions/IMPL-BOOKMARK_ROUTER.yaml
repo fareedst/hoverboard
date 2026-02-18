@@ -13,8 +13,12 @@ IMPL-BOOKMARK_ROUTER:
     files: []
     functions: []
   traceability:
-    architecture: []
-    requirements: []
+    architecture:
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    requirements:
+      - REQ-PER_BOOKMARK_STORAGE_BACKEND
+      - REQ-STORAGE_MODE_DEFAULT
+      - REQ-MOVE_BOOKMARK_STORAGE_UI
     tests: []
     code_annotations:
       - IMPL-BOOKMARK_ROUTER
@@ -29,14 +33,15 @@ IMPL-BOOKMARK_ROUTER:
       author: MCP converter
     last_updated:
       date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      author: AI Agent
+      reason: saveBookmark honors data.preferredBackend (save follows highlight)
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  bookmarkrouter: 'holds pinboardProvider, localProvider, fileProvider, storageIndex, and defaultStorageMode (from config). Implements provider contract: getBookmarkForUrl(url), getRecentBookmarks(count), saveBookmark(data), deleteBookmark(url), saveTag(data), deleteTag(data), testConnection(). Resolves provider per URL via getBackendForUrl(url) or defaultStorageMode. getRecentBookmarks fetches from all three providers, merges, sorts by time descending, slices to count. Extra methods for move UI: getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) (get from current, save to target, delete from source, update index). Move treats bookmark as found when it has `bookmark.url`; if `bookmark.time` is missing, it is set when saving to target ([IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL](IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.md)).'
-  cross-references: REQ-PER_BOOKMARK_STORAGE_BACKEND, ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-STORAGE_INDEX
+  bookmarkrouter: 'holds pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, and defaultStorageMode (from config). Implements provider contract: getBookmarkForUrl(url), getRecentBookmarks(count), saveBookmark(data), deleteBookmark(url), saveTag(data), deleteTag(data), testConnection(). Resolves provider per URL via index getBackendForUrl(url) or defaultStorageMode. **Save follows highlight**: saveBookmark(data) accepts optional data.preferredBackend (or data.backend); when present and valid (pinboard|local|file|sync), that backend is used for the save (overriding index and default), so popup UI selection is honored (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI). getRecentBookmarks fetches from all providers, merges, sorts by time descending, slices to count. Extra methods for move UI: getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) (get from current, save to target, delete from source, update index). Move treats bookmark as found when it has `bookmark.url`; if `bookmark.time` is missing, it is set when saving to target ([IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL](IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.md)).'
+  cross-references: REQ-PER_BOOKMARK_STORAGE_BACKEND, REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI, ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-STORAGE_INDEX, IMPL-MOVE_BOOKMARK_UI
   related:
     - IMPL-STORAGE_INDEX, IMPL-LOCAL_BOOKMARK_SERVICE, IMPL-FILE_BOOKMARK_SERVICE
     - ARCH-STORAGE_INDEX_AND_ROUTER
+    - IMPL-MOVE_BOOKMARK_UI (popup sends preferredBackend)

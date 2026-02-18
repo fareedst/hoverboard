@@ -9,12 +9,18 @@ REQ-STORAGE_MODE_DEFAULT:
     benefits: []
   satisfaction_criteria:
     - criterion: See detail file
+    - criterion: When the popup shows a storage backend as selected (e.g. default Local), saving a bookmark uses that backend so save follows the highlight (REQ-MOVE_BOOKMARK_STORAGE_UI, IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI).
   validation_criteria:
     - method: Manual verification
       coverage: See detail file
   traceability:
-    architecture: []
-    implementation: []
+    architecture:
+      - ARCH-LOCAL_STORAGE_PROVIDER
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    implementation:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-MOVE_BOOKMARK_UI
     tests: []
     code_annotations:
       - REQ-STORAGE_MODE_DEFAULT
@@ -29,14 +35,14 @@ REQ-STORAGE_MODE_DEFAULT:
       author: MCP converter
     last_updated:
       date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      author: AI Agent
+      reason: Save-follows-highlight criterion and traceability (IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI)
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
   configmanager: '`getDefaultConfiguration().storageMode === ''local''`; `getStorageMode()` / `setStorageMode(mode)`.'
-  cross-references: ARCH-LOCAL_STORAGE_PROVIDER, IMPL-LOCAL_BOOKMARK_SERVICE
+  cross-references: ARCH-LOCAL_STORAGE_PROVIDER, ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-LOCAL_BOOKMARK_SERVICE, IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI
   how_validated:
     - 'Unit tests in `tests/unit/config-manager.test.js`:'
     - 'Default configuration includes `storageMode: ''local''`.'

@@ -10,12 +10,17 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
   satisfaction_criteria:
     - criterion: Popup shows current bookmark storage and a control (e.g. dropdown) to move to Pinboard, Local, or File.
     - criterion: When the bookmark is stored in **Local (browser)** or **File (folder)**, a dedicated one-click control allows toggling between file and browser storage ("Move to File" when current is local, "Move to browser" when current is file). Hidden when storage is Pinboard or when there is no bookmark for the current URL.
+    - criterion: Save follows the highlight: creating or updating a bookmark from the popup uses the currently selected (highlighted) storage backend; popup sends preferredBackend and router honors it (REQ-STORAGE_MODE_DEFAULT, IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI).
   validation_criteria:
     - method: Manual verification
       coverage: See detail file
   traceability:
-    architecture: []
-    implementation: []
+    architecture:
+      - ARCH-MOVE_BOOKMARK_UI
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    implementation:
+      - IMPL-MOVE_BOOKMARK_UI
+      - IMPL-BOOKMARK_ROUTER
     tests: []
     code_annotations:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
@@ -30,8 +35,8 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
       author: MCP converter
     last_updated:
       date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      author: AI Agent
+      reason: Save-follows-highlight criterion and traceability
     last_validated:
       date: '2026-02-18'
       validator: MCP converter

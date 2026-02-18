@@ -2,15 +2,15 @@
  * Configuration Manager - Modern settings and authentication management
  * Replaces legacy config.js constants and AuthSettings class
  *
- * CFG-001: Central configuration management system
- * CFG-002: Authentication token secure storage and validation
- * CFG-003: User settings persistence and synchronization
- * CFG-004: URL inhibition management for site-specific behavior
+ * [IMPL-CONFIG_BACKUP_RESTORE] Central configuration management and backup/restore
+ * [IMPL-CONFIG_MIGRATION] Authentication token secure storage and validation
+ * [IMPL-FEATURE_FLAGS] User settings persistence and synchronization
+ * [IMPL-URL_INHIBITION] URL inhibition management for site-specific behavior
  */
 
 export class ConfigManager {
   constructor () {
-    // CFG-001: Standardized storage key naming convention
+    // IMPL-CONFIG_BACKUP_RESTORE: Standardized storage key naming convention
     // SPECIFICATION: Use prefixed keys to avoid conflicts with other extensions
     this.storageKeys = {
       AUTH_TOKEN: 'hoverboard_auth_token',
@@ -21,7 +21,7 @@ export class ConfigManager {
       TAG_FREQUENCY: 'hoverboard_tag_frequency' // [IMMUTABLE-REQ-TAG-001] - Tag frequency storage key
     }
 
-    // CFG-003: Default configuration provides baseline behavior
+    // IMPL-FEATURE_FLAGS: Default configuration provides baseline behavior
     // IMPLEMENTATION DECISION: All settings have sensible defaults to ensure functionality without user configuration
     this.defaultConfig = this.getDefaultConfiguration()
   }
@@ -30,7 +30,7 @@ export class ConfigManager {
    * Get default configuration values
    * Migrated from src/shared/config.js
    *
-   * CFG-003: Feature flags and UI behavior control defaults
+   * IMPL-FEATURE_FLAGS: Feature flags and UI behavior control defaults
    * SPECIFICATION: Each setting controls specific extension behavior
    * IMPLEMENTATION DECISION: Conservative defaults favor user privacy and minimal intrusion
    */
@@ -39,7 +39,7 @@ export class ConfigManager {
       // [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] - Default local: preferable for most users (no account/API required)
       storageMode: 'local',
 
-      // CFG-003: Feature flags - Core functionality toggles
+      // IMPL-FEATURE_FLAGS: Feature flags - Core functionality toggles
       // IMPLEMENTATION DECISION: Enable helpful features by default, disable potentially intrusive ones
       hoverShowRecentTags: true, // Show recent tags in hover overlay
       hoverShowTooltips: false, // Tooltips disabled by default to avoid visual clutter
@@ -49,7 +49,7 @@ export class ConfigManager {
       inhibitSitesOnPageLoad: true, // Respect site-specific inhibition settings
       setIconOnLoad: true, // Update extension icon to reflect bookmark status
 
-      // CFG-003: UI behavior settings - User experience configuration
+      // IMPL-FEATURE_FLAGS: UI behavior settings - User experience configuration
       // IMPLEMENTATION DECISION: Reasonable limits that balance functionality with performance
       recentTagsCountMax: 32, // Maximum recent tags to track
       initRecentPostsCount: 15, // Initial recent posts to load
@@ -71,14 +71,14 @@ export class ConfigManager {
       recentTagsEnableUserDriven: true, // Enable user-driven recent tags
       recentTagsClearOnReload: true, // Clear shared memory on extension reload
 
-      // CFG-003: Badge configuration - Extension icon indicator settings
+      // IMPL-FEATURE_FLAGS: Badge configuration - Extension icon indicator settings
       // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
       badgeTextIfNotBookmarked: '-', // Clear indication of non-bookmarked state
       badgeTextIfPrivate: '*', // Privacy indicator
       badgeTextIfQueued: '!', // Pending action indicator
       badgeTextIfBookmarkedNoTags: '0', // Zero tags indicator
 
-      // CFG-002: API retry configuration - Network resilience settings
+      // IMPL-CONFIG_MIGRATION: API retry configuration - Network resilience settings
       // IMPLEMENTATION DECISION: Conservative retry strategy to avoid API rate limiting
       pinRetryCountMax: 2, // Maximum retry attempts
       pinRetryDelay: 1000, // in ms - delay between retries
@@ -103,13 +103,13 @@ export class ConfigManager {
   /**
    * Initialize default settings on first installation
    *
-   * CFG-003: First-run initialization ensures extension works immediately
+   * IMPL-FEATURE_FLAGS: First-run initialization ensures extension works immediately
    * IMPLEMENTATION DECISION: Only initialize if no settings exist to preserve user customizations
    */
   async initializeDefaults () {
     const existingSettings = await this.getStoredSettings()
     if (!existingSettings || Object.keys(existingSettings).length === 0) {
-      // CFG-003: Store defaults only on first run
+      // IMPL-FEATURE_FLAGS: Store defaults only on first run
       await this.saveSettings(this.defaultConfig)
     }
   }
@@ -118,7 +118,7 @@ export class ConfigManager {
    * Get complete configuration object
    * @returns {Promise<Object>} Configuration object
    *
-   * CFG-003: Configuration resolution with default fallback
+   * IMPL-FEATURE_FLAGS: Configuration resolution with default fallback
    * IMPLEMENTATION DECISION: Merge defaults with stored settings to handle partial configurations
    */
   async getConfig () {
@@ -127,7 +127,7 @@ export class ConfigManager {
     if (!stored || typeof stored !== 'object' || Array.isArray(stored)) {
       return { ...this.defaultConfig }
     }
-    // CFG-003: Defaults ensure all required configuration keys are present
+    // IMPL-FEATURE_FLAGS: Defaults ensure all required configuration keys are present
     return { ...this.defaultConfig, ...stored }
   }
 
@@ -135,12 +135,12 @@ export class ConfigManager {
    * Get user-configurable options (subset of config for UI)
    * @returns {Promise<Object>} Options object
    *
-   * CFG-003: UI-specific configuration subset
+   * IMPL-FEATURE_FLAGS: UI-specific configuration subset
    * IMPLEMENTATION DECISION: Only expose user-relevant settings to avoid configuration complexity
    */
   async getOptions () {
     const config = await this.getConfig()
-    // CFG-003: Filtered configuration for user interface display
+    // IMPL-FEATURE_FLAGS: Filtered configuration for user interface display
     return {
       badgeTextIfBookmarkedNoTags: config.badgeTextIfBookmarkedNoTags,
       badgeTextIfNotBookmarked: config.badgeTextIfNotBookmarked,
@@ -168,13 +168,13 @@ export class ConfigManager {
    * Update specific configuration values
    * @param {Object} updates - Configuration updates
    *
-   * CFG-003: Partial configuration updates with persistence
+   * IMPL-FEATURE_FLAGS: Partial configuration updates with persistence
    * IMPLEMENTATION DECISION: Merge updates to preserve unmodified settings
    */
   async updateConfig (updates) {
     const current = await this.getConfig()
     const updated = { ...current, ...updates }
-    // CFG-003: Persist merged configuration
+    // IMPL-FEATURE_FLAGS: Persist merged configuration
     await this.saveSettings(updated)
   }
 
@@ -247,17 +247,17 @@ export class ConfigManager {
    * Get authentication token
    * @returns {Promise<string>} Auth token or empty string
    *
-   * CFG-002: Secure authentication token retrieval
+   * IMPL-CONFIG_MIGRATION: Secure authentication token retrieval
    * IMPLEMENTATION DECISION: Return empty string on failure to ensure graceful degradation
    */
   async getAuthToken () {
     try {
-      // CFG-002: Use sync storage for authentication data synchronization across devices
+      // IMPL-CONFIG_MIGRATION: Use sync storage for authentication data synchronization across devices
       const result = await chrome.storage.sync.get(this.storageKeys.AUTH_TOKEN)
       return result[this.storageKeys.AUTH_TOKEN] || ''
     } catch (error) {
       console.error('Failed to get auth token:', error)
-      // CFG-002: Graceful degradation - return empty string to allow detection of no-auth state
+      // IMPL-CONFIG_MIGRATION: Graceful degradation - return empty string to allow detection of no-auth state
       return ''
     }
   }
@@ -266,18 +266,18 @@ export class ConfigManager {
    * Set authentication token
    * @param {string} token - Pinboard API token
    *
-   * CFG-002: Secure authentication token storage
+   * IMPL-CONFIG_MIGRATION: Secure authentication token storage
    * IMPLEMENTATION DECISION: Use sync storage for cross-device authentication
    */
   async setAuthToken (token) {
     try {
-      // CFG-002: Store token in sync storage for device synchronization
+      // IMPL-CONFIG_MIGRATION: Store token in sync storage for device synchronization
       await chrome.storage.sync.set({
         [this.storageKeys.AUTH_TOKEN]: token
       })
     } catch (error) {
       console.error('Failed to set auth token:', error)
-      // CFG-002: Re-throw to allow caller to handle authentication failures
+      // IMPL-CONFIG_MIGRATION: Re-throw to allow caller to handle authentication failures
       throw error
     }
   }
@@ -286,12 +286,12 @@ export class ConfigManager {
    * Check if authentication token exists
    * @returns {Promise<boolean>} Whether token exists
    *
-   * CFG-002: Authentication state validation
+   * IMPL-CONFIG_MIGRATION: Authentication state validation
    * IMPLEMENTATION DECISION: Simple boolean check for authentication state
    */
   async hasAuthToken () {
     const token = await this.getAuthToken()
-    // CFG-002: Token existence check - non-empty string indicates configured authentication
+    // IMPL-CONFIG_MIGRATION: Token existence check - non-empty string indicates configured authentication
     return token.length > 0
   }
 
@@ -299,12 +299,12 @@ export class ConfigManager {
    * Get authentication token formatted for API requests
    * @returns {Promise<string>} Token formatted as URL parameter
    *
-   * CFG-002: API-ready authentication parameter formatting
+   * IMPL-CONFIG_MIGRATION: API-ready authentication parameter formatting
    * IMPLEMENTATION DECISION: Pre-format token for consistent API usage
    */
   async getAuthTokenParam () {
     const token = await this.getAuthToken()
-    // CFG-002: Format token as URL parameter for Pinboard API compatibility
+    // IMPL-CONFIG_MIGRATION: Format token as URL parameter for Pinboard API compatibility
     return `auth_token=${token}`
   }
 
@@ -312,19 +312,19 @@ export class ConfigManager {
    * Get inhibited URLs list
    * @returns {Promise<string[]>} Array of inhibited URLs
    *
-   * CFG-004: Site-specific behavior control through URL inhibition
+   * IMPL-URL_INHIBITION: Site-specific behavior control through URL inhibition
    * IMPLEMENTATION DECISION: Store URLs as newline-separated string for user editing convenience
    */
   async getInhibitUrls () {
     try {
-      // CFG-004: Retrieve inhibition list from storage
+      // IMPL-URL_INHIBITION: Retrieve inhibition list from storage
       const result = await chrome.storage.sync.get(this.storageKeys.INHIBIT_URLS)
       const inhibitString = result[this.storageKeys.INHIBIT_URLS] || ''
-      // CFG-004: Parse newline-separated URLs and filter empty entries
+      // IMPL-URL_INHIBITION: Parse newline-separated URLs and filter empty entries
       return inhibitString.split('\n').filter(url => url.trim().length > 0)
     } catch (error) {
       console.error('Failed to get inhibit URLs:', error)
-      // CFG-004: Return empty array on failure to allow normal operation
+      // IMPL-URL_INHIBITION: Return empty array on failure to allow normal operation
       return []
     }
   }
@@ -333,7 +333,7 @@ export class ConfigManager {
    * Add URL to inhibit list
    * @param {string} url - URL to inhibit
    *
-   * CFG-004: Dynamic inhibition list management
+   * IMPL-URL_INHIBITION: Dynamic inhibition list management
    * IMPLEMENTATION DECISION: Check for duplicates to maintain clean inhibition list
    */
   async addInhibitUrl (url) {
@@ -342,15 +342,15 @@ export class ConfigManager {
       const normalizedUrl = url.replace(/^https?:\/\//, '')
       const current = await this.getInhibitUrls()
       if (!current.includes(normalizedUrl)) {
-        // CFG-004: Add URL only if not already present
+        // IMPL-URL_INHIBITION: Add URL only if not already present
         current.push(normalizedUrl)
         const inhibitString = current.join('\n')
-        // CFG-004: Store updated inhibition list
+        // IMPL-URL_INHIBITION: Store updated inhibition list
         await chrome.storage.sync.set({
           [this.storageKeys.INHIBIT_URLS]: inhibitString
         })
       }
-      // CFG-004: Return formatted inhibition string for legacy compatibility
+      // IMPL-URL_INHIBITION: Return formatted inhibition string for legacy compatibility
       return { inhibit: current.join('\n') }
     } catch (error) {
       console.error('Failed to add inhibit URL:', error)
@@ -362,12 +362,12 @@ export class ConfigManager {
    * Set inhibit URLs list (replaces existing list)
    * @param {string[]} urls - Array of URLs to inhibit
    *
-   * CFG-004: Complete inhibition list replacement
+   * IMPL-URL_INHIBITION: Complete inhibition list replacement
    * IMPLEMENTATION DECISION: Allow bulk replacement for configuration import/reset scenarios
    */
   async setInhibitUrls (urls) {
     try {
-      // CFG-004: Replace entire inhibition list
+      // IMPL-URL_INHIBITION: Replace entire inhibition list
       const inhibitString = urls.join('\n')
       await chrome.storage.sync.set({
         [this.storageKeys.INHIBIT_URLS]: inhibitString
@@ -383,7 +383,7 @@ export class ConfigManager {
    * @param {string} url - URL to check
    * @returns {Promise<boolean>} Whether URL is allowed
    *
-   * CFG-004: URL filtering logic for site-specific behavior
+   * IMPL-URL_INHIBITION: URL filtering logic for site-specific behavior
    * IMPLEMENTATION DECISION: Bidirectional substring matching for flexible URL patterns
    */
   async isUrlAllowed (url) {
@@ -391,13 +391,13 @@ export class ConfigManager {
       const inhibitUrls = await this.getInhibitUrls()
       // Normalize: strip protocol for matching
       const normalizedUrl = url.replace(/^https?:\/\//, '')
-      // CFG-004: Check both directions for substring matching (flexible pattern matching)
+      // IMPL-URL_INHIBITION: Check both directions for substring matching (flexible pattern matching)
       return !inhibitUrls.some(inhibitUrl =>
         normalizedUrl.includes(inhibitUrl) || inhibitUrl.includes(normalizedUrl)
       )
     } catch (error) {
       console.error('Failed to check URL allowance:', error)
-      // CFG-004: Default to allowing on error to avoid breaking functionality
+      // IMPL-URL_INHIBITION: Default to allowing on error to avoid breaking functionality
       return true // Default to allowing if check fails
     }
   }
@@ -406,16 +406,16 @@ export class ConfigManager {
    * Get stored settings from storage
    * @returns {Promise<Object>} Stored settings
    *
-   * CFG-003: Core settings retrieval with error handling
+   * IMPL-FEATURE_FLAGS: Core settings retrieval with error handling
    * IMPLEMENTATION DECISION: Return empty object on failure to allow default merging
    */
   async getStoredSettings () {
     try {
-      // CFG-003: Retrieve settings from sync storage
+      // IMPL-FEATURE_FLAGS: Retrieve settings from sync storage
       const result = await chrome.storage.sync.get(this.storageKeys.SETTINGS)
       const stored = result[this.storageKeys.SETTINGS]
 
-      // CFG-003: Handle corrupted data (string instead of object)
+      // IMPL-FEATURE_FLAGS: Handle corrupted data (string instead of object)
       if (typeof stored === 'string') {
         try {
           return JSON.parse(stored)
@@ -428,7 +428,7 @@ export class ConfigManager {
       return stored || {}
     } catch (error) {
       console.error('Failed to get stored settings:', error)
-      // CFG-003: Return empty object to trigger default configuration usage
+      // IMPL-FEATURE_FLAGS: Return empty object to trigger default configuration usage
       return {}
     }
   }
@@ -437,18 +437,18 @@ export class ConfigManager {
    * Save settings to storage
    * @param {Object} settings - Settings to save
    *
-   * CFG-003: Settings persistence with error propagation
+   * IMPL-FEATURE_FLAGS: Settings persistence with error propagation
    * IMPLEMENTATION DECISION: Let errors propagate to caller for proper error handling
    */
   async saveSettings (settings) {
     try {
-      // CFG-003: Store settings in sync storage for cross-device synchronization
+      // IMPL-FEATURE_FLAGS: Store settings in sync storage for cross-device synchronization
       await chrome.storage.sync.set({
         [this.storageKeys.SETTINGS]: settings
       })
     } catch (error) {
       console.error('Failed to save settings:', error)
-      // CFG-003: Re-throw to allow caller to handle save failures
+      // IMPL-FEATURE_FLAGS: Re-throw to allow caller to handle save failures
       throw error
     }
   }
@@ -456,11 +456,11 @@ export class ConfigManager {
   /**
    * Reset all settings to defaults
    *
-   * CFG-003: Configuration reset functionality
+   * IMPL-FEATURE_FLAGS: Configuration reset functionality
    * IMPLEMENTATION DECISION: Simple replacement with defaults for clean reset
    */
   async resetToDefaults () {
-    // CFG-003: Replace all settings with default configuration
+    // IMPL-FEATURE_FLAGS: Replace all settings with default configuration
     await this.saveSettings(this.defaultConfig)
   }
 
@@ -468,18 +468,18 @@ export class ConfigManager {
    * Export configuration for backup
    * @returns {Promise<Object>} Complete configuration export
    *
-   * CFG-001: Configuration backup and portability
+   * IMPL-CONFIG_BACKUP_RESTORE: Configuration backup and portability
    * IMPLEMENTATION DECISION: Include all configuration data with metadata for validation
    */
   async exportConfig () {
-    // CFG-001: Gather all configuration data in parallel for efficiency
+    // IMPL-CONFIG_BACKUP_RESTORE: Gather all configuration data in parallel for efficiency
     const [settings, token, inhibitUrls] = await Promise.all([
       this.getStoredSettings(),
       this.getAuthToken(),
       this.getInhibitUrls()
     ])
 
-    // CFG-001: Create comprehensive configuration export with metadata
+    // IMPL-CONFIG_BACKUP_RESTORE: Create comprehensive configuration export with metadata
     return {
       settings,
       authToken: token,
@@ -493,21 +493,21 @@ export class ConfigManager {
    * Import configuration from backup
    * @param {Object} configData - Configuration data to import
    *
-   * CFG-001: Configuration restoration from backup
+   * IMPL-CONFIG_BACKUP_RESTORE: Configuration restoration from backup
    * IMPLEMENTATION DECISION: Selective import allows partial configuration restoration
    */
   async importConfig (configData) {
-    // CFG-001: Import settings if present in backup
+    // IMPL-CONFIG_BACKUP_RESTORE: Import settings if present in backup
     if (configData.settings) {
       await this.saveSettings(configData.settings)
     }
 
-    // CFG-002: Import authentication token if present
+    // IMPL-CONFIG_MIGRATION: Import authentication token if present
     if (configData.authToken) {
       await this.setAuthToken(configData.authToken)
     }
 
-    // CFG-004: Import inhibition list if present
+    // IMPL-URL_INHIBITION: Import inhibition list if present
     if (configData.inhibitUrls) {
       const inhibitString = configData.inhibitUrls.join('\n')
       await chrome.storage.sync.set({

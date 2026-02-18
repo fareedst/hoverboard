@@ -1715,19 +1715,24 @@ IMPL-BOOKMARK_ROUTER:
   status: Active
   cross_references:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - REQ-STORAGE_MODE_DEFAULT
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
     - ARCH-STORAGE_INDEX_AND_ROUTER
+    - IMPL-MOVE_BOOKMARK_UI
   rationale:
-    why: Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks
+    why: Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks; save follows popup UI selection when preferredBackend is sent
     problems_solved:
       - Single provider cannot support per-bookmark backends
+      - Save not following highlighted storage when creating bookmark from popup
     benefits:
       - getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL
+      - saveBookmark honors data.preferredBackend (popup UI selection) so save follows the highlight (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)
       - getRecentBookmarks aggregates pinboard + local + file + sync, sorted by time
       - getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI
   implementation_approach:
     summary: BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, defaultStorageMode.
     details:
-      - 'Resolve provider: getBackendForUrl(url) || defaultStorageMode; map to one of four providers (pinboard, local, file, sync)'
+      - 'Resolve provider: (valid data.preferredBackend) || getBackendForUrl(url) || defaultStorageMode; map to one of four providers (pinboard, local, file, sync)'
       - 'moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index'
   code_locations:
     files:
@@ -1738,6 +1743,8 @@ IMPL-BOOKMARK_ROUTER:
       - ARCH-STORAGE_INDEX_AND_ROUTER
     requirements:
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
+      - REQ-STORAGE_MODE_DEFAULT
+      - REQ-MOVE_BOOKMARK_STORAGE_UI
     tests:
       - tests/unit/bookmark-router.test.js
     code_annotations:
@@ -1786,18 +1793,23 @@ IMPL-MOVE_BOOKMARK_UI:
   status: Active
   cross_references:
     - REQ-MOVE_BOOKMARK_STORAGE_UI
+    - REQ-STORAGE_MODE_DEFAULT
     - ARCH-MOVE_BOOKMARK_UI
+    - IMPL-BOOKMARK_ROUTER
   rationale:
-    why: Popup control to show and change current bookmark storage backend
+    why: Popup control to show and change current bookmark storage backend; save must use highlighted backend
     problems_solved:
       - User cannot move bookmark between backends
+      - Save not following highlighted storage on create/update from popup
     benefits:
       - Storage select-one buttons (Pinboard, File, Local, Sync) in popup; current highlighted; click sends moveBookmarkToStorage
+      - Save follows highlight: getSelectedStorageBackend() and data.preferredBackend on createBookmark, addTagsToBookmark, toggle private/read-later (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)
   implementation_approach:
-    summary: 'Popup: storage section with four select-one buttons (Pinboard, File, Local, Sync); load backend on data load; on click send moveBookmarkToStorage.'
+    summary: 'Popup: storage section with four select-one buttons (Pinboard, File, Local, Sync); load backend on data load; on click send moveBookmarkToStorage; on save send preferredBackend so router uses highlighted storage.'
     details:
-      - 'PopupController: on load get storage backend for current URL; set select value'
+      - 'PopupController: on load get storage backend for current URL (or default when no bookmark); set highlighted button'
       - 'On select change: send moveBookmarkToStorage(url, targetBackend); refresh bookmark data'
+      - 'On save (createBookmark, addTagsToBookmark, handleTogglePrivate, handleReadLater): add data.preferredBackend = getSelectedStorageBackend() so save follows highlight'
       - Pinboard storage option is disabled in the popup when no API token is configured (updateStoragePinboardEnabled from getAuthToken)
   code_locations:
     files:
@@ -1812,6 +1824,7 @@ IMPL-MOVE_BOOKMARK_UI:
       - ARCH-MOVE_BOOKMARK_UI
     requirements:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
+      - REQ-STORAGE_MODE_DEFAULT
     code_annotations:
       - IMPL-MOVE_BOOKMARK_UI
   related_decisions:

@@ -123,8 +123,13 @@ export class BookmarkRouter {
     if (!url) {
       return { success: false, code: 'invalid', message: 'URL is required' }
     }
-    let backend = await this.storageIndex.getBackendForUrl(url)
-    if (!backend) backend = await this.getDefaultStorageMode()
+    const VALID_BACKENDS = ['pinboard', 'local', 'file', 'sync']
+    const fromIndex = await this.storageIndex.getBackendForUrl(url)
+    const defaultMode = await this.getDefaultStorageMode()
+    const preferred = bookmarkData?.preferredBackend ?? bookmarkData?.backend
+    const usePreferred = preferred && VALID_BACKENDS.includes(preferred)
+    // [REQ-STORAGE_MODE_DEFAULT] When popup sends preferredBackend (UI selection), use it so save follows the highlight.
+    const backend = (usePreferred ? preferred : null) || fromIndex || defaultMode
     const provider = this._providerFor(backend)
     const result = await provider.saveBookmark(bookmarkData)
     if (result.success) {

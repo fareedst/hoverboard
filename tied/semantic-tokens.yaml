@@ -1060,15 +1060,18 @@ REQ-STORAGE_MODE_DEFAULT:
   name: Storage Mode Default and Dual-Use
   category: Functional
   status: Active
-  description: "Default storage mode is local; dual-use (local / Pinboard) configurable in Options; local preferable for most users"
+  description: "Default storage mode is local; dual-use (local / Pinboard) configurable in Options; save follows popup storage highlight"
   cross_references:
     - ARCH-LOCAL_STORAGE_PROVIDER
+    - ARCH-STORAGE_INDEX_AND_ROUTER
     - IMPL-LOCAL_BOOKMARK_SERVICE
+    - IMPL-BOOKMARK_ROUTER
+    - IMPL-MOVE_BOOKMARK_UI
   source_index: requirements.yaml
   detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.yaml
   metadata:
     registered: 2026-02-13
-    last_updated: 2026-02-13
+    last_updated: 2026-02-18
 
 ARCH-LOCAL_STORAGE_PROVIDER:
   type: ARCH
@@ -1293,16 +1296,18 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
   name: Storage Index and Bookmark Router
   category: Storage
   status: Active
-  description: "Per-URL index; router delegates to pinboard/local/file/sync; getRecentBookmarks aggregates all four; URL-tags module on top for display normalization"
+  description: "Per-URL index; router delegates to pinboard/local/file/sync; popup preferred backend so save follows highlight; getRecentBookmarks aggregates all four"
   cross_references:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - REQ-STORAGE_MODE_DEFAULT
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
     - IMPL-STORAGE_INDEX
     - IMPL-BOOKMARK_ROUTER
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml
   metadata:
     registered: 2026-02-14
-    last_updated: 2026-02-17
+    last_updated: 2026-02-18
 
 IMPL-STORAGE_INDEX:
   type: IMPL
@@ -1324,30 +1329,35 @@ IMPL-BOOKMARK_ROUTER:
   name: Bookmark Router
   category: Storage
   status: Active
-  description: "Router with four providers (pinboard, local, file, sync); delegate by URL; getStorageBackendForUrl, moveBookmarkToStorage"
+  description: "Router with four providers; saveBookmark honors data.preferredBackend so save follows popup highlight; getStorageBackendForUrl, moveBookmarkToStorage"
   cross_references:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - REQ-STORAGE_MODE_DEFAULT
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
     - ARCH-STORAGE_INDEX_AND_ROUTER
+    - IMPL-MOVE_BOOKMARK_UI
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml
   metadata:
     registered: 2026-02-14
-    last_updated: 2026-02-17
+    last_updated: 2026-02-18
 
 REQ-MOVE_BOOKMARK_STORAGE_UI:
   type: REQ
   name: Move Bookmark Storage UI
   category: Functional
   status: Active
-  description: "UI to show and change bookmark storage (Pinboard, Local, File)"
+  description: "UI to show and change bookmark storage; save follows highlighted storage (preferredBackend)"
   cross_references:
     - ARCH-MOVE_BOOKMARK_UI
+    - ARCH-STORAGE_INDEX_AND_ROUTER
     - IMPL-MOVE_BOOKMARK_UI
+    - IMPL-BOOKMARK_ROUTER
   source_index: requirements.yaml
   detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml
   metadata:
     registered: 2026-02-14
-    last_updated: 2026-02-14
+    last_updated: 2026-02-18
 
 ARCH-MOVE_BOOKMARK_UI:
   type: ARCH
@@ -1369,15 +1379,17 @@ IMPL-MOVE_BOOKMARK_UI:
   name: Move Bookmark Storage UI
   category: UI
   status: Active
-  description: "Popup storage select; getStorageBackendForUrl, moveBookmarkToStorage"
+  description: "Popup storage buttons; getSelectedStorageBackend, preferredBackend on save so save follows highlight; moveBookmarkToStorage"
   cross_references:
     - REQ-MOVE_BOOKMARK_STORAGE_UI
+    - REQ-STORAGE_MODE_DEFAULT
     - ARCH-MOVE_BOOKMARK_UI
+    - IMPL-BOOKMARK_ROUTER
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml
   metadata:
     registered: 2026-02-14
-    last_updated: 2026-02-14
+    last_updated: 2026-02-18
 
 IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
   type: IMPL

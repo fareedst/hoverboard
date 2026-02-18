@@ -821,6 +821,17 @@ export class PopupController {
   }
 
   /**
+   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Get the storage backend currently selected in the popup UI (highlighted button).
+   * Used so save follows the highlight when creating or updating a bookmark.
+   * @returns {string|null} 'pinboard'|'local'|'file'|'sync' or null if not determinable
+   */
+  getSelectedStorageBackend () {
+    const btn = this.uiManager.elements.storageBackendButtons?.querySelector('.storage-backend-btn[aria-pressed="true"]')
+    const backend = btn?.getAttribute('data-backend') || null
+    return (backend && ['pinboard', 'local', 'file', 'sync'].includes(backend)) ? backend : null
+  }
+
+  /**
    * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Get storage backend for URL (pinboard | local | file | sync).
    */
   async getStorageBackendForUrl (url) {
@@ -1557,6 +1568,8 @@ export class PopupController {
           ...this.currentPin,
           shared: newSharedStatus
         }
+        const preferredBackendToggle = this.getSelectedStorageBackend()
+        if (preferredBackendToggle) updatedPin.preferredBackend = preferredBackendToggle
 
         const response = await this.sendMessage({
           type: 'saveBookmark',
@@ -1610,6 +1623,8 @@ export class PopupController {
           toread: newToReadStatus,
           description: this.getBetterDescription(this.currentPin?.description, this.currentTab?.title)
         }
+        const preferredBackendRead = this.getSelectedStorageBackend()
+        if (preferredBackendRead) updatedPin.preferredBackend = preferredBackendRead
 
         const response = await this.sendMessage({
           type: 'saveBookmark',
@@ -1784,6 +1799,9 @@ export class PopupController {
       tags: tagsString,
       description: this.getBetterDescription(this.currentPin?.description, this.currentTab?.title)
     }
+    const preferredBackendTag = this.getSelectedStorageBackend()
+    if (preferredBackendTag) pinData.preferredBackend = preferredBackendTag
+
     const response = await this.sendMessage({
       type: 'saveBookmark',
       data: pinData
@@ -1856,6 +1874,10 @@ export class PopupController {
       shared: sharedStatus,
       toread: toreadStatus
     }
+
+    // [REQ-STORAGE_MODE_DEFAULT] Save follows highlight: pass UI-selected backend so router uses it for new bookmarks.
+    const preferredBackend = this.getSelectedStorageBackend()
+    if (preferredBackend) pinData.preferredBackend = preferredBackend
 
     const response = await this.sendMessage({
       type: 'saveBookmark',
