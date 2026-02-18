@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Export and Move below table:** "Export all", "Export displayed", "Export selected", and "Move selected to" (dropdown + Move button) are in an **actions-below-table** block under the bookmarks table (no longer in the toolbar).
   - **Export selected:** New "Export selected" button; enabled when one or more bookmarks are selected; downloads CSV of only the selected bookmarks. Unit tests in `tests/unit/bookmarks-table-export.test.js` for CSV helpers and selected-scope logic.
 
+- **Local Bookmarks Index import** (`REQ-LOCAL_BOOKMARKS_INDEX_IMPORT`, `ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT`, `IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT`) – Import bookmarks from CSV or JSON on the index page:
+  - **Import** (hidden file input + button) accepts `.csv` and `.json` files in the same format as export (CSV: Title, URL, Tags, Time, Storage, Shared, To read, Notes; JSON: array of bookmark objects).
+  - **Only new:** Skips rows whose URL is already in the index (merge without overwriting).
+  - **Overwrite existing:** Sends every row to `saveBookmark` (backend upserts by URL).
+  - **Import to:** Target storage dropdown (Local | File | Sync); uses existing `saveBookmark` message with `preferredBackend` (no new backend API).
+  - Result message shows imported, skipped, and failed counts; table refreshes after import. Unit tests in `tests/unit/bookmarks-table-import.test.js` for `parseCsv`, JSON normalization contract, and only-new vs overwrite filtering.
+
 - **Extension UI Inspection and Testability** (`REQ-UI_INSPECTION`, `ARCH-UI_TESTABILITY`) – Enables testing and debugging of extension UI via a single contract, optional inspector, and testability hooks:
   - **UI action contract** (`IMPL-UI_ACTION_CONTRACT`): `src/shared/ui-action-contract.js` re-exports `MESSAGE_TYPES` and defines popup/overlay action IDs for tests and inspector.
   - **UI inspector** (`IMPL-UI_INSPECTOR`): Optional ring buffers (last 50 messages, last 50 actions) in `src/shared/ui-inspector.js`; gated by `DEBUG_HOVERBOARD_UI` in storage; wired in service worker, popup, and content script.

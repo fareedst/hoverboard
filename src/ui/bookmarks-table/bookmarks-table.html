@@ -91,6 +91,28 @@
         </select>
         <button type="button" id="move-selected-btn" class="btn btn-secondary btn-sm" disabled aria-label="Move selected bookmarks to chosen storage">Move</button>
       </div>
+      <!-- [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import from file -->
+      <div class="import-row">
+        <input type="file" id="import-file" accept=".csv,.json" style="display: none;" aria-label="Choose CSV or JSON file to import">
+        <button type="button" id="import-trigger" class="btn btn-secondary btn-sm" title="Import bookmarks from CSV or JSON file" aria-label="Import bookmarks">Import</button>
+        <fieldset class="import-mode-fieldset" aria-label="Import mode">
+          <label class="import-mode-label">
+            <input type="radio" name="import-mode" value="only-new" checked>
+            <span>Only new</span>
+          </label>
+          <label class="import-mode-label">
+            <input type="radio" name="import-mode" value="overwrite">
+            <span>Overwrite existing</span>
+          </label>
+        </fieldset>
+        <label for="import-target">Import to:</label>
+        <select id="import-target" class="filter-select" aria-label="Target storage for imported bookmarks">
+          <option value="local">Local</option>
+          <option value="file">File</option>
+          <option value="sync">Sync</option>
+        </select>
+        <span id="import-result" class="import-result" aria-live="polite"></span>
+      </div>
     </div>
 
     <div class="footer-info">

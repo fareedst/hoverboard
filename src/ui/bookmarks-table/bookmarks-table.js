@@ -2,14 +2,16 @@
  * Local Bookmarks Index - [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
  * Loads local + file bookmarks via getAggregatedBookmarksForIndex (Storage column). Fallback: getLocalBookmarksForIndex.
  * Export: [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]
+ * Import: [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT]
  */
 
 import { matchStorageFilter } from './bookmarks-table-filter.js'
-import { buildCsv } from './bookmarks-table-csv.js'
+import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
 const MESSAGE_TYPE_MOVE = 'moveBookmarkToStorage'
+const MESSAGE_TYPE_SAVE = 'saveBookmark'
 
 let allBookmarks = []
 let filteredBookmarks = []
@@ -35,7 +37,11 @@ const elements = {
   table: document.getElementById('bookmarks-table'),
   selectAll: document.getElementById('select-all'),
   moveTargetSelect: document.getElementById('move-target'),
-  moveButton: document.getElementById('move-selected-btn')
+  moveButton: document.getElementById('move-selected-btn'),
+  importFile: document.getElementById('import-file'),
+  importTrigger: document.getElementById('import-trigger'),
+  importTarget: document.getElementById('import-target'),
+  importResult: document.getElementById('import-result')
 }
 
 function escapeHtml (str) {
@@ -271,6 +277,95 @@ function updateExportButtonState () {
   if (elements.exportSelected) elements.exportSelected.disabled = selectedUrls.size === 0
 }
 
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT]
+ * Normalize a raw object from JSON import to bookmark payload (url, description, tags array, time, shared, toread, extended).
+ */
+function normalizeJsonBookmark (raw) {
+  const url = (raw.url || '').trim()
+  if (!url) return null
+  const tags = raw.tags == null ? [] : Array.isArray(raw.tags) ? raw.tags : String(raw.tags).split(/\s+/).filter(Boolean)
+  return {
+    url,
+    description: (raw.description ?? '').trim(),
+    extended: (raw.extended ?? '').trim(),
+    tags,
+    time: (raw.time ?? '').trim(),
+    shared: raw.shared === 'no' ? 'no' : 'yes',
+    toread: raw.toread === 'yes' ? 'yes' : 'no'
+  }
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT]
+ * Parse file content (CSV or JSON) into array of bookmark-like objects. Returns [] on parse error.
+ */
+function parseImportFile (text, filename) {
+  const lower = (filename || '').toLowerCase()
+  if (lower.endsWith('.json')) {
+    try {
+      const data = JSON.parse(text)
+      const arr = Array.isArray(data) ? data : [data]
+      return arr.map(normalizeJsonBookmark).filter(Boolean)
+    } catch (e) {
+      console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] JSON parse failed:', e)
+      return []
+    }
+  }
+  return parseCsv(text)
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT]
+ * Run import: parse file, optionally filter to only new URLs, send saveBookmark per row, refresh, show result.
+ */
+async function runImport (file) {
+  if (!file || !elements.importResult) return
+  elements.importResult.textContent = ''
+  const onlyNew = document.querySelector('input[name="import-mode"]:checked')?.value === 'only-new'
+  const preferredBackend = (elements.importTarget && elements.importTarget.value) || 'local'
+  let text
+  try {
+    text = await file.text()
+  } catch (e) {
+    elements.importResult.textContent = 'Could not read file.'
+    console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] file.text() failed:', e)
+    return
+  }
+  const records = parseImportFile(text, file.name)
+  if (records.length === 0) {
+    elements.importResult.textContent = 'No valid bookmarks in file (or invalid format).'
+    return
+  }
+  const existingUrls = new Set(allBookmarks.map(b => (b.url || '').trim()).filter(Boolean))
+  const toSave = onlyNew ? records.filter(r => !existingUrls.has(r.url)) : records
+  const skipped = records.length - toSave.length
+  if (elements.importTrigger) elements.importTrigger.disabled = true
+  let imported = 0
+  let failed = 0
+  for (const rec of toSave) {
+    try {
+      const res = await chrome.runtime.sendMessage({
+        type: MESSAGE_TYPE_SAVE,
+        data: { ...rec, preferredBackend }
+      })
+      if (res && res.success) imported++
+      else failed++
+    } catch (e) {
+      console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] saveBookmark failed for', rec.url, e)
+      failed++
+    }
+  }
+  if (elements.importTrigger) elements.importTrigger.disabled = false
+  await loadBookmarks()
+  const parts = []
+  if (imported > 0) parts.push(`Imported ${imported}`)
+  if (skipped > 0) parts.push(`skipped ${skipped}`)
+  if (failed > 0) parts.push(`${failed} failed`)
+  elements.importResult.textContent = parts.length ? parts.join(', ') + '.' : 'Done.'
+  if (elements.importFile) elements.importFile.value = ''
+}
+
 async function loadBookmarks () {
   try {
     const response = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_AGGREGATED })
@@ -334,6 +429,14 @@ function init () {
   })
 
   if (elements.moveButton) elements.moveButton.addEventListener('click', () => moveSelectedToStorage())
+
+  if (elements.importTrigger && elements.importFile) {
+    elements.importTrigger.addEventListener('click', () => elements.importFile.click())
+    elements.importFile.addEventListener('change', (e) => {
+      const file = e.target.files?.[0]
+      if (file) runImport(file)
+    })
+  }
 
   loadBookmarks()
   updateMoveControlsState()

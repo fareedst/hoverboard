@@ -1180,6 +1180,67 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
       date: 2026-02-13T00:00:00.000Z
       validator: AI Agent
       result: pass
+IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  name: Local Bookmarks Index Import Implementation
+  status: Active
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+    - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  rationale:
+    why: Implement import UI and parse + save loop using existing saveBookmark
+    problems_solved:
+      - No import path for index data
+    benefits:
+      - File input + only new / overwrite; Import to Local | File | Sync; result message
+  implementation_approach:
+    summary: Import row in actions-below-table; parseCsv in bookmarks-table-csv.js; file input + Import button; only new filters by allBookmarks; per-row saveBookmark; loadBookmarks + result
+    details:
+      - bookmarks-table.html: hidden file input, Import button, radios, Import to dropdown
+      - bookmarks-table.js: runImport on file change; parse CSV/JSON; filter if only new; sendMessage saveBookmark; loadBookmarks; show result
+      - bookmarks-table-csv.js: parseCsv(csvString) returning array of bookmark-like objects
+  code_locations:
+    files:
+      - path: src/ui/bookmarks-table/bookmarks-table.html
+        description: Import row (file input, button, radios, dropdown)
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+        description: runImport, file change handler, result message
+      - path: src/ui/bookmarks-table/bookmarks-table-csv.js
+        description: parseCsv for import
+    functions:
+      - name: parseCsv
+        file: src/ui/bookmarks-table/bookmarks-table-csv.js
+        description: Parse CSV string to array of bookmark objects (export format)
+      - name: runImport
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: Parse file, filter if only new, send saveBookmark per row, refresh, show result
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+    tests:
+      - tests/unit/bookmarks-table-import.test.js
+    code_annotations:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+  related_decisions:
+    depends_on:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New implementation for import UX
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
 IMPL-CONFIG_STRUCT:
   name: Configuration Structure
   status: Template

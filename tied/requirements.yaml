@@ -1414,6 +1414,51 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
       date: 2026-02-13T00:00:00.000Z
       validator: AI Agent
       result: pass
+REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  name: Local Bookmarks Index Import
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Allow users to import bookmarks from CSV or JSON with option to import only new or overwrite existing.
+    problems_solved:
+      - No way to import previously exported or external bookmark files into index storage
+    benefits:
+      - Import only new (skip existing URLs) or overwrite existing; target storage Local | File | Sync
+  satisfaction_criteria:
+    - criterion: User can choose "Import only new" or "Import and overwrite existing"
+    - criterion: User can select file (CSV or JSON) and optional target storage
+  validation_criteria:
+    - method: Manual verification and unit tests
+      coverage: Parse CSV/JSON; only-new vs overwrite; result message
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+    tests:
+      - tests/unit/bookmarks-table-import.test.js
+    code_annotations:
+      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+    supersedes: []
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New requirement for import UX
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
 REQ-FILE_BOOKMARK_STORAGE:
   name: File-Based Bookmark Storage
   category: Functional

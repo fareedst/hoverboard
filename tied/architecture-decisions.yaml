@@ -1669,6 +1669,46 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
       date: '2026-02-14'
       author: AI Agent
       reason: Implementation complete
+ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  name: Local Bookmarks Index Import Architecture
+  status: Active
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  rationale:
+    why: Import from file without new backend; use existing saveBookmark and preferredBackend
+    problems_solved:
+      - No import path for index data
+    benefits:
+      - Client-side parse (CSV/JSON); existing saveBookmark; two modes (only new / overwrite)
+  alternatives_considered: []
+  implementation_approach:
+    summary: Import client-side; parse CSV (export format) or JSON; send each record via saveBookmark with preferredBackend; only new filters by allBookmarks URLs; no new backend message
+    details: []
+  traceability:
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+    tests:
+      - tests/unit/bookmarks-table-import.test.js
+    code_annotations:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+  related_decisions:
+    depends_on: []
+    informs:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New architecture for import UX
 ARCH-FILE_BOOKMARK_PROVIDER:
   name: File-Based Bookmark Provider
   status: Active

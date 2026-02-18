@@ -1,0 +1,65 @@
+IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  name: Local Bookmarks Index Import Implementation
+  status: Active
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+    - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  rationale:
+    why: Implement import UX and parse/save flow using existing saveBookmark and CSV/JSON format.
+    problems_solved:
+      - No import UI or parsing for index page
+    benefits:
+      - Hidden file input + Import button; two radios (Only new / Overwrite existing); Import to dropdown (Local | File | Sync)
+      - parseCsv in bookmarks-table-csv.js matches export format (quoted fields, "" escape); JSON parsed and normalized (url required, tags array, shared/toread yes/no)
+      - runImport: read file, parseImportFile(text, filename), filter by allBookmarks when only new, send saveBookmark per row with preferredBackend, loadBookmarks(), show "Imported N, skipped M, K failed"
+  implementation_approach:
+    summary: Import row in .actions-below-table; parseCsv and parseCsvLine in bookmarks-table-csv.js; normalizeJsonBookmark and parseImportFile in bookmarks-table.js; runImport on file input change; result in #import-result.
+    details:
+      - CSV: parseCsv skips header (line starting with title,url), parseCsvLine handles quoted fields and ""; rows with empty URL skipped; Shared Private→no Yes→toread yes
+      - JSON: Array or single object; normalizeJsonBookmark returns null for empty url; tags normalized to array
+      - UI: Import button triggers file input click; file input accept=".csv,.json"; import result span with aria-live="polite"
+  code_locations:
+    files:
+      - src/ui/bookmarks-table/bookmarks-table.html
+      - src/ui/bookmarks-table/bookmarks-table.js
+      - src/ui/bookmarks-table/bookmarks-table-csv.js
+    functions:
+      - parseCsv
+      - runImport
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+    tests:
+      - tests/unit/bookmarks-table-import.test.js
+    code_annotations:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New implementation for import UX
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
+  annotations: Use [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT], [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT], [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] in HTML/JS comments.
+  cross-references: ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT, REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  logic: 'In bookmarks-table.js: hidden file input (accept .csv,.json); Import button triggers click on file input. On file change: read file text; if .json parse as array of bookmark objects; if .csv use parseCsv() from bookmarks-table-csv.js. Map each row to { url, description, tags, time, shared, toread, extended, preferredBackend }. If "Import only new", filter to rows whose url is not in allBookmarks. For each record send chrome.runtime.sendMessage({ type: "saveBookmark", data }). Count imported, skipped, failed; call loadBookmarks(); show result in UI (e.g. span or temporary message).'
+  ui: 'In .actions-below-table: Import row with hidden <input type="file" accept=".csv,.json">, "Import" button, two radios "Only new" / "Overwrite existing", optional "Import to: Local | File | Sync" dropdown. Result message (e.g. "Imported 12, skipped 3" or error).'
+  related:
+    - IMPL-LOCAL_BOOKMARKS_INDEX (index page this import extends)
+    - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT, REQ-LOCAL_BOOKMARKS_INDEX_IMPORT

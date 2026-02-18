@@ -1232,6 +1232,52 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     registered: 2026-02-13
     last_updated: 2026-02-14
 
+REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  type: REQ
+  name: Local Bookmarks Index Import
+  category: Functional
+  status: Active
+  description: "Import bookmarks from CSV or JSON; only new or overwrite existing; target Local | File | Sync"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+    - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+    - REQ-LOCAL_BOOKMARKS_INDEX
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
+ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  type: ARCH
+  name: Local Bookmarks Index Import Architecture
+  category: Storage / UI
+  status: Active
+  description: "Client-side import; parse CSV/JSON; saveBookmark with preferredBackend; only new vs overwrite"
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+    - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
+IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  type: IMPL
+  name: Local Bookmarks Index Import Implementation
+  category: Storage / UI
+  status: Active
+  description: "Import UI (file input, only new/overwrite, Import to); parseCsv; per-row saveBookmark; result message"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+    - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
 REQ-FILE_BOOKMARK_STORAGE:
   type: REQ
   name: File-Based Bookmark Storage

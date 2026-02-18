@@ -185,6 +185,41 @@ body {
   cursor: not-allowed;
 }
 
+/* [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import row */
+.import-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.import-row .import-mode-fieldset {
+  display: flex;
+  gap: var(--space-3);
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+.import-row .import-mode-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.import-row label[for="import-target"] {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+.import-row .import-result {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

@@ -1,0 +1,59 @@
+ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  name: Local Bookmarks Index Import Architecture
+  status: Active
+  cross_references: &ref_0
+    - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  rationale:
+    why: Support import from file without adding backend complexity; reuse export format and existing save path.
+    problems_solved:
+      - No import path for index data; users could export but not re-import or merge
+    benefits:
+      - Client-side only: parse file in the index page; no new background message
+      - Reuses saveBookmark with preferredBackend (Local | File | Sync) so import targets the chosen storage
+      - Two modes (only new vs overwrite) implemented by filtering on in-memory allBookmarks before sending
+      - CSV format matches export (Title, URL, Tags, Time, Storage, Shared, To read, Notes); JSON accepts array or single object
+  alternatives_considered:
+    - name: New bulk-import message
+      pros: Single round-trip for large files
+      cons: Adds backend API; per-row saveBookmark is sufficient for typical use
+      rejected_reason: Deferred; can add later if needed
+  implementation_approach:
+    summary: 'Import is implemented **entirely on the index page** (client-side). User selects a file (CSV or JSON). CSV is parsed to match export format (Title, URL, Tags, Time, Storage, Shared, To read, Notes). No new background message: each record is sent via existing **saveBookmark** with **preferredBackend** (Import to: Local | File | Sync). "Import only new" filters out URLs already present in allBookmarks before sending; "Import and overwrite" sends all. Backend saveBookmark already upserts by URL.'
+    details: []
+  traceability:
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+    tests:
+      - tests/unit/bookmarks-table-import.test.js
+    code_annotations:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+  related_decisions:
+    depends_on:
+      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+    informs:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New architecture for import UX
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
+  decision: 'Import is client-side: parse file (CSV/JSON), map to bookmark payload, use existing saveBookmark with preferredBackend; two modes (only new vs overwrite). No new backend message.'
+  cross-references: REQ-LOCAL_BOOKMARKS_INDEX_IMPORT, IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+  related:
+    - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT (import UI and parse + save loop)
+    - ARCH-LOCAL_BOOKMARKS_INDEX (index page this import extends)
+    - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT (same CSV/JSON format as export)
+  summary: 'Import is client-side: parse CSV/JSON (export format), send each record via saveBookmark with preferredBackend; "only new" skips URLs in allBookmarks; "overwrite" sends all. No new backend message.'
