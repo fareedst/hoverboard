@@ -96,6 +96,7 @@ export class UIManager {
       reloadBtn: document.getElementById('reloadBtn'),
       optionsBtn: document.getElementById('optionsBtn'),
       bookmarksIndexBtn: document.getElementById('bookmarksIndexBtn'),
+      browserBookmarkImportBtn: document.getElementById('browserBookmarkImportBtn'),
       settingsBtn: document.getElementById('settingsBtn'),
 
       // Input elements
@@ -162,6 +163,10 @@ export class UIManager {
 
     this.elements.bookmarksIndexBtn?.addEventListener('click', () => {
       this.emit('openBookmarksIndex')
+    })
+
+    this.elements.browserBookmarkImportBtn?.addEventListener('click', () => {
+      this.emit('openBrowserBookmarkImport')
     })
 
     // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend buttons: click emits storageBackendChange (move when non-API to non-API)

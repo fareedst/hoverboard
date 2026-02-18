@@ -1709,6 +1709,45 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
       date: '2026-02-18'
       author: AI Agent
       reason: New architecture for import UX
+ARCH-BROWSER_BOOKMARK_IMPORT:
+  name: Browser Bookmark Import Architecture
+  status: Active
+  cross_references:
+    - REQ-BROWSER_BOOKMARK_IMPORT
+  rationale:
+    why: Reuse index layout and existing save path; page calls chrome.bookmarks with bookmarks permission.
+    problems_solved:
+      - No import path from browser bookmarks into Hoverboard
+    benefits:
+      - Single page; getTree in page; flatten with folder path; filters, sort, select; conflict resolution; folder + extra tags; saveBookmark per row
+  alternatives_considered: []
+  implementation_approach:
+    summary: Dedicated page; getTree in page script; flatten to list with folderPath; table with Select, Title, URL, Folder, Date; search + folder filter; conflict Skip/Overwrite/Merge via getAggregatedBookmarksForIndex; saveBookmark with preferredBackend
+    details: []
+  traceability:
+    requirements:
+      - REQ-BROWSER_BOOKMARK_IMPORT
+    implementation:
+      - IMPL-BROWSER_BOOKMARK_IMPORT
+    tests: []
+    code_annotations:
+      - ARCH-BROWSER_BOOKMARK_IMPORT
+  related_decisions:
+    depends_on: []
+    informs:
+      - IMPL-BROWSER_BOOKMARK_IMPORT
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+  detail_file: architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New architecture for browser bookmark import
 ARCH-FILE_BOOKMARK_PROVIDER:
   name: File-Based Bookmark Provider
   status: Active

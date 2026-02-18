@@ -6343,6 +6343,7 @@ var UIManager = class {
       reloadBtn: document.getElementById("reloadBtn"),
       optionsBtn: document.getElementById("optionsBtn"),
       bookmarksIndexBtn: document.getElementById("bookmarksIndexBtn"),
+      browserBookmarkImportBtn: document.getElementById("browserBookmarkImportBtn"),
       settingsBtn: document.getElementById("settingsBtn"),
       // Input elements
       newTagInput: document.getElementById("newTagInput"),
@@ -6393,6 +6394,9 @@ var UIManager = class {
     });
     this.elements.bookmarksIndexBtn?.addEventListener("click", () => {
       this.emit("openBookmarksIndex");
+    });
+    this.elements.browserBookmarkImportBtn?.addEventListener("click", () => {
+      this.emit("openBrowserBookmarkImport");
     });
     const storageBtns = this.elements.storageBackendButtons?.querySelectorAll(".storage-backend-btn");
     storageBtns?.forEach((btn) => {
@@ -7850,6 +7854,7 @@ var POPUP_ACTION_IDS = {
   reloadExtension: "reloadExtension",
   openOptions: "openOptions",
   openBookmarksIndex: "openBookmarksIndex",
+  openBrowserBookmarkImport: "openBrowserBookmarkImport",
   storageBackendChange: "storageBackendChange",
   showHoverOnPageLoadChange: "showHoverOnPageLoadChange",
   retry: "retry"
@@ -7871,6 +7876,8 @@ var POPUP_ACTION_TO_MESSAGE = {
   // chrome.runtime.openOptionsPage
   [POPUP_ACTION_IDS.openBookmarksIndex]: null,
   // chrome.tabs.create
+  [POPUP_ACTION_IDS.openBrowserBookmarkImport]: null,
+  // chrome.tabs.create [REQ-BROWSER_BOOKMARK_IMPORT]
   [POPUP_ACTION_IDS.storageBackendChange]: MESSAGE_TYPES.MOVE_BOOKMARK_TO_STORAGE,
   [POPUP_ACTION_IDS.showHoverOnPageLoadChange]: MESSAGE_TYPES.UPDATE_OVERLAY_CONFIG,
   [POPUP_ACTION_IDS.retry]: null
@@ -7908,6 +7915,7 @@ var PopupController = class {
     this.handleReloadExtension = this.handleReloadExtension.bind(this);
     this.handleOpenOptions = this.handleOpenOptions.bind(this);
     this.handleOpenBookmarksIndex = this.handleOpenBookmarksIndex.bind(this);
+    this.handleOpenBrowserBookmarkImport = this.handleOpenBrowserBookmarkImport.bind(this);
     this.handleStorageBackendChange = this.handleStorageBackendChange.bind(this);
     this.normalizeTags = this.normalizeTags.bind(this);
     this.setupEventListeners();
@@ -8007,6 +8015,7 @@ var PopupController = class {
     this.uiManager.on("reloadExtension", this.handleReloadExtension);
     this.uiManager.on("openOptions", this.handleOpenOptions);
     this.uiManager.on("openBookmarksIndex", this.handleOpenBookmarksIndex);
+    this.uiManager.on("openBrowserBookmarkImport", this.handleOpenBrowserBookmarkImport);
     this.uiManager.on("storageBackendChange", this.handleStorageBackendChange);
     this.uiManager.on("storageLocalToggle", (targetBackend) => this.handleStorageBackendChange(targetBackend));
     this.uiManager.on("refreshData", this.refreshPopupData.bind(this));
@@ -9739,6 +9748,21 @@ var PopupController = class {
     }
   }
   /**
+   * [REQ-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
+   * Open the browser bookmark import page in a new tab.
+   */
+  handleOpenBrowserBookmarkImport() {
+    recordAction(POPUP_ACTION_IDS.openBrowserBookmarkImport, void 0, "popup");
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openBrowserBookmarkImport, payload: void 0 });
+    try {
+      const url = chrome.runtime.getURL("src/ui/browser-bookmark-import/browser-bookmark-import.html");
+      chrome.tabs.create({ url });
+      this.uiManager.showSuccess("Browser bookmark import opened in new tab");
+    } catch (error) {
+      this.errorHandler.handleError("Failed to open browser bookmark import", error);
+    }
+  }
+  /**
    * Get better description for bookmark
    */
   getBetterDescription(currentDescription, pageTitle) {
@@ -9783,6 +9807,7 @@ var PopupController = class {
     this.uiManager?.off("reloadExtension", this.handleReloadExtension);
     this.uiManager?.off("openOptions", this.handleOpenOptions);
     this.uiManager?.off("openBookmarksIndex", this.handleOpenBookmarksIndex);
+    this.uiManager?.off("openBrowserBookmarkImport", this.handleOpenBrowserBookmarkImport);
   }
   /**
    * [POPUP-REFRESH-001] Manual refresh capability

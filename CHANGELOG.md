@@ -21,6 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Import to:** Target storage dropdown (Local | File | Sync); uses existing `saveBookmark` message with `preferredBackend` (no new backend API).
   - Result message shows imported, skipped, and failed counts; table refreshes after import. Unit tests in `tests/unit/bookmarks-table-import.test.js` for `parseCsv`, JSON normalization contract, and only-new vs overwrite filtering.
 
+- **Browser Bookmark Import** (`REQ-BROWSER_BOOKMARK_IMPORT`, `ARCH-BROWSER_BOOKMARK_IMPORT`, `IMPL-BROWSER_BOOKMARK_IMPORT`) – Dedicated page to copy **browser bookmarks** into Hoverboard:
+  - **Open from:** Popup footer ("Browser bookmark import") or Options ("Browser bookmark import"); opens in a new tab. Popup handler is bound in PopupController so the button works correctly.
+  - **Data source:** `chrome.bookmarks.getTree()` in the page (requires `bookmarks` permission); tree flattened to a list with folder path per bookmark.
+  - **Table:** Select (checkboxes, select-all), Title, URL (link with external indicator), Folder path, Date added; search over title/URL; filter by folder (dropdown of unique folder paths); sortable columns (default: Date added descending).
+  - **Conflict mode:** When a selected URL already exists in Hoverboard — **Skip** (do not overwrite), **Overwrite** (replace with browser data), **Merge** (keep existing description/notes, merge tags).
+  - **Tags:** Optional "Use folder names as tags" (folder path segments → sanitized tags) and "Add tags (comma-separated)" applied to every imported bookmark.
+  - **Import to:** Target storage dropdown (Local | File | Sync); uses existing `saveBookmark` with `preferredBackend`. Result message shows imported, skipped, and failed counts.
+  - **Implementation:** `src/ui/browser-bookmark-import/` (HTML, JS, CSS, utils); pure helpers in `browser-bookmark-import-utils.js` for tests. Unit tests in `tests/unit/browser-bookmark-import.test.js` for `sanitizeTag`, `folderPathToTags`, `parseExtraTags`, `flattenTree`, and conflict logic.
+
 - **Extension UI Inspection and Testability** (`REQ-UI_INSPECTION`, `ARCH-UI_TESTABILITY`) – Enables testing and debugging of extension UI via a single contract, optional inspector, and testability hooks:
   - **UI action contract** (`IMPL-UI_ACTION_CONTRACT`): `src/shared/ui-action-contract.js` re-exports `MESSAGE_TYPES` and defines popup/overlay action IDs for tests and inspector.
   - **UI inspector** (`IMPL-UI_INSPECTOR`): Optional ring buffers (last 50 messages, last 50 actions) in `src/shared/ui-inspector.js`; gated by `DEBUG_HOVERBOARD_UI` in storage; wired in service worker, popup, and content script.

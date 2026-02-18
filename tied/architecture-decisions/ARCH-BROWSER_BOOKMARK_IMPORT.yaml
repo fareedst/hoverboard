@@ -1,0 +1,56 @@
+ARCH-BROWSER_BOOKMARK_IMPORT:
+  name: Browser Bookmark Import Architecture
+  status: Active
+  cross_references: &ref_0
+    - REQ-BROWSER_BOOKMARK_IMPORT
+  rationale:
+    why: Reuse index-page layout and existing save path; add no backend for reading bookmarks (page calls chrome.bookmarks directly with "bookmarks" permission).
+    problems_solved:
+      - No import path from browser bookmarks into Hoverboard
+    benefits:
+      - Single extension page (e.g. browser-bookmark-import.html); chrome.bookmarks.getTree in page script; flatten tree to list with folder path; filters (search, folder), sort, select; conflict resolution (Skip / Overwrite / Merge) using getAggregatedBookmarksForIndex; tags from folder path + extra; saveBookmark with preferredBackend per row
+  alternatives_considered:
+    - name: Background script fetches bookmarks, page requests via message
+      pros: Centralized API
+      cons: Unnecessary; extension page with permission can call chrome.bookmarks directly
+      rejected_reason: Simpler to call from page
+  implementation_approach:
+    summary: 'Dedicated page in src/ui/browser-bookmark-import/; on load call chrome.bookmarks.getTree(), flatten to list of { url, title, dateAdded, id, folderPath }; build unique folder list for filter dropdown; table with Select, Title, URL (link), Folder path, Date added; search + folder filter; sort; selection; conflict mode (Skip / Overwrite / Merge); "Use folder names as tags" + "Add tags"; Import to Local | File | Sync; Import button sends getAggregatedBookmarksForIndex once, then for each selected item builds payload, applies conflict rule, sendMessage saveBookmark; show result.'
+    details: []
+  traceability:
+    requirements:
+      - REQ-BROWSER_BOOKMARK_IMPORT
+    implementation:
+      - IMPL-BROWSER_BOOKMARK_IMPORT
+    tests:
+      - tests/unit/browser-bookmark-import.test.js
+    code_annotations:
+      - ARCH-BROWSER_BOOKMARK_IMPORT
+  related_decisions:
+    depends_on:
+      - REQ-BROWSER_BOOKMARK_IMPORT
+    informs:
+      - IMPL-BROWSER_BOOKMARK_IMPORT
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
+  detail_file: architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New architecture for browser bookmark import
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
+  decision: 'Dedicated page; chrome.bookmarks.getTree in page; flatten with folder path; filter (search, folder), sort, select; conflict Skip/Overwrite/Merge via aggregated index; folder + extra tags; saveBookmark per row; no new backend message.'
+  cross-references: REQ-BROWSER_BOOKMARK_IMPORT, IMPL-BROWSER_BOOKMARK_IMPORT
+  summary: 'Browser bookmark import page loads getTree in-page, flattens to table with folder path; search + folder filter; select; conflict mode; folder-as-tags + extra tags; Import to Local | File | Sync; saveBookmark per selected; result message.'
+  related:
+    - IMPL-BROWSER_BOOKMARK_IMPORT (import page UI and flatten + save loop)
+    - ARCH-LOCAL_BOOKMARKS_INDEX (layout reference)
+    - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT (same save path and conflict concepts)

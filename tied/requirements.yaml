@@ -1459,6 +1459,50 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
       date: '2026-02-18'
       validator: AI Agent
       result: pass
+REQ-BROWSER_BOOKMARK_IMPORT:
+  name: Browser Bookmark Import Page
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Let users copy bookmarks from the browser's native bookmarking API into Hoverboard storage with filter, selection, conflict resolution, and tag assignment.
+    problems_solved:
+      - No way to import browser bookmarks into Hoverboard
+    benefits:
+      - Dedicated page; chrome.bookmarks.getTree; filter by folder and search; select; conflict Skip/Overwrite/Merge; tags from folder + extra; import to Local | File | Sync via saveBookmark
+  satisfaction_criteria:
+    - criterion: Page displays browser bookmarks with search, folder filter, select, conflict mode, tag options, Import to; uses getAggregatedBookmarksForIndex and saveBookmark
+  validation_criteria:
+    - method: Manual verification
+      coverage: Load page, filter, select, import with each conflict mode; confirm result and data in index
+  traceability:
+    architecture:
+      - ARCH-BROWSER_BOOKMARK_IMPORT
+    implementation:
+      - IMPL-BROWSER_BOOKMARK_IMPORT
+    tests:
+      - tests/unit/browser-bookmark-import.test.js
+    code_annotations:
+      - REQ-BROWSER_BOOKMARK_IMPORT
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+    supersedes: []
+  detail_file: requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New requirement for browser bookmark import page
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
 REQ-FILE_BOOKMARK_STORAGE:
   name: File-Based Bookmark Storage
   category: Functional

@@ -42,7 +42,8 @@
     "contextMenus",
     "scripting",
     "offscreen",
-    "nativeMessaging"
+    "nativeMessaging",
+    "bookmarks"
   ],
   "host_permissions": [
     "http://*/*",

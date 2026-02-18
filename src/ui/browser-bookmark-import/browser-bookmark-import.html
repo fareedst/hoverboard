@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Bookmark Import – Hoverboard</title>
+  <link rel="stylesheet" href="../styles/design-tokens.css">
+  <link rel="stylesheet" href="browser-bookmark-import.css">
+</head>
+<body>
+  <!-- [REQ-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT] -->
+  <div class="container">
+    <header class="header">
+      <div class="header-brand">
+        <img src="../../../icons/hoverboard_48.png" alt="Hoverboard" class="logo">
+        <span class="extension-name">Hoverboard</span>
+      </div>
+      <h1>Browser Bookmark Import</h1>
+      <p class="subtitle">Copy bookmarks from your browser into Hoverboard. Filter by folder, select which to import, resolve conflicts, and add tags.</p>
+    </header>
+
+    <div class="toolbar">
+      <div class="search-row">
+        <label for="search-input" class="sr-only">Search</label>
+        <input type="text" id="search-input" class="search-input" placeholder="Search title, URL…" autocomplete="off">
+        <button type="button" id="search-clear" class="btn btn-secondary btn-sm" title="Clear search" aria-label="Clear search">Clear</button>
+      </div>
+      <div class="filters-row">
+        <label for="filter-folder">Folder:</label>
+        <select id="filter-folder" class="filter-select" aria-label="Filter by folder">
+          <option value="">All</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="empty-state" class="empty-state hidden">
+      <p id="empty-state-message">No browser bookmarks found. If you have bookmarks in this browser, ensure the extension has the bookmarks permission.</p>
+    </div>
+
+    <div id="table-wrapper" class="table-wrapper">
+      <table class="bookmarks-table" id="bookmarks-table">
+        <thead>
+          <tr>
+            <th class="col-select" scope="col">
+              <label class="select-all-label">
+                <input type="checkbox" id="select-all" aria-label="Select all visible bookmarks">
+                <span class="sr-only">Select all</span>
+              </label>
+            </th>
+            <th data-sort="title" class="sortable">Title <span class="sort-icon" aria-hidden="true"></span></th>
+            <th data-sort="url" class="sortable">URL <span class="sort-icon" aria-hidden="true"></span></th>
+            <th data-sort="folderPath" class="sortable">Folder <span class="sort-icon" aria-hidden="true"></span></th>
+            <th data-sort="dateAdded" class="sortable sort-active sort-desc">Date added <span class="sort-icon" aria-hidden="true">↓</span></th>
+          </tr>
+        </thead>
+        <tbody id="table-body">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="actions-below-table">
+      <fieldset class="import-options-fieldset" aria-label="Import options">
+        <legend class="sr-only">Conflict and tags</legend>
+        <div class="conflict-row">
+          <span class="option-label">When URL already in Hoverboard:</span>
+          <label class="import-mode-label">
+            <input type="radio" name="conflict-mode" value="skip" checked>
+            <span>Skip</span>
+          </label>
+          <label class="import-mode-label">
+            <input type="radio" name="conflict-mode" value="overwrite">
+            <span>Overwrite</span>
+          </label>
+          <label class="import-mode-label">
+            <input type="radio" name="conflict-mode" value="merge">
+            <span>Merge tags</span>
+          </label>
+        </div>
+        <div class="tags-row">
+          <label class="import-mode-label">
+            <input type="checkbox" id="use-folder-tags" value="1">
+            <span>Use folder names as tags</span>
+          </label>
+          <label for="extra-tags">Add tags (comma-separated):</label>
+          <input type="text" id="extra-tags" class="filter-input" placeholder="e.g. imported, browser" autocomplete="off" aria-label="Extra tags for all imported bookmarks">
+        </div>
+      </fieldset>
+      <div class="import-action-row">
+        <label for="import-target">Import to:</label>
+        <select id="import-target" class="filter-select" aria-label="Target storage for imported bookmarks">
+          <option value="local">Local</option>
+          <option value="file">File</option>
+          <option value="sync">Sync</option>
+        </select>
+        <button type="button" id="import-btn" class="btn btn-secondary btn-sm" disabled aria-label="Import selected bookmarks into Hoverboard">Import selected</button>
+        <span id="import-result" class="import-result" aria-live="polite"></span>
+      </div>
+    </div>
+
+    <div class="footer-info">
+      <span id="row-count">0 bookmarks</span>
+    </div>
+  </div>
+
+  <script type="module" src="browser-bookmark-import.js"></script>
+</body>
+</html>

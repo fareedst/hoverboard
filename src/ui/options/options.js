@@ -21,6 +21,9 @@ class OptionsController {
     if (this.elements.bookmarksIndexLink && typeof chrome !== 'undefined' && chrome.runtime) {
       this.elements.bookmarksIndexLink.href = chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html')
     }
+    if (this.elements.browserBookmarkImportLink && typeof chrome !== 'undefined' && chrome.runtime) {
+      this.elements.browserBookmarkImportLink.href = chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html')
+    }
     this.attachEventListeners()
     await this.loadSettings()
     if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
@@ -97,6 +100,8 @@ class OptionsController {
 
     // [REQ-LOCAL_BOOKMARKS_INDEX] Local bookmarks index link
     this.elements.bookmarksIndexLink = document.getElementById('bookmarks-index-link')
+    // [REQ-BROWSER_BOOKMARK_IMPORT] Browser bookmark import link
+    this.elements.browserBookmarkImportLink = document.getElementById('browser-bookmark-import-link')
 
     // [REQ-NATIVE_HOST_WRAPPER] Native host test
     this.elements.testNativeHost = document.getElementById('test-native-host')

@@ -52,6 +52,7 @@ export class PopupController {
     this.handleReloadExtension = this.handleReloadExtension.bind(this)
     this.handleOpenOptions = this.handleOpenOptions.bind(this)
     this.handleOpenBookmarksIndex = this.handleOpenBookmarksIndex.bind(this)
+    this.handleOpenBrowserBookmarkImport = this.handleOpenBrowserBookmarkImport.bind(this)
     this.handleStorageBackendChange = this.handleStorageBackendChange.bind(this)
     this.normalizeTags = this.normalizeTags.bind(this)
 
@@ -172,6 +173,7 @@ export class PopupController {
     this.uiManager.on('reloadExtension', this.handleReloadExtension)
     this.uiManager.on('openOptions', this.handleOpenOptions)
     this.uiManager.on('openBookmarksIndex', this.handleOpenBookmarksIndex)
+    this.uiManager.on('openBrowserBookmarkImport', this.handleOpenBrowserBookmarkImport)
 
     // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend change (move bookmark)
     this.uiManager.on('storageBackendChange', this.handleStorageBackendChange)
@@ -2061,6 +2063,22 @@ export class PopupController {
   }
 
   /**
+   * [REQ-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [IMPL-BROWSER_BOOKMARK_IMPORT]
+   * Open the browser bookmark import page in a new tab.
+   */
+  handleOpenBrowserBookmarkImport () {
+    recordAction(POPUP_ACTION_IDS.openBrowserBookmarkImport, undefined, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openBrowserBookmarkImport, payload: undefined })
+    try {
+      const url = chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html')
+      chrome.tabs.create({ url })
+      this.uiManager.showSuccess('Browser bookmark import opened in new tab')
+    } catch (error) {
+      this.errorHandler.handleError('Failed to open browser bookmark import', error)
+    }
+  }
+
+  /**
    * Get better description for bookmark
    */
   getBetterDescription (currentDescription, pageTitle) {
@@ -2116,6 +2134,7 @@ export class PopupController {
     this.uiManager?.off('reloadExtension', this.handleReloadExtension)
     this.uiManager?.off('openOptions', this.handleOpenOptions)
     this.uiManager?.off('openBookmarksIndex', this.handleOpenBookmarksIndex)
+    this.uiManager?.off('openBrowserBookmarkImport', this.handleOpenBrowserBookmarkImport)
   }
 
   /**

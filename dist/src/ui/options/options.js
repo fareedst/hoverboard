@@ -5090,6 +5090,9 @@ var OptionsController = class {
     if (this.elements.bookmarksIndexLink && typeof chrome !== "undefined" && chrome.runtime) {
       this.elements.bookmarksIndexLink.href = chrome.runtime.getURL("src/ui/bookmarks-table/bookmarks-table.html");
     }
+    if (this.elements.browserBookmarkImportLink && typeof chrome !== "undefined" && chrome.runtime) {
+      this.elements.browserBookmarkImportLink.href = chrome.runtime.getURL("src/ui/browser-bookmark-import/browser-bookmark-import.html");
+    }
     this.attachEventListeners();
     await this.loadSettings();
     if (typeof chrome !== "undefined" && chrome.storage?.onChanged) {
@@ -5144,6 +5147,7 @@ var OptionsController = class {
     this.elements.importFile = document.getElementById("import-file");
     this.elements.statusMessage = document.getElementById("status-message");
     this.elements.bookmarksIndexLink = document.getElementById("bookmarks-index-link");
+    this.elements.browserBookmarkImportLink = document.getElementById("browser-bookmark-import-link");
     this.elements.testNativeHost = document.getElementById("test-native-host");
     this.elements.nativeHostStatus = document.getElementById("native-host-status");
   }

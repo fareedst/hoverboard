@@ -1241,6 +1241,58 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
       date: '2026-02-18'
       validator: AI Agent
       result: pass
+IMPL-BROWSER_BOOKMARK_IMPORT:
+  name: Browser Bookmark Import Implementation
+  status: Active
+  cross_references:
+    - ARCH-BROWSER_BOOKMARK_IMPORT
+    - REQ-BROWSER_BOOKMARK_IMPORT
+  rationale:
+    why: Implement browser bookmark import page with getTree, flatten, filters, selection, conflict resolution, tags, saveBookmark loop.
+    problems_solved:
+      - No UI or logic for importing browser bookmarks into Hoverboard
+    benefits:
+      - browser-bookmark-import.html/.js/.css; getTree + flatten; search + folder filter; table; conflict mode; folder + extra tags; Import to; result message
+  implementation_approach:
+    summary: src/ui/browser-bookmark-import/ with HTML, JS (loadBrowserBookmarks, flattenTree, runImport), CSS; popup and options entry.
+    details: []
+  code_locations:
+    files:
+      - src/ui/browser-bookmark-import/browser-bookmark-import.html
+      - src/ui/browser-bookmark-import/browser-bookmark-import.js
+      - src/ui/browser-bookmark-import/browser-bookmark-import.css
+    functions:
+      - flattenTree
+      - loadBrowserBookmarks
+      - runImport
+  traceability:
+    architecture:
+      - ARCH-BROWSER_BOOKMARK_IMPORT
+    requirements:
+      - REQ-BROWSER_BOOKMARK_IMPORT
+    tests:
+      - tests/unit/browser-bookmark-import.test.js
+    code_annotations:
+      - IMPL-BROWSER_BOOKMARK_IMPORT
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+  detail_file: implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New implementation for browser bookmark import page
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
 IMPL-CONFIG_STRUCT:
   name: Configuration Structure
   status: Template

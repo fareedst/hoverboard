@@ -1,0 +1,51 @@
+REQ-BROWSER_BOOKMARK_IMPORT:
+  name: Browser Bookmark Import Page
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Let users copy bookmarks from the browser's native bookmarking API into Hoverboard storage (Local | File | Sync) with filter, selection, conflict resolution, and tag assignment.
+    problems_solved:
+      - No way to import browser bookmarks into Hoverboard
+      - No way to filter/select which browser bookmarks to import or resolve URL conflicts
+    benefits:
+      - Dedicated page loads native bookmarks via chrome.bookmarks.getTree; user filters by folder and search, selects rows, chooses conflict mode (Skip | Overwrite | Merge), assigns tags from folder names and optional extra tags, imports to Local | File | Sync via existing saveBookmark
+  satisfaction_criteria:
+    - criterion: Dedicated extension page displays browser bookmarks (flattened from getTree) with Select column, Title, URL, Folder path, Date added; search over title/URL; filter by folder.
+    - criterion: User can select bookmarks (checkboxes, select-all), choose conflict mode (Skip / Overwrite / Merge) when URL exists in Hoverboard, optionally use folder names as tags and add extra tags, choose Import to (Local | File | Sync), and run import; result shows imported, skipped, failed counts.
+    - criterion: Import uses existing getAggregatedBookmarksForIndex (or getLocalBookmarksForIndex) for conflict set and saveBookmark for each selected item; no new backend message for reading bookmarks (chrome.bookmarks called from page).
+  validation_criteria:
+    - method: Manual verification
+      coverage: Open page from popup/options; load browser bookmarks; search, folder filter, sort, select; run import with each conflict mode and tag options; confirm result message and data in Hoverboard index.
+    - method: Unit tests
+      coverage: tests/unit/browser-bookmark-import.test.js — sanitizeTag, folderPathToTags, parseExtraTags, flattenTree; conflict logic (skip, overwrite, merge).
+  traceability:
+    architecture:
+      - ARCH-BROWSER_BOOKMARK_IMPORT
+    implementation:
+      - IMPL-BROWSER_BOOKMARK_IMPORT
+    tests:
+      - tests/unit/browser-bookmark-import.test.js
+    code_annotations:
+      - REQ-BROWSER_BOOKMARK_IMPORT
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+    supersedes: []
+  detail_file: requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: New requirement for browser bookmark import page
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
+  cross-references: ARCH-BROWSER_BOOKMARK_IMPORT, IMPL-BROWSER_BOOKMARK_IMPORT, REQ-LOCAL_BOOKMARKS_INDEX, REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  summary: A dedicated **Browser Bookmark Import** page loads native bookmarks (chrome.bookmarks.getTree), lets users filter (search, folder), select rows, resolve conflicts (Skip | Overwrite | Merge), assign tags (folder names + extra), and import to Local | File | Sync via saveBookmark; entry from popup and Options.

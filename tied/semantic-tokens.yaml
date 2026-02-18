@@ -1278,6 +1278,53 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     registered: 2026-02-18
     last_updated: 2026-02-18
 
+REQ-BROWSER_BOOKMARK_IMPORT:
+  type: REQ
+  name: Browser Bookmark Import Page
+  category: Functional
+  status: Active
+  description: "Dedicated page to import browser bookmarks into Hoverboard; filter, select, conflict resolution, tags from folder + extra"
+  cross_references:
+    - ARCH-BROWSER_BOOKMARK_IMPORT
+    - IMPL-BROWSER_BOOKMARK_IMPORT
+    - REQ-LOCAL_BOOKMARKS_INDEX
+    - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
+ARCH-BROWSER_BOOKMARK_IMPORT:
+  type: ARCH
+  name: Browser Bookmark Import Architecture
+  category: Storage / UI
+  status: Active
+  description: "Dedicated page; chrome.bookmarks.getTree in page; flatten with folder path; filter, select; conflict Skip/Overwrite/Merge; saveBookmark per row"
+  cross_references:
+    - REQ-BROWSER_BOOKMARK_IMPORT
+    - IMPL-BROWSER_BOOKMARK_IMPORT
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
+IMPL-BROWSER_BOOKMARK_IMPORT:
+  type: IMPL
+  name: Browser Bookmark Import Implementation
+  category: Storage / UI
+  status: Active
+  description: "browser-bookmark-import page; getTree, flattenTree; search + folder filter; table; conflict mode; folder + extra tags; runImport"
+  cross_references:
+    - ARCH-BROWSER_BOOKMARK_IMPORT
+    - REQ-BROWSER_BOOKMARK_IMPORT
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
 REQ-FILE_BOOKMARK_STORAGE:
   type: REQ
   name: File-Based Bookmark Storage
