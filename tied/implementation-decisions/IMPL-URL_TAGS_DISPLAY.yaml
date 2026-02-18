@@ -1,0 +1,60 @@
+IMPL-URL_TAGS_DISPLAY:
+  name: URL Tags and Badge Display Module
+  status: Active
+  cross_references:
+    - ARCH-URL_TAGS_DISPLAY
+    - REQ-URL_TAGS_DISPLAY
+    - REQ-BADGE_INDICATORS
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: See detail file
+    details: []
+  code_locations:
+    files: []
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-URL_TAGS_DISPLAY
+    requirements:
+      - REQ-URL_TAGS_DISPLAY
+      - REQ-BADGE_INDICATORS
+    tests: []
+    code_annotations:
+      - IMPL-URL_TAGS_DISPLAY
+      - ARCH-URL_TAGS_DISPLAY
+      - REQ-URL_TAGS_DISPLAY
+      - REQ-BADGE_INDICATORS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - ARCH-URL_TAGS_DISPLAY
+      - REQ-URL_TAGS_DISPLAY
+      - REQ-BADGE_INDICATORS
+  detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  architecture: ARCH-URL_TAGS_DISPLAY.
+  badge-manager_js: calculateBadgeData uses getBadgeDisplayValue(bookmark, config) for text and title.
+  bookmark-router_js: _hasTags and _isEmptyBookmark use normalizeBookmarkForDisplay(bookmark) for tag shape (string/array) so router best-candidate logic matches display contract.
+  cross-references: '[ARCH-URL_TAGS_DISPLAY](../architecture-decisions/ARCH-URL_TAGS_DISPLAY.md), [REQ-URL_TAGS_DISPLAY](../requirements/REQ-URL_TAGS_DISPLAY.md), [REQ-BADGE_INDICATORS](../requirements/REQ-BADGE_INDICATORS.md)'
+  message-handler_js: handleGetCurrentBookmark uses getBookmarkForDisplay(bookmarkProvider, targetUrl, data?.title) (single source; no short-circuit when !hasAuth); sets normalized.needsAuth when !hasAuth. handleSaveBookmark uses getTagsForUrl(bookmarkProvider, data.url) for previous tags so added-tag tracking uses the same source as badge/popup. GET_TAGS_FOR_URL message and handleGetTagsForUrl(data) return { tags } from getTagsForUrl(bookmarkProvider, data.url).
+  popupcontroller_js: getBookmarkData resolves(null) only when bookmarkData.blocked; when needsAuth still returns bookmark (with tags). handleAddTag and handleRemoveTag re-fetch current tags via getBookmarkData before building payload; validateBookmarkData normalizes data.tags to array when not array (instead of rejecting).
+  requirements: REQ-URL_TAGS_DISPLAY, REQ-BADGE_INDICATORS.
+  service-worker_js: updateBadgeForTab gets raw bookmark, normalizes with normalizeBookmarkForDisplay, then calls BadgeManager.updateBadge.
+  summary: 'Single source for tags-for-URL and badge display value: `url-tags-manager.js` with normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue. **Fixes**: handleGetCurrentBookmark always uses router (no early return when no Pinboard auth), normalizes, sets needsAuth when !hasAuth; GET_TAGS_FOR_URL message and handleGetTagsForUrl for centralized tag storage; popup getBookmarkData only resolves null when blocked (when needsAuth still returns bookmark with tags).'
+  tests: tests/unit/url-tags-manager.test.js, tests/unit/popup-live-data.test.js (including bookmark with tags when needsAuth, getBookmarkData null when blocked), tests/unit/message-handler-url-tags.test.js (handleGetTagsForUrl, handleGetCurrentBookmark normalization/needsAuth/blocked), tests/unit/bookmark-router.test.js (best-candidate selection).
+  url-tags-manager_js: normalizeBookmarkForDisplay(bookmark) — tags always array; getBookmarkForDisplay(provider, url, title); getTagsForUrl(provider, url); getBadgeDisplayValue(bookmark, config) — text, tagCount, isPrivate, isToRead, isBookmarked, title.

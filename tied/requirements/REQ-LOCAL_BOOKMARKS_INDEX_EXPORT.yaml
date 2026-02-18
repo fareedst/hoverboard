@@ -1,0 +1,53 @@
+REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  name: Local Bookmarks Index Export
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  satisfaction_criteria:
+    - criterion: See detail file
+  validation_criteria:
+    - method: Manual verification
+      coverage: See detail file
+  traceability:
+    architecture: []
+    implementation: []
+    tests: []
+    code_annotations:
+      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  at_least_one_format: CSV (recommended for table-like export; columns include Title, URL, Tags, Time, **Storage**, Shared, To read, Notes); optionally JSON for full record structure.
+  cross-references: ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT, IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT, REQ-LOCAL_BOOKMARKS_INDEX
+  download: is triggered client-side (no backend export message).
+  export_all: Downloads a file containing every bookmark shown in the index (local + file; same as full list loaded on the page).
+  export_control(s): in the index page UI with clear scope (all vs displayed).
+  export_displayed: Downloads a file containing only the rows currently shown (after search/filter/sort).
+  how_validated:
+    - 'Manual: Open index page, click "Export all" and "Export displayed"; verify CSV downloads with correct row counts and content; verify "Export displayed" reflects current filters/sort.'
+  purpose:
+    - Allow users to backup or port index data outside the extension.
+    - Support exporting either the full local+file set or the current filtered/sorted view, including storage location.
+  related:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT (client-side export architecture)
+    - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT (export UI and serialization)
+    - REQ-LOCAL_BOOKMARKS_INDEX (index page this export extends)
+  summary: 'From the local bookmarks index page, the user can **export bookmarks as a downloadable file**. Two scopes are supported: **all** (entire list of local + file bookmarks loaded on the page) or **currently displayed** (filtered/sorted rows shown in the table). The file is downloaded client-side (e.g. CSV or JSON). CSV includes a **Storage** column (Local | File).'

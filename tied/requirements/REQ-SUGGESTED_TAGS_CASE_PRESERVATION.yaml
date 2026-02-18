@@ -1,0 +1,102 @@
+REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
+  name: Suggested Tags Case Preservation
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: The extension must preserve the original capitalization of words found in page content when generating suggested tags. For words containing uppercase letters, both the original case version and a lowercase version must be offered as separate tag suggestions, giving users flexibility to choose their preferred capitalization style.
+    problems_solved: []
+    benefits: []
+  satisfaction_criteria:
+    - criterion: '1. **Preserves original case from content**: The first occurrence of each word in the extracted content preserves its original capitalization (e.g., "JavaScript" from a heading appears as "JavaScript").'
+    - criterion: '2. **For words with uppercase, includes both original and lowercase versions as separate tags**: If a word contains any uppercase letters (e.g., "JavaScript"), both "JavaScript" and "javascript" appear as separate suggestions.'
+    - criterion: '3. **All-lowercase words appear once**: If a word is already all-lowercase (e.g., "tutorial"), it appears only once in suggestions (not duplicated).'
+    - criterion: '4. **Both versions displayed to users**: The UI shows both versions in the suggestions list, allowing users to click either one.'
+    - criterion: '--'
+  validation_criteria:
+    - method: Manual verification
+      coverage: See detail file
+  traceability:
+    architecture:
+      - ARCH-SUGGESTED_TAGS
+    implementation:
+      - IMPL-SUGGESTED_TAGS
+    tests: []
+    code_annotations:
+      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+  related_requirements:
+    depends_on:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  '[arch-suggested_tags]': Case preservation with dual-version generation
+  '[impl-suggested_tags]': Original case tracking, lowercase variant generation, exact duplicate removal
+  '[req-suggested_tags_deduplication]': Deduplication must use case-insensitive comparison while preserving both case variants in suggestions
+  '[req-suggested_tags_from_content]': Case preservation applied to extracted suggestions
+  actual: None implemented (see "Current Test Gap" above)
+  code_annotations: Case preservation sections marked with `[REQ-SUGGESTED_TAGS_CASE_PRESERVATION]` in comments
+  code_locations: |-
+    | File | Function/Section | Lines | Description |
+    |------|------------------|-------|-------------|
+    | `src/features/tagging/tag-service.js` | Case preservation in `extractSuggestedTagsFromContent` | ~1031-1193 | Tracks `originalCaseMap` (lowercase → first original case seen); generates both versions; sorts and deduplicates |
+    | `src/ui/popup/PopupController.js` | Case preservation in inlined extraction | ~450-590 | Duplicated logic: `originalCaseMap`, dual-version generation, exact duplicate removal with `seenExact` Set |
+    | `safari/src/features/tagging/tag-service.js` | (mirror) | ~1031-1193 | Safari mirror of TagService case preservation |
+  coverage: Case preservation logic, dual-version generation
+  created: '2025-07-14'
+  depends_on: None
+  description: The extension must preserve the original capitalization of words found in page content when generating suggested tags. For words containing uppercase letters, both the original case version and a lowercase version must be offered as separate tag suggestions, giving users flexibility to choose their preferred capitalization style.
+  expected: '"Suggested tags case preservation tests" (referenced in requirements.yaml)'
+  last_updated: '2026-02-13'
+  lost_original_case_from_content: Previous implementations might have lowercased all suggestions, losing important semantic information.
+  modifiable_decisions: |-
+    The following design choices are documented in [IMPL-SUGGESTED_TAGS] and can be modified:
+
+    1. **First-occurrence case preference**: Currently, the first occurrence of each word (by lowercase key) sets the "original case" for that word. Alternative: use most-frequent case variant, or most-recently-seen case.
+
+    2. **Dual-version generation rule**: Currently generates lowercase version only if word contains uppercase letters. Alternative: always generate both versions for all words (but would duplicate all-lowercase words).
+
+    3. **Exact duplicate removal strategy**: Currently uses a `Set` (`seenExact`) to track exact string matches. This correctly preserves "Git" and "git" as distinct while removing true duplicates. Alternative: use `Map` to track and merge frequency counts.
+
+    4. **Sort order for case variants**: Currently sorts all tags (both versions) by frequency, then alphabetically. This may interleave "JavaScript" and "javascript" based on frequency. Alternative: group case variants together in sort.
+
+    5. **Limit application**: Currently applies limit *after* dual-version generation, so limit of 10 may return 20 tags (original + lowercase for each). This is intentional to give users more choices, but could be adjusted to apply limit to unique lowercase words before dual-version generation.
+
+    ---
+
+    *Last validated: 2026-02-13 by AI agent*
+  no_capitalization_choice: Users had no way to choose between "JavaScript" and "javascript" if only one was offered.
+  no_dedicated_unit_tests: exist for suggested tags case preservation. The requirements.yaml references "Suggested tags case preservation tests", but these have not been implemented.
+  preserved_original_case: Proper nouns and brand names maintain their canonical capitalization.
+  recommended_tests_for_future_modification: |-
+    1. **Unit test for case preservation in TagService.extractSuggestedTagsFromContent**:
+       - Mock document with title "Learning JavaScript and Python"
+       - Verify suggestions include ["JavaScript", "javascript", "Python", "python", "Learning", "learning"]
+       - Verify all-lowercase word "and" appears only once (or filtered as noise word)
+
+    2. **Unit test for exact duplicate removal**:
+       - Mock content with "React" appearing 5 times and "react" appearing 3 times
+       - Verify both "React" and "react" in suggestions (not 8 duplicate entries)
+       - Verify frequency reflects combined count (8 total occurrences)
+
+    ---
+  supersedes: |-
+    None
+
+    ---
+  test_scope: '(currently **not implemented**; see "Current Test Gap" below):'
+  user_choice_in_capitalization: Users can select either the original-case or lowercase version based on their tagging preferences.
+  why_this_requirement_exists: Page content often contains proper nouns, acronyms, and brand names with specific capitalization (e.g., "JavaScript", "GitHub", "AI"). Forcing all suggestions to lowercase would lose semantic meaning, while offering only original case would prevent users from choosing consistent lowercase tagging. Providing both options respects the content's semantics while giving users control.

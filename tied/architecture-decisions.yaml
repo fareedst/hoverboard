@@ -53,7 +53,7 @@ ARCH-TIED_STRUCTURE:
     informs:
       - IMPL-TIED_FILES
     see_also: []
-  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.md
+  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
   metadata:
     created:
       date: 2025-12-18T00:00:00.000Z
@@ -134,7 +134,7 @@ ARCH-MODULE_VALIDATION:
     informs:
       - IMPL-MODULE_VALIDATION
     see_also: []
-  detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.md
+  detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.yaml
   metadata:
     created:
       date: 2025-12-18T00:00:00.000Z
@@ -248,7 +248,7 @@ ARCH-EXAMPLE_DECISION:
     informs:
       - IMPL-EXAMPLE_IMPLEMENTATION
     see_also: []
-  detail_file: architecture-decisions/ARCH-EXAMPLE_DECISION.md
+  detail_file: architecture-decisions/ARCH-EXAMPLE_DECISION.yaml
   metadata:
     created:
       date: YYYY-MM-DD
@@ -625,7 +625,7 @@ ARCH-SUGGESTED_TAGS:
       - IMPL-SUGGESTED_TAGS
     see_also:
       - ARCH-TAG_SYSTEM
-  detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.md
+  detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -786,7 +786,7 @@ ARCH-URL_TAGS_DISPLAY:
     see_also:
       - ARCH-STORAGE_INDEX_AND_ROUTER
       - ARCH-BADGE
-  detail_file: architecture-decisions/ARCH-URL_TAGS_DISPLAY.md
+  detail_file: architecture-decisions/ARCH-URL_TAGS_DISPLAY.yaml
   metadata:
     created:
       date: '2026-02-17'
@@ -1464,7 +1464,7 @@ ARCH-LOCAL_STORAGE_PROVIDER:
       - IMPL-LOCAL_BOOKMARK_SERVICE
     see_also:
       - ARCH-MESSAGE_HANDLING
-  detail_file: architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.md
+  detail_file: architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.yaml
   metadata:
     created:
       date: '2026-02-13'
@@ -1556,7 +1556,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
     see_also:
       - ARCH-LOCAL_STORAGE_PROVIDER
       - ARCH-MESSAGE_HANDLING
-  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     created:
       date: '2026-02-13'
@@ -1605,7 +1605,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
       - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
     see_also:
       - ARCH-LOCAL_BOOKMARKS_INDEX
-  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
     created:
       date: '2026-02-13'
@@ -1658,7 +1658,7 @@ ARCH-FILE_BOOKMARK_PROVIDER:
       - IMPL-FILE_BOOKMARK_SERVICE
     see_also:
       - ARCH-STORAGE
-  detail_file: architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.md
+  detail_file: architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml
   metadata:
     created:
       date: '2026-02-14'
@@ -1711,7 +1711,7 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
       - IMPL-BOOKMARK_ROUTER
     see_also:
       - ARCH-MOVE_BOOKMARK_UI
-  detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.md
+  detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml
   metadata:
     created:
       date: '2026-02-14'
@@ -1751,7 +1751,7 @@ ARCH-MOVE_BOOKMARK_UI:
     informs:
       - IMPL-MOVE_BOOKMARK_UI
     see_also: []
-  detail_file: architecture-decisions/ARCH-MOVE_BOOKMARK_UI.md
+  detail_file: architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml
   metadata:
     created:
       date: '2026-02-14'
@@ -1790,7 +1790,7 @@ ARCH-NATIVE_HOST:
       - IMPL-NATIVE_HOST_WRAPPER
       - IMPL-NATIVE_HOST_INSTALLER
     see_also: []
-  detail_file: architecture-decisions/ARCH-NATIVE_HOST.md
+  detail_file: architecture-decisions/ARCH-NATIVE_HOST.yaml
   metadata:
     created:
       date: '2026-02-14'

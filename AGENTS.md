@@ -88,7 +88,7 @@ This document centralizes every instruction AI coding assistants must follow whi
 | `semantic-tokens.md` | Semantic tokens guide with format, naming conventions, and usage examples |
 | `requirements.md` | Requirements guide with documentation (copy from template per project) |
 | `requirements.yaml` | Requirements YAML index/database with all requirement records |
-| `requirements/` | Individual requirement detail files (e.g., `REQ-TIED_SETUP.md`) |
+| `requirements/` | Individual requirement detail files (e.g., `REQ-TIED_SETUP.yaml`) |
 | `architecture-decisions.md` | Architecture decisions guide with documentation (copy from template per project) |
 | `architecture-decisions.yaml` | Architecture decisions YAML index/database with `[ARCH-*]` records tied to requirements |
 | `architecture-decisions/` | Individual architecture decision detail files |

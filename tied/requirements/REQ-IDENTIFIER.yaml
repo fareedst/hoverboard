@@ -1,0 +1,51 @@
+REQ-IDENTIFIER:
+  name: Requirement Name
+  category: Functional | Non-Functional | Immutable
+  priority: P0
+  status: Implemented
+  rationale:
+    why: Why the requirement exists (WHY)
+    problems_solved: []
+    benefits: []
+  satisfaction_criteria:
+    - criterion: How we know the requirement is satisfied
+    - criterion: Acceptance criteria
+    - criterion: Success conditions
+  validation_criteria:
+    - method: How we verify/validate the requirement is met
+    - method: Testing approach
+    - method: Verification methods
+    - method: Success metrics
+  traceability:
+    architecture: []
+    implementation: []
+    tests: []
+    code_annotations:
+      - REQ-IDENTIFIER
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-IDENTIFIER.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  architecture: '`ARCH-IDENTIFIER` (see `architecture-decisions.yaml`)'
+  code: '`// [REQ-IDENTIFIER] Implementation comment` in source files'
+  created: YYYY-MM-DD
+  depends_on: (if applicable)
+  description: What the requirement specifies (WHAT)
+  implementation: '`IMPL-IDENTIFIER` (see `implementation-decisions.yaml`)'
+  last_updated: YYYY-MM-DD
+  related_to: (if applicable)
+  supersedes: (if this replaces another requirement)
+  tests: '`testFeatureName_REQ_IDENTIFIER` in test files'

@@ -282,11 +282,11 @@ npm run create-release
 
 ### TIED Documentation (Token-Integrated Engineering & Development)
 This project follows the TIED methodology for comprehensive requirements tracking and traceability:
-- **Requirements**: [`tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md`](tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md) - Detailed tag extraction requirements and validation criteria
-- **Architecture**: [`tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md`](tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md) - Multi-source extraction architecture and design decisions
-- **Implementation**: [`tied/implementation-decisions/IMPL-SUGGESTED_TAGS.md`](tied/implementation-decisions/IMPL-SUGGESTED_TAGS.md) - Implementation details, modifiable decisions, and performance considerations
-- **Recent Tags Refresh**: [`tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md`](tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md) - Refresh Recent Tags on every popup display and cross-window sync
-- **Local Bookmarks Index**: [`tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.md`](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.md), [`tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md`](tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md), [`tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md`](tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md) - Full-page index of local bookmarks (search, filter, sort, launch)
+- **Requirements**: [`tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml`](tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml) - Detailed tag extraction requirements and validation criteria
+- **Architecture**: [`tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml`](tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml) - Multi-source extraction architecture and design decisions
+- **Implementation**: [`tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml`](tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) - Implementation details, modifiable decisions, and performance considerations
+- **Recent Tags Refresh**: [`tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml`](tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml) - Refresh Recent Tags on every popup display and cross-window sync
+- **Local Bookmarks Index**: [`tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml`](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml`](tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml`](tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) - Full-page index of local bookmarks (search, filter, sort, launch)
 - **Implementation Map**: [`tied/docs/suggested-tags-implementation-map.md`](tied/docs/suggested-tags-implementation-map.md) - Quick reference mapping TIED tokens to code locations
 
 ### Architecture Documents

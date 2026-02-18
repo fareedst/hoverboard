@@ -1,0 +1,49 @@
+ARCH-LOCAL_BOOKMARKS_INDEX:
+  name: Local Bookmarks Index Architecture
+  status: Active
+  cross_references: &ref_0 []
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  alternatives_considered: []
+  implementation_approach:
+    summary: 'A **single extension page** (e.g. `bookmarks-table.html`) displays a table of **local and file-stored bookmarks** (non-Pinboard). The primary data source is message **getAggregatedBookmarksForIndex**, which returns bookmarks from LocalBookmarkService and FileBookmarkService (via BookmarkRouter.getAllBookmarksForIndex), each item tagged with `storage: ''local''` or `''file''`. Fallback: **getLocalBookmarksForIndex** (LocalBookmarkService only, all items `storage: ''local''`) when the router is not used. The table includes a **Storage** column (Local | File), supports **search** (single input over title, URL, tags, notes), **filters** (by tag, to-read, private), **sortable columns** (including Storage; default: time descending), and **launchable URLs** (link opens in new tab). When there are no local or file bookmarks, an empty state is shown.'
+    details: []
+  traceability:
+    requirements: *ref_0
+    implementation: []
+    tests: []
+    code_annotations:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+  related_decisions:
+    depends_on: *ref_0
+    informs: []
+    see_also: []
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  decision: 'A **single extension page** (e.g. `bookmarks-table.html`) displays a table of **local and file-stored bookmarks** (non-Pinboard). The primary data source is message **getAggregatedBookmarksForIndex**, which returns bookmarks from LocalBookmarkService and FileBookmarkService (via BookmarkRouter.getAllBookmarksForIndex), each item tagged with `storage: ''local''` or `''file''`. Fallback: **getLocalBookmarksForIndex** (LocalBookmarkService only, all items `storage: ''local''`) when the router is not used. The table includes a **Storage** column (Local | File), supports **search** (single input over title, URL, tags, notes), **filters** (by tag, to-read, private), **sortable columns** (including Storage; default: time descending), and **launchable URLs** (link opens in new tab). When there are no local or file bookmarks, an empty state is shown.'
+  cross-references: REQ-LOCAL_BOOKMARKS_INDEX, IMPL-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER
+  filters: By tag (include), "To read" only (toread === 'yes'), "Private" only (shared === 'no'). Combined with search; all client-side.
+  getaggregatedbookmarksforindex: 'Handled by calling `bookmarkProvider.getAllBookmarksForIndex()` when the provider is BookmarkRouter; router aggregates `localProvider.getAllBookmarks()` and `fileProvider.getAllBookmarks()`, adds `storage: ''local''` or `''file''`, merges and sorts by time desc.'
+  getlocalbookmarksforindex: 'Fallback when aggregated is unavailable; uses LocalBookmarkService directly, returns local bookmarks only (index page tags each with `storage: ''local''`).'
+  launch: URL column is `<a href="..." target="_blank" rel="noopener">`.
+  related:
+    - IMPL-LOCAL_BOOKMARKS_INDEX (getAggregatedBookmarksForIndex / getLocalBookmarksForIndex, handler, bookmarks-table UI with Storage column)
+    - ARCH-STORAGE_INDEX_AND_ROUTER (BookmarkRouter, getAllBookmarksForIndex)
+    - ARCH-LOCAL_STORAGE_PROVIDER (LocalBookmarkService strategy)
+    - ARCH-MESSAGE_HANDLING (message routing)
+  search: One text input; case-insensitive substring match on description, url, tags (joined), extended.
+  sort: 'Click column header to sort; toggle asc/desc. Columns: Title, URL, Tags, Time, **Storage** (Local | File), Shared, To read. Default sort: time descending.'
+  summary: 'A **single extension page** (e.g. `bookmarks-table.html`) displays a table of **local and file-stored bookmarks** (non-Pinboard). The primary data source is message **getAggregatedBookmarksForIndex**, which returns bookmarks from LocalBookmarkService and FileBookmarkService (via BookmarkRouter.getAllBookmarksForIndex), each item tagged with `storage: ''local''` or `''file''`. Fallback: **getLocalBookmarksForIndex** (LocalBookmarkService only, all items `storage: ''local''`) when the router is not used. The table includes a **Storage** column (Local | File), supports **search** (single input over title, URL, tags, notes), **filters** (by tag, to-read, private), **sortable columns** (including Storage; default: time descending), and **launchable URLs** (link opens in new tab). When there are no local or file bookmarks, an empty state is shown.'

@@ -1,0 +1,41 @@
+ARCH-MOVE_BOOKMARK_UI:
+  name: Move Bookmark Storage UI
+  status: Active
+  cross_references: &ref_0 []
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  alternatives_considered: []
+  implementation_approach:
+    summary: 'Popup displays the **current storage backend** for the current tab''s bookmark and allows the user to **move** it to another backend (Pinboard, Local, File). Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. When the bookmark is in Local or File, a dedicated control (file ↔ browser toggle) offers one-click move between those two backends; the same move path is used (moveBookmarkToStorage).'
+    details: []
+  traceability:
+    requirements: *ref_0
+    implementation: []
+    tests: []
+    code_annotations:
+      - ARCH-MOVE_BOOKMARK_UI
+  related_decisions:
+    depends_on: *ref_0
+    informs: []
+    see_also: []
+  detail_file: architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  decision: 'Popup displays the **current storage backend** for the current tab''s bookmark and allows the user to **move** it to another backend (Pinboard, Local, File). Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. When the bookmark is in Local or File, a dedicated control (file ↔ browser toggle) offers one-click move between those two backends; the same move path is used (moveBookmarkToStorage).'
+  cross-references: REQ-MOVE_BOOKMARK_STORAGE_UI, ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-MOVE_BOOKMARK_UI
+  related:
+    - IMPL-MOVE_BOOKMARK_UI (popup select and messaging)
+    - ARCH-STORAGE_INDEX_AND_ROUTER (router.moveBookmarkToStorage)
+  summary: 'Popup displays the **current storage backend** for the current tab''s bookmark and allows the user to **move** it to another backend (Pinboard, Local, File). Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. When the bookmark is in Local or File, a dedicated control (file ↔ browser toggle) offers one-click move between those two backends; the same move path is used (moveBookmarkToStorage).'

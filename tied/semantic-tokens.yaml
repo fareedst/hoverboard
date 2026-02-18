@@ -33,7 +33,7 @@ REQ-TIED_SETUP:
     - ARCH-TIED_STRUCTURE
     - IMPL-TIED_FILES
   source_index: requirements.yaml
-  detail_file: requirements/REQ-TIED_SETUP.md
+  detail_file: requirements/REQ-TIED_SETUP.yaml
   metadata:
     registered: 2025-11-08
     last_updated: 2026-02-08
@@ -48,7 +48,7 @@ REQ-MODULE_VALIDATION:
     - ARCH-MODULE_VALIDATION
     - IMPL-MODULE_VALIDATION
   source_index: requirements.yaml
-  detail_file: requirements/REQ-MODULE_VALIDATION.md
+  detail_file: requirements/REQ-MODULE_VALIDATION.yaml
   metadata:
     registered: 2025-01-27
     last_updated: 2026-02-08
@@ -63,7 +63,7 @@ REQ-EXAMPLE_FEATURE:
     - ARCH-EXAMPLE_DECISION
     - IMPL-EXAMPLE_IMPLEMENTATION
   source_index: requirements.yaml
-  detail_file: requirements/REQ-IDENTIFIER.md
+  detail_file: requirements/REQ-IDENTIFIER.yaml
   metadata:
     registered: 2025-11-08
     last_updated: 2026-02-08
@@ -168,7 +168,7 @@ ARCH-TIED_STRUCTURE:
     - REQ-TIED_SETUP
     - IMPL-TIED_FILES
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.md
+  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
   metadata:
     registered: 2025-12-18
     last_updated: 2026-02-08
@@ -182,7 +182,7 @@ ARCH-MODULE_VALIDATION:
     - REQ-MODULE_VALIDATION
     - IMPL-MODULE_VALIDATION
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.md
+  detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.yaml
   metadata:
     registered: 2025-12-18
     last_updated: 2026-02-08
@@ -196,7 +196,7 @@ ARCH-EXAMPLE_DECISION:
     - REQ-EXAMPLE_FEATURE
     - IMPL-EXAMPLE_IMPLEMENTATION
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-EXAMPLE_DECISION.md
+  detail_file: architecture-decisions/ARCH-EXAMPLE_DECISION.yaml
   metadata:
     registered: 2025-11-08
     last_updated: 2026-02-08
@@ -266,7 +266,7 @@ IMPL-MODULE_VALIDATION:
     - ARCH-MODULE_VALIDATION
     - REQ-MODULE_VALIDATION
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.md
+  detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.yaml
   metadata:
     registered: 2025-12-18
     last_updated: 2026-02-08
@@ -294,7 +294,7 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
     - IMPL-PINBOARD_API
     - IMPL-TAG_SYSTEM
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.md
+  detail_file: implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-13
@@ -379,7 +379,7 @@ REQ-EXTENSION_IDENTITY:
     - ARCH-EXT_IDENTITY
     - IMPL-EXT_IDENTITY
   source_index: requirements.yaml
-  detail_file: requirements/REQ-EXTENSION_IDENTITY.md
+  detail_file: requirements/REQ-EXTENSION_IDENTITY.yaml
   metadata:
     registered: 2025-07-14
     last_updated: 2026-02-13
@@ -546,7 +546,7 @@ REQ-URL_TAGS_DISPLAY:
     - REQ-BADGE_INDICATORS
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
   source_index: requirements.yaml
-  detail_file: requirements/REQ-URL_TAGS_DISPLAY.md
+  detail_file: requirements/REQ-URL_TAGS_DISPLAY.yaml
   metadata:
     registered: 2026-02-17
     last_updated: 2026-02-17
@@ -726,7 +726,7 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
     - ARCH-SUGGESTED_TAGS
     - IMPL-SUGGESTED_TAGS
   source_index: requirements.yaml
-  detail_file: requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md
+  detail_file: requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml
   metadata:
     registered: 2025-07-14
     last_updated: 2026-02-13
@@ -741,7 +741,7 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
     - ARCH-SUGGESTED_TAGS
     - IMPL-SUGGESTED_TAGS
   source_index: requirements.yaml
-  detail_file: requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.md
+  detail_file: requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml
   metadata:
     registered: 2025-07-14
     last_updated: 2026-02-13
@@ -756,7 +756,7 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
     - ARCH-SUGGESTED_TAGS
     - IMPL-SUGGESTED_TAGS
   source_index: requirements.yaml
-  detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md
+  detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml
   metadata:
     registered: 2025-07-14
     last_updated: 2026-02-13
@@ -862,7 +862,7 @@ ARCH-SUGGESTED_TAGS:
     - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
     - IMPL-SUGGESTED_TAGS
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.md
+  detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.yaml
   metadata:
     registered: 2025-07-14
     last_updated: 2026-02-13
@@ -905,7 +905,7 @@ ARCH-URL_TAGS_DISPLAY:
     - REQ-BADGE_INDICATORS
     - IMPL-URL_TAGS_DISPLAY
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-URL_TAGS_DISPLAY.md
+  detail_file: architecture-decisions/ARCH-URL_TAGS_DISPLAY.yaml
   metadata:
     registered: 2026-02-17
     last_updated: 2026-02-17
@@ -1050,7 +1050,7 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
     - REQ-RECENT_TAGS_SYSTEM
     - ARCH-POPUP_SESSION
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md
+  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-13
@@ -1065,7 +1065,7 @@ REQ-STORAGE_MODE_DEFAULT:
     - ARCH-LOCAL_STORAGE_PROVIDER
     - IMPL-LOCAL_BOOKMARK_SERVICE
   source_index: requirements.yaml
-  detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.md
+  detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-13
@@ -1082,7 +1082,7 @@ ARCH-LOCAL_STORAGE_PROVIDER:
     - ARCH-STORAGE
     - ARCH-PINBOARD_API
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.md
+  detail_file: architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-13
@@ -1098,7 +1098,7 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
     - ARCH-LOCAL_STORAGE_PROVIDER
     - ARCH-STORAGE
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.md
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-13
@@ -1113,7 +1113,7 @@ IMPL-BADGE_REFRESH:
     - REQ-BADGE_INDICATORS
     - ARCH-BADGE
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-BADGE_REFRESH.md
+  detail_file: implementation-decisions/IMPL-BADGE_REFRESH.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-13
@@ -1129,7 +1129,7 @@ IMPL-URL_TAGS_DISPLAY:
     - REQ-URL_TAGS_DISPLAY
     - REQ-BADGE_INDICATORS
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.md
+  detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
   metadata:
     registered: 2026-02-17
     last_updated: 2026-02-17
@@ -1145,7 +1145,7 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     - IMPL-LOCAL_BOOKMARKS_INDEX
     - ARCH-STORAGE_INDEX_AND_ROUTER
   source_index: requirements.yaml
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.md
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-14
@@ -1161,7 +1161,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
     - IMPL-LOCAL_BOOKMARKS_INDEX
     - ARCH-STORAGE_INDEX_AND_ROUTER
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.md
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-14
@@ -1176,7 +1176,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     - ARCH-LOCAL_BOOKMARKS_INDEX
     - REQ-LOCAL_BOOKMARKS_INDEX
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-14
@@ -1192,7 +1192,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
     - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
     - REQ-LOCAL_BOOKMARKS_INDEX
   source_index: requirements.yaml
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-14
@@ -1207,7 +1207,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
     - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
     - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-14
@@ -1222,7 +1222,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
     - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
     registered: 2026-02-13
     last_updated: 2026-02-14
@@ -1237,7 +1237,7 @@ REQ-FILE_BOOKMARK_STORAGE:
     - ARCH-FILE_BOOKMARK_PROVIDER
     - IMPL-FILE_BOOKMARK_SERVICE
   source_index: requirements.yaml
-  detail_file: requirements/REQ-FILE_BOOKMARK_STORAGE.md
+  detail_file: requirements/REQ-FILE_BOOKMARK_STORAGE.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1252,7 +1252,7 @@ ARCH-FILE_BOOKMARK_PROVIDER:
     - REQ-FILE_BOOKMARK_STORAGE
     - IMPL-FILE_BOOKMARK_SERVICE
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.md
+  detail_file: architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1267,7 +1267,7 @@ IMPL-FILE_BOOKMARK_SERVICE:
     - REQ-FILE_BOOKMARK_STORAGE
     - ARCH-FILE_BOOKMARK_PROVIDER
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.md
+  detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1283,7 +1283,7 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
     - IMPL-STORAGE_INDEX
     - IMPL-BOOKMARK_ROUTER
   source_index: requirements.yaml
-  detail_file: requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.md
+  detail_file: requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1299,7 +1299,7 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
     - IMPL-STORAGE_INDEX
     - IMPL-BOOKMARK_ROUTER
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.md
+  detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-17
@@ -1314,7 +1314,7 @@ IMPL-STORAGE_INDEX:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - ARCH-STORAGE_INDEX_AND_ROUTER
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-STORAGE_INDEX.md
+  detail_file: implementation-decisions/IMPL-STORAGE_INDEX.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1329,7 +1329,7 @@ IMPL-BOOKMARK_ROUTER:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - ARCH-STORAGE_INDEX_AND_ROUTER
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.md
+  detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-17
@@ -1344,7 +1344,7 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
     - ARCH-MOVE_BOOKMARK_UI
     - IMPL-MOVE_BOOKMARK_UI
   source_index: requirements.yaml
-  detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.md
+  detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1359,7 +1359,7 @@ ARCH-MOVE_BOOKMARK_UI:
     - REQ-MOVE_BOOKMARK_STORAGE_UI
     - IMPL-MOVE_BOOKMARK_UI
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-MOVE_BOOKMARK_UI.md
+  detail_file: architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1374,7 +1374,7 @@ IMPL-MOVE_BOOKMARK_UI:
     - REQ-MOVE_BOOKMARK_STORAGE_UI
     - ARCH-MOVE_BOOKMARK_UI
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.md
+  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1390,7 +1390,7 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
     - IMPL-MOVE_BOOKMARK_UI
     - IMPL-BOOKMARK_ROUTER
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.md
+  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1414,7 +1414,7 @@ REQ-NATIVE_HOST_WRAPPER:
     - IMPL-NATIVE_HOST_WRAPPER
     - IMPL-NATIVE_HOST_INSTALLER
   source_index: requirements.yaml
-  detail_file: requirements/REQ-NATIVE_HOST_WRAPPER.md
+  detail_file: requirements/REQ-NATIVE_HOST_WRAPPER.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1429,7 +1429,7 @@ ARCH-NATIVE_HOST:
     - IMPL-NATIVE_HOST_WRAPPER
     - IMPL-NATIVE_HOST_INSTALLER
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-NATIVE_HOST.md
+  detail_file: architecture-decisions/ARCH-NATIVE_HOST.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1443,7 +1443,7 @@ IMPL-NATIVE_HOST_WRAPPER:
     - ARCH-NATIVE_HOST
     - REQ-NATIVE_HOST_WRAPPER
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.md
+  detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14
@@ -1457,7 +1457,7 @@ IMPL-NATIVE_HOST_INSTALLER:
     - ARCH-NATIVE_HOST
     - REQ-NATIVE_HOST_WRAPPER
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.md
+  detail_file: implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.yaml
   metadata:
     registered: 2026-02-14
     last_updated: 2026-02-14

@@ -43,7 +43,7 @@ REQ-TIED_SETUP:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-TIED_SETUP.md
+  detail_file: requirements/REQ-TIED_SETUP.yaml
   metadata:
     created:
       date: 2025-11-08T00:00:00.000Z
@@ -109,7 +109,7 @@ REQ-MODULE_VALIDATION:
       - REQ-TIED_SETUP
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-MODULE_VALIDATION.md
+  detail_file: requirements/REQ-MODULE_VALIDATION.yaml
   metadata:
     created:
       date: 2025-01-27T00:00:00.000Z
@@ -163,7 +163,7 @@ REQ-EXTENSION_IDENTITY:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-EXTENSION_IDENTITY.md
+  detail_file: requirements/REQ-EXTENSION_IDENTITY.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -398,7 +398,7 @@ REQ-STORAGE_MODE_DEFAULT:
     related_to:
       - REQ-CHROME_STORAGE_USAGE
     supersedes: []
-  detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.md
+  detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.yaml
   metadata:
     created:
       date: '2026-02-13'
@@ -1215,7 +1215,7 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
       - REQ-TAG_MANAGEMENT
     supersedes: []
-  detail_file: requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md
+  detail_file: requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1259,7 +1259,7 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
       - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
     supersedes: []
-  detail_file: requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.md
+  detail_file: requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1304,7 +1304,7 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
       - REQ-SUGGESTED_TAGS_DEDUPLICATION
     supersedes: []
-  detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md
+  detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1351,7 +1351,7 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       - REQ-STORAGE_MODE_DEFAULT
       - REQ-CHROME_STORAGE_USAGE
     supersedes: []
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.md
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     created:
       date: 2026-02-13T00:00:00.000Z
@@ -1398,7 +1398,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
     related_to:
       - REQ-LOCAL_BOOKMARKS_INDEX
     supersedes: []
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
     created:
       date: 2026-02-13T00:00:00.000Z
@@ -1446,7 +1446,7 @@ REQ-FILE_BOOKMARK_STORAGE:
       - REQ-STORAGE_MODE_DEFAULT
       - REQ-LOCAL_BOOKMARKS_INDEX
     supersedes: []
-  detail_file: requirements/REQ-FILE_BOOKMARK_STORAGE.md
+  detail_file: requirements/REQ-FILE_BOOKMARK_STORAGE.yaml
   metadata:
     created:
       date: '2026-02-14'
@@ -1496,7 +1496,7 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
       - REQ-STORAGE_MODE_DEFAULT
       - REQ-MOVE_BOOKMARK_STORAGE_UI
     supersedes: []
-  detail_file: requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.md
+  detail_file: requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml
   metadata:
     created:
       date: '2026-02-14'
@@ -1541,7 +1541,7 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.md
+  detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml
   metadata:
     created:
       date: '2026-02-14'
@@ -1596,7 +1596,7 @@ REQ-URL_TAGS_DISPLAY:
       - REQ-BADGE_INDICATORS
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
     supersedes: []
-  detail_file: requirements/REQ-URL_TAGS_DISPLAY.md
+  detail_file: requirements/REQ-URL_TAGS_DISPLAY.yaml
   metadata:
     created:
       date: '2026-02-17'
@@ -1640,7 +1640,7 @@ REQ-NATIVE_HOST_WRAPPER:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-NATIVE_HOST_WRAPPER.md
+  detail_file: requirements/REQ-NATIVE_HOST_WRAPPER.yaml
   metadata:
     created:
       date: '2026-02-14'

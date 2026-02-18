@@ -16,9 +16,9 @@ This document serves as the **central listing/registry** for all requirements in
 tied/
 ├── requirements.md              # This guide file (you are here)
 ├── requirements.yaml            # YAML index/database of all requirements
-├── requirements/                # Detail files directory
-│   ├── REQ-TIED_SETUP.md
-│   ├── REQ-MODULE_VALIDATION.md
+├── requirements/                # Detail files directory (YAML)
+│   ├── REQ-TIED_SETUP.yaml
+│   ├── REQ-MODULE_VALIDATION.yaml
 │   └── ...
 ```
 
@@ -28,10 +28,10 @@ Token names use the same format in text and filenames:
 
 | Token Format | Filename Format |
 |--------------|-----------------|
-| `[REQ-USER_AUTH]` | `REQ-USER_AUTH.md` |
-| `[REQ-MODULE_VALIDATION]` | `REQ-MODULE_VALIDATION.md` |
+| `[REQ-USER_AUTH]` | `REQ-USER_AUTH.yaml` |
+| `[REQ-MODULE_VALIDATION]` | `REQ-MODULE_VALIDATION.yaml` |
 
-**Rule**: Remove brackets, keep hyphen, append `.md`
+**Rule**: Remove brackets, keep hyphen, append `.yaml`
 
 ## Notes
 
@@ -83,7 +83,7 @@ grep -A 30 '^REQ-TIED_SETUP:' tied/requirements.yaml
 3. Paste it at the end with a blank line before it
 4. Replace `REQ-IDENTIFIER` with your new semantic token
 5. Fill in all fields (name, category, priority, status, rationale, etc.)
-6. Update the `detail_file` path to match your new `.md` file in `requirements/` directory
+6. Update the `detail_file` path to match your new `.yaml` file in `requirements/` directory
 7. Save the file
 
 Example append operation:
@@ -126,7 +126,7 @@ REQ-NEW_FEATURE:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-NEW_FEATURE.md
+  detail_file: requirements/REQ-NEW_FEATURE.yaml
   metadata:
     created:
       date: 2026-02-06
@@ -210,7 +210,7 @@ Why the requirement exists (WHY)
 
 ```bash
 # 1. Create the detail file
-touch tied/requirements/REQ-YOUR_TOKEN.md
+touch tied/requirements/REQ-YOUR_TOKEN.yaml
 
 # 2. Copy the template above into the new file
 
@@ -230,18 +230,18 @@ For very large projects, organize detail files by domain:
 ```
 requirements/
 ├── core/
-│   ├── REQ-TIED_SETUP.md
-│   └── REQ-MODULE_VALIDATION.md
+│   ├── REQ-TIED_SETUP.yaml
+│   └── REQ-MODULE_VALIDATION.yaml
 ├── auth/
-│   ├── REQ-USER_LOGIN.md
-│   └── REQ-SESSION_MGMT.md
+│   ├── REQ-USER_LOGIN.yaml
+│   └── REQ-SESSION_MGMT.yaml
 └── api/
-    └── REQ-REST_ENDPOINTS.md
+    └── REQ-REST_ENDPOINTS.yaml
 ```
 
 When using subdirectories, update the Detail File column in the index:
 ```markdown
-| `[REQ-USER_LOGIN]` | User Login | P0 | ✅ Implemented | Auth | ... | [Detail](requirements/auth/REQ-USER_LOGIN.md) |
+| `[REQ-USER_LOGIN]` | User Login | P0 | ✅ Implemented | Auth | ... | [Detail](requirements/auth/REQ-USER_LOGIN.yaml) |
 ```
 
 ---

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **TIED detail files: Markdown → YAML** – Requirement, architecture, and implementation **detail** files in `tied/requirements/`, `tied/architecture-decisions/`, and `tied/implementation-decisions/` are now stored as **YAML** (e.g. `REQ-TIED_SETUP.yaml`, `ARCH-SUGGESTED_TAGS.yaml`, `IMPL-URL_TAGS_DISPLAY.yaml`). The YAML indexes (`requirements.yaml`, `architecture-decisions.yaml`, `implementation-decisions.yaml`) and `semantic-tokens.yaml` reference these `.yaml` detail files. Guide files (`requirements.md`, `architecture-decisions.md`, `implementation-decisions.md`) remain Markdown. Existing `.md` detail files were converted via MCP; new detail files should be created as `.yaml`.
+
 - **ESLint 9 and flat config** (`REQ-CODE_QUALITY`, `ARCH-CODE_QUALITY`, `IMPL-CODE_STYLE`) – Linting now uses ESLint 9 with the flat config format:
   - **Config:** Single `eslint.config.mjs` (replaces `.eslintrc.yml` and `.eslintignore`). Standard preset applied via `@eslint/eslintrc` FlatCompat and `@eslint/compat` fixupConfigRules. Ignores and rule overrides live in the flat config.
   - **Node:** `package.json` includes `engines.node >= 18.18.0` (required for ESLint 9).

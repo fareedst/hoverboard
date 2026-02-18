@@ -1,0 +1,42 @@
+IMPL-STORAGE_INDEX:
+  name: Storage Index
+  status: Active
+  cross_references: []
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: See detail file
+    details: []
+  code_locations:
+    files: []
+    functions: []
+  traceability:
+    architecture: []
+    requirements: []
+    tests: []
+    code_annotations:
+      - IMPL-STORAGE_INDEX
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-STORAGE_INDEX.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  cross-references: REQ-PER_BOOKMARK_STORAGE_BACKEND, ARCH-STORAGE_INDEX_AND_ROUTER
+  related:
+    - IMPL-BOOKMARK_ROUTER (consumes index)
+    - ARCH-STORAGE_INDEX_AND_ROUTER
+  storageindex: 'manages the per-URL storage backend mapping in chrome.storage.local under key `hoverboard_storage_index`. Shape: `{ "<url>": "pinboard"|"local"|"file" }`. Methods: getIndex(), setBackendForUrl(url, backend), getBackendForUrl(url), removeUrl(url). Migration: on first use (or when index empty), seed from LocalBookmarkService.getAllBookmarks() by setting index[url] = ''local'' for each URL.'

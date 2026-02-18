@@ -14,7 +14,7 @@
 
 **What**: Intelligent tag suggestions from page content (title, URL, meta tags, headings, emphasis elements, structured content, nav, breadcrumbs, images, links)
 
-**Detail File**: [tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md](../requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md)
+**Detail File**: [tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml](../requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml)
 
 **Implemented In**:
 
@@ -27,7 +27,7 @@
 
 **Safari Mirrors**: `safari/src/features/tagging/tag-service.js` (~921-1240), `safari/src/features/content/overlay-manager.js` (~603-678)
 
-**Tests**: ❌ None (see [REQ-SUGGESTED_TAGS_FROM_CONTENT.md](../requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md) "Current Test Gap")
+**Tests**: ❌ None (see [REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml](../requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml) "Current Test Gap")
 
 ---
 
@@ -35,7 +35,7 @@
 
 **What**: Case-insensitive filtering to exclude tags already in current bookmark
 
-**Detail File**: [tied/requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.md](../requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.md)
+**Detail File**: [tied/requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml](../requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml)
 
 **Implemented In**:
 
@@ -44,7 +44,7 @@
 | `src/features/content/overlay-manager.js` | Deduplication in `show()` | ~633-641 | `currentTagsLower` Set, `!currentTagsLower.has(tagLower)` |
 | `src/ui/popup/PopupController.js` | Deduplication in `loadSuggestedTags()` | ~596-603 | `currentTagsLower` Set, filter before `updateSuggestedTags` |
 
-**Tests**: ❌ None (see [REQ-SUGGESTED_TAGS_DEDUPLICATION.md](../requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.md) "Current Test Gap")
+**Tests**: ❌ None (see [REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml](../requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml) "Current Test Gap")
 
 ---
 
@@ -52,7 +52,7 @@
 
 **What**: Preserve original case, provide both original and lowercase versions for capitalized words
 
-**Detail File**: [tied/requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md](../requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md)
+**Detail File**: [tied/requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml](../requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml)
 
 **Implemented In**:
 
@@ -61,7 +61,7 @@
 | `src/features/tagging/tag-service.js` | Case preservation logic | ~1031-1193 | `originalCaseMap`, dual-version generation, exact duplicate removal |
 | `src/ui/popup/PopupController.js` | Case preservation in inlined | ~450-590 | Duplicated logic in executeScript function |
 
-**Tests**: ❌ None (see [REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md](../requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md) "Current Test Gap")
+**Tests**: ❌ None (see [REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml](../requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml) "Current Test Gap")
 
 ---
 
@@ -71,7 +71,7 @@
 
 **What**: Multi-source extraction with frequency sorting and case preservation architecture
 
-**Detail File**: [tied/architecture-decisions/ARCH-SUGGESTED_TAGS.md](../architecture-decisions/ARCH-SUGGESTED_TAGS.md)
+**Detail File**: [tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml](../architecture-decisions/ARCH-SUGGESTED_TAGS.yaml)
 
 **Key Design Decisions**:
 - Extraction sources and order (title → URL → meta keywords/description → headings → emphasis elements → definition terms/table headers → nav → breadcrumbs → images → links)
@@ -92,7 +92,7 @@
 
 **What**: Concrete implementation with two extraction paths (TagService for overlay, inlined script for popup)
 
-**Detail File**: [tied/implementation-decisions/IMPL-SUGGESTED_TAGS.md](../implementation-decisions/IMPL-SUGGESTED_TAGS.md)
+**Detail File**: [tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml](../implementation-decisions/IMPL-SUGGESTED_TAGS.yaml)
 
 **Code Components**:
 
@@ -103,7 +103,7 @@
 | **Overlay Display** | `src/features/content/overlay-manager.js` | Suggested section in `show()` | ~611-686 | "Suggested:" UI, click handler |
 | **Popup Display** | `src/ui/popup/UIManager.js` | `updateSuggestedTags()` | ~410-440 | Render suggestions in popup |
 
-**Modifiable Decisions** (see [IMPL-SUGGESTED_TAGS.md](../implementation-decisions/IMPL-SUGGESTED_TAGS.md) for details):
+**Modifiable Decisions** (see [IMPL-SUGGESTED_TAGS.yaml](../implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) for details):
 1. Extraction sources and order
 2. Numeric limits (10/20/5)
 3. URL path segment filtering
@@ -135,10 +135,10 @@
 ### Recommended Tests
 
 See detail files for comprehensive test recommendations:
-- [REQ-SUGGESTED_TAGS_FROM_CONTENT.md](../requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.md) §"Recommended Tests"
-- [REQ-SUGGESTED_TAGS_DEDUPLICATION.md](../requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.md) §"Recommended Tests"
-- [REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md](../requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.md) §"Recommended Tests"
-- [IMPL-SUGGESTED_TAGS.md](../implementation-decisions/IMPL-SUGGESTED_TAGS.md) §"Testing Strategy"
+- [REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml](../requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml) §"Recommended Tests"
+- [REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml](../requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml) §"Recommended Tests"
+- [REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml](../requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml) §"Recommended Tests"
+- [IMPL-SUGGESTED_TAGS.yaml](../implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) §"Testing Strategy"
 
 **Quick Summary**:
 1. Unit test `TagService.extractSuggestedTagsFromContent` (sources, frequency, noise, case)
@@ -183,9 +183,9 @@ rg "www.*com.*org" --type js
 
 When modifying suggested tags behavior:
 
-1. **Identify decision to modify**: Check [ARCH-SUGGESTED_TAGS.md](../architecture-decisions/ARCH-SUGGESTED_TAGS.md) §"Key Modifiable Decisions"
+1. **Identify decision to modify**: Check [ARCH-SUGGESTED_TAGS.yaml](../architecture-decisions/ARCH-SUGGESTED_TAGS.yaml) §"Key Modifiable Decisions"
 
-2. **Locate code**: Use table above or [IMPL-SUGGESTED_TAGS.md](../implementation-decisions/IMPL-SUGGESTED_TAGS.md) §"Code Locations"
+2. **Locate code**: Use table above or [IMPL-SUGGESTED_TAGS.yaml](../implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) §"Code Locations"
 
 3. **Check sync requirements**: Many decisions exist in **both** TagService and PopupController inlined script
    - Extraction sources and order
@@ -221,7 +221,7 @@ When modifying suggested tags behavior:
 
 **Drift Risk**: Changes to one path may not be reflected in the other, causing inconsistent behavior.
 
-**Mitigation** (see [IMPL-SUGGESTED_TAGS.md](../implementation-decisions/IMPL-SUGGESTED_TAGS.md) §"Popup vs Overlay Extraction Architecture"):
+**Mitigation** (see [IMPL-SUGGESTED_TAGS.yaml](../implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) §"Popup vs Overlay Extraction Architecture"):
 - Document all changes in both locations
 - Consider centralizing extraction (bundle TagService into content script)
 - Add cross-implementation tests to verify consistency

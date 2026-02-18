@@ -1,0 +1,42 @@
+IMPL-BOOKMARK_ROUTER:
+  name: Bookmark Router
+  status: Active
+  cross_references: []
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: See detail file
+    details: []
+  code_locations:
+    files: []
+    functions: []
+  traceability:
+    architecture: []
+    requirements: []
+    tests: []
+    code_annotations:
+      - IMPL-BOOKMARK_ROUTER
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  bookmarkrouter: 'holds pinboardProvider, localProvider, fileProvider, storageIndex, and defaultStorageMode (from config). Implements provider contract: getBookmarkForUrl(url), getRecentBookmarks(count), saveBookmark(data), deleteBookmark(url), saveTag(data), deleteTag(data), testConnection(). Resolves provider per URL via getBackendForUrl(url) or defaultStorageMode. getRecentBookmarks fetches from all three providers, merges, sorts by time descending, slices to count. Extra methods for move UI: getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) (get from current, save to target, delete from source, update index). Move treats bookmark as found when it has `bookmark.url`; if `bookmark.time` is missing, it is set when saving to target ([IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL](IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.md)).'
+  cross-references: REQ-PER_BOOKMARK_STORAGE_BACKEND, ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-STORAGE_INDEX
+  related:
+    - IMPL-STORAGE_INDEX, IMPL-LOCAL_BOOKMARK_SERVICE, IMPL-FILE_BOOKMARK_SERVICE
+    - ARCH-STORAGE_INDEX_AND_ROUTER

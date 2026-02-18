@@ -14,10 +14,10 @@ All decisions are cross-referenced with requirements using `[REQ-*]` tokens for 
 tied/
 ├── architecture-decisions.md              # This guide file (you are here)
 ├── architecture-decisions.yaml            # YAML index/database of all architecture decisions
-├── architecture-decisions/                # Detail files directory
-│   ├── ARCH-TIED_STRUCTURE.md
-│   ├── ARCH-MODULE_VALIDATION.md
-│   ├── ARCH-LANGUAGE_SELECTION.md
+├── architecture-decisions/                # Detail files directory (YAML)
+│   ├── ARCH-TIED_STRUCTURE.yaml
+│   ├── ARCH-MODULE_VALIDATION.yaml
+│   ├── ARCH-LANGUAGE_SELECTION.yaml
 │   └── ...
 ```
 
@@ -27,10 +27,10 @@ Token names use the same format in text and filenames:
 
 | Token Format | Filename Format |
 |--------------|-----------------|
-| `[ARCH-CONFIG_STRUCTURE]` | `ARCH-CONFIG_STRUCTURE.md` |
-| `[ARCH-MODULE_VALIDATION]` | `ARCH-MODULE_VALIDATION.md` |
+| `[ARCH-CONFIG_STRUCTURE]` | `ARCH-CONFIG_STRUCTURE.yaml` |
+| `[ARCH-MODULE_VALIDATION]` | `ARCH-MODULE_VALIDATION.yaml` |
 
-**Rule**: Remove brackets, keep hyphen, append `.md`
+**Rule**: Remove brackets, keep hyphen, append `.yaml`
 
 ## Notes
 
@@ -90,7 +90,7 @@ grep -A 30 '^ARCH-TIED_STRUCTURE:' tied/architecture-decisions.yaml
 3. Paste it at the end with a blank line before it
 4. Replace `ARCH-IDENTIFIER` with your new semantic token
 5. Fill in all fields (name, status, cross_references, rationale, alternatives, etc.)
-6. Update the `detail_file` path to match your new `.md` file in `architecture-decisions/` directory
+6. Update the `detail_file` path to match your new `.yaml` file in `architecture-decisions/` directory
 7. Save the file
 
 Example append operation:
@@ -145,7 +145,7 @@ ARCH-NEW_DECISION:
     informs:
       - IMPL-NEW_DECISION
     see_also: []
-  detail_file: architecture-decisions/ARCH-NEW_DECISION.md
+  detail_file: architecture-decisions/ARCH-NEW_DECISION.yaml
   metadata:
     created:
       date: 2026-02-06
@@ -236,7 +236,7 @@ Tests expected to reference `[REQ-*]` / `[TEST-*]` tokens:
 
 ```bash
 # 1. Create the detail file
-touch tied/architecture-decisions/ARCH-YOUR_TOKEN.md
+touch tied/architecture-decisions/ARCH-YOUR_TOKEN.yaml
 
 # 2. Copy the template above into the new file
 
@@ -256,18 +256,18 @@ For very large projects, organize detail files by domain:
 ```
 architecture-decisions/
 ├── core/
-│   ├── ARCH-TIED_STRUCTURE.md
-│   └── ARCH-MODULE_VALIDATION.md
+│   ├── ARCH-TIED_STRUCTURE.yaml
+│   └── ARCH-MODULE_VALIDATION.yaml
 ├── auth/
-│   ├── ARCH-AUTH_FLOW.md
-│   └── ARCH-SESSION_MGMT.md
+│   ├── ARCH-AUTH_FLOW.yaml
+│   └── ARCH-SESSION_MGMT.yaml
 └── api/
-    └── ARCH-REST_DESIGN.md
+    └── ARCH-REST_DESIGN.yaml
 ```
 
 When using subdirectories, update the Detail File column in the index:
 ```markdown
-| `[ARCH-AUTH_FLOW]` | Auth Flow | Active | ... | [Detail](architecture-decisions/auth/ARCH-AUTH_FLOW.md) |
+| `[ARCH-AUTH_FLOW]` | Auth Flow | Active | ... | [Detail](architecture-decisions/auth/ARCH-AUTH_FLOW.yaml) |
 ```
 
 ---

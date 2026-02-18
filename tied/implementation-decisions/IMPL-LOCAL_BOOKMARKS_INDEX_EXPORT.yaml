@@ -1,0 +1,52 @@
+IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  name: Local Bookmarks Index Export Implementation
+  status: Active
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+    - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: See detail file
+    details: []
+  code_locations:
+    files: []
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+    tests: []
+    code_annotations:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  annotations: Use [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT], [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT], [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] in HTML/CSS/JS comments.
+  cross-references: ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT, REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  logic: 'In bookmarks-table.js, add `exportBookmarks(scope)` where scope is `''all''` or `''displayed''`. Use `allBookmarks` or `filteredBookmarks`; serialize to CSV (escape quotes, comma-separated columns: description, url, tags as string, time, storage (Local | File), shared, toread, extended); build filename e.g. `hoverboard-bookmarks-{all|displayed}-{ISO date}.csv`; create Blob, object URL, programmatic click on `<a download="...">`, revoke URL.'
+  related:
+    - IMPL-LOCAL_BOOKMARKS_INDEX (index page this export extends)
+    - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT, REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+  ui: 'Export controls in bookmarks-table toolbar: two buttons, "Export all" and "Export displayed" (in an export-row). Buttons are disabled when the corresponding scope has zero bookmarks.'

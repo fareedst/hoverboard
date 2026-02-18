@@ -1,0 +1,95 @@
+REQ-SUGGESTED_TAGS_DEDUPLICATION:
+  name: Suggested Tags Deduplication
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: The extension must filter suggested tags to exclude any tags already present in the current bookmark's tag list, using case-insensitive comparison. This prevents redundant suggestions and keeps the suggestions list clean and relevant.
+    problems_solved: []
+    benefits: []
+  satisfaction_criteria:
+    - criterion: '1. **Case-insensitive comparison with current tags**: Compare suggested tags to current bookmark tags using lowercase normalization (e.g., "Git" in current tags excludes both "Git" and "git" from suggestions).'
+    - criterion: '2. **Tags present in current list excluded from suggestions**: Any suggested tag whose lowercase form matches a current tag''s lowercase form is filtered out before display.'
+    - criterion: '3. **Works in both popup and overlay**: Deduplication logic is applied in both popup (PopupController) and overlay (overlay-manager) contexts.'
+    - criterion: '--'
+  validation_criteria:
+    - method: Manual verification
+      coverage: See detail file
+  traceability:
+    architecture:
+      - ARCH-SUGGESTED_TAGS
+    implementation:
+      - IMPL-SUGGESTED_TAGS
+    tests: []
+    code_annotations:
+      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+  related_requirements:
+    depends_on:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  '[arch-suggested_tags]': Multi-source extraction with case-insensitive deduplication
+  '[impl-suggested_tags]': Deduplication implemented in both overlay and popup display logic
+  '[req-suggested_tags_case_preservation]': Deduplication must work with both original and lowercase tag versions
+  '[req-suggested_tags_from_content]': Provides the suggestions to be deduplicated
+  actual: None implemented (see "Current Test Gap" above)
+  clean_suggestions: Only new, relevant tags appear in the suggestions section.
+  cluttered_suggestions_list: Irrelevant suggestions reduce the value of the feature.
+  code_annotations: Deduplication sections marked with `[REQ-SUGGESTED_TAGS_DEDUPLICATION]` in comments
+  code_locations: |-
+    | File | Function/Section | Lines | Description |
+    |------|------------------|-------|-------------|
+    | `src/features/content/overlay-manager.js` | Suggested section build in `show()` | ~633-641 | Creates `currentTagsLower` Set, filters suggestions with `!currentTagsLower.has(tagLower)` |
+    | `src/ui/popup/PopupController.js` | `loadSuggestedTags()` filtering | ~596-603 | Creates `currentTagsLower` Set from `currentPin.tags`, filters with `!currentTagsLower.has(tag.toLowerCase())` |
+    | `safari/src/features/content/overlay-manager.js` | (mirror) | ~625-633 | Safari mirror of overlay deduplication |
+  coverage: Case-insensitive filtering logic
+  created: '2025-07-14'
+  depends_on: None
+  description: The extension must filter suggested tags to exclude any tags already present in the current bookmark's tag list, using case-insensitive comparison. This prevents redundant suggestions and keeps the suggestions list clean and relevant.
+  expected: '"Suggested tags deduplication tests" (referenced in requirements.yaml)'
+  last_updated: '2026-02-13'
+  modifiable_decisions: |-
+    The following design choice is documented in [IMPL-SUGGESTED_TAGS] and can be modified:
+
+    1. **Case-insensitive comparison strategy**: Currently uses `Set` of lowercased current tags for O(1) lookup. Alternative approaches (case-insensitive indexOf, normalize-compare-compare) would have different performance characteristics but same user-facing behavior.
+
+    2. **Deduplication location**: Currently duplicated in overlay-manager and PopupController. Could be centralized in TagService or a shared utility.
+
+    ---
+
+    *Last validated: 2026-02-13 by AI agent*
+  no_dedicated_unit_tests: exist for suggested tags deduplication. The requirements.yaml references "Suggested tags deduplication tests", but these have not been implemented.
+  recommended_tests_for_future_modification: |-
+    1. **Unit test for deduplication in overlay**:
+       - Mock overlay with current tags ["React", "tutorial"]
+       - Mock TagService to return ["react", "React", "TypeScript", "tutorial", "coding"]
+       - Verify only ["TypeScript", "coding"] displayed (case-insensitive exclusion)
+
+    2. **Unit test for deduplication in popup**:
+       - Mock currentPin with tags ["Python", "data"]
+       - Mock executeScript result ["python", "Python", "analysis", "data", "science"]
+       - Verify only ["analysis", "science"] passed to updateSuggestedTags
+
+    ---
+  redundant_tag_suggestions: Without deduplication, users see tags they've already added, creating confusion and UI clutter.
+  relevant-only_tags: Users can focus on discovering and adding new tags without filtering out duplicates mentally.
+  supersedes: |-
+    None
+
+    ---
+  test_scope: '(currently **not implemented**; see "Current Test Gap" below):'
+  why_this_requirement_exists: Users should only see tag suggestions they don't already have. Showing tags already applied to the current bookmark clutters the UI and wastes user attention.

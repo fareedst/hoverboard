@@ -1,0 +1,60 @@
+REQ-TIED_SETUP:
+  name: TIED Methodology Setup
+  category: Functional
+  priority: P0
+  status: Implemented
+  rationale:
+    why: To ensure traceability of intent from requirements to code and to maintain a consistent development process.
+    problems_solved: []
+    benefits: []
+  satisfaction_criteria:
+    - criterion: '`tied/` directory exists'
+    - criterion: 'All required documentation files exist and are populated from templates:'
+    - criterion: '`requirements.md` (index) with `requirements/` directory for detail files'
+    - criterion: '`architecture-decisions.md` (index) with `architecture-decisions/` directory for detail files'
+    - criterion: '`implementation-decisions.md` (index) with `implementation-decisions/` directory for detail files'
+    - criterion: '`semantic-tokens.yaml` (YAML index/database of all tokens - canonical token registry)'
+    - criterion: '`semantic-tokens.md` (semantic tokens guide with format and conventions)'
+    - criterion: '`processes.md` (process tracking including `[PROC-YAML_DB_OPERATIONS]`)'
+    - criterion: '`.cursorrules` contains the TIED rules'
+    - criterion: '`AGENTS.md` contains canonical AI agent instructions'
+  validation_criteria:
+    - method: Manual verification of file existence
+    - method: AI agent acknowledgment of principles ("Observing AI principles!")
+    - method: Verification that all index files have corresponding detail directories
+    - method: Verification that template files are properly structured
+  traceability:
+    architecture:
+      - ARCH-TIED_STRUCTURE
+    implementation:
+      - IMPL-TIED_FILES
+    tests: []
+    code_annotations:
+      - REQ-TIED_SETUP
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-TIED_SETUP.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  architecture: '`ARCH-TIED_STRUCTURE` (see `architecture-decisions.yaml`)'
+  code: Bootstrap scripts with `// [IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP]`
+  created: '2025-11-08'
+  depends_on: None (foundational requirement)
+  description: The project must follow the Token-Integrated Engineering & Development (TIED) methodology, including a specific directory structure (`tied/`) and documentation files (`requirements.md`, `architecture-decisions.md`, etc.).
+  implementation: '`IMPL-TIED_FILES` (see `implementation-decisions.yaml`)'
+  last_updated: '2026-02-06'
+  related_to: All other requirements depend on this setup
+  supersedes: None
+  tests: Manual verification checklists

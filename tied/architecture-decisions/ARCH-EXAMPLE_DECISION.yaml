@@ -1,0 +1,78 @@
+ARCH-EXAMPLE_DECISION:
+  name: Core Architecture Example
+  status: Active
+  cross_references: &ref_0
+    - REQ-EXAMPLE_FEATURE
+  rationale:
+    why: |-
+      Matches requirement [REQ-EXAMPLE_FEATURE]
+      Provides benefits X, Y, Z
+      Simpler implementation
+      [Add more rationale points]
+    problems_solved: []
+    benefits: []
+  alternatives_considered: []
+  implementation_approach:
+    summary: |-
+      High-level approach description
+      Key components and their responsibilities
+      Integration points with other systems
+      Data flow overview
+    details:
+      - |-
+        1. **Component A**: Description of what it does
+        2. **Component B**: Description of what it does
+        3. **Component C**: Description of what it does
+    key_components: |-
+      1. **Component A**: Description of what it does
+      2. **Component B**: Description of what it does
+      3. **Component C**: Description of what it does
+    integration_points: &ref_1
+      - 'External System 1: How we integrate'
+      - 'External System 2: How we integrate'
+  traceability:
+    requirements: *ref_0
+    implementation: []
+    tests: []
+    code_annotations:
+      - ARCH-EXAMPLE_DECISION
+      - REQ-EXAMPLE_FEATURE
+  related_decisions:
+    depends_on: *ref_0
+    informs: []
+    see_also: []
+  detail_file: architecture-decisions/ARCH-EXAMPLE_DECISION.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  decision: '[Your Architecture Choice - describe the high-level architectural decision]'
+  alternative_approach_1: Why it was rejected - more complex, less maintainable
+  alternative_approach_2: Why it was rejected - performance concerns
+  alternative_approach_3: Why it was rejected - doesn't meet requirements
+  created: YYYY-MM-DD
+  cross-references: '[REQ-EXAMPLE_FEATURE]'
+  integration_points: *ref_1
+  key_components: |-
+    1. **Component A**: Description of what it does
+    2. **Component B**: Description of what it does
+    3. **Component C**: Description of what it does
+  last_updated: YYYY-MM-DD
+  token_coverage_`[proc-token_audit]`: |-
+    Code files expected to carry `[IMPL-*] [ARCH-*] [REQ-*]` comments:
+    - [ ] `path/to/main.ext` - Annotate entry points with `[IMPL-EXAMPLE_IMPLEMENTATION] [ARCH-EXAMPLE_DECISION] [REQ-EXAMPLE_FEATURE]`
+
+    Tests expected to reference `[REQ-*]` / `[TEST-*]` tokens:
+    - [ ] `testCoreFeature_REQ_EXAMPLE_FEATURE` plus inline `[REQ-EXAMPLE_FEATURE]` comments validate behavior
+  validation_evidence_`[proc-token_validation]`: |-
+    | Date | Commit | Validation Result | Notes |
+    |------|--------|-------------------|-------|
+    | YYYY-MM-DD | `abc1234` | ⏳ Pending | Awaiting implementation |

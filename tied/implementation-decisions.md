@@ -14,10 +14,10 @@ All decisions are cross-referenced with architecture decisions using `[ARCH-*]` 
 tied/
 ├── implementation-decisions.md              # This guide file (you are here)
 ├── implementation-decisions.yaml            # YAML index/database of all implementation decisions
-├── implementation-decisions/                # Detail files directory
-│   ├── IMPL-CONFIG_STRUCT.md
-│   ├── IMPL-TIED_FILES.md
-│   ├── IMPL-MODULE_VALIDATION.md
+├── implementation-decisions/                # Detail files directory (YAML)
+│   ├── IMPL-CONFIG_STRUCT.yaml
+│   ├── IMPL-TIED_FILES.yaml
+│   ├── IMPL-MODULE_VALIDATION.yaml
 │   └── ...
 ```
 
@@ -27,10 +27,10 @@ Token names contain `:` which is invalid in filenames on many operating systems.
 
 | Token Format | Filename Format |
 |--------------|-----------------|
-| `[IMPL-CONFIG_STRUCT]` | `IMPL-CONFIG_STRUCT.md` |
-| `[IMPL-MODULE_VALIDATION]` | `IMPL-MODULE_VALIDATION.md` |
+| `[IMPL-CONFIG_STRUCT]` | `IMPL-CONFIG_STRUCT.yaml` |
+| `[IMPL-MODULE_VALIDATION]` | `IMPL-MODULE_VALIDATION.yaml` |
 
-**Rule**: Replace `[`, `]`, and `:` → Remove brackets, replace `:` with `-`, append `.md`
+**Rule**: Replace `[`, `]`, and `:` → Remove brackets, replace `:` with `-`, append `.yaml`
 
 ## Notes
 
@@ -90,7 +90,7 @@ grep -A 30 '^IMPL-MODULE_VALIDATION:' tied/implementation-decisions.yaml
 3. Paste it at the end with a blank line before it
 4. Replace `IMPL-IDENTIFIER` with your new semantic token
 5. Fill in all fields (name, status, cross_references, rationale, implementation_approach, etc.)
-6. Update the `detail_file` path to match your new `.md` file in `implementation-decisions/` directory
+6. Update the `detail_file` path to match your new `.yaml` file in `implementation-decisions/` directory
 7. Save the file
 
 Example append operation:
@@ -140,7 +140,7 @@ IMPL-NEW_IMPLEMENTATION:
     depends_on: []
     supersedes: []
     see_also: []
-  detail_file: implementation-decisions/IMPL-NEW_IMPLEMENTATION.md
+  detail_file: implementation-decisions/IMPL-NEW_IMPLEMENTATION.yaml
   metadata:
     created:
       date: 2026-02-06
@@ -260,7 +260,7 @@ Latest `./scripts/validate_tokens.sh` output summary:
 
 ```bash
 # 1. Create the detail file
-touch tied/implementation-decisions/IMPL-YOUR_TOKEN.md
+touch tied/implementation-decisions/IMPL-YOUR_TOKEN.yaml
 
 # 2. Copy the template above into the new file
 
@@ -280,18 +280,18 @@ For very large projects, organize detail files by domain:
 ```
 implementation-decisions/
 ├── core/
-│   ├── IMPL-CONFIG_STRUCT.md
-│   └── IMPL-ERROR_HANDLING.md
+│   ├── IMPL-CONFIG_STRUCT.yaml
+│   └── IMPL-ERROR_HANDLING.yaml
 ├── auth/
-│   ├── IMPL-AUTH_FLOW.md
-│   └── IMPL-SESSION_MGMT.md
+│   ├── IMPL-AUTH_FLOW.yaml
+│   └── IMPL-SESSION_MGMT.yaml
 └── api/
-    └── IMPL-REST_ENDPOINTS.md
+    └── IMPL-REST_ENDPOINTS.yaml
 ```
 
 When using subdirectories, update the Detail File column in the index:
 ```markdown
-| `[IMPL-AUTH_FLOW]` | Auth Flow | Active | ... | [Detail](implementation-decisions/auth/IMPL-AUTH_FLOW.md) |
+| `[IMPL-AUTH_FLOW]` | Auth Flow | Active | ... | [Detail](implementation-decisions/auth/IMPL-AUTH_FLOW.yaml) |
 ```
 
 ---
@@ -302,7 +302,7 @@ If migrating from a single `implementation-decisions.md` file:
 
 1. Create the `implementation-decisions/` directory
 2. For each numbered section in the old file:
-   - Create `IMPL-{TOKEN_NAME}.md` using the detail template
+   - Create `IMPL-{TOKEN_NAME}.yaml` using the detail template
    - Copy content into the new file
    - Add metadata (Status, Created, Last Updated)
 3. Replace section content in this file with an index row

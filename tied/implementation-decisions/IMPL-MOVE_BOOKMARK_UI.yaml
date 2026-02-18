@@ -1,0 +1,44 @@
+IMPL-MOVE_BOOKMARK_UI:
+  name: Move Bookmark Storage UI
+  status: Active
+  cross_references: []
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: See detail file
+    details: []
+  code_locations:
+    files: []
+    functions: []
+  traceability:
+    architecture: []
+    requirements: []
+    tests: []
+    code_annotations:
+      - IMPL-MOVE_BOOKMARK_UI
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  cross-references: REQ-MOVE_BOOKMARK_STORAGE_UI, ARCH-MOVE_BOOKMARK_UI
+  file_↔_browser_toggle: When the current bookmark exists and its backend is `local` or `file`, a button is shown ("Move to File" or "Move to browser"). Click emits `storageLocalToggle` with target backend; controller reuses handleStorageBackendChange so the same move path runs. Toggle is hidden when backend is pinboard or when there is no bookmark. After a successful move, both the select value and the toggle are updated (updateStorageBackendValue, updateStorageLocalToggle).
+  related:
+    - IMPL-BOOKMARK_ROUTER (moveBookmarkToStorage, getStorageBackendForUrl)
+    - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL (inner result, bookmark URL, allow no-time)
+  response_and_url_handling: '([IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL](IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.md)): Popup uses inner result (`response.data`) for success/error so UI matches router outcome; move uses bookmark URL (`currentPin.url`) when available; router allows move when bookmark has url but no time (sets time when saving to target).'
+  summary: Popup includes a **Storage** section with a `<select>` (or buttons) for Pinboard, Local, File. On load, popup sends getStorageBackendForUrl(currentUrl) and sets the select value. On change, popup sends moveBookmarkToStorage(url, targetBackend) and refreshes bookmark data.

@@ -1,0 +1,51 @@
+REQ-EXTENSION_IDENTITY:
+  name: Extension Identity Preservation
+  category: Immutable
+  priority: P0
+  status: Implemented
+  rationale:
+    why: Core extension identity is fundamental to user recognition and brand consistency. Changing this would break user expectations and require complete rebranding.
+    problems_solved: []
+    benefits: []
+  satisfaction_criteria:
+    - criterion: Extension name remains "Hoverboard" in all contexts
+    - criterion: Purpose remains Pinboard.in bookmarking interface enhancement
+    - criterion: Target platform remains Chrome/Chromium-based browsers
+    - criterion: Architecture remains browser extension with content script injection
+  validation_criteria:
+    - method: Manifest.json name field validation
+    - method: Documentation consistency checks
+    - method: Branding audit in all user-facing interfaces
+  traceability:
+    architecture:
+      - ARCH-EXT_IDENTITY
+    implementation:
+      - IMPL-EXT_IDENTITY
+    tests: []
+    code_annotations:
+      - REQ-EXTENSION_IDENTITY
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-EXTENSION_IDENTITY.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  architecture: See `architecture-decisions.yaml` § [ARCH-EXT_IDENTITY]
+  code: manifest.json, README.md, all user-facing UI files
+  created: '2025-07-14'
+  description: The extension must maintain its core identity as "Hoverboard" - a Pinboard.in bookmarking interface enhancement. The name, purpose, and target platform (Chrome/Chromium-based browsers) must never change.
+  implementation: See `implementation-decisions.yaml` § [IMPL-EXT_IDENTITY]
+  last_updated: '2026-02-13'
+  notes: This is an immutable requirement - changes require major version bump and full rebranding.
+  tests: Manifest validation tests, branding consistency tests

@@ -1,0 +1,54 @@
+REQ-STORAGE_MODE_DEFAULT:
+  name: Storage Mode Default and Dual-Use
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  satisfaction_criteria:
+    - criterion: See detail file
+  validation_criteria:
+    - method: Manual verification
+      coverage: See detail file
+  traceability:
+    architecture: []
+    implementation: []
+    tests: []
+    code_annotations:
+      - REQ-STORAGE_MODE_DEFAULT
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  configmanager: '`getDefaultConfiguration().storageMode === ''local''`; `getStorageMode()` / `setStorageMode(mode)`.'
+  cross-references: ARCH-LOCAL_STORAGE_PROVIDER, IMPL-LOCAL_BOOKMARK_SERVICE
+  how_validated:
+    - 'Unit tests in `tests/unit/config-manager.test.js`:'
+    - 'Default configuration includes `storageMode: ''local''`.'
+    - '`getStorageMode()` returns `''local''` when no stored override, `''pinboard''` when stored, and `''pinboard''` for invalid stored value (fallback).'
+    - '`setStorageMode(''local'')` and `setStorageMode(''pinboard'')` call `updateConfig` with the correct value; invalid mode throws.'
+  options_page: Storage Mode section with radios "Local Storage (offline)" and "Pinboard (cloud)"; selection is persisted and triggers provider swap via `SWITCH_STORAGE_MODE` message.
+  purpose:
+    - 'Reduce friction for new users: no signup or API required by default.'
+    - Preserve optional Pinboard integration for users who want it.
+    - 'Make the dual-use case explicit: local-first, Pinboard optional.'
+  related:
+    - ARCH-LOCAL_STORAGE_PROVIDER (strategy and default choice)
+    - IMPL-LOCAL_BOOKMARK_SERVICE (local provider implementation)
+    - REQ-CHROME_STORAGE_USAGE (storage API usage)
+  summary: 'The extension supports two bookmark storage modes: **local** (chrome.storage.local) and **Pinboard** (Pinboard.in API). The **default is local** so most users can use the extension without creating an account or configuring an API token. Users who want cloud sync may switch to Pinboard in the Options page (Storage Mode).'

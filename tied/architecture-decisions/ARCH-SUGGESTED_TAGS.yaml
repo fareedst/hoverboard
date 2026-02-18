@@ -1,0 +1,270 @@
+ARCH-SUGGESTED_TAGS:
+  name: Suggested Tags from Page Content Architecture
+  status: Active
+  cross_references: &ref_0
+    - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    - REQ-SUGGESTED_TAGS_DEDUPLICATION
+    - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+  rationale:
+    why: Intelligent tag suggestions speed up bookmarking workflow by providing context-aware tag candidates without requiring manual typing. Multi-source extraction ensures comprehensive coverage of page semantics; frequency sorting prioritizes common/important terms; case preservation respects proper nouns and brand names while offering lowercase alternatives.
+    problems_solved: []
+    benefits: []
+  alternatives_considered:
+    - name: See detail file
+      pros: []
+      cons: []
+      rejected_reason: |-
+        No formal alternatives were documented. The current multi-source extraction approach was implemented directly based on requirements.
+
+        ---
+  implementation_approach:
+    summary: |-
+      Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, preserving original case with lowercase variants, and deduplicating against current tags.
+
+      ---
+    details:
+      - |-
+        #### 1. Extraction Sources (in order)
+
+        | Source | Selector/Method | Limit | Priority |
+        |--------|----------------|-------|----------|
+        | Document title | `document.title` | Full text | High |
+        | URL path segments | `URL.pathname.split('/')` | All segments (filtered) | High |
+        | Meta keywords | `meta[name="keywords"]` | Full content | High |
+        | Meta description | `meta[name="description"]` | Full content | High |
+        | H1/H2/H3 headings | `querySelectorAll('h1, h2, h3')` | All headings | High |
+        | Emphasis elements | `main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code` (+ article, [role="main"], .main, .content) | First 30 elements | Medium-High |
+        | Definition terms | `main dl dt` (+ article, [role="main"], .main, .content) | First 20 terms | Medium |
+        | Table headers/captions | `main th, main caption` (+ article, [role="main"], .main, .content) | First 20 headers | Medium |
+        | Navigation links | `nav a`, `header nav a`, `[role="navigation"] a` | First 20 links | Medium |
+        | Breadcrumbs | `[aria-label*="breadcrumb"]`, `.breadcrumb`, etc. | All breadcrumb links | Medium |
+        | Main images | `main img`, `article img`, etc. | First 5 images (alt text) | Low |
+        | Main links | `main a`, `article a`, etc. | First 10 links | Low |
+      - |-
+        ```
+        Page Content (DOM + URL)
+                 ↓
+            [Extraction]
+            ├─ Title
+            ├─ URL segments
+            ├─ Headings (h1/h2/h3)
+            ├─ Nav links (20)
+            ├─ Breadcrumbs
+            ├─ Images alt (5)
+            └─ Main links (10)
+                 ↓
+            [Tokenization]
+            Split on whitespace/punctuation
+                 ↓
+            [Filtering]
+            ├─ Remove noise words
+            ├─ Remove short words (<2)
+            ├─ Remove pure numbers
+            └─ Filter URL segments
+                 ↓
+            [Frequency Counting]
+            Count occurrences (case-insensitive)
+                 ↓
+            [Case Preservation]
+            ├─ Track original case (first occurrence)
+            ├─ Generate lowercase variant (if has uppercase)
+            └─ Remove exact duplicates
+                 ↓
+            [Sorting]
+            Sort by frequency ↓, then alphabetically ↑
+                 ↓
+            [Sanitization]
+            Remove special chars, limit length
+                 ↓
+            [Deduplication vs Current Tags]
+            Exclude suggestions in current tags (case-insensitive)
+                 ↓
+            [Display]
+            ├─ Overlay: show 5 tags, click → saveTag + refresh
+            └─ Popup: show all tags, click → add tag
+        ```
+
+        ---
+      - For all elements, check `element.title` first, then `childElement.title`, then fall back to `textContent`.
+      - 'These design choices are implementation details that can be changed without breaking requirements:'
+    key_components: |-
+      #### 1. Extraction Sources (in order)
+
+      | Source | Selector/Method | Limit | Priority |
+      |--------|----------------|-------|----------|
+      | Document title | `document.title` | Full text | High |
+      | URL path segments | `URL.pathname.split('/')` | All segments (filtered) | High |
+      | Meta keywords | `meta[name="keywords"]` | Full content | High |
+      | Meta description | `meta[name="description"]` | Full content | High |
+      | H1/H2/H3 headings | `querySelectorAll('h1, h2, h3')` | All headings | High |
+      | Emphasis elements | `main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code` (+ article, [role="main"], .main, .content) | First 30 elements | Medium-High |
+      | Definition terms | `main dl dt` (+ article, [role="main"], .main, .content) | First 20 terms | Medium |
+      | Table headers/captions | `main th, main caption` (+ article, [role="main"], .main, .content) | First 20 headers | Medium |
+      | Navigation links | `nav a`, `header nav a`, `[role="navigation"] a` | First 20 links | Medium |
+      | Breadcrumbs | `[aria-label*="breadcrumb"]`, `.breadcrumb`, etc. | All breadcrumb links | Medium |
+      | Main images | `main img`, `article img`, etc. | First 5 images (alt text) | Low |
+      | Main links | `main a`, `article a`, etc. | First 10 links | Low |
+  traceability:
+    requirements: *ref_0
+    implementation: []
+    tests: []
+    code_annotations:
+      - ARCH-SUGGESTED_TAGS
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+  related_decisions:
+    depends_on: *ref_0
+    informs: []
+    see_also: []
+  detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  decision: |-
+    Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, preserving original case with lowercase variants, and deduplicating against current tags.
+
+    ---
+  '[arch-tag_system]': General tag system architecture (recent tags, sanitization, storage)
+  '[impl-suggested_tags]': Implementation details for extraction, display, and user interaction
+  '[impl-tag_system]': Tag service implementation
+  caller: PopupController.js `loadSuggestedTags()` method
+  centralize: Move to shared config or constant
+  centralize_extraction: Bundle TagService into content script so popup can call it directly
+  context: Runs in page context (has access to page DOM)
+  context-aware_suggestions: Tags reflect actual page content, improving discoverability.
+  created: '2025-07-14'
+  cross-references: '[REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]'
+  current:
+    - 'Overlay/TagService: `sanitizeTag()` (comprehensive XSS prevention)'
+    - 'Popup inlined: `replace(/[^a-zA-Z0-9_-]/g, '''').substring(0, 50)` (simple character filter)'
+  data_flow_diagram: |-
+    ```
+    Page Content (DOM + URL)
+             ↓
+        [Extraction]
+        ├─ Title
+        ├─ URL segments
+        ├─ Headings (h1/h2/h3)
+        ├─ Nav links (20)
+        ├─ Breadcrumbs
+        ├─ Images alt (5)
+        └─ Main links (10)
+             ↓
+        [Tokenization]
+        Split on whitespace/punctuation
+             ↓
+        [Filtering]
+        ├─ Remove noise words
+        ├─ Remove short words (<2)
+        ├─ Remove pure numbers
+        └─ Filter URL segments
+             ↓
+        [Frequency Counting]
+        Count occurrences (case-insensitive)
+             ↓
+        [Case Preservation]
+        ├─ Track original case (first occurrence)
+        ├─ Generate lowercase variant (if has uppercase)
+        └─ Remove exact duplicates
+             ↓
+        [Sorting]
+        Sort by frequency ↓, then alphabetically ↑
+             ↓
+        [Sanitization]
+        Remove special chars, limit length
+             ↓
+        [Deduplication vs Current Tags]
+        Exclude suggestions in current tags (case-insensitive)
+             ↓
+        [Display]
+        ├─ Overlay: show 5 tags, click → saveTag + refresh
+        └─ Popup: show all tags, click → add tag
+    ```
+
+    ---
+  depends_on: None
+  extract_→_filter_→_rank_→_deduplicate_→_display: |-
+    1. **Extract text** from multiple page sources (title, URL segments, meta tags, headings, emphasis elements, definition terms, table headers, nav, breadcrumbs, images, links)
+    2. **Tokenize and filter** (remove noise words, short words, pure numbers)
+    3. **Rank by frequency** (count occurrences, sort descending)
+    4. **Preserve case** (track original case, generate lowercase variants for capitalized words)
+    5. **Sanitize** (remove special characters, limit length)
+    6. **Deduplicate** (exclude tags already in current bookmark, case-insensitive)
+    7. **Display** (show suggestions in UI, allow click-to-add)
+  faster_tagging: Click-to-add suggestions reduce keystrokes and cognitive load.
+  hybrid: Extract core logic to shared module imported by both paths
+  issue: Inconsistent sanitization may produce different suggestions from same page content.
+  keep_inlined: Maintain current approach but document sync requirements
+  key_components: |-
+    #### 1. Extraction Sources (in order)
+
+    | Source | Selector/Method | Limit | Priority |
+    |--------|----------------|-------|----------|
+    | Document title | `document.title` | Full text | High |
+    | URL path segments | `URL.pathname.split('/')` | All segments (filtered) | High |
+    | Meta keywords | `meta[name="keywords"]` | Full content | High |
+    | Meta description | `meta[name="description"]` | Full content | High |
+    | H1/H2/H3 headings | `querySelectorAll('h1, h2, h3')` | All headings | High |
+    | Emphasis elements | `main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code` (+ article, [role="main"], .main, .content) | First 30 elements | Medium-High |
+    | Definition terms | `main dl dt` (+ article, [role="main"], .main, .content) | First 20 terms | Medium |
+    | Table headers/captions | `main th, main caption` (+ article, [role="main"], .main, .content) | First 20 headers | Medium |
+    | Navigation links | `nav a`, `header nav a`, `[role="navigation"] a` | First 20 links | Medium |
+    | Breadcrumbs | `[aria-label*="breadcrumb"]`, `.breadcrumb`, etc. | All breadcrumb links | Medium |
+    | Main images | `main img`, `article img`, etc. | First 5 images (alt text) | Low |
+    | Main links | `main a`, `article a`, etc. | First 10 links | Low |
+  key_modifiable_decisions: 'These design choices are implementation details that can be changed without breaking requirements:'
+  last_updated: '2026-02-13'
+  localize: Add non-English stop word lists based on page language
+  manual_tag_entry: Users previously typed all tags manually, slowing bookmarking.
+  method: '`extractSuggestedTagsFromContent(document, url, limit)`'
+  modifiable: Unify sanitization; inline full `sanitizeTag` logic in popup script; or document and accept the difference.
+  no_context_awareness: Without page analysis, users invented tags without semantic guidance.
+  noise_words: 'Large English stop word list (~200 words: "a", "an", "and", "the", "is", "of", etc.) filters common words with no semantic value.'
+  overlay: overlay-manager.js builds suggested section DOM, handles click events
+  parameters: Native DOM document, current page URL, extraction limit
+  popup: UIManager.js `updateSuggestedTags()` renders tags in `suggestedTagsContainer`
+  popup_inlined_script: Simple `replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 50)`
+  returns: Array of sanitized suggested tag strings (via `executeScript` result)
+  script: Inlined function injected into current tab
+  smart_filtering: Use TF-IDF or other NLP techniques instead of static list
+  tagservice: '`sanitizeTag()` method (strict XSS prevention, character filtering)'
+  title_attribute_priority: For all elements, check `element.title` first, then `childElement.title`, then fall back to `textContent`.
+  token_coverage_`[proc-token_audit]`: |-
+    Code files carrying `[IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_*]` annotations:
+
+    - [x] `src/features/tagging/tag-service.js` - Extraction method with full token annotations
+    - [x] `src/features/content/overlay-manager.js` - Display section with token annotations
+    - [x] `src/ui/popup/PopupController.js` - Inlined extraction with token annotations
+    - [x] `src/ui/popup/UIManager.js` - Display method with token annotations
+    - [x] `safari/src/features/tagging/tag-service.js` - Safari mirror
+    - [x] `safari/src/features/content/overlay-manager.js` - Safari mirror
+
+    Tests expected to reference tokens:
+    - [ ] `testExtractSuggestedTags_REQ_SUGGESTED_TAGS_FROM_CONTENT` (not yet implemented)
+    - [ ] `testSuggestedTagsDeduplication_REQ_SUGGESTED_TAGS_DEDUPLICATION` (not yet implemented)
+    - [ ] `testSuggestedTagsCasePreservation_REQ_SUGGESTED_TAGS_CASE_PRESERVATION` (not yet implemented)
+
+    ---
+  url_path_segments: Exclude `www`, `com`, `org`, `net`, `html`, `htm`, `php`, `asp`, `aspx`, `index`, `home`, `page`; exclude pure numeric segments; exclude segments shorter than 2 characters.
+  user-configurable: Allow users to add custom noise words
+  user_choice_in_capitalization: Both original and lowercase versions give users flexibility.
+  validation_evidence_`[proc-token_validation]`: |-
+    | Date | Commit | Validation Result | Notes |
+    |------|--------|-------------------|-------|
+    | 2025-07-14 | Initial | ✅ Implemented | Feature implemented and deployed |
+    | 2026-02-13 | Migration | ✅ Documented | Migrated from STDD to TIED format |
+    | 2026-02-13 | Detail files | ✅ Documented | Created ARCH detail file with modifiable decisions |
+
+    ---
+  why_this_architecture: Intelligent tag suggestions speed up bookmarking workflow by providing context-aware tag candidates without requiring manual typing. Multi-source extraction ensures comprehensive coverage of page semantics; frequency sorting prioritizes common/important terms; case preservation respects proper nouns and brand names while offering lowercase alternatives.
+  word_rules: Minimum length 2 characters; exclude pure numbers.

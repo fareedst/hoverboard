@@ -1,0 +1,46 @@
+REQ-MOVE_BOOKMARK_STORAGE_UI:
+  name: Move Bookmark Storage UI
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  satisfaction_criteria:
+    - criterion: Popup shows current bookmark storage and a control (e.g. dropdown) to move to Pinboard, Local, or File.
+    - criterion: When the bookmark is stored in **Local (browser)** or **File (folder)**, a dedicated one-click control allows toggling between file and browser storage ("Move to File" when current is local, "Move to browser" when current is file). Hidden when storage is Pinboard or when there is no bookmark for the current URL.
+  validation_criteria:
+    - method: Manual verification
+      coverage: See detail file
+  traceability:
+    architecture: []
+    implementation: []
+    tests: []
+    code_annotations:
+      - REQ-MOVE_BOOKMARK_STORAGE_UI
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  cross-references: ARCH-MOVE_BOOKMARK_UI, IMPL-MOVE_BOOKMARK_UI, REQ-PER_BOOKMARK_STORAGE_BACKEND
+  move_succeeds_when_bookmark_has_url_but_no_time: Router treats a bookmark as found when it has `bookmark.url`; if `time` is missing, it is set when saving to the target so legacy or provider-returned bookmarks without time can be moved.
+  move_uses_bookmark_url: When sending moveBookmarkToStorage, popup uses the current bookmark's URL (e.g. `currentPin.url`) when available so the move key matches storage (avoids query-string or tab-URL mismatch).
+  related:
+    - IMPL-MOVE_BOOKMARK_UI, ARCH-MOVE_BOOKMARK_UI, IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND (router provides move)
+  summary: The user can see the **current storage** of the current page's bookmark (Pinboard, Local, or File) and **move** it to another storage method via a UI control in the popup. Move is implemented as copy to target backend, delete from source, and update storage index. Options page explains default storage for new bookmarks with a three-way choice.
+  ui_reflects_actual_move_result: 'Popup uses the inner router result (service worker wraps as `{ success: true, data: routerResult }`); success/error message and UI updates only when the move actually succeeded.'

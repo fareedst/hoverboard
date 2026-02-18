@@ -1,0 +1,66 @@
+IMPL-FILE_BOOKMARK_SERVICE:
+  name: File Bookmark Service
+  status: Active
+  cross_references:
+    - REQ-FILE_BOOKMARK_STORAGE
+  rationale:
+    why: See detail file
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: See detail file
+    details: []
+  code_locations:
+    files: []
+    functions: []
+  traceability:
+    architecture: []
+    requirements:
+      - REQ-FILE_BOOKMARK_STORAGE
+    tests: []
+    code_annotations:
+      - IMPL-FILE_BOOKMARK_SERVICE
+      - REQ-FILE_BOOKMARK_STORAGE
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - REQ-FILE_BOOKMARK_STORAGE
+  detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  cross-references: REQ-FILE_BOOKMARK_STORAGE, ARCH-FILE_BOOKMARK_PROVIDER
+  file_format_[req-file_bookmark_storage]: |-
+    ```json
+    {
+      "version": 1,
+      "bookmarks": {
+        "https://example.com/page": {
+          "url": "https://example.com/page",
+          "description": "Title",
+          "extended": "",
+          "tags": ["tag1", "tag2"],
+          "time": "2026-02-14T12:00:00.000Z",
+          "shared": "yes",
+          "toread": "no",
+          "hash": "file-abc123"
+        }
+      }
+    }
+    ```
+
+    Stored as URL -> bookmark object; tags in file may be array or space-separated string; service normalizes to array for return values.
+  filebookmarkstorageadapter: 'provides an abstraction for reading and writing the bookmarks file: `readBookmarksFile()` returns `Promise<{ version, bookmarks }>`, `writeBookmarksFile(data)` writes the same shape. **FileBookmarkService** uses the adapter to implement the full provider contract (getBookmarkForUrl, getRecentBookmarks, saveBookmark, deleteBookmark, saveTag, deleteTag, testConnection). Bookmark shape and URL normalization match LocalBookmarkService. Filename in the directory: **hoverboard-bookmarks.json**.'
+  related:
+    - IMPL-LOCAL_BOOKMARK_SERVICE (same contract and bookmark shape)
+    - ARCH-FILE_BOOKMARK_PROVIDER (file I/O in document context)

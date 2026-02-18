@@ -1,0 +1,69 @@
+ARCH-TIED_STRUCTURE:
+  name: TIED Project Structure
+  status: Active
+  cross_references: &ref_0
+    - REQ-TIED_SETUP
+  rationale:
+    why: |-
+      Keeps documentation close to code but organized in a dedicated namespace
+      Ensures the AI agent can easily find all context in one place
+      Separates meta-documentation from project source code
+      Clear separation of concerns
+      Standard project layout
+      Testable components
+    problems_solved: []
+    benefits: []
+  alternatives_considered: []
+  implementation_approach:
+    summary: |-
+      Create `tied/` directory at project root
+      Populate with template files:
+      `requirements.md`
+      `architecture-decisions.md` (index)
+      `architecture-decisions/` (detail files)
+      `implementation-decisions.md` (index)
+      `implementation-decisions/` (detail files)
+      `semantic-tokens.yaml` (YAML index)
+      `semantic-tokens.md` (guide)
+      `processes.md`
+    details: []
+  traceability:
+    requirements: *ref_0
+    implementation: []
+    tests: []
+    code_annotations:
+      - ARCH-TIED_STRUCTURE
+      - REQ-TIED_SETUP
+  related_decisions:
+    depends_on: *ref_0
+    informs: []
+    see_also: []
+  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: MCP converter
+    last_updated:
+      date: '2026-02-18'
+      author: MCP converter
+      reason: Converted from monolithic
+    last_validated:
+      date: '2026-02-18'
+      validator: MCP converter
+      result: pass
+  decision: Centralized `tied/` directory for all TIED methodology documentation.
+  '`_github`_or_`_docs`_folder': Rejected - `tied` is more specific to the methodology
+  created: '2025-12-18'
+  cross-references: '[REQ-TIED_SETUP]'
+  last_updated: '2025-12-18'
+  root-level_files: Rejected - clutters the root directory
+  token_coverage_`[proc-token_audit]`: |-
+    Code files expected to carry `[IMPL-*] [ARCH-*] [REQ-*]` comments:
+    - [ ] Bootstrap scripts with `// [IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP]`
+
+    Tests expected to reference `[REQ-*]` / `[TEST-*]` tokens:
+    - [ ] `TestTIEDSetup_REQ_TIED_SETUP` ensures docs + registry exist
+  validation_evidence_`[proc-token_validation]`: |-
+    | Date | Commit | Validation Result | Notes |
+    |------|--------|-------------------|-------|
+    | 2025-12-18 | — | ✅ Pass | Initial structure validated |

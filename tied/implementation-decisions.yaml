@@ -1,29 +1,3 @@
-# Implementation Decisions Index (YAML Database)
-#
-# This YAML file serves as the central index/registry for all implementation decisions in the project.
-# Each top-level key is a semantic token (e.g., IMPL-MODULE_VALIDATION).
-#
-# To append a new implementation decision:
-# 1. Copy the template block at the bottom of this file (IMPL-IDENTIFIER)
-# 2. Paste it at the end with a blank line before it
-# 3. Replace IMPL-IDENTIFIER with your new token
-# 4. Fill in all fields
-# 5. Update the detail_file path to match your new .md file in implementation-decisions/ directory
-#
-# Field descriptions:
-#   name: Short descriptive name of the decision
-#   status: Active | Deprecated | Template | Superseded
-#   cross_references: List of ARCH-* and REQ-* tokens this decision implements
-#   rationale: Structured explanation with why, problems_solved, benefits
-#   implementation_approach: Structured approach with summary and details
-#   code_locations: Structured code locations with files and functions
-#   traceability: Structured links to architecture, requirements, tests, code_annotations
-#   related_decisions: Lists of depends_on, supersedes, see_also (YAML lists or [])
-#   detail_file: Path to the detailed .md file in implementation-decisions/ directory
-#   metadata: Structured metadata with created, last_updated, last_validated info
-
----
-
 IMPL-TIED_FILES:
   name: TIED File Creation
   status: Active
@@ -31,32 +5,34 @@ IMPL-TIED_FILES:
     - ARCH-TIED_STRUCTURE
     - REQ-TIED_SETUP
   rationale:
-    why: "Implements ARCH-TIED_STRUCTURE and realizes REQ-TIED_SETUP by creating the foundational TIED directory structure and files"
+    why: Implements ARCH-TIED_STRUCTURE and realizes REQ-TIED_SETUP by creating the foundational TIED directory structure and files
     problems_solved:
-      - "Manual setup of TIED structure is error-prone"
-      - "Inconsistent project structure across implementations"
-      - "Missing required TIED files and directories"
+      - Manual setup of TIED structure is error-prone
+      - Inconsistent project structure across implementations
+      - Missing required TIED files and directories
     benefits:
-      - "Automated, consistent TIED setup"
-      - "All required files and directories created correctly"
-      - "Easy project bootstrapping with single command"
+      - Automated, consistent TIED setup
+      - All required files and directories created correctly
+      - Easy project bootstrapping with single command
   implementation_approach:
-    summary: "Bootstrap script that creates tied/ directory, copies template files, and sets up base files"
+    summary: Bootstrap script that creates tied/ directory, copies template files, and sets up base files
     details:
-      - "Create tied/ directory at project root"
-      - "Copy YAML index files from templates (requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml)"
-      - "Copy guide files from templates (semantic-tokens.md, processes.md)"
-      - "Create detail subdirectories (requirements/, architecture-decisions/, implementation-decisions/)"
-      - "Copy base files to project root (.cursorrules, AGENTS.md, ai-principles.md)"
+      - Create tied/ directory at project root
+      - Copy YAML index files from templates (requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml)
+      - Copy guide files from templates (semantic-tokens.md, processes.md)
+      - Create detail subdirectories (requirements/, architecture-decisions/, implementation-decisions/)
+      - Copy base files to project root (.cursorrules, AGENTS.md, ai-principles.md)
   code_locations:
     files:
-      - path: "copy_files.sh"
-        description: "Bootstrap script that sets up TIED structure"
-        lines: [1, 163]
+      - path: copy_files.sh
+        description: Bootstrap script that sets up TIED structure
+        lines:
+          - 1
+          - 163
     functions:
-      - name: "setup_tied_structure"
-        file: "copy_files.sh"
-        description: "Creates directories and copies template files (if implemented as function)"
+      - name: setup_tied_structure
+        file: copy_files.sh
+        description: Creates directories and copies template files (if implemented as function)
   traceability:
     architecture:
       - ARCH-TIED_STRUCTURE
@@ -77,17 +53,16 @@ IMPL-TIED_FILES:
   detail_file: implementation-decisions/IMPL-TIED_FILES.md
   metadata:
     created:
-      date: 2025-12-18
-      author: "AI Agent"
+      date: 2025-12-18T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-06
-      author: "AI Agent"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+      date: 2026-02-06T00:00:00.000Z
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
     last_validated:
-      date: 2026-02-06
-      validator: "AI Agent"
-      result: "pass"
-
+      date: 2026-02-06T00:00:00.000Z
+      validator: AI Agent
+      result: pass
 IMPL-MODULE_VALIDATION:
   name: Module Validation Implementation
   status: Active
@@ -95,36 +70,36 @@ IMPL-MODULE_VALIDATION:
     - ARCH-MODULE_VALIDATION
     - REQ-MODULE_VALIDATION
   rationale:
-    why: "Implements REQ-MODULE_VALIDATION requirement and ARCH-MODULE_VALIDATION strategy to ensure modules are validated independently before integration"
+    why: Implements REQ-MODULE_VALIDATION requirement and ARCH-MODULE_VALIDATION strategy to ensure modules are validated independently before integration
     problems_solved:
-      - "Complexity-related bugs discovered too late"
-      - "Difficult to debug integration issues"
-      - "Module contracts not validated before integration"
+      - Complexity-related bugs discovered too late
+      - Difficult to debug integration issues
+      - Module contracts not validated before integration
     benefits:
-      - "Bugs caught early in development cycle"
-      - "Easier debugging by isolating issues to specific modules"
-      - "Clear validation criteria for each module"
-      - "Reduced integration complexity"
+      - Bugs caught early in development cycle
+      - Easier debugging by isolating issues to specific modules
+      - Clear validation criteria for each module
+      - Reduced integration complexity
   implementation_approach:
-    summary: "Five-phase approach: module identification, independent development, independent validation, documentation, and integration"
+    summary: 'Five-phase approach: module identification, independent development, independent validation, documentation, and integration'
     details:
-      - "Phase 1: Identify modules and document boundaries, interfaces, contracts, dependencies, validation criteria"
-      - "Phase 2: Develop module independently with dependency injection"
-      - "Phase 3: Validate independently with unit tests (mocked dependencies), contract validation, edge cases, error handling, integration tests with test doubles"
-      - "Phase 4: Document validation results including passed tests, limitations, assumptions"
-      - "Phase 5: Integrate only after validation passes, with integration tests validating combined behavior"
+      - 'Phase 1: Identify modules and document boundaries, interfaces, contracts, dependencies, validation criteria'
+      - 'Phase 2: Develop module independently with dependency injection'
+      - 'Phase 3: Validate independently with unit tests (mocked dependencies), contract validation, edge cases, error handling, integration tests with test doubles'
+      - 'Phase 4: Document validation results including passed tests, limitations, assumptions'
+      - 'Phase 5: Integrate only after validation passes, with integration tests validating combined behavior'
   code_locations:
     files:
-      - path: "*_module_test.[ext]"
-        description: "Module validation test files"
-      - path: "*_validation_test.[ext]"
-        description: "Module validation test files (alternate pattern)"
-      - path: "*_integration_test.[ext]"
-        description: "Integration test files"
+      - path: '*_module_test.[ext]'
+        description: Module validation test files
+      - path: '*_validation_test.[ext]'
+        description: Module validation test files (alternate pattern)
+      - path: '*_integration_test.[ext]'
+        description: Integration test files
     functions:
-      - name: "testModuleName_IndependentValidation_REQ_MODULE_VALIDATION"
-        file: "various test files"
-        description: "Module validation test function pattern"
+      - name: testModuleName_IndependentValidation_REQ_MODULE_VALIDATION
+        file: various test files
+        description: Module validation test function pattern
   traceability:
     architecture:
       - ARCH-MODULE_VALIDATION
@@ -141,25 +116,19 @@ IMPL-MODULE_VALIDATION:
     see_also:
       - ARCH-MODULE_VALIDATION
       - REQ-MODULE_VALIDATION
-  detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.md
+  detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.yaml
   metadata:
     created:
-      date: 2025-12-18
-      author: "AI Agent"
+      date: 2025-12-18T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-06
-      author: "AI Agent"
-      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
+      date: 2026-02-06T00:00:00.000Z
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
     last_validated:
-      date: 2026-02-06
-      validator: "AI Agent"
-      result: "pass"
-
-# ---
-# Product Implementation Decisions - Hoverboard Extension
-# Migrated from stdd/implementation-decisions.md
-# ---
-
+      date: 2026-02-06T00:00:00.000Z
+      validator: AI Agent
+      result: pass
 IMPL-PINBOARD_API:
   name: Pinboard API Service Implementation
   status: Active
@@ -167,24 +136,24 @@ IMPL-PINBOARD_API:
     - ARCH-PINBOARD_API
     - REQ-PINBOARD_COMPATIBILITY
   rationale:
-    why: "Concrete API integration with error handling"
+    why: Concrete API integration with error handling
     problems_solved:
-      - "API communication complexity"
-      - "Rate limiting issues"
+      - API communication complexity
+      - Rate limiting issues
     benefits:
-      - "Reliable API access"
-      - "Proper error handling"
+      - Reliable API access
+      - Proper error handling
   implementation_approach:
-    summary: "Token-based auth with endpoint wrappers, rate limiting, retry logic"
+    summary: Token-based auth with endpoint wrappers, rate limiting, retry logic
     details:
-      - "API endpoints: /posts/get, /posts/recent, /posts/add, /posts/delete"
-      - "Token authentication"
-      - "429 retry logic"
-      - "401 error handling"
+      - 'API endpoints: /posts/get, /posts/recent, /posts/add, /posts/delete'
+      - Token authentication
+      - 429 retry logic
+      - 401 error handling
   code_locations:
     files:
-      - path: "src/bg/pinboard.js"
-        description: "Pinboard API service"
+      - path: src/bg/pinboard.js
+        description: Pinboard API service
     functions: []
   traceability:
     architecture:
@@ -201,13 +170,12 @@ IMPL-PINBOARD_API:
   detail_file: implementation-decisions/IMPL-PINBOARD_API.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-MESSAGE_HANDLING:
   name: Message Handling System Implementation
   status: Active
@@ -215,26 +183,26 @@ IMPL-MESSAGE_HANDLING:
     - ARCH-MESSAGE_HANDLING
     - REQ-SMART_BOOKMARKING
   rationale:
-    why: "Concrete message routing and handling"
+    why: Concrete message routing and handling
     problems_solved:
-      - "Complex routing logic"
-      - "Message validation"
+      - Complex routing logic
+      - Message validation
     benefits:
-      - "Centralized communication"
-      - "Type-safe messages"
+      - Centralized communication
+      - Type-safe messages
   implementation_approach:
-    summary: "Message service with type validation, routing, error handling"
+    summary: Message service with type validation, routing, error handling
     details:
-      - "Standardized message types"
-      - "Async request/response"
-      - "Error handling"
-      - "Input validation"
+      - Standardized message types
+      - Async request/response
+      - Error handling
+      - Input validation
   code_locations:
     files:
-      - path: "src/core/message-service.js"
-        description: "Message service"
-      - path: "src/core/message-handler.js"
-        description: "Message handler"
+      - path: src/core/message-service.js
+        description: Message service
+      - path: src/core/message-handler.js
+        description: Message handler
     functions: []
   traceability:
     architecture:
@@ -252,13 +220,12 @@ IMPL-MESSAGE_HANDLING:
   detail_file: implementation-decisions/IMPL-MESSAGE_HANDLING.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-OVERLAY:
   name: Overlay Implementation
   status: Active
@@ -266,38 +233,38 @@ IMPL-OVERLAY:
     - ARCH-OVERLAY
     - REQ-OVERLAY_SYSTEM
   rationale:
-    why: "Concrete overlay rendering and interaction"
+    why: Concrete overlay rendering and interaction
     problems_solved:
-      - "Overlay display complexity"
-      - "Interaction handling"
+      - Overlay display complexity
+      - Interaction handling
     benefits:
-      - "Working overlay"
-      - "Proper lifecycle"
+      - Working overlay
+      - Proper lifecycle
   implementation_approach:
-    summary: "Overlay manager with show/hide, content rendering, control creation"
+    summary: Overlay manager with show/hide, content rendering, control creation
     details:
-      - "Overlay DOM injection"
-      - "Transparency controls"
-      - "Auto-show logic"
-      - "Refresh control"
-      - "Theme integration"
+      - Overlay DOM injection
+      - Transparency controls
+      - Auto-show logic
+      - Refresh control
+      - Theme integration
   code_locations:
     files:
-      - path: "src/features/content/overlay-manager.js"
-        description: "Overlay manager"
+      - path: src/features/content/overlay-manager.js
+        description: Overlay manager
     functions:
-      - name: "show"
-        description: "Display overlay"
-        file: "src/features/content/overlay-manager.js"
-      - name: "hide"
-        description: "Hide overlay"
-        file: "src/features/content/overlay-manager.js"
-      - name: "createCloseButton"
-        description: "Create close control"
-        file: "src/features/content/overlay-manager.js"
-      - name: "createRefreshButton"
-        description: "Create refresh control"
-        file: "src/features/content/overlay-manager.js"
+      - name: show
+        description: Display overlay
+        file: src/features/content/overlay-manager.js
+      - name: hide
+        description: Hide overlay
+        file: src/features/content/overlay-manager.js
+      - name: createCloseButton
+        description: Create close control
+        file: src/features/content/overlay-manager.js
+      - name: createRefreshButton
+        description: Create refresh control
+        file: src/features/content/overlay-manager.js
   traceability:
     architecture:
       - ARCH-OVERLAY
@@ -316,13 +283,12 @@ IMPL-OVERLAY:
   detail_file: implementation-decisions/IMPL-OVERLAY.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-TAG_SYSTEM:
   name: Tag Service Implementation
   status: Active
@@ -331,31 +297,31 @@ IMPL-TAG_SYSTEM:
     - REQ-RECENT_TAGS_SYSTEM
     - REQ-TAG_INPUT_SANITIZATION
   rationale:
-    why: "Concrete tag management logic"
+    why: Concrete tag management logic
     problems_solved:
-      - "Tag sanitization"
-      - "Recent tags tracking"
+      - Tag sanitization
+      - Recent tags tracking
     benefits:
-      - "Secure tag handling"
-      - "Fast tag reuse"
+      - Secure tag handling
+      - Fast tag reuse
   implementation_approach:
-    summary: "TagService with sanitization, recent tags caching, suggestions"
+    summary: TagService with sanitization, recent tags caching, suggestions
     details:
-      - "sanitizeTag function"
-      - "Recent tags TTL caching"
-      - "Tag history persistence"
-      - "Suggestion algorithm"
+      - sanitizeTag function
+      - Recent tags TTL caching
+      - Tag history persistence
+      - Suggestion algorithm
   code_locations:
     files:
-      - path: "src/features/tagging/tag-service.js"
-        description: "Tag service"
+      - path: src/features/tagging/tag-service.js
+        description: Tag service
     functions:
-      - name: "sanitizeTag"
-        description: "Tag sanitization"
-        file: "src/features/tagging/tag-service.js"
-      - name: "getRecentTags"
-        description: "Recent tags retrieval"
-        file: "src/features/tagging/tag-service.js"
+      - name: sanitizeTag
+        description: Tag sanitization
+        file: src/features/tagging/tag-service.js
+      - name: getRecentTags
+        description: Recent tags retrieval
+        file: src/features/tagging/tag-service.js
   traceability:
     architecture:
       - ARCH-TAG_SYSTEM
@@ -374,13 +340,12 @@ IMPL-TAG_SYSTEM:
   detail_file: implementation-decisions/IMPL-TAG_SYSTEM.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-POPUP_SESSION:
   name: Popup Session Persistence Implementation
   status: Active
@@ -388,37 +353,37 @@ IMPL-POPUP_SESSION:
     - ARCH-POPUP_SESSION
     - REQ-POPUP_PERSISTENT_SESSION
   rationale:
-    why: "Multi-action workflows without reopening"
+    why: Multi-action workflows without reopening
     problems_solved:
-      - "Popup closing interrupts work"
-      - "State management complexity"
+      - Popup closing interrupts work
+      - State management complexity
     benefits:
-      - "Continuous workflows"
-      - "Better UX"
+      - Continuous workflows
+      - Better UX
   implementation_approach:
-    summary: "PopupController routing with StateManager, UIManager, no window.close"
+    summary: PopupController routing with StateManager, UIManager, no window.close
     details:
-      - "PopupController handlers await async work"
-      - "StateManager mutations"
-      - "UIManager updates"
-      - "GET_OVERLAY_STATE fallback"
-      - "Inline notifications"
+      - PopupController handlers await async work
+      - StateManager mutations
+      - UIManager updates
+      - GET_OVERLAY_STATE fallback
+      - Inline notifications
   code_locations:
     files:
-      - path: "src/ui/popup/PopupController.js"
-        description: "Popup controller"
-      - path: "src/ui/popup/UIManager.js"
-        description: "UI manager"
+      - path: src/ui/popup/PopupController.js
+        description: Popup controller
+      - path: src/ui/popup/UIManager.js
+        description: UI manager
     functions:
-      - name: "handleShowHoverboard"
-        description: "Overlay toggle handler"
-        file: "src/ui/popup/PopupController.js"
-      - name: "handleTogglePrivate"
-        description: "Privacy toggle"
-        file: "src/ui/popup/PopupController.js"
-      - name: "updateShowHoverButtonState"
-        description: "Button state updater"
-        file: "src/ui/popup/UIManager.js"
+      - name: handleShowHoverboard
+        description: Overlay toggle handler
+        file: src/ui/popup/PopupController.js
+      - name: handleTogglePrivate
+        description: Privacy toggle
+        file: src/ui/popup/PopupController.js
+      - name: updateShowHoverButtonState
+        description: Button state updater
+        file: src/ui/popup/UIManager.js
   traceability:
     architecture:
       - ARCH-POPUP_SESSION
@@ -435,13 +400,12 @@ IMPL-POPUP_SESSION:
   detail_file: implementation-decisions/IMPL-POPUP_SESSION.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-BOOKMARK_STATE_SYNC:
   name: Bookmark State Synchronization Implementation
   status: Active
@@ -449,28 +413,28 @@ IMPL-BOOKMARK_STATE_SYNC:
     - ARCH-BOOKMARK_STATE_SYNC
     - REQ-BOOKMARK_STATE_SYNCHRONIZATION
   rationale:
-    why: "Consistent state across surfaces"
+    why: Consistent state across surfaces
     problems_solved:
-      - "State divergence"
-      - "Race conditions"
+      - State divergence
+      - Race conditions
     benefits:
-      - "Reliable sync"
-      - "Observable contract"
+      - Reliable sync
+      - Observable contract
   implementation_approach:
-    summary: "BOOKMARK_UPDATED broadcast with overlay persist, popup refresh, badge update"
+    summary: BOOKMARK_UPDATED broadcast with overlay persist, popup refresh, badge update
     details:
-      - "Overlay toggle handlers persist via saveBookmark"
-      - "BOOKMARK_UPDATED broadcast"
-      - "PopupController listener refreshes data"
-      - "Badge compares states"
+      - Overlay toggle handlers persist via saveBookmark
+      - BOOKMARK_UPDATED broadcast
+      - PopupController listener refreshes data
+      - Badge compares states
   code_locations:
     files:
-      - path: "src/features/content/overlay-manager.js"
-        description: "Overlay manager"
-      - path: "src/ui/popup/PopupController.js"
-        description: "Popup controller"
-      - path: "src/core/badge-manager.js"
-        description: "Badge manager"
+      - path: src/features/content/overlay-manager.js
+        description: Overlay manager
+      - path: src/ui/popup/PopupController.js
+        description: Popup controller
+      - path: src/core/badge-manager.js
+        description: Badge manager
     functions: []
   traceability:
     architecture:
@@ -488,13 +452,12 @@ IMPL-BOOKMARK_STATE_SYNC:
   detail_file: implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-OVERLAY_CONTROLS:
   name: Overlay Control Layout Implementation
   status: Active
@@ -502,32 +465,32 @@ IMPL-OVERLAY_CONTROLS:
     - ARCH-OVERLAY_CONTROLS
     - REQ-OVERLAY_CONTROL_LAYOUT
   rationale:
-    why: "Deterministic control placement"
+    why: Deterministic control placement
     problems_solved:
-      - "Positioning inconsistency"
-      - "Accessibility gaps"
+      - Positioning inconsistency
+      - Accessibility gaps
     benefits:
-      - "Predictable layout"
-      - "Full accessibility"
+      - Predictable layout
+      - Full accessibility
   implementation_approach:
-    summary: "Helper functions with inline styles, theme variables, ARIA metadata"
+    summary: Helper functions with inline styles, theme variables, ARIA metadata
     details:
-      - "Fixed absolute positioning"
-      - "24px min touch targets"
-      - "Theme CSS variables"
-      - "ARIA metadata"
-      - "Keyboard handlers"
+      - Fixed absolute positioning
+      - 24px min touch targets
+      - Theme CSS variables
+      - ARIA metadata
+      - Keyboard handlers
   code_locations:
     files:
-      - path: "src/features/content/overlay-manager.js"
-        description: "Overlay manager"
+      - path: src/features/content/overlay-manager.js
+        description: Overlay manager
     functions:
-      - name: "createCloseButton"
-        description: "Close control creator"
-        file: "src/features/content/overlay-manager.js"
-      - name: "createRefreshButton"
-        description: "Refresh control creator"
-        file: "src/features/content/overlay-manager.js"
+      - name: createCloseButton
+        description: Close control creator
+        file: src/features/content/overlay-manager.js
+      - name: createRefreshButton
+        description: Refresh control creator
+        file: src/features/content/overlay-manager.js
   traceability:
     architecture:
       - ARCH-OVERLAY_CONTROLS
@@ -544,13 +507,12 @@ IMPL-OVERLAY_CONTROLS:
   detail_file: implementation-decisions/IMPL-OVERLAY_CONTROLS.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-SAFARI_ADAPTATION:
   name: Safari Adaptive Implementation
   status: Active
@@ -558,34 +520,34 @@ IMPL-SAFARI_ADAPTATION:
     - ARCH-SAFARI_ADAPTATION
     - REQ-SAFARI_ADAPTATION
   rationale:
-    why: "Safari stability and performance"
+    why: Safari stability and performance
     problems_solved:
-      - "Safari memory issues"
-      - "Messaging failures"
+      - Safari memory issues
+      - Messaging failures
     benefits:
-      - "Stable Safari support"
-      - "Bounded recovery"
+      - Stable Safari support
+      - Bounded recovery
   implementation_approach:
-    summary: "Safari shim, content optimizations, error handler with degraded mode"
+    summary: Safari shim, content optimizations, error handler with degraded mode
     details:
-      - "Platform detection"
-      - "Safari config (timeouts, retries)"
-      - "Animation/memory optimizations"
-      - "Error handler with recovery"
-      - "Degraded mode"
+      - Platform detection
+      - Safari config (timeouts, retries)
+      - Animation/memory optimizations
+      - Error handler with recovery
+      - Degraded mode
   code_locations:
     files:
-      - path: "src/shared/safari-shim.js"
-        description: "Safari shim"
-      - path: "safari/src/shared/ErrorHandler.js"
-        description: "Safari error handler"
+      - path: src/shared/safari-shim.js
+        description: Safari shim
+      - path: safari/src/shared/ErrorHandler.js
+        description: Safari error handler
     functions:
-      - name: "getSafariConfig"
-        description: "Safari config"
-        file: "src/shared/safari-shim.js"
-      - name: "optimizeSafariAnimations"
-        description: "Animation optimization"
-        file: "src/shared/safari-shim.js"
+      - name: getSafariConfig
+        description: Safari config
+        file: src/shared/safari-shim.js
+      - name: optimizeSafariAnimations
+        description: Animation optimization
+        file: src/shared/safari-shim.js
   traceability:
     architecture:
       - ARCH-SAFARI_ADAPTATION
@@ -602,13 +564,12 @@ IMPL-SAFARI_ADAPTATION:
   detail_file: implementation-decisions/IMPL-SAFARI_ADAPTATION.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-SUGGESTED_TAGS:
   name: Suggested Tags Implementation
   status: Active
@@ -618,45 +579,45 @@ IMPL-SUGGESTED_TAGS:
     - REQ-SUGGESTED_TAGS_DEDUPLICATION
     - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
   rationale:
-    why: "Multi-source extraction with intelligent filtering"
+    why: Multi-source extraction with intelligent filtering
     problems_solved:
-      - "Manual tag entry"
-      - "No context awareness"
+      - Manual tag entry
+      - No context awareness
     benefits:
-      - "Smart suggestions"
-      - "Faster tagging"
+      - Smart suggestions
+      - Faster tagging
   implementation_approach:
-    summary: "Extract from title/URL/meta/headings/emphasis/structured content/nav/breadcrumbs/images/links, frequency sort, case preserve"
+    summary: Extract from title/URL/meta/headings/emphasis/structured content/nav/breadcrumbs/images/links, frequency sort, case preserve
     details:
-      - "Multi-source extraction including meta tags, emphasis elements (strong/em/mark/dfn/cite/kbd/code), definition terms, and table headers"
-      - "Title attribute priority"
-      - "Noise filtering"
-      - "Frequency counting and sorting"
-      - "Case preservation (both versions)"
-      - "Case-insensitive deduplication"
+      - Multi-source extraction including meta tags, emphasis elements (strong/em/mark/dfn/cite/kbd/code), definition terms, and table headers
+      - Title attribute priority
+      - Noise filtering
+      - Frequency counting and sorting
+      - Case preservation (both versions)
+      - Case-insensitive deduplication
   code_locations:
     files:
-      - path: "src/features/tagging/tag-service.js"
-        description: "Tag service with core extraction algorithm"
-      - path: "src/features/content/overlay-manager.js"
-        description: "Overlay display with suggested section"
-      - path: "src/ui/popup/PopupController.js"
-        description: "Popup extraction with inlined script"
-      - path: "src/ui/popup/UIManager.js"
-        description: "Popup display of suggested tags"
+      - path: src/features/tagging/tag-service.js
+        description: Tag service with core extraction algorithm
+      - path: src/features/content/overlay-manager.js
+        description: Overlay display with suggested section
+      - path: src/ui/popup/PopupController.js
+        description: Popup extraction with inlined script
+      - path: src/ui/popup/UIManager.js
+        description: Popup display of suggested tags
     functions:
-      - name: "extractSuggestedTagsFromContent"
-        description: "Core extraction algorithm (overlay path)"
-        file: "src/features/tagging/tag-service.js"
-      - name: "loadSuggestedTags"
-        description: "Popup extraction via script injection"
-        file: "src/ui/popup/PopupController.js"
-      - name: "Inlined extraction function"
-        description: "Duplicated extraction logic in executeScript"
-        file: "src/ui/popup/PopupController.js"
-      - name: "updateSuggestedTags"
-        description: "Render suggested tags in popup UI"
-        file: "src/ui/popup/UIManager.js"
+      - name: extractSuggestedTagsFromContent
+        description: Core extraction algorithm (overlay path)
+        file: src/features/tagging/tag-service.js
+      - name: loadSuggestedTags
+        description: Popup extraction via script injection
+        file: src/ui/popup/PopupController.js
+      - name: Inlined extraction function
+        description: Duplicated extraction logic in executeScript
+        file: src/ui/popup/PopupController.js
+      - name: updateSuggestedTags
+        description: Render suggested tags in popup UI
+        file: src/ui/popup/UIManager.js
   traceability:
     architecture:
       - ARCH-SUGGESTED_TAGS
@@ -672,16 +633,15 @@ IMPL-SUGGESTED_TAGS:
     supersedes: []
     see_also:
       - IMPL-TAG_SYSTEM
-  detail_file: implementation-decisions/IMPL-SUGGESTED_TAGS.md
+  detail_file: implementation-decisions/IMPL-SUGGESTED_TAGS.yaml
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Enhanced with meta tags, emphasis elements, and structured content extraction"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Enhanced with meta tags, emphasis elements, and structured content extraction
 IMPL-OVERLAY_TEST_HARNESS:
   name: Overlay Test Harness Implementation
   status: Active
@@ -689,23 +649,23 @@ IMPL-OVERLAY_TEST_HARNESS:
     - ARCH-OVERLAY_TESTABILITY
     - REQ-OVERLAY_SYSTEM
   rationale:
-    why: "Mock DOM for deterministic overlay testing"
+    why: Mock DOM for deterministic overlay testing
     problems_solved:
-      - "Stale test registries"
-      - "Heavy DOM emulation"
+      - Stale test registries
+      - Heavy DOM emulation
     benefits:
-      - "Lightweight tests"
-      - "Auto-registration"
+      - Lightweight tests
+      - Auto-registration
   implementation_approach:
-    summary: "Mock DOM with className/id auto-registration, classList/attribute hooks"
+    summary: Mock DOM with className/id auto-registration, classList/attribute hooks
     details:
-      - "Auto-register on property assignments"
-      - "classList operations tracking"
-      - "Lightweight verification"
+      - Auto-register on property assignments
+      - classList operations tracking
+      - Lightweight verification
   code_locations:
     files:
-      - path: "tests/utils/mock-dom.js"
-        description: "Mock DOM utilities"
+      - path: tests/utils/mock-dom.js
+        description: Mock DOM utilities
     functions: []
   traceability:
     architecture:
@@ -724,35 +684,34 @@ IMPL-OVERLAY_TEST_HARNESS:
   detail_file: implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-POPUP_MESSAGE_TIMEOUT:
   name: Popup Message Timeout Implementation
   status: Active
   cross_references: []
   rationale:
-    why: "Predictable refresh behavior in tests and runtime"
+    why: Predictable refresh behavior in tests and runtime
     problems_solved:
-      - "Hanging messages"
-      - "Test timeouts"
+      - Hanging messages
+      - Test timeouts
     benefits:
-      - "Reliable messaging"
-      - "Testable timeouts"
+      - Reliable messaging
+      - Testable timeouts
   implementation_approach:
-    summary: "Promise-based message sending with timeout handling"
+    summary: Promise-based message sending with timeout handling
     details:
-      - "Timeout logic"
-      - "Error handling"
-      - "Test mock support"
+      - Timeout logic
+      - Error handling
+      - Test mock support
   code_locations:
     files:
-      - path: "src/ui/popup/PopupController.js"
-        description: "Popup controller"
+      - path: src/ui/popup/PopupController.js
+        description: Popup controller
     functions: []
   traceability:
     architecture: []
@@ -768,13 +727,12 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
   detail_file: implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.md
   metadata:
     created:
-      date: 2025-07-14
-      author: "AI Agent"
+      date: 2025-07-14T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Migrated from STDD to TIED format"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Migrated from STDD to TIED format
 IMPL-BADGE_REFRESH:
   name: Badge refresh on overlay and popup changes
   status: Active
@@ -782,52 +740,51 @@ IMPL-BADGE_REFRESH:
     - ARCH-BADGE
     - REQ-BADGE_INDICATORS
   rationale:
-    why: "Badge must reflect tag count and private/toread flags as soon as user changes them in overlay or popup"
+    why: Badge must reflect tag count and private/toread flags as soon as user changes them in overlay or popup
     problems_solved:
-      - "Badge not updating after overlay tag add/remove"
-      - "Badge not updating after overlay or popup private/toread toggle"
+      - Badge not updating after overlay tag add/remove
+      - Badge not updating after overlay or popup private/toread toggle
     benefits:
-      - "Immediate visual feedback"
-      - "Consistent state across icon, overlay, and popup"
+      - Immediate visual feedback
+      - Consistent state across icon, overlay, and popup
   implementation_approach:
-    summary: "Service worker refreshes badge after saveTag, deleteTag, and saveBookmark when message succeeds"
+    summary: Service worker refreshes badge after saveTag, deleteTag, and saveBookmark when message succeeds
     details:
-      - "Chrome and Safari service workers: after processMessage success, if message type is saveTag, deleteTag, or saveBookmark, resolve tab (sender.tab or for saveBookmark query active tab) and call updateBadgeForTab(tab)"
-      - "Covers overlay-originated and popup-originated changes"
+      - 'Chrome and Safari service workers: after processMessage success, if message type is saveTag, deleteTag, or saveBookmark, resolve tab (sender.tab or for saveBookmark query active tab) and call updateBadgeForTab(tab)'
+      - Covers overlay-originated and popup-originated changes
   code_locations:
     files:
-      - path: "src/core/service-worker.js"
-        description: "Chrome service worker handleMessage badge refresh"
-      - path: "safari/src/core/service-worker.js"
-        description: "Safari service worker handleMessage badge refresh"
+      - path: src/core/service-worker.js
+        description: Chrome service worker handleMessage badge refresh
+      - path: safari/src/core/service-worker.js
+        description: Safari service worker handleMessage badge refresh
     functions:
-      - name: "handleMessage"
-        file: "src/core/service-worker.js"
-        description: "Calls updateBadgeForTab after saveTag/deleteTag/saveBookmark"
+      - name: handleMessage
+        file: src/core/service-worker.js
+        description: Calls updateBadgeForTab after saveTag/deleteTag/saveBookmark
   traceability:
     architecture:
       - ARCH-BADGE
     requirements:
       - REQ-BADGE_INDICATORS
     tests:
-      - "tests/unit/badge-refresh-service-worker.test.js"
+      - tests/unit/badge-refresh-service-worker.test.js
     code_annotations:
-      - "[REQ-BADGE_INDICATORS] in service-worker.js"
+      - '[REQ-BADGE_INDICATORS] in service-worker.js'
   related_decisions:
     depends_on: []
     supersedes: []
     see_also:
       - IMPL-BOOKMARK_STATE_SYNC
-  detail_file: implementation-decisions/IMPL-BADGE_REFRESH.md
+  detail_file: implementation-decisions/IMPL-BADGE_REFRESH.yaml
   metadata:
     created:
-      date: 2026-02-13
-      author: "AI Agent"
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-13
-      author: "AI Agent"
-      reason: "Badge refresh on tag and private/toread changes"
-
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
+      reason: Badge refresh on tag and private/toread changes
 IMPL-URL_TAGS_DISPLAY:
   name: URL Tags and Badge Display Module
   status: Active
@@ -837,42 +794,42 @@ IMPL-URL_TAGS_DISPLAY:
     - REQ-BADGE_INDICATORS
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
   rationale:
-    why: "Single source for tags-for-URL and badge display value; normalization at boundary so badge, popup, overlay use same contract"
+    why: Single source for tags-for-URL and badge display value; normalization at boundary so badge, popup, overlay use same contract
     problems_solved:
-      - "Popup showing no tags when badge correct; adding tag losing prior tags"
-      - "Tags string vs array inconsistency across providers"
-      - "Popup empty when no Pinboard auth although bookmark in local/file/sync"
+      - Popup showing no tags when badge correct; adding tag losing prior tags
+      - Tags string vs array inconsistency across providers
+      - Popup empty when no Pinboard auth although bookmark in local/file/sync
     benefits:
-      - "normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue in one module"
-      - "Message handler and service worker use it; popup re-fetches and merges when adding/removing tag"
-      - "getTagsForUrl message centralizes tag storage for tests and UI"
+      - normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue in one module
+      - Message handler and service worker use it; popup re-fetches and merges when adding/removing tag
+      - getTagsForUrl message centralizes tag storage for tests and UI
   implementation_approach:
-    summary: "url-tags-manager.js; handleGetCurrentBookmark always uses router (no early return for no auth), normalizes, sets needsAuth when !hasAuth; GET_TAGS_FOR_URL message and handleGetTagsForUrl; popup getBookmarkData only null when blocked."
+    summary: url-tags-manager.js; handleGetCurrentBookmark always uses router (no early return for no auth), normalizes, sets needsAuth when !hasAuth; GET_TAGS_FOR_URL message and handleGetTagsForUrl; popup getBookmarkData only null when blocked.
     details:
-      - "normalizeBookmarkForDisplay(bookmark): tags always array, required fields defaulted"
-      - "getBookmarkForDisplay(provider, url, title): async, returns normalized bookmark"
-      - "getTagsForUrl(provider, url): async, returns tags array"
-      - "getBadgeDisplayValue(bookmark, config): text, tagCount, isPrivate, isToRead, isBookmarked, title"
-      - "handleGetCurrentBookmark: use getBookmarkForDisplay(bookmarkProvider, targetUrl, data?.title); set normalized.needsAuth when !hasAuth"
-      - "handleSaveBookmark: previous tags from getTagsForUrl(bookmarkProvider, data.url) (same source as badge/popup)"
-      - "GET_TAGS_FOR_URL message and handleGetTagsForUrl(data): return { tags } from getTagsForUrl(bookmarkProvider, data.url)"
-      - "BookmarkRouter: _hasTags and _isEmptyBookmark use normalizeBookmarkForDisplay for tag shape"
-      - "PopupController getBookmarkData: resolve(null) only when bookmarkData.blocked; when needsAuth still return bookmark (with tags)"
-      - "PopupController: re-fetch before add/remove tag; validateBookmarkData normalizes tags to array"
+      - 'normalizeBookmarkForDisplay(bookmark): tags always array, required fields defaulted'
+      - 'getBookmarkForDisplay(provider, url, title): async, returns normalized bookmark'
+      - 'getTagsForUrl(provider, url): async, returns tags array'
+      - 'getBadgeDisplayValue(bookmark, config): text, tagCount, isPrivate, isToRead, isBookmarked, title'
+      - 'handleGetCurrentBookmark: use getBookmarkForDisplay(bookmarkProvider, targetUrl, data?.title); set normalized.needsAuth when !hasAuth'
+      - 'handleSaveBookmark: previous tags from getTagsForUrl(bookmarkProvider, data.url) (same source as badge/popup)'
+      - 'GET_TAGS_FOR_URL message and handleGetTagsForUrl(data): return { tags } from getTagsForUrl(bookmarkProvider, data.url)'
+      - 'BookmarkRouter: _hasTags and _isEmptyBookmark use normalizeBookmarkForDisplay for tag shape'
+      - 'PopupController getBookmarkData: resolve(null) only when bookmarkData.blocked; when needsAuth still return bookmark (with tags)'
+      - 'PopupController: re-fetch before add/remove tag; validateBookmarkData normalizes tags to array'
   code_locations:
     files:
-      - path: "src/features/storage/url-tags-manager.js"
-        description: "URL tags manager module"
-      - path: "src/core/message-handler.js"
-        description: "handleGetCurrentBookmark always from router; handleGetTagsForUrl"
-      - path: "src/core/service-worker.js"
-        description: "updateBadgeForTab normalizes bookmark"
-      - path: "src/core/badge-manager.js"
-        description: "calculateBadgeData uses getBadgeDisplayValue"
-      - path: "src/ui/popup/PopupController.js"
-        description: "getBookmarkData only null when blocked; re-fetch and merge on add/remove tag"
-      - path: "src/features/storage/bookmark-router.js"
-        description: "_hasTags and _isEmptyBookmark use normalizeBookmarkForDisplay"
+      - path: src/features/storage/url-tags-manager.js
+        description: URL tags manager module
+      - path: src/core/message-handler.js
+        description: handleGetCurrentBookmark always from router; handleGetTagsForUrl
+      - path: src/core/service-worker.js
+        description: updateBadgeForTab normalizes bookmark
+      - path: src/core/badge-manager.js
+        description: calculateBadgeData uses getBadgeDisplayValue
+      - path: src/ui/popup/PopupController.js
+        description: getBookmarkData only null when blocked; re-fetch and merge on add/remove tag
+      - path: src/features/storage/bookmark-router.js
+        description: _hasTags and _isEmptyBookmark use normalizeBookmarkForDisplay
   traceability:
     architecture:
       - ARCH-URL_TAGS_DISPLAY
@@ -880,10 +837,10 @@ IMPL-URL_TAGS_DISPLAY:
       - REQ-URL_TAGS_DISPLAY
       - REQ-BADGE_INDICATORS
     tests:
-      - "tests/unit/url-tags-manager.test.js"
-      - "tests/unit/popup-live-data.test.js"
-      - "tests/unit/message-handler-url-tags.test.js"
-      - "tests/unit/bookmark-router.test.js"
+      - tests/unit/url-tags-manager.test.js
+      - tests/unit/popup-live-data.test.js
+      - tests/unit/message-handler-url-tags.test.js
+      - tests/unit/bookmark-router.test.js
     code_annotations:
       - IMPL-URL_TAGS_DISPLAY
       - ARCH-URL_TAGS_DISPLAY
@@ -893,16 +850,15 @@ IMPL-URL_TAGS_DISPLAY:
     see_also:
       - IMPL-BOOKMARK_ROUTER
       - IMPL-BADGE_REFRESH
-  detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.md
+  detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
   metadata:
     created:
-      date: "2026-02-17"
-      author: "AI Agent"
+      date: '2026-02-17'
+      author: AI Agent
     last_updated:
-      date: "2026-02-17"
-      author: "AI Agent"
-      reason: "Fixes: getCurrentBookmark always router; getTagsForUrl message; popup use bookmark when needsAuth"
-
+      date: '2026-02-17'
+      author: AI Agent
+      reason: 'Fixes: getCurrentBookmark always router; getTagsForUrl message; popup use bookmark when needsAuth'
 IMPL-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Implementation
   status: Active
@@ -911,52 +867,52 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     - REQ-LOCAL_BOOKMARKS_INDEX
     - ARCH-STORAGE_INDEX_AND_ROUTER
   rationale:
-    why: "Implement full index of local and file bookmarks with Storage column, search, filter, sort, launch"
+    why: Implement full index of local and file bookmarks with Storage column, search, filter, sort, launch
     problems_solved:
-      - "No single view of local and file bookmarks"
+      - No single view of local and file bookmarks
     benefits:
-      - "getAggregatedBookmarksForIndex (router aggregates local + file) with fallback getLocalBookmarksForIndex; table page with Storage column"
+      - getAggregatedBookmarksForIndex (router aggregates local + file) with fallback getLocalBookmarksForIndex; table page with Storage column
   implementation_approach:
-    summary: "Index page sends getAggregatedBookmarksForIndex first (BookmarkRouter.getAllBookmarksForIndex), fallback getLocalBookmarksForIndex; bookmarks-table with Storage column (Local | File), search/filter/sort/launch; entry point from popup/options"
+    summary: Index page sends getAggregatedBookmarksForIndex first (BookmarkRouter.getAllBookmarksForIndex), fallback getLocalBookmarksForIndex; bookmarks-table with Storage column (Local | File), search/filter/sort/launch; entry point from popup/options
     details:
-      - "MessageHandler: handleGetAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() when available; handleGetLocalBookmarksForIndex uses LocalBookmarkService only (fallback)"
-      - "BookmarkRouter.getAllBookmarksForIndex(): aggregates localProvider.getAllBookmarks() and fileProvider.getAllBookmarks(), adds storage 'local'|'file', merges and sorts by time desc"
-      - "src/ui/bookmarks-table/: HTML (search, filters, table with Storage column, empty state), JS (loadBookmarks uses aggregated then fallback, renderTableBody shows Storage, sort by storage), CSS (table, sort indicators)"
-      - "Popup: bookmarksIndexBtn emits openBookmarksIndex; PopupController.handleOpenBookmarksIndex opens tab. Options: bookmarks-index-link href set to extension URL"
+      - 'MessageHandler: handleGetAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() when available; handleGetLocalBookmarksForIndex uses LocalBookmarkService only (fallback)'
+      - 'BookmarkRouter.getAllBookmarksForIndex(): aggregates localProvider.getAllBookmarks() and fileProvider.getAllBookmarks(), adds storage ''local''|''file'', merges and sorts by time desc'
+      - 'src/ui/bookmarks-table/: HTML (search, filters, table with Storage column, empty state), JS (loadBookmarks uses aggregated then fallback, renderTableBody shows Storage, sort by storage), CSS (table, sort indicators)'
+      - 'Popup: bookmarksIndexBtn emits openBookmarksIndex; PopupController.handleOpenBookmarksIndex opens tab. Options: bookmarks-index-link href set to extension URL'
   code_locations:
     files:
-      - path: "src/features/storage/local-bookmark-service.js"
-        description: "getAllBookmarks() method"
-      - path: "src/core/message-handler.js"
-        description: "GET_AGGREGATED_BOOKMARKS_FOR_INDEX, GET_LOCAL_BOOKMARKS_FOR_INDEX, handleGetAggregatedBookmarksForIndex, handleGetLocalBookmarksForIndex"
-      - path: "src/features/storage/bookmark-router.js"
-        description: "getAllBookmarksForIndex() aggregates local + file with storage field"
-      - path: "src/ui/bookmarks-table/bookmarks-table.html"
-        description: "Index page layout"
-      - path: "src/ui/bookmarks-table/bookmarks-table.js"
-        description: "loadBookmarks, applySearchAndFilter, renderTableBody, setSort"
-      - path: "src/ui/bookmarks-table/bookmarks-table.css"
-        description: "Table and toolbar styles"
-      - path: "src/ui/popup/popup.html"
-        description: "bookmarksIndexBtn entry point"
-      - path: "src/ui/popup/PopupController.js"
-        description: "handleOpenBookmarksIndex"
-      - path: "src/ui/popup/UIManager.js"
-        description: "bookmarksIndexBtn click emits openBookmarksIndex"
-      - path: "src/ui/options/options.html"
-        description: "bookmarks-index-link in footer"
-      - path: "src/ui/options/options.js"
-        description: "bookmarksIndexLink href set in init()"
+      - path: src/features/storage/local-bookmark-service.js
+        description: getAllBookmarks() method
+      - path: src/core/message-handler.js
+        description: GET_AGGREGATED_BOOKMARKS_FOR_INDEX, GET_LOCAL_BOOKMARKS_FOR_INDEX, handleGetAggregatedBookmarksForIndex, handleGetLocalBookmarksForIndex
+      - path: src/features/storage/bookmark-router.js
+        description: getAllBookmarksForIndex() aggregates local + file with storage field
+      - path: src/ui/bookmarks-table/bookmarks-table.html
+        description: Index page layout
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+        description: loadBookmarks, applySearchAndFilter, renderTableBody, setSort
+      - path: src/ui/bookmarks-table/bookmarks-table.css
+        description: Table and toolbar styles
+      - path: src/ui/popup/popup.html
+        description: bookmarksIndexBtn entry point
+      - path: src/ui/popup/PopupController.js
+        description: handleOpenBookmarksIndex
+      - path: src/ui/popup/UIManager.js
+        description: bookmarksIndexBtn click emits openBookmarksIndex
+      - path: src/ui/options/options.html
+        description: bookmarks-index-link in footer
+      - path: src/ui/options/options.js
+        description: bookmarksIndexLink href set in init()
     functions:
-      - name: "getAllBookmarks"
-        file: "src/features/storage/local-bookmark-service.js"
-        description: "Returns full normalized array of local bookmarks, sorted by time desc"
-      - name: "handleGetLocalBookmarksForIndex"
-        file: "src/core/message-handler.js"
-        description: "Uses LocalBookmarkService, returns { bookmarks } (fallback)"
-      - name: "getAllBookmarksForIndex"
-        file: "src/features/storage/bookmark-router.js"
-        description: "Aggregates local + file bookmarks with storage field, sorted by time desc"
+      - name: getAllBookmarks
+        file: src/features/storage/local-bookmark-service.js
+        description: Returns full normalized array of local bookmarks, sorted by time desc
+      - name: handleGetLocalBookmarksForIndex
+        file: src/core/message-handler.js
+        description: Uses LocalBookmarkService, returns { bookmarks } (fallback)
+      - name: getAllBookmarksForIndex
+        file: src/features/storage/bookmark-router.js
+        description: Aggregates local + file bookmarks with storage field, sorted by time desc
   traceability:
     architecture:
       - ARCH-LOCAL_BOOKMARKS_INDEX
@@ -973,20 +929,19 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     see_also:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-BOOKMARK_ROUTER
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.md
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     created:
-      date: 2026-02-13
-      author: "AI Agent"
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-14
-      author: "AI Agent"
-      reason: "Index shows local + file with Storage column; getAggregatedBookmarksForIndex; router.getAllBookmarksForIndex"
+      date: 2026-02-14T00:00:00.000Z
+      author: AI Agent
+      reason: Index shows local + file with Storage column; getAggregatedBookmarksForIndex; router.getAllBookmarksForIndex
     last_validated:
-      date: 2026-02-13
-      validator: "AI Agent"
-      result: "pass"
-
+      date: 2026-02-13T00:00:00.000Z
+      validator: AI Agent
+      result: pass
 IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
   name: Local Bookmarks Index Export Implementation
   status: Active
@@ -994,29 +949,29 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
     - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
   rationale:
-    why: "Implement export UI and download using existing in-memory data"
+    why: Implement export UI and download using existing in-memory data
     problems_solved:
-      - "No export path for index data"
+      - No export path for index data
     benefits:
-      - "Two buttons: Export all, Export displayed; CSV download"
+      - 'Two buttons: Export all, Export displayed; CSV download'
   implementation_approach:
-    summary: "Export controls in bookmarks-table toolbar; exportBookmarks(scope) with scope 'all' or 'displayed'; serialize to CSV including Storage column; Blob + object URL + <a download> click; revoke URL"
+    summary: Export controls in bookmarks-table toolbar; exportBookmarks(scope) with scope 'all' or 'displayed'; serialize to CSV including Storage column; Blob + object URL + <a download> click; revoke URL
     details:
-      - "bookmarks-table.html: Export all and Export displayed buttons in toolbar"
-      - "bookmarks-table.js: elements.exportAll, elements.exportDisplayed; exportBookmarks(scope); get allBookmarks or filteredBookmarks (local + file with storage field); build CSV (header + rows including Storage Local|File, quoted fields); filename hoverboard-bookmarks-{all|displayed}-{date}.csv; trigger download"
-      - "Disable Export displayed when filteredBookmarks.length === 0; disable Export all when allBookmarks.length === 0"
+      - 'bookmarks-table.html: Export all and Export displayed buttons in toolbar'
+      - 'bookmarks-table.js: elements.exportAll, elements.exportDisplayed; exportBookmarks(scope); get allBookmarks or filteredBookmarks (local + file with storage field); build CSV (header + rows including Storage Local|File, quoted fields); filename hoverboard-bookmarks-{all|displayed}-{date}.csv; trigger download'
+      - Disable Export displayed when filteredBookmarks.length === 0; disable Export all when allBookmarks.length === 0
   code_locations:
     files:
-      - path: "src/ui/bookmarks-table/bookmarks-table.html"
-        description: "Export all / Export displayed buttons"
-      - path: "src/ui/bookmarks-table/bookmarks-table.js"
-        description: "exportBookmarks(scope), CSV build, download trigger, init bindings"
-      - path: "src/ui/bookmarks-table/bookmarks-table.css"
-        description: "Export button styles (if any)"
+      - path: src/ui/bookmarks-table/bookmarks-table.html
+        description: Export all / Export displayed buttons
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+        description: exportBookmarks(scope), CSV build, download trigger, init bindings
+      - path: src/ui/bookmarks-table/bookmarks-table.css
+        description: Export button styles (if any)
     functions:
-      - name: "exportBookmarks"
-        file: "src/ui/bookmarks-table/bookmarks-table.js"
-        description: "Exports given scope (all|displayed) to CSV and triggers download"
+      - name: exportBookmarks
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: Exports given scope (all|displayed) to CSV and triggers download
   traceability:
     architecture:
       - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
@@ -1031,26 +986,19 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     supersedes: []
     see_also:
       - IMPL-LOCAL_BOOKMARKS_INDEX
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.md
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
     created:
-      date: 2026-02-13
-      author: "AI Agent"
+      date: 2026-02-13T00:00:00.000Z
+      author: AI Agent
     last_updated:
-      date: 2026-02-14
-      author: "AI Agent"
-      reason: "CSV includes Storage column; index data is local + file"
+      date: 2026-02-14T00:00:00.000Z
+      author: AI Agent
+      reason: CSV includes Storage column; index data is local + file
     last_validated:
-      date: 2026-02-13
-      validator: "AI Agent"
-      result: "pass"
-
-# NOTE: Additional IMPL tokens from stdd/implementation-decisions.md may remain:
-# IMPL-STORAGE, IMPL-BADGE, IMPL-CROSS_BROWSER, IMPL-SERVICE_WORKER,
-# IMPL-CONTENT_SCRIPT, IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-MV3_MIGRATION,
-# IMPL-THEME, IMPL-BOOKMARKING (and others not yet in stdd file)
-# Follow established pattern above.
-
+      date: 2026-02-13T00:00:00.000Z
+      validator: AI Agent
+      result: pass
 IMPL-CONFIG_STRUCT:
   name: Configuration Structure
   status: Template
@@ -1058,25 +1006,25 @@ IMPL-CONFIG_STRUCT:
     - ARCH-CONFIG_STRUCTURE
     - REQ-CONFIGURATION
   rationale:
-    why: "Why this configuration structure was chosen"
+    why: Why this configuration structure was chosen
     problems_solved:
-      - "Problem 1"
+      - Problem 1
     benefits:
-      - "Benefit 1"
+      - Benefit 1
   implementation_approach:
-    summary: "Configuration structure implementation approach"
+    summary: Configuration structure implementation approach
     details:
-      - "Specific technical detail 1"
-      - "Code structure or pattern"
-      - "API design decision"
+      - Specific technical detail 1
+      - Code structure or pattern
+      - API design decision
   code_locations:
     files:
-      - path: "path/to/config.ext"
-        description: "Configuration implementation"
+      - path: path/to/config.ext
+        description: Configuration implementation
     functions:
-      - name: "loadConfig"
-        file: "path/to/config.ext"
-        description: "Configuration loading logic"
+      - name: loadConfig
+        file: path/to/config.ext
+        description: Configuration loading logic
   traceability:
     architecture:
       - ARCH-CONFIG_STRUCTURE
@@ -1094,16 +1042,15 @@ IMPL-CONFIG_STRUCT:
   metadata:
     created:
       date: YYYY-MM-DD
-      author: "agent/contributor"
+      author: agent/contributor
     last_updated:
       date: YYYY-MM-DD
-      author: "agent/contributor"
-      reason: "Initial creation"
+      author: agent/contributor
+      reason: Initial creation
     last_validated:
       date: YYYY-MM-DD
-      validator: "agent/contributor"
-      result: "pass"
-
+      validator: agent/contributor
+      result: pass
 IMPL-EXAMPLE_IMPLEMENTATION:
   name: Core Implementation Example
   status: Template
@@ -1111,26 +1058,28 @@ IMPL-EXAMPLE_IMPLEMENTATION:
     - ARCH-EXAMPLE_DECISION
     - REQ-EXAMPLE_FEATURE
   rationale:
-    why: "Why this implementation approach was chosen"
+    why: Why this implementation approach was chosen
     problems_solved:
-      - "Problem 1 that implementation solves"
+      - Problem 1 that implementation solves
     benefits:
-      - "Benefit 1 of implementation"
+      - Benefit 1 of implementation
   implementation_approach:
-    summary: "Main implementation approach"
+    summary: Main implementation approach
     details:
-      - "Specific technical detail 1"
-      - "Code structure or pattern"
-      - "API design decision"
+      - Specific technical detail 1
+      - Code structure or pattern
+      - API design decision
   code_locations:
     files:
-      - path: "path/to/implementation.ext"
-        description: "Main implementation"
-        lines: [10, 50]
+      - path: path/to/implementation.ext
+        description: Main implementation
+        lines:
+          - 10
+          - 50
     functions:
-      - name: "exampleFunction"
-        file: "path/to/implementation.ext"
-        description: "What it does"
+      - name: exampleFunction
+        file: path/to/implementation.ext
+        description: What it does
   traceability:
     architecture:
       - ARCH-EXAMPLE_DECISION
@@ -1148,16 +1097,15 @@ IMPL-EXAMPLE_IMPLEMENTATION:
   metadata:
     created:
       date: YYYY-MM-DD
-      author: "agent/contributor"
+      author: agent/contributor
     last_updated:
       date: YYYY-MM-DD
-      author: "agent/contributor"
-      reason: "Initial creation"
+      author: agent/contributor
+      reason: Initial creation
     last_validated:
       date: YYYY-MM-DD
-      validator: "agent/contributor"
-      result: "pass"
-
+      validator: agent/contributor
+      result: pass
 IMPL-ERROR_HANDLING:
   name: Error Handling Implementation
   status: Template
@@ -1165,25 +1113,25 @@ IMPL-ERROR_HANDLING:
     - ARCH-ERROR_HANDLING
     - REQ-ERROR_HANDLING
   rationale:
-    why: "Why this error handling implementation was chosen"
+    why: Why this error handling implementation was chosen
     problems_solved:
-      - "Problem 1"
+      - Problem 1
     benefits:
-      - "Benefit 1"
+      - Benefit 1
   implementation_approach:
-    summary: "Error handling implementation approach"
+    summary: Error handling implementation approach
     details:
-      - "Specific error handling pattern"
-      - "Error propagation strategy"
-      - "Error logging and reporting"
+      - Specific error handling pattern
+      - Error propagation strategy
+      - Error logging and reporting
   code_locations:
     files:
-      - path: "path/to/error_handler.ext"
-        description: "Error handling implementation"
+      - path: path/to/error_handler.ext
+        description: Error handling implementation
     functions:
-      - name: "handleError"
-        file: "path/to/error_handler.ext"
-        description: "Error handling logic"
+      - name: handleError
+        file: path/to/error_handler.ext
+        description: Error handling logic
   traceability:
     architecture:
       - ARCH-ERROR_HANDLING
@@ -1201,42 +1149,41 @@ IMPL-ERROR_HANDLING:
   metadata:
     created:
       date: YYYY-MM-DD
-      author: "agent/contributor"
+      author: agent/contributor
     last_updated:
       date: YYYY-MM-DD
-      author: "agent/contributor"
-      reason: "Initial creation"
+      author: agent/contributor
+      reason: Initial creation
     last_validated:
       date: YYYY-MM-DD
-      validator: "agent/contributor"
-      result: "pass"
-
+      validator: agent/contributor
+      result: pass
 IMPL-TESTING:
   name: Testing Implementation
   status: Template
   cross_references:
     - ARCH-TESTING_STRATEGY
   rationale:
-    why: "Why this testing implementation was chosen"
+    why: Why this testing implementation was chosen
     problems_solved:
-      - "Problem 1"
+      - Problem 1
     benefits:
-      - "Benefit 1"
+      - Benefit 1
   implementation_approach:
-    summary: "Testing implementation approach"
+    summary: Testing implementation approach
     details:
-      - "Unit testing implementation details"
-      - "Integration testing implementation details"
-      - "Test utilities and helpers"
-      - "Test coverage tools"
+      - Unit testing implementation details
+      - Integration testing implementation details
+      - Test utilities and helpers
+      - Test coverage tools
   code_locations:
     files:
-      - path: "*_test.ext"
-        description: "Test files"
+      - path: '*_test.ext'
+        description: Test files
     functions:
-      - name: "setupTestEnvironment"
-        file: "test_helpers.ext"
-        description: "Test setup logic"
+      - name: setupTestEnvironment
+        file: test_helpers.ext
+        description: Test setup logic
   traceability:
     architecture:
       - ARCH-TESTING_STRATEGY
@@ -1254,16 +1201,15 @@ IMPL-TESTING:
   metadata:
     created:
       date: YYYY-MM-DD
-      author: "agent/contributor"
+      author: agent/contributor
     last_updated:
       date: YYYY-MM-DD
-      author: "agent/contributor"
-      reason: "Initial creation"
+      author: agent/contributor
+      reason: Initial creation
     last_validated:
       date: YYYY-MM-DD
-      validator: "agent/contributor"
-      result: "pass"
-
+      validator: agent/contributor
+      result: pass
 IMPL-CODE_STYLE:
   name: Code Style and Conventions
   status: Active
@@ -1271,29 +1217,29 @@ IMPL-CODE_STYLE:
     - ARCH-CODE_QUALITY
     - REQ-CODE_QUALITY
   rationale:
-    why: "Enforce consistent JavaScript style and quality via ESLint 9 flat config (Standard preset) and avoid build failure on moderate audit findings in tooling deps"
+    why: Enforce consistent JavaScript style and quality via ESLint 9 flat config (Standard preset) and avoid build failure on moderate audit findings in tooling deps
     problems_solved:
-      - "Legacy .eslintrc.yml and .eslintignore no longer used"
-      - "Build failing on moderate vulnerabilities in @eslint/eslintrc (ajv) with no safe fix"
+      - Legacy .eslintrc.yml and .eslintignore no longer used
+      - Build failing on moderate vulnerabilities in @eslint/eslintrc (ajv) with no safe fix
     benefits:
-      - "Single eslint.config.mjs; Standard via FlatCompat; ignores in config"
-      - "security:check uses --audit-level=high so build succeeds"
+      - Single eslint.config.mjs; Standard via FlatCompat; ignores in config
+      - security:check uses --audit-level=high so build succeeds
   implementation_approach:
-    summary: "ESLint 9 flat config, Standard preset, Node engines, security audit level"
+    summary: ESLint 9 flat config, Standard preset, Node engines, security audit level
     details:
-      - "eslint.config.mjs: globalIgnores from former .eslintignore, fixupConfigRules(compat.extends('standard')), files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides"
-      - "package.json engines.node >= 18.18.0"
-      - "package.json security:check: npm audit --audit-level=high"
+      - 'eslint.config.mjs: globalIgnores from former .eslintignore, fixupConfigRules(compat.extends(''standard'')), files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides'
+      - package.json engines.node >= 18.18.0
+      - 'package.json security:check: npm audit --audit-level=high'
   code_locations:
     files:
-      - path: ".editorconfig"
-        description: "Editor configuration"
-      - path: ".prettierrc"
-        description: "Code formatter configuration (or similar)"
-      - path: "eslint.config.mjs"
-        description: "ESLint 9 flat config (Standard via FlatCompat)"
-      - path: "package.json"
-        description: "engines.node, scripts.lint/lint:fix/validate/security:check"
+      - path: .editorconfig
+        description: Editor configuration
+      - path: .prettierrc
+        description: Code formatter configuration (or similar)
+      - path: eslint.config.mjs
+        description: ESLint 9 flat config (Standard via FlatCompat)
+      - path: package.json
+        description: engines.node, scripts.lint/lint:fix/validate/security:check
   traceability:
     architecture:
       - ARCH-CODE_QUALITY
@@ -1313,20 +1259,15 @@ IMPL-CODE_STYLE:
   metadata:
     created:
       date: YYYY-MM-DD
-      author: "agent/contributor"
+      author: agent/contributor
     last_updated:
-      date: "2025-02-17"
-      author: "agent"
-      reason: "ESLint 9 flat config migration; security:check audit-level=high; REQ/ARCH traceability"
+      date: '2025-02-17'
+      author: agent
+      reason: ESLint 9 flat config migration; security:check audit-level=high; REQ/ARCH traceability
     last_validated:
-      date: "2025-02-17"
-      validator: "agent"
-      result: "pass"
-
-# ---
-# Template Record - Copy this block to create new implementation decisions
-# ---
-#
+      date: '2025-02-17'
+      validator: agent
+      result: pass
 IMPL-PINBOARD_POSTS_ADD_ENCODING:
   name: Pinboard posts/add query parameter encoding
   status: Active
@@ -1334,53 +1275,52 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
     - IMPL-PINBOARD_API
     - IMPL-TAG_SYSTEM
   rationale:
-    why: "Store-tag API calls fail when tags contain #, +, or . unless query parameters are percent-encoded"
+    why: 'Store-tag API calls fail when tags contain #, +, or . unless query parameters are percent-encoded'
     problems_solved:
-      - "Unencoded # breaks the request URL (fragment delimiter); auth_token and other params can be lost"
-      - "Unencoded + is interpreted as space in application/x-www-form-urlencoded"
-      - "Pinboard API requires all arguments to be URL-encoded"
+      - 'Unencoded # breaks the request URL (fragment delimiter); auth_token and other params can be lost'
+      - Unencoded + is interpreted as space in application/x-www-form-urlencoded
+      - Pinboard API requires all arguments to be URL-encoded
     benefits:
-      - "Tags (and description, extended, url) with #, +, ., &, = etc. can be stored without breaking the API call"
-      - "Explicit encodeURIComponent guarantees correct encoding across extension and Safari runtimes"
+      - 'Tags (and description, extended, url) with #, +, ., &, = etc. can be stored without breaking the API call'
+      - Explicit encodeURIComponent guarantees correct encoding across extension and Safari runtimes
   implementation_approach:
-    summary: "Build posts/add query string with encodeURIComponent for every user-controlled parameter value"
+    summary: Build posts/add query string with encodeURIComponent for every user-controlled parameter value
     details:
-      - "buildSaveParams builds key=encodeURIComponent(value) pairs and join('&') instead of URLSearchParams"
-      - "Applied to url, description, extended, tags, shared, toread in src and safari pinboard-service"
-      - "Same logic in safari/src/features/pinboard/pinboard-service.js for consistency"
+      - buildSaveParams builds key=encodeURIComponent(value) pairs and join('&') instead of URLSearchParams
+      - Applied to url, description, extended, tags, shared, toread in src and safari pinboard-service
+      - Same logic in safari/src/features/pinboard/pinboard-service.js for consistency
   code_locations:
     files:
-      - path: "src/features/pinboard/pinboard-service.js"
-        description: "buildSaveParams uses encodeURIComponent for all params"
-      - path: "safari/src/features/pinboard/pinboard-service.js"
-        description: "Mirror buildSaveParams encoding"
+      - path: src/features/pinboard/pinboard-service.js
+        description: buildSaveParams uses encodeURIComponent for all params
+      - path: safari/src/features/pinboard/pinboard-service.js
+        description: Mirror buildSaveParams encoding
     functions:
-      - name: "buildSaveParams"
-        file: "src/features/pinboard/pinboard-service.js"
-        description: "Builds encoded query string for posts/add"
+      - name: buildSaveParams
+        file: src/features/pinboard/pinboard-service.js
+        description: Builds encoded query string for posts/add
   traceability:
     architecture: []
     requirements: []
     tests:
-      - "tag-storage.test.js: should save tag with special characters (#, +, .) with percent-encoded URL"
+      - 'tag-storage.test.js: should save tag with special characters (#, +, .) with percent-encoded URL'
     code_annotations:
-      - "PIN-003 (parameter encoding comment in buildSaveParams)"
+      - PIN-003 (parameter encoding comment in buildSaveParams)
   related_decisions:
     depends_on:
       - IMPL-PINBOARD_API
     supersedes: []
     see_also:
       - IMPL-TAG_SYSTEM
-  detail_file: implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.md
+  detail_file: implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.yaml
   metadata:
     created:
-      date: "2026-02-13"
-      author: "AI Agent"
+      date: '2026-02-13'
+      author: AI Agent
     last_updated:
-      date: "2026-02-13"
-      author: "AI Agent"
-      reason: "Bug fix: tag storage fails when special characters in tag"
-
+      date: '2026-02-13'
+      author: AI Agent
+      reason: 'Bug fix: tag storage fails when special characters in tag'
 IMPL-RECENT_TAGS_POPUP_REFRESH:
   name: Recent Tags refresh on every popup display
   status: Active
@@ -1388,27 +1328,27 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
     - REQ-RECENT_TAGS_SYSTEM
     - ARCH-POPUP_SESSION
   rationale:
-    why: "Ensure Recent Tags list is refreshed whenever the popup is displayed, including when the document is reused without full reload"
+    why: Ensure Recent Tags list is refreshed whenever the popup is displayed, including when the document is reused without full reload
     problems_solved:
-      - "Popup might be shown again without loadInitialData running (e.g. document reuse)"
-      - "Recent Tags could appear stale after saving a tag in another window"
+      - Popup might be shown again without loadInitialData running (e.g. document reuse)
+      - Recent Tags could appear stale after saving a tag in another window
     benefits:
-      - "Recent Tags always reflect service worker shared memory when user sees the popup"
-      - "Tags saved in one window appear in Recent Tags when popup is displayed in any window"
+      - Recent Tags always reflect service worker shared memory when user sees the popup
+      - Tags saved in one window appear in Recent Tags when popup is displayed in any window
   implementation_approach:
-    summary: "Add document.visibilitychange listener in PopupController that calls loadRecentTags() when document becomes visible and popup is initialized"
+    summary: Add document.visibilitychange listener in PopupController that calls loadRecentTags() when document becomes visible and popup is initialized
     details:
-      - "Listener registered in setupAutoRefresh() alongside existing focus listener"
-      - "Guard: only run when document.visibilityState === 'visible', isInitialized, and !isLoading"
-      - "loadRecentTags() fetches from service worker (getRecentBookmarks) and updates UI via uiManager.updateRecentTags()"
+      - Listener registered in setupAutoRefresh() alongside existing focus listener
+      - 'Guard: only run when document.visibilityState === ''visible'', isInitialized, and !isLoading'
+      - loadRecentTags() fetches from service worker (getRecentBookmarks) and updates UI via uiManager.updateRecentTags()
   code_locations:
     files:
-      - path: "src/ui/popup/PopupController.js"
-        description: "visibilitychange listener and loadRecentTags call"
+      - path: src/ui/popup/PopupController.js
+        description: visibilitychange listener and loadRecentTags call
     functions:
-      - name: "setupAutoRefresh"
-        file: "src/ui/popup/PopupController.js"
-        description: "Registers visibilitychange listener for Recent Tags refresh"
+      - name: setupAutoRefresh
+        file: src/ui/popup/PopupController.js
+        description: Registers visibilitychange listener for Recent Tags refresh
   traceability:
     architecture:
       - ARCH-POPUP_SESSION
@@ -1423,20 +1363,19 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
     supersedes: []
     see_also:
       - IMPL-TAG_SYSTEM
-  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.md
+  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml
   metadata:
     created:
-      date: "2026-02-13"
-      author: "AI Agent"
+      date: '2026-02-13'
+      author: AI Agent
     last_updated:
-      date: "2026-02-13"
-      author: "AI Agent"
-      reason: "Recent Tags refresh on every popup display per plan"
+      date: '2026-02-13'
+      author: AI Agent
+      reason: Recent Tags refresh on every popup display per plan
     last_validated:
-      date: "2026-02-13"
-      validator: "AI Agent"
-      result: "pass"
-
+      date: '2026-02-13'
+      validator: AI Agent
+      result: pass
 IMPL-LOCAL_BOOKMARK_SERVICE:
   name: Local Bookmark Service
   status: Active
@@ -1445,24 +1384,24 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
     - ARCH-LOCAL_STORAGE_PROVIDER
     - ARCH-STORAGE
   rationale:
-    why: "Implement bookmark provider contract using chrome.storage.local for local-only mode"
+    why: Implement bookmark provider contract using chrome.storage.local for local-only mode
     problems_solved:
-      - "No local bookmark storage implementation"
+      - No local bookmark storage implementation
     benefits:
-      - "Default storage mode is local (ConfigManager default storageMode: 'local'); Pinboard selectable in Options"
-      - "Same method signatures as PinboardService (getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag, getRecentBookmarks, testConnection)"
-      - "Bookmarks keyed by URL in hoverboard_local_bookmarks; recent by time sort"
+      - 'Default storage mode is local (ConfigManager default storageMode: ''local''); Pinboard selectable in Options'
+      - Same method signatures as PinboardService (getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag, getRecentBookmarks, testConnection)
+      - Bookmarks keyed by URL in hoverboard_local_bookmarks; recent by time sort
   implementation_approach:
-    summary: "LocalBookmarkService class in src/features/storage/local-bookmark-service.js; TagService integration for tag tracking."
+    summary: LocalBookmarkService class in src/features/storage/local-bookmark-service.js; TagService integration for tag tracking.
     details:
-      - "Default provider is local (ConfigManager getDefaultConfiguration().storageMode: 'local')"
-      - "Storage key: hoverboard_local_bookmarks (object keyed by URL)"
-      - "Normalized bookmark shape matches PinboardService (url, description, extended, tags, time, shared, toread, hash)"
-      - "trackBookmarkTags and extractTagsFromBookmarkData for recent-tag integration"
+      - 'Default provider is local (ConfigManager getDefaultConfiguration().storageMode: ''local'')'
+      - 'Storage key: hoverboard_local_bookmarks (object keyed by URL)'
+      - Normalized bookmark shape matches PinboardService (url, description, extended, tags, time, shared, toread, hash)
+      - trackBookmarkTags and extractTagsFromBookmarkData for recent-tag integration
   code_locations:
     files:
-      - path: "src/features/storage/local-bookmark-service.js"
-        description: "LocalBookmarkService implementation"
+      - path: src/features/storage/local-bookmark-service.js
+        description: LocalBookmarkService implementation
   traceability:
     architecture:
       - ARCH-LOCAL_STORAGE_PROVIDER
@@ -1477,20 +1416,19 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
     supersedes: []
     see_also:
       - ARCH-STORAGE
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.md
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml
   metadata:
     created:
-      date: "2026-02-13"
-      author: "AI Agent"
+      date: '2026-02-13'
+      author: AI Agent
     last_updated:
-      date: "2026-02-13"
-      author: "AI Agent"
-      reason: "Local storage mode implementation per plan"
+      date: '2026-02-13'
+      author: AI Agent
+      reason: Local storage mode implementation per plan
     last_validated:
-      date: "2026-02-13"
-      validator: "AI Agent"
-      result: "pass"
-
+      date: '2026-02-13'
+      validator: AI Agent
+      result: pass
 IMPL-FILE_BOOKMARK_SERVICE:
   name: File Bookmark Service
   status: Active
@@ -1498,32 +1436,32 @@ IMPL-FILE_BOOKMARK_SERVICE:
     - REQ-FILE_BOOKMARK_STORAGE
     - ARCH-FILE_BOOKMARK_PROVIDER
   rationale:
-    why: "Implement file-based bookmark provider with same contract as Local/Pinboard; testable via adapter abstraction"
+    why: Implement file-based bookmark provider with same contract as Local/Pinboard; testable via adapter abstraction
     problems_solved:
-      - "No file-based storage implementation"
+      - No file-based storage implementation
     benefits:
-      - "FileBookmarkStorageAdapter: readBookmarksFile(), writeBookmarksFile(data); mockable for tests"
-      - "FileBookmarkService: getBookmarkForUrl, getRecentBookmarks, saveBookmark, deleteBookmark, saveTag, deleteTag, testConnection"
-      - "File format: { version: 1, bookmarks: { url: bookmark } }; same bookmark shape as local"
+      - 'FileBookmarkStorageAdapter: readBookmarksFile(), writeBookmarksFile(data); mockable for tests'
+      - 'FileBookmarkService: getBookmarkForUrl, getRecentBookmarks, saveBookmark, deleteBookmark, saveTag, deleteTag, testConnection'
+      - 'File format: { version: 1, bookmarks: { url: bookmark } }; same bookmark shape as local'
   implementation_approach:
-    summary: "FileBookmarkService in src/features/storage/file-bookmark-service.js; adapter interface; in-memory adapter for tests; real adapter (file I/O) for production."
+    summary: FileBookmarkService in src/features/storage/file-bookmark-service.js; adapter interface; in-memory adapter for tests; real adapter (file I/O) for production.
     details:
-      - "Adapter methods: readBookmarksFile() -> Promise<{ version, bookmarks }>, writeBookmarksFile(data) -> Promise<void>"
-      - "Normalize URL and bookmark shape to match LocalBookmarkService (url, description, extended, tags, time, shared, toread, hash)"
-      - "Filename in directory: hoverboard-bookmarks.json"
+      - 'Adapter methods: readBookmarksFile() -> Promise<{ version, bookmarks }>, writeBookmarksFile(data) -> Promise<void>'
+      - Normalize URL and bookmark shape to match LocalBookmarkService (url, description, extended, tags, time, shared, toread, hash)
+      - 'Filename in directory: hoverboard-bookmarks.json'
   code_locations:
     files:
-      - path: "src/features/storage/file-bookmark-service.js"
-        description: "FileBookmarkService and adapter usage"
-      - path: "src/features/storage/file-bookmark-storage-adapter.js"
-        description: "Adapter interface and in-memory implementation"
+      - path: src/features/storage/file-bookmark-service.js
+        description: FileBookmarkService and adapter usage
+      - path: src/features/storage/file-bookmark-storage-adapter.js
+        description: Adapter interface and in-memory implementation
   traceability:
     architecture:
       - ARCH-FILE_BOOKMARK_PROVIDER
     requirements:
       - REQ-FILE_BOOKMARK_STORAGE
     tests:
-      - "tests/unit/file-bookmark-service.test.js"
+      - tests/unit/file-bookmark-service.test.js
     code_annotations:
       - IMPL-FILE_BOOKMARK_SERVICE
   related_decisions:
@@ -1532,20 +1470,19 @@ IMPL-FILE_BOOKMARK_SERVICE:
     supersedes: []
     see_also:
       - IMPL-LOCAL_BOOKMARK_SERVICE
-  detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.md
+  detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "File-based storage module per plan"
+      date: '2026-02-14'
+      author: AI Agent
+      reason: File-based storage module per plan
     last_validated:
-      date: "2026-02-14"
-      validator: "AI Agent"
-      result: "pass"
-
+      date: '2026-02-14'
+      validator: AI Agent
+      result: pass
 IMPL-STORAGE_INDEX:
   name: Storage Index
   status: Active
@@ -1553,28 +1490,28 @@ IMPL-STORAGE_INDEX:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - ARCH-STORAGE_INDEX_AND_ROUTER
   rationale:
-    why: "Persist per-URL storage backend (pinboard|local|file) in chrome.storage.local"
+    why: Persist per-URL storage backend (pinboard|local|file) in chrome.storage.local
     problems_solved:
-      - "Need to know which backend owns each URL"
+      - Need to know which backend owns each URL
     benefits:
-      - "getIndex(), setBackendForUrl(url, backend), getBackendForUrl(url), removeUrl(url)"
-      - "Key: hoverboard_storage_index"
+      - getIndex(), setBackendForUrl(url, backend), getBackendForUrl(url), removeUrl(url)
+      - 'Key: hoverboard_storage_index'
   implementation_approach:
-    summary: "StorageIndex class in src/features/storage/storage-index.js; chrome.storage.local."
+    summary: StorageIndex class in src/features/storage/storage-index.js; chrome.storage.local.
     details:
-      - "Index shape: { url: 'pinboard'|'local'|'file' }"
-      - "Migration: on first use, seed from LocalBookmarkService.getAllBookmarks() -> setBackendForUrl(url, 'local')"
+      - 'Index shape: { url: ''pinboard''|''local''|''file'' }'
+      - 'Migration: on first use, seed from LocalBookmarkService.getAllBookmarks() -> setBackendForUrl(url, ''local'')'
   code_locations:
     files:
-      - path: "src/features/storage/storage-index.js"
-        description: "StorageIndex implementation"
+      - path: src/features/storage/storage-index.js
+        description: StorageIndex implementation
   traceability:
     architecture:
       - ARCH-STORAGE_INDEX_AND_ROUTER
     requirements:
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
     tests:
-      - "tests/unit/storage-index.test.js"
+      - tests/unit/storage-index.test.js
     code_annotations:
       - IMPL-STORAGE_INDEX
   related_decisions:
@@ -1583,16 +1520,15 @@ IMPL-STORAGE_INDEX:
     supersedes: []
     see_also:
       - IMPL-BOOKMARK_ROUTER
-  detail_file: implementation-decisions/IMPL-STORAGE_INDEX.md
+  detail_file: implementation-decisions/IMPL-STORAGE_INDEX.yaml
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Storage index per plan"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Storage index per plan
 IMPL-BOOKMARK_ROUTER:
   name: Bookmark Router
   status: Active
@@ -1600,29 +1536,29 @@ IMPL-BOOKMARK_ROUTER:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - ARCH-STORAGE_INDEX_AND_ROUTER
   rationale:
-    why: "Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks"
+    why: Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks
     problems_solved:
-      - "Single provider cannot support per-bookmark backends"
+      - Single provider cannot support per-bookmark backends
     benefits:
-      - "getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL"
-      - "getRecentBookmarks aggregates pinboard + local + file + sync, sorted by time"
-      - "getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI"
+      - getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL
+      - getRecentBookmarks aggregates pinboard + local + file + sync, sorted by time
+      - getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI
   implementation_approach:
-    summary: "BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, defaultStorageMode."
+    summary: BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, defaultStorageMode.
     details:
-      - "Resolve provider: getBackendForUrl(url) || defaultStorageMode; map to one of four providers (pinboard, local, file, sync)"
-      - "moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index"
+      - 'Resolve provider: getBackendForUrl(url) || defaultStorageMode; map to one of four providers (pinboard, local, file, sync)'
+      - 'moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index'
   code_locations:
     files:
-      - path: "src/features/storage/bookmark-router.js"
-        description: "BookmarkRouter implementation"
+      - path: src/features/storage/bookmark-router.js
+        description: BookmarkRouter implementation
   traceability:
     architecture:
       - ARCH-STORAGE_INDEX_AND_ROUTER
     requirements:
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
     tests:
-      - "tests/unit/bookmark-router.test.js"
+      - tests/unit/bookmark-router.test.js
     code_annotations:
       - IMPL-BOOKMARK_ROUTER
   related_decisions:
@@ -1633,16 +1569,15 @@ IMPL-BOOKMARK_ROUTER:
     see_also:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-FILE_BOOKMARK_SERVICE
-  detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.md
+  detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Bookmark router per plan"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Bookmark router per plan
 IMPL-SYNC_BOOKMARK_SERVICE:
   name: Sync Bookmark Service
   status: Active
@@ -1650,22 +1585,21 @@ IMPL-SYNC_BOOKMARK_SERVICE:
     - ARCH-SYNC_STORAGE_PROVIDER
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
   rationale:
-    why: "Fourth storage backend using chrome.storage.sync; same provider contract as LocalBookmarkService"
+    why: Fourth storage backend using chrome.storage.sync; same provider contract as LocalBookmarkService
     benefits:
-      - "Sync across Chrome profile devices; quota ~100 KB documented"
+      - Sync across Chrome profile devices; quota ~100 KB documented
   implementation_approach:
-    summary: "SyncBookmarkService in src/features/storage/sync-bookmark-service.js; chrome.storage.sync key hoverboard_sync_bookmarks."
+    summary: SyncBookmarkService in src/features/storage/sync-bookmark-service.js; chrome.storage.sync key hoverboard_sync_bookmarks.
   code_locations:
     files:
-      - path: "src/features/storage/sync-bookmark-service.js"
-        description: "SyncBookmarkService implementation"
+      - path: src/features/storage/sync-bookmark-service.js
+        description: SyncBookmarkService implementation
   detail_file: null
   metadata:
     created:
-      date: "2026-02-15"
+      date: '2026-02-15'
     last_updated:
-      date: "2026-02-15"
-
+      date: '2026-02-15'
 IMPL-MOVE_BOOKMARK_UI:
   name: Move Bookmark Storage UI
   status: Active
@@ -1673,25 +1607,25 @@ IMPL-MOVE_BOOKMARK_UI:
     - REQ-MOVE_BOOKMARK_STORAGE_UI
     - ARCH-MOVE_BOOKMARK_UI
   rationale:
-    why: "Popup control to show and change current bookmark storage backend"
+    why: Popup control to show and change current bookmark storage backend
     problems_solved:
-      - "User cannot move bookmark between backends"
+      - User cannot move bookmark between backends
     benefits:
-      - "Storage select-one buttons (Pinboard, File, Local, Sync) in popup; current highlighted; click sends moveBookmarkToStorage"
+      - Storage select-one buttons (Pinboard, File, Local, Sync) in popup; current highlighted; click sends moveBookmarkToStorage
   implementation_approach:
-    summary: "Popup: storage section with four select-one buttons (Pinboard, File, Local, Sync); load backend on data load; on click send moveBookmarkToStorage."
+    summary: 'Popup: storage section with four select-one buttons (Pinboard, File, Local, Sync); load backend on data load; on click send moveBookmarkToStorage.'
     details:
-      - "PopupController: on load get storage backend for current URL; set select value"
-      - "On select change: send moveBookmarkToStorage(url, targetBackend); refresh bookmark data"
-      - "Pinboard storage option is disabled in the popup when no API token is configured (updateStoragePinboardEnabled from getAuthToken)"
+      - 'PopupController: on load get storage backend for current URL; set select value'
+      - 'On select change: send moveBookmarkToStorage(url, targetBackend); refresh bookmark data'
+      - Pinboard storage option is disabled in the popup when no API token is configured (updateStoragePinboardEnabled from getAuthToken)
   code_locations:
     files:
-      - path: "src/ui/popup/popup.html"
-        description: "Storage select markup"
-      - path: "src/ui/popup/UIManager.js"
-        description: "updateStoragePinboardEnabled(hasApiKey)"
-      - path: "src/ui/popup/PopupController.js"
-        description: "Load backend, handle move"
+      - path: src/ui/popup/popup.html
+        description: Storage select markup
+      - path: src/ui/popup/UIManager.js
+        description: updateStoragePinboardEnabled(hasApiKey)
+      - path: src/ui/popup/PopupController.js
+        description: Load backend, handle move
   traceability:
     architecture:
       - ARCH-MOVE_BOOKMARK_UI
@@ -1705,16 +1639,15 @@ IMPL-MOVE_BOOKMARK_UI:
     supersedes: []
     see_also:
       - IMPL-BOOKMARK_ROUTER
-  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.md
+  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Move bookmark UI per plan"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Move bookmark UI per plan
 IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
   name: Move Bookmark Response Handling and URL
   status: Active
@@ -1723,34 +1656,33 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
     - IMPL-MOVE_BOOKMARK_UI
     - IMPL-BOOKMARK_ROUTER
   rationale:
-    why: "UI must reflect actual move result; move must use bookmark URL and allow bookmark without time"
+    why: UI must reflect actual move result; move must use bookmark URL and allow bookmark without time
     problems_solved:
-      - "Popup showed success when move failed (service worker wraps response)"
-      - "Move failed when tab URL differed from stored bookmark URL"
-      - "Move failed when source bookmark had no time field"
+      - Popup showed success when move failed (service worker wraps response)
+      - Move failed when tab URL differed from stored bookmark URL
+      - Move failed when source bookmark had no time field
   implementation_approach:
-    summary: "Popup uses inner result (response.data); move URL from currentPin when available; router accepts bookmark.url and sets time when missing."
+    summary: Popup uses inner result (response.data); move URL from currentPin when available; router accepts bookmark.url and sets time when missing.
   code_locations:
     files:
-      - path: "src/ui/popup/PopupController.js"
-        description: "handleStorageBackendChange: url from currentPin, result from response.data"
-      - path: "src/features/storage/bookmark-router.js"
-        description: "moveBookmarkToStorage: check bookmark.url, toSave with time if missing"
+      - path: src/ui/popup/PopupController.js
+        description: 'handleStorageBackendChange: url from currentPin, result from response.data'
+      - path: src/features/storage/bookmark-router.js
+        description: 'moveBookmarkToStorage: check bookmark.url, toSave with time if missing'
   traceability:
     requirements:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
     code_annotations:
       - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
-  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.md
+  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Move bookmark fix: inner result, bookmark URL, allow no-time"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: 'Move bookmark fix: inner result, bookmark URL, allow no-time'
 IMPL-NATIVE_HOST_WRAPPER:
   name: Native Host Wrapper Implementation
   status: Active
@@ -1758,21 +1690,21 @@ IMPL-NATIVE_HOST_WRAPPER:
     - ARCH-NATIVE_HOST
     - REQ-NATIVE_HOST_WRAPPER
   rationale:
-    why: "Thin host speaks Chrome protocol and delegates to helper in same dir"
+    why: Thin host speaks Chrome protocol and delegates to helper in same dir
     problems_solved:
-      - "Host cannot use extension path"
+      - Host cannot use extension path
     benefits:
-      - "Go binary; ping/pong; helper.sh or helper.ps1 in same dir"
+      - Go binary; ping/pong; helper.sh or helper.ps1 in same dir
   implementation_approach:
-    summary: "native_host/main.go: readMessage/writeMessage, install dir from os.Executable(), callHelper for helper.sh/helper.ps1/helper.exe"
+    summary: 'native_host/main.go: readMessage/writeMessage, install dir from os.Executable(), callHelper for helper.sh/helper.ps1/helper.exe'
     details:
-      - "Protocol: 4-byte native byte order length + JSON"
-      - "Helper: stdin = message JSON, stdout = response JSON"
+      - 'Protocol: 4-byte native byte order length + JSON'
+      - 'Helper: stdin = message JSON, stdout = response JSON'
   code_locations:
     files:
-      - path: "native_host/main.go"
-      - path: "native_host/helper.sh"
-      - path: "native_host/helper.ps1"
+      - path: native_host/main.go
+      - path: native_host/helper.sh
+      - path: native_host/helper.ps1
   traceability:
     architecture:
       - ARCH-NATIVE_HOST
@@ -1785,16 +1717,15 @@ IMPL-NATIVE_HOST_WRAPPER:
     supersedes: []
     see_also:
       - IMPL-NATIVE_HOST_INSTALLER
-  detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.md
+  detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Native host wrapper per plan"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Native host wrapper per plan
 IMPL-NATIVE_HOST_INSTALLER:
   name: Native Host Installer Implementation
   status: Active
@@ -1802,21 +1733,21 @@ IMPL-NATIVE_HOST_INSTALLER:
     - ARCH-NATIVE_HOST
     - REQ-NATIVE_HOST_WRAPPER
   rationale:
-    why: "Copy wrapper and helper to fixed path and register with Chrome"
+    why: Copy wrapper and helper to fixed path and register with Chrome
     problems_solved:
-      - "Chrome needs manifest path and (Windows) registry"
+      - Chrome needs manifest path and (Windows) registry
     benefits:
-      - "install.sh (macOS/Linux), install.ps1 (Windows); user-level install dir"
+      - install.sh (macOS/Linux), install.ps1 (Windows); user-level install dir
   implementation_approach:
-    summary: "install.sh and install.ps1 copy binaries, generate manifest with path and allowed_origins, write to NativeMessagingHosts dir; Windows: registry key"
+    summary: 'install.sh and install.ps1 copy binaries, generate manifest with path and allowed_origins, write to NativeMessagingHosts dir; Windows: registry key'
     details:
-      - "Install dir: ~/.hoverboard or %LOCALAPPDATA%\\Hoverboard"
-      - "Manifest: com.hoverboard.native_host.json.template with {{PATH}} and {{ALLOWED_ORIGINS}}"
+      - 'Install dir: ~/.hoverboard or %LOCALAPPDATA%\Hoverboard'
+      - 'Manifest: com.hoverboard.native_host.json.template with {{PATH}} and {{ALLOWED_ORIGINS}}'
   code_locations:
     files:
-      - path: "native_host/install.sh"
-      - path: "native_host/install.ps1"
-      - path: "native_host/com.hoverboard.native_host.json.template"
+      - path: native_host/install.sh
+      - path: native_host/install.ps1
+      - path: native_host/com.hoverboard.native_host.json.template
   traceability:
     architecture:
       - ARCH-NATIVE_HOST
@@ -1829,16 +1760,15 @@ IMPL-NATIVE_HOST_INSTALLER:
     supersedes: []
     see_also:
       - IMPL-NATIVE_HOST_WRAPPER
-  detail_file: implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.md
+  detail_file: implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.yaml
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Native host installer per plan"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Native host installer per plan
 IMPL-FILE_STORAGE_TYPED_PATH:
   name: File Storage User-Typed Path
   status: Active
@@ -1847,34 +1777,34 @@ IMPL-FILE_STORAGE_TYPED_PATH:
     - ARCH-FILE_BOOKMARK_PROVIDER
     - IMPL-NATIVE_HOST_WRAPPER
   rationale:
-    why: "Allow file storage without folder picker; user types path; native host performs read/write so no browser file permissions for directory listing"
+    why: Allow file storage without folder picker; user types path; native host performs read/write so no browser file permissions for directory listing
     problems_solved:
-      - "Folder picker unreliable on options page; path-based flow avoids picker"
-      - "Single default path (~/.hoverboard) works out of the box"
+      - Folder picker unreliable on options page; path-based flow avoids picker
+      - Single default path (~/.hoverboard) works out of the box
     benefits:
-      - "Options: path input (default ~/.hoverboard); native host reads/writes hoverboard-bookmarks.json; no offscreen doc for path flow"
-      - "Service worker uses NativeHostFileBookmarkAdapter when path set; picker flow (MessageFileBookmarkAdapter) when no path"
+      - 'Options: path input (default ~/.hoverboard); native host reads/writes hoverboard-bookmarks.json; no offscreen doc for path flow'
+      - Service worker uses NativeHostFileBookmarkAdapter when path set; picker flow (MessageFileBookmarkAdapter) when no path
   implementation_approach:
-    summary: "Options path input saved to hoverboard_file_storage_path; helper.sh/helper.ps1 handle readBookmarksFile/writeBookmarksFile with path (expand ~); NativeHostFileBookmarkAdapter; initBookmarkProvider prefers path over picker"
+    summary: Options path input saved to hoverboard_file_storage_path; helper.sh/helper.ps1 handle readBookmarksFile/writeBookmarksFile with path (expand ~); NativeHostFileBookmarkAdapter; initBookmarkProvider prefers path over picker
     details:
-      - "Options: file-storage-path input, default ~/.hoverboard; persist on save and blur"
-      - "Helper: path as directory -> path/hoverboard-bookmarks.json; path ending .json as file; create dir on write; see IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE for HOME normalization and post-write check"
-      - "NativeHostFileBookmarkAdapter: get path from storage, sendNativeMessage with type and path"
-      - "Service worker: path set -> NativeHostFileBookmarkAdapter; else picker configured -> MessageFileBookmarkAdapter"
+      - 'Options: file-storage-path input, default ~/.hoverboard; persist on save and blur'
+      - 'Helper: path as directory -> path/hoverboard-bookmarks.json; path ending .json as file; create dir on write; see IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE for HOME normalization and post-write check'
+      - 'NativeHostFileBookmarkAdapter: get path from storage, sendNativeMessage with type and path'
+      - 'Service worker: path set -> NativeHostFileBookmarkAdapter; else picker configured -> MessageFileBookmarkAdapter'
   code_locations:
     files:
-      - path: "src/ui/options/options.html"
-        description: "Path input for file storage"
-      - path: "src/ui/options/options.js"
-        description: "Load/save path, persistFileStoragePath"
-      - path: "native_host/helper.sh"
-        description: "readBookmarksFile/writeBookmarksFile with path (Unix)"
-      - path: "native_host/helper.ps1"
-        description: "readBookmarksFile/writeBookmarksFile with path (Windows)"
-      - path: "src/features/storage/native-host-file-bookmark-adapter.js"
-        description: "Adapter using native host and path from storage"
-      - path: "src/core/service-worker.js"
-        description: "initBookmarkProvider path vs picker branch"
+      - path: src/ui/options/options.html
+        description: Path input for file storage
+      - path: src/ui/options/options.js
+        description: Load/save path, persistFileStoragePath
+      - path: native_host/helper.sh
+        description: readBookmarksFile/writeBookmarksFile with path (Unix)
+      - path: native_host/helper.ps1
+        description: readBookmarksFile/writeBookmarksFile with path (Windows)
+      - path: src/features/storage/native-host-file-bookmark-adapter.js
+        description: Adapter using native host and path from storage
+      - path: src/core/service-worker.js
+        description: initBookmarkProvider path vs picker branch
   traceability:
     architecture:
       - ARCH-FILE_BOOKMARK_PROVIDER
@@ -1893,13 +1823,12 @@ IMPL-FILE_STORAGE_TYPED_PATH:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Path-based file storage per plan"
-
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Path-based file storage per plan
 IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
   name: File Storage Helper Path Normalization
   status: Active
@@ -1907,29 +1836,29 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
     - IMPL-FILE_STORAGE_TYPED_PATH
     - REQ-FILE_BOOKMARK_STORAGE
   rationale:
-    why: "Chrome native host can set HOME with a trailing slash; concatenation produced paths like /Users/name//.hoverboard so the write could fail or create wrong path; return success only when file exists and is non-empty"
+    why: Chrome native host can set HOME with a trailing slash; concatenation produced paths like /Users/name//.hoverboard so the write could fail or create wrong path; return success only when file exists and is non-empty
     problems_solved:
-      - "Bookmark file not created when extension reported success (HOME trailing slash)"
-      - "False success when write actually failed"
+      - Bookmark file not created when extension reported success (HOME trailing slash)
+      - False success when write actually failed
     benefits:
-      - "expand_tilde uses ${HOME%/} so resolved path has no double slash"
-      - "Helper returns error if file is missing or empty after write"
+      - expand_tilde uses ${HOME%/} so resolved path has no double slash
+      - Helper returns error if file is missing or empty after write
   implementation_approach:
-    summary: "In helper.sh expand_tilde use H=${HOME%/}; after write, verify file exists and -s (non-empty) before echoing success"
+    summary: In helper.sh expand_tilde use H=${HOME%/}; after write, verify file exists and -s (non-empty) before echoing success
     details:
-      - "expand_tilde: H=\"${HOME%/}\"; use H in all branches so ~/.hoverboard becomes /home/user/.hoverboard not /home/user//.hoverboard"
-      - "writeBookmarksFile: after echo DATA > FILE, if [ ! -f \"$FILE\" ] || [ ! -s \"$FILE\" ]; then echo error and exit"
+      - 'expand_tilde: H="${HOME%/}"; use H in all branches so ~/.hoverboard becomes /home/user/.hoverboard not /home/user//.hoverboard'
+      - 'writeBookmarksFile: after echo DATA > FILE, if [ ! -f "$FILE" ] || [ ! -s "$FILE" ]; then echo error and exit'
   code_locations:
     files:
-      - path: "native_host/helper.sh"
-        description: "expand_tilde and writeBookmarksFile post-write check"
+      - path: native_host/helper.sh
+        description: expand_tilde and writeBookmarksFile post-write check
   traceability:
     architecture:
       - ARCH-FILE_BOOKMARK_PROVIDER
     requirements:
       - REQ-FILE_BOOKMARK_STORAGE
     tests:
-      - "tests/unit/helper-path-normalize.test.js"
+      - tests/unit/helper-path-normalize.test.js
     code_annotations:
       - IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE
   related_decisions:
@@ -1941,65 +1870,9 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-14"
-      author: "AI Agent"
+      date: '2026-02-14'
+      author: AI Agent
     last_updated:
-      date: "2026-02-14"
-      author: "AI Agent"
-      reason: "Helper path normalization and post-write verification"
-
-# IMPL-IDENTIFIER:
-#   name: Implementation Title
-#   status: Active
-#   cross_references:
-#     - ARCH-RELATED_ARCHITECTURE
-#     - REQ-RELATED_REQUIREMENT
-#   rationale:
-#     why: "Primary reason for this implementation approach"
-#     problems_solved:
-#       - "Problem 1"
-#       - "Problem 2"
-#     benefits:
-#       - "Benefit 1"
-#       - "Benefit 2"
-#   implementation_approach:
-#     summary: "High-level description of implementation"
-#     details:
-#       - "Specific technical detail 1"
-#       - "Code structure or pattern"
-#       - "API design decision"
-#   code_locations:
-#     files:
-#       - path: "path/to/file.ext"
-#         description: "Description of what's implemented there"
-#         lines: [10, 50]  # optional line range
-#     functions:
-#       - name: "exampleFunction"
-#         file: "path/to/file.ext"
-#         description: "What it does"
-#   traceability:
-#     architecture:
-#       - ARCH-IDENTIFIER
-#     requirements:
-#       - REQ-IDENTIFIER
-#     tests:
-#       - testFeatureName_REQ_IDENTIFIER
-#     code_annotations:
-#       - IMPL-IDENTIFIER
-#   related_decisions:
-#     depends_on: []
-#     supersedes: []
-#     see_also: []
-#   detail_file: implementation-decisions/IMPL-IDENTIFIER.md
-#   metadata:
-#     created:
-#       date: YYYY-MM-DD
-#       author: "agent/contributor"
-#     last_updated:
-#       date: YYYY-MM-DD
-#       author: "agent/contributor"
-#       reason: "Initial creation"
-#     last_validated:
-#       date: YYYY-MM-DD
-#       validator: "agent/contributor"
-#       result: "pass"
+      date: '2026-02-14'
+      author: AI Agent
+      reason: Helper path normalization and post-write verification

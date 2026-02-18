@@ -138,7 +138,7 @@ REQ-NEW_FEATURE:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-NEW_FEATURE.md
+  detail_file: requirements/REQ-NEW_FEATURE.yaml
   metadata:
     created:
       date: 2026-02-06
