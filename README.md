@@ -33,6 +33,8 @@ npm install
 npm run build:dev
 ```
 
+**Load the built extension** (required): In Chrome/Brave go to `chrome://extensions` (or `brave://extensions`), turn on **Developer mode**, click **Load unpacked**, and select the **`dist`** folder inside the repo (not the repo root). The extension must be loaded from `dist` because the service worker and content scripts use bundled dependencies (e.g. `fast-xml-parser`); loading from the repo root will fail with "Failed to resolve module specifier".
+
 ### Optional: Native messaging host
 
 For features that need to run local code (e.g. outside the browser sandbox), the extension can talk to a **native messaging host**. The host is a thin wrapper that runs code installed next to it (not from the extension folder). You install it once:

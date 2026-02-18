@@ -1526,6 +1526,152 @@ IMPL-SYNC_BOOKMARK_SERVICE:
     registered: 2026-02-15
     last_updated: 2026-02-15
 
+REQ-UI_INSPECTION:
+  type: REQ
+  name: UI Inspection and Testability
+  category: Non-Functional
+  status: Active
+  description: "Ability to inspect UI inputs, actions, message flow, and outputs for testing and debugging"
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - IMPL-UI_ACTION_CONTRACT
+    - IMPL-UI_INSPECTOR
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-UI_INSPECTION.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+ARCH-UI_TESTABILITY:
+  type: ARCH
+  name: UI Testability and Inspection Architecture
+  status: Active
+  description: "Inspector and contract for message/action logging; single source of truth for action IDs and message types"
+  cross_references:
+    - REQ-UI_INSPECTION
+    - IMPL-UI_ACTION_CONTRACT
+    - IMPL-UI_INSPECTOR
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-UI_TESTABILITY.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-UI_ACTION_CONTRACT:
+  type: IMPL
+  name: UI Action Contract
+  status: Active
+  description: "ui-action-contract.js: MESSAGE_TYPES, POPUP_ACTION_IDS, CONTENT_MESSAGE_TYPES, OVERLAY_ACTION_IDS"
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-UI_INSPECTOR:
+  type: IMPL
+  name: UI Inspector
+  status: Active
+  description: "Optional message/action ring buffers; wired in SW, popup, content script; gated by DEBUG_HOVERBOARD_UI"
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-UI_TESTABILITY_HOOKS:
+  type: IMPL
+  name: UI Testability Hooks
+  status: Active
+  description: "Optional onMessageProcessed, onAction, onStateChange callbacks for tests"
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+    - REQ-MODULE_VALIDATION
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-DEV_COMMAND_INSPECTION:
+  type: IMPL
+  name: DEV_COMMAND storage and router inspection
+  status: Active
+  description: "DEV_COMMAND subcommands for getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl, getStorageSnapshot; test helpers"
+  cross_references:
+    - REQ-UI_INSPECTION
+    - REQ-URL_TAGS_DISPLAY
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-DEBUG_PANEL:
+  type: IMPL
+  name: Debug panel and structured UI/message logging
+  status: Active
+  description: "LOG_CATEGORIES in debug-logger; debug panel (last N actions/messages, current state) gated by DEBUG_HOVERBOARD_UI"
+  cross_references:
+    - REQ-UI_INSPECTION
+    - ARCH-UI_TESTABILITY
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
+  type: REQ
+  name: Extension Bundled Entry Points
+  category: Non-Functional
+  status: Active
+  description: "Browser-loaded extension scripts must be bundled so bare module specifiers (e.g. fast-xml-parser) are never resolved at runtime"
+  cross_references:
+    - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+    - IMPL-POPUP_BUNDLE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
+  type: ARCH
+  name: Extension Bundled Entry Points
+  status: Active
+  description: "All four entry points (service worker, popup, options, content script) built as single bundles with dependencies inlined; copy step skips entry files"
+  cross_references:
+    - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
+    - IMPL-POPUP_BUNDLE
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
+IMPL-POPUP_BUNDLE:
+  type: IMPL
+  name: Popup bundle build
+  status: Active
+  description: "build:popup bundles popup.js; build script skips copying popup.js so extension loads bundled popup (fixes bare specifier fast-xml-parser error)"
+  cross_references:
+    - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
+    - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: "2026-02-17"
+    last_updated: "2026-02-17"
+
 # ---
 # Template Record - Copy this block to create new tokens
 # ---

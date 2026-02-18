@@ -7,6 +7,10 @@ import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
 import { debugLog, debugError } from '../../shared/utils.js'
 import { ConfigManager } from '../../config/config-manager.js'
+// [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
+import { recordAction } from '../../shared/ui-inspector.js'
+import { POPUP_ACTION_IDS } from '../../shared/ui-action-contract.js'
+import { debugLogger, LOG_CATEGORIES } from '../../shared/debug-logger.js'
 
 debugLog('[SAFARI-EXT-SHIM-001] PopupController.js: module loaded');
 
@@ -28,6 +32,9 @@ export class PopupController {
     this.currentPin = null
     this.isInitialized = false
     this.isLoading = false
+    // [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Optional test hooks
+    this._onAction = null
+    this._onStateChange = null
 
     // [IMPL-POPUP_MESSAGE_TIMEOUT] Preserve predictable refresh behavior in tests and runtime
     const isTestEnv = typeof process !== 'undefined' && process?.env?.JEST_WORKER_ID
@@ -179,6 +186,22 @@ export class PopupController {
   }
 
   /**
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
+   * Set optional callback for UI actions (for tests). Signature: ({ actionId, payload }) => void
+   */
+  setOnAction (fn) {
+    this._onAction = typeof fn === 'function' ? fn : null
+  }
+
+  /**
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
+   * Set optional callback for state/screen changes (for tests). Signature: ({ screen, state }) => void
+   */
+  setOnStateChange (fn) {
+    this._onStateChange = typeof fn === 'function' ? fn : null
+  }
+
+  /**
    * Load initial data when popup opens
    * [POPUP-DATA-FLOW-001] Enhanced data flow validation
    */
@@ -268,10 +291,18 @@ export class PopupController {
       const manifest = chrome.runtime.getManifest()
       this.uiManager.updateVersionInfo(manifest.version)
 
-      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Load current storage backend for URL (pinboard | local | file | sync)
-      const storageBackend = await this.getStorageBackendForUrl(this.currentTab?.url)
-      this.uiManager.updateStorageBackendValue(storageBackend || 'local')
-      this.uiManager.updateStorageLocalToggle(storageBackend || 'local', !!this.currentPin)
+      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] [REQ-STORAGE_MODE_DEFAULT] When not bookmarked: show default storage (ARCH).
+      const hasRealBookmark = !!(this.currentPin?.time)
+      const validBackends = ['pinboard', 'local', 'file', 'sync']
+      let storageBackend
+      if (!hasRealBookmark) {
+        storageBackend = await this.configManager.getStorageMode()
+      } else {
+        storageBackend = await this.getStorageBackendForUrl(this.currentTab?.url)
+      }
+      const backend = validBackends.includes(storageBackend) ? storageBackend : (await this.configManager.getStorageMode()) || 'local'
+      this.uiManager.updateStorageBackendValue(backend)
+      this.uiManager.updateStorageLocalToggle(backend, hasRealBookmark)
       // [REQ-MOVE_BOOKMARK_STORAGE_UI] Disable Pinboard storage option when no API token configured
       const token = await this.configManager.getAuthToken()
       this.uiManager.updateStoragePinboardEnabled(!!(token && token.trim()))
@@ -279,8 +310,12 @@ export class PopupController {
       // Mark as initialized
       this.isInitialized = true
       debugLog('[POPUP-DATA-FLOW-001] Popup initialization completed successfully')
+      if (this._onStateChange) {
+        this._onStateChange({ screen: 'mainInterface', state: { bookmark: this.currentPin } })
+      }
     } catch (error) {
       debugError('[POPUP-DATA-FLOW-001] Failed to load initial data:', error)
+      if (this._onStateChange) this._onStateChange({ screen: 'error', state: {} })
       if (this.errorHandler) {
         this.errorHandler.handleError('Failed to load initial data', error)
       }
@@ -809,6 +844,8 @@ export class PopupController {
    * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move current bookmark to target storage backend.
    */
   async handleStorageBackendChange (targetBackend) {
+    recordAction(POPUP_ACTION_IDS.storageBackendChange, { targetBackend }, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.storageBackendChange, payload: { targetBackend } })
     // [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Use bookmark URL when available so move uses same key as storage.
     const url = this.currentPin?.url || this.currentTab?.url
     if (!url) return
@@ -1454,6 +1491,9 @@ export class PopupController {
   setLoading (isLoading) {
     this.isLoading = isLoading
     this.uiManager.setLoading(isLoading)
+    if (this._onStateChange) {
+      this._onStateChange({ screen: isLoading ? 'loading' : 'mainInterface', state: { bookmark: this.currentPin } })
+    }
   }
 
   /**
@@ -1464,6 +1504,9 @@ export class PopupController {
    * Modified to NOT close popup after toggling overlay visibility
    */
   async handleShowHoverboard () {
+    recordAction(POPUP_ACTION_IDS.showHoverboard, { tabId: this.currentTab?.id }, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.showHoverboard, payload: { tabId: this.currentTab?.id } })
+    debugLogger.trace('PopupController', 'handleShowHoverboard', { tabId: this.currentTab?.id }, LOG_CATEGORIES.UI)
     try {
       debugLog('Attempting to show hoverboard on tab:', this.currentTab)
 
@@ -1500,6 +1543,8 @@ export class PopupController {
    * Handle toggle private status
    */
   async handleTogglePrivate () {
+    recordAction(POPUP_ACTION_IDS.togglePrivate, { hasBookmark: !!this.currentPin }, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.togglePrivate, payload: { hasBookmark: !!this.currentPin } })
     try {
       this.setLoading(true)
 
@@ -1550,6 +1595,8 @@ export class PopupController {
    * Handle read later action - toggles the toread attribute
    */
   async handleReadLater () {
+    recordAction(POPUP_ACTION_IDS.readLater, { hasBookmark: !!this.currentPin }, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.readLater, payload: { hasBookmark: !!this.currentPin } })
     try {
       this.setLoading(true)
 
@@ -1604,6 +1651,8 @@ export class PopupController {
    * [IMMUTABLE-REQ-TAG-003] - Enhanced with user-driven recent tags tracking
    */
   async handleAddTag (tagText) {
+    recordAction(POPUP_ACTION_IDS.addTag, { tag: tagText }, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.addTag, payload: { tag: tagText } })
     if (!tagText || !tagText.trim()) {
       this.errorHandler.handleError('Please enter a tag')
       return
@@ -1683,6 +1732,8 @@ export class PopupController {
    * Handle remove tag action
    */
   async handleRemoveTag (tagToRemove) {
+    recordAction(POPUP_ACTION_IDS.removeTag, { tag: tagToRemove }, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.removeTag, payload: { tag: tagToRemove } })
     if (!this.currentPin) {
       this.errorHandler.handleError('No bookmark found')
       return
@@ -1825,6 +1876,8 @@ export class PopupController {
    * Handle search action - now uses tab search functionality
    */
   async handleSearch (searchText) {
+    recordAction(POPUP_ACTION_IDS.search, { searchText }, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.search, payload: { searchText } })
     debugLog('[SEARCH-UI] Starting search:', { searchText, currentTab: this.currentTab })
 
     if (!searchText || !searchText.trim()) {
@@ -1886,6 +1939,8 @@ export class PopupController {
    * Modified to NOT close popup after deletion - popup stays open for continued interaction
    */
   async handleDeletePin () {
+    recordAction(POPUP_ACTION_IDS.deletePin, { url: this.currentPin?.url }, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.deletePin, payload: { url: this.currentPin?.url } })
     if (!this.currentPin) {
       this.errorHandler.handleError('No bookmark found to delete')
       return
@@ -1929,6 +1984,8 @@ export class PopupController {
    * Modified to NOT close popup after reload - popup stays open for continued interaction
    */
   async handleReloadExtension () {
+    recordAction(POPUP_ACTION_IDS.reloadExtension, undefined, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.reloadExtension, payload: undefined })
     try {
       // Extension reload doesn't need a message - just reload the tab
       if (this.currentTab) {
@@ -1946,6 +2003,8 @@ export class PopupController {
    * Modified to NOT close popup after opening options - popup stays open for continued interaction
    */
   async handleOpenOptions () {
+    recordAction(POPUP_ACTION_IDS.openOptions, undefined, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openOptions, payload: undefined })
     try {
       chrome.runtime.openOptionsPage()
       this.uiManager.showSuccess('Options page opened in new tab')
@@ -1960,6 +2019,8 @@ export class PopupController {
    * Open the local bookmarks index page in a new tab.
    */
   handleOpenBookmarksIndex () {
+    recordAction(POPUP_ACTION_IDS.openBookmarksIndex, undefined, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openBookmarksIndex, payload: undefined })
     try {
       const url = chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html')
       chrome.tabs.create({ url })
@@ -2031,6 +2092,8 @@ export class PopupController {
    * [POPUP-REFRESH-001] Manual refresh capability
    */
   async refreshPopupData() {
+    recordAction(POPUP_ACTION_IDS.refreshData, undefined, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.refreshData, payload: undefined })
     debugLog('[POPUP-REFRESH-001] Starting manual refresh')
     try {
       this.setLoading(true)
@@ -2154,6 +2217,8 @@ export class PopupController {
    * [SHOW-HOVER-CHECKBOX-CONTROLLER-003] - Handle checkbox state change
    */
   async handleShowHoverOnPageLoadChange() {
+    recordAction(POPUP_ACTION_IDS.showHoverOnPageLoadChange, undefined, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.showHoverOnPageLoadChange, payload: undefined })
     try {
       const isChecked = this.uiManager.elements.showHoverOnPageLoad.checked
 

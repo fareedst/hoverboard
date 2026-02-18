@@ -220,4 +220,20 @@ export const createStorageResponse = (data) => Promise.resolve(data);
  * @param {Array} tabs - Tabs data
  * @returns {Promise} Promise that resolves with tabs
  */
-export const createTabsResponse = (tabs) => Promise.resolve(tabs); 
+export const createTabsResponse = (tabs) => Promise.resolve(tabs);
+
+/**
+ * [REQ-UI_INSPECTION] DEV_COMMAND test helpers - call MessageHandler.processDevCommand for inspection.
+ * Use in unit tests that have a MessageHandler instance; requires debug flag for getStorageSnapshot in real SW.
+ */
+export async function devCommandGetCurrentBookmark (messageHandler, { url }, senderContext = {}) {
+  return await messageHandler.processDevCommand({ subcommand: 'getCurrentBookmark', url }, senderContext)
+}
+
+export async function devCommandGetTagsForUrl (messageHandler, { url }, senderContext = {}) {
+  return await messageHandler.processDevCommand({ subcommand: 'getTagsForUrl', url }, senderContext)
+}
+
+export async function devCommandGetStorageBackendForUrl (messageHandler, { url }, senderContext = {}) {
+  return await messageHandler.processDevCommand({ subcommand: 'getStorageBackendForUrl', url }, senderContext)
+} 

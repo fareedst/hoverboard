@@ -11,6 +11,9 @@ import { DOMUtils } from './dom-utils.js'
 import { MESSAGE_TYPES } from '../../core/message-handler.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
 import { browser, debugLog, debugError } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+// [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
+import { recordAction } from '../../shared/ui-inspector.js'
+import { debugLogger, LOG_CATEGORIES } from '../../shared/debug-logger.js'
 
 // Global debug flag
 window.HOVERBOARD_DEBUG = true
@@ -113,6 +116,8 @@ class HoverboardContentScript {
 
   async handleMessage (message, sender, sendResponse) {
     try {
+      recordAction(message.type, message.data, 'content')
+      debugLogger.trace('content-main', 'handleMessage', { type: message.type }, LOG_CATEGORIES.MESSAGE)
       console.log('Content script received message:', message.type)
 
       switch (message.type) {
@@ -372,6 +377,7 @@ class HoverboardContentScript {
 
   async showHover (userTriggered = false) {
     try {
+      debugLogger.trace('content-main', 'showHover', { userTriggered }, LOG_CATEGORIES.OVERLAY)
       debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] showHover called', { userTriggered, platform: navigator.userAgent });
       // Platform detection
       if (typeof chrome !== 'undefined' && chrome.runtime) {

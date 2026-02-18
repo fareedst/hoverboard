@@ -1699,3 +1699,53 @@ REQ-CODE_QUALITY:
       date: '2025-02-17'
       validator: agent
       result: pass
+REQ-UI_INSPECTION:
+  name: UI Inspection and Testability
+  category: Non-Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Enable thorough testing and debugging of extension UI by inspecting inputs, actions, message flow, and outputs
+    problems_solved:
+      - Difficult to assert on UI actions and message flow in tests
+      - No single source of truth for message types and action IDs
+    benefits:
+      - Tests can assert on action/message sequence; E2E and unit tests share same contract
+  satisfaction_criteria:
+    - criterion: UI action contract and optional inspector implemented and wired
+      metric: ui-action-contract.js, ui-inspector.js; SW/popup/content record messages and actions when enabled
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    implementation:
+      - IMPL-UI_ACTION_CONTRACT
+      - IMPL-UI_INSPECTOR
+  detail_file: requirements/REQ-UI_INSPECTION.yaml
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent
+REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
+  name: Extension Bundled Entry Points
+  category: Non-Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Browser-loaded extension scripts must not contain bare module specifiers; all entry points must be bundled so npm dependencies are inlined
+    problems_solved:
+      - "Failed to resolve module specifier" when popup or other entry loaded unbundled code with npm imports
+    benefits:
+      - Extension loads reliably from dist; service worker, popup, options, content script are single bundles
+  satisfaction_criteria:
+    - criterion: All four entry points built as bundles; build copy step skips those entry files
+      metric: build:sw, build:popup, build:options, build:content; scripts/build.js skip list
+  traceability:
+    architecture:
+      - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+    implementation:
+      - IMPL-POPUP_BUNDLE
+  detail_file: requirements/REQ-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent

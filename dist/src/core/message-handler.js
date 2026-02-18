@@ -10,6 +10,7 @@ import { TagService } from '../features/tagging/tag-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { TabSearchService } from '../features/search/tab-search-service.js'
 import { debugLog, debugError, browser } from '../shared/utils.js'
+import { debugLogger, LOG_CATEGORIES } from '../shared/debug-logger.js'
 
 // Message type constants - migrated from config.js
 export const MESSAGE_TYPES = {
@@ -93,6 +94,14 @@ export class MessageHandler {
   }
 
   /**
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
+   * Set optional callback invoked after each message is processed (for tests). Signature: ({ type, data, response, error, senderContext }) => void
+   */
+  setOnMessageProcessed (fn) {
+    this._onMessageProcessed = typeof fn === 'function' ? fn : null
+  }
+
+  /**
    * Process incoming messages with modern async/await pattern
    * @param {Object} message - The message object
    * @param {Object} sender - Chrome extension sender info
@@ -151,114 +160,144 @@ export class MessageHandler {
     }
 
     debugLog(`Processing message: ${type}`, { data, tabId, url })
+    debugLogger.debug('message-handler', `processMessage ${type}`, { dataSanitized: !!data, tabId, url }, LOG_CATEGORIES.MESSAGE)
 
-    switch (type) {
-      case MESSAGE_TYPES.GET_CURRENT_BOOKMARK:
-        return this.handleGetCurrentBookmark(data, url, tabId)
-
-      case MESSAGE_TYPES.GET_TAGS_FOR_URL:
-        return this.handleGetTagsForUrl(data)
-
-      case MESSAGE_TYPES.GET_RECENT_BOOKMARKS:
-        return this.handleGetRecentBookmarks(data, url)
-
-      case MESSAGE_TYPES.GET_LOCAL_BOOKMARKS_FOR_INDEX:
-        return this.handleGetLocalBookmarksForIndex()
-
-      case MESSAGE_TYPES.GET_AGGREGATED_BOOKMARKS_FOR_INDEX:
-        return this.handleGetAggregatedBookmarksForIndex()
-
-      case MESSAGE_TYPES.GET_OPTIONS:
-        return this.handleGetOptions()
-
-      case MESSAGE_TYPES.SAVE_BOOKMARK:
-        return this.handleSaveBookmark(data)
-
-      case MESSAGE_TYPES.DELETE_BOOKMARK:
-        return this.handleDeleteBookmark(data)
-
-      case MESSAGE_TYPES.SAVE_TAG:
-        return this.handleSaveTag(data)
-
-      case MESSAGE_TYPES.DELETE_TAG:
-        return this.handleDeleteTag(data)
-
-      case MESSAGE_TYPES.GET_STORAGE_BACKEND_FOR_URL:
-        return this.handleGetStorageBackendForUrl(data)
-
-      case MESSAGE_TYPES.MOVE_BOOKMARK_TO_STORAGE:
-        return this.handleMoveBookmarkToStorage(data)
-
-      case MESSAGE_TYPES.INHIBIT_URL:
-        return this.handleInhibitUrl(data)
-
-      case MESSAGE_TYPES.SEARCH_TITLE:
-        return this.handleSearchTitle(data, tabId)
-
-      // [IMMUTABLE-REQ-TAG-002] Handle tab search messages
-      case MESSAGE_TYPES.SEARCH_TABS:
-        return this.handleSearchTabs(data, tabId)
-
-      case MESSAGE_TYPES.GET_SEARCH_HISTORY:
-        return this.handleGetSearchHistory()
-
-      case MESSAGE_TYPES.CLEAR_SEARCH_STATE:
-        return this.handleClearSearchState()
-
-      // [IMMUTABLE-REQ-TAG-003] Handle recent tags messages
-      case MESSAGE_TYPES.ADD_TAG_TO_RECENT:
-        return this.handleAddTagToRecent(data)
-
-      case MESSAGE_TYPES.GET_USER_RECENT_TAGS:
-        return this.handleGetUserRecentTags(data)
-
-      case MESSAGE_TYPES.GET_SHARED_MEMORY_STATUS:
-        return this.handleGetSharedMemoryStatus()
-
-      case MESSAGE_TYPES.GET_TAB_ID:
-        // For content scripts, the tabId should come from sender.tab.id
-        // For popup/background, we need to get the current active tab
-        debugLog('[MESSAGE-HANDLER] Processing GET_TAB_ID, current tabId:', tabId)
-        if (!tabId) {
-          try {
-            debugLog('[MESSAGE-HANDLER] Getting current active tab for GET_TAB_ID')
-            const tabs = await browser.tabs.query({ active: true, currentWindow: true })
-            if (tabs.length > 0) {
-              tabId = tabs[0].id
-              debugLog('[MESSAGE-HANDLER] Found active tab:', tabId)
-            } else {
-              debugLog('[MESSAGE-HANDLER] No active tab found, using sender tab')
+    const senderContext = { tabId, url }
+    let response
+    try {
+      switch (type) {
+        case MESSAGE_TYPES.GET_CURRENT_BOOKMARK:
+          response = await this.handleGetCurrentBookmark(data, url, tabId)
+          break
+        case MESSAGE_TYPES.GET_TAGS_FOR_URL:
+          response = await this.handleGetTagsForUrl(data)
+          break
+        case MESSAGE_TYPES.GET_RECENT_BOOKMARKS:
+          response = await this.handleGetRecentBookmarks(data, url)
+          break
+        case MESSAGE_TYPES.GET_LOCAL_BOOKMARKS_FOR_INDEX:
+          response = await this.handleGetLocalBookmarksForIndex()
+          break
+        case MESSAGE_TYPES.GET_AGGREGATED_BOOKMARKS_FOR_INDEX:
+          response = await this.handleGetAggregatedBookmarksForIndex()
+          break
+        case MESSAGE_TYPES.GET_OPTIONS:
+          response = await this.handleGetOptions()
+          break
+        case MESSAGE_TYPES.SAVE_BOOKMARK:
+          response = await this.handleSaveBookmark(data)
+          break
+        case MESSAGE_TYPES.DELETE_BOOKMARK:
+          response = await this.handleDeleteBookmark(data)
+          break
+        case MESSAGE_TYPES.SAVE_TAG:
+          response = await this.handleSaveTag(data)
+          break
+        case MESSAGE_TYPES.DELETE_TAG:
+          response = await this.handleDeleteTag(data)
+          break
+        case MESSAGE_TYPES.GET_STORAGE_BACKEND_FOR_URL:
+          response = await this.handleGetStorageBackendForUrl(data)
+          break
+        case MESSAGE_TYPES.MOVE_BOOKMARK_TO_STORAGE:
+          response = await this.handleMoveBookmarkToStorage(data)
+          break
+        case MESSAGE_TYPES.INHIBIT_URL:
+          response = await this.handleInhibitUrl(data)
+          break
+        case MESSAGE_TYPES.SEARCH_TITLE:
+          response = await this.handleSearchTitle(data, tabId)
+          break
+        case MESSAGE_TYPES.SEARCH_TABS:
+          response = await this.handleSearchTabs(data, tabId)
+          break
+        case MESSAGE_TYPES.GET_SEARCH_HISTORY:
+          response = await this.handleGetSearchHistory()
+          break
+        case MESSAGE_TYPES.CLEAR_SEARCH_STATE:
+          response = await this.handleClearSearchState()
+          break
+        case MESSAGE_TYPES.ADD_TAG_TO_RECENT:
+          response = await this.handleAddTagToRecent(data)
+          break
+        case MESSAGE_TYPES.GET_USER_RECENT_TAGS:
+          response = await this.handleGetUserRecentTags(data)
+          break
+        case MESSAGE_TYPES.GET_SHARED_MEMORY_STATUS:
+          response = await this.handleGetSharedMemoryStatus()
+          break
+        case MESSAGE_TYPES.GET_TAB_ID:
+          if (!tabId) {
+            try {
+              const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+              if (tabs.length > 0) tabId = tabs[0].id
+            } catch (err) {
+              debugError('[MESSAGE-HANDLER] Error getting active tab:', err)
             }
-          } catch (error) {
-            debugError('[MESSAGE-HANDLER] Error getting active tab:', error)
           }
-        }
-        debugLog('[MESSAGE-HANDLER] Returning tabId:', tabId)
-        return { tabId }
+          response = { tabId }
+          break
+        case MESSAGE_TYPES.CONTENT_SCRIPT_READY:
+          response = await this.handleContentScriptReady(data, tabId, url)
+          break
+        case MESSAGE_TYPES.UPDATE_OVERLAY_CONFIG:
+          response = await this.handleUpdateOverlayConfig(data)
+          break
+        case MESSAGE_TYPES.GET_OVERLAY_CONFIG:
+          response = await this.handleGetOverlayConfig()
+          break
+        case MESSAGE_TYPES.BOOKMARK_UPDATED:
+          response = await this.handleBookmarkUpdated(data, tabId)
+          break
+        case MESSAGE_TYPES.TAG_UPDATED:
+          response = await this.handleTagUpdated(data, tabId)
+          break
+        case MESSAGE_TYPES.ECHO:
+          response = { echo: data, timestamp: Date.now() }
+          break
+        case MESSAGE_TYPES.DEV_COMMAND:
+          response = await this.processDevCommand(data, senderContext)
+          break
+        default:
+          throw new Error(`Unknown message type: ${type}`)
+      }
+    } catch (error) {
+      if (this._onMessageProcessed) {
+        this._onMessageProcessed({ type, data, response: null, error: error.message, senderContext })
+      }
+      throw error
+    }
+    if (this._onMessageProcessed) {
+      this._onMessageProcessed({ type, data, response, error: null, senderContext })
+    }
+    return response
+  }
 
-      case MESSAGE_TYPES.CONTENT_SCRIPT_READY:
-        return this.handleContentScriptReady(data, tabId, url)
-
-      case MESSAGE_TYPES.UPDATE_OVERLAY_CONFIG:
-        return this.handleUpdateOverlayConfig(data)
-
-      case MESSAGE_TYPES.GET_OVERLAY_CONFIG:
-        return this.handleGetOverlayConfig()
-
-      // [TOGGLE-SYNC-MESSAGE-001] - Handle bookmark updates across interfaces
-      case MESSAGE_TYPES.BOOKMARK_UPDATED:
-        debugLog('[MessageHandler] BOOKMARK_UPDATED message received', { data, tabId })
-        return this.handleBookmarkUpdated(data, tabId)
-
-      // [TAG-SYNC-MESSAGE-001] - Handle tag updates across interfaces
-      case MESSAGE_TYPES.TAG_UPDATED:
-        return this.handleTagUpdated(data, tabId)
-
-      case MESSAGE_TYPES.ECHO:
-        return { echo: data, timestamp: Date.now() }
-
-      default:
-        throw new Error(`Unknown message type: ${type}`)
+  /**
+   * [REQ-UI_INSPECTION] Handle DEV_COMMAND subcommands for tests and debug panel (only when caller has set debug flag).
+   * Subcommands: getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl. getStorageSnapshot is handled in service worker.
+   */
+  async processDevCommand (data, senderContext) {
+    const sub = data?.subcommand
+    if (!sub) return { error: 'missing subcommand' }
+    const url = data?.url || senderContext?.url
+    const tabId = data?.tabId ?? senderContext?.tabId
+    try {
+      switch (sub) {
+        case 'getCurrentBookmark':
+          if (!url) return { error: 'url required' }
+          return await this.handleGetCurrentBookmark(data, url, tabId)
+        case 'getTagsForUrl':
+          if (!url) return { error: 'url required' }
+          return await this.handleGetTagsForUrl({ ...data, url })
+        case 'getStorageBackendForUrl':
+          if (!url) return { error: 'url required' }
+          return await this.handleGetStorageBackendForUrl({ url })
+        default:
+          return { error: 'unknown subcommand' }
+      }
+    } catch (err) {
+      return { error: err.message }
     }
   }
 

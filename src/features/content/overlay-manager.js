@@ -66,7 +66,27 @@ class OverlayManager {
     // [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] - Initialize tag service for suggested tags extraction
     this.tagService = new TagService()
 
+    // [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Optional test hooks
+    this._onStateChange = null
+    this._onOverlayAction = null
+
     debugLog('OverlayManager initialized', { config, transparencyMode: this.transparencyMode })
+  }
+
+  /**
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
+   * Set optional callback for overlay state changes (for tests). Signature: ({ visible, contentSnapshot }) => void
+   */
+  setOnStateChange (fn) {
+    this._onStateChange = typeof fn === 'function' ? fn : null
+  }
+
+  /**
+   * [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-UI_INSPECTION]
+   * Set optional callback for overlay user actions (for tests). Signature: (actionId) => void. actionId: 'refresh' | 'close' | 'tag-added' | 'tag-removed' | 'togglePrivate' | 'toggleReadLater'
+   */
+  setOnOverlayAction (fn) {
+    this._onOverlayAction = typeof fn === 'function' ? fn : null
   }
 
   /**
@@ -210,7 +230,10 @@ class OverlayManager {
         align-items: center;
         justify-content: center;
       `
-      closeBtn.onclick = () => this.hide()
+      closeBtn.onclick = () => {
+        if (this._onOverlayAction) this._onOverlayAction('close')
+        this.hide()
+      }
 
       // [OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Keyboard event handlers
       this.logger.log('DEBUG', 'OverlayManager', 'Adding close button keyboard handlers')
@@ -276,6 +299,7 @@ class OverlayManager {
                 }
                 // [arch:atomic-sync] - Refresh overlay with updated content
                 this.show(content)
+                if (this._onOverlayAction) this._onOverlayAction('tag-removed')
                 this.showMessage('Tag deleted successfully', 'success') // [test:tag-deletion]
               } catch (error) {
                 this.logger.log('ERROR', 'OverlayManager', 'Failed to delete tag', { tag, error })
@@ -326,6 +350,7 @@ class OverlayManager {
               // [IMMUTABLE-REQ-TAG-004] - Clear input and refresh overlay with updated content
               tagInput.value = ''
               this.show(content) // Refresh overlay with updated local content
+              if (this._onOverlayAction) this._onOverlayAction('tag-added')
               debugLog('[IMMUTABLE-REQ-TAG-004] Tag persisted successfully', tagText)
               this.showMessage('Tag saved successfully', 'success')
             } catch (error) {
@@ -390,6 +415,7 @@ class OverlayManager {
 
                     // [TAG-SYNC-OVERLAY-001] - Refresh overlay with updated local content
                     this.show(content) // Refresh overlay with updated local content
+                    if (this._onOverlayAction) this._onOverlayAction('tag-added')
                     debugLog('[TAG-SYNC-OVERLAY-001] Tag persisted from recent', tag)
                     this.showMessage('Tag saved successfully', 'success')
                   } catch (error) {
@@ -706,7 +732,19 @@ class OverlayManager {
       debugLog('[OverlayManager] Setting overlay opacity to 1')
       this.overlayElement.style.opacity = '1'
       this.isVisible = true
-
+      if (this._onStateChange) {
+        const b = content?.bookmark
+        this._onStateChange({
+          visible: true,
+          contentSnapshot: {
+            title: b?.description || content?.pageTitle,
+            url: content?.pageUrl || b?.url,
+            tags: b?.tags,
+            private: b?.shared === 'no',
+            toread: b?.toread === 'yes'
+          }
+        })
+      }
       debugLog('Overlay positioned and displayed')
       console.log('🎨 [Overlay Debug] Final overlay visibility check:', {
         isVisible: this.isVisible,
@@ -745,6 +783,7 @@ class OverlayManager {
         }
         this.isVisible = false
         this.currentContent = null
+        if (this._onStateChange) this._onStateChange({ visible: false, contentSnapshot: null })
         debugLog('Overlay hidden successfully')
       })
     } catch (error) {
@@ -860,6 +899,7 @@ class OverlayManager {
   async handleRefreshButtonClick() {
     // [OVERLAY-TEST-LOG-001] Enhanced debug logging for refresh button click
     this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
+    if (this._onOverlayAction) this._onOverlayAction('refresh')
 
     const refreshButton = this.document.querySelector('.refresh-button')
     this.logger.log('DEBUG', 'OverlayManager', 'Found refresh button', { found: !!refreshButton })

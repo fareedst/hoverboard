@@ -373,10 +373,12 @@ export class UIManager {
 
   /**
    * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Update storage backend buttons: set aria-pressed on the selected backend (pinboard | local | file | sync).
+   * [REQ-STORAGE_MODE_DEFAULT] If backend is falsy, use 'local' so one option is always selected.
    */
   updateStorageBackendValue (backend) {
+    if (!backend) backend = 'local'
     const container = this.elements.storageBackendButtons
-    if (!container || !backend) return
+    if (!container) return
     const buttons = container.querySelectorAll('.storage-backend-btn')
     buttons.forEach(btn => {
       const isSelected = btn.getAttribute('data-backend') === backend

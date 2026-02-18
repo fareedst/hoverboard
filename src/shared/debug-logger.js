@@ -1,10 +1,19 @@
 /**
  * Debug Logger - Enhanced logging system for Safari extension development
  * [SAFARI-EXT-DEBUG-001] Enhanced debug logging system
+ * [IMPL-DEBUG_PANEL] Categories (ui, message, overlay, storage) for structured UI/message debug output.
  *
  * This module provides comprehensive logging with levels, timestamps, and component tracking
  * to help debug extension loading issues and Safari-specific problems.
  */
+
+/** @readonly Categories for filtering: ui, message, overlay, storage */
+export const LOG_CATEGORIES = Object.freeze({
+  UI: 'ui',
+  MESSAGE: 'message',
+  OVERLAY: 'overlay',
+  STORAGE: 'storage'
+})
 
 class DebugLogger {
   constructor () {
@@ -19,6 +28,8 @@ class DebugLogger {
     this.currentLevel = this.logLevels.DEBUG
     this.logBuffer = [] // Store logs for analysis
     this.maxBufferSize = 1000
+    /** @type {string[]} When non-empty, only these categories are logged (e.g. ['message','ui']). Empty = all. */
+    this.categoryFilter = []
   }
 
   /**
@@ -27,20 +38,26 @@ class DebugLogger {
    * @param {string} component - Component name for tracking
    * @param {string} message - Log message
    * @param {*} data - Optional data to log
+   * @param {string} [category] - Optional category (LOG_CATEGORIES.UI | MESSAGE | OVERLAY | STORAGE) for filtering
    */
-  log (level, component, message, data = null) {
+  log (level, component, message, data = null, category = null) {
     if (!this.debugEnabled || this.logLevels[level] > this.currentLevel) {
+      return
+    }
+    if (this.categoryFilter.length && category && !this.categoryFilter.includes(category)) {
       return
     }
 
     const timestamp = new Date().toISOString()
     const prefix = `[${timestamp}] [${level}] [${component}]`
+    const categoryPrefix = category ? `[${category}] ` : ''
 
     // Create log entry
     const logEntry = {
       timestamp: Date.now(),
       level,
       component,
+      category: category || null,
       message,
       data
     }
@@ -50,9 +67,9 @@ class DebugLogger {
 
     // Output to console
     if (data) {
-      console.log(prefix, message, data)
+      console.log(prefix, categoryPrefix + message, data)
     } else {
-      console.log(prefix, message)
+      console.log(prefix, categoryPrefix + message)
     }
   }
 
@@ -74,9 +91,10 @@ class DebugLogger {
    * @param {string} component - Component name
    * @param {string} message - Error message
    * @param {*} data - Optional error data
+   * @param {string} [category] - Optional category for filtering
    */
-  error (component, message, data) {
-    this.log('ERROR', component, message, data)
+  error (component, message, data, category) {
+    this.log('ERROR', component, message, data, category)
   }
 
   /**
@@ -84,9 +102,10 @@ class DebugLogger {
    * @param {string} component - Component name
    * @param {string} message - Warning message
    * @param {*} data - Optional warning data
+   * @param {string} [category] - Optional category for filtering
    */
-  warn (component, message, data) {
-    this.log('WARN', component, message, data)
+  warn (component, message, data, category) {
+    this.log('WARN', component, message, data, category)
   }
 
   /**
@@ -94,9 +113,10 @@ class DebugLogger {
    * @param {string} component - Component name
    * @param {string} message - Info message
    * @param {*} data - Optional info data
+   * @param {string} [category] - Optional category for filtering
    */
-  info (component, message, data) {
-    this.log('INFO', component, message, data)
+  info (component, message, data, category) {
+    this.log('INFO', component, message, data, category)
   }
 
   /**
@@ -104,9 +124,10 @@ class DebugLogger {
    * @param {string} component - Component name
    * @param {string} message - Debug message
    * @param {*} data - Optional debug data
+   * @param {string} [category] - Optional category for filtering
    */
-  debug (component, message, data) {
-    this.log('DEBUG', component, message, data)
+  debug (component, message, data, category) {
+    this.log('DEBUG', component, message, data, category)
   }
 
   /**
@@ -114,9 +135,18 @@ class DebugLogger {
    * @param {string} component - Component name
    * @param {string} message - Trace message
    * @param {*} data - Optional trace data
+   * @param {string} [category] - Optional category for filtering
    */
-  trace (component, message, data) {
-    this.log('TRACE', component, message, data)
+  trace (component, message, data, category) {
+    this.log('TRACE', component, message, data, category)
+  }
+
+  /**
+   * Set category filter: only log entries with these categories (empty = all).
+   * @param {string[]} categories - e.g. [LOG_CATEGORIES.MESSAGE, LOG_CATEGORIES.UI]
+   */
+  setCategoryFilter (categories) {
+    this.categoryFilter = Array.isArray(categories) ? categories : []
   }
 
   /**

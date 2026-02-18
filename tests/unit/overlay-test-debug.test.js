@@ -1,11 +1,18 @@
 /**
  * [OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests
- * 
+ * [ARCH-OVERLAY_TESTABILITY] [IMPL-OVERLAY_TEST_HARNESS] [REQ-UI_INSPECTION]
  * Comprehensive unit tests for enhanced mock DOM and debug logging
- * Tests element creation, registration, querying, and debug output
+ * Tests element creation, registration, querying, displayed state snapshot, and action log
  */
 
 import { OverlayManager } from '../../src/features/content/overlay-manager.js'
+import {
+  setOverlayDisplayedSnapshot,
+  getOverlayDisplayedSnapshot,
+  pushOverlayAction,
+  getOverlayActionLog,
+  clearOverlayTestHarness
+} from '../utils/overlay-test-harness.js'
 const { createMockDocument } = require('../utils/mock-dom')
 
 // [OVERLAY-TEST-UNIT-001] Enhanced overlay testing debug unit tests
@@ -34,6 +41,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
 
   afterEach(() => {
     // [OVERLAY-TEST-RESET-001] Enhanced cleanup with mock document reset
+    clearOverlayTestHarness()
     jest.clearAllMocks()
     if (mockDocument.reset) {
       mockDocument.reset()
@@ -129,6 +137,60 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
       expect(allElements).toHaveLength(2)
       expect(allElements).toContain(button1)
       expect(allElements).toContain(button2)
+    })
+  })
+
+  // [ARCH-OVERLAY_TESTABILITY] [REQ-UI_INSPECTION] Displayed state snapshot and action log
+  describe('Overlay displayed state snapshot and action log', () => {
+    beforeEach(() => {
+      overlayManager.overlayElement = null
+      overlayManager.isVisible = false
+      overlayManager.currentContent = null
+      if (mockDocument.reset) mockDocument.reset()
+      overlayManager.loadRecentTagsForOverlay = jest.fn().mockResolvedValue([])
+      overlayManager.tagService = { extractSuggestedTagsFromContent: jest.fn().mockReturnValue([]) }
+    })
+
+    test('should capture displayed state snapshot via setOnStateChange callback', () => {
+      overlayManager.setOnStateChange(({ contentSnapshot }) => {
+        setOverlayDisplayedSnapshot(contentSnapshot)
+      })
+      const snapshot = { title: 'Example Title', url: 'https://example.com', tags: ['a', 'b'], private: true, toread: true }
+      overlayManager._onStateChange({ visible: true, contentSnapshot: snapshot })
+      const received = getOverlayDisplayedSnapshot()
+      expect(received).not.toBeNull()
+      expect(received.title).toBe('Example Title')
+      expect(received.url).toBe('https://example.com')
+      expect(received.tags).toEqual(['a', 'b'])
+      expect(received.private).toBe(true)
+      expect(received.toread).toBe(true)
+    })
+
+    test('should record overlay action via setOnOverlayAction callback', () => {
+      overlayManager.setOnOverlayAction((actionId) => pushOverlayAction(actionId))
+      overlayManager._onOverlayAction('close')
+      const log = getOverlayActionLog()
+      expect(log.length).toBe(1)
+      expect(log[0].actionId).toBe('close')
+    })
+
+    test('should record refresh action when refresh button is clicked', async () => {
+      overlayManager.setOnOverlayAction((actionId) => pushOverlayAction(actionId))
+      const content = {
+        bookmark: { url: 'https://example.com', tags: [] },
+        pageTitle: 'Test',
+        pageUrl: 'https://example.com'
+      }
+      await overlayManager.show(content)
+      const refreshBtn = mockDocument.querySelector('.refresh-button')
+      expect(refreshBtn).toBeDefined()
+      if (typeof refreshBtn._triggerClick === 'function') {
+        await refreshBtn._triggerClick()
+      } else if (typeof refreshBtn.onclick === 'function') {
+        await refreshBtn.onclick()
+      }
+      const log = getOverlayActionLog()
+      expect(log.some((e) => e.actionId === 'refresh')).toBe(true)
     })
   })
 

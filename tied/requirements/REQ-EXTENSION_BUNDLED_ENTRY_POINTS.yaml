@@ -1,0 +1,39 @@
+REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
+  name: Extension Bundled Entry Points
+  category: Non-Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: The browser loads extension scripts as ES modules but does not resolve bare module specifiers (e.g. 'fast-xml-parser'); any script loaded directly by the browser must have npm dependencies inlined so the extension runs without "Failed to resolve module specifier" errors
+    problems_solved:
+      - Popup (or other entry points) loading unbundled code that imports npm packages via bare specifiers
+      - Dynamic import chains (e.g. PopupController → TagService → PinboardService) pulling in raw files that contain 'fast-xml-parser' or similar
+    benefits:
+      - Extension loads reliably when loaded from dist; no runtime resolution of npm package names
+      - All entry points (service worker, popup, options, content script) are single bundles with dependencies inlined
+  satisfaction_criteria:
+    - criterion: Service worker, popup, options page, and content script are built as bundles (esbuild) with dependencies inlined
+      metric: build:sw, build:popup, build:options, build:content in package.json; scripts/build.js runs each and skips copying those entry files
+    - criterion: No browser-loaded script in dist contains unresolved bare specifiers (e.g. import from 'fast-xml-parser')
+      metric: Only bundled entry files are loaded by manifest; copied source files (e.g. pinboard-service.js) are not loaded as entry points
+  validation_criteria:
+    - method: Manual
+      coverage: Load extension from dist; open popup and options; no "Failed to resolve module specifier" error
+  traceability:
+    architecture:
+      - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+    implementation:
+      - IMPL-POPUP_BUNDLE
+    code_annotations:
+      - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+      - IMPL-POPUP_BUNDLE
+      - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent

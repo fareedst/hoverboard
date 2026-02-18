@@ -20,6 +20,8 @@ import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
 import { browser } from '../shared/safari-shim.js' // [SAFARI-EXT-SHIM-001]
+// [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Optional message log for testing/debugging
+import * as uiInspector from '../shared/ui-inspector.js'
 
 /**
  * [IMMUTABLE-REQ-TAG-003] - Recent Tags Memory Manager
@@ -258,11 +260,19 @@ class HoverboardServiceWorker {
   }
 
   async handleMessage (message, sender) {
+    // [IMPL-UI_INSPECTOR] Enable inspector in SW from storage (no localStorage in SW)
+    try {
+      const prefs = await browser.storage.local.get('DEBUG_HOVERBOARD_UI')
+      if (prefs.DEBUG_HOVERBOARD_UI) uiInspector.setEnabled(true)
+    } catch (_) {}
+
     try {
       // [REQ-NATIVE_HOST_WRAPPER] [IMPL-NATIVE_HOST_WRAPPER] Optional ping to native host for testing connectivity
       if (message.type === 'NATIVE_PING') {
         const pingResult = await this.pingNativeHost()
-        return { success: true, data: pingResult }
+        const out = { success: true, data: pingResult }
+        uiInspector.recordMessage(message.type, message.data, sender, out)
+        return out
       }
 
       // [ARCH-LOCAL_STORAGE_PROVIDER] Lazy-init provider from config (storage mode)
@@ -273,7 +283,43 @@ class HoverboardServiceWorker {
       // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode switch: re-init provider and respond (no processMessage)
       if (message.type === MESSAGE_TYPES.SWITCH_STORAGE_MODE) {
         await this.initBookmarkProvider()
-        return { success: true, data: { switched: true } }
+        const out = { success: true, data: { switched: true } }
+        uiInspector.recordMessage(message.type, message.data, sender, out)
+        return out
+      }
+
+      // [REQ-UI_INSPECTION] DEV_COMMAND: only when debug flag set; getStorageSnapshot handled in SW
+      if (message.type === MESSAGE_TYPES.DEV_COMMAND) {
+        let devEnabled = false
+        try {
+          const prefs = await browser.storage.local.get('DEBUG_HOVERBOARD_UI')
+          devEnabled = !!prefs.DEBUG_HOVERBOARD_UI
+        } catch (_) {}
+        if (!devEnabled) {
+          const out = { success: false, error: 'debug not enabled' }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
+        if (message.data?.subcommand === 'getStorageSnapshot') {
+          const local = await browser.storage.local.get(null)
+          const sync = await browser.storage.sync.get(null).catch(() => ({}))
+          const redact = (obj) => Object.keys(obj).filter((k) => !/token|password|secret|auth/i.test(k))
+          const out = { success: true, data: { local: redact(local), sync: redact(sync) } }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
+        if (message.data?.subcommand === 'getLastActions') {
+          const n = message.data?.n ?? 20
+          const out = { success: true, data: uiInspector.getLastActions(n) }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
+        if (message.data?.subcommand === 'getLastMessages') {
+          const n = message.data?.n ?? 20
+          const out = { success: true, data: uiInspector.getLastMessages(n) }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
       }
 
       console.log('[SERVICE-WORKER] Processing message:', message.type)
@@ -291,10 +337,14 @@ class HoverboardServiceWorker {
         if (tab) await this.updateBadgeForTab(tab)
       }
 
-      return { success: true, data: response }
+      const out = { success: true, data: response }
+      uiInspector.recordMessage(message.type, message.data, sender, out)
+      return out
     } catch (error) {
       console.error('Service worker message error:', error)
-      return { success: false, error: error.message }
+      const out = { success: false, error: error.message }
+      uiInspector.recordMessage(message?.type, message?.data, sender, out)
+      return out
     }
   }
 

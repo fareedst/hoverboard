@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoverboard Debug</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 12px; max-width: 900px; }
+    h1 { font-size: 1.2rem; }
+    h2 { font-size: 1rem; margin-top: 1rem; }
+    section { margin-bottom: 1rem; }
+    pre { background: #f0f0f0; padding: 8px; overflow: auto; font-size: 12px; max-height: 200px; }
+    .error { color: #c00; }
+    button { margin-right: 8px; margin-bottom: 8px; }
+    .meta { color: #666; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>Hoverboard Debug Panel</h1>
+  <p class="meta">[IMPL-DEBUG_PANEL] Only works when debug is enabled (storage: DEBUG_HOVERBOARD_UI).</p>
+  <section>
+    <button id="refresh">Refresh</button>
+  </section>
+  <section>
+    <h2>Last actions</h2>
+    <pre id="actions">—</pre>
+  </section>
+  <section>
+    <h2>Last messages</h2>
+    <pre id="messages">—</pre>
+  </section>
+  <section>
+    <h2>Current tab state</h2>
+    <pre id="current-state">—</pre>
+  </section>
+  <script type="module" src="debug.js"></script>
+</body>
+</html>

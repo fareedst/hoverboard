@@ -5,9 +5,26 @@ All notable changes to the Hoverboard Browser Extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.2.0] - 2026-02-17
+
+### Added
+
+- **Extension UI Inspection and Testability** (`REQ-UI_INSPECTION`, `ARCH-UI_TESTABILITY`) – Enables testing and debugging of extension UI via a single contract, optional inspector, and testability hooks:
+  - **UI action contract** (`IMPL-UI_ACTION_CONTRACT`): `src/shared/ui-action-contract.js` re-exports `MESSAGE_TYPES` and defines popup/overlay action IDs for tests and inspector.
+  - **UI inspector** (`IMPL-UI_INSPECTOR`): Optional ring buffers (last 50 messages, last 50 actions) in `src/shared/ui-inspector.js`; gated by `DEBUG_HOVERBOARD_UI` in storage; wired in service worker, popup, and content script.
+  - **Testability hooks** (`IMPL-UI_TESTABILITY_HOOKS`): Optional `onMessageProcessed`, `onAction`, `onStateChange` on message handler, popup, and overlay for unit/integration tests without DOM.
+  - **Overlay test harness**: Displayed-state snapshot and action log helpers for overlay unit tests (`tests/utils/overlay-test-harness.js`).
+  - **E2E snapshot helpers**: `snapshotPopup`, `snapshotOverlay`, `snapshotOptions` in `tests/e2e/helpers.js` for real-browser assertions.
+  - **DEV_COMMAND inspection** (`IMPL-DEV_COMMAND_INSPECTION`): When debug is enabled, `DEV_COMMAND` subcommands `getCurrentBookmark`, `getTagsForUrl`, `getStorageBackendForUrl`, `getStorageSnapshot`, `getLastActions`, `getLastMessages` for tests and debug panel.
+  - **Debug panel** (`IMPL-DEBUG_PANEL`): Optional `src/ui/debug/debug.html` shows last N actions, last N messages, and current tab state (bookmark, tags, storage backend); structured debug logging with categories (`ui`, `message`, `overlay`, `storage`) in `src/shared/debug-logger.js`.
+
+- **Extension bundled entry points** (`REQ-EXTENSION_BUNDLED_ENTRY_POINTS`, `ARCH-EXTENSION_BUNDLED_ENTRY_POINTS`) – Requirement and architecture for bundling all browser-loaded entry points so bare module specifiers (e.g. npm package names) are never resolved at runtime. Implemented by existing service worker, options, and content script bundles plus new popup bundle.
 
 ### Changed
+
+- **Dependencies: fast-xml-parser and eslint** – Upgraded `fast-xml-parser` from `^4.3.2` to `^5.3.6` to address **high** severity DoS (entity expansion in DOCTYPE, GHSA-jmr7-xgp7-cmfj). `npm audit --audit-level=high` now passes. Added explicit dev dependency `eslint-plugin-n` so lint succeeds after install. Moderate ajv/ESLint findings remain (fix would require breaking ESLint downgrade); documented in security check.
+
+- **README: Load extension from dist** – Build-from-source instructions now state that the unpacked extension must be loaded from the **`dist`** folder (not the repo root), and that loading from the root causes "Failed to resolve module specifier" errors because the browser cannot resolve npm package names in unbundled scripts.
 
 - **TIED detail files: Markdown → YAML** – Requirement, architecture, and implementation **detail** files in `tied/requirements/`, `tied/architecture-decisions/`, and `tied/implementation-decisions/` are now stored as **YAML** (e.g. `REQ-TIED_SETUP.yaml`, `ARCH-SUGGESTED_TAGS.yaml`, `IMPL-URL_TAGS_DISPLAY.yaml`). The YAML indexes (`requirements.yaml`, `architecture-decisions.yaml`, `implementation-decisions.yaml`) and `semantic-tokens.yaml` reference these `.yaml` detail files. Guide files (`requirements.md`, `architecture-decisions.md`, `implementation-decisions.md`) remain Markdown. Existing `.md` detail files were converted via MCP; new detail files should be created as `.yaml`.
 
@@ -32,6 +49,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Popup "Failed to resolve module specifier 'fast-xml-parser'"** (`IMPL-POPUP_BUNDLE`, `REQ-EXTENSION_BUNDLED_ENTRY_POINTS`) – Opening the popup when the extension was loaded from `dist` could fail with the above error because the popup was loaded unbundled; its dependency chain (e.g. PopupController → TagService → PinboardService) eventually loaded the raw `pinboard-service.js`, which contains `import ... from 'fast-xml-parser'` (a bare specifier the browser cannot resolve). The popup is now built as a single bundle (`npm run build:popup`); `scripts/build.js` runs the popup build and skips copying `ui/popup/popup.js` so the extension always loads the bundled popup with dependencies inlined.
+
 - **Pinboard API key can be cleared** – The Options page previously only called `setAuthToken` when the token field was non-empty, so clearing the field and saving left the old token in storage. Save now always persists the current field value; **clear the Pinboard API Token field and click Save** to disable Pinboard. Help text in Options: "Leave empty and save to disable Pinboard." Same fix in `options.js` and `options-browser.js`.
 
 - **File storage helper path normalization** (`IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE`) – When the native host runs with `HOME` set with a trailing slash (e.g. by Chrome’s environment), the helper now normalizes it so `~/.hoverboard` resolves to a path without a double slash; the bookmark file is created at `~/.hoverboard/hoverboard-bookmarks.json` as expected. The helper also verifies the file exists and is non-empty after writing before returning success.
@@ -43,6 +62,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Technical Details
 
+- **UI Inspection TIED:** `REQ-UI_INSPECTION`, `ARCH-UI_TESTABILITY`, `IMPL-UI_ACTION_CONTRACT`, `IMPL-UI_INSPECTOR`, `IMPL-UI_TESTABILITY_HOOKS`, `IMPL-DEV_COMMAND_INSPECTION`, `IMPL-DEBUG_PANEL` in requirements, architecture-decisions, implementation-decisions, and semantic-tokens.
+- **Bundled entry points TIED:** `REQ-EXTENSION_BUNDLED_ENTRY_POINTS`, `ARCH-EXTENSION_BUNDLED_ENTRY_POINTS`, `IMPL-POPUP_BUNDLE`; detail files `tied/requirements/REQ-EXTENSION_BUNDLED_ENTRY_POINTS.yaml`, `tied/architecture-decisions/ARCH-EXTENSION_BUNDLED_ENTRY_POINTS.yaml`.
 - **Storage:** Four backends: Pinboard (P), File (F), Local (L, default), Sync (S). `VALID_BACKENDS` and BookmarkRouter include `sync`; ConfigManager and Options support `storageMode: 'sync'`. Sync uses `chrome.storage.sync` key `hoverboard_sync_bookmarks`. TIED: `ARCH-SYNC_STORAGE_PROVIDER`, `IMPL-SYNC_BOOKMARK_SERVICE` in semantic-tokens and implementation-decisions.
 - **Popup:** UIManager `updateStorageBackendValue(backend)` and `updateStoragePinboardEnabled(hasApiKey)`; PopupController loads auth token and disables Pinboard button when empty. Implementation decision: Pinboard option disabled when no API token.
 - **Auth:** Options save flow always calls `setAuthToken(authToken)` (including empty string) so user can clear token to disable Pinboard.

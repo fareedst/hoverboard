@@ -301,6 +301,40 @@ describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
     })
   })
 
+  describe('[REQ-STORAGE_MODE_DEFAULT] Default storage selected when no bookmark', () => {
+    test('when page has no bookmark, updateStorageBackendValue is called with default storage mode (e.g. local)', async () => {
+      const mockConfigManager = {
+        getStorageMode: jest.fn().mockResolvedValue('local'),
+        getAuthToken: jest.fn().mockResolvedValue('')
+      }
+      uiManager.updateStorageBackendValue = jest.fn()
+      popupController = new PopupController({
+        errorHandler,
+        stateManager,
+        uiManager,
+        configManager: mockConfigManager
+      })
+
+      chrome.runtime.sendMessage.mockImplementation((message, callback) => {
+        if (message.type === 'getCurrentBookmark') {
+          callback({ success: true, data: null })
+        } else if (message.type === 'getRecentBookmarks') {
+          callback({ success: true, data: { recentTags: [] } })
+        } else {
+          callback({ success: true, data: null })
+        }
+      })
+      chrome.tabs.query.mockImplementation((query, callback) => {
+        callback([{ id: 1, url: 'https://example.com', title: 'Test Page' }])
+      })
+
+      await popupController.loadInitialData()
+
+      expect(mockConfigManager.getStorageMode).toHaveBeenCalled()
+      expect(uiManager.updateStorageBackendValue).toHaveBeenCalledWith('local')
+    })
+  })
+
   describe('[POPUP-DEBUG-001] Debug Logging', () => {
     test('should log comprehensive debug information', async () => {
       const mockBookmark = {

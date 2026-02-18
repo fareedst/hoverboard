@@ -1,0 +1,48 @@
+REQ-UI_INSPECTION:
+  name: UI Inspection and Testability
+  category: Non-Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Enable thorough testing and debugging of extension UI by inspecting inputs, actions, message flow, and outputs
+    problems_solved:
+      - Difficult to assert on UI actions and message flow in tests
+      - No single source of truth for message types and action IDs
+      - Hard to inspect stored/displayed state for regression testing
+    benefits:
+      - Tests can assert on action/message sequence without DOM
+      - E2E and unit tests share same contract (message types, action IDs)
+      - Debug and dev panel can show last N actions and state
+  satisfaction_criteria:
+    - criterion: UI action contract exports MESSAGE_TYPES and popup/overlay action IDs
+      metric: src/shared/ui-action-contract.js
+    - criterion: Optional inspector records messages and actions when enabled
+      metric: src/shared/ui-inspector.js; gated by DEBUG_HOVERBOARD_UI or setEnabled
+    - criterion: Service worker, popup, and content script wire inspector
+      metric: recordMessage in SW; recordAction in popup and content script
+  validation_criteria:
+    - method: Unit tests
+      coverage: Contract and inspector API used in tests
+    - method: Manual
+      coverage: Set DEBUG_HOVERBOARD_UI and verify no-op when unset
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    implementation:
+      - IMPL-UI_ACTION_CONTRACT
+      - IMPL-UI_INSPECTOR
+    code_annotations:
+      - IMPL-UI_ACTION_CONTRACT
+      - IMPL-UI_INSPECTOR
+      - ARCH-UI_TESTABILITY
+      - REQ-UI_INSPECTION
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-MODULE_VALIDATION
+      - REQ-OVERLAY_SYSTEM
+  detail_file: requirements/REQ-UI_INSPECTION.yaml
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent

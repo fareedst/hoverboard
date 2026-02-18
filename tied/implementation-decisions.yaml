@@ -733,6 +733,187 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
       reason: Migrated from STDD to TIED format
+IMPL-UI_ACTION_CONTRACT:
+  name: UI Action Contract
+  status: Active
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+  rationale:
+    why: Single source of truth for message types and popup/overlay action IDs for tests and inspector
+    problems_solved:
+      - Scattered message type and action definitions
+    benefits:
+      - Tests and E2E use same contract
+  implementation_approach:
+    summary: src/shared/ui-action-contract.js re-exports MESSAGE_TYPES; exports POPUP_ACTION_IDS, POPUP_ACTION_TO_MESSAGE, CONTENT_MESSAGE_TYPES, OVERLAY_ACTION_IDS
+  code_locations:
+    files:
+      - path: src/shared/ui-action-contract.js
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    requirements:
+      - REQ-UI_INSPECTION
+    code_annotations:
+      - IMPL-UI_ACTION_CONTRACT
+  detail_file: null
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent
+IMPL-UI_INSPECTOR:
+  name: UI Inspector
+  status: Active
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+  rationale:
+    why: Optional action and message log for testing and debugging when enabled
+    problems_solved:
+      - Cannot inspect message flow and UI actions in tests or manually
+    benefits:
+      - recordMessage/recordAction ring buffers; getLastMessages/getLastActions; gated by DEBUG_HOVERBOARD_UI or setEnabled
+  implementation_approach:
+    summary: src/shared/ui-inspector.js; wired in service-worker (recordMessage), PopupController (recordAction), content-main (recordAction)
+  code_locations:
+    files:
+      - path: src/shared/ui-inspector.js
+      - path: src/core/service-worker.js
+      - path: src/ui/popup/PopupController.js
+      - path: src/features/content/content-main.js
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    requirements:
+      - REQ-UI_INSPECTION
+    code_annotations:
+      - IMPL-UI_INSPECTOR
+  detail_file: null
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent
+IMPL-UI_TESTABILITY_HOOKS:
+  name: UI Testability Hooks
+  status: Active
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+    - REQ-MODULE_VALIDATION
+  rationale:
+    why: Optional callbacks so unit/integration tests can assert on message handling and UI state without DOM
+    problems_solved:
+      - Tests cannot observe message flow or popup/overlay state without DOM
+    benefits:
+      - MessageHandler.setOnMessageProcessed(fn); PopupController.setOnAction(fn), setOnStateChange(fn); OverlayManager.setOnStateChange(fn)
+  implementation_approach:
+    summary: Optional _onMessageProcessed in MessageHandler (called after processMessage); _onAction/_onStateChange in PopupController; _onStateChange in OverlayManager (visible, contentSnapshot)
+  code_locations:
+    files:
+      - path: src/core/message-handler.js
+      - path: src/ui/popup/PopupController.js
+      - path: src/features/content/overlay-manager.js
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    requirements:
+      - REQ-UI_INSPECTION
+      - REQ-MODULE_VALIDATION
+  detail_file: null
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent
+IMPL-DEV_COMMAND_INSPECTION:
+  name: DEV_COMMAND storage and router inspection
+  status: Active
+  cross_references:
+    - REQ-UI_INSPECTION
+    - REQ-URL_TAGS_DISPLAY
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+  rationale:
+    why: Tests and debug panel can read current bookmark, tags for URL, storage backend, and storage key list
+    problems_solved:
+      - Cannot inspect stored state without manual steps
+    benefits:
+      - processDevCommand in MessageHandler; getStorageSnapshot in SW when DEBUG_HOVERBOARD_UI set
+  implementation_approach:
+    summary: DEV_COMMAND subcommands getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl (message-handler); getStorageSnapshot (service worker, returns key names only)
+  code_locations:
+    files:
+      - path: src/core/message-handler.js
+      - path: src/core/service-worker.js
+      - path: tests/utils/test-helpers.js
+  traceability:
+    requirements:
+      - REQ-UI_INSPECTION
+  detail_file: null
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent
+IMPL-DEBUG_PANEL:
+  name: Debug panel and structured UI/message logging
+  status: Active
+  cross_references:
+    - REQ-UI_INSPECTION
+    - ARCH-UI_TESTABILITY
+    - ai-principles.md
+  rationale:
+    why: Consistent DEBUG/TRACE labels for UI and message flow; optional in-extension view of last N actions and state
+    problems_solved:
+      - Ad-hoc console.log/debugLog scattered across message-handler, popup, content
+    benefits:
+      - debug-logger.js categories (ui, message, overlay, storage); debug panel shows inspector ring buffers and current tab state via DEV_COMMAND
+  implementation_approach:
+    summary: LOG_CATEGORIES in debug-logger; debugLogger.trace/debug in message-handler, PopupController, content-main; src/ui/debug/debug.html + debug.js (last actions, last messages, current bookmark/tags/backend)
+  code_locations:
+    files:
+      - path: src/shared/debug-logger.js
+      - path: src/core/message-handler.js
+      - path: src/ui/popup/PopupController.js
+      - path: src/features/content/content-main.js
+      - path: src/ui/debug/debug.html
+      - path: src/ui/debug/debug.js
+  traceability:
+    requirements:
+      - REQ-UI_INSPECTION
+  detail_file: null
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent
+IMPL-POPUP_BUNDLE:
+  name: Popup bundle build
+  status: Active
+  cross_references:
+    - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
+    - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+  rationale:
+    why: Popup was loaded unbundled; its dependency chain (e.g. PopupController → TagService → PinboardService → fast-xml-parser) caused "Failed to resolve module specifier 'fast-xml-parser'" when opening the popup
+    problems_solved:
+      - Popup opening triggered dynamic import of pinboard-service.js (raw copy in dist) which contains bare import of fast-xml-parser
+    benefits:
+      - Popup entry is a single bundle with all dependencies inlined; no bare specifiers at runtime
+  implementation_approach:
+    summary: build:popup bundles src/ui/popup/popup.js to dist/src/ui/popup/popup.js; scripts/build.js runs build:popup and skips copying ui/popup/popup.js
+  code_locations:
+    files:
+      - path: package.json
+        description: build:popup script
+      - path: scripts/build.js
+        description: Run build:popup; skip ui/popup/popup.js in copyDir
+  traceability:
+    requirements:
+      - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
+    architecture:
+      - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+  detail_file: null
+  metadata:
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
+    author: AI Agent
 IMPL-BADGE_REFRESH:
   name: Badge refresh on overlay and popup changes
   status: Active

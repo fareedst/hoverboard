@@ -1,0 +1,20 @@
+ARCH-UI_TESTABILITY:
+  rationale:
+    why: Single source of truth for message types and action IDs; optional inspector for testing and debugging
+    problems_solved:
+      - Tests and E2E cannot reliably assert on message flow and UI actions
+      - No shared contract between popup, content script, and service worker for inspection
+    benefits:
+      - Inspector records messages and actions when enabled (gated by flag)
+      - Contract module used by tests and inspector
+  implementation_approach:
+    summary: ui-action-contract.js re-exports MESSAGE_TYPES and defines POPUP_ACTION_IDS/OVERLAY_ACTION_IDS; ui-inspector.js provides ring buffers and is wired in SW, popup, content
+    details:
+      - Service worker records each message after handleMessage; popup/content recordAction at start of handlers
+      - Inspector enabled via localStorage DEBUG_HOVERBOARD_UI or setEnabled in SW (from chrome.storage.local)
+  traceability:
+    requirements:
+      - REQ-UI_INSPECTION
+    implementation:
+      - IMPL-UI_ACTION_CONTRACT
+      - IMPL-UI_INSPECTOR

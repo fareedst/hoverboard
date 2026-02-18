@@ -24,6 +24,10 @@ execSync('npm run build:options', { stdio: 'inherit' });
 console.log('Building content scripts...');
 execSync('npm run build:content', { stdio: 'inherit' });
 
+// Build popup with dependencies (so fast-xml-parser etc. are bundled; unbundled popup would load raw pinboard-service.js)
+console.log('Building popup...');
+execSync('npm run build:popup', { stdio: 'inherit' });
+
 // Copy manifest
 fs.copyFileSync(
     path.join(rootDir, 'manifest.json'),
@@ -49,6 +53,7 @@ const copyDir = (src, dest) => {
             if (entry.name === 'service-worker.js') continue;
             if (srcPath.includes('ui/options/options.js')) continue;
             if (srcPath.includes('features/content/content-main.js')) continue;
+            if (srcPath.includes('ui/popup/popup.js')) continue;
             fs.copyFileSync(srcPath, destPath);
         }
     }
