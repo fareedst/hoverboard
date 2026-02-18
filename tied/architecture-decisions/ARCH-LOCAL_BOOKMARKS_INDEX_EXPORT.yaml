@@ -12,8 +12,10 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
     details: []
   traceability:
     requirements: *ref_0
-    implementation: []
-    tests: []
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+    tests:
+      - tests/unit/bookmarks-table-export.test.js
     code_annotations:
       - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
   related_decisions:
@@ -42,6 +44,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
     - Create Blob (e.g. `text/csv; charset=utf-8` or `application/json`).
     - Create object URL; create `<a download="filename">`, set href to object URL; programmatic click(); revokeObjectURL; remove anchor.
   filteredbookmarks: Result of applying search and filters (and current sort); used for "Export displayed".
+  selected_scope: "Export selected" uses bookmarks whose URL is in the current selection (selectedUrls); list built from allBookmarks.filter(b => selectedUrls.has(b.url)). Export and Move UI are placed below the table; index page header is compact (minimal height).
   json: '(optional): Array of bookmark objects as returned from the index (description, url, tags, time, shared, toread, extended, etc.).'
   related:
     - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT (export UI and exportBookmarks implementation)

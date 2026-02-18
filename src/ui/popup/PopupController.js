@@ -399,6 +399,14 @@ export class PopupController {
         return
       }
 
+      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Skip script injection on restricted URLs (extension pages, chrome://, etc.)
+      const url = (this.currentTab.url || '').trim()
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Tab URL not injectable (chrome-extension://, chrome://, etc.), skipping suggested tags')
+        this.uiManager.updateSuggestedTags([])
+        return
+      }
+
       // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags using content script injection
       // Import TagService dynamically to avoid circular dependencies
       const { TagService } = await import('../../features/tagging/tag-service.js')

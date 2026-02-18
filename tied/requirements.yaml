@@ -1207,6 +1207,7 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       - IMPL-SUGGESTED_TAGS
     tests:
       - Suggested tags tests
+      - tests/unit/popup-suggested-tags.test.js
     code_annotations:
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
   related_requirements:
@@ -1222,9 +1223,9 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       date: 2025-07-14T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-13T00:00:00.000Z
+      date: 2026-02-18T00:00:00.000Z
       author: AI Agent
-      reason: Enhanced with meta tags, emphasis elements, and structured content extraction
+      reason: Add restricted-URL skip criterion; add popup-suggested-tags tests
 REQ-SUGGESTED_TAGS_DEDUPLICATION:
   name: Suggested Tags Deduplication
   category: Functional
@@ -1391,7 +1392,8 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
       - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
     implementation:
       - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
-    tests: []
+    tests:
+      - tests/unit/bookmarks-table-export.test.js
     code_annotations:
       - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
   related_requirements:

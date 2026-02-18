@@ -8176,6 +8176,12 @@ var PopupController = class {
         this.uiManager.updateSuggestedTags([]);
         return;
       }
+      const url = (this.currentTab.url || "").trim();
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        debugLog("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Tab URL not injectable (chrome-extension://, chrome://, etc.), skipping suggested tags");
+        this.uiManager.updateSuggestedTags([]);
+        return;
+      }
       const { TagService: TagService2 } = await Promise.resolve().then(() => (init_tag_service(), tag_service_exports));
       const tagService = new TagService2();
       try {

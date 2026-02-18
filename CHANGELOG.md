@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Local Bookmarks Index layout and export** (`REQ-LOCAL_BOOKMARKS_INDEX`, `REQ-LOCAL_BOOKMARKS_INDEX_EXPORT`) – UX updates:
+  - **Compact header:** Banner and page heading use minimal height (smaller logo, tighter spacing, smaller type for title and subtitle).
+  - **Export and Move below table:** "Export all", "Export displayed", "Export selected", and "Move selected to" (dropdown + Move button) are in an **actions-below-table** block under the bookmarks table (no longer in the toolbar).
+  - **Export selected:** New "Export selected" button; enabled when one or more bookmarks are selected; downloads CSV of only the selected bookmarks. Unit tests in `tests/unit/bookmarks-table-export.test.js` for CSV helpers and selected-scope logic.
+
 - **Extension UI Inspection and Testability** (`REQ-UI_INSPECTION`, `ARCH-UI_TESTABILITY`) – Enables testing and debugging of extension UI via a single contract, optional inspector, and testability hooks:
   - **UI action contract** (`IMPL-UI_ACTION_CONTRACT`): `src/shared/ui-action-contract.js` re-exports `MESSAGE_TYPES` and defines popup/overlay action IDs for tests and inspector.
   - **UI inspector** (`IMPL-UI_INSPECTOR`): Optional ring buffers (last 50 messages, last 50 actions) in `src/shared/ui-inspector.js`; gated by `DEBUG_HOVERBOARD_UI` in storage; wired in service worker, popup, and content script.

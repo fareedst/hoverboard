@@ -30,7 +30,8 @@ IMPL-SUGGESTED_TAGS:
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
       - REQ-SUGGESTED_TAGS_DEDUPLICATION
       - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
-    tests: []
+    tests:
+      - tests/unit/popup-suggested-tags.test.js
     code_annotations:
       - IMPL-SUGGESTED_TAGS
       - ARCH-SUGGESTED_TAGS
@@ -52,8 +53,8 @@ IMPL-SUGGESTED_TAGS:
       author: MCP converter
     last_updated:
       date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      author: AI agent
+      reason: Document restricted-URL skip for popup loadSuggestedTags
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
@@ -257,6 +258,9 @@ IMPL-SUGGESTED_TAGS:
     2. **Popup Path**: Popup has no DOM access → injects script into page context → duplicates extraction logic
 
     Both paths follow the same algorithm but have **implementation drift** (different limits, different sanitization).
+
+  restricted_url_skip_popup: |-
+    **Restricted-URL skip (popup)** [REQ-SUGGESTED_TAGS_FROM_CONTENT] [ARCH-SUGGESTED_TAGS]: In `PopupController.loadSuggestedTags()`, before calling `chrome.scripting.executeScript`, the implementation checks `(this.currentTab.url || '').trim()`. If the URL does not start with `http://` or `https://`, it skips injection, logs a debug message, calls `this.uiManager.updateSuggestedTags([])`, and returns. This avoids Chrome throwing "Cannot access contents of url ... Extension manifest must request permission to access this host" when the active tab is an extension page (e.g. bookmarks-table.html) or other restricted origin. Code location: `src/ui/popup/PopupController.js` in `loadSuggestedTags()` immediately after the "no current tab" check.
   popup_inlined_path:
     - 'Uses simple regex: `word.replace(/[^a-zA-Z0-9_-]/g, '''').substring(0, 50)`'
     - 'Location: `PopupController.js` line ~573-575'
@@ -364,7 +368,8 @@ IMPL-SUGGESTED_TAGS:
     - [x] `safari/src/features/content/overlay-manager.js` - Safari mirror
 
     Tests expected:
-    - [ ] Tag extraction tests (not implemented)
+    - [x] Popup suggested-tags tests: restricted-URL skip and injectable-URL extraction (`tests/unit/popup-suggested-tags.test.js`)
+    - [ ] Tag extraction tests (TagService.extractSuggestedTagsFromContent, not implemented)
     - [ ] Deduplication tests (not implemented)
     - [ ] Case preservation tests (not implemented)
     - [ ] Display tests (not implemented)

@@ -19,10 +19,12 @@ ARCH-SUGGESTED_TAGS:
         ---
   implementation_approach:
     summary: |-
-      Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, preserving original case with lowercase variants, and deduplicating against current tags.
+      Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, preserving original case with lowercase variants, and deduplicating against current tags. The popup path must only run script injection on injectable URLs (`http://`, `https://`); on restricted URLs (e.g. `chrome-extension://`, `chrome://`) it skips injection and shows no suggestions, avoiding Chrome permission errors.
 
       ---
     details:
+      - |-
+        **Restricted-URL skip (popup)**: Before calling `chrome.scripting.executeScript` in the popup path, the implementation checks that the current tab URL starts with `http://` or `https://`. If not (e.g. extension page, chrome://, file://), it skips injection, calls `updateSuggestedTags([])`, and returns. This prevents "Cannot access contents of url ... Extension manifest must request permission to access this host" errors when the user opens the popup while the active tab is an extension page such as the bookmarks table.
       - |-
         #### 1. Extraction Sources (in order)
 
@@ -106,8 +108,10 @@ ARCH-SUGGESTED_TAGS:
       | Main links | `main a`, `article a`, etc. | First 10 links | Low |
   traceability:
     requirements: *ref_0
-    implementation: []
-    tests: []
+    implementation:
+      - IMPL-SUGGESTED_TAGS
+    tests:
+      - tests/unit/popup-suggested-tags.test.js
     code_annotations:
       - ARCH-SUGGESTED_TAGS
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
@@ -124,8 +128,8 @@ ARCH-SUGGESTED_TAGS:
       author: MCP converter
     last_updated:
       date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      author: AI agent
+      reason: Document restricted-URL skip for popup suggested-tags path
     last_validated:
       date: '2026-02-18'
       validator: MCP converter

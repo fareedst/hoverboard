@@ -23,6 +23,7 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
     - criterion: '- Main content anchor links (first 10)'
     - criterion: '3. **Prioritizes title attribute over textContent**: When extracting element text, prefer the `title` attribute (on the element or child elements) over `textContent`.'
     - criterion: '4. **Filters noise, counts frequency, sorts by frequency**: Remove common English stop words, count word occurrences, and return suggestions sorted by frequency (descending), then alphabetically.'
+    - criterion: '5. **Restricted-URL skip (popup path)**: When the current tab URL is not injectable (e.g. `chrome-extension://`, `chrome://`, `file://`), the popup must not attempt script injection; it must show no suggested tags and must not surface a runtime error (e.g. "Cannot access contents of url"). Only `http://` and `https://` URLs are considered injectable for suggested-tag extraction.'
     - criterion: '--'
   validation_criteria:
     - method: Manual verification
@@ -32,7 +33,8 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       - ARCH-SUGGESTED_TAGS
     implementation:
       - IMPL-SUGGESTED_TAGS
-    tests: []
+    tests:
+      - tests/unit/popup-suggested-tags.test.js
     code_annotations:
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
   related_requirements:
@@ -49,8 +51,8 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       author: MCP converter
     last_updated:
       date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      author: AI agent
+      reason: Add restricted-URL skip criterion and test traceability
     last_validated:
       date: '2026-02-18'
       validator: MCP converter

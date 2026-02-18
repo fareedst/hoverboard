@@ -5,6 +5,7 @@
  */
 
 import { matchStorageFilter } from './bookmarks-table-filter.js'
+import { buildCsv } from './bookmarks-table-csv.js'
 
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
@@ -26,6 +27,7 @@ const elements = {
   filterStorage: document.getElementById('filter-storage'),
   exportAll: document.getElementById('export-all'),
   exportDisplayed: document.getElementById('export-displayed'),
+  exportSelected: document.getElementById('export-selected'),
   emptyState: document.getElementById('empty-state'),
   tableWrapper: document.getElementById('table-wrapper'),
   tableBody: document.getElementById('table-body'),
@@ -163,6 +165,7 @@ function updateMoveControlsState () {
   const hasSelection = selectedUrls.size > 0
   if (elements.moveTargetSelect) elements.moveTargetSelect.disabled = !hasSelection
   if (elements.moveButton) elements.moveButton.disabled = !hasSelection
+  updateExportButtonState()
   updateSelectAllState()
 }
 
@@ -226,35 +229,6 @@ function setSort (key) {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]
- * Escape a field for CSV: wrap in double quotes, escape internal " as "".
- */
-function escapeCsvField (str) {
-  if (str == null) return '""'
-  const s = String(str).replace(/"/g, '""')
-  return `"${s}"`
-}
-
-/**
- * [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Build CSV string from bookmark array. Columns: Title, URL, Tags, Time, Storage, Shared, To read, Notes.
- */
-function buildCsv (bookmarks) {
-  const header = 'Title,URL,Tags,Time,Storage,Shared,To read,Notes'
-  const rows = bookmarks.map(b => {
-    const title = b.description ?? ''
-    const url = b.url ?? ''
-    const tags = Array.isArray(b.tags) ? b.tags.join(', ') : String(b.tags ?? '')
-    const time = b.time ? new Date(b.time).toISOString() : ''
-    const storage = b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local')
-    const shared = b.shared === 'no' ? 'Private' : 'Public'
-    const toread = b.toread === 'yes' ? 'Yes' : 'No'
-    const notes = b.extended ?? ''
-    return [escapeCsvField(title), escapeCsvField(url), escapeCsvField(tags), escapeCsvField(time), escapeCsvField(storage), escapeCsvField(shared), escapeCsvField(toread), escapeCsvField(notes)].join(',')
-  })
-  return [header, ...rows].join('\r\n')
-}
-
-/**
  * [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Trigger download of a blob as a file.
  */
 function downloadBlob (blob, filename) {
@@ -271,10 +245,14 @@ function downloadBlob (blob, filename) {
 
 /**
  * [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]
- * Export bookmarks to CSV. scope: 'all' | 'displayed'.
+ * Export bookmarks to CSV. scope: 'all' | 'displayed' | 'selected'.
  */
 function exportBookmarks (scope) {
-  const list = scope === 'all' ? allBookmarks : filteredBookmarks
+  let list
+  if (scope === 'all') list = allBookmarks
+  else if (scope === 'displayed') list = filteredBookmarks
+  else if (scope === 'selected') list = allBookmarks.filter(b => selectedUrls.has(b.url || ''))
+  else return
   if (!list || list.length === 0) return
   const csv = buildCsv(list)
   const date = new Date().toISOString().slice(0, 10)
@@ -284,11 +262,13 @@ function exportBookmarks (scope) {
 }
 
 /**
- * [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Enable/disable export buttons based on data availability.
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Enable/disable export buttons based on data availability and selection.
+ * Export selected: enabled only when at least one bookmark is selected.
  */
 function updateExportButtonState () {
   if (elements.exportAll) elements.exportAll.disabled = allBookmarks.length === 0
   if (elements.exportDisplayed) elements.exportDisplayed.disabled = filteredBookmarks.length === 0
+  if (elements.exportSelected) elements.exportSelected.disabled = selectedUrls.size === 0
 }
 
 async function loadBookmarks () {
@@ -328,6 +308,7 @@ function init () {
 
   if (elements.exportAll) elements.exportAll.addEventListener('click', () => exportBookmarks('all'))
   if (elements.exportDisplayed) elements.exportDisplayed.addEventListener('click', () => exportBookmarks('displayed'))
+  if (elements.exportSelected) elements.exportSelected.addEventListener('click', () => exportBookmarks('selected'))
 
   elements.table.querySelectorAll('th.sortable').forEach(th => {
     th.addEventListener('click', () => setSort(th.dataset.sort))

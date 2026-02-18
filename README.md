@@ -77,7 +77,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - ✅ **Recent Tags** - Quick access to frequently used tags; list refreshes every time the popup is displayed and syncs across windows
 - ✅ **Dark Theme Support** - Modern UI with dark theme default
 - ✅ **Overlay System** - Visual feedback with transparency controls
-- ✅ **Local Bookmarks Index** - Full-page index of **local, file, and sync** bookmarks with a **Storage** column (Local | File | Sync): **Storage filter** (All | Local | File | Sync); **Select** column (checkboxes, select-all for visible rows); search (title, URL, tags, notes); filter (by tag, to-read, private); sortable columns; clickable URLs with **external-link indicator** (opens in new tab); **Move selected to** (Local | File | Sync) with Move button (enabled only when at least one bookmark is selected); Export all / Export displayed to CSV. Open from popup ("Bookmarks index") or Options ("Local bookmarks index").
+- ✅ **Local Bookmarks Index** - Full-page index of **local, file, and sync** bookmarks with a **compact header** (Hoverboard, title, subtitle), **Storage** column (Local | File | Sync), **Storage filter** (All | Local | File | Sync), **Select** column (checkboxes, select-all); search (title, URL, tags, notes); filter (by tag, to-read, private); sortable columns; clickable URLs with **external-link indicator** (opens in new tab). **Below the table:** Export all / Export displayed / **Export selected** (enabled when one or more bookmarks are selected) and **Move selected to** (Local | File | Sync) with Move button. Open from popup ("Bookmarks index") or Options ("Local bookmarks index").
 - ✅ **Optional Pinboard integration** - Use Storage Mode in Options to sync with Pinboard.in (requires API token)
 - ✅ **Optional native messaging host** - For features that need local code: thin Go wrapper + helper scripts; one-time install to `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\` (Windows); test from Options ("Test native host"). See [Optional: Native messaging host](#optional-native-messaging-host) below.
 - ✅ **Badge Indicators** - Visual status indicators in the extension icon
@@ -112,7 +112,7 @@ Intelligent tag suggestions extracted from multiple page content sources:
 
 #### Additional Features
 - **Storage (popup UI):** In the popup, the **Storage** section has select-one buttons (Pinboard, File, Local, Sync); the current setting is highlighted. When the bookmark is in non-API storage (Local, File, or Sync), clicking another non-API option moves the bookmark; the UI shows success or error based on the actual move result, and moves use the bookmark’s stored URL so they work even when the page URL differs (e.g. query parameters).
-- **Local Bookmarks Index:** Browse all **local, file, and sync** bookmarks in a dedicated page with a **Storage** column (Local | File | Sync). **Storage filter** (All | Local | File | Sync); **Select** column with checkboxes and select-all; **Move selected to** (Local | File | Sync) to move chosen bookmarks; move controls enabled only when at least one bookmark is selected. Search by title, URL, tags, or notes; filter by tag, to-read, or private; sort by column (default: newest first); click a URL (with external-link indicator) to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index").
+- **Local Bookmarks Index:** Browse all **local, file, and sync** bookmarks in a dedicated page with a **compact header** and a **Storage** column (Local | File | Sync). **Storage filter** (All | Local | File | Sync); **Select** column with checkboxes and select-all. **Export** (all / displayed / selected) and **Move selected to** (Local | File | Sync) sit **below the table**; Export selected and move controls are enabled when at least one bookmark is selected. Search by title, URL, tags, or notes; filter by tag, to-read, or private; sort by column (default: newest first); click a URL (with external-link indicator) to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index").
 - **Tag Management:** Organize bookmarks with custom tags and categories
 - **Recent Tags:** Quick access to frequently used tags; refreshes on every popup display and syncs across windows so tags saved in one window appear in any other
 - **Optional Pinboard integration:** Use Storage Mode in Options to sync with Pinboard.in bookmarking service (requires API token)
@@ -176,11 +176,10 @@ The configuration page provides comprehensive settings for customizing the exten
 
 The snapshot above shows the dedicated full-page view of all locally stored bookmarks:
 
-- **Header:** Hoverboard logo and extension name, with "Local Bookmarks Index" title and subtitle
+- **Header:** Compact banner with Hoverboard logo and name, "Local Bookmarks Index" title, and subtitle (minimal height)
 - **Search and filters:** Search box (title, URL, tags, notes), Clear button, tag filter (comma-separated), "To read only" and "Private only" checkboxes, **Storage** dropdown (All | Local | File | Sync)
-- **Export:** "Export all" and "Export displayed" buttons download the current set as CSV
-- **Move selected to:** Dropdown (Local | File | Sync) and Move button; enabled only when at least one bookmark is selected
 - **Table:** **Select** column (checkboxes per row, select-all in header), Title, URL, Tags, Time, Storage, Shared, To read; URL column is clickable with **external-link indicator** (opens in new tab)
+- **Below the table:** **Export** — "Export all", "Export displayed", and "Export selected" (enabled when one or more bookmarks are selected) download CSV; **Move selected to** — dropdown (Local | File | Sync) and Move button (enabled when at least one selected)
 - **Footer:** Row count (e.g. "N bookmarks")
 
 ## Architecture
