@@ -47,6 +47,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Service worker:** When storage mode is File and a path is set, the service worker uses the native-host path adapter; otherwise the existing picker-based flow (MessageFileBookmarkAdapter) is used.
   - Requires the native host to be installed; no folder picker needed for the path-based flow.
 
+- **Local Bookmarks Index UX** (`REQ-LOCAL_BOOKMARKS_INDEX`, `REQ-MOVE_BOOKMARK_STORAGE_UI`) – Index page enhancements:
+  - **URL column:** External-link indicator (e.g. ↗) and title "Opens in new tab" for each URL link.
+  - **Storage filter:** Dropdown to display one of each storage type (All | Local | File | Sync).
+  - **Select column:** First column with checkboxes per row and header "select all" for visible rows; selected bookmarks grouped for further operations.
+  - **Move selected to:** Dropdown (Local | File | Sync) and Move button to move all selected bookmarks to the chosen storage via existing `moveBookmarkToStorage`; move controls **enabled** when at least one bookmark is selected, **disabled** when selection is cleared.
+
 ### Fixed
 
 - **Popup "Failed to resolve module specifier 'fast-xml-parser'"** (`IMPL-POPUP_BUNDLE`, `REQ-EXTENSION_BUNDLED_ENTRY_POINTS`) – Opening the popup when the extension was loaded from `dist` could fail with the above error because the popup was loaded unbundled; its dependency chain (e.g. PopupController → TagService → PinboardService) eventually loaded the raw `pinboard-service.js`, which contains `import ... from 'fast-xml-parser'` (a bare specifier the browser cannot resolve). The popup is now built as a single bundle (`npm run build:popup`); `scripts/build.js` runs the popup build and skips copying `ui/popup/popup.js` so the extension always loads the bundled popup with dependencies inlined.

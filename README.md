@@ -77,7 +77,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - ✅ **Recent Tags** - Quick access to frequently used tags; list refreshes every time the popup is displayed and syncs across windows
 - ✅ **Dark Theme Support** - Modern UI with dark theme default
 - ✅ **Overlay System** - Visual feedback with transparency controls
-- ✅ **Local Bookmarks Index** - Full-page index of **local, file, and sync** bookmarks with a **Storage** column (Local | File | Sync): search (title, URL, tags, notes), filter (by tag, to-read, private), sortable columns, clickable URLs, Export all / Export displayed to CSV. Open from popup ("Bookmarks index") or Options ("Local bookmarks index").
+- ✅ **Local Bookmarks Index** - Full-page index of **local, file, and sync** bookmarks with a **Storage** column (Local | File | Sync): **Storage filter** (All | Local | File | Sync); **Select** column (checkboxes, select-all for visible rows); search (title, URL, tags, notes); filter (by tag, to-read, private); sortable columns; clickable URLs with **external-link indicator** (opens in new tab); **Move selected to** (Local | File | Sync) with Move button (enabled only when at least one bookmark is selected); Export all / Export displayed to CSV. Open from popup ("Bookmarks index") or Options ("Local bookmarks index").
 - ✅ **Optional Pinboard integration** - Use Storage Mode in Options to sync with Pinboard.in (requires API token)
 - ✅ **Optional native messaging host** - For features that need local code: thin Go wrapper + helper scripts; one-time install to `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\` (Windows); test from Options ("Test native host"). See [Optional: Native messaging host](#optional-native-messaging-host) below.
 - ✅ **Badge Indicators** - Visual status indicators in the extension icon
@@ -112,7 +112,7 @@ Intelligent tag suggestions extracted from multiple page content sources:
 
 #### Additional Features
 - **Storage (popup UI):** In the popup, the **Storage** section has select-one buttons (Pinboard, File, Local, Sync); the current setting is highlighted. When the bookmark is in non-API storage (Local, File, or Sync), clicking another non-API option moves the bookmark; the UI shows success or error based on the actual move result, and moves use the bookmark’s stored URL so they work even when the page URL differs (e.g. query parameters).
-- **Local Bookmarks Index:** Browse all **local, file, and sync** bookmarks in a dedicated page with a **Storage** column (Local | File | Sync). Search by title, URL, tags, or notes; filter by tag, to-read, or private; sort by column (default: newest first); click a URL to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index").
+- **Local Bookmarks Index:** Browse all **local, file, and sync** bookmarks in a dedicated page with a **Storage** column (Local | File | Sync). **Storage filter** (All | Local | File | Sync); **Select** column with checkboxes and select-all; **Move selected to** (Local | File | Sync) to move chosen bookmarks; move controls enabled only when at least one bookmark is selected. Search by title, URL, tags, or notes; filter by tag, to-read, or private; sort by column (default: newest first); click a URL (with external-link indicator) to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index").
 - **Tag Management:** Organize bookmarks with custom tags and categories
 - **Recent Tags:** Quick access to frequently used tags; refreshes on every popup display and syncs across windows so tags saved in one window appear in any other
 - **Optional Pinboard integration:** Use Storage Mode in Options to sync with Pinboard.in bookmarking service (requires API token)
@@ -177,9 +177,10 @@ The configuration page provides comprehensive settings for customizing the exten
 The snapshot above shows the dedicated full-page view of all locally stored bookmarks:
 
 - **Header:** Hoverboard logo and extension name, with "Local Bookmarks Index" title and subtitle
-- **Search and filters:** Search box (title, URL, tags, notes), Clear button, tag filter (comma-separated), "To read only" and "Private only" checkboxes
+- **Search and filters:** Search box (title, URL, tags, notes), Clear button, tag filter (comma-separated), "To read only" and "Private only" checkboxes, **Storage** dropdown (All | Local | File | Sync)
 - **Export:** "Export all" and "Export displayed" buttons download the current set as CSV
-- **Table:** Columns Title, URL, Tags, Time, Shared, To read; URL column is clickable (opens in new tab)
+- **Move selected to:** Dropdown (Local | File | Sync) and Move button; enabled only when at least one bookmark is selected
+- **Table:** **Select** column (checkboxes per row, select-all in header), Title, URL, Tags, Time, Storage, Shared, To read; URL column is clickable with **external-link indicator** (opens in new tab)
 - **Footer:** Row count (e.g. "N bookmarks")
 
 ## Architecture
@@ -195,7 +196,7 @@ The snapshot above shows the dedicated full-page view of all locally stored book
 - **Service Worker:** Background script handling bookmark operations and API calls
 - **Content Scripts:** Overlay system with transparency controls and visual feedback
 - **Popup Interface:** Modern UI with quick actions and tag management
-- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) for searching, filtering, sorting, and opening local and file bookmarks (Storage column); data from `getAggregatedBookmarksForIndex` (local + file)
+- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) for searching, filtering (including storage type), sorting, selecting (checkboxes, select-all), moving selected bookmarks to another storage, and opening local, file, and sync bookmarks (Storage column); data from `getAggregatedBookmarksForIndex` (local + file + sync)
 - **Storage System:** Local state management with Chrome storage API
 - **Error Handling:** Comprehensive error recovery and user feedback
 - **Badge Management:** Visual indicators in the extension icon

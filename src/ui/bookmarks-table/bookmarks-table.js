@@ -4,13 +4,18 @@
  * Export: [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]
  */
 
+import { matchStorageFilter } from './bookmarks-table-filter.js'
+
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
+const MESSAGE_TYPE_MOVE = 'moveBookmarkToStorage'
 
 let allBookmarks = []
 let filteredBookmarks = []
 let sortKey = 'time'
 let sortAsc = false
+/** [REQ-LOCAL_BOOKMARKS_INDEX] Selected bookmark URLs for bulk operations (e.g. move to storage). */
+const selectedUrls = new Set()
 
 const elements = {
   searchInput: document.getElementById('search-input'),
@@ -18,13 +23,17 @@ const elements = {
   filterTags: document.getElementById('filter-tags'),
   filterToread: document.getElementById('filter-toread'),
   filterPrivate: document.getElementById('filter-private'),
+  filterStorage: document.getElementById('filter-storage'),
   exportAll: document.getElementById('export-all'),
   exportDisplayed: document.getElementById('export-displayed'),
   emptyState: document.getElementById('empty-state'),
   tableWrapper: document.getElementById('table-wrapper'),
   tableBody: document.getElementById('table-body'),
   rowCount: document.getElementById('row-count'),
-  table: document.getElementById('bookmarks-table')
+  table: document.getElementById('bookmarks-table'),
+  selectAll: document.getElementById('select-all'),
+  moveTargetSelect: document.getElementById('move-target'),
+  moveButton: document.getElementById('move-selected-btn')
 }
 
 function escapeHtml (str) {
@@ -56,6 +65,8 @@ function matchFilters (bookmark) {
   }
   if (elements.filterToread.checked && bookmark.toread !== 'yes') return false
   if (elements.filterPrivate.checked && bookmark.shared !== 'no') return false
+  const storageFilter = (elements.filterStorage && elements.filterStorage.value) || ''
+  if (!matchStorageFilter(bookmark, storageFilter)) return false
   return true
 }
 
@@ -100,8 +111,10 @@ function renderTableBody () {
   elements.tableBody.innerHTML = ''
   for (const b of filteredBookmarks) {
     const tr = document.createElement('tr')
+    const url = b.url || ''
+    const checked = selectedUrls.has(url) ? ' checked' : ''
     const title = escapeHtml(b.description || '(no title)')
-    const url = escapeHtml(b.url || '')
+    const urlEsc = escapeHtml(url)
     const tagsStr = Array.isArray(b.tags) ? b.tags.join(', ') : String(b.tags || '')
     const tagsEsc = escapeHtml(tagsStr)
     const time = escapeHtml(b.time ? new Date(b.time).toLocaleString() : '')
@@ -109,9 +122,10 @@ function renderTableBody () {
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
     const storage = escapeHtml(b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local'))
     const urlLink = b.url
-      ? `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" class="url-link">${url}</a>`
-      : url
+      ? `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" class="url-link" title="Opens in new tab">${urlEsc}<span class="url-external-icon" aria-hidden="true">↗</span></a>`
+      : urlEsc
     tr.innerHTML = `
+      <td class="col-select"><label><input type="checkbox" class="row-select" data-url="${escapeHtml(url)}" aria-label="Select bookmark"${checked}></label></td>
       <td class="col-title">${title}</td>
       <td class="col-url">${urlLink}</td>
       <td class="col-tags">${tagsEsc}</td>
@@ -122,6 +136,61 @@ function renderTableBody () {
     `
     elements.tableBody.appendChild(tr)
   }
+  updateSelectAllState()
+}
+
+/** [REQ-LOCAL_BOOKMARKS_INDEX] Toggle selection for one row; call after checkbox change. */
+function onRowSelectChange (url, checked) {
+  if (checked) selectedUrls.add(url)
+  else selectedUrls.delete(url)
+  updateMoveControlsState()
+}
+
+/** [REQ-LOCAL_BOOKMARKS_INDEX] Update header "select all" checkbox to reflect current visible selection. */
+function updateSelectAllState () {
+  if (!elements.selectAll) return
+  const visible = filteredBookmarks.map(b => b.url).filter(Boolean)
+  const none = visible.length === 0
+  const allSelected = !none && visible.every(u => selectedUrls.has(u))
+  const someSelected = visible.some(u => selectedUrls.has(u))
+  elements.selectAll.checked = allSelected
+  elements.selectAll.indeterminate = someSelected && !allSelected
+  elements.selectAll.disabled = none
+}
+
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable/disable move-selected controls based on selection. */
+function updateMoveControlsState () {
+  const hasSelection = selectedUrls.size > 0
+  if (elements.moveTargetSelect) elements.moveTargetSelect.disabled = !hasSelection
+  if (elements.moveButton) elements.moveButton.disabled = !hasSelection
+  updateSelectAllState()
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Move all selected bookmarks to the chosen storage backend.
+ * Uses existing moveBookmarkToStorage message per URL; then refreshes table and clears selection.
+ */
+async function moveSelectedToStorage () {
+  const target = elements.moveTargetSelect && elements.moveTargetSelect.value
+  if (!target || selectedUrls.size === 0) return
+  const urls = Array.from(selectedUrls)
+  if (elements.moveButton) elements.moveButton.disabled = true
+  let ok = 0
+  let fail = 0
+  for (const url of urls) {
+    try {
+      const res = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_MOVE, data: { url, targetBackend: target } })
+      if (res && res.success) ok++
+      else fail++
+    } catch (e) {
+      console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX] moveBookmarkToStorage failed for', url, e)
+      fail++
+    }
+  }
+  selectedUrls.clear()
+  await loadBookmarks()
+  updateMoveControlsState()
+  if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX] Move completed:', ok, 'moved,', fail, 'failed')
 }
 
 function updateRowCount () {
@@ -235,6 +304,7 @@ async function loadBookmarks () {
     applySearchAndFilter()
     toggleEmptyState()
     updateExportButtonState()
+    updateMoveControlsState()
   } catch (err) {
     console.error('[IMPL-LOCAL_BOOKMARKS_INDEX] loadBookmarks failed:', err)
     allBookmarks = []
@@ -254,6 +324,7 @@ function init () {
   elements.filterTags.addEventListener('input', applySearchAndFilter)
   elements.filterToread.addEventListener('change', applySearchAndFilter)
   elements.filterPrivate.addEventListener('change', applySearchAndFilter)
+  if (elements.filterStorage) elements.filterStorage.addEventListener('change', applySearchAndFilter)
 
   if (elements.exportAll) elements.exportAll.addEventListener('click', () => exportBookmarks('all'))
   if (elements.exportDisplayed) elements.exportDisplayed.addEventListener('click', () => exportBookmarks('displayed'))
@@ -262,7 +333,29 @@ function init () {
     th.addEventListener('click', () => setSort(th.dataset.sort))
   })
 
+  if (elements.selectAll) {
+    elements.selectAll.addEventListener('change', () => {
+      const visible = filteredBookmarks.map(b => b.url).filter(Boolean)
+      if (elements.selectAll.checked) {
+        visible.forEach(u => selectedUrls.add(u))
+      } else {
+        visible.forEach(u => selectedUrls.delete(u))
+      }
+      renderTableBody()
+      updateMoveControlsState()
+    })
+  }
+  elements.tableBody.addEventListener('change', (e) => {
+    const cb = e.target.closest('.row-select')
+    if (cb && cb.dataset.url !== undefined) {
+      onRowSelectChange(cb.dataset.url, cb.checked)
+    }
+  })
+
+  if (elements.moveButton) elements.moveButton.addEventListener('click', () => moveSelectedToStorage())
+
   loadBookmarks()
+  updateMoveControlsState()
 }
 
 init()

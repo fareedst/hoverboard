@@ -36,11 +36,28 @@
           <input type="checkbox" id="filter-private" value="1">
           <span>Private only</span>
         </label>
+        <label for="filter-storage">Storage:</label>
+        <select id="filter-storage" class="filter-select" aria-label="Filter by storage type">
+          <option value="">All</option>
+          <option value="local">Local</option>
+          <option value="file">File</option>
+          <option value="sync">Sync</option>
+        </select>
       </div>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] -->
       <div class="export-row">
         <button type="button" id="export-all" class="btn btn-secondary btn-sm" title="Export all bookmarks to CSV" aria-label="Export all bookmarks">Export all</button>
         <button type="button" id="export-displayed" class="btn btn-secondary btn-sm" title="Export currently displayed (filtered) bookmarks to CSV" aria-label="Export displayed bookmarks">Export displayed</button>
+      </div>
+      <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Move selected bookmarks to another storage -->
+      <div class="move-row">
+        <label for="move-target">Move selected to:</label>
+        <select id="move-target" class="filter-select" disabled aria-label="Target storage for selected bookmarks">
+          <option value="local">Local</option>
+          <option value="file">File</option>
+          <option value="sync">Sync</option>
+        </select>
+        <button type="button" id="move-selected-btn" class="btn btn-secondary btn-sm" disabled aria-label="Move selected bookmarks to chosen storage">Move</button>
       </div>
     </div>
 
@@ -52,6 +69,12 @@
       <table class="bookmarks-table" id="bookmarks-table">
         <thead>
           <tr>
+            <th class="col-select" scope="col">
+              <label class="select-all-label">
+                <input type="checkbox" id="select-all" aria-label="Select all visible bookmarks">
+                <span class="sr-only">Select all</span>
+              </label>
+            </th>
             <th data-sort="description" class="sortable">Title <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="url" class="sortable">URL <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="tags" class="sortable">Tags <span class="sort-icon" aria-hidden="true"></span></th>

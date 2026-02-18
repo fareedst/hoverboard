@@ -1142,11 +1142,12 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Page
   category: Functional
   status: Active
-  description: "Full searchable, filterable, sortable index of local and file bookmarks with Storage column (Local | File); launchable URLs"
+  description: "Full searchable, filterable (tag, to-read, private, storage type), sortable index of local, file, sync bookmarks; Storage column; Select column and bulk move to storage (REQ-MOVE_BOOKMARK_STORAGE_UI); URL external-link indicator"
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX
     - IMPL-LOCAL_BOOKMARKS_INDEX
     - ARCH-STORAGE_INDEX_AND_ROUTER
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
   source_index: requirements.yaml
   detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
@@ -1158,7 +1159,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Architecture
   category: Storage / UI
   status: Active
-  description: "Dedicated extension page; getAggregatedBookmarksForIndex (local + file) with Storage column; fallback getLocalBookmarksForIndex; client-side search/filter/sort; launchable URLs"
+  description: "Dedicated extension page; getAggregatedBookmarksForIndex (local + file + sync); Storage filter; Select column and bulk move; URL external-link indicator; client-side search/filter/sort"
   cross_references:
     - REQ-LOCAL_BOOKMARKS_INDEX
     - IMPL-LOCAL_BOOKMARKS_INDEX
@@ -1174,10 +1175,11 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Implementation
   category: Storage / UI
   status: Active
-  description: "getAggregatedBookmarksForIndex and getLocalBookmarksForIndex; BookmarkRouter.getAllBookmarksForIndex; bookmarks-table page with Storage column"
+  description: "getAggregatedBookmarksForIndex/getLocalBookmarksForIndex; bookmarks-table with Storage filter, Select column, bulk move (moveBookmarkToStorage), URL external-link indicator"
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX
     - REQ-LOCAL_BOOKMARKS_INDEX
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:

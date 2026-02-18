@@ -10,12 +10,25 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     summary: See detail file
     details: []
   code_locations:
-    files: []
-    functions: []
+    files:
+      - src/ui/bookmarks-table/bookmarks-table.html
+      - src/ui/bookmarks-table/bookmarks-table.js
+      - src/ui/bookmarks-table/bookmarks-table.css
+      - src/ui/bookmarks-table/bookmarks-table-filter.js
+    functions:
+      - matchFilters
+      - matchStorageFilter
+      - renderTableBody
+      - updateMoveControlsState
+      - moveSelectedToStorage
+      - updateSelectAllState
+      - onRowSelectChange
   traceability:
     architecture: []
     requirements: []
-    tests: []
+    tests:
+      - 'tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)'
+      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter)'
     code_annotations:
       - IMPL-LOCAL_BOOKMARKS_INDEX
   related_decisions:
@@ -35,11 +48,11 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  bookmarks_table_page: '`src/ui/bookmarks-table/bookmarks-table.html`, `bookmarks-table.js`, `bookmarks-table.css`. Renders table with **Storage** column (Local | File); sortable by storage; search (single input over description/url/tags/extended), filters (tag include, toread only, private only), column sort (toggle asc/desc), URL column as links. All operations client-side on in-memory array.'
+  bookmarks_table_page: '`src/ui/bookmarks-table/bookmarks-table.html`, `bookmarks-table.js`, `bookmarks-table.css`. Renders table with **Select** column (checkboxes, select-all), **Storage** column (Local | File | Sync); filter by storage (All | Local | File | Sync); sortable columns; search and filters (tag, toread, private); URL column as links with **external-link indicator** (↗). **Move selected to** dropdown + Move button; moveBookmarkToStorage per selected URL; move controls enabled only when selection non-empty. State: selectedUrls Set, updateMoveControlsState(), updateSelectAllState(). All operations client-side on in-memory array except move (message loop).'
   cross-references: ARCH-LOCAL_BOOKMARKS_INDEX, REQ-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER
   entry_point: Popup footer has "Bookmarks index" button (bookmarksIndexBtn); click emits openBookmarksIndex, PopupController.handleOpenBookmarksIndex opens tab. Options footer has "Local bookmarks index" link (bookmarks-index-link); options.js sets href in init() to chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html').
   localbookmarkservice_getallbookmarks(): Used by getLocalBookmarksForIndex handler and by BookmarkRouter for local slice of aggregated data.
-  primary_data: 'On load, the index page sends **getAggregatedBookmarksForIndex**. Message handler calls `bookmarkProvider.getAllBookmarksForIndex()` when available (BookmarkRouter); router aggregates localProvider.getAllBookmarks() and fileProvider.getAllBookmarks(), tags each item with `storage: ''local''` or `''file''`, returns merged list sorted by time desc. Fallback: page sends **getLocalBookmarksForIndex** and tags each item with `storage: ''local''`.'
+  primary_data: 'On load, the index page sends **getAggregatedBookmarksForIndex**. Message handler calls `bookmarkProvider.getAllBookmarksForIndex()` when available (BookmarkRouter); router aggregates localProvider, fileProvider, and syncProvider getAllBookmarks(), tags each item with `storage: ''local''` | ''file'' | ''sync'', returns merged list sorted by time desc. Fallback: page sends **getLocalBookmarksForIndex** and tags each item with `storage: ''local''`.'
   related:
     - IMPL-LOCAL_BOOKMARK_SERVICE (existing local provider)
     - IMPL-BOOKMARK_ROUTER (getAllBookmarksForIndex)

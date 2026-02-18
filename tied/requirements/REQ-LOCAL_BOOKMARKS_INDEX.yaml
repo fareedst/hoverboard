@@ -15,7 +15,9 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   traceability:
     architecture: []
     implementation: []
-    tests: []
+    tests:
+      - 'tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)'
+      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter)'
     code_annotations:
       - REQ-LOCAL_BOOKMARKS_INDEX
   related_requirements:
@@ -35,21 +37,24 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  backend: 'Primary data via message `getAggregatedBookmarksForIndex` (BookmarkRouter aggregates LocalBookmarkService + FileBookmarkService, each item tagged with `storage: ''local''` or `''file''`). Fallback: `getLocalBookmarksForIndex` uses LocalBookmarkService only (all items tagged `storage: ''local''`) when aggregated is unavailable.'
+  backend: 'Primary data via message `getAggregatedBookmarksForIndex` (BookmarkRouter aggregates LocalBookmarkService + FileBookmarkService + SyncBookmarkService, each item tagged with `storage: ''local''` | ''file'' | ''sync''). Fallback: `getLocalBookmarksForIndex` uses LocalBookmarkService only (all items tagged `storage: ''local''`) when aggregated is unavailable.'
   cross-references: ARCH-LOCAL_BOOKMARKS_INDEX, IMPL-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER
   entry_point: 'Popup and/or options provide a link/button that opens the index page in a new tab via `chrome.tabs.create({ url: chrome.runtime.getURL(''src/ui/bookmarks-table/bookmarks-table.html'') })`.'
   how_validated:
-    - 'Manual: Open index page, confirm local and file bookmarks load (Storage column shows Local | File); run search, filters, sort; click URL to open in new tab.'
-    - 'Optional unit tests: `getAllBookmarks()` returns normalized list; handler for `getLocalBookmarksForIndex` uses LocalBookmarkService only; `getAggregatedBookmarksForIndex` returns merged local + file with storage field.'
+    - 'Manual: Open index page, confirm local, file, and sync bookmarks load (Storage column shows Local | File | Sync); run search, filters (including storage filter All | Local | File | Sync), sort; click URL to open in new tab (external-link indicator).'
+    - 'Manual: Select column and select-all; Move selected to (Local | File | Sync); confirm move controls enabled when at least one bookmark selected, disabled when selection cleared.'
+    - 'Unit tests: handleGetAggregatedBookmarksForIndex returns { bookmarks } with storage field; matchStorageFilter (storage filter logic) for All/local/file/sync.'
   purpose:
-    - Give users a single place to browse and search all non-Pinboard bookmarks (local + file).
+    - Give users a single place to browse and search all non-Pinboard bookmarks (local + file + sync).
     - Support finding and opening bookmarks without leaving the extension.
-    - Show where each bookmark is stored (Local vs File) via a Storage column.
+    - Show where each bookmark is stored (Local | File | Sync) via a Storage column.
+    - Allow bulk move of selected bookmarks to another storage (Local | File | Sync) via [REQ-MOVE_BOOKMARK_STORAGE_UI].
   related:
-    - ARCH-LOCAL_BOOKMARKS_INDEX (architecture for dedicated page and aggregated local + file data source)
-    - IMPL-LOCAL_BOOKMARKS_INDEX (getAggregatedBookmarksForIndex / getLocalBookmarksForIndex, message handler, bookmarks-table UI with Storage column)
+    - ARCH-LOCAL_BOOKMARKS_INDEX (architecture for dedicated page and aggregated local + file + sync data source)
+    - IMPL-LOCAL_BOOKMARKS_INDEX (getAggregatedBookmarksForIndex / getLocalBookmarksForIndex, message handler, bookmarks-table UI with Storage column, selection, bulk move)
     - ARCH-STORAGE_INDEX_AND_ROUTER (BookmarkRouter.getAllBookmarksForIndex)
     - REQ-STORAGE_MODE_DEFAULT (local vs Pinboard vs File mode)
     - REQ-CHROME_STORAGE_USAGE (chrome.storage.local)
-  summary: A dedicated extension page shows **local and file-stored bookmarks** (chrome.storage.local via LocalBookmarkService, plus file-backed bookmarks from a user-chosen folder). Data is **live only**—no static or hardcoded bookmark data. The page must be **searchable** (text across title, URL, tags, notes), **filterable** (by tag, to-read, private), **sortable** (column click, including a **Storage** column Local | File; default time descending), and **launchable** (URL opens in new tab). Pinboard data is not shown in this index.
-  table_page: Implements search (single input, case-insensitive match on description, url, tags, extended), filters (tag include, toread only, shared/private), sortable columns (Title, URL, Tags, Time, **Storage** (Local | File), Shared, To read; default sort time desc), and URL column as links (`target="_blank"`).
+    - REQ-MOVE_BOOKMARK_STORAGE_UI (moveBookmarkToStorage used for bulk move from index)
+  summary: A dedicated extension page shows **local, file, and sync bookmarks** (chrome.storage.local/sync and file-backed). Data is **live only**. The page is **searchable**, **filterable** (by tag, to-read, private, **storage type**), **sortable**, and **launchable** (URL opens in new tab with external-link indicator). A **Select** column with checkboxes allows **selection** of bookmarks; **Move selected to** (Local | File | Sync) uses [REQ-MOVE_BOOKMARK_STORAGE_UI] moveBookmarkToStorage; move controls are enabled only when at least one bookmark is selected.
+  table_page: 'Search (single input); filters (tag include, toread only, shared/private, **Storage**: All | Local | File | Sync); **Select** column (checkboxes, select-all for visible rows); sortable columns (Title, URL, Tags, Time, Storage, Shared, To read); URL column as links with **external-link indicator** (opens in new tab); **Move selected to** dropdown (Local | File | Sync) + Move button, disabled when selection empty; selection and move UI [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI].'
