@@ -1,19 +1,22 @@
 ARCH-CODE_QUALITY:
   rationale:
-    why: Use ESLint 9 flat config with Standard preset; run security audit at high severity so builds do not fail on unfixable moderate transitive deps
+    why: Use ESLint 10 flat config with Standard-style preset; run security audit at high severity so builds do not fail on unfixable moderate transitive deps
     problems_solved:
-      - Legacy eslintrc/.eslintignore no longer supported in ESLint 9
-      - Moderate vulnerabilities in ESLint compat stack block build
+      - ESLint 10 removes eslintrc; flat config only
+      - Moderate vulnerabilities in tooling deps block build if audit-level=moderate
     benefits:
-      - Single flat config file; ignores in config
-      - Build passes while high/critical still fail validate
+      - Single flat config file (no FlatCompat); @eslinter/eslint-config-standard; ignores in config
+      - Build passes while high/critical still fail validate; Node >= 20.19.0
   implementation_approach:
-    summary: ESLint 9 eslint.config.mjs (Standard via FlatCompat); Node >= 18.18.0; security:check --audit-level=high; npm overrides minimatch ^10.2.1
+    summary: ESLint 10 eslint.config.mjs (Standard via @eslinter/eslint-config-standard); Node >= 20.19.0; security:check --audit-level=high; npm overrides minimatch ^10.2.1, test-exclude ^7.0.1 (Jest 30 secure and up to date)
     details:
-      - 'eslint.config.mjs: globalIgnores, fixupConfigRules(compat.extends(''standard'')), languageOptions and rules for src/**/*.js'
-      - package.json engines.node >= 18.18.0
+      - 'eslint.config.mjs: globalIgnores, spread @eslinter/eslint-config-standard, languageOptions and rules for src/**/*.js'
+      - package.json engines.node >= 20.19.0 (required by ESLint 10)
       - 'security:check: npm audit --audit-level=high'
-      - 'package.json overrides.minimatch ^10.2.1 (fixes HIGH ReDoS); patch-package adds ESM default export for @eslint/eslintrc'
+      - 'package.json overrides.minimatch ^10.2.1 (fixes HIGH ReDoS GHSA-3ppc-4f35-3m26 in Jest/tooling transitive deps)'
+      - 'package.json overrides.test-exclude ^7.0.1 (coverage tree uses test-exclude 7.x with glob ^10; removes deprecated glob 7 and inflight)'
+      - 'Remaining: MODERATE ajv (GHSA-2g4f-4pwh-qvx6) in ESLint; unfixable without breaking ESLint. Override to ajv ^8.18.0 was tried; ESLint 10 requires ajv 6 (e.g. json-schema-draft-04) removed in ajv 8, so override breaks lint. audit-level=high so validate passes.'
+      - '.npmrc legacy-peer-deps=true until @eslinter/eslint-config-standard declares eslint ^10; then re-evaluate and remove if install passes'
   traceability:
     requirements:
       - REQ-CODE_QUALITY

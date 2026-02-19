@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- **Security check audit level** – `npm run security:check` uses `--audit-level=high`. All HIGH vulnerabilities (minimatch ReDoS) are fixed via `package.json` `overrides.minimatch: ^10.2.1`; a patch (`patches/minimatch+10.2.1.patch`) adds an ESM default export so `@eslint/eslintrc` continues to work. One moderate finding (ajv in ESLint) remains unfixable without breaking ESLint. Removed deprecated `eslint-plugin-node` (project uses `eslint-plugin-n`). Safe semver updates applied (Babel, Playwright, esbuild, puppeteer, etc.). `.npmrc` sets `legacy-peer-deps=true` so `npm install` succeeds (eslint-config-standard@17 expects eslint ^8; project uses eslint ^9).
+- **Dependencies: overrides re-added for Jest 30 security** – Re-added npm `overrides` in `package.json`: `minimatch: ^10.2.1` (fixes HIGH ReDoS GHSA-3ppc-4f35-3m26 in Jest/tooling) and `test-exclude: ^7.0.1` (coverage tree uses glob ^10; removes deprecated glob 7 and inflight). Keeps Jest 30 secure and up to date without downgrading. `npm run validate` passes; only **moderate** ajv (GHSA-2g4f-4pwh-qvx6) in ESLint remains, unfixable without breaking ESLint.
 
 ## [1.2.0] - 2026-02-17
 

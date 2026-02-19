@@ -1511,20 +1511,20 @@ IMPL-CODE_STYLE:
     - ARCH-CODE_QUALITY
     - REQ-CODE_QUALITY
   rationale:
-    why: Enforce consistent JavaScript style and quality via ESLint 9 flat config (Standard preset) and avoid build failure on moderate audit findings in tooling deps
+    why: Enforce consistent JavaScript style and quality via ESLint 10 flat config (Standard-style preset) and avoid build failure on moderate audit findings in tooling deps
     problems_solved:
-      - Legacy .eslintrc.yml and .eslintignore no longer used
-      - Build failing on moderate vulnerabilities in @eslint/eslintrc (ajv) with no safe fix
+      - ESLint 10 removes eslintrc; flat config only with native preset
+      - Build failing on moderate vulnerabilities in tooling deps with no safe fix
     benefits:
-      - Single eslint.config.mjs; Standard via FlatCompat; ignores in config
-      - security:check uses --audit-level=high; overrides.minimatch ^10.2.1 fixes HIGH ReDoS; one moderate (ajv) remains in ESLint
+      - Single eslint.config.mjs; @eslinter/eslint-config-standard; ignores in config
+      - security:check uses --audit-level=high; overrides.minimatch and test-exclude fix HIGH and deprecated transitives; Jest 30 stays secure
   implementation_approach:
-    summary: ESLint 9 flat config, Standard preset, Node engines, security audit level, minimatch override + patch
+    summary: ESLint 10 flat config, @eslinter/eslint-config-standard, Node >= 20.19.0, security audit level; minimatch and test-exclude overrides
     details:
-      - 'eslint.config.mjs: globalIgnores from former .eslintignore, fixupConfigRules(compat.extends(''standard'')), files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides'
-      - package.json engines.node >= 18.18.0
+      - 'eslint.config.mjs: globalIgnores, spread @eslinter/eslint-config-standard, files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides'
+      - package.json engines.node >= 20.19.0
       - 'package.json security:check: npm audit --audit-level=high'
-      - 'package.json overrides.minimatch ^10.2.1; patch-package + patches/minimatch+10.2.1.patch (ESM default export for @eslint/eslintrc)'
+      - 'package.json overrides.minimatch ^10.2.1, test-exclude ^7.0.1 (Jest 30; fixes high ReDoS and deprecated glob 7/inflight)'
   code_locations:
     files:
       - path: .editorconfig
@@ -1532,11 +1532,9 @@ IMPL-CODE_STYLE:
       - path: .prettierrc
         description: Code formatter configuration (or similar)
       - path: eslint.config.mjs
-        description: ESLint 9 flat config (Standard via FlatCompat)
+        description: ESLint 10 flat config (@eslinter/eslint-config-standard)
       - path: package.json
-        description: engines.node, scripts.lint/lint:fix/validate/security:check, overrides.minimatch, postinstall patch-package
-      - path: patches/minimatch+10.2.1.patch
-        description: ESM default export for @eslint/eslintrc compatibility
+        description: engines.node, scripts, overrides.minimatch and test-exclude
   traceability:
     architecture:
       - ARCH-CODE_QUALITY
@@ -1558,11 +1556,11 @@ IMPL-CODE_STYLE:
       date: YYYY-MM-DD
       author: agent/contributor
     last_updated:
-      date: '2025-02-17'
+      date: '2026-02-19'
       author: agent
-      reason: security:check --audit-level=high; overrides.minimatch; patch-package for ESM compat; REQ/ARCH traceability
+      reason: ESLint 10; @eslinter/eslint-config-standard; Node 20+; overrides minimatch and test-exclude for Jest 30 security
     last_validated:
-      date: '2026-02-18'
+      date: '2026-02-19'
       validator: agent
       result: pass
 IMPL-PINBOARD_POSTS_ADD_ENCODING:

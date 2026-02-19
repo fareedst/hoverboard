@@ -3302,7 +3302,7 @@ var init_xmlNode = __esm({
     if (typeof Symbol !== "function") {
       METADATA_SYMBOL = "@@xmlMetadata";
     } else {
-      METADATA_SYMBOL = Symbol("XML Node Metadata");
+      METADATA_SYMBOL = /* @__PURE__ */ Symbol("XML Node Metadata");
     }
     XmlNode = class {
       constructor(tagname) {

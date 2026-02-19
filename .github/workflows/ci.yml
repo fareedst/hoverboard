@@ -9,7 +9,7 @@ on:
     types: [ published ]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '22'
   CHROME_BIN: google-chrome-stable
   CI: true
 
@@ -21,7 +21,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [20, 22]
     
     steps:
     - name: 📥 Checkout Repository

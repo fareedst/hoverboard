@@ -1,13 +1,6 @@
 import { defineConfig, globalIgnores } from "eslint/config";
-import { fixupConfigRules } from "@eslint/compat";
+import * as standard from "@eslinter/eslint-config-standard";
 import globals from "globals";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { FlatCompat } from "@eslint/eslintrc";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({ baseDirectory: __dirname });
 
 export default defineConfig([
   globalIgnores([
@@ -19,7 +12,7 @@ export default defineConfig([
     "src/shared/browser-polyfill.js",
     "src/shared/jquery*.js",
   ]),
-  ...fixupConfigRules(compat.extends("standard")),
+  standard,
   {
     files: ["src/**/*.js"],
     languageOptions: {

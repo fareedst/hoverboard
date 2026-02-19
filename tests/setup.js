@@ -299,17 +299,22 @@ afterAll(() => {
 });
 
 // Mock DOM APIs commonly used in browser extensions
+// [Jest 30 / jsdom v26] window.location is non-configurable; only override when possible
 if (typeof window !== 'undefined') {
-  Object.defineProperty(window, 'location', {
-    value: {
-      href: 'https://example.com',
-      hostname: 'example.com',
-      pathname: '/',
-      search: '',
-      hash: '',
-    },
-    writable: true,
-  });
+  try {
+    Object.defineProperty(window, 'location', {
+      value: {
+        href: 'https://example.com',
+        hostname: 'example.com',
+        pathname: '/',
+        search: '',
+        hash: '',
+      },
+      writable: true,
+    });
+  } catch (_) {
+    // jsdom v26+ defines a non-configurable location; leave it as-is
+  }
 }
 
 // [TEST-FIX-MOCK-2025-07-14] - Mock background page for recent tags functionality

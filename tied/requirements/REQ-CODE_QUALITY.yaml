@@ -5,13 +5,13 @@ REQ-CODE_QUALITY:
       - Inconsistent style and undefined globals
       - Build failures due to moderate audit findings in tooling deps
     benefits:
-      - Single source of truth for lint rules (ESLint 9 flat config)
+      - Single source of truth for lint rules (ESLint 10 flat config)
       - 'Predictable builds: validate fails only on high/critical'
   satisfaction_criteria:
-    - criterion: ESLint runs with flat config and Standard preset
-      metric: eslint.config.mjs; npm run lint/lint:fix succeed
+    - criterion: ESLint runs with flat config and Standard-style preset
+      metric: eslint.config.mjs with @eslinter/eslint-config-standard; npm run lint/lint:fix succeed
     - criterion: Node.js version documented
-      metric: package.json engines.node >= 18.18.0
+      metric: package.json engines.node >= 20.19.0
     - criterion: Security audit does not block for moderate-only
       metric: security:check uses --audit-level=high
   traceability:

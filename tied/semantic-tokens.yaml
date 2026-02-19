@@ -112,7 +112,7 @@ REQ-CODE_QUALITY:
   name: Code Quality and Tooling
   category: Non-Functional
   status: Active
-  description: "Code quality via ESLint 9 flat config and security audit at critical severity"
+  description: "Code quality via ESLint 10 flat config and security audit at high severity"
   cross_references:
     - ARCH-CODE_QUALITY
     - IMPL-CODE_STYLE
@@ -120,7 +120,7 @@ REQ-CODE_QUALITY:
   detail_file: requirements/REQ-CODE_QUALITY.yaml
   metadata:
     registered: 2025-02-17
-    last_updated: 2025-02-17
+    last_updated: 2026-02-19
 
 REQ-USABILITY:
   type: REQ
@@ -205,7 +205,7 @@ ARCH-CODE_QUALITY:
   type: ARCH
   name: Code Quality Tooling (ESLint and Security Audit)
   status: Active
-  description: "ESLint 9 flat config with Standard preset; security audit --audit-level=high; overrides.minimatch"
+  description: "ESLint 10 flat config with @eslinter/eslint-config-standard; security audit --audit-level=high; overrides.minimatch and test-exclude; Node >= 20.19.0"
   cross_references:
     - REQ-CODE_QUALITY
     - IMPL-CODE_STYLE
@@ -213,7 +213,7 @@ ARCH-CODE_QUALITY:
   detail_file: architecture-decisions/ARCH-CODE_QUALITY.yaml
   metadata:
     registered: 2025-02-17
-    last_updated: 2025-02-17
+    last_updated: 2026-02-19
 
 IMPL-CONFIG_STRUCT:
   type: IMPL
@@ -233,7 +233,7 @@ IMPL-CODE_STYLE:
   type: IMPL
   name: Code Style and Conventions
   status: Active
-  description: "ESLint 9 flat config (Standard via FlatCompat), Node engines, security:check audit-level=high; minimatch override + patch"
+  description: "ESLint 10 flat config (@eslinter/eslint-config-standard), Node >= 20.19.0, security:check audit-level=high; minimatch and test-exclude overrides"
   cross_references:
     - ARCH-CODE_QUALITY
     - REQ-CODE_QUALITY
@@ -241,7 +241,7 @@ IMPL-CODE_STYLE:
   detail_file: implementation-decisions/IMPL-CODE_STYLE.md
   metadata:
     registered: 2025-02-17
-    last_updated: 2025-02-17
+    last_updated: 2026-02-19
 
 IMPL-TIED_FILES:
   type: IMPL
