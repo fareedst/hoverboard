@@ -55,7 +55,7 @@ jobs:
         fail_ci_if_error: true
         
     - name: 🔒 Security Audit
-      run: npm audit --audit-level=moderate
+      run: npm audit --audit-level=high
 
   # 🎭 End-to-End Testing
   e2e:

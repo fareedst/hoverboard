@@ -449,6 +449,21 @@ export function minEmpty (data, title = '') {
 }
 
 /**
+ * [IMPL-SELECTION_TO_TAG_INPUT] Normalize page selection for tag input prefill.
+ * Strips punctuation, takes first 8 words, returns empty string if no words.
+ * @param {string} selection - Raw selection text
+ * @param {number} maxWords - Max words to keep (default 8)
+ * @returns {string} - Normalized string or ''
+ */
+export function normalizeSelectionForTagInput (selection, maxWords = 8) {
+  if (!selection || typeof selection !== 'string') return ''
+  const stripped = selection.replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim()
+  const words = stripped.split(/\s+/).filter(Boolean)
+  if (words.length === 0) return ''
+  return words.slice(0, maxWords).join(' ')
+}
+
+/**
  * Global debug configuration
  * Controls debug output throughout the application
  */

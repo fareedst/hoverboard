@@ -1315,6 +1315,56 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
       reason: Migrated from STDD to TIED format
+REQ-SELECTION_TO_TAG_INPUT:
+  name: Selection to Tag Input on Extension Icon Click
+  category: Functional
+  priority: P2
+  status: Implemented
+  rationale:
+    why: When the user highlights text on the page and opens the popup by clicking the extension icon, the highlighted text should be placed in the New Tag textbox so the user can submit it as new tags.
+    problems_solved:
+      - Manual copy-paste of page selection into the tag input
+    benefits:
+      - One-click flow: select text, click extension icon, submit as tags
+  satisfaction_criteria:
+    - criterion: When 8 words or fewer are highlighted, full text (normalized) is placed in the New Tag textbox
+    - criterion: When more than 8 words are highlighted, only the first 8 words (normalized) are placed
+    - criterion: Punctuation is eliminated from the selection
+    - criterion: No selection or restricted URL leaves tag input unchanged; no error shown
+  validation_criteria:
+    - method: Unit tests
+      coverage: normalizeSelectionForTagInput; popup prefill with mocked sendToTab
+    - method: Manual verification
+      coverage: Select text, open popup, verify prefill and submit
+  traceability:
+    architecture:
+      - ARCH-SELECTION_TO_TAG_INPUT
+    implementation:
+      - IMPL-SELECTION_TO_TAG_INPUT
+    tests:
+      - tests/unit/selection-to-tag-input.test.js
+    code_annotations:
+      - REQ-SELECTION_TO_TAG_INPUT
+      - IMPL-SELECTION_TO_TAG_INPUT
+  related_requirements:
+    depends_on:
+      - REQ-TAG_MANAGEMENT
+    related_to:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    supersedes: []
+  detail_file: requirements/REQ-SELECTION_TO_TAG_INPUT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: Selection-to-tag input requirement
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
 REQ-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Page
   category: Functional

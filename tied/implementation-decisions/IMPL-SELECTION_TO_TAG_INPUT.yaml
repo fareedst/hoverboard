@@ -1,0 +1,68 @@
+IMPL-SELECTION_TO_TAG_INPUT:
+  name: Selection to Tag Input on Icon Click Implementation
+  status: Active
+  cross_references:
+    - ARCH-SELECTION_TO_TAG_INPUT
+    - REQ-SELECTION_TO_TAG_INPUT
+    - REQ-TAG_MANAGEMENT
+  rationale:
+    why: Prefill New Tag input from page selection when user opens popup so they can submit selection as tags without manual copy-paste.
+    problems_solved:
+      - Manual copy-paste of selection into tag input
+    benefits:
+      - One-click flow: select text, click icon, submit as tags
+  implementation_approach:
+    summary: Content script handles GET_PAGE_SELECTION; popup loadInitialData requests selection, normalizes (strip punctuation, first 8 words), sets tag input via setTagInputValue; on timeout or failure leave tag input unchanged.
+    details:
+      - "Content script (Chrome + Safari): handleMessage case GET_PAGE_SELECTION returns { success: true, data: { selection: window.getSelection().toString() } }"
+      - "Shared utils: normalizeSelectionForTagInput(selection, maxWords=8) — replace /[^\\w\\s]/g with space, collapse spaces, trim, split(/\s+/), slice(0, maxWords), join(' ')"
+      - "UIManager: setTagInputValue(value) sets newTagInput.value and removes invalid class"
+      - "PopupController loadInitialData: after loadSuggestedTags (Chrome) or loadRecentTags (Safari), try/catch sendToTab GET_PAGE_SELECTION; if data.selection non-empty, setTagInputValue(normalizeSelectionForTagInput(raw, 8))"
+  code_locations:
+    files:
+      - path: src/features/content/content-main.js
+        description: GET_PAGE_SELECTION handler
+      - path: safari/src/features/content/content-main.js
+        description: GET_PAGE_SELECTION handler
+      - path: src/ui/popup/PopupController.js
+        description: loadInitialData selection prefill
+      - path: safari/src/ui/popup/PopupController.js
+        description: loadInitialData selection prefill
+      - path: src/ui/popup/UIManager.js
+        description: setTagInputValue
+      - path: safari/src/ui/popup/UIManager.js
+        description: setTagInputValue
+      - path: src/shared/utils.js
+        description: normalizeSelectionForTagInput
+      - path: safari/src/shared/utils.js
+        description: normalizeSelectionForTagInput
+  traceability:
+    architecture:
+      - ARCH-SELECTION_TO_TAG_INPUT
+    requirements:
+      - REQ-SELECTION_TO_TAG_INPUT
+      - REQ-TAG_MANAGEMENT
+    tests:
+      - tests/unit/selection-to-tag-input.test.js
+    code_annotations:
+      - IMPL-SELECTION_TO_TAG_INPUT
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - ARCH-SELECTION_TO_TAG_INPUT
+      - REQ-SELECTION_TO_TAG_INPUT
+      - IMPL-SUGGESTED_TAGS
+  detail_file: implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: Selection-to-tag input implementation
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass

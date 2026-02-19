@@ -1042,6 +1042,13 @@ var init_safari_shim = __esm({
 });
 
 // src/shared/utils.js
+function normalizeSelectionForTagInput(selection, maxWords = 8) {
+  if (!selection || typeof selection !== "string") return "";
+  const stripped = selection.replace(/[^\w\s]/g, " ").replace(/\s+/g, " ").trim();
+  const words = stripped.split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "";
+  return words.slice(0, maxWords).join(" ");
+}
 function debugLog(component, message, ...args) {
   if (DEBUG_CONFIG.enabled) {
     const prefix = `${DEBUG_CONFIG.prefix} [${component}]`;
@@ -6713,6 +6720,16 @@ var UIManager = class {
     }
   }
   /**
+   * [IMPL-SELECTION_TO_TAG_INPUT] Set tag input value (e.g. from page selection).
+   * Clears invalid class when setting a value.
+   * @param {string} value - Text to set in the new-tag input
+   */
+  setTagInputValue(value) {
+    if (!this.elements.newTagInput) return;
+    this.elements.newTagInput.value = value ?? "";
+    this.elements.newTagInput.classList.remove("invalid");
+  }
+  /**
    * Clear search input
    */
   clearSearchInput() {
@@ -8096,6 +8113,16 @@ var PopupController = class {
       this.uiManager.updateReadLaterStatus(hasReadLaterStatus);
       await this.loadRecentTags();
       await this.loadSuggestedTags();
+      try {
+        const selectionResponse = await this.sendToTab({ type: "GET_PAGE_SELECTION" });
+        const data = selectionResponse?.data ?? selectionResponse;
+        const raw = data?.selection;
+        if (raw && typeof raw === "string") {
+          const normalized = normalizeSelectionForTagInput(raw, 8);
+          if (normalized) this.uiManager.setTagInputValue(normalized);
+        }
+      } catch (_) {
+      }
       await this.loadShowHoverOnPageLoadSetting();
       const manifest = chrome.runtime.getManifest();
       this.uiManager.updateVersionInfo(manifest.version);

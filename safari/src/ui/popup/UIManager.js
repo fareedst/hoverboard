@@ -440,6 +440,17 @@ export class UIManager {
   }
 
   /**
+   * [IMPL-SELECTION_TO_TAG_INPUT] Set tag input value (e.g. from page selection).
+   * Clears invalid class when setting a value.
+   * @param {string} value - Text to set in the new-tag input
+   */
+  setTagInputValue (value) {
+    if (!this.elements.newTagInput) return
+    this.elements.newTagInput.value = value ?? ''
+    this.elements.newTagInput.classList.remove('invalid')
+  }
+
+  /**
    * Clear search input
    */
   clearSearchInput () {

@@ -634,6 +634,57 @@ ARCH-SUGGESTED_TAGS:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
       reason: Enhanced with meta tags, emphasis elements, and structured content extraction
+ARCH-SELECTION_TO_TAG_INPUT:
+  name: Selection to Tag Input Architecture
+  status: Active
+  cross_references:
+    - REQ-SELECTION_TO_TAG_INPUT
+    - REQ-TAG_MANAGEMENT
+  rationale:
+    why: Popup cannot read page selection; content script returns it via GET_PAGE_SELECTION; popup normalizes and prefills tag input on load.
+    problems_solved:
+      - Popup has no access to window.getSelection()
+      - Need graceful behavior on restricted URLs
+    benefits:
+      - Single message flow; no user-visible error when content script absent
+  alternatives_considered: []
+  implementation_approach:
+    summary: Content script handles GET_PAGE_SELECTION; popup in loadInitialData requests selection, normalizes (strip punctuation, first 8 words), sets tag input via setTagInputValue; on failure leave input unchanged.
+    details:
+      - normalizeSelectionForTagInput in shared utils; UIManager.setTagInputValue
+  traceability:
+    requirements:
+      - REQ-SELECTION_TO_TAG_INPUT
+      - REQ-TAG_MANAGEMENT
+    implementation:
+      - IMPL-SELECTION_TO_TAG_INPUT
+    tests:
+      - tests/unit/selection-to-tag-input.test.js
+    code_annotations:
+      - ARCH-SELECTION_TO_TAG_INPUT
+      - REQ-SELECTION_TO_TAG_INPUT
+      - IMPL-SELECTION_TO_TAG_INPUT
+  related_decisions:
+    depends_on:
+      - REQ-SELECTION_TO_TAG_INPUT
+      - REQ-TAG_MANAGEMENT
+    informs:
+      - IMPL-SELECTION_TO_TAG_INPUT
+    see_also:
+      - ARCH-SUGGESTED_TAGS
+  detail_file: architecture-decisions/ARCH-SELECTION_TO_TAG_INPUT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: Selection-to-tag input architecture
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
 ARCH-MV3_MIGRATION:
   name: Manifest V3 Migration Strategy
   status: Active

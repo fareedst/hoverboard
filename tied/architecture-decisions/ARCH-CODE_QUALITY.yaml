@@ -8,11 +8,12 @@ ARCH-CODE_QUALITY:
       - Single flat config file; ignores in config
       - Build passes while high/critical still fail validate
   implementation_approach:
-    summary: ESLint 9 eslint.config.mjs (Standard via FlatCompat); Node >= 18.18.0; security:check --audit-level=high
+    summary: ESLint 9 eslint.config.mjs (Standard via FlatCompat); Node >= 18.18.0; security:check --audit-level=high; npm overrides minimatch ^10.2.1
     details:
       - 'eslint.config.mjs: globalIgnores, fixupConfigRules(compat.extends(''standard'')), languageOptions and rules for src/**/*.js'
       - package.json engines.node >= 18.18.0
       - 'security:check: npm audit --audit-level=high'
+      - 'package.json overrides.minimatch ^10.2.1 (fixes HIGH ReDoS); patch-package adds ESM default export for @eslint/eslintrc'
   traceability:
     requirements:
       - REQ-CODE_QUALITY

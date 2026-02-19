@@ -1517,13 +1517,14 @@ IMPL-CODE_STYLE:
       - Build failing on moderate vulnerabilities in @eslint/eslintrc (ajv) with no safe fix
     benefits:
       - Single eslint.config.mjs; Standard via FlatCompat; ignores in config
-      - security:check uses --audit-level=high so build succeeds
+      - security:check uses --audit-level=high; overrides.minimatch ^10.2.1 fixes HIGH ReDoS; one moderate (ajv) remains in ESLint
   implementation_approach:
-    summary: ESLint 9 flat config, Standard preset, Node engines, security audit level
+    summary: ESLint 9 flat config, Standard preset, Node engines, security audit level, minimatch override + patch
     details:
       - 'eslint.config.mjs: globalIgnores from former .eslintignore, fixupConfigRules(compat.extends(''standard'')), files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides'
       - package.json engines.node >= 18.18.0
       - 'package.json security:check: npm audit --audit-level=high'
+      - 'package.json overrides.minimatch ^10.2.1; patch-package + patches/minimatch+10.2.1.patch (ESM default export for @eslint/eslintrc)'
   code_locations:
     files:
       - path: .editorconfig
@@ -1533,7 +1534,9 @@ IMPL-CODE_STYLE:
       - path: eslint.config.mjs
         description: ESLint 9 flat config (Standard via FlatCompat)
       - path: package.json
-        description: engines.node, scripts.lint/lint:fix/validate/security:check
+        description: engines.node, scripts.lint/lint:fix/validate/security:check, overrides.minimatch, postinstall patch-package
+      - path: patches/minimatch+10.2.1.patch
+        description: ESM default export for @eslint/eslintrc compatibility
   traceability:
     architecture:
       - ARCH-CODE_QUALITY
@@ -1557,9 +1560,9 @@ IMPL-CODE_STYLE:
     last_updated:
       date: '2025-02-17'
       author: agent
-      reason: ESLint 9 flat config migration; security:check audit-level=high; REQ/ARCH traceability
+      reason: security:check --audit-level=high; overrides.minimatch; patch-package for ESM compat; REQ/ARCH traceability
     last_validated:
-      date: '2025-02-17'
+      date: '2026-02-18'
       validator: agent
       result: pass
 IMPL-PINBOARD_POSTS_ADD_ENCODING:
@@ -2607,3 +2610,50 @@ IMPL-LOGGER_LEGACY:
       date: "2026-02-17"
       author: AI Agent
       reason: Numbered token reinterpretation (LOG-003)
+
+IMPL-SELECTION_TO_TAG_INPUT:
+  name: Selection to tag input on icon click
+  status: Active
+  cross_references:
+    - ARCH-SELECTION_TO_TAG_INPUT
+    - REQ-SELECTION_TO_TAG_INPUT
+  rationale:
+    why: Prefill New Tag input from page selection when user opens popup so they can submit selection as tags
+    problems_solved:
+      - Manual copy-paste of selection into tag input
+    benefits:
+      - One-click flow: select text, click icon, submit as tags
+  implementation_approach:
+    summary: Content script GET_PAGE_SELECTION; popup loadInitialData requests selection, normalizes (strip punctuation, first 8 words), sets tag input via setTagInputValue
+    details:
+      - normalizeSelectionForTagInput in shared utils; UIManager.setTagInputValue
+      - Chrome and Safari content-main and PopupController
+  code_locations:
+    files:
+      - path: src/features/content/content-main.js
+      - path: safari/src/features/content/content-main.js
+      - path: src/ui/popup/PopupController.js
+      - path: safari/src/ui/popup/PopupController.js
+      - path: src/ui/popup/UIManager.js
+      - path: safari/src/ui/popup/UIManager.js
+      - path: src/shared/utils.js
+      - path: safari/src/shared/utils.js
+  traceability:
+    architecture:
+      - ARCH-SELECTION_TO_TAG_INPUT
+    requirements:
+      - REQ-SELECTION_TO_TAG_INPUT
+    code_annotations:
+      - IMPL-SELECTION_TO_TAG_INPUT
+  related_decisions:
+    depends_on: []
+    supersedes: []
+  detail_file: implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml
+  metadata:
+    created:
+      date: "2026-02-18"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-18"
+      author: AI Agent
+      reason: Selection-to-tag input feature

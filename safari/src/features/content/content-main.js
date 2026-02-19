@@ -204,6 +204,13 @@ class HoverboardContentScript {
           sendResponse({ success: true, data: overlayState })
           break
 
+        // [IMPL-SELECTION_TO_TAG_INPUT] - Return current page selection for popup tag input prefill
+        case 'GET_PAGE_SELECTION': {
+          const selection = typeof window.getSelection === 'function' ? window.getSelection().toString() : ''
+          sendResponse({ success: true, data: { selection } })
+          break
+        }
+
         default:
           console.warn('Unknown message type:', message.type)
           sendResponse({ success: false, error: 'Unknown message type' })

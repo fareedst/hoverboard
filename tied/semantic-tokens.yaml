@@ -112,7 +112,7 @@ REQ-CODE_QUALITY:
   name: Code Quality and Tooling
   category: Non-Functional
   status: Active
-  description: "Code quality via ESLint 9 flat config and security audit at high severity"
+  description: "Code quality via ESLint 9 flat config and security audit at critical severity"
   cross_references:
     - ARCH-CODE_QUALITY
     - IMPL-CODE_STYLE
@@ -205,7 +205,7 @@ ARCH-CODE_QUALITY:
   type: ARCH
   name: Code Quality Tooling (ESLint and Security Audit)
   status: Active
-  description: "ESLint 9 flat config with Standard preset; security audit --audit-level=high"
+  description: "ESLint 9 flat config with Standard preset; security audit --audit-level=high; overrides.minimatch"
   cross_references:
     - REQ-CODE_QUALITY
     - IMPL-CODE_STYLE
@@ -233,7 +233,7 @@ IMPL-CODE_STYLE:
   type: IMPL
   name: Code Style and Conventions
   status: Active
-  description: "ESLint 9 flat config (Standard via FlatCompat), Node engines, security:check audit-level=high"
+  description: "ESLint 9 flat config (Standard via FlatCompat), Node engines, security:check audit-level=high; minimatch override + patch"
   cross_references:
     - ARCH-CODE_QUALITY
     - REQ-CODE_QUALITY
@@ -2072,6 +2072,51 @@ TEST-POPUP_CLOSE_BEHAVIOR:
 # ---
 # Template Record - Copy this block to create new tokens
 # ---
+IMPL-SELECTION_TO_TAG_INPUT:
+  type: IMPL
+  name: Selection to tag input on icon click
+  category: Popup / Tags
+  status: Active
+  description: "When popup opens (extension icon click), prefill New Tag input from page selection: strip punctuation, first 8 words; GET_PAGE_SELECTION in content script"
+  cross_references:
+    - ARCH-SELECTION_TO_TAG_INPUT
+    - REQ-SELECTION_TO_TAG_INPUT
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
+REQ-SELECTION_TO_TAG_INPUT:
+  type: REQ
+  name: Selection to Tag Input on Extension Icon Click
+  category: Functional
+  status: Active
+  description: "When user highlights text and opens popup, place selection in New Tag textbox (≤8 words, punctuation stripped) for submit as tags"
+  cross_references:
+    - ARCH-SELECTION_TO_TAG_INPUT
+    - IMPL-SELECTION_TO_TAG_INPUT
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SELECTION_TO_TAG_INPUT.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
+ARCH-SELECTION_TO_TAG_INPUT:
+  type: ARCH
+  name: Selection to Tag Input Architecture
+  status: Active
+  description: "Content script returns selection via GET_PAGE_SELECTION; popup normalizes and prefills tag input on load; graceful when content script absent"
+  cross_references:
+    - REQ-SELECTION_TO_TAG_INPUT
+    - REQ-TAG_MANAGEMENT
+    - IMPL-SELECTION_TO_TAG_INPUT
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SELECTION_TO_TAG_INPUT.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
 #
 # TOKEN-IDENTIFIER:
 #   type: REQ | ARCH | IMPL | TEST | PROC

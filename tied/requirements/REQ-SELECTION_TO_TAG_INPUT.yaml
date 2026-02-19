@@ -1,0 +1,53 @@
+REQ-SELECTION_TO_TAG_INPUT:
+  name: Selection to Tag Input on Extension Icon Click
+  category: Functional
+  priority: P2
+  status: Implemented
+  rationale:
+    why: When the user highlights text on the page and opens the popup by clicking the extension icon, the highlighted text should be placed in the New Tag textbox so the user can submit it as new tags without manual copy-paste.
+    problems_solved:
+      - Manual copy-paste of page selection into the tag input
+      - Friction when adding selected text as tags
+    benefits:
+      - One-click flow: select text, click extension icon, submit as tags
+      - Faster tagging from page content
+  satisfaction_criteria:
+    - criterion: When 8 words or fewer are highlighted and the user clicks the extension icon, the full highlighted text (after normalization) is placed in the New Tag textbox so the user can submit it as new tags.
+    - criterion: When more than 8 words are highlighted, only the first 8 words (after normalization) are placed in the New Tag textbox.
+    - criterion: Punctuation is eliminated from the selection before placing in the textbox (e.g. "hello, world!" becomes "hello world").
+    - criterion: When no text is highlighted or selection is empty, the tag input is left unchanged (no error shown).
+    - criterion: When the content script is not available (e.g. restricted URL), the tag input is left unchanged and no error is shown to the user.
+  validation_criteria:
+    - method: Unit tests
+      coverage: normalizeSelectionForTagInput (strip punctuation, first 8 words); popup prefill with mocked sendToTab
+    - method: Manual verification
+      coverage: Select text on page, open popup; verify tag input prefill and submit as tags
+  traceability:
+    architecture:
+      - ARCH-SELECTION_TO_TAG_INPUT
+    implementation:
+      - IMPL-SELECTION_TO_TAG_INPUT
+    tests:
+      - tests/unit/selection-to-tag-input.test.js
+    code_annotations:
+      - REQ-SELECTION_TO_TAG_INPUT
+      - IMPL-SELECTION_TO_TAG_INPUT
+  related_requirements:
+    depends_on:
+      - REQ-TAG_MANAGEMENT
+    related_to:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    supersedes: []
+  detail_file: requirements/REQ-SELECTION_TO_TAG_INPUT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: Selection-to-tag input requirement
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass

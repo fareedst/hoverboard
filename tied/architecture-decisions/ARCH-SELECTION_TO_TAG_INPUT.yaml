@@ -1,0 +1,65 @@
+ARCH-SELECTION_TO_TAG_INPUT:
+  name: Selection to Tag Input Architecture
+  status: Active
+  cross_references:
+    - REQ-SELECTION_TO_TAG_INPUT
+    - REQ-TAG_MANAGEMENT
+  rationale:
+    why: User selects text on the page and opens the popup (extension icon click); the popup has no direct access to the page's selection, so the selection must be obtained from the content script and then normalized and placed in the tag input.
+    problems_solved:
+      - Popup cannot read window.getSelection() (runs in extension context)
+      - Need a single, predictable flow for prefill without errors on restricted URLs
+    benefits:
+      - Content script returns selection; popup requests it on load and prefills tag input when non-empty
+      - Graceful degradation when content script is absent (e.g. chrome://)
+  alternatives_considered:
+    - name: Inject script on every popup open to read selection
+      pros: Same as current (content script handles GET_PAGE_SELECTION)
+      cons: N/A
+      rejected_reason: Not rejected; this is the chosen approach
+    - name: Use chrome.scripting.executeScript to run getSelection in page
+      pros: No new message type
+      cons: Popup already uses sendToTab for other state; consistent message pattern is clearer
+      rejected_reason: Prefer reuse of sendToTab and content script message handling for consistency
+  implementation_approach:
+    summary: |-
+      Content script handles GET_PAGE_SELECTION (returns window.getSelection().toString()).
+      Popup in loadInitialData() sends GET_PAGE_SELECTION to current tab via sendToTab.
+      On success and non-empty selection: normalize (strip punctuation, first 8 words), set tag input via UIManager.setTagInputValue.
+      On timeout or failure: leave tag input unchanged; no user-visible error.
+    details:
+      - Normalization: strip non-word non-space characters, collapse spaces, split on whitespace, take first 8 words, join with space
+      - Empty or whitespace-only selection after normalization: do not set tag input
+  traceability:
+    requirements:
+      - REQ-SELECTION_TO_TAG_INPUT
+      - REQ-TAG_MANAGEMENT
+    implementation:
+      - IMPL-SELECTION_TO_TAG_INPUT
+    tests:
+      - tests/unit/selection-to-tag-input.test.js
+    code_annotations:
+      - ARCH-SELECTION_TO_TAG_INPUT
+      - REQ-SELECTION_TO_TAG_INPUT
+      - IMPL-SELECTION_TO_TAG_INPUT
+  related_decisions:
+    depends_on:
+      - REQ-SELECTION_TO_TAG_INPUT
+      - REQ-TAG_MANAGEMENT
+    informs:
+      - IMPL-SELECTION_TO_TAG_INPUT
+    see_also:
+      - ARCH-SUGGESTED_TAGS
+  detail_file: architecture-decisions/ARCH-SELECTION_TO_TAG_INPUT.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: Selection-to-tag input architecture
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass

@@ -5,7 +5,7 @@
 import { UIManager } from './UIManager.js'
 import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
-import { debugLog, debugError } from '../../shared/utils.js'
+import { debugLog, debugError, normalizeSelectionForTagInput } from '../../shared/utils.js'
 import { ConfigManager } from '../../config/config-manager.js'
 
 debugLog('[SAFARI-EXT-SHIM-001] PopupController.js: module loaded');
@@ -246,6 +246,19 @@ export class PopupController {
 
       // Load recent tags
       await this.loadRecentTags()
+
+      // [IMPL-SELECTION_TO_TAG_INPUT] - Prefill tag input from page selection (≤8 words, punctuation stripped)
+      try {
+        const selectionResponse = await this.sendToTab({ type: 'GET_PAGE_SELECTION' })
+        const data = selectionResponse?.data ?? selectionResponse
+        const raw = data?.selection
+        if (raw && typeof raw === 'string') {
+          const normalized = normalizeSelectionForTagInput(raw, 8)
+          if (normalized) this.uiManager.setTagInputValue(normalized)
+        }
+      } catch (_) {
+        // Content script not injected or no selection: leave tag input unchanged
+      }
 
       // [SHOW-HOVER-CHECKBOX-CONTROLLER-002] - Load checkbox state
       await this.loadShowHoverOnPageLoadSetting()
