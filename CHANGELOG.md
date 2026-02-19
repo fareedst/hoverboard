@@ -14,6 +14,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Time format:** Choose **Absolute** (`YYYY-MM-DD HH:mm:ss`) or **Age** (two largest units, e.g. `N days O hours`, `45 seconds`, `just now`).
   - Implementation: `bookmarks-table-time.js` exports `formatTimeAbsolute` and `formatTimeAge`; table state `timeColumnSource` and `timeDisplayMode`; compare uses effective key when sort is Time. Unit tests in `tests/unit/bookmarks-table-time.test.js` and integration in `tests/unit/bookmarks-table-index.test.js`.
 
+- **Screenshot and placeholder tooling** (`IMPL-SCREENSHOT_MODE`, `IMPL-POPUP_THEME_CSS`) – Tooling to generate reproducible README/marketing screenshots with no live account:
+  - **Placeholder data:** `scripts/screenshot-placeholder-data.js` defines demo bookmarks and `hoverboard_theme: 'dark'` so the popup renders in dark theme during capture.
+  - **Playwright script:** `scripts/screenshots-placeholder.js` builds the extension, launches Chrome with the extension loaded, injects placeholder data and theme, then captures popup, options, local bookmarks index, and a Pinboard.in page with overlay; uses **sharp** to composite the popup onto the Pinboard page image. Outputs to `images/` (e.g. `Hoverboard_v1.0.7.0_Chrome_Popup.png`, `Hoverboard_v1.0.7.0_Chrome_Pinboard.png`, `Hoverboard_v1.0.7.0_Chrome_Options.png`, `local-bookmarks-index.png`).
+  - **npm scripts:** `npm run screenshots` (capture with current tab/state) and `npm run screenshots:placeholder` (full placeholder flow; use for README assets).
+  - **Popup dark theme for screenshots:** Popup CSS `:root.hb-theme-dark` (`IMPL-POPUP_THEME_CSS`) ensures the popup respects ThemeManager so screenshot mode shows the dark popup consistently.
+
 ## [1.4.0] - 2026-02-18
 
 ### Added

@@ -62,7 +62,7 @@ Install directory: `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\
 **Last Updated:** 2026-02-18  
 **Chrome Extension Status:** Production Ready
 
-**Latest Enhancement:** **Local Bookmarks Index – Time column toggles** – On the Local Bookmarks Index page you can choose **Time column** (Create time | Last updated) and **Time format** (Absolute: `YYYY-MM-DD HH:mm:ss` | Age: e.g. N days O hours). Only one time column is shown; sort by Time uses the selected source. **Bookmark create-time and most-recent-update-time** – Each bookmark has a create-time (`time`) and a most-recent-update-time (`updated_at`); for new records they are equal. Local, file, and sync storage update `updated_at` on save; Pinboard only stores create-time so `updated_at` equals `time`. CSV export includes an optional **Updated** column; import supports 8- and 9-column CSV. **Selection to tag input** – Highlight text on a page, click the extension icon, and the selection (up to 8 words, punctuation stripped) is placed in the New Tag textbox so you can submit it as tags in one step. Optional **native messaging host** for running local code: thin Go wrapper plus installer scripts; one-time install to a fixed directory; test from Options. The extension supports **four storage options**: **(P)** Pinboard.in API, **(F)** file-based, **(L)** chrome.storage.local (default), **(S)** chrome.storage.sync. File storage keeps bookmarks in a **single file** in a **folder you choose**—important for **privacy** and **sharing**. Sync storage syncs across Chrome profile devices; **quota is approximately 100 KB**. A **Local Bookmarks Index** page lets you browse, search, filter, sort, and open local, file, and sync bookmarks (Storage column: Local | File | Sync). Bookmarks are stored **locally in your browser by default**—no account or API required. In the popup, **Storage** uses select-one buttons (Pinboard, File, Local, Sync); the current setting is highlighted, and choosing another non-API option (Local, File, or Sync) when the bookmark is already in non-API storage moves the bookmark. Recent Tags list refreshes every time the popup is displayed and stays in sync across browser windows. Intelligent tag suggestions extract from 11 content sources including meta tags, emphasis elements, definition terms, and table headers.
+**Latest Enhancement:** **Local Bookmarks Index – Time column toggles** – On the Local Bookmarks Index page you can choose **Time column** (Create time | Last updated) and **Time format** (Absolute: `YYYY-MM-DD HH:mm:ss` | Age: e.g. N days O hours). Only one time column is shown; sort by Time uses the selected source.
 
 ### Chrome Extension Features
 
@@ -131,15 +131,23 @@ Intelligent tag suggestions extracted from multiple page content sources:
 
 ## 📸 Screenshots
 
+Screenshots are generated with **placeholder bookmark data** (no live account) and show the extension in **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)).
+
+### Popup (dark theme)
+
+![Hoverboard Popup](images/Hoverboard_v1.0.7.0_Chrome_Popup.png)
+
+The popup in dark theme: visibility controls, tag management, search, and quick actions.
+
 ### Extension Interface on Pinboard.in
 
 ![Hoverboard Extension on Pinboard.in](images/Hoverboard_v1.0.7.0_Chrome_Pinboard.png)
 
-The screenshot above demonstrates Hoverboard in action on the Pinboard.in website, showcasing:
+The screenshot above shows Hoverboard on a Pinboard.in placeholder page (overlay + popup composite, dark theme; demo tags "Pinboard" and "tags"). It showcases:
 
 - **Extension Badge**: The Hoverboard icon in the browser toolbar displays "3!" indicating 3 tags are associated with the current page and the site is marked as "Read Later"
-- **Transparent Overlay**: A dark overlay appears at the bottom of the page showing the current bookmark status with tags "Pinboard," "Social," and "Bookmarking"
-- **Popup Interface**: The main Hoverboard popup window provides:
+- **Transparent Overlay**: A dark overlay at the bottom showing the current bookmark status (placeholder tags, e.g. "Pinboard" and "tags")
+- **Popup Interface**: The main Hoverboard popup (dark theme) provides:
   - **Visibility Controls**: Eye icon and "Show on page load" checkbox for overlay display
   - **Tag Management**: "Add a tag..." input field with current tags displayed below
   - **Search Functionality**: "Search tabs by title..." for finding related bookmarks
@@ -179,7 +187,7 @@ The configuration page provides comprehensive settings for customizing the exten
 
 ![Local Bookmarks Index](images/local-bookmarks-index.png)
 
-The snapshot above shows the dedicated full-page view of all locally stored bookmarks:
+The snapshot above shows the dedicated full-page view of all locally stored bookmarks (placeholder data):
 
 - **Header:** Compact banner with Hoverboard logo and name, "Local Bookmarks Index" title, and subtitle (minimal height)
 - **Search and filters:** Search box (title, URL, tags, notes), Clear button, tag filter (comma-separated), "To read only" and "Private only" checkboxes, **Storage** dropdown (All | Local | File | Sync)
@@ -246,44 +254,11 @@ npm run validate-manifest
 
 # Create release package
 npm run create-release
+
+# Screenshots (requires built extension and Playwright)
+npm run screenshots              # Capture popup, options, index (current tab state)
+npm run screenshots:placeholder # Same, using placeholder data and dark-theme popup; writes to images/
 ```
-
-## Testing
-
-### Test Coverage
-- **Unit Tests:** 252 comprehensive tests across 8 test suites
-- **Integration Tests:** Chrome extension API integration and component interaction
-- **Performance Tests:** Memory usage, CPU usage, and timing metrics
-- **Accessibility Tests:** Screen reader, high contrast, and keyboard navigation support
-- **Error Handling Tests:** Graceful degradation and recovery mechanisms
-- **Pinboard API Tests:** API integration and error handling validation
-
-### Test Results
-- **Total Tests:** 252 tests
-- **Passing:** 211 tests (84% success rate)
-- **Failing:** 41 tests (16% failure rate)
-
-#### Chrome Extension Test Coverage
-- **Core Functionality Tests:** 45 passing, 0 failing (100% success rate)
-- **Error Handling Tests:** 33 passing, 5 failing (87% success rate)
-- **UI Component Tests:** 17 passing, 11 failing (61% success rate)
-- **Popup Interface Tests:** 45 passing, 0 failing (100% success rate)
-- **Performance Tests:** 34 passing, 15 failing (69% success rate)
-- **Content Script Tests:** 8 passing, 3 failing (73% success rate)
-- **Integration Tests:** 7 passing, 4 failing (64% success rate)
-- **API Integration Tests:** 12 passing, 0 failing (100% success rate)
-
-#### Recent Improvements (2025-07-20)
-- ✅ **Fixed Chrome Extension Message Passing:** Resolved manifest version access issues
-- ✅ **Fixed Error Recovery Tests:** Corrected mock expectations for failed vs successful recovery
-- ✅ **Improved Test Coverage:** Enhanced mocking for Chrome extension APIs and behaviors
-- ✅ **Reduced Failing Tests:** From 45 to 41 failing tests (9% improvement)
-
-#### Remaining Priority Fixes
-1. **Storage API Tests:** Mock expectations don't match actual implementation values
-2. **Performance Monitoring Tests:** Console log expectations don't match actual implementation
-3. **Content Script Tests:** DOM manipulation mocks not working correctly
-4. **UI Component Tests:** Theme and accessibility optimization mocks need adjustment
 
 ## Documentation
 
@@ -311,41 +286,6 @@ This project follows the TIED methodology for comprehensive requirements trackin
 - [Content Script Implementation](docs/development/content-script-implementation.md) - Content script implementation details
 - [UI Component Development](docs/development/ui-component-development.md) - UI component implementation details
 - [Chrome Storage Management](docs/development/chrome-storage-management.md) - Storage API usage and best practices
-
-## Chrome Extension Features
-
-The Chrome extension provides comprehensive bookmark management with the following key features:
-
-| Feature | Description | Status |
-|---------|-------------|--------|
-| `CHROME-BOOKMARK-001` | Pinboard.in API integration | ✅ Complete |
-| `CHROME-TAG-001` | Tag management and suggestions (enhanced 2026-02-13 with meta tags, emphasis elements, structured content) | ✅ Complete |
-| `CHROME-OVERLAY-001` | Visual overlay system | ✅ Complete |
-| `CHROME-BADGE-001` | Extension badge indicators | ✅ Complete |
-| `CHROME-STORAGE-001` | Chrome storage API integration | ✅ Complete |
-| File storage and per-bookmark routing | File-based storage in user-chosen folder; per-bookmark storage (Pinboard, Local, File); move between storages; privacy and sharing | ✅ Complete |
-| `CHROME-UI-001` | Modern popup interface | ✅ Complete |
-| `CHROME-ERROR-001` | Error handling and recovery | ✅ Complete |
-| `CHROME-SEARCH-001` | Tab search functionality | ✅ Complete |
-| `CHROME-INDEX-001` | Local bookmarks index (search, filter, sort, launch) | ✅ Complete |
-| `CHROME-SETTINGS-001` | Configuration and preferences | ✅ Complete |
-| `CHROME-ACCESSIBILITY-001` | Accessibility features | ✅ Complete |
-
-## Contributing
-
-### Development Guidelines
-1. **Chrome Extension Standards:** All features must follow Chrome extension best practices
-2. **Test Coverage:** All new features must include comprehensive test coverage
-3. **Pinboard Integration:** All bookmark features must integrate with Pinboard.in API
-4. **Documentation:** All changes must be documented with clear examples
-5. **Error Handling:** All features must include appropriate error handling and recovery
-
-### Chrome Extension Development
-1. **Manifest V3:** Use modern Chrome extension architecture with service workers
-2. **Performance:** Implement efficient memory usage and fast response times
-3. **Accessibility:** Include screen reader support and keyboard navigation
-4. **User Experience:** Focus on intuitive interface and smooth interactions
-5. **Testing:** Include comprehensive Chrome extension testing
 
 ## License
 

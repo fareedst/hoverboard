@@ -36,6 +36,8 @@
     "dev:server": "node dev-server.js",
     "dev:overlay": "npm run dev:server",
     "version:set": "bash scripts/set-version.sh",
+    "screenshots": "npm run build:dev && node scripts/screenshots-placeholder.js",
+    "screenshots:placeholder": "node scripts/screenshots-placeholder.js",
     "prepare": "husky"
   },
   "author": "Fareed Stevenson",
@@ -76,7 +78,8 @@
     "jest-puppeteer": "^9.0.0",
     "jest-webextension-mock": "^3.8.9",
     "lint-staged": "^16.0.0",
-    "puppeteer": "^24.10.0"
+    "puppeteer": "^24.10.0",
+    "sharp": "^0.34.5"
   },
   "lint-staged": {
     "src/**/*.js": [

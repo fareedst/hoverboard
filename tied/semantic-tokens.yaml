@@ -2160,6 +2160,38 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
     registered: 2026-02-18
     last_updated: 2026-02-18
 
+IMPL-SCREENSHOT_MODE:
+  type: IMPL
+  name: Screenshot/Demo mode for placeholder screenshots
+  category: UI / Tooling
+  status: Active
+  description: "Popup accepts ?screenshot=1&url=...&title=... so automated screenshot scripts can show bookmark UI for a specific URL without relying on the active tab"
+  cross_references:
+    - IMPL-LOCAL_BOOKMARK_SERVICE
+    - IMPL-UI_TESTABILITY_HOOKS
+    - IMPL-POPUP_THEME_CSS
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: 2026-02-19
+    last_updated: 2026-02-19
+
+IMPL-POPUP_THEME_CSS:
+  type: IMPL
+  name: Popup CSS honors ThemeManager (hb-theme-dark)
+  category: UI / Theme
+  status: Active
+  description: "Popup stylesheet defines :root.hb-theme-dark so popup respects ThemeManager-applied dark theme (e.g. hoverboard_theme in storage); fixes popup staying light when theme preference is dark"
+  cross_references:
+    - REQ-DARK_THEME
+    - ARCH-THEME
+    - IMPL-SCREENSHOT_MODE
+  source_index: implementation-decisions.yaml
+  detail_file: null
+  metadata:
+    registered: 2026-02-19
+    last_updated: 2026-02-19
+
 #
 # TOKEN-IDENTIFIER:
 #   type: REQ | ARCH | IMPL | TEST | PROC

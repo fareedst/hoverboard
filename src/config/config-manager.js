@@ -542,8 +542,6 @@ export class ConfigManager {
           count: limitedTags.length
         }
       })
-
-      console.log('[IMMUTABLE-REQ-TAG-001] Recent tags updated:', limitedTags.length)
     } catch (error) {
       console.error('[IMMUTABLE-REQ-TAG-001] Failed to update recent tags:', error)
 
@@ -556,7 +554,6 @@ export class ConfigManager {
             count: Math.min(tags.length, 50)
           }
         })
-        console.log('[IMMUTABLE-REQ-TAG-001] Fallback to local storage successful')
       } catch (fallbackError) {
         console.error('[IMMUTABLE-REQ-TAG-001] Fallback storage also failed:', fallbackError)
       }
@@ -630,7 +627,6 @@ export class ConfigManager {
       if (recentTags.length > maxTags) {
         const trimmedTags = recentTags.slice(0, maxTags)
         await this.updateRecentTags(trimmedTags)
-        console.log('[IMMUTABLE-REQ-TAG-001] Cleaned up old tags, kept:', trimmedTags.length)
       }
     } catch (error) {
       console.error('[IMMUTABLE-REQ-TAG-001] Failed to cleanup old tags:', error)

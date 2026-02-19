@@ -10,9 +10,6 @@ import { ConfigManager } from '../../config/config-manager.js'
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
 import { recordAction } from '../../shared/ui-inspector.js'
 import { POPUP_ACTION_IDS } from '../../shared/ui-action-contract.js'
-import { debugLogger, LOG_CATEGORIES } from '../../shared/debug-logger.js'
-
-debugLog('[SAFARI-EXT-SHIM-001] PopupController.js: module loaded')
 
 export class PopupController {
   constructor (dependencies = {}) {
@@ -177,10 +174,25 @@ export class PopupController {
     try {
       this.setLoading(true)
 
-      // Get current tab information
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getCurrentTab')
-      this.currentTab = await this.getCurrentTab()
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentTab', this.currentTab)
+      // [IMPL-SCREENSHOT_MODE] Screenshot/demo mode: use fake current tab from URL params so automated
+      // screenshot scripts can open the popup as a tab and still show bookmark data for a specific URL.
+      const params = typeof window !== 'undefined' && window.location && window.location.search
+        ? new URLSearchParams(window.location.search)
+        : null
+      const screenshotMode = params && params.get('screenshot') === '1'
+      const screenshotUrl = params && params.get('url')
+      const screenshotTitle = params && params.get('title')
+      if (screenshotMode && screenshotUrl) {
+        const decodedUrl = decodeURIComponent(screenshotUrl)
+        const decodedTitle = screenshotTitle ? decodeURIComponent(screenshotTitle) : ''
+        this.currentTab = { url: decodedUrl, title: decodedTitle }
+        debugLog('[IMPL-SCREENSHOT_MODE] loadInitialData: using fake tab from params', this.currentTab)
+      } else {
+        // Get current tab information
+        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getCurrentTab')
+        this.currentTab = await this.getCurrentTab()
+        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentTab', this.currentTab)
+      }
       if (!this.currentTab) {
         throw new Error('Unable to get current tab information')
       }
@@ -1514,9 +1526,7 @@ export class PopupController {
   async handleShowHoverboard () {
     recordAction(POPUP_ACTION_IDS.showHoverboard, { tabId: this.currentTab?.id }, 'popup')
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.showHoverboard, payload: { tabId: this.currentTab?.id } })
-    debugLogger.trace('PopupController', 'handleShowHoverboard', { tabId: this.currentTab?.id }, LOG_CATEGORIES.UI)
     try {
-      debugLog('Attempting to show hoverboard on tab:', this.currentTab)
 
       // Check if we can inject into this tab
       if (!this.canInjectIntoTab(this.currentTab)) {

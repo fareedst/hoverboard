@@ -1577,7 +1577,6 @@ var init_config_manager = __esm({
               count: limitedTags.length
             }
           });
-          console.log("[IMMUTABLE-REQ-TAG-001] Recent tags updated:", limitedTags.length);
         } catch (error) {
           console.error("[IMMUTABLE-REQ-TAG-001] Failed to update recent tags:", error);
           try {
@@ -1588,7 +1587,6 @@ var init_config_manager = __esm({
                 count: Math.min(tags.length, 50)
               }
             });
-            console.log("[IMMUTABLE-REQ-TAG-001] Fallback to local storage successful");
           } catch (fallbackError) {
             console.error("[IMMUTABLE-REQ-TAG-001] Fallback storage also failed:", fallbackError);
           }
@@ -1653,7 +1651,6 @@ var init_config_manager = __esm({
           if (recentTags.length > maxTags) {
             const trimmedTags = recentTags.slice(0, maxTags);
             await this.updateRecentTags(trimmedTags);
-            console.log("[IMMUTABLE-REQ-TAG-001] Cleaned up old tags, kept:", trimmedTags.length);
           }
         } catch (error) {
           console.error("[IMMUTABLE-REQ-TAG-001] Failed to cleanup old tags:", error);
@@ -4205,202 +4202,6 @@ init_utils();
 init_tag_service();
 init_config_manager();
 init_utils();
-
-// src/shared/debug-logger.js
-var LOG_CATEGORIES = Object.freeze({
-  UI: "ui",
-  MESSAGE: "message",
-  OVERLAY: "overlay",
-  STORAGE: "storage"
-});
-var DebugLogger = class {
-  constructor() {
-    this.debugEnabled = true;
-    this.logLevels = {
-      ERROR: 0,
-      WARN: 1,
-      INFO: 2,
-      DEBUG: 3,
-      TRACE: 4
-    };
-    this.currentLevel = this.logLevels.DEBUG;
-    this.logBuffer = [];
-    this.maxBufferSize = 1e3;
-    this.categoryFilter = [];
-  }
-  /**
-   * Core logging method with timestamp and component tracking
-   * @param {string} level - Log level (ERROR, WARN, INFO, DEBUG, TRACE)
-   * @param {string} component - Component name for tracking
-   * @param {string} message - Log message
-   * @param {*} data - Optional data to log
-   * @param {string} [category] - Optional category (LOG_CATEGORIES.UI | MESSAGE | OVERLAY | STORAGE) for filtering
-   */
-  log(level, component, message, data = null, category = null) {
-    if (!this.debugEnabled || this.logLevels[level] > this.currentLevel) {
-      return;
-    }
-    if (this.categoryFilter.length && category && !this.categoryFilter.includes(category)) {
-      return;
-    }
-    const timestamp = (/* @__PURE__ */ new Date()).toISOString();
-    const prefix = `[${timestamp}] [${level}] [${component}]`;
-    const categoryPrefix = category ? `[${category}] ` : "";
-    const logEntry = {
-      timestamp: Date.now(),
-      level,
-      component,
-      category: category || null,
-      message,
-      data
-    };
-    this.addToBuffer(logEntry);
-    if (data) {
-      console.log(prefix, categoryPrefix + message, data);
-    } else {
-      console.log(prefix, categoryPrefix + message);
-    }
-  }
-  /**
-   * Add log entry to buffer for later analysis
-   * @param {Object} logEntry - Log entry object
-   */
-  addToBuffer(logEntry) {
-    this.logBuffer.push(logEntry);
-    if (this.logBuffer.length > this.maxBufferSize) {
-      this.logBuffer.shift();
-    }
-  }
-  /**
-   * Error level logging
-   * @param {string} component - Component name
-   * @param {string} message - Error message
-   * @param {*} data - Optional error data
-   * @param {string} [category] - Optional category for filtering
-   */
-  error(component, message, data, category) {
-    this.log("ERROR", component, message, data, category);
-  }
-  /**
-   * Warning level logging
-   * @param {string} component - Component name
-   * @param {string} message - Warning message
-   * @param {*} data - Optional warning data
-   * @param {string} [category] - Optional category for filtering
-   */
-  warn(component, message, data, category) {
-    this.log("WARN", component, message, data, category);
-  }
-  /**
-   * Info level logging
-   * @param {string} component - Component name
-   * @param {string} message - Info message
-   * @param {*} data - Optional info data
-   * @param {string} [category] - Optional category for filtering
-   */
-  info(component, message, data, category) {
-    this.log("INFO", component, message, data, category);
-  }
-  /**
-   * Debug level logging
-   * @param {string} component - Component name
-   * @param {string} message - Debug message
-   * @param {*} data - Optional debug data
-   * @param {string} [category] - Optional category for filtering
-   */
-  debug(component, message, data, category) {
-    this.log("DEBUG", component, message, data, category);
-  }
-  /**
-   * Trace level logging
-   * @param {string} component - Component name
-   * @param {string} message - Trace message
-   * @param {*} data - Optional trace data
-   * @param {string} [category] - Optional category for filtering
-   */
-  trace(component, message, data, category) {
-    this.log("TRACE", component, message, data, category);
-  }
-  /**
-   * Set category filter: only log entries with these categories (empty = all).
-   * @param {string[]} categories - e.g. [LOG_CATEGORIES.MESSAGE, LOG_CATEGORIES.UI]
-   */
-  setCategoryFilter(categories) {
-    this.categoryFilter = Array.isArray(categories) ? categories : [];
-  }
-  /**
-   * Set the current log level
-   * @param {string} level - Log level to set
-   */
-  setLevel(level) {
-    if (this.logLevels[level] !== void 0) {
-      this.currentLevel = this.logLevels[level];
-      this.info("DEBUG_LOGGER", `Log level set to ${level}`);
-    }
-  }
-  /**
-   * Enable or disable debug logging
-   * @param {boolean} enabled - Whether to enable logging
-   */
-  setEnabled(enabled) {
-    this.debugEnabled = enabled;
-    if (enabled) {
-      this.info("DEBUG_LOGGER", "Debug logging enabled");
-    }
-  }
-  /**
-   * Get recent log entries
-   * @param {number} count - Number of recent entries to get
-   * @returns {Array} Recent log entries
-   */
-  getRecentLogs(count = 50) {
-    return this.logBuffer.slice(-count);
-  }
-  /**
-   * Get logs for a specific component
-   * @param {string} component - Component name to filter by
-   * @returns {Array} Log entries for the component
-   */
-  getComponentLogs(component) {
-    return this.logBuffer.filter((entry) => entry.component === component);
-  }
-  /**
-   * Get error logs only
-   * @returns {Array} Error log entries
-   */
-  getErrorLogs() {
-    return this.logBuffer.filter((entry) => entry.level === "ERROR");
-  }
-  /**
-   * Clear the log buffer
-   */
-  clearLogs() {
-    this.logBuffer = [];
-    this.info("DEBUG_LOGGER", "Log buffer cleared");
-  }
-  /**
-   * Generate a summary report of logging activity
-   * @returns {Object} Log summary report
-   */
-  generateReport() {
-    const report = {
-      totalLogs: this.logBuffer.length,
-      byLevel: {},
-      byComponent: {},
-      errors: this.getErrorLogs().length,
-      recentActivity: this.getRecentLogs(10)
-    };
-    this.logBuffer.forEach((entry) => {
-      report.byLevel[entry.level] = (report.byLevel[entry.level] || 0) + 1;
-      report.byComponent[entry.component] = (report.byComponent[entry.component] || 0) + 1;
-    });
-    return report;
-  }
-};
-var debugLogger = new DebugLogger();
-debugLogger.info("DEBUG_LOGGER", "Debug logger initialized");
-
-// src/core/message-handler.js
 var MESSAGE_TYPES = {
   // Data retrieval
   GET_CURRENT_BOOKMARK: "getCurrentBookmark",
@@ -4499,7 +4300,6 @@ var POPUP_ACTION_TO_MESSAGE = {
 };
 
 // src/ui/popup/PopupController.js
-debugLog("[SAFARI-EXT-SHIM-001] PopupController.js: module loaded");
 var PopupController = class {
   constructor(dependencies = {}) {
     this.errorHandler = dependencies.errorHandler || new ErrorHandler();
@@ -4624,9 +4424,20 @@ var PopupController = class {
     debugLog("[POPUP-DATA-FLOW-001] loadInitialData: start");
     try {
       this.setLoading(true);
-      debugLog("[POPUP-DATA-FLOW-001] loadInitialData: calling getCurrentTab");
-      this.currentTab = await this.getCurrentTab();
-      debugLog("[POPUP-DATA-FLOW-001] loadInitialData: got currentTab", this.currentTab);
+      const params = typeof window !== "undefined" && window.location && window.location.search ? new URLSearchParams(window.location.search) : null;
+      const screenshotMode = params && params.get("screenshot") === "1";
+      const screenshotUrl = params && params.get("url");
+      const screenshotTitle = params && params.get("title");
+      if (screenshotMode && screenshotUrl) {
+        const decodedUrl = decodeURIComponent(screenshotUrl);
+        const decodedTitle = screenshotTitle ? decodeURIComponent(screenshotTitle) : "";
+        this.currentTab = { url: decodedUrl, title: decodedTitle };
+        debugLog("[IMPL-SCREENSHOT_MODE] loadInitialData: using fake tab from params", this.currentTab);
+      } else {
+        debugLog("[POPUP-DATA-FLOW-001] loadInitialData: calling getCurrentTab");
+        this.currentTab = await this.getCurrentTab();
+        debugLog("[POPUP-DATA-FLOW-001] loadInitialData: got currentTab", this.currentTab);
+      }
       if (!this.currentTab) {
         throw new Error("Unable to get current tab information");
       }
@@ -5920,9 +5731,7 @@ var PopupController = class {
   async handleShowHoverboard() {
     recordAction(POPUP_ACTION_IDS.showHoverboard, { tabId: this.currentTab?.id }, "popup");
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.showHoverboard, payload: { tabId: this.currentTab?.id } });
-    debugLogger.trace("PopupController", "handleShowHoverboard", { tabId: this.currentTab?.id }, LOG_CATEGORIES.UI);
     try {
-      debugLog("Attempting to show hoverboard on tab:", this.currentTab);
       if (!this.canInjectIntoTab(this.currentTab)) {
         this.uiManager.showError("Hoverboard is not available on this page (e.g., Chrome Web Store, New Tab, or Settings).");
         return;

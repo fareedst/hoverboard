@@ -10,7 +10,6 @@ import { TagService } from '../features/tagging/tag-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { TabSearchService } from '../features/search/tab-search-service.js'
 import { debugLog, debugError, browser } from '../shared/utils.js'
-import { debugLogger, LOG_CATEGORIES } from '../shared/debug-logger.js'
 
 // Message type constants - migrated from config.js
 export const MESSAGE_TYPES = {
@@ -158,9 +157,6 @@ export class MessageHandler {
         })
       }
     }
-
-    debugLog(`Processing message: ${type}`, { data, tabId, url })
-    debugLogger.debug('message-handler', `processMessage ${type}`, { dataSanitized: !!data, tabId, url }, LOG_CATEGORIES.MESSAGE)
 
     const senderContext = { tabId, url }
     let response

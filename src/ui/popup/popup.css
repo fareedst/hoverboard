@@ -52,7 +52,7 @@
   --popup-max-height: 450px;
 }
 
-/* Dark theme */
+/* Dark theme: system preference */
 @media (prefers-color-scheme: dark) {
   :root {
     --bg-primary: #1e1e1e;
@@ -67,6 +67,19 @@
     --border-color: #404040;
     --border-hover: #606060;
   }
+}
+
+/* [IMPL-POPUP_THEME_CSS] Dark theme: ThemeManager (hoverboard_theme: dark or hb-theme-dark on root) */
+:root.hb-theme-dark {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #2d2d2d;
+  --bg-hover: #3d3d3d;
+  --bg-active: #4d4d4d;
+  --text-primary: #e0e0e0;
+  --text-secondary: #b0b0b0;
+  --text-muted: #808080;
+  --border-color: #404040;
+  --border-hover: #606060;
 }
 
 /* Reset and base styles */

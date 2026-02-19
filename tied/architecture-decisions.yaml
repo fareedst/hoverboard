@@ -1032,6 +1032,7 @@ ARCH-THEME:
       - REQ-DARK_THEME
     implementation:
       - IMPL-THEME
+      - IMPL-POPUP_THEME_CSS
     tests: []
     code_annotations:
       - ARCH-THEME
@@ -1039,6 +1040,7 @@ ARCH-THEME:
     depends_on: []
     informs:
       - IMPL-THEME
+      - IMPL-POPUP_THEME_CSS
     see_also: []
   detail_file: architecture-decisions/ARCH-THEME.md
   metadata:
@@ -1046,9 +1048,9 @@ ARCH-THEME:
       date: 2025-07-14T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-13T00:00:00.000Z
+      date: 2026-02-19
       author: AI Agent
-      reason: Migrated from STDD to TIED format
+      reason: Add IMPL-POPUP_THEME_CSS traceability
 ARCH-POPUP_SESSION:
   name: Popup Session Persistence Architecture
   status: Active

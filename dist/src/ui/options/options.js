@@ -508,7 +508,6 @@ var init_config_manager = __esm({
               count: limitedTags.length
             }
           });
-          console.log("[IMMUTABLE-REQ-TAG-001] Recent tags updated:", limitedTags.length);
         } catch (error) {
           console.error("[IMMUTABLE-REQ-TAG-001] Failed to update recent tags:", error);
           try {
@@ -519,7 +518,6 @@ var init_config_manager = __esm({
                 count: Math.min(tags.length, 50)
               }
             });
-            console.log("[IMMUTABLE-REQ-TAG-001] Fallback to local storage successful");
           } catch (fallbackError) {
             console.error("[IMMUTABLE-REQ-TAG-001] Fallback storage also failed:", fallbackError);
           }
@@ -584,7 +582,6 @@ var init_config_manager = __esm({
           if (recentTags.length > maxTags) {
             const trimmedTags = recentTags.slice(0, maxTags);
             await this.updateRecentTags(trimmedTags);
-            console.log("[IMMUTABLE-REQ-TAG-001] Cleaned up old tags, kept:", trimmedTags.length);
           }
         } catch (error) {
           console.error("[IMMUTABLE-REQ-TAG-001] Failed to cleanup old tags:", error);

@@ -2704,3 +2704,96 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       author: AI Agent
       reason: Initial creation
   summary: All bookmark providers and normalization paths include updated_at; new/update and Pinboard rules as per ARCH-BOOKMARK_CREATE_UPDATE_TIMES; export/import preserve or default updated_at.
+
+IMPL-SCREENSHOT_MODE:
+  name: Screenshot/Demo mode for placeholder screenshots
+  status: Active
+  cross_references:
+    - IMPL-LOCAL_BOOKMARK_SERVICE
+    - IMPL-UI_TESTABILITY_HOOKS
+  rationale:
+    why: Enable automated generation of README/docs screenshots with placeholder bookmark data
+    problems_solved:
+      - Popup opened as a tab in Playwright has that tab as "active", so bookmark data would be for the wrong URL
+      - Manual screenshot capture is brittle and uses live user data
+    benefits:
+      - Repeatable screenshot script; no live bookmarks; deterministic placeholder data
+  implementation_approach:
+    summary: Popup reads ?screenshot=1&url=...&title=... and uses them as fake current tab; Playwright script seeds chrome.storage.local/sync and captures overlay, popup, options, bookmarks index
+    details:
+      - PopupController.loadInitialData checks URL params; when screenshot=1 and url present, skip getCurrentTab() and use decoded url/title
+      - scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme for dark popup) and placeholderSyncSeed (showHoverOnPageLoad)
+      - scripts/screenshots-placeholder.js launches Chromium with extension, seeds storage via options page, takes four screenshots to images/
+      - Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: 'dark' (see IMPL-POPUP_THEME_CSS)
+  code_locations:
+    files:
+      - path: src/ui/popup/PopupController.js
+        description: Screenshot mode param check in loadInitialData
+      - path: scripts/screenshot-placeholder-data.js
+        description: Placeholder bookmark and sync seed data
+      - path: scripts/screenshots-placeholder.js
+        description: Playwright screenshot script
+  traceability:
+    code_annotations:
+      - IMPL-SCREENSHOT_MODE
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-POPUP_THEME_CSS
+  detail_file: null
+  metadata:
+    created:
+      date: '2026-02-19'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-19'
+      author: AI Agent
+      reason: Initial creation
+  summary: Popup screenshot mode and Playwright script for placeholder-data screenshots.
+
+IMPL-POPUP_THEME_CSS:
+  name: Popup CSS honors ThemeManager (hb-theme-dark)
+  status: Active
+  cross_references:
+    - REQ-DARK_THEME
+    - ARCH-THEME
+    - IMPL-SCREENSHOT_MODE
+  rationale:
+    why: Popup must reflect ThemeManager-applied theme so dark preference and screenshot seed (hoverboard_theme: 'dark') show dark popup
+    problems_solved:
+      - Popup stayed light when hoverboard_theme was 'dark' because popup.css only overrode variables in @media (prefers-color-scheme: dark), not when document root had class hb-theme-dark
+    benefits:
+      - Dark theme preference applies to popup; placeholder screenshots show dark popup when seed includes hoverboard_theme: 'dark'
+  implementation_approach:
+    summary: Add :root.hb-theme-dark block in popup.css with same dark variable values as the prefers-color-scheme media query
+    details:
+      - ThemeManager applies hb-theme-dark to document.documentElement and sets --hb-* variables; popup uses --bg-primary, --text-primary, etc. from popup.css
+      - popup.css had no rule for :root.hb-theme-dark, so body stayed white; add :root.hb-theme-dark { --bg-primary: #1e1e1e; ... } so popup uses dark variables when ThemeManager sets dark
+  code_locations:
+    files:
+      - path: src/ui/popup/popup.css
+        description: ':root.hb-theme-dark block for popup dark theme'
+  traceability:
+    requirements:
+      - REQ-DARK_THEME
+    architecture:
+      - ARCH-THEME
+    code_annotations:
+      - IMPL-POPUP_THEME_CSS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-SCREENSHOT_MODE
+  detail_file: null
+  metadata:
+    created:
+      date: '2026-02-19'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-19'
+      author: AI Agent
+      reason: Popup dark mode fix for screenshot and theme preference
+  summary: Popup CSS :root.hb-theme-dark so popup honors ThemeManager dark theme.

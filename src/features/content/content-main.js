@@ -13,10 +13,6 @@ import { MESSAGE_TYPES } from '../../core/message-handler.js'
 import { browser, debugLog, debugError } from '../../shared/utils' // [SAFARI-EXT-SHIM-001]
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
 import { recordAction } from '../../shared/ui-inspector.js'
-import { debugLogger, LOG_CATEGORIES } from '../../shared/debug-logger.js'
-
-// Global debug flag
-window.HOVERBOARD_DEBUG = true
 
 // MV3-003: Main content script class for V3 architecture
 class HoverboardContentScript {
@@ -117,8 +113,6 @@ class HoverboardContentScript {
   async handleMessage (message, sender, sendResponse) {
     try {
       recordAction(message.type, message.data, 'content')
-      debugLogger.trace('content-main', 'handleMessage', { type: message.type }, LOG_CATEGORIES.MESSAGE)
-      console.log('Content script received message:', message.type)
 
       switch (message.type) {
         case 'TOGGLE_HOVER': {
@@ -381,20 +375,6 @@ class HoverboardContentScript {
 
   async showHover (userTriggered = false) {
     try {
-      debugLogger.trace('content-main', 'showHover', { userTriggered }, LOG_CATEGORIES.OVERLAY)
-      debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] showHover called', { userTriggered, platform: navigator.userAgent })
-      // Platform detection
-      if (typeof chrome !== 'undefined' && chrome.runtime) {
-        debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] Detected Chrome runtime')
-      } else if (typeof browser !== 'undefined' && browser.runtime) {
-        debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] Detected browser polyfill runtime')
-      } else {
-        debugError('CONTENT-SCRIPT', '[CHROME-DEBUG-001] No recognized extension runtime detected')
-      }
-      // Check utils.js access
-      if (!debugLog || !debugError) {
-        console.error('[CHROME-DEBUG-001] utils.js functions missing')
-      }
       debugLog('CONTENT-SCRIPT', 'Showing hover', { userTriggered })
 
       // Refresh bookmark data for user-triggered displays
@@ -430,7 +410,6 @@ class HoverboardContentScript {
   async refreshData () {
     try {
       await this.loadCurrentPageData()
-      console.log('Bookmark data refreshed')
     } catch (error) {
       console.error('Failed to refresh data:', error)
     }
