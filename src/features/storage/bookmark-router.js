@@ -218,8 +218,9 @@ export class BookmarkRouter {
     if (!bookmark || !bookmark.url) {
       return { success: false, code: 'not_found', message: 'Bookmark not found in source' }
     }
-    // [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Allow move when bookmark has url but missing time.
-    const toSave = bookmark.time ? bookmark : { ...bookmark, time: new Date().toISOString() }
+    // [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Allow move when bookmark has url but missing time. [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Ensure time and updated_at set for target.
+    const now = new Date().toISOString()
+    const toSave = { ...bookmark, time: bookmark.time || now, updated_at: now }
     const saveResult = await targetProvider.saveBookmark(toSave)
     if (!saveResult.success) {
       debugError('[IMPL-BOOKMARK_ROUTER] moveBookmarkToStorage save to target failed:', saveResult)

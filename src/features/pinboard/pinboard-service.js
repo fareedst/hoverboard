@@ -13,7 +13,7 @@ import { TagService } from '../tagging/tag-service.js' // [IMMUTABLE-REQ-TAG-001
 import { XMLParser } from 'fast-xml-parser'
 import { debugLog, debugError, debugWarn } from '../../shared/utils.js'
 
-debugLog('[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded');
+debugLog('[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded')
 
 export class PinboardService {
   constructor (tagService = null) {
@@ -472,7 +472,7 @@ export class PinboardService {
 
       return parsed
     } catch (error) {
-      debugError(`💥 HTTP request failed:`, error.message)
+      debugError('💥 HTTP request failed:', error.message)
 
       // PIN-004: Determine if error is retryable (network/rate limit issues)
       const isRetryable = this.isRetryableError(error)
@@ -488,7 +488,7 @@ export class PinboardService {
         return this.makeRequestWithRetry(url, method, retryCount + 1)
       }
 
-      debugError(`❌ Max retries exceeded or non-retryable error. Giving up.`)
+      debugError('❌ Max retries exceeded or non-retryable error. Giving up.')
 
       // PIN-004: Re-throw error if not retryable or max retries exceeded
       throw error
@@ -545,13 +545,15 @@ export class PinboardService {
 
         debugLog('📄 Processing post:', post)
 
-        // PIN-002: Extract bookmark data from XML attributes
+        // PIN-002: Extract bookmark data from XML attributes. [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Pinboard has only create-time; updated_at = time.
+        const pinTime = post['@_time'] || ''
         const result = {
           url: post['@_href'] || url,
           description: post['@_description'] || title || '',
           extended: post['@_extended'] || '',
           tags: post['@_tag'] ? post['@_tag'].split(' ') : [],
-          time: post['@_time'] || '',
+          time: pinTime,
+          updated_at: pinTime,
           shared: post['@_shared'] || 'yes',
           toread: post['@_toread'] || 'no',
           hash: post['@_hash'] || ''
@@ -565,12 +567,14 @@ export class PinboardService {
         // Handle case where posts is a single object, not array
         debugLog('📄 Single post object found, processing directly:', posts)
 
+        const pinTime = posts['@_time'] || ''
         const result = {
           url: posts['@_href'] || url,
           description: posts['@_description'] || title || '',
           extended: posts['@_extended'] || '',
           tags: posts['@_tag'] ? posts['@_tag'].split(' ') : [],
-          time: posts['@_time'] || '',
+          time: pinTime,
+          updated_at: pinTime,
           shared: posts['@_shared'] || 'yes',
           toread: posts['@_toread'] || 'no',
           hash: posts['@_hash'] || ''
@@ -629,12 +633,14 @@ export class PinboardService {
         const tags = post['@_tag'] ? post['@_tag'].split(' ') : []
         debugLog(`[PINBOARD-SERVICE] Post ${index + 1} tags after split:`, tags)
 
+        const pinTime = post['@_time'] || ''
         return {
           url: post['@_href'] || '',
           description: post['@_description'] || '',
           extended: post['@_extended'] || '',
-          tags: tags,
-          time: post['@_time'] || '',
+          tags,
+          time: pinTime,
+          updated_at: pinTime,
           shared: post['@_shared'] || 'yes',
           toread: post['@_toread'] || 'no',
           hash: post['@_hash'] || ''
@@ -697,13 +703,14 @@ export class PinboardService {
    * IMPLEMENTATION DECISION: Include all standard Pinboard bookmark fields with defaults
    */
   createEmptyBookmark (url, title) {
-    // PIN-002: Create bookmark object with all standard fields
+    // PIN-002: Create bookmark object with all standard fields. [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] updated_at = time (empty here).
     return {
       url: url || '',
       description: title || '',
       extended: '',
       tags: [],
       time: '',
+      updated_at: '',
       shared: 'yes',
       toread: 'no',
       hash: ''

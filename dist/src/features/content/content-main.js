@@ -3681,12 +3681,14 @@
             if (posts && posts.length > 0) {
               const post = Array.isArray(posts) ? posts[0] : posts;
               debugLog2("\u{1F4C4} Processing post:", post);
+              const pinTime = post["@_time"] || "";
               const result = {
                 url: post["@_href"] || url,
                 description: post["@_description"] || title || "",
                 extended: post["@_extended"] || "",
                 tags: post["@_tag"] ? post["@_tag"].split(" ") : [],
-                time: post["@_time"] || "",
+                time: pinTime,
+                updated_at: pinTime,
                 shared: post["@_shared"] || "yes",
                 toread: post["@_toread"] || "no",
                 hash: post["@_hash"] || ""
@@ -3696,12 +3698,14 @@
             }
             if (posts && !Array.isArray(posts)) {
               debugLog2("\u{1F4C4} Single post object found, processing directly:", posts);
+              const pinTime = posts["@_time"] || "";
               const result = {
                 url: posts["@_href"] || url,
                 description: posts["@_description"] || title || "",
                 extended: posts["@_extended"] || "",
                 tags: posts["@_tag"] ? posts["@_tag"].split(" ") : [],
-                time: posts["@_time"] || "",
+                time: pinTime,
+                updated_at: pinTime,
                 shared: posts["@_shared"] || "yes",
                 toread: posts["@_toread"] || "no",
                 hash: posts["@_hash"] || ""
@@ -3745,12 +3749,14 @@
               });
               const tags = post["@_tag"] ? post["@_tag"].split(" ") : [];
               debugLog2(`[PINBOARD-SERVICE] Post ${index + 1} tags after split:`, tags);
+              const pinTime = post["@_time"] || "";
               return {
                 url: post["@_href"] || "",
                 description: post["@_description"] || "",
                 extended: post["@_extended"] || "",
                 tags,
-                time: post["@_time"] || "",
+                time: pinTime,
+                updated_at: pinTime,
                 shared: post["@_shared"] || "yes",
                 toread: post["@_toread"] || "no",
                 hash: post["@_hash"] || ""
@@ -3810,6 +3816,7 @@
             extended: "",
             tags: [],
             time: "",
+            updated_at: "",
             shared: "yes",
             toread: "no",
             hash: ""

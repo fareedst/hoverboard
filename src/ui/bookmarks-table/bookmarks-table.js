@@ -217,7 +217,7 @@ function setSort (key) {
     sortAsc = !sortAsc
   } else {
     sortKey = key
-    sortAsc = key === 'time' ? false : true
+    sortAsc = key !== 'time'
   }
   const headers = elements.table.querySelectorAll('th.sortable')
   headers.forEach(th => {
@@ -285,12 +285,14 @@ function normalizeJsonBookmark (raw) {
   const url = (raw.url || '').trim()
   if (!url) return null
   const tags = raw.tags == null ? [] : Array.isArray(raw.tags) ? raw.tags : String(raw.tags).split(/\s+/).filter(Boolean)
+  const time = (raw.time ?? '').trim()
   return {
     url,
     description: (raw.description ?? '').trim(),
     extended: (raw.extended ?? '').trim(),
     tags,
-    time: (raw.time ?? '').trim(),
+    time,
+    updated_at: (raw.updated_at ?? time ?? '').trim(),
     shared: raw.shared === 'no' ? 'no' : 'yes',
     toread: raw.toread === 'yes' ? 'yes' : 'no'
   }

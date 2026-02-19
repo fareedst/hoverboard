@@ -4872,12 +4872,14 @@ var init_pinboard_service = __esm({
           if (posts && posts.length > 0) {
             const post = Array.isArray(posts) ? posts[0] : posts;
             debugLog("\u{1F4C4} Processing post:", post);
+            const pinTime = post["@_time"] || "";
             const result = {
               url: post["@_href"] || url,
               description: post["@_description"] || title || "",
               extended: post["@_extended"] || "",
               tags: post["@_tag"] ? post["@_tag"].split(" ") : [],
-              time: post["@_time"] || "",
+              time: pinTime,
+              updated_at: pinTime,
               shared: post["@_shared"] || "yes",
               toread: post["@_toread"] || "no",
               hash: post["@_hash"] || ""
@@ -4887,12 +4889,14 @@ var init_pinboard_service = __esm({
           }
           if (posts && !Array.isArray(posts)) {
             debugLog("\u{1F4C4} Single post object found, processing directly:", posts);
+            const pinTime = posts["@_time"] || "";
             const result = {
               url: posts["@_href"] || url,
               description: posts["@_description"] || title || "",
               extended: posts["@_extended"] || "",
               tags: posts["@_tag"] ? posts["@_tag"].split(" ") : [],
-              time: posts["@_time"] || "",
+              time: pinTime,
+              updated_at: pinTime,
               shared: posts["@_shared"] || "yes",
               toread: posts["@_toread"] || "no",
               hash: posts["@_hash"] || ""
@@ -4936,12 +4940,14 @@ var init_pinboard_service = __esm({
             });
             const tags = post["@_tag"] ? post["@_tag"].split(" ") : [];
             debugLog(`[PINBOARD-SERVICE] Post ${index + 1} tags after split:`, tags);
+            const pinTime = post["@_time"] || "";
             return {
               url: post["@_href"] || "",
               description: post["@_description"] || "",
               extended: post["@_extended"] || "",
               tags,
-              time: post["@_time"] || "",
+              time: pinTime,
+              updated_at: pinTime,
               shared: post["@_shared"] || "yes",
               toread: post["@_toread"] || "no",
               hash: post["@_hash"] || ""
@@ -5001,6 +5007,7 @@ var init_pinboard_service = __esm({
           extended: "",
           tags: [],
           time: "",
+          updated_at: "",
           shared: "yes",
           toread: "no",
           hash: ""
@@ -8083,6 +8090,7 @@ var PopupController = class {
           shared: "yes",
           toread: "no",
           time: "",
+          updated_at: "",
           extended: "",
           hash: ""
         };
@@ -8318,7 +8326,7 @@ var PopupController = class {
             }
             if (allTexts.length === 0) return [];
             const allText = allTexts.join(" ");
-            const words = allText.split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/).filter((word) => word.length > 0);
+            const words = allText.split(/[\s.,;:!?\-_()[\]]{}"']+/).filter((word) => word.length > 0);
             const noiseWords = /* @__PURE__ */ new Set([
               "a",
               "an",

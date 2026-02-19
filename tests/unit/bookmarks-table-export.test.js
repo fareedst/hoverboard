@@ -24,9 +24,9 @@ describe('escapeCsvField [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT]', () => {
 })
 
 describe('buildCsv [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT]', () => {
-  test('returns header only for empty array', () => {
+  test('returns header only for empty array [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]', () => {
     const csv = buildCsv([])
-    expect(csv).toBe('Title,URL,Tags,Time,Storage,Shared,To read,Notes')
+    expect(csv).toBe('Title,URL,Tags,Time,Updated,Storage,Shared,To read,Notes')
   })
 
   test('outputs one row with Local storage', () => {
@@ -34,7 +34,7 @@ describe('buildCsv [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT]', () => {
       { description: 'Foo', url: 'https://foo.com', tags: [], time: '2026-01-01T12:00:00.000Z', storage: 'local', shared: 'yes', toread: 'no', extended: '' }
     ]
     const csv = buildCsv(bookmarks)
-    expect(csv).toContain('Title,URL,Tags,Time,Storage,Shared,To read,Notes')
+    expect(csv).toContain('Title,URL,Tags,Time,Updated,Storage,Shared,To read,Notes')
     expect(csv).toContain('"Foo"')
     expect(csv).toContain('"https://foo.com"')
     expect(csv).toContain('"Local"')

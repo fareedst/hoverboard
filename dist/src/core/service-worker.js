@@ -4861,12 +4861,14 @@ var init_pinboard_service = __esm({
           if (posts && posts.length > 0) {
             const post = Array.isArray(posts) ? posts[0] : posts;
             debugLog("\u{1F4C4} Processing post:", post);
+            const pinTime = post["@_time"] || "";
             const result = {
               url: post["@_href"] || url,
               description: post["@_description"] || title || "",
               extended: post["@_extended"] || "",
               tags: post["@_tag"] ? post["@_tag"].split(" ") : [],
-              time: post["@_time"] || "",
+              time: pinTime,
+              updated_at: pinTime,
               shared: post["@_shared"] || "yes",
               toread: post["@_toread"] || "no",
               hash: post["@_hash"] || ""
@@ -4876,12 +4878,14 @@ var init_pinboard_service = __esm({
           }
           if (posts && !Array.isArray(posts)) {
             debugLog("\u{1F4C4} Single post object found, processing directly:", posts);
+            const pinTime = posts["@_time"] || "";
             const result = {
               url: posts["@_href"] || url,
               description: posts["@_description"] || title || "",
               extended: posts["@_extended"] || "",
               tags: posts["@_tag"] ? posts["@_tag"].split(" ") : [],
-              time: posts["@_time"] || "",
+              time: pinTime,
+              updated_at: pinTime,
               shared: posts["@_shared"] || "yes",
               toread: posts["@_toread"] || "no",
               hash: posts["@_hash"] || ""
@@ -4925,12 +4929,14 @@ var init_pinboard_service = __esm({
             });
             const tags = post["@_tag"] ? post["@_tag"].split(" ") : [];
             debugLog(`[PINBOARD-SERVICE] Post ${index + 1} tags after split:`, tags);
+            const pinTime = post["@_time"] || "";
             return {
               url: post["@_href"] || "",
               description: post["@_description"] || "",
               extended: post["@_extended"] || "",
               tags,
-              time: post["@_time"] || "",
+              time: pinTime,
+              updated_at: pinTime,
               shared: post["@_shared"] || "yes",
               toread: post["@_toread"] || "no",
               hash: post["@_hash"] || ""
@@ -4990,6 +4996,7 @@ var init_pinboard_service = __esm({
           extended: "",
           tags: [],
           time: "",
+          updated_at: "",
           shared: "yes",
           toread: "no",
           hash: ""
@@ -5090,7 +5097,7 @@ var LocalBookmarkService = class {
     if (!url) return "";
     return url.trim().replace(/\/+$/, "");
   }
-  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Empty bookmark shape (match PinboardService.createEmptyBookmark). */
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Empty bookmark shape (match PinboardService.createEmptyBookmark). */
   createEmptyBookmark(url, title) {
     return {
       url: url || "",
@@ -5098,6 +5105,7 @@ var LocalBookmarkService = class {
       extended: "",
       tags: [],
       time: "",
+      updated_at: "",
       shared: "yes",
       toread: "no",
       hash: ""
@@ -5119,16 +5127,18 @@ var LocalBookmarkService = class {
   async _setAllBookmarks(map) {
     await chrome.storage.local.set({ [STORAGE_KEY]: map });
   }
-  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Normalize bookmark for return: tags as array. */
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Normalize bookmark for return: tags as array; legacy updated_at default to time. */
   _normalizeBookmark(b) {
     if (!b) return null;
     const tags = b.tags == null ? [] : Array.isArray(b.tags) ? b.tags : String(b.tags).split(/\s+/).filter(Boolean);
+    const time = b.time || "";
     return {
       url: b.url || "",
       description: b.description || "",
       extended: b.extended || "",
       tags,
-      time: b.time || "",
+      time,
+      updated_at: b.updated_at ?? time ?? "",
       shared: b.shared === "no" ? "no" : "yes",
       toread: b.toread === "yes" ? "yes" : "no",
       hash: b.hash || ""
@@ -5197,12 +5207,14 @@ var LocalBookmarkService = class {
       const now = (/* @__PURE__ */ new Date()).toISOString();
       const all = await this._getAllBookmarks();
       const existing = all[url];
+      const time = existing ? existing.time || now : now;
       const bookmark = {
         url,
         description: bookmarkData.description ?? existing?.description ?? "",
         extended: bookmarkData.extended ?? existing?.extended ?? "",
         tags,
-        time: bookmarkData.time ?? existing?.time ?? now,
+        time,
+        updated_at: now,
         shared: bookmarkData.shared !== void 0 ? String(bookmarkData.shared) : existing?.shared ?? "yes",
         toread: bookmarkData.toread !== void 0 ? String(bookmarkData.toread) : existing?.toread ?? "no",
         hash: existing?.hash ?? this._localHash(url)
@@ -5311,18 +5323,21 @@ function normalizeBookmarkForDisplay(bookmark) {
       extended: "",
       tags: [],
       time: "",
+      updated_at: "",
       shared: "yes",
       toread: "no",
       hash: ""
     };
   }
   const tags = bookmark.tags == null ? [] : Array.isArray(bookmark.tags) ? bookmark.tags.filter((t) => t != null && String(t).trim()) : String(bookmark.tags).split(/\s+/).filter(Boolean);
+  const time = bookmark.time ?? "";
   return {
     url: bookmark.url ?? "",
     description: bookmark.description ?? "",
     extended: bookmark.extended ?? "",
     tags,
-    time: bookmark.time ?? "",
+    time,
+    updated_at: bookmark.updated_at ?? time ?? "",
     shared: bookmark.shared === "no" ? "no" : "yes",
     toread: bookmark.toread === "yes" ? "yes" : "no",
     hash: bookmark.hash ?? ""
@@ -6412,7 +6427,7 @@ var SyncBookmarkService = class {
     if (!url) return "";
     return url.trim().replace(/\/+$/, "");
   }
-  /** [IMPL-SYNC_BOOKMARK_SERVICE] Empty bookmark shape (match PinboardService.createEmptyBookmark). */
+  /** [IMPL-SYNC_BOOKMARK_SERVICE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Empty bookmark shape (match PinboardService.createEmptyBookmark). */
   createEmptyBookmark(url, title) {
     return {
       url: url || "",
@@ -6420,6 +6435,7 @@ var SyncBookmarkService = class {
       extended: "",
       tags: [],
       time: "",
+      updated_at: "",
       shared: "yes",
       toread: "no",
       hash: ""
@@ -6441,16 +6457,18 @@ var SyncBookmarkService = class {
   async _setAllBookmarks(map) {
     await chrome.storage.sync.set({ [STORAGE_KEY2]: map });
   }
-  /** [IMPL-SYNC_BOOKMARK_SERVICE] Normalize bookmark for return: tags as array. */
+  /** [IMPL-SYNC_BOOKMARK_SERVICE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Normalize bookmark for return: tags as array; legacy updated_at default to time. */
   _normalizeBookmark(b) {
     if (!b) return null;
     const tags = b.tags == null ? [] : Array.isArray(b.tags) ? b.tags : String(b.tags).split(/\s+/).filter(Boolean);
+    const time = b.time || "";
     return {
       url: b.url || "",
       description: b.description || "",
       extended: b.extended || "",
       tags,
-      time: b.time || "",
+      time,
+      updated_at: b.updated_at ?? time ?? "",
       shared: b.shared === "no" ? "no" : "yes",
       toread: b.toread === "yes" ? "yes" : "no",
       hash: b.hash || ""
@@ -6519,12 +6537,14 @@ var SyncBookmarkService = class {
       const now = (/* @__PURE__ */ new Date()).toISOString();
       const all = await this._getAllBookmarks();
       const existing = all[url];
+      const time = existing ? existing.time || now : now;
       const bookmark = {
         url,
         description: bookmarkData.description ?? existing?.description ?? "",
         extended: bookmarkData.extended ?? existing?.extended ?? "",
         tags,
-        time: bookmarkData.time ?? existing?.time ?? now,
+        time,
+        updated_at: now,
         shared: bookmarkData.shared !== void 0 ? String(bookmarkData.shared) : existing?.shared ?? "yes",
         toread: bookmarkData.toread !== void 0 ? String(bookmarkData.toread) : existing?.toread ?? "no",
         hash: existing?.hash ?? this._syncHash(url)
@@ -6670,7 +6690,7 @@ var FileBookmarkService = class {
     if (!url) return "";
     return url.trim().replace(/\/+$/, "");
   }
-  /** [IMPL-FILE_BOOKMARK_SERVICE] Empty bookmark shape (match LocalBookmarkService.createEmptyBookmark). */
+  /** [IMPL-FILE_BOOKMARK_SERVICE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Empty bookmark shape (match LocalBookmarkService.createEmptyBookmark). */
   createEmptyBookmark(url, title) {
     return {
       url: url || "",
@@ -6678,6 +6698,7 @@ var FileBookmarkService = class {
       extended: "",
       tags: [],
       time: "",
+      updated_at: "",
       shared: "yes",
       toread: "no",
       hash: ""
@@ -6700,16 +6721,18 @@ var FileBookmarkService = class {
   async _setAllBookmarks(map) {
     await this.adapter.writeBookmarksFile({ version: FILE_FORMAT_VERSION, bookmarks: map });
   }
-  /** [IMPL-FILE_BOOKMARK_SERVICE] Normalize bookmark for return: tags as array. */
+  /** [IMPL-FILE_BOOKMARK_SERVICE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Normalize bookmark for return: tags as array; legacy updated_at default to time. */
   _normalizeBookmark(b) {
     if (!b) return null;
     const tags = b.tags == null ? [] : Array.isArray(b.tags) ? b.tags : String(b.tags).split(/\s+/).filter(Boolean);
+    const time = b.time || "";
     return {
       url: b.url || "",
       description: b.description || "",
       extended: b.extended || "",
       tags,
-      time: b.time || "",
+      time,
+      updated_at: b.updated_at ?? time ?? "",
       shared: b.shared === "no" ? "no" : "yes",
       toread: b.toread === "yes" ? "yes" : "no",
       hash: b.hash || ""
@@ -6776,12 +6799,14 @@ var FileBookmarkService = class {
       const now = (/* @__PURE__ */ new Date()).toISOString();
       const all = await this._getAllBookmarks();
       const existing = all[url];
+      const time = existing ? existing.time || now : now;
       const bookmark = {
         url,
         description: bookmarkData.description ?? existing?.description ?? "",
         extended: bookmarkData.extended ?? existing?.extended ?? "",
         tags,
-        time: bookmarkData.time ?? existing?.time ?? now,
+        time,
+        updated_at: now,
         shared: bookmarkData.shared !== void 0 ? String(bookmarkData.shared) : existing?.shared ?? "yes",
         toread: bookmarkData.toread !== void 0 ? String(bookmarkData.toread) : existing?.toread ?? "no",
         hash: existing?.hash ?? this._fileHash(url)
@@ -7261,7 +7286,8 @@ var BookmarkRouter = class {
     if (!bookmark || !bookmark.url) {
       return { success: false, code: "not_found", message: "Bookmark not found in source" };
     }
-    const toSave = bookmark.time ? bookmark : { ...bookmark, time: (/* @__PURE__ */ new Date()).toISOString() };
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    const toSave = { ...bookmark, time: bookmark.time || now, updated_at: now };
     const saveResult = await targetProvider.saveBookmark(toSave);
     if (!saveResult.success) {
       debugError("[IMPL-BOOKMARK_ROUTER] moveBookmarkToStorage save to target failed:", saveResult);

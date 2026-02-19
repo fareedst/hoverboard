@@ -242,6 +242,7 @@ export class PopupController {
           shared: 'yes',
           toread: 'no',
           time: '',
+          updated_at: '',
           extended: '',
           hash: ''
         }
@@ -560,7 +561,7 @@ export class PopupController {
 
             // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
             const words = allText
-              .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/)
+              .split(/[\s.,;:!?\-_()[\]]{}"']+/)
               .filter(word => word.length > 0)
 
             // Noise word list (common English stop words) - lowercase for case-insensitive matching

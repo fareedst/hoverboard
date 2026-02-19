@@ -174,9 +174,31 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
     const result = await router.moveBookmarkToStorage('https://example.com/m', 'file')
     expect(result.success).toBe(true)
     expect(file.saveBookmark).toHaveBeenCalledWith(expect.objectContaining({ url: 'https://example.com/m', description: 'Move me' }))
+    const savedToFile = file.saveBookmark.mock.calls[0][0]
+    expect(savedToFile.time).toBeDefined()
+    expect(savedToFile.updated_at).toBeDefined()
+    expect(typeof savedToFile.updated_at).toBe('string')
     expect(local.deleteBookmark).toHaveBeenCalledWith('https://example.com/m')
     const backend = await storageIndex.getBackendForUrl('https://example.com/m')
     expect(backend).toBe('file')
+  })
+
+  test('moveBookmarkToStorage passes time and updated_at to target saveBookmark [REQ-BOOKMARK_CREATE_UPDATE_TIMES]', async () => {
+    await storageIndex.setBackendForUrl('https://example.com/ts', 'local')
+    await local.saveBookmark({
+      url: 'https://example.com/ts',
+      description: 'To sync',
+      tags: ['a'],
+      time: '2026-02-14T09:00:00.000Z'
+    })
+    const result = await router.moveBookmarkToStorage('https://example.com/ts', 'sync')
+    expect(result.success).toBe(true)
+    expect(sync.saveBookmark).toHaveBeenCalled()
+    const payload = sync.saveBookmark.mock.calls[0][0]
+    expect(payload.url).toBe('https://example.com/ts')
+    expect(payload.time).toBe('2026-02-14T09:00:00.000Z')
+    expect(payload.updated_at).toBeDefined()
+    expect(typeof payload.updated_at).toBe('string')
   })
 
   test('moveBookmarkToStorage no-op when already in target', async () => {
@@ -235,6 +257,8 @@ describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTE
     const saved = file.saveBookmark.mock.calls[0][0]
     expect(saved.time).toBeDefined()
     expect(typeof saved.time).toBe('string')
+    expect(saved.updated_at).toBeDefined()
+    expect(typeof saved.updated_at).toBe('string')
     expect(local.deleteBookmark).toHaveBeenCalledWith('https://example.com/notime')
     const backend = await storageIndex.getBackendForUrl('https://example.com/notime')
     expect(backend).toBe('file')

@@ -3,6 +3,7 @@
  * Single source for "tags for a URL" and "badge display value". Normalizes bookmark/tags
  * at the boundary so badge, popup, and overlay all use the same contract (tags as array).
  * [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+ * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] normalizeBookmarkForDisplay includes updated_at (default to time when missing).
  */
 
 /**
@@ -19,6 +20,7 @@ export function normalizeBookmarkForDisplay (bookmark) {
       extended: '',
       tags: [],
       time: '',
+      updated_at: '',
       shared: 'yes',
       toread: 'no',
       hash: ''
@@ -29,12 +31,14 @@ export function normalizeBookmarkForDisplay (bookmark) {
     : Array.isArray(bookmark.tags)
       ? bookmark.tags.filter(t => t != null && String(t).trim())
       : String(bookmark.tags).split(/\s+/).filter(Boolean)
+  const time = bookmark.time ?? ''
   return {
     url: bookmark.url ?? '',
     description: bookmark.description ?? '',
     extended: bookmark.extended ?? '',
     tags,
-    time: bookmark.time ?? '',
+    time,
+    updated_at: bookmark.updated_at ?? time ?? '',
     shared: bookmark.shared === 'no' ? 'no' : 'yes',
     toread: bookmark.toread === 'yes' ? 'yes' : 'no',
     hash: bookmark.hash ?? ''

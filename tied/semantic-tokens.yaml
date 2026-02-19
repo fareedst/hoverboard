@@ -2117,6 +2117,49 @@ ARCH-SELECTION_TO_TAG_INPUT:
     registered: 2026-02-18
     last_updated: 2026-02-18
 
+REQ-BOOKMARK_CREATE_UPDATE_TIMES:
+  type: REQ
+  name: Bookmark Create-Time and Most-Recent-Update-Time
+  category: Functional
+  status: Active
+  description: "Each bookmark has create-time and most-recent-update-time; new record has both equal; Pinboard only has create-time so updated_at equals time"
+  cross_references:
+    - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
+    - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-BOOKMARK_CREATE_UPDATE_TIMES.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
+ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
+  type: ARCH
+  name: Bookmark Create and Update Time Architecture
+  status: Active
+  description: "time = create-time; updated_at = most-recent-update-time; normalize missing updated_at to time; Pinboard updated_at = time"
+  cross_references:
+    - REQ-BOOKMARK_CREATE_UPDATE_TIMES
+    - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-BOOKMARK_CREATE_UPDATE_TIMES.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
+IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
+  type: IMPL
+  name: Bookmark Create and Update Time Implementation
+  status: Active
+  description: "Providers and normalization set/normalize updated_at; local/file/sync save rules; Pinboard updated_at = time; export/import"
+  cross_references:
+    - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
+    - REQ-BOOKMARK_CREATE_UPDATE_TIMES
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml
+  metadata:
+    registered: 2026-02-18
+    last_updated: 2026-02-18
+
 #
 # TOKEN-IDENTIFIER:
 #   type: REQ | ARCH | IMPL | TEST | PROC

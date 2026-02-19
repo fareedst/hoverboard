@@ -1947,3 +1947,49 @@ REQ-STRUCTURED_LOGGING:
     created: "2026-02-17"
     last_updated: "2026-02-17"
     author: AI Agent
+REQ-BOOKMARK_CREATE_UPDATE_TIMES:
+  name: Bookmark Create-Time and Most-Recent-Update-Time
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Each bookmark must have an explicit create-time and most-recent-update-time for auditing, sorting, and display.
+    problems_solved:
+      - Single "time" field ambiguous between created vs updated
+      - No way to know when a bookmark was last modified
+    benefits:
+      - Clear semantics: create-time never changes; updated_at changes on every save
+      - Pinboard has only create-time; most-recent-update-time equals create-time for Pinboard
+  satisfaction_criteria:
+    - criterion: Every bookmark has create-time (existing `time` field) and most-recent-update-time (`updated_at`).
+    - criterion: For new records, most-recent-update-time equals create-time.
+    - criterion: For local/file/sync, on update create-time is preserved and most-recent-update-time is set to now.
+    - criterion: For Pinboard, only create-time exists; most-recent-update-time is always equal to the stored create-time.
+  validation_criteria:
+    - method: Unit tests for services (new/update/legacy normalization)
+    - method: Unit tests for Pinboard parse and createEmptyBookmark
+    - method: Unit tests for export/import with updated_at
+  traceability:
+    architecture:
+      - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
+    implementation:
+      - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
+    tests: []
+    code_annotations:
+      - REQ-BOOKMARK_CREATE_UPDATE_TIMES
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-PER_BOOKMARK_STORAGE_BACKEND
+      - REQ-URL_TAGS_DISPLAY
+    supersedes: []
+  detail_file: requirements/REQ-BOOKMARK_CREATE_UPDATE_TIMES.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: Initial creation for bookmark create/update times
+  summary: Each bookmark tracks create-time (`time`) and most-recent-update-time (`updated_at`). New records set both equal; local/file/sync set `updated_at` to now on save; Pinboard only has create-time so `updated_at` equals `time`.

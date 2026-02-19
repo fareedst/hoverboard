@@ -205,6 +205,7 @@ export class PopupController {
           shared: 'yes',
           toread: 'no',
           time: '',
+          updated_at: '',
           extended: '',
           hash: ''
         }

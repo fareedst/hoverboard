@@ -12,6 +12,7 @@
  * - testConnection() -> true (always; no network)
  *
  * [ARCH-LOCAL_STORAGE_PROVIDER] Local storage implementation for bookmark provider strategy.
+ * [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] time = create-time, updated_at = most-recent-update-time.
  */
 
 import { TagService } from '../tagging/tag-service.js'
@@ -30,7 +31,7 @@ export class LocalBookmarkService {
     return url.trim().replace(/\/+$/, '')
   }
 
-  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Empty bookmark shape (match PinboardService.createEmptyBookmark). */
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Empty bookmark shape (match PinboardService.createEmptyBookmark). */
   createEmptyBookmark (url, title) {
     return {
       url: url || '',
@@ -38,6 +39,7 @@ export class LocalBookmarkService {
       extended: '',
       tags: [],
       time: '',
+      updated_at: '',
       shared: 'yes',
       toread: 'no',
       hash: ''
@@ -62,16 +64,18 @@ export class LocalBookmarkService {
     await chrome.storage.local.set({ [STORAGE_KEY]: map })
   }
 
-  /** [IMPL-LOCAL_BOOKMARK_SERVICE] Normalize bookmark for return: tags as array. */
+  /** [IMPL-LOCAL_BOOKMARK_SERVICE] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Normalize bookmark for return: tags as array; legacy updated_at default to time. */
   _normalizeBookmark (b) {
     if (!b) return null
     const tags = b.tags == null ? [] : Array.isArray(b.tags) ? b.tags : String(b.tags).split(/\s+/).filter(Boolean)
+    const time = b.time || ''
     return {
       url: b.url || '',
       description: b.description || '',
       extended: b.extended || '',
       tags,
-      time: b.time || '',
+      time,
+      updated_at: b.updated_at ?? time ?? '',
       shared: b.shared === 'no' ? 'no' : 'yes',
       toread: b.toread === 'yes' ? 'yes' : 'no',
       hash: b.hash || ''
@@ -148,18 +152,23 @@ export class LocalBookmarkService {
       if (!url) {
         return { success: false, code: 'invalid', message: 'URL is required' }
       }
-      const tags = bookmarkData.tags == null ? [] : Array.isArray(bookmarkData.tags)
-        ? bookmarkData.tags
-        : String(bookmarkData.tags).split(/\s+/).filter(Boolean)
+      const tags = bookmarkData.tags == null
+        ? []
+        : Array.isArray(bookmarkData.tags)
+          ? bookmarkData.tags
+          : String(bookmarkData.tags).split(/\s+/).filter(Boolean)
       const now = new Date().toISOString()
       const all = await this._getAllBookmarks()
       const existing = all[url]
+      // [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] New: time and updated_at = now; update: preserve time (create-time), set updated_at = now.
+      const time = existing ? (existing.time || now) : now
       const bookmark = {
         url,
         description: bookmarkData.description ?? existing?.description ?? '',
         extended: bookmarkData.extended ?? existing?.extended ?? '',
         tags,
-        time: bookmarkData.time ?? existing?.time ?? now,
+        time,
+        updated_at: now,
         shared: bookmarkData.shared !== undefined ? String(bookmarkData.shared) : (existing?.shared ?? 'yes'),
         toread: bookmarkData.toread !== undefined ? String(bookmarkData.toread) : (existing?.toread ?? 'no'),
         hash: existing?.hash ?? this._localHash(url)

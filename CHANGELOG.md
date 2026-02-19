@@ -5,6 +5,12 @@ All notable changes to the Hoverboard Browser Extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-02-18
+
+### Added
+
+- **Bookmark create-time and most-recent-update-time** (`REQ-BOOKMARK_CREATE_UPDATE_TIMES`, `ARCH-BOOKMARK_CREATE_UPDATE_TIMES`, `IMPL-BOOKMARK_CREATE_UPDATE_TIMES`) – Each bookmark tracks create-time (`time`) and most-recent-update-time (`updated_at`). For new records, `updated_at` equals create-time; for local/file/sync, updates set `updated_at` to now while preserving `time`; Pinboard has only create-time, so `updated_at` is always equal to `time`. Legacy data without `updated_at` is normalized to `updated_at = time`. CSV export adds an optional **Updated** column; import supports 8- and 9-column CSV and defaults `updated_at` from `time` when missing. Unit tests: file-bookmark-service, sync-bookmark-service, local-bookmark-service, url-tags-manager, bookmarks-table-export, bookmarks-table-import, pinboard-bookmark-times, bookmark-router.
+
 ## [1.3.0] - 2026-02-18
 
 ### Added

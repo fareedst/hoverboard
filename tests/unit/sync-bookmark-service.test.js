@@ -28,26 +28,29 @@ describe('SyncBookmarkService [ARCH-SYNC_STORAGE_PROVIDER] [IMPL-SYNC_BOOKMARK_S
     service = new SyncBookmarkService(null)
   })
 
-  test('getBookmarkForUrl returns empty bookmark when URL not stored', async () => {
+  test('getBookmarkForUrl returns empty bookmark when URL not stored [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]', async () => {
     const b = await service.getBookmarkForUrl('https://example.com/new')
     expect(b.url).toBe('https://example.com/new')
     expect(b.description).toBe('')
     expect(b.tags).toEqual([])
+    expect(b.time).toBe('')
+    expect(b.updated_at).toBe('')
   })
 
-  test('saveBookmark and getBookmarkForUrl round-trip [IMPL-SYNC_BOOKMARK_SERVICE]', async () => {
+  test('saveBookmark and getBookmarkForUrl round-trip [IMPL-SYNC_BOOKMARK_SERVICE] [REQ-BOOKMARK_CREATE_UPDATE_TIMES]', async () => {
     const result = await service.saveBookmark({
       url: 'https://example.com/page',
       description: 'Test',
-      tags: ['a', 'b'],
-      time: '2026-02-15T12:00:00.000Z'
+      tags: ['a', 'b']
     })
     expect(result.success).toBe(true)
     const b = await service.getBookmarkForUrl('https://example.com/page')
     expect(b.url).toBe('https://example.com/page')
     expect(b.description).toBe('Test')
     expect(b.tags).toEqual(['a', 'b'])
-    expect(b.time).toBe('2026-02-15T12:00:00.000Z')
+    expect(b.time).toBeTruthy()
+    expect(b.updated_at).toBeTruthy()
+    expect(b.time).toBe(b.updated_at)
   })
 
   test('deleteBookmark removes URL from sync storage', async () => {

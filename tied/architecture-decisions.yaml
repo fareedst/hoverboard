@@ -2130,3 +2130,42 @@ ARCH-STRUCTURED_LOGGING:
       date: "2026-02-17"
       author: AI Agent
       reason: Numbered token reinterpretation
+ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
+  name: Bookmark Create and Update Time Architecture
+  status: Active
+  cross_references:
+    - REQ-BOOKMARK_CREATE_UPDATE_TIMES
+  rationale:
+    why: Canonical data model for create vs update timestamps across all bookmark providers.
+    problems_solved: []
+    benefits:
+      - Single normalization rule for missing updated_at (default to time)
+      - Pinboard mapping: updated_at always equals time
+  implementation_approach:
+    summary: 'Keep `time` as create-time (ISO8601). Add `updated_at` as most-recent-update-time. On read, if bookmark has no `updated_at`, set `updated_at = time`. Pinboard: when parsing API response or building bookmark, set `updated_at = time`. Local/file/sync: on create set both to now; on update keep time, set updated_at to now.'
+    details: []
+  traceability:
+    requirements:
+      - REQ-BOOKMARK_CREATE_UPDATE_TIMES
+    implementation:
+      - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
+    code_annotations:
+      - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
+  related_decisions:
+    depends_on:
+      - REQ-BOOKMARK_CREATE_UPDATE_TIMES
+    informs:
+      - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
+    see_also:
+      - ARCH-LOCAL_STORAGE_PROVIDER
+      - ARCH-URL_TAGS_DISPLAY
+  detail_file: architecture-decisions/ARCH-BOOKMARK_CREATE_UPDATE_TIMES.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: Initial creation
+  decision: '`time` = create-time (set once, never changed on update). `updated_at` = most-recent-update-time (same as time on create; set to now on every update). Normalization: missing `updated_at` -> `updated_at = time`. Pinboard: `updated_at = time` always.'

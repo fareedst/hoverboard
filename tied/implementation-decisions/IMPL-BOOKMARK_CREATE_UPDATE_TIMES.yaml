@@ -1,0 +1,63 @@
+IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
+  name: Bookmark Create and Update Time Implementation
+  status: Active
+  cross_references:
+    - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
+    - REQ-BOOKMARK_CREATE_UPDATE_TIMES
+  rationale:
+    why: Provider-specific rules for setting and normalizing time and updated_at.
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: 'LocalBookmarkService, FileBookmarkService, SyncBookmarkService: createEmptyBookmark and _normalizeBookmark include updated_at; saveBookmark sets time and updated_at on create (both now), preserves time and sets updated_at on update. PinboardService: parseBookmarkResponse and createEmptyBookmark set updated_at = time; do not send updated_at to API. url-tags-manager normalizeBookmarkForDisplay, bookmark-router moveBookmarkToStorage, PopupController empty pin, export/import CSV and JSON include updated_at; legacy read normalizes updated_at = time.'
+    details: []
+  code_locations:
+    files:
+      - src/features/storage/local-bookmark-service.js
+      - src/features/storage/file-bookmark-service.js
+      - src/features/storage/sync-bookmark-service.js
+      - src/features/pinboard/pinboard-service.js
+      - safari/src/features/pinboard/pinboard-service.js
+      - src/features/storage/url-tags-manager.js
+      - src/features/storage/bookmark-router.js
+      - src/ui/popup/PopupController.js
+      - safari/src/ui/popup/PopupController.js
+      - src/ui/bookmarks-table/bookmarks-table-csv.js
+      - src/ui/bookmarks-table/bookmarks-table.js
+  traceability:
+    architecture:
+      - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
+    requirements:
+      - REQ-BOOKMARK_CREATE_UPDATE_TIMES
+    tests:
+      - tests/unit/file-bookmark-service.test.js
+      - tests/unit/sync-bookmark-service.test.js
+      - tests/unit/local-bookmark-service.test.js
+      - tests/unit/url-tags-manager.test.js
+      - tests/unit/bookmarks-table-export.test.js
+      - tests/unit/bookmarks-table-import.test.js
+      - tests/unit/pinboard-bookmark-times.test.js
+      - tests/unit/bookmark-router.test.js
+    code_annotations:
+      - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-FILE_BOOKMARK_SERVICE
+      - IMPL-URL_TAGS_DISPLAY
+  detail_file: implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml
+  metadata:
+    created:
+      date: '2026-02-18'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-18'
+      author: AI Agent
+      reason: Initial creation
+    last_validated:
+      date: '2026-02-18'
+      validator: AI Agent
+      result: pass
+  summary: All bookmark providers and normalization paths include updated_at; new/update and Pinboard rules as per ARCH-BOOKMARK_CREATE_UPDATE_TIMES; export/import preserve or default updated_at.

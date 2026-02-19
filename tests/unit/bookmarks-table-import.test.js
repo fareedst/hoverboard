@@ -10,10 +10,10 @@ describe('parseCsv [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]', () => {
     expect(parseCsv('')).toEqual([])
     expect(parseCsv(null)).toEqual([])
     expect(parseCsv(undefined)).toEqual([])
-    expect(parseCsv('Title,URL,Tags,Time,Storage,Shared,To read,Notes')).toEqual([])
+    expect(parseCsv('Title,URL,Tags,Time,Updated,Storage,Shared,To read,Notes')).toEqual([])
   })
 
-  test('parses one data row with header', () => {
+  test('parses one data row with header (8-column legacy: updated_at defaults to time) [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]', () => {
     const csv = 'Title,URL,Tags,Time,Storage,Shared,To read,Notes\n"Foo","https://foo.com","","2026-01-01T12:00:00.000Z","Local","Public","No",""'
     const out = parseCsv(csv)
     expect(out).toHaveLength(1)
@@ -22,6 +22,7 @@ describe('parseCsv [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]', () => {
       url: 'https://foo.com',
       tags: [],
       time: '2026-01-01T12:00:00.000Z',
+      updated_at: '2026-01-01T12:00:00.000Z',
       shared: 'yes',
       toread: 'no',
       extended: ''
@@ -75,10 +76,10 @@ describe('parseCsv [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]', () => {
     expect(out[1].extended).toBe('note')
   })
 
-  test('round-trip: parseCsv(buildCsv(bookmarks)) yields equivalent bookmark-like objects [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT]', () => {
+  test('round-trip: parseCsv(buildCsv(bookmarks)) yields equivalent bookmark-like objects [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]', () => {
     const bookmarks = [
-      { description: 'One', url: 'https://one.com', tags: ['a', 'b'], time: '2026-01-01T00:00:00.000Z', storage: 'local', shared: 'yes', toread: 'no', extended: 'notes one' },
-      { description: 'Two', url: 'https://two.com', tags: [], time: '', storage: 'file', shared: 'no', toread: 'yes', extended: '' }
+      { description: 'One', url: 'https://one.com', tags: ['a', 'b'], time: '2026-01-01T00:00:00.000Z', updated_at: '2026-01-01T00:00:00.000Z', storage: 'local', shared: 'yes', toread: 'no', extended: 'notes one' },
+      { description: 'Two', url: 'https://two.com', tags: [], time: '', updated_at: '', storage: 'file', shared: 'no', toread: 'yes', extended: '' }
     ]
     const csv = buildCsv(bookmarks)
     const parsed = parseCsv(csv)
@@ -86,6 +87,8 @@ describe('parseCsv [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]', () => {
     expect(parsed[0].url).toBe(bookmarks[0].url)
     expect(parsed[0].description).toBe(bookmarks[0].description)
     expect(parsed[0].tags).toEqual(bookmarks[0].tags)
+    expect(parsed[0].time).toBe(bookmarks[0].time)
+    expect(parsed[0].updated_at).toBe(bookmarks[0].updated_at)
     expect(parsed[0].shared).toBe(bookmarks[0].shared)
     expect(parsed[0].toread).toBe(bookmarks[0].toread)
     expect(parsed[0].extended).toBe(bookmarks[0].extended)
@@ -114,6 +117,14 @@ describe('parseCsv [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]', () => {
     const out = parseCsv(csv)
     expect(out).toHaveLength(1)
     expect(out[0].extended).toBe('Note, with comma')
+  })
+
+  test('parses 9-column CSV with Updated column [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]', () => {
+    const csv = 'Title,URL,Tags,Time,Updated,Storage,Shared,To read,Notes\n"R","https://r.com","","2026-01-01T00:00:00.000Z","2026-01-02T00:00:00.000Z","Local","Public","No",""'
+    const out = parseCsv(csv)
+    expect(out).toHaveLength(1)
+    expect(out[0].time).toBe('2026-01-01T00:00:00.000Z')
+    expect(out[0].updated_at).toBe('2026-01-02T00:00:00.000Z')
   })
 })
 

@@ -12,14 +12,16 @@ import {
 
 describe('url-tags-manager [IMPL-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS]', () => {
   describe('normalizeBookmarkForDisplay', () => {
-    test('returns default shape for null/undefined', () => {
+    test('returns default shape for null/undefined [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]', () => {
       expect(normalizeBookmarkForDisplay(null)).toMatchObject({
         url: '',
         tags: [],
+        time: '',
+        updated_at: '',
         shared: 'yes',
         toread: 'no'
       })
-      expect(normalizeBookmarkForDisplay(undefined)).toMatchObject({ tags: [] })
+      expect(normalizeBookmarkForDisplay(undefined)).toMatchObject({ tags: [], updated_at: '' })
     })
 
     test('converts tags string to array', () => {
@@ -66,6 +68,14 @@ describe('url-tags-manager [IMPL-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS]', () =
       expect(out.shared).toBe('no')
       expect(out.toread).toBe('yes')
       expect(out.hash).toBe('abc')
+      expect(out.updated_at).toBe('2026-02-14T00:00:00Z')
+    })
+
+    test('bookmark without updated_at gets updated_at = time [REQ-BOOKMARK_CREATE_UPDATE_TIMES]', () => {
+      const b = { url: 'https://x.com', time: '2026-02-14T12:00:00.000Z', tags: [] }
+      const out = normalizeBookmarkForDisplay(b)
+      expect(out.time).toBe('2026-02-14T12:00:00.000Z')
+      expect(out.updated_at).toBe('2026-02-14T12:00:00.000Z')
     })
   })
 
