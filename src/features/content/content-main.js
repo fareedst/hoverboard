@@ -10,7 +10,7 @@ import { MessageClient } from './message-client.js'
 import { DOMUtils } from './dom-utils.js'
 import { MESSAGE_TYPES } from '../../core/message-handler.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
-import { browser, debugLog, debugError } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+import { browser, debugLog, debugError } from '../../shared/utils' // [SAFARI-EXT-SHIM-001]
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
 import { recordAction } from '../../shared/ui-inspector.js'
 import { debugLogger, LOG_CATEGORIES } from '../../shared/debug-logger.js'
@@ -121,7 +121,7 @@ class HoverboardContentScript {
       console.log('Content script received message:', message.type)
 
       switch (message.type) {
-        case 'TOGGLE_HOVER':
+        case 'TOGGLE_HOVER': {
           await this.toggleHover()
           // [POPUP-CLOSE-BEHAVIOR-ARCH-012] - Return overlay state after toggle
           const newState = {
@@ -130,6 +130,7 @@ class HoverboardContentScript {
           }
           sendResponse({ success: true, data: newState })
           break
+        }
 
         case 'HIDE_OVERLAY':
           this.overlayManager.hide()
@@ -194,7 +195,7 @@ class HoverboardContentScript {
           break
 
         // [POPUP-CLOSE-BEHAVIOR-ARCH-012] - Handle overlay state queries from popup
-        case 'GET_OVERLAY_STATE':
+        case 'GET_OVERLAY_STATE': {
           const overlayState = {
             isVisible: this.overlayActive,
             hasBookmark: !!this.currentBookmark,
@@ -202,6 +203,7 @@ class HoverboardContentScript {
           }
           sendResponse({ success: true, data: overlayState })
           break
+        }
 
         // [IMPL-SELECTION_TO_TAG_INPUT] - Return current page selection for popup tag input prefill
         case 'GET_PAGE_SELECTION': {
@@ -317,11 +319,6 @@ class HoverboardContentScript {
         return
       }
 
-      // Debug the response structure
-      console.log('🔍 [Debug] Response structure:', response)
-      console.log('🔍 [Debug] Actual response:', actualResponse)
-      console.log('🔍 [Debug] Actual response type:', typeof actualResponse)
-
       // Extract the actual bookmark data from the response
       this.currentBookmark = actualResponse.data || actualResponse
       debugLog('CONTENT-SCRIPT', 'Current bookmark set:', this.currentBookmark)
@@ -385,18 +382,18 @@ class HoverboardContentScript {
   async showHover (userTriggered = false) {
     try {
       debugLogger.trace('content-main', 'showHover', { userTriggered }, LOG_CATEGORIES.OVERLAY)
-      debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] showHover called', { userTriggered, platform: navigator.userAgent });
+      debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] showHover called', { userTriggered, platform: navigator.userAgent })
       // Platform detection
       if (typeof chrome !== 'undefined' && chrome.runtime) {
-        debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] Detected Chrome runtime');
+        debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] Detected Chrome runtime')
       } else if (typeof browser !== 'undefined' && browser.runtime) {
-        debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] Detected browser polyfill runtime');
+        debugLog('CONTENT-SCRIPT', '[CHROME-DEBUG-001] Detected browser polyfill runtime')
       } else {
-        debugError('CONTENT-SCRIPT', '[CHROME-DEBUG-001] No recognized extension runtime detected');
+        debugError('CONTENT-SCRIPT', '[CHROME-DEBUG-001] No recognized extension runtime detected')
       }
       // Check utils.js access
       if (!debugLog || !debugError) {
-        console.error('[CHROME-DEBUG-001] utils.js functions missing');
+        console.error('[CHROME-DEBUG-001] utils.js functions missing')
       }
       debugLog('CONTENT-SCRIPT', 'Showing hover', { userTriggered })
 
@@ -413,18 +410,6 @@ class HoverboardContentScript {
       }
 
       debugLog('CONTENT-SCRIPT', 'Current bookmark data:', this.currentBookmark)
-
-      // Enhanced debugging for bookmark structure
-      console.log('🔍 [Debug] Bookmark data structure:')
-      console.log('🔍 [Debug] - URL:', this.currentBookmark.url)
-      console.log('🔍 [Debug] - Description:', this.currentBookmark.description)
-      console.log('🔍 [Debug] - Tags:', this.currentBookmark.tags)
-      console.log('🔍 [Debug] - Tags type:', typeof this.currentBookmark.tags)
-      console.log('🔍 [Debug] - Tags length:', this.currentBookmark.tags?.length)
-      console.log('🔍 [Debug] - Extended:', this.currentBookmark.extended)
-      console.log('🔍 [Debug] - Hash:', this.currentBookmark.hash)
-      console.log('🔍 [Debug] - Shared:', this.currentBookmark.shared)
-      console.log('🔍 [Debug] - ToRead:', this.currentBookmark.toread)
 
       // Create and show the overlay
       this.overlayManager.show({
@@ -651,7 +636,7 @@ class HoverboardContentScript {
   }
 
   // [TOGGLE-SYNC-CONTENT-001] - Handle bookmark updates from external sources
-  async handleBookmarkUpdated(bookmarkData) {
+  async handleBookmarkUpdated (bookmarkData) {
     try {
       // [TOGGLE-SYNC-CONTENT-001] Robustness: Validate bookmarkData before updating overlay
       if (!bookmarkData || !bookmarkData.url || !bookmarkData.tags) {
@@ -673,12 +658,12 @@ class HoverboardContentScript {
 
       debugLog('CONTENT-SCRIPT', '[TOGGLE-SYNC-CONTENT-001] Bookmark updated from external source', bookmarkData)
     } catch (error) {
-              debugError('CONTENT-SCRIPT', '[TOGGLE-SYNC-CONTENT-001] Failed to handle bookmark update:', error)
+      debugError('CONTENT-SCRIPT', '[TOGGLE-SYNC-CONTENT-001] Failed to handle bookmark update:', error)
     }
   }
 
   // [TAG-SYNC-CONTENT-001] - Handle tag updates from popup or other sources
-  async handleTagUpdated(tagUpdateData) {
+  async handleTagUpdated (tagUpdateData) {
     try {
       // [TAG-SYNC-CONTENT-001] Validate tag update data
       if (!tagUpdateData || !tagUpdateData.url || !Array.isArray(tagUpdateData.tags)) {
@@ -700,7 +685,7 @@ class HoverboardContentScript {
         debugLog('CONTENT-SCRIPT', '[TAG-SYNC-CONTENT-001] Overlay updated with new tags', tagUpdateData.tags)
       }
     } catch (error) {
-              debugError('CONTENT-SCRIPT', '[TAG-SYNC-CONTENT-001] Failed to handle tag update:', error)
+      debugError('CONTENT-SCRIPT', '[TAG-SYNC-CONTENT-001] Failed to handle tag update:', error)
     }
   }
 

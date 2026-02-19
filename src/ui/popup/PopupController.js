@@ -106,54 +106,19 @@ export class PopupController {
    * Normalize tags to array format regardless of input type
    */
   normalizeTags (tags) {
-    // [DEBUG-FIX-001] Add debug logs for normalizeTags
-    console.log('🔍 [DEBUG-FIX-001] normalizeTags called with:', tags)
-    debugLog('[DEBUG-FIX-001] normalizeTags: input:', {
-      tags,
-      tagsType: typeof tags,
-      tagsIsArray: Array.isArray(tags),
-      tagsLength: tags ? (Array.isArray(tags) ? tags.length : tags.toString().length) : 0
-    })
-
     if (!tags) {
-      console.log('🔍 [DEBUG-FIX-001] normalizeTags: no tags provided, returning empty array')
-      debugLog('[DEBUG-FIX-001] normalizeTags: no tags provided, returning empty array')
       return []
     }
 
     if (typeof tags === 'string') {
       // If tags is a string, split by spaces and filter out empty strings
-      const result = tags.split(' ').filter(tag => tag.trim())
-      console.log('🔍 [DEBUG-FIX-001] normalizeTags: string input processed:', {
-        originalString: tags,
-        splitResult: result,
-        resultLength: result.length
-      })
-      debugLog('[DEBUG-FIX-001] normalizeTags: string input processed:', {
-        originalString: tags,
-        splitResult: result,
-        resultLength: result.length
-      })
-      return result
+      return tags.split(' ').filter(tag => tag.trim())
     } else if (Array.isArray(tags)) {
       // If tags is already an array, filter out empty or non-string values
-      const result = tags.filter(tag => tag && typeof tag === 'string' && tag.trim())
-      console.log('🔍 [DEBUG-FIX-001] normalizeTags: array input processed:', {
-        originalArray: tags,
-        filteredResult: result,
-        resultLength: result.length
-      })
-      debugLog('[DEBUG-FIX-001] normalizeTags: array input processed:', {
-        originalArray: tags,
-        filteredResult: result,
-        resultLength: result.length
-      })
-      return result
+      return tags.filter(tag => tag && typeof tag === 'string' && tag.trim())
     }
 
     // For any other type, return empty array
-    console.log('🔍 [DEBUG-FIX-001] normalizeTags: unknown input type, returning empty array')
-    debugLog('[DEBUG-FIX-001] normalizeTags: unknown input type, returning empty array')
     return []
   }
 
@@ -424,14 +389,11 @@ export class PopupController {
       }
 
       // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags using content script injection
-      // Import TagService dynamically to avoid circular dependencies
-      const { TagService } = await import('../../features/tagging/tag-service.js')
-      const tagService = new TagService()
-
-      // Execute script in tab to extract suggested tags
+      // (Injected func is self-contained; no TagService needed in popup context.)
       try {
         const results = await chrome.scripting.executeScript({
           target: { tabId: this.currentTab.id },
+          world: 'MAIN', // Run in page context so we read the page's DOM, not an isolated copy
           func: () => {
             // Extract tags from multiple sources in the page context
             const allTexts = []
@@ -554,14 +516,22 @@ export class PopupController {
               }
             }
 
+            // 8. Fallback: if no structured content found, use body text (ensures we read the page when DOM is minimal or different)
+            if (allTexts.length === 0 && document.body && document.body.innerText) {
+              const bodyText = (document.body.innerText || '').trim()
+              if (bodyText.length > 0) {
+                allTexts.push(bodyText.slice(0, 5000))
+              }
+            }
+
             if (allTexts.length === 0) return []
 
             // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Preserve original case from content
             const allText = allTexts.join(' ')
 
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case (keep in sync with tag-service.js)
             const words = allText
-              .split(/[\s.,;:!?\-_()[\]]{}"']+/)
+              .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/) // eslint-disable-line no-useless-escape -- ] must be escaped to be literal in character class
               .filter(word => word.length > 0)
 
             // Noise word list (common English stop words) - lowercase for case-insensitive matching
@@ -611,9 +581,12 @@ export class PopupController {
               // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Generate lowercase version for case-insensitive operations
               const lowerWord = trimmed.toLowerCase()
 
-              // Filter: not a noise word, length >= 2, not a number
+              // Filter: not a noise word, length >= 2 and <= max tag length, not a number
+              // [REQ-SUGGESTED_TAGS_FROM_CONTENT] Skip only truly overlong tokens (e.g. spaceless title/URL); 50 matches sanitization cap
+              const maxTagLen = 50
               if (
                 trimmed.length >= 2 &&
+                trimmed.length <= maxTagLen &&
                 !noiseWords.has(lowerWord) &&
                 !/^\d+$/.test(trimmed)
               ) {

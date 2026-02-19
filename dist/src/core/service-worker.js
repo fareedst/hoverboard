@@ -4504,7 +4504,7 @@ var init_pinboard_service = __esm({
           }
           const cleanUrl3 = this.cleanUrl(url);
           const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl3)}`;
-          debugLog("\u{1F50D} Making Pinboard API request:", {
+          debugLog("Making Pinboard API request:", {
             endpoint,
             cleanUrl: cleanUrl3,
             originalUrl: url
@@ -4808,7 +4808,7 @@ var init_pinboard_service = __esm({
           debugLog("\u2705 Successfully parsed XML response");
           return parsed;
         } catch (error) {
-          debugError(`\u{1F4A5} HTTP request failed:`, error.message);
+          debugError("\u{1F4A5} HTTP request failed:", error.message);
           const isRetryable = this.isRetryableError(error);
           const maxRetries = config.pinRetryCountMax || 2;
           if (isRetryable && retryCount < maxRetries) {
@@ -4817,7 +4817,7 @@ var init_pinboard_service = __esm({
             await this.sleep(delay);
             return this.makeRequestWithRetry(url, method, retryCount + 1);
           }
-          debugError(`\u274C Max retries exceeded or non-retryable error. Giving up.`);
+          debugError("\u274C Max retries exceeded or non-retryable error. Giving up.");
           throw error;
         }
       }
@@ -4852,7 +4852,7 @@ var init_pinboard_service = __esm({
        */
       parseBookmarkResponse(xmlObj, url, title) {
         try {
-          debugLog("\u{1F50D} Parsing XML object structure:", JSON.stringify(xmlObj, null, 2));
+          debugLog("Parsing XML object structure:", JSON.stringify(xmlObj, null, 2));
           const posts = xmlObj?.posts?.post;
           debugLog("\u{1F4CB} Posts extracted:", posts);
           debugLog("\u{1F4CB} Posts type:", typeof posts);

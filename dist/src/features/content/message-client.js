@@ -4,7 +4,7 @@
  */
 
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
-import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+import { browser } from '../../shared/utils' // [SAFARI-EXT-SHIM-001]
 
 export class MessageClient {
   constructor () {
@@ -58,19 +58,10 @@ export class MessageClient {
    * @returns {Promise} Promise that resolves with response
    */
   // [SAFARI-EXT-SHIM-001] Refactor sendSingleMessage to use await directly
-  async sendSingleMessage(message, options) {
-    const messageId = this.generateMessageId();
-    const fullMessage = { ...message, messageId };
-    try {
-      console.log('🔍 [MessageClient] Sending message:', fullMessage);
-      const response = await browser.runtime.sendMessage(fullMessage);
-      console.log('🔍 [MessageClient] Received response:', response);
-      // Optionally process response here if needed
-      return response;
-    } catch (error) {
-      console.error('🔍 [MessageClient] Message send failed:', error);
-      throw error;
-    }
+  async sendSingleMessage (message, options) {
+    const messageId = this.generateMessageId()
+    const fullMessage = { ...message, messageId }
+    return await browser.runtime.sendMessage(fullMessage)
   }
 
   /**
@@ -91,13 +82,8 @@ export class MessageClient {
    * @returns {Promise} Promise that resolves with response
    */
   // [SAFARI-EXT-SHIM-001] Refactor sendMessageToTab to use await directly
-  async sendMessageToTab(tabId, message) {
-    try {
-      const response = await browser.tabs.sendMessage(tabId, message);
-      return response;
-    } catch (error) {
-      throw error;
-    }
+  async sendMessageToTab (tabId, message) {
+    return await browser.tabs.sendMessage(tabId, message)
   }
 
   /**

@@ -52,9 +52,9 @@ IMPL-SUGGESTED_TAGS:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: '2026-02-19'
       author: AI agent
-      reason: Document restricted-URL skip for popup loadSuggestedTags
+      reason: Document popup test fix (mockResolvedValueOnce for executeScript)
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
@@ -261,6 +261,8 @@ IMPL-SUGGESTED_TAGS:
 
   restricted_url_skip_popup: |-
     **Restricted-URL skip (popup)** [REQ-SUGGESTED_TAGS_FROM_CONTENT] [ARCH-SUGGESTED_TAGS]: In `PopupController.loadSuggestedTags()`, before calling `chrome.scripting.executeScript`, the implementation checks `(this.currentTab.url || '').trim()`. If the URL does not start with `http://` or `https://`, it skips injection, logs a debug message, calls `this.uiManager.updateSuggestedTags([])`, and returns. This avoids Chrome throwing "Cannot access contents of url ... Extension manifest must request permission to access this host" when the active tab is an extension page (e.g. bookmarks-table.html) or other restricted origin. Code location: `src/ui/popup/PopupController.js` in `loadSuggestedTags()` immediately after the "no current tab" check.
+  popup_test_mocking: |-
+    **Popup suggested-tags test mocking** [REQ-SUGGESTED_TAGS_FROM_CONTENT] [ARCH-SUGGESTED_TAGS]: Tests in `tests/unit/popup-suggested-tags.test.js` must mock `chrome.scripting.executeScript` using the existing Jest mock: `chrome.scripting.executeScript.mockResolvedValueOnce([{ result: [...] }])`. Do not replace the function (e.g. `chrome.scripting.executeScript = function (...) { ... }`), because the implementation calls the global reference; replacing it can be unreliable in some Jest environments and the mock may not receive the replacement, causing `results` to be undefined and `updateSuggestedTags([])` to be called. Using `mockResolvedValueOnce` configures the next call's return value on the same mock the implementation uses.
   popup_inlined_path:
     - 'Uses simple regex: `word.replace(/[^a-zA-Z0-9_-]/g, '''').substring(0, 50)`'
     - 'Location: `PopupController.js` line ~573-575'
@@ -333,6 +335,20 @@ IMPL-SUGGESTED_TAGS:
 
     ---
   regex: '`/[\s\.,;:!?\-_\(\)\[\]{}"'']+/`'
+  # Popup path duplicates tokenization in an inline script in PopupController.loadSuggestedTags().
+  # The delimiter regex and tokenization logic MUST match tag-service.js (extractSuggestedTagsFromContent).
+  # Canonical regex: /[\s\.,;:!?\-_\(\)\[\]{}"']+/. Changing it in only one place (e.g. removing escapes
+  # so {}"' fall outside the character class and + applies only to ') breaks suggested-tag tokenization.
+  popup_tokenizer_sync: |-
+    Popup tokenizer must stay in sync with tag-service.js. Same delimiter regex in both:
+    tag-service.js extractSuggestedTagsFromContent (~line 1078) and PopupController.js loadSuggestedTags
+    inline script (tokenize allText). Canonical: .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/). When changing
+    delimiter rules, update both locations.
+  regression_lesson_dca25b3: |-
+    Commit dca25b3 (feat: bookmark create-time, most-recent-update-time) inadvertently changed the
+    popup tokenizer regex in PopupController.js and broke suggested tags. Last good 4e8c251, first bad
+    dca25b3. Culprit: .split(/[\s.,;:!?\-_()[\]]{}"']+/) — character class and + scope wrong. Fix:
+    restore regex to match tag-service.js. See popup_tokenizer_sync.
   removes: Multiple occurrences of identical string (e.g., 5 "react" → 1 "react")
   risk: Performance impact; false positives from design elements
   safari_mirrors: |-
@@ -391,5 +407,6 @@ IMPL-SUGGESTED_TAGS:
     | 2026-02-13 | Migration | ✅ Documented | Migrated from STDD to TIED format |
     | 2026-02-13 | Detail file | ✅ Documented | Created IMPL detail file with all modifiable decisions |
     | 2026-02-13 | Enhancement | ✅ Implemented | Added meta tags, emphasis elements, definition terms, and table headers extraction |
+    | 2026-02-19 | Test fix | ✅ Implemented | Popup tests: use mockResolvedValueOnce for executeScript instead of replacing function (see popup_test_mocking) |
 
     ---

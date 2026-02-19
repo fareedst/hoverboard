@@ -43,6 +43,16 @@
           <option value="file">File</option>
           <option value="sync">Sync</option>
         </select>
+        <label for="time-column-source">Time column:</label>
+        <select id="time-column-source" class="filter-select" aria-label="Time column: create time or last updated">
+          <option value="time">Create time</option>
+          <option value="updated_at" selected>Last updated</option>
+        </select>
+        <label for="time-display-mode">Time format:</label>
+        <select id="time-display-mode" class="filter-select" aria-label="Time format: absolute or age">
+          <option value="absolute">Absolute</option>
+          <option value="age" selected>Age</option>
+        </select>
       </div>
     </div>
 

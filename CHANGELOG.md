@@ -5,6 +5,15 @@ All notable changes to the Hoverboard Browser Extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2026-02-18
+
+### Added
+
+- **Local Bookmarks Index – Time column toggles** (`REQ-LOCAL_BOOKMARKS_INDEX`, `ARCH-LOCAL_BOOKMARKS_INDEX`, `IMPL-LOCAL_BOOKMARKS_INDEX`) – On the Local Bookmarks Index page, two toolbar controls affect the single **Time** column:
+  - **Time column:** Choose **Create time** or **Last updated** (displays `time` or `updated_at` [REQ-BOOKMARK_CREATE_UPDATE_TIMES]); only one time column is shown. Sorting by the Time column uses the selected source.
+  - **Time format:** Choose **Absolute** (`YYYY-MM-DD HH:mm:ss`) or **Age** (two largest units, e.g. `N days O hours`, `45 seconds`, `just now`).
+  - Implementation: `bookmarks-table-time.js` exports `formatTimeAbsolute` and `formatTimeAge`; table state `timeColumnSource` and `timeDisplayMode`; compare uses effective key when sort is Time. Unit tests in `tests/unit/bookmarks-table-time.test.js` and integration in `tests/unit/bookmarks-table-index.test.js`.
+
 ## [1.4.0] - 2026-02-18
 
 ### Added

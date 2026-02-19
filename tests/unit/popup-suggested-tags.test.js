@@ -96,7 +96,7 @@ describe('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Popup suggested tags', () => {
       popupController.currentTab = { id: 10, url: 'https://example.com/page' }
       popupController.currentPin = { tags: [] }
       popupController.normalizeTags = jest.fn((tags) => tags || [])
-      chrome.scripting.executeScript.mockResolvedValue([{ result: ['suggested1', 'suggested2'] }])
+      chrome.scripting.executeScript.mockResolvedValueOnce([{ result: ['suggested1', 'suggested2'] }])
 
       await popupController.loadSuggestedTags()
 
@@ -110,7 +110,7 @@ describe('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Popup suggested tags', () => {
       popupController.currentTab = { id: 11, url: 'http://example.org' }
       popupController.currentPin = { tags: [] }
       popupController.normalizeTags = jest.fn((tags) => tags || [])
-      chrome.scripting.executeScript.mockResolvedValue([{ result: ['httpTag'] }])
+      chrome.scripting.executeScript.mockResolvedValueOnce([{ result: ['httpTag'] }])
 
       await popupController.loadSuggestedTags()
 
@@ -122,7 +122,7 @@ describe('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Popup suggested tags', () => {
       popupController.currentTab = { id: 12, url: 'https://example.com' }
       popupController.currentPin = { tags: ['existing', 'Suggested1'] }
       popupController.normalizeTags = jest.fn((tags) => tags || [])
-      chrome.scripting.executeScript.mockResolvedValue([{ result: ['suggested1', 'suggested2', 'existing'] }])
+      chrome.scripting.executeScript.mockResolvedValueOnce([{ result: ['suggested1', 'suggested2', 'existing'] }])
 
       await popupController.loadSuggestedTags()
 

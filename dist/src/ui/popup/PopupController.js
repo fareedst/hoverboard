@@ -12,7 +12,7 @@ import { recordAction } from '../../shared/ui-inspector.js'
 import { POPUP_ACTION_IDS } from '../../shared/ui-action-contract.js'
 import { debugLogger, LOG_CATEGORIES } from '../../shared/debug-logger.js'
 
-debugLog('[SAFARI-EXT-SHIM-001] PopupController.js: module loaded');
+debugLog('[SAFARI-EXT-SHIM-001] PopupController.js: module loaded')
 
 export class PopupController {
   constructor (dependencies = {}) {
@@ -87,18 +87,18 @@ export class PopupController {
         }
       })
     }
-    debugLog('[CHROME-DEBUG-001] PopupController constructor called', { platform: navigator.userAgent });
+    debugLog('[CHROME-DEBUG-001] PopupController constructor called', { platform: navigator.userAgent })
     // Platform detection
     if (typeof chrome !== 'undefined' && chrome.runtime) {
-      debugLog('[CHROME-DEBUG-001] Detected Chrome runtime in PopupController');
+      debugLog('[CHROME-DEBUG-001] Detected Chrome runtime in PopupController')
     } else if (typeof browser !== 'undefined' && browser.runtime) {
-      debugLog('[CHROME-DEBUG-001] Detected browser polyfill runtime in PopupController');
+      debugLog('[CHROME-DEBUG-001] Detected browser polyfill runtime in PopupController')
     } else {
-      debugError('[CHROME-DEBUG-001] No recognized extension runtime detected in PopupController');
+      debugError('[CHROME-DEBUG-001] No recognized extension runtime detected in PopupController')
     }
     // Check utils.js access
     if (!debugLog || !debugError) {
-      console.error('[CHROME-DEBUG-001] utils.js functions missing in PopupController');
+      console.error('[CHROME-DEBUG-001] utils.js functions missing in PopupController')
     }
   }
 
@@ -106,54 +106,19 @@ export class PopupController {
    * Normalize tags to array format regardless of input type
    */
   normalizeTags (tags) {
-    // [DEBUG-FIX-001] Add debug logs for normalizeTags
-    console.log('🔍 [DEBUG-FIX-001] normalizeTags called with:', tags);
-    debugLog('[DEBUG-FIX-001] normalizeTags: input:', {
-      tags: tags,
-      tagsType: typeof tags,
-      tagsIsArray: Array.isArray(tags),
-      tagsLength: tags ? (Array.isArray(tags) ? tags.length : tags.toString().length) : 0
-    });
-
     if (!tags) {
-      console.log('🔍 [DEBUG-FIX-001] normalizeTags: no tags provided, returning empty array');
-      debugLog('[DEBUG-FIX-001] normalizeTags: no tags provided, returning empty array');
       return []
     }
 
     if (typeof tags === 'string') {
       // If tags is a string, split by spaces and filter out empty strings
-      const result = tags.split(' ').filter(tag => tag.trim())
-      console.log('🔍 [DEBUG-FIX-001] normalizeTags: string input processed:', {
-        originalString: tags,
-        splitResult: result,
-        resultLength: result.length
-      });
-      debugLog('[DEBUG-FIX-001] normalizeTags: string input processed:', {
-        originalString: tags,
-        splitResult: result,
-        resultLength: result.length
-      });
-      return result
+      return tags.split(' ').filter(tag => tag.trim())
     } else if (Array.isArray(tags)) {
       // If tags is already an array, filter out empty or non-string values
-      const result = tags.filter(tag => tag && typeof tag === 'string' && tag.trim())
-      console.log('🔍 [DEBUG-FIX-001] normalizeTags: array input processed:', {
-        originalArray: tags,
-        filteredResult: result,
-        resultLength: result.length
-      });
-      debugLog('[DEBUG-FIX-001] normalizeTags: array input processed:', {
-        originalArray: tags,
-        filteredResult: result,
-        resultLength: result.length
-      });
-      return result
+      return tags.filter(tag => tag && typeof tag === 'string' && tag.trim())
     }
 
     // For any other type, return empty array
-    console.log('🔍 [DEBUG-FIX-001] normalizeTags: unknown input type, returning empty array');
-    debugLog('[DEBUG-FIX-001] normalizeTags: unknown input type, returning empty array');
     return []
   }
 
@@ -208,14 +173,14 @@ export class PopupController {
    * [POPUP-DATA-FLOW-001] Enhanced data flow validation
    */
   async loadInitialData () {
-    debugLog('[POPUP-DATA-FLOW-001] loadInitialData: start');
+    debugLog('[POPUP-DATA-FLOW-001] loadInitialData: start')
     try {
       this.setLoading(true)
 
       // Get current tab information
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getCurrentTab');
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getCurrentTab')
       this.currentTab = await this.getCurrentTab()
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentTab', this.currentTab);
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentTab', this.currentTab)
       if (!this.currentTab) {
         throw new Error('Unable to get current tab information')
       }
@@ -228,13 +193,13 @@ export class PopupController {
       })
 
       // [POPUP-DATA-FLOW-001] Get and validate bookmark data
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getBookmarkData', this.currentTab.url);
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getBookmarkData', this.currentTab.url)
       this.currentPin = await this.getBookmarkData(this.currentTab.url)
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentPin', this.currentPin);
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentPin', this.currentPin)
 
       // [POPUP-DATA-FLOW-001] Handle both bookmarked and non-bookmarked sites
       if (!this.currentPin) {
-        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: No bookmark data, creating empty bookmark for current site');
+        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: No bookmark data, creating empty bookmark for current site')
         this.currentPin = {
           url: this.currentTab.url,
           description: this.currentTab.title || '',
@@ -247,7 +212,7 @@ export class PopupController {
           hash: ''
         }
         // [POPUP-DATA-FLOW-001] Log the created empty bookmark for test compatibility
-        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: created empty bookmark', this.currentPin);
+        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: created empty bookmark', this.currentPin)
       }
 
       this.stateManager.setState({ currentPin: this.currentPin })
@@ -260,19 +225,19 @@ export class PopupController {
         tagCount: this.currentPin?.tags?.length || 0,
         isPrivate: this.currentPin?.shared === 'no',
         isReadLater: this.currentPin?.toread === 'yes'
-      });
+      })
 
       // [POPUP-DATA-FLOW-001] Process and validate tags
       const normalizedTags = this.normalizeTags(this.currentPin?.tags)
       debugLog('[POPUP-DATA-FLOW-001] loadInitialData: tags processing:', {
         originalTags: this.currentPin?.tags,
         originalTagsType: typeof this.currentPin?.tags,
-        normalizedTags: normalizedTags,
+        normalizedTags,
         normalizedTagsLength: normalizedTags.length,
         normalizedTagsIsArray: Array.isArray(normalizedTags)
-      });
+      })
       // [POPUP-DATA-FLOW-001] Update UI with validated data
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling updateCurrentTags with:', normalizedTags);
+      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling updateCurrentTags with:', normalizedTags)
       this.uiManager.updateCurrentTags(normalizedTags)
       this.uiManager.updateConnectionStatus(true)
       this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
@@ -359,7 +324,7 @@ export class PopupController {
       const response = await this.sendMessage({
         type: 'getRecentBookmarks',
         data: {
-          currentTags: currentTags, // Pass current tags for exclusion
+          currentTags, // Pass current tags for exclusion
           senderUrl: this.currentTab?.url
         }
       })
@@ -424,14 +389,11 @@ export class PopupController {
       }
 
       // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags using content script injection
-      // Import TagService dynamically to avoid circular dependencies
-      const { TagService } = await import('../../features/tagging/tag-service.js')
-      const tagService = new TagService()
-
-      // Execute script in tab to extract suggested tags
+      // (Injected func is self-contained; no TagService needed in popup context.)
       try {
         const results = await chrome.scripting.executeScript({
           target: { tabId: this.currentTab.id },
+          world: 'MAIN', // Run in page context so we read the page's DOM, not an isolated copy
           func: () => {
             // Extract tags from multiple sources in the page context
             const allTexts = []
@@ -554,14 +516,22 @@ export class PopupController {
               }
             }
 
+            // 8. Fallback: if no structured content found, use body text (ensures we read the page when DOM is minimal or different)
+            if (allTexts.length === 0 && document.body && document.body.innerText) {
+              const bodyText = (document.body.innerText || '').trim()
+              if (bodyText.length > 0) {
+                allTexts.push(bodyText.slice(0, 5000))
+              }
+            }
+
             if (allTexts.length === 0) return []
 
             // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Preserve original case from content
             const allText = allTexts.join(' ')
 
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
+            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case (keep in sync with tag-service.js)
             const words = allText
-              .split(/[\s.,;:!?\-_()[\]]{}"']+/)
+              .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/) // eslint-disable-line no-useless-escape -- ] must be escaped to be literal in character class
               .filter(word => word.length > 0)
 
             // Noise word list (common English stop words) - lowercase for case-insensitive matching
@@ -611,9 +581,12 @@ export class PopupController {
               // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Generate lowercase version for case-insensitive operations
               const lowerWord = trimmed.toLowerCase()
 
-              // Filter: not a noise word, length >= 2, not a number
+              // Filter: not a noise word, length >= 2 and <= max tag length, not a number
+              // [REQ-SUGGESTED_TAGS_FROM_CONTENT] Skip only truly overlong tokens (e.g. spaceless title/URL); 50 matches sanitization cap
+              const maxTagLen = 50
               if (
                 trimmed.length >= 2 &&
+                trimmed.length <= maxTagLen &&
                 !noiseWords.has(lowerWord) &&
                 !/^\d+$/.test(trimmed)
               ) {
@@ -760,12 +733,12 @@ export class PopupController {
    * Get current active tab
    */
   async getCurrentTab () {
-    debugLog('[CHROME-DEBUG-001] getCurrentTab: calling chrome.tabs.query');
+    debugLog('[CHROME-DEBUG-001] getCurrentTab: calling chrome.tabs.query')
     return new Promise((resolve, reject) => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        debugLog('[CHROME-DEBUG-001] getCurrentTab: chrome.tabs.query callback', tabs, chrome.runtime.lastError);
+        debugLog('[CHROME-DEBUG-001] getCurrentTab: chrome.tabs.query callback', tabs, chrome.runtime.lastError)
         if (chrome.runtime.lastError) {
-          debugError('[CHROME-DEBUG-001] getCurrentTab: chrome.runtime.lastError', chrome.runtime.lastError);
+          debugError('[CHROME-DEBUG-001] getCurrentTab: chrome.runtime.lastError', chrome.runtime.lastError)
           reject(new Error(chrome.runtime.lastError.message))
           return
         }
@@ -773,7 +746,7 @@ export class PopupController {
         if (tabs && tabs.length > 0) {
           resolve(tabs[0])
         } else {
-          debugError('[CHROME-DEBUG-001] getCurrentTab: No active tab found');
+          debugError('[CHROME-DEBUG-001] getCurrentTab: No active tab found')
           reject(new Error('No active tab found'))
         }
       })
@@ -785,7 +758,7 @@ export class PopupController {
    * [POPUP-DATA-FLOW-001] Enhanced data extraction with validation
    */
   async getBookmarkData (url) {
-    debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: calling chrome.runtime.sendMessage', url);
+    debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: calling chrome.runtime.sendMessage', url)
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
@@ -793,9 +766,9 @@ export class PopupController {
           data: { url }
         },
         (response) => {
-          debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.sendMessage callback', response, chrome.runtime.lastError);
+          debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.sendMessage callback', response, chrome.runtime.lastError)
           if (chrome.runtime.lastError) {
-            debugError('[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.lastError', chrome.runtime.lastError);
+            debugError('[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.lastError', chrome.runtime.lastError)
             reject(new Error(chrome.runtime.lastError.message))
             return
           }
@@ -803,40 +776,40 @@ export class PopupController {
           if (response && response.success) {
             // [POPUP-DATA-FLOW-001] Enhanced response structure validation
             debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: response structure:', {
-              response: response,
+              response,
               responseSuccess: response.success,
               responseData: response.data,
               responseDataType: typeof response.data,
               responseDataKeys: response.data ? Object.keys(response.data) : null,
-              hasUrl: response.data?.url ? true : false,
-              hasTags: response.data?.tags ? true : false,
+              hasUrl: !!response.data?.url,
+              hasTags: !!response.data?.tags,
               tagCount: response.data?.tags ? (Array.isArray(response.data.tags) ? response.data.tags.length : 'not-array') : 0
-            });
+            })
 
             // [POPUP-DATA-FLOW-001] Extract and validate bookmark data
-            const bookmarkData = response.data;
+            const bookmarkData = response.data
 
             // [POPUP-DATA-FLOW-001] Only treat as no bookmark when URL is blocked; needsAuth still has bookmark from local/file/sync
             if (bookmarkData?.blocked) {
-              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: URL blocked', bookmarkData);
-              resolve(null);
-              return;
+              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: URL blocked', bookmarkData)
+              resolve(null)
+              return
             }
 
             // [POPUP-DATA-FLOW-001] Validate extracted data
-            const isValid = this.validateBookmarkData(bookmarkData);
+            const isValid = this.validateBookmarkData(bookmarkData)
             if (!isValid) {
-              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: Invalid bookmark data structure, treating as no bookmark', bookmarkData);
-              resolve(null);
-              return;
+              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: Invalid bookmark data structure, treating as no bookmark', bookmarkData)
+              resolve(null)
+              return
             }
 
             // [POPUP-DATA-FLOW-001] Extract the actual bookmark data (handle both direct and nested structures)
-            const extractedData = bookmarkData?.data || bookmarkData;
-            debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: extracted and validated bookmark data:', extractedData);
+            const extractedData = bookmarkData?.data || bookmarkData
+            debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: extracted and validated bookmark data:', extractedData)
             resolve(extractedData)
           } else {
-            debugError('[POPUP-DATA-FLOW-001] getBookmarkData: Failed to get bookmark data', response);
+            debugError('[POPUP-DATA-FLOW-001] getBookmarkData: Failed to get bookmark data', response)
             reject(new Error(response?.error || 'Failed to get bookmark data'))
           }
         }
@@ -917,28 +890,28 @@ export class PopupController {
    * @param {Object} bookmarkData - Bookmark data to validate
    * @returns {boolean} Whether the data is valid
    */
-  validateBookmarkData(bookmarkData) {
+  validateBookmarkData (bookmarkData) {
     // Handle null and undefined inputs
     if (bookmarkData === null || bookmarkData === undefined) {
-      return false;
+      return false
     }
 
     // Handle both direct bookmark data and response structure
-    const data = bookmarkData?.data || bookmarkData;
+    const data = bookmarkData?.data || bookmarkData
 
     if (!data || typeof data !== 'object' || !data.url) {
-      debugLog('[POPUP-DEBUG-001] Bookmark data validation: missing url or invalid object');
-      return false;
+      debugLog('[POPUP-DEBUG-001] Bookmark data validation: missing url or invalid object')
+      return false
     }
 
     // [IMPL-URL_TAGS_DISPLAY] Normalize tags to array instead of rejecting (defensive; backend now returns normalized)
     if (!Array.isArray(data.tags)) {
       data.tags = data.tags == null
         ? []
-        : (typeof data.tags === 'string' ? data.tags.split(/\s+/).filter(t => t.trim()) : []);
+        : (typeof data.tags === 'string' ? data.tags.split(/\s+/).filter(t => t.trim()) : [])
     }
 
-    const isValid = true;
+    const isValid = true
     debugLog('[POPUP-DEBUG-001] Bookmark data validation:', {
       isValid,
       hasUrl: !!data?.url,
@@ -1547,8 +1520,8 @@ export class PopupController {
 
       // Check if we can inject into this tab
       if (!this.canInjectIntoTab(this.currentTab)) {
-        this.uiManager.showError('Hoverboard is not available on this page (e.g., Chrome Web Store, New Tab, or Settings).');
-        return;
+        this.uiManager.showError('Hoverboard is not available on this page (e.g., Chrome Web Store, New Tab, or Settings).')
+        return
       }
 
       const toggleResponse = await this.sendToTab({
@@ -1858,13 +1831,13 @@ export class PopupController {
    * [TAG-SYNC-POPUP-001] - Notify overlay of tag changes
    * @param {string[]} tags - Array of updated tags
    */
-  async notifyOverlayOfTagChanges(tags) {
+  async notifyOverlayOfTagChanges (tags) {
     try {
       // [TAG-SYNC-POPUP-001] Send TAG_UPDATED message to overlay/content script
       const updatedBookmark = {
         url: this.currentTab?.url,
         description: this.currentTab?.title,
-        tags: tags
+        tags
       }
       await this.sendToTab({
         type: 'TAG_UPDATED',
@@ -2112,7 +2085,7 @@ export class PopupController {
   /**
    * [POPUP-CLOSE-BEHAVIOR-005] Update popup UI to reflect overlay state
    */
-  async updateOverlayState() {
+  async updateOverlayState () {
     try {
       // Query overlay state from content script
       const overlayState = await this.sendToTab({
@@ -2154,7 +2127,7 @@ export class PopupController {
   /**
    * [POPUP-REFRESH-001] Manual refresh capability
    */
-  async refreshPopupData() {
+  async refreshPopupData () {
     recordAction(POPUP_ACTION_IDS.refreshData, undefined, 'popup')
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.refreshData, payload: undefined })
     debugLog('[POPUP-REFRESH-001] Starting manual refresh')
@@ -2179,7 +2152,7 @@ export class PopupController {
    * [POPUP-REFRESH-001] Setup auto-refresh on focus
    * [IMMUTABLE-REQ-TAG-003] [IMPL-RECENT_TAGS_POPUP_REFRESH] Refresh Recent Tags when popup becomes visible
    */
-  setupAutoRefresh() {
+  setupAutoRefresh () {
     window.addEventListener('focus', () => {
       if (this.isInitialized && !this.isLoading) {
         debugLog('[POPUP-REFRESH-001] Auto-refresh on focus triggered')
@@ -2199,7 +2172,7 @@ export class PopupController {
   /**
    * [POPUP-REFRESH-001] Enhanced real-time update handling
    */
-  setupRealTimeUpdates() {
+  setupRealTimeUpdates () {
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
       chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         if (message.type === 'BOOKMARK_UPDATED') {
@@ -2219,7 +2192,7 @@ export class PopupController {
   /**
    * [POPUP-SYNC-001] Ensure popup and badge show same data
    */
-  async validateBadgeSynchronization() {
+  async validateBadgeSynchronization () {
     try {
       const currentTab = await this.getCurrentTab()
       const popupData = this.currentPin
@@ -2250,7 +2223,7 @@ export class PopupController {
   /**
    * [POPUP-SYNC-001] Ensure popup and overlay show same data
    */
-  async validateOverlaySynchronization() {
+  async validateOverlaySynchronization () {
     try {
       const overlayData = await this.sendToTab({
         type: 'getCurrentBookmark',
@@ -2259,7 +2232,7 @@ export class PopupController {
 
       debugLog('[POPUP-SYNC-001] Overlay synchronization check:', {
         popupData: this.currentPin,
-        overlayData: overlayData,
+        overlayData,
         popupTagCount: this.currentPin?.tags?.length || 0,
         overlayTagCount: overlayData?.tags?.length || 0,
         synchronized: JSON.stringify(this.currentPin) === JSON.stringify(overlayData)
@@ -2268,7 +2241,7 @@ export class PopupController {
       return {
         synchronized: JSON.stringify(this.currentPin) === JSON.stringify(overlayData),
         popupData: this.currentPin,
-        overlayData: overlayData
+        overlayData
       }
     } catch (error) {
       debugError('[POPUP-SYNC-001] Overlay synchronization check failed:', error)
@@ -2279,7 +2252,7 @@ export class PopupController {
   /**
    * [SHOW-HOVER-CHECKBOX-CONTROLLER-003] - Handle checkbox state change
    */
-  async handleShowHoverOnPageLoadChange() {
+  async handleShowHoverOnPageLoadChange () {
     recordAction(POPUP_ACTION_IDS.showHoverOnPageLoadChange, undefined, 'popup')
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.showHoverOnPageLoadChange, payload: undefined })
     try {
@@ -2297,7 +2270,6 @@ export class PopupController {
 
       // Broadcast to content scripts
       await this.broadcastConfigUpdate()
-
     } catch (error) {
       this.errorHandler.handleError('Failed to update page load setting', error)
     }
@@ -2306,7 +2278,7 @@ export class PopupController {
   /**
    * [SHOW-HOVER-CHECKBOX-CONTROLLER-004] - Load checkbox state from configuration
    */
-  async loadShowHoverOnPageLoadSetting() {
+  async loadShowHoverOnPageLoadSetting () {
     try {
       const config = await this.configManager.getConfig()
       this.uiManager.elements.showHoverOnPageLoad.checked = config.showHoverOnPageLoad
@@ -2315,10 +2287,10 @@ export class PopupController {
     }
   }
 
-    /**
+  /**
    * [SHOW-HOVER-CHECKBOX-CONTROLLER-005] - Broadcast configuration updates to content scripts
    */
-  async broadcastConfigUpdate() {
+  async broadcastConfigUpdate () {
     try {
       const config = await this.configManager.getConfig()
 
@@ -2335,7 +2307,6 @@ export class PopupController {
         type: 'updateOverlayConfig',
         data: { showHoverOnPageLoad: config.showHoverOnPageLoad }
       })
-
     } catch (error) {
       this.errorHandler.handleError('Failed to broadcast config update', error)
     }

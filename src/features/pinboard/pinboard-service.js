@@ -61,7 +61,7 @@ export class PinboardService {
       const cleanUrl = this.cleanUrl(url)
       const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`
 
-      debugLog('🔍 Making Pinboard API request:', {
+      debugLog('Making Pinboard API request:', {
         endpoint,
         cleanUrl,
         originalUrl: url
@@ -529,7 +529,7 @@ export class PinboardService {
    */
   parseBookmarkResponse (xmlObj, url, title) {
     try {
-      debugLog('🔍 Parsing XML object structure:', JSON.stringify(xmlObj, null, 2))
+      debugLog('Parsing XML object structure:', JSON.stringify(xmlObj, null, 2))
 
       // PIN-002: Extract posts array from XML structure
       const posts = xmlObj?.posts?.post

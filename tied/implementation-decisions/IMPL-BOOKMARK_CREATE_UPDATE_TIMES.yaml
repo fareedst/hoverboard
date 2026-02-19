@@ -40,6 +40,9 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       - tests/unit/bookmark-router.test.js
     code_annotations:
       - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
+  # Unintended regression in same commit: PopupController suggested-tags tokenizer regex was
+  # changed and broke suggested tags. Fixed by restoring regex to match tag-service.js. See
+  # IMPL-SUGGESTED_TAGS (regression_lesson_dca25b3, popup_tokenizer_sync), REQ-SUGGESTED_TAGS_*.
   related_decisions:
     depends_on: []
     supersedes: []

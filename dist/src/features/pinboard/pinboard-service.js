@@ -13,7 +13,7 @@ import { TagService } from '../tagging/tag-service.js' // [IMMUTABLE-REQ-TAG-001
 import { XMLParser } from 'fast-xml-parser'
 import { debugLog, debugError, debugWarn } from '../../shared/utils.js'
 
-debugLog('[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded');
+debugLog('[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded')
 
 export class PinboardService {
   constructor (tagService = null) {
@@ -61,7 +61,7 @@ export class PinboardService {
       const cleanUrl = this.cleanUrl(url)
       const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`
 
-      debugLog('🔍 Making Pinboard API request:', {
+      debugLog('Making Pinboard API request:', {
         endpoint,
         cleanUrl,
         originalUrl: url
@@ -472,7 +472,7 @@ export class PinboardService {
 
       return parsed
     } catch (error) {
-      debugError(`💥 HTTP request failed:`, error.message)
+      debugError('💥 HTTP request failed:', error.message)
 
       // PIN-004: Determine if error is retryable (network/rate limit issues)
       const isRetryable = this.isRetryableError(error)
@@ -488,7 +488,7 @@ export class PinboardService {
         return this.makeRequestWithRetry(url, method, retryCount + 1)
       }
 
-      debugError(`❌ Max retries exceeded or non-retryable error. Giving up.`)
+      debugError('❌ Max retries exceeded or non-retryable error. Giving up.')
 
       // PIN-004: Re-throw error if not retryable or max retries exceeded
       throw error
@@ -529,7 +529,7 @@ export class PinboardService {
    */
   parseBookmarkResponse (xmlObj, url, title) {
     try {
-      debugLog('🔍 Parsing XML object structure:', JSON.stringify(xmlObj, null, 2))
+      debugLog('Parsing XML object structure:', JSON.stringify(xmlObj, null, 2))
 
       // PIN-002: Extract posts array from XML structure
       const posts = xmlObj?.posts?.post
@@ -638,7 +638,7 @@ export class PinboardService {
           url: post['@_href'] || '',
           description: post['@_description'] || '',
           extended: post['@_extended'] || '',
-          tags: tags,
+          tags,
           time: pinTime,
           updated_at: pinTime,
           shared: post['@_shared'] || 'yes',

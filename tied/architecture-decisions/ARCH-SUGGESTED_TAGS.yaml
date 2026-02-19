@@ -26,6 +26,10 @@ ARCH-SUGGESTED_TAGS:
       - |-
         **Restricted-URL skip (popup)**: Before calling `chrome.scripting.executeScript` in the popup path, the implementation checks that the current tab URL starts with `http://` or `https://`. If not (e.g. extension page, chrome://, file://), it skips injection, calls `updateSuggestedTags([])`, and returns. This prevents "Cannot access contents of url ... Extension manifest must request permission to access this host" errors when the user opens the popup while the active tab is an extension page such as the bookmarks table.
       - |-
+        **Popup unit test mocking**: In `tests/unit/popup-suggested-tags.test.js`, `chrome.scripting.executeScript` is mocked via Jest `mockResolvedValueOnce([{ result: [...] }])` on the global mock, not by replacing the function. This ensures the implementation's call to `chrome.scripting.executeScript` receives the configured return value reliably across test workers and full-suite runs (replacing the function reference can fail when the implementation uses the same global).
+      - |-
+        **Tokenizer sync (popup vs TagService)**: Popup path uses inlined tokenization; overlay uses TagService. Both must use the same delimiter regex and tokenization logic. Canonical regex: `/[\s\.,;:!?\-_\(\)\[\]{}"']+/`. Changing it in only one place breaks suggested tags (see IMPL-SUGGESTED_TAGS popup_tokenizer_sync, regression_lesson_dca25b3).
+      - |-
         #### 1. Extraction Sources (in order)
 
         | Source | Selector/Method | Limit | Priority |
@@ -127,9 +131,9 @@ ARCH-SUGGESTED_TAGS:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: '2026-02-19'
       author: AI agent
-      reason: Document restricted-URL skip for popup suggested-tags path
+      reason: Document popup test mocking (Jest mockResolvedValueOnce for executeScript)
     last_validated:
       date: '2026-02-18'
       validator: MCP converter

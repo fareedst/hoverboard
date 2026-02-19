@@ -7,6 +7,7 @@
 
 import { matchStorageFilter } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
+import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
 
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
@@ -17,6 +18,10 @@ let allBookmarks = []
 let filteredBookmarks = []
 let sortKey = 'time'
 let sortAsc = false
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] Time column: which value to show (time = create, updated_at = last updated). Default: last updated. */
+let timeColumnSource = 'updated_at'
+/** [REQ-LOCAL_BOOKMARKS_INDEX] Time column display: 'absolute' (YYYY-MM-DD HH:mm:ss) or 'age' (e.g. N days O hours). Default: age at page load. */
+let timeDisplayMode = 'age'
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Selected bookmark URLs for bulk operations (e.g. move to storage). */
 const selectedUrls = new Set()
 
@@ -27,6 +32,8 @@ const elements = {
   filterToread: document.getElementById('filter-toread'),
   filterPrivate: document.getElementById('filter-private'),
   filterStorage: document.getElementById('filter-storage'),
+  timeColumnSource: document.getElementById('time-column-source'),
+  timeDisplayMode: document.getElementById('time-display-mode'),
   exportAll: document.getElementById('export-all'),
   exportDisplayed: document.getElementById('export-displayed'),
   exportSelected: document.getElementById('export-selected'),
@@ -89,8 +96,10 @@ function applySearchAndFilter () {
 }
 
 function compare (a, b) {
-  const va = a[sortKey]
-  const vb = b[sortKey]
+  /** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] When sorting by Time column, use timeColumnSource so order matches displayed value. */
+  const effectiveKey = sortKey === 'time' ? timeColumnSource : sortKey
+  const va = a[effectiveKey]
+  const vb = b[effectiveKey]
   if (sortKey === 'time') {
     const cmp = (vb || '').localeCompare(va || '')
     return sortAsc ? -cmp : cmp
@@ -125,7 +134,12 @@ function renderTableBody () {
     const urlEsc = escapeHtml(url)
     const tagsStr = Array.isArray(b.tags) ? b.tags.join(', ') : String(b.tags || '')
     const tagsEsc = escapeHtml(tagsStr)
-    const time = escapeHtml(b.time ? new Date(b.time).toLocaleString() : '')
+    const timeValue = b[timeColumnSource] ?? b.time
+    const time = escapeHtml(
+      timeDisplayMode === 'absolute'
+        ? formatTimeAbsolute(timeValue)
+        : formatTimeAge(timeValue)
+    )
     const shared = b.shared === 'no' ? 'Private' : 'Public'
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
     const storage = escapeHtml(b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local'))
@@ -403,6 +417,20 @@ function init () {
   elements.filterPrivate.addEventListener('change', applySearchAndFilter)
   if (elements.filterStorage) elements.filterStorage.addEventListener('change', applySearchAndFilter)
 
+  if (elements.timeColumnSource) {
+    elements.timeColumnSource.addEventListener('change', () => {
+      timeColumnSource = elements.timeColumnSource.value
+      sortTable()
+      renderTableBody()
+    })
+  }
+  if (elements.timeDisplayMode) {
+    elements.timeDisplayMode.addEventListener('change', () => {
+      timeDisplayMode = elements.timeDisplayMode.value
+      renderTableBody()
+    })
+  }
+
   if (elements.exportAll) elements.exportAll.addEventListener('click', () => exportBookmarks('all'))
   if (elements.exportDisplayed) elements.exportDisplayed.addEventListener('click', () => exportBookmarks('displayed'))
   if (elements.exportSelected) elements.exportSelected.addEventListener('click', () => exportBookmarks('selected'))
@@ -439,6 +467,9 @@ function init () {
       if (file) runImport(file)
     })
   }
+
+  if (elements.timeColumnSource) timeColumnSource = elements.timeColumnSource.value
+  if (elements.timeDisplayMode) timeDisplayMode = elements.timeDisplayMode.value
 
   loadBookmarks()
   updateMoveControlsState()

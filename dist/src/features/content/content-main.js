@@ -3324,7 +3324,7 @@
             }
             const cleanUrl = this.cleanUrl(url);
             const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`;
-            debugLog2("\u{1F50D} Making Pinboard API request:", {
+            debugLog2("Making Pinboard API request:", {
               endpoint,
               cleanUrl,
               originalUrl: url
@@ -3628,7 +3628,7 @@
             debugLog2("\u2705 Successfully parsed XML response");
             return parsed;
           } catch (error) {
-            debugError(`\u{1F4A5} HTTP request failed:`, error.message);
+            debugError("\u{1F4A5} HTTP request failed:", error.message);
             const isRetryable = this.isRetryableError(error);
             const maxRetries = config.pinRetryCountMax || 2;
             if (isRetryable && retryCount < maxRetries) {
@@ -3637,7 +3637,7 @@
               await this.sleep(delay);
               return this.makeRequestWithRetry(url, method, retryCount + 1);
             }
-            debugError(`\u274C Max retries exceeded or non-retryable error. Giving up.`);
+            debugError("\u274C Max retries exceeded or non-retryable error. Giving up.");
             throw error;
           }
         }
@@ -3672,7 +3672,7 @@
          */
         parseBookmarkResponse(xmlObj, url, title) {
           try {
-            debugLog2("\u{1F50D} Parsing XML object structure:", JSON.stringify(xmlObj, null, 2));
+            debugLog2("Parsing XML object structure:", JSON.stringify(xmlObj, null, 2));
             const posts = xmlObj?.posts?.post;
             debugLog2("\u{1F4CB} Posts extracted:", posts);
             debugLog2("\u{1F4CB} Posts type:", typeof posts);
@@ -5611,15 +5611,7 @@
     async sendSingleMessage(message, options) {
       const messageId = this.generateMessageId();
       const fullMessage = { ...message, messageId };
-      try {
-        console.log("\u{1F50D} [MessageClient] Sending message:", fullMessage);
-        const response = await safariEnhancements.runtime.sendMessage(fullMessage);
-        console.log("\u{1F50D} [MessageClient] Received response:", response);
-        return response;
-      } catch (error) {
-        console.error("\u{1F50D} [MessageClient] Message send failed:", error);
-        throw error;
-      }
+      return await safariEnhancements.runtime.sendMessage(fullMessage);
     }
     /**
      * Handle response from background script
@@ -5636,12 +5628,7 @@
      */
     // [SAFARI-EXT-SHIM-001] Refactor sendMessageToTab to use await directly
     async sendMessageToTab(tabId, message) {
-      try {
-        const response = await safariEnhancements.tabs.sendMessage(tabId, message);
-        return response;
-      } catch (error) {
-        throw error;
-      }
+      return await safariEnhancements.tabs.sendMessage(tabId, message);
     }
     /**
      * Broadcast message to all tabs
@@ -8639,7 +8626,7 @@
         debugLogger.trace("content-main", "handleMessage", { type: message.type }, LOG_CATEGORIES.MESSAGE);
         console.log("Content script received message:", message.type);
         switch (message.type) {
-          case "TOGGLE_HOVER":
+          case "TOGGLE_HOVER": {
             await this.toggleHover();
             const newState = {
               isVisible: this.overlayActive,
@@ -8647,6 +8634,7 @@
             };
             sendResponse({ success: true, data: newState });
             break;
+          }
           case "HIDE_OVERLAY":
             this.overlayManager.hide();
             sendResponse({ success: true });
@@ -8697,7 +8685,7 @@
             sendResponse({ success: true });
             break;
           // [POPUP-CLOSE-BEHAVIOR-ARCH-012] - Handle overlay state queries from popup
-          case "GET_OVERLAY_STATE":
+          case "GET_OVERLAY_STATE": {
             const overlayState = {
               isVisible: this.overlayActive,
               hasBookmark: !!this.currentBookmark,
@@ -8705,6 +8693,7 @@
             };
             sendResponse({ success: true, data: overlayState });
             break;
+          }
           // [IMPL-SELECTION_TO_TAG_INPUT] - Return current page selection for popup tag input prefill
           case "GET_PAGE_SELECTION": {
             const selection = typeof window.getSelection === "function" ? window.getSelection().toString() : "";
@@ -8802,9 +8791,6 @@
           debugLog2("CONTENT-SCRIPT", "Site is blocked from processing");
           return;
         }
-        console.log("\u{1F50D} [Debug] Response structure:", response);
-        console.log("\u{1F50D} [Debug] Actual response:", actualResponse);
-        console.log("\u{1F50D} [Debug] Actual response type:", typeof actualResponse);
         this.currentBookmark = actualResponse.data || actualResponse;
         debugLog2("CONTENT-SCRIPT", "Current bookmark set:", this.currentBookmark);
         const options = await this.getOptions();
@@ -8875,16 +8861,6 @@
           return;
         }
         debugLog2("CONTENT-SCRIPT", "Current bookmark data:", this.currentBookmark);
-        console.log("\u{1F50D} [Debug] Bookmark data structure:");
-        console.log("\u{1F50D} [Debug] - URL:", this.currentBookmark.url);
-        console.log("\u{1F50D} [Debug] - Description:", this.currentBookmark.description);
-        console.log("\u{1F50D} [Debug] - Tags:", this.currentBookmark.tags);
-        console.log("\u{1F50D} [Debug] - Tags type:", typeof this.currentBookmark.tags);
-        console.log("\u{1F50D} [Debug] - Tags length:", this.currentBookmark.tags?.length);
-        console.log("\u{1F50D} [Debug] - Extended:", this.currentBookmark.extended);
-        console.log("\u{1F50D} [Debug] - Hash:", this.currentBookmark.hash);
-        console.log("\u{1F50D} [Debug] - Shared:", this.currentBookmark.shared);
-        console.log("\u{1F50D} [Debug] - ToRead:", this.currentBookmark.toread);
         this.overlayManager.show({
           bookmark: this.currentBookmark,
           pageTitle: this.pageTitle,

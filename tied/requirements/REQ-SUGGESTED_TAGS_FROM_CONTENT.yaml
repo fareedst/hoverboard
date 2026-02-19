@@ -50,9 +50,9 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: '2026-02-19'
       author: AI agent
-      reason: Add restricted-URL skip criterion and test traceability
+      reason: Document popup test mocking (mockResolvedValueOnce for executeScript)
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
@@ -130,8 +130,8 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
        - Verify "Suggested:" section appears with correct tags
        - Verify click adds tag and refreshes display
 
-    3. **Integration test for popup display**:
-       - Mock chrome.scripting.executeScript to return suggested tags
+    3. **Integration test for popup display** (implemented in `tests/unit/popup-suggested-tags.test.js`):
+       - Use `chrome.scripting.executeScript.mockResolvedValueOnce([{ result: [...] }])` so the same Jest mock is invoked by the implementation; do not replace the function reference (replacement can be unreliable across workers/suites).
        - Verify UIManager displays tags in suggestedTagsContainer
        - Verify deduplication against current tags
 

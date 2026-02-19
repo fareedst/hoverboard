@@ -18,6 +18,7 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     tests:
       - 'tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)'
       - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter)'
+      - 'tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)'
     code_annotations:
       - REQ-LOCAL_BOOKMARKS_INDEX
   related_requirements:
@@ -42,8 +43,9 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   entry_point: 'Popup and/or options provide a link/button that opens the index page in a new tab via `chrome.tabs.create({ url: chrome.runtime.getURL(''src/ui/bookmarks-table/bookmarks-table.html'') })`.'
   how_validated:
     - 'Manual: Open index page, confirm local, file, and sync bookmarks load (Storage column shows Local | File | Sync); run search, filters (including storage filter All | Local | File | Sync), sort; click URL to open in new tab (external-link indicator).'
+    - 'Manual: Time column toggle (Create time | Last updated) and Time format (Absolute | Age); single Time column shows chosen value and format; sort by Time uses selected time source.'
     - 'Manual: Select column and select-all; Move selected to (Local | File | Sync); confirm move controls enabled when at least one bookmark selected, disabled when selection cleared.'
-    - 'Unit tests: handleGetAggregatedBookmarksForIndex returns { bookmarks } with storage field; matchStorageFilter (storage filter logic) for All/local/file/sync.'
+    - 'Unit tests: handleGetAggregatedBookmarksForIndex returns { bookmarks } with storage field; matchStorageFilter (storage filter logic) for All/local/file/sync; formatTimeAbsolute and formatTimeAge (bookmarks-table-time.test.js).'
   purpose:
     - Give users a single place to browse and search all non-Pinboard bookmarks (local + file + sync).
     - Support finding and opening bookmarks without leaving the extension.
@@ -56,5 +58,5 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     - REQ-STORAGE_MODE_DEFAULT (local vs Pinboard vs File mode)
     - REQ-CHROME_STORAGE_USAGE (chrome.storage.local)
     - REQ-MOVE_BOOKMARK_STORAGE_UI (moveBookmarkToStorage used for bulk move from index)
-  summary: A dedicated extension page shows **local, file, and sync bookmarks** (chrome.storage.local/sync and file-backed). Data is **live only**. The page is **searchable**, **filterable** (by tag, to-read, private, **storage type**), **sortable**, and **launchable** (URL opens in new tab with external-link indicator). A **Select** column with checkboxes allows **selection** of bookmarks; **Move selected to** (Local | File | Sync) uses [REQ-MOVE_BOOKMARK_STORAGE_UI] moveBookmarkToStorage; move controls are enabled only when at least one bookmark is selected.
-  table_page: 'Search (single input); filters (tag include, toread only, shared/private, **Storage**: All | Local | File | Sync); **Select** column (checkboxes, select-all for visible rows); sortable columns (Title, URL, Tags, Time, Storage, Shared, To read); URL column as links with **external-link indicator** (opens in new tab); **Move selected to** dropdown (Local | File | Sync) + Move button, disabled when selection empty; selection and move UI [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI].'
+  summary: A dedicated extension page shows **local, file, and sync bookmarks** (chrome.storage.local/sync and file-backed). Data is **live only**. The page is **searchable**, **filterable** (by tag, to-read, private, **storage type**), **sortable**, and **launchable** (URL opens in new tab with external-link indicator). A single **Time** column can show **create-time** or **last-updated** [REQ-BOOKMARK_CREATE_UPDATE_TIMES], with **Time format** (absolute: YYYY-MM-DD HH:mm:ss, or age: e.g. N days O hours). A **Select** column with checkboxes allows **selection** of bookmarks; **Move selected to** (Local | File | Sync) uses [REQ-MOVE_BOOKMARK_STORAGE_UI] moveBookmarkToStorage; move controls are enabled only when at least one bookmark is selected.
+  table_page: 'Search (single input); filters (tag include, toread only, shared/private, **Storage**: All | Local | File | Sync); **Time column** toggle (Create time | Last updated) and **Time format** toggle (Absolute | Age); single **Time** column shows create-time or most-recent-update-time [REQ-BOOKMARK_CREATE_UPDATE_TIMES], formatted as YYYY-MM-DD HH:mm:ss (absolute) or two-largest-units age (e.g. N days O hours); **Select** column (checkboxes, select-all for visible rows); sortable columns (Title, URL, Tags, Time, Storage, Shared, To read); URL column as links with **external-link indicator** (opens in new tab); **Move selected to** dropdown (Local | File | Sync) + Move button, disabled when selection empty; selection and move UI [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI].'
