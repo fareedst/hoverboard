@@ -62,7 +62,7 @@ Install directory: `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\
 **Last Updated:** 2026-02-18  
 **Chrome Extension Status:** Production Ready
 
-**Latest Enhancement:** **Local Bookmarks Index – Time column toggles** – On the Local Bookmarks Index page you can choose **Time column** (Create time | Last updated) and **Time format** (Absolute: `YYYY-MM-DD HH:mm:ss` | Age: e.g. N days O hours). Only one time column is shown; sort by Time uses the selected source.
+**Latest Enhancement:** **Local Bookmarks Index – UI groups and Delete** – Toolbar is organized into **Stores** (Local / File / Sync checkboxes; default none checked so no bookmarks shown until you select at least one), **Show only** (tags include, to-read, private, time range), and **Hide** (tags exclude). **Actions for selected** below the table: Export, Move, **Delete** (with confirmation showing count and names when ≤8), and Import.
 
 ### Chrome Extension Features
 
@@ -79,7 +79,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - ✅ **Recent Tags** - Quick access to frequently used tags; list refreshes every time the popup is displayed and syncs across windows
 - ✅ **Dark Theme Support** - Modern UI with dark theme default
 - ✅ **Overlay System** - Visual feedback with transparency controls
-- ✅ **Local Bookmarks Index** - Full-page index of **local, file, and sync** bookmarks with a **compact header** (Hoverboard, title, subtitle), **Storage** column (Local | File | Sync), **Storage filter** (All | Local | File | Sync), **Time column** toggle (Create time | Last updated) and **Time format** toggle (Absolute | Age), **Select** column (checkboxes, select-all); search (title, URL, tags, notes); filter (by tag, to-read, private); sortable columns; clickable URLs with **external-link indicator** (opens in new tab). **Below the table:** Export all / Export displayed / **Export selected** (enabled when one or more bookmarks are selected), **Move selected to** (Local | File | Sync) with Move button, and **Import** (CSV or JSON file with **Only new** or **Overwrite existing**, and **Import to** Local | File | Sync). Open from popup ("Bookmarks index") or Options ("Local bookmarks index").
+- ✅ **Local Bookmarks Index** - Full-page index of **local, file, and sync** bookmarks with a **compact header**. **Stores** (Local / File / Sync checkboxes; default unchecked so no bookmarks shown until at least one store is selected), **Show only** (tags include, to-read, private, time range), **Hide** (tags exclude). **Storage** column and **Time column** (Create time | Last updated) and **Time format** (Absolute | Age). **Select** column (checkboxes, select-all); search (title, URL, tags, notes); sortable columns; clickable URLs with **external-link indicator**. **Actions for selected:** Export all / Export displayed / Export selected, **Move selected to** (Local | File | Sync), **Delete** (confirmation with count and names when ≤8), and **Import** (CSV or JSON: Only new or Overwrite, Import to Local | File | Sync). Open from popup ("Bookmarks index") or Options ("Local bookmarks index").
 - ✅ **Browser Bookmark Import** - Dedicated page to **copy browser bookmarks** into Hoverboard. Loads native bookmarks via the browser’s bookmark API; **search** (title, URL) and **filter by folder**; **Select** column with checkboxes and select-all; **conflict mode** (Skip / Overwrite / Merge) when a URL already exists in Hoverboard; **Use folder names as tags** and optional **Add tags** (comma-separated); **Import to** Local | File | Sync. Result shows imported, skipped, and failed counts. Open from popup ("Browser bookmark import") or Options ("Browser bookmark import"). Requires the `bookmarks` permission.
 - ✅ **Optional Pinboard integration** - Use Storage Mode in Options to sync with Pinboard.in (requires API token)
 - ✅ **Optional native messaging host** - For features that need local code: thin Go wrapper + helper scripts; one-time install to `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\` (Windows); test from Options ("Test native host"). See [Optional: Native messaging host](#optional-native-messaging-host) below.
@@ -115,7 +115,7 @@ Intelligent tag suggestions extracted from multiple page content sources:
 
 #### Additional Features
 - **Storage (popup UI):** In the popup, the **Storage** section has select-one buttons (Pinboard, File, Local, Sync); the current setting is highlighted. When the bookmark is in non-API storage (Local, File, or Sync), clicking another non-API option moves the bookmark; the UI shows success or error based on the actual move result, and moves use the bookmark’s stored URL so they work even when the page URL differs (e.g. query parameters).
-- **Local Bookmarks Index:** Browse all **local, file, and sync** bookmarks in a dedicated page with a **compact header** and a **Storage** column (Local | File | Sync). **Time column** (Create time | Last updated) and **Time format** (Absolute | Age) toggles control the single Time column. **Storage filter** (All | Local | File | Sync); **Select** column with checkboxes and select-all. **Export** (all / displayed / selected), **Move selected to** (Local | File | Sync), and **Import** (from CSV or JSON: **Only new** or **Overwrite existing**, **Import to** Local | File | Sync) sit **below the table**; Export selected and move controls are enabled when at least one bookmark is selected. Search by title, URL, tags, or notes; filter by tag, to-read, or private; sort by column (default: newest first); click a URL (with external-link indicator) to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index").
+- **Local Bookmarks Index:** Browse **local, file, and sync** bookmarks in a dedicated page. **Stores** (Local / File / Sync checkboxes; default unchecked); **Show only** (tags include, to-read, private, time range); **Hide** (tags exclude). **Storage** column; **Time column** and **Time format** toggles. **Select** column with checkboxes and select-all. **Actions for selected:** Export (all / displayed / selected), **Move selected to** (Local | File | Sync), **Delete** (confirmation with count and names when ≤8), and **Import** (CSV or JSON: Only new or Overwrite, Import to Local | File | Sync). Search by title, URL, tags, or notes; sort by column (default: newest first); click a URL (external-link indicator) to open in a new tab. Available from the popup ("Bookmarks index") or Options ("Local bookmarks index").
 - **Browser Bookmark Import:** Copy **browser bookmarks** into Hoverboard from a dedicated page. Loads native bookmarks (browser API); search and filter by folder; select rows (checkboxes, select-all); choose **conflict mode** (Skip / Overwrite / Merge) for URLs already in Hoverboard; optionally use folder names as tags and add extra tags; **Import to** Local | File | Sync. Open from popup ("Browser bookmark import") or Options ("Browser bookmark import").
 - **Selection to tag input:** Highlight text on a page and open the popup (extension icon); the selection is placed in the New Tag textbox (up to 8 words, punctuation removed) so you can submit it as tags in one step
 - **Tag Management:** Organize bookmarks with custom tags and categories
@@ -190,10 +190,49 @@ The configuration page provides comprehensive settings for customizing the exten
 The snapshot above shows the dedicated full-page view of all locally stored bookmarks (placeholder data):
 
 - **Header:** Compact banner with Hoverboard logo and name, "Local Bookmarks Index" title, and subtitle (minimal height)
-- **Search and filters:** Search box (title, URL, tags, notes), Clear button, tag filter (comma-separated), "To read only" and "Private only" checkboxes, **Storage** dropdown (All | Local | File | Sync)
+- **Stores:** Checkboxes for Local (L), File (F), Sync (S); no bookmarks shown until at least one is checked
+- **Show only:** Tags (comma-separated, include), To read only, Private only, Time range (Start, End, Time field: Create time | Last updated); Time column and Time format toggles
+- **Hide:** Tags (comma-separated, exclude)
 - **Table:** **Select** column (checkboxes per row, select-all in header), Title, URL, Tags, Time, Storage, Shared, To read; URL column is clickable with **external-link indicator** (opens in new tab)
-- **Below the table:** **Export** — "Export all", "Export displayed", and "Export selected" (enabled when one or more bookmarks are selected) download CSV; **Move selected to** — dropdown (Local | File | Sync) and Move button (enabled when at least one selected)
+- **Actions for selected:** Export all / Export displayed / Export selected, Move selected to (Local | File | Sync), **Delete** (confirmation with count; names if ≤8), Import
 - **Footer:** Row count (e.g. "N bookmarks")
+
+The diagram below shows which bookmarks are shown in the table and what actions are available for selected rows.
+
+```mermaid
+flowchart TB
+  subgraph whichShown [Which bookmarks are shown]
+    All[allBookmarks]
+    Stores[Stores: L / F / S checkboxes]
+    Search[Search: title, URL, tags, notes]
+    ShowOnly[Show only: tags include, to-read, private, time range]
+    Hide[Hide: tags exclude]
+    Filtered[filteredBookmarks]
+    Table[Table]
+    All --> Stores
+    Stores --> Search
+    Search --> ShowOnly
+    ShowOnly --> Hide
+    Hide --> Filtered
+    Filtered --> Table
+  end
+  subgraph actions [Actions for selected]
+    Selected[Selected rows]
+    ExportAll[Export all]
+    ExportDisplayed[Export displayed]
+    ExportSelected[Export selected]
+    Move[Move selected to L / F / S]
+    Delete[Delete with confirmation]
+    Import[Import CSV or JSON]
+    Selected --> ExportAll
+    Selected --> ExportDisplayed
+    Selected --> ExportSelected
+    Selected --> Move
+    Selected --> Delete
+    Selected --> Import
+  end
+  Table --> Selected
+```
 
 ## Architecture
 
@@ -208,7 +247,7 @@ The snapshot above shows the dedicated full-page view of all locally stored book
 - **Service Worker:** Background script handling bookmark operations and API calls
 - **Content Scripts:** Overlay system with transparency controls and visual feedback
 - **Popup Interface:** Modern UI with quick actions and tag management
-- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) for searching, filtering (including storage type), sorting, selecting (checkboxes, select-all), moving selected bookmarks to another storage, and opening local, file, and sync bookmarks (Storage column); data from `getAggregatedBookmarksForIndex` (local + file + sync)
+- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) with four UI groups (Stores, Show only, Hide, Actions for selected); search, filter pipeline, sort, select (checkboxes, select-all), move and bulk delete with confirmation; data from `getAggregatedBookmarksForIndex` (local + file + sync)
 - **Storage System:** Local state management with Chrome storage API
 - **Error Handling:** Comprehensive error recovery and user feedback
 - **Badge Management:** Visual indicators in the extension icon
@@ -268,7 +307,7 @@ This project follows the TIED methodology for comprehensive requirements trackin
 - **Architecture**: [`tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml`](tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml) - Multi-source extraction architecture and design decisions
 - **Implementation**: [`tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml`](tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) - Implementation details, modifiable decisions, and performance considerations
 - **Recent Tags Refresh**: [`tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml`](tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml) - Refresh Recent Tags on every popup display and cross-window sync
-- **Local Bookmarks Index**: [`tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml`](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml`](tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml`](tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) - Full-page index of local bookmarks (search, filter, sort, launch)
+- **Local Bookmarks Index**: [`tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml`](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml`](tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml`](tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) - Full-page index with UI groups (Stores, Show only, Hide, Actions for selected) and Delete selected
 - **Implementation Map**: [`tied/docs/suggested-tags-implementation-map.md`](tied/docs/suggested-tags-implementation-map.md) - Quick reference mapping TIED tokens to code locations
 
 ### Architecture Documents

@@ -9,8 +9,13 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   implementation_approach:
     summary: See detail file
     details:
-      - 'Time column: toolbar selects **Time column** (Create time | Last updated) and **Time format** (Absolute | Age); single Time column shows b[timeColumnSource] ?? b.time; formatTimeAbsolute (YYYY-MM-DD HH:mm:ss) or formatTimeAge (two largest units); compare() uses timeColumnSource when sortKey === ''time''. Module bookmarks-table-time.js exports formatters; unit tests in bookmarks-table-time.test.js.'
-      - 'Default at page load [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BOOKMARK_CREATE_UPDATE_TIMES]: Time column = Last updated, Time format = Age; initial sort is by last-updated descending with age displayed.'
+      - '**Show only Clear** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX]: Pseudo-code: getShowOnlyDefaultState() => { tags: "", toread: false, private: false, timeRangeStart: "", timeRangeEnd: "", timeRangeField: "updated_at" }. applyShowOnlyDefaults(elements): for each key in getShowOnlyDefaultState(), set elements.filterTags.value, elements.filterToread.checked, etc. to default; then applySearchAndFilter(). Button #show-only-clear click calls applyShowOnlyDefaults(elements).'
+      - '**Table Display group**: Separate toolbar fieldset after Hide; legend "Table Display"; contains Time column select (#time-column-source) and Time format select (#time-display-mode). Show only fieldset no longer contains Time column/Time format. Same IDs so existing JS unchanged.'
+      - '**Compact layout** [ARCH-LOCAL_BOOKMARKS_INDEX]: Pseudo-code: container padding → var(--space-2); header margin-bottom → var(--space-2); toolbar margin-bottom, gap → var(--space-2); toolbar-group padding → var(--space-2) var(--space-3); filters-row gap → var(--space-2); actions-group margin-top, padding → var(--space-2); table-wrapper margin-bottom → var(--space-2); optionally search-row gap and table cell padding reduced.'
+      - 'Time column: **Table Display** group selects **Time column** (Create time | Last updated) and **Time format** (Absolute | Age); single Time column shows b[timeColumnSource] ?? b.time; formatTimeAbsolute or formatTimeAge; compare() uses timeColumnSource when sortKey === ''time''. bookmarks-table-time.js; unit tests bookmarks-table-time.test.js.'
+      - 'Default at page load [REQ-BOOKMARK_CREATE_UPDATE_TIMES]: Time column = Last updated, Time format = Age; initial sort last-updated descending with age displayed.'
+      - '**Five UI areas.** (1) **Stores**: three checkboxes; default all unchecked; matchStoresFilter(bookmark, getAllowedStores()). (2) **Show only**: Tags, To read only, Private only, Time range (Start/End, Time field), **Clear** button; matchFilters() includes time-range; getShowOnlyDefaultState() used by Clear. (3) **Table Display**: Time column, Time format. (4) **Hide**: Tags exclude; matchExcludeTags(). (5) **Actions for selected**: Export, Move, **Delete**, Import.'
+      - 'Empty state: when no store checked, message "Select at least one store..."; when no data, default message. Delete selected: confirm() then deleteBookmark per URL; refresh and clear selection.'
   code_locations:
     files:
       - src/ui/bookmarks-table/bookmarks-table.html
@@ -19,11 +24,16 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - src/ui/bookmarks-table/bookmarks-table.css
       - src/ui/bookmarks-table/bookmarks-table-filter.js
     functions:
+      - getShowOnlyDefaultState
+      - getAllowedStores
       - matchFilters
-      - matchStorageFilter
+      - matchStoresFilter
+      - matchExcludeTags
+      - buildDeleteConfirmMessage
       - renderTableBody
       - updateMoveControlsState
       - moveSelectedToStorage
+      - deleteSelectedBookmarks
       - updateSelectAllState
       - onRowSelectChange
   traceability:
@@ -31,7 +41,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     requirements: []
     tests:
       - 'tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)'
-      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter)'
+      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation, getShowOnlyDefaultState)'
       - 'tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)'
     code_annotations:
       - IMPL-LOCAL_BOOKMARKS_INDEX
@@ -45,14 +55,14 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      date: '2026-02-20'
+      author: Agent
+      reason: Show only Clear, Table Display group, compact layout; getShowOnlyDefaultState
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  bookmarks_table_page: '`src/ui/bookmarks-table/bookmarks-table.html`, `bookmarks-table.js`, `bookmarks-table-time.js`, `bookmarks-table.css`. **Compact header** (minimal-height banner: logo, Hoverboard, Local Bookmarks Index, subtitle). Toolbar: search + filters; **Time column** toggle (Create time | Last updated) and **Time format** toggle (Absolute | Age). Single **Time** column shows either create-time or most-recent-update-time [REQ-BOOKMARK_CREATE_UPDATE_TIMES]; format is YYYY-MM-DD HH:mm:ss (absolute) or two-largest-units age (e.g. N days O hours). Sort by Time uses the selected time source. Table with **Select** column (checkboxes, select-all), **Storage** column (Local | File | Sync); filter by storage (All | Local | File | Sync); sortable columns; search and filters (tag, toread, private); URL column as links with **external-link indicator** (↗). **Actions below table** (`.actions-below-table`): Export all / Export displayed / Export selected, and **Move selected to** dropdown + Move button; moveBookmarkToStorage per selected URL; move and Export selected enabled only when selection non-empty. State: selectedUrls Set, timeColumnSource, timeDisplayMode, updateMoveControlsState(), updateSelectAllState(), updateExportButtonState(). All operations client-side on in-memory array except move (message loop).'
+  bookmarks_table_page: '`src/ui/bookmarks-table/bookmarks-table.html`, `bookmarks-table.js`, `bookmarks-table-time.js`, `bookmarks-table-filter.js`, `bookmarks-table.css`. **Compact header** and **compact layout** (reduced padding/margins). Toolbar: search; **Stores**; **Show only** (Tags, To read only, Private only, Time range Start/End + Time field, **Clear** button; getShowOnlyDefaultState() in bookmarks-table-filter.js); **Table Display** (Time column, Time format); **Hide**. Filter pipeline: stores → search → show-only → exclude tags. Table: **Select** column, **Storage** column, sortable columns, URL links with **external-link indicator** (↗). **Actions for selected**: Export, Move, **Delete**, Import. State: selectedUrls Set, timeColumnSource, timeDisplayMode, getAllowedStores(), applyShowOnlyDefaults(), updateMoveControlsState(), updateSelectAllState(), updateExportButtonState().'
   cross-references: ARCH-LOCAL_BOOKMARKS_INDEX, REQ-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER
   entry_point: Popup footer has "Bookmarks index" button (bookmarksIndexBtn); click emits openBookmarksIndex, PopupController.handleOpenBookmarksIndex opens tab. Options footer has "Local bookmarks index" link (bookmarks-index-link); options.js sets href in init() to chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html').
   localbookmarkservice_getallbookmarks(): Used by getLocalBookmarksForIndex handler and by BookmarkRouter for local slice of aggregated data.

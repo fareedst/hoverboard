@@ -13,10 +13,11 @@ body {
   padding: 0;
 }
 
+/* [IMPL-LOCAL_BOOKMARKS_INDEX] Compact layout: reduced padding to maximize table space */
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: var(--space-6);
+  padding: var(--space-2);
   background-color: var(--color-background);
   min-height: 100vh;
 }
@@ -41,7 +42,7 @@ body {
 }
 
 .header {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .header h1 {
@@ -58,15 +59,52 @@ body {
 }
 
 .toolbar {
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-2);
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2);
+}
+
+/* [IMPL-LOCAL_BOOKMARKS_INDEX] Toolbar groups: Stores, Show only, Hide, Table Display */
+.toolbar-group {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3);
+  margin: 0;
+}
+
+.toolbar-group .group-legend {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  padding: 0 var(--space-2);
+}
+
+/* [IMPL-LOCAL_BOOKMARKS_INDEX] Table Display group sits immediately above the table (outside main toolbar) */
+.toolbar-group.table-display-above {
+  margin-top: 0;
+  margin-bottom: var(--space-2);
+}
+
+.actions-group {
+  margin-top: var(--space-2);
+  padding: var(--space-2);
+}
+
+.actions-group .group-legend {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+  padding: 0 var(--space-2);
+}
+
+.filter-datetime {
+  min-width: 160px;
 }
 
 .search-row {
   display: flex;
-  gap: var(--space-3);
+  gap: var(--space-2);
   align-items: center;
 }
 
@@ -113,7 +151,7 @@ body {
 .filters-row {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: var(--space-2);
   align-items: center;
 }
 
@@ -185,6 +223,27 @@ body {
   cursor: not-allowed;
 }
 
+.delete-row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.delete-row .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background: var(--color-button-danger-bg, #c53030);
+  color: var(--color-button-danger-text, #fff);
+  border-color: var(--color-button-danger-bg, #c53030);
+}
+
+.btn-danger:hover {
+  background: var(--color-button-danger-bg-hover, #9b2c2c);
+}
+
 /* [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import row */
 .import-row {
   display: flex;
@@ -247,17 +306,17 @@ body {
 
 .table-wrapper {
   overflow-x: auto;
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 /* [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Export and Move UI below table */
 .actions-below-table {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: var(--space-2);
   align-items: center;
   margin-top: var(--space-2);
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-2);
 }
 
 .bookmarks-table {
@@ -268,7 +327,7 @@ body {
 
 .bookmarks-table th,
 .bookmarks-table td {
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-2) var(--space-3);
   text-align: left;
   border-bottom: 1px solid var(--color-border);
 }

@@ -5,7 +5,7 @@
  * Import: [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT]
  */
 
-import { matchStorageFilter } from './bookmarks-table-filter.js'
+import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, buildDeleteConfirmMessage, getShowOnlyDefaultState } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
 
@@ -13,6 +13,7 @@ const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
 const MESSAGE_TYPE_MOVE = 'moveBookmarkToStorage'
 const MESSAGE_TYPE_SAVE = 'saveBookmark'
+const MESSAGE_TYPE_DELETE = 'deleteBookmark'
 
 let allBookmarks = []
 let filteredBookmarks = []
@@ -28,16 +29,24 @@ const selectedUrls = new Set()
 const elements = {
   searchInput: document.getElementById('search-input'),
   searchClear: document.getElementById('search-clear'),
+  storeLocal: document.getElementById('store-local'),
+  storeFile: document.getElementById('store-file'),
+  storeSync: document.getElementById('store-sync'),
   filterTags: document.getElementById('filter-tags'),
   filterToread: document.getElementById('filter-toread'),
   filterPrivate: document.getElementById('filter-private'),
-  filterStorage: document.getElementById('filter-storage'),
+  filterTimeRangeStart: document.getElementById('filter-time-range-start'),
+  filterTimeRangeEnd: document.getElementById('filter-time-range-end'),
+  filterTimeRangeField: document.getElementById('filter-time-range-field'),
+  filterTagsExclude: document.getElementById('filter-tags-exclude'),
+  showOnlyClear: document.getElementById('show-only-clear'),
   timeColumnSource: document.getElementById('time-column-source'),
   timeDisplayMode: document.getElementById('time-display-mode'),
   exportAll: document.getElementById('export-all'),
   exportDisplayed: document.getElementById('export-displayed'),
   exportSelected: document.getElementById('export-selected'),
   emptyState: document.getElementById('empty-state'),
+  emptyStateMessage: document.getElementById('empty-state-message'),
   tableWrapper: document.getElementById('table-wrapper'),
   tableBody: document.getElementById('table-body'),
   rowCount: document.getElementById('row-count'),
@@ -45,6 +54,7 @@ const elements = {
   selectAll: document.getElementById('select-all'),
   moveTargetSelect: document.getElementById('move-target'),
   moveButton: document.getElementById('move-selected-btn'),
+  deleteSelectedBtn: document.getElementById('delete-selected-btn'),
   importFile: document.getElementById('import-file'),
   importTrigger: document.getElementById('import-trigger'),
   importTarget: document.getElementById('import-target'),
@@ -59,6 +69,30 @@ function escapeHtml (str) {
   return div.innerHTML
 }
 
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
+ * Reset Show only group to defaults and re-apply filter. Used by Clear button.
+ */
+function applyShowOnlyDefaults () {
+  const def = getShowOnlyDefaultState()
+  if (elements.filterTags) elements.filterTags.value = def.tags
+  if (elements.filterToread) elements.filterToread.checked = def.toread
+  if (elements.filterPrivate) elements.filterPrivate.checked = def.private
+  if (elements.filterTimeRangeStart) elements.filterTimeRangeStart.value = def.timeRangeStart
+  if (elements.filterTimeRangeEnd) elements.filterTimeRangeEnd.value = def.timeRangeEnd
+  if (elements.filterTimeRangeField) elements.filterTimeRangeField.value = def.timeRangeField
+  applySearchAndFilter()
+}
+
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Set of storage backends to include from store checkboxes; empty when none checked. */
+function getAllowedStores () {
+  const set = new Set()
+  if (elements.storeLocal && elements.storeLocal.checked) set.add('local')
+  if (elements.storeFile && elements.storeFile.checked) set.add('file')
+  if (elements.storeSync && elements.storeSync.checked) set.add('sync')
+  return set
+}
+
 function matchSearch (bookmark, q) {
   if (!q || !q.trim()) return true
   const lower = q.trim().toLowerCase()
@@ -70,7 +104,7 @@ function matchSearch (bookmark, q) {
 }
 
 function matchFilters (bookmark) {
-  const tagFilter = (elements.filterTags.value || '').trim()
+  const tagFilter = ((elements.filterTags && elements.filterTags.value) || '').trim()
   if (tagFilter) {
     const includeTags = tagFilter.split(',').map(t => t.trim().toLowerCase()).filter(Boolean)
     if (includeTags.length) {
@@ -78,16 +112,29 @@ function matchFilters (bookmark) {
       if (!includeTags.some(t => bTags.includes(t))) return false
     }
   }
-  if (elements.filterToread.checked && bookmark.toread !== 'yes') return false
-  if (elements.filterPrivate.checked && bookmark.shared !== 'no') return false
-  const storageFilter = (elements.filterStorage && elements.filterStorage.value) || ''
-  if (!matchStorageFilter(bookmark, storageFilter)) return false
+  if (elements.filterToread && elements.filterToread.checked && bookmark.toread !== 'yes') return false
+  if (elements.filterPrivate && elements.filterPrivate.checked && bookmark.shared !== 'no') return false
+  const timeField = (elements.filterTimeRangeField && elements.filterTimeRangeField.value) || 'updated_at'
+  const startMs = elements.filterTimeRangeStart ? parseTimeRangeValue(elements.filterTimeRangeStart.value) : null
+  const endMs = elements.filterTimeRangeEnd ? parseTimeRangeValue(elements.filterTimeRangeEnd.value) : null
+  if (startMs != null || endMs != null) {
+    if (!inTimeRange(bookmark, timeField, startMs, endMs)) return false
+  }
   return true
 }
 
+function matchExcludeTags (bookmark) {
+  const excludeStr = (elements.filterTagsExclude && elements.filterTagsExclude.value) || ''
+  return matchExcludeTagsFilter(bookmark, excludeStr)
+}
+
 function applySearchAndFilter () {
+  const allowedStores = getAllowedStores()
+  let list = allBookmarks.filter(b => matchStoresFilter(b, allowedStores))
   const q = elements.searchInput.value.trim()
-  filteredBookmarks = allBookmarks.filter(b => matchSearch(b, q) && matchFilters(b))
+  list = list.filter(b => matchSearch(b, q) && matchFilters(b))
+  list = list.filter(matchExcludeTags)
+  filteredBookmarks = list
   sortTable()
   renderTableBody()
   updateRowCount()
@@ -180,11 +227,12 @@ function updateSelectAllState () {
   elements.selectAll.disabled = none
 }
 
-/** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable/disable move-selected controls based on selection. */
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable/disable move and delete controls based on selection. */
 function updateMoveControlsState () {
   const hasSelection = selectedUrls.size > 0
   if (elements.moveTargetSelect) elements.moveTargetSelect.disabled = !hasSelection
   if (elements.moveButton) elements.moveButton.disabled = !hasSelection
+  if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.disabled = !hasSelection
   updateExportButtonState()
   updateSelectAllState()
 }
@@ -216,12 +264,49 @@ async function moveSelectedToStorage () {
   if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX] Move completed:', ok, 'moved,', fail, 'failed')
 }
 
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Delete selected bookmarks; confirmation includes count and names if ≤8.
+ */
+async function deleteSelectedBookmarks () {
+  if (selectedUrls.size === 0) return
+  const urls = Array.from(selectedUrls)
+  const byUrl = new Map(filteredBookmarks.filter(b => b.url).map(b => [b.url, b]))
+  const titles = urls.map(u => (byUrl.get(u) && byUrl.get(u).description) || '(no title)')
+  const message = buildDeleteConfirmMessage(urls.length, titles)
+  if (!confirm(message)) return
+  if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.disabled = true
+  let ok = 0
+  let fail = 0
+  for (const url of urls) {
+    try {
+      const res = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_DELETE, data: { url } })
+      if (res && res.success) ok++
+      else fail++
+    } catch (e) {
+      console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX] deleteBookmark failed for', url, e)
+      fail++
+    }
+  }
+  selectedUrls.clear()
+  await loadBookmarks()
+  updateMoveControlsState()
+  if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX] Delete completed:', ok, 'deleted,', fail, 'failed')
+}
+
 function updateRowCount () {
   elements.rowCount.textContent = `${filteredBookmarks.length} bookmark${filteredBookmarks.length !== 1 ? 's' : ''}`
 }
 
+/** [IMPL-LOCAL_BOOKMARKS_INDEX] Empty state: when no store checked show "Select at least one store…"; when no data show default message. */
 function toggleEmptyState () {
-  const showEmpty = allBookmarks.length === 0
+  const noStoreChecked = getAllowedStores().size === 0
+  const noData = allBookmarks.length === 0
+  const showEmpty = noStoreChecked || noData
+  if (elements.emptyStateMessage) {
+    elements.emptyStateMessage.textContent = noStoreChecked
+      ? 'Select at least one store (Local, File, Sync) to show bookmarks.'
+      : 'No local, file, or sync bookmarks. This index shows bookmarks stored in your browser (Local or Sync) or in a file you chose (File). Use Options to set Storage Mode and add bookmarks to see them here.'
+  }
   elements.emptyState.classList.toggle('hidden', !showEmpty)
   elements.tableWrapper.classList.toggle('hidden', showEmpty)
 }
@@ -412,10 +497,17 @@ function init () {
     elements.searchInput.value = ''
     applySearchAndFilter()
   })
-  elements.filterTags.addEventListener('input', applySearchAndFilter)
-  elements.filterToread.addEventListener('change', applySearchAndFilter)
-  elements.filterPrivate.addEventListener('change', applySearchAndFilter)
-  if (elements.filterStorage) elements.filterStorage.addEventListener('change', applySearchAndFilter)
+  if (elements.storeLocal) elements.storeLocal.addEventListener('change', applySearchAndFilter)
+  if (elements.storeFile) elements.storeFile.addEventListener('change', applySearchAndFilter)
+  if (elements.storeSync) elements.storeSync.addEventListener('change', applySearchAndFilter)
+  if (elements.filterTags) elements.filterTags.addEventListener('input', applySearchAndFilter)
+  if (elements.filterToread) elements.filterToread.addEventListener('change', applySearchAndFilter)
+  if (elements.filterPrivate) elements.filterPrivate.addEventListener('change', applySearchAndFilter)
+  if (elements.filterTimeRangeStart) elements.filterTimeRangeStart.addEventListener('change', applySearchAndFilter)
+  if (elements.filterTimeRangeEnd) elements.filterTimeRangeEnd.addEventListener('change', applySearchAndFilter)
+  if (elements.filterTimeRangeField) elements.filterTimeRangeField.addEventListener('change', applySearchAndFilter)
+  if (elements.filterTagsExclude) elements.filterTagsExclude.addEventListener('input', applySearchAndFilter)
+  if (elements.showOnlyClear) elements.showOnlyClear.addEventListener('click', applyShowOnlyDefaults)
 
   if (elements.timeColumnSource) {
     elements.timeColumnSource.addEventListener('change', () => {
@@ -459,6 +551,7 @@ function init () {
   })
 
   if (elements.moveButton) elements.moveButton.addEventListener('click', () => moveSelectedToStorage())
+  if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.addEventListener('click', () => deleteSelectedBookmarks())
 
   if (elements.importTrigger && elements.importFile) {
     elements.importTrigger.addEventListener('click', () => elements.importFile.click())

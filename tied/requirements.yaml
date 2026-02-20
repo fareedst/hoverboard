@@ -1395,7 +1395,9 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       - ARCH-STORAGE_INDEX_AND_ROUTER
     implementation:
       - IMPL-LOCAL_BOOKMARKS_INDEX
-    tests: []
+    tests:
+      - 'tests/unit/bookmarks-table-index.test.js (matchStoresFilter, getShowOnlyDefaultState, etc.)'
+      - 'tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)'
     code_annotations:
       - REQ-LOCAL_BOOKMARKS_INDEX
   related_requirements:
@@ -1410,9 +1412,9 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-14T00:00:00.000Z
-      author: AI Agent
-      reason: Index shows local + file bookmarks with Storage column; getAggregatedBookmarksForIndex
+      date: '2026-02-20'
+      author: Agent
+      reason: Show only Clear, Table Display group, compact layout; getShowOnlyDefaultState tests
     last_validated:
       date: 2026-02-13T00:00:00.000Z
       validator: AI Agent

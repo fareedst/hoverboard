@@ -1527,7 +1527,6 @@ export class PopupController {
     recordAction(POPUP_ACTION_IDS.showHoverboard, { tabId: this.currentTab?.id }, 'popup')
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.showHoverboard, payload: { tabId: this.currentTab?.id } })
     try {
-
       // Check if we can inject into this tab
       if (!this.canInjectIntoTab(this.currentTab)) {
         this.uiManager.showError('Hoverboard is not available on this page (e.g., Chrome Web Store, New Tab, or Settings).')
