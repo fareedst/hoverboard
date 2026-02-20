@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Local Bookmarks Index – Sticky Table Display and column headers** (`REQ-LOCAL_BOOKMARKS_INDEX`, `ARCH-LOCAL_BOOKMARKS_INDEX`, `IMPL-LOCAL_BOOKMARKS_INDEX`) – When you scroll past the Table Display section, the **Table Display** block (search, Time column, Time format) and the **table column headers** remain at the top of the viewport while the table body scrolls underneath. Content above (header, Stores, Show only, Hide) scrolls away normally; **Actions for selected** and the row count scroll with the table. Implemented with CSS `position: sticky`, a CSS variable `--table-display-sticky-height` (set via `setTableDisplayStickyHeight` and ResizeObserver in `bookmarks-table-sticky.js`), and an IntersectionObserver so the header offset is applied only after scrolling past the Table Display (avoids the header painting as a second row). Unit tests for `setTableDisplayStickyHeight` in `tests/unit/bookmarks-table-index.test.js`.
+
 - **Local Bookmarks Index – Time column toggles** (`REQ-LOCAL_BOOKMARKS_INDEX`, `ARCH-LOCAL_BOOKMARKS_INDEX`, `IMPL-LOCAL_BOOKMARKS_INDEX`) – On the Local Bookmarks Index page, two toolbar controls affect the single **Time** column:
   - **Time column:** Choose **Create time** or **Last updated** (displays `time` or `updated_at` [REQ-BOOKMARK_CREATE_UPDATE_TIMES]); only one time column is shown. Sorting by the Time column uses the selected source.
   - **Time format:** Choose **Absolute** (`YYYY-MM-DD HH:mm:ss`) or **Age** (two largest units, e.g. `N days O hours`, `45 seconds`, `just now`).
@@ -26,6 +28,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Playwright script:** `scripts/screenshots-placeholder.js` builds the extension, launches Chrome with the extension loaded, injects placeholder data and theme, then captures popup, options, local bookmarks index, and a Pinboard.in page with overlay; uses **sharp** to composite the popup onto the Pinboard page image. Outputs to `images/` (e.g. `Hoverboard_v1.0.7.0_Chrome_Popup.png`, `Hoverboard_v1.0.7.0_Chrome_Pinboard.png`, `Hoverboard_v1.0.7.0_Chrome_Options.png`, `local-bookmarks-index.png`).
   - **npm scripts:** `npm run screenshots` (capture with current tab/state) and `npm run screenshots:placeholder` (full placeholder flow; use for README assets).
   - **Popup dark theme for screenshots:** Popup CSS `:root.hb-theme-dark` (`IMPL-POPUP_THEME_CSS`) ensures the popup respects ThemeManager so screenshot mode shows the dark popup consistently.
+
+### Fixed
+
+- **Local Bookmarks Index – Table header row no longer appears as second row** – The sticky `top` offset for the table header was applied even at scroll zero, causing the header to be painted below a blank band. The thead now defaults to `top: 0`; the offset is applied only when the user has scrolled past the Table Display (via class `sticky-thead-offset` and IntersectionObserver), so the header is the first row when at the top of the page and sticks below the Table Display when scrolled.
 
 ## [1.4.0] - 2026-02-18
 

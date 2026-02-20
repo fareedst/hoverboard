@@ -16,6 +16,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - 'Default at page load [REQ-BOOKMARK_CREATE_UPDATE_TIMES]: Time column = Last updated, Time format = Age; initial sort last-updated descending with age displayed.'
       - '**Five UI areas.** (1) **Stores**: three checkboxes; default all unchecked; matchStoresFilter(bookmark, getAllowedStores()). (2) **Show only**: Tags, To read only, Private only, Time range (Start/End, Time field), **Clear** button; matchFilters() includes time-range; getShowOnlyDefaultState() used by Clear. (3) **Table Display**: Time column, Time format. (4) **Hide**: Tags exclude; matchExcludeTags(). (5) **Actions for selected**: Export, Move, **Delete**, Import.'
       - 'Empty state: when no store checked, message "Select at least one store..."; when no data, default message. Delete selected: confirm() then deleteBookmark per URL; refresh and clear selection.'
+      - '**Sticky Table Display and thead** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX]: Pseudo-code: (CSS) .table-display-above: position sticky; top 0; z-index 2; background var(--color-background). .bookmarks-table thead th: position sticky; top var(--table-display-sticky-height, 0); z-index 1; background var(--color-background). (JS) setTableDisplayStickyHeight(tableDisplayEl, rootEl): if !tableDisplayEl || !rootEl return; height = tableDisplayEl.offsetHeight; rootEl.style.setProperty("--table-display-sticky-height", height + "px"). On init: tableDisplayEl = container.querySelector(".table-display-above"); rootEl = .container or document.documentElement; setTableDisplayStickyHeight(tableDisplayEl, rootEl) once; ro = new ResizeObserver(() => setTableDisplayStickyHeight(tableDisplayEl, rootEl)); ro.observe(tableDisplayEl). Actions for selected and .footer-info have no sticky; they scroll with page.'
   code_locations:
     files:
       - src/ui/bookmarks-table/bookmarks-table.html
@@ -23,6 +24,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - src/ui/bookmarks-table/bookmarks-table-time.js
       - src/ui/bookmarks-table/bookmarks-table.css
       - src/ui/bookmarks-table/bookmarks-table-filter.js
+      - src/ui/bookmarks-table/bookmarks-table-sticky.js
     functions:
       - getShowOnlyDefaultState
       - getAllowedStores
@@ -36,12 +38,13 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - deleteSelectedBookmarks
       - updateSelectAllState
       - onRowSelectChange
+      - setTableDisplayStickyHeight
   traceability:
     architecture: []
     requirements: []
     tests:
       - 'tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)'
-      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation, getShowOnlyDefaultState)'
+      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation, getShowOnlyDefaultState, setTableDisplayStickyHeight)'
       - 'tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)'
     code_annotations:
       - IMPL-LOCAL_BOOKMARKS_INDEX
@@ -57,12 +60,12 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     last_updated:
       date: '2026-02-20'
       author: Agent
-      reason: Show only Clear, Table Display group, compact layout; getShowOnlyDefaultState
+      reason: Sticky Table Display and thead; setTableDisplayStickyHeight, bookmarks-table-sticky.js, ResizeObserver in init
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  bookmarks_table_page: '`src/ui/bookmarks-table/bookmarks-table.html`, `bookmarks-table.js`, `bookmarks-table-time.js`, `bookmarks-table-filter.js`, `bookmarks-table.css`. **Compact header** and **compact layout** (reduced padding/margins). Toolbar: search; **Stores**; **Show only** (Tags, To read only, Private only, Time range Start/End + Time field, **Clear** button; getShowOnlyDefaultState() in bookmarks-table-filter.js); **Table Display** (Time column, Time format); **Hide**. Filter pipeline: stores → search → show-only → exclude tags. Table: **Select** column, **Storage** column, sortable columns, URL links with **external-link indicator** (↗). **Actions for selected**: Export, Move, **Delete**, Import. State: selectedUrls Set, timeColumnSource, timeDisplayMode, getAllowedStores(), applyShowOnlyDefaults(), updateMoveControlsState(), updateSelectAllState(), updateExportButtonState().'
+  bookmarks_table_page: '`src/ui/bookmarks-table/bookmarks-table.html`, `bookmarks-table.js`, `bookmarks-table-time.js`, `bookmarks-table-filter.js`, `bookmarks-table-sticky.js`, `bookmarks-table.css`. **Compact header** and **compact layout** (reduced padding/margins). Toolbar: search; **Stores**; **Show only** (Tags, To read only, Private only, Time range Start/End + Time field, **Clear** button; getShowOnlyDefaultState() in bookmarks-table-filter.js); **Table Display** (Time column, Time format); **Hide**. Filter pipeline: stores → search → show-only → exclude tags. Table: **Select** column, **Storage** column, sortable columns, URL links with **external-link indicator** (↗). **Actions for selected**: Export, Move, **Delete**, Import. State: selectedUrls Set, timeColumnSource, timeDisplayMode, getAllowedStores(), applyShowOnlyDefaults(), updateMoveControlsState(), updateSelectAllState(), updateExportButtonState().'
   cross-references: ARCH-LOCAL_BOOKMARKS_INDEX, REQ-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER
   entry_point: Popup footer has "Bookmarks index" button (bookmarksIndexBtn); click emits openBookmarksIndex, PopupController.handleOpenBookmarksIndex opens tab. Options footer has "Local bookmarks index" link (bookmarks-index-link); options.js sets href in init() to chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html').
   localbookmarkservice_getallbookmarks(): Used by getLocalBookmarksForIndex handler and by BookmarkRouter for local slice of aggregated data.

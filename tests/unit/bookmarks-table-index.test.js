@@ -15,6 +15,7 @@ import {
   getShowOnlyDefaultState
 } from '../../src/ui/bookmarks-table/bookmarks-table-filter.js'
 import { formatTimeAbsolute, formatTimeAge } from '../../src/ui/bookmarks-table/bookmarks-table-time.js'
+import { setTableDisplayStickyHeight } from '../../src/ui/bookmarks-table/bookmarks-table-sticky.js'
 
 describe('matchStorageFilter [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
   test('returns true for any bookmark when value is empty (All)', () => {
@@ -302,5 +303,46 @@ describe('Time column formatters integration [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-L
     const now = new Date('2025-06-15T12:00:00.000Z').getTime()
     expect(formatTimeAge(valueCreate, now)).toMatch(/\d+ (day|days|hour|hours|minute|minutes|second|seconds)/)
     expect(formatTimeAge(valueUpdated, now)).toMatch(/\d+ (day|days|hour|hours|minute|minutes|second|seconds)/)
+  })
+})
+
+describe('setTableDisplayStickyHeight [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]', () => {
+  test('sets --table-display-sticky-height on root to tableDisplayEl offsetHeight in px', () => {
+    const root = document.createElement('div')
+    const tableDisplayEl = document.createElement('div')
+    Object.defineProperty(tableDisplayEl, 'offsetHeight', { value: 72, configurable: true })
+    setTableDisplayStickyHeight(tableDisplayEl, root)
+    expect(root.style.getPropertyValue('--table-display-sticky-height')).toBe('72px')
+  })
+
+  test('updates when offsetHeight changes', () => {
+    const root = document.createElement('div')
+    let height = 48
+    const tableDisplayEl = document.createElement('div')
+    Object.defineProperty(tableDisplayEl, 'offsetHeight', {
+      get () { return height },
+      configurable: true
+    })
+    setTableDisplayStickyHeight(tableDisplayEl, root)
+    expect(root.style.getPropertyValue('--table-display-sticky-height')).toBe('48px')
+    height = 96
+    setTableDisplayStickyHeight(tableDisplayEl, root)
+    expect(root.style.getPropertyValue('--table-display-sticky-height')).toBe('96px')
+  })
+
+  test('does nothing when tableDisplayEl is null', () => {
+    const root = document.createElement('div')
+    setTableDisplayStickyHeight(null, root)
+    expect(root.style.getPropertyValue('--table-display-sticky-height')).toBe('')
+  })
+
+  test('does nothing when rootEl is null', () => {
+    const tableDisplayEl = document.createElement('div')
+    Object.defineProperty(tableDisplayEl, 'offsetHeight', { value: 72, configurable: true })
+    expect(() => setTableDisplayStickyHeight(tableDisplayEl, null)).not.toThrow()
+  })
+
+  test('does nothing when both are null', () => {
+    expect(() => setTableDisplayStickyHeight(null, null)).not.toThrow()
   })
 })

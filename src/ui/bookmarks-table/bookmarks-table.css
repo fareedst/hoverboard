@@ -80,10 +80,14 @@ body {
   padding: 0 var(--space-2);
 }
 
-/* [IMPL-LOCAL_BOOKMARKS_INDEX] Table Display group sits immediately above the table (outside main toolbar) */
+/* [IMPL-LOCAL_BOOKMARKS_INDEX] Table Display group sits immediately above the table (outside main toolbar). [REQ-LOCAL_BOOKMARKS_INDEX] Sticky: remain at top when user scrolls past; table body scrolls underneath */
 .toolbar-group.table-display-above {
   margin-top: 0;
   margin-bottom: var(--space-2);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--color-background);
 }
 
 .actions-group {
@@ -336,6 +340,16 @@ body {
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-secondary);
   white-space: nowrap;
+  /* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Sticky thead: top 0 when Table Display visible; offset only when scrolled past (see .sticky-thead-offset) */
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: var(--color-background);
+}
+
+/* Apply thead offset only after user has scrolled past Table Display to avoid header painting as second row */
+.container.sticky-thead-offset .bookmarks-table th {
+  top: var(--table-display-sticky-height, 0);
 }
 
 .bookmarks-table th.sortable {

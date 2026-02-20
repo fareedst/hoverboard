@@ -8,6 +8,7 @@
 import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, buildDeleteConfirmMessage, getShowOnlyDefaultState } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
+import { setTableDisplayStickyHeight } from './bookmarks-table-sticky.js'
 
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
@@ -563,6 +564,22 @@ function init () {
 
   if (elements.timeColumnSource) timeColumnSource = elements.timeColumnSource.value
   if (elements.timeDisplayMode) timeDisplayMode = elements.timeDisplayMode.value
+
+  /* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Sticky Table Display: set --table-display-sticky-height and observe resize */
+  const container = document.querySelector('.container')
+  const tableDisplayEl = document.querySelector('.table-display-above')
+  if (tableDisplayEl && container) {
+    setTableDisplayStickyHeight(tableDisplayEl, container)
+    const ro = new ResizeObserver(() => setTableDisplayStickyHeight(tableDisplayEl, container))
+    ro.observe(tableDisplayEl)
+    /* Apply thead sticky offset only when Table Display has scrolled out of view so header is not painted as second row */
+    const io = new IntersectionObserver((entries) => {
+      const e = entries[0]
+      const past = e && !e.isIntersecting && e.boundingClientRect.top < 0
+      container.classList.toggle('sticky-thead-offset', !!past)
+    }, { threshold: 0, rootMargin: '0px' })
+    io.observe(tableDisplayEl)
+  }
 
   loadBookmarks()
   updateMoveControlsState()
