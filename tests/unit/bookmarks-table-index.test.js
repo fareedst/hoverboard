@@ -1,6 +1,7 @@
 /**
  * Local Bookmarks Index storage filter logic - [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
  * Pure functions: matchStorageFilter (legacy), matchStoresFilter, time range, exclude tags, delete confirmation message.
+ * Add tags: [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] parseTagsInput, mergeTags, buildAddTagsPayload, removeTags, buildRemoveTagsPayload.
  * Time column integration: formatters used by index for Time column display.
  */
 
@@ -14,7 +15,15 @@ import {
   inTimeRange,
   matchExcludeTags,
   buildDeleteConfirmMessage,
-  getShowOnlyDefaultState
+  getShowOnlyDefaultState,
+  parseTagsInput,
+  mergeTags,
+  buildAddTagsPayload,
+  removeTags,
+  buildRemoveTagsPayload,
+  buildAddTagsConfirmMessage,
+  buildRemoveTagsConfirmMessage,
+  selectionStillVisible
 } from '../../src/ui/bookmarks-table/bookmarks-table-filter.js'
 import { formatTimeAbsolute, formatTimeAge } from '../../src/ui/bookmarks-table/bookmarks-table-time.js'
 import { setTableDisplayStickyHeight } from '../../src/ui/bookmarks-table/bookmarks-table-sticky.js'
@@ -221,6 +230,75 @@ describe('buildDeleteConfirmMessage [IMPL-LOCAL_BOOKMARKS_INDEX]', () => {
   })
 })
 
+describe('buildAddTagsConfirmMessage [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
+  test('includes tag list and count', () => {
+    expect(buildAddTagsConfirmMessage(['work', 'review'], 2)).toContain('work, review')
+    expect(buildAddTagsConfirmMessage(['work', 'review'], 2)).toContain('2 bookmarks')
+    expect(buildAddTagsConfirmMessage(['x'], 1)).toContain('1 bookmark')
+  })
+  test('empty tag list shows (none)', () => {
+    expect(buildAddTagsConfirmMessage([], 3)).toContain('(none)')
+    expect(buildAddTagsConfirmMessage([], 3)).toContain('3 bookmarks')
+  })
+})
+
+describe('buildRemoveTagsConfirmMessage [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
+  test('includes tag list and count', () => {
+    expect(buildRemoveTagsConfirmMessage(['work', 'review'], 2)).toContain('work, review')
+    expect(buildRemoveTagsConfirmMessage(['work', 'review'], 2)).toContain('Remove')
+    expect(buildRemoveTagsConfirmMessage(['work', 'review'], 2)).toContain('2 bookmarks')
+    expect(buildRemoveTagsConfirmMessage(['x'], 1)).toContain('1 bookmark')
+  })
+  test('empty tag list shows (none)', () => {
+    expect(buildRemoveTagsConfirmMessage([], 3)).toContain('(none)')
+    expect(buildRemoveTagsConfirmMessage([], 3)).toContain('3 bookmarks')
+  })
+})
+
+describe('selectionStillVisible [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
+  test('returns intersection of selected URLs and displayed bookmark URLs', () => {
+    const selected = new Set(['https://a.com', 'https://b.com', 'https://c.com'])
+    const filtered = [
+      { url: 'https://a.com', description: 'A' },
+      { url: 'https://c.com', description: 'C' }
+    ]
+    const result = selectionStillVisible(selected, filtered)
+    expect(result.size).toBe(2)
+    expect(result.has('https://a.com')).toBe(true)
+    expect(result.has('https://c.com')).toBe(true)
+    expect(result.has('https://b.com')).toBe(false)
+  })
+  test('empty selectedUrls returns empty Set', () => {
+    const filtered = [{ url: 'https://x.com' }]
+    expect(selectionStillVisible(new Set(), filtered)).toEqual(new Set())
+  })
+  test('empty filteredBookmarks returns empty Set', () => {
+    const selected = new Set(['https://a.com'])
+    expect(selectionStillVisible(selected, [])).toEqual(new Set())
+  })
+  test('all selected visible returns same URLs', () => {
+    const selected = new Set(['u1', 'u2'])
+    const filtered = [{ url: 'u1' }, { url: 'u2' }]
+    const result = selectionStillVisible(selected, filtered)
+    expect(result.size).toBe(2)
+    expect(result.has('u1')).toBe(true)
+    expect(result.has('u2')).toBe(true)
+  })
+  test('ignores bookmarks with missing or falsy url', () => {
+    const selected = new Set(['u1', 'u2'])
+    const filtered = [{ url: 'u1' }, {}, { url: null }, { url: 'u2' }]
+    const result = selectionStillVisible(selected, filtered)
+    expect(result.size).toBe(2)
+    expect(result.has('u1')).toBe(true)
+    expect(result.has('u2')).toBe(true)
+  })
+  test('non-array filteredBookmarks treated as empty', () => {
+    const selected = new Set(['u1'])
+    expect(selectionStillVisible(selected, null)).toEqual(new Set())
+    expect(selectionStillVisible(selected, undefined)).toEqual(new Set())
+  })
+})
+
 describe('Filter pipeline order [IMPL-LOCAL_BOOKMARKS_INDEX]', () => {
   const startMs = new Date('2025-06-10T00:00:00Z').getTime()
   const endMs = new Date('2025-06-15T00:00:00Z').getTime()
@@ -386,5 +464,162 @@ describe('bookmark count at bottom of page [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
     expect(css).toContain('.footer-info')
     expect(css).toMatch(/position:\s*sticky/)
     expect(css).toMatch(/bottom:\s*0/)
+  })
+})
+
+describe('Add tags to selected UI [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
+  test('index HTML has add-tags row with label, input and Add tags / Delete tags buttons in Actions for selected', () => {
+    const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    expect(html).toContain('id="add-tags-input"')
+    expect(html).toContain('id="add-tags-btn"')
+    expect(html).toContain('id="delete-tags-btn"')
+    expect(html).toContain('New tag(s):')
+    expect(html).toContain('Add tags')
+    expect(html).toContain('Delete tags')
+  })
+})
+
+describe('parseTagsInput [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
+  test('returns empty array for empty or whitespace-only input', () => {
+    expect(parseTagsInput('')).toEqual([])
+    expect(parseTagsInput('   ')).toEqual([])
+    expect(parseTagsInput('\t')).toEqual([])
+    expect(parseTagsInput(null)).toEqual([])
+  })
+
+  test('returns single tag trimmed', () => {
+    expect(parseTagsInput('foo')).toEqual(['foo'])
+    expect(parseTagsInput('  foo  ')).toEqual(['foo'])
+  })
+
+  test('returns multiple comma-separated tags trimmed', () => {
+    expect(parseTagsInput('a, b, c')).toEqual(['a', 'b', 'c'])
+    expect(parseTagsInput('  a , b , c  ')).toEqual(['a', 'b', 'c'])
+  })
+
+  test('filters empty segments', () => {
+    expect(parseTagsInput('a, , b')).toEqual(['a', 'b'])
+    expect(parseTagsInput(', a, , b,')).toEqual(['a', 'b'])
+  })
+
+  test('dedupes case-insensitive within input (keeps first)', () => {
+    expect(parseTagsInput('a, A')).toEqual(['a'])
+    expect(parseTagsInput('Work, work, WORK')).toEqual(['Work'])
+  })
+})
+
+describe('mergeTags [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
+  test('returns empty when both empty', () => {
+    expect(mergeTags([], [])).toEqual([])
+    expect(mergeTags(undefined, [])).toEqual([])
+    expect(mergeTags([], undefined)).toEqual([])
+  })
+
+  test('returns existing only when new is empty', () => {
+    expect(mergeTags(['a', 'b'], [])).toEqual(['a', 'b'])
+  })
+
+  test('returns new only when existing is empty', () => {
+    expect(mergeTags([], ['x', 'y'])).toEqual(['x', 'y'])
+  })
+
+  test('merges with no overlap', () => {
+    expect(mergeTags(['a', 'b'], ['x', 'y'])).toEqual(['a', 'b', 'x', 'y'])
+  })
+
+  test('merges with overlap case-insensitive (does not duplicate)', () => {
+    expect(mergeTags(['a', 'b'], ['b', 'A', 'c'])).toEqual(['a', 'b', 'c'])
+  })
+
+  test('preserves existing casing and appends new', () => {
+    expect(mergeTags(['Work'], ['Dev'])).toEqual(['Work', 'Dev'])
+  })
+})
+
+describe('buildAddTagsPayload [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
+  test('returns null when bookmark is null or missing url', () => {
+    expect(buildAddTagsPayload(null, ['x'])).toBe(null)
+    expect(buildAddTagsPayload({}, ['x'])).toBe(null)
+    expect(buildAddTagsPayload({ description: 'No URL' }, ['x'])).toBe(null)
+  })
+
+  test('returns payload with merged tags and preferredBackend from bookmark.storage', () => {
+    const bookmark = { url: 'https://example.com', description: 'Ex', tags: ['a'], storage: 'file' }
+    const payload = buildAddTagsPayload(bookmark, ['b', 'c'])
+    expect(payload).not.toBe(null)
+    expect(payload.url).toBe('https://example.com')
+    expect(payload.tags).toEqual(['a', 'b', 'c'])
+    expect(payload.preferredBackend).toBe('file')
+  })
+
+  test('defaults preferredBackend to local when storage missing', () => {
+    const bookmark = { url: 'https://example.com', description: 'Ex' }
+    const payload = buildAddTagsPayload(bookmark, ['x'])
+    expect(payload.preferredBackend).toBe('local')
+  })
+
+  test('merges new tags with existing (case-insensitive dedupe)', () => {
+    const bookmark = { url: 'https://example.com', tags: ['a', 'b'], storage: 'local' }
+    const payload = buildAddTagsPayload(bookmark, ['b', 'A', 'c'])
+    expect(payload.tags).toEqual(['a', 'b', 'c'])
+  })
+})
+
+describe('removeTags [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
+  test('returns empty when both empty', () => {
+    expect(removeTags([], [])).toEqual([])
+    expect(removeTags(undefined, [])).toEqual([])
+    expect(removeTags([], undefined)).toEqual([])
+  })
+
+  test('returns existing only when toRemove is empty', () => {
+    expect(removeTags(['a', 'b'], [])).toEqual(['a', 'b'])
+  })
+
+  test('returns empty when toRemove only and existing empty', () => {
+    expect(removeTags([], ['x', 'y'])).toEqual([])
+  })
+
+  test('removes one tag (case-insensitive)', () => {
+    expect(removeTags(['a', 'b', 'c'], ['b'])).toEqual(['a', 'c'])
+    expect(removeTags(['a', 'b', 'c'], ['B'])).toEqual(['a', 'c'])
+  })
+
+  test('removes multiple tags', () => {
+    expect(removeTags(['a', 'b', 'c'], ['a', 'c'])).toEqual(['b'])
+  })
+
+  test('preserves casing of remaining tags', () => {
+    expect(removeTags(['Work', 'Dev'], ['dev'])).toEqual(['Work'])
+  })
+})
+
+describe('buildRemoveTagsPayload [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
+  test('returns null when bookmark is null or missing url', () => {
+    expect(buildRemoveTagsPayload(null, ['x'])).toBe(null)
+    expect(buildRemoveTagsPayload({}, ['x'])).toBe(null)
+    expect(buildRemoveTagsPayload({ description: 'No URL' }, ['x'])).toBe(null)
+  })
+
+  test('returns payload with reduced tags and preferredBackend from bookmark.storage', () => {
+    const bookmark = { url: 'https://example.com', description: 'Ex', tags: ['a', 'b', 'c'], storage: 'file' }
+    const payload = buildRemoveTagsPayload(bookmark, ['b'])
+    expect(payload).not.toBe(null)
+    expect(payload.url).toBe('https://example.com')
+    expect(payload.tags).toEqual(['a', 'c'])
+    expect(payload.preferredBackend).toBe('file')
+  })
+
+  test('defaults preferredBackend to local when storage missing', () => {
+    const bookmark = { url: 'https://example.com', tags: ['a'] }
+    const payload = buildRemoveTagsPayload(bookmark, [])
+    expect(payload.preferredBackend).toBe('local')
+  })
+
+  test('removes tags case-insensitive', () => {
+    const bookmark = { url: 'https://example.com', tags: ['a', 'b', 'c'], storage: 'local' }
+    const payload = buildRemoveTagsPayload(bookmark, ['B', 'A'])
+    expect(payload.tags).toEqual(['c'])
   })
 })

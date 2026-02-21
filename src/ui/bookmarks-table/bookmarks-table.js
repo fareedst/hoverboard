@@ -3,9 +3,10 @@
  * Loads local + file bookmarks via getAggregatedBookmarksForIndex (Storage column). Fallback: getLocalBookmarksForIndex.
  * Export: [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]
  * Import: [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT]
+ * Add tags: [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  */
 
-import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, buildDeleteConfirmMessage, getShowOnlyDefaultState } from './bookmarks-table-filter.js'
+import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, buildDeleteConfirmMessage, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
 import { setTableDisplayStickyHeight } from './bookmarks-table-sticky.js'
@@ -56,6 +57,9 @@ const elements = {
   moveTargetSelect: document.getElementById('move-target'),
   moveButton: document.getElementById('move-selected-btn'),
   deleteSelectedBtn: document.getElementById('delete-selected-btn'),
+  addTagsInput: document.getElementById('add-tags-input'),
+  addTagsBtn: document.getElementById('add-tags-btn'),
+  deleteTagsBtn: document.getElementById('delete-tags-btn'),
   importFile: document.getElementById('import-file'),
   importTrigger: document.getElementById('import-trigger'),
   importTarget: document.getElementById('import-target'),
@@ -228,12 +232,14 @@ function updateSelectAllState () {
   elements.selectAll.disabled = none
 }
 
-/** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable/disable move and delete controls based on selection. */
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable/disable move, delete, and add-tags controls based on selection. [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] */
 function updateMoveControlsState () {
   const hasSelection = selectedUrls.size > 0
   if (elements.moveTargetSelect) elements.moveTargetSelect.disabled = !hasSelection
   if (elements.moveButton) elements.moveButton.disabled = !hasSelection
   if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.disabled = !hasSelection
+  if (elements.addTagsBtn) elements.addTagsBtn.disabled = !hasSelection
+  if (elements.deleteTagsBtn) elements.deleteTagsBtn.disabled = !hasSelection
   updateExportButtonState()
   updateSelectAllState()
 }
@@ -292,6 +298,84 @@ async function deleteSelectedBookmarks () {
   await loadBookmarks()
   updateMoveControlsState()
   if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX] Delete completed:', ok, 'deleted,', fail, 'failed')
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Add parsed tags from input to all selected bookmarks; merge with existing (case-insensitive dedupe); save via saveBookmark with preferredBackend; refresh; retain selection for still-visible rows.
+ */
+async function addTagsToSelected () {
+  const newTags = parseTagsInput(elements.addTagsInput && elements.addTagsInput.value)
+  if (newTags.length === 0) return
+  if (selectedUrls.size === 0) return
+  const message = buildAddTagsConfirmMessage(newTags, selectedUrls.size)
+  if (!confirm(message)) return
+  const urls = Array.from(selectedUrls)
+  const byUrl = new Map(allBookmarks.filter(b => b && b.url).map(b => [b.url, b]))
+  if (elements.addTagsBtn) elements.addTagsBtn.disabled = true
+  let ok = 0
+  let fail = 0
+  for (const url of urls) {
+    const bookmark = byUrl.get(url)
+    if (!bookmark) continue
+    const payload = buildAddTagsPayload(bookmark, newTags)
+    if (!payload) continue
+    try {
+      const res = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_SAVE, data: payload })
+      if (res && res.success) ok++
+      else fail++
+    } catch (e) {
+      console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] saveBookmark failed for', url, e)
+      fail++
+    }
+  }
+  const urlsToRestore = new Set(selectedUrls)
+  selectedUrls.clear()
+  await loadBookmarks()
+  for (const url of selectionStillVisible(urlsToRestore, filteredBookmarks)) selectedUrls.add(url)
+  renderTableBody()
+  if (elements.addTagsInput) elements.addTagsInput.value = ''
+  updateMoveControlsState()
+  if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] Add tags completed:', ok, 'updated,', fail, 'failed')
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Remove parsed tags from input from all selected bookmarks; save via saveBookmark with reduced tags and preferredBackend; refresh; retain selection for still-visible rows.
+ */
+async function deleteTagsFromSelected () {
+  const tagsToRemove = parseTagsInput(elements.addTagsInput && elements.addTagsInput.value)
+  if (tagsToRemove.length === 0) return
+  if (selectedUrls.size === 0) return
+  const message = buildRemoveTagsConfirmMessage(tagsToRemove, selectedUrls.size)
+  if (!confirm(message)) return
+  const urls = Array.from(selectedUrls)
+  const byUrl = new Map(allBookmarks.filter(b => b && b.url).map(b => [b.url, b]))
+  if (elements.deleteTagsBtn) elements.deleteTagsBtn.disabled = true
+  let ok = 0
+  let fail = 0
+  for (const url of urls) {
+    const bookmark = byUrl.get(url)
+    if (!bookmark) continue
+    const payload = buildRemoveTagsPayload(bookmark, tagsToRemove)
+    if (!payload) continue
+    try {
+      const res = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_SAVE, data: payload })
+      if (res && res.success) ok++
+      else fail++
+    } catch (e) {
+      console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] saveBookmark failed for', url, e)
+      fail++
+    }
+  }
+  const urlsToRestore = new Set(selectedUrls)
+  selectedUrls.clear()
+  await loadBookmarks()
+  for (const url of selectionStillVisible(urlsToRestore, filteredBookmarks)) selectedUrls.add(url)
+  renderTableBody()
+  if (elements.addTagsInput) elements.addTagsInput.value = ''
+  updateMoveControlsState()
+  if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] Delete tags completed:', ok, 'updated,', fail, 'failed')
 }
 
 /** [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Update row count at bottom of page; footer layout keeps it at visual bottom when content is short. */
@@ -554,6 +638,8 @@ function init () {
 
   if (elements.moveButton) elements.moveButton.addEventListener('click', () => moveSelectedToStorage())
   if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.addEventListener('click', () => deleteSelectedBookmarks())
+  if (elements.addTagsBtn) elements.addTagsBtn.addEventListener('click', () => addTagsToSelected())
+  if (elements.deleteTagsBtn) elements.deleteTagsBtn.addEventListener('click', () => deleteTagsFromSelected())
 
   if (elements.importTrigger && elements.importFile) {
     elements.importTrigger.addEventListener('click', () => elements.importFile.click())

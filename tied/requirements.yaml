@@ -1512,6 +1512,55 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
       date: '2026-02-18'
       validator: AI Agent
       result: pass
+REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  name: Local Bookmarks Index Add Tags to Selected
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Allow users to add one or more tags to all selected bookmarks in one action from the index page.
+    problems_solved:
+      - No bulk way to add the same tags to multiple bookmarks from the index
+    benefits:
+      - Single textbox (comma-separated tags) and button to add those tags to every selected bookmark; tags merged with existing (case-insensitive dedupe)
+  satisfaction_criteria:
+    - criterion: "Actions for selected" includes a labeled textbox (e.g. "New tag(s):") and an "Add tags" button.
+    - criterion: Add tags button is enabled only when at least one bookmark is selected.
+    - criterion: On click, parsed tags are merged with each selected bookmark's existing tags and saved via saveBookmark with preferredBackend.
+    - criterion: After save, table refreshes and tag input is cleared.
+    - criterion: After either action, the same records remain selected in the UI; if a record is no longer displayed, it is no longer marked.
+  validation_criteria:
+    - method: Unit tests
+      coverage: parseTagsInput, mergeTags, selectionStillVisible in bookmarks-table-index.test.js
+    - method: Manual verification
+      coverage: Add tags row visible; button disabled with no selection; adding tags updates bookmarks and refreshes table
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    tests:
+      - tests/unit/bookmarks-table-index.test.js
+    code_annotations:
+      - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: New requirement for Add tags to selected
+    last_validated:
+      date: '2026-02-20'
+      validator: AI Agent
+      result: pass
 REQ-BROWSER_BOOKMARK_IMPORT:
   name: Browser Bookmark Import Page
   category: Functional

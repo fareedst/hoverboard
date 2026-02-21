@@ -1762,6 +1762,45 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
       date: '2026-02-18'
       author: AI Agent
       reason: New architecture for import UX
+ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  name: Local Bookmarks Index Add Tags to Selected Architecture
+  status: Active
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  rationale:
+    why: Extend Actions for selected with add-tags without new backend; reuse selection model and saveBookmark.
+    problems_solved:
+      - No bulk add-tags action on the index
+    benefits:
+      - One row (label + input + button); parse input; merge with each bookmark; saveBookmark with preferredBackend
+  alternatives_considered: []
+  implementation_approach:
+    summary: Add tags row in Actions for selected; parse input (comma-separated); merge with each selected bookmark; saveBookmark with preferredBackend; refresh and clear.
+    details: []
+  traceability:
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    tests:
+      - tests/unit/bookmarks-table-index.test.js
+    code_annotations:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  related_decisions:
+    depends_on: []
+    informs:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: New architecture for Add tags to selected
 ARCH-BROWSER_BOOKMARK_IMPORT:
   name: Browser Bookmark Import Architecture
   status: Active

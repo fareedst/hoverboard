@@ -1,0 +1,50 @@
+ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  name: Local Bookmarks Index Add Tags to Selected Architecture
+  status: Active
+  cross_references: &ref_0
+    - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  rationale:
+    why: Extend Actions for selected with add-tags without new backend; reuse selection model and saveBookmark.
+    problems_solved:
+      - No bulk add-tags action on the index
+    benefits:
+      - One row (label + input + button); parse input to tags; merge with each bookmark; saveBookmark with preferredBackend so router writes to correct backend
+  alternatives_considered: []
+  implementation_approach:
+    summary: 'Extend "Actions for selected" with one row: label "New tag(s):", single text input (comma-separated), "Add tags" and "Delete tags" buttons. Add tags: parse input, merge with each selected bookmark, saveBookmark with preferredBackend; then refresh; retain selection for rows still in the displayed list; clear tag input. Delete tags: same input; parse input, remove those tags from each selected bookmark (case-insensitive), saveBookmark with reduced tags and preferredBackend; then refresh; retain selection for rows still displayed; clear tag input. Records no longer displayed are removed from selection. Both buttons disabled when no selection.'
+    details: []
+  traceability:
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    tests:
+      - tests/unit/bookmarks-table-index.test.js
+    code_annotations:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  related_decisions:
+    depends_on:
+      - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    informs:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: New architecture for Add tags to selected
+    last_validated:
+      date: '2026-02-20'
+      validator: AI Agent
+      result: pass
+  decision: 'Add/Remove tags row in Actions for selected: label, input, Add tags and Delete tags buttons. Same input for both. Add: merge parsed tags with each selected bookmark; saveBookmark. Delete: remove parsed tags (case-insensitive) from each selected bookmark; saveBookmark with reduced tags. Both with preferredBackend; refresh; retain selection for rows still in the displayed list; clear tag input. Records no longer displayed are removed from selection.'
+  cross-references: REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS, IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  related:
+    - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS (parseTagsInput, mergeTags, removeTags, selectionStillVisible, addTagsToSelected, deleteTagsFromSelected)
+    - ARCH-LOCAL_BOOKMARKS_INDEX (same page, selection model)
+  summary: 'Add/Delete tags row: New tag(s) input + Add tags + Delete tags buttons; Add merges tags, Delete removes tags (case-insensitive); saveBookmark with preferredBackend; refresh; retain selection for still-visible rows; clear tag input.'

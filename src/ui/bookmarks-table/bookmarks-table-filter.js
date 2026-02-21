@@ -96,6 +96,54 @@ export function buildDeleteConfirmMessage (count, titles) {
 }
 
 /**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Build confirmation message for Add tags action.
+ * @param {string[]} tagList - Tags to add
+ * @param {number} count - Number of selected bookmarks
+ * @returns {string}
+ */
+export function buildAddTagsConfirmMessage (tagList, count) {
+  const tagsLabel = Array.isArray(tagList) && tagList.length > 0
+    ? tagList.join(', ')
+    : '(none)'
+  return `Add tag(s) "${tagsLabel}" to ${count} bookmark${count !== 1 ? 's' : ''}?`
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Build confirmation message for Delete tags action.
+ * @param {string[]} tagList - Tags to remove
+ * @param {number} count - Number of selected bookmarks
+ * @returns {string}
+ */
+export function buildRemoveTagsConfirmMessage (tagList, count) {
+  const tagsLabel = Array.isArray(tagList) && tagList.length > 0
+    ? tagList.join(', ')
+    : '(none)'
+  return `Remove tag(s) "${tagsLabel}" from ${count} bookmark${count !== 1 ? 's' : ''}?`
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Return Set of selected URLs that are still in the displayed list (intersection).
+ * Used after Add tags / Delete tags to retain selection for still-visible rows; records no longer displayed are not included.
+ * @param {Set<string>|Iterable<string>} selectedUrls - Previously selected bookmark URLs
+ * @param {Array<{ url?: string }>} filteredBookmarks - Currently displayed bookmarks
+ * @returns {Set<string>}
+ */
+export function selectionStillVisible (selectedUrls, filteredBookmarks) {
+  const visibleUrls = new Set(
+    (Array.isArray(filteredBookmarks) ? filteredBookmarks : [])
+      .map(b => b && b.url)
+      .filter(Boolean)
+  )
+  const selected = selectedUrls != null && typeof selectedUrls[Symbol.iterator] === 'function'
+    ? [...selectedUrls]
+    : []
+  return new Set(selected.filter(url => visibleUrls.has(url)))
+}
+
+/**
  * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
  * Default state for the "Show only" group. Used by Clear button to reset controls.
  * @returns {{ tags: string, toread: boolean, private: boolean, timeRangeStart: string, timeRangeEnd: string, timeRangeField: string }}
@@ -108,5 +156,99 @@ export function getShowOnlyDefaultState () {
     timeRangeStart: '',
     timeRangeEnd: '',
     timeRangeField: 'updated_at'
+  }
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Parse comma-separated tag input to array of trimmed non-empty tags; dedupe case-insensitive (keep first).
+ * @param {string} raw - User input (e.g. "a, b , A" -> ["a", "b"])
+ * @returns {string[]}
+ */
+export function parseTagsInput (raw) {
+  if (!raw || !String(raw).trim()) return []
+  const parts = String(raw).split(',').map(s => s.trim()).filter(Boolean)
+  const seen = new Set()
+  const result = []
+  for (const p of parts) {
+    const low = p.toLowerCase()
+    if (!seen.has(low)) {
+      seen.add(low)
+      result.push(p)
+    }
+  }
+  return result
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Merge new tags with existing; case-insensitive dedupe; preserve existing casing, append new.
+ * @param {string[]} existingTags
+ * @param {string[]} newTags
+ * @returns {string[]}
+ */
+export function mergeTags (existingTags, newTags) {
+  const existing = Array.isArray(existingTags) ? existingTags : []
+  const newArr = Array.isArray(newTags) ? newTags : []
+  const lowerSet = new Set(existing.map(t => String(t).toLowerCase()))
+  const result = [...existing]
+  for (const tag of newArr) {
+    const t = String(tag).trim()
+    if (t && !lowerSet.has(t.toLowerCase())) {
+      result.push(t)
+      lowerSet.add(t.toLowerCase())
+    }
+  }
+  return result
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Build payload for saveBookmark when adding tags to a bookmark (merge tags, set preferredBackend).
+ * @param {{ url?: string, storage?: string, tags?: string[], [key: string]: unknown }} bookmark
+ * @param {string[]} newTags
+ * @returns {{ [key: string]: unknown }}
+ */
+export function buildAddTagsPayload (bookmark, newTags) {
+  if (!bookmark || !bookmark.url) return null
+  const existing = (bookmark.tags && Array.isArray(bookmark.tags)) ? bookmark.tags : []
+  const merged = mergeTags(existing, newTags)
+  return {
+    ...bookmark,
+    tags: merged,
+    preferredBackend: (bookmark.storage && String(bookmark.storage).toLowerCase()) || 'local'
+  }
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Remove tags from existing list (case-insensitive match); preserve casing of remaining tags.
+ * @param {string[]} existingTags
+ * @param {string[]} tagsToRemove
+ * @returns {string[]}
+ */
+export function removeTags (existingTags, tagsToRemove) {
+  const existing = Array.isArray(existingTags) ? existingTags : []
+  const toRemove = Array.isArray(tagsToRemove) ? tagsToRemove : []
+  const removeSet = new Set(toRemove.map(t => String(t).trim().toLowerCase()).filter(Boolean))
+  if (removeSet.size === 0) return existing
+  return existing.filter(t => !removeSet.has(String(t).toLowerCase()))
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Build payload for saveBookmark when removing tags from a bookmark (reduced tags, set preferredBackend).
+ * @param {{ url?: string, storage?: string, tags?: string[], [key: string]: unknown }} bookmark
+ * @param {string[]} tagsToRemove
+ * @returns {{ [key: string]: unknown }}
+ */
+export function buildRemoveTagsPayload (bookmark, tagsToRemove) {
+  if (!bookmark || !bookmark.url) return null
+  const existing = (bookmark.tags && Array.isArray(bookmark.tags)) ? bookmark.tags : []
+  const reduced = removeTags(existing, tagsToRemove)
+  return {
+    ...bookmark,
+    tags: reduced,
+    preferredBackend: (bookmark.storage && String(bookmark.storage).toLowerCase()) || 'local'
   }
 }

@@ -1278,6 +1278,52 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     registered: 2026-02-18
     last_updated: 2026-02-18
 
+REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  type: REQ
+  name: Local Bookmarks Index Add Tags to Selected
+  category: Functional
+  status: Active
+  description: "Add one or more tags to all selected bookmarks from the index; textbox and button in Actions for selected; merge with existing, save via saveBookmark"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    - REQ-LOCAL_BOOKMARKS_INDEX
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  type: ARCH
+  name: Local Bookmarks Index Add Tags to Selected Architecture
+  category: Storage / UI
+  status: Active
+  description: "Add tags row in Actions for selected; parse input; merge with each selected bookmark; saveBookmark with preferredBackend; refresh; retain selection for still-visible rows; clear tag input"
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  type: IMPL
+  name: Local Bookmarks Index Add Tags to Selected Implementation
+  category: Storage / UI
+  status: Active
+  description: "parseTagsInput, mergeTags, selectionStillVisible in filter module; add-tags row; addTagsToSelected/deleteTagsFromSelected send saveBookmark per selected; refresh; retain selection for still-visible rows"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
 REQ-BROWSER_BOOKMARK_IMPORT:
   type: REQ
   name: Browser Bookmark Import Page

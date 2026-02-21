@@ -144,6 +144,13 @@
       <div class="delete-row">
         <button type="button" id="delete-selected-btn" class="btn btn-secondary btn-sm btn-danger" title="Delete selected bookmarks" aria-label="Delete selected bookmarks" disabled>Delete</button>
       </div>
+      <!-- [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] Add tags / Delete tags to selected (same textbox) -->
+      <div class="add-tags-row">
+        <label for="add-tags-input">New tag(s):</label>
+        <input type="text" id="add-tags-input" class="filter-input" placeholder="e.g. work, review" aria-label="Tags to add or remove from selected bookmarks (comma-separated)">
+        <button type="button" id="add-tags-btn" class="btn btn-secondary btn-sm" title="Add the entered tags to all selected bookmarks" aria-label="Add tags to selected bookmarks" disabled>Add tags</button>
+        <button type="button" id="delete-tags-btn" class="btn btn-secondary btn-sm" title="Remove the entered tags from all selected bookmarks" aria-label="Remove tags from selected bookmarks" disabled>Delete tags</button>
+      </div>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import from file -->
       <div class="import-row">
         <input type="file" id="import-file" accept=".csv,.json" style="display: none;" aria-label="Choose CSV or JSON file to import">

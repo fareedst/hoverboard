@@ -1,0 +1,97 @@
+IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  name: Local Bookmarks Index Add Tags to Selected Implementation
+  status: Active
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  rationale:
+    why: Implement add-tags UI and pure helpers (parseTagsInput, mergeTags) in index filter module; reuse saveBookmark.
+    problems_solved:
+      - No add-tags control or tag-merge logic for index
+    benefits:
+      - parseTagsInput and mergeTags in bookmarks-table-filter.js (testable); add-tags row in HTML; addTagsToSelected in bookmarks-table.js; button disabled when no selection
+  implementation_approach:
+    summary: parseTagsInput, mergeTags, removeTags, buildAddTagsPayload, buildRemoveTagsPayload, selectionStillVisible in filter module; add-tags row with Add tags and Delete tags buttons; addTagsToSelected and deleteTagsFromSelected mirror flow (parse input, byUrl, saveBookmark per selected, save selection, loadBookmarks, restore selection to intersection with displayed URLs, re-render, clear input). Both buttons disabled when no selection.
+    details:
+      - 'parseTagsInput(raw): if empty/whitespace return []; split by comma; trim each; filter empty; dedupe case-insensitive (keep first); return array'
+      - 'mergeTags(existingTags, newTags): existing = existing || []; new = new || []; lowerSet = Set(existing.map(t => String(t).toLowerCase())); result = [...existing]; for tag in new: if trim(tag) and !lowerSet.has(tag.trim().toLowerCase()) push and add to lowerSet; return result'
+      - 'removeTags(existingTags, tagsToRemove): removeSet = Set(tagsToRemove lowercased); return existing.filter(t => !removeSet.has(t.toLowerCase()))'
+      - 'selectionStillVisible(selectedUrls, filteredBookmarks): return Set of URLs that are in both selectedUrls and the set of b.url for b in filteredBookmarks (ignore falsy url)'
+      - 'addTagsToSelected(): newTags = parseTagsInput(addTagsInput.value); for each selected URL buildAddTagsPayload and send saveBookmark; urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); restore selectedUrls from selectionStillVisible(urlsToRestore, filteredBookmarks); renderTableBody(); clear input; updateMoveControlsState()'
+      - 'deleteTagsFromSelected(): tagsToRemove = parseTagsInput(addTagsInput.value); for each selected URL buildRemoveTagsPayload and send saveBookmark; urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); restore selectedUrls from selectionStillVisible(urlsToRestore, filteredBookmarks); renderTableBody(); clear input; updateMoveControlsState()'
+  code_locations:
+    files:
+      - path: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: parseTagsInput, mergeTags, removeTags, buildAddTagsPayload, buildRemoveTagsPayload, selectionStillVisible
+      - path: src/ui/bookmarks-table/bookmarks-table.html
+        description: Add tags row (label, input, Add tags and Delete tags buttons)
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+        description: addTagsToSelected, deleteTagsFromSelected, elements, updateMoveControlsState, init
+    functions:
+      - name: parseTagsInput
+        file: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: Parse comma-separated tag input to array; trim; dedupe case-insensitive
+      - name: mergeTags
+        file: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: Merge new tags with existing; case-insensitive dedupe
+      - name: removeTags
+        file: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: Remove tags from existing list (case-insensitive)
+      - name: buildAddTagsPayload
+        file: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: Build saveBookmark payload with merged tags and preferredBackend
+      - name: buildRemoveTagsPayload
+        file: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: Build saveBookmark payload with reduced tags and preferredBackend
+      - name: selectionStillVisible
+        file: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: Return Set of selected URLs that are still in filteredBookmarks (intersection)
+      - name: addTagsToSelected
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: For each selected URL merge tags and send saveBookmark; refresh; retain selection for still-visible rows
+      - name: deleteTagsFromSelected
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: For each selected URL remove tags and send saveBookmark; refresh; retain selection for still-visible rows
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    tests:
+      - tests/unit/bookmarks-table-index.test.js (parseTagsInput, mergeTags, removeTags, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, Add tags UI)
+    code_annotations:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  related_decisions:
+    depends_on:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+    composed_with:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+      - IMPL-BOOKMARK_ROUTER
+  essence_pseudocode: |
+    parseTagsInput(raw): IF !raw || !raw.trim() RETURN []; parts = raw.split(',').map(s => s.trim()).filter(Boolean); seen = Set(); result = []; FOR p IN parts: low = p.toLowerCase(); IF !seen.has(low): seen.add(low); result.push(p); RETURN result
+
+    mergeTags(existingTags, newTags): existing = existingTags || []; new = newTags || []; lowerSet = Set(existing.map(t => String(t).toLowerCase())); result = [...existing]; FOR tag IN new: t = tag.trim(); IF t && !lowerSet.has(t.toLowerCase()): result.push(t); lowerSet.add(t.toLowerCase()); RETURN result
+
+    removeTags(existingTags, tagsToRemove): removeSet = Set(tagsToRemove.map(t => String(t).trim().toLowerCase()).filter(Boolean)); RETURN existing.filter(t => !removeSet.has(String(t).toLowerCase()))
+
+    selectionStillVisible(selectedUrls, filteredBookmarks): visibleUrls = Set(filteredBookmarks.map(b => b.url).filter(Boolean)); RETURN new Set([...selectedUrls].filter(url => visibleUrls.has(url)))
+
+    addTagsToSelected(): newTags = parseTagsInput(addTagsInput.value); IF newTags.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildAddTagsPayload(b, newTags); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = ""; updateMoveControlsState()
+
+    deleteTagsFromSelected(): tagsToRemove = parseTagsInput(addTagsInput.value); IF tagsToRemove.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildRemoveTagsPayload(b, tagsToRemove); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = ""; updateMoveControlsState()
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: New implementation for Add tags to selected
+    last_validated:
+      date: '2026-02-20'
+      validator: AI Agent
+      result: pass
