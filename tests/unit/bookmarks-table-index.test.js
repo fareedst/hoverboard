@@ -4,6 +4,8 @@
  * Time column integration: formatters used by index for Time column display.
  */
 
+import fs from 'fs'
+import path from 'path'
 import {
   matchStorageFilter,
   matchStoresFilter,
@@ -344,5 +346,45 @@ describe('setTableDisplayStickyHeight [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BO
 
   test('does nothing when both are null', () => {
     expect(() => setTableDisplayStickyHeight(null, null)).not.toThrow()
+  })
+})
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX] Bookmark count at bottom of page: row count must be the last content in the page container.
+ * Validates that the index HTML has .footer-info as the last block in .container and contains #row-count.
+ */
+describe('bookmark count at bottom of page [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
+  test('index HTML has footer-info with row-count as last content in container', () => {
+    const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    expect(html).toContain('class="footer-info"')
+    expect(html).toContain('id="row-count"')
+    const containerStart = html.indexOf('<div class="container">')
+    expect(containerStart).toBeGreaterThan(-1)
+    const afterContainer = html.slice(containerStart)
+    const lastFooterInfo = afterContainer.lastIndexOf('class="footer-info"')
+    const lastRowCount = afterContainer.lastIndexOf('id="row-count"')
+    expect(lastFooterInfo).toBeGreaterThan(-1)
+    expect(lastRowCount).toBeGreaterThan(lastFooterInfo)
+    const scriptTag = afterContainer.indexOf('<script')
+    expect(scriptTag).toBeGreaterThan(lastRowCount)
+  })
+
+  test('index HTML has footer-spacer before footer-info for short-page layout [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
+    const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    expect(html).toContain('class="footer-spacer"')
+    const spacerPos = html.indexOf('footer-spacer')
+    const footerInfoPos = html.indexOf('footer-info')
+    expect(spacerPos).toBeGreaterThan(-1)
+    expect(footerInfoPos).toBeGreaterThan(spacerPos)
+  })
+
+  test('index CSS has footer-info sticky at bottom so count stays visible when scrolling [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
+    const cssPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.css')
+    const css = fs.readFileSync(cssPath, 'utf8')
+    expect(css).toContain('.footer-info')
+    expect(css).toMatch(/position:\s*sticky/)
+    expect(css).toMatch(/bottom:\s*0/)
   })
 })

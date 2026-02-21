@@ -17,7 +17,7 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     implementation: []
     tests:
       - 'tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)'
-      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation)'
+      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation, row count last in container, footer-spacer, footer-info sticky)'
       - 'tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)'
     code_annotations:
       - REQ-LOCAL_BOOKMARKS_INDEX
@@ -33,7 +33,7 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     last_updated:
       date: '2026-02-20'
       author: Agent
-      reason: Sticky Table Display and column headers; Actions and count scroll with content
+      reason: Bookmark count always at bottom of page (last in document; visual bottom when short)
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
@@ -48,12 +48,14 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     - 'Manual: Select column and select-all; Move selected to (Local | File | Sync); Delete selected – confirmation shows count and names when ≤8; after confirm, bookmarks removed and table refreshed.'
     - 'Manual: **Sticky Table Display**: When user scrolls past the Table Display section, the Table Display block and table column headers remain at the top of the viewport; table body scrolls underneath. Content above Table Display scrolls away normally. Actions for selected and row count scroll up with the table content.'
     - 'Unit tests: handleGetAggregatedBookmarksForIndex returns { bookmarks } with storage field; matchStorageFilter, matchStoresFilter, inTimeRange, matchExcludeTags, buildDeleteConfirmMessage, getShowOnlyDefaultState (bookmarks-table-index.test.js); formatTimeAbsolute and formatTimeAge (bookmarks-table-time.test.js); setTableDisplayStickyHeight (bookmarks-table-index.test.js or bookmarks-table-sticky.test.js).'
+    - 'Unit tests (bookmarks-table-index.test.js): Bookmark count at bottom – footer-info with row-count as last content in container; footer-spacer before footer-info for short-page layout; CSS has .footer-info position sticky and bottom 0 so count stays visible when scrolling. Manual: with 0 or few bookmarks, count at visual bottom; with many bookmarks, count bar stays at bottom of viewport when scrolling.'
   purpose:
     - Give users a single place to browse and search all non-Pinboard bookmarks (local + file + sync).
     - Support finding and opening bookmarks without leaving the extension.
     - Show where each bookmark is stored (Local | File | Sync) via a Storage column.
     - Allow bulk move of selected bookmarks to another storage (Local | File | Sync) via [REQ-MOVE_BOOKMARK_STORAGE_UI].
     - Allow bulk delete of selected bookmarks from the index (confirmation with count and optionally titles).
+    - The bookmark count (# bookmarks) must always appear at the bottom of the page: last in document order; when content is shorter than the viewport, at the visual bottom of the viewport; when content is long, the count bar stays visible (sticky to the viewport bottom) when scrolling.
   related:
     - ARCH-LOCAL_BOOKMARKS_INDEX (architecture for dedicated page and aggregated local + file + sync data source)
     - IMPL-LOCAL_BOOKMARKS_INDEX (getAggregatedBookmarksForIndex / getLocalBookmarksForIndex, message handler, bookmarks-table UI with four UI groups, Storage column, selection, bulk move, bulk delete)
@@ -62,4 +64,4 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     - REQ-CHROME_STORAGE_USAGE (chrome.storage.local)
     - REQ-MOVE_BOOKMARK_STORAGE_UI (moveBookmarkToStorage used for bulk move from index)
   summary: A dedicated extension page shows **local, file, and sync bookmarks** (chrome.storage.local/sync and file-backed). Data is **live only**. The page is **searchable** and **sortable**, with **launchable** URLs (opens in new tab with external-link indicator). Toolbar is organized into **Stores** (Local / File / Sync checkboxes; default all unchecked so no bookmarks shown initially), **Show only** (tags include, to-read, private, time range), **Hide** (tags exclude). A single **Time** column can show **create-time** or **last-updated** [REQ-BOOKMARK_CREATE_UPDATE_TIMES], with **Time format** (absolute or age). **Select** column allows **selection**; **Actions for selected** (Export, Move, **Delete** with confirmation, Import). Delete confirmation shows count and, if ≤8, bookmark names; move and delete controls enabled only when at least one bookmark is selected.
-  table_page: 'Search (single input). **Stores** group: checkboxes Local (L), File (F), Sync (S); default all unchecked so no bookmarks displayed until at least one store is selected; store checkboxes control which backends are included. **Show only** group: Tags (comma-separated, include), To read only, Private only, Time range (Start/End date-time, Time field: Create time | Last updated), **Clear** button to reset this group to defaults. **Table Display** group: **Time column** (Create time | Last updated) and **Time format** (Absolute | Age) toggles that modify the table. **Hide** group: Tags (comma-separated, exclude). **Select** column (checkboxes, select-all); sortable columns (Title, URL, Tags, Time, Storage, Shared, To read); URL column as links with **external-link indicator**. **Sticky behavior**: When the user scrolls past the Table Display section, the **Table Display** block and the **table column headers** remain at the top of the viewport; the table body scrolls below them. Content above the Table Display scrolls normally. **Actions for selected** (below table) and the row count scroll up with the table content (not sticky). **Actions for selected**: Export all / Export displayed / Export selected, Move selected to (dropdown + Move), **Delete** (confirmation with count and names if ≤8), Import [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI]. Page layout is **compact** (reduced whitespace around and inside control groups) to give maximum space to the table.'
+  table_page: 'Search (single input). **Stores** group: checkboxes Local (L), File (F), Sync (S); default all unchecked so no bookmarks displayed until at least one store is selected; store checkboxes control which backends are included. **Show only** group: Tags (comma-separated, include), To read only, Private only, Time range (Start/End date-time, Time field: Create time | Last updated), **Clear** button to reset this group to defaults. **Table Display** group: **Time column** (Create time | Last updated) and **Time format** (Absolute | Age) toggles that modify the table. **Hide** group: Tags (comma-separated, exclude). **Select** column (checkboxes, select-all); sortable columns (Title, URL, Tags, Time, Storage, Shared, To read); URL column as links with **external-link indicator**. **Sticky behavior**: When the user scrolls past the Table Display section, the **Table Display** block and the **table column headers** remain at the top of the viewport; the table body scrolls below them. The **bookmark count** (# bookmarks) is sticky to the bottom of the viewport so it stays visible when scrolling long content; when content is short, a spacer pushes it to the visual bottom. **Actions for selected** (below table) scroll with the content. **Actions for selected**: Export all / Export displayed / Export selected, Move selected to (dropdown + Move), **Delete** (confirmation with count and names if ≤8), Import [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI]. Page layout is **compact** (reduced whitespace around and inside control groups) to give maximum space to the table.'

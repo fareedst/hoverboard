@@ -4,7 +4,15 @@
   box-sizing: border-box;
 }
 
+/* [IMPL-LOCAL_BOOKMARKS_INDEX] Full viewport height so .container flex + .footer-info margin-top:auto can push count to bottom [REQ-LOCAL_BOOKMARKS_INDEX] */
+html {
+  min-height: 100vh;
+}
+
 body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   font-family: var(--font-family-primary);
   line-height: var(--line-height-normal);
   color: var(--color-text-primary);
@@ -13,8 +21,11 @@ body {
   padding: 0;
 }
 
-/* [IMPL-LOCAL_BOOKMARKS_INDEX] Compact layout: reduced padding to maximize table space */
+/* [IMPL-LOCAL_BOOKMARKS_INDEX] Compact layout: reduced padding to maximize table space. Flex column so footer stays at visual bottom when content is short [REQ-LOCAL_BOOKMARKS_INDEX]. min-height: 100vh so container has free space for margin-top:auto when content is shorter than viewport. */
 .container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--space-2);
@@ -431,7 +442,19 @@ body {
   white-space: nowrap;
 }
 
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Spacer grows to fill space above footer so count stays at visual bottom */
+.footer-spacer {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+/* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Bookmark count at bottom of page; sticky so it stays visible when scrolling long content */
 .footer-info {
+  position: sticky;
+  bottom: 0;
+  background-color: var(--color-background);
+  padding: var(--space-1) 0;
   font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
+  z-index: 1;
 }

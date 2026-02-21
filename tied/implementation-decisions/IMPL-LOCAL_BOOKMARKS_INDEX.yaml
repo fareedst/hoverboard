@@ -17,6 +17,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - '**Five UI areas.** (1) **Stores**: three checkboxes; default all unchecked; matchStoresFilter(bookmark, getAllowedStores()). (2) **Show only**: Tags, To read only, Private only, Time range (Start/End, Time field), **Clear** button; matchFilters() includes time-range; getShowOnlyDefaultState() used by Clear. (3) **Table Display**: Time column, Time format. (4) **Hide**: Tags exclude; matchExcludeTags(). (5) **Actions for selected**: Export, Move, **Delete**, Import.'
       - 'Empty state: when no store checked, message "Select at least one store..."; when no data, default message. Delete selected: confirm() then deleteBookmark per URL; refresh and clear selection.'
       - '**Sticky Table Display and thead** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX]: Pseudo-code: (CSS) .table-display-above: position sticky; top 0; z-index 2; background var(--color-background). .bookmarks-table thead th: position sticky; top var(--table-display-sticky-height, 0); z-index 1; background var(--color-background). (JS) setTableDisplayStickyHeight(tableDisplayEl, rootEl): if !tableDisplayEl || !rootEl return; height = tableDisplayEl.offsetHeight; rootEl.style.setProperty("--table-display-sticky-height", height + "px"). On init: tableDisplayEl = container.querySelector(".table-display-above"); rootEl = .container or document.documentElement; setTableDisplayStickyHeight(tableDisplayEl, rootEl) once; ro = new ResizeObserver(() => setTableDisplayStickyHeight(tableDisplayEl, rootEl)); ro.observe(tableDisplayEl). Actions for selected and .footer-info have no sticky; they scroll with page.'
+      - '**Bookmark count at bottom of page and always visible** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX]: Pseudo-code: (DOM order) container children = header → toolbar → table-display-above → empty-state → table-wrapper → actions-below-table → .footer-spacer → .footer-info (row count). (Layout) html, body min-height: 100vh; body display flex; flex-direction column. .container flex: 1; min-height: 100vh; display flex; flex-direction column. .footer-spacer { flex: 1 1 0; min-height: 0; } so it grows and pushes footer down when content short. .footer-info { position: sticky; bottom: 0; background; padding; z-index 1; } so count bar stays visible at viewport bottom when scrolling long content. (Update count) updateRowCount() sets elements.rowCount.textContent = "N bookmark(s)"; called after filter/render.'
   code_locations:
     files:
       - src/ui/bookmarks-table/bookmarks-table.html
@@ -39,12 +40,13 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - updateSelectAllState
       - onRowSelectChange
       - setTableDisplayStickyHeight
+      - updateRowCount
   traceability:
     architecture: []
     requirements: []
     tests:
       - 'tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)'
-      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation, getShowOnlyDefaultState, setTableDisplayStickyHeight)'
+      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation, getShowOnlyDefaultState, setTableDisplayStickyHeight, bookmark count at bottom: footer-info/row-count, footer-spacer, footer-info sticky CSS)'
       - 'tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)'
     code_annotations:
       - IMPL-LOCAL_BOOKMARKS_INDEX
@@ -60,7 +62,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     last_updated:
       date: '2026-02-20'
       author: Agent
-      reason: Sticky Table Display and thead; setTableDisplayStickyHeight, bookmarks-table-sticky.js, ResizeObserver in init
+      reason: Bookmark count at bottom and always visible; footer-spacer + footer-info sticky; unit tests footer structure and sticky CSS
     last_validated:
       date: '2026-02-18'
       validator: MCP converter

@@ -294,6 +294,7 @@ async function deleteSelectedBookmarks () {
   if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX] Delete completed:', ok, 'deleted,', fail, 'failed')
 }
 
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Update row count at bottom of page; footer layout keeps it at visual bottom when content is short. */
 function updateRowCount () {
   elements.rowCount.textContent = `${filteredBookmarks.length} bookmark${filteredBookmarks.length !== 1 ? 's' : ''}`
 }

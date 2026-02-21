@@ -28,7 +28,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
     last_updated:
       date: '2026-02-20'
       author: Agent
-      reason: Sticky Table Display and column headers (position:sticky; CSS variable for thead top)
+      reason: Bookmark count at bottom (count_footer: flex column + margin-top auto)
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
@@ -53,4 +53,5 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
   show_only_clear: '**Show only** group includes a **Clear** button that resets all controls in that group to default (empty tags, to-read and private unchecked, time range cleared, time field = Last updated).'
   layout: 'Page uses **compact layout**: reduced padding and margins (e.g. --space-2, --space-3) for container, header, toolbar, toolbar groups, filters row, actions group, and table wrapper so the table receives maximum space.'
   sticky_table_display: '**Sticky Table Display and column headers** [REQ-LOCAL_BOOKMARKS_INDEX]: When the user scrolls past the Table Display section, the Table Display block (search, Time column, Time format) and the table column headers (thead) remain fixed at the top of the viewport; the table body scrolls underneath. Implemented with CSS position:sticky on the Table Display fieldset and on the table thead; thead top offset is a CSS variable set from the measured height of the Table Display block so the header row sits directly below it. Content above the Table Display (header, Stores, Show only, Hide) scrolls away normally. Actions for selected and the row count (footer) are not sticky; they scroll with the page content.'
+  count_footer: '**Bookmark count at bottom of page and always visible** [REQ-LOCAL_BOOKMARKS_INDEX]: The row count (# bookmarks) lives in a dedicated footer block (.footer-info), the last content in the main container; a .footer-spacer (flex: 1 1 0) before it pushes the footer to the visual bottom when content is short. .footer-info uses position: sticky; bottom: 0 so when content is long the count bar stays visible at the bottom of the viewport while scrolling. html/body min-height: 100vh and body flex column; container flex: 1 and min-height: 100vh.'
   summary: 'A **single extension page** (e.g. `bookmarks-table.html`) displays a table of **local, file, and sync bookmarks** (non-Pinboard). Data from **getAggregatedBookmarksForIndex** (or fallback **getLocalBookmarksForIndex**). **Stores** group (Local, File, Sync checkboxes; default all unchecked). **Show only** (tags include, to-read, private, time range; **Clear** button). **Table Display** group (Time column, Time format). **Hide** (tags exclude). **Actions for selected** (Export, Move, **Delete** with confirmation, Import). **Compact layout** to maximize table space. Table: **Select** column, **Storage** column, **Time** column, **search**, sortable columns, **launchable URLs** with **external-link indicator**. Empty state when no store checked or no data.'
