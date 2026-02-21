@@ -1,0 +1,53 @@
+REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  name: Local Bookmarks Index Regex Find-and-Replace on Selected
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Allow users to run a regular-expression find-and-replace on selected bookmarks' text fields from the index page.
+    problems_solved:
+      - No bulk way to transform title, URL, tags, or notes with a pattern
+    benefits:
+      - Regex and replacement inputs with field checkboxes (Title, URL, Tags, Notes); apply replace only to checked fields; supports named groups, negative lookahead, backreferences; save via saveBookmark; refresh and retain selection for still-visible rows
+  satisfaction_criteria:
+    - criterion: "Actions for selected" includes a labeled textbox for regular expression and a labeled textbox for replacement string.
+    - criterion: "Actions for selected" includes checkboxes for target fields: Title, URL, Tags, Notes (user chooses which fields to replace).
+    - criterion: A "Replace" button runs the regex replace on each selected bookmark for the checked fields only; replacement uses JavaScript semantics ($1, $<name>, $&, etc.).
+    - criterion: Regex supports named groups, negative lookahead, and backreferences (JavaScript RegExp).
+    - criterion: Invalid regex shows an error and no save is performed.
+    - criterion: After apply, table refreshes and the same records remain selected where still visible; records no longer displayed are deselected.
+    - criterion: Replace button is disabled when no bookmark is selected or when pattern is empty.
+  validation_criteria:
+    - method: Unit tests
+      coverage: applyRegexReplace (invalid regex, empty pattern, no fields, simple replace, global replace, named group, negative lookahead, backreference, no match, tags); HTML has regex input, replacement input, field checkboxes, Replace button
+    - method: Manual verification
+      coverage: Regex replace row visible; Replace disabled with no selection; valid regex updates bookmarks and refreshes; invalid regex shows error
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    tests:
+      - tests/unit/bookmarks-table-index.test.js
+    code_annotations:
+      - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: New requirement for Regex find-and-replace on selected
+    last_validated:
+      date: '2026-02-20'
+      validator: AI Agent
+      result: pass
+  cross-references: ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE, IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE, REQ-LOCAL_BOOKMARKS_INDEX
+  summary: From the Local Bookmarks Index, the user can run a **regex find-and-replace** on selected bookmarks. "Actions for selected" includes a **Regex** textbox, a **Replacement** textbox, checkboxes for **Title**, **URL**, **Tags**, **Notes**, and a **Replace** button. Replace runs only on checked fields; regex supports named groups, negative lookahead, and backreferences. Invalid regex shows an error; after apply, table refreshes and selection is retained for still-visible rows.

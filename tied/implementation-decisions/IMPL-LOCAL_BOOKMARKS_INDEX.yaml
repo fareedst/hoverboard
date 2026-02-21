@@ -88,6 +88,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
       - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
       - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+      - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
   essence_pseudocode: |
     INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
     OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list

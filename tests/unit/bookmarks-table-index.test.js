@@ -2,6 +2,7 @@
  * Local Bookmarks Index storage filter logic - [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
  * Pure functions: matchStorageFilter (legacy), matchStoresFilter, time range, exclude tags, delete confirmation message.
  * Add tags: [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] parseTagsInput, mergeTags, buildAddTagsPayload, removeTags, buildRemoveTagsPayload.
+ * Regex replace: [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] applyRegexReplace.
  * Time column integration: formatters used by index for Time column display.
  */
 
@@ -23,7 +24,8 @@ import {
   buildRemoveTagsPayload,
   buildAddTagsConfirmMessage,
   buildRemoveTagsConfirmMessage,
-  selectionStillVisible
+  selectionStillVisible,
+  applyRegexReplace
 } from '../../src/ui/bookmarks-table/bookmarks-table-filter.js'
 import { formatTimeAbsolute, formatTimeAge } from '../../src/ui/bookmarks-table/bookmarks-table-time.js'
 import { setTableDisplayStickyHeight } from '../../src/ui/bookmarks-table/bookmarks-table-sticky.js'
@@ -621,5 +623,136 @@ describe('buildRemoveTagsPayload [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCA
     const bookmark = { url: 'https://example.com', tags: ['a', 'b', 'c'], storage: 'local' }
     const payload = buildRemoveTagsPayload(bookmark, ['B', 'A'])
     expect(payload.tags).toEqual(['c'])
+  })
+})
+
+describe('Regex replace UI [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]', () => {
+  test('index HTML has regex-replace row with regex input, replacement input, field checkboxes and Replace button in Actions for selected', () => {
+    const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    expect(html).toContain('id="regex-replace-input"')
+    expect(html).toContain('id="regex-replacement-input"')
+    expect(html).toContain('id="regex-replace-btn"')
+    expect(html).toContain('Regex:')
+    expect(html).toContain('Replacement:')
+    expect(html).toContain('Replace')
+    expect(html).toContain('id="regex-replace-title"')
+    expect(html).toContain('id="regex-replace-url"')
+    expect(html).toContain('id="regex-replace-tags"')
+    expect(html).toContain('id="regex-replace-notes"')
+  })
+})
+
+describe('applyRegexReplace [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]', () => {
+  test('returns error when pattern is invalid (throws on RegExp)', () => {
+    const bookmark = { url: 'https://example.com', description: 'Foo' }
+    const result = applyRegexReplace(bookmark, '[invalid', 'x', { title: true, url: false, tags: false, notes: false })
+    expect(result.payload).toBe(null)
+    expect(result.error).toBeDefined()
+    expect(typeof result.error).toBe('string')
+  })
+
+  test('returns error when bookmark is null or missing url', () => {
+    expect(applyRegexReplace(null, 'a', 'b', { title: true, url: false, tags: false, notes: false }).payload).toBe(null)
+    expect(applyRegexReplace({}, 'a', 'b', { title: true, url: false, tags: false, notes: false }).payload).toBe(null)
+    expect(applyRegexReplace({ description: 'No URL' }, 'a', 'b', { title: true, url: false, tags: false, notes: false }).payload).toBe(null)
+  })
+
+  test('returns error when pattern is empty or whitespace', () => {
+    const bookmark = { url: 'https://example.com', description: 'Foo' }
+    expect(applyRegexReplace(bookmark, '', 'x', { title: true, url: false, tags: false, notes: false }).payload).toBe(null)
+    expect(applyRegexReplace(bookmark, '   ', 'x', { title: true, url: false, tags: false, notes: false }).payload).toBe(null)
+  })
+
+  test('returns error when no fields selected', () => {
+    const bookmark = { url: 'https://example.com', description: 'Foo' }
+    const result = applyRegexReplace(bookmark, 'foo', 'bar', { title: false, url: false, tags: false, notes: false })
+    expect(result.payload).toBe(null)
+    expect(result.error).toBeDefined()
+  })
+
+  test('simple replace on title: pattern and replacement applied to description', () => {
+    const bookmark = { url: 'https://example.com', description: 'hello foo world', storage: 'local' }
+    const result = applyRegexReplace(bookmark, 'foo', 'bar', { title: true, url: false, tags: false, notes: false })
+    expect(result.error).toBe(null)
+    expect(result.payload).not.toBe(null)
+    expect(result.payload.description).toBe('hello bar world')
+    expect(result.payload.url).toBe('https://example.com')
+    expect(result.payload.preferredBackend).toBe('local')
+    expect(result.changed).toBe(true)
+  })
+
+  test('global replace: all occurrences in field replaced', () => {
+    const bookmark = { url: 'https://example.com', description: 'foo foo foo', storage: 'local' }
+    const result = applyRegexReplace(bookmark, 'foo', 'x', { title: true, url: false, tags: false, notes: false })
+    expect(result.payload.description).toBe('x x x')
+  })
+
+  test('named group in replacement: pattern (?<x>\\d+), replacement $<x> items', () => {
+    const bookmark = { url: 'https://example.com', description: 'Count 42 here', storage: 'local' }
+    const result = applyRegexReplace(bookmark, '(?<x>\\d+)', '$<x> items', { title: true, url: false, tags: false, notes: false })
+    expect(result.payload.description).toBe('Count 42 items here')
+  })
+
+  test('negative lookahead: pattern matches as per JS semantics', () => {
+    // In "foo baz", "foo" is not followed by " bar", so foo(?! bar) matches and is replaced
+    const bookmark = { url: 'https://example.com', description: 'foo baz', storage: 'local' }
+    const result = applyRegexReplace(bookmark, 'foo(?! bar)', 'X', { title: true, url: false, tags: false, notes: false })
+    expect(result.payload.description).toBe('X baz')
+  })
+
+  test('backreference in replacement: (\\w+) (\\w+) -> $2 $1', () => {
+    const bookmark = { url: 'https://example.com', description: 'first second', storage: 'local' }
+    const result = applyRegexReplace(bookmark, '(\\w+) (\\w+)', '$2 $1', { title: true, url: false, tags: false, notes: false })
+    expect(result.payload.description).toBe('second first')
+  })
+
+  test('no match leaves field unchanged', () => {
+    const bookmark = { url: 'https://example.com', description: 'hello', storage: 'local' }
+    const result = applyRegexReplace(bookmark, 'xyz', 'bar', { title: true, url: false, tags: false, notes: false })
+    expect(result.payload.description).toBe('hello')
+    expect(result.changed).toBe(false)
+  })
+
+  test('replacement equals original: changed is false', () => {
+    const bookmark = { url: 'https://example.com', description: 'foo', storage: 'local' }
+    const result = applyRegexReplace(bookmark, 'foo', 'foo', { title: true, url: false, tags: false, notes: false })
+    expect(result.payload.description).toBe('foo')
+    expect(result.changed).toBe(false)
+  })
+
+  test('tags option: replace applied to each tag string', () => {
+    const bookmark = { url: 'https://example.com', tags: ['foo-tag', 'bar-tag', 'other'], storage: 'file' }
+    const result = applyRegexReplace(bookmark, '-tag', '', { title: false, url: false, tags: true, notes: false })
+    expect(result.payload.tags).toEqual(['foo', 'bar', 'other'])
+    expect(result.payload.preferredBackend).toBe('file')
+  })
+
+  test('url option: replace applied to url field', () => {
+    const bookmark = { url: 'https://old.example.com/page', description: 'Title', storage: 'local' }
+    const result = applyRegexReplace(bookmark, 'old\\.example', 'new.example', { title: false, url: true, tags: false, notes: false })
+    expect(result.payload.url).toBe('https://new.example.com/page')
+  })
+
+  test('notes option: replace applied to extended field', () => {
+    const bookmark = { url: 'https://example.com', extended: 'Note: foo and foo', storage: 'local' }
+    const result = applyRegexReplace(bookmark, 'foo', 'bar', { title: false, url: false, tags: false, notes: true })
+    expect(result.payload.extended).toBe('Note: bar and bar')
+  })
+
+  test('multiple fields at once: title and notes updated', () => {
+    const bookmark = { url: 'https://example.com', description: 'd-foo', extended: 'e-foo', storage: 'local' }
+    const result = applyRegexReplace(bookmark, 'foo', 'X', { title: true, url: false, tags: false, notes: true })
+    expect(result.payload.description).toBe('d-X')
+    expect(result.payload.extended).toBe('e-X')
+  })
+
+  test('unchanged fields preserved in payload', () => {
+    const bookmark = { url: 'https://example.com', description: 'hello', tags: ['a'], extended: 'notes', time: '2020-01-01', storage: 'local' }
+    const result = applyRegexReplace(bookmark, 'hello', 'hi', { title: true, url: false, tags: false, notes: false })
+    expect(result.payload.description).toBe('hi')
+    expect(result.payload.tags).toEqual(['a'])
+    expect(result.payload.extended).toBe('notes')
+    expect(result.payload.time).toBe('2020-01-01')
   })
 })

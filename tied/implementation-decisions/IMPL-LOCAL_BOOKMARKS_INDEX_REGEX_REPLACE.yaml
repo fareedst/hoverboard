@@ -1,0 +1,87 @@
+IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  name: Local Bookmarks Index Regex Find-and-Replace Implementation
+  status: Active
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  rationale:
+    why: Implement regex-replace UI and pure helper applyRegexReplace in filter (or dedicated) module; reuse saveBookmark and selectionStillVisible.
+    problems_solved:
+      - No regex replace control or replace logic for index
+    benefits:
+      - applyRegexReplace in bookmarks-table-filter.js (testable); regex-replace row in HTML; regexReplaceSelected in bookmarks-table.js; Replace button disabled when no selection or empty pattern
+  implementation_approach:
+    summary: applyRegexReplace(bookmark, patternStr, replacementStr, options) returns { payload, error, changed }; changed is true iff at least one selected field's value actually changed. regexReplaceSelected sends saveBookmark only when result.changed === true so most-recent-update-time (updated_at) is not updated when replacement had no effect. Regex-replace row with inputs, checkboxes, Replace button; Replace button disabled when no selection or empty pattern.
+    details:
+      - 'applyRegexReplace: compute new desc, u, tagsArr, ext from replace; compare only selected fields to originals; changed = true if any selected field differs; RETURN { payload, error: null, changed }. Preserve time, shared, toread in payload.'
+      - 'regexReplaceSelected: FOR each selected url, result = applyRegexReplace(...); IF result.error show and RETURN; IF !result.payload CONTINUE; IF result.changed === false CONTINUE (skip save so updated_at not updated); SEND saveBookmark(result.payload); then loadBookmarks, selectionStillVisible, renderTableBody.'
+  code_locations:
+    files:
+      - path: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: applyRegexReplace
+      - path: src/ui/bookmarks-table/bookmarks-table.html
+        description: Regex replace row (regex input, replacement input, field checkboxes, Replace button)
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+        description: regexReplaceSelected, elements, updateMoveControlsState, init
+    functions:
+      - name: applyRegexReplace
+        file: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: Pure function: bookmark + pattern + replacement + options -> { payload, error, changed }; changed true iff any selected field value changed
+      - name: regexReplaceSelected
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: Orchestration: read UI, validate regex, applyRegexReplace per selected, saveBookmark, refresh, retain selection
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    tests:
+      - tests/unit/bookmarks-table-index.test.js (applyRegexReplace, regex replace UI)
+    code_annotations:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  related_decisions:
+    depends_on:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    composed_with:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+      - IMPL-BOOKMARK_ROUTER
+  essence_pseudocode: |
+    applyRegexReplace(bookmark, patternStr, replacementStr, options { title, url, tags, notes }):
+      TRY reg = new RegExp(patternStr, 'g')
+      CATCH e RETURN { payload: null, error: e.message }
+      IF !bookmark || !bookmark.url RETURN { payload: null, error: 'missing bookmark or url' }
+      IF !patternStr || !patternStr.trim() RETURN { payload: null, error: 'empty pattern' }
+      IF !options.title && !options.url && !options.tags && !options.notes RETURN { payload: null, error: 'no fields selected' }
+      origDesc = String(bookmark.description ?? ''); origUrl = String(bookmark.url ?? ''); origTags = [...]; origExt = String(bookmark.extended ?? '')
+      desc = origDesc; u = origUrl; tagsArr = [...]; ext = origExt
+      TRY IF options.title: desc = desc.replace(reg, replacementStr); IF options.url: u = u.replace(reg, replacementStr); IF options.tags: tagsArr = ...; IF options.notes: ext = ext.replace(reg, replacementStr)
+      CATCH e RETURN { payload: null, error: e.message }
+      changed = (opts.title && desc !== origDesc) || (opts.url && u !== origUrl) || (opts.tags && tagsArr differs from origTags) || (opts.notes && ext !== origExt)
+      payload = { url, description: desc, tags: tagsArr, extended: ext, preferredBackend, ...time/updated_at/shared/toread }
+      RETURN { payload, error: null, changed }
+
+    regexReplaceSelected():
+      patternStr = regexInput.value.trim(); replacementStr = replacementInput.value
+      IF !patternStr || selectedUrls.size === 0 RETURN
+      options = { title, url, tags, notes } from checkboxes
+      IF no field selected: show error; RETURN
+      TRY RegExp(patternStr); CATCH: show error; RETURN
+      byUrl = Map(allBookmarks: url -> bookmark)
+      FOR url IN selectedUrls: b = byUrl.get(url); IF !b CONTINUE; result = applyRegexReplace(b, patternStr, replacementStr, options); IF result.error show and RETURN; IF !result.payload CONTINUE; IF result.changed === false CONTINUE; SEND saveBookmark(result.payload)
+      urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); selectionStillVisible; renderTableBody(); clear error; updateMoveControlsState()
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: New implementation for Regex find-and-replace on selected
+    last_validated:
+      date: '2026-02-20'
+      validator: AI Agent
+      result: pass

@@ -1801,6 +1801,45 @@ ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
       date: '2026-02-20'
       author: AI Agent
       reason: New architecture for Add tags to selected
+ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  name: Local Bookmarks Index Regex Find-and-Replace Architecture
+  status: Active
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  rationale:
+    why: Extend Actions for selected with regex replace without new backend; reuse selection model and saveBookmark.
+    problems_solved:
+      - No bulk regex replace on index
+    benefits:
+      - One row (regex, replacement, field checkboxes, Replace); validate regex; per-bookmark per-field replace with RegExp; saveBookmark with preferredBackend; selectionStillVisible
+  alternatives_considered: []
+  implementation_approach:
+    summary: Regex replace row in Actions for selected; validate regex before run; per-bookmark per checked field replace; saveBookmark with preferredBackend; refresh; retain selection for still-visible rows.
+    details: []
+  traceability:
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    tests:
+      - tests/unit/bookmarks-table-index.test.js
+    code_annotations:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  related_decisions:
+    depends_on: []
+    informs:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: New architecture for Regex find-and-replace on selected
 ARCH-BROWSER_BOOKMARK_IMPORT:
   name: Browser Bookmark Import Architecture
   status: Active

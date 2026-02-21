@@ -1,0 +1,50 @@
+ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  name: Local Bookmarks Index Regex Find-and-Replace Architecture
+  status: Active
+  cross_references: &ref_0
+    - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  rationale:
+    why: Extend Actions for selected with regex replace without new backend; reuse selection model and saveBookmark.
+    problems_solved:
+      - No bulk regex replace on index
+    benefits:
+      - One row (regex input, replacement input, field checkboxes, Replace button); validate regex before running; per-bookmark per-field replace using native RegExp and String.prototype.replace; saveBookmark with preferredBackend; reuse selectionStillVisible
+  alternatives_considered: []
+  implementation_approach:
+    summary: 'Extend "Actions for selected" with one row: label "Regex:", text input (pattern); label "Replacement:", text input; checkboxes Title, URL, Tags, Notes; "Replace" button. Validate regex (try new RegExp(pattern)) before running; if invalid show error and do not save. For each selected bookmark, for each checked field (description, url, tags per element, extended), run pattern with "g" flag and replacement string (JavaScript replacement semantics: $1, $<name>, $&, $$); build payload and send saveBookmark with preferredBackend; then refresh; retain selection for rows still in displayed list. Replace button disabled when no selection or empty pattern.'
+    details: []
+  traceability:
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    tests:
+      - tests/unit/bookmarks-table-index.test.js
+    code_annotations:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  related_decisions:
+    depends_on:
+      - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    informs:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: New architecture for Regex find-and-replace on selected
+    last_validated:
+      date: '2026-02-20'
+      validator: AI Agent
+      result: pass
+  decision: 'Regex replace row in Actions for selected: Regex input, Replacement input, checkboxes Title/URL/Tags/Notes, Replace button. Validate regex before run; invalid regex → error, no save. Per bookmark, per checked field: new RegExp(pattern, "g"), string.replace(regex, replacementStr); build saveBookmark payload with preferredBackend; send saveBookmark. Refresh; retain selection for still-visible rows. Button disabled when no selection or empty pattern.'
+  cross-references: REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE, IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  related:
+    - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE (applyRegexReplace, regexReplaceSelected)
+    - ARCH-LOCAL_BOOKMARKS_INDEX (same page, selection model)
+  summary: 'Regex replace row: Regex + Replacement inputs, field checkboxes (Title, URL, Tags, Notes), Replace button; validate regex; per-bookmark per-field replace with RegExp "g"; saveBookmark with preferredBackend; refresh; retain selection for still-visible rows.'

@@ -252,3 +252,67 @@ export function buildRemoveTagsPayload (bookmark, tagsToRemove) {
     preferredBackend: (bookmark.storage && String(bookmark.storage).toLowerCase()) || 'local'
   }
 }
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]
+ * Apply regex find-and-replace to a bookmark's text fields. Returns payload for saveBookmark or error.
+ * Supports named groups, negative lookahead, backreferences (JavaScript RegExp and replacement semantics).
+ * When no error, also returns changed: true iff at least one selected field's value actually changed (so caller can skip save to avoid updating updated_at).
+ * @param {{ url?: string, description?: string, tags?: string[], extended?: string, storage?: string, [key: string]: unknown }} bookmark
+ * @param {string} patternStr - Regular expression pattern (used with 'g' flag)
+ * @param {string} replacementStr - Replacement string ($1, $<name>, $&, $$, etc.)
+ * @param {{ title?: boolean, url?: boolean, tags?: boolean, notes?: boolean }} options - Which fields to replace
+ * @returns {{ payload: { [key: string]: unknown } | null, error: string | null, changed?: boolean }}
+ */
+export function applyRegexReplace (bookmark, patternStr, replacementStr, options) {
+  if (!bookmark || !bookmark.url) {
+    return { payload: null, error: 'missing bookmark or url' }
+  }
+  if (!patternStr || !String(patternStr).trim()) {
+    return { payload: null, error: 'empty pattern' }
+  }
+  const opts = options || {}
+  if (!opts.title && !opts.url && !opts.tags && !opts.notes) {
+    return { payload: null, error: 'no fields selected' }
+  }
+  let reg
+  try {
+    reg = new RegExp(String(patternStr).trim(), 'g')
+  } catch (e) {
+    return { payload: null, error: e instanceof Error ? e.message : String(e) }
+  }
+  const origDescription = String(bookmark.description ?? '')
+  const origUrl = String(bookmark.url ?? '')
+  const origTagsArr = Array.isArray(bookmark.tags) ? bookmark.tags.map(t => String(t)) : []
+  const origExtended = String(bookmark.extended ?? '')
+  let description = origDescription
+  let url = origUrl
+  let tagsArr = Array.isArray(bookmark.tags) ? [...bookmark.tags].map(t => String(t)) : []
+  let extended = origExtended
+  try {
+    if (opts.title) description = description.replace(reg, replacementStr)
+    if (opts.url) url = url.replace(reg, replacementStr)
+    if (opts.tags) tagsArr = tagsArr.map(t => String(t).replace(reg, replacementStr))
+    if (opts.notes) extended = extended.replace(reg, replacementStr)
+  } catch (e) {
+    return { payload: null, error: e instanceof Error ? e.message : String(e) }
+  }
+  const titleChanged = opts.title && description !== origDescription
+  const urlChanged = opts.url && url !== origUrl
+  const tagsChanged = opts.tags && (tagsArr.length !== origTagsArr.length || tagsArr.some((t, i) => t !== (origTagsArr[i] ?? '')))
+  const notesChanged = opts.notes && extended !== origExtended
+  const changed = titleChanged || urlChanged || tagsChanged || notesChanged
+  const preferredBackend = (bookmark.storage && String(bookmark.storage).toLowerCase()) || 'local'
+  const payload = {
+    url: opts.url ? url : bookmark.url,
+    description,
+    tags: tagsArr,
+    extended,
+    preferredBackend,
+    ...(bookmark.time != null && { time: bookmark.time }),
+    ...(bookmark.updated_at != null && { updated_at: bookmark.updated_at }),
+    ...(bookmark.shared != null && { shared: bookmark.shared }),
+    ...(bookmark.toread != null && { toread: bookmark.toread })
+  }
+  return { payload, error: null, changed }
+}

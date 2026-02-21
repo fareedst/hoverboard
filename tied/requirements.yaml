@@ -1561,6 +1561,54 @@ REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
       date: '2026-02-20'
       validator: AI Agent
       result: pass
+REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  name: Local Bookmarks Index Regex Find-and-Replace on Selected
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Allow users to run a regular-expression find-and-replace on selected bookmarks' text fields from the index page.
+    problems_solved:
+      - No bulk way to transform title, URL, tags, or notes with a pattern
+    benefits:
+      - Regex and replacement inputs with field checkboxes (Title, URL, Tags, Notes); apply replace only to checked fields; supports named groups, negative lookahead, backreferences
+  satisfaction_criteria:
+    - criterion: "Actions for selected" includes labeled textbox for regex and for replacement string.
+    - criterion: "Actions for selected" includes checkboxes for Title, URL, Tags, Notes.
+    - criterion: Replace button runs regex replace on selected bookmarks for checked fields only; invalid regex shows error; Replace disabled when no selection or empty pattern.
+    - criterion: After apply, table refreshes and selection retained for still-visible rows.
+  validation_criteria:
+    - method: Unit tests
+      coverage: applyRegexReplace and regex replace UI in bookmarks-table-index.test.js
+    - method: Manual verification
+      coverage: Regex replace row visible; Replace disabled with no selection; valid regex updates and refreshes
+  traceability:
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    implementation:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    tests:
+      - tests/unit/bookmarks-table-index.test.js
+    code_annotations:
+      - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: New requirement for Regex find-and-replace on selected
+    last_validated:
+      date: '2026-02-20'
+      validator: AI Agent
+      result: pass
 REQ-BROWSER_BOOKMARK_IMPORT:
   name: Browser Bookmark Import Page
   category: Functional

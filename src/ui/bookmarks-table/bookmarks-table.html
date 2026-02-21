@@ -151,6 +151,21 @@
         <button type="button" id="add-tags-btn" class="btn btn-secondary btn-sm" title="Add the entered tags to all selected bookmarks" aria-label="Add tags to selected bookmarks" disabled>Add tags</button>
         <button type="button" id="delete-tags-btn" class="btn btn-secondary btn-sm" title="Remove the entered tags from all selected bookmarks" aria-label="Remove tags from selected bookmarks" disabled>Delete tags</button>
       </div>
+      <!-- [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] Regex find-and-replace on selected (pattern, replacement, field checkboxes) -->
+      <div class="regex-replace-row">
+        <label for="regex-replace-input">Regex:</label>
+        <input type="text" id="regex-replace-input" class="filter-input" placeholder="e.g. (\\w+)" aria-label="Regular expression pattern (supports named groups, lookahead, backreferences)">
+        <label for="regex-replacement-input">Replacement:</label>
+        <input type="text" id="regex-replacement-input" class="filter-input" placeholder="e.g. $1" aria-label="Replacement string ($1, $<name>, $&, etc.)">
+        <span class="regex-replace-fields">
+          <label class="filter-checkbox"><input type="checkbox" id="regex-replace-title" aria-label="Replace in Title">Title</label>
+          <label class="filter-checkbox"><input type="checkbox" id="regex-replace-url" aria-label="Replace in URL">URL</label>
+          <label class="filter-checkbox"><input type="checkbox" id="regex-replace-tags" aria-label="Replace in Tags">Tags</label>
+          <label class="filter-checkbox"><input type="checkbox" id="regex-replace-notes" aria-label="Replace in Notes">Notes</label>
+        </span>
+        <button type="button" id="regex-replace-btn" class="btn btn-secondary btn-sm" title="Run regex replace on selected bookmarks" aria-label="Replace in selected bookmarks" disabled>Replace</button>
+        <span id="regex-replace-error" class="regex-replace-error hidden" aria-live="polite"></span>
+      </div>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import from file -->
       <div class="import-row">
         <input type="file" id="import-file" accept=".csv,.json" style="display: none;" aria-label="Choose CSV or JSON file to import">

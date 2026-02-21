@@ -73,7 +73,7 @@ The snapshot above shows the dedicated full-page view of all locally stored book
 - **Table Display:** Search, Time column, and Time format sit just above the table. When you scroll past this section, the Table Display block and the **table column headers** stay at the top of the viewport; the table body scrolls underneath. Actions for selected and the row count scroll with the content.
 - **Bookmark count always visible:** The row count (# bookmarks) is sticky to the bottom of the viewport so it stays visible when scrolling long content. When the page is short, a flex spacer pushes it to the visual bottom. Implemented with `.footer-spacer` (flex: 1 1 0) and `.footer-info { position: sticky; bottom: 0 }`.
 - **Table:** **Select** column (checkboxes per row, select-all in header), Title, URL, Tags, Time, Storage, Shared, To read; URL column is clickable with **external-link indicator** (opens in new tab)
-- **Actions for selected:** Export all / Export displayed / Export selected, Move selected to (Local | File | Sync), **Delete** (confirmation with count; names if ≤8), **Add tags** and **Delete tags** (same textbox: enter tag(s) comma-separated; Add tags merges with selected bookmarks, Delete tags removes them from selected). After Add tags or Delete tags, the same records remain selected where still visible; if a record is no longer displayed (e.g. filtered out), it is no longer marked. Import
+- **Actions for selected:** Export all / Export displayed / Export selected, Move selected to (Local | File | Sync), **Delete** (confirmation with count; names if ≤8), **Add tags** and **Delete tags** (same textbox: enter tag(s) comma-separated; Add tags merges with selected bookmarks, Delete tags removes them from selected). **Regex find-and-replace:** Regex and Replacement textboxes, checkboxes for Title / URL / Tags / Notes, and **Replace** button; regex supports named groups, negative lookahead, and backreferences (JavaScript semantics). After Add tags, Delete tags, or Replace, the same records remain selected where still visible; if a record is no longer displayed (e.g. filtered out), it is no longer marked. Import
 - **Footer:** Row count (e.g. "N bookmarks")
 
 The diagram below shows which bookmarks are shown in the table and what actions are available for selected rows.
@@ -104,6 +104,7 @@ flowchart TB
     Delete[Delete with confirmation]
     AddTags[Add tags to selected]
     DeleteTags[Delete tags from selected]
+    RegexReplace[Regex find-and-replace]
     Import[Import CSV or JSON]
     Selected --> ExportAll
     Selected --> ExportDisplayed
@@ -112,6 +113,7 @@ flowchart TB
     Selected --> Delete
     Selected --> AddTags
     Selected --> DeleteTags
+    Selected --> RegexReplace
     Selected --> Import
   end
   Table --> Selected
@@ -163,7 +165,7 @@ Install directory: `~/.hoverboard/` (macOS/Linux) or `%LOCALAPPDATA%\Hoverboard\
 **Last Updated:** 2026-02-20
 **Chrome Extension Status:** Production Ready
 
-**Latest Enhancement:** **Local Bookmarks Index – Sticky Table Display and count always visible** – When you scroll past the Table Display section, the **Table Display** block (search, Time column, Time format) and the **table column headers** stay at the top of the viewport while the table body scrolls underneath. The **bookmark count** (# bookmarks) is sticky to the bottom of the viewport so it stays visible when scrolling long content; when the page is short, a spacer pushes it to the visual bottom. Toolbar remains organized into **Stores**, **Show only**, **Hide**, and **Actions for selected** (Export, Move, **Delete**, **Add tags**, **Delete tags**, Import).
+**Latest Enhancement:** **Local Bookmarks Index – Sticky Table Display and count always visible** – When you scroll past the Table Display section, the **Table Display** block (search, Time column, Time format) and the **table column headers** stay at the top of the viewport while the table body scrolls underneath. The **bookmark count** (# bookmarks) is sticky to the bottom of the viewport so it stays visible when scrolling long content; when the page is short, a spacer pushes it to the visual bottom. Toolbar remains organized into **Stores**, **Show only**, **Hide**, and **Actions for selected** (Export, Move, **Delete**, **Add tags**, **Delete tags**, **Regex replace**, Import).
 
 ### Chrome Extension Features
 
@@ -219,7 +221,7 @@ The popup in dark theme: visibility controls, tag management, search, and quick 
 - **Service Worker:** Background script handling bookmark operations and API calls
 - **Content Scripts:** Overlay system with transparency controls and visual feedback
 - **Popup Interface:** Modern UI with quick actions and tag management
-- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) with four UI groups (Stores, Show only, Hide, Actions for selected); sticky Table Display and column headers when scrolling; search, filter pipeline, sort, select (checkboxes, select-all), move, bulk delete with confirmation, add tags and delete tags to/from selected; data from `getAggregatedBookmarksForIndex` (local + file + sync)
+- **Local Bookmarks Index:** Dedicated extension page (`src/ui/bookmarks-table/`) with four UI groups (Stores, Show only, Hide, Actions for selected); sticky Table Display and column headers when scrolling; search, filter pipeline, sort, select (checkboxes, select-all), move, bulk delete with confirmation, add tags and delete tags to/from selected, regex find-and-replace on selected (Title/URL/Tags/Notes); data from `getAggregatedBookmarksForIndex` (local + file + sync)
 - **Storage System:** Local state management with Chrome storage API
 - **Error Handling:** Comprehensive error recovery and user feedback
 - **Badge Management:** Visual indicators in the extension icon
@@ -282,7 +284,7 @@ This project follows the TIED methodology for comprehensive requirements trackin
 - **Architecture**: [`tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml`](tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml) - Multi-source extraction architecture and design decisions
 - **Implementation**: [`tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml`](tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) - Implementation details, modifiable decisions, and performance considerations
 - **Recent Tags Refresh**: [`tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml`](tied/implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml) - Refresh Recent Tags on every popup display and cross-window sync
-- **Local Bookmarks Index**: [`tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml`](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml`](tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml`](tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) - Full-page index with sticky Table Display and column headers, bookmark count at bottom and always visible (sticky), UI groups (Stores, Show only, Hide, Actions for selected), Delete selected, Add tags and Delete tags to/from selected ([REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml))
+- **Local Bookmarks Index**: [`tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml`](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml`](tied/architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml), [`tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml`](tied/implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) - Full-page index with sticky Table Display and column headers, bookmark count at bottom and always visible (sticky), UI groups (Stores, Show only, Hide, Actions for selected), Delete selected, Add tags and Delete tags to/from selected ([REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml)), Regex find-and-replace on selected ([REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE](tied/requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml))
 - **Implementation Map**: [`tied/docs/suggested-tags-implementation-map.md`](tied/docs/suggested-tags-implementation-map.md) - Quick reference mapping TIED tokens to code locations
 
 ### Architecture Documents

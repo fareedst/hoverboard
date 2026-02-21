@@ -314,8 +314,33 @@ body {
   border-radius: var(--radius-lg);
 }
 
+.hidden {
+  display: none !important;
+}
+
 .empty-state.hidden,
 .table-wrapper.hidden {
+  display: none !important;
+}
+
+/* [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] Regex replace row and inline error */
+.regex-replace-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.regex-replace-fields {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+.regex-replace-error {
+  color: var(--color-text-error, #b91c1c);
+  font-size: var(--font-size-xs);
+}
+.regex-replace-error.hidden {
   display: none !important;
 }
 

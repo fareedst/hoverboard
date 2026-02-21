@@ -4,9 +4,10 @@
  * Export: [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]
  * Import: [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT]
  * Add tags: [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * Regex replace: [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]
  */
 
-import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, buildDeleteConfirmMessage, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible } from './bookmarks-table-filter.js'
+import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, buildDeleteConfirmMessage, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
 import { setTableDisplayStickyHeight } from './bookmarks-table-sticky.js'
@@ -60,6 +61,14 @@ const elements = {
   addTagsInput: document.getElementById('add-tags-input'),
   addTagsBtn: document.getElementById('add-tags-btn'),
   deleteTagsBtn: document.getElementById('delete-tags-btn'),
+  regexReplaceInput: document.getElementById('regex-replace-input'),
+  regexReplacementInput: document.getElementById('regex-replacement-input'),
+  regexReplaceTitle: document.getElementById('regex-replace-title'),
+  regexReplaceUrl: document.getElementById('regex-replace-url'),
+  regexReplaceTags: document.getElementById('regex-replace-tags'),
+  regexReplaceNotes: document.getElementById('regex-replace-notes'),
+  regexReplaceBtn: document.getElementById('regex-replace-btn'),
+  regexReplaceError: document.getElementById('regex-replace-error'),
   importFile: document.getElementById('import-file'),
   importTrigger: document.getElementById('import-trigger'),
   importTarget: document.getElementById('import-target'),
@@ -232,7 +241,7 @@ function updateSelectAllState () {
   elements.selectAll.disabled = none
 }
 
-/** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable/disable move, delete, and add-tags controls based on selection. [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] */
+/** [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI] Enable/disable move, delete, add-tags, and regex-replace controls based on selection. [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] */
 function updateMoveControlsState () {
   const hasSelection = selectedUrls.size > 0
   if (elements.moveTargetSelect) elements.moveTargetSelect.disabled = !hasSelection
@@ -240,6 +249,8 @@ function updateMoveControlsState () {
   if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.disabled = !hasSelection
   if (elements.addTagsBtn) elements.addTagsBtn.disabled = !hasSelection
   if (elements.deleteTagsBtn) elements.deleteTagsBtn.disabled = !hasSelection
+  const hasPattern = elements.regexReplaceInput && (elements.regexReplaceInput.value || '').trim().length > 0
+  if (elements.regexReplaceBtn) elements.regexReplaceBtn.disabled = !hasSelection || !hasPattern
   updateExportButtonState()
   updateSelectAllState()
 }
@@ -376,6 +387,78 @@ async function deleteTagsFromSelected () {
   if (elements.addTagsInput) elements.addTagsInput.value = ''
   updateMoveControlsState()
   if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] Delete tags completed:', ok, 'updated,', fail, 'failed')
+}
+
+/**
+ * [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]
+ * Run regex find-and-replace on selected bookmarks for checked fields (Title, URL, Tags, Notes); save via saveBookmark; refresh; retain selection for still-visible rows.
+ */
+async function regexReplaceSelected () {
+  const patternStr = elements.regexReplaceInput && (elements.regexReplaceInput.value || '').trim()
+  if (!patternStr || selectedUrls.size === 0) return
+  const replacementStr = elements.regexReplacementInput ? (elements.regexReplacementInput.value || '') : ''
+  const options = {
+    title: elements.regexReplaceTitle ? elements.regexReplaceTitle.checked : false,
+    url: elements.regexReplaceUrl ? elements.regexReplaceUrl.checked : false,
+    tags: elements.regexReplaceTags ? elements.regexReplaceTags.checked : false,
+    notes: elements.regexReplaceNotes ? elements.regexReplaceNotes.checked : false
+  }
+  if (!options.title && !options.url && !options.tags && !options.notes) {
+    if (elements.regexReplaceError) {
+      elements.regexReplaceError.textContent = 'Select at least one field (Title, URL, Tags, Notes).'
+      elements.regexReplaceError.classList.remove('hidden')
+    }
+    return
+  }
+  try {
+    RegExp(patternStr)
+  } catch (e) {
+    if (elements.regexReplaceError) {
+      elements.regexReplaceError.textContent = 'Invalid regex: ' + (e instanceof Error ? e.message : String(e))
+      elements.regexReplaceError.classList.remove('hidden')
+    }
+    return
+  }
+  if (elements.regexReplaceError) {
+    elements.regexReplaceError.textContent = ''
+    elements.regexReplaceError.classList.add('hidden')
+  }
+  const urls = Array.from(selectedUrls)
+  const byUrl = new Map(allBookmarks.filter(b => b && b.url).map(b => [b.url, b]))
+  if (elements.regexReplaceBtn) elements.regexReplaceBtn.disabled = true
+  let ok = 0
+  let fail = 0
+  for (const url of urls) {
+    const bookmark = byUrl.get(url)
+    if (!bookmark) continue
+    const result = applyRegexReplace(bookmark, patternStr, replacementStr, options)
+    if (result.error) {
+      if (elements.regexReplaceError) {
+        elements.regexReplaceError.textContent = result.error
+        elements.regexReplaceError.classList.remove('hidden')
+      }
+      if (elements.regexReplaceBtn) elements.regexReplaceBtn.disabled = false
+      updateMoveControlsState()
+      return
+    }
+    if (!result.payload) continue
+    if (result.changed === false) continue
+    try {
+      const res = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_SAVE, data: result.payload })
+      if (res && res.success) ok++
+      else fail++
+    } catch (e) {
+      console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] saveBookmark failed for', url, e)
+      fail++
+    }
+  }
+  const urlsToRestore = new Set(selectedUrls)
+  selectedUrls.clear()
+  await loadBookmarks()
+  for (const url of selectionStillVisible(urlsToRestore, filteredBookmarks)) selectedUrls.add(url)
+  renderTableBody()
+  updateMoveControlsState()
+  if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] Replace completed:', ok, 'updated,', fail, 'failed')
 }
 
 /** [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Update row count at bottom of page; footer layout keeps it at visual bottom when content is short. */
@@ -640,6 +723,11 @@ function init () {
   if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.addEventListener('click', () => deleteSelectedBookmarks())
   if (elements.addTagsBtn) elements.addTagsBtn.addEventListener('click', () => addTagsToSelected())
   if (elements.deleteTagsBtn) elements.deleteTagsBtn.addEventListener('click', () => deleteTagsFromSelected())
+  if (elements.regexReplaceBtn) elements.regexReplaceBtn.addEventListener('click', () => regexReplaceSelected())
+  if (elements.regexReplaceInput) {
+    elements.regexReplaceInput.addEventListener('input', () => updateMoveControlsState())
+    elements.regexReplaceInput.addEventListener('change', () => updateMoveControlsState())
+  }
 
   if (elements.importTrigger && elements.importFile) {
     elements.importTrigger.addEventListener('click', () => elements.importFile.click())

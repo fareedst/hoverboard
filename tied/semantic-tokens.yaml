@@ -1324,6 +1324,52 @@ IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
     registered: 2026-02-20
     last_updated: 2026-02-20
 
+REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  type: REQ
+  name: Local Bookmarks Index Regex Find-and-Replace on Selected
+  category: Functional
+  status: Active
+  description: "Regex and replacement inputs with field checkboxes (Title, URL, Tags, Notes); Replace button; apply to selected bookmarks; named groups, lookahead, backreferences; save via saveBookmark; retain selection"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    - REQ-LOCAL_BOOKMARKS_INDEX
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  type: ARCH
+  name: Local Bookmarks Index Regex Find-and-Replace Architecture
+  category: Storage / UI
+  status: Active
+  description: "Regex replace row in Actions for selected; validate regex; per-bookmark per-field replace with RegExp; saveBookmark with preferredBackend; selectionStillVisible"
+  cross_references:
+    - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  type: IMPL
+  name: Local Bookmarks Index Regex Find-and-Replace Implementation
+  category: Storage / UI
+  status: Active
+  description: "applyRegexReplace in filter module; regex-replace row; regexReplaceSelected validates regex, saveBookmark per selected; refresh; selectionStillVisible"
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+    - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
 REQ-BROWSER_BOOKMARK_IMPORT:
   type: REQ
   name: Browser Bookmark Import Page
