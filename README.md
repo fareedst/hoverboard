@@ -121,6 +121,46 @@ flowchart TB
   Table --> Selected
 ```
 
+### Browser Bookmark Import
+
+![Browser Bookmark Import](images/browser-bookmark-import.png)
+
+The Browser Bookmark Import page copies bookmarks from the browser into Hoverboard. It opens in a new tab and uses the same visual style as the Local Bookmarks Index.
+
+- **Header:** Hoverboard logo, "Browser Bookmark Import" title, and subtitle describing copy-from-browser, filter by folder, select which to import, resolve conflicts, and add tags.
+- **Toolbar:** Search (title, URL) with Clear button; Folder dropdown (All plus flattened folder list from browser bookmarks).
+- **Empty state:** Shown when no bookmarks are found or the bookmarks API is unavailable; message explains the `bookmarks` permission.
+- **Table:** **Select** column (checkboxes per row, select-all in header), Title, URL (clickable link), Folder, Date added; sortable columns.
+- **Import options:** When URL already in Hoverboard: **Skip** / **Overwrite** / **Merge tags**. Checkbox "Use folder names as tags"; optional "Add tags (comma-separated)" for all imported items.
+- **Import action row:** "Import to" (Local | File | Sync), "Import selected" button (enabled when at least one row is selected), and result text (imported, skipped, failed counts).
+- **Footer:** Row count (e.g. "N bookmarks").
+
+**How to open the page:**
+
+- **From the popup:** Click **Browser bookmark import**. The page opens in a new tab (`chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html')`).
+- **From Options:** In the footer, click the **Browser bookmark import** link (same URL).
+
+**How to use it:** Open the page; browser bookmarks load via `chrome.bookmarks.getTree`. Optionally search (title, URL) and filter by folder. Select rows (or use select-all), then choose conflict mode, optionally "Use folder names as tags" and "Add tags", and "Import to" (Local / File / Sync). Click **Import selected** and read the result (imported, skipped, failed). The extension must have the `bookmarks` permission.
+
+**Example scenario:** You keep work links in a Chrome folder "Work/Projects". Open Browser Bookmark Import, set **Folder** to that path, check **Use folder names as tags**, add the tag `work`, set **Import to** to Local and **When URL already in Hoverboard** to Skip. Select all visible rows and click **Import selected**. You get Hoverboard bookmarks tagged e.g. `work`, `projects` and `work`, with duplicates skipped.
+
+The diagram below shows the import pipeline from load through user choices to the import run.
+
+```mermaid
+flowchart TB
+  subgraph userChoices [User choices]
+    SelectRows[Select rows]
+    ConflictMode[Conflict: Skip / Overwrite / Merge]
+    UseFolderTags[Use folder names as tags]
+    ExtraTags[Add tags]
+    ImportTo[Import to L / F / S]
+  end
+  SelectRows --> ConflictMode
+  ConflictMode --> UseFolderTags
+  UseFolderTags --> ExtraTags
+  ExtraTags --> ImportTo
+```
+
 ## 🚀 Quick Start
 
 ### Install from GitHub Releases

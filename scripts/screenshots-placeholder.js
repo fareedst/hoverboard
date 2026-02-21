@@ -187,6 +187,18 @@ async function main () {
   console.log('Saved: images/local-bookmarks-index.png')
   await indexPage.close()
 
+  // 5) Browser Bookmark Import – table or empty state (uses chrome.bookmarks.getTree from profile)
+  const importPage = await context.newPage()
+  await importPage.goto(`${baseUrl}/src/ui/browser-bookmark-import/browser-bookmark-import.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await importPage.locator('#table-wrapper, #empty-state').first().waitFor({ state: 'attached', timeout: 10000 })
+  await importPage.waitForTimeout(1000)
+  await importPage.screenshot({
+    path: path.join(imagesDir, 'browser-bookmark-import.png'),
+    fullPage: true
+  })
+  console.log('Saved: images/browser-bookmark-import.png')
+  await importPage.close()
+
   await context.close()
   console.log('Done. Screenshots in images/')
 }
