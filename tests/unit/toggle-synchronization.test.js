@@ -1,6 +1,6 @@
 /**
- * [TOGGLE-SYNC-TEST-001] - Toggle Synchronization Unit Tests
- * Tests for toggle button synchronization between popup and overlay
+ * [TOGGLE-SYNC-TEST-001] Toggle synchronization - [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC]
+ * Tests for toggle button synchronization between popup and overlay.
  */
 
 import { jest } from '@jest/globals'
@@ -28,7 +28,7 @@ globalThis.console = {
 globalThis.debugLog = jest.fn()
 globalThis.debugError = jest.fn()
 
-describe('[TOGGLE-SYNC-TEST-001] Toggle Synchronization', () => {
+describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle Synchronization', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })

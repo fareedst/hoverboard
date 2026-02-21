@@ -1,0 +1,83 @@
+IMPL-OVERLAY:
+  name: Overlay Implementation
+  status: Active
+  cross_references:
+    - ARCH-OVERLAY
+    - REQ-OVERLAY_SYSTEM
+  rationale:
+    why: Concrete overlay rendering and interaction
+    problems_solved:
+      - Overlay display complexity
+      - Interaction handling
+    benefits:
+      - Working overlay
+      - Proper lifecycle
+  implementation_approach:
+    summary: Overlay manager with show/hide, content rendering, control creation
+    details:
+      - Overlay DOM injection
+      - Transparency controls
+      - Auto-show logic
+      - Refresh control
+      - Theme integration
+  code_locations:
+    files:
+      - path: src/features/content/content-script.js
+        description: Content script entry; bootstraps overlay and content
+      - path: src/features/content/overlay-manager.js
+        description: Overlay manager
+    functions:
+      - name: show
+        file: src/features/content/overlay-manager.js
+        description: Display overlay
+      - name: hide
+        file: src/features/content/overlay-manager.js
+        description: Hide overlay
+      - name: createCloseButton
+        file: src/features/content/overlay-manager.js
+        description: Create close control
+      - name: createRefreshButton
+        file: src/features/content/overlay-manager.js
+        description: Create refresh control
+  traceability:
+    architecture:
+      - ARCH-OVERLAY
+    requirements:
+      - REQ-OVERLAY_SYSTEM
+      - REQ-OVERLAY_AUTO_SHOW_CONTROL
+      - REQ-OVERLAY_REFRESH_ACTION
+    tests:
+      - tests/unit/overlay-tag-persistence.test.js
+    code_annotations:
+      - IMPL-OVERLAY
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-OVERLAY_CONTROLS
+    composed_with:
+      - IMPL-OVERLAY_CONTROLS
+  essence_pseudocode: |
+    INPUT: show/hide command; optional auto-show condition; theme vars
+    OUTPUT: overlay visible/hidden; DOM injected; controls (close, refresh) created
+    DATA: overlay root element; content container; control elements; visibility state
+
+    show():
+      CREATE overlay root (or reuse); INJECT into document body
+      APPLY theme CSS variables; RENDER content (bookmark form, etc.)
+      createCloseButton(); createRefreshButton(); ATTACH handlers
+      SET visibility = true
+
+    hide():
+      REMOVE overlay from DOM (or set display none); SET visibility = false
+
+    Auto-show: IF condition (e.g. message or storage): show()
+  detail_file: implementation-decisions/IMPL-OVERLAY.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

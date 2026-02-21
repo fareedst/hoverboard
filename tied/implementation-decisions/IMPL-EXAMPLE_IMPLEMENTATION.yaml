@@ -1,0 +1,59 @@
+IMPL-EXAMPLE_IMPLEMENTATION:
+  name: Core Implementation Example
+  status: Template
+  cross_references:
+    - ARCH-EXAMPLE_DECISION
+    - REQ-EXAMPLE_FEATURE
+  rationale:
+    why: Why this implementation approach was chosen
+    problems_solved:
+      - Problem 1 that implementation solves
+    benefits:
+      - Benefit 1 of implementation
+  implementation_approach:
+    summary: Main implementation approach
+    details:
+      - Specific technical detail 1
+      - Code structure or pattern
+      - API design decision
+  code_locations:
+    files:
+      - path: path/to/implementation.ext
+        description: Main implementation
+        lines: [10, 50]
+    functions:
+      - name: exampleFunction
+        file: path/to/implementation.ext
+        description: What it does
+  traceability:
+    architecture:
+      - ARCH-EXAMPLE_DECISION
+    requirements:
+      - REQ-EXAMPLE_FEATURE
+    tests:
+      - testFeatureName_REQ_EXAMPLE_FEATURE
+    code_annotations:
+      - IMPL-EXAMPLE_IMPLEMENTATION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with: []
+  essence_pseudocode: |
+    Template: placeholder for core implementation example.
+    INPUT: (to be defined per feature)
+    OUTPUT: (to be defined)
+    exampleFunction(...): (steps to be filled; use INPUT/OUTPUT/DATA and procedure names)
+  detail_file: implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.yaml
+  metadata:
+    created:
+      date: YYYY-MM-DD
+      author: agent/contributor
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode (template stub)
+    last_validated:
+      date: YYYY-MM-DD
+      validator: agent/contributor
+      result: pass

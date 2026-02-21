@@ -1,27 +1,72 @@
 IMPL-STORAGE_INDEX:
   name: Storage Index
   status: Active
-  cross_references: []
+  cross_references:
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - ARCH-STORAGE_INDEX_AND_ROUTER
   rationale:
-    why: See detail file
-    problems_solved: []
-    benefits: []
+    why: Persist per-URL storage backend (pinboard|local|file) in chrome.storage.local so the router and UI know which backend owns each URL.
+    problems_solved:
+      - Need to know which backend owns each URL
+    benefits:
+      - getIndex(), setBackendForUrl(url, backend), getBackendForUrl(url), removeUrl(url)
+      - Key hoverboard_storage_index
   implementation_approach:
-    summary: See detail file
-    details: []
+    summary: StorageIndex class in src/features/storage/storage-index.js; chrome.storage.local.
+    details:
+      - 'Index shape: { url: pinboard|local|file }'
+      - 'Migration: on first use, seed from LocalBookmarkService.getAllBookmarks() -> setBackendForUrl(url, local)'
   code_locations:
-    files: []
+    files:
+      - path: src/features/storage/storage-index.js
+        description: StorageIndex implementation
     functions: []
   traceability:
-    architecture: []
-    requirements: []
-    tests: []
+    architecture:
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    requirements:
+      - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    tests:
+      - tests/unit/storage-index.test.js
     code_annotations:
       - IMPL-STORAGE_INDEX
   related_decisions:
-    depends_on: []
+    depends_on:
+      - ARCH-STORAGE_INDEX_AND_ROUTER
     supersedes: []
-    see_also: []
+    see_also:
+      - IMPL-BOOKMARK_ROUTER
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+  essence_pseudocode: |
+    INPUT: storage key (hoverboard_storage_index), optional localBookmarkProvider for migration
+    OUTPUT: index map url -> backend (pinboard|local|file)
+    DATA: index = map of url string to backend string; persisted in chrome.storage.local
+
+    getIndex():
+      LOAD index from storage under key
+      RETURN index (or empty map if missing)
+
+    getBackendForUrl(url):
+      index = getIndex()
+      RETURN index[url] or null
+
+    setBackendForUrl(url, backend):
+      index = getIndex()
+      SET index[url] = backend
+      PERSIST index to storage
+
+    removeUrl(url):
+      index = getIndex()
+      REMOVE index[url]
+      PERSIST index to storage
+
+    migration (on first use or when index empty):
+      IF getIndex() is empty AND localBookmarkProvider given:
+        bookmarks = localBookmarkProvider.getAllBookmarks()
+        FOR each bookmark WITH url:
+          setBackendForUrl(url, "local")
   detail_file: implementation-decisions/IMPL-STORAGE_INDEX.yaml
   metadata:
     created:
@@ -35,8 +80,3 @@ IMPL-STORAGE_INDEX:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  cross-references: REQ-PER_BOOKMARK_STORAGE_BACKEND, ARCH-STORAGE_INDEX_AND_ROUTER
-  related:
-    - IMPL-BOOKMARK_ROUTER (consumes index)
-    - ARCH-STORAGE_INDEX_AND_ROUTER
-  storageindex: 'manages the per-URL storage backend mapping in chrome.storage.local under key `hoverboard_storage_index`. Shape: `{ "<url>": "pinboard"|"local"|"file" }`. Methods: getIndex(), setBackendForUrl(url, backend), getBackendForUrl(url), removeUrl(url). Migration: on first use (or when index empty), seed from LocalBookmarkService.getAllBookmarks() by setting index[url] = ''local'' for each URL.'

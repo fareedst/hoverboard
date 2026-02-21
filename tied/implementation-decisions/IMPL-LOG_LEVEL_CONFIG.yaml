@@ -1,40 +1,58 @@
-# [IMPL-LOG_LEVEL_CONFIG] Environment-aware log level (LOG-002)
-name: Log Level Configuration
-status: Active
-cross_references:
-  - REQ-STRUCTURED_LOGGING
-  - ARCH-STRUCTURED_LOGGING
-rationale:
-  why: getLogLevel() from process.env.NODE_ENV; debug in dev, warn in production
-  problems_solved: []
-  benefits: []
-implementation_approach:
-  summary: Logger.getLogLevel() in src/shared/logger.js; browser vs Node; NODE_ENV production => warn
-  details: []
-code_locations:
-  files:
-    - path: src/shared/logger.js
-      description: getLogLevel
-  functions: []
-traceability:
-  architecture:
-    - ARCH-STRUCTURED_LOGGING
-  requirements:
+IMPL-LOG_LEVEL_CONFIG:
+  name: Log Level Configuration
+  status: Active
+  cross_references:
     - REQ-STRUCTURED_LOGGING
-  code_annotations:
-    - IMPL-LOG_LEVEL_CONFIG
-related_decisions:
-  depends_on: []
-  supersedes: []
-  see_also:
-    - IMPL-LOGGER_CONTEXT_LEVELS
-    - IMPL-LOGGER_LEGACY
-detail_file: implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml
-metadata:
-  created:
-    date: "2026-02-17"
-    author: AI Agent
-  last_updated:
-    date: "2026-02-17"
-    author: AI Agent
-    reason: Numbered token reinterpretation (LOG-002)
+    - ARCH-STRUCTURED_LOGGING
+  rationale:
+    why: getLogLevel() from environment; debug in dev, warn in production.
+    problems_solved: []
+    benefits:
+      - Reduce noise in production; full debug in development
+  implementation_approach:
+    summary: Logger.getLogLevel() in src/shared/logger.js; browser vs Node; NODE_ENV production => warn.
+    details:
+      - 'getLogLevel(): read NODE_ENV or browser equivalent; if production return warn else debug (or config override)'
+      - 'Logger.shouldLog(level) uses getLogLevel() to decide whether to emit'
+  code_locations:
+    files:
+      - path: src/shared/logger.js
+        description: getLogLevel
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-STRUCTURED_LOGGING
+    requirements:
+      - REQ-STRUCTURED_LOGGING
+    tests: []
+    code_annotations:
+      - IMPL-LOG_LEVEL_CONFIG
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOGGER_LEGACY
+    composed_with:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOGGER_LEGACY
+  essence_pseudocode: |
+    INPUT: none (reads environment)
+    OUTPUT: current log level (e.g. "debug" | "info" | "warn" | "error")
+    DATA: NODE_ENV or browser equivalent; production => warn, else => debug
+
+    getLogLevel():
+      env = read NODE_ENV or process.env (browser fallback)
+      IF env = "production": RETURN "warn"
+      RETURN "debug" (or override from config)
+
+    Used by Logger.shouldLog(level): IF level >= getLogLevel() then emit else skip.
+  detail_file: implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Canonical YAML rewrite; add root key, essence_pseudocode, composed_with

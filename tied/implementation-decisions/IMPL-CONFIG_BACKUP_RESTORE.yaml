@@ -1,40 +1,62 @@
-# [IMPL-CONFIG_BACKUP_RESTORE] Configuration backup and portability (CFG-001)
-name: Config Backup and Restore
-status: Active
-cross_references:
-  - REQ-CONFIG_PORTABILITY
-  - ARCH-CONFIG_STRUCTURE
-rationale:
-  why: exportConfig/importConfig for backup and portability; gather settings, auth, inhibit URLs
-  problems_solved: []
-  benefits: []
-implementation_approach:
-  summary: ConfigManager.exportConfig() and importConfig(); parallel get of settings and auth for export
-  details: []
-code_locations:
-  files:
-    - path: src/config/config-manager.js
-      description: exportConfig, importConfig
-  functions: []
-traceability:
-  architecture:
-    - ARCH-CONFIG_STRUCTURE
-  requirements:
+IMPL-CONFIG_BACKUP_RESTORE:
+  name: Config Backup and Restore
+  status: Active
+  cross_references:
     - REQ-CONFIG_PORTABILITY
-  code_annotations:
-    - IMPL-CONFIG_BACKUP_RESTORE
-related_decisions:
-  depends_on: []
-  supersedes: []
-  see_also:
-    - IMPL-CONFIG_MIGRATION
-    - IMPL-URL_INHIBITION
-detail_file: implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml
-metadata:
-  created:
-    date: "2026-02-17"
-    author: AI Agent
-  last_updated:
-    date: "2026-02-17"
-    author: AI Agent
-    reason: Numbered token reinterpretation (CFG-001)
+    - ARCH-CONFIG_STRUCTURE
+  rationale:
+    why: exportConfig/importConfig for backup and portability; gather settings, auth, inhibit URLs
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: ConfigManager.exportConfig() and importConfig(); parallel get of settings and auth for export
+    details: []
+  code_locations:
+    files:
+      - path: src/config/config-manager.js
+        description: exportConfig, importConfig
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-CONFIG_STRUCTURE
+    requirements:
+      - REQ-CONFIG_PORTABILITY
+    tests: []
+    code_annotations:
+      - IMPL-CONFIG_BACKUP_RESTORE
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-CONFIG_MIGRATION
+      - IMPL-URL_INHIBITION
+    composed_with:
+      - IMPL-CONFIG_MIGRATION
+      - IMPL-FEATURE_FLAGS
+      - IMPL-URL_INHIBITION
+  essence_pseudocode: |
+    INPUT: none (export); serialized config blob (import)
+    OUTPUT: config object (export); void or error (import)
+    DATA: settings, auth, inhibit URLs (from storage / to storage)
+
+    exportConfig():
+      PARALLEL_GET settings, auth, inhibitUrlList from storage (or config manager)
+      BUILD config object = { settings, auth, inhibitUrls: inhibitUrlList }
+      RETURN config object (serializable)
+
+    importConfig(configBlob):
+      PARSE configBlob
+      VALIDATE structure
+      WRITE settings to storage
+      WRITE auth to storage
+      WRITE inhibit URLs to storage (if present)
+      HANDLE conflicts or overwrite per product rule
+  detail_file: implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with

@@ -1,9 +1,9 @@
 /**
  * Simple Test to Verify Testing Infrastructure
- * Demonstrates that Jest and testing setup is working correctly
+ * [IMPL-TESTING] [REQ-MODULE_VALIDATION] Demonstrates that Jest and testing setup is working correctly.
  */
 
-describe('Testing Infrastructure', () => {
+describe('Testing Infrastructure [IMPL-TESTING]', () => {
   test('should run basic tests', () => {
     expect(true).toBe(true);
   });

@@ -1,39 +1,65 @@
-# [IMPL-DOM_UTILITIES] DOM utilities for content scripts (UTIL-005)
-name: DOM Utilities
-status: Active
-cross_references:
-  - REQ-SHARED_UTILITIES
-  - ARCH-SHARED_UTILITIES
-rationale:
-  why: waitForElement (MutationObserver), createElement; legacy createPinFromFormData, validatePinFormData
-  problems_solved: []
-  benefits: []
-implementation_approach:
-  summary: domUtils in src/shared/utils.js — waitForElement, createElement; createPinFromFormData, validatePinFormData
-  details: []
-code_locations:
-  files:
-    - path: src/shared/utils.js
-      description: domUtils, createPinFromFormData, validatePinFormData
-  functions: []
-traceability:
-  architecture:
-    - ARCH-SHARED_UTILITIES
-  requirements:
+IMPL-DOM_UTILITIES:
+  name: DOM Utilities
+  status: Active
+  cross_references:
     - REQ-SHARED_UTILITIES
-  code_annotations:
-    - IMPL-DOM_UTILITIES
-related_decisions:
-  depends_on: []
-  supersedes: []
-  see_also:
-    - IMPL-TIME_ASYNC_UTILITIES
-detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
-metadata:
-  created:
-    date: "2026-02-17"
-    author: AI Agent
-  last_updated:
-    date: "2026-02-17"
-    author: AI Agent
-    reason: Numbered token reinterpretation (UTIL-005)
+    - ARCH-SHARED_UTILITIES
+  rationale:
+    why: waitForElement (MutationObserver), createElement; legacy createPinFromFormData, validatePinFormData
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: domUtils in src/shared/utils.js — waitForElement, createElement; createPinFromFormData, validatePinFormData
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/utils.js
+        description: domUtils, createPinFromFormData, validatePinFormData
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    requirements:
+      - REQ-SHARED_UTILITIES
+    tests: []
+    code_annotations:
+      - IMPL-DOM_UTILITIES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-TIME_ASYNC_UTILITIES
+    composed_with:
+      - IMPL-TIME_ASYNC_UTILITIES
+  essence_pseudocode: |
+    INPUT: selector (waitForElement); tag and attrs (createElement); form data (createPinFromFormData / validatePinFormData)
+    OUTPUT: element or null (waitForElement); element (createElement); pin object or validation result
+
+    waitForElement(container, selector, options):
+      IF element = container.querySelector(selector) THEN RETURN resolve(element)
+      observer = new MutationObserver(callback)
+      observer.observe(container, { childList, subtree })
+      ON mutation: IF element = container.querySelector(selector) THEN resolve(element), disconnect observer
+      ON timeout (if given): reject or resolve null, disconnect observer
+
+    createElement(tag, attrs):
+      el = document.createElement(tag)
+      FOR each attr in attrs: SET el[attr] or setAttribute
+      RETURN el
+
+    createPinFromFormData(formData):
+      BUILD pin object from form fields (url, description, tags, etc.)
+      RETURN pin object
+
+    validatePinFormData(formData or pin):
+      CHECK required fields and formats
+      RETURN valid boolean or validation errors
+  detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with

@@ -1,0 +1,68 @@
+IMPL-SAFARI_ADAPTATION:
+  name: Safari Adaptive Implementation
+  status: Active
+  cross_references:
+    - ARCH-SAFARI_ADAPTATION
+    - REQ-SAFARI_ADAPTATION
+  rationale:
+    why: Safari stability and performance
+    problems_solved:
+      - Safari memory issues
+      - Messaging failures
+    benefits:
+      - Stable Safari support
+      - Bounded recovery
+  implementation_approach:
+    summary: Safari shim, content optimizations, error handler with degraded mode
+    details:
+      - Platform detection
+      - Safari config (timeouts, retries)
+      - Animation/memory optimizations
+      - Error handler with recovery
+      - Degraded mode
+  code_locations:
+    files:
+      - path: src/shared/safari-shim.js
+        description: Safari shim
+      - path: safari/src/shared/ErrorHandler.js
+        description: Safari error handler
+    functions:
+      - name: getSafariConfig
+        file: src/shared/safari-shim.js
+        description: Safari config
+      - name: optimizeSafariAnimations
+        file: src/shared/safari-shim.js
+        description: Animation optimization
+  traceability:
+    architecture:
+      - ARCH-SAFARI_ADAPTATION
+    requirements:
+      - REQ-SAFARI_ADAPTATION
+    tests: []
+    code_annotations:
+      - IMPL-SAFARI_ADAPTATION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-CROSS_BROWSER
+    composed_with: []
+  essence_pseudocode: |
+    INPUT: platform (detect Safari); config (timeouts, retries); animation/content operations
+    OUTPUT: Safari-specific config; optimized or fallback behavior; degraded mode on unrecoverable error
+    DATA: getSafariConfig(); ErrorHandler with recovery
+
+    ON init: IF Safari: config = getSafariConfig(); APPLY timeouts/retries
+
+    optimizeSafariAnimations(): REDUCE or REPLACE heavy animations for Safari; BOUND memory
+
+    ON error: ErrorHandler; TRY recovery; IF unrecoverable: ENTER degraded mode (minimal features)
+  detail_file: implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

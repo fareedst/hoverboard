@@ -1,11 +1,11 @@
 /**
- * [POPUP-CLOSE-BEHAVIOR-006] Unit tests for popup close behavior
+ * [POPUP-CLOSE-BEHAVIOR-006] Popup close behavior - [REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION]
  */
 
 import { PopupController } from '../../src/ui/popup/PopupController.js'
 import { UIManager } from '../../src/ui/popup/UIManager.js'
 
-describe('[POPUP-CLOSE-BEHAVIOR-006] Popup Close Behavior', () => {
+describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavior', () => {
   let popupController
   let mockUIManager
   let mockStateManager

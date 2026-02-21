@@ -1,0 +1,55 @@
+IMPL-POPUP_BUNDLE:
+  name: Popup bundle build
+  status: Active
+  cross_references:
+    - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
+    - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+  rationale:
+    why: Popup was loaded unbundled; its dependency chain (e.g. PopupController → TagService → PinboardService → fast-xml-parser) caused "Failed to resolve module specifier 'fast-xml-parser'" when opening the popup
+    problems_solved:
+      - Popup opening triggered dynamic import of pinboard-service.js (raw copy in dist) which contains bare import of fast-xml-parser
+    benefits:
+      - Popup entry is a single bundle with all dependencies inlined; no bare specifiers at runtime
+  implementation_approach:
+    summary: build:popup bundles src/ui/popup/popup.js to dist/src/ui/popup/popup.js; scripts/build.js runs build:popup and skips copying ui/popup/popup.js
+  code_locations:
+    files:
+      - path: package.json
+        description: build:popup script
+      - path: scripts/build.js
+        description: Run build:popup; skip ui/popup/popup.js in copyDir
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+    requirements:
+      - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
+    tests: []
+    code_annotations:
+      - IMPL-POPUP_BUNDLE
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with: []
+  essence_pseudocode: |
+    INPUT: source src/ui/popup/popup.js and its dependency graph
+    OUTPUT: single bundle dist/src/ui/popup/popup.js with all deps inlined; no bare specifiers at runtime
+    DATA: build config (e.g. rollup/vite); copyDir skip list for popup.js
+
+    build:popup:
+      ENTRY = src/ui/popup/popup.js
+      BUNDLE ENTRY and all imports into dist/src/ui/popup/popup.js
+      INLINE fast-xml-parser, TagService, PinboardService, etc.
+
+    copyDir (scripts/build.js):
+      SKIP src/ui/popup/popup.js so only the bundle is in dist
+  detail_file: implementation-decisions/IMPL-POPUP_BUNDLE.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

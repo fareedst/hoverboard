@@ -53,16 +53,40 @@ IMPL-SELECTION_TO_TAG_INPUT:
       - ARCH-SELECTION_TO_TAG_INPUT
       - REQ-SELECTION_TO_TAG_INPUT
       - IMPL-SUGGESTED_TAGS
+    composed_with:
+      - IMPL-SUGGESTED_TAGS
+  essence_pseudocode: |
+    INPUT: none at popup open (selection read from page via message); raw selection string (normalizeSelectionForTagInput)
+    OUTPUT: tag input field prefilled with normalized words (side effect)
+    DATA: current tab; newTagInput element; maxWords = 8
+
+    content script on GET_PAGE_SELECTION:
+      selection = window.getSelection().toString()
+      RETURN { success: true, data: { selection } }
+
+    normalizeSelectionForTagInput(selection, maxWords):
+      text = replace non-word non-space chars with space in selection
+      text = collapse spaces, trim
+      words = split text on whitespace
+      RETURN first maxWords words joined by space
+
+    popup loadInitialData (after loadSuggestedTags or loadRecentTags):
+      TRY response = sendToTab(GET_PAGE_SELECTION)
+      ON timeout or failure LEAVE tag input unchanged, RETURN
+      raw = response.data.selection
+      IF raw non-empty:
+        normalized = normalizeSelectionForTagInput(raw, 8)
+        setTagInputValue(normalized)
   detail_file: implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-20"
       author: AI Agent
-      reason: Selection-to-tag input implementation
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass

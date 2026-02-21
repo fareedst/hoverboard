@@ -1,59 +1,115 @@
 IMPL-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Implementation
   status: Active
-  cross_references: []
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX
+    - REQ-LOCAL_BOOKMARKS_INDEX
+    - ARCH-STORAGE_INDEX_AND_ROUTER
   rationale:
-    why: See detail file
-    problems_solved: []
-    benefits: []
+    why: Implement full index of local and file bookmarks with Storage column, search, filter, sort, launch.
+    problems_solved:
+      - No single view of local and file bookmarks
+    benefits:
+      - getAggregatedBookmarksForIndex (router aggregates local + file) with fallback getLocalBookmarksForIndex; table page with Storage column
   implementation_approach:
-    summary: See detail file
+    summary: Index page sends getAggregatedBookmarksForIndex first (BookmarkRouter.getAllBookmarksForIndex), fallback getLocalBookmarksForIndex; bookmarks-table with Storage column (Local | File | Sync), search/filter/sort/launch; entry point from popup/options.
     details:
-      - '**Show only Clear** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX]: Pseudo-code: getShowOnlyDefaultState() => { tags: "", toread: false, private: false, timeRangeStart: "", timeRangeEnd: "", timeRangeField: "updated_at" }. applyShowOnlyDefaults(elements): for each key in getShowOnlyDefaultState(), set elements.filterTags.value, elements.filterToread.checked, etc. to default; then applySearchAndFilter(). Button #show-only-clear click calls applyShowOnlyDefaults(elements).'
-      - '**Table Display group**: Separate toolbar fieldset after Hide; legend "Table Display"; contains Time column select (#time-column-source) and Time format select (#time-display-mode). Show only fieldset no longer contains Time column/Time format. Same IDs so existing JS unchanged.'
-      - '**Compact layout** [ARCH-LOCAL_BOOKMARKS_INDEX]: Pseudo-code: container padding → var(--space-2); header margin-bottom → var(--space-2); toolbar margin-bottom, gap → var(--space-2); toolbar-group padding → var(--space-2) var(--space-3); filters-row gap → var(--space-2); actions-group margin-top, padding → var(--space-2); table-wrapper margin-bottom → var(--space-2); optionally search-row gap and table cell padding reduced.'
-      - 'Time column: **Table Display** group selects **Time column** (Create time | Last updated) and **Time format** (Absolute | Age); single Time column shows b[timeColumnSource] ?? b.time; formatTimeAbsolute or formatTimeAge; compare() uses timeColumnSource when sortKey === ''time''. bookmarks-table-time.js; unit tests bookmarks-table-time.test.js.'
-      - 'Default at page load [REQ-BOOKMARK_CREATE_UPDATE_TIMES]: Time column = Last updated, Time format = Age; initial sort last-updated descending with age displayed.'
-      - '**Five UI areas.** (1) **Stores**: three checkboxes; default all unchecked; matchStoresFilter(bookmark, getAllowedStores()). (2) **Show only**: Tags, To read only, Private only, Time range (Start/End, Time field), **Clear** button; matchFilters() includes time-range; getShowOnlyDefaultState() used by Clear. (3) **Table Display**: Time column, Time format. (4) **Hide**: Tags exclude; matchExcludeTags(). (5) **Actions for selected**: Export, Move, **Delete**, Import.'
-      - 'Empty state: when no store checked, message "Select at least one store..."; when no data, default message. Delete selected: confirm() then deleteBookmark per URL; refresh and clear selection.'
-      - '**Sticky Table Display and thead** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX]: Pseudo-code: (CSS) .table-display-above: position sticky; top 0; z-index 2; background var(--color-background). .bookmarks-table thead th: position sticky; top var(--table-display-sticky-height, 0); z-index 1; background var(--color-background). (JS) setTableDisplayStickyHeight(tableDisplayEl, rootEl): if !tableDisplayEl || !rootEl return; height = tableDisplayEl.offsetHeight; rootEl.style.setProperty("--table-display-sticky-height", height + "px"). On init: tableDisplayEl = container.querySelector(".table-display-above"); rootEl = .container or document.documentElement; setTableDisplayStickyHeight(tableDisplayEl, rootEl) once; ro = new ResizeObserver(() => setTableDisplayStickyHeight(tableDisplayEl, rootEl)); ro.observe(tableDisplayEl). Actions for selected and .footer-info have no sticky; they scroll with page.'
-      - '**Bookmark count at bottom of page and always visible** [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX]: Pseudo-code: (DOM order) container children = header → toolbar → table-display-above → empty-state → table-wrapper → actions-below-table → .footer-spacer → .footer-info (row count). (Layout) html, body min-height: 100vh; body display flex; flex-direction column. .container flex: 1; min-height: 100vh; display flex; flex-direction column. .footer-spacer { flex: 1 1 0; min-height: 0; } so it grows and pushes footer down when content short. .footer-info { position: sticky; bottom: 0; background; padding; z-index 1; } so count bar stays visible at viewport bottom when scrolling long content. (Update count) updateRowCount() sets elements.rowCount.textContent = "N bookmark(s)"; called after filter/render.'
+      - 'MessageHandler: handleGetAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() when available; handleGetLocalBookmarksForIndex uses LocalBookmarkService only (fallback)'
+      - 'BookmarkRouter.getAllBookmarksForIndex(): aggregates localProvider, fileProvider, syncProvider getAllBookmarks(), adds storage ''local''|''file''|''sync'', merges and sorts by time desc'
+      - 'Index page loadBookmarks: send getAggregatedBookmarksForIndex; on response set allBookmarks; on failure send getLocalBookmarksForIndex, set allBookmarks with storage ''local'''
+      - 'Filter pipeline: stores (matchStoresFilter) -> search -> show-only (tags, toread, private, time range, getShowOnlyDefaultState/Clear) -> exclude tags (matchExcludeTags); then sort and render'
+      - 'Table: Storage column, sortable columns, Select; actions for selected Export, Move, Delete, Import. Entry: popup bookmarksIndexBtn -> openBookmarksIndex -> open tab; options bookmarks-index-link href to extension URL'
   code_locations:
     files:
-      - src/ui/bookmarks-table/bookmarks-table.html
-      - src/ui/bookmarks-table/bookmarks-table.js
-      - src/ui/bookmarks-table/bookmarks-table-time.js
-      - src/ui/bookmarks-table/bookmarks-table.css
-      - src/ui/bookmarks-table/bookmarks-table-filter.js
-      - src/ui/bookmarks-table/bookmarks-table-sticky.js
+      - path: src/features/storage/local-bookmark-service.js
+        description: getAllBookmarks() method
+      - path: src/core/message-handler.js
+        description: GET_AGGREGATED_BOOKMARKS_FOR_INDEX, GET_LOCAL_BOOKMARKS_FOR_INDEX, handleGetAggregatedBookmarksForIndex, handleGetLocalBookmarksForIndex
+      - path: src/features/storage/bookmark-router.js
+        description: getAllBookmarksForIndex() aggregates local + file + sync with storage field
+      - path: src/ui/bookmarks-table/bookmarks-table.html
+        description: Index page layout
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+        description: loadBookmarks, applySearchAndFilter, renderTableBody, setSort
+      - path: src/ui/bookmarks-table/bookmarks-table.css
+        description: Table and toolbar styles
+      - path: src/ui/bookmarks-table/bookmarks-table-filter.js
+        description: Filter pipeline and getShowOnlyDefaultState
+      - path: src/ui/bookmarks-table/bookmarks-table-time.js
+        description: Time column and format
+      - path: src/ui/bookmarks-table/bookmarks-table-sticky.js
+        description: Sticky table display and footer
+      - path: src/ui/popup/popup.html
+        description: bookmarksIndexBtn entry point
+      - path: src/ui/popup/PopupController.js
+        description: handleOpenBookmarksIndex
+      - path: src/ui/options/options.html
+        description: bookmarks-index-link in footer
+      - path: src/ui/options/options.js
+        description: bookmarksIndexLink href set in init()
     functions:
-      - getShowOnlyDefaultState
-      - getAllowedStores
-      - matchFilters
-      - matchStoresFilter
-      - matchExcludeTags
-      - buildDeleteConfirmMessage
-      - renderTableBody
-      - updateMoveControlsState
-      - moveSelectedToStorage
-      - deleteSelectedBookmarks
-      - updateSelectAllState
-      - onRowSelectChange
-      - setTableDisplayStickyHeight
-      - updateRowCount
+      - name: getAllBookmarks
+        file: src/features/storage/local-bookmark-service.js
+        description: Returns full normalized array of local bookmarks, sorted by time desc
+      - name: handleGetLocalBookmarksForIndex
+        file: src/core/message-handler.js
+        description: Uses LocalBookmarkService, returns { bookmarks } (fallback)
+      - name: getAllBookmarksForIndex
+        file: src/features/storage/bookmark-router.js
+        description: Aggregates local + file + sync bookmarks with storage field, sorted by time desc
+      - name: loadBookmarks
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: Sends getAggregatedBookmarksForIndex then fallback getLocalBookmarksForIndex
+      - name: applySearchAndFilter
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: Applies filter pipeline and updates displayed rows
   traceability:
-    architecture: []
-    requirements: []
+    architecture:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    requirements:
+      - REQ-LOCAL_BOOKMARKS_INDEX
     tests:
-      - 'tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)'
-      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation, getShowOnlyDefaultState, setTableDisplayStickyHeight, bookmark count at bottom: footer-info/row-count, footer-spacer, footer-info sticky CSS)'
-      - 'tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)'
+      - tests/unit/message-handler-bookmarks-index.test.js
+      - tests/unit/bookmarks-table-index.test.js
+      - tests/unit/bookmarks-table-time.test.js
     code_annotations:
       - IMPL-LOCAL_BOOKMARKS_INDEX
   related_decisions:
-    depends_on: []
+    depends_on:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
     supersedes: []
-    see_also: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-BOOKMARK_ROUTER
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+  essence_pseudocode: |
+    INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+    OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+    DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode
+
+    ON page load:
+      SEND getAggregatedBookmarksForIndex
+      ON response: SET allBookmarks = response.bookmarks (each item has storage "local"|"file"|"sync")
+      ON failure: SEND getLocalBookmarksForIndex; SET allBookmarks = response.bookmarks with storage "local"
+      applySearchAndFilter()
+
+    applySearchAndFilter():
+      filteredBookmarks = allBookmarks
+      APPLY stores filter (matchStoresFilter, getAllowedStores)
+      APPLY search (text)
+      APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)
+      APPLY exclude tags (matchExcludeTags)
+      SORT by sortKey (e.g. time desc)
+      renderTableBody(filteredBookmarks); updateRowCount()
+
+    Entry points:
+      Popup: bookmarksIndexBtn click -> openBookmarksIndex -> open tab to bookmarks-table.html
+      Options: bookmarks-index-link href -> extension URL to bookmarks-table.html
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     created:
@@ -61,18 +117,9 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       author: MCP converter
     last_updated:
       date: '2026-02-20'
-      author: Agent
-      reason: Bookmark count at bottom and always visible; footer-spacer + footer-info sticky; unit tests footer structure and sticky CSS
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  bookmarks_table_page: '`src/ui/bookmarks-table/bookmarks-table.html`, `bookmarks-table.js`, `bookmarks-table-time.js`, `bookmarks-table-filter.js`, `bookmarks-table-sticky.js`, `bookmarks-table.css`. **Compact header** and **compact layout** (reduced padding/margins). Toolbar: search; **Stores**; **Show only** (Tags, To read only, Private only, Time range Start/End + Time field, **Clear** button; getShowOnlyDefaultState() in bookmarks-table-filter.js); **Table Display** (Time column, Time format); **Hide**. Filter pipeline: stores → search → show-only → exclude tags. Table: **Select** column, **Storage** column, sortable columns, URL links with **external-link indicator** (↗). **Actions for selected**: Export, Move, **Delete**, Import. State: selectedUrls Set, timeColumnSource, timeDisplayMode, getAllowedStores(), applyShowOnlyDefaults(), updateMoveControlsState(), updateSelectAllState(), updateExportButtonState().'
-  cross-references: ARCH-LOCAL_BOOKMARKS_INDEX, REQ-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER
-  entry_point: Popup footer has "Bookmarks index" button (bookmarksIndexBtn); click emits openBookmarksIndex, PopupController.handleOpenBookmarksIndex opens tab. Options footer has "Local bookmarks index" link (bookmarks-index-link); options.js sets href in init() to chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html').
-  localbookmarkservice_getallbookmarks(): Used by getLocalBookmarksForIndex handler and by BookmarkRouter for local slice of aggregated data.
-  primary_data: 'On load, the index page sends **getAggregatedBookmarksForIndex**. Message handler calls `bookmarkProvider.getAllBookmarksForIndex()` when available (BookmarkRouter); router aggregates localProvider, fileProvider, and syncProvider getAllBookmarks(), tags each item with `storage: ''local''` | ''file'' | ''sync'', returns merged list sorted by time desc. Fallback: page sends **getLocalBookmarksForIndex** and tags each item with `storage: ''local''`.'
-  related:
-    - IMPL-LOCAL_BOOKMARK_SERVICE (existing local provider)
-    - IMPL-BOOKMARK_ROUTER (getAllBookmarksForIndex)
-    - ARCH-LOCAL_BOOKMARKS_INDEX, REQ-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER

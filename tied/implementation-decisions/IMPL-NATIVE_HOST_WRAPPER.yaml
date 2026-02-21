@@ -5,21 +5,29 @@ IMPL-NATIVE_HOST_WRAPPER:
     - ARCH-NATIVE_HOST
     - REQ-NATIVE_HOST_WRAPPER
   rationale:
-    why: See detail file
+    why: Thin native messaging host reads length-prefixed JSON from stdin; handles ping with pong; otherwise invokes helper script and returns helper JSON; debug to stderr.
     problems_solved: []
     benefits: []
   implementation_approach:
-    summary: See detail file
+    summary: Go binary in native_host/; 4-byte length (native order) + UTF-8 JSON; max 64 MiB in, 1 MB out; ping/pong; helper in same dir (helper.sh or helper.ps1 on Windows).
     details: []
   code_locations:
-    files: []
+    files:
+      - path: native_host/main.go
+        description: Protocol read/write, ping, helper invocation
+      - path: native_host/helper.sh
+        description: Unix helper
+      - path: native_host/helper.ps1
+        description: Windows helper
     functions: []
   traceability:
     architecture:
       - ARCH-NATIVE_HOST
     requirements:
       - REQ-NATIVE_HOST_WRAPPER
-    tests: []
+    tests:
+      - native_host/main_test.go
+      - tests/unit/native-host-ping.test.js
     code_annotations:
       - IMPL-NATIVE_HOST_WRAPPER
       - ARCH-NATIVE_HOST
@@ -28,28 +36,41 @@ IMPL-NATIVE_HOST_WRAPPER:
     depends_on: []
     supersedes: []
     see_also:
-      - ARCH-NATIVE_HOST
-      - REQ-NATIVE_HOST_WRAPPER
+      - IMPL-NATIVE_HOST_INSTALLER
+    composed_with:
+      - IMPL-NATIVE_HOST_INSTALLER
+  essence_pseudocode: |
+    INPUT: stdin — 4-byte length (native byte order) then UTF-8 JSON message (max 64 MiB from Chrome)
+    OUTPUT: stdout — 4-byte length then UTF-8 JSON response (max 1 MB to Chrome); stderr for debug/TRACE
+    DATA: install_dir = dir of executable; helper = helper.sh (Unix) or helper.exe then helper.ps1 (Windows)
+
+    loop:
+      READ 4-byte length L
+      READ L bytes UTF-8 into message
+      PARSE message as JSON
+
+      IF message.type === "ping":
+        WRITE length-prefixed JSON {"type":"pong"} to stdout
+        CONTINUE
+
+      RESOLVE helper path from install_dir (helper.sh or helper.ps1/helper.exe)
+      IF no helper:
+        ECHO request or pong to stdout (per product rule)
+        CONTINUE
+
+      INVOKE helper with message JSON on stdin
+      READ helper stdout as single JSON object
+      WRITE length-prefixed response to stdout
   detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  architecture: '[ARCH-NATIVE_HOST](../architecture-decisions/ARCH-NATIVE_HOST.md)'
-  build: '`go build -o native_host .`; cross-build with `GOOS`/`GOARCH` for darwin_arm64, darwin_amd64, linux_amd64, windows_amd64.'
-  code: '`native_host/main.go`, `native_host/helper.sh`, `native_host/helper.ps1`'
-  helper_lookup: 'Windows: `helper.exe` then `helper.ps1` (run via PowerShell); Unix: `helper.sh`. Helper receives raw JSON on stdin, must output single JSON object to stdout.'
-  install_dir: '`filepath.Dir(os.Executable())`.'
-  ping: Message `{"type":"ping"}` → response `{"type":"pong"}` without calling helper.
-  protocol: 4-byte length (native byte order) + UTF-8 JSON; max 64 MiB from Chrome, 1 MB to Chrome.
-  requirements: '[REQ-NATIVE_HOST_WRAPPER](../requirements/REQ-NATIVE_HOST_WRAPPER.md)'
-  summary: 'Thin native messaging host implemented in Go in `native_host/`: reads length-prefixed JSON from stdin, resolves install dir from executable path, handles `ping` with `pong`, otherwise invokes helper in same dir (e.g. `helper.sh` or `helper.ps1` on Windows) and returns helper’s JSON; if no helper, echoes request or pong. Debug/TRACE output to stderr.'
-  tests: '`native_host/main_test.go` (protocol read/write, findHelper, ping-pong integration); `tests/unit/native-host-ping.test.js` (NATIVE_PING handling and pingNativeHost)'

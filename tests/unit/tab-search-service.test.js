@@ -1,10 +1,11 @@
 /**
- * [IMMUTABLE-REQ-TAG-002] Unit tests for TabSearchService
+ * [IMMUTABLE-REQ-TAG-002] Tab search - [REQ-SEARCH_FUNCTIONALITY] [IMPL-TAB_SEARCH_SERVICE]
+ * Unit tests for TabSearchService (searchAndNavigate, tab focus).
  */
 
 import { TabSearchService } from '../../src/features/search/tab-search-service.js'
 
-describe('TabSearchService', () => {
+describe('[REQ-SEARCH_FUNCTIONALITY] [IMPL-TAB_SEARCH_SERVICE] TabSearchService', () => {
   let tabSearchService
   let mockChrome
 

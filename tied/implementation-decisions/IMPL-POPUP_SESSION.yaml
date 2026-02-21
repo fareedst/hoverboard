@@ -1,0 +1,75 @@
+IMPL-POPUP_SESSION:
+  name: Popup Session Persistence Implementation
+  status: Active
+  cross_references:
+    - ARCH-POPUP_SESSION
+    - REQ-POPUP_PERSISTENT_SESSION
+  rationale:
+    why: Multi-action workflows without reopening
+    problems_solved:
+      - Popup closing interrupts work
+      - State management complexity
+    benefits:
+      - Continuous workflows
+      - Better UX
+  implementation_approach:
+    summary: PopupController routing with StateManager, UIManager, no window.close
+    details:
+      - PopupController handlers await async work
+      - StateManager mutations
+      - UIManager updates
+      - GET_OVERLAY_STATE fallback
+      - Inline notifications
+  code_locations:
+    files:
+      - path: src/ui/popup/PopupController.js
+        description: Popup controller
+      - path: src/ui/popup/UIManager.js
+        description: UI manager
+    functions:
+      - name: handleShowHoverboard
+        file: src/ui/popup/PopupController.js
+        description: Overlay toggle handler
+      - name: handleTogglePrivate
+        file: src/ui/popup/PopupController.js
+        description: Privacy toggle
+      - name: updateShowHoverButtonState
+        file: src/ui/popup/UIManager.js
+        description: Button state updater
+  traceability:
+    architecture:
+      - ARCH-POPUP_SESSION
+    requirements:
+      - REQ-POPUP_PERSISTENT_SESSION
+    tests:
+      - tests/unit/popup-close-behavior.test.js
+      - tests/unit/popup-checkbox.test.js
+    code_annotations:
+      - IMPL-POPUP_SESSION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-MESSAGE_HANDLING
+    composed_with:
+      - IMPL-MESSAGE_HANDLING
+  essence_pseudocode: |
+    INPUT: user actions (show overlay, toggle private, save, etc.); GET_OVERLAY_STATE fallback
+    OUTPUT: popup stays open; state and UI updated; no window.close
+    DATA: StateManager (overlay visible, bookmark, etc.); UIManager (button states, labels)
+
+    PopupController handler (e.g. handleShowHoverboard):
+      AWAIT send message (e.g. TOGGLE_OVERLAY)
+      StateManager.update(...); UIManager.updateShowHoverButtonState(...)
+      INLINE notification if needed; DO NOT call window.close
+
+    ON popup open: SEND GET_OVERLAY_STATE; SYNC state to StateManager and UIManager
+  detail_file: implementation-decisions/IMPL-POPUP_SESSION.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

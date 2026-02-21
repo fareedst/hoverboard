@@ -1,5 +1,5 @@
 /**
- * [TEST-OVERLAY_REFRESH] Overlay Refresh Button Unit Tests
+ * [TEST-OVERLAY_REFRESH] Overlay Refresh Button - [REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS]
  * 
  * Comprehensive unit tests for the overlay refresh button functionality
  * Tests button rendering, click handling, error scenarios, accessibility, and theme integration
@@ -65,8 +65,8 @@ const mockRefreshResponse = (mockMessageService, { bookmark, rawResponse, error 
   })
 }
 
-// [TEST-OVERLAY_REFRESH] Test suite for overlay refresh button
-describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
+// [REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Test suite for overlay refresh button
+describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh Button', () => {
   let overlayManager
   let mockMessageService
   let mockDocument

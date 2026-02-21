@@ -1,0 +1,64 @@
+IMPL-OVERLAY_TEST_HARNESS:
+  name: Overlay Test Harness Implementation
+  status: Active
+  cross_references:
+    - ARCH-OVERLAY_TESTABILITY
+    - REQ-OVERLAY_SYSTEM
+  rationale:
+    why: Mock DOM for deterministic overlay testing
+    problems_solved:
+      - Stale test registries
+      - Heavy DOM emulation
+    benefits:
+      - Lightweight tests
+      - Auto-registration
+  implementation_approach:
+    summary: Mock DOM with className/id auto-registration, classList/attribute hooks
+    details:
+      - Auto-register on property assignments
+      - classList operations tracking
+      - Lightweight verification
+  code_locations:
+    files:
+      - path: tests/utils/mock-dom.js
+        description: Mock DOM utilities
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-OVERLAY_TESTABILITY
+    requirements:
+      - REQ-OVERLAY_SYSTEM
+      - REQ-OVERLAY_CONTROL_LAYOUT
+    tests:
+      - tests/unit/overlay-test-debug.test.js
+      - tests/utils/overlay-test-harness.js
+      - tests/utils/mock-dom.js
+    code_annotations:
+      - IMPL-OVERLAY_TEST_HARNESS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-OVERLAY
+    composed_with:
+      - IMPL-OVERLAY
+  essence_pseudocode: |
+    INPUT: test setup (no real DOM); overlay manager create calls
+    OUTPUT: mock DOM with auto-registered className/id; classList/attribute operations trackable
+    DATA: mock element registry (by className, id); classList add/remove log
+
+    ON element creation / property assign (className, id):
+      REGISTER element in registry by className and id
+
+    classList.add/remove: RECORD operation for assertions
+
+    Test setup: CREATE mock document/body; INJECT overlay into mock; RUN show(); ASSERT registry and classList state
+  detail_file: implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

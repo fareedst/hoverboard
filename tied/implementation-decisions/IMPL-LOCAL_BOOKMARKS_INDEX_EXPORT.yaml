@@ -5,21 +5,32 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
     - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
   rationale:
-    why: See detail file
-    problems_solved: []
-    benefits: []
+    why: Implement export UI and download using existing in-memory data.
+    problems_solved:
+      - No export path for index data
+    benefits:
+      - Export controls in bookmarks-table; exportBookmarks(scope) for all, displayed, or selected; CSV with Storage column; programmatic download
   implementation_approach:
-    summary: See detail file
-    details: []
+    summary: Export controls in bookmarks-table toolbar; exportBookmarks(scope) with scope 'all', 'displayed', or 'selected'; serialize to CSV including Storage column; Blob + object URL + <a download> click; revoke URL.
+    details:
+      - 'bookmarks-table.js: exportBookmarks(scope); scope all -> allBookmarks, displayed -> filteredBookmarks, selected -> allBookmarks.filter(b => selectedUrls.has(b.url))'
+      - 'CSV: escape quotes, columns description, url, tags, time, storage (Local|File|Sync), shared, toread, extended; filename hoverboard-bookmarks-{scope}-{ISO date}.csv'
+      - 'updateExportButtonState() disables Export selected when selectedUrls.size === 0; called from updateMoveControlsState()'
   code_locations:
     files:
-      - src/ui/bookmarks-table/bookmarks-table.js
-      - src/ui/bookmarks-table/bookmarks-table-csv.js
+      - path: src/ui/bookmarks-table/bookmarks-table.html
+        description: Export all / Export displayed / Export selected buttons
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+        description: exportBookmarks(scope), CSV build, download trigger, updateExportButtonState
+      - path: src/ui/bookmarks-table/bookmarks-table-csv.js
+        description: buildCsv, escapeCsvField for export
     functions:
-      - exportBookmarks
-      - updateExportButtonState
-      - buildCsv
-      - escapeCsvField
+      - name: exportBookmarks
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: Exports given scope (all|displayed|selected) to CSV and triggers download
+      - name: updateExportButtonState
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: Enables/disables Export selected based on selection
   traceability:
     architecture:
       - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
@@ -29,31 +40,43 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
       - tests/unit/bookmarks-table-export.test.js
     code_annotations:
       - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
-      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
-      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
   related_decisions:
-    depends_on: []
+    depends_on:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
     supersedes: []
     see_also:
-      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
-      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    composed_with:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+  essence_pseudocode: |
+    INPUT: scope ('all' | 'displayed' | 'selected'), allBookmarks, filteredBookmarks, selectedUrls (set)
+    OUTPUT: CSV file download (Blob -> object URL -> <a download> click -> revoke)
+    DATA: CSV header + rows; columns description, url, tags, time, storage, shared, toread, extended
+
+    exportBookmarks(scope):
+      IF scope = 'all': source = allBookmarks
+      IF scope = 'displayed': source = filteredBookmarks
+      IF scope = 'selected': source = allBookmarks FILTER url IN selectedUrls
+      csvString = buildCsv(source)   // header row + one row per bookmark; escape quotes; storage Local|File|Sync
+      filename = "hoverboard-bookmarks-{scope}-{ISO date}.csv"
+      blob = new Blob([csvString]); url = createObjectURL(blob)
+      trigger <a download=filename href=url> click; revokeObjectURL(url)
+
+    updateExportButtonState():
+      DISABLE "Export selected" when selectedUrls.size === 0
+      DISABLE "Export displayed" when filteredBookmarks.length === 0
+      DISABLE "Export all" when allBookmarks.length === 0
+      (called when selection or filter changes, e.g. from updateMoveControlsState)
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  annotations: Use [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT], [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT], [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] in HTML/CSS/JS comments.
-  cross-references: ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT, REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
-  logic: 'In bookmarks-table.js, `exportBookmarks(scope)` where scope is `''all''`, `''displayed''`, or `''selected''`. For all: use `allBookmarks`; for displayed: use `filteredBookmarks`; for selected: use `allBookmarks.filter(b => selectedUrls.has(b.url))`. Serialize to CSV (escape quotes, columns: description, url, tags, time, storage (Local | File | Sync), shared, toread, extended); filename `hoverboard-bookmarks-{scope}-{ISO date}.csv`; Blob, object URL, programmatic click on `<a download>`, revoke URL. `updateExportButtonState()` disables Export selected when `selectedUrls.size === 0`; called from `updateMoveControlsState()` so selection changes update it.'
-  related:
-    - IMPL-LOCAL_BOOKMARKS_INDEX (index page this export extends)
-    - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT, REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
-  ui: 'Export and Move controls are in an **actions-below-table** block below the bookmarks table (compact header above). Export row: three buttons — "Export all", "Export displayed", "Export selected". Export selected enabled only when at least one bookmark is selected. Buttons disabled when the corresponding scope has zero bookmarks.'

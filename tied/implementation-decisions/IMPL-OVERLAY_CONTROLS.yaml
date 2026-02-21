@@ -1,0 +1,74 @@
+IMPL-OVERLAY_CONTROLS:
+  name: Overlay Control Layout Implementation
+  status: Active
+  cross_references:
+    - ARCH-OVERLAY_CONTROLS
+    - REQ-OVERLAY_CONTROL_LAYOUT
+  rationale:
+    why: Deterministic control placement
+    problems_solved:
+      - Positioning inconsistency
+      - Accessibility gaps
+    benefits:
+      - Predictable layout
+      - Full accessibility
+  implementation_approach:
+    summary: Helper functions with inline styles, theme variables, ARIA metadata
+    details:
+      - Fixed absolute positioning
+      - 24px min touch targets
+      - Theme CSS variables
+      - ARIA metadata
+      - Keyboard handlers
+  code_locations:
+    files:
+      - path: src/features/content/overlay-manager.js
+        description: Overlay manager
+    functions:
+      - name: createCloseButton
+        file: src/features/content/overlay-manager.js
+        description: Close control creator
+      - name: createRefreshButton
+        file: src/features/content/overlay-manager.js
+        description: Refresh control creator
+  traceability:
+    architecture:
+      - ARCH-OVERLAY_CONTROLS
+    requirements:
+      - REQ-OVERLAY_CONTROL_LAYOUT
+    tests:
+      - tests/unit/overlay-refresh-button.test.js
+      - tests/unit/overlay-refresh-accessibility.test.js
+      - tests/unit/overlay-close-button-positioning.test.js
+    code_annotations:
+      - IMPL-OVERLAY_CONTROLS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-OVERLAY
+    composed_with:
+      - IMPL-OVERLAY
+  essence_pseudocode: |
+    INPUT: parent element; theme CSS variables; callback (close/refresh)
+    OUTPUT: control elements with fixed position, min 24px touch target, ARIA, keyboard handlers
+    DATA: inline styles (position absolute); theme vars for colors; ARIA labels/roles
+
+    createCloseButton():
+      CREATE button; SET position, size (min 24px); SET aria-label
+      APPLY theme vars; ATTACH click -> callback; ATTACH key (Escape)
+      RETURN element
+
+    createRefreshButton():
+      CREATE button; SET position, size; SET aria-label
+      APPLY theme vars; ATTACH click -> callback
+      RETURN element
+  detail_file: implementation-decisions/IMPL-OVERLAY_CONTROLS.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

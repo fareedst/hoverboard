@@ -1,6 +1,6 @@
 /**
- * Tag Synchronization Tests
- * Tests for the tag synchronization feature between popup and overlay
+ * Tag synchronization - [IMPL-TAG_SYSTEM] [IMPL-BOOKMARK_STATE_SYNC] [ARCH-TAG_SYSTEM]
+ * Tests for tag sync between popup and overlay.
  */
 
 import { MessageHandler } from '../../src/core/message-handler.js'
@@ -31,7 +31,7 @@ jest.mock('../../src/config/config-service.js', () => {
   }
 })
 
-describe('Tag Synchronization', () => {
+describe('[IMPL-TAG_SYSTEM] [IMPL-BOOKMARK_STATE_SYNC] Tag Synchronization', () => {
   let messageHandler
   let popupController
   let overlayManager

@@ -1,40 +1,68 @@
-# [IMPL-LOGGER_CONTEXT_LEVELS] Structured logging context and levels (LOG-001)
-name: Logger Context and Levels
-status: Active
-cross_references:
-  - REQ-STRUCTURED_LOGGING
-  - ARCH-STRUCTURED_LOGGING
-rationale:
-  why: Logger class with context, shouldLog, formatMessage, debug/info/warn/error; default logger and createLogger
-  problems_solved: []
-  benefits: []
-implementation_approach:
-  summary: src/shared/logger.js — Logger(context), shouldLog, formatMessage, debug/info/warn/error; logger, createLogger
-  details: []
-code_locations:
-  files:
-    - path: src/shared/logger.js
-      description: Logger class, logger, createLogger
-  functions: []
-traceability:
-  architecture:
-    - ARCH-STRUCTURED_LOGGING
-  requirements:
+IMPL-LOGGER_CONTEXT_LEVELS:
+  name: Logger Context and Levels
+  status: Active
+  cross_references:
     - REQ-STRUCTURED_LOGGING
-  code_annotations:
-    - IMPL-LOGGER_CONTEXT_LEVELS
-related_decisions:
-  depends_on: []
-  supersedes: []
-  see_also:
-    - IMPL-LOG_LEVEL_CONFIG
-    - IMPL-LOGGER_LEGACY
-detail_file: implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml
-metadata:
-  created:
-    date: "2026-02-17"
-    author: AI Agent
-  last_updated:
-    date: "2026-02-17"
-    author: AI Agent
-    reason: Numbered token reinterpretation (LOG-001)
+    - ARCH-STRUCTURED_LOGGING
+  rationale:
+    why: Logger class with context, shouldLog, formatMessage, debug/info/warn/error; default logger and createLogger.
+    problems_solved: []
+    benefits:
+      - Structured log lines with context; level filtering via shouldLog
+  implementation_approach:
+    summary: src/shared/logger.js — Logger(context), shouldLog, formatMessage, debug/info/warn/error; logger, createLogger.
+    details:
+      - 'Logger(context): holds context string; shouldLog(level) compares level to getLogLevel()'
+      - 'formatMessage(level, ...args): prefix with context and level'
+      - 'debug/info/warn/error(...): if shouldLog(level) then emit formatMessage output'
+      - 'logger = default instance; createLogger(context) returns new Logger'
+  code_locations:
+    files:
+      - path: src/shared/logger.js
+        description: Logger class, logger, createLogger
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-STRUCTURED_LOGGING
+    requirements:
+      - REQ-STRUCTURED_LOGGING
+    tests: []
+    code_annotations:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-LOG_LEVEL_CONFIG
+      - IMPL-LOGGER_LEGACY
+    composed_with:
+      - IMPL-LOG_LEVEL_CONFIG
+      - IMPL-LOGGER_LEGACY
+  essence_pseudocode: |
+    INPUT: context (string), level (debug|info|warn|error), message/args
+    OUTPUT: formatted log line to console (or transport); no return
+    DATA: Logger instance; getLogLevel() from IMPL-LOG_LEVEL_CONFIG
+
+    Logger(context):
+      this.context = context
+
+    shouldLog(level):
+      minLevel = getLogLevel()
+      RETURN level >= minLevel (by severity order)
+
+    formatMessage(level, ...args):
+      RETURN "[context] level: args..." or structured format
+
+    debug(...), info(...), warn(...), error(...):
+      IF shouldLog(level): OUTPUT formatMessage(level, ...args)
+
+    logger = default Logger; createLogger(context) = new Logger(context).
+  detail_file: implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Canonical YAML rewrite; add root key, essence_pseudocode, composed_with

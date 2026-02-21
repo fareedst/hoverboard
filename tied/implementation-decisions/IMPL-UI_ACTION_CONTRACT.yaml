@@ -1,0 +1,54 @@
+IMPL-UI_ACTION_CONTRACT:
+  name: UI Action Contract
+  status: Active
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+  rationale:
+    why: Single source of truth for message types and popup/overlay action IDs for tests and inspector
+    problems_solved:
+      - Scattered message type and action definitions
+    benefits:
+      - Tests and E2E use same contract
+  implementation_approach:
+    summary: src/shared/ui-action-contract.js re-exports MESSAGE_TYPES; exports POPUP_ACTION_IDS, POPUP_ACTION_TO_MESSAGE, CONTENT_MESSAGE_TYPES, OVERLAY_ACTION_IDS
+  code_locations:
+    files:
+      - path: src/shared/ui-action-contract.js
+        description: UI action contract
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    requirements:
+      - REQ-UI_INSPECTION
+    tests: []
+    code_annotations:
+      - IMPL-UI_ACTION_CONTRACT
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with:
+      - IMPL-UI_INSPECTOR
+      - IMPL-UI_TESTABILITY_HOOKS
+  essence_pseudocode: |
+    INPUT: none (static contract)
+    OUTPUT: exported constants MESSAGE_TYPES, POPUP_ACTION_IDS, POPUP_ACTION_TO_MESSAGE, CONTENT_MESSAGE_TYPES, OVERLAY_ACTION_IDS
+    DATA: single module src/shared/ui-action-contract.js
+
+    LOAD contract:
+      RE-EXPORT MESSAGE_TYPES from message layer
+      EXPORT POPUP_ACTION_IDS (e.g. save, toggle-overlay)
+      EXPORT POPUP_ACTION_TO_MESSAGE (actionId -> message type)
+      EXPORT CONTENT_MESSAGE_TYPES, OVERLAY_ACTION_IDS
+    Tests and E2E IMPORT from this module; same IDs for send/assert
+  detail_file: implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

@@ -1,5 +1,6 @@
 /**
- * ErrorHandler - Centralized error handling for the extension
+ * ErrorHandler [IMPL-ERROR_HANDLING] [ARCH-ERROR_HANDLING]
+ * Centralized error handling for the extension.
  */
 
 export class ErrorHandler {

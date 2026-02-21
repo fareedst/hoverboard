@@ -1,6 +1,6 @@
 /**
- * Tag Renderer Module
- * Handles visual representation and interaction for different types of tags
+ * Tag Renderer Module [IMPL-TAG_SYSTEM] [IMPL-URL_TAGS_DISPLAY] [ARCH-TAG_SYSTEM]
+ * Handles visual representation and interaction for different types of tags.
  */
 
 class TagRenderer {

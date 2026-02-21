@@ -1,4 +1,6 @@
-// [OVERLAY-CLOSE-POSITION-TEST-001] Test suite for overlay close button positioning
+/**
+ * [OVERLAY-CLOSE-POSITION-TEST-001] Overlay close button positioning - [REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS]
+ */
 import { OverlayManager } from '../../src/features/content/overlay-manager.js'
 
 // Mock document and message service for testing
@@ -150,7 +152,7 @@ const createMockBookmarkContent = () => ({
 })
 
 // [OVERLAY-CLOSE-POSITION-TEST-001] Test suite for overlay close button positioning
-describe('[OVERLAY-CLOSE-POSITION-001] Overlay Close Button Positioning', () => {
+describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close Button Positioning', () => {
   let overlayManager
   let mockMessageService
   let mockDocument

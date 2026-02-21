@@ -1,4 +1,6 @@
-// [IMMUTABLE-REQ-TAG-001] - Tag Recent Tracking Tests
+/**
+ * [IMMUTABLE-REQ-TAG-001] Tag recent tracking - [REQ-RECENT_TAGS_SYSTEM] [IMPL-TAG_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH]
+ */
 import { TagService } from '../../src/features/tagging/tag-service.js'
 
 // [IMMUTABLE-REQ-TAG-001] - Mock chrome storage
@@ -39,7 +41,7 @@ global.chrome = {
   storage: mockChromeStorage
 }
 
-describe('Tag Recent Tracking [IMMUTABLE-REQ-TAG-001]', () => {
+describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-TAG_SYSTEM] Tag Recent Tracking', () => {
   let tagService
 
   beforeEach(() => {

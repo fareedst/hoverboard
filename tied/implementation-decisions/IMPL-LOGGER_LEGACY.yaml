@@ -1,40 +1,59 @@
-# [IMPL-LOGGER_LEGACY] Legacy logging compatibility (LOG-003)
-name: Logger Legacy Compatibility
-status: Active
-cross_references:
-  - REQ-STRUCTURED_LOGGING
-  - ARCH-STRUCTURED_LOGGING
-rationale:
-  why: log(context, ...args) and noisy export for gradual migration from legacy debug/console
-  problems_solved: []
-  benefits: []
-implementation_approach:
-  summary: src/shared/logger.js — log() maps to debug; export noisy
-  details: []
-code_locations:
-  files:
-    - path: src/shared/logger.js
-      description: log(), noisy
-  functions: []
-traceability:
-  architecture:
-    - ARCH-STRUCTURED_LOGGING
-  requirements:
+IMPL-LOGGER_LEGACY:
+  name: Logger Legacy Compatibility
+  status: Active
+  cross_references:
     - REQ-STRUCTURED_LOGGING
-  code_annotations:
-    - IMPL-LOGGER_LEGACY
-related_decisions:
-  depends_on: []
-  supersedes: []
-  see_also:
-    - IMPL-LOGGER_CONTEXT_LEVELS
-    - IMPL-LOG_LEVEL_CONFIG
-detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
-metadata:
-  created:
-    date: "2026-02-17"
-    author: AI Agent
-  last_updated:
-    date: "2026-02-17"
-    author: AI Agent
-    reason: Numbered token reinterpretation (LOG-003)
+    - ARCH-STRUCTURED_LOGGING
+  rationale:
+    why: log(context, ...args) and noisy export for gradual migration from legacy debug/console.
+    problems_solved: []
+    benefits:
+      - Existing call sites keep working; noisy for temporary debug
+  implementation_approach:
+    summary: src/shared/logger.js — log() maps to debug; export noisy.
+    details:
+      - 'log(context, ...args): equivalent to logger.debug or createLogger(context).debug(...)'
+      - 'noisy: same as log but always emitted (or high verbosity) for migration debugging'
+  code_locations:
+    files:
+      - path: src/shared/logger.js
+        description: log(), noisy
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-STRUCTURED_LOGGING
+    requirements:
+      - REQ-STRUCTURED_LOGGING
+    tests: []
+    code_annotations:
+      - IMPL-LOGGER_LEGACY
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOG_LEVEL_CONFIG
+    composed_with:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOG_LEVEL_CONFIG
+  essence_pseudocode: |
+    INPUT: context (string), ...args (message or interpolated values)
+    OUTPUT: log line to console
+    DATA: log and noisy in same logger module
+
+    log(context, ...args):
+      CALL default logger.debug or createLogger(context).debug(...args)
+      (Same as Logger.debug so level filtering applies)
+
+    noisy(context, ...args):
+      EMIT log line regardless of level (or at debug)
+      Used for temporary migration/debug; can be removed when call sites use Logger directly.
+  detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Canonical YAML rewrite; add root key, essence_pseudocode, composed_with

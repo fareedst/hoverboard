@@ -1,27 +1,83 @@
 IMPL-LOCAL_BOOKMARK_SERVICE:
   name: Local Bookmark Service
   status: Active
-  cross_references: []
+  cross_references:
+    - REQ-STORAGE_MODE_DEFAULT
+    - ARCH-LOCAL_STORAGE_PROVIDER
+    - ARCH-STORAGE
   rationale:
-    why: See detail file
-    problems_solved: []
-    benefits: []
+    why: Implement bookmark provider contract using chrome.storage.local for local-only mode; no local storage existed before.
+    problems_solved:
+      - No implementation for storing bookmarks locally without the Pinboard API
+    benefits:
+      - Same provider contract as PinboardService; default storage mode is local; TagService integration for recent-tag tracking
+      - Bookmarks keyed by URL in hoverboard_local_bookmarks; recent by time sort
   implementation_approach:
-    summary: See detail file
-    details: []
+    summary: LocalBookmarkService class in src/features/storage/local-bookmark-service.js; TagService integration for tag tracking.
+    details:
+      - 'Default provider is local (ConfigManager getDefaultConfiguration().storageMode local)'
+      - 'Storage key: hoverboard_local_bookmarks (object keyed by URL)'
+      - Normalized bookmark shape matches PinboardService (url, description, extended, tags, time, shared, toread, hash)
+      - trackBookmarkTags and extractTagsFromBookmarkData for recent-tag integration
   code_locations:
-    files: []
+    files:
+      - path: src/features/storage/local-bookmark-service.js
+        description: LocalBookmarkService implementation
     functions: []
   traceability:
-    architecture: []
-    requirements: []
+    architecture:
+      - ARCH-LOCAL_STORAGE_PROVIDER
+      - ARCH-STORAGE
+    requirements:
+      - REQ-STORAGE_MODE_DEFAULT
     tests: []
     code_annotations:
       - IMPL-LOCAL_BOOKMARK_SERVICE
   related_decisions:
-    depends_on: []
+    depends_on:
+      - ARCH-LOCAL_STORAGE_PROVIDER
     supersedes: []
-    see_also: []
+    see_also:
+      - ARCH-STORAGE
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-STORAGE_INDEX
+  essence_pseudocode: |
+    INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
+    OUTPUT: bookmark object or list of bookmarks or success/error; shape matches provider contract
+    DATA: storage key = hoverboard_local_bookmarks; value = object keyed by normalized URL -> bookmark
+
+    LOAD bookmarks:
+      READ from storage under key
+      RETURN parsed object (or {} if missing)
+
+    getBookmarkForUrl(url):
+      bookmarks = LOAD bookmarks
+      urlNorm = normalize(url)
+      RETURN bookmarks[urlNorm] or null
+
+    saveBookmark(data):
+      bookmarks = LOAD bookmarks
+      urlNorm = normalize(data.url)
+      bookmarks[urlNorm] = merge(data into bookmark shape with url, description, extended, tags, time, shared, toread, hash)
+      PERSIST bookmarks to storage under key
+      RETURN { success: true }
+
+    deleteBookmark(url):
+      bookmarks = LOAD bookmarks
+      REMOVE bookmarks[normalize(url)]
+      PERSIST bookmarks to storage
+      RETURN { success: true }
+
+    saveTag(data), deleteTag(data):
+      bookmark = getBookmarkForUrl(data.url); update tags; saveBookmark(bookmark) or equivalent
+      RETURN { success: true }
+
+    getRecentBookmarks(count):
+      bookmarks = LOAD bookmarks
+      list = values(bookmarks)
+      SORT list BY time DESCENDING
+      RETURN list[0..count-1]
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml
   metadata:
     created:
@@ -35,13 +91,3 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  cross-references: ARCH-LOCAL_STORAGE_PROVIDER, ARCH-STORAGE
-  file: '`src/features/storage/local-bookmark-service.js`'
-  problem: No implementation existed for storing bookmarks locally without the Pinboard API.
-  related:
-    - ARCH-LOCAL_STORAGE_PROVIDER (strategy and config)
-    - ARCH-STORAGE (chrome.storage.local usage)
-  solution: 'New class in `src/features/storage/local-bookmark-service.js` with methods: `getBookmarkForUrl`, `getRecentBookmarks`, `saveBookmark`, `deleteBookmark`, `saveTag`, `deleteTag`, `testConnection`, plus `trackBookmarkTags` and `extractTagsFromBookmarkData` for TagService integration. Return shapes match PinboardService (e.g. `{ success, code, message }` for save/delete; bookmark object with `url`, `description`, `extended`, `tags`, `time`, `shared`, `toread`, `hash`).'
-  storage_key: '`hoverboard_local_bookmarks` (object: URL -> bookmark).'
-  summary: '`LocalBookmarkService` implements the same bookmark provider contract as `PinboardService`, backed by `chrome.storage.local` under the key `hoverboard_local_bookmarks`. The default storage mode is local; Pinboard is selectable in Options. Bookmark records are stored as an object keyed by normalized URL for O(1) lookup; recent bookmarks are derived by sorting by `time` descending.'
-  tag_integration: Constructor accepts optional `TagService`; same pattern as PinboardService for recent-tag tracking after save.

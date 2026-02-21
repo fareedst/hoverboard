@@ -1,47 +1,65 @@
 IMPL-RECENT_TAGS_POPUP_REFRESH:
   name: Recent Tags refresh on every popup display
   status: Active
-  cross_references: []
+  cross_references:
+    - REQ-RECENT_TAGS_SYSTEM
+    - ARCH-POPUP_SESSION
   rationale:
-    why: See detail file
-    problems_solved: []
+    why: In reused popup documents the Recent Tags list might not refresh when popup is shown again; users expect list to reflect shared service-worker state every time. Fix: refresh on visibility change when popup becomes visible and initialized.
+    problems_solved:
+      - Stale Recent Tags list when popup is reopened without full reload
     benefits: []
   implementation_approach:
-    summary: See detail file
+    summary: setupAutoRefresh() adds document visibilitychange listener; when document.visibilityState === 'visible' and controller initialized and !isLoading, call loadRecentTags() so UI reflects recentTagsMemory every time popup is displayed.
     details: []
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: src/ui/popup/PopupController.js
+        description: setupAutoRefresh, loadRecentTags on visibilitychange
+    functions:
+      - name: setupAutoRefresh
+        file: src/ui/popup/PopupController.js
+        description: Adds visibilitychange listener that invokes loadRecentTags() when visible and initialized
   traceability:
-    architecture: []
-    requirements: []
-    tests: []
+    architecture:
+      - ARCH-POPUP_SESSION
+    requirements:
+      - REQ-RECENT_TAGS_SYSTEM
+    tests:
+      - tests/unit/tag-recent-behavior.test.js
+      - tests/unit/tag-recent-tracking.test.js
     code_annotations:
       - IMPL-RECENT_TAGS_POPUP_REFRESH
   related_decisions:
     depends_on: []
     supersedes: []
     see_also: []
+    composed_with: []
+  essence_pseudocode: |
+    INPUT: none (event-driven)
+    OUTPUT: void (side effect — UI updated with latest recent tags)
+    DATA: document.visibilityState; controller initialized flag; isLoading guard; loadRecentTags() (fetches from service worker recentTagsMemory)
+
+    setupAutoRefresh():
+      REGISTER document.addEventListener("visibilitychange", handler)
+
+    handler():
+      IF document.visibilityState !== "visible" THEN RETURN
+      IF NOT controller.initialized OR controller.isLoading THEN RETURN
+      loadRecentTags()
+      (UI updates from returned data)
+
+    effect: Every time popup document becomes visible (e.g. user reopens popup), Recent Tags list is refreshed so tags saved in one window appear when popup is shown in this or another window.
   detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  cross-references: REQ-RECENT_TAGS_SYSTEM, ARCH-POPUP_SESSION
-  file: '`src/ui/popup/PopupController.js`'
-  function: '`setupAutoRefresh()` — adds `document.addEventListener(''visibilitychange'', ...)` that invokes `this.loadRecentTags()` when visible and initialized (with `!this.isLoading` guard).'
-  problem: In environments where the popup document is reused (e.g. without a full reload), the Recent Tags list might not be refreshed when the popup is shown again. Users expect the list to reflect the shared service-worker state every time they see the popup.
-  related:
-    - REQ-RECENT_TAGS_SYSTEM (recent tags behavior)
-    - ARCH-POPUP_SESSION (popup lifecycle)
-    - IMMUTABLE-REQ-TAG-003 (user-driven recent tags; referenced in code comments)
-  solution: Register a `visibilitychange` listener in `PopupController.setupAutoRefresh()`. When `document.visibilityState === 'visible'` and the controller is initialized and not loading, call `loadRecentTags()` so the UI is updated from the service worker’s `recentTagsMemory`.
-  summary: The Recent Tags list is refreshed whenever the popup document becomes visible by listening for `document.visibilitychange` and calling `loadRecentTags()` when the document is visible and the popup is initialized. This ensures tags saved in one browser window appear in the Recent Tags list when the popup is displayed in this or any other window.

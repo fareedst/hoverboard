@@ -1,55 +1,71 @@
 IMPL-BADGE_REFRESH:
-  name: IMPL-BADGE_REFRESH
+  name: Badge refresh on overlay and popup changes
   status: Active
   cross_references:
     - ARCH-BADGE
     - REQ-BADGE_INDICATORS
   rationale:
-    why: See detail file
-    problems_solved: []
-    benefits: []
+    why: Badge must reflect tag count and private/toread flags as soon as user changes them in overlay or popup.
+    problems_solved:
+      - Badge not updating after overlay tag add/remove
+      - Badge not updating after overlay or popup private/toread toggle
+    benefits:
+      - Immediate visual feedback
+      - Consistent state across icon, overlay, and popup
   implementation_approach:
-    summary: See detail file
-    details: []
+    summary: Service worker refreshes badge after saveTag, deleteTag, and saveBookmark when message succeeds.
+    details:
+      - 'Chrome: in handleMessage, after processMessage success, if message type is saveTag, deleteTag, or saveBookmark, resolve tab (sender.tab when present; for saveBookmark with no sender tab, query active tab) and call updateBadgeForTab(tab)'
+      - 'Safari: same logic in safari service worker with string literals saveTag, deleteTag, saveBookmark and chrome.tabs.query for active tab'
+      - Covers overlay-originated and popup-originated changes
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: src/core/service-worker.js
+        description: Chrome service worker handleMessage badge refresh after saveTag/deleteTag/saveBookmark
+      - path: safari/src/core/service-worker.js
+        description: Safari service worker handleMessage badge refresh
+    functions:
+      - name: handleMessage
+        file: src/core/service-worker.js
+        description: After processMessage success for saveTag/deleteTag/saveBookmark, resolve tab and call updateBadgeForTab
   traceability:
     architecture:
       - ARCH-BADGE
     requirements:
       - REQ-BADGE_INDICATORS
-    tests: []
+    tests:
+      - tests/unit/badge-refresh-service-worker.test.js
     code_annotations:
       - IMPL-BADGE_REFRESH
-      - ARCH-BADGE
-      - REQ-BADGE_INDICATORS
   related_decisions:
     depends_on: []
     supersedes: []
     see_also:
-      - ARCH-BADGE
-      - REQ-BADGE_INDICATORS
+      - IMPL-BOOKMARK_STATE_SYNC
+    composed_with:
+      - IMPL-MESSAGE_HANDLING
+      - IMPL-BOOKMARK_ROUTER
+  essence_pseudocode: |
+    INPUT: message result (after processMessage) with type saveTag | deleteTag | saveBookmark
+    OUTPUT: badge updated for the affected tab (icon label and optional private/toread indicators)
+    DATA: handleMessage in service worker; updateBadgeForTab(tab)
+
+    AFTER processMessage(message) succeeds:
+      IF message.type IN [saveTag, deleteTag, saveBookmark]:
+        tab = sender.tab IF present
+        IF no tab AND message.type = saveBookmark: tab = query active tab
+        IF tab: updateBadgeForTab(tab)
+    (Chrome and Safari: same control flow; Safari uses string literals and tabs.query)
   detail_file: implementation-decisions/IMPL-BADGE_REFRESH.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  architecture: ARCH-BADGE.
-  benefits: Immediate visual feedback; consistent state across icon, overlay, and popup.
-  chrome: '([src/core/service-worker.js](../../src/core/service-worker.js)): In `handleMessage`, after a successful `processMessage`, if the message type is `saveTag`, `deleteTag`, or `saveBookmark`, resolve the tab (use `sender.tab` when present; for `saveBookmark` when sender has no tab, query active tab) and call `updateBadgeForTab(tab)`.'
-  cross-references: '[ARCH-BADGE](../architecture-decisions/ARCH-BADGE.md), [REQ-BADGE_INDICATORS](../requirements/REQ-BADGE_INDICATORS.md)'
-  problems_solved: Badge not updating after overlay tag add/remove; badge not updating after overlay or popup private/to-read toggle.
-  requirements: REQ-BADGE_INDICATORS (badge refreshes on tag and private/toread changes).
-  safari: '([safari/src/core/service-worker.js](../../safari/src/core/service-worker.js)): Same logic using string literals `''saveTag''`, `''deleteTag''`, `''saveBookmark''` and `chrome.tabs.query` for active tab.'
-  summary: The extension badge (icon label showing tag count and optional private/toread indicators) must refresh as soon as the user changes bookmark state from the overlay or popup. This implementation records how the service worker triggers a badge update after handling `saveTag`, `deleteTag`, and `saveBookmark` messages.
-  tests: '[tests/unit/badge-refresh-service-worker.test.js](../../tests/unit/badge-refresh-service-worker.test.js).'
-  why: Users expect the toolbar icon to reflect the current bookmark state without switching tabs or reloading.

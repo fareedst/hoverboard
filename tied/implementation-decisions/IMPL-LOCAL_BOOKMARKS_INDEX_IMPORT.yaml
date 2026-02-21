@@ -9,23 +9,28 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     problems_solved:
       - No import UI or parsing for index page
     benefits:
-      - Hidden file input + Import button; two radios (Only new / Overwrite existing); Import to dropdown (Local | File | Sync)
-      - parseCsv in bookmarks-table-csv.js matches export format (quoted fields, "" escape); JSON parsed and normalized (url required, tags array, shared/toread yes/no)
-      - runImport: read file, parseImportFile(text, filename), filter by allBookmarks when only new, send saveBookmark per row with preferredBackend, loadBookmarks(), show "Imported N, skipped M, K failed"
+      - Hidden file input + Import button; Only new / Overwrite existing; Import to Local | File | Sync; parseCsv and JSON; saveBookmark per row; result message
   implementation_approach:
-    summary: Import row in .actions-below-table; parseCsv and parseCsvLine in bookmarks-table-csv.js; normalizeJsonBookmark and parseImportFile in bookmarks-table.js; runImport on file input change; result in #import-result.
+    summary: Import row in actions-below-table; parseCsv in bookmarks-table-csv.js; file input + Import button; only new filters by allBookmarks; per-row saveBookmark with preferredBackend; loadBookmarks + result.
     details:
-      - CSV: parseCsv skips header (line starting with title,url), parseCsvLine handles quoted fields and ""; rows with empty URL skipped; Shared Private→no Yes→toread yes
-      - JSON: Array or single object; normalizeJsonBookmark returns null for empty url; tags normalized to array
-      - UI: Import button triggers file input click; file input accept=".csv,.json"; import result span with aria-live="polite"
+      - 'CSV: parseCsv skips header (title,url); parseCsvLine handles quoted fields and ""; rows with empty URL skipped; Shared/Private/toread normalized'
+      - 'JSON: array or single object; normalizeJsonBookmark returns null for empty url; tags to array'
+      - 'runImport: read file text; parseImportFile(text, filename) -> rows; if Only new filter rows where url NOT IN allBookmarks; for each row sendMessage saveBookmark({ ...row, preferredBackend }); count imported/skipped/failed; loadBookmarks(); show result in #import-result'
   code_locations:
     files:
-      - src/ui/bookmarks-table/bookmarks-table.html
-      - src/ui/bookmarks-table/bookmarks-table.js
-      - src/ui/bookmarks-table/bookmarks-table-csv.js
+      - path: src/ui/bookmarks-table/bookmarks-table.html
+        description: Import row (file input, button, radios, Import to dropdown)
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+        description: runImport, file change handler, parseImportFile, result message
+      - path: src/ui/bookmarks-table/bookmarks-table-csv.js
+        description: parseCsv for import
     functions:
-      - parseCsv
-      - runImport
+      - name: parseCsv
+        file: src/ui/bookmarks-table/bookmarks-table-csv.js
+        description: Parse CSV string to array of bookmark-like objects (export format)
+      - name: runImport
+        file: src/ui/bookmarks-table/bookmarks-table.js
+        description: Parse file, filter if only new, send saveBookmark per row, refresh, show result
   traceability:
     architecture:
       - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
@@ -35,31 +40,44 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
       - tests/unit/bookmarks-table-import.test.js
     code_annotations:
       - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
-      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
-      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
   related_decisions:
-    depends_on: []
+    depends_on:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
     supersedes: []
     see_also:
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+    composed_with:
       - IMPL-LOCAL_BOOKMARKS_INDEX
       - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - IMPL-BOOKMARK_ROUTER
+  essence_pseudocode: |
+    INPUT: file (CSV or JSON), mode (Only new | Overwrite), preferredBackend (Local | File | Sync), allBookmarks (existing set for "Only new")
+    OUTPUT: imported count, skipped count, failed count; refreshed table
+    DATA: rows = array of { url, description, tags, time, shared, toread, extended }; existingByUrl = set of url from allBookmarks
+
+    runImport(file):
+      text = read file as text
+      rows = parseImportFile(text, filename)   // CSV -> parseCsv; JSON -> normalize array; skip empty url
+      IF mode = "Only new": rows = rows FILTER url NOT IN existingByUrl
+      imported = 0; skipped = 0; failed = 0
+      FOR each row IN rows:
+        payload = { ...row, preferredBackend }
+        response = SEND saveBookmark(payload)
+        IF response.success: imported++
+        ELSE IF skipped (e.g. duplicate): skipped++
+        ELSE: failed++
+      loadBookmarks()   // refresh table
+      SHOW "Imported N, skipped M, K failed" in #import-result
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: '2026-02-20'
       author: AI Agent
-      reason: New implementation for import UX
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
       date: '2026-02-18'
       validator: AI Agent
       result: pass
-  annotations: Use [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT], [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT], [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] in HTML/JS comments.
-  cross-references: ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT, REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
-  logic: 'In bookmarks-table.js: hidden file input (accept .csv,.json); Import button triggers click on file input. On file change: read file text; if .json parse as array of bookmark objects; if .csv use parseCsv() from bookmarks-table-csv.js. Map each row to { url, description, tags, time, shared, toread, extended, preferredBackend }. If "Import only new", filter to rows whose url is not in allBookmarks. For each record send chrome.runtime.sendMessage({ type: "saveBookmark", data }). Count imported, skipped, failed; call loadBookmarks(); show result in UI (e.g. span or temporary message).'
-  ui: 'In .actions-below-table: Import row with hidden <input type="file" accept=".csv,.json">, "Import" button, two radios "Only new" / "Overwrite existing", optional "Import to: Local | File | Sync" dropdown. Result message (e.g. "Imported 12, skipped 3" or error).'
-  related:
-    - IMPL-LOCAL_BOOKMARKS_INDEX (index page this import extends)
-    - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT, REQ-LOCAL_BOOKMARKS_INDEX_IMPORT

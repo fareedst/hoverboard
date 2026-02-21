@@ -1,40 +1,78 @@
-# [IMPL-FEATURE_FLAGS] Feature flags, UI behavior, settings persistence (CFG-003)
-name: Feature Flags and Settings
-status: Active
-cross_references:
-  - REQ-CONFIG_PORTABILITY
-  - ARCH-CONFIG_STRUCTURE
-rationale:
-  why: Default config with feature flags, UI behavior, badge settings; first-run init; getConfigForUI; updateConfig; getSettings/setSettings; resetToDefaults
-  problems_solved: []
-  benefits: []
-implementation_approach:
-  summary: getDefaultConfiguration(); ensureDefaults(); getConfigForUI(); updateConfig(); getSettings/setSettings with error handling; resetToDefaults
-  details: []
-code_locations:
-  files:
-    - path: src/config/config-manager.js
-      description: Defaults, getConfigForUI, updateConfig, getSettings, setSettings, resetToDefaults
-  functions: []
-traceability:
-  architecture:
-    - ARCH-CONFIG_STRUCTURE
-  requirements:
+IMPL-FEATURE_FLAGS:
+  name: Feature Flags and Settings
+  status: Active
+  cross_references:
     - REQ-CONFIG_PORTABILITY
-  code_annotations:
-    - IMPL-FEATURE_FLAGS
-related_decisions:
-  depends_on: []
-  supersedes: []
-  see_also:
-    - IMPL-CONFIG_BACKUP_RESTORE
-    - IMPL-CONFIG_MIGRATION
-detail_file: implementation-decisions/IMPL-FEATURE_FLAGS.yaml
-metadata:
-  created:
-    date: "2026-02-17"
-    author: AI Agent
-  last_updated:
-    date: "2026-02-17"
-    author: AI Agent
-    reason: Numbered token reinterpretation (CFG-003)
+    - ARCH-CONFIG_STRUCTURE
+  rationale:
+    why: Default config with feature flags, UI behavior, badge settings; first-run init; getConfigForUI; updateConfig; getSettings/setSettings; resetToDefaults
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: getDefaultConfiguration(); ensureDefaults(); getConfigForUI(); updateConfig(); getSettings/setSettings with error handling; resetToDefaults
+    details: []
+  code_locations:
+    files:
+      - path: src/config/config-manager.js
+        description: Defaults, getConfigForUI, updateConfig, getSettings, setSettings, resetToDefaults
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-CONFIG_STRUCTURE
+    requirements:
+      - REQ-CONFIG_PORTABILITY
+    tests: []
+    code_annotations:
+      - IMPL-FEATURE_FLAGS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-CONFIG_BACKUP_RESTORE
+      - IMPL-CONFIG_MIGRATION
+    composed_with:
+      - IMPL-CONFIG_BACKUP_RESTORE
+      - IMPL-CONFIG_MIGRATION
+  essence_pseudocode: |
+    INPUT: config patch (updateConfig); key/value (setSettings); none (getters, reset)
+    OUTPUT: full config or UI-safe config (getConfigForUI); settings object (getSettings); void (setters, reset)
+    DATA: default configuration (feature flags, UI behavior, badge settings); persisted settings
+
+    getDefaultConfiguration():
+      RETURN static default config object (all feature flags and defaults)
+
+    ensureDefaults():
+      current = LOAD from storage
+      IF current missing or keys missing THEN MERGE getDefaultConfiguration() into current, PERSIST
+
+    getConfigForUI():
+      config = get full config (ensureDefaults applied)
+      RETURN subset or shape safe for UI (e.g. strip secrets)
+
+    updateConfig(patch):
+      current = LOAD config
+      MERGE patch into current
+      PERSIST current
+
+    getSettings():
+      TRY LOAD settings from storage
+      ON error RETURN defaults or empty
+      RETURN settings object
+
+    setSettings(settings):
+      VALIDATE or sanitize
+      PERSIST settings
+      ON error handle (e.g. log, throw)
+
+    resetToDefaults():
+      defaults = getDefaultConfiguration()
+      PERSIST defaults (overwrite)
+  detail_file: implementation-decisions/IMPL-FEATURE_FLAGS.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with

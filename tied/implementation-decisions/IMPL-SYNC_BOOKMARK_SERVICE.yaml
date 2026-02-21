@@ -1,0 +1,68 @@
+IMPL-SYNC_BOOKMARK_SERVICE:
+  name: Sync Bookmark Service
+  status: Active
+  cross_references:
+    - ARCH-STORAGE_INDEX_AND_ROUTER
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+  rationale:
+    why: Fourth storage backend using chrome.storage.sync; same provider contract as LocalBookmarkService
+    problems_solved: []
+    benefits:
+      - Sync across Chrome profile devices; quota ~100 KB documented
+  implementation_approach:
+    summary: SyncBookmarkService in src/features/storage/sync-bookmark-service.js; chrome.storage.sync key hoverboard_sync_bookmarks.
+  code_locations:
+    files:
+      - path: src/features/storage/sync-bookmark-service.js
+        description: SyncBookmarkService implementation
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+    requirements:
+      - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    tests: []
+    code_annotations:
+      - IMPL-SYNC_BOOKMARK_SERVICE
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-BOOKMARK_ROUTER
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-STORAGE_INDEX
+  essence_pseudocode: |
+    INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
+    OUTPUT: bookmark object or list of bookmarks or success/error; same provider contract as LocalBookmarkService
+    DATA: chrome.storage.sync key = hoverboard_sync_bookmarks; value = object keyed by URL -> bookmark (quota ~100 KB)
+
+    LOAD bookmarks:
+      READ from chrome.storage.sync under key
+      RETURN parsed object (or {} if missing)
+
+    getBookmarkForUrl(url):
+      bookmarks = LOAD bookmarks
+      RETURN bookmarks[normalize(url)] or null
+
+    saveBookmark(data):
+      bookmarks = LOAD bookmarks
+      bookmarks[normalize(data.url)] = merge(data into bookmark shape)
+      PERSIST bookmarks to chrome.storage.sync
+      RETURN { success: true }
+
+    deleteBookmark(url), saveTag(data), deleteTag(data):
+      UPDATE bookmarks; PERSIST; RETURN { success: true }
+
+    getRecentBookmarks(count):
+      list = values(LOAD bookmarks); SORT BY time DESCENDING; RETURN list[0..count-1]
+  detail_file: implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml
+  metadata:
+    created:
+      date: "2026-02-15"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

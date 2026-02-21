@@ -1,5 +1,5 @@
 /**
- * Unit tests for popup checkbox functionality
+ * Popup checkbox (show hover on page load) - [REQ-OVERLAY_AUTO_SHOW_CONTROL] [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION]
  * [SHOW-HOVER-CHECKBOX-TEST-001] through [SHOW-HOVER-CHECKBOX-TEST-003]
  */
 
@@ -131,7 +131,7 @@ global.chrome = {
   }
 }
 
-describe('Popup Checkbox Functionality', () => {
+describe('[REQ-OVERLAY_AUTO_SHOW_CONTROL] [IMPL-POPUP_SESSION] Popup Checkbox Functionality', () => {
   let popupController
   let configManager
   let uiManager

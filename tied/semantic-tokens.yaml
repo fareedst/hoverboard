@@ -2193,6 +2193,20 @@ IMPL-POPUP_THEME_CSS:
     registered: 2026-02-19
     last_updated: 2026-02-19
 
+IMPL-TAB_SEARCH_SERVICE:
+  type: IMPL
+  name: Tab Search Service Implementation
+  category: Search
+  status: Active
+  description: "TabSearchService: search tabs by title, navigate to next match with circular wrap; search history and continuation from last position"
+  cross_references:
+    - REQ-SEARCH_FUNCTIONALITY
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
 #
 # TOKEN-IDENTIFIER:
 #   type: REQ | ARCH | IMPL | TEST | PROC

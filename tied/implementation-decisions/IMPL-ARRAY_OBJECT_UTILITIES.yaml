@@ -1,39 +1,72 @@
-# [IMPL-ARRAY_OBJECT_UTILITIES] Array and object manipulation (UTIL-003)
-name: Array and Object Utilities
-status: Active
-cross_references:
-  - REQ-SHARED_UTILITIES
-  - ARCH-SHARED_UTILITIES
-rationale:
-  why: unique, chunk, compact; deepClone, isEmpty, pick for data processing and state
-  problems_solved: []
-  benefits: []
-implementation_approach:
-  summary: arrayUtils and objectUtils in src/shared/utils.js
-  details: []
-code_locations:
-  files:
-    - path: src/shared/utils.js
-      description: arrayUtils, objectUtils
-  functions: []
-traceability:
-  architecture:
-    - ARCH-SHARED_UTILITIES
-  requirements:
+IMPL-ARRAY_OBJECT_UTILITIES:
+  name: Array and Object Utilities
+  status: Active
+  cross_references:
     - REQ-SHARED_UTILITIES
-  code_annotations:
-    - IMPL-ARRAY_OBJECT_UTILITIES
-related_decisions:
-  depends_on: []
-  supersedes: []
-  see_also:
-    - IMPL-URL_UTILITIES
-detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
-metadata:
-  created:
-    date: "2026-02-17"
-    author: AI Agent
-  last_updated:
-    date: "2026-02-17"
-    author: AI Agent
-    reason: Numbered token reinterpretation (UTIL-003)
+    - ARCH-SHARED_UTILITIES
+  rationale:
+    why: unique, chunk, compact; deepClone, isEmpty, pick for data processing and state.
+    problems_solved: []
+    benefits:
+      - Dedupe and partition arrays; copy and subset objects for safe state updates
+  implementation_approach:
+    summary: arrayUtils and objectUtils in src/shared/utils.js.
+    details:
+      - 'arrayUtils: unique(arr) dedupes; chunk(arr, size) splits into size-sized arrays; compact(arr) removes falsy'
+      - 'objectUtils: deepClone(obj) deep copy; isEmpty(obj) true if no enumerable keys; pick(obj, keys) subset of object'
+  code_locations:
+    files:
+      - path: src/shared/utils.js
+        description: arrayUtils, objectUtils
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    requirements:
+      - REQ-SHARED_UTILITIES
+    tests: []
+    code_annotations:
+      - IMPL-ARRAY_OBJECT_UTILITIES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-URL_UTILITIES
+    composed_with:
+      - IMPL-URL_UTILITIES
+  essence_pseudocode: |
+    INPUT: array or object; optional keys (for pick), size (for chunk)
+    OUTPUT: transformed array or object; no mutation of inputs
+    DATA: pure functions; same file as urlUtils, textUtils
+
+    unique(arr):
+      RETURN array of distinct elements (order preserved or by first occurrence)
+
+    chunk(arr, size):
+      SPLIT arr into subarrays of length size; last chunk may be shorter
+      RETURN array of chunks
+
+    compact(arr):
+      RETURN array with falsy elements removed (false, null, undefined, 0, "", NaN)
+
+    deepClone(obj):
+      RETURN deep copy of obj (nested objects/arrays copied recursively)
+
+    isEmpty(obj):
+      IF obj is null or undefined: RETURN true
+      FOR each enumerable key: IF any exists RETURN false
+      RETURN true
+
+    pick(obj, keys):
+      result = {}
+      FOR each key IN keys: IF obj[key] present THEN result[key] = obj[key]
+      RETURN result
+  detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Canonical YAML rewrite; add root key, essence_pseudocode, composed_with

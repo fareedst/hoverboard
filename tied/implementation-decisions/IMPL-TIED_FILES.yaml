@@ -1,0 +1,75 @@
+IMPL-TIED_FILES:
+  name: TIED File Creation
+  status: Active
+  cross_references:
+    - ARCH-TIED_STRUCTURE
+    - REQ-TIED_SETUP
+  rationale:
+    why: Implements ARCH-TIED_STRUCTURE and realizes REQ-TIED_SETUP by creating the foundational TIED directory structure and files
+    problems_solved:
+      - Manual setup of TIED structure is error-prone
+      - Inconsistent project structure across implementations
+      - Missing required TIED files and directories
+    benefits:
+      - Automated, consistent TIED setup
+      - All required files and directories created correctly
+      - Easy project bootstrapping with single command
+  implementation_approach:
+    summary: Bootstrap script that creates tied/ directory, copies template files, and sets up base files
+    details:
+      - Create tied/ directory at project root
+      - Copy YAML index files from templates (requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml)
+      - Copy guide files from templates (semantic-tokens.md, processes.md)
+      - Create detail subdirectories (requirements/, architecture-decisions/, implementation-decisions/)
+      - Copy base files to project root (.cursorrules, AGENTS.md, ai-principles.md)
+  code_locations:
+    files:
+      - path: copy_files.sh
+        description: Bootstrap script that sets up TIED structure
+        lines: [1, 163]
+    functions:
+      - name: setup_tied_structure
+        file: copy_files.sh
+        description: Creates directories and copies template files (if implemented as function)
+  traceability:
+    architecture:
+      - ARCH-TIED_STRUCTURE
+    requirements:
+      - REQ-TIED_SETUP
+    tests:
+      - Manual verification checklists
+    code_annotations:
+      - IMPL-TIED_FILES
+      - ARCH-TIED_STRUCTURE
+      - REQ-TIED_SETUP
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - ARCH-TIED_STRUCTURE
+      - REQ-TIED_SETUP
+    composed_with: []
+  essence_pseudocode: |
+    INPUT: project root; template source dir (or embedded templates)
+    OUTPUT: tied/ directory and files; root .cursorrules, AGENTS.md, ai-principles.md
+    DATA: copy_files.sh (or equivalent); template files for YAML indexes and guides
+
+    setup_tied_structure():
+      CREATE directory tied/
+      CREATE subdirs tied/requirements/, tied/architecture-decisions/, tied/implementation-decisions/
+      COPY template YAML indexes -> tied/*.yaml
+      COPY template guides -> tied/semantic-tokens.md, tied/processes.md
+      COPY .cursorrules, AGENTS.md, ai-principles.md -> project root
+  detail_file: implementation-decisions/IMPL-TIED_FILES.yaml
+  metadata:
+    created:
+      date: "2025-12-18"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with
+    last_validated:
+      date: "2026-02-06"
+      validator: AI Agent
+      result: pass

@@ -1,8 +1,6 @@
 /**
- * [OVERLAY-REFRESH-TEST-001] Overlay Refresh Button Accessibility Tests
- * 
- * Accessibility tests for the overlay refresh button functionality
- * Tests ARIA attributes, keyboard navigation, and screen reader compatibility
+ * [OVERLAY-REFRESH-TEST-001] Overlay Refresh Button Accessibility - [REQ-UI_INSPECTION] [IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] [ARCH-OVERLAY_TESTABILITY]
+ * Accessibility tests for the overlay refresh button (ARIA, keyboard, screen reader).
  */
 
 import { OverlayManager } from '../../src/features/content/overlay-manager.js'
@@ -31,8 +29,8 @@ const mockRefreshResponse = (mockMessageService, { bookmark, rawResponse, error 
   })
 }
 
-// [OVERLAY-REFRESH-TEST-001] Accessibility test suite for overlay refresh button
-describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
+// [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_TESTABILITY] Accessibility test suite for overlay refresh button
+describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Tests', () => {
   let overlayManager
   let mockDocument
   let mockMessageService

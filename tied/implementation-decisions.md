@@ -42,6 +42,95 @@ Token names contain `:` which is invalid in filenames on many operating systems.
 - Include the most recent `[PROC-TOKEN_VALIDATION]` run information so future contributors know the last verified state
 - **Language-Specific Implementation**: Language-specific implementation details (APIs, libraries, syntax patterns, idioms) belong in implementation decisions. Code examples in documentation should use `[your-language]` placeholders or be language-agnostic pseudo-code unless demonstrating a specific language requirement. Requirements and architecture decisions should remain language-agnostic.
 
+---
+
+## Core data object (IMPL detail YAML)
+
+Every IMPL **detail** file in `implementation-decisions/` must use a single **root key** equal to the IMPL token (e.g. `IMPL-STORAGE_INDEX`). All content is nested under that key. This keeps each file self-identifying and machine-parseable and matches the index structure. This section is the **canonical schema** for validation and tooling.
+
+### Core (required) fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | string | Short human-readable title for the implementation decision. |
+| `status` | string | One of: `Active`, `Deprecated`, `Template`, `Superseded`. |
+| `cross_references` | list of strings | Tokens this IMPL links to (REQ-\*, ARCH-\*, other IMPL-\*). May be empty `[]`. |
+| `rationale` | object | `why` (string), `problems_solved` (list of strings), `benefits` (list of strings). Lists may be empty. |
+| `implementation_approach` | object | `summary` (string), `details` (list of strings). `details` may be empty. |
+| `code_locations` | object | `files` (list of objects with `path`, optional `description`, optional `lines`), `functions` (list of objects with `name`, `file`, optional `description`). Either list may be empty. |
+| `traceability` | object | `architecture` (list of ARCH-\* tokens), `requirements` (list of REQ-\* tokens), `tests` (list of test names or paths), `code_annotations` (list of tokens to appear in code). Lists may be empty. |
+| `related_decisions` | object | `depends_on` (list), `supersedes` (list), `see_also` (list). All lists of decision tokens. |
+| `detail_file` | string | Path to this detail file relative to `tied/` (e.g. `implementation-decisions/IMPL-STORAGE_INDEX.yaml`). |
+| `metadata` | object | `created` (`date`, `author`), `last_updated` (`date`, `author`, `reason`), optional `last_validated` (`date`, `validator`, `result`). |
+| `essence_pseudocode` | string (multiline) | **Mandatory.** Language-agnostic step-wise pseudo-code (main steps, data flow, control flow). Required for identifying collisions between implementation decisions (overlapping logic, data flow, ordering). See **Mandatory essence_pseudocode** below. |
+
+### Optional but standard fields
+
+Same shape in all files that use them:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `related_decisions.composed_with` | list of strings | IMPL tokens routinely composed with this one in a single algorithm. |
+
+See **Optional fields for composition and workflow** below for usage.
+
+### Mandatory essence_pseudocode
+
+Every IMPL detail file **must** include an `essence_pseudocode` field. It is used to:
+
+- Capture the implementation’s core algorithm in language-agnostic form (INPUT/OUTPUT/DATA, procedure names, key branches).
+- Support **collision detection**: when IMPLs are composed or share code paths, comparing their `essence_pseudocode` blocks helps identify overlapping steps, shared data, ordering dependencies, and conflicting assumptions.
+- Keep documentation aligned with tests and code; the pseudo-code should reflect what the implementation (and its tests) do.
+
+### Extra fields
+
+Any other **top-level keys** under the IMPL root (e.g. domain-specific prose or format keys) are allowed and need not be shared across files. Naming should avoid clashing with the core and optional-but-standard field names above.
+
+### Canonical YAML shape
+
+```yaml
+IMPL-TOKEN:           # root key = IMPL token; required
+  name: string
+  status: Active | Deprecated | Template | Superseded
+  cross_references: [ string ]
+  rationale:
+    why: string
+    problems_solved: [ string ]
+    benefits: [ string ]
+  implementation_approach:
+    summary: string
+    details: [ string ]
+  code_locations:
+    files:
+      - path: string
+        description: string   # optional
+        lines: [ number ]    # optional
+    functions:
+      - name: string
+        file: string
+        description: string   # optional
+  traceability:
+    architecture: [ string ]
+    requirements: [ string ]
+    tests: [ string ]
+    code_annotations: [ string ]
+  related_decisions:
+    depends_on: [ string ]
+    supersedes: [ string ]
+    see_also: [ string ]
+    composed_with: [ string ]   # optional
+  essence_pseudocode: |         # required (collision detection)
+    ...
+  detail_file: string
+  metadata:
+    created: { date: string, author: string }
+    last_updated: { date: string, author: string, reason: string }
+    last_validated: { date: string, validator: string, result: string }  # optional
+  # extra fields allowed below
+```
+
+---
+
 ## How to Add a New Implementation Decision
 
 1. **Create a new detail file** in `implementation-decisions/` using the naming convention above
@@ -140,6 +229,7 @@ IMPL-NEW_IMPLEMENTATION:
     depends_on: []
     supersedes: []
     see_also: []
+    composed_with: []   # optional: list of IMPL tokens routinely composed with this one
   detail_file: implementation-decisions/IMPL-NEW_IMPLEMENTATION.yaml
   metadata:
     created:
@@ -253,6 +343,39 @@ Latest `./scripts/validate_tokens.sh` output summary:
 
 *Last validated: YYYY-MM-DD by [agent/contributor]*
 ```
+
+### Optional fields for composition and workflow
+
+Detail YAML files may include the following to support composing multiple IMPLs in one algorithm and to guide combined workflow description and test design:
+
+- **`essence_pseudocode`** (**mandatory**, see Core data object): Language-agnostic, step-wise pseudo-code that captures the IMPL’s core algorithm: main steps, data flow (inputs, outputs, key structures), and control flow (branches, loops, ordering). Use a multi-line YAML string (e.g. `\|-`) for readability. When multiple IMPLs are combined in the same workflow, this pseudo-code is the primary artifact for deducing how IMPLs affect each other (ordering, shared data, dependencies), for producing a combined algorithm or workflow description, for guiding the design of tests and the structure of code, and for **collision detection** between implementation decisions.
+
+- **`related_decisions.composed_with`** (optional): A list of IMPL tokens (e.g. `[IMPL-BOOKMARK_ROUTER, IMPL-STORAGE_INDEX]`) that record which IMPLs are routinely composed with this one in a single algorithm or workflow. Use this to document composition relationships alongside `depends_on`, `supersedes`, and `see_also`.
+
+---
+
+## Collision detection using essence_pseudocode
+
+When IMPLs are composed (see `related_decisions.composed_with`) or share code paths, compare their **essence_pseudocode** blocks to:
+
+1. **Identify overlapping steps or data** — e.g. both IMPLs read/write the same storage key or structure.
+2. **Respect ordering dependencies** — e.g. IMPL-STORAGE_INDEX (index read/update) must be used before or after IMPL-BOOKMARK_ROUTER (resolve provider by URL) when saving; index update follows successful save.
+3. **Avoid conflicting assumptions** — e.g. one IMPL assumes sync storage, another async.
+
+**Process**: For each IMPL that lists others in `composed_with`, open the corresponding detail files and compare INPUT/OUTPUT/DATA and procedure names. Document ordering or shared-data notes in the IMPL’s `related_decisions.see_also` or in a short "Collision notes" extra field if needed.
+
+**Key composition pairs (checklist)** — when changing these, re-check ordering and shared data:
+
+| Composed pair / group | Ordering / shared data note |
+|----------------------|-----------------------------|
+| IMPL-STORAGE_INDEX, IMPL-BOOKMARK_ROUTER, IMPL-LOCAL_BOOKMARK_SERVICE | Router uses index to resolve provider; after save, router updates index. Migration (index seed) uses LocalBookmarkService.getAllBookmarks. |
+| IMPL-MESSAGE_HANDLING, IMPL-POPUP_MESSAGE_TIMEOUT | Timeout wraps sendMessage; handler must complete before timeout. |
+| IMPL-BADGE_REFRESH, IMPL-MESSAGE_HANDLING, IMPL-BOOKMARK_ROUTER | Badge refresh runs after message handling; may call router for bookmark state. |
+| IMPL-URL_TAGS_DISPLAY, IMPL-BOOKMARK_ROUTER | Display reads bookmark/tags via router; no write ordering. |
+| IMPL-FILE_STORAGE_TYPED_PATH, IMPL-FILE_BOOKMARK_SERVICE, IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE | Path normalize before typed path use; file service uses resolved path. |
+| IMPL-CONFIG_MIGRATION, IMPL-CONFIG_BACKUP_RESTORE, IMPL-FEATURE_FLAGS | Backup/restore and migration read/write config; feature flags read config. |
+
+Run this check when adding or changing `composed_with` or when modifying an IMPL’s core algorithm so that composed behavior remains consistent.
 
 ---
 

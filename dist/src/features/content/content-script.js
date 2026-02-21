@@ -1,6 +1,7 @@
 /**
- * Content Script Main Module
- * Coordinates all content script functionality with modern architecture
+ * Content Script Main Module [IMPL-OVERLAY] [ARCH-OVERLAY]
+ * Coordinates all content script functionality with modern architecture.
+ * Bootstraps OverlayManager, HoverSystem, ContentInjector; ties to REQ-OVERLAY_SYSTEM.
  */
 
 import { HoverSystem } from './hover-system.js'

@@ -1,0 +1,66 @@
+IMPL-CODE_STYLE:
+  name: Code Style and Conventions
+  status: Active
+  cross_references:
+    - ARCH-CODE_QUALITY
+    - REQ-CODE_QUALITY
+  rationale:
+    why: Enforce consistent JavaScript style and quality via ESLint 10 flat config (Standard-style preset) and avoid build failure on moderate audit findings in tooling deps
+    problems_solved:
+      - ESLint 10 removes eslintrc; flat config only with native preset
+      - Build failing on moderate vulnerabilities in tooling deps with no safe fix
+    benefits:
+      - Single eslint.config.mjs; @eslinter/eslint-config-standard; ignores in config
+      - security:check uses --audit-level=high; overrides.minimatch and test-exclude fix HIGH and deprecated transitives; Jest 30 stays secure
+  implementation_approach:
+    summary: ESLint 10 flat config, @eslinter/eslint-config-standard, Node >= 20.19.0, security audit level; minimatch and test-exclude overrides
+    details:
+      - 'eslint.config.mjs: globalIgnores, spread @eslinter/eslint-config-standard, files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides'
+      - package.json engines.node >= 20.19.0
+      - 'package.json security:check: npm audit --audit-level=high'
+      - 'package.json overrides.minimatch ^10.2.1, test-exclude ^7.0.1 (Jest 30; fixes high ReDoS and deprecated glob 7/inflight)'
+  code_locations:
+    files:
+      - path: .editorconfig
+        description: Editor configuration
+      - path: .prettierrc
+        description: Code formatter configuration (or similar)
+      - path: eslint.config.mjs
+        description: ESLint 10 flat config (@eslinter/eslint-config-standard)
+      - path: package.json
+        description: engines.node, scripts, overrides.minimatch and test-exclude
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-CODE_QUALITY
+    requirements:
+      - REQ-CODE_QUALITY
+    tests:
+      - npm run lint; npm run lint:fix; npm run validate
+    code_annotations:
+      - All source files follow these conventions
+  related_decisions:
+    depends_on:
+      - ARCH-CODE_QUALITY
+    supersedes: []
+    see_also:
+      - REQ-MAINTAINABILITY
+    composed_with: []
+  essence_pseudocode: |
+    Meta: conventions and tooling; no runtime algorithm.
+    lint: RUN ESLint (flat config, @eslinter/eslint-config-standard) on src/**/*.js; APPLY rule overrides; REPORT violations
+    security:check: RUN npm audit --audit-level=high; OVERRIDES for minimatch/test-exclude where needed
+    Code: FOLLOW .editorconfig, ESLint, formatter config; no bare specifiers in output
+  detail_file: implementation-decisions/IMPL-CODE_STYLE.yaml
+  metadata:
+    created:
+      date: YYYY-MM-DD
+      author: agent/contributor
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with
+    last_validated:
+      date: "2026-02-19"
+      validator: agent
+      result: pass

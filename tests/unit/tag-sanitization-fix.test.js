@@ -1,11 +1,11 @@
 /**
- * [TEST-FIX-001-SANITIZE] - Tag sanitization fix validation tests
- * Tests the fixed tag sanitization logic
+ * [TEST-FIX-001-SANITIZE] Tag sanitization - [REQ-TAG_INPUT_SANITIZATION] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM]
+ * Tests the fixed tag sanitization logic (sanitizeTag).
  */
 
 import { TagService } from '../../src/features/tagging/tag-service.js'
 
-describe('[TEST-FIX-001-SANITIZE] Tag Sanitization Fix Validation', () => {
+describe('[REQ-TAG_INPUT_SANITIZATION] [IMPL-TAG_SYSTEM] Tag Sanitization Fix Validation', () => {
   let tagService
 
   beforeEach(() => {

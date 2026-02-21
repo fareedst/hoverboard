@@ -1,0 +1,67 @@
+IMPL-PINBOARD_API:
+  name: Pinboard API Service Implementation
+  status: Active
+  cross_references:
+    - ARCH-PINBOARD_API
+    - REQ-PINBOARD_COMPATIBILITY
+  rationale:
+    why: Concrete API integration with error handling
+    problems_solved:
+      - API communication complexity
+      - Rate limiting issues
+    benefits:
+      - Reliable API access
+      - Proper error handling
+  implementation_approach:
+    summary: Token-based auth with endpoint wrappers, rate limiting, retry logic
+    details:
+      - 'API endpoints: /posts/get, /posts/recent, /posts/add, /posts/delete'
+      - Token authentication
+      - 429 retry logic
+      - 401 error handling
+  code_locations:
+    files:
+      - path: src/features/pinboard/pinboard-service.js
+        description: Pinboard API service
+      - path: src/features/pinboard/pinboard-service-browser.js
+        description: Browser-specific Pinboard API usage
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-PINBOARD_API
+    requirements:
+      - REQ-PINBOARD_COMPATIBILITY
+    tests: []
+    code_annotations:
+      - IMPL-PINBOARD_API
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+  essence_pseudocode: |
+    INPUT: auth token; endpoint params (url, tag, etc.); optional retry policy
+    OUTPUT: API response (bookmark list, success/error); 401/429 handled
+    DATA: base URL; token in query; endpoints /posts/get, /posts/recent, /posts/add, /posts/delete
+
+    request(endpoint, params):
+      URL = base + endpoint + "?auth_token=" + token + queryString(params)
+      response = FETCH URL
+      IF 429: WAIT; RETRY with backoff
+      IF 401: RETURN error (auth failed)
+      RETURN parsed response
+
+    getBookmarkForUrl(url): request("/posts/get", { url }); RETURN single post or null
+    getRecentBookmarks(count): request("/posts/recent", { count }); RETURN list
+    saveBookmark(data): request("/posts/add", data); RETURN result
+    deleteBookmark(url): request("/posts/delete", { url }); RETURN result
+  detail_file: implementation-decisions/IMPL-PINBOARD_API.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

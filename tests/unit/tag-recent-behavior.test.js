@@ -1,5 +1,5 @@
 /**
- * [IMMUTABLE-REQ-TAG-003] - Unit tests for user-driven recent tags behavior
+ * [IMMUTABLE-REQ-TAG-003] Recent tags behavior - [REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SYSTEM]
  */
 
 import { TagService } from '../../src/features/tagging/tag-service.js'
@@ -20,7 +20,7 @@ global.chrome = {
   }
 }
 
-describe('[IMMUTABLE-REQ-TAG-003] Recent Tags Behavior', () => {
+describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SYSTEM] Recent Tags Behavior', () => {
   let tagService
   let messageHandler
   let configManager

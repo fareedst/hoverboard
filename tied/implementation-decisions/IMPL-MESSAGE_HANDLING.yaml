@@ -1,0 +1,68 @@
+IMPL-MESSAGE_HANDLING:
+  name: Message Handling System Implementation
+  status: Active
+  cross_references:
+    - ARCH-MESSAGE_HANDLING
+    - REQ-SMART_BOOKMARKING
+  rationale:
+    why: Concrete message routing and handling
+    problems_solved:
+      - Complex routing logic
+      - Message validation
+    benefits:
+      - Centralized communication
+      - Type-safe messages
+  implementation_approach:
+    summary: Message service with type validation, routing, error handling
+    details:
+      - Standardized message types
+      - Async request/response
+      - Error handling
+      - Input validation
+  code_locations:
+    files:
+      - path: src/core/message-service.js
+        description: Message service
+      - path: src/core/message-handler.js
+        description: Message handler
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-MESSAGE_HANDLING
+    requirements:
+      - REQ-SMART_BOOKMARKING
+      - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+    tests:
+      - tests/unit/module-import-fix.test.js
+    code_annotations:
+      - IMPL-MESSAGE_HANDLING
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with:
+      - IMPL-POPUP_MESSAGE_TIMEOUT
+      - IMPL-BOOKMARK_STATE_SYNC
+  essence_pseudocode: |
+    INPUT: message { type, payload }; sender (tab/popup/background)
+    OUTPUT: Promise resolving to handler result or rejecting on validation/error
+    DATA: message types (allowlist); handler map type -> handler fn
+
+    send(message):
+      VALIDATE message.type in allowlist; VALIDATE payload shape
+      ROUTE to handler for message.type
+      handler(message) -> result; RETURN Promise.resolve(result)
+      ON error: RETURN Promise.reject; optional log
+
+    processMessage(message) (in message-handler):
+      handler = lookup(message.type); result = AWAIT handler(message.payload)
+      RETURN result; (caller may broadcast BOOKMARK_UPDATED etc.)
+  detail_file: implementation-decisions/IMPL-MESSAGE_HANDLING.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

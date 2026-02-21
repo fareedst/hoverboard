@@ -7,22 +7,33 @@ IMPL-SUGGESTED_TAGS:
     - REQ-SUGGESTED_TAGS_DEDUPLICATION
     - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
   rationale:
-    why: |-
-      Implement suggested tags with two extraction paths: TagService for overlay (content script context) and inlined script injection for popup (page context). Both paths use multi-source extraction, frequency ranking, case preservation, and deduplication, with slight differences in limits and sanitization.
-
-      ---
+    why: Two extraction paths — TagService for overlay (content script), inlined script injection for popup (page context). Both use multi-source extraction, frequency ranking, case preservation, deduplication; limits and sanitization differ slightly.
     problems_solved: []
     benefits: []
   implementation_approach:
-    summary: |-
-      Walk main-content text nodes or inline elements
-      Call `getComputedStyle` on candidates
-      Start with single heuristic (e.g., bold only)
-      Limit scope (e.g., first 20 bold spans in main)
+    summary: Extract from title, URL, meta, headings, emphasis elements, definition terms, table headers, nav, breadcrumbs, images, links (per-source limits). Tokenize, filter noise, frequency sort, case preservation, sanitize, deduplicate, apply limit. Overlay path uses TagService; popup path uses executeScript with inlined same algorithm.
     details: []
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: src/features/tagging/tag-service.js
+        description: extractSuggestedTagsFromContent (overlay path)
+      - path: src/features/content/overlay-manager.js
+        description: Suggested section display
+      - path: src/ui/popup/PopupController.js
+        description: loadSuggestedTags inlined extraction
+      - path: src/ui/popup/UIManager.js
+        description: updateSuggestedTags
+      - path: safari/src/features/tagging/tag-service.js
+        description: Safari mirror extraction
+      - path: safari/src/features/content/overlay-manager.js
+        description: Safari mirror overlay
+    functions:
+      - name: extractSuggestedTagsFromContent
+        file: src/features/tagging/tag-service.js
+        description: Primary extraction for overlay; limit default; includes meta, emphasis, structured content
+      - name: loadSuggestedTags
+        file: src/ui/popup/PopupController.js
+        description: Popup extraction via executeScript; inlined function duplicates algorithm
   traceability:
     architecture:
       - ARCH-SUGGESTED_TAGS
@@ -46,367 +57,42 @@ IMPL-SUGGESTED_TAGS:
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
       - REQ-SUGGESTED_TAGS_DEDUPLICATION
       - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+    composed_with:
+      - IMPL-SELECTION_TO_TAG_INPUT
+  essence_pseudocode: |
+    INPUT: document, url, limit (per-path defaults differ)
+    OUTPUT: list of suggested tag strings (frequency-ordered, case-preserved, deduplicated)
+    DATA: sources = title, URL segments, meta keywords/description, headings, emphasis elements (strong/b/em/...), definition terms, table headers/captions, nav links, breadcrumbs, images alt, main links (each with per-source cap); noise word set; delimiter regex for tokenize
+
+    extractSuggestedTags(document, url, limit):
+      allTexts = []
+      allTexts.push( title, urlSegments, metaKeywords, metaDescription, headings, emphasisElements, definitionTerms, tableHeaders, navLinks, breadcrumbs, imageAlts, mainLinks )  // each source capped
+      text = join allTexts with space
+      words = tokenize(text)  // split on delimiter regex (whitespace, punctuation, brackets, quotes)
+      filtered = filter words: NOT noise AND length >= 2 AND NOT pure number
+      wordFrequency = count by lowercase key; originalCaseMap = first-seen case per lowercase
+      sorted = sort by frequency descending, then alphabetically by lowercase
+      tagsWithVersions = []
+      FOR each (lowerWord, count) in sorted:
+        originalCase = originalCaseMap[lowerWord]
+        tagsWithVersions.push(originalCase)
+        IF originalCase !== lowerWord THEN tagsWithVersions.push(lowerWord)
+      sanitized = map sanitize over tagsWithVersions, filter non-empty
+      unique = deduplicate exact strings
+      RETURN unique.slice(0, limit or limit*2 for case variants)
+
+    overlay path: call TagService.extractSuggestedTagsFromContent(document, url, limit)
+    popup path: chrome.scripting.executeScript with inlined function implementing same algorithm; skip if URL not http(s); filter result vs currentPin.tags (case-insensitive) before display
   detail_file: implementation-decisions/IMPL-SUGGESTED_TAGS.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-19'
-      author: AI agent
-      reason: Document popup test fix (mockResolvedValueOnce for executeScript)
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
       result: pass
-  2_numeric_limits: |-
-    | Component | Limit | Code Location | How to Modify |
-    |-----------|-------|---------------|---------------|
-    | Overlay extraction | 30 | `tag-service.js` line ~921 (default parameter) | Change `limit = 30` to desired value |
-    | Popup extraction | 60 | `PopupController.js` line ~628 (`.slice(0, 60)`) | Change `60` to desired value |
-    | Emphasis elements | 60 | `tag-service.js` line ~999, `PopupController.js` line ~431 (`.slice(0, 60)`) | Change `60` to desired value in both locations |
-    | Definition terms | 40 | `tag-service.js` line ~1009, `PopupController.js` line ~442 (`.slice(0, 40)`) | Change `40` to desired value in both locations |
-    | Table headers/captions | 40 | `tag-service.js` line ~1017, `PopupController.js` line ~450 (`.slice(0, 40)`) | Change `40` to desired value in both locations |
-    | Nav links | 40 | `tag-service.js` line ~1028, `PopupController.js` line ~459 (`.slice(0, 40)`) | Change `40` to desired value in both locations |
-    | Images alt | 10 | `tag-service.js` line ~1049, `PopupController.js` line ~478 (`.slice(0, 10)`) | Change `10` to desired value in both locations |
-    | Main content links | 20 | `tag-service.js` line ~1059, `PopupController.js` line ~487 (`.slice(0, 20)`) | Change `20` to desired value in both locations |
-    | Overlay display | 15 | `overlay-manager.js` line ~637 (`.slice(0, 15)`) | Change `15` to desired value |
-    | Popup display | No cap | `PopupController.js` ~634-642 (shows all filtered) | Add `.slice(0, n)` before `updateSuggestedTags()` |
-  '[arch-suggested_tags]': Architecture decision for suggested tags
-  '[impl-tag_system]': Tag service implementation (sanitization, recent tags)
-  accept_difference: '(document only):'
-  add_fuzzy_matching: |-
-    ```javascript
-    // Use Levenshtein distance or similar
-    function isSimilar(tag1, tag2) {
-      // Compare normalized forms
-      return levenshtein(tag1, tag2) <= 2
-    }
-    // Filter suggestions that are similar to any current tag
-    ```
-  add_partial_match_exclusion: |-
-    ```javascript
-    // Exclude suggestions that contain or are contained by current tags
-    currentTags.forEach(currentTag => {
-      if (suggestion.includes(currentTag) || currentTag.includes(suggestion)) {
-        // exclude
-      }
-    })
-    ```
-  always_generate_both_versions: '(would duplicate lowercase words):'
-  apply_limit_before_dual-version_generation: |-
-    ```javascript
-    // Move limit slice before case variant generation
-    // Would reduce total suggestions but ensure all unique words within limit
-    ```
-  background_color: Non-transparent background on inline/block elements (highlight detection)
-  benefit: Captures introductory/summary terms that may not appear in headings
-  centralize: Move to shared constant file, import in both paths
-  change_to_most-frequent_case: |-
-    ```javascript
-    // Replace originalCaseMap tracking with frequency map
-    const caseCounts = new Map() // lowercase -> Map<originalCase, count>
-    // Track all case variants with counts
-    // Select most-frequent case variant instead of first occurrence
-    ```
-  considerations: Higher limits increase computational cost; lower limits may miss relevant suggestions. Per-source limits balance coverage with noise reduction. Limits increased 100-200% on 2026-02-13 to provide more tag candidates from all sources.
-  core_extraction: |-
-    | File | Function/Method | Lines | Description |
-    |------|----------------|-------|-------------|
-    | `src/features/tagging/tag-service.js` | `extractSuggestedTagsFromContent(document, url, limit)` | ~921-1240 | **Primary extraction** for overlay path; limit default 10; includes meta, emphasis, structured content; comprehensive algorithm with TagService sanitization |
-    | `src/ui/popup/PopupController.js` | `loadSuggestedTags()` | ~342-650 | **Popup extraction** via chrome.scripting.executeScript; inlined function duplicates algorithm with all new sources; limit 20; simple sanitization |
-  created: '2025-07-14'
-  cross-references: '[ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]'
-  current: Two separate implementations (TagService for overlay, inlined script for popup)
-  current_exclusions: '`www`, `com`, `org`, `net`, `html`, `htm`, `php`, `asp`, `aspx`, `index`, `home`, `page`, pure numbers, length <2'
-  current_logic: |-
-    1. Track first occurrence of each word (by lowercase key)
-    2. For capitalized words: add both original case and lowercase
-    3. For all-lowercase words: add only once
-    4. Remove exact string duplicates
-  current_order: Title → URL path → Meta keywords/description → Headings → Emphasis elements → Definition terms/Table headers → Nav → Breadcrumbs → Images → Links
-  data_structure: '`Set<exactString>` tracks seen strings'
-  decision: |-
-    Implement suggested tags with two extraction paths: TagService for overlay (content script context) and inlined script injection for popup (page context). Both paths use multi-source extraction, frequency ranking, case preservation, and deduplication, with slight differences in limits and sanitization.
-
-    ---
-  definition_terms: First 20 only (capped with `.slice(0, 20)`)
-  depends_on: None
-  description: Detect visual emphasis via computed CSS properties.
-  display_components: |-
-    | File | Function/Method | Lines | Description |
-    |------|----------------|-------|-------------|
-    | `src/features/content/overlay-manager.js` | Suggested section in `show()` | ~611-686 | Builds "Suggested:" section; calls TagService; filters with `currentTagsLower`; shows 5 tags; click → saveTag + refresh |
-    | `src/ui/popup/UIManager.js` | `updateSuggestedTags(suggestedTags)` | ~410-440 | Renders suggested tags in popup; shows/hides section; reuses `createRecentTagElement` for styling |
-    | `src/ui/popup/PopupController.js` | Filtering in `loadSuggestedTags()` | ~596-604 | Filters suggestions vs `currentPin.tags` (case-insensitive); calls `updateSuggestedTags` |
-  dom_queries: +4 queries (~2-3ms on typical pages)
-  element_iteration: +70 max elements (30+20+20) beyond existing limits
-  emphasis_elements: First 30 only (capped with `.slice(0, 30)`)
-  extraction_algorithm_(common_to_both_paths): |-
-    ```javascript
-    // Pseudo-code for extraction algorithm
-    function extractSuggestedTags(document, url, limit) {
-      // 1. Extract text from sources
-      allTexts = []
-      allTexts.push(document.title)
-      allTexts.push(extractURLSegments(url))
-      allTexts.push(extractMetaKeywords(document))      // meta[name="keywords"]
-      allTexts.push(extractMetaDescription(document))   // meta[name="description"]
-      allTexts.push(extractHeadings(document))          // h1, h2, h3
-      allTexts.push(extractEmphasisElements(document))  // first 30: strong, b, em, i, mark, dfn, cite, kbd, code
-      allTexts.push(extractDefinitionTerms(document))   // first 20: dl dt
-      allTexts.push(extractTableHeaders(document))      // first 20: th, caption
-      allTexts.push(extractNav(document))               // first 20 nav links
-      allTexts.push(extractBreadcrumbs(document))
-      allTexts.push(extractImages(document))            // first 5 main images alt
-      allTexts.push(extractLinks(document))             // first 10 main links
-      
-      // 2. Tokenize
-      words = tokenize(allTexts.join(' '))
-      
-      // 3. Filter noise words
-      filteredWords = words.filter(w => !noiseWords.has(w.toLowerCase()) && w.length >= 2 && !isPureNumber(w))
-      
-      // 4. Count frequency (case-insensitive grouping)
-      wordFrequency = Map<lowercase, count>
-      originalCaseMap = Map<lowercase, firstOriginalCase>
-      
-      // 5. Sort by frequency (descending), then alphabetically
-      sortedWords = sort(wordFrequency, (a, b) => b.frequency - a.frequency || a.lowercase.localeCompare(b.lowercase))
-      
-      // 6. Case preservation: generate both versions for capitalized words
-      tagsWithVersions = []
-      for (lowerWord, frequency in sortedWords) {
-        originalCase = originalCaseMap.get(lowerWord)
-        tagsWithVersions.push(originalCase)
-        if (originalCase !== lowerWord) {
-          tagsWithVersions.push(lowerWord)  // add lowercase variant
-        }
-      }
-      
-      // 7. Sanitize
-      sanitizedTags = tagsWithVersions.map(sanitize).filter(notEmpty)
-      
-      // 8. Remove exact duplicates
-      uniqueTags = deduplicate(sanitizedTags)
-      
-      // 9. Apply limit
-      return uniqueTags.slice(0, limit * 2)  // Allow both case variants
-    }
-    ```
-  faster_tagging: Click-to-add reduces keystrokes and cognitive load
-  font_size: Noticeably larger than sibling or parent text
-  font_weight: '`getComputedStyle(el).fontWeight >= 600` or `=== ''bold''`'
-  future_enhancements_(not_implemented): 'The following extraction sources were identified during enhancement analysis but not yet implemented. These remain as potential improvements if the current sources prove insufficient:'
-  grouping: Case-insensitive (all variants of "JavaScript" counted together)
-  helper_function_extract_element_text_(title_attribute_priority): |-
-    ```javascript
-    function extractElementText(element) {
-      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Prioritize title attribute
-      if (element.title && element.title.trim().length > 0) {
-        return element.title.trim()
-      }
-      
-      // Check child elements for title attribute
-      const childWithTitle = element.querySelector('[title]')
-      if (childWithTitle && childWithTitle.title.trim().length > 0) {
-        return childWithTitle.title.trim()
-      }
-      
-      // Fall back to textContent
-      return (element.textContent || '').trim()
-    }
-    ```
-
-    ---
-  how_to_modify:
-    - 'Add aria-label: Insert `if (element.ariaLabel) return element.ariaLabel` before title check'
-    - 'Change priority: Reorder if-conditions'
-    - 'Remove title check: Delete title-checking code, use only textContent'
-  images: First 5 only (existing)
-  implementation: '`Array.sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))`'
-  implementation_priority: |-
-    If additional sources are needed:
-    1. **First**: Class/attribute hints (semantic meaning, medium cost)
-    2. **Second**: Lead paragraph (low cost, quick win)
-    3. **Last**: Computed style (experimental, document as opt-in or experimental feature)
-
-    ---
-  issue: Implementation drift risk; must maintain two copies of extraction logic, noise word list, and sanitization.
-  last_updated: '2026-02-13'
-  localize: Detect page language, use language-specific stop word list
-  main_links: First 10 only (existing)
-  manual_tag_entry: Users can click suggested tags instead of typing
-  meets_[req-suggested_tags_case_preservation]: Preserves original case, provides lowercase variants
-  meets_[req-suggested_tags_deduplication]: Case-insensitive filtering against current tags
-  meets_[req-suggested_tags_from_content]: Extracts from title, URL, meta tags, headings, emphasis elements, structured content (definition terms, table headers), nav, breadcrumbs, images, links
-  meta_keywords/description: '(lines ~959-969 TagService, ~415-425 PopupController): Extracts from `<meta name="keywords">` and `<meta name="description">` tags'
-  navigation_links: First 20 only (existing)
-  new_sources_(as_of_2026-02-13): 'add ~4 DOM queries:'
-  no_breaking_changes: All existing sources unchanged
-  no_context_awareness: Suggestions reflect actual page content
-  no_dedicated_tests: for suggested tags extraction or display. Requirements reference "Suggested tags tests", "Suggested tags deduplication tests", "Suggested tags case preservation tests" but these are not implemented.
-  option_a: Centralize extraction
-  option_b: Keep inlined but document sync
-  option_c: Extract shared module
-  original_case_tracking: Separate `Map<lowercase, firstOriginalCase>` preserves first-seen case
-  original_sources: ~7 DOM queries (title, URL, headings, nav, breadcrumbs, images, links)
-  overview: |-
-    Two extraction paths exist due to execution context constraints:
-
-    1. **Overlay Path**: Content script has DOM access → calls TagService directly
-    2. **Popup Path**: Popup has no DOM access → injects script into page context → duplicates extraction logic
-
-    Both paths follow the same algorithm but have **implementation drift** (different limits, different sanitization).
-
-  restricted_url_skip_popup: |-
-    **Restricted-URL skip (popup)** [REQ-SUGGESTED_TAGS_FROM_CONTENT] [ARCH-SUGGESTED_TAGS]: In `PopupController.loadSuggestedTags()`, before calling `chrome.scripting.executeScript`, the implementation checks `(this.currentTab.url || '').trim()`. If the URL does not start with `http://` or `https://`, it skips injection, logs a debug message, calls `this.uiManager.updateSuggestedTags([])`, and returns. This avoids Chrome throwing "Cannot access contents of url ... Extension manifest must request permission to access this host" when the active tab is an extension page (e.g. bookmarks-table.html) or other restricted origin. Code location: `src/ui/popup/PopupController.js` in `loadSuggestedTags()` immediately after the "no current tab" check.
-  popup_test_mocking: |-
-    **Popup suggested-tags test mocking** [REQ-SUGGESTED_TAGS_FROM_CONTENT] [ARCH-SUGGESTED_TAGS]: Tests in `tests/unit/popup-suggested-tags.test.js` must mock `chrome.scripting.executeScript` using the existing Jest mock: `chrome.scripting.executeScript.mockResolvedValueOnce([{ result: [...] }])`. Do not replace the function (e.g. `chrome.scripting.executeScript = function (...) { ... }`), because the implementation calls the global reference; replacing it can be unreliable in some Jest environments and the mock may not receive the replacement, causing `results` to be undefined and `updateSuggestedTags([])` to be called. Using `mockResolvedValueOnce` configures the next call's return value on the same mock the implementation uses.
-  popup_inlined_path:
-    - 'Uses simple regex: `word.replace(/[^a-zA-Z0-9_-]/g, '''').substring(0, 50)`'
-    - 'Location: `PopupController.js` line ~573-575'
-  potential_sources:
-    - '`main p:first-of-type`'
-    - '`article > p:first-of-type`'
-    - First 1-2 `<p>` elements in main content
-  preserves: '"JavaScript" and "javascript" as distinct (different exact strings)'
-  primary: Frequency (descending)
-  processing_limits: 'Limits prevent excessive DOM traversal and processing:'
-  realizes_[arch-suggested_tags]: Multi-source extraction with frequency sorting and case preservation
-  recommended_tests: |-
-    #### Unit Tests for TagService.extractSuggestedTagsFromContent
-
-    ```javascript
-    describe('TagService.extractSuggestedTagsFromContent', () => {
-      test('extracts from title', () => {
-        const doc = createMockDocument({ title: 'Learning JavaScript' })
-        const tags = tagService.extractSuggestedTagsFromContent(doc, '', 10)
-        expect(tags).toContain('Learning')
-        expect(tags).toContain('JavaScript')
-      })
-      
-      test('filters noise words', () => {
-        const doc = createMockDocument({ title: 'The Quick Brown Fox' })
-        const tags = tagService.extractSuggestedTagsFromContent(doc, '', 10)
-        expect(tags).not.toContain('The')
-        expect(tags).toContain('Quick')
-      })
-      
-      test('preserves case and generates lowercase', () => {
-        const doc = createMockDocument({ title: 'GitHub Tutorial' })
-        const tags = tagService.extractSuggestedTagsFromContent(doc, '', 10)
-        expect(tags).toContain('GitHub')
-        expect(tags).toContain('github')
-      })
-      
-      test('prioritizes title attribute', () => {
-        const doc = createMockDocument({
-          headings: [{ textContent: 'Short', title: 'Full Title Here' }]
-        })
-        const tags = tagService.extractSuggestedTagsFromContent(doc, '', 10)
-        expect(tags).toContain('Full')
-        expect(tags).not.toContain('Short')
-      })
-    })
-    ```
-
-    #### Integration Tests for Display
-
-    ```javascript
-    describe('Overlay suggested tags display', () => {
-      test('shows suggestions below recent tags', async () => {
-        const overlay = createOverlay()
-        await overlay.show({ bookmark: { tags: [] } })
-        const suggested = overlay.querySelector('.suggested-container')
-        expect(suggested).toBeDefined()
-        expect(suggested.textContent).toContain('Suggested:')
-      })
-      
-      test('deduplicates against current tags', async () => {
-        const overlay = createOverlay()
-        mockTagService.extractSuggestedTagsFromContent.mockReturnValue(['react', 'React', 'tutorial'])
-        await overlay.show({ bookmark: { tags: ['React'] } })
-        const tags = overlay.querySelectorAll('.suggested-container .tag-element')
-        expect(tags.length).toBe(1)  // Only 'tutorial' (react and React excluded)
-      })
-    })
-    ```
-
-    ---
-  regex: '`/[\s\.,;:!?\-_\(\)\[\]{}"'']+/`'
-  # Popup path duplicates tokenization in an inline script in PopupController.loadSuggestedTags().
-  # The delimiter regex and tokenization logic MUST match tag-service.js (extractSuggestedTagsFromContent).
-  # Canonical regex: /[\s\.,;:!?\-_\(\)\[\]{}"']+/. Changing it in only one place (e.g. removing escapes
-  # so {}"' fall outside the character class and + applies only to ') breaks suggested-tag tokenization.
-  popup_tokenizer_sync: |-
-    Popup tokenizer must stay in sync with tag-service.js. Same delimiter regex in both:
-    tag-service.js extractSuggestedTagsFromContent (~line 1078) and PopupController.js loadSuggestedTags
-    inline script (tokenize allText). Canonical: .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/). When changing
-    delimiter rules, update both locations.
-  regression_lesson_dca25b3: |-
-    Commit dca25b3 (feat: bookmark create-time, most-recent-update-time) inadvertently changed the
-    popup tokenizer regex in PopupController.js and broke suggested tags. Last good 4e8c251, first bad
-    dca25b3. Culprit: .split(/[\s.,;:!?\-_()[\]]{}"']+/) — character class and + scope wrong. Fix:
-    restore regex to match tag-service.js. See popup_tokenizer_sync.
-  removes: Multiple occurrences of identical string (e.g., 5 "react" → 1 "react")
-  risk: Performance impact; false positives from design elements
-  safari_mirrors: |-
-    | File | Description |
-    |------|-------------|
-    | `safari/src/features/tagging/tag-service.js` | Mirror of TagService extraction (~921-1240); includes all new sources |
-    | `safari/src/features/content/overlay-manager.js` | Mirror of overlay display (~603-678) |
-
-    ---
-  same_pipeline: Frequency sorting, noise filtering, case preservation unchanged
-  same_sanitization: No changes to tag validation or storage
-  scope_restrictions: |-
-    All new sources limited to **main content areas** to reduce noise and processing:
-    - `main`, `article`, `[role="main"]`, `.main`, `.content`
-    - Excludes nav, footer, sidebar, ads
-  secondary: Alphabetical (ascending, using lowercase key)
-  smart_suggestions: Frequency-ranked, noise-filtered tags from page semantics
-  splits_on: Whitespace, punctuation, brackets, quotes
-  supersedes: None
-  sync_requirement: Must update in both locations.
-  table_headers: First 20 only (capped with `.slice(0, 20)`)
-  table_headers/captions: '(lines ~1015-1022 TagService, ~447-454 PopupController): Extracts first 40 `<th>` and `<caption>` elements from tables'
-  tagservice_path: '(overlay):'
-  text_extraction: Same `extractElementText()` helper (no change)
-  token_coverage_`[proc-token_audit]`: |-
-    Code files carrying `[IMPL-SUGGESTED_TAGS]` annotations:
-
-    - [x] `src/features/tagging/tag-service.js` - Extraction method (~913-1200)
-    - [x] `src/features/content/overlay-manager.js` - Display section (~611-686)
-    - [x] `src/ui/popup/PopupController.js` - Inlined extraction (~339-620)
-    - [x] `src/ui/popup/UIManager.js` - Display method (~410-440)
-    - [x] `safari/src/features/tagging/tag-service.js` - Safari mirror
-    - [x] `safari/src/features/content/overlay-manager.js` - Safari mirror
-
-    Tests expected:
-    - [x] Popup suggested-tags tests: restricted-URL skip and injectable-URL extraction (`tests/unit/popup-suggested-tags.test.js`)
-    - [ ] Tag extraction tests (TagService.extractSuggestedTagsFromContent, not implemented)
-    - [ ] Deduplication tests (not implemented)
-    - [ ] Case preservation tests (not implemented)
-    - [ ] Display tests (not implemented)
-
-    ---
-  tokenization/sorting: Marginally more text (~10-20% increase)
-  total: ~11 DOM queries per extraction
-  total_estimated_overhead: ~5-10ms on typical pages; <20ms on complex pages with many tables/lists
-  trade-offs:
-    - Higher computational cost (requires style computation)
-    - More fragile (sites vary widely in styling)
-    - Recommend only if semantic + class + meta sources insufficient
-  unify_sanitization: '(recommended):'
-  user-configurable: Store in chrome.storage, load at runtime
-  validation_evidence_`[proc-token_validation]`: |-
-    | Date | Commit | Validation Result | Notes |
-    |------|--------|-------------------|-------|
-    | 2025-07-14 | Initial | ✅ Implemented | Feature implemented with dual extraction paths |
-    | 2026-02-13 | Migration | ✅ Documented | Migrated from STDD to TIED format |
-    | 2026-02-13 | Detail file | ✅ Documented | Created IMPL detail file with all modifiable decisions |
-    | 2026-02-13 | Enhancement | ✅ Implemented | Added meta tags, emphasis elements, definition terms, and table headers extraction |
-    | 2026-02-19 | Test fix | ✅ Implemented | Popup tests: use mockResolvedValueOnce for executeScript instead of replacing function (see popup_test_mocking) |
-
-    ---

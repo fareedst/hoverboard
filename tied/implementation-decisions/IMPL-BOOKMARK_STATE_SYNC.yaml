@@ -1,0 +1,71 @@
+IMPL-BOOKMARK_STATE_SYNC:
+  name: Bookmark State Synchronization Implementation
+  status: Active
+  cross_references:
+    - ARCH-BOOKMARK_STATE_SYNC
+    - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+  rationale:
+    why: Consistent state across surfaces
+    problems_solved:
+      - State divergence
+      - Race conditions
+    benefits:
+      - Reliable sync
+      - Observable contract
+  implementation_approach:
+    summary: BOOKMARK_UPDATED broadcast with overlay persist, popup refresh, badge update
+    details:
+      - Overlay toggle handlers persist via saveBookmark
+      - BOOKMARK_UPDATED broadcast
+      - PopupController listener refreshes data
+      - Badge compares states
+  code_locations:
+    files:
+      - path: src/features/content/overlay-manager.js
+        description: Overlay manager
+      - path: src/ui/popup/PopupController.js
+        description: Popup controller
+      - path: src/core/badge-manager.js
+        description: Badge manager
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-BOOKMARK_STATE_SYNC
+    requirements:
+      - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+    tests:
+      - tests/unit/toggle-synchronization.test.js
+      - tests/unit/tag-synchronization.test.js
+    code_annotations:
+      - IMPL-BOOKMARK_STATE_SYNC
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-MESSAGE_HANDLING
+    composed_with:
+      - IMPL-MESSAGE_HANDLING
+      - IMPL-BADGE_REFRESH
+  essence_pseudocode: |
+    INPUT: user actions (overlay toggle, tag save/delete, bookmark save); processMessage result
+    OUTPUT: consistent bookmark state across overlay, popup, badge
+    DATA: overlay state, popup state, badge state; BOOKMARK_UPDATED broadcast
+
+    ON overlay toggle (saveBookmark / saveTag / deleteTag):
+      SEND message to backend; await processMessage result
+      BROADCAST BOOKMARK_UPDATED (so other surfaces can refresh)
+
+    PopupController (listener for BOOKMARK_UPDATED):
+      ON BOOKMARK_UPDATED: refresh popup data (re-fetch bookmark state for current URL)
+
+    Badge manager:
+      ON message result (saveTag | deleteTag | saveBookmark): compare current tab URL state with stored state; UPDATE badge icon/count
+  detail_file: implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

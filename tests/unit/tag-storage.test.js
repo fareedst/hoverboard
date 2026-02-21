@@ -1,8 +1,6 @@
 /**
- * Tag Storage Tests
- * 
- * Tests to verify that tags added to bookmarks are properly stored
- * and available across different popup instances and sessions.
+ * Tag storage - [REQ-TAG_MANAGEMENT] [REQ-BADGE_INDICATORS] [IMPL-TAG_SYSTEM] [IMPL-URL_TAGS_DISPLAY]
+ * Tests that tags added to bookmarks are stored and available across popup instances and sessions.
  */
 
 import { PinboardService } from '../../src/features/pinboard/pinboard-service.js'
@@ -34,7 +32,7 @@ global.chrome = {
 // Mock fetch with proper Response object
 global.fetch = jest.fn()
 
-describe('Tag Storage and Cross-Instance Availability', () => {
+describe('[REQ-TAG_MANAGEMENT] [IMPL-TAG_SYSTEM] [IMPL-URL_TAGS_DISPLAY] Tag Storage and Cross-Instance Availability', () => {
   let pinboardService
   let tagService
   let messageHandler

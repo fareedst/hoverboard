@@ -80,7 +80,7 @@ Use the structure below for every process you document. Each entry should be kep
 Provides succinct guidance for reading, writing, querying, and validating the YAML index files (`requirements.yaml`, `architecture-decisions.yaml`, `implementation-decisions.yaml`, `semantic-tokens.yaml`).
 
 ### Scope
-Applies to all TIED YAML index files in the `tied/` directory.
+Applies to all TIED YAML index files in the `tied/` directory. Implementation decision **detail** YAMLs (e.g. in `implementation-decisions/*.yaml`) may include `essence_pseudocode` and `related_decisions.composed_with` for composition analysis, combined workflow description, and test design; see `implementation-decisions.md` § Optional fields for composition and workflow.
 
 ### Token references
 - `[REQ-TIED_SETUP]` — YAML indexes are part of TIED methodology setup

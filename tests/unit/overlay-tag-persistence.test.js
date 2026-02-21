@@ -1,6 +1,6 @@
 /**
- * [IMMUTABLE-REQ-TAG-004] - Overlay tag persistence unit tests
- * Tests for overlay window tag persistence functionality
+ * [IMMUTABLE-REQ-TAG-004] Overlay tag persistence - [IMPL-OVERLAY] [IMPL-TAG_SYSTEM] [ARCH-OVERLAY]
+ * Tests for overlay window tag persistence functionality.
  */
 
 import { jest } from '@jest/globals'
@@ -66,7 +66,7 @@ global.chrome = {
   }
 }
 
-describe('[IMMUTABLE-REQ-TAG-004] Overlay Tag Persistence', () => {
+describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
   let OverlayManager
   let overlayManager
 

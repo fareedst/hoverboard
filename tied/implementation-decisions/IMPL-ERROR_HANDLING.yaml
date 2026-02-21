@@ -1,0 +1,62 @@
+IMPL-ERROR_HANDLING:
+  name: Error Handling Implementation
+  status: Template
+  cross_references:
+    - ARCH-ERROR_HANDLING
+    - REQ-ERROR_HANDLING
+  rationale:
+    why: Why this error handling implementation was chosen
+    problems_solved:
+      - Problem 1
+    benefits:
+      - Benefit 1
+  implementation_approach:
+    summary: Error handling implementation approach
+    details:
+      - Specific error handling pattern
+      - Error propagation strategy
+      - Error logging and reporting
+  code_locations:
+    files:
+      - path: src/shared/ErrorHandler.js
+        description: Centralized error handling for the extension
+    functions:
+      - name: setupGlobalHandlers
+        file: src/shared/ErrorHandler.js
+        description: Global unhandledrejection and error handlers
+      - name: handleError
+        file: src/shared/ErrorHandler.js
+        description: Error handling logic
+  traceability:
+    architecture:
+      - ARCH-ERROR_HANDLING
+    requirements:
+      - REQ-ERROR_HANDLING
+    tests:
+      - tests/unit/module-import-fix.test.js
+      - testErrorHandling_IMPL_ERROR_HANDLING
+    code_annotations:
+      - IMPL-ERROR_HANDLING
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with: []
+  essence_pseudocode: |
+    Template: placeholder for error handling implementation.
+    INPUT: (to be defined) error or throwable
+    OUTPUT: (to be defined) handled result or rethrow
+    handleError(err): LOG; optionally WRAP or PROPAGATE; (steps to be filled per project)
+  detail_file: implementation-decisions/IMPL-ERROR_HANDLING.yaml
+  metadata:
+    created:
+      date: YYYY-MM-DD
+      author: agent/contributor
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode (template stub)
+    last_validated:
+      date: YYYY-MM-DD
+      validator: agent/contributor
+      result: pass

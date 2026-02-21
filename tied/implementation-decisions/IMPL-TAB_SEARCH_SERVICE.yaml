@@ -1,0 +1,84 @@
+IMPL-TAB_SEARCH_SERVICE:
+  name: Tab Search Service Implementation
+  status: Active
+  cross_references:
+    - REQ-SEARCH_FUNCTIONALITY
+  rationale:
+    why: Implements in-extension tab search by title with navigate-to-match and circular navigation.
+    problems_solved:
+      - Finding and switching to browser tabs by title from the extension
+      - Repeating search cycles through multiple matches (circular navigation)
+    benefits:
+      - Fast tab discovery and focus from popup/overlay
+      - Search history and continuation from last position
+  implementation_approach:
+    summary: TabSearchService queries chrome.tabs, filters by title substring, selects next match (with wrap-around), activates tab and focuses window; maintains lastSearchText and lastMatchedTabId for continuation.
+    details:
+      - searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }
+      - findNextTab(matchingTabs, restartTabId): circular navigation; addToSearchHistory
+      - Chrome API errors surfaced as rejected promise
+  code_locations:
+    files:
+      - path: src/features/search/tab-search-service.js
+        description: TabSearchService class
+    functions:
+      - name: searchAndNavigate
+        file: src/features/search/tab-search-service.js
+        description: Search tabs by title and navigate to next match
+      - name: findNextTab
+        file: src/features/search/tab-search-service.js
+        description: Select next tab in match list with circular wrap
+      - name: addToSearchHistory
+        file: src/features/search/tab-search-service.js
+        description: Maintain search history (move to front if duplicate)
+  traceability:
+    architecture: []
+    requirements:
+      - REQ-SEARCH_FUNCTIONALITY
+    tests:
+      - tests/unit/tab-search-service.test.js
+    code_annotations:
+      - IMPL-TAB_SEARCH_SERVICE
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with: []
+  essence_pseudocode: |
+    INPUT: searchText (string), currentTabId (number)
+    OUTPUT: { success, matchCount, tabId?, tabTitle? } or { success: false, matchCount, message }
+    DATA: lastSearchText, lastMatchedTabId, searchHistory (list)
+
+    searchAndNavigate(searchText, currentTabId):
+      normalized = TRIM(LOWERCASE(searchText))
+      isNewSearch = (lastSearchText !== normalized)
+      restartTabId = isNewSearch ? currentTabId : (lastMatchedTabId OR currentTabId)
+      allTabs = getAllTabs()
+      matchingTabs = FILTER allTabs WHERE title CONTAINS normalized
+      nextTab = findNextTab(matchingTabs, restartTabId)
+      IF nextTab AND nextTab.id !== restartTabId:
+        activateTab(nextTab.id)
+        focusWindow(nextTab.windowId)
+        lastSearchText = normalized
+        lastMatchedTabId = nextTab.id
+        addToSearchHistory(normalized)
+        RETURN { success: true, matchCount: LEN(matchingTabs), tabId: nextTab.id, tabTitle: nextTab.title }
+      ELSE:
+        RETURN { success: false, matchCount: LEN(matchingTabs), message: "No matching tabs found" OR "Already on last match" }
+
+    findNextTab(matchingTabs, restartTabId):
+      order tabs after restartTabId; wrap to start if none after
+      RETURN next tab in sequence or null
+
+    addToSearchHistory(term):
+      IF term in searchHistory: MOVE term to front
+      ELSE: PREPEND term to searchHistory
+  detail_file: implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml
+  metadata:
+    created:
+      date: "2026-02-20"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Create IMPL for tab-search-service tests; essence_pseudocode from test behavior

@@ -50,7 +50,7 @@ IMPL-TIED_FILES:
     see_also:
       - ARCH-TIED_STRUCTURE
       - REQ-TIED_SETUP
-  detail_file: implementation-decisions/IMPL-TIED_FILES.md
+  detail_file: implementation-decisions/IMPL-TIED_FILES.yaml
   metadata:
     created:
       date: 2025-12-18T00:00:00.000Z
@@ -152,8 +152,10 @@ IMPL-PINBOARD_API:
       - 401 error handling
   code_locations:
     files:
-      - path: src/bg/pinboard.js
+      - path: src/features/pinboard/pinboard-service.js
         description: Pinboard API service
+      - path: src/features/pinboard/pinboard-service-browser.js
+        description: Browser-specific Pinboard API usage
     functions: []
   traceability:
     architecture:
@@ -167,7 +169,7 @@ IMPL-PINBOARD_API:
     depends_on: []
     supersedes: []
     see_also: []
-  detail_file: implementation-decisions/IMPL-PINBOARD_API.md
+  detail_file: implementation-decisions/IMPL-PINBOARD_API.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -217,7 +219,7 @@ IMPL-MESSAGE_HANDLING:
     depends_on: []
     supersedes: []
     see_also: []
-  detail_file: implementation-decisions/IMPL-MESSAGE_HANDLING.md
+  detail_file: implementation-decisions/IMPL-MESSAGE_HANDLING.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -280,7 +282,7 @@ IMPL-OVERLAY:
     supersedes: []
     see_also:
       - IMPL-OVERLAY_CONTROLS
-  detail_file: implementation-decisions/IMPL-OVERLAY.md
+  detail_file: implementation-decisions/IMPL-OVERLAY.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -337,7 +339,7 @@ IMPL-TAG_SYSTEM:
     supersedes: []
     see_also:
       - IMPL-SUGGESTED_TAGS
-  detail_file: implementation-decisions/IMPL-TAG_SYSTEM.md
+  detail_file: implementation-decisions/IMPL-TAG_SYSTEM.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -397,7 +399,7 @@ IMPL-POPUP_SESSION:
     supersedes: []
     see_also:
       - IMPL-MESSAGE_HANDLING
-  detail_file: implementation-decisions/IMPL-POPUP_SESSION.md
+  detail_file: implementation-decisions/IMPL-POPUP_SESSION.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -449,7 +451,7 @@ IMPL-BOOKMARK_STATE_SYNC:
     supersedes: []
     see_also:
       - IMPL-MESSAGE_HANDLING
-  detail_file: implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.md
+  detail_file: implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -504,7 +506,7 @@ IMPL-OVERLAY_CONTROLS:
     supersedes: []
     see_also:
       - IMPL-OVERLAY
-  detail_file: implementation-decisions/IMPL-OVERLAY_CONTROLS.md
+  detail_file: implementation-decisions/IMPL-OVERLAY_CONTROLS.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -561,7 +563,7 @@ IMPL-SAFARI_ADAPTATION:
     supersedes: []
     see_also:
       - IMPL-CROSS_BROWSER
-  detail_file: implementation-decisions/IMPL-SAFARI_ADAPTATION.md
+  detail_file: implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -681,7 +683,7 @@ IMPL-OVERLAY_TEST_HARNESS:
     supersedes: []
     see_also:
       - IMPL-OVERLAY
-  detail_file: implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.md
+  detail_file: implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -724,7 +726,7 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
     supersedes: []
     see_also:
       - IMPL-MESSAGE_HANDLING
-  detail_file: implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.md
+  detail_file: implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.yaml
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -757,11 +759,15 @@ IMPL-UI_ACTION_CONTRACT:
       - REQ-UI_INSPECTION
     code_annotations:
       - IMPL-UI_ACTION_CONTRACT
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
-    author: AI Agent
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Extracted from index to detail file
 IMPL-UI_INSPECTOR:
   name: UI Inspector
   status: Active
@@ -789,11 +795,15 @@ IMPL-UI_INSPECTOR:
       - REQ-UI_INSPECTION
     code_annotations:
       - IMPL-UI_INSPECTOR
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-UI_INSPECTOR.yaml
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
-    author: AI Agent
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Extracted from index to detail file
 IMPL-UI_TESTABILITY_HOOKS:
   name: UI Testability Hooks
   status: Active
@@ -820,11 +830,15 @@ IMPL-UI_TESTABILITY_HOOKS:
     requirements:
       - REQ-UI_INSPECTION
       - REQ-MODULE_VALIDATION
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-UI_TESTABILITY_HOOKS.yaml
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
-    author: AI Agent
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Extracted from index to detail file
 IMPL-DEV_COMMAND_INSPECTION:
   name: DEV_COMMAND storage and router inspection
   status: Active
@@ -848,11 +862,15 @@ IMPL-DEV_COMMAND_INSPECTION:
   traceability:
     requirements:
       - REQ-UI_INSPECTION
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-DEV_COMMAND_INSPECTION.yaml
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
-    author: AI Agent
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Extracted from index to detail file
 IMPL-DEBUG_PANEL:
   name: Debug panel and structured UI/message logging
   status: Active
@@ -879,11 +897,15 @@ IMPL-DEBUG_PANEL:
   traceability:
     requirements:
       - REQ-UI_INSPECTION
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-DEBUG_PANEL.yaml
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
-    author: AI Agent
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Extracted from index to detail file
 IMPL-POPUP_BUNDLE:
   name: Popup bundle build
   status: Active
@@ -909,11 +931,15 @@ IMPL-POPUP_BUNDLE:
       - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
     architecture:
       - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-POPUP_BUNDLE.yaml
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
-    author: AI Agent
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-17"
+      author: AI Agent
+      reason: Extracted from index to detail file
 IMPL-BADGE_REFRESH:
   name: Badge refresh on overlay and popup changes
   status: Active
@@ -957,15 +983,20 @@ IMPL-BADGE_REFRESH:
     supersedes: []
     see_also:
       - IMPL-BOOKMARK_STATE_SYNC
+    composed_with:
+      - IMPL-MESSAGE_HANDLING
+      - IMPL-BOOKMARK_ROUTER
+  essence_pseudocode: |
+    After processMessage success for saveTag/deleteTag/saveBookmark: resolve tab (sender.tab or query active); updateBadgeForTab(tab).
   detail_file: implementation-decisions/IMPL-BADGE_REFRESH.yaml
   metadata:
     created:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-13T00:00:00.000Z
+      date: '2026-02-20'
       author: AI Agent
-      reason: Badge refresh on tag and private/toread changes
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-URL_TAGS_DISPLAY:
   name: URL Tags and Badge Display Module
   status: Active
@@ -1031,15 +1062,21 @@ IMPL-URL_TAGS_DISPLAY:
     see_also:
       - IMPL-BOOKMARK_ROUTER
       - IMPL-BADGE_REFRESH
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-BADGE_REFRESH
+      - IMPL-MESSAGE_HANDLING
+  essence_pseudocode: |
+    normalizeBookmarkForDisplay; getBookmarkForDisplay; getTagsForUrl; getBadgeDisplayValue. Message handler/popup/router/badge use single source.
   detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
   metadata:
     created:
       date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: '2026-02-17'
+      date: '2026-02-20'
       author: AI Agent
-      reason: 'Fixes: getCurrentBookmark always router; getTagsForUrl message; popup use bookmark when needsAuth'
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Implementation
   status: Active
@@ -1100,7 +1137,10 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - ARCH-STORAGE_INDEX_AND_ROUTER
     requirements:
       - REQ-LOCAL_BOOKMARKS_INDEX
-    tests: []
+    tests:
+      - tests/unit/message-handler-bookmarks-index.test.js
+      - tests/unit/bookmarks-table-index.test.js
+      - tests/unit/bookmarks-table-time.test.js
     code_annotations:
       - IMPL-LOCAL_BOOKMARKS_INDEX
   related_decisions:
@@ -1110,15 +1150,43 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     see_also:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-BOOKMARK_ROUTER
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+  essence_pseudocode: |
+    INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+    OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+    DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode
+
+    ON page load:
+      SEND getAggregatedBookmarksForIndex
+      ON response: SET allBookmarks = response.bookmarks (each item has storage "local"|"file"|"sync")
+      ON failure: SEND getLocalBookmarksForIndex; SET allBookmarks = response.bookmarks with storage "local"
+      applySearchAndFilter()
+
+    applySearchAndFilter():
+      filteredBookmarks = allBookmarks
+      APPLY stores filter (matchStoresFilter, getAllowedStores)
+      APPLY search (text)
+      APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)
+      APPLY exclude tags (matchExcludeTags)
+      SORT by sortKey (e.g. time desc)
+      renderTableBody(filteredBookmarks); updateRowCount()
+
+    Entry points:
+      Popup: bookmarksIndexBtn click -> openBookmarksIndex -> open tab to bookmarks-table.html
+      Options: bookmarks-index-link href -> extension URL to bookmarks-table.html
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     created:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-14T00:00:00.000Z
+      date: '2026-02-20'
       author: AI Agent
-      reason: Index shows local + file with Storage column; getAggregatedBookmarksForIndex; router.getAllBookmarksForIndex
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
       date: 2026-02-13T00:00:00.000Z
       validator: AI Agent
@@ -1167,15 +1235,19 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     supersedes: []
     see_also:
       - IMPL-LOCAL_BOOKMARKS_INDEX
+    composed_with:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+  essence_pseudocode: |
+    exportBookmarks(scope): source = allBookmarks|filteredBookmarks|selected; buildCsv(source); Blob+object URL+<a download>; revoke. updateExportButtonState() disables Export selected when no selection.
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
     created:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-14T00:00:00.000Z
+      date: '2026-02-20'
       author: AI Agent
-      reason: CSV includes Storage column; index data is local + file
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
       date: 2026-02-13T00:00:00.000Z
       validator: AI Agent
@@ -1228,15 +1300,21 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     supersedes: []
     see_also:
       - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+    composed_with:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - IMPL-BOOKMARK_ROUTER
+  essence_pseudocode: |
+    runImport(file): parseImportFile -> rows; if Only new filter by allBookmarks; for each row send saveBookmark({ ...row, preferredBackend }); count imported/skipped/failed; loadBookmarks(); show result.
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: '2026-02-20'
       author: AI Agent
-      reason: New implementation for import UX
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
       date: '2026-02-18'
       validator: AI Agent
@@ -1280,15 +1358,21 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
     see_also:
       - IMPL-LOCAL_BOOKMARKS_INDEX
       - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+    composed_with:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+      - IMPL-BOOKMARK_ROUTER
+  essence_pseudocode: |
+    ON load: getTree -> flattenTree -> allBookmarks. runImport: existingByUrl = getAggregatedBookmarksForIndex; for each selected build payload; Skip/Overwrite/Merge; saveBookmark per row; show imported/skipped/failed.
   detail_file: implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: '2026-02-20'
       author: AI Agent
-      reason: New implementation for browser bookmark import page
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
       date: '2026-02-18'
       validator: AI Agent
@@ -1332,7 +1416,7 @@ IMPL-CONFIG_STRUCT:
     depends_on: []
     supersedes: []
     see_also: []
-  detail_file: implementation-decisions/IMPL-CONFIG_STRUCT.md
+  detail_file: implementation-decisions/IMPL-CONFIG_STRUCT.yaml
   metadata:
     created:
       date: YYYY-MM-DD
@@ -1387,7 +1471,7 @@ IMPL-EXAMPLE_IMPLEMENTATION:
     depends_on: []
     supersedes: []
     see_also: []
-  detail_file: implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.md
+  detail_file: implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.yaml
   metadata:
     created:
       date: YYYY-MM-DD
@@ -1439,7 +1523,7 @@ IMPL-ERROR_HANDLING:
     depends_on: []
     supersedes: []
     see_also: []
-  detail_file: implementation-decisions/IMPL-ERROR_HANDLING.md
+  detail_file: implementation-decisions/IMPL-ERROR_HANDLING.yaml
   metadata:
     created:
       date: YYYY-MM-DD
@@ -1491,7 +1575,7 @@ IMPL-TESTING:
     depends_on: []
     supersedes: []
     see_also: []
-  detail_file: implementation-decisions/IMPL-TESTING.md
+  detail_file: implementation-decisions/IMPL-TESTING.yaml
   metadata:
     created:
       date: YYYY-MM-DD
@@ -1550,7 +1634,7 @@ IMPL-CODE_STYLE:
     supersedes: []
     see_also:
       - REQ-MAINTAINABILITY
-  detail_file: implementation-decisions/IMPL-CODE_STYLE.md
+  detail_file: implementation-decisions/IMPL-CODE_STYLE.yaml
   metadata:
     created:
       date: YYYY-MM-DD
@@ -1711,6 +1795,9 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
     supersedes: []
     see_also:
       - ARCH-STORAGE
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-STORAGE_INDEX
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml
   metadata:
     created:
@@ -1765,15 +1852,55 @@ IMPL-FILE_BOOKMARK_SERVICE:
     supersedes: []
     see_also:
       - IMPL-LOCAL_BOOKMARK_SERVICE
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-STORAGE_INDEX
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+  essence_pseudocode: |
+    INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
+    OUTPUT: bookmark object or list of bookmarks or success/error; shape matches provider contract
+    DATA: adapter (readBookmarksFile, writeBookmarksFile); file shape = { version: 1, bookmarks: map url -> bookmark }
+
+    LOAD bookmarks from file:
+      data = adapter.readBookmarksFile()
+      RETURN data.bookmarks (or {} if missing); in-memory map urlNorm -> bookmark
+
+    getBookmarkForUrl(url):
+      bookmarks = LOAD bookmarks from file
+      urlNorm = normalize(url)
+      RETURN bookmarks[urlNorm] or null
+
+    saveBookmark(data):
+      bookmarks = LOAD bookmarks from file
+      urlNorm = normalize(data.url)
+      bookmarks[urlNorm] = merge(data into bookmark shape with url, description, extended, tags, time, shared, toread, hash)
+      adapter.writeBookmarksFile({ version: 1, bookmarks })
+      RETURN { success: true }
+
+    deleteBookmark(url):
+      bookmarks = LOAD bookmarks from file
+      REMOVE bookmarks[normalize(url)]
+      adapter.writeBookmarksFile({ version: 1, bookmarks })
+      RETURN { success: true }
+
+    saveTag(data), deleteTag(data):
+      bookmark = getBookmarkForUrl(data.url); update tags; saveBookmark(bookmark) or equivalent
+      RETURN { success: true }
+
+    getRecentBookmarks(count):
+      bookmarks = LOAD bookmarks from file
+      list = values(bookmarks)
+      SORT list BY time DESCENDING
+      RETURN list[0..count-1]
   detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml
   metadata:
     created:
       date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: '2026-02-20'
       author: AI Agent
-      reason: File-based storage module per plan
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
       date: '2026-02-14'
       validator: AI Agent
@@ -1815,6 +1942,9 @@ IMPL-STORAGE_INDEX:
     supersedes: []
     see_also:
       - IMPL-BOOKMARK_ROUTER
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-LOCAL_BOOKMARK_SERVICE
   detail_file: implementation-decisions/IMPL-STORAGE_INDEX.yaml
   metadata:
     created:
@@ -1871,15 +2001,20 @@ IMPL-BOOKMARK_ROUTER:
     see_also:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-FILE_BOOKMARK_SERVICE
+    composed_with:
+      - IMPL-STORAGE_INDEX
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-FILE_BOOKMARK_SERVICE
+      - IMPL-MOVE_BOOKMARK_UI
   detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml
   metadata:
     created:
       date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: '2026-02-20'
       author: AI Agent
-      reason: Bookmark router per plan
+      reason: Add IMPL-MOVE_BOOKMARK_UI to composed_with
 IMPL-SYNC_BOOKMARK_SERVICE:
   name: Sync Bookmark Service
   status: Active
@@ -1896,12 +2031,15 @@ IMPL-SYNC_BOOKMARK_SERVICE:
     files:
       - path: src/features/storage/sync-bookmark-service.js
         description: SyncBookmarkService implementation
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml
   metadata:
     created:
-      date: '2026-02-15'
+      date: "2026-02-15"
+      author: AI Agent
     last_updated:
-      date: '2026-02-15'
+      date: "2026-02-15"
+      author: AI Agent
+      reason: Extracted from index to detail file
 IMPL-MOVE_BOOKMARK_UI:
   name: Move Bookmark Storage UI
   status: Active
@@ -1947,15 +2085,24 @@ IMPL-MOVE_BOOKMARK_UI:
     supersedes: []
     see_also:
       - IMPL-BOOKMARK_ROUTER
+    composed_with:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-STORAGE_INDEX
+      - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
+  essence_pseudocode: |
+    INPUT: currentUrl, currentPin, user action (select storage, save, toggle)
+    ON load: backend = getStorageBackendForUrl or default; set highlighted button; show/hide file↔browser toggle.
+    ON storage click: url = currentPin?.url || currentTab?.url; SEND moveBookmarkToStorage(url, target); result = response?.data ?? response; refresh on success.
+    ON save: data.preferredBackend = getSelectedStorageBackend(); SEND saveBookmark(data).
   detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml
   metadata:
     created:
       date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: '2026-02-20'
       author: AI Agent
-      reason: Move bookmark UI per plan
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
   name: Move Bookmark Response Handling and URL
   status: Active
@@ -1982,15 +2129,27 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
     code_annotations:
       - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-MOVE_BOOKMARK_UI
+      - IMPL-BOOKMARK_ROUTER
+    composed_with:
+      - IMPL-MOVE_BOOKMARK_UI
+      - IMPL-BOOKMARK_ROUTER
+  essence_pseudocode: |
+    Popup: result = response?.data ?? response; show success/error from result. Move URL = currentPin?.url || currentTab?.url.
+    Router: if bookmark has url but no time, toSave = { ...bookmark, time: now }; save to target, delete from source, update index.
   detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml
   metadata:
     created:
       date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: '2026-02-20'
       author: AI Agent
-      reason: 'Move bookmark fix: inner result, bookmark URL, allow no-time'
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-NATIVE_HOST_WRAPPER:
   name: Native Host Wrapper Implementation
   status: Active
@@ -2128,13 +2287,13 @@ IMPL-FILE_STORAGE_TYPED_PATH:
     see_also:
       - IMPL-FILE_BOOKMARK_SERVICE
       - IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml
   metadata:
     created:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
       reason: Path-based file storage per plan
 IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
@@ -2175,13 +2334,13 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
     supersedes: []
     see_also:
       - IMPL-NATIVE_HOST_WRAPPER
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE.yaml
   metadata:
     created:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
       reason: Helper path normalization and post-write verification
 IMPL-CONFIG_BACKUP_RESTORE:
@@ -2319,15 +2478,21 @@ IMPL-URL_INHIBITION:
   related_decisions:
     depends_on: []
     supersedes: []
+    see_also:
+      - IMPL-CONFIG_BACKUP_RESTORE
+    composed_with:
+      - IMPL-CONFIG_BACKUP_RESTORE
+  essence_pseudocode: |
+    getInhibitUrls(); addInhibitUrl(entry); setInhibitUrls(list); isUrlInhibited(url) — substring match against list.
   detail_file: implementation-decisions/IMPL-URL_INHIBITION.yaml
   metadata:
     created:
       date: "2026-02-17"
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: "2026-02-20"
       author: AI Agent
-      reason: Numbered token reinterpretation (CFG-004)
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-URL_UTILITIES:
   name: URL Utilities
   status: Active
@@ -2354,15 +2519,23 @@ IMPL-URL_UTILITIES:
   related_decisions:
     depends_on: []
     supersedes: []
+    see_also:
+      - IMPL-TEXT_UTILITIES
+      - IMPL-DOM_UTILITIES
+    composed_with:
+      - IMPL-ARRAY_OBJECT_UTILITIES
+      - IMPL-TEXT_UTILITIES
+  essence_pseudocode: |
+    processUrl(url); isValidUrl(url); getDomain(url). Pure functions in utils.js.
   detail_file: implementation-decisions/IMPL-URL_UTILITIES.yaml
   metadata:
     created:
       date: "2026-02-17"
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: "2026-02-20"
       author: AI Agent
-      reason: Numbered token reinterpretation (UTIL-001)
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-TEXT_UTILITIES:
   name: Text Utilities
   status: Active
@@ -2424,15 +2597,21 @@ IMPL-ARRAY_OBJECT_UTILITIES:
   related_decisions:
     depends_on: []
     supersedes: []
+    see_also:
+      - IMPL-URL_UTILITIES
+    composed_with:
+      - IMPL-URL_UTILITIES
+  essence_pseudocode: |
+    unique(arr), chunk(arr, size), compact(arr); deepClone(obj), isEmpty(obj), pick(obj, keys). Pure functions; no mutation.
   detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
   metadata:
     created:
       date: "2026-02-17"
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: "2026-02-20"
       author: AI Agent
-      reason: Numbered token reinterpretation (UTIL-003)
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-TIME_ASYNC_UTILITIES:
   name: Time and Async Utilities
   status: Active
@@ -2529,15 +2708,23 @@ IMPL-LOGGER_CONTEXT_LEVELS:
   related_decisions:
     depends_on: []
     supersedes: []
+    see_also:
+      - IMPL-LOG_LEVEL_CONFIG
+      - IMPL-LOGGER_LEGACY
+    composed_with:
+      - IMPL-LOG_LEVEL_CONFIG
+      - IMPL-LOGGER_LEGACY
+  essence_pseudocode: |
+    Logger(context); shouldLog(level); formatMessage; debug/info/warn/error. logger, createLogger.
   detail_file: implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml
   metadata:
     created:
       date: "2026-02-17"
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: "2026-02-20"
       author: AI Agent
-      reason: Numbered token reinterpretation (LOG-001)
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-LOG_LEVEL_CONFIG:
   name: Log Level Configuration
   status: Active
@@ -2564,15 +2751,23 @@ IMPL-LOG_LEVEL_CONFIG:
   related_decisions:
     depends_on: []
     supersedes: []
+    see_also:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOGGER_LEGACY
+    composed_with:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOGGER_LEGACY
+  essence_pseudocode: |
+    getLogLevel() from NODE_ENV; production => warn, else => debug. Used by shouldLog.
   detail_file: implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml
   metadata:
     created:
       date: "2026-02-17"
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: "2026-02-20"
       author: AI Agent
-      reason: Numbered token reinterpretation (LOG-002)
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-LOGGER_LEGACY:
   name: Logger Legacy Compatibility
   status: Active
@@ -2599,15 +2794,23 @@ IMPL-LOGGER_LEGACY:
   related_decisions:
     depends_on: []
     supersedes: []
+    see_also:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOG_LEVEL_CONFIG
+    composed_with:
+      - IMPL-LOGGER_CONTEXT_LEVELS
+      - IMPL-LOG_LEVEL_CONFIG
+  essence_pseudocode: |
+    log(context, ...args) -> debug; noisy for migration. Same logger module.
   detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
   metadata:
     created:
       date: "2026-02-17"
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: "2026-02-20"
       author: AI Agent
-      reason: Numbered token reinterpretation (LOG-003)
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 
 IMPL-SELECTION_TO_TAG_INPUT:
   name: Selection to tag input on icon click
@@ -2670,21 +2873,30 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
     details: []
   code_locations:
     files:
-      - src/features/storage/local-bookmark-service.js
-      - src/features/storage/file-bookmark-service.js
-      - src/features/storage/sync-bookmark-service.js
-      - src/features/pinboard/pinboard-service.js
-      - safari/src/features/pinboard/pinboard-service.js
-      - src/features/storage/url-tags-manager.js
-      - src/features/storage/bookmark-router.js
-      - src/ui/popup/PopupController.js
-      - src/ui/bookmarks-table/bookmarks-table-csv.js
-      - src/ui/bookmarks-table/bookmarks-table.js
+      - path: src/features/storage/local-bookmark-service.js
+      - path: src/features/storage/file-bookmark-service.js
+      - path: src/features/storage/sync-bookmark-service.js
+      - path: src/features/pinboard/pinboard-service.js
+      - path: safari/src/features/pinboard/pinboard-service.js
+      - path: src/features/storage/url-tags-manager.js
+      - path: src/features/storage/bookmark-router.js
+      - path: src/ui/popup/PopupController.js
+      - path: src/ui/bookmarks-table/bookmarks-table-csv.js
+      - path: src/ui/bookmarks-table/bookmarks-table.js
   traceability:
     architecture:
       - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
     requirements:
       - REQ-BOOKMARK_CREATE_UPDATE_TIMES
+    tests:
+      - tests/unit/file-bookmark-service.test.js
+      - tests/unit/sync-bookmark-service.test.js
+      - tests/unit/local-bookmark-service.test.js
+      - tests/unit/url-tags-manager.test.js
+      - tests/unit/bookmarks-table-export.test.js
+      - tests/unit/bookmarks-table-import.test.js
+      - tests/unit/pinboard-bookmark-times.test.js
+      - tests/unit/bookmark-router.test.js
     code_annotations:
       - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
   related_decisions:
@@ -2694,16 +2906,23 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-FILE_BOOKMARK_SERVICE
       - IMPL-URL_TAGS_DISPLAY
+    composed_with:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-FILE_BOOKMARK_SERVICE
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+  essence_pseudocode: |
+    Local/File/Sync: create -> time=now, updated_at=now; update -> keep time, updated_at=now. Pinboard: updated_at=time; never send to API. Normalize/legacy: updated_at=time if missing.
   detail_file: implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: '2026-02-20'
       author: AI Agent
-      reason: Initial creation
-  summary: All bookmark providers and normalization paths include updated_at; new/update and Pinboard rules as per ARCH-BOOKMARK_CREATE_UPDATE_TIMES; export/import preserve or default updated_at.
+      reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 
 IMPL-SCREENSHOT_MODE:
   name: Screenshot/Demo mode for placeholder screenshots
@@ -2752,16 +2971,15 @@ IMPL-SCREENSHOT_MODE:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-POPUP_THEME_CSS
       - REQ-LOCAL_BOOKMARKS_INDEX
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-SCREENSHOT_MODE.yaml
   metadata:
     created:
-      date: '2026-02-19'
+      date: "2026-02-19"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Screenshot fixes and formal seed-from-file; data-screenshot-ready; store checkbox for index
-  summary: Popup screenshot mode, awaited seed, data.url preference, data-screenshot-ready, seed-from-file, and Local store check for placeholder screenshots.
 
 IMPL-POPUP_THEME_CSS:
   name: Popup CSS honors ThemeManager (hb-theme-dark)
@@ -2797,13 +3015,68 @@ IMPL-POPUP_THEME_CSS:
     supersedes: []
     see_also:
       - IMPL-SCREENSHOT_MODE
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-POPUP_THEME_CSS.yaml
   metadata:
     created:
-      date: '2026-02-19'
+      date: "2026-02-19"
       author: AI Agent
     last_updated:
-      date: '2026-02-19'
+      date: "2026-02-19"
       author: AI Agent
       reason: Popup dark mode fix for screenshot and theme preference
-  summary: Popup CSS :root.hb-theme-dark so popup honors ThemeManager dark theme.
+
+IMPL-TAB_SEARCH_SERVICE:
+  name: Tab Search Service Implementation
+  status: Active
+  cross_references:
+    - REQ-SEARCH_FUNCTIONALITY
+  rationale:
+    why: Implements in-extension tab search by title with navigate-to-match and circular navigation.
+    problems_solved:
+      - Finding and switching to browser tabs by title from the extension
+      - Repeating search cycles through multiple matches (circular navigation)
+    benefits:
+      - Fast tab discovery and focus from popup/overlay
+      - Search history and continuation from last position
+  implementation_approach:
+    summary: TabSearchService queries chrome.tabs, filters by title substring, selects next match (with wrap-around), activates tab and focuses window; maintains lastSearchText and lastMatchedTabId for continuation.
+    details:
+      - searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }
+      - findNextTab(matchingTabs, restartTabId): circular navigation; addToSearchHistory
+      - Chrome API errors surfaced as rejected promise
+  code_locations:
+    files:
+      - path: src/features/search/tab-search-service.js
+        description: TabSearchService class
+    functions:
+      - name: searchAndNavigate
+        file: src/features/search/tab-search-service.js
+        description: Search tabs by title and navigate to next match
+      - name: findNextTab
+        file: src/features/search/tab-search-service.js
+        description: Select next tab in match list with circular wrap
+      - name: addToSearchHistory
+        file: src/features/search/tab-search-service.js
+        description: Maintain search history (move to front if duplicate)
+  traceability:
+    architecture: []
+    requirements:
+      - REQ-SEARCH_FUNCTIONALITY
+    tests:
+      - tests/unit/tab-search-service.test.js
+    code_annotations:
+      - IMPL-TAB_SEARCH_SERVICE
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with: []
+  detail_file: implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml
+  metadata:
+    created:
+      date: "2026-02-20"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Create IMPL for tab-search-service tests; add to index

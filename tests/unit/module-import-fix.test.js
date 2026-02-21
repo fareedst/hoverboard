@@ -1,9 +1,9 @@
 /**
- * [TEST-FIX-001-MODULE] - Module import fix validation tests
- * Tests the fixed module import functionality
+ * [TEST-FIX-001-MODULE] Module import fix validation - [IMPL-MESSAGE_HANDLING] [IMPL-ERROR_HANDLING] [ARCH-MESSAGE_HANDLING]
+ * Tests MessageClient and debug utils imports.
  */
 
-describe('[TEST-FIX-001-MODULE] Module Import Fix Validation', () => {
+describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] Module Import Fix Validation', () => {
   describe('[TEST-FIX-001-MODULE] MessageClient Import', () => {
     test('[TEST-FIX-001-MODULE] should properly import MessageClient', async () => {
       // [TEST-FIX-001-MODULE] - Test MessageClient import

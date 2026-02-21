@@ -1,0 +1,57 @@
+IMPL-TESTING:
+  name: Testing Implementation
+  status: Template
+  cross_references:
+    - ARCH-TESTING_STRATEGY
+  rationale:
+    why: Why this testing implementation was chosen
+    problems_solved:
+      - Problem 1
+    benefits:
+      - Benefit 1
+  implementation_approach:
+    summary: Testing implementation approach
+    details:
+      - Unit testing implementation details
+      - Integration testing implementation details
+      - Test utilities and helpers
+      - Test coverage tools
+  code_locations:
+    files:
+      - path: '*_test.ext'
+        description: Test files
+    functions:
+      - name: setupTestEnvironment
+        file: test_helpers.ext
+        description: Test setup logic
+  traceability:
+    architecture:
+      - ARCH-TESTING_STRATEGY
+    requirements: []
+    tests:
+      - tests/unit/simple.test.js
+      - All test files implement this strategy
+    code_annotations:
+      - IMPL-TESTING
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with: []
+  essence_pseudocode: |
+    Meta: test layout and conventions; no single executable algorithm.
+    setupTestEnvironment(): (create mocks, load fixtures, set env)
+    Test files: FOLLOW naming and location; REFERENCE [REQ-*]/[IMPL-*] in names/comments; RUN unit then integration per strategy
+  detail_file: implementation-decisions/IMPL-TESTING.yaml
+  metadata:
+    created:
+      date: YYYY-MM-DD
+      author: agent/contributor
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode (meta stub)
+    last_validated:
+      date: YYYY-MM-DD
+      validator: agent/contributor
+      result: pass

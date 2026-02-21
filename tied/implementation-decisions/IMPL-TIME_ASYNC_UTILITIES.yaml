@@ -1,39 +1,58 @@
-# [IMPL-TIME_ASYNC_UTILITIES] Time and async utilities (UTIL-004)
-name: Time and Async Utilities
-status: Active
-cross_references:
-  - REQ-SHARED_UTILITIES
-  - ARCH-SHARED_UTILITIES
-rationale:
-  why: delay (Promise), formatTimestamp, getRelativeTime for API/UI timing
-  problems_solved: []
-  benefits: []
-implementation_approach:
-  summary: timeUtils in src/shared/utils.js — delay, formatTimestamp, getRelativeTime
-  details: []
-code_locations:
-  files:
-    - path: src/shared/utils.js
-      description: timeUtils
-  functions: []
-traceability:
-  architecture:
-    - ARCH-SHARED_UTILITIES
-  requirements:
+IMPL-TIME_ASYNC_UTILITIES:
+  name: Time and Async Utilities
+  status: Active
+  cross_references:
     - REQ-SHARED_UTILITIES
-  code_annotations:
-    - IMPL-TIME_ASYNC_UTILITIES
-related_decisions:
-  depends_on: []
-  supersedes: []
-  see_also:
-    - IMPL-DOM_UTILITIES
-detail_file: implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml
-metadata:
-  created:
-    date: "2026-02-17"
-    author: AI Agent
-  last_updated:
-    date: "2026-02-17"
-    author: AI Agent
-    reason: Numbered token reinterpretation (UTIL-004)
+    - ARCH-SHARED_UTILITIES
+  rationale:
+    why: delay (Promise), formatTimestamp, getRelativeTime for API/UI timing
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: timeUtils in src/shared/utils.js — delay, formatTimestamp, getRelativeTime
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/utils.js
+        description: timeUtils
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    requirements:
+      - REQ-SHARED_UTILITIES
+    tests: []
+    code_annotations:
+      - IMPL-TIME_ASYNC_UTILITIES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-DOM_UTILITIES
+    composed_with:
+      - IMPL-DOM_UTILITIES
+  essence_pseudocode: |
+    INPUT: milliseconds (delay); timestamp (formatTimestamp, getRelativeTime)
+    OUTPUT: Promise that resolves after ms (delay); formatted date string (formatTimestamp); relative time string (getRelativeTime)
+    DATA: current time for relative calculation
+
+    delay(ms):
+      RETURN new Promise such that resolve() is called after ms (e.g. setTimeout(resolve, ms))
+
+    formatTimestamp(ts):
+      CONVERT timestamp to display format (e.g. locale date/time string)
+      RETURN formatted string
+
+    getRelativeTime(ts):
+      delta = now - ts
+      IF delta in seconds/minutes/hours/days THEN RETURN "X s/m/h/d ago" (or similar)
+      RETURN human-readable relative string
+  detail_file: implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with

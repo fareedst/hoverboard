@@ -1,0 +1,81 @@
+IMPL-TAG_SYSTEM:
+  name: Tag Service Implementation
+  status: Active
+  cross_references:
+    - ARCH-TAG_SYSTEM
+    - REQ-RECENT_TAGS_SYSTEM
+    - REQ-TAG_INPUT_SANITIZATION
+  rationale:
+    why: Concrete tag management logic
+    problems_solved:
+      - Tag sanitization
+      - Recent tags tracking
+    benefits:
+      - Secure tag handling
+      - Fast tag reuse
+  implementation_approach:
+    summary: TagService with sanitization, recent tags caching, suggestions
+    details:
+      - sanitizeTag function
+      - Recent tags TTL caching
+      - Tag history persistence
+      - Suggestion algorithm
+  code_locations:
+    files:
+      - path: src/features/tagging/tag-service.js
+        description: Tag service
+    functions:
+      - name: sanitizeTag
+        file: src/features/tagging/tag-service.js
+        description: Tag sanitization
+      - name: getRecentTags
+        file: src/features/tagging/tag-service.js
+        description: Recent tags retrieval
+  traceability:
+    architecture:
+      - ARCH-TAG_SYSTEM
+    requirements:
+      - REQ-RECENT_TAGS_SYSTEM
+      - REQ-TAG_MANAGEMENT
+      - REQ-TAG_INPUT_SANITIZATION
+    tests:
+      - tests/unit/tag-sanitization-fix.test.js
+      - tests/unit/tag-recent-behavior.test.js
+      - tests/unit/tag-recent-tracking.test.js
+      - tests/unit/tag-synchronization.test.js
+      - tests/unit/tag-storage.test.js
+      - tests/unit/overlay-tag-persistence.test.js
+    code_annotations:
+      - IMPL-TAG_SYSTEM
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-SUGGESTED_TAGS
+    composed_with:
+      - IMPL-SUGGESTED_TAGS
+  essence_pseudocode: |
+    INPUT: raw tag string (sanitize); none (getRecentTags); bookmark data (trackBookmarkTags)
+    OUTPUT: sanitized tag; list of recent tags; updated recent-tags cache
+    DATA: recent tags cache (TTL); persisted tag history
+
+    sanitizeTag(raw):
+      TRIM; normalize whitespace; apply allowed charset/length
+      RETURN sanitized string
+
+    getRecentTags():
+      IF cache valid: RETURN cached list
+      LOAD tag history from persistence; SORT by recency; UPDATE cache; RETURN list
+
+    trackBookmarkTags(bookmarkData):
+      tags = extractTagsFromBookmarkData(bookmarkData)
+      APPEND to tag history; PERSIST; invalidate cache
+  detail_file: implementation-decisions/IMPL-TAG_SYSTEM.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

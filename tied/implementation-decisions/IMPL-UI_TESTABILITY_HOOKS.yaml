@@ -1,0 +1,60 @@
+IMPL-UI_TESTABILITY_HOOKS:
+  name: UI Testability Hooks
+  status: Active
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+    - REQ-MODULE_VALIDATION
+  rationale:
+    why: Optional callbacks so unit/integration tests can assert on message handling and UI state without DOM
+    problems_solved:
+      - Tests cannot observe message flow or popup/overlay state without DOM
+    benefits:
+      - MessageHandler.setOnMessageProcessed(fn); PopupController.setOnAction(fn), setOnStateChange(fn); OverlayManager.setOnStateChange(fn)
+  implementation_approach:
+    summary: Optional _onMessageProcessed in MessageHandler (called after processMessage); _onAction/_onStateChange in PopupController; _onStateChange in OverlayManager (visible, contentSnapshot)
+  code_locations:
+    files:
+      - path: src/core/message-handler.js
+        description: setOnMessageProcessed
+      - path: src/ui/popup/PopupController.js
+        description: setOnAction, setOnStateChange
+      - path: src/features/content/overlay-manager.js
+        description: setOnStateChange
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    requirements:
+      - REQ-UI_INSPECTION
+      - REQ-MODULE_VALIDATION
+    tests:
+      - tests/unit/overlay-refresh-accessibility.test.js
+    code_annotations:
+      - IMPL-UI_TESTABILITY_HOOKS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+    composed_with:
+      - IMPL-UI_ACTION_CONTRACT
+      - IMPL-MESSAGE_HANDLING
+  essence_pseudocode: |
+    INPUT: optional callback fn (set by tests); message (processMessage); popup/overlay action or state change
+    OUTPUT: test can assert on message payload, action id, state without DOM
+    DATA: MessageHandler._onMessageProcessed; PopupController._onAction, _onStateChange; OverlayManager._onStateChange
+
+    MessageHandler: AFTER processMessage(msg): IF _onMessageProcessed: CALL with msg/result
+    PopupController: ON action: IF _onAction: CALL with actionId; ON state change: IF _onStateChange: CALL with state
+    OverlayManager: ON visibility/content change: IF _onStateChange: CALL with { visible, contentSnapshot }
+
+    Tests: SET callbacks; TRIGGER message/action; ASSERT callback invoked with expected args
+  detail_file: implementation-decisions/IMPL-UI_TESTABILITY_HOOKS.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

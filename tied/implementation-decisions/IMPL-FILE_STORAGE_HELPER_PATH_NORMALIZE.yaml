@@ -1,0 +1,65 @@
+IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
+  name: File Storage Helper Path Normalization
+  status: Active
+  cross_references:
+    - IMPL-FILE_STORAGE_TYPED_PATH
+    - REQ-FILE_BOOKMARK_STORAGE
+  rationale:
+    why: Chrome native host can set HOME with a trailing slash; concatenation produced paths like /Users/name//.hoverboard so the write could fail or create wrong path; return success only when file exists and is non-empty
+    problems_solved:
+      - Bookmark file not created when extension reported success (HOME trailing slash)
+      - False success when write actually failed
+    benefits:
+      - expand_tilde uses ${HOME%/} so resolved path has no double slash
+      - Helper returns error if file is missing or empty after write
+  implementation_approach:
+    summary: In helper.sh expand_tilde use H=${HOME%/}; after write, verify file exists and -s (non-empty) before echoing success
+    details:
+      - 'expand_tilde: H="${HOME%/}"; use H in all branches so ~/.hoverboard becomes /home/user/.hoverboard not /home/user//.hoverboard'
+      - 'writeBookmarksFile: after echo DATA > FILE, if [ ! -f "$FILE" ] || [ ! -s "$FILE" ]; then echo error and exit'
+  code_locations:
+    files:
+      - path: native_host/helper.sh
+        description: expand_tilde and writeBookmarksFile post-write check
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-FILE_BOOKMARK_PROVIDER
+    requirements:
+      - REQ-FILE_BOOKMARK_STORAGE
+    tests:
+      - tests/unit/helper-path-normalize.test.js
+    code_annotations:
+      - IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE
+  related_decisions:
+    depends_on:
+      - IMPL-FILE_STORAGE_TYPED_PATH
+    supersedes: []
+    see_also:
+      - IMPL-NATIVE_HOST_WRAPPER
+    composed_with:
+      - IMPL-FILE_STORAGE_TYPED_PATH
+  essence_pseudocode: |
+    INPUT: path string (may contain ~); file path and data (for write)
+    OUTPUT: resolved path (no double slash from HOME); success only if file exists and non-empty after write
+    DATA: HOME with trailing slash stripped (H = ${HOME%/})
+
+    expand_tilde(path):
+      H = strip_trailing_slash(HOME)
+      IF path is ~ or ~/...: REPLACE ~ with H; RETURN (no // in result)
+      RETURN path
+
+    writeBookmarksFile(path, data):
+      path = expand_tilde(path)
+      WRITE data to path (create dir if needed)
+      IF file missing OR file empty: OUTPUT error; EXIT failure
+      ELSE: OUTPUT success
+  detail_file: implementation-decisions/IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE.yaml
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

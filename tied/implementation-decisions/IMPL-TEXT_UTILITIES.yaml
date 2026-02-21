@@ -1,39 +1,58 @@
-# [IMPL-TEXT_UTILITIES] Text processing for UI (UTIL-002)
-name: Text Utilities
-status: Active
-cross_references:
-  - REQ-SHARED_UTILITIES
-  - ARCH-SHARED_UTILITIES
-rationale:
-  why: truncate, normalizeText, escapeHtml for UI display and user input
-  problems_solved: []
-  benefits: []
-implementation_approach:
-  summary: stringUtils in src/shared/utils.js — truncate, normalizeText, escapeHtml (textContent)
-  details: []
-code_locations:
-  files:
-    - path: src/shared/utils.js
-      description: stringUtils
-  functions: []
-traceability:
-  architecture:
-    - ARCH-SHARED_UTILITIES
-  requirements:
+IMPL-TEXT_UTILITIES:
+  name: Text Utilities
+  status: Active
+  cross_references:
     - REQ-SHARED_UTILITIES
-  code_annotations:
-    - IMPL-TEXT_UTILITIES
-related_decisions:
-  depends_on: []
-  supersedes: []
-  see_also:
-    - IMPL-URL_UTILITIES
-detail_file: implementation-decisions/IMPL-TEXT_UTILITIES.yaml
-metadata:
-  created:
-    date: "2026-02-17"
-    author: AI Agent
-  last_updated:
-    date: "2026-02-17"
-    author: AI Agent
-    reason: Numbered token reinterpretation (UTIL-002)
+    - ARCH-SHARED_UTILITIES
+  rationale:
+    why: truncate, normalizeText, escapeHtml for UI display and user input
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: stringUtils in src/shared/utils.js — truncate, normalizeText, escapeHtml (textContent)
+    details: []
+  code_locations:
+    files:
+      - path: src/shared/utils.js
+        description: stringUtils
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-SHARED_UTILITIES
+    requirements:
+      - REQ-SHARED_UTILITIES
+    tests: []
+    code_annotations:
+      - IMPL-TEXT_UTILITIES
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-URL_UTILITIES
+    composed_with:
+      - IMPL-URL_UTILITIES
+  essence_pseudocode: |
+    INPUT: string and optional max length (truncate); string (normalizeText, escapeHtml)
+    OUTPUT: string (truncated, normalized, or HTML-escaped)
+    DATA: ellipsis string (e.g. "…")
+
+    truncate(str, maxLen):
+      IF str.length <= maxLen RETURN str
+      RETURN str.slice(0, maxLen) + ellipsis
+
+    normalizeText(str):
+      NORMALIZE whitespace and Unicode (e.g. trim, collapse spaces) for display or comparison
+      RETURN normalized string
+
+    escapeHtml(str):
+      ENCODE characters that are significant in HTML (e.g. <, >, &, ") so string is safe for textContent or attribute use
+      RETURN encoded string
+  detail_file: implementation-decisions/IMPL-TEXT_UTILITIES.yaml
+  metadata:
+    created:
+      date: "2026-02-17"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with

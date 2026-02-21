@@ -1,0 +1,87 @@
+IMPL-FILE_STORAGE_TYPED_PATH:
+  name: File Storage User-Typed Path
+  status: Active
+  cross_references:
+    - REQ-FILE_BOOKMARK_STORAGE
+    - ARCH-FILE_BOOKMARK_PROVIDER
+    - IMPL-NATIVE_HOST_WRAPPER
+  rationale:
+    why: Allow file storage without folder picker; user types path; native host performs read/write so no browser file permissions for directory listing
+    problems_solved:
+      - Folder picker unreliable on options page; path-based flow avoids picker
+      - Single default path (~/.hoverboard) works out of the box
+    benefits:
+      - 'Options: path input (default ~/.hoverboard); native host reads/writes hoverboard-bookmarks.json; no offscreen doc for path flow'
+      - Service worker uses NativeHostFileBookmarkAdapter when path set; picker flow (MessageFileBookmarkAdapter) when no path
+  implementation_approach:
+    summary: Options path input saved to hoverboard_file_storage_path; helper.sh/helper.ps1 handle readBookmarksFile/writeBookmarksFile with path (expand ~); NativeHostFileBookmarkAdapter; initBookmarkProvider prefers path over picker
+    details:
+      - 'Options: file-storage-path input, default ~/.hoverboard; persist on save and blur'
+      - 'Helper: path as directory -> path/hoverboard-bookmarks.json; path ending .json as file; create dir on write; see IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE for HOME normalization and post-write check'
+      - 'NativeHostFileBookmarkAdapter: get path from storage, sendNativeMessage with type and path'
+      - 'Service worker: path set -> NativeHostFileBookmarkAdapter; else picker configured -> MessageFileBookmarkAdapter'
+  code_locations:
+    files:
+      - path: src/ui/options/options.html
+        description: Path input for file storage
+      - path: src/ui/options/options.js
+        description: Load/save path, persistFileStoragePath
+      - path: native_host/helper.sh
+        description: readBookmarksFile/writeBookmarksFile with path (Unix)
+      - path: native_host/helper.ps1
+        description: readBookmarksFile/writeBookmarksFile with path (Windows)
+      - path: src/features/storage/native-host-file-bookmark-adapter.js
+        description: Adapter using native host and path from storage
+      - path: src/core/service-worker.js
+        description: initBookmarkProvider path vs picker branch
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-FILE_BOOKMARK_PROVIDER
+    requirements:
+      - REQ-FILE_BOOKMARK_STORAGE
+    tests: []
+    code_annotations:
+      - IMPL-FILE_STORAGE_TYPED_PATH
+  related_decisions:
+    depends_on:
+      - IMPL-NATIVE_HOST_WRAPPER
+      - IMPL-FILE_BOOKMARK_SERVICE
+    supersedes: []
+    see_also:
+      - IMPL-FILE_BOOKMARK_SERVICE
+      - IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE
+    composed_with:
+      - IMPL-FILE_BOOKMARK_SERVICE
+      - IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE
+      - IMPL-NATIVE_HOST_WRAPPER
+  essence_pseudocode: |
+    INPUT: path string (user-typed, default ~/.hoverboard); read/write requests with path
+    OUTPUT: persisted path in hoverboard_file_storage_path; file contents read/written via native host
+    DATA: hoverboard_file_storage_path (storage); path -> if dir then path/hoverboard-bookmarks.json else path as file
+
+    Options (path input):
+      ON load: READ hoverboard_file_storage_path; display in input (default ~/.hoverboard)
+      ON save/blur: WRITE path to storage
+
+    resolveFilePath(path):
+      path = expand_tilde(path)  // IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE
+      IF path ends with .json: RETURN path AS file
+      ELSE: RETURN path + "/hoverboard-bookmarks.json"
+
+    readBookmarksFile(path), writeBookmarksFile(path, data):
+      path = resolveFilePath(path)
+      SEND native message (type, path) to helper; helper reads/writes file; RETURN result
+
+    initBookmarkProvider():
+      IF path set in storage: USE NativeHostFileBookmarkAdapter(path)
+      ELSE IF picker configured: USE MessageFileBookmarkAdapter
+  detail_file: implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml
+  metadata:
+    created:
+      date: "2026-02-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-20"
+      author: AI Agent
+      reason: Add essence_pseudocode and complete composed_with

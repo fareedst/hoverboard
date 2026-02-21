@@ -6,24 +6,41 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
     - REQ-BOOKMARK_CREATE_UPDATE_TIMES
   rationale:
     why: Provider-specific rules for setting and normalizing time and updated_at.
-    problems_solved: []
-    benefits: []
+    problems_solved:
+      - No consistent create/update timestamps across local, file, sync, and Pinboard
+    benefits:
+      - Every bookmark has time (create) and updated_at (last update); export/import and display use them
   implementation_approach:
     summary: 'LocalBookmarkService, FileBookmarkService, SyncBookmarkService: createEmptyBookmark and _normalizeBookmark include updated_at; saveBookmark sets time and updated_at on create (both now), preserves time and sets updated_at on update. PinboardService: parseBookmarkResponse and createEmptyBookmark set updated_at = time; do not send updated_at to API. url-tags-manager normalizeBookmarkForDisplay, bookmark-router moveBookmarkToStorage, PopupController empty pin, export/import CSV and JSON include updated_at; legacy read normalizes updated_at = time.'
-    details: []
+    details:
+      - 'Local/File/Sync: on create set time = now, updated_at = now; on update keep time, set updated_at = now'
+      - 'Pinboard: API returns only time; set updated_at = time in parseBookmarkResponse/createEmptyBookmark; never send updated_at to API'
+      - 'Normalize/display/move/export/import: always include updated_at; if missing (legacy) use updated_at = time'
   code_locations:
     files:
-      - src/features/storage/local-bookmark-service.js
-      - src/features/storage/file-bookmark-service.js
-      - src/features/storage/sync-bookmark-service.js
-      - src/features/pinboard/pinboard-service.js
-      - safari/src/features/pinboard/pinboard-service.js
-      - src/features/storage/url-tags-manager.js
-      - src/features/storage/bookmark-router.js
-      - src/ui/popup/PopupController.js
-      - safari/src/ui/popup/PopupController.js
-      - src/ui/bookmarks-table/bookmarks-table-csv.js
-      - src/ui/bookmarks-table/bookmarks-table.js
+      - path: src/features/storage/local-bookmark-service.js
+        description: createEmptyBookmark, _normalizeBookmark, saveBookmark time/updated_at
+      - path: src/features/storage/file-bookmark-service.js
+        description: same contract as local
+      - path: src/features/storage/sync-bookmark-service.js
+        description: same contract as local
+      - path: src/features/pinboard/pinboard-service.js
+        description: parseBookmarkResponse, createEmptyBookmark updated_at = time
+      - path: safari/src/features/pinboard/pinboard-service.js
+        description: Safari Pinboard time/updated_at
+      - path: src/features/storage/url-tags-manager.js
+        description: normalizeBookmarkForDisplay updated_at
+      - path: src/features/storage/bookmark-router.js
+        description: moveBookmarkToStorage toSave time/updated_at
+      - path: src/ui/popup/PopupController.js
+        description: empty pin time/updated_at
+      - path: safari/src/ui/popup/PopupController.js
+        description: Safari popup empty pin
+      - path: src/ui/bookmarks-table/bookmarks-table-csv.js
+        description: export/import CSV updated_at
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+        description: table display updated_at
+    functions: []
   traceability:
     architecture:
       - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
@@ -40,9 +57,6 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       - tests/unit/bookmark-router.test.js
     code_annotations:
       - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
-  # Unintended regression in same commit: PopupController suggested-tags tokenizer regex was
-  # changed and broke suggested tags. Fixed by restoring regex to match tag-service.js. See
-  # IMPL-SUGGESTED_TAGS (regression_lesson_dca25b3, popup_tokenizer_sync), REQ-SUGGESTED_TAGS_*.
   related_decisions:
     depends_on: []
     supersedes: []
@@ -50,17 +64,42 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-FILE_BOOKMARK_SERVICE
       - IMPL-URL_TAGS_DISPLAY
+    composed_with:
+      - IMPL-LOCAL_BOOKMARK_SERVICE
+      - IMPL-FILE_BOOKMARK_SERVICE
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
+  essence_pseudocode: |
+    INPUT: bookmark data (for save), API response (for Pinboard), raw record (for normalize)
+    OUTPUT: bookmark with time and updated_at set per provider and context
+    DATA: time = create time; updated_at = last update time
+
+    Local/File/Sync saveBookmark(data):
+      IF url not in store (create):
+        SET time = now, updated_at = now
+      ELSE (update):
+        KEEP existing time; SET updated_at = now
+      PERSIST
+
+    Pinboard:
+      parseBookmarkResponse / createEmptyBookmark: SET updated_at = time (API has no updated_at)
+      SEND to API: do NOT include updated_at
+
+    Normalize (url-tags-manager, display, move, export/import):
+      IF bookmark has no updated_at: SET updated_at = time   // legacy
+      ELSE: keep updated_at
+      Include updated_at in payload/CSV/JSON
   detail_file: implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
     created:
       date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: '2026-02-20'
       author: AI Agent
-      reason: Initial creation
+      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; fix code_locations; remove extraneous
     last_validated:
       date: '2026-02-18'
       validator: AI Agent
       result: pass
-  summary: All bookmark providers and normalization paths include updated_at; new/update and Pinboard rules as per ARCH-BOOKMARK_CREATE_UPDATE_TIMES; export/import preserve or default updated_at.
