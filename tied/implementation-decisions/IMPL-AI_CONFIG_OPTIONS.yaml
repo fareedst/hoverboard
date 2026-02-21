@@ -1,0 +1,74 @@
+IMPL-AI_CONFIG_OPTIONS:
+  name: AI Config in Options
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_CONFIG
+    - REQ-AI_TAGGING_CONFIG
+  rationale:
+    why: Options page must expose and persist AI API key, provider, and optional limit; same pattern as auth token
+    problems_solved: []
+    benefits:
+      - Single place to configure AI tagging
+  implementation_approach:
+    summary: ConfigManager defaultConfig and storage include aiApiKey, aiProvider, aiTagLimit; options.html section; options.js bind elements, load from config, save to config, validate; Test button calls testAiApiKey(apiKey, provider) or message to SW.
+    details:
+      - getDefaultConfiguration: aiApiKey '', aiProvider 'openai', aiTagLimit 64
+      - options.html: section "AI Tagging" with label "AI API Key", input (password or text), label "Provider", select (OpenAI, Gemini), "Test API key" button
+      - options.js: bind aiApiKey input, aiProvider select, test button; loadSettings reads from getStoredSettings; saveSettings includes aiApiKey, aiProvider, aiTagLimit in updateConfig
+  code_locations:
+    files:
+      - path: src/config/config-manager.js
+        description: Defaults and getStoredSettings/updateConfig for AI fields
+      - path: src/ui/options/options.html
+        description: AI Tagging section
+      - path: src/ui/options/options.js
+        description: Bind, load, save, Test button handler
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_CONFIG
+    requirements:
+      - REQ-AI_TAGGING_CONFIG
+    tests:
+      - tests/unit/config-manager.test.js (AI config)
+      - options load/save tests if any
+    code_annotations:
+      - IMPL-AI_CONFIG_OPTIONS
+      - REQ-AI_TAGGING_CONFIG
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-CONFIG_MIGRATION
+      - IMPL-AI_TAG_TEST
+    composed_with:
+      - IMPL-AI_TAG_TEST
+  essence_pseudocode: |
+    INPUT: user edits in options (apiKey, provider, optional limit)
+    OUTPUT: persisted config; Test result (ok or error message)
+
+    loadSettings():
+      settings = getStoredSettings()
+      SET aiApiKey input = settings.aiApiKey ?? ''
+      SET provider select = settings.aiProvider ?? 'openai'
+      SET limit input = settings.aiTagLimit ?? 64
+
+    saveSettings():
+      settings = { aiApiKey: trim(aiApiKey input), aiProvider: provider select value, aiTagLimit: number(limit input) }
+      updateConfig(settings)
+
+    on Test click:
+      apiKey = trim(aiApiKey input)
+      provider = provider select value
+      IF !apiKey THEN show error; RETURN
+      result = testAiApiKey(apiKey, provider)  // or send message to SW
+      IF result.ok THEN show success ELSE show result.error
+  detail_file: implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Initial creation

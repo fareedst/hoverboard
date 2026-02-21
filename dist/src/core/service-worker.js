@@ -127,8 +127,12 @@ var init_config_manager = __esm({
           // Current and recent tag elements in pixels
           fontSizeBase: 14,
           // Base UI text size in pixels
-          fontSizeInputs: 14
+          fontSizeInputs: 14,
           // Input fields and buttons font size in pixels
+          // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging (optional)
+          aiApiKey: "",
+          aiProvider: "openai",
+          aiTagLimit: 64
         };
       }
       /**
@@ -5541,6 +5545,115 @@ var TabSearchService = class {
   }
 };
 
+// src/features/ai/session-tags.js
+var SESSION_TAGS_KEY = "hoverboard_session_tags";
+var inMemorySessionTags = [];
+function hasSessionStorage() {
+  return typeof chrome !== "undefined" && chrome.storage && typeof chrome.storage.session !== "undefined" && chrome.storage.session.get;
+}
+async function getSessionTags() {
+  if (hasSessionStorage()) {
+    try {
+      const result = await chrome.storage.session.get(SESSION_TAGS_KEY);
+      const arr = result[SESSION_TAGS_KEY];
+      return Array.isArray(arr) ? arr.map((t) => String(t).toLowerCase()) : [];
+    } catch {
+      return [];
+    }
+  }
+  return inMemorySessionTags.map((t) => String(t).toLowerCase());
+}
+async function recordSessionTags(tags) {
+  if (!Array.isArray(tags) || tags.length === 0) return;
+  const current = await getSessionTags();
+  const set = new Set(current);
+  for (const tag of tags) {
+    const t = String(tag).trim().toLowerCase();
+    if (t) set.add(t);
+  }
+  const arr = Array.from(set);
+  if (hasSessionStorage()) {
+    try {
+      await chrome.storage.session.set({ [SESSION_TAGS_KEY]: arr });
+    } catch {
+      inMemorySessionTags = arr;
+    }
+  } else {
+    inMemorySessionTags = arr;
+  }
+}
+
+// src/features/ai/ai-tagging-provider.js
+var OPENAI_CHAT_URL = "https://api.openai.com/v1/chat/completions";
+var GEMINI_GENERATE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+function defaultSanitize(str) {
+  if (!str || typeof str !== "string") return null;
+  const t = str.trim();
+  return t.length > 0 ? t : null;
+}
+async function requestAiTags(provider, apiKey, text, limit = 64, options = {}) {
+  const sanitizeTag = options.sanitizeTag || defaultSanitize;
+  const fetchFn = options.fetchFn || globalThis.fetch;
+  const safeLimit = Math.max(1, Math.min(Number(limit) || 64, 128));
+  const excerpt = text && String(text).trim() ? String(text).slice(0, 12e3) : "";
+  const prompt = `Return only a list of up to ${safeLimit} tags for this page, one tag per line. No numbering or explanation. Only the tags, one per line.
+
+Page content:
+${excerpt}`;
+  let raw;
+  if (provider === "openai") {
+    const res = await fetchFn(OPENAI_CHAT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 1024
+      })
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(res.statusText || errText || "OpenAI request failed");
+    }
+    const data = await res.json();
+    raw = data.choices?.[0]?.message?.content || "";
+  } else if (provider === "gemini") {
+    const url = `${GEMINI_GENERATE_URL}?key=${encodeURIComponent(apiKey)}`;
+    const res = await fetchFn(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { maxOutputTokens: 1024 }
+      })
+    });
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(res.statusText || errText || "Gemini request failed");
+    }
+    const data = await res.json();
+    const part = data.candidates?.[0]?.content?.parts?.[0];
+    raw = part?.text || "";
+  } else {
+    return [];
+  }
+  const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  const tags = [];
+  const seen = /* @__PURE__ */ new Set();
+  for (const line of lines) {
+    const tag = sanitizeTag(line);
+    if (tag != null && tag !== "" && !seen.has(tag.toLowerCase())) {
+      tags.push(tag);
+      seen.add(tag.toLowerCase());
+    }
+    if (tags.length >= safeLimit) break;
+  }
+  return tags;
+}
+
 // src/core/message-handler.js
 init_utils();
 var MESSAGE_TYPES = {
@@ -5594,7 +5707,12 @@ var MESSAGE_TYPES = {
   GET_OVERLAY_CONFIG: "getOverlayConfig",
   // Development/debug
   DEV_COMMAND: "devCommand",
-  ECHO: "echo"
+  ECHO: "echo",
+  // [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] AI tagging
+  GET_PAGE_CONTENT: "GET_PAGE_CONTENT",
+  GET_AI_TAGS: "GET_AI_TAGS",
+  GET_SESSION_TAGS: "getSessionTags",
+  RECORD_SESSION_TAGS: "recordSessionTags"
 };
 var MessageHandler = class {
   constructor(bookmarkProvider = null, tagService = null) {
@@ -5756,6 +5874,18 @@ var MessageHandler = class {
           break;
         case MESSAGE_TYPES.ECHO:
           response = { echo: data, timestamp: Date.now() };
+          break;
+        case MESSAGE_TYPES.GET_PAGE_CONTENT:
+          response = await this.handleGetPageContent(data);
+          break;
+        case MESSAGE_TYPES.GET_AI_TAGS:
+          response = await this.handleGetAiTags(data);
+          break;
+        case MESSAGE_TYPES.GET_SESSION_TAGS:
+          response = await this.handleGetSessionTags();
+          break;
+        case MESSAGE_TYPES.RECORD_SESSION_TAGS:
+          response = await this.handleRecordSessionTags(data);
           break;
         case MESSAGE_TYPES.DEV_COMMAND:
           response = await this.processDevCommand(data, senderContext);
@@ -5976,6 +6106,70 @@ var MessageHandler = class {
     debugLog("[MESSAGE-HANDLER] Returning options:", options);
     return options;
   }
+  /**
+   * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-AI_TAGGING_READABILITY]
+   * Get page title and text via scripting.executeScript so it works even when the content script
+   * was not injected (e.g. tab opened before extension load). Uses body.innerText; same max length as Readability path.
+   */
+  async handleGetPageContent(data) {
+    const tabId = data?.tabId;
+    if (tabId == null) return { success: false, error: "tabId required" };
+    const timeoutError = { success: false, error: "Page content unavailable. Reload the page and try again, or use a different tab." };
+    const scripting = typeof chrome !== "undefined" && chrome.scripting ? chrome.scripting : typeof safariEnhancements !== "undefined" && safariEnhancements.scripting ? safariEnhancements.scripting : null;
+    if (!scripting) return timeoutError;
+    const extractInPage = () => {
+      const title = document.title && String(document.title).trim() || "";
+      const raw = document.body && document.body.innerText ? String(document.body.innerText).trim() : "";
+      return { title, textContent: raw };
+    };
+    try {
+      const results = await scripting.executeScript({ target: { tabId }, func: extractInPage });
+      const raw = results && results[0] && results[0].result;
+      if (!raw || typeof raw !== "object") return timeoutError;
+      const maxLen = 16e3;
+      const textContent = raw.textContent && raw.textContent.length > maxLen ? raw.textContent.slice(0, maxLen) : raw.textContent || "";
+      return { title: raw.title || "", textContent };
+    } catch (e) {
+      debugError("[MESSAGE-HANDLER] GET_PAGE_CONTENT executeScript failed:", e);
+      return timeoutError;
+    }
+  }
+  /**
+   * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-AI_TAGGING_PROVIDER]
+   * Call AI provider for tags; uses config aiApiKey, aiProvider, aiTagLimit and TagService.sanitizeTag.
+   */
+  async handleGetAiTags(data) {
+    const config = await this.configManager.getConfig();
+    const apiKey = (config.aiApiKey || "").trim();
+    if (!apiKey) return { success: false, error: "No AI API key configured", tags: [] };
+    const provider = config.aiProvider || "openai";
+    const limit = Math.min(128, Math.max(1, Number(config.aiTagLimit) || 64));
+    const text = (data?.text || "").trim();
+    if (!text) return { success: false, error: "No text", tags: [] };
+    try {
+      const sanitizeTag = (s) => this.tagService.sanitizeTag(s);
+      const tags = await requestAiTags(provider, apiKey, text, limit, { sanitizeTag });
+      return { success: true, tags };
+    } catch (err) {
+      debugError("[MESSAGE-HANDLER] GET_AI_TAGS failed:", err);
+      return { success: false, error: err.message, tags: [] };
+    }
+  }
+  /**
+   * [REQ-AI_TAGGING_POPUP] [IMPL-SESSION_TAGS] Return session tags (lowercase) for auto-apply.
+   */
+  async handleGetSessionTags() {
+    const tags = await getSessionTags();
+    return { success: true, tags };
+  }
+  /**
+   * [REQ-AI_TAGGING_POPUP] [IMPL-SESSION_TAGS] Add tags to session set (called when user adds tags).
+   */
+  async handleRecordSessionTags(data) {
+    const tags = Array.isArray(data?.tags) ? data.tags : data?.tag ? [data.tag] : [];
+    await recordSessionTags(tags);
+    return { success: true };
+  }
   async handleSaveBookmark(data) {
     const previousTags = await getTagsForUrl(this.bookmarkProvider, data.url);
     const newTags = Array.isArray(data.tags) ? data.tags : data.tags ? String(data.tags).split(" ").filter((tag) => tag.trim()) : [];
@@ -5999,6 +6193,13 @@ var MessageHandler = class {
         }
       }
     }
+    if (addedTags.length > 0) {
+      try {
+        await recordSessionTags(addedTags.map((t) => t.trim()).filter(Boolean));
+      } catch (err) {
+        debugError("[IMPL-SESSION_TAGS] recordSessionTags failed:", err);
+      }
+    }
     return result;
   }
   async handleDeleteBookmark(data) {
@@ -6018,6 +6219,13 @@ var MessageHandler = class {
         await this.tagService.addTagToUserRecentList(data.value.trim(), data.url);
       } catch (error) {
         debugError(`[IMMUTABLE-REQ-TAG-003] Failed to add tag "${data.value}" to user recent list:`, error);
+      }
+    }
+    if (data.value && data.value.trim()) {
+      try {
+        await recordSessionTags([data.value.trim()]);
+      } catch (err) {
+        debugError("[IMPL-SESSION_TAGS] recordSessionTags failed:", err);
       }
     }
     return result;

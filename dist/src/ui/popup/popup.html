@@ -105,6 +105,11 @@
               aria-label="New tag">
             <button id="addTagBtn" class="button primary" disabled>Add</button>
           </div>
+          <!-- [REQ-AI_TAGGING_POPUP] [IMPL-AI_TAGGING_POPUP_UI] Submit page to AI for tagging -->
+          <button id="tagWithAiBtn" class="button secondary" type="button" title="Get AI-suggested tags for this page" aria-label="Tag with AI">Tag with AI</button>
+          <!-- [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Test API key from popup -->
+          <button id="testAiApiBtn" class="button secondary" type="button" title="Test AI API key" aria-label="Test API key">Test API key</button>
+          <span id="popupAiTestStatus" class="help-text" style="margin-left: 0.25em;"></span>
         </div>
 
         <!-- Current Tags -->

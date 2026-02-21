@@ -5,7 +5,11 @@ All notable changes to the Hoverboard Browser Extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.0] - 2026-02-21
+
+### Fixed
+
+- **Tag with AI failing after 8 seconds** (`REQ-AI_TAGGING_POPUP`, `ARCH-AI_TAGGING_FLOW`, `IMPL-AI_TAGGING_READABILITY`, `IMPL-AI_TAGGING_POPUP_UI`) – "Tag with AI" could fail when the content script was not present in the tab (e.g. tab opened before the extension was loaded). Page content is now obtained by the service worker via `scripting.executeScript` with an inline function (title + `document.body.innerText`, 16k character cap), so the flow no longer depends on the content script. When the content script is present, an early top-level listener still handles `GET_PAGE_CONTENT` using Readability for richer extraction. The popup now shows the service worker’s error message (e.g. "Page content unavailable. Reload the page and try again...") when extraction fails instead of a generic message.
 
 ### Changed
 
@@ -29,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Local store checked for index:** The Local Bookmarks Index shows no rows until at least one store (Local / File / Sync) is checked. The script now checks the **Local (L)** checkbox before capturing the index screenshot so seeded local bookmarks are visible.
 
 ### Added
+
+- **AI Tagging: Configuration and popup flow** (`REQ-AI_TAGGING_CONFIG`, `REQ-AI_TAGGING_POPUP`, `ARCH-AI_TAGGING_CONFIG`, `ARCH-AI_TAGGING_FLOW`, `IMPL-AI_CONFIG_OPTIONS`, `IMPL-AI_TAG_TEST`, `IMPL-AI_TAGGING_READABILITY`, `IMPL-AI_TAGGING_PROVIDER`, `IMPL-SESSION_TAGS`, `IMPL-AI_TAGGING_POPUP_UI`) – Options page: AI API key (optional), provider (OpenAI or Gemini), optional tag limit (default 64), and **Test API key** button; settings persisted in config; no key disables the feature. Popup: **Tag with AI** button submits the current page to the configured AI for tagging; page content is extracted with Readability.js; AI returns up to N tags; tags added to any site this session are auto-applied to the bookmark; remaining AI tags appear first in Suggested Tags; new bookmarks from this flow use the default store. Session tags use `chrome.storage.session` (MV3) or in-memory in the service worker.
 
 - **Local Bookmarks Index – Regex find-and-replace on selected** (`REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE`, `ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE`, `IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE`) – In "Actions for selected", added a **Regex** textbox, **Replacement** textbox, checkboxes for **Title**, **URL**, **Tags**, and **Notes**, and a **Replace** button. Run a regular-expression find-and-replace on selected bookmarks for the checked fields only. Regex supports named groups, negative lookahead, and backreferences (JavaScript `RegExp` and replacement semantics: `$1`, `$<name>`, `$&`, etc.). Invalid regex shows an inline error; no save is performed. Each updated bookmark is saved via `saveBookmark` with `preferredBackend`; table refreshes and selection is retained for still-visible rows. Replace button is disabled when no bookmark is selected or when the pattern is empty. Pure helper `applyRegexReplace` in `bookmarks-table-filter.js`; `regexReplaceSelected` in `bookmarks-table.js`; unit tests in `tests/unit/bookmarks-table-index.test.js`.
 

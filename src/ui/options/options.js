@@ -5,6 +5,7 @@
 
 import { ConfigManager } from '../../config/config-manager.js'
 import { PinboardService } from '../../features/pinboard/pinboard-service.js'
+import { testAiApiKey } from '../../features/ai/ai-api-test.js'
 
 class OptionsController {
   constructor () {
@@ -106,6 +107,13 @@ class OptionsController {
     // [REQ-NATIVE_HOST_WRAPPER] Native host test
     this.elements.testNativeHost = document.getElementById('test-native-host')
     this.elements.nativeHostStatus = document.getElementById('native-host-status')
+
+    // [REQ-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI Tagging
+    this.elements.aiApiKey = document.getElementById('ai-api-key')
+    this.elements.aiProvider = document.getElementById('ai-provider')
+    this.elements.aiTagLimit = document.getElementById('ai-tag-limit')
+    this.elements.testAiApi = document.getElementById('test-ai-api')
+    this.elements.aiTestStatus = document.getElementById('ai-test-status')
   }
 
   attachEventListeners () {
@@ -123,6 +131,11 @@ class OptionsController {
 
     // Authentication
     this.elements.testAuth.addEventListener('click', () => this.testAuthentication())
+
+    // [REQ-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] Test AI API key
+    if (this.elements.testAiApi) {
+      this.elements.testAiApi.addEventListener('click', () => this.testAiApiKey())
+    }
 
     // [REQ-NATIVE_HOST_WRAPPER] Native host ping test
     if (this.elements.testNativeHost) {
@@ -202,6 +215,11 @@ class OptionsController {
       this.elements.fontSizeBase.value = config.fontSizeBase || 14
       this.elements.fontSizeInputs.value = config.fontSizeInputs || 14
 
+      // [REQ-AI_TAGGING_CONFIG] Load AI tagging settings
+      if (this.elements.aiApiKey) this.elements.aiApiKey.value = config.aiApiKey || ''
+      if (this.elements.aiProvider) this.elements.aiProvider.value = config.aiProvider || 'openai'
+      if (this.elements.aiTagLimit) this.elements.aiTagLimit.value = config.aiTagLimit || 64
+
       // Update visibility UI
       this.currentTheme = config.defaultVisibilityTheme
       this.updateThemeDisplay()
@@ -256,7 +274,12 @@ class OptionsController {
         fontSizeLabels: parseInt(this.elements.fontSizeLabels.value),
         fontSizeTags: parseInt(this.elements.fontSizeTags.value),
         fontSizeBase: parseInt(this.elements.fontSizeBase.value),
-        fontSizeInputs: parseInt(this.elements.fontSizeInputs.value)
+        fontSizeInputs: parseInt(this.elements.fontSizeInputs.value),
+
+        // [REQ-AI_TAGGING_CONFIG] AI Tagging
+        aiApiKey: this.elements.aiApiKey ? this.elements.aiApiKey.value.trim() : '',
+        aiProvider: this.elements.aiProvider ? this.elements.aiProvider.value : 'openai',
+        aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64
       }
 
       // Save configuration
@@ -437,6 +460,30 @@ class OptionsController {
       }
     } catch (e) {
       this.elements.nativeHostStatus.textContent = `Error: ${e.message}`
+    }
+  }
+
+  /**
+   * [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Test AI API key with minimal request
+   */
+  async testAiApiKey () {
+    if (!this.elements.aiTestStatus) return
+    const apiKey = this.elements.aiApiKey?.value?.trim()
+    const provider = this.elements.aiProvider?.value || 'openai'
+    if (!apiKey) {
+      this.elements.aiTestStatus.textContent = 'Enter an API key first'
+      return
+    }
+    this.elements.aiTestStatus.textContent = 'Testing…'
+    try {
+      const result = await testAiApiKey(apiKey, provider)
+      if (result.ok) {
+        this.elements.aiTestStatus.textContent = 'API key OK'
+      } else {
+        this.elements.aiTestStatus.textContent = result.error || 'Failed'
+      }
+    } catch (e) {
+      this.elements.aiTestStatus.textContent = `Error: ${e.message}`
     }
   }
 

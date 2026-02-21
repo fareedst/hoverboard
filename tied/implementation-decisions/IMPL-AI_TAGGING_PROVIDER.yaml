@@ -1,0 +1,76 @@
+IMPL-AI_TAGGING_PROVIDER:
+  name: OpenAI/Gemini Tag Request
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+    - REQ-TAG_INPUT_SANITIZATION
+  rationale:
+    why: Call provider API with page text and get back list of tags; sanitize with existing tag rules
+    problems_solved: []
+    benefits:
+      - Testable with mocked fetch; reuse sanitizeTag
+  implementation_approach:
+    summary: Given provider, apiKey, text, limit N: call OpenAI chat completions or Gemini generateContent with prompt "Return only a list of up to N tags for this page, one tag per line. No numbering or explanation." Parse response to lines, trim, sanitizeTag each, filter null, dedupe, slice(0, N).
+    details:
+      - OpenAI: POST https://api.openai.com/v1/chat/completions, model gpt-3.5-turbo or gpt-4o-mini, message with prompt + text excerpt
+      - Gemini: POST generateContent with prompt + text; parse text from response
+      - Split response on newlines; each line trim; sanitizeTag(line); filter out null/empty; unique; slice(0, limit)
+  code_locations:
+    files:
+      - path: src/features/ai/ai-tagging-provider.js
+        description: requestAiTags(provider, apiKey, text, limit) using fetch
+    functions:
+      - name: requestAiTags
+        file: src/features/ai/ai-tagging-provider.js
+        description: Returns Promise<string[]>
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_FLOW
+    requirements:
+      - REQ-AI_TAGGING_POPUP
+      - REQ-TAG_INPUT_SANITIZATION
+    tests:
+      - tests/unit/ai-tagging-provider.test.js (mocked fetch)
+    code_annotations:
+      - IMPL-AI_TAGGING_PROVIDER
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-TAG_SYSTEM
+      - IMPL-AI_TAGGING_READABILITY
+    composed_with: []
+  essence_pseudocode: |
+    INPUT: provider, apiKey, text (string), limit (number)
+    OUTPUT: string[] (sanitized tags, max length limit)
+
+    requestAiTags(provider, apiKey, text, limit):
+      prompt = "Return only a list of up to " + limit + " tags for this page, one tag per line. No numbering or explanation.\n\nPage content:\n" + text.slice(0, 12000)
+      IF provider === 'openai':
+        body = { model: 'gpt-4o-mini', messages: [{ role: 'user', content: prompt }], max_tokens: 1024 }
+        res = fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + apiKey }, body: JSON.stringify(body) })
+        data = await res.json()
+        raw = data.choices[0].message.content
+      IF provider === 'gemini':
+        body = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 1024 } }
+        res = fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        data = await res.json()
+        raw = data.candidates[0].content.parts[0].text
+      lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+      tags = []
+      seen = new Set()
+      FOR line IN lines:
+        tag = sanitizeTag(line)
+        IF tag && !seen.has(tag.toLowerCase()): tags.push(tag); seen.add(tag.toLowerCase())
+        IF tags.length >= limit BREAK
+      RETURN tags
+  detail_file: implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Initial creation

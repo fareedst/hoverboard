@@ -1,0 +1,48 @@
+ARCH-AI_TAGGING_CONFIG:
+  name: AI Tagging Config Architecture
+  status: Active
+  cross_references:
+    - REQ-AI_TAGGING_CONFIG
+  rationale:
+    why: Centralize AI provider and key so options and popup can use same config; test validates key before use
+    problems_solved:
+      - Where to store API key and provider choice
+      - How to validate key without full tagging flow
+    benefits:
+      - Single source for aiApiKey, aiProvider, aiTagLimit
+      - Test button uses minimal API call (e.g. list models or tiny completion)
+  implementation_approach:
+    summary: Config stores aiApiKey, aiProvider (openai | gemini), optional aiTagLimit (default 64); options UI bind, load, save; Test button on options and popup each call testAiApiKey(apiKey, provider) and show "API key OK" or error.
+    details:
+      - ConfigManager defaultConfig and getStoredSettings/updateConfig include aiApiKey (string, default ''), aiProvider ('openai' | 'gemini', default 'openai'), aiTagLimit (number, default 64)
+      - Options page: section with label + textbox for API key, label + select for provider, Test API key button and status span
+      - Popup: Test API key button and status span; reads config and calls testAiApiKey, displays "API key OK" or error (same as options)
+      - Test: minimal request (OpenAI list models; Gemini list models); return { ok, error }; never log key
+  traceability:
+    requirements:
+      - REQ-AI_TAGGING_CONFIG
+    implementation:
+      - IMPL-AI_CONFIG_OPTIONS
+      - IMPL-AI_TAG_TEST
+    tests:
+      - ConfigManager AI config tests
+      - testAiApiKey unit tests
+    code_annotations:
+      - ARCH-AI_TAGGING_CONFIG
+  related_decisions:
+    depends_on:
+      - REQ-AI_TAGGING_CONFIG
+    informs:
+      - IMPL-AI_CONFIG_OPTIONS
+      - IMPL-AI_TAG_TEST
+    see_also:
+      - ARCH-STORAGE
+  detail_file: architecture-decisions/ARCH-AI_TAGGING_CONFIG.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Popup Test API key button; test callable from options and popup

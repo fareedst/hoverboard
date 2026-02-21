@@ -2249,3 +2249,101 @@ ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
       author: AI Agent
       reason: Initial creation
   decision: '`time` = create-time (set once, never changed on update). `updated_at` = most-recent-update-time (same as time on create; set to now on every update). Normalization: missing `updated_at` -> `updated_at = time`. Pinboard: `updated_at = time` always.'
+ARCH-AI_TAGGING_CONFIG:
+  name: AI Tagging Config Architecture
+  status: Active
+  cross_references:
+    - REQ-AI_TAGGING_CONFIG
+  rationale:
+    why: Centralize AI provider and key so options and popup can use same config; test validates key before use
+    problems_solved:
+      - Where to store API key and provider choice
+      - How to validate key without full tagging flow
+    benefits:
+      - Single source for aiApiKey, aiProvider, aiTagLimit
+      - Test button uses minimal API call
+  implementation_approach:
+    summary: Config stores aiApiKey, aiProvider (openai | gemini), optional aiTagLimit (default 64); options and popup each have Test API key button calling testAiApiKey, showing "API key OK" or error.
+    details:
+      - ConfigManager defaultConfig and getStoredSettings/updateConfig include aiApiKey, aiProvider, aiTagLimit
+      - Options page section with API key input, provider select, Test button and status span
+      - Popup: Test API key button and status span; reads config, calls testAiApiKey, displays result
+      - Test: minimal request (OpenAI list models; Gemini list models); return { ok, error }
+  traceability:
+    requirements:
+      - REQ-AI_TAGGING_CONFIG
+    implementation:
+      - IMPL-AI_CONFIG_OPTIONS
+      - IMPL-AI_TAG_TEST
+    code_annotations:
+      - ARCH-AI_TAGGING_CONFIG
+  related_decisions:
+    depends_on:
+      - REQ-AI_TAGGING_CONFIG
+    informs:
+      - IMPL-AI_CONFIG_OPTIONS
+      - IMPL-AI_TAG_TEST
+    see_also:
+      - ARCH-STORAGE
+  detail_file: architecture-decisions/ARCH-AI_TAGGING_CONFIG.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Popup Test API key button
+ARCH-AI_TAGGING_FLOW:
+  name: AI Tagging Flow Architecture
+  status: Active
+  cross_references:
+    - REQ-AI_TAGGING_POPUP
+    - REQ-AI_TAGGING_CONFIG
+  rationale:
+    why: Define how page content reaches AI and how tags are applied and displayed
+    problems_solved:
+      - How to get main content from page for AI (Readability)
+      - How to auto-apply "session" tags and show rest as suggested
+      - Where to store new bookmark (default store)
+    benefits:
+      - Readability gives clean text for AI; session set gives consistent auto-tagging; suggested order clear
+  implementation_approach:
+    summary: SW obtains page content via scripting.executeScript (inline func, 16k cap) so flow works when content script not in tab; content script may provide Readability via early listener when present. SW calls OpenAI/Gemini for up to N tags; session tag set maintained; popup triggers flow, splits tags, shows SW error on extraction failure; new bookmark uses getStorageMode().
+    details:
+      - GET_PAGE_CONTENT: popup sends to SW with tabId; SW uses scripting.executeScript in tab (no content script dependency); optional content script early listener for Readability when present
+      - GET_AI_TAGS uses config, calls provider, parses and sanitizes tags
+      - Session tags: add when user adds tag; getSessionTags returns set; AI tags in set merged into bookmark
+      - Popup: sends GET_PAGE_CONTENT to SW; on failure shows content.error when content.success === false; create bookmark if none with preferredBackend = getStorageMode(); updateSuggestedTags(rest)
+  traceability:
+    requirements:
+      - REQ-AI_TAGGING_POPUP
+    implementation:
+      - IMPL-AI_TAGGING_READABILITY
+      - IMPL-AI_TAGGING_PROVIDER
+      - IMPL-SESSION_TAGS
+      - IMPL-AI_TAGGING_POPUP_UI
+    code_annotations:
+      - ARCH-AI_TAGGING_FLOW
+  related_decisions:
+    depends_on:
+      - REQ-AI_TAGGING_POPUP
+      - ARCH-AI_TAGGING_CONFIG
+    informs:
+      - IMPL-AI_TAGGING_READABILITY
+      - IMPL-AI_TAGGING_PROVIDER
+      - IMPL-SESSION_TAGS
+      - IMPL-AI_TAGGING_POPUP_UI
+    see_also:
+      - ARCH-SUGGESTED_TAGS
+      - ARCH-MESSAGE_HANDLING
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+  detail_file: architecture-decisions/ARCH-AI_TAGGING_FLOW.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-21'
+      author: AI Agent
+      reason: GET_PAGE_CONTENT in SW via executeScript; popup shows SW error on failure

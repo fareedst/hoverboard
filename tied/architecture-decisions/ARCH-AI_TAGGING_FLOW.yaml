@@ -1,0 +1,55 @@
+ARCH-AI_TAGGING_FLOW:
+  name: AI Tagging Flow Architecture
+  status: Active
+  cross_references:
+    - REQ-AI_TAGGING_POPUP
+    - REQ-AI_TAGGING_CONFIG
+  rationale:
+    why: Define how page content reaches AI and how tags are applied and displayed
+    problems_solved:
+      - How to get main content from page for AI (Readability)
+      - How to auto-apply "session" tags and show rest as suggested
+      - Where to store new bookmark (default store)
+    benefits:
+      - Readability gives clean text for AI; session set gives consistent auto-tagging; suggested order clear
+  implementation_approach:
+    summary: Page content obtained by SW via scripting.executeScript (inline function: title + body.innerText, 16k cap) so flow works even when content script was not injected (e.g. tab opened before extension load). Content script may optionally provide Readability extraction via an early listener when present. SW calls OpenAI/Gemini for up to N tags; session tag set maintained; popup button triggers flow, splits tags into in-session (auto-add) and rest (first in Suggested Tags); new bookmark uses getStorageMode() as preferredBackend.
+    details:
+      - GET_PAGE_CONTENT: popup sends to SW with tabId. SW uses scripting.executeScript with an inline function in the tab returning { title: document.title, textContent: document.body?.innerText } (capped at 16k chars), so no dependency on content script. When content script is present, it may register an early GET_PAGE_CONTENT listener that runs Readability (extractPageContent) for richer extraction; SW path is the single implementation and works for all tabs.
+      - GET_AI_TAGS message: SW uses config aiApiKey/aiProvider/aiTagLimit, calls provider, parses response to string array, sanitizes with sanitizeTag
+      - Session tags: add to set when user adds tag (saveTag/saveBookmark); getSessionTags returns set; when AI returns tags, those in set are merged into bookmark and saved
+      - Popup: sends GET_PAGE_CONTENT to SW (not to tab); on failure (e.g. no text), shows content.error from SW when content.success === false. If no bookmark exists, create with preferredBackend = getStorageMode(); merge inSession tags; updateSuggestedTags(rest) so AI tags appear first
+  traceability:
+    requirements:
+      - REQ-AI_TAGGING_POPUP
+    implementation:
+      - IMPL-AI_TAGGING_READABILITY
+      - IMPL-AI_TAGGING_PROVIDER
+      - IMPL-SESSION_TAGS
+      - IMPL-AI_TAGGING_POPUP_UI
+    tests:
+      - AI tagging flow tests
+    code_annotations:
+      - ARCH-AI_TAGGING_FLOW
+  related_decisions:
+    depends_on:
+      - REQ-AI_TAGGING_POPUP
+      - ARCH-AI_TAGGING_CONFIG
+    informs:
+      - IMPL-AI_TAGGING_READABILITY
+      - IMPL-AI_TAGGING_PROVIDER
+      - IMPL-SESSION_TAGS
+      - IMPL-AI_TAGGING_POPUP_UI
+    see_also:
+      - ARCH-SUGGESTED_TAGS
+      - ARCH-MESSAGE_HANDLING
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+  detail_file: architecture-decisions/ARCH-AI_TAGGING_FLOW.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-21'
+      author: AI Agent
+      reason: GET_PAGE_CONTENT implemented in SW via scripting.executeScript so flow works when content script not in tab; popup shows SW error on failure

@@ -305,7 +305,8 @@ describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
     test('when page has no bookmark, updateStorageBackendValue is called with default storage mode (e.g. local)', async () => {
       const mockConfigManager = {
         getStorageMode: jest.fn().mockResolvedValue('local'),
-        getAuthToken: jest.fn().mockResolvedValue('')
+        getAuthToken: jest.fn().mockResolvedValue(''),
+        getConfig: jest.fn().mockResolvedValue({ aiApiKey: '', aiProvider: 'openai', aiTagLimit: 64 })
       }
       uiManager.updateStorageBackendValue = jest.fn()
       popupController = new PopupController({

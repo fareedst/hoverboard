@@ -1,0 +1,84 @@
+IMPL-AI_TAGGING_POPUP_UI:
+  name: AI Tagging Popup Button and Flow
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+    - REQ-STORAGE_MODE_DEFAULT
+  rationale:
+    why: Single entry point in popup to run full AI tagging flow and update UI
+    problems_solved: []
+    benefits:
+      - One button; correct order (session auto-add, then suggested)
+  implementation_approach:
+    summary: Popup "Tag with AI" button. On click: get current tab; if no http(s) URL show message and return; send GET_PAGE_CONTENT to SW (SW obtains page content via scripting.executeScript in tab); send GET_AI_TAGS to SW with text and limit; get session tags from SW; split AI tags into inSession and suggested; create or update bookmark with merged tags; updateSuggestedTags(suggested); refresh bookmark state. When extraction fails, popup shows content.error from SW.
+    details:
+      - Button disabled when no API key in config or tab URL not http(s)
+      - GET_PAGE_CONTENT: popup sendMessage to SW with { type: 'GET_PAGE_CONTENT', data: { tabId } }. SW handleGetPageContent uses scripting.executeScript with inline function in tab (no content script dependency). Response is { title, textContent } or { success: false, error }.
+      - Popup: when !content?.textContent, show content.error if content.success === false (so user sees SW message e.g. "Page content unavailable. Reload the page and try again..."); otherwise generic "Could not extract page content for tagging"
+      - Split: inSession = aiTags.filter(t => sessionSet.has(t.toLowerCase())); suggested = rest
+      - saveBookmark with preferredBackend = getStorageMode() when creating new; merge inSession into current tags
+  code_locations:
+    files:
+      - path: src/ui/popup/popup.html
+        description: Tag with AI button (id tagWithAiBtn)
+      - path: src/ui/popup/PopupController.js
+        description: handleTagWithAi; loadInitialData sets tagWithAiBtn.disabled by API key and URL; sendMessage resolves with response.error or raw content shape
+      - path: src/ui/popup/UIManager.js
+        description: tagWithAiBtn in cacheElements; click emits tagWithAi
+      - path: src/core/message-handler.js
+        description: handleGetPageContent (scripting.executeScript inline func), handleGetAiTags, handleGetSessionTags
+    functions:
+      - name: handleTagWithAi
+        file: src/ui/popup/PopupController.js
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_FLOW
+    requirements:
+      - REQ-AI_TAGGING_POPUP
+      - REQ-STORAGE_MODE_DEFAULT
+    tests:
+      - tests/unit/ai-tagging-popup.test.js (splitAiTagsBySession; edge case all AI tags in session)
+      - tests/unit/popup-live-data.test.js (getConfig mock for loadInitialData)
+    code_annotations:
+      - IMPL-AI_TAGGING_POPUP_UI
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-SUGGESTED_TAGS
+      - IMPL-SESSION_TAGS
+    composed_with:
+      - IMPL-AI_TAGGING_READABILITY
+      - IMPL-AI_TAGGING_PROVIDER
+      - IMPL-SESSION_TAGS
+  essence_pseudocode: |
+    INPUT: user click "Tag with AI"
+    OUTPUT: bookmark updated; suggested tags updated
+
+    onTagWithAiClick():
+      IF !config.aiApiKey or !currentTab.url.startsWith('http') THEN show message; RETURN
+      content = await sendToSW({ type: 'GET_PAGE_CONTENT', data: { tabId } })  // SW uses scripting.executeScript in tab
+      IF !content?.textContent THEN show (content.error if content.success === false else generic error); RETURN
+      aiTags = await sendToSW({ type: 'GET_AI_TAGS', data: { text: content.textContent, limit: config.aiTagLimit } })
+      sessionSet = new Set(await sendToSW({ type: 'getSessionTags' }))
+      inSession = aiTags.filter(t => sessionSet.has(t.toLowerCase()))
+      suggested = aiTags.filter(t => !sessionSet.has(t.toLowerCase()))
+      bookmark = await getCurrentBookmark()
+      defaultBackend = await configManager.getStorageMode()
+      IF !bookmark?.time:
+        create bookmark with url, title, tags: inSession, preferredBackend: defaultBackend
+      ELSE:
+        merged = merge(bookmark.tags, inSession)  // dedupe case-insensitive
+        saveBookmark({ ...bookmark, tags: merged, preferredBackend: bookmark backend or defaultBackend })
+      updateSuggestedTags(suggested)  // so AI tags appear first in Suggested section
+      refresh bookmark state / badge
+  detail_file: implementation-decisions/IMPL-AI_TAGGING_POPUP_UI.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-21'
+      author: AI Agent
+      reason: GET_PAGE_CONTENT via SW executeScript; popup shows content.error on extraction failure

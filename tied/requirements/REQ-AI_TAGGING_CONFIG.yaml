@@ -1,0 +1,54 @@
+REQ-AI_TAGGING_CONFIG:
+  name: AI Tagging Configuration
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Allow users to configure an AI provider and API key for AI-generated tag suggestions
+    problems_solved:
+      - No way to use AI for tagging without configuration
+      - Need to support multiple providers (OpenAI, Gemini)
+    benefits:
+      - Optional AI tagging when key is set
+      - Test button to verify key before use
+  satisfaction_criteria:
+    - criterion: Options page has labeled textbox for AI API key
+    - criterion: Options page has provider selector (OpenAI or Gemini)
+    - criterion: Options page has "Test API key" button (shows "API key OK" or error)
+    - criterion: Popup has "Test API key" button that runs same test and shows "API key OK" or error in a status span
+    - criterion: Settings persisted in config (e.g. hoverboard_settings); no key = feature disabled
+  validation_criteria:
+    - method: Unit tests
+      coverage: ConfigManager defaults and get/set for aiApiKey, aiProvider, aiTagLimit
+    - method: Manual verification
+      coverage: Options UI load/save and Test button
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_CONFIG
+    implementation:
+      - IMPL-AI_CONFIG_OPTIONS
+      - IMPL-AI_TAG_TEST
+    tests:
+      - ConfigManager AI config tests
+      - testAiApiKey unit tests
+    code_annotations:
+      - REQ-AI_TAGGING_CONFIG
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-CONFIG_PORTABILITY
+      - REQ-CHROME_STORAGE_USAGE
+    supersedes: []
+  detail_file: requirements/REQ-AI_TAGGING_CONFIG.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Popup Test API key button added; satisfaction_criteria updated
+    last_validated:
+      date: '2026-02-20'
+      validator: AI Agent
+      result: pass

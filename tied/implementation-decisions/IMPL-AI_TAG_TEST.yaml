@@ -1,0 +1,80 @@
+IMPL-AI_TAG_TEST:
+  name: AI API Key Test
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_CONFIG
+    - REQ-AI_TAGGING_CONFIG
+  rationale:
+    why: User should verify API key works before using AI tagging; minimal request to avoid cost and latency
+    problems_solved: []
+    benefits:
+      - Testable with mocked fetch; no key logged
+  implementation_approach:
+    summary: Pure or SW-callable function testAiApiKey(apiKey, provider). OpenAI: GET models; Gemini: GET models. Return { ok: true } or { ok: false, error: string }. Options page and popup each have a Test API key button that call it and show "API key OK" or error. Unit-test with fetch mock.
+    details:
+      - OpenAI: https://api.openai.com/v1/models with Authorization Bearer key
+      - Gemini: https://generativelanguage.googleapis.com/v1beta/models?key=KEY
+      - On 401/403 return invalid key message; on network error return error message
+      - Options: test-ai-api button, ai-test-status span. Popup: testAiApiBtn, popupAiTestStatus span; handleTestAiApiKey reads config and calls testAiApiKey, sets status "Testing…" then "API key OK" or error
+  code_locations:
+    files:
+      - path: src/features/ai/ai-api-test.js
+        description: testAiApiKey(apiKey, provider) using fetch
+      - path: src/ui/options/options.html
+        description: Test API key button (id test-ai-api), ai-test-status span
+      - path: src/ui/options/options.js
+        description: testAiApiKey() loads key/provider from form, calls testAiApiKey, sets aiTestStatus
+      - path: src/ui/popup/popup.html
+        description: Test API key button (id testAiApiBtn), status span (id popupAiTestStatus)
+      - path: src/ui/popup/PopupController.js
+        description: handleTestAiApiKey gets config, calls testAiApiKey, sets popupAiTestStatus
+      - path: src/ui/popup/UIManager.js
+        description: testAiApiBtn, popupAiTestStatus in cacheElements; click emits testAiApiKey
+    functions:
+      - name: testAiApiKey
+        file: src/features/ai/ai-api-test.js
+        description: Returns { ok, error }; uses fetch
+      - name: handleTestAiApiKey
+        file: src/ui/popup/PopupController.js
+        description: Popup test; sets popupAiTestStatus to "API key OK" or error
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_CONFIG
+    requirements:
+      - REQ-AI_TAGGING_CONFIG
+    tests:
+      - tests/unit/ai-api-test.test.js
+    code_annotations:
+      - IMPL-AI_TAG_TEST
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-AI_CONFIG_OPTIONS
+    composed_with: []
+  essence_pseudocode: |
+    INPUT: apiKey (string), provider ('openai' | 'gemini')
+    OUTPUT: { ok: boolean, error?: string }
+
+    testAiApiKey(apiKey, provider):
+      IF !apiKey or !provider RETURN { ok: false, error: 'Missing key or provider' }
+      IF provider === 'openai':
+        res = fetch('https://api.openai.com/v1/models', { headers: { Authorization: 'Bearer ' + apiKey } })
+        IF res.ok RETURN { ok: true }
+        IF res.status === 401 or 403 RETURN { ok: false, error: 'Invalid API key' }
+        RETURN { ok: false, error: res.statusText or 'Request failed' }
+      IF provider === 'gemini':
+        res = fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + apiKey)
+        IF res.ok RETURN { ok: true }
+        IF res.status === 400 or 403 RETURN { ok: false, error: 'Invalid API key' }
+        RETURN { ok: false, error: res.statusText or 'Request failed' }
+      RETURN { ok: false, error: 'Unknown provider' }
+  detail_file: implementation-decisions/IMPL-AI_TAG_TEST.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Popup Test API key button and handleTestAiApiKey; code_locations for options and popup

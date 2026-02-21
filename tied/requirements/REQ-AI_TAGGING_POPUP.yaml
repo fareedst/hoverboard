@@ -1,0 +1,61 @@
+REQ-AI_TAGGING_POPUP:
+  name: AI Tagging from Popup
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Let users submit the current page to AI for tag suggestions and auto-apply session tags
+    problems_solved:
+      - Manual tag entry for every bookmark
+      - No AI-assisted tagging from popup
+    benefits:
+      - One-click AI tag suggestions from popup
+      - Session tags auto-added to current bookmark; rest shown as first Suggested Tags
+      - New bookmarks from AI flow stored to default store
+  satisfaction_criteria:
+    - criterion: Popup has button to submit page to AI for tagging
+    - criterion: Page content is obtained for AI (Readability when content script present; otherwise body text via scripting.executeScript so flow works when content script was not injected, e.g. tab opened before extension load)
+    - criterion: AI returns list of up to N tags (default 64) for the visible page
+    - criterion: If any tag has been added to any site in this browser session, automatically add to this bookmark
+    - criterion: Other tags returned by AI displayed as first "Suggested Tags"
+    - criterion: New bookmarks created from this flow stored to default store
+  validation_criteria:
+    - method: Unit tests
+      coverage: Split logic (in-session vs suggested), default preferredBackend, Readability extraction, provider request/parse
+    - method: Manual verification
+      coverage: Popup button flow end-to-end
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_FLOW
+      - ARCH-SUGGESTED_TAGS
+    implementation:
+      - IMPL-AI_TAGGING_READABILITY
+      - IMPL-AI_TAGGING_PROVIDER
+      - IMPL-SESSION_TAGS
+      - IMPL-AI_TAGGING_POPUP_UI
+    tests:
+      - AI tagging flow tests
+      - Session tags tests
+    code_annotations:
+      - REQ-AI_TAGGING_POPUP
+  related_requirements:
+    depends_on:
+      - REQ-AI_TAGGING_CONFIG
+    related_to:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-STORAGE_MODE_DEFAULT
+      - REQ-SMART_BOOKMARKING
+    supersedes: []
+  detail_file: requirements/REQ-AI_TAGGING_POPUP.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-21'
+      author: AI Agent
+      reason: Satisfaction criteria updated for GET_PAGE_CONTENT via executeScript when content script not in tab
+    last_validated:
+      date: '2026-02-20'
+      validator: AI Agent
+      result: pass

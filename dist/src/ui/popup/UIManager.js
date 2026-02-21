@@ -102,10 +102,9 @@ export class UIManager {
       // Input elements
       newTagInput: document.getElementById('newTagInput'),
       addTagBtn: document.getElementById('addTagBtn'),
-      searchInput: document.getElementById('searchInput'),
-      searchBtn: document.getElementById('searchBtn'),
-
-      // Search elements
+      tagWithAiBtn: document.getElementById('tagWithAiBtn'),
+      testAiApiBtn: document.getElementById('testAiApiBtn'),
+      popupAiTestStatus: document.getElementById('popupAiTestStatus'),
       searchInput: document.getElementById('searchInput'),
       searchBtn: document.getElementById('searchBtn'),
       searchSuggestions: document.getElementById('searchSuggestions'),
@@ -195,6 +194,16 @@ export class UIManager {
       }
     })
 
+    // [REQ-AI_TAGGING_POPUP] [IMPL-AI_TAGGING_POPUP_UI] Tag with AI button
+    this.elements.tagWithAiBtn?.addEventListener('click', () => {
+      this.emit('tagWithAi')
+    })
+
+    // [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Test API key button
+    this.elements.testAiApiBtn?.addEventListener('click', () => {
+      this.emit('testAiApiKey')
+    })
+
     this.elements.newTagInput?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
         const tagText = this.elements.newTagInput?.value
@@ -242,8 +251,6 @@ export class UIManager {
         }
       }
     })
-
-
 
     // Error handling
     this.elements.retryBtn?.addEventListener('click', () => {
@@ -307,7 +314,7 @@ export class UIManager {
       this.elements.mainInterface.classList.toggle('hidden', isLoading)
     }
 
-    // Disable/enable interactive elements
+    // Disable/enable interactive elements ([REQ-AI_TAGGING_POPUP] tagWithAiBtn state set in loadInitialData + handleTagWithAi)
     const interactiveElements = [
       this.elements.showHoverBtn,
       this.elements.togglePrivateBtn,
@@ -423,8 +430,6 @@ export class UIManager {
       this.elements.versionInfo.textContent = `v${version}`
     }
   }
-
-
 
   /**
    * Update current tags display
@@ -688,7 +693,7 @@ export class UIManager {
    * [POPUP-CLOSE-BEHAVIOR-005] Update Show Hover button state
    * @param {boolean} isOverlayVisible - Whether the overlay is currently visible
    */
-  updateShowHoverButtonState(isOverlayVisible) {
+  updateShowHoverButtonState (isOverlayVisible) {
     const showHoverBtn = this.elements.showHoverBtn
     if (showHoverBtn) {
       const actionIcon = showHoverBtn.querySelector('.action-icon')

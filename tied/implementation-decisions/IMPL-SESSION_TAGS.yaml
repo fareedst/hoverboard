@@ -1,0 +1,70 @@
+IMPL-SESSION_TAGS:
+  name: Session Tags for Auto-Apply
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+  rationale:
+    why: Tags added to any site this session should auto-apply to current bookmark when AI returns them
+    problems_solved: []
+    benefits:
+      - Consistent tagging across session; less manual add
+  implementation_approach:
+    summary: In-session set of tags (lowercase for comparison). When user adds a tag via saveTag/saveBookmark, add that tag (lowercase) to set. Storage: chrome.storage.session if available (MV3), else in-memory in service worker (cleared on reload). getSessionTags returns set; recordSessionTag(tag) adds. When AI returns tags, those in set are merged into current bookmark.
+    details:
+      - Key e.g. hoverboard_session_tags: string[] (or Set serialized as array)
+      - recordSessionTag called from message handler when saveBookmark/saveTag succeeds; add each tag lowercase to set, persist
+      - getSessionTags returns array of lowercase tags for current session
+  code_locations:
+    files:
+      - path: src/features/ai/session-tags.js
+        description: getSessionTags(), recordSessionTags(tags), clear on reload implied by session storage
+      - path: src/core/message-handler.js
+        description: On saveBookmark/saveTag success, recordSessionTags(added tags)
+    functions:
+      - name: getSessionTags
+        file: src/features/ai/session-tags.js
+      - name: recordSessionTags
+        file: src/features/ai/session-tags.js
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_FLOW
+    requirements:
+      - REQ-AI_TAGGING_POPUP
+    tests:
+      - tests/unit/session-tags.test.js
+    code_annotations:
+      - IMPL-SESSION_TAGS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-AI_TAGGING_POPUP_UI
+    composed_with: []
+  essence_pseudocode: |
+    INPUT: recordSessionTags(tags: string[]); getSessionTags(): no args
+    OUTPUT: getSessionTags() -> string[] (lowercase); recordSessionTags -> void
+    DATA: storage key hoverboard_session_tags; use chrome.storage.session or in-memory Map in SW
+
+    getSessionTags():
+      IF chrome.storage.session:
+        result = await chrome.storage.session.get('hoverboard_session_tags')
+        RETURN (result.hoverboard_session_tags ?? []).map(t => t.toLowerCase())
+      RETURN inMemorySet ? Array.from(inMemorySet) : []
+
+    recordSessionTags(tags):
+      current = await getSessionTags()
+      set = new Set(current.map(t => t.toLowerCase()))
+      FOR tag IN tags: set.add(String(tag).trim().toLowerCase())
+      arr = Array.from(set)
+      IF chrome.storage.session: await chrome.storage.session.set({ hoverboard_session_tags: arr })
+      ELSE: inMemorySet = set
+  detail_file: implementation-decisions/IMPL-SESSION_TAGS.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Initial creation

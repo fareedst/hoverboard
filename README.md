@@ -26,7 +26,7 @@ The screenshot above shows Hoverboard on a Pinboard.in placeholder page (overlay
 - **Transparent Overlay**: A dark overlay at the bottom showing the current bookmark status (placeholder tags, e.g. "Pinboard" and "tags")
 - **Popup Interface**: The main Hoverboard popup (dark theme) provides:
   - **Visibility Controls**: Eye icon and "Show on page load" checkbox for overlay display
-  - **Tag Management**: "Add a tag..." input field with current tags displayed below
+  - **Tag Management**: "Add a tag..." input field with current tags displayed below; **Tag with AI** button ([REQ-AI_TAGGING_POPUP], [ARCH-AI_TAGGING_FLOW], [IMPL-AI_TAGGING_POPUP_UI]) submits the current page to the configured AI provider (OpenAI or Gemini) for tag suggestions. Page content is obtained by the extension (works even when the tab was opened before the extension was loaded); when the content script is present, Readability.js is used for main-article extraction. AI returns up to N tags (default 64). Tags you have already added to any site this session are auto-applied to the bookmark; the rest appear first in **Suggested Tags**. New bookmarks created from this flow use the default storage (local/file/sync per your default). The button is enabled only when an AI API key is set in Options and the current tab is http(s).
   - **Search Functionality**: "Search tabs by title..." for finding related bookmarks
   - **Quick Actions**: Reload and Options buttons for easy access to settings
 
@@ -55,6 +55,8 @@ The configuration page provides comprehensive settings for customizing the exten
 - **Site Management**: 
   - Disabled sites list to prevent extension activation on specific domains
   - Example entries: "example.com" and "subdomain.example.org"
+
+- **AI Tagging** ([REQ-AI_TAGGING_CONFIG], [ARCH-AI_TAGGING_CONFIG], [IMPL-AI_CONFIG_OPTIONS], [IMPL-AI_TAG_TEST]): Optional AI API key (textbox with label), provider selector (OpenAI or Gemini), optional tag limit (default 64), and **Test API key** button. When no key is set, AI tagging is disabled; settings are persisted in config.
 
 - **Advanced Options**: 
   - URL hash stripping when saving bookmarks

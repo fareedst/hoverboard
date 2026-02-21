@@ -3204,3 +3204,283 @@ IMPL-TAB_SEARCH_SERVICE:
       date: "2026-02-20"
       author: AI Agent
       reason: Create IMPL for tab-search-service tests; add to index
+IMPL-AI_CONFIG_OPTIONS:
+  name: AI Config in Options
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_CONFIG
+    - REQ-AI_TAGGING_CONFIG
+  rationale:
+    why: Options page must expose and persist AI API key, provider, and optional limit
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: ConfigManager defaultConfig and storage include aiApiKey, aiProvider, aiTagLimit; options.html section; options.js bind, load, save; Test button calls testAiApiKey.
+  code_locations:
+    files:
+      - path: src/config/config-manager.js
+      - path: src/ui/options/options.html
+      - path: src/ui/options/options.js
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_CONFIG
+    requirements:
+      - REQ-AI_TAGGING_CONFIG
+    tests:
+      - tests/unit/config-manager.test.js
+    code_annotations:
+      - IMPL-AI_CONFIG_OPTIONS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-CONFIG_MIGRATION
+      - IMPL-AI_TAG_TEST
+    composed_with:
+      - IMPL-AI_TAG_TEST
+  detail_file: implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Initial creation
+IMPL-AI_TAG_TEST:
+  name: AI API Key Test
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_CONFIG
+    - REQ-AI_TAGGING_CONFIG
+  rationale:
+    why: User should verify API key works before using AI tagging
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: testAiApiKey(apiKey, provider) performs minimal request (OpenAI/Gemini); returns { ok, error }. Options and popup each have Test API key button showing "API key OK" or error; unit-testable with fetch mock.
+  code_locations:
+    files:
+      - path: src/features/ai/ai-api-test.js
+      - path: src/ui/options/options.html
+      - path: src/ui/options/options.js
+      - path: src/ui/popup/popup.html
+      - path: src/ui/popup/PopupController.js
+      - path: src/ui/popup/UIManager.js
+    functions:
+      - name: testAiApiKey
+        file: src/features/ai/ai-api-test.js
+      - name: handleTestAiApiKey
+        file: src/ui/popup/PopupController.js
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_CONFIG
+    requirements:
+      - REQ-AI_TAGGING_CONFIG
+    tests:
+      - tests/unit/ai-api-test.test.js
+    code_annotations:
+      - IMPL-AI_TAG_TEST
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-AI_CONFIG_OPTIONS
+    composed_with: []
+  detail_file: implementation-decisions/IMPL-AI_TAG_TEST.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Popup Test API key button; code_locations for options and popup
+IMPL-AI_TAGGING_READABILITY:
+  name: Page Content via Readability
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+  rationale:
+    why: AI needs page content; SW path works without content script; Readability when script present
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: SW handleGetPageContent uses scripting.executeScript with inline func (title + body.innerText, 16k cap). Content script early listener for GET_PAGE_CONTENT runs extractPageContent (Readability) when present.
+  code_locations:
+    files:
+      - path: src/core/message-handler.js
+      - path: src/features/content/content-main.js
+      - path: src/features/ai/readability-extract.js
+    functions:
+      - name: handleGetPageContent
+        file: src/core/message-handler.js
+      - name: extractPageContent
+        file: src/features/ai/readability-extract.js
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_FLOW
+    requirements:
+      - REQ-AI_TAGGING_POPUP
+    tests:
+      - tests/unit/readability-extract.test.js
+    code_annotations:
+      - IMPL-AI_TAGGING_READABILITY
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-AI_TAGGING_PROVIDER
+    composed_with: []
+  detail_file: implementation-decisions/IMPL-AI_TAGGING_READABILITY.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-21'
+      author: AI Agent
+      reason: GET_PAGE_CONTENT in SW via executeScript; content script early listener for Readability
+IMPL-AI_TAGGING_PROVIDER:
+  name: OpenAI/Gemini Tag Request
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+    - REQ-TAG_INPUT_SANITIZATION
+  rationale:
+    why: Call provider API with page text and get back list of tags; sanitize with existing tag rules
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: requestAiTags(provider, apiKey, text, limit) calls OpenAI or Gemini, parses response to lines, sanitizeTag each, filter null, dedupe, slice(0, limit).
+  code_locations:
+    files:
+      - path: src/features/ai/ai-tagging-provider.js
+    functions:
+      - name: requestAiTags
+        file: src/features/ai/ai-tagging-provider.js
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_FLOW
+    requirements:
+      - REQ-AI_TAGGING_POPUP
+      - REQ-TAG_INPUT_SANITIZATION
+    tests:
+      - tests/unit/ai-tagging-provider.test.js
+    code_annotations:
+      - IMPL-AI_TAGGING_PROVIDER
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-TAG_SYSTEM
+      - IMPL-AI_TAGGING_READABILITY
+    composed_with: []
+  detail_file: implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Initial creation
+IMPL-SESSION_TAGS:
+  name: Session Tags for Auto-Apply
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+  rationale:
+    why: Tags added to any site this session should auto-apply to current bookmark when AI returns them
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: getSessionTags() and recordSessionTags(tags); chrome.storage.session or in-memory in SW; add on saveTag/saveBookmark success.
+  code_locations:
+    files:
+      - path: src/features/ai/session-tags.js
+      - path: src/core/message-handler.js
+    functions:
+      - name: getSessionTags
+        file: src/features/ai/session-tags.js
+      - name: recordSessionTags
+        file: src/features/ai/session-tags.js
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_FLOW
+    requirements:
+      - REQ-AI_TAGGING_POPUP
+    tests:
+      - tests/unit/session-tags.test.js
+    code_annotations:
+      - IMPL-SESSION_TAGS
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-AI_TAGGING_POPUP_UI
+    composed_with: []
+  detail_file: implementation-decisions/IMPL-SESSION_TAGS.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Initial creation
+IMPL-AI_TAGGING_POPUP_UI:
+  name: AI Tagging Popup Button and Flow
+  status: Active
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+    - REQ-STORAGE_MODE_DEFAULT
+  rationale:
+    why: Single entry point in popup to run full AI tagging flow and update UI
+    problems_solved: []
+    benefits: []
+  implementation_approach:
+    summary: Popup "Tag with AI" button; GET_PAGE_CONTENT sent to SW (SW uses scripting.executeScript in tab); GET_AI_TAGS, getSessionTags; popup shows content.error when extraction fails; split inSession vs suggested; save bookmark with preferredBackend = getStorageMode() when new; updateSuggestedTags(suggested).
+  code_locations:
+    files:
+      - path: src/ui/popup/popup.html
+      - path: src/ui/popup/PopupController.js
+      - path: src/ui/popup/UIManager.js
+      - path: src/core/message-handler.js
+    functions:
+      - name: handleTagWithAi
+        file: src/ui/popup/PopupController.js
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_FLOW
+    requirements:
+      - REQ-AI_TAGGING_POPUP
+      - REQ-STORAGE_MODE_DEFAULT
+    tests:
+      - tests/unit/ai-tagging-popup.test.js
+    code_annotations:
+      - IMPL-AI_TAGGING_POPUP_UI
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-SUGGESTED_TAGS
+      - IMPL-SESSION_TAGS
+    composed_with:
+      - IMPL-AI_TAGGING_READABILITY
+      - IMPL-AI_TAGGING_PROVIDER
+      - IMPL-SESSION_TAGS
+  detail_file: implementation-decisions/IMPL-AI_TAGGING_POPUP_UI.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-21'
+      author: AI Agent
+      reason: GET_PAGE_CONTENT via SW executeScript; popup shows content.error on failure

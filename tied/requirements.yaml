@@ -2093,3 +2093,110 @@ REQ-BOOKMARK_CREATE_UPDATE_TIMES:
       author: AI Agent
       reason: Initial creation for bookmark create/update times
   summary: Each bookmark tracks create-time (`time`) and most-recent-update-time (`updated_at`). New records set both equal; local/file/sync set `updated_at` to now on save; Pinboard only has create-time so `updated_at` equals `time`.
+REQ-AI_TAGGING_CONFIG:
+  name: AI Tagging Configuration
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Allow users to configure an AI provider and API key for AI-generated tag suggestions
+    problems_solved:
+      - No way to use AI for tagging without configuration
+      - Need to support multiple providers (OpenAI, Gemini)
+    benefits:
+      - Optional AI tagging when key is set
+      - Test button to verify key before use
+  satisfaction_criteria:
+    - criterion: Options page has labeled textbox for AI API key
+    - criterion: Options page has provider selector (OpenAI or Gemini)
+    - criterion: Options page has "Test API key" button (shows "API key OK" or error)
+    - criterion: Popup has "Test API key" button that shows "API key OK" or error
+    - criterion: Settings persisted in config (e.g. hoverboard_settings); no key = feature disabled
+  validation_criteria:
+    - method: Unit tests
+      coverage: ConfigManager defaults and get/set for aiApiKey, aiProvider, aiTagLimit
+    - method: Manual verification
+      coverage: Options UI load/save and Test button; popup Test API key button
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_CONFIG
+    implementation:
+      - IMPL-AI_CONFIG_OPTIONS
+      - IMPL-AI_TAG_TEST
+    tests:
+      - ConfigManager AI config tests
+      - testAiApiKey unit tests
+    code_annotations:
+      - REQ-AI_TAGGING_CONFIG
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-CONFIG_PORTABILITY
+      - REQ-CHROME_STORAGE_USAGE
+    supersedes: []
+  detail_file: requirements/REQ-AI_TAGGING_CONFIG.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Popup Test API key button; satisfaction and validation criteria updated
+REQ-AI_TAGGING_POPUP:
+  name: AI Tagging from Popup
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Let users submit the current page to AI for tag suggestions and auto-apply session tags
+    problems_solved:
+      - Manual tag entry for every bookmark
+      - No AI-assisted tagging from popup
+    benefits:
+      - One-click AI tag suggestions from popup
+      - Session tags auto-added to current bookmark; rest shown as first Suggested Tags
+      - New bookmarks from AI flow stored to default store
+  satisfaction_criteria:
+    - criterion: Popup has button to submit page to AI for tagging
+    - criterion: Page content is analyzed with a library like Readability.js
+    - criterion: AI returns list of up to N tags (default 64) for the visible page
+    - criterion: If any tag has been added to any site in this browser session, automatically add to this bookmark
+    - criterion: Other tags returned by AI displayed as first "Suggested Tags"
+    - criterion: New bookmarks created from this flow stored to default store
+  validation_criteria:
+    - method: Unit tests
+      coverage: Split logic (in-session vs suggested), default preferredBackend, Readability extraction, provider request/parse
+    - method: Manual verification
+      coverage: Popup button flow end-to-end
+  traceability:
+    architecture:
+      - ARCH-AI_TAGGING_FLOW
+      - ARCH-SUGGESTED_TAGS
+    implementation:
+      - IMPL-AI_TAGGING_READABILITY
+      - IMPL-AI_TAGGING_PROVIDER
+      - IMPL-SESSION_TAGS
+      - IMPL-AI_TAGGING_POPUP_UI
+    tests:
+      - AI tagging flow tests
+      - Session tags tests
+    code_annotations:
+      - REQ-AI_TAGGING_POPUP
+  related_requirements:
+    depends_on:
+      - REQ-AI_TAGGING_CONFIG
+    related_to:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-STORAGE_MODE_DEFAULT
+      - REQ-SMART_BOOKMARKING
+    supersedes: []
+  detail_file: requirements/REQ-AI_TAGGING_POPUP.yaml
+  metadata:
+    created:
+      date: '2026-02-20'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-20'
+      author: AI Agent
+      reason: Initial creation for AI tagging from popup

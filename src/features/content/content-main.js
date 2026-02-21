@@ -9,10 +9,24 @@ import { OverlayManager } from './overlay-manager.js'
 import { MessageClient } from './message-client.js'
 import { DOMUtils } from './dom-utils.js'
 import { MESSAGE_TYPES } from '../../core/message-handler.js'
+import { extractPageContent } from '../ai/readability-extract.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
 import { browser, debugLog, debugError } from '../../shared/utils' // [SAFARI-EXT-SHIM-001]
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
 import { recordAction } from '../../shared/ui-inspector.js'
+
+// [REQ-AI_TAGGING_POPUP] [IMPL-AI_TAGGING_READABILITY] Register GET_PAGE_CONTENT immediately so the
+// popup can get page content before init() finishes (init() awaits waitForDOM() before setupMessageListeners).
+browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message.type !== 'GET_PAGE_CONTENT') return
+  try {
+    const result = extractPageContent(document)
+    sendResponse({ success: true, data: result })
+  } catch (e) {
+    sendResponse({ success: false, error: e.message })
+  }
+  return true
+})
 
 // MV3-003: Main content script class for V3 architecture
 class HoverboardContentScript {
@@ -205,6 +219,8 @@ class HoverboardContentScript {
           sendResponse({ success: true, data: { selection } })
           break
         }
+
+        // [REQ-AI_TAGGING_POPUP] GET_PAGE_CONTENT is handled by the early listener above (before init) so popup gets a response without waiting for waitForDOM().
 
         default:
           console.warn('Unknown message type:', message.type)
@@ -617,8 +633,8 @@ class HoverboardContentScript {
   // [TOGGLE-SYNC-CONTENT-001] - Handle bookmark updates from external sources
   async handleBookmarkUpdated (bookmarkData) {
     try {
-      // [TOGGLE-SYNC-CONTENT-001] Robustness: Validate bookmarkData before updating overlay
-      if (!bookmarkData || !bookmarkData.url || !bookmarkData.tags) {
+      // [TOGGLE-SYNC-CONTENT-001] Robustness: Validate bookmarkData before updating overlay (url required; tags may be empty)
+      if (!bookmarkData || !bookmarkData.url) {
         console.warn('[TOGGLE-SYNC-CONTENT-001] Ignoring malformed bookmark update:', bookmarkData)
         return
       }

@@ -2299,6 +2299,158 @@ IMPL-TAB_SEARCH_SERVICE:
     registered: 2026-02-20
     last_updated: 2026-02-20
 
+REQ-AI_TAGGING_CONFIG:
+  type: REQ
+  name: AI Tagging Configuration
+  category: Functional
+  status: Planned
+  description: "Options page: AI API key, provider (OpenAI or Gemini), Test API key button; persisted in config"
+  cross_references:
+    - ARCH-AI_TAGGING_CONFIG
+    - IMPL-AI_CONFIG_OPTIONS
+    - IMPL-AI_TAG_TEST
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-AI_TAGGING_CONFIG.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+REQ-AI_TAGGING_POPUP:
+  type: REQ
+  name: AI Tagging from Popup
+  category: Functional
+  status: Planned
+  description: "Popup: submit page to AI for tagging; Readability; up to N tags; session tags auto-add; rest as first Suggested Tags; new bookmarks to default store"
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - IMPL-AI_TAGGING_READABILITY
+    - IMPL-AI_TAGGING_PROVIDER
+    - IMPL-SESSION_TAGS
+    - IMPL-AI_TAGGING_POPUP_UI
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-AI_TAGGING_POPUP.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+ARCH-AI_TAGGING_CONFIG:
+  type: ARCH
+  name: AI Tagging Config Architecture
+  status: Active
+  description: "Config stores aiApiKey, aiProvider, aiTagLimit; options UI; Test button calls testAiApiKey"
+  cross_references:
+    - REQ-AI_TAGGING_CONFIG
+    - IMPL-AI_CONFIG_OPTIONS
+    - IMPL-AI_TAG_TEST
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-AI_TAGGING_CONFIG.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+ARCH-AI_TAGGING_FLOW:
+  type: ARCH
+  name: AI Tagging Flow Architecture
+  status: Active
+  description: "Page content via SW scripting.executeScript (works when content script not in tab); optional Readability via content script; AI tags; session split; popup shows SW error on failure"
+  cross_references:
+    - REQ-AI_TAGGING_POPUP
+    - IMPL-AI_TAGGING_READABILITY
+    - IMPL-AI_TAGGING_PROVIDER
+    - IMPL-SESSION_TAGS
+    - IMPL-AI_TAGGING_POPUP_UI
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-AI_TAGGING_FLOW.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-21
+
+IMPL-AI_CONFIG_OPTIONS:
+  type: IMPL
+  name: AI Config in Options
+  status: Active
+  description: "ConfigManager AI fields; options.html section; options.js bind, load, save, Test button"
+  cross_references:
+    - ARCH-AI_TAGGING_CONFIG
+    - REQ-AI_TAGGING_CONFIG
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+IMPL-AI_TAG_TEST:
+  type: IMPL
+  name: AI API Key Test
+  status: Active
+  description: "testAiApiKey(apiKey, provider); minimal OpenAI/Gemini request; return { ok, error }"
+  cross_references:
+    - ARCH-AI_TAGGING_CONFIG
+    - REQ-AI_TAGGING_CONFIG
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-AI_TAG_TEST.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+IMPL-AI_TAGGING_READABILITY:
+  type: IMPL
+  name: Page Content via Readability
+  status: Active
+  description: "SW handleGetPageContent: scripting.executeScript inline func (title + body.innerText, 16k cap); content script early GET_PAGE_CONTENT listener runs extractPageContent when present"
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-AI_TAGGING_READABILITY.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-21
+
+IMPL-AI_TAGGING_PROVIDER:
+  type: IMPL
+  name: OpenAI/Gemini Tag Request
+  status: Active
+  description: "requestAiTags(provider, apiKey, text, limit); parse response; sanitizeTag; dedupe"
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+    - REQ-TAG_INPUT_SANITIZATION
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+IMPL-SESSION_TAGS:
+  type: IMPL
+  name: Session Tags for Auto-Apply
+  status: Active
+  description: "getSessionTags(), recordSessionTags(tags); chrome.storage.session or in-memory SW"
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SESSION_TAGS.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-20
+
+IMPL-AI_TAGGING_POPUP_UI:
+  type: IMPL
+  name: AI Tagging Popup Button and Flow
+  status: Active
+  description: "Popup Tag with AI; GET_PAGE_CONTENT to SW (SW uses executeScript in tab); show content.error on failure; GET_AI_TAGS; split inSession/suggested; save; updateSuggestedTags"
+  cross_references:
+    - ARCH-AI_TAGGING_FLOW
+    - REQ-AI_TAGGING_POPUP
+    - REQ-STORAGE_MODE_DEFAULT
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-AI_TAGGING_POPUP_UI.yaml
+  metadata:
+    registered: 2026-02-20
+    last_updated: 2026-02-21
+
 #
 # TOKEN-IDENTIFIER:
 #   type: REQ | ARCH | IMPL | TEST | PROC

@@ -1196,8 +1196,12 @@ var init_config_manager = __esm({
           // Current and recent tag elements in pixels
           fontSizeBase: 14,
           // Base UI text size in pixels
-          fontSizeInputs: 14
+          fontSizeInputs: 14,
           // Input fields and buttons font size in pixels
+          // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging (optional)
+          aiApiKey: "",
+          aiProvider: "openai",
+          aiTagLimit: 64
         };
       }
       /**
@@ -2949,9 +2953,9 @@ var UIManager = class {
       // Input elements
       newTagInput: document.getElementById("newTagInput"),
       addTagBtn: document.getElementById("addTagBtn"),
-      searchInput: document.getElementById("searchInput"),
-      searchBtn: document.getElementById("searchBtn"),
-      // Search elements
+      tagWithAiBtn: document.getElementById("tagWithAiBtn"),
+      testAiApiBtn: document.getElementById("testAiApiBtn"),
+      popupAiTestStatus: document.getElementById("popupAiTestStatus"),
       searchInput: document.getElementById("searchInput"),
       searchBtn: document.getElementById("searchBtn"),
       searchSuggestions: document.getElementById("searchSuggestions"),
@@ -3017,6 +3021,12 @@ var UIManager = class {
       } else if (tagText && !this.isValidTag(tagText)) {
         this.showError("Invalid tag format");
       }
+    });
+    this.elements.tagWithAiBtn?.addEventListener("click", () => {
+      this.emit("tagWithAi");
+    });
+    this.elements.testAiApiBtn?.addEventListener("click", () => {
+      this.emit("testAiApiKey");
     });
     this.elements.newTagInput?.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
@@ -4253,7 +4263,12 @@ var MESSAGE_TYPES = {
   GET_OVERLAY_CONFIG: "getOverlayConfig",
   // Development/debug
   DEV_COMMAND: "devCommand",
-  ECHO: "echo"
+  ECHO: "echo",
+  // [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] AI tagging
+  GET_PAGE_CONTENT: "GET_PAGE_CONTENT",
+  GET_AI_TAGS: "GET_AI_TAGS",
+  GET_SESSION_TAGS: "getSessionTags",
+  RECORD_SESSION_TAGS: "recordSessionTags"
 };
 
 // src/shared/ui-action-contract.js
@@ -4299,6 +4314,64 @@ var POPUP_ACTION_TO_MESSAGE = {
   // retry load
 };
 
+// src/features/ai/ai-tagging-popup-utils.js
+function splitAiTagsBySession(aiTags, sessionTags) {
+  const set = sessionTags instanceof Set ? sessionTags : new Set((sessionTags || []).map((t) => String(t).toLowerCase()));
+  const inSession = [];
+  const suggested = [];
+  for (const tag of aiTags || []) {
+    const t = String(tag).trim();
+    if (!t) continue;
+    if (set.has(t.toLowerCase())) {
+      inSession.push(t);
+    } else {
+      suggested.push(t);
+    }
+  }
+  return { inSession, suggested };
+}
+
+// src/features/ai/ai-api-test.js
+var OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
+var GEMINI_MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models";
+async function testAiApiKey(apiKey, provider, fetchFn = globalThis.fetch) {
+  if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
+    return { ok: false, error: "Missing API key" };
+  }
+  const key = apiKey.trim();
+  if (!provider || provider !== "openai" && provider !== "gemini") {
+    return { ok: false, error: "Unknown provider" };
+  }
+  try {
+    if (provider === "openai") {
+      const res = await fetchFn(OPENAI_MODELS_URL, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${key}` }
+      });
+      if (res.ok) return { ok: true };
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, error: "Invalid API key" };
+      }
+      const text = await res.text();
+      return { ok: false, error: res.statusText || text || "Request failed" };
+    }
+    if (provider === "gemini") {
+      const url = `${GEMINI_MODELS_URL}?key=${encodeURIComponent(key)}`;
+      const res = await fetchFn(url, { method: "GET" });
+      if (res.ok) return { ok: true };
+      if (res.status === 400 || res.status === 403) {
+        return { ok: false, error: "Invalid API key" };
+      }
+      const text = await res.text();
+      return { ok: false, error: res.statusText || text || "Request failed" };
+    }
+  } catch (err) {
+    const message = err && typeof err.message === "string" ? err.message : "Network error";
+    return { ok: false, error: message };
+  }
+  return { ok: false, error: "Unknown provider" };
+}
+
 // src/ui/popup/PopupController.js
 var PopupController = class {
   constructor(dependencies = {}) {
@@ -4331,6 +4404,8 @@ var PopupController = class {
     this.handleOpenBookmarksIndex = this.handleOpenBookmarksIndex.bind(this);
     this.handleOpenBrowserBookmarkImport = this.handleOpenBrowserBookmarkImport.bind(this);
     this.handleStorageBackendChange = this.handleStorageBackendChange.bind(this);
+    this.handleTagWithAi = this.handleTagWithAi.bind(this);
+    this.handleTestAiApiKey = this.handleTestAiApiKey.bind(this);
     this.normalizeTags = this.normalizeTags.bind(this);
     this.setupEventListeners();
     this.setupAutoRefresh();
@@ -4397,6 +4472,8 @@ var PopupController = class {
     this.uiManager.on("openOptions", this.handleOpenOptions);
     this.uiManager.on("openBookmarksIndex", this.handleOpenBookmarksIndex);
     this.uiManager.on("openBrowserBookmarkImport", this.handleOpenBrowserBookmarkImport);
+    this.uiManager.on("tagWithAi", this.handleTagWithAi);
+    this.uiManager.on("testAiApiKey", this.handleTestAiApiKey);
     this.uiManager.on("storageBackendChange", this.handleStorageBackendChange);
     this.uiManager.on("storageLocalToggle", (targetBackend) => this.handleStorageBackendChange(targetBackend));
     this.uiManager.on("refreshData", this.refreshPopupData.bind(this));
@@ -4516,6 +4593,12 @@ var PopupController = class {
       this.uiManager.updateStorageLocalToggle(backend, hasRealBookmark);
       const token = await this.configManager.getAuthToken();
       this.uiManager.updateStoragePinboardEnabled(!!(token && token.trim()));
+      const config = await this.configManager.getConfig();
+      const aiApiKey = (config?.aiApiKey || "").trim();
+      const tabUrl = (this.currentTab?.url || "").trim();
+      const urlOk = tabUrl.startsWith("http://") || tabUrl.startsWith("https://");
+      const tagWithAiBtn = this.uiManager.elements.tagWithAiBtn;
+      if (tagWithAiBtn) tagWithAiBtn.disabled = !aiApiKey || !urlOk;
       this.isInitialized = true;
       debugLog("[POPUP-DATA-FLOW-001] Popup initialization completed successfully");
       if (this._onStateChange) {
@@ -5258,6 +5341,10 @@ var PopupController = class {
         }
         if (response && response.success) {
           resolve(response.data);
+        } else if (response && typeof response.error === "string") {
+          reject(new Error(response.error));
+        } else if (response && ("textContent" in response || "title" in response)) {
+          resolve(response);
         } else {
           reject(new Error(response?.error || "Request failed"));
         }
@@ -6172,6 +6259,121 @@ var PopupController = class {
       this.uiManager.showSuccess("Browser bookmark import opened in new tab");
     } catch (error) {
       this.errorHandler.handleError("Failed to open browser bookmark import", error);
+    }
+  }
+  /**
+   * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-AI_TAGGING_POPUP_UI]
+   * Submit current page to AI for tagging: Readability → AI tags → session split → save/suggested.
+   */
+  async handleTagWithAi() {
+    const btn = this.uiManager.elements.tagWithAiBtn;
+    if (btn) btn.disabled = true;
+    try {
+      if (!this.currentTab || !this.currentTab.id) {
+        this.uiManager.showError("No tab available");
+        return;
+      }
+      const url = (this.currentTab.url || "").trim();
+      if (!url.startsWith("http://") && !url.startsWith("https://")) {
+        this.uiManager.showError("AI tagging is not available on this page");
+        return;
+      }
+      const config = await this.configManager.getConfig();
+      const apiKey = (config.aiApiKey || "").trim();
+      if (!apiKey) {
+        this.uiManager.showError("Set an AI API key in Options to use Tag with AI");
+        return;
+      }
+      const content = await this.sendMessage({
+        type: "GET_PAGE_CONTENT",
+        data: { tabId: this.currentTab.id }
+      });
+      const text = (content?.textContent ?? content?.data?.textContent ?? "").trim();
+      if (!text) {
+        const msg = content?.success === false && content?.error ? content.error : "Could not extract page content for tagging";
+        this.uiManager.showError(msg);
+        return;
+      }
+      const aiRes = await this.sendMessage({
+        type: "GET_AI_TAGS",
+        data: { text }
+      });
+      const aiTags = Array.isArray(aiRes?.tags) ? aiRes.tags : [];
+      if (!aiRes?.success || aiTags.length === 0) {
+        const msg = aiRes?.error || "No tags returned from AI";
+        this.uiManager.showError(msg);
+        return;
+      }
+      const sessionRes = await this.sendMessage({ type: "getSessionTags" });
+      const sessionTags = Array.isArray(sessionRes?.tags) ? sessionRes.tags : [];
+      const { inSession, suggested } = splitAiTagsBySession(aiTags, sessionTags);
+      const currentTags = this.normalizeTags(this.currentPin?.tags || []);
+      const mergedTags = [.../* @__PURE__ */ new Set([...currentTags, ...inSession])];
+      if (!this.currentPin || !this.currentPin.url) {
+        const preferredBackend = await this.configManager.getStorageMode();
+        const pinData = {
+          url: this.currentTab.url,
+          description: content?.title || this.currentTab?.title || "Untitled",
+          tags: mergedTags.join(" "),
+          shared: "yes",
+          toread: "no",
+          preferredBackend: preferredBackend || void 0
+        };
+        await this.sendMessage({ type: "saveBookmark", data: pinData });
+        this.currentPin = pinData;
+        this.stateManager.setState({ currentPin: this.currentPin });
+        this.uiManager.updateCurrentTags(mergedTags);
+        this.uiManager.showSuccess("Bookmark created with AI tags");
+      } else {
+        const pinData = {
+          ...this.currentPin,
+          tags: mergedTags.join(" "),
+          description: this.getBetterDescription(this.currentPin?.description, content?.title || this.currentTab?.title)
+        };
+        const preferredBackend = this.getSelectedStorageBackend();
+        if (preferredBackend) pinData.preferredBackend = preferredBackend;
+        await this.sendMessage({ type: "saveBookmark", data: pinData });
+        this.currentPin.tags = pinData.tags;
+        this.stateManager.setState({ currentPin: this.currentPin });
+        this.uiManager.updateCurrentTags(mergedTags);
+        this.uiManager.showSuccess("Tags updated with AI suggestions");
+      }
+      this.uiManager.updateSuggestedTags(suggested);
+      await this.loadRecentTags();
+      try {
+        await this.sendToTab({ type: "BOOKMARK_UPDATED", data: this.currentPin });
+      } catch (_) {
+      }
+    } catch (error) {
+      debugError("[REQ-AI_TAGGING_POPUP] handleTagWithAi failed:", error);
+      this.uiManager.showError(error?.message || "AI tagging failed");
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+  /**
+   * [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Test AI API key from popup (same as options page).
+   */
+  async handleTestAiApiKey() {
+    const statusEl = this.uiManager.elements.popupAiTestStatus;
+    if (!statusEl) return;
+    try {
+      const config = await this.configManager.getConfig();
+      const apiKey = (config.aiApiKey || "").trim();
+      const provider = config.aiProvider || "openai";
+      if (!apiKey) {
+        statusEl.textContent = "Set API key in Options first";
+        return;
+      }
+      statusEl.textContent = "Testing\u2026";
+      const result = await testAiApiKey(apiKey, provider);
+      if (result.ok) {
+        statusEl.textContent = "API key OK";
+      } else {
+        statusEl.textContent = result.error || "Failed";
+      }
+    } catch (e) {
+      statusEl.textContent = `Error: ${e?.message || "Unknown"}`;
     }
   }
   /**

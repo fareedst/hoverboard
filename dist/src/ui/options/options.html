@@ -71,6 +71,29 @@
         <button id="test-auth" class="btn btn-secondary">Test Connection</button>
       </section>
 
+      <!-- [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI Tagging -->
+      <section class="section" id="ai-tagging-section">
+        <h2>AI Tagging</h2>
+        <p class="help-text">Optional: use OpenAI or Gemini to suggest tags for the current page from the popup. Leave API key empty to disable.</p>
+        <div class="form-group">
+          <label for="ai-api-key">AI API Key</label>
+          <input type="password" id="ai-api-key" class="input-text" placeholder="sk-... or API key" aria-label="AI API Key" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label for="ai-provider">Provider</label>
+          <select id="ai-provider" class="input-text" aria-label="AI provider">
+            <option value="openai">OpenAI</option>
+            <option value="gemini">Gemini</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ai-tag-limit">Max tags (default 64)</label>
+          <input type="number" id="ai-tag-limit" min="1" max="128" value="64" aria-label="Max AI tags">
+        </div>
+        <button id="test-ai-api" class="btn btn-secondary">Test API key</button>
+        <span id="ai-test-status" class="help-text" style="margin-left: 0.5em;"></span>
+      </section>
+
       <!-- [REQ-NATIVE_HOST_WRAPPER] Native host (optional): test connectivity -->
       <section class="section" id="native-host-section">
         <h2>Native Host</h2>

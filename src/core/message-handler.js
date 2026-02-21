@@ -9,6 +9,8 @@ import { getBookmarkForDisplay, getTagsForUrl } from '../features/storage/url-ta
 import { TagService } from '../features/tagging/tag-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { TabSearchService } from '../features/search/tab-search-service.js'
+import { getSessionTags, recordSessionTags } from '../features/ai/session-tags.js'
+import { requestAiTags } from '../features/ai/ai-tagging-provider.js'
 import { debugLog, debugError, browser } from '../shared/utils.js'
 
 // Message type constants - migrated from config.js
@@ -69,7 +71,13 @@ export const MESSAGE_TYPES = {
 
   // Development/debug
   DEV_COMMAND: 'devCommand',
-  ECHO: 'echo'
+  ECHO: 'echo',
+
+  // [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] AI tagging
+  GET_PAGE_CONTENT: 'GET_PAGE_CONTENT',
+  GET_AI_TAGS: 'GET_AI_TAGS',
+  GET_SESSION_TAGS: 'getSessionTags',
+  RECORD_SESSION_TAGS: 'recordSessionTags'
 }
 
 export class MessageHandler {
@@ -250,6 +258,18 @@ export class MessageHandler {
           break
         case MESSAGE_TYPES.ECHO:
           response = { echo: data, timestamp: Date.now() }
+          break
+        case MESSAGE_TYPES.GET_PAGE_CONTENT:
+          response = await this.handleGetPageContent(data)
+          break
+        case MESSAGE_TYPES.GET_AI_TAGS:
+          response = await this.handleGetAiTags(data)
+          break
+        case MESSAGE_TYPES.GET_SESSION_TAGS:
+          response = await this.handleGetSessionTags()
+          break
+        case MESSAGE_TYPES.RECORD_SESSION_TAGS:
+          response = await this.handleRecordSessionTags(data)
           break
         case MESSAGE_TYPES.DEV_COMMAND:
           response = await this.processDevCommand(data, senderContext)
@@ -518,6 +538,74 @@ export class MessageHandler {
     return options
   }
 
+  /**
+   * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-AI_TAGGING_READABILITY]
+   * Get page title and text via scripting.executeScript so it works even when the content script
+   * was not injected (e.g. tab opened before extension load). Uses body.innerText; same max length as Readability path.
+   */
+  async handleGetPageContent (data) {
+    const tabId = data?.tabId
+    if (tabId == null) return { success: false, error: 'tabId required' }
+    const timeoutError = { success: false, error: 'Page content unavailable. Reload the page and try again, or use a different tab.' }
+    const scripting = (typeof chrome !== 'undefined' && chrome.scripting) ? chrome.scripting : (typeof browser !== 'undefined' && browser.scripting) ? browser.scripting : null
+    if (!scripting) return timeoutError
+    const extractInPage = () => {
+      const title = (document.title && String(document.title).trim()) || ''
+      const raw = document.body && document.body.innerText ? String(document.body.innerText).trim() : ''
+      return { title, textContent: raw }
+    }
+    try {
+      const results = await scripting.executeScript({ target: { tabId }, func: extractInPage })
+      const raw = results && results[0] && results[0].result
+      if (!raw || typeof raw !== 'object') return timeoutError
+      const maxLen = 16000
+      const textContent = (raw.textContent && raw.textContent.length > maxLen) ? raw.textContent.slice(0, maxLen) : (raw.textContent || '')
+      return { title: raw.title || '', textContent }
+    } catch (e) {
+      debugError('[MESSAGE-HANDLER] GET_PAGE_CONTENT executeScript failed:', e)
+      return timeoutError
+    }
+  }
+
+  /**
+   * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-AI_TAGGING_PROVIDER]
+   * Call AI provider for tags; uses config aiApiKey, aiProvider, aiTagLimit and TagService.sanitizeTag.
+   */
+  async handleGetAiTags (data) {
+    const config = await this.configManager.getConfig()
+    const apiKey = (config.aiApiKey || '').trim()
+    if (!apiKey) return { success: false, error: 'No AI API key configured', tags: [] }
+    const provider = config.aiProvider || 'openai'
+    const limit = Math.min(128, Math.max(1, Number(config.aiTagLimit) || 64))
+    const text = (data?.text || '').trim()
+    if (!text) return { success: false, error: 'No text', tags: [] }
+    try {
+      const sanitizeTag = (s) => this.tagService.sanitizeTag(s)
+      const tags = await requestAiTags(provider, apiKey, text, limit, { sanitizeTag })
+      return { success: true, tags }
+    } catch (err) {
+      debugError('[MESSAGE-HANDLER] GET_AI_TAGS failed:', err)
+      return { success: false, error: err.message, tags: [] }
+    }
+  }
+
+  /**
+   * [REQ-AI_TAGGING_POPUP] [IMPL-SESSION_TAGS] Return session tags (lowercase) for auto-apply.
+   */
+  async handleGetSessionTags () {
+    const tags = await getSessionTags()
+    return { success: true, tags }
+  }
+
+  /**
+   * [REQ-AI_TAGGING_POPUP] [IMPL-SESSION_TAGS] Add tags to session set (called when user adds tags).
+   */
+  async handleRecordSessionTags (data) {
+    const tags = Array.isArray(data?.tags) ? data.tags : (data?.tag ? [data.tag] : [])
+    await recordSessionTags(tags)
+    return { success: true }
+  }
+
   async handleSaveBookmark (data) {
     // [IMPL-URL_TAGS_DISPLAY] Previous tags from same source as badge/popup (getTagsForUrl returns normalized array)
     const previousTags = await getTagsForUrl(this.bookmarkProvider, data.url)
@@ -551,6 +639,15 @@ export class MessageHandler {
       }
     }
 
+    // [REQ-AI_TAGGING_POPUP] [IMPL-SESSION_TAGS] Record added tags for session auto-apply
+    if (addedTags.length > 0) {
+      try {
+        await recordSessionTags(addedTags.map(t => t.trim()).filter(Boolean))
+      } catch (err) {
+        debugError('[IMPL-SESSION_TAGS] recordSessionTags failed:', err)
+      }
+    }
+
     return result
   }
 
@@ -578,6 +675,15 @@ export class MessageHandler {
       } catch (error) {
         debugError(`[IMMUTABLE-REQ-TAG-003] Failed to add tag "${data.value}" to user recent list:`, error)
         // Don't fail the entire operation if tag tracking fails
+      }
+    }
+
+    // [REQ-AI_TAGGING_POPUP] [IMPL-SESSION_TAGS] Record tag for session auto-apply
+    if (data.value && data.value.trim()) {
+      try {
+        await recordSessionTags([data.value.trim()])
+      } catch (err) {
+        debugError('[IMPL-SESSION_TAGS] recordSessionTags failed:', err)
       }
     }
 

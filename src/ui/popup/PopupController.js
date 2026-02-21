@@ -10,6 +10,8 @@ import { ConfigManager } from '../../config/config-manager.js'
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
 import { recordAction } from '../../shared/ui-inspector.js'
 import { POPUP_ACTION_IDS } from '../../shared/ui-action-contract.js'
+import { splitAiTagsBySession } from '../../features/ai/ai-tagging-popup-utils.js'
+import { testAiApiKey } from '../../features/ai/ai-api-test.js'
 
 export class PopupController {
   constructor (dependencies = {}) {
@@ -51,6 +53,8 @@ export class PopupController {
     this.handleOpenBookmarksIndex = this.handleOpenBookmarksIndex.bind(this)
     this.handleOpenBrowserBookmarkImport = this.handleOpenBrowserBookmarkImport.bind(this)
     this.handleStorageBackendChange = this.handleStorageBackendChange.bind(this)
+    this.handleTagWithAi = this.handleTagWithAi.bind(this)
+    this.handleTestAiApiKey = this.handleTestAiApiKey.bind(this)
     this.normalizeTags = this.normalizeTags.bind(this)
 
     this.setupEventListeners()
@@ -136,6 +140,8 @@ export class PopupController {
     this.uiManager.on('openOptions', this.handleOpenOptions)
     this.uiManager.on('openBookmarksIndex', this.handleOpenBookmarksIndex)
     this.uiManager.on('openBrowserBookmarkImport', this.handleOpenBrowserBookmarkImport)
+    this.uiManager.on('tagWithAi', this.handleTagWithAi)
+    this.uiManager.on('testAiApiKey', this.handleTestAiApiKey)
 
     // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend change (move bookmark)
     this.uiManager.on('storageBackendChange', this.handleStorageBackendChange)
@@ -300,6 +306,14 @@ export class PopupController {
       // [REQ-MOVE_BOOKMARK_STORAGE_UI] Disable Pinboard storage option when no API token configured
       const token = await this.configManager.getAuthToken()
       this.uiManager.updateStoragePinboardEnabled(!!(token && token.trim()))
+
+      // [REQ-AI_TAGGING_POPUP] [IMPL-AI_TAGGING_POPUP_UI] Enable Tag with AI only when API key set and tab is http(s)
+      const config = await this.configManager.getConfig()
+      const aiApiKey = (config?.aiApiKey || '').trim()
+      const tabUrl = (this.currentTab?.url || '').trim()
+      const urlOk = tabUrl.startsWith('http://') || tabUrl.startsWith('https://')
+      const tagWithAiBtn = this.uiManager.elements.tagWithAiBtn
+      if (tagWithAiBtn) tagWithAiBtn.disabled = !aiApiKey || !urlOk
 
       // Mark as initialized
       this.isInitialized = true
@@ -960,6 +974,10 @@ export class PopupController {
 
         if (response && response.success) {
           resolve(response.data)
+        } else if (response && typeof response.error === 'string') {
+          reject(new Error(response.error))
+        } else if (response && ('textContent' in response || 'title' in response)) {
+          resolve(response)
         } else {
           reject(new Error(response?.error || 'Request failed'))
         }
@@ -2076,6 +2094,133 @@ export class PopupController {
       this.uiManager.showSuccess('Browser bookmark import opened in new tab')
     } catch (error) {
       this.errorHandler.handleError('Failed to open browser bookmark import', error)
+    }
+  }
+
+  /**
+   * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-AI_TAGGING_POPUP_UI]
+   * Submit current page to AI for tagging: Readability → AI tags → session split → save/suggested.
+   */
+  async handleTagWithAi () {
+    const btn = this.uiManager.elements.tagWithAiBtn
+    if (btn) btn.disabled = true
+    try {
+      if (!this.currentTab || !this.currentTab.id) {
+        this.uiManager.showError('No tab available')
+        return
+      }
+      const url = (this.currentTab.url || '').trim()
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        this.uiManager.showError('AI tagging is not available on this page')
+        return
+      }
+      const config = await this.configManager.getConfig()
+      const apiKey = (config.aiApiKey || '').trim()
+      if (!apiKey) {
+        this.uiManager.showError('Set an AI API key in Options to use Tag with AI')
+        return
+      }
+
+      // Get page content from tab (SW uses scripting.executeScript)
+      const content = await this.sendMessage({
+        type: 'GET_PAGE_CONTENT',
+        data: { tabId: this.currentTab.id }
+      })
+      const text = (content?.textContent ?? content?.data?.textContent ?? '').trim()
+      if (!text) {
+        const msg = (content?.success === false && content?.error) ? content.error : 'Could not extract page content for tagging'
+        this.uiManager.showError(msg)
+        return
+      }
+
+      // Get AI tags from service worker
+      const aiRes = await this.sendMessage({
+        type: 'GET_AI_TAGS',
+        data: { text }
+      })
+      const aiTags = Array.isArray(aiRes?.tags) ? aiRes.tags : []
+      if (!aiRes?.success || aiTags.length === 0) {
+        const msg = aiRes?.error || 'No tags returned from AI'
+        this.uiManager.showError(msg)
+        return
+      }
+
+      // Session tags for auto-apply
+      const sessionRes = await this.sendMessage({ type: 'getSessionTags' })
+      const sessionTags = Array.isArray(sessionRes?.tags) ? sessionRes.tags : []
+      const { inSession, suggested } = splitAiTagsBySession(aiTags, sessionTags)
+
+      const currentTags = this.normalizeTags(this.currentPin?.tags || [])
+      const mergedTags = [...new Set([...currentTags, ...inSession])]
+
+      if (!this.currentPin || !this.currentPin.url) {
+        // Create new bookmark with default store [REQ-STORAGE_MODE_DEFAULT]
+        const preferredBackend = await this.configManager.getStorageMode()
+        const pinData = {
+          url: this.currentTab.url,
+          description: content?.title || this.currentTab?.title || 'Untitled',
+          tags: mergedTags.join(' '),
+          shared: 'yes',
+          toread: 'no',
+          preferredBackend: preferredBackend || undefined
+        }
+        await this.sendMessage({ type: 'saveBookmark', data: pinData })
+        this.currentPin = pinData
+        this.stateManager.setState({ currentPin: this.currentPin })
+        this.uiManager.updateCurrentTags(mergedTags)
+        this.uiManager.showSuccess('Bookmark created with AI tags')
+      } else {
+        // Update existing bookmark with in-session tags
+        const pinData = {
+          ...this.currentPin,
+          tags: mergedTags.join(' '),
+          description: this.getBetterDescription(this.currentPin?.description, content?.title || this.currentTab?.title)
+        }
+        const preferredBackend = this.getSelectedStorageBackend()
+        if (preferredBackend) pinData.preferredBackend = preferredBackend
+        await this.sendMessage({ type: 'saveBookmark', data: pinData })
+        this.currentPin.tags = pinData.tags
+        this.stateManager.setState({ currentPin: this.currentPin })
+        this.uiManager.updateCurrentTags(mergedTags)
+        this.uiManager.showSuccess('Tags updated with AI suggestions')
+      }
+
+      this.uiManager.updateSuggestedTags(suggested)
+      await this.loadRecentTags()
+      try {
+        await this.sendToTab({ type: 'BOOKMARK_UPDATED', data: this.currentPin })
+      } catch (_) { /* ignore */ }
+    } catch (error) {
+      debugError('[REQ-AI_TAGGING_POPUP] handleTagWithAi failed:', error)
+      this.uiManager.showError(error?.message || 'AI tagging failed')
+    } finally {
+      if (btn) btn.disabled = false
+    }
+  }
+
+  /**
+   * [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Test AI API key from popup (same as options page).
+   */
+  async handleTestAiApiKey () {
+    const statusEl = this.uiManager.elements.popupAiTestStatus
+    if (!statusEl) return
+    try {
+      const config = await this.configManager.getConfig()
+      const apiKey = (config.aiApiKey || '').trim()
+      const provider = config.aiProvider || 'openai'
+      if (!apiKey) {
+        statusEl.textContent = 'Set API key in Options first'
+        return
+      }
+      statusEl.textContent = 'Testing…'
+      const result = await testAiApiKey(apiKey, provider)
+      if (result.ok) {
+        statusEl.textContent = 'API key OK'
+      } else {
+        statusEl.textContent = result.error || 'Failed'
+      }
+    } catch (e) {
+      statusEl.textContent = `Error: ${e?.message || 'Unknown'}`
     }
   }
 

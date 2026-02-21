@@ -211,6 +211,41 @@ describe('ConfigManager', () => {
     });
   });
 
+  // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS]
+  describe('AI Tagging Config', () => {
+    test('default config includes aiApiKey, aiProvider, aiTagLimit', () => {
+      const defaults = configManager.getDefaultConfiguration();
+      expect(defaults).toHaveProperty('aiApiKey', '');
+      expect(defaults).toHaveProperty('aiProvider', 'openai');
+      expect(defaults).toHaveProperty('aiTagLimit', 64);
+    });
+
+    test('getConfig returns AI fields from stored settings', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_settings: { aiApiKey: 'sk-test', aiProvider: 'gemini', aiTagLimit: 32 }
+      });
+      const config = await configManager.getConfig();
+      expect(config).toHaveProperty('aiApiKey', 'sk-test');
+      expect(config).toHaveProperty('aiProvider', 'gemini');
+      expect(config).toHaveProperty('aiTagLimit', 32);
+    });
+
+    test('updateConfig persists AI fields', async () => {
+      await configManager.updateConfig({
+        aiApiKey: 'key',
+        aiProvider: 'openai',
+        aiTagLimit: 64
+      });
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_settings: expect.objectContaining({
+          aiApiKey: 'key',
+          aiProvider: 'openai',
+          aiTagLimit: 64
+        })
+      });
+    });
+  });
+
   describe('Authentication Management', () => {
     test('should get auth token', async () => {
       const token = await configManager.getAuthToken();

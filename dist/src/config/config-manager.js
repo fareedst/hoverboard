@@ -96,7 +96,12 @@ export class ConfigManager {
       fontSizeLabels: 12, // Label text (Current, Recent, Suggested) in pixels
       fontSizeTags: 12, // Current and recent tag elements in pixels
       fontSizeBase: 14, // Base UI text size in pixels
-      fontSizeInputs: 14 // Input fields and buttons font size in pixels
+      fontSizeInputs: 14, // Input fields and buttons font size in pixels
+
+      // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging (optional)
+      aiApiKey: '',
+      aiProvider: 'openai',
+      aiTagLimit: 64
     }
   }
 

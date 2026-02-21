@@ -127,8 +127,12 @@ var init_config_manager = __esm({
           // Current and recent tag elements in pixels
           fontSizeBase: 14,
           // Base UI text size in pixels
-          fontSizeInputs: 14
+          fontSizeInputs: 14,
           // Input fields and buttons font size in pixels
+          // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging (optional)
+          aiApiKey: "",
+          aiProvider: "openai",
+          aiTagLimit: 64
         };
       }
       /**
@@ -5081,6 +5085,49 @@ var init_pinboard_service = __esm({
 // src/ui/options/options.js
 init_config_manager();
 init_pinboard_service();
+
+// src/features/ai/ai-api-test.js
+var OPENAI_MODELS_URL = "https://api.openai.com/v1/models";
+var GEMINI_MODELS_URL = "https://generativelanguage.googleapis.com/v1beta/models";
+async function testAiApiKey(apiKey, provider, fetchFn = globalThis.fetch) {
+  if (!apiKey || typeof apiKey !== "string" || !apiKey.trim()) {
+    return { ok: false, error: "Missing API key" };
+  }
+  const key = apiKey.trim();
+  if (!provider || provider !== "openai" && provider !== "gemini") {
+    return { ok: false, error: "Unknown provider" };
+  }
+  try {
+    if (provider === "openai") {
+      const res = await fetchFn(OPENAI_MODELS_URL, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${key}` }
+      });
+      if (res.ok) return { ok: true };
+      if (res.status === 401 || res.status === 403) {
+        return { ok: false, error: "Invalid API key" };
+      }
+      const text = await res.text();
+      return { ok: false, error: res.statusText || text || "Request failed" };
+    }
+    if (provider === "gemini") {
+      const url = `${GEMINI_MODELS_URL}?key=${encodeURIComponent(key)}`;
+      const res = await fetchFn(url, { method: "GET" });
+      if (res.ok) return { ok: true };
+      if (res.status === 400 || res.status === 403) {
+        return { ok: false, error: "Invalid API key" };
+      }
+      const text = await res.text();
+      return { ok: false, error: res.statusText || text || "Request failed" };
+    }
+  } catch (err) {
+    const message = err && typeof err.message === "string" ? err.message : "Network error";
+    return { ok: false, error: message };
+  }
+  return { ok: false, error: "Unknown provider" };
+}
+
+// src/ui/options/options.js
 var OptionsController = class {
   constructor() {
     this.configManager = new ConfigManager();
@@ -5154,6 +5201,11 @@ var OptionsController = class {
     this.elements.browserBookmarkImportLink = document.getElementById("browser-bookmark-import-link");
     this.elements.testNativeHost = document.getElementById("test-native-host");
     this.elements.nativeHostStatus = document.getElementById("native-host-status");
+    this.elements.aiApiKey = document.getElementById("ai-api-key");
+    this.elements.aiProvider = document.getElementById("ai-provider");
+    this.elements.aiTagLimit = document.getElementById("ai-tag-limit");
+    this.elements.testAiApi = document.getElementById("test-ai-api");
+    this.elements.aiTestStatus = document.getElementById("ai-test-status");
   }
   attachEventListeners() {
     this.elements.storageModePinboard.addEventListener("change", () => this.onStorageModeChange("pinboard"));
@@ -5167,6 +5219,9 @@ var OptionsController = class {
       this.elements.fileStoragePath.addEventListener("blur", () => this.persistFileStoragePath());
     }
     this.elements.testAuth.addEventListener("click", () => this.testAuthentication());
+    if (this.elements.testAiApi) {
+      this.elements.testAiApi.addEventListener("click", () => this.testAiApiKey());
+    }
     if (this.elements.testNativeHost) {
       this.elements.testNativeHost.addEventListener("click", () => this.testNativeHost());
     }
@@ -5220,6 +5275,9 @@ var OptionsController = class {
       this.elements.fontSizeTags.value = config.fontSizeTags || 12;
       this.elements.fontSizeBase.value = config.fontSizeBase || 14;
       this.elements.fontSizeInputs.value = config.fontSizeInputs || 14;
+      if (this.elements.aiApiKey) this.elements.aiApiKey.value = config.aiApiKey || "";
+      if (this.elements.aiProvider) this.elements.aiProvider.value = config.aiProvider || "openai";
+      if (this.elements.aiTagLimit) this.elements.aiTagLimit.value = config.aiTagLimit || 64;
       this.currentTheme = config.defaultVisibilityTheme;
       this.updateThemeDisplay();
       this.updateTransparencyState();
@@ -5263,7 +5321,11 @@ var OptionsController = class {
         fontSizeLabels: parseInt(this.elements.fontSizeLabels.value),
         fontSizeTags: parseInt(this.elements.fontSizeTags.value),
         fontSizeBase: parseInt(this.elements.fontSizeBase.value),
-        fontSizeInputs: parseInt(this.elements.fontSizeInputs.value)
+        fontSizeInputs: parseInt(this.elements.fontSizeInputs.value),
+        // [REQ-AI_TAGGING_CONFIG] AI Tagging
+        aiApiKey: this.elements.aiApiKey ? this.elements.aiApiKey.value.trim() : "",
+        aiProvider: this.elements.aiProvider ? this.elements.aiProvider.value : "openai",
+        aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64
       };
       await this.configManager.updateConfig(settings);
       const authToken = this.elements.authToken.value.trim();
@@ -5412,6 +5474,29 @@ var OptionsController = class {
       }
     } catch (e) {
       this.elements.nativeHostStatus.textContent = `Error: ${e.message}`;
+    }
+  }
+  /**
+   * [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Test AI API key with minimal request
+   */
+  async testAiApiKey() {
+    if (!this.elements.aiTestStatus) return;
+    const apiKey = this.elements.aiApiKey?.value?.trim();
+    const provider = this.elements.aiProvider?.value || "openai";
+    if (!apiKey) {
+      this.elements.aiTestStatus.textContent = "Enter an API key first";
+      return;
+    }
+    this.elements.aiTestStatus.textContent = "Testing\u2026";
+    try {
+      const result = await testAiApiKey(apiKey, provider);
+      if (result.ok) {
+        this.elements.aiTestStatus.textContent = "API key OK";
+      } else {
+        this.elements.aiTestStatus.textContent = result.error || "Failed";
+      }
+    } catch (e) {
+      this.elements.aiTestStatus.textContent = `Error: ${e.message}`;
     }
   }
   async exportSettings() {
