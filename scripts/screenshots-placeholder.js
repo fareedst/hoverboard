@@ -3,6 +3,12 @@
  * Generate README/docs screenshots with placeholder bookmark data.
  * [IMPL-SCREENSHOT_MODE] Requires built extension in dist/. Run: npm run build:dev && node scripts/screenshots-placeholder.js
  * Popup is cropped to #mainInterface only. Pinboard image composites overlay page + cropped popup.
+ *
+ * Seed from file (optional):
+ *   node scripts/screenshots-placeholder.js [--seed=path/to/seed.json]
+ *   SCREENSHOT_SEED_FILE=path/to/seed.json node scripts/screenshots-placeholder.js
+ * Seed JSON shape: { hoverboard_local_bookmarks: { [url]: bookmark }, hoverboard_storage_index: { [url]: "local" }, hoverboard_theme?: "dark"|"light", hoverboard_settings?: object }
+ * See scripts/screenshot-placeholder-data.js for the default seed and bookmark shape.
  */
 
 import path from 'path'
@@ -12,8 +18,8 @@ import { fileURLToPath } from 'url'
 import { chromium } from '@playwright/test'
 import sharp from 'sharp'
 import {
-  placeholderStorageSeed,
-  placeholderSyncSeed,
+  placeholderStorageSeed as defaultLocalSeed,
+  placeholderSyncSeed as defaultSyncSeed,
   screenshotPopupUrl,
   screenshotPopupTitle
 } from './screenshot-placeholder-data.js'
@@ -23,18 +29,62 @@ const projectRoot = path.join(__dirname, '..')
 const extPath = path.join(projectRoot, 'dist')
 const imagesDir = path.join(projectRoot, 'images')
 
+function getSeedFilePath () {
+  const env = process.env.SCREENSHOT_SEED_FILE
+  if (env) return path.isAbsolute(env) ? env : path.join(projectRoot, env)
+  const arg = process.argv.find(a => a.startsWith('--seed='))
+  if (arg) return path.isAbsolute(arg.slice(7)) ? arg.slice(7) : path.join(projectRoot, arg.slice(7))
+  return null
+}
+
+function loadSeedFromFile (filePath) {
+  const raw = fs.readFileSync(filePath, 'utf8')
+  const data = JSON.parse(raw)
+  if (!data || typeof data.hoverboard_local_bookmarks !== 'object' || Array.isArray(data.hoverboard_local_bookmarks)) {
+    throw new Error('Seed file must have hoverboard_local_bookmarks (object keyed by URL)')
+  }
+  const hoverboard_storage_index = data.hoverboard_storage_index && typeof data.hoverboard_storage_index === 'object' && !Array.isArray(data.hoverboard_storage_index)
+    ? data.hoverboard_storage_index
+    : Object.fromEntries(Object.keys(data.hoverboard_local_bookmarks).map(url => [url, 'local']))
+  const placeholderStorageSeed = {
+    hoverboard_local_bookmarks: data.hoverboard_local_bookmarks,
+    hoverboard_storage_index,
+    hoverboard_theme: data.hoverboard_theme || 'dark'
+  }
+  const placeholderSyncSeed = data.hoverboard_settings != null
+    ? { hoverboard_settings: data.hoverboard_settings }
+    : defaultSyncSeed
+  return { placeholderStorageSeed, placeholderSyncSeed }
+}
+
 const PINBOARD_CONTENT_URL = 'https://pinboard.in/'
 const SCREENSHOT_WAIT_MS = 3000
 const OVERLAY_SELECTOR = '#hoverboard-overlay'
 const POPUP_MAIN_SELECTOR = '#mainInterface'
+const POPUP_READY_ATTR = '[data-screenshot-ready="true"]'
 const OPTIONS_LOAD_SELECTOR = '#auth-token, #storage-mode-pinboard'
 const TABLE_SELECTOR = '.bookmarks-table tbody, .empty-state'
+const STORE_LOCAL_CHECKBOX = '#store-local'
 const POPUP_COMPOSITE_INSET = 24 // px from top-right when compositing popup onto Pinboard image
 
 async function main () {
   if (!fs.existsSync(extPath) || !fs.existsSync(path.join(extPath, 'manifest.json'))) {
     console.error('Extension not built. Run: npm run build:dev')
     process.exit(1)
+  }
+
+  const seedPath = getSeedFilePath()
+  let placeholderStorageSeed = defaultLocalSeed
+  let placeholderSyncSeed = defaultSyncSeed
+  if (seedPath) {
+    if (!fs.existsSync(seedPath)) {
+      console.error('Seed file not found:', seedPath)
+      process.exit(1)
+    }
+    const loaded = loadSeedFromFile(seedPath)
+    placeholderStorageSeed = loaded.placeholderStorageSeed
+    placeholderSyncSeed = loaded.placeholderSyncSeed
+    console.log('Using seed file:', seedPath)
   }
 
   const userDataDir = path.join(os.tmpdir(), `hoverboard-screenshots-${Date.now()}`)
@@ -59,16 +109,17 @@ async function main () {
 
   const baseUrl = `chrome-extension://${extensionId}`
 
-  // Seed storage from extension context (options page has chrome.storage)
+  // Seed storage from extension context (options page has chrome.storage).
+  // [IMPL-SCREENSHOT_MODE] Await storage set so popup/bookmarks-table see seeded data.
   const optionsPage = await context.newPage()
   await optionsPage.goto(`${baseUrl}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
-  await optionsPage.evaluate(({ localSeed, syncSeed }) => {
-    chrome.storage.local.set(localSeed)
+  await optionsPage.evaluate(async ({ localSeed, syncSeed }) => {
+    await chrome.storage.local.set(localSeed)
     if (syncSeed && typeof chrome.storage.sync !== 'undefined') {
-      chrome.storage.sync.set(syncSeed)
+      await chrome.storage.sync.set(syncSeed)
     }
   }, { localSeed: placeholderStorageSeed, syncSeed: placeholderSyncSeed })
-  await optionsPage.waitForTimeout(1000)
+  await optionsPage.waitForTimeout(500)
 
   // 1) Overlay on content page (Pinboard) – capture to temp for compositing
   const pinboardTempPath = path.join(os.tmpdir(), `hoverboard-pinboard-${Date.now()}.png`)
@@ -89,7 +140,8 @@ async function main () {
   const popupPage = await context.newPage()
   await popupPage.goto(popupUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
   await popupPage.locator(POPUP_MAIN_SELECTOR).waitFor({ state: 'visible', timeout: 10000 })
-  await popupPage.waitForTimeout(500)
+  await popupPage.locator(POPUP_READY_ATTR).waitFor({ state: 'attached', timeout: 15000 })
+  await popupPage.waitForTimeout(300)
   const popupBuffer = await popupPage.locator(POPUP_MAIN_SELECTOR).screenshot()
   await popupPage.close()
 
@@ -122,11 +174,12 @@ async function main () {
   console.log('Saved: images/Hoverboard_v1.0.7.0_Chrome_Options.png')
   await optionsPage.close()
 
-  // 4) Local bookmarks index
+  // 4) Local bookmarks index – check Local (L) so seeded bookmarks (storage: local) are visible
   const indexPage = await context.newPage()
   await indexPage.goto(`${baseUrl}/src/ui/bookmarks-table/bookmarks-table.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
   await indexPage.locator(TABLE_SELECTOR).first().waitFor({ state: 'attached', timeout: 10000 })
-  await indexPage.waitForTimeout(1000)
+  await indexPage.locator(STORE_LOCAL_CHECKBOX).check()
+  await indexPage.waitForTimeout(500)
   await indexPage.screenshot({
     path: path.join(imagesDir, 'local-bookmarks-index.png'),
     fullPage: true

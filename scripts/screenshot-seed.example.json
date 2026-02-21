@@ -1,0 +1,44 @@
+{
+  "hoverboard_local_bookmarks": {
+    "https://pinboard.in": {
+      "url": "https://pinboard.in",
+      "description": "Pinboard: social bookmarking",
+      "extended": "",
+      "tags": ["Pinboard", "tags"],
+      "time": "2025-01-15T12:00:00Z",
+      "updated_at": "2025-01-15T12:00:00Z",
+      "shared": "yes",
+      "toread": "yes",
+      "hash": ""
+    },
+    "https://example.com": {
+      "url": "https://example.com",
+      "description": "Example Domain",
+      "extended": "Placeholder for screenshots",
+      "tags": ["example", "placeholder"],
+      "time": "2025-01-14T10:00:00Z",
+      "updated_at": "2025-01-14T10:00:00Z",
+      "shared": "yes",
+      "toread": "no",
+      "hash": ""
+    },
+    "https://github.com": {
+      "url": "https://github.com",
+      "description": "GitHub",
+      "extended": "",
+      "tags": ["development", "code"],
+      "time": "2025-01-13T09:00:00Z",
+      "updated_at": "2025-01-13T09:00:00Z",
+      "shared": "yes",
+      "toread": "yes",
+      "hash": ""
+    }
+  },
+  "hoverboard_storage_index": {
+    "https://pinboard.in": "local",
+    "https://example.com": "local",
+    "https://github.com": "local"
+  },
+  "hoverboard_theme": "dark",
+  "hoverboard_settings": { "showHoverOnPageLoad": true }
+}

@@ -5,6 +5,24 @@ All notable changes to the Hoverboard Browser Extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- **Screenshot placeholder flow** (`IMPL-SCREENSHOT_MODE`) – Placeholder screenshots now show bookmarks reliably:
+  - **Storage seed awaited:** The script awaits `chrome.storage.local.set` and `chrome.storage.sync.set` in the options page so the popup and bookmarks index load after data is written.
+  - **Popup-as-tab URL:** When the popup is opened as a full tab (screenshot flow), the message handler now prefers `data.url` when it is an `http`/`https` URL so `getCurrentBookmark` returns the bookmark for the screenshot URL (e.g. Pinboard) instead of the extension tab URL.
+  - **Wait for content:** The popup sets `data-screenshot-ready="true"` on `#mainInterface` when loading finishes in screenshot mode; the script waits for this attribute before capturing so the popup screenshot shows tags and bookmark data.
+  - **Local store checked for index:** The Local Bookmarks Index shows no rows until at least one store (Local / File / Sync) is checked. The script now checks the **Local (L)** checkbox before capturing the index screenshot so seeded local bookmarks are visible.
+
+### Added
+
+- **Screenshot seed from file** (`IMPL-SCREENSHOT_MODE`) – Formal way to load placeholder data from a JSON file:
+  - **CLI:** `node scripts/screenshots-placeholder.js [--seed=path/to/seed.json]`
+  - **Env:** `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js`
+  - **Seed shape:** `hoverboard_local_bookmarks` (object keyed by URL), `hoverboard_storage_index` (optional), `hoverboard_theme` (optional), `hoverboard_settings` (optional for sync). See `scripts/screenshot-placeholder-data.js` for the default seed and bookmark shape.
+  - **Example file:** `scripts/screenshot-seed.example.json` – copy and edit for custom screenshot data.
+
 ## [1.5.0] - 2026-02-18
 
 ### Added

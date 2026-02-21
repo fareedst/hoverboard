@@ -2711,28 +2711,37 @@ IMPL-SCREENSHOT_MODE:
   cross_references:
     - IMPL-LOCAL_BOOKMARK_SERVICE
     - IMPL-UI_TESTABILITY_HOOKS
+    - REQ-LOCAL_BOOKMARKS_INDEX
   rationale:
     why: Enable automated generation of README/docs screenshots with placeholder bookmark data
     problems_solved:
       - Popup opened as a tab in Playwright has that tab as "active", so bookmark data would be for the wrong URL
+      - Storage seed was not awaited, so popup could load before data was written
+      - No store checkbox checked on index page, so seeded bookmarks were filtered out (REQ-LOCAL_BOOKMARKS_INDEX: Stores default unchecked)
       - Manual screenshot capture is brittle and uses live user data
     benefits:
-      - Repeatable screenshot script; no live bookmarks; deterministic placeholder data
+      - Repeatable screenshot script; no live bookmarks; deterministic placeholder data; optional seed from file
   implementation_approach:
-    summary: Popup reads ?screenshot=1&url=...&title=... and uses them as fake current tab; Playwright script seeds chrome.storage.local/sync and captures overlay, popup, options, bookmarks index
+    summary: Popup reads ?screenshot=1&url=...&title=... and uses them as fake current tab; script awaits storage seed, waits for data-screenshot-ready; message handler prefers data.url when http(s); script can load seed from file; script checks Local store before index screenshot
     details:
-      - PopupController.loadInitialData checks URL params; when screenshot=1 and url present, skip getCurrentTab() and use decoded url/title
-      - scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme for dark popup) and placeholderSyncSeed (showHoverOnPageLoad)
-      - scripts/screenshots-placeholder.js launches Chromium with extension, seeds storage via options page, takes four screenshots to images/
+      - PopupController.loadInitialData checks URL params; when screenshot=1 and url present, skip getCurrentTab() and use decoded url/title; in finally, set data-screenshot-ready on #mainInterface so script can wait for content
+      - MessageHandler.handleGetCurrentBookmark: when data.url is present and is http(s), use it as targetUrl so popup-opened-as-tab gets bookmark for the screenshot URL, not the extension tab URL
+      - scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme) and placeholderSyncSeed (showHoverOnPageLoad)
+      - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?); wait for [data-screenshot-ready="true"] before popup screenshot; check #store-local before bookmarks index screenshot so seeded local bookmarks are visible
+      - scripts/screenshot-seed.example.json: example seed file matching the expected JSON shape
       - Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: 'dark' (see IMPL-POPUP_THEME_CSS)
   code_locations:
     files:
       - path: src/ui/popup/PopupController.js
-        description: Screenshot mode param check in loadInitialData
+        description: Screenshot mode param check, _screenshotMode, data-screenshot-ready in finally
+      - path: src/core/message-handler.js
+        description: handleGetCurrentBookmark prefers data.url when http(s)
       - path: scripts/screenshot-placeholder-data.js
         description: Placeholder bookmark and sync seed data
       - path: scripts/screenshots-placeholder.js
-        description: Playwright screenshot script
+        description: Playwright script; await seed; seed-from-file; wait for data-screenshot-ready; check store-local
+      - path: scripts/screenshot-seed.example.json
+        description: Example seed file for --seed / SCREENSHOT_SEED_FILE
   traceability:
     code_annotations:
       - IMPL-SCREENSHOT_MODE
@@ -2742,16 +2751,17 @@ IMPL-SCREENSHOT_MODE:
     see_also:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-POPUP_THEME_CSS
+      - REQ-LOCAL_BOOKMARKS_INDEX
   detail_file: null
   metadata:
     created:
       date: '2026-02-19'
       author: AI Agent
     last_updated:
-      date: '2026-02-19'
+      date: '2026-02-20'
       author: AI Agent
-      reason: Initial creation
-  summary: Popup screenshot mode and Playwright script for placeholder-data screenshots.
+      reason: Screenshot fixes and formal seed-from-file; data-screenshot-ready; store checkbox for index
+  summary: Popup screenshot mode, awaited seed, data.url preference, data-screenshot-ready, seed-from-file, and Local store check for placeholder screenshots.
 
 IMPL-POPUP_THEME_CSS:
   name: Popup CSS honors ThemeManager (hb-theme-dark)

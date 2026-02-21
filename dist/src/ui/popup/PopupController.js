@@ -180,6 +180,7 @@ export class PopupController {
         ? new URLSearchParams(window.location.search)
         : null
       const screenshotMode = params && params.get('screenshot') === '1'
+      this._screenshotMode = !!screenshotMode
       const screenshotUrl = params && params.get('url')
       const screenshotTitle = params && params.get('title')
       if (screenshotMode && screenshotUrl) {
@@ -317,6 +318,10 @@ export class PopupController {
       throw error
     } finally {
       this.setLoading(false)
+      // [IMPL-SCREENSHOT_MODE] Signal to screenshot script that content is ready (enables wait-for-content).
+      if (this._screenshotMode && this.uiManager?.elements?.mainInterface) {
+        this.uiManager.elements.mainInterface.setAttribute('data-screenshot-ready', 'true')
+      }
     }
   }
 

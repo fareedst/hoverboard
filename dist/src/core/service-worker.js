@@ -5802,7 +5802,8 @@ var MessageHandler = class {
     }
   }
   async handleGetCurrentBookmark(data, url, tabId) {
-    const targetUrl = url || data?.url;
+    const dataUrl = data?.url && typeof data.url === "string" && (data.url.startsWith("http://") || data.url.startsWith("https://")) ? data.url : null;
+    const targetUrl = dataUrl || url || data?.url;
     if (!targetUrl) {
       throw new Error("No URL provided");
     }

@@ -4426,6 +4426,7 @@ var PopupController = class {
       this.setLoading(true);
       const params = typeof window !== "undefined" && window.location && window.location.search ? new URLSearchParams(window.location.search) : null;
       const screenshotMode = params && params.get("screenshot") === "1";
+      this._screenshotMode = !!screenshotMode;
       const screenshotUrl = params && params.get("url");
       const screenshotTitle = params && params.get("title");
       if (screenshotMode && screenshotUrl) {
@@ -4530,6 +4531,9 @@ var PopupController = class {
       throw error;
     } finally {
       this.setLoading(false);
+      if (this._screenshotMode && this.uiManager?.elements?.mainInterface) {
+        this.uiManager.elements.mainInterface.setAttribute("data-screenshot-ready", "true");
+      }
     }
   }
   /**

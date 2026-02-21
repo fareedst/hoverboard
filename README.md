@@ -131,7 +131,7 @@ Intelligent tag suggestions extracted from multiple page content sources:
 
 ## 📸 Screenshots
 
-Screenshots are generated with **placeholder bookmark data** (no live account) and show the extension in **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)).
+Screenshots are generated with **placeholder bookmark data** (no live account) and show the extension in **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script awaits storage seed, waits for the popup to signal content ready, and checks the **Local (L)** store on the bookmarks index so seeded bookmarks are visible. You can use a custom seed file with `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js`; see `scripts/screenshot-seed.example.json` for the expected JSON shape.
 
 ### Popup (dark theme)
 
@@ -298,7 +298,10 @@ npm run create-release
 
 # Screenshots (requires built extension and Playwright)
 npm run screenshots              # Capture popup, options, index (current tab state)
-npm run screenshots:placeholder # Same, using placeholder data and dark-theme popup; writes to images/
+npm run screenshots:placeholder  # Same, using placeholder data and dark-theme popup; writes to images/
+# Optional: use a custom seed file (JSON: hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?)
+node scripts/screenshots-placeholder.js --seed=scripts/screenshot-seed.example.json
+# Or: SCREENSHOT_SEED_FILE=./my-seed.json node scripts/screenshots-placeholder.js
 ```
 
 ## Documentation

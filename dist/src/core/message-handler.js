@@ -298,8 +298,10 @@ export class MessageHandler {
   }
 
   async handleGetCurrentBookmark (data, url, tabId) {
-    // Use URL from data if sender doesn't have tab context (e.g., popup messages)
-    const targetUrl = url || data?.url
+    // Use URL from data when present and is a content URL (e.g. screenshot mode popup opened as tab sends data.url).
+    // Otherwise use sender tab url so content scripts and real popup get bookmark for the current page.
+    const dataUrl = data?.url && typeof data.url === 'string' && (data.url.startsWith('http://') || data.url.startsWith('https://')) ? data.url : null
+    const targetUrl = dataUrl || url || data?.url
     if (!targetUrl) {
       throw new Error('No URL provided')
     }
