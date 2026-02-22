@@ -1,5 +1,5 @@
 /**
- * [REQ-BADGE_INDICATORS] [IMPL-BADGE_REFRESH] Badge refresh on overlay/popup changes
+ * [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] Badge refresh on overlay/popup changes.
  * Unit tests for service worker refreshing the badge after saveTag, deleteTag, and saveBookmark.
  */
 

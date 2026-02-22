@@ -1,5 +1,5 @@
+// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] Mock DOM for overlay tests; className/id auto-registration, classList tracking.
 // [OVERLAY-TEST-MOCK-001] Enhanced mock DOM utility for UI/overlay-related tests
-// [OVERLAY-TEST-ELEMENT-001] Enhanced element creation with comprehensive tracking
 // [OVERLAY-TEST-CLASS-001] Improved class and ID tracking with dynamic updates
 // [OVERLAY-TEST-APPEND-001] Enhanced appendChild simulation with proper registration
 // [OVERLAY-TEST-QUERY-001] Improved query selector with accurate results
@@ -17,7 +17,7 @@ const mockLogger = {
   }
 }
 
-// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM]
+// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT]
 // Ensure direct property assignments update selector registries just like setAttribute/classList operations
 function attachTrackedProperties (element, registerElement) {
   let classNameValue = typeof element.className === 'string' ? element.className : ''

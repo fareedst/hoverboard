@@ -1,5 +1,5 @@
 /**
- * Local Bookmark Service - [IMPL-LOCAL_BOOKMARK_SERVICE]
+ * [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE] [REQ-STORAGE_MODE_DEFAULT] Local bookmark provider using chrome.storage.local; same contract as Pinboard.
  * Bookmark provider backed by chrome.storage.local (no external API).
  *
  * Provider contract (duck-typed with PinboardService):
@@ -12,7 +12,7 @@
  * - testConnection() -> true (always; no network)
  *
  * [ARCH-LOCAL_STORAGE_PROVIDER] Local storage implementation for bookmark provider strategy.
- * [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] time = create-time, updated_at = most-recent-update-time.
+ * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] time = create-time, updated_at = most-recent-update-time.
  */
 
 import { TagService } from '../tagging/tag-service.js'

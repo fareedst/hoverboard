@@ -2,11 +2,11 @@
  * Modern Utilities - Replaces legacy tools.js
  * Provides common utility functions with modern patterns
  *
- * [IMPL-URL_UTILITIES] URL processing and validation
- * [IMPL-TEXT_UTILITIES] String manipulation and text processing
- * [IMPL-ARRAY_OBJECT_UTILITIES] Array and object manipulation
- * [IMPL-TIME_ASYNC_UTILITIES] Time and async utilities for UI and API operations
- * [IMPL-DOM_UTILITIES] DOM utilities for extension content scripts
+ * [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] URL processing and validation
+ * [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] String manipulation and text processing
+ * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Array and object manipulation
+ * [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Time and async utilities for UI and API operations
+ * [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] DOM utilities for extension content scripts
  */
 
 // [SAFARI-EXT-SHIM-001] 2025-07-15: Safari/Firefox/Chrome browser API abstraction for cross-browser extension support
@@ -20,20 +20,14 @@ import { browser } from './safari-shim.js'
 export { browser }
 
 /**
- * URL utilities
- *
- * IMPL-URL_UTILITIES: URL processing system for bookmark management
- * SPECIFICATION: Handle URL normalization, validation, and domain extraction
+ * [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] URL utilities: processUrl, isValidUrl, getDomain.
  */
 export const urlUtils = {
   /**
-   * Strip hash from URL if configured
+   * [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Strip hash from URL if configured.
    * @param {string} url - Original URL
    * @param {boolean} stripHash - Whether to strip hash
    * @returns {string} - Processed URL
-   *
-   * IMPL-URL_UTILITIES: URL normalization with optional hash removal
-   * IMPLEMENTATION DECISION: Use URL constructor for reliable parsing, preserve original on error
    */
   processUrl (url, stripHash = false) {
     if (!url) return ''
@@ -54,12 +48,9 @@ export const urlUtils = {
   },
 
   /**
-   * Check if URL is valid
+   * [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Check if URL is valid.
    * @param {string} url - URL to validate
    * @returns {boolean} - Whether URL is valid
-   *
-   * IMPL-URL_UTILITIES: URL validation using native URL constructor
-   * IMPLEMENTATION DECISION: Simple try/catch validation for broad compatibility
    */
   isValidUrl (url) {
     try {
@@ -73,12 +64,9 @@ export const urlUtils = {
   },
 
   /**
-   * Extract domain from URL
+   * [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Extract domain from URL.
    * @param {string} url - URL to process
    * @returns {string} - Domain or empty string
-   *
-   * IMPL-URL_UTILITIES: Domain extraction for site-specific features
-   * IMPLEMENTATION DECISION: Return empty string on error for safe string operations
    */
   getDomain (url) {
     try {
@@ -92,21 +80,15 @@ export const urlUtils = {
 }
 
 /**
- * String utilities
- *
- * IMPL-TEXT_UTILITIES: Text processing system for UI display and user input
- * SPECIFICATION: Handle text truncation, cleaning, and HTML escaping
+ * [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] String utilities: truncate, cleanText, escapeHtml.
  */
 export const stringUtils = {
   /**
-   * Truncate string to specified length
+   * [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Truncate string to maxLength with suffix.
    * @param {string} str - String to truncate
    * @param {number} maxLength - Maximum length
    * @param {string} suffix - Suffix to add if truncated
    * @returns {string} - Truncated string
-   *
-   * IMPL-TEXT_UTILITIES: Text truncation for UI display constraints
-   * IMPLEMENTATION DECISION: Account for suffix length to maintain total length limit
    */
   truncate (str, maxLength = 100, suffix = '...') {
     if (!str || str.length <= maxLength) return str || ''
@@ -115,12 +97,9 @@ export const stringUtils = {
   },
 
   /**
-   * Clean and normalize text
+   * [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Clean and normalize text (trim, collapse spaces).
    * @param {string} text - Text to clean
    * @returns {string} - Cleaned text
-   *
-   * IMPL-TEXT_UTILITIES: Text normalization for consistent processing
-   * IMPLEMENTATION DECISION: Trim whitespace and collapse multiple spaces
    */
   cleanText (text) {
     if (!text) return ''
@@ -129,12 +108,9 @@ export const stringUtils = {
   },
 
   /**
-   * Escape HTML entities
+   * [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Escape HTML entities (textContent).
    * @param {string} text - Text to escape
    * @returns {string} - Escaped text
-   *
-   * IMPL-TEXT_UTILITIES: HTML entity escaping for XSS prevention
-   * IMPLEMENTATION DECISION: Use DOM textContent for browser-native escaping
    */
   escapeHtml (text) {
     if (!text) return ''
@@ -146,80 +122,48 @@ export const stringUtils = {
 }
 
 /**
- * Array utilities
- *
- * IMPL-ARRAY_OBJECT_UTILITIES: Array manipulation system for data processing
- * SPECIFICATION: Handle deduplication, chunking, and filtering operations
+ * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]
+ * Array utilities: unique, chunk, compact; pure, no mutation.
  */
 export const arrayUtils = {
   /**
-   * Remove duplicates from array
-   * @param {Array} arr - Array to deduplicate
-   * @returns {Array} - Array without duplicates
-   *
-   * IMPL-ARRAY_OBJECT_UTILITIES: Array deduplication using Set
-   * IMPLEMENTATION DECISION: Use Set for efficient O(n) deduplication
+   * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Dedupe; order by first occurrence.
    */
   unique (arr) {
-    // IMPL-ARRAY_OBJECT_UTILITIES: Set automatically handles deduplication, spread back to array
     return [...new Set(arr)]
   },
 
   /**
-   * Chunk array into smaller arrays
-   * @param {Array} arr - Array to chunk
-   * @param {number} size - Chunk size
-   * @returns {Array[]} - Array of chunks
-   *
-   * IMPL-ARRAY_OBJECT_UTILITIES: Array chunking for pagination and batch processing
-   * IMPLEMENTATION DECISION: Use slice for efficient chunking without mutation
+   * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Split into size-sized chunks; last may be shorter.
    */
   chunk (arr, size) {
     const chunks = []
     for (let i = 0; i < arr.length; i += size) {
-      // IMPL-ARRAY_OBJECT_UTILITIES: Slice creates chunks without modifying original array
       chunks.push(arr.slice(i, i + size))
     }
     return chunks
   },
 
   /**
-   * Filter out empty/null/undefined values
-   * @param {Array} arr - Array to filter
-   * @returns {Array} - Filtered array
-   *
-   * IMPL-ARRAY_OBJECT_UTILITIES: Array compaction to remove falsy values
-   * IMPLEMENTATION DECISION: Filter null, undefined, and empty strings specifically
+   * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Remove falsy (false, null, undefined, 0, "", NaN).
    */
   compact (arr) {
-    // IMPL-ARRAY_OBJECT_UTILITIES: Filter out null, undefined, and empty string values
     return arr.filter(item => item != null && item !== '')
   }
 }
 
 /**
- * Object utilities
- *
- * IMPL-ARRAY_OBJECT_UTILITIES: Object manipulation system for configuration and state management
- * SPECIFICATION: Handle deep cloning, emptiness checks, and property selection
+ * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]
+ * Object utilities: deepClone, isEmpty, pick; pure, no mutation.
  */
 export const objectUtils = {
   /**
-   * Deep clone an object
-   * @param {Object} obj - Object to clone
-   * @returns {Object} - Cloned object
-   *
-   * IMPL-ARRAY_OBJECT_UTILITIES: Deep object cloning for immutable operations
-   * IMPLEMENTATION DECISION: Handle special cases (Date, Array) and recursive structures
+   * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Deep copy; Date/Array/plain object recursively.
    */
   deepClone (obj) {
     if (obj === null || typeof obj !== 'object') return obj
-    // IMPL-ARRAY_OBJECT_UTILITIES: Handle Date objects specially to preserve time values
     if (obj instanceof Date) return new Date(obj.getTime())
-    // IMPL-ARRAY_OBJECT_UTILITIES: Handle Array objects with recursive cloning
     if (obj instanceof Array) return obj.map(item => this.deepClone(item))
-
-    // IMPL-ARRAY_OBJECT_UTILITIES: Clone plain objects recursively
     const cloned = {}
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
@@ -230,31 +174,18 @@ export const objectUtils = {
   },
 
   /**
-   * Check if object is empty
-   * @param {Object} obj - Object to check
-   * @returns {boolean} - Whether object is empty
-   *
-   * IMPL-ARRAY_OBJECT_UTILITIES: Object emptiness validation
-   * IMPLEMENTATION DECISION: Check for null and zero keys for comprehensive emptiness
+   * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] True if null/undefined or no enumerable keys.
    */
   isEmpty (obj) {
-    // IMPL-ARRAY_OBJECT_UTILITIES: Check null/undefined and object key count for emptiness
     return obj == null || Object.keys(obj).length === 0
   },
 
   /**
-   * Pick specific keys from object
-   * @param {Object} obj - Source object
-   * @param {string[]} keys - Keys to pick
-   * @returns {Object} - Object with only specified keys
-   *
-   * IMPL-ARRAY_OBJECT_UTILITIES: Object property selection for data filtering
-   * IMPLEMENTATION DECISION: Only include keys that exist in source object
+   * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Subset of object with only specified keys.
    */
   pick (obj, keys) {
     const result = {}
     keys.forEach(key => {
-      // IMPL-ARRAY_OBJECT_UTILITIES: Only include keys that exist in source object
       if (key in obj) {
         result[key] = obj[key]
       }
@@ -264,19 +195,13 @@ export const objectUtils = {
 }
 
 /**
- * Time utilities
- *
- * IMPL-TIME_ASYNC_UTILITIES: Time and async operations for API and UI timing
- * SPECIFICATION: Handle delays, formatting, and relative time calculations
+ * [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Time utilities: sleep (delay), formatTimestamp, getRelativeTime.
  */
 export const timeUtils = {
   /**
-   * Sleep for specified milliseconds
+   * [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Sleep for specified milliseconds.
    * @param {number} ms - Milliseconds to sleep
    * @returns {Promise} - Promise that resolves after delay
-   *
-   * IMPL-TIME_ASYNC_UTILITIES: Async delay utility for API rate limiting and UI timing
-   * IMPLEMENTATION DECISION: Promise-based sleep for modern async/await compatibility
    */
   sleep (ms) {
     // IMPL-TIME_ASYNC_UTILITIES: Promise-based delay for async/await patterns
@@ -284,12 +209,9 @@ export const timeUtils = {
   },
 
   /**
-   * Format timestamp for display
+   * [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Format timestamp for display (toLocaleString).
    * @param {number|string|Date} timestamp - Timestamp to format
    * @returns {string} - Formatted timestamp
-   *
-   * IMPL-TIME_ASYNC_UTILITIES: Timestamp formatting for UI display
-   * IMPLEMENTATION DECISION: Localized date/time format for user readability
    */
   formatTimestamp (timestamp) {
     const date = new Date(timestamp)
@@ -298,12 +220,9 @@ export const timeUtils = {
   },
 
   /**
-   * Get relative time string (e.g., "2 hours ago")
+   * [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Get relative time string (e.g. "2 hours ago").
    * @param {number|string|Date} timestamp - Timestamp to process
    * @returns {string} - Relative time string
-   *
-   * IMPL-TIME_ASYNC_UTILITIES: Relative time calculation for recent activity display
-   * IMPLEMENTATION DECISION: Human-readable time differences with fallback formatting
    */
   getRelativeTime (timestamp) {
     const date = new Date(timestamp)
@@ -324,37 +243,28 @@ export const timeUtils = {
 }
 
 /**
- * DOM utilities
- *
- * IMPL-DOM_UTILITIES: DOM manipulation system for content scripts and UI
- * SPECIFICATION: Handle element waiting, creation, and attribute management
+ * [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] DOM utilities: waitForElement (MutationObserver), createElement, legacy pin helpers.
  */
 export const domUtils = {
   /**
-   * Wait for element to appear in DOM
-   * @param {string} selector - CSS selector
-   * @param {number} timeout - Timeout in milliseconds
-   * @returns {Promise<Element>} - Found element
-   *
-   * IMPL-DOM_UTILITIES: DOM element waiting utility for dynamic content
-   * IMPLEMENTATION DECISION: MutationObserver for efficient DOM watching with timeout
+   * [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Wait for selector in DOM via MutationObserver with timeout.
    */
   waitForElement (selector, timeout = 5000) {
     return new Promise((resolve, reject) => {
-      // IMPL-DOM_UTILITIES: Check if element already exists
+      // [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Check if element already exists
       const existingElement = document.querySelector(selector)
       if (existingElement) {
         resolve(existingElement)
         return
       }
 
-      // IMPL-DOM_UTILITIES: Set up timeout for promise rejection
+      // [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Timeout for promise rejection
       const timeoutId = setTimeout(() => {
         observer.disconnect()
         reject(new Error(`Element ${selector} not found within ${timeout}ms`))
       }, timeout)
 
-      // IMPL-DOM_UTILITIES: Use MutationObserver for efficient DOM watching
+      // [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] MutationObserver for DOM watching
       const observer = new MutationObserver((mutations, obs) => {
         const element = document.querySelector(selector)
         if (element) {
@@ -364,7 +274,7 @@ export const domUtils = {
         }
       })
 
-      // IMPL-DOM_UTILITIES: Observe DOM changes for new elements
+      // [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Observe document.body for new elements
       observer.observe(document.body, {
         childList: true,
         subtree: true
@@ -373,37 +283,21 @@ export const domUtils = {
   },
 
   /**
-   * Create element with attributes and content
-   * @param {string} tag - HTML tag name
-   * @param {Object} attributes - Element attributes
-   * @param {string} content - Element content
-   * @returns {Element} - Created element
-   *
-   * IMPL-DOM_UTILITIES: DOM element creation utility with full attribute support
-   * IMPLEMENTATION DECISION: Comprehensive attribute handling including data attributes and events
+   * [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Create element with tag, attributes, and content.
    */
   createElement (tag, attributes = {}, content = '') {
-    // IMPL-DOM_UTILITIES: Create element with specified tag
     const element = document.createElement(tag)
-
-    // IMPL-DOM_UTILITIES: Set all provided attributes
     Object.entries(attributes).forEach(([key, value]) => {
       if (key.startsWith('on') && typeof value === 'function') {
-        // IMPL-DOM_UTILITIES: Handle event listeners
         element.addEventListener(key.substring(2).toLowerCase(), value)
       } else if (key === 'className') {
-        // IMPL-DOM_UTILITIES: Handle className property
         element.className = value
       } else if (key === 'style' && typeof value === 'object') {
-        // IMPL-DOM_UTILITIES: Handle style object
         Object.assign(element.style, value)
       } else {
-        // IMPL-DOM_UTILITIES: Handle standard attributes
         element.setAttribute(key, value)
       }
     })
-
-    // IMPL-DOM_UTILITIES: Set content if provided
     if (content) {
       element.textContent = content
     }
@@ -412,11 +306,8 @@ export const domUtils = {
   }
 }
 
-// IMPL-DOM_UTILITIES: Legacy bookmark creation utility
-// SPECIFICATION: Maintain compatibility with existing bookmark creation patterns
-// IMPLEMENTATION DECISION: Merge existing and additional data with sensible defaults
+// [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Legacy createPinFromFormData-style: new pin with merged data and timestamp.
 export function newPin (existing = {}, additional = {}) {
-  // IMPL-DOM_UTILITIES: Create new pin object with merged data and timestamp
   return {
     url: '',
     description: '',
@@ -433,11 +324,8 @@ export function newPin (existing = {}, additional = {}) {
   }
 }
 
-// IMPL-DOM_UTILITIES: Legacy data validation utility
-// SPECIFICATION: Provide fallback values for minimal data requirements
-// IMPLEMENTATION DECISION: Return minimal valid object structure with title fallback
+// [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] Legacy validatePinFormData-style: minimal bookmark structure with fallback title.
 export function minEmpty (data, title = '') {
-  // IMPL-DOM_UTILITIES: Return minimal bookmark structure with fallback title
   return {
     url: data?.url || '',
     description: data?.description || title || 'Untitled',
@@ -449,8 +337,7 @@ export function minEmpty (data, title = '') {
 }
 
 /**
- * [IMPL-SELECTION_TO_TAG_INPUT] Normalize page selection for tag input prefill.
- * Strips punctuation, takes first 8 words, returns empty string if no words.
+ * [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] Normalize page selection for tag input prefill (strip punctuation, first maxWords).
  * @param {string} selection - Raw selection text
  * @param {number} maxWords - Max words to keep (default 8)
  * @returns {string} - Normalized string or ''

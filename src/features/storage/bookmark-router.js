@@ -1,7 +1,7 @@
 /**
- * Bookmark Router - [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER]
- * Delegates bookmark operations to the correct provider (pinboard, local, file, sync) per URL using storage index.
- * [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-URL_TAGS_DISPLAY] Tag shape (string/array) via url-tags-manager.
+ * [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI]
+ * Delegates bookmark operations to the correct provider per URL; save follows preferredBackend; getRecentBookmarks aggregate; moveBookmarkToStorage.
+ * [IMPL-URL_TAGS_DISPLAY] Tag shape (string/array) via url-tags-manager.
  */
 
 import { debugLog, debugError } from '../../shared/utils.js'
@@ -14,7 +14,7 @@ function cleanUrl (url) {
 
 export class BookmarkRouter {
   /**
-   * [IMPL-BOOKMARK_ROUTER] Constructor.
+   * [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI] Constructor.
    * @param {Object} pinboardProvider - getBookmarkForUrl, saveBookmark, deleteBookmark, getRecentBookmarks, saveTag, deleteTag, testConnection
    * @param {Object} localProvider - same contract
    * @param {Object} fileProvider - same contract
@@ -128,7 +128,7 @@ export class BookmarkRouter {
     const defaultMode = await this.getDefaultStorageMode()
     const preferred = bookmarkData?.preferredBackend ?? bookmarkData?.backend
     const usePreferred = preferred && VALID_BACKENDS.includes(preferred)
-    // [REQ-STORAGE_MODE_DEFAULT] When popup sends preferredBackend (UI selection), use it so save follows the highlight.
+    // [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI] When popup sends preferredBackend (UI selection), use it so save follows the highlight.
     const backend = (usePreferred ? preferred : null) || fromIndex || defaultMode
     const provider = this._providerFor(backend)
     const result = await provider.saveBookmark(bookmarkData)
@@ -173,7 +173,7 @@ export class BookmarkRouter {
   }
 
   /**
-   * [REQ-LOCAL_BOOKMARKS_INDEX] Return all bookmarks from local, file, and sync providers with storage field (for index page).
+   * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX] Aggregate local + file + sync with storage field; sort by time desc.
    * @returns {Promise<Array<{ ...bookmark, storage: 'local'|'file'|'sync' }>>}
    */
   async getAllBookmarksForIndex () {
@@ -202,7 +202,7 @@ export class BookmarkRouter {
   }
 
   /**
-   * [IMPL-BOOKMARK_ROUTER] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move bookmark to target storage (copy to target, delete from source, update index).
+   * [IMPL-BOOKMARK_ROUTER] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] [REQ-MOVE_BOOKMARK_STORAGE_UI] Move bookmark to target storage (copy to target, delete from source, update index).
    * @param {string} url
    * @param {string} targetBackend - 'pinboard'|'local'|'file'|'sync'
    */

@@ -1,12 +1,7 @@
 /**
- * Safari Browser API Abstraction Layer
- *
- * [SAFARI-EXT-SHIM-001] Safari/Firefox/Chrome browser API abstraction for cross-browser extension support
- * This module provides a unified browser API using webextension-polyfill for cross-browser compatibility.
- * All extension code should import { browser } from './safari-shim.js' instead of using chrome.* directly.
- *
- * Date: 2025-07-19
- * Status: Active Development
+ * [IMPL-SAFARI_ADAPTATION] [ARCH-SAFARI_ADAPTATION] [REQ-SAFARI_ADAPTATION]
+ * Safari browser API abstraction; webextension-polyfill fallback; minimal mock when unavailable.
+ * [SAFARI-EXT-SHIM-001] All extension code should import { browser } from './safari-shim.js' instead of chrome.*.
  */
 
 import { logger } from './logger.js'

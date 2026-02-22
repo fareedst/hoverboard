@@ -1198,7 +1198,7 @@ var init_config_manager = __esm({
           // Base UI text size in pixels
           fontSizeInputs: 14,
           // Input fields and buttons font size in pixels
-          // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging (optional)
+          // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging defaults for options and storage; empty key disables feature.
           aiApiKey: "",
           aiProvider: "openai",
           aiTagLimit: 64
@@ -1388,11 +1388,8 @@ var init_config_manager = __esm({
         return `auth_token=${token}`;
       }
       /**
-       * Get inhibited URLs list
+       * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Get inhibited URLs list (newline-separated).
        * @returns {Promise<string[]>} Array of inhibited URLs
-       *
-       * IMPL-URL_INHIBITION: Site-specific behavior control through URL inhibition
-       * IMPLEMENTATION DECISION: Store URLs as newline-separated string for user editing convenience
        */
       async getInhibitUrls() {
         try {
@@ -1405,11 +1402,8 @@ var init_config_manager = __esm({
         }
       }
       /**
-       * Add URL to inhibit list
+       * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Add URL to inhibit list (no duplicate).
        * @param {string} url - URL to inhibit
-       *
-       * IMPL-URL_INHIBITION: Dynamic inhibition list management
-       * IMPLEMENTATION DECISION: Check for duplicates to maintain clean inhibition list
        */
       async addInhibitUrl(url) {
         try {
@@ -1429,11 +1423,8 @@ var init_config_manager = __esm({
         }
       }
       /**
-       * Set inhibit URLs list (replaces existing list)
+       * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Set inhibit URLs list (replaces existing).
        * @param {string[]} urls - Array of URLs to inhibit
-       *
-       * IMPL-URL_INHIBITION: Complete inhibition list replacement
-       * IMPLEMENTATION DECISION: Allow bulk replacement for configuration import/reset scenarios
        */
       async setInhibitUrls(urls) {
         try {
@@ -1447,12 +1438,9 @@ var init_config_manager = __esm({
         }
       }
       /**
-       * Check if URL is allowed (not in inhibit list)
+       * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Check if URL is allowed (not in inhibit list; substring match).
        * @param {string} url - URL to check
        * @returns {Promise<boolean>} Whether URL is allowed
-       *
-       * IMPL-URL_INHIBITION: URL filtering logic for site-specific behavior
-       * IMPLEMENTATION DECISION: Bidirectional substring matching for flexible URL patterns
        */
       async isUrlAllowed(url) {
         try {
@@ -2954,6 +2942,7 @@ var UIManager = class {
       newTagInput: document.getElementById("newTagInput"),
       addTagBtn: document.getElementById("addTagBtn"),
       tagWithAiBtn: document.getElementById("tagWithAiBtn"),
+      // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Popup Test API key button and status span.
       testAiApiBtn: document.getElementById("testAiApiBtn"),
       popupAiTestStatus: document.getElementById("popupAiTestStatus"),
       searchInput: document.getElementById("searchInput"),
@@ -2970,7 +2959,7 @@ var UIManager = class {
       readStatus: document.getElementById("readStatus"),
       // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
       showHoverOnPageLoad: document.getElementById("showHoverOnPageLoad"),
-      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend select-one buttons (pinboard | file | local | sync)
+      // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend select-one buttons (pinboard | file | local | sync)
       storageBackendButtons: document.getElementById("storageBackendButtons")
     };
   }
@@ -3324,8 +3313,7 @@ var UIManager = class {
     }
   }
   /**
-   * [IMPL-SELECTION_TO_TAG_INPUT] Set tag input value (e.g. from page selection).
-   * Clears invalid class when setting a value.
+   * [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] Set tag input value (e.g. from page selection).
    * @param {string} value - Text to set in the new-tag input
    */
   setTagInputValue(value) {
@@ -3427,7 +3415,7 @@ var UIManager = class {
     }
   }
   /**
-   * [POPUP-CLOSE-BEHAVIOR-005] Update Show Hover button state
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Update Show Hover button state from overlay visibility.
    * @param {boolean} isOverlayVisible - Whether the overlay is currently visible
    */
   updateShowHoverButtonState(isOverlayVisible) {
@@ -4480,15 +4468,13 @@ var PopupController = class {
     this.uiManager.on("showHoverOnPageLoadChange", this.handleShowHoverOnPageLoadChange.bind(this));
   }
   /**
-   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
-   * Set optional callback for UI actions (for tests). Signature: ({ actionId, payload }) => void
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] Set optional callback for UI actions (for tests).
    */
   setOnAction(fn) {
     this._onAction = typeof fn === "function" ? fn : null;
   }
   /**
-   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
-   * Set optional callback for state/screen changes (for tests). Signature: ({ screen, state }) => void
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] Set optional callback for state/screen changes (for tests).
    */
   setOnStateChange(fn) {
     this._onStateChange = typeof fn === "function" ? fn : null;
@@ -5233,7 +5219,7 @@ var PopupController = class {
     });
   }
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Get the storage backend currently selected in the popup UI (highlighted button).
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Get the storage backend currently selected in the popup UI (highlighted button).
    * Used so save follows the highlight when creating or updating a bookmark.
    * @returns {string|null} 'pinboard'|'local'|'file'|'sync' or null if not determinable
    */
@@ -5243,7 +5229,7 @@ var PopupController = class {
     return backend && ["pinboard", "local", "file", "sync"].includes(backend) ? backend : null;
   }
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Get storage backend for URL (pinboard | local | file | sync).
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] Get storage backend for URL (pinboard | local | file | sync).
    */
   async getStorageBackendForUrl(url) {
     if (!url || typeof chrome?.runtime?.sendMessage !== "function") return "local";
@@ -5262,7 +5248,7 @@ var PopupController = class {
     });
   }
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move current bookmark to target storage backend.
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move current bookmark to target storage backend.
    */
   async handleStorageBackendChange(targetBackend) {
     recordAction(POPUP_ACTION_IDS.storageBackendChange, { targetBackend }, "popup");
@@ -5352,7 +5338,7 @@ var PopupController = class {
     });
   }
   /**
-   * Send message to content script in current tab
+   * [IMPL-POPUP_MESSAGE_TIMEOUT] Send message to content script with timeout; reject on timeout or error.
    */
   async sendToTab(message) {
     if (!this.currentTab) {
@@ -5813,11 +5799,8 @@ var PopupController = class {
     }
   }
   /**
-   * Handle show/hide hoverboard action
-   */
-  /**
-   * [POPUP-CLOSE-BEHAVIOR-004] Handle show/hide hoverboard action
-   * Modified to NOT close popup after toggling overlay visibility
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Handle show/hide hoverboard; no window.close.
+   * [POPUP-CLOSE-BEHAVIOR-004] Modified to NOT close popup after toggling overlay visibility
    */
   async handleShowHoverboard() {
     recordAction(POPUP_ACTION_IDS.showHoverboard, { tabId: this.currentTab?.id }, "popup");
@@ -5846,7 +5829,7 @@ var PopupController = class {
     }
   }
   /**
-   * Handle toggle private status
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Handle toggle private status (popup stays open).
    */
   async handleTogglePrivate() {
     recordAction(POPUP_ACTION_IDS.togglePrivate, { hasBookmark: !!this.currentPin }, "popup");
@@ -6445,7 +6428,7 @@ var PopupController = class {
   }
   /**
    * [POPUP-REFRESH-001] Setup auto-refresh on focus
-   * [IMMUTABLE-REQ-TAG-003] [IMPL-RECENT_TAGS_POPUP_REFRESH] Refresh Recent Tags when popup becomes visible
+   * [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [REQ-RECENT_TAGS_SYSTEM] Refresh Recent Tags when popup becomes visible (visibilitychange).
    */
   setupAutoRefresh() {
     window.addEventListener("focus", () => {

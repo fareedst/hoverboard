@@ -15,6 +15,7 @@ const GEMINI_MODELS_URL = 'https://generativelanguage.googleapis.com/v1beta/mode
  * @returns {Promise<{ ok: boolean, error?: string }>}
  */
 export async function testAiApiKey (apiKey, provider, fetchFn = globalThis.fetch) {
+  // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Validation: ensure key and provider present so we never call API with missing params.
   if (!apiKey || typeof apiKey !== 'string' || !apiKey.trim()) {
     return { ok: false, error: 'Missing API key' }
   }
@@ -24,6 +25,7 @@ export async function testAiApiKey (apiKey, provider, fetchFn = globalThis.fetch
   }
 
   try {
+    // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] OpenAI: minimal GET models; 401/403 → invalid key, else request failed.
     if (provider === 'openai') {
       const res = await fetchFn(OPENAI_MODELS_URL, {
         method: 'GET',
@@ -37,6 +39,7 @@ export async function testAiApiKey (apiKey, provider, fetchFn = globalThis.fetch
       return { ok: false, error: res.statusText || text || 'Request failed' }
     }
 
+    // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Gemini: minimal GET models; 400/403 → invalid key, else request failed.
     if (provider === 'gemini') {
       const url = `${GEMINI_MODELS_URL}?key=${encodeURIComponent(key)}`
       const res = await fetchFn(url, { method: 'GET' })
@@ -48,6 +51,7 @@ export async function testAiApiKey (apiKey, provider, fetchFn = globalThis.fetch
       return { ok: false, error: res.statusText || text || 'Request failed' }
     }
   } catch (err) {
+    // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Network or other error; return user-facing message, never log key.
     const message = err && typeof err.message === 'string' ? err.message : 'Network error'
     return { ok: false, error: message }
   }

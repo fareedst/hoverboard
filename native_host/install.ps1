@@ -1,4 +1,4 @@
-# [REQ-NATIVE_HOST_WRAPPER] [IMPL-NATIVE_HOST_INSTALLER] Install native host and manifest for Windows.
+# [IMPL-NATIVE_HOST_INSTALLER] [ARCH-NATIVE_HOST] [REQ-NATIVE_HOST_WRAPPER] Install native host and manifest for Windows.
 # Usage: .\install.ps1 [-SourceDir <path>] [-ExtensionId <id>] [-Browser chrome|chromium]
 param(
   [string]$SourceDir = $PSScriptRoot,

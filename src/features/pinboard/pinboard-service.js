@@ -1,11 +1,6 @@
 /**
- * Pinboard Service - Modern API integration for Pinboard bookmarking service
- * Replaces legacy Pb class with Promise-based, error-handled architecture
- *
- * PIN-001: Pinboard API integration with authentication and rate limiting
- * PIN-002: Bookmark retrieval and management operations
- * PIN-003: Tag management and bookmark modification operations
- * PIN-004: Error handling and retry logic for network resilience
+ * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]
+ * Token auth, endpoint wrappers (/posts/get, recent, add, delete), 429 retry, 401 handling.
  */
 
 import { ConfigManager } from '../../config/config-manager.js'
@@ -718,14 +713,9 @@ export class PinboardService {
   }
 
   /**
-   * Build URL parameters for bookmark save operation
+   * [IMPL-PINBOARD_POSTS_ADD_ENCODING] [IMPL-PINBOARD_API] [IMPL-TAG_SYSTEM] Build posts/add query string with encodeURIComponent for url, description, extended, tags, shared, toread.
    * @param {Object} bookmarkData - Bookmark data
-   * @returns {string} URL parameter string
-   *
-   * PIN-003: Parameter encoding for bookmark save operations
-   * SPECIFICATION: Encode all bookmark fields as URL parameters for posts/add
-   * IMPLEMENTATION DECISION: Handle both string and array tag formats
-   * Explicit encodeURIComponent so tags (and other fields) containing #, +, ., etc. do not break the API request.
+   * @returns {string} URL parameter string (key=encodedValue&...)
    */
   buildSaveParams (bookmarkData) {
     const pairs = []

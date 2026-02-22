@@ -1,5 +1,5 @@
 /**
- * [IMPL-DEBUG_PANEL] Debug panel: last N actions, last N messages, current tab state.
+ * [IMPL-DEBUG_PANEL] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Debug panel: last N actions, last N messages, current tab state.
  * Requires DEBUG_HOVERBOARD_UI set in storage; DEV_COMMAND is rejected otherwise.
  */
 

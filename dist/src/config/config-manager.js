@@ -2,10 +2,11 @@
  * Configuration Manager - Modern settings and authentication management
  * Replaces legacy config.js constants and AuthSettings class
  *
- * [IMPL-CONFIG_BACKUP_RESTORE] Central configuration management and backup/restore
- * [IMPL-CONFIG_MIGRATION] Authentication token secure storage and validation
+ * [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] exportConfig/importConfig for backup and portability.
+ * [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] Auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam.
+ * [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] getDefaultConfiguration, ensureDefaults, getConfigForUI, updateConfig, getSettings/setSettings, resetToDefaults.
  * [IMPL-FEATURE_FLAGS] User settings persistence and synchronization
- * [IMPL-URL_INHIBITION] URL inhibition management for site-specific behavior
+ * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlAllowed (substring match).
  */
 
 export class ConfigManager {
@@ -98,7 +99,7 @@ export class ConfigManager {
       fontSizeBase: 14, // Base UI text size in pixels
       fontSizeInputs: 14, // Input fields and buttons font size in pixels
 
-      // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging (optional)
+      // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging defaults for options and storage; empty key disables feature.
       aiApiKey: '',
       aiProvider: 'openai',
       aiTagLimit: 64
@@ -314,11 +315,8 @@ export class ConfigManager {
   }
 
   /**
-   * Get inhibited URLs list
+   * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Get inhibited URLs list (newline-separated).
    * @returns {Promise<string[]>} Array of inhibited URLs
-   *
-   * IMPL-URL_INHIBITION: Site-specific behavior control through URL inhibition
-   * IMPLEMENTATION DECISION: Store URLs as newline-separated string for user editing convenience
    */
   async getInhibitUrls () {
     try {
@@ -335,11 +333,8 @@ export class ConfigManager {
   }
 
   /**
-   * Add URL to inhibit list
+   * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Add URL to inhibit list (no duplicate).
    * @param {string} url - URL to inhibit
-   *
-   * IMPL-URL_INHIBITION: Dynamic inhibition list management
-   * IMPLEMENTATION DECISION: Check for duplicates to maintain clean inhibition list
    */
   async addInhibitUrl (url) {
     try {
@@ -364,11 +359,8 @@ export class ConfigManager {
   }
 
   /**
-   * Set inhibit URLs list (replaces existing list)
+   * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Set inhibit URLs list (replaces existing).
    * @param {string[]} urls - Array of URLs to inhibit
-   *
-   * IMPL-URL_INHIBITION: Complete inhibition list replacement
-   * IMPLEMENTATION DECISION: Allow bulk replacement for configuration import/reset scenarios
    */
   async setInhibitUrls (urls) {
     try {
@@ -384,12 +376,9 @@ export class ConfigManager {
   }
 
   /**
-   * Check if URL is allowed (not in inhibit list)
+   * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Check if URL is allowed (not in inhibit list; substring match).
    * @param {string} url - URL to check
    * @returns {Promise<boolean>} Whether URL is allowed
-   *
-   * IMPL-URL_INHIBITION: URL filtering logic for site-specific behavior
-   * IMPLEMENTATION DECISION: Bidirectional substring matching for flexible URL patterns
    */
   async isUrlAllowed (url) {
     try {

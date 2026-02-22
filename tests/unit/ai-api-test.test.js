@@ -1,5 +1,5 @@
 /**
- * [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Unit tests for testAiApiKey
+ * [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Unit tests for testAiApiKey
  */
 
 import { testAiApiKey } from '../../src/features/ai/ai-api-test.js'
@@ -11,6 +11,7 @@ describe('ai-api-test [IMPL-AI_TAG_TEST]', () => {
     mockFetch = jest.fn()
   })
 
+  // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Tests input contract: missing key or unknown provider.
   describe('validation', () => {
     test('returns error when apiKey is missing', async () => {
       const result = await testAiApiKey('', 'openai', mockFetch)
@@ -32,6 +33,7 @@ describe('ai-api-test [IMPL-AI_TAG_TEST]', () => {
     })
   })
 
+  // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Tests OpenAI: 200 → ok, 401/403 → invalid key, network error.
   describe('OpenAI', () => {
     test('returns ok when OpenAI returns 200', async () => {
       mockFetch.mockResolvedValue({ ok: true })
@@ -66,6 +68,7 @@ describe('ai-api-test [IMPL-AI_TAG_TEST]', () => {
     })
   })
 
+  // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Tests Gemini: 200 → ok, 400/403 → invalid key.
   describe('Gemini', () => {
     test('returns ok when Gemini returns 200', async () => {
       mockFetch.mockResolvedValue({ ok: true })

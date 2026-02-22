@@ -1,10 +1,11 @@
 /**
- * [REQ-AI_TAGGING_POPUP] [IMPL-AI_TAGGING_POPUP_UI] Unit tests for AI tagging popup helpers
+ * [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Unit tests for AI tagging popup helpers
  */
 
 import { splitAiTagsBySession } from '../../src/features/ai/ai-tagging-popup-utils.js'
 
 describe('ai-tagging-popup-utils [IMPL-AI_TAGGING_POPUP_UI]', () => {
+  // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] splitAiTagsBySession: inSession vs suggested, case-insensitive, edge cases.
   describe('splitAiTagsBySession', () => {
     test('splits tags into inSession and suggested by session set', () => {
       const aiTags = ['javascript', 'react', 'tutorial', 'webdev']

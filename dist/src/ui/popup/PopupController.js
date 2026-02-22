@@ -63,7 +63,7 @@ export class PopupController {
     this.setupAutoRefresh()
     this.setupRealTimeUpdates()
 
-    // [TOGGLE_SYNC_POPUP] Listen for BOOKMARK_UPDATED to sync popup UI with shared state
+    // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] Listen for BOOKMARK_UPDATED to refresh popup data.
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
       chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         if (message.type === 'BOOKMARK_UPDATED') {
@@ -143,7 +143,7 @@ export class PopupController {
     this.uiManager.on('tagWithAi', this.handleTagWithAi)
     this.uiManager.on('testAiApiKey', this.handleTestAiApiKey)
 
-    // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend change (move bookmark)
+    // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend change (move bookmark)
     this.uiManager.on('storageBackendChange', this.handleStorageBackendChange)
     // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser one-click toggle reuses same move handler
     this.uiManager.on('storageLocalToggle', (targetBackend) => this.handleStorageBackendChange(targetBackend))
@@ -156,16 +156,14 @@ export class PopupController {
   }
 
   /**
-   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
-   * Set optional callback for UI actions (for tests). Signature: ({ actionId, payload }) => void
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] Set optional callback for UI actions (for tests).
    */
   setOnAction (fn) {
     this._onAction = typeof fn === 'function' ? fn : null
   }
 
   /**
-   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
-   * Set optional callback for state/screen changes (for tests). Signature: ({ screen, state }) => void
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] Set optional callback for state/screen changes (for tests).
    */
   setOnStateChange (fn) {
     this._onStateChange = typeof fn === 'function' ? fn : null
@@ -180,8 +178,8 @@ export class PopupController {
     try {
       this.setLoading(true)
 
-      // [IMPL-SCREENSHOT_MODE] Screenshot/demo mode: use fake current tab from URL params so automated
-      // screenshot scripts can open the popup as a tab and still show bookmark data for a specific URL.
+      // [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] Screenshot/demo mode: use fake current tab from URL params so
+      // screenshot scripts can open popup as tab and show bookmark data for a specific URL.
       const params = typeof window !== 'undefined' && window.location && window.location.search
         ? new URLSearchParams(window.location.search)
         : null
@@ -271,7 +269,7 @@ export class PopupController {
       // [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] - Load suggested tags from page content
       await this.loadSuggestedTags()
 
-      // [IMPL-SELECTION_TO_TAG_INPUT] - Prefill tag input from page selection (≤8 words, punctuation stripped)
+      // [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] Prefill tag input from page selection (≤8 words)
       try {
         const selectionResponse = await this.sendToTab({ type: 'GET_PAGE_SELECTION' })
         const data = selectionResponse?.data ?? selectionResponse
@@ -307,7 +305,7 @@ export class PopupController {
       const token = await this.configManager.getAuthToken()
       this.uiManager.updateStoragePinboardEnabled(!!(token && token.trim()))
 
-      // [REQ-AI_TAGGING_POPUP] [IMPL-AI_TAGGING_POPUP_UI] Enable Tag with AI only when API key set and tab is http(s)
+      // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Enable Tag with AI only when API key set and tab is http(s).
       const config = await this.configManager.getConfig()
       const aiApiKey = (config?.aiApiKey || '').trim()
       const tabUrl = (this.currentTab?.url || '').trim()
@@ -332,7 +330,7 @@ export class PopupController {
       throw error
     } finally {
       this.setLoading(false)
-      // [IMPL-SCREENSHOT_MODE] Signal to screenshot script that content is ready (enables wait-for-content).
+      // [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] Signal to screenshot script that content is ready (enables wait-for-content).
       if (this._screenshotMode && this.uiManager?.elements?.mainInterface) {
         this.uiManager.elements.mainInterface.setAttribute('data-screenshot-ready', 'true')
       }
@@ -849,7 +847,7 @@ export class PopupController {
   }
 
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Get the storage backend currently selected in the popup UI (highlighted button).
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Get the storage backend currently selected in the popup UI (highlighted button).
    * Used so save follows the highlight when creating or updating a bookmark.
    * @returns {string|null} 'pinboard'|'local'|'file'|'sync' or null if not determinable
    */
@@ -860,7 +858,7 @@ export class PopupController {
   }
 
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Get storage backend for URL (pinboard | local | file | sync).
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] Get storage backend for URL (pinboard | local | file | sync).
    */
   async getStorageBackendForUrl (url) {
     if (!url || typeof chrome?.runtime?.sendMessage !== 'function') return 'local'
@@ -880,7 +878,7 @@ export class PopupController {
   }
 
   /**
-   * [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move current bookmark to target storage backend.
+   * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move current bookmark to target storage backend.
    */
   async handleStorageBackendChange (targetBackend) {
     recordAction(POPUP_ACTION_IDS.storageBackendChange, { targetBackend }, 'popup')
@@ -986,7 +984,7 @@ export class PopupController {
   }
 
   /**
-   * Send message to content script in current tab
+   * [IMPL-POPUP_MESSAGE_TIMEOUT] Send message to content script with timeout; reject on timeout or error.
    */
   async sendToTab (message) {
     if (!this.currentTab) {
@@ -1540,11 +1538,8 @@ export class PopupController {
   }
 
   /**
-   * Handle show/hide hoverboard action
-   */
-  /**
-   * [POPUP-CLOSE-BEHAVIOR-004] Handle show/hide hoverboard action
-   * Modified to NOT close popup after toggling overlay visibility
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Handle show/hide hoverboard; no window.close.
+   * [POPUP-CLOSE-BEHAVIOR-004] Modified to NOT close popup after toggling overlay visibility
    */
   async handleShowHoverboard () {
     recordAction(POPUP_ACTION_IDS.showHoverboard, { tabId: this.currentTab?.id }, 'popup')
@@ -1580,7 +1575,7 @@ export class PopupController {
   }
 
   /**
-   * Handle toggle private status
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Handle toggle private status (popup stays open).
    */
   async handleTogglePrivate () {
     recordAction(POPUP_ACTION_IDS.togglePrivate, { hasBookmark: !!this.currentPin }, 'popup')
@@ -2105,6 +2100,7 @@ export class PopupController {
     const btn = this.uiManager.elements.tagWithAiBtn
     if (btn) btn.disabled = true
     try {
+      // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Guard: require tab, http(s) URL, and API key.
       if (!this.currentTab || !this.currentTab.id) {
         this.uiManager.showError('No tab available')
         return
@@ -2121,7 +2117,7 @@ export class PopupController {
         return
       }
 
-      // Get page content from tab (SW uses scripting.executeScript)
+      // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] GET_PAGE_CONTENT via SW; show content.error or generic message when no text.
       const content = await this.sendMessage({
         type: 'GET_PAGE_CONTENT',
         data: { tabId: this.currentTab.id }
@@ -2133,7 +2129,7 @@ export class PopupController {
         return
       }
 
-      // Get AI tags from service worker
+      // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] GET_AI_TAGS from SW; require success and non-empty tags.
       const aiRes = await this.sendMessage({
         type: 'GET_AI_TAGS',
         data: { text }
@@ -2145,7 +2141,7 @@ export class PopupController {
         return
       }
 
-      // Session tags for auto-apply
+      // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] getSessionTags + splitAiTagsBySession → inSession vs suggested.
       const sessionRes = await this.sendMessage({ type: 'getSessionTags' })
       const sessionTags = Array.isArray(sessionRes?.tags) ? sessionRes.tags : []
       const { inSession, suggested } = splitAiTagsBySession(aiTags, sessionTags)
@@ -2154,7 +2150,7 @@ export class PopupController {
       const mergedTags = [...new Set([...currentTags, ...inSession])]
 
       if (!this.currentPin || !this.currentPin.url) {
-        // Create new bookmark with default store [REQ-STORAGE_MODE_DEFAULT]
+        // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-STORAGE_MODE_DEFAULT] Create new bookmark with preferredBackend from getStorageMode().
         const preferredBackend = await this.configManager.getStorageMode()
         const pinData = {
           url: this.currentTab.url,
@@ -2170,7 +2166,7 @@ export class PopupController {
         this.uiManager.updateCurrentTags(mergedTags)
         this.uiManager.showSuccess('Bookmark created with AI tags')
       } else {
-        // Update existing bookmark with in-session tags
+        // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-STORAGE_MODE_DEFAULT] Update existing bookmark: merged tags, preferredBackend from selection or default.
         const pinData = {
           ...this.currentPin,
           tags: mergedTags.join(' '),
@@ -2185,6 +2181,7 @@ export class PopupController {
         this.uiManager.showSuccess('Tags updated with AI suggestions')
       }
 
+      // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] updateSuggestedTags, loadRecentTags, notify tab (BOOKMARK_UPDATED).
       this.uiManager.updateSuggestedTags(suggested)
       await this.loadRecentTags()
       try {
@@ -2203,8 +2200,10 @@ export class PopupController {
    */
   async handleTestAiApiKey () {
     const statusEl = this.uiManager.elements.popupAiTestStatus
+    // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] No status element; skip.
     if (!statusEl) return
     try {
+      // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Load config; require apiKey or show "Set API key in Options first".
       const config = await this.configManager.getConfig()
       const apiKey = (config.aiApiKey || '').trim()
       const provider = config.aiProvider || 'openai'
@@ -2212,6 +2211,7 @@ export class PopupController {
         statusEl.textContent = 'Set API key in Options first'
         return
       }
+      // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] "Testing…" then testAiApiKey; set status to "API key OK" or error.
       statusEl.textContent = 'Testing…'
       const result = await testAiApiKey(apiKey, provider)
       if (result.ok) {
@@ -2220,6 +2220,7 @@ export class PopupController {
         statusEl.textContent = result.error || 'Failed'
       }
     } catch (e) {
+      // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Catch: show error message in status.
       statusEl.textContent = `Error: ${e?.message || 'Unknown'}`
     }
   }
@@ -2309,7 +2310,7 @@ export class PopupController {
 
   /**
    * [POPUP-REFRESH-001] Setup auto-refresh on focus
-   * [IMMUTABLE-REQ-TAG-003] [IMPL-RECENT_TAGS_POPUP_REFRESH] Refresh Recent Tags when popup becomes visible
+   * [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [REQ-RECENT_TAGS_SYSTEM] Refresh Recent Tags when popup becomes visible (visibilitychange).
    */
   setupAutoRefresh () {
     window.addEventListener('focus', () => {
@@ -2319,7 +2320,7 @@ export class PopupController {
       }
     })
 
-    // [IMMUTABLE-REQ-TAG-003] [IMPL-RECENT_TAGS_POPUP_REFRESH] Refresh Recent Tags every time popup is displayed
+    // [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [REQ-RECENT_TAGS_SYSTEM] Refresh Recent Tags every time popup is displayed
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible' && this.isInitialized && !this.isLoading) {
         debugLog('[IMPL-RECENT_TAGS_POPUP_REFRESH] Popup visible, refreshing recent tags')

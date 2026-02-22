@@ -1,19 +1,8 @@
 /**
- * Sync Bookmark Service - [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-SYNC_STORAGE_PROVIDER]
- * Bookmark provider backed by chrome.storage.sync (synced across Chrome profile devices).
- * Quota is approximately 100 KB total for sync storage.
- *
- * Provider contract (duck-typed with PinboardService):
- * - getBookmarkForUrl(url, title) -> { url, description, extended, tags, time, shared, toread, hash }
- * - getRecentBookmarks(count) -> Array<bookmark>
- * - saveBookmark(bookmarkData) -> { success, code, message }
- * - deleteBookmark(url) -> { success, code, message }
- * - saveTag(tagData) -> same as saveBookmark result
- * - deleteTag(tagData) -> same as saveBookmark result
- * - testConnection() -> true (always; no network)
- *
- * [ARCH-SYNC_STORAGE_PROVIDER] Sync storage implementation for bookmark provider strategy.
- * [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] time = create-time, updated_at = most-recent-update-time.
+ * [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+ * Bookmark provider backed by chrome.storage.sync (synced across Chrome profile devices); quota ~100 KB.
+ * Provider contract: getBookmarkForUrl, getRecentBookmarks, saveBookmark, deleteBookmark, saveTag, deleteTag, testConnection.
+ * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] time = create-time, updated_at = most-recent-update-time.
  */
 
 import { TagService } from '../tagging/tag-service.js'

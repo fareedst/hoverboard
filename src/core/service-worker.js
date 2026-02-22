@@ -148,9 +148,8 @@ class HoverboardServiceWorker {
   }
 
   /**
-   * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [IMPL-FILE_STORAGE_TYPED_PATH]
-   * Create three providers, storage index, router; wire MessageHandler.
-   * File adapter: path set → NativeHostFileBookmarkAdapter; else picker configured → MessageFileBookmarkAdapter; else InMemoryFileBookmarkAdapter.
+   * [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] File adapter: path set → NativeHost; else picker → Message; else InMemory.
+   * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Create providers, storage index, router; wire MessageHandler.
    */
   async initBookmarkProvider () {
     const tagService = this.messageHandler.tagService
@@ -288,7 +287,7 @@ class HoverboardServiceWorker {
         return out
       }
 
-      // [REQ-UI_INSPECTION] DEV_COMMAND: only when debug flag set; getStorageSnapshot handled in SW
+      // [IMPL-DEV_COMMAND_INSPECTION] [REQ-UI_INSPECTION] [REQ-URL_TAGS_DISPLAY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] DEV_COMMAND: only when debug flag set; getStorageSnapshot in SW.
       if (message.type === MESSAGE_TYPES.DEV_COMMAND) {
         let devEnabled = false
         try {
@@ -326,7 +325,7 @@ class HoverboardServiceWorker {
       const response = await this.messageHandler.processMessage(message, sender)
       console.log('[SERVICE-WORKER] Message processed successfully:', response)
 
-      // [REQ-BADGE_INDICATORS] Refresh badge when overlay/popup change tags or private/toread so count and flags update immediately
+      // [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] After saveTag/deleteTag/saveBookmark success: resolve tab, updateBadgeForTab(tab).
       const badgeRefreshTypes = [MESSAGE_TYPES.SAVE_TAG, MESSAGE_TYPES.DELETE_TAG, MESSAGE_TYPES.SAVE_BOOKMARK]
       if (badgeRefreshTypes.includes(message.type)) {
         let tab = sender.tab

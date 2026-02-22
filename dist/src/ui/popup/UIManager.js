@@ -103,6 +103,7 @@ export class UIManager {
       newTagInput: document.getElementById('newTagInput'),
       addTagBtn: document.getElementById('addTagBtn'),
       tagWithAiBtn: document.getElementById('tagWithAiBtn'),
+      // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Popup Test API key button and status span.
       testAiApiBtn: document.getElementById('testAiApiBtn'),
       popupAiTestStatus: document.getElementById('popupAiTestStatus'),
       searchInput: document.getElementById('searchInput'),
@@ -123,7 +124,7 @@ export class UIManager {
       // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
       showHoverOnPageLoad: document.getElementById('showHoverOnPageLoad'),
 
-      // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage backend select-one buttons (pinboard | file | local | sync)
+      // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend select-one buttons (pinboard | file | local | sync)
       storageBackendButtons: document.getElementById('storageBackendButtons')
     }
   }
@@ -194,12 +195,12 @@ export class UIManager {
       }
     })
 
-    // [REQ-AI_TAGGING_POPUP] [IMPL-AI_TAGGING_POPUP_UI] Tag with AI button
+    // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Tag with AI button click emits tagWithAi.
     this.elements.tagWithAiBtn?.addEventListener('click', () => {
       this.emit('tagWithAi')
     })
 
-    // [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Test API key button
+    // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Test API key button click emits testAiApiKey.
     this.elements.testAiApiBtn?.addEventListener('click', () => {
       this.emit('testAiApiKey')
     })
@@ -566,8 +567,7 @@ export class UIManager {
   }
 
   /**
-   * [IMPL-SELECTION_TO_TAG_INPUT] Set tag input value (e.g. from page selection).
-   * Clears invalid class when setting a value.
+   * [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] Set tag input value (e.g. from page selection).
    * @param {string} value - Text to set in the new-tag input
    */
   setTagInputValue (value) {
@@ -690,7 +690,7 @@ export class UIManager {
   }
 
   /**
-   * [POPUP-CLOSE-BEHAVIOR-005] Update Show Hover button state
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Update Show Hover button state from overlay visibility.
    * @param {boolean} isOverlayVisible - Whether the overlay is currently visible
    */
   updateShowHoverButtonState (isOverlayVisible) {

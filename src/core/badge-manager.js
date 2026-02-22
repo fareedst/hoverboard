@@ -1,6 +1,5 @@
 /**
- * Badge Manager - Modern badge and icon management for browser action
- * Replaces legacy BadgeAttributes class with Promise-based architecture
+ * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] Badge compares tab URL state and updates icon/count on saveTag/deleteTag/saveBookmark.
  * [REQ-BADGE_INDICATORS] [IMPL-URL_TAGS_DISPLAY] Uses getBadgeDisplayValue for single source of badge text/count.
  */
 

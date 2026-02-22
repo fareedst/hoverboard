@@ -129,7 +129,7 @@ var init_config_manager = __esm({
           // Base UI text size in pixels
           fontSizeInputs: 14,
           // Input fields and buttons font size in pixels
-          // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging (optional)
+          // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging defaults for options and storage; empty key disables feature.
           aiApiKey: "",
           aiProvider: "openai",
           aiTagLimit: 64
@@ -319,11 +319,8 @@ var init_config_manager = __esm({
         return `auth_token=${token}`;
       }
       /**
-       * Get inhibited URLs list
+       * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Get inhibited URLs list (newline-separated).
        * @returns {Promise<string[]>} Array of inhibited URLs
-       *
-       * IMPL-URL_INHIBITION: Site-specific behavior control through URL inhibition
-       * IMPLEMENTATION DECISION: Store URLs as newline-separated string for user editing convenience
        */
       async getInhibitUrls() {
         try {
@@ -336,11 +333,8 @@ var init_config_manager = __esm({
         }
       }
       /**
-       * Add URL to inhibit list
+       * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Add URL to inhibit list (no duplicate).
        * @param {string} url - URL to inhibit
-       *
-       * IMPL-URL_INHIBITION: Dynamic inhibition list management
-       * IMPLEMENTATION DECISION: Check for duplicates to maintain clean inhibition list
        */
       async addInhibitUrl(url) {
         try {
@@ -360,11 +354,8 @@ var init_config_manager = __esm({
         }
       }
       /**
-       * Set inhibit URLs list (replaces existing list)
+       * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Set inhibit URLs list (replaces existing).
        * @param {string[]} urls - Array of URLs to inhibit
-       *
-       * IMPL-URL_INHIBITION: Complete inhibition list replacement
-       * IMPLEMENTATION DECISION: Allow bulk replacement for configuration import/reset scenarios
        */
       async setInhibitUrls(urls) {
         try {
@@ -378,12 +369,9 @@ var init_config_manager = __esm({
         }
       }
       /**
-       * Check if URL is allowed (not in inhibit list)
+       * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] Check if URL is allowed (not in inhibit list; substring match).
        * @param {string} url - URL to check
        * @returns {Promise<boolean>} Whether URL is allowed
-       *
-       * IMPL-URL_INHIBITION: URL filtering logic for site-specific behavior
-       * IMPLEMENTATION DECISION: Bidirectional substring matching for flexible URL patterns
        */
       async isUrlAllowed(url) {
         try {
@@ -1859,7 +1847,7 @@ var init_tag_service = __esm({
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-003] - Get recent tags with new user-driven behavior
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] Get recent tags (cache + shared memory).
        * @param {Object} options - Tag retrieval options
        * @returns {Promise<Object[]>} Array of recent tag objects
        */
@@ -2338,7 +2326,7 @@ var init_tag_service = __esm({
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Sanitize tag input
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Sanitize tag input.
        * @param {string} tag - Raw tag input
        * @returns {string|null} Sanitized tag or null for invalid input
        */
@@ -5004,14 +4992,9 @@ var init_pinboard_service = __esm({
         };
       }
       /**
-       * Build URL parameters for bookmark save operation
+       * [IMPL-PINBOARD_POSTS_ADD_ENCODING] [IMPL-PINBOARD_API] [IMPL-TAG_SYSTEM] Build posts/add query string with encodeURIComponent for url, description, extended, tags, shared, toread.
        * @param {Object} bookmarkData - Bookmark data
-       * @returns {string} URL parameter string
-       *
-       * PIN-003: Parameter encoding for bookmark save operations
-       * SPECIFICATION: Encode all bookmark fields as URL parameters for posts/add
-       * IMPLEMENTATION DECISION: Handle both string and array tag formats
-       * Explicit encodeURIComponent so tags (and other fields) containing #, +, ., etc. do not break the API request.
+       * @returns {string} URL parameter string (key=encodedValue&...)
        */
       buildSaveParams(bookmarkData) {
         const pairs = [];
@@ -5322,7 +5305,7 @@ var OptionsController = class {
         fontSizeTags: parseInt(this.elements.fontSizeTags.value),
         fontSizeBase: parseInt(this.elements.fontSizeBase.value),
         fontSizeInputs: parseInt(this.elements.fontSizeInputs.value),
-        // [REQ-AI_TAGGING_CONFIG] AI Tagging
+        // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] Persist trimmed apiKey, provider, clamped aiTagLimit via updateConfig.
         aiApiKey: this.elements.aiApiKey ? this.elements.aiApiKey.value.trim() : "",
         aiProvider: this.elements.aiProvider ? this.elements.aiProvider.value : "openai",
         aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64
@@ -5477,7 +5460,7 @@ var OptionsController = class {
     }
   }
   /**
-   * [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Test AI API key with minimal request
+   * [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] [IMPL-AI_TAG_TEST] Options-page Test handler: validate key via testAiApiKey(apiKey, provider); show "API key OK" or error in aiTestStatus.
    */
   async testAiApiKey() {
     if (!this.elements.aiTestStatus) return;

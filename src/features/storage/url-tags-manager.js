@@ -1,13 +1,11 @@
 /**
- * URL Tags Manager - [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY]
- * Single source for "tags for a URL" and "badge display value". Normalizes bookmark/tags
- * at the boundary so badge, popup, and overlay all use the same contract (tags as array).
- * [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+ * [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+ * Single source for tags-for-URL and badge display; normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue.
  * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] normalizeBookmarkForDisplay includes updated_at (default to time when missing).
  */
 
 /**
- * [IMPL-URL_TAGS_DISPLAY] Normalize raw bookmark from any provider for display.
+ * [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] Normalize raw bookmark from any provider for display.
  * Ensures tags is always Array<string> and required fields exist.
  * @param {Object|null|undefined} bookmark - Raw bookmark from pinboard/local/file/sync
  * @returns {Object} Normalized bookmark with tags array and defaulted fields
@@ -46,7 +44,7 @@ export function normalizeBookmarkForDisplay (bookmark) {
 }
 
 /**
- * [IMPL-URL_TAGS_DISPLAY] Fetch bookmark for a URL and return normalized for display.
+ * [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] Fetch bookmark for a URL and return normalized for display.
  * @param {Object} bookmarkProvider - Duck-typed { getBookmarkForUrl(url, title) }
  * @param {string} url - Page URL
  * @param {string} [title=''] - Optional title fallback
@@ -61,7 +59,7 @@ export async function getBookmarkForDisplay (bookmarkProvider, url, title = '') 
 }
 
 /**
- * [IMPL-URL_TAGS_DISPLAY] Get tags array for a URL from the same source as display.
+ * [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] Get tags array for a URL from the same source as display.
  * @param {Object} bookmarkProvider - Duck-typed { getBookmarkForUrl(url, title) }
  * @param {string} url - Page URL
  * @returns {Promise<string[]>} Normalized tags array
@@ -82,7 +80,7 @@ const DEFAULT_BADGE_CONFIG = {
 }
 
 /**
- * [IMPL-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] Compute badge display value from bookmark.
+ * [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] Compute badge display value from bookmark.
  * Single place for tag count and flags so badge and popup never diverge.
  * @param {Object} bookmark - Raw or normalized bookmark
  * @param {Object} [config] - Badge config (badgeTextIfNotBookmarked, etc.)

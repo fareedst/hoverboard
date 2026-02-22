@@ -108,10 +108,11 @@ class OptionsController {
     this.elements.testNativeHost = document.getElementById('test-native-host')
     this.elements.nativeHostStatus = document.getElementById('native-host-status')
 
-    // [REQ-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI Tagging
+    // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI Tagging: bind API key, provider, limit, Test button, status elements.
     this.elements.aiApiKey = document.getElementById('ai-api-key')
     this.elements.aiProvider = document.getElementById('ai-provider')
     this.elements.aiTagLimit = document.getElementById('ai-tag-limit')
+    // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Test button and status span for Options-page API key test.
     this.elements.testAiApi = document.getElementById('test-ai-api')
     this.elements.aiTestStatus = document.getElementById('ai-test-status')
   }
@@ -132,7 +133,7 @@ class OptionsController {
     // Authentication
     this.elements.testAuth.addEventListener('click', () => this.testAuthentication())
 
-    // [REQ-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] Test AI API key
+    // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] [IMPL-AI_TAG_TEST] Options-page Test button wires to testAiApiKey handler.
     if (this.elements.testAiApi) {
       this.elements.testAiApi.addEventListener('click', () => this.testAiApiKey())
     }
@@ -215,7 +216,7 @@ class OptionsController {
       this.elements.fontSizeBase.value = config.fontSizeBase || 14
       this.elements.fontSizeInputs.value = config.fontSizeInputs || 14
 
-      // [REQ-AI_TAGGING_CONFIG] Load AI tagging settings
+      // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] Load aiApiKey, aiProvider, aiTagLimit from config into form (populate from stored config).
       if (this.elements.aiApiKey) this.elements.aiApiKey.value = config.aiApiKey || ''
       if (this.elements.aiProvider) this.elements.aiProvider.value = config.aiProvider || 'openai'
       if (this.elements.aiTagLimit) this.elements.aiTagLimit.value = config.aiTagLimit || 64
@@ -276,7 +277,7 @@ class OptionsController {
         fontSizeBase: parseInt(this.elements.fontSizeBase.value),
         fontSizeInputs: parseInt(this.elements.fontSizeInputs.value),
 
-        // [REQ-AI_TAGGING_CONFIG] AI Tagging
+        // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] Persist trimmed apiKey, provider, clamped aiTagLimit via updateConfig.
         aiApiKey: this.elements.aiApiKey ? this.elements.aiApiKey.value.trim() : '',
         aiProvider: this.elements.aiProvider ? this.elements.aiProvider.value : 'openai',
         aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64
@@ -464,7 +465,7 @@ class OptionsController {
   }
 
   /**
-   * [REQ-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Test AI API key with minimal request
+   * [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] [IMPL-AI_TAG_TEST] Options-page Test handler: validate key via testAiApiKey(apiKey, provider); show "API key OK" or error in aiTestStatus.
    */
   async testAiApiKey () {
     if (!this.elements.aiTestStatus) return
@@ -474,6 +475,7 @@ class OptionsController {
       this.elements.aiTestStatus.textContent = 'Enter an API key first'
       return
     }
+    // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Call testAiApiKey and set aiTestStatus to "API key OK" or error.
     this.elements.aiTestStatus.textContent = 'Testing…'
     try {
       const result = await testAiApiKey(apiKey, provider)

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Generate README/docs screenshots with placeholder bookmark data.
- * [IMPL-SCREENSHOT_MODE] Requires built extension in dist/. Run: npm run build:dev && node scripts/screenshots-placeholder.js
+ * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] Requires built extension in dist/. Run: npm run build:dev && node scripts/screenshots-placeholder.js
  * Popup is cropped to #mainInterface only. Pinboard image composites overlay page + cropped popup.
  *
  * Seed from file (optional):

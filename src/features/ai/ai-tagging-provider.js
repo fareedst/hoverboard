@@ -6,6 +6,7 @@
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions'
 const GEMINI_GENERATE_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
 
+// [IMPL-AI_TAGGING_PROVIDER] [REQ-TAG_INPUT_SANITIZATION] Default trim-only sanitizer when none injected.
 function defaultSanitize (str) {
   if (!str || typeof str !== 'string') return null
   const t = str.trim()
@@ -26,10 +27,11 @@ export async function requestAiTags (provider, apiKey, text, limit = 64, options
   const fetchFn = options.fetchFn || globalThis.fetch
   const safeLimit = Math.max(1, Math.min(Number(limit) || 64, 128))
   const excerpt = (text && String(text).trim()) ? String(text).slice(0, 12000) : ''
-
+  // [IMPL-AI_TAGGING_PROVIDER] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Prompt + text excerpt (cap 12k); limit in prompt.
   const prompt = `Return only a list of up to ${safeLimit} tags for this page, one tag per line. No numbering or explanation. Only the tags, one per line.\n\nPage content:\n${excerpt}`
 
   let raw
+  // [IMPL-AI_TAGGING_PROVIDER] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] OpenAI: chat completions; parse content from choices[0].message.content.
   if (provider === 'openai') {
     const res = await fetchFn(OPENAI_CHAT_URL, {
       method: 'POST',
@@ -50,6 +52,7 @@ export async function requestAiTags (provider, apiKey, text, limit = 64, options
     const data = await res.json()
     raw = data.choices?.[0]?.message?.content || ''
   } else if (provider === 'gemini') {
+    // [IMPL-AI_TAGGING_PROVIDER] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Gemini: generateContent; parse text from candidates[0].content.parts[0].
     const url = `${GEMINI_GENERATE_URL}?key=${encodeURIComponent(apiKey)}`
     const res = await fetchFn(url, {
       method: 'POST',
@@ -67,9 +70,11 @@ export async function requestAiTags (provider, apiKey, text, limit = 64, options
     const part = data.candidates?.[0]?.content?.parts?.[0]
     raw = part?.text || ''
   } else {
+    // [IMPL-AI_TAGGING_PROVIDER] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Unknown provider: return empty array.
     return []
   }
 
+  // [IMPL-AI_TAGGING_PROVIDER] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-TAG_INPUT_SANITIZATION] Lines → sanitizeTag → dedupe case-insensitive → slice to limit.
   const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
   const tags = []
   const seen = new Set()

@@ -211,9 +211,10 @@ describe('ConfigManager', () => {
     });
   });
 
-  // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS]
+  // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] Validates default AI fields, getConfig merge of stored AI fields, and updateConfig persistence of AI fields.
   describe('AI Tagging Config', () => {
     test('default config includes aiApiKey, aiProvider, aiTagLimit', () => {
+      // How: defaults from getDefaultConfiguration.
       const defaults = configManager.getDefaultConfiguration();
       expect(defaults).toHaveProperty('aiApiKey', '');
       expect(defaults).toHaveProperty('aiProvider', 'openai');
@@ -221,6 +222,7 @@ describe('ConfigManager', () => {
     });
 
     test('getConfig returns AI fields from stored settings', async () => {
+      // How: getConfig merge of stored AI fields.
       global.chrome.storage.sync.get.mockResolvedValue({
         hoverboard_settings: { aiApiKey: 'sk-test', aiProvider: 'gemini', aiTagLimit: 32 }
       });
@@ -231,6 +233,7 @@ describe('ConfigManager', () => {
     });
 
     test('updateConfig persists AI fields', async () => {
+      // How: updateConfig persistence of AI fields.
       await configManager.updateConfig({
         aiApiKey: 'key',
         aiProvider: 'openai',

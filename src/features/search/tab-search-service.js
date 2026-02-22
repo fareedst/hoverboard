@@ -1,22 +1,22 @@
 /**
- * [IMMUTABLE-REQ-TAG-002] TabSearchService - Core tab search functionality
- * Handles tab discovery, filtering, and navigation logic
+ * [IMPL-TAB_SEARCH_SERVICE] [REQ-SEARCH_FUNCTIONALITY]
+ * Tab search by title; searchAndNavigate, findNextTab (circular), addToSearchHistory.
  */
 
 export class TabSearchService {
-  constructor() {
+  constructor () {
     this.lastSearchText = null
     this.lastMatchedTabId = null
     this.searchHistory = []
   }
 
   /**
-   * [TAB-SEARCH-CORE] Search tabs by title and navigate to next match
+   * [IMPL-TAB_SEARCH_SERVICE] [REQ-SEARCH_FUNCTIONALITY] Search tabs by title and navigate to next match.
    * @param {string} searchText - Search string to find in tab titles
    * @param {number} currentTabId - ID of the current active tab
    * @returns {Promise<Object>} Search results with navigation info
    */
-  async searchAndNavigate(searchText, currentTabId) {
+  async searchAndNavigate (searchText, currentTabId) {
     try {
       console.log('[TAB-SEARCH-CORE] Starting search with:', { searchText, currentTabId })
 
@@ -88,7 +88,7 @@ export class TabSearchService {
    * [TAB-SEARCH-CORE] Get all browser tabs
    * @returns {Promise<Array>} Array of tab objects
    */
-  async getAllTabs() {
+  async getAllTabs () {
     return new Promise((resolve, reject) => {
       console.log('[TAB-SEARCH-SERVICE] Querying all tabs')
       chrome.tabs.query({}, (tabs) => {
@@ -104,12 +104,12 @@ export class TabSearchService {
   }
 
   /**
-   * [TAB-SEARCH-NAV] Find next tab in circular sequence
+   * [IMPL-TAB_SEARCH_SERVICE] [REQ-SEARCH_FUNCTIONALITY] Find next tab in circular sequence.
    * @param {Array} matchingTabs - Array of matching tab objects
    * @param {number} restartTabId - Tab ID to start search from
    * @returns {Object|null} Next tab object or null
    */
-  findNextTab(matchingTabs, restartTabId) {
+  findNextTab (matchingTabs, restartTabId) {
     if (matchingTabs.length === 0) return null
 
     // [TAB-SEARCH-NAV] Find tab with ID greater than restart point
@@ -123,7 +123,7 @@ export class TabSearchService {
    * [TAB-SEARCH-NAV] Activate a specific tab
    * @param {number} tabId - Tab ID to activate
    */
-  async activateTab(tabId) {
+  async activateTab (tabId) {
     return new Promise((resolve, reject) => {
       console.log('[TAB-SEARCH-SERVICE] Activating tab:', tabId)
       chrome.tabs.update(tabId, { active: true }, (tab) => {
@@ -142,7 +142,7 @@ export class TabSearchService {
    * [TAB-SEARCH-NAV] Focus the window containing the tab
    * @param {number} windowId - Window ID to focus
    */
-  async focusWindow(windowId) {
+  async focusWindow (windowId) {
     return new Promise((resolve, reject) => {
       console.log('[TAB-SEARCH-SERVICE] Focusing window:', windowId)
       chrome.windows.update(windowId, { focused: true }, (window) => {
@@ -158,10 +158,10 @@ export class TabSearchService {
   }
 
   /**
-   * [TAB-SEARCH-STATE] Add search term to history
+   * [IMPL-TAB_SEARCH_SERVICE] [REQ-SEARCH_FUNCTIONALITY] Add search term to history (move to front if duplicate).
    * @param {string} searchText - Search term to add
    */
-  addToSearchHistory(searchText) {
+  addToSearchHistory (searchText) {
     if (!searchText || searchText.trim().length === 0) return
 
     const trimmedText = searchText.trim()
@@ -178,14 +178,14 @@ export class TabSearchService {
    * [TAB-SEARCH-STATE] Get search history
    * @returns {Array} Array of recent search terms
    */
-  getSearchHistory() {
+  getSearchHistory () {
     return [...this.searchHistory]
   }
 
   /**
    * [TAB-SEARCH-STATE] Clear search state
    */
-  clearSearchState() {
+  clearSearchState () {
     this.lastSearchText = null
     this.lastMatchedTabId = null
   }

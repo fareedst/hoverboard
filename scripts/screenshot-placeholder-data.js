@@ -1,7 +1,6 @@
 /**
- * Placeholder bookmark data for screenshot generation (README/docs).
- * [IMPL-SCREENSHOT_MODE] Seed data matches LocalBookmarkService storage shape:
- * hoverboard_local_bookmarks = { [cleanUrl]: bookmark }, hoverboard_storage_index = { [cleanUrl]: 'local' }.
+ * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] Placeholder bookmark data for screenshot generation.
+ * Seed shape: hoverboard_local_bookmarks, hoverboard_storage_index; hoverboard_theme, hoverboard_settings optional.
  */
 
 const PINBOARD_URL = 'https://pinboard.in'

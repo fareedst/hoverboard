@@ -1,13 +1,8 @@
 /**
- * Debug Logger - Enhanced logging system for Safari extension development
- * [SAFARI-EXT-DEBUG-001] Enhanced debug logging system
- * [IMPL-DEBUG_PANEL] Categories (ui, message, overlay, storage) for structured UI/message debug output.
- *
- * This module provides comprehensive logging with levels, timestamps, and component tracking
- * to help debug extension loading issues and Safari-specific problems.
+ * [IMPL-DEBUG_PANEL] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] LOG_CATEGORIES and debugLogger for structured UI/message debug output.
+ * [SAFARI-EXT-DEBUG-001] Enhanced debug logging system.
  */
-
-/** @readonly Categories for filtering: ui, message, overlay, storage */
+/** @readonly [IMPL-DEBUG_PANEL] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Categories for filtering: ui, message, overlay, storage */
 export const LOG_CATEGORIES = Object.freeze({
   UI: 'ui',
   MESSAGE: 'message',

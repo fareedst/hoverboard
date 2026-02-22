@@ -205,7 +205,7 @@ class HoverboardServiceWorker {
       const response = await this.messageHandler.processMessage(message, sender)
       console.log('[SERVICE-WORKER] Message processed successfully:', response)
 
-      // [REQ-BADGE_INDICATORS] Refresh badge when overlay/popup change tags or private/toread so count and flags update immediately
+      // [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] After saveTag/deleteTag/saveBookmark success: resolve tab, updateBadgeForTab(tab).
       const badgeRefreshTypes = ['saveTag', 'deleteTag', 'saveBookmark']
       if (badgeRefreshTypes.includes(message.type)) {
         let tab = sender.tab

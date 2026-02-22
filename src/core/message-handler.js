@@ -1,6 +1,6 @@
 /**
- * Message Handler - Modern message routing system for Hoverboard
- * Replaces legacy message passing with typed, async-first architecture
+ * [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION]
+ * Message routing with type validation and handler map; processMessage and handler dispatch.
  */
 
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
@@ -101,7 +101,7 @@ export class MessageHandler {
   }
 
   /**
-   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION]
    * Set optional callback invoked after each message is processed (for tests). Signature: ({ type, data, response, error, senderContext }) => void
    */
   setOnMessageProcessed (fn) {
@@ -291,7 +291,7 @@ export class MessageHandler {
 
   /**
    * [REQ-UI_INSPECTION] Handle DEV_COMMAND subcommands for tests and debug panel (only when caller has set debug flag).
-   * Subcommands: getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl. getStorageSnapshot is handled in service worker.
+   * [IMPL-DEV_COMMAND_INSPECTION] [REQ-UI_INSPECTION] [REQ-URL_TAGS_DISPLAY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] Subcommands: getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl; getStorageSnapshot in SW.
    */
   async processDevCommand (data, senderContext) {
     const sub = data?.subcommand
@@ -318,8 +318,7 @@ export class MessageHandler {
   }
 
   async handleGetCurrentBookmark (data, url, tabId) {
-    // Use URL from data when present and is a content URL (e.g. screenshot mode popup opened as tab sends data.url).
-    // Otherwise use sender tab url so content scripts and real popup get bookmark for the current page.
+    // [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] Prefer data.url when http(s) (screenshot mode popup-as-tab); else sender tab url.
     const dataUrl = data?.url && typeof data.url === 'string' && (data.url.startsWith('http://') || data.url.startsWith('https://')) ? data.url : null
     const targetUrl = dataUrl || url || data?.url
     if (!targetUrl) {
@@ -419,7 +418,7 @@ export class MessageHandler {
   }
 
   /**
-   * [ARCH-STORAGE_INDEX_AND_ROUTER] Return local + file + sync bookmarks with storage field (for index page with Storage column).
+   * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX] Return local + file + sync bookmarks with storage field (for index page).
    * @returns {Promise<{ bookmarks: Array<{ ...bookmark, storage: 'local'|'file'|'sync' }> }>}
    */
   async handleGetAggregatedBookmarksForIndex () {
@@ -549,6 +548,7 @@ export class MessageHandler {
     const timeoutError = { success: false, error: 'Page content unavailable. Reload the page and try again, or use a different tab.' }
     const scripting = (typeof chrome !== 'undefined' && chrome.scripting) ? chrome.scripting : (typeof browser !== 'undefined' && browser.scripting) ? browser.scripting : null
     if (!scripting) return timeoutError
+    // [IMPL-AI_TAGGING_READABILITY] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] SW fallback when content script not injected: title + body.innerText, 16k cap in caller.
     const extractInPage = () => {
       const title = (document.title && String(document.title).trim()) || ''
       const raw = document.body && document.body.innerText ? String(document.body.innerText).trim() : ''
@@ -579,6 +579,7 @@ export class MessageHandler {
     const limit = Math.min(128, Math.max(1, Number(config.aiTagLimit) || 64))
     const text = (data?.text || '').trim()
     if (!text) return { success: false, error: 'No text', tags: [] }
+    // [IMPL-AI_TAGGING_PROVIDER] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-TAG_INPUT_SANITIZATION] Get config, call requestAiTags with TagService.sanitizeTag, return tags.
     try {
       const sanitizeTag = (s) => this.tagService.sanitizeTag(s)
       const tags = await requestAiTags(provider, apiKey, text, limit, { sanitizeTag })
@@ -598,7 +599,7 @@ export class MessageHandler {
   }
 
   /**
-   * [REQ-AI_TAGGING_POPUP] [IMPL-SESSION_TAGS] Add tags to session set (called when user adds tags).
+   * [IMPL-SESSION_TAGS] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Add tags to session set (called when user adds tags).
    */
   async handleRecordSessionTags (data) {
     const tags = Array.isArray(data?.tags) ? data.tags : (data?.tag ? [data.tag] : [])
@@ -639,7 +640,7 @@ export class MessageHandler {
       }
     }
 
-    // [REQ-AI_TAGGING_POPUP] [IMPL-SESSION_TAGS] Record added tags for session auto-apply
+    // [IMPL-SESSION_TAGS] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Record added tags for session auto-apply
     if (addedTags.length > 0) {
       try {
         await recordSessionTags(addedTags.map(t => t.trim()).filter(Boolean))
@@ -678,7 +679,7 @@ export class MessageHandler {
       }
     }
 
-    // [REQ-AI_TAGGING_POPUP] [IMPL-SESSION_TAGS] Record tag for session auto-apply
+    // [IMPL-SESSION_TAGS] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Record tag for session auto-apply
     if (data.value && data.value.trim()) {
       try {
         await recordSessionTags([data.value.trim()])

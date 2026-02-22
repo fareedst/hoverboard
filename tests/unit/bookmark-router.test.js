@@ -1,11 +1,12 @@
 /**
- * Unit tests for BookmarkRouter - [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTER]
+ * [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI]
+ * Unit tests for BookmarkRouter.
  */
 
 import { BookmarkRouter } from '../../src/features/storage/bookmark-router.js'
 import { StorageIndex } from '../../src/features/storage/storage-index.js'
 
-describe('BookmarkRouter [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-BOOKMARK_ROUTER]', () => {
+describe('BookmarkRouter [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND]', () => {
   let router
   let pinboard
   let local

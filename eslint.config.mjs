@@ -1,3 +1,4 @@
+// [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] ESLint 10 flat config; @eslinter/eslint-config-standard; src/**/*.js.
 import { defineConfig, globalIgnores } from "eslint/config";
 import * as standard from "@eslinter/eslint-config-standard";
 import globals from "globals";

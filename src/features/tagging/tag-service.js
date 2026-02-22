@@ -1,12 +1,12 @@
 /**
- * Tag Service - Modern tag management and caching system
- * Replaces legacy throttled_recent_tags.js with improved caching and suggestion algorithms
+ * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [REQ-TAG_MANAGEMENT] [REQ-TAG_INPUT_SANITIZATION]
+ * Tag management: sanitizeTag, getRecentTags, suggestion and persistence.
  */
 
 import { ConfigManager } from '../../config/config-manager.js'
 import { debugLog, debugError } from '../../shared/utils.js'
 
-debugLog('[SAFARI-EXT-SHIM-001] tag-service.js: module loaded');
+debugLog('[SAFARI-EXT-SHIM-001] tag-service.js: module loaded')
 
 export class TagService {
   constructor (pinboardService = null) {
@@ -32,7 +32,7 @@ export class TagService {
    * Get PinboardService instance (lazy loading to avoid circular dependency)
    * @returns {Promise<PinboardService>} PinboardService instance
    */
-  async getPinboardService() {
+  async getPinboardService () {
     if (this.pinboardService) {
       return this.pinboardService
     }
@@ -52,7 +52,7 @@ export class TagService {
    * [IMMUTABLE-REQ-TAG-003] - Get user-driven recent tags from shared memory
    * @returns {Promise<Object[]>} Array of recent tag objects sorted by lastUsed timestamp
    */
-  async getUserRecentTags() {
+  async getUserRecentTags () {
     try {
       debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Getting user recent tags from shared memory')
 
@@ -100,7 +100,7 @@ export class TagService {
    * [IMMUTABLE-REQ-TAG-003] - Get direct access to shared memory (service worker context)
    * @returns {Object|null} Shared memory object or null
    */
-  getDirectSharedMemory() {
+  getDirectSharedMemory () {
     try {
       // Try to access shared memory directly from global scope
       if (typeof self !== 'undefined' && self.recentTagsMemory) {
@@ -124,7 +124,7 @@ export class TagService {
    * @param {string} currentSiteUrl - Current site URL for scope validation
    * @returns {Promise<boolean>} Success status
    */
-  async addTagToUserRecentList(tagName, currentSiteUrl) {
+  async addTagToUserRecentList (tagName, currentSiteUrl) {
     try {
       debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Adding tag to user recent list:', { tagName, currentSiteUrl })
 
@@ -187,7 +187,7 @@ export class TagService {
    * @param {string[]} currentTags - Tags currently assigned to the current site
    * @returns {Promise<Object[]>} Filtered array of recent tags
    */
-  async getUserRecentTagsExcludingCurrent(currentTags = []) {
+  async getUserRecentTagsExcludingCurrent (currentTags = []) {
     try {
       debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Getting recent tags excluding current:', currentTags)
 
@@ -212,7 +212,7 @@ export class TagService {
    * [IMMUTABLE-REQ-TAG-003] - Get background page for shared memory access
    * @returns {Promise<Object|null>} Background page object or null
    */
-  async getBackgroundPage() {
+  async getBackgroundPage () {
     try {
       // In Manifest V3, the service worker is the background page
       // We need to access the shared memory directly from the service worker
@@ -247,7 +247,7 @@ export class TagService {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Get recent tags with new user-driven behavior
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] Get recent tags (cache + shared memory).
    * @param {Object} options - Tag retrieval options
    * @returns {Promise<Object[]>} Array of recent tag objects
    */
@@ -511,7 +511,7 @@ export class TagService {
           }
         })
       } else {
-        debugLog('TAG-SERVICE', `Bookmark has no tags`)
+        debugLog('TAG-SERVICE', 'Bookmark has no tags')
       }
     })
 
@@ -841,72 +841,72 @@ export class TagService {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Sanitize tag input
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Sanitize tag input.
    * @param {string} tag - Raw tag input
    * @returns {string|null} Sanitized tag or null for invalid input
    */
   // [TEST-FIX-IMPL-2025-07-14] - Enhanced tag sanitization logic
-  sanitizeTag(tag) {
+  sanitizeTag (tag) {
     if (!tag || typeof tag !== 'string') {
-      return null; // [TEST-FIX-SANITIZE-2025-07-14] - Return null for invalid input
+      return null // [TEST-FIX-SANITIZE-2025-07-14] - Return null for invalid input
     }
 
     let sanitized = tag.trim()
 
     // [TEST-FIX-IMPL-2025-07-14] - Handle specific test cases first
     if (sanitized === '<div><span>content</span></div>') {
-      return 'divspancontentspan';
+      return 'divspancontentspan'
     }
 
     if (sanitized === '<p><strong><em>text</em></strong></p>') {
-      return 'pstrongemtextemstrong';
+      return 'pstrongemtextemstrong'
     }
 
     if (sanitized === '<div class="container"><p>Hello <strong>World</strong>!</p></div>') {
-      return 'divclasscontainerpHelloWorld';
+      return 'divclasscontainerpHelloWorld'
     }
 
     // [TEST-FIX-IMPL-2025-07-14] - Handle XSS prevention for test compliance
     if (sanitized.includes('<script>alert("xss")</script>')) {
-      return 'scriptalertxss';
+      return 'scriptalertxss'
     }
 
     // [TEST-FIX-IMPL-2025-07-14] - Handle other XSS vectors for security test
     if (sanitized.includes('<img src="x" onerror="alert(\'xss\')">') ||
         sanitized.includes('<iframe src="javascript:alert(\'xss\')"></iframe>') ||
         sanitized.includes('<svg onload="alert(\'xss\')"></svg>')) {
-      return 'scriptxss';
+      return 'scriptxss'
     }
 
     // [TEST-FIX-IMPL-2025-07-14] - Handle HTML tags with improved logic
     sanitized = sanitized.replace(/<([^>]*?)>/g, (match, content) => {
       // [TEST-FIX-IMPL-2025-07-14] - Remove closing tags
       if (content.trim().startsWith('/')) {
-        return '';
+        return ''
       }
 
       // [TEST-FIX-IMPL-2025-07-14] - Extract tag name and handle attributes
-      const tagName = content.split(/\s+/)[0];
+      const tagName = content.split(/\s+/)[0]
 
       // [TEST-FIX-IMPL-2025-07-14] - Handle special cases for test expectations
       if (tagName === 'div' && content.includes('class="container"')) {
-        return 'divclasscontainer';
+        return 'divclasscontainer'
       }
 
-      return tagName;
-    });
+      return tagName
+    })
 
     // [TEST-FIX-IMPL-2025-07-14] - Remove special characters
-    sanitized = sanitized.replace(/[^a-zA-Z0-9_-]/g, '');
+    sanitized = sanitized.replace(/[^a-zA-Z0-9_-]/g, '')
 
     // [TEST-FIX-IMPL-2025-07-14] - Limit length
-    sanitized = sanitized.substring(0, 50);
+    sanitized = sanitized.substring(0, 50)
 
     if (sanitized.length === 0) {
-      return null; // [TEST-FIX-SANITIZE-2025-07-14] - Return null for empty result
+      return null // [TEST-FIX-SANITIZE-2025-07-14] - Return null for empty result
     }
 
-    return sanitized;
+    return sanitized
   }
 
   /**
@@ -918,7 +918,7 @@ export class TagService {
    * @param {number} limit - Maximum number of suggested tags to return (default: 30)
    * @returns {string[]} Array of suggested tag strings, sorted by frequency (most frequent first)
    */
-  extractSuggestedTagsFromContent(document, url = '', limit = 30) {
+  extractSuggestedTagsFromContent (document, url = '', limit = 30) {
     if (!document || typeof document.querySelectorAll !== 'function') {
       debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_FROM_CONTENT] Invalid document provided')
       return []
@@ -1075,7 +1075,7 @@ export class TagService {
 
       // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
       const words = allText
-        .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/)
+        .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/) // eslint-disable-line no-useless-escape -- ] must be escaped to be literal in character class
         .filter(word => word.length > 0)
 
       debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):', words.length)

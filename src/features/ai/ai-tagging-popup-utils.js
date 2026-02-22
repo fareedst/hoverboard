@@ -1,5 +1,5 @@
 /**
- * [REQ-AI_TAGGING_POPUP] [IMPL-AI_TAGGING_POPUP_UI] Pure helpers for AI tagging popup flow (split inSession vs suggested).
+ * [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Pure helpers for AI tagging popup flow (split inSession vs suggested).
  */
 
 /**
@@ -9,6 +9,7 @@
  * @returns {{ inSession: string[], suggested: string[] }}
  */
 export function splitAiTagsBySession (aiTags, sessionTags) {
+  // [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Split AI tags into inSession (auto-apply) vs suggested; session set normalization + loop.
   const set = sessionTags instanceof Set ? sessionTags : new Set((sessionTags || []).map(t => String(t).toLowerCase()))
   const inSession = []
   const suggested = []

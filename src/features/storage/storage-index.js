@@ -1,7 +1,6 @@
 /**
- * Storage Index - [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER]
- * Per-URL storage backend mapping in chrome.storage.local.
- * [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+ * [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+ * Per-URL storage backend mapping in chrome.storage.local; getIndex, getBackendForUrl, setBackendForUrl, removeUrl.
  */
 
 import { debugLog, debugError } from '../../shared/utils.js'

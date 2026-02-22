@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# [REQ-NATIVE_HOST_WRAPPER] [IMPL-NATIVE_HOST_INSTALLER] Install native host and manifest for macOS/Linux.
+# [IMPL-NATIVE_HOST_INSTALLER] [ARCH-NATIVE_HOST] [REQ-NATIVE_HOST_WRAPPER] Install native host and manifest for macOS/Linux.
 # Usage: ./install.sh [SOURCE_DIR] [EXTENSION_ID] [BROWSER]
 #   SOURCE_DIR: dir containing native_host binary and helper scripts (default: script dir)
 #   EXTENSION_ID: e.g. from chrome://extensions (default: prompt)

@@ -1,6 +1,6 @@
 /**
- * Tag Service - Modern tag management and caching system
- * Replaces legacy throttled_recent_tags.js with improved caching and suggestion algorithms
+ * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [REQ-TAG_MANAGEMENT] [REQ-TAG_INPUT_SANITIZATION]
+ * Tag management: sanitizeTag, getRecentTags, suggestion and persistence.
  */
 
 import { ConfigManager } from '../../config/config-manager.js'
@@ -247,7 +247,7 @@ export class TagService {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Get recent tags with new user-driven behavior
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] Get recent tags (cache + shared memory).
    * @param {Object} options - Tag retrieval options
    * @returns {Promise<Object[]>} Array of recent tag objects
    */
@@ -841,7 +841,7 @@ export class TagService {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Sanitize tag input
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Sanitize tag input.
    * @param {string} tag - Raw tag input
    * @returns {string|null} Sanitized tag or null for invalid input
    */
@@ -1075,7 +1075,7 @@ export class TagService {
 
       // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case
       const words = allText
-        .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/)
+        .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/) // eslint-disable-line no-useless-escape -- ] must be escaped to be literal in character class
         .filter(word => word.length > 0)
 
       debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenized words (preserving case):', words.length)

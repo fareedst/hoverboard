@@ -1,5 +1,5 @@
 /**
- * File Bookmark Service - [IMPL-FILE_BOOKMARK_SERVICE] [ARCH-FILE_BOOKMARK_PROVIDER]
+ * [IMPL-FILE_BOOKMARK_SERVICE] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] File-based bookmark provider via adapter; same contract as Local/Pinboard.
  * Bookmark provider backed by a file (via adapter). Same contract as LocalBookmarkService/PinboardService.
  *
  * Provider contract (duck-typed):

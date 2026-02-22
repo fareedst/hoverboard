@@ -1,6 +1,6 @@
 /**
- * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-SESSION_TAGS]
- * In-session set of tags added to any URL this session; used to auto-apply when AI returns those tags.
+ * [IMPL-SESSION_TAGS] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP]
+ * In-session set of tags added to any URL this session; getSessionTags, recordSessionTags; auto-apply when AI returns.
  */
 
 const SESSION_TAGS_KEY = 'hoverboard_session_tags'
@@ -13,7 +13,7 @@ function hasSessionStorage () {
 }
 
 /**
- * Get the set of tags (lowercase) added this session.
+ * [IMPL-SESSION_TAGS] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Get the set of tags (lowercase) added this session.
  * @returns {Promise<string[]>}
  */
 export async function getSessionTags () {
@@ -30,7 +30,7 @@ export async function getSessionTags () {
 }
 
 /**
- * Add tags to the session set (lowercase, deduplicated).
+ * [IMPL-SESSION_TAGS] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Add tags to the session set (lowercase, deduplicated).
  * @param {string[]} tags - Tags to add
  */
 export async function recordSessionTags (tags) {

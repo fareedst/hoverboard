@@ -96,7 +96,7 @@ export function buildDeleteConfirmMessage (count, titles) {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  * Build confirmation message for Add tags action.
  * @param {string[]} tagList - Tags to add
  * @param {number} count - Number of selected bookmarks
@@ -110,7 +110,7 @@ export function buildAddTagsConfirmMessage (tagList, count) {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  * Build confirmation message for Delete tags action.
  * @param {string[]} tagList - Tags to remove
  * @param {number} count - Number of selected bookmarks
@@ -124,7 +124,7 @@ export function buildRemoveTagsConfirmMessage (tagList, count) {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  * Return Set of selected URLs that are still in the displayed list (intersection).
  * Used after Add tags / Delete tags to retain selection for still-visible rows; records no longer displayed are not included.
  * @param {Set<string>|Iterable<string>} selectedUrls - Previously selected bookmark URLs
@@ -160,7 +160,7 @@ export function getShowOnlyDefaultState () {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  * Parse comma-separated tag input to array of trimmed non-empty tags; dedupe case-insensitive (keep first).
  * @param {string} raw - User input (e.g. "a, b , A" -> ["a", "b"])
  * @returns {string[]}
@@ -181,7 +181,7 @@ export function parseTagsInput (raw) {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  * Merge new tags with existing; case-insensitive dedupe; preserve existing casing, append new.
  * @param {string[]} existingTags
  * @param {string[]} newTags
@@ -203,7 +203,7 @@ export function mergeTags (existingTags, newTags) {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  * Build payload for saveBookmark when adding tags to a bookmark (merge tags, set preferredBackend).
  * @param {{ url?: string, storage?: string, tags?: string[], [key: string]: unknown }} bookmark
  * @param {string[]} newTags
@@ -221,7 +221,7 @@ export function buildAddTagsPayload (bookmark, newTags) {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  * Remove tags from existing list (case-insensitive match); preserve casing of remaining tags.
  * @param {string[]} existingTags
  * @param {string[]} tagsToRemove
@@ -236,7 +236,7 @@ export function removeTags (existingTags, tagsToRemove) {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  * Build payload for saveBookmark when removing tags from a bookmark (reduced tags, set preferredBackend).
  * @param {{ url?: string, storage?: string, tags?: string[], [key: string]: unknown }} bookmark
  * @param {string[]} tagsToRemove

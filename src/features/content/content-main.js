@@ -15,10 +15,11 @@ import { browser, debugLog, debugError } from '../../shared/utils' // [SAFARI-EX
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
 import { recordAction } from '../../shared/ui-inspector.js'
 
-// [REQ-AI_TAGGING_POPUP] [IMPL-AI_TAGGING_READABILITY] Register GET_PAGE_CONTENT immediately so the
+// [IMPL-AI_TAGGING_READABILITY] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Register GET_PAGE_CONTENT immediately so the
 // popup can get page content before init() finishes (init() awaits waitForDOM() before setupMessageListeners).
 browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type !== 'GET_PAGE_CONTENT') return
+  // [IMPL-AI_TAGGING_READABILITY] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] Readability path: extractPageContent(document) then sendResponse.
   try {
     const result = extractPageContent(document)
     sendResponse({ success: true, data: result })
@@ -213,7 +214,7 @@ class HoverboardContentScript {
           break
         }
 
-        // [IMPL-SELECTION_TO_TAG_INPUT] - Return current page selection for popup tag input prefill
+        // [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] Return page selection for popup tag prefill
         case 'GET_PAGE_SELECTION': {
           const selection = typeof window.getSelection === 'function' ? window.getSelection().toString() : ''
           sendResponse({ success: true, data: { selection } })

@@ -1,7 +1,6 @@
 /**
- * Overlay test harness - displayed state snapshot and action log for overlay unit tests
- * [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-UI_INSPECTION]
- * Used with OverlayManager.setOnStateChange and setOnOverlayAction in tests.
+ * [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] [REQ-UI_INSPECTION]
+ * Overlay test harness: displayed state snapshot and action log for overlay unit tests.
  */
 
 let _displayedSnapshot = null

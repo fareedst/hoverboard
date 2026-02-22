@@ -1,6 +1,6 @@
 /**
- * Message Service - Wrapper for MessageClient with event handling
- * Provides onMessage functionality for content scripts
+ * [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION]
+ * Message service wrapper for content scripts; onMessage and listener dispatch.
  */
 
 import { MessageClient } from '../features/content/message-client.js'

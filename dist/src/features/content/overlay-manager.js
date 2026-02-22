@@ -1,6 +1,6 @@
 /**
- * Overlay Manager Module
- * Handles DOM overlay creation, positioning, and interaction management
+ * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION] Overlay show/hide, content, controls.
+ * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] On toggle/save send message to backend then broadcast BOOKMARK_UPDATED.
  */
 
 import { Logger } from '../../shared/logger.js'
@@ -74,8 +74,7 @@ class OverlayManager {
   }
 
   /**
-   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
-   * Set optional callback for overlay state changes (for tests). Signature: ({ visible, contentSnapshot }) => void
+   * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] Set optional callback for overlay state changes (for tests).
    */
   setOnStateChange (fn) {
     this._onStateChange = typeof fn === 'function' ? fn : null
@@ -153,6 +152,7 @@ class OverlayManager {
         border-radius: 4px;
       `
 
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Refresh button: position, ARIA, 24px min touch target, keyboard.
       // [OVERLAY-REFRESH-UI-001] Add refresh button to overlay structure with enhanced styling
       this.logger.log('DEBUG', 'OverlayManager', 'Creating refresh button')
       const refreshBtn = this.document.createElement('button')
@@ -201,6 +201,7 @@ class OverlayManager {
         }
       })
 
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Close button: position, ARIA, 24px min touch target.
       // [OVERLAY-CLOSE-POSITION-UI-001] Close button positioned in top-left corner
       this.logger.log('DEBUG', 'OverlayManager', 'Creating close button')
       const closeBtn = this.document.createElement('span')
@@ -760,7 +761,7 @@ class OverlayManager {
   }
 
   /**
-   * Hide overlay
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] Hide overlay.
    */
   hide () {
     debugLog('[OverlayManager] hide() called', { stack: new Error().stack })
@@ -2379,7 +2380,8 @@ class OverlayManager {
         debugLog(`Applied solid theme: ${settings.textTheme}`)
       }
 
-      // Force CSS recalculation for immediate visual update
+      // Force CSS recalculation for immediate visual update (read layout to trigger reflow)
+      // eslint-disable-next-line no-unused-expressions -- intentional side effect
       this.overlayElement.offsetHeight
     }
   }

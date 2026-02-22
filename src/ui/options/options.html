@@ -71,7 +71,7 @@
         <button id="test-auth" class="btn btn-secondary">Test Connection</button>
       </section>
 
-      <!-- [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI Tagging -->
+      <!-- [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI Tagging: section with API key input, provider select, tag limit, Test button per REQ/ARCH. -->
       <section class="section" id="ai-tagging-section">
         <h2>AI Tagging</h2>
         <p class="help-text">Optional: use OpenAI or Gemini to suggest tags for the current page from the popup. Leave API key empty to disable.</p>
@@ -90,6 +90,7 @@
           <label for="ai-tag-limit">Max tags (default 64)</label>
           <input type="number" id="ai-tag-limit" min="1" max="128" value="64" aria-label="Max AI tags">
         </div>
+        <!-- [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Test API key button and status -->
         <button id="test-ai-api" class="btn btn-secondary">Test API key</button>
         <span id="ai-test-status" class="help-text" style="margin-left: 0.5em;"></span>
       </section>
