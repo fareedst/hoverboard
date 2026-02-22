@@ -1,0 +1,52 @@
+# [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE]
+# Architecture: Chrome sidePanel API; single panel page; data from getAggregatedBookmarksForIndex;
+# open from popup via message to SW → chrome.sidePanel.open; UI: tag selector + order, then tree (tag → collapsible URLs); open URL via chrome.tabs.create.
+
+ARCH-SIDE_PANEL_TAGS_TREE:
+  name: Side Panel Tags and Bookmarks Tree Architecture
+  status: Active
+  cross_references:
+    - REQ-SIDE_PANEL_TAGS_TREE
+  rationale:
+    why: Side panel provides persistent, non-intrusive view of tags and bookmarks; reuses existing index data.
+    problems_solved:
+      - Full index page takes over a tab; no tag-centric hierarchy
+    benefits:
+      - Chrome sidePanel API; panel stays open across tabs; same data source as local bookmarks index (getAggregatedBookmarksForIndex)
+  implementation_approach:
+    summary: Chrome sidePanel permission and default_path; panel is a dedicated extension page; data via getAggregatedBookmarksForIndex; popup sends message to SW which calls chrome.sidePanel.open({ windowId }); panel UI has a config region (expand/collapse) and tag selector then hierarchical tree or grouped list; clicking URL calls chrome.tabs.create({ url }).
+    details:
+      - Manifest: sidePanel permission, side_panel.default_path to panel HTML
+      - Open flow: popup footer button → handler sends OPEN_SIDE_PANEL (or equivalent) → SW receives, gets windowId (e.g. from sender or chrome.windows.getCurrent), calls chrome.sidePanel.open({ windowId })
+      - Panel page: on load sends getAggregatedBookmarksForIndex; applies filters (time range by create/update, tags include, domain); sorts by chosen axis and direction; optionally groups by create date, update date, tag, or domain; renders tag selector (selected tags + order) and tree or grouped sections (collapsible); click URL → chrome.tabs.create({ url })
+      - Config region: expand/collapse toggle; when expanded shows time field (create | update), time range, tag include filter, domain filter, group-by, sort-by, sort-order, tag display order; when collapsed shows compact bar (e.g. "Filters & view" + chevron) to maximize space for bookmarks list
+      - Config and expanded state persisted in chrome.storage.local
+      - Data: no new backend; same bookmarks as local index (local + file + sync; no Pinboard in this view)
+  traceability:
+    requirements:
+      - REQ-SIDE_PANEL_TAGS_TREE
+    implementation:
+      - IMPL-SIDE_PANEL_TAGS_TREE
+    tests:
+      - tests/unit/tags-tree-data.test.js
+      - tests/unit/tags-tree-filter.test.js
+      - tests/unit/side-panel-open.test.js
+    code_annotations:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+  related_decisions:
+    depends_on:
+      - REQ-SIDE_PANEL_TAGS_TREE
+    informs:
+      - IMPL-SIDE_PANEL_TAGS_TREE
+    see_also:
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+      - ARCH-MESSAGE_HANDLING
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_TAGS_TREE.yaml
+  metadata:
+    created:
+      date: '2026-02-21'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-22'
+      author: AI Agent
+      reason: Add config region, filters, sort/group, persistence

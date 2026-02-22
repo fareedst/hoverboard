@@ -1,0 +1,62 @@
+# [REQ-SIDE_PANEL_TAGS_TREE] Side panel tags and bookmarks tree
+# Requirement: Chrome side panel shows hierarchical tree of tags (top level) and bookmarks (leaves);
+# launched from popup; user selects tags and order; collapsible URL lists; click URL opens in new tab.
+
+REQ-SIDE_PANEL_TAGS_TREE:
+  name: Side Panel Tags and Bookmarks Tree
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Give users a dedicated side-panel view of bookmarks grouped by tag, without leaving the current window.
+    problems_solved:
+      - No at-a-glance tag-based browse of bookmarks in the extension
+      - Opening full index page loses current tab context
+    benefits:
+      - Side panel stays open across tab changes; hierarchical tag → URLs view; user chooses which tags and order
+      - Click URL opens in new tab; URL list per tag is collapsible
+  satisfaction_criteria:
+    - criterion: Side panel opens from popup (e.g. footer button "Tags tree" or "Side panel")
+    - criterion: User can select one or more tags to display and control their order
+    - criterion: Below tag selector, hierarchical display: tags at top level, URLs as leaf nodes showing bookmark name and URL
+    - criterion: The list of URLs under each tag is collapsible
+    - criterion: Clicking a URL opens it in a new tab
+    - criterion: User can filter bookmarks by create time or update time (time range)
+    - criterion: User can filter bookmarks by tags (include set: show only bookmarks that have at least one of the selected tags)
+    - criterion: User can filter bookmarks by domain(s) in URL (hostname)
+    - criterion: Display can be sorted by create date, update date, tags, or domain; sort order (asc/desc) is configurable
+    - criterion: Display can be grouped by create date, update date, tags, or domain (or none for flat list); grouped sections are collapsible
+    - criterion: Selection and display configuration region is expandable for use and collapsible to maximize space for the bookmarks list
+    - criterion: Config state (expanded/collapsed, filter values, sort/group choices) is persisted (e.g. chrome.storage.local)
+  validation_criteria:
+    - method: Manual verification
+      coverage: Open panel from popup; select/reorder tags; expand/collapse tag sections; click URL opens in new tab; expand/collapse config; set filters (time, tags, domain), sort and group; verify persistence
+    - method: Unit tests
+      coverage: buildTagToBookmarks from bookmarks array; tag order; open-URL action with mock chrome.tabs; getDomainFromUrl; filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters; sortBookmarks; groupBookmarksBy
+    - method: Integration tests (mocks)
+      coverage: Popup button sends open-panel message; SW calls chrome.sidePanel.open; panel load sends getAggregatedBookmarksForIndex and renders tree
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+    implementation:
+      - IMPL-SIDE_PANEL_TAGS_TREE
+    tests:
+      - tests/unit/tags-tree-data.test.js
+      - tests/unit/tags-tree-filter.test.js
+      - tests/unit/side-panel-open.test.js
+    code_annotations:
+      - REQ-SIDE_PANEL_TAGS_TREE
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+  detail_file: requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml
+  metadata:
+    created:
+      date: '2026-02-21'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-22'
+      author: AI Agent
+      reason: Add filters (time, tags, domain), sort/group, expandable config, persistence

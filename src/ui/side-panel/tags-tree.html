@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tags Tree – Hoverboard</title>
+  <link rel="stylesheet" href="../styles/design-tokens.css">
+  <link rel="stylesheet" href="tags-tree.css">
+</head>
+<body id="tags-tree-panel">
+  <!-- [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] -->
+  <header class="tags-tree-header">
+    <h1 class="tags-tree-title">Tags &amp; bookmarks</h1>
+    <p class="tags-tree-subtitle">Select tags to show; expand to see URLs. Click a URL to open in a new tab.</p>
+  </header>
+
+  <!-- [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Config region: expand/collapse to maximize bookmarks space; when expanded shows filters and display options. -->
+  <section class="config-section" aria-labelledby="config-legend">
+    <button type="button" id="configToggle" class="config-toggle" aria-expanded="false" aria-controls="configContent">
+      <span class="config-toggle-chevron" aria-hidden="true">▼</span>
+      <span id="configLegend" class="config-toggle-label">Filters &amp; view</span>
+    </button>
+    <div id="configContent" class="config-content hidden" role="region" aria-labelledby="config-legend">
+      <div class="config-row">
+        <label for="filterTimeField">Time field</label>
+        <select id="filterTimeField" aria-label="Filter by create time or last updated">
+          <option value="time">Create time</option>
+          <option value="updated_at" selected>Last updated</option>
+        </select>
+      </div>
+      <div class="config-row">
+        <label for="filterTimeStart">From</label>
+        <input type="datetime-local" id="filterTimeStart" aria-label="Filter from date and time">
+      </div>
+      <div class="config-row">
+        <label for="filterTimeEnd">To</label>
+        <input type="datetime-local" id="filterTimeEnd" aria-label="Filter to date and time">
+      </div>
+      <div class="config-row">
+        <label for="filterTagsInclude">Tags to include (comma-separated, empty = all)</label>
+        <input type="text" id="filterTagsInclude" placeholder="e.g. work, personal" aria-label="Filter by tags include">
+      </div>
+      <div class="config-row">
+        <label for="filterDomains">Domains (comma-separated)</label>
+        <input type="text" id="filterDomains" placeholder="e.g. example.com" aria-label="Filter by URL domains">
+      </div>
+      <div class="config-row">
+        <label for="groupBy">Group by</label>
+        <select id="groupBy" aria-label="Group display by">
+          <option value="none" selected>None</option>
+          <option value="time">Create date</option>
+          <option value="updated_at">Update date</option>
+          <option value="tag">Tag</option>
+          <option value="domain">Domain</option>
+        </select>
+      </div>
+      <div class="config-row">
+        <label for="sortBy">Sort by</label>
+        <select id="sortBy" aria-label="Sort display by">
+          <option value="time">Create date</option>
+          <option value="updated_at" selected>Last updated</option>
+          <option value="tag">Tag</option>
+          <option value="domain">Domain</option>
+        </select>
+      </div>
+      <div class="config-row config-row-inline">
+        <label for="sortAsc">Sort order</label>
+        <select id="sortAsc" aria-label="Sort order">
+          <option value="0" selected>Newest first</option>
+          <option value="1">Oldest first</option>
+        </select>
+      </div>
+    </div>
+  </section>
+
+  <section class="tag-selector-section" aria-labelledby="tag-selector-legend">
+    <h2 id="tag-selector-legend" class="tag-selector-legend">Select tags (order = display order)</h2>
+    <div id="tagSelector" class="tag-selector">
+      <!-- Filled by JS: checkboxes per tag -->
+    </div>
+  </section>
+
+  <section class="tree-section" aria-label="Tags and bookmarks tree">
+    <div id="treeContainer" class="tree-container">
+      <!-- Filled by JS: for each selected tag, collapsible section with bookmark links -->
+    </div>
+    <div id="emptyState" class="empty-state hidden">No tags selected or no bookmarks.</div>
+    <div id="loadError" class="load-error hidden"></div>
+  </section>
+
+  <script type="module" src="tags-tree.js"></script>
+</body>
+</html>

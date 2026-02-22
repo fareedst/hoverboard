@@ -3484,3 +3484,68 @@ IMPL-AI_TAGGING_POPUP_UI:
       date: '2026-02-21'
       author: AI Agent
       reason: GET_PAGE_CONTENT via SW executeScript; popup shows content.error on failure
+IMPL-SIDE_PANEL_TAGS_TREE:
+  name: Side Panel Tags and Bookmarks Tree Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_TAGS_TREE
+    - REQ-SIDE_PANEL_TAGS_TREE
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_TAGS_TREE and REQ-SIDE_PANEL_TAGS_TREE with one IMPL covering open flow, data build, and panel UI.
+    problems_solved:
+      - No side panel entry or tag-tree view
+    benefits:
+      - Single traceable IMPL; pure buildTagToBookmarks testable in isolation; open flow and panel UI prescribed by pseudo-code
+  implementation_approach:
+    summary: Popup button and handler send OPEN_SIDE_PANEL; SW handles message and calls chrome.sidePanel.open({ windowId }). Panel page on load sends getAggregatedBookmarksForIndex; buildTagToBookmarks(bookmarks) returns tag to [{ title, url }]; derive allTags; tag selector (selected + order, optional persist); render tree (each selected tag to collapsible section); click URL to chrome.tabs.create({ url }).
+    details:
+      - ui-action-contract: add openTagsTree to POPUP_ACTION_IDS
+      - Popup: footer button, UIManager element + emit, PopupController handler sends OPEN_SIDE_PANEL
+      - Service worker: listener for OPEN_SIDE_PANEL; chrome.sidePanel.open({ windowId })
+      - Panel: tags-tree.html, tags-tree.js, tags-tree.css; tags-tree-data.js (pure buildTagToBookmarks) for unit tests
+  code_locations:
+    files:
+      - path: src/ui/side-panel/tags-tree-data.js
+      - path: src/ui/side-panel/tags-tree.html
+      - path: src/ui/side-panel/tags-tree.js
+      - path: src/ui/side-panel/tags-tree.css
+      - path: src/ui/popup/popup.html
+      - path: src/ui/popup/UIManager.js
+      - path: src/ui/popup/PopupController.js
+      - path: src/core/service-worker.js
+      - path: src/shared/ui-action-contract.js
+    functions:
+      - name: buildTagToBookmarks
+        file: src/ui/side-panel/tags-tree-data.js
+      - name: getAllTagsFromBookmarks
+        file: src/ui/side-panel/tags-tree-data.js
+      - name: handleOpenTagsTree
+        file: src/ui/popup/PopupController.js
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+    requirements:
+      - REQ-SIDE_PANEL_TAGS_TREE
+    tests:
+      - tests/unit/tags-tree-data.test.js
+      - tests/unit/tags-tree-filter.test.js
+      - tests/unit/side-panel-open.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_TAGS_TREE
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    composed_with:
+      - IMPL-MESSAGE_HANDLING
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml
+  metadata:
+    created:
+      date: '2026-02-21'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-21'
+      author: AI Agent
+      reason: Initial creation

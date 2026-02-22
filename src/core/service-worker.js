@@ -142,9 +142,12 @@ class HoverboardServiceWorker {
     this.recentTagsMemory = new RecentTagsMemoryManager()
 
     this._providerInitialized = false
+    // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Cached normal windowId for sidePanel.open(). Implements open-from-popup by keeping a windowId so open() can be called synchronously in onMessage (user gesture requirement: no await before open).
+    this._sidePanelWindowId = null
 
     // MV3-001: Set up V3 event listeners
     this.setupEventListeners()
+    this._seedSidePanelWindowCache()
   }
 
   /**
@@ -208,6 +211,23 @@ class HoverboardServiceWorker {
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log('[SERVICE-WORKER] Received message:', message)
 
+      // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Handle OPEN_SIDE_PANEL in listener with no await so sidePanel.open() runs in user-gesture context. Implements requirement "open tags tree from popup" by calling chrome.sidePanel.open({ windowId }) using cached _sidePanelWindowId (normal window); responds success or error.
+      if (message.type === MESSAGE_TYPES.OPEN_SIDE_PANEL) {
+        const windowId = this._sidePanelWindowId
+        const openFn = typeof globalThis.chrome !== 'undefined' && globalThis.chrome.sidePanel && globalThis.chrome.sidePanel.open
+        if (windowId != null && openFn) {
+          try {
+            globalThis.chrome.sidePanel.open({ windowId })
+            sendResponse({ success: true })
+          } catch (e) {
+            sendResponse({ success: false, error: e?.message ?? String(e) })
+          }
+        } else {
+          sendResponse({ success: false, error: windowId == null ? 'No browser window available for side panel. Switch to a browser tab and try again.' : 'Side panel is not available.' })
+        }
+        return true
+      }
+
       // Handle async response properly for Manifest V3
       this.handleMessage(message, sender)
         .then(response => {
@@ -239,6 +259,17 @@ class HoverboardServiceWorker {
     })
   }
 
+  /** [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Seed _sidePanelWindowId from active tab's normal window. Implements cache so OPEN_SIDE_PANEL handler can open panel without await (user gesture). */
+  _seedSidePanelWindowCache () {
+    const winApi = typeof globalThis.chrome !== 'undefined' && globalThis.chrome.windows ? globalThis.chrome.windows : browser.windows
+    const tabsApi = typeof globalThis.chrome !== 'undefined' && globalThis.chrome.tabs ? globalThis.chrome.tabs : browser.tabs
+    const setCache = (windowId) => { if (windowId != null) this._sidePanelWindowId = windowId }
+    tabsApi.query({ active: true }).then((tabs) => {
+      const tab = tabs && tabs[0]
+      if (tab?.windowId != null && winApi.get) winApi.get(tab.windowId).then((w) => { if (w?.type === 'normal') setCache(w.id) }).catch(() => {})
+    }).catch(() => {})
+  }
+
   // [IMMUTABLE-REQ-TAG-003] - Handle extension startup (clears shared memory)
   async handleExtensionStartup () {
     console.log('[IMMUTABLE-REQ-TAG-003] Extension startup - clearing recent tags shared memory')
@@ -266,6 +297,8 @@ class HoverboardServiceWorker {
     } catch (_) {}
 
     try {
+      // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] OPEN_SIDE_PANEL is handled in onMessage listener only (synchronous open for user gesture); not processed here.
+
       // [REQ-NATIVE_HOST_WRAPPER] [IMPL-NATIVE_HOST_WRAPPER] Optional ping to native host for testing connectivity
       if (message.type === 'NATIVE_PING') {
         const pingResult = await this.pingNativeHost()
@@ -366,9 +399,16 @@ class HoverboardServiceWorker {
     })
   }
 
+  // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Update _sidePanelWindowId when user activates a tab in a normal window. Implements cache maintenance so "open Tags tree" has a valid windowId.
   async handleTabActivated (activeInfo) {
     try {
       const tab = await browser.tabs.get(activeInfo.tabId)
+      if (tab?.windowId != null) {
+        try {
+          const win = await (typeof globalThis.chrome !== 'undefined' && globalThis.chrome.windows ? globalThis.chrome.windows : browser.windows).get(tab.windowId)
+          if (win?.type === 'normal' && win?.id != null) this._sidePanelWindowId = win.id
+        } catch (_) {}
+      }
       if (tab.url) {
         await this.updateBadgeForTab(tab)
       }

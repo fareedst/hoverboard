@@ -2056,7 +2056,7 @@ var init_tag_service = __esm({
               }
             });
           } else {
-            debugLog("TAG-SERVICE", `Bookmark has no tags`);
+            debugLog("TAG-SERVICE", "Bookmark has no tags");
           }
         });
         const result = Array.from(tagMap.values());

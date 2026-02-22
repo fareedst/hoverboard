@@ -25,6 +25,7 @@ export const POPUP_ACTION_IDS = {
   openOptions: 'openOptions',
   openBookmarksIndex: 'openBookmarksIndex',
   openBrowserBookmarkImport: 'openBrowserBookmarkImport',
+  openTagsTree: 'openTagsTree', // [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
   storageBackendChange: 'storageBackendChange',
   showHoverOnPageLoadChange: 'showHoverOnPageLoadChange',
   retry: 'retry'
@@ -47,6 +48,7 @@ export const POPUP_ACTION_TO_MESSAGE = {
   [POPUP_ACTION_IDS.openOptions]: null, // chrome.runtime.openOptionsPage
   [POPUP_ACTION_IDS.openBookmarksIndex]: null, // chrome.tabs.create
   [POPUP_ACTION_IDS.openBrowserBookmarkImport]: null, // chrome.tabs.create [REQ-BROWSER_BOOKMARK_IMPORT]
+  [POPUP_ACTION_IDS.openTagsTree]: MESSAGE_TYPES.OPEN_SIDE_PANEL, // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Popup action maps to OPEN_SIDE_PANEL; SW opens side panel with cached windowId
   [POPUP_ACTION_IDS.storageBackendChange]: MESSAGE_TYPES.MOVE_BOOKMARK_TO_STORAGE,
   [POPUP_ACTION_IDS.showHoverOnPageLoadChange]: MESSAGE_TYPES.UPDATE_OVERLAY_CONFIG,
   [POPUP_ACTION_IDS.retry]: null // retry load

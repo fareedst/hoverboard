@@ -8,7 +8,7 @@ import { VisibilityControls } from '../../ui/components/VisibilityControls.js'
 import { MessageClient } from './message-client.js'
 import { TagService } from '../tagging/tag-service.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
-import { browser } from '../../shared/utils'; // [SAFARI-EXT-SHIM-001]
+import { browser } from '../../shared/utils' // [SAFARI-EXT-SHIM-001]
 
 // Debug logging utility
 const debugLog = (message, data = null) => {
@@ -845,7 +845,7 @@ class OverlayManager {
    */
   // [OVERLAY-REFRESH-INTEGRATION-001] Refresh overlay content with latest bookmark data
   // Coordinates with [OVERLAY-DATA-DISPLAY-001] for data refresh mechanism
-  async refreshOverlayContent() {
+  async refreshOverlayContent () {
     try {
       // [OVERLAY-REFRESH-INTEGRATION-001] Prepare refresh request data
       // Use content.pageTitle if available, fallback to document.title
@@ -897,7 +897,7 @@ class OverlayManager {
    * [OVERLAY-REFRESH-HANDLER-001] Refresh button click handler
    */
   // [OVERLAY-REFRESH-HANDLER-001] Handle refresh button click with comprehensive error handling and loading state
-  async handleRefreshButtonClick() {
+  async handleRefreshButtonClick () {
     // [OVERLAY-TEST-LOG-001] Enhanced debug logging for refresh button click
     this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
     if (this._onOverlayAction) this._onOverlayAction('refresh')
@@ -950,7 +950,7 @@ class OverlayManager {
    * @param {Object} content - Content object with bookmark data
    * @returns {Promise<string[]>} Array of recent tag names
    */
-  async loadRecentTagsForOverlay(content) {
+  async loadRecentTagsForOverlay (content) {
     try {
       debugLog('[TAG-SYNC-OVERLAY-001] Loading recent tags for overlay')
 

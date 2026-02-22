@@ -2936,6 +2936,7 @@ var UIManager = class {
       reloadBtn: document.getElementById("reloadBtn"),
       optionsBtn: document.getElementById("optionsBtn"),
       bookmarksIndexBtn: document.getElementById("bookmarksIndexBtn"),
+      openTagsTreeBtn: document.getElementById("openTagsTreeBtn"),
       browserBookmarkImportBtn: document.getElementById("browserBookmarkImportBtn"),
       settingsBtn: document.getElementById("settingsBtn"),
       // Input elements
@@ -2988,6 +2989,9 @@ var UIManager = class {
     });
     this.elements.bookmarksIndexBtn?.addEventListener("click", () => {
       this.emit("openBookmarksIndex");
+    });
+    this.elements.openTagsTreeBtn?.addEventListener("click", () => {
+      this.emit("openTagsTree");
     });
     this.elements.browserBookmarkImportBtn?.addEventListener("click", () => {
       this.emit("openBrowserBookmarkImport");
@@ -4256,7 +4260,9 @@ var MESSAGE_TYPES = {
   GET_PAGE_CONTENT: "GET_PAGE_CONTENT",
   GET_AI_TAGS: "GET_AI_TAGS",
   GET_SESSION_TAGS: "getSessionTags",
-  RECORD_SESSION_TAGS: "recordSessionTags"
+  RECORD_SESSION_TAGS: "recordSessionTags",
+  // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Message type for opening side panel. Implements contract: popup sends this type; SW handles in onMessage and calls chrome.sidePanel.open({ windowId }).
+  OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL"
 };
 
 // src/shared/ui-action-contract.js
@@ -4273,6 +4279,8 @@ var POPUP_ACTION_IDS = {
   openOptions: "openOptions",
   openBookmarksIndex: "openBookmarksIndex",
   openBrowserBookmarkImport: "openBrowserBookmarkImport",
+  openTagsTree: "openTagsTree",
+  // [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
   storageBackendChange: "storageBackendChange",
   showHoverOnPageLoadChange: "showHoverOnPageLoadChange",
   retry: "retry"
@@ -4296,6 +4304,8 @@ var POPUP_ACTION_TO_MESSAGE = {
   // chrome.tabs.create
   [POPUP_ACTION_IDS.openBrowserBookmarkImport]: null,
   // chrome.tabs.create [REQ-BROWSER_BOOKMARK_IMPORT]
+  [POPUP_ACTION_IDS.openTagsTree]: MESSAGE_TYPES.OPEN_SIDE_PANEL,
+  // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Popup action maps to OPEN_SIDE_PANEL; SW opens side panel with cached windowId
   [POPUP_ACTION_IDS.storageBackendChange]: MESSAGE_TYPES.MOVE_BOOKMARK_TO_STORAGE,
   [POPUP_ACTION_IDS.showHoverOnPageLoadChange]: MESSAGE_TYPES.UPDATE_OVERLAY_CONFIG,
   [POPUP_ACTION_IDS.retry]: null
@@ -4394,6 +4404,7 @@ var PopupController = class {
     this.handleStorageBackendChange = this.handleStorageBackendChange.bind(this);
     this.handleTagWithAi = this.handleTagWithAi.bind(this);
     this.handleTestAiApiKey = this.handleTestAiApiKey.bind(this);
+    this.handleOpenTagsTree = this.handleOpenTagsTree.bind(this);
     this.normalizeTags = this.normalizeTags.bind(this);
     this.setupEventListeners();
     this.setupAutoRefresh();
@@ -4460,6 +4471,7 @@ var PopupController = class {
     this.uiManager.on("openOptions", this.handleOpenOptions);
     this.uiManager.on("openBookmarksIndex", this.handleOpenBookmarksIndex);
     this.uiManager.on("openBrowserBookmarkImport", this.handleOpenBrowserBookmarkImport);
+    this.uiManager.on("openTagsTree", this.handleOpenTagsTree);
     this.uiManager.on("tagWithAi", this.handleTagWithAi);
     this.uiManager.on("testAiApiKey", this.handleTestAiApiKey);
     this.uiManager.on("storageBackendChange", this.handleStorageBackendChange);
@@ -6245,6 +6257,20 @@ var PopupController = class {
     }
   }
   /**
+   * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+   * Open the tags and bookmarks tree in the side panel. Implements requirement "open tags tree from popup" by sending OPEN_SIDE_PANEL to the service worker (which opens the panel with cached windowId); records action, shows success or delegates error to ErrorHandler.
+   */
+  async handleOpenTagsTree() {
+    recordAction(POPUP_ACTION_IDS.openTagsTree, void 0, "popup");
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openTagsTree, payload: void 0 });
+    try {
+      await this.sendMessage({ type: MESSAGE_TYPES.OPEN_SIDE_PANEL });
+      this.uiManager.showSuccess("Tags tree opened in side panel");
+    } catch (error) {
+      this.errorHandler.handleError("Failed to open tags tree", error);
+    }
+  }
+  /**
    * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-AI_TAGGING_POPUP_UI]
    * Submit current page to AI for tagging: Readability → AI tags → session split → save/suggested.
    */
@@ -6405,6 +6431,7 @@ var PopupController = class {
     this.uiManager?.off("openOptions", this.handleOpenOptions);
     this.uiManager?.off("openBookmarksIndex", this.handleOpenBookmarksIndex);
     this.uiManager?.off("openBrowserBookmarkImport", this.handleOpenBrowserBookmarkImport);
+    this.uiManager?.off("openTagsTree", this.handleOpenTagsTree);
   }
   /**
    * [POPUP-REFRESH-001] Manual refresh capability

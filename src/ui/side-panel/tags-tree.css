@@ -1,0 +1,245 @@
+/**
+ * [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE]
+ * Side panel: config region (expand/collapse), tags selector, hierarchical tree or grouped list.
+ */
+
+.config-section {
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.config-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  width: 100%;
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  background: var(--color-background-secondary, #f8fafc);
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #0f172a);
+  text-align: left;
+}
+
+.config-toggle:hover {
+  background: var(--color-background-hover, #f1f5f9);
+}
+
+.config-toggle-chevron {
+  display: inline-block;
+  width: 16px;
+  font-size: 0.75rem;
+  transition: transform 0.15s ease;
+}
+
+.config-toggle-label {
+  flex: 1;
+}
+
+.config-content {
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  border-top: 1px solid var(--color-border, #e2e8f0);
+}
+
+.config-row {
+  margin-bottom: var(--space-2, 8px);
+}
+
+.config-row label {
+  display: block;
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 500;
+  color: var(--color-text-secondary, #64748b);
+  margin-bottom: var(--space-1, 4px);
+}
+
+.config-row select,
+.config-row input[type="text"],
+.config-row input[type="datetime-local"] {
+  width: 100%;
+  font-size: var(--font-size-sm, 0.875rem);
+  padding: var(--space-1, 4px) var(--space-2, 8px);
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-sm, 4px);
+}
+
+.config-row-inline label {
+  display: inline;
+  margin-right: var(--space-2, 8px);
+}
+
+.config-row-inline select {
+  width: auto;
+}
+
+.tag-selector-section.hidden {
+  display: none !important;
+}
+
+.tags-tree-header {
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.tags-tree-title {
+  margin: 0;
+  font-size: var(--font-size-lg, 1.125rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #0f172a);
+}
+
+.tags-tree-subtitle {
+  margin: var(--space-1, 4px) 0 0;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, #64748b);
+}
+
+.tag-selector-section {
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.tag-selector-legend {
+  display: block;
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: 600;
+  color: var(--color-text-secondary, #64748b);
+  margin-bottom: var(--space-2, 8px);
+}
+
+.tag-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2, 8px);
+}
+
+.tag-selector label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  font-size: var(--font-size-sm, 0.875rem);
+  cursor: pointer;
+  color: var(--color-text-primary, #0f172a);
+}
+
+.tag-selector input {
+  margin: 0;
+}
+
+.tree-section {
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  flex: 1;
+  overflow-y: auto;
+}
+
+.tree-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2, 8px);
+}
+
+.tree-tag-section {
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-md, 6px);
+  overflow: hidden;
+}
+
+.tree-tag-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1, 4px);
+  padding: var(--space-2, 8px) var(--space-3, 12px);
+  background: var(--color-background-secondary, #f8fafc);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-primary, #0f172a);
+}
+
+.tree-tag-header:hover {
+  background: var(--color-background-hover, #f1f5f9);
+}
+
+.tree-tag-toggle {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  transition: transform 0.15s ease;
+}
+
+.tree-tag-section.collapsed .tree-tag-toggle {
+  transform: rotate(-90deg);
+}
+
+.tree-tag-list {
+  padding: var(--space-1, 4px) 0;
+  list-style: none;
+  margin: 0;
+}
+
+.tree-tag-section.collapsed .tree-tag-list {
+  display: none;
+}
+
+.tree-tag-list li {
+  margin: 0;
+  padding: 0;
+}
+
+.tree-bookmark-link {
+  display: block;
+  padding: var(--space-1, 4px) var(--space-3, 12px) var(--space-1, 4px) var(--space-6, 24px);
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-interactive-primary, #2563eb);
+  text-decoration: none;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tree-bookmark-link:hover {
+  text-decoration: underline;
+  background: var(--color-background-hover, #f1f5f9);
+}
+
+.tree-bookmark-link .bookmark-title {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-bookmark-link .bookmark-url {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary, #64748b);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.empty-state,
+.load-error {
+  padding: var(--space-4, 16px);
+  text-align: center;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-secondary, #64748b);
+}
+
+.load-error {
+  color: var(--color-error-600, #dc2626);
+}
+
+.hidden {
+  display: none !important;
+}
+
+#tags-tree-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-background, #fff);
+}

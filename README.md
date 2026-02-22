@@ -62,6 +62,14 @@ The configuration page provides comprehensive settings for customizing the exten
   - URL hash stripping when saving bookmarks
   - Auto-close timeout configuration (currently disabled at 0ms)
 
+### Side Panel – Tags and Bookmarks Tree
+
+![Side Panel – Tags and Bookmarks Tree](images/side-panel-tags-tree.png)
+
+The snapshot above shows the side panel with placeholder tag and bookmark data (tag selector and collapsible tree with sample URLs).
+
+([REQ-SIDE_PANEL_TAGS_TREE], [ARCH-SIDE_PANEL_TAGS_TREE], [IMPL-SIDE_PANEL_TAGS_TREE]) A **Chrome side panel** shows a hierarchical view of bookmarks by tag (or a grouped list). Open it from the popup footer via **Tags tree**. A **Filters & view** bar can be expanded or collapsed to maximize space for the bookmarks list. When expanded, you can filter by **create time** or **last updated** (date range), **tags to include** (comma-separated), and **domains** (URL hostnames, comma-separated); set **Group by** (none, create date, update date, tag, or domain) and **Sort by** with **Sort order** (newest/oldest first). You can select one or more tags and control their display order; below that, each tag is shown with a collapsible list of bookmarks (title and URL), or when grouped, sections by the chosen axis. Clicking a URL opens it in a new tab. Config state (expanded/collapsed and filter, sort, group values) is persisted. Data comes from the same local, file, and sync bookmarks as the Local Bookmarks Index (no Pinboard in this view). The panel stays open when you switch tabs. Requires Chrome 114+ and the `sidePanel` permission.
+
 ### Local Bookmarks Index
 
 ![Local Bookmarks Index](images/local-bookmarks-index.png)

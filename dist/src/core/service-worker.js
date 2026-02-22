@@ -2056,7 +2056,7 @@ var init_tag_service = __esm({
               }
             });
           } else {
-            debugLog("TAG-SERVICE", `Bookmark has no tags`);
+            debugLog("TAG-SERVICE", "Bookmark has no tags");
           }
         });
         const result = Array.from(tagMap.values());
@@ -5695,7 +5695,9 @@ var MESSAGE_TYPES = {
   GET_PAGE_CONTENT: "GET_PAGE_CONTENT",
   GET_AI_TAGS: "GET_AI_TAGS",
   GET_SESSION_TAGS: "getSessionTags",
-  RECORD_SESSION_TAGS: "recordSessionTags"
+  RECORD_SESSION_TAGS: "recordSessionTags",
+  // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Message type for opening side panel. Implements contract: popup sends this type; SW handles in onMessage and calls chrome.sidePanel.open({ windowId }).
+  OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL"
 };
 var MessageHandler = class {
   constructor(bookmarkProvider = null, tagService = null) {
@@ -7585,7 +7587,9 @@ var HoverboardServiceWorker = class {
     this.bookmarkProvider = this.messageHandler.bookmarkProvider;
     this.recentTagsMemory = new RecentTagsMemoryManager();
     this._providerInitialized = false;
+    this._sidePanelWindowId = null;
     this.setupEventListeners();
+    this._seedSidePanelWindowCache();
   }
   /**
    * [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] File adapter: path set → NativeHost; else picker → Message; else InMemory.
@@ -7637,6 +7641,21 @@ var HoverboardServiceWorker = class {
     });
     safariEnhancements.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("[SERVICE-WORKER] Received message:", message);
+      if (message.type === MESSAGE_TYPES.OPEN_SIDE_PANEL) {
+        const windowId = this._sidePanelWindowId;
+        const openFn = typeof globalThis.chrome !== "undefined" && globalThis.chrome.sidePanel && globalThis.chrome.sidePanel.open;
+        if (windowId != null && openFn) {
+          try {
+            globalThis.chrome.sidePanel.open({ windowId });
+            sendResponse({ success: true });
+          } catch (e) {
+            sendResponse({ success: false, error: e?.message ?? String(e) });
+          }
+        } else {
+          sendResponse({ success: false, error: windowId == null ? "No browser window available for side panel. Switch to a browser tab and try again." : "Side panel is not available." });
+        }
+        return true;
+      }
       this.handleMessage(message, sender).then((response) => {
         console.log("[SERVICE-WORKER] Sending response:", response);
         sendResponse(response);
@@ -7654,6 +7673,22 @@ var HoverboardServiceWorker = class {
     });
     safariEnhancements.runtime.onStartup.addListener(() => {
       this.handleExtensionStartup();
+    });
+  }
+  /** [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Seed _sidePanelWindowId from active tab's normal window. Implements cache so OPEN_SIDE_PANEL handler can open panel without await (user gesture). */
+  _seedSidePanelWindowCache() {
+    const winApi = typeof globalThis.chrome !== "undefined" && globalThis.chrome.windows ? globalThis.chrome.windows : safariEnhancements.windows;
+    const tabsApi = typeof globalThis.chrome !== "undefined" && globalThis.chrome.tabs ? globalThis.chrome.tabs : safariEnhancements.tabs;
+    const setCache = (windowId) => {
+      if (windowId != null) this._sidePanelWindowId = windowId;
+    };
+    tabsApi.query({ active: true }).then((tabs) => {
+      const tab = tabs && tabs[0];
+      if (tab?.windowId != null && winApi.get) winApi.get(tab.windowId).then((w) => {
+        if (w?.type === "normal") setCache(w.id);
+      }).catch(() => {
+      });
+    }).catch(() => {
     });
   }
   // [IMMUTABLE-REQ-TAG-003] - Handle extension startup (clears shared memory)
@@ -7764,9 +7799,17 @@ var HoverboardServiceWorker = class {
       });
     });
   }
+  // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Update _sidePanelWindowId when user activates a tab in a normal window. Implements cache maintenance so "open Tags tree" has a valid windowId.
   async handleTabActivated(activeInfo) {
     try {
       const tab = await safariEnhancements.tabs.get(activeInfo.tabId);
+      if (tab?.windowId != null) {
+        try {
+          const win = await (typeof globalThis.chrome !== "undefined" && globalThis.chrome.windows ? globalThis.chrome.windows : safariEnhancements.windows).get(tab.windowId);
+          if (win?.type === "normal" && win?.id != null) this._sidePanelWindowId = win.id;
+        } catch (_) {
+        }
+      }
       if (tab.url) {
         await this.updateBadgeForTab(tab);
       }

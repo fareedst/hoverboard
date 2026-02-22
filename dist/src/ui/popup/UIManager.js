@@ -96,6 +96,7 @@ export class UIManager {
       reloadBtn: document.getElementById('reloadBtn'),
       optionsBtn: document.getElementById('optionsBtn'),
       bookmarksIndexBtn: document.getElementById('bookmarksIndexBtn'),
+      openTagsTreeBtn: document.getElementById('openTagsTreeBtn'),
       browserBookmarkImportBtn: document.getElementById('browserBookmarkImportBtn'),
       settingsBtn: document.getElementById('settingsBtn'),
 
@@ -163,6 +164,11 @@ export class UIManager {
 
     this.elements.bookmarksIndexBtn?.addEventListener('click', () => {
       this.emit('openBookmarksIndex')
+    })
+
+    // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Tags tree button: emit openTagsTree so PopupController sends OPEN_SIDE_PANEL and SW opens side panel.
+    this.elements.openTagsTreeBtn?.addEventListener('click', () => {
+      this.emit('openTagsTree')
     })
 
     this.elements.browserBookmarkImportBtn?.addEventListener('click', () => {

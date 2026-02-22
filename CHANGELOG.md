@@ -5,6 +5,12 @@ All notable changes to the Hoverboard Browser Extension will be documented in th
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Side panel – Filters, sort/group, expandable config** (`REQ-SIDE_PANEL_TAGS_TREE`, `ARCH-SIDE_PANEL_TAGS_TREE`, `IMPL-SIDE_PANEL_TAGS_TREE`) – The side panel now supports filtering by create/update time range, tags to include (comma-separated), and domains (URL hostnames); display can be sorted by create date, update date, tag, or domain (asc/desc) and optionally grouped by the same axes. A **Filters & view** config region can be expanded to adjust filters and display options or collapsed to maximize space for the bookmarks list. Config state is persisted in `chrome.storage.local`. Unit tests: `tests/unit/tags-tree-data.test.js`, `tests/unit/tags-tree-filter.test.js`, `tests/unit/side-panel-open.test.js`.
+
 ## [2.0.0] - 2026-02-21
 
 ### Fixed
@@ -36,6 +42,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - **Local store checked for index:** The Local Bookmarks Index shows no rows until at least one store (Local / File / Sync) is checked. The script now checks the **Local (L)** checkbox before capturing the index screenshot so seeded local bookmarks are visible.
 
 ### Added
+
+- **Side panel – Tags and bookmarks tree** (`REQ-SIDE_PANEL_TAGS_TREE`, `ARCH-SIDE_PANEL_TAGS_TREE`, `IMPL-SIDE_PANEL_TAGS_TREE`) – A Chrome side panel shows a hierarchical view of bookmarks by tag. Open it from the popup footer via **Tags tree**. Select one or more tags and control their display order; below that, each tag is shown with a collapsible list of bookmarks (title and URL). Clicking a URL opens it in a new tab. Data comes from the same local, file, and sync bookmarks as the Local Bookmarks Index. Requires Chrome 114+ and the `sidePanel` permission. Unit tests: `tests/unit/tags-tree-data.test.js`, `tests/unit/side-panel-open.test.js`.
 
 - **AI Tagging: Configuration and popup flow** (`REQ-AI_TAGGING_CONFIG`, `REQ-AI_TAGGING_POPUP`, `ARCH-AI_TAGGING_CONFIG`, `ARCH-AI_TAGGING_FLOW`, `IMPL-AI_CONFIG_OPTIONS`, `IMPL-AI_TAG_TEST`, `IMPL-AI_TAGGING_READABILITY`, `IMPL-AI_TAGGING_PROVIDER`, `IMPL-SESSION_TAGS`, `IMPL-AI_TAGGING_POPUP_UI`) – Options page: AI API key (optional), provider (OpenAI or Gemini), optional tag limit (default 64), and **Test API key** button; settings persisted in config; no key disables the feature. Popup: **Tag with AI** button submits the current page to the configured AI for tagging; page content is extracted with Readability.js; AI returns up to N tags; tags added to any site this session are auto-applied to the bookmark; remaining AI tags appear first in Suggested Tags; new bookmarks from this flow use the default store. Session tags use `chrome.storage.session` (MV3) or in-memory in the service worker.
 

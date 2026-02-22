@@ -2451,6 +2451,49 @@ IMPL-AI_TAGGING_POPUP_UI:
     registered: 2026-02-20
     last_updated: 2026-02-21
 
+REQ-SIDE_PANEL_TAGS_TREE:
+  type: REQ
+  name: Side Panel Tags and Bookmarks Tree
+  category: Functional
+  status: Implemented
+  description: "Chrome side panel: tags at top level, URLs as leaves; launched from popup; user selects tags and order; collapsible URL lists; click URL opens in new tab"
+  cross_references:
+    - ARCH-SIDE_PANEL_TAGS_TREE
+    - IMPL-SIDE_PANEL_TAGS_TREE
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml
+  metadata:
+    registered: 2026-02-21
+    last_updated: 2026-02-21
+
+ARCH-SIDE_PANEL_TAGS_TREE:
+  type: ARCH
+  name: Side Panel Tags and Bookmarks Tree Architecture
+  status: Active
+  description: "Chrome sidePanel API; panel page; data from getAggregatedBookmarksForIndex; open from popup via SW; tag selector + order; tree with collapsible URLs; chrome.tabs.create on URL click"
+  cross_references:
+    - REQ-SIDE_PANEL_TAGS_TREE
+    - IMPL-SIDE_PANEL_TAGS_TREE
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_TAGS_TREE.yaml
+  metadata:
+    registered: 2026-02-21
+    last_updated: 2026-02-21
+
+IMPL-SIDE_PANEL_TAGS_TREE:
+  type: IMPL
+  name: Side Panel Tags and Bookmarks Tree Implementation
+  status: Active
+  description: "Popup OPEN_SIDE_PANEL; SW chrome.sidePanel.open; panel getAggregatedBookmarksForIndex, buildTagToBookmarks, tag selector, tree with collapse; click URL to tabs.create"
+  cross_references:
+    - ARCH-SIDE_PANEL_TAGS_TREE
+    - REQ-SIDE_PANEL_TAGS_TREE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml
+  metadata:
+    registered: 2026-02-21
+    last_updated: 2026-02-21
+
 #
 # TOKEN-IDENTIFIER:
 #   type: REQ | ARCH | IMPL | TEST | PROC

@@ -66,6 +66,7 @@ const OPTIONS_LOAD_SELECTOR = '#auth-token, #storage-mode-pinboard'
 const TABLE_SELECTOR = '.bookmarks-table tbody, .empty-state'
 const STORE_LOCAL_CHECKBOX = '#store-local'
 const POPUP_COMPOSITE_INSET = 24 // px from top-right when compositing popup onto Pinboard image
+const SIDE_PANEL_READY_SELECTOR = '#treeContainer, #emptyState'
 
 async function main () {
   if (!fs.existsSync(extPath) || !fs.existsSync(path.join(extPath, 'manifest.json'))) {
@@ -187,9 +188,24 @@ async function main () {
   console.log('Saved: images/local-bookmarks-index.png')
   await indexPage.close()
 
-  // 5) Browser Bookmark Import – table or empty state (uses chrome.bookmarks.getTree from profile)
+  // 5) Side panel (Tags tree) – open panel page with ?screenshot=1 for placeholder data
+  const sidePanelPage = await context.newPage()
+  await sidePanelPage.goto(`${baseUrl}/src/ui/side-panel/tags-tree.html?screenshot=1`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await sidePanelPage.locator(SIDE_PANEL_READY_SELECTOR).first().waitFor({ state: 'attached', timeout: 10000 })
+  await sidePanelPage.waitForTimeout(500)
+  await sidePanelPage.screenshot({
+    path: path.join(imagesDir, 'side-panel-tags-tree.png'),
+    fullPage: true
+  })
+  console.log('Saved: images/side-panel-tags-tree.png')
+  await sidePanelPage.close()
+
+  // 6) Browser Bookmark Import – table or empty state (uses chrome.bookmarks.getTree from profile)
   const importPage = await context.newPage()
-  await importPage.goto(`${baseUrl}/src/ui/browser-bookmark-import/browser-bookmark-import.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await importPage.goto(`${baseUrl}/src/ui/browser-bookmark-import/browser-bookmark-import.html`, {
+    waitUntil: 'domcontentloaded',
+    timeout: 15000
+  })
   await importPage.locator('#table-wrapper, #empty-state').first().waitFor({ state: 'attached', timeout: 10000 })
   await importPage.waitForTimeout(1000)
   await importPage.screenshot({

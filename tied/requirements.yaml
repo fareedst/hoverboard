@@ -2200,3 +2200,54 @@ REQ-AI_TAGGING_POPUP:
       date: '2026-02-20'
       author: AI Agent
       reason: Initial creation for AI tagging from popup
+REQ-SIDE_PANEL_TAGS_TREE:
+  name: Side Panel Tags and Bookmarks Tree
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Give users a dedicated side-panel view of bookmarks grouped by tag, without leaving the current window.
+    problems_solved:
+      - No at-a-glance tag-based browse of bookmarks in the extension
+      - Opening full index page loses current tab context
+    benefits:
+      - Side panel stays open across tab changes; hierarchical tag to URLs view; user chooses which tags and order
+      - Click URL opens in new tab; URL list per tag is collapsible
+  satisfaction_criteria:
+    - criterion: Side panel opens from popup (e.g. footer button "Tags tree" or "Side panel")
+    - criterion: User can select one or more tags to display and control their order
+    - criterion: Below tag selector, hierarchical display tags at top level, URLs as leaf nodes showing bookmark name and URL
+    - criterion: The list of URLs under each tag is collapsible
+    - criterion: Clicking a URL opens it in a new tab
+  validation_criteria:
+    - method: Manual verification
+      coverage: Open panel from popup; select/reorder tags; expand/collapse tag sections; click URL opens in new tab
+    - method: Unit tests
+      coverage: buildTagToBookmarks from bookmarks array; tag order; open-URL action with mock chrome.tabs
+    - method: Integration tests with mocks
+      coverage: Popup button sends open-panel message; SW calls chrome.sidePanel.open; panel load sends getAggregatedBookmarksForIndex and renders tree
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+    implementation:
+      - IMPL-SIDE_PANEL_TAGS_TREE
+    tests:
+      - tests/unit/tags-tree-data.test.js
+      - tests/unit/tags-tree-filter.test.js
+      - tests/unit/side-panel-open.test.js
+    code_annotations:
+      - REQ-SIDE_PANEL_TAGS_TREE
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-LOCAL_BOOKMARKS_INDEX
+    supersedes: []
+  detail_file: requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml
+  metadata:
+    created:
+      date: '2026-02-21'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-21'
+      author: AI Agent
+      reason: Initial creation for side panel tags tree

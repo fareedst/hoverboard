@@ -1,0 +1,242 @@
+# [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE]
+# Implementation: Open side panel from popup; panel loads bookmarks via getAggregatedBookmarksForIndex,
+# builds tag→urls map, tag selector with order, hierarchical tree with collapsible URL lists; click URL opens in new tab.
+
+IMPL-SIDE_PANEL_TAGS_TREE:
+  name: Side Panel Tags and Bookmarks Tree Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_TAGS_TREE
+    - REQ-SIDE_PANEL_TAGS_TREE
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_TAGS_TREE and REQ-SIDE_PANEL_TAGS_TREE with one IMPL covering open flow, data build, and panel UI.
+    problems_solved:
+      - No side panel entry or tag-tree view
+    benefits:
+      - Single traceable IMPL; pure buildTagToBookmarks testable in isolation; open flow and panel UI prescribed by pseudo-code
+  implementation_approach:
+    summary: Popup button sends OPEN_SIDE_PANEL; SW handles it in onMessage (synchronously, no await) using a cached normal windowId so chrome.sidePanel.open() runs in user-gesture context. Panel loads bookmarks via getAggregatedBookmarksForIndex; applies filter pipeline (time, tags, domain), sort, optional group; config region expandable/collapsible with state and filter/sort/group values persisted; tag selector + tree or grouped sections; click URL → openUrlInNewTab (chrome.tabs.create).
+    details:
+      - manifest: "windows" permission for chrome.windows.get/getCurrent; sidePanel permission and default_path
+      - ui-action-contract: openTagsTree maps to OPEN_SIDE_PANEL
+      - Popup: footer button, UIManager emit, PopupController.handleOpenTagsTree bound; sends OPEN_SIDE_PANEL, shows success or delegates error
+      - Service worker: OPEN_SIDE_PANEL handled in onMessage listener only (no await before open). windowId from _sidePanelWindowId cache; chrome.sidePanel.open({ windowId }) called synchronously. _seedSidePanelWindowCache() seeds cache from active tab's normal window on startup. handleTabActivated updates _sidePanelWindowId when activated tab's window is normal.
+      - Message handler: OPEN_SIDE_PANEL type; SW listener handles directly (not via handleMessage async path)
+      - Panel: tags-tree.html/js/css; tags-tree-data.js has buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab (pure + testable); tags-tree-filter.js (or same module) has getDomainFromUrl, filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy (pure + testable)
+      - Config: load/save config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder) from chrome.storage.local; expand/collapse toggle shows or hides full filter and display controls
+  code_locations:
+    files:
+      - path: src/ui/side-panel/tags-tree-data.js
+        description: buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab (pure/helpers; testable)
+      - path: src/ui/side-panel/tags-tree-filter.js
+        description: getDomainFromUrl, filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy (pure; testable)
+      - path: src/ui/side-panel/tags-tree.html
+        description: Panel layout (config region + tag selector + tree container)
+      - path: src/ui/side-panel/tags-tree.js
+        description: load data and config, apply filter/sort/group, render config toggle and controls, tag selector, tree or grouped list, click URL
+      - path: src/ui/side-panel/tags-tree.css
+        description: Panel styles including config region expand/collapse
+      - path: src/ui/popup/popup.html
+        description: Footer button for Tags tree
+      - path: src/ui/popup/UIManager.js
+        description: Element reference and openTagsTree emit
+      - path: src/ui/popup/PopupController.js
+        description: handleOpenTagsTree (bound), send OPEN_SIDE_PANEL, success/error
+      - path: src/core/service-worker.js
+        description: _sidePanelWindowId cache; onMessage OPEN_SIDE_PANEL sync open; _seedSidePanelWindowCache; handleTabActivated cache update
+      - path: src/core/message-handler.js
+        description: MESSAGE_TYPES.OPEN_SIDE_PANEL
+      - path: src/shared/ui-action-contract.js
+        description: POPUP_ACTION_IDS.openTagsTree → OPEN_SIDE_PANEL
+      - path: manifest.json
+        description: permissions windows, sidePanel; side_panel.default_path
+    functions:
+      - name: buildTagToBookmarks
+        file: src/ui/side-panel/tags-tree-data.js
+        description: Maps bookmarks to tag → [{ title, url }]; implements tag→urls for tree (REQ/ARCH/IMPL)
+      - name: getAllTagsFromBookmarks
+        file: src/ui/side-panel/tags-tree-data.js
+        description: Returns sorted unique tags; implements tag list for selector (REQ/ARCH/IMPL)
+      - name: openUrlInNewTab
+        file: src/ui/side-panel/tags-tree-data.js
+        description: chrome.tabs.create({ url }); implements click-URL-opens-in-new-tab (REQ/ARCH/IMPL)
+      - name: getDomainFromUrl
+        file: src/ui/side-panel/tags-tree-filter.js
+        description: Returns hostname from URL for domain filter/group (REQ/ARCH/IMPL)
+      - name: filterByTimeRange
+        file: src/ui/side-panel/tags-tree-filter.js
+        description: Keep bookmarks whose time/updated_at in [startMs, endMs] (REQ/ARCH/IMPL)
+      - name: filterByTagsInclude
+        file: src/ui/side-panel/tags-tree-filter.js
+        description: Keep bookmarks that have at least one tag in tagSet (REQ/ARCH/IMPL)
+      - name: filterByDomains
+        file: src/ui/side-panel/tags-tree-filter.js
+        description: Keep bookmarks whose URL hostname in domainSet (REQ/ARCH/IMPL)
+      - name: applyFilters
+        file: src/ui/side-panel/tags-tree-filter.js
+        description: Apply time, tags, domain filters in sequence (REQ/ARCH/IMPL)
+      - name: sortBookmarks
+        file: src/ui/side-panel/tags-tree-filter.js
+        description: Sort by create/update/tag/domain; asc/desc (REQ/ARCH/IMPL)
+      - name: groupBookmarksBy
+        file: src/ui/side-panel/tags-tree-filter.js
+        description: Group sorted list by axis; return structure for sectioned render (REQ/ARCH/IMPL)
+      - name: loadPanelConfig
+        file: src/ui/side-panel/tags-tree.js
+        description: Load config from chrome.storage.local; implements config persistence (REQ/ARCH/IMPL)
+      - name: savePanelConfig
+        file: src/ui/side-panel/tags-tree.js
+        description: Persist config to chrome.storage.local (REQ/ARCH/IMPL)
+      - name: renderConfigToggle
+        file: src/ui/side-panel/tags-tree.js
+        description: Show/hide config content; expand/collapse UI (REQ/ARCH/IMPL)
+      - name: refreshFromConfig
+        file: src/ui/side-panel/tags-tree.js
+        description: Re-apply filter/sort/group and re-render on config change (REQ/ARCH/IMPL)
+      - name: renderGrouped
+        file: src/ui/side-panel/tags-tree.js
+        description: Render collapsible sections when groupBy not none (REQ/ARCH/IMPL)
+      - name: handleOpenTagsTree
+        file: src/ui/popup/PopupController.js
+        description: Sends OPEN_SIDE_PANEL, shows success or error; implements popup entry for side panel (REQ/ARCH/IMPL)
+      - name: _seedSidePanelWindowCache
+        file: src/core/service-worker.js
+        description: Seeds _sidePanelWindowId from active tab's normal window; implements cache for user-gesture open (REQ/ARCH/IMPL)
+      - name: handleTabActivated (cache update)
+        file: src/core/service-worker.js
+        description: Updates _sidePanelWindowId when tab's window is normal; implements cache maintenance (REQ/ARCH/IMPL)
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+    requirements:
+      - REQ-SIDE_PANEL_TAGS_TREE
+    tests:
+      - tests/unit/tags-tree-data.test.js
+      - tests/unit/tags-tree-filter.test.js
+      - tests/unit/side-panel-open.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_TAGS_TREE
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+    supersedes: []
+    see_also:
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    composed_with:
+      - IMPL-MESSAGE_HANDLING
+  essence_pseudocode: |
+    # [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE]
+    # This block defines the overall feature: side panel tags tree opened from popup; panel shows tag→urls tree; click URL opens in new tab. Implements REQ by providing the side-panel entry and tag-tree UX; implements ARCH by following the open-flow and data-flow decisions.
+    INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+    OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+    DATA: bookmarks (from getAggregatedBookmarksForIndex), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # Popup entry: implements requirement "open tags tree from popup" by sending OPEN_SIDE_PANEL. ARCH prescribes message-based open; this block is the popup side.
+    ON popup "Tags tree" click:
+      recordAction(openTagsTree); IF _onAction THEN _onAction(openTagsTree)
+      SEND message OPEN_SIDE_PANEL (no payload)
+      ON success: showSuccess("Tags tree opened in side panel")
+      ON error: errorHandler.handleError("Failed to open tags tree", error)
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # SW open in user gesture: implements requirement that side panel opens in response to user click. chrome.sidePanel.open() may only be called in user gesture (no await). So: maintain cached normal windowId; on OPEN_SIDE_PANEL handle in onMessage synchronously (no await before open). Implements ARCH open flow.
+    SW constructor:
+      _sidePanelWindowId = null
+      _seedSidePanelWindowCache()  // async seed from active tab's normal window
+    SW onMessage OPEN_SIDE_PANEL (before any await):
+      windowId = _sidePanelWindowId; openFn = chrome.sidePanel?.open
+      IF windowId != null AND openFn: chrome.sidePanel.open({ windowId }); sendResponse({ success: true })
+      ELSE: sendResponse({ success: false, error: "No browser window..." })
+      RETURN true
+    SW handleTabActivated: get tab.windowId; get window; IF type === 'normal' THEN _sidePanelWindowId = window.id  // implements cache maintenance
+    _seedSidePanelWindowCache: tabs.query({ active: true }); get window for tab.windowId; IF type === 'normal' THEN _sidePanelWindowId = window.id
+
+    # [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-LOCAL_BOOKMARKS_INDEX]
+    # Panel load: implements tag tree data flow; uses getAggregatedBookmarksForIndex then load config, apply filters, sort, group, build tag map and tag list, render. Implements REQ filters/sort/group and config persistence.
+    ON panel page load:
+      config = loadPanelConfig()  // expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder
+      renderConfigToggle(config.expanded)  // compact bar when collapsed; full controls when expanded
+      SEND getAggregatedBookmarksForIndex
+      ON response: bookmarks = response.bookmarks; filtered = applyFilters(bookmarks, config); sorted = sortBookmarks(filtered, config.sortBy, config.sortAsc); allTags = getAllTagsFromBookmarks(bookmarks); selectedTagOrder = config.selectedTagOrder OR allTags; IF config.groupBy !== 'none' THEN grouped = groupBookmarksBy(sorted, config.groupBy); renderGrouped(grouped, config) ELSE tagToBookmarks = buildTagToBookmarks(sorted); collapsedTags = loadCollapsedState(); renderTagSelector(allTags, selectedTagOrder); renderTree(selectedTagOrder, tagToBookmarks, collapsedTags); attachClickHandlers()
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # buildTagToBookmarks: implements requirement "tag-based tree" by producing Map<tag, [{ title, url }]> from bookmarks. One pass; trim/dedupe per tag.
+    buildTagToBookmarks(bookmarks):
+      result = new Map()
+      FOR each b in bookmarks:
+        tags = Array.isArray(b.tags) ? b.tags : []; title = b.description || b.url || ''
+        FOR each tag in tags:
+          tagKey = String(tag).trim(); IF empty skip
+          IF result has no key tagKey THEN result[tagKey] = []; result[tagKey].push({ title, url: b.url })
+      RETURN result
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # getAllTagsFromBookmarks: implements tag selector data by returning sorted unique tags from bookmarks.
+    getAllTagsFromBookmarks(bookmarks):
+      set = new Set(); FOR each b in bookmarks: FOR each t in (b.tags || []): set.add(String(t).trim())
+      RETURN sorted Array.from(set)
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # renderTagSelector: implements tag selection and order UI; optional persist selectedTagOrder to chrome.storage.local.
+    renderTagSelector(allTags, selectedTagOrder):
+      render list of tags with selection state and order; on change save selectedTagOrder (optional)
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # renderTree: implements collapsible URL lists per tag; each section has tag label + toggle + list of title+URL.
+    renderTree(selectedTagOrder, tagToBookmarks, collapsedTags):
+      FOR each tag in selectedTagOrder: entries = tagToBookmarks.get(tag) || []; render section (tag + toggle + list); store url for click
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # Config expand/collapse: implements requirement that config region is expandable for use and collapsible to maximize bookmarks space; toggle loads/saves expanded state; when collapsed only compact bar visible; when expanded show full filter and display controls.
+    ON config toggle click: config.expanded = NOT config.expanded; savePanelConfig(config); renderConfigToggle(config.expanded); show or hide config content
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # Filter pipeline: implements requirement to filter by create/update time range, tags include, and domain. Apply in sequence: time range (field + startMs/endMs), then tags include (bookmark must have at least one tag in set), then domains (URL hostname in set). Empty set or null bounds mean no filter for that step.
+    applyFilters(bookmarks, config): list = bookmarks; list = filterByTimeRange(list, config.timeField, config.timeStart, config.timeEnd); list = filterByTagsInclude(list, config.tagsInclude); list = filterByDomains(list, config.domains); RETURN list
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # getDomainFromUrl: implements domain filter/group by returning hostname from URL; invalid or empty URL returns empty string; no throw.
+    getDomainFromUrl(url): IF !url or !String(url).trim() RETURN ''; TRY parse url; RETURN hostname (lowercase) OR ''
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # filterByTimeRange: implements time range filter; uses bookmark time or updated_at per field; null start/end means no bound; inclusive.
+    filterByTimeRange(bookmarks, field, startMs, endMs): RETURN bookmarks WHERE inTimeRange(b, field, startMs, endMs)  // inTimeRange: get ms from b; if null return false; if startMs and ms < startMs return false; if endMs and ms > endMs return false; return true
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # filterByTagsInclude: implements tags include filter; empty tagSet = all pass; otherwise bookmark must have at least one tag (case-insensitive) in set.
+    filterByTagsInclude(bookmarks, tagSet): IF !tagSet or size 0 RETURN bookmarks; RETURN bookmarks WHERE (b.tags normalized) INTERSECT tagSet non-empty
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # filterByDomains: implements domain filter; empty domainSet = all pass; otherwise bookmark's getDomainFromUrl(url) in domainSet (case-insensitive).
+    filterByDomains(bookmarks, domainSet): IF !domainSet or size 0 RETURN bookmarks; RETURN bookmarks WHERE getDomainFromUrl(b.url) in domainSet
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # sortBookmarks: implements display sort by chosen axis (time, updated_at, tag, domain) and direction (sortAsc). For time use ms; for tag use first tag or ''; for domain use getDomainFromUrl.
+    sortBookmarks(bookmarks, sortBy, sortAsc): sort list by sortBy key; if sortAsc ascending else descending; RETURN sorted array
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # groupBookmarksBy: implements display group by; returns structure for sectioned render (e.g. Map<groupKey, bookmark[]>). groupBy in 'none' | 'time' | 'updated_at' | 'tag' | 'domain'; bucket keys for date (e.g. date string); per-tag or per-domain one key per value.
+    groupBookmarksBy(bookmarks, groupBy): IF groupBy === 'none' RETURN null or flat; result = Map(); FOR b in bookmarks: key = keyFor(b, groupBy); append b to result[key]; RETURN result
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # renderGrouped: implements collapsible sectioned display when groupBy not none; each section has header (toggle) and list of bookmark links; click URL opens in new tab.
+    renderGrouped(grouped, config): FOR each groupKey in grouped: render section header (groupKey + toggle); render list of title+URL; store url for click → openUrlInNewTab(url)
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # loadPanelConfig / savePanelConfig: implements config state persistence; read/write expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder to chrome.storage.local.
+    loadPanelConfig(): get from chrome.storage.local; RETURN defaults for missing keys
+    savePanelConfig(config): chrome.storage.local.set(config keyed by storage keys)
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # openUrlInNewTab / ON click URL: implements "click-to-open in new tab" requirement via chrome.tabs.create({ url }).
+    ON click URL in tree: url = event target url; openUrlInNewTab(url)  // openUrlInNewTab(url) => chrome.tabs.create({ url })
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml
+  metadata:
+    created:
+      date: '2026-02-21'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-21'
+      author: AI Agent
+      reason: Add filters, sort/group, expandable config, persistence; sync essence_pseudocode and code

@@ -4304,7 +4304,7 @@
                 }
               });
             } else {
-              debugLog2("TAG-SERVICE", `Bookmark has no tags`);
+              debugLog2("TAG-SERVICE", "Bookmark has no tags");
             }
           });
           const result = Array.from(tagMap.values());
@@ -10381,7 +10381,9 @@
     GET_PAGE_CONTENT: "GET_PAGE_CONTENT",
     GET_AI_TAGS: "GET_AI_TAGS",
     GET_SESSION_TAGS: "getSessionTags",
-    RECORD_SESSION_TAGS: "recordSessionTags"
+    RECORD_SESSION_TAGS: "recordSessionTags",
+    // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Message type for opening side panel. Implements contract: popup sends this type; SW handles in onMessage and calls chrome.sidePanel.open({ windowId }).
+    OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL"
   };
 
   // src/features/ai/readability-extract.js

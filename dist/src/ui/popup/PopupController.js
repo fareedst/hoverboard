@@ -9,7 +9,7 @@ import { debugLog, debugError, normalizeSelectionForTagInput } from '../../share
 import { ConfigManager } from '../../config/config-manager.js'
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
 import { recordAction } from '../../shared/ui-inspector.js'
-import { POPUP_ACTION_IDS } from '../../shared/ui-action-contract.js'
+import { POPUP_ACTION_IDS, MESSAGE_TYPES } from '../../shared/ui-action-contract.js'
 import { splitAiTagsBySession } from '../../features/ai/ai-tagging-popup-utils.js'
 import { testAiApiKey } from '../../features/ai/ai-api-test.js'
 
@@ -55,6 +55,7 @@ export class PopupController {
     this.handleStorageBackendChange = this.handleStorageBackendChange.bind(this)
     this.handleTagWithAi = this.handleTagWithAi.bind(this)
     this.handleTestAiApiKey = this.handleTestAiApiKey.bind(this)
+    this.handleOpenTagsTree = this.handleOpenTagsTree.bind(this)
     this.normalizeTags = this.normalizeTags.bind(this)
 
     this.setupEventListeners()
@@ -140,6 +141,7 @@ export class PopupController {
     this.uiManager.on('openOptions', this.handleOpenOptions)
     this.uiManager.on('openBookmarksIndex', this.handleOpenBookmarksIndex)
     this.uiManager.on('openBrowserBookmarkImport', this.handleOpenBrowserBookmarkImport)
+    this.uiManager.on('openTagsTree', this.handleOpenTagsTree)
     this.uiManager.on('tagWithAi', this.handleTagWithAi)
     this.uiManager.on('testAiApiKey', this.handleTestAiApiKey)
 
@@ -2093,6 +2095,21 @@ export class PopupController {
   }
 
   /**
+   * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+   * Open the tags and bookmarks tree in the side panel. Implements requirement "open tags tree from popup" by sending OPEN_SIDE_PANEL to the service worker (which opens the panel with cached windowId); records action, shows success or delegates error to ErrorHandler.
+   */
+  async handleOpenTagsTree () {
+    recordAction(POPUP_ACTION_IDS.openTagsTree, undefined, 'popup')
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openTagsTree, payload: undefined })
+    try {
+      await this.sendMessage({ type: MESSAGE_TYPES.OPEN_SIDE_PANEL })
+      this.uiManager.showSuccess('Tags tree opened in side panel')
+    } catch (error) {
+      this.errorHandler.handleError('Failed to open tags tree', error)
+    }
+  }
+
+  /**
    * [REQ-AI_TAGGING_POPUP] [ARCH-AI_TAGGING_FLOW] [IMPL-AI_TAGGING_POPUP_UI]
    * Submit current page to AI for tagging: Readability → AI tags → session split → save/suggested.
    */
@@ -2282,6 +2299,7 @@ export class PopupController {
     this.uiManager?.off('openOptions', this.handleOpenOptions)
     this.uiManager?.off('openBookmarksIndex', this.handleOpenBookmarksIndex)
     this.uiManager?.off('openBrowserBookmarkImport', this.handleOpenBrowserBookmarkImport)
+    this.uiManager?.off('openTagsTree', this.handleOpenTagsTree)
   }
 
   /**

@@ -43,8 +43,13 @@
     "scripting",
     "offscreen",
     "nativeMessaging",
-    "bookmarks"
+    "bookmarks",
+    "sidePanel",
+    "windows"
   ],
+  "side_panel": {
+    "default_path": "src/ui/side-panel/tags-tree.html"
+  },
   "host_permissions": [
     "http://*/*",
     "https://*/*"
