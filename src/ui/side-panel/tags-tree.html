@@ -73,6 +73,19 @@
     </div>
   </section>
 
+  <!-- [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Search over displayed list; count and Next/Previous. -->
+  <section class="search-section" aria-labelledby="search-legend">
+    <h2 id="search-legend" class="search-legend">Search bookmarks</h2>
+    <div class="search-row">
+      <input type="text" id="searchInput" class="search-input" placeholder="Title, URL, tags, notes…" aria-label="Search bookmarks in list">
+      <span id="searchCount" class="search-count" aria-live="polite"></span>
+    </div>
+    <div class="search-nav">
+      <button type="button" id="searchPrev" class="search-nav-btn" aria-label="Previous match">Previous</button>
+      <button type="button" id="searchNext" class="search-nav-btn" aria-label="Next match">Next</button>
+    </div>
+  </section>
+
   <section class="tag-selector-section" aria-labelledby="tag-selector-legend">
     <h2 id="tag-selector-legend" class="tag-selector-legend">Select tags (order = display order)</h2>
     <div id="tagSelector" class="tag-selector">

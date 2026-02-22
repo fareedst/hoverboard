@@ -1,0 +1,46 @@
+# [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_BOOKMARK_SEARCH]
+# Architecture: Client-side text filter on the list already filtered and sorted; search bar in panel; match count; Next/Previous with scroll and highlight.
+
+ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
+  name: Side Panel Bookmark Search Architecture
+  status: Active
+  cross_references:
+    - REQ-SIDE_PANEL_BOOKMARK_SEARCH
+  rationale:
+    why: Search applies to the displayed list only; no new backend; same data flow as existing panel.
+    problems_solved:
+      - How to scope search (displayed list after filters/sort)
+      - How to navigate matches (Next/Previous, scroll, highlight)
+    benefits:
+      - Client-side only; search bar, count, Next/Previous; current match highlighted and scrolled into view
+  implementation_approach:
+    summary: After applyFilters and sortBookmarks, filter by text (filterBookmarksBySearch); build tree/grouped from matching list; search input, count text, Next/Previous buttons; maintain current match index; scroll to and highlight DOM row.
+    details:
+      - filterBookmarksBySearch(bookmarks, query): pure; match on description, url, tags (joined), extended; case-insensitive substring; empty/whitespace query returns full list
+      - Panel: search input; on change update searchQuery and re-run pipeline; display count = matchingBookmarks.length; Next/Previous update searchMatchIndex (wrap); find Nth .tree-bookmark-link (data attribute), scrollIntoView, add highlight class
+      - Display order: same as today (tag or group); flat display order so match index N = Nth bookmark in that order
+  traceability:
+    requirements:
+      - REQ-SIDE_PANEL_BOOKMARK_SEARCH
+    implementation:
+      - IMPL-SIDE_PANEL_BOOKMARK_SEARCH
+    tests:
+      - tests/unit/tags-tree-filter.test.js
+    code_annotations:
+      - ARCH-SIDE_PANEL_BOOKMARK_SEARCH
+  related_decisions:
+    depends_on:
+      - REQ-SIDE_PANEL_BOOKMARK_SEARCH
+    informs:
+      - IMPL-SIDE_PANEL_BOOKMARK_SEARCH
+    see_also:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_BOOKMARK_SEARCH.yaml
+  metadata:
+    created:
+      date: '2026-02-22'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-22'
+      author: AI Agent
+      reason: Initial creation

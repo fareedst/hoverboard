@@ -3671,3 +3671,52 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       date: '2026-02-21'
       author: AI Agent
       reason: Initial creation
+IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
+  name: Side Panel Bookmark Search Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_BOOKMARK_SEARCH
+    - REQ-SIDE_PANEL_BOOKMARK_SEARCH
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_BOOKMARK_SEARCH and REQ-SIDE_PANEL_BOOKMARK_SEARCH with pure filter plus panel UI.
+    problems_solved:
+      - No search in side panel list
+    benefits:
+      - Testable filterBookmarksBySearch; search bar, count, Next/Previous with scroll and highlight
+  implementation_approach:
+    summary: filterBookmarksBySearch in tags-tree-filter.js; tags-tree.js/html/css: search input, count, Next/Previous; data-search-index on links; scroll and highlight current match.
+  code_locations:
+    files:
+      - path: src/ui/side-panel/tags-tree-filter.js
+      - path: src/ui/side-panel/tags-tree.js
+      - path: src/ui/side-panel/tags-tree.html
+      - path: src/ui/side-panel/tags-tree.css
+    functions:
+      - name: filterBookmarksBySearch
+        file: src/ui/side-panel/tags-tree-filter.js
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_BOOKMARK_SEARCH
+    requirements:
+      - REQ-SIDE_PANEL_BOOKMARK_SEARCH
+    tests:
+      - tests/unit/tags-tree-filter.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_BOOKMARK_SEARCH
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_BOOKMARK_SEARCH
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_TAGS_TREE
+    composed_with:
+      - IMPL-SIDE_PANEL_TAGS_TREE
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK_SEARCH.yaml
+  metadata:
+    created:
+      date: '2026-02-22'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-22'
+      author: AI Agent
+      reason: Initial creation

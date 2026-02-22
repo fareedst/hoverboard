@@ -2251,3 +2251,47 @@ REQ-SIDE_PANEL_TAGS_TREE:
       date: '2026-02-21'
       author: AI Agent
       reason: Initial creation for side panel tags tree
+REQ-SIDE_PANEL_BOOKMARK_SEARCH:
+  name: Side Panel Bookmark Search
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Allow users to quickly locate a specific bookmark in the side panel list without scanning manually.
+    problems_solved:
+      - Long lists make it hard to find a single bookmark
+      - No way to jump to the next/previous match
+    benefits:
+      - Text search over displayed list (title, URL, tags, notes); match count; Next/Previous with scroll and highlight
+  satisfaction_criteria:
+    - criterion: Search input filters the currently displayed bookmark list by text (match on title, URL, tags, notes)
+    - criterion: Match count is displayed (e.g. "N matches" or "No matches")
+    - criterion: Next and Previous controls advance to the next/previous matching record with scroll-into-view and highlight
+  validation_criteria:
+    - method: Unit tests
+      coverage: filterBookmarksBySearch: empty query returns all; non-empty matches title/url/tags/extended; case-insensitive; no match returns empty
+    - method: Manual verification
+      coverage: Type search; see count; use Next/Previous to move through matches; current match highlighted and scrolled into view
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_BOOKMARK_SEARCH
+    implementation:
+      - IMPL-SIDE_PANEL_BOOKMARK_SEARCH
+    tests:
+      - tests/unit/tags-tree-filter.test.js
+    code_annotations:
+      - REQ-SIDE_PANEL_BOOKMARK_SEARCH
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-SIDE_PANEL_TAGS_TREE
+    supersedes: []
+  detail_file: requirements/REQ-SIDE_PANEL_BOOKMARK_SEARCH.yaml
+  metadata:
+    created:
+      date: '2026-02-22'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-22'
+      author: AI Agent
+      reason: Initial creation for side panel bookmark search

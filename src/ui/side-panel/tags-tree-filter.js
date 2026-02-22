@@ -2,6 +2,9 @@
  * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
  * Pure filter/sort/group helpers for side panel. Implements selection by time range, tags include, domain;
  * display sort and group by create date, update date, tags, domain. All functions pure and testable.
+ *
+ * [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]
+ * filterBookmarksBySearch: text filter on displayed list (title, URL, tags, notes); implements search and match count data source.
  */
 
 import { getBookmarkTimeMs, inTimeRange } from '../bookmarks-table/bookmarks-table-filter.js'
@@ -178,4 +181,25 @@ export function groupBookmarksBy (bookmarks, groupBy) {
     map.get(key).push(b)
   }
   return map
+}
+
+/**
+ * [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]
+ * Returns bookmarks where query (trimmed, case-insensitive) appears in description, url, tags (joined), or extended.
+ * Empty/whitespace query returns full list. Implements "search displayed list by text" and match count source.
+ * @param {Array<{ url?: string, description?: string, tags?: string[], extended?: string }>} bookmarks
+ * @param {string} query
+ * @returns {Array<object>}
+ */
+export function filterBookmarksBySearch (bookmarks, query) {
+  if (!Array.isArray(bookmarks)) return []
+  const q = String(query ?? '').trim().toLowerCase()
+  if (q === '') return [...bookmarks]
+  return bookmarks.filter(b => {
+    const title = (b.description ?? '').toLowerCase()
+    const url = (b.url ?? '').toLowerCase()
+    const tags = (Array.isArray(b.tags) ? b.tags : []).map(t => String(t)).join(' ').toLowerCase()
+    const extended = (b.extended ?? '').toLowerCase()
+    return title.includes(q) || url.includes(q) || tags.includes(q) || extended.includes(q)
+  })
 }

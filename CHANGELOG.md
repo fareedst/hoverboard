@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Side panel bookmark search** (`REQ-SIDE_PANEL_BOOKMARK_SEARCH`, `ARCH-SIDE_PANEL_BOOKMARK_SEARCH`, `IMPL-SIDE_PANEL_BOOKMARK_SEARCH`) – In the side panel, a search input filters the displayed bookmark list by text (title, URL, tags, notes). The match count is shown (e.g. "N matches" or "No matches"), and **Previous** / **Next** buttons advance through matches with scroll-into-view and highlight. Search is client-side over the list already filtered and sorted; no new backend. Unit tests: `tests/unit/tags-tree-filter.test.js` (filterBookmarksBySearch).
+
 - **Runtime validation (Zod)** (`IMPL-RUNTIME_VALIDATION`, `ARCH-MESSAGE_HANDLING`, `ARCH-CONFIG_STRUCTURE`) – Message envelope and critical payloads (getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag) are validated at the service worker via Zod; invalid messages return a structured error. Merged config in `ConfigManager.getConfig()` is validated with a Zod schema; on failure the extension falls back to defaults. Unit tests: `tests/unit/message-schemas.test.js`, `tests/unit/config-manager.test.js` (describe `[IMPL-RUNTIME_VALIDATION]`).
 
 - **TypeScript incremental** (`ARCH-LANGUAGE_SELECTION`, `IMPL-TYPESCRIPT_MIGRATION`) – `tsconfig.json` (noEmit, allowJs), `npm run typecheck` in validate; shared type definitions `src/shared/message-types.d.ts` and `src/shared/config-types.d.ts`; JSDoc on `processMessage`, `sendMessage`, and popup `sendMessage`. Enables future `.ts` adoption; esbuild supports TypeScript natively.

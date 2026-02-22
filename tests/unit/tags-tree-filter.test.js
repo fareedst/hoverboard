@@ -3,6 +3,9 @@
  * Unit tests for side panel filter/sort/group: getDomainFromUrl, filterByTimeRange, filterByTagsInclude,
  * filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy. Validates that selection and display
  * by time, tags, domain implement the requirement.
+ *
+ * [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]
+ * Tests for filterBookmarksBySearch: search over displayed list by title, URL, tags, notes; count and Next/Prev rely on this filter.
  */
 
 import {
@@ -12,7 +15,8 @@ import {
   filterByDomains,
   applyFilters,
   sortBookmarks,
-  groupBookmarksBy
+  groupBookmarksBy,
+  filterBookmarksBySearch
 } from '../../src/ui/side-panel/tags-tree-filter.js'
 
 describe('getDomainFromUrl [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]', () => {
@@ -254,5 +258,59 @@ describe('groupBookmarksBy [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE
 
   test('returns null for non-array input (implements safe input)', () => {
     expect(groupBookmarksBy(null, 'domain')).toBeNull()
+  })
+})
+
+// [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]
+// filterBookmarksBySearch: validates search over displayed list (title, URL, tags, extended); implements match count and Next/Prev data source.
+describe('filterBookmarksBySearch [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]', () => {
+  const sampleBookmarks = [
+    { url: 'https://example.com', description: 'Example Page', tags: ['work'], extended: 'notes one' },
+    { url: 'https://other.org', description: 'Other', tags: ['personal', 'blog'], extended: '' },
+    { url: 'https://foo.net', description: 'Foo Net', tags: ['work'], extended: 'memo' }
+  ]
+
+  test('empty or whitespace query returns all bookmarks (implements no filter when no search)', () => {
+    expect(filterBookmarksBySearch(sampleBookmarks, '')).toEqual(sampleBookmarks)
+    expect(filterBookmarksBySearch(sampleBookmarks, '   ')).toEqual(sampleBookmarks)
+    expect(filterBookmarksBySearch(sampleBookmarks, '\t')).toEqual(sampleBookmarks)
+  })
+
+  test('matches on description/title (implements search by title)', () => {
+    const out = filterBookmarksBySearch(sampleBookmarks, 'Example')
+    expect(out).toHaveLength(1)
+    expect(out[0].url).toBe('https://example.com')
+  })
+
+  test('matches on url (implements search by URL)', () => {
+    const out = filterBookmarksBySearch(sampleBookmarks, 'other.org')
+    expect(out).toHaveLength(1)
+    expect(out[0].description).toBe('Other')
+  })
+
+  test('matches on tags (implements search by tags)', () => {
+    const out = filterBookmarksBySearch(sampleBookmarks, 'blog')
+    expect(out).toHaveLength(1)
+    expect(out[0].url).toBe('https://other.org')
+  })
+
+  test('matches on extended/notes (implements search by notes)', () => {
+    const out = filterBookmarksBySearch(sampleBookmarks, 'memo')
+    expect(out).toHaveLength(1)
+    expect(out[0].url).toBe('https://foo.net')
+  })
+
+  test('case-insensitive match (implements case-insensitive search)', () => {
+    expect(filterBookmarksBySearch(sampleBookmarks, 'EXAMPLE')).toHaveLength(1)
+    expect(filterBookmarksBySearch(sampleBookmarks, 'Work')).toHaveLength(2)
+  })
+
+  test('no match returns empty array (implements count and Next/Prev when zero matches)', () => {
+    expect(filterBookmarksBySearch(sampleBookmarks, 'xyznone')).toEqual([])
+  })
+
+  test('returns empty array for non-array bookmarks (implements safe input)', () => {
+    expect(filterBookmarksBySearch(null, 'x')).toEqual([])
+    expect(filterBookmarksBySearch(undefined, 'x')).toEqual([])
   })
 })

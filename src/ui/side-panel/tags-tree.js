@@ -1,10 +1,13 @@
 /**
  * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
  * Side panel entry script. Load bookmarks, load config, apply filter/sort/group, render config toggle and controls, tag selector, tree or grouped list; click URL opens in new tab.
+ *
+ * [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]
+ * Search over displayed list; count; Next/Previous with scroll and highlight.
  */
 
 import { buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab } from './tags-tree-data.js'
-import { applyFilters, sortBookmarks, groupBookmarksBy } from './tags-tree-filter.js'
+import { applyFilters, sortBookmarks, groupBookmarksBy, filterBookmarksBySearch } from './tags-tree-filter.js'
 import { parseTimeRangeValue } from '../bookmarks-table/bookmarks-table-filter.js'
 
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
@@ -45,6 +48,16 @@ const filterDomainsEl = document.getElementById('filterDomains')
 const groupByEl = document.getElementById('groupBy')
 const sortByEl = document.getElementById('sortBy')
 const sortAscEl = document.getElementById('sortAsc')
+
+// [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Search state and refs for count and Next/Prev.
+let searchQuery = ''
+let searchMatchIndex = 0
+/** @type {Array<object>} Flat list of bookmarks in current display order (after search filter) for match count and scroll-to. */
+let matchingBookmarks = []
+const searchInputEl = document.getElementById('searchInput')
+const searchCountEl = document.getElementById('searchCount')
+const searchPrevEl = document.getElementById('searchPrev')
+const searchNextEl = document.getElementById('searchNext')
 
 /** Placeholder bookmarks for ?screenshot=1 / ?demo=1 (README and demos). */
 const MOCK_BOOKMARKS = [
@@ -191,18 +204,23 @@ async function loadBookmarks () {
     }
     const filtered = applyFilters(bookmarks, filterState)
     const sorted = sortBookmarks(filtered, panelConfig.sortBy, panelConfig.sortAsc)
+    // [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Apply text search to displayed list; use matchingBookmarks for tree/grouped and count.
+    matchingBookmarks = (searchQuery && searchQuery.trim()) ? filterBookmarksBySearch(sorted, searchQuery) : sorted
     if (panelConfig.groupBy && panelConfig.groupBy !== 'none') {
-      const grouped = groupBookmarksBy(sorted, panelConfig.groupBy)
+      const grouped = groupBookmarksBy(matchingBookmarks, panelConfig.groupBy)
       renderGrouped(grouped)
       const hasContent = grouped && grouped.size > 0
       emptyStateEl.classList.toggle('hidden', hasContent)
     } else {
-      tagToBookmarks = buildTagToBookmarks(sorted)
+      tagToBookmarks = buildTagToBookmarks(matchingBookmarks)
       renderTagSelector()
       renderTree()
       const hasContent = selectedTagOrder.length > 0 && selectedTagOrder.some(t => tagToBookmarks.has(t) && tagToBookmarks.get(t).length > 0)
       emptyStateEl.classList.toggle('hidden', hasContent)
     }
+    updateSearchCount()
+    if (matchingBookmarks.length > 0 && searchMatchIndex >= matchingBookmarks.length) searchMatchIndex = 0
+    scrollToMatch(searchMatchIndex)
   } catch (err) {
     loadErrorEl.textContent = err?.message || 'Failed to load bookmarks.'
     loadErrorEl.classList.remove('hidden')
@@ -259,6 +277,7 @@ function renderTagSelector () {
 /**
  * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
  * renderGrouped: when groupBy is not none, render section headers (collapsible) and list of bookmark links per group; click URL opens in new tab. Implements sectioned display.
+ * [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Sets data-search-index on each link for scroll/highlight.
  * @param {Map<string, Array<object>>} grouped
  */
 function renderGrouped (grouped) {
@@ -266,6 +285,7 @@ function renderGrouped (grouped) {
   treeContainerEl.innerHTML = ''
   const tagSelectorSection = document.querySelector('.tag-selector-section')
   if (tagSelectorSection) tagSelectorSection.classList.add('hidden')
+  let searchRenderIndex = 0
   const keys = [...grouped.keys()].sort()
   for (const groupKey of keys) {
     const items = grouped.get(groupKey) || []
@@ -299,6 +319,7 @@ function renderGrouped (grouped) {
       a.href = url
       a.target = '_blank'
       a.rel = 'noopener'
+      a.dataset.searchIndex = String(searchRenderIndex++)
       const titleSpan = document.createElement('span')
       titleSpan.className = 'bookmark-title'
       titleSpan.textContent = title || url
@@ -320,11 +341,12 @@ function renderGrouped (grouped) {
   }
 }
 
-/** [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Renders collapsible tree per selected tag with bookmark links; implements tag→URL list and click-to-open (openUrlInNewTab). */
+/** [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Renders collapsible tree per selected tag with bookmark links; implements tag→URL list and click-to-open (openUrlInNewTab). [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Sets data-search-index on each link for scroll/highlight. */
 function renderTree () {
   const tagSelectorSection = document.querySelector('.tag-selector-section')
   if (tagSelectorSection) tagSelectorSection.classList.remove('hidden')
   treeContainerEl.innerHTML = ''
+  let searchRenderIndex = 0
   for (const tag of selectedTagOrder) {
     const entries = tagToBookmarks.get(tag) || []
     if (entries.length === 0) continue
@@ -356,6 +378,7 @@ function renderTree () {
       a.href = url
       a.target = '_blank'
       a.rel = 'noopener'
+      a.dataset.searchIndex = String(searchRenderIndex++)
       const titleSpan = document.createElement('span')
       titleSpan.className = 'bookmark-title'
       titleSpan.textContent = title || url
@@ -394,15 +417,78 @@ function refreshFromConfig () {
   }
   const filtered = applyFilters(rawBookmarks, filterState)
   const sorted = sortBookmarks(filtered, panelConfig.sortBy, panelConfig.sortAsc)
+  // [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Apply text search; use matchingBookmarks for tree/grouped and count.
+  matchingBookmarks = (searchQuery && searchQuery.trim()) ? filterBookmarksBySearch(sorted, searchQuery) : sorted
   if (panelConfig.groupBy && panelConfig.groupBy !== 'none') {
-    const grouped = groupBookmarksBy(sorted, panelConfig.groupBy)
+    const grouped = groupBookmarksBy(matchingBookmarks, panelConfig.groupBy)
     renderGrouped(grouped)
     emptyStateEl.classList.toggle('hidden', grouped && grouped.size > 0)
   } else {
-    tagToBookmarks = buildTagToBookmarks(sorted)
+    tagToBookmarks = buildTagToBookmarks(matchingBookmarks)
     renderTagSelector()
     renderTree()
     emptyStateEl.classList.toggle('hidden', selectedTagOrder.length > 0 && selectedTagOrder.some(t => tagToBookmarks.has(t) && tagToBookmarks.get(t).length > 0))
+  }
+  updateSearchCount()
+  if (matchingBookmarks.length > 0 && searchMatchIndex >= matchingBookmarks.length) searchMatchIndex = 0
+  scrollToMatch(searchMatchIndex)
+}
+
+/**
+ * [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]
+ * Updates the search count text (N matches / No matches). Implements display count of matching records.
+ */
+function updateSearchCount () {
+  if (!searchCountEl) return
+  const n = Array.isArray(matchingBookmarks) ? matchingBookmarks.length : 0
+  searchCountEl.textContent = n === 0 ? 'No matches' : n + (n === 1 ? ' match' : ' matches')
+}
+
+/**
+ * [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]
+ * Scrolls to the Nth matching bookmark link and highlights it. Implements advance to next/previous with scroll and highlight.
+ * @param {number} idx 0-based index into matching list
+ */
+function scrollToMatch (idx) {
+  if (!treeContainerEl) return
+  const links = treeContainerEl.querySelectorAll('.tree-bookmark-link[data-search-index]')
+  const el = links[idx]
+  links.forEach(link => link.classList.remove('search-current'))
+  if (el) {
+    el.classList.add('search-current')
+    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+  }
+}
+
+/**
+ * [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]
+ * Wires search input, count, and Previous/Next buttons. Implements search bar and advance to next/previous record.
+ */
+function attachSearchHandlers () {
+  if (searchInputEl) {
+    const onSearchChange = () => {
+      searchQuery = searchInputEl.value
+      searchMatchIndex = 0
+      refreshFromConfig()
+    }
+    searchInputEl.addEventListener('input', onSearchChange)
+    searchInputEl.addEventListener('change', onSearchChange)
+  }
+  if (searchPrevEl) {
+    searchPrevEl.addEventListener('click', () => {
+      const total = matchingBookmarks.length
+      if (total === 0) return
+      searchMatchIndex = (searchMatchIndex - 1 + total) % total
+      scrollToMatch(searchMatchIndex)
+    })
+  }
+  if (searchNextEl) {
+    searchNextEl.addEventListener('click', () => {
+      const total = matchingBookmarks.length
+      if (total === 0) return
+      searchMatchIndex = (searchMatchIndex + 1) % total
+      scrollToMatch(searchMatchIndex)
+    })
   }
 }
 
@@ -431,6 +517,7 @@ export { openUrlInNewTab }
 
 document.addEventListener('DOMContentLoaded', () => {
   attachConfigHandlers()
+  attachSearchHandlers()
   const params = new URLSearchParams(typeof window !== 'undefined' && window.location ? window.location.search : '')
   if (params.get('screenshot') === '1' || params.get('demo') === '1') {
     loadPlaceholderForScreenshot()
