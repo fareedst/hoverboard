@@ -98,6 +98,7 @@ This document centralizes every instruction AI coding assistants must follow whi
 | `processes.md` | Process tracking including `[PROC-YAML_DB_OPERATIONS]` for YAML operations |
 | `.cursorrules` | IDE loader that points back to this document |
 | `.ai-agent-instructions` | Quick reminder pointing to this document |
+| `playwright.extension.config.js` | [IMPL-PLAYWRIGHT_E2E_EXTENSION] Playwright config for extension E2E (load unpacked, popup flow). Run: `npm run test:e2e:extension` |
 
 ---
 

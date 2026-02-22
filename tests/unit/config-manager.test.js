@@ -88,6 +88,25 @@ describe('ConfigManager', () => {
     });
   });
 
+  describe('[IMPL-RUNTIME_VALIDATION] Config validation in getConfig', () => {
+    test('returns defaults when stored storageMode is invalid', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_settings: { storageMode: 'invalid' }
+      })
+      const config = await configManager.getConfig()
+      expect(config.storageMode).toBe('local')
+      expect(config.hoverShowRecentTags).toBe(true)
+    })
+
+    test('returns defaults when stored has wrong type for number (e.g. recentTagsCountMax string)', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_settings: { recentTagsCountMax: 'not-a-number' }
+      })
+      const config = await configManager.getConfig()
+      expect(config.recentTagsCountMax).toBe(32)
+    })
+  })
+
   describe('Configuration Management', () => {
     test('should get complete config with defaults and overrides', async () => {
       const config = await configManager.getConfig();

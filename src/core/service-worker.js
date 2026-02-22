@@ -208,6 +208,7 @@ class HoverboardServiceWorker {
 
     // MV3-001: Handle messages from content scripts and popup
     // [SAFARI-EXT-IMPL-001] Use browser API for cross-browser compatibility
+    /** @type {(message: { type: string, data?: Record<string, unknown> }, sender: chrome.runtime.MessageSender, sendResponse: (response?: unknown) => void) => void} */
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log('[SERVICE-WORKER] Received message:', message)
 

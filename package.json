@@ -13,7 +13,8 @@
     "build:content": "esbuild src/features/content/content-main.js --bundle --outfile=dist/src/features/content/content-main.js --format=iife --platform=browser",
     "build:popup": "esbuild src/ui/popup/popup.js --bundle --outfile=dist/src/ui/popup/popup.js --format=esm --platform=browser",
     "build:native": "node scripts/build-native.js",
-    "validate": "npm run lint && npm run validate:manifest && npm run security:check",
+    "validate": "npm run lint && npm run typecheck && npm run validate:manifest && npm run security:check",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src/**/*.js",
     "lint:fix": "eslint src/**/*.js --fix",
     "style:fix": "npm run lint:fix && find src -name '*.js' -exec sed -i '' 's/[[:space:]]*$//' {} \\;",
@@ -27,6 +28,7 @@
     "test:unit": "jest --testMatch='**/*.test.js'",
     "test:integration": "jest --testMatch='**/*.integration.test.js'",
     "test:e2e": "jest --testMatch='**/*.e2e.test.js'",
+    "test:e2e:extension": "npx playwright test -c playwright.extension.config.js",
     "test:ci": "npm run test:coverage && npm run test:e2e",
     "security:check": "npm audit --audit-level=high",
     "security:fix": "npm audit fix",
@@ -55,7 +57,8 @@
     "express": "^5.0.0",
     "fast-xml-parser": "^5.3.6",
     "node-fetch": "^2.6.7",
-    "webextension-polyfill": "^0.12.0"
+    "webextension-polyfill": "^0.12.0",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@babel/core": "^7.28.0",
@@ -67,6 +70,7 @@
     "@playwright/test": "^1.40.0",
     "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^6.1.4",
+    "@types/chrome": "^0.1.37",
     "babel-jest": "^30.0.0",
     "chokidar-cli": "^3.0.0",
     "esbuild": "^0.27.0",
@@ -80,7 +84,8 @@
     "jest-webextension-mock": "^3.8.9",
     "lint-staged": "^16.0.0",
     "puppeteer": "^24.10.0",
-    "sharp": "^0.34.5"
+    "sharp": "^0.34.5",
+    "typescript": "^5.9.3"
   },
   "lint-staged": {
     "src/**/*.js": [

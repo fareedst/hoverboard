@@ -1,0 +1,49 @@
+IMPL-PLAYWRIGHT_E2E_EXTENSION:
+  name: Playwright E2E for extension (load unpacked, popup flow)
+  status: Active
+  cross_references:
+    - REQ-UI_INSPECTION
+    - ARCH-UI_TESTABILITY
+  rationale:
+    why: One reliable E2E flow that loads the built extension and asserts popup so refactors are guarded
+    problems_solved:
+      - No real-extension E2E; Jest E2E in tests/e2e does not load the extension
+    benefits:
+      - Load unpacked dist/, open popup, assert structure; run in CI
+  implementation_approach:
+    summary: playwright.extension.config.js (no web server); global-setup builds extension; extension-popup.spec.js uses launchPersistentContext with --load-extension, discovers extension ID from service worker, opens popup and asserts #popupMain visible
+    details:
+      - tests/playwright/global-setup.js runs npm run build:only
+      - tests/playwright/extension-popup.spec.js: custom fixture launches chromium.launchPersistentContext with --disable-extensions-except and --load-extension=dist; wait for serviceworker event to get extension ID; goto chrome-extension://ID/src/ui/popup/popup.html; expect body and #popupMain visible
+      - npm run test:e2e:extension runs Playwright with playwright.extension.config.js
+  code_locations:
+    files:
+      - path: playwright.extension.config.js
+        description: Config for extension E2E only
+      - path: tests/playwright/global-setup.js
+        description: Builds extension before E2E
+      - path: tests/playwright/extension-popup.spec.js
+        description: Extension popup E2E spec
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    requirements:
+      - REQ-UI_INSPECTION
+    tests:
+      - tests/playwright/extension-popup.spec.js
+    code_annotations:
+      - IMPL-PLAYWRIGHT_E2E_EXTENSION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  detail_file: implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml
+  metadata:
+    created:
+      date: "2026-02-22"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-22"
+      author: AI Agent
+      reason: Initial creation for extension E2E flow

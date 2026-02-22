@@ -1,0 +1,57 @@
+# [ARCH-LANGUAGE_SELECTION] Language and static typing strategy
+# Records choice of JavaScript with incremental TypeScript/JSDoc typing.
+
+ARCH-LANGUAGE_SELECTION:
+  name: Language and Static Typing Strategy
+  status: Active
+  cross_references:
+    - IMPL-TYPESCRIPT_MIGRATION
+    - IMPL-RUNTIME_VALIDATION
+    - IMPL-MESSAGE_HANDLING
+  rationale:
+    why: Improve maintainability and catch contract errors at build time without a full rewrite
+    problems_solved:
+      - Message and config shapes only enforced at runtime (before Phase 1 Zod)
+      - Refactors risky across popup/SW/content boundaries
+    benefits:
+      - Incremental adoption: allowJs, JSDoc, and .d.ts first; .ts later
+      - Single typecheck script; esbuild already supports TS for future .ts entry points
+  alternatives_considered:
+    - name: Remain JavaScript-only
+      pros: No tooling change
+      cons: No static checking for message/config contracts
+      rejected_reason: Plan adopts incremental typing for robustness
+    - name: Full TypeScript rewrite
+      pros: Maximum type safety
+      cons: Large one-time migration, risk of regressions
+      rejected_reason: Incremental approach preferred
+  implementation_approach:
+    summary: TypeScript for type-check only (tsconfig.json noEmit); JSDoc and .d.ts for contracts and shared types; optional future .ts files with esbuild
+    details:
+      - tsconfig.json with allowJs, checkJs false, noEmit; typecheck in validate script
+      - src/shared/message-types.d.ts and config-types.d.ts for message/config shapes
+      - JSDoc on processMessage, sendMessage, and message listener for core; PopupController.sendMessage for UI
+      - New .ts files can be added incrementally; esbuild compiles TS natively
+  traceability:
+    requirements: []
+    implementation:
+      - IMPL-TYPESCRIPT_MIGRATION
+    tests: []
+    code_annotations:
+      - ARCH-LANGUAGE_SELECTION
+  related_decisions:
+    depends_on: []
+    informs:
+      - IMPL-TYPESCRIPT_MIGRATION
+    see_also:
+      - IMPL-RUNTIME_VALIDATION
+      - IMPL-MESSAGE_HANDLING
+  detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.yaml
+  metadata:
+    created:
+      date: "2026-02-22"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-22"
+      author: AI Agent
+      reason: Flesh out from template for incremental TypeScript/JSDoc strategy

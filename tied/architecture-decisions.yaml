@@ -148,59 +148,38 @@ ARCH-MODULE_VALIDATION:
       validator: AI Agent
       result: pass
 ARCH-LANGUAGE_SELECTION:
-  name: Language and Runtime Selection
-  status: Template
-  cross_references: []
+  name: Language and Static Typing Strategy
+  status: Active
+  cross_references:
+    - IMPL-TYPESCRIPT_MIGRATION
+    - IMPL-RUNTIME_VALIDATION
   rationale:
-    why: Why this language/runtime was chosen for the project
+    why: Improve maintainability and catch contract errors at build time without a full rewrite
     problems_solved:
-      - Problem 1 that language solves
+      - Message and config shapes only enforced at runtime before Zod
+      - Refactors risky across popup/SW/content boundaries
     benefits:
-      - Benefit 1 of chosen language
-  alternatives_considered:
-    - name: Language A
-      pros:
-        - Pro 1
-      cons:
-        - Con 1
-      rejected_reason: Why it was rejected
-    - name: Language B
-      pros:
-        - Pro 1
-      cons:
-        - Con 1
-      rejected_reason: Why it was rejected
+      - Incremental adoption: allowJs, JSDoc, .d.ts first; .ts later
+      - Single typecheck script; esbuild supports TS for future .ts entry points
   implementation_approach:
-    summary: How the selected language/runtime will be used in the project
+    summary: TypeScript for type-check only; JSDoc and .d.ts for contracts; optional future .ts with esbuild
     details:
-      - Detail 1
-      - Detail 2
+      - tsconfig.json noEmit, typecheck in validate; message-types.d.ts, config-types.d.ts; JSDoc on core and popup sendMessage
   traceability:
-    requirements:
-      - REQ-*
+    requirements: []
     implementation:
-      - IMPL-*
-    tests:
-      - testFeatureName_ARCH_LANGUAGE_SELECTION
+      - IMPL-TYPESCRIPT_MIGRATION
     code_annotations:
       - ARCH-LANGUAGE_SELECTION
-  related_decisions:
-    depends_on: []
-    informs: []
-    see_also: []
-  detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.md
+  detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.yaml
   metadata:
     created:
-      date: YYYY-MM-DD
-      author: agent/contributor
+      date: "2026-02-22"
+      author: AI Agent
     last_updated:
-      date: YYYY-MM-DD
-      author: agent/contributor
-      reason: Initial creation
-    last_validated:
-      date: YYYY-MM-DD
-      validator: agent/contributor
-      result: pass
+      date: "2026-02-22"
+      author: AI Agent
+      reason: Flesh out for incremental TypeScript/JSDoc strategy
 ARCH-EXAMPLE_DECISION:
   name: Core Architecture Example
   status: Template

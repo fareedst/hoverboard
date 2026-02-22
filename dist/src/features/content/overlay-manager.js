@@ -858,7 +858,7 @@ class OverlayManager {
 
       debugLog('[OVERLAY-REFRESH-INTEGRATION-001] Refresh request data:', refreshData)
 
-      // [OVERLAY-REFRESH-INTEGRATION-001] Get updated bookmark data via message service
+      // [OVERLAY-REFRESH-INTEGRATION-001] [IMPL-RUNTIME_VALIDATION] Get updated bookmark data via message service; payload may include url, title, tabId (schema allows passthrough).
       const response = await this.messageService.sendMessage({
         type: 'getCurrentBookmark',
         data: refreshData

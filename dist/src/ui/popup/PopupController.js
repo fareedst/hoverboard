@@ -962,7 +962,9 @@ export class PopupController {
   }
 
   /**
-   * Send message to background script
+   * Send message to background script.
+   * @param {{ type: string, data?: Record<string, unknown> }} message - Message envelope (type + optional data)
+   * @returns {Promise<unknown>} Response from service worker
    */
   async sendMessage (message) {
     return new Promise((resolve, reject) => {

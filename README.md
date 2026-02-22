@@ -243,8 +243,11 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - ✅ **Customizable font sizes** - Configure font sizes for suggested tags, labels, tags, and UI elements in Options
 
 #### **Test Coverage:**
-- **508 tests** across 37 test suites (1 skipped)
+- **508+ tests** across 37+ test suites (1 skipped)
 - **Complete Chrome extension testing** with Manifest V3 compliance
+- **Runtime validation** ([IMPL-RUNTIME_VALIDATION], [ARCH-MESSAGE_HANDLING]) – Zod schemas validate message envelope and critical payloads (getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag) at the service worker; merged config validated in getConfig() with fallback to defaults. Unit tests: `tests/unit/message-schemas.test.js`, `tests/unit/config-manager.test.js`.
+- **TypeScript** ([ARCH-LANGUAGE_SELECTION], [IMPL-TYPESCRIPT_MIGRATION]) – Incremental typing: `npm run typecheck` (tsc --noEmit), shared type definitions (`message-types.d.ts`, `config-types.d.ts`), JSDoc on core and popup message APIs.
+- **Extension E2E** ([IMPL-PLAYWRIGHT_E2E_EXTENSION], [REQ-UI_INSPECTION], [ARCH-UI_TESTABILITY]) – Playwright loads the unpacked extension, opens the popup, and asserts structure; run with `npm run test:e2e:extension`.
 - **Native host tests** – Go tests for protocol and ping-pong; Jest tests for NATIVE_PING and `pingNativeHost`
 - **Pinboard API integration testing** for reliable bookmark management
 
@@ -300,17 +303,23 @@ npm run dev
 
 ### Chrome Extension Development
 ```bash
-# Build for development
+# Build for development (includes lint, typecheck, manifest validation)
 npm run build:dev
 
 # Build for production
 npm run build
+
+# Type-check only (TypeScript/JSDoc; no emit)
+npm run typecheck
 
 # Run unit tests
 npm test
 
 # Run integration tests
 npm run test:integration
+
+# Run extension E2E (Playwright: load unpacked extension, open popup, assert structure)
+npm run test:e2e:extension
 
 # Validate manifest
 npm run validate-manifest

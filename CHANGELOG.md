@@ -9,7 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Runtime validation (Zod)** (`IMPL-RUNTIME_VALIDATION`, `ARCH-MESSAGE_HANDLING`, `ARCH-CONFIG_STRUCTURE`) – Message envelope and critical payloads (getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag) are validated at the service worker via Zod; invalid messages return a structured error. Merged config in `ConfigManager.getConfig()` is validated with a Zod schema; on failure the extension falls back to defaults. Unit tests: `tests/unit/message-schemas.test.js`, `tests/unit/config-manager.test.js` (describe `[IMPL-RUNTIME_VALIDATION]`).
+
+- **TypeScript incremental** (`ARCH-LANGUAGE_SELECTION`, `IMPL-TYPESCRIPT_MIGRATION`) – `tsconfig.json` (noEmit, allowJs), `npm run typecheck` in validate; shared type definitions `src/shared/message-types.d.ts` and `src/shared/config-types.d.ts`; JSDoc on `processMessage`, `sendMessage`, and popup `sendMessage`. Enables future `.ts` adoption; esbuild supports TypeScript natively.
+
+- **Playwright extension E2E** (`IMPL-PLAYWRIGHT_E2E_EXTENSION`, `REQ-UI_INSPECTION`, `ARCH-UI_TESTABILITY`) – One E2E flow: build extension, launch Chromium with unpacked `dist/`, discover extension ID from service worker, open popup and assert structure. Config: `playwright.extension.config.js`; spec: `tests/playwright/extension-popup.spec.js`; run with `npm run test:e2e:extension`.
+
 - **Side panel – Filters, sort/group, expandable config** (`REQ-SIDE_PANEL_TAGS_TREE`, `ARCH-SIDE_PANEL_TAGS_TREE`, `IMPL-SIDE_PANEL_TAGS_TREE`) – The side panel now supports filtering by create/update time range, tags to include (comma-separated), and domains (URL hostnames); display can be sorted by create date, update date, tag, or domain (asc/desc) and optionally grouped by the same axes. A **Filters & view** config region can be expanded to adjust filters and display options or collapsed to maximize space for the bookmarks list. Config state is persisted in `chrome.storage.local`. Unit tests: `tests/unit/tags-tree-data.test.js`, `tests/unit/tags-tree-filter.test.js`, `tests/unit/side-panel-open.test.js`.
+
+### Fixed
+
+- **getCurrentBookmark validation rejecting overlay payloads** (`IMPL-RUNTIME_VALIDATION`) – The overlay sends `getCurrentBookmark` with `data: { url, title, tabId }`. The Zod schema used `.strict()` and only allowed `url`, so validation failed. Schema updated to `.passthrough()` so extra keys (title, tabId) are allowed while still validating `url`.
 
 ## [2.0.0] - 2026-02-21
 

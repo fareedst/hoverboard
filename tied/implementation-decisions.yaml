@@ -228,6 +228,128 @@ IMPL-MESSAGE_HANDLING:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
       reason: Migrated from STDD to TIED format
+IMPL-RUNTIME_VALIDATION:
+  name: Runtime validation with Zod for messages and config
+  status: Active
+  cross_references:
+    - IMPL-MESSAGE_HANDLING
+    - ARCH-MESSAGE_HANDLING
+    - ARCH-CONFIG_STRUCTURE
+  rationale:
+    why: Validate message payloads and merged config at boundaries to prevent invalid data from breaking the extension
+    problems_solved:
+      - Invalid or malicious message payloads reaching handlers
+      - Corrupted or wrongly-typed stored config breaking getConfig()
+    benefits:
+      - Structured error responses for invalid messages
+      - Safe fallback to defaults when stored config fails validation
+      - Incremental coverage (only critical message types and config)
+  implementation_approach:
+    summary: Zod schemas in shared/message-schemas.js and config-manager.js; validate at processMessage entry and in getConfig() after merge
+    details:
+      - Message envelope (type + optional data) validated for all messages in message-handler processMessage
+      - Data schemas for critical types: getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag
+      - getCurrentBookmark schema uses .passthrough() so senders (e.g. overlay-manager) may include url, title, tabId
+      - Config schema validates merged (defaults + stored) config in ConfigManager.getConfig(); on failure use defaults
+      - Validation is incremental: message types without a schema pass through; config schema uses passthrough for future keys
+  code_locations:
+    files:
+      - path: src/shared/message-schemas.js
+        description: Zod message envelope and data schemas; validateMessageEnvelope, validateMessageData
+      - path: src/core/message-handler.js
+        description: processMessage calls validateMessageEnvelope and validateMessageData before dispatch
+      - path: src/config/config-manager.js
+        description: mergedConfigSchema and getConfig() safeParse with fallback to defaults
+      - path: src/features/content/overlay-manager.js
+        description: Sends getCurrentBookmark with url, title, tabId (IMPL-RUNTIME_VALIDATION passthrough)
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-MESSAGE_HANDLING
+      - ARCH-CONFIG_STRUCTURE
+    requirements: []
+    tests:
+      - tests/unit/message-schemas.test.js
+      - tests/unit/config-manager.test.js
+    code_annotations:
+      - IMPL-RUNTIME_VALIDATION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-MESSAGE_HANDLING
+      - IMPL-CONFIG_STRUCT
+  detail_file: implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml
+  metadata:
+    created:
+      date: "2026-02-22"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-22"
+      author: AI Agent
+      reason: Initial creation for Zod message and config validation
+IMPL-TYPESCRIPT_MIGRATION:
+  name: Incremental TypeScript and JSDoc typing
+  status: Active
+  cross_references:
+    - ARCH-LANGUAGE_SELECTION
+    - IMPL-MESSAGE_HANDLING
+    - IMPL-RUNTIME_VALIDATION
+  rationale:
+    why: Implements ARCH-LANGUAGE_SELECTION; add static typing without big-bang rewrite
+    benefits:
+      - typecheck script in CI and validate; JSDoc documents public APIs
+  implementation_approach:
+    summary: tsconfig noEmit, typecheck script, .d.ts for message and config; JSDoc on core and popup sendMessage
+  code_locations:
+    files:
+      - path: tsconfig.json
+      - path: src/shared/message-types.d.ts
+      - path: src/shared/config-types.d.ts
+  traceability:
+    architecture:
+      - ARCH-LANGUAGE_SELECTION
+    code_annotations:
+      - IMPL-TYPESCRIPT_MIGRATION
+  detail_file: implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml
+  metadata:
+    created:
+      date: "2026-02-22"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-22"
+      author: AI Agent
+      reason: Initial creation for incremental TypeScript/JSDoc
+IMPL-PLAYWRIGHT_E2E_EXTENSION:
+  name: Playwright E2E for extension (load unpacked, popup flow)
+  status: Active
+  cross_references:
+    - REQ-UI_INSPECTION
+    - ARCH-UI_TESTABILITY
+  rationale:
+    why: One reliable E2E flow that loads the built extension and asserts popup so refactors are guarded
+  implementation_approach:
+    summary: playwright.extension.config.js; global-setup builds extension; extension-popup.spec.js uses launchPersistentContext, discovers ID, opens popup, asserts structure
+  code_locations:
+    files:
+      - path: playwright.extension.config.js
+      - path: tests/playwright/extension-popup.spec.js
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    requirements:
+      - REQ-UI_INSPECTION
+    code_annotations:
+      - IMPL-PLAYWRIGHT_E2E_EXTENSION
+  detail_file: implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml
+  metadata:
+    created:
+      date: "2026-02-22"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-22"
+      author: AI Agent
+      reason: Initial creation for extension E2E flow
 IMPL-OVERLAY:
   name: Overlay Implementation
   status: Active

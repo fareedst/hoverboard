@@ -1,6 +1,7 @@
 /**
  * [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION]
  * Message routing with type validation and handler map; processMessage and handler dispatch.
+ * [IMPL-RUNTIME_VALIDATION] Incremental Zod validation at processMessage entry for critical message types.
  */
 
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
@@ -12,6 +13,7 @@ import { TabSearchService } from '../features/search/tab-search-service.js'
 import { getSessionTags, recordSessionTags } from '../features/ai/session-tags.js'
 import { requestAiTags } from '../features/ai/ai-tagging-provider.js'
 import { debugLog, debugError, browser } from '../shared/utils.js'
+import { validateMessageEnvelope, validateMessageData } from '../shared/message-schemas.js'
 
 // Message type constants - migrated from config.js
 export const MESSAGE_TYPES = {
@@ -112,13 +114,30 @@ export class MessageHandler {
   }
 
   /**
-   * Process incoming messages with modern async/await pattern
-   * @param {Object} message - The message object
-   * @param {Object} sender - Chrome extension sender info
-   * @returns {Promise<any>} - Response data
+   * Process incoming messages with modern async/await pattern.
+   * [IMPL-RUNTIME_VALIDATION] Validates envelope and data (for critical types) before dispatch.
+   * @param {{ type: string, data?: Record<string, unknown> }} message - The message object (type + optional data)
+   * @param {chrome.runtime.MessageSender} sender - Chrome extension sender info (tab, id, url)
+   * @returns {Promise<unknown>} - Response data or { error, details } on validation failure
    */
   async processMessage (message, sender) {
-    const { type, data } = message
+    // [IMPL-RUNTIME_VALIDATION] Validate message envelope; reject invalid shape before dispatch
+    const envelopeResult = validateMessageEnvelope(message)
+    if (!envelopeResult.success) {
+      debugError('[IMPL-RUNTIME_VALIDATION] Invalid message envelope', envelopeResult.error?.issues)
+      return { error: 'Invalid message', details: envelopeResult.error?.issues ?? 'envelope validation failed' }
+    }
+    const { type } = envelopeResult.data
+    const rawData = envelopeResult.data.data
+
+    // [IMPL-RUNTIME_VALIDATION] Validate data for critical message types (incremental; no schema = no check)
+    const dataResult = validateMessageData(type, rawData)
+    if (!dataResult.success) {
+      debugError('[IMPL-RUNTIME_VALIDATION] Invalid message data for type', type, dataResult.error?.issues)
+      return { error: 'Invalid message', details: dataResult.error?.issues ?? 'data validation failed' }
+    }
+    const data = dataResult.data
+
     let tabId = sender.tab?.id
     let url = sender.tab?.url
 

@@ -1,15 +1,30 @@
 /**
  * Playwright Configuration for Hoverboard Extension E2E Testing
  * [TEST-FIX-001-PLAYWRIGHT] - Separate Playwright configuration for E2E tests
+ * [IMPL-PLAYWRIGHT_E2E_EXTENSION] - Extension project loads unpacked dist/ and runs extension E2E spec
  */
 
-import { defineConfig, devices } from '@playwright/test';
+import path from 'path'
+import { fileURLToPath } from 'url'
+import { defineConfig, devices } from '@playwright/test'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
-  // Test environment
   testDir: './tests/playwright',
-  
-  // Use multiple browsers for testing
+  timeout: 30000,
+  globalSetup: path.join(__dirname, 'tests/playwright/global-setup.js'),
+  globalTeardown: path.join(__dirname, 'tests/playwright/global-teardown.js'),
+  reporter: [
+    ['html'],
+    ['json', { outputFile: 'test-results/results.json' }],
+  ],
+  use: {
+    baseURL: 'http://localhost:3000',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+    trace: 'retain-on-failure',
+  },
   projects: [
     {
       name: 'chromium',
@@ -23,37 +38,12 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
     },
+    {
+      name: 'extension',
+      testMatch: /extension.*\.spec\.js/,
+      use: { ...devices['Desktop Chrome'] },
+    },
   ],
-  
-  // Test timeout
-  timeout: 30000,
-  
-  // Global setup and teardown
-  globalSetup: require.resolve('./tests/playwright/global-setup.js'),
-  globalTeardown: require.resolve('./tests/playwright/global-teardown.js'),
-  
-  // Reporter configuration
-  reporter: [
-    ['html'],
-    ['json', { outputFile: 'test-results/results.json' }],
-  ],
-  
-  // Use specific browser for Chrome extension testing
-  use: {
-    // Base URL for tests
-    baseURL: 'http://localhost:3000',
-    
-    // Screenshot on failure
-    screenshot: 'only-on-failure',
-    
-    // Video recording
-    video: 'retain-on-failure',
-    
-    // Trace for debugging
-    trace: 'retain-on-failure',
-  },
-  
-  // Web server for testing
   webServer: {
     command: 'npm run dev:server',
     url: 'http://localhost:3000',

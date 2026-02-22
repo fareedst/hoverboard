@@ -1,0 +1,62 @@
+IMPL-TYPESCRIPT_MIGRATION:
+  name: Incremental TypeScript and JSDoc typing
+  status: Active
+  cross_references:
+    - ARCH-LANGUAGE_SELECTION
+    - IMPL-MESSAGE_HANDLING
+    - IMPL-RUNTIME_VALIDATION
+  rationale:
+    why: Implements ARCH-LANGUAGE_SELECTION; add static typing without big-bang rewrite
+    problems_solved:
+      - No compile-time checking for message/config contracts
+    benefits:
+      - typecheck script in CI and validate; JSDoc documents public APIs
+      - Shared type definitions align with Zod schemas and config shape
+  implementation_approach:
+    summary: tsconfig (noEmit), typecheck script, .d.ts for message and config; JSDoc on core and popup sendMessage
+    details:
+      - tsconfig.json: allowJs, checkJs false, noEmit, types chrome/node/jest
+      - npm run typecheck (tsc --noEmit) added to validate
+      - src/shared/message-types.d.ts (MessageEnvelope, payload interfaces)
+      - src/shared/config-types.d.ts (MergedConfig, StorageMode)
+      - JSDoc on message-handler processMessage, message-service sendMessage, service-worker onMessage listener, PopupController sendMessage
+      - Future: enable checkJs on selected files or convert files to .ts; esbuild supports .ts
+  code_locations:
+    files:
+      - path: tsconfig.json
+        description: TypeScript config for type-check only
+      - path: src/shared/message-types.d.ts
+        description: Message envelope and payload type definitions
+      - path: src/shared/config-types.d.ts
+        description: Merged config type definitions
+      - path: src/core/message-handler.js
+        description: JSDoc for processMessage
+      - path: src/core/message-service.js
+        description: JSDoc for sendMessage
+      - path: src/core/service-worker.js
+        description: JSDoc for onMessage listener
+      - path: src/ui/popup/PopupController.js
+        description: JSDoc for sendMessage
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-LANGUAGE_SELECTION
+    requirements: []
+    tests: []
+    code_annotations:
+      - IMPL-TYPESCRIPT_MIGRATION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - ARCH-LANGUAGE_SELECTION
+      - IMPL-RUNTIME_VALIDATION
+  detail_file: implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml
+  metadata:
+    created:
+      date: "2026-02-22"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-22"
+      author: AI Agent
+      reason: Initial creation for incremental TypeScript/JSDoc

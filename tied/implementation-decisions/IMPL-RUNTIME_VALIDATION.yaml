@@ -1,0 +1,60 @@
+IMPL-RUNTIME_VALIDATION:
+  name: Runtime validation with Zod for messages and config
+  status: Active
+  cross_references:
+    - IMPL-MESSAGE_HANDLING
+    - ARCH-MESSAGE_HANDLING
+    - ARCH-CONFIG_STRUCTURE
+  rationale:
+    why: Validate message payloads and merged config at boundaries to prevent invalid data from breaking the extension
+    problems_solved:
+      - Invalid or malicious message payloads reaching handlers
+      - Corrupted or wrongly-typed stored config breaking getConfig()
+    benefits:
+      - Structured error responses for invalid messages
+      - Safe fallback to defaults when stored config fails validation
+      - Incremental coverage (only critical message types and config)
+  implementation_approach:
+    summary: Zod schemas in shared/message-schemas.js and config-manager.js; validate at processMessage entry and in getConfig() after merge
+    details:
+      - Message envelope (type + optional data) validated for all messages in message-handler processMessage
+      - Data schemas for critical types: getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag
+      - getCurrentBookmark data schema uses .passthrough() so overlay and other senders may include extra keys (e.g. title, tabId from overlay-manager) without validation failure
+      - Config schema validates merged (defaults + stored) config in ConfigManager.getConfig(); on failure use defaults
+      - Validation is incremental: message types without a schema pass through; config schema uses passthrough for future keys
+  code_locations:
+    files:
+      - path: src/shared/message-schemas.js
+        description: Zod message envelope and data schemas; validateMessageEnvelope, validateMessageData
+      - path: src/core/message-handler.js
+        description: processMessage calls validateMessageEnvelope and validateMessageData before dispatch
+      - path: src/config/config-manager.js
+        description: mergedConfigSchema and getConfig() safeParse with fallback to defaults
+      - path: src/features/content/overlay-manager.js
+        description: Sends getCurrentBookmark with url, title, tabId; schema passthrough allows extra keys
+    functions: []
+  traceability:
+    architecture:
+      - ARCH-MESSAGE_HANDLING
+      - ARCH-CONFIG_STRUCTURE
+    requirements: []
+    tests:
+      - tests/unit/message-schemas.test.js
+      - tests/unit/config-manager.test.js (describe IMPL-RUNTIME_VALIDATION)
+    code_annotations:
+      - IMPL-RUNTIME_VALIDATION
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-MESSAGE_HANDLING
+      - IMPL-CONFIG_STRUCT
+  detail_file: implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml
+  metadata:
+    created:
+      date: "2026-02-22"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-22"
+      author: AI Agent
+      reason: Document getCurrentBookmark passthrough for overlay payloads; sync with code and tests

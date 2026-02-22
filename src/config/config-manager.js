@@ -7,7 +7,56 @@
  * [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] getDefaultConfiguration, ensureDefaults, getConfigForUI, updateConfig, getSettings/setSettings, resetToDefaults.
  * [IMPL-FEATURE_FLAGS] User settings persistence and synchronization
  * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlAllowed (substring match).
+ * [IMPL-RUNTIME_VALIDATION] Zod schema validates merged config in getConfig(); invalid stored data falls back to defaults.
  */
+
+import { z } from 'zod'
+
+// [IMPL-RUNTIME_VALIDATION] Schema for merged config (defaults + stored). Passthrough allows future keys.
+const mergedConfigSchema = z.object({
+  storageMode: z.enum(['local', 'pinboard', 'file', 'sync']).optional(),
+  hoverShowRecentTags: z.boolean().optional(),
+  hoverShowTooltips: z.boolean().optional(),
+  showHoverOnPageLoad: z.boolean().optional(),
+  showHoverOPLOnlyIfNoTags: z.boolean().optional(),
+  showHoverOPLOnlyIfSomeTags: z.boolean().optional(),
+  inhibitSitesOnPageLoad: z.boolean().optional(),
+  setIconOnLoad: z.boolean().optional(),
+  recentTagsCountMax: z.number().int().min(0).optional(),
+  initRecentPostsCount: z.number().int().min(0).optional(),
+  uxAutoCloseTimeout: z.number().min(0).optional(),
+  uxRecentRowWithBlock: z.boolean().optional(),
+  uxRecentRowWithBookmarkButton: z.boolean().optional(),
+  uxRecentRowWithCloseButton: z.boolean().optional(),
+  uxRecentRowWithPrivateButton: z.boolean().optional(),
+  uxRecentRowWithDeletePin: z.boolean().optional(),
+  uxRecentRowWithInput: z.boolean().optional(),
+  uxUrlStripHash: z.boolean().optional(),
+  uxShowSectionLabels: z.boolean().optional(),
+  recentTagsMaxListSize: z.number().int().min(0).optional(),
+  recentTagsMaxDisplayCount: z.number().int().min(0).optional(),
+  recentTagsSharedMemoryKey: z.string().optional(),
+  recentTagsEnableUserDriven: z.boolean().optional(),
+  recentTagsClearOnReload: z.boolean().optional(),
+  badgeTextIfNotBookmarked: z.string().optional(),
+  badgeTextIfPrivate: z.string().optional(),
+  badgeTextIfQueued: z.string().optional(),
+  badgeTextIfBookmarkedNoTags: z.string().optional(),
+  pinRetryCountMax: z.number().int().min(0).optional(),
+  pinRetryDelay: z.number().min(0).optional(),
+  defaultVisibilityTheme: z.string().optional(),
+  defaultTransparencyEnabled: z.boolean().optional(),
+  defaultBackgroundOpacity: z.number().min(0).max(100).optional(),
+  overlayPositionMode: z.string().optional(),
+  fontSizeSuggestedTags: z.number().int().min(1).optional(),
+  fontSizeLabels: z.number().int().min(1).optional(),
+  fontSizeTags: z.number().int().min(1).optional(),
+  fontSizeBase: z.number().int().min(1).optional(),
+  fontSizeInputs: z.number().int().min(1).optional(),
+  aiApiKey: z.string().optional(),
+  aiProvider: z.string().optional(),
+  aiTagLimit: z.number().int().min(0).optional()
+}).passthrough()
 
 export class ConfigManager {
   constructor () {
@@ -134,7 +183,16 @@ export class ConfigManager {
       return { ...this.defaultConfig }
     }
     // IMPL-FEATURE_FLAGS: Defaults ensure all required configuration keys are present
-    return { ...this.defaultConfig, ...stored }
+    const merged = { ...this.defaultConfig, ...stored }
+    // [IMPL-RUNTIME_VALIDATION] Validate merged config; on failure fall back to defaults to prevent bad stored data from breaking the extension
+    const parsed = mergedConfigSchema.safeParse(merged)
+    if (!parsed.success) {
+      if (typeof console !== 'undefined' && console.warn) {
+        console.warn('[IMPL-RUNTIME_VALIDATION] Config validation failed, using defaults:', parsed.error?.issues)
+      }
+      return { ...this.defaultConfig }
+    }
+    return parsed.data
   }
 
   /**

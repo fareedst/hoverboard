@@ -88,10 +88,10 @@ export class MessageService {
   }
 
   /**
-   * Send message using the underlying MessageClient
-   * @param {string|Object} message - Message to send
-   * @param {Object} data - Optional data
-   * @returns {Promise} Promise that resolves with response
+   * Send message using the underlying MessageClient.
+   * @param {string|{ type: string, data?: Record<string, unknown> }} message - Message type string or envelope object
+   * @param {Record<string, unknown> | null} [data=null] - Optional payload (when message is string)
+   * @returns {Promise<unknown>} Promise that resolves with response
    */
   async sendMessage (message, data = null) {
     if (typeof message === 'string') {

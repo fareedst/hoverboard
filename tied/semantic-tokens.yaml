@@ -137,15 +137,17 @@ REQ-USABILITY:
 
 ARCH-LANGUAGE_SELECTION:
   type: ARCH
-  name: Language and Runtime Selection
-  status: Template
-  description: "Language and runtime selection decision"
-  cross_references: []
+  name: Language and Static Typing Strategy
+  status: Active
+  description: "Incremental TypeScript/JSDoc typing; tsconfig noEmit, .d.ts and JSDoc for contracts"
+  cross_references:
+    - IMPL-TYPESCRIPT_MIGRATION
+    - IMPL-RUNTIME_VALIDATION
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.md
+  detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.yaml
   metadata:
     registered: 2025-11-08
-    last_updated: 2026-02-08
+    last_updated: 2026-02-22
 
 ARCH-PROJECT_STRUCTURE:
   type: ARCH
@@ -228,6 +230,49 @@ IMPL-CONFIG_STRUCT:
   metadata:
     registered: 2025-11-08
     last_updated: 2026-02-08
+
+IMPL-RUNTIME_VALIDATION:
+  type: IMPL
+  name: Runtime validation with Zod for messages and config
+  status: Active
+  description: "Zod schemas for message envelope/data and merged config; validate at processMessage and getConfig"
+  cross_references:
+    - IMPL-MESSAGE_HANDLING
+    - ARCH-MESSAGE_HANDLING
+    - ARCH-CONFIG_STRUCTURE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml
+  metadata:
+    registered: 2026-02-22
+    last_updated: 2026-02-22
+
+IMPL-TYPESCRIPT_MIGRATION:
+  type: IMPL
+  name: Incremental TypeScript and JSDoc typing
+  status: Active
+  description: "tsconfig noEmit, typecheck script, .d.ts and JSDoc for message/config and core/popup APIs"
+  cross_references:
+    - ARCH-LANGUAGE_SELECTION
+    - IMPL-RUNTIME_VALIDATION
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml
+  metadata:
+    registered: 2026-02-22
+    last_updated: 2026-02-22
+
+IMPL-PLAYWRIGHT_E2E_EXTENSION:
+  type: IMPL
+  name: Playwright E2E for extension (load unpacked, popup flow)
+  status: Active
+  description: "One E2E flow: load extension, open popup, assert structure; npm run test:e2e:extension"
+  cross_references:
+    - REQ-UI_INSPECTION
+    - ARCH-UI_TESTABILITY
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml
+  metadata:
+    registered: 2026-02-22
+    last_updated: 2026-02-22
 
 IMPL-CODE_STYLE:
   type: IMPL
