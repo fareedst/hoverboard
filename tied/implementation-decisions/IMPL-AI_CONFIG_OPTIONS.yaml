@@ -44,19 +44,26 @@ IMPL-AI_CONFIG_OPTIONS:
     composed_with:
       - IMPL-AI_TAG_TEST
   essence_pseudocode: |
+    # [IMPL-AI_CONFIG_OPTIONS] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG]
+    # Options-page AI config: persist apiKey, provider, limit; load/save; Test button shows OK or error.
+
+    # Contract: inputs = user edits; outputs = persisted config and Test result.
     INPUT: user edits in options (apiKey, provider, optional limit)
     OUTPUT: persisted config; Test result (ok or error message)
 
+    # Options page shows persisted API key, provider, and limit by loading from stored config into the form.
     loadSettings():
       settings = getStoredSettings()
       SET aiApiKey input = settings.aiApiKey ?? ''
       SET provider select = settings.aiProvider ?? 'openai'
       SET limit input = settings.aiTagLimit ?? 64
 
+    # Settings persisted in config via updateConfig; no key = feature disabled elsewhere.
     saveSettings():
       settings = { aiApiKey: trim(aiApiKey input), aiProvider: provider select value, aiTagLimit: number(limit input) }
       updateConfig(settings)
 
+    # [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_TAG_TEST] Nested block: Test API key button; requires key present, calls testAiApiKey(apiKey, provider), shows "API key OK" or error message.
     on Test click:
       apiKey = trim(aiApiKey input)
       provider = provider select value

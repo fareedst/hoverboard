@@ -50,10 +50,14 @@ IMPL-TIED_FILES:
       - REQ-TIED_SETUP
     composed_with: []
   essence_pseudocode: |
+    # [IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP]
+    # Bootstrap tied/ dir, subdirs, YAML indexes, guides, root files.
+    # Contract: project root and template source; tied/ and root files.
     INPUT: project root; template source dir (or embedded templates)
     OUTPUT: tied/ directory and files; root .cursorrules, AGENTS.md, ai-principles.md
     DATA: copy_files.sh (or equivalent); template files for YAML indexes and guides
 
+    # Create tied/ and subdirs; copy YAML and guides; copy root files.
     setup_tied_structure():
       CREATE directory tied/
       CREATE subdirs tied/requirements/, tied/architecture-decisions/, tied/implementation-decisions/

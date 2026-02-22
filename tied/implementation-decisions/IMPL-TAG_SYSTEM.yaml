@@ -55,18 +55,24 @@ IMPL-TAG_SYSTEM:
     composed_with:
       - IMPL-SUGGESTED_TAGS
   essence_pseudocode: |
+    # [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [REQ-TAG_MANAGEMENT] [REQ-TAG_INPUT_SANITIZATION]
+    # sanitizeTag, getRecentTags (cache), trackBookmarkTags; tag history persistence.
+    # Contract: raw tag or bookmark data; sanitized tag or recent list or cache update.
     INPUT: raw tag string (sanitize); none (getRecentTags); bookmark data (trackBookmarkTags)
     OUTPUT: sanitized tag; list of recent tags; updated recent-tags cache
     DATA: recent tags cache (TTL); persisted tag history
 
+    # Trim, normalize whitespace, apply charset/length.
     sanitizeTag(raw):
       TRIM; normalize whitespace; apply allowed charset/length
       RETURN sanitized string
 
+    # Return cache if valid else load from persistence, update cache, return list.
     getRecentTags():
       IF cache valid: RETURN cached list
-      LOAD tag history from persistence; SORT by recency; UPDATE cache; RETURN list
+      LOAD tag history from persistence; SORT by recency; UPDATE cache;       RETURN list
 
+    # Extract tags from bookmark; append to history; persist; invalidate cache.
     trackBookmarkTags(bookmarkData):
       tags = extractTagsFromBookmarkData(bookmarkData)
       APPEND to tag history; PERSIST; invalidate cache

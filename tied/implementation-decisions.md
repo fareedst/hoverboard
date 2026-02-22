@@ -82,6 +82,26 @@ Every IMPL detail file **must** include an `essence_pseudocode` field. It is use
 - Support **collision detection**: when IMPLs are composed or share code paths, comparing their `essence_pseudocode` blocks helps identify overlapping steps, shared data, ordering dependencies, and conflicting assumptions.
 - Keep documentation aligned with tests and code; the pseudo-code should reflect what the implementation (and its tests) do.
 
+### Managed code and block token rules (REQ / ARCH / IMPL in pseudo-code)
+
+These rules apply to **managed code** everywhere (source, tests, data, and pseudo-code in TIED detail YAML). Code for processing, support, or management of code (e.g. build scripts, linters, token validators) is **not** managed code.
+
+1. **What is managed code**
+   - Managed code is code developed with the TIED methodology to ensure correctness.
+   - It appears in: **source code**, **tests**, **data**, and **pseudo-code in TIED detail YAML** (e.g. `essence_pseudocode` in IMPL detail files).
+
+2. **Block and token naming**
+   - Every **block** of managed code must include a comment that names all **REQ**, **ARCH**, and **IMPL** reflected in that block (i.e. whose implementation depends on that block), and states **how** that block implements the requirements.
+   - For TIED tokens, a **block** is a contiguous sequence of code (complete logical units) that all implement the **same set** of REQ / ARCH / IMPL. A single block may contain **nested blocks** that implement a **different set** of REQ / ARCH / IMPL.
+
+3. **Using token names selectively**
+   - **Name tokens only where the set is defined or changes.** At the start of a block, name the full set (REQ, ARCH, IMPL) that the block implements. For nested blocks that implement the **same** set, do **not** repeat the token names; use a comment that only describes *how* that sub-block implements the requirements.
+   - For a nested block that implements a **different** set (e.g. adds another IMPL or REQ), add a comment at the start of that nested block naming the tokens for **that** set (and briefly how it implements them).
+
+4. **Applying this to IMPL pseudo-code**
+   - In `essence_pseudocode`, add one top-level comment naming the IMPL, ARCH, and REQ tokens for the whole decision and a one-line summary of what the pseudo-code implements.
+   - For each logical sub-block (e.g. INPUT/OUTPUT, a procedure, an event handler): if it implements the **same** set as the top level, comment only the *how* (no token list). If a sub-block implements a **different** set (e.g. depends on another IMPL), start that sub-block with a comment listing the tokens for that set and how the sub-block implements them.
+
 ### Extra fields
 
 Any other **top-level keys** under the IMPL root (e.g. domain-specific prose or format keys) are allowed and need not be shared across files. Naming should avoid clashing with the core and optional-but-standard field names above.

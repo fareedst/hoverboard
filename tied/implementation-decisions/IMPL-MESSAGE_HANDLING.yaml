@@ -44,16 +44,21 @@ IMPL-MESSAGE_HANDLING:
       - IMPL-POPUP_MESSAGE_TIMEOUT
       - IMPL-BOOKMARK_STATE_SYNC
   essence_pseudocode: |
+    # [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION]
+    # Message routing with type validation and handler map; send and processMessage.
+    # Contract: message shape, Promise result, allowlist and handler map.
     INPUT: message { type, payload }; sender (tab/popup/background)
     OUTPUT: Promise resolving to handler result or rejecting on validation/error
     DATA: message types (allowlist); handler map type -> handler fn
 
+    # Validate type and payload, route to handler, return Promise.
     send(message):
       VALIDATE message.type in allowlist; VALIDATE payload shape
       ROUTE to handler for message.type
       handler(message) -> result; RETURN Promise.resolve(result)
       ON error: RETURN Promise.reject; optional log
 
+    # Lookup handler by type, await result; caller may broadcast BOOKMARK_UPDATED.
     processMessage(message) (in message-handler):
       handler = lookup(message.type); result = AWAIT handler(message.payload)
       RETURN result; (caller may broadcast BOOKMARK_UPDATED etc.)

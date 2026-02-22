@@ -69,27 +69,35 @@ IMPL-URL_TAGS_DISPLAY:
       - IMPL-BADGE_REFRESH
       - IMPL-MESSAGE_HANDLING
   essence_pseudocode: |
+    # [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+    # normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue; handler and popup use router and re-fetch.
+    # Contract: bookmark or provider+url; normalized bookmark, tags, or badge value.
     INPUT: bookmark (raw from provider), provider + url + title (for getBookmarkForDisplay), provider + url (for getTagsForUrl)
     OUTPUT: normalized bookmark (tags array), tags array, badge display value (text, tagCount, flags)
     DATA: single module url-tags-manager; used by message-handler, service-worker, badge-manager, popup, bookmark-router
 
+    # Tags as array; required defaults; null -> empty shape.
     normalizeBookmarkForDisplay(bookmark):
       IF bookmark null: RETURN null or empty shape
       tags = bookmark.tags IF array ELSE (bookmark.tags split by spaces or [])
       RETURN { ...bookmark, tags, ...requiredDefaults }
 
+    # Get raw from provider and normalize; caller sets needsAuth.
     getBookmarkForDisplay(provider, url, title):
       raw = await provider.getBookmarkForUrl(url)
       RETURN normalizeBookmarkForDisplay(raw); caller sets needsAuth when !hasAuth
 
+    # Get bookmark for url and return tags array.
     getTagsForUrl(provider, url):
       bookmark = await getBookmarkForDisplay(provider, url, null)
       RETURN bookmark?.tags ?? []
 
+    # Normalize and return text, tagCount, isPrivate, isToRead, isBookmarked, title.
     getBadgeDisplayValue(bookmark, config):
       normalized = normalizeBookmarkForDisplay(bookmark)
       RETURN { text, tagCount, isPrivate, isToRead, isBookmarked, title }
 
+    # Handler uses getBookmarkForDisplay and getTagsForUrl; popup null only when blocked and re-fetches; router uses normalizeBookmarkForDisplay.
     Message handler: handleGetCurrentBookmark always via getBookmarkForDisplay(router); handleGetTagsForUrl returns getTagsForUrl. Popup: getBookmarkData null only when blocked; re-fetch tags before add/remove. Router: _hasTags/_isEmptyBookmark use normalizeBookmarkForDisplay.
   detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
   metadata:

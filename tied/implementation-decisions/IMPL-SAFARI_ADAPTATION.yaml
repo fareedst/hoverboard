@@ -48,15 +48,21 @@ IMPL-SAFARI_ADAPTATION:
       - IMPL-CROSS_BROWSER
     composed_with: []
   essence_pseudocode: |
+    # [IMPL-SAFARI_ADAPTATION] [ARCH-SAFARI_ADAPTATION] [REQ-SAFARI_ADAPTATION]
+    # Safari shim, config, animation optimizations, ErrorHandler with degraded mode.
+    # Contract: platform and config; Safari config and fallback/degraded behavior.
     INPUT: platform (detect Safari); config (timeouts, retries); animation/content operations
     OUTPUT: Safari-specific config; optimized or fallback behavior; degraded mode on unrecoverable error
     DATA: getSafariConfig(); ErrorHandler with recovery
 
+    # Apply Safari timeouts/retries on init.
     ON init: IF Safari: config = getSafariConfig(); APPLY timeouts/retries
 
+    # Reduce or replace heavy animations; bound memory.
     optimizeSafariAnimations(): REDUCE or REPLACE heavy animations for Safari; BOUND memory
 
-    ON error: ErrorHandler; TRY recovery; IF unrecoverable: ENTER degraded mode (minimal features)
+      # Try recovery; enter degraded mode if unrecoverable.
+      ON error: ErrorHandler; TRY recovery; IF unrecoverable: ENTER degraded mode (minimal features)
   detail_file: implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml
   metadata:
     created:

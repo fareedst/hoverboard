@@ -60,10 +60,14 @@ IMPL-SUGGESTED_TAGS:
     composed_with:
       - IMPL-SELECTION_TO_TAG_INPUT
   essence_pseudocode: |
+    # [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]
+    # Multi-source extraction, tokenize, frequency sort, case preservation, dedupe; overlay (TagService) and popup (executeScript inlined).
+    # Contract: document and url and limit; suggested tag list.
     INPUT: document, url, limit (per-path defaults differ)
     OUTPUT: list of suggested tag strings (frequency-ordered, case-preserved, deduplicated)
     DATA: sources = title, URL segments, meta keywords/description, headings, emphasis elements (strong/b/em/...), definition terms, table headers/captions, nav links, breadcrumbs, images alt, main links (each with per-source cap); noise word set; delimiter regex for tokenize
 
+    # Gather capped sources, tokenize, filter noise, frequency sort, case-preserve, sanitize, dedupe, slice to limit.
     extractSuggestedTags(document, url, limit):
       allTexts = []
       allTexts.push( title, urlSegments, metaKeywords, metaDescription, headings, emphasisElements, definitionTerms, tableHeaders, navLinks, breadcrumbs, imageAlts, mainLinks )  // each source capped
@@ -81,6 +85,7 @@ IMPL-SUGGESTED_TAGS:
       unique = deduplicate exact strings
       RETURN unique.slice(0, limit or limit*2 for case variants)
 
+    # Overlay: TagService; popup: executeScript with inlined same algorithm; filter vs currentPin.tags.
     overlay path: call TagService.extractSuggestedTagsFromContent(document, url, limit)
     popup path: chrome.scripting.executeScript with inlined function implementing same algorithm; skip if URL not http(s); filter result vs currentPin.tags (case-insensitive) before display
   detail_file: implementation-decisions/IMPL-SUGGESTED_TAGS.yaml

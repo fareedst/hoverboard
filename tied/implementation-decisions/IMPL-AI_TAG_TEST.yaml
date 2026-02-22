@@ -53,9 +53,14 @@ IMPL-AI_TAG_TEST:
       - IMPL-AI_CONFIG_OPTIONS
     composed_with: []
   essence_pseudocode: |
+    # [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG]
+    # Minimal API request to verify key; return { ok } or { ok, error }; used by Options and Popup Test button.
+
+    # Contract: inputs = apiKey and provider; output = success or error result.
     INPUT: apiKey (string), provider ('openai' | 'gemini')
     OUTPUT: { ok: boolean, error?: string }
 
+    # Validate key/provider; per-provider fetch (OpenAI GET models, Gemini GET models); map status to invalid-key or generic error; never log key.
     testAiApiKey(apiKey, provider):
       IF !apiKey or !provider RETURN { ok: false, error: 'Missing key or provider' }
       IF provider === 'openai':

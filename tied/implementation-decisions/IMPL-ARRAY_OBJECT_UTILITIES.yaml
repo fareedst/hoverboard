@@ -35,10 +35,15 @@ IMPL-ARRAY_OBJECT_UTILITIES:
     composed_with:
       - IMPL-URL_UTILITIES
   essence_pseudocode: |
+    # [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]
+    # Array and object helpers: unique, chunk, compact; deepClone, isEmpty, pick; pure, no mutation.
+
+    # Contract: inputs = array or object plus optional keys/size; output = transformed array or object.
     INPUT: array or object; optional keys (for pick), size (for chunk)
     OUTPUT: transformed array or object; no mutation of inputs
     DATA: pure functions; same file as urlUtils, textUtils
 
+    # Dedupe, partition, remove falsy; deep copy, empty check, key subset.
     unique(arr):
       RETURN array of distinct elements (order preserved or by first occurrence)
 

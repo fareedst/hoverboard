@@ -54,14 +54,20 @@ IMPL-SCREENSHOT_MODE:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-POPUP_THEME_CSS
   essence_pseudocode: |
+    # [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX]
+    # Placeholder screenshot flow: seed storage, fake tab params, data-screenshot-ready, handleGetCurrentBookmark prefers data.url.
+    # Contract: URL params and seed; placeholder UI and script capture.
     INPUT: ?screenshot=1&url=...&title=... (popup); seed JSON (local bookmarks, storage index, theme); optional --seed=path
     OUTPUT: popup/index rendered with placeholder data; data-screenshot-ready attribute; script can capture screenshot
     DATA: PopupController._screenshotMode; handleGetCurrentBookmark prefers data.url when http(s); placeholderStorageSeed
 
+    # Await seed; open popup/index; wait for ready; check store-local for index; capture.
     Script: SEED chrome.storage.local/sync (await set); optional LOAD seed from file; OPEN popup or index; WAIT for [data-screenshot-ready="true"]; CHECK #store-local for index; CAPTURE screenshot
 
+    # Use URL params as fake tab; set data-screenshot-ready in finally.
     Popup load: IF screenshot=1 and url param: USE param as fake tab url/title; SKIP getCurrentTab; IN finally SET data-screenshot-ready on #mainInterface
 
+    # Prefer data.url as targetUrl when http(s) so popup-as-tab gets correct bookmark.
     handleGetCurrentBookmark: IF data.url present and http(s): USE as targetUrl so popup-as-tab gets bookmark for screenshot URL
   detail_file: implementation-decisions/IMPL-SCREENSHOT_MODE.yaml
   metadata:

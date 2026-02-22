@@ -42,9 +42,14 @@ IMPL-AI_TAGGING_PROVIDER:
       - IMPL-AI_TAGGING_READABILITY
     composed_with: []
   essence_pseudocode: |
+    # [IMPL-AI_TAGGING_PROVIDER] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-TAG_INPUT_SANITIZATION]
+    # Call provider API (OpenAI or Gemini) with prompt + text; parse lines, sanitizeTag each, dedupe, slice to limit.
+
+    # Contract: inputs = provider, apiKey, text, limit; output = array of sanitized tags up to limit.
     INPUT: provider, apiKey, text (string), limit (number)
     OUTPUT: string[] (sanitized tags, max length limit)
 
+    # Build prompt; per-provider POST (chat completions / generateContent); split response on newlines; trim, sanitizeTag, dedupe case-insensitive, cap at limit.
     requestAiTags(provider, apiKey, text, limit):
       prompt = "Return only a list of up to " + limit + " tags for this page, one tag per line. No numbering or explanation.\n\nPage content:\n" + text.slice(0, 12000)
       IF provider === 'openai':

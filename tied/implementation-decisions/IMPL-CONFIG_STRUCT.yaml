@@ -39,7 +39,10 @@ IMPL-CONFIG_STRUCT:
     see_also: []
     composed_with: []
   essence_pseudocode: |
-    Template: placeholder for configuration structure.
+    # [IMPL-CONFIG_STRUCT] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIGURATION]
+    # Template: placeholder for configuration structure; steps to be filled per project.
+
+    # Contract: input/output/data and loadConfig to be defined per project.
     INPUT: (to be defined) config key or full patch
     OUTPUT: (to be defined) config value or success
     DATA: (to be defined) config shape and storage

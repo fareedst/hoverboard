@@ -46,10 +46,15 @@ IMPL-AI_TAGGING_READABILITY:
       - IMPL-AI_TAGGING_PROVIDER
     composed_with: []
   essence_pseudocode: |
+    # [IMPL-AI_TAGGING_READABILITY] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP]
+    # Extract main content from document: Readability when available, else title + body.innerText; cap at maxLength.
+
+    # Contract: input = document (or run in page context); output = { title, textContent }; maxLength cap (e.g. 16k).
     INPUT: document (or run in page context)
     OUTPUT: { title: string, textContent: string }
     DATA: maxLength (e.g. 16000)
 
+    # Clone document; Readability.parse; use result title/text or fallback to document.title and body.innerText; cap text length.
     extractPageContent(document):
       clone = document.cloneNode(true)
       result = Readability.parse(clone)  // @mozilla/readability

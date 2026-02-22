@@ -53,9 +53,14 @@ IMPL-AI_TAGGING_POPUP_UI:
       - IMPL-AI_TAGGING_PROVIDER
       - IMPL-SESSION_TAGS
   essence_pseudocode: |
+    # [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-STORAGE_MODE_DEFAULT]
+    # Popup "Tag with AI" flow: get page content, get AI tags, split by session, create/update bookmark with default backend, update suggested tags.
+
+    # Contract: input = user click; outputs = bookmark updated, suggested tags list updated.
     INPUT: user click "Tag with AI"
     OUTPUT: bookmark updated; suggested tags updated
 
+    # Guard on API key and http(s) URL; GET_PAGE_CONTENT then GET_AI_TAGS via SW; split inSession vs suggested; save with preferredBackend (REQ-STORAGE_MODE_DEFAULT); refresh state.
     onTagWithAiClick():
       IF !config.aiApiKey or !currentTab.url.startsWith('http') THEN show message; RETURN
       content = await sendToSW({ type: 'GET_PAGE_CONTENT', data: { tabId } })  // SW uses scripting.executeScript in tab

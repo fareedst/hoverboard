@@ -51,10 +51,14 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
       - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
       - IMPL-BOOKMARK_ROUTER
   essence_pseudocode: |
+    # [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]
+    # Import from CSV/JSON; Only new or Overwrite; saveBookmark per row; result message.
+    # Contract: file and mode and backend; counts and refreshed table.
     INPUT: file (CSV or JSON), mode (Only new | Overwrite), preferredBackend (Local | File | Sync), allBookmarks (existing set for "Only new")
     OUTPUT: imported count, skipped count, failed count; refreshed table
     DATA: rows = array of { url, description, tags, time, shared, toread, extended }; existingByUrl = set of url from allBookmarks
 
+    # Parse file, filter if Only new, send saveBookmark per row, refresh and show result.
     runImport(file):
       text = read file as text
       rows = parseImportFile(text, filename)   // CSV -> parseCsv; JSON -> normalize array; skip empty url

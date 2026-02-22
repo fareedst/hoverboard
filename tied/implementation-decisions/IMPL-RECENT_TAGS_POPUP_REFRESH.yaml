@@ -36,19 +36,25 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
     see_also: []
     composed_with: []
   essence_pseudocode: |
+    # [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [REQ-RECENT_TAGS_SYSTEM]
+    # visibilitychange listener calls loadRecentTags when popup visible and initialized.
+    # Contract: event-driven; side effect updates UI with recent tags.
     INPUT: none (event-driven)
     OUTPUT: void (side effect — UI updated with latest recent tags)
     DATA: document.visibilityState; controller initialized flag; isLoading guard; loadRecentTags() (fetches from service worker recentTagsMemory)
 
+    # Register visibilitychange listener.
     setupAutoRefresh():
       REGISTER document.addEventListener("visibilitychange", handler)
 
+    # When visible and initialized and not loading, refresh recent tags.
     handler():
       IF document.visibilityState !== "visible" THEN RETURN
       IF NOT controller.initialized OR controller.isLoading THEN RETURN
       loadRecentTags()
       (UI updates from returned data)
 
+    # Popup visible -> list reflects recentTagsMemory so tags from other windows appear.
     effect: Every time popup document becomes visible (e.g. user reopens popup), Recent Tags list is refreshed so tags saved in one window appear when popup is shown in this or another window.
   detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml
   metadata:

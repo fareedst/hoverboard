@@ -30,18 +30,24 @@ IMPL-MODULE_VALIDATION:
     see_also: []
     composed_with: []
   essence_pseudocode: |
+    # [IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION]
+    # Independent module validation before integration; identify → develop → validate → integrate.
+    # Contract: module boundaries in; validated modules out; strict ordering.
     INPUT: module boundaries and interfaces (identified before development)
     OUTPUT: validated module(s); integration only after validation pass
     CONTROL: strict ordering — development → validation → document → integrate → integration tests
 
+    # Document boundaries, interfaces, contracts, dependencies, validation criteria.
     1. MODULE_IDENTIFICATION (before development):
        DOCUMENT module boundaries, responsibilities, interfaces, contracts, dependencies, validation criteria
 
+    # Implement to interface; use mocks; keep module isolated.
     2. MODULE_DEVELOPMENT:
        IMPLEMENT module to interface
        USE dependency injection or mocks for dependencies
        KEEP module isolated from other modules
 
+    # Run unit/contract tests with mocks; document results; mark validated when pass.
     3. MODULE_VALIDATION (before integration):
        SETUP module with mocked dependencies
        RUN unit tests (contract, edge cases, error handling)
@@ -50,6 +56,7 @@ IMPL-MODULE_VALIDATION:
        DOCUMENT validation results and limitations
        MARK module validated only when all criteria pass
 
+    # Combine validated modules; run integration tests; verify end-to-end.
     4. INTEGRATION (only after validation passes):
        COMBINE validated modules at integration points
        RUN integration tests on combined behavior

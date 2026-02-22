@@ -49,6 +49,9 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       - IMPL-LOCAL_BOOKMARKS_INDEX
       - IMPL-BOOKMARK_ROUTER
   essence_pseudocode: |
+    # [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]
+    # Regex find-and-replace on selected fields; applyRegexReplace (pure); regexReplaceSelected sends saveBookmark when changed.
+    # Pure function: build payload and set changed iff any selected field value changed.
     applyRegexReplace(bookmark, patternStr, replacementStr, options { title, url, tags, notes }):
       TRY reg = new RegExp(patternStr, 'g')
       CATCH e RETURN { payload: null, error: e.message }
@@ -63,6 +66,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       payload = { url, description: desc, tags: tagsArr, extended: ext, preferredBackend, ...time/updated_at/shared/toread }
       RETURN { payload, error: null, changed }
 
+    # Per selected URL apply regex; save only when changed; refresh and restore selection.
     regexReplaceSelected():
       patternStr = regexInput.value.trim(); replacementStr = replacementInput.value
       IF !patternStr || selectedUrls.size === 0 RETURN
