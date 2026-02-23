@@ -1,8 +1,8 @@
 # Tasks and Incomplete Subtasks
 
-**TIED Methodology Version**: 2.1.0
+**TIED Methodology Version**: 2.2.0
 
-**⚠️ OPTIONAL TEMPLATE**: As of TIED 2.0.0, task tracking via `tasks.md` is **optional**. The core TIED value is in the **traceability chain** (requirements → architecture → implementation → tests → code) maintained through semantic tokens and decision documentation, not in task tracking artifacts. Agents may maintain planning state in-session (e.g., conversation-based todo lists) or document work breakdown in `implementation-decisions`. Use this template only if your project benefits from a shared task list for human visibility.
+**⚠️ OPTIONAL TEMPLATE**: As of TIED 2.2.0, task tracking via `tasks.md` is **optional**. The core TIED value is in the **traceability chain** (requirements → architecture → implementation → tests → code) maintained through semantic tokens and decision documentation, not in task tracking artifacts. Agents may maintain planning state in-session (e.g., conversation-based todo lists) or document work breakdown in `implementation-decisions`. Use this template only if your project benefits from a shared task list for human visibility.
 
 ## Overview
 This document tracks all tasks and subtasks for implementing this project. Tasks are organized by priority and implementation phase.

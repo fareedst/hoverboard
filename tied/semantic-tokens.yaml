@@ -18,7 +18,7 @@
 #   description: One-line description of what this token represents
 #   cross_references: List of related tokens (traceability chain)
 #   source_index: Path to the YAML index that holds the full record (e.g., requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, processes.md)
-#   detail_file: Path to the detailed .md file (if one exists)
+#   detail_file: Path to the detailed .yaml file (if one exists)
 #   metadata: Structured metadata with registered and last_updated dates
 
 ---
@@ -297,7 +297,7 @@ IMPL-TIED_FILES:
     - ARCH-TIED_STRUCTURE
     - REQ-TIED_SETUP
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-TIED_FILES.md
+  detail_file: implementation-decisions/IMPL-TIED_FILES.yaml
   metadata:
     registered: 2025-12-18
     last_updated: 2026-02-08

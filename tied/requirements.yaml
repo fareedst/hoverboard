@@ -1524,7 +1524,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
     benefits:
       - Single textbox (comma-separated tags) and button to add those tags to every selected bookmark; tags merged with existing (case-insensitive dedupe)
   satisfaction_criteria:
-    - criterion: "Actions for selected" includes a labeled textbox (e.g. "New tag(s):") and an "Add tags" button.
+    - criterion: '"Actions for selected" includes a labeled textbox (e.g. "New tag(s):") and an "Add tags" button.'
     - criterion: Add tags button is enabled only when at least one bookmark is selected.
     - criterion: On click, parsed tags are merged with each selected bookmark's existing tags and saved via saveBookmark with preferredBackend.
     - criterion: After save, table refreshes and tag input is cleared.
@@ -1573,8 +1573,8 @@ REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
     benefits:
       - Regex and replacement inputs with field checkboxes (Title, URL, Tags, Notes); apply replace only to checked fields; supports named groups, negative lookahead, backreferences
   satisfaction_criteria:
-    - criterion: "Actions for selected" includes labeled textbox for regex and for replacement string.
-    - criterion: "Actions for selected" includes checkboxes for Title, URL, Tags, Notes.
+    - criterion: '"Actions for selected" includes labeled textbox for regex and for replacement string.'
+    - criterion: '"Actions for selected" includes checkboxes for Title, URL, Tags, Notes.'
     - criterion: Replace button runs regex replace on selected bookmarks for checked fields only; invalid regex shows error; Replace disabled when no selection or empty pattern.
     - criterion: After apply, table refreshes and selection retained for still-visible rows.
   validation_criteria:
@@ -1765,7 +1765,7 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
     - criterion: Move uses bookmark URL when available; router allows bookmark without time
     - criterion: Message getStorageBackendForUrl and moveBookmarkToStorage implemented
     - criterion: Options explains default storage for new bookmarks (three-way choice)
-    - criterion: Save follows the highlight: creating/updating a bookmark from the popup uses the currently selected storage backend (popup sends preferredBackend, router honors it)
+    - criterion: "Save follows the highlight: creating/updating a bookmark from the popup uses the currently selected storage backend (popup sends preferredBackend, router honors it)"
   validation_criteria:
     - method: Unit test moveBookmarkToStorage (mock providers)
     - method: Unit test move when source bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]
@@ -1978,7 +1978,7 @@ REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
   rationale:
     why: Browser-loaded extension scripts must not contain bare module specifiers; all entry points must be bundled so npm dependencies are inlined
     problems_solved:
-      - "Failed to resolve module specifier" when popup or other entry loaded unbundled code with npm imports
+      - 'Failed to resolve module specifier when popup or other entry loaded unbundled code with npm imports'
     benefits:
       - Extension loads reliably from dist; service worker, popup, options, content script are single bundles
   satisfaction_criteria:
@@ -2269,7 +2269,7 @@ REQ-SIDE_PANEL_BOOKMARK_SEARCH:
     - criterion: Next and Previous controls advance to the next/previous matching record with scroll-into-view and highlight
   validation_criteria:
     - method: Unit tests
-      coverage: filterBookmarksBySearch: empty query returns all; non-empty matches title/url/tags/extended; case-insensitive; no match returns empty
+      coverage: "filterBookmarksBySearch: empty query returns all; non-empty matches title/url/tags/extended; case-insensitive; no match returns empty"
     - method: Manual verification
       coverage: Type search; see count; use Next/Previous to move through matches; current match highlighted and scrolled into view
   traceability:

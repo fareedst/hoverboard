@@ -3194,7 +3194,7 @@ IMPL-SCREENSHOT_MODE:
       - scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme) and placeholderSyncSeed (showHoverOnPageLoad)
       - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?); wait for [data-screenshot-ready="true"] before popup screenshot; check #store-local before bookmarks index screenshot so seeded local bookmarks are visible
       - scripts/screenshot-seed.example.json: example seed file matching the expected JSON shape
-      - Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: 'dark' (see IMPL-POPUP_THEME_CSS)
+      - "Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: 'dark' (see IMPL-POPUP_THEME_CSS)"
   code_locations:
     files:
       - path: src/ui/popup/PopupController.js
@@ -3235,11 +3235,11 @@ IMPL-POPUP_THEME_CSS:
     - ARCH-THEME
     - IMPL-SCREENSHOT_MODE
   rationale:
-    why: Popup must reflect ThemeManager-applied theme so dark preference and screenshot seed (hoverboard_theme: 'dark') show dark popup
+    why: "Popup must reflect ThemeManager-applied theme so dark preference and screenshot seed (hoverboard_theme: 'dark') show dark popup"
     problems_solved:
       - Popup stayed light when hoverboard_theme was 'dark' because popup.css only overrode variables in @media (prefers-color-scheme: dark), not when document root had class hb-theme-dark
     benefits:
-      - Dark theme preference applies to popup; placeholder screenshots show dark popup when seed includes hoverboard_theme: 'dark'
+      - "Dark theme preference applies to popup; placeholder screenshots show dark popup when seed includes hoverboard_theme: 'dark'"
   implementation_approach:
     summary: Add :root.hb-theme-dark block in popup.css with same dark variable values as the prefers-color-scheme media query
     details:
@@ -3287,7 +3287,7 @@ IMPL-TAB_SEARCH_SERVICE:
   implementation_approach:
     summary: TabSearchService queries chrome.tabs, filters by title substring, selects next match (with wrap-around), activates tab and focuses window; maintains lastSearchText and lastMatchedTabId for continuation.
     details:
-      - searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }
+      - "searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }"
       - findNextTab(matchingTabs, restartTabId): circular navigation; addToSearchHistory
       - Chrome API errors surfaced as rejected promise
   code_locations:
@@ -3684,7 +3684,7 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
     benefits:
       - Testable filterBookmarksBySearch; search bar, count, Next/Previous with scroll and highlight
   implementation_approach:
-    summary: filterBookmarksBySearch in tags-tree-filter.js; tags-tree.js/html/css: search input, count, Next/Previous; data-search-index on links; scroll and highlight current match.
+    summary: "filterBookmarksBySearch in tags-tree-filter.js; tags-tree.js/html/css: search input, count, Next/Previous; data-search-index on links; scroll and highlight current match."
   code_locations:
     files:
       - path: src/ui/side-panel/tags-tree-filter.js

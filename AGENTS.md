@@ -2,7 +2,7 @@
 
 **Scope**: Entire repository (root unless overridden by nested `AGENTS.md` files)
 
-**TIED Methodology Version**: 2.1.0
+**TIED Methodology Version**: 2.2.0
 
 This document centralizes every instruction AI coding assistants must follow while working in TIED repositories. It supersedes reminders in `.ai-agent-instructions`, `.cursorrules`, and README snippets. Treat it as the canonical reference when configuring prompts, IDE rules, or agent workflows.
 
@@ -88,13 +88,14 @@ This document centralizes every instruction AI coding assistants must follow whi
 | `semantic-tokens.md` | Semantic tokens guide with format, naming conventions, and usage examples |
 | `requirements.md` | Requirements guide with documentation (copy from template per project) |
 | `requirements.yaml` | Requirements YAML index/database with all requirement records |
-| `requirements/` | Individual requirement detail files (e.g., `REQ-TIED_SETUP.yaml`) |
+| `requirements/` | Individual requirement detail files (YAML, e.g., `REQ-TIED_SETUP.yaml`); schema: `detail-files-schema.md` |
 | `architecture-decisions.md` | Architecture decisions guide with documentation (copy from template per project) |
 | `architecture-decisions.yaml` | Architecture decisions YAML index/database with `[ARCH-*]` records tied to requirements |
-| `architecture-decisions/` | Individual architecture decision detail files |
+| `architecture-decisions/` | Individual architecture decision detail files (YAML, e.g., `ARCH-TIED_STRUCTURE.yaml`) |
 | `implementation-decisions.md` | Implementation decisions guide with documentation (copy from template per project) |
 | `implementation-decisions.yaml` | Implementation decisions YAML index/database with `[IMPL-*]` records tied to requirements + architecture |
-| `implementation-decisions/` | Individual implementation decision detail files |
+| `implementation-decisions/` | Individual implementation decision detail files (YAML, e.g., `IMPL-MODULE_VALIDATION.yaml`) |
+| `detail-files-schema.md` | Schema for REQ/ARCH/IMPL detail YAML files (in TIED repo or tied/) |
 | `processes.md` | Process tracking including `[PROC-YAML_DB_OPERATIONS]` for YAML operations |
 | `.cursorrules` | IDE loader that points back to this document |
 | `.ai-agent-instructions` | Quick reminder pointing to this document |
@@ -122,4 +123,4 @@ You can apply these rules in several ways:
 - Mirror changes into `ai-principles.md` and related docs as needed.
 - Nested directories may introduce their own `AGENTS.md` to extend or override these rules within their subtree; the most specific file wins.
 
-**Last Updated**: 2025-12-18
+**Last Updated**: 2026-02-23
