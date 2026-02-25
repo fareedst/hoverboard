@@ -247,7 +247,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - **Complete Chrome extension testing** with Manifest V3 compliance
 - **Runtime validation** ([IMPL-RUNTIME_VALIDATION], [ARCH-MESSAGE_HANDLING]) – Zod schemas validate message envelope and critical payloads (getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag) at the service worker; merged config validated in getConfig() with fallback to defaults. Unit tests: `tests/unit/message-schemas.test.js`, `tests/unit/message-handler-runtime-validation.test.js`, `tests/unit/message-handler-local-save-recall.test.js`, `tests/unit/config-manager.test.js`.
 - **TypeScript** ([ARCH-LANGUAGE_SELECTION], [IMPL-TYPESCRIPT_MIGRATION]) – Incremental typing: `npm run typecheck` (tsc --noEmit), shared type definitions (`message-types.d.ts`, `config-types.d.ts`), JSDoc on core and popup message APIs.
-- **Extension E2E** ([IMPL-PLAYWRIGHT_E2E_EXTENSION], [REQ-UI_INSPECTION], [ARCH-UI_TESTABILITY]) – Playwright loads the unpacked extension, opens the popup, and asserts structure; run with `npm run test:e2e:extension`.
+- **Extension E2E** ([IMPL-PLAYWRIGHT_E2E_EXTENSION], [REQ-UI_INSPECTION], [ARCH-UI_TESTABILITY]) – Playwright loads the unpacked extension and runs 16 E2E tests: popup structure; popup↔background messaging (GET_OPTIONS, GET_TAB_ID); popup→content script (TOGGLE_HOVER, GET_OVERLAY_STATE); GET_PAGE_CONTENT (service worker executeScript); suggested tags (MAIN world); GET_PAGE_SELECTION; overlay visibility (snapshotOverlay); options and side panel messaging; options page snapshot (snapshotOptions); bookmarks table, browser bookmark import, offscreen (READ_FILE_BOOKMARKS). Shared fixture: `tests/playwright/extension-fixture.js`; specs: `extension-popup.spec.js`, `extension-messaging.spec.js`, `extension-evaluation.spec.js`, `extension-lower.spec.js`. Run with `npm run test:e2e:extension`.
 - **Native host tests** – Go tests for protocol and ping-pong; Jest tests for NATIVE_PING and `pingNativeHost`
 - **Pinboard API integration testing** for reliable bookmark management
 
@@ -318,7 +318,7 @@ npm test
 # Run integration tests
 npm run test:integration
 
-# Run extension E2E (Playwright: load unpacked extension, open popup, assert structure)
+# Run extension E2E (Playwright: load unpacked extension; popup, messaging, evaluation, overlay, options, side panel)
 npm run test:e2e:extension
 
 # Validate manifest

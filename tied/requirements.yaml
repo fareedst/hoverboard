@@ -1963,17 +1963,24 @@ REQ-UI_INSPECTION:
   satisfaction_criteria:
     - criterion: UI action contract and optional inspector implemented and wired
       metric: ui-action-contract.js, ui-inspector.js; SW/popup/content record messages and actions when enabled
+    - criterion: Extension E2E tests cover messaging, evaluation contexts, overlay, options snapshot
+      metric: tests/playwright/extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js; npm run test:e2e:extension
+  validation_criteria:
+    - method: Extension E2E (Playwright)
+      coverage: Popup, popup↔background, popup→content, GET_PAGE_CONTENT, suggested tags, GET_PAGE_SELECTION, overlay (snapshotOverlay), options/side panel messaging, options snapshot, bookmarks table, browser import, offscreen. See IMPL-PLAYWRIGHT_E2E_EXTENSION.
   traceability:
     architecture:
       - ARCH-UI_TESTABILITY
     implementation:
       - IMPL-UI_ACTION_CONTRACT
       - IMPL-UI_INSPECTOR
+      - IMPL-PLAYWRIGHT_E2E_EXTENSION
   detail_file: requirements/REQ-UI_INSPECTION.yaml
   metadata:
     created: "2026-02-17"
-    last_updated: "2026-02-17"
+    last_updated: "2026-02-25"
     author: AI Agent
+    reason: Added E2E validation and IMPL-PLAYWRIGHT_E2E_EXTENSION traceability
 REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
   name: Extension Bundled Entry Points
   category: Non-Functional

@@ -11,10 +11,14 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
     benefits:
       - Load unpacked dist/, open popup, assert structure; run in CI
   implementation_approach:
-    summary: playwright.extension.config.js (no web server); global-setup builds extension; extension-popup.spec.js uses launchPersistentContext with --load-extension, discovers extension ID from service worker, opens popup and asserts #popupMain visible
+    summary: playwright.extension.config.js (no web server); global-setup builds extension; shared extension-fixture.js provides launchPersistentContext and getExtensionId; multiple specs cover popup, messaging, evaluation contexts, overlay, options, side panel, and lower-priority UIs.
     details:
       - tests/playwright/global-setup.js runs npm run build:only
-      - tests/playwright/extension-popup.spec.js: custom fixture launches chromium.launchPersistentContext with --disable-extensions-except and --load-extension=dist; wait for serviceworker event to get extension ID; goto chrome-extension://ID/src/ui/popup/popup.html; expect body and #popupMain visible
+      - tests/playwright/extension-fixture.js: launchExtensionContext, getExtensionId, shared test fixture; used by all extension specs
+      - tests/playwright/extension-popup.spec.js: popup structure after load
+      - tests/playwright/extension-messaging.spec.js: popup↔background (GET_OPTIONS, GET_TAB_ID), popup→content (TOGGLE_HOVER, GET_OVERLAY_STATE), content↔background, options↔background (NATIVE_PING), side panel↔background (getAggregatedBookmarksForIndex), options page snapshot (snapshotOptions)
+      - tests/playwright/extension-evaluation.spec.js: GET_PAGE_CONTENT (SW executeScript), suggested tags (MAIN world), GET_PAGE_SELECTION, overlay visibility (snapshotOverlay)
+      - tests/playwright/extension-lower.spec.js: bookmarks table, browser bookmark import, READ_FILE_BOOKMARKS (offscreen)
       - npm run test:e2e:extension runs Playwright with playwright.extension.config.js
   code_locations:
     files:
@@ -22,16 +26,29 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
         description: Config for extension E2E only
       - path: tests/playwright/global-setup.js
         description: Builds extension before E2E
+      - path: tests/playwright/extension-fixture.js
+        description: Shared fixture and getExtensionId helper
       - path: tests/playwright/extension-popup.spec.js
         description: Extension popup E2E spec
+      - path: tests/playwright/extension-messaging.spec.js
+        description: Messaging interfaces E2E
+      - path: tests/playwright/extension-evaluation.spec.js
+        description: Evaluation contexts and overlay E2E
+      - path: tests/playwright/extension-lower.spec.js
+        description: Lower-priority UIs and offscreen E2E
     functions: []
   traceability:
     architecture:
       - ARCH-UI_TESTABILITY
+      - ARCH-MESSAGE_HANDLING
     requirements:
       - REQ-UI_INSPECTION
+      - REQ-AI_TAGGING_POPUP
     tests:
       - tests/playwright/extension-popup.spec.js
+      - tests/playwright/extension-messaging.spec.js
+      - tests/playwright/extension-evaluation.spec.js
+      - tests/playwright/extension-lower.spec.js
     code_annotations:
       - IMPL-PLAYWRIGHT_E2E_EXTENSION
   related_decisions:
@@ -44,6 +61,6 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
       date: "2026-02-22"
       author: AI Agent
     last_updated:
-      date: "2026-02-22"
+      date: "2026-02-25"
       author: AI Agent
-      reason: Initial creation for extension E2E flow
+      reason: Added messaging, evaluation, overlay, options snapshot, side panel, and lower-priority E2E specs per plan

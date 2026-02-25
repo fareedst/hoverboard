@@ -324,24 +324,38 @@ IMPL-TYPESCRIPT_MIGRATION:
       author: AI Agent
       reason: Initial creation for incremental TypeScript/JSDoc
 IMPL-PLAYWRIGHT_E2E_EXTENSION:
-  name: Playwright E2E for extension (load unpacked, popup flow)
+  name: Playwright E2E for extension (load unpacked, popup, messaging, evaluation, overlay)
   status: Active
   cross_references:
     - REQ-UI_INSPECTION
     - ARCH-UI_TESTABILITY
+    - ARCH-MESSAGE_HANDLING
+    - REQ-AI_TAGGING_POPUP
   rationale:
-    why: One reliable E2E flow that loads the built extension and asserts popup so refactors are guarded
+    why: E2E flows that load the built extension and assert popup, messaging interfaces, evaluation contexts, overlay, options, and side panel so refactors are guarded
   implementation_approach:
-    summary: playwright.extension.config.js; global-setup builds extension; extension-popup.spec.js uses launchPersistentContext, discovers ID, opens popup, asserts structure
+    summary: playwright.extension.config.js; global-setup builds extension; extension-fixture.js provides launchPersistentContext and getExtensionId; extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js cover popup, popup↔background, popup→content, GET_PAGE_CONTENT, suggested tags, GET_PAGE_SELECTION, overlay (snapshotOverlay), options/side panel messaging, options snapshot, bookmarks table, browser import, offscreen. Run: npm run test:e2e:extension.
   code_locations:
     files:
       - path: playwright.extension.config.js
+      - path: tests/playwright/global-setup.js
+      - path: tests/playwright/extension-fixture.js
       - path: tests/playwright/extension-popup.spec.js
+      - path: tests/playwright/extension-messaging.spec.js
+      - path: tests/playwright/extension-evaluation.spec.js
+      - path: tests/playwright/extension-lower.spec.js
   traceability:
     architecture:
       - ARCH-UI_TESTABILITY
+      - ARCH-MESSAGE_HANDLING
     requirements:
       - REQ-UI_INSPECTION
+      - REQ-AI_TAGGING_POPUP
+    tests:
+      - tests/playwright/extension-popup.spec.js
+      - tests/playwright/extension-messaging.spec.js
+      - tests/playwright/extension-evaluation.spec.js
+      - tests/playwright/extension-lower.spec.js
     code_annotations:
       - IMPL-PLAYWRIGHT_E2E_EXTENSION
   detail_file: implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml
@@ -350,9 +364,9 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
       date: "2026-02-22"
       author: AI Agent
     last_updated:
-      date: "2026-02-22"
+      date: "2026-02-25"
       author: AI Agent
-      reason: Initial creation for extension E2E flow
+      reason: Added messaging, evaluation, overlay, options snapshot, side panel, lower-priority E2E specs
 IMPL-OVERLAY:
   name: Overlay Implementation
   status: Active

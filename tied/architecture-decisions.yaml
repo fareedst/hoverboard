@@ -1272,6 +1272,7 @@ ARCH-UI_TESTABILITY:
     - REQ-UI_INSPECTION
     - IMPL-UI_ACTION_CONTRACT
     - IMPL-UI_INSPECTOR
+    - IMPL-PLAYWRIGHT_E2E_EXTENSION
   rationale:
     why: Single source of truth for message types and action IDs; optional inspector for testing and debugging
     problems_solved:
@@ -1280,22 +1281,26 @@ ARCH-UI_TESTABILITY:
     benefits:
       - Inspector records messages and actions when enabled (gated by flag)
       - Contract module used by tests and inspector
+      - Playwright E2E covers messaging, evaluation contexts, overlay, options, side panel
   implementation_approach:
-    summary: ui-action-contract.js re-exports MESSAGE_TYPES and defines POPUP_ACTION_IDS/OVERLAY_ACTION_IDS; ui-inspector.js provides ring buffers and is wired in SW, popup, content
+    summary: ui-action-contract.js re-exports MESSAGE_TYPES and defines POPUP_ACTION_IDS/OVERLAY_ACTION_IDS; ui-inspector.js provides ring buffers and is wired in SW, popup, content; Playwright extension E2E covers popup, messaging, evaluation, overlay, options, side panel (IMPL-PLAYWRIGHT_E2E_EXTENSION).
     details:
       - Service worker records each message after handleMessage; popup/content recordAction at start of handlers
       - Inspector enabled via localStorage DEBUG_HOVERBOARD_UI or setEnabled in SW (from chrome.storage.local)
+      - E2E: extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js
   traceability:
     requirements:
       - REQ-UI_INSPECTION
     implementation:
       - IMPL-UI_ACTION_CONTRACT
       - IMPL-UI_INSPECTOR
+      - IMPL-PLAYWRIGHT_E2E_EXTENSION
   detail_file: architecture-decisions/ARCH-UI_TESTABILITY.yaml
   metadata:
     created: "2026-02-17"
-    last_updated: "2026-02-17"
+    last_updated: "2026-02-25"
     author: AI Agent
+    reason: Added IMPL-PLAYWRIGHT_E2E_EXTENSION and E2E spec references
 ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
   name: Extension Bundled Entry Points
   status: Active
