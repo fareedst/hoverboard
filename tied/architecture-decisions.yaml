@@ -164,11 +164,15 @@ ARCH-LANGUAGE_SELECTION:
   implementation_approach:
     summary: TypeScript for type-check only; JSDoc and .d.ts for contracts; optional future .ts with esbuild
     details:
-      - tsconfig.json noEmit, typecheck in validate; message-types.d.ts, config-types.d.ts; JSDoc on core and popup sendMessage
+      - tsconfig.json noEmit, typecheck in validate; message-types.d.ts, config-types.d.ts; JSDoc and // @ts-check on config/message key files
+      - Validation: npm run validate (includes typecheck); full pre-push: npm run validate && npm run test && npm run test:e2e:extension
   traceability:
     requirements: []
     implementation:
       - IMPL-TYPESCRIPT_MIGRATION
+    tests:
+      - npm run typecheck
+      - npm run validate
     code_annotations:
       - ARCH-LANGUAGE_SELECTION
   detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.yaml

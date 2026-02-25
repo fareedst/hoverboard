@@ -8,9 +8,12 @@
  * [IMPL-FEATURE_FLAGS] User settings persistence and synchronization
  * [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlAllowed (substring match).
  * [IMPL-RUNTIME_VALIDATION] Zod schema validates merged config in getConfig(); invalid stored data falls back to defaults.
+ * @ts-check
  */
 
 import { z } from 'zod'
+
+/** @typedef {import('../shared/config-types').MergedConfig} MergedConfig */
 
 // [IMPL-RUNTIME_VALIDATION] Schema for merged config (defaults + stored). Passthrough allows future keys.
 const mergedConfigSchema = z.object({
@@ -79,7 +82,7 @@ export class ConfigManager {
   /**
    * Get default configuration values
    * Migrated from src/shared/config.js
-   *
+   * @returns {MergedConfig}
    * IMPL-FEATURE_FLAGS: Feature flags and UI behavior control defaults
    * SPECIFICATION: Each setting controls specific extension behavior
    * IMPLEMENTATION DECISION: Conservative defaults favor user privacy and minimal intrusion
@@ -171,7 +174,7 @@ export class ConfigManager {
 
   /**
    * Get complete configuration object
-   * @returns {Promise<Object>} Configuration object
+   * @returns {Promise<MergedConfig>} Configuration object
    *
    * IMPL-FEATURE_FLAGS: Configuration resolution with default fallback
    * IMPLEMENTATION DECISION: Merge defaults with stored settings to handle partial configurations
@@ -203,6 +206,7 @@ export class ConfigManager {
    * IMPLEMENTATION DECISION: Only expose user-relevant settings to avoid configuration complexity
    */
   async getOptions () {
+    /** @type {MergedConfig} */
     const config = await this.getConfig()
     // IMPL-FEATURE_FLAGS: Filtered configuration for user interface display
     return {
@@ -230,7 +234,7 @@ export class ConfigManager {
 
   /**
    * Update specific configuration values
-   * @param {Object} updates - Configuration updates
+   * @param {Partial<MergedConfig>} updates - Configuration updates
    *
    * IMPL-FEATURE_FLAGS: Partial configuration updates with persistence
    * IMPLEMENTATION DECISION: Merge updates to preserve unmodified settings
@@ -286,7 +290,7 @@ export class ConfigManager {
 
   /**
    * Update visibility default settings
-   * @param {Object} visibilitySettings - New visibility defaults
+   * @param {{ textTheme?: string, transparencyEnabled?: boolean, backgroundOpacity?: number }} visibilitySettings - New visibility defaults
    *
    * UI-006: Visibility defaults update
    * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
@@ -487,7 +491,7 @@ export class ConfigManager {
 
   /**
    * Save settings to storage
-   * @param {Object} settings - Settings to save
+   * @param {MergedConfig|Record<string, unknown>} settings - Settings to save
    *
    * IMPL-FEATURE_FLAGS: Settings persistence with error propagation
    * IMPLEMENTATION DECISION: Let errors propagate to caller for proper error handling
@@ -543,7 +547,7 @@ export class ConfigManager {
 
   /**
    * Import configuration from backup
-   * @param {Object} configData - Configuration data to import
+   * @param {{ settings?: MergedConfig|Record<string, unknown>, authToken?: string, inhibitUrls?: string[] }} configData - Configuration data to import
    *
    * IMPL-CONFIG_BACKUP_RESTORE: Configuration restoration from backup
    * IMPLEMENTATION DECISION: Selective import allows partial configuration restoration

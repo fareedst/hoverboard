@@ -2,14 +2,17 @@
  * [IMPL-RUNTIME_VALIDATION] [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING]
  * Zod schemas for runtime validation of extension messages at the service worker boundary.
  * Validation is incremental: only critical message types have data schemas; others pass through.
+ * @ts-check
  */
 
 import { z } from 'zod'
 
+/** @typedef {import('./message-types').MessageEnvelope} MessageEnvelope */
+
 // Message envelope: all messages must have a type; data is optional (plain object or undefined).
 export const messageEnvelopeSchema = z.object({
   type: z.string(),
-  data: z.record(z.string(), z.any()).optional()
+  data: z.record(z.string(), z.unknown()).optional()
 })
 
 // Optional URL (string; handler accepts any string for data.url in getCurrentBookmark).
@@ -65,7 +68,7 @@ const dataSchemasByType = {
 /**
  * Validate message envelope (type + optional data object). Returns { success: true, data } or { success: false, error }.
  * @param {unknown} message - Raw message object
- * @returns {{ success: true, data: { type: string, data?: object } } | { success: false, error: z.ZodError }}
+ * @returns {{ success: true, data: MessageEnvelope } | { success: false, error: import('zod').ZodError }}
  */
 export function validateMessageEnvelope (message) {
   const result = messageEnvelopeSchema.safeParse(message)

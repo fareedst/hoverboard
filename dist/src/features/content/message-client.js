@@ -1,10 +1,13 @@
 /**
  * Message Client - Modern content script communication with background
  * Replaces legacy sendToExtension/BRSendMessage with Promise-based messaging
+ * @ts-check
  */
 
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
-import { browser } from '../../shared/utils' // [SAFARI-EXT-SHIM-001]
+import { browser } from '../../shared/utils.js' // [SAFARI-EXT-SHIM-001]
+
+/** @typedef {import('../../shared/message-types').MessageEnvelope} MessageEnvelope */
 
 export class MessageClient {
   constructor () {
@@ -15,9 +18,9 @@ export class MessageClient {
 
   /**
    * Send message to background script
-   * @param {Object} message - Message object with type and data
-   * @param {Object} options - Send options
-   * @returns {Promise} Promise that resolves with response
+   * @param {MessageEnvelope} message - Message object with type and data
+   * @param {{ timeout?: number, retries?: number, retryDelay?: number }} [options] - Send options
+   * @returns {Promise<unknown>} Promise that resolves with response
    */
   async sendMessage (message, options = {}) {
     const messageOptions = {
@@ -32,10 +35,10 @@ export class MessageClient {
 
   /**
    * Send message with retry logic
-   * @param {Object} message - Message object
-   * @param {Object} options - Send options
+   * @param {MessageEnvelope} message - Message object
+   * @param {{ timeout?: number, retries?: number, retryDelay?: number }} options - Send options
    * @param {number} attempt - Current attempt number
-   * @returns {Promise} Promise that resolves with response
+   * @returns {Promise<unknown>} Promise that resolves with response
    */
   async sendMessageWithRetry (message, options, attempt) {
     try {
@@ -53,9 +56,9 @@ export class MessageClient {
 
   /**
    * Send single message to background
-   * @param {Object} message - Message object
-   * @param {Object} options - Send options
-   * @returns {Promise} Promise that resolves with response
+   * @param {MessageEnvelope} message - Message object
+   * @param {{ timeout?: number, retries?: number, retryDelay?: number }} options - Send options
+   * @returns {Promise<unknown>} Promise that resolves with response
    */
   // [SAFARI-EXT-SHIM-001] Refactor sendSingleMessage to use await directly
   async sendSingleMessage (message, options) {

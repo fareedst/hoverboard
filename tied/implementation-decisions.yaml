@@ -296,22 +296,40 @@ IMPL-TYPESCRIPT_MIGRATION:
   status: Active
   cross_references:
     - ARCH-LANGUAGE_SELECTION
+    - ARCH-CONFIG_STRUCTURE
+    - ARCH-MESSAGE_HANDLING
     - IMPL-MESSAGE_HANDLING
     - IMPL-RUNTIME_VALIDATION
   rationale:
-    why: Implements ARCH-LANGUAGE_SELECTION; add static typing without big-bang rewrite
+    why: Implements ARCH-LANGUAGE_SELECTION; add static typing without big-bang rewrite; full utilization via checkJs (incremental) and shared types wired into config and message layers
     benefits:
       - typecheck script in CI and validate; JSDoc documents public APIs
+      - config and message types (MergedConfig, MessageEnvelope, etc.) used in JSDoc for config-manager, message-handler, message-schemas, message-client
+      - incremental type-checking via // @ts-check on selected .js files when checkJs is false
   implementation_approach:
-    summary: tsconfig noEmit, typecheck script, .d.ts for message and config; JSDoc on core and popup sendMessage
+    summary: tsconfig noEmit, allowJs, checkJs false with // @ts-check on key files; lib ES2022+DOM; shared .d.ts (config-types, message-types) referenced in config-manager.js, message-handler.js, message-schemas.js, message-client.js; JSDoc @typedef/@param/@returns; z.unknown() instead of z.any() in message schemas
+    details:
+      - tsconfig.json: allowJs true, checkJs false, strict true, lib ES2022 and DOM
+      - Key files use // @ts-check and import shared types via JSDoc (e.g. @typedef {import(...).MergedConfig} MergedConfig)
+      - getConfig/getOptions/updateConfig/saveSettings use MergedConfig; processMessage and message client use MessageEnvelope and payload types
+      - npm run typecheck (tsc --noEmit) runs in validate; expand to more files by adding @ts-check or enabling checkJs true and fixing errors
   code_locations:
     files:
       - path: tsconfig.json
       - path: src/shared/message-types.d.ts
       - path: src/shared/config-types.d.ts
+      - path: src/config/config-manager.js
+      - path: src/core/message-handler.js
+      - path: src/shared/message-schemas.js
+      - path: src/features/content/message-client.js
   traceability:
     architecture:
       - ARCH-LANGUAGE_SELECTION
+      - ARCH-CONFIG_STRUCTURE
+      - ARCH-MESSAGE_HANDLING
+    tests:
+      - npm run typecheck (validates type-checked .js and .d.ts)
+      - npm run validate (includes typecheck; gate before build and before push)
     code_annotations:
       - IMPL-TYPESCRIPT_MIGRATION
   detail_file: implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml
@@ -320,9 +338,9 @@ IMPL-TYPESCRIPT_MIGRATION:
       date: "2026-02-22"
       author: AI Agent
     last_updated:
-      date: "2026-02-22"
+      date: "2026-02-25"
       author: AI Agent
-      reason: Initial creation for incremental TypeScript/JSDoc
+      reason: Full TypeScript utilization; wire shared types; @ts-check on key files; add validation tests to REQ/ARCH/IMPL
 IMPL-PLAYWRIGHT_E2E_EXTENSION:
   name: Playwright E2E for extension (load unpacked, popup, messaging, evaluation, overlay)
   status: Active

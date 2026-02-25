@@ -15496,7 +15496,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         /**
          * Get default configuration values
          * Migrated from src/shared/config.js
-         *
+         * @returns {MergedConfig}
          * IMPL-FEATURE_FLAGS: Feature flags and UI behavior control defaults
          * SPECIFICATION: Each setting controls specific extension behavior
          * IMPLEMENTATION DECISION: Conservative defaults favor user privacy and minimal intrusion
@@ -15615,7 +15615,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         /**
          * Get complete configuration object
-         * @returns {Promise<Object>} Configuration object
+         * @returns {Promise<MergedConfig>} Configuration object
          *
          * IMPL-FEATURE_FLAGS: Configuration resolution with default fallback
          * IMPLEMENTATION DECISION: Merge defaults with stored settings to handle partial configurations
@@ -15668,7 +15668,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         /**
          * Update specific configuration values
-         * @param {Object} updates - Configuration updates
+         * @param {Partial<MergedConfig>} updates - Configuration updates
          *
          * IMPL-FEATURE_FLAGS: Partial configuration updates with persistence
          * IMPLEMENTATION DECISION: Merge updates to preserve unmodified settings
@@ -15719,7 +15719,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         /**
          * Update visibility default settings
-         * @param {Object} visibilitySettings - New visibility defaults
+         * @param {{ textTheme?: string, transparencyEnabled?: boolean, backgroundOpacity?: number }} visibilitySettings - New visibility defaults
          *
          * UI-006: Visibility defaults update
          * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
@@ -15886,7 +15886,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         /**
          * Save settings to storage
-         * @param {Object} settings - Settings to save
+         * @param {MergedConfig|Record<string, unknown>} settings - Settings to save
          *
          * IMPL-FEATURE_FLAGS: Settings persistence with error propagation
          * IMPLEMENTATION DECISION: Let errors propagate to caller for proper error handling
@@ -15934,7 +15934,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         /**
          * Import configuration from backup
-         * @param {Object} configData - Configuration data to import
+         * @param {{ settings?: MergedConfig|Record<string, unknown>, authToken?: string, inhibitUrls?: string[] }} configData - Configuration data to import
          *
          * IMPL-CONFIG_BACKUP_RESTORE: Configuration restoration from backup
          * IMPLEMENTATION DECISION: Selective import allows partial configuration restoration
@@ -22009,9 +22009,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     }
     /**
      * Send message to background script
-     * @param {Object} message - Message object with type and data
-     * @param {Object} options - Send options
-     * @returns {Promise} Promise that resolves with response
+     * @param {MessageEnvelope} message - Message object with type and data
+     * @param {{ timeout?: number, retries?: number, retryDelay?: number }} [options] - Send options
+     * @returns {Promise<unknown>} Promise that resolves with response
      */
     async sendMessage(message, options = {}) {
       const messageOptions = {
@@ -22024,10 +22024,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     }
     /**
      * Send message with retry logic
-     * @param {Object} message - Message object
-     * @param {Object} options - Send options
+     * @param {MessageEnvelope} message - Message object
+     * @param {{ timeout?: number, retries?: number, retryDelay?: number }} options - Send options
      * @param {number} attempt - Current attempt number
-     * @returns {Promise} Promise that resolves with response
+     * @returns {Promise<unknown>} Promise that resolves with response
      */
     async sendMessageWithRetry(message, options, attempt) {
       try {
@@ -22044,9 +22044,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     }
     /**
      * Send single message to background
-     * @param {Object} message - Message object
-     * @param {Object} options - Send options
-     * @returns {Promise} Promise that resolves with response
+     * @param {MessageEnvelope} message - Message object
+     * @param {{ timeout?: number, retries?: number, retryDelay?: number }} options - Send options
+     * @returns {Promise<unknown>} Promise that resolves with response
      */
     // [SAFARI-EXT-SHIM-001] Refactor sendSingleMessage to use await directly
     async sendSingleMessage(message, options) {
@@ -24705,7 +24705,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   init_zod();
   var messageEnvelopeSchema = external_exports.object({
     type: external_exports.string(),
-    data: external_exports.record(external_exports.string(), external_exports.any()).optional()
+    data: external_exports.record(external_exports.string(), external_exports.unknown()).optional()
   });
   var optionalUrlSchema = external_exports.string().optional().nullable();
   var requiredUrlSchema = external_exports.string().min(1);

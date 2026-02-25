@@ -3,48 +3,59 @@ IMPL-TYPESCRIPT_MIGRATION:
   status: Active
   cross_references:
     - ARCH-LANGUAGE_SELECTION
+    - ARCH-CONFIG_STRUCTURE
+    - ARCH-MESSAGE_HANDLING
     - IMPL-MESSAGE_HANDLING
     - IMPL-RUNTIME_VALIDATION
   rationale:
-    why: Implements ARCH-LANGUAGE_SELECTION; add static typing without big-bang rewrite
+    why: Implements ARCH-LANGUAGE_SELECTION; add static typing without big-bang rewrite; full utilization via checkJs (incremental) and shared types wired into config and message layers
     problems_solved:
       - No compile-time checking for message/config contracts
     benefits:
       - typecheck script in CI and validate; JSDoc documents public APIs
       - Shared type definitions align with Zod schemas and config shape
+      - config-manager and message-handler/schemas/message-client use MergedConfig and MessageEnvelope in JSDoc; tsc validates selected .js files via // @ts-check
   implementation_approach:
-    summary: tsconfig (noEmit), typecheck script, .d.ts for message and config; JSDoc on core and popup sendMessage
+    summary: tsconfig noEmit, allowJs, checkJs false with // @ts-check on key files; lib ES2022+DOM; shared .d.ts referenced in config and message code; JSDoc discipline; z.unknown() in message schemas
     details:
-      - tsconfig.json: allowJs, checkJs false, noEmit, types chrome/node/jest
-      - npm run typecheck (tsc --noEmit) added to validate
-      - src/shared/message-types.d.ts (MessageEnvelope, payload interfaces)
-      - src/shared/config-types.d.ts (MergedConfig, StorageMode)
-      - JSDoc on message-handler processMessage, message-service sendMessage, service-worker onMessage listener, PopupController sendMessage
-      - Future: enable checkJs on selected files or convert files to .ts; esbuild supports .ts
+      - tsconfig.json: allowJs true, checkJs false, noEmit, strict true, lib ES2022 and DOM, types chrome/node/jest
+      - npm run typecheck (tsc --noEmit) runs in validate
+      - src/shared/message-types.d.ts (MessageEnvelope, SaveBookmarkData, etc.); src/shared/config-types.d.ts (MergedConfig, StorageMode)
+      - Key files use // @ts-check and JSDoc @typedef {import(...).MergedConfig} and @param/@returns; getConfig returns Promise<MergedConfig>; processMessage and message client use MessageEnvelope
+      - config-manager.js, message-handler.js, message-schemas.js, message-client.js are type-checked; expand by adding @ts-check to more files or enabling checkJs true
+      - message-schemas.js uses z.record(z.string(), z.unknown()) instead of z.any() for envelope data
   code_locations:
     files:
       - path: tsconfig.json
-        description: TypeScript config for type-check only
+        description: TypeScript config for type-check only; lib includes DOM
       - path: src/shared/message-types.d.ts
         description: Message envelope and payload type definitions
       - path: src/shared/config-types.d.ts
         description: Merged config type definitions
+      - path: src/config/config-manager.js
+        description: @ts-check; MergedConfig in getConfig/getOptions/updateConfig/saveSettings/importConfig
       - path: src/core/message-handler.js
-        description: JSDoc for processMessage
-      - path: src/core/message-service.js
-        description: JSDoc for sendMessage
-      - path: src/core/service-worker.js
-        description: JSDoc for onMessage listener
-      - path: src/ui/popup/PopupController.js
-        description: JSDoc for sendMessage
+        description: @ts-check; MessageEnvelope and payload typedefs; processMessage and handlers
+      - path: src/shared/message-schemas.js
+        description: @ts-check; MessageEnvelope in validateMessageEnvelope return type
+      - path: src/features/content/message-client.js
+        description: @ts-check; MessageEnvelope in sendMessage/sendMessageWithRetry/sendSingleMessage
     functions: []
   traceability:
     architecture:
       - ARCH-LANGUAGE_SELECTION
+      - ARCH-CONFIG_STRUCTURE
+      - ARCH-MESSAGE_HANDLING
     requirements: []
-    tests: []
+    tests:
+      - npm run typecheck (tsc --noEmit) validates type-checked .js files and .d.ts
+      - npm run validate (includes typecheck) is the gate before build; run before pushing
     code_annotations:
       - IMPL-TYPESCRIPT_MIGRATION
+  validation_evidence:
+    - date: "2026-02-25"
+      result: pass
+      notes: typecheck passes with @ts-check on config-manager, message-handler, message-schemas, message-client; validate runs typecheck
   related_decisions:
     depends_on: []
     supersedes: []
@@ -57,6 +68,6 @@ IMPL-TYPESCRIPT_MIGRATION:
       date: "2026-02-22"
       author: AI Agent
     last_updated:
-      date: "2026-02-22"
+      date: "2026-02-25"
       author: AI Agent
-      reason: Initial creation for incremental TypeScript/JSDoc
+      reason: Full TypeScript utilization; wire shared types; @ts-check on config/message files; document approach

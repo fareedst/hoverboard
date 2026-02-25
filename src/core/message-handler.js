@@ -2,9 +2,14 @@
  * [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION]
  * Message routing with type validation and handler map; processMessage and handler dispatch.
  * [IMPL-RUNTIME_VALIDATION] Incremental Zod validation at processMessage entry for critical message types.
+ * @ts-check
  */
 
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
+
+/** @typedef {import('../shared/message-types').MessageEnvelope} MessageEnvelope */
+/** @typedef {import('../shared/message-types').SaveBookmarkData} SaveBookmarkData */
+/** @typedef {import('../shared/message-types').GetCurrentBookmarkData} GetCurrentBookmarkData */
 import { LocalBookmarkService } from '../features/storage/local-bookmark-service.js'
 import { getBookmarkForDisplay, getTagsForUrl } from '../features/storage/url-tags-manager.js'
 import { TagService } from '../features/tagging/tag-service.js'
@@ -98,7 +103,7 @@ export class MessageHandler {
 
   /**
    * [ARCH-LOCAL_STORAGE_PROVIDER] Swap the active bookmark provider at runtime (e.g. after storage mode change).
-   * @param {Object} provider - PinboardService or LocalBookmarkService instance
+   * @param {import('../features/pinboard/pinboard-service.js').PinboardService | import('../features/storage/local-bookmark-service.js').LocalBookmarkService} provider - PinboardService or LocalBookmarkService instance
    */
   setBookmarkProvider (provider) {
     this.bookmarkProvider = provider
@@ -108,6 +113,7 @@ export class MessageHandler {
   /**
    * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION]
    * Set optional callback invoked after each message is processed (for tests). Signature: ({ type, data, response, error, senderContext }) => void
+   * @param {((arg: { type: string, data?: unknown, response?: unknown, error?: unknown, senderContext?: { tabId?: number, url?: string } }) => void) | null} fn
    */
   setOnMessageProcessed (fn) {
     this._onMessageProcessed = typeof fn === 'function' ? fn : null
@@ -124,8 +130,9 @@ export class MessageHandler {
     // [IMPL-RUNTIME_VALIDATION] Validate message envelope; reject invalid shape before dispatch
     const envelopeResult = validateMessageEnvelope(message)
     if (!envelopeResult.success) {
-      debugError('[IMPL-RUNTIME_VALIDATION] Invalid message envelope', envelopeResult.error?.issues)
-      return { error: 'Invalid message', details: envelopeResult.error?.issues ?? 'envelope validation failed' }
+      const issues = envelopeResult.error?.issues
+      debugError('[IMPL-RUNTIME_VALIDATION] Invalid message envelope', issues != null ? JSON.stringify(issues) : 'envelope validation failed')
+      return { error: 'Invalid message', details: issues ?? 'envelope validation failed' }
     }
     const { type } = envelopeResult.data
     const rawData = envelopeResult.data.data
@@ -133,8 +140,9 @@ export class MessageHandler {
     // [IMPL-RUNTIME_VALIDATION] Validate data for critical message types (incremental; no schema = no check)
     const dataResult = validateMessageData(type, rawData)
     if (!dataResult.success) {
-      debugError('[IMPL-RUNTIME_VALIDATION] Invalid message data for type', type, dataResult.error?.issues)
-      return { error: 'Invalid message', details: dataResult.error?.issues ?? 'data validation failed' }
+      const dataIssues = dataResult.error?.issues
+      debugError('[IMPL-RUNTIME_VALIDATION] Invalid message data for type', type, dataIssues != null ? JSON.stringify(dataIssues) : 'data validation failed')
+      return { error: 'Invalid message', details: dataIssues ?? 'data validation failed' }
     }
     const data = dataResult.data
 

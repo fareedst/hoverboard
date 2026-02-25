@@ -15468,7 +15468,7 @@ var init_config_manager = __esm({
       /**
        * Get default configuration values
        * Migrated from src/shared/config.js
-       *
+       * @returns {MergedConfig}
        * IMPL-FEATURE_FLAGS: Feature flags and UI behavior control defaults
        * SPECIFICATION: Each setting controls specific extension behavior
        * IMPLEMENTATION DECISION: Conservative defaults favor user privacy and minimal intrusion
@@ -15587,7 +15587,7 @@ var init_config_manager = __esm({
       }
       /**
        * Get complete configuration object
-       * @returns {Promise<Object>} Configuration object
+       * @returns {Promise<MergedConfig>} Configuration object
        *
        * IMPL-FEATURE_FLAGS: Configuration resolution with default fallback
        * IMPLEMENTATION DECISION: Merge defaults with stored settings to handle partial configurations
@@ -15640,7 +15640,7 @@ var init_config_manager = __esm({
       }
       /**
        * Update specific configuration values
-       * @param {Object} updates - Configuration updates
+       * @param {Partial<MergedConfig>} updates - Configuration updates
        *
        * IMPL-FEATURE_FLAGS: Partial configuration updates with persistence
        * IMPLEMENTATION DECISION: Merge updates to preserve unmodified settings
@@ -15691,7 +15691,7 @@ var init_config_manager = __esm({
       }
       /**
        * Update visibility default settings
-       * @param {Object} visibilitySettings - New visibility defaults
+       * @param {{ textTheme?: string, transparencyEnabled?: boolean, backgroundOpacity?: number }} visibilitySettings - New visibility defaults
        *
        * UI-006: Visibility defaults update
        * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
@@ -15858,7 +15858,7 @@ var init_config_manager = __esm({
       }
       /**
        * Save settings to storage
-       * @param {Object} settings - Settings to save
+       * @param {MergedConfig|Record<string, unknown>} settings - Settings to save
        *
        * IMPL-FEATURE_FLAGS: Settings persistence with error propagation
        * IMPLEMENTATION DECISION: Let errors propagate to caller for proper error handling
@@ -15906,7 +15906,7 @@ var init_config_manager = __esm({
       }
       /**
        * Import configuration from backup
-       * @param {Object} configData - Configuration data to import
+       * @param {{ settings?: MergedConfig|Record<string, unknown>, authToken?: string, inhibitUrls?: string[] }} configData - Configuration data to import
        *
        * IMPL-CONFIG_BACKUP_RESTORE: Configuration restoration from backup
        * IMPLEMENTATION DECISION: Selective import allows partial configuration restoration
@@ -18588,7 +18588,7 @@ init_utils();
 init_zod();
 var messageEnvelopeSchema = external_exports.object({
   type: external_exports.string(),
-  data: external_exports.record(external_exports.string(), external_exports.any()).optional()
+  data: external_exports.record(external_exports.string(), external_exports.unknown()).optional()
 });
 var optionalUrlSchema = external_exports.string().optional().nullable();
 var requiredUrlSchema = external_exports.string().min(1);

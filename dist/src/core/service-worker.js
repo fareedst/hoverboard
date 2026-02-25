@@ -14391,7 +14391,7 @@ var init_config_manager = __esm({
       /**
        * Get default configuration values
        * Migrated from src/shared/config.js
-       *
+       * @returns {MergedConfig}
        * IMPL-FEATURE_FLAGS: Feature flags and UI behavior control defaults
        * SPECIFICATION: Each setting controls specific extension behavior
        * IMPLEMENTATION DECISION: Conservative defaults favor user privacy and minimal intrusion
@@ -14510,7 +14510,7 @@ var init_config_manager = __esm({
       }
       /**
        * Get complete configuration object
-       * @returns {Promise<Object>} Configuration object
+       * @returns {Promise<MergedConfig>} Configuration object
        *
        * IMPL-FEATURE_FLAGS: Configuration resolution with default fallback
        * IMPLEMENTATION DECISION: Merge defaults with stored settings to handle partial configurations
@@ -14563,7 +14563,7 @@ var init_config_manager = __esm({
       }
       /**
        * Update specific configuration values
-       * @param {Object} updates - Configuration updates
+       * @param {Partial<MergedConfig>} updates - Configuration updates
        *
        * IMPL-FEATURE_FLAGS: Partial configuration updates with persistence
        * IMPLEMENTATION DECISION: Merge updates to preserve unmodified settings
@@ -14614,7 +14614,7 @@ var init_config_manager = __esm({
       }
       /**
        * Update visibility default settings
-       * @param {Object} visibilitySettings - New visibility defaults
+       * @param {{ textTheme?: string, transparencyEnabled?: boolean, backgroundOpacity?: number }} visibilitySettings - New visibility defaults
        *
        * UI-006: Visibility defaults update
        * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
@@ -14781,7 +14781,7 @@ var init_config_manager = __esm({
       }
       /**
        * Save settings to storage
-       * @param {Object} settings - Settings to save
+       * @param {MergedConfig|Record<string, unknown>} settings - Settings to save
        *
        * IMPL-FEATURE_FLAGS: Settings persistence with error propagation
        * IMPLEMENTATION DECISION: Let errors propagate to caller for proper error handling
@@ -14829,7 +14829,7 @@ var init_config_manager = __esm({
       }
       /**
        * Import configuration from backup
-       * @param {Object} configData - Configuration data to import
+       * @param {{ settings?: MergedConfig|Record<string, unknown>, authToken?: string, inhibitUrls?: string[] }} configData - Configuration data to import
        *
        * IMPL-CONFIG_BACKUP_RESTORE: Configuration restoration from backup
        * IMPLEMENTATION DECISION: Selective import allows partial configuration restoration
@@ -20018,7 +20018,7 @@ init_utils();
 init_zod();
 var messageEnvelopeSchema = external_exports.object({
   type: external_exports.string(),
-  data: external_exports.record(external_exports.string(), external_exports.any()).optional()
+  data: external_exports.record(external_exports.string(), external_exports.unknown()).optional()
 });
 var optionalUrlSchema = external_exports.string().optional().nullable();
 var requiredUrlSchema = external_exports.string().min(1);
@@ -20138,7 +20138,7 @@ var MessageHandler = class {
   }
   /**
    * [ARCH-LOCAL_STORAGE_PROVIDER] Swap the active bookmark provider at runtime (e.g. after storage mode change).
-   * @param {Object} provider - PinboardService or LocalBookmarkService instance
+   * @param {import('../features/pinboard/pinboard-service.js').PinboardService | import('../features/storage/local-bookmark-service.js').LocalBookmarkService} provider - PinboardService or LocalBookmarkService instance
    */
   setBookmarkProvider(provider) {
     this.bookmarkProvider = provider;
@@ -20147,6 +20147,7 @@ var MessageHandler = class {
   /**
    * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION]
    * Set optional callback invoked after each message is processed (for tests). Signature: ({ type, data, response, error, senderContext }) => void
+   * @param {((arg: { type: string, data?: unknown, response?: unknown, error?: unknown, senderContext?: { tabId?: number, url?: string } }) => void) | null} fn
    */
   setOnMessageProcessed(fn) {
     this._onMessageProcessed = typeof fn === "function" ? fn : null;
@@ -20161,15 +20162,17 @@ var MessageHandler = class {
   async processMessage(message, sender) {
     const envelopeResult = validateMessageEnvelope(message);
     if (!envelopeResult.success) {
-      debugError("[IMPL-RUNTIME_VALIDATION] Invalid message envelope", envelopeResult.error?.issues);
-      return { error: "Invalid message", details: envelopeResult.error?.issues ?? "envelope validation failed" };
+      const issues = envelopeResult.error?.issues;
+      debugError("[IMPL-RUNTIME_VALIDATION] Invalid message envelope", issues != null ? JSON.stringify(issues) : "envelope validation failed");
+      return { error: "Invalid message", details: issues ?? "envelope validation failed" };
     }
     const { type } = envelopeResult.data;
     const rawData = envelopeResult.data.data;
     const dataResult = validateMessageData(type, rawData);
     if (!dataResult.success) {
-      debugError("[IMPL-RUNTIME_VALIDATION] Invalid message data for type", type, dataResult.error?.issues);
-      return { error: "Invalid message", details: dataResult.error?.issues ?? "data validation failed" };
+      const dataIssues = dataResult.error?.issues;
+      debugError("[IMPL-RUNTIME_VALIDATION] Invalid message data for type", type, dataIssues != null ? JSON.stringify(dataIssues) : "data validation failed");
+      return { error: "Invalid message", details: dataIssues ?? "data validation failed" };
     }
     const data = dataResult.data;
     let tabId = sender.tab?.id;
