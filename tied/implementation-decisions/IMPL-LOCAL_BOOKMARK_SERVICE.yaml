@@ -30,7 +30,9 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       - ARCH-STORAGE
     requirements:
       - REQ-STORAGE_MODE_DEFAULT
-    tests: []
+    tests:
+      - tests/unit/local-bookmark-service.test.js
+      - tests/unit/message-handler-local-save-recall.test.js
     code_annotations:
       - IMPL-LOCAL_BOOKMARK_SERVICE
   related_decisions:
@@ -93,9 +95,9 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      date: '2026-02-25'
+      author: AI Agent
+      reason: Add tests: local-bookmark-service (shared/toread round-trip), message-handler-local-save-recall (save then getCurrentBookmark)
     last_validated:
       date: '2026-02-18'
       validator: MCP converter

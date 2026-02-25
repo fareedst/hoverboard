@@ -26,13 +26,13 @@ export const getTagsForUrlDataSchema = z.object({
   url: requiredUrlSchema
 }).strict()
 
-// saveBookmark: url required; tags optional (array or string); other fields optional; passthrough for provider-specific keys
+// saveBookmark: url required; tags optional (array or string); shared/toread optional (boolean, number, or Pinboard-style 'yes'/'no')
 export const saveBookmarkDataSchema = z.object({
   url: requiredUrlSchema,
   tags: z.union([z.array(z.string()), z.string()]).optional(),
   description: z.string().optional(),
-  toread: z.union([z.boolean(), z.number()]).optional(),
-  shared: z.union([z.boolean(), z.number()]).optional(),
+  toread: z.union([z.boolean(), z.number(), z.enum(['yes', 'no'])]).optional(),
+  shared: z.union([z.boolean(), z.number(), z.enum(['yes', 'no'])]).optional(),
   title: z.string().optional()
 }).passthrough()
 

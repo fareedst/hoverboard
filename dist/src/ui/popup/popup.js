@@ -18602,8 +18602,8 @@ var saveBookmarkDataSchema = external_exports.object({
   url: requiredUrlSchema,
   tags: external_exports.union([external_exports.array(external_exports.string()), external_exports.string()]).optional(),
   description: external_exports.string().optional(),
-  toread: external_exports.union([external_exports.boolean(), external_exports.number()]).optional(),
-  shared: external_exports.union([external_exports.boolean(), external_exports.number()]).optional(),
+  toread: external_exports.union([external_exports.boolean(), external_exports.number(), external_exports.enum(["yes", "no"])]).optional(),
+  shared: external_exports.union([external_exports.boolean(), external_exports.number(), external_exports.enum(["yes", "no"])]).optional(),
   title: external_exports.string().optional()
 }).passthrough();
 var deleteBookmarkDataSchema = external_exports.object({

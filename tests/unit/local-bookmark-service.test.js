@@ -60,6 +60,23 @@ describe('LocalBookmarkService [ARCH-LOCAL_STORAGE_PROVIDER] [IMPL-LOCAL_BOOKMAR
     expect(b.time).toBe(b.updated_at)
   })
 
+  test('saveBookmark and getBookmarkForUrl round-trip with shared/toread (UI-style payload) [IMPL-LOCAL_BOOKMARK_SERVICE]', async () => {
+    const result = await service.saveBookmark({
+      url: 'https://example.com/page',
+      description: 'Test',
+      tags: ['a'],
+      shared: 'yes',
+      toread: 'no'
+    })
+    expect(result.success).toBe(true)
+    const b = await service.getBookmarkForUrl('https://example.com/page')
+    expect(b.url).toBe('https://example.com/page')
+    expect(b.description).toBe('Test')
+    expect(b.tags).toEqual(['a'])
+    expect(b.shared).toBe('yes')
+    expect(b.toread).toBe('no')
+  })
+
   test('rejects when URL is missing [IMPL-LOCAL_BOOKMARK_SERVICE]', async () => {
     const result = await service.saveBookmark({ description: 'No URL' })
     expect(result).toEqual({ success: false, code: 'invalid', message: 'URL is required' })

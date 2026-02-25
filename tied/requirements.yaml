@@ -478,6 +478,10 @@ REQ-SMART_BOOKMARKING:
       - IMPL-BOOKMARKING
     tests:
       - Bookmark creation tests
+      - tests/unit/message-schemas.test.js (saveBookmark payload validation)
+      - tests/unit/message-handler-runtime-validation.test.js (processMessage saveBookmark acceptance)
+      - tests/unit/message-handler-local-save-recall.test.js (save then getCurrentBookmark local storage path)
+      - tests/unit/local-bookmark-service.test.js (shared/toread round-trip)
     code_annotations:
       - REQ-SMART_BOOKMARKING
   related_requirements:

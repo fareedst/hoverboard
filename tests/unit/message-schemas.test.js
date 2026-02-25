@@ -34,6 +34,11 @@ describe('[IMPL-RUNTIME_VALIDATION] Message envelope validation', () => {
     const result2 = validateMessageEnvelope('string')
     expect(result2.success).toBe(false)
   })
+
+  test('rejects envelope when data is not a plain object [IMPL-RUNTIME_VALIDATION]', () => {
+    expect(validateMessageEnvelope({ type: 'getCurrentBookmark', data: [] }).success).toBe(false)
+    expect(validateMessageEnvelope({ type: 'getCurrentBookmark', data: 'x' }).success).toBe(false)
+  })
 })
 
 describe('[IMPL-RUNTIME_VALIDATION] getCurrentBookmark data', () => {
@@ -61,6 +66,10 @@ describe('[IMPL-RUNTIME_VALIDATION] getTagsForUrl data', () => {
     const result = validateMessageData('getTagsForUrl', { url: '' })
     expect(result.success).toBe(false)
   })
+  test('rejects undefined data [IMPL-RUNTIME_VALIDATION]', () => {
+    const result = validateMessageData('getTagsForUrl', undefined)
+    expect(result.success).toBe(false)
+  })
 })
 
 describe('[IMPL-RUNTIME_VALIDATION] saveBookmark data', () => {
@@ -75,6 +84,20 @@ describe('[IMPL-RUNTIME_VALIDATION] saveBookmark data', () => {
   })
   test('rejects missing url', () => {
     const result = validateMessageData('saveBookmark', { tags: ['a'] })
+    expect(result.success).toBe(false)
+  })
+  test('rejects undefined data [IMPL-RUNTIME_VALIDATION]', () => {
+    const result = validateMessageData('saveBookmark', undefined)
+    expect(result.success).toBe(false)
+  })
+  test('accepts shared/toread as Pinboard-style strings yes/no when saving to local storage [IMPL-RUNTIME_VALIDATION]', () => {
+    const result = validateMessageData('saveBookmark', { url: 'https://example.com', shared: 'yes', toread: 'no' })
+    expect(result.success).toBe(true)
+    expect(result.data.shared).toBe('yes')
+    expect(result.data.toread).toBe('no')
+  })
+  test('rejects empty url', () => {
+    const result = validateMessageData('saveBookmark', { url: '' })
     expect(result.success).toBe(false)
   })
 })
@@ -112,6 +135,10 @@ describe('[IMPL-RUNTIME_VALIDATION] deleteTag data', () => {
   })
   test('rejects missing url', () => {
     const result = validateMessageData('deleteTag', { value: 't' })
+    expect(result.success).toBe(false)
+  })
+  test('rejects missing value [IMPL-RUNTIME_VALIDATION]', () => {
+    const result = validateMessageData('deleteTag', { url: 'https://x.com' })
     expect(result.success).toBe(false)
   })
 })

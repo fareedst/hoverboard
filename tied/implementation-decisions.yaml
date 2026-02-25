@@ -249,6 +249,7 @@ IMPL-RUNTIME_VALIDATION:
     details:
       - Message envelope (type + optional data) validated for all messages in message-handler processMessage
       - Data schemas for critical types: getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag
+      - saveBookmark schema accepts shared/toread as Pinboard-style 'yes'/'no' for local storage and popup payloads
       - getCurrentBookmark schema uses .passthrough() so senders (e.g. overlay-manager) may include url, title, tabId
       - Config schema validates merged (defaults + stored) config in ConfigManager.getConfig(); on failure use defaults
       - Validation is incremental: message types without a schema pass through; config schema uses passthrough for future keys
@@ -270,6 +271,8 @@ IMPL-RUNTIME_VALIDATION:
     requirements: []
     tests:
       - tests/unit/message-schemas.test.js
+      - tests/unit/message-handler-runtime-validation.test.js
+      - tests/unit/message-handler-local-save-recall.test.js
       - tests/unit/config-manager.test.js
     code_annotations:
       - IMPL-RUNTIME_VALIDATION
@@ -285,9 +288,9 @@ IMPL-RUNTIME_VALIDATION:
       date: "2026-02-22"
       author: AI Agent
     last_updated:
-      date: "2026-02-22"
+      date: "2026-02-25"
       author: AI Agent
-      reason: Initial creation for Zod message and config validation
+      reason: Add message-handler-runtime-validation.test.js; message-handler-local-save-recall.test.js; saveBookmark shared/toread yes/no for local storage
 IMPL-TYPESCRIPT_MIGRATION:
   name: Incremental TypeScript and JSDoc typing
   status: Active
@@ -2032,7 +2035,9 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       - ARCH-LOCAL_STORAGE_PROVIDER
     requirements:
       - REQ-STORAGE_MODE_DEFAULT
-    tests: []
+    tests:
+      - tests/unit/local-bookmark-service.test.js
+      - tests/unit/message-handler-local-save-recall.test.js
     code_annotations:
       - IMPL-LOCAL_BOOKMARK_SERVICE
   related_decisions:
@@ -2050,8 +2055,9 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       date: '2026-02-13'
       author: AI Agent
     last_updated:
-      date: '2026-02-13'
+      date: '2026-02-25'
       author: AI Agent
+      reason: Add message-handler-local-save-recall.test.js; local-bookmark-service shared/toread round-trip
       reason: Local storage mode implementation per plan
     last_validated:
       date: '2026-02-13'

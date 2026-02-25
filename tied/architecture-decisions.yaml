@@ -969,7 +969,11 @@ ARCH-MESSAGE_HANDLING:
       - REQ-BOOKMARK_STATE_SYNCHRONIZATION
     implementation:
       - IMPL-MESSAGE_HANDLING
-    tests: []
+    tests:
+      - tests/unit/message-schemas.test.js
+      - tests/unit/message-handler-runtime-validation.test.js
+      - tests/unit/message-handler-local-save-recall.test.js
+      - tests/unit/message-handler-url-tags.test.js
     code_annotations:
       - ARCH-MESSAGE_HANDLING
   related_decisions:
@@ -1540,7 +1544,9 @@ ARCH-LOCAL_STORAGE_PROVIDER:
       - REQ-STORAGE_MODE_DEFAULT
     implementation:
       - IMPL-LOCAL_BOOKMARK_SERVICE
-    tests: []
+    tests:
+      - tests/unit/local-bookmark-service.test.js
+      - tests/unit/message-handler-local-save-recall.test.js
     code_annotations:
       - ARCH-LOCAL_STORAGE_PROVIDER
   related_decisions:

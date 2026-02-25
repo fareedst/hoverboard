@@ -245,7 +245,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 #### **Test Coverage:**
 - **508+ tests** across 37+ test suites (1 skipped)
 - **Complete Chrome extension testing** with Manifest V3 compliance
-- **Runtime validation** ([IMPL-RUNTIME_VALIDATION], [ARCH-MESSAGE_HANDLING]) – Zod schemas validate message envelope and critical payloads (getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag) at the service worker; merged config validated in getConfig() with fallback to defaults. Unit tests: `tests/unit/message-schemas.test.js`, `tests/unit/config-manager.test.js`.
+- **Runtime validation** ([IMPL-RUNTIME_VALIDATION], [ARCH-MESSAGE_HANDLING]) – Zod schemas validate message envelope and critical payloads (getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag) at the service worker; merged config validated in getConfig() with fallback to defaults. Unit tests: `tests/unit/message-schemas.test.js`, `tests/unit/message-handler-runtime-validation.test.js`, `tests/unit/message-handler-local-save-recall.test.js`, `tests/unit/config-manager.test.js`.
 - **TypeScript** ([ARCH-LANGUAGE_SELECTION], [IMPL-TYPESCRIPT_MIGRATION]) – Incremental typing: `npm run typecheck` (tsc --noEmit), shared type definitions (`message-types.d.ts`, `config-types.d.ts`), JSDoc on core and popup message APIs.
 - **Extension E2E** ([IMPL-PLAYWRIGHT_E2E_EXTENSION], [REQ-UI_INSPECTION], [ARCH-UI_TESTABILITY]) – Playwright loads the unpacked extension, opens the popup, and asserts structure; run with `npm run test:e2e:extension`.
 - **Native host tests** – Go tests for protocol and ping-pong; Jest tests for NATIVE_PING and `pingNativeHost`
