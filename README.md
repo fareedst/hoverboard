@@ -339,6 +339,9 @@ npm run test:e2e:extension
 # Validate manifest
 npm run validate-manifest
 
+# Validate TIED tokens (included in npm run validate)
+npm run validate:tokens
+
 # Create release package
 npm run create-release
 
@@ -358,11 +361,18 @@ node scripts/screenshots-placeholder.js --seed=scripts/screenshot-seed.example.j
 npm run validate && npm run test && npm run test:e2e:extension
 ```
 
-- **`npm run validate`** – Runs lint, typecheck (`tsc --noEmit`), manifest validation, and security audit. This is the same gate used by `npm run build:dev`.
+- **`npm run validate`** – Runs lint, typecheck (`tsc --noEmit`), manifest validation, TIED token validation (`scripts/validate_tokens.sh`), and security audit. This is the same gate used by `npm run build:dev`.
 - **`npm run test`** – Unit and integration tests (Jest), including messaging protocol tests (MessageHandler contracts, SW routing, content/offscreen/popup contracts, MessageClient retry, message-type drift).
 - **`npm run test:e2e:extension`** – Playwright E2E tests (load unpacked extension, popup, messaging, overlay, options, side panel).
 
 For a quicker check without E2E: `npm run validate && npm run test`.
+
+### Code and test quality (TIED)
+
+Development is guided by the TIED process: implementation decisions are captured in pseudo-code and decision docs (`tied/`) before tests or code. Code and tests carry semantic tokens (`[REQ-*]`, `[ARCH-*]`, `[IMPL-*]`) for traceability from requirements → architecture → implementation → tests → code.
+
+- **Token validation** – `npm run validate` (and CI) runs `npm run validate:tokens`, which ensures every `[REQ-*]` / `[ARCH-*]` / `[IMPL-*]` referenced in `src/` and `tests/` is registered in `tied/semantic-tokens.yaml`. Run manually: `bash scripts/validate_tokens.sh`.
+- **Quality summary** – Module boundaries and provider-style contracts are documented; unit tests use mocks and reference REQ/IMPL in describe/test names; messaging and contract tests cover extension protocols. Debug output uses `debugLog`/`debugError` per TIED. See CHANGELOG for the latest quality and token-validation notes.
 
 ## Documentation
 

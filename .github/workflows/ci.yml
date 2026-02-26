@@ -39,6 +39,9 @@ jobs:
     - name: 🔍 Lint Code
       run: npm run lint
       
+    - name: 🏷️ Validate TIED tokens
+      run: npm run validate:tokens
+      
     - name: 🧪 Run Unit Tests
       run: npm run test:unit
       
