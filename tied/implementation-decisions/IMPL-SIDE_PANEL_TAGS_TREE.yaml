@@ -8,6 +8,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
   cross_references:
     - ARCH-SIDE_PANEL_TAGS_TREE
     - REQ-SIDE_PANEL_TAGS_TREE
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
   rationale:
     why: Implements ARCH-SIDE_PANEL_TAGS_TREE and REQ-SIDE_PANEL_TAGS_TREE with one IMPL covering open flow, data build, and panel UI.
     problems_solved:
@@ -27,13 +28,13 @@ IMPL-SIDE_PANEL_TAGS_TREE:
   code_locations:
     files:
       - path: src/ui/side-panel/tags-tree-data.js
-        description: buildTagToBookmarks, getAllTagsFromBookmarks, getTagsToDisplay, openUrlInNewTab (pure/helpers; testable)
+        description: buildTagToBookmarks, getAllTagsFromBookmarks, getTagsToDisplay, intersectionTagOrder, openUrlInNewTab (pure/helpers; testable)
       - path: src/ui/side-panel/tags-tree-filter.js
         description: getDomainFromUrl, filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy (pure; testable)
       - path: src/ui/side-panel/tags-tree.html
         description: Panel layout (config region + tag selector + tree container)
       - path: src/ui/side-panel/tags-tree.js
-        description: load data and config, apply filter/sort/group, render config toggle and controls, tag selector, tree or grouped list, click URL
+        description: load data and config, apply filter/sort/group, render config toggle and controls, tag selector, tree or grouped list, click URL; pendingCurrentBookmarkTags, initTagsTreeTab(options), setSelectedTagsFromCurrentBookmark(tags)
       - path: src/ui/side-panel/tags-tree.css
         description: Panel styles including config region expand/collapse
       - path: src/ui/popup/popup.html
@@ -60,6 +61,12 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - name: getTagsToDisplay
         file: src/ui/side-panel/tags-tree-data.js
         description: Returns tags to show in selector: allTags when showAllTags true, else selectedTagOrder filtered by allTags (REQ/ARCH/IMPL)
+      - name: intersectionTagOrder
+        file: src/ui/side-panel/tags-tree-data.js
+        description: Intersection of preferredTags with allTags preserving order; used to set Tags tree selection from current bookmark tags (REQ-SIDE_PANEL_POPUP_EQUIVALENT)
+      - name: setSelectedTagsFromCurrentBookmark
+        file: src/ui/side-panel/tags-tree.js
+        description: Set selectedTagOrder to intersection(allTags, tags), save, refresh; no-op if bookmarks not loaded (REQ-SIDE_PANEL_POPUP_EQUIVALENT)
       - name: openUrlInNewTab
         file: src/ui/side-panel/tags-tree-data.js
         description: chrome.tabs.create({ url }); implements click-URL-opens-in-new-tab (REQ/ARCH/IMPL)
@@ -167,6 +174,10 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       SEND getAggregatedBookmarksForIndex
       ON response: bookmarks = response.bookmarks; filtered = applyFilters(bookmarks, config); sorted = sortBookmarks(filtered, config.sortBy, config.sortAsc); allTags = getAllTagsFromBookmarks(bookmarks); selectedTagOrder = config.selectedTagOrder OR allTags; IF config.groupBy !== 'none' THEN grouped = groupBookmarksBy(sorted, config.groupBy); renderGrouped(grouped, config) ELSE tagToBookmarks = buildTagToBookmarks(sorted); collapsedTags = loadCollapsedState(); renderTagSelector(); renderTree(selectedTagOrder, tagToBookmarks, collapsedTags); attachClickHandlers()
 
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # When panel is tabbed, Tags tree is second tab; load/render runs on tab select or first show. initTagsTreeTab(options) is callable from side-panel.js when user selects Tags tree tab; optional currentBookmarkTags syncs tag selector to current bookmark. Implements "Tags tree tab" in tabbed panel and "tag selector matches current bookmark; tree shows only bookmarks that share at least one tag".
+    WHEN panel is tabbed (side-panel.html): Tags tree content in #tagsTreePanel; initTagsTreeTab(options) exported; side-panel.js passes currentBookmarkTags from Bookmark tab controller when switching to Tags tree. initTagsTreeTab(options): IF options.currentBookmarkTags set pendingCurrentBookmarkTags. loadBookmarks(): after allTags and default selectedTagOrder, IF pendingCurrentBookmarkTags set THEN selectedTagOrder = intersectionTagOrder(allTags, pendingCurrentBookmarkTags); saveSelectedTagOrder(selectedTagOrder); pendingCurrentBookmarkTags = null. setSelectedTagsFromCurrentBookmark(tags): when Tags tree already loaded, selectedTagOrder = intersectionTagOrder(allTags, tags); save; refreshFromConfig(); renderTagSelector(). intersectionTagOrder(allTags, preferredTags): RETURN preferredTags filtered to tags that exist in allTags (order preserved). Implements "Tags tree displays only bookmarks that have at least one of the same tags as the current bookmark".
+
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
     # buildTagToBookmarks: implements requirement "tag-based tree" by producing Map<tag, [{ title, url }]> from bookmarks. One pass; trim/dedupe per tag.
     buildTagToBookmarks(bookmarks):
@@ -246,6 +257,10 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
     # openUrlInNewTab / ON click URL: implements "click-to-open in new tab" requirement via chrome.tabs.create({ url }).
     ON click URL in tree: url = event target url; openUrlInNewTab(url)  // openUrlInNewTab(url) => chrome.tabs.create({ url })
+
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # Tags tree panel layout: panel fills content area and tree section scrolls. Selector must match DOM id (tagsTreePanel). Override min-height so panel participates in flex; overflow hidden so only .tree-section scrolls. Implements "tab content fills vertical space" for Tags tree tab.
+    CSS #tagsTreePanel: display flex; flex-direction column; min-height 0; overflow hidden; background var(--color-background)
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml
   metadata:
     created:
@@ -254,4 +269,4 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     last_updated:
       date: '2026-02-25'
       author: AI Agent
-      reason: Add getTagsToDisplay, showAllTags, compact tag selector, all/checked toggle; sync essence_pseudocode and code
+      reason: Add Tags tree panel layout essence_pseudocode and #tagsTreePanel CSS (min-height 0, overflow hidden) so tab content fills vertical space

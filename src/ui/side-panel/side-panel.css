@@ -1,0 +1,61 @@
+/* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] Side panel tab bar and content layout. Layout overrides popup-derived body constraints so tab content fills vertical space. */
+
+.side-panel-header {
+  flex-shrink: 0;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border-color, #333);
+}
+
+.side-panel-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.side-panel-tabs {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.side-panel-tab {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #eee);
+  cursor: pointer;
+}
+
+.side-panel-tab:hover {
+  background: var(--bg-hover, #333);
+}
+
+.side-panel-tab[aria-selected="true"] {
+  background: var(--bg-active, #444);
+  border-color: var(--accent, #5a9);
+}
+
+/* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] Tab content area: flex column so children can fill space; flex-grow and min-height 0 so it uses remaining viewport height. */
+.side-panel-content {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  padding: 0.5rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.side-panel-content[hidden] {
+  display: none !important;
+}
+
+/* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] Override popup body constraints so panel uses full viewport height and width; max-height none and width 100% implement "tab content fills vertical space". */
+#side-panel-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  max-height: none;
+  width: 100%;
+}

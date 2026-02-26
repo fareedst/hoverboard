@@ -28,6 +28,10 @@ execSync('npm run build:content', { stdio: 'inherit' });
 console.log('Building popup...');
 execSync('npm run build:popup', { stdio: 'inherit' });
 
+// [IMPL-SIDE_PANEL_TABS] Build side panel bundle (popup stack + tags-tree) so extension loads single entry
+console.log('Building side panel...');
+execSync('npm run build:side-panel', { stdio: 'inherit' });
+
 // Copy manifest
 fs.copyFileSync(
     path.join(rootDir, 'manifest.json'),
@@ -54,6 +58,7 @@ const copyDir = (src, dest) => {
             if (srcPath.includes('ui/options/options.js')) continue;
             if (srcPath.includes('features/content/content-main.js')) continue;
             if (srcPath.includes('ui/popup/popup.js')) continue;
+            if (srcPath.includes('ui/side-panel/side-panel.js')) continue;
             fs.copyFileSync(srcPath, destPath);
         }
     }

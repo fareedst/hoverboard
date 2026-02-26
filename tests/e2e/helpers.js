@@ -1,6 +1,6 @@
 /**
- * E2E snapshot helpers for popup, overlay, and options pages
- * [REQ-UI_INSPECTION] [ARCH-UI_TESTABILITY]
+ * E2E snapshot helpers for popup, overlay, options, and side panel pages
+ * [REQ-UI_INSPECTION] [ARCH-UI_TESTABILITY] [IMPL-SIDE_PANEL_SNAPSHOT]
  * Use with Puppeteer/Playwright page instances when extension is loaded.
  */
 
@@ -80,5 +80,63 @@ export async function snapshotOptions (page) {
       hasTokenField: !!tokenInput,
       storageMode: storageMode || undefined
     }
+  })
+}
+
+/**
+ * [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
+ * Snapshot side panel: two serializable state shapes (Bookmark tab, Tags tree tab) for E2E assertions.
+ * @param {import('puppeteer').Page} page - Page navigated to side-panel.html (chrome-extension://id/.../side-panel.html)
+ * @returns {Promise<{ bookmarkTab: { panelPresent: boolean, screen?: string, loadingVisible?: boolean, errorVisible?: boolean, mainVisible?: boolean, errorMessage?: string }, tagsTreeTab: { panelPresent: boolean, hasTagSelector?: boolean, hasTreeContainer?: boolean, hasSearchInput?: boolean, hasConfigToggle?: boolean, hasSearchCount?: boolean, hasEmptyState?: boolean, hasLoadError?: boolean } }>}
+ */
+export async function snapshotSidePanel (page) {
+  return await page.evaluate(() => {
+    // [IMPL-SIDE_PANEL_SNAPSHOT] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] Bookmark tab: root #bookmarkPanel, data-popup-ref visibility and screen
+    const bookmarkRoot = document.getElementById('bookmarkPanel')
+    let bookmarkTab
+    if (!bookmarkRoot) {
+      bookmarkTab = { panelPresent: false }
+    } else {
+      const loading = bookmarkRoot.querySelector('[data-popup-ref="loadingState"]')
+      const error = bookmarkRoot.querySelector('[data-popup-ref="errorState"]')
+      const main = bookmarkRoot.querySelector('[data-popup-ref="mainInterface"]')
+      const loadingVisible = !!(loading && !loading.classList.contains('hidden'))
+      const errorVisible = !!(error && !error.classList.contains('hidden'))
+      const mainVisible = !!(main && !main.classList.contains('hidden'))
+      let screen = 'unknown'
+      if (loadingVisible) screen = 'loading'
+      else if (errorVisible) screen = 'error'
+      else if (mainVisible) screen = 'mainInterface'
+      const errorMsgEl = bookmarkRoot.querySelector('[data-popup-ref="errorMessage"]')
+      bookmarkTab = {
+        panelPresent: true,
+        screen,
+        loadingVisible,
+        errorVisible,
+        mainVisible,
+        errorMessage: errorMsgEl ? errorMsgEl.textContent : undefined
+      }
+    }
+
+    // [IMPL-SIDE_PANEL_SNAPSHOT] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Tags tree tab: root #tagsTreePanel, key element presence
+    const tagsTreeRoot = document.getElementById('tagsTreePanel')
+    let tagsTreeTab
+    if (!tagsTreeRoot) {
+      tagsTreeTab = { panelPresent: false }
+    } else {
+      const byId = (id) => document.getElementById(id)
+      tagsTreeTab = {
+        panelPresent: true,
+        hasTagSelector: !!byId('tagSelector'),
+        hasTreeContainer: !!byId('treeContainer'),
+        hasSearchInput: !!byId('searchInput'),
+        hasConfigToggle: !!byId('configToggle'),
+        hasSearchCount: !!byId('searchCount'),
+        hasEmptyState: !!byId('emptyState'),
+        hasLoadError: !!byId('loadError')
+      }
+    }
+
+    return { bookmarkTab, tagsTreeTab }
   })
 }

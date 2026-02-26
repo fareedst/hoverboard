@@ -48,7 +48,7 @@
     "windows"
   ],
   "side_panel": {
-    "default_path": "src/ui/side-panel/tags-tree.html"
+    "default_path": "src/ui/side-panel/side-panel.html"
   },
   "host_permissions": [
     "http://*/*",

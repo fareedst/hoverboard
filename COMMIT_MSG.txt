@@ -1,0 +1,14 @@
+feat(side-panel): both tabs refresh on browser tab focus
+
+- When side panel is open, both Bookmark and Tags tree tabs update to show
+  the DB record for the current tab's URL when the active browser tab
+  changes or completes (same trigger as badge).
+- Tags tree tab now refreshes on tab focus: tag selector and tree reflect
+  current tab's bookmark tags (REQ-SIDE_PANEL_POPUP_EQUIVALENT,
+  IMPL-SIDE_PANEL_TABS, IMPL-SIDE_PANEL_TAGS_TREE).
+- On tab change: always refresh controller (refreshPopupData) when panel
+  has controller; then refresh Tags tree when visible via
+  refreshTagsTreeTabIfVisible (setSelectedTagsFromCurrentBookmark).
+- Add shouldRefreshTagsTreeTabOnTabChange in side-panel-tab-state.js;
+  unit tests for Tags tree refresh helper in side-panel-tabs.test.js.
+- TIED: REQ/IMPL criteria and essence_pseudocode updated; CHANGELOG entry.

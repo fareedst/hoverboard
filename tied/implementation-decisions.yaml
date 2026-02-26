@@ -395,6 +395,44 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
       date: "2026-02-25"
       author: AI Agent
       reason: Added messaging, evaluation, overlay, options snapshot, side panel, lower-priority E2E specs
+IMPL-SIDE_PANEL_SNAPSHOT:
+  name: Side Panel Snapshot E2E Helper
+  status: Active
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - REQ-SIDE_PANEL_TAGS_TREE
+  rationale:
+    why: E2E snapshot helper for side panel (Bookmark tab + Tags tree tab) so tests can assert serializable state shapes
+  implementation_approach:
+    summary: snapshotSidePanel(page) in tests/e2e/helpers.js returns { bookmarkTab, tagsTreeTab }; page.evaluate queries #bookmarkPanel/#tagsTreePanel and key elements; E2E spec asserts shapes.
+  code_locations:
+    files:
+      - path: tests/e2e/helpers.js
+      - path: tests/playwright/extension-messaging.spec.js
+      - path: tests/e2e/popup-snapshot.e2e.test.js
+  traceability:
+    architecture:
+      - ARCH-UI_TESTABILITY
+    requirements:
+      - REQ-UI_INSPECTION
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+      - REQ-SIDE_PANEL_TAGS_TREE
+    tests:
+      - tests/e2e/popup-snapshot.e2e.test.js
+      - tests/playwright/extension-messaging.spec.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_SNAPSHOT
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml
+  metadata:
+    created:
+      date: "2026-02-25"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-25"
+      author: AI Agent
+      reason: Side panel snapshot E2E (Bookmark + Tags tree tabs)
 IMPL-OVERLAY:
   name: Overlay Implementation
   status: Active
@@ -3240,7 +3278,7 @@ IMPL-SCREENSHOT_MODE:
       - PopupController.loadInitialData checks URL params; when screenshot=1 and url present, skip getCurrentTab() and use decoded url/title; in finally, set data-screenshot-ready on #mainInterface so script can wait for content
       - MessageHandler.handleGetCurrentBookmark: when data.url is present and is http(s), use it as targetUrl so popup-opened-as-tab gets bookmark for the screenshot URL, not the extension tab URL
       - scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme) and placeholderSyncSeed (showHoverOnPageLoad)
-      - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?); wait for [data-screenshot-ready="true"] before popup screenshot; check #store-local before bookmarks index screenshot so seeded local bookmarks are visible
+      - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?); wait for [data-screenshot-ready="true"] before popup screenshot; check #store-local before bookmarks index screenshot so seeded local bookmarks are visible; side panel captures use viewport 240px width so README images match real Chrome side panel proportions
       - scripts/screenshot-seed.example.json: example seed file matching the expected JSON shape
       - "Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: 'dark' (see IMPL-POPUP_THEME_CSS)"
   code_locations:
@@ -3273,7 +3311,7 @@ IMPL-SCREENSHOT_MODE:
     last_updated:
       date: "2026-02-20"
       author: AI Agent
-      reason: Screenshot fixes and formal seed-from-file; data-screenshot-ready; store checkbox for index
+      reason: Side panel captures at 240px viewport width (IMPL-SCREENSHOT_MODE)
 
 IMPL-POPUP_THEME_CSS:
   name: Popup CSS honors ThemeManager (hb-theme-dark)
@@ -3766,5 +3804,154 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
       author: AI Agent
     last_updated:
       date: '2026-02-22'
+      author: AI Agent
+      reason: Initial creation
+IMPL-SIDE_PANEL_TABS:
+  name: Side Panel Tabs Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_TABS and REQ-SIDE_PANEL_POPUP_EQUIVALENT with one IMPL for tab UI and init flow.
+    problems_solved:
+      - No tabbed panel; no single entry for Bookmark + Tags tree
+    benefits:
+      - Single side-panel entry script; tab bar; lazy init of Bookmark and Tags tree tabs; tab persistence
+  implementation_approach:
+    summary: side-panel.html has tab bar and two panels (#bookmarkPanel, #tagsTreePanel). side-panel.js on load reads persisted tab, shows that panel, binds tab clicks. On first "Bookmark" select: init UISystem, createPopup({ container: bookmarkPanel }), controller.loadInitialData(), setupEventListeners. On "Tags tree" select: call initTagsTreeTab(). Persist tab on switch. Build: bundle side-panel.js.
+    details:
+      - manifest side_panel.default_path to side-panel.html
+      - Tab buttons; click handler switches panel, saves to storage, runs init for that tab if not yet inited
+      - Storage key hoverboard_sidepanel_active_tab; values "bookmark" | "tagsTree"
+  code_locations:
+    files:
+      - path: src/ui/side-panel/side-panel.html
+      - path: src/ui/side-panel/side-panel.js
+      - path: src/ui/side-panel/tags-tree.js
+      - path: manifest.json
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TABS
+    requirements:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    tests:
+      - tests/unit/side-panel-tabs.test.js
+      - tests/playwright/extension-messaging.spec.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_TABS
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_TABS
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_BOOKMARK
+      - IMPL-SIDE_PANEL_TAGS_TREE
+      - IMPL-UIManager_SCOPED_ROOT
+    composed_with:
+      - IMPL-SIDE_PANEL_BOOKMARK
+      - IMPL-SIDE_PANEL_TAGS_TREE
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
+  metadata:
+    created:
+      date: '2026-02-25'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-25'
+      author: AI Agent
+      reason: Initial creation
+IMPL-SIDE_PANEL_BOOKMARK:
+  name: Side Panel Bookmark Tab Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - IMPL-UIManager_SCOPED_ROOT
+  rationale:
+    why: Bookmark tab must mirror popup UI so the same controller and handlers work; scoped root avoids duplicate IDs in document.
+    problems_solved:
+      - Popup uses document.getElementById; panel has two panels in one document
+    benefits:
+      - Same PopupController/UIManager logic; container + data-popup-ref for element lookup in Bookmark panel
+      - "Open Tags tree" in panel context switches tab instead of opening panel again
+  implementation_approach:
+    summary: #bookmarkPanel contains markup mirroring popup main with data-popup-ref on each element. UIManager built with container = bookmarkPanel uses container.querySelector('[data-popup-ref="id"]'). PopupController receives that UIManager. Footer "Tags tree" in panel: switchToTagsTreeTab() instead of OPEN_SIDE_PANEL.
+  code_locations:
+    files:
+      - path: src/ui/side-panel/side-panel.html
+      - path: src/ui/side-panel/side-panel.js
+      - path: src/ui/popup/UIManager.js
+      - path: src/ui/index.js
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TABS
+    requirements:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    tests:
+      - tests/unit/ui-manager-scoped-root.test.js
+      - tests/unit/side-panel-tabs.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_BOOKMARK
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_TABS
+      - IMPL-UIManager_SCOPED_ROOT
+    see_also:
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-AI_TAGGING_POPUP_UI
+    composed_with:
+      - IMPL-UIManager_SCOPED_ROOT
+      - IMPL-SIDE_PANEL_TABS
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml
+  metadata:
+    created:
+      date: '2026-02-25'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-25'
+      author: AI Agent
+      reason: Initial creation
+IMPL-UIManager_SCOPED_ROOT:
+  name: UIManager Scoped Root for Panel Context
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - IMPL-SIDE_PANEL_BOOKMARK
+  rationale:
+    why: In the tabbed side panel, Bookmark and Tags tree share one document; UIManager must resolve elements from Bookmark subtree when container is provided.
+    problems_solved:
+      - document.getElementById would clash if both panels had same ids
+    benefits:
+      - Popup remains document-scoped; panel passes container so all lookups are under that root
+  implementation_approach:
+    summary: UIManager constructor accepts optional container. In cacheElements(), if container set, use container.querySelector('[data-popup-ref="key"]') for each key; else document.getElementById(key). Section labels and other selectors scope to container when set.
+  code_locations:
+    files:
+      - path: src/ui/popup/UIManager.js
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TABS
+    requirements:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    tests:
+      - tests/unit/ui-manager-scoped-root.test.js
+    code_annotations:
+      - IMPL-UIManager_SCOPED_ROOT
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_TABS
+    see_also:
+      - IMPL-SIDE_PANEL_BOOKMARK
+      - IMPL-SIDE_PANEL_TABS
+    composed_with:
+      - IMPL-SIDE_PANEL_BOOKMARK
+  detail_file: implementation-decisions/IMPL-UIManager_SCOPED_ROOT.yaml
+  metadata:
+    created:
+      date: '2026-02-25'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-25'
       author: AI Agent
       reason: Initial creation

@@ -1,0 +1,88 @@
+# [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK]
+# Implementation: UIManager accepts optional container; when set, cacheElements uses container.querySelector('[data-popup-ref="id"]') instead of document.getElementById('id').
+
+IMPL-UIManager_SCOPED_ROOT:
+  name: UIManager Scoped Root for Panel Context
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - IMPL-SIDE_PANEL_BOOKMARK
+  rationale:
+    why: In the tabbed side panel, Bookmark and Tags tree share one document; popup UI expects element ids. To avoid duplicate IDs, Bookmark panel is a subtree with data-popup-ref attributes; UIManager must resolve elements from that subtree when container is provided.
+    problems_solved:
+      - document.getElementById would clash if both panels had same ids
+      - Popup and panel could not share the same UIManager/PopupController without scoping
+    benefits:
+      - Popup remains document-scoped (no container); panel passes container = bookmarkPanel so all lookups are under that root
+      - One code path for both contexts
+  implementation_approach:
+    summary: UIManager constructor accepts optional container (DOM element). In cacheElements(), if container is set, for each element key (e.g. mainInterface) use container.querySelector('[data-popup-ref="mainInterface"]'); else use document.getElementById('mainInterface'). All other UIManager methods use this.elements so no further changes. Popup creates UIManager without container; side-panel creates UIManager with container = bookmarkPanel.
+    details:
+      - data-popup-ref value matches the id used in popup (mainInterface, loadingState, showHoverBtn, newTagInput, etc.)
+      - Section labels and other document.querySelectorAll in UIManager: when container set, scope to container (e.g. container.querySelectorAll('.section-title'))
+  code_locations:
+    files:
+      - path: src/ui/popup/UIManager.js
+        description: Constructor container option; cacheElements branch by container
+    functions:
+      - name: cacheElements
+        file: src/ui/popup/UIManager.js
+        description: If container: querySelector('[data-popup-ref="key"]') for each key; else getElementById
+      - name: constructor
+        file: src/ui/popup/UIManager.js
+        description: this.container = options.container || null
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TABS
+    requirements:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    tests:
+      - tests/unit/ui-manager-scoped-root.test.js
+    code_annotations:
+      - IMPL-UIManager_SCOPED_ROOT
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_TABS
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_BOOKMARK
+      - IMPL-SIDE_PANEL_TABS
+    composed_with:
+      - IMPL-SIDE_PANEL_BOOKMARK
+  essence_pseudocode: |
+    # [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK]
+    # This block defines scoped element resolution in UIManager so the same UI logic works in popup (document) and panel (container). Implements REQ by allowing popup-equivalent in panel without duplicate IDs; implements ARCH scoped root.
+
+    INPUT: UIManager constructor options { container?: Element }; cacheElements() run at init
+    OUTPUT: this.elements populated; when container set, elements are from container subtree
+    DATA: container (optional), elementKeys (mainInterface, loadingState, showHoverBtn, ...)
+
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-UIManager_SCOPED_ROOT]
+    # Constructor: store container. Implements optional scoped root.
+    UIManager constructor({ container, ... }):
+      this.container = container || null
+      cacheElements()
+
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-UIManager_SCOPED_ROOT]
+    # cacheElements: when container set, for each key (mainInterface, loadingState, ...) set this.elements[key] = container.querySelector('[data-popup-ref="key"]'); else this.elements[key] = document.getElementById(key). Implements "elements resolved from container when in panel context".
+    cacheElements():
+      FOR each key in elementKeys:
+        IF this.container: this.elements[key] = this.container.querySelector('[data-popup-ref="' + key + '"]')
+        ELSE: this.elements[key] = document.getElementById(key)
+
+    # [IMPL-UIManager_SCOPED_ROOT]
+    # Section labels and other selectors: when container set, use container.querySelectorAll so visibility/config apply only to Bookmark panel. Sub-block implements same REQ/ARCH by scoping all DOM lookups to container.
+    updateSectionLabelsVisibility(showLabels):
+      root = this.container || document
+      sectionTitles = root.querySelectorAll('.section-title')
+      ...
+  detail_file: implementation-decisions/IMPL-UIManager_SCOPED_ROOT.yaml
+  metadata:
+    created:
+      date: '2026-02-25'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-25'
+      author: AI Agent
+      reason: Initial creation

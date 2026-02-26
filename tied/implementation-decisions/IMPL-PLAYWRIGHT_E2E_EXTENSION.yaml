@@ -16,7 +16,7 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
       - tests/playwright/global-setup.js runs npm run build:only
       - tests/playwright/extension-fixture.js: launchExtensionContext, getExtensionId, shared test fixture; used by all extension specs
       - tests/playwright/extension-popup.spec.js: popup structure after load
-      - tests/playwright/extension-messaging.spec.js: popup↔background (GET_OPTIONS, GET_TAB_ID), popup→content (TOGGLE_HOVER, GET_OVERLAY_STATE), content↔background, options↔background (NATIVE_PING), side panel↔background (getAggregatedBookmarksForIndex), options page snapshot (snapshotOptions)
+      - tests/playwright/extension-messaging.spec.js: popup↔background (GET_OPTIONS, GET_TAB_ID), popup→content (TOGGLE_HOVER, GET_OVERLAY_STATE), content↔background, options↔background (NATIVE_PING), side panel↔background (getAggregatedBookmarksForIndex), options page snapshot (snapshotOptions), side panel snapshot (snapshotSidePanel; IMPL-SIDE_PANEL_SNAPSHOT)
       - tests/playwright/extension-evaluation.spec.js: GET_PAGE_CONTENT (SW executeScript), suggested tags (MAIN world), GET_PAGE_SELECTION, overlay visibility (snapshotOverlay)
       - tests/playwright/extension-lower.spec.js: bookmarks table, browser bookmark import, READ_FILE_BOOKMARKS (offscreen)
       - npm run test:e2e:extension runs Playwright with playwright.extension.config.js

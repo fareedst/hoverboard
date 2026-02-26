@@ -2100,9 +2100,17 @@ export class PopupController {
    * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
    * Open the tags and bookmarks tree in the side panel. Implements requirement "open tags tree from popup" by sending OPEN_SIDE_PANEL to the service worker (which opens the panel with cached windowId); records action, shows success or delegates error to ErrorHandler.
    */
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] When onOpenTagsTreeInPanel is set (side panel Bookmark tab),
+   * call it instead of sending OPEN_SIDE_PANEL so the panel switches to the Tags tree tab.
+   */
   async handleOpenTagsTree () {
     recordAction(POPUP_ACTION_IDS.openTagsTree, undefined, 'popup')
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openTagsTree, payload: undefined })
+    if (typeof this.onOpenTagsTreeInPanel === 'function') {
+      this.onOpenTagsTreeInPanel()
+      return
+    }
     try {
       await this.sendMessage({ type: MESSAGE_TYPES.OPEN_SIDE_PANEL })
       this.uiManager.showSuccess('Tags tree opened in side panel')
@@ -2265,6 +2273,10 @@ export class PopupController {
    * [POPUP-CLOSE-BEHAVIOR-005] Update popup UI to reflect overlay state
    */
   async updateOverlayState () {
+    if (!this.currentTab || !this.canInjectIntoTab(this.currentTab)) {
+      this.uiManager.updateShowHoverButtonState(false)
+      return
+    }
     try {
       // Query overlay state from content script
       const overlayState = await this.sendToTab({

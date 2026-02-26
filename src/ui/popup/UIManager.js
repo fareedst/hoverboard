@@ -1,13 +1,17 @@
 /**
  * UIManager - Handles all UI interactions and DOM manipulation
+ * [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Optional container:
+ * when set, cacheElements resolves elements via container.querySelector('[data-popup-ref="id"]') for panel context.
  */
 
 export class UIManager {
-  constructor ({ errorHandler, stateManager, config = {} }) {
+  constructor ({ errorHandler, stateManager, config = {}, container = null } = {}) {
     this.errorHandler = errorHandler
     this.stateManager = stateManager
     this.config = config
     this.eventHandlers = new Map()
+    // [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Scoped root for side panel Bookmark tab
+    this.container = container || null
 
     // Cache DOM elements
     this.elements = {}
@@ -59,10 +63,12 @@ export class UIManager {
   }
 
   /**
-   * Update section labels visibility based on configuration
+   * Update section labels visibility based on configuration.
+   * [IMPL-UIManager_SCOPED_ROOT] When container set, scope to container so only Bookmark panel labels are updated.
    */
   updateSectionLabelsVisibility (showLabels) {
-    const sectionTitles = document.querySelectorAll('.section-title')
+    const root = this.container || document
+    const sectionTitles = root.querySelectorAll('.section-title')
     sectionTitles.forEach(title => {
       if (showLabels) {
         title.style.display = ''
@@ -73,60 +79,69 @@ export class UIManager {
   }
 
   /**
-   * Cache frequently used DOM elements
+   * Cache frequently used DOM elements.
+   * [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] When this.container is set,
+   * resolve each element via container.querySelector('[data-popup-ref="key"]'); otherwise document.getElementById(key).
    */
   cacheElements () {
+    const root = this.container || document
+    const get = (key) => {
+      if (this.container) {
+        return this.container.querySelector(`[data-popup-ref="${key}"]`)
+      }
+      return document.getElementById(key)
+    }
     this.elements = {
       // Container elements
-      mainInterface: document.getElementById('mainInterface'),
-      loadingState: document.getElementById('loadingState'),
-      errorState: document.getElementById('errorState'),
-      errorMessage: document.getElementById('errorMessage'),
-      retryBtn: document.getElementById('retryBtn'),
+      mainInterface: get('mainInterface'),
+      loadingState: get('loadingState'),
+      errorState: get('errorState'),
+      errorMessage: get('errorMessage'),
+      retryBtn: get('retryBtn'),
 
       // Status elements
-      bookmarkStatus: document.getElementById('bookmarkStatus'),
-      versionInfo: document.getElementById('versionInfo'),
+      bookmarkStatus: get('bookmarkStatus'),
+      versionInfo: get('versionInfo'),
 
       // Action buttons
-      showHoverBtn: document.getElementById('showHoverBtn'),
-      togglePrivateBtn: document.getElementById('togglePrivateBtn'),
-      toggleReadBtn: document.getElementById('toggleReadBtn'),
-      deleteBtn: document.getElementById('deleteBtn'),
-      reloadBtn: document.getElementById('reloadBtn'),
-      optionsBtn: document.getElementById('optionsBtn'),
-      bookmarksIndexBtn: document.getElementById('bookmarksIndexBtn'),
-      openTagsTreeBtn: document.getElementById('openTagsTreeBtn'),
-      browserBookmarkImportBtn: document.getElementById('browserBookmarkImportBtn'),
-      settingsBtn: document.getElementById('settingsBtn'),
+      showHoverBtn: get('showHoverBtn'),
+      togglePrivateBtn: get('togglePrivateBtn'),
+      toggleReadBtn: get('toggleReadBtn'),
+      deleteBtn: get('deleteBtn'),
+      reloadBtn: get('reloadBtn'),
+      optionsBtn: get('optionsBtn'),
+      bookmarksIndexBtn: get('bookmarksIndexBtn'),
+      openTagsTreeBtn: get('openTagsTreeBtn'),
+      browserBookmarkImportBtn: get('browserBookmarkImportBtn'),
+      settingsBtn: get('settingsBtn'),
 
       // Input elements
-      newTagInput: document.getElementById('newTagInput'),
-      addTagBtn: document.getElementById('addTagBtn'),
-      tagWithAiBtn: document.getElementById('tagWithAiBtn'),
+      newTagInput: get('newTagInput'),
+      addTagBtn: get('addTagBtn'),
+      tagWithAiBtn: get('tagWithAiBtn'),
       // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Popup Test API key button and status span.
-      testAiApiBtn: document.getElementById('testAiApiBtn'),
-      popupAiTestStatus: document.getElementById('popupAiTestStatus'),
-      searchInput: document.getElementById('searchInput'),
-      searchBtn: document.getElementById('searchBtn'),
-      searchSuggestions: document.getElementById('searchSuggestions'),
+      testAiApiBtn: get('testAiApiBtn'),
+      popupAiTestStatus: get('popupAiTestStatus'),
+      searchInput: get('searchInput'),
+      searchBtn: get('searchBtn'),
+      searchSuggestions: get('searchSuggestions'),
 
       // Tag display
-      currentTagsContainer: document.getElementById('currentTagsContainer'),
-      recentTagsContainer: document.getElementById('recentTagsContainer'),
-      suggestedTagsContainer: document.getElementById('suggestedTagsContainer'),
+      currentTagsContainer: get('currentTagsContainer'),
+      recentTagsContainer: get('recentTagsContainer'),
+      suggestedTagsContainer: get('suggestedTagsContainer'),
 
       // Status displays
-      privateIcon: document.getElementById('privateIcon'),
-      privateStatus: document.getElementById('privateStatus'),
-      readIcon: document.getElementById('readIcon'),
-      readStatus: document.getElementById('readStatus'),
+      privateIcon: get('privateIcon'),
+      privateStatus: get('privateStatus'),
+      readIcon: get('readIcon'),
+      readStatus: get('readStatus'),
 
       // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
-      showHoverOnPageLoad: document.getElementById('showHoverOnPageLoad'),
+      showHoverOnPageLoad: get('showHoverOnPageLoad'),
 
       // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend select-one buttons (pinboard | file | local | sync)
-      storageBackendButtons: document.getElementById('storageBackendButtons')
+      storageBackendButtons: get('storageBackendButtons')
     }
   }
 
@@ -516,9 +531,11 @@ export class UIManager {
     // Clear existing suggested tags
     this.elements.suggestedTagsContainer.innerHTML = ''
 
+    // [IMPL-UIManager_SCOPED_ROOT] Resolve suggestedTags section from container when set
+    const suggestedTagsSection = this.container ? this.container.querySelector('[data-popup-ref="suggestedTags"]') : document.getElementById('suggestedTags')
+
     // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Show empty state or hide when no suggestions
     if (!suggestedTags || suggestedTags.length === 0) {
-      const suggestedTagsSection = document.getElementById('suggestedTags')
       if (suggestedTagsSection) {
         suggestedTagsSection.style.display = 'none'
       }
@@ -526,7 +543,6 @@ export class UIManager {
     }
 
     // Show the section
-    const suggestedTagsSection = document.getElementById('suggestedTags')
     if (suggestedTagsSection) {
       suggestedTagsSection.style.display = 'block'
     }

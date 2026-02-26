@@ -5,7 +5,7 @@
  */
 
 import { test, expect, getExtensionId } from './extension-fixture.js'
-import { snapshotOptions } from '../e2e/helpers.js'
+import { snapshotOptions, snapshotSidePanel } from '../e2e/helpers.js'
 
 // Message types used by the extension (must match message-handler.js)
 const GET_OPTIONS = 'getOptions'
@@ -197,17 +197,78 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Options ↔ background', () => {
   })
 })
 
-test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Side panel ↔ background', () => {
-  test('side panel loads and fetches bookmarks via getAggregatedBookmarksForIndex', async ({ context }) => {
+test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Side panel ↔ background', () => {
+  test('side panel loads with Bookmark and Tags tree tabs and Tags tree tab fetches bookmarks', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const sidePanelPage = await context.newPage()
-    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/tags-tree.html`)
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
     await sidePanelPage.waitForLoadState('domcontentloaded')
-    await sidePanelPage.waitForTimeout(2500)
+    await sidePanelPage.waitForTimeout(1500)
 
-    await expect(sidePanelPage.locator('#tags-tree-panel, body#tags-tree-panel')).toBeVisible()
+    // [IMPL-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Tab bar has Bookmark and Tags tree
+    await expect(sidePanelPage.locator('.side-panel-tab[data-tab="bookmark"]')).toBeVisible()
+    await expect(sidePanelPage.locator('.side-panel-tab[data-tab="tagsTree"]')).toBeVisible()
+    await expect(sidePanelPage.locator('#bookmarkPanel, #tagsTreePanel')).toHaveCount(2)
+
+    // Default tab is Bookmark; switch to Tags tree and verify tree content loads
+    await sidePanelPage.locator('.side-panel-tab[data-tab="tagsTree"]').click()
+    await sidePanelPage.waitForTimeout(2000)
     const hasListOrEmpty = await sidePanelPage.locator('#treeContainer, #emptyState, #loadError').count() >= 1
     expect(hasListOrEmpty).toBe(true)
+    await sidePanelPage.close()
+  })
+
+  test('Tags tree shows either tree sections or empty state and does not show load error [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(1500)
+
+    await sidePanelPage.locator('.side-panel-tab[data-tab="tagsTree"]').click()
+    await sidePanelPage.waitForTimeout(2000)
+
+    const treeSections = sidePanelPage.locator('#tagsTreePanel .tree-tag-section')
+    const emptyState = sidePanelPage.locator('#tagsTreePanel #emptyState')
+    const loadError = sidePanelPage.locator('#tagsTreePanel #loadError')
+
+    const hasTreeContent = (await treeSections.count()) > 0
+    const hasEmptyState = await emptyState.isVisible()
+    const hasLoadError = await loadError.isVisible()
+
+    expect(hasTreeContent || hasEmptyState).toBe(true)
+    expect(hasLoadError).toBe(false)
+    await sidePanelPage.close()
+  })
+
+  // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS]
+  // Asserts tab content fills vertical space: body not capped at popup max-height; content area is flex column. Implements validation for "tab content fills the vertical space available".
+  test('side panel layout fills vertical space [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TABS]', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(1500)
+
+    const layout = await sidePanelPage.evaluate(() => {
+      const body = document.body
+      const content = document.querySelector('.side-panel-content:not([hidden])')
+      const bodyStyle = body ? getComputedStyle(body) : null
+      const contentStyle = content ? getComputedStyle(content) : null
+      return {
+        bodyMaxHeight: bodyStyle ? bodyStyle.maxHeight : null,
+        bodyHeight: bodyStyle ? bodyStyle.height : null,
+        bodyWidth: bodyStyle ? bodyStyle.width : null,
+        contentDisplay: contentStyle ? contentStyle.display : null,
+        contentFlexDirection: contentStyle ? contentStyle.flexDirection : null
+      }
+    })
+
+    // Body must not be capped at popup 450px so tab content can fill viewport
+    expect(layout.bodyMaxHeight).not.toBe('450px')
+    // Content area should be flex column so children can fill space
+    expect(layout.contentDisplay).toBe('flex')
+    expect(layout.contentFlexDirection).toBe('column')
     await sidePanelPage.close()
   })
 })
@@ -225,5 +286,40 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Options page snapshot', () => {
     expect(typeof snapshot.hasTokenField).toBe('boolean')
     expect(snapshot.hasTokenField).toBe(true)
     await optionsPage.close()
+  })
+})
+
+// [IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
+// Side panel snapshot: load side-panel.html, call snapshotSidePanel, assert bookmarkTab and tagsTreeTab have required properties.
+test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side panel snapshot', () => {
+  test('side panel loads and snapshotSidePanel returns bookmarkTab and tagsTreeTab with required structure', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(1500)
+
+    const snapshot = await snapshotSidePanel(sidePanelPage)
+    expect(snapshot).toHaveProperty('bookmarkTab')
+    expect(snapshot).toHaveProperty('tagsTreeTab')
+
+    const { bookmarkTab, tagsTreeTab } = snapshot
+    expect(bookmarkTab).toHaveProperty('panelPresent')
+    expect(typeof bookmarkTab.panelPresent).toBe('boolean')
+    expect(bookmarkTab.panelPresent).toBe(true)
+    expect(bookmarkTab).toHaveProperty('screen')
+    expect(['loading', 'error', 'mainInterface', 'unknown']).toContain(bookmarkTab.screen)
+    expect(bookmarkTab).toHaveProperty('loadingVisible')
+    expect(bookmarkTab).toHaveProperty('mainVisible')
+
+    expect(tagsTreeTab).toHaveProperty('panelPresent')
+    expect(typeof tagsTreeTab.panelPresent).toBe('boolean')
+    expect(tagsTreeTab.panelPresent).toBe(true)
+    expect(tagsTreeTab).toHaveProperty('hasTagSelector')
+    expect(tagsTreeTab).toHaveProperty('hasTreeContainer')
+    expect(tagsTreeTab).toHaveProperty('hasSearchInput')
+    expect(tagsTreeTab).toHaveProperty('hasConfigToggle')
+
+    await sidePanelPage.close()
   })
 })

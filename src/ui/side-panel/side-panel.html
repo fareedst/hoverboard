@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoverboard – Side panel</title>
+  <link rel="stylesheet" href="../styles/design-tokens.css">
+  <link rel="stylesheet" href="../popup/popup.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <link rel="stylesheet" href="tags-tree.css">
+  <link rel="stylesheet" href="side-panel.css">
+</head>
+<body id="side-panel-page">
+  <!-- [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] Tab bar -->
+  <header class="side-panel-header">
+    <h1 class="side-panel-title">Hoverboard</h1>
+    <nav class="side-panel-tabs" role="tablist" aria-label="Panel tabs">
+      <button type="button" class="side-panel-tab" role="tab" data-tab="bookmark" aria-selected="true">Bookmark</button>
+      <button type="button" class="side-panel-tab" role="tab" data-tab="tagsTree" aria-selected="false">Tags tree</button>
+    </nav>
+  </header>
+
+  <!-- [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT] Bookmark panel: popup-equivalent with data-popup-ref for scoped UIManager -->
+  <div id="bookmarkPanel" class="side-panel-content" role="tabpanel" aria-labelledby="tab-bookmark" hidden>
+    <div data-popup-ref="loadingState" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading bookmark data...</p>
+    </div>
+    <div data-popup-ref="errorState" class="error-state hidden">
+      <div class="error-icon">&#x26A0;&#xFE0F;</div>
+      <h3>Error Loading Data</h3>
+      <p data-popup-ref="errorMessage">Unable to load bookmark information.</p>
+      <button type="button" data-popup-ref="retryBtn" class="button secondary">Retry</button>
+    </div>
+    <span data-popup-ref="bookmarkStatus" class="hidden" aria-hidden="true"></span>
+    <div data-popup-ref="mainInterface" class="main-interface hidden">
+      <section class="quick-actions">
+        <h3 class="section-title">Quick Actions</h3>
+        <div class="action-grid">
+          <div class="show-hover-controls">
+            <button type="button" data-popup-ref="showHoverBtn" class="action-icon-button" title="Show Hover" aria-label="Show hoverboard overlay"><span class="action-icon" aria-hidden="true">&#x1F441;&#xFE0F;</span></button>
+            <div class="page-load-checkbox">
+              <label class="checkbox-label">
+                <input type="checkbox" data-popup-ref="showHoverOnPageLoad" title="Show on page load">
+                <span class="checkmark"></span>
+                <span class="checkbox-text">Show on page load</span>
+              </label>
+            </div>
+          </div>
+          <button type="button" data-popup-ref="togglePrivateBtn" class="action-icon-button" title="Toggle Privacy" aria-label="Toggle privacy"><span class="action-icon" data-popup-ref="privateIcon" aria-hidden="true">&#x1F512;</span></button>
+          <button type="button" data-popup-ref="toggleReadBtn" class="action-icon-button" title="Toggle Read Later" aria-label="Toggle read later"><span class="action-icon" data-popup-ref="readIcon" aria-hidden="true">&#x1F4CB;</span></button>
+          <button type="button" data-popup-ref="deleteBtn" class="action-icon-button danger" title="Delete Bookmark" aria-label="Delete bookmark"><span class="action-icon" aria-hidden="true">&#x1F5D1;&#xFE0F;</span></button>
+        </div>
+      </section>
+      <section class="storage-section">
+        <h3 class="section-title">Storage</h3>
+        <div class="storage-control" role="group" aria-label="Bookmark storage location">
+          <span class="storage-label">Save to:</span>
+          <div class="storage-buttons" data-popup-ref="storageBackendButtons">
+            <button type="button" class="storage-backend-btn" data-backend="pinboard" aria-pressed="false">Pinboard</button>
+            <button type="button" class="storage-backend-btn" data-backend="file" aria-pressed="false">File</button>
+            <button type="button" class="storage-backend-btn" data-backend="local" aria-pressed="false">Local</button>
+            <button type="button" class="storage-backend-btn" data-backend="sync" aria-pressed="false">Sync</button>
+          </div>
+        </div>
+      </section>
+      <section class="tag-management">
+        <div class="add-tag-section">
+          <div class="input-group">
+            <input type="text" data-popup-ref="newTagInput" class="tag-input" placeholder="Add a tag..." autocomplete="off" aria-label="New tag">
+            <button type="button" data-popup-ref="addTagBtn" class="button primary" disabled>Add</button>
+          </div>
+          <button type="button" data-popup-ref="tagWithAiBtn" class="button secondary">Tag with AI</button>
+          <button type="button" data-popup-ref="testAiApiBtn" class="button secondary">Test API key</button>
+          <span data-popup-ref="popupAiTestStatus" class="help-text"></span>
+        </div>
+        <div class="current-tags">
+          <h4 class="tags-subtitle">Current Tags</h4>
+          <div class="tags-container" data-popup-ref="currentTagsContainer"></div>
+        </div>
+        <div class="recent-tags">
+          <h4 class="tags-subtitle">Recent Tags</h4>
+          <div class="tags-container" data-popup-ref="recentTagsContainer"></div>
+        </div>
+        <div class="suggested-tags" data-popup-ref="suggestedTags">
+          <h4 class="tags-subtitle">Suggested Tags</h4>
+          <div class="tags-container" data-popup-ref="suggestedTagsContainer"></div>
+        </div>
+      </section>
+      <section class="search-section">
+        <h3 class="section-title">Search Tabs</h3>
+        <div class="search-container">
+          <div class="input-group">
+            <input type="text" data-popup-ref="searchInput" class="search-input" placeholder="Search tabs by title..." aria-label="Search tabs by title">
+            <button type="button" data-popup-ref="searchBtn" class="button secondary">Search</button>
+          </div>
+          <div class="search-suggestions" data-popup-ref="searchSuggestions"></div>
+        </div>
+      </section>
+    </div>
+    <footer class="popup-footer">
+      <div class="footer-actions">
+        <button type="button" data-popup-ref="reloadBtn" class="text-button" title="Reload">Reload</button>
+        <button type="button" data-popup-ref="optionsBtn" class="text-button" title="Options">Options</button>
+        <button type="button" data-popup-ref="bookmarksIndexBtn" class="text-button" title="Bookmarks index">Bookmarks index</button>
+        <button type="button" data-popup-ref="openTagsTreeBtn" class="text-button" title="Switch to Tags tree tab">Tags tree</button>
+        <button type="button" data-popup-ref="browserBookmarkImportBtn" class="text-button" title="Browser bookmark import">Browser bookmark import</button>
+      </div>
+      <div class="footer-info">
+        <span data-popup-ref="versionInfo" class="version">v1.0</span>
+      </div>
+    </footer>
+    <!-- Placeholder for settingsBtn (UIManager may reference it); optional in panel -->
+    <button type="button" data-popup-ref="settingsBtn" class="icon-button hidden" aria-hidden="true" style="position:absolute;left:-9999px"></button>
+    <span data-popup-ref="privateStatus" class="hidden" aria-hidden="true"></span>
+    <span data-popup-ref="readStatus" class="hidden" aria-hidden="true"></span>
+  </div>
+
+  <!-- [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Tags tree panel: same structure as tags-tree.html for getElementById lookups -->
+  <div id="tagsTreePanel" class="side-panel-content" role="tabpanel" aria-labelledby="tab-tags-tree">
+    <header class="tags-tree-header">
+      <h2 class="tags-tree-title">Tags &amp; bookmarks</h2>
+      <p class="tags-tree-subtitle">Select tags to show; expand to see URLs. Click a URL to open in a new tab.</p>
+    </header>
+    <section class="config-section" aria-labelledby="config-legend">
+      <button type="button" id="configToggle" class="config-toggle" aria-expanded="false" aria-controls="configContent">
+        <span class="config-toggle-chevron" aria-hidden="true">&#x25BC;</span>
+        <span id="configLegend" class="config-toggle-label">Filters &amp; view</span>
+      </button>
+      <div id="configContent" class="config-content hidden" role="region" aria-labelledby="config-legend">
+        <div class="config-row">
+          <label for="filterTimeField">Time field</label>
+          <select id="filterTimeField" aria-label="Filter by create time or last updated">
+            <option value="time">Create time</option>
+            <option value="updated_at" selected>Last updated</option>
+          </select>
+        </div>
+        <div class="config-row">
+          <label for="filterTimeStart">From</label>
+          <input type="datetime-local" id="filterTimeStart" aria-label="Filter from date and time">
+        </div>
+        <div class="config-row">
+          <label for="filterTimeEnd">To</label>
+          <input type="datetime-local" id="filterTimeEnd" aria-label="Filter to date and time">
+        </div>
+        <div class="config-row">
+          <label for="filterTagsInclude">Tags to include (comma-separated)</label>
+          <input type="text" id="filterTagsInclude" placeholder="e.g. work, personal" aria-label="Filter by tags include">
+        </div>
+        <div class="config-row">
+          <label for="filterDomains">Domains (comma-separated)</label>
+          <input type="text" id="filterDomains" placeholder="e.g. example.com" aria-label="Filter by URL domains">
+        </div>
+        <div class="config-row">
+          <label for="groupBy">Group by</label>
+          <select id="groupBy" aria-label="Group display by">
+            <option value="none" selected>None</option>
+            <option value="time">Create date</option>
+            <option value="updated_at">Update date</option>
+            <option value="tag">Tag</option>
+            <option value="domain">Domain</option>
+          </select>
+        </div>
+        <div class="config-row">
+          <label for="sortBy">Sort by</label>
+          <select id="sortBy" aria-label="Sort display by">
+            <option value="time">Create date</option>
+            <option value="updated_at" selected>Last updated</option>
+            <option value="tag">Tag</option>
+            <option value="domain">Domain</option>
+          </select>
+        </div>
+        <div class="config-row config-row-inline">
+          <label for="sortAsc">Sort order</label>
+          <select id="sortAsc" aria-label="Sort order">
+            <option value="0" selected>Newest first</option>
+            <option value="1">Oldest first</option>
+          </select>
+        </div>
+      </div>
+    </section>
+    <section class="search-section" aria-labelledby="search-legend">
+      <h2 id="search-legend" class="search-legend">Search bookmarks</h2>
+      <div class="search-row">
+        <input type="text" id="searchInput" class="search-input" placeholder="Title, URL, tags, notes…" aria-label="Search bookmarks in list">
+        <span id="searchCount" class="search-count" aria-live="polite"></span>
+      </div>
+      <div class="search-nav">
+        <button type="button" id="searchPrev" class="search-nav-btn" aria-label="Previous match">Previous</button>
+        <button type="button" id="searchNext" class="search-nav-btn" aria-label="Next match">Next</button>
+      </div>
+    </section>
+    <section class="tag-selector-section" aria-labelledby="tag-selector-legend">
+      <div class="tag-selector-header">
+        <h2 id="tag-selector-legend" class="tag-selector-legend">Select tags (order = display order)</h2>
+        <label class="tag-list-view-toggle-label">
+          <input type="checkbox" id="tagListViewToggle" checked aria-label="Show all tags">
+          <span>Show all tags</span>
+        </label>
+      </div>
+      <div id="tagSelector" class="tag-selector tag-selector-compact"></div>
+    </section>
+    <section class="tree-section" aria-label="Tags and bookmarks tree">
+      <div id="treeContainer" class="tree-container"></div>
+      <div id="emptyState" class="empty-state hidden">No tags selected or no bookmarks.</div>
+      <div id="loadError" class="load-error hidden"></div>
+    </section>
+  </div>
+
+  <script type="module" src="side-panel.js"></script>
+</body>
+</html>

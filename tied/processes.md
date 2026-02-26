@@ -348,3 +348,67 @@ yq '.REQ-TIED_SETUP.metadata.last_validated.result' tied/requirements.yaml
 ### Artifacts & Metrics
 - **Artifacts**: YAML index files (requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml)
 - **Success Metrics**: YAML files are valid, all records have required fields, cross-references are consistent
+
+---
+
+## `[PROC-TIED_DEV_CYCLE]` TIED development cycle (session workflow)
+
+### Purpose
+Run a single development session so that REQ/ARCH/IMPL and pseudo-code stay primary: test-driven development produces testable code and infrastructure; TIED docs are updated to reflect the final code and tests. Supports traceability and `[PROC-TOKEN_AUDIT]` / `[PROC-TOKEN_VALIDATION]`.
+
+### Scope
+Applies to any feature or change that touches managed code, tests, or TIED documentation (requirements, architecture decisions, implementation decisions). Use per session or per feature slice.
+
+### Token references
+- `[REQ-TIED_SETUP]` — TIED methodology and doc-first flow
+- `[REQ-MODULE_VALIDATION]` — validate modules before integration
+- `[PROC-TOKEN_AUDIT]` — code/test token parity
+- `[PROC-TOKEN_VALIDATION]` — token registry and traceability checks
+- All REQ/ARCH/IMPL tokens touched by the session
+
+### Status
+Active
+
+### Core Activities
+
+1. **Plan from TIED**
+   - Read existing REQ, ARCH, and IMPL for the scope of work.
+   - Use each IMPL’s `essence_pseudocode` as the full prescription for what to implement.
+   - Identify required updates (new or changed requirements and decisions) before writing code or tests.
+
+2. **Author TIED docs (pseudo-code + tokens)**
+   - Update REQ, ARCH, and IMPL (new and existing) as needed.
+   - In every IMPL, ensure `essence_pseudocode` is complete. Every **block** in `essence_pseudocode` must have a comment that (1) names all REQ, ARCH, and IMPL reflected in that block and (2) states how that block implements those requirements.
+   - Use the project block definition: a block is a contiguous logical unit implementing the same set of REQ/ARCH/IMPL; nested blocks implementing a different set get their own token comment.
+
+3. **Add and align tests**
+   - Add or update tests so they match the IMPL.
+   - Every test **block** must carry the same REQ/ARCH/IMPL comments as the corresponding IMPL block (in the appropriate place in the test).
+   - If a comment would help tests but is not yet in the IMPL, add it to the IMPL for permanence; treat test code as transient.
+
+4. **Implement to tests (TDD)**
+   - Implement managed code to satisfy the tests.
+   - Every **block** in managed sources must carry the same REQ/ARCH/IMPL comments as in the IMPL. For nested blocks with the **same** set, do not repeat token names; comment only how that sub-block implements the requirements. For a nested block with a **different** set, add a comment at the start naming that set and how the block implements it.
+   - Iterate until all tests pass.
+
+5. **Implement non-testable glue**
+   - Implement any remaining wiring and glue code that is not meaningfully testable but is required to satisfy REQ/ARCH/IMPL (e.g. entry points, manifest wiring, platform hooks).
+   - Annotate with the same token/block rules where the code is still “managed” and traceable.
+
+6. **Validate and close test gaps**
+   - Run the full test suite and add any missing tests.
+   - Run `[PROC-TOKEN_VALIDATION]` (e.g. `./scripts/validate_tokens.sh`) and fix gaps so coverage and token traceability are complete.
+
+7. **Sync TIED to code and tests**
+   - Update REQ/ARCH/IMPL so they match the final code and tests. Ensure IMPLs modified this session reflect the implemented code and tests, including block-level comments with semantic tokens.
+   - Sync `semantic-tokens.yaml`, `requirements.yaml`, `architecture-decisions.yaml`, and `implementation-decisions.yaml` (and detail files) so TIED docs remain the single source of truth for intent.
+
+8. **Update README and CHANGELOG**
+   - Update README.md and CHANGELOG.md for user- and release-facing changes made in this session.
+
+9. **Write commit message**
+   - Write the commit message summarizing the session’s changes; where useful, reference the main REQ/ARCH/IMPL tokens touched.
+
+### Artifacts & Metrics
+- **Artifacts**: Updated REQ/ARCH/IMPL (including `essence_pseudocode` and block comments), tests, managed source code, README.md, CHANGELOG.md, commit.
+- **Success Metrics**: All tests pass; `[PROC-TOKEN_VALIDATION]` passes; TIED docs match final code and tests; `[PROC-TOKEN_AUDIT]` can succeed.

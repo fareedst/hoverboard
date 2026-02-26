@@ -326,9 +326,11 @@
   display: none !important;
 }
 
-#tags-tree-panel {
+/* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE] Tags tree panel fills content area; min-height 0 and overflow hidden so .tree-section scrolls and implements "tab content fills vertical space". Selector matches DOM id tagsTreePanel. */
+#tagsTreePanel {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 0;
+  overflow: hidden;
   background: var(--color-background, #fff);
 }

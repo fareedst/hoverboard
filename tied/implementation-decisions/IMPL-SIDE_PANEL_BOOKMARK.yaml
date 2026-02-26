@@ -1,0 +1,101 @@
+# [IMPL-SIDE_PANEL_BOOKMARK] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
+# Implementation: Bookmark tab markup with data-popup-ref; reuse PopupController + UIManager with container; "Open Tags tree" switches to Tags tree tab in panel.
+
+IMPL-SIDE_PANEL_BOOKMARK:
+  name: Side Panel Bookmark Tab Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - IMPL-UIManager_SCOPED_ROOT
+  rationale:
+    why: Bookmark tab must mirror popup UI so the same controller and handlers work; scoped root avoids duplicate IDs in document.
+    problems_solved:
+      - Popup uses document.getElementById; panel has two panels in one document
+    benefits:
+      - Same PopupController/UIManager logic; container + data-popup-ref for element lookup in Bookmark panel
+      - "Open Tags tree" in panel context switches tab instead of opening panel again
+  implementation_approach:
+    summary: #bookmarkPanel contains markup mirroring popup main (loading, error, main with quick actions, storage, tag management, search, footer). Each element has data-popup-ref="id" (e.g. data-popup-ref="mainInterface"). UIManager built with container = bookmarkPanel uses container.querySelector('[data-popup-ref="mainInterface"]'). PopupController receives that UIManager; loadInitialData and handlers unchanged. Footer "Tags tree" button: when in panel, emit or call switchToTagsTreeTab() instead of sending OPEN_SIDE_PANEL.
+    details:
+      - Bookmark panel HTML: same sections as popup (loadingState, errorState, mainInterface with quick-actions, storage, tag-management, search-section); use data-popup-ref for each ref id
+      - CSS: reuse popup.css and shared design-tokens/components so Bookmark tab looks like popup
+      - Panel context detection: e.g. document.getElementById('bookmarkPanel') exists and we're inside it; or flag passed from side-panel.js when creating popup
+  code_locations:
+    files:
+      - path: src/ui/side-panel/side-panel.html
+        description: #bookmarkPanel with data-popup-ref markup
+      - path: src/ui/side-panel/side-panel.js
+        description: createPopup({ container: bookmarkPanel }); wire openTagsTree to switch tab
+      - path: src/ui/popup/UIManager.js
+        description: Optional container; cacheElements uses data-popup-ref when container set
+      - path: src/ui/popup/PopupController.js
+        description: No change; uses UIManager from dependency
+    functions:
+      - name: createPopup
+        file: src/ui/index.js
+        description: Accept container option; pass to UIManager so it uses scoped root
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TABS
+    requirements:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    tests:
+      - tests/unit/ui-manager-scoped-root.test.js
+      - tests/unit/side-panel-tabs.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_BOOKMARK
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_TABS
+      - IMPL-UIManager_SCOPED_ROOT
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-AI_TAGGING_POPUP_UI
+    composed_with:
+      - IMPL-UIManager_SCOPED_ROOT
+      - IMPL-SIDE_PANEL_TABS
+  essence_pseudocode: |
+    # [IMPL-SIDE_PANEL_BOOKMARK] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
+    # This block defines the Bookmark tab content and init: markup with data-popup-ref, PopupController + UIManager with container, and "Open Tags tree" → switch tab. Implements REQ by providing popup-equivalent in panel; implements ARCH by scoped root.
+
+    INPUT: User selects Bookmark tab; side-panel.js calls createPopup({ container: bookmarkPanel })
+    OUTPUT: Bookmark panel shows current-tab bookmark UI (quick actions, storage, tags, search); interactions work as in popup
+    DATA: bookmarkPanel (DOM root), UIManager(container), PopupController(uiManager, ...)
+
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT]
+    # Markup: #bookmarkPanel contains elements with data-popup-ref="mainInterface", data-popup-ref="loadingState", etc. Same structure as popup (quick actions, storage, tag management, search). Implements "Bookmark tab shows functional equivalent of popup UI".
+    MARKUP under #bookmarkPanel:
+      div[data-popup-ref="loadingState"], div[data-popup-ref="errorState"], div[data-popup-ref="mainInterface"] with sections quick-actions, storage, tag-management, search-section; footer with Reload, Options, Bookmarks index, Tags tree, Browser import
+      Each ref id from UIManager.cacheElements (mainInterface, showHoverBtn, newTagInput, ...) has corresponding data-popup-ref in Bookmark panel
+
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT]
+    # createPopup({ container }): when container provided, UIManager uses container for cacheElements (querySelector by data-popup-ref). PopupController receives that UIManager; loadInitialData gets current tab and bookmark; setupEventListeners binds same events. Implements reuse of popup stack with scoped root.
+    createPopup({ container }):
+      uiManager = new UIManager({ ..., container })  // UIManager.cacheElements uses container if set
+      controller = new PopupController({ uiManager, ... })
+      RETURN { controller, uiManager, ... }
+
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BOOKMARK]
+    # "Open Tags tree" in panel: when in side panel context, do not send OPEN_SIDE_PANEL; instead call switchToTagsTreeTab() (or emit so side-panel.js switches tab). Implements "Open Tags tree switches to Tags tree tab" in panel.
+    ON "Open Tags tree" click in Bookmark tab:
+      IF inPanelContext: switchToTagsTreeTab()  // e.g. callback from side-panel.js or global
+      ELSE: send OPEN_SIDE_PANEL  // popup context
+
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_TABS]
+    # When switching to Bookmark tab and it was already inited, call controller.refreshPopupData() so getCurrentTab and getBookmarkData run for the active tab; content then reflects current tab's bookmark state (same as badge). Implements "Bookmark tab reflects current tab when selected".
+    ON switchTab("bookmark"): IF bookmarkTabInited already true AND popupComponents.controller: controller.refreshPopupData()
+
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_TABS]
+    # Prompt refresh (like badge): when Bookmark tab is visible, refresh on tabs.onActivated and on tabs.onUpdated (when updated tab is active and status complete). refreshBookmarkTabIfVisible() calls controller.refreshPopupData() only when activeTab === "bookmark" and controller exists. Implements "Bookmark tab refreshes promptly when active tab changes or completes".
+    bindTabChangeRefresh(): chrome.tabs.onActivated → refreshBookmarkTabIfVisible(); chrome.tabs.onUpdated(tabId, changeInfo, tab) → IF changeInfo.status === "complete" AND tab.url AND updated tab is current window active tab: refreshBookmarkTabIfVisible()
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml
+  metadata:
+    created:
+      date: '2026-02-25'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-25'
+      author: AI Agent
+      reason: Initial creation

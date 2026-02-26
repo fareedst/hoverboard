@@ -131,11 +131,13 @@ export class UISystem {
     }
 
     // UI-004: Create popup component instances based on options
+    // [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT] Pass container when provided (side panel Bookmark tab) so UIManager resolves elements via data-popup-ref.
     const stateManager = enableState ? new StateManager() : null
     const uiManager = new UIManager({
       errorHandler: popupOptions.errorHandler,
       stateManager,
-      config: popupOptions.config || {}
+      config: popupOptions.config || {},
+      container: popupOptions.container !== undefined && popupOptions.container !== document.body ? popupOptions.container : null
     })
     const keyboardManager = enableKeyboard ? new KeyboardManager({ uiManager }) : null
     const controller = new PopupController({

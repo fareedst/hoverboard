@@ -17241,11 +17241,12 @@ var VisualAssetsManager = class {
 
 // src/ui/popup/UIManager.js
 var UIManager = class {
-  constructor({ errorHandler, stateManager, config: config2 = {} }) {
+  constructor({ errorHandler, stateManager, config: config2 = {}, container = null } = {}) {
     this.errorHandler = errorHandler;
     this.stateManager = stateManager;
     this.config = config2;
     this.eventHandlers = /* @__PURE__ */ new Map();
+    this.container = container || null;
     this.elements = {};
     this.cacheElements();
     this.applyConfiguration();
@@ -17281,10 +17282,12 @@ var UIManager = class {
     root.style.setProperty("--font-size-inputs-custom", `${fontSizes.inputs}px`);
   }
   /**
-   * Update section labels visibility based on configuration
+   * Update section labels visibility based on configuration.
+   * [IMPL-UIManager_SCOPED_ROOT] When container set, scope to container so only Bookmark panel labels are updated.
    */
   updateSectionLabelsVisibility(showLabels) {
-    const sectionTitles = document.querySelectorAll(".section-title");
+    const root = this.container || document;
+    const sectionTitles = root.querySelectorAll(".section-title");
     sectionTitles.forEach((title) => {
       if (showLabels) {
         title.style.display = "";
@@ -17294,53 +17297,62 @@ var UIManager = class {
     });
   }
   /**
-   * Cache frequently used DOM elements
+   * Cache frequently used DOM elements.
+   * [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] When this.container is set,
+   * resolve each element via container.querySelector('[data-popup-ref="key"]'); otherwise document.getElementById(key).
    */
   cacheElements() {
+    const root = this.container || document;
+    const get = (key) => {
+      if (this.container) {
+        return this.container.querySelector(`[data-popup-ref="${key}"]`);
+      }
+      return document.getElementById(key);
+    };
     this.elements = {
       // Container elements
-      mainInterface: document.getElementById("mainInterface"),
-      loadingState: document.getElementById("loadingState"),
-      errorState: document.getElementById("errorState"),
-      errorMessage: document.getElementById("errorMessage"),
-      retryBtn: document.getElementById("retryBtn"),
+      mainInterface: get("mainInterface"),
+      loadingState: get("loadingState"),
+      errorState: get("errorState"),
+      errorMessage: get("errorMessage"),
+      retryBtn: get("retryBtn"),
       // Status elements
-      bookmarkStatus: document.getElementById("bookmarkStatus"),
-      versionInfo: document.getElementById("versionInfo"),
+      bookmarkStatus: get("bookmarkStatus"),
+      versionInfo: get("versionInfo"),
       // Action buttons
-      showHoverBtn: document.getElementById("showHoverBtn"),
-      togglePrivateBtn: document.getElementById("togglePrivateBtn"),
-      toggleReadBtn: document.getElementById("toggleReadBtn"),
-      deleteBtn: document.getElementById("deleteBtn"),
-      reloadBtn: document.getElementById("reloadBtn"),
-      optionsBtn: document.getElementById("optionsBtn"),
-      bookmarksIndexBtn: document.getElementById("bookmarksIndexBtn"),
-      openTagsTreeBtn: document.getElementById("openTagsTreeBtn"),
-      browserBookmarkImportBtn: document.getElementById("browserBookmarkImportBtn"),
-      settingsBtn: document.getElementById("settingsBtn"),
+      showHoverBtn: get("showHoverBtn"),
+      togglePrivateBtn: get("togglePrivateBtn"),
+      toggleReadBtn: get("toggleReadBtn"),
+      deleteBtn: get("deleteBtn"),
+      reloadBtn: get("reloadBtn"),
+      optionsBtn: get("optionsBtn"),
+      bookmarksIndexBtn: get("bookmarksIndexBtn"),
+      openTagsTreeBtn: get("openTagsTreeBtn"),
+      browserBookmarkImportBtn: get("browserBookmarkImportBtn"),
+      settingsBtn: get("settingsBtn"),
       // Input elements
-      newTagInput: document.getElementById("newTagInput"),
-      addTagBtn: document.getElementById("addTagBtn"),
-      tagWithAiBtn: document.getElementById("tagWithAiBtn"),
+      newTagInput: get("newTagInput"),
+      addTagBtn: get("addTagBtn"),
+      tagWithAiBtn: get("tagWithAiBtn"),
       // [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] Popup Test API key button and status span.
-      testAiApiBtn: document.getElementById("testAiApiBtn"),
-      popupAiTestStatus: document.getElementById("popupAiTestStatus"),
-      searchInput: document.getElementById("searchInput"),
-      searchBtn: document.getElementById("searchBtn"),
-      searchSuggestions: document.getElementById("searchSuggestions"),
+      testAiApiBtn: get("testAiApiBtn"),
+      popupAiTestStatus: get("popupAiTestStatus"),
+      searchInput: get("searchInput"),
+      searchBtn: get("searchBtn"),
+      searchSuggestions: get("searchSuggestions"),
       // Tag display
-      currentTagsContainer: document.getElementById("currentTagsContainer"),
-      recentTagsContainer: document.getElementById("recentTagsContainer"),
-      suggestedTagsContainer: document.getElementById("suggestedTagsContainer"),
+      currentTagsContainer: get("currentTagsContainer"),
+      recentTagsContainer: get("recentTagsContainer"),
+      suggestedTagsContainer: get("suggestedTagsContainer"),
       // Status displays
-      privateIcon: document.getElementById("privateIcon"),
-      privateStatus: document.getElementById("privateStatus"),
-      readIcon: document.getElementById("readIcon"),
-      readStatus: document.getElementById("readStatus"),
+      privateIcon: get("privateIcon"),
+      privateStatus: get("privateStatus"),
+      readIcon: get("readIcon"),
+      readStatus: get("readStatus"),
       // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
-      showHoverOnPageLoad: document.getElementById("showHoverOnPageLoad"),
+      showHoverOnPageLoad: get("showHoverOnPageLoad"),
       // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend select-one buttons (pinboard | file | local | sync)
-      storageBackendButtons: document.getElementById("storageBackendButtons")
+      storageBackendButtons: get("storageBackendButtons")
     };
   }
   /**
@@ -17650,14 +17662,13 @@ var UIManager = class {
   updateSuggestedTags(suggestedTags) {
     if (!this.elements.suggestedTagsContainer) return;
     this.elements.suggestedTagsContainer.innerHTML = "";
+    const suggestedTagsSection = this.container ? this.container.querySelector('[data-popup-ref="suggestedTags"]') : document.getElementById("suggestedTags");
     if (!suggestedTags || suggestedTags.length === 0) {
-      const suggestedTagsSection2 = document.getElementById("suggestedTags");
-      if (suggestedTagsSection2) {
-        suggestedTagsSection2.style.display = "none";
+      if (suggestedTagsSection) {
+        suggestedTagsSection.style.display = "none";
       }
       return;
     }
-    const suggestedTagsSection = document.getElementById("suggestedTags");
     if (suggestedTagsSection) {
       suggestedTagsSection.style.display = "block";
     }
@@ -20681,9 +20692,17 @@ var PopupController = class {
    * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
    * Open the tags and bookmarks tree in the side panel. Implements requirement "open tags tree from popup" by sending OPEN_SIDE_PANEL to the service worker (which opens the panel with cached windowId); records action, shows success or delegates error to ErrorHandler.
    */
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] When onOpenTagsTreeInPanel is set (side panel Bookmark tab),
+   * call it instead of sending OPEN_SIDE_PANEL so the panel switches to the Tags tree tab.
+   */
   async handleOpenTagsTree() {
     recordAction(POPUP_ACTION_IDS.openTagsTree, void 0, "popup");
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openTagsTree, payload: void 0 });
+    if (typeof this.onOpenTagsTreeInPanel === "function") {
+      this.onOpenTagsTreeInPanel();
+      return;
+    }
     try {
       await this.sendMessage({ type: MESSAGE_TYPES.OPEN_SIDE_PANEL });
       this.uiManager.showSuccess("Tags tree opened in side panel");
@@ -20825,6 +20844,10 @@ var PopupController = class {
    * [POPUP-CLOSE-BEHAVIOR-005] Update popup UI to reflect overlay state
    */
   async updateOverlayState() {
+    if (!this.currentTab || !this.canInjectIntoTab(this.currentTab)) {
+      this.uiManager.updateShowHoverButtonState(false);
+      return;
+    }
     try {
       const overlayState = await this.sendToTab({
         type: "GET_OVERLAY_STATE"
@@ -21426,7 +21449,8 @@ var UISystem = class {
     const uiManager = new UIManager({
       errorHandler: popupOptions.errorHandler,
       stateManager,
-      config: popupOptions.config || {}
+      config: popupOptions.config || {},
+      container: popupOptions.container !== void 0 && popupOptions.container !== document.body ? popupOptions.container : null
     });
     const keyboardManager = enableKeyboard ? new KeyboardManager({ uiManager }) : null;
     const controller = new PopupController({

@@ -6,7 +6,7 @@
  * Search over displayed list; count; Next/Previous with scroll and highlight.
  */
 
-import { buildTagToBookmarks, getAllTagsFromBookmarks, getTagsToDisplay, openUrlInNewTab } from './tags-tree-data.js'
+import { buildTagToBookmarks, getAllTagsFromBookmarks, getFilterStateForTagsTree, getTagsToDisplay, intersectionTagOrder, mergePreferredTagSpelling, openUrlInNewTab } from './tags-tree-data.js'
 import { applyFilters, sortBookmarks, groupBookmarksBy, filterBookmarksBySearch } from './tags-tree-filter.js'
 import { parseTimeRangeValue } from '../bookmarks-table/bookmarks-table-filter.js'
 
@@ -51,6 +51,9 @@ const sortByEl = document.getElementById('sortBy')
 const sortAscEl = document.getElementById('sortAsc')
 // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Toggle: show all tags vs only checked tags; state persisted in panel config.
 const tagListViewToggleEl = document.getElementById('tagListViewToggle')
+
+/** [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE] When set before loadBookmarks(), applied to selectedTagOrder so Tags tree shows only bookmarks that share at least one tag with current bookmark. */
+let pendingCurrentBookmarkTags = null
 
 // [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Search state and refs for count and Next/Prev.
 let searchQuery = ''
@@ -199,6 +202,13 @@ async function loadBookmarks () {
     }
     rawBookmarks = bookmarks
     allTags = getAllTagsFromBookmarks(bookmarks)
+    // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE] Merge current bookmark tag spellings so the list shows the bookmark's tags and is complete.
+    if (pendingCurrentBookmarkTags != null && pendingCurrentBookmarkTags.length > 0) {
+      allTags = mergePreferredTagSpelling(allTags, pendingCurrentBookmarkTags)
+      selectedTagOrder = intersectionTagOrder(allTags, pendingCurrentBookmarkTags)
+      saveSelectedTagOrder(selectedTagOrder)
+      pendingCurrentBookmarkTags = null
+    }
     if (selectedTagOrder.length === 0) selectedTagOrder = [...allTags]
     collapsedTags = await loadCollapsedState()
     collapsedSections = new Set()
@@ -219,7 +229,7 @@ async function loadBookmarks () {
       const hasContent = grouped && grouped.size > 0
       emptyStateEl.classList.toggle('hidden', hasContent)
     } else {
-      tagToBookmarks = buildTagToBookmarks(matchingBookmarks)
+      tagToBookmarks = buildTagToBookmarks(matchingBookmarks, allTags)
       renderTagSelector()
       renderTree()
       const hasContent = selectedTagOrder.length > 0 && selectedTagOrder.some(t => tagToBookmarks.has(t) && tagToBookmarks.get(t).length > 0)
@@ -417,13 +427,7 @@ function refreshFromConfig () {
   syncConfigFromControls()
   savePanelConfig()
   if (!Array.isArray(rawBookmarks) || rawBookmarks.length === 0) return
-  const filterState = {
-    timeField: panelConfig.timeField,
-    timeStart: panelConfig.timeStart,
-    timeEnd: panelConfig.timeEnd,
-    tagsInclude: panelConfig.tagsInclude.size > 0 ? panelConfig.tagsInclude : new Set(selectedTagOrder),
-    domains: panelConfig.domains
-  }
+  const filterState = getFilterStateForTagsTree(panelConfig, selectedTagOrder)
   const filtered = applyFilters(rawBookmarks, filterState)
   const sorted = sortBookmarks(filtered, panelConfig.sortBy, panelConfig.sortAsc)
   // [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Apply text search; use matchingBookmarks for tree/grouped and count.
@@ -433,10 +437,11 @@ function refreshFromConfig () {
     renderGrouped(grouped)
     emptyStateEl.classList.toggle('hidden', grouped && grouped.size > 0)
   } else {
-    tagToBookmarks = buildTagToBookmarks(matchingBookmarks)
+    tagToBookmarks = buildTagToBookmarks(matchingBookmarks, allTags)
+    const hasContent = selectedTagOrder.length > 0 && selectedTagOrder.some(t => tagToBookmarks.has(t) && tagToBookmarks.get(t).length > 0)
     renderTagSelector()
     renderTree()
-    emptyStateEl.classList.toggle('hidden', selectedTagOrder.length > 0 && selectedTagOrder.some(t => tagToBookmarks.has(t) && tagToBookmarks.get(t).length > 0))
+    emptyStateEl.classList.toggle('hidden', hasContent)
   }
   updateSearchCount()
   if (matchingBookmarks.length > 0 && searchMatchIndex >= matchingBookmarks.length) searchMatchIndex = 0
@@ -532,7 +537,39 @@ function attachConfigHandlers () {
 // Export for unit test (open URL in new tab)
 export { openUrlInNewTab }
 
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]
+ * Set tag selector checked state to current bookmark tags and refresh tree so only bookmarks that share at least one tag are shown. No-op if bookmarks not yet loaded.
+ * @param {string[]} tags - Current bookmark tags (e.g. from PopupController.normalizeTags(currentPin?.tags)).
+ */
+export function setSelectedTagsFromCurrentBookmark (tags) {
+  if (!Array.isArray(tags)) return
+  if (allTags.length === 0) return
+  allTags = mergePreferredTagSpelling(allTags, tags)
+  selectedTagOrder = intersectionTagOrder(allTags, tags)
+  saveSelectedTagOrder(selectedTagOrder)
+  // Clear Filters & view inputs so we use selectedTagOrder only (tagsFromSelection) and domain/time do not zero the list.
+  panelConfig.tagsInclude = new Set()
+  panelConfig.domains = new Set()
+  panelConfig.timeStart = null
+  panelConfig.timeEnd = null
+  syncControlsFromConfig()
+  savePanelConfig()
+  refreshFromConfig()
+  renderTagSelector()
+}
+
+/**
+ * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
+ * initTagsTreeTab: run when Tags tree tab is shown (standalone tags-tree.html or from side-panel.js). Optional currentBookmarkTags applied when loadBookmarks completes.
+ * Attaches handlers and loads bookmarks; only runs once (guard).
+ * @param {{ currentBookmarkTags?: string[] }} [options]
+ */
+let tagsTreeTabInited = false
+export function initTagsTreeTab (options = {}) {
+  if (tagsTreeTabInited) return
+  tagsTreeTabInited = true
+  if (options.currentBookmarkTags != null) pendingCurrentBookmarkTags = options.currentBookmarkTags
   attachConfigHandlers()
   attachSearchHandlers()
   const params = new URLSearchParams(typeof window !== 'undefined' && window.location ? window.location.search : '')
@@ -540,5 +577,12 @@ document.addEventListener('DOMContentLoaded', () => {
     loadPlaceholderForScreenshot()
   } else {
     loadBookmarks()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // [IMPL-SIDE_PANEL_TAGS_TREE] When loaded as standalone tags-tree.html, auto-init. When loaded by side-panel.js, initTagsTreeTab is called on tab select.
+  if (document.body.id === 'tags-tree-panel') {
+    initTagsTreeTab()
   }
 })

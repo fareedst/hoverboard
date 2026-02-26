@@ -20,13 +20,15 @@ REQ-UI_INSPECTION:
       metric: src/shared/ui-inspector.js; gated by DEBUG_HOVERBOARD_UI or setEnabled
     - criterion: Service worker, popup, and content script wire inspector
       metric: recordMessage in SW; recordAction in popup and content script
+    - criterion: Side panel snapshot: E2E can capture two serializable state shapes (Bookmark tab, Tags tree tab)
+      metric: snapshotSidePanel(page) in tests/e2e/helpers.js returns bookmarkTab and tagsTreeTab with required properties
   validation_criteria:
     - method: Unit tests
       coverage: Contract and inspector API used in tests
     - method: Manual
       coverage: Set DEBUG_HOVERBOARD_UI and verify no-op when unset
     - method: Extension E2E (Playwright)
-      coverage: tests/playwright/extension-*.spec.js – popup structure; popup↔background (GET_OPTIONS, GET_TAB_ID); popup→content (TOGGLE_HOVER, GET_OVERLAY_STATE); GET_PAGE_CONTENT (SW executeScript); suggested tags (MAIN world); GET_PAGE_SELECTION; overlay visibility (snapshotOverlay); options/side panel messaging; options snapshot (snapshotOptions); bookmarks table, browser import, offscreen (READ_FILE_BOOKMARKS). Run: npm run test:e2e:extension.
+      coverage: tests/playwright/extension-*.spec.js – popup structure; popup↔background (GET_OPTIONS, GET_TAB_ID); popup→content (TOGGLE_HOVER, GET_OVERLAY_STATE); GET_PAGE_CONTENT (SW executeScript); suggested tags (MAIN world); GET_PAGE_SELECTION; overlay visibility (snapshotOverlay); options/side panel messaging; options snapshot (snapshotOptions); side panel snapshot (snapshotSidePanel returns bookmarkTab and tagsTreeTab); bookmarks table, browser import, offscreen (READ_FILE_BOOKMARKS). Run: npm run test:e2e:extension.
   traceability:
     architecture:
       - ARCH-UI_TESTABILITY
@@ -35,6 +37,7 @@ REQ-UI_INSPECTION:
       - IMPL-UI_ACTION_CONTRACT
       - IMPL-UI_INSPECTOR
       - IMPL-PLAYWRIGHT_E2E_EXTENSION
+      - IMPL-SIDE_PANEL_SNAPSHOT
       - IMPL-MESSAGE_HANDLING
     tests:
       - tests/playwright/extension-messaging.spec.js

@@ -1975,11 +1975,13 @@ REQ-UI_INSPECTION:
   satisfaction_criteria:
     - criterion: UI action contract and optional inspector implemented and wired
       metric: ui-action-contract.js, ui-inspector.js; SW/popup/content record messages and actions when enabled
-    - criterion: Extension E2E tests cover messaging, evaluation contexts, overlay, options snapshot
-      metric: tests/playwright/extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js; npm run test:e2e:extension
+    - criterion: Extension E2E tests cover messaging, evaluation contexts, overlay, options snapshot, side panel snapshot
+      metric: tests/playwright/extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js; snapshotSidePanel in helpers.js; npm run test:e2e:extension
+    - criterion: Side panel snapshot returns two serializable shapes (Bookmark tab, Tags tree tab)
+      metric: snapshotSidePanel(page) returns bookmarkTab and tagsTreeTab with required properties
   validation_criteria:
     - method: Extension E2E (Playwright)
-      coverage: Popup, popup↔background, popup→content, GET_PAGE_CONTENT, suggested tags, GET_PAGE_SELECTION, overlay (snapshotOverlay), options/side panel messaging, options snapshot, bookmarks table, browser import, offscreen. See IMPL-PLAYWRIGHT_E2E_EXTENSION.
+      coverage: Popup, popup↔background, popup→content, GET_PAGE_CONTENT, suggested tags, GET_PAGE_SELECTION, overlay (snapshotOverlay), options/side panel messaging, options snapshot (snapshotOptions), side panel snapshot (snapshotSidePanel), bookmarks table, browser import, offscreen. See IMPL-PLAYWRIGHT_E2E_EXTENSION, IMPL-SIDE_PANEL_SNAPSHOT.
   traceability:
     architecture:
       - ARCH-UI_TESTABILITY
@@ -1988,6 +1990,7 @@ REQ-UI_INSPECTION:
       - IMPL-UI_ACTION_CONTRACT
       - IMPL-UI_INSPECTOR
       - IMPL-PLAYWRIGHT_E2E_EXTENSION
+      - IMPL-SIDE_PANEL_SNAPSHOT
       - IMPL-MESSAGE_HANDLING
     tests:
       - tests/playwright/extension-messaging.spec.js (popup↔background, popup→content, content↔background, options↔background, getTabId round-trip)
@@ -2327,3 +2330,58 @@ REQ-SIDE_PANEL_BOOKMARK_SEARCH:
       date: '2026-02-22'
       author: AI Agent
       reason: Initial creation for side panel bookmark search
+REQ-SIDE_PANEL_POPUP_EQUIVALENT:
+  name: Side Panel Popup Equivalent with Tabs
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Users can keep the side panel open and still manage the current tab's bookmark and browse the tags tree without reopening the popup.
+    problems_solved:
+      - Popup closes when focus is lost; no persistent popup-equivalent view
+      - Side panel previously showed only the tags tree
+    benefits:
+      - One panel with tabs "Bookmark" and "Tags tree"; Bookmark tab = popup-equivalent UI; Tags tree tab = hierarchical view
+      - User switches between Bookmark and Tags tree inside the same panel
+  satisfaction_criteria:
+    - criterion: Side panel has a tab bar with "Bookmark" and "Tags tree"
+    - criterion: Bookmark tab shows functional equivalent of popup UI (quick actions, storage selector, tag management, search tabs, footer actions)
+    - criterion: Tags tree tab shows the existing tags-and-bookmarks tree (config, search, tag selector, tree)
+    - criterion: Only one tab content is visible at a time; switching tabs shows the corresponding panel
+    - criterion: Last-selected tab is persisted and restored when the panel is reopened
+    - criterion: In Bookmark tab, "Open Tags tree" (or equivalent) switches to the Tags tree tab instead of opening the panel again
+  validation_criteria:
+    - method: Manual verification
+      coverage: Open panel; see tabs; switch to Bookmark, verify popup-equivalent UI and current-tab bookmark; switch to Tags tree, verify tree; close and reopen panel, verify last tab restored
+    - method: Unit tests
+      coverage: UIManager with scoped root (container) resolves elements from that root; tab switching shows/hides correct panel; tab persistence (mock storage)
+    - method: E2E tests
+      coverage: Open side panel; assert tabs present; switch tabs and assert correct content visible
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_TABS
+    implementation:
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-SIDE_PANEL_BOOKMARK
+      - IMPL-UIManager_SCOPED_ROOT
+    tests:
+      - tests/unit/ui-manager-scoped-root.test.js
+      - tests/unit/side-panel-tabs.test.js
+      - tests/playwright/extension-messaging.spec.js
+    code_annotations:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-SIDE_PANEL_TAGS_TREE
+      - REQ-AI_TAGGING_POPUP
+    supersedes: []
+  detail_file: requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml
+  metadata:
+    created:
+      date: '2026-02-25'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-25'
+      author: AI Agent
+      reason: Initial creation for tabbed side panel with popup equivalent

@@ -20,7 +20,7 @@ IMPL-SCREENSHOT_MODE:
       - PopupController.loadInitialData checks URL params; when screenshot=1 and url present, skip getCurrentTab() and use decoded url/title; in finally, set data-screenshot-ready on #mainInterface so script can wait for content
       - MessageHandler.handleGetCurrentBookmark: when data.url is present and is http(s), use it as targetUrl so popup-opened-as-tab gets bookmark for the screenshot URL, not the extension tab URL
       - scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme) and placeholderSyncSeed (showHoverOnPageLoad)
-      - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?); wait for [data-screenshot-ready="true"] before popup screenshot; check #store-local before bookmarks index screenshot so seeded local bookmarks are visible
+      - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?); wait for [data-screenshot-ready="true"] before popup screenshot; check #store-local before bookmarks index screenshot so seeded local bookmarks are visible; side panel captures use viewport 240px width so README images match real Chrome side panel proportions (not full-screen width)
       - scripts/screenshot-seed.example.json: example seed file matching the expected JSON shape
       - Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: 'dark' (see IMPL-POPUP_THEME_CSS)
   code_locations:
@@ -69,12 +69,16 @@ IMPL-SCREENSHOT_MODE:
 
     # Prefer data.url as targetUrl when http(s) so popup-as-tab gets correct bookmark.
     handleGetCurrentBookmark: IF data.url present and http(s): USE as targetUrl so popup-as-tab gets bookmark for screenshot URL
+
+    # [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX]
+    # Side panel screenshot width: capture at 240px viewport width so README images match real Chrome side panel proportions (not full-screen). Implements consistent docs and realistic side panel preview.
+    Side panel capture: CREATE page for side-panel.html; SET viewport to width 240, height sufficient for content (e.g. 600); GOTO side-panel.html; WAIT for tab content; CAPTURE screenshot (Bookmark tab then Tags tree tab); output side-panel-bookmark.png and side-panel-tags-tree.png at 240px width
   detail_file: implementation-decisions/IMPL-SCREENSHOT_MODE.yaml
   metadata:
     created:
       date: "2026-02-19"
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: "2026-02-26"
       author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: Side panel screenshot at 240px viewport width; essence_pseudocode block for side panel capture

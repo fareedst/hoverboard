@@ -117,10 +117,11 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
       })
 
       popupController.canInjectIntoTab = jest.fn().mockReturnValue(true)
+      popupController.currentTab = { id: 1, url: 'https://example.com' }
 
       await popupController.handleShowHoverboard()
 
-      // Verify updateOverlayState was called as fallback
+      // Verify updateOverlayState was called as fallback (sendToTab with GET_OVERLAY_STATE)
       expect(popupController.sendToTab).toHaveBeenCalledWith({
         type: 'GET_OVERLAY_STATE'
       })
@@ -129,6 +130,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
 
   describe('updateOverlayState', () => {
     test('[POPUP-CLOSE-BEHAVIOR-005] should update UI with overlay state', async () => {
+      popupController.currentTab = { id: 1, url: 'https://example.com' }
       // Mock GET_OVERLAY_STATE response
       popupController.sendToTab.mockResolvedValue({
         success: true,

@@ -1305,12 +1305,13 @@ ARCH-UI_TESTABILITY:
       - IMPL-UI_ACTION_CONTRACT
       - IMPL-UI_INSPECTOR
       - IMPL-PLAYWRIGHT_E2E_EXTENSION
+      - IMPL-SIDE_PANEL_SNAPSHOT
   detail_file: architecture-decisions/ARCH-UI_TESTABILITY.yaml
   metadata:
     created: "2026-02-17"
     last_updated: "2026-02-25"
     author: AI Agent
-    reason: Added IMPL-PLAYWRIGHT_E2E_EXTENSION and E2E spec references
+    reason: Added IMPL-SIDE_PANEL_SNAPSHOT for side panel snapshot (Bookmark + Tags tree tabs)
 ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
   name: Extension Bundled Entry Points
   status: Active
@@ -2436,3 +2437,58 @@ ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
       date: '2026-02-22'
       author: AI Agent
       reason: Initial creation
+ARCH-SIDE_PANEL_TABS:
+  name: Side Panel Tabs Architecture
+  status: Active
+  cross_references:
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - REQ-SIDE_PANEL_TAGS_TREE
+  rationale:
+    why: One panel page avoids multiple default_path entries; tabs let users switch between popup-equivalent and tags tree without losing context.
+    problems_solved:
+      - Side panel showed only tags tree; no popup-equivalent in panel
+      - Duplicate global IDs if both UIs were in the same document
+    benefits:
+      - Single panel entry (e.g. side-panel.html); tab bar; Bookmark panel uses UIManager/PopupController with scoped root (container); Tags tree panel hosts existing tags-tree UI
+      - Only one panel visible at a time; last-selected tab persisted
+  implementation_approach:
+    summary: Manifest side_panel.default_path points to one HTML (side-panel.html). Page has tab bar ("Bookmark" | "Tags tree"), #bookmarkPanel (root for popup-equivalent with data-popup-ref), #tagsTreePanel (existing tags-tree content). When Bookmark tab selected, init UISystem and createPopup({ container: bookmarkPanel }); when Tags tree tab selected, run tags-tree load/render. Persist selected tab in chrome.storage.local.
+    details:
+      - Tab bar: two buttons; click switches visible panel and persists choice
+      - UIManager supports optional container; when set, cacheElements uses container.querySelector('[data-popup-ref="id"]')
+      - Bookmark panel markup: same structure as popup with data-popup-ref on each element
+      - "Open Tags tree" in Bookmark footer: in panel context, switch to Tags tree tab
+  traceability:
+    requirements:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+      - REQ-SIDE_PANEL_TAGS_TREE
+    implementation:
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-SIDE_PANEL_BOOKMARK
+      - IMPL-UIManager_SCOPED_ROOT
+    tests:
+      - tests/unit/ui-manager-scoped-root.test.js
+      - tests/unit/side-panel-tabs.test.js
+      - tests/playwright/extension-messaging.spec.js
+    code_annotations:
+      - ARCH-SIDE_PANEL_TABS
+  related_decisions:
+    depends_on:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+      - REQ-SIDE_PANEL_TAGS_TREE
+    informs:
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-SIDE_PANEL_BOOKMARK
+      - IMPL-UIManager_SCOPED_ROOT
+    see_also:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+      - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_TABS.yaml
+  metadata:
+    created:
+      date: '2026-02-25'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-25'
+      author: AI Agent
+      reason: Initial creation for tabbed side panel

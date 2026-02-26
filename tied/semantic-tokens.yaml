@@ -274,6 +274,22 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
     registered: 2026-02-22
     last_updated: 2026-02-22
 
+IMPL-SIDE_PANEL_SNAPSHOT:
+  type: IMPL
+  name: Side Panel Snapshot E2E Helper
+  status: Active
+  description: "snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab } for E2E assertions; REQ-UI_INSPECTION, REQ-SIDE_PANEL_POPUP_EQUIVALENT, REQ-SIDE_PANEL_TAGS_TREE"
+  cross_references:
+    - ARCH-UI_TESTABILITY
+    - REQ-UI_INSPECTION
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - REQ-SIDE_PANEL_TAGS_TREE
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml
+  metadata:
+    registered: 2026-02-25
+    last_updated: 2026-02-25
+
 IMPL-CODE_STYLE:
   type: IMPL
   name: Code Style and Conventions
@@ -408,6 +424,22 @@ PROC-YAML_DB_OPERATIONS:
   metadata:
     registered: 2025-11-08
     last_updated: 2026-02-08
+
+PROC-TIED_DEV_CYCLE:
+  type: PROC
+  name: TIED Development Cycle (Session Workflow)
+  status: Active
+  description: "Per-session workflow: plan from REQ/ARCH/IMPL and pseudo-code, author TIED docs, add tests, implement (TDD), glue code, validate, sync docs, README/CHANGELOG, commit"
+  cross_references:
+    - REQ-TIED_SETUP
+    - REQ-MODULE_VALIDATION
+    - PROC-TOKEN_AUDIT
+    - PROC-TOKEN_VALIDATION
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: 2026-02-25
+    last_updated: 2026-02-25
 
 # ---
 # Product Requirements (Hoverboard Extension)
@@ -2581,6 +2613,84 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
   metadata:
     registered: 2026-02-22
     last_updated: 2026-02-22
+
+REQ-SIDE_PANEL_POPUP_EQUIVALENT:
+  type: REQ
+  name: Side Panel Popup Equivalent with Tabs
+  category: Functional
+  status: Implemented
+  description: "Side panel provides popup-equivalent UI (current-tab bookmark) and tags tree, switchable via tabs Bookmark | Tags tree"
+  cross_references:
+    - ARCH-SIDE_PANEL_TABS
+    - IMPL-SIDE_PANEL_TABS
+    - IMPL-SIDE_PANEL_BOOKMARK
+    - IMPL-UIManager_SCOPED_ROOT
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml
+  metadata:
+    registered: 2026-02-25
+    last_updated: 2026-02-25
+
+ARCH-SIDE_PANEL_TABS:
+  type: ARCH
+  name: Side Panel Tabs Architecture
+  status: Active
+  description: "Single side panel page with tab bar; Bookmark panel (scoped root) and Tags tree panel; persist selected tab"
+  cross_references:
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - REQ-SIDE_PANEL_TAGS_TREE
+    - IMPL-SIDE_PANEL_TABS
+    - IMPL-SIDE_PANEL_BOOKMARK
+    - IMPL-UIManager_SCOPED_ROOT
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_TABS.yaml
+  metadata:
+    registered: 2026-02-25
+    last_updated: 2026-02-25
+
+IMPL-SIDE_PANEL_TABS:
+  type: IMPL
+  name: Side Panel Tabs Implementation
+  status: Active
+  description: "Tab bar and switching; init Bookmark with createPopup(container); init Tags tree tab; persist selected tab"
+  cross_references:
+    - ARCH-SIDE_PANEL_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
+  metadata:
+    registered: 2026-02-25
+    last_updated: 2026-02-25
+
+IMPL-SIDE_PANEL_BOOKMARK:
+  type: IMPL
+  name: Side Panel Bookmark Tab Implementation
+  status: Active
+  description: "Bookmark tab markup with data-popup-ref; PopupController + UIManager with container; Open Tags tree switches tab"
+  cross_references:
+    - ARCH-SIDE_PANEL_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - IMPL-UIManager_SCOPED_ROOT
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml
+  metadata:
+    registered: 2026-02-25
+    last_updated: 2026-02-25
+
+IMPL-UIManager_SCOPED_ROOT:
+  type: IMPL
+  name: UIManager Scoped Root for Panel Context
+  status: Active
+  description: "UIManager optional container; cacheElements uses container.querySelector('[data-popup-ref=\"id\"]') when set"
+  cross_references:
+    - ARCH-SIDE_PANEL_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - IMPL-SIDE_PANEL_BOOKMARK
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-UIManager_SCOPED_ROOT.yaml
+  metadata:
+    registered: 2026-02-25
+    last_updated: 2026-02-25
 
 #
 # TOKEN-IDENTIFIER:
