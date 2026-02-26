@@ -1,0 +1,77 @@
+# [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
+# Implementation: KeyboardManager adds four shortcuts; side panel Bookmark tab enables keyboard and setupKeyboardNavigation so same shortcuts work in panel.
+
+IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
+  name: In-Popup and In-Panel Keyboard Shortcuts for Quick Access
+  status: Active
+  cross_references:
+    - ARCH-QUICK_ACCESS_ENTRY
+    - REQ-QUICK_ACCESS_ENTRY
+  rationale:
+    why: Implements REQ-QUICK_ACCESS_ENTRY and ARCH-QUICK_ACCESS_ENTRY by allowing keyboard shortcuts when popup or side panel has focus; reuses existing PopupController handlers via emit.
+    problems_solved:
+      - No keyboard shortcut from within popup/panel to open side panel, options, bookmarks index, or import
+    benefits:
+      - KeyboardManager shortcuts (Ctrl+Shift+KeyB, KeyO, KeyM, KeyI) emit openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport so existing handlers run; side panel gets same behavior by enableKeyboard true and setupKeyboardNavigation()
+  implementation_approach:
+    summary: In KeyboardManager constructor shortcuts map, add Ctrl+Shift+KeyB → emit('openTagsTree'), Ctrl+Shift+KeyO → emit('openOptions'), Ctrl+Shift+KeyM → emit('openBookmarksIndex'), Ctrl+Shift+KeyI → emit('openBrowserBookmarkImport'). getShortcutKey(event) already returns e.g. "Ctrl+Shift+KeyB" so no change there. In side-panel.js initBookmarkTab, set enableKeyboard: true and after setupEventListeners call popupComponents.keyboardManager?.setupKeyboardNavigation() so panel has same shortcuts.
+    details:
+      - KeyboardManager: shortcuts['Ctrl+Shift+KeyB'] = () => this.uiManager.emit('openTagsTree'); same for KeyO (openOptions), KeyM (openBookmarksIndex), KeyI (openBrowserBookmarkImport). Meta can be used on Mac for consistency; getShortcutKey uses ctrlKey/metaKey so both Ctrl+Shift and Meta+Shift will match if we add both or use a normalized key (plan uses Ctrl+Shift for simplicity; Chrome on Mac often maps Ctrl to Control key).
+      - side-panel.js initBookmarkTab: popup({ ..., enableKeyboard: true, ... }); after uiManager.setupEventListeners(), if popupComponents.keyboardManager then popupComponents.keyboardManager.setupKeyboardNavigation()
+  code_locations:
+    files:
+      - path: src/ui/popup/KeyboardManager.js
+        description: shortcuts map extended with Ctrl+Shift+KeyB, KeyO, KeyM, KeyI → emit openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport
+      - path: src/ui/side-panel/side-panel.js
+        description: initBookmarkTab enableKeyboard true; keyboardManager.setupKeyboardNavigation() after setupEventListeners
+    functions: []
+  essence_pseudocode: |
+    # [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
+    # This block defines in-popup and in-panel keyboard shortcuts. Implements REQ "keyboard shortcuts when popup or side panel has focus"; implements ARCH by reusing UI event flow (emit → PopupController handlers).
+    INPUT: user focuses popup or side panel Bookmark tab; user presses Ctrl+Shift+B/O/M/I
+    OUTPUT: same as footer button click (side panel opens, options opens, bookmarks index tab, or import tab)
+
+    # [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS]
+    # KeyboardManager shortcuts: add four entries so handleKeyDown finds handler and calls emit; PopupController already listens for openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport. Implements REQ "in-popup/panel shortcuts".
+    KeyboardManager constructor shortcuts:
+      "Ctrl+Shift+KeyB": () => this.uiManager.emit('openTagsTree')
+      "Ctrl+Shift+KeyO": () => this.uiManager.emit('openOptions')
+      "Ctrl+Shift+KeyM": () => this.uiManager.emit('openBookmarksIndex')
+      "Ctrl+Shift+KeyI": () => this.uiManager.emit('openBrowserBookmarkImport')
+
+    # [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS]
+    # Side panel Bookmark tab: enable keyboard and setup so panel has same shortcuts. Implements REQ "when popup or side panel has focus".
+    initBookmarkTab() (side-panel.js):
+      popupComponents = popup({ ..., enableKeyboard: true, ... })
+      ...
+      popupComponents.uiManager.setupEventListeners()
+      IF popupComponents.keyboardManager THEN popupComponents.keyboardManager.setupKeyboardNavigation()
+  traceability:
+    architecture:
+      - ARCH-QUICK_ACCESS_ENTRY
+    requirements:
+      - REQ-QUICK_ACCESS_ENTRY
+    tests:
+      - tests/unit/keyboard-manager-quick-access.test.js
+    code_annotations:
+      - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+      - REQ-QUICK_ACCESS_ENTRY
+      - ARCH-QUICK_ACCESS_ENTRY
+  related_decisions:
+    depends_on:
+      - ARCH-QUICK_ACCESS_ENTRY
+      - REQ-QUICK_ACCESS_ENTRY
+    supersedes: []
+    see_also:
+      - IMPL-EXTENSION_COMMANDS
+      - IMPL-CONTEXT_MENU_QUICK_ACCESS
+      - IMPL-SIDE_PANEL_TABS
+  detail_file: implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS.yaml
+  metadata:
+    created:
+      date: '2026-02-26'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-26'
+      author: AI Agent
+      reason: Initial creation for in-popup/panel keyboard quick access

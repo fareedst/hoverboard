@@ -19,6 +19,24 @@
     "default_popup": "src/ui/popup/popup.html",
     "default_title": "Hoverboard - Pinboard Integration"
   },
+  "commands": {
+    "open-side-panel": {
+      "suggested_key": { "default": "Ctrl+Shift+B" },
+      "description": "Open Hoverboard side panel"
+    },
+    "open-options": {
+      "suggested_key": { "default": "Ctrl+Shift+O" },
+      "description": "Open Hoverboard options"
+    },
+    "open-bookmarks-index": {
+      "suggested_key": { "default": "Ctrl+Shift+M" },
+      "description": "Open bookmarks index"
+    },
+    "open-import": {
+      "suggested_key": { "default": "Ctrl+Shift+I" },
+      "description": "Open browser bookmark import"
+    }
+  },
   "content_scripts": [
     {
       "matches": [

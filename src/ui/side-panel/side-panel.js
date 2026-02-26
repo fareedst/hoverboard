@@ -106,11 +106,12 @@ async function initBookmarkTab () {
   const configManager = new ConfigManager()
   const config = await configManager.getConfig()
   await init({ enableThemes: true, enableIcons: true, enableAssets: true, preloadCriticalAssets: true })
+  // [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS] Enable keyboard so same shortcuts work in side panel Bookmark tab
   popupComponents = popup({
     container: bookmarkPanelEl,
     errorHandler,
     config,
-    enableKeyboard: false,
+    enableKeyboard: true,
     enableState: true,
     onOpenTagsTreeInPanel: () => switchTab(TAB_TAGS_TREE)
   })
@@ -119,6 +120,9 @@ async function initBookmarkTab () {
   }
   if (popupComponents.uiManager) {
     popupComponents.uiManager.setupEventListeners()
+  }
+  if (popupComponents.keyboardManager) {
+    popupComponents.keyboardManager.setupKeyboardNavigation()
   }
 }
 

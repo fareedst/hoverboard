@@ -1,0 +1,59 @@
+# [REQ-QUICK_ACCESS_ENTRY] Quick access entry points for side panel, options, bookmarks index, import
+# Requirement: Users can open side panel, extension options page, bookmarks index (manager), and browser bookmark import
+# via (a) extension keyboard commands, (b) context menu, (c) keyboard shortcuts when popup or side panel has focus.
+
+REQ-QUICK_ACCESS_ENTRY:
+  name: Quick Access Entry Points
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Provide fast access to key extension surfaces without relying only on footer links in popup/side panel.
+    problems_solved:
+      - Opening side panel, options, bookmarks index, or import requires opening popup/panel first and clicking a link
+      - No global keyboard shortcut or right-click entry for these targets
+    benefits:
+      - Extension commands: user-configurable keyboard shortcuts (e.g. chrome://extensions/shortcuts) open side panel, options, bookmarks index, or import
+      - Context menu: right-click → Hoverboard submenu with four actions
+      - In-popup/panel shortcuts: when popup or side panel has focus, same four actions via keyboard (e.g. Ctrl+Shift+B/O/M/I)
+      - Options page is explicitly one of the four targets (open via chrome.runtime.openOptionsPage)
+  satisfaction_criteria:
+    - criterion: Extension commands (manifest commands + SW onCommand) open side panel, options page, bookmarks index page, and browser bookmark import page
+    - criterion: User can assign or change command shortcuts in chrome://extensions/shortcuts
+    - criterion: Context menu has parent "Hoverboard" with four items that perform the same four actions
+    - criterion: When popup or side panel Bookmark tab has focus, keyboard shortcuts trigger open side panel, open options, open bookmarks index, open import (same behavior as footer buttons)
+    - criterion: Options page is openable via command, context menu item, and in-UI shortcut (not only via Options button/link)
+  validation_criteria:
+    - method: Unit tests
+      coverage: SW command handler invokes correct API per command name; context menu creation and onClicked invokes same actions; KeyboardManager shortcuts emit correct events (openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport)
+    - method: Manual verification
+      coverage: Assign shortcuts in chrome://extensions/shortcuts; trigger each command; right-click → Hoverboard → each item; in popup/panel press shortcuts and verify target opens
+  traceability:
+    architecture:
+      - ARCH-QUICK_ACCESS_ENTRY
+    implementation:
+      - IMPL-EXTENSION_COMMANDS
+      - IMPL-CONTEXT_MENU_QUICK_ACCESS
+      - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+      - tests/unit/keyboard-manager-quick-access.test.js
+    code_annotations:
+      - REQ-QUICK_ACCESS_ENTRY
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-SIDE_PANEL_TAGS_TREE
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+      - REQ-LOCAL_BOOKMARKS_INDEX
+      - REQ-BROWSER_BOOKMARK_IMPORT
+    supersedes: []
+  detail_file: requirements/REQ-QUICK_ACCESS_ENTRY.yaml
+  metadata:
+    created:
+      date: '2026-02-26'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-26'
+      author: AI Agent
+      reason: Initial creation for quick access commands, context menu, and in-popup/panel shortcuts

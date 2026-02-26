@@ -1,0 +1,53 @@
+# [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
+# Architecture: Three entry mechanisms (extension commands, context menu, in-UI keyboard shortcuts) target the same four actions;
+# service worker owns commands and context menu; popup/panel UI owns in-focus shortcuts via existing event flow.
+
+ARCH-QUICK_ACCESS_ENTRY:
+  name: Quick Access Entry Architecture
+  status: Active
+  cross_references:
+    - REQ-QUICK_ACCESS_ENTRY
+  rationale:
+    why: Centralize the four targets (side panel, options, bookmarks index, import) and provide multiple entry paths without duplicating behavior.
+    problems_solved:
+      - Single path (footer links) for opening key surfaces
+    benefits:
+      - Commands and context menu run in service worker; reuse _sidePanelWindowId and chrome APIs (openOptionsPage, tabs.create)
+      - In-popup/panel shortcuts reuse existing PopupController handlers via UIManager emit so no duplicate logic
+  implementation_approach:
+    summary: Manifest declares four commands; SW onCommand and contextMenus.onClicked perform same four actions. KeyboardManager in popup (and side panel when enableKeyboard true) adds four key combos that emit openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport so PopupController handles them as today.
+    details:
+      - Commands: manifest.json "commands" with open-side-panel, open-options, open-bookmarks-index, open-import; SW chrome.commands.onCommand switches on command name and calls sidePanel.open, openOptionsPage, or tabs.create(extension URL)
+      - Context menu: browser.contextMenus.create parent "Hoverboard" and four children; onClicked switches on menuItemId and performs same four actions
+      - In-UI shortcuts: KeyboardManager shortcuts map (e.g. Ctrl+Shift+KeyB, KeyO, KeyM, KeyI) → uiManager.emit; side panel initBookmarkTab uses enableKeyboard true and setupKeyboardNavigation so panel gets same shortcuts
+  traceability:
+    requirements:
+      - REQ-QUICK_ACCESS_ENTRY
+    implementation:
+      - IMPL-EXTENSION_COMMANDS
+      - IMPL-CONTEXT_MENU_QUICK_ACCESS
+      - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+      - tests/unit/keyboard-manager-quick-access.test.js
+    code_annotations:
+      - ARCH-QUICK_ACCESS_ENTRY
+  related_decisions:
+    depends_on:
+      - REQ-QUICK_ACCESS_ENTRY
+    informs:
+      - IMPL-EXTENSION_COMMANDS
+      - IMPL-CONTEXT_MENU_QUICK_ACCESS
+      - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+    see_also:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+      - IMPL-SIDE_PANEL_TAGS_TREE
+  detail_file: architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml
+  metadata:
+    created:
+      date: '2026-02-26'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-26'
+      author: AI Agent
+      reason: Initial creation for quick access architecture

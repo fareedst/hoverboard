@@ -8,13 +8,18 @@ export class KeyboardManager {
     this.isEnabled = true
 
     // Keyboard shortcuts mapping
+    // [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS] Quick access: side panel, options, bookmarks index, import
     this.shortcuts = {
       Space: () => this.uiManager.emit('showHoverboard'),
       KeyT: () => this.uiManager.focusTagInput(),
       KeyS: () => this.uiManager.focusSearchInput(),
       Escape: () => this.handleEscape(),
       KeyH: () => this.uiManager.toggleShortcutsHelp(),
-      F1: () => this.uiManager.toggleShortcutsHelp()
+      F1: () => this.uiManager.toggleShortcutsHelp(),
+      'Ctrl+Shift+KeyB': () => this.uiManager.emit('openTagsTree'),
+      'Ctrl+Shift+KeyO': () => this.uiManager.emit('openOptions'),
+      'Ctrl+Shift+KeyM': () => this.uiManager.emit('openBookmarksIndex'),
+      'Ctrl+Shift+KeyI': () => this.uiManager.emit('openBrowserBookmarkImport')
     }
 
     // Bind methods

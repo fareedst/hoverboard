@@ -2692,6 +2692,81 @@ IMPL-UIManager_SCOPED_ROOT:
     registered: 2026-02-25
     last_updated: 2026-02-25
 
+REQ-QUICK_ACCESS_ENTRY:
+  type: REQ
+  name: Quick Access Entry Points
+  category: Functional
+  status: Implemented
+  description: "Users can open side panel, options, bookmarks index, import via extension commands, context menu, and in-popup/panel keyboard shortcuts"
+  cross_references:
+    - ARCH-QUICK_ACCESS_ENTRY
+    - IMPL-EXTENSION_COMMANDS
+    - IMPL-CONTEXT_MENU_QUICK_ACCESS
+    - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-QUICK_ACCESS_ENTRY.yaml
+  metadata:
+    registered: 2026-02-26
+    last_updated: 2026-02-26
+
+ARCH-QUICK_ACCESS_ENTRY:
+  type: ARCH
+  name: Quick Access Entry Architecture
+  status: Active
+  description: "Three entry mechanisms (commands, context menu, in-UI shortcuts) target same four actions; SW owns commands/context menu; UI owns in-focus shortcuts"
+  cross_references:
+    - REQ-QUICK_ACCESS_ENTRY
+    - IMPL-EXTENSION_COMMANDS
+    - IMPL-CONTEXT_MENU_QUICK_ACCESS
+    - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml
+  metadata:
+    registered: 2026-02-26
+    last_updated: 2026-02-26
+
+IMPL-EXTENSION_COMMANDS:
+  type: IMPL
+  name: Extension Commands for Quick Access
+  status: Active
+  description: "Manifest commands + SW onCommand; open side panel, options, bookmarks index, import"
+  cross_references:
+    - ARCH-QUICK_ACCESS_ENTRY
+    - REQ-QUICK_ACCESS_ENTRY
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml
+  metadata:
+    registered: 2026-02-26
+    last_updated: 2026-02-26
+
+IMPL-CONTEXT_MENU_QUICK_ACCESS:
+  type: IMPL
+  name: Context Menu Quick Access
+  status: Active
+  description: "Context menu parent Hoverboard and four items; onClicked same four actions as commands"
+  cross_references:
+    - ARCH-QUICK_ACCESS_ENTRY
+    - REQ-QUICK_ACCESS_ENTRY
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS.yaml
+  metadata:
+    registered: 2026-02-26
+    last_updated: 2026-02-26
+
+IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
+  type: IMPL
+  name: In-Popup and In-Panel Keyboard Shortcuts for Quick Access
+  status: Active
+  description: "KeyboardManager four shortcuts emit openTagsTree/openOptions/openBookmarksIndex/openBrowserBookmarkImport; side panel enableKeyboard and setupKeyboardNavigation"
+  cross_references:
+    - ARCH-QUICK_ACCESS_ENTRY
+    - REQ-QUICK_ACCESS_ENTRY
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS.yaml
+  metadata:
+    registered: 2026-02-26
+    last_updated: 2026-02-26
+
 #
 # TOKEN-IDENTIFIER:
 #   type: REQ | ARCH | IMPL | TEST | PROC

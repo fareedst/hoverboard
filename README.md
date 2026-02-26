@@ -76,6 +76,14 @@ The snapshot above shows the side panel **Tags tree** tab with placeholder tag a
 
 ([REQ-SIDE_PANEL_TAGS_TREE], [ARCH-SIDE_PANEL_TAGS_TREE], [IMPL-SIDE_PANEL_TAGS_TREE]) The **Tags tree** tab shows a hierarchical view of bookmarks by tag (or a grouped list). The tag selector uses a **compact** list of checkboxes and labels; a **Show all tags** toggle lets you switch between displaying every tag and only the selected (checked) tags, and that choice is persisted. ([REQ-SIDE_PANEL_BOOKMARK_SEARCH], [ARCH-SIDE_PANEL_BOOKMARK_SEARCH], [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]) A **Search bookmarks** box filters the displayed list by text (title, URL, tags, notes); the match count is shown and **Previous** / **Next** move through matches with scroll and highlight. A **Filters & view** bar can be expanded or collapsed to maximize space for the bookmarks list. When expanded, you can filter by **create time** or **last updated** (date range), **tags to include** (comma-separated), and **domains** (URL hostnames, comma-separated); set **Group by** (none, create date, update date, tag, or domain) and **Sort by** with **Sort order** (newest/oldest first). You can select one or more tags and control their display order; below that, each tag is shown with a collapsible list of bookmarks (title and URL), or when grouped, sections by the chosen axis. Clicking a URL opens it in a new tab. Config state (expanded/collapsed and filter, sort, group values) is persisted. Data comes from the same local, file, and sync bookmarks as the Local Bookmarks Index (no Pinboard in this view). The panel stays open when you switch tabs. Requires Chrome 114+ and the `sidePanel` permission.
 
+### Quick access (keyboard and context menu)
+
+([REQ-QUICK_ACCESS_ENTRY], [ARCH-QUICK_ACCESS_ENTRY], [IMPL-EXTENSION_COMMANDS], [IMPL-CONTEXT_MENU_QUICK_ACCESS], [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS]) You can open the **side panel**, **options**, **bookmarks index**, or **browser bookmark import** page without using the popup or side panel footer links:
+
+- **Extension commands (global shortcuts):** Assign keyboard shortcuts in Chrome at `chrome://extensions/shortcuts`. Default suggested keys: **Ctrl+Shift+B** (open side panel), **Ctrl+Shift+O** (open options), **Ctrl+Shift+M** (open bookmarks index), **Ctrl+Shift+I** (open browser bookmark import). You can change or disable any of these.
+- **Context menu:** Right-click anywhere and choose **Hoverboard** → **Open side panel**, **Open options**, **Open bookmarks index**, or **Open browser bookmark import**.
+- **In-popup / in-panel shortcuts:** When the popup or the side panel Bookmark tab has focus, the same four actions are available with **Ctrl+Shift+B**, **Ctrl+Shift+O**, **Ctrl+Shift+M**, and **Ctrl+Shift+I** (same as the extension commands by default).
+
 ### Local Bookmarks Index
 
 ![Local Bookmarks Index](images/local-bookmarks-index.png)

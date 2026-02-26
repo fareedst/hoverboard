@@ -3955,3 +3955,98 @@ IMPL-UIManager_SCOPED_ROOT:
       date: '2026-02-25'
       author: AI Agent
       reason: Initial creation
+IMPL-EXTENSION_COMMANDS:
+  name: Extension Commands for Quick Access
+  status: Active
+  cross_references:
+    - ARCH-QUICK_ACCESS_ENTRY
+    - REQ-QUICK_ACCESS_ENTRY
+  rationale:
+    why: Implements REQ-QUICK_ACCESS_ENTRY by providing global keyboard shortcuts; SW owns command handling.
+  implementation_approach:
+    summary: manifest.json commands (open-side-panel, open-options, open-bookmarks-index, open-import); SW chrome.commands.onCommand switches and performs sidePanel.open, openOptionsPage, tabs.create.
+  code_locations:
+    files:
+      - path: manifest.json
+      - path: src/core/service-worker.js
+  traceability:
+    architecture:
+      - ARCH-QUICK_ACCESS_ENTRY
+    requirements:
+      - REQ-QUICK_ACCESS_ENTRY
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+    code_annotations:
+      - IMPL-EXTENSION_COMMANDS
+  detail_file: implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml
+  metadata:
+    created:
+      date: '2026-02-26'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-26'
+      author: AI Agent
+      reason: Initial creation for extension commands quick access
+IMPL-CONTEXT_MENU_QUICK_ACCESS:
+  name: Context Menu Quick Access
+  status: Active
+  cross_references:
+    - ARCH-QUICK_ACCESS_ENTRY
+    - REQ-QUICK_ACCESS_ENTRY
+  rationale:
+    why: Implements REQ-QUICK_ACCESS_ENTRY by providing right-click menu entry to the same four targets.
+  implementation_approach:
+    summary: setupContextMenus creates parent Hoverboard and four children; contextMenus.onClicked performs same four actions as commands.
+  code_locations:
+    files:
+      - path: src/core/service-worker.js
+  traceability:
+    architecture:
+      - ARCH-QUICK_ACCESS_ENTRY
+    requirements:
+      - REQ-QUICK_ACCESS_ENTRY
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+    code_annotations:
+      - IMPL-CONTEXT_MENU_QUICK_ACCESS
+  detail_file: implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS.yaml
+  metadata:
+    created:
+      date: '2026-02-26'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-26'
+      author: AI Agent
+      reason: Initial creation for context menu quick access
+IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
+  name: In-Popup and In-Panel Keyboard Shortcuts for Quick Access
+  status: Active
+  cross_references:
+    - ARCH-QUICK_ACCESS_ENTRY
+    - REQ-QUICK_ACCESS_ENTRY
+  rationale:
+    why: Implements REQ-QUICK_ACCESS_ENTRY by allowing keyboard shortcuts when popup or side panel has focus; reuses PopupController handlers via emit.
+  implementation_approach:
+    summary: KeyboardManager shortcuts Ctrl+Shift+KeyB/O/M/I emit openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport; side panel enableKeyboard true and setupKeyboardNavigation.
+  code_locations:
+    files:
+      - path: src/ui/popup/KeyboardManager.js
+      - path: src/ui/side-panel/side-panel.js
+  traceability:
+    architecture:
+      - ARCH-QUICK_ACCESS_ENTRY
+    requirements:
+      - REQ-QUICK_ACCESS_ENTRY
+    tests:
+      - tests/unit/keyboard-manager-quick-access.test.js
+    code_annotations:
+      - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+  detail_file: implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS.yaml
+  metadata:
+    created:
+      date: '2026-02-26'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-26'
+      author: AI Agent
+      reason: Initial creation for in-popup/panel keyboard quick access

@@ -2492,3 +2492,46 @@ ARCH-SIDE_PANEL_TABS:
       date: '2026-02-25'
       author: AI Agent
       reason: Initial creation for tabbed side panel
+ARCH-QUICK_ACCESS_ENTRY:
+  name: Quick Access Entry Architecture
+  status: Active
+  cross_references:
+    - REQ-QUICK_ACCESS_ENTRY
+  rationale:
+    why: Centralize the four targets (side panel, options, bookmarks index, import) and provide multiple entry paths without duplicating behavior.
+    problems_solved:
+      - Single path (footer links) for opening key surfaces
+    benefits:
+      - Commands and context menu run in service worker; reuse _sidePanelWindowId and chrome APIs; in-popup/panel shortcuts reuse PopupController handlers via UIManager emit
+  implementation_approach:
+    summary: Manifest declares four commands; SW onCommand and contextMenus.onClicked perform same four actions; KeyboardManager adds four key combos that emit so PopupController handles them.
+  traceability:
+    requirements:
+      - REQ-QUICK_ACCESS_ENTRY
+    implementation:
+      - IMPL-EXTENSION_COMMANDS
+      - IMPL-CONTEXT_MENU_QUICK_ACCESS
+      - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+      - tests/unit/keyboard-manager-quick-access.test.js
+    code_annotations:
+      - ARCH-QUICK_ACCESS_ENTRY
+  related_decisions:
+    depends_on:
+      - REQ-QUICK_ACCESS_ENTRY
+    informs:
+      - IMPL-EXTENSION_COMMANDS
+      - IMPL-CONTEXT_MENU_QUICK_ACCESS
+      - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+    see_also:
+      - ARCH-SIDE_PANEL_TAGS_TREE
+  detail_file: architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml
+  metadata:
+    created:
+      date: '2026-02-26'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-26'
+      author: AI Agent
+      reason: Initial creation for quick access architecture

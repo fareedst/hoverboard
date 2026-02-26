@@ -1,0 +1,82 @@
+# [IMPL-EXTENSION_COMMANDS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
+# Implementation: Manifest commands + SW onCommand; four commands open side panel, options, bookmarks index, import.
+
+IMPL-EXTENSION_COMMANDS:
+  name: Extension Commands for Quick Access
+  status: Active
+  cross_references:
+    - ARCH-QUICK_ACCESS_ENTRY
+    - REQ-QUICK_ACCESS_ENTRY
+  rationale:
+    why: Implements REQ-QUICK_ACCESS_ENTRY and ARCH-QUICK_ACCESS_ENTRY by providing global keyboard shortcuts that open the four targets; user can customize in chrome://extensions/shortcuts.
+    problems_solved:
+      - No keyboard shortcut to open side panel, options, bookmarks index, or import without opening popup first
+    benefits:
+      - Four commands; SW handles onCommand; reuse _sidePanelWindowId for side panel; openOptionsPage and tabs.create for others
+  implementation_approach:
+    summary: manifest.json "commands" with four entries (open-side-panel, open-options, open-bookmarks-index, open-import) and suggested_key; SW chrome.commands.onCommand.addListener switches on command name and performs the corresponding action.
+    details:
+      - manifest: "commands": { "open-side-panel": { "suggested_key": { "default": "Ctrl+Shift+B" }, "description": "Open Hoverboard side panel" }, "open-options": { "suggested_key": { "default": "Ctrl+Shift+O" }, "description": "Open Hoverboard options" }, "open-bookmarks-index": { "suggested_key": { "default": "Ctrl+Shift+M" }, "description": "Open bookmarks index" }, "open-import": { "suggested_key": { "default": "Ctrl+Shift+I" }, "description": "Open browser bookmark import" } }
+      - SW: In setupEventListeners (or after), if chrome.commands exists, chrome.commands.onCommand.addListener((command) => { ... }). Handler: switch(command). open-side-panel: use this._sidePanelWindowId and chrome.sidePanel.open({ windowId }); open-options: chrome.runtime.openOptionsPage(); open-bookmarks-index: chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html') }); open-import: chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html') }). Guard chrome.sidePanel and chrome.commands for environments where they may be undefined.
+  code_locations:
+    files:
+      - path: manifest.json
+        description: commands key with four command definitions and suggested_key
+      - path: src/core/service-worker.js
+        description: chrome.commands.onCommand.addListener; switch on command; open side panel, options, bookmarks index, import
+    functions: []
+  essence_pseudocode: |
+    # [IMPL-EXTENSION_COMMANDS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
+    # This block defines extension commands for quick access. Implements REQ by providing global keyboard shortcuts; implements ARCH by having SW own command handling.
+    INPUT: user presses assigned shortcut (or default Ctrl+Shift+B/O/M/I)
+    OUTPUT: side panel opens, or options page opens, or bookmarks index tab opens, or import page tab opens
+
+    # [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]
+    # Manifest: declares four commands so Chrome shows them in chrome://extensions/shortcuts; user can reassign. Implements REQ "extension keyboard commands".
+    manifest.json:
+      "commands": {
+        "open-side-panel": { "suggested_key": { "default": "Ctrl+Shift+B" }, "description": "Open Hoverboard side panel" },
+        "open-options": { "suggested_key": { "default": "Ctrl+Shift+O" }, "description": "Open Hoverboard options" },
+        "open-bookmarks-index": { "suggested_key": { "default": "Ctrl+Shift+M" }, "description": "Open bookmarks index" },
+        "open-import": { "suggested_key": { "default": "Ctrl+Shift+I" }, "description": "Open browser bookmark import" }
+      }
+
+    # [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]
+    # SW onCommand: implements REQ by handling each command and performing the correct action. Reuses _sidePanelWindowId from existing OPEN_SIDE_PANEL flow for side panel; openOptionsPage and tabs.create for options, index, import.
+    SW setupEventListeners (or init):
+      IF chrome.commands THEN chrome.commands.onCommand.addListener((command) => handleCommand(command))
+    handleCommand(command):
+      SWITCH command:
+        "open-side-panel": windowId = this._sidePanelWindowId; IF windowId != null AND chrome.sidePanel?.open THEN chrome.sidePanel.open({ windowId })
+        "open-options": chrome.runtime.openOptionsPage()
+        "open-bookmarks-index": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html') })
+        "open-import": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html') })
+  traceability:
+    architecture:
+      - ARCH-QUICK_ACCESS_ENTRY
+    requirements:
+      - REQ-QUICK_ACCESS_ENTRY
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+    code_annotations:
+      - IMPL-EXTENSION_COMMANDS
+      - REQ-QUICK_ACCESS_ENTRY
+      - ARCH-QUICK_ACCESS_ENTRY
+  related_decisions:
+    depends_on:
+      - ARCH-QUICK_ACCESS_ENTRY
+      - REQ-QUICK_ACCESS_ENTRY
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_TAGS_TREE
+      - IMPL-CONTEXT_MENU_QUICK_ACCESS
+      - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
+  detail_file: implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml
+  metadata:
+    created:
+      date: '2026-02-26'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-26'
+      author: AI Agent
+      reason: Initial creation for extension commands quick access

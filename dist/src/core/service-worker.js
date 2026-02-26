@@ -22125,6 +22125,43 @@ var HoverboardServiceWorker = class {
     safariEnhancements.runtime.onStartup.addListener(() => {
       this.handleExtensionStartup();
     });
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    if (chromeApi?.commands?.onCommand?.addListener) {
+      chromeApi.commands.onCommand.addListener((command) => this.handleCommand(command));
+    }
+  }
+  /**
+   * [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]
+   * Handle extension command (keyboard shortcut): open side panel, options, bookmarks index, or import page.
+   */
+  handleCommand(command) {
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    const runtime = chromeApi?.runtime || safariEnhancements.runtime;
+    const getURL = runtime.getURL ? (path) => runtime.getURL(path) : () => "";
+    if (command === "open-side-panel") {
+      const windowId = this._sidePanelWindowId;
+      if (windowId != null && chromeApi?.sidePanel?.open) {
+        chromeApi.sidePanel.open({ windowId });
+      }
+      return;
+    }
+    if (command === "open-options") {
+      if (runtime.openOptionsPage) runtime.openOptionsPage();
+      return;
+    }
+    if (command === "open-bookmarks-index") {
+      const url2 = getURL("src/ui/bookmarks-table/bookmarks-table.html");
+      if (url2 && (chromeApi?.tabs?.create || safariEnhancements.tabs?.create)) {
+        (chromeApi?.tabs ?? safariEnhancements.tabs).create({ url: url2 });
+      }
+      return;
+    }
+    if (command === "open-import") {
+      const url2 = getURL("src/ui/browser-bookmark-import/browser-bookmark-import.html");
+      if (url2 && (chromeApi?.tabs?.create || safariEnhancements.tabs?.create)) {
+        (chromeApi?.tabs ?? safariEnhancements.tabs).create({ url: url2 });
+      }
+    }
   }
   /** [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Seed _sidePanelWindowId from active tab's normal window. Implements cache so OPEN_SIDE_PANEL handler can open panel without await (user gesture). */
   _seedSidePanelWindowCache() {
@@ -22292,7 +22329,43 @@ var HoverboardServiceWorker = class {
       console.error("Badge update error:", error48);
     }
   }
+  /**
+   * [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_QUICK_ACCESS]
+   * Create context menu parent "Hoverboard" and four items; onClicked performs same four actions as handleCommand.
+   */
   setupContextMenus() {
+    const api = typeof globalThis.chrome !== "undefined" && globalThis.chrome.contextMenus || safariEnhancements.contextMenus;
+    if (!api?.create || !api?.onClicked?.addListener) return;
+    api.removeAll(() => {
+      api.create({ id: "hoverboard-root", title: "Hoverboard", contexts: ["all"] });
+      api.create({ id: "hoverboard-open-side-panel", parentId: "hoverboard-root", title: "Open side panel", contexts: ["all"] });
+      api.create({ id: "hoverboard-open-options", parentId: "hoverboard-root", title: "Open options", contexts: ["all"] });
+      api.create({ id: "hoverboard-open-bookmarks-index", parentId: "hoverboard-root", title: "Open bookmarks index", contexts: ["all"] });
+      api.create({ id: "hoverboard-open-import", parentId: "hoverboard-root", title: "Open browser bookmark import", contexts: ["all"] });
+    });
+    const self2 = this;
+    api.onClicked.addListener((info) => {
+      const menuId = info?.menuItemId;
+      if (menuId === "hoverboard-open-side-panel") {
+        const windowId = self2._sidePanelWindowId;
+        const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+        if (windowId != null && chromeApi?.sidePanel?.open) chromeApi.sidePanel.open({ windowId });
+        return;
+      }
+      if (menuId === "hoverboard-open-options") {
+        const runtime = typeof globalThis.chrome !== "undefined" && globalThis.chrome.runtime || safariEnhancements.runtime;
+        if (runtime?.openOptionsPage) runtime.openOptionsPage();
+        return;
+      }
+      if (menuId === "hoverboard-open-bookmarks-index" || menuId === "hoverboard-open-import") {
+        const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+        const runtime = chromeApi?.runtime || safariEnhancements.runtime;
+        const getURL = runtime?.getURL ? (path2) => runtime.getURL(path2) : () => "";
+        const path = menuId === "hoverboard-open-bookmarks-index" ? "src/ui/bookmarks-table/bookmarks-table.html" : "src/ui/browser-bookmark-import/browser-bookmark-import.html";
+        const url2 = getURL(path);
+        if (url2 && (chromeApi?.tabs?.create || safariEnhancements.tabs?.create)) (chromeApi?.tabs ?? safariEnhancements.tabs).create({ url: url2 });
+      }
+    });
   }
 };
 var serviceWorker = new HoverboardServiceWorker();

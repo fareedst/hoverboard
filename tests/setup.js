@@ -213,6 +213,18 @@ global.chrome = {
     request: jest.fn().mockResolvedValue(),
     contains: jest.fn().mockResolvedValue(),
   },
+  // [REQ-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS] [IMPL-CONTEXT_MENU_QUICK_ACCESS] Mocks for quick-access tests
+  commands: {
+    onCommand: { addListener: jest.fn() },
+  },
+  sidePanel: {
+    open: jest.fn(),
+  },
+  contextMenus: {
+    create: jest.fn(),
+    removeAll: jest.fn().mockImplementation((cb) => { if (typeof cb === 'function') cb(); }),
+    onClicked: { addListener: jest.fn() },
+  },
 };
 
 // Mock browser APIs for cross-browser compatibility
