@@ -6,7 +6,7 @@
  * Search over displayed list; count; Next/Previous with scroll and highlight.
  */
 
-import { buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab } from './tags-tree-data.js'
+import { buildTagToBookmarks, getAllTagsFromBookmarks, getTagsToDisplay, openUrlInNewTab } from './tags-tree-data.js'
 import { applyFilters, sortBookmarks, groupBookmarksBy, filterBookmarksBySearch } from './tags-tree-filter.js'
 import { parseTimeRangeValue } from '../bookmarks-table/bookmarks-table-filter.js'
 
@@ -21,7 +21,7 @@ let allTags = []
 let selectedTagOrder = []
 let collapsedTags = new Set()
 let collapsedSections = new Set()
-/** @type {{ expanded: boolean, timeField: string, timeStart: number|null, timeEnd: number|null, tagsInclude: Set<string>, domains: Set<string>, groupBy: string, sortBy: string, sortAsc: boolean }} */
+/** @type {{ expanded: boolean, timeField: string, timeStart: number|null, timeEnd: number|null, tagsInclude: Set<string>, domains: Set<string>, groupBy: string, sortBy: string, sortAsc: boolean, showAllTags: boolean }} */
 let panelConfig = {
   expanded: false,
   timeField: 'updated_at',
@@ -31,7 +31,8 @@ let panelConfig = {
   domains: new Set(),
   groupBy: 'none',
   sortBy: 'updated_at',
-  sortAsc: false
+  sortAsc: false,
+  showAllTags: true
 }
 
 const tagSelectorEl = document.getElementById('tagSelector')
@@ -48,6 +49,8 @@ const filterDomainsEl = document.getElementById('filterDomains')
 const groupByEl = document.getElementById('groupBy')
 const sortByEl = document.getElementById('sortBy')
 const sortAscEl = document.getElementById('sortAsc')
+// [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Toggle: show all tags vs only checked tags; state persisted in panel config.
+const tagListViewToggleEl = document.getElementById('tagListViewToggle')
 
 // [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Search state and refs for count and Next/Prev.
 let searchQuery = ''
@@ -83,7 +86,8 @@ function loadPanelConfig () {
       const groupBy = c?.groupBy === 'time' || c?.groupBy === 'updated_at' || c?.groupBy === 'tag' || c?.groupBy === 'domain' ? c.groupBy : 'none'
       const sortBy = c?.sortBy === 'time' || c?.sortBy === 'updated_at' || c?.sortBy === 'tag' || c?.sortBy === 'domain' ? c.sortBy : 'updated_at'
       const sortAsc = c?.sortAsc === true
-      panelConfig = { expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc }
+      const showAllTags = c?.showAllTags !== false
+      panelConfig = { expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, showAllTags }
       resolve(panelConfig)
     })
   })
@@ -103,7 +107,8 @@ function savePanelConfig () {
     domains: Array.from(panelConfig.domains),
     groupBy: panelConfig.groupBy,
     sortBy: panelConfig.sortBy,
-    sortAsc: panelConfig.sortAsc
+    sortAsc: panelConfig.sortAsc,
+    showAllTags: panelConfig.showAllTags
   }
   chrome.storage.local.set({ [STORAGE_KEY_PANEL_CONFIG]: c })
 }
@@ -162,6 +167,7 @@ function loadPlaceholderForScreenshot () {
   allTags = getAllTagsFromBookmarks(MOCK_BOOKMARKS)
   selectedTagOrder = [...allTags]
   collapsedTags = new Set()
+  if (tagListViewToggleEl) tagListViewToggleEl.checked = panelConfig.showAllTags
   renderTagSelector()
   renderTree()
 }
@@ -176,6 +182,7 @@ async function loadBookmarks () {
     await loadPanelConfig()
     renderConfigToggle()
     syncControlsFromConfig()
+    if (tagListViewToggleEl) tagListViewToggleEl.checked = panelConfig.showAllTags
     selectedTagOrder = await loadSelectedTagOrder()
     allTags = [] // set after we have bookmarks
     const response = await new Promise((resolve, reject) => {
@@ -253,10 +260,12 @@ function saveCollapsedState () {
   chrome.storage.local.set({ [STORAGE_KEY_COLLAPSED]: Array.from(collapsedTags) })
 }
 
-/** [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Renders tag selector (checkboxes) from allTags; implements tag selection/order UI; persists selectedTagOrder. */
+/** [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Renders tag selector (checkboxes) for visible tags from getTagsToDisplay; implements tag selection/order UI and compact layout; persists selectedTagOrder. */
 function renderTagSelector () {
+  if (!tagSelectorEl) return
+  const visibleTags = getTagsToDisplay(allTags, selectedTagOrder, panelConfig.showAllTags)
   tagSelectorEl.innerHTML = ''
-  for (const tag of allTags) {
+  for (const tag of visibleTags) {
     const label = document.createElement('label')
     const cb = document.createElement('input')
     cb.type = 'checkbox'
@@ -510,6 +519,14 @@ function attachConfigHandlers () {
   })
   if (filterTagsIncludeEl) filterTagsIncludeEl.addEventListener('blur', refreshFromConfig)
   if (filterDomainsEl) filterDomainsEl.addEventListener('blur', refreshFromConfig)
+  // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] ON tag list view toggle: update showAllTags, save config, re-render tag selector only.
+  if (tagListViewToggleEl) {
+    tagListViewToggleEl.addEventListener('change', () => {
+      panelConfig.showAllTags = !!tagListViewToggleEl.checked
+      savePanelConfig()
+      renderTagSelector()
+    })
+  }
 }
 
 // Export for unit test (open URL in new tab)

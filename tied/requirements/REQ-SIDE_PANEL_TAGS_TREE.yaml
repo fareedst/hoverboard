@@ -28,11 +28,13 @@ REQ-SIDE_PANEL_TAGS_TREE:
     - criterion: Display can be grouped by create date, update date, tags, or domain (or none for flat list); grouped sections are collapsible
     - criterion: Selection and display configuration region is expandable for use and collapsible to maximize space for the bookmarks list
     - criterion: Config state (expanded/collapsed, filter values, sort/group choices) is persisted (e.g. chrome.storage.local)
+    - criterion: Tag selector uses a compact layout (reduced spacing/size) to maximize space for the bookmarks list
+    - criterion: User can switch between viewing all tags and only selected (checked) tags; the choice is persisted
   validation_criteria:
     - method: Manual verification
-      coverage: Open panel from popup; select/reorder tags; expand/collapse tag sections; click URL opens in new tab; expand/collapse config; set filters (time, tags, domain), sort and group; verify persistence
+      coverage: Open panel from popup; select/reorder tags; expand/collapse tag sections; click URL opens in new tab; expand/collapse config; set filters (time, tags, domain), sort and group; verify persistence; verify compact tag list and toggle between all tags / only checked tags; verify toggle state persists
     - method: Unit tests
-      coverage: buildTagToBookmarks from bookmarks array; tag order; open-URL action with mock chrome.tabs; getDomainFromUrl; filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters; sortBookmarks; groupBookmarksBy
+      coverage: buildTagToBookmarks from bookmarks array; tag order; open-URL action with mock chrome.tabs; getDomainFromUrl; filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters; sortBookmarks; groupBookmarksBy; getTagsToDisplay (all vs only checked)
     - method: Integration tests (mocks)
       coverage: Popup button sends open-panel message; SW calls chrome.sidePanel.open; panel load sends getAggregatedBookmarksForIndex and renders tree
   traceability:
@@ -43,6 +45,7 @@ REQ-SIDE_PANEL_TAGS_TREE:
     tests:
       - tests/unit/tags-tree-data.test.js
       - tests/unit/tags-tree-filter.test.js
+      - tests/unit/tags-tree-ui.test.js
       - tests/unit/side-panel-open.test.js
     code_annotations:
       - REQ-SIDE_PANEL_TAGS_TREE
@@ -57,6 +60,6 @@ REQ-SIDE_PANEL_TAGS_TREE:
       date: '2026-02-21'
       author: AI Agent
     last_updated:
-      date: '2026-02-22'
+      date: '2026-02-25'
       author: AI Agent
-      reason: Add filters (time, tags, domain), sort/group, expandable config, persistence
+      reason: Add compact tag selector and all/checked toggle criteria and validation

@@ -47,6 +47,22 @@ export function getAllTagsFromBookmarks (bookmarks) {
 
 /**
  * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+ * Return the list of tags to show in the tag selector: all tags when showAllTags is true, else only selected tags that still exist in allTags (avoids stale tags). Implements tag list view mode (all vs only checked) for compact selector.
+ * @param {string[]} allTags
+ * @param {string[]} selectedTagOrder
+ * @param {boolean} showAllTags
+ * @returns {string[]}
+ */
+export function getTagsToDisplay (allTags, selectedTagOrder, showAllTags) {
+  if (!Array.isArray(allTags)) return []
+  if (showAllTags) return allTags
+  if (!Array.isArray(selectedTagOrder) || selectedTagOrder.length === 0) return []
+  const allSet = new Set(allTags)
+  return selectedTagOrder.filter(t => allSet.has(t))
+}
+
+/**
+ * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
  * Open a URL in a new tab. Implements requirement "click URL opens in new tab" by calling chrome.tabs.create({ url }); used when user clicks a bookmark link in the panel.
  * @param {string} url
  */

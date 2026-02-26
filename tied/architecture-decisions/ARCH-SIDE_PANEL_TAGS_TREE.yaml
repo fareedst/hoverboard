@@ -20,6 +20,7 @@ ARCH-SIDE_PANEL_TAGS_TREE:
       - Open flow: popup footer button → handler sends OPEN_SIDE_PANEL (or equivalent) → SW receives, gets windowId (e.g. from sender or chrome.windows.getCurrent), calls chrome.sidePanel.open({ windowId })
       - Panel page: on load sends getAggregatedBookmarksForIndex; applies filters (time range by create/update, tags include, domain); sorts by chosen axis and direction; optionally groups by create date, update date, tag, or domain; renders tag selector (selected tags + order) and tree or grouped sections (collapsible); click URL → chrome.tabs.create({ url })
       - Config region: expand/collapse toggle; when expanded shows time field (create | update), time range, tag include filter, domain filter, group-by, sort-by, sort-order, tag display order; when collapsed shows compact bar (e.g. "Filters & view" + chevron) to maximize space for bookmarks list
+      - Tag selector: compact layout (reduced gap, smaller font) to maximize space for bookmarks list; a control toggles between "all tags" and "only checked tags"; toggle state is part of panel config and persisted in chrome.storage.local
       - Config and expanded state persisted in chrome.storage.local
       - Data: no new backend; same bookmarks as local index (local + file + sync; no Pinboard in this view)
   traceability:
@@ -30,6 +31,7 @@ ARCH-SIDE_PANEL_TAGS_TREE:
     tests:
       - tests/unit/tags-tree-data.test.js
       - tests/unit/tags-tree-filter.test.js
+      - tests/unit/tags-tree-ui.test.js
       - tests/unit/side-panel-open.test.js
     code_annotations:
       - ARCH-SIDE_PANEL_TAGS_TREE
@@ -47,6 +49,6 @@ ARCH-SIDE_PANEL_TAGS_TREE:
       date: '2026-02-21'
       author: AI Agent
     last_updated:
-      date: '2026-02-22'
+      date: '2026-02-25'
       author: AI Agent
-      reason: Add config region, filters, sort/group, persistence
+      reason: Add compact tag selector layout and all/checked toggle with persistence

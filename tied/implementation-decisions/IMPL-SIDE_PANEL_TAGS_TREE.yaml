@@ -23,11 +23,11 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - Service worker: OPEN_SIDE_PANEL handled in onMessage listener only (no await before open). windowId from _sidePanelWindowId cache; chrome.sidePanel.open({ windowId }) called synchronously. _seedSidePanelWindowCache() seeds cache from active tab's normal window on startup. handleTabActivated updates _sidePanelWindowId when activated tab's window is normal.
       - Message handler: OPEN_SIDE_PANEL type; SW listener handles directly (not via handleMessage async path)
       - Panel: tags-tree.html/js/css; tags-tree-data.js has buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab (pure + testable); tags-tree-filter.js (or same module) has getDomainFromUrl, filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy (pure + testable)
-      - Config: load/save config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder) from chrome.storage.local; expand/collapse toggle shows or hides full filter and display controls
+      - Config: load/save config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags) from chrome.storage.local; expand/collapse toggle shows or hides full filter and display controls; tag list view toggle (showAllTags) persists with config
   code_locations:
     files:
       - path: src/ui/side-panel/tags-tree-data.js
-        description: buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab (pure/helpers; testable)
+        description: buildTagToBookmarks, getAllTagsFromBookmarks, getTagsToDisplay, openUrlInNewTab (pure/helpers; testable)
       - path: src/ui/side-panel/tags-tree-filter.js
         description: getDomainFromUrl, filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy (pure; testable)
       - path: src/ui/side-panel/tags-tree.html
@@ -57,6 +57,9 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - name: getAllTagsFromBookmarks
         file: src/ui/side-panel/tags-tree-data.js
         description: Returns sorted unique tags; implements tag list for selector (REQ/ARCH/IMPL)
+      - name: getTagsToDisplay
+        file: src/ui/side-panel/tags-tree-data.js
+        description: Returns tags to show in selector: allTags when showAllTags true, else selectedTagOrder filtered by allTags (REQ/ARCH/IMPL)
       - name: openUrlInNewTab
         file: src/ui/side-panel/tags-tree-data.js
         description: chrome.tabs.create({ url }); implements click-URL-opens-in-new-tab (REQ/ARCH/IMPL)
@@ -90,6 +93,9 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - name: renderConfigToggle
         file: src/ui/side-panel/tags-tree.js
         description: Show/hide config content; expand/collapse UI (REQ/ARCH/IMPL)
+      - name: renderTagSelector
+        file: src/ui/side-panel/tags-tree.js
+        description: Renders checkboxes for getTagsToDisplay(allTags, selectedTagOrder, showAllTags); compact layout; on change save selectedTagOrder and refresh (REQ/ARCH/IMPL)
       - name: refreshFromConfig
         file: src/ui/side-panel/tags-tree.js
         description: Re-apply filter/sort/group and re-render on config change (REQ/ARCH/IMPL)
@@ -113,6 +119,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     tests:
       - tests/unit/tags-tree-data.test.js
       - tests/unit/tags-tree-filter.test.js
+      - tests/unit/tags-tree-ui.test.js
       - tests/unit/side-panel-open.test.js
     code_annotations:
       - IMPL-SIDE_PANEL_TAGS_TREE
@@ -129,7 +136,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     # This block defines the overall feature: side panel tags tree opened from popup; panel shows tag→urls tree; click URL opens in new tab. Implements REQ by providing the side-panel entry and tag-tree UX; implements ARCH by following the open-flow and data-flow decisions.
     INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
     OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
-    DATA: bookmarks (from getAggregatedBookmarksForIndex), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+    DATA: bookmarks (from getAggregatedBookmarksForIndex), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
 
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
     # Popup entry: implements requirement "open tags tree from popup" by sending OPEN_SIDE_PANEL. ARCH prescribes message-based open; this block is the popup side.
@@ -158,7 +165,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       config = loadPanelConfig()  // expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder
       renderConfigToggle(config.expanded)  // compact bar when collapsed; full controls when expanded
       SEND getAggregatedBookmarksForIndex
-      ON response: bookmarks = response.bookmarks; filtered = applyFilters(bookmarks, config); sorted = sortBookmarks(filtered, config.sortBy, config.sortAsc); allTags = getAllTagsFromBookmarks(bookmarks); selectedTagOrder = config.selectedTagOrder OR allTags; IF config.groupBy !== 'none' THEN grouped = groupBookmarksBy(sorted, config.groupBy); renderGrouped(grouped, config) ELSE tagToBookmarks = buildTagToBookmarks(sorted); collapsedTags = loadCollapsedState(); renderTagSelector(allTags, selectedTagOrder); renderTree(selectedTagOrder, tagToBookmarks, collapsedTags); attachClickHandlers()
+      ON response: bookmarks = response.bookmarks; filtered = applyFilters(bookmarks, config); sorted = sortBookmarks(filtered, config.sortBy, config.sortAsc); allTags = getAllTagsFromBookmarks(bookmarks); selectedTagOrder = config.selectedTagOrder OR allTags; IF config.groupBy !== 'none' THEN grouped = groupBookmarksBy(sorted, config.groupBy); renderGrouped(grouped, config) ELSE tagToBookmarks = buildTagToBookmarks(sorted); collapsedTags = loadCollapsedState(); renderTagSelector(); renderTree(selectedTagOrder, tagToBookmarks, collapsedTags); attachClickHandlers()
 
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
     # buildTagToBookmarks: implements requirement "tag-based tree" by producing Map<tag, [{ title, url }]> from bookmarks. One pass; trim/dedupe per tag.
@@ -178,9 +185,17 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       RETURN sorted Array.from(set)
 
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # renderTagSelector: implements tag selection and order UI; optional persist selectedTagOrder to chrome.storage.local.
-    renderTagSelector(allTags, selectedTagOrder):
-      render list of tags with selection state and order; on change save selectedTagOrder (optional)
+    # Tag list view mode: implements "user can switch between all tags and only checked tags; choice persisted". showAllTags boolean in config; when true display allTags, when false display selectedTagOrder filtered by allTags (avoid stale tags). Persisted in panel config.
+    getTagsToDisplay(allTags, selectedTagOrder, showAllTags):
+      IF showAllTags THEN RETURN allTags
+      allSet = Set(allTags); RETURN selectedTagOrder filtered to items IN allSet (preserve order)
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # renderTagSelector: implements tag selection and order UI and compact layout. Renders checkboxes for visibleTags = getTagsToDisplay(allTags, selectedTagOrder, config.showAllTags); on checkbox change save selectedTagOrder and refreshFromConfig; toggle change updates showAllTags, savePanelConfig, renderTagSelector only.
+    renderTagSelector():
+      visibleTags = getTagsToDisplay(allTags, selectedTagOrder, config.showAllTags)
+      render list of tags (visibleTags) with selection state (checked iff in selectedTagOrder) and compact layout; on change save selectedTagOrder and refreshFromConfig
+    ON tag list view toggle: config.showAllTags = NOT config.showAllTags; savePanelConfig(config); renderTagSelector()
 
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
     # renderTree: implements collapsible URL lists per tag; each section has tag label + toggle + list of title+URL.
@@ -224,8 +239,8 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     renderGrouped(grouped, config): FOR each groupKey in grouped: render section header (groupKey + toggle); render list of title+URL; store url for click → openUrlInNewTab(url)
 
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # loadPanelConfig / savePanelConfig: implements config state persistence; read/write expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder to chrome.storage.local.
-    loadPanelConfig(): get from chrome.storage.local; RETURN defaults for missing keys
+    # loadPanelConfig / savePanelConfig: implements config state persistence; read/write expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags to chrome.storage.local. showAllTags defaults true for backward compatibility.
+    loadPanelConfig(): get from chrome.storage.local; RETURN defaults for missing keys (showAllTags default true)
     savePanelConfig(config): chrome.storage.local.set(config keyed by storage keys)
 
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
@@ -237,6 +252,6 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       date: '2026-02-21'
       author: AI Agent
     last_updated:
-      date: '2026-02-21'
+      date: '2026-02-25'
       author: AI Agent
-      reason: Add filters, sort/group, expandable config, persistence; sync essence_pseudocode and code
+      reason: Add getTagsToDisplay, showAllTags, compact tag selector, all/checked toggle; sync essence_pseudocode and code

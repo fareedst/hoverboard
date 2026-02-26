@@ -86,9 +86,16 @@
     </div>
   </section>
 
+  <!-- [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Tag selector: compact list of checkboxes; toggle shows all tags vs only checked; state persisted. -->
   <section class="tag-selector-section" aria-labelledby="tag-selector-legend">
-    <h2 id="tag-selector-legend" class="tag-selector-legend">Select tags (order = display order)</h2>
-    <div id="tagSelector" class="tag-selector">
+    <div class="tag-selector-header">
+      <h2 id="tag-selector-legend" class="tag-selector-legend">Select tags (order = display order)</h2>
+      <label class="tag-list-view-toggle-label">
+        <input type="checkbox" id="tagListViewToggle" checked aria-label="Show all tags (uncheck to show only selected tags)">
+        <span>Show all tags</span>
+      </label>
+    </div>
+    <div id="tagSelector" class="tag-selector tag-selector-compact">
       <!-- Filled by JS: checkboxes per tag -->
     </div>
   </section>
