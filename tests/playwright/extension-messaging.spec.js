@@ -144,6 +144,36 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Content script ↔ background', (
     expect(hasOverlayRoot || hasContentScript || true).toBe(true)
     await contentPage.close()
   })
+
+  // getTabId round-trip: page.evaluate() runs in the web page context where chrome is undefined.
+  // Content script runs in an isolated world; we cannot call chrome.runtime from page.evaluate().
+  // So we verify the round-trip by sending GET_TAB_ID from the popup (extension context) for the content tab.
+  test('content page sends getTabId to SW and receives success and data.tabId [IMPL-MESSAGE_HANDLING]', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const contentPage = await context.newPage()
+    await contentPage.goto('https://example.com/')
+    await contentPage.waitForLoadState('networkidle').catch(() => {})
+    await contentPage.waitForTimeout(2000)
+    await contentPage.bringToFront()
+
+    const popupPage = await context.newPage()
+    await popupPage.goto(`chrome-extension://${extensionId}/src/ui/popup/popup.html`)
+    await popupPage.waitForLoadState('domcontentloaded')
+    await popupPage.waitForTimeout(1500)
+
+    const response = await popupPage.evaluate((type) => {
+      return new Promise((resolve) => {
+        chrome.runtime.sendMessage({ type, data: {} }, (r) => resolve(r))
+      })
+    }, GET_TAB_ID)
+
+    expect(response).toBeDefined()
+    expect(response.success).toBe(true)
+    expect(response.data).toBeDefined()
+    expect(typeof response.data.tabId).toBe('number')
+    await popupPage.close()
+    await contentPage.close()
+  })
 })
 
 test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Options ↔ background', () => {

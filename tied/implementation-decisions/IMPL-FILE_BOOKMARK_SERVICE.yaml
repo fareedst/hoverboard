@@ -32,6 +32,7 @@ IMPL-FILE_BOOKMARK_SERVICE:
       - REQ-FILE_BOOKMARK_STORAGE
     tests:
       - tests/unit/file-bookmark-service.test.js
+      - tests/unit/offscreen-file-bookmark-messaging.test.js
     code_annotations:
       - IMPL-FILE_BOOKMARK_SERVICE
   related_decisions:

@@ -19,6 +19,7 @@ IMPL-MESSAGE_HANDLING:
       - Async request/response
       - Error handling
       - Input validation
+      - Messaging protocol tests validate SW routing, MessageHandler contracts, content/offscreen/popup contracts, MessageClient retry, and type drift (see traceability.tests and docs/architecture/extension-messaging-protocols.md)
   code_locations:
     files:
       - path: src/core/message-service.js
@@ -37,6 +38,14 @@ IMPL-MESSAGE_HANDLING:
       - tests/unit/message-handler-runtime-validation.test.js
       - tests/unit/message-handler-local-save-recall.test.js
       - tests/unit/message-schemas.test.js
+      - tests/unit/message-handler-contracts.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+      - tests/unit/content-messaging-contracts.test.js
+      - tests/unit/popup-message-contract.test.js
+      - tests/unit/offscreen-file-bookmark-messaging.test.js
+      - tests/unit/message-client.test.js
+      - tests/unit/message-type-drift.test.js
+      - tests/playwright/extension-messaging.spec.js
     code_annotations:
       - IMPL-MESSAGE_HANDLING
   related_decisions:
@@ -71,6 +80,6 @@ IMPL-MESSAGE_HANDLING:
       date: "2025-07-14"
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: "2026-02-25"
       author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: Add messaging protocol test traceability and docs reference

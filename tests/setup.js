@@ -71,7 +71,7 @@ global.chrome = {
       addListener: jest.fn(),
       removeListener: jest.fn(),
     },
-    getManifest: jest.fn(),
+    getManifest: jest.fn(() => ({ version: '1.0.0' })),
     getPlatformInfo: jest.fn(),
     getPackageDirectoryEntry: jest.fn(),
     requestUpdateCheck: jest.fn(),
@@ -197,6 +197,12 @@ global.chrome = {
     sendMessage: jest.fn().mockResolvedValue(),
     create: jest.fn().mockResolvedValue(),
     update: jest.fn().mockResolvedValue(),
+    get: jest.fn().mockResolvedValue({ id: 1, url: 'https://example.com' }),
+    onActivated: { addListener: jest.fn(), removeListener: jest.fn() },
+    onUpdated: { addListener: jest.fn(), removeListener: jest.fn() },
+  },
+  windows: {
+    get: jest.fn().mockResolvedValue({ id: 1, type: 'normal' }),
   },
   scripting: {
     executeScript: jest.fn().mockResolvedValue(),

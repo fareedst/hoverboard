@@ -18,7 +18,7 @@ IMPL-RUNTIME_VALIDATION:
     summary: Zod schemas in shared/message-schemas.js and config-manager.js; validate at processMessage entry and in getConfig() after merge
     details:
       - Message envelope (type + optional data) validated for all messages in message-handler processMessage
-      - Data schemas for critical types: getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag
+      - Data schemas for critical types: getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag, moveBookmarkToStorage
       - saveBookmark data schema accepts shared/toread as Pinboard-style strings 'yes'/'no' (in addition to boolean/number) so local storage and popup payloads validate
       - getCurrentBookmark data schema uses .passthrough() so overlay and other senders may include extra keys (e.g. title, tabId from overlay-manager) without validation failure
       - Config schema validates merged (defaults + stored) config in ConfigManager.getConfig(); on failure use defaults
@@ -43,6 +43,7 @@ IMPL-RUNTIME_VALIDATION:
       - tests/unit/message-schemas.test.js
       - tests/unit/message-handler-runtime-validation.test.js
       - tests/unit/message-handler-local-save-recall.test.js
+      - tests/unit/message-handler-contracts.test.js
       - tests/unit/config-manager.test.js (describe IMPL-RUNTIME_VALIDATION)
     code_annotations:
       - IMPL-RUNTIME_VALIDATION

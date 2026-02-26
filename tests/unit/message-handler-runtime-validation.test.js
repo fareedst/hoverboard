@@ -203,6 +203,61 @@ describe('[IMPL-RUNTIME_VALIDATION] processMessage saveTag validation', () => {
   })
 })
 
+describe('[IMPL-RUNTIME_VALIDATION] processMessage moveBookmarkToStorage validation', () => {
+  test('returns error and does not call moveBookmarkToStorage when data missing url', async () => {
+    const moveBookmarkToStorage = jest.fn()
+    const mockProvider = {
+      getBookmarkForUrl: jest.fn(),
+      saveBookmark: jest.fn(),
+      deleteBookmark: jest.fn(),
+      getRecentBookmarks: jest.fn(),
+      saveTag: jest.fn(),
+      deleteTag: jest.fn(),
+      moveBookmarkToStorage
+    }
+    const handler = new MessageHandler(mockProvider)
+    const result = await handler.processMessage({ type: 'moveBookmarkToStorage', data: { targetBackend: 'local' } }, {})
+    expect(result).toMatchObject({ error: 'Invalid message' })
+    expect(result.details).toBeDefined()
+    expect(moveBookmarkToStorage).not.toHaveBeenCalled()
+  })
+  test('returns error and does not call moveBookmarkToStorage when data missing targetBackend', async () => {
+    const moveBookmarkToStorage = jest.fn()
+    const mockProvider = {
+      getBookmarkForUrl: jest.fn(),
+      saveBookmark: jest.fn(),
+      deleteBookmark: jest.fn(),
+      getRecentBookmarks: jest.fn(),
+      saveTag: jest.fn(),
+      deleteTag: jest.fn(),
+      moveBookmarkToStorage
+    }
+    const handler = new MessageHandler(mockProvider)
+    const result = await handler.processMessage({ type: 'moveBookmarkToStorage', data: { url: 'https://example.com' } }, {})
+    expect(result).toMatchObject({ error: 'Invalid message' })
+    expect(moveBookmarkToStorage).not.toHaveBeenCalled()
+  })
+  test('accepts valid moveBookmarkToStorage and calls moveBookmarkToStorage [IMPL-RUNTIME_VALIDATION]', async () => {
+    const moveBookmarkToStorage = jest.fn().mockResolvedValue({ success: true })
+    const mockProvider = {
+      getBookmarkForUrl: jest.fn(),
+      saveBookmark: jest.fn(),
+      deleteBookmark: jest.fn(),
+      getRecentBookmarks: jest.fn(),
+      saveTag: jest.fn(),
+      deleteTag: jest.fn(),
+      moveBookmarkToStorage
+    }
+    const handler = new MessageHandler(mockProvider)
+    const result = await handler.processMessage(
+      { type: 'moveBookmarkToStorage', data: { url: 'https://example.com', targetBackend: 'local' } },
+      {}
+    )
+    expect(result).not.toMatchObject({ error: 'Invalid message' })
+    expect(moveBookmarkToStorage).toHaveBeenCalledWith('https://example.com', 'local')
+  })
+})
+
 describe('[IMPL-RUNTIME_VALIDATION] processMessage deleteTag validation', () => {
   test('returns error and does not call deleteTag when data missing url', async () => {
     const deleteTag = jest.fn()

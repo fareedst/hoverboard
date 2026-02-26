@@ -20047,13 +20047,18 @@ var deleteTagDataSchema = external_exports.object({
   url: requiredUrlSchema,
   value: external_exports.string().min(1)
 }).strict();
+var moveBookmarkToStorageDataSchema = external_exports.object({
+  url: requiredUrlSchema,
+  targetBackend: external_exports.string().min(1)
+}).strict();
 var dataSchemasByType = {
   getCurrentBookmark: getCurrentBookmarkDataSchema,
   getTagsForUrl: getTagsForUrlDataSchema,
   saveBookmark: saveBookmarkDataSchema,
   deleteBookmark: deleteBookmarkDataSchema,
   saveTag: saveTagDataSchema,
-  deleteTag: deleteTagDataSchema
+  deleteTag: deleteTagDataSchema,
+  moveBookmarkToStorage: moveBookmarkToStorageDataSchema
 };
 function validateMessageEnvelope(message) {
   const result = messageEnvelopeSchema.safeParse(message);

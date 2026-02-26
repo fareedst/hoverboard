@@ -58,31 +58,44 @@ async function writeFile (dirHandle, data) {
   await writable.close()
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+/**
+ * [IMPL-FILE_BOOKMARK_SERVICE] [REQ-FILE_BOOKMARK_STORAGE]
+ * Handles READ_FILE_BOOKMARKS and WRITE_FILE_BOOKMARKS. Exported for unit tests.
+ * @param {{ type: string, data?: object }} message
+ * @param {(r: object) => void} sendResponse
+ * @param {{ getDirectoryHandle: () => Promise<unknown>, readFile: (h: unknown) => Promise<{ version: number, bookmarks: object }>, writeFile: (h: unknown, data: object) => Promise<void> }} io - Optional; defaults to real getDirectoryHandle/readFile/writeFile
+ * @returns {boolean} true if async response expected
+ */
+export function handleOffscreenMessage (message, sendResponse, io = { getDirectoryHandle, readFile, writeFile }) {
   const type = message?.type
+  const { getDirectoryHandle: getHandle, readFile: read, writeFile: write } = io
   if (type === 'READ_FILE_BOOKMARKS') {
-    getDirectoryHandle()
+    getHandle()
       .then((handle) => {
         if (!handle) {
           sendResponse({ error: 'NO_HANDLE', data: null })
           return
         }
-        return readFile(handle).then((data) => sendResponse({ error: null, data }))
+        return read(handle).then((data) => sendResponse({ error: null, data }))
       })
       .catch((e) => sendResponse({ error: e.message || 'READ_FAILED', data: null }))
     return true
   }
   if (type === 'WRITE_FILE_BOOKMARKS') {
-    getDirectoryHandle()
+    getHandle()
       .then((handle) => {
         if (!handle) {
           sendResponse({ error: 'NO_HANDLE', success: false })
           return
         }
-        return writeFile(handle, message.data || {}).then(() => sendResponse({ error: null, success: true }))
+        return write(handle, message.data || {}).then(() => sendResponse({ error: null, success: true }))
       })
       .catch((e) => sendResponse({ error: e.message || 'WRITE_FAILED', success: false }))
     return true
   }
   return false
+}
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  return handleOffscreenMessage(message, sendResponse)
 })

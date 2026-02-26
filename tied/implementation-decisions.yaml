@@ -212,7 +212,17 @@ IMPL-MESSAGE_HANDLING:
     requirements:
       - REQ-SMART_BOOKMARKING
       - REQ-BOOKMARK_STATE_SYNCHRONIZATION
-    tests: []
+    tests:
+      - tests/unit/message-handler-contracts.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+      - tests/unit/content-messaging-contracts.test.js
+      - tests/unit/popup-message-contract.test.js
+      - tests/unit/offscreen-file-bookmark-messaging.test.js
+      - tests/unit/message-client.test.js
+      - tests/unit/message-type-drift.test.js
+      - tests/unit/message-schemas.test.js
+      - tests/unit/message-handler-runtime-validation.test.js
+      - tests/playwright/extension-messaging.spec.js
     code_annotations:
       - IMPL-MESSAGE_HANDLING
   related_decisions:
@@ -225,9 +235,9 @@ IMPL-MESSAGE_HANDLING:
       date: 2025-07-14T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-13T00:00:00.000Z
+      date: 2026-02-25T00:00:00.000Z
       author: AI Agent
-      reason: Migrated from STDD to TIED format
+      reason: Add messaging protocol test traceability
 IMPL-RUNTIME_VALIDATION:
   name: Runtime validation with Zod for messages and config
   status: Active

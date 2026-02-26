@@ -474,13 +474,20 @@ REQ-SMART_BOOKMARKING:
   traceability:
     architecture:
       - ARCH-UX_CORE
+      - ARCH-MESSAGE_HANDLING
     implementation:
       - IMPL-BOOKMARKING
+      - IMPL-MESSAGE_HANDLING
     tests:
       - Bookmark creation tests
       - tests/unit/message-schemas.test.js (saveBookmark payload validation)
       - tests/unit/message-handler-runtime-validation.test.js (processMessage saveBookmark acceptance)
       - tests/unit/message-handler-local-save-recall.test.js (save then getCurrentBookmark local storage path)
+      - tests/unit/message-handler-contracts.test.js (MessageHandler contracts for message types used by bookmarking)
+      - tests/unit/service-worker-messaging-routing.test.js (SW routing for getOptions, processMessage)
+      - tests/unit/content-messaging-contracts.test.js (content script message contracts)
+      - tests/unit/popup-message-contract.test.js (popup action → message type)
+      - tests/unit/message-type-drift.test.js (message type consistency)
       - tests/unit/local-bookmark-service.test.js (shared/toread round-trip)
     code_annotations:
       - REQ-SMART_BOOKMARKING
@@ -496,9 +503,9 @@ REQ-SMART_BOOKMARKING:
       date: 2025-07-14T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-13T00:00:00.000Z
+      date: 2026-02-25T00:00:00.000Z
       author: AI Agent
-      reason: Migrated from STDD to TIED format
+      reason: Add messaging protocol test traceability (IMPL-MESSAGE_HANDLING, ARCH-MESSAGE_HANDLING)
 REQ-TAG_MANAGEMENT:
   name: Tag Management
   category: Functional
@@ -978,6 +985,11 @@ REQ-BOOKMARK_STATE_SYNCHRONIZATION:
     tests:
       - Toggle synchronization tests
       - Popup live data tests
+      - tests/unit/message-handler-contracts.test.js (MessageHandler contracts, BOOKMARK_UPDATED flow)
+      - tests/unit/service-worker-messaging-routing.test.js (SW handleMessage routing)
+      - tests/unit/content-messaging-contracts.test.js (content message contracts)
+      - tests/unit/popup-message-contract.test.js (popup → message type)
+      - tests/playwright/extension-messaging.spec.js (popup↔background, content↔background, getTabId round-trip)
     code_annotations:
       - REQ-BOOKMARK_STATE_SYNCHRONIZATION
   related_requirements:
@@ -991,9 +1003,9 @@ REQ-BOOKMARK_STATE_SYNCHRONIZATION:
       date: 2025-07-14T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-13T00:00:00.000Z
+      date: 2026-02-25T00:00:00.000Z
       author: AI Agent
-      reason: Migrated from STDD to TIED format
+      reason: Add messaging protocol test traceability
 REQ-OVERLAY_CONTROL_LAYOUT:
   name: Overlay Control Layout
   category: Functional
@@ -1971,16 +1983,25 @@ REQ-UI_INSPECTION:
   traceability:
     architecture:
       - ARCH-UI_TESTABILITY
+      - ARCH-MESSAGE_HANDLING
     implementation:
       - IMPL-UI_ACTION_CONTRACT
       - IMPL-UI_INSPECTOR
       - IMPL-PLAYWRIGHT_E2E_EXTENSION
+      - IMPL-MESSAGE_HANDLING
+    tests:
+      - tests/playwright/extension-messaging.spec.js (popup↔background, popup→content, content↔background, options↔background, getTabId round-trip)
+      - tests/unit/message-handler-contracts.test.js (MessageHandler message-type contracts)
+      - tests/unit/popup-message-contract.test.js (popup action → message type)
+      - tests/unit/content-messaging-contracts.test.js (content script message contracts)
+      - tests/unit/service-worker-messaging-routing.test.js (SW routing)
+      - tests/unit/message-type-drift.test.js (message type consistency)
   detail_file: requirements/REQ-UI_INSPECTION.yaml
   metadata:
     created: "2026-02-17"
     last_updated: "2026-02-25"
     author: AI Agent
-    reason: Added E2E validation and IMPL-PLAYWRIGHT_E2E_EXTENSION traceability
+    reason: Add messaging protocol test traceability (ARCH-MESSAGE_HANDLING, IMPL-MESSAGE_HANDLING)
 REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
   name: Extension Bundled Entry Points
   category: Non-Functional

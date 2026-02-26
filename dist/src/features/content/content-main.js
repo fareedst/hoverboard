@@ -24734,6 +24734,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     url: requiredUrlSchema,
     value: external_exports.string().min(1)
   }).strict();
+  var moveBookmarkToStorageDataSchema = external_exports.object({
+    url: requiredUrlSchema,
+    targetBackend: external_exports.string().min(1)
+  }).strict();
 
   // src/core/message-handler.js
   var MESSAGE_TYPES = {

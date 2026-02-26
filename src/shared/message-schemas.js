@@ -56,13 +56,20 @@ export const deleteTagDataSchema = z.object({
   value: z.string().min(1)
 }).strict()
 
+// [IMPL-RUNTIME_VALIDATION] moveBookmarkToStorage: url and targetBackend required (per-bookmark storage move)
+export const moveBookmarkToStorageDataSchema = z.object({
+  url: requiredUrlSchema,
+  targetBackend: z.string().min(1)
+}).strict()
+
 const dataSchemasByType = {
   getCurrentBookmark: getCurrentBookmarkDataSchema,
   getTagsForUrl: getTagsForUrlDataSchema,
   saveBookmark: saveBookmarkDataSchema,
   deleteBookmark: deleteBookmarkDataSchema,
   saveTag: saveTagDataSchema,
-  deleteTag: deleteTagDataSchema
+  deleteTag: deleteTagDataSchema,
+  moveBookmarkToStorage: moveBookmarkToStorageDataSchema
 }
 
 /**

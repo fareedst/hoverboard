@@ -245,7 +245,8 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 #### **Test Coverage:**
 - **508+ tests** across 37+ test suites (1 skipped)
 - **Complete Chrome extension testing** with Manifest V3 compliance
-- **Runtime validation** ([IMPL-RUNTIME_VALIDATION], [ARCH-MESSAGE_HANDLING]) – Zod schemas validate message envelope and critical payloads (getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag) at the service worker; merged config validated in getConfig() with fallback to defaults. Unit tests: `tests/unit/message-schemas.test.js`, `tests/unit/message-handler-runtime-validation.test.js`, `tests/unit/message-handler-local-save-recall.test.js`, `tests/unit/config-manager.test.js`.
+- **Messaging protocol tests** ([IMPL-MESSAGE_HANDLING], [ARCH-MESSAGE_HANDLING]) – Unit and E2E tests validate extension messaging: MessageHandler contracts (all critical types, sender context), service worker routing (NATIVE_PING, SWITCH_STORAGE_MODE, DEV_COMMAND vs processMessage), content/offscreen/popup message contracts, MessageClient retry and lastError, moveBookmarkToStorage schema, message-type drift. See `docs/architecture/extension-messaging-protocols.md`. Tests: `message-handler-contracts.test.js`, `service-worker-messaging-routing.test.js`, `content-messaging-contracts.test.js`, `popup-message-contract.test.js`, `offscreen-file-bookmark-messaging.test.js`, `message-client.test.js`, `message-type-drift.test.js`, and E2E content→SW getTabId in `extension-messaging.spec.js`. **Recommended before push:** run full validation (see [Validating before push](#validating-before-push)).
+- **Runtime validation** ([IMPL-RUNTIME_VALIDATION], [ARCH-MESSAGE_HANDLING]) – Zod schemas validate message envelope and critical payloads (getCurrentBookmark, getTagsForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag, moveBookmarkToStorage) at the service worker; merged config validated in getConfig() with fallback to defaults. Unit tests: `tests/unit/message-schemas.test.js`, `tests/unit/message-handler-runtime-validation.test.js`, `tests/unit/message-handler-local-save-recall.test.js`, `tests/unit/config-manager.test.js`.
 - **TypeScript** ([ARCH-LANGUAGE_SELECTION], [IMPL-TYPESCRIPT_MIGRATION]) – Incremental typing: `npm run typecheck` (tsc --noEmit) validates type-checked .js files and shared .d.ts; `message-types.d.ts` and `config-types.d.ts`; `// @ts-check` and JSDoc on config-manager, message-handler, message-schemas, message-client. Typecheck runs as part of `npm run validate`; run `npm run validate && npm run test && npm run test:e2e:extension` for full pre-push validation.
 - **Extension E2E** ([IMPL-PLAYWRIGHT_E2E_EXTENSION], [REQ-UI_INSPECTION], [ARCH-UI_TESTABILITY]) – Playwright loads the unpacked extension and runs 16 E2E tests: popup structure; popup↔background messaging (GET_OPTIONS, GET_TAB_ID); popup→content script (TOGGLE_HOVER, GET_OVERLAY_STATE); GET_PAGE_CONTENT (service worker executeScript); suggested tags (MAIN world); GET_PAGE_SELECTION; overlay visibility (snapshotOverlay); options and side panel messaging; options page snapshot (snapshotOptions); bookmarks table, browser bookmark import, offscreen (READ_FILE_BOOKMARKS). Shared fixture: `tests/playwright/extension-fixture.js`; specs: `extension-popup.spec.js`, `extension-messaging.spec.js`, `extension-evaluation.spec.js`, `extension-lower.spec.js`. Run with `npm run test:e2e:extension`.
 - **Native host tests** – Go tests for protocol and ping-pong; Jest tests for NATIVE_PING and `pingNativeHost`
@@ -337,14 +338,14 @@ node scripts/screenshots-placeholder.js --seed=scripts/screenshot-seed.example.j
 
 ### Validating before push
 
-Run the following to validate the entire project before pushing (lint, typecheck, manifest, security, unit tests, and extension E2E):
+**Recommended CLI to validate the entire project before pushing** (lint, typecheck, manifest, security, unit tests including messaging protocol tests, and extension E2E):
 
 ```bash
 npm run validate && npm run test && npm run test:e2e:extension
 ```
 
 - **`npm run validate`** – Runs lint, typecheck (`tsc --noEmit`), manifest validation, and security audit. This is the same gate used by `npm run build:dev`.
-- **`npm run test`** – Unit and integration tests (Jest).
+- **`npm run test`** – Unit and integration tests (Jest), including messaging protocol tests (MessageHandler contracts, SW routing, content/offscreen/popup contracts, MessageClient retry, message-type drift).
 - **`npm run test:e2e:extension`** – Playwright E2E tests (load unpacked extension, popup, messaging, overlay, options, side panel).
 
 For a quicker check without E2E: `npm run validate && npm run test`.
@@ -361,6 +362,7 @@ This project follows the TIED methodology for comprehensive requirements trackin
 - **Implementation Map**: [`tied/docs/suggested-tags-implementation-map.md`](tied/docs/suggested-tags-implementation-map.md) - Quick reference mapping TIED tokens to code locations
 
 ### Architecture Documents
+- [Extension Messaging Protocols](docs/architecture/extension-messaging-protocols.md) - Message types, channels (SW, content, offscreen, popup), and response contracts; [ARCH-MESSAGE_HANDLING], [IMPL-MESSAGE_HANDLING]
 - [Chrome Extension Architecture](docs/architecture/chrome-extension-architecture.md) - Core architectural decisions and implementation strategy
 - [Development Guide](docs/development/development-guide.md) - Development setup and guidelines
 - [Feature Tracking Matrix](docs/development/feature-tracking-matrix.md) - Feature implementation status

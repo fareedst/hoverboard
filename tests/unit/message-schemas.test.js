@@ -143,6 +143,30 @@ describe('[IMPL-RUNTIME_VALIDATION] deleteTag data', () => {
   })
 })
 
+describe('[IMPL-RUNTIME_VALIDATION] moveBookmarkToStorage data', () => {
+  test('accepts url and targetBackend', () => {
+    const result = validateMessageData('moveBookmarkToStorage', { url: 'https://example.com', targetBackend: 'local' })
+    expect(result.success).toBe(true)
+    expect(result.data).toEqual({ url: 'https://example.com', targetBackend: 'local' })
+  })
+  test('rejects missing url', () => {
+    const result = validateMessageData('moveBookmarkToStorage', { targetBackend: 'local' })
+    expect(result.success).toBe(false)
+  })
+  test('rejects missing targetBackend', () => {
+    const result = validateMessageData('moveBookmarkToStorage', { url: 'https://example.com' })
+    expect(result.success).toBe(false)
+  })
+  test('rejects empty targetBackend', () => {
+    const result = validateMessageData('moveBookmarkToStorage', { url: 'https://example.com', targetBackend: '' })
+    expect(result.success).toBe(false)
+  })
+  test('rejects undefined data [IMPL-RUNTIME_VALIDATION]', () => {
+    const result = validateMessageData('moveBookmarkToStorage', undefined)
+    expect(result.success).toBe(false)
+  })
+})
+
 describe('[IMPL-RUNTIME_VALIDATION] Unknown type passes through', () => {
   test('returns success with original data when no schema for type', () => {
     const result = validateMessageData('unknownType', { anything: 123 })
