@@ -105,7 +105,7 @@ IMPL-SIDE_PANEL_TABS:
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
     # On browser tab change: always refresh controller (refreshPopupData) so currentPin is for the new tab; Bookmark tab UI is updated by refreshPopupData when visible; when Tags tree tab is visible and inited, refreshTagsTreeTabIfVisible() calls setSelectedTagsFromCurrentBookmark(controller.normalizeTags(controller.currentPin?.tags) || []). Implements "both tabs update to current tab's URL/DB record".
     ON tabs.onActivated / tabs.onUpdated (active tab complete):
-      IF popupComponents?.controller: await controller.refreshPopupData()
+      IF popupComponents?.controller: AWAIT controller.refreshPopupData()
       IF Bookmark tab visible: UI already updated by refreshPopupData
       IF Tags tree tab visible AND tagsTreeTabInited: refreshTagsTreeTabIfVisible() → setSelectedTagsFromCurrentBookmark(controller tags)
 
@@ -136,8 +136,8 @@ IMPL-SIDE_PANEL_TABS:
     initTabIfNeeded("bookmark"):
       IF bookmarkTabInited RETURN
       bookmarkTabInited = true
-      uiSystem = await UISystem.init(); popupComponents = uiSystem.createPopup({ container: document.getElementById('bookmarkPanel'), errorHandler, config })
-      await popupComponents.controller.loadInitialData()
+      uiSystem = AWAIT UISystem.init(); popupComponents = uiSystem.createPopup({ container: document.getElementById('bookmarkPanel'), errorHandler, config })
+      AWAIT popupComponents.controller.loadInitialData()
       popupComponents.uiManager.setupEventListeners()
       // Wire "Open Tags tree" in footer to switchTab("tagsTree") when in panel context
 
@@ -155,4 +155,4 @@ IMPL-SIDE_PANEL_TABS:
     last_updated:
       date: '2026-02-26'
       author: AI Agent
-      reason: Tags tree tab on open shows current URL's DB record; runInitialTabInit when restored tab is tagsTree inits Bookmark first then initTagsTreeTab with getTagsTreeInitOptions(controller); essence_pseudocode and code_locations updated
+      reason: Align essence_pseudocode with standard (AWAIT vocabulary)

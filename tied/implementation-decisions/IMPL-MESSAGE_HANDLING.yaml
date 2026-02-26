@@ -65,7 +65,8 @@ IMPL-MESSAGE_HANDLING:
 
     # Validate type and payload, route to handler, return Promise.
     send(message):
-      VALIDATE message.type in allowlist; VALIDATE payload shape
+      VALIDATE message.type in allowlist
+      VALIDATE payload shape
       ROUTE to handler for message.type
       handler(message) -> result; RETURN Promise.resolve(result)
       ON error: RETURN Promise.reject; optional log
@@ -80,6 +81,6 @@ IMPL-MESSAGE_HANDLING:
       date: "2025-07-14"
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: "2026-02-26"
       author: AI Agent
-      reason: Add messaging protocol test traceability and docs reference
+      reason: Align essence_pseudocode with standard (one-action-per-step)

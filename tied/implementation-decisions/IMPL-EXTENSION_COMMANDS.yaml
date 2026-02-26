@@ -27,12 +27,14 @@ IMPL-EXTENSION_COMMANDS:
     functions: []
   essence_pseudocode: |
     # [IMPL-EXTENSION_COMMANDS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
-    # This block defines extension commands for quick access. Implements REQ by providing global keyboard shortcuts; implements ARCH by having SW own command handling.
+    # Extension commands for quick access; SW owns command handling.
+    # Contract: shortcut in; one of four targets opens.
     INPUT: user presses assigned shortcut (or default Ctrl+Shift+B/O/M/I)
     OUTPUT: side panel opens, or options page opens, or bookmarks index tab opens, or import page tab opens
+    DATA: command names (open-side-panel, open-options, open-bookmarks-index, open-import); SW onCommand handler
 
     # [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]
-    # Manifest: declares four commands so Chrome shows them in chrome://extensions/shortcuts; user can reassign. Implements REQ "extension keyboard commands".
+    # Manifest: four commands so Chrome shows them in chrome://extensions/shortcuts; user can reassign.
     manifest.json:
       "commands": {
         "open-side-panel": { "suggested_key": { "default": "Ctrl+Shift+B" }, "description": "Open Hoverboard side panel" },
@@ -42,7 +44,7 @@ IMPL-EXTENSION_COMMANDS:
       }
 
     # [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]
-    # SW onCommand: implements REQ by handling each command and performing the correct action. Reuses _sidePanelWindowId from existing OPEN_SIDE_PANEL flow for side panel; openOptionsPage and tabs.create for options, index, import.
+    # SW onCommand: handle each command; side panel via _sidePanelWindowId; openOptionsPage and tabs.create for options, index, import.
     SW setupEventListeners (or init):
       IF chrome.commands THEN chrome.commands.onCommand.addListener((command) => handleCommand(command))
     handleCommand(command):
@@ -79,4 +81,4 @@ IMPL-EXTENSION_COMMANDS:
     last_updated:
       date: '2026-02-26'
       author: AI Agent
-      reason: Initial creation for extension commands quick access
+      reason: Align essence_pseudocode with standard (Contract, DATA, sub-block comments)

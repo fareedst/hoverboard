@@ -80,7 +80,9 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
 
     # Update tags on bookmark and persist.
     saveTag(data), deleteTag(data):
-      bookmark = getBookmarkForUrl(data.url); update tags; saveBookmark(bookmark) or equivalent
+      bookmark = getBookmarkForUrl(data.url)
+      update tags on bookmark
+      saveBookmark(bookmark) or equivalent
       RETURN { success: true }
 
     # Sort by time descending and return first count.
@@ -95,9 +97,9 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       date: '2026-02-18'
       author: MCP converter
     last_updated:
-      date: '2026-02-25'
+      date: '2026-02-26'
       author: AI Agent
-      reason: Add tests: local-bookmark-service (shared/toread round-trip), message-handler-local-save-recall (save then getCurrentBookmark)
+      reason: Align essence_pseudocode with standard (one-action-per-step)
     last_validated:
       date: '2026-02-18'
       validator: MCP converter
