@@ -16321,7 +16321,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       if (!validateAttrName(attrName)) {
         return getErrorObject("InvalidAttr", "Attribute '" + attrName + "' is an invalid name.", getPositionFromMatch(matches[i]));
       }
-      if (!attrNames.hasOwnProperty(attrName)) {
+      if (!Object.prototype.hasOwnProperty.call(attrNames, attrName)) {
         attrNames[attrName] = 1;
       } else {
         return getErrorObject("InvalidAttr", "Attribute '" + attrName + "' is repeated.", getPositionFromMatch(matches[i]));
@@ -16478,7 +16478,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           return tagName;
         },
         // skipEmptyListItem: false
-        captureMetaData: false
+        captureMetaData: false,
+        maxNestedTags: 100,
+        strictReservedNames: true
       };
       buildOptions = function(options) {
         const built = Object.assign({}, defaultOptions2, options);
@@ -16502,7 +16504,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         constructor(tagname) {
           this.tagname = tagname;
           this.child = [];
-          this[":@"] = {};
+          this[":@"] = /* @__PURE__ */ Object.create(null);
         }
         add(key, val) {
           if (key === "__proto__") key = "#__proto__";
@@ -16550,7 +16552,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           this.options = options;
         }
         readDocType(xmlData, i) {
-          const entities = {};
+          const entities = /* @__PURE__ */ Object.create(null);
           if (xmlData[i + 3] === "O" && xmlData[i + 4] === "C" && xmlData[i + 5] === "T" && xmlData[i + 6] === "Y" && xmlData[i + 7] === "P" && xmlData[i + 8] === "E") {
             i = i + 9;
             let angleBracketsCount = 1;
@@ -17041,19 +17043,19 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       currentNode.addChild(childNode, startIndex);
     }
   }
-  function saveTextToParentTag(textData, currentNode, jPath, isLeafNode) {
+  function saveTextToParentTag(textData, parentNode, jPath, isLeafNode) {
     if (textData) {
-      if (isLeafNode === void 0) isLeafNode = currentNode.child.length === 0;
+      if (isLeafNode === void 0) isLeafNode = parentNode.child.length === 0;
       textData = this.parseTextData(
         textData,
-        currentNode.tagname,
+        parentNode.tagname,
         jPath,
         false,
-        currentNode[":@"] ? Object.keys(currentNode[":@"]).length !== 0 : false,
+        parentNode[":@"] ? Object.keys(parentNode[":@"]).length !== 0 : false,
         isLeafNode
       );
       if (textData !== void 0 && textData !== "")
-        currentNode.add(this.options.textNodeName, textData);
+        parentNode.add(this.options.textNodeName, textData);
       textData = "";
     }
     return textData;
@@ -17352,6 +17354,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
                 }
                 tagName = newTagName;
               }
+              if (this.options.strictReservedNames && (tagName === this.options.commentPropName || tagName === this.options.cdataPropName)) {
+                throw new Error(`Invalid tag name: ${tagName}`);
+              }
               if (currentNode && textData) {
                 if (currentNode.tagname !== "!xml") {
                   textData = this.saveTextToParentTag(textData, currentNode, jPath, false);
@@ -17417,8 +17422,20 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
                   }
                   this.addChild(currentNode, childNode, jPath, startIndex);
                   jPath = jPath.substr(0, jPath.lastIndexOf("."));
+                } else if (this.options.unpairedTags.indexOf(tagName) !== -1) {
+                  const childNode = new XmlNode(tagName);
+                  if (tagName !== tagExp && attrExpPresent) {
+                    childNode[":@"] = this.buildAttributesMap(tagExp, jPath);
+                  }
+                  this.addChild(currentNode, childNode, jPath, startIndex);
+                  jPath = jPath.substr(0, jPath.lastIndexOf("."));
+                  i = result.closeIndex;
+                  continue;
                 } else {
                   const childNode = new XmlNode(tagName);
+                  if (this.tagsNodeStack.length > this.options.maxNestedTags) {
+                    throw new Error("Maximum nested tags exceeded");
+                  }
                   this.tagsNodeStack.push(currentNode);
                   if (tagName !== tagExp && attrExpPresent) {
                     childNode[":@"] = this.buildAttributesMap(tagExp, jPath, tagName);
@@ -17515,9 +17532,6 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       } else if (tagObj[property]) {
         let val = compress(tagObj[property], options, newJpath);
         const isLeaf = isLeafTag(val, options);
-        if (tagObj[METADATA_SYMBOL2] !== void 0) {
-          val[METADATA_SYMBOL2] = tagObj[METADATA_SYMBOL2];
-        }
         if (tagObj[":@"]) {
           assignAttributes(val, tagObj[":@"], newJpath, options);
         } else if (Object.keys(val).length === 1 && val[options.textNodeName] !== void 0 && !options.alwaysCreateTextNode) {
@@ -17526,7 +17540,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           if (options.alwaysCreateTextNode) val[options.textNodeName] = "";
           else val = "";
         }
-        if (compressedObj[property] !== void 0 && compressedObj.hasOwnProperty(property)) {
+        if (tagObj[METADATA_SYMBOL2] !== void 0 && typeof val === "object" && val !== null) {
+          val[METADATA_SYMBOL2] = tagObj[METADATA_SYMBOL2];
+        }
+        if (compressedObj[property] !== void 0 && Object.prototype.hasOwnProperty.call(compressedObj, property)) {
           if (!Array.isArray(compressedObj[property])) {
             compressedObj[property] = [compressedObj[property]];
           }

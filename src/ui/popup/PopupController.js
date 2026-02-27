@@ -1960,7 +1960,11 @@ export class PopupController {
       return
     }
 
+    let scrollContainer = null
+    let savedScrollTop
     try {
+      scrollContainer = this.uiManager?.container
+      savedScrollTop = scrollContainer ? scrollContainer.scrollTop : undefined
       this.setLoading(true)
 
       debugLog('[SEARCH-UI] Sending search message with tab ID:', this.currentTab.id)
@@ -1974,13 +1978,22 @@ export class PopupController {
       if (response.success) {
         this.uiManager.showSuccess(`Found ${response.matchCount} matching tabs - navigating to "${response.tabTitle}"`)
       } else {
-        this.uiManager.showError(response.message || 'No matching tabs found')
+        // [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX] No-match: visual feedback only, no error message.
+        const isNoMatch = response.message === 'No matching tabs found' || response.matchCount === 0
+        if (isNoMatch) {
+          this.uiManager.showSearchNoMatchFeedback()
+        } else {
+          this.uiManager.showError(response.message || 'No matching tabs found')
+        }
       }
     } catch (error) {
       debugError('[SEARCH-UI] Search error:', error)
       this.errorHandler.handleError('Failed to search tabs', error)
     } finally {
       this.setLoading(false)
+      if (scrollContainer != null && savedScrollTop !== undefined) {
+        scrollContainer.scrollTop = savedScrollTop
+      }
     }
   }
 

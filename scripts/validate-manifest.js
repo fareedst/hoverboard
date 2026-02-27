@@ -59,7 +59,7 @@ function validateManifest() {
     if (manifest.permissions) {
       const v3Permissions = [
         'storage', 'tabs', 'activeTab', 'contextMenus', 'scripting',
-        'offscreen', 'nativeMessaging'
+        'offscreen', 'nativeMessaging', 'bookmarks', 'sidePanel', 'windows'
       ];
       
       manifest.permissions.forEach(permission => {

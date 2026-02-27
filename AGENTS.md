@@ -29,6 +29,7 @@ This document centralizes every instruction AI coding assistants must follow whi
   - Update `semantic-tokens.yaml` immediately when introducing new tokens.
 - **Documentation-First Flow**
   - Expand requirements into pseudo-code and decisions before any code changes.
+  - Address all implementation issues (logical and flow) in IMPL pseudo-code before tests or code; IMPL `essence_pseudocode` is the **source of consistent logic** for implementation.
   - Record architecture decisions (`architecture-decisions.md`) with `[ARCH-*]` tokens cross-referencing requirements.
   - Record implementation decisions (`implementation-decisions.md`) with `[IMPL-*]` tokens cross-referencing `[ARCH-*]` and `[REQ-*]` tokens.
   - Never defer documentation; update as you think, design, and implement.

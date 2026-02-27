@@ -778,11 +778,18 @@ section:last-child {
   background: var(--bg-primary);
   color: var(--text-primary);
   border-color: var(--border-color);
+  transition: border-color 2s ease;
 }
 
 .button.secondary:hover:not(:disabled) {
   background: var(--bg-hover);
   border-color: var(--border-hover);
+}
+
+/* [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX] No-match feedback: bright red border, fade to default in 2s */
+.button.secondary.search-no-match {
+  border-color: #e00;
+  transition: border-color 2s ease;
 }
 
 .button.danger {

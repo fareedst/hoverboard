@@ -42,3 +42,13 @@ docs/development-sessions/prompts
 # OS files
 Thumbs.db
 .DS_Store
+scripts/word_histogram.rb
+promo/reddit-release-announcement-v1.2.md
+playwright-report/index.html
+.cursor/hooks.json
+.cursor/hooks/state/agent-metrics.json
+test-results/.last-run.json
+test-results
+*.log
+COMMIT_MSG_QUICK_ACCESS.txt
+COMMIT_*.txt

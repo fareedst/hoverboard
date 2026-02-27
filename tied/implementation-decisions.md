@@ -8,6 +8,8 @@ This document serves as the **index** for all implementation decisions in this p
 
 All decisions are cross-referenced with architecture decisions using `[ARCH-*]` tokens and requirements using `[REQ-*]` tokens for traceability.
 
+**Source of consistent logic:** IMPL pseudo-code (`essence_pseudocode` in each IMPL detail file) is the **source of consistent logic** for the implementation. Logical and flow issues are resolved there before any tests or code are written; tests and code are derived from and must align with it.
+
 ## Directory Structure
 
 ```
@@ -76,11 +78,11 @@ See **Optional fields for composition and workflow** below for usage.
 
 ### Mandatory essence_pseudocode
 
-Every IMPL detail file **must** include an `essence_pseudocode` field. It is used to:
+Every IMPL detail file **must** include an `essence_pseudocode` field. **Address all implementation issues (logical and flow) in pseudo-code before writing tests or code.** Pseudo-code is the **authoritative source of consistent logic**; tests and code follow from it. It is used to:
 
 - Capture the implementation’s core algorithm in language-agnostic form (INPUT/OUTPUT/DATA, and CONTROL when relevant), procedure names, key branches.
 - Support **collision detection**: when IMPLs are composed or share code paths, comparing their `essence_pseudocode` blocks helps identify overlapping steps, shared data, ordering dependencies, and conflicting assumptions.
-- Keep documentation aligned with tests and code; the pseudo-code should reflect what the implementation (and its tests) do.
+- Once implemented, keep pseudo-code aligned with code and tests so documentation remains the single source of truth.
 - **Algol-style notation:** Prefer Algol-style readability: clear control flow (if/then/else, loops, ON/WHEN), explicit INPUT/OUTPUT/DATA (and CONTROL when relevant), and procedure names in UPPER_SNAKE so blocks are easy to read and compare.
 - **One action per step:** Each logical step in `essence_pseudocode` should express one clear action or decision (or one small, coherent block). Avoid long prose lines that mix multiple actions; that weakens collision detection and makes it harder to compare IMPLs and spot overlapping steps or ordering.
 - **Traceability to tests:** Key branches and procedures in `essence_pseudocode` should be reflected in test names or test structure (e.g. one procedure or branch ≈ one `describe`/`it` or test section). That keeps the pseudo-code precise enough to guide tests and to detect when an IMPL’s behavior has drifted from its description.

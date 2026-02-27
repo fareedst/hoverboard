@@ -373,11 +373,12 @@ Active
 
 1. **Plan from TIED**
    - Read existing REQ, ARCH, and IMPL for the scope of work.
-   - Use each IMPL’s `essence_pseudocode` as the full prescription for what to implement.
+   - Use each IMPL’s `essence_pseudocode` as the full prescription for what to implement; it is the **source of consistent logic**. Resolve all logical and flow issues in IMPL pseudo-code before adding tests or code.
    - Identify required updates (new or changed requirements and decisions) before writing code or tests.
 
 2. **Author TIED docs (pseudo-code + tokens)**
    - Update REQ, ARCH, and IMPL (new and existing) as needed.
+   - Resolve all logical and flow issues in IMPL pseudo-code so that it is complete and authoritative before proceeding to “Add and align tests.”
    - In every IMPL, ensure `essence_pseudocode` is complete. Every **block** in `essence_pseudocode` must have a comment that (1) names all REQ, ARCH, and IMPL reflected in that block and (2) states how that block implements those requirements.
    - Use the project block definition: a block is a contiguous logical unit implementing the same set of REQ/ARCH/IMPL; nested blocks implementing a different set get their own token comment.
 

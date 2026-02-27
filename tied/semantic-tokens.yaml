@@ -658,6 +658,21 @@ REQ-SEARCH_FUNCTIONALITY:
     registered: 2025-07-14
     last_updated: 2026-02-13
 
+REQ-TAB_SEARCH_NO_MATCH_UX:
+  type: REQ
+  name: Tab Search No-Match Visual Feedback Only
+  category: Functional
+  status: Active
+  description: "When tab search has no matches, show visual feedback only (search button border), not error message; border fades to default within 2s."
+  cross_references:
+    - ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK
+    - IMPL-TAB_SEARCH_NO_MATCH_UI
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-TAB_SEARCH_NO_MATCH_UX.yaml
+  metadata:
+    registered: 2026-02-26
+    last_updated: 2026-02-26
+
 REQ-PRIVACY_CONTROLS:
   type: REQ
   name: Privacy Controls
@@ -2376,6 +2391,20 @@ IMPL-TAB_SEARCH_SERVICE:
     registered: 2026-02-20
     last_updated: 2026-02-20
 
+IMPL-TAB_SEARCH_NO_MATCH_UI:
+  type: IMPL
+  name: Tab Search No-Match UI Feedback
+  status: Active
+  description: "Popup/side-panel tab-search: no-match triggers search button border feedback (showSearchNoMatchFeedback), not error message; 2s fade."
+  cross_references:
+    - ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK
+    - REQ-TAB_SEARCH_NO_MATCH_UX
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI.yaml
+  metadata:
+    registered: 2026-02-26
+    last_updated: 2026-02-26
+
 REQ-AI_TAGGING_CONFIG:
   type: REQ
   name: AI Tagging Configuration
@@ -2599,6 +2628,20 @@ ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
   metadata:
     registered: 2026-02-22
     last_updated: 2026-02-22
+
+ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK:
+  type: ARCH
+  name: Tab Search No-Match Button Border Feedback
+  status: Active
+  description: "No-match uses button border feedback (bright red then default over ≤2s) instead of error message; popup and side panel."
+  cross_references:
+    - REQ-TAB_SEARCH_NO_MATCH_UX
+    - IMPL-TAB_SEARCH_NO_MATCH_UI
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK.yaml
+  metadata:
+    registered: 2026-02-26
+    last_updated: 2026-02-26
 
 IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
   type: IMPL

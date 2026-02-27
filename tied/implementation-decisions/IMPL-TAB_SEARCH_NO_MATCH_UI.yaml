@@ -1,0 +1,98 @@
+# [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]
+# Popup/side-panel tab-search UI: no-match triggers search button border feedback, not error message.
+
+IMPL-TAB_SEARCH_NO_MATCH_UI:
+  name: Tab Search No-Match UI Feedback
+  status: Active
+  cross_references:
+    - ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK
+    - REQ-TAB_SEARCH_NO_MATCH_UX
+  rationale:
+    why: Implement ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK so that no-match is communicated by button border only.
+    problems_solved:
+      - Detecting no-match vs other failures (e.g. "Already on last match")
+      - Applying and clearing feedback class with 2s fade
+    benefits:
+      - Single code path for popup and side panel; CSS transition gives 2s fade to default
+  implementation_approach:
+    summary: In PopupController.handleSearch, when response.success is false and response indicates no matches (message === "No matching tabs found" or matchCount === 0), call uiManager.showSearchNoMatchFeedback(); for other failures keep showError. UIManager.showSearchNoMatchFeedback adds class to searchBtn, removes after 2000ms. CSS class sets border-color bright red and transition 2s.
+    details:
+      - No-match detection: response.success === false && (response.message === "No matching tabs found" || response.matchCount === 0)
+      - showSearchNoMatchFeedback: if elements.searchBtn exists, add class "search-no-match", setTimeout 2000ms then remove class
+      - CSS: .button.secondary.search-no-match { border-color: bright red; transition: border-color 2s ease; } (default button already has border so removal fades back)
+      - Scroll preservation: when uiManager.container exists (side panel), handleSearch saves container.scrollTop before setLoading(true) and restores it in finally after setLoading(false) so the panel does not jump.
+      - Search button: popup uses type="button"; UIManager click and Enter handlers call e.preventDefault() so the overlay/page does not submit or jump.
+  code_locations:
+    files:
+      - path: src/ui/popup/PopupController.js
+        description: handleSearch no-match branch
+      - path: src/ui/popup/UIManager.js
+        description: showSearchNoMatchFeedback
+      - path: src/ui/popup/popup.css
+        description: .search-no-match on search button
+    functions:
+      - name: handleSearch
+        file: src/ui/popup/PopupController.js
+        description: Branch on no-match to showSearchNoMatchFeedback instead of showError
+      - name: showSearchNoMatchFeedback
+        file: src/ui/popup/UIManager.js
+        description: Add/remove feedback class on search button with 2s delay
+  traceability:
+    architecture:
+      - ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK
+    requirements:
+      - REQ-TAB_SEARCH_NO_MATCH_UX
+    tests:
+      - tests/unit/tab-search-no-match-ui.test.js
+      - handleSearch no-match, showSearchNoMatchFeedback, scroll restore
+    code_annotations:
+      - IMPL-TAB_SEARCH_NO_MATCH_UI
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-TAB_SEARCH_SERVICE
+  essence_pseudocode: |
+    # [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]
+    # Block 1: When handleSearch receives response.success === false and response indicates no matches,
+    # do not call showError; call showSearchNoMatchFeedback(). Other failures (e.g. "Already on last match") still call showError.
+    handleSearch(response):
+      IF response.success:
+        showSuccess(...); RETURN
+      isNoMatch = (response.message === "No matching tabs found" OR response.matchCount === 0)
+      IF isNoMatch:
+        showSearchNoMatchFeedback()
+      ELSE:
+        showError(response.message OR "No matching tabs found")
+
+    # [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]
+    # Block 2: showSearchNoMatchFeedback adds class to elements.searchBtn; after 2s remove class. Ensures bright red border then fade to default.
+    showSearchNoMatchFeedback():
+      IF NOT elements.searchBtn: RETURN
+      elements.searchBtn.classList.add("search-no-match")
+      setTimeout(2000, () => elements.searchBtn.classList.remove("search-no-match"))
+
+    # [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]
+    # Block 3: CSS class on search button sets border to bright red and transition (2s) to default; when class removed, border fades back.
+    # .button.secondary.search-no-match { border-color: #e00 or similar; transition: border-color 2s ease; }
+
+    # [IMPL-TAB_SEARCH_NO_MATCH_UI] handleSearch scroll restore when side panel (uiManager.container) exists
+    handleSearch_try_finally_scroll():
+      scrollContainer = uiManager?.container
+      savedScrollTop = scrollContainer ? scrollContainer.scrollTop : undefined
+      TRY:
+        setLoading(true)   # may reset scroll in UI
+        # ... search logic ...
+      FINALLY:
+        setLoading(false)
+        IF scrollContainer != null AND savedScrollTop !== undefined:
+          scrollContainer.scrollTop = savedScrollTop
+  detail_file: implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI.yaml
+  metadata:
+    created:
+      date: "2026-02-26"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-26"
+      author: AI Agent
+      reason: Initial creation

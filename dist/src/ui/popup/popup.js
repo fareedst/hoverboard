@@ -17437,7 +17437,8 @@ var UIManager = class {
         this.elements.newTagInput.classList.remove("invalid");
       }
     });
-    this.elements.searchBtn?.addEventListener("click", () => {
+    this.elements.searchBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
       const searchText = this.elements.searchInput?.value;
       if (searchText) {
         this.emit("search", searchText);
@@ -17445,6 +17446,7 @@ var UIManager = class {
     });
     this.elements.searchInput?.addEventListener("keypress", (e) => {
       if (e.key === "Enter") {
+        e.preventDefault();
         const searchText = this.elements.searchInput?.value;
         if (searchText) {
           this.emit("search", searchText);
@@ -17738,6 +17740,17 @@ var UIManager = class {
     if (this.elements.searchInput) {
       this.elements.searchInput.focus();
     }
+  }
+  /**
+   * [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]
+   * Show search no-match feedback: add class to search button, remove after 2s so border fades to default.
+   */
+  showSearchNoMatchFeedback() {
+    if (!this.elements.searchBtn) return;
+    this.elements.searchBtn.classList.add("search-no-match");
+    setTimeout(() => {
+      this.elements.searchBtn?.classList.remove("search-no-match");
+    }, 2e3);
   }
   /**
    * Show error message
@@ -20575,7 +20588,11 @@ var PopupController = class {
       this.errorHandler.handleError("No current tab available");
       return;
     }
+    let scrollContainer = null;
+    let savedScrollTop = void 0;
     try {
+      scrollContainer = this.uiManager?.container;
+      savedScrollTop = scrollContainer ? scrollContainer.scrollTop : void 0;
       this.setLoading(true);
       debugLog("[SEARCH-UI] Sending search message with tab ID:", this.currentTab.id);
       const response = await this.sendMessage({
@@ -20586,13 +20603,21 @@ var PopupController = class {
       if (response.success) {
         this.uiManager.showSuccess(`Found ${response.matchCount} matching tabs - navigating to "${response.tabTitle}"`);
       } else {
-        this.uiManager.showError(response.message || "No matching tabs found");
+        const isNoMatch = response.message === "No matching tabs found" || response.matchCount === 0;
+        if (isNoMatch) {
+          this.uiManager.showSearchNoMatchFeedback();
+        } else {
+          this.uiManager.showError(response.message || "No matching tabs found");
+        }
       }
     } catch (error48) {
       debugError("[SEARCH-UI] Search error:", error48);
       this.errorHandler.handleError("Failed to search tabs", error48);
     } finally {
       this.setLoading(false);
+      if (scrollContainer != null && savedScrollTop !== void 0) {
+        scrollContainer.scrollTop = savedScrollTop;
+      }
     }
   }
   /**

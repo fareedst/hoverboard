@@ -1,0 +1,46 @@
+# [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]
+# No-match case uses button border feedback (bright red then default over ≤2s) instead of error message; applies to popup and side panel.
+
+ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK:
+  name: Tab Search No-Match Button Border Feedback
+  status: Active
+  cross_references:
+    - REQ-TAB_SEARCH_NO_MATCH_UX
+  rationale:
+    why: Satisfy REQ-TAB_SEARCH_NO_MATCH_UX with a single, consistent UI pattern across popup and side panel.
+    problems_solved:
+      - Where to show "no match" feedback (search button, not error area)
+      - How to avoid error message while still signaling that search ran
+    benefits:
+      - Visual feedback only; no error state; border transition makes outcome clear
+  implementation_approach:
+    summary: When handleSearch receives success false and response indicates no matches, call UIManager.showSearchNoMatchFeedback() instead of showError; that method adds a class to the search button and removes it after 2s; CSS provides bright red border and transition to default.
+    details:
+      - Popup and side panel share PopupController + UIManager; one code path satisfies both
+      - Overlay (no search button) out of scope for this decision; can follow same pattern later with input/container border if desired
+      - When uiManager.container exists (side panel), handleSearch saves container.scrollTop before setLoading(true) and restores it in finally after setLoading(false) so the panel does not jump.
+  traceability:
+    requirements:
+      - REQ-TAB_SEARCH_NO_MATCH_UX
+    implementation:
+      - IMPL-TAB_SEARCH_NO_MATCH_UI
+    tests:
+      - handleSearch no-match unit tests
+    code_annotations:
+      - ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK
+  related_decisions:
+    depends_on:
+      - REQ-TAB_SEARCH_NO_MATCH_UX
+    informs:
+      - IMPL-TAB_SEARCH_NO_MATCH_UI
+    see_also:
+      - ARCH-SIDE_PANEL_TABS
+  detail_file: architecture-decisions/ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK.yaml
+  metadata:
+    created:
+      date: "2026-02-26"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-26"
+      author: AI Agent
+      reason: Initial creation

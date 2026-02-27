@@ -258,7 +258,8 @@ export class UIManager {
       }
     })
 
-    this.elements.searchBtn?.addEventListener('click', () => {
+    this.elements.searchBtn?.addEventListener('click', (e) => {
+      e.preventDefault()
       const searchText = this.elements.searchInput?.value
       if (searchText) {
         this.emit('search', searchText)
@@ -267,6 +268,7 @@ export class UIManager {
 
     this.elements.searchInput?.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') {
+        e.preventDefault()
         const searchText = this.elements.searchInput?.value
         if (searchText) {
           this.emit('search', searchText)
@@ -623,6 +625,18 @@ export class UIManager {
     if (this.elements.searchInput) {
       this.elements.searchInput.focus()
     }
+  }
+
+  /**
+   * [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]
+   * Show search no-match feedback: add class to search button, remove after 2s so border fades to default.
+   */
+  showSearchNoMatchFeedback () {
+    if (!this.elements.searchBtn) return
+    this.elements.searchBtn.classList.add('search-no-match')
+    setTimeout(() => {
+      this.elements.searchBtn?.classList.remove('search-no-match')
+    }, 2000)
   }
 
   /**

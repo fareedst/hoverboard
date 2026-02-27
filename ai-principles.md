@@ -22,6 +22,7 @@ This creates a **living documentation system** where:
 - Implementation details remain connected to their purpose
 - Tests explicitly validate the original intent
 - Code comments maintain context even as the codebase evolves
+- **IMPL pseudo-code** (`essence_pseudocode` in implementation decision detail files) is where logical and flow issues are resolved before tests or code; it is the **source of consistent logic** for the implementation
 
 **Semantic tokens are not just labels—they are the mechanism that preserves intent from requirements through architecture, implementation, tests, and code.**
 
@@ -61,6 +62,7 @@ This acknowledgment confirms that the AI agent has:
 
 2. **Documentation-First Development**
    - Requirements MUST be expanded into pseudo-code and architectural decisions before implementation.
+   - Logical and flow issues MUST be resolved in IMPL pseudo-code before any tests or code; pseudo-code is the **source of consistent logic**.
    - No code changes until requirements are fully specified with semantic tokens.
 
 3. **Test-Driven Documentation**
@@ -522,6 +524,7 @@ Create and maintain `semantic-tokens.yaml` with:
    - **Rationale**: Independent module validation reduces complexity-related bugs by ensuring each module works correctly before integration
 
 5. **Pseudo-Code**
+   - Address **all implementation issues** (logical and flow) in IMPL detail pseudo-code (`essence_pseudocode`) **before** writing tests or code. The IMPL pseudo-code is the **authoritative source of consistent logic** that tests and code follow.
    - Write pseudo-code with semantic token comments
    - Include module boundaries in pseudo-code
    - Example:

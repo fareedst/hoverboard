@@ -1,0 +1,55 @@
+# [REQ-TAB_SEARCH_NO_MATCH_UX] Tab search no-match visual feedback only
+# When tab search is processed and no tab matches, do not show an error message; provide visual feedback only (e.g. search button border) that fades to default within 2 seconds.
+
+REQ-TAB_SEARCH_NO_MATCH_UX:
+  name: Tab Search No-Match Visual Feedback Only
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Avoid intrusive error messaging when the user simply got no matches; signal the outcome with subtle visual feedback instead.
+    problems_solved:
+      - "No matching tabs found" error message felt like an error when it is a valid outcome
+      - Desire for visual feedback only when input is processed but no new tab is displayed
+    benefits:
+      - Clear feedback that search ran without showing an error state
+      - Search button border (bright red then fade to default within 2s) indicates no match; no new tab displayed
+  satisfaction_criteria:
+    - criterion: When tab search is processed and no tab matches, the error message "No matching tabs found" must not be displayed
+    - criterion: The search button border must turn bright red when no match
+    - criterion: The search button border must fade to its default color within 2 seconds
+    - criterion: No new tab is displayed on no match
+    - criterion: Side panel scroll position is preserved when tab search is run (panel does not jump).
+  validation_criteria:
+    - method: Unit tests
+      coverage: handleSearch with no-match response does not call showError; calls showSearchNoMatchFeedback; button receives feedback class and class removed after delay
+    - method: Unit tests
+      coverage: handleSearch scroll restore when uiManager.container present; saved scrollTop restored in finally after setLoading(false)
+    - method: Manual verification
+      coverage: Popup and side panel; search with non-matching substring; confirm no error message, red border on button, fade within 2s
+  traceability:
+    architecture:
+      - ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK
+    implementation:
+      - IMPL-TAB_SEARCH_NO_MATCH_UI
+    tests:
+      - tests/unit/tab-search-no-match-ui.test.js
+      - handleSearch no-match shows button feedback not error
+      - handleSearch scroll restore when container present
+    code_annotations:
+      - REQ-TAB_SEARCH_NO_MATCH_UX
+  related_requirements:
+    depends_on:
+      - REQ-SEARCH_FUNCTIONALITY
+    related_to:
+      - REQ-SEARCH_FUNCTIONALITY
+    supersedes: []
+  detail_file: requirements/REQ-TAB_SEARCH_NO_MATCH_UX.yaml
+  metadata:
+    created:
+      date: "2026-02-26"
+      author: AI Agent
+    last_updated:
+      date: "2026-02-26"
+      author: AI Agent
+      reason: Initial creation
