@@ -19,7 +19,7 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
     details:
       - No-match detection: response.success === false && (response.message === "No matching tabs found" || response.matchCount === 0)
       - showSearchNoMatchFeedback: if elements.searchBtn exists, add class "search-no-match", setTimeout 2000ms then remove class
-      - CSS: .button.secondary.search-no-match { border-color: bright red; transition: border-color 2s ease; } (default button already has border so removal fades back)
+      - "CSS: .button.secondary.search-no-match { border-color: bright red; transition: border-color 2s ease; } (default button already has border so removal fades back)"
       - Scroll preservation: when uiManager.container exists (side panel), handleSearch saves container.scrollTop before setLoading(true) and restores it in finally after setLoading(false) so the panel does not jump.
       - Search button: popup uses type="button"; UIManager click and Enter handlers call e.preventDefault() so the overlay/page does not submit or jump.
   code_locations:
@@ -87,7 +87,6 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
         setLoading(false)
         IF scrollContainer != null AND savedScrollTop !== undefined:
           scrollContainer.scrollTop = savedScrollTop
-  detail_file: implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI.yaml
   metadata:
     created:
       date: "2026-02-26"

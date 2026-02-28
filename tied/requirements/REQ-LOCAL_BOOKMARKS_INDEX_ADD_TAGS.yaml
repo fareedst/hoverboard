@@ -10,10 +10,10 @@ REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
     benefits:
       - Single textbox (comma-separated tags) and button to add those tags to every selected bookmark; tags merged with existing (case-insensitive dedupe); uses existing saveBookmark path
   satisfaction_criteria:
-    - criterion: "Actions for selected" includes a labeled textbox (e.g. "New tag(s):") and an "Add tags" button.
-    - criterion: The same textbox and row include a "Delete tags" button; both buttons are enabled only when at least one bookmark is selected.
-    - criterion: Add tags: on click, parsed tags are merged with each selected bookmark's existing tags (case-insensitive dedupe) and saved via saveBookmark with preferredBackend.
-    - criterion: Delete tags: on click, parsed tags are removed from each selected bookmark (case-insensitive) and saved via saveBookmark with reduced tags and preferredBackend.
+    - criterion: "\"Actions for selected\" includes a labeled textbox (e.g. \"New tag(s):\") and an \"Add tags\" button."
+    - criterion: "The same textbox and row include a \"Delete tags\" button; both buttons are enabled only when at least one bookmark is selected."
+    - criterion: "Add tags: on click, parsed tags are merged with each selected bookmark's existing tags (case-insensitive dedupe) and saved via saveBookmark with preferredBackend."
+    - criterion: "Delete tags: on click, parsed tags are removed from each selected bookmark (case-insensitive) and saved via saveBookmark with reduced tags and preferredBackend."
     - criterion: After either action, table refreshes and tag input is cleared.
     - criterion: After either action, the same records remain selected in the UI; if a record is no longer displayed, it is no longer marked.
   validation_criteria:
@@ -35,7 +35,6 @@ REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
     related_to:
       - REQ-LOCAL_BOOKMARKS_INDEX
     supersedes: []
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
   metadata:
     created:
       date: '2026-02-20'
@@ -48,5 +47,8 @@ REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
       date: '2026-02-20'
       validator: AI Agent
       result: pass
-  cross-references: ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS, IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS, REQ-LOCAL_BOOKMARKS_INDEX
-  summary: From the Local Bookmarks Index, the user can **add** or **remove** tags on all selected bookmarks. "Actions for selected" includes a "New tag(s):" textbox (comma-separated), an "Add tags" button (merge entered tags with existing), and a "Delete tags" button (remove entered tags from existing). Both use the same textbox; each bookmark is saved via saveBookmark with preferredBackend; table refreshes and tag input clears after apply; selection is retained for rows still visible, and rows no longer displayed are deselected.
+  cross_references:
+    - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    - REQ-LOCAL_BOOKMARKS_INDEX
+  summary: "From the Local Bookmarks Index, the user can **add** or **remove** tags on all selected bookmarks. Actions for selected includes a New tag(s) textbox (comma-separated), an Add tags button (merge entered tags with existing), and a Delete tags button (remove entered tags from existing). Both use the same textbox; each bookmark is saved via saveBookmark with preferredBackend; table refreshes and tag input clears after apply; selection is retained for rows still visible, and rows no longer displayed are deselected."

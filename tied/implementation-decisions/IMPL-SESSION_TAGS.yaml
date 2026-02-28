@@ -10,7 +10,7 @@ IMPL-SESSION_TAGS:
     benefits:
       - Consistent tagging across session; less manual add
   implementation_approach:
-    summary: In-session set of tags (lowercase for comparison). When user adds a tag via saveTag/saveBookmark, add that tag (lowercase) to set. Storage: chrome.storage.session if available (MV3), else in-memory in service worker (cleared on reload). getSessionTags returns set; recordSessionTag(tag) adds. When AI returns tags, those in set are merged into current bookmark.
+    summary: "In-session set of tags (lowercase for comparison). When user adds a tag via saveTag/saveBookmark, add that tag (lowercase) to set. Storage: chrome.storage.session if available (MV3), else in-memory in service worker (cleared on reload). getSessionTags returns set; recordSessionTag(tag) adds. When AI returns tags, those in set are merged into current bookmark."
     details:
       - Key e.g. hoverboard_session_tags: string[] (or Set serialized as array)
       - recordSessionTag called from message handler when saveBookmark/saveTag succeeds; add each tag lowercase to set, persist
@@ -64,7 +64,6 @@ IMPL-SESSION_TAGS:
       arr = Array.from(set)
       IF chrome.storage.session: await chrome.storage.session.set({ hoverboard_session_tags: arr })
       ELSE: inMemorySet = set
-  detail_file: implementation-decisions/IMPL-SESSION_TAGS.yaml
   metadata:
     created:
       date: '2026-02-20'

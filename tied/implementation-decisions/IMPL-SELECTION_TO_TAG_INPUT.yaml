@@ -15,7 +15,7 @@ IMPL-SELECTION_TO_TAG_INPUT:
     summary: Content script handles GET_PAGE_SELECTION; popup loadInitialData requests selection, normalizes (strip punctuation, first 8 words), sets tag input via setTagInputValue; on timeout or failure leave tag input unchanged.
     details:
       - "Content script (Chrome + Safari): handleMessage case GET_PAGE_SELECTION returns { success: true, data: { selection: window.getSelection().toString() } }"
-      - "Shared utils: normalizeSelectionForTagInput(selection, maxWords=8) — replace /[^\\w\\s]/g with space, collapse spaces, trim, split(/\s+/), slice(0, maxWords), join(' ')"
+      - "Shared utils: normalizeSelectionForTagInput(selection, maxWords=8) — replace with space, collapse spaces, trim, split on whitespace, slice(0, maxWords), join"
       - "UIManager: setTagInputValue(value) sets newTagInput.value and removes invalid class"
       - "PopupController loadInitialData: after loadSuggestedTags (Chrome) or loadRecentTags (Safari), try/catch sendToTab GET_PAGE_SELECTION; if data.selection non-empty, setTagInputValue(normalizeSelectionForTagInput(raw, 8))"
   code_locations:
@@ -83,7 +83,6 @@ IMPL-SELECTION_TO_TAG_INPUT:
       IF raw non-empty:
         normalized = normalizeSelectionForTagInput(raw, 8)
         setTagInputValue(normalized)
-  detail_file: implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml
   metadata:
     created:
       date: "2026-02-18"

@@ -39,6 +39,8 @@ This document centralizes every instruction AI coding assistants must follow whi
   - Only integrate modules after validation passes. Document validation results.
 - **Priority Order**
   - Always prioritize: Tests, Code, Basic Functions ➜ Developer experience ➜ Infrastructure ➜ Security.
+- **TIED data access** (see `docs/ai-agent-tied-mcp-usage.md`)
+  - Use the **TIED MCP server** (tools and resources) as the primary way to read and write TIED data. TIED is the db that controls/directs the build; significant code is created in TIED first, then implemented with TDD. Direct file access to TIED content is permitted only when no MCP tool supports the operation; document such cases for addition to the MCP tool set.
 
 ---
 
@@ -68,6 +70,7 @@ This document centralizes every instruction AI coding assistants must follow whi
 - [ ] Module validation status is documented
 - [ ] All documentation matches the implemented state (no drift)
 - [ ] Verify all code and tests are consistently linked to requirements and decisions; update code and documentation where necessary
+- [ ] Run **`tied_validate_consistency`** (TIED MCP tool) and fix any reported issues so REQ→ARCH→IMPL indexes, detail files, and token references remain consistent; align with `[PROC-TOKEN_VALIDATION]` and any project `validate_tokens.sh`.
 - [ ] Do not create a stand-alone summary document for the session (e.g. no SESSION_SUMMARY.md or similar)
 
 ---
@@ -98,6 +101,7 @@ This document centralizes every instruction AI coding assistants must follow whi
 | `implementation-decisions/` | Individual implementation decision detail files (YAML, e.g., `IMPL-MODULE_VALIDATION.yaml`) |
 | `detail-files-schema.md` | Schema for REQ/ARCH/IMPL detail YAML files (in TIED repo or tied/) |
 | `processes.md` | Process tracking including `[PROC-YAML_DB_OPERATIONS]` for YAML operations |
+| `docs/ai-agent-tied-mcp-usage.md` | **AI agents**: Use TIED MCP server as primary interface to TIED data; TIED directs the build; direct file use only when necessary (see doc). |
 | `.cursorrules` | IDE loader that points back to this document |
 | `.ai-agent-instructions` | Quick reminder pointing to this document |
 | `playwright.extension.config.js` | [IMPL-PLAYWRIGHT_E2E_EXTENSION] Playwright config for extension E2E (load unpacked, popup flow). Run: `npm run test:e2e:extension` |

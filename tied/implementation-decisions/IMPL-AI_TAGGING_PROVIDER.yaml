@@ -11,7 +11,7 @@ IMPL-AI_TAGGING_PROVIDER:
     benefits:
       - Testable with mocked fetch; reuse sanitizeTag
   implementation_approach:
-    summary: Given provider, apiKey, text, limit N: call OpenAI chat completions or Gemini generateContent with prompt "Return only a list of up to N tags for this page, one tag per line. No numbering or explanation." Parse response to lines, trim, sanitizeTag each, filter null, dedupe, slice(0, N).
+    summary: "Given provider, apiKey, text, limit N: call OpenAI chat completions or Gemini generateContent with prompt. Return only a list of up to N tags for this page, one tag per line. No numbering or explanation. Parse response to lines, trim, sanitizeTag each, filter null, dedupe, slice(0, N)."
     details:
       - OpenAI: POST https://api.openai.com/v1/chat/completions, model gpt-3.5-turbo or gpt-4o-mini, message with prompt + text excerpt
       - Gemini: POST generateContent with prompt + text; parse text from response
@@ -70,7 +70,6 @@ IMPL-AI_TAGGING_PROVIDER:
         IF tag && !seen.has(tag.toLowerCase()): tags.push(tag); seen.add(tag.toLowerCase())
         IF tags.length >= limit BREAK
       RETURN tags
-  detail_file: implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml
   metadata:
     created:
       date: '2026-02-20'

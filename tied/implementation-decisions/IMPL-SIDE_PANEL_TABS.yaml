@@ -52,10 +52,10 @@ IMPL-SIDE_PANEL_TABS:
         description: Call setSelectedTagsFromCurrentBookmark(controller tags) when Tags tree tab is visible and inited (on browser tab change)
       - name: runInitialTabInit
         file: src/ui/side-panel/side-panel.js
-        description: On panel load: when activeTab is tagsTree, await initBookmarkTab then init Tags tree with getTagsTreeInitOptions(controller); else initTabIfNeeded(activeTab). Exported for tests.
+        description: "On panel load: when activeTab is tagsTree, await initBookmarkTab then init Tags tree with getTagsTreeInitOptions(controller); else initTabIfNeeded(activeTab). Exported for tests."
       - name: getTagsTreeInitOptions
         file: src/ui/side-panel/side-panel-tab-state.js
-        description: Pure helper: given controller, returns { currentBookmarkTags } for initTagsTreeTab (Tags tree on open shows current URL's record).
+        description: "Pure helper: given controller, returns currentBookmarkTags for initTagsTreeTab (Tags tree on open shows current URL record)."
   traceability:
     architecture:
       - ARCH-SIDE_PANEL_TABS
@@ -147,7 +147,6 @@ IMPL-SIDE_PANEL_TABS:
       IF tagsTreeTabInited RETURN
       tagsTreeTabInited = true
       initTagsTreeTab(options)  // load getAggregatedBookmarksForIndex; if options.currentBookmarkTags set, apply at end of loadBookmarks
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
   metadata:
     created:
       date: '2026-02-25'

@@ -76,6 +76,7 @@ This acknowledgment confirms that the AI agent has:
 
 5. **Automated Token Validation** `[PROC-TOKEN_VALIDATION]`
    - Run `./scripts/validate_tokens.sh` (or the project-specific equivalent) to ensure semantic tokens exist in the registry and maintain traceability.
+   - When using the TIED MCP server, run **`tied_validate_consistency`** to validate index and detail YAML consistency (token existence, REQ→ARCH→IMPL traceability, detail file content, IMPL pseudo-code token refs). Fix any reported issues before marking work complete.
    - Validation failures MUST be documented and resolved before proceeding.
 
 6. **Priority-Based Implementation**
@@ -761,6 +762,7 @@ This project follows AI-First Principles. Before making changes:
 - [ ] **MANDATORY**: Update documentation AS YOU WORK - do not defer until the end
 - [ ] **MANDATORY**: Perform the `[PROC-TOKEN_AUDIT]` checklist to confirm every code/test change carries the correct tokens
 - [ ] **MANDATORY**: Run `./scripts/validate_tokens.sh` (or repo-specific equivalent) whenever tokens are added or moved
+- [ ] **MANDATORY** (when using TIED MCP): Run **`tied_validate_consistency`** and fix any reported issues before marking work complete
 
 **AFTER COMPLETING WORK:**
 

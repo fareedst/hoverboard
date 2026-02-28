@@ -18,11 +18,11 @@ REQ-SIDE_PANEL_TAGS_TREE:
   satisfaction_criteria:
     - criterion: Side panel opens from popup (e.g. footer button "Tags tree" or "Side panel")
     - criterion: User can select one or more tags to display and control their order
-    - criterion: Below tag selector, hierarchical display: tags at top level, URLs as leaf nodes showing bookmark name and URL
+    - criterion: "Below tag selector, hierarchical display: tags at top level, URLs as leaf nodes showing bookmark name and URL"
     - criterion: The list of URLs under each tag is collapsible
     - criterion: Clicking a URL opens it in a new tab
     - criterion: User can filter bookmarks by create time or update time (time range)
-    - criterion: User can filter bookmarks by tags (include set: show only bookmarks that have at least one of the selected tags)
+    - criterion: "User can filter bookmarks by tags (include set: show only bookmarks that have at least one of the selected tags)"
     - criterion: User can filter bookmarks by domain(s) in URL (hostname)
     - criterion: Display can be sorted by create date, update date, tags, or domain; sort order (asc/desc) is configurable
     - criterion: Display can be grouped by create date, update date, tags, or domain (or none for flat list); grouped sections are collapsible
@@ -54,7 +54,6 @@ REQ-SIDE_PANEL_TAGS_TREE:
     related_to:
       - REQ-LOCAL_BOOKMARKS_INDEX
     supersedes: []
-  detail_file: requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml
   metadata:
     created:
       date: '2026-02-21'

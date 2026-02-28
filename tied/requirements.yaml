@@ -213,7 +213,7 @@ REQ-CORE_UX_PRESERVATION:
       - REQ-OVERLAY_SYSTEM
       - REQ-RECENT_TAGS_SYSTEM
     supersedes: []
-  detail_file: requirements/REQ-CORE_UX_PRESERVATION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -260,7 +260,7 @@ REQ-PINBOARD_COMPATIBILITY:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-PINBOARD_COMPATIBILITY.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -306,7 +306,7 @@ REQ-MANIFEST_V3_MIGRATION:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-MANIFEST_V3_MIGRATION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -354,7 +354,7 @@ REQ-CHROME_STORAGE_USAGE:
     related_to:
       - REQ-CONFIG_PORTABILITY
     supersedes: []
-  detail_file: requirements/REQ-CHROME_STORAGE_USAGE.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -442,7 +442,7 @@ REQ-RECENT_TAGS_SYSTEM:
     related_to:
       - REQ-TAG_MANAGEMENT
     supersedes: []
-  detail_file: requirements/REQ-RECENT_TAGS_SYSTEM.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -497,7 +497,7 @@ REQ-SMART_BOOKMARKING:
       - REQ-TAG_MANAGEMENT
       - REQ-OVERLAY_SYSTEM
     supersedes: []
-  detail_file: requirements/REQ-SMART_BOOKMARKING.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -541,7 +541,7 @@ REQ-TAG_MANAGEMENT:
       - REQ-RECENT_TAGS_SYSTEM
       - REQ-TAG_INPUT_SANITIZATION
     supersedes: []
-  detail_file: requirements/REQ-TAG_MANAGEMENT.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -586,7 +586,7 @@ REQ-OVERLAY_SYSTEM:
       - REQ-OVERLAY_REFRESH_ACTION
       - REQ-OVERLAY_CONTROL_LAYOUT
     supersedes: []
-  detail_file: requirements/REQ-OVERLAY_SYSTEM.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -628,7 +628,7 @@ REQ-DARK_THEME:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-DARK_THEME.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -672,7 +672,7 @@ REQ-BADGE_INDICATORS:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-BADGE_INDICATORS.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -716,7 +716,7 @@ REQ-SITE_MANAGEMENT:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-SITE_MANAGEMENT.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -761,7 +761,7 @@ REQ-SEARCH_FUNCTIONALITY:
     related_to:
       - REQ-TAB_SEARCH_NO_MATCH_UX
     supersedes: []
-  detail_file: requirements/REQ-SEARCH_FUNCTIONALITY.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -778,7 +778,7 @@ REQ-TAB_SEARCH_NO_MATCH_UX:
   rationale:
     why: Avoid intrusive error messaging when the user simply got no matches; signal the outcome with subtle visual feedback instead.
     problems_solved:
-      - "No matching tabs found" error message felt like an error when it is a valid outcome
+      - '"No matching tabs found" error message felt like an error when it is a valid outcome'
       - Desire for visual feedback only when input is processed but no new tab is displayed
     benefits:
       - Clear feedback that search ran without showing an error state
@@ -813,13 +813,13 @@ REQ-TAB_SEARCH_NO_MATCH_UX:
     related_to:
       - REQ-SEARCH_FUNCTIONALITY
     supersedes: []
-  detail_file: requirements/REQ-TAB_SEARCH_NO_MATCH_UX.yaml
+  detail_file: null
   metadata:
     created:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
       reason: Initial creation
 REQ-PRIVACY_CONTROLS:
@@ -857,7 +857,7 @@ REQ-PRIVACY_CONTROLS:
     depends_on: []
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-PRIVACY_CONTROLS.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -906,7 +906,7 @@ REQ-OVERLAY_AUTO_SHOW_CONTROL:
     related_to:
       - REQ-OVERLAY_SYSTEM
     supersedes: []
-  detail_file: requirements/REQ-OVERLAY_AUTO_SHOW_CONTROL.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -953,7 +953,7 @@ REQ-OVERLAY_REFRESH_ACTION:
       - REQ-OVERLAY_SYSTEM
       - REQ-OVERLAY_CONTROL_LAYOUT
     supersedes: []
-  detail_file: requirements/REQ-OVERLAY_REFRESH_ACTION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -999,7 +999,7 @@ REQ-POPUP_PERSISTENT_SESSION:
     related_to:
       - REQ-CORE_UX_PRESERVATION
     supersedes: []
-  detail_file: requirements/REQ-POPUP_PERSISTENT_SESSION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1050,7 +1050,7 @@ REQ-BOOKMARK_STATE_SYNCHRONIZATION:
     related_to:
       - REQ-POPUP_PERSISTENT_SESSION
     supersedes: []
-  detail_file: requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1098,7 +1098,7 @@ REQ-OVERLAY_CONTROL_LAYOUT:
       - REQ-OVERLAY_SYSTEM
       - REQ-OVERLAY_REFRESH_ACTION
     supersedes: []
-  detail_file: requirements/REQ-OVERLAY_CONTROL_LAYOUT.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1143,7 +1143,7 @@ REQ-CONFIG_PORTABILITY:
     related_to:
       - REQ-CHROME_STORAGE_USAGE
     supersedes: []
-  detail_file: requirements/REQ-CONFIG_PORTABILITY.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1190,7 +1190,7 @@ REQ-TAG_INPUT_SANITIZATION:
     related_to:
       - REQ-TAG_MANAGEMENT
     supersedes: []
-  detail_file: requirements/REQ-TAG_INPUT_SANITIZATION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1240,7 +1240,7 @@ REQ-SAFARI_ADAPTATION:
     related_to:
       - REQ-EXTENSION_IDENTITY
     supersedes: []
-  detail_file: requirements/REQ-SAFARI_ADAPTATION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1465,8 +1465,8 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     implementation:
       - IMPL-LOCAL_BOOKMARKS_INDEX
     tests:
-      - 'tests/unit/bookmarks-table-index.test.js (matchStoresFilter, getShowOnlyDefaultState, etc.)'
-      - 'tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)'
+      - tests/unit/bookmarks-table-index.test.js (matchStoresFilter, getShowOnlyDefaultState, etc.)
+      - tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)
     code_annotations:
       - REQ-LOCAL_BOOKMARKS_INDEX
   related_requirements:
@@ -1568,7 +1568,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
       - REQ-LOCAL_BOOKMARKS_INDEX
       - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
     supersedes: []
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-18'
@@ -1665,7 +1665,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
     related_to:
       - REQ-LOCAL_BOOKMARKS_INDEX
     supersedes: []
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-20'
@@ -1834,7 +1834,7 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
     - criterion: Move uses bookmark URL when available; router allows bookmark without time
     - criterion: Message getStorageBackendForUrl and moveBookmarkToStorage implemented
     - criterion: Options explains default storage for new bookmarks (three-way choice)
-    - criterion: "Save follows the highlight: creating/updating a bookmark from the popup uses the currently selected storage backend (popup sends preferredBackend, router honors it)"
+    - criterion: 'Save follows the highlight: creating/updating a bookmark from the popup uses the currently selected storage backend (popup sends preferredBackend, router honors it)'
   validation_criteria:
     - method: Unit test moveBookmarkToStorage (mock providers)
     - method: Unit test move when source bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]
@@ -1855,7 +1855,7 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
     related_to: []
     supersedes: []
-  detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-14'
@@ -2052,10 +2052,10 @@ REQ-UI_INSPECTION:
       - tests/unit/content-messaging-contracts.test.js (content script message contracts)
       - tests/unit/service-worker-messaging-routing.test.js (SW routing)
       - tests/unit/message-type-drift.test.js (message type consistency)
-  detail_file: requirements/REQ-UI_INSPECTION.yaml
+  detail_file: null
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-25"
+    created: '2026-02-17'
+    last_updated: '2026-02-25'
     author: AI Agent
     reason: Add messaging protocol test traceability (ARCH-MESSAGE_HANDLING, IMPL-MESSAGE_HANDLING)
 REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
@@ -2066,7 +2066,7 @@ REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
   rationale:
     why: Browser-loaded extension scripts must not contain bare module specifiers; all entry points must be bundled so npm dependencies are inlined
     problems_solved:
-      - 'Failed to resolve module specifier when popup or other entry loaded unbundled code with npm imports'
+      - Failed to resolve module specifier when popup or other entry loaded unbundled code with npm imports
     benefits:
       - Extension loads reliably from dist; service worker, popup, options, content script are single bundles
   satisfaction_criteria:
@@ -2079,8 +2079,8 @@ REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
       - IMPL-POPUP_BUNDLE
   detail_file: requirements/REQ-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
+    created: '2026-02-17'
+    last_updated: '2026-02-17'
     author: AI Agent
 REQ-SHARED_UTILITIES:
   name: Shared Utilities
@@ -2107,8 +2107,8 @@ REQ-SHARED_UTILITIES:
       - IMPL-DOM_UTILITIES
   detail_file: requirements/REQ-SHARED_UTILITIES.yaml
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
+    created: '2026-02-17'
+    last_updated: '2026-02-17'
     author: AI Agent
 REQ-STRUCTURED_LOGGING:
   name: Structured Logging
@@ -2130,10 +2130,10 @@ REQ-STRUCTURED_LOGGING:
       - IMPL-LOGGER_CONTEXT_LEVELS
       - IMPL-LOG_LEVEL_CONFIG
       - IMPL-LOGGER_LEGACY
-  detail_file: requirements/REQ-STRUCTURED_LOGGING.yaml
+  detail_file: null
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
+    created: '2026-02-17'
+    last_updated: '2026-02-17'
     author: AI Agent
 REQ-BOOKMARK_CREATE_UPDATE_TIMES:
   name: Bookmark Create-Time and Most-Recent-Update-Time
@@ -2330,7 +2330,7 @@ REQ-SIDE_PANEL_TAGS_TREE:
     related_to:
       - REQ-LOCAL_BOOKMARKS_INDEX
     supersedes: []
-  detail_file: requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-21'
@@ -2357,7 +2357,7 @@ REQ-SIDE_PANEL_BOOKMARK_SEARCH:
     - criterion: Next and Previous controls advance to the next/previous matching record with scroll-into-view and highlight
   validation_criteria:
     - method: Unit tests
-      coverage: "filterBookmarksBySearch: empty query returns all; non-empty matches title/url/tags/extended; case-insensitive; no match returns empty"
+      coverage: 'filterBookmarksBySearch: empty query returns all; non-empty matches title/url/tags/extended; case-insensitive; no match returns empty'
     - method: Manual verification
       coverage: Type search; see count; use Next/Previous to move through matches; current match highlighted and scrolled into view
   traceability:
@@ -2374,7 +2374,7 @@ REQ-SIDE_PANEL_BOOKMARK_SEARCH:
     related_to:
       - REQ-SIDE_PANEL_TAGS_TREE
     supersedes: []
-  detail_file: requirements/REQ-SIDE_PANEL_BOOKMARK_SEARCH.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-22'
@@ -2493,3 +2493,73 @@ REQ-QUICK_ACCESS_ENTRY:
       date: '2026-02-26'
       author: AI Agent
       reason: Initial creation for quick access commands, context menu, and in-popup/panel shortcuts
+REQ-MAINTAINABILITY:
+  name: Maintainability
+  category: Non-Functional
+  priority: P2
+  status: Active
+  rationale:
+    why: Codebase maintainability and clarity
+  satisfaction_criteria: []
+  traceability: {}
+  detail_file: null
+REQ-EXAMPLE_FEATURE:
+  name: Example Feature
+  category: Functional
+  priority: P2
+  status: Template
+  rationale:
+    why: Template requirement for examples
+  satisfaction_criteria: []
+  traceability: {}
+  detail_file: null
+REQ-ERROR_HANDLING:
+  name: Error Handling
+  category: Non-Functional
+  priority: P2
+  status: Active
+  rationale:
+    why: Consistent error handling
+  satisfaction_criteria: []
+  traceability: {}
+  detail_file: null
+REQ-CONFIGURATION:
+  name: Configuration
+  category: Functional
+  priority: P2
+  status: Active
+  rationale:
+    why: Configuration and settings
+  satisfaction_criteria: []
+  traceability: {}
+  detail_file: null
+REQ-PERFORMANCE:
+  name: Performance
+  category: Non-Functional
+  priority: P2
+  status: Active
+  rationale:
+    why: Performance requirements
+  satisfaction_criteria: []
+  traceability: {}
+  detail_file: null
+REQ-RELIABILITY:
+  name: Reliability
+  category: Non-Functional
+  priority: P2
+  status: Active
+  rationale:
+    why: Reliability requirements
+  satisfaction_criteria: []
+  traceability: {}
+  detail_file: null
+REQ-USABILITY:
+  name: Usability
+  category: Non-Functional
+  priority: P2
+  status: Active
+  rationale:
+    why: Usability requirements
+  satisfaction_criteria: []
+  traceability: {}
+  detail_file: null

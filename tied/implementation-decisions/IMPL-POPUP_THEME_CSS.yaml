@@ -6,11 +6,11 @@ IMPL-POPUP_THEME_CSS:
     - ARCH-THEME
     - IMPL-SCREENSHOT_MODE
   rationale:
-    why: Popup must reflect ThemeManager-applied theme so dark preference and screenshot seed (hoverboard_theme: 'dark') show dark popup
+    why: "Popup must reflect ThemeManager-applied theme so dark preference and screenshot seed (hoverboard_theme: dark) show dark popup"
     problems_solved:
       - Popup stayed light when hoverboard_theme was 'dark' because popup.css only overrode variables in @media (prefers-color-scheme: dark), not when document root had class hb-theme-dark
     benefits:
-      - Dark theme preference applies to popup; placeholder screenshots show dark popup when seed includes hoverboard_theme: 'dark'
+      - "Dark theme preference applies to popup; placeholder screenshots show dark popup when seed includes hoverboard_theme: dark"
   implementation_approach:
     summary: Add :root.hb-theme-dark block in popup.css with same dark variable values as the prefers-color-scheme media query
     details:
@@ -51,7 +51,6 @@ IMPL-POPUP_THEME_CSS:
       ELSE IF prefers-color-scheme dark: APPLY @media (prefers-color-scheme: dark) variables
       ELSE: APPLY light variables
     Popup elements USE --bg-primary, --text-primary, etc. from resolved rule
-  detail_file: implementation-decisions/IMPL-POPUP_THEME_CSS.yaml
   metadata:
     created:
       date: "2026-02-19"

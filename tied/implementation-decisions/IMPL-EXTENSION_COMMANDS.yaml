@@ -16,8 +16,8 @@ IMPL-EXTENSION_COMMANDS:
   implementation_approach:
     summary: manifest.json "commands" with four entries (open-side-panel, open-options, open-bookmarks-index, open-import) and suggested_key; SW chrome.commands.onCommand.addListener switches on command name and performs the corresponding action.
     details:
-      - manifest: "commands": { "open-side-panel": { "suggested_key": { "default": "Ctrl+Shift+B" }, "description": "Open Hoverboard side panel" }, "open-options": { "suggested_key": { "default": "Ctrl+Shift+O" }, "description": "Open Hoverboard options" }, "open-bookmarks-index": { "suggested_key": { "default": "Ctrl+Shift+M" }, "description": "Open bookmarks index" }, "open-import": { "suggested_key": { "default": "Ctrl+Shift+I" }, "description": "Open browser bookmark import" } }
-      - SW: In setupEventListeners (or after), if chrome.commands exists, chrome.commands.onCommand.addListener((command) => { ... }). Handler: switch(command). open-side-panel: use this._sidePanelWindowId and chrome.sidePanel.open({ windowId }); open-options: chrome.runtime.openOptionsPage(); open-bookmarks-index: chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html') }); open-import: chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html') }). Guard chrome.sidePanel and chrome.commands for environments where they may be undefined.
+      - "manifest commands: open-side-panel, open-options, open-bookmarks-index, open-import with suggested_key and description; open-side-panel Ctrl+Shift+B, open-options Ctrl+Shift+O, open-bookmarks-index Ctrl+Shift+M, open-import Ctrl+Shift+I"
+      - "SW: In setupEventListeners (or after), if chrome.commands exists, chrome.commands.onCommand.addListener. Handler switch on command. open-side-panel: use _sidePanelWindowId and chrome.sidePanel.open; open-options: chrome.runtime.openOptionsPage; open-bookmarks-index and open-import: chrome.tabs.create with getURL. Guard chrome.sidePanel and chrome.commands for environments where they may be undefined."
   code_locations:
     files:
       - path: manifest.json
@@ -73,7 +73,6 @@ IMPL-EXTENSION_COMMANDS:
       - IMPL-SIDE_PANEL_TAGS_TREE
       - IMPL-CONTEXT_MENU_QUICK_ACCESS
       - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
-  detail_file: implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml
   metadata:
     created:
       date: '2026-02-26'

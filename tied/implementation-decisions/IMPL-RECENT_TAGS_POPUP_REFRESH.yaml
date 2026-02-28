@@ -5,7 +5,7 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
     - REQ-RECENT_TAGS_SYSTEM
     - ARCH-POPUP_SESSION
   rationale:
-    why: In reused popup documents the Recent Tags list might not refresh when popup is shown again; users expect list to reflect shared service-worker state every time. Fix: refresh on visibility change when popup becomes visible and initialized.
+    why: "In reused popup documents the Recent Tags list might not refresh when popup is shown again; users expect list to reflect shared service-worker state every time. Fix: refresh on visibility change when popup becomes visible and initialized."
     problems_solved:
       - Stale Recent Tags list when popup is reopened without full reload
     benefits: []
@@ -56,7 +56,6 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
 
     # Popup visible -> list reflects recentTagsMemory so tags from other windows appear.
     effect: Every time popup document becomes visible (e.g. user reopens popup), Recent Tags list is refreshed so tags saved in one window appear when popup is shown in this or another window.
-  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml
   metadata:
     created:
       date: '2026-02-18'

@@ -376,6 +376,7 @@ For a quicker check without E2E: `npm run validate && npm run test`.
 Development is guided by the TIED process: implementation decisions are captured in pseudo-code and decision docs (`tied/`) before tests or code. Code and tests carry semantic tokens (`[REQ-*]`, `[ARCH-*]`, `[IMPL-*]`) for traceability from requirements → architecture → implementation → tests → code.
 
 - **Token validation** – `npm run validate` (and CI) runs `npm run validate:tokens`, which ensures every `[REQ-*]` / `[ARCH-*]` / `[IMPL-*]` referenced in `src/` and `tests/` is registered in `tied/semantic-tokens.yaml`. Run manually: `bash scripts/validate_tokens.sh`.
+- **TIED consistency validation** – The TIED MCP tool `tied_validate_consistency` checks index files and detail YAML (REQ/ARCH/IMPL) for parse errors, token references, and cross-index consistency. All `tied/requirements/`, `tied/architecture-decisions/`, and `tied/implementation-decisions/` detail files are valid YAML and pass this validation. See `docs/ai-agent-tied-mcp-usage.md` for MCP usage.
 - **Quality summary** – Module boundaries and provider-style contracts are documented; unit tests use mocks and reference REQ/IMPL in describe/test names; messaging and contract tests cover extension protocols. Debug output uses `debugLog`/`debugError` per TIED. See CHANGELOG for the latest quality and token-validation notes.
 
 ## Documentation

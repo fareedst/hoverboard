@@ -14,7 +14,7 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
     benefits:
       - Testable filterBookmarksBySearch; search bar, count, Next/Previous with scroll and highlight
   implementation_approach:
-    summary: filterBookmarksBySearch(bookmarks, query) in tags-tree-filter.js; tags-tree.js/html/css: search input, count span, Next/Previous; when searchQuery set use matchingBookmarks for tree/grouped; data-search-index on each link; Next/Prev update index, scrollIntoView, highlight class.
+    summary: "filterBookmarksBySearch(bookmarks, query) in tags-tree-filter.js; tags-tree.js/html/css: search input, count span, Next/Previous; when searchQuery set use matchingBookmarks for tree/grouped; data-search-index on each link; Next/Prev update index, scrollIntoView, highlight class."
     details:
       - tags-tree-filter.js: filterBookmarksBySearch(bookmarks, query) - substring match on description, url, tags joined, extended; case-insensitive; empty/whitespace returns full list
       - tags-tree.js: after filtered+sorted, if searchQuery.trim() then matchingBookmarks = filterBookmarksBySearch(list, searchQuery) else matchingBookmarks = list; build tagToBookmarks/grouped from matchingBookmarks; searchMatchIndex (0-based); on Next/Prev wrap index; collect .tree-bookmark-link with data-search-index, scroll to Nth, toggle .search-current
@@ -86,7 +86,6 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
     # Render: each bookmark link gets data-search-index = flat index in display order so Nth match can be found. Implements "scroll and highlight" by finding element with data-search-index === searchMatchIndex, scrollIntoView, classList.add('search-current'); clear previous highlight.
     WHEN rendering tree or grouped: for each bookmark link set data-search-index = index (0-based in display order)
     scrollToMatch(idx): links = querySelectorAll('.tree-bookmark-link[data-search-index]'); el = links[idx]; IF el THEN el.scrollIntoView({ block: 'nearest' }); remove .search-current from all; el.classList.add('search-current')
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK_SEARCH.yaml
   metadata:
     created:
       date: '2026-02-22'

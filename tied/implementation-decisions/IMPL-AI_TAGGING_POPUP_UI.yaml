@@ -11,12 +11,12 @@ IMPL-AI_TAGGING_POPUP_UI:
     benefits:
       - One button; correct order (session auto-add, then suggested)
   implementation_approach:
-    summary: Popup "Tag with AI" button. On click: get current tab; if no http(s) URL show message and return; send GET_PAGE_CONTENT to SW (SW obtains page content via scripting.executeScript in tab); send GET_AI_TAGS to SW with text and limit; get session tags from SW; split AI tags into inSession and suggested; create or update bookmark with merged tags; updateSuggestedTags(suggested); refresh bookmark state. When extraction fails, popup shows content.error from SW.
+    summary: "Popup Tag with AI button. On click: get current tab; if no http(s) URL show message and return; send GET_PAGE_CONTENT to SW (SW obtains page content via scripting.executeScript in tab); send GET_AI_TAGS to SW with text and limit; get session tags from SW; split AI tags into inSession and suggested; create or update bookmark with merged tags; updateSuggestedTags(suggested); refresh bookmark state. When extraction fails, popup shows content.error from SW."
     details:
       - Button disabled when no API key in config or tab URL not http(s)
-      - GET_PAGE_CONTENT: popup sendMessage to SW with { type: 'GET_PAGE_CONTENT', data: { tabId } }. SW handleGetPageContent uses scripting.executeScript with inline function in tab (no content script dependency). Response is { title, textContent } or { success: false, error }.
-      - Popup: when !content?.textContent, show content.error if content.success === false (so user sees SW message e.g. "Page content unavailable. Reload the page and try again..."); otherwise generic "Could not extract page content for tagging"
-      - Split: inSession = aiTags.filter(t => sessionSet.has(t.toLowerCase())); suggested = rest
+      - "GET_PAGE_CONTENT: popup sendMessage to SW with { type: 'GET_PAGE_CONTENT', data: { tabId } }. SW handleGetPageContent uses scripting.executeScript with inline function in tab (no content script dependency). Response is { title, textContent } or { success: false, error }."
+      - "Popup: when !content?.textContent, show content.error if content.success === false (so user sees SW message e.g. Page content unavailable. Reload the page and try again); otherwise generic Could not extract page content for tagging"
+      - "Split: inSession = aiTags.filter(t => sessionSet.has(t.toLowerCase())); suggested = rest"
       - saveBookmark with preferredBackend = getStorageMode() when creating new; merge inSession into current tags
   code_locations:
     files:
@@ -78,7 +78,6 @@ IMPL-AI_TAGGING_POPUP_UI:
         saveBookmark({ ...bookmark, tags: merged, preferredBackend: bookmark backend or defaultBackend })
       updateSuggestedTags(suggested)  // so AI tags appear first in Suggested section
       refresh bookmark state / badge
-  detail_file: implementation-decisions/IMPL-AI_TAGGING_POPUP_UI.yaml
   metadata:
     created:
       date: '2026-02-20'

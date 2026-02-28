@@ -14,7 +14,7 @@ IMPL-TAB_SEARCH_SERVICE:
   implementation_approach:
     summary: TabSearchService queries chrome.tabs, filters by title substring, selects next match (with wrap-around), activates tab and focuses window; maintains lastSearchText and lastMatchedTabId for continuation.
     details:
-      - searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }
+      - "searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }"
       - findNextTab(matchingTabs, restartTabId): circular navigation; addToSearchHistory
       - Chrome API errors surfaced as rejected promise
   code_locations:
@@ -79,7 +79,6 @@ IMPL-TAB_SEARCH_SERVICE:
     addToSearchHistory(term):
       IF term in searchHistory: MOVE term to front
       ELSE: PREPEND term to searchHistory
-  detail_file: implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml
   metadata:
     created:
       date: "2026-02-20"

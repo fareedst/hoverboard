@@ -33,13 +33,13 @@ IMPL-TYPESCRIPT_MIGRATION:
       - path: src/shared/config-types.d.ts
         description: Merged config type definitions
       - path: src/config/config-manager.js
-        description: @ts-check; MergedConfig in getConfig/getOptions/updateConfig/saveSettings/importConfig
+        description: "@ts-check; MergedConfig in getConfig/getOptions/updateConfig/saveSettings/importConfig"
       - path: src/core/message-handler.js
-        description: @ts-check; MessageEnvelope and payload typedefs; processMessage and handlers
+        description: "@ts-check; MessageEnvelope and payload typedefs; processMessage and handlers"
       - path: src/shared/message-schemas.js
-        description: @ts-check; MessageEnvelope in validateMessageEnvelope return type
+        description: "@ts-check; MessageEnvelope in validateMessageEnvelope return type"
       - path: src/features/content/message-client.js
-        description: @ts-check; MessageEnvelope in sendMessage/sendMessageWithRetry/sendSingleMessage
+        description: "@ts-check; MessageEnvelope in sendMessage/sendMessageWithRetry/sendSingleMessage"
     functions: []
   traceability:
     architecture:
@@ -62,7 +62,6 @@ IMPL-TYPESCRIPT_MIGRATION:
     see_also:
       - ARCH-LANGUAGE_SELECTION
       - IMPL-RUNTIME_VALIDATION
-  detail_file: implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml
   metadata:
     created:
       date: "2026-02-22"

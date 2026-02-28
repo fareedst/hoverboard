@@ -18,7 +18,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
   implementation_approach:
     summary: Popup button sends OPEN_SIDE_PANEL; SW handles it in onMessage (synchronously, no await) using a cached normal windowId so chrome.sidePanel.open() runs in user-gesture context. Panel loads bookmarks via getAggregatedBookmarksForIndex; applies filter pipeline (time, tags, domain), sort, optional group; config region expandable/collapsible with state and filter/sort/group values persisted; tag selector + tree or grouped sections; click URL → openUrlInNewTab (chrome.tabs.create).
     details:
-      - manifest: "windows" permission for chrome.windows.get/getCurrent; sidePanel permission and default_path
+      - "manifest: windows permission for chrome.windows.get/getCurrent; sidePanel permission and default_path"
       - ui-action-contract: openTagsTree maps to OPEN_SIDE_PANEL
       - Popup: footer button, UIManager emit, PopupController.handleOpenTagsTree bound; sends OPEN_SIDE_PANEL, shows success or delegates error
       - Service worker: OPEN_SIDE_PANEL handled in onMessage listener only (no await before open). windowId from _sidePanelWindowId cache; chrome.sidePanel.open({ windowId }) called synchronously. _seedSidePanelWindowCache() seeds cache from active tab's normal window on startup. handleTabActivated updates _sidePanelWindowId when activated tab's window is normal.
@@ -60,7 +60,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
         description: Returns sorted unique tags; implements tag list for selector (REQ/ARCH/IMPL)
       - name: getTagsToDisplay
         file: src/ui/side-panel/tags-tree-data.js
-        description: Returns tags to show in selector: allTags when showAllTags true, else selectedTagOrder filtered by allTags (REQ/ARCH/IMPL)
+        description: "Returns tags to show in selector: allTags when showAllTags true, else selectedTagOrder filtered by allTags (REQ/ARCH/IMPL)"
       - name: intersectionTagOrder
         file: src/ui/side-panel/tags-tree-data.js
         description: Intersection of preferredTags with allTags preserving order; used to set Tags tree selection from current bookmark tags (REQ-SIDE_PANEL_POPUP_EQUIVALENT)
@@ -261,7 +261,6 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
     # Tags tree panel layout: panel fills content area and tree section scrolls. Selector must match DOM id (tagsTreePanel). Override min-height so panel participates in flex; overflow hidden so only .tree-section scrolls. Implements "tab content fills vertical space" for Tags tree tab.
     CSS #tagsTreePanel: display flex; flex-direction column; min-height 0; overflow hidden; background var(--color-background)
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml
   metadata:
     created:
       date: '2026-02-21'

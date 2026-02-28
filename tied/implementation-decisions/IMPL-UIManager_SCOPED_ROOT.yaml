@@ -28,7 +28,7 @@ IMPL-UIManager_SCOPED_ROOT:
     functions:
       - name: cacheElements
         file: src/ui/popup/UIManager.js
-        description: If container: querySelector('[data-popup-ref="key"]') for each key; else getElementById
+        description: "If container: querySelector('[data-popup-ref=\"key\"]') for each key; else getElementById"
       - name: constructor
         file: src/ui/popup/UIManager.js
         description: this.container = options.container || null
@@ -77,7 +77,6 @@ IMPL-UIManager_SCOPED_ROOT:
       root = this.container || document
       sectionTitles = root.querySelectorAll('.section-title')
       ...
-  detail_file: implementation-decisions/IMPL-UIManager_SCOPED_ROOT.yaml
   metadata:
     created:
       date: '2026-02-25'

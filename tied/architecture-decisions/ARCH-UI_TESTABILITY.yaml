@@ -12,7 +12,7 @@ ARCH-UI_TESTABILITY:
     details:
       - Service worker records each message after handleMessage; popup/content recordAction at start of handlers
       - Inspector enabled via localStorage DEBUG_HOVERBOARD_UI or setEnabled in SW (from chrome.storage.local)
-      - E2E specs: extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js (run: npm run test:e2e:extension)
+      - "E2E specs: extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js (run: npm run test:e2e:extension)"
       - E2E snapshot helpers: snapshotPopup, snapshotOverlay, snapshotOptions, snapshotSidePanel (Bookmark tab + Tags tree tab)
   traceability:
     requirements:

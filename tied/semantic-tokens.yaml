@@ -1,241 +1,201 @@
-# Semantic Tokens Index (YAML Database)
-#
-# This YAML file serves as the central registry for all semantic tokens in the project.
-# Each top-level key is a semantic token (e.g., REQ-TIED_SETUP, ARCH-TIED_STRUCTURE, IMPL-MODULE_VALIDATION).
-#
-# To append a new token:
-# 1. Copy the template block at the bottom of this file (TOKEN-IDENTIFIER)
-# 2. Paste it at the end with a blank line before it
-# 3. Replace TOKEN-IDENTIFIER with your new token
-# 4. Fill in all fields
-# 5. Update the detail_file path if a detail file exists
-#
-# Field descriptions:
-#   type: REQ | ARCH | IMPL | TEST | PROC
-#   name: Short descriptive name of the token
-#   category: Sub-category (e.g., "Core Functional", "Non-Functional" for REQ; free-form for others; optional)
-#   status: Active | Deprecated | Template | Planned
-#   description: One-line description of what this token represents
-#   cross_references: List of related tokens (traceability chain)
-#   source_index: Path to the YAML index that holds the full record (e.g., requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, processes.md)
-#   detail_file: Path to the detailed .yaml file (if one exists)
-#   metadata: Structured metadata with registered and last_updated dates
-
----
-
 REQ-TIED_SETUP:
   type: REQ
   name: TIED Methodology Setup
   category: Core Functional
   status: Active
-  description: "TIED methodology setup requirement"
+  description: TIED methodology setup requirement
   cross_references:
     - ARCH-TIED_STRUCTURE
     - IMPL-TIED_FILES
   source_index: requirements.yaml
   detail_file: requirements/REQ-TIED_SETUP.yaml
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 REQ-MODULE_VALIDATION:
   type: REQ
   name: Independent Module Validation Before Integration
   category: Core Functional
   status: Active
-  description: "Independent module validation before integration requirement"
+  description: Independent module validation before integration requirement
   cross_references:
     - ARCH-MODULE_VALIDATION
     - IMPL-MODULE_VALIDATION
   source_index: requirements.yaml
   detail_file: requirements/REQ-MODULE_VALIDATION.yaml
   metadata:
-    registered: 2025-01-27
-    last_updated: 2026-02-08
-
+    registered: 2025-01-27T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 REQ-EXAMPLE_FEATURE:
   type: REQ
   name: Example Feature Requirement
   category: Core Functional
   status: Template
-  description: "Example feature requirement (template)"
+  description: Example feature requirement (template)
   cross_references:
     - ARCH-EXAMPLE_DECISION
     - IMPL-EXAMPLE_IMPLEMENTATION
   source_index: requirements.yaml
   detail_file: requirements/REQ-IDENTIFIER.yaml
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 REQ-PERFORMANCE:
   type: REQ
   name: Performance Requirements
   category: Non-Functional
   status: Template
-  description: "Performance requirements"
+  description: Performance requirements
   cross_references: []
   source_index: requirements.yaml
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 REQ-RELIABILITY:
   type: REQ
   name: Reliability Requirements
   category: Non-Functional
   status: Template
-  description: "Reliability requirements"
+  description: Reliability requirements
   cross_references: []
   source_index: requirements.yaml
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 REQ-MAINTAINABILITY:
   type: REQ
   name: Maintainability Requirements
   category: Non-Functional
   status: Template
-  description: "Maintainability requirements"
+  description: Maintainability requirements
   cross_references: []
   source_index: requirements.yaml
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 REQ-CODE_QUALITY:
   type: REQ
   name: Code Quality and Tooling
   category: Non-Functional
   status: Active
-  description: "Code quality via ESLint 10 flat config and security audit at high severity"
+  description: Code quality via ESLint 10 flat config and security audit at high severity
   cross_references:
     - ARCH-CODE_QUALITY
     - IMPL-CODE_STYLE
   source_index: requirements.yaml
   detail_file: requirements/REQ-CODE_QUALITY.yaml
   metadata:
-    registered: 2025-02-17
-    last_updated: 2026-02-19
-
+    registered: 2025-02-17T00:00:00.000Z
+    last_updated: 2026-02-19T00:00:00.000Z
 REQ-USABILITY:
   type: REQ
   name: Usability Requirements
   category: Non-Functional
   status: Template
-  description: "Usability requirements"
+  description: Usability requirements
   cross_references: []
   source_index: requirements.yaml
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 ARCH-LANGUAGE_SELECTION:
   type: ARCH
   name: Language and Static Typing Strategy
   status: Active
-  description: "Incremental TypeScript/JSDoc typing; tsconfig noEmit, .d.ts and JSDoc for contracts"
+  description: Incremental TypeScript/JSDoc typing; tsconfig noEmit, .d.ts and JSDoc for contracts
   cross_references:
     - IMPL-TYPESCRIPT_MIGRATION
     - IMPL-RUNTIME_VALIDATION
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.yaml
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-22
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-22T00:00:00.000Z
 ARCH-PROJECT_STRUCTURE:
   type: ARCH
   name: Project Structure Decision
   status: Template
-  description: "Project structure decision"
+  description: Project structure decision
   cross_references: []
   source_index: architecture-decisions.yaml
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 ARCH-TIED_STRUCTURE:
   type: ARCH
   name: TIED Project Structure
   status: Active
-  description: "TIED project structure decision"
+  description: TIED project structure decision
   cross_references:
     - REQ-TIED_SETUP
     - IMPL-TIED_FILES
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
   metadata:
-    registered: 2025-12-18
-    last_updated: 2026-02-08
-
+    registered: 2025-12-18T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 ARCH-MODULE_VALIDATION:
   type: ARCH
   name: Module Validation Strategy
   status: Active
-  description: "Module validation strategy decision"
+  description: Module validation strategy decision
   cross_references:
     - REQ-MODULE_VALIDATION
     - IMPL-MODULE_VALIDATION
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.yaml
   metadata:
-    registered: 2025-12-18
-    last_updated: 2026-02-08
-
+    registered: 2025-12-18T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 ARCH-EXAMPLE_DECISION:
   type: ARCH
   name: Core Architecture Example
   status: Template
-  description: "Example architecture decision (template)"
+  description: Example architecture decision (template)
   cross_references:
     - REQ-EXAMPLE_FEATURE
     - IMPL-EXAMPLE_IMPLEMENTATION
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-EXAMPLE_DECISION.yaml
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 ARCH-CODE_QUALITY:
   type: ARCH
   name: Code Quality Tooling (ESLint and Security Audit)
   status: Active
-  description: "ESLint 10 flat config with @eslinter/eslint-config-standard; security audit --audit-level=high; overrides.minimatch and test-exclude; Node >= 20.19.0"
+  description: ESLint 10 flat config with @eslinter/eslint-config-standard; security audit --audit-level=high; overrides.minimatch and test-exclude; Node >= 20.19.0
   cross_references:
     - REQ-CODE_QUALITY
     - IMPL-CODE_STYLE
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-CODE_QUALITY.yaml
   metadata:
-    registered: 2025-02-17
-    last_updated: 2026-02-19
-
+    registered: 2025-02-17T00:00:00.000Z
+    last_updated: 2026-02-19T00:00:00.000Z
 IMPL-CONFIG_STRUCT:
   type: IMPL
   name: Configuration Structure
   status: Template
-  description: "Configuration structure implementation"
+  description: Configuration structure implementation
   cross_references:
     - ARCH-CONFIG_STRUCTURE
     - REQ-CONFIGURATION
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-CONFIG_STRUCT.md
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 IMPL-RUNTIME_VALIDATION:
   type: IMPL
   name: Runtime validation with Zod for messages and config
   status: Active
-  description: "Zod schemas for message envelope/data and merged config; validate at processMessage and getConfig"
+  description: Zod schemas for message envelope/data and merged config; validate at processMessage and getConfig
   cross_references:
     - IMPL-MESSAGE_HANDLING
     - ARCH-MESSAGE_HANDLING
@@ -243,42 +203,39 @@ IMPL-RUNTIME_VALIDATION:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml
   metadata:
-    registered: 2026-02-22
-    last_updated: 2026-02-22
-
+    registered: 2026-02-22T00:00:00.000Z
+    last_updated: 2026-02-22T00:00:00.000Z
 IMPL-TYPESCRIPT_MIGRATION:
   type: IMPL
   name: Incremental TypeScript and JSDoc typing
   status: Active
-  description: "tsconfig noEmit, typecheck script, .d.ts and JSDoc for message/config and core/popup APIs"
+  description: tsconfig noEmit, typecheck script, .d.ts and JSDoc for message/config and core/popup APIs
   cross_references:
     - ARCH-LANGUAGE_SELECTION
     - IMPL-RUNTIME_VALIDATION
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-22
-    last_updated: 2026-02-22
-
+    registered: 2026-02-22T00:00:00.000Z
+    last_updated: 2026-02-22T00:00:00.000Z
 IMPL-PLAYWRIGHT_E2E_EXTENSION:
   type: IMPL
   name: Playwright E2E for extension (load unpacked, popup flow)
   status: Active
-  description: "One E2E flow: load extension, open popup, assert structure; npm run test:e2e:extension"
+  description: 'One E2E flow: load extension, open popup, assert structure; npm run test:e2e:extension'
   cross_references:
     - REQ-UI_INSPECTION
     - ARCH-UI_TESTABILITY
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml
   metadata:
-    registered: 2026-02-22
-    last_updated: 2026-02-22
-
+    registered: 2026-02-22T00:00:00.000Z
+    last_updated: 2026-02-22T00:00:00.000Z
 IMPL-SIDE_PANEL_SNAPSHOT:
   type: IMPL
   name: Side Panel Snapshot E2E Helper
   status: Active
-  description: "snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab } for E2E assertions; REQ-UI_INSPECTION, REQ-SIDE_PANEL_POPUP_EQUIVALENT, REQ-SIDE_PANEL_TAGS_TREE"
+  description: snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab } for E2E assertions; REQ-UI_INSPECTION, REQ-SIDE_PANEL_POPUP_EQUIVALENT, REQ-SIDE_PANEL_TAGS_TREE
   cross_references:
     - ARCH-UI_TESTABILITY
     - REQ-UI_INSPECTION
@@ -287,149 +244,138 @@ IMPL-SIDE_PANEL_SNAPSHOT:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml
   metadata:
-    registered: 2026-02-25
-    last_updated: 2026-02-25
-
+    registered: 2026-02-25T00:00:00.000Z
+    last_updated: 2026-02-25T00:00:00.000Z
 IMPL-CODE_STYLE:
   type: IMPL
   name: Code Style and Conventions
   status: Active
-  description: "ESLint 10 flat config (@eslinter/eslint-config-standard), Node >= 20.19.0, security:check audit-level=high; minimatch and test-exclude overrides"
+  description: ESLint 10 flat config (@eslinter/eslint-config-standard), Node >= 20.19.0, security:check audit-level=high; minimatch and test-exclude overrides
   cross_references:
     - ARCH-CODE_QUALITY
     - REQ-CODE_QUALITY
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-CODE_STYLE.md
   metadata:
-    registered: 2025-02-17
-    last_updated: 2026-02-19
-
+    registered: 2025-02-17T00:00:00.000Z
+    last_updated: 2026-02-19T00:00:00.000Z
 IMPL-TIED_FILES:
   type: IMPL
   name: TIED File Creation
   status: Active
-  description: "TIED file creation implementation"
+  description: TIED file creation implementation
   cross_references:
     - ARCH-TIED_STRUCTURE
     - REQ-TIED_SETUP
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-TIED_FILES.yaml
   metadata:
-    registered: 2025-12-18
-    last_updated: 2026-02-08
-
+    registered: 2025-12-18T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 IMPL-MODULE_VALIDATION:
   type: IMPL
   name: Module Validation Implementation
   status: Active
-  description: "Module validation implementation"
+  description: Module validation implementation
   cross_references:
     - ARCH-MODULE_VALIDATION
     - REQ-MODULE_VALIDATION
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.yaml
   metadata:
-    registered: 2025-12-18
-    last_updated: 2026-02-08
-
+    registered: 2025-12-18T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 IMPL-EXAMPLE_IMPLEMENTATION:
   type: IMPL
   name: Core Implementation Example
   status: Template
-  description: "Example implementation (template)"
+  description: Example implementation (template)
   cross_references:
     - ARCH-EXAMPLE_DECISION
     - REQ-EXAMPLE_FEATURE
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.md
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 IMPL-PINBOARD_POSTS_ADD_ENCODING:
   type: IMPL
   name: Pinboard posts/add query parameter encoding
   status: Active
-  description: "Explicit percent-encoding of posts/add params so tags and other fields with #, +, . do not break the API call"
+  description: 'Explicit percent-encoding of posts/add params so tags and other fields with #, +, . do not break the API call'
   cross_references:
     - IMPL-PINBOARD_API
     - IMPL-TAG_SYSTEM
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.yaml
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-13
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 PROC-PROJECT_SURVEY_AND_SETUP:
   type: PROC
   name: Project Survey and Setup Process
   status: Active
-  description: "Survey and readiness process supporting REQ-TIED_SETUP and ARCH-TIED_STRUCTURE"
+  description: Survey and readiness process supporting REQ-TIED_SETUP and ARCH-TIED_STRUCTURE
   cross_references:
     - REQ-TIED_SETUP
     - ARCH-TIED_STRUCTURE
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-BUILD_PIPELINE_VALIDATION:
   type: PROC
   name: Build Pipeline Validation Process
   status: Active
-  description: "Build/deploy validation tied to REQ-MODULE_VALIDATION"
+  description: Build/deploy validation tied to REQ-MODULE_VALIDATION
   cross_references:
     - REQ-MODULE_VALIDATION
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-TOKEN_AUDIT:
   type: PROC
   name: Token Audit Process
   status: Active
-  description: "Mandatory checklist ensuring every requirement → architecture → implementation → code/test path is annotated and documented"
+  description: Mandatory checklist ensuring every requirement → architecture → implementation → code/test path is annotated and documented
   cross_references: []
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-TOKEN_VALIDATION:
   type: PROC
   name: Token Validation Process
   status: Active
-  description: "Automated validation workflow that proves all referenced tokens exist in the registry"
+  description: Automated validation workflow that proves all referenced tokens exist in the registry
   cross_references: []
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-YAML_DB_OPERATIONS:
   type: PROC
   name: YAML Database Operations Process
   status: Active
-  description: "YAML database operations for reading, writing, querying, and validating YAML index files"
+  description: YAML database operations for reading, writing, querying, and validating YAML index files
   cross_references:
     - REQ-TIED_SETUP
     - ARCH-TIED_STRUCTURE
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
-
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-TIED_DEV_CYCLE:
   type: PROC
   name: TIED Development Cycle (Session Workflow)
   status: Active
-  description: "Per-session workflow: plan from REQ/ARCH/IMPL and pseudo-code, author TIED docs, add tests, implement (TDD), glue code, validate, sync docs, README/CHANGELOG, commit"
+  description: 'Per-session workflow: plan from REQ/ARCH/IMPL and pseudo-code, author TIED docs, add tests, implement (TDD), glue code, validate, sync docs, README/CHANGELOG, commit'
   cross_references:
     - REQ-TIED_SETUP
     - REQ-MODULE_VALIDATION
@@ -438,185 +384,168 @@ PROC-TIED_DEV_CYCLE:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-02-25
-    last_updated: 2026-02-25
-
-# ---
-# Product Requirements (Hoverboard Extension)
-# Migrated from stdd/requirements.md to TIED format
-# ---
-
+    registered: 2026-02-25T00:00:00.000Z
+    last_updated: 2026-02-25T00:00:00.000Z
 REQ-EXTENSION_IDENTITY:
   type: REQ
   name: Extension Identity Preservation
   category: Immutable
   status: Active
-  description: "Extension maintains core identity as Hoverboard Pinboard.in bookmarking interface"
+  description: Extension maintains core identity as Hoverboard Pinboard.in bookmarking interface
   cross_references:
     - ARCH-EXT_IDENTITY
     - IMPL-EXT_IDENTITY
   source_index: requirements.yaml
   detail_file: requirements/REQ-EXTENSION_IDENTITY.yaml
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-CORE_UX_PRESERVATION:
   type: REQ
   name: Core User Experience Preservation
   category: Immutable
   status: Active
-  description: "Core UX preserved: hover interface, quick actions, tag management, private bookmarking"
+  description: 'Core UX preserved: hover interface, quick actions, tag management, private bookmarking'
   cross_references:
     - ARCH-UX_CORE
     - IMPL-UX_CORE
   source_index: requirements.yaml
   detail_file: requirements/REQ-CORE_UX_PRESERVATION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-PINBOARD_COMPATIBILITY:
   type: REQ
   name: Pinboard API Compatibility
   category: Immutable
   status: Active
-  description: "Maintains compatibility with Pinboard.in API including auth, endpoints, rate limits"
+  description: Maintains compatibility with Pinboard.in API including auth, endpoints, rate limits
   cross_references:
     - ARCH-PINBOARD_API
     - IMPL-PINBOARD_API
   source_index: requirements.yaml
   detail_file: requirements/REQ-PINBOARD_COMPATIBILITY.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-MANIFEST_V3_MIGRATION:
   type: REQ
   name: Manifest V3 Migration
   category: Immutable
   status: Planned
-  description: "Migrate to Manifest V3 with service worker, maintaining functionality"
+  description: Migrate to Manifest V3 with service worker, maintaining functionality
   cross_references:
     - ARCH-MV3_MIGRATION
     - IMPL-MV3_MIGRATION
   source_index: requirements.yaml
   detail_file: requirements/REQ-MANIFEST_V3_MIGRATION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-CHROME_STORAGE_USAGE:
   type: REQ
   name: Chrome Storage API Usage
   category: Immutable
   status: Active
-  description: "Uses chrome.storage for persistence, no external data collection"
+  description: Uses chrome.storage for persistence, no external data collection
   cross_references:
     - ARCH-STORAGE
     - IMPL-STORAGE
   source_index: requirements.yaml
   detail_file: requirements/REQ-CHROME_STORAGE_USAGE.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-RECENT_TAGS_SYSTEM:
   type: REQ
   name: Recent Tags System
   category: Immutable
   status: Active
-  description: "Recent tags system for efficient bookmarking workflow"
+  description: Recent tags system for efficient bookmarking workflow
   cross_references:
     - ARCH-TAG_SYSTEM
     - IMPL-TAG_SYSTEM
   source_index: requirements.yaml
   detail_file: requirements/REQ-RECENT_TAGS_SYSTEM.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-SMART_BOOKMARKING:
   type: REQ
   name: Smart Bookmarking
   category: Functional
   status: Active
-  description: "Fast in-page bookmarking without context switching"
+  description: Fast in-page bookmarking without context switching
   cross_references:
     - ARCH-UX_CORE
     - IMPL-BOOKMARKING
   source_index: requirements.yaml
   detail_file: requirements/REQ-SMART_BOOKMARKING.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-TAG_MANAGEMENT:
   type: REQ
   name: Tag Management
   category: Functional
   status: Active
-  description: "Tag input, editing, sanitization, and suggestions"
+  description: Tag input, editing, sanitization, and suggestions
   cross_references:
     - ARCH-TAG_SYSTEM
     - IMPL-TAG_SYSTEM
   source_index: requirements.yaml
   detail_file: requirements/REQ-TAG_MANAGEMENT.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-OVERLAY_SYSTEM:
   type: REQ
   name: Overlay System
   category: Functional
   status: Active
-  description: "Non-intrusive hover overlay for bookmarking"
+  description: Non-intrusive hover overlay for bookmarking
   cross_references:
     - ARCH-OVERLAY
     - IMPL-OVERLAY
   source_index: requirements.yaml
   detail_file: requirements/REQ-OVERLAY_SYSTEM.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-DARK_THEME:
   type: REQ
   name: Dark Theme Support
   category: Functional
   status: Active
-  description: "Dark theme for comfortable viewing"
+  description: Dark theme for comfortable viewing
   cross_references:
     - ARCH-THEME
     - IMPL-THEME
   source_index: requirements.yaml
   detail_file: requirements/REQ-DARK_THEME.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-BADGE_INDICATORS:
   type: REQ
   name: Badge Indicators
   category: Functional
   status: Active
-  description: "Visual status indicators showing bookmark state and tag count"
+  description: Visual status indicators showing bookmark state and tag count
   cross_references:
     - ARCH-BADGE
     - IMPL-BADGE
   source_index: requirements.yaml
   detail_file: requirements/REQ-BADGE_INDICATORS.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-URL_TAGS_DISPLAY:
   type: REQ
   name: URL Tags and Badge Single Source
   category: Functional
   status: Active
-  description: "Single source for tags-for-URL and badge display value; getCurrentBookmark always from router; getTagsForUrl message; popup use bookmark when needsAuth"
+  description: Single source for tags-for-URL and badge display value; getCurrentBookmark always from router; getTagsForUrl message; popup use bookmark when needsAuth
   cross_references:
     - ARCH-URL_TAGS_DISPLAY
     - IMPL-URL_TAGS_DISPLAY
@@ -625,267 +554,249 @@ REQ-URL_TAGS_DISPLAY:
   source_index: requirements.yaml
   detail_file: requirements/REQ-URL_TAGS_DISPLAY.yaml
   metadata:
-    registered: 2026-02-17
-    last_updated: 2026-02-17
-
+    registered: 2026-02-17T00:00:00.000Z
+    last_updated: 2026-02-17T00:00:00.000Z
 REQ-SITE_MANAGEMENT:
   type: REQ
   name: Site Management
   category: Functional
   status: Active
-  description: "Allow users to disable extension on specific domains"
+  description: Allow users to disable extension on specific domains
   cross_references:
     - ARCH-SITE_MGMT
     - IMPL-SITE_MGMT
   source_index: requirements.yaml
   detail_file: requirements/REQ-SITE_MANAGEMENT.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-SEARCH_FUNCTIONALITY:
   type: REQ
   name: Search Functionality
   category: Functional
   status: Active
-  description: "Search through bookmarked tabs by title"
+  description: Search through bookmarked tabs by title
   cross_references:
     - ARCH-SEARCH
     - IMPL-SEARCH
   source_index: requirements.yaml
   detail_file: requirements/REQ-SEARCH_FUNCTIONALITY.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-TAB_SEARCH_NO_MATCH_UX:
   type: REQ
   name: Tab Search No-Match Visual Feedback Only
   category: Functional
   status: Active
-  description: "When tab search has no matches, show visual feedback only (search button border), not error message; border fades to default within 2s."
+  description: When tab search has no matches, show visual feedback only (search button border), not error message; border fades to default within 2s.
   cross_references:
     - ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK
     - IMPL-TAB_SEARCH_NO_MATCH_UI
   source_index: requirements.yaml
-  detail_file: requirements/REQ-TAB_SEARCH_NO_MATCH_UX.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-26
-    last_updated: 2026-02-26
-
+    registered: 2026-02-26T00:00:00.000Z
+    last_updated: 2026-02-26T00:00:00.000Z
 REQ-PRIVACY_CONTROLS:
   type: REQ
   name: Privacy Controls
   category: Functional
   status: Active
-  description: "Mark bookmarks as private or to-read"
+  description: Mark bookmarks as private or to-read
   cross_references:
     - ARCH-PRIVACY
     - IMPL-PRIVACY
   source_index: requirements.yaml
   detail_file: requirements/REQ-PRIVACY_CONTROLS.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-OVERLAY_AUTO_SHOW_CONTROL:
   type: REQ
   name: Hover Auto-Show Controls
   category: Functional
   status: Active
-  description: "Configurable auto-display of hover overlay on page load"
+  description: Configurable auto-display of hover overlay on page load
   cross_references:
     - ARCH-OVERLAY
     - IMPL-OVERLAY
   source_index: requirements.yaml
   detail_file: requirements/REQ-OVERLAY_AUTO_SHOW_CONTROL.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-OVERLAY_REFRESH_ACTION:
   type: REQ
   name: Overlay Refresh Control
   category: Functional
   status: Active
-  description: "Dedicated refresh control to re-fetch bookmark data in overlay"
+  description: Dedicated refresh control to re-fetch bookmark data in overlay
   cross_references:
     - ARCH-OVERLAY
     - IMPL-OVERLAY
   source_index: requirements.yaml
   detail_file: requirements/REQ-OVERLAY_REFRESH_ACTION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-POPUP_PERSISTENT_SESSION:
   type: REQ
   name: Popup Session Persistence
   category: Functional
   status: Active
-  description: "Popup stays open during multi-action workflows"
+  description: Popup stays open during multi-action workflows
   cross_references:
     - ARCH-UX_CORE
     - IMPL-UX_CORE
   source_index: requirements.yaml
   detail_file: requirements/REQ-POPUP_PERSISTENT_SESSION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-BOOKMARK_STATE_SYNCHRONIZATION:
   type: REQ
   name: Bookmark State Synchronization
   category: Functional
   status: Active
-  description: "Bookmark state propagates across overlay, popup, badge via BOOKMARK_UPDATED"
+  description: Bookmark state propagates across overlay, popup, badge via BOOKMARK_UPDATED
   cross_references:
     - ARCH-MESSAGE_HANDLING
     - IMPL-MESSAGE_HANDLING
   source_index: requirements.yaml
   detail_file: requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-OVERLAY_CONTROL_LAYOUT:
   type: REQ
   name: Overlay Control Layout
   category: Functional
   status: Active
-  description: "Close and refresh controls pinned with fixed spacing, accessible design"
+  description: Close and refresh controls pinned with fixed spacing, accessible design
   cross_references:
     - ARCH-OVERLAY
     - IMPL-OVERLAY
   source_index: requirements.yaml
   detail_file: requirements/REQ-OVERLAY_CONTROL_LAYOUT.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-CONFIG_PORTABILITY:
   type: REQ
   name: Configuration Import/Export
   category: Non-Functional
   status: Active
-  description: "Export and import user configuration for backup and migration"
+  description: Export and import user configuration for backup and migration
   cross_references:
     - ARCH-STORAGE
     - IMPL-STORAGE
   source_index: requirements.yaml
   detail_file: requirements/REQ-CONFIG_PORTABILITY.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-TAG_INPUT_SANITIZATION:
   type: REQ
   name: Tag Input Sanitization
   category: Functional
   status: Active
-  description: "Sanitize tag inputs to prevent XSS and ensure data integrity"
+  description: Sanitize tag inputs to prevent XSS and ensure data integrity
   cross_references:
     - ARCH-TAG_SYSTEM
     - IMPL-TAG_SYSTEM
   source_index: requirements.yaml
   detail_file: requirements/REQ-TAG_INPUT_SANITIZATION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-SAFARI_ADAPTATION:
   type: REQ
   name: Safari Adaptive Behavior
   category: Functional
   status: Active
-  description: "Safari-specific adaptations for stability and performance"
+  description: Safari-specific adaptations for stability and performance
   cross_references:
     - ARCH-CROSS_BROWSER
     - IMPL-CROSS_BROWSER
   source_index: requirements.yaml
   detail_file: requirements/REQ-SAFARI_ADAPTATION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-SUGGESTED_TAGS_FROM_CONTENT:
   type: REQ
   name: Suggested Tags from Page Content
   category: Functional
   status: Active
-  description: "Intelligent tag suggestions from page title, URL, headings, nav, etc."
+  description: Intelligent tag suggestions from page title, URL, headings, nav, etc.
   cross_references:
     - ARCH-SUGGESTED_TAGS
     - IMPL-SUGGESTED_TAGS
   source_index: requirements.yaml
   detail_file: requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-SUGGESTED_TAGS_DEDUPLICATION:
   type: REQ
   name: Suggested Tags Deduplication
   category: Functional
   status: Active
-  description: "Case-insensitive filtering of suggestions already in current tags"
+  description: Case-insensitive filtering of suggestions already in current tags
   cross_references:
     - ARCH-SUGGESTED_TAGS
     - IMPL-SUGGESTED_TAGS
   source_index: requirements.yaml
   detail_file: requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
   type: REQ
   name: Suggested Tags Case Preservation
   category: Functional
   status: Active
-  description: "Preserve original case, provide both original and lowercase versions"
+  description: Preserve original case, provide both original and lowercase versions
   cross_references:
     - ARCH-SUGGESTED_TAGS
     - IMPL-SUGGESTED_TAGS
   source_index: requirements.yaml
   detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-EXT_IDENTITY:
   type: ARCH
   name: Extension Identity Architecture
   status: Active
-  description: "Browser extension architecture with content script injection for Pinboard"
+  description: Browser extension architecture with content script injection for Pinboard
   cross_references:
     - REQ-EXTENSION_IDENTITY
     - IMPL-EXT_IDENTITY
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-EXT_IDENTITY.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-PINBOARD_API:
   type: ARCH
   name: Pinboard API Integration Architecture
   status: Active
-  description: "Token-based auth with rate limiting and error handling"
+  description: Token-based auth with rate limiting and error handling
   cross_references:
     - REQ-PINBOARD_COMPATIBILITY
     - IMPL-PINBOARD_API
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-PINBOARD_API.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-STORAGE:
   type: ARCH
   name: Storage Strategy
   status: Active
-  description: "chrome.storage.sync for settings, local for temp, export/import workflows"
+  description: chrome.storage.sync for settings, local for temp, export/import workflows
   cross_references:
     - REQ-CHROME_STORAGE_USAGE
     - REQ-CONFIG_PORTABILITY
@@ -893,14 +804,13 @@ ARCH-STORAGE:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-STORAGE.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-TAG_SYSTEM:
   type: ARCH
   name: Tag System Architecture
   status: Active
-  description: "Recent tags with TTL caching, sanitization, sync storage"
+  description: Recent tags with TTL caching, sanitization, sync storage
   cross_references:
     - REQ-RECENT_TAGS_SYSTEM
     - REQ-TAG_MANAGEMENT
@@ -909,14 +819,13 @@ ARCH-TAG_SYSTEM:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-TAG_SYSTEM.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-OVERLAY:
   type: ARCH
   name: Overlay System Architecture
   status: Active
-  description: "Semi-transparent overlay with hover activation, auto-show, refresh"
+  description: Semi-transparent overlay with hover activation, auto-show, refresh
   cross_references:
     - REQ-OVERLAY_SYSTEM
     - REQ-OVERLAY_AUTO_SHOW_CONTROL
@@ -925,14 +834,13 @@ ARCH-OVERLAY:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-OVERLAY.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-UX_CORE:
   type: ARCH
   name: User Experience Architecture
   status: Active
-  description: "Popup session persistence with multi-action workflows"
+  description: Popup session persistence with multi-action workflows
   cross_references:
     - REQ-CORE_UX_PRESERVATION
     - REQ-POPUP_PERSISTENT_SESSION
@@ -940,14 +848,13 @@ ARCH-UX_CORE:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-UX_CORE.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-SUGGESTED_TAGS:
   type: ARCH
   name: Suggested Tags Architecture
   status: Active
-  description: "Multi-source extraction with frequency sorting and case preservation"
+  description: Multi-source extraction with frequency sorting and case preservation
   cross_references:
     - REQ-SUGGESTED_TAGS_FROM_CONTENT
     - REQ-SUGGESTED_TAGS_DEDUPLICATION
@@ -956,42 +863,39 @@ ARCH-SUGGESTED_TAGS:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.yaml
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-MV3_MIGRATION:
   type: ARCH
   name: Manifest V3 Migration Strategy
   status: Active
-  description: "Service worker replacement for background scripts with V3 permissions"
+  description: Service worker replacement for background scripts with V3 permissions
   cross_references:
     - REQ-MANIFEST_V3_MIGRATION
     - IMPL-MV3_MIGRATION
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-MV3_MIGRATION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-BADGE:
   type: ARCH
   name: Badge System Architecture
   status: Active
-  description: "Dynamic badge with color-coded states, tab-specific management"
+  description: Dynamic badge with color-coded states, tab-specific management
   cross_references:
     - REQ-BADGE_INDICATORS
     - IMPL-BADGE
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-BADGE.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-URL_TAGS_DISPLAY:
   type: ARCH
   name: URL Tags and Badge Single Source
   status: Active
-  description: "Single module for tags-for-URL and badge value; getCurrentBookmark always from router; getTagsForUrl message; popup use bookmark when needsAuth"
+  description: Single module for tags-for-URL and badge value; getCurrentBookmark always from router; getTagsForUrl message; popup use bookmark when needsAuth
   cross_references:
     - REQ-URL_TAGS_DISPLAY
     - REQ-BADGE_INDICATORS
@@ -999,14 +903,13 @@ ARCH-URL_TAGS_DISPLAY:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-URL_TAGS_DISPLAY.yaml
   metadata:
-    registered: 2026-02-17
-    last_updated: 2026-02-17
-
+    registered: 2026-02-17T00:00:00.000Z
+    last_updated: 2026-02-17T00:00:00.000Z
 ARCH-CROSS_BROWSER:
   type: ARCH
   name: Cross-Browser Compatibility Architecture
   status: Active
-  description: "Unified browser API shim with Safari adaptations"
+  description: Unified browser API shim with Safari adaptations
   cross_references:
     - REQ-EXTENSION_IDENTITY
     - REQ-SAFARI_ADAPTATION
@@ -1014,28 +917,26 @@ ARCH-CROSS_BROWSER:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-CROSS_BROWSER.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-SERVICE_WORKER:
   type: ARCH
   name: Service Worker Architecture
   status: Active
-  description: "Manifest V3 service worker with lifecycle management"
+  description: Manifest V3 service worker with lifecycle management
   cross_references:
     - REQ-MANIFEST_V3_MIGRATION
     - IMPL-SERVICE_WORKER
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-SERVICE_WORKER.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-MESSAGE_HANDLING:
   type: ARCH
   name: Message Handling Architecture
   status: Active
-  description: "Centralized routing with standardized format, BOOKMARK_UPDATED broadcasts"
+  description: Centralized routing with standardized format, BOOKMARK_UPDATED broadcasts
   cross_references:
     - REQ-SMART_BOOKMARKING
     - REQ-BOOKMARK_STATE_SYNCHRONIZATION
@@ -1043,56 +944,52 @@ ARCH-MESSAGE_HANDLING:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-MESSAGE_HANDLING.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-THEME:
   type: ARCH
   name: Theme System Architecture
   status: Active
-  description: "Dark theme default with toggle and persisted preference"
+  description: Dark theme default with toggle and persisted preference
   cross_references:
     - REQ-DARK_THEME
     - IMPL-THEME
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-THEME.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-POPUP_SESSION:
   type: ARCH
   name: Popup Session Persistence Architecture
   status: Active
-  description: "PopupController routing to keep popup open during multi-action workflows"
+  description: PopupController routing to keep popup open during multi-action workflows
   cross_references:
     - REQ-POPUP_PERSISTENT_SESSION
     - IMPL-POPUP_SESSION
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-POPUP_SESSION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-BOOKMARK_STATE_SYNC:
   type: ARCH
   name: Bookmark State Synchronization Architecture
   status: Active
-  description: "BOOKMARK_UPDATED broadcast pattern for cross-surface state sync"
+  description: BOOKMARK_UPDATED broadcast pattern for cross-surface state sync
   cross_references:
     - REQ-BOOKMARK_STATE_SYNCHRONIZATION
     - IMPL-BOOKMARK_STATE_SYNC
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-BOOKMARK_STATE_SYNC.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-OVERLAY_CONTROLS:
   type: ARCH
   name: Overlay Control Layout Architecture
   status: Active
-  description: "Fixed absolute positioning with accessibility, theme-aware styling"
+  description: Fixed absolute positioning with accessibility, theme-aware styling
   cross_references:
     - REQ-OVERLAY_CONTROL_LAYOUT
     - REQ-OVERLAY_REFRESH_ACTION
@@ -1100,14 +997,13 @@ ARCH-OVERLAY_CONTROLS:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-OVERLAY_CONTROLS.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-OVERLAY_TESTABILITY:
   type: ARCH
   name: Overlay Test Harness Architecture
   status: Active
-  description: "Mock DOM with auto-registration for overlay verification"
+  description: Mock DOM with auto-registration for overlay verification
   cross_references:
     - REQ-OVERLAY_SYSTEM
     - REQ-OVERLAY_CONTROL_LAYOUT
@@ -1115,44 +1011,41 @@ ARCH-OVERLAY_TESTABILITY:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-OVERLAY_TESTABILITY.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 ARCH-SAFARI_ADAPTATION:
   type: ARCH
   name: Safari Adaptive Architecture
   status: Active
-  description: "Safari-specific config, optimizations, error handler with degraded mode"
+  description: Safari-specific config, optimizations, error handler with degraded mode
   cross_references:
     - REQ-SAFARI_ADAPTATION
     - IMPL-SAFARI_ADAPTATION
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-SAFARI_ADAPTATION.md
   metadata:
-    registered: 2025-07-14
-    last_updated: 2026-02-13
-
+    registered: 2025-07-14T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 IMPL-RECENT_TAGS_POPUP_REFRESH:
   type: IMPL
   name: Recent Tags refresh on popup display
   category: Popup / Tags
   status: Active
-  description: "Refresh Recent Tags list whenever the popup document becomes visible (visibilitychange)"
+  description: Refresh Recent Tags list whenever the popup document becomes visible (visibilitychange)
   cross_references:
     - REQ-RECENT_TAGS_SYSTEM
     - ARCH-POPUP_SESSION
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-13
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 REQ-STORAGE_MODE_DEFAULT:
   type: REQ
   name: Storage Mode Default and Dual-Use
   category: Functional
   status: Active
-  description: "Default storage mode is local; dual-use (local / Pinboard) configurable in Options; save follows popup storage highlight"
+  description: Default storage mode is local; dual-use (local / Pinboard) configurable in Options; save follows popup storage highlight
   cross_references:
     - ARCH-LOCAL_STORAGE_PROVIDER
     - ARCH-STORAGE_INDEX_AND_ROUTER
@@ -1162,15 +1055,14 @@ REQ-STORAGE_MODE_DEFAULT:
   source_index: requirements.yaml
   detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.yaml
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-18
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 ARCH-LOCAL_STORAGE_PROVIDER:
   type: ARCH
   name: Local Storage Bookmark Provider
   category: Storage / Bookmarking
   status: Active
-  description: "Strategy pattern for bookmark storage: Pinboard (API) or Local (chrome.storage.local) selectable by user"
+  description: 'Strategy pattern for bookmark storage: Pinboard (API) or Local (chrome.storage.local) selectable by user'
   cross_references:
     - REQ-STORAGE_MODE_DEFAULT
     - IMPL-LOCAL_BOOKMARK_SERVICE
@@ -1179,15 +1071,14 @@ ARCH-LOCAL_STORAGE_PROVIDER:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.yaml
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-13
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 IMPL-LOCAL_BOOKMARK_SERVICE:
   type: IMPL
   name: Local Bookmark Service implementation
   category: Storage / Bookmarking
   status: Active
-  description: "LocalBookmarkService implementing bookmark provider contract using chrome.storage.local"
+  description: LocalBookmarkService implementing bookmark provider contract using chrome.storage.local
   cross_references:
     - REQ-STORAGE_MODE_DEFAULT
     - ARCH-LOCAL_STORAGE_PROVIDER
@@ -1195,30 +1086,28 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-13
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 IMPL-BADGE_REFRESH:
   type: IMPL
   name: Badge refresh on overlay and popup changes
   category: Badge / Service worker
   status: Active
-  description: "Service worker refreshes badge after saveTag, deleteTag, saveBookmark so tag count and private/toread flags update immediately"
+  description: Service worker refreshes badge after saveTag, deleteTag, saveBookmark so tag count and private/toread flags update immediately
   cross_references:
     - REQ-BADGE_INDICATORS
     - ARCH-BADGE
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-BADGE_REFRESH.yaml
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-13
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-13T00:00:00.000Z
 IMPL-URL_TAGS_DISPLAY:
   type: IMPL
   name: URL Tags and Badge Display Module
   category: Storage / Badge
   status: Active
-  description: "url-tags-manager; handleGetCurrentBookmark always router; GET_TAGS_FOR_URL message; popup getBookmarkData only null when blocked"
+  description: url-tags-manager; handleGetCurrentBookmark always router; GET_TAGS_FOR_URL message; popup getBookmarkData only null when blocked
   cross_references:
     - ARCH-URL_TAGS_DISPLAY
     - REQ-URL_TAGS_DISPLAY
@@ -1226,15 +1115,14 @@ IMPL-URL_TAGS_DISPLAY:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
   metadata:
-    registered: 2026-02-17
-    last_updated: 2026-02-17
-
+    registered: 2026-02-17T00:00:00.000Z
+    last_updated: 2026-02-17T00:00:00.000Z
 REQ-LOCAL_BOOKMARKS_INDEX:
   type: REQ
   name: Local Bookmarks Index Page
   category: Functional
   status: Active
-  description: "Full searchable, filterable (tag, to-read, private, storage type), sortable index of local, file, sync bookmarks; Storage column; Select column and bulk move to storage (REQ-MOVE_BOOKMARK_STORAGE_UI); URL external-link indicator"
+  description: Full searchable, filterable (tag, to-read, private, storage type), sortable index of local, file, sync bookmarks; Storage column; Select column and bulk move to storage (REQ-MOVE_BOOKMARK_STORAGE_UI); URL external-link indicator
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX
     - IMPL-LOCAL_BOOKMARKS_INDEX
@@ -1243,31 +1131,29 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   source_index: requirements.yaml
   detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-14
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 ARCH-LOCAL_BOOKMARKS_INDEX:
   type: ARCH
   name: Local Bookmarks Index Architecture
   category: Storage / UI
   status: Active
-  description: "Dedicated extension page; getAggregatedBookmarksForIndex (local + file + sync); Storage filter; Select column and bulk move; URL external-link indicator; client-side search/filter/sort"
+  description: Dedicated extension page; getAggregatedBookmarksForIndex (local + file + sync); Storage filter; Select column and bulk move; URL external-link indicator; client-side search/filter/sort
   cross_references:
     - REQ-LOCAL_BOOKMARKS_INDEX
     - IMPL-LOCAL_BOOKMARKS_INDEX
     - ARCH-STORAGE_INDEX_AND_ROUTER
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-14
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 IMPL-LOCAL_BOOKMARKS_INDEX:
   type: IMPL
   name: Local Bookmarks Index Implementation
   category: Storage / UI
   status: Active
-  description: "getAggregatedBookmarksForIndex/getLocalBookmarksForIndex; bookmarks-table with Storage filter, Select column, bulk move (moveBookmarkToStorage), URL external-link indicator"
+  description: getAggregatedBookmarksForIndex/getLocalBookmarksForIndex; bookmarks-table with Storage filter, Select column, bulk move (moveBookmarkToStorage), URL external-link indicator
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX
     - REQ-LOCAL_BOOKMARKS_INDEX
@@ -1275,15 +1161,14 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-14
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
   type: REQ
   name: Local Bookmarks Index Export
   category: Functional
   status: Active
-  description: "Export from index page: scope all or displayed, CSV includes Storage column (Local | File), downloadable file"
+  description: 'Export from index page: scope all or displayed, CSV includes Storage column (Local | File), downloadable file'
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
     - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
@@ -1291,183 +1176,171 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
   source_index: requirements.yaml
   detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-14
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
   type: ARCH
   name: Local Bookmarks Index Export Architecture
   category: Storage / UI
   status: Active
-  description: "Client-side export only; use existing allBookmarks/filteredBookmarks (local + file); CSV includes Storage column; and/or JSON"
+  description: Client-side export only; use existing allBookmarks/filteredBookmarks (local + file); CSV includes Storage column; and/or JSON
   cross_references:
     - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
     - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-14
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
   type: IMPL
   name: Local Bookmarks Index Export Implementation
   category: Storage / UI
   status: Active
-  description: "Export UI in bookmarks-table toolbar; serialize scope to CSV (including Storage column); trigger download"
+  description: Export UI in bookmarks-table toolbar; serialize scope to CSV (including Storage column); trigger download
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
     - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
-    registered: 2026-02-13
-    last_updated: 2026-02-14
-
+    registered: 2026-02-13T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
   type: REQ
   name: Local Bookmarks Index Import
   category: Functional
   status: Active
-  description: "Import bookmarks from CSV or JSON; only new or overwrite existing; target Local | File | Sync"
+  description: Import bookmarks from CSV or JSON; only new or overwrite existing; target Local | File | Sync
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
     - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
     - REQ-LOCAL_BOOKMARKS_INDEX
   source_index: requirements.yaml
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
   type: ARCH
   name: Local Bookmarks Index Import Architecture
   category: Storage / UI
   status: Active
-  description: "Client-side import; parse CSV/JSON; saveBookmark with preferredBackend; only new vs overwrite"
+  description: Client-side import; parse CSV/JSON; saveBookmark with preferredBackend; only new vs overwrite
   cross_references:
     - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
     - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
   type: IMPL
   name: Local Bookmarks Index Import Implementation
   category: Storage / UI
   status: Active
-  description: "Import UI (file input, only new/overwrite, Import to); parseCsv; per-row saveBookmark; result message"
+  description: Import UI (file input, only new/overwrite, Import to); parseCsv; per-row saveBookmark; result message
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
     - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   type: REQ
   name: Local Bookmarks Index Add Tags to Selected
   category: Functional
   status: Active
-  description: "Add one or more tags to all selected bookmarks from the index; textbox and button in Actions for selected; merge with existing, save via saveBookmark"
+  description: Add one or more tags to all selected bookmarks from the index; textbox and button in Actions for selected; merge with existing, save via saveBookmark
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
     - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
     - REQ-LOCAL_BOOKMARKS_INDEX
   source_index: requirements.yaml
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   type: ARCH
   name: Local Bookmarks Index Add Tags to Selected Architecture
   category: Storage / UI
   status: Active
-  description: "Add tags row in Actions for selected; parse input; merge with each selected bookmark; saveBookmark with preferredBackend; refresh; retain selection for still-visible rows; clear tag input"
+  description: Add tags row in Actions for selected; parse input; merge with each selected bookmark; saveBookmark with preferredBackend; refresh; retain selection for still-visible rows; clear tag input
   cross_references:
     - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
     - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   type: IMPL
   name: Local Bookmarks Index Add Tags to Selected Implementation
   category: Storage / UI
   status: Active
-  description: "parseTagsInput, mergeTags, selectionStillVisible in filter module; add-tags row; addTagsToSelected/deleteTagsFromSelected send saveBookmark per selected; refresh; retain selection for still-visible rows"
+  description: parseTagsInput, mergeTags, selectionStillVisible in filter module; add-tags row; addTagsToSelected/deleteTagsFromSelected send saveBookmark per selected; refresh; retain selection for still-visible rows
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
     - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   type: REQ
   name: Local Bookmarks Index Regex Find-and-Replace on Selected
   category: Functional
   status: Active
-  description: "Regex and replacement inputs with field checkboxes (Title, URL, Tags, Notes); Replace button; apply to selected bookmarks; named groups, lookahead, backreferences; save via saveBookmark; retain selection"
+  description: Regex and replacement inputs with field checkboxes (Title, URL, Tags, Notes); Replace button; apply to selected bookmarks; named groups, lookahead, backreferences; save via saveBookmark; retain selection
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
     - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
     - REQ-LOCAL_BOOKMARKS_INDEX
   source_index: requirements.yaml
-  detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   type: ARCH
   name: Local Bookmarks Index Regex Find-and-Replace Architecture
   category: Storage / UI
   status: Active
-  description: "Regex replace row in Actions for selected; validate regex; per-bookmark per-field replace with RegExp; saveBookmark with preferredBackend; selectionStillVisible"
+  description: Regex replace row in Actions for selected; validate regex; per-bookmark per-field replace with RegExp; saveBookmark with preferredBackend; selectionStillVisible
   cross_references:
     - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
     - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   type: IMPL
   name: Local Bookmarks Index Regex Find-and-Replace Implementation
   category: Storage / UI
   status: Active
-  description: "applyRegexReplace in filter module; regex-replace row; regexReplaceSelected validates regex, saveBookmark per selected; refresh; selectionStillVisible"
+  description: applyRegexReplace in filter module; regex-replace row; regexReplaceSelected validates regex, saveBookmark per selected; refresh; selectionStillVisible
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
     - REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 REQ-BROWSER_BOOKMARK_IMPORT:
   type: REQ
   name: Browser Bookmark Import Page
   category: Functional
   status: Active
-  description: "Dedicated page to import browser bookmarks into Hoverboard; filter, select, conflict resolution, tags from folder + extra"
+  description: Dedicated page to import browser bookmarks into Hoverboard; filter, select, conflict resolution, tags from folder + extra
   cross_references:
     - ARCH-BROWSER_BOOKMARK_IMPORT
     - IMPL-BROWSER_BOOKMARK_IMPORT
@@ -1476,90 +1349,84 @@ REQ-BROWSER_BOOKMARK_IMPORT:
   source_index: requirements.yaml
   detail_file: requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 ARCH-BROWSER_BOOKMARK_IMPORT:
   type: ARCH
   name: Browser Bookmark Import Architecture
   category: Storage / UI
   status: Active
-  description: "Dedicated page; chrome.bookmarks.getTree in page; flatten with folder path; filter, select; conflict Skip/Overwrite/Merge; saveBookmark per row"
+  description: Dedicated page; chrome.bookmarks.getTree in page; flatten with folder path; filter, select; conflict Skip/Overwrite/Merge; saveBookmark per row
   cross_references:
     - REQ-BROWSER_BOOKMARK_IMPORT
     - IMPL-BROWSER_BOOKMARK_IMPORT
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 IMPL-BROWSER_BOOKMARK_IMPORT:
   type: IMPL
   name: Browser Bookmark Import Implementation
   category: Storage / UI
   status: Active
-  description: "browser-bookmark-import page; getTree, flattenTree; search + folder filter; table; conflict mode; folder + extra tags; runImport"
+  description: browser-bookmark-import page; getTree, flattenTree; search + folder filter; table; conflict mode; folder + extra tags; runImport
   cross_references:
     - ARCH-BROWSER_BOOKMARK_IMPORT
     - REQ-BROWSER_BOOKMARK_IMPORT
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 REQ-FILE_BOOKMARK_STORAGE:
   type: REQ
   name: File-Based Bookmark Storage
   category: Functional
   status: Active
-  description: "Bookmarks stored in single directory, one file, cloud-sync friendly format"
+  description: Bookmarks stored in single directory, one file, cloud-sync friendly format
   cross_references:
     - ARCH-FILE_BOOKMARK_PROVIDER
     - IMPL-FILE_BOOKMARK_SERVICE
   source_index: requirements.yaml
   detail_file: requirements/REQ-FILE_BOOKMARK_STORAGE.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 ARCH-FILE_BOOKMARK_PROVIDER:
   type: ARCH
   name: File-Based Bookmark Provider
   category: Storage
   status: Active
-  description: "File-based provider; same contract as local/Pinboard; file I/O via adapter in document context"
+  description: File-based provider; same contract as local/Pinboard; file I/O via adapter in document context
   cross_references:
     - REQ-FILE_BOOKMARK_STORAGE
     - IMPL-FILE_BOOKMARK_SERVICE
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 IMPL-FILE_BOOKMARK_SERVICE:
   type: IMPL
   name: File Bookmark Service
   category: Storage
   status: Active
-  description: "FileBookmarkService and FileBookmarkStorageAdapter; file format version 1"
+  description: FileBookmarkService and FileBookmarkStorageAdapter; file format version 1
   cross_references:
     - REQ-FILE_BOOKMARK_STORAGE
     - ARCH-FILE_BOOKMARK_PROVIDER
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 REQ-PER_BOOKMARK_STORAGE_BACKEND:
   type: REQ
   name: Per-Bookmark Storage Backend
   category: Functional
   status: Active
-  description: "Bookmarks tagged with storage method; index URL -> backend; router delegates; default for new"
+  description: Bookmarks tagged with storage method; index URL -> backend; router delegates; default for new
   cross_references:
     - ARCH-STORAGE_INDEX_AND_ROUTER
     - IMPL-STORAGE_INDEX
@@ -1567,15 +1434,14 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
   source_index: requirements.yaml
   detail_file: requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 ARCH-STORAGE_INDEX_AND_ROUTER:
   type: ARCH
   name: Storage Index and Bookmark Router
   category: Storage
   status: Active
-  description: "Per-URL index; router delegates to pinboard/local/file/sync; popup preferred backend so save follows highlight; getRecentBookmarks aggregates all four"
+  description: Per-URL index; router delegates to pinboard/local/file/sync; popup preferred backend so save follows highlight; getRecentBookmarks aggregates all four
   cross_references:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - REQ-STORAGE_MODE_DEFAULT
@@ -1585,30 +1451,28 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-18
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 IMPL-STORAGE_INDEX:
   type: IMPL
   name: Storage Index
   category: Storage
   status: Active
-  description: "hoverboard_storage_index in chrome.storage.local; getIndex, setBackendForUrl, getBackendForUrl, removeUrl"
+  description: hoverboard_storage_index in chrome.storage.local; getIndex, setBackendForUrl, getBackendForUrl, removeUrl
   cross_references:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - ARCH-STORAGE_INDEX_AND_ROUTER
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-STORAGE_INDEX.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 IMPL-BOOKMARK_ROUTER:
   type: IMPL
   name: Bookmark Router
   category: Storage
   status: Active
-  description: "Router with four providers; saveBookmark honors data.preferredBackend so save follows popup highlight; getStorageBackendForUrl, moveBookmarkToStorage"
+  description: Router with four providers; saveBookmark honors data.preferredBackend so save follows popup highlight; getStorageBackendForUrl, moveBookmarkToStorage
   cross_references:
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
     - REQ-STORAGE_MODE_DEFAULT
@@ -1618,47 +1482,44 @@ IMPL-BOOKMARK_ROUTER:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-18
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 REQ-MOVE_BOOKMARK_STORAGE_UI:
   type: REQ
   name: Move Bookmark Storage UI
   category: Functional
   status: Active
-  description: "UI to show and change bookmark storage; save follows highlighted storage (preferredBackend)"
+  description: UI to show and change bookmark storage; save follows highlighted storage (preferredBackend)
   cross_references:
     - ARCH-MOVE_BOOKMARK_UI
     - ARCH-STORAGE_INDEX_AND_ROUTER
     - IMPL-MOVE_BOOKMARK_UI
     - IMPL-BOOKMARK_ROUTER
   source_index: requirements.yaml
-  detail_file: requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-18
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 ARCH-MOVE_BOOKMARK_UI:
   type: ARCH
   name: Move Bookmark Storage UI
   category: UI
   status: Active
-  description: "Popup shows current storage; move = copy + delete + update index"
+  description: Popup shows current storage; move = copy + delete + update index
   cross_references:
     - REQ-MOVE_BOOKMARK_STORAGE_UI
     - IMPL-MOVE_BOOKMARK_UI
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 IMPL-MOVE_BOOKMARK_UI:
   type: IMPL
   name: Move Bookmark Storage UI
   category: UI
   status: Active
-  description: "Popup storage buttons; getSelectedStorageBackend, preferredBackend on save so save follows highlight; moveBookmarkToStorage"
+  description: Popup storage buttons; getSelectedStorageBackend, preferredBackend on save so save follows highlight; moveBookmarkToStorage
   cross_references:
     - REQ-MOVE_BOOKMARK_STORAGE_UI
     - REQ-STORAGE_MODE_DEFAULT
@@ -1667,15 +1528,14 @@ IMPL-MOVE_BOOKMARK_UI:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-18
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
   type: IMPL
   name: Move Bookmark Response Handling and URL
   category: UI/Storage
   status: Active
-  description: "Popup uses inner result and bookmark URL; router allows move when bookmark has url but no time"
+  description: Popup uses inner result and bookmark URL; router allows move when bookmark has url but no time
   cross_references:
     - REQ-MOVE_BOOKMARK_STORAGE_UI
     - IMPL-MOVE_BOOKMARK_UI
@@ -1683,23 +1543,14 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
-# NOTE: Implementation tokens from stdd/implementation-decisions.md remain to be migrated
-# IMPL-EXT_IDENTITY, IMPL-UX_CORE, IMPL-PINBOARD_API, IMPL-MV3_MIGRATION,
-# IMPL-STORAGE, IMPL-TAG_SYSTEM, IMPL-OVERLAY, IMPL-THEME, IMPL-BOOKMARKING, IMPL-BADGE,
-# IMPL-CROSS_BROWSER, IMPL-SERVICE_WORKER, IMPL-MESSAGE_HANDLING, IMPL-POPUP_SESSION,
-# IMPL-BOOKMARK_STATE_SYNC, IMPL-OVERLAY_CONTROLS, IMPL-SAFARI_ADAPTATION, IMPL-SUGGESTED_TAGS,
-# IMPL-OVERLAY_TEST_HARNESS, and others
-# Follow the established pattern above.
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 REQ-NATIVE_HOST_WRAPPER:
   type: REQ
   name: Native Host Wrapper
   category: Functional
   status: Active
-  description: "Native host is thin wrapper; real logic from code installed next to wrapper via installer; no loading from extension path"
+  description: Native host is thin wrapper; real logic from code installed next to wrapper via installer; no loading from extension path
   cross_references:
     - ARCH-NATIVE_HOST
     - IMPL-NATIVE_HOST_WRAPPER
@@ -1707,14 +1558,13 @@ REQ-NATIVE_HOST_WRAPPER:
   source_index: requirements.yaml
   detail_file: requirements/REQ-NATIVE_HOST_WRAPPER.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 ARCH-NATIVE_HOST:
   type: ARCH
   name: Native Host Architecture
   status: Active
-  description: "Thin wrapper + helper in same dir; installer copies to fixed path; stdio protocol"
+  description: Thin wrapper + helper in same dir; installer copies to fixed path; stdio protocol
   cross_references:
     - REQ-NATIVE_HOST_WRAPPER
     - IMPL-NATIVE_HOST_WRAPPER
@@ -1722,43 +1572,40 @@ ARCH-NATIVE_HOST:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-NATIVE_HOST.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 IMPL-NATIVE_HOST_WRAPPER:
   type: IMPL
   name: Native Host Wrapper Implementation
   status: Active
-  description: "Go wrapper: stdio protocol, install dir, helper spawn, ping/pong"
+  description: 'Go wrapper: stdio protocol, install dir, helper spawn, ping/pong'
   cross_references:
     - ARCH-NATIVE_HOST
     - REQ-NATIVE_HOST_WRAPPER
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 IMPL-NATIVE_HOST_INSTALLER:
   type: IMPL
   name: Native Host Installer Implementation
   status: Active
-  description: "install.sh (macOS/Linux) and install.ps1 (Windows); copy to fixed path, write manifest and registry"
+  description: install.sh (macOS/Linux) and install.ps1 (Windows); copy to fixed path, write manifest and registry
   cross_references:
     - ARCH-NATIVE_HOST
     - REQ-NATIVE_HOST_WRAPPER
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.yaml
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 IMPL-FILE_STORAGE_TYPED_PATH:
   type: IMPL
   name: File Storage User-Typed Path
   category: Storage
   status: Active
-  description: "Path-based file storage via native host; user types path (default ~/.hoverboard); no folder picker; helper read/write hoverboard-bookmarks.json"
+  description: Path-based file storage via native host; user types path (default ~/.hoverboard); no folder picker; helper read/write hoverboard-bookmarks.json
   cross_references:
     - REQ-FILE_BOOKMARK_STORAGE
     - ARCH-FILE_BOOKMARK_PROVIDER
@@ -1767,30 +1614,28 @@ IMPL-FILE_STORAGE_TYPED_PATH:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
   type: IMPL
   name: File Storage Helper Path Normalization
   category: Storage
   status: Active
-  description: "Helper normalizes HOME (no trailing slash) when expanding ~ so path-based file write succeeds; post-write verification before returning success"
+  description: Helper normalizes HOME (no trailing slash) when expanding ~ so path-based file write succeeds; post-write verification before returning success
   cross_references:
     - IMPL-FILE_STORAGE_TYPED_PATH
     - REQ-FILE_BOOKMARK_STORAGE
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: 2026-02-14
-    last_updated: 2026-02-14
-
+    registered: 2026-02-14T00:00:00.000Z
+    last_updated: 2026-02-14T00:00:00.000Z
 ARCH-SYNC_STORAGE_PROVIDER:
   type: ARCH
   name: Sync Storage Bookmark Provider
   category: Storage
   status: Active
-  description: "Fourth storage backend: chrome.storage.sync; synced across Chrome profile; ~100 KB quota"
+  description: 'Fourth storage backend: chrome.storage.sync; synced across Chrome profile; ~100 KB quota'
   cross_references:
     - REQ-STORAGE_MODE_DEFAULT
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
@@ -1799,88 +1644,82 @@ ARCH-SYNC_STORAGE_PROVIDER:
   source_index: architecture-decisions.yaml
   detail_file: null
   metadata:
-    registered: 2026-02-15
-    last_updated: 2026-02-15
-
+    registered: 2026-02-15T00:00:00.000Z
+    last_updated: 2026-02-15T00:00:00.000Z
 IMPL-SYNC_BOOKMARK_SERVICE:
   type: IMPL
   name: Sync Bookmark Service
   category: Storage
   status: Active
-  description: "Bookmark provider backed by chrome.storage.sync; same contract as LocalBookmarkService; key hoverboard_sync_bookmarks"
+  description: Bookmark provider backed by chrome.storage.sync; same contract as LocalBookmarkService; key hoverboard_sync_bookmarks
   cross_references:
     - ARCH-SYNC_STORAGE_PROVIDER
     - REQ-PER_BOOKMARK_STORAGE_BACKEND
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: 2026-02-15
-    last_updated: 2026-02-15
-
+    registered: 2026-02-15T00:00:00.000Z
+    last_updated: 2026-02-15T00:00:00.000Z
 REQ-UI_INSPECTION:
   type: REQ
   name: UI Inspection and Testability
   category: Non-Functional
   status: Active
-  description: "Ability to inspect UI inputs, actions, message flow, and outputs for testing and debugging"
+  description: Ability to inspect UI inputs, actions, message flow, and outputs for testing and debugging
   cross_references:
     - ARCH-UI_TESTABILITY
     - IMPL-UI_ACTION_CONTRACT
     - IMPL-UI_INSPECTOR
   source_index: requirements.yaml
-  detail_file: requirements/REQ-UI_INSPECTION.yaml
+  detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 ARCH-UI_TESTABILITY:
   type: ARCH
   name: UI Testability and Inspection Architecture
   status: Active
-  description: "Inspector and contract for message/action logging; single source of truth for action IDs and message types"
+  description: Inspector and contract for message/action logging; single source of truth for action IDs and message types
   cross_references:
     - REQ-UI_INSPECTION
     - IMPL-UI_ACTION_CONTRACT
     - IMPL-UI_INSPECTOR
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-UI_TESTABILITY.yaml
+  detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-UI_ACTION_CONTRACT:
   type: IMPL
   name: UI Action Contract
   status: Active
-  description: "ui-action-contract.js: MESSAGE_TYPES, POPUP_ACTION_IDS, CONTENT_MESSAGE_TYPES, OVERLAY_ACTION_IDS"
+  description: 'ui-action-contract.js: MESSAGE_TYPES, POPUP_ACTION_IDS, CONTENT_MESSAGE_TYPES, OVERLAY_ACTION_IDS'
   cross_references:
     - ARCH-UI_TESTABILITY
     - REQ-UI_INSPECTION
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-UI_INSPECTOR:
   type: IMPL
   name: UI Inspector
   status: Active
-  description: "Optional message/action ring buffers; wired in SW, popup, content script; gated by DEBUG_HOVERBOARD_UI"
+  description: Optional message/action ring buffers; wired in SW, popup, content script; gated by DEBUG_HOVERBOARD_UI
   cross_references:
     - ARCH-UI_TESTABILITY
     - REQ-UI_INSPECTION
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-UI_TESTABILITY_HOOKS:
   type: IMPL
   name: UI Testability Hooks
   status: Active
-  description: "Optional onMessageProcessed, onAction, onStateChange callbacks for tests"
+  description: Optional onMessageProcessed, onAction, onStateChange callbacks for tests
   cross_references:
     - ARCH-UI_TESTABILITY
     - REQ-UI_INSPECTION
@@ -1888,14 +1727,13 @@ IMPL-UI_TESTABILITY_HOOKS:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-DEV_COMMAND_INSPECTION:
   type: IMPL
   name: DEV_COMMAND storage and router inspection
   status: Active
-  description: "DEV_COMMAND subcommands for getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl, getStorageSnapshot; test helpers"
+  description: DEV_COMMAND subcommands for getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl, getStorageSnapshot; test helpers
   cross_references:
     - REQ-UI_INSPECTION
     - REQ-URL_TAGS_DISPLAY
@@ -1903,72 +1741,67 @@ IMPL-DEV_COMMAND_INSPECTION:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-DEBUG_PANEL:
   type: IMPL
   name: Debug panel and structured UI/message logging
   status: Active
-  description: "LOG_CATEGORIES in debug-logger; debug panel (last N actions/messages, current state) gated by DEBUG_HOVERBOARD_UI"
+  description: LOG_CATEGORIES in debug-logger; debug panel (last N actions/messages, current state) gated by DEBUG_HOVERBOARD_UI
   cross_references:
     - REQ-UI_INSPECTION
     - ARCH-UI_TESTABILITY
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
   type: REQ
   name: Extension Bundled Entry Points
   category: Non-Functional
   status: Active
-  description: "Browser-loaded extension scripts must be bundled so bare module specifiers (e.g. fast-xml-parser) are never resolved at runtime"
+  description: Browser-loaded extension scripts must be bundled so bare module specifiers (e.g. fast-xml-parser) are never resolved at runtime
   cross_references:
     - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
     - IMPL-POPUP_BUNDLE
   source_index: requirements.yaml
   detail_file: requirements/REQ-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
   type: ARCH
   name: Extension Bundled Entry Points
   status: Active
-  description: "All four entry points (service worker, popup, options, content script) built as single bundles with dependencies inlined; copy step skips entry files"
+  description: All four entry points (service worker, popup, options, content script) built as single bundles with dependencies inlined; copy step skips entry files
   cross_references:
     - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
     - IMPL-POPUP_BUNDLE
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
+  detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-POPUP_BUNDLE:
   type: IMPL
   name: Popup bundle build
   status: Active
-  description: "build:popup bundles popup.js; build script skips copying popup.js so extension loads bundled popup (fixes bare specifier fast-xml-parser error)"
+  description: build:popup bundles popup.js; build script skips copying popup.js so extension loads bundled popup (fixes bare specifier fast-xml-parser error)
   cross_references:
     - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
     - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 REQ-SHARED_UTILITIES:
   type: REQ
   name: Shared Utilities
   category: Non-Functional
   status: Active
-  description: "URL, text, array/object, time/async, DOM utilities for extension"
+  description: URL, text, array/object, time/async, DOM utilities for extension
   cross_references:
     - ARCH-SHARED_UTILITIES
     - IMPL-URL_UTILITIES
@@ -1979,31 +1812,29 @@ REQ-SHARED_UTILITIES:
   source_index: requirements.yaml
   detail_file: requirements/REQ-SHARED_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 REQ-STRUCTURED_LOGGING:
   type: REQ
   name: Structured Logging
   category: Non-Functional
   status: Active
-  description: "Structured logging with context and levels; environment-aware; legacy compatibility"
+  description: Structured logging with context and levels; environment-aware; legacy compatibility
   cross_references:
     - ARCH-STRUCTURED_LOGGING
     - IMPL-LOGGER_CONTEXT_LEVELS
     - IMPL-LOG_LEVEL_CONFIG
     - IMPL-LOGGER_LEGACY
   source_index: requirements.yaml
-  detail_file: requirements/REQ-STRUCTURED_LOGGING.yaml
+  detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 ARCH-SHARED_UTILITIES:
   type: ARCH
   name: Shared Utilities Module
   status: Active
-  description: "Shared utils module for URL, text, array/object, time, DOM"
+  description: Shared utils module for URL, text, array/object, time, DOM
   cross_references:
     - REQ-SHARED_UTILITIES
     - IMPL-URL_UTILITIES
@@ -2012,285 +1843,262 @@ ARCH-SHARED_UTILITIES:
     - IMPL-TIME_ASYNC_UTILITIES
     - IMPL-DOM_UTILITIES
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-SHARED_UTILITIES.yaml
+  detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 ARCH-STRUCTURED_LOGGING:
   type: ARCH
   name: Structured Logging
   status: Active
-  description: "Context-based logging with level filtering; environment-aware; legacy compatibility"
+  description: Context-based logging with level filtering; environment-aware; legacy compatibility
   cross_references:
     - REQ-STRUCTURED_LOGGING
     - IMPL-LOGGER_CONTEXT_LEVELS
     - IMPL-LOG_LEVEL_CONFIG
     - IMPL-LOGGER_LEGACY
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-STRUCTURED_LOGGING.yaml
+  detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-CONFIG_BACKUP_RESTORE:
   type: IMPL
   name: Config Backup and Restore
   status: Active
-  description: "exportConfig/importConfig for backup and portability (CFG-001)"
+  description: exportConfig/importConfig for backup and portability (CFG-001)
   cross_references:
     - REQ-CONFIG_PORTABILITY
     - ARCH-CONFIG_STRUCTURE
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-CONFIG_MIGRATION:
   type: IMPL
   name: Config Migration and Auth
   status: Active
-  description: "Auth token storage, validation, API retry (CFG-002)"
+  description: Auth token storage, validation, API retry (CFG-002)
   cross_references:
     - REQ-CONFIG_PORTABILITY
     - ARCH-CONFIG_STRUCTURE
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-CONFIG_MIGRATION.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-FEATURE_FLAGS:
   type: IMPL
   name: Feature Flags and Settings
   status: Active
-  description: "Feature flags, UI behavior, settings persistence (CFG-003)"
+  description: Feature flags, UI behavior, settings persistence (CFG-003)
   cross_references:
     - REQ-CONFIG_PORTABILITY
     - ARCH-CONFIG_STRUCTURE
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-FEATURE_FLAGS.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-URL_INHIBITION:
   type: IMPL
   name: URL Inhibition
   status: Active
-  description: "Site-specific behavior via URL inhibition list (CFG-004)"
+  description: Site-specific behavior via URL inhibition list (CFG-004)
   cross_references:
     - REQ-SITE_MANAGEMENT
     - ARCH-CONFIG_STRUCTURE
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-URL_INHIBITION.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-URL_UTILITIES:
   type: IMPL
   name: URL Utilities
   status: Active
-  description: "processUrl, isValidUrl, getDomain (UTIL-001)"
+  description: processUrl, isValidUrl, getDomain (UTIL-001)
   cross_references:
     - REQ-SHARED_UTILITIES
     - ARCH-SHARED_UTILITIES
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-URL_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-TEXT_UTILITIES:
   type: IMPL
   name: Text Utilities
   status: Active
-  description: "truncate, normalizeText, escapeHtml (UTIL-002)"
+  description: truncate, normalizeText, escapeHtml (UTIL-002)
   cross_references:
     - REQ-SHARED_UTILITIES
     - ARCH-SHARED_UTILITIES
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-TEXT_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-ARRAY_OBJECT_UTILITIES:
   type: IMPL
   name: Array and Object Utilities
   status: Active
-  description: "unique, chunk, compact; deepClone, isEmpty, pick (UTIL-003)"
+  description: unique, chunk, compact; deepClone, isEmpty, pick (UTIL-003)
   cross_references:
     - REQ-SHARED_UTILITIES
     - ARCH-SHARED_UTILITIES
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-TIME_ASYNC_UTILITIES:
   type: IMPL
   name: Time and Async Utilities
   status: Active
-  description: "delay, formatTimestamp, getRelativeTime (UTIL-004)"
+  description: delay, formatTimestamp, getRelativeTime (UTIL-004)
   cross_references:
     - REQ-SHARED_UTILITIES
     - ARCH-SHARED_UTILITIES
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-DOM_UTILITIES:
   type: IMPL
   name: DOM Utilities
   status: Active
-  description: "waitForElement, createElement; legacy createPinFromFormData, validatePinFormData (UTIL-005)"
+  description: waitForElement, createElement; legacy createPinFromFormData, validatePinFormData (UTIL-005)
   cross_references:
     - REQ-SHARED_UTILITIES
     - ARCH-SHARED_UTILITIES
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-LOGGER_CONTEXT_LEVELS:
   type: IMPL
   name: Logger Context and Levels
   status: Active
-  description: "Logger context, levels, formatMessage, debug/info/warn/error (LOG-001)"
+  description: Logger context, levels, formatMessage, debug/info/warn/error (LOG-001)
   cross_references:
     - REQ-STRUCTURED_LOGGING
     - ARCH-STRUCTURED_LOGGING
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-LOG_LEVEL_CONFIG:
   type: IMPL
   name: Log Level Configuration
   status: Active
-  description: "getLogLevel from NODE_ENV (LOG-002)"
+  description: getLogLevel from NODE_ENV (LOG-002)
   cross_references:
     - REQ-STRUCTURED_LOGGING
     - ARCH-STRUCTURED_LOGGING
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-LOGGER_LEGACY:
   type: IMPL
   name: Logger Legacy Compatibility
   status: Active
-  description: "log(context, ...args), noisy (LOG-003)"
+  description: log(context, ...args), noisy (LOG-003)
   cross_references:
     - REQ-STRUCTURED_LOGGING
     - ARCH-STRUCTURED_LOGGING
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 TEST-OVERLAY_REFRESH:
   type: TEST
   name: Overlay Refresh Button Tests
   status: Active
-  description: "Test suite for overlay refresh button (replaces OVERLAY-REFRESH-TEST-001)"
+  description: Test suite for overlay refresh button (replaces OVERLAY-REFRESH-TEST-001)
   cross_references:
     - REQ-OVERLAY_REFRESH_ACTION
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 TEST-TAG_SYNC:
   type: TEST
   name: Tag Synchronization Tests
   status: Active
-  description: "Test suite for tag synchronization (replaces TAG-SYNC-TEST-001)"
+  description: Test suite for tag synchronization (replaces TAG-SYNC-TEST-001)
   cross_references:
     - REQ-BOOKMARK_STATE_SYNCHRONIZATION
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 TEST-SHOW_HOVER_CHECKBOX:
   type: TEST
   name: Show Hover Checkbox Tests
   status: Active
-  description: "Test suite for show-hover checkbox (replaces SHOW-HOVER-CHECKBOX-TEST-001/002/003)"
+  description: Test suite for show-hover checkbox (replaces SHOW-HOVER-CHECKBOX-TEST-001/002/003)
   cross_references:
     - REQ-OVERLAY_AUTO_SHOW_CONTROL
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 TEST-POPUP_CLOSE_BEHAVIOR:
   type: TEST
   name: Popup Close Behavior Tests
   status: Active
-  description: "Test suite for popup close behavior (replaces POPUP-CLOSE-BEHAVIOR-TEST-001/002)"
+  description: Test suite for popup close behavior (replaces POPUP-CLOSE-BEHAVIOR-TEST-001/002)
   cross_references:
     - REQ-POPUP_PERSISTENT_SESSION
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
-
-# ---
-# Template Record - Copy this block to create new tokens
-# ---
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-SELECTION_TO_TAG_INPUT:
   type: IMPL
   name: Selection to tag input on icon click
   category: Popup / Tags
   status: Active
-  description: "When popup opens (extension icon click), prefill New Tag input from page selection: strip punctuation, first 8 words; GET_PAGE_SELECTION in content script"
+  description: 'When popup opens (extension icon click), prefill New Tag input from page selection: strip punctuation, first 8 words; GET_PAGE_SELECTION in content script'
   cross_references:
     - ARCH-SELECTION_TO_TAG_INPUT
     - REQ-SELECTION_TO_TAG_INPUT
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 REQ-SELECTION_TO_TAG_INPUT:
   type: REQ
   name: Selection to Tag Input on Extension Icon Click
   category: Functional
   status: Active
-  description: "When user highlights text and opens popup, place selection in New Tag textbox (≤8 words, punctuation stripped) for submit as tags"
+  description: When user highlights text and opens popup, place selection in New Tag textbox (≤8 words, punctuation stripped) for submit as tags
   cross_references:
     - ARCH-SELECTION_TO_TAG_INPUT
     - IMPL-SELECTION_TO_TAG_INPUT
   source_index: requirements.yaml
   detail_file: requirements/REQ-SELECTION_TO_TAG_INPUT.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 ARCH-SELECTION_TO_TAG_INPUT:
   type: ARCH
   name: Selection to Tag Input Architecture
   status: Active
-  description: "Content script returns selection via GET_PAGE_SELECTION; popup normalizes and prefills tag input on load; graceful when content script absent"
+  description: Content script returns selection via GET_PAGE_SELECTION; popup normalizes and prefills tag input on load; graceful when content script absent
   cross_references:
     - REQ-SELECTION_TO_TAG_INPUT
     - REQ-TAG_MANAGEMENT
@@ -2298,58 +2106,54 @@ ARCH-SELECTION_TO_TAG_INPUT:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-SELECTION_TO_TAG_INPUT.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 REQ-BOOKMARK_CREATE_UPDATE_TIMES:
   type: REQ
   name: Bookmark Create-Time and Most-Recent-Update-Time
   category: Functional
   status: Active
-  description: "Each bookmark has create-time and most-recent-update-time; new record has both equal; Pinboard only has create-time so updated_at equals time"
+  description: Each bookmark has create-time and most-recent-update-time; new record has both equal; Pinboard only has create-time so updated_at equals time
   cross_references:
     - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
     - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
   source_index: requirements.yaml
   detail_file: requirements/REQ-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
   type: ARCH
   name: Bookmark Create and Update Time Architecture
   status: Active
-  description: "time = create-time; updated_at = most-recent-update-time; normalize missing updated_at to time; Pinboard updated_at = time"
+  description: time = create-time; updated_at = most-recent-update-time; normalize missing updated_at to time; Pinboard updated_at = time
   cross_references:
     - REQ-BOOKMARK_CREATE_UPDATE_TIMES
     - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
   type: IMPL
   name: Bookmark Create and Update Time Implementation
   status: Active
-  description: "Providers and normalization set/normalize updated_at; local/file/sync save rules; Pinboard updated_at = time; export/import"
+  description: Providers and normalization set/normalize updated_at; local/file/sync save rules; Pinboard updated_at = time; export/import
   cross_references:
     - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
     - REQ-BOOKMARK_CREATE_UPDATE_TIMES
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
-    registered: 2026-02-18
-    last_updated: 2026-02-18
-
+    registered: 2026-02-18T00:00:00.000Z
+    last_updated: 2026-02-18T00:00:00.000Z
 IMPL-SCREENSHOT_MODE:
   type: IMPL
   name: Screenshot/Demo mode for placeholder screenshots
   category: UI / Tooling
   status: Active
-  description: "Popup accepts ?screenshot=1&url=...&title=... so automated screenshot scripts can show bookmark UI for a specific URL; script awaits storage seed, waits for data-screenshot-ready, prefers data.url in getCurrentBookmark when http(s), seeds from optional file (--seed / SCREENSHOT_SEED_FILE), and checks Local store for index screenshot so seeded bookmarks are visible"
+  description: Popup accepts ?screenshot=1&url=...&title=... so automated screenshot scripts can show bookmark UI for a specific URL; script awaits storage seed, waits for data-screenshot-ready, prefers data.url in getCurrentBookmark when http(s), seeds from optional file (--seed / SCREENSHOT_SEED_FILE), and checks Local store for index screenshot so seeded bookmarks are visible
   cross_references:
     - IMPL-LOCAL_BOOKMARK_SERVICE
     - IMPL-UI_TESTABILITY_HOOKS
@@ -2358,15 +2162,14 @@ IMPL-SCREENSHOT_MODE:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: 2026-02-19
-    last_updated: 2026-02-20
-
+    registered: 2026-02-19T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 IMPL-POPUP_THEME_CSS:
   type: IMPL
   name: Popup CSS honors ThemeManager (hb-theme-dark)
   category: UI / Theme
   status: Active
-  description: "Popup stylesheet defines :root.hb-theme-dark so popup respects ThemeManager-applied dark theme (e.g. hoverboard_theme in storage); fixes popup staying light when theme preference is dark"
+  description: Popup stylesheet defines :root.hb-theme-dark so popup respects ThemeManager-applied dark theme (e.g. hoverboard_theme in storage); fixes popup staying light when theme preference is dark
   cross_references:
     - REQ-DARK_THEME
     - ARCH-THEME
@@ -2374,43 +2177,40 @@ IMPL-POPUP_THEME_CSS:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: 2026-02-19
-    last_updated: 2026-02-19
-
+    registered: 2026-02-19T00:00:00.000Z
+    last_updated: 2026-02-19T00:00:00.000Z
 IMPL-TAB_SEARCH_SERVICE:
   type: IMPL
   name: Tab Search Service Implementation
   category: Search
   status: Active
-  description: "TabSearchService: search tabs by title, navigate to next match with circular wrap; search history and continuation from last position"
+  description: 'TabSearchService: search tabs by title, navigate to next match with circular wrap; search history and continuation from last position'
   cross_references:
     - REQ-SEARCH_FUNCTIONALITY
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 IMPL-TAB_SEARCH_NO_MATCH_UI:
   type: IMPL
   name: Tab Search No-Match UI Feedback
   status: Active
-  description: "Popup/side-panel tab-search: no-match triggers search button border feedback (showSearchNoMatchFeedback), not error message; 2s fade."
+  description: 'Popup/side-panel tab-search: no-match triggers search button border feedback (showSearchNoMatchFeedback), not error message; 2s fade.'
   cross_references:
     - ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK
     - REQ-TAB_SEARCH_NO_MATCH_UX
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-26
-    last_updated: 2026-02-26
-
+    registered: 2026-02-26T00:00:00.000Z
+    last_updated: 2026-02-26T00:00:00.000Z
 REQ-AI_TAGGING_CONFIG:
   type: REQ
   name: AI Tagging Configuration
   category: Functional
   status: Planned
-  description: "Options page: AI API key, provider (OpenAI or Gemini), Test API key button; persisted in config"
+  description: 'Options page: AI API key, provider (OpenAI or Gemini), Test API key button; persisted in config'
   cross_references:
     - ARCH-AI_TAGGING_CONFIG
     - IMPL-AI_CONFIG_OPTIONS
@@ -2418,15 +2218,14 @@ REQ-AI_TAGGING_CONFIG:
   source_index: requirements.yaml
   detail_file: requirements/REQ-AI_TAGGING_CONFIG.yaml
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 REQ-AI_TAGGING_POPUP:
   type: REQ
   name: AI Tagging from Popup
   category: Functional
   status: Planned
-  description: "Popup: submit page to AI for tagging; Readability; up to N tags; session tags auto-add; rest as first Suggested Tags; new bookmarks to default store"
+  description: 'Popup: submit page to AI for tagging; Readability; up to N tags; session tags auto-add; rest as first Suggested Tags; new bookmarks to default store'
   cross_references:
     - ARCH-AI_TAGGING_FLOW
     - IMPL-AI_TAGGING_READABILITY
@@ -2436,14 +2235,13 @@ REQ-AI_TAGGING_POPUP:
   source_index: requirements.yaml
   detail_file: requirements/REQ-AI_TAGGING_POPUP.yaml
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 ARCH-AI_TAGGING_CONFIG:
   type: ARCH
   name: AI Tagging Config Architecture
   status: Active
-  description: "Config stores aiApiKey, aiProvider, aiTagLimit; options UI; Test button calls testAiApiKey"
+  description: Config stores aiApiKey, aiProvider, aiTagLimit; options UI; Test button calls testAiApiKey
   cross_references:
     - REQ-AI_TAGGING_CONFIG
     - IMPL-AI_CONFIG_OPTIONS
@@ -2451,14 +2249,13 @@ ARCH-AI_TAGGING_CONFIG:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-AI_TAGGING_CONFIG.yaml
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 ARCH-AI_TAGGING_FLOW:
   type: ARCH
   name: AI Tagging Flow Architecture
   status: Active
-  description: "Page content via SW scripting.executeScript (works when content script not in tab); optional Readability via content script; AI tags; session split; popup shows SW error on failure"
+  description: Page content via SW scripting.executeScript (works when content script not in tab); optional Readability via content script; AI tags; session split; popup shows SW error on failure
   cross_references:
     - REQ-AI_TAGGING_POPUP
     - IMPL-AI_TAGGING_READABILITY
@@ -2466,203 +2263,189 @@ ARCH-AI_TAGGING_FLOW:
     - IMPL-SESSION_TAGS
     - IMPL-AI_TAGGING_POPUP_UI
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-AI_TAGGING_FLOW.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-21
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-21T00:00:00.000Z
 IMPL-AI_CONFIG_OPTIONS:
   type: IMPL
   name: AI Config in Options
   status: Active
-  description: "ConfigManager AI fields; options.html section; options.js bind, load, save, Test button"
+  description: ConfigManager AI fields; options.html section; options.js bind, load, save, Test button
   cross_references:
     - ARCH-AI_TAGGING_CONFIG
     - REQ-AI_TAGGING_CONFIG
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 IMPL-AI_TAG_TEST:
   type: IMPL
   name: AI API Key Test
   status: Active
-  description: "testAiApiKey(apiKey, provider); minimal OpenAI/Gemini request; return { ok, error }"
+  description: testAiApiKey(apiKey, provider); minimal OpenAI/Gemini request; return { ok, error }
   cross_references:
     - ARCH-AI_TAGGING_CONFIG
     - REQ-AI_TAGGING_CONFIG
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-AI_TAG_TEST.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 IMPL-AI_TAGGING_READABILITY:
   type: IMPL
   name: Page Content via Readability
   status: Active
-  description: "SW handleGetPageContent: scripting.executeScript inline func (title + body.innerText, 16k cap); content script early GET_PAGE_CONTENT listener runs extractPageContent when present"
+  description: 'SW handleGetPageContent: scripting.executeScript inline func (title + body.innerText, 16k cap); content script early GET_PAGE_CONTENT listener runs extractPageContent when present'
   cross_references:
     - ARCH-AI_TAGGING_FLOW
     - REQ-AI_TAGGING_POPUP
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-AI_TAGGING_READABILITY.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-21
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-21T00:00:00.000Z
 IMPL-AI_TAGGING_PROVIDER:
   type: IMPL
   name: OpenAI/Gemini Tag Request
   status: Active
-  description: "requestAiTags(provider, apiKey, text, limit); parse response; sanitizeTag; dedupe"
+  description: requestAiTags(provider, apiKey, text, limit); parse response; sanitizeTag; dedupe
   cross_references:
     - ARCH-AI_TAGGING_FLOW
     - REQ-AI_TAGGING_POPUP
     - REQ-TAG_INPUT_SANITIZATION
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 IMPL-SESSION_TAGS:
   type: IMPL
   name: Session Tags for Auto-Apply
   status: Active
-  description: "getSessionTags(), recordSessionTags(tags); chrome.storage.session or in-memory SW"
+  description: getSessionTags(), recordSessionTags(tags); chrome.storage.session or in-memory SW
   cross_references:
     - ARCH-AI_TAGGING_FLOW
     - REQ-AI_TAGGING_POPUP
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-SESSION_TAGS.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-20
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-20T00:00:00.000Z
 IMPL-AI_TAGGING_POPUP_UI:
   type: IMPL
   name: AI Tagging Popup Button and Flow
   status: Active
-  description: "Popup Tag with AI; GET_PAGE_CONTENT to SW (SW uses executeScript in tab); show content.error on failure; GET_AI_TAGS; split inSession/suggested; save; updateSuggestedTags"
+  description: Popup Tag with AI; GET_PAGE_CONTENT to SW (SW uses executeScript in tab); show content.error on failure; GET_AI_TAGS; split inSession/suggested; save; updateSuggestedTags
   cross_references:
     - ARCH-AI_TAGGING_FLOW
     - REQ-AI_TAGGING_POPUP
     - REQ-STORAGE_MODE_DEFAULT
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-AI_TAGGING_POPUP_UI.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-20
-    last_updated: 2026-02-21
-
+    registered: 2026-02-20T00:00:00.000Z
+    last_updated: 2026-02-21T00:00:00.000Z
 REQ-SIDE_PANEL_TAGS_TREE:
   type: REQ
   name: Side Panel Tags and Bookmarks Tree
   category: Functional
   status: Implemented
-  description: "Chrome side panel: tags at top level, URLs as leaves; launched from popup; user selects tags and order; collapsible URL lists; click URL opens in new tab"
+  description: 'Chrome side panel: tags at top level, URLs as leaves; launched from popup; user selects tags and order; collapsible URL lists; click URL opens in new tab'
   cross_references:
     - ARCH-SIDE_PANEL_TAGS_TREE
     - IMPL-SIDE_PANEL_TAGS_TREE
   source_index: requirements.yaml
-  detail_file: requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-21
-    last_updated: 2026-02-21
-
+    registered: 2026-02-21T00:00:00.000Z
+    last_updated: 2026-02-21T00:00:00.000Z
 ARCH-SIDE_PANEL_TAGS_TREE:
   type: ARCH
   name: Side Panel Tags and Bookmarks Tree Architecture
   status: Active
-  description: "Chrome sidePanel API; panel page; data from getAggregatedBookmarksForIndex; open from popup via SW; tag selector + order; tree with collapsible URLs; chrome.tabs.create on URL click"
+  description: Chrome sidePanel API; panel page; data from getAggregatedBookmarksForIndex; open from popup via SW; tag selector + order; tree with collapsible URLs; chrome.tabs.create on URL click
   cross_references:
     - REQ-SIDE_PANEL_TAGS_TREE
     - IMPL-SIDE_PANEL_TAGS_TREE
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_TAGS_TREE.yaml
   metadata:
-    registered: 2026-02-21
-    last_updated: 2026-02-21
-
+    registered: 2026-02-21T00:00:00.000Z
+    last_updated: 2026-02-21T00:00:00.000Z
 IMPL-SIDE_PANEL_TAGS_TREE:
   type: IMPL
   name: Side Panel Tags and Bookmarks Tree Implementation
   status: Active
-  description: "Popup OPEN_SIDE_PANEL; SW chrome.sidePanel.open; panel getAggregatedBookmarksForIndex, buildTagToBookmarks, tag selector, tree with collapse; click URL to tabs.create"
+  description: Popup OPEN_SIDE_PANEL; SW chrome.sidePanel.open; panel getAggregatedBookmarksForIndex, buildTagToBookmarks, tag selector, tree with collapse; click URL to tabs.create
   cross_references:
     - ARCH-SIDE_PANEL_TAGS_TREE
     - REQ-SIDE_PANEL_TAGS_TREE
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-21
-    last_updated: 2026-02-21
-
+    registered: 2026-02-21T00:00:00.000Z
+    last_updated: 2026-02-21T00:00:00.000Z
 REQ-SIDE_PANEL_BOOKMARK_SEARCH:
   type: REQ
   name: Side Panel Bookmark Search
   category: Functional
   status: Active
-  description: "Side panel search over displayed list (title, URL, tags, notes); match count; Next/Previous with scroll and highlight"
+  description: Side panel search over displayed list (title, URL, tags, notes); match count; Next/Previous with scroll and highlight
   cross_references:
     - ARCH-SIDE_PANEL_BOOKMARK_SEARCH
     - IMPL-SIDE_PANEL_BOOKMARK_SEARCH
   source_index: requirements.yaml
-  detail_file: requirements/REQ-SIDE_PANEL_BOOKMARK_SEARCH.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-22
-    last_updated: 2026-02-22
-
+    registered: 2026-02-22T00:00:00.000Z
+    last_updated: 2026-02-22T00:00:00.000Z
 ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
   type: ARCH
   name: Side Panel Bookmark Search Architecture
   status: Active
-  description: "Client-side filter on displayed list; search bar, count, Next/Previous; scroll and highlight current match"
+  description: Client-side filter on displayed list; search bar, count, Next/Previous; scroll and highlight current match
   cross_references:
     - REQ-SIDE_PANEL_BOOKMARK_SEARCH
     - IMPL-SIDE_PANEL_BOOKMARK_SEARCH
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_BOOKMARK_SEARCH.yaml
   metadata:
-    registered: 2026-02-22
-    last_updated: 2026-02-22
-
+    registered: 2026-02-22T00:00:00.000Z
+    last_updated: 2026-02-22T00:00:00.000Z
 ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK:
   type: ARCH
   name: Tab Search No-Match Button Border Feedback
   status: Active
-  description: "No-match uses button border feedback (bright red then default over ≤2s) instead of error message; popup and side panel."
+  description: No-match uses button border feedback (bright red then default over ≤2s) instead of error message; popup and side panel.
   cross_references:
     - REQ-TAB_SEARCH_NO_MATCH_UX
     - IMPL-TAB_SEARCH_NO_MATCH_UI
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK.yaml
   metadata:
-    registered: 2026-02-26
-    last_updated: 2026-02-26
-
+    registered: 2026-02-26T00:00:00.000Z
+    last_updated: 2026-02-26T00:00:00.000Z
 IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
   type: IMPL
   name: Side Panel Bookmark Search Implementation
   status: Active
-  description: "filterBookmarksBySearch in tags-tree-filter; panel search input, count, Next/Prev, data-search-index, scroll and highlight"
+  description: filterBookmarksBySearch in tags-tree-filter; panel search input, count, Next/Prev, data-search-index, scroll and highlight
   cross_references:
     - ARCH-SIDE_PANEL_BOOKMARK_SEARCH
     - REQ-SIDE_PANEL_BOOKMARK_SEARCH
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK_SEARCH.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-22
-    last_updated: 2026-02-22
-
+    registered: 2026-02-22T00:00:00.000Z
+    last_updated: 2026-02-22T00:00:00.000Z
 REQ-SIDE_PANEL_POPUP_EQUIVALENT:
   type: REQ
   name: Side Panel Popup Equivalent with Tabs
   category: Functional
   status: Implemented
-  description: "Side panel provides popup-equivalent UI (current-tab bookmark) and tags tree, switchable via tabs Bookmark | Tags tree"
+  description: Side panel provides popup-equivalent UI (current-tab bookmark) and tags tree, switchable via tabs Bookmark | Tags tree
   cross_references:
     - ARCH-SIDE_PANEL_TABS
     - IMPL-SIDE_PANEL_TABS
@@ -2671,14 +2454,13 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
   source_index: requirements.yaml
   detail_file: requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml
   metadata:
-    registered: 2026-02-25
-    last_updated: 2026-02-25
-
+    registered: 2026-02-25T00:00:00.000Z
+    last_updated: 2026-02-25T00:00:00.000Z
 ARCH-SIDE_PANEL_TABS:
   type: ARCH
   name: Side Panel Tabs Architecture
   status: Active
-  description: "Single side panel page with tab bar; Bookmark panel (scoped root) and Tags tree panel; persist selected tab"
+  description: Single side panel page with tab bar; Bookmark panel (scoped root) and Tags tree panel; persist selected tab
   cross_references:
     - REQ-SIDE_PANEL_POPUP_EQUIVALENT
     - REQ-SIDE_PANEL_TAGS_TREE
@@ -2686,61 +2468,57 @@ ARCH-SIDE_PANEL_TABS:
     - IMPL-SIDE_PANEL_BOOKMARK
     - IMPL-UIManager_SCOPED_ROOT
   source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-SIDE_PANEL_TABS.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-25
-    last_updated: 2026-02-25
-
+    registered: 2026-02-25T00:00:00.000Z
+    last_updated: 2026-02-25T00:00:00.000Z
 IMPL-SIDE_PANEL_TABS:
   type: IMPL
   name: Side Panel Tabs Implementation
   status: Active
-  description: "Tab bar and switching; init Bookmark with createPopup(container); init Tags tree tab; persist selected tab"
+  description: Tab bar and switching; init Bookmark with createPopup(container); init Tags tree tab; persist selected tab
   cross_references:
     - ARCH-SIDE_PANEL_TABS
     - REQ-SIDE_PANEL_POPUP_EQUIVALENT
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-25
-    last_updated: 2026-02-25
-
+    registered: 2026-02-25T00:00:00.000Z
+    last_updated: 2026-02-25T00:00:00.000Z
 IMPL-SIDE_PANEL_BOOKMARK:
   type: IMPL
   name: Side Panel Bookmark Tab Implementation
   status: Active
-  description: "Bookmark tab markup with data-popup-ref; PopupController + UIManager with container; Open Tags tree switches tab"
+  description: Bookmark tab markup with data-popup-ref; PopupController + UIManager with container; Open Tags tree switches tab
   cross_references:
     - ARCH-SIDE_PANEL_TABS
     - REQ-SIDE_PANEL_POPUP_EQUIVALENT
     - IMPL-UIManager_SCOPED_ROOT
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-25
-    last_updated: 2026-02-25
-
+    registered: 2026-02-25T00:00:00.000Z
+    last_updated: 2026-02-25T00:00:00.000Z
 IMPL-UIManager_SCOPED_ROOT:
   type: IMPL
   name: UIManager Scoped Root for Panel Context
   status: Active
-  description: "UIManager optional container; cacheElements uses container.querySelector('[data-popup-ref=\"id\"]') when set"
+  description: UIManager optional container; cacheElements uses container.querySelector('[data-popup-ref="id"]') when set
   cross_references:
     - ARCH-SIDE_PANEL_TABS
     - REQ-SIDE_PANEL_POPUP_EQUIVALENT
     - IMPL-SIDE_PANEL_BOOKMARK
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-UIManager_SCOPED_ROOT.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-25
-    last_updated: 2026-02-25
-
+    registered: 2026-02-25T00:00:00.000Z
+    last_updated: 2026-02-25T00:00:00.000Z
 REQ-QUICK_ACCESS_ENTRY:
   type: REQ
   name: Quick Access Entry Points
   category: Functional
   status: Implemented
-  description: "Users can open side panel, options, bookmarks index, import via extension commands, context menu, and in-popup/panel keyboard shortcuts"
+  description: Users can open side panel, options, bookmarks index, import via extension commands, context menu, and in-popup/panel keyboard shortcuts
   cross_references:
     - ARCH-QUICK_ACCESS_ENTRY
     - IMPL-EXTENSION_COMMANDS
@@ -2749,14 +2527,13 @@ REQ-QUICK_ACCESS_ENTRY:
   source_index: requirements.yaml
   detail_file: requirements/REQ-QUICK_ACCESS_ENTRY.yaml
   metadata:
-    registered: 2026-02-26
-    last_updated: 2026-02-26
-
+    registered: 2026-02-26T00:00:00.000Z
+    last_updated: 2026-02-26T00:00:00.000Z
 ARCH-QUICK_ACCESS_ENTRY:
   type: ARCH
   name: Quick Access Entry Architecture
   status: Active
-  description: "Three entry mechanisms (commands, context menu, in-UI shortcuts) target same four actions; SW owns commands/context menu; UI owns in-focus shortcuts"
+  description: Three entry mechanisms (commands, context menu, in-UI shortcuts) target same four actions; SW owns commands/context menu; UI owns in-focus shortcuts
   cross_references:
     - REQ-QUICK_ACCESS_ENTRY
     - IMPL-EXTENSION_COMMANDS
@@ -2765,63 +2542,44 @@ ARCH-QUICK_ACCESS_ENTRY:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml
   metadata:
-    registered: 2026-02-26
-    last_updated: 2026-02-26
-
+    registered: 2026-02-26T00:00:00.000Z
+    last_updated: 2026-02-26T00:00:00.000Z
 IMPL-EXTENSION_COMMANDS:
   type: IMPL
   name: Extension Commands for Quick Access
   status: Active
-  description: "Manifest commands + SW onCommand; open side panel, options, bookmarks index, import"
+  description: Manifest commands + SW onCommand; open side panel, options, bookmarks index, import
   cross_references:
     - ARCH-QUICK_ACCESS_ENTRY
     - REQ-QUICK_ACCESS_ENTRY
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-26
-    last_updated: 2026-02-26
-
+    registered: 2026-02-26T00:00:00.000Z
+    last_updated: 2026-02-26T00:00:00.000Z
 IMPL-CONTEXT_MENU_QUICK_ACCESS:
   type: IMPL
   name: Context Menu Quick Access
   status: Active
-  description: "Context menu parent Hoverboard and four items; onClicked same four actions as commands"
+  description: Context menu parent Hoverboard and four items; onClicked same four actions as commands
   cross_references:
     - ARCH-QUICK_ACCESS_ENTRY
     - REQ-QUICK_ACCESS_ENTRY
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-26
-    last_updated: 2026-02-26
-
+    registered: 2026-02-26T00:00:00.000Z
+    last_updated: 2026-02-26T00:00:00.000Z
 IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
   type: IMPL
   name: In-Popup and In-Panel Keyboard Shortcuts for Quick Access
   status: Active
-  description: "KeyboardManager four shortcuts emit openTagsTree/openOptions/openBookmarksIndex/openBrowserBookmarkImport; side panel enableKeyboard and setupKeyboardNavigation"
+  description: KeyboardManager four shortcuts emit openTagsTree/openOptions/openBookmarksIndex/openBrowserBookmarkImport; side panel enableKeyboard and setupKeyboardNavigation
   cross_references:
     - ARCH-QUICK_ACCESS_ENTRY
     - REQ-QUICK_ACCESS_ENTRY
   source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS.yaml
+  detail_file: null
   metadata:
-    registered: 2026-02-26
-    last_updated: 2026-02-26
-
-#
-# TOKEN-IDENTIFIER:
-#   type: REQ | ARCH | IMPL | TEST | PROC
-#   name: Token Name
-#   category: Optional category (e.g., Core Functional, Non-Functional for REQ)
-#   status: Active | Deprecated | Template | Planned
-#   description: "One-line description of what this token represents"
-#   cross_references:
-#     - RELATED-TOKEN-1
-#     - RELATED-TOKEN-2
-#   source_index: requirements.yaml | architecture-decisions.yaml | implementation-decisions.yaml | processes.md
-#   detail_file: path/to/detail/file.md | null
-#   metadata:
-#     registered: YYYY-MM-DD
-#     last_updated: YYYY-MM-DD
+    registered: 2026-02-26T00:00:00.000Z
+    last_updated: 2026-02-26T00:00:00.000Z

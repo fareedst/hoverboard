@@ -165,7 +165,7 @@ ARCH-LANGUAGE_SELECTION:
     summary: TypeScript for type-check only; JSDoc and .d.ts for contracts; optional future .ts with esbuild
     details:
       - tsconfig.json noEmit, typecheck in validate; message-types.d.ts, config-types.d.ts; JSDoc and // @ts-check on config/message key files
-      - Validation: npm run validate (includes typecheck); full pre-push: npm run validate && npm run test && npm run test:e2e:extension
+      - 'Validation: npm run validate (includes typecheck); full pre-push: npm run validate && npm run test && npm run test:e2e:extension'
   traceability:
     requirements: []
     implementation:
@@ -178,10 +178,10 @@ ARCH-LANGUAGE_SELECTION:
   detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.yaml
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
       reason: Flesh out for incremental TypeScript/JSDoc strategy
 ARCH-EXAMPLE_DECISION:
@@ -289,7 +289,7 @@ ARCH-EXT_IDENTITY:
     informs:
       - IMPL-EXT_IDENTITY
     see_also: []
-  detail_file: architecture-decisions/ARCH-EXT_IDENTITY.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -345,7 +345,7 @@ ARCH-PINBOARD_API:
     informs:
       - IMPL-PINBOARD_API
     see_also: []
-  detail_file: architecture-decisions/ARCH-PINBOARD_API.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -401,7 +401,7 @@ ARCH-STORAGE:
     informs:
       - IMPL-STORAGE
     see_also: []
-  detail_file: architecture-decisions/ARCH-STORAGE.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -459,7 +459,7 @@ ARCH-TAG_SYSTEM:
     informs:
       - IMPL-TAG_SYSTEM
     see_also: []
-  detail_file: architecture-decisions/ARCH-TAG_SYSTEM.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -515,7 +515,7 @@ ARCH-OVERLAY:
     informs:
       - IMPL-OVERLAY
     see_also: []
-  detail_file: architecture-decisions/ARCH-OVERLAY.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -559,7 +559,7 @@ ARCH-UX_CORE:
     informs:
       - IMPL-UX_CORE
     see_also: []
-  detail_file: architecture-decisions/ARCH-UX_CORE.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -713,7 +713,7 @@ ARCH-MV3_MIGRATION:
       - IMPL-MV3_MIGRATION
     see_also:
       - ARCH-SERVICE_WORKER
-  detail_file: architecture-decisions/ARCH-MV3_MIGRATION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -766,7 +766,7 @@ ARCH-BADGE:
     informs:
       - IMPL-BADGE
     see_also: []
-  detail_file: architecture-decisions/ARCH-BADGE.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -877,7 +877,7 @@ ARCH-CROSS_BROWSER:
       - IMPL-CROSS_BROWSER
     see_also:
       - ARCH-SAFARI_ADAPTATION
-  detail_file: architecture-decisions/ARCH-CROSS_BROWSER.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -925,7 +925,7 @@ ARCH-SERVICE_WORKER:
       - IMPL-SERVICE_WORKER
     see_also:
       - ARCH-MV3_MIGRATION
-  detail_file: architecture-decisions/ARCH-SERVICE_WORKER.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -991,7 +991,7 @@ ARCH-MESSAGE_HANDLING:
     informs:
       - IMPL-MESSAGE_HANDLING
     see_also: []
-  detail_file: architecture-decisions/ARCH-MESSAGE_HANDLING.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1035,13 +1035,13 @@ ARCH-THEME:
       - IMPL-THEME
       - IMPL-POPUP_THEME_CSS
     see_also: []
-  detail_file: architecture-decisions/ARCH-THEME.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: 2026-02-19
+      date: 2026-02-19T00:00:00.000Z
       author: AI Agent
       reason: Add IMPL-POPUP_THEME_CSS traceability
 ARCH-POPUP_SESSION:
@@ -1091,7 +1091,7 @@ ARCH-POPUP_SESSION:
     see_also:
       - ARCH-UX_CORE
       - ARCH-MESSAGE_HANDLING
-  detail_file: architecture-decisions/ARCH-POPUP_SESSION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1149,7 +1149,7 @@ ARCH-BOOKMARK_STATE_SYNC:
       - ARCH-MESSAGE_HANDLING
       - ARCH-OVERLAY
       - ARCH-BADGE
-  detail_file: architecture-decisions/ARCH-BOOKMARK_STATE_SYNC.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1208,7 +1208,7 @@ ARCH-OVERLAY_CONTROLS:
       - IMPL-OVERLAY_CONTROLS
     see_also:
       - ARCH-OVERLAY
-  detail_file: architecture-decisions/ARCH-OVERLAY_CONTROLS.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1266,7 +1266,7 @@ ARCH-OVERLAY_TESTABILITY:
     see_also:
       - ARCH-OVERLAY
       - ARCH-OVERLAY_CONTROLS
-  detail_file: architecture-decisions/ARCH-OVERLAY_TESTABILITY.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1306,10 +1306,10 @@ ARCH-UI_TESTABILITY:
       - IMPL-UI_INSPECTOR
       - IMPL-PLAYWRIGHT_E2E_EXTENSION
       - IMPL-SIDE_PANEL_SNAPSHOT
-  detail_file: architecture-decisions/ARCH-UI_TESTABILITY.yaml
+  detail_file: null
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-25"
+    created: '2026-02-17'
+    last_updated: '2026-02-25'
     author: AI Agent
     reason: Added IMPL-SIDE_PANEL_SNAPSHOT for side panel snapshot (Bookmark + Tags tree tabs)
 ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
@@ -1331,10 +1331,10 @@ ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
       - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
     implementation:
       - IMPL-POPUP_BUNDLE
-  detail_file: architecture-decisions/ARCH-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
+  detail_file: null
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
+    created: '2026-02-17'
+    last_updated: '2026-02-17'
     author: AI Agent
 ARCH-SAFARI_ADAPTATION:
   name: Safari Adaptive Architecture
@@ -1387,7 +1387,7 @@ ARCH-SAFARI_ADAPTATION:
       - ARCH-CROSS_BROWSER
       - ARCH-OVERLAY
       - ARCH-MESSAGE_HANDLING
-  detail_file: architecture-decisions/ARCH-SAFARI_ADAPTATION.md
+  detail_file: null
   metadata:
     created:
       date: 2025-07-14T00:00:00.000Z
@@ -1447,7 +1447,7 @@ ARCH-ERROR_HANDLING:
     informs:
       - IMPL-ERROR_HANDLING
     see_also: []
-  detail_file: architecture-decisions/ARCH-ERROR_HANDLING.md
+  detail_file: null
   metadata:
     created:
       date: YYYY-MM-DD
@@ -1492,7 +1492,7 @@ ARCH-TESTING_STRATEGY:
       - Test coverage goals
   traceability:
     requirements:
-      - REQ-*
+      - REQ-CODE_QUALITY
     implementation:
       - IMPL-TESTING
     tests:
@@ -1504,7 +1504,7 @@ ARCH-TESTING_STRATEGY:
     informs:
       - IMPL-TESTING
     see_also: []
-  detail_file: architecture-decisions/ARCH-TESTING_STRATEGY.md
+  detail_file: null
   metadata:
     created:
       date: YYYY-MM-DD
@@ -1665,7 +1665,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
     see_also:
       - ARCH-LOCAL_STORAGE_PROVIDER
       - ARCH-MESSAGE_HANDLING
-  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-13'
@@ -1714,7 +1714,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
       - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
     see_also:
       - ARCH-LOCAL_BOOKMARKS_INDEX
-  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-13'
@@ -2163,13 +2163,13 @@ ARCH-SHARED_UTILITIES:
       - IMPL-TIME_ASYNC_UTILITIES
       - IMPL-DOM_UTILITIES
     see_also: []
-  detail_file: architecture-decisions/ARCH-SHARED_UTILITIES.yaml
+  detail_file: null
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation
 ARCH-STRUCTURED_LOGGING:
@@ -2202,13 +2202,13 @@ ARCH-STRUCTURED_LOGGING:
       - IMPL-LOG_LEVEL_CONFIG
       - IMPL-LOGGER_LEGACY
     see_also: []
-  detail_file: architecture-decisions/ARCH-STRUCTURED_LOGGING.yaml
+  detail_file: null
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation
 ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
@@ -2339,7 +2339,7 @@ ARCH-AI_TAGGING_FLOW:
       - ARCH-SUGGESTED_TAGS
       - ARCH-MESSAGE_HANDLING
       - ARCH-STORAGE_INDEX_AND_ROUTER
-  detail_file: architecture-decisions/ARCH-AI_TAGGING_FLOW.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-20'
@@ -2474,10 +2474,10 @@ ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK:
   detail_file: architecture-decisions/ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK.yaml
   metadata:
     created:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
       reason: Initial creation
 ARCH-SIDE_PANEL_TABS:
@@ -2495,12 +2495,12 @@ ARCH-SIDE_PANEL_TABS:
       - Single panel entry (e.g. side-panel.html); tab bar; Bookmark panel uses UIManager/PopupController with scoped root (container); Tags tree panel hosts existing tags-tree UI
       - Only one panel visible at a time; last-selected tab persisted
   implementation_approach:
-    summary: Manifest side_panel.default_path points to one HTML (side-panel.html). Page has tab bar ("Bookmark" | "Tags tree"), #bookmarkPanel (root for popup-equivalent with data-popup-ref), #tagsTreePanel (existing tags-tree content). When Bookmark tab selected, init UISystem and createPopup({ container: bookmarkPanel }); when Tags tree tab selected, run tags-tree load/render. Persist selected tab in chrome.storage.local.
+    summary: Manifest side_panel.default_path points to one HTML (side-panel.html). Page has tab bar ("Bookmark" | "Tags tree"),
     details:
       - Tab bar: two buttons; click switches visible panel and persists choice
       - UIManager supports optional container; when set, cacheElements uses container.querySelector('[data-popup-ref="id"]')
       - Bookmark panel markup: same structure as popup with data-popup-ref on each element
-      - "Open Tags tree" in Bookmark footer: in panel context, switch to Tags tree tab
+      - '"Open Tags tree" in Bookmark footer: in panel context, switch to Tags tree tab'
   traceability:
     requirements:
       - REQ-SIDE_PANEL_POPUP_EQUIVALENT
@@ -2526,7 +2526,7 @@ ARCH-SIDE_PANEL_TABS:
     see_also:
       - ARCH-SIDE_PANEL_TAGS_TREE
       - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
-  detail_file: architecture-decisions/ARCH-SIDE_PANEL_TABS.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-25'
@@ -2578,3 +2578,53 @@ ARCH-QUICK_ACCESS_ENTRY:
       date: '2026-02-26'
       author: AI Agent
       reason: Initial creation for quick access architecture
+ARCH-SITE_MGMT:
+  name: Site Management
+  status: Active
+  cross_references: []
+  rationale:
+    why: Site management architecture
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+ARCH-SEARCH:
+  name: Search
+  status: Active
+  cross_references: []
+  rationale:
+    why: Search functionality architecture
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+ARCH-PRIVACY:
+  name: Privacy
+  status: Active
+  cross_references: []
+  rationale:
+    why: Privacy controls architecture
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+ARCH-CONFIG_STRUCTURE:
+  name: Config Structure
+  status: Active
+  cross_references: []
+  rationale:
+    why: Configuration structure architecture
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+ARCH-PROJECT_STRUCTURE:
+  name: Project Structure
+  status: Active
+  cross_references: []
+  rationale:
+    why: Project structure architecture
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null

@@ -20,7 +20,6 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
     depends_on: *ref_0
     informs: []
     see_also: []
-  detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     created:
       date: '2026-02-18'
@@ -28,7 +27,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
     last_updated:
       date: '2026-02-20'
       author: Agent
-      reason: Bookmark count at bottom (count_footer: flex column + margin-top auto)
+      reason: "Bookmark count at bottom (count_footer: flex column + margin-top auto)"
     last_validated:
       date: '2026-02-18'
       validator: MCP converter

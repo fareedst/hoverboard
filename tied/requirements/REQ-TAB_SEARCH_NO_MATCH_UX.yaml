@@ -9,7 +9,7 @@ REQ-TAB_SEARCH_NO_MATCH_UX:
   rationale:
     why: Avoid intrusive error messaging when the user simply got no matches; signal the outcome with subtle visual feedback instead.
     problems_solved:
-      - "No matching tabs found" error message felt like an error when it is a valid outcome
+      - "\"No matching tabs found\" error message felt like an error when it is a valid outcome"
       - Desire for visual feedback only when input is processed but no new tab is displayed
     benefits:
       - Clear feedback that search ran without showing an error state
@@ -44,7 +44,6 @@ REQ-TAB_SEARCH_NO_MATCH_UX:
     related_to:
       - REQ-SEARCH_FUNCTIONALITY
     supersedes: []
-  detail_file: requirements/REQ-TAB_SEARCH_NO_MATCH_UX.yaml
   metadata:
     created:
       date: "2026-02-26"

@@ -26,10 +26,10 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
     functions:
       - name: applyRegexReplace
         file: src/ui/bookmarks-table/bookmarks-table-filter.js
-        description: Pure function: bookmark + pattern + replacement + options -> { payload, error, changed }; changed true iff any selected field value changed
+        description: "Pure function: bookmark + pattern + replacement + options -> { payload, error, changed }; changed true iff any selected field value changed"
       - name: regexReplaceSelected
         file: src/ui/bookmarks-table/bookmarks-table.js
-        description: Orchestration: read UI, validate regex, applyRegexReplace per selected, saveBookmark, refresh, retain selection
+        description: "Orchestration: read UI, validate regex, applyRegexReplace per selected, saveBookmark, refresh, retain selection"
   traceability:
     architecture:
       - ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
@@ -76,7 +76,6 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       byUrl = Map(allBookmarks: url -> bookmark)
       FOR url IN selectedUrls: b = byUrl.get(url); IF !b CONTINUE; result = applyRegexReplace(b, patternStr, replacementStr, options); IF result.error show and RETURN; IF !result.payload CONTINUE; IF result.changed === false CONTINUE; SEND saveBookmark(result.payload)
       urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); selectionStillVisible; renderTableBody(); clear error; updateMoveControlsState()
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
   metadata:
     created:
       date: '2026-02-20'

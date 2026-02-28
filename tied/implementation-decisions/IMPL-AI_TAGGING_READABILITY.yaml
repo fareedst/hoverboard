@@ -12,9 +12,9 @@ IMPL-AI_TAGGING_READABILITY:
   implementation_approach:
     summary: Page content for AI is obtained by the service worker via scripting.executeScript with an inline function (title + body.innerText, 16k cap), so the flow works when the content script was not injected (e.g. tab opened before extension load). When the content script is present, an early top-level GET_PAGE_CONTENT listener runs Readability (extractPageContent) for richer extraction.
     details:
-      - SW handleGetPageContent: uses scripting.executeScript({ target: { tabId }, func }) where func returns { title: document.title, textContent: document.body?.innerText } trimmed and capped at 16000 chars. No dependency on content script.
-      - Content script: early browser.runtime.onMessage listener (registered before init() / waitForDOM()) handles GET_PAGE_CONTENT by calling extractPageContent(document) and sendResponse. When present, this provides Readability-based extraction; the class handleMessage no longer handles GET_PAGE_CONTENT to avoid double response.
-      - extractPageContent in readability-extract.js: @mozilla/readability on document clone; cap 16k; fallback to document.title and body.innerText if parse returns null
+      - "SW handleGetPageContent: uses scripting.executeScript({ target: { tabId }, func }) where func returns { title: document.title, textContent: document.body?.innerText } trimmed and capped at 16000 chars. No dependency on content script."
+      - "Content script: early browser.runtime.onMessage listener (registered before init() / waitForDOM()) handles GET_PAGE_CONTENT by calling extractPageContent(document) and sendResponse. When present, this provides Readability-based extraction; the class handleMessage no longer handles GET_PAGE_CONTENT to avoid double response."
+      - "extractPageContent in readability-extract.js: @mozilla/readability on document clone; cap 16k; fallback to document.title and body.innerText if parse returns null"
   code_locations:
     files:
       - path: src/core/message-handler.js
@@ -26,7 +26,7 @@ IMPL-AI_TAGGING_READABILITY:
     functions:
       - name: handleGetPageContent
         file: src/core/message-handler.js
-        description: SW: executeScript with inline func returning { title, textContent }; 16k cap
+        description: "SW: executeScript with inline func returning { title, textContent }; 16k cap"
       - name: extractPageContent
         file: src/features/ai/readability-extract.js
         description: Returns { title, textContent } from document clone (Readability or fallback)
@@ -66,7 +66,6 @@ IMPL-AI_TAGGING_READABILITY:
         text = document.body ? document.body.innerText : ''
       IF text.length > maxLength THEN text = text.slice(0, maxLength)
       RETURN { title, textContent: text }
-  detail_file: implementation-decisions/IMPL-AI_TAGGING_READABILITY.yaml
   metadata:
     created:
       date: '2026-02-20'

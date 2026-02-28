@@ -295,10 +295,10 @@ IMPL-RUNTIME_VALIDATION:
   detail_file: implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Add message-handler-runtime-validation.test.js; message-handler-local-save-recall.test.js; saveBookmark shared/toread yes/no for local storage
 IMPL-TYPESCRIPT_MIGRATION:
@@ -342,13 +342,13 @@ IMPL-TYPESCRIPT_MIGRATION:
       - npm run validate (includes typecheck; gate before build and before push)
     code_annotations:
       - IMPL-TYPESCRIPT_MIGRATION
-  detail_file: implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml
+  detail_file: null
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Full TypeScript utilization; wire shared types; @ts-check on key files; add validation tests to REQ/ARCH/IMPL
 IMPL-PLAYWRIGHT_E2E_EXTENSION:
@@ -362,7 +362,7 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
   rationale:
     why: E2E flows that load the built extension and assert popup, messaging interfaces, evaluation contexts, overlay, options, and side panel so refactors are guarded
   implementation_approach:
-    summary: playwright.extension.config.js; global-setup builds extension; extension-fixture.js provides launchPersistentContext and getExtensionId; extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js cover popup, popup↔background, popup→content, GET_PAGE_CONTENT, suggested tags, GET_PAGE_SELECTION, overlay (snapshotOverlay), options/side panel messaging, options snapshot, bookmarks table, browser import, offscreen. Run: npm run test:e2e:extension.
+    summary: 'playwright.extension.config.js; global-setup builds extension; extension-fixture.js provides launchPersistentContext and getExtensionId; extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js cover popup, popup↔background, popup→content, GET_PAGE_CONTENT, suggested tags, GET_PAGE_SELECTION, overlay (snapshotOverlay), options/side panel messaging, options snapshot, bookmarks table, browser import, offscreen. Run: npm run test:e2e:extension.'
   code_locations:
     files:
       - path: playwright.extension.config.js
@@ -389,10 +389,10 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
   detail_file: implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Added messaging, evaluation, overlay, options snapshot, side panel, lower-priority E2E specs
 IMPL-SIDE_PANEL_SNAPSHOT:
@@ -406,7 +406,7 @@ IMPL-SIDE_PANEL_SNAPSHOT:
   rationale:
     why: E2E snapshot helper for side panel (Bookmark tab + Tags tree tab) so tests can assert serializable state shapes
   implementation_approach:
-    summary: snapshotSidePanel(page) in tests/e2e/helpers.js returns { bookmarkTab, tagsTreeTab }; page.evaluate queries #bookmarkPanel/#tagsTreePanel and key elements; E2E spec asserts shapes.
+    summary: snapshotSidePanel(page) in tests/e2e/helpers.js returns { bookmarkTab, tagsTreeTab }; page.evaluate queries
   code_locations:
     files:
       - path: tests/e2e/helpers.js
@@ -427,10 +427,10 @@ IMPL-SIDE_PANEL_SNAPSHOT:
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml
   metadata:
     created:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Side panel snapshot E2E (Bookmark + Tags tree tabs)
 IMPL-OVERLAY:
@@ -967,10 +967,10 @@ IMPL-UI_ACTION_CONTRACT:
   detail_file: implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-UI_INSPECTOR:
@@ -1003,10 +1003,10 @@ IMPL-UI_INSPECTOR:
   detail_file: implementation-decisions/IMPL-UI_INSPECTOR.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-UI_TESTABILITY_HOOKS:
@@ -1038,10 +1038,10 @@ IMPL-UI_TESTABILITY_HOOKS:
   detail_file: implementation-decisions/IMPL-UI_TESTABILITY_HOOKS.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-DEV_COMMAND_INSPECTION:
@@ -1070,10 +1070,10 @@ IMPL-DEV_COMMAND_INSPECTION:
   detail_file: implementation-decisions/IMPL-DEV_COMMAND_INSPECTION.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-DEBUG_PANEL:
@@ -1105,10 +1105,10 @@ IMPL-DEBUG_PANEL:
   detail_file: implementation-decisions/IMPL-DEBUG_PANEL.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-POPUP_BUNDLE:
@@ -1139,10 +1139,10 @@ IMPL-POPUP_BUNDLE:
   detail_file: implementation-decisions/IMPL-POPUP_BUNDLE.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-BADGE_REFRESH:
@@ -1635,7 +1635,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       - IMPL-BOOKMARK_ROUTER
   essence_pseudocode: |
     applyRegexReplace(bookmark, patternStr, replacementStr, options): try RegExp(patternStr,'g'); catch return error; for each option field replace; return payload. regexReplaceSelected: read inputs/checkboxes; validate regex; for each selected applyRegexReplace and saveBookmark; loadBookmarks; selectionStillVisible; render.
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-20'
@@ -1895,7 +1895,7 @@ IMPL-TESTING:
     architecture:
       - ARCH-TESTING_STRATEGY
     requirements:
-      - REQ-*
+      - REQ-CODE_QUALITY
     tests:
       - All test files implement this strategy
     code_annotations:
@@ -1937,7 +1937,7 @@ IMPL-CODE_STYLE:
       - 'eslint.config.mjs: globalIgnores, spread @eslinter/eslint-config-standard, files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides'
       - package.json engines.node >= 20.19.0
       - 'package.json security:check: npm audit --audit-level=high'
-      - 'package.json overrides.minimatch ^10.2.1, test-exclude ^7.0.1 (Jest 30; fixes high ReDoS and deprecated glob 7/inflight)'
+      - package.json overrides.minimatch ^10.2.1, test-exclude ^7.0.1 (Jest 30; fixes high ReDoS and deprecated glob 7/inflight)
   code_locations:
     files:
       - path: .editorconfig
@@ -2071,7 +2071,7 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
     supersedes: []
     see_also:
       - IMPL-TAG_SYSTEM
-  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-13'
@@ -2137,8 +2137,7 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
     last_updated:
       date: '2026-02-25'
       author: AI Agent
-      reason: Add message-handler-local-save-recall.test.js; local-bookmark-service shared/toread round-trip
-      reason: Local storage mode implementation per plan
+      reason: Add message-handler-local-save-recall.test.js; local-bookmark-service shared/toread round-trip. Local storage mode implementation per plan
     last_validated:
       date: '2026-02-13'
       validator: AI Agent
@@ -2366,10 +2365,10 @@ IMPL-SYNC_BOOKMARK_SERVICE:
   detail_file: implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml
   metadata:
     created:
-      date: "2026-02-15"
+      date: '2026-02-15'
       author: AI Agent
     last_updated:
-      date: "2026-02-15"
+      date: '2026-02-15'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-MOVE_BOOKMARK_UI:
@@ -2622,10 +2621,10 @@ IMPL-FILE_STORAGE_TYPED_PATH:
   detail_file: implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Path-based file storage per plan
 IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
@@ -2669,10 +2668,10 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
   detail_file: implementation-decisions/IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Helper path normalization and post-write verification
 IMPL-CONFIG_BACKUP_RESTORE:
@@ -2707,10 +2706,10 @@ IMPL-CONFIG_BACKUP_RESTORE:
   detail_file: implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (CFG-001)
 IMPL-CONFIG_MIGRATION:
@@ -2743,10 +2742,10 @@ IMPL-CONFIG_MIGRATION:
   detail_file: implementation-decisions/IMPL-CONFIG_MIGRATION.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (CFG-002)
 IMPL-FEATURE_FLAGS:
@@ -2778,10 +2777,10 @@ IMPL-FEATURE_FLAGS:
   detail_file: implementation-decisions/IMPL-FEATURE_FLAGS.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (CFG-003)
 IMPL-URL_INHIBITION:
@@ -2819,10 +2818,10 @@ IMPL-URL_INHIBITION:
   detail_file: implementation-decisions/IMPL-URL_INHIBITION.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-URL_UTILITIES:
@@ -2862,10 +2861,10 @@ IMPL-URL_UTILITIES:
   detail_file: implementation-decisions/IMPL-URL_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-TEXT_UTILITIES:
@@ -2897,10 +2896,10 @@ IMPL-TEXT_UTILITIES:
   detail_file: implementation-decisions/IMPL-TEXT_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (UTIL-002)
 IMPL-ARRAY_OBJECT_UTILITIES:
@@ -2938,10 +2937,10 @@ IMPL-ARRAY_OBJECT_UTILITIES:
   detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-TIME_ASYNC_UTILITIES:
@@ -2973,10 +2972,10 @@ IMPL-TIME_ASYNC_UTILITIES:
   detail_file: implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (UTIL-004)
 IMPL-DOM_UTILITIES:
@@ -3008,10 +3007,10 @@ IMPL-DOM_UTILITIES:
   detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (UTIL-005)
 IMPL-LOGGER_CONTEXT_LEVELS:
@@ -3051,10 +3050,10 @@ IMPL-LOGGER_CONTEXT_LEVELS:
   detail_file: implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-LOG_LEVEL_CONFIG:
@@ -3094,10 +3093,10 @@ IMPL-LOG_LEVEL_CONFIG:
   detail_file: implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-LOGGER_LEGACY:
@@ -3137,13 +3136,12 @@ IMPL-LOGGER_LEGACY:
   detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
-
 IMPL-SELECTION_TO_TAG_INPUT:
   name: Selection to tag input on icon click
   status: Active
@@ -3181,13 +3179,13 @@ IMPL-SELECTION_TO_TAG_INPUT:
   related_decisions:
     depends_on: []
     supersedes: []
-  detail_file: implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml
+  detail_file: null
   metadata:
     created:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
       reason: Selection-to-tag input feature
 IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
@@ -3255,7 +3253,6 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
-
 IMPL-SCREENSHOT_MODE:
   name: Screenshot/Demo mode for placeholder screenshots
   status: Active
@@ -3275,12 +3272,12 @@ IMPL-SCREENSHOT_MODE:
   implementation_approach:
     summary: Popup reads ?screenshot=1&url=...&title=... and uses them as fake current tab; script awaits storage seed, waits for data-screenshot-ready; message handler prefers data.url when http(s); script can load seed from file; script checks Local store before index screenshot
     details:
-      - PopupController.loadInitialData checks URL params; when screenshot=1 and url present, skip getCurrentTab() and use decoded url/title; in finally, set data-screenshot-ready on #mainInterface so script can wait for content
+      - PopupController.loadInitialData checks URL params; when screenshot=1 and url present, skip getCurrentTab() and use decoded url/title; in finally, set data-screenshot-ready on
       - MessageHandler.handleGetCurrentBookmark: when data.url is present and is http(s), use it as targetUrl so popup-opened-as-tab gets bookmark for the screenshot URL, not the extension tab URL
       - scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme) and placeholderSyncSeed (showHoverOnPageLoad)
-      - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?); wait for [data-screenshot-ready="true"] before popup screenshot; check #store-local before bookmarks index screenshot so seeded local bookmarks are visible; side panel captures use viewport 240px width so README images match real Chrome side panel proportions
+      - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?); wait for [data-screenshot-ready="true"] before popup screenshot; check
       - scripts/screenshot-seed.example.json: example seed file matching the expected JSON shape
-      - "Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: 'dark' (see IMPL-POPUP_THEME_CSS)"
+      - 'Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: ''dark'' (see IMPL-POPUP_THEME_CSS)'
   code_locations:
     files:
       - path: src/ui/popup/PopupController.js
@@ -3303,16 +3300,15 @@ IMPL-SCREENSHOT_MODE:
       - IMPL-LOCAL_BOOKMARK_SERVICE
       - IMPL-POPUP_THEME_CSS
       - REQ-LOCAL_BOOKMARKS_INDEX
-  detail_file: implementation-decisions/IMPL-SCREENSHOT_MODE.yaml
+  detail_file: null
   metadata:
     created:
-      date: "2026-02-19"
+      date: '2026-02-19'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Side panel captures at 240px viewport width (IMPL-SCREENSHOT_MODE)
-
 IMPL-POPUP_THEME_CSS:
   name: Popup CSS honors ThemeManager (hb-theme-dark)
   status: Active
@@ -3321,16 +3317,16 @@ IMPL-POPUP_THEME_CSS:
     - ARCH-THEME
     - IMPL-SCREENSHOT_MODE
   rationale:
-    why: "Popup must reflect ThemeManager-applied theme so dark preference and screenshot seed (hoverboard_theme: 'dark') show dark popup"
+    why: 'Popup must reflect ThemeManager-applied theme so dark preference and screenshot seed (hoverboard_theme: ''dark'') show dark popup'
     problems_solved:
       - Popup stayed light when hoverboard_theme was 'dark' because popup.css only overrode variables in @media (prefers-color-scheme: dark), not when document root had class hb-theme-dark
     benefits:
-      - "Dark theme preference applies to popup; placeholder screenshots show dark popup when seed includes hoverboard_theme: 'dark'"
+      - 'Dark theme preference applies to popup; placeholder screenshots show dark popup when seed includes hoverboard_theme: ''dark'''
   implementation_approach:
     summary: Add :root.hb-theme-dark block in popup.css with same dark variable values as the prefers-color-scheme media query
     details:
       - ThemeManager applies hb-theme-dark to document.documentElement and sets --hb-* variables; popup uses --bg-primary, --text-primary, etc. from popup.css
-      - popup.css had no rule for :root.hb-theme-dark, so body stayed white; add :root.hb-theme-dark { --bg-primary: #1e1e1e; ... } so popup uses dark variables when ThemeManager sets dark
+      - popup.css had no rule for :root.hb-theme-dark, so body stayed white; add :root.hb-theme-dark { --bg-primary: null
   code_locations:
     files:
       - path: src/ui/popup/popup.css
@@ -3347,16 +3343,15 @@ IMPL-POPUP_THEME_CSS:
     supersedes: []
     see_also:
       - IMPL-SCREENSHOT_MODE
-  detail_file: implementation-decisions/IMPL-POPUP_THEME_CSS.yaml
+  detail_file: null
   metadata:
     created:
-      date: "2026-02-19"
+      date: '2026-02-19'
       author: AI Agent
     last_updated:
-      date: "2026-02-19"
+      date: '2026-02-19'
       author: AI Agent
       reason: Popup dark mode fix for screenshot and theme preference
-
 IMPL-TAB_SEARCH_SERVICE:
   name: Tab Search Service Implementation
   status: Active
@@ -3373,7 +3368,7 @@ IMPL-TAB_SEARCH_SERVICE:
   implementation_approach:
     summary: TabSearchService queries chrome.tabs, filters by title substring, selects next match (with wrap-around), activates tab and focuses window; maintains lastSearchText and lastMatchedTabId for continuation.
     details:
-      - "searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }"
+      - 'searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }'
       - findNextTab(matchingTabs, restartTabId): circular navigation; addToSearchHistory
       - Chrome API errors surfaced as rejected promise
   code_locations:
@@ -3403,13 +3398,13 @@ IMPL-TAB_SEARCH_SERVICE:
     supersedes: []
     see_also: []
     composed_with: []
-  detail_file: implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml
+  detail_file: null
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Create IMPL for tab-search-service tests; add to index
 IMPL-TAB_SEARCH_NO_MATCH_UI:
@@ -3430,7 +3425,7 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
     details:
       - No-match detection: response.success === false && (response.message === "No matching tabs found" || response.matchCount === 0)
       - showSearchNoMatchFeedback: if elements.searchBtn exists, add class "search-no-match", setTimeout 2000ms then remove class
-      - CSS: .button.secondary.search-no-match { border-color: bright red; transition: border-color 2s ease; }
+      - 'CSS: .button.secondary.search-no-match { border-color: bright red; transition: border-color 2s ease; }'
       - Scroll preservation: when uiManager.container exists (side panel), handleSearch saves container.scrollTop before setLoading(true) and restores it in finally after setLoading(false) so the panel does not jump.
       - Search button: popup uses type="button"; UIManager click and Enter handlers call e.preventDefault() so the overlay/page does not submit or jump.
   code_locations:
@@ -3463,13 +3458,13 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
     supersedes: []
     see_also:
       - IMPL-TAB_SEARCH_SERVICE
-  detail_file: implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI.yaml
+  detail_file: null
   metadata:
     created:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
       reason: Initial creation
 IMPL-AI_CONFIG_OPTIONS:
@@ -3556,7 +3551,7 @@ IMPL-AI_TAG_TEST:
     see_also:
       - IMPL-AI_CONFIG_OPTIONS
     composed_with: []
-  detail_file: implementation-decisions/IMPL-AI_TAG_TEST.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-20'
@@ -3602,7 +3597,7 @@ IMPL-AI_TAGGING_READABILITY:
     see_also:
       - IMPL-AI_TAGGING_PROVIDER
     composed_with: []
-  detail_file: implementation-decisions/IMPL-AI_TAGGING_READABILITY.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-20'
@@ -3647,7 +3642,7 @@ IMPL-AI_TAGGING_PROVIDER:
       - IMPL-TAG_SYSTEM
       - IMPL-AI_TAGGING_READABILITY
     composed_with: []
-  detail_file: implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-20'
@@ -3692,7 +3687,7 @@ IMPL-SESSION_TAGS:
     see_also:
       - IMPL-AI_TAGGING_POPUP_UI
     composed_with: []
-  detail_file: implementation-decisions/IMPL-SESSION_TAGS.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-20'
@@ -3743,7 +3738,7 @@ IMPL-AI_TAGGING_POPUP_UI:
       - IMPL-AI_TAGGING_READABILITY
       - IMPL-AI_TAGGING_PROVIDER
       - IMPL-SESSION_TAGS
-  detail_file: implementation-decisions/IMPL-AI_TAGGING_POPUP_UI.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-20'
@@ -3808,7 +3803,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - IMPL-LOCAL_BOOKMARKS_INDEX
     composed_with:
       - IMPL-MESSAGE_HANDLING
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-21'
@@ -3830,7 +3825,7 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
     benefits:
       - Testable filterBookmarksBySearch; search bar, count, Next/Previous with scroll and highlight
   implementation_approach:
-    summary: "filterBookmarksBySearch in tags-tree-filter.js; tags-tree.js/html/css: search input, count, Next/Previous; data-search-index on links; scroll and highlight current match."
+    summary: 'filterBookmarksBySearch in tags-tree-filter.js; tags-tree.js/html/css: search input, count, Next/Previous; data-search-index on links; scroll and highlight current match.'
   code_locations:
     files:
       - path: src/ui/side-panel/tags-tree-filter.js
@@ -3857,7 +3852,7 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
       - IMPL-SIDE_PANEL_TAGS_TREE
     composed_with:
       - IMPL-SIDE_PANEL_TAGS_TREE
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK_SEARCH.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-22'
@@ -3879,7 +3874,7 @@ IMPL-SIDE_PANEL_TABS:
     benefits:
       - Single side-panel entry script; tab bar; lazy init of Bookmark and Tags tree tabs; tab persistence
   implementation_approach:
-    summary: side-panel.html has tab bar and two panels (#bookmarkPanel, #tagsTreePanel). side-panel.js on load reads persisted tab, shows that panel, binds tab clicks. On first "Bookmark" select: init UISystem, createPopup({ container: bookmarkPanel }), controller.loadInitialData(), setupEventListeners. On "Tags tree" select: call initTagsTreeTab(). Persist tab on switch. Build: bundle side-panel.js.
+    summary: side-panel.html has tab bar and two panels (#bookmarkPanel,
     details:
       - manifest side_panel.default_path to side-panel.html
       - Tab buttons; click handler switches panel, saves to storage, runs init for that tab if not yet inited
@@ -3911,7 +3906,7 @@ IMPL-SIDE_PANEL_TABS:
     composed_with:
       - IMPL-SIDE_PANEL_BOOKMARK
       - IMPL-SIDE_PANEL_TAGS_TREE
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-25'
@@ -3933,9 +3928,9 @@ IMPL-SIDE_PANEL_BOOKMARK:
       - Popup uses document.getElementById; panel has two panels in one document
     benefits:
       - Same PopupController/UIManager logic; container + data-popup-ref for element lookup in Bookmark panel
-      - "Open Tags tree" in panel context switches tab instead of opening panel again
+      - '"Open Tags tree" in panel context switches tab instead of opening panel again'
   implementation_approach:
-    summary: #bookmarkPanel contains markup mirroring popup main with data-popup-ref on each element. UIManager built with container = bookmarkPanel uses container.querySelector('[data-popup-ref="id"]'). PopupController receives that UIManager. Footer "Tags tree" in panel: switchToTagsTreeTab() instead of OPEN_SIDE_PANEL.
+    summary: null
   code_locations:
     files:
       - path: src/ui/side-panel/side-panel.html
@@ -3962,7 +3957,7 @@ IMPL-SIDE_PANEL_BOOKMARK:
     composed_with:
       - IMPL-UIManager_SCOPED_ROOT
       - IMPL-SIDE_PANEL_TABS
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-25'
@@ -4006,7 +4001,7 @@ IMPL-UIManager_SCOPED_ROOT:
       - IMPL-SIDE_PANEL_TABS
     composed_with:
       - IMPL-SIDE_PANEL_BOOKMARK
-  detail_file: implementation-decisions/IMPL-UIManager_SCOPED_ROOT.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-25'
@@ -4038,7 +4033,7 @@ IMPL-EXTENSION_COMMANDS:
       - tests/unit/service-worker-quick-access.test.js
     code_annotations:
       - IMPL-EXTENSION_COMMANDS
-  detail_file: implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-26'
@@ -4069,7 +4064,7 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
       - tests/unit/service-worker-quick-access.test.js
     code_annotations:
       - IMPL-CONTEXT_MENU_QUICK_ACCESS
-  detail_file: implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-26'
@@ -4101,7 +4096,7 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
       - tests/unit/keyboard-manager-quick-access.test.js
     code_annotations:
       - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
-  detail_file: implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS.yaml
+  detail_file: null
   metadata:
     created:
       date: '2026-02-26'
@@ -4110,3 +4105,123 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
       date: '2026-02-26'
       author: AI Agent
       reason: Initial creation for in-popup/panel keyboard quick access
+IMPL-EXT_IDENTITY:
+  name: Extension Identity
+  status: Active
+  cross_references: []
+  rationale:
+    why: Extension identity implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-UX_CORE:
+  name: UX Core
+  status: Active
+  cross_references: []
+  rationale:
+    why: Core UX implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-MV3_MIGRATION:
+  name: MV3 Migration
+  status: Active
+  cross_references: []
+  rationale:
+    why: Manifest V3 migration
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-STORAGE:
+  name: Storage
+  status: Active
+  cross_references: []
+  rationale:
+    why: Storage implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-BOOKMARKING:
+  name: Bookmarking
+  status: Active
+  cross_references: []
+  rationale:
+    why: Bookmarking implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-THEME:
+  name: Theme
+  status: Active
+  cross_references: []
+  rationale:
+    why: Theme implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-BADGE:
+  name: Badge
+  status: Active
+  cross_references: []
+  rationale:
+    why: Badge implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-SITE_MGMT:
+  name: Site Management
+  status: Active
+  cross_references: []
+  rationale:
+    why: Site management implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-SEARCH:
+  name: Search
+  status: Active
+  cross_references: []
+  rationale:
+    why: Search implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-PRIVACY:
+  name: Privacy
+  status: Active
+  cross_references: []
+  rationale:
+    why: Privacy implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-CROSS_BROWSER:
+  name: Cross Browser
+  status: Active
+  cross_references: []
+  rationale:
+    why: Cross-browser implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null
+IMPL-SERVICE_WORKER:
+  name: Service Worker
+  status: Active
+  cross_references: []
+  rationale:
+    why: Service worker implementation
+  implementation_approach:
+    summary: ''
+  traceability: {}
+  detail_file: null

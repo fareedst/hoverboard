@@ -14,7 +14,7 @@ IMPL-SIDE_PANEL_BOOKMARK:
       - Popup uses document.getElementById; panel has two panels in one document
     benefits:
       - Same PopupController/UIManager logic; container + data-popup-ref for element lookup in Bookmark panel
-      - "Open Tags tree" in panel context switches tab instead of opening panel again
+      - "\"Open Tags tree\" in panel context switches tab instead of opening panel again"
   implementation_approach:
     summary: #bookmarkPanel contains markup mirroring popup main (loading, error, main with quick actions, storage, tag management, search, footer). Each element has data-popup-ref="id" (e.g. data-popup-ref="mainInterface"). UIManager built with container = bookmarkPanel uses container.querySelector('[data-popup-ref="mainInterface"]'). PopupController receives that UIManager; loadInitialData and handlers unchanged. Footer "Tags tree" button: when in panel, emit or call switchToTagsTreeTab() instead of sending OPEN_SIDE_PANEL.
     details:
@@ -26,7 +26,7 @@ IMPL-SIDE_PANEL_BOOKMARK:
       - path: src/ui/side-panel/side-panel.html
         description: #bookmarkPanel with data-popup-ref markup
       - path: src/ui/side-panel/side-panel.js
-        description: createPopup({ container: bookmarkPanel }); wire openTagsTree to switch tab
+        description: "createPopup with container bookmarkPanel; wire openTagsTree to switch tab"
       - path: src/ui/popup/UIManager.js
         description: Optional container; cacheElements uses data-popup-ref when container set
       - path: src/ui/popup/PopupController.js
@@ -90,7 +90,6 @@ IMPL-SIDE_PANEL_BOOKMARK:
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_TABS]
     # Prompt refresh (like badge): when Bookmark tab is visible, refresh on tabs.onActivated and on tabs.onUpdated (when updated tab is active and status complete). refreshBookmarkTabIfVisible() calls controller.refreshPopupData() only when activeTab === "bookmark" and controller exists. Implements "Bookmark tab refreshes promptly when active tab changes or completes".
     bindTabChangeRefresh(): chrome.tabs.onActivated → refreshBookmarkTabIfVisible(); chrome.tabs.onUpdated(tabId, changeInfo, tab) → IF changeInfo.status === "complete" AND tab.url AND updated tab is current window active tab: refreshBookmarkTabIfVisible()
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml
   metadata:
     created:
       date: '2026-02-25'

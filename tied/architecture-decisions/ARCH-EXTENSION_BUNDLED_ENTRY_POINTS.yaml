@@ -7,7 +7,7 @@ ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
   rationale:
     why: Browsers do not resolve Node-style bare module specifiers; extension scripts loaded by the browser (service worker, popup, options, content script) must be self-contained bundles
     problems_solved:
-      - "Failed to resolve module specifier 'fast-xml-parser'" when popup loaded unbundled code that eventually imported pinboard-service.js (which imports fast-xml-parser)
+      - "\"Failed to resolve module specifier 'fast-xml-parser'\" when popup loaded unbundled code that eventually imported pinboard-service.js (which imports fast-xml-parser)"
       - Any entry point that loads raw source files with npm imports would fail at runtime
     benefits:
       - All four entry points are built with esbuild; npm dependencies (e.g. fast-xml-parser) are inlined
@@ -22,7 +22,6 @@ ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
       - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
     implementation:
       - IMPL-POPUP_BUNDLE
-  detail_file: architecture-decisions/ARCH-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
   metadata:
     created: "2026-02-17"
     last_updated: "2026-02-17"
