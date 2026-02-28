@@ -72,6 +72,9 @@ const SIDE_PANEL_TAB_BOOKMARK = '.side-panel-tab[data-tab="bookmark"]'
 const SIDE_PANEL_TAB_TAGS_TREE = '.side-panel-tab[data-tab="tagsTree"]'
 // [IMPL-SCREENSHOT_MODE] Side panel captures at 240px width so README images match real Chrome side panel proportions
 const SIDE_PANEL_VIEWPORT = { width: 240, height: 600 }
+// Viewport for Pinboard overlay page so composite (pinboard + side panel) has predictable dimensions
+const PINBOARD_VIEWPORT = { width: 1024 - 240, height: 600 }
+const PINBOARD_SIDE_PANEL_COMPOSITE_WIDTH = PINBOARD_VIEWPORT.width + SIDE_PANEL_VIEWPORT.width
 
 async function main () {
   if (!fs.existsSync(extPath) || !fs.existsSync(path.join(extPath, 'manifest.json'))) {
@@ -127,9 +130,11 @@ async function main () {
   }, { localSeed: placeholderStorageSeed, syncSeed: placeholderSyncSeed })
   await optionsPage.waitForTimeout(500)
 
-  // 1) Overlay on content page (Pinboard) – capture to temp for compositing
+  // 1) Overlay on content page (Pinboard) – capture to temp for compositing (popup + later pinboard+side-panel composite)
   const pinboardTempPath = path.join(os.tmpdir(), `hoverboard-pinboard-${Date.now()}.png`)
+  const pinboardOnlyPath = path.join(os.tmpdir(), `hoverboard-pinboard-only-${Date.now()}.png`)
   const overlayPage = await context.newPage()
+  await overlayPage.setViewportSize(PINBOARD_VIEWPORT)
   await overlayPage.goto(PINBOARD_CONTENT_URL, { waitUntil: 'domcontentloaded', timeout: 20000 })
   await overlayPage.waitForTimeout(SCREENSHOT_WAIT_MS)
   const overlayEl = overlayPage.locator(OVERLAY_SELECTOR)
@@ -139,6 +144,7 @@ async function main () {
     console.warn('Overlay may not be visible; capturing page anyway.')
   }
   await overlayPage.screenshot({ path: pinboardTempPath, fullPage: false })
+  fs.copyFileSync(pinboardTempPath, pinboardOnlyPath)
   await overlayPage.close()
 
   // 2) Popup (screenshot mode) – crop to #mainInterface only, then composite onto Pinboard and save standalone
@@ -168,6 +174,7 @@ async function main () {
     .toFile(path.join(imagesDir, 'Hoverboard_v1.0.7.0_Chrome_Pinboard.png'))
   console.log('Saved: images/Hoverboard_v1.0.7.0_Chrome_Pinboard.png (overlay + popup composited)')
   try { fs.unlinkSync(pinboardTempPath) } catch (_) {}
+  // pinboardOnlyPath kept for pinboard+side-panel composite after step 5a
 
   // 3) Options
   await optionsPage.reload({ waitUntil: 'domcontentloaded', timeout: 15000 })
@@ -199,14 +206,34 @@ async function main () {
   await sidePanelPage.goto(`${baseUrl}/src/ui/side-panel/side-panel.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
   await sidePanelPage.waitForTimeout(2000)
 
-  // 5a) Bookmark tab (default): wait for content then capture
+  // 5a) Bookmark tab (default): wait for content then capture (file + buffer for pinboard+side-panel composite)
   await sidePanelPage.locator(SIDE_PANEL_BOOKMARK_READY).first().waitFor({ state: 'attached', timeout: 10000 })
   await sidePanelPage.waitForTimeout(800)
-  await sidePanelPage.screenshot({
-    path: path.join(imagesDir, 'side-panel-bookmark.png'),
-    fullPage: true
-  })
+  const sidePanelBookmarkBuffer = await sidePanelPage.screenshot({ fullPage: true })
+  fs.writeFileSync(path.join(imagesDir, 'side-panel-bookmark.png'), sidePanelBookmarkBuffer)
   console.log('Saved: images/side-panel-bookmark.png')
+
+  // 5a') Composite: Pinboard page (with overlay) + side panel Bookmark tab → pinboard-side-panel-bookmark.png [IMPL-SCREENSHOT_MODE]
+  const pinboardOnlyBuf = fs.readFileSync(pinboardOnlyPath)
+  const panelTop = sharp(sidePanelBookmarkBuffer).extract({ left: 0, top: 0, width: SIDE_PANEL_VIEWPORT.width, height: SIDE_PANEL_VIEWPORT.height })
+  const panelTopBuf = await panelTop.png().toBuffer()
+  const compositeCanvas = sharp({
+    create: {
+      width: PINBOARD_SIDE_PANEL_COMPOSITE_WIDTH,
+      height: PINBOARD_VIEWPORT.height,
+      channels: 3,
+      background: { r: 30, g: 30, b: 30 }
+    }
+  })
+  await compositeCanvas
+    .composite([
+      { input: pinboardOnlyBuf, left: 0, top: 0 },
+      { input: panelTopBuf, left: PINBOARD_VIEWPORT.width, top: 0 }
+    ])
+    .png()
+    .toFile(path.join(imagesDir, 'pinboard-side-panel-bookmark.png'))
+  console.log('Saved: images/pinboard-side-panel-bookmark.png (Pinboard + side panel Bookmark tab)')
+  try { fs.unlinkSync(pinboardOnlyPath) } catch (_) {}
 
   // 5b) Tags tree tab: switch tab, wait for tree content, capture
   await sidePanelPage.locator(SIDE_PANEL_TAB_TAGS_TREE).click()

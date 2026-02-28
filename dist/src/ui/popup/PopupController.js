@@ -1961,7 +1961,7 @@ export class PopupController {
     }
 
     let scrollContainer = null
-    let savedScrollTop = undefined
+    let savedScrollTop
     try {
       scrollContainer = this.uiManager?.container
       savedScrollTop = scrollContainer ? scrollContainer.scrollTop : undefined

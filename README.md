@@ -64,9 +64,13 @@ The configuration page provides comprehensive settings for customizing the exten
 
 ### Side Panel – Bookmark and Tags Tree
 
+![Pinboard.in with side panel (Bookmark tab)](images/pinboard-side-panel-bookmark.png)
+
+The snapshot above shows **pinboard.in** in the main content area with the Hoverboard **side panel** open and the **Bookmark** tab visible (popup-equivalent: quick actions, storage, tag management, search).
+
 ![Side Panel – Bookmark tab](images/side-panel-bookmark.png)
 
-The snapshot above shows the side panel **Bookmark** tab (popup-equivalent: quick actions, storage, tag management, search).
+Close-up of the side panel **Bookmark** tab only.
 
 ![Side Panel – Tags tree tab](images/side-panel-tags-tree.png)
 
@@ -268,7 +272,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 
 ## 📸 Screenshots
 
-Screenshots are generated with **placeholder bookmark data** (no live account) and show the extension in **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script awaits storage seed, waits for the popup to signal content ready, and checks the **Local (L)** store on the bookmarks index so seeded bookmarks are visible. Side panel images (Bookmark and Tags tree tabs) are captured at **240px width** to match real Chrome side panel proportions. You can use a custom seed file with `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js`; see `scripts/screenshot-seed.example.json` for the expected JSON shape.
+Screenshots are generated with **placeholder bookmark data** (no live account) and show the extension in **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script awaits storage seed, waits for the popup to signal content ready, and checks the **Local (L)** store on the bookmarks index so seeded bookmarks are visible. Side panel images (Bookmark and Tags tree tabs) are captured at **240px width** to match real Chrome side panel proportions. The script also produces **pinboard-side-panel-bookmark.png** (Pinboard.in page with the side panel Bookmark tab visible). You can use a custom seed file with `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js`; see `scripts/screenshot-seed.example.json` for the expected JSON shape.
 
 ### Popup (dark theme)
 

@@ -20589,7 +20589,7 @@ var PopupController = class {
       return;
     }
     let scrollContainer = null;
-    let savedScrollTop = void 0;
+    let savedScrollTop;
     try {
       scrollContainer = this.uiManager?.container;
       savedScrollTop = scrollContainer ? scrollContainer.scrollTop : void 0;
