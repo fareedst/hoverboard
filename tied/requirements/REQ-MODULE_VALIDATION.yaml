@@ -16,12 +16,15 @@ REQ-MODULE_VALIDATION:
     - criterion: Module validation results are documented
     - criterion: Integration tasks are separate from module development and validation tasks
     - criterion: Integration only occurs after module validation passes
+    - criterion: "Minimize code measurable only from outside testing (E2E/manual): every IMPL that introduces or changes behavior has a test strategy (unit, integration, or E2E/glue-only with documented reason)"
+    - criterion: "No non-trivial logic in entry points (popup, service worker, content script main) unless explicitly documented as glue and the reason it cannot be extracted is stated"
   validation_criteria:
     - method: Manual verification that modules are identified and documented before development
     - method: Automated verification that module validation tests exist and pass before integration
     - method: Code review verification that integration code references validated modules
     - method: Verification that module validation results are documented
     - method: Verification that integration tests validate the combined behavior of validated modules
+    - method: "Coverage gates and coverage gap report; IMPL traceability.tests or test_coverage_note (E2E-only with reason) for every Active IMPL"
   traceability:
     architecture: []
     implementation: []

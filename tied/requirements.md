@@ -39,6 +39,7 @@ Token names use the same format in text and filenames:
 - Requirements describe WHAT the system should do and WHY, not HOW
 - Requirements MUST NOT describe bugs or implementation details
 - **Language-Agnostic Requirements**: Requirements MUST be language-agnostic. Language selection, runtime choices, and language-specific implementation details belong in architecture decisions (`architecture-decisions.md`) or implementation decisions (`implementation-decisions.md`), NOT in requirements. The ONLY exception is when language selection is itself a specific requirement (e.g., `[REQ-USE_PYTHON]` for a Python-specific project requirement). When documenting requirements, focus on behavior and capabilities, not on how they are implemented in a specific language.
+- **Testability and E2E-only minimization** ([REQ-MODULE_VALIDATION], [PROC-TEST_STRATEGY]): Minimize code that is only measurable from outside testing (E2E/manual); logic must live in testable modules unless justified. See REQ-MODULE_VALIDATION satisfaction and validation criteria for test strategy and entry-point rules.
 
 ## How to Add a New Requirement
 

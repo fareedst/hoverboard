@@ -1692,9 +1692,10 @@ ARCH-UI_TESTABILITY:
   type: ARCH
   name: UI Testability and Inspection Architecture
   status: Active
-  description: Inspector and contract for message/action logging; single source of truth for action IDs and message types
+  description: Inspector and contract for message/action logging; thin entry points; logic in testable modules; single source of truth for action IDs and message types
   cross_references:
     - REQ-UI_INSPECTION
+    - REQ-MODULE_VALIDATION
     - IMPL-UI_ACTION_CONTRACT
     - IMPL-UI_INSPECTOR
   source_index: architecture-decisions.yaml

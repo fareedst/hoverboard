@@ -84,7 +84,8 @@ Chrome extension `src/` only (Safari-only code excluded). Applies to unit tests 
 
 ### Token references
 - `[IMPL-TESTING]` — testing implementation decisions
-- `[REQ-MODULE_VALIDATION]` — module validation before integration
+- `[REQ-MODULE_VALIDATION]` — module validation before integration; testability and minimize E2E-only (satisfaction/validation criteria)
+- `[ARCH-UI_TESTABILITY]` — thin entry points; logic in testable modules
 - All `[REQ-*]` / `[ARCH-*]` / `[IMPL-*]` reflected in code under test
 
 ### Status
@@ -95,11 +96,13 @@ Active
 2. **Unit + integration tests cover logic** — Unit and integration tests should cover IMPL/ARCH/REQ logic so that untested pathways are found and fixed before or alongside E2E.
 3. **IMPL–test alignment** — Every Active IMPL should have at least one test reference in `traceability.tests`, or be explicitly documented as "tested only via E2E" / "no unit tests" with a reason.
 4. **Coverage gates** — Jest `coverageThreshold` and the coverage gap report (`scripts/coverage-gap-report.js`) help prevent regressions and surface files/IMPLs with no tests.
+5. **Minimize E2E-only code** — Treat E2E and manual verification as the exception. Every IMPL should have unit or integration tests for its logic, or an explicit E2E-only reason in the IMPL detail.
 
 ### Activities
 - Run `npm run test:coverage` before merging; fix or document any new code that lowers coverage below threshold.
 - Run `node scripts/coverage-gap-report.js [threshold]` to list src files below threshold and IMPLs with empty `traceability.tests`; use the report in MRs or docs.
 - For IMPLs that are intentionally not unit-tested (e.g. platform-specific glue or debug tooling), record in the IMPL detail that coverage is via E2E or manual testing so the "no tests" is explicit and reviewable.
+- When adding or changing IMPLs, classify code as unit-testable, integration-testable, or E2E-only. If E2E-only, set `traceability.tests` to [] and document in the IMPL (e.g. `test_coverage_note` or `e2e_only_reason`) why unit/integration are not used. Use the coverage gap report to catch IMPLs with empty tests and no justification.
 
 ### Artifacts & Metrics
 - **Artifacts** — Coverage report (`coverage/`), coverage gap report output, TIED `traceability.tests` in IMPL detail files.
@@ -419,14 +422,16 @@ Active
    - Add or update tests so they match the IMPL.
    - Every test **block** must carry the same REQ/ARCH/IMPL comments as the corresponding IMPL block (in the appropriate place in the test).
    - If a comment would help tests but is not yet in the IMPL, add it to the IMPL for permanence; treat test code as transient.
+   - Ensure testable logic is not implemented in entry points; plan extraction to a module so unit/integration tests can run.
 
 4. **Implement to tests (TDD)**
+   - Implement logic in testable modules (with dependency injection or pure functions). Entry points should only call into these modules.
    - Implement managed code to satisfy the tests.
    - Every **block** in managed sources must carry the same REQ/ARCH/IMPL comments as in the IMPL. For nested blocks with the **same** set, do not repeat token names; comment only how that sub-block implements the requirements. For a nested block with a **different** set, add a comment at the start naming that set and how the block implements it.
    - Iterate until all tests pass.
 
-5. **Implement non-testable glue**
-   - Implement any remaining wiring and glue code that is not meaningfully testable but is required to satisfy REQ/ARCH/IMPL (e.g. entry points, manifest wiring, platform hooks).
+5. **Implement minimal glue**
+   - Implement **minimal** glue (entry points, manifest wiring, platform hooks). Any non-trivial logic that remains in glue must be justified in the IMPL (`e2e_only_reason` or `test_coverage_note`). Prefer extracting logic to a testable module and keeping glue thin.
    - Annotate with the same token/block rules where the code is still “managed” and traceable.
 
 6. **Validate and close test gaps**

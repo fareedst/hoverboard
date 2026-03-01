@@ -73,8 +73,17 @@ Same shape in all files that use them:
 | Field | Type | Description |
 |-------|------|-------------|
 | `related_decisions.composed_with` | list of strings | IMPL tokens routinely composed with this one in a single algorithm. |
+| `testability` | string | Optional. One of `unit`, `integration`, `e2e_only`. Classifies how the IMPL’s logic is tested. When `e2e_only`, provide `e2e_only_reason`. |
+| `e2e_only_reason` | string | Optional. Required when `testability` is `e2e_only`. Explains why unit/integration tests are not used (e.g. platform event binding only, manifest wiring, visual regression only). |
 
-See **Optional fields for composition and workflow** below for usage.
+See **Optional fields for composition and workflow** below for usage. See **Testability classification and E2E-only code** below for when to use these fields.
+
+### Testability classification and E2E-only code
+
+When authoring an IMPL, classify each major code path or block as unit-testable, integration-testable, or E2E-only. If E2E-only, document the reason (e.g. "platform event binding only", "manifest wiring", "visual regression only") in the IMPL detail using `e2e_only_reason` or `test_coverage_note`. This supports [REQ-MODULE_VALIDATION] and [PROC-TEST_STRATEGY]: minimize code that is only measurable from outside (E2E/manual) testing.
+
+- **Optional schema fields:** `testability` (`unit` | `integration` | `e2e_only`) and, when `e2e_only`, `e2e_only_reason` (string). When `e2e_only`, the reason is required so reviewers see why unit/integration tests are not used.
+- **Logic in entry points:** If logic ends up in an entry point (popup, service worker, content script main), the IMPL must either (a) describe the extracted module and unit/integration tests, or (b) state why the logic remains in the entry point and why it is E2E-only (and accept review). No breaking change to existing IMPL files; new IMPLs and major revisions should adopt this classification.
 
 ### Mandatory essence_pseudocode
 
@@ -85,7 +94,7 @@ Every IMPL detail file **must** include an `essence_pseudocode` field. **Address
 - Once implemented, keep pseudo-code aligned with code and tests so documentation remains the single source of truth.
 - **Algol-style notation:** Prefer Algol-style readability: clear control flow (if/then/else, loops, ON/WHEN), explicit INPUT/OUTPUT/DATA (and CONTROL when relevant), and procedure names in UPPER_SNAKE so blocks are easy to read and compare.
 - **One action per step:** Each logical step in `essence_pseudocode` should express one clear action or decision (or one small, coherent block). Avoid long prose lines that mix multiple actions; that weakens collision detection and makes it harder to compare IMPLs and spot overlapping steps or ordering.
-- **Traceability to tests:** Key branches and procedures in `essence_pseudocode` should be reflected in test names or test structure (e.g. one procedure or branch ≈ one `describe`/`it` or test section). That keeps the pseudo-code precise enough to guide tests and to detect when an IMPL’s behavior has drifted from its description.
+- **Traceability to tests:** Key branches and procedures in `essence_pseudocode` should be reflected in test names or test structure (e.g. one procedure or branch ≈ one `describe`/`it` or test section). That keeps the pseudo-code precise enough to guide tests and to detect when an IMPL’s behavior has drifted from its description. Optionally, note the intended test level in a comment at block start (e.g. `# unit-testable: NORMALIZE_INPUT`, `# E2E-only: platform onMessage binding`) so E2E-only code is visible and justified at design time.
 
 ### Preferred vocabulary for essence_pseudocode
 

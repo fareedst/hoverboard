@@ -104,6 +104,7 @@ This acknowledgment confirms that the AI agent has:
    - **Benefits**: Improved testability, reusability, maintainability, and clarity
    - **Application**: Apply consistently when designing new features, refactoring existing code, or when complexity makes testing or reasoning difficult
    - **Rationale**: Separating simple, reusable logic from complex application logic enables independent testing, reduces coupling, and makes code easier to understand and maintain. Pure functions with single responsibilities are easier to reason about, test, and reuse across different contexts.
+   - **Minimize E2E-only code**: Minimize code that is only verifiable via E2E or manual testing; such code should be limited to true glue (event binding, platform APIs) and documented in IMPL.
 
 9. **Independent Module Validation Before Integration** (MANDATORY - Required for [REQ-MODULE_VALIDATION])
    - **MANDATORY**: Logical modules MUST be validated independently before integration into code satisfying specific requirements
@@ -117,6 +118,11 @@ This acknowledgment confirms that the AI agent has:
    - **MANDATORY**: Modules must pass all validation criteria before integration
    - **MANDATORY**: Integration tasks must be separate from module development and validation tasks
    - **Rationale**: Independent module validation eliminates bugs related to code complexity by ensuring each module works correctly in isolation before combining with other modules. This reduces integration complexity and catches bugs early in the development cycle.
+   - **Thin entry points**: Entry points (e.g. popup, service worker bootstrap) should be thin: orchestration and calls into validated modules only. Logic that could be unit- or integration-tested must live in modules, not in entry points.
+
+10. **Thin Entry Points and Testability Classification** (supports [REQ-MODULE_VALIDATION], [PROC-TEST_STRATEGY])
+   - **Principle**: Logic belongs in testable modules; entry points orchestrate only. When code is only measurable from outside (E2E/manual), document the reason in the IMPL and keep that code minimal.
+   - **Application**: When authoring or reviewing IMPLs, classify code paths as unit-testable, integration-testable, or E2E-only; require justification for E2E-only. Prefer extracting logic from entry points into modules so unit/integration tests can cover it.
 
 ---
 

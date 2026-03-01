@@ -83,6 +83,8 @@ REQ-MODULE_VALIDATION:
     - criterion: Module validation results documented
     - criterion: Integration tasks separate from module development tasks
     - criterion: Integration only occurs after module validation passes
+    - criterion: Minimize code measurable only from outside testing (E2E/manual); every IMPL has test strategy (unit/integration or E2E/glue-only with documented reason)
+    - criterion: No non-trivial logic in entry points unless documented as glue with reason
   validation_criteria:
     - method: Manual verification
       coverage: Modules identified and documented before development starts
@@ -94,6 +96,8 @@ REQ-MODULE_VALIDATION:
       coverage: Module validation results are documented
     - method: Integration testing
       coverage: Integration tests validate combined behavior of validated modules
+    - method: Coverage gates and gap report
+      coverage: IMPL traceability.tests or test_coverage_note (E2E-only with reason) for every Active IMPL
   traceability:
     architecture:
       - ARCH-MODULE_VALIDATION
