@@ -69,6 +69,9 @@ export const MESSAGE_TYPES = {
   GET_USER_RECENT_TAGS: 'getUserRecentTags',
   GET_SHARED_MEMORY_STATUS: 'getSharedMemoryStatus',
 
+  // [REQ-SIDE_PANEL_BROWSER_TABS] Get document.referrer for tabs (run in SW so injection is in tab context)
+  GET_TAB_REFERRERS: 'getTabReferrers',
+
   // Content script lifecycle
   CONTENT_SCRIPT_READY: 'contentScriptReady',
 

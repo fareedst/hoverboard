@@ -1,0 +1,40 @@
+ARCH-SIDE_PANEL_BROWSER_TABS:
+  name: Side Panel Browser Tabs Architecture
+  status: Active
+  cross_references:
+    - REQ-SIDE_PANEL_BROWSER_TABS
+  rationale:
+    why: New panel lists browser tabs from chrome.tabs; referrer must be fetched by the service worker so scripting runs in tab context; filter and actions operate on visible list.
+    problems_solved:
+      - How to get referrer (not in chrome.tabs API)
+      - Scripting from the side panel does not run in tab context; injection must be done from the service worker
+      - How to scope copy/close to filtered list
+    benefits:
+      - 'Single panel #browserTabsPanel; data from chrome.tabs; referrer via GET_TAB_REFERRERS (SW runs executeScript per tab); filter and actions on visible tabs'
+  implementation_approach:
+    summary: 'Panel uses chrome.tabs.query; referrer is obtained by sending GET_TAB_REFERRERS to the service worker, which runs chrome.scripting.executeScript in each tab and returns a tabId-to-referrer map. Filter applies case-insensitive to title, url, referrer; copy and close act on visible (filtered) list.'
+  traceability:
+    requirements:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    implementation:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+    code_annotations:
+      - ARCH-SIDE_PANEL_BROWSER_TABS
+  related_decisions:
+    depends_on:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    informs:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+    see_also:
+      - ARCH-SIDE_PANEL_TABS
+  metadata:
+    created:
+      date: '2026-02-28'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-28'
+      author: AI Agent
+      reason: Referrer via SW (GET_TAB_REFERRERS); scripting from panel does not run in tab context

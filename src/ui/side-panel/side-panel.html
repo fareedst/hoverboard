@@ -17,6 +17,7 @@
     <nav class="side-panel-tabs" role="tablist" aria-label="Panel tabs">
       <button type="button" class="side-panel-tab" role="tab" data-tab="bookmark" aria-selected="true">Bookmark</button>
       <button type="button" class="side-panel-tab" role="tab" data-tab="tagsTree" aria-selected="false">Tags tree</button>
+      <button type="button" class="side-panel-tab" role="tab" data-tab="browserTabs" aria-selected="false">Tabs</button>
     </nav>
   </header>
 
@@ -114,6 +115,23 @@
     <button type="button" data-popup-ref="settingsBtn" class="icon-button hidden" aria-hidden="true" style="position:absolute;left:-9999px"></button>
     <span data-popup-ref="privateStatus" class="hidden" aria-hidden="true"></span>
     <span data-popup-ref="readStatus" class="hidden" aria-hidden="true"></span>
+  </div>
+
+  <!-- [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Browser Tabs panel: list tabs with title, URL, referrer; filter; copy URLs; close visible -->
+  <div id="browserTabsPanel" class="side-panel-content" role="tabpanel" aria-labelledby="tab-browser-tabs" hidden>
+    <header class="browser-tabs-header">
+      <h2 class="browser-tabs-title">Browser tabs</h2>
+      <p class="browser-tabs-subtitle">Filter by title, URL, or referrer. Copy URLs or close visible tabs.</p>
+    </header>
+    <section class="browser-tabs-search" aria-label="Filter tabs">
+      <input type="text" id="browserTabsFilterInput" class="browser-tabs-filter-input" placeholder="Filter by title, URL, referrer…" aria-label="Filter tabs">
+    </section>
+    <div id="browserTabsList" class="browser-tabs-list"></div>
+    <div id="browserTabsMessage" class="browser-tabs-message hidden" aria-live="polite"></div>
+    <section class="browser-tabs-actions">
+      <button type="button" id="browserTabsCopyBtn" data-action="copyUrls" class="button secondary">Copy URLs</button>
+      <button type="button" id="browserTabsCloseBtn" data-action="closeTabs" class="button secondary">Close visible tabs</button>
+    </section>
   </div>
 
   <!-- [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Tags tree panel: same structure as tags-tree.html for getElementById lookups -->

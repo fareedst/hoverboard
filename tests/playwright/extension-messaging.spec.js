@@ -205,10 +205,11 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
     await sidePanelPage.waitForLoadState('domcontentloaded')
     await sidePanelPage.waitForTimeout(1500)
 
-    // [IMPL-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Tab bar has Bookmark and Tags tree
+    // [IMPL-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_BROWSER_TABS] Tab bar has Bookmark, Tags tree, and Tabs
     await expect(sidePanelPage.locator('.side-panel-tab[data-tab="bookmark"]')).toBeVisible()
     await expect(sidePanelPage.locator('.side-panel-tab[data-tab="tagsTree"]')).toBeVisible()
-    await expect(sidePanelPage.locator('#bookmarkPanel, #tagsTreePanel')).toHaveCount(2)
+    await expect(sidePanelPage.locator('.side-panel-tab[data-tab="browserTabs"]')).toBeVisible()
+    await expect(sidePanelPage.locator('#bookmarkPanel, #tagsTreePanel, #browserTabsPanel')).toHaveCount(3)
 
     // Default tab is Bookmark; switch to Tags tree and verify tree content loads
     await sidePanelPage.locator('.side-panel-tab[data-tab="tagsTree"]').click()
@@ -302,8 +303,9 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     const snapshot = await snapshotSidePanel(sidePanelPage)
     expect(snapshot).toHaveProperty('bookmarkTab')
     expect(snapshot).toHaveProperty('tagsTreeTab')
+    expect(snapshot).toHaveProperty('browserTabsTab')
 
-    const { bookmarkTab, tagsTreeTab } = snapshot
+    const { bookmarkTab, tagsTreeTab, browserTabsTab } = snapshot
     expect(bookmarkTab).toHaveProperty('panelPresent')
     expect(typeof bookmarkTab.panelPresent).toBe('boolean')
     expect(bookmarkTab.panelPresent).toBe(true)
@@ -319,6 +321,14 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     expect(tagsTreeTab).toHaveProperty('hasTreeContainer')
     expect(tagsTreeTab).toHaveProperty('hasSearchInput')
     expect(tagsTreeTab).toHaveProperty('hasConfigToggle')
+
+    expect(browserTabsTab).toHaveProperty('panelPresent')
+    expect(typeof browserTabsTab.panelPresent).toBe('boolean')
+    expect(browserTabsTab.panelPresent).toBe(true)
+    expect(browserTabsTab).toHaveProperty('hasFilterInput')
+    expect(browserTabsTab).toHaveProperty('hasCopyButton')
+    expect(browserTabsTab).toHaveProperty('hasCloseButton')
+    expect(browserTabsTab).toHaveProperty('hasListContainer')
 
     await sidePanelPage.close()
   })

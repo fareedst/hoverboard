@@ -1,0 +1,105 @@
+IMPL-SIDE_PANEL_BROWSER_TABS:
+  name: Side Panel Browser Tabs Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_TABS
+    - REQ-SIDE_PANEL_BROWSER_TABS
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_BROWSER_TABS and REQ-SIDE_PANEL_BROWSER_TABS with filter, copy, close and panel UI.
+    problems_solved:
+      - No browser tabs list in side panel
+    benefits:
+      - Testable filterBrowserTabs; panel with list, filter, copy URLs, close with confirm
+  implementation_approach:
+    details:
+      - "Data fetch: chrome.tabs.query in panel; referrer via GET_TAB_REFERRERS message to service worker (panel cannot run executeScript in tab context). SW handles GET_TAB_REFERRERS: for each tab with http(s) URL runs chrome.scripting.executeScript({ target: { tabId }, func: () => document.referrer || '' }), returns { tabId: referrer } map; panel merges map into tab list. MESSAGE_TYPES.GET_TAB_REFERRERS in message-handler.js; SW handler in service-worker.js before processMessage."
+      - UI: multi-row card per tab (title, URL, referrer); search input; filter applies case-insensitive substring to title, url, referrer; visible = filtered list
+      - Copy: collect URLs of visible tabs, clipboard.writeText(urls.join("\n")), show count
+      - Close: confirm("Close N tabs?"); on confirm chrome.tabs.remove for each visible id; show success count
+  code_locations:
+    files:
+      - path: src/ui/side-panel/browser-tabs-panel.js
+        description: filter, copy list, close IDs; init and render; sendMessage GET_TAB_REFERRERS and merge referrer map
+      - path: src/ui/side-panel/side-panel.html
+        description: Tab button and #browserTabsPanel
+      - path: src/core/service-worker.js
+        description: GET_TAB_REFERRERS handler; executeScript per tab, return referrers map
+      - path: src/core/message-handler.js
+        description: MESSAGE_TYPES.GET_TAB_REFERRERS
+    functions:
+      - name: filterBrowserTabs
+        file: src/ui/side-panel/browser-tabs-panel.js
+        description: Pure filter by title, url, referrer (case-insensitive)
+      - name: buildUrlListForCopy
+        file: src/ui/side-panel/browser-tabs-panel.js
+        description: Return URLs of visible tabs (one per line)
+      - name: getVisibleTabIds
+        file: src/ui/side-panel/browser-tabs-panel.js
+        description: Return tab IDs of visible (filtered) list for close
+      - name: GET_TAB_REFERRERS handler
+        file: src/core/service-worker.js
+        description: Handle getTabReferrers message; executeScript per tab; return { tabId: referrer }
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_BROWSER_TABS
+    requirements:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/side-panel-tabs.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_BROWSER_TABS
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_TABS
+    composed_with:
+      - IMPL-SIDE_PANEL_TABS
+  essence_pseudocode: |
+    # [IMPL-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_BROWSER_TABS]
+    # This block defines the browser tabs panel: data fetch, filter, UI, copy URLs, close with confirm. Implements REQ by listing tabs with title/URL/referrer, filter, copy, close; implements ARCH by chrome.tabs + scripting and visible-list actions.
+
+    INPUT: windowScope (currentWindow | all), searchQuery (string), tabs list from chrome.tabs
+    OUTPUT: visible tabs (filtered), copy URLs to clipboard with count, close visible tabs after confirm with count
+    DATA: tabs = [{ id, title, url, referrer }], visibleTabs = filterBrowserTabs(tabs, searchQuery)
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # Data fetch: panel queries chrome.tabs; referrer must be obtained from service worker (scripting from panel does not run in tab context). Panel sends GET_TAB_REFERRERS with { tabs: [{ id, url }] }; SW runs executeScript per tab and returns { tabId: referrer }; panel merges map into list. Implements "list from current or all windows" and "collect page referrer" (best-effort).
+    ON load / refresh (panel):
+      list = AWAIT chrome.tabs.query({})
+      referrersMap = AWAIT sendMessage({ type: GET_TAB_REFERRERS, data: { tabs: list.map(t => ({ id: t.id, url: t.url })) } }) then response.data
+      allTabs = list.map(tab => ({ ...tab, referrer: referrersMap[tab.id] ?? '' }))
+    ON GET_TAB_REFERRERS (service worker):
+      FOR each tab in message.data.tabs WHERE tab.url is http(s): executeScript({ target: { tabId: tab.id }, func: () => document.referrer || '' }) → referrers[tab.id] = result or ''
+      RETURN { success: true, data: referrers }
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # filterBrowserTabs: pure function. Empty or whitespace query returns all tabs; else return tabs where query (case-insensitive) appears in title, url, or referrer. Implements "filter by search term matching any attribute".
+    filterBrowserTabs(tabs, query):
+      q = String(query).trim().toLowerCase()
+      IF q === '' RETURN tabs
+      RETURN tabs WHERE (t.title ?? '').toLowerCase().includes(q) OR (t.url ?? '').toLowerCase().includes(q) OR (t.referrer ?? '').toLowerCase().includes(q)
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # UI: multi-row card per tab (title, URL, referrer); search input; on input set searchQuery and set visibleTabs = filterBrowserTabs(allTabs, searchQuery); re-render list. Implements "multi-row format" and "filter by search".
+    RENDER: FOR each tab in visibleTabs: display card with line1=title, line2=url, line3=referrer (or "—" if empty)
+    ON searchInput input: searchQuery = value; visibleTabs = filterBrowserTabs(allTabs, searchQuery); re-render list
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # Copy URLs: build list of URLs from visibleTabs (e.g. urls = visibleTabs.map(t => t.url)); clipboard.writeText(urls.join('\n')); show message "Copied N URLs". Implements "copy URLs for visible tabs" and "display success counter".
+    ON Copy button click: urls = visibleTabs.map(t => t.url); navigator.clipboard.writeText(urls.join('\n')); showToastOrMessage("Copied " + urls.length + " URLs")
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # Close tabs: show confirm("Close N tabs?"); on confirm FOR each id in visibleTabIds AWAIT chrome.tabs.remove(id); show "Closed N tabs". Implements "close visible tabs", "pause to confirm", "display success counter".
+    ON Close button click: IF visibleTabs.length === 0 return; IF NOT confirm("Close " + visibleTabs.length + " tabs?") return; count = 0; FOR each tab in visibleTabs: try chrome.tabs.remove(tab.id); count++; show "Closed " + count + " tabs"
+  metadata:
+    created:
+      date: '2026-02-28'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-28'
+      author: AI Agent
+      reason: Referrer via GET_TAB_REFERRERS (SW); panel sendMessage and merge map; code_locations and essence_pseudocode updated

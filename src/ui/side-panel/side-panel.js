@@ -7,6 +7,7 @@ import {
   SIDE_PANEL_TAB_STORAGE_KEY,
   TAB_BOOKMARK,
   TAB_TAGS_TREE,
+  TAB_BROWSER_TABS,
   getDefaultTab,
   getVisibilityForTab,
   getTagsTreeInitOptions,
@@ -15,17 +16,20 @@ import {
   shouldRefreshTagsTreeTabOnTabChange
 } from './side-panel-tab-state.js'
 import { initTagsTreeTab, setSelectedTagsFromCurrentBookmark } from './tags-tree.js'
+import { initBrowserTabsTab } from './browser-tabs-panel.js'
 import { init, popup } from '../index.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
 import { ConfigManager } from '../../config/config-manager.js'
 
 const bookmarkPanelEl = document.getElementById('bookmarkPanel')
 const tagsTreePanelEl = document.getElementById('tagsTreePanel')
+const browserTabsPanelEl = document.getElementById('browserTabsPanel')
 const tabButtons = document.querySelectorAll('.side-panel-tab[data-tab]')
 
 let activeTab = getDefaultTab()
 let bookmarkTabInited = false
 let tagsTreeTabInited = false
+let browserTabsTabInited = false
 /** @type {{ controller: import('../popup/PopupController.js').PopupController, uiManager: import('../popup/UIManager.js').UIManager } | null} */
 let popupComponents = null
 
@@ -34,12 +38,15 @@ let popupComponents = null
  * Show the panel for activeTab and hide the other; update tab aria-selected.
  */
 function showPanel () {
-  const { bookmarkVisible, tagsTreeVisible } = getVisibilityForTab(activeTab)
+  const { bookmarkVisible, tagsTreeVisible, browserTabsVisible } = getVisibilityForTab(activeTab)
   if (bookmarkPanelEl) {
     bookmarkPanelEl.hidden = !bookmarkVisible
   }
   if (tagsTreePanelEl) {
     tagsTreePanelEl.hidden = !tagsTreeVisible
+  }
+  if (browserTabsPanelEl) {
+    browserTabsPanelEl.hidden = !browserTabsVisible
   }
   tabButtons.forEach((btn) => {
     const tab = btn.getAttribute('data-tab')
@@ -87,6 +94,8 @@ function switchTab (tabId) {
     const wasTagsTreeInited = tagsTreeTabInited
     initTabIfNeeded(tabId, { currentBookmarkTags: tagsArray })
     if (wasTagsTreeInited) setSelectedTagsFromCurrentBookmark(tagsArray)
+  } else if (tabId === TAB_BROWSER_TABS) {
+    initTabIfNeeded(tabId)
   } else {
     initTabIfNeeded(tabId)
   }
@@ -141,7 +150,19 @@ function initTabIfNeeded (tabId, options = {}) {
     initBookmarkTab()
   } else if (tabId === TAB_TAGS_TREE) {
     initTagsTreeTabIfNeeded(options)
+  } else if (tabId === TAB_BROWSER_TABS) {
+    initBrowserTabsTabIfNeeded()
   }
+}
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Init Browser Tabs tab: call initBrowserTabsTab() once (load tabs, referrers, render, bind filter/copy/close).
+ */
+function initBrowserTabsTabIfNeeded () {
+  if (browserTabsTabInited) return
+  browserTabsTabInited = true
+  initBrowserTabsTab()
 }
 
 function bindTabButtons () {
@@ -158,7 +179,7 @@ async function loadPersistedTab () {
   return new Promise((resolve) => {
     chrome.storage.local.get([SIDE_PANEL_TAB_STORAGE_KEY], (o) => {
       const stored = o[SIDE_PANEL_TAB_STORAGE_KEY]
-      resolve(stored === TAB_BOOKMARK || stored === TAB_TAGS_TREE ? stored : getDefaultTab())
+      resolve(stored === TAB_BOOKMARK || stored === TAB_TAGS_TREE || stored === TAB_BROWSER_TABS ? stored : getDefaultTab())
     })
   })
 }
@@ -197,6 +218,8 @@ export async function runInitialTabInit (tabId) {
   if (tabId === TAB_TAGS_TREE) {
     await initBookmarkTab()
     initTabIfNeeded(tabId, getTagsTreeInitOptions(popupComponents?.controller))
+  } else if (tabId === TAB_BROWSER_TABS) {
+    initTabIfNeeded(tabId)
   } else {
     initTabIfNeeded(tabId)
   }

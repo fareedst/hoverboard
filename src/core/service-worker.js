@@ -361,6 +361,38 @@ class HoverboardServiceWorker {
         return out
       }
 
+      // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Get referrers from tab documents; must run in SW so executeScript runs in tab context.
+      if (message.type === MESSAGE_TYPES.GET_TAB_REFERRERS) {
+        const tabs = message.data?.tabs || []
+        const scripting = typeof chrome !== 'undefined' && chrome.scripting ? chrome.scripting : (typeof browser !== 'undefined' && browser.scripting ? browser.scripting : null)
+        const referrers = /** @type {Record<number, string>} */ ({})
+        if (scripting && scripting.executeScript) {
+          await Promise.all(
+            tabs.map(async (tab) => {
+              const id = tab.id ?? tab.tabId
+              const url = tab.url
+              if (id == null || !url || !/^https?:\/\//i.test(url)) {
+                if (id != null) referrers[id] = ''
+                return
+              }
+              try {
+                const results = await scripting.executeScript({
+                  target: { tabId: id },
+                  func: () => document.referrer || ''
+                })
+                const raw = results?.[0]?.result
+                referrers[id] = (raw != null && String(raw) !== 'null') ? String(raw) : ''
+              } catch (_) {
+                referrers[id] = ''
+              }
+            })
+          )
+        }
+        const out = { success: true, data: referrers }
+        uiInspector.recordMessage(message.type, message.data, sender, out)
+        return out
+      }
+
       // [IMPL-DEV_COMMAND_INSPECTION] [REQ-UI_INSPECTION] [REQ-URL_TAGS_DISPLAY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] DEV_COMMAND: only when debug flag set; getStorageSnapshot in SW.
       if (message.type === MESSAGE_TYPES.DEV_COMMAND) {
         let devEnabled = false

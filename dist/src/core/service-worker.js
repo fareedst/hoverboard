@@ -20135,6 +20135,8 @@ var MESSAGE_TYPES = {
   ADD_TAG_TO_RECENT: "addTagToRecent",
   GET_USER_RECENT_TAGS: "getUserRecentTags",
   GET_SHARED_MEMORY_STATUS: "getSharedMemoryStatus",
+  // [REQ-SIDE_PANEL_BROWSER_TABS] Get document.referrer for tabs (run in SW so injection is in tab context)
+  GET_TAB_REFERRERS: "getTabReferrers",
   // Content script lifecycle
   CONTENT_SCRIPT_READY: "contentScriptReady",
   // Overlay configuration
@@ -22228,6 +22230,39 @@ var HoverboardServiceWorker = class {
       if (message.type === MESSAGE_TYPES.SWITCH_STORAGE_MODE) {
         await this.initBookmarkProvider();
         const out2 = { success: true, data: { switched: true } };
+        recordMessage(message.type, message.data, sender, out2);
+        return out2;
+      }
+      if (message.type === MESSAGE_TYPES.GET_TAB_REFERRERS) {
+        const tabs = message.data?.tabs || [];
+        const scripting = typeof chrome !== "undefined" && chrome.scripting ? chrome.scripting : typeof safariEnhancements !== "undefined" && safariEnhancements.scripting ? safariEnhancements.scripting : null;
+        const referrers = (
+          /** @type {Record<number, string>} */
+          {}
+        );
+        if (scripting && scripting.executeScript) {
+          await Promise.all(
+            tabs.map(async (tab) => {
+              const id = tab.id ?? tab.tabId;
+              const url2 = tab.url;
+              if (id == null || !url2 || !/^https?:\/\//i.test(url2)) {
+                if (id != null) referrers[id] = "";
+                return;
+              }
+              try {
+                const results = await scripting.executeScript({
+                  target: { tabId: id },
+                  func: () => document.referrer || ""
+                });
+                const raw = results?.[0]?.result;
+                referrers[id] = raw != null && String(raw) !== "null" ? String(raw) : "";
+              } catch (_) {
+                referrers[id] = "";
+              }
+            })
+          );
+        }
+        const out2 = { success: true, data: referrers };
         recordMessage(message.type, message.data, sender, out2);
         return out2;
       }

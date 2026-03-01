@@ -15,14 +15,15 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       - No serializable snapshot of side panel for E2E regression
       - Cannot assert Bookmark tab and Tags tree tab structure in one call
     benefits:
-      - Single helper snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab }; E2E can assert required properties
+      - Single helper snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab, browserTabsTab }; E2E can assert required properties
       - Contract aligns with IMPL-SIDE_PANEL_TABS (two panels) and IMPL-SIDE_PANEL_BOOKMARK / IMPL-SIDE_PANEL_TAGS_TREE
   implementation_approach:
     summary: tests/e2e/helpers.js exports snapshotSidePanel(page); single page.evaluate returns { bookmarkTab, tagsTreeTab }; Bookmark tab snapshot queries #bookmarkPanel and data-popup-ref elements; Tags tree tab snapshot queries #tagsTreePanel and key IDs. E2E spec loads side-panel.html and asserts snapshot shapes.
     details:
-      - snapshotSidePanel(page) calls page.evaluate(() => { ... }) returning one object with bookmarkTab and tagsTreeTab
+      - snapshotSidePanel(page) calls page.evaluate(() => { ... }) returning one object with bookmarkTab, tagsTreeTab, and browserTabsTab
       - bookmarkTab: root #bookmarkPanel; if absent return { panelPresent: false }; else query [data-popup-ref="loadingState"], [data-popup-ref="errorState"], [data-popup-ref="mainInterface"]; compute loadingVisible, errorVisible, mainVisible (not hidden); screen = loading|error|mainInterface|unknown; optional errorMessage
       - tagsTreeTab: root #tagsTreePanel; if absent return { panelPresent: false }; else hasTagSelector = !!#tagSelector, hasTreeContainer = !!#treeContainer, hasSearchInput = !!#searchInput, hasConfigToggle = !!#configToggle; optional hasSearchCount, hasEmptyState, hasLoadError
+      - browserTabsTab: root #browserTabsPanel; if absent return { panelPresent: false }; else hasFilterInput, hasCopyButton, hasCloseButton, hasListContainer
   code_locations:
     files:
       - path: tests/e2e/helpers.js
@@ -61,7 +62,7 @@ IMPL-SIDE_PANEL_SNAPSHOT:
     # Implements REQ-UI_INSPECTION by providing E2E-inspectable state for side panel; REQ-SIDE_PANEL_POPUP_EQUIVALENT (Bookmark tab) and REQ-SIDE_PANEL_TAGS_TREE (Tags tree tab) by capturing key elements per tab.
 
     INPUT: page (Playwright/Puppeteer page navigated to side-panel.html)
-    OUTPUT: { bookmarkTab: { panelPresent, screen?, loadingVisible?, errorVisible?, mainVisible?, errorMessage? }, tagsTreeTab: { panelPresent, hasTagSelector, hasTreeContainer, hasSearchInput, hasConfigToggle?, ... } }
+    OUTPUT: { bookmarkTab: {...}, tagsTreeTab: {...}, browserTabsTab: { panelPresent, hasFilterInput?, hasCopyButton?, hasCloseButton?, hasListContainer? } }
     DATA: document in page context
 
     # [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BOOKMARK]
@@ -100,7 +101,21 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       }
     })()
 
-    RETURN { bookmarkTab, tagsTreeTab }
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # browserTabsTab snapshot: root #browserTabsPanel; presence of filter input, Copy button, Close button, list container. Implements E2E-inspectable state for Tabs tab.
+    browserTabsTab = (function () {
+      const root = document.getElementById('browserTabsPanel')
+      if (!root) return { panelPresent: false }
+      return {
+        panelPresent: true,
+        hasFilterInput: !!root.querySelector('#browserTabsFilterInput') || !!document.getElementById('browserTabsFilterInput'),
+        hasCopyButton: !!root.querySelector('[data-action="copyUrls"]') || !!root.querySelector('#browserTabsCopyBtn'),
+        hasCloseButton: !!root.querySelector('[data-action="closeTabs"]') || !!root.querySelector('#browserTabsCloseBtn'),
+        hasListContainer: !!root.querySelector('#browserTabsList') || !!root.querySelector('.browser-tabs-list')
+      }
+    })()
+
+    RETURN { bookmarkTab, tagsTreeTab, browserTabsTab }
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml
   metadata:
     created:

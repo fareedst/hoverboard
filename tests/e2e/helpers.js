@@ -87,7 +87,7 @@ export async function snapshotOptions (page) {
  * [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
  * Snapshot side panel: two serializable state shapes (Bookmark tab, Tags tree tab) for E2E assertions.
  * @param {import('puppeteer').Page} page - Page navigated to side-panel.html (chrome-extension://id/.../side-panel.html)
- * @returns {Promise<{ bookmarkTab: { panelPresent: boolean, screen?: string, loadingVisible?: boolean, errorVisible?: boolean, mainVisible?: boolean, errorMessage?: string }, tagsTreeTab: { panelPresent: boolean, hasTagSelector?: boolean, hasTreeContainer?: boolean, hasSearchInput?: boolean, hasConfigToggle?: boolean, hasSearchCount?: boolean, hasEmptyState?: boolean, hasLoadError?: boolean } }>}
+ * @returns {Promise<{ bookmarkTab: object, tagsTreeTab: object, browserTabsTab: { panelPresent: boolean, hasFilterInput?: boolean, hasCopyButton?: boolean, hasCloseButton?: boolean, hasListContainer?: boolean } }>}
  */
 export async function snapshotSidePanel (page) {
   return await page.evaluate(() => {
@@ -137,6 +137,21 @@ export async function snapshotSidePanel (page) {
       }
     }
 
-    return { bookmarkTab, tagsTreeTab }
+    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS] browserTabsTab: root #browserTabsPanel, filter input, copy/close buttons, list
+    const browserTabsRoot = document.getElementById('browserTabsPanel')
+    let browserTabsTab
+    if (!browserTabsRoot) {
+      browserTabsTab = { panelPresent: false }
+    } else {
+      browserTabsTab = {
+        panelPresent: true,
+        hasFilterInput: !!browserTabsRoot.querySelector('#browserTabsFilterInput') || !!document.getElementById('browserTabsFilterInput'),
+        hasCopyButton: !!browserTabsRoot.querySelector('[data-action="copyUrls"]') || !!browserTabsRoot.querySelector('#browserTabsCopyBtn'),
+        hasCloseButton: !!browserTabsRoot.querySelector('[data-action="closeTabs"]') || !!browserTabsRoot.querySelector('#browserTabsCloseBtn'),
+        hasListContainer: !!browserTabsRoot.querySelector('#browserTabsList') || !!browserTabsRoot.querySelector('.browser-tabs-list')
+      }
+    }
+
+    return { bookmarkTab, tagsTreeTab, browserTabsTab }
   })
 }

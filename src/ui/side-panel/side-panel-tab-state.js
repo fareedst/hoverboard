@@ -11,9 +11,11 @@ export const SIDE_PANEL_TAB_STORAGE_KEY = 'hoverboard_sidepanel_active_tab'
 export const TAB_BOOKMARK = 'bookmark'
 /** @type {string} */
 export const TAB_TAGS_TREE = 'tagsTree'
+/** @type {string} [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] */
+export const TAB_BROWSER_TABS = 'browserTabs'
 
 /** @type {string[]} */
-export const TAB_IDS = [TAB_BOOKMARK, TAB_TAGS_TREE]
+export const TAB_IDS = [TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS]
 
 /**
  * Default tab when none persisted.
@@ -28,12 +30,13 @@ export function getDefaultTab () {
  * Returns which panel(s) should be visible for the given activeTab.
  * [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
  * @param {string} activeTab
- * @returns {{ bookmarkVisible: boolean, tagsTreeVisible: boolean }}
+ * @returns {{ bookmarkVisible: boolean, tagsTreeVisible: boolean, browserTabsVisible: boolean }}
  */
 export function getVisibilityForTab (activeTab) {
   return {
     bookmarkVisible: activeTab === TAB_BOOKMARK,
-    tagsTreeVisible: activeTab === TAB_TAGS_TREE
+    tagsTreeVisible: activeTab === TAB_TAGS_TREE,
+    browserTabsVisible: activeTab === TAB_BROWSER_TABS
   }
 }
 

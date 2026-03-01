@@ -1,0 +1,49 @@
+REQ-SIDE_PANEL_BROWSER_TABS:
+  name: Side Panel Browser Tabs List
+  category: Functional
+  priority: P1
+  status: Planned
+  rationale:
+    why: Let users see and manage browser tabs from the side panel (list, filter, copy URLs, close).
+    problems_solved:
+      - No single view of all tabs in current or all windows with URL and referrer
+      - No quick way to copy URLs or close filtered tabs from the panel
+    benefits:
+      - Third side-panel tab Tabs; list from current window (default) or all windows; per-tab title, URL, referrer in multi-row format; case-insensitive filter; copy URLs with count; close visible tabs with confirmation and count
+  satisfaction_criteria:
+    - criterion: Side panel has a tab named Tabs that displays browser tabs from the current window (default) or all windows
+    - criterion: For each tab the panel shows title, URL, and page referrer (multi-row per tab); referrer is best-effort and may be empty
+    - criterion: A search box filters the list by matching any of title, URL, or referrer (case-insensitive)
+    - criterion: A button copies the URLs of all visible (filtered) tabs to the clipboard and shows a success count
+    - criterion: A button closes all visible (filtered) tabs after user confirmation and shows a success count
+  validation_criteria:
+    - method: Unit tests
+      coverage: 'filterBrowserTabs: empty query returns all; case-insensitive match on title/url/referrer; build URL list and close-IDs from visible list; GET_TAB_REFERRERS message type and SW handler; panel merges referrer map from SW'
+    - method: Manual or E2E
+      coverage: Open Tabs tab; see list with referrers when opened from links; filter; copy URLs; confirm and close visible tabs; see counts
+  notes:
+    - 'Referrer must be obtained via service worker (GET_TAB_REFERRERS): scripting from the side panel does not run in tab context, so the panel sends a message and the SW runs chrome.scripting.executeScript per tab and returns a referrer map.'
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_BROWSER_TABS
+    implementation:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/side-panel-tabs.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+    code_annotations:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    supersedes: []
+  metadata:
+    created:
+      date: '2026-02-28'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-28'
+      author: AI Agent
+      reason: Document referrer-via-SW (GET_TAB_REFERRERS) and validation coverage

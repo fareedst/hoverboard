@@ -4225,3 +4225,51 @@ IMPL-SERVICE_WORKER:
     summary: ''
   traceability: {}
   detail_file: null
+IMPL-SIDE_PANEL_BROWSER_TABS:
+  name: Side Panel Browser Tabs Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_TABS
+    - REQ-SIDE_PANEL_BROWSER_TABS
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_BROWSER_TABS and REQ-SIDE_PANEL_BROWSER_TABS with filter, copy, close and panel UI.
+    problems_solved:
+      - No browser tabs list in side panel
+    benefits:
+      - Testable filterBrowserTabs; panel with list, filter, copy URLs, close with confirm
+  implementation_approach:
+    summary: 'browser-tabs-panel.js: filterBrowserTabs, buildUrlListForCopy, getVisibleTabIds; chrome.tabs.query and scripting for referrer; render list; wire filter, copy, close.'
+  code_locations:
+    files:
+      - path: src/ui/side-panel/browser-tabs-panel.js
+        description: filter, copy list, close IDs; init and render
+    functions:
+      - name: filterBrowserTabs
+        file: src/ui/side-panel/browser-tabs-panel.js
+        description: Pure filter by title, url, referrer (case-insensitive)
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_BROWSER_TABS
+    requirements:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_BROWSER_TABS
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_TABS
+    composed_with:
+      - IMPL-SIDE_PANEL_TABS
+  metadata:
+    created:
+      date: '2026-02-28'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-28'
+      author: AI Agent
+      reason: Initial creation
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml

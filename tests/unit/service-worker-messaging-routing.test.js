@@ -1,6 +1,6 @@
 /**
- * [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING]
- * Service worker handleMessage routing: NATIVE_PING, SWITCH_STORAGE_MODE, DEV_COMMAND
+ * [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Service worker handleMessage routing: NATIVE_PING, SWITCH_STORAGE_MODE, DEV_COMMAND, GET_TAB_REFERRERS
  * are handled inside handleMessage and do not call messageHandler.processMessage.
  * Other types go through processMessage and response is wrapped as { success, data } or { success: false, error }.
  */
@@ -21,6 +21,10 @@ beforeEach(() => {
 })
 
 describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] SW handleMessage routing', () => {
+  test('[REQ-SIDE_PANEL_BROWSER_TABS] MESSAGE_TYPES includes GET_TAB_REFERRERS for referrer-via-SW', () => {
+    expect(MESSAGE_TYPES.GET_TAB_REFERRERS).toBe('getTabReferrers')
+  })
+
   test('NATIVE_PING returns success and data and does not call processMessage', async () => {
     const sw = new HoverboardServiceWorker()
     sw.pingNativeHost = jest.fn().mockResolvedValue({ pong: true })
@@ -82,5 +86,36 @@ describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] SW handleMessage routi
     const result = await sw.handleMessage({ type: MESSAGE_TYPES.GET_OPTIONS }, {})
 
     expect(result).toEqual({ success: false, error: 'handler failed' })
+  })
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+  // Referrer fix: GET_TAB_REFERRERS is handled in SW (executeScript in tab context); does not call processMessage.
+  test('GET_TAB_REFERRERS returns success and referrer map and does not call processMessage', async () => {
+    const sw = new HoverboardServiceWorker()
+    const processMessageSpy = jest.spyOn(sw.messageHandler, 'processMessage')
+    global.chrome.scripting.executeScript.mockResolvedValue([{ result: 'https://referrer.example.com/' }])
+
+    const result = await sw.handleMessage({
+      type: MESSAGE_TYPES.GET_TAB_REFERRERS,
+      data: { tabs: [{ id: 1, url: 'https://example.com' }] }
+    }, {})
+
+    expect(processMessageSpy).not.toHaveBeenCalled()
+    expect(result).toEqual({ success: true, data: { 1: 'https://referrer.example.com/' } })
+    processMessageSpy.mockRestore()
+  })
+
+  test('GET_TAB_REFERRERS with non-http URL sets empty referrer for that tab', async () => {
+    const sw = new HoverboardServiceWorker()
+    global.chrome.scripting.executeScript.mockResolvedValue([{ result: '' }])
+
+    const result = await sw.handleMessage({
+      type: MESSAGE_TYPES.GET_TAB_REFERRERS,
+      data: { tabs: [{ id: 2, url: 'chrome://extensions' }, { id: 3, url: 'https://a.com' }] }
+    }, {})
+
+    expect(result.success).toBe(true)
+    expect(result.data[2]).toBe('')
+    expect(result.data[3]).toBeDefined()
   })
 })

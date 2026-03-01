@@ -7,6 +7,7 @@ import {
   SIDE_PANEL_TAB_STORAGE_KEY,
   TAB_BOOKMARK,
   TAB_TAGS_TREE,
+  TAB_BROWSER_TABS,
   TAB_IDS,
   getDefaultTab,
   getVisibilityForTab,
@@ -22,10 +23,11 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(SIDE_PANEL_TAB_STORAGE_KEY).toBe('hoverboard_sidepanel_active_tab')
   })
 
-  test('tab ids are bookmark and tagsTree', () => {
+  test('tab ids are bookmark, tagsTree, and browserTabs [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]', () => {
     expect(TAB_BOOKMARK).toBe('bookmark')
     expect(TAB_TAGS_TREE).toBe('tagsTree')
-    expect(TAB_IDS).toEqual(['bookmark', 'tagsTree'])
+    expect(TAB_BROWSER_TABS).toBe('browserTabs')
+    expect(TAB_IDS).toEqual(['bookmark', 'tagsTree', 'browserTabs'])
   })
 
   test('getDefaultTab returns bookmark', () => {
@@ -36,18 +38,28 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     const v = getVisibilityForTab('bookmark')
     expect(v.bookmarkVisible).toBe(true)
     expect(v.tagsTreeVisible).toBe(false)
+    expect(v.browserTabsVisible).toBe(false)
   })
 
   test('getVisibilityForTab(tagsTree) shows only tags tree panel', () => {
     const v = getVisibilityForTab('tagsTree')
     expect(v.bookmarkVisible).toBe(false)
     expect(v.tagsTreeVisible).toBe(true)
+    expect(v.browserTabsVisible).toBe(false)
+  })
+
+  test('getVisibilityForTab(browserTabs) shows only browser Tabs panel [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]', () => {
+    const v = getVisibilityForTab('browserTabs')
+    expect(v.bookmarkVisible).toBe(false)
+    expect(v.tagsTreeVisible).toBe(false)
+    expect(v.browserTabsVisible).toBe(true)
   })
 
   test('getVisibilityForTab unknown defaults to neither', () => {
     const v = getVisibilityForTab('other')
     expect(v.bookmarkVisible).toBe(false)
     expect(v.tagsTreeVisible).toBe(false)
+    expect(v.browserTabsVisible).toBe(false)
   })
 
   describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] refresh when switching to Bookmark tab', () => {

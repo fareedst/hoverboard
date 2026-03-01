@@ -2628,3 +2628,42 @@ ARCH-PROJECT_STRUCTURE:
     summary: ''
   traceability: {}
   detail_file: null
+ARCH-SIDE_PANEL_BROWSER_TABS:
+  name: Side Panel Browser Tabs Architecture
+  status: Active
+  cross_references:
+    - REQ-SIDE_PANEL_BROWSER_TABS
+  rationale:
+    why: New panel lists browser tabs from chrome.tabs; referrer via scripting when possible; filter and actions operate on visible list.
+    problems_solved:
+      - How to get referrer (not in chrome.tabs API)
+      - How to scope copy/close to filtered list
+    benefits:
+      - 'Single panel #browserTabsPanel; data from chrome.tabs; best-effort referrer via scripting; filter and actions on visible tabs'
+  implementation_approach:
+    summary: 'New panel #browserTabsPanel; chrome.tabs.query for current or all windows; chrome.scripting.executeScript for document.referrer per tab when possible; filter applies case-insensitive to title, url, referrer; copy and close act on visible (filtered) list.'
+  traceability:
+    requirements:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    implementation:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+    code_annotations:
+      - ARCH-SIDE_PANEL_BROWSER_TABS
+  related_decisions:
+    depends_on:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    informs:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+    see_also:
+      - ARCH-SIDE_PANEL_TABS
+  metadata:
+    created:
+      date: '2026-02-28'
+      author: AI Agent
+    last_updated:
+      date: '2026-02-28'
+      author: AI Agent
+      reason: Initial creation
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml

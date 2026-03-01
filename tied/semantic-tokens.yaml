@@ -2583,3 +2583,43 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
   metadata:
     registered: 2026-02-26T00:00:00.000Z
     last_updated: 2026-02-26T00:00:00.000Z
+REQ-SIDE_PANEL_BROWSER_TABS:
+  type: REQ
+  name: Side Panel Browser Tabs List
+  category: Functional
+  status: Planned
+  description: Side panel Tabs tab lists browser tabs (title, URL, referrer) with filter, copy URLs, close visible tabs with confirmation
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_BROWSER_TABS
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml
+  metadata:
+    registered: '2026-02-28T00:00:00.000Z'
+    last_updated: '2026-02-28T00:00:00.000Z'
+ARCH-SIDE_PANEL_BROWSER_TABS:
+  type: ARCH
+  name: Side Panel Browser Tabs Architecture
+  status: Active
+  description: 'New panel #browserTabsPanel; chrome.tabs + scripting for referrer; filter and actions on visible list'
+  cross_references:
+    - REQ-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_BROWSER_TABS
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml
+  metadata:
+    registered: '2026-02-28T00:00:00.000Z'
+    last_updated: '2026-02-28T00:00:00.000Z'
+IMPL-SIDE_PANEL_BROWSER_TABS:
+  type: IMPL
+  name: Side Panel Browser Tabs Implementation
+  status: Active
+  description: filterBrowserTabs, copy URLs, close with confirm; browser-tabs-panel.js and panel UI
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_TABS
+    - REQ-SIDE_PANEL_BROWSER_TABS
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml
+  metadata:
+    registered: '2026-02-28T00:00:00.000Z'
+    last_updated: '2026-02-28T00:00:00.000Z'

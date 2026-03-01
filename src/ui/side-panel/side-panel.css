@@ -59,3 +59,94 @@
   max-height: none;
   width: 100%;
 }
+
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Browser Tabs panel: multi-row cards, filter, actions */
+.browser-tabs-header {
+  flex-shrink: 0;
+  margin: 0 0 0.5rem 0;
+}
+
+.browser-tabs-title {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.browser-tabs-subtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #999);
+}
+
+.browser-tabs-search {
+  flex-shrink: 0;
+  margin-bottom: 0.5rem;
+}
+
+.browser-tabs-filter-input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #eee);
+}
+
+.browser-tabs-list {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.browser-tabs-card {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  background: var(--bg-secondary, #2a2a2a);
+  font-size: 0.8rem;
+}
+
+.browser-tabs-card-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  word-break: break-word;
+}
+
+.browser-tabs-card-url {
+  color: var(--accent, #5a9);
+  word-break: break-all;
+  margin-bottom: 0.15rem;
+}
+
+.browser-tabs-card-referrer {
+  color: var(--text-secondary, #999);
+  word-break: break-all;
+}
+
+.browser-tabs-message {
+  flex-shrink: 0;
+  margin: 0.25rem 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #999);
+}
+
+.browser-tabs-message.hidden {
+  display: none;
+}
+
+.browser-tabs-actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.browser-tabs-error {
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--error-color, #c66);
+}
