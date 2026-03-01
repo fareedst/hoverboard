@@ -137,18 +137,23 @@ export async function snapshotSidePanel (page) {
       }
     }
 
-    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS] browserTabsTab: root #browserTabsPanel, filter input, copy/close buttons, list
+    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS] browserTabsTab: root #browserTabsPanel, scope toggle, filter input, copy/close buttons, list
     const browserTabsRoot = document.getElementById('browserTabsPanel')
     let browserTabsTab
     if (!browserTabsRoot) {
       browserTabsTab = { panelPresent: false }
     } else {
+      const scopeRadios = browserTabsRoot.querySelectorAll('input[name="browserTabsWindowScope"]')
+      const firstCard = browserTabsRoot.querySelector('.browser-tabs-card')
+      const hasIdsInFirstCard = firstCard && !!firstCard.querySelector('.browser-tabs-card-ids')
       browserTabsTab = {
         panelPresent: true,
+        hasWindowScopeToggle: scopeRadios && scopeRadios.length >= 2,
         hasFilterInput: !!browserTabsRoot.querySelector('#browserTabsFilterInput') || !!document.getElementById('browserTabsFilterInput'),
         hasCopyButton: !!browserTabsRoot.querySelector('[data-action="copyUrls"]') || !!browserTabsRoot.querySelector('#browserTabsCopyBtn'),
         hasCloseButton: !!browserTabsRoot.querySelector('[data-action="closeTabs"]') || !!browserTabsRoot.querySelector('#browserTabsCloseBtn'),
-        hasListContainer: !!browserTabsRoot.querySelector('#browserTabsList') || !!browserTabsRoot.querySelector('.browser-tabs-list')
+        hasListContainer: !!browserTabsRoot.querySelector('#browserTabsList') || !!browserTabsRoot.querySelector('.browser-tabs-list'),
+        hasIdsInFirstCard
       }
     }
 

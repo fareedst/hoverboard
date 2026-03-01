@@ -78,6 +78,19 @@
   color: var(--text-secondary, #999);
 }
 
+.browser-tabs-scope {
+  margin: 0.5rem 0 0 0;
+}
+
+.browser-tabs-scope-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.8rem;
+  margin-right: 0.75rem;
+  cursor: pointer;
+}
+
 .browser-tabs-search {
   flex-shrink: 0;
   margin-bottom: 0.5rem;
@@ -125,6 +138,12 @@
 .browser-tabs-card-referrer {
   color: var(--text-secondary, #999);
   word-break: break-all;
+}
+
+.browser-tabs-card-ids {
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #999);
 }
 
 .browser-tabs-message {

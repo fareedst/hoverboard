@@ -16,6 +16,7 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     - criterion: A search box filters the list by matching any of title, URL, or referrer (case-insensitive)
     - criterion: A button copies the URLs of all visible (filtered) tabs to the clipboard and shows a success count
     - criterion: A button closes all visible (filtered) tabs after user confirmation and shows a success count
+    - criterion: Each tab row displays window id and tab id (for debugging and identification).
   validation_criteria:
     - method: Unit tests
       coverage: 'filterBrowserTabs: empty query returns all; case-insensitive match on title/url/referrer; build URL list and close-IDs from visible list; GET_TAB_REFERRERS message type and SW handler; panel merges referrer map from SW'

@@ -62,11 +62,24 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const copyBtn = panel.querySelector('[data-action="copyUrls"]') || panel.querySelector('#browserTabsCopyBtn')
   const closeBtn = panel.querySelector('[data-action="closeTabs"]') || panel.querySelector('#browserTabsCloseBtn')
   const messageEl = panel.querySelector('#browserTabsMessage')
+  const scopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsWindowScope"]')
 
-  /** @type {{ id: number, title?: string, url?: string, referrer?: string }[]} */
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] windowScope: currentWindow (default) or all
+  let windowScope = 'currentWindow'
+
+  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string }[]} */
   let allTabs = []
-  /** @type {{ id: number, title?: string, url?: string, referrer?: string }[]} */
+  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string }[]} */
   let visibleTabs = []
+
+  function getWindowScope () {
+    if (scopeRadios && scopeRadios.length) {
+      for (let i = 0; i < scopeRadios.length; i++) {
+        if (scopeRadios[i].checked) return scopeRadios[i].value
+      }
+    }
+    return 'currentWindow'
+  }
 
   function renderList () {
     if (!listEl) return
@@ -74,10 +87,13 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     visibleTabs.forEach((tab) => {
       const card = document.createElement('div')
       card.className = 'browser-tabs-card'
+      const windowId = tab.windowId != null ? String(tab.windowId) : ''
+      const tabId = tab.id != null ? String(tab.id) : ''
       card.innerHTML = `
         <div class="browser-tabs-card-title">${escapeHtml(tab.title || '(no title)')}</div>
         <div class="browser-tabs-card-url">${escapeHtml(tab.url || '')}</div>
         <div class="browser-tabs-card-referrer">${escapeHtml(getReferrerDisplayText(tab.referrer))}</div>
+        <div class="browser-tabs-card-ids">Window ${escapeHtml(windowId)} · Tab ${escapeHtml(tabId)}</div>
       `
       listEl.appendChild(card)
     })
@@ -92,9 +108,11 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   async function loadTabs () {
     const api = chromeTabs || (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null)
     if (!api) return
+    windowScope = getWindowScope()
     const runtime = typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime : (typeof browser !== 'undefined' && browser.runtime ? browser.runtime : null)
     try {
-      const list = await api.query({})
+      const queryOpts = windowScope === 'currentWindow' ? { currentWindow: true } : {}
+      const list = await api.query(queryOpts)
       // [REQ-SIDE_PANEL_BROWSER_TABS] Get referrers from service worker so executeScript runs in tab context (side panel context cannot inject into tabs).
       let referrersMap = /** @type {Record<number, string>} */ ({})
       if (typeof getReferrers === 'function') {
@@ -113,6 +131,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       }
       const withReferrer = list.map((tab) => ({
         id: tab.id,
+        windowId: tab.windowId,
         title: tab.title ?? '',
         url: tab.url ?? '',
         referrer: (tab.id != null && referrersMap[tab.id] !== undefined) ? referrersMap[tab.id] : ''
@@ -134,6 +153,15 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         messageEl.classList.add('hidden')
         if (messageEl.dataset) messageEl.dataset.visible = 'false'
       }, 3000)
+    }
+  }
+
+  if (scopeRadios && scopeRadios.length) {
+    for (let i = 0; i < scopeRadios.length; i++) {
+      scopeRadios[i].addEventListener('change', () => {
+        windowScope = getWindowScope()
+        loadTabs()
+      })
     }
   }
 

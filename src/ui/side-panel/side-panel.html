@@ -117,11 +117,15 @@
     <span data-popup-ref="readStatus" class="hidden" aria-hidden="true"></span>
   </div>
 
-  <!-- [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Browser Tabs panel: list tabs with title, URL, referrer; filter; copy URLs; close visible -->
+  <!-- [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Browser Tabs panel: list tabs with title, URL, referrer; filter; copy URLs; close visible; window scope toggle; window/tab ids -->
   <div id="browserTabsPanel" class="side-panel-content" role="tabpanel" aria-labelledby="tab-browser-tabs" hidden>
     <header class="browser-tabs-header">
       <h2 class="browser-tabs-title">Browser tabs</h2>
       <p class="browser-tabs-subtitle">Filter by title, URL, or referrer. Copy URLs or close visible tabs.</p>
+      <div class="browser-tabs-scope" role="group" aria-label="Window scope">
+        <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsWindowScope" value="currentWindow" id="browserTabsScopeCurrent" checked> Current window</label>
+        <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsWindowScope" value="all" id="browserTabsScopeAll"> All windows</label>
+      </div>
     </header>
     <section class="browser-tabs-search" aria-label="Filter tabs">
       <input type="text" id="browserTabsFilterInput" class="browser-tabs-filter-input" placeholder="Filter by title, URL, referrer…" aria-label="Filter tabs">

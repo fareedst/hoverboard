@@ -325,6 +325,8 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     expect(browserTabsTab).toHaveProperty('panelPresent')
     expect(typeof browserTabsTab.panelPresent).toBe('boolean')
     expect(browserTabsTab.panelPresent).toBe(true)
+    expect(browserTabsTab).toHaveProperty('hasWindowScopeToggle')
+    expect(browserTabsTab.hasWindowScopeToggle).toBe(true)
     expect(browserTabsTab).toHaveProperty('hasFilterInput')
     expect(browserTabsTab).toHaveProperty('hasCopyButton')
     expect(browserTabsTab).toHaveProperty('hasCloseButton')

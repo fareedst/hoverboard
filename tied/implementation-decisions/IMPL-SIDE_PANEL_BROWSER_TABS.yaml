@@ -12,8 +12,8 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - Testable filterBrowserTabs; panel with list, filter, copy URLs, close with confirm
   implementation_approach:
     details:
-      - "Data fetch: chrome.tabs.query in panel; referrer via GET_TAB_REFERRERS message to service worker (panel cannot run executeScript in tab context). SW handles GET_TAB_REFERRERS: for each tab with http(s) URL runs chrome.scripting.executeScript({ target: { tabId }, func: () => document.referrer || '' }), returns { tabId: referrer } map; panel merges map into tab list. MESSAGE_TYPES.GET_TAB_REFERRERS in message-handler.js; SW handler in service-worker.js before processMessage."
-      - UI: multi-row card per tab (title, URL, referrer); search input; filter applies case-insensitive substring to title, url, referrer; visible = filtered list
+      - "Data fetch: chrome.tabs.query in panel; scope by windowScope (currentWindow default) via query({ currentWindow: true }) or query({}); referrer via GET_TAB_REFERRERS message to service worker (panel cannot run executeScript in tab context). SW handles GET_TAB_REFERRERS: for each tab with http(s) URL runs chrome.scripting.executeScript({ target: { tabId }, func: () => document.referrer || '' }), returns { tabId: referrer } map; panel merges map into tab list. MESSAGE_TYPES.GET_TAB_REFERRERS in message-handler.js; SW handler in service-worker.js before processMessage."
+      - "UI: window scope toggle (Current window | All windows, default current); multi-row card per tab (title, URL, referrer, window id and tab id); search input; filter applies case-insensitive substring to title, url, referrer; visible = filtered list"
       - Copy: collect URLs of visible tabs, clipboard.writeText(urls.join("\n")), show count
       - Close: confirm("Close N tabs?"); on confirm chrome.tabs.remove for each visible id; show success count
   code_locations:
@@ -64,12 +64,13 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
 
     INPUT: windowScope (currentWindow | all), searchQuery (string), tabs list from chrome.tabs
     OUTPUT: visible tabs (filtered), copy URLs to clipboard with count, close visible tabs after confirm with count
-    DATA: tabs = [{ id, title, url, referrer }], visibleTabs = filterBrowserTabs(tabs, searchQuery)
+    DATA: tabs = [{ id, windowId, title, url, referrer }], visibleTabs = filterBrowserTabs(tabs, searchQuery)
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # Data fetch: panel queries chrome.tabs; referrer must be obtained from service worker (scripting from panel does not run in tab context). Panel sends GET_TAB_REFERRERS with { tabs: [{ id, url }] }; SW runs executeScript per tab and returns { tabId: referrer }; panel merges map into list. Implements "list from current or all windows" and "collect page referrer" (best-effort).
+    # Data fetch: panel queries chrome.tabs; windowScope (currentWindow | all) selects query. currentWindow (default) → query({ currentWindow: true }); all → query({}). Referrer must be obtained from service worker (scripting from panel does not run in tab context). Panel sends GET_TAB_REFERRERS with { tabs: [{ id, url }] }; SW runs executeScript per tab and returns { tabId: referrer }; panel merges map into list. Implements "list from current or all windows" and "collect page referrer" (best-effort).
     ON load / refresh (panel):
-      list = AWAIT chrome.tabs.query({})
+      queryOpts = (windowScope === 'currentWindow') ? { currentWindow: true } : {}
+      list = AWAIT chrome.tabs.query(queryOpts)
       referrersMap = AWAIT sendMessage({ type: GET_TAB_REFERRERS, data: { tabs: list.map(t => ({ id: t.id, url: t.url })) } }) then response.data
       allTabs = list.map(tab => ({ ...tab, referrer: referrersMap[tab.id] ?? '' }))
     ON GET_TAB_REFERRERS (service worker):
@@ -84,8 +85,9 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       RETURN tabs WHERE (t.title ?? '').toLowerCase().includes(q) OR (t.url ?? '').toLowerCase().includes(q) OR (t.referrer ?? '').toLowerCase().includes(q)
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # UI: multi-row card per tab (title, URL, referrer); search input; on input set searchQuery and set visibleTabs = filterBrowserTabs(allTabs, searchQuery); re-render list. Implements "multi-row format" and "filter by search".
-    RENDER: FOR each tab in visibleTabs: display card with line1=title, line2=url, line3=referrer (or "—" if empty)
+    # UI: window scope toggle "Current window" (default) / "All windows"; on change set windowScope and call loadTabs(). Multi-row card per tab (title, URL, referrer, window id and tab id); search input; on input set searchQuery and set visibleTabs = filterBrowserTabs(allTabs, searchQuery); re-render list. Implements "multi-row format", "filter by search", "each tab row displays window id and tab id".
+    RENDER: FOR each tab in visibleTabs: display card with line1=title, line2=url, line3=referrer (or "—" if empty), line4="Window <windowId> · Tab <id>"
+    ON windowScope toggle change: windowScope = selected; loadTabs()
     ON searchInput input: searchQuery = value; visibleTabs = filterBrowserTabs(allTabs, searchQuery); re-render list
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]

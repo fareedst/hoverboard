@@ -178,4 +178,104 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer 
     expect(card).toBeTruthy()
     expect(card.querySelector('.browser-tabs-card-referrer')?.textContent?.trim()).toBe('—')
   })
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Each tab row displays window id and tab id
+  test('card displays window id and tab id', async () => {
+    const { doc, listEl } = makePanelDoc()
+    const mockTabs = {
+      query: async () => [
+        { id: 42, windowId: 100, title: 'Tab A', url: 'https://a.com' }
+      ]
+    }
+    const getReferrers = async () => ({ 42: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    const card = listEl.querySelector('.browser-tabs-card')
+    expect(card).toBeTruthy()
+    const idsEl = card.querySelector('.browser-tabs-card-ids')
+    expect(idsEl).toBeTruthy()
+    const text = idsEl.textContent.trim()
+    expect(text).toContain('100')
+    expect(text).toContain('42')
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Window scope: default current window, toggle to all windows
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] window scope (current vs all)', () => {
+  function makePanelDocWithScopeToggle () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const scopeCurrent = document.createElement('input')
+    scopeCurrent.type = 'radio'
+    scopeCurrent.name = 'browserTabsWindowScope'
+    scopeCurrent.value = 'currentWindow'
+    scopeCurrent.id = 'browserTabsScopeCurrent'
+    const scopeAll = document.createElement('input')
+    scopeAll.type = 'radio'
+    scopeAll.name = 'browserTabsWindowScope'
+    scopeAll.value = 'all'
+    scopeAll.id = 'browserTabsScopeAll'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(scopeCurrent)
+    panel.appendChild(scopeAll)
+    panel.appendChild(listEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '#browserTabsFilterInput' || sel === '[data-action="copyUrls"]' || sel === '#browserTabsCopyBtn' ||
+          sel === '[data-action="closeTabs"]' || sel === '#browserTabsMessage') return null
+      if (sel === '#browserTabsScopeCurrent' || sel === 'input[name="browserTabsWindowScope"][value="currentWindow"]') return scopeCurrent
+      if (sel === '#browserTabsScopeAll' || sel === 'input[name="browserTabsWindowScope"][value="all"]') return scopeAll
+      return null
+    }
+    panel.querySelectorAll = (sel) => {
+      if (sel === 'input[name="browserTabsWindowScope"]') return [scopeCurrent, scopeAll]
+      return []
+    }
+    return {
+      doc: {
+        getElementById (id) { return id === 'browserTabsPanel' ? panel : null },
+        createElement: document.createElement.bind(document)
+      },
+      listEl,
+      panel,
+      scopeCurrent,
+      scopeAll
+    }
+  }
+
+  test('default scope calls query with currentWindow true', async () => {
+    let capturedOpts = null
+    const { doc } = makePanelDocWithScopeToggle()
+    const mockTabs = {
+      query: async (opts) => {
+        capturedOpts = opts
+        return []
+      }
+    }
+    initBrowserTabsTab(doc, mockTabs, null, async () => ({}))
+    await new Promise(r => setTimeout(r, 100))
+    expect(capturedOpts).toEqual({ currentWindow: true })
+  })
+
+  test('when All windows selected, query called with empty object', async () => {
+    let capturedOpts = null
+    const { doc, scopeAll } = makePanelDocWithScopeToggle()
+    const mockTabs = {
+      query: async (opts) => {
+        capturedOpts = opts
+        return []
+      }
+    }
+    initBrowserTabsTab(doc, mockTabs, null, async () => ({}))
+    await new Promise(r => setTimeout(r, 50))
+    capturedOpts = null
+    scopeAll.checked = true
+    scopeAll.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise(r => setTimeout(r, 100))
+    expect(capturedOpts).toEqual({})
+  })
 })
