@@ -70,6 +70,8 @@ const SIDE_PANEL_READY_SELECTOR = '#treeContainer, #emptyState'
 const SIDE_PANEL_BOOKMARK_READY = '#bookmarkPanel [data-popup-ref="mainInterface"], #bookmarkPanel [data-popup-ref="loadingState"]'
 const SIDE_PANEL_TAB_BOOKMARK = '.side-panel-tab[data-tab="bookmark"]'
 const SIDE_PANEL_TAB_TAGS_TREE = '.side-panel-tab[data-tab="tagsTree"]'
+const SIDE_PANEL_TAB_BROWSER_TABS = '.side-panel-tab[data-tab="browserTabs"]'
+const SIDE_PANEL_BROWSER_TABS_READY = '#browserTabsPanel .browser-tabs-header'
 // [IMPL-SCREENSHOT_MODE] Side panel captures at 240px width so README images match real Chrome side panel proportions
 const SIDE_PANEL_VIEWPORT = { width: 240, height: 600 }
 // Viewport for Pinboard overlay page so composite (pinboard + side panel) has predictable dimensions
@@ -245,6 +247,17 @@ async function main () {
     fullPage: true
   })
   console.log('Saved: images/side-panel-tags-tree.png')
+
+  // 5c) Tabs tab: switch tab, wait for panel content, capture [IMPL-SCREENSHOT_MODE] side-panel-tabs.png
+  await sidePanelPage.locator(SIDE_PANEL_TAB_BROWSER_TABS).click()
+  await sidePanelPage.waitForTimeout(2000)
+  await sidePanelPage.locator(SIDE_PANEL_BROWSER_TABS_READY).first().waitFor({ state: 'attached', timeout: 10000 })
+  await sidePanelPage.waitForTimeout(500)
+  await sidePanelPage.screenshot({
+    path: path.join(imagesDir, 'side-panel-tabs.png'),
+    fullPage: true
+  })
+  console.log('Saved: images/side-panel-tabs.png')
   await sidePanelPage.close()
 
   // 6) Browser Bookmark Import – table or empty state (uses chrome.bookmarks.getTree from profile)

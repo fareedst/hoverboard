@@ -62,19 +62,29 @@ The configuration page provides comprehensive settings for customizing the exten
   - URL hash stripping when saving bookmarks
   - Auto-close timeout configuration (currently disabled at 0ms)
 
-### Side Panel – Bookmark and Tags Tree
+### Side Panel – Bookmark, Tags Tree, and Tabs
 
 ![Pinboard.in with side panel (Bookmark tab)](images/pinboard-side-panel-bookmark.png)
 
 The snapshot above shows **pinboard.in** in the main content area with the Hoverboard **side panel** open and the **Bookmark** tab visible (popup-equivalent: quick actions, storage, tag management, search).
 
+#### Bookmark tab
+
 ![Side Panel – Bookmark tab](images/side-panel-bookmark.png)
 
 Close-up of the side panel **Bookmark** tab only.
 
+#### Tags tree tab
+
 ![Side Panel – Tags tree tab](images/side-panel-tags-tree.png)
 
 The snapshot above shows the side panel **Tags tree** tab with placeholder tag and bookmark data (tag selector and collapsible tree with sample URLs).
+
+#### Tabs tab
+
+![Side Panel – Tabs tab](images/side-panel-tabs.png)
+
+The **Tabs** tab lists browser tabs with title, URL, and referrer. It includes a **Current window / All windows** toggle, **Search in** scope (Tab info, Page text, or Important tags), a filter input, **Copy URLs**, **Copy Records**, and **Close visible tabs**; each row shows window id and tab id.
 
 ([REQ-SIDE_PANEL_POPUP_EQUIVALENT], [ARCH-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_BOOKMARK], [REQ-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) The **Chrome side panel** has three tabs: **Bookmark**, **Tags tree**, and **Tabs**. The **Tabs** tab lists browser tabs (title, URL, referrer) with a **Current window / All windows** toggle (default: current window), a **Search in** scope (**Tab info** for title/URL/referrer, **Page text** for body text, or **Important tags** for headings, alt, meta description, etc.), a case-insensitive filter, a button to copy visible tab URLs to the clipboard (with success count), and a button to close visible tabs after confirmation (with success count). Each tab row shows window id and tab id for identification. Open the panel from the popup footer via **Tags tree**. In the panel you can switch between **Bookmark** (popup-equivalent UI for the current tab: quick actions, storage, tag management, search) and **Tags tree** (hierarchical view). The last-selected tab is persisted. Tab content fills the available vertical space (full panel height and width, not popup dimensions). The **Bookmark** tab refreshes promptly when the active browser tab changes or the tab's page completes (like the badge), and when you switch to the Bookmark tab it shows the current tab's bookmark. When you open the panel with the **Tags tree** tab visible (restored tab) or switch to it, the tag selector is set to the current bookmark's tags and the tree shows only bookmarks that share at least one of those tags. In the Bookmark tab, the **Tags tree** footer button switches to the Tags tree tab.
 
@@ -272,7 +282,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 
 ## 📸 Screenshots
 
-Screenshots are generated with **placeholder bookmark data** (no live account) and show the extension in **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script awaits storage seed, waits for the popup to signal content ready, and checks the **Local (L)** store on the bookmarks index so seeded bookmarks are visible. Side panel images (Bookmark and Tags tree tabs) are captured at **240px width** to match real Chrome side panel proportions. The script also produces **pinboard-side-panel-bookmark.png** (Pinboard.in page with the side panel Bookmark tab visible). You can use a custom seed file with `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js`; see `scripts/screenshot-seed.example.json` for the expected JSON shape.
+Screenshots are generated with **placeholder bookmark data** (no live account) and show the extension in **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script awaits storage seed, waits for the popup to signal content ready, and checks the **Local (L)** store on the bookmarks index so seeded bookmarks are visible. Side panel images (Bookmark, Tags tree, and Tabs tabs) are captured at **240px width** to match real Chrome side panel proportions. The script also produces **pinboard-side-panel-bookmark.png** (Pinboard.in page with the side panel Bookmark tab visible) and **side-panel-tabs.png** (Tabs tab). You can use a custom seed file with `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js`; see `scripts/screenshot-seed.example.json` for the expected JSON shape.
 
 ### Popup (dark theme)
 
