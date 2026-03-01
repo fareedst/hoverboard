@@ -28,6 +28,7 @@ IMPL-STORAGE_INDEX:
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
     tests:
       - tests/unit/storage-index.test.js
+      - tests/integration/message-handler-router-storage.integration.test.js
     code_annotations:
       - IMPL-STORAGE_INDEX
   related_decisions:

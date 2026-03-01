@@ -21777,6 +21777,34 @@ function popup(options = {}) {
 
 // src/ui/popup/popup.js
 init_config_manager();
+
+// src/ui/popup/popup-error-message.js
+var AUTH_PHRASES = [
+  "No authentication token configured",
+  "Authentication failed",
+  "Invalid API token"
+];
+function normalizePopupErrorInput(message, errorInfo = null) {
+  if (typeof message === "object" && message !== null) {
+    return message.message || "An unexpected error occurred";
+  }
+  return typeof message === "string" ? message : String(message);
+}
+function getPopupErrorMessage(errorMessage) {
+  const msg = errorMessage || "";
+  if (AUTH_PHRASES.some((phrase) => msg.includes(phrase))) {
+    return "Please configure your Pinboard API token in the extension options.";
+  }
+  if (msg.includes("network") || msg.includes("fetch")) {
+    return "Network error. Please check your connection and try again.";
+  }
+  if (msg.includes("permission") || msg.includes("denied")) {
+    return "Permission denied. Please check extension permissions.";
+  }
+  return "An unexpected error occurred. Please try again.";
+}
+
+// src/ui/popup/popup.js
 var HoverboardPopup = class {
   constructor() {
     this.isInitialized = false;
@@ -21830,41 +21858,13 @@ var HoverboardPopup = class {
     }
   }
   /**
-   * Handle errors from any component
+   * Handle errors from any component. [IMPL-POPUP_BUNDLE] Delegates message to getPopupErrorMessage for testable logic.
    */
   async handleError(message, errorInfo = null) {
-    let errorMessage = message;
-    let actualError = errorInfo;
-    if (typeof message === "object" && message !== null) {
-      actualError = message;
-      errorMessage = actualError.message || "An unexpected error occurred";
-    }
-    console.error("Popup Error:", errorMessage, actualError);
-    const authErrorMessages = [
-      "No authentication token configured",
-      "Authentication failed",
-      "Invalid API token"
-    ];
-    if (authErrorMessages.some((msg) => errorMessage.includes(msg))) {
-      if (this.popupComponents && this.popupComponents.uiManager) {
-        this.popupComponents.uiManager.showError("Please configure your Pinboard API token in the extension options.");
-      }
-      return;
-    }
-    if (errorMessage.includes("network") || errorMessage.includes("fetch")) {
-      if (this.popupComponents && this.popupComponents.uiManager) {
-        this.popupComponents.uiManager.showError("Network error. Please check your connection and try again.");
-      }
-      return;
-    }
-    if (errorMessage.includes("permission") || errorMessage.includes("denied")) {
-      if (this.popupComponents && this.popupComponents.uiManager) {
-        this.popupComponents.uiManager.showError("Permission denied. Please check extension permissions.");
-      }
-      return;
-    }
+    const errorMessage = normalizePopupErrorInput(message, errorInfo);
+    console.error("Popup Error:", errorMessage, errorInfo ?? message);
     if (this.popupComponents && this.popupComponents.uiManager) {
-      this.popupComponents.uiManager.showError("An unexpected error occurred. Please try again.");
+      this.popupComponents.uiManager.showError(getPopupErrorMessage(errorMessage));
     }
   }
   /**

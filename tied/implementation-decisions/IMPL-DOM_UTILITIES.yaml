@@ -21,7 +21,8 @@ IMPL-DOM_UTILITIES:
       - ARCH-SHARED_UTILITIES
     requirements:
       - REQ-SHARED_UTILITIES
-    tests: []
+    tests:
+      - tests/unit/dom-utils.test.js
     code_annotations:
       - IMPL-DOM_UTILITIES
   related_decisions:

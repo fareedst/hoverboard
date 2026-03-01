@@ -26,6 +26,7 @@ IMPL-NATIVE_HOST_INSTALLER:
     requirements:
       - REQ-NATIVE_HOST_WRAPPER
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: native host installer and platform setup."
     code_annotations:
       - IMPL-NATIVE_HOST_INSTALLER
       - ARCH-NATIVE_HOST

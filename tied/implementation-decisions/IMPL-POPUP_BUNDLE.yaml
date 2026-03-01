@@ -18,13 +18,16 @@ IMPL-POPUP_BUNDLE:
         description: build:popup script
       - path: scripts/build.js
         description: Run build:popup; skip ui/popup/popup.js in copyDir
+      - path: src/ui/popup/popup-error-message.js
+        description: Extracted popup error classification (getPopupErrorMessage) for testability
     functions: []
   traceability:
     architecture:
       - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
     requirements:
       - REQ-EXTENSION_BUNDLED_ENTRY_POINTS
-    tests: []
+    tests:
+      - tests/unit/popup-error-message.test.js
     code_annotations:
       - IMPL-POPUP_BUNDLE
   related_decisions:

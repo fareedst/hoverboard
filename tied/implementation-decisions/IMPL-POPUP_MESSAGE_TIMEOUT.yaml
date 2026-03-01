@@ -25,6 +25,7 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
     architecture: []
     requirements: []
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: message timeout wrapper around sendMessage."
     code_annotations:
       - IMPL-POPUP_MESSAGE_TIMEOUT
   related_decisions:

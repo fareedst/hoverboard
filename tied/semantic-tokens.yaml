@@ -386,6 +386,19 @@ PROC-TIED_DEV_CYCLE:
   metadata:
     registered: 2026-02-25T00:00:00.000Z
     last_updated: 2026-02-25T00:00:00.000Z
+PROC-TEST_STRATEGY:
+  type: PROC
+  name: Test Strategy and Coverage (Minimize Untested Code)
+  status: Active
+  description: E2E reserved for critical journeys; unit and integration tests cover IMPL/ARCH/REQ logic; coverage gates and gap report
+  cross_references:
+    - IMPL-TESTING
+    - REQ-MODULE_VALIDATION
+  source_index: processes.md
+  detail_file: null
+  metadata:
+    registered: 2026-03-01T00:00:00.000Z
+    last_updated: 2026-03-01T00:00:00.000Z
 REQ-EXTENSION_IDENTITY:
   type: REQ
   name: Extension Identity Preservation

@@ -22,7 +22,9 @@ IMPL-UI_ACTION_CONTRACT:
       - ARCH-UI_TESTABILITY
     requirements:
       - REQ-UI_INSPECTION
-    tests: []
+    tests:
+      - tests/unit/popup-message-contract.test.js
+      - tests/unit/content-messaging-contracts.test.js
     code_annotations:
       - IMPL-UI_ACTION_CONTRACT
   related_decisions:

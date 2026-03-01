@@ -6,6 +6,7 @@
 import { init, popup } from '../index.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
 import { ConfigManager } from '../../config/config-manager.js'
+import { normalizePopupErrorInput, getPopupErrorMessage } from './popup-error-message.js'
 
 class HoverboardPopup {
   constructor () {
@@ -55,7 +56,7 @@ class HoverboardPopup {
         errorHandler: this.errorHandler,
         enableKeyboard: true,
         enableState: true,
-        config: config
+        config
       })
 
       console.log('Popup components created')
@@ -84,54 +85,14 @@ class HoverboardPopup {
   }
 
   /**
-   * Handle errors from any component
+   * Handle errors from any component. [IMPL-POPUP_BUNDLE] Delegates message to getPopupErrorMessage for testable logic.
    */
   async handleError (message, errorInfo = null) {
-    // Handle different parameter formats
-    let errorMessage = message
-    let actualError = errorInfo
+    const errorMessage = normalizePopupErrorInput(message, errorInfo)
+    console.error('Popup Error:', errorMessage, errorInfo ?? message)
 
-    // If first parameter is an error object, adjust parameters
-    if (typeof message === 'object' && message !== null) {
-      actualError = message
-      errorMessage = actualError.message || 'An unexpected error occurred'
-    }
-
-    console.error('Popup Error:', errorMessage, actualError)
-
-    // Check if this is an auth error
-    const authErrorMessages = [
-      'No authentication token configured',
-      'Authentication failed',
-      'Invalid API token'
-    ]
-
-    if (authErrorMessages.some(msg => errorMessage.includes(msg))) {
-      if (this.popupComponents && this.popupComponents.uiManager) {
-        this.popupComponents.uiManager.showError('Please configure your Pinboard API token in the extension options.')
-      }
-      return
-    }
-
-    // Check for network errors
-    if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
-      if (this.popupComponents && this.popupComponents.uiManager) {
-        this.popupComponents.uiManager.showError('Network error. Please check your connection and try again.')
-      }
-      return
-    }
-
-    // Check for permission errors
-    if (errorMessage.includes('permission') || errorMessage.includes('denied')) {
-      if (this.popupComponents && this.popupComponents.uiManager) {
-        this.popupComponents.uiManager.showError('Permission denied. Please check extension permissions.')
-      }
-      return
-    }
-
-    // Generic error fallback
     if (this.popupComponents && this.popupComponents.uiManager) {
-      this.popupComponents.uiManager.showError('An unexpected error occurred. Please try again.')
+      this.popupComponents.uiManager.showError(getPopupErrorMessage(errorMessage))
     }
   }
 

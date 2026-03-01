@@ -25,6 +25,7 @@ IMPL-URL_INHIBITION:
     requirements:
       - REQ-SITE_MANAGEMENT
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: URL inhibition list and site management."
     code_annotations:
       - IMPL-URL_INHIBITION
   related_decisions:

@@ -27,6 +27,7 @@ IMPL-LOGGER_CONTEXT_LEVELS:
     requirements:
       - REQ-STRUCTURED_LOGGING
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: logger context/level API used across codebase."
     code_annotations:
       - IMPL-LOGGER_CONTEXT_LEVELS
   related_decisions:

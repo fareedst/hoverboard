@@ -29,6 +29,7 @@ IMPL-DEV_COMMAND_INSPECTION:
       - REQ-URL_TAGS_DISPLAY
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: dev-only command inspection and inspector hooks."
     code_annotations:
       - IMPL-DEV_COMMAND_INSPECTION
   related_decisions:

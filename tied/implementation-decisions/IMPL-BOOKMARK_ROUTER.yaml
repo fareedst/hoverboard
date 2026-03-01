@@ -37,6 +37,7 @@ IMPL-BOOKMARK_ROUTER:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
     tests:
       - tests/unit/bookmark-router.test.js
+      - tests/integration/message-handler-router-storage.integration.test.js
     code_annotations:
       - IMPL-BOOKMARK_ROUTER
   related_decisions:

@@ -22,6 +22,7 @@ IMPL-FEATURE_FLAGS:
     requirements:
       - REQ-CONFIG_PORTABILITY
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: feature-flag config read in options and runtime."
     code_annotations:
       - IMPL-FEATURE_FLAGS
   related_decisions:

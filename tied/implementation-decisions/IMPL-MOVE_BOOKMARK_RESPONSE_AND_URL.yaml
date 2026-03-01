@@ -33,6 +33,7 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
     requirements:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: move bookmark response and URL handling in UI."
     code_annotations:
       - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
   related_decisions:

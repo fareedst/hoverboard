@@ -36,6 +36,7 @@ IMPL-BOOKMARK_STATE_SYNC:
     tests:
       - tests/unit/toggle-synchronization.test.js
       - tests/unit/tag-synchronization.test.js
+      - tests/unit/badge-manager.test.js
     code_annotations:
       - IMPL-BOOKMARK_STATE_SYNC
   related_decisions:

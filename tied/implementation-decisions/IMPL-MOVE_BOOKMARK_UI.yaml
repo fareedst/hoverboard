@@ -38,6 +38,7 @@ IMPL-MOVE_BOOKMARK_UI:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
       - REQ-STORAGE_MODE_DEFAULT
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: move bookmark UI flow in side panel/popup."
     code_annotations:
       - IMPL-MOVE_BOOKMARK_UI
   related_decisions:

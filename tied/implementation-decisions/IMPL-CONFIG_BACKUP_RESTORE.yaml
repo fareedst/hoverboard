@@ -22,6 +22,7 @@ IMPL-CONFIG_BACKUP_RESTORE:
     requirements:
       - REQ-CONFIG_PORTABILITY
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: export/import config and options UI flow."
     code_annotations:
       - IMPL-CONFIG_BACKUP_RESTORE
   related_decisions:

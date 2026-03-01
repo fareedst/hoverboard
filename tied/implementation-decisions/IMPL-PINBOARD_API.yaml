@@ -32,6 +32,7 @@ IMPL-PINBOARD_API:
     requirements:
       - REQ-PINBOARD_COMPATIBILITY
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: Pinboard API calls covered indirectly by pinboard-bookmark-times.test.js and tag-storage tests."
     code_annotations:
       - IMPL-PINBOARD_API
   related_decisions:

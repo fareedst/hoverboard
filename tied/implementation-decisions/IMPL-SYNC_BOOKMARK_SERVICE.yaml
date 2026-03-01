@@ -21,7 +21,8 @@ IMPL-SYNC_BOOKMARK_SERVICE:
       - ARCH-STORAGE_INDEX_AND_ROUTER
     requirements:
       - REQ-PER_BOOKMARK_STORAGE_BACKEND
-    tests: []
+    tests:
+      - tests/unit/sync-bookmark-service.test.js
     code_annotations:
       - IMPL-SYNC_BOOKMARK_SERVICE
   related_decisions:

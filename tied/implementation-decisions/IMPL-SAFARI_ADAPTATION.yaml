@@ -39,6 +39,7 @@ IMPL-SAFARI_ADAPTATION:
     requirements:
       - REQ-SAFARI_ADAPTATION
     tests: []
+    test_coverage_note: "Safari-only; out of scope for Chrome extension coverage. No unit tests for Safari adaptation."
     code_annotations:
       - IMPL-SAFARI_ADAPTATION
   related_decisions:

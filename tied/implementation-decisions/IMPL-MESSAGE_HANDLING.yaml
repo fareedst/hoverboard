@@ -35,6 +35,7 @@ IMPL-MESSAGE_HANDLING:
       - REQ-BOOKMARK_STATE_SYNCHRONIZATION
     tests:
       - tests/unit/module-import-fix.test.js
+      - tests/unit/message-service.test.js
       - tests/unit/message-handler-runtime-validation.test.js
       - tests/unit/message-handler-local-save-recall.test.js
       - tests/unit/message-schemas.test.js
@@ -46,6 +47,7 @@ IMPL-MESSAGE_HANDLING:
       - tests/unit/message-client.test.js
       - tests/unit/message-type-drift.test.js
       - tests/playwright/extension-messaging.spec.js
+      - tests/integration/message-handler-router-storage.integration.test.js
     code_annotations:
       - IMPL-MESSAGE_HANDLING
   related_decisions:

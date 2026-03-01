@@ -33,6 +33,7 @@ IMPL-DEBUG_PANEL:
     requirements:
       - REQ-UI_INSPECTION
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: debug panel UI and debug-logger usage in message-handler/popup/content."
     code_annotations:
       - IMPL-DEBUG_PANEL
   related_decisions:

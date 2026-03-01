@@ -41,6 +41,7 @@ IMPL-FILE_STORAGE_TYPED_PATH:
     requirements:
       - REQ-FILE_BOOKMARK_STORAGE
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: file path typing exercised via file-bookmark-service tests."
     code_annotations:
       - IMPL-FILE_STORAGE_TYPED_PATH
   related_decisions:

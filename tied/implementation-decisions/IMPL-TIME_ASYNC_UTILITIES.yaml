@@ -22,6 +22,7 @@ IMPL-TIME_ASYNC_UTILITIES:
     requirements:
       - REQ-SHARED_UTILITIES
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: time/async helpers exercised indirectly."
     code_annotations:
       - IMPL-TIME_ASYNC_UTILITIES
   related_decisions:

@@ -20,6 +20,7 @@ IMPL-MODULE_VALIDATION:
     requirements:
       - REQ-MODULE_VALIDATION
     tests: []
+    test_coverage_note: "No unit tests; methodology meta. Reason: process guidance for module validation, not a code module."
     code_annotations:
       - IMPL-MODULE_VALIDATION
       - ARCH-MODULE_VALIDATION

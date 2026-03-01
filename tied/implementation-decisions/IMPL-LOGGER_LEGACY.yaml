@@ -25,6 +25,7 @@ IMPL-LOGGER_LEGACY:
     requirements:
       - REQ-STRUCTURED_LOGGING
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: legacy logger fallback exercised indirectly."
     code_annotations:
       - IMPL-LOGGER_LEGACY
   related_decisions:

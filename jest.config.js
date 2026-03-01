@@ -37,9 +37,20 @@ export default {
   coverageReporters: [
     'text',
     'lcov',
-    'html'
+    'html',
+    'json-summary'
   ],
-  
+
+  // [IMPL-TESTING] [PROC-TEST_STRATEGY] Coverage gates: fail CI if coverage drops below threshold (minimize untested code)
+  coverageThreshold: {
+    global: {
+      branches: 27,
+      functions: 28,
+      lines: 28,
+      statements: 28
+    }
+  },
+
   // Module handling
   moduleFileExtensions: ['js', 'json'],
   

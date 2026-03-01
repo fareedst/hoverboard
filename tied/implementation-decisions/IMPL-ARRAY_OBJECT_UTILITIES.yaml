@@ -25,6 +25,7 @@ IMPL-ARRAY_OBJECT_UTILITIES:
     requirements:
       - REQ-SHARED_UTILITIES
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: shared array/object utils exercised indirectly by other tested modules."
     code_annotations:
       - IMPL-ARRAY_OBJECT_UTILITIES
   related_decisions:

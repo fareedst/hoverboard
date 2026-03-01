@@ -25,6 +25,7 @@ IMPL-LOG_LEVEL_CONFIG:
     requirements:
       - REQ-STRUCTURED_LOGGING
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: log level config in options and logger init."
     code_annotations:
       - IMPL-LOG_LEVEL_CONFIG
   related_decisions:

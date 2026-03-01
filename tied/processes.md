@@ -74,6 +74,39 @@ Use the structure below for every process you document. Each entry should be kep
 
 ---
 
+## `[PROC-TEST_STRATEGY]` Test strategy and coverage (minimize untested code)
+
+### Purpose
+Minimize the amount of code not covered by tests so that IMPL/ARCH/REQ logic is validated by unit and integration tests; E2E remains expensive and is reserved for critical user journeys.
+
+### Scope
+Chrome extension `src/` only (Safari-only code excluded). Applies to unit tests (`tests/unit/**/*.test.js`), integration tests (`**/*.integration.test.js`), and Playwright E2E (`tests/playwright/`).
+
+### Token references
+- `[IMPL-TESTING]` — testing implementation decisions
+- `[REQ-MODULE_VALIDATION]` — module validation before integration
+- All `[REQ-*]` / `[ARCH-*]` / `[IMPL-*]` reflected in code under test
+
+### Status
+Active
+
+### Principles
+1. **E2E is expensive** — Reserve E2E for critical user journeys. Do not rely on E2E as the primary way to find untested pathways.
+2. **Unit + integration tests cover logic** — Unit and integration tests should cover IMPL/ARCH/REQ logic so that untested pathways are found and fixed before or alongside E2E.
+3. **IMPL–test alignment** — Every Active IMPL should have at least one test reference in `traceability.tests`, or be explicitly documented as "tested only via E2E" / "no unit tests" with a reason.
+4. **Coverage gates** — Jest `coverageThreshold` and the coverage gap report (`scripts/coverage-gap-report.js`) help prevent regressions and surface files/IMPLs with no tests.
+
+### Activities
+- Run `npm run test:coverage` before merging; fix or document any new code that lowers coverage below threshold.
+- Run `node scripts/coverage-gap-report.js [threshold]` to list src files below threshold and IMPLs with empty `traceability.tests`; use the report in MRs or docs.
+- For IMPLs that are intentionally not unit-tested (e.g. platform-specific glue or debug tooling), record in the IMPL detail that coverage is via E2E or manual testing so the "no tests" is explicit and reviewable.
+
+### Artifacts & Metrics
+- **Artifacts** — Coverage report (`coverage/`), coverage gap report output, TIED `traceability.tests` in IMPL detail files.
+- **Success Metrics** — Coverage at or above threshold; IMPL traceability.tests populated or explicitly documented; E2E used for critical flows only.
+
+---
+
 ## `[PROC-YAML_DB_OPERATIONS]` YAML Database Operations
 
 ### Purpose

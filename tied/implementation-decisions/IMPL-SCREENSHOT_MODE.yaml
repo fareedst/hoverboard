@@ -41,6 +41,7 @@ IMPL-SCREENSHOT_MODE:
     requirements:
       - REQ-LOCAL_BOOKMARKS_INDEX
     tests: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: screenshot script and viewport capture."
     code_annotations:
       - IMPL-SCREENSHOT_MODE
   related_decisions:

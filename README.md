@@ -331,11 +331,18 @@ npm run build
 # Type-check only (TypeScript/JSDoc; no emit)
 npm run typecheck
 
-# Run unit tests
+# Run unit tests (Jest)
 npm test
 
-# Run integration tests
+# Run tests with coverage (enforces coverage threshold; see [PROC-TEST_STRATEGY])
+npm run test:coverage
+
+# Run integration tests (MessageHandler+Router+StorageIndex, ConfigManager auth/storage mode)
 npm run test:integration
+
+# Coverage gap report (lists src/ files below threshold and IMPLs with empty traceability.tests; run after test:coverage)
+npm run coverage:gap-report
+# With threshold, e.g. 30%: npm run coverage:gap-report -- 30
 
 # Run extension E2E (Playwright: load unpacked extension; popup, messaging, evaluation, overlay, options, side panel)
 npm run test:e2e:extension
@@ -377,7 +384,8 @@ Development is guided by the TIED process: implementation decisions are captured
 
 - **Token validation** – `npm run validate` (and CI) runs `npm run validate:tokens`, which ensures every `[REQ-*]` / `[ARCH-*]` / `[IMPL-*]` referenced in `src/` and `tests/` is registered in `tied/semantic-tokens.yaml`. Run manually: `bash scripts/validate_tokens.sh`.
 - **TIED consistency validation** – The TIED MCP tool `tied_validate_consistency` checks index files and detail YAML (REQ/ARCH/IMPL) for parse errors, token references, and cross-index consistency. All `tied/requirements/`, `tied/architecture-decisions/`, and `tied/implementation-decisions/` detail files are valid YAML and pass this validation. See `docs/ai-agent-tied-mcp-usage.md` for MCP usage.
-- **Quality summary** – Module boundaries and provider-style contracts are documented; unit tests use mocks and reference REQ/IMPL in describe/test names; messaging and contract tests cover extension protocols. Debug output uses `debugLog`/`debugError` per TIED. See CHANGELOG for the latest quality and token-validation notes.
+- **Test strategy ([PROC-TEST_STRATEGY])** – E2E is reserved for critical user journeys; unit and integration tests cover IMPL/ARCH/REQ logic. Jest coverage thresholds (`jest.config.js`) fail CI if coverage drops; `npm run coverage:gap-report` lists `src/` files below threshold and IMPLs with empty `traceability.tests`. See `tied/processes.md` § PROC-TEST_STRATEGY.
+- **Quality summary** – Module boundaries and provider-style contracts are documented; unit tests use mocks and reference REQ/IMPL in describe/test names; messaging and contract tests cover extension protocols; integration tests exercise MessageHandler+BookmarkRouter+StorageIndex and ConfigManager with minimal mocks. Debug output uses `debugLog`/`debugError` per TIED. See CHANGELOG for the latest quality and token-validation notes.
 
 ## Documentation
 

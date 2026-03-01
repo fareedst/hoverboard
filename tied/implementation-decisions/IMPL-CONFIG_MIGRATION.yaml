@@ -23,7 +23,9 @@ IMPL-CONFIG_MIGRATION:
       - ARCH-CONFIG_STRUCTURE
     requirements:
       - REQ-CONFIG_PORTABILITY
-    tests: []
+    tests:
+      - tests/unit/config-manager.test.js
+      - tests/integration/config-manager-load.integration.test.js
     code_annotations:
       - IMPL-CONFIG_MIGRATION
   related_decisions:
