@@ -14,17 +14,21 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     - criterion: Side panel has a tab named Tabs that displays browser tabs from the current window (default) or all windows
     - criterion: For each tab the panel shows title, URL, and page referrer (multi-row per tab); referrer is best-effort and may be empty
     - criterion: A search box filters the list by matching any of title, URL, or referrer (case-insensitive)
+    - criterion: User can select search scope: Tab info (title, URL, referrer), Page text (body), or Important tags (alt, h1–h3, meta description, etc.)
+    - criterion: When "Page text" is selected, the filter matches against page body text for each tab
+    - criterion: When "Important tags" is selected, the filter matches against concatenated important-tags text (alt, h1–h3, meta description, og:title, etc.) per tab
     - criterion: A button copies the URLs of all visible (filtered) tabs to the clipboard and shows a success count
     - criterion: A button copies the full list of visible (filtered) tab records as YAML (including id, windowId, title, url, referrer) to the clipboard and shows a success count
     - criterion: A button closes all visible (filtered) tabs after user confirmation and shows a success count
     - criterion: Each tab row displays window id and tab id (for debugging and identification).
   validation_criteria:
     - method: Unit tests
-      coverage: 'filterBrowserTabs: empty query returns all; case-insensitive match on title/url/referrer; build URL list and buildRecordsYamlForCopy; Copy Records button writes YAML to clipboard; GET_TAB_REFERRERS message type and SW handler; panel merges referrer map from SW'
+      coverage: 'filterBrowserTabs: empty query returns all; scope-aware filter (tabInfo/pageText/importantTags); build URL list and buildRecordsYamlForCopy; Copy Records button; GET_TAB_REFERRERS and GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; panel merges referrer and pageText/importantTags from SW'
     - method: Manual or E2E
-      coverage: Open Tabs tab; see list with referrers when opened from links; filter; copy URLs; copy records as YAML; confirm and close visible tabs; see counts
+      coverage: Open Tabs tab; select search scope; filter by tab info, page text, or important tags; copy URLs; copy records; close visible tabs; see counts
   notes:
     - 'Referrer must be obtained via service worker (GET_TAB_REFERRERS): scripting from the side panel does not run in tab context, so the panel sends a message and the SW runs chrome.scripting.executeScript per tab and returns a referrer map.'
+    - 'Page text and important tags for filter are obtained via GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS (SW executeScript per tab); fetch when user selects that scope or on load if that scope is selected.'
   traceability:
     architecture:
       - ARCH-SIDE_PANEL_BROWSER_TABS
@@ -46,6 +50,6 @@ REQ-SIDE_PANEL_BROWSER_TABS:
       date: '2026-02-28'
       author: AI Agent
     last_updated:
-      date: '2026-02-28'
+      date: '2026-03-01'
       author: AI Agent
-      reason: Add Copy Records as YAML satisfaction criterion and validation
+      reason: Add search scope (tab info / page text / important tags) satisfaction and validation criteria

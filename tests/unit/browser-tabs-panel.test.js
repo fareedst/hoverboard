@@ -3,7 +3,16 @@
  * Unit tests: filterBrowserTabs (case-insensitive filter on title, URL, referrer), buildUrlListForCopy (URLs from visible tabs).
  */
 
-import { filterBrowserTabs, buildUrlListForCopy, buildRecordsYamlForCopy, getReferrerDisplayText, initBrowserTabsTab } from '../../src/ui/side-panel/browser-tabs-panel.js'
+import {
+  filterBrowserTabs,
+  buildUrlListForCopy,
+  buildRecordsYamlForCopy,
+  getReferrerDisplayText,
+  initBrowserTabsTab,
+  SEARCH_SCOPE_TAB_INFO,
+  SEARCH_SCOPE_PAGE_TEXT,
+  SEARCH_SCOPE_IMPORTANT_TAGS
+} from '../../src/ui/side-panel/browser-tabs-panel.js'
 
 const tabs = [
   { id: 1, title: 'Google', url: 'https://google.com', referrer: '' },
@@ -48,6 +57,61 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] filterBro
   test('null or undefined query treated as empty (returns all)', () => {
     expect(filterBrowserTabs(tabs, null)).toEqual(tabs)
     expect(filterBrowserTabs(tabs, undefined)).toEqual(tabs)
+  })
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] scope tabInfo (default): same as no scope
+  test('scope tabInfo or omitted uses title, url, referrer', () => {
+    expect(filterBrowserTabs(tabs, 'google', SEARCH_SCOPE_TAB_INFO).length).toBeGreaterThanOrEqual(1)
+    expect(filterBrowserTabs(tabs, 'google').some(t => t.id === 1)).toBe(true)
+  })
+})
+
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] filterBrowserTabs scope pageText', () => {
+  const tabsWithPageText = [
+    { id: 1, title: 'A', url: 'https://a.com', referrer: '', pageText: 'Welcome to Alpha product page' },
+    { id: 2, title: 'B', url: 'https://b.com', referrer: '', pageText: 'Beta documentation and guides' },
+    { id: 3, title: 'C', url: 'https://c.com', referrer: '', pageText: 'Contact us for support' }
+  ]
+
+  test('filters by pageText when scope is pageText', () => {
+    const out = filterBrowserTabs(tabsWithPageText, 'Alpha', SEARCH_SCOPE_PAGE_TEXT)
+    expect(out).toHaveLength(1)
+    expect(out[0].id).toBe(1)
+  })
+
+  test('empty query returns all when scope pageText', () => {
+    expect(filterBrowserTabs(tabsWithPageText, '', SEARCH_SCOPE_PAGE_TEXT)).toEqual(tabsWithPageText)
+  })
+
+  test('no match in pageText returns empty', () => {
+    expect(filterBrowserTabs(tabsWithPageText, 'xyz', SEARCH_SCOPE_PAGE_TEXT)).toEqual([])
+  })
+
+  test('missing pageText treated as empty string', () => {
+    const withMissing = [{ id: 1, title: 'T', url: 'https://x.com', referrer: '' }]
+    expect(filterBrowserTabs(withMissing, 'anything', SEARCH_SCOPE_PAGE_TEXT)).toEqual([])
+  })
+})
+
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] filterBrowserTabs scope importantTags', () => {
+  const tabsWithTags = [
+    { id: 1, title: 'A', url: 'https://a.com', referrer: '', importantTags: 'Home Page Main heading' },
+    { id: 2, title: 'B', url: 'https://b.com', referrer: '', importantTags: 'Docs H1 Getting started' }
+  ]
+
+  test('filters by importantTags when scope is importantTags', () => {
+    const out = filterBrowserTabs(tabsWithTags, 'Getting started', SEARCH_SCOPE_IMPORTANT_TAGS)
+    expect(out).toHaveLength(1)
+    expect(out[0].id).toBe(2)
+  })
+
+  test('empty query returns all when scope importantTags', () => {
+    expect(filterBrowserTabs(tabsWithTags, '', SEARCH_SCOPE_IMPORTANT_TAGS)).toEqual(tabsWithTags)
+  })
+
+  test('missing importantTags treated as empty string', () => {
+    const withMissing = [{ id: 1, title: 'T', url: 'https://x.com', referrer: '' }]
+    expect(filterBrowserTabs(withMissing, 'heading', SEARCH_SCOPE_IMPORTANT_TAGS)).toEqual([])
   })
 })
 
@@ -375,5 +439,96 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] window sc
     scopeAll.dispatchEvent(new Event('change', { bubbles: true }))
     await new Promise(r => setTimeout(r, 100))
     expect(capturedOpts).toEqual({})
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Search scope: when scope is Page text, panel fetches getTabsPageText and merges into tabs; filter uses pageText.
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] search scope Page text (merge and filter)', () => {
+  function makePanelDocWithSearchScope () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const filterInput = document.createElement('input')
+    filterInput.id = 'browserTabsFilterInput'
+    const scopeTabInfo = document.createElement('input')
+    scopeTabInfo.type = 'radio'
+    scopeTabInfo.name = 'browserTabsSearchScope'
+    scopeTabInfo.value = 'tabInfo'
+    scopeTabInfo.id = 'browserTabsSearchScopeTabInfo'
+    const scopePageText = document.createElement('input')
+    scopePageText.type = 'radio'
+    scopePageText.name = 'browserTabsSearchScope'
+    scopePageText.value = 'pageText'
+    scopePageText.id = 'browserTabsSearchScopePageText'
+    const scopeImportantTags = document.createElement('input')
+    scopeImportantTags.type = 'radio'
+    scopeImportantTags.name = 'browserTabsSearchScope'
+    scopeImportantTags.value = 'importantTags'
+    scopeImportantTags.id = 'browserTabsSearchScopeImportantTags'
+    scopePageText.checked = true
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(scopeTabInfo)
+    panel.appendChild(scopePageText)
+    panel.appendChild(scopeImportantTags)
+    panel.appendChild(filterInput)
+    panel.appendChild(listEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '#browserTabsFilterInput') return filterInput
+      if (sel === '#browserTabsMessage' || sel === '[data-action="copyUrls"]' || sel === '#browserTabsCopyBtn' ||
+          sel === '[data-action="copyRecords"]' || sel === '#browserTabsCopyRecordsBtn' ||
+          sel === '[data-action="closeTabs"]' || sel === '#browserTabsCloseBtn') return null
+      return null
+    }
+    panel.querySelectorAll = (sel) => {
+      if (sel === 'input[name="browserTabsSearchScope"]') return [scopeTabInfo, scopePageText, scopeImportantTags]
+      if (sel === 'input[name="browserTabsWindowScope"]') return []
+      return []
+    }
+    return {
+      doc: {
+        getElementById (id) { return id === 'browserTabsPanel' ? panel : null },
+        createElement: document.createElement.bind(document)
+      },
+      listEl,
+      filterInput,
+      scopePageText
+    }
+  }
+
+  test('when scope Page text and sendMessage returns pageText map, filter matches pageText', async () => {
+    const { doc, listEl, filterInput } = makePanelDocWithSearchScope()
+    const tabList = [
+      { id: 1, title: 'Tab One', url: 'https://one.com' },
+      { id: 2, title: 'Tab Two', url: 'https://two.com' }
+    ]
+    const pageTextMap = { 1: 'Content about bananas', 2: 'Content about apples' }
+    let sentType = null
+    const mockTabs = { query: async () => tabList }
+    const getReferrers = async () => ({ 1: '', 2: '' })
+    const origRuntime = global.chrome?.runtime
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = {
+      sendMessage (msg, cb) {
+        sentType = msg?.type
+        cb({ success: true, data: pageTextMap })
+      }
+    }
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 150))
+      expect(sentType).toBe('getTabsPageText')
+      filterInput.value = 'bananas'
+      filterInput.dispatchEvent(new Event('input', { bubbles: true }))
+      await new Promise(r => setTimeout(r, 50))
+      const cards = listEl.querySelectorAll('.browser-tabs-card')
+      expect(cards).toHaveLength(1)
+      expect(cards[0].querySelector('.browser-tabs-card-title')?.textContent?.trim()).toBe('Tab One')
+    } finally {
+      if (origRuntime) global.chrome.runtime = origRuntime
+    }
   })
 })

@@ -12,8 +12,8 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - Testable filterBrowserTabs; panel with list, filter, copy URLs, close with confirm
   implementation_approach:
     details:
-      - "Data fetch: chrome.tabs.query in panel; scope by windowScope (currentWindow default) via query({ currentWindow: true }) or query({}); referrer via GET_TAB_REFERRERS message to service worker (panel cannot run executeScript in tab context). SW handles GET_TAB_REFERRERS: for each tab with http(s) URL runs chrome.scripting.executeScript({ target: { tabId }, func: () => document.referrer || '' }), returns { tabId: referrer } map; panel merges map into tab list. MESSAGE_TYPES.GET_TAB_REFERRERS in message-handler.js; SW handler in service-worker.js before processMessage."
-      - "UI: window scope toggle (Current window | All windows, default current); multi-row card per tab (title, URL, referrer, window id and tab id); search input; filter applies case-insensitive substring to title, url, referrer; visible = filtered list"
+      - "Data fetch: chrome.tabs.query in panel; windowScope (currentWindow | all); referrer via GET_TAB_REFERRERS (SW executeScript per tab). Search scope: tabInfo (default), pageText, importantTags. When scope is pageText or importantTags, panel sends GET_TABS_PAGE_TEXT or GET_TABS_IMPORTANT_TAGS with tab list; SW runs executeScript per tab (injectable returns title+body.innerText capped, or concatenated alt/h1–h3/meta/og:title/etc.); panel merges map into allTabs as pageText/importantTags. Show loading state during fetch."
+      - "UI: window scope toggle; search-scope control (Tab info | Page text | Important tags, default Tab info); search input; filter is scope-aware (filterBrowserTabs(tabs, query, scope)); multi-row card per tab; visible = filtered list"
       - Copy: collect URLs of visible tabs, clipboard.writeText(urls.join("\n")), show count
       - Copy Records: build YAML list from visible tabs (each item id, windowId, title, url, referrer), clipboard.writeText(yamlString), show "Copied N records"
       - Close: confirm("Close N tabs?"); on confirm chrome.tabs.remove for each visible id; show success count
@@ -26,11 +26,11 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - path: src/core/service-worker.js
         description: GET_TAB_REFERRERS handler; executeScript per tab, return referrers map
       - path: src/core/message-handler.js
-        description: MESSAGE_TYPES.GET_TAB_REFERRERS
+        description: MESSAGE_TYPES.GET_TAB_REFERRERS, GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS
     functions:
       - name: filterBrowserTabs
         file: src/ui/side-panel/browser-tabs-panel.js
-        description: Pure filter by title, url, referrer (case-insensitive)
+        description: Scope-aware filter (tabInfo: title/url/referrer; pageText: tab.pageText; importantTags: tab.importantTags); case-insensitive
       - name: buildUrlListForCopy
         file: src/ui/side-panel/browser-tabs-panel.js
         description: Return URLs of visible tabs (one per line)
@@ -64,52 +64,52 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - IMPL-SIDE_PANEL_TABS
   essence_pseudocode: |
     # [IMPL-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_BROWSER_TABS]
-    # This block defines the browser tabs panel: data fetch, filter, UI, copy URLs, close with confirm. Implements REQ by listing tabs with title/URL/referrer, filter, copy, close; implements ARCH by chrome.tabs + scripting and visible-list actions.
+    # This block defines the browser tabs panel: data fetch, search scope, filter, UI, copy URLs, close with confirm. Implements REQ by listing tabs with title/URL/referrer and optional pageText/importantTags; scope-aware filter; implements ARCH by chrome.tabs + scripting and visible-list actions.
 
-    INPUT: windowScope (currentWindow | all), searchQuery (string), tabs list from chrome.tabs
+    INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
     OUTPUT: visible tabs (filtered), copy URLs to clipboard with count, close visible tabs after confirm with count
-    DATA: tabs = [{ id, windowId, title, url, referrer }], visibleTabs = filterBrowserTabs(tabs, searchQuery)
+    DATA: tabs = [{ id, windowId, title, url, referrer, pageText?, importantTags? }], visibleTabs = filterBrowserTabs(tabs, searchQuery, searchScope)
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # Data fetch: panel queries chrome.tabs; windowScope (currentWindow | all) selects query. currentWindow (default) → query({ currentWindow: true }); all → query({}). Referrer must be obtained from service worker (scripting from panel does not run in tab context). Panel sends GET_TAB_REFERRERS with { tabs: [{ id, url }] }; SW runs executeScript per tab and returns { tabId: referrer }; panel merges map into list. Implements "list from current or all windows" and "collect page referrer" (best-effort).
+    # Data fetch: panel queries chrome.tabs; windowScope selects query. Referrer via GET_TAB_REFERRERS (SW executeScript per tab). When searchScope is pageText or importantTags, panel sends GET_TABS_PAGE_TEXT or GET_TABS_IMPORTANT_TAGS with tab list; SW executeScript per tab returns tabId→string map; panel merges into allTabs. Show loading state during pageText/importantTags fetch. Implements "list from current or all windows", "collect referrer", "search in page text or important tags".
     ON load / refresh (panel):
       queryOpts = (windowScope === 'currentWindow') ? { currentWindow: true } : {}
       list = AWAIT chrome.tabs.query(queryOpts)
       referrersMap = AWAIT sendMessage({ type: GET_TAB_REFERRERS, data: { tabs: list.map(t => ({ id: t.id, url: t.url })) } }) then response.data
       allTabs = list.map(tab => ({ ...tab, referrer: referrersMap[tab.id] ?? '' }))
-    ON GET_TAB_REFERRERS (service worker):
-      FOR each tab in message.data.tabs WHERE tab.url is http(s): executeScript({ target: { tabId: tab.id }, func: () => document.referrer || '' }) → referrers[tab.id] = result or ''
-      RETURN { success: true, data: referrers }
+      IF searchScope === 'pageText': showLoading(); pageTextMap = AWAIT sendMessage({ type: GET_TABS_PAGE_TEXT, data: { tabs: list } }) then response.data; merge pageTextMap into allTabs; hideLoading()
+      IF searchScope === 'importantTags': showLoading(); importantTagsMap = AWAIT sendMessage({ type: GET_TABS_IMPORTANT_TAGS, data: { tabs: list } }) then response.data; merge importantTagsMap into allTabs; hideLoading()
+    ON GET_TAB_REFERRERS (service worker): FOR each tab WHERE url is http(s): executeScript({ target: { tabId }, func: () => document.referrer || '' }) → referrers[tab.id]; RETURN { success: true, data: referrers }
+    ON GET_TABS_PAGE_TEXT (service worker): FOR each tab WHERE url is http(s): executeScript({ target: { tabId }, func: () => { const t = (document.title||'').trim(); const b = (document.body&&document.body.innerText) ? String(document.body.innerText).trim().slice(0,16000) : ''; return t + ' ' + b; } }) → map[tab.id] = result; RETURN { success: true, data: map }
+    ON GET_TABS_IMPORTANT_TAGS (service worker): FOR each tab WHERE url is http(s): executeScript({ target: { tabId }, func: injectableCollectImportantTags }) → map[tab.id] = result; RETURN { success: true, data: map }
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # filterBrowserTabs: pure function. Empty or whitespace query returns all tabs; else return tabs where query (case-insensitive) appears in title, url, or referrer. Implements "filter by search term matching any attribute".
-    filterBrowserTabs(tabs, query):
+    # filterBrowserTabs(tabs, query, scope): pure function. Empty query returns all. scope tabInfo → match title, url, referrer; scope pageText → match tab.pageText; scope importantTags → match tab.importantTags. Case-insensitive substring. Implements "filter by search term" and "search in selected scope".
+    filterBrowserTabs(tabs, query, scope):
       q = String(query).trim().toLowerCase()
       IF q === '' RETURN tabs
-      RETURN tabs WHERE (t.title ?? '').toLowerCase().includes(q) OR (t.url ?? '').toLowerCase().includes(q) OR (t.referrer ?? '').toLowerCase().includes(q)
+      IF scope === 'tabInfo': RETURN tabs WHERE (t.title??'').toLowerCase().includes(q) OR (t.url??'').toLowerCase().includes(q) OR (t.referrer??'').toLowerCase().includes(q)
+      IF scope === 'pageText': RETURN tabs WHERE (t.pageText??'').toLowerCase().includes(q)
+      IF scope === 'importantTags': RETURN tabs WHERE (t.importantTags??'').toLowerCase().includes(q)
+      RETURN tabs
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # UI: window scope toggle "Current window" (default) / "All windows"; on change set windowScope and call loadTabs(). Multi-row card per tab (title, URL, referrer, window id and tab id); search input; on input set searchQuery and set visibleTabs = filterBrowserTabs(allTabs, searchQuery); re-render list. Implements "multi-row format", "filter by search", "each tab row displays window id and tab id".
-    RENDER: FOR each tab in visibleTabs: display card with line1=title, line2=url, line3=referrer (or "—" if empty), line4="Window <windowId> · Tab <id>"
+    # UI: window scope toggle; search-scope control (Tab info | Page text | Important tags, default Tab info); on searchScope change, if pageText or importantTags fetch that data and merge; search input; on input visibleTabs = filterBrowserTabs(allTabs, searchQuery, searchScope); re-render. Multi-row card per tab. Implements "search scope selection", "filter by selected scope".
+    RENDER: FOR each tab in visibleTabs: display card with title, url, referrer, window id, tab id
     ON windowScope toggle change: windowScope = selected; loadTabs()
-    ON searchInput input: searchQuery = value; visibleTabs = filterBrowserTabs(allTabs, searchQuery); re-render list
+    ON searchScope change: searchScope = selected; IF selected is pageText or importantTags THEN loadExtraForScope() (fetch and merge); applyFilter(); re-render
+    ON searchInput input: searchQuery = value; visibleTabs = filterBrowserTabs(allTabs, searchQuery, searchScope); re-render list
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # Copy URLs: build list of URLs from visibleTabs (e.g. urls = visibleTabs.map(t => t.url)); clipboard.writeText(urls.join('\n')); show message "Copied N URLs". Implements "copy URLs for visible tabs" and "display success counter".
+    # Copy URLs / Copy Records / Close: unchanged; act on visibleTabs.
     ON Copy button click: urls = visibleTabs.map(t => t.url); navigator.clipboard.writeText(urls.join('\n')); showToastOrMessage("Copied " + urls.length + " URLs")
-
-    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # Copy Records: build YAML list from visibleTabs (each item: id, windowId, title, url, referrer); clipboard.writeText(yamlString); show message "Copied N records". Implements "copy full tab records as YAML" and "display success counter".
     ON Copy Records button click: yamlString = buildRecordsYamlForCopy(visibleTabs); navigator.clipboard.writeText(yamlString); showToastOrMessage("Copied " + visibleTabs.length + " record(s)")
-
-    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # Close tabs: show confirm("Close N tabs?"); on confirm FOR each id in visibleTabIds AWAIT chrome.tabs.remove(id); show "Closed N tabs". Implements "close visible tabs", "pause to confirm", "display success counter".
-    ON Close button click: IF visibleTabs.length === 0 return; IF NOT confirm("Close " + visibleTabs.length + " tabs?") return; count = 0; FOR each tab in visibleTabs: try chrome.tabs.remove(tab.id); count++; show "Closed " + count + " tabs"
+    ON Close button click: IF visibleTabs.length === 0 return; IF NOT confirm("Close " + visibleTabs.length + " tabs?") return; FOR each tab in visibleTabs: chrome.tabs.remove(tab.id); show "Closed N tabs"
   metadata:
     created:
       date: '2026-02-28'
       author: AI Agent
     last_updated:
-      date: '2026-02-28'
+      date: '2026-03-01'
       author: AI Agent
-      reason: Add Copy Records as YAML (buildRecordsYamlForCopy, button, essence_pseudocode)
+      reason: Add search scope (tabInfo/pageText/importantTags), GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS, scope-aware filter, essence_pseudocode

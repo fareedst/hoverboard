@@ -3,16 +3,29 @@
  * Browser tabs panel: pure filter and URL list helpers; init and render (load tabs, referrer, UI).
  */
 
+/** [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Search scope: tabInfo = title/url/referrer; pageText = body text; importantTags = alt, h1–h3, meta, etc. */
+export const SEARCH_SCOPE_TAB_INFO = 'tabInfo'
+export const SEARCH_SCOPE_PAGE_TEXT = 'pageText'
+export const SEARCH_SCOPE_IMPORTANT_TAGS = 'importantTags'
+
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
- * Filter tabs by query (case-insensitive substring on title, url, referrer). Empty/whitespace returns all.
- * @param {{ id: number, title?: string, url?: string, referrer?: string }[]} tabs
+ * Filter tabs by query (case-insensitive substring). Scope: tabInfo = title/url/referrer; pageText = tab.pageText; importantTags = tab.importantTags. Empty/whitespace returns all.
+ * @param {{ id: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string }[]} tabs
  * @param {string} query
- * @returns {{ id: number, title?: string, url?: string, referrer?: string }[]}
+ * @param {string} [scope] - 'tabInfo' (default), 'pageText', or 'importantTags'
+ * @returns {typeof tabs}
  */
-export function filterBrowserTabs (tabs, query) {
+export function filterBrowserTabs (tabs, query, scope) {
   const q = (query == null ? '' : String(query)).trim().toLowerCase()
   if (q === '') return tabs
+  const s = scope === SEARCH_SCOPE_PAGE_TEXT ? SEARCH_SCOPE_PAGE_TEXT : scope === SEARCH_SCOPE_IMPORTANT_TAGS ? SEARCH_SCOPE_IMPORTANT_TAGS : SEARCH_SCOPE_TAB_INFO
+  if (s === SEARCH_SCOPE_PAGE_TEXT) {
+    return tabs.filter((t) => (t.pageText ?? '').toLowerCase().includes(q))
+  }
+  if (s === SEARCH_SCOPE_IMPORTANT_TAGS) {
+    return tabs.filter((t) => (t.importantTags ?? '').toLowerCase().includes(q))
+  }
   return tabs.filter((t) => {
     const title = (t.title ?? '').toLowerCase()
     const url = (t.url ?? '').toLowerCase()
@@ -90,13 +103,15 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const closeBtn = panel.querySelector('[data-action="closeTabs"]') || panel.querySelector('#browserTabsCloseBtn')
   const messageEl = panel.querySelector('#browserTabsMessage')
   const scopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsWindowScope"]')
+  const searchScopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsSearchScope"]')
 
-  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] windowScope: currentWindow (default) or all
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] windowScope: currentWindow (default) or all; searchScope: tabInfo (default), pageText, or importantTags
   let windowScope = 'currentWindow'
+  let searchScope = SEARCH_SCOPE_TAB_INFO
 
-  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string }[]} */
+  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string }[]} */
   let allTabs = []
-  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string }[]} */
+  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string }[]} */
   let visibleTabs = []
 
   function getWindowScope () {
@@ -106,6 +121,15 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       }
     }
     return 'currentWindow'
+  }
+
+  function getSearchScope () {
+    if (searchScopeRadios && searchScopeRadios.length) {
+      for (let i = 0; i < searchScopeRadios.length; i++) {
+        if (searchScopeRadios[i].checked) return searchScopeRadios[i].value
+      }
+    }
+    return SEARCH_SCOPE_TAB_INFO
   }
 
   function renderList () {
@@ -128,8 +152,44 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
 
   function applyFilter () {
     const query = filterInput ? filterInput.value : ''
-    visibleTabs = filterBrowserTabs(allTabs, query)
+    searchScope = getSearchScope()
+    visibleTabs = filterBrowserTabs(allTabs, query, searchScope)
     renderList()
+  }
+
+  function setFilterPlaceholder () {
+    if (!filterInput) return
+    if (searchScope === SEARCH_SCOPE_PAGE_TEXT) filterInput.placeholder = 'Filter by page text…'
+    else if (searchScope === SEARCH_SCOPE_IMPORTANT_TAGS) filterInput.placeholder = 'Filter by headings, alt, meta…'
+    else filterInput.placeholder = 'Filter by title, URL, referrer…'
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Fetch page text or important tags from SW and merge into allTabs; show loading state.
+  async function loadExtraForScope () {
+    const scope = getSearchScope()
+    if (scope !== SEARCH_SCOPE_PAGE_TEXT && scope !== SEARCH_SCOPE_IMPORTANT_TAGS) return
+    const runtime = typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime : (typeof browser !== 'undefined' && browser.runtime ? browser.runtime : null)
+    if (!runtime || !runtime.sendMessage || allTabs.length === 0) return
+    if (listEl) listEl.innerHTML = '<div class="browser-tabs-loading">Loading…</div>'
+    const msgType = scope === SEARCH_SCOPE_PAGE_TEXT ? 'getTabsPageText' : 'getTabsImportantTags'
+    const msg = { type: msgType, data: { tabs: allTabs.map((t) => ({ id: t.id, url: t.url })) } }
+    try {
+      const reply = await new Promise((resolve, reject) => {
+        runtime.sendMessage(msg, (r) => { if (chrome.runtime?.lastError) reject(new Error(chrome.runtime.lastError?.message)); else resolve(r) })
+      })
+      const data = reply && typeof reply === 'object' && reply.success && reply.data && typeof reply.data === 'object' ? reply.data : {}
+      for (let i = 0; i < allTabs.length; i++) {
+        const id = allTabs[i].id
+        if (scope === SEARCH_SCOPE_PAGE_TEXT) allTabs[i] = { ...allTabs[i], pageText: data[id] !== undefined ? data[id] : '' }
+        else allTabs[i] = { ...allTabs[i], importantTags: data[id] !== undefined ? data[id] : '' }
+      }
+    } catch (_) {
+      for (let i = 0; i < allTabs.length; i++) {
+        if (scope === SEARCH_SCOPE_PAGE_TEXT) allTabs[i] = { ...allTabs[i], pageText: '' }
+        else allTabs[i] = { ...allTabs[i], importantTags: '' }
+      }
+    }
+    applyFilter()
   }
 
   async function loadTabs () {
@@ -164,8 +224,14 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         referrer: (tab.id != null && referrersMap[tab.id] !== undefined) ? referrersMap[tab.id] : ''
       }))
       allTabs = withReferrer
-      visibleTabs = filterBrowserTabs(allTabs, filterInput ? filterInput.value : '')
-      renderList()
+      searchScope = getSearchScope()
+      setFilterPlaceholder()
+      if (searchScope === SEARCH_SCOPE_PAGE_TEXT || searchScope === SEARCH_SCOPE_IMPORTANT_TAGS) {
+        await loadExtraForScope()
+      } else {
+        visibleTabs = filterBrowserTabs(allTabs, filterInput ? filterInput.value : '', searchScope)
+        renderList()
+      }
     } catch (e) {
       if (listEl) listEl.innerHTML = `<div class="browser-tabs-error">Failed to load tabs: ${escapeHtml(String((e && e.message) || e))}</div>`
     }
@@ -188,6 +254,21 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       scopeRadios[i].addEventListener('change', () => {
         windowScope = getWindowScope()
         loadTabs()
+      })
+    }
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] On search-scope change: fetch page text or important tags if needed, then re-apply filter.
+  if (searchScopeRadios && searchScopeRadios.length) {
+    for (let i = 0; i < searchScopeRadios.length; i++) {
+      searchScopeRadios[i].addEventListener('change', async () => {
+        searchScope = getSearchScope()
+        setFilterPlaceholder()
+        if (searchScope === SEARCH_SCOPE_PAGE_TEXT || searchScope === SEARCH_SCOPE_IMPORTANT_TAGS) {
+          await loadExtraForScope()
+        } else {
+          applyFilter()
+        }
       })
     }
   }

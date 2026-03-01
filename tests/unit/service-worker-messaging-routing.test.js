@@ -25,6 +25,11 @@ describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] SW handleMessage routi
     expect(MESSAGE_TYPES.GET_TAB_REFERRERS).toBe('getTabReferrers')
   })
 
+  test('[REQ-SIDE_PANEL_BROWSER_TABS] MESSAGE_TYPES includes GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS for search scope', () => {
+    expect(MESSAGE_TYPES.GET_TABS_PAGE_TEXT).toBe('getTabsPageText')
+    expect(MESSAGE_TYPES.GET_TABS_IMPORTANT_TAGS).toBe('getTabsImportantTags')
+  })
+
   test('NATIVE_PING returns success and data and does not call processMessage', async () => {
     const sw = new HoverboardServiceWorker()
     sw.pingNativeHost = jest.fn().mockResolvedValue({ pong: true })
@@ -117,5 +122,35 @@ describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] SW handleMessage routi
     expect(result.success).toBe(true)
     expect(result.data[2]).toBe('')
     expect(result.data[3]).toBeDefined()
+  })
+
+  test('[REQ-SIDE_PANEL_BROWSER_TABS] GET_TABS_PAGE_TEXT returns success and pageText map and does not call processMessage', async () => {
+    const sw = new HoverboardServiceWorker()
+    const processMessageSpy = jest.spyOn(sw.messageHandler, 'processMessage')
+    global.chrome.scripting.executeScript.mockResolvedValue([{ result: 'Title and body text here' }])
+
+    const result = await sw.handleMessage({
+      type: MESSAGE_TYPES.GET_TABS_PAGE_TEXT,
+      data: { tabs: [{ id: 1, url: 'https://example.com' }] }
+    }, {})
+
+    expect(processMessageSpy).not.toHaveBeenCalled()
+    expect(result).toEqual({ success: true, data: { 1: 'Title and body text here' } })
+    processMessageSpy.mockRestore()
+  })
+
+  test('[REQ-SIDE_PANEL_BROWSER_TABS] GET_TABS_IMPORTANT_TAGS returns success and importantTags map and does not call processMessage', async () => {
+    const sw = new HoverboardServiceWorker()
+    const processMessageSpy = jest.spyOn(sw.messageHandler, 'processMessage')
+    global.chrome.scripting.executeScript.mockResolvedValue([{ result: 'H1 Heading Meta description' }])
+
+    const result = await sw.handleMessage({
+      type: MESSAGE_TYPES.GET_TABS_IMPORTANT_TAGS,
+      data: { tabs: [{ id: 2, url: 'https://test.com' }] }
+    }, {})
+
+    expect(processMessageSpy).not.toHaveBeenCalled()
+    expect(result).toEqual({ success: true, data: { 2: 'H1 Heading Meta description' } })
+    processMessageSpy.mockRestore()
   })
 })

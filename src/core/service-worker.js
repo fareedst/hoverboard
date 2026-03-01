@@ -393,6 +393,113 @@ class HoverboardServiceWorker {
         return out
       }
 
+      // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for search scope "Page text". SW runs executeScript per tab; returns tabId -> string (title + body.innerText capped).
+      if (message.type === MESSAGE_TYPES.GET_TABS_PAGE_TEXT) {
+        const tabs = message.data?.tabs || []
+        const scripting = typeof chrome !== 'undefined' && chrome.scripting ? chrome.scripting : (typeof browser !== 'undefined' && browser.scripting ? browser.scripting : null)
+        const pageTextMap = /** @type {Record<number, string>} */ ({})
+        const extractPageText = () => {
+          const maxLen = 16000
+          const title = (document.title && String(document.title).trim()) || ''
+          const raw = document.body && document.body.innerText ? String(document.body.innerText).trim() : ''
+          const text = (title + ' ' + raw).trim()
+          return text.length > maxLen ? text.slice(0, maxLen) : text
+        }
+        if (scripting && scripting.executeScript) {
+          await Promise.all(
+            tabs.map(async (tab) => {
+              const id = tab.id ?? tab.tabId
+              const url = tab.url
+              if (id == null || !url || !/^https?:\/\//i.test(url)) {
+                if (id != null) pageTextMap[id] = ''
+                return
+              }
+              try {
+                const results = await scripting.executeScript({
+                  target: { tabId: id },
+                  func: extractPageText
+                })
+                const raw = results?.[0]?.result
+                pageTextMap[id] = typeof raw === 'string' ? raw : ''
+              } catch (_) {
+                pageTextMap[id] = ''
+              }
+            })
+          )
+        }
+        const out = { success: true, data: pageTextMap }
+        uiInspector.recordMessage(message.type, message.data, sender, out)
+        return out
+      }
+
+      // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Get important-tags snippet per tab (alt, h1–h3, meta description, og:title, a[title]). SW runs executeScript per tab; returns tabId -> string.
+      if (message.type === MESSAGE_TYPES.GET_TABS_IMPORTANT_TAGS) {
+        const tabs = message.data?.tabs || []
+        const scripting = typeof chrome !== 'undefined' && chrome.scripting ? chrome.scripting : (typeof browser !== 'undefined' && browser.scripting ? browser.scripting : null)
+        const importantTagsMap = /** @type {Record<number, string>} */ ({})
+        const collectImportantTags = () => {
+          const maxLen = 8192
+          const parts = []
+          const doc = document
+          const title = (doc.title && String(doc.title).trim()) || ''
+          if (title) parts.push(title)
+          const metaDesc = doc.querySelector('meta[name="description"]')
+          if (metaDesc) {
+            const c = (metaDesc.getAttribute('content') || '').trim()
+            if (c) parts.push(c)
+          }
+          const ogTitle = doc.querySelector('meta[property="og:title"]')
+          if (ogTitle) {
+            const c = (ogTitle.getAttribute('content') || '').trim()
+            if (c) parts.push(c)
+          }
+          const headings = doc.querySelectorAll('h1, h2, h3')
+          headings.forEach((el) => {
+            const t = (el.textContent || '').trim()
+            if (t) parts.push(t)
+          })
+          const imgs = doc.querySelectorAll('img[alt]')
+          imgs.forEach((el) => {
+            const alt = (el.getAttribute('alt') || '').trim()
+            if (alt) parts.push(alt)
+          })
+          const linksWithTitle = doc.querySelectorAll('a[title]')
+          const linkTitles = []
+          linksWithTitle.forEach((el) => {
+            const t = (el.getAttribute('title') || '').trim()
+            if (t) linkTitles.push(t)
+          })
+          if (linkTitles.length > 0) parts.push(linkTitles.slice(0, 50).join(' '))
+          const joined = parts.join(' ')
+          return joined.length > maxLen ? joined.slice(0, maxLen) : joined
+        }
+        if (scripting && scripting.executeScript) {
+          await Promise.all(
+            tabs.map(async (tab) => {
+              const id = tab.id ?? tab.tabId
+              const url = tab.url
+              if (id == null || !url || !/^https?:\/\//i.test(url)) {
+                if (id != null) importantTagsMap[id] = ''
+                return
+              }
+              try {
+                const results = await scripting.executeScript({
+                  target: { tabId: id },
+                  func: collectImportantTags
+                })
+                const raw = results?.[0]?.result
+                importantTagsMap[id] = typeof raw === 'string' ? raw : ''
+              } catch (_) {
+                importantTagsMap[id] = ''
+              }
+            })
+          )
+        }
+        const out = { success: true, data: importantTagsMap }
+        uiInspector.recordMessage(message.type, message.data, sender, out)
+        return out
+      }
+
       // [IMPL-DEV_COMMAND_INSPECTION] [REQ-UI_INSPECTION] [REQ-URL_TAGS_DISPLAY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] DEV_COMMAND: only when debug flag set; getStorageSnapshot in SW.
       if (message.type === MESSAGE_TYPES.DEV_COMMAND) {
         let devEnabled = false

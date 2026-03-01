@@ -96,6 +96,16 @@
   margin-bottom: 0.5rem;
 }
 
+.browser-tabs-search-scope {
+  margin-bottom: 0.35rem;
+}
+
+.browser-tabs-loading {
+  padding: 0.75rem;
+  color: var(--text-secondary, #999);
+  font-size: 0.875rem;
+}
+
 .browser-tabs-filter-input {
   width: 100%;
   padding: 0.35rem 0.5rem;

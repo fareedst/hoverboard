@@ -24803,6 +24803,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     GET_SHARED_MEMORY_STATUS: "getSharedMemoryStatus",
     // [REQ-SIDE_PANEL_BROWSER_TABS] Get document.referrer for tabs (run in SW so injection is in tab context)
     GET_TAB_REFERRERS: "getTabReferrers",
+    // [REQ-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for filter (SW executeScript per tab)
+    GET_TABS_PAGE_TEXT: "getTabsPageText",
+    // [REQ-SIDE_PANEL_BROWSER_TABS] Get important-tags snippet (alt, h1–h3, meta, og:title) per tab for filter (SW executeScript per tab)
+    GET_TABS_IMPORTANT_TAGS: "getTabsImportantTags",
     // Content script lifecycle
     CONTENT_SCRIPT_READY: "contentScriptReady",
     // Overlay configuration

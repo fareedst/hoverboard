@@ -128,6 +128,11 @@
       </div>
     </header>
     <section class="browser-tabs-search" aria-label="Filter tabs">
+      <div class="browser-tabs-search-scope" role="group" aria-label="Search in">
+        <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsSearchScope" value="tabInfo" id="browserTabsSearchScopeTabInfo" checked> Tab info</label>
+        <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsSearchScope" value="pageText" id="browserTabsSearchScopePageText"> Page text</label>
+        <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsSearchScope" value="importantTags" id="browserTabsSearchScopeImportantTags"> Important tags</label>
+      </div>
       <input type="text" id="browserTabsFilterInput" class="browser-tabs-filter-input" placeholder="Filter by title, URL, referrer…" aria-label="Filter tabs">
     </section>
     <div id="browserTabsList" class="browser-tabs-list"></div>

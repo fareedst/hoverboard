@@ -20137,6 +20137,10 @@ var MESSAGE_TYPES = {
   GET_SHARED_MEMORY_STATUS: "getSharedMemoryStatus",
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get document.referrer for tabs (run in SW so injection is in tab context)
   GET_TAB_REFERRERS: "getTabReferrers",
+  // [REQ-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for filter (SW executeScript per tab)
+  GET_TABS_PAGE_TEXT: "getTabsPageText",
+  // [REQ-SIDE_PANEL_BROWSER_TABS] Get important-tags snippet (alt, h1–h3, meta, og:title) per tab for filter (SW executeScript per tab)
+  GET_TABS_IMPORTANT_TAGS: "getTabsImportantTags",
   // Content script lifecycle
   CONTENT_SCRIPT_READY: "contentScriptReady",
   // Overlay configuration
@@ -22263,6 +22267,115 @@ var HoverboardServiceWorker = class {
           );
         }
         const out2 = { success: true, data: referrers };
+        recordMessage(message.type, message.data, sender, out2);
+        return out2;
+      }
+      if (message.type === MESSAGE_TYPES.GET_TABS_PAGE_TEXT) {
+        const tabs = message.data?.tabs || [];
+        const scripting = typeof chrome !== "undefined" && chrome.scripting ? chrome.scripting : typeof safariEnhancements !== "undefined" && safariEnhancements.scripting ? safariEnhancements.scripting : null;
+        const pageTextMap = (
+          /** @type {Record<number, string>} */
+          {}
+        );
+        const extractPageText = () => {
+          const maxLen = 16e3;
+          const title = document.title && String(document.title).trim() || "";
+          const raw = document.body && document.body.innerText ? String(document.body.innerText).trim() : "";
+          const text = (title + " " + raw).trim();
+          return text.length > maxLen ? text.slice(0, maxLen) : text;
+        };
+        if (scripting && scripting.executeScript) {
+          await Promise.all(
+            tabs.map(async (tab) => {
+              const id = tab.id ?? tab.tabId;
+              const url2 = tab.url;
+              if (id == null || !url2 || !/^https?:\/\//i.test(url2)) {
+                if (id != null) pageTextMap[id] = "";
+                return;
+              }
+              try {
+                const results = await scripting.executeScript({
+                  target: { tabId: id },
+                  func: extractPageText
+                });
+                const raw = results?.[0]?.result;
+                pageTextMap[id] = typeof raw === "string" ? raw : "";
+              } catch (_) {
+                pageTextMap[id] = "";
+              }
+            })
+          );
+        }
+        const out2 = { success: true, data: pageTextMap };
+        recordMessage(message.type, message.data, sender, out2);
+        return out2;
+      }
+      if (message.type === MESSAGE_TYPES.GET_TABS_IMPORTANT_TAGS) {
+        const tabs = message.data?.tabs || [];
+        const scripting = typeof chrome !== "undefined" && chrome.scripting ? chrome.scripting : typeof safariEnhancements !== "undefined" && safariEnhancements.scripting ? safariEnhancements.scripting : null;
+        const importantTagsMap = (
+          /** @type {Record<number, string>} */
+          {}
+        );
+        const collectImportantTags = () => {
+          const maxLen = 8192;
+          const parts = [];
+          const doc = document;
+          const title = doc.title && String(doc.title).trim() || "";
+          if (title) parts.push(title);
+          const metaDesc = doc.querySelector('meta[name="description"]');
+          if (metaDesc) {
+            const c = (metaDesc.getAttribute("content") || "").trim();
+            if (c) parts.push(c);
+          }
+          const ogTitle = doc.querySelector('meta[property="og:title"]');
+          if (ogTitle) {
+            const c = (ogTitle.getAttribute("content") || "").trim();
+            if (c) parts.push(c);
+          }
+          const headings = doc.querySelectorAll("h1, h2, h3");
+          headings.forEach((el) => {
+            const t = (el.textContent || "").trim();
+            if (t) parts.push(t);
+          });
+          const imgs = doc.querySelectorAll("img[alt]");
+          imgs.forEach((el) => {
+            const alt = (el.getAttribute("alt") || "").trim();
+            if (alt) parts.push(alt);
+          });
+          const linksWithTitle = doc.querySelectorAll("a[title]");
+          const linkTitles = [];
+          linksWithTitle.forEach((el) => {
+            const t = (el.getAttribute("title") || "").trim();
+            if (t) linkTitles.push(t);
+          });
+          if (linkTitles.length > 0) parts.push(linkTitles.slice(0, 50).join(" "));
+          const joined = parts.join(" ");
+          return joined.length > maxLen ? joined.slice(0, maxLen) : joined;
+        };
+        if (scripting && scripting.executeScript) {
+          await Promise.all(
+            tabs.map(async (tab) => {
+              const id = tab.id ?? tab.tabId;
+              const url2 = tab.url;
+              if (id == null || !url2 || !/^https?:\/\//i.test(url2)) {
+                if (id != null) importantTagsMap[id] = "";
+                return;
+              }
+              try {
+                const results = await scripting.executeScript({
+                  target: { tabId: id },
+                  func: collectImportantTags
+                });
+                const raw = results?.[0]?.result;
+                importantTagsMap[id] = typeof raw === "string" ? raw : "";
+              } catch (_) {
+                importantTagsMap[id] = "";
+              }
+            })
+          );
+        }
+        const out2 = { success: true, data: importantTagsMap };
         recordMessage(message.type, message.data, sender, out2);
         return out2;
       }
