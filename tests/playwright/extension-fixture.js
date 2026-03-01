@@ -20,19 +20,38 @@ export const pathToExtension = path.join(__dirname, '../../dist')
  */
 export async function getExtensionId (context, options = {}) {
   const timeout = options.timeout ?? 15000
-  const worker = await context.waitForEvent('serviceworker', { timeout }).catch(() => null)
+  const re = /chrome-extension:\/\/([a-z]{32})\//
   let extensionId = null
-  if (worker && worker.url()) {
-    const match = worker.url().match(/chrome-extension:\/\/([a-z]{32})\//)
-    if (match) extensionId = match[1]
-  }
-  if (!extensionId && context.serviceWorkers().length > 0) {
-    const sw = context.serviceWorkers()[0]
-    if (sw && sw.url()) {
-      const match = sw.url().match(/chrome-extension:\/\/([a-z]{32})\//)
-      if (match) extensionId = match[1]
+
+  // Check existing service workers first; event may have already fired when context was created.
+  const existing = context.serviceWorkers()
+  for (const sw of existing) {
+    const url = sw && sw.url ? sw.url() : null
+    if (url) {
+      const match = url.match(re)
+      if (match) {
+        extensionId = match[1]
+        break
+      }
     }
   }
+
+  if (!extensionId) {
+    const worker = await context.waitForEvent('serviceworker', { timeout }).catch(() => null)
+    if (worker && worker.url()) {
+      const match = worker.url().match(re)
+      if (match) extensionId = match[1]
+    }
+    if (!extensionId && context.serviceWorkers().length > 0) {
+      const sw = context.serviceWorkers()[0]
+      const swUrl = sw && sw.url ? sw.url() : null
+      if (swUrl) {
+        const m = swUrl.match(re)
+        if (m) extensionId = m[1]
+      }
+    }
+  }
+
   expect(extensionId, 'Extension ID should be discoverable from service worker').toBeTruthy()
   return extensionId
 }

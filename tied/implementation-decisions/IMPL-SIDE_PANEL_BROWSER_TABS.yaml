@@ -15,6 +15,7 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - "Data fetch: chrome.tabs.query in panel; scope by windowScope (currentWindow default) via query({ currentWindow: true }) or query({}); referrer via GET_TAB_REFERRERS message to service worker (panel cannot run executeScript in tab context). SW handles GET_TAB_REFERRERS: for each tab with http(s) URL runs chrome.scripting.executeScript({ target: { tabId }, func: () => document.referrer || '' }), returns { tabId: referrer } map; panel merges map into tab list. MESSAGE_TYPES.GET_TAB_REFERRERS in message-handler.js; SW handler in service-worker.js before processMessage."
       - "UI: window scope toggle (Current window | All windows, default current); multi-row card per tab (title, URL, referrer, window id and tab id); search input; filter applies case-insensitive substring to title, url, referrer; visible = filtered list"
       - Copy: collect URLs of visible tabs, clipboard.writeText(urls.join("\n")), show count
+      - Copy Records: build YAML list from visible tabs (each item id, windowId, title, url, referrer), clipboard.writeText(yamlString), show "Copied N records"
       - Close: confirm("Close N tabs?"); on confirm chrome.tabs.remove for each visible id; show success count
   code_locations:
     files:
@@ -33,6 +34,9 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - name: buildUrlListForCopy
         file: src/ui/side-panel/browser-tabs-panel.js
         description: Return URLs of visible tabs (one per line)
+      - name: buildRecordsYamlForCopy
+        file: src/ui/side-panel/browser-tabs-panel.js
+        description: Return YAML string of full tab records (id, windowId, title, url, referrer) for clipboard
       - name: getVisibleTabIds
         file: src/ui/side-panel/browser-tabs-panel.js
         description: Return tab IDs of visible (filtered) list for close
@@ -95,6 +99,10 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
     ON Copy button click: urls = visibleTabs.map(t => t.url); navigator.clipboard.writeText(urls.join('\n')); showToastOrMessage("Copied " + urls.length + " URLs")
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # Copy Records: build YAML list from visibleTabs (each item: id, windowId, title, url, referrer); clipboard.writeText(yamlString); show message "Copied N records". Implements "copy full tab records as YAML" and "display success counter".
+    ON Copy Records button click: yamlString = buildRecordsYamlForCopy(visibleTabs); navigator.clipboard.writeText(yamlString); showToastOrMessage("Copied " + visibleTabs.length + " record(s)")
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
     # Close tabs: show confirm("Close N tabs?"); on confirm FOR each id in visibleTabIds AWAIT chrome.tabs.remove(id); show "Closed N tabs". Implements "close visible tabs", "pause to confirm", "display success counter".
     ON Close button click: IF visibleTabs.length === 0 return; IF NOT confirm("Close " + visibleTabs.length + " tabs?") return; count = 0; FOR each tab in visibleTabs: try chrome.tabs.remove(tab.id); count++; show "Closed " + count + " tabs"
   metadata:
@@ -104,4 +112,4 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
     last_updated:
       date: '2026-02-28'
       author: AI Agent
-      reason: Referrer via GET_TAB_REFERRERS (SW); panel sendMessage and merge map; code_locations and essence_pseudocode updated
+      reason: Add Copy Records as YAML (buildRecordsYamlForCopy, button, essence_pseudocode)

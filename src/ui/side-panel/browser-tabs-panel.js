@@ -33,6 +33,32 @@ export function buildUrlListForCopy (visibleTabs) {
 
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Build YAML string of full tab records (id, windowId, title, url, referrer) for clipboard copy.
+ * @param {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string }[]} visibleTabs
+ * @returns {string}
+ */
+export function buildRecordsYamlForCopy (visibleTabs) {
+  if (!visibleTabs || visibleTabs.length === 0) return ''
+  const lines = []
+  for (const tab of visibleTabs) {
+    lines.push('- id: ' + Number(tab.id))
+    lines.push('  windowId: ' + (tab.windowId != null ? Number(tab.windowId) : ''))
+    lines.push('  title: ' + yamlQuoted(String(tab.title ?? '')))
+    lines.push('  url: ' + yamlQuoted(String(tab.url ?? '')))
+    lines.push('  referrer: ' + yamlQuoted(String(tab.referrer ?? '')))
+  }
+  return lines.join('\n')
+}
+
+function yamlQuoted (s) {
+  if (s.includes('"') || s.includes('\n') || s.includes('\\') || s.includes(':')) {
+    return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"'
+  }
+  return '"' + s + '"'
+}
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
  * Return the string to display for a tab's referrer: '—' for null, undefined, empty, or the literal "null"; else the referrer URL.
  * @param {string | null | undefined} referrer
  * @returns {string}
@@ -60,6 +86,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const filterInput = panel.querySelector('#browserTabsFilterInput')
   const listEl = panel.querySelector('#browserTabsList') || panel.querySelector('.browser-tabs-list')
   const copyBtn = panel.querySelector('[data-action="copyUrls"]') || panel.querySelector('#browserTabsCopyBtn')
+  const copyRecordsBtn = panel.querySelector('[data-action="copyRecords"]') || panel.querySelector('#browserTabsCopyRecordsBtn')
   const closeBtn = panel.querySelector('[data-action="closeTabs"]') || panel.querySelector('#browserTabsCloseBtn')
   const messageEl = panel.querySelector('#browserTabsMessage')
   const scopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsWindowScope"]')
@@ -177,6 +204,24 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
           await navigator.clipboard.writeText(urls)
           const count = visibleTabs.length
           showMessage(`Copied ${count} URL${count !== 1 ? 's' : ''}`)
+        } else {
+          showMessage('Clipboard not available')
+        }
+      } catch (_) {
+        showMessage('Copy failed')
+      }
+    })
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Copy Records: full tab records as YAML to clipboard
+  if (copyRecordsBtn) {
+    copyRecordsBtn.addEventListener('click', async () => {
+      const yamlString = buildRecordsYamlForCopy(visibleTabs)
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(yamlString)
+          const count = visibleTabs.length
+          showMessage(`Copied ${count} record${count !== 1 ? 's' : ''}`)
         } else {
           showMessage('Clipboard not available')
         }

@@ -3,7 +3,7 @@
  * Unit tests: filterBrowserTabs (case-insensitive filter on title, URL, referrer), buildUrlListForCopy (URLs from visible tabs).
  */
 
-import { filterBrowserTabs, buildUrlListForCopy, getReferrerDisplayText, initBrowserTabsTab } from '../../src/ui/side-panel/browser-tabs-panel.js'
+import { filterBrowserTabs, buildUrlListForCopy, buildRecordsYamlForCopy, getReferrerDisplayText, initBrowserTabsTab } from '../../src/ui/side-panel/browser-tabs-panel.js'
 
 const tabs = [
   { id: 1, title: 'Google', url: 'https://google.com', referrer: '' },
@@ -69,6 +69,56 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] buildUrlL
   })
 })
 
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Copy Records: buildRecordsYamlForCopy returns YAML list of full tab records (id, windowId, title, url, referrer).
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] buildRecordsYamlForCopy', () => {
+  test('empty array returns minimal YAML list', () => {
+    const yaml = buildRecordsYamlForCopy([])
+    expect(yaml).toBeDefined()
+    expect(typeof yaml).toBe('string')
+    expect(yaml.trim()).toBe('')
+  })
+
+  test('one record includes all five fields id windowId title url referrer', () => {
+    const list = [
+      { id: 1, windowId: 100, title: 'Page', url: 'https://example.com', referrer: 'https://google.com' }
+    ]
+    const yaml = buildRecordsYamlForCopy(list)
+    expect(yaml).toContain('id: 1')
+    expect(yaml).toContain('windowId: 100')
+    expect(yaml).toContain('title:')
+    expect(yaml).toContain('Page')
+    expect(yaml).toContain('url:')
+    expect(yaml).toContain('https://example.com')
+    expect(yaml).toContain('referrer:')
+    expect(yaml).toContain('https://google.com')
+  })
+
+  test('multiple records produce valid YAML list', () => {
+    const list = [
+      { id: 1, windowId: 10, title: 'A', url: 'https://a.com', referrer: '' },
+      { id: 2, windowId: 10, title: 'B', url: 'https://b.com', referrer: 'https://a.com' }
+    ]
+    const yaml = buildRecordsYamlForCopy(list)
+    expect(yaml).toContain('id: 1')
+    expect(yaml).toContain('id: 2')
+    expect(yaml).toContain('windowId: 10')
+    expect(yaml).toContain('https://a.com')
+    expect(yaml).toContain('https://b.com')
+  })
+
+  test('strings with colons or quotes are safely serialized', () => {
+    const list = [
+      { id: 1, windowId: 1, title: 'Title: with colon', url: 'https://example.com', referrer: '' }
+    ]
+    const yaml = buildRecordsYamlForCopy(list)
+    expect(yaml).toContain('Title: with colon')
+    expect(yaml).toContain('id: 1')
+  })
+})
+
 describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] getReferrerDisplayText (referrer display)', () => {
   test('null returns placeholder (not the string "null")', () => {
     expect(getReferrerDisplayText(null)).toBe('—')
@@ -106,6 +156,7 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer 
     panel.querySelector = (sel) => {
       if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
       if (sel === '#browserTabsFilterInput' || sel === '[data-action="copyUrls"]' || sel === '#browserTabsCopyBtn' ||
+          sel === '[data-action="copyRecords"]' || sel === '#browserTabsCopyRecordsBtn' ||
           sel === '[data-action="closeTabs"]' || sel === '#browserTabsCloseBtn' || sel === '#browserTabsMessage') return null
       return null
     }
@@ -177,6 +228,53 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer 
     const card = listEl.querySelector('.browser-tabs-card')
     expect(card).toBeTruthy()
     expect(card.querySelector('.browser-tabs-card-referrer')?.textContent?.trim()).toBe('—')
+  })
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Copy Records button writes YAML to clipboard
+  test('Copy Records button writes full tab records as YAML to clipboard', async () => {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const copyRecordsBtn = document.createElement('button')
+    copyRecordsBtn.setAttribute('data-action', 'copyRecords')
+    copyRecordsBtn.id = 'browserTabsCopyRecordsBtn'
+    const messageEl = document.createElement('div')
+    messageEl.id = 'browserTabsMessage'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(listEl)
+    panel.appendChild(copyRecordsBtn)
+    panel.appendChild(messageEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '[data-action="copyRecords"]' || sel === '#browserTabsCopyRecordsBtn') return copyRecordsBtn
+      if (sel === '#browserTabsMessage') return messageEl
+      if (sel === '#browserTabsFilterInput' || sel === '[data-action="copyUrls"]' || sel === '#browserTabsCopyBtn' ||
+          sel === '[data-action="closeTabs"]' || sel === '#browserTabsCloseBtn') return null
+      return null
+    }
+    const doc = { getElementById: (id) => (id === 'browserTabsPanel' ? panel : null), createElement: document.createElement.bind(document) }
+    let clipboardText = null
+    const mockClipboard = { writeText: (text) => { clipboardText = text; return Promise.resolve() } }
+    Object.defineProperty(global, 'navigator', { value: { clipboard: mockClipboard }, writable: true })
+    const mockTabs = {
+      query: async () => [
+        { id: 5, windowId: 20, title: 'YAML Tab', url: 'https://yaml.example.com', referrer: '' }
+      ]
+    }
+    const getReferrers = async () => ({ 5: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    copyRecordsBtn.click()
+    await new Promise(r => setTimeout(r, 50))
+    expect(clipboardText).toBeTruthy()
+    expect(clipboardText).toContain('id: 5')
+    expect(clipboardText).toContain('windowId: 20')
+    expect(clipboardText).toContain('title:')
+    expect(clipboardText).toContain('YAML Tab')
+    expect(clipboardText).toContain('url:')
+    expect(clipboardText).toContain('https://yaml.example.com')
+    expect(clipboardText).toContain('referrer:')
   })
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Each tab row displays window id and tab id

@@ -12,7 +12,7 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
     benefits:
       - 'Single panel #browserTabsPanel; data from chrome.tabs; referrer via GET_TAB_REFERRERS (SW runs executeScript per tab); filter and actions on visible tabs'
   implementation_approach:
-    summary: 'Panel uses chrome.tabs.query; scope is chosen by user (Current window default, or All windows). Referrer is obtained by sending GET_TAB_REFERRERS to the service worker, which runs chrome.scripting.executeScript in each tab and returns a tabId-to-referrer map. Each tab row shows window id and tab id. Filter applies case-insensitive to title, url, referrer; copy and close act on visible (filtered) list.'
+    summary: 'Panel uses chrome.tabs.query; scope is chosen by user (Current window default, or All windows). Referrer is obtained by sending GET_TAB_REFERRERS to the service worker, which runs chrome.scripting.executeScript in each tab and returns a tabId-to-referrer map. Each tab row shows window id and tab id. Filter applies case-insensitive to title, url, referrer; copy URLs, copy records as YAML (full tab record: id, windowId, title, url, referrer), and close act on visible (filtered) list.'
   traceability:
     requirements:
       - REQ-SIDE_PANEL_BROWSER_TABS
@@ -37,4 +37,4 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
     last_updated:
       date: '2026-02-28'
       author: AI Agent
-      reason: Referrer via SW (GET_TAB_REFERRERS); scripting from panel does not run in tab context
+      reason: Add Copy Records as YAML to implementation approach
