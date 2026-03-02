@@ -341,6 +341,10 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     expect(browserTabsTab.hasDistributeButton).toBe(true)
     expect(browserTabsTab).toHaveProperty('hasImportantTagSourcesInput')
     expect(browserTabsTab.hasImportantTagSourcesInput).toBe(true)
+    expect(browserTabsTab).toHaveProperty('hasImportantElementsCheckbox')
+    expect(browserTabsTab.hasImportantElementsCheckbox).toBe(true)
+    expect(browserTabsTab).toHaveProperty('hasControlGroups')
+    expect(browserTabsTab.hasControlGroups).toBe(true)
     expect(browserTabsTab).toHaveProperty('hasSections')
     expect(browserTabsTab.hasSections).toBe(true)
 

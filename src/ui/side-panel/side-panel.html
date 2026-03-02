@@ -124,53 +124,67 @@
         <h2 class="browser-tabs-title">Browser tabs</h2>
         <p class="browser-tabs-subtitle">Filter by title, URL, or referrer. Copy URLs or close visible tabs.</p>
       </header>
-      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Scope (window + search scope) -->
+      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Scope (window + search scope); control groups with very narrow margins -->
       <section class="browser-tabs-section-scope browser-tabs-section" aria-label="Scope">
-        <div class="browser-tabs-scope" role="group" aria-label="Window scope">
-          <label class="browser-tabs-scope-label" title="List tabs from the current window only"><input type="radio" name="browserTabsWindowScope" value="currentWindow" id="browserTabsScopeCurrent" checked> Current window</label>
-          <label class="browser-tabs-scope-label" title="List tabs from all windows"><input type="radio" name="browserTabsWindowScope" value="all" id="browserTabsScopeAll"> All windows</label>
+        <div class="browser-tabs-control-group">
+          <div class="browser-tabs-scope" role="group" aria-label="Window scope">
+            <label class="browser-tabs-scope-label" title="List tabs from the current window only"><input type="radio" name="browserTabsWindowScope" value="currentWindow" id="browserTabsScopeCurrent" checked> Current window</label>
+            <label class="browser-tabs-scope-label" title="List tabs from all windows"><input type="radio" name="browserTabsWindowScope" value="all" id="browserTabsScopeAll"> All windows</label>
+          </div>
         </div>
-        <div class="browser-tabs-search-scope" role="group" aria-label="Search in">
-          <label class="browser-tabs-scope-label" title="Filter by tab title, URL, and referrer"><input type="radio" name="browserTabsSearchScope" value="tabInfo" id="browserTabsSearchScopeTabInfo" checked> Tab info</label>
-          <label class="browser-tabs-scope-label" title="Filter by page body text"><input type="radio" name="browserTabsSearchScope" value="pageText" id="browserTabsSearchScopePageText"> Page text</label>
-          <label class="browser-tabs-scope-label" title="Filter by important tag sources (headings, alt, meta, etc.)"><input type="radio" name="browserTabsSearchScope" value="importantTags" id="browserTabsSearchScopeImportantTags"> Important tags</label>
+        <div class="browser-tabs-control-group">
+          <div class="browser-tabs-search-scope" role="group" aria-label="Search in">
+            <label class="browser-tabs-scope-label" title="Filter by tab title, URL, and referrer"><input type="radio" name="browserTabsSearchScope" value="tabInfo" id="browserTabsSearchScopeTabInfo" checked> Tab info</label>
+            <label class="browser-tabs-scope-label" title="Filter by page body text"><input type="radio" name="browserTabsSearchScope" value="pageText" id="browserTabsSearchScopePageText"> Page text</label>
+            <label class="browser-tabs-scope-label" title="Filter by important elements (headings, alt, meta, etc.)"><input type="radio" name="browserTabsSearchScope" value="importantTags" id="browserTabsSearchScopeImportantTags"> Important elements</label>
+          </div>
         </div>
       </section>
-      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Filter & display -->
+      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Filter & display; Title/URL/Block above filter textbox; control groups -->
       <section class="browser-tabs-section-filter browser-tabs-section" aria-label="Filter and display">
-        <div class="browser-tabs-list-display-mode" role="group" aria-label="Show each tab as">
-          <label class="browser-tabs-scope-label" title="Show only tab title per row"><input type="radio" name="browserTabsListDisplayMode" value="title" id="browserTabsListDisplayTitle"> Title</label>
-          <label class="browser-tabs-scope-label" title="Show only URL per row"><input type="radio" name="browserTabsListDisplayMode" value="url" id="browserTabsListDisplayUrl"> URL</label>
-          <label class="browser-tabs-scope-label" title="Show full card with title, URL, referrer, ids, tags"><input type="radio" name="browserTabsListDisplayMode" value="block" id="browserTabsListDisplayBlock" checked> Block</label>
+        <div class="browser-tabs-control-group">
+          <div class="browser-tabs-list-display-mode" role="group" aria-label="Show each tab as">
+            <label class="browser-tabs-scope-label" title="Show only tab title per row"><input type="radio" name="browserTabsListDisplayMode" value="title" id="browserTabsListDisplayTitle"> Title</label>
+            <label class="browser-tabs-scope-label" title="Show only URL per row"><input type="radio" name="browserTabsListDisplayMode" value="url" id="browserTabsListDisplayUrl"> URL</label>
+            <label class="browser-tabs-scope-label" title="Show full card with title, URL, referrer, ids, tags"><input type="radio" name="browserTabsListDisplayMode" value="block" id="browserTabsListDisplayBlock" checked> Block</label>
+          </div>
         </div>
-        <input type="text" id="browserTabsFilterInput" class="browser-tabs-filter-input" placeholder="Filter by title, URL, referrer…" aria-label="Filter tabs" title="Filter the list by the selected search scope">
-        <div class="browser-tabs-important-sources" id="browserTabsImportantSourcesWrap">
-          <label for="browserTabsImportantTagSources" class="browser-tabs-important-sources-label">Important tag sources</label>
-          <input type="text" id="browserTabsImportantTagSources" class="browser-tabs-important-sources-input" placeholder="title, meta description, og:title, h1, h2, h3, img alt, a title" aria-label="Comma-separated DOM sources for Important tags search" title="DOM sources to collect when filtering by Important tags (comma-separated); applied on next search or refresh">
+        <div class="browser-tabs-control-group">
+          <input type="text" id="browserTabsFilterInput" class="browser-tabs-filter-input" placeholder="Filter by title, URL, referrer…" aria-label="Filter tabs" title="Filter the list by the selected search scope">
+        </div>
+        <div class="browser-tabs-control-group browser-tabs-important-sources" id="browserTabsImportantSourcesWrap">
+          <label for="browserTabsUseCustomImportantSources" class="browser-tabs-important-elements-checkbox-label" title="Use custom DOM sources from the textbox when filtering by Important elements"><input type="checkbox" id="browserTabsUseCustomImportantSources" checked aria-label="Use custom DOM sources for Important elements search"> Important elements</label>
+          <input type="text" id="browserTabsImportantTagSources" class="browser-tabs-important-sources-input" placeholder="title, meta description, og:title, h1, h2, h3, img alt, a title" aria-label="Comma-separated DOM sources for Important elements search" title="DOM sources to collect when filtering by Important elements (comma-separated); applied on next search or refresh">
         </div>
       </section>
       <div id="browserTabsMessage" class="browser-tabs-message hidden" aria-live="polite"></div>
-      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Batch bookmark actions -->
+      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Batch bookmark actions; control groups -->
       <section class="browser-tabs-section-bookmark browser-tabs-section browser-tabs-bookmark-actions" aria-label="Batch bookmark actions">
-        <label for="browserTabsTagsInput" title="Tags to add to all visible tabs">Tags</label>
-        <input type="text" id="browserTabsTagsInput" class="browser-tabs-tags-input" placeholder="tag1, tag2" aria-label="Tags to add to visible tabs" title="Comma-separated tags to add to bookmarks of visible tabs">
-        <button type="button" id="browserTabsAddTagsBtn" data-action="addTags" class="button secondary" title="Add the entered tags to all visible tabs' bookmarks" aria-label="Add tags to visible tabs">Add tags</button>
-        <button type="button" id="browserTabsSetToReadBtn" data-action="setToRead" class="button secondary" title="Set to-read flag for all visible tabs' bookmarks (creates bookmark if missing)" aria-label="Set to-read for visible tabs">Set to-read</button>
-        <button type="button" id="browserTabsClearToReadBtn" data-action="clearToRead" class="button secondary" title="Clear to-read flag for visible tabs' bookmarks (skips URLs with no bookmark)" aria-label="Clear to-read for visible tabs">Clear to-read</button>
+        <div class="browser-tabs-control-group">
+          <label for="browserTabsTagsInput" title="Tags to add to all visible tabs">Tags</label>
+          <input type="text" id="browserTabsTagsInput" class="browser-tabs-tags-input" placeholder="tag1, tag2" aria-label="Tags to add to visible tabs" title="Comma-separated tags to add to bookmarks of visible tabs">
+          <button type="button" id="browserTabsAddTagsBtn" data-action="addTags" class="button secondary" title="Add the entered tags to all visible tabs' bookmarks" aria-label="Add tags to visible tabs">Add tags</button>
+          <button type="button" id="browserTabsSetToReadBtn" data-action="setToRead" class="button secondary" title="Set to-read flag for all visible tabs' bookmarks (creates bookmark if missing)" aria-label="Set to-read for visible tabs">Set to-read</button>
+          <button type="button" id="browserTabsClearToReadBtn" data-action="clearToRead" class="button secondary" title="Clear to-read flag for visible tabs' bookmarks (skips URLs with no bookmark)" aria-label="Clear to-read for visible tabs">Clear to-read</button>
+        </div>
       </section>
-      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: List actions -->
+      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: List actions; control groups -->
       <section class="browser-tabs-section-actions browser-tabs-section browser-tabs-actions" aria-label="List actions">
-        <button type="button" id="browserTabsCopyBtn" data-action="copyUrls" class="button secondary" title="Copy URLs of visible tabs to clipboard" aria-label="Copy URLs">Copy URLs</button>
-        <button type="button" id="browserTabsCopyRecordsBtn" data-action="copyRecords" class="button secondary" title="Copy full tab records (id, windowId, title, url, referrer) as YAML to clipboard" aria-label="Copy Records">Copy Records</button>
-        <button type="button" id="browserTabsCloseBtn" data-action="closeTabs" class="button secondary" title="Close all visible tabs after confirmation" aria-label="Close visible tabs">Close visible tabs</button>
-        <button type="button" id="browserTabsCloseTaggedBtn" data-action="closeTabsWithTag" class="button secondary" title="Close only tabs that have at least one bookmark tag" aria-label="Close tagged tabs">Close tagged</button>
-        <button type="button" id="browserTabsCloseUntaggedBtn" data-action="closeTabsWithoutTag" class="button secondary" title="Close only tabs that have no bookmark tags" aria-label="Close untagged tabs">Close untagged</button>
-        <button type="button" id="browserTabsRefreshBtn" data-action="refreshTabs" class="button secondary" title="Reload tab list and clear hidden-from-display set" aria-label="Refresh tab list">Refresh</button>
+        <div class="browser-tabs-control-group">
+          <button type="button" id="browserTabsCopyBtn" data-action="copyUrls" class="button secondary" title="Copy URLs of visible tabs to clipboard" aria-label="Copy URLs">Copy URLs</button>
+          <button type="button" id="browserTabsCopyRecordsBtn" data-action="copyRecords" class="button secondary" title="Copy full tab records (id, windowId, title, url, referrer) as YAML to clipboard" aria-label="Copy Records">Copy Records</button>
+          <button type="button" id="browserTabsCloseBtn" data-action="closeTabs" class="button secondary" title="Close all visible tabs after confirmation" aria-label="Close visible tabs">Close visible tabs</button>
+          <button type="button" id="browserTabsCloseTaggedBtn" data-action="closeTabsWithTag" class="button secondary" title="Close only tabs that have at least one bookmark tag" aria-label="Close tagged tabs">Close tagged</button>
+          <button type="button" id="browserTabsCloseUntaggedBtn" data-action="closeTabsWithoutTag" class="button secondary" title="Close only tabs that have no bookmark tags" aria-label="Close untagged tabs">Close untagged</button>
+          <button type="button" id="browserTabsRefreshBtn" data-action="refreshTabs" class="button secondary" title="Reload tab list and clear hidden-from-display set" aria-label="Refresh tab list">Refresh</button>
+        </div>
       </section>
-      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Window actions (Gather, Distribute) -->
+      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Window actions (Gather, Distribute); control groups -->
       <section class="browser-tabs-section-window browser-tabs-section" aria-label="Window actions">
-        <button type="button" id="browserTabsGatherBtn" data-action="gatherTabs" class="button secondary" title="Move all visible tabs into this window" aria-label="Gather visible tabs into this window">Gather into this window</button>
-        <button type="button" id="browserTabsDistributeBtn" data-action="distributeTabs" class="button secondary" title="Move each visible tab into its own window (tabs already alone are unchanged)" aria-label="One window per tab">One window per tab</button>
+        <div class="browser-tabs-control-group">
+          <button type="button" id="browserTabsGatherBtn" data-action="gatherTabs" class="button secondary" title="Move all visible tabs into this window" aria-label="Gather visible tabs into this window">Gather into this window</button>
+          <button type="button" id="browserTabsDistributeBtn" data-action="distributeTabs" class="button secondary" title="Move each visible tab into its own window (tabs already alone are unchanged)" aria-label="One window per tab">One window per tab</button>
+        </div>
       </section>
     </div>
     <section class="browser-tabs-list-section" aria-label="Tab list">

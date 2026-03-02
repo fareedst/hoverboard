@@ -111,6 +111,11 @@
   cursor: pointer;
 }
 
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Control groups: very narrow margins to group UI controls */
+.browser-tabs-control-group {
+  margin: 0.125rem 0;
+}
+
 /* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Sections: Scope, Filter & display, Batch bookmark, List actions, Window actions */
 .browser-tabs-section {
   flex-shrink: 0;
@@ -147,17 +152,25 @@
   color: var(--text-primary, #eee);
 }
 
-/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Important tag sources input (comma-separated DOM sources for Important tags search) */
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Important elements: checkbox + DOM sources textbox adjacent (same row, narrow gap) */
 .browser-tabs-important-sources {
-  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
 }
-.browser-tabs-important-sources-label {
-  display: block;
+.browser-tabs-important-elements-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   font-size: 0.8rem;
-  margin-bottom: 0.25rem;
   color: var(--text-secondary, #999);
+  cursor: pointer;
+  flex-shrink: 0;
 }
 .browser-tabs-important-sources-input {
+  flex: 1;
+  min-width: 8rem;
   width: 100%;
   padding: 0.35rem 0.5rem;
   font-size: 0.8rem;

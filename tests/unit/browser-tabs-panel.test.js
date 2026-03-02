@@ -187,7 +187,7 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] buildReco
 
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
- * parseImportantTagSources: comma-separated DOM sources for Important tags search; applied on GET_TABS_IMPORTANT_TAGS.
+ * parseImportantTagSources: comma-separated DOM sources for Important elements search; applied on GET_TABS_IMPORTANT_TAGS.
  */
 describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] parseImportantTagSources', () => {
   test('comma-separated string returns trimmed non-empty array', () => {
@@ -246,15 +246,21 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] important
     const importantTagSourcesInput = document.createElement('input')
     importantTagSourcesInput.id = 'browserTabsImportantTagSources'
     importantTagSourcesInput.type = 'text'
+    const useCustomImportantSourcesCheckbox = document.createElement('input')
+    useCustomImportantSourcesCheckbox.id = 'browserTabsUseCustomImportantSources'
+    useCustomImportantSourcesCheckbox.type = 'checkbox'
+    useCustomImportantSourcesCheckbox.checked = true
     const panel = document.createElement('div')
     panel.id = 'browserTabsPanel'
     panel.appendChild(listEl)
     panel.appendChild(messageEl)
     panel.appendChild(importantTagSourcesInput)
+    panel.appendChild(useCustomImportantSourcesCheckbox)
     panel.querySelector = (sel) => {
       if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
       if (sel === '#browserTabsMessage') return messageEl
       if (sel === '#browserTabsImportantTagSources') return importantTagSourcesInput
+      if (sel === '#browserTabsUseCustomImportantSources') return useCustomImportantSourcesCheckbox
       return null
     }
     panel.querySelectorAll = () => []
@@ -262,6 +268,7 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] important
       doc: { getElementById: (id) => (id === 'browserTabsPanel' ? panel : null), createElement: document.createElement.bind(document) },
       listEl,
       importantTagSourcesInput,
+      useCustomImportantSourcesCheckbox,
       panel
     }
   }

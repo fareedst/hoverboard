@@ -26,6 +26,8 @@ export function parseImportantTagSources (str) {
 
 /** [IMPL-SIDE_PANEL_BROWSER_TABS] Storage key for persisted important-tag sources list */
 const STORAGE_KEY_IMPORTANT_TAG_SOURCES = 'hoverboard_tabs_important_tag_sources'
+/** [IMPL-SIDE_PANEL_BROWSER_TABS] Storage key for "use custom DOM sources" checkbox (Important elements) */
+const STORAGE_KEY_USE_CUSTOM_IMPORTANT_SOURCES = 'hoverboard_tabs_use_custom_important_sources'
 
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
@@ -135,6 +137,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const setToReadBtn = panel.querySelector('[data-action="setToRead"]') || panel.querySelector('#browserTabsSetToReadBtn')
   const clearToReadBtn = panel.querySelector('[data-action="clearToRead"]') || panel.querySelector('#browserTabsClearToReadBtn')
   const importantTagSourcesInput = panel.querySelector('#browserTabsImportantTagSources')
+  const useCustomImportantSourcesCheckbox = panel.querySelector('#browserTabsUseCustomImportantSources')
   const gatherBtn = panel.querySelector('[data-action="gatherTabs"]') || panel.querySelector('#browserTabsGatherBtn')
   const distributeBtn = panel.querySelector('[data-action="distributeTabs"]') || panel.querySelector('#browserTabsDistributeBtn')
 
@@ -277,9 +280,10 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     const msgType = scope === SEARCH_SCOPE_PAGE_TEXT ? 'getTabsPageText' : 'getTabsImportantTags'
     const msgData = { tabs: allTabs.map((t) => ({ id: t.id, url: t.url })) }
     if (scope === SEARCH_SCOPE_IMPORTANT_TAGS) {
+      const useCustom = useCustomImportantSourcesCheckbox ? useCustomImportantSourcesCheckbox.checked : true
       const raw = importantTagSourcesInput ? importantTagSourcesInput.value : ''
       const sources = parseImportantTagSources(raw)
-      msgData.importantTagSources = sources.length > 0 ? sources : parseImportantTagSources(DEFAULT_IMPORTANT_TAG_SOURCES)
+      msgData.importantTagSources = useCustom && sources.length > 0 ? sources : parseImportantTagSources(DEFAULT_IMPORTANT_TAG_SOURCES)
     }
     const msg = { type: msgType, data: msgData }
     try {
@@ -629,24 +633,37 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     })
   }
 
-  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Persist important-tag sources on blur; load from storage on init
-  if (importantTagSourcesInput) {
-    const storage = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local ? chrome.storage.local : (typeof browser !== 'undefined' && browser.storage && browser.storage.local ? browser.storage.local : null)
-    if (storage) {
-      storage.get(STORAGE_KEY_IMPORTANT_TAG_SOURCES).then((obj) => {
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Persist important-tag sources on blur; persist "use custom" checkbox on change; load from storage on init
+  const storage = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local ? chrome.storage.local : (typeof browser !== 'undefined' && browser.storage && browser.storage.local ? browser.storage.local : null)
+  if (storage) {
+    storage.get([STORAGE_KEY_IMPORTANT_TAG_SOURCES, STORAGE_KEY_USE_CUSTOM_IMPORTANT_SOURCES]).then((obj) => {
+      if (importantTagSourcesInput) {
         const val = obj && obj[STORAGE_KEY_IMPORTANT_TAG_SOURCES]
         if (typeof val === 'string' && val.trim() !== '') importantTagSourcesInput.value = val.trim()
         else importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
-      }).catch(() => {
-        importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
-      })
+      }
+      if (useCustomImportantSourcesCheckbox) {
+        const useCustom = obj && obj[STORAGE_KEY_USE_CUSTOM_IMPORTANT_SOURCES]
+        useCustomImportantSourcesCheckbox.checked = useCustom !== false
+      }
+    }).catch(() => {
+      if (importantTagSourcesInput) importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
+      if (useCustomImportantSourcesCheckbox) useCustomImportantSourcesCheckbox.checked = true
+    })
+    if (importantTagSourcesInput) {
       importantTagSourcesInput.addEventListener('blur', () => {
         const val = importantTagSourcesInput.value.trim()
         storage.set({ [STORAGE_KEY_IMPORTANT_TAG_SOURCES]: val || DEFAULT_IMPORTANT_TAG_SOURCES }).catch(() => {})
       })
-    } else {
-      importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
     }
+    if (useCustomImportantSourcesCheckbox) {
+      useCustomImportantSourcesCheckbox.addEventListener('change', () => {
+        storage.set({ [STORAGE_KEY_USE_CUSTOM_IMPORTANT_SOURCES]: useCustomImportantSourcesCheckbox.checked }).catch(() => {})
+      })
+    }
+  } else {
+    if (importantTagSourcesInput) importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
+    if (useCustomImportantSourcesCheckbox) useCustomImportantSourcesCheckbox.checked = true
   }
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Batch bookmark actions: set to-read (create if missing), clear to-read (skip if no bookmark), add tags (create if missing).
