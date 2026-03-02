@@ -12,7 +12,7 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
     benefits:
       - 'Single panel #browserTabsPanel; data from chrome.tabs; referrer via GET_TAB_REFERRERS; search scope Tab info / Page text / Important elements via GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS (SW executeScript per tab); scope-aware filter and actions on visible tabs; batch bookmark actions (set/clear to-read, add tags) using existing getCurrentBookmark and saveBookmark; create bookmark only when needed (set to-read, add tags), not for clear to-read'
   implementation_approach:
-    summary: 'Panel uses chrome.tabs.query; scope is chosen by user (Current window default, or All windows). Referrer via GET_TAB_REFERRERS (SW executeScript per tab). Search scope: user selects Tab info (title/url/referrer), Page text (body), or Important elements (alt, h1–h3, meta, etc.); GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS return tabId-to-string maps via SW executeScript; fetch when scope is selected or on load. Filter is scope-aware; loading state during fetch. List display mode (Title | URL | Block) is kept above the filter textbox; control groups use very narrow margins. Important elements: checkbox "Important elements" adjacent to DOM sources textbox; when checked use textbox list for importantTagSources, when unchecked use default list. Panel controls are grouped into sections with inner control-group wrappers (very narrow margins). Copy URLs, copy records as YAML, close act on visible list. Gather/Distribute, batch bookmark, favicon, tooltips as before.'
+    summary: 'Panel uses chrome.tabs.query; scope is chosen by user (Current window default, or All windows). Referrer via GET_TAB_REFERRERS (SW executeScript per tab). Search scope: user selects Tab info (title/url/referrer), Page text (body), or Important elements (alt, h1–h3, meta, etc.); GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS return tabId-to-string maps via SW executeScript; fetch when scope is selected or on load. Filter is scope-aware; loading state during fetch. List display mode (Title | URL | Block) is in the list section immediately above the tab list (not in the filter section). Control groups use very narrow margins. Above the batch bookmark (Tags) section a stats line shows: windows in display group / total windows open, tabs in display group / total tabs open (totals from chrome.windows.getAll and chrome.tabs.query({})). Important elements: DOM sources textbox (Important tag sources) is always used for importantTagSources when scope is Important elements; empty textbox falls back to default list. Panel controls are grouped into sections with inner control-group wrappers (very narrow margins). Copy URLs, copy records as YAML, close act on visible list. Gather/Distribute, batch bookmark, favicon, tooltips as before.'
   traceability:
     requirements:
       - REQ-SIDE_PANEL_BROWSER_TABS
@@ -35,6 +35,6 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
       date: '2026-02-28'
       author: AI Agent
     last_updated:
-      date: '2026-03-01'
+      date: '2026-03-02'
       author: AI Agent
-      reason: Control groups (narrow margins), Important elements naming, checkbox + DOM sources textbox; Gather/Distribute (tabs.move, windows.create)
+      reason: Display mode above list; stats line (display/total windows and tabs)

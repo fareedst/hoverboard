@@ -131,9 +131,21 @@
   margin-bottom: 0.35rem;
 }
 
-/* [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] List display mode: Title | URL | Block (default) */
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] List display mode: Title | URL | Block (default); when in list section, row sits immediately above #browserTabsList */
 .browser-tabs-list-display-mode {
   margin-bottom: 0.35rem;
+}
+.browser-tabs-list-section .browser-tabs-list-display-mode-wrap {
+  margin-bottom: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Stats line: display windows/total windows, display tabs/total tabs (above batch bookmark section) */
+.browser-tabs-stats {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #999);
+  margin: 0.35rem 0;
+  padding: 0.25rem 0;
 }
 
 .browser-tabs-loading {
@@ -152,20 +164,16 @@
   color: var(--text-primary, #eee);
 }
 
-/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Important elements: checkbox + DOM sources textbox adjacent (same row, narrow gap) */
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Important tag sources: label + textbox (always use textbox value or default when empty) */
 .browser-tabs-important-sources {
   display: flex;
   align-items: center;
   gap: 0.35rem;
   flex-wrap: wrap;
 }
-.browser-tabs-important-elements-checkbox-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
+.browser-tabs-important-sources-label {
   font-size: 0.8rem;
   color: var(--text-secondary, #999);
-  cursor: pointer;
   flex-shrink: 0;
 }
 .browser-tabs-important-sources-input {

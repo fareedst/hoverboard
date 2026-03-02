@@ -160,9 +160,13 @@ export async function snapshotSidePanel (page) {
         hasGatherButton: !!browserTabsRoot.querySelector('[data-action="gatherTabs"]') || !!browserTabsRoot.querySelector('#browserTabsGatherBtn'),
         hasDistributeButton: !!browserTabsRoot.querySelector('[data-action="distributeTabs"]') || !!browserTabsRoot.querySelector('#browserTabsDistributeBtn'),
         hasImportantTagSourcesInput: !!browserTabsRoot.querySelector('#browserTabsImportantTagSources') || !!document.getElementById('browserTabsImportantTagSources'),
-        hasImportantElementsCheckbox: !!browserTabsRoot.querySelector('#browserTabsUseCustomImportantSources') || !!document.getElementById('browserTabsUseCustomImportantSources'),
         hasControlGroups: !!browserTabsRoot.querySelector('.browser-tabs-control-group'),
-        hasSections: sections && sections.length >= 2
+        hasSections: sections && sections.length >= 2,
+        hasDisplayModeAboveList: (() => {
+          const listSection = browserTabsRoot.querySelector('.browser-tabs-list-section')
+          return !!(listSection && listSection.querySelector('.browser-tabs-list-display-mode') && listSection.querySelector('#browserTabsList'))
+        })(),
+        hasStatsLine: !!browserTabsRoot.querySelector('#browserTabsStats') || !!document.getElementById('browserTabsStats')
       }
     }
 

@@ -26,8 +26,6 @@ export function parseImportantTagSources (str) {
 
 /** [IMPL-SIDE_PANEL_BROWSER_TABS] Storage key for persisted important-tag sources list */
 const STORAGE_KEY_IMPORTANT_TAG_SOURCES = 'hoverboard_tabs_important_tag_sources'
-/** [IMPL-SIDE_PANEL_BROWSER_TABS] Storage key for "use custom DOM sources" checkbox (Important elements) */
-const STORAGE_KEY_USE_CUSTOM_IMPORTANT_SOURCES = 'hoverboard_tabs_use_custom_important_sources'
 
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
@@ -137,9 +135,10 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const setToReadBtn = panel.querySelector('[data-action="setToRead"]') || panel.querySelector('#browserTabsSetToReadBtn')
   const clearToReadBtn = panel.querySelector('[data-action="clearToRead"]') || panel.querySelector('#browserTabsClearToReadBtn')
   const importantTagSourcesInput = panel.querySelector('#browserTabsImportantTagSources')
-  const useCustomImportantSourcesCheckbox = panel.querySelector('#browserTabsUseCustomImportantSources')
   const gatherBtn = panel.querySelector('[data-action="gatherTabs"]') || panel.querySelector('#browserTabsGatherBtn')
   const distributeBtn = panel.querySelector('[data-action="distributeTabs"]') || panel.querySelector('#browserTabsDistributeBtn')
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Stats line: display windows/tabs vs total (above batch bookmark section)
+  const statsEl = panel.querySelector('#browserTabsStats')
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] windowScope: currentWindow (default) or all; searchScope: tabInfo (default), pageText, or importantTags
   let windowScope = 'currentWindow'
@@ -153,6 +152,9 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   let allTabs = []
   /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string, bookmarkTags?: string[] }[]} */
   let visibleTabs = []
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Total windows and tabs (browser-wide) for stats line; set in loadTabs from chrome.windows.getAll and chrome.tabs.query({})
+  let totalWindows = 0
+  let totalTabs = 0
 
   function getWindowScope () {
     if (scopeRadios && scopeRadios.length) {
@@ -209,6 +211,15 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     return url || FAVICON_PLACEHOLDER
   }
 
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Stats line: display windows/total windows, display tabs/total tabs; call after render and after loadTabs
+  function updateStatsLine () {
+    if (!statsEl) return
+    const displayed = visibleTabs.filter((t) => !hiddenTabIds.has(t.id))
+    const displayWindows = new Set(displayed.map((t) => t.windowId).filter((id) => id != null)).size
+    const displayTabs = displayed.length
+    statsEl.textContent = `Windows: ${displayWindows} / ${totalWindows} · Tabs: ${displayTabs} / ${totalTabs}`
+  }
+
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Display list = visibleTabs minus hiddenTabIds; render per listDisplayMode (title | url | block); favicon before title/url in all modes; non-block: clickable text + remove icon after; block view includes remove icon before Tags
   function renderList () {
     if (!listEl) return
@@ -254,6 +265,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       }
       listEl.appendChild(card)
     })
+    updateStatsLine()
   }
 
   function applyFilter () {
@@ -280,10 +292,9 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     const msgType = scope === SEARCH_SCOPE_PAGE_TEXT ? 'getTabsPageText' : 'getTabsImportantTags'
     const msgData = { tabs: allTabs.map((t) => ({ id: t.id, url: t.url })) }
     if (scope === SEARCH_SCOPE_IMPORTANT_TAGS) {
-      const useCustom = useCustomImportantSourcesCheckbox ? useCustomImportantSourcesCheckbox.checked : true
       const raw = importantTagSourcesInput ? importantTagSourcesInput.value : ''
       const sources = parseImportantTagSources(raw)
-      msgData.importantTagSources = useCustom && sources.length > 0 ? sources : parseImportantTagSources(DEFAULT_IMPORTANT_TAG_SOURCES)
+      msgData.importantTagSources = sources.length > 0 ? sources : parseImportantTagSources(DEFAULT_IMPORTANT_TAG_SOURCES)
     }
     const msg = { type: msgType, data: msgData }
     try {
@@ -310,7 +321,29 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     if (!api) return
     windowScope = getWindowScope()
     const runtime = typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime : (typeof browser !== 'undefined' && browser.runtime ? browser.runtime : null)
+    const windowsApi = chromeWindows || (typeof chrome !== 'undefined' && chrome.windows ? chrome.windows : null) || (typeof browser !== 'undefined' && browser.windows ? browser.windows : null)
     try {
+      // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Stats line denominators: total windows and total tabs (browser-wide)
+      if (windowsApi && typeof windowsApi.getAll === 'function') {
+        try {
+          const wins = await windowsApi.getAll()
+          totalWindows = Array.isArray(wins) ? wins.length : 0
+        } catch (_) {
+          totalWindows = 0
+        }
+      } else {
+        totalWindows = 0
+      }
+      if (api && typeof api.query === 'function') {
+        try {
+          const all = await api.query({})
+          totalTabs = Array.isArray(all) ? all.length : 0
+        } catch (_) {
+          totalTabs = 0
+        }
+      } else {
+        totalTabs = 0
+      }
       const queryOpts = windowScope === 'currentWindow' ? { currentWindow: true } : {}
       const list = await api.query(queryOpts)
       // [REQ-SIDE_PANEL_BROWSER_TABS] Get referrers from service worker so executeScript runs in tab context (side panel context cannot inject into tabs).
@@ -633,22 +666,17 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     })
   }
 
-  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Persist important-tag sources on blur; persist "use custom" checkbox on change; load from storage on init
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Persist important-tag sources on blur; load from storage on init; always use textbox value (or default when empty)
   const storage = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local ? chrome.storage.local : (typeof browser !== 'undefined' && browser.storage && browser.storage.local ? browser.storage.local : null)
   if (storage) {
-    storage.get([STORAGE_KEY_IMPORTANT_TAG_SOURCES, STORAGE_KEY_USE_CUSTOM_IMPORTANT_SOURCES]).then((obj) => {
+    storage.get([STORAGE_KEY_IMPORTANT_TAG_SOURCES]).then((obj) => {
       if (importantTagSourcesInput) {
         const val = obj && obj[STORAGE_KEY_IMPORTANT_TAG_SOURCES]
         if (typeof val === 'string' && val.trim() !== '') importantTagSourcesInput.value = val.trim()
         else importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
       }
-      if (useCustomImportantSourcesCheckbox) {
-        const useCustom = obj && obj[STORAGE_KEY_USE_CUSTOM_IMPORTANT_SOURCES]
-        useCustomImportantSourcesCheckbox.checked = useCustom !== false
-      }
     }).catch(() => {
       if (importantTagSourcesInput) importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
-      if (useCustomImportantSourcesCheckbox) useCustomImportantSourcesCheckbox.checked = true
     })
     if (importantTagSourcesInput) {
       importantTagSourcesInput.addEventListener('blur', () => {
@@ -656,14 +684,8 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         storage.set({ [STORAGE_KEY_IMPORTANT_TAG_SOURCES]: val || DEFAULT_IMPORTANT_TAG_SOURCES }).catch(() => {})
       })
     }
-    if (useCustomImportantSourcesCheckbox) {
-      useCustomImportantSourcesCheckbox.addEventListener('change', () => {
-        storage.set({ [STORAGE_KEY_USE_CUSTOM_IMPORTANT_SOURCES]: useCustomImportantSourcesCheckbox.checked }).catch(() => {})
-      })
-    }
   } else {
     if (importantTagSourcesInput) importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
-    if (useCustomImportantSourcesCheckbox) useCustomImportantSourcesCheckbox.checked = true
   }
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Batch bookmark actions: set to-read (create if missing), clear to-read (skip if no bookmark), add tags (create if missing).

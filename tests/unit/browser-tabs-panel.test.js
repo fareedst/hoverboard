@@ -246,21 +246,15 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] important
     const importantTagSourcesInput = document.createElement('input')
     importantTagSourcesInput.id = 'browserTabsImportantTagSources'
     importantTagSourcesInput.type = 'text'
-    const useCustomImportantSourcesCheckbox = document.createElement('input')
-    useCustomImportantSourcesCheckbox.id = 'browserTabsUseCustomImportantSources'
-    useCustomImportantSourcesCheckbox.type = 'checkbox'
-    useCustomImportantSourcesCheckbox.checked = true
     const panel = document.createElement('div')
     panel.id = 'browserTabsPanel'
     panel.appendChild(listEl)
     panel.appendChild(messageEl)
     panel.appendChild(importantTagSourcesInput)
-    panel.appendChild(useCustomImportantSourcesCheckbox)
     panel.querySelector = (sel) => {
       if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
       if (sel === '#browserTabsMessage') return messageEl
       if (sel === '#browserTabsImportantTagSources') return importantTagSourcesInput
-      if (sel === '#browserTabsUseCustomImportantSources') return useCustomImportantSourcesCheckbox
       return null
     }
     panel.querySelectorAll = () => []
@@ -268,7 +262,6 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] important
       doc: { getElementById: (id) => (id === 'browserTabsPanel' ? panel : null), createElement: document.createElement.bind(document) },
       listEl,
       importantTagSourcesInput,
-      useCustomImportantSourcesCheckbox,
       panel
     }
   }
@@ -465,10 +458,14 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
     panel.appendChild(clearToReadBtn)
     panel.appendChild(messageEl)
     panel.appendChild(listEl)
+    const statsEl = document.createElement('div')
+    statsEl.id = 'browserTabsStats'
+    panel.appendChild(statsEl)
     panel.querySelector = (sel) => {
       if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
       if (sel === '#browserTabsMessage') return messageEl
       if (sel === '#browserTabsTagsInput') return tagsInput
+      if (sel === '#browserTabsStats') return statsEl
       if (sel === '[data-action="addTags"]' || sel === '#browserTabsAddTagsBtn') return addTagsBtn
       if (sel === '[data-action="setToRead"]' || sel === '#browserTabsSetToReadBtn') return setToReadBtn
       if (sel === '[data-action="clearToRead"]' || sel === '#browserTabsClearToReadBtn') return clearToReadBtn
@@ -487,6 +484,7 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
       },
       listEl,
       messageEl,
+      statsEl,
       tagsInput,
       addTagsBtn,
       setToReadBtn,
@@ -664,6 +662,97 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
     } finally {
       if (origRuntime) global.chrome.runtime = origRuntime
     }
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Stats line: display windows/total windows, display tabs/total tabs (above batch bookmark section).
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] stats line', () => {
+  beforeEach(() => {
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = global.chrome.runtime || {}
+    const prev = global.chrome.runtime.sendMessage
+    global.chrome.runtime.sendMessage = function (msg, cb) {
+      if (msg.type === 'getCurrentBookmark' && typeof cb === 'function') {
+        cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        return
+      }
+      if (typeof prev === 'function') return prev.call(this, msg, cb)
+      if (typeof cb === 'function') cb({})
+    }
+  })
+
+  test('stats line shows display windows/total windows and display tabs/total tabs after loadTabs', async () => {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const statsEl = document.createElement('div')
+    statsEl.id = 'browserTabsStats'
+    const messageEl = document.createElement('div')
+    messageEl.id = 'browserTabsMessage'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(statsEl)
+    panel.appendChild(listEl)
+    panel.appendChild(messageEl)
+    const allTabsForScope = [
+      { id: 1, windowId: 100, title: 'A', url: 'https://a.com', referrer: '' },
+      { id: 2, windowId: 100, title: 'B', url: 'https://b.com', referrer: '' },
+      { id: 3, windowId: 100, title: 'C', url: 'https://c.com', referrer: '' }
+    ]
+    const allTabsTotal = [
+      ...allTabsForScope,
+      { id: 4, windowId: 101, title: 'D', url: 'https://d.com', referrer: '' },
+      { id: 5, windowId: 101, title: 'E', url: 'https://e.com', referrer: '' }
+    ]
+    const mockTabs = {
+      query: async (opts) => (opts && opts.currentWindow ? allTabsForScope : allTabsTotal)
+    }
+    const mockWindows = { getAll: async () => [{ id: 100 }, { id: 101 }] }
+    const getReferrers = async (list) => Object.fromEntries((list || []).map((t) => [t.id, '']))
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '#browserTabsStats') return statsEl
+      if (sel === '#browserTabsMessage') return messageEl
+      return null
+    }
+    panel.querySelectorAll = () => []
+    const doc = { getElementById: (id) => (id === 'browserTabsPanel' ? panel : null), createElement: document.createElement.bind(document) }
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers, mockWindows)
+    await new Promise(r => setTimeout(r, 200))
+    expect(statsEl.textContent).toContain('Windows: 1 / 2')
+    expect(statsEl.textContent).toContain('Tabs: 3 / 5')
+  })
+
+  test('stats line renders without throw when windows API unavailable (totalWindows 0)', async () => {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const statsEl = document.createElement('div')
+    statsEl.id = 'browserTabsStats'
+    const messageEl = document.createElement('div')
+    messageEl.id = 'browserTabsMessage'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(statsEl)
+    panel.appendChild(listEl)
+    panel.appendChild(messageEl)
+    const tabList = [{ id: 1, windowId: 1, title: 'T', url: 'https://t.com', referrer: '' }]
+    const mockTabs = { query: async () => tabList }
+    const getReferrers = async () => ({ 1: '' })
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '#browserTabsStats') return statsEl
+      if (sel === '#browserTabsMessage') return messageEl
+      return null
+    }
+    panel.querySelectorAll = () => []
+    const doc = { getElementById: (id) => (id === 'browserTabsPanel' ? panel : null), createElement: document.createElement.bind(document) }
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers, null)
+    await new Promise(r => setTimeout(r, 150))
+    expect(statsEl.textContent).toContain('Windows: 1 / 0')
+    expect(statsEl.textContent).toMatch(/Tabs: 1 \/ \d+/)
   })
 })
 

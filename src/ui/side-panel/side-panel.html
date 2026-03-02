@@ -140,24 +140,20 @@
           </div>
         </div>
       </section>
-      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Filter & display; Title/URL/Block above filter textbox; control groups -->
+      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Filter & display; filter textbox and Important elements only (Title/URL/Block moved to list section) -->
       <section class="browser-tabs-section-filter browser-tabs-section" aria-label="Filter and display">
-        <div class="browser-tabs-control-group">
-          <div class="browser-tabs-list-display-mode" role="group" aria-label="Show each tab as">
-            <label class="browser-tabs-scope-label" title="Show only tab title per row"><input type="radio" name="browserTabsListDisplayMode" value="title" id="browserTabsListDisplayTitle"> Title</label>
-            <label class="browser-tabs-scope-label" title="Show only URL per row"><input type="radio" name="browserTabsListDisplayMode" value="url" id="browserTabsListDisplayUrl"> URL</label>
-            <label class="browser-tabs-scope-label" title="Show full card with title, URL, referrer, ids, tags"><input type="radio" name="browserTabsListDisplayMode" value="block" id="browserTabsListDisplayBlock" checked> Block</label>
-          </div>
-        </div>
         <div class="browser-tabs-control-group">
           <input type="text" id="browserTabsFilterInput" class="browser-tabs-filter-input" placeholder="Filter by title, URL, referrer…" aria-label="Filter tabs" title="Filter the list by the selected search scope">
         </div>
+        <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Important tag sources: textbox only; always use its value (or default when empty) for Important elements search -->
         <div class="browser-tabs-control-group browser-tabs-important-sources" id="browserTabsImportantSourcesWrap">
-          <label for="browserTabsUseCustomImportantSources" class="browser-tabs-important-elements-checkbox-label" title="Use custom DOM sources from the textbox when filtering by Important elements"><input type="checkbox" id="browserTabsUseCustomImportantSources" checked aria-label="Use custom DOM sources for Important elements search"> Important elements</label>
+          <label for="browserTabsImportantTagSources" class="browser-tabs-important-sources-label">Important tag sources</label>
           <input type="text" id="browserTabsImportantTagSources" class="browser-tabs-important-sources-input" placeholder="title, meta description, og:title, h1, h2, h3, img alt, a title" aria-label="Comma-separated DOM sources for Important elements search" title="DOM sources to collect when filtering by Important elements (comma-separated); applied on next search or refresh">
         </div>
       </section>
       <div id="browserTabsMessage" class="browser-tabs-message hidden" aria-live="polite"></div>
+      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Stats line: display windows/total windows, display tabs/total tabs (above batch bookmark section) -->
+      <div id="browserTabsStats" class="browser-tabs-stats" aria-label="Display and total counts for windows and tabs"></div>
       <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Batch bookmark actions; control groups -->
       <section class="browser-tabs-section-bookmark browser-tabs-section browser-tabs-bookmark-actions" aria-label="Batch bookmark actions">
         <div class="browser-tabs-control-group">
@@ -188,6 +184,14 @@
       </section>
     </div>
     <section class="browser-tabs-list-section" aria-label="Tab list">
+      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Title/URL/Block immediately above the tab list -->
+      <div class="browser-tabs-control-group browser-tabs-list-display-mode-wrap">
+        <div class="browser-tabs-list-display-mode" role="group" aria-label="Show each tab as">
+          <label class="browser-tabs-scope-label" title="Show only tab title per row"><input type="radio" name="browserTabsListDisplayMode" value="title" id="browserTabsListDisplayTitle"> Title</label>
+          <label class="browser-tabs-scope-label" title="Show only URL per row"><input type="radio" name="browserTabsListDisplayMode" value="url" id="browserTabsListDisplayUrl"> URL</label>
+          <label class="browser-tabs-scope-label" title="Show full card with title, URL, referrer, ids, tags"><input type="radio" name="browserTabsListDisplayMode" value="block" id="browserTabsListDisplayBlock" checked> Block</label>
+        </div>
+      </div>
       <div id="browserTabsList" class="browser-tabs-list"></div>
     </section>
   </div>

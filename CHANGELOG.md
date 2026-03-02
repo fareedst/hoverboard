@@ -7,7 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Side panel Tabs tab: always use Important tag sources textbox** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) – The "Use custom DOM sources" checkbox next to the Important tag sources textbox has been removed. The textbox list is always used when the search scope is **Important elements**; an empty textbox falls back to the default list. Label for the textbox is now "Important tag sources". TIED: REQ/ARCH/IMPL updated; E2E snapshot no longer includes `hasImportantElementsCheckbox`.
+
 ### Added
+
+- **Side panel Tabs tab: layout (Title/URL/Block above list) and stats line** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS], [PROC-TIED_DEV_CYCLE]) – In the **Tabs** tab the **Show: Title | URL | Block** control is now placed immediately above the tab list (inside the list section). A stats line above the **Tags** batch bookmark section shows: number of windows in the display group / total windows open, and number of tabs in the display group / total tabs open (display group = tabs currently shown in the list; totals from `chrome.windows.getAll` and `chrome.tabs.query({})`). Unit tests: stats line shows correct display/total after loadTabs; stats line renders when windows API unavailable. E2E snapshot: `hasDisplayModeAboveList`, `hasStatsLine`. TIED: REQ/ARCH/IMPL satisfaction criteria and essence_pseudocode updated.
 
 - **Side panel Tabs tab: control groups, Important elements, checkbox + DOM sources** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS], [PROC-TIED_DEV_CYCLE]) – In the **Tabs** tab: control groups with very narrow margins group UI controls; search scope label **Important tags** renamed to **Important elements**; a checkbox **Important elements** is now adjacent to the DOM sources textbox (when checked, the textbox list is used for Important elements search; when unchecked, the default list is used; checkbox state persisted). Title / URL / Block line remains above the filter textbox. E2E snapshot: `hasImportantElementsCheckbox`, `hasControlGroups`. TIED: REQ/ARCH/IMPL updated with control groups, Important elements naming, and checkbox semantics.
 
