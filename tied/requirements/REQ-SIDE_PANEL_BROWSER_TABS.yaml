@@ -29,9 +29,12 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     - criterion: A button closes only the displayed tabs that have at least one bookmark tag (after user confirmation) and shows a success count.
     - criterion: A button closes only the displayed tabs that have no bookmark tags (after user confirmation) and shows a success count.
     - criterion: A Refresh button reloads the tab list (and window/tabs used) so the list reflects current state (e.g. after closing tabs outside the panel).
+    - criterion: User can choose how each tab is shown in the list: Title only, URL only, or Block (full card: title, URL, referrer, window/tab ids, Tags). Default is Block.
+    - criterion: In Block view, each card has a control (e.g. icon) before the Tags line that removes that tab from the displayed list for the session; Refresh clears the hidden set and reloads so all tabs can reappear.
+    - criterion: When display format is Title only or URL only (not Block), the displayed text is clickable to switch to that window and tab (same focus behavior as the ids line in Block); the remove icon appears after the text (in Block it remains before the Tags line).
   validation_criteria:
     - method: Unit tests
-      coverage: 'filterBrowserTabs: empty query returns all; scope-aware filter (tabInfo/pageText/importantTags); build URL list and buildRecordsYamlForCopy; Copy Records button; GET_TAB_REFERRERS and GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; panel merges referrer and pageText/importantTags from SW; batch set/clear to-read and add tags; clickable window/tab id (focus window and tab on click); display bookmark tags per tab'
+      coverage: 'filterBrowserTabs: empty query returns all; scope-aware filter (tabInfo/pageText/importantTags); build URL list and buildRecordsYamlForCopy; Copy Records button; GET_TAB_REFERRERS and GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; panel merges referrer and pageText/importantTags from SW; batch set/clear to-read and add tags; clickable window/tab id (focus window and tab on click); clickable title/URL in title and url display mode (focus link, windows.update/tabs.update); remove icon after text in title/url mode, before Tags in block; display bookmark tags per tab; display mode and remove-from-display'
     - method: Manual or E2E
       coverage: Open Tabs tab; select search scope; filter by tab info, page text, or important tags; copy URLs; copy records; close visible tabs; set to-read; clear to-read; add tags; see counts
   notes:
@@ -60,4 +63,4 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     last_updated:
       date: '2026-03-01'
       author: AI Agent
-      reason: Close tagged/untagged buttons; Refresh button; satisfaction criteria
+      reason: Display mode clickable title/URL in non-block; remove icon after text in title/url mode; satisfaction and validation criteria

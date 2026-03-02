@@ -110,6 +110,8 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const messageEl = panel.querySelector('#browserTabsMessage')
   const scopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsWindowScope"]')
   const searchScopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsSearchScope"]')
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] List display mode: title | url | block (default block)
+  const listDisplayModeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsListDisplayMode"]')
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch bookmark UI
   const tagsInput = panel.querySelector('#browserTabsTagsInput')
   const addTagsBtn = panel.querySelector('[data-action="addTags"]') || panel.querySelector('#browserTabsAddTagsBtn')
@@ -119,6 +121,10 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] windowScope: currentWindow (default) or all; searchScope: tabInfo (default), pageText, or importantTags
   let windowScope = 'currentWindow'
   let searchScope = SEARCH_SCOPE_TAB_INFO
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] listDisplayMode: title | url | block (default block); hiddenTabIds: session-scoped set of tab IDs removed from display
+  let listDisplayMode = 'block'
+  /** @type {Set<number>} */
+  const hiddenTabIds = new Set()
 
   /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string, bookmarkTags?: string[] }[]} */
   let allTabs = []
@@ -143,6 +149,21 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     return SEARCH_SCOPE_TAB_INFO
   }
 
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Tabs currently shown in the list (visibleTabs minus hiddenTabIds); copy/close act on this list
+  function getDisplayedTabs () {
+    return visibleTabs.filter((t) => !hiddenTabIds.has(t.id))
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] List display mode: title | url | block (default block)
+  function getListDisplayMode () {
+    if (listDisplayModeRadios && listDisplayModeRadios.length) {
+      for (let i = 0; i < listDisplayModeRadios.length; i++) {
+        if (listDisplayModeRadios[i].checked) return listDisplayModeRadios[i].value
+      }
+    }
+    return 'block'
+  }
+
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Focus window and tab on click (ids line clickable)
   function focusWindowAndTab (windowId, tabId) {
     const w = Number(windowId)
@@ -158,10 +179,13 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     }
   }
 
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Display list = visibleTabs minus hiddenTabIds; render per listDisplayMode (title | url | block); non-block: clickable text + remove icon after; block view includes remove icon before Tags
   function renderList () {
     if (!listEl) return
+    listDisplayMode = getListDisplayMode()
+    const displayList = visibleTabs.filter((t) => !hiddenTabIds.has(t.id))
     listEl.innerHTML = ''
-    visibleTabs.forEach((tab) => {
+    displayList.forEach((tab) => {
       const card = document.createElement('div')
       card.className = 'browser-tabs-card'
       const windowId = tab.windowId != null ? String(tab.windowId) : ''
@@ -170,16 +194,32 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       const hasValidIds = windowId !== '' && tabId !== ''
       const tagsArr = Array.isArray(tab.bookmarkTags) ? tab.bookmarkTags : []
       const tagsDisplay = tagsArr.length > 0 ? escapeHtml(tagsArr.join(', ')) : '—'
-      const idsMarkup = hasValidIds
-        ? `<button type="button" class="browser-tabs-card-ids browser-tabs-card-ids-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${idsDisplay}</button>`
-        : `<div class="browser-tabs-card-ids">${idsDisplay}</div>`
-      card.innerHTML = `
+      const removeBtn = `<button type="button" class="browser-tabs-card-remove" data-action="removeFromDisplay" data-tab-id="${escapeHtml(tabId)}" aria-label="Remove from list" title="Remove from list">×</button>`
+      if (listDisplayMode === 'title') {
+        const titleText = escapeHtml(tab.title || '(no title)')
+        const focusBtn = hasValidIds
+          ? `<button type="button" class="browser-tabs-card-title browser-tabs-card-focus-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${titleText}</button>`
+          : `<div class="browser-tabs-card-title">${titleText}</div>`
+        card.innerHTML = `${focusBtn} ${removeBtn}`
+      } else if (listDisplayMode === 'url') {
+        const urlText = escapeHtml(tab.url || '')
+        const focusBtn = hasValidIds
+          ? `<button type="button" class="browser-tabs-card-url browser-tabs-card-focus-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${urlText}</button>`
+          : `<div class="browser-tabs-card-url">${urlText}</div>`
+        card.innerHTML = `${focusBtn} ${removeBtn}`
+      } else {
+        const idsMarkup = hasValidIds
+          ? `<button type="button" class="browser-tabs-card-ids browser-tabs-card-ids-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${idsDisplay}</button>`
+          : `<div class="browser-tabs-card-ids">${idsDisplay}</div>`
+        card.innerHTML = `
         <div class="browser-tabs-card-title">${escapeHtml(tab.title || '(no title)')}</div>
         <div class="browser-tabs-card-url">${escapeHtml(tab.url || '')}</div>
         <div class="browser-tabs-card-referrer">${escapeHtml(getReferrerDisplayText(tab.referrer))}</div>
         ${idsMarkup}
+        ${removeBtn}
         <div class="browser-tabs-card-tags">Tags: ${tagsDisplay}</div>
       `
+      }
       listEl.appendChild(card)
     })
   }
@@ -334,14 +374,36 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     }
   }
 
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] List display mode change: re-render so each card shows title only, URL only, or full block
+  if (listDisplayModeRadios && listDisplayModeRadios.length) {
+    for (let i = 0; i < listDisplayModeRadios.length; i++) {
+      listDisplayModeRadios[i].addEventListener('change', () => {
+        listDisplayMode = getListDisplayMode()
+        renderList()
+      })
+    }
+  }
+
   if (filterInput) {
     filterInput.addEventListener('input', applyFilter)
   }
 
-  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Delegated click: focus window and tab when ids line is clicked
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Delegated click: focus window and tab when ids line or focus link (title/url in non-block mode) clicked; remove from display when remove icon clicked
   if (listEl) {
     listEl.addEventListener('click', (e) => {
-      const btn = e.target && e.target.closest && e.target.closest('.browser-tabs-card-ids-link')
+      const removeBtn = e.target && e.target.closest && e.target.closest('[data-action="removeFromDisplay"]')
+      if (removeBtn) {
+        const tabId = removeBtn.getAttribute('data-tab-id')
+        if (tabId != null) {
+          const id = Number(tabId)
+          if (!Number.isNaN(id)) {
+            hiddenTabIds.add(id)
+            renderList()
+          }
+        }
+        return
+      }
+      const btn = e.target && e.target.closest && (e.target.closest('.browser-tabs-card-ids-link') || e.target.closest('.browser-tabs-card-focus-link'))
       if (!btn) return
       const windowId = btn.getAttribute('data-window-id')
       const tabId = btn.getAttribute('data-tab-id')
@@ -351,11 +413,12 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
 
   if (copyBtn) {
     copyBtn.addEventListener('click', async () => {
-      const urls = buildUrlListForCopy(visibleTabs)
+      const displayed = getDisplayedTabs()
+      const urls = buildUrlListForCopy(displayed)
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText(urls)
-          const count = visibleTabs.length
+          const count = displayed.length
           showMessage(`Copied ${count} URL${count !== 1 ? 's' : ''}`)
         } else {
           showMessage('Clipboard not available')
@@ -366,14 +429,15 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     })
   }
 
-  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Copy Records: full tab records as YAML to clipboard
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Copy Records: full tab records as YAML to clipboard (displayed list only)
   if (copyRecordsBtn) {
     copyRecordsBtn.addEventListener('click', async () => {
-      const yamlString = buildRecordsYamlForCopy(visibleTabs)
+      const displayed = getDisplayedTabs()
+      const yamlString = buildRecordsYamlForCopy(displayed)
       try {
         if (navigator.clipboard && navigator.clipboard.writeText) {
           await navigator.clipboard.writeText(yamlString)
-          const count = visibleTabs.length
+          const count = displayed.length
           showMessage(`Copied ${count} record${count !== 1 ? 's' : ''}`)
         } else {
           showMessage('Clipboard not available')
@@ -386,11 +450,12 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
 
   if (closeBtn) {
     closeBtn.addEventListener('click', async () => {
-      if (visibleTabs.length === 0) return
-      if (!confirm(`Close ${visibleTabs.length} tab${visibleTabs.length !== 1 ? 's' : ''}?`)) return
+      const displayed = getDisplayedTabs()
+      if (displayed.length === 0) return
+      if (!confirm(`Close ${displayed.length} tab${displayed.length !== 1 ? 's' : ''}?`)) return
       const api = (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null) || chromeTabs
       let closed = 0
-      for (const tab of visibleTabs) {
+      for (const tab of displayed) {
         try {
           await api.remove(tab.id)
           closed++
@@ -404,7 +469,8 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Close only displayed tabs that have at least one bookmark tag.
   if (closeTaggedBtn) {
     closeTaggedBtn.addEventListener('click', async () => {
-      const toClose = visibleTabs.filter((t) => Array.isArray(t.bookmarkTags) && t.bookmarkTags.length > 0)
+      const displayed = getDisplayedTabs()
+      const toClose = displayed.filter((t) => Array.isArray(t.bookmarkTags) && t.bookmarkTags.length > 0)
       if (toClose.length === 0) {
         showMessage('No tagged tabs to close')
         return
@@ -426,7 +492,8 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Close only displayed tabs that have no bookmark tags.
   if (closeUntaggedBtn) {
     closeUntaggedBtn.addEventListener('click', async () => {
-      const toClose = visibleTabs.filter((t) => !Array.isArray(t.bookmarkTags) || t.bookmarkTags.length === 0)
+      const displayed = getDisplayedTabs()
+      const toClose = displayed.filter((t) => !Array.isArray(t.bookmarkTags) || t.bookmarkTags.length === 0)
       if (toClose.length === 0) {
         showMessage('No untagged tabs to close')
         return
@@ -445,9 +512,10 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     })
   }
 
-  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Refresh: reload tab list so it reflects current windows/tabs.
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Refresh: clear hidden set and reload tab list so all tabs can reappear.
   if (refreshBtn) {
     refreshBtn.addEventListener('click', () => {
+      hiddenTabIds.clear()
       loadTabs()
     })
   }
@@ -466,11 +534,12 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
 
   if (setToReadBtn) {
     setToReadBtn.addEventListener('click', async () => {
-      if (visibleTabs.length === 0) return
+      const displayed = getDisplayedTabs()
+      if (displayed.length === 0) return
       const buttons = [setToReadBtn, clearToReadBtn, addTagsBtn].filter(Boolean)
       buttons.forEach(b => { b.disabled = true })
       let ok = 0
-      for (const tab of visibleTabs) {
+      for (const tab of displayed) {
         const tabUrl = (tab.url ?? '').trim()
         if (!tabUrl.startsWith('http://') && !tabUrl.startsWith('https://')) continue
         try {
@@ -507,11 +576,12 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
 
   if (clearToReadBtn) {
     clearToReadBtn.addEventListener('click', async () => {
-      if (visibleTabs.length === 0) return
+      const displayed = getDisplayedTabs()
+      if (displayed.length === 0) return
       const buttons = [setToReadBtn, clearToReadBtn, addTagsBtn].filter(Boolean)
       buttons.forEach(b => { b.disabled = true })
       let ok = 0
-      for (const tab of visibleTabs) {
+      for (const tab of displayed) {
         try {
           const reply = await sendMessage({ type: 'getCurrentBookmark', data: { url: tab.url, title: tab.title } })
           if (reply && reply.success && reply.data && !reply.data.blocked && reply.data.exists) {
@@ -532,11 +602,12 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     addTagsBtn.addEventListener('click', async () => {
       const newTags = parseTagsInput(tagsInput.value)
       if (newTags.length === 0) return
-      if (visibleTabs.length === 0) return
+      const displayed = getDisplayedTabs()
+      if (displayed.length === 0) return
       const buttons = [setToReadBtn, clearToReadBtn, addTagsBtn].filter(Boolean)
       buttons.forEach(b => { b.disabled = true })
       let ok = 0
-      for (const tab of visibleTabs) {
+      for (const tab of displayed) {
         const tabUrl = (tab.url ?? '').trim()
         if (!tabUrl.startsWith('http://') && !tabUrl.startsWith('https://')) continue
         try {

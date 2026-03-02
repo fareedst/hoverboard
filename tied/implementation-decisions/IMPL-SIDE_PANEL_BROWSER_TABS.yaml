@@ -19,11 +19,14 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - Close: confirm("Close N tabs?"); on confirm chrome.tabs.remove for each visible id; show success count
       - "Panel layout (same as Tags tree): #browserTabsPanel is the scroll container; first child .browser-tabs-above-list (flex: none) contains header, window scope, search scope, filter input, message, bookmark batch UI (tags input + Add tags, Set to-read, Clear to-read), actions (Copy URLs, Copy Records, Close); second child .browser-tabs-list-section (min-height: 100%, overflow-y: auto) contains #browserTabsList. The above block scrolls off so the list section fills visible height and scrolls its contents."
       - "Batch bookmark UI: section .browser-tabs-bookmark-actions with label Tags, input #browserTabsTagsInput (placeholder tag1, tag2), button Add tags; button Set to-read; button Clear to-read. All act on visibleTabs; only http(s) URLs are processed. Set to-read: getCurrentBookmark(url) per tab; if reply.data.exists and reply.data.url then saveBookmark({ ...reply.data, toread: 'yes' }) to preserve tags; else create with urlToSave (reply.data.url || tabUrl), description, toread: 'yes', tags: [], preferredBackend. Clear to-read: getCurrentBookmark(url) per tab; if reply.success and reply.data and not blocked and reply.data.exists then saveBookmark({ ...reply.data, toread: 'no' }); else skip. Add tags: parseTagsInput(input); for each tab getCurrentBookmark(url); guard reply.success and reply.data and reply.data.url and not blocked; if exists use buildAddTagsPayload(reply.data, newTags) and saveBookmark; else saveBookmark with urlToSave = reply.data.url || tabUrl, description, tags: newTags, preferredBackend. Reuse parseTagsInput, buildAddTagsPayload from bookmarks-table-filter.js. Service worker returns processMessage response as-is (no double-wrap) so reply.data.url and reply.data.exists are present in panel. Message handler getCurrentBookmark returns plain dataOut object (url, exists, tags, etc.) so fields survive structured clone."
-      - "Focus on click: In RENDER, window/tab id line is a button (or clickable element) with data-window-id and data-tab-id. On click (delegated on list): read windowId and tabId; if both valid numeric, call chrome.windows.update(windowId, { focused: true }) then chrome.tabs.update(tabId, { active: true }). Optional: inject chromeWindows in init for testability."
+      - "Focus on click: In block mode, window/tab id line is a button with class browser-tabs-card-ids-link and data-window-id, data-tab-id. In title or url mode, the displayed text (title or URL) is a button with class browser-tabs-card-focus-link and data-window-id, data-tab-id so clicking it focuses that window and tab. On click (delegated on list): if .browser-tabs-card-ids-link or .browser-tabs-card-focus-link, read windowId and tabId; if both valid numeric, call chrome.windows.update(windowId, { focused: true }) then chrome.tabs.update(tabId, { active: true }). Optional: inject chromeWindows in init for testability."
       - "Bookmark tags per row: After building allTabs (with referrers), for each tab with http(s) URL call getCurrentBookmark({ url, title }); merge reply.data.tags into tab (e.g. tab.bookmarkTags). In RENDER, display line Tags: tag1, tag2 or — when empty. Parallel or sequential getCurrentBookmark acceptable; batch getTagsForUrls optional later."
       - "Close tagged: Button (e.g. data-action=closeTabsWithTag) closes only visible tabs where Array.isArray(tab.bookmarkTags) && tab.bookmarkTags.length > 0; confirm then chrome.tabs.remove each; then loadTabs()."
       - "Close untagged: Button (e.g. data-action=closeTabsWithoutTag) closes only visible tabs where !tab.bookmarkTags || !Array.isArray(tab.bookmarkTags) || tab.bookmarkTags.length === 0; confirm then remove each; then loadTabs()."
       - "Refresh: Button (e.g. data-action=refreshTabs) on click calls loadTabs() to re-query tabs, referrers, bookmark tags, re-apply filter, re-render."
+      - "List display mode: DATA listDisplayMode = 'block' | 'title' | 'url' (default 'block'). UI: radio group (e.g. name=browserTabsListDisplayMode) Show: Title | URL | Block. RENDER: per card, if title show clickable title (button .browser-tabs-card-title .browser-tabs-card-focus-link with data-window-id, data-tab-id when ids valid) then remove icon after; if url show clickable URL (button .browser-tabs-card-url .browser-tabs-card-focus-link) then remove icon after; if block show full card (title, url, referrer, ids, tags) with remove icon before Tags. ON display-mode change: set listDisplayMode, renderList()."
+      - "Remove from display: DATA hiddenTabIds = Set of tab IDs. Display list = visibleTabs.filter(t => !hiddenTabIds.has(t.id)); getDisplayedTabs() returns this list for copy/close/batch actions. Every card has remove icon (data-action=removeFromDisplay, data-tab-id): in title/url mode after the text, in block mode before the Tags line. ON remove icon click: hiddenTabIds.add(tabId); renderList(). ON Refresh: hiddenTabIds.clear(); then loadTabs() so all tabs can reappear."
+      - "Recommended E2E (IMPL-SIDE_PANEL_BROWSER_TABS): open side panel and switch to Tabs tab; assert display mode control (Title | URL | Block) and list render; switch to Title mode and assert cards show only title and remove icon after text; switch to URL mode and assert cards show only URL and remove icon; switch back to Block and assert full card with remove before Tags; click remove on one card and assert it disappears from list; click Refresh and assert list repopulates (hidden set cleared); optionally in title or url mode click the focus link and assert active tab/window changes if test harness can verify focus."
   code_locations:
     files:
       - path: src/ui/side-panel/browser-tabs-panel.js
@@ -44,9 +47,9 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - name: buildRecordsYamlForCopy
         file: src/ui/side-panel/browser-tabs-panel.js
         description: Return YAML string of full tab records (id, windowId, title, url, referrer) for clipboard
-      - name: getVisibleTabIds
+      - name: getDisplayedTabs
         file: src/ui/side-panel/browser-tabs-panel.js
-        description: Return tab IDs of visible (filtered) list for close
+        description: Return visibleTabs filtered by !hiddenTabIds.has(id); used for copy, close, batch actions and render
       - name: GET_TAB_REFERRERS handler
         file: src/core/service-worker.js
         description: Handle getTabReferrers message; executeScript per tab; return { tabId: referrer }
@@ -103,11 +106,27 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
     # UI: window scope toggle; search-scope control (Tab info | Page text | Important tags, default Tab info); on searchScope change, if pageText or importantTags fetch that data and merge; search input; on input visibleTabs = filterBrowserTabs(allTabs, searchQuery, searchScope); re-render. Multi-row card per tab. Implements "search scope selection", "filter by selected scope".
     RENDER: FOR each tab in visibleTabs: display card with title, url, referrer, window id, tab id (clickable), bookmark tags (or —)
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # List display mode: user chooses what each list item shows (title only, URL only, or full block). Default block. In non-block mode text is clickable to focus window/tab; remove icon after text. Implements "choose how each tab is shown" and "clickable text in title/url mode".
+    DATA: listDisplayMode = 'block' | 'title' | 'url' (default 'block')
+    UI: radio group "Show: Title | URL | Block" (e.g. name=browserTabsListDisplayMode, value=title|url|block, default checked=block)
+    RENDER (per card): IF listDisplayMode === 'title': clickable title (button .browser-tabs-card-title .browser-tabs-card-focus-link with data-window-id, data-tab-id when valid) then remove icon; IF listDisplayMode === 'url': clickable URL (button .browser-tabs-card-url .browser-tabs-card-focus-link) then remove icon; IF listDisplayMode === 'block': full card (title, url, referrer, ids, tags) with remove icon before Tags line
+    ON display-mode change: listDisplayMode = selected value; renderList()
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # Remove from display: session-scoped hidden set; remove icon in all modes (after text in title/url, before Tags in block). Refresh clears. Implements "remove from displayed list".
+    DATA: hiddenTabIds = Set<number>
+    Display list = visibleTabs.filter(t => !hiddenTabIds.has(t.id)); getDisplayedTabs() returns this for copy/close/batch
+    RENDER: every card has remove icon (data-action=removeFromDisplay, data-tab-id); in title/url mode after the text, in block before Tags line
+    ON remove icon click: tabId = data-tab-id; hiddenTabIds.add(Number(tabId)); renderList()
+    ON Refresh button click: hiddenTabIds.clear(); loadTabs()
+
     ON windowScope toggle change: windowScope = selected; loadTabs()
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # Focus on click: window/tab id line is a button with data-window-id and data-tab-id. On click (delegated): read ids; if valid, chrome.windows.update(windowId, { focused: true }); chrome.tabs.update(tabId, { active: true }).
-    ON click .browser-tabs-card-ids-link: windowId = data-window-id; tabId = data-tab-id; IF both numeric: windows.update(windowId, { focused: true }); tabs.update(tabId, { active: true })
+    # Focus on click: in block mode ids line (.browser-tabs-card-ids-link); in title/url mode the text (.browser-tabs-card-focus-link). Both have data-window-id and data-tab-id. On click (delegated): read ids; if valid, chrome.windows.update(windowId, { focused: true }); chrome.tabs.update(tabId, { active: true }).
+    ON click .browser-tabs-card-ids-link OR .browser-tabs-card-focus-link: windowId = data-window-id; tabId = data-tab-id; IF both numeric: windows.update(windowId, { focused: true }); tabs.update(tabId, { active: true })
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
     # Bookmark tags: after allTabs built (referrers merged), FOR each tab WHERE url is http(s): reply = getCurrentBookmark({ url, title }); tab.bookmarkTags = reply?.data?.tags ?? []. In RENDER show "Tags: " + join(tab.bookmarkTags) or "—".
@@ -128,8 +147,8 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
     # Close tabs without tags: from visibleTabs take those with !tab.bookmarkTags || !Array.isArray(tab.bookmarkTags) || tab.bookmarkTags.length === 0; confirm; remove each; then loadTabs().
     ON Close untagged button click: toClose = visibleTabs.filter(t => !Array.isArray(t.bookmarkTags) || t.bookmarkTags.length === 0); IF toClose.length === 0 show message and return; IF NOT confirm("Close N tab(s) without tags?") return; FOR each tab in toClose: chrome.tabs.remove(tab.id); await loadTabs(); show "Closed N tabs"
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # Refresh: on click call loadTabs() (re-query tabs, referrers, bookmark tags, re-apply filter, re-render).
-    ON Refresh button click: loadTabs()
+    # Refresh: clear hidden set then loadTabs() so list repopulates and all tabs can reappear.
+    ON Refresh button click: hiddenTabIds.clear(); loadTabs()
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
     # Batch bookmark actions: Set to-read (fetch then merge to preserve tags; create if missing), Clear to-read (skip if no bookmark), Add tags (create if missing; use reply.data.url). Only http(s) URLs. SW returns handler response as-is; handler getCurrentBookmark returns plain dataOut.
@@ -147,4 +166,4 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
     last_updated:
       date: '2026-03-01'
       author: AI Agent
-      reason: Close tagged/untagged/refresh buttons; essence_pseudocode and implementation_approach for new actions
+      reason: Clickable title/URL in non-block mode (focus link); remove icon after text in title/url, before Tags in block; getDisplayedTabs; essence_pseudocode and details synced with code and tests

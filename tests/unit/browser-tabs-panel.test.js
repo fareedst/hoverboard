@@ -1136,3 +1136,317 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] close tag
     expect(queryCount).toBeGreaterThan(before)
   })
 })
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * List display mode: Title | URL | Block (default). Each card shows only title, only URL, or full block with remove icon.
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] list display mode (title | url | block)', () => {
+  beforeEach(() => {
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = global.chrome.runtime || {}
+    const prev = global.chrome.runtime.sendMessage
+    global.chrome.runtime.sendMessage = function (msg, cb) {
+      if (msg.type === 'getCurrentBookmark' && typeof cb === 'function') {
+        cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        return
+      }
+      if (typeof prev === 'function') return prev.call(this, msg, cb)
+      if (typeof cb === 'function') cb({})
+    }
+  })
+
+  function makePanelDocWithDisplayMode () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const radioTitle = document.createElement('input')
+    radioTitle.type = 'radio'
+    radioTitle.name = 'browserTabsListDisplayMode'
+    radioTitle.value = 'title'
+    const radioUrl = document.createElement('input')
+    radioUrl.type = 'radio'
+    radioUrl.name = 'browserTabsListDisplayMode'
+    radioUrl.value = 'url'
+    const radioBlock = document.createElement('input')
+    radioBlock.type = 'radio'
+    radioBlock.name = 'browserTabsListDisplayMode'
+    radioBlock.value = 'block'
+    radioBlock.checked = true
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(radioTitle)
+    panel.appendChild(radioUrl)
+    panel.appendChild(radioBlock)
+    panel.appendChild(listEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      return null
+    }
+    panel.querySelectorAll = (sel) => {
+      if (sel === 'input[name="browserTabsListDisplayMode"]') return [radioTitle, radioUrl, radioBlock]
+      if (sel === 'input[name="browserTabsWindowScope"]') return []
+      if (sel === 'input[name="browserTabsSearchScope"]') return []
+      return []
+    }
+    return {
+      doc: {
+        getElementById (id) { return id === 'browserTabsPanel' ? panel : null },
+        createElement: document.createElement.bind(document)
+      },
+      listEl,
+      radioTitle,
+      radioUrl,
+      radioBlock,
+      panel
+    }
+  }
+
+  test('default block mode: card has title, url, referrer, ids, tags and remove control', async () => {
+    const { doc, listEl } = makePanelDocWithDisplayMode()
+    const mockTabs = {
+      query: async () => [{ id: 1, windowId: 10, title: 'My Tab', url: 'https://example.com', referrer: '' }]
+    }
+    const getReferrers = async () => ({ 1: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    const card = listEl.querySelector('.browser-tabs-card')
+    expect(card).toBeTruthy()
+    expect(card.querySelector('.browser-tabs-card-title')?.textContent?.trim()).toBe('My Tab')
+    expect(card.querySelector('.browser-tabs-card-url')?.textContent?.trim()).toBe('https://example.com')
+    expect(card.querySelector('.browser-tabs-card-referrer')).toBeTruthy()
+    expect(card.querySelector('.browser-tabs-card-ids')).toBeTruthy()
+    expect(card.querySelector('.browser-tabs-card-tags')).toBeTruthy()
+    expect(card.querySelector('[data-action="removeFromDisplay"]')).toBeTruthy()
+  })
+
+  test('display mode title: card contains only .browser-tabs-card-title', async () => {
+    const { doc, listEl, radioTitle } = makePanelDocWithDisplayMode()
+    const mockTabs = {
+      query: async () => [{ id: 1, windowId: 10, title: 'Only Title', url: 'https://x.com', referrer: '' }]
+    }
+    const getReferrers = async () => ({ 1: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    radioTitle.checked = true
+    radioTitle.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise(r => setTimeout(r, 20))
+    const card = listEl.querySelector('.browser-tabs-card')
+    expect(card).toBeTruthy()
+    expect(card.querySelector('.browser-tabs-card-title')?.textContent?.trim()).toBe('Only Title')
+    expect(card.querySelector('.browser-tabs-card-url')).toBeFalsy()
+    expect(card.querySelector('.browser-tabs-card-referrer')).toBeFalsy()
+    expect(card.querySelector('.browser-tabs-card-tags')).toBeFalsy()
+  })
+
+  test('display mode url: card contains only .browser-tabs-card-url', async () => {
+    const { doc, listEl, radioUrl } = makePanelDocWithDisplayMode()
+    const mockTabs = {
+      query: async () => [{ id: 2, windowId: 20, title: 'Any', url: 'https://url-only.example.com', referrer: '' }]
+    }
+    const getReferrers = async () => ({ 2: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    radioUrl.checked = true
+    radioUrl.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise(r => setTimeout(r, 20))
+    const card = listEl.querySelector('.browser-tabs-card')
+    expect(card).toBeTruthy()
+    expect(card.querySelector('.browser-tabs-card-url')?.textContent?.trim()).toBe('https://url-only.example.com')
+    expect(card.querySelector('.browser-tabs-card-title')).toBeFalsy()
+    expect(card.querySelector('.browser-tabs-card-tags')).toBeFalsy()
+  })
+
+  test('switching display mode re-renders list with correct content', async () => {
+    const { doc, listEl, radioTitle, radioBlock } = makePanelDocWithDisplayMode()
+    const mockTabs = {
+      query: async () => [{ id: 1, windowId: 1, title: 'Tab', url: 'https://t.com', referrer: '' }]
+    }
+    const getReferrers = async () => ({ 1: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    expect(listEl.querySelector('.browser-tabs-card-tags')).toBeTruthy()
+    radioTitle.checked = true
+    radioTitle.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise(r => setTimeout(r, 20))
+    expect(listEl.querySelector('.browser-tabs-card-tags')).toBeFalsy()
+    radioBlock.checked = true
+    radioBlock.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise(r => setTimeout(r, 20))
+    expect(listEl.querySelector('.browser-tabs-card-tags')).toBeTruthy()
+  })
+
+  test('in title mode, text is clickable (focus link) and remove icon appears after text', async () => {
+    const { doc, listEl, radioTitle } = makePanelDocWithDisplayMode()
+    const mockTabs = {
+      query: async () => [{ id: 42, windowId: 10, title: 'Click Me', url: 'https://x.com', referrer: '' }]
+    }
+    const getReferrers = async () => ({ 42: '' })
+    const windowsUpdate = jest.fn().mockResolvedValue(undefined)
+    const tabsUpdate = jest.fn().mockResolvedValue(undefined)
+    const mockWindows = { update: windowsUpdate }
+    const mockTabsWithUpdate = { ...mockTabs, update: tabsUpdate }
+    initBrowserTabsTab(doc, mockTabsWithUpdate, null, getReferrers, mockWindows)
+    await new Promise(r => setTimeout(r, 100))
+    radioTitle.checked = true
+    radioTitle.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise(r => setTimeout(r, 20))
+    const card = listEl.querySelector('.browser-tabs-card')
+    const focusLink = card.querySelector('.browser-tabs-card-focus-link')
+    const removeBtn = card.querySelector('[data-action="removeFromDisplay"]')
+    expect(focusLink).toBeTruthy()
+    expect(focusLink.getAttribute('data-window-id')).toBe('10')
+    expect(focusLink.getAttribute('data-tab-id')).toBe('42')
+    expect(removeBtn).toBeTruthy()
+    focusLink.click()
+    expect(windowsUpdate).toHaveBeenCalledWith(10, { focused: true })
+    expect(tabsUpdate).toHaveBeenCalledWith(42, { active: true })
+  })
+
+  test('in url mode, text is clickable and remove icon appears after text', async () => {
+    const { doc, listEl, radioUrl } = makePanelDocWithDisplayMode()
+    const mockTabs = {
+      query: async () => [{ id: 99, windowId: 5, title: 'T', url: 'https://url.example.com', referrer: '' }]
+    }
+    const getReferrers = async () => ({ 99: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    radioUrl.checked = true
+    radioUrl.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise(r => setTimeout(r, 20))
+    const card = listEl.querySelector('.browser-tabs-card')
+    const focusLink = card.querySelector('.browser-tabs-card-focus-link')
+    const removeBtn = card.querySelector('[data-action="removeFromDisplay"]')
+    expect(focusLink).toBeTruthy()
+    expect(focusLink.textContent?.trim()).toBe('https://url.example.com')
+    expect(removeBtn).toBeTruthy()
+  })
+
+  test('in url mode, clicking URL focus link calls windows.update and tabs.update', async () => {
+    const { doc, listEl, radioUrl } = makePanelDocWithDisplayMode()
+    const windowsUpdate = jest.fn().mockResolvedValue(undefined)
+    const tabsUpdate = jest.fn().mockResolvedValue(undefined)
+    const mockTabs = {
+      query: async () => [{ id: 88, windowId: 12, title: 'U', url: 'https://focus-url.com', referrer: '' }],
+      update: tabsUpdate
+    }
+    const mockWindows = { update: windowsUpdate }
+    const getReferrers = async () => ({ 88: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers, mockWindows)
+    await new Promise(r => setTimeout(r, 100))
+    radioUrl.checked = true
+    radioUrl.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise(r => setTimeout(r, 20))
+    const focusLink = listEl.querySelector('.browser-tabs-card-focus-link')
+    expect(focusLink).toBeTruthy()
+    focusLink.click()
+    expect(windowsUpdate).toHaveBeenCalledWith(12, { focused: true })
+    expect(tabsUpdate).toHaveBeenCalledWith(88, { active: true })
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Remove from display: icon in block view removes card from list; Refresh clears hidden set and tabs reappear.
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] remove from display', () => {
+  beforeEach(() => {
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = global.chrome.runtime || {}
+    const prev = global.chrome.runtime.sendMessage
+    global.chrome.runtime.sendMessage = function (msg, cb) {
+      if (msg.type === 'getCurrentBookmark' && typeof cb === 'function') {
+        cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        return
+      }
+      if (typeof prev === 'function') return prev.call(this, msg, cb)
+      if (typeof cb === 'function') cb({})
+    }
+  })
+
+  function makePanelDocWithRemoveAndRefresh () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const radioBlock = document.createElement('input')
+    radioBlock.type = 'radio'
+    radioBlock.name = 'browserTabsListDisplayMode'
+    radioBlock.value = 'block'
+    radioBlock.checked = true
+    const refreshBtn = document.createElement('button')
+    refreshBtn.setAttribute('data-action', 'refreshTabs')
+    refreshBtn.id = 'browserTabsRefreshBtn'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(radioBlock)
+    panel.appendChild(refreshBtn)
+    panel.appendChild(listEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '[data-action="refreshTabs"]' || sel === '#browserTabsRefreshBtn') return refreshBtn
+      return null
+    }
+    panel.querySelectorAll = (sel) => {
+      if (sel === 'input[name="browserTabsListDisplayMode"]') return [radioBlock]
+      if (sel === 'input[name="browserTabsWindowScope"]') return []
+      if (sel === 'input[name="browserTabsSearchScope"]') return []
+      return []
+    }
+    return {
+      doc: {
+        getElementById (id) { return id === 'browserTabsPanel' ? panel : null },
+        createElement: document.createElement.bind(document)
+      },
+      listEl,
+      refreshBtn,
+      panel
+    }
+  }
+
+  test('clicking remove icon removes that card from the list', async () => {
+    const { doc, listEl } = makePanelDocWithRemoveAndRefresh()
+    const tabList = [
+      { id: 101, windowId: 1, title: 'First', url: 'https://first.com', referrer: '' },
+      { id: 102, windowId: 1, title: 'Second', url: 'https://second.com', referrer: '' }
+    ]
+    const mockTabs = { query: async () => tabList }
+    const getReferrers = async () => ({ 101: '', 102: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    expect(listEl.querySelectorAll('.browser-tabs-card').length).toBe(2)
+    const firstCard = listEl.querySelector('.browser-tabs-card')
+    const removeBtn = firstCard.querySelector('[data-action="removeFromDisplay"]')
+    expect(removeBtn).toBeTruthy()
+    expect(removeBtn.getAttribute('data-tab-id')).toBe('101')
+    removeBtn.click()
+    await new Promise(r => setTimeout(r, 20))
+    expect(listEl.querySelectorAll('.browser-tabs-card').length).toBe(1)
+    expect(listEl.querySelector('.browser-tabs-card-title')?.textContent?.trim()).toBe('Second')
+  })
+
+  test('after Refresh previously hidden tab reappears', async () => {
+    const { doc, listEl, refreshBtn } = makePanelDocWithRemoveAndRefresh()
+    const tabList = [
+      { id: 201, windowId: 2, title: 'A', url: 'https://a.com', referrer: '' },
+      { id: 202, windowId: 2, title: 'B', url: 'https://b.com', referrer: '' }
+    ]
+    let queryCount = 0
+    const mockTabs = {
+      query: async () => {
+        queryCount++
+        return tabList
+      }
+    }
+    const getReferrers = async () => ({ 201: '', 202: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    expect(listEl.querySelectorAll('.browser-tabs-card').length).toBe(2)
+    const removeBtn = listEl.querySelector('.browser-tabs-card [data-action="removeFromDisplay"]')
+    removeBtn.click()
+    await new Promise(r => setTimeout(r, 20))
+    expect(listEl.querySelectorAll('.browser-tabs-card').length).toBe(1)
+    refreshBtn.click()
+    await new Promise(r => setTimeout(r, 150))
+    expect(listEl.querySelectorAll('.browser-tabs-card').length).toBe(2)
+  })
+})

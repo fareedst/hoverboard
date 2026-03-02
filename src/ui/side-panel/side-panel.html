@@ -134,6 +134,11 @@
           <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsSearchScope" value="pageText" id="browserTabsSearchScopePageText"> Page text</label>
           <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsSearchScope" value="importantTags" id="browserTabsSearchScopeImportantTags"> Important tags</label>
         </div>
+        <div class="browser-tabs-list-display-mode" role="group" aria-label="Show each tab as">
+          <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsListDisplayMode" value="title" id="browserTabsListDisplayTitle"> Title</label>
+          <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsListDisplayMode" value="url" id="browserTabsListDisplayUrl"> URL</label>
+          <label class="browser-tabs-scope-label"><input type="radio" name="browserTabsListDisplayMode" value="block" id="browserTabsListDisplayBlock" checked> Block</label>
+        </div>
         <input type="text" id="browserTabsFilterInput" class="browser-tabs-filter-input" placeholder="Filter by title, URL, referrer…" aria-label="Filter tabs">
       </section>
       <div id="browserTabsMessage" class="browser-tabs-message hidden" aria-live="polite"></div>
