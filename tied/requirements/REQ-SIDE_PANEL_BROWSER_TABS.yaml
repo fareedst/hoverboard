@@ -26,6 +26,9 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     - criterion: A "Set to-read" button sets the to-read flag for all visible (filtered) tabs' bookmarks; if a URL has no bookmark, one is created. When a bookmark already exists, existing tags and other fields are preserved (fetch-then-merge).
     - criterion: A "Clear to-read" button clears the to-read flag for all visible tabs' bookmarks; if a URL has no bookmark, it is skipped (no bookmark is created).
     - criterion: A "Tags" textbox and "Add tags" button add the entered tag(s) to all visible tabs' bookmarks (comma-separated); if a URL has no bookmark, one is created with those tags.
+    - criterion: A button closes only the displayed tabs that have at least one bookmark tag (after user confirmation) and shows a success count.
+    - criterion: A button closes only the displayed tabs that have no bookmark tags (after user confirmation) and shows a success count.
+    - criterion: A Refresh button reloads the tab list (and window/tabs used) so the list reflects current state (e.g. after closing tabs outside the panel).
   validation_criteria:
     - method: Unit tests
       coverage: 'filterBrowserTabs: empty query returns all; scope-aware filter (tabInfo/pageText/importantTags); build URL list and buildRecordsYamlForCopy; Copy Records button; GET_TAB_REFERRERS and GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; panel merges referrer and pageText/importantTags from SW; batch set/clear to-read and add tags; clickable window/tab id (focus window and tab on click); display bookmark tags per tab'
@@ -57,4 +60,4 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     last_updated:
       date: '2026-03-01'
       author: AI Agent
-      reason: Clickable window/tab id to focus; display bookmark tags per tab
+      reason: Close tagged/untagged buttons; Refresh button; satisfaction criteria

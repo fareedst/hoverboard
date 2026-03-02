@@ -988,3 +988,151 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] search sc
     }
   })
 })
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Close tagged / close untagged / refresh buttons.
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] close tagged, close untagged, refresh', () => {
+  beforeEach(() => {
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = global.chrome.runtime || {}
+    const prev = global.chrome.runtime.sendMessage
+    global.chrome.runtime.sendMessage = function (msg, cb) {
+      if (msg.type === 'getCurrentBookmark' && typeof cb === 'function') {
+        const url = msg.data?.url ?? ''
+        const tags = url === 'https://tagged.com' ? ['work'] : []
+        cb({ success: true, data: { url, tags } })
+        return
+      }
+      if (typeof prev === 'function') return prev.call(this, msg, cb)
+      if (typeof cb === 'function') cb({})
+    }
+  })
+
+  function makePanelDocWithCloseAndRefresh () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const messageEl = document.createElement('div')
+    messageEl.id = 'browserTabsMessage'
+    const closeTaggedBtn = document.createElement('button')
+    closeTaggedBtn.setAttribute('data-action', 'closeTabsWithTag')
+    closeTaggedBtn.id = 'browserTabsCloseTaggedBtn'
+    const closeUntaggedBtn = document.createElement('button')
+    closeUntaggedBtn.setAttribute('data-action', 'closeTabsWithoutTag')
+    closeUntaggedBtn.id = 'browserTabsCloseUntaggedBtn'
+    const refreshBtn = document.createElement('button')
+    refreshBtn.setAttribute('data-action', 'refreshTabs')
+    refreshBtn.id = 'browserTabsRefreshBtn'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(messageEl)
+    panel.appendChild(closeTaggedBtn)
+    panel.appendChild(closeUntaggedBtn)
+    panel.appendChild(refreshBtn)
+    panel.appendChild(listEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '#browserTabsMessage') return messageEl
+      if (sel === '[data-action="closeTabsWithTag"]' || sel === '#browserTabsCloseTaggedBtn') return closeTaggedBtn
+      if (sel === '[data-action="closeTabsWithoutTag"]' || sel === '#browserTabsCloseUntaggedBtn') return closeUntaggedBtn
+      if (sel === '[data-action="refreshTabs"]' || sel === '#browserTabsRefreshBtn') return refreshBtn
+      if (sel === '#browserTabsFilterInput' || sel === '[data-action="copyUrls"]' || sel === '[data-action="closeTabs"]') return null
+      return null
+    }
+    panel.querySelectorAll = () => []
+    return {
+      doc: {
+        getElementById (id) { return id === 'browserTabsPanel' ? panel : null },
+        createElement: document.createElement.bind(document)
+      },
+      listEl,
+      messageEl,
+      closeTaggedBtn,
+      closeUntaggedBtn,
+      refreshBtn,
+      panel
+    }
+  }
+
+  test('Close tagged button closes only tabs with non-empty bookmarkTags [REQ-SIDE_PANEL_BROWSER_TABS]', async () => {
+    const { doc, listEl, closeTaggedBtn, messageEl } = makePanelDocWithCloseAndRefresh()
+    const tabList = [
+      { id: 10, title: 'Tagged', url: 'https://tagged.com' },
+      { id: 20, title: 'Untagged', url: 'https://untagged.com' }
+    ]
+    const removedIds = []
+    const mockTabs = {
+      query: async () => tabList,
+      remove: async (id) => { removedIds.push(id) }
+    }
+    const getReferrers = async () => ({ 10: '', 20: '' })
+    global.chrome.tabs = mockTabs
+    const confirmSpy = jest.spyOn(global, 'confirm').mockImplementation(() => true)
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 250))
+      expect(listEl.querySelectorAll('.browser-tabs-card').length).toBe(2)
+      const taggedCard = listEl.querySelector('.browser-tabs-card-tags')
+      expect(taggedCard && taggedCard.textContent).toContain('work')
+      removedIds.length = 0
+      closeTaggedBtn.click()
+      await new Promise(r => setTimeout(r, 350))
+      expect(confirmSpy).toHaveBeenCalled()
+      expect(removedIds).toEqual([10])
+      expect(messageEl.textContent).toContain('Closed 1 tab')
+    } finally {
+      confirmSpy.mockRestore()
+      delete global.chrome.tabs
+    }
+  })
+
+  test('Close untagged button closes only tabs with no or empty bookmarkTags [REQ-SIDE_PANEL_BROWSER_TABS]', async () => {
+    const { doc, listEl, closeUntaggedBtn, messageEl } = makePanelDocWithCloseAndRefresh()
+    const tabList = [
+      { id: 10, title: 'Tagged', url: 'https://tagged.com' },
+      { id: 20, title: 'Untagged', url: 'https://untagged.com' }
+    ]
+    const removedIds = []
+    const mockTabs = {
+      query: async () => tabList,
+      remove: async (id) => { removedIds.push(id) }
+    }
+    const getReferrers = async () => ({ 10: '', 20: '' })
+    global.chrome.tabs = mockTabs
+    const confirmSpy = jest.spyOn(global, 'confirm').mockImplementation(() => true)
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 250))
+      expect(listEl.querySelectorAll('.browser-tabs-card').length).toBe(2)
+      removedIds.length = 0
+      closeUntaggedBtn.click()
+      await new Promise(r => setTimeout(r, 350))
+      expect(confirmSpy).toHaveBeenCalled()
+      expect(removedIds).toEqual([20])
+      expect(messageEl.textContent).toContain('Closed 1 tab')
+    } finally {
+      confirmSpy.mockRestore()
+      delete global.chrome.tabs
+    }
+  })
+
+  test('Refresh button calls loadTabs (query invoked again) [REQ-SIDE_PANEL_BROWSER_TABS]', async () => {
+    const { doc, refreshBtn } = makePanelDocWithCloseAndRefresh()
+    let queryCount = 0
+    const mockTabs = {
+      query: async () => {
+        queryCount++
+        return [{ id: 1, title: 'T', url: 'https://x.com' }]
+      }
+    }
+    const getReferrers = async () => ({ 1: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 150))
+    expect(queryCount).toBeGreaterThanOrEqual(1)
+    const before = queryCount
+    refreshBtn.click()
+    await new Promise(r => setTimeout(r, 150))
+    expect(queryCount).toBeGreaterThan(before)
+  })
+})

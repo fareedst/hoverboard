@@ -104,6 +104,9 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const copyBtn = panel.querySelector('[data-action="copyUrls"]') || panel.querySelector('#browserTabsCopyBtn')
   const copyRecordsBtn = panel.querySelector('[data-action="copyRecords"]') || panel.querySelector('#browserTabsCopyRecordsBtn')
   const closeBtn = panel.querySelector('[data-action="closeTabs"]') || panel.querySelector('#browserTabsCloseBtn')
+  const closeTaggedBtn = panel.querySelector('[data-action="closeTabsWithTag"]') || panel.querySelector('#browserTabsCloseTaggedBtn')
+  const closeUntaggedBtn = panel.querySelector('[data-action="closeTabsWithoutTag"]') || panel.querySelector('#browserTabsCloseUntaggedBtn')
+  const refreshBtn = panel.querySelector('[data-action="refreshTabs"]') || panel.querySelector('#browserTabsRefreshBtn')
   const messageEl = panel.querySelector('#browserTabsMessage')
   const scopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsWindowScope"]')
   const searchScopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsSearchScope"]')
@@ -395,6 +398,57 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       }
       showMessage(`Closed ${closed} tab${closed !== 1 ? 's' : ''}`)
       await loadTabs()
+    })
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Close only displayed tabs that have at least one bookmark tag.
+  if (closeTaggedBtn) {
+    closeTaggedBtn.addEventListener('click', async () => {
+      const toClose = visibleTabs.filter((t) => Array.isArray(t.bookmarkTags) && t.bookmarkTags.length > 0)
+      if (toClose.length === 0) {
+        showMessage('No tagged tabs to close')
+        return
+      }
+      if (!confirm(`Close ${toClose.length} tab${toClose.length !== 1 ? 's' : ''} with tag(s)?`)) return
+      const api = (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null) || chromeTabs
+      let closed = 0
+      for (const tab of toClose) {
+        try {
+          await api.remove(tab.id)
+          closed++
+        } catch (_) { /* skip */ }
+      }
+      showMessage(`Closed ${closed} tab${closed !== 1 ? 's' : ''}`)
+      await loadTabs()
+    })
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Close only displayed tabs that have no bookmark tags.
+  if (closeUntaggedBtn) {
+    closeUntaggedBtn.addEventListener('click', async () => {
+      const toClose = visibleTabs.filter((t) => !Array.isArray(t.bookmarkTags) || t.bookmarkTags.length === 0)
+      if (toClose.length === 0) {
+        showMessage('No untagged tabs to close')
+        return
+      }
+      if (!confirm(`Close ${toClose.length} tab${toClose.length !== 1 ? 's' : ''} without tags?`)) return
+      const api = (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null) || chromeTabs
+      let closed = 0
+      for (const tab of toClose) {
+        try {
+          await api.remove(tab.id)
+          closed++
+        } catch (_) { /* skip */ }
+      }
+      showMessage(`Closed ${closed} tab${closed !== 1 ? 's' : ''}`)
+      await loadTabs()
+    })
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Refresh: reload tab list so it reflects current windows/tabs.
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', () => {
+      loadTabs()
     })
   }
 

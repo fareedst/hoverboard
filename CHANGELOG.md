@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Side panel Tabs tab: Close tagged, Close untagged, Refresh** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS], [PROC-TIED_DEV_CYCLE]) – In the side panel **Tabs** tab: **Close tagged** closes only the displayed tabs that have at least one bookmark tag (after confirmation); **Close untagged** closes only the displayed tabs that have no bookmark tags (after confirmation); **Refresh** reloads the tab list (and window/tabs used) so the list reflects current state when tabs are closed outside the panel. Unit tests: close tagged/untagged filter by `bookmarkTags`, refresh invokes loadTabs. TIED: REQ satisfaction criteria and IMPL essence_pseudocode updated.
+
 ### Fixed
 
 - **Side panel Tabs: Add tags on URL without bookmark reported "0 tabs modified"** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) – The service worker was double-wrapping the getCurrentBookmark handler response as `{ success: true, data: response }`, so the panel received the bookmark at `reply.data.data` and `reply.data.url` was undefined. The service worker now returns the handler response as-is. The message handler’s getCurrentBookmark returns a plain `dataOut` object (url, exists, tags, etc.) so these fields survive structured clone to the panel. Add tags (and set to-read) now correctly see `reply.data.url` and can create or update bookmarks.
