@@ -484,7 +484,7 @@ More detailed description if needed.
 Fixes #123
 ```
 
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+Full format, types, and list of scopes are in [CONTRIBUTING.md](../../CONTRIBUTING.md#commit-message-guidelines). Subject: 50 characters max; body/footer lines: 100 characters max. Types include: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`, `build`, `ci`, `perf`.
 
 ### 🧪 Pre-commit Hooks
 

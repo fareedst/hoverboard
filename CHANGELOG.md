@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Commit message guidelines and project scopes** – CONTRIBUTING.md now includes a full Commit Message Guidelines section (Angular-style format: type(scope): subject, body, footer). Lists supported scopes (core, ui, features, shared, config, offscreen, safari, tied, docs, tests, build, ci, changelog), types (build, ci, chore, docs, feat, fix, perf, refactor, style, test), revert format, and a TIED note for optional REQ/ARCH/IMPL references. Development guide links to CONTRIBUTING for the full format and scopes.
+
 - **Side panel Tabs tab: Close tagged, Close untagged, Refresh** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS], [PROC-TIED_DEV_CYCLE]) – In the side panel **Tabs** tab: **Close tagged** closes only the displayed tabs that have at least one bookmark tag (after confirmation); **Close untagged** closes only the displayed tabs that have no bookmark tags (after confirmation); **Refresh** reloads the tab list (and window/tabs used) so the list reflects current state when tabs are closed outside the panel. Unit tests: close tagged/untagged filter by `bookmarkTags`, refresh invokes loadTabs. TIED: REQ satisfaction criteria and IMPL essence_pseudocode updated.
 
 ### Fixed

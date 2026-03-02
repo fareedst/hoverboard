@@ -446,7 +446,7 @@ Active
    - Update README.md and CHANGELOG.md for user- and release-facing changes made in this session.
 
 9. **Write commit message**
-   - Write the commit message summarizing the session’s changes; where useful, reference the main REQ/ARCH/IMPL tokens touched.
+   - Write the commit message summarizing the session’s changes; where useful, reference the main REQ/ARCH/IMPL tokens touched per CONTRIBUTING.md ("## Commit Message Guidelines")
 
 ### Artifacts & Metrics
 - **Artifacts**: Updated REQ/ARCH/IMPL (including `essence_pseudocode` and block comments), tests, managed source code, README.md, CHANGELOG.md, commit.

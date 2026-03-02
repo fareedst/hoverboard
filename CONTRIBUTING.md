@@ -13,6 +13,7 @@ Thank you for your interest in contributing to Hoverboard! This document provide
 - [Testing](#testing)
 - [Cross-Browser Compatibility](#cross-browser-compatibility)
 - [Documentation](#documentation)
+- [Commit Message Guidelines](#commit-message-guidelines)
 
 ## Code of Conduct
 
@@ -289,10 +290,113 @@ npm run test:watch
 
 ### Git
 
-- Use conventional commit messages
-- Keep commits focused
-- Write descriptive commit messages
-- Use present tense ("Add feature" not "Added feature")
+See [Commit Message Guidelines](#commit-message-guidelines) for format, types, and list of scopes. Keep commits focused and descriptive.
+
+## Commit Message Guidelines
+
+We use a consistent format for git commit messages so that history is readable and, if needed, changelogs can be generated from commits.
+
+### Commit Message Format
+
+Each commit message has a **header**, an optional **body**, and an optional **footer**. The header uses a **type**, an optional **scope**, and a **subject**:
+
+```
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+```
+
+Keep the **subject** (header line) to 50 characters or fewer so it stays readable in logs and UIs. Keep body and footer lines to 100 characters or fewer.
+
+The footer may contain a [closing reference to an issue](https://help.github.com/articles/closing-issues-via-commit-messages/) (e.g. `Closes #123`).
+
+**Examples:**
+
+```
+docs(changelog): update changelog to v1.5.0
+```
+
+```
+fix(ui): correct popup theme when system preference changes
+
+Popup now re-reads prefers-color-scheme on visibility change.
+Fixes #42
+```
+
+### Revert
+
+To revert a previous commit, start the header with `revert: ` followed by the original commit header. In the body write: `This reverts commit <hash>.` (replace `<hash>` with the SHA of the reverted commit.)
+
+### Type
+
+Use exactly one of:
+
+| Type | Use for |
+|------|--------|
+| **build** | Build system or external dependencies (e.g. scripts, manifest, tooling) |
+| **ci** | CI configuration and scripts (e.g. `.github/workflows/`) |
+| **chore** | Repo maintenance, no code/docs change |
+| **docs** | Documentation only |
+| **feat** | A new feature |
+| **fix** | A bug fix |
+| **perf** | A change that improves performance |
+| **refactor** | A change that neither fixes a bug nor adds a feature |
+| **style** | Formatting, whitespace, semicolons; no meaning change |
+| **test** | Adding or correcting tests |
+
+### Scope
+
+The scope is the name of the area affected (as someone reading history or a changelog would understand it). It is optional but recommended.
+
+**Supported scopes:**
+
+| Scope | Area |
+|-------|------|
+| **core** | Service worker, message handling, badge manager (`src/core/`) |
+| **ui** | Popup, options, side-panel, bookmarks-table, components, styles (`src/ui/`) |
+| **features** | Content scripts, overlay, storage, AI, pinboard, search, tagging (`src/features/`) |
+| **shared** | Shared utilities, logger, ErrorHandler, message-schemas (`src/shared/`) |
+| **config** | Config manager and config service (`src/config/`) |
+| **offscreen** | Offscreen file-bookmark I/O (`src/offscreen/`) |
+| **safari** | Safari App Extension (`safari/`) |
+| **tied** | TIED methodology: requirements, architecture, implementation, semantic tokens (`tied/`, `semantic-tokens.yaml`) |
+| **docs** | Documentation outside `tied/` (`docs/`) |
+| **tests** | Test files, harnesses, Playwright E2E |
+| **build** | Build scripts, manifest, tooling (`scripts/`, `manifest.json`) |
+| **ci** | CI configuration (e.g. `.github/workflows/`) |
+| **changelog** | Release notes in `CHANGELOG.md` |
+
+**Exceptions:**
+
+- **packaging**: Use only when a change affects package/output layout across the repo (e.g. manifest or build layout for all outputs). Otherwise use **build**.
+- **Empty scope**: Allowed for `style`, `test`, `refactor`, or `docs` when the change spans many areas (e.g. `style: normalize line endings`).
+
+**Recommended for future use** (add as the codebase grows):
+
+- **popup**, **side-panel**, **options** – when UI work is often scoped to a single surface.
+- **storage**, **content**, **ai** – when features are split more finely than a single `features` scope.
+
+### Subject
+
+- Keep to **50 characters or fewer** (the full header line: `type(scope): subject`).
+- Use imperative, present tense: "change" not "changed" nor "changes".
+- Do not capitalize the first letter.
+- No period at the end.
+
+### Body
+
+Use imperative, present tense. Include motivation for the change and how it differs from previous behavior when it helps.
+
+### Footer
+
+- **Breaking changes**: Start with `BREAKING CHANGE:` (with a space or two newlines). The rest of the message describes the break.
+- **Issues**: Use `Closes #123` or `Fixes #123` to link and close issues.
+
+### TIED and commit messages
+
+When a commit implements or touches a specific requirement or decision, you may reference TIED tokens in the body or footer (e.g. `REQ-SIDE_PANEL_TAGS_TREE`, `ARCH-*`, `IMPL-*`). This is optional but encouraged for traceability. Commit format is defined here; for token discipline in code and docs see [AGENTS.md](AGENTS.md) and `ai-principles.md`.
 
 ## Release Process
 

@@ -413,6 +413,7 @@ This project follows the TIED methodology for comprehensive requirements trackin
 - [Extension Messaging Protocols](docs/architecture/extension-messaging-protocols.md) - Message types, channels (SW, content, offscreen, popup), and response contracts; [ARCH-MESSAGE_HANDLING], [IMPL-MESSAGE_HANDLING]
 - [Chrome Extension Architecture](docs/architecture/chrome-extension-architecture.md) - Core architectural decisions and implementation strategy
 - [Development Guide](docs/development/development-guide.md) - Development setup and guidelines
+- [CONTRIBUTING](CONTRIBUTING.md) - Contributor guidelines and commit message format (types, scopes)
 - [Feature Tracking Matrix](docs/development/feature-tracking-matrix.md) - Feature implementation status
 
 ### Chrome Extension Development
