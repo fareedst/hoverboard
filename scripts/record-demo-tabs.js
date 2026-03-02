@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-DEMO_OVERLAY]
  * Standalone script: launch extension with software rendering (SwiftShader), run Tabs-tab flow,
  * capture screenshot sequence, assemble GIF via ffmpeg two-pass palette.
  * Run: node scripts/record-demo-tabs.js
@@ -73,25 +73,35 @@ async function main () {
     await page.screenshot({ path: p })
   }
 
-  async function setOverlay (action, achievement) {
-    await page.evaluate(({ action, achievement }) => {
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Overlay at top; larger font; five text classes with colors
+  const OVERLAY_CLASSES = {
+    intro: { color: '#e0e0e0' },
+    navigation: { color: '#42a5f5' },
+    state: { color: '#ffa726' },
+    action: { color: '#26c6da' },
+    result: { color: '#66bb6a' },
+  }
+
+  async function setOverlay (action, achievement, textClass = 'intro') {
+    const { color } = OVERLAY_CLASSES[textClass] || OVERLAY_CLASSES.intro
+    await page.evaluate(({ action, achievement, color }) => {
       let el = document.getElementById('__demo_overlay__')
       if (!el) {
         el = document.createElement('div')
         el.id = '__demo_overlay__'
         el.style.cssText = [
-          'position:fixed', 'bottom:0', 'left:0', 'right:0',
+          'position:fixed', 'top:0', 'left:0', 'right:0',
           'background:rgba(0,0,0,0.72)', 'color:#fff',
-          'font-family:system-ui,sans-serif', 'font-size:12px',
+          'font-family:system-ui,sans-serif', 'font-size:18px',
           'line-height:1.4', 'padding:8px 12px',
           'z-index:2147483647', 'pointer-events:none',
         ].join(';')
         document.body.appendChild(el)
       }
       el.innerHTML =
-        `<strong>${action}</strong><br>` +
-        `<span style="opacity:0.8">${achievement}</span>`
-    }, { action, achievement })
+        `<strong style="color:${color}">${action}</strong><br>` +
+        `<span style="opacity:0.8;color:${color}">${achievement}</span>`
+    }, { action, achievement, color })
   }
 
   async function removeOverlay () {
@@ -101,17 +111,28 @@ async function main () {
     })
   }
 
-  // Step 1: Load side panel; hold on Bookmark tab
+  // Step 1: Load side panel; hold on Bookmark tab (3 frames)
   await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
   await page.waitForLoadState('domcontentloaded')
   await page.waitForTimeout(1500)
-  await setOverlay('Opening the side panel', 'Hoverboard: bookmarks, tabs & search')
+  await setOverlay('Opening the side panel', 'Hoverboard: bookmarks, tabs & search', 'intro')
+  await snap()
+  await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
   await snap()
 
-  // Step 2: Click Tabs tab; wait for list init
-  await setOverlay('Switching to the Tabs tab', 'Lists all open browser tabs')
+  // Step 2: Panel ready (3 frames)
+  await setOverlay('Side panel open', 'Bookmark tab visible; switch to Tabs next', 'intro')
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+
+  // Step 3: Click Tabs tab; wait for list init (4 frames)
+  await setOverlay('Switching to the Tabs tab', 'Lists all open browser tabs', 'navigation')
   await page.locator('.side-panel-tab[data-tab="browserTabs"]').click()
   await snap()
   await page.waitForTimeout(400)
@@ -121,8 +142,8 @@ async function main () {
   await page.waitForTimeout(400)
   await snap()
 
-  // Step 3: List populated; hold for viewer
-  await setOverlay('Tab list loaded', 'Each row: title, URL and referrer')
+  // Step 4: List loading (3 frames)
+  await setOverlay('Tabs tab selected', 'Loading tab list…', 'navigation')
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
@@ -130,9 +151,28 @@ async function main () {
   await page.waitForTimeout(400)
   await snap()
 
-  // Step 4: Fill filter with "playwright"; wait
-  await setOverlay("Filtering: typing 'playwright'", 'Only matching tabs remain visible')
+  // Step 5: List populated (4 frames)
+  await setOverlay('Tab list loaded', 'Each row: title, URL and referrer', 'state')
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+
+  // Step 6: Before filter (2 frames)
+  await setOverlay('Focusing filter', 'Type to narrow the list', 'state')
   const filterInput = page.locator('#browserTabsFilterInput')
+  if (await filterInput.isVisible()) await filterInput.focus().catch(() => {})
+  await page.waitForTimeout(300)
+  await snap()
+  await page.waitForTimeout(300)
+  await snap()
+
+  // Step 7: Type filter (4 frames)
+  await setOverlay("Filtering: typing 'playwright'", 'Only matching tabs remain visible', 'action')
   if (await filterInput.isVisible()) {
     await filterInput.fill('playwright')
     await page.waitForTimeout(300)
@@ -141,10 +181,21 @@ async function main () {
     await snap()
     await page.waitForTimeout(300)
     await snap()
+    await page.waitForTimeout(300)
+    await snap()
   }
 
-  // Step 5: Click Copy Records; wait for feedback
-  await setOverlay('Clicking Copy Records', 'Exports visible tabs as YAML to clipboard')
+  // Step 8: Filter applied (3 frames)
+  await setOverlay('Filter applied', 'List shows matching tabs only', 'state')
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+
+  // Step 9: Copy Records (4 frames)
+  await setOverlay('Clicking Copy Records', 'Exports visible tabs as YAML to clipboard', 'action')
   await page.locator('[data-action="copyRecords"], #browserTabsCopyRecordsBtn').click()
   await page.waitForTimeout(300)
   await snap()
@@ -152,9 +203,30 @@ async function main () {
   await snap()
   await page.waitForTimeout(300)
   await snap()
+  await page.waitForTimeout(300)
+  await snap()
 
-  // Step 6: Success message visible; hold
-  await setOverlay('Export complete', 'YAML records copied — ready to paste')
+  // Step 10: Copy Records success (3 frames)
+  await setOverlay('Export complete (YAML)', 'YAML records copied — ready to paste', 'result')
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+
+  // Step 11: Copy URLs (3 frames)
+  await setOverlay('Clicking Copy URLs', 'Exports visible tab URLs to clipboard', 'action')
+  await page.locator('[data-action="copyUrls"], #browserTabsCopyBtn').click()
+  await page.waitForTimeout(300)
+  await snap()
+  await page.waitForTimeout(300)
+  await snap()
+  await page.waitForTimeout(300)
+  await snap()
+
+  // Step 12: Copy URLs success (3 frames)
+  await setOverlay('Export complete (URLs)', 'URLs copied — ready to paste', 'result')
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
@@ -170,15 +242,15 @@ async function main () {
     process.exit(1)
   }
 
-  // Two-pass ffmpeg: palettegen then paletteuse
+  // Two-pass ffmpeg: palettegen then paletteuse (1 fps = 1/4 speed)
   const palettePath = path.join(rootDir, 'test-results', 'demo-palette.png')
   const framesPattern = path.join(framesDir, 'frame-%04d.png')
   execSync(
-    `ffmpeg -framerate 4 -i "${framesPattern}" -vf "fps=4,scale=400:-1:flags=lanczos,palettegen=max_colors=128" -y "${palettePath}"`,
+    `ffmpeg -framerate 1 -i "${framesPattern}" -vf "fps=1,scale=400:-1:flags=lanczos,palettegen=max_colors=128" -y "${palettePath}"`,
     { cwd: rootDir, stdio: 'inherit' }
   )
   execSync(
-    `ffmpeg -framerate 4 -i "${framesPattern}" -i "${palettePath}" -filter_complex "fps=4,scale=400:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:diff_mode=rectangle" -loop 0 -y "${gifOut}"`,
+    `ffmpeg -framerate 1 -i "${framesPattern}" -i "${palettePath}" -filter_complex "fps=1,scale=400:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:diff_mode=rectangle" -loop 0 -y "${gifOut}"`,
     { cwd: rootDir, stdio: 'inherit' }
   )
 

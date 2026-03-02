@@ -1,0 +1,63 @@
+IMPL-DEMO_OVERLAY:
+  name: Demo Recording Overlay
+  status: Active
+  cross_references:
+    - PROC-DEMO_RECORDING
+    - REQ-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_BROWSER_TABS
+  rationale:
+    why: Implements PROC-DEMO_RECORDING overlay styling for Tabs demo; position, text size, and class-based colors so key-frame annotations are visible and semantically distinct.
+    problems_solved:
+      - Overlay at bottom obscures content
+      - Single text style for all steps
+      - No visual distinction between action vs result
+    benefits:
+      - Overlay at top; larger text; five text classes (intro, navigation, state, action, result) with distinct colors
+  implementation_approach:
+    summary: Overlay fixed at top of viewport; font 18-20px; setOverlay(action, achievement, textClass); five classes with assigned colors; 12 steps mapped to classes.
+    details:
+      - Position: fixed at top (top:0), full width; background rgba(0,0,0,0.72).
+      - Font: system-ui, 18px or 20px; line-height 1.4; padding 8px 12px.
+      - setOverlay(action, achievement, textClass): create or reuse #__demo_overlay__; apply class color to action (strong) and achievement (span, muted); textClass one of intro, navigation, state, action, result.
+      - OVERLAY_CLASSES: intro #e0e0e0, navigation #42a5f5, state #ffa726, action #26c6da, result #66bb6a.
+      - Step mapping: 1-2 intro; 3-4 navigation; 5-6,8 state; 7,9,11 action; 10,12 result.
+  code_locations:
+    files:
+      - path: scripts/record-demo-tabs.js
+        description: setOverlay and removeOverlay; OVERLAY_CLASSES map; step-to-class mapping
+  traceability:
+    architecture: []
+    requirements:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    tests: []
+    code_annotations:
+      - IMPL-DEMO_OVERLAY
+      - PROC-DEMO_RECORDING
+  related_decisions:
+    depends_on:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+    supersedes: []
+    see_also:
+      - PROC-DEMO_RECORDING
+  essence_pseudocode: |
+    # [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS]
+    # Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-tabs.js only.
+
+    setOverlay(action, achievement, textClass):
+      el = getElementById('__demo_overlay__') or create and append div#__demo_overlay__
+      base style: position fixed; top 0; left 0; right 0; background rgba(0,0,0,0.72); font-size 18px; font-family system-ui; z-index max; pointer-events none
+      color = OVERLAY_CLASSES[textClass].color  // intro #e0e0e0, navigation #42a5f5, state #ffa726, action #26c6da, result #66bb6a
+      el.innerHTML = <strong style="color">action</strong><br><span style="opacity 0.8; color">achievement</span>
+
+    removeOverlay(): remove #__demo_overlay__ if present
+
+    # Step-to-class mapping (12 steps): 1,2 intro; 3,4 navigation; 5,6,8 state; 7,9,11 action; 10,12 result.
+  test_coverage_note: Demo overlay styling verified by running record-demo-tabs.js and inspecting output GIF; no unit tests (standalone recording script).
+  metadata:
+    created:
+      date: "2026-03-02"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-02"
+      author: AI Agent
+      reason: Initial creation

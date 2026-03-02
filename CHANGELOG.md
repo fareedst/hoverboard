@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Demo overlay: top position, larger text, five text classes with colors** ([PROC-DEMO_RECORDING], [IMPL-DEMO_OVERLAY], [PROC-TIED_DEV_CYCLE]) – The Tabs demo recording overlay is now at the **top** of the window (was bottom), uses **larger text** (18px), and five **overlay text classes** with distinct colors: intro (neutral), navigation (blue), state (amber), action (cyan), result (green). Each of the 12 demo steps is mapped to a class. GIF re-generated at [docs/demo-tabs-export.gif](docs/demo-tabs-export.gif). TIED: [IMPL-DEMO_OVERLAY] added; [PROC-DEMO_RECORDING] updated in `tied/processes.md`.
+
 - **Side panel Tabs tab: always use Important tag sources textbox** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) – The "Use custom DOM sources" checkbox next to the Important tag sources textbox has been removed. The textbox list is always used when the search scope is **Important elements**; an empty textbox falls back to the default list. Label for the textbox is now "Important tag sources". TIED: REQ/ARCH/IMPL updated; E2E snapshot no longer includes `hasImportantElementsCheckbox`.
 
 ### Added

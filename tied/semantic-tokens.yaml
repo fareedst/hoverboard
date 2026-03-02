@@ -2691,3 +2691,17 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
   metadata:
     registered: "2026-02-28T00:00:00.000Z"
     last_updated: "2026-02-28T00:00:00.000Z"
+IMPL-DEMO_OVERLAY:
+  type: IMPL
+  name: Demo Recording Overlay
+  status: Active
+  description: Overlay at top, larger font, five text classes (intro, navigation, state, action, result) with colors for Tabs demo key-frame annotations
+  cross_references:
+    - PROC-DEMO_RECORDING
+    - REQ-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_BROWSER_TABS
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-DEMO_OVERLAY.yaml
+  metadata:
+    registered: "2026-03-02"
+    last_updated: "2026-03-02"

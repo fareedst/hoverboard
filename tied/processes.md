@@ -473,10 +473,10 @@ Active
 ### Core Activities
 1. Use extension E2E fixture; enable video for the run (e.g. dedicated config with `video: 'on'`).
 2. In spec or script: open side-panel.html → switch to Tabs tab → wait for list → optionally filter → Copy Records or Copy URLs.
-3. Optionally inject a DOM overlay `<div>` into the side-panel page before each key-frame group to annotate what the user is doing (action) and what is produced (achievement); remove after the last frame.
+3. Optionally inject a DOM overlay `<div>` into the side-panel page before each key-frame group to annotate what the user is doing (action) and what is produced (achievement); remove after the last frame. Overlay position: top of window; text size: 18–20px; text classes (intro, navigation, state, action, result) with distinct colors per [IMPL-DEMO_OVERLAY].
 4. Run once; obtain WebM from test-results.
 5. Convert WebM to GIF (e.g. `ffmpeg -i video.webm -vf "fps=8,scale=640:-1:flags=lanczos" -c:v gif output.gif`).
-6. Place GIF in docs/ or docs/assets/; reference in README/CHANGELOG.
+6. Place GIF in docs/ or docs/assets/; reference in README/CHANGELOG. The Tabs demo script uses 12 steps with overlays and 1 fps output for a slower, clearer loop.
 
 ### Artifacts & Metrics
 - **Artifacts**: Demo spec (or script), WebM recording, GIF asset, README/CHANGELOG mention.
