@@ -1576,6 +1576,33 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] list disp
     expect(card.querySelector('.browser-tabs-card-ids')).toBeTruthy()
     expect(card.querySelector('.browser-tabs-card-tags')).toBeTruthy()
     expect(card.querySelector('[data-action="removeFromDisplay"]')).toBeTruthy()
+    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Per-row close-tab button before window id
+    const closeTabBtn = card.querySelector('[data-action="closeTab"]')
+    expect(closeTabBtn).toBeTruthy()
+    expect(closeTabBtn.getAttribute('data-tab-id')).toBe('1')
+    expect(closeTabBtn.getAttribute('title')).toBe('Close tab')
+  })
+
+  test('clicking close-tab button calls chrome.tabs.remove with tab id [IMPL-SIDE_PANEL_BROWSER_TABS]', async () => {
+    const { doc, listEl } = makePanelDocWithDisplayMode()
+    const removeMock = jest.fn().mockResolvedValue(undefined)
+    const mockTabs = {
+      query: async () => [
+        { id: 101, windowId: 1, title: 'First', url: 'https://first.com', referrer: '' },
+        { id: 102, windowId: 1, title: 'Second', url: 'https://second.com', referrer: '' }
+      ],
+      remove: removeMock
+    }
+    const getReferrers = async () => ({ 101: '', 102: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    const firstCard = listEl.querySelector('.browser-tabs-card')
+    const closeTabBtn = firstCard.querySelector('[data-action="closeTab"]')
+    expect(closeTabBtn).toBeTruthy()
+    closeTabBtn.click()
+    await new Promise(r => setTimeout(r, 50))
+    expect(removeMock).toHaveBeenCalledWith(101)
+    expect(removeMock).toHaveBeenCalledTimes(1)
   })
 
   test('display mode title: card contains only .browser-tabs-card-title', async () => {
@@ -1677,6 +1704,26 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] list disp
     const removeBtn = card.querySelector('[data-action="removeFromDisplay"]')
     expect(focusLink).toBeTruthy()
     expect(focusLink.textContent?.trim()).toBe('https://url.example.com')
+    expect(removeBtn).toBeTruthy()
+  })
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Title mode: card has close-tab button before focus link; remove unchanged after.
+  test('in title mode card has close-tab button with correct data-tab-id [IMPL-SIDE_PANEL_BROWSER_TABS]', async () => {
+    const { doc, listEl, radioTitle } = makePanelDocWithDisplayMode()
+    const mockTabs = {
+      query: async () => [{ id: 7, windowId: 1, title: 'Title Only', url: 'https://t.com', referrer: '' }]
+    }
+    const getReferrers = async () => ({ 7: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    radioTitle.checked = true
+    radioTitle.dispatchEvent(new Event('change', { bubbles: true }))
+    await new Promise(r => setTimeout(r, 20))
+    const card = listEl.querySelector('.browser-tabs-card')
+    const closeTabBtn = card.querySelector('[data-action="closeTab"]')
+    const removeBtn = card.querySelector('[data-action="removeFromDisplay"]')
+    expect(closeTabBtn).toBeTruthy()
+    expect(closeTabBtn.getAttribute('data-tab-id')).toBe('7')
     expect(removeBtn).toBeTruthy()
   })
 

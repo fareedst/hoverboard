@@ -22,6 +22,7 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
     - criterion: When the side panel is open, both the Bookmark and Tags tree tabs update to display the DB record for the current tab's URL when the active browser tab changes or completes (same trigger as badge); the Tags tree tab's tag selector and tree reflect the current tab's bookmark tags
     - criterion: When the user switches to the Tags tree tab, the tag selector checked state matches the current bookmark's tags (from the Bookmark tab), and the tree displays only bookmarks that have at least one of those tags
     - criterion: Tab content fills the vertical space available in the side panel; the panel uses full panel width and height (not popup dimensions such as 350px width or 450px max-height)
+    - criterion: 'Side panel header shows extension version and compile time (UTC YYYY-MM-DD HH:mm) after the title (e.g. element #side-panel-version).'
     - criterion: 'Tags tree tab scroll behavior: the content above the list (inside #tagsTreePanel > div) can scroll off the page so the list section (#tagsTreePanel > section) can consume the full visible height'
   validation_criteria:
     - method: Manual verification
@@ -40,6 +41,7 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
     tests:
       - tests/unit/ui-manager-scoped-root.test.js
       - tests/unit/side-panel-tabs.test.js
+      - tests/unit/side-panel-initial-tab-init.test.js
       - tests/playwright/extension-messaging.spec.js
     code_annotations:
       - REQ-SIDE_PANEL_POPUP_EQUIVALENT
@@ -52,6 +54,6 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
   detail_file: requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml
   metadata:
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
-      reason: Add Tags tree tab scroll criterion (above-list div scrolls off so list fills height)
+      reason: Add header version/compile-time criterion; add side-panel-initial-tab-init.test.js to traceability

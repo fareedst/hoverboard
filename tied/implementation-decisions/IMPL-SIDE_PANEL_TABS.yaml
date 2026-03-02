@@ -1,6 +1,5 @@
 # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
 # Implementation: Tab bar and switching; init Bookmark tab with createPopup(container); init Tags tree tab with tags-tree load/render; persist selected tab.
-
 IMPL-SIDE_PANEL_TABS:
   name: Side Panel Tabs Implementation
   status: Active
@@ -17,16 +16,20 @@ IMPL-SIDE_PANEL_TABS:
     summary: side-panel.html has tab bar and two panels (#bookmarkPanel, #tagsTreePanel). side-panel.js on load reads persisted tab (chrome.storage.local), shows that panel, binds tab clicks. On first "Bookmark" select: init UISystem, createPopup({ container: bookmarkPanel }), controller.loadInitialData(), setupEventListeners. On "Tags tree" select: call initTagsTreeTab() (extracted from tags-tree.js). Persist tab on switch. Build: bundle side-panel.js so popup stack and tags-tree modules are inlined.
     details:
       - manifest side_panel.default_path → side-panel.html
+      - 'Side panel header: after h1 "Hoverboard", show version (from chrome.runtime.getManifest().version) and compile time UTC (YYYY-MM-DD HH:mm) from build-time constant; element #side-panel-version.'
       - Tab buttons: data-tab="bookmark", data-tab="tagsTree", data-tab="browserTabs"; click handler switches panel, saves to storage, runs init for that tab if not yet inited
       - Storage key e.g. hoverboard_sidepanel_active_tab; values "bookmark" | "tagsTree" | "browserTabs"
       - Bookmark init runs once (guard); Tags tree init can re-run on each show or once
       - On browser tab change (onActivated/onUpdated): if controller exists always call refreshPopupData() so currentPin is for new tab; then refresh Tags tree tab when visible via refreshTagsTreeTabIfVisible (setSelectedTagsFromCurrentBookmark)
+      - 'Recommended E2E (IMPL-SIDE_PANEL_TABS): after loading side panel, assert header contains #side-panel-version with non-empty text matching pattern v* · YYYY-MM-DD HH:mm (version and compile time UTC).'
   code_locations:
     files:
       - path: src/ui/side-panel/side-panel.html
-        description: Tab bar and two panel roots
+        description: Tab bar, #side-panel-version, and panel roots
       - path: src/ui/side-panel/side-panel.js
-        description: Tab switching, persist, init Bookmark and Tags tree tabs
+        description: Tab switching, persist, initSidePanelVersion, init Bookmark and Tags tree tabs
+      - path: src/ui/side-panel/build-info.js
+        description: BUILD_TIME_UTC (generated at build by scripts/build.js)
       - path: src/ui/side-panel/tags-tree.js
         description: Export initTagsTreeTab for side-panel.js
       - path: manifest.json
@@ -52,10 +55,16 @@ IMPL-SIDE_PANEL_TABS:
         description: Call setSelectedTagsFromCurrentBookmark(controller tags) when Tags tree tab is visible and inited (on browser tab change)
       - name: runInitialTabInit
         file: src/ui/side-panel/side-panel.js
-        description: "On panel load: when activeTab is tagsTree, await initBookmarkTab then init Tags tree with getTagsTreeInitOptions(controller); else initTabIfNeeded(activeTab). Exported for tests."
+        description: 'On panel load: when activeTab is tagsTree, await initBookmarkTab then init Tags tree with getTagsTreeInitOptions(controller); else initTabIfNeeded(activeTab). Exported for tests.'
       - name: getTagsTreeInitOptions
         file: src/ui/side-panel/side-panel-tab-state.js
-        description: "Pure helper: given controller, returns currentBookmarkTags for initTagsTreeTab (Tags tree on open shows current URL record)."
+        description: 'Pure helper: given controller, returns currentBookmarkTags for initTagsTreeTab (Tags tree on open shows current URL record).'
+      - name: setSidePanelVersion
+        file: src/ui/side-panel/side-panel.js
+        description: Set #side-panel-version text to "v" + version + " · " + buildTimeUtc; no-op when element missing. Exported for tests.
+      - name: initSidePanelVersion
+        file: src/ui/side-panel/side-panel.js
+        description: Called on DOMContentLoaded; reads getManifest().version and BUILD_TIME_UTC, calls setSidePanelVersion().
   traceability:
     architecture:
       - ARCH-SIDE_PANEL_TABS
@@ -129,6 +138,10 @@ IMPL-SIDE_PANEL_TABS:
       ELSE IF activeTab === "browserTabs": #browserTabsPanel visible, #bookmarkPanel hidden, #tagsTreePanel hidden
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS]
+    # Side panel header version and compile time: after h1 "Hoverboard", element #side-panel-version shows "v" + manifest.version + " · " + BUILD_TIME_UTC (build-time constant, format YYYY-MM-DD HH:mm UTC). setSidePanelVersion(version?, buildTimeUtc?): if element #side-panel-version missing RETURN (no-op, no throw); v = version ?? getManifest()?.version ?? ""; t = buildTimeUtc ?? BUILD_TIME_UTC; el.textContent = v ? "v" + v + " · " + t : t. initSidePanelVersion() called on DOMContentLoaded; guard for missing chrome.runtime (e.g. tests).
+    ON panel page load (after bindTabButtons): initSidePanelVersion() → setSidePanelVersion()  // no-op when #side-panel-version missing
+
+    # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS]
     # Layout: side panel page and tab content fill vertical space. Popup CSS is loaded and sets body max-height/width; we override when page is side panel so tab content uses full panel size. Implements "tab content fills the vertical space available".
     CSS #side-panel-page (body): display flex; flex-direction column; height 100vh; margin 0; max-height none; width 100%
     CSS .side-panel-content: flex 1 1 0; min-height 0; overflow auto; padding 0.5rem 0.75rem; display flex; flex-direction column
@@ -158,9 +171,9 @@ IMPL-SIDE_PANEL_TABS:
       initBrowserTabsTab()  // load tabs, referrers; render #browserTabsPanel list; bind search input, Copy button, Close button
   metadata:
     created:
-      date: '2026-02-25'
+      date: "2026-02-25"
       author: AI Agent
     last_updated:
-      date: '2026-02-26'
+      date: "2026-03-02"
       author: AI Agent
-      reason: Align essence_pseudocode with standard (AWAIT vocabulary)
+      reason: Side panel header version and compile time (UTC) after h1; BUILD_TIME_UTC from build-info

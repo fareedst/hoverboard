@@ -16,6 +16,7 @@ import {
   shouldRefreshBookmarkTabOnTabChange,
   shouldRefreshTagsTreeTabOnTabChange
 } from './side-panel-tab-state.js'
+import { BUILD_TIME_UTC } from './build-info.js'
 import { initTagsTreeTab, setSelectedTagsFromCurrentBookmark } from './tags-tree.js'
 import { initBrowserTabsTab } from './browser-tabs-panel.js'
 import { init, popup } from '../index.js'
@@ -177,6 +178,26 @@ function bindTabButtons () {
   })
 }
 
+/**
+ * [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
+ * Set side panel header version and compile time. Called on load; exported for tests.
+ * @param {string} [version] - From getManifest().version when omitted we read from chrome.runtime.getManifest()
+ * @param {string} [buildTimeUtc] - BUILD_TIME_UTC when omitted we use imported constant
+ */
+export function setSidePanelVersion (version, buildTimeUtc) {
+  const el = document.getElementById('side-panel-version')
+  // [IMPL-SIDE_PANEL_TABS] No-op when #side-panel-version missing (e.g. tests); no throw.
+  if (!el) return
+  const v = version ?? (typeof chrome !== 'undefined' && chrome.runtime?.getManifest?.()?.version) ?? ''
+  const t = buildTimeUtc ?? BUILD_TIME_UTC
+  el.textContent = v ? `v${v} · ${t}` : t
+}
+
+/** [IMPL-SIDE_PANEL_TABS] Init header version and compile time on panel load. */
+function initSidePanelVersion () {
+  setSidePanelVersion()
+}
+
 async function loadPersistedTab () {
   if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local) return getDefaultTab()
   return new Promise((resolve) => {
@@ -284,6 +305,7 @@ export function resetTagsTreeTabInitedForTest () {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
+  initSidePanelVersion()
   activeTab = await loadPersistedTab()
   showPanel()
   bindTabButtons()

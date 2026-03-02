@@ -9,45 +9,46 @@ REQ-SIDE_PANEL_BROWSER_TABS:
       - No single view of all tabs in current or all windows with URL and referrer
       - No quick way to copy URLs or close filtered tabs from the panel
     benefits:
-      - 'Third side-panel tab Tabs; list from current window (default) or all windows; per-tab title, URL, referrer in multi-row format; case-insensitive filter; copy URLs with count; copy records as YAML (id, windowId, title, url, referrer) with count; close visible tabs with confirmation and count'
+      - Third side-panel tab Tabs; list from current window (default) or all windows; per-tab title, URL, referrer in multi-row format; case-insensitive filter; copy URLs with count; copy records as YAML (id, windowId, title, url, referrer) with count; close visible tabs with confirmation and count
   satisfaction_criteria:
-    - criterion: 'Side panel has a tab named Tabs that displays browser tabs from the current window (default) or all windows'
-    - criterion: 'For each tab the panel shows title, URL, and page referrer (multi-row per tab); referrer is best-effort and may be empty'
-    - criterion: 'A search box filters the list by matching any of title, URL, or referrer (case-insensitive)'
+    - criterion: Side panel has a tab named Tabs that displays browser tabs from the current window (default) or all windows
+    - criterion: For each tab the panel shows title, URL, and page referrer (multi-row per tab); referrer is best-effort and may be empty
+    - criterion: A search box filters the list by matching any of title, URL, or referrer (case-insensitive)
     - criterion: 'User can select search scope: Tab info (title, URL, referrer), Page text (body), or Important tags (alt, h1–h3, meta description, etc.)'
-    - criterion: 'When "Page text" is selected, the filter matches against page body text for each tab'
-    - criterion: 'When "Important tags" is selected, the filter matches against concatenated important-tags text (alt, h1–h3, meta description, og:title, etc.) per tab'
-    - criterion: 'A button copies the URLs of all visible (filtered) tabs to the clipboard and shows a success count'
-    - criterion: 'A button copies the full list of visible (filtered) tab records as YAML (including id, windowId, title, url, referrer) to the clipboard and shows a success count'
-    - criterion: 'A button closes all visible (filtered) tabs after user confirmation and shows a success count'
-    - criterion: 'Each tab row displays window id and tab id (for debugging and identification).'
-    - criterion: 'The window id and tab id line in each tab row is clickable; when clicked, the specified window and tab are focused and made visible.'
-    - criterion: 'Each tab row displays the bookmark tags for that tab''s URL (from the same source as the popup); if there is no bookmark or no tags, show nothing or a neutral placeholder (e.g. —).'
-    - criterion: 'A "Set to-read" button sets the to-read flag for all visible (filtered) tabs'' bookmarks; if a URL has no bookmark, one is created. When a bookmark already exists, existing tags and other fields are preserved (fetch-then-merge).'
-    - criterion: 'A "Clear to-read" button clears the to-read flag for all visible tabs'' bookmarks; if a URL has no bookmark, it is skipped (no bookmark is created).'
-    - criterion: 'A "Tags" textbox and "Add tags" button add the entered tag(s) to all visible tabs'' bookmarks (comma-separated); if a URL has no bookmark, one is created with those tags.'
-    - criterion: 'A button closes only the displayed tabs that have at least one bookmark tag (after user confirmation) and shows a success count.'
-    - criterion: 'A button closes only the displayed tabs that have no bookmark tags (after user confirmation) and shows a success count.'
-    - criterion: 'A Refresh button reloads the tab list (and window/tabs used) so the list reflects current state (e.g. after closing tabs outside the panel).'
+    - criterion: When "Page text" is selected, the filter matches against page body text for each tab
+    - criterion: When "Important tags" is selected, the filter matches against concatenated important-tags text (alt, h1–h3, meta description, og:title, etc.) per tab
+    - criterion: A button copies the URLs of all visible (filtered) tabs to the clipboard and shows a success count
+    - criterion: A button copies the full list of visible (filtered) tab records as YAML (including id, windowId, title, url, referrer) to the clipboard and shows a success count
+    - criterion: A button closes all visible (filtered) tabs after user confirmation and shows a success count
+    - criterion: Each tab row displays window id and tab id (for debugging and identification).
+    - criterion: The window id and tab id line in each tab row is clickable; when clicked, the specified window and tab are focused and made visible.
+    - criterion: Each tab row displays the bookmark tags for that tab's URL (from the same source as the popup); if there is no bookmark or no tags, show nothing or a neutral placeholder (e.g. —).
+    - criterion: A "Set to-read" button sets the to-read flag for all visible (filtered) tabs' bookmarks; if a URL has no bookmark, one is created. When a bookmark already exists, existing tags and other fields are preserved (fetch-then-merge).
+    - criterion: A "Clear to-read" button clears the to-read flag for all visible tabs' bookmarks; if a URL has no bookmark, it is skipped (no bookmark is created).
+    - criterion: A "Tags" textbox and "Add tags" button add the entered tag(s) to all visible tabs' bookmarks (comma-separated); if a URL has no bookmark, one is created with those tags.
+    - criterion: A button closes only the displayed tabs that have at least one bookmark tag (after user confirmation) and shows a success count.
+    - criterion: A button closes only the displayed tabs that have no bookmark tags (after user confirmation) and shows a success count.
+    - criterion: A Refresh button reloads the tab list (and window/tabs used) so the list reflects current state (e.g. after closing tabs outside the panel).
     - criterion: 'User can choose how each tab is shown in the list: Title only, URL only, or Block (full card: title, URL, referrer, window/tab ids, Tags). Default is Block.'
-    - criterion: 'In Block view, each card has a control (e.g. icon) before the Tags line that removes that tab from the displayed list for the session; Refresh clears the hidden set and reloads so all tabs can reappear.'
-    - criterion: 'When display format is Title only or URL only (not Block), the displayed text is clickable to switch to that window and tab (same focus behavior as the ids line in Block); the remove icon appears after the text (in Block it remains before the Tags line).'
-    - criterion: 'UI controls in the Tabs panel are grouped into logical sections (Scope, Filter & display, Batch bookmark, List actions, Window actions) so their purpose is scannable.'
-    - criterion: 'Each interactive control in the Tabs panel has a short tooltip (title and where helpful aria-label) explaining its use.'
-    - criterion: 'Each tab in the display list shows the tab''s favicon (in block view before the title; in Title/URL view before the title or URL text); fallback when favicon is missing.'
-    - criterion: 'A text control (Important tag sources) allows editing the list of DOM sources used for "Important elements" search (e.g. title, meta description, og:title, h1, h2, h3, img alt, a title); this list is always used when that search scope is selected (empty textbox falls back to the default list); the value is persisted and applied on subsequent searches and refreshes.'
-    - criterion: 'A button "Gather into this window" moves all visible (displayed) tabs into the window that contains the side panel.'
-    - criterion: 'A button "One window per tab" (or Distribute) moves each visible tab into its own window; tabs that are already the only tab in their window are left unchanged.'
-    - criterion: 'The Title / URL / Block control (Show each tab as) is placed immediately above the tab list (in the list section), not in the filter section.'
+    - criterion: In Block view, each card has a control (e.g. icon) before the Tags line that removes that tab from the displayed list for the session; Refresh clears the hidden set and reloads so all tabs can reappear.
+    - criterion: Each tab row has a control to close that single tab (placed before the window/tab id line in block view, before the focus link in title/url view); the remove-from-display control remains after the tab id or after the link.
+    - criterion: When display format is Title only or URL only (not Block), the displayed text is clickable to switch to that window and tab (same focus behavior as the ids line in Block); the remove icon appears after the text (in Block it remains before the Tags line).
+    - criterion: UI controls in the Tabs panel are grouped into logical sections (Scope, Filter & display, Batch bookmark, List actions, Window actions) so their purpose is scannable.
+    - criterion: Each interactive control in the Tabs panel has a short tooltip (title and where helpful aria-label) explaining its use.
+    - criterion: Each tab in the display list shows the tab's favicon (in block view before the title; in Title/URL view before the title or URL text); fallback when favicon is missing.
+    - criterion: A text control (Important tag sources) allows editing the list of DOM sources used for "Important elements" search (e.g. title, meta description, og:title, h1, h2, h3, img alt, a title); this list is always used when that search scope is selected (empty textbox falls back to the default list); the value is persisted and applied on subsequent searches and refreshes.
+    - criterion: A button "Gather into this window" moves all visible (displayed) tabs into the window that contains the side panel.
+    - criterion: A button "One window per tab" (or Distribute) moves each visible tab into its own window; tabs that are already the only tab in their window are left unchanged.
+    - criterion: The Title / URL / Block control (Show each tab as) is placed immediately above the tab list (in the list section), not in the filter section.
     - criterion: 'A stats line above the "Tags" batch bookmark section shows: number of windows in the display group / number of windows open, and number of tabs in the display group / number of tabs open in all windows (display group = tabs currently shown in the list).'
   validation_criteria:
     - method: Unit tests
-      coverage: 'filterBrowserTabs: empty query returns all; scope-aware filter (tabInfo/pageText/importantTags); build URL list and buildRecordsYamlForCopy; Copy Records button; GET_TAB_REFERRERS and GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; panel merges referrer and pageText/importantTags from SW; batch set/clear to-read and add tags; clickable window/tab id (focus window and tab on click); clickable title/URL in title and url display mode (focus link, windows.update/tabs.update); remove icon after text in title/url mode, before Tags in block; display bookmark tags per tab; display mode and remove-from-display; sections and tooltips; favicon in list; parse important-tag sources; Gather (tabs.move to current window); Distribute (windows.create per tab when window has >1 tab)'
+      coverage: 'filterBrowserTabs: empty query returns all; scope-aware filter (tabInfo/pageText/importantTags); build URL list and buildRecordsYamlForCopy; Copy Records button; GET_TAB_REFERRERS and GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; panel merges referrer and pageText/importantTags from SW; batch set/clear to-read and add tags; clickable window/tab id (focus window and tab on click); clickable title/URL in title and url display mode (focus link, windows.update/tabs.update); per-row close-tab button (data-action=closeTab) before ids/focus link, chrome.tabs.remove on click; remove icon after text in title/url mode, before Tags in block; display bookmark tags per tab; display mode and remove-from-display; sections and tooltips; favicon in list; parse important-tag sources; Gather (tabs.move to current window); Distribute (windows.create per tab when window has >1 tab)'
     - method: Manual or E2E
-      coverage: 'Open Tabs tab; select search scope; filter by tab info, page text, or important tags; copy URLs; copy records; close visible tabs; set to-read; clear to-read; add tags; see counts'
+      coverage: Open Tabs tab; select search scope; filter by tab info, page text, or important tags; copy URLs; copy records; close visible tabs; set to-read; clear to-read; add tags; see counts
   notes:
     - 'Referrer must be obtained via service worker (GET_TAB_REFERRERS): scripting from the side panel does not run in tab context, so the panel sends a message and the SW runs chrome.scripting.executeScript per tab and returns a referrer map.'
-    - 'Page text and important tags for filter are obtained via GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS (SW executeScript per tab); fetch when user selects that scope or on load if that scope is selected.'
+    - Page text and important tags for filter are obtained via GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS (SW executeScript per tab); fetch when user selects that scope or on load if that scope is selected.
   traceability:
     architecture:
       - ARCH-SIDE_PANEL_BROWSER_TABS
@@ -66,9 +67,9 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     supersedes: []
   metadata:
     created:
-      date: '2026-02-28'
+      date: "2026-02-28"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
-      reason: Title/URL/Block above list; stats line (display group vs all open for windows and tabs)
+      reason: Per-row close-tab criterion and validation_criteria; traceability aligned with tests

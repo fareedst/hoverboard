@@ -28,7 +28,15 @@ execSync('npm run build:content', { stdio: 'inherit' });
 console.log('Building popup...');
 execSync('npm run build:popup', { stdio: 'inherit' });
 
-// [IMPL-SIDE_PANEL_TABS] Build side panel bundle (popup stack + tags-tree) so extension loads single entry
+// [IMPL-SIDE_PANEL_TABS] Write build-info.js with BUILD_TIME_UTC (YYYY-MM-DD HH:mm) then build side panel bundle
+const buildInfoPath = path.join(rootDir, 'src', 'ui', 'side-panel', 'build-info.js');
+const buildTimeUtc = new Date().toISOString().slice(0, 16).replace('T', ' ');
+fs.writeFileSync(buildInfoPath, `/**
+ * [IMPL-SIDE_PANEL_TABS] Build-time compile time (UTC). Overwritten by scripts/build.js before side-panel bundle.
+ * Format: YYYY-MM-DD HH:mm
+ */
+export const BUILD_TIME_UTC = '${buildTimeUtc}'
+`);
 console.log('Building side panel...');
 execSync('npm run build:side-panel', { stdio: 'inherit' });
 

@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Side panel header: version and compile time (UTC)** ([IMPL-SIDE_PANEL_TABS], [REQ-SIDE_PANEL_POPUP_EQUIVALENT]) – After the "Hoverboard" title in the side panel, the extension version (from the manifest) and build compile time in UTC (YYYY-MM-DD HH:mm) are shown. Compile time is injected at build via `scripts/build.js` writing `src/ui/side-panel/build-info.js` before the side-panel bundle. Unit test: `setSidePanelVersion` in `side-panel-initial-tab-init.test.js`.
+
+- **Side panel Tabs tab: per-row close-tab button** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) – In the **Tabs** tab each tab row has a **Close tab** button (✕) before the window/tab id line (in Block mode) or before the title/URL link (in Title/URL mode). Clicking it closes that single tab via `chrome.tabs.remove` and refreshes the list. The existing remove-from-display button (×) remains after the tab id. Unit tests: card has `[data-action="closeTab"]`; clicking it calls `chrome.tabs.remove` with the tab id. TIED: IMPL-SIDE_PANEL_BROWSER_TABS detail and essence_pseudocode updated.
+
 ### Changed
 
 - **Side panel Tabs tab: always use Important tag sources textbox** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) – The "Use custom DOM sources" checkbox next to the Important tag sources textbox has been removed. The textbox list is always used when the search scope is **Important elements**; an empty textbox falls back to the default list. Label for the textbox is now "Important tag sources". TIED: REQ/ARCH/IMPL updated; E2E snapshot no longer includes `hasImportantElementsCheckbox`.

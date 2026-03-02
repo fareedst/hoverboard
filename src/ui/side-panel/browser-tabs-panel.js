@@ -236,6 +236,8 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       const tagsArr = Array.isArray(tab.bookmarkTags) ? tab.bookmarkTags : []
       const tagsDisplay = tagsArr.length > 0 ? escapeHtml(tagsArr.join(', ')) : '—'
       const removeBtn = `<button type="button" class="browser-tabs-card-remove" data-action="removeFromDisplay" data-tab-id="${escapeHtml(tabId)}" aria-label="Remove from list" title="Remove from list">×</button>`
+      // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Per-row close-tab button before window id; remove button unchanged after tab id
+      const closeTabBtn = `<button type="button" class="browser-tabs-card-close-tab" data-action="closeTab" data-tab-id="${escapeHtml(tabId)}" aria-label="Close tab" title="Close tab">✕</button>`
       const faviconSrc = getFaviconSrc(tab)
       const faviconImg = `<img class="browser-tabs-card-favicon" src="${escapeHtml(faviconSrc)}" alt="" width="16" height="16">`
       if (listDisplayMode === 'title') {
@@ -243,13 +245,13 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         const focusBtn = hasValidIds
           ? `<button type="button" class="browser-tabs-card-title browser-tabs-card-focus-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${titleText}</button>`
           : `<div class="browser-tabs-card-title">${titleText}</div>`
-        card.innerHTML = `${faviconImg} ${focusBtn} ${removeBtn}`
+        card.innerHTML = `${faviconImg} ${closeTabBtn} ${focusBtn} ${removeBtn}`
       } else if (listDisplayMode === 'url') {
         const urlText = escapeHtml(tab.url || '')
         const focusBtn = hasValidIds
           ? `<button type="button" class="browser-tabs-card-url browser-tabs-card-focus-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${urlText}</button>`
           : `<div class="browser-tabs-card-url">${urlText}</div>`
-        card.innerHTML = `${faviconImg} ${focusBtn} ${removeBtn}`
+        card.innerHTML = `${faviconImg} ${closeTabBtn} ${focusBtn} ${removeBtn}`
       } else {
         const idsMarkup = hasValidIds
           ? `<button type="button" class="browser-tabs-card-ids browser-tabs-card-ids-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${idsDisplay}</button>`
@@ -258,6 +260,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         <div class="browser-tabs-card-title-row">${faviconImg}<span class="browser-tabs-card-title">${escapeHtml(tab.title || '(no title)')}</span></div>
         <div class="browser-tabs-card-url">${escapeHtml(tab.url || '')}</div>
         <div class="browser-tabs-card-referrer">${escapeHtml(getReferrerDisplayText(tab.referrer))}</div>
+        ${closeTabBtn}
         ${idsMarkup}
         ${removeBtn}
         <div class="browser-tabs-card-tags">Tags: ${tagsDisplay}</div>
@@ -461,9 +464,29 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     filterInput.addEventListener('input', applyFilter)
   }
 
-  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Delegated click: focus window and tab when ids line or focus link (title/url in non-block mode) clicked; remove from display when remove icon clicked
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Delegated click: close tab (closeTab); remove from display (removeFromDisplay); focus window and tab when ids or focus link clicked
   if (listEl) {
-    listEl.addEventListener('click', (e) => {
+    listEl.addEventListener('click', async (e) => {
+      const closeTabBtnEl = e.target && e.target.closest && e.target.closest('[data-action="closeTab"]')
+      if (closeTabBtnEl) {
+        const tabId = closeTabBtnEl.getAttribute('data-tab-id')
+        if (tabId != null) {
+          const id = Number(tabId)
+          if (!Number.isNaN(id)) {
+            const api = chromeTabs || (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null)
+            if (api && typeof api.remove === 'function') {
+              try {
+                await api.remove(id)
+                allTabs = allTabs.filter((t) => t.id !== id)
+                applyFilter()
+              } catch (_) {
+                showMessage('Failed to close tab')
+              }
+            }
+          }
+        }
+        return
+      }
       const removeBtn = e.target && e.target.closest && e.target.closest('[data-action="removeFromDisplay"]')
       if (removeBtn) {
         const tabId = removeBtn.getAttribute('data-tab-id')

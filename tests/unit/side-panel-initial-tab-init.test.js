@@ -24,9 +24,32 @@ jest.mock('../../src/config/config-manager.js', () => ({
 import {
   runInitialTabInit,
   setPopupComponentsForTest,
-  resetTagsTreeTabInitedForTest
+  resetTagsTreeTabInitedForTest,
+  setSidePanelVersion
 } from '../../src/ui/side-panel/side-panel.js'
 import { TAB_TAGS_TREE } from '../../src/ui/side-panel/side-panel-tab-state.js'
+
+describe('[IMPL-SIDE_PANEL_TABS] setSidePanelVersion', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '<p id="side-panel-version"></p>'
+  })
+
+  test('sets version and compile time (UTC) text [IMPL-SIDE_PANEL_TABS]', () => {
+    setSidePanelVersion('1.2.3', '2026-03-02 14:30')
+    expect(document.getElementById('side-panel-version').textContent).toBe('v1.2.3 · 2026-03-02 14:30')
+  })
+
+  test('when version is empty string shows only build time', () => {
+    setSidePanelVersion('', '2026-03-02 14:30')
+    expect(document.getElementById('side-panel-version').textContent).toBe('2026-03-02 14:30')
+  })
+
+  // [IMPL-SIDE_PANEL_TABS] When #side-panel-version element is missing, setSidePanelVersion does not throw (no-op).
+  test('when #side-panel-version element is missing does not throw', () => {
+    document.body.innerHTML = ''
+    expect(() => setSidePanelVersion('1.0.0', '2026-01-01 00:00')).not.toThrow()
+  })
+})
 
 describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE] runInitialTabInit with Tags tree tab', () => {
   beforeEach(() => {
