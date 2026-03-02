@@ -111,9 +111,15 @@
   cursor: pointer;
 }
 
-.browser-tabs-search {
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Sections: Scope, Filter & display, Batch bookmark, List actions, Window actions */
+.browser-tabs-section {
   flex-shrink: 0;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.browser-tabs-section-scope .browser-tabs-scope,
+.browser-tabs-section-scope .browser-tabs-search-scope {
+  margin-top: 0.25rem;
 }
 
 .browser-tabs-search-scope {
@@ -141,6 +147,26 @@
   color: var(--text-primary, #eee);
 }
 
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Important tag sources input (comma-separated DOM sources for Important tags search) */
+.browser-tabs-important-sources {
+  margin-top: 0.5rem;
+}
+.browser-tabs-important-sources-label {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-secondary, #999);
+}
+.browser-tabs-important-sources-input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #eee);
+}
+
 .browser-tabs-list {
   display: flex;
   flex-direction: column;
@@ -155,10 +181,30 @@
   font-size: 0.8rem;
 }
 
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Favicon per tab in list (block, title, url modes) */
+.browser-tabs-card-favicon {
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  margin-right: 0.35rem;
+  flex-shrink: 0;
+}
+
+.browser-tabs-card-title-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+.browser-tabs-card-title-row .browser-tabs-card-favicon {
+  margin-right: 0.35rem;
+}
 .browser-tabs-card-title {
   font-weight: 600;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0;
   word-break: break-word;
+}
+.browser-tabs-card-title-row + .browser-tabs-card-url {
+  margin-top: 0;
 }
 
 .browser-tabs-card-url {

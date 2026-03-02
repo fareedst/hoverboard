@@ -22326,48 +22326,69 @@ var HoverboardServiceWorker = class {
         return out2;
       }
       if (message.type === MESSAGE_TYPES.GET_TABS_IMPORTANT_TAGS) {
+        let collectImportantTagsWithSources2 = function(sourcesArg) {
+          const maxLen = 8192;
+          const parts = [];
+          const doc = document;
+          const s = sourcesArg && Array.isArray(sourcesArg) ? sourcesArg : [];
+          const has = (name) => s.includes(name);
+          if (has("title")) {
+            const title = doc.title && String(doc.title).trim() || "";
+            if (title) parts.push(title);
+          }
+          if (has("meta description")) {
+            const metaDesc = doc.querySelector('meta[name="description"]');
+            if (metaDesc) {
+              const c = (metaDesc.getAttribute("content") || "").trim();
+              if (c) parts.push(c);
+            }
+          }
+          if (has("og:title")) {
+            const ogTitle = doc.querySelector('meta[property="og:title"]');
+            if (ogTitle) {
+              const c = (ogTitle.getAttribute("content") || "").trim();
+              if (c) parts.push(c);
+            }
+          }
+          if (has("h1") || has("h2") || has("h3")) {
+            const sel = ["h1", "h2", "h3"].filter((h) => has(h));
+            if (sel.length) {
+              const headings = doc.querySelectorAll(sel.join(", "));
+              headings.forEach((el) => {
+                const t = (el.textContent || "").trim();
+                if (t) parts.push(t);
+              });
+            }
+          }
+          if (has("img alt")) {
+            const imgs = doc.querySelectorAll("img[alt]");
+            imgs.forEach((el) => {
+              const alt = (el.getAttribute("alt") || "").trim();
+              if (alt) parts.push(alt);
+            });
+          }
+          if (has("a title")) {
+            const linksWithTitle = doc.querySelectorAll("a[title]");
+            const linkTitles = [];
+            linksWithTitle.forEach((el) => {
+              const t = (el.getAttribute("title") || "").trim();
+              if (t) linkTitles.push(t);
+            });
+            if (linkTitles.length > 0) parts.push(linkTitles.slice(0, 50).join(" "));
+          }
+          const joined = parts.join(" ");
+          return joined.length > maxLen ? joined.slice(0, maxLen) : joined;
+        };
+        var collectImportantTagsWithSources = collectImportantTagsWithSources2;
         const tabs = message.data?.tabs || [];
+        const rawSources = message.data?.importantTagSources;
+        const defaultSources = ["title", "meta description", "og:title", "h1", "h2", "h3", "img alt", "a title"];
+        const sources = Array.isArray(rawSources) && rawSources.length > 0 ? rawSources : defaultSources;
         const scripting = typeof chrome !== "undefined" && chrome.scripting ? chrome.scripting : typeof safariEnhancements !== "undefined" && safariEnhancements.scripting ? safariEnhancements.scripting : null;
         const importantTagsMap = (
           /** @type {Record<number, string>} */
           {}
         );
-        const collectImportantTags = () => {
-          const maxLen = 8192;
-          const parts = [];
-          const doc = document;
-          const title = doc.title && String(doc.title).trim() || "";
-          if (title) parts.push(title);
-          const metaDesc = doc.querySelector('meta[name="description"]');
-          if (metaDesc) {
-            const c = (metaDesc.getAttribute("content") || "").trim();
-            if (c) parts.push(c);
-          }
-          const ogTitle = doc.querySelector('meta[property="og:title"]');
-          if (ogTitle) {
-            const c = (ogTitle.getAttribute("content") || "").trim();
-            if (c) parts.push(c);
-          }
-          const headings = doc.querySelectorAll("h1, h2, h3");
-          headings.forEach((el) => {
-            const t = (el.textContent || "").trim();
-            if (t) parts.push(t);
-          });
-          const imgs = doc.querySelectorAll("img[alt]");
-          imgs.forEach((el) => {
-            const alt = (el.getAttribute("alt") || "").trim();
-            if (alt) parts.push(alt);
-          });
-          const linksWithTitle = doc.querySelectorAll("a[title]");
-          const linkTitles = [];
-          linksWithTitle.forEach((el) => {
-            const t = (el.getAttribute("title") || "").trim();
-            if (t) linkTitles.push(t);
-          });
-          if (linkTitles.length > 0) parts.push(linkTitles.slice(0, 50).join(" "));
-          const joined = parts.join(" ");
-          return joined.length > maxLen ? joined.slice(0, maxLen) : joined;
-        };
         if (scripting && scripting.executeScript) {
           await Promise.all(
             tabs.map(async (tab) => {
@@ -22380,7 +22401,8 @@ var HoverboardServiceWorker = class {
               try {
                 const results = await scripting.executeScript({
                   target: { tabId: id },
-                  func: collectImportantTags
+                  func: collectImportantTagsWithSources2,
+                  args: [sources]
                 });
                 const raw = results?.[0]?.result;
                 importantTagsMap[id] = typeof raw === "string" ? raw : "";

@@ -10,6 +10,23 @@ export const SEARCH_SCOPE_TAB_INFO = 'tabInfo'
 export const SEARCH_SCOPE_PAGE_TEXT = 'pageText'
 export const SEARCH_SCOPE_IMPORTANT_TAGS = 'importantTags'
 
+/** [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Default DOM source names for Important tags search (comma-separated); used when user has not set custom list. */
+export const DEFAULT_IMPORTANT_TAG_SOURCES = 'title, meta description, og:title, h1, h2, h3, img alt, a title'
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Parse comma-separated important-tag sources string into normalized array (trim, filter empty). Applied on GET_TABS_IMPORTANT_TAGS.
+ * @param {string} str - Raw input (e.g. from text control)
+ * @returns {string[]}
+ */
+export function parseImportantTagSources (str) {
+  if (str == null || typeof str !== 'string') return []
+  return str.trim().split(',').map((s) => s.trim()).filter(Boolean)
+}
+
+/** [IMPL-SIDE_PANEL_BROWSER_TABS] Storage key for persisted important-tag sources list */
+const STORAGE_KEY_IMPORTANT_TAG_SOURCES = 'hoverboard_tabs_important_tag_sources'
+
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
  * Filter tabs by query (case-insensitive substring). Scope: tabInfo = title/url/referrer; pageText = tab.pageText; importantTags = tab.importantTags. Empty/whitespace returns all.
@@ -117,6 +134,9 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const addTagsBtn = panel.querySelector('[data-action="addTags"]') || panel.querySelector('#browserTabsAddTagsBtn')
   const setToReadBtn = panel.querySelector('[data-action="setToRead"]') || panel.querySelector('#browserTabsSetToReadBtn')
   const clearToReadBtn = panel.querySelector('[data-action="clearToRead"]') || panel.querySelector('#browserTabsClearToReadBtn')
+  const importantTagSourcesInput = panel.querySelector('#browserTabsImportantTagSources')
+  const gatherBtn = panel.querySelector('[data-action="gatherTabs"]') || panel.querySelector('#browserTabsGatherBtn')
+  const distributeBtn = panel.querySelector('[data-action="distributeTabs"]') || panel.querySelector('#browserTabsDistributeBtn')
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] windowScope: currentWindow (default) or all; searchScope: tabInfo (default), pageText, or importantTags
   let windowScope = 'currentWindow'
@@ -179,7 +199,14 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     }
   }
 
-  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Display list = visibleTabs minus hiddenTabIds; render per listDisplayMode (title | url | block); non-block: clickable text + remove icon after; block view includes remove icon before Tags
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Favicon src: use tab.favIconUrl or 1x1 transparent data URI so img never breaks layout
+  const FAVICON_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+  function getFaviconSrc (tab) {
+    const url = (tab && tab.favIconUrl) ? String(tab.favIconUrl).trim() : ''
+    return url || FAVICON_PLACEHOLDER
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Display list = visibleTabs minus hiddenTabIds; render per listDisplayMode (title | url | block); favicon before title/url in all modes; non-block: clickable text + remove icon after; block view includes remove icon before Tags
   function renderList () {
     if (!listEl) return
     listDisplayMode = getListDisplayMode()
@@ -195,24 +222,26 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       const tagsArr = Array.isArray(tab.bookmarkTags) ? tab.bookmarkTags : []
       const tagsDisplay = tagsArr.length > 0 ? escapeHtml(tagsArr.join(', ')) : '—'
       const removeBtn = `<button type="button" class="browser-tabs-card-remove" data-action="removeFromDisplay" data-tab-id="${escapeHtml(tabId)}" aria-label="Remove from list" title="Remove from list">×</button>`
+      const faviconSrc = getFaviconSrc(tab)
+      const faviconImg = `<img class="browser-tabs-card-favicon" src="${escapeHtml(faviconSrc)}" alt="" width="16" height="16">`
       if (listDisplayMode === 'title') {
         const titleText = escapeHtml(tab.title || '(no title)')
         const focusBtn = hasValidIds
           ? `<button type="button" class="browser-tabs-card-title browser-tabs-card-focus-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${titleText}</button>`
           : `<div class="browser-tabs-card-title">${titleText}</div>`
-        card.innerHTML = `${focusBtn} ${removeBtn}`
+        card.innerHTML = `${faviconImg} ${focusBtn} ${removeBtn}`
       } else if (listDisplayMode === 'url') {
         const urlText = escapeHtml(tab.url || '')
         const focusBtn = hasValidIds
           ? `<button type="button" class="browser-tabs-card-url browser-tabs-card-focus-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${urlText}</button>`
           : `<div class="browser-tabs-card-url">${urlText}</div>`
-        card.innerHTML = `${focusBtn} ${removeBtn}`
+        card.innerHTML = `${faviconImg} ${focusBtn} ${removeBtn}`
       } else {
         const idsMarkup = hasValidIds
           ? `<button type="button" class="browser-tabs-card-ids browser-tabs-card-ids-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${idsDisplay}</button>`
           : `<div class="browser-tabs-card-ids">${idsDisplay}</div>`
         card.innerHTML = `
-        <div class="browser-tabs-card-title">${escapeHtml(tab.title || '(no title)')}</div>
+        <div class="browser-tabs-card-title-row">${faviconImg}<span class="browser-tabs-card-title">${escapeHtml(tab.title || '(no title)')}</span></div>
         <div class="browser-tabs-card-url">${escapeHtml(tab.url || '')}</div>
         <div class="browser-tabs-card-referrer">${escapeHtml(getReferrerDisplayText(tab.referrer))}</div>
         ${idsMarkup}
@@ -246,7 +275,13 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     if (!runtime || !runtime.sendMessage || allTabs.length === 0) return
     if (listEl) listEl.innerHTML = '<div class="browser-tabs-loading">Loading…</div>'
     const msgType = scope === SEARCH_SCOPE_PAGE_TEXT ? 'getTabsPageText' : 'getTabsImportantTags'
-    const msg = { type: msgType, data: { tabs: allTabs.map((t) => ({ id: t.id, url: t.url })) } }
+    const msgData = { tabs: allTabs.map((t) => ({ id: t.id, url: t.url })) }
+    if (scope === SEARCH_SCOPE_IMPORTANT_TAGS) {
+      const raw = importantTagSourcesInput ? importantTagSourcesInput.value : ''
+      const sources = parseImportantTagSources(raw)
+      msgData.importantTagSources = sources.length > 0 ? sources : parseImportantTagSources(DEFAULT_IMPORTANT_TAG_SOURCES)
+    }
+    const msg = { type: msgType, data: msgData }
     try {
       const reply = await new Promise((resolve, reject) => {
         runtime.sendMessage(msg, (r) => { if (chrome.runtime?.lastError) reject(new Error(chrome.runtime.lastError?.message)); else resolve(r) })
@@ -295,7 +330,8 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         windowId: tab.windowId,
         title: tab.title ?? '',
         url: tab.url ?? '',
-        referrer: (tab.id != null && referrersMap[tab.id] !== undefined) ? referrersMap[tab.id] : ''
+        referrer: (tab.id != null && referrersMap[tab.id] !== undefined) ? referrersMap[tab.id] : '',
+        favIconUrl: tab.favIconUrl ?? ''
       }))
       allTabs = withReferrer
       // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Fetch bookmark tags per tab (same source as popup)
@@ -518,6 +554,99 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       hiddenTabIds.clear()
       loadTabs()
     })
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Gather: move all displayed tabs into the current window.
+  if (gatherBtn) {
+    gatherBtn.addEventListener('click', async () => {
+      const displayed = getDisplayedTabs()
+      if (displayed.length === 0) {
+        showMessage('No tabs to gather')
+        return
+      }
+      const apiWindows = chromeWindows || (typeof chrome !== 'undefined' && chrome.windows ? chrome.windows : null) || (typeof browser !== 'undefined' && browser.windows ? browser.windows : null)
+      const apiTabs = chromeTabs || (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null)
+      if (!apiWindows || !apiTabs) {
+        showMessage('Window API not available')
+        return
+      }
+      try {
+        const currentWin = await apiWindows.getCurrent()
+        const currentWindowId = currentWin && currentWin.id != null ? currentWin.id : null
+        if (currentWindowId == null) {
+          showMessage('Could not get current window')
+          return
+        }
+        let moved = 0
+        for (const tab of displayed) {
+          if (tab.windowId !== currentWindowId) {
+            try {
+              await apiTabs.move(tab.id, { windowId: currentWindowId, index: -1 })
+              moved++
+            } catch (_) { /* skip */ }
+          }
+        }
+        if (moved > 0) showMessage(`Gathered ${moved} tab${moved !== 1 ? 's' : ''}`)
+        else showMessage('All visible tabs already in this window')
+        await loadTabs()
+      } catch (e) {
+        showMessage('Gather failed')
+      }
+    })
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Distribute: move each displayed tab into its own window (skip if already only tab in window).
+  if (distributeBtn) {
+    distributeBtn.addEventListener('click', async () => {
+      const displayed = getDisplayedTabs()
+      if (displayed.length === 0) {
+        showMessage('No tabs to distribute')
+        return
+      }
+      const apiWindows = chromeWindows || (typeof chrome !== 'undefined' && chrome.windows ? chrome.windows : null) || (typeof browser !== 'undefined' && browser.windows ? browser.windows : null)
+      const apiTabs = chromeTabs || (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null)
+      if (!apiWindows || !apiTabs) {
+        showMessage('Window API not available')
+        return
+      }
+      try {
+        let distributed = 0
+        for (const tab of displayed) {
+          try {
+            const tabsInWindow = await apiTabs.query({ windowId: tab.windowId })
+            if (tabsInWindow && tabsInWindow.length > 1) {
+              await apiWindows.create({ tabId: tab.id })
+              distributed++
+            }
+          } catch (_) { /* skip */ }
+        }
+        if (distributed > 0) showMessage(`Distributed ${distributed} tab${distributed !== 1 ? 's' : ''}`)
+        else showMessage('All visible tabs already in their own window')
+        await loadTabs()
+      } catch (_) {
+        showMessage('Distribute failed')
+      }
+    })
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Persist important-tag sources on blur; load from storage on init
+  if (importantTagSourcesInput) {
+    const storage = typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local ? chrome.storage.local : (typeof browser !== 'undefined' && browser.storage && browser.storage.local ? browser.storage.local : null)
+    if (storage) {
+      storage.get(STORAGE_KEY_IMPORTANT_TAG_SOURCES).then((obj) => {
+        const val = obj && obj[STORAGE_KEY_IMPORTANT_TAG_SOURCES]
+        if (typeof val === 'string' && val.trim() !== '') importantTagSourcesInput.value = val.trim()
+        else importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
+      }).catch(() => {
+        importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
+      })
+      importantTagSourcesInput.addEventListener('blur', () => {
+        const val = importantTagSourcesInput.value.trim()
+        storage.set({ [STORAGE_KEY_IMPORTANT_TAG_SOURCES]: val || DEFAULT_IMPORTANT_TAG_SOURCES }).catch(() => {})
+      })
+    } else {
+      importantTagSourcesInput.value = DEFAULT_IMPORTANT_TAG_SOURCES
+    }
   }
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Batch bookmark actions: set to-read (create if missing), clear to-read (skip if no bookmark), add tags (create if missing).

@@ -153,4 +153,21 @@ describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] SW handleMessage routi
     expect(result).toEqual({ success: true, data: { 2: 'H1 Heading Meta description' } })
     processMessageSpy.mockRestore()
   })
+
+  test('[REQ-SIDE_PANEL_BROWSER_TABS] GET_TABS_IMPORTANT_TAGS with importantTagSources passes args to executeScript', async () => {
+    const sw = new HoverboardServiceWorker()
+    global.chrome.scripting.executeScript.mockResolvedValue([{ result: 'Custom title only' }])
+
+    await sw.handleMessage({
+      type: MESSAGE_TYPES.GET_TABS_IMPORTANT_TAGS,
+      data: {
+        tabs: [{ id: 1, url: 'https://example.com' }],
+        importantTagSources: ['title', 'h1']
+      }
+    }, {})
+
+    expect(global.chrome.scripting.executeScript).toHaveBeenCalled()
+    const call = global.chrome.scripting.executeScript.mock.calls[0][0]
+    expect(call.args).toEqual([['title', 'h1']])
+  })
 })

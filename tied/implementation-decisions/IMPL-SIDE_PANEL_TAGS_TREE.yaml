@@ -1,7 +1,3 @@
-# [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE]
-# Implementation: Open side panel from popup; panel loads bookmarks via getAggregatedBookmarksForIndex,
-# builds tag→urls map, tag selector with order, hierarchical tree with collapsible URL lists; click URL opens in new tab.
-
 IMPL-SIDE_PANEL_TAGS_TREE:
   name: Side Panel Tags and Bookmarks Tree Implementation
   status: Active
@@ -18,13 +14,13 @@ IMPL-SIDE_PANEL_TAGS_TREE:
   implementation_approach:
     summary: Popup button sends OPEN_SIDE_PANEL; SW handles it in onMessage (synchronously, no await) using a cached normal windowId so chrome.sidePanel.open() runs in user-gesture context. Panel loads bookmarks via getAggregatedBookmarksForIndex; applies filter pipeline (time, tags, domain), sort, optional group; config region expandable/collapsible with state and filter/sort/group values persisted; tag selector + tree or grouped sections; click URL → openUrlInNewTab (chrome.tabs.create).
     details:
-      - "manifest: windows permission for chrome.windows.get/getCurrent; sidePanel permission and default_path"
-      - ui-action-contract: openTagsTree maps to OPEN_SIDE_PANEL
-      - Popup: footer button, UIManager emit, PopupController.handleOpenTagsTree bound; sends OPEN_SIDE_PANEL, shows success or delegates error
-      - Service worker: OPEN_SIDE_PANEL handled in onMessage listener only (no await before open). windowId from _sidePanelWindowId cache; chrome.sidePanel.open({ windowId }) called synchronously. _seedSidePanelWindowCache() seeds cache from active tab's normal window on startup. handleTabActivated updates _sidePanelWindowId when activated tab's window is normal.
-      - Message handler: OPEN_SIDE_PANEL type; SW listener handles directly (not via handleMessage async path)
-      - Panel: tags-tree.html/js/css; tags-tree-data.js has buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab (pure + testable); tags-tree-filter.js (or same module) has getDomainFromUrl, filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy (pure + testable)
-      - Config: load/save config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags) from chrome.storage.local; expand/collapse toggle shows or hides full filter and display controls; tag list view toggle (showAllTags) persists with config
+      - 'manifest: windows permission for chrome.windows.get/getCurrent; sidePanel permission and default_path'
+      - 'ui-action-contract: openTagsTree maps to OPEN_SIDE_PANEL'
+      - 'Popup: footer button, UIManager emit, PopupController.handleOpenTagsTree bound; sends OPEN_SIDE_PANEL, shows success or delegates error'
+      - 'Service worker: OPEN_SIDE_PANEL handled in onMessage listener only (no await before open). windowId from _sidePanelWindowId cache; chrome.sidePanel.open({ windowId }) called synchronously. _seedSidePanelWindowCache() seeds cache from active tab''s normal window on startup. handleTabActivated updates _sidePanelWindowId when activated tab''s window is normal.'
+      - 'Message handler: OPEN_SIDE_PANEL type; SW listener handles directly (not via handleMessage async path)'
+      - 'Panel: tags-tree.html/js/css; tags-tree-data.js has buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab (pure + testable); tags-tree-filter.js (or same module) has getDomainFromUrl, filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy (pure + testable)'
+      - 'Config: load/save config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags) from chrome.storage.local; expand/collapse toggle shows or hides full filter and display controls; tag list view toggle (showAllTags) persists with config'
   code_locations:
     files:
       - path: src/ui/side-panel/tags-tree-data.js
@@ -60,7 +56,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
         description: Returns sorted unique tags; implements tag list for selector (REQ/ARCH/IMPL)
       - name: getTagsToDisplay
         file: src/ui/side-panel/tags-tree-data.js
-        description: "Returns tags to show in selector: allTags when showAllTags true, else selectedTagOrder filtered by allTags (REQ/ARCH/IMPL)"
+        description: 'Returns tags to show in selector: allTags when showAllTags true, else selectedTagOrder filtered by allTags (REQ/ARCH/IMPL)'
       - name: intersectionTagOrder
         file: src/ui/side-panel/tags-tree-data.js
         description: Intersection of preferredTags with allTags preserving order; used to set Tags tree selection from current bookmark tags (REQ-SIDE_PANEL_POPUP_EQUIVALENT)
@@ -266,9 +262,9 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     CSS .tree-section: min-height 100%; overflow-y auto
   metadata:
     created:
-      date: '2026-02-21'
+      date: "2026-02-21"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
-      reason: Tags tree tab scroll: panel scroll container; above-list div scrolls off; tree fills height
+      reason: 'Tags tree tab scroll: panel scroll container; above-list div scrolls off; tree fills height'

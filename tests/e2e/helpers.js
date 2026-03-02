@@ -87,7 +87,7 @@ export async function snapshotOptions (page) {
  * [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
  * Snapshot side panel: two serializable state shapes (Bookmark tab, Tags tree tab) for E2E assertions.
  * @param {import('puppeteer').Page} page - Page navigated to side-panel.html (chrome-extension://id/.../side-panel.html)
- * @returns {Promise<{ bookmarkTab: object, tagsTreeTab: object, browserTabsTab: { panelPresent: boolean, hasFilterInput?: boolean, hasCopyButton?: boolean, hasCloseButton?: boolean, hasListContainer?: boolean } }>}
+ * @returns {Promise<{ bookmarkTab: object, tagsTreeTab: object, browserTabsTab: { panelPresent: boolean, hasFilterInput?: boolean, hasCopyButton?: boolean, hasCloseButton?: boolean, hasListContainer?: boolean, hasGatherButton?: boolean, hasDistributeButton?: boolean, hasImportantTagSourcesInput?: boolean, hasSections?: boolean } }>}
  */
 export async function snapshotSidePanel (page) {
   return await page.evaluate(() => {
@@ -137,7 +137,7 @@ export async function snapshotSidePanel (page) {
       }
     }
 
-    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS] browserTabsTab: root #browserTabsPanel, layout (above-list + list-section), scope toggle, filter, copy/close, list
+    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS] browserTabsTab: root #browserTabsPanel, layout (above-list + list-section), scope toggle, filter, copy/close, list, Gather/Distribute, important-tag sources, sections
     const browserTabsRoot = document.getElementById('browserTabsPanel')
     let browserTabsTab
     if (!browserTabsRoot) {
@@ -146,6 +146,7 @@ export async function snapshotSidePanel (page) {
       const scopeRadios = browserTabsRoot.querySelectorAll('input[name="browserTabsWindowScope"]')
       const firstCard = browserTabsRoot.querySelector('.browser-tabs-card')
       const hasIdsInFirstCard = firstCard && !!firstCard.querySelector('.browser-tabs-card-ids')
+      const sections = browserTabsRoot.querySelectorAll('.browser-tabs-section, section[aria-label]')
       browserTabsTab = {
         panelPresent: true,
         hasAboveList: !!browserTabsRoot.querySelector('.browser-tabs-above-list'),
@@ -155,7 +156,11 @@ export async function snapshotSidePanel (page) {
         hasCopyButton: !!browserTabsRoot.querySelector('[data-action="copyUrls"]') || !!browserTabsRoot.querySelector('#browserTabsCopyBtn'),
         hasCloseButton: !!browserTabsRoot.querySelector('[data-action="closeTabs"]') || !!browserTabsRoot.querySelector('#browserTabsCloseBtn'),
         hasListContainer: !!browserTabsRoot.querySelector('#browserTabsList') || !!browserTabsRoot.querySelector('.browser-tabs-list'),
-        hasIdsInFirstCard
+        hasIdsInFirstCard,
+        hasGatherButton: !!browserTabsRoot.querySelector('[data-action="gatherTabs"]') || !!browserTabsRoot.querySelector('#browserTabsGatherBtn'),
+        hasDistributeButton: !!browserTabsRoot.querySelector('[data-action="distributeTabs"]') || !!browserTabsRoot.querySelector('#browserTabsDistributeBtn'),
+        hasImportantTagSourcesInput: !!browserTabsRoot.querySelector('#browserTabsImportantTagSources') || !!document.getElementById('browserTabsImportantTagSources'),
+        hasSections: sections && sections.length >= 2
       }
     }
 

@@ -9,6 +9,8 @@ import {
   buildRecordsYamlForCopy,
   getReferrerDisplayText,
   initBrowserTabsTab,
+  parseImportantTagSources,
+  DEFAULT_IMPORTANT_TAG_SOURCES,
   SEARCH_SCOPE_TAB_INFO,
   SEARCH_SCOPE_PAGE_TEXT,
   SEARCH_SCOPE_IMPORTANT_TAGS
@@ -180,6 +182,122 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] buildReco
     const yaml = buildRecordsYamlForCopy(list)
     expect(yaml).toContain('Title: with colon')
     expect(yaml).toContain('id: 1')
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * parseImportantTagSources: comma-separated DOM sources for Important tags search; applied on GET_TABS_IMPORTANT_TAGS.
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] parseImportantTagSources', () => {
+  test('comma-separated string returns trimmed non-empty array', () => {
+    expect(parseImportantTagSources('title, meta description, h1')).toEqual(['title', 'meta description', 'h1'])
+    expect(parseImportantTagSources('  og:title , h2 , h3  ')).toEqual(['og:title', 'h2', 'h3'])
+  })
+
+  test('empty string returns empty array', () => {
+    expect(parseImportantTagSources('')).toEqual([])
+    expect(parseImportantTagSources('   ')).toEqual([])
+  })
+
+  test('null or undefined returns empty array', () => {
+    expect(parseImportantTagSources(null)).toEqual([])
+    expect(parseImportantTagSources(undefined)).toEqual([])
+  })
+
+  test('filters out empty segments', () => {
+    expect(parseImportantTagSources('a,,b')).toEqual(['a', 'b'])
+    expect(parseImportantTagSources('  ,  title  ,  ')).toEqual(['title'])
+  })
+
+  test('DEFAULT_IMPORTANT_TAG_SOURCES parses to expected list', () => {
+    const parsed = parseImportantTagSources(DEFAULT_IMPORTANT_TAG_SOURCES)
+    expect(parsed).toContain('title')
+    expect(parsed).toContain('meta description')
+    expect(parsed).toContain('og:title')
+    expect(parsed).toContain('h1')
+    expect(parsed).toContain('img alt')
+    expect(parsed).toContain('a title')
+  })
+})
+
+/** [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Important-tag sources: persisted in chrome.storage.local; applied on GET_TABS_IMPORTANT_TAGS. */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] important-tag sources persistence', () => {
+  const STORAGE_KEY = 'hoverboard_tabs_important_tag_sources'
+
+  beforeEach(() => {
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = global.chrome.runtime || {}
+    global.chrome.runtime.sendMessage = function (msg, cb) {
+      if (msg.type === 'getCurrentBookmark' && typeof cb === 'function') {
+        cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        return
+      }
+      if (typeof cb === 'function') cb({})
+    }
+  })
+
+  function makePanelWithImportantSourcesInput () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const messageEl = document.createElement('div')
+    messageEl.id = 'browserTabsMessage'
+    const importantTagSourcesInput = document.createElement('input')
+    importantTagSourcesInput.id = 'browserTabsImportantTagSources'
+    importantTagSourcesInput.type = 'text'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(listEl)
+    panel.appendChild(messageEl)
+    panel.appendChild(importantTagSourcesInput)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '#browserTabsMessage') return messageEl
+      if (sel === '#browserTabsImportantTagSources') return importantTagSourcesInput
+      return null
+    }
+    panel.querySelectorAll = () => []
+    return {
+      doc: { getElementById: (id) => (id === 'browserTabsPanel' ? panel : null), createElement: document.createElement.bind(document) },
+      listEl,
+      importantTagSourcesInput,
+      panel
+    }
+  }
+
+  test('init populates important-tag sources input from storage', async () => {
+    const { doc, importantTagSourcesInput } = makePanelWithImportantSourcesInput()
+    const stored = 'h1, h2, meta description'
+    global.chrome.storage = {
+      local: {
+        get: jest.fn().mockResolvedValue({ [STORAGE_KEY]: stored }),
+        set: jest.fn().mockResolvedValue(undefined)
+      }
+    }
+    const mockTabs = { query: async () => [{ id: 1, windowId: 100, title: 'A', url: 'https://a.com' }] }
+    const getReferrers = async () => ({ 1: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 150))
+    expect(importantTagSourcesInput.value).toBe(stored)
+  })
+
+  test('blur on important-tag sources input saves value to storage', async () => {
+    const { doc, importantTagSourcesInput } = makePanelWithImportantSourcesInput()
+    const setMock = jest.fn().mockResolvedValue(undefined)
+    global.chrome.storage = {
+      local: {
+        get: jest.fn().mockResolvedValue({}),
+        set: setMock
+      }
+    }
+    const mockTabs = { query: async () => [{ id: 1, windowId: 100, title: 'A', url: 'https://a.com' }] }
+    const getReferrers = async () => ({ 1: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 150))
+    importantTagSourcesInput.value = 'og:title, h1'
+    importantTagSourcesInput.dispatchEvent(new Event('blur', { bubbles: true }))
+    expect(setMock).toHaveBeenCalledWith({ [STORAGE_KEY]: 'og:title, h1' })
   })
 })
 
@@ -544,6 +662,116 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
 
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Gather: move displayed tabs into current window. Distribute: one window per tab.
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Gather and Distribute', () => {
+  beforeEach(() => {
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = global.chrome.runtime || {}
+    const prev = global.chrome.runtime.sendMessage
+    global.chrome.runtime.sendMessage = function (msg, cb) {
+      if (msg.type === 'getCurrentBookmark' && typeof cb === 'function') {
+        cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        return
+      }
+      if (typeof prev === 'function') return prev.call(this, msg, cb)
+      if (typeof cb === 'function') cb({})
+    }
+  })
+
+  function makePanelDocWithGatherDistribute () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const messageEl = document.createElement('div')
+    messageEl.id = 'browserTabsMessage'
+    const gatherBtn = document.createElement('button')
+    gatherBtn.setAttribute('data-action', 'gatherTabs')
+    gatherBtn.id = 'browserTabsGatherBtn'
+    const distributeBtn = document.createElement('button')
+    distributeBtn.setAttribute('data-action', 'distributeTabs')
+    distributeBtn.id = 'browserTabsDistributeBtn'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(listEl)
+    panel.appendChild(messageEl)
+    panel.appendChild(gatherBtn)
+    panel.appendChild(distributeBtn)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '#browserTabsMessage') return messageEl
+      if (sel === '[data-action="gatherTabs"]' || sel === '#browserTabsGatherBtn') return gatherBtn
+      if (sel === '[data-action="distributeTabs"]' || sel === '#browserTabsDistributeBtn') return distributeBtn
+      return null
+    }
+    panel.querySelectorAll = () => []
+    return {
+      doc: { getElementById: (id) => id === 'browserTabsPanel' ? panel : null, createElement: document.createElement.bind(document) },
+      listEl,
+      messageEl,
+      gatherBtn,
+      distributeBtn,
+      panel
+    }
+  }
+
+  test('Gather calls tabs.move for displayed tabs not in current window', async () => {
+    const { doc, listEl, gatherBtn } = makePanelDocWithGatherDistribute()
+    const moveCalls = []
+    const mockTabs = {
+      query: async () => [
+        { id: 1, windowId: 100, title: 'A', url: 'https://a.com' },
+        { id: 2, windowId: 200, title: 'B', url: 'https://b.com' }
+      ],
+      move: async (tabId, opts) => { moveCalls.push({ tabId, opts }) }
+    }
+    const mockWindows = { getCurrent: async () => ({ id: 100 }) }
+    const getReferrers = async () => ({ 1: '', 2: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers, mockWindows)
+    await new Promise(r => setTimeout(r, 100))
+    expect(listEl.querySelectorAll('.browser-tabs-card')).toHaveLength(2)
+    gatherBtn.click()
+    await new Promise(r => setTimeout(r, 50))
+    expect(moveCalls.length).toBe(1)
+    expect(moveCalls[0].tabId).toBe(2)
+    expect(moveCalls[0].opts.windowId).toBe(100)
+    expect(moveCalls[0].opts.index).toBe(-1)
+  })
+
+  test('Distribute calls windows.create for tabs in windows that have more than one tab', async () => {
+    const { doc, listEl, distributeBtn } = makePanelDocWithGatherDistribute()
+    const createCalls = []
+    const mockTabs = {
+      query: async (opts) => {
+        if (opts.windowId !== undefined) {
+          if (opts.windowId === 100) return [{ id: 1 }, { id: 2 }]
+          if (opts.windowId === 200) return [{ id: 3 }]
+          return []
+        }
+        return [
+          { id: 1, windowId: 100, title: 'A', url: 'https://a.com' },
+          { id: 2, windowId: 100, title: 'B', url: 'https://b.com' },
+          { id: 3, windowId: 200, title: 'C', url: 'https://c.com' }
+        ]
+      },
+      move: async () => {}
+    }
+    const mockWindows = {
+      getCurrent: async () => ({ id: 100 }),
+      create: async (opts) => { createCalls.push(opts) }
+    }
+    const getReferrers = async () => ({ 1: '', 2: '', 3: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers, mockWindows)
+    await new Promise(r => setTimeout(r, 100))
+    distributeBtn.click()
+    await new Promise(r => setTimeout(r, 150))
+    expect(createCalls.length).toBeGreaterThanOrEqual(1)
+    expect(createCalls.some(c => c.tabId === 1 || c.tabId === 2)).toBe(true)
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
  * Referrer + Copy Records + card ids (continued from referrer from getReferrers).
  */
 describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer and Copy Records', () => {
@@ -652,6 +880,40 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer 
     const text = idsEl.textContent.trim()
     expect(text).toContain('100')
     expect(text).toContain('42')
+  })
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Favicon: each card shows img.browser-tabs-card-favicon (tab.favIconUrl or placeholder)
+  test('card displays favicon img element', async () => {
+    const { doc, listEl } = makePanelDoc()
+    const mockTabs = {
+      query: async () => [{ id: 42, windowId: 100, title: 'Tab A', url: 'https://a.com' }]
+    }
+    const getReferrers = async () => ({ 42: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    const card = listEl.querySelector('.browser-tabs-card')
+    expect(card).toBeTruthy()
+    const favicon = card.querySelector('.browser-tabs-card-favicon')
+    expect(favicon).toBeTruthy()
+    expect(favicon.tagName).toBe('IMG')
+    expect(favicon.getAttribute('src')).toBeTruthy()
+  })
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Favicon fallback: when tab has no favIconUrl, img src is placeholder data URI
+  const FAVICON_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+  test('card favicon uses placeholder when tab has no favIconUrl', async () => {
+    const { doc, listEl } = makePanelDoc()
+    const mockTabs = {
+      query: async () => [{ id: 43, windowId: 100, title: 'No favicon', url: 'https://b.com' }]
+    }
+    const getReferrers = async () => ({ 43: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    const card = listEl.querySelector('.browser-tabs-card')
+    expect(card).toBeTruthy()
+    const favicon = card.querySelector('.browser-tabs-card-favicon')
+    expect(favicon).toBeTruthy()
+    expect(favicon.getAttribute('src')).toBe(FAVICON_PLACEHOLDER)
   })
 })
 
