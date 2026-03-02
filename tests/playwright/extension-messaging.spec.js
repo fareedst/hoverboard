@@ -331,6 +331,10 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     expect(browserTabsTab).toHaveProperty('hasCopyButton')
     expect(browserTabsTab).toHaveProperty('hasCloseButton')
     expect(browserTabsTab).toHaveProperty('hasListContainer')
+    expect(browserTabsTab).toHaveProperty('hasAboveList')
+    expect(browserTabsTab.hasAboveList).toBe(true)
+    expect(browserTabsTab).toHaveProperty('hasListSection')
+    expect(browserTabsTab.hasListSection).toBe(true)
 
     await sidePanelPage.close()
   })

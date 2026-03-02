@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Side panel Tabs tab: layout and scroll like Tags tree** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS], [PROC-TIED_DEV_CYCLE]) – In the side panel **Tabs** tab, the layout now matches **Tags tree**: selection UI (header, window scope, search scope, filter, message, actions) is in an above-list block that scrolls off; the tab list sits in a list section that fills the remaining height and scrolls its contents. Panel is the scroll container so the header and controls can scroll away and the list uses full visible height. E2E snapshot includes `hasAboveList` and `hasListSection`. TIED: IMPL-SIDE_PANEL_BROWSER_TABS updated with panel layout detail and essence_pseudocode block.
+
 - **Tags tree tab: scroll content above list so list fills height** ([REQ-SIDE_PANEL_POPUP_EQUIVALENT], [ARCH-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_TAGS_TREE], [PROC-TIED_DEV_CYCLE]) – In the side panel **Tags tree** tab, the header/filters/search/tag selector can now scroll out of the way so the bookmarks list can use the full visible height; the list still scrolls independently for long results. Same behavior in standalone `tags-tree.html` for consistency.
 
 - **Side panel README and screenshots** ([IMPL-SCREENSHOT_MODE]) – Side panel section in README now lists all three tabs (Bookmark, Tags tree, Tabs) with subsections and images. Screenshot script extended to capture the Tabs tab (`side-panel-tabs.png` at 240px width). Section retitled to "Side Panel – Bookmark, Tags Tree, and Tabs"; README Screenshots section updated to mention all three side panel images.

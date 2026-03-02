@@ -60,6 +60,26 @@
   width: 100%;
 }
 
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Browser Tabs panel is the scroll container so .browser-tabs-above-list can scroll off; list section fills height and scrolls (same as Tags tree). */
+#browserTabsPanel {
+  display: block;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Above-list block scrolls off; no flex/overflow so it takes natural height and participates in panel scroll. */
+.browser-tabs-above-list {
+  flex: none;
+}
+
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] List section fills visible height when above scrolled off and scrolls its contents. */
+.browser-tabs-list-section {
+  min-height: 100%;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
 /* [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Browser Tabs panel: multi-row cards, filter, actions */
 .browser-tabs-header {
   flex-shrink: 0;
@@ -117,9 +137,6 @@
 }
 
 .browser-tabs-list {
-  flex: 1 1 0;
-  min-height: 0;
-  overflow: auto;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

@@ -137,7 +137,7 @@ export async function snapshotSidePanel (page) {
       }
     }
 
-    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS] browserTabsTab: root #browserTabsPanel, scope toggle, filter input, copy/close buttons, list
+    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS] browserTabsTab: root #browserTabsPanel, layout (above-list + list-section), scope toggle, filter, copy/close, list
     const browserTabsRoot = document.getElementById('browserTabsPanel')
     let browserTabsTab
     if (!browserTabsRoot) {
@@ -148,6 +148,8 @@ export async function snapshotSidePanel (page) {
       const hasIdsInFirstCard = firstCard && !!firstCard.querySelector('.browser-tabs-card-ids')
       browserTabsTab = {
         panelPresent: true,
+        hasAboveList: !!browserTabsRoot.querySelector('.browser-tabs-above-list'),
+        hasListSection: !!browserTabsRoot.querySelector('.browser-tabs-list-section'),
         hasWindowScopeToggle: scopeRadios && scopeRadios.length >= 2,
         hasFilterInput: !!browserTabsRoot.querySelector('#browserTabsFilterInput') || !!document.getElementById('browserTabsFilterInput'),
         hasCopyButton: !!browserTabsRoot.querySelector('[data-action="copyUrls"]') || !!browserTabsRoot.querySelector('#browserTabsCopyBtn'),
