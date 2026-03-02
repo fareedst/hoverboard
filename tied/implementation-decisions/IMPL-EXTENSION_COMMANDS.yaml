@@ -1,6 +1,5 @@
 # [IMPL-EXTENSION_COMMANDS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
 # Implementation: Manifest commands + SW onCommand; four commands open side panel, options, bookmarks index, import.
-
 IMPL-EXTENSION_COMMANDS:
   name: Extension Commands for Quick Access
   status: Active
@@ -14,10 +13,11 @@ IMPL-EXTENSION_COMMANDS:
     benefits:
       - Four commands; SW handles onCommand; reuse _sidePanelWindowId for side panel; openOptionsPage and tabs.create for others
   implementation_approach:
-    summary: manifest.json "commands" with four entries (open-side-panel, open-options, open-bookmarks-index, open-import) and suggested_key; SW chrome.commands.onCommand.addListener switches on command name and performs the corresponding action.
+    summary: 'manifest.json "commands" with open-side-panel, open-side-panel-bookmark, open-side-panel-tags-tree, open-side-panel-browser-tabs, open-options, open-bookmarks-index, open-import. Exactly four commands have suggested_key (Chrome limit): the three side-panel tab commands and open-bookmarks-index; all others have no suggested_key. SW handleCommand switches on command; for tab-specific commands set storage then sidePanel.open; side panel listens for storage.onChanged to switch tab when already open.'
     details:
-      - "manifest commands: open-side-panel, open-options, open-bookmarks-index, open-import with suggested_key and description; open-side-panel Ctrl+Shift+B, open-options Ctrl+Shift+O, open-bookmarks-index Ctrl+Shift+M, open-import Ctrl+Shift+I"
-      - "SW: In setupEventListeners (or after), if chrome.commands exists, chrome.commands.onCommand.addListener. Handler switch on command. open-side-panel: use _sidePanelWindowId and chrome.sidePanel.open; open-options: chrome.runtime.openOptionsPage; open-bookmarks-index and open-import: chrome.tabs.create with getURL. Guard chrome.sidePanel and chrome.commands for environments where they may be undefined."
+      - 'manifest commands: open-side-panel (no suggested_key), open-side-panel-bookmark (Ctrl+Shift+1), open-side-panel-tags-tree (Ctrl+Shift+2), open-side-panel-browser-tabs (Ctrl+Shift+3), open-options (no suggested_key), open-bookmarks-index (Ctrl+Shift+B), open-import (no suggested_key). Exactly four suggested_key per Chrome limit.'
+      - 'SW handleCommand: open-side-panel: sidePanel.open; open-side-panel-bookmark/tags-tree/browser-tabs: set chrome.storage.local hoverboard_sidepanel_active_tab to ''bookmark''|''tagsTree''|''browserTabs'', then sidePanel.open; open-options: openOptionsPage; open-bookmarks-index and open-import: tabs.create with getURL.'
+      - 'Side panel: chrome.storage.onChanged for SIDE_PANEL_TAB_STORAGE_KEY; on change call switchTab(newValue) so when panel is already open and user triggers tab command, visible tab updates.'
   code_locations:
     files:
       - path: manifest.json
@@ -50,9 +50,13 @@ IMPL-EXTENSION_COMMANDS:
     handleCommand(command):
       SWITCH command:
         "open-side-panel": windowId = this._sidePanelWindowId; IF windowId != null AND chrome.sidePanel?.open THEN chrome.sidePanel.open({ windowId })
+        "open-side-panel-bookmark": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'bookmark' }); THEN sidePanel.open({ windowId })
+        "open-side-panel-tags-tree": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'tagsTree' }); THEN sidePanel.open({ windowId })
+        "open-side-panel-browser-tabs": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'browserTabs' }); THEN sidePanel.open({ windowId })
         "open-options": chrome.runtime.openOptionsPage()
-        "open-bookmarks-index": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html') })
-        "open-import": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html') })
+        "open-bookmarks-index": chrome.tabs.create({ url: ... bookmarks-table.html })
+        "open-import": chrome.tabs.create({ url: ... browser-bookmark-import.html })
+    # Side panel: storage.onChanged for SIDE_PANEL_TAB_STORAGE_KEY → switchTab(newValue) when panel already open.
   traceability:
     architecture:
       - ARCH-QUICK_ACCESS_ENTRY
@@ -75,9 +79,9 @@ IMPL-EXTENSION_COMMANDS:
       - IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS
   metadata:
     created:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
     last_updated:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
       reason: Align essence_pseudocode with standard (Contract, DATA, sub-block comments)

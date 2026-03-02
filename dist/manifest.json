@@ -16,7 +16,6 @@
       "48": "icons/hoverboard_48.png",
       "128": "icons/hoverboard_128.png"
     },
-    "default_popup": "src/ui/popup/popup.html",
     "default_title": "Hoverboard - Pinboard Integration"
   },
   "commands": {

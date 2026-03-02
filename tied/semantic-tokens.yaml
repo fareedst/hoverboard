@@ -2562,15 +2562,55 @@ IMPL-EXTENSION_COMMANDS:
   type: IMPL
   name: Extension Commands for Quick Access
   status: Active
-  description: Manifest commands + SW onCommand; open side panel, options, bookmarks index, import
+  description: Manifest commands + SW onCommand; side panel (and tab-specific), options, bookmarks index, import; four suggested_key only
   cross_references:
     - ARCH-QUICK_ACCESS_ENTRY
     - REQ-QUICK_ACCESS_ENTRY
   source_index: implementation-decisions.yaml
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml
   metadata:
     registered: 2026-02-26T00:00:00.000Z
-    last_updated: 2026-02-26T00:00:00.000Z
+    last_updated: 2026-03-02T00:00:00.000Z
+REQ-ICON_CLICK_BEHAVIOR:
+  type: REQ
+  name: Extension Icon Single-Click Behavior
+  category: Functional
+  status: Implemented
+  description: Single click on extension icon opens side panel by default; user can choose popup via options
+  cross_references:
+    - ARCH-ICON_CLICK_BEHAVIOR
+    - IMPL-ICON_CLICK_BEHAVIOR
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-ICON_CLICK_BEHAVIOR.yaml
+  metadata:
+    registered: 2026-03-02T00:00:00.000Z
+    last_updated: 2026-03-02T00:00:00.000Z
+ARCH-ICON_CLICK_BEHAVIOR:
+  type: ARCH
+  name: Extension Icon Click Behavior Architecture
+  status: Active
+  description: Remove default_popup; SW action.onClicked; config-driven side panel or popup
+  cross_references:
+    - REQ-ICON_CLICK_BEHAVIOR
+    - IMPL-ICON_CLICK_BEHAVIOR
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-ICON_CLICK_BEHAVIOR.yaml
+  metadata:
+    registered: 2026-03-02T00:00:00.000Z
+    last_updated: 2026-03-02T00:00:00.000Z
+IMPL-ICON_CLICK_BEHAVIOR:
+  type: IMPL
+  name: Extension Icon Single-Click Behavior
+  status: Active
+  description: No default_popup; ConfigManager iconClickOpensSidePanel; options toggle; SW action.onClicked
+  cross_references:
+    - ARCH-ICON_CLICK_BEHAVIOR
+    - REQ-ICON_CLICK_BEHAVIOR
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml
+  metadata:
+    registered: 2026-03-02T00:00:00.000Z
+    last_updated: 2026-03-02T00:00:00.000Z
 IMPL-CONTEXT_MENU_QUICK_ACCESS:
   type: IMPL
   name: Context Menu Quick Access

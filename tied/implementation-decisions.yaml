@@ -4033,15 +4033,50 @@ IMPL-EXTENSION_COMMANDS:
       - tests/unit/service-worker-quick-access.test.js
     code_annotations:
       - IMPL-EXTENSION_COMMANDS
-  detail_file: null
+  detail_file: implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml
   metadata:
     created:
       date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: '2026-02-26'
+      date: '2026-03-02'
       author: AI Agent
-      reason: Initial creation for extension commands quick access
+      reason: Add tab-specific commands and suggested_key policy
+IMPL-ICON_CLICK_BEHAVIOR:
+  name: Extension Icon Single-Click Behavior
+  status: Active
+  cross_references:
+    - ARCH-ICON_CLICK_BEHAVIOR
+    - REQ-ICON_CLICK_BEHAVIOR
+  rationale:
+    why: Implements REQ-ICON_CLICK_BEHAVIOR so icon click opens side panel (default) or popup per options.
+  implementation_approach:
+    summary: Remove action.default_popup; ConfigManager iconClickOpensSidePanel; options toggle; SW action.onClicked reads config and opens side panel or popup.
+  code_locations:
+    files:
+      - path: manifest.json
+      - path: src/config/config-manager.js
+      - path: src/ui/options/options.html
+      - path: src/ui/options/options.js
+      - path: src/core/service-worker.js
+  traceability:
+    architecture:
+      - ARCH-ICON_CLICK_BEHAVIOR
+    requirements:
+      - REQ-ICON_CLICK_BEHAVIOR
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+    code_annotations:
+      - IMPL-ICON_CLICK_BEHAVIOR
+  detail_file: implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml
+  metadata:
+    created:
+      date: '2026-03-02'
+      author: AI Agent
+    last_updated:
+      date: '2026-03-02'
+      author: AI Agent
+      reason: Initial creation for icon click behavior
 IMPL-CONTEXT_MENU_QUICK_ACCESS:
   name: Context Menu Quick Access
   status: Active

@@ -94,7 +94,9 @@ export const MESSAGE_TYPES = {
   RECORD_SESSION_TAGS: 'recordSessionTags',
 
   // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Message type for opening side panel. Implements contract: popup sends this type; SW handles in onMessage and calls chrome.sidePanel.open({ windowId }).
-  OPEN_SIDE_PANEL: 'OPEN_SIDE_PANEL'
+  OPEN_SIDE_PANEL: 'OPEN_SIDE_PANEL',
+  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel; side panel closes itself if visible and open long enough (toggle).
+  REQUEST_SIDE_PANEL_CLOSE: 'REQUEST_SIDE_PANEL_CLOSE'
 }
 
 export class MessageHandler {

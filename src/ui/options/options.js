@@ -55,6 +55,9 @@ class OptionsController {
     this.elements.authToken = document.getElementById('auth-token')
     this.elements.testAuth = document.getElementById('test-auth')
 
+    // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on icon: side panel vs popup
+    this.elements.iconClickOpensSidePanel = document.getElementById('icon-click-opens-side-panel')
+
     // Display settings
     this.elements.showHoverOnLoad = document.getElementById('show-hover-on-load')
     this.elements.hoverShowTooltips = document.getElementById('hover-show-tooltips')
@@ -221,6 +224,11 @@ class OptionsController {
       if (this.elements.aiProvider) this.elements.aiProvider.value = config.aiProvider || 'openai'
       if (this.elements.aiTagLimit) this.elements.aiTagLimit.value = config.aiTagLimit || 64
 
+      // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Load icon click behavior; default true (side panel)
+      if (this.elements.iconClickOpensSidePanel) {
+        this.elements.iconClickOpensSidePanel.checked = config.iconClickOpensSidePanel !== false
+      }
+
       // Update visibility UI
       this.currentTheme = config.defaultVisibilityTheme
       this.updateThemeDisplay()
@@ -280,7 +288,10 @@ class OptionsController {
         // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] Persist trimmed apiKey, provider, clamped aiTagLimit via updateConfig.
         aiApiKey: this.elements.aiApiKey ? this.elements.aiApiKey.value.trim() : '',
         aiProvider: this.elements.aiProvider ? this.elements.aiProvider.value : 'openai',
-        aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64
+        aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64,
+
+        // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on icon: side panel (true) or popup (false)
+        iconClickOpensSidePanel: this.elements.iconClickOpensSidePanel ? this.elements.iconClickOpensSidePanel.checked : true
       }
 
       // Save configuration

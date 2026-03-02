@@ -1,0 +1,52 @@
+# [REQ-ICON_CLICK_BEHAVIOR] Extension icon single-click opens side panel or popup, user-configurable
+# Requirement: Single click on the extension toolbar icon opens the side panel by default; user can choose to open the popup instead via options.
+
+REQ-ICON_CLICK_BEHAVIOR:
+  name: Extension Icon Single-Click Behavior
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Provide fast access to the side panel (primary surface) from the extension icon; allow users who prefer the popup to choose it.
+    problems_solved:
+      - Icon click always opened popup; side panel required an extra step (footer or context menu)
+      - No user choice for icon click target
+    benefits:
+      - "Default: one click opens side panel (consistent with quick-access goal)"
+      - "Toggle: when side panel is open, click icon again to close it"
+      - "Options toggle: Single click opens side panel vs popup"
+  satisfaction_criteria:
+    - criterion: Single click on extension icon opens side panel by default
+    - criterion: When "open side panel on click" is enabled, a click toggles the side panel (open if closed, close if already open)
+    - criterion: User can set "Single click opens popup" in options; then icon click opens popup
+    - criterion: Setting is persisted and applied on next icon click
+  validation_criteria:
+    - method: Unit tests
+      coverage: SW action.onClicked uses cached preference and calls sidePanel.open or action.openPopup; SW sends REQUEST_SIDE_PANEL_CLOSE when opening panel; options load/save iconClickOpensSidePanel; side panel closes itself on message when visible and open long enough (shouldClosePanelOnToggleMessage)
+    - method: Manual verification
+      coverage: Click icon with default → side panel opens; click again → panel closes (toggle); set "open popup" in options, save, click icon → popup opens
+    - method: E2E (recommended)
+      coverage: Icon click opens side panel; icon click toggles (closes) panel when already open; options toggle then icon click opens popup. See IMPL-ICON_CLICK_BEHAVIOR e2e_recommendations.
+  traceability:
+    architecture:
+      - ARCH-ICON_CLICK_BEHAVIOR
+    implementation:
+      - IMPL-ICON_CLICK_BEHAVIOR
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+    code_annotations:
+      - REQ-ICON_CLICK_BEHAVIOR
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-QUICK_ACCESS_ENTRY
+    supersedes: []
+  detail_file: requirements/REQ-ICON_CLICK_BEHAVIOR.yaml
+  metadata:
+    created:
+      date: '2026-03-02'
+      author: AI Agent
+    last_updated:
+      date: '2026-03-02'
+      author: AI Agent
+      reason: Initial creation for icon click behavior

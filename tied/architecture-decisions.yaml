@@ -2578,6 +2578,37 @@ ARCH-QUICK_ACCESS_ENTRY:
       date: '2026-02-26'
       author: AI Agent
       reason: Initial creation for quick access architecture
+ARCH-ICON_CLICK_BEHAVIOR:
+  name: Extension Icon Click Behavior Architecture
+  status: Active
+  cross_references:
+    - REQ-ICON_CLICK_BEHAVIOR
+  rationale:
+    why: Enable icon click to open side panel (default) or popup by removing default_popup and handling click in SW with config-driven behavior.
+    problems_solved:
+      - default_popup prevents onClicked from firing
+    benefits:
+      - Single entry point (onClicked); config decides side panel vs openPopup()
+  implementation_approach:
+    summary: Manifest omits action.default_popup; SW registers action.onClicked; handler reads config (iconClickOpensSidePanel), then sidePanel.open or action.openPopup. Options toggle for the setting.
+  traceability:
+    requirements:
+      - REQ-ICON_CLICK_BEHAVIOR
+    implementation:
+      - IMPL-ICON_CLICK_BEHAVIOR
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+    code_annotations:
+      - ARCH-ICON_CLICK_BEHAVIOR
+  detail_file: architecture-decisions/ARCH-ICON_CLICK_BEHAVIOR.yaml
+  metadata:
+    created:
+      date: '2026-03-02'
+      author: AI Agent
+    last_updated:
+      date: '2026-03-02'
+      author: AI Agent
+      reason: Initial creation for icon click behavior
 ARCH-SITE_MGMT:
   name: Site Management
   status: Active

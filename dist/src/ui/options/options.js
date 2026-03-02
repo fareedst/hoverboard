@@ -14371,7 +14371,9 @@ var init_config_manager = __esm({
       fontSizeInputs: external_exports.number().int().min(1).optional(),
       aiApiKey: external_exports.string().optional(),
       aiProvider: external_exports.string().optional(),
-      aiTagLimit: external_exports.number().int().min(0).optional()
+      aiTagLimit: external_exports.number().int().min(0).optional(),
+      // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
+      iconClickOpensSidePanel: external_exports.boolean().optional()
     }).passthrough();
     ConfigManager = class {
       constructor() {
@@ -14493,7 +14495,9 @@ var init_config_manager = __esm({
           // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging defaults for options and storage; empty key disables feature.
           aiApiKey: "",
           aiProvider: "openai",
-          aiTagLimit: 64
+          aiTagLimit: 64,
+          // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
+          iconClickOpensSidePanel: true
         };
       }
       /**
@@ -19543,6 +19547,7 @@ var OptionsController = class {
     this.elements.authSection = document.getElementById("auth-section");
     this.elements.authToken = document.getElementById("auth-token");
     this.elements.testAuth = document.getElementById("test-auth");
+    this.elements.iconClickOpensSidePanel = document.getElementById("icon-click-opens-side-panel");
     this.elements.showHoverOnLoad = document.getElementById("show-hover-on-load");
     this.elements.hoverShowTooltips = document.getElementById("hover-show-tooltips");
     this.elements.recentPostsCount = document.getElementById("recent-posts-count");
@@ -19652,6 +19657,9 @@ var OptionsController = class {
       if (this.elements.aiApiKey) this.elements.aiApiKey.value = config2.aiApiKey || "";
       if (this.elements.aiProvider) this.elements.aiProvider.value = config2.aiProvider || "openai";
       if (this.elements.aiTagLimit) this.elements.aiTagLimit.value = config2.aiTagLimit || 64;
+      if (this.elements.iconClickOpensSidePanel) {
+        this.elements.iconClickOpensSidePanel.checked = config2.iconClickOpensSidePanel !== false;
+      }
       this.currentTheme = config2.defaultVisibilityTheme;
       this.updateThemeDisplay();
       this.updateTransparencyState();
@@ -19699,7 +19707,9 @@ var OptionsController = class {
         // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] Persist trimmed apiKey, provider, clamped aiTagLimit via updateConfig.
         aiApiKey: this.elements.aiApiKey ? this.elements.aiApiKey.value.trim() : "",
         aiProvider: this.elements.aiProvider ? this.elements.aiProvider.value : "openai",
-        aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64
+        aiTagLimit: this.elements.aiTagLimit ? Math.min(128, Math.max(1, parseInt(this.elements.aiTagLimit.value) || 64)) : 64,
+        // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on icon: side panel (true) or popup (false)
+        iconClickOpensSidePanel: this.elements.iconClickOpensSidePanel ? this.elements.iconClickOpensSidePanel.checked : true
       };
       await this.configManager.updateConfig(settings);
       const authToken = this.elements.authToken.value.trim();

@@ -3,6 +3,7 @@
  * Side panel entry: tab bar, Bookmark panel (popup-equivalent), Tags tree panel; tab switch and persist; init Bookmark and Tags tree tabs on first select.
  */
 
+import { MESSAGE_TYPES } from '../../core/message-handler.js'
 import {
   SIDE_PANEL_TAB_STORAGE_KEY,
   TAB_BOOKMARK,
@@ -32,6 +33,8 @@ let tagsTreeTabInited = false
 let browserTabsTabInited = false
 /** @type {{ controller: import('../popup/PopupController.js').PopupController, uiManager: import('../popup/UIManager.js').UIManager } | null} */
 let popupComponents = null
+// [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Time when panel script ran; used to avoid closing on first open (toggle only if open > threshold).
+const _sidePanelLoadTime = Date.now()
 
 /**
  * [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
@@ -210,6 +213,44 @@ function bindTabChangeRefresh () {
 }
 
 /**
+ * [IMPL-EXTENSION_COMMANDS] [IMPL-SIDE_PANEL_TABS] When a tab-specific command runs (e.g. Ctrl+Shift+2), SW sets storage then opens panel.
+ * If panel is already open, listen for storage change and switch to the requested tab.
+ */
+function bindStorageTabChange () {
+  if (typeof chrome === 'undefined' || !chrome.storage?.onChanged?.addListener) return
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== 'local') return
+    const change = changes[SIDE_PANEL_TAB_STORAGE_KEY]
+    if (!change?.newValue) return
+    const tabId = change.newValue
+    if (tabId !== TAB_BOOKMARK && tabId !== TAB_TAGS_TREE && tabId !== TAB_BROWSER_TABS) return
+    if (tabId === activeTab) return
+    switchTab(tabId)
+  })
+}
+
+/** [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Decide whether to close on REQUEST_SIDE_PANEL_CLOSE (visible and open long enough). Exported for unit tests. */
+export function shouldClosePanelOnToggleMessage (message, opts = {}) {
+  const visibilityState = opts.visibilityState ?? document.visibilityState
+  const now = opts.now ?? Date.now()
+  const loadTime = opts.loadTime ?? _sidePanelLoadTime
+  const TOGGLE_MIN_OPEN_MS = 300
+  if (message?.type !== MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE) return false
+  if (visibilityState !== 'visible') return false
+  if (now - loadTime < TOGGLE_MIN_OPEN_MS) return false
+  return true
+}
+
+/** [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] On REQUEST_SIDE_PANEL_CLOSE from SW: close panel if visible and open long enough (toggle). */
+function bindToggleCloseRequest () {
+  if (typeof chrome === 'undefined' || !chrome.runtime?.onMessage?.addListener) return
+  chrome.runtime.onMessage.addListener((message) => {
+    if (!shouldClosePanelOnToggleMessage(message)) return
+    if (typeof window.close === 'function') window.close()
+  })
+}
+
+/**
  * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
  * On panel load: when restored tab is Tags tree, init Bookmark tab first so controller and current-tab data exist, then init Tags tree with currentBookmarkTags so it displays current URL's DB record. Exported for unit tests.
  * @param {string} tabId - activeTab (TAB_BOOKMARK | TAB_TAGS_TREE)
@@ -247,5 +288,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   showPanel()
   bindTabButtons()
   bindTabChangeRefresh()
+  bindStorageTabChange()
+  bindToggleCloseRequest()
   await runInitialTabInit(activeTab)
 })

@@ -58,7 +58,9 @@ const mergedConfigSchema = z.object({
   fontSizeInputs: z.number().int().min(1).optional(),
   aiApiKey: z.string().optional(),
   aiProvider: z.string().optional(),
-  aiTagLimit: z.number().int().min(0).optional()
+  aiTagLimit: z.number().int().min(0).optional(),
+  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
+  iconClickOpensSidePanel: z.boolean().optional()
 }).passthrough()
 
 export class ConfigManager {
@@ -154,7 +156,10 @@ export class ConfigManager {
       // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging defaults for options and storage; empty key disables feature.
       aiApiKey: '',
       aiProvider: 'openai',
-      aiTagLimit: 64
+      aiTagLimit: 64,
+
+      // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
+      iconClickOpensSidePanel: true
     }
   }
 

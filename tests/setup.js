@@ -225,6 +225,11 @@ global.chrome = {
     removeAll: jest.fn().mockImplementation((cb) => { if (typeof cb === 'function') cb(); }),
     onClicked: { addListener: jest.fn() },
   },
+  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] action.onClicked and openPopup for icon click tests
+  action: {
+    onClicked: { addListener: jest.fn() },
+    openPopup: jest.fn(),
+  },
 };
 
 // Mock browser APIs for cross-browser compatibility

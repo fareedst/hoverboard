@@ -1,0 +1,46 @@
+# [ARCH-ICON_CLICK_BEHAVIOR] [REQ-ICON_CLICK_BEHAVIOR]
+# Architecture: Remove action.default_popup so chrome.action.onClicked fires; SW handler reads config and opens side panel or popup.
+
+ARCH-ICON_CLICK_BEHAVIOR:
+  name: Extension Icon Click Behavior Architecture
+  status: Active
+  cross_references:
+    - REQ-ICON_CLICK_BEHAVIOR
+  rationale:
+    why: Enable icon click to open side panel (default) or popup by removing the fixed popup and handling click in the service worker with config-driven behavior.
+    problems_solved:
+      - default_popup prevents onClicked from firing; must remove it to get click events
+    benefits:
+      - Single entry point (onClicked); config (iconClickOpensSidePanel) decides side panel vs action.openPopup()
+  implementation_approach:
+    summary: Manifest omits action.default_popup; SW registers chrome.action.onClicked; handler runs synchronously using a cached preference so sidePanel.open() runs in user-gesture context; when opening side panel, SW sends REQUEST_SIDE_PANEL_CLOSE so the panel can close itself if already visible (toggle). Config key iconClickOpensSidePanel (default true) stored via ConfigManager; options page toggle to set it.
+    details:
+      - "Manifest: remove action.default_popup so that clicking the icon does not open a popup automatically; onClicked will fire."
+      - "SW: cache iconClickOpensSidePanel at startup and on storage change; onClicked handler is synchronous: if cached preference !== false and windowId set, call sidePanel.open({ windowId }) then sendMessage(REQUEST_SIDE_PANEL_CLOSE); else action.openPopup(). No await in handler (user gesture requirement)."
+      - "Side panel: on REQUEST_SIDE_PANEL_CLOSE, if document.visibilityState === 'visible' and (Date.now() - loadTime) > threshold, window.close() to implement toggle."
+      - "Config: iconClickOpensSidePanel boolean, default true; in getDefaultConfiguration and mergedConfigSchema; options UI bind and save."
+  traceability:
+    requirements:
+      - REQ-ICON_CLICK_BEHAVIOR
+    implementation:
+      - IMPL-ICON_CLICK_BEHAVIOR
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+    code_annotations:
+      - ARCH-ICON_CLICK_BEHAVIOR
+  related_decisions:
+    depends_on:
+      - REQ-ICON_CLICK_BEHAVIOR
+    informs:
+      - IMPL-ICON_CLICK_BEHAVIOR
+    see_also:
+      - ARCH-QUICK_ACCESS_ENTRY
+  detail_file: architecture-decisions/ARCH-ICON_CLICK_BEHAVIOR.yaml
+  metadata:
+    created:
+      date: '2026-03-02'
+      author: AI Agent
+    last_updated:
+      date: '2026-03-02'
+      author: AI Agent
+      reason: Initial creation for icon click behavior

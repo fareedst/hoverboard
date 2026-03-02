@@ -48,5 +48,7 @@ export interface MergedConfig {
   aiApiKey?: string
   aiProvider?: string
   aiTagLimit?: number
+  /** [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon opens side panel (true) or popup (false). Default true. */
+  iconClickOpensSidePanel?: boolean
   [key: string]: unknown
 }

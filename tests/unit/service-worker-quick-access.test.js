@@ -4,6 +4,7 @@
  */
 
 import { HoverboardServiceWorker } from '../../src/core/service-worker.js'
+import { MESSAGE_TYPES } from '../../src/core/message-handler.js'
 
 describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS] Extension commands quick access', () => {
   let sw
@@ -29,6 +30,33 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COM
     sw._sidePanelWindowId = 42
     const listener = global.chrome.commands.onCommand.addListener.mock.calls[0][0]
     listener('open-side-panel')
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
+  })
+
+  test('command open-side-panel-bookmark sets storage then opens side panel [IMPL-EXTENSION_COMMANDS]', async () => {
+    sw._sidePanelWindowId = 42
+    await sw.handleCommand('open-side-panel-bookmark')
+    expect(global.chrome.storage.local.set).toHaveBeenCalledWith(
+      { hoverboard_sidepanel_active_tab: 'bookmark' }
+    )
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
+  })
+
+  test('command open-side-panel-tags-tree sets storage then opens side panel [IMPL-EXTENSION_COMMANDS]', async () => {
+    sw._sidePanelWindowId = 42
+    await sw.handleCommand('open-side-panel-tags-tree')
+    expect(global.chrome.storage.local.set).toHaveBeenCalledWith(
+      { hoverboard_sidepanel_active_tab: 'tagsTree' }
+    )
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
+  })
+
+  test('command open-side-panel-browser-tabs sets storage then opens side panel [IMPL-EXTENSION_COMMANDS]', async () => {
+    sw._sidePanelWindowId = 42
+    await sw.handleCommand('open-side-panel-browser-tabs')
+    expect(global.chrome.storage.local.set).toHaveBeenCalledWith(
+      { hoverboard_sidepanel_active_tab: 'browserTabs' }
+    )
     expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
   })
 
@@ -103,5 +131,50 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_
     expect(global.chrome.tabs.create).toHaveBeenCalledWith({
       url: 'chrome-extension://test-id/src/ui/browser-bookmark-import/browser-bookmark-import.html'
     })
+  })
+})
+
+describe('[REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Extension icon click', () => {
+  let sw
+
+  beforeEach(() => {
+    jest.clearAllMocks()
+    global.chrome.runtime.getURL.mockImplementation((path) => `chrome-extension://test-id/${path}`)
+    sw = new HoverboardServiceWorker()
+  })
+
+  test('action.onClicked listener is registered', () => {
+    expect(global.chrome.action.onClicked.addListener).toHaveBeenCalled()
+    expect(typeof global.chrome.action.onClicked.addListener.mock.calls[0][0]).toBe('function')
+  })
+
+  test('handleActionClick with _iconClickOpensSidePanel true opens side panel', () => {
+    sw._sidePanelWindowId = 42
+    sw._iconClickOpensSidePanel = true
+    sw.handleActionClick()
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
+    expect(global.chrome.action.openPopup).not.toHaveBeenCalled()
+  })
+
+  test('handleActionClick with _iconClickOpensSidePanel false opens popup', () => {
+    sw._iconClickOpensSidePanel = false
+    sw.handleActionClick()
+    expect(global.chrome.sidePanel.open).not.toHaveBeenCalled()
+    expect(global.chrome.action.openPopup).toHaveBeenCalledTimes(1)
+  })
+
+  test('handleActionClick with cache undefined (default) opens side panel', () => {
+    sw._sidePanelWindowId = 42
+    sw._iconClickOpensSidePanel = undefined
+    sw.handleActionClick()
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
+  })
+
+  test('handleActionClick when opening side panel sends REQUEST_SIDE_PANEL_CLOSE for toggle [REQ-ICON_CLICK_BEHAVIOR]', () => {
+    sw._sidePanelWindowId = 42
+    sw._iconClickOpensSidePanel = true
+    global.chrome.runtime.sendMessage = jest.fn()
+    sw.handleActionClick()
+    expect(global.chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE })
   })
 })

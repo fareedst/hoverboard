@@ -2497,6 +2497,50 @@ REQ-QUICK_ACCESS_ENTRY:
       date: '2026-02-26'
       author: AI Agent
       reason: Initial creation for quick access commands, context menu, and in-popup/panel shortcuts
+REQ-ICON_CLICK_BEHAVIOR:
+  name: Extension Icon Single-Click Behavior
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Provide fast access to the side panel from the extension icon; allow users who prefer the popup to choose it.
+    problems_solved:
+      - Icon click always opened popup; side panel required an extra step
+      - No user choice for icon click target
+    benefits:
+      - Default: one click opens side panel; options toggle for popup
+  satisfaction_criteria:
+    - criterion: Single click on extension icon opens side panel by default
+    - criterion: User can set "Single click opens popup" in options; then icon click opens popup
+    - criterion: Setting is persisted and applied on next icon click
+  validation_criteria:
+    - method: Unit tests
+      coverage: SW action.onClicked reads config and calls sidePanel.open or action.openPopup; options load/save iconClickOpensSidePanel
+    - method: Manual verification
+      coverage: Click icon with default → side panel; set "open popup" in options → icon click opens popup
+  traceability:
+    architecture:
+      - ARCH-ICON_CLICK_BEHAVIOR
+    implementation:
+      - IMPL-ICON_CLICK_BEHAVIOR
+    tests:
+      - tests/unit/service-worker-quick-access.test.js
+    code_annotations:
+      - REQ-ICON_CLICK_BEHAVIOR
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-QUICK_ACCESS_ENTRY
+    supersedes: []
+  detail_file: requirements/REQ-ICON_CLICK_BEHAVIOR.yaml
+  metadata:
+    created:
+      date: '2026-03-02'
+      author: AI Agent
+    last_updated:
+      date: '2026-03-02'
+      author: AI Agent
+      reason: Initial creation for icon click behavior
 REQ-MAINTAINABILITY:
   name: Maintainability
   category: Non-Functional

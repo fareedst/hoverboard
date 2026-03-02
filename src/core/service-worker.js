@@ -18,6 +18,8 @@ import { BookmarkRouter } from '../features/storage/bookmark-router.js'
 import { normalizeBookmarkForDisplay } from '../features/storage/url-tags-manager.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
+// [REQ-ICON_CLICK_BEHAVIOR] [IMPL-EXTENSION_COMMANDS] Tab IDs and storage key for side panel tab-specific commands
+import { SIDE_PANEL_TAB_STORAGE_KEY, TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS } from '../ui/side-panel/side-panel-tab-state.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
 import { browser } from '../shared/safari-shim.js' // [SAFARI-EXT-SHIM-001]
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Optional message log for testing/debugging
@@ -144,10 +146,13 @@ class HoverboardServiceWorker {
     this._providerInitialized = false
     // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Cached normal windowId for sidePanel.open(). Implements open-from-popup by keeping a windowId so open() can be called synchronously in onMessage (user gesture requirement: no await before open).
     this._sidePanelWindowId = null
+    // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Cached so handleActionClick can call sidePanel.open() synchronously (user gesture requirement: no await before open).
+    this._iconClickOpensSidePanel = undefined
 
     // MV3-001: Set up V3 event listeners
     this.setupEventListeners()
     this._seedSidePanelWindowCache()
+    this._seedIconClickPreferenceCache()
   }
 
   /**
@@ -259,23 +264,73 @@ class HoverboardServiceWorker {
       this.handleExtensionStartup()
     })
 
-    // [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS] Extension commands: open side panel, options, bookmarks index, import.
+    // [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS] Extension commands: open side panel (and tab-specific), options, bookmarks index, import.
     const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
     if (chromeApi?.commands?.onCommand?.addListener) {
-      chromeApi.commands.onCommand.addListener((command) => this.handleCommand(command))
+      chromeApi.commands.onCommand.addListener((command) => { this.handleCommand(command).catch(() => {}) })
+    }
+
+    // [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Icon click: open side panel (default) or popup per config. Handler must be synchronous so sidePanel.open() runs in user-gesture context.
+    if (chromeApi?.action?.onClicked?.addListener) {
+      chromeApi.action.onClicked.addListener(() => { this.handleActionClick() })
+    }
+  }
+
+  /** [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Seed and keep _iconClickOpensSidePanel so handleActionClick can read it synchronously. */
+  _seedIconClickPreferenceCache () {
+    this.configManager.getConfig().then((c) => { this._iconClickOpensSidePanel = c.iconClickOpensSidePanel }).catch(() => {})
+    const storage = typeof globalThis.chrome !== 'undefined' && globalThis.chrome.storage ? globalThis.chrome.storage : null
+    if (storage?.onChanged?.addListener) {
+      storage.onChanged.addListener((changes, areaName) => {
+        if (areaName !== 'local') return
+        if (changes.hoverboard_settings) {
+          this.configManager.getConfig().then((c) => { this._iconClickOpensSidePanel = c.iconClickOpensSidePanel }).catch(() => {})
+        }
+      })
+    }
+  }
+
+  /**
+   * [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR]
+   * Handle extension icon click: open side panel (default) or popup per cached preference; if side panel, toggle (close when already open). Must run synchronously so sidePanel.open() is in user-gesture context.
+   */
+  handleActionClick () {
+    const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
+    const openSidePanel = this._iconClickOpensSidePanel !== false
+    if (openSidePanel && this._sidePanelWindowId != null && chromeApi?.sidePanel?.open) {
+      chromeApi.sidePanel.open({ windowId: this._sidePanelWindowId })
+      // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Ask panel to close if already visible (toggle). Panel closes only if open > ~300ms to avoid closing on first open.
+      if (chromeApi?.runtime?.sendMessage) {
+        const p = chromeApi.runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE })
+        if (p && typeof p.catch === 'function') p.catch(() => {})
+      }
+    } else if (chromeApi?.action?.openPopup) {
+      chromeApi.action.openPopup()
     }
   }
 
   /**
    * [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]
-   * Handle extension command (keyboard shortcut): open side panel, options, bookmarks index, or import page.
+   * Handle extension command (keyboard shortcut): open side panel (or specific tab), options, bookmarks index, or import page.
    */
-  handleCommand (command) {
+  async handleCommand (command) {
     const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
     const runtime = chromeApi?.runtime || browser.runtime
     const getURL = runtime.getURL ? (path) => runtime.getURL(path) : () => ''
+    const windowId = this._sidePanelWindowId
+
     if (command === 'open-side-panel') {
-      const windowId = this._sidePanelWindowId
+      if (windowId != null && chromeApi?.sidePanel?.open) {
+        chromeApi.sidePanel.open({ windowId })
+      }
+      return
+    }
+    // [IMPL-EXTENSION_COMMANDS] Tab-specific commands: set persisted tab then open panel; panel reads storage on load or onChanged.
+    if (command === 'open-side-panel-bookmark' || command === 'open-side-panel-tags-tree' || command === 'open-side-panel-browser-tabs') {
+      const tabId = command === 'open-side-panel-bookmark' ? TAB_BOOKMARK : command === 'open-side-panel-tags-tree' ? TAB_TAGS_TREE : TAB_BROWSER_TABS
+      if (chromeApi?.storage?.local?.set) {
+        await chromeApi.storage.local.set({ [SIDE_PANEL_TAB_STORAGE_KEY]: tabId })
+      }
       if (windowId != null && chromeApi?.sidePanel?.open) {
         chromeApi.sidePanel.open({ windowId })
       }

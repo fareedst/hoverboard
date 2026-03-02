@@ -14371,7 +14371,9 @@ var init_config_manager = __esm({
       fontSizeInputs: external_exports.number().int().min(1).optional(),
       aiApiKey: external_exports.string().optional(),
       aiProvider: external_exports.string().optional(),
-      aiTagLimit: external_exports.number().int().min(0).optional()
+      aiTagLimit: external_exports.number().int().min(0).optional(),
+      // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
+      iconClickOpensSidePanel: external_exports.boolean().optional()
     }).passthrough();
     ConfigManager = class {
       constructor() {
@@ -14493,7 +14495,9 @@ var init_config_manager = __esm({
           // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging defaults for options and storage; empty key disables feature.
           aiApiKey: "",
           aiProvider: "openai",
-          aiTagLimit: 64
+          aiTagLimit: 64,
+          // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
+          iconClickOpensSidePanel: true
         };
       }
       /**
@@ -20155,7 +20159,9 @@ var MESSAGE_TYPES = {
   GET_SESSION_TAGS: "getSessionTags",
   RECORD_SESSION_TAGS: "recordSessionTags",
   // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Message type for opening side panel. Implements contract: popup sends this type; SW handles in onMessage and calls chrome.sidePanel.open({ windowId }).
-  OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL"
+  OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL",
+  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel; side panel closes itself if visible and open long enough (toggle).
+  REQUEST_SIDE_PANEL_CLOSE: "REQUEST_SIDE_PANEL_CLOSE"
 };
 var MessageHandler = class {
   constructor(bookmarkProvider = null, tagService = null) {
@@ -21924,6 +21930,12 @@ var BadgeManager = class {
   }
 };
 
+// src/ui/side-panel/side-panel-tab-state.js
+var SIDE_PANEL_TAB_STORAGE_KEY = "hoverboard_sidepanel_active_tab";
+var TAB_BOOKMARK = "bookmark";
+var TAB_TAGS_TREE = "tagsTree";
+var TAB_BROWSER_TABS = "browserTabs";
+
 // src/core/service-worker.js
 init_safari_shim();
 
@@ -22077,8 +22089,10 @@ var HoverboardServiceWorker = class {
     this.recentTagsMemory = new RecentTagsMemoryManager();
     this._providerInitialized = false;
     this._sidePanelWindowId = null;
+    this._iconClickOpensSidePanel = void 0;
     this.setupEventListeners();
     this._seedSidePanelWindowCache();
+    this._seedIconClickPreferenceCache();
   }
   /**
    * [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] File adapter: path set → NativeHost; else picker → Message; else InMemory.
@@ -22165,19 +22179,74 @@ var HoverboardServiceWorker = class {
     });
     const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
     if (chromeApi?.commands?.onCommand?.addListener) {
-      chromeApi.commands.onCommand.addListener((command) => this.handleCommand(command));
+      chromeApi.commands.onCommand.addListener((command) => {
+        this.handleCommand(command).catch(() => {
+        });
+      });
+    }
+    if (chromeApi?.action?.onClicked?.addListener) {
+      chromeApi.action.onClicked.addListener(() => {
+        this.handleActionClick();
+      });
+    }
+  }
+  /** [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Seed and keep _iconClickOpensSidePanel so handleActionClick can read it synchronously. */
+  _seedIconClickPreferenceCache() {
+    this.configManager.getConfig().then((c) => {
+      this._iconClickOpensSidePanel = c.iconClickOpensSidePanel;
+    }).catch(() => {
+    });
+    const storage = typeof globalThis.chrome !== "undefined" && globalThis.chrome.storage ? globalThis.chrome.storage : null;
+    if (storage?.onChanged?.addListener) {
+      storage.onChanged.addListener((changes, areaName) => {
+        if (areaName !== "local") return;
+        if (changes.hoverboard_settings) {
+          this.configManager.getConfig().then((c) => {
+            this._iconClickOpensSidePanel = c.iconClickOpensSidePanel;
+          }).catch(() => {
+          });
+        }
+      });
+    }
+  }
+  /**
+   * [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR]
+   * Handle extension icon click: open side panel (default) or popup per cached preference; if side panel, toggle (close when already open). Must run synchronously so sidePanel.open() is in user-gesture context.
+   */
+  handleActionClick() {
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    const openSidePanel = this._iconClickOpensSidePanel !== false;
+    if (openSidePanel && this._sidePanelWindowId != null && chromeApi?.sidePanel?.open) {
+      chromeApi.sidePanel.open({ windowId: this._sidePanelWindowId });
+      if (chromeApi?.runtime?.sendMessage) {
+        const p = chromeApi.runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE });
+        if (p && typeof p.catch === "function") p.catch(() => {
+        });
+      }
+    } else if (chromeApi?.action?.openPopup) {
+      chromeApi.action.openPopup();
     }
   }
   /**
    * [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]
-   * Handle extension command (keyboard shortcut): open side panel, options, bookmarks index, or import page.
+   * Handle extension command (keyboard shortcut): open side panel (or specific tab), options, bookmarks index, or import page.
    */
-  handleCommand(command) {
+  async handleCommand(command) {
     const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
     const runtime = chromeApi?.runtime || safariEnhancements.runtime;
     const getURL = runtime.getURL ? (path) => runtime.getURL(path) : () => "";
+    const windowId = this._sidePanelWindowId;
     if (command === "open-side-panel") {
-      const windowId = this._sidePanelWindowId;
+      if (windowId != null && chromeApi?.sidePanel?.open) {
+        chromeApi.sidePanel.open({ windowId });
+      }
+      return;
+    }
+    if (command === "open-side-panel-bookmark" || command === "open-side-panel-tags-tree" || command === "open-side-panel-browser-tabs") {
+      const tabId = command === "open-side-panel-bookmark" ? TAB_BOOKMARK : command === "open-side-panel-tags-tree" ? TAB_TAGS_TREE : TAB_BROWSER_TABS;
+      if (chromeApi?.storage?.local?.set) {
+        await chromeApi.storage.local.set({ [SIDE_PANEL_TAB_STORAGE_KEY]: tabId });
+      }
       if (windowId != null && chromeApi?.sidePanel?.open) {
         chromeApi.sidePanel.open({ windowId });
       }

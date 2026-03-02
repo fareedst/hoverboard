@@ -15476,7 +15476,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         fontSizeInputs: external_exports.number().int().min(1).optional(),
         aiApiKey: external_exports.string().optional(),
         aiProvider: external_exports.string().optional(),
-        aiTagLimit: external_exports.number().int().min(0).optional()
+        aiTagLimit: external_exports.number().int().min(0).optional(),
+        // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (true) or popup (false)
+        iconClickOpensSidePanel: external_exports.boolean().optional()
       }).passthrough();
       ConfigManager = class {
         constructor() {
@@ -15598,7 +15600,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
             // [REQ-AI_TAGGING_CONFIG] [ARCH-AI_TAGGING_CONFIG] [IMPL-AI_CONFIG_OPTIONS] AI tagging defaults for options and storage; empty key disables feature.
             aiApiKey: "",
             aiProvider: "openai",
-            aiTagLimit: 64
+            aiTagLimit: 64,
+            // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Default: single click on extension icon opens side panel; user can set to open popup in options.
+            iconClickOpensSidePanel: true
           };
         }
         /**
@@ -24821,7 +24825,9 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     GET_SESSION_TAGS: "getSessionTags",
     RECORD_SESSION_TAGS: "recordSessionTags",
     // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Message type for opening side panel. Implements contract: popup sends this type; SW handles in onMessage and calls chrome.sidePanel.open({ windowId }).
-    OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL"
+    OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL",
+    // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel; side panel closes itself if visible and open long enough (toggle).
+    REQUEST_SIDE_PANEL_CLOSE: "REQUEST_SIDE_PANEL_CLOSE"
   };
 
   // src/features/ai/readability-extract.js
