@@ -1,7 +1,9 @@
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
- * Browser tabs panel: pure filter and URL list helpers; init and render (load tabs, referrer, UI).
+ * Browser tabs panel: pure filter and URL list helpers; init and render (load tabs, referrer, UI); batch bookmark actions (set/clear to-read, add tags).
  */
+
+import { parseTagsInput, buildAddTagsPayload } from '../bookmarks-table/bookmarks-table-filter.js'
 
 /** [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Search scope: tabInfo = title/url/referrer; pageText = body text; importantTags = alt, h1–h3, meta, etc. */
 export const SEARCH_SCOPE_TAB_INFO = 'tabInfo'
@@ -89,8 +91,9 @@ export function getReferrerDisplayText (referrer) {
  * @param {{ query: (opts: object) => Promise<object[]>, remove: (id: number) => Promise<void> }} [chromeTabs]
  * @param {{ executeScript?: (opts: object) => Promise<object[]> }} [chromeScripting] - unused; referrer is fetched via GET_TAB_REFERRERS from SW
  * @param {(tabs: { id?: number, url?: string }[]) => Promise<Record<number, string>>} [getReferrers] - optional for tests; when provided, used instead of sendMessage
+ * @param {{ update: (windowId: number, opts: object) => Promise<unknown> }} [chromeWindows] - optional for tests; when provided, used for focus-on-click
  */
-export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferrers) {
+export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferrers, chromeWindows) {
   const document = doc || (typeof globalThis.document !== 'undefined' ? globalThis.document : null)
   if (!document) return
   const panel = document.getElementById('browserTabsPanel')
@@ -104,14 +107,19 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const messageEl = panel.querySelector('#browserTabsMessage')
   const scopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsWindowScope"]')
   const searchScopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsSearchScope"]')
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch bookmark UI
+  const tagsInput = panel.querySelector('#browserTabsTagsInput')
+  const addTagsBtn = panel.querySelector('[data-action="addTags"]') || panel.querySelector('#browserTabsAddTagsBtn')
+  const setToReadBtn = panel.querySelector('[data-action="setToRead"]') || panel.querySelector('#browserTabsSetToReadBtn')
+  const clearToReadBtn = panel.querySelector('[data-action="clearToRead"]') || panel.querySelector('#browserTabsClearToReadBtn')
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] windowScope: currentWindow (default) or all; searchScope: tabInfo (default), pageText, or importantTags
   let windowScope = 'currentWindow'
   let searchScope = SEARCH_SCOPE_TAB_INFO
 
-  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string }[]} */
+  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string, bookmarkTags?: string[] }[]} */
   let allTabs = []
-  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string }[]} */
+  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string, bookmarkTags?: string[] }[]} */
   let visibleTabs = []
 
   function getWindowScope () {
@@ -132,6 +140,21 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     return SEARCH_SCOPE_TAB_INFO
   }
 
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Focus window and tab on click (ids line clickable)
+  function focusWindowAndTab (windowId, tabId) {
+    const w = Number(windowId)
+    const t = Number(tabId)
+    if (Number.isNaN(w) || Number.isNaN(t)) return
+    const apiTabs = chromeTabs || (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null)
+    const apiWindows = chromeWindows || (typeof chrome !== 'undefined' && chrome.windows ? chrome.windows : null) || (typeof browser !== 'undefined' && browser.windows ? browser.windows : null)
+    if (apiWindows && typeof apiWindows.update === 'function') {
+      apiWindows.update(w, { focused: true }).catch(() => {})
+    }
+    if (apiTabs && typeof apiTabs.update === 'function') {
+      apiTabs.update(t, { active: true }).catch(() => {})
+    }
+  }
+
   function renderList () {
     if (!listEl) return
     listEl.innerHTML = ''
@@ -140,11 +163,19 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       card.className = 'browser-tabs-card'
       const windowId = tab.windowId != null ? String(tab.windowId) : ''
       const tabId = tab.id != null ? String(tab.id) : ''
+      const idsDisplay = `Window ${escapeHtml(windowId)} · Tab ${escapeHtml(tabId)}`
+      const hasValidIds = windowId !== '' && tabId !== ''
+      const tagsArr = Array.isArray(tab.bookmarkTags) ? tab.bookmarkTags : []
+      const tagsDisplay = tagsArr.length > 0 ? escapeHtml(tagsArr.join(', ')) : '—'
+      const idsMarkup = hasValidIds
+        ? `<button type="button" class="browser-tabs-card-ids browser-tabs-card-ids-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${idsDisplay}</button>`
+        : `<div class="browser-tabs-card-ids">${idsDisplay}</div>`
       card.innerHTML = `
         <div class="browser-tabs-card-title">${escapeHtml(tab.title || '(no title)')}</div>
         <div class="browser-tabs-card-url">${escapeHtml(tab.url || '')}</div>
         <div class="browser-tabs-card-referrer">${escapeHtml(getReferrerDisplayText(tab.referrer))}</div>
-        <div class="browser-tabs-card-ids">Window ${escapeHtml(windowId)} · Tab ${escapeHtml(tabId)}</div>
+        ${idsMarkup}
+        <div class="browser-tabs-card-tags">Tags: ${tagsDisplay}</div>
       `
       listEl.appendChild(card)
     })
@@ -224,6 +255,33 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         referrer: (tab.id != null && referrersMap[tab.id] !== undefined) ? referrersMap[tab.id] : ''
       }))
       allTabs = withReferrer
+      // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Fetch bookmark tags per tab (same source as popup)
+      if (runtime && typeof runtime.sendMessage === 'function') {
+        try {
+          await Promise.all(allTabs.map(async (tab) => {
+            const url = (tab.url ?? '').trim()
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+              tab.bookmarkTags = []
+              return
+            }
+            try {
+              const reply = await new Promise((resolve, reject) => {
+                runtime.sendMessage({ type: 'getCurrentBookmark', data: { url: tab.url, title: tab.title } }, (r) => {
+                  if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError?.message))
+                  else resolve(r)
+                })
+              })
+              tab.bookmarkTags = reply && reply.success && reply.data && Array.isArray(reply.data.tags) ? reply.data.tags : []
+            } catch (_) {
+              tab.bookmarkTags = []
+            }
+          }))
+        } catch (_) {
+          allTabs.forEach((t) => { t.bookmarkTags = t.bookmarkTags ?? [] })
+        }
+      } else {
+        allTabs.forEach((t) => { t.bookmarkTags = [] })
+      }
       searchScope = getSearchScope()
       setFilterPlaceholder()
       if (searchScope === SEARCH_SCOPE_PAGE_TEXT || searchScope === SEARCH_SCOPE_IMPORTANT_TAGS) {
@@ -277,6 +335,17 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     filterInput.addEventListener('input', applyFilter)
   }
 
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Delegated click: focus window and tab when ids line is clicked
+  if (listEl) {
+    listEl.addEventListener('click', (e) => {
+      const btn = e.target && e.target.closest && e.target.closest('.browser-tabs-card-ids-link')
+      if (!btn) return
+      const windowId = btn.getAttribute('data-window-id')
+      const tabId = btn.getAttribute('data-tab-id')
+      if (windowId != null && tabId != null) focusWindowAndTab(windowId, tabId)
+    })
+  }
+
   if (copyBtn) {
     copyBtn.addEventListener('click', async () => {
       const urls = buildUrlListForCopy(visibleTabs)
@@ -326,6 +395,128 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       }
       showMessage(`Closed ${closed} tab${closed !== 1 ? 's' : ''}`)
       await loadTabs()
+    })
+  }
+
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Batch bookmark actions: set to-read (create if missing), clear to-read (skip if no bookmark), add tags (create if missing).
+  const runtime = typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime : (typeof browser !== 'undefined' && browser.runtime ? browser.runtime : null)
+  function sendMessage (msg) {
+    if (!runtime || !runtime.sendMessage) return Promise.reject(new Error('No runtime'))
+    return new Promise((resolve, reject) => {
+      runtime.sendMessage(msg, (r) => {
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError?.message))
+        else resolve(r)
+      })
+    })
+  }
+
+  if (setToReadBtn) {
+    setToReadBtn.addEventListener('click', async () => {
+      if (visibleTabs.length === 0) return
+      const buttons = [setToReadBtn, clearToReadBtn, addTagsBtn].filter(Boolean)
+      buttons.forEach(b => { b.disabled = true })
+      let ok = 0
+      for (const tab of visibleTabs) {
+        const tabUrl = (tab.url ?? '').trim()
+        if (!tabUrl.startsWith('http://') && !tabUrl.startsWith('https://')) continue
+        try {
+          const reply = await sendMessage({ type: 'getCurrentBookmark', data: { url: tabUrl, title: tab.title } })
+          if (!reply || !reply.success || !reply.data || reply.data.blocked) continue
+          if (reply.data.exists && reply.data.url) {
+            // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Preserve existing tags (and other fields); API may replace bookmark if we only send toread.
+            const res = await sendMessage({
+              type: 'saveBookmark',
+              data: { ...reply.data, toread: 'yes' }
+            })
+            if (res && res.success) ok++
+          } else {
+            const urlToSave = (reply.data && reply.data.url) || tabUrl
+            if (!urlToSave) continue
+            const res = await sendMessage({
+              type: 'saveBookmark',
+              data: {
+                url: urlToSave,
+                description: (tab.title ?? '').trim() || urlToSave,
+                tags: [],
+                toread: 'yes',
+                preferredBackend: 'local'
+              }
+            })
+            if (res && res.success) ok++
+          }
+        } catch (_) { /* skip */ }
+      }
+      buttons.forEach(b => { b.disabled = false })
+      showMessage(`Set to-read for ${ok} tab${ok !== 1 ? 's' : ''}`)
+    })
+  }
+
+  if (clearToReadBtn) {
+    clearToReadBtn.addEventListener('click', async () => {
+      if (visibleTabs.length === 0) return
+      const buttons = [setToReadBtn, clearToReadBtn, addTagsBtn].filter(Boolean)
+      buttons.forEach(b => { b.disabled = true })
+      let ok = 0
+      for (const tab of visibleTabs) {
+        try {
+          const reply = await sendMessage({ type: 'getCurrentBookmark', data: { url: tab.url, title: tab.title } })
+          if (reply && reply.success && reply.data && !reply.data.blocked && reply.data.exists) {
+            const res = await sendMessage({
+              type: 'saveBookmark',
+              data: { ...reply.data, toread: 'no' }
+            })
+            if (res && res.success) ok++
+          }
+        } catch (_) { /* skip */ }
+      }
+      buttons.forEach(b => { b.disabled = false })
+      showMessage(`Cleared to-read for ${ok} tab${ok !== 1 ? 's' : ''}`)
+    })
+  }
+
+  if (addTagsBtn && tagsInput) {
+    addTagsBtn.addEventListener('click', async () => {
+      const newTags = parseTagsInput(tagsInput.value)
+      if (newTags.length === 0) return
+      if (visibleTabs.length === 0) return
+      const buttons = [setToReadBtn, clearToReadBtn, addTagsBtn].filter(Boolean)
+      buttons.forEach(b => { b.disabled = true })
+      let ok = 0
+      for (const tab of visibleTabs) {
+        const tabUrl = (tab.url ?? '').trim()
+        if (!tabUrl.startsWith('http://') && !tabUrl.startsWith('https://')) continue
+        try {
+          const reply = await sendMessage({ type: 'getCurrentBookmark', data: { url: tabUrl, title: tab.title } })
+          if (reply && reply.success && reply.data && !reply.data.blocked && reply.data.url) {
+            if (reply.data.exists) {
+              const payload = buildAddTagsPayload(reply.data, newTags)
+              if (payload) {
+                const res = await sendMessage({ type: 'saveBookmark', data: payload })
+                if (res && res.success) ok++
+              }
+            } else {
+              // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Use reply.data.url so we never send empty url (handler resolves targetUrl; tab.url may be empty for some tabs).
+              const urlToSave = (reply.data && reply.data.url) || tabUrl
+              if (!urlToSave) continue
+              const res = await sendMessage({
+                type: 'saveBookmark',
+                data: {
+                  url: urlToSave,
+                  description: (tab.title ?? '').trim() || urlToSave,
+                  tags: newTags,
+                  preferredBackend: 'local'
+                }
+              })
+              if (res && res.success) ok++
+            }
+          }
+        } catch (e) {
+          // ignore per-tab errors
+        }
+      }
+      buttons.forEach(b => { b.disabled = false })
+      tagsInput.value = ''
+      showMessage(`Added tags for ${ok} tab${ok !== 1 ? 's' : ''}`)
     })
   }
 

@@ -72,7 +72,7 @@ describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] SW handleMessage routi
     processMessageSpy.mockRestore()
   })
 
-  test('GET_OPTIONS calls processMessage and wraps response as success and data', async () => {
+  test('GET_OPTIONS calls processMessage and wraps response when missing success', async () => {
     const sw = new HoverboardServiceWorker()
     sw._providerInitialized = true
     sw.messageHandler.processMessage = jest.fn().mockResolvedValue({ someOption: true })

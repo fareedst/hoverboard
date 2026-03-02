@@ -20405,11 +20405,26 @@ var MessageHandler = class {
     debugLog("[POPUP-DATA-FLOW-001] URL is allowed, getting bookmark data...");
     const hasAuth = await this.configManager.hasAuthToken();
     debugLog("[POPUP-DATA-FLOW-001] Getting bookmark data from provider (router)...");
-    const normalized = await getBookmarkForDisplay(this.bookmarkProvider, targetUrl, data?.title);
+    const raw = await this.bookmarkProvider.getBookmarkForUrl(targetUrl, data?.title);
+    const normalized = normalizeBookmarkForDisplay(raw);
     debugLog("[POPUP-DATA-FLOW-001] Bookmark data retrieved:", normalized);
     normalized.url = normalized.url || targetUrl;
+    normalized.exists = !!(raw && typeof raw === "object");
     if (!hasAuth) normalized.needsAuth = true;
-    const response = { success: true, data: normalized };
+    const dataOut = {
+      url: String(normalized.url || targetUrl),
+      description: normalized.description ?? "",
+      tags: Array.isArray(normalized.tags) ? normalized.tags : [],
+      toread: normalized.toread ?? "no",
+      shared: normalized.shared ?? "yes",
+      exists: !!normalized.exists,
+      extended: normalized.extended ?? "",
+      time: normalized.time ?? "",
+      updated_at: normalized.updated_at ?? "",
+      hash: normalized.hash ?? ""
+    };
+    if (normalized.needsAuth) dataOut.needsAuth = true;
+    const response = { success: true, data: dataOut };
     debugLog("[POPUP-DATA-FLOW-001] Service worker response structure:", {
       success: response.success,
       dataType: typeof response.data,
@@ -22424,7 +22439,7 @@ var HoverboardServiceWorker = class {
         }
         if (tab) await this.updateBadgeForTab(tab);
       }
-      const out = { success: true, data: response };
+      const out = response && typeof response === "object" && "success" in response ? response : { success: true, data: response };
       recordMessage(message.type, message.data, sender, out);
       return out;
     } catch (error48) {

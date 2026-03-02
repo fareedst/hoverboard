@@ -21,11 +21,16 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     - criterion: A button copies the full list of visible (filtered) tab records as YAML (including id, windowId, title, url, referrer) to the clipboard and shows a success count
     - criterion: A button closes all visible (filtered) tabs after user confirmation and shows a success count
     - criterion: Each tab row displays window id and tab id (for debugging and identification).
+    - criterion: The window id and tab id line in each tab row is clickable; when clicked, the specified window and tab are focused and made visible.
+    - criterion: Each tab row displays the bookmark tags for that tab's URL (from the same source as the popup); if there is no bookmark or no tags, show nothing or a neutral placeholder (e.g. —).
+    - criterion: A "Set to-read" button sets the to-read flag for all visible (filtered) tabs' bookmarks; if a URL has no bookmark, one is created. When a bookmark already exists, existing tags and other fields are preserved (fetch-then-merge).
+    - criterion: A "Clear to-read" button clears the to-read flag for all visible tabs' bookmarks; if a URL has no bookmark, it is skipped (no bookmark is created).
+    - criterion: A "Tags" textbox and "Add tags" button add the entered tag(s) to all visible tabs' bookmarks (comma-separated); if a URL has no bookmark, one is created with those tags.
   validation_criteria:
     - method: Unit tests
-      coverage: 'filterBrowserTabs: empty query returns all; scope-aware filter (tabInfo/pageText/importantTags); build URL list and buildRecordsYamlForCopy; Copy Records button; GET_TAB_REFERRERS and GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; panel merges referrer and pageText/importantTags from SW'
+      coverage: 'filterBrowserTabs: empty query returns all; scope-aware filter (tabInfo/pageText/importantTags); build URL list and buildRecordsYamlForCopy; Copy Records button; GET_TAB_REFERRERS and GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; panel merges referrer and pageText/importantTags from SW; batch set/clear to-read and add tags; clickable window/tab id (focus window and tab on click); display bookmark tags per tab'
     - method: Manual or E2E
-      coverage: Open Tabs tab; select search scope; filter by tab info, page text, or important tags; copy URLs; copy records; close visible tabs; see counts
+      coverage: Open Tabs tab; select search scope; filter by tab info, page text, or important tags; copy URLs; copy records; close visible tabs; set to-read; clear to-read; add tags; see counts
   notes:
     - 'Referrer must be obtained via service worker (GET_TAB_REFERRERS): scripting from the side panel does not run in tab context, so the panel sends a message and the SW runs chrome.scripting.executeScript per tab and returns a referrer map.'
     - 'Page text and important tags for filter are obtained via GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS (SW executeScript per tab); fetch when user selects that scope or on load if that scope is selected.'
@@ -52,4 +57,4 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     last_updated:
       date: '2026-03-01'
       author: AI Agent
-      reason: Add search scope (tab info / page text / important tags) satisfaction and validation criteria
+      reason: Clickable window/tab id to focus; display bookmark tags per tab

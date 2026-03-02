@@ -210,6 +210,21 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] getReferr
  * Integration: referrer is merged from GET_TAB_REFERRERS response (SW); when getReferrers returns a map, panel displays it (not placeholder).
  */
 describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer from getReferrers (SW path)', () => {
+  // [IMPL-SIDE_PANEL_BROWSER_TABS] loadTabs now fetches bookmark tags via getCurrentBookmark; mock so loadTabs completes
+  beforeEach(() => {
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = global.chrome.runtime || {}
+    const prev = global.chrome.runtime.sendMessage
+    global.chrome.runtime.sendMessage = function (msg, cb) {
+      if (msg.type === 'getCurrentBookmark' && typeof cb === 'function') {
+        cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        return
+      }
+      if (typeof prev === 'function') return prev.call(this, msg, cb)
+      if (typeof cb === 'function') cb({})
+    }
+  })
+
   function makePanelDoc () {
     const listEl = document.createElement('div')
     listEl.id = 'browserTabsList'
@@ -293,6 +308,284 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer 
     expect(card).toBeTruthy()
     expect(card.querySelector('.browser-tabs-card-referrer')?.textContent?.trim()).toBe('—')
   })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Batch bookmark actions: Set to-read sends saveBookmark with toread yes for each visible tab; Clear to-read only for existing bookmarks; Add tags merges or creates.
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch bookmark actions', () => {
+  function makePanelDocWithBatchButtons () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const messageEl = document.createElement('div')
+    messageEl.id = 'browserTabsMessage'
+    const tagsInput = document.createElement('input')
+    tagsInput.id = 'browserTabsTagsInput'
+    const addTagsBtn = document.createElement('button')
+    addTagsBtn.setAttribute('data-action', 'addTags')
+    addTagsBtn.id = 'browserTabsAddTagsBtn'
+    const setToReadBtn = document.createElement('button')
+    setToReadBtn.setAttribute('data-action', 'setToRead')
+    setToReadBtn.id = 'browserTabsSetToReadBtn'
+    const clearToReadBtn = document.createElement('button')
+    clearToReadBtn.setAttribute('data-action', 'clearToRead')
+    clearToReadBtn.id = 'browserTabsClearToReadBtn'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(tagsInput)
+    panel.appendChild(addTagsBtn)
+    panel.appendChild(setToReadBtn)
+    panel.appendChild(clearToReadBtn)
+    panel.appendChild(messageEl)
+    panel.appendChild(listEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '#browserTabsMessage') return messageEl
+      if (sel === '#browserTabsTagsInput') return tagsInput
+      if (sel === '[data-action="addTags"]' || sel === '#browserTabsAddTagsBtn') return addTagsBtn
+      if (sel === '[data-action="setToRead"]' || sel === '#browserTabsSetToReadBtn') return setToReadBtn
+      if (sel === '[data-action="clearToRead"]' || sel === '#browserTabsClearToReadBtn') return clearToReadBtn
+      if (sel === '#browserTabsFilterInput' || sel === '[data-action="copyUrls"]' || sel === '[data-action="copyRecords"]' || sel === '[data-action="closeTabs"]') return null
+      return null
+    }
+    panel.querySelectorAll = (sel) => {
+      if (sel === 'input[name="browserTabsWindowScope"]') return []
+      if (sel === 'input[name="browserTabsSearchScope"]') return []
+      return []
+    }
+    return {
+      doc: {
+        getElementById (id) { return id === 'browserTabsPanel' ? panel : null },
+        createElement: document.createElement.bind(document)
+      },
+      listEl,
+      messageEl,
+      tagsInput,
+      addTagsBtn,
+      setToReadBtn,
+      clearToReadBtn,
+      panel
+    }
+  }
+
+  test('Set to-read sends getCurrentBookmark then saveBookmark with toread yes for each visible tab', async () => {
+    const { doc, listEl, setToReadBtn, messageEl } = makePanelDocWithBatchButtons()
+    const tabList = [
+      { id: 1, title: 'Tab A', url: 'https://a.com' },
+      { id: 2, title: 'Tab B', url: 'https://b.com' }
+    ]
+    const saveCalls = []
+    const mockTabs = { query: async () => tabList }
+    const getReferrers = async () => ({ 1: '', 2: '' })
+    const origRuntime = global.chrome?.runtime
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = {
+      sendMessage (msg, cb) {
+        if (msg.type === 'getCurrentBookmark') {
+          const url = msg.data?.url ?? ''
+          cb({ success: true, data: { url, exists: true, toread: 'no', description: '', tags: [] } })
+        } else if (msg.type === 'saveBookmark') {
+          saveCalls.push(msg.data)
+          cb({ success: true })
+        } else {
+          cb({ success: true })
+        }
+      }
+    }
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 150))
+      setToReadBtn.click()
+      await new Promise(r => setTimeout(r, 200))
+      expect(saveCalls.length).toBe(2)
+      expect(saveCalls.every(d => d.toread === 'yes')).toBe(true)
+      expect(saveCalls.map(d => d.url)).toEqual(['https://a.com', 'https://b.com'])
+      expect(messageEl.textContent).toContain('Set to-read for 2 tabs')
+    } finally {
+      if (origRuntime) global.chrome.runtime = origRuntime
+    }
+  })
+
+  test('Clear to-read sends getCurrentBookmark then saveBookmark only when exists', async () => {
+    const { doc, listEl, clearToReadBtn, messageEl } = makePanelDocWithBatchButtons()
+    const tabList = [
+      { id: 1, title: 'Tab A', url: 'https://a.com' },
+      { id: 2, title: 'Tab B', url: 'https://b.com' }
+    ]
+    const saveCalls = []
+    const mockTabs = { query: async () => tabList }
+    const getReferrers = async () => ({ 1: '', 2: '' })
+    const origRuntime = global.chrome?.runtime
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = {
+      sendMessage (msg, cb) {
+        if (msg.type === 'getCurrentBookmark') {
+          const url = msg.data?.url
+          const exists = url === 'https://a.com'
+          cb({ success: true, data: { url: msg.data?.url, title: msg.data?.title, exists, toread: exists ? 'yes' : 'no' } })
+        } else if (msg.type === 'saveBookmark') {
+          saveCalls.push(msg.data)
+          cb({ success: true })
+        } else cb({ success: true })
+      }
+    }
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 150))
+      clearToReadBtn.click()
+      await new Promise(r => setTimeout(r, 250))
+      expect(saveCalls.length).toBe(1)
+      expect(saveCalls[0].url).toBe('https://a.com')
+      expect(saveCalls[0].toread).toBe('no')
+      expect(messageEl.textContent).toContain('Cleared to-read for 1 tab')
+    } finally {
+      if (origRuntime) global.chrome.runtime = origRuntime
+    }
+  })
+
+  test('Add tags with empty input does nothing', async () => {
+    const { doc, addTagsBtn } = makePanelDocWithBatchButtons()
+    const mockTabs = { query: async () => [{ id: 1, title: 'T', url: 'https://x.com' }] }
+    const getReferrers = async () => ({ 1: '' })
+    const messages = []
+    const origRuntime = global.chrome?.runtime
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = {
+      sendMessage (msg, cb) {
+        messages.push(msg.type)
+        if (msg.type === 'getCurrentBookmark') cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        else cb({ success: true })
+      }
+    }
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 150))
+      const getCurrentBookmarkCountAfterInit = messages.filter(t => t === 'getCurrentBookmark').length
+      const saveBookmarkCountAfterInit = messages.filter(t => t === 'saveBookmark').length
+      addTagsBtn.click()
+      await new Promise(r => setTimeout(r, 50))
+      expect(messages.filter(t => t === 'saveBookmark').length).toBe(saveBookmarkCountAfterInit)
+      expect(messages.filter(t => t === 'getCurrentBookmark').length).toBe(getCurrentBookmarkCountAfterInit)
+    } finally {
+      if (origRuntime) global.chrome.runtime = origRuntime
+    }
+  })
+
+  test('Add tags with input sends getCurrentBookmark then saveBookmark (create or merge)', async () => {
+    const { doc, tagsInput, addTagsBtn, messageEl } = makePanelDocWithBatchButtons()
+    const tabList = [{ id: 1, title: 'Tab One', url: 'https://one.com' }]
+    const saveCalls = []
+    const mockTabs = { query: async () => tabList }
+    const getReferrers = async () => ({ 1: '' })
+    const origRuntime = global.chrome?.runtime
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = {
+      sendMessage (msg, cb) {
+        if (msg.type === 'getCurrentBookmark') {
+          cb({ success: true, data: { url: msg.data?.url, exists: false, tags: [] } })
+        } else if (msg.type === 'saveBookmark') {
+          saveCalls.push(msg.data)
+          cb({ success: true })
+        } else cb({ success: true })
+      }
+    }
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 150))
+      tagsInput.value = 'foo, bar'
+      tagsInput.dispatchEvent(new Event('input', { bubbles: true }))
+      addTagsBtn.click()
+      await new Promise(r => setTimeout(r, 150))
+      expect(saveCalls.length).toBe(1)
+      expect(saveCalls[0].url).toBe('https://one.com')
+      expect(saveCalls[0].tags).toEqual(['foo', 'bar'])
+      expect(saveCalls[0].preferredBackend).toBe('local')
+      expect(messageEl.textContent).toContain('Added tags for 1 tab')
+    } finally {
+      if (origRuntime) global.chrome.runtime = origRuntime
+    }
+  })
+
+  test('Add tags with existing bookmark merges tags via buildAddTagsPayload', async () => {
+    const { doc, tagsInput, addTagsBtn, messageEl } = makePanelDocWithBatchButtons()
+    const tabList = [{ id: 1, title: 'Tab One', url: 'https://one.com' }]
+    const saveCalls = []
+    const mockTabs = { query: async () => tabList }
+    const getReferrers = async () => ({ 1: '' })
+    const origRuntime = global.chrome?.runtime
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = {
+      sendMessage (msg, cb) {
+        if (msg.type === 'getCurrentBookmark') {
+          cb({ success: true, data: { url: 'https://one.com', exists: true, tags: ['existing'], storage: 'local' } })
+        } else if (msg.type === 'saveBookmark') {
+          saveCalls.push(msg.data)
+          cb({ success: true })
+        } else cb({ success: true })
+      }
+    }
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 150))
+      tagsInput.value = 'newTag'
+      addTagsBtn.click()
+      await new Promise(r => setTimeout(r, 150))
+      expect(saveCalls.length).toBe(1)
+      expect(saveCalls[0].tags).toContain('existing')
+      expect(saveCalls[0].tags).toContain('newTag')
+      expect(messageEl.textContent).toContain('Added tags for 1 tab')
+    } finally {
+      if (origRuntime) global.chrome.runtime = origRuntime
+    }
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Referrer + Copy Records + card ids (continued from referrer from getReferrers).
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer and Copy Records', () => {
+  beforeEach(() => {
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = global.chrome.runtime || {}
+    const prev = global.chrome.runtime.sendMessage
+    global.chrome.runtime.sendMessage = function (msg, cb) {
+      if (msg.type === 'getCurrentBookmark' && typeof cb === 'function') {
+        cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        return
+      }
+      if (typeof prev === 'function') return prev.call(this, msg, cb)
+      if (typeof cb === 'function') cb({})
+    }
+  })
+
+  function makePanelDoc () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(listEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '#browserTabsFilterInput' || sel === '[data-action="copyUrls"]' || sel === '#browserTabsCopyBtn' ||
+          sel === '[data-action="copyRecords"]' || sel === '#browserTabsCopyRecordsBtn' ||
+          sel === '[data-action="closeTabs"]' || sel === '#browserTabsCloseBtn' || sel === '#browserTabsMessage' ||
+          sel === '#browserTabsTagsInput' || sel === '[data-action="addTags"]' || sel === '[data-action="setToRead"]' || sel === '[data-action="clearToRead"]') return null
+      return null
+    }
+    panel.querySelectorAll = () => []
+    return {
+      doc: {
+        getElementById (id) { return id === 'browserTabsPanel' ? panel : null },
+        createElement: document.createElement.bind(document)
+      },
+      listEl,
+      panel
+    }
+  }
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Copy Records button writes YAML to clipboard
   test('Copy Records button writes full tab records as YAML to clipboard', async () => {
@@ -359,6 +652,169 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer 
     const text = idsEl.textContent.trim()
     expect(text).toContain('100')
     expect(text).toContain('42')
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Clickable window/tab id: ids line is a button; on click calls chrome.windows.update and chrome.tabs.update.
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] clickable window/tab id (focus on click)', () => {
+  beforeEach(() => {
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = global.chrome.runtime || {}
+    const prev = global.chrome.runtime.sendMessage
+    global.chrome.runtime.sendMessage = function (msg, cb) {
+      if (msg.type === 'getCurrentBookmark' && typeof cb === 'function') {
+        cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        return
+      }
+      if (typeof prev === 'function') return prev.call(this, msg, cb)
+      if (typeof cb === 'function') cb({})
+    }
+  })
+
+  function makePanelDoc () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(listEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      return null
+    }
+    panel.querySelectorAll = () => []
+    return {
+      doc: {
+        getElementById (id) { return id === 'browserTabsPanel' ? panel : null },
+        createElement: document.createElement.bind(document)
+      },
+      listEl,
+      panel
+    }
+  }
+
+  test('card has clickable element with data-window-id and data-tab-id when windowId and tabId present', async () => {
+    const { doc, listEl } = makePanelDoc()
+    const mockTabs = {
+      query: async () => [{ id: 42, windowId: 100, title: 'Tab A', url: 'https://a.com' }]
+    }
+    const getReferrers = async () => ({ 42: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    const link = listEl.querySelector('.browser-tabs-card-ids-link')
+    expect(link).toBeTruthy()
+    expect(link.getAttribute('data-window-id')).toBe('100')
+    expect(link.getAttribute('data-tab-id')).toBe('42')
+  })
+
+  test('clicking ids button calls windows.update and tabs.update with correct args', async () => {
+    const { doc, listEl } = makePanelDoc()
+    const windowsUpdate = jest.fn().mockResolvedValue(undefined)
+    const tabsUpdate = jest.fn().mockResolvedValue(undefined)
+    const mockTabs = {
+      query: async () => [{ id: 7, windowId: 3, title: 'T', url: 'https://x.com' }],
+      update: tabsUpdate
+    }
+    const mockWindows = { update: windowsUpdate }
+    const getReferrers = async () => ({ 7: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers, mockWindows)
+    await new Promise(r => setTimeout(r, 100))
+    const link = listEl.querySelector('.browser-tabs-card-ids-link')
+    expect(link).toBeTruthy()
+    link.click()
+    expect(windowsUpdate).toHaveBeenCalledWith(3, { focused: true })
+    expect(tabsUpdate).toHaveBeenCalledWith(7, { active: true })
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Bookmark tags: each tab row displays bookmark tags for that URL; — when none.
+ */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] bookmark tags display', () => {
+  function makePanelDoc () {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(listEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      return null
+    }
+    panel.querySelectorAll = () => []
+    return {
+      doc: {
+        getElementById (id) { return id === 'browserTabsPanel' ? panel : null },
+        createElement: document.createElement.bind(document)
+      },
+      listEl,
+      panel
+    }
+  }
+
+  test('card displays bookmark tags when tab has bookmarkTags', async () => {
+    const { doc, listEl } = makePanelDoc()
+    const mockTabs = {
+      query: async () => [
+        { id: 1, windowId: 10, title: 'A', url: 'https://a.com' }
+      ]
+    }
+    const getReferrers = async () => ({ 1: '' })
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = {
+      sendMessage (msg, cb) {
+        if (msg.type === 'getCurrentBookmark') {
+          cb({ success: true, data: { url: msg.data?.url, tags: ['work', 'read-later'] } })
+        } else cb({ success: true })
+      }
+    }
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 150))
+      const card = listEl.querySelector('.browser-tabs-card')
+      expect(card).toBeTruthy()
+      const tagsEl = card.querySelector('.browser-tabs-card-tags')
+      expect(tagsEl).toBeTruthy()
+      expect(tagsEl.textContent).toContain('work')
+      expect(tagsEl.textContent).toContain('read-later')
+    } finally {
+      if (global.chrome?.runtime) delete global.chrome.runtime
+    }
+  })
+
+  test('card shows — for tags when no bookmark or empty tags', async () => {
+    const { doc, listEl } = makePanelDoc()
+    const mockTabs = {
+      query: async () => [
+        { id: 1, windowId: 10, title: 'B', url: 'https://b.com' }
+      ]
+    }
+    const getReferrers = async () => ({ 1: '' })
+    global.chrome = global.chrome || {}
+    global.chrome.runtime = {
+      sendMessage (msg, cb) {
+        if (msg.type === 'getCurrentBookmark') {
+          cb({ success: true, data: { url: msg.data?.url, tags: [] } })
+        } else cb({ success: true })
+      }
+    }
+    try {
+      initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+      await new Promise(r => setTimeout(r, 150))
+      const card = listEl.querySelector('.browser-tabs-card')
+      expect(card).toBeTruthy()
+      const tagsEl = card.querySelector('.browser-tabs-card-tags')
+      expect(tagsEl).toBeTruthy()
+      expect(tagsEl.textContent).toContain('Tags:')
+      expect(tagsEl.textContent).toContain('—')
+    } finally {
+      if (global.chrome?.runtime) delete global.chrome.runtime
+    }
   })
 })
 

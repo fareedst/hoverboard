@@ -549,7 +549,8 @@ class HoverboardServiceWorker {
         if (tab) await this.updateBadgeForTab(tab)
       }
 
-      const out = { success: true, data: response }
+      // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Handlers that already return { success, data } (e.g. getCurrentBookmark) are returned as-is so panel gets reply.data.url. Others (getOptions, getTabId, GET_PAGE_CONTENT success) return plain shapes; wrap as { success: true, data: response } for popup/E2E contract.
+      const out = (response && typeof response === 'object' && 'success' in response) ? response : { success: true, data: response }
       uiInspector.recordMessage(message.type, message.data, sender, out)
       return out
     } catch (error) {

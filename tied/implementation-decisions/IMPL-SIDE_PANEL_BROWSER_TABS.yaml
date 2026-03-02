@@ -17,7 +17,10 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - Copy: collect URLs of visible tabs, clipboard.writeText(urls.join("\n")), show count
       - Copy Records: build YAML list from visible tabs (each item id, windowId, title, url, referrer), clipboard.writeText(yamlString), show "Copied N records"
       - Close: confirm("Close N tabs?"); on confirm chrome.tabs.remove for each visible id; show success count
-      - "Panel layout (same as Tags tree): #browserTabsPanel is the scroll container; first child .browser-tabs-above-list (flex: none) contains header, window scope, search scope, filter input, message, actions; second child .browser-tabs-list-section (min-height: 100%, overflow-y: auto) contains #browserTabsList. The above block scrolls off so the list section fills visible height and scrolls its contents."
+      - "Panel layout (same as Tags tree): #browserTabsPanel is the scroll container; first child .browser-tabs-above-list (flex: none) contains header, window scope, search scope, filter input, message, bookmark batch UI (tags input + Add tags, Set to-read, Clear to-read), actions (Copy URLs, Copy Records, Close); second child .browser-tabs-list-section (min-height: 100%, overflow-y: auto) contains #browserTabsList. The above block scrolls off so the list section fills visible height and scrolls its contents."
+      - "Batch bookmark UI: section .browser-tabs-bookmark-actions with label Tags, input #browserTabsTagsInput (placeholder tag1, tag2), button Add tags; button Set to-read; button Clear to-read. All act on visibleTabs; only http(s) URLs are processed. Set to-read: getCurrentBookmark(url) per tab; if reply.data.exists and reply.data.url then saveBookmark({ ...reply.data, toread: 'yes' }) to preserve tags; else create with urlToSave (reply.data.url || tabUrl), description, toread: 'yes', tags: [], preferredBackend. Clear to-read: getCurrentBookmark(url) per tab; if reply.success and reply.data and not blocked and reply.data.exists then saveBookmark({ ...reply.data, toread: 'no' }); else skip. Add tags: parseTagsInput(input); for each tab getCurrentBookmark(url); guard reply.success and reply.data and reply.data.url and not blocked; if exists use buildAddTagsPayload(reply.data, newTags) and saveBookmark; else saveBookmark with urlToSave = reply.data.url || tabUrl, description, tags: newTags, preferredBackend. Reuse parseTagsInput, buildAddTagsPayload from bookmarks-table-filter.js. Service worker returns processMessage response as-is (no double-wrap) so reply.data.url and reply.data.exists are present in panel. Message handler getCurrentBookmark returns plain dataOut object (url, exists, tags, etc.) so fields survive structured clone."
+      - "Focus on click: In RENDER, window/tab id line is a button (or clickable element) with data-window-id and data-tab-id. On click (delegated on list): read windowId and tabId; if both valid numeric, call chrome.windows.update(windowId, { focused: true }) then chrome.tabs.update(tabId, { active: true }). Optional: inject chromeWindows in init for testability."
+      - "Bookmark tags per row: After building allTabs (with referrers), for each tab with http(s) URL call getCurrentBookmark({ url, title }); merge reply.data.tags into tab (e.g. tab.bookmarkTags). In RENDER, display line Tags: tag1, tag2 or — when empty. Parallel or sequential getCurrentBookmark acceptable; batch getTagsForUrls optional later."
   code_locations:
     files:
       - path: src/ui/side-panel/browser-tabs-panel.js
@@ -25,9 +28,9 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - path: src/ui/side-panel/side-panel.html
         description: Tab button and #browserTabsPanel
       - path: src/core/service-worker.js
-        description: GET_TAB_REFERRERS handler; executeScript per tab, return referrers map
+        description: GET_TAB_REFERRERS handler; executeScript per tab; handleMessage returns processMessage response as-is (no double-wrap) for getCurrentBookmark
       - path: src/core/message-handler.js
-        description: MESSAGE_TYPES.GET_TAB_REFERRERS, GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS
+        description: GET_TAB_REFERRERS, GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; handleGetCurrentBookmark returns plain dataOut (url, exists, tags, etc.) for panel/SW contract
     functions:
       - name: filterBrowserTabs
         file: src/ui/side-panel/browser-tabs-panel.js
@@ -96,8 +99,16 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
     # UI: window scope toggle; search-scope control (Tab info | Page text | Important tags, default Tab info); on searchScope change, if pageText or importantTags fetch that data and merge; search input; on input visibleTabs = filterBrowserTabs(allTabs, searchQuery, searchScope); re-render. Multi-row card per tab. Implements "search scope selection", "filter by selected scope".
-    RENDER: FOR each tab in visibleTabs: display card with title, url, referrer, window id, tab id
+    RENDER: FOR each tab in visibleTabs: display card with title, url, referrer, window id, tab id (clickable), bookmark tags (or —)
     ON windowScope toggle change: windowScope = selected; loadTabs()
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # Focus on click: window/tab id line is a button with data-window-id and data-tab-id. On click (delegated): read ids; if valid, chrome.windows.update(windowId, { focused: true }); chrome.tabs.update(tabId, { active: true }).
+    ON click .browser-tabs-card-ids-link: windowId = data-window-id; tabId = data-tab-id; IF both numeric: windows.update(windowId, { focused: true }); tabs.update(tabId, { active: true })
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # Bookmark tags: after allTabs built (referrers merged), FOR each tab WHERE url is http(s): reply = getCurrentBookmark({ url, title }); tab.bookmarkTags = reply?.data?.tags ?? []. In RENDER show "Tags: " + join(tab.bookmarkTags) or "—".
+    AFTER allTabs built: FOR each tab (http(s) URL): getCurrentBookmark({ url, title }) → tab.bookmarkTags = data.tags ?? []
     ON searchScope change: searchScope = selected; IF selected is pageText or importantTags THEN loadExtraForScope() (fetch and merge); applyFilter(); re-render
     ON searchInput input: searchQuery = value; visibleTabs = filterBrowserTabs(allTabs, searchQuery, searchScope); re-render list
 
@@ -106,6 +117,12 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
     ON Copy button click: urls = visibleTabs.map(t => t.url); navigator.clipboard.writeText(urls.join('\n')); showToastOrMessage("Copied " + urls.length + " URLs")
     ON Copy Records button click: yamlString = buildRecordsYamlForCopy(visibleTabs); navigator.clipboard.writeText(yamlString); showToastOrMessage("Copied " + visibleTabs.length + " record(s)")
     ON Close button click: IF visibleTabs.length === 0 return; IF NOT confirm("Close " + visibleTabs.length + " tabs?") return; FOR each tab in visibleTabs: chrome.tabs.remove(tab.id); show "Closed N tabs"
+
+    # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+    # Batch bookmark actions: Set to-read (fetch then merge to preserve tags; create if missing), Clear to-read (skip if no bookmark), Add tags (create if missing; use reply.data.url). Only http(s) URLs. SW returns handler response as-is; handler getCurrentBookmark returns plain dataOut.
+    ON Set to-read button click: FOR each tab in visibleTabs WHERE tab.url is http(s): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.data.exists AND reply.data.url: saveBookmark({ ...reply.data, toread: 'yes' }); ELSE: urlToSave = reply.data.url || tab.url; saveBookmark({ url: urlToSave, description: tab.title ?? '', tags: [], toread: 'yes', preferredBackend: 'local' }); show "Set to-read for N tabs"
+    ON Clear to-read button click: FOR each tab in visibleTabs: reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.success AND reply.data AND NOT reply.data.blocked AND reply.data.exists: saveBookmark({ ...reply.data, toread: 'no' }); ELSE skip; show "Cleared to-read for N tabs"
+    ON Add tags button click: newTags = parseTagsInput(tagsInput.value); IF newTags.length === 0 return; FOR each tab in visibleTabs WHERE tab.url is http(s): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.success AND reply.data AND reply.data.url AND NOT reply.data.blocked: IF reply.data.exists: payload = buildAddTagsPayload(reply.data, newTags); saveBookmark(payload); ELSE: urlToSave = reply.data.url || tab.url; saveBookmark({ url: urlToSave, description: tab.title ?? '', tags: newTags, preferredBackend: 'local' }); clear tagsInput; show "Added tags for N tabs"
 
     # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
     # Panel structure: same scroll behavior as Tags tree. Panel (#browserTabsPanel) is the scroll container. First child .browser-tabs-above-list (flex: none): header, window scope, search scope, filter, message, actions. Second child .browser-tabs-list-section (min-height: 100%, overflow-y: auto): contains #browserTabsList. Above block scrolls off; list section fills visible height and scrolls list.
@@ -117,4 +134,4 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
     last_updated:
       date: '2026-03-01'
       author: AI Agent
-      reason: Panel layout and scroll like Tags tree (above-list scrolls off, list-section fills height and scrolls)
+      reason: Clickable window/tab id (focus on click); fetch and display bookmark tags per tab; essence_pseudocode blocks for focus and tags
