@@ -137,6 +137,13 @@
         <input type="text" id="browserTabsFilterInput" class="browser-tabs-filter-input" placeholder="Filter by title, URL, referrer…" aria-label="Filter tabs">
       </section>
       <div id="browserTabsMessage" class="browser-tabs-message hidden" aria-live="polite"></div>
+      <section class="browser-tabs-bookmark-actions" aria-label="Batch bookmark actions">
+        <label for="browserTabsTagsInput">Tags</label>
+        <input type="text" id="browserTabsTagsInput" class="browser-tabs-tags-input" placeholder="tag1, tag2" aria-label="Tags to add to visible tabs">
+        <button type="button" id="browserTabsAddTagsBtn" data-action="addTags" class="button secondary">Add tags</button>
+        <button type="button" id="browserTabsSetToReadBtn" data-action="setToRead" class="button secondary">Set to-read</button>
+        <button type="button" id="browserTabsClearToReadBtn" data-action="clearToRead" class="button secondary">Clear to-read</button>
+      </section>
       <section class="browser-tabs-actions">
         <button type="button" id="browserTabsCopyBtn" data-action="copyUrls" class="button secondary">Copy URLs</button>
         <button type="button" id="browserTabsCopyRecordsBtn" data-action="copyRecords" class="button secondary">Copy Records</button>

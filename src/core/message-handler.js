@@ -11,7 +11,7 @@ import { PinboardService } from '../features/pinboard/pinboard-service.js'
 /** @typedef {import('../shared/message-types').SaveBookmarkData} SaveBookmarkData */
 /** @typedef {import('../shared/message-types').GetCurrentBookmarkData} GetCurrentBookmarkData */
 import { LocalBookmarkService } from '../features/storage/local-bookmark-service.js'
-import { getBookmarkForDisplay, getTagsForUrl } from '../features/storage/url-tags-manager.js'
+import { getBookmarkForDisplay, getTagsForUrl, normalizeBookmarkForDisplay } from '../features/storage/url-tags-manager.js'
 import { TagService } from '../features/tagging/tag-service.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { TabSearchService } from '../features/search/tab-search-service.js'
@@ -375,14 +375,31 @@ export class MessageHandler {
     // [IMPL-URL_TAGS_DISPLAY] Single source: getBookmarkForDisplay (router + normalize); do not short-circuit when no Pinboard auth so local/file/sync bookmarks and tags are shown
     const hasAuth = await this.configManager.hasAuthToken()
     debugLog('[POPUP-DATA-FLOW-001] Getting bookmark data from provider (router)...')
-    const normalized = await getBookmarkForDisplay(this.bookmarkProvider, targetUrl, data?.title)
+    const raw = await this.bookmarkProvider.getBookmarkForUrl(targetUrl, data?.title)
+    const normalized = normalizeBookmarkForDisplay(raw)
     debugLog('[POPUP-DATA-FLOW-001] Bookmark data retrieved:', normalized)
 
     normalized.url = normalized.url || targetUrl
+    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Flag so panel can skip creating bookmark when clearing to-read
+    normalized.exists = !!(raw && typeof raw === 'object')
     if (!hasAuth) normalized.needsAuth = true
 
-    // [POPUP-DATA-FLOW-001] Enhanced response structure validation
-    const response = { success: true, data: normalized }
+    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Return a plain object so url/exists survive structured clone to side panel (fixes "0 tabs modified" when reply.data.url was undefined in panel).
+    const dataOut = {
+      url: String(normalized.url || targetUrl),
+      description: normalized.description ?? '',
+      tags: Array.isArray(normalized.tags) ? normalized.tags : [],
+      toread: normalized.toread ?? 'no',
+      shared: normalized.shared ?? 'yes',
+      exists: !!normalized.exists,
+      extended: normalized.extended ?? '',
+      time: normalized.time ?? '',
+      updated_at: normalized.updated_at ?? '',
+      hash: normalized.hash ?? ''
+    }
+    if (normalized.needsAuth) dataOut.needsAuth = true
+
+    const response = { success: true, data: dataOut }
     debugLog('[POPUP-DATA-FLOW-001] Service worker response structure:', {
       success: response.success,
       dataType: typeof response.data,

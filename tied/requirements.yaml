@@ -2585,11 +2585,14 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     - criterion: A search box filters the list by matching any of title, URL, or referrer (case-insensitive)
     - criterion: A button copies the URLs of all visible (filtered) tabs to the clipboard and shows a success count
     - criterion: A button closes all visible (filtered) tabs after user confirmation and shows a success count
+    - criterion: A "Set to-read" button sets the to-read flag for all visible tabs' bookmarks; if a URL has no bookmark, one is created; when a bookmark exists, existing tags and other fields are preserved (fetch-then-merge)
+    - criterion: A "Clear to-read" button clears the to-read flag for all visible tabs' bookmarks; if a URL has no bookmark, it is skipped
+    - criterion: A "Tags" textbox and "Add tags" button add the entered tag(s) to all visible tabs' bookmarks; if a URL has no bookmark, one is created with those tags
   validation_criteria:
     - method: Unit tests
-      coverage: 'filterBrowserTabs: empty query returns all; case-insensitive match on title/url/referrer; build URL list and close-IDs from visible list'
+      coverage: 'filterBrowserTabs; build URL list; batch set to-read (fetch-then-merge preserves tags), clear to-read (only when exists), add tags (create if missing; reply.data.url for create)'
     - method: Manual or E2E
-      coverage: Open Tabs tab; see list; filter; copy URLs; confirm and close visible tabs; see counts
+      coverage: Open Tabs tab; filter; copy URLs; close visible tabs; set to-read; clear to-read; add tags; see counts
   traceability:
     architecture:
       - ARCH-SIDE_PANEL_BROWSER_TABS
@@ -2610,7 +2613,7 @@ REQ-SIDE_PANEL_BROWSER_TABS:
       date: '2026-02-28'
       author: AI Agent
     last_updated:
-      date: '2026-02-28'
+      date: '2026-03-01'
       author: AI Agent
-      reason: Initial creation for side panel browser tabs list
+      reason: Set to-read preserves tags; getCurrentBookmark response shape (SW as-is, handler dataOut)
   detail_file: requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml
