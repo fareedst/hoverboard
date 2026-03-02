@@ -32,6 +32,7 @@
     "test:integration": "jest --testMatch='**/*.integration.test.js'",
     "test:e2e": "jest --testMatch='**/*.e2e.test.js'",
     "test:e2e:extension": "npx playwright test -c playwright.extension.config.js",
+    "record:demo:tabs": "node scripts/record-demo-tabs.js",
     "test:ci": "npm run test:coverage && npm run test:e2e",
     "security:check": "npm audit --audit-level=high",
     "security:fix": "npm audit fix",

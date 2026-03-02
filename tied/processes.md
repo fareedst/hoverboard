@@ -451,3 +451,33 @@ Active
 ### Artifacts & Metrics
 - **Artifacts**: Updated REQ/ARCH/IMPL (including `essence_pseudocode` and block comments), tests, managed source code, README.md, CHANGELOG.md, commit.
 - **Success Metrics**: All tests pass; `[PROC-TOKEN_VALIDATION]` passes; TIED docs match final code and tests; `[PROC-TOKEN_AUDIT]` can succeed.
+
+---
+
+## `[PROC-DEMO_RECORDING]` Demo recording (Playwright video → GIF)
+
+### Purpose
+Document or demo existing features (e.g. side panel Tabs) by recording a brief session with Playwright E2E (video) and converting to GIF for README or docs. Serves documentation and onboarding.
+
+### Scope
+Playwright extension E2E harness; record side panel or popup flows; produce WebM then convert to GIF (e.g. via ffmpeg). Applies when creating demo assets only.
+
+### Token references
+- `[REQ-SIDE_PANEL_BROWSER_TABS]` — Tabs tab list, filter, Copy Records/URLs
+- `[IMPL-SIDE_PANEL_BROWSER_TABS]` — browser-tabs-panel implementation
+- `[PROC-TIED_DEV_CYCLE]` — session workflow when TIED docs or code change
+
+### Status
+Active
+
+### Core Activities
+1. Use extension E2E fixture; enable video for the run (e.g. dedicated config with `video: 'on'`).
+2. In spec or script: open side-panel.html → switch to Tabs tab → wait for list → optionally filter → Copy Records or Copy URLs.
+3. Optionally inject a DOM overlay `<div>` into the side-panel page before each key-frame group to annotate what the user is doing (action) and what is produced (achievement); remove after the last frame.
+4. Run once; obtain WebM from test-results.
+5. Convert WebM to GIF (e.g. `ffmpeg -i video.webm -vf "fps=8,scale=640:-1:flags=lanczos" -c:v gif output.gif`).
+6. Place GIF in docs/ or docs/assets/; reference in README/CHANGELOG.
+
+### Artifacts & Metrics
+- **Artifacts**: Demo spec (or script), WebM recording, GIF asset, README/CHANGELOG mention.
+- **Success Metrics**: GIF plays; flow matches “find and export” (filter + Copy Records/URLs).

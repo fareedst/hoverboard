@@ -958,6 +958,55 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] referrer 
     expect(clipboardText).toContain('referrer:')
   })
 
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Copy URLs button writes visible tab URLs to clipboard
+  test('Copy URLs button writes URLs of visible tabs to clipboard', async () => {
+    const listEl = document.createElement('div')
+    listEl.id = 'browserTabsList'
+    listEl.className = 'browser-tabs-list'
+    const copyUrlsBtn = document.createElement('button')
+    copyUrlsBtn.setAttribute('data-action', 'copyUrls')
+    copyUrlsBtn.id = 'browserTabsCopyBtn'
+    const messageEl = document.createElement('div')
+    messageEl.id = 'browserTabsMessage'
+    const panel = document.createElement('div')
+    panel.id = 'browserTabsPanel'
+    panel.appendChild(listEl)
+    panel.appendChild(copyUrlsBtn)
+    panel.appendChild(messageEl)
+    panel.querySelector = (sel) => {
+      if (sel === '#browserTabsList' || sel === '.browser-tabs-list') return listEl
+      if (sel === '[data-action="copyUrls"]' || sel === '#browserTabsCopyBtn') return copyUrlsBtn
+      if (sel === '#browserTabsMessage') return messageEl
+      if (sel === '#browserTabsFilterInput' || sel === '[data-action="copyRecords"]' || sel === '#browserTabsCopyRecordsBtn' ||
+          sel === '[data-action="closeTabs"]' || sel === '#browserTabsCloseBtn') return null
+      return null
+    }
+    const doc = { getElementById: (id) => (id === 'browserTabsPanel' ? panel : null), createElement: document.createElement.bind(document) }
+    let clipboardText = null
+    const mockClipboard = { writeText: (text) => { clipboardText = text; return Promise.resolve() } }
+    Object.defineProperty(global, 'navigator', { value: { clipboard: mockClipboard }, writable: true })
+    const url1 = 'https://first.example.com'
+    const url2 = 'https://second.example.com'
+    const mockTabs = {
+      query: async () => [
+        { id: 10, windowId: 1, title: 'First', url: url1, referrer: '' },
+        { id: 11, windowId: 1, title: 'Second', url: url2, referrer: '' }
+      ]
+    }
+    const getReferrers = async () => ({ 10: '', 11: '' })
+    initBrowserTabsTab(doc, mockTabs, null, getReferrers)
+    await new Promise(r => setTimeout(r, 100))
+    copyUrlsBtn.click()
+    await new Promise(r => setTimeout(r, 50))
+    expect(clipboardText).toBeTruthy()
+    expect(clipboardText).toContain(url1)
+    expect(clipboardText).toContain(url2)
+    expect(clipboardText.trim().split('\n')).toHaveLength(2)
+    const messageText = (messageEl.textContent || '').trim()
+    const hasFeedback = /Copied \d+ URL/.test(messageText) || messageText.includes('Clipboard not available')
+    expect(hasFeedback).toBe(true)
+  })
+
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Each tab row displays window id and tab id
   test('card displays window id and tab id', async () => {
     const { doc, listEl } = makePanelDoc()

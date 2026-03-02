@@ -2,7 +2,7 @@ REQ-SIDE_PANEL_BROWSER_TABS:
   name: Side Panel Browser Tabs List
   category: Functional
   priority: P1
-  status: Planned
+  status: Implemented
   rationale:
     why: Let users see and manage browser tabs from the side panel (list, filter, copy URLs, copy records as YAML, close).
     problems_solved:
@@ -46,6 +46,8 @@ REQ-SIDE_PANEL_BROWSER_TABS:
       coverage: 'filterBrowserTabs: empty query returns all; scope-aware filter (tabInfo/pageText/importantTags); build URL list and buildRecordsYamlForCopy; Copy Records button; GET_TAB_REFERRERS and GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; panel merges referrer and pageText/importantTags from SW; batch set/clear to-read and add tags; clickable window/tab id (focus window and tab on click); clickable title/URL in title and url display mode (focus link, windows.update/tabs.update); per-row close-tab button (data-action=closeTab) before ids/focus link, chrome.tabs.remove on click; remove icon after text in title/url mode, before Tags in block; display bookmark tags per tab; display mode and remove-from-display; sections and tooltips; favicon in list; parse important-tag sources; Gather (tabs.move to current window); Distribute (windows.create per tab when window has >1 tab)'
     - method: Manual or E2E
       coverage: Open Tabs tab; select search scope; filter by tab info, page text, or important tags; copy URLs; copy records; close visible tabs; set to-read; clear to-read; add tags; see counts
+    - method: Recommended E2E
+      coverage: Tabs tab list and display mode (assert list/empty state; switch Title/URL/Block and assert card content); Filter and Copy URLs (type filter, click Copy URLs, assert success message); Refresh (click Refresh, assert list re-renders; after remove-from-display, Refresh brings hidden tab back); Per-row close and remove-from-display (close one tab assert count/decrease; remove-from-display assert card gone; Refresh assert card reappears)
   notes:
     - 'Referrer must be obtained via service worker (GET_TAB_REFERRERS): scripting from the side panel does not run in tab context, so the panel sends a message and the SW runs chrome.scripting.executeScript per tab and returns a referrer map.'
     - Page text and important tags for filter are obtained via GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS (SW executeScript per tab); fetch when user selects that scope or on load if that scope is selected.
@@ -58,6 +60,7 @@ REQ-SIDE_PANEL_BROWSER_TABS:
       - tests/unit/browser-tabs-panel.test.js
       - tests/unit/side-panel-tabs.test.js
       - tests/unit/service-worker-messaging-routing.test.js
+      - tests/playwright/extension-demo-tabs.spec.js
     code_annotations:
       - REQ-SIDE_PANEL_BROWSER_TABS
   related_requirements:
@@ -72,4 +75,4 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     last_updated:
       date: "2026-03-02"
       author: AI Agent
-      reason: Per-row close-tab criterion and validation_criteria; traceability aligned with tests
+      reason: Status Implemented; traceability.tests + E2E demo; validation_criteria Recommended E2E

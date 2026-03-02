@@ -20,7 +20,9 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
       - IMPL-SIDE_PANEL_BROWSER_TABS
     tests:
       - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/side-panel-tabs.test.js
       - tests/unit/service-worker-messaging-routing.test.js
+      - tests/playwright/extension-demo-tabs.spec.js
     code_annotations:
       - ARCH-SIDE_PANEL_BROWSER_TABS
   related_decisions:
@@ -32,9 +34,9 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
       - ARCH-SIDE_PANEL_TABS
   metadata:
     created:
-      date: '2026-02-28'
+      date: "2026-02-28"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
-      reason: Display mode above list; stats line (display/total windows and tabs)
+      reason: Traceability.tests aligned with REQ (unit + E2E demo)
