@@ -464,7 +464,11 @@ Playwright extension E2E harness; record side panel or popup flows; produce WebM
 
 ### Token references
 - `[REQ-SIDE_PANEL_BROWSER_TABS]` — Tabs tab list, filter, Copy Records/URLs
+- `[REQ-SIDE_PANEL_POPUP_EQUIVALENT]` — Bookmark tab (popup-equivalent)
+- `[REQ-SIDE_PANEL_TAGS_TREE]` — Tags tree tab
 - `[IMPL-SIDE_PANEL_BROWSER_TABS]` — browser-tabs-panel implementation
+- `[IMPL-SIDE_PANEL_BOOKMARK]` — Bookmark panel implementation
+- `[IMPL-SIDE_PANEL_TAGS_TREE]` — Tags tree panel implementation
 - `[PROC-TIED_DEV_CYCLE]` — session workflow when TIED docs or code change
 
 ### Status
@@ -472,12 +476,13 @@ Active
 
 ### Core Activities
 1. Use extension E2E fixture; enable video for the run (e.g. dedicated config with `video: 'on'`).
-2. In spec or script: open side-panel.html → switch to Tabs tab → wait for list → optionally filter → Copy Records or Copy URLs.
-3. Optionally inject a DOM overlay `<div>` into the side-panel page before each key-frame group to annotate what the user is doing (action) and what is produced (achievement); remove after the last frame. Overlay position: top of window; text size: 18–20px; text classes (intro, navigation, state, action, result) with distinct colors per [IMPL-DEMO_OVERLAY].
-4. Run once; obtain WebM from test-results.
-5. Convert WebM to GIF (e.g. `ffmpeg -i video.webm -vf "fps=8,scale=640:-1:flags=lanczos" -c:v gif output.gif`).
-6. Place GIF in docs/ or docs/assets/; reference in README/CHANGELOG. The Tabs demo script uses 12 steps with overlays and 1 fps output for a slower, clearer loop.
+2. **Tabs demo**: In spec or script: open side-panel.html → switch to Tabs tab → wait for list → optionally filter → Copy Records or Copy URLs.
+3. **Bookmark demo**: Open side-panel (Bookmark tab is default); show Quick Actions, Storage, Add tag (or one clear action); optional Search Tabs. Script: `scripts/record-demo-bookmark.js`; output: `docs/demo-bookmark.gif`.
+4. **Tags tree demo**: Open side-panel → switch to Tags tree tab → wait for data → select tags → show tree → optional search → click URL (open in new tab). Script: `scripts/record-demo-tags-tree.js`; output: `docs/demo-tags-tree.gif`.
+5. Optionally inject a DOM overlay `<div>` into the side-panel page before each key-frame group to annotate what the user is doing (action) and what is produced (achievement); remove after the last frame. Overlay position: top of window; text size: 18–20px; text classes (intro, navigation, state, action, result) with distinct colors per [IMPL-DEMO_OVERLAY].
+6. Run once; obtain WebM from test-results (or screenshot frames for standalone scripts).
+7. Convert WebM/frames to GIF (e.g. `ffmpeg` two-pass palette; Tabs script uses 1 fps, scale 400). Place GIF in docs/; reference in README/CHANGELOG.
 
 ### Artifacts & Metrics
-- **Artifacts**: Demo spec (or script), WebM recording, GIF asset, README/CHANGELOG mention.
-- **Success Metrics**: GIF plays; flow matches “find and export” (filter + Copy Records/URLs).
+- **Artifacts**: Demo spec (or script), WebM/frames, GIF assets (`docs/demo-tabs-export.gif`, `docs/demo-bookmark.gif`, `docs/demo-tags-tree.gif`), scripts (`scripts/record-demo-tabs.js`, `scripts/record-demo-bookmark.js`, `scripts/record-demo-tags-tree.js`), README/CHANGELOG mention.
+- **Success Metrics**: GIF plays; Tabs flow matches “find and export”; Bookmark flow shows Quick Actions/Storage/Add tag; Tags tree flow shows select tags → tree → optional search/click URL.

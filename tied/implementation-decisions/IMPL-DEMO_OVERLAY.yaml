@@ -4,7 +4,11 @@ IMPL-DEMO_OVERLAY:
   cross_references:
     - PROC-DEMO_RECORDING
     - REQ-SIDE_PANEL_BROWSER_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - REQ-SIDE_PANEL_TAGS_TREE
     - IMPL-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_BOOKMARK
+    - IMPL-SIDE_PANEL_TAGS_TREE
   rationale:
     why: Implements PROC-DEMO_RECORDING overlay styling for Tabs demo; position, text size, and class-based colors so key-frame annotations are visible and semantically distinct.
     problems_solved:
@@ -21,14 +25,21 @@ IMPL-DEMO_OVERLAY:
       - setOverlay(action, achievement, textClass): create or reuse #__demo_overlay__; apply class color to action (strong) and achievement (span, muted); textClass one of intro, navigation, state, action, result.
       - OVERLAY_CLASSES: intro #e0e0e0, navigation #42a5f5, state #ffa726, action #26c6da, result #66bb6a.
       - Step mapping: 1-2 intro; 3-4 navigation; 5-6,8 state; 7,9,11 action; 10,12 result.
+      - Demo also shows display mode (Title then Block), remove-from-display, and Refresh; steps 5a/5b and 8a/8b in record-demo-tabs.js.
   code_locations:
     files:
       - path: scripts/record-demo-tabs.js
-        description: setOverlay and removeOverlay; OVERLAY_CLASSES map; step-to-class mapping
+        description: setOverlay and removeOverlay; OVERLAY_CLASSES map; step-to-class mapping (Tabs demo)
+      - path: scripts/record-demo-bookmark.js
+        description: same overlay helpers; Bookmark tab demo (Quick Actions, Storage, Add tag)
+      - path: scripts/record-demo-tags-tree.js
+        description: same overlay helpers; Tags tree tab demo (select tags, tree, search, click URL)
   traceability:
     architecture: []
     requirements:
       - REQ-SIDE_PANEL_BROWSER_TABS
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+      - REQ-SIDE_PANEL_TAGS_TREE
     tests: []
     code_annotations:
       - IMPL-DEMO_OVERLAY
@@ -40,8 +51,8 @@ IMPL-DEMO_OVERLAY:
     see_also:
       - PROC-DEMO_RECORDING
   essence_pseudocode: |
-    # [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS]
-    # Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-tabs.js only.
+    # [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
+    # Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-tabs.js, record-demo-bookmark.js, record-demo-tags-tree.js.
 
     setOverlay(action, achievement, textClass):
       el = getElementById('__demo_overlay__') or create and append div#__demo_overlay__

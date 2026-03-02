@@ -65,11 +65,18 @@ const searchCountEl = document.getElementById('searchCount')
 const searchPrevEl = document.getElementById('searchPrev')
 const searchNextEl = document.getElementById('searchNext')
 
-/** Placeholder bookmarks for ?screenshot=1 / ?demo=1 (README and demos). */
+/** Placeholder bookmarks for ?screenshot=1 / ?demo=1 (README and demos). Multiple tags per bookmark for Tags tree GIF. */
 const MOCK_BOOKMARKS = [
-  { url: 'https://example.com', description: 'Example', tags: ['work'] },
+  { url: 'https://example.com', description: 'Example Domain', tags: ['work', 'reference'] },
   { url: 'https://example.org', description: 'Example Org', tags: ['work', 'personal'] },
-  { url: 'https://example.net', description: 'Sample Page', tags: ['personal'] }
+  { url: 'https://example.net', description: 'Sample Page', tags: ['personal', 'reading'] },
+  { url: 'https://developer.mozilla.org', description: 'MDN Web Docs', tags: ['docs', 'reference', 'web'] },
+  { url: 'https://github.com', description: 'GitHub', tags: ['dev', 'code'] },
+  { url: 'https://www.npmjs.com', description: 'npm', tags: ['dev', 'docs'] },
+  { url: 'https://stackoverflow.com', description: 'Stack Overflow', tags: ['dev', 'reference', 'tutorial'] },
+  { url: 'https://nodejs.org', description: 'Node.js', tags: ['dev', 'docs', 'tutorial'] },
+  { url: 'https://playwright.dev', description: 'Playwright', tags: ['dev', 'testing', 'tutorial'] },
+  { url: 'https://jestjs.io', description: 'Jest', tags: ['dev', 'testing'] }
 ]
 
 /**
@@ -162,10 +169,12 @@ function syncControlsFromConfig () {
 
 /**
  * Load placeholder data when ?screenshot=1 or ?demo=1 so the panel can be captured with consistent content.
+ * Sets rawBookmarks so refreshFromConfig() (e.g. when a tag is unchecked) has data and can re-render the tree.
  */
 function loadPlaceholderForScreenshot () {
   loadErrorEl.classList.add('hidden')
   emptyStateEl.classList.add('hidden')
+  rawBookmarks = [...MOCK_BOOKMARKS]
   tagToBookmarks = buildTagToBookmarks(MOCK_BOOKMARKS)
   allTags = getAllTagsFromBookmarks(MOCK_BOOKMARKS)
   selectedTagOrder = [...allTags]
