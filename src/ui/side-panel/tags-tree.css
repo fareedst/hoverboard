@@ -216,9 +216,14 @@
   margin: 0;
 }
 
+/* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE] Above-list div scrolls off the page; no flex/overflow so it takes natural height and participates in panel scroll. */
+.tags-tree-above-list {
+  flex: none;
+}
+
 .tree-section {
   padding: var(--space-2, 8px) var(--space-3, 12px);
-  flex: 1;
+  min-height: 100%;
   overflow-y: auto;
 }
 
@@ -326,11 +331,20 @@
   display: none !important;
 }
 
-/* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE] Tags tree panel fills content area; min-height 0 and overflow hidden so .tree-section scrolls and implements "tab content fills vertical space". Selector matches DOM id tagsTreePanel. */
+/* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE] Tags tree panel is the scroll container so .tags-tree-above-list (the div) can scroll off the page; .tree-section has min-height 100% so it consumes full visible height when div is scrolled off and scrolls its list. */
 #tagsTreePanel {
-  display: flex;
-  flex-direction: column;
+  display: block;
+  flex: 1 1 0;
   min-height: 0;
-  overflow: hidden;
+  overflow-y: auto;
   background: var(--color-background, #fff);
+}
+
+/* [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Standalone tags-tree.html: body is the scroll container so the above-list div can scroll off and tree-section consumes full visible height. */
+#tags-tree-panel {
+  display: block;
+  min-height: 0;
+  overflow-y: auto;
+  height: 100vh;
+  box-sizing: border-box;
 }

@@ -259,13 +259,16 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     ON click URL in tree: url = event target url; openUrlInNewTab(url)  // openUrlInNewTab(url) => chrome.tabs.create({ url })
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # Tags tree panel layout: panel fills content area and tree section scrolls. Selector must match DOM id (tagsTreePanel). Override min-height so panel participates in flex; overflow hidden so only .tree-section scrolls. Implements "tab content fills vertical space" for Tags tree tab.
-    CSS #tagsTreePanel: display flex; flex-direction column; min-height 0; overflow hidden; background var(--color-background)
+    # Tags tree panel layout: panel (#tagsTreePanel) is the scroll container so the above-list div can scroll off the page; .tree-section has min-height 100% so it consumes full visible height when the div is scrolled off and scrolls its list. Implements "tab content fills vertical space" for Tags tree tab.
+    # DOM: #tagsTreePanel > .tags-tree-above-list > (header, config-section, search-section, tag-selector-section) + .tree-section
+    CSS #tagsTreePanel: display block; flex 1 1 0; min-height 0; overflow-y auto; background var(--color-background)
+    CSS .tags-tree-above-list: flex none (natural height; scrolls off with panel scroll)
+    CSS .tree-section: min-height 100%; overflow-y auto
   metadata:
     created:
       date: '2026-02-21'
       author: AI Agent
     last_updated:
-      date: '2026-02-25'
+      date: '2026-03-02'
       author: AI Agent
-      reason: Add Tags tree panel layout essence_pseudocode and #tagsTreePanel CSS (min-height 0, overflow hidden) so tab content fills vertical space
+      reason: Tags tree tab scroll: panel scroll container; above-list div scrolls off; tree fills height

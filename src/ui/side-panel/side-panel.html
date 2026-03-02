@@ -144,8 +144,9 @@
     </section>
   </div>
 
-  <!-- [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Tags tree panel: same structure as tags-tree.html for getElementById lookups -->
+  <!-- [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Tags tree panel: same structure as tags-tree.html for getElementById lookups; above-list div scrolls off so tree section can consume full visible height. -->
   <div id="tagsTreePanel" class="side-panel-content" role="tabpanel" aria-labelledby="tab-tags-tree">
+    <div class="tags-tree-above-list">
     <header class="tags-tree-header">
       <h2 class="tags-tree-title">Tags &amp; bookmarks</h2>
       <p class="tags-tree-subtitle">Select tags to show; expand to see URLs. Click a URL to open in a new tab.</p>
@@ -228,6 +229,7 @@
       </div>
       <div id="tagSelector" class="tag-selector tag-selector-compact"></div>
     </section>
+    </div>
     <section class="tree-section" aria-label="Tags and bookmarks tree">
       <div id="treeContainer" class="tree-container"></div>
       <div id="emptyState" class="empty-state hidden">No tags selected or no bookmarks.</div>

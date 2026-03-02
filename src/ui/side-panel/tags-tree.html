@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="tags-tree.css">
 </head>
 <body id="tags-tree-panel">
-  <!-- [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] -->
+  <!-- [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] Above-list div scrolls off so tree section can consume full visible height. -->
+  <div class="tags-tree-above-list">
   <header class="tags-tree-header">
     <h1 class="tags-tree-title">Tags &amp; bookmarks</h1>
     <p class="tags-tree-subtitle">Select tags to show; expand to see URLs. Click a URL to open in a new tab.</p>
@@ -99,6 +100,7 @@
       <!-- Filled by JS: checkboxes per tag -->
     </div>
   </section>
+  </div>
 
   <section class="tree-section" aria-label="Tags and bookmarks tree">
     <div id="treeContainer" class="tree-container">

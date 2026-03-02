@@ -1,7 +1,3 @@
-# [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
-# Architecture: Single side panel page with tab bar; two content panels (Bookmark, Tags tree);
-# reuse popup stack for Bookmark with scoped root; Tags tree as second tab.
-
 ARCH-SIDE_PANEL_TABS:
   name: Side Panel Tabs Architecture
   status: Active
@@ -17,14 +13,13 @@ ARCH-SIDE_PANEL_TABS:
       - Single panel entry (e.g. side-panel.html); tab bar; Bookmark panel uses UIManager/PopupController with scoped root (container) so element lookup is under that root; Tags tree panel hosts existing tags-tree UI
       - Only one panel visible at a time; last-selected tab persisted
   implementation_approach:
-    summary: Manifest side_panel.default_path points to one HTML (side-panel.html). Page has tab bar ("Bookmark" | "Tags tree"), #bookmarkPanel (root for popup-equivalent with data-popup-ref attributes), #tagsTreePanel (existing tags-tree content). When Bookmark tab is selected, init UISystem and createPopup({ container: bookmarkPanel }), loadInitialData, setupEventListeners. When Tags tree tab is selected, run tags-tree load/render. Persist selected tab in chrome.storage.local.
     details:
-      - "Tab bar: two buttons or links; click switches visible panel and persists choice"
-      - "UIManager must support optional container; when set, cacheElements uses container.querySelector('[data-popup-ref=\"id\"]') instead of document.getElementById"
-      - "Bookmark panel markup: same structure as popup main (loading, error, main with quick actions, storage, tag management, search) with data-popup-ref on each element"
-      - "Tags tree panel: current tags-tree sections (config, search, tag selector, tree); IDs remain unique in document"
-      - "\"Open Tags tree\" in Bookmark footer: in panel context, switch to Tags tree tab instead of sending OPEN_SIDE_PANEL"
-      - "Layout: Page and tab content use full viewport height and panel width. Override popup-derived body constraints (max-height, width) when in side panel. Tab content area is a flex column so children can distribute space. Tags tree panel fills the content area with a single scrollable tree section."
+      - 'Tab bar: two buttons or links; click switches visible panel and persists choice'
+      - UIManager must support optional container; when set, cacheElements uses container.querySelector('[data-popup-ref="id"]') instead of document.getElementById
+      - 'Bookmark panel markup: same structure as popup main (loading, error, main with quick actions, storage, tag management, search) with data-popup-ref on each element'
+      - 'Tags tree panel: current tags-tree sections (config, search, tag selector, tree); IDs remain unique in document'
+      - '"Open Tags tree" in Bookmark footer: in panel context, switch to Tags tree tab instead of sending OPEN_SIDE_PANEL'
+      - 'Layout: Page and tab content use full viewport height and panel width. Override popup-derived body constraints (max-height, width) when in side panel. Tab content area is a flex column so children can distribute space. Tags tree tab: #tagsTreePanel is the scroll container so the above-list div (.tags-tree-above-list) can scroll off the page; the tree list section (.tree-section) uses min-height: 100% so it consumes the full visible height and scrolls its own list.'
   traceability:
     requirements:
       - REQ-SIDE_PANEL_POPUP_EQUIVALENT
@@ -51,10 +46,7 @@ ARCH-SIDE_PANEL_TABS:
       - ARCH-SIDE_PANEL_TAGS_TREE
       - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
   metadata:
-    created:
-      date: '2026-02-25'
-      author: AI Agent
     last_updated:
-      date: '2026-02-25'
+      date: '2026-03-02'
       author: AI Agent
-      reason: Add layout detail (full viewport height/width; tab content flex; Tags tree scrollable section)
+      reason: 'Tags tree tab scroll: panel scroll container; above-list div scrolls off; tree fills height'
