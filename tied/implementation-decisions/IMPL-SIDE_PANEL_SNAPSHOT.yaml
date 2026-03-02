@@ -15,8 +15,8 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       - No serializable snapshot of side panel for E2E regression
       - Cannot assert Bookmark tab and Tags tree tab structure in one call
     benefits:
-      - Single helper snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab, browserTabsTab }; E2E can assert required properties
-      - Contract aligns with IMPL-SIDE_PANEL_TABS (two panels) and IMPL-SIDE_PANEL_BOOKMARK / IMPL-SIDE_PANEL_TAGS_TREE
+      - Single helper snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }; E2E can assert required properties
+      - Contract aligns with IMPL-SIDE_PANEL_TABS (two panels) and IMPL-SIDE_PANEL_BOOKMARK / IMPL-SIDE_PANEL_TAGS_TREE / IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
   implementation_approach:
     summary: tests/e2e/helpers.js exports snapshotSidePanel(page); single page.evaluate returns { bookmarkTab, tagsTreeTab }; Bookmark tab snapshot queries #bookmarkPanel and data-popup-ref elements; Tags tree tab snapshot queries #tagsTreePanel and key IDs. E2E spec loads side-panel.html and asserts snapshot shapes.
     details:
@@ -24,6 +24,7 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       - bookmarkTab: root #bookmarkPanel; if absent return { panelPresent: false }; else query [data-popup-ref="loadingState"], [data-popup-ref="errorState"], [data-popup-ref="mainInterface"]; compute loadingVisible, errorVisible, mainVisible (not hidden); screen = loading|error|mainInterface|unknown; optional errorMessage
       - tagsTreeTab: root #tagsTreePanel; if absent return { panelPresent: false }; else hasTagSelector = !!#tagSelector, hasTreeContainer = !!#treeContainer, hasSearchInput = !!#searchInput, hasConfigToggle = !!#configToggle; optional hasSearchCount, hasEmptyState, hasLoadError
       - browserTabsTab: root #browserTabsPanel; if absent return { panelPresent: false }; else hasFilterInput, hasCopyButton, hasCloseButton, hasListContainer
+      - browserBookmarksTab: root #browserBookmarksPanel; if absent return { panelPresent: false }; else hasSearchInput, hasFolderSelect, hasSortSelect, hasListContainer, hasSelectAllBtn, hasUndoBar, hasImportFolderSelect, hasExportHtmlBtn, hasExportCsvBtn (REQ-SIDE_PANEL_BROWSER_BOOKMARKS)
   code_locations:
     files:
       - path: tests/e2e/helpers.js
@@ -56,13 +57,14 @@ IMPL-SIDE_PANEL_SNAPSHOT:
     see_also:
       - IMPL-SIDE_PANEL_BOOKMARK
       - IMPL-SIDE_PANEL_TAGS_TREE
+      - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
   essence_pseudocode: |
     # [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
     # This block defines the side panel snapshot helper: one function returning bookmarkTab and tagsTreeTab shapes.
     # Implements REQ-UI_INSPECTION by providing E2E-inspectable state for side panel; REQ-SIDE_PANEL_POPUP_EQUIVALENT (Bookmark tab) and REQ-SIDE_PANEL_TAGS_TREE (Tags tree tab) by capturing key elements per tab.
 
     INPUT: page (Playwright/Puppeteer page navigated to side-panel.html)
-    OUTPUT: { bookmarkTab: {...}, tagsTreeTab: {...}, browserTabsTab: { panelPresent, hasFilterInput?, hasCopyButton?, hasCloseButton?, hasListContainer? } }
+    OUTPUT: { bookmarkTab: {...}, tagsTreeTab: {...}, browserTabsTab: {...}, browserBookmarksTab: { panelPresent, hasSearchInput?, hasFolderSelect?, hasSortSelect?, hasListContainer?, hasSelectAllBtn?, hasUndoBar?, hasImportFolderSelect?, hasExportHtmlBtn?, hasExportCsvBtn? } }
     DATA: document in page context
 
     # [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BOOKMARK]
@@ -115,13 +117,33 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       }
     })()
 
-    RETURN { bookmarkTab, tagsTreeTab, browserTabsTab }
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # browserBookmarksTab snapshot: root #browserBookmarksPanel; presence of search input, folder select, sort select, list container, Select all, Undo bar, Import folder select, Export HTML/CSV buttons. Implements E2E-inspectable state for Bookmarks tab.
+    browserBookmarksTab = (function () {
+      const root = document.getElementById('browserBookmarksPanel')
+      if (!root) return { panelPresent: false }
+      const byId = (id) => document.getElementById(id)
+      return {
+        panelPresent: true,
+        hasSearchInput: !!byId('browserBookmarksSearchInput'),
+        hasFolderSelect: !!byId('browserBookmarksFolderSelect'),
+        hasSortSelect: !!byId('browserBookmarksSortSelect'),
+        hasListContainer: !!byId('browserBookmarksList'),
+        hasSelectAllBtn: !!byId('browserBookmarksSelectAllBtn'),
+        hasUndoBar: !!byId('browserBookmarksUndoBar'),
+        hasImportFolderSelect: !!byId('browserBookmarksImportFolderSelect'),
+        hasExportHtmlBtn: !!byId('browserBookmarksExportHtmlBtn'),
+        hasExportCsvBtn: !!byId('browserBookmarksExportCsvBtn')
+      }
+    })()
+
+    RETURN { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml
   metadata:
     created:
       date: '2026-02-25'
       author: AI Agent
     last_updated:
-      date: '2026-02-25'
+      date: '2026-03-02'
       author: AI Agent
-      reason: Initial creation for side panel snapshot E2E
+      reason: Add browserBookmarksTab to snapshot contract and essence_pseudocode; cross-ref IMPL-SIDE_PANEL_BROWSER_BOOKMARKS

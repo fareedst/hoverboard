@@ -2691,6 +2691,46 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
   metadata:
     registered: "2026-02-28T00:00:00.000Z"
     last_updated: "2026-02-28T00:00:00.000Z"
+REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
+  type: REQ
+  name: Side Panel Browser Bookmarks
+  category: Functional
+  status: Implemented
+  description: Side panel Bookmarks tab lists Chrome browser bookmarks with search, folder filter, click to open
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+    - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
+  metadata:
+    registered: "2026-03-02"
+    last_updated: "2026-03-02"
+ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
+  type: ARCH
+  name: Side Panel Browser Bookmarks Architecture
+  status: Active
+  description: New panel #browserBookmarksPanel; chrome.bookmarks.getTree; flatten to list; folder tree with counts; filter and click to open
+  cross_references:
+    - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+    - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
+  metadata:
+    registered: "2026-03-02"
+    last_updated: "2026-03-02"
+IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
+  type: IMPL
+  name: Side Panel Browser Bookmarks Implementation
+  status: Active
+  description: flattenBookmarkTree, filterBrowserBookmarks, buildFolderTree; browser-bookmarks-panel.js and panel UI
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+    - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
+  metadata:
+    registered: "2026-03-02"
+    last_updated: "2026-03-02"
 IMPL-DEMO_OVERLAY:
   type: IMPL
   name: Demo Recording Overlay

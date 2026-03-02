@@ -33,9 +33,9 @@ describe('E2E popup and overlay snapshots', () => {
     expect(shape).toHaveProperty('hasTokenField')
   })
 
-  // [IMPL-SIDE_PANEL_SNAPSHOT] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
-  // Asserts snapshotSidePanel return contract: bookmarkTab and tagsTreeTab with required properties.
-  test('snapshotSidePanel return shape has bookmarkTab and tagsTreeTab with required keys', () => {
+  // [IMPL-SIDE_PANEL_SNAPSHOT] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS]
+  // Asserts snapshotSidePanel return contract: bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab with required properties.
+  test('snapshotSidePanel return shape has bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab with required keys', () => {
     const bookmarkTab = {
       panelPresent: true,
       screen: 'mainInterface',
@@ -51,6 +51,18 @@ describe('E2E popup and overlay snapshots', () => {
       hasSearchInput: true,
       hasConfigToggle: true
     }
+    const browserBookmarksTab = {
+      panelPresent: true,
+      hasSearchInput: true,
+      hasFolderSelect: true,
+      hasSortSelect: true,
+      hasListContainer: true,
+      hasSelectAllBtn: true,
+      hasUndoBar: true,
+      hasImportFolderSelect: true,
+      hasExportHtmlBtn: true,
+      hasExportCsvBtn: true
+    }
     expect(bookmarkTab).toHaveProperty('panelPresent')
     expect(bookmarkTab).toHaveProperty('screen')
     expect(bookmarkTab).toHaveProperty('loadingVisible')
@@ -60,8 +72,14 @@ describe('E2E popup and overlay snapshots', () => {
     expect(tagsTreeTab).toHaveProperty('hasTreeContainer')
     expect(tagsTreeTab).toHaveProperty('hasSearchInput')
     expect(tagsTreeTab).toHaveProperty('hasConfigToggle')
-    const fullShape = { bookmarkTab, tagsTreeTab }
+    expect(browserBookmarksTab).toHaveProperty('panelPresent')
+    expect(browserBookmarksTab).toHaveProperty('hasSearchInput')
+    expect(browserBookmarksTab).toHaveProperty('hasFolderSelect')
+    expect(browserBookmarksTab).toHaveProperty('hasExportHtmlBtn')
+    expect(browserBookmarksTab).toHaveProperty('hasExportCsvBtn')
+    const fullShape = { bookmarkTab, tagsTreeTab, browserBookmarksTab }
     expect(fullShape).toHaveProperty('bookmarkTab')
     expect(fullShape).toHaveProperty('tagsTreeTab')
+    expect(fullShape).toHaveProperty('browserBookmarksTab')
   })
 })

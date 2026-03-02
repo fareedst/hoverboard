@@ -4308,6 +4308,60 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       author: AI Agent
       reason: Initial creation
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml
+IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
+  name: Side Panel Browser Bookmarks Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+    - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_BROWSER_BOOKMARKS and REQ-SIDE_PANEL_BROWSER_BOOKMARKS with flatten, filter, folder tree, and panel UI.
+    problems_solved:
+      - No browser bookmarks list in side panel
+    benefits:
+      - Testable filterBrowserBookmarks, flattenBookmarkTree, buildFolderTree; panel with list, search, folder filter, click to open
+  implementation_approach:
+    summary: Panel fetches chrome.bookmarks.getTree; flatten to list; build folder tree with counts; filter by query and folder; render list; click URL opens in new tab.
+  code_locations:
+    files:
+      - path: src/ui/side-panel/browser-bookmarks-panel.js
+        description: flattenBookmarkTree, filterBrowserBookmarks, buildFolderTree; init and render
+    functions:
+      - name: flattenBookmarkTree
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Recursively flatten chrome bookmarks tree to list with folderPath
+      - name: filterBrowserBookmarks
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Pure filter by query and folderId; case-insensitive
+      - name: buildFolderTree
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Build folder hierarchy with bookmark counts per folder
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+    requirements:
+      - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+    tests:
+      - tests/unit/browser-bookmarks-panel.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_TABS
+    composed_with:
+      - IMPL-SIDE_PANEL_TABS
+  metadata:
+    created:
+      date: "2026-03-02"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-02"
+      author: AI Agent
+      reason: Initial creation
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
 IMPL-DEMO_OVERLAY:
   name: Demo Recording Overlay
   status: Active

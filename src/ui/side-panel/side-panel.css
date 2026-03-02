@@ -68,6 +68,209 @@
   width: 100%;
 }
 
+/* [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] Browser Bookmarks panel: same layout as Tags tree and Browser Tabs. */
+#browserBookmarksPanel {
+  display: block;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.browser-bookmarks-above-list {
+  flex: none;
+}
+
+.browser-bookmarks-list-section {
+  min-height: 100%;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+}
+
+.browser-bookmarks-header {
+  flex-shrink: 0;
+  margin: 0 0 0.5rem 0;
+}
+
+.browser-bookmarks-title {
+  margin: 0 0 0.25rem 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.browser-bookmarks-subtitle {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #999);
+}
+
+.browser-bookmarks-section {
+  flex-shrink: 0;
+  margin-bottom: 0.75rem;
+}
+
+.browser-bookmarks-control-group {
+  margin: 0.125rem 0;
+}
+
+.browser-bookmarks-search-input {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #eee);
+}
+
+.browser-bookmarks-folder-select,
+.browser-bookmarks-sort-select {
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.875rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #eee);
+}
+
+.browser-bookmarks-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #999);
+  margin-bottom: 0.25rem;
+}
+
+.browser-bookmarks-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #999);
+  margin: 0.35rem 0;
+}
+
+.browser-bookmarks-message {
+  flex-shrink: 0;
+  margin: 0.25rem 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, #999);
+}
+
+.browser-bookmarks-message.hidden {
+  display: none;
+}
+.browser-bookmarks-undo-bar {
+  flex-shrink: 0;
+  padding: 0.35rem 0.5rem;
+  background: var(--bg-secondary, #2a2a2a);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  font-size: 0.8rem;
+}
+.browser-bookmarks-undo-bar.hidden {
+  display: none;
+}
+.browser-bookmarks-undo-btn {
+  margin-left: 0.25rem;
+}
+.browser-bookmarks-import-file-input {
+  max-width: 12rem;
+}
+.browser-bookmarks-import-progress {
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+.browser-bookmarks-import-progress.hidden {
+  display: none;
+}
+.browser-bookmarks-inline-edit {
+  width: 100%;
+  font: inherit;
+  padding: 0.15rem 0.25rem;
+  border: 1px solid var(--hb-border-focus, #1a73e8);
+  border-radius: 2px;
+  background: var(--hb-bg-primary, #fff);
+  color: var(--hb-text-primary, #202124);
+}
+
+.browser-bookmarks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.browser-bookmarks-row {
+  padding: 0.5rem;
+  border: 1px solid var(--border-color, #333);
+  border-radius: 4px;
+  background: var(--bg-secondary, #2a2a2a);
+  font-size: 0.8rem;
+}
+
+.browser-bookmarks-row-checkbox-wrap {
+  flex-shrink: 0;
+  margin-right: 0.5rem;
+  display: flex;
+  align-items: center;
+}
+.browser-bookmarks-row-checkbox {
+  margin: 0;
+  cursor: pointer;
+}
+.browser-bookmarks-section-actions {
+  flex-shrink: 0;
+}
+.browser-bookmarks-move-select {
+  width: 100%;
+  max-width: 12rem;
+}
+.browser-bookmarks-row-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.browser-bookmarks-favicon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+.browser-bookmarks-favicon-placeholder {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  background: var(--border-color, #333);
+  border-radius: 2px;
+}
+
+.browser-bookmarks-row-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.browser-bookmarks-row-title {
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+  word-break: break-word;
+}
+
+.browser-bookmarks-row-url {
+  color: var(--accent, #5a9);
+  word-break: break-all;
+  font-size: 0.75rem;
+}
+
+.browser-bookmarks-row-url:hover {
+  text-decoration: underline;
+}
+
+.browser-bookmarks-row-folder {
+  margin-top: 0.15rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #999);
+  word-break: break-word;
+}
+
 /* [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Browser Tabs panel is the scroll container so .browser-tabs-above-list can scroll off; list section fills height and scrolls (same as Tags tree). */
 #browserTabsPanel {
   display: block;

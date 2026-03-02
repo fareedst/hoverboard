@@ -60,6 +60,15 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COM
     expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
   })
 
+  test('command open-side-panel-browser-bookmarks sets storage then opens side panel [IMPL-EXTENSION_COMMANDS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS]', async () => {
+    sw._sidePanelWindowId = 42
+    await sw.handleCommand('open-side-panel-browser-bookmarks')
+    expect(global.chrome.storage.local.set).toHaveBeenCalledWith(
+      { hoverboard_sidepanel_active_tab: 'browserBookmarks' }
+    )
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
+  })
+
   test('command open-bookmarks-index calls chrome.tabs.create with bookmarks-table URL', () => {
     const listener = global.chrome.commands.onCommand.addListener.mock.calls[0][0]
     listener('open-bookmarks-index')

@@ -327,8 +327,9 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     expect(snapshot).toHaveProperty('bookmarkTab')
     expect(snapshot).toHaveProperty('tagsTreeTab')
     expect(snapshot).toHaveProperty('browserTabsTab')
+    expect(snapshot).toHaveProperty('browserBookmarksTab')
 
-    const { bookmarkTab, tagsTreeTab, browserTabsTab } = snapshot
+    const { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab } = snapshot
     expect(bookmarkTab).toHaveProperty('panelPresent')
     expect(typeof bookmarkTab.panelPresent).toBe('boolean')
     expect(bookmarkTab.panelPresent).toBe(true)
@@ -372,6 +373,20 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     expect(browserTabsTab.hasDisplayModeAboveList).toBe(true)
     expect(browserTabsTab).toHaveProperty('hasStatsLine')
     expect(browserTabsTab.hasStatsLine).toBe(true)
+
+    expect(browserBookmarksTab).toHaveProperty('panelPresent')
+    expect(typeof browserBookmarksTab.panelPresent).toBe('boolean')
+    expect(browserBookmarksTab.panelPresent).toBe(true)
+    expect(browserBookmarksTab).toHaveProperty('hasSearchInput')
+    expect(typeof browserBookmarksTab.hasSearchInput).toBe('boolean')
+    expect(browserBookmarksTab).toHaveProperty('hasFolderSelect')
+    expect(browserBookmarksTab).toHaveProperty('hasSortSelect')
+    expect(browserBookmarksTab).toHaveProperty('hasListContainer')
+    expect(browserBookmarksTab).toHaveProperty('hasSelectAllBtn')
+    expect(browserBookmarksTab).toHaveProperty('hasUndoBar')
+    expect(browserBookmarksTab).toHaveProperty('hasImportFolderSelect')
+    expect(browserBookmarksTab).toHaveProperty('hasExportHtmlBtn')
+    expect(browserBookmarksTab).toHaveProperty('hasExportCsvBtn')
 
     await sidePanelPage.close()
   })

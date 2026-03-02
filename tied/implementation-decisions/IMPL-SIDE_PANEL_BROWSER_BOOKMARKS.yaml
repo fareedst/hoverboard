@@ -1,0 +1,190 @@
+IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
+  name: Side Panel Browser Bookmarks Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+    - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_BROWSER_BOOKMARKS and REQ-SIDE_PANEL_BROWSER_BOOKMARKS with flatten, filter, folder tree, and panel UI.
+    problems_solved:
+      - No browser bookmarks list in side panel
+    benefits:
+      - Testable filterBrowserBookmarks, flattenBookmarkTree, buildFolderTree; panel with list, search, folder filter, click to open
+  implementation_approach:
+    summary: Panel fetches chrome.bookmarks.getTree; flatten to list; build folder tree with counts; filter by query and folder; render list; click URL opens in new tab.
+    details:
+      - Data fetch: chrome.bookmarks.getTree in panel; flattenBookmarkTree(nodes, parentPath) returns flat list with id, url, title, dateAdded, folderPath, parentId
+      - Folder tree: buildFolderTree(nodes, parentPath) returns tree of { id, title, path, count, children }; count = direct bookmarks in folder
+      - Filter: filterBrowserBookmarks(bookmarks, query, folderId) pure; empty query returns all; folderId filters by parentId; case-insensitive substring on title, url, folderPath
+      - Sort: sortBrowserBookmarks(bookmarks, sortBy, sortAsc) pure; sortBy in date|name|default; sortAsc boolean; persisted in chrome.storage.local (hoverboard_browser_bookmarks_sort)
+      - UI: search input; folder dropdown; sort dropdown (date-desc, date-asc, name-asc, name-desc, default); list section; match count; each row shows favicon (chrome favicon API or fallback), title, url, folder path; click url opens chrome.tabs.create
+      - Panel layout: same as Tags tree and Browser Tabs; above-list scrolls off; list section fills height; bulk (selectedIds, getSelectedBookmarks, updateBulkButtonStates); undo (undoStack, showUndoMessage); import/export (parseBookmarksHtml/Csv, buildBookmarksHtml/Csv, downloadBlob); inline edit (startInlineEdit, finishEdit); keyboard (setupKeyboardShortcuts, handleBookmarksKeydown); command (manifest open-side-panel-browser-bookmarks)
+  code_locations:
+    files:
+      - path: src/ui/side-panel/browser-bookmarks-panel.js
+        description: flattenBookmarkTree, filterBrowserBookmarks, buildFolderTree, sortBrowserBookmarks, build/parse Html/Csv, getFaviconSrc, buildUrlListForCopy; init, render, bulk, undo, import/export, inline edit, keyboard
+      - path: src/ui/side-panel/side-panel.html
+        description: Tab button and #browserBookmarksPanel
+      - path: src/ui/side-panel/side-panel.js
+        description: initBrowserBookmarksTab wiring
+      - path: src/ui/side-panel/side-panel-tab-state.js
+        description: TAB_BROWSER_BOOKMARKS constant and visibility
+    functions:
+      - name: flattenBookmarkTree
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Recursively flatten chrome bookmarks tree to list with folderPath
+      - name: filterBrowserBookmarks
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Pure filter by query (title, url, folderPath) and folderId (parentId); case-insensitive
+      - name: buildFolderTree
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Build folder hierarchy with bookmark counts per folder
+      - name: sortBrowserBookmarks
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Sort bookmarks by date, name, or default (tree order)
+      - name: getSelectedBookmarks
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Returns selected bookmarks from lastVisible (internal; testable via behavior)
+      - name: buildBookmarksHtml
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Pure; build Netscape bookmark file HTML from bookmark list
+      - name: buildBookmarksCsv
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Pure; build CSV (title, url, folderPath) from bookmark list
+      - name: parseBookmarksHtml
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Pure; parse Netscape HTML string to list of { url, title }
+      - name: parseBookmarksCsv
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Pure; parse CSV string to list of { url, title }
+      - name: getFaviconSrc
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Return chrome-extension favicon URL for http(s) URLs; empty for others
+      - name: buildUrlListForCopy
+        file: src/ui/side-panel/browser-bookmarks-panel.js
+        description: Build newline-separated URL list from bookmarks for clipboard
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+    requirements:
+      - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+    tests:
+      - tests/unit/browser-bookmarks-panel.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-BROWSER_BOOKMARK_IMPORT
+    composed_with:
+      - IMPL-SIDE_PANEL_TABS
+  essence_pseudocode: |
+    # [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # This block defines the browser bookmarks panel: data fetch, flatten, folder tree, filter, UI, click to open. Implements REQ by listing Chrome bookmarks with folder path and favicon; real-time search; folder filter; implements ARCH by chrome.bookmarks API and visible-list actions.
+
+    INPUT: searchQuery (string), selectedFolderId (string | null), bookmarks from chrome.bookmarks.getTree
+    OUTPUT: visible bookmarks (filtered), click URL opens in new tab
+    DATA: allBookmarks = flattenBookmarkTree(tree), visibleBookmarks = filterBrowserBookmarks(allBookmarks, searchQuery, selectedFolderId)
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Data fetch: panel calls chrome.bookmarks.getTree; flatten to list. Implements "list all Chrome bookmarks".
+    ON load / refresh (panel):
+      tree = AWAIT chrome.bookmarks.getTree()
+      allBookmarks = flattenBookmarkTree(tree[0]?.children ?? [], '')
+      folderTree = buildFolderTree(tree[0]?.children ?? [], '')
+      applyFilter(); renderList()
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # flattenBookmarkTree(nodes, parentPath): pure. For each node: if node.url push { id, url, title, dateAdded, folderPath: parentPath, parentId }; if node.children recurse with path = parentPath ? parentPath + ' / ' + node.title : node.title. Return flat list. Implements "folder path per bookmark".
+    flattenBookmarkTree(nodes, parentPath):
+      list = []
+      FOR each node in nodes:
+        path = parentPath ? parentPath + ' / ' + (node.title || 'Unnamed') : (node.title || 'Unnamed')
+        IF node.url: list.push({ id: node.id, url: node.url, title: node.title || '', dateAdded: node.dateAdded ?? 0, folderPath: parentPath, parentId: node.parentId })
+        IF node.children: list.push(...flattenBookmarkTree(node.children, path))
+      RETURN list
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # buildFolderTree(nodes, parentPath): pure. Returns [{ id, title, path, count, children }]. count = number of direct bookmarks (node.url) in this folder; children = recurse on node.children. Implements "folder tree with bookmark counts".
+    buildFolderTree(nodes, parentPath):
+      result = []
+      FOR each node in nodes:
+        path = parentPath ? parentPath + ' / ' + (node.title || 'Unnamed') : (node.title || 'Unnamed')
+        directCount = (node.children ?? []).filter(c => c.url).length
+        childFolders = buildFolderTree((node.children ?? []).filter(c => !c.url), path)
+        result.push({ id: node.id, title: node.title || 'Unnamed', path, count: directCount, children: childFolders })
+      RETURN result
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # filterBrowserBookmarks(bookmarks, query, folderId): pure. Empty query returns all. If folderId: filter where parentId === folderId. Then filter by query: case-insensitive substring match on title, url, folderPath. Implements "real-time search" and "folder filter".
+    filterBrowserBookmarks(bookmarks, query, folderId):
+      filtered = bookmarks
+      IF folderId: filtered = filtered.filter(b => b.parentId === folderId)
+      q = String(query).trim().toLowerCase()
+      IF q === '': RETURN filtered
+      RETURN filtered.filter(b => (b.title??'').toLowerCase().includes(q) OR (b.url??'').toLowerCase().includes(q) OR (b.folderPath??'').toLowerCase().includes(q))
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # UI: search input; folder dropdown/sidebar; list section; match count. Each row: favicon, title, url, folder path. Click url: chrome.tabs.create({ url }) for http(s). Implements "match count", "click URL opens in new tab".
+    RENDER: FOR each b in visibleBookmarks: display row with favicon, title, url (clickable), folderPath; show "N bookmarks" count
+    ON search input: searchQuery = value; applyFilter(); renderList()
+    ON folder select: selectedFolderId = value; applyFilter(); renderList()
+    ON sort select: sortValue = value; applyFilter(); chrome.storage.local.set({ hoverboard_browser_bookmarks_sort: sortValue })
+    sortBrowserBookmarks(visible, sortBy, sortAsc): IF sortBy === 'default' RETURN copy; IF sortBy === 'date' sort by dateAdded; IF sortBy === 'name' sort by title; sortAsc controls direction
+    ON url click: IF url starts with http(s): chrome.tabs.create({ url: b.url })
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Bulk selection and button state: selectedIds Set; renderList outputs checkbox per row; checkbox change toggles selectedIds; updateBulkButtonStates disables Open/Copy/Move/Delete/Export when selectedIds.size === 0. Select all / Deselect all buttons.
+    DATA: selectedIds = Set(), lastVisible = filtered+sorted list
+    getSelectedBookmarks() = lastVisible.filter(b => selectedIds.has(b.id))
+    ON Select all: FOR b in lastVisible selectedIds.add(b.id); applyFilter()
+    ON Deselect all: selectedIds.clear(); applyFilter()
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Bulk actions: Open in tabs (getSelectedBookmarks, chrome.tabs.create per URL); Open in window (chrome.windows.create); Copy (buildUrlListForCopy, navigator.clipboard.writeText); Move (move select value, chrome.bookmarks.move); Delete (confirm, chrome.bookmarks.remove, push undo stack, showUndoMessage).
+    ON Open in tabs: FOR url in getSelectedBookmarks().map(b => b.url): chrome.tabs.create({ url })
+    ON Open in window: chrome.windows.create({ url: getSelectedBookmarks().map(b => b.url) })
+    ON Copy URLs: navigator.clipboard.writeText(buildUrlListForCopy(getSelectedBookmarks()))
+    ON Move: targetId = moveSelect.value; FOR b in getSelectedBookmarks(): chrome.bookmarks.move(b.id, { parentId: targetId }); loadBookmarks()
+    ON Delete: confirm; FOR b in getSelectedBookmarks(): chrome.bookmarks.remove(b.id); push to undoStack { bookmarks: [{ parentId, url, title }] }; showUndoMessage(count)
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Undo: undoStack array; UNDO_STACK_LIMIT 50; showUndoMessage(count) renders #browserBookmarksUndoBar with "Undo" button and setTimeout(UNDO_MESSAGE_DURATION_MS) to hide; on Undo click pop entry, chrome.bookmarks.create per bookmark, loadBookmarks.
+    showUndoMessage(deletedCount): render undo bar "Deleted N bookmarks. Undo"; setTimeout(hide, UNDO_MESSAGE_DURATION_MS)
+    ON Undo click: entry = undoStack.pop(); FOR b in entry.bookmarks: chrome.bookmarks.create({ parentId: b.parentId||'1', url, title, index: 0 }); loadBookmarks()
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Export: buildBookmarksHtml/buildBookmarksCsv(selected|allBookmarks); Blob; downloadBlob. Export selected/all buttons disabled when no selection or no data.
+    ON Export selected HTML/CSV: buildBookmarksHtml|buildBookmarksCsv(getSelectedBookmarks()); downloadBlob(blob, filename)
+    ON Export all HTML/CSV: buildBookmarksHtml|buildBookmarksCsv(allBookmarks); downloadBlob(blob, filename)
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Import: populateImportFolderSelect from folderTree; file input; on Import read file.text(), parse by extension (parseBookmarksHtml|parseBookmarksCsv); get existing URLs via getSubTree(targetId)+flatten; for each row skip or overwrite per conflict; chrome.bookmarks.create; progress; loadBookmarks.
+    ON Import: list = parseBookmarksHtml(text)|parseBookmarksCsv(text); existingUrls = flatten(getSubTree(targetId)); FOR b in list: IF conflict skip skip; ELSE IF overwrite find and chrome.bookmarks.update OR create; ELSE chrome.bookmarks.create; update progress; loadBookmarks()
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Inline edit: double-click [data-field="title"] or [data-field="url"]; startInlineEdit(el): create input, replace el, focus; on blur/Enter finishEdit: chrome.bookmarks.update(id, { title }|{ url }), update allBookmarks, applyFilter(); Escape restore currentVal and applyFilter().
+    ON double-click title|url: startInlineEdit(el); input.onblur|Enter => finishEdit (update then applyFilter); Escape => applyFilter (restore view)
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Keyboard: document keydown; if panel hidden return; if target in input/select/textarea and Escape blur and return; if Escape clear selectedIds and applyFilter(); if Ctrl+F preventDefault and focus searchInput.
+    handleBookmarksKeydown(e): IF panel hidden RETURN; IF target in input|select|textarea AND Escape THEN blur; RETURN; IF Escape THEN selectedIds.clear(); applyFilter(); IF Ctrl+F THEN preventDefault; searchInput.focus()
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Layout: Undo bar #browserBookmarksUndoBar; import section with Import to folder, Conflict select, file input, Import button, progress; populateMoveSelect and populateImportFolderSelect mirror folder tree.
+    PANEL LAYOUT: above-list includes undo bar, bulk actions, import section; populateMoveSelect() and populateImportFolderSelect() from folderTree
+
+    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
+    # Panel layout: same as Tags tree. #browserBookmarksPanel scroll container; .browser-bookmarks-above-list (flex none) with header, search, folder selector; .browser-bookmarks-list-section (min-height 100%, overflow-y auto) with #browserBookmarksList.
+    PANEL LAYOUT: browserBookmarksPanel = scroll container; above-list = header + search + folder + sort + bulk + undo + import; list-section = #browserBookmarksList
+  metadata:
+    created:
+      date: "2026-03-02"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-02"
+      author: AI Agent
+      reason: Fix filter to parentId only; add pseudocode blocks for bulk, undo, export, import, inline edit, keyboard, layout; add code_locations functions

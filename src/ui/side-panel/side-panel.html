@@ -19,6 +19,7 @@
       <button type="button" class="side-panel-tab" role="tab" data-tab="bookmark" aria-selected="true">Bookmark</button>
       <button type="button" class="side-panel-tab" role="tab" data-tab="tagsTree" aria-selected="false">Tags tree</button>
       <button type="button" class="side-panel-tab" role="tab" data-tab="browserTabs" aria-selected="false">Tabs</button>
+      <button type="button" class="side-panel-tab" role="tab" data-tab="browserBookmarks" aria-selected="false">Bookmarks</button>
     </nav>
   </header>
 
@@ -116,6 +117,91 @@
     <button type="button" data-popup-ref="settingsBtn" class="icon-button hidden" aria-hidden="true" style="position:absolute;left:-9999px"></button>
     <span data-popup-ref="privateStatus" class="hidden" aria-hidden="true"></span>
     <span data-popup-ref="readStatus" class="hidden" aria-hidden="true"></span>
+  </div>
+
+  <!-- [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] Browser Bookmarks panel: list Chrome bookmarks with search, folder filter, click to open. -->
+  <div id="browserBookmarksPanel" class="side-panel-content" role="tabpanel" aria-labelledby="tab-browser-bookmarks" hidden>
+    <div class="browser-bookmarks-above-list">
+      <header class="browser-bookmarks-header">
+        <h2 class="browser-bookmarks-title">Chrome bookmarks</h2>
+        <p class="browser-bookmarks-subtitle">Search and filter by folder. Click a URL to open in a new tab.</p>
+      </header>
+      <section class="browser-bookmarks-section-filter browser-bookmarks-section" aria-label="Filter">
+        <div class="browser-bookmarks-control-group">
+          <input type="text" id="browserBookmarksSearchInput" class="browser-bookmarks-search-input" placeholder="Search title, URL, folder…" aria-label="Search bookmarks" title="Filter by title, URL, or folder path">
+        </div>
+        <div class="browser-bookmarks-control-group">
+          <label for="browserBookmarksFolderSelect" class="browser-bookmarks-label">Folder</label>
+          <select id="browserBookmarksFolderSelect" class="browser-bookmarks-folder-select" aria-label="Filter by folder" title="Show only bookmarks in selected folder">
+            <option value="">All folders</option>
+          </select>
+        </div>
+        <div class="browser-bookmarks-control-group">
+          <label for="browserBookmarksSortSelect" class="browser-bookmarks-label">Sort</label>
+          <select id="browserBookmarksSortSelect" class="browser-bookmarks-sort-select" aria-label="Sort bookmarks" title="Sort by date, name, or default order">
+            <option value="date-desc">Date (newest first)</option>
+            <option value="date-asc">Date (oldest first)</option>
+            <option value="name-asc">Name (A–Z)</option>
+            <option value="name-desc">Name (Z–A)</option>
+            <option value="default">Chrome default order</option>
+          </select>
+        </div>
+        <div id="browserBookmarksCount" class="browser-bookmarks-count" aria-live="polite">0 bookmarks</div>
+        <div id="browserBookmarksMessage" class="browser-bookmarks-message hidden" aria-live="polite"></div>
+        <div id="browserBookmarksUndoBar" class="browser-bookmarks-undo-bar hidden" aria-live="polite"></div>
+        <div class="browser-bookmarks-control-group">
+          <button type="button" id="browserBookmarksRefreshBtn" class="button secondary" title="Reload bookmark list" aria-label="Refresh">Refresh</button>
+        </div>
+      </section>
+      <!-- [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] Bulk actions: select, open, move, delete, copy, export -->
+      <section class="browser-bookmarks-section-actions browser-bookmarks-section" aria-label="Bulk actions">
+        <div class="browser-bookmarks-control-group">
+          <button type="button" id="browserBookmarksSelectAllBtn" class="button secondary" title="Select all visible bookmarks" aria-label="Select all">Select all</button>
+          <button type="button" id="browserBookmarksDeselectAllBtn" class="button secondary" title="Clear selection" aria-label="Deselect all">Deselect all</button>
+        </div>
+        <div class="browser-bookmarks-control-group">
+          <button type="button" id="browserBookmarksOpenTabsBtn" data-action="openTabs" class="button secondary" title="Open selected in new tabs" aria-label="Open in tabs">Open in tabs</button>
+          <button type="button" id="browserBookmarksOpenWindowBtn" data-action="openWindow" class="button secondary" title="Open selected in new window" aria-label="Open in window">Open in window</button>
+          <button type="button" id="browserBookmarksCopyBtn" data-action="copyUrls" class="button secondary" title="Copy selected URLs to clipboard" aria-label="Copy URLs">Copy URLs</button>
+        </div>
+        <div class="browser-bookmarks-control-group">
+          <label for="browserBookmarksMoveSelect" class="browser-bookmarks-label">Move to</label>
+          <select id="browserBookmarksMoveSelect" class="browser-bookmarks-move-select" aria-label="Target folder for move" title="Select folder to move selected bookmarks to">
+            <option value="">— Select folder —</option>
+          </select>
+          <button type="button" id="browserBookmarksMoveBtn" class="button secondary" title="Move selected to chosen folder" aria-label="Move">Move</button>
+          <button type="button" id="browserBookmarksDeleteBtn" class="button secondary danger" title="Delete selected bookmarks" aria-label="Delete">Delete</button>
+        </div>
+        <div class="browser-bookmarks-control-group">
+          <button type="button" id="browserBookmarksExportHtmlBtn" data-action="exportHtml" class="button secondary" title="Export selected as Netscape HTML" aria-label="Export HTML">Export HTML</button>
+          <button type="button" id="browserBookmarksExportCsvBtn" data-action="exportCsv" class="button secondary" title="Export selected as CSV" aria-label="Export CSV">Export CSV</button>
+          <button type="button" id="browserBookmarksExportAllHtmlBtn" class="button secondary" title="Export all bookmarks as HTML" aria-label="Export all HTML">Export all HTML</button>
+          <button type="button" id="browserBookmarksExportAllCsvBtn" class="button secondary" title="Export all bookmarks as CSV" aria-label="Export all CSV">Export all CSV</button>
+        </div>
+      </section>
+      <!-- [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] Import HTML/CSV -->
+      <section class="browser-bookmarks-section-import browser-bookmarks-section" aria-label="Import">
+        <div class="browser-bookmarks-control-group">
+          <label for="browserBookmarksImportFolderSelect" class="browser-bookmarks-label">Import to folder</label>
+          <select id="browserBookmarksImportFolderSelect" class="browser-bookmarks-import-folder-select" aria-label="Target folder for import" title="Folder to import bookmarks into">
+            <option value="1">Bookmarks Bar</option>
+          </select>
+          <label for="browserBookmarksConflictMode" class="browser-bookmarks-label">Conflict</label>
+          <select id="browserBookmarksConflictMode" class="browser-bookmarks-conflict-select" aria-label="Conflict resolution" title="Skip duplicates or overwrite existing">
+            <option value="skip">Skip duplicates</option>
+            <option value="overwrite">Overwrite</option>
+          </select>
+        </div>
+        <div class="browser-bookmarks-control-group">
+          <input type="file" id="browserBookmarksImportFileInput" class="browser-bookmarks-import-file-input" accept=".html,.htm,.csv,text/html,text/csv" aria-label="Choose HTML or CSV file" title="Select Netscape HTML or CSV file to import">
+          <button type="button" id="browserBookmarksImportBtn" class="button secondary" title="Import from selected file" aria-label="Import" disabled>Import</button>
+        </div>
+        <div id="browserBookmarksImportProgress" class="browser-bookmarks-import-progress hidden" aria-live="polite"></div>
+      </section>
+    </div>
+    <section class="browser-bookmarks-list-section" aria-label="Bookmark list">
+      <div id="browserBookmarksList" class="browser-bookmarks-list"></div>
+    </section>
   </div>
 
   <!-- [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Browser Tabs panel: sections, tooltips, layout like Tags tree (above-list scrolls off, list section fills height). -->

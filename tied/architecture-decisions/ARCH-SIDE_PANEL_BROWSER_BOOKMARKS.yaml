@@ -1,0 +1,50 @@
+ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
+  name: Side Panel Browser Bookmarks Architecture
+  status: Active
+  cross_references:
+    - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+  rationale:
+    why: New panel lists Chrome browser bookmarks from chrome.bookmarks API; data fetched in panel; filter and folder selection operate on flattened list.
+    problems_solved:
+      - How to display Chrome bookmarks in side panel
+      - How to support folder navigation and search
+    benefits:
+      - Single panel #browserBookmarksPanel; data from chrome.bookmarks.getTree; flatten to list; folder tree with counts; real-time search; click URL to open
+  implementation_approach:
+    summary: Panel uses chrome.bookmarks.getTree; flatten to flat list with folder path; folder tree built from nodes; filter by query and folder; actions on visible list; bulk, undo, import/export, inline edit, keyboard, command.
+    details:
+      - Data fetch: chrome.bookmarks.getTree in panel; flatten to list of { id, url, title, dateAdded, folderPath, parentId }; folder tree built recursively with counts
+      - UI: search input; folder selector (sidebar or dropdown) with folder tree; list section with above-list controls; match count
+      - Filter: filterBrowserBookmarks(bookmarks, query, folderId) pure function; empty query returns all; folderId filters by parentId
+      - Click URL: chrome.tabs.create({ url }) for http(s) URLs
+      - Bulk: selectedIds Set; Select all/Deselect all; Open in tabs (chrome.tabs.create per URL), Open in window (chrome.windows.create); Copy URLs (buildUrlListForCopy + clipboard); Move (folder picker + chrome.bookmarks.move); Delete (confirm + chrome.bookmarks.remove); Export selected/all (buildBookmarksHtml/buildBookmarksCsv + Blob download)
+      - Undo: session-scoped undo stack (max 50); on delete push { bookmarks, timestamp }; show undo bar with timed dismiss (10s); on Undo pop stack and chrome.bookmarks.create per item
+      - Import: file input (HTML/CSV); parseBookmarksHtml/parseBookmarksCsv; target folder select; conflict skip/overwrite; getSubTree for existing URLs; progress text; chrome.bookmarks.create
+      - Inline edit: double-click title/URL; replace node with input; on blur/Enter call chrome.bookmarks.update and re-apply filter
+      - Keyboard: document keydown when panel visible; Escape clear selection; Ctrl+F focus search (skip when focus in input/select/textarea)
+      - Command: manifest command open-side-panel-browser-bookmarks; SW sets storage tab then sidePanel.open; panel bindStorageTabChange switches to tab
+  traceability:
+    requirements:
+      - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+    implementation:
+      - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
+    tests:
+      - tests/unit/browser-bookmarks-panel.test.js
+    code_annotations:
+      - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+  related_decisions:
+    depends_on:
+      - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+    informs:
+      - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
+    see_also:
+      - ARCH-SIDE_PANEL_TABS
+      - ARCH-BROWSER_BOOKMARK_IMPORT
+  metadata:
+    created:
+      date: "2026-03-02"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-02"
+      author: AI Agent
+      reason: Add implementation_approach details for bulk, undo, import, inline edit, keyboard, command; fix filter to parentId only

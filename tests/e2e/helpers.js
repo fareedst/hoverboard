@@ -87,7 +87,7 @@ export async function snapshotOptions (page) {
  * [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
  * Snapshot side panel: two serializable state shapes (Bookmark tab, Tags tree tab) for E2E assertions.
  * @param {import('puppeteer').Page} page - Page navigated to side-panel.html (chrome-extension://id/.../side-panel.html)
- * @returns {Promise<{ bookmarkTab: object, tagsTreeTab: object, browserTabsTab: { panelPresent: boolean, hasFilterInput?: boolean, hasCopyButton?: boolean, hasCloseButton?: boolean, hasListContainer?: boolean, hasGatherButton?: boolean, hasDistributeButton?: boolean, hasImportantTagSourcesInput?: boolean, hasSections?: boolean } }>}
+ * @returns {Promise<{ bookmarkTab: object, tagsTreeTab: object, browserTabsTab: object, browserBookmarksTab: { panelPresent: boolean, hasSearchInput?: boolean, hasFolderSelect?: boolean, hasSortSelect?: boolean, hasListContainer?: boolean, hasSelectAllBtn?: boolean, hasUndoBar?: boolean, hasImportFolderSelect?: boolean, hasExportHtmlBtn?: boolean, hasExportCsvBtn?: boolean } }>}
  */
 export async function snapshotSidePanel (page) {
   return await page.evaluate(() => {
@@ -170,6 +170,27 @@ export async function snapshotSidePanel (page) {
       }
     }
 
-    return { bookmarkTab, tagsTreeTab, browserTabsTab }
+    // [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] browserBookmarksTab: root #browserBookmarksPanel, key element presence
+    const browserBookmarksRoot = document.getElementById('browserBookmarksPanel')
+    let browserBookmarksTab
+    if (!browserBookmarksRoot) {
+      browserBookmarksTab = { panelPresent: false }
+    } else {
+      const byId = (id) => document.getElementById(id)
+      browserBookmarksTab = {
+        panelPresent: true,
+        hasSearchInput: !!byId('browserBookmarksSearchInput'),
+        hasFolderSelect: !!byId('browserBookmarksFolderSelect'),
+        hasSortSelect: !!byId('browserBookmarksSortSelect'),
+        hasListContainer: !!byId('browserBookmarksList'),
+        hasSelectAllBtn: !!byId('browserBookmarksSelectAllBtn'),
+        hasUndoBar: !!byId('browserBookmarksUndoBar'),
+        hasImportFolderSelect: !!byId('browserBookmarksImportFolderSelect'),
+        hasExportHtmlBtn: !!byId('browserBookmarksExportHtmlBtn'),
+        hasExportCsvBtn: !!byId('browserBookmarksExportCsvBtn')
+      }
+    }
+
+    return { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }
   })
 }

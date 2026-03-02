@@ -13,9 +13,11 @@ export const TAB_BOOKMARK = 'bookmark'
 export const TAB_TAGS_TREE = 'tagsTree'
 /** @type {string} [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] */
 export const TAB_BROWSER_TABS = 'browserTabs'
+/** @type {string} [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] */
+export const TAB_BROWSER_BOOKMARKS = 'browserBookmarks'
 
 /** @type {string[]} */
-export const TAB_IDS = [TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS]
+export const TAB_IDS = [TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS, TAB_BROWSER_BOOKMARKS]
 
 /**
  * Default tab when none persisted.
@@ -30,13 +32,14 @@ export function getDefaultTab () {
  * Returns which panel(s) should be visible for the given activeTab.
  * [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
  * @param {string} activeTab
- * @returns {{ bookmarkVisible: boolean, tagsTreeVisible: boolean, browserTabsVisible: boolean }}
+ * @returns {{ bookmarkVisible: boolean, tagsTreeVisible: boolean, browserTabsVisible: boolean, browserBookmarksVisible: boolean }}
  */
 export function getVisibilityForTab (activeTab) {
   return {
     bookmarkVisible: activeTab === TAB_BOOKMARK,
     tagsTreeVisible: activeTab === TAB_TAGS_TREE,
-    browserTabsVisible: activeTab === TAB_BROWSER_TABS
+    browserTabsVisible: activeTab === TAB_BROWSER_TABS,
+    browserBookmarksVisible: activeTab === TAB_BROWSER_BOOKMARKS
   }
 }
 

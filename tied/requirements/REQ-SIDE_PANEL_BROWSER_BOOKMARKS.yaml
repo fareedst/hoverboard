@@ -1,0 +1,58 @@
+REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
+  name: Side Panel Browser Bookmarks
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Let users manage Chrome browser bookmarks from the side panel with search, folder navigation, sorting, bulk operations, and import/export.
+    problems_solved:
+      - No side-panel view of Chrome bookmarks
+      - No quick search or bulk management of browser bookmarks
+    benefits:
+      - Fourth side-panel tab Bookmarks; list all Chrome bookmarks with folder path, favicon; real-time search; folder filter; sort; bulk open/move/delete/copy; undo delete; import/export HTML and CSV
+  satisfaction_criteria:
+    - criterion: Side panel has a tab named Bookmarks that displays Chrome browser bookmarks from chrome.bookmarks.getTree
+    - criterion: List shows title, URL, favicon, folder path for each bookmark
+    - criterion: Folder sidebar or dropdown shows folder tree with bookmark counts; click folder filters list to that folder
+    - criterion: Real-time search (case-insensitive substring) across title, URL, folder path; match count displayed
+    - criterion: Click bookmark URL opens in new tab via chrome.tabs.create
+    - criterion: Sort by Date (newest/oldest), Name (A-Z/Z-A), Chrome default order; preference persisted in chrome.storage.local
+    - criterion: Bulk checkbox per row; Select all / Deselect all; Open in tabs/window; Copy URLs; Move to folder; Delete with confirmation; Export selected or all as HTML/CSV
+    - criterion: Session-scoped undo stack; "Deleted N bookmarks. Undo" with timed dismiss; undo restores via chrome.bookmarks.create
+    - criterion: Import HTML (Netscape) or CSV into selected folder; conflict resolution (skip duplicates or overwrite); progress indicator
+    - criterion: Inline edit double-click title or URL; chrome.bookmarks.update
+    - criterion: Keyboard Ctrl+F focus search, Escape clear selection
+    - criterion: Manifest command open-side-panel-browser-bookmarks opens panel on Bookmarks tab
+  validation_criteria:
+    - method: Unit tests
+      coverage: filterBrowserBookmarks, flattenBookmarkTree, buildFolderTree, sortBrowserBookmarks, buildBookmarksHtml, buildBookmarksCsv, parseBookmarksHtml, parseBookmarksCsv, getFaviconSrc, buildUrlListForCopy pure functions
+    - method: Manual or E2E
+      coverage: Open Bookmarks tab; search; filter by folder; click URL to open
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_BROWSER_BOOKMARKS
+    implementation:
+      - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
+    tests:
+      - tests/unit/browser-bookmarks-panel.test.js
+      - tests/unit/side-panel-tabs.test.js
+      - tests/unit/service-worker-quick-access.test.js
+    code_annotations:
+      - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    supersedes: []
+  metadata:
+    created:
+      date: "2026-03-02"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-02"
+      author: AI Agent
+      reason: Sync satisfaction criteria for bulk, undo, import/export, inline edit, keyboard, command; extend validation and traceability.tests
+    last_validated:
+      date: "2026-03-02"
+      validator: AI Agent
+      result: pass

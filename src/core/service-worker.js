@@ -19,7 +19,7 @@ import { normalizeBookmarkForDisplay } from '../features/storage/url-tags-manage
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
 // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-EXTENSION_COMMANDS] Tab IDs and storage key for side panel tab-specific commands
-import { SIDE_PANEL_TAB_STORAGE_KEY, TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS } from '../ui/side-panel/side-panel-tab-state.js'
+import { SIDE_PANEL_TAB_STORAGE_KEY, TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS, TAB_BROWSER_BOOKMARKS } from '../ui/side-panel/side-panel-tab-state.js'
 // [SAFARI-EXT-SHIM-001] Import browser API abstraction for cross-browser support
 import { browser } from '../shared/safari-shim.js' // [SAFARI-EXT-SHIM-001]
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Optional message log for testing/debugging
@@ -326,8 +326,8 @@ class HoverboardServiceWorker {
       return
     }
     // [IMPL-EXTENSION_COMMANDS] Tab-specific commands: set persisted tab then open panel; panel reads storage on load or onChanged.
-    if (command === 'open-side-panel-bookmark' || command === 'open-side-panel-tags-tree' || command === 'open-side-panel-browser-tabs') {
-      const tabId = command === 'open-side-panel-bookmark' ? TAB_BOOKMARK : command === 'open-side-panel-tags-tree' ? TAB_TAGS_TREE : TAB_BROWSER_TABS
+    if (command === 'open-side-panel-bookmark' || command === 'open-side-panel-tags-tree' || command === 'open-side-panel-browser-tabs' || command === 'open-side-panel-browser-bookmarks') {
+      const tabId = command === 'open-side-panel-bookmark' ? TAB_BOOKMARK : command === 'open-side-panel-tags-tree' ? TAB_TAGS_TREE : command === 'open-side-panel-browser-tabs' ? TAB_BROWSER_TABS : TAB_BROWSER_BOOKMARKS
       if (chromeApi?.storage?.local?.set) {
         await chromeApi.storage.local.set({ [SIDE_PANEL_TAB_STORAGE_KEY]: tabId })
       }

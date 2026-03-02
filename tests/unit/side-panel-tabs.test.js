@@ -8,6 +8,7 @@ import {
   TAB_BOOKMARK,
   TAB_TAGS_TREE,
   TAB_BROWSER_TABS,
+  TAB_BROWSER_BOOKMARKS,
   TAB_IDS,
   getDefaultTab,
   getVisibilityForTab,
@@ -23,11 +24,12 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(SIDE_PANEL_TAB_STORAGE_KEY).toBe('hoverboard_sidepanel_active_tab')
   })
 
-  test('tab ids are bookmark, tagsTree, and browserTabs [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]', () => {
+  test('tab ids are bookmark, tagsTree, browserTabs, and browserBookmarks [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]', () => {
     expect(TAB_BOOKMARK).toBe('bookmark')
     expect(TAB_TAGS_TREE).toBe('tagsTree')
     expect(TAB_BROWSER_TABS).toBe('browserTabs')
-    expect(TAB_IDS).toEqual(['bookmark', 'tagsTree', 'browserTabs'])
+    expect(TAB_BROWSER_BOOKMARKS).toBe('browserBookmarks')
+    expect(TAB_IDS).toEqual(['bookmark', 'tagsTree', 'browserTabs', 'browserBookmarks'])
   })
 
   test('getDefaultTab returns bookmark', () => {
@@ -53,6 +55,15 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(v.bookmarkVisible).toBe(false)
     expect(v.tagsTreeVisible).toBe(false)
     expect(v.browserTabsVisible).toBe(true)
+    expect(v.browserBookmarksVisible).toBe(false)
+  })
+
+  test('getVisibilityForTab(browserBookmarks) shows only browser Bookmarks panel [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]', () => {
+    const v = getVisibilityForTab('browserBookmarks')
+    expect(v.bookmarkVisible).toBe(false)
+    expect(v.tagsTreeVisible).toBe(false)
+    expect(v.browserTabsVisible).toBe(false)
+    expect(v.browserBookmarksVisible).toBe(true)
   })
 
   test('getVisibilityForTab unknown defaults to neither', () => {
@@ -60,6 +71,7 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(v.bookmarkVisible).toBe(false)
     expect(v.tagsTreeVisible).toBe(false)
     expect(v.browserTabsVisible).toBe(false)
+    expect(v.browserBookmarksVisible).toBe(false)
   })
 
   describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] refresh when switching to Bookmark tab', () => {

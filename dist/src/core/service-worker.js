@@ -21935,6 +21935,7 @@ var SIDE_PANEL_TAB_STORAGE_KEY = "hoverboard_sidepanel_active_tab";
 var TAB_BOOKMARK = "bookmark";
 var TAB_TAGS_TREE = "tagsTree";
 var TAB_BROWSER_TABS = "browserTabs";
+var TAB_BROWSER_BOOKMARKS = "browserBookmarks";
 
 // src/core/service-worker.js
 init_safari_shim();
@@ -22242,8 +22243,8 @@ var HoverboardServiceWorker = class {
       }
       return;
     }
-    if (command === "open-side-panel-bookmark" || command === "open-side-panel-tags-tree" || command === "open-side-panel-browser-tabs") {
-      const tabId = command === "open-side-panel-bookmark" ? TAB_BOOKMARK : command === "open-side-panel-tags-tree" ? TAB_TAGS_TREE : TAB_BROWSER_TABS;
+    if (command === "open-side-panel-bookmark" || command === "open-side-panel-tags-tree" || command === "open-side-panel-browser-tabs" || command === "open-side-panel-browser-bookmarks") {
+      const tabId = command === "open-side-panel-bookmark" ? TAB_BOOKMARK : command === "open-side-panel-tags-tree" ? TAB_TAGS_TREE : command === "open-side-panel-browser-tabs" ? TAB_BROWSER_TABS : TAB_BROWSER_BOOKMARKS;
       if (chromeApi?.storage?.local?.set) {
         await chromeApi.storage.local.set({ [SIDE_PANEL_TAB_STORAGE_KEY]: tabId });
       }
