@@ -21,6 +21,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - 'Message handler: OPEN_SIDE_PANEL type; SW listener handles directly (not via handleMessage async path)'
       - 'Panel: tags-tree.html/js/css; tags-tree-data.js has buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab (pure + testable); tags-tree-filter.js (or same module) has getDomainFromUrl, filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy (pure + testable)'
       - 'Config: load/save config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags) from chrome.storage.local; expand/collapse toggle shows or hides full filter and display controls; tag list view toggle (showAllTags) persists with config'
+      - 'Placeholder/demo mode (?demo=1 or ?screenshot=1): loadPlaceholderForScreenshot sets rawBookmarks from MOCK_BOOKMARKS so that when a tag checkbox is toggled, refreshFromConfig has data and re-applies filter/tree; otherwise refreshFromConfig early-returns and the tree does not update.'
   code_locations:
     files:
       - path: src/ui/side-panel/tags-tree-data.js
@@ -99,9 +100,12 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - name: renderTagSelector
         file: src/ui/side-panel/tags-tree.js
         description: Renders checkboxes for getTagsToDisplay(allTags, selectedTagOrder, showAllTags); compact layout; on change save selectedTagOrder and refresh (REQ/ARCH/IMPL)
+      - name: loadPlaceholderForScreenshot
+        file: src/ui/side-panel/tags-tree.js
+        description: Loads MOCK_BOOKMARKS into rawBookmarks and builds tagToBookmarks/allTags/selectedTagOrder so refreshFromConfig can run on tag toggle; used when ?demo=1 or ?screenshot=1 [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING]
       - name: refreshFromConfig
         file: src/ui/side-panel/tags-tree.js
-        description: Re-apply filter/sort/group and re-render on config change (REQ/ARCH/IMPL)
+        description: Re-apply filter/sort/group from rawBookmarks and re-render; early-returns when rawBookmarks empty (so placeholder mode must set rawBookmarks in loadPlaceholderForScreenshot) [REQ/ARCH/IMPL]
       - name: renderGrouped
         file: src/ui/side-panel/tags-tree.js
         description: Render collapsible sections when groupBy not none (REQ/ARCH/IMPL)
@@ -174,6 +178,10 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     # When panel is tabbed, Tags tree is second tab; load/render runs on tab select or first show. initTagsTreeTab(options) is callable from side-panel.js when user selects Tags tree tab; optional currentBookmarkTags syncs tag selector to current bookmark. Implements "Tags tree tab" in tabbed panel and "tag selector matches current bookmark; tree shows only bookmarks that share at least one tag".
     WHEN panel is tabbed (side-panel.html): Tags tree content in #tagsTreePanel; initTagsTreeTab(options) exported; side-panel.js passes currentBookmarkTags from Bookmark tab controller when switching to Tags tree. initTagsTreeTab(options): IF options.currentBookmarkTags set pendingCurrentBookmarkTags. loadBookmarks(): after allTags and default selectedTagOrder, IF pendingCurrentBookmarkTags set THEN selectedTagOrder = intersectionTagOrder(allTags, pendingCurrentBookmarkTags); saveSelectedTagOrder(selectedTagOrder); pendingCurrentBookmarkTags = null. setSelectedTagsFromCurrentBookmark(tags): when Tags tree already loaded, selectedTagOrder = intersectionTagOrder(allTags, tags); save; refreshFromConfig(); renderTagSelector(). intersectionTagOrder(allTags, preferredTags): RETURN preferredTags filtered to tags that exist in allTags (order preserved). Implements "Tags tree displays only bookmarks that have at least one of the same tags as the current bookmark".
 
+    # [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE]
+    # Placeholder/demo mode (?demo=1 or ?screenshot=1): loadPlaceholderForScreenshot must set rawBookmarks = [...MOCK_BOOKMARKS] so that subsequent tag checkbox changes invoke refreshFromConfig with data; otherwise refreshFromConfig early-returns and the tree does not update. Then set tagToBookmarks, allTags, selectedTagOrder from MOCK_BOOKMARKS; hide load error and empty state; renderTagSelector(); renderTree().
+    loadPlaceholderForScreenshot(): rawBookmarks = [...MOCK_BOOKMARKS]; tagToBookmarks = buildTagToBookmarks(MOCK_BOOKMARKS); allTags = getAllTagsFromBookmarks(MOCK_BOOKMARKS); selectedTagOrder = [...allTags]; hide loadErrorEl and emptyStateEl; renderTagSelector(); renderTree()
+
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
     # buildTagToBookmarks: implements requirement "tag-based tree" by producing Map<tag, [{ title, url }]> from bookmarks. One pass; trim/dedupe per tag.
     buildTagToBookmarks(bookmarks):
@@ -208,6 +216,10 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     # renderTree: implements collapsible URL lists per tag; each section has tag label + toggle + list of title+URL.
     renderTree(selectedTagOrder, tagToBookmarks, collapsedTags):
       FOR each tag in selectedTagOrder: entries = tagToBookmarks.get(tag) || []; render section (tag + toggle + list); store url for click
+
+    # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
+    # refreshFromConfig: syncConfigFromControls; savePanelConfig; IF !rawBookmarks or length 0 RETURN (no re-render). filterState = getFilterStateForTagsTree(panelConfig, selectedTagOrder); filtered = applyFilters(rawBookmarks, filterState); sorted = sortBookmarks(filtered, ...); matchingBookmarks = search filter or sorted; IF groupBy !== 'none' renderGrouped ELSE tagToBookmarks = buildTagToBookmarks(matchingBookmarks, allTags); renderTagSelector(); renderTree(); updateSearchCount; scrollToMatch.
+    refreshFromConfig(): syncConfigFromControls(); savePanelConfig(); IF !rawBookmarks or rawBookmarks.length === 0 RETURN; filterState = getFilterStateForTagsTree(panelConfig, selectedTagOrder); filtered = applyFilters(rawBookmarks, filterState); sorted = sortBookmarks(filtered, panelConfig.sortBy, panelConfig.sortAsc); matchingBookmarks = searchQuery ? filterBookmarksBySearch(sorted, searchQuery) : sorted; IF panelConfig.groupBy !== 'none' THEN renderGrouped(matchingBookmarks) ELSE tagToBookmarks = buildTagToBookmarks(matchingBookmarks, allTags); renderTagSelector(); renderTree(); updateSearchCount(); scrollToMatch(searchMatchIndex)
 
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
     # Config expand/collapse: implements requirement that config region is expandable for use and collapsible to maximize bookmarks space; toggle loads/saves expanded state; when collapsed only compact bar visible; when expanded show full filter and display controls.
@@ -267,4 +279,4 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     last_updated:
       date: "2026-03-02"
       author: AI Agent
-      reason: 'Tags tree tab scroll: panel scroll container; above-list div scrolls off; tree fills height'
+      reason: Placeholder rawBookmarks fix so tag uncheck updates tree in demo mode; essence_pseudocode blocks for loadPlaceholderForScreenshot and refreshFromConfig

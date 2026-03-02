@@ -62,6 +62,9 @@ IMPL-DEMO_OVERLAY:
 
     removeOverlay(): remove #__demo_overlay__ if present
 
+    # [IMPL-DEMO_OVERLAY] [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING]
+    # Tags tree demo (record-demo-tags-tree.js) loads side panel with ?demo=1, which triggers loadPlaceholderForScreenshot; tag toggles must update the tree per IMPL-SIDE_PANEL_TAGS_TREE (rawBookmarks set in placeholder path so refreshFromConfig runs on checkbox change).
+
     # Step-to-class mapping (12 steps): 1,2 intro; 3,4 navigation; 5,6,8 state; 7,9,11 action; 10,12 result.
   test_coverage_note: Demo overlay styling verified by running record-demo-tabs.js and inspecting output GIF; no unit tests (standalone recording script).
   metadata:

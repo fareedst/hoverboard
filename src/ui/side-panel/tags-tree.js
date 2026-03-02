@@ -168,12 +168,14 @@ function syncControlsFromConfig () {
 }
 
 /**
+ * [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE]
  * Load placeholder data when ?screenshot=1 or ?demo=1 so the panel can be captured with consistent content.
  * Sets rawBookmarks so refreshFromConfig() (e.g. when a tag is unchecked) has data and can re-render the tree.
  */
 function loadPlaceholderForScreenshot () {
   loadErrorEl.classList.add('hidden')
   emptyStateEl.classList.add('hidden')
+  // [IMPL-SIDE_PANEL_TAGS_TREE] Required so refreshFromConfig does not early-return when user toggles a tag in demo mode.
   rawBookmarks = [...MOCK_BOOKMARKS]
   tagToBookmarks = buildTagToBookmarks(MOCK_BOOKMARKS)
   allTags = getAllTagsFromBookmarks(MOCK_BOOKMARKS)
@@ -209,6 +211,7 @@ async function loadBookmarks () {
       loadErrorEl.classList.remove('hidden')
       return
     }
+    // [IMPL-SIDE_PANEL_TAGS_TREE] [IMPL-LOCAL_BOOKMARKS_INDEX] Store raw bookmarks so refreshFromConfig can re-apply filters on config change.
     rawBookmarks = bookmarks
     allTags = getAllTagsFromBookmarks(bookmarks)
     // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE] Merge current bookmark tag spellings so the list shows the bookmark's tags and is complete.
@@ -221,6 +224,7 @@ async function loadBookmarks () {
     if (selectedTagOrder.length === 0) selectedTagOrder = [...allTags]
     collapsedTags = await loadCollapsedState()
     collapsedSections = new Set()
+    // [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Build filter state (time, tagsInclude from selectedTagOrder or config, domains) and apply pipeline.
     const filterState = {
       timeField: panelConfig.timeField,
       timeStart: panelConfig.timeStart,
@@ -433,14 +437,18 @@ function renderTree () {
  * refreshFromConfig: re-applies filter/sort/group from current config and rawBookmarks, then re-renders. Used when config controls change. Implements config change → re-render.
  */
 function refreshFromConfig () {
+  // [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Sync config from controls and persist.
   syncConfigFromControls()
   savePanelConfig()
+  // [IMPL-SIDE_PANEL_TAGS_TREE] Early-return when no data; placeholder path must set rawBookmarks in loadPlaceholderForScreenshot.
   if (!Array.isArray(rawBookmarks) || rawBookmarks.length === 0) return
+  // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Build filter state from selectedTagOrder, apply pipeline, sort.
   const filterState = getFilterStateForTagsTree(panelConfig, selectedTagOrder)
   const filtered = applyFilters(rawBookmarks, filterState)
   const sorted = sortBookmarks(filtered, panelConfig.sortBy, panelConfig.sortAsc)
   // [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] Apply text search; use matchingBookmarks for tree/grouped and count.
   matchingBookmarks = (searchQuery && searchQuery.trim()) ? filterBookmarksBySearch(sorted, searchQuery) : sorted
+  // [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] groupBy branch: renderGrouped; else flat tree from tagToBookmarks.
   if (panelConfig.groupBy && panelConfig.groupBy !== 'none') {
     const grouped = groupBookmarksBy(matchingBookmarks, panelConfig.groupBy)
     renderGrouped(grouped)
@@ -582,6 +590,7 @@ export function initTagsTreeTab (options = {}) {
   attachConfigHandlers()
   attachSearchHandlers()
   const params = new URLSearchParams(typeof window !== 'undefined' && window.location ? window.location.search : '')
+  // [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] Placeholder path sets rawBookmarks so tag toggle updates tree.
   if (params.get('screenshot') === '1' || params.get('demo') === '1') {
     loadPlaceholderForScreenshot()
   } else {

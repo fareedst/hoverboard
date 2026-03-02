@@ -2,9 +2,11 @@
  * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
  * Unit tests for getTagsToDisplay: implements validation of "tags to display" logic (all tags vs only checked);
  * compact tag selector and all/checked toggle requirement.
+ * Data-flow test: selectedTagOrder + getFilterStateForTagsTree + applyFilters + buildTagToBookmarks (tag toggle updates tree).
  */
 
-import { getTagsToDisplay } from '../../src/ui/side-panel/tags-tree-data.js'
+import { getTagsToDisplay, getFilterStateForTagsTree, buildTagToBookmarks } from '../../src/ui/side-panel/tags-tree-data.js'
+import { applyFilters } from '../../src/ui/side-panel/tags-tree-filter.js'
 
 describe('getTagsToDisplay [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]', () => {
   // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] When showAllTags is true, returns allTags so selector shows every tag.
@@ -38,5 +40,31 @@ describe('getTagsToDisplay [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE
   test('returns empty array when showAllTags is false and selectedTagOrder is empty', () => {
     const allTags = ['a', 'b']
     expect(getTagsToDisplay(allTags, [], false)).toEqual([])
+  })
+})
+
+// [IMPL-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE] Data-flow: when selectedTagOrder excludes a tag, applyFilters keeps only bookmarks with at least one selected tag; buildTagToBookmarks(filtered) yields map; tree sections for unchecked tags are those not in selectedTagOrder.
+describe('Tags tree filter+tree data flow [IMPL-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE]', () => {
+  test('when selectedTagOrder excludes one tag, filtered list and buildTagToBookmarks reflect only selected-tag bookmarks', () => {
+    const now = new Date().toISOString()
+    const bookmarks = [
+      { url: 'https://a.example.com', description: 'Page A', tags: ['a', 'b'], time: now, updated_at: now },
+      { url: 'https://b.example.com', description: 'Page B', tags: ['b'], time: now, updated_at: now }
+    ]
+    const panelConfig = { timeField: 'updated_at', timeStart: null, timeEnd: null, tagsInclude: new Set(), domains: new Set() }
+    const selectedTagOrder = ['a']
+    const filterState = getFilterStateForTagsTree(panelConfig, selectedTagOrder)
+    expect(filterState.tagsInclude).toEqual(new Set(['a']))
+    const filtered = applyFilters(bookmarks, filterState)
+    expect(filtered).toHaveLength(1)
+    expect(filtered[0].url).toBe('https://a.example.com')
+    const tagToBookmarks = buildTagToBookmarks(filtered)
+    expect(tagToBookmarks.has('a')).toBe(true)
+    expect(tagToBookmarks.has('b')).toBe(true)
+    expect(tagToBookmarks.get('a')).toHaveLength(1)
+    expect(tagToBookmarks.get('b')).toHaveLength(1)
+    // renderTree(selectedTagOrder, tagToBookmarks, ...) would show only section 'a'; section 'b' exists in map but order of sections is selectedTagOrder
+    expect(selectedTagOrder).toContain('a')
+    expect(selectedTagOrder).not.toContain('b')
   })
 })
