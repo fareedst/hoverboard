@@ -12,6 +12,7 @@ import { recordAction } from '../../shared/ui-inspector.js'
 import { POPUP_ACTION_IDS, MESSAGE_TYPES } from '../../shared/ui-action-contract.js'
 import { splitAiTagsBySession } from '../../features/ai/ai-tagging-popup-utils.js'
 import { testAiApiKey } from '../../features/ai/ai-api-test.js'
+import { formatTimeAge } from '../bookmarks-table/bookmarks-table-time.js'
 
 export class PopupController {
   constructor (dependencies = {}) {
@@ -271,6 +272,11 @@ export class PopupController {
       // [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] - Load suggested tags from page content
       await this.loadSuggestedTags()
 
+      // [IMPL-SCREENSHOT_MODE] [REQ-SUGGESTED_TAGS_FROM_CONTENT] In screenshot/demo mode, overlay demo suggested tags from storage so Suggested Tags section is visible.
+      if (this._screenshotMode) {
+        await this.loadDemoSuggestedTagsIfScreenshotMode()
+      }
+
       // [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] Prefill tag input from page selection (≤8 words)
       try {
         const selectionResponse = await this.sendToTab({ type: 'GET_PAGE_SELECTION' })
@@ -315,6 +321,9 @@ export class PopupController {
       const tagWithAiBtn = this.uiManager.elements.tagWithAiBtn
       if (tagWithAiBtn) tagWithAiBtn.disabled = !aiApiKey || !urlOk
 
+      // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] This Page inline usage section
+      await this.refreshUsageSection()
+
       // Mark as initialized
       this.isInitialized = true
       debugLog('[POPUP-DATA-FLOW-001] Popup initialization completed successfully')
@@ -340,12 +349,41 @@ export class PopupController {
   }
 
   /**
+   * [IMPL-SCREENSHOT_MODE] [REQ-RECENT_TAGS_SYSTEM] In screenshot/demo mode, read hoverboard_demo_recent_tags from storage and call updateRecentTags (excluding current bookmark tags). Returns true if demo tags were applied, false otherwise.
+   */
+  async loadDemoRecentTagsIfScreenshotMode () {
+    return new Promise((resolve) => {
+      if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local || typeof chrome.storage.local.get !== 'function') {
+        resolve(false)
+        return
+      }
+      chrome.storage.local.get('hoverboard_demo_recent_tags', (result) => {
+        const tags = result && result.hoverboard_demo_recent_tags
+        if (!Array.isArray(tags) || tags.length === 0) {
+          resolve(false)
+          return
+        }
+        const currentTags = this.normalizeTags(this.currentPin?.tags || [])
+        const filtered = tags.filter(tag => !currentTags.includes(tag))
+        this.uiManager.updateRecentTags(filtered)
+        resolve(true)
+      })
+    })
+  }
+
+  /**
    * [IMMUTABLE-REQ-TAG-003] - Load user-driven recent tags from shared memory
    * Excludes tags already assigned to the current site
    */
   async loadRecentTags () {
     try {
       debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Loading user-driven recent tags')
+
+      // [IMPL-SCREENSHOT_MODE] [REQ-RECENT_TAGS_SYSTEM] In screenshot/demo mode use seeded demo recent tags so Recent Tags section is visible.
+      if (this._screenshotMode) {
+        const applied = await this.loadDemoRecentTagsIfScreenshotMode()
+        if (applied) return
+      }
 
       // [IMMUTABLE-REQ-TAG-003] - Get current tags to exclude from recent tags
       const currentTags = this.normalizeTags(this.currentPin?.tags || [])
@@ -728,6 +766,25 @@ export class PopupController {
       debugError('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to load suggested tags:', error)
       this.uiManager.updateSuggestedTags([])
     }
+  }
+
+  /**
+   * [IMPL-SCREENSHOT_MODE] [REQ-SUGGESTED_TAGS_FROM_CONTENT] In screenshot/demo mode, read hoverboard_demo_suggested_tags from storage and call updateSuggestedTags so the Suggested Tags section is visible in screenshots and demo GIF.
+   */
+  async loadDemoSuggestedTagsIfScreenshotMode () {
+    return new Promise((resolve) => {
+      if (typeof chrome === 'undefined' || !chrome.storage || !chrome.storage.local || typeof chrome.storage.local.get !== 'function') {
+        resolve()
+        return
+      }
+      chrome.storage.local.get('hoverboard_demo_suggested_tags', (result) => {
+        const tags = result && result.hoverboard_demo_suggested_tags
+        if (Array.isArray(tags) && tags.length > 0) {
+          this.uiManager.updateSuggestedTags(tags)
+        }
+        resolve()
+      })
+    })
   }
 
   /**
@@ -2327,6 +2384,44 @@ export class PopupController {
     this.uiManager?.off('openBookmarksIndex', this.handleOpenBookmarksIndex)
     this.uiManager?.off('openBrowserBookmarkImport', this.handleOpenBrowserBookmarkImport)
     this.uiManager?.off('openTagsTree', this.handleOpenTagsTree)
+  }
+
+  /**
+   * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
+   * Fetch usage and inbound links for current tab URL and update This Page usage section.
+   */
+  async refreshUsageSection () {
+    const url = this.currentTab?.url
+    if (!url || typeof this.sendMessage !== 'function') return
+    try {
+      const [usageRes, inboundRes] = await Promise.all([
+        this.sendMessage({ type: MESSAGE_TYPES.GET_BOOKMARK_USAGE, data: { url } }),
+        this.sendMessage({ type: MESSAGE_TYPES.GET_BOOKMARK_INBOUND_LINKS, data: { url } })
+      ])
+      const usage = usageRes && typeof usageRes === 'object' ? usageRes : null
+      const inbound = (Array.isArray(inboundRes) ? inboundRes : [])
+        .filter((e) => e?.sourceUrl)
+        .sort((a, b) => (b?.count ?? 0) - (a?.count ?? 0))
+      const topReferrer = inbound[0]?.sourceUrl
+      let topReferrerDisplay = ''
+      if (topReferrer) {
+        try {
+          const u = new URL(topReferrer)
+          topReferrerDisplay = u.hostname + (u.pathname && u.pathname !== '/' ? u.pathname.slice(0, 50) + (u.pathname.length > 50 ? '…' : '') : '')
+        } catch (_) {
+          topReferrerDisplay = topReferrer.slice(0, 50)
+        }
+      }
+      const visitCount = usage?.visitCount ?? 0
+      const lastVisitedAgoText = usage?.lastVisitedAt ? formatTimeAge(usage.lastVisitedAt) : ''
+      this.uiManager.updateUsageSection(
+        visitCount > 0 ? { visitCount, lastVisitedAgoText } : null,
+        topReferrerDisplay
+      )
+    } catch (err) {
+      debugError('[IMPL-BOOKMARK_USAGE_TRACKING_UI] refreshUsageSection failed:', err)
+      this.uiManager.updateUsageSection(null, '')
+    }
   }
 
   /**

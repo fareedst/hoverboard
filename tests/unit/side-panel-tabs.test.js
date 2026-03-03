@@ -29,7 +29,7 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(TAB_TAGS_TREE).toBe('tagsTree')
     expect(TAB_BROWSER_TABS).toBe('browserTabs')
     expect(TAB_BROWSER_BOOKMARKS).toBe('browserBookmarks')
-    expect(TAB_IDS).toEqual(['bookmark', 'tagsTree', 'browserTabs', 'browserBookmarks'])
+    expect(TAB_IDS).toEqual(['bookmark', 'tagsTree', 'browserTabs', 'browserBookmarks', 'usage'])
   })
 
   test('getDefaultTab returns bookmark', () => {
@@ -64,6 +64,16 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(v.tagsTreeVisible).toBe(false)
     expect(v.browserTabsVisible).toBe(false)
     expect(v.browserBookmarksVisible).toBe(true)
+    expect(v.usageVisible).toBe(false)
+  })
+
+  test('getVisibilityForTab(usage) shows only Usage panel [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI]', () => {
+    const v = getVisibilityForTab('usage')
+    expect(v.bookmarkVisible).toBe(false)
+    expect(v.tagsTreeVisible).toBe(false)
+    expect(v.browserTabsVisible).toBe(false)
+    expect(v.browserBookmarksVisible).toBe(false)
+    expect(v.usageVisible).toBe(true)
   })
 
   test('getVisibilityForTab unknown defaults to neither', () => {
@@ -72,6 +82,7 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(v.tagsTreeVisible).toBe(false)
     expect(v.browserTabsVisible).toBe(false)
     expect(v.browserBookmarksVisible).toBe(false)
+    expect(v.usageVisible).toBe(false)
   })
 
   describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] refresh when switching to This Page tab', () => {

@@ -6,6 +6,11 @@ IMPL-DEMO_OVERLAY:
     - REQ-SIDE_PANEL_BROWSER_TABS
     - REQ-SIDE_PANEL_POPUP_EQUIVALENT
     - REQ-SIDE_PANEL_TAGS_TREE
+    - REQ-SIDE_PANEL_BOOKMARK_SEARCH
+    - REQ-MOVE_BOOKMARK_STORAGE_UI
+    - REQ-RECENT_TAGS_SYSTEM
+    - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    - REQ-AI_TAGGING_POPUP
     - IMPL-SIDE_PANEL_BROWSER_TABS
     - IMPL-SIDE_PANEL_BOOKMARK
     - IMPL-SIDE_PANEL_TAGS_TREE
@@ -26,20 +31,26 @@ IMPL-DEMO_OVERLAY:
       - OVERLAY_CLASSES: intro #e0e0e0, navigation #42a5f5, state #ffa726, action #26c6da, result #66bb6a.
       - Step mapping: 1-2 intro; 3-4 navigation; 5-6,8 state; 7,9,11 action; 10,12 result.
       - Demo also shows display mode (Title then Block), remove-from-display, and Refresh; steps 5a/5b and 8a/8b in record-demo-tabs.js.
+      - Bookmark demo (record-demo-bookmark.js): highlightElement(selector) and clearHighlight() apply outline/box-shadow to first element matching selector inside #bookmarkPanel; selectors .quick-actions, .storage-section, [data-popup-ref="tagWithAiBtn"], .recent-tags, [data-popup-ref="suggestedTags"], .search-section, .popup-footer; step order Quick Actions row, Save to (Storage), add tags (demo/reading/tools), Tag with AI button highlight + overlay, Recent Tags, Suggested Tags, Search Tabs, Footer, result.
   code_locations:
     files:
       - path: scripts/record-demo-tabs.js
         description: setOverlay and removeOverlay; OVERLAY_CLASSES map; step-to-class mapping (Tabs demo)
       - path: scripts/record-demo-bookmark.js
-        description: same overlay helpers; This Page tab demo (Quick Actions, Storage, Add tag)
+        description: setOverlay, removeOverlay, highlightElement, clearHighlight; This Page tab demo with section highlights (Quick Actions, Save to, Tag with AI, Recent Tags, Suggested Tags, Search Tabs, Footer); add-tag flow to populate Recent Tags
       - path: scripts/record-demo-tags-tree.js
-        description: same overlay helpers; By Tag tab demo (select tags, tree, search, click URL)
+        description: setOverlay, removeOverlay, highlightElement, clearHighlight scoped to #tagsTreePanel; By Tag demo step order (Filtering by tag highlight + overlay, select tags, tree updated, Search bookmarks + #searchCount highlight + overlay, click URL); panel uses tagsTreePlaceholderBookmarks for rich demo data
   traceability:
     architecture: []
     requirements:
       - REQ-SIDE_PANEL_BROWSER_TABS
       - REQ-SIDE_PANEL_POPUP_EQUIVALENT
       - REQ-SIDE_PANEL_TAGS_TREE
+      - REQ-SIDE_PANEL_BOOKMARK_SEARCH
+      - REQ-MOVE_BOOKMARK_STORAGE_UI
+      - REQ-RECENT_TAGS_SYSTEM
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-AI_TAGGING_POPUP
     tests: []
     code_annotations:
       - IMPL-DEMO_OVERLAY
@@ -62,8 +73,16 @@ IMPL-DEMO_OVERLAY:
 
     removeOverlay(): remove #__demo_overlay__ if present
 
-    # [IMPL-DEMO_OVERLAY] [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING]
-    # By Tag demo (record-demo-tags-tree.js) loads side panel with ?demo=1, which triggers loadPlaceholderForScreenshot; tag toggles must update the tree per IMPL-SIDE_PANEL_TAGS_TREE (rawBookmarks set in placeholder path so refreshFromConfig runs on checkbox change).
+    # [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] Bookmark demo element highlight: scope to #bookmarkPanel so only This Page tab content is highlighted.
+    highlightElement(selector): panel = getElementById('bookmarkPanel'); el = panel.querySelector(selector); clear any existing data-demo-highlight; set el.outline and el.boxShadow to 3px solid #42a5f5 and glow; set data-demo-highlight=1 on el
+    clearHighlight(): find element with data-demo-highlight="1"; clear outline and boxShadow; remove data-demo-highlight
+
+    # [IMPL-DEMO_OVERLAY] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-RECENT_TAGS_SYSTEM] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-AI_TAGGING_POPUP] Bookmark demo step order (record-demo-bookmark.js): (1) Open side panel, (2) Panel ready, (3) Quick Actions row highlight + overlay, (4) Save to (Storage) section highlight + overlay, (5) Add tags demo/reading/tools to populate Recent Tags, (6) Tag with AI button highlight + overlay (selector [data-popup-ref="tagWithAiBtn"]; overlay text describes "Get AI-suggested tags for this page (set API key in Options)"), (7) Recent Tags section highlight + overlay, (8) Suggested Tags section highlight + overlay, (9) Search Tabs section highlight + overlay, (10) Footer highlight + overlay, (11) Result overlay; clearHighlight before each highlight and at end.
+
+    # [IMPL-DEMO_OVERLAY] [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH]
+    # By Tag demo (record-demo-tags-tree.js): load side panel with ?demo=1 (loadPlaceholderForScreenshot, tagsTreePlaceholderBookmarks); tag toggles update the tree. Element highlight scoped to #tagsTreePanel so only By Tag tab content is highlighted.
+    highlightElement(selector) for By Tag: panel = getElementById('tagsTreePanel'); el = panel.querySelector(selector); clear existing data-demo-highlight; set el.outline and el.boxShadow (3px solid #42a5f5, glow); set data-demo-highlight=1 on el. clearHighlight() same as Bookmark demo.
+    # Step order: (1) Open side panel, (2) Switch to By Tag, (3) By Tag loaded, (4) Filtering by tag — clearHighlight; setOverlay("Filtering by tag", "Only bookmarks that have at least one selected tag are shown in the tree.", state); highlightElement('.tag-selector-section'); snap. Then select tag(s) if hasTags. (5) Tree updated overlay. (6) Search bookmarks and # matches — clearHighlight; setOverlay("Search bookmarks", "Type to filter the list.", action); highlightElement('#searchInput'); fill('example'); wait; clearHighlight; setOverlay("Match count", "The count updates as you type; it shows how many bookmarks match your search.", action); highlightElement('#searchCount'); snap. (7) Click URL (result).
 
     # Step-to-class mapping (12 steps): 1,2 intro; 3,4 navigation; 5,6,8 state; 7,9,11 action; 10,12 result.
   test_coverage_note: Demo overlay styling verified by running record-demo-tabs.js and inspecting output GIF; no unit tests (standalone recording script).
@@ -72,6 +91,6 @@ IMPL-DEMO_OVERLAY:
       date: "2026-03-02"
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: "2026-03-03"
       author: AI Agent
-      reason: Initial creation
+      reason: 'By Tag demo: highlightElement/clearHighlight scoped to #tagsTreePanel; Filtering by tag and # matches highlights + overlay text; REQ-SIDE_PANEL_BOOKMARK_SEARCH'

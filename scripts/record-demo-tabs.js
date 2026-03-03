@@ -214,7 +214,7 @@ async function main () {
 
   // Step 8a: Remove from list (tab hidden, not closed)
   await setOverlay('Remove from list', 'Tab hidden from list (not closed)', 'action')
-  await page.locator('[data-action="removeFromDisplay"]').first().click()
+  await page.locator('#browserTabsPanel [data-action="removeFromDisplay"]').first().click()
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(300)
@@ -224,7 +224,7 @@ async function main () {
 
   // Step 8b: Refresh (list reloaded; hidden tab reappears)
   await setOverlay('Refreshing tab list', 'List reloaded; hidden tabs reappear', 'action')
-  await page.locator('[data-action="refreshTabs"]').click()
+  await page.locator('#browserTabsPanel [data-action="refreshTabs"]').click()
   await page.waitForTimeout(700)
   await snap()
   await page.waitForTimeout(400)
@@ -234,7 +234,7 @@ async function main () {
 
   // Step 9: Copy Records (4 frames)
   await setOverlay('Clicking Copy Records', 'Exports visible tabs as YAML to clipboard', 'action')
-  await page.locator('[data-action="copyRecords"], #browserTabsCopyRecordsBtn').click()
+  await page.locator('#browserTabsCopyRecordsBtn').click()
   await page.waitForTimeout(300)
   await snap()
   await page.waitForTimeout(300)
@@ -255,7 +255,7 @@ async function main () {
 
   // Step 11: Copy URLs (3 frames)
   await setOverlay('Clicking Copy URLs', 'Exports visible tab URLs to clipboard', 'action')
-  await page.locator('[data-action="copyUrls"], #browserTabsCopyBtn').click()
+  await page.locator('#browserTabsCopyBtn').click()
   await page.waitForTimeout(300)
   await snap()
   await page.waitForTimeout(300)

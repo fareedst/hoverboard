@@ -10,6 +10,7 @@ import {
   TAB_TAGS_TREE,
   TAB_BROWSER_TABS,
   TAB_BROWSER_BOOKMARKS,
+  TAB_USAGE,
   getDefaultTab,
   getVisibilityForTab,
   getTagsTreeInitOptions,
@@ -21,6 +22,7 @@ import { BUILD_TIME_UTC } from './build-info.js'
 import { initTagsTreeTab, setSelectedTagsFromCurrentBookmark } from './tags-tree.js'
 import { initBrowserTabsTab } from './browser-tabs-panel.js'
 import { initBrowserBookmarksTab } from './browser-bookmarks-panel.js'
+import { initUsageTab } from './usage-panel.js'
 import { init, popup } from '../index.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
 import { ConfigManager } from '../../config/config-manager.js'
@@ -29,6 +31,7 @@ const bookmarkPanelEl = document.getElementById('bookmarkPanel')
 const tagsTreePanelEl = document.getElementById('tagsTreePanel')
 const browserTabsPanelEl = document.getElementById('browserTabsPanel')
 const browserBookmarksPanelEl = document.getElementById('browserBookmarksPanel')
+const usagePanelEl = document.getElementById('usagePanel')
 const tabButtons = document.querySelectorAll('.side-panel-tab[data-tab]')
 
 let activeTab = getDefaultTab()
@@ -36,6 +39,7 @@ let bookmarkTabInited = false
 let tagsTreeTabInited = false
 let browserTabsTabInited = false
 let browserBookmarksTabInited = false
+let usageTabInited = false
 /** @type {{ controller: import('../popup/PopupController.js').PopupController, uiManager: import('../popup/UIManager.js').UIManager } | null} */
 let popupComponents = null
 // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Time when panel script ran; used to avoid closing on first open (toggle only if open > threshold).
@@ -46,7 +50,7 @@ const _sidePanelLoadTime = Date.now()
  * Show the panel for activeTab and hide the other; update tab aria-selected.
  */
 function showPanel () {
-  const { bookmarkVisible, tagsTreeVisible, browserTabsVisible, browserBookmarksVisible } = getVisibilityForTab(activeTab)
+  const { bookmarkVisible, tagsTreeVisible, browserTabsVisible, browserBookmarksVisible, usageVisible } = getVisibilityForTab(activeTab)
   if (bookmarkPanelEl) {
     bookmarkPanelEl.hidden = !bookmarkVisible
   }
@@ -58,6 +62,9 @@ function showPanel () {
   }
   if (browserBookmarksPanelEl) {
     browserBookmarksPanelEl.hidden = !browserBookmarksVisible
+  }
+  if (usagePanelEl) {
+    usagePanelEl.hidden = !usageVisible
   }
   tabButtons.forEach((btn) => {
     const tab = btn.getAttribute('data-tab')
@@ -167,6 +174,8 @@ function initTabIfNeeded (tabId, options = {}) {
     initBrowserTabsTabIfNeeded()
   } else if (tabId === TAB_BROWSER_BOOKMARKS) {
     initBrowserBookmarksTabIfNeeded()
+  } else if (tabId === TAB_USAGE) {
+    initUsageTabIfNeeded()
   }
 }
 
@@ -178,6 +187,26 @@ function initBrowserBookmarksTabIfNeeded () {
   if (browserBookmarksTabInited) return
   browserBookmarksTabInited = true
   initBrowserBookmarksTab()
+}
+
+/**
+ * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
+ * Init Usage tab: call initUsageTab() once with panel el and chrome.runtime.sendMessage.
+ */
+function initUsageTabIfNeeded () {
+  if (usageTabInited || !usagePanelEl) return
+  usageTabInited = true
+  const sendMessage = (msg) => new Promise((resolve, reject) => {
+    if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.sendMessage) {
+      chrome.runtime.sendMessage(msg, (res) => {
+        if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message))
+        else resolve(res || {})
+      })
+    } else {
+      resolve({})
+    }
+  })
+  initUsageTab({ panelEl: usagePanelEl, sendMessage })
 }
 
 /**

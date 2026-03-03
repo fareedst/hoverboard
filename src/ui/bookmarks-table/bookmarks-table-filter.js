@@ -316,3 +316,32 @@ export function applyRegexReplace (bookmark, patternStr, replacementStr, options
   }
   return { payload, error: null, changed }
 }
+
+/**
+ * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
+ * Merge usage data (from getBookmarkUsage with no url) into bookmarks array. Adds .visits and .lastVisited to each bookmark.
+ * URL matching uses same normalization as tracker (trim, strip trailing slash).
+ * @param {{ url?: string }[]} bookmarks
+ * @param {{ url?: string, visitCount?: number, lastVisitedAt?: string }[]} usageArray - from getBookmarkUsage() (all)
+ * @returns {{ url?: string, visits?: number, lastVisited?: string }[]}
+ */
+export function mergeUsageIntoBookmarks (bookmarks, usageArray) {
+  const clean = (u) => (u && String(u).trim().replace(/\/+$/, '')) || ''
+  const map = new Map()
+  if (Array.isArray(usageArray)) {
+    for (const u of usageArray) {
+      const key = clean(u.url)
+      if (key) map.set(key, { visitCount: u.visitCount ?? 0, lastVisitedAt: u.lastVisitedAt ?? '' })
+    }
+  }
+  if (!Array.isArray(bookmarks)) return []
+  return bookmarks.map((b) => {
+    const key = clean(b.url)
+    const usage = key ? map.get(key) : null
+    return {
+      ...b,
+      visits: usage ? usage.visitCount : 0,
+      lastVisited: usage ? usage.lastVisitedAt : ''
+    }
+  })
+}

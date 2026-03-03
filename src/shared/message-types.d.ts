@@ -39,3 +39,13 @@ export interface DeleteTagData {
   url: string
   value: string
 }
+
+/** [REQ-BOOKMARK_USAGE_TRACKING] getBookmarkUsage: optional url for single URL; omit for all */
+export interface GetBookmarkUsageData {
+  url?: string | null
+}
+
+/** [REQ-BOOKMARK_USAGE_TRACKING] getBookmarkUsageStats: optional n (limit) */
+export interface GetBookmarkUsageStatsData {
+  n?: number
+}

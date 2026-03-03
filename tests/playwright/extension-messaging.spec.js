@@ -265,6 +265,53 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
     await sidePanelPage.close()
   })
 
+  // [IMPL-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] With ?demo=1, loadPlaceholderForScreenshot uses tagsTreePlaceholderBookmarks (rich data). Assert tag selector has multiple tags and tree has sections with links.
+  test('By Tag with ?demo=1: rich placeholder shows many tags and tree sections with links [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING]', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html?demo=1`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(500)
+
+    await sidePanelPage.locator('.side-panel-tab[data-tab="tagsTree"]').click()
+    await sidePanelPage.waitForTimeout(2000)
+
+    const tagCheckboxes = sidePanelPage.locator('#tagsTreePanel #tagSelector input[type=checkbox]')
+    const checkboxCount = await tagCheckboxes.count()
+    expect(checkboxCount).toBeGreaterThanOrEqual(12)
+
+    const treeSections = sidePanelPage.locator('#tagsTreePanel .tree-tag-section')
+    const sectionCount = await treeSections.count()
+    expect(sectionCount).toBeGreaterThan(0)
+
+    const firstLink = sidePanelPage.locator('#tagsTreePanel #treeContainer .tree-bookmark-link').first()
+    await expect(firstLink).toBeVisible()
+    await sidePanelPage.close()
+  })
+
+  // [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] With ?demo=1, typing in Search bookmarks input updates #searchCount (N matches / No matches).
+  test('By Tag with ?demo=1: typing in Search bookmarks updates #searchCount [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_TAGS_TREE]', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html?demo=1`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(500)
+
+    await sidePanelPage.locator('.side-panel-tab[data-tab="tagsTree"]').click()
+    await sidePanelPage.waitForTimeout(2000)
+
+    const searchInput = sidePanelPage.locator('#tagsTreePanel #searchInput')
+    const searchCount = sidePanelPage.locator('#tagsTreePanel #searchCount')
+    await expect(searchInput).toBeVisible()
+
+    await searchInput.fill('example')
+    await sidePanelPage.waitForTimeout(600)
+    await expect(searchCount).toHaveText(/\d+ (match|matches)|No matches/, { timeout: 3000 })
+    const countAfter = await searchCount.textContent()
+    expect(countAfter).toMatch(/^\d+ (match|matches)$|^No matches$/)
+    await sidePanelPage.close()
+  })
+
   // [IMPL-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] In demo=1 mode, loadPlaceholderForScreenshot sets rawBookmarks so unchecking a tag runs refreshFromConfig and tree updates (section count decreases).
   // Skip: in Playwright extension E2E the section count goes to 0 after uncheck (needs investigation); manual verification and unit/data-flow tests cover the fix.
   test.skip('By Tag with ?demo=1: unchecking a tag updates the tree (section for that tag no longer shown)', async ({ context }) => {

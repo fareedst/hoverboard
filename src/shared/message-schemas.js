@@ -62,6 +62,21 @@ export const moveBookmarkToStorageDataSchema = z.object({
   targetBackend: z.string().min(1)
 }).strict()
 
+// [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] getBookmarkUsage: optional url (single) or omit for all
+export const getBookmarkUsageDataSchema = z.object({
+  url: z.string().optional().nullable()
+}).strict().optional()
+
+// [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] getBookmarkUsageStats: optional n (limit, default 10)
+export const getBookmarkUsageStatsDataSchema = z.object({
+  n: z.number().int().min(1).max(100).optional()
+}).strict().optional()
+
+// [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] getBookmarkInboundLinks: optional url
+export const getBookmarkInboundLinksDataSchema = z.object({
+  url: z.string().optional().nullable()
+}).strict().optional()
+
 const dataSchemasByType = {
   getCurrentBookmark: getCurrentBookmarkDataSchema,
   getTagsForUrl: getTagsForUrlDataSchema,
@@ -69,7 +84,10 @@ const dataSchemasByType = {
   deleteBookmark: deleteBookmarkDataSchema,
   saveTag: saveTagDataSchema,
   deleteTag: deleteTagDataSchema,
-  moveBookmarkToStorage: moveBookmarkToStorageDataSchema
+  moveBookmarkToStorage: moveBookmarkToStorageDataSchema,
+  getBookmarkUsage: getBookmarkUsageDataSchema,
+  getBookmarkUsageStats: getBookmarkUsageStatsDataSchema,
+  getBookmarkInboundLinks: getBookmarkInboundLinksDataSchema
 }
 
 /**

@@ -6,7 +6,7 @@
  * [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]
  */
 
-import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, buildDeleteConfirmMessage, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace } from './bookmarks-table-filter.js'
+import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, buildDeleteConfirmMessage, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
 import { setTableDisplayStickyHeight } from './bookmarks-table-sticky.js'
@@ -16,6 +16,8 @@ const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
 const MESSAGE_TYPE_MOVE = 'moveBookmarkToStorage'
 const MESSAGE_TYPE_SAVE = 'saveBookmark'
 const MESSAGE_TYPE_DELETE = 'deleteBookmark'
+/** [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] */
+const MESSAGE_TYPE_USAGE = 'getBookmarkUsage'
 
 let allBookmarks = []
 let filteredBookmarks = []
@@ -164,6 +166,18 @@ function compare (a, b) {
     const cmp = (vb || '').localeCompare(va || '')
     return sortAsc ? -cmp : cmp
   }
+  /** [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Sort by visits (numeric). */
+  if (sortKey === 'visits') {
+    const na = Number(va) || 0
+    const nb = Number(vb) || 0
+    const cmp = na - nb
+    return sortAsc ? cmp : -cmp
+  }
+  /** [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Sort by lastVisited (string/date compare). */
+  if (sortKey === 'lastVisited') {
+    const cmp = (vb || '').localeCompare(va || '')
+    return sortAsc ? -cmp : cmp
+  }
   if (sortKey === 'tags') {
     const sa = Array.isArray(va) ? va.join(' ') : String(va || '')
     const sb = Array.isArray(vb) ? vb.join(' ') : String(vb || '')
@@ -200,6 +214,13 @@ function renderTableBody () {
         ? formatTimeAbsolute(timeValue)
         : formatTimeAge(timeValue)
     )
+    const visits = b.visits ?? 0
+    const lastVisitedValue = b.lastVisited || ''
+    const lastVisited = escapeHtml(
+      timeDisplayMode === 'absolute'
+        ? formatTimeAbsolute(lastVisitedValue)
+        : (lastVisitedValue ? formatTimeAge(lastVisitedValue) : '')
+    )
     const shared = b.shared === 'no' ? 'Private' : 'Public'
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
     const storage = escapeHtml(b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local'))
@@ -212,6 +233,8 @@ function renderTableBody () {
       <td class="col-url">${urlLink}</td>
       <td class="col-tags">${tagsEsc}</td>
       <td class="col-time">${time}</td>
+      <td class="col-visits">${visits}</td>
+      <td class="col-last-visited">${lastVisited}</td>
       <td class="col-storage">${storage}</td>
       <td class="col-shared">${shared}</td>
       <td class="col-toread">${toread}</td>
@@ -484,7 +507,8 @@ function setSort (key) {
     sortAsc = !sortAsc
   } else {
     sortKey = key
-    sortAsc = key !== 'time'
+    // [IMPL-BOOKMARK_USAGE_TRACKING_UI] Default desc for time, visits, lastVisited (newest / most first)
+    sortAsc = !['time', 'visits', 'lastVisited'].includes(key)
   }
   const headers = elements.table.querySelectorAll('th.sortable')
   headers.forEach(th => {
@@ -644,7 +668,14 @@ async function loadBookmarks () {
       list = fallback?.data?.bookmarks ?? fallback?.bookmarks ?? []
       list = list.map(b => ({ ...b, storage: 'local' }))
     }
-    allBookmarks = Array.isArray(list) ? list : []
+    list = Array.isArray(list) ? list : []
+    // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Merge usage (visits, lastVisited) for Index columns
+    let usageArray = []
+    try {
+      const usageRes = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_USAGE })
+      if (usageRes?.success && Array.isArray(usageRes?.data)) usageArray = usageRes.data
+    } catch (_) {}
+    allBookmarks = mergeUsageIntoBookmarks(list, usageArray)
     applySearchAndFilter()
     toggleEmptyState()
     updateExportButtonState()

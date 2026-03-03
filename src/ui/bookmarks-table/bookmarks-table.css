@@ -467,6 +467,19 @@ body {
   white-space: nowrap;
 }
 
+/* [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Visits and Last Visited columns */
+.col-visits {
+  width: 4rem;
+  text-align: right;
+  white-space: nowrap;
+}
+.col-last-visited {
+  white-space: nowrap;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Spacer grows to fill space above footer so count stays at visual bottom */
 .footer-spacer {
   flex: 1 1 0;

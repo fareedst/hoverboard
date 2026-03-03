@@ -18886,16 +18886,16 @@ var init_pinboard_service = __esm({
             debugLog("[PINBOARD-SERVICE] No auth token configured, returning empty bookmark without API call");
             return this.createEmptyBookmark(url2, title);
           }
-          const cleanUrl3 = this.cleanUrl(url2);
-          const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl3)}`;
+          const cleanUrl4 = this.cleanUrl(url2);
+          const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl4)}`;
           debugLog("Making Pinboard API request:", {
             endpoint,
-            cleanUrl: cleanUrl3,
+            cleanUrl: cleanUrl4,
             originalUrl: url2
           });
           const response = await this.makeApiRequest(endpoint);
           debugLog("\u{1F4E5} Pinboard API response received:", response);
-          const parsed = this.parseBookmarkResponse(response, cleanUrl3, title);
+          const parsed = this.parseBookmarkResponse(response, cleanUrl4, title);
           debugLog("\u{1F4CB} Parsed bookmark result:", parsed);
           return parsed;
         } catch (error48) {
@@ -19014,8 +19014,8 @@ var init_pinboard_service = __esm({
             debugLog("[PINBOARD-SERVICE] No auth token configured, skipping delete without API call");
             return { success: false, code: "no_auth", message: "No authentication token configured" };
           }
-          const cleanUrl3 = this.cleanUrl(url2);
-          const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl3)}`;
+          const cleanUrl4 = this.cleanUrl(url2);
+          const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl4)}`;
           const response = await this.makeApiRequest(endpoint);
           return this.parseApiResponse(response);
         } catch (error48) {
@@ -19535,14 +19535,14 @@ var LocalBookmarkService = class {
   }
   async getBookmarkForUrl(url2, title = "") {
     try {
-      const cleanUrl3 = this.cleanUrl(url2);
+      const cleanUrl4 = this.cleanUrl(url2);
       const all = await this._getAllBookmarks();
-      const b = all[cleanUrl3];
+      const b = all[cleanUrl4];
       if (b) {
-        debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] getBookmarkForUrl found:", cleanUrl3);
-        return this._normalizeBookmark({ ...b, url: cleanUrl3 });
+        debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] getBookmarkForUrl found:", cleanUrl4);
+        return this._normalizeBookmark({ ...b, url: cleanUrl4 });
       }
-      debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] getBookmarkForUrl not found, returning empty:", cleanUrl3);
+      debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] getBookmarkForUrl not found, returning empty:", cleanUrl4);
       return this.createEmptyBookmark(url2, title);
     } catch (error48) {
       debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] getBookmarkForUrl failed:", error48);
@@ -19632,15 +19632,15 @@ var LocalBookmarkService = class {
   }
   async deleteBookmark(url2) {
     try {
-      const cleanUrl3 = this.cleanUrl(url2);
+      const cleanUrl4 = this.cleanUrl(url2);
       const all = await this._getAllBookmarks();
-      if (!(cleanUrl3 in all)) {
-        debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] deleteBookmark URL not found:", cleanUrl3);
+      if (!(cleanUrl4 in all)) {
+        debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] deleteBookmark URL not found:", cleanUrl4);
         return { success: true, code: "done", message: "Operation completed" };
       }
-      delete all[cleanUrl3];
+      delete all[cleanUrl4];
       await this._setAllBookmarks(all);
-      debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] deleteBookmark ok:", cleanUrl3);
+      debugLog("[IMPL-LOCAL_BOOKMARK_SERVICE] deleteBookmark ok:", cleanUrl4);
       return { success: true, code: "done", message: "Operation completed" };
     } catch (error48) {
       debugError("[IMPL-LOCAL_BOOKMARK_SERVICE] deleteBookmark failed:", error48);
@@ -20072,6 +20072,15 @@ var moveBookmarkToStorageDataSchema = external_exports.object({
   url: requiredUrlSchema,
   targetBackend: external_exports.string().min(1)
 }).strict();
+var getBookmarkUsageDataSchema = external_exports.object({
+  url: external_exports.string().optional().nullable()
+}).strict().optional();
+var getBookmarkUsageStatsDataSchema = external_exports.object({
+  n: external_exports.number().int().min(1).max(100).optional()
+}).strict().optional();
+var getBookmarkInboundLinksDataSchema = external_exports.object({
+  url: external_exports.string().optional().nullable()
+}).strict().optional();
 var dataSchemasByType = {
   getCurrentBookmark: getCurrentBookmarkDataSchema,
   getTagsForUrl: getTagsForUrlDataSchema,
@@ -20079,7 +20088,10 @@ var dataSchemasByType = {
   deleteBookmark: deleteBookmarkDataSchema,
   saveTag: saveTagDataSchema,
   deleteTag: deleteTagDataSchema,
-  moveBookmarkToStorage: moveBookmarkToStorageDataSchema
+  moveBookmarkToStorage: moveBookmarkToStorageDataSchema,
+  getBookmarkUsage: getBookmarkUsageDataSchema,
+  getBookmarkUsageStats: getBookmarkUsageStatsDataSchema,
+  getBookmarkInboundLinks: getBookmarkInboundLinksDataSchema
 };
 function validateMessageEnvelope(message) {
   const result = messageEnvelopeSchema.safeParse(message);
@@ -20141,6 +20153,11 @@ var MESSAGE_TYPES = {
   GET_SHARED_MEMORY_STATUS: "getSharedMemoryStatus",
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get document.referrer for tabs (run in SW so injection is in tab context)
   GET_TAB_REFERRERS: "getTabReferrers",
+  // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] Usage and navigation graph queries
+  GET_BOOKMARK_USAGE: "getBookmarkUsage",
+  GET_BOOKMARK_USAGE_STATS: "getBookmarkUsageStats",
+  GET_BOOKMARK_NAVIGATION_GRAPH: "getBookmarkNavigationGraph",
+  GET_BOOKMARK_INBOUND_LINKS: "getBookmarkInboundLinks",
   // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Get recently closed tabs from chrome.sessions
   GET_RECENTLY_CLOSED_TABS: "getRecentlyClosedTabs",
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for filter (SW executeScript per tab)
@@ -20976,14 +20993,14 @@ var SyncBookmarkService = class {
   }
   async getBookmarkForUrl(url2, title = "") {
     try {
-      const cleanUrl3 = this.cleanUrl(url2);
+      const cleanUrl4 = this.cleanUrl(url2);
       const all = await this._getAllBookmarks();
-      const b = all[cleanUrl3];
+      const b = all[cleanUrl4];
       if (b) {
-        debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] getBookmarkForUrl found:", cleanUrl3);
-        return this._normalizeBookmark({ ...b, url: cleanUrl3 });
+        debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] getBookmarkForUrl found:", cleanUrl4);
+        return this._normalizeBookmark({ ...b, url: cleanUrl4 });
       }
-      debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] getBookmarkForUrl not found, returning empty:", cleanUrl3);
+      debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] getBookmarkForUrl not found, returning empty:", cleanUrl4);
       return this.createEmptyBookmark(url2, title);
     } catch (error48) {
       debugError("[IMPL-SYNC_BOOKMARK_SERVICE] getBookmarkForUrl failed:", error48);
@@ -21073,15 +21090,15 @@ var SyncBookmarkService = class {
   }
   async deleteBookmark(url2) {
     try {
-      const cleanUrl3 = this.cleanUrl(url2);
+      const cleanUrl4 = this.cleanUrl(url2);
       const all = await this._getAllBookmarks();
-      if (!(cleanUrl3 in all)) {
-        debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] deleteBookmark URL not found:", cleanUrl3);
+      if (!(cleanUrl4 in all)) {
+        debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] deleteBookmark URL not found:", cleanUrl4);
         return { success: true, code: "done", message: "Operation completed" };
       }
-      delete all[cleanUrl3];
+      delete all[cleanUrl4];
       await this._setAllBookmarks(all);
-      debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] deleteBookmark ok:", cleanUrl3);
+      debugLog("[IMPL-SYNC_BOOKMARK_SERVICE] deleteBookmark ok:", cleanUrl4);
       return { success: true, code: "done", message: "Operation completed" };
     } catch (error48) {
       debugError("[IMPL-SYNC_BOOKMARK_SERVICE] deleteBookmark failed:", error48);
@@ -21240,14 +21257,14 @@ var FileBookmarkService = class {
   }
   async getBookmarkForUrl(url2, title = "") {
     try {
-      const cleanUrl3 = this.cleanUrl(url2);
+      const cleanUrl4 = this.cleanUrl(url2);
       const all = await this._getAllBookmarks();
-      const b = all[cleanUrl3];
+      const b = all[cleanUrl4];
       if (b) {
-        debugLog("[IMPL-FILE_BOOKMARK_SERVICE] getBookmarkForUrl found:", cleanUrl3);
-        return this._normalizeBookmark({ ...b, url: cleanUrl3 });
+        debugLog("[IMPL-FILE_BOOKMARK_SERVICE] getBookmarkForUrl found:", cleanUrl4);
+        return this._normalizeBookmark({ ...b, url: cleanUrl4 });
       }
-      debugLog("[IMPL-FILE_BOOKMARK_SERVICE] getBookmarkForUrl not found, returning empty:", cleanUrl3);
+      debugLog("[IMPL-FILE_BOOKMARK_SERVICE] getBookmarkForUrl not found, returning empty:", cleanUrl4);
       return this.createEmptyBookmark(url2, title);
     } catch (error48) {
       debugError("[IMPL-FILE_BOOKMARK_SERVICE] getBookmarkForUrl failed:", error48);
@@ -21335,15 +21352,15 @@ var FileBookmarkService = class {
   }
   async deleteBookmark(url2) {
     try {
-      const cleanUrl3 = this.cleanUrl(url2);
+      const cleanUrl4 = this.cleanUrl(url2);
       const all = await this._getAllBookmarks();
-      if (!(cleanUrl3 in all)) {
-        debugLog("[IMPL-FILE_BOOKMARK_SERVICE] deleteBookmark URL not found:", cleanUrl3);
+      if (!(cleanUrl4 in all)) {
+        debugLog("[IMPL-FILE_BOOKMARK_SERVICE] deleteBookmark URL not found:", cleanUrl4);
         return { success: true, code: "done", message: "Operation completed" };
       }
-      delete all[cleanUrl3];
+      delete all[cleanUrl4];
       await this._setAllBookmarks(all);
-      debugLog("[IMPL-FILE_BOOKMARK_SERVICE] deleteBookmark ok:", cleanUrl3);
+      debugLog("[IMPL-FILE_BOOKMARK_SERVICE] deleteBookmark ok:", cleanUrl4);
       return { success: true, code: "done", message: "Operation completed" };
     } catch (error48) {
       debugError("[IMPL-FILE_BOOKMARK_SERVICE] deleteBookmark failed:", error48);
@@ -21793,6 +21810,258 @@ var BookmarkRouter = class {
   }
 };
 
+// src/features/storage/bookmark-usage-tracker.js
+init_utils();
+var STORAGE_KEY_USAGE = "hoverboard_bookmark_usage";
+var STORAGE_KEY_EDGES = "hoverboard_bookmark_nav_edges";
+var RECENT_VISITS_CAP = 10;
+var DEBOUNCE_MS = 6e4;
+function cleanUrl3(url2) {
+  if (!url2 || typeof url2 !== "string") return "";
+  return url2.trim().replace(/\/+$/, "");
+}
+var BookmarkUsageTracker = class {
+  constructor(storage = null) {
+    this._storage = storage || (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local ? chrome.storage.local : null);
+    this._lastRecordedVisit = {};
+  }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Record a visit to a bookmarked URL; optionally record referrer as navigation edge.
+   * Debounced per URL (DEBOUNCE_MS). Referrer is only stored if non-empty, different from url, and http(s).
+   * @param {string} url - Visited URL (bookmarked)
+   * @param {string} [referrer] - document.referrer (optional)
+   */
+  async recordVisit(url2, referrer = "") {
+    const key = cleanUrl3(url2);
+    if (!key) {
+      debugLog("[IMPL-BOOKMARK_USAGE_TRACKING] recordVisit: empty url, skip");
+      return;
+    }
+    const now = (/* @__PURE__ */ new Date()).toISOString();
+    const last = this._lastRecordedVisit[key];
+    if (last != null && Date.now() - last < DEBOUNCE_MS) {
+      debugLog("[IMPL-BOOKMARK_USAGE_TRACKING] recordVisit: debounced", key);
+      return;
+    }
+    this._lastRecordedVisit[key] = Date.now();
+    try {
+      const result = await this._storage.get([STORAGE_KEY_USAGE, STORAGE_KEY_EDGES]);
+      const usageMap = result[STORAGE_KEY_USAGE] && typeof result[STORAGE_KEY_USAGE] === "object" && !Array.isArray(result[STORAGE_KEY_USAGE]) ? { ...result[STORAGE_KEY_USAGE] } : {};
+      const edgesMap = result[STORAGE_KEY_EDGES] && typeof result[STORAGE_KEY_EDGES] === "object" && !Array.isArray(result[STORAGE_KEY_EDGES]) ? { ...result[STORAGE_KEY_EDGES] } : {};
+      const existing = usageMap[key];
+      const visitCount = (existing?.visitCount ?? 0) + 1;
+      const firstVisitedAt = existing?.firstVisitedAt || now;
+      const recentVisits = [now, ...existing?.recentVisits || []].slice(0, RECENT_VISITS_CAP);
+      usageMap[key] = {
+        url: key,
+        visitCount,
+        lastVisitedAt: now,
+        firstVisitedAt,
+        recentVisits
+      };
+      await this._storage.set({ [STORAGE_KEY_USAGE]: usageMap });
+      const ref = cleanUrl3(referrer);
+      if (ref && ref !== key && /^https?:\/\//i.test(ref)) {
+        const targetEdges = Array.isArray(edgesMap[key]) ? [...edgesMap[key]] : [];
+        const idx = targetEdges.findIndex((e) => e.sourceUrl === ref);
+        const nowEdge = { sourceUrl: ref, targetUrl: key, lastTraversedAt: now, firstTraversedAt: "", count: 1 };
+        if (idx >= 0) {
+          const e = targetEdges[idx];
+          nowEdge.count = (e.count || 0) + 1;
+          nowEdge.firstTraversedAt = e.firstTraversedAt || now;
+          targetEdges[idx] = nowEdge;
+        } else {
+          nowEdge.firstTraversedAt = now;
+          targetEdges.push(nowEdge);
+        }
+        edgesMap[key] = targetEdges;
+        await this._storage.set({ [STORAGE_KEY_EDGES]: edgesMap });
+        debugLog("[IMPL-BOOKMARK_USAGE_TRACKING] recordVisit: edge", ref, "->", key);
+      }
+    } catch (e) {
+      debugError("[IMPL-BOOKMARK_USAGE_TRACKING] recordVisit failed:", e);
+    }
+  }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Get usage record for a single URL.
+   * @param {string} url
+   * @returns {Promise<UsageRecord | null>}
+   */
+  async getUsage(url2) {
+    const key = cleanUrl3(url2);
+    if (!key) return null;
+    try {
+      const result = await this._storage.get(STORAGE_KEY_USAGE);
+      const map2 = result[STORAGE_KEY_USAGE];
+      const raw = map2 && map2[key];
+      return raw ? this._normalizeUsage(raw, key) : null;
+    } catch (e) {
+      debugError("[IMPL-BOOKMARK_USAGE_TRACKING] getUsage failed:", e);
+      return null;
+    }
+  }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Get all usage records.
+   * @returns {Promise<UsageRecord[]>}
+   */
+  async getAllUsage() {
+    try {
+      const result = await this._storage.get(STORAGE_KEY_USAGE);
+      const map2 = result[STORAGE_KEY_USAGE];
+      if (!map2 || typeof map2 !== "object" || Array.isArray(map2)) return [];
+      return Object.entries(map2).map(([u, r]) => this._normalizeUsage(r, u));
+    } catch (e) {
+      debugError("[IMPL-BOOKMARK_USAGE_TRACKING] getAllUsage failed:", e);
+      return [];
+    }
+  }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Top N by visit count.
+   * @param {number} n
+   * @returns {Promise<UsageRecord[]>}
+   */
+  async getMostFrequent(n = 10) {
+    const all = await this.getAllUsage();
+    return all.sort((a, b) => (b.visitCount || 0) - (a.visitCount || 0)).slice(0, n);
+  }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Top N by last visited (most recent first).
+   * @param {number} n
+   * @returns {Promise<UsageRecord[]>}
+   */
+  async getMostRecent(n = 10) {
+    const all = await this.getAllUsage();
+    return all.filter((r) => r.lastVisitedAt).sort((a, b) => (b.lastVisitedAt || "").localeCompare(a.lastVisitedAt || "")).slice(0, n);
+  }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Edges whose target is this URL (who referred to this page).
+   * @param {string} url
+   * @returns {Promise<NavigationEdge[]>}
+   */
+  async getInboundLinks(url2) {
+    const key = cleanUrl3(url2);
+    if (!key) return [];
+    try {
+      const result = await this._storage.get(STORAGE_KEY_EDGES);
+      const map2 = result[STORAGE_KEY_EDGES];
+      const edges = map2 && map2[key] && Array.isArray(map2[key]) ? map2[key] : [];
+      return edges.map((e) => ({
+        sourceUrl: e.sourceUrl || "",
+        targetUrl: e.targetUrl || key,
+        count: e.count ?? 0,
+        lastTraversedAt: e.lastTraversedAt || "",
+        firstTraversedAt: e.firstTraversedAt || ""
+      }));
+    } catch (e) {
+      debugError("[IMPL-BOOKMARK_USAGE_TRACKING] getInboundLinks failed:", e);
+      return [];
+    }
+  }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Edges whose source is this URL (pages this URL referred to).
+   * @param {string} url
+   * @returns {Promise<NavigationEdge[]>}
+   */
+  async getOutboundLinks(url2) {
+    const key = cleanUrl3(url2);
+    if (!key) return [];
+    try {
+      const result = await this._storage.get(STORAGE_KEY_EDGES);
+      const map2 = result[STORAGE_KEY_EDGES];
+      if (!map2 || typeof map2 !== "object" || Array.isArray(map2)) return [];
+      const out = [];
+      for (const [target, edges] of Object.entries(map2)) {
+        if (!Array.isArray(edges)) continue;
+        for (const e of edges) {
+          if (e.sourceUrl === key) {
+            out.push({
+              sourceUrl: key,
+              targetUrl: e.targetUrl || target,
+              count: e.count ?? 0,
+              lastTraversedAt: e.lastTraversedAt || "",
+              firstTraversedAt: e.firstTraversedAt || ""
+            });
+          }
+        }
+      }
+      return out;
+    } catch (e) {
+      debugError("[IMPL-BOOKMARK_USAGE_TRACKING] getOutboundLinks failed:", e);
+      return [];
+    }
+  }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Full list of navigation edges for graph visualization.
+   * @returns {Promise<NavigationEdge[]>}
+   */
+  async getNavigationGraph() {
+    try {
+      const result = await this._storage.get(STORAGE_KEY_EDGES);
+      const map2 = result[STORAGE_KEY_EDGES];
+      if (!map2 || typeof map2 !== "object" || Array.isArray(map2)) return [];
+      const out = [];
+      for (const [targetUrl, edges] of Object.entries(map2)) {
+        if (!Array.isArray(edges)) continue;
+        for (const e of edges) {
+          out.push({
+            sourceUrl: e.sourceUrl || "",
+            targetUrl: e.targetUrl || targetUrl,
+            count: e.count ?? 0,
+            lastTraversedAt: e.lastTraversedAt || "",
+            firstTraversedAt: e.firstTraversedAt || ""
+          });
+        }
+      }
+      return out;
+    } catch (e) {
+      debugError("[IMPL-BOOKMARK_USAGE_TRACKING] getNavigationGraph failed:", e);
+      return [];
+    }
+  }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Remove usage and all edges for a URL (e.g. on bookmark delete).
+   * @param {string} url
+   */
+  async clearUsage(url2) {
+    const key = cleanUrl3(url2);
+    if (!key) return;
+    try {
+      delete this._lastRecordedVisit[key];
+      const result = await this._storage.get([STORAGE_KEY_USAGE, STORAGE_KEY_EDGES]);
+      const usageMap = result[STORAGE_KEY_USAGE] && typeof result[STORAGE_KEY_USAGE] === "object" && !Array.isArray(result[STORAGE_KEY_USAGE]) ? { ...result[STORAGE_KEY_USAGE] } : {};
+      const edgesMap = result[STORAGE_KEY_EDGES] && typeof result[STORAGE_KEY_EDGES] === "object" && !Array.isArray(result[STORAGE_KEY_EDGES]) ? { ...result[STORAGE_KEY_EDGES] } : {};
+      delete usageMap[key];
+      delete edgesMap[key];
+      for (const target of Object.keys(edgesMap)) {
+        const edges = edgesMap[target];
+        if (Array.isArray(edges)) {
+          const filtered = edges.filter((e) => e.sourceUrl !== key);
+          if (filtered.length === 0) delete edgesMap[target];
+          else edgesMap[target] = filtered;
+        }
+      }
+      await this._storage.set({ [STORAGE_KEY_USAGE]: usageMap, [STORAGE_KEY_EDGES]: edgesMap });
+    } catch (e) {
+      debugError("[IMPL-BOOKMARK_USAGE_TRACKING] clearUsage failed:", e);
+    }
+  }
+  /**
+   * @param {Record<string, unknown>} r
+   * @param {string} url
+   * @returns {UsageRecord}
+   */
+  _normalizeUsage(r, url2) {
+    const recent = Array.isArray(r.recentVisits) ? r.recentVisits : [];
+    return {
+      url: r.url || url2,
+      visitCount: typeof r.visitCount === "number" ? r.visitCount : 0,
+      lastVisitedAt: typeof r.lastVisitedAt === "string" ? r.lastVisitedAt : "",
+      firstVisitedAt: typeof r.firstVisitedAt === "string" ? r.firstVisitedAt : "",
+      recentVisits: recent.filter((x) => typeof x === "string")
+    };
+  }
+};
+
 // src/core/service-worker.js
 init_config_manager();
 
@@ -22089,6 +22358,7 @@ var HoverboardServiceWorker = class {
     this.messageHandler = new MessageHandler();
     this.configManager = new ConfigManager();
     this.badgeManager = new BadgeManager();
+    this.usageTracker = new BookmarkUsageTracker();
     this.bookmarkProvider = this.messageHandler.bookmarkProvider;
     this.recentTagsMemory = new RecentTagsMemoryManager();
     this._providerInitialized = false;
@@ -22441,6 +22711,60 @@ var HoverboardServiceWorker = class {
           return out2;
         }
       }
+      if (message.type === MESSAGE_TYPES.GET_BOOKMARK_USAGE) {
+        try {
+          const url2 = message.data?.url;
+          const data = url2 ? await this.usageTracker.getUsage(url2) : await this.usageTracker.getAllUsage();
+          const out2 = { success: true, data };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        } catch (err) {
+          const out2 = { success: false, error: String(err && err.message ? err.message : err) };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        }
+      }
+      if (message.type === MESSAGE_TYPES.GET_BOOKMARK_USAGE_STATS) {
+        try {
+          const n = Math.min(100, Math.max(1, Number(message.data?.n) || 10));
+          const [mostFrequent, mostRecent] = await Promise.all([
+            this.usageTracker.getMostFrequent(n),
+            this.usageTracker.getMostRecent(n)
+          ]);
+          const out2 = { success: true, data: { mostFrequent, mostRecent } };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        } catch (err) {
+          const out2 = { success: false, error: String(err && err.message ? err.message : err) };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        }
+      }
+      if (message.type === MESSAGE_TYPES.GET_BOOKMARK_NAVIGATION_GRAPH) {
+        try {
+          const data = await this.usageTracker.getNavigationGraph();
+          const out2 = { success: true, data };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        } catch (err) {
+          const out2 = { success: false, error: String(err && err.message ? err.message : err) };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        }
+      }
+      if (message.type === MESSAGE_TYPES.GET_BOOKMARK_INBOUND_LINKS) {
+        try {
+          const url2 = message.data?.url;
+          const data = url2 ? await this.usageTracker.getInboundLinks(url2) : [];
+          const out2 = { success: true, data };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        } catch (err) {
+          const out2 = { success: false, error: String(err && err.message ? err.message : err) };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        }
+      }
       if (message.type === MESSAGE_TYPES.GET_TABS_PAGE_TEXT) {
         const tabs = message.data?.tabs || [];
         const scripting = typeof chrome !== "undefined" && chrome.scripting ? chrome.scripting : typeof safariEnhancements !== "undefined" && safariEnhancements.scripting ? safariEnhancements.scripting : null;
@@ -22657,7 +22981,8 @@ var HoverboardServiceWorker = class {
         }
       }
       if (tab.url) {
-        await this.updateBadgeForTab(tab);
+        const bookmark = await this.updateBadgeForTab(tab);
+        await this._recordBookmarkVisitIfNeeded(tab, bookmark);
       }
     } catch (error48) {
       console.error("Tab activation error:", error48);
@@ -22666,15 +22991,21 @@ var HoverboardServiceWorker = class {
   async handleTabUpdated(tabId, changeInfo, tab) {
     if (changeInfo.status === "complete" && tab.url) {
       try {
-        await this.updateBadgeForTab(tab);
+        const bookmark = await this.updateBadgeForTab(tab);
+        await this._recordBookmarkVisitIfNeeded(tab, bookmark);
       } catch (error48) {
         console.error("Tab update error:", error48);
       }
     }
   }
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Returns the normalized bookmark for the tab URL (so callers can record visit if bookmarked).
+   * @param {chrome.tabs.Tab} tab
+   * @returns {Promise<{ url: string, time?: string, tags?: string[], hash?: string } | undefined>}
+   */
   async updateBadgeForTab(tab) {
     const config2 = await this.configManager.getConfig();
-    if (!config2.setIconOnLoad) return;
+    if (!config2.setIconOnLoad) return void 0;
     try {
       if (!this._providerInitialized) {
         await this.initBookmarkProvider();
@@ -22683,9 +23014,35 @@ var HoverboardServiceWorker = class {
       const bookmark = normalizeBookmarkForDisplay(raw);
       if (!bookmark.url) bookmark.url = tab.url;
       await this.badgeManager.updateBadge(tab.id, bookmark);
+      return bookmark;
     } catch (error48) {
       console.error("Badge update error:", error48);
+      return void 0;
     }
+  }
+  /**
+   * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING]
+   * Record a visit to a bookmarked URL and optional referrer (for navigation graph). Debounced per URL in tracker.
+   * @param {chrome.tabs.Tab} tab
+   * @param {{ url: string, time?: string, tags?: string[], hash?: string } | undefined} bookmark
+   */
+  async _recordBookmarkVisitIfNeeded(tab, bookmark) {
+    if (!bookmark?.url || !bookmark.time && (!bookmark.tags || bookmark.tags.length === 0) && !bookmark.hash) return;
+    const scripting = typeof globalThis.chrome !== "undefined" && globalThis.chrome.scripting || typeof safariEnhancements !== "undefined" && safariEnhancements.scripting || null;
+    let referrer = "";
+    if (scripting?.executeScript && tab?.id != null && tab?.url && /^https?:\/\//i.test(tab.url)) {
+      try {
+        const results = await scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => document.referrer || ""
+        });
+        const raw = results?.[0]?.result;
+        referrer = raw != null && String(raw) !== "null" ? String(raw) : "";
+      } catch (_) {
+        referrer = "";
+      }
+    }
+    await this.usageTracker.recordVisit(tab.url, referrer);
   }
   /**
    * [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_QUICK_ACCESS]

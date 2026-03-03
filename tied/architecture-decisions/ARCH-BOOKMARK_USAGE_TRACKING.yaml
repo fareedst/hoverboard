@@ -1,0 +1,49 @@
+ARCH-BOOKMARK_USAGE_TRACKING:
+  name: Bookmark Usage Tracking Architecture
+  status: Active
+  cross_references:
+    - REQ-BOOKMARK_USAGE_TRACKING
+  rationale:
+    why: Keep usage and graph data separate from bookmark records so all four backends (pinboard, local, file, sync) remain unchanged and Pinboard-compatible.
+    problems_solved:
+      - Avoiding schema changes to existing bookmark providers
+      - Where to capture referrer (service worker can executeScript in tab context)
+    benefits:
+      - Single source of usage/graph data regardless of which backend stores the bookmark
+      - Referrer captured at visit time via same mechanism as GET_TAB_REFERRERS
+  implementation_approach:
+    summary: Two dedicated keys in chrome.storage.local — hoverboard_bookmark_usage (URL → UsageRecord) and hoverboard_bookmark_nav_edges (targetUrl → NavigationEdge[]). Service worker records visit after badge update when URL is bookmarked; fetches document.referrer via executeScript and passes to tracker. Tracker module encapsulates read/write and debouncing.
+    details:
+      - UsageRecord: url, visitCount, lastVisitedAt, firstVisitedAt, recentVisits (last N timestamps)
+      - NavigationEdge: sourceUrl, count, lastTraversedAt, firstTraversedAt; keyed by targetUrl
+      - Debounce: in-memory lastRecordedVisit map; same URL within 60s does not record again
+      - Only record when URL is bookmarked (router returns non-empty bookmark)
+  traceability:
+    requirements:
+      - REQ-BOOKMARK_USAGE_TRACKING
+    implementation:
+      - IMPL-BOOKMARK_USAGE_TRACKING
+    code_annotations:
+      - ARCH-BOOKMARK_USAGE_TRACKING
+  related_decisions:
+    depends_on:
+      - REQ-BOOKMARK_USAGE_TRACKING
+    informs:
+      - IMPL-BOOKMARK_USAGE_TRACKING
+    see_also:
+      - ARCH-STORAGE
+      - ARCH-STORAGE_INDEX_AND_ROUTER
+  detail_file: architecture-decisions/ARCH-BOOKMARK_USAGE_TRACKING.yaml
+  metadata:
+    created:
+      date: '2026-03-03'
+      author: AI Agent
+    last_updated:
+      date: '2026-03-03'
+      author: AI Agent
+      reason: Initial creation
+    last_validated:
+      date: '2026-03-03'
+      validator: AI Agent
+      result: pass
+  decision: 'Separate storage keys for usage and nav edges; service worker hooks after getBookmarkForUrl; referrer via executeScript; 60s debounce per URL.'

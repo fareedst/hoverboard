@@ -141,7 +141,12 @@ export class UIManager {
       showHoverOnPageLoad: get('showHoverOnPageLoad'),
 
       // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend select-one buttons (pinboard | file | local | sync)
-      storageBackendButtons: get('storageBackendButtons')
+      storageBackendButtons: get('storageBackendButtons'),
+
+      // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] This Page inline usage section
+      usageStatsSection: get('usageStatsSection'),
+      usageStatsText: get('usageStatsText'),
+      usageReferrerText: get('usageReferrerText')
     }
   }
 
@@ -355,6 +360,31 @@ export class UIManager {
         element.disabled = isLoading
       }
     })
+  }
+
+  /**
+   * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
+   * Update This Page inline usage section: show when visitCount > 0 with stats and optional referrer line; hide otherwise.
+   * @param {{ visitCount: number, lastVisitedAgoText: string } | null} usage - null or { visitCount, lastVisitedAgoText } (e.g. "2 hours ago")
+   * @param {string} [topReferrerDisplay] - e.g. "example.com/docs" or ''
+   */
+  updateUsageSection (usage, topReferrerDisplay = '') {
+    const section = this.elements.usageStatsSection
+    const statsEl = this.elements.usageStatsText
+    const referrerEl = this.elements.usageReferrerText
+    if (!section) return
+    const show = usage && usage.visitCount > 0
+    section.classList.toggle('hidden', !show)
+    if (show && statsEl) {
+      const n = usage.visitCount
+      const ago = usage.lastVisitedAgoText || ''
+      statsEl.textContent = `Visited ${n} time${n !== 1 ? 's' : ''} — last ${ago}`
+    }
+    if (referrerEl) {
+      const ref = (topReferrerDisplay || '').trim()
+      referrerEl.textContent = ref ? `Referred from: ${ref}` : ''
+      referrerEl.setAttribute('aria-hidden', ref ? 'false' : 'true')
+    }
   }
 
   /**

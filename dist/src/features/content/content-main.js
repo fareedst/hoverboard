@@ -24759,6 +24759,15 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     url: requiredUrlSchema,
     targetBackend: external_exports.string().min(1)
   }).strict();
+  var getBookmarkUsageDataSchema = external_exports.object({
+    url: external_exports.string().optional().nullable()
+  }).strict().optional();
+  var getBookmarkUsageStatsDataSchema = external_exports.object({
+    n: external_exports.number().int().min(1).max(100).optional()
+  }).strict().optional();
+  var getBookmarkInboundLinksDataSchema = external_exports.object({
+    url: external_exports.string().optional().nullable()
+  }).strict().optional();
 
   // src/core/message-handler.js
   var MESSAGE_TYPES = {
@@ -24807,6 +24816,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     GET_SHARED_MEMORY_STATUS: "getSharedMemoryStatus",
     // [REQ-SIDE_PANEL_BROWSER_TABS] Get document.referrer for tabs (run in SW so injection is in tab context)
     GET_TAB_REFERRERS: "getTabReferrers",
+    // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] Usage and navigation graph queries
+    GET_BOOKMARK_USAGE: "getBookmarkUsage",
+    GET_BOOKMARK_USAGE_STATS: "getBookmarkUsageStats",
+    GET_BOOKMARK_NAVIGATION_GRAPH: "getBookmarkNavigationGraph",
+    GET_BOOKMARK_INBOUND_LINKS: "getBookmarkInboundLinks",
     // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Get recently closed tabs from chrome.sessions
     GET_RECENTLY_CLOSED_TABS: "getRecentlyClosedTabs",
     // [REQ-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for filter (SW executeScript per tab)

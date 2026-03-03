@@ -22,6 +22,7 @@
       <button type="button" class="side-panel-tab" role="tab" data-tab="tagsTree" aria-selected="false">By Tag</button>
       <button type="button" class="side-panel-tab" role="tab" data-tab="browserTabs" aria-selected="false">Tabs</button>
       <button type="button" class="side-panel-tab" role="tab" data-tab="browserBookmarks" aria-selected="false">Bookmarks</button>
+      <button type="button" class="side-panel-tab" role="tab" data-tab="usage" aria-selected="false">Usage</button>
     </nav>
   </header>
 
@@ -68,6 +69,12 @@
             <button type="button" class="storage-backend-btn" data-backend="sync" aria-pressed="false">Sync</button>
           </div>
         </div>
+      </section>
+      <!-- [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Inline usage stats (hidden when no visit data) -->
+      <section data-popup-ref="usageStatsSection" class="usage-stats-section hidden">
+        <h3 class="section-title">Usage</h3>
+        <div class="usage-stats" data-popup-ref="usageStatsText"></div>
+        <div class="usage-referrer" data-popup-ref="usageReferrerText" aria-hidden="true"></div>
       </section>
       <section class="tag-management">
         <div class="add-tag-section">
@@ -382,6 +389,25 @@
       <div id="treeContainer" class="tree-container"></div>
       <div id="emptyState" class="empty-state hidden">No tags selected or no bookmarks.</div>
       <div id="loadError" class="load-error hidden"></div>
+    </section>
+  </div>
+
+  <!-- [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Usage tab: Most Visited, Recently Visited, Navigation Graph -->
+  <div id="usagePanel" class="side-panel-content usage-panel" role="tabpanel" aria-labelledby="tab-usage" hidden>
+    <div class="usage-panel-toolbar">
+      <button type="button" data-usage-refresh class="button secondary">Refresh</button>
+    </div>
+    <section class="usage-section" aria-labelledby="usage-most-visited-heading">
+      <h2 id="usage-most-visited-heading" class="usage-section-title">Most Visited</h2>
+      <div data-usage-most-visited class="usage-list"></div>
+    </section>
+    <section class="usage-section" aria-labelledby="usage-recently-visited-heading">
+      <h2 id="usage-recently-visited-heading" class="usage-section-title">Recently Visited</h2>
+      <div data-usage-recently-visited class="usage-list"></div>
+    </section>
+    <section class="usage-section" aria-labelledby="usage-graph-heading">
+      <h2 id="usage-graph-heading" class="usage-section-title">Navigation Graph</h2>
+      <div data-usage-graph class="usage-graph"></div>
     </section>
   </div>
 

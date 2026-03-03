@@ -16,6 +16,7 @@ import { NativeHostFileBookmarkAdapter } from '../features/storage/native-host-f
 import { StorageIndex } from '../features/storage/storage-index.js'
 import { BookmarkRouter } from '../features/storage/bookmark-router.js'
 import { normalizeBookmarkForDisplay } from '../features/storage/url-tags-manager.js'
+import { BookmarkUsageTracker } from '../features/storage/bookmark-usage-tracker.js'
 import { ConfigManager } from '../config/config-manager.js'
 import { BadgeManager } from './badge-manager.js'
 // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-EXTENSION_COMMANDS] Tab IDs and storage key for side panel tab-specific commands
@@ -140,6 +141,8 @@ class HoverboardServiceWorker {
     this.messageHandler = new MessageHandler()
     this.configManager = new ConfigManager()
     this.badgeManager = new BadgeManager()
+    // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] Track visit frequency/recency and referrer graph for bookmarked URLs
+    this.usageTracker = new BookmarkUsageTracker()
     // [ARCH-LOCAL_STORAGE_PROVIDER] Active bookmark provider (set by initBookmarkProvider)
     this.bookmarkProvider = this.messageHandler.bookmarkProvider
 
@@ -538,6 +541,68 @@ class HoverboardServiceWorker {
         }
       }
 
+      // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] Get usage for one URL or all (data.url optional).
+      if (message.type === MESSAGE_TYPES.GET_BOOKMARK_USAGE) {
+        try {
+          const url = message.data?.url
+          const data = url ? await this.usageTracker.getUsage(url) : await this.usageTracker.getAllUsage()
+          const out = { success: true, data }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        } catch (err) {
+          const out = { success: false, error: String(err && err.message ? err.message : err) }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
+      }
+
+      // [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] Get most frequent and most recent (data.n optional, default 10).
+      if (message.type === MESSAGE_TYPES.GET_BOOKMARK_USAGE_STATS) {
+        try {
+          const n = Math.min(100, Math.max(1, Number(message.data?.n) || 10))
+          const [mostFrequent, mostRecent] = await Promise.all([
+            this.usageTracker.getMostFrequent(n),
+            this.usageTracker.getMostRecent(n)
+          ])
+          const out = { success: true, data: { mostFrequent, mostRecent } }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        } catch (err) {
+          const out = { success: false, error: String(err && err.message ? err.message : err) }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
+      }
+
+      // [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] Get full navigation graph (edges: sourceUrl, targetUrl, count, timestamps).
+      if (message.type === MESSAGE_TYPES.GET_BOOKMARK_NAVIGATION_GRAPH) {
+        try {
+          const data = await this.usageTracker.getNavigationGraph()
+          const out = { success: true, data }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        } catch (err) {
+          const out = { success: false, error: String(err && err.message ? err.message : err) }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
+      }
+
+      // [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Get inbound links for a URL (for This Page "Referred from").
+      if (message.type === MESSAGE_TYPES.GET_BOOKMARK_INBOUND_LINKS) {
+        try {
+          const url = message.data?.url
+          const data = url ? await this.usageTracker.getInboundLinks(url) : []
+          const out = { success: true, data }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        } catch (err) {
+          const out = { success: false, error: String(err && err.message ? err.message : err) }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
+      }
+
       // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for search scope "Page text". SW runs executeScript per tab; returns tabId -> string (title + body.innerText capped).
       if (message.type === MESSAGE_TYPES.GET_TABS_PAGE_TEXT) {
         const tabs = message.data?.tabs || []
@@ -758,7 +823,8 @@ class HoverboardServiceWorker {
         } catch (_) {}
       }
       if (tab.url) {
-        await this.updateBadgeForTab(tab)
+        const bookmark = await this.updateBadgeForTab(tab)
+        await this._recordBookmarkVisitIfNeeded(tab, bookmark)
       }
     } catch (error) {
       console.error('Tab activation error:', error)
@@ -768,16 +834,22 @@ class HoverboardServiceWorker {
   async handleTabUpdated (tabId, changeInfo, tab) {
     if (changeInfo.status === 'complete' && tab.url) {
       try {
-        await this.updateBadgeForTab(tab)
+        const bookmark = await this.updateBadgeForTab(tab)
+        await this._recordBookmarkVisitIfNeeded(tab, bookmark)
       } catch (error) {
         console.error('Tab update error:', error)
       }
     }
   }
 
+  /**
+   * [IMPL-BOOKMARK_USAGE_TRACKING] Returns the normalized bookmark for the tab URL (so callers can record visit if bookmarked).
+   * @param {chrome.tabs.Tab} tab
+   * @returns {Promise<{ url: string, time?: string, tags?: string[], hash?: string } | undefined>}
+   */
   async updateBadgeForTab (tab) {
     const config = await this.configManager.getConfig()
-    if (!config.setIconOnLoad) return
+    if (!config.setIconOnLoad) return undefined
 
     try {
       if (!this._providerInitialized) {
@@ -788,9 +860,36 @@ class HoverboardServiceWorker {
       const bookmark = normalizeBookmarkForDisplay(raw)
       if (!bookmark.url) bookmark.url = tab.url
       await this.badgeManager.updateBadge(tab.id, bookmark)
+      return bookmark
     } catch (error) {
       console.error('Badge update error:', error)
+      return undefined
     }
+  }
+
+  /**
+   * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING]
+   * Record a visit to a bookmarked URL and optional referrer (for navigation graph). Debounced per URL in tracker.
+   * @param {chrome.tabs.Tab} tab
+   * @param {{ url: string, time?: string, tags?: string[], hash?: string } | undefined} bookmark
+   */
+  async _recordBookmarkVisitIfNeeded (tab, bookmark) {
+    if (!bookmark?.url || (!bookmark.time && (!bookmark.tags || bookmark.tags.length === 0) && !bookmark.hash)) return
+    const scripting = (typeof globalThis.chrome !== 'undefined' && globalThis.chrome.scripting) || (typeof browser !== 'undefined' && browser.scripting) || null
+    let referrer = ''
+    if (scripting?.executeScript && tab?.id != null && tab?.url && /^https?:\/\//i.test(tab.url)) {
+      try {
+        const results = await scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => document.referrer || ''
+        })
+        const raw = results?.[0]?.result
+        referrer = (raw != null && String(raw) !== 'null') ? String(raw) : ''
+      } catch (_) {
+        referrer = ''
+      }
+    }
+    await this.usageTracker.recordVisit(tab.url, referrer)
   }
 
   /**

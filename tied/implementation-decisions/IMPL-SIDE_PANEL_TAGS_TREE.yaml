@@ -21,7 +21,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - 'Message handler: OPEN_SIDE_PANEL type; SW listener handles directly (not via handleMessage async path)'
       - 'Panel: tags-tree.html/js/css; tags-tree-data.js has buildTagToBookmarks, getAllTagsFromBookmarks, openUrlInNewTab (pure + testable); tags-tree-filter.js (or same module) has getDomainFromUrl, filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters, sortBookmarks, groupBookmarksBy (pure + testable)'
       - 'Config: load/save config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags) from chrome.storage.local; expand/collapse toggle shows or hides full filter and display controls; tag list view toggle (showAllTags) persists with config'
-      - 'Placeholder/demo mode (?demo=1 or ?screenshot=1): loadPlaceholderForScreenshot sets rawBookmarks from MOCK_BOOKMARKS so that when a tag checkbox is toggled, refreshFromConfig has data and re-applies filter/tree; otherwise refreshFromConfig early-returns and the tree does not update.'
+      - 'Placeholder/demo mode (?demo=1 or ?screenshot=1): loadPlaceholderForScreenshot sets rawBookmarks from tagsTreePlaceholderBookmarks (tags-tree-demo-data.js), a rich set (25+ bookmarks, 15+ tags, time/updated_at, extended) so the By Tag GIF demonstrates tag selector, tree, filters and search; tag toggle runs refreshFromConfig; otherwise refreshFromConfig early-returns.'
   code_locations:
     files:
       - path: src/ui/side-panel/tags-tree-data.js
@@ -34,6 +34,8 @@ IMPL-SIDE_PANEL_TAGS_TREE:
         description: load data and config, apply filter/sort/group, render config toggle and controls, tag selector, tree or grouped list, click URL; pendingCurrentBookmarkTags, initTagsTreeTab(options), setSelectedTagsFromCurrentBookmark(tags)
       - path: src/ui/side-panel/tags-tree.css
         description: Panel styles including config region expand/collapse
+      - path: src/ui/side-panel/tags-tree-demo-data.js
+        description: 'tagsTreePlaceholderBookmarks array for demo/screenshot (rich data: many tags, time/updated_at, extended); demo GIF highlights Filtering by tag and #searchCount (REQ-SIDE_PANEL_BOOKMARK_SEARCH)'
       - path: src/ui/popup/popup.html
         description: Footer button for Tags tree
       - path: src/ui/popup/UIManager.js
@@ -102,7 +104,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
         description: Renders checkboxes for getTagsToDisplay(allTags, selectedTagOrder, showAllTags); compact layout; on change save selectedTagOrder and refresh (REQ/ARCH/IMPL)
       - name: loadPlaceholderForScreenshot
         file: src/ui/side-panel/tags-tree.js
-        description: Loads MOCK_BOOKMARKS into rawBookmarks and builds tagToBookmarks/allTags/selectedTagOrder so refreshFromConfig can run on tag toggle; used when ?demo=1 or ?screenshot=1 [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING]
+        description: Loads tagsTreePlaceholderBookmarks (from tags-tree-demo-data.js) into rawBookmarks and builds tagToBookmarks/allTags/selectedTagOrder so refreshFromConfig can run on tag toggle; used when ?demo=1 or ?screenshot=1 [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING]
       - name: refreshFromConfig
         file: src/ui/side-panel/tags-tree.js
         description: Re-apply filter/sort/group from rawBookmarks and re-render; early-returns when rawBookmarks empty (so placeholder mode must set rawBookmarks in loadPlaceholderForScreenshot) [REQ/ARCH/IMPL]
@@ -127,7 +129,9 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - tests/unit/tags-tree-data.test.js
       - tests/unit/tags-tree-filter.test.js
       - tests/unit/tags-tree-ui.test.js
+      - tests/unit/tags-tree-demo-data.test.js
       - tests/unit/side-panel-open.test.js
+      - tests/playwright/extension-messaging.spec.js
     code_annotations:
       - IMPL-SIDE_PANEL_TAGS_TREE
   related_decisions:
@@ -179,8 +183,8 @@ IMPL-SIDE_PANEL_TAGS_TREE:
     WHEN panel is tabbed (side-panel.html): Tags tree content in #tagsTreePanel; initTagsTreeTab(options) exported; side-panel.js passes currentBookmarkTags from Bookmark tab controller when switching to Tags tree. initTagsTreeTab(options): IF options.currentBookmarkTags set pendingCurrentBookmarkTags. loadBookmarks(): after allTags and default selectedTagOrder, IF pendingCurrentBookmarkTags set THEN selectedTagOrder = intersectionTagOrder(allTags, pendingCurrentBookmarkTags); saveSelectedTagOrder(selectedTagOrder); pendingCurrentBookmarkTags = null. setSelectedTagsFromCurrentBookmark(tags): when Tags tree already loaded, selectedTagOrder = intersectionTagOrder(allTags, tags); save; refreshFromConfig(); renderTagSelector(). intersectionTagOrder(allTags, preferredTags): RETURN preferredTags filtered to tags that exist in allTags (order preserved). Implements "Tags tree displays only bookmarks that have at least one of the same tags as the current bookmark".
 
     # [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE]
-    # Placeholder/demo mode (?demo=1 or ?screenshot=1): loadPlaceholderForScreenshot must set rawBookmarks = [...MOCK_BOOKMARKS] so that subsequent tag checkbox changes invoke refreshFromConfig with data; otherwise refreshFromConfig early-returns and the tree does not update. Then set tagToBookmarks, allTags, selectedTagOrder from MOCK_BOOKMARKS; hide load error and empty state; renderTagSelector(); renderTree().
-    loadPlaceholderForScreenshot(): rawBookmarks = [...MOCK_BOOKMARKS]; tagToBookmarks = buildTagToBookmarks(MOCK_BOOKMARKS); allTags = getAllTagsFromBookmarks(MOCK_BOOKMARKS); selectedTagOrder = [...allTags]; hide loadErrorEl and emptyStateEl; renderTagSelector(); renderTree()
+    # Placeholder/demo mode (?demo=1 or ?screenshot=1): loadPlaceholderForScreenshot uses tagsTreePlaceholderBookmarks (tags-tree-demo-data.js), a rich set (25+ bookmarks, 15+ tags, time/updated_at, extended) so the By Tag demo GIF shows tag selector, tree, filters and search. Set rawBookmarks so tag toggle invokes refreshFromConfig; then tagToBookmarks, allTags, selectedTagOrder; hide load error and empty state; renderTagSelector(); renderTree().
+    loadPlaceholderForScreenshot(): rawBookmarks = [...tagsTreePlaceholderBookmarks]; tagToBookmarks = buildTagToBookmarks(tagsTreePlaceholderBookmarks); allTags = getAllTagsFromBookmarks(tagsTreePlaceholderBookmarks); selectedTagOrder = [...allTags]; hide loadErrorEl and emptyStateEl; renderTagSelector(); renderTree()
 
     # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
     # buildTagToBookmarks: implements requirement "tag-based tree" by producing Map<tag, [{ title, url }]> from bookmarks. One pass; trim/dedupe per tag.
@@ -277,6 +281,6 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       date: "2026-02-21"
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: "2026-03-03"
       author: AI Agent
-      reason: Placeholder rawBookmarks fix so tag uncheck updates tree in demo mode; essence_pseudocode blocks for loadPlaceholderForScreenshot and refreshFromConfig
+      reason: Rich tags-tree demo data (tagsTreePlaceholderBookmarks, tags-tree-demo-data.js); placeholder block and code_locations updated; tests traceability

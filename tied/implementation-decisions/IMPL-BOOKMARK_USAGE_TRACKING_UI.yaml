@@ -1,0 +1,88 @@
+IMPL-BOOKMARK_USAGE_TRACKING_UI:
+  name: Bookmark Usage Tracking UI Implementation
+  status: Active
+  cross_references:
+    - ARCH-BOOKMARK_USAGE_TRACKING_UI
+    - REQ-BOOKMARK_USAGE_TRACKING
+    - IMPL-BOOKMARK_USAGE_TRACKING
+  rationale:
+    why: Implement the three-surface UI so usage data is visible in This Page, Index table, and Usage tab; logic in testable modules; minimal glue in entry points.
+    problems_solved: []
+    benefits:
+      - Users see visit count and last visited per bookmark; can sort/filter by usage; can browse referrer graph
+  implementation_approach:
+    summary: Surface 1 – HTML section in side-panel.html #bookmarkPanel; UIManager/PopupController fetch getBookmarkUsage(currentUrl) and getInboundLinks(currentUrl) after loadInitialData; render or hide section. Surface 2 – bookmarks-table.html two new columns; bookmarks-table.js fetch getBookmarkUsage (no url), merge by url, renderTableBody + sort. Surface 3 – side-panel-tab-state TAB_USAGE; side-panel.html tab + #usagePanel; usage-panel.js initUsageTab fetches getBookmarkUsageStats and getBookmarkNavigationGraph, renders three sections; side-panel.js initUsageTabIfNeeded.
+    details:
+      - Surface 1: data-popup-ref usageStatsSection, usageStatsText, usageReferrerText; hide when !usage?.visitCount
+      - Surface 2: th data-sort visits, lastVisited; merge b.visits = u.visitCount, b.lastVisited = u.lastVisitedAt; formatTimeAge/formatTimeAbsolute for lastVisited
+      - Surface 3: getVisibilityForTab usageVisible; usagePanelEl; initUsageTab in usage-panel.js; Refresh button
+  code_locations:
+    files:
+      - path: src/ui/side-panel/side-panel.html
+      - path: src/ui/side-panel/side-panel.js
+      - path: src/ui/side-panel/side-panel-tab-state.js
+      - path: src/ui/side-panel/usage-panel.js
+      - path: src/ui/side-panel/side-panel.css
+      - path: src/ui/popup/PopupController.js
+      - path: src/ui/popup/UIManager.js
+      - path: src/ui/popup/popup.css
+      - path: src/ui/bookmarks-table/bookmarks-table.html
+      - path: src/ui/bookmarks-table/bookmarks-table.js
+      - path: src/ui/bookmarks-table/bookmarks-table.css
+    functions:
+      - name: initUsageTab
+        file: src/ui/side-panel/usage-panel.js
+      - name: renderTableBody
+        file: src/ui/bookmarks-table/bookmarks-table.js
+  traceability:
+    architecture:
+      - ARCH-BOOKMARK_USAGE_TRACKING_UI
+    requirements:
+      - REQ-BOOKMARK_USAGE_TRACKING
+    tests:
+      - tests/unit/usage-panel.test.js
+      - tests/unit/bookmarks-table-usage-columns.test.js
+    code_annotations:
+      - IMPL-BOOKMARK_USAGE_TRACKING_UI
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-BOOKMARK_USAGE_TRACKING
+      - IMPL-SIDE_PANEL_BOOKMARK
+      - IMPL-LOCAL_BOOKMARKS_INDEX
+    composed_with:
+      - IMPL-MESSAGE_HANDLING
+  essence_pseudocode: |
+    # [IMPL-BOOKMARK_USAGE_TRACKING_UI] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [REQ-BOOKMARK_USAGE_TRACKING]
+    # Block 1: Surface 1 – This Page inline usage section. REQ: UI display of usage; ARCH: three surfaces; IMPL: popup/panel fetch and render.
+
+    # 1a. After loadInitialData (or refresh), if currentPin?.url: send getBookmarkUsage({ url: currentUrl }); send getBookmarkNavigationGraph or getInboundLinks for referrer.
+    # 1b. If usage && usage.visitCount > 0: show usageStatsSection; set usageStatsText to "Visited N times — last X ago"; set usageReferrerText to top inbound source or hide.
+    # 1c. Else: hide usageStatsSection. [REQ-BOOKMARK_USAGE_TRACKING] satisfaction: UI can query and display.
+
+    # Block 2: Surface 2 – Index table Visits and Last Visited columns. ARCH: Index columns; IMPL: merge usage, render, sort.
+
+    # 2a. On load: after getAggregatedBookmarksForIndex, send getBookmarkUsage() (no url) to get all usage array.
+    # 2b. Build map url -> usage; for each bookmark b, set b.visits = map[b.url]?.visitCount ?? 0, b.lastVisited = map[b.url]?.lastVisitedAt ?? ''.
+    # 2c. renderTableBody: for each row add <td class="col-visits"> and <td class="col-last-visited">; lastVisited uses timeDisplayMode (absolute/age).
+    # 2d. Sort comparator: add visits (numeric), lastVisited (string compare). [REQ-BOOKMARK_USAGE_TRACKING] display and sort.
+
+    # Block 3: Surface 3 – Usage side-panel tab. ARCH: Usage tab; IMPL: initUsageTab, fetch stats and graph, render.
+
+    # 3a. Tab state: TAB_USAGE = 'usage'; TAB_IDS include it; getVisibilityForTab returns usageVisible for activeTab === TAB_USAGE.
+    # 3b. initUsageTab(): send getBookmarkUsageStats({ n: 10 }), getBookmarkNavigationGraph(); render Most Visited list (mostFrequent), Recently Visited list (mostRecent), Navigation Graph (edges grouped by sourceUrl).
+    # 3c. Refresh button: re-fetch and re-render. [REQ-BOOKMARK_USAGE_TRACKING] UI query and display.
+  detail_file: implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING_UI.yaml
+  metadata:
+    created:
+      date: "2026-03-03"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-03"
+      author: AI Agent
+      reason: Initial creation
+    last_validated:
+      date: "2026-03-03"
+      validator: AI Agent
+      result: pass

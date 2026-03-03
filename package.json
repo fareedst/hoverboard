@@ -33,6 +33,9 @@
     "test:e2e": "jest --testMatch='**/*.e2e.test.js'",
     "test:e2e:extension": "npx playwright test -c playwright.extension.config.js",
     "record:demo:tabs": "node scripts/record-demo-tabs.js",
+    "record:demo:bookmark": "node scripts/record-demo-bookmark.js",
+    "record:demo:tags-tree": "node scripts/record-demo-tags-tree.js",
+    "record:demo:usage": "node scripts/record-demo-usage.js",
     "test:ci": "npm run test:coverage && npm run test:e2e",
     "security:check": "npm audit --audit-level=high",
     "security:fix": "npm audit fix",
@@ -44,6 +47,8 @@
     "version:set": "bash scripts/set-version.sh",
     "screenshots": "npm run build:dev && node scripts/screenshots-placeholder.js",
     "screenshots:placeholder": "node scripts/screenshots-placeholder.js",
+    "screenshots:readme": "node scripts/screenshots-placeholder.js --seed=scripts/screenshot-seed.example.json",
+    "media:readme": "npm run build:dev && npm run screenshots:readme && npm run record:demo:bookmark && npm run record:demo:tags-tree && npm run record:demo:tabs",
     "prepare": "husky"
   },
   "author": "Fareed Stevenson",

@@ -17356,7 +17356,11 @@ var UIManager = class {
       // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
       showHoverOnPageLoad: get("showHoverOnPageLoad"),
       // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend select-one buttons (pinboard | file | local | sync)
-      storageBackendButtons: get("storageBackendButtons")
+      storageBackendButtons: get("storageBackendButtons"),
+      // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] This Page inline usage section
+      usageStatsSection: get("usageStatsSection"),
+      usageStatsText: get("usageStatsText"),
+      usageReferrerText: get("usageReferrerText")
     };
   }
   /**
@@ -17525,6 +17529,30 @@ var UIManager = class {
         element.disabled = isLoading;
       }
     });
+  }
+  /**
+   * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
+   * Update This Page inline usage section: show when visitCount > 0 with stats and optional referrer line; hide otherwise.
+   * @param {{ visitCount: number, lastVisitedAgoText: string } | null} usage - null or { visitCount, lastVisitedAgoText } (e.g. "2 hours ago")
+   * @param {string} [topReferrerDisplay] - e.g. "example.com/docs" or ''
+   */
+  updateUsageSection(usage, topReferrerDisplay = "") {
+    const section = this.elements.usageStatsSection;
+    const statsEl = this.elements.usageStatsText;
+    const referrerEl = this.elements.usageReferrerText;
+    if (!section) return;
+    const show = usage && usage.visitCount > 0;
+    section.classList.toggle("hidden", !show);
+    if (show && statsEl) {
+      const n = usage.visitCount;
+      const ago = usage.lastVisitedAgoText || "";
+      statsEl.textContent = `Visited ${n} time${n !== 1 ? "s" : ""} \u2014 last ${ago}`;
+    }
+    if (referrerEl) {
+      const ref = (topReferrerDisplay || "").trim();
+      referrerEl.textContent = ref ? `Referred from: ${ref}` : "";
+      referrerEl.setAttribute("aria-hidden", ref ? "false" : "true");
+    }
   }
   /**
    * Update connection status indicator
@@ -18649,6 +18677,15 @@ var moveBookmarkToStorageDataSchema = external_exports.object({
   url: requiredUrlSchema,
   targetBackend: external_exports.string().min(1)
 }).strict();
+var getBookmarkUsageDataSchema = external_exports.object({
+  url: external_exports.string().optional().nullable()
+}).strict().optional();
+var getBookmarkUsageStatsDataSchema = external_exports.object({
+  n: external_exports.number().int().min(1).max(100).optional()
+}).strict().optional();
+var getBookmarkInboundLinksDataSchema = external_exports.object({
+  url: external_exports.string().optional().nullable()
+}).strict().optional();
 
 // src/core/message-handler.js
 var MESSAGE_TYPES = {
@@ -18697,6 +18734,11 @@ var MESSAGE_TYPES = {
   GET_SHARED_MEMORY_STATUS: "getSharedMemoryStatus",
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get document.referrer for tabs (run in SW so injection is in tab context)
   GET_TAB_REFERRERS: "getTabReferrers",
+  // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] Usage and navigation graph queries
+  GET_BOOKMARK_USAGE: "getBookmarkUsage",
+  GET_BOOKMARK_USAGE_STATS: "getBookmarkUsageStats",
+  GET_BOOKMARK_NAVIGATION_GRAPH: "getBookmarkNavigationGraph",
+  GET_BOOKMARK_INBOUND_LINKS: "getBookmarkInboundLinks",
   // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Get recently closed tabs from chrome.sessions
   GET_RECENTLY_CLOSED_TABS: "getRecentlyClosedTabs",
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for filter (SW executeScript per tab)
@@ -18825,6 +18867,42 @@ async function testAiApiKey(apiKey, provider, fetchFn = globalThis.fetch) {
     return { ok: false, error: message };
   }
   return { ok: false, error: "Unknown provider" };
+}
+
+// src/ui/bookmarks-table/bookmarks-table-time.js
+var SEC = 1e3;
+var MIN = 60 * SEC;
+var HOUR = 60 * MIN;
+var DAY = 24 * HOUR;
+var AVG_MONTH_DAYS = 30;
+var MONTH = AVG_MONTH_DAYS * DAY;
+var YEAR = 365 * DAY;
+function formatTimeAge(value, nowMs = Date.now()) {
+  if (value === "" || value === null || value === void 0) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  let deltaMs = nowMs - d.getTime();
+  if (deltaMs < 0) return "just now";
+  if (deltaMs < SEC) return "just now";
+  const units = [
+    { ms: YEAR, name: "year", names: "years" },
+    { ms: MONTH, name: "month", names: "months" },
+    { ms: DAY, name: "day", names: "days" },
+    { ms: HOUR, name: "hour", names: "hours" },
+    { ms: MIN, name: "minute", names: "minutes" },
+    { ms: SEC, name: "second", names: "seconds" }
+  ];
+  const parts = [];
+  for (const u of units) {
+    const n = Math.floor(deltaMs / u.ms);
+    if (n > 0) {
+      parts.push(`${n} ${n === 1 ? u.name : u.names}`);
+      deltaMs -= n * u.ms;
+      if (parts.length >= 2) break;
+    }
+  }
+  if (parts.length === 0) return "just now";
+  return parts.join(" ");
 }
 
 // src/ui/popup/PopupController.js
@@ -19022,6 +19100,9 @@ var PopupController = class {
       this.uiManager.updateReadLaterStatus(hasReadLaterStatus);
       await this.loadRecentTags();
       await this.loadSuggestedTags();
+      if (this._screenshotMode) {
+        await this.loadDemoSuggestedTagsIfScreenshotMode();
+      }
       try {
         const selectionResponse = await this.sendToTab({ type: "GET_PAGE_SELECTION" });
         const data = selectionResponse?.data ?? selectionResponse;
@@ -19054,6 +19135,7 @@ var PopupController = class {
       const urlOk = tabUrl.startsWith("http://") || tabUrl.startsWith("https://");
       const tagWithAiBtn = this.uiManager.elements.tagWithAiBtn;
       if (tagWithAiBtn) tagWithAiBtn.disabled = !aiApiKey || !urlOk;
+      await this.refreshUsageSection();
       this.isInitialized = true;
       debugLog("[POPUP-DATA-FLOW-001] Popup initialization completed successfully");
       if (this._onStateChange) {
@@ -19075,12 +19157,38 @@ var PopupController = class {
     }
   }
   /**
+   * [IMPL-SCREENSHOT_MODE] [REQ-RECENT_TAGS_SYSTEM] In screenshot/demo mode, read hoverboard_demo_recent_tags from storage and call updateRecentTags (excluding current bookmark tags). Returns true if demo tags were applied, false otherwise.
+   */
+  async loadDemoRecentTagsIfScreenshotMode() {
+    return new Promise((resolve) => {
+      if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.local || typeof chrome.storage.local.get !== "function") {
+        resolve(false);
+        return;
+      }
+      chrome.storage.local.get("hoverboard_demo_recent_tags", (result) => {
+        const tags = result && result.hoverboard_demo_recent_tags;
+        if (!Array.isArray(tags) || tags.length === 0) {
+          resolve(false);
+          return;
+        }
+        const currentTags = this.normalizeTags(this.currentPin?.tags || []);
+        const filtered = tags.filter((tag) => !currentTags.includes(tag));
+        this.uiManager.updateRecentTags(filtered);
+        resolve(true);
+      });
+    });
+  }
+  /**
    * [IMMUTABLE-REQ-TAG-003] - Load user-driven recent tags from shared memory
    * Excludes tags already assigned to the current site
    */
   async loadRecentTags() {
     try {
       debugLog("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Loading user-driven recent tags");
+      if (this._screenshotMode) {
+        const applied = await this.loadDemoRecentTagsIfScreenshotMode();
+        if (applied) return;
+      }
       const currentTags = this.normalizeTags(this.currentPin?.tags || []);
       debugLog("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Current tags to exclude:", currentTags);
       const response = await this.sendMessage({
@@ -19588,6 +19696,24 @@ var PopupController = class {
       debugError("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to load suggested tags:", error48);
       this.uiManager.updateSuggestedTags([]);
     }
+  }
+  /**
+   * [IMPL-SCREENSHOT_MODE] [REQ-SUGGESTED_TAGS_FROM_CONTENT] In screenshot/demo mode, read hoverboard_demo_suggested_tags from storage and call updateSuggestedTags so the Suggested Tags section is visible in screenshots and demo GIF.
+   */
+  async loadDemoSuggestedTagsIfScreenshotMode() {
+    return new Promise((resolve) => {
+      if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.local || typeof chrome.storage.local.get !== "function") {
+        resolve();
+        return;
+      }
+      chrome.storage.local.get("hoverboard_demo_suggested_tags", (result) => {
+        const tags = result && result.hoverboard_demo_suggested_tags;
+        if (Array.isArray(tags) && tags.length > 0) {
+          this.uiManager.updateSuggestedTags(tags);
+        }
+        resolve();
+      });
+    });
   }
   /**
    * [IMMUTABLE-REQ-TAG-001] - Validate tag input
@@ -20915,6 +21041,41 @@ var PopupController = class {
     this.uiManager?.off("openBookmarksIndex", this.handleOpenBookmarksIndex);
     this.uiManager?.off("openBrowserBookmarkImport", this.handleOpenBrowserBookmarkImport);
     this.uiManager?.off("openTagsTree", this.handleOpenTagsTree);
+  }
+  /**
+   * [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
+   * Fetch usage and inbound links for current tab URL and update This Page usage section.
+   */
+  async refreshUsageSection() {
+    const url2 = this.currentTab?.url;
+    if (!url2 || typeof this.sendMessage !== "function") return;
+    try {
+      const [usageRes, inboundRes] = await Promise.all([
+        this.sendMessage({ type: MESSAGE_TYPES.GET_BOOKMARK_USAGE, data: { url: url2 } }),
+        this.sendMessage({ type: MESSAGE_TYPES.GET_BOOKMARK_INBOUND_LINKS, data: { url: url2 } })
+      ]);
+      const usage = usageRes && typeof usageRes === "object" ? usageRes : null;
+      const inbound = (Array.isArray(inboundRes) ? inboundRes : []).filter((e) => e?.sourceUrl).sort((a, b) => (b?.count ?? 0) - (a?.count ?? 0));
+      const topReferrer = inbound[0]?.sourceUrl;
+      let topReferrerDisplay = "";
+      if (topReferrer) {
+        try {
+          const u = new URL(topReferrer);
+          topReferrerDisplay = u.hostname + (u.pathname && u.pathname !== "/" ? u.pathname.slice(0, 50) + (u.pathname.length > 50 ? "\u2026" : "") : "");
+        } catch (_) {
+          topReferrerDisplay = topReferrer.slice(0, 50);
+        }
+      }
+      const visitCount = usage?.visitCount ?? 0;
+      const lastVisitedAgoText = usage?.lastVisitedAt ? formatTimeAge(usage.lastVisitedAt) : "";
+      this.uiManager.updateUsageSection(
+        visitCount > 0 ? { visitCount, lastVisitedAgoText } : null,
+        topReferrerDisplay
+      );
+    } catch (err) {
+      debugError("[IMPL-BOOKMARK_USAGE_TRACKING_UI] refreshUsageSection failed:", err);
+      this.uiManager.updateUsageSection(null, "");
+    }
   }
   /**
    * [POPUP-REFRESH-001] Manual refresh capability

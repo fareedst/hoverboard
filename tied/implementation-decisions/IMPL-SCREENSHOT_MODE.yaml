@@ -5,6 +5,8 @@ IMPL-SCREENSHOT_MODE:
     - IMPL-LOCAL_BOOKMARK_SERVICE
     - IMPL-UI_TESTABILITY_HOOKS
     - REQ-LOCAL_BOOKMARKS_INDEX
+    - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    - REQ-RECENT_TAGS_SYSTEM
   rationale:
     why: Enable automated generation of README/docs screenshots with placeholder bookmark data
     problems_solved:
@@ -19,8 +21,8 @@ IMPL-SCREENSHOT_MODE:
     details:
       - PopupController.loadInitialData checks URL params; when screenshot=1 and url present, skip getCurrentTab() and use decoded url/title; in finally, set data-screenshot-ready on #mainInterface so script can wait for content
       - MessageHandler.handleGetCurrentBookmark: when data.url is present and is http(s), use it as targetUrl so popup-opened-as-tab gets bookmark for the screenshot URL, not the extension tab URL
-      - scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme) and placeholderSyncSeed (showHoverOnPageLoad)
-      - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?); wait for [data-screenshot-ready="true"] before popup screenshot; check #store-local before bookmarks index screenshot so seeded local bookmarks are visible; side panel captures use viewport 240px width so README images match real Chrome side panel proportions (not full-screen width); outputs side-panel-bookmark.png, side-panel-tags-tree.png, and side-panel-tabs.png (Tabs tab)
+      - scripts/screenshot-placeholder-data.js exports placeholderStorageSeed (local bookmarks + storage index, hoverboard_theme, hoverboard_demo_suggested_tags, hoverboard_demo_recent_tags) and placeholderSyncSeed (showHoverOnPageLoad); placeholderRecentTags for demo Recent Tags; when _screenshotMode the controller reads hoverboard_demo_suggested_tags and calls updateSuggestedTags, and in loadRecentTags reads hoverboard_demo_recent_tags and calls updateRecentTags (filtering out current bookmark tags) so all three tag sections are visible in screenshots/demo GIF
+      - scripts/screenshots-placeholder.js: await chrome.storage.local.set/sync.set in options page; optional --seed=path or SCREENSHOT_SEED_FILE for seed JSON (hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_demo_suggested_tags?, hoverboard_demo_recent_tags?, hoverboard_settings?); loadSeedFromFile adds default placeholderSuggestedTags and placeholderRecentTags when keys missing; wait for [data-screenshot-ready="true"] before popup screenshot; check #store-local before bookmarks index screenshot; before side-panel-bookmark.png wait for #bookmarkPanel [data-popup-ref="suggestedTagsContainer"] .tag (timeout 3s) so demo tags are visible; side panel viewport 360px; outputs side-panel-bookmark.png, side-panel-tags-tree.png, side-panel-tabs.png
       - scripts/screenshot-seed.example.json: example seed file matching the expected JSON shape
       - Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme dark (see IMPL-POPUP_THEME_CSS)
   code_locations:
@@ -30,9 +32,11 @@ IMPL-SCREENSHOT_MODE:
       - path: src/core/message-handler.js
         description: handleGetCurrentBookmark prefers data.url when http(s)
       - path: scripts/screenshot-placeholder-data.js
-        description: Placeholder bookmark and sync seed data
+        description: Placeholder bookmark and sync seed data; rich localBookmarks (15+), hero Pinboard entry
       - path: scripts/screenshots-placeholder.js
-        description: Playwright script; await seed; seed-from-file; wait for data-screenshot-ready; check store-local
+        description: Playwright script; await seed; side panel URL with ?screenshot=1&url&title; check store-local
+      - path: scripts/record-demo-bookmark.js
+        description: Seeds storage; opens side panel with ?screenshot=1&url&title for demo GIF
       - path: scripts/screenshot-seed.example.json
         description: Example seed file for --seed / SCREENSHOT_SEED_FILE
     functions: []
@@ -40,8 +44,11 @@ IMPL-SCREENSHOT_MODE:
     architecture: []
     requirements:
       - REQ-LOCAL_BOOKMARKS_INDEX
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: screenshot script and viewport capture.'
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-RECENT_TAGS_SYSTEM
+    tests:
+      - tests/unit/screenshot-placeholder-data.test.js
+      - tests/unit/popup-suggested-tags.test.js
     code_annotations:
       - IMPL-SCREENSHOT_MODE
   related_decisions:
@@ -58,9 +65,13 @@ IMPL-SCREENSHOT_MODE:
     # [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX]
     # Placeholder screenshot flow: seed storage, fake tab params, data-screenshot-ready, handleGetCurrentBookmark prefers data.url.
     # Contract: URL params and seed; placeholder UI and script capture.
-    INPUT: ?screenshot=1&url=...&title=... (popup); seed JSON (local bookmarks, storage index, theme); optional --seed=path
-    OUTPUT: popup/index rendered with placeholder data; data-screenshot-ready attribute; script can capture screenshot
+    INPUT: ?screenshot=1&url=...&title=... (popup/side panel); seed JSON (local bookmarks, storage index, theme); optional --seed=path
+    OUTPUT: popup/index/side panel rendered with placeholder data; data-screenshot-ready attribute; script can capture screenshot
     DATA: PopupController._screenshotMode; handleGetCurrentBookmark prefers data.url when http(s); placeholderStorageSeed
+
+    # [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX]
+    # Rich placeholder data: 15+ bookmarks so index and By Tag tree look robust; hero Pinboard entry with 6+ tags and non-empty extended for This Page view.
+    localBookmarks: BUILD object keyed by URL; Pinboard entry HAS tags.length >= 6, extended non-empty, toread 'yes'; total entries >= 15; mix of toread yes/no; storageIndex one key per localBookmarks URL, value 'local'
 
     # Await seed; open popup/index; wait for ready; check store-local for index; capture.
     Script: SEED chrome.storage.local/sync (await set); optional LOAD seed from file; OPEN popup or index; WAIT for [data-screenshot-ready="true"]; CHECK #store-local for index; CAPTURE screenshot
@@ -72,13 +83,20 @@ IMPL-SCREENSHOT_MODE:
     handleGetCurrentBookmark: IF data.url present and http(s): USE as targetUrl so popup-as-tab gets bookmark for screenshot URL
 
     # [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX]
-    # Side panel screenshot width: capture at 240px viewport width so README images match real Chrome side panel proportions (not full-screen). Implements consistent docs and realistic side panel preview.
-    Side panel capture: CREATE page for side-panel.html; SET viewport to width 240, height sufficient for content (e.g. 600); GOTO side-panel.html; WAIT for tab content; CAPTURE screenshot (This Page tab, then By Tag tab, then Tabs tab); output side-panel-bookmark.png, side-panel-tags-tree.png, and side-panel-tabs.png at 240px width
+    # Side panel: open with ?screenshot=1&url=screenshotPopupUrl&title=screenshotPopupTitle so Bookmark tab shows Pinboard bookmark (same doc, PopupController reads window.location.search).
+    Side panel URL: GOTO side-panel.html?screenshot=1&url=encode(screenshotPopupUrl)&title=encode(screenshotPopupTitle); SET viewport width 360 (or 240); WAIT for tab content; CAPTURE screenshot (This Page, then By Tag, Tabs, etc.); output side-panel-bookmark.png, side-panel-tags-tree.png, side-panel-tabs.png
+
+    # [IMPL-SCREENSHOT_MODE] [PROC-DEMO_RECORDING] Demo GIF script: seed storage then open side panel with same screenshot params so GIF shows rich This Page state.
+    record-demo-bookmark: SEED chrome.storage.local with placeholderStorageSeed via options page; GOTO side-panel.html?screenshot=1&url=...&title=...; record frames; assemble GIF
+
+    # [IMPL-SCREENSHOT_MODE] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Demo suggested tags overlay: in screenshot/demo mode Suggested Tags are empty (no tab.id for injection). Seed hoverboard_demo_suggested_tags (array of strings) in placeholderStorageSeed; PopupController in loadInitialData when _screenshotMode after loadSuggestedTags() reads chrome.storage.local.get('hoverboard_demo_suggested_tags') and if non-empty array calls this.uiManager.updateSuggestedTags(value) so screenshots and demo GIF show sample Suggested Tags.
+
+    # [IMPL-SCREENSHOT_MODE] [REQ-RECENT_TAGS_SYSTEM] Demo recent tags overlay: in screenshot/demo mode Recent Tags are empty (SW in-memory empty). Seed hoverboard_demo_recent_tags (array of strings) in placeholderStorageSeed; placeholderRecentTags exported; PopupController in loadRecentTags() when _screenshotMode calls loadDemoRecentTagsIfScreenshotMode() which reads chrome.storage.local.get('hoverboard_demo_recent_tags'), filters out current bookmark tags, and calls this.uiManager.updateRecentTags(filtered) so side-panel-bookmark.png shows all three tag sections (Current, Recent, Suggested). Script waits for suggestedTagsContainer .tag before capture.
   metadata:
     created:
       date: "2026-02-19"
       author: AI Agent
     last_updated:
-      date: "2026-02-26"
+      date: "2026-03-03"
       author: AI Agent
-      reason: Side panel screenshot at 240px viewport width; essence_pseudocode block for side panel capture
+      reason: Demo recent tags overlay (hoverboard_demo_recent_tags, loadDemoRecentTagsIfScreenshotMode); REQ-RECENT_TAGS_SYSTEM; script wait for tag sections; unit tests

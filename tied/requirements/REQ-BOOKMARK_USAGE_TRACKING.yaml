@@ -1,0 +1,55 @@
+REQ-BOOKMARK_USAGE_TRACKING:
+  name: Bookmark Usage Tracking
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Track when bookmarked URLs are visited so users can see frequency, recency, and navigation paths (referrer graph) for their bookmarks.
+    problems_solved:
+      - No visibility into which bookmarks are used most or when they were last opened
+      - No way to see how users navigate between bookmarked pages (referrer → URL edges)
+    benefits:
+      - Visit counts and last-visited timestamps for sorting and display
+      - Referrer-based navigation graph (inbound/outbound links) for understanding flow between bookmarks
+      - All data stored locally; no external collection (REQ-CHROME_STORAGE_USAGE)
+  satisfaction_criteria:
+    - criterion: When a user visits a bookmarked URL (tab activated or loaded), a visit is recorded with optional referrer.
+    - criterion: Usage data (visitCount, lastVisitedAt, firstVisitedAt, recentVisits) is stored per URL in chrome.storage.local.
+    - criterion: Navigation edges (sourceUrl → targetUrl with count and timestamps) are stored for referrer-based graph.
+    - criterion: Visits are debounced per URL (e.g. 60s) to avoid inflating counts from rapid tab switches.
+    - criterion: UI can query usage and graph via messages (getBookmarkUsage, getBookmarkUsageStats, getBookmarkNavigationGraph).
+    - criterion: UI displays usage on three surfaces – This Page inline section (visit count, last visited, top referrer), Bookmarks Index table columns (Visits, Last Visited sortable), and Usage side-panel tab (Most Visited, Recently Visited, Navigation Graph).
+  validation_criteria:
+    - method: Unit tests for BookmarkUsageTracker (recordVisit, getUsage, getMostFrequent, getMostRecent, getInboundLinks, getOutboundLinks, getNavigationGraph, deduplication)
+    - method: Integration in service worker tab handlers; referrer captured via executeScript when recording visit
+  traceability:
+    architecture:
+      - ARCH-BOOKMARK_USAGE_TRACKING
+      - ARCH-BOOKMARK_USAGE_TRACKING_UI
+    implementation:
+      - IMPL-BOOKMARK_USAGE_TRACKING
+      - IMPL-BOOKMARK_USAGE_TRACKING_UI
+    tests:
+      - tests/unit/bookmark-usage-tracker.test.js
+    code_annotations:
+      - REQ-BOOKMARK_USAGE_TRACKING
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-CHROME_STORAGE_USAGE
+      - REQ-URL_TAGS_DISPLAY
+    supersedes: []
+  detail_file: requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml
+  metadata:
+    created:
+      date: "2026-03-03"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-03"
+      author: AI Agent
+      reason: Initial creation for bookmark usage and referrer graph tracking
+    last_validated:
+      date: "2026-03-03"
+      validator: AI Agent
+      result: pass
+  summary: Track bookmark visit frequency/recency and referrer-based navigation edges in chrome.storage.local; service worker records visits on tab activation/update; UI queries via messages.

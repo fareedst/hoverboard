@@ -9,6 +9,7 @@
 import { buildTagToBookmarks, getAllTagsFromBookmarks, getFilterStateForTagsTree, getTagsToDisplay, intersectionTagOrder, mergePreferredTagSpelling, openUrlInNewTab } from './tags-tree-data.js'
 import { applyFilters, sortBookmarks, groupBookmarksBy, filterBookmarksBySearch } from './tags-tree-filter.js'
 import { parseTimeRangeValue } from '../bookmarks-table/bookmarks-table-filter.js'
+import { tagsTreePlaceholderBookmarks } from './tags-tree-demo-data.js'
 
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const STORAGE_KEY_SELECTED_TAGS = 'hoverboard_sidepanel_selected_tags'
@@ -64,20 +65,6 @@ const searchInputEl = document.getElementById('searchInput')
 const searchCountEl = document.getElementById('searchCount')
 const searchPrevEl = document.getElementById('searchPrev')
 const searchNextEl = document.getElementById('searchNext')
-
-/** Placeholder bookmarks for ?screenshot=1 / ?demo=1 (README and demos). Multiple tags per bookmark for Tags tree GIF. */
-const MOCK_BOOKMARKS = [
-  { url: 'https://example.com', description: 'Example Domain', tags: ['work', 'reference'] },
-  { url: 'https://example.org', description: 'Example Org', tags: ['work', 'personal'] },
-  { url: 'https://example.net', description: 'Sample Page', tags: ['personal', 'reading'] },
-  { url: 'https://developer.mozilla.org', description: 'MDN Web Docs', tags: ['docs', 'reference', 'web'] },
-  { url: 'https://github.com', description: 'GitHub', tags: ['dev', 'code'] },
-  { url: 'https://www.npmjs.com', description: 'npm', tags: ['dev', 'docs'] },
-  { url: 'https://stackoverflow.com', description: 'Stack Overflow', tags: ['dev', 'reference', 'tutorial'] },
-  { url: 'https://nodejs.org', description: 'Node.js', tags: ['dev', 'docs', 'tutorial'] },
-  { url: 'https://playwright.dev', description: 'Playwright', tags: ['dev', 'testing', 'tutorial'] },
-  { url: 'https://jestjs.io', description: 'Jest', tags: ['dev', 'testing'] }
-]
 
 /**
  * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
@@ -171,14 +158,15 @@ function syncControlsFromConfig () {
  * [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE]
  * Load placeholder data when ?screenshot=1 or ?demo=1 so the panel can be captured with consistent content.
  * Sets rawBookmarks so refreshFromConfig() (e.g. when a tag is unchecked) has data and can re-render the tree.
+ * Uses tagsTreePlaceholderBookmarks (rich set: many tags, time/updated_at, extended for filters and search).
  */
 function loadPlaceholderForScreenshot () {
   loadErrorEl.classList.add('hidden')
   emptyStateEl.classList.add('hidden')
   // [IMPL-SIDE_PANEL_TAGS_TREE] Required so refreshFromConfig does not early-return when user toggles a tag in demo mode.
-  rawBookmarks = [...MOCK_BOOKMARKS]
-  tagToBookmarks = buildTagToBookmarks(MOCK_BOOKMARKS)
-  allTags = getAllTagsFromBookmarks(MOCK_BOOKMARKS)
+  rawBookmarks = [...tagsTreePlaceholderBookmarks]
+  tagToBookmarks = buildTagToBookmarks(tagsTreePlaceholderBookmarks)
+  allTags = getAllTagsFromBookmarks(tagsTreePlaceholderBookmarks)
   selectedTagOrder = [...allTags]
   collapsedTags = new Set()
   if (tagListViewToggleEl) tagListViewToggleEl.checked = panelConfig.showAllTags

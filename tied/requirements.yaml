@@ -406,10 +406,10 @@ REQ-STORAGE_MODE_DEFAULT:
   detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.yaml
   metadata:
     created:
-      date: '2026-02-13'
+      date: "2026-02-13"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: Save-follows-highlight criterion
 REQ-RECENT_TAGS_SYSTEM:
@@ -820,10 +820,10 @@ REQ-TAB_SEARCH_NO_MATCH_UX:
   detail_file: null
   metadata:
     created:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
     last_updated:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
       reason: Initial creation
 REQ-PRIVACY_CONTROLS:
@@ -1429,14 +1429,14 @@ REQ-SELECTION_TO_TAG_INPUT:
   detail_file: requirements/REQ-SELECTION_TO_TAG_INPUT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: Selection-to-tag input requirement
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass
 REQ-LOCAL_BOOKMARKS_INDEX:
@@ -1485,7 +1485,7 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: Agent
       reason: Show only Clear, Table Display group, compact layout; getShowOnlyDefaultState tests
     last_validated:
@@ -1575,14 +1575,14 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
   detail_file: null
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: New requirement for import UX
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass
 REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
@@ -1624,14 +1624,14 @@ REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: New requirement for Add tags to selected
     last_validated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       validator: AI Agent
       result: pass
 REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
@@ -1672,14 +1672,14 @@ REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   detail_file: null
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: New requirement for Regex find-and-replace on selected
     last_validated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       validator: AI Agent
       result: pass
 REQ-BROWSER_BOOKMARK_IMPORT:
@@ -1716,14 +1716,14 @@ REQ-BROWSER_BOOKMARK_IMPORT:
   detail_file: requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: New requirement for browser bookmark import page
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass
 REQ-FILE_BOOKMARK_STORAGE:
@@ -1764,10 +1764,10 @@ REQ-FILE_BOOKMARK_STORAGE:
   detail_file: requirements/REQ-FILE_BOOKMARK_STORAGE.yaml
   metadata:
     created:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
       reason: File-based storage feature per plan
 REQ-PER_BOOKMARK_STORAGE_BACKEND:
@@ -1814,10 +1814,10 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
   detail_file: requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml
   metadata:
     created:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
       reason: Per-bookmark storage and router per plan
 REQ-MOVE_BOOKMARK_STORAGE_UI:
@@ -1862,10 +1862,10 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
   detail_file: null
   metadata:
     created:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: Save-follows-highlight criterion and traceability
 REQ-URL_TAGS_DISPLAY:
@@ -1917,10 +1917,10 @@ REQ-URL_TAGS_DISPLAY:
   detail_file: requirements/REQ-URL_TAGS_DISPLAY.yaml
   metadata:
     created:
-      date: '2026-02-17'
+      date: "2026-02-17"
       author: AI Agent
     last_updated:
-      date: '2026-02-17'
+      date: "2026-02-17"
       author: AI Agent
       reason: 'URL tags module fixes: always use router for getCurrentBookmark; getTagsForUrl message; popup use bookmark when needsAuth'
 REQ-NATIVE_HOST_WRAPPER:
@@ -1961,10 +1961,10 @@ REQ-NATIVE_HOST_WRAPPER:
   detail_file: requirements/REQ-NATIVE_HOST_WRAPPER.yaml
   metadata:
     created:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
     last_updated:
-      date: '2026-02-14'
+      date: "2026-02-14"
       author: AI Agent
       reason: Native host wrapper and installer per plan
 REQ-CODE_QUALITY:
@@ -2007,14 +2007,14 @@ REQ-CODE_QUALITY:
   detail_file: requirements/REQ-CODE_QUALITY.yaml
   metadata:
     created:
-      date: '2025-02-17'
+      date: "2025-02-17"
       author: agent
     last_updated:
-      date: '2025-02-17'
+      date: "2025-02-17"
       author: agent
       reason: ESLint 9 flat config migration and security check level
     last_validated:
-      date: '2025-02-17'
+      date: "2025-02-17"
       validator: agent
       result: pass
 REQ-UI_INSPECTION:
@@ -2058,8 +2058,8 @@ REQ-UI_INSPECTION:
       - tests/unit/message-type-drift.test.js (message type consistency)
   detail_file: null
   metadata:
-    created: '2026-02-17'
-    last_updated: '2026-02-25'
+    created: "2026-02-17"
+    last_updated: "2026-02-25"
     author: AI Agent
     reason: Add messaging protocol test traceability (ARCH-MESSAGE_HANDLING, IMPL-MESSAGE_HANDLING)
 REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
@@ -2083,8 +2083,8 @@ REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
       - IMPL-POPUP_BUNDLE
   detail_file: requirements/REQ-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
   metadata:
-    created: '2026-02-17'
-    last_updated: '2026-02-17'
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
     author: AI Agent
 REQ-SHARED_UTILITIES:
   name: Shared Utilities
@@ -2111,8 +2111,8 @@ REQ-SHARED_UTILITIES:
       - IMPL-DOM_UTILITIES
   detail_file: requirements/REQ-SHARED_UTILITIES.yaml
   metadata:
-    created: '2026-02-17'
-    last_updated: '2026-02-17'
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
     author: AI Agent
 REQ-STRUCTURED_LOGGING:
   name: Structured Logging
@@ -2136,8 +2136,8 @@ REQ-STRUCTURED_LOGGING:
       - IMPL-LOGGER_LEGACY
   detail_file: null
   metadata:
-    created: '2026-02-17'
-    last_updated: '2026-02-17'
+    created: "2026-02-17"
+    last_updated: "2026-02-17"
     author: AI Agent
 REQ-BOOKMARK_CREATE_UPDATE_TIMES:
   name: Bookmark Create-Time and Most-Recent-Update-Time
@@ -2178,13 +2178,64 @@ REQ-BOOKMARK_CREATE_UPDATE_TIMES:
   detail_file: requirements/REQ-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: Initial creation for bookmark create/update times
   summary: Each bookmark tracks create-time (`time`) and most-recent-update-time (`updated_at`). New records set both equal; local/file/sync set `updated_at` to now on save; Pinboard only has create-time so `updated_at` equals `time`.
+REQ-BOOKMARK_USAGE_TRACKING:
+  name: Bookmark Usage Tracking
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Track when bookmarked URLs are visited so users can see frequency, recency, and navigation paths (referrer graph) for their bookmarks.
+    problems_solved:
+      - No visibility into which bookmarks are used most or when they were last opened
+      - No way to see how users navigate between bookmarked pages (referrer → URL edges)
+    benefits:
+      - Visit counts and last-visited timestamps for sorting and display
+      - Referrer-based navigation graph (inbound/outbound links) for understanding flow between bookmarks
+      - All data stored locally; no external collection (REQ-CHROME_STORAGE_USAGE)
+  satisfaction_criteria:
+    - criterion: When a user visits a bookmarked URL (tab activated or loaded), a visit is recorded with optional referrer.
+    - criterion: Usage data (visitCount, lastVisitedAt, firstVisitedAt, recentVisits) is stored per URL in chrome.storage.local.
+    - criterion: Navigation edges (sourceUrl → targetUrl with count and timestamps) are stored for referrer-based graph.
+    - criterion: Visits are debounced per URL (e.g. 60s) to avoid inflating counts from rapid tab switches.
+    - criterion: UI can query usage and graph via messages (getBookmarkUsage, getBookmarkUsageStats, getBookmarkNavigationGraph).
+    - criterion: UI displays usage on three surfaces – This Page inline section (visit count, last visited, top referrer), Bookmarks Index table columns (Visits, Last Visited sortable), and Usage side-panel tab (Most Visited, Recently Visited, Navigation Graph).
+  validation_criteria:
+    - method: Unit tests for BookmarkUsageTracker (recordVisit, getUsage, getMostFrequent, getMostRecent, getInboundLinks, getOutboundLinks, getNavigationGraph, deduplication)
+    - method: Integration in service worker tab handlers; referrer captured via executeScript when recording visit
+  traceability:
+    architecture:
+      - ARCH-BOOKMARK_USAGE_TRACKING
+      - ARCH-BOOKMARK_USAGE_TRACKING_UI
+    implementation:
+      - IMPL-BOOKMARK_USAGE_TRACKING
+      - IMPL-BOOKMARK_USAGE_TRACKING_UI
+    tests:
+      - tests/unit/bookmark-usage-tracker.test.js
+    code_annotations:
+      - REQ-BOOKMARK_USAGE_TRACKING
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-CHROME_STORAGE_USAGE
+      - REQ-URL_TAGS_DISPLAY
+    supersedes: []
+  detail_file: requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml
+  metadata:
+    created:
+      date: "2026-03-03"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-03"
+      author: AI Agent
+      reason: Initial creation for bookmark usage and referrer graph tracking
+  summary: Track bookmark visit frequency/recency and referrer-based navigation edges in chrome.storage.local; service worker records visits on tab activation/update; UI queries via messages; UI displays on This Page, Index columns, Usage tab.
 REQ-AI_TAGGING_CONFIG:
   name: AI Tagging Configuration
   category: Functional
@@ -2229,10 +2280,10 @@ REQ-AI_TAGGING_CONFIG:
   detail_file: requirements/REQ-AI_TAGGING_CONFIG.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Popup Test API key button; satisfaction and validation criteria updated
 REQ-AI_TAGGING_POPUP:
@@ -2286,10 +2337,10 @@ REQ-AI_TAGGING_POPUP:
   detail_file: requirements/REQ-AI_TAGGING_POPUP.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Initial creation for AI tagging from popup
 REQ-SIDE_PANEL_TAGS_TREE:
@@ -2337,10 +2388,10 @@ REQ-SIDE_PANEL_TAGS_TREE:
   detail_file: null
   metadata:
     created:
-      date: '2026-02-21'
+      date: "2026-02-21"
       author: AI Agent
     last_updated:
-      date: '2026-02-21'
+      date: "2026-02-21"
       author: AI Agent
       reason: Initial creation for side panel tags tree
 REQ-SIDE_PANEL_BOOKMARK_SEARCH:
@@ -2381,10 +2432,10 @@ REQ-SIDE_PANEL_BOOKMARK_SEARCH:
   detail_file: null
   metadata:
     created:
-      date: '2026-02-22'
+      date: "2026-02-22"
       author: AI Agent
     last_updated:
-      date: '2026-02-22'
+      date: "2026-02-22"
       author: AI Agent
       reason: Initial creation for side panel bookmark search
 REQ-SIDE_PANEL_POPUP_EQUIVALENT:
@@ -2436,10 +2487,10 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
   detail_file: requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml
   metadata:
     created:
-      date: '2026-02-25'
+      date: "2026-02-25"
       author: AI Agent
     last_updated:
-      date: '2026-02-25'
+      date: "2026-02-25"
       author: AI Agent
       reason: Initial creation for tabbed side panel with popup equivalent
 REQ-QUICK_ACCESS_ENTRY:
@@ -2491,10 +2542,10 @@ REQ-QUICK_ACCESS_ENTRY:
   detail_file: requirements/REQ-QUICK_ACCESS_ENTRY.yaml
   metadata:
     created:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
     last_updated:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
       reason: Initial creation for quick access commands, context menu, and in-popup/panel shortcuts
 REQ-ICON_CLICK_BEHAVIOR:
@@ -2535,10 +2586,10 @@ REQ-ICON_CLICK_BEHAVIOR:
   detail_file: requirements/REQ-ICON_CLICK_BEHAVIOR.yaml
   metadata:
     created:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
       reason: Initial creation for icon click behavior
 REQ-MAINTAINABILITY:
@@ -2656,10 +2707,10 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     supersedes: []
   metadata:
     created:
-      date: '2026-02-28'
+      date: "2026-02-28"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
       reason: Status Implemented; traceability.tests aligned with unit and E2E
   detail_file: requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml
@@ -2702,14 +2753,14 @@ REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
     supersedes: []
   metadata:
     created:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
       reason: Initial creation
     last_validated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       validator: AI Agent
       result: pass
   detail_file: requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
@@ -2757,10 +2808,10 @@ REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
     supersedes: []
   metadata:
     created:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
       reason: Initial creation
   detail_file: requirements/REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml

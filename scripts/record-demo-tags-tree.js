@@ -105,6 +105,36 @@ async function main () {
     })
   }
 
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE] Element highlight: scope to #tagsTreePanel so only By Tag tab content is highlighted.
+  async function highlightElement (selector) {
+    await page.evaluate((sel) => {
+      const panel = document.getElementById('tagsTreePanel')
+      if (!panel) return
+      const el = panel.querySelector(sel)
+      if (!el) return
+      const prev = document.querySelector('[data-demo-highlight="1"]')
+      if (prev) {
+        prev.removeAttribute('data-demo-highlight')
+        prev.style.outline = ''
+        prev.style.boxShadow = ''
+      }
+      el.setAttribute('data-demo-highlight', '1')
+      el.style.outline = '3px solid #42a5f5'
+      el.style.boxShadow = '0 0 0 3px rgba(66,165,245,0.4)'
+    }, selector)
+  }
+
+  async function clearHighlight () {
+    await page.evaluate(() => {
+      const prev = document.querySelector('[data-demo-highlight="1"]')
+      if (prev) {
+        prev.removeAttribute('data-demo-highlight')
+        prev.style.outline = ''
+        prev.style.boxShadow = ''
+      }
+    })
+  }
+
   // Step 1: Open side panel (This Page tab first) — 3 frames
   await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html?demo=1`)
   await page.waitForLoadState('domcontentloaded')
@@ -146,9 +176,18 @@ async function main () {
   await page.waitForTimeout(400)
   await snap()
 
-  // Step 4: Select tag(s) — action (if we have tags)
+  // Step 4: Filtering by tag — highlight tag selector and explain; then select tag(s) [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_TAGS_TREE]
+  await clearHighlight()
+  await setOverlay('Filtering by tag', 'Only bookmarks that have at least one selected tag are shown in the tree.', 'state')
+  await highlightElement('.tag-selector-section')
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
+  await page.waitForTimeout(400)
+  await snap()
   if (hasTags) {
-    await setOverlay('Selecting tags', 'Filtering by tag', 'action')
+    await setOverlay('Selecting tags', 'Check tags to filter the tree', 'action')
     const firstTag = page.locator('#tagSelector input[type="checkbox"]').first()
     await firstTag.click()
     await page.waitForTimeout(400)
@@ -158,6 +197,7 @@ async function main () {
     await page.waitForTimeout(400)
     await snap()
   } else {
+    await clearHighlight()
     await setOverlay('Tag selector', 'Select tags when you have bookmarks', 'state')
     await page.waitForTimeout(400)
     await snap()
@@ -179,12 +219,21 @@ async function main () {
   await page.waitForTimeout(400)
   await snap()
 
-  // Step 6: Optional search — action
-  await setOverlay('Search bookmarks', 'Type to filter the list', 'action')
+  // Step 6: Search bookmarks and # matches — highlight input, type, then highlight count [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BOOKMARK_SEARCH]
+  await clearHighlight()
+  await setOverlay('Search bookmarks', 'Type to filter the list.', 'action')
   const searchInput = page.locator('#tagsTreePanel #searchInput')
   if (await searchInput.isVisible()) {
+    await highlightElement('#searchInput')
+    await page.waitForTimeout(300)
+    await snap()
     await searchInput.focus()
     await searchInput.fill('example')
+    await page.waitForTimeout(600)
+    await snap()
+    await clearHighlight()
+    await setOverlay('Match count', 'The count updates as you type; it shows how many bookmarks match your search.', 'action')
+    await highlightElement('#searchCount')
     await page.waitForTimeout(400)
     await snap()
     await page.waitForTimeout(400)

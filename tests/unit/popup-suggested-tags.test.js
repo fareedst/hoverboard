@@ -18,7 +18,8 @@ jest.mock('../../src/shared/utils.js', () => ({
 global.chrome = {
   runtime: { sendMessage: jest.fn(), onMessage: { addListener: jest.fn() }, getManifest: jest.fn(() => ({ version: '1.0.0' })) },
   tabs: { query: jest.fn(), sendMessage: jest.fn() },
-  scripting: { executeScript: jest.fn(), insertCSS: jest.fn() }
+  scripting: { executeScript: jest.fn(), insertCSS: jest.fn() },
+  storage: { local: { get: jest.fn() } }
 }
 
 jest.mock('../../src/features/tagging/tag-service.js', () => ({
@@ -37,6 +38,7 @@ describe('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Popup suggested tags', () => {
     stateManager = new StateManager()
     uiManager = new UIManager({ errorHandler, stateManager, config: {} })
     uiManager.updateSuggestedTags = jest.fn()
+    uiManager.updateRecentTags = jest.fn()
     popupController = new PopupController({
       errorHandler,
       stateManager,
@@ -127,6 +129,79 @@ describe('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Popup suggested tags', () => {
       await popupController.loadSuggestedTags()
 
       expect(uiManager.updateSuggestedTags).toHaveBeenCalledWith(['suggested2'])
+    })
+  })
+
+  describe('loadDemoSuggestedTagsIfScreenshotMode [IMPL-SCREENSHOT_MODE] [REQ-SUGGESTED_TAGS_FROM_CONTENT]', () => {
+    test('calls updateSuggestedTags with stored hoverboard_demo_suggested_tags when non-empty array', async () => {
+      const demoTags = ['bookmarks', 'reading', 'reference']
+      chrome.storage.local.get.mockImplementation((key, callback) => {
+        if (typeof callback === 'function') callback({ hoverboard_demo_suggested_tags: demoTags })
+      })
+
+      await popupController.loadDemoSuggestedTagsIfScreenshotMode()
+
+      expect(chrome.storage.local.get).toHaveBeenCalledWith('hoverboard_demo_suggested_tags', expect.any(Function))
+      expect(uiManager.updateSuggestedTags).toHaveBeenCalledWith(demoTags)
+    })
+
+    test('does not call updateSuggestedTags when storage returns empty array', async () => {
+      chrome.storage.local.get.mockImplementation((key, callback) => {
+        if (typeof callback === 'function') callback({ hoverboard_demo_suggested_tags: [] })
+      })
+
+      await popupController.loadDemoSuggestedTagsIfScreenshotMode()
+
+      expect(uiManager.updateSuggestedTags).not.toHaveBeenCalled()
+    })
+
+    test('does not call updateSuggestedTags when storage returns missing or non-array', async () => {
+      chrome.storage.local.get.mockImplementation((key, callback) => {
+        if (typeof callback === 'function') callback({})
+      })
+
+      await popupController.loadDemoSuggestedTagsIfScreenshotMode()
+
+      expect(uiManager.updateSuggestedTags).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('loadDemoRecentTagsIfScreenshotMode [IMPL-SCREENSHOT_MODE] [REQ-RECENT_TAGS_SYSTEM]', () => {
+    test('calls updateRecentTags with stored tags excluding current bookmark tags', async () => {
+      popupController.currentPin = { tags: ['bookmarks', 'reading'] }
+      popupController.normalizeTags = jest.fn((tags) => (Array.isArray(tags) ? tags : []).map(t => String(t).trim()).filter(Boolean))
+      const demoTags = ['demo', 'reading', 'tools', 'reference', 'bookmarks']
+      chrome.storage.local.get.mockImplementation((key, callback) => {
+        if (typeof callback === 'function') callback({ hoverboard_demo_recent_tags: demoTags })
+      })
+
+      const applied = await popupController.loadDemoRecentTagsIfScreenshotMode()
+
+      expect(applied).toBe(true)
+      expect(chrome.storage.local.get).toHaveBeenCalledWith('hoverboard_demo_recent_tags', expect.any(Function))
+      expect(uiManager.updateRecentTags).toHaveBeenCalledWith(['demo', 'tools', 'reference'])
+    })
+
+    test('does not call updateRecentTags when storage returns empty array', async () => {
+      chrome.storage.local.get.mockImplementation((key, callback) => {
+        if (typeof callback === 'function') callback({ hoverboard_demo_recent_tags: [] })
+      })
+
+      const applied = await popupController.loadDemoRecentTagsIfScreenshotMode()
+
+      expect(applied).toBe(false)
+      expect(uiManager.updateRecentTags).not.toHaveBeenCalled()
+    })
+
+    test('does not call updateRecentTags when storage returns missing or non-array', async () => {
+      chrome.storage.local.get.mockImplementation((key, callback) => {
+        if (typeof callback === 'function') callback({})
+      })
+
+      const applied = await popupController.loadDemoRecentTagsIfScreenshotMode()
+
+      expect(applied).toBe(false)
+      expect(uiManager.updateRecentTags).not.toHaveBeenCalled()
     })
   })
 })

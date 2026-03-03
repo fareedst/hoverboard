@@ -15,9 +15,11 @@ export const TAB_TAGS_TREE = 'tagsTree'
 export const TAB_BROWSER_TABS = 'browserTabs'
 /** @type {string} [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] */
 export const TAB_BROWSER_BOOKMARKS = 'browserBookmarks'
+/** @type {string} [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] */
+export const TAB_USAGE = 'usage'
 
 /** @type {string[]} */
-export const TAB_IDS = [TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS, TAB_BROWSER_BOOKMARKS]
+export const TAB_IDS = [TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TABS, TAB_BROWSER_BOOKMARKS, TAB_USAGE]
 
 /**
  * Default tab when none persisted.
@@ -39,7 +41,8 @@ export function getVisibilityForTab (activeTab) {
     bookmarkVisible: activeTab === TAB_BOOKMARK,
     tagsTreeVisible: activeTab === TAB_TAGS_TREE,
     browserTabsVisible: activeTab === TAB_BROWSER_TABS,
-    browserBookmarksVisible: activeTab === TAB_BROWSER_BOOKMARKS
+    browserBookmarksVisible: activeTab === TAB_BROWSER_BOOKMARKS,
+    usageVisible: activeTab === TAB_USAGE
   }
 }
 

@@ -71,6 +71,11 @@ export const MESSAGE_TYPES = {
 
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get document.referrer for tabs (run in SW so injection is in tab context)
   GET_TAB_REFERRERS: 'getTabReferrers',
+  // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] Usage and navigation graph queries
+  GET_BOOKMARK_USAGE: 'getBookmarkUsage',
+  GET_BOOKMARK_USAGE_STATS: 'getBookmarkUsageStats',
+  GET_BOOKMARK_NAVIGATION_GRAPH: 'getBookmarkNavigationGraph',
+  GET_BOOKMARK_INBOUND_LINKS: 'getBookmarkInboundLinks',
   // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Get recently closed tabs from chrome.sessions
   GET_RECENTLY_CLOSED_TABS: 'getRecentlyClosedTabs',
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for filter (SW executeScript per tab)

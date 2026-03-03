@@ -608,3 +608,68 @@
   font-size: 0.85rem;
   color: var(--error-color, #c66);
 }
+
+/* [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Usage tab */
+.usage-panel {
+  padding: var(--spacing-sm, 0.5rem);
+  overflow-y: auto;
+}
+.usage-panel-toolbar {
+  margin-bottom: 0.75rem;
+}
+.usage-section {
+  margin-bottom: 1rem;
+}
+.usage-section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0 0 0.35rem 0;
+  color: var(--text-primary, #eee);
+}
+.usage-list,
+.usage-graph {
+  font-size: 0.85rem;
+  color: var(--text-primary, #eee);
+}
+.usage-row {
+  margin: 0.25rem 0;
+  padding: 0.2rem 0;
+}
+.usage-rank {
+  margin-right: 0.25rem;
+  color: var(--text-secondary, #999);
+}
+.usage-link {
+  color: var(--link-color, #7eb8da);
+  text-decoration: none;
+}
+.usage-link:hover {
+  text-decoration: underline;
+}
+.usage-meta {
+  margin-left: 0.35rem;
+  color: var(--text-secondary, #999);
+  font-size: 0.8rem;
+}
+.usage-graph-group {
+  margin: 0.5rem 0;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border-color, #333);
+}
+.usage-graph-source {
+  font-weight: 500;
+  margin-bottom: 0.25rem;
+}
+.usage-graph-edge {
+  margin-left: 1rem;
+  margin: 0.2rem 0 0.2rem 1rem;
+}
+.usage-empty,
+.usage-error {
+  color: var(--text-secondary, #999);
+  font-size: 0.85rem;
+  padding: 0.5rem 0;
+}
+.usage-error {
+  color: var(--error-color, #c66);
+}

@@ -1,0 +1,50 @@
+ARCH-BOOKMARK_USAGE_TRACKING_UI:
+  name: Bookmark Usage Tracking UI Architecture
+  status: Active
+  cross_references:
+    - REQ-BOOKMARK_USAGE_TRACKING
+    - ARCH-BOOKMARK_USAGE_TRACKING
+  rationale:
+    why: Expose usage and referrer graph via three UI surfaces so users can see visit stats and navigation flow without leaving the extension.
+    problems_solved:
+      - Where to show per-URL usage (current page vs full list)
+      - How to support sorting/filtering by visits and last-visited
+      - How to present the referrer graph
+    benefits:
+      - Inline stats on This Page for immediate context; Index columns for bulk analysis; dedicated Usage tab for rankings and graph
+  implementation_approach:
+    summary: Three surfaces. (1) This Page tab – Usage section after Storage, visible when visitCount > 0; getBookmarkUsage + getInboundLinks for current URL. (2) Bookmarks Index – Visits and Last Visited columns; merge getAllUsage into table data; sortable. (3) Usage tab – fifth side-panel tab; Most Visited (getMostFrequent), Recently Visited (getMostRecent), Navigation Graph (getNavigationGraph); Refresh button.
+    details:
+      - Surface 1: section in #bookmarkPanel; data-popup-ref for usage stats; refresh with bookmark tab
+      - Surface 2: two new th/td; fetch getBookmarkUsage (no url) after getAggregatedBookmarksForIndex; merge by url; sort keys visits, lastVisited
+      - Surface 3: TAB_USAGE in side-panel-tab-state; #usagePanel; initUsageTab fetches getBookmarkUsageStats and getBookmarkNavigationGraph; render three sections
+  traceability:
+    requirements:
+      - REQ-BOOKMARK_USAGE_TRACKING
+    implementation:
+      - IMPL-BOOKMARK_USAGE_TRACKING_UI
+    code_annotations:
+      - ARCH-BOOKMARK_USAGE_TRACKING_UI
+  related_decisions:
+    depends_on:
+      - REQ-BOOKMARK_USAGE_TRACKING
+      - ARCH-BOOKMARK_USAGE_TRACKING
+    informs:
+      - IMPL-BOOKMARK_USAGE_TRACKING_UI
+    see_also:
+      - ARCH-SIDE_PANEL_TABS
+      - ARCH-LOCAL_BOOKMARKS_INDEX
+  detail_file: architecture-decisions/ARCH-BOOKMARK_USAGE_TRACKING_UI.yaml
+  metadata:
+    created:
+      date: "2026-03-03"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-03"
+      author: AI Agent
+      reason: Initial creation for usage tracking UX
+    last_validated:
+      date: "2026-03-03"
+      validator: AI Agent
+      result: pass
+  decision: Three surfaces – This Page inline section, Index table columns (Visits, Last Visited), Usage side-panel tab (Most Visited, Recently Visited, Navigation Graph). Data via existing getBookmarkUsage / getBookmarkUsageStats / getBookmarkNavigationGraph messages.

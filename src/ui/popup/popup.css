@@ -282,6 +282,20 @@ section:last-child {
   gap: var(--spacing-sm);
 }
 
+/* [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] This Page inline usage section */
+.usage-stats-section {
+  margin-top: var(--spacing-sm);
+}
+.usage-stats-section.hidden {
+  display: none;
+}
+.usage-stats,
+.usage-referrer {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #666);
+  margin: 0.2rem 0;
+}
+
 /* [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage section: select-one buttons */
 .storage-section {
   margin-top: var(--spacing-sm);

@@ -64,11 +64,11 @@ The configuration page provides comprehensive settings for customizing the exten
   - URL hash stripping when saving bookmarks
   - Auto-close timeout configuration (currently disabled at 0ms)
 
-### Side Panel – This Page, By Tag, Tabs, and Bookmarks
+### Side Panel – This Page, By Tag, Tabs, Bookmarks, and Usage
 
 ![Pinboard.in with side panel (This Page tab)](images/pinboard-side-panel-bookmark.png)
 
-The snapshot above shows **pinboard.in** in the main content area with the Hoverboard **side panel** open and the **This Page** tab visible (popup-equivalent: quick actions, storage, tag management, search). The side panel header is a single line: extension name and version on the left ("Hoverboard vX.Y.Z") and build time (UTC) on the right.
+The snapshot above shows **pinboard.in** in the main content area with the Hoverboard **side panel** open and the **This Page** tab visible (popup-equivalent: quick actions, storage, tag management, search). All side-panel screenshots and demo GIFs in this section use the same **placeholder data**: 15+ bookmarks (with a “hero” Pinboard entry: multiple tags and notes), plus seeded **Current**, **Recent**, and **Suggested** tags so every tab and animation reflects a realistic use case. The side panel header is a single line: extension name and version on the left ("Hoverboard vX.Y.Z") and build time (UTC) on the right.
 
 #### This Page tab
 
@@ -76,9 +76,9 @@ The snapshot above shows **pinboard.in** in the main content area with the Hover
 
 ![Demo: This Page tab](docs/demo-bookmark.gif)
 
-A short demo animation shows the **This Page** tab: quick actions, storage, and adding a tag for the current tab.
+A short demo animation walks through the **This Page** tab with highlighted sections and overlay descriptions: **Quick Actions** (Show Hover, Toggle Privacy, Read Later, Delete), **Save to** (Pinboard, File, Local, Sync), **Tag with AI** (AI-suggested tags; set API key in Options), **Recent Tags** and **Suggested Tags** (seeded in demo mode so both sections appear), **Search Tabs**, and the **footer** (Reload, Options, Bookmarks index, By Tag, Browser bookmark import). Produce the GIF with `node scripts/record-demo-bookmark.js`.
 
-Close-up of the side panel **This Page** tab only.
+Close-up of the **This Page** tab. When the current bookmark has visit data, a **Usage** section appears (visit count, last visited time, top referrer) ([REQ-BOOKMARK_USAGE_TRACKING], [ARCH-BOOKMARK_USAGE_TRACKING_UI], [IMPL-BOOKMARK_USAGE_TRACKING_UI]).
 
 #### By Tag tab
 
@@ -86,9 +86,9 @@ Close-up of the side panel **This Page** tab only.
 
 ![Demo: By Tag tab](docs/demo-tags-tree.gif)
 
-A short demo animation shows the **By Tag** tab: switching to it, selecting tags, and viewing or opening bookmarks.
+A short demo shows the **By Tag** tab: switching to it, selecting tags, and viewing or opening bookmarks. Overlays highlight **Filtering by tag** (only bookmarks with at least one selected tag) and the **# matches** count that updates as you type in **Search bookmarks**. The shared placeholder data (many tags and bookmarks, with time/domain and notes) makes the GIF illustrate the full workflow: tag selector, tree, filters, and search.
 
-The snapshot above shows the side panel **By Tag** tab with placeholder tag and bookmark data (tag selector and collapsible tree with sample URLs).
+The snapshot above shows the **By Tag** tab (tag selector and collapsible tree with sample URLs).
 
 #### Tabs tab
 
@@ -106,7 +106,19 @@ The **Tabs** tab lists browser tabs with title, URL, and referrer. Each row has 
 
 ([REQ-SIDE_PANEL_BROWSER_BOOKMARKS], [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS], [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]) The **Bookmarks** tab lists Chrome browser bookmarks from `chrome.bookmarks.getTree`. Each row shows checkbox, favicon, title, URL (click to open, double-click to edit), and folder path. **Search** filters by title, URL, or folder path (case-insensitive). **Folder** dropdown filters to a selected folder. **Sort** by Date (newest/oldest), Name (A–Z/Z–A), or Chrome default (persisted). **Bulk:** Select all / Deselect all; Open in tabs, Open in window; Copy URLs; Move to folder; Delete (with confirmation); Export selected or all as HTML (Netscape) or CSV. **Undo:** After delete, "Deleted N bookmarks. Undo" with 10s auto-dismiss. **Import:** HTML or CSV into selected folder; conflict resolution (skip duplicates or overwrite). **Keyboard:** Ctrl+F focus search, Escape clear selection. Command `open-side-panel-browser-bookmarks` opens the panel on this tab.
 
-([REQ-SIDE_PANEL_POPUP_EQUIVALENT], [ARCH-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_BOOKMARK], [REQ-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) The **Chrome side panel** has four tabs: **This Page**, **By Tag**, **Tabs**, and **Bookmarks**. The **Tabs** tab lists browser tabs (title, URL, referrer) with a **Current window / All windows** toggle (default: current window), a **Search in** scope (**Tab info** for title/URL/referrer, **Page text** for body text, or **Elements** for headings, alt, meta description, etc.), a case-insensitive filter, a button to copy visible tab URLs to the clipboard (with success count), and a button to close visible tabs after confirmation (with success count). Each tab row shows window id and tab id for identification. Open the panel from the popup footer via **Tags tree**. In the panel you can switch between **This Page** (popup-equivalent UI for the current tab: quick actions, storage, tag management, search) and **By Tag** (hierarchical view). The last-selected tab is persisted. Tab content fills the available vertical space (full panel height and width, not popup dimensions). The **This Page** tab refreshes promptly when the active browser tab changes or the tab's page completes (like the badge), and when you switch to the This Page tab it shows the current tab's bookmark. When you open the panel with the **By Tag** tab visible (restored tab) or switch to it, the tag selector is set to the current bookmark's tags and the tree shows only bookmarks that share at least one of those tags. In the This Page tab, the **By Tag** footer button switches to the By Tag tab.
+#### Usage tab
+
+![Side Panel – Usage tab](images/side-panel-usage.png)
+
+*Close-up of the Usage tab (Most Visited, Recently Visited, Navigation Graph).*
+
+![Demo: Usage tab](docs/demo-usage.gif)
+
+*Switching to the Usage tab and using Refresh.*
+
+([REQ-BOOKMARK_USAGE_TRACKING], [ARCH-BOOKMARK_USAGE_TRACKING_UI], [IMPL-BOOKMARK_USAGE_TRACKING_UI]) The **Usage** tab shows bookmark visit analytics: **Most Visited** (top 10 by visit count), **Recently Visited** (top 10 by last visit time), and **Navigation Graph** (referrer → URL edges). Data is stored locally; a **Refresh** button reloads all three sections. Each URL is clickable to open in a new tab. The image and GIF use the same placeholder data so all three sections are populated.
+
+([REQ-SIDE_PANEL_POPUP_EQUIVALENT], [ARCH-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_TABS], [IMPL-SIDE_PANEL_BOOKMARK], [REQ-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) The **Chrome side panel** has five tabs: **This Page**, **By Tag**, **Tabs**, **Bookmarks**, and **Usage**. The **Tabs** tab lists browser tabs (title, URL, referrer) with a **Current window / All windows** toggle (default: current window), a **Search in** scope (**Tab info** for title/URL/referrer, **Page text** for body text, or **Elements** for headings, alt, meta description, etc.), a case-insensitive filter, a button to copy visible tab URLs to the clipboard (with success count), and a button to close visible tabs after confirmation (with success count). Each tab row shows window id and tab id for identification. Open the panel from the popup footer via **Tags tree**. In the panel you can switch between **This Page** (popup-equivalent UI for the current tab: quick actions, storage, tag management, search) and **By Tag** (hierarchical view). The last-selected tab is persisted. Tab content fills the available vertical space (full panel height and width, not popup dimensions). The **This Page** tab refreshes promptly when the active browser tab changes or the tab's page completes (like the badge), and when you switch to the This Page tab it shows the current tab's bookmark. When you open the panel with the **By Tag** tab visible (restored tab) or switch to it, the tag selector is set to the current bookmark's tags and the tree shows only bookmarks that share at least one of those tags. In the This Page tab, the **By Tag** footer button switches to the By Tag tab.
 
 ([REQ-SIDE_PANEL_TAGS_TREE], [ARCH-SIDE_PANEL_TAGS_TREE], [IMPL-SIDE_PANEL_TAGS_TREE]) The **By Tag** tab shows a hierarchical view of bookmarks by tag (or a grouped list). The tag selector uses a **compact** list of checkboxes and labels; a **Show all tags** toggle lets you switch between displaying every tag and only the selected (checked) tags, and that choice is persisted. ([REQ-SIDE_PANEL_BOOKMARK_SEARCH], [ARCH-SIDE_PANEL_BOOKMARK_SEARCH], [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]) A **Search bookmarks** box filters the displayed list by text (title, URL, tags, notes); the match count is shown and **Previous** / **Next** move through matches with scroll and highlight. A **Filters & view** bar can be expanded or collapsed to maximize space for the bookmarks list. In the side panel, the header/filters/search/tag selector can scroll out of the way so the bookmarks list can use the full visible height. When expanded, you can filter by **create time** or **last updated** (date range), **tags to include** (comma-separated), and **domains** (URL hostnames, comma-separated); set **Group by** (none, create date, update date, tag, or domain) and **Sort by** with **Sort order** (newest/oldest first). You can select one or more tags and control their display order; below that, each tag is shown with a collapsible list of bookmarks (title and URL), or when grouped, sections by the chosen axis. Clicking a URL opens it in a new tab. Config state (expanded/collapsed and filter, sort, group values) is persisted. Data comes from the same local, file, and sync bookmarks as the Local Bookmarks Index (no Pinboard in this view). The panel stays open when you switch tabs. Requires Chrome 114+ and the `sidePanel` permission.
 
@@ -132,7 +144,7 @@ The snapshot above shows the dedicated full-page view of all locally stored book
 - **Hide:** Tags (comma-separated, exclude)
 - **Table Display:** Search, Time column, and Time format sit just above the table. When you scroll past this section, the Table Display block and the **table column headers** stay at the top of the viewport; the table body scrolls underneath. Actions for selected and the row count scroll with the content.
 - **Bookmark count always visible:** The row count (# bookmarks) is sticky to the bottom of the viewport so it stays visible when scrolling long content. When the page is short, a flex spacer pushes it to the visual bottom. Implemented with `.footer-spacer` (flex: 1 1 0) and `.footer-info { position: sticky; bottom: 0 }`.
-- **Table:** **Select** column (checkboxes per row, select-all in header), Title, URL, Tags, Time, Storage, Shared, To read; URL column is clickable with **external-link indicator** (opens in new tab)
+- **Table:** **Select** column (checkboxes per row, select-all in header), Title, URL, Tags, Time, **Visits** and **Last Visited** ([REQ-BOOKMARK_USAGE_TRACKING], [IMPL-BOOKMARK_USAGE_TRACKING_UI]), Storage, Shared, To read; URL column is clickable with **external-link indicator** (opens in new tab)
 - **Actions for selected:** Export all / Export displayed / Export selected, Move selected to (Local | File | Sync), **Delete** (confirmation with count; names if ≤8), **Add tags** and **Delete tags** (same textbox: enter tag(s) comma-separated; Add tags merges with selected bookmarks, Delete tags removes them from selected). **Regex find-and-replace:** Regex and Replacement textboxes, checkboxes for Title / URL / Tags / Notes, and **Replace** button; regex supports named groups, negative lookahead, and backreferences (JavaScript semantics). After Add tags, Delete tags, or Replace, the same records remain selected where still visible; if a record is no longer displayed (e.g. filtered out), it is no longer marked. Import
 - **Footer:** Row count (e.g. "N bookmarks")
 
@@ -305,7 +317,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 
 ## 📸 Screenshots
 
-Screenshots are generated with **placeholder bookmark data** (no live account) and show the extension in **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script awaits storage seed, waits for the popup to signal content ready, and checks the **Local (L)** store on the bookmarks index so seeded bookmarks are visible. Side panel images (Bookmark, Tags tree, Tabs, and Bookmarks tabs) are captured at **240px width** to match real Chrome side panel proportions. The script also produces **pinboard-side-panel-bookmark.png** (Pinboard.in page with the side panel Bookmark tab visible), **side-panel-tabs.png** (Tabs tab), and **side-panel-bookmarks.png** (Bookmarks tab). You can use a custom seed file with `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js`; see `scripts/screenshot-seed.example.json` for the expected JSON shape. The side panel **demo GIFs** (Bookmark, Tags tree, Tabs) are generated by running `node scripts/record-demo-bookmark.js`, `node scripts/record-demo-tags-tree.js`, and `node scripts/record-demo-tabs.js` after `npm run build`; each script writes a GIF to `docs/` (e.g. `docs/demo-bookmark.gif`, `docs/demo-tags-tree.gif`, `docs/demo-tabs-export.gif`).
+Screenshots use **placeholder bookmark data** (no live account) and **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script seeds storage, waits for the popup to signal content ready, and verifies the **Local (L)** store on the bookmarks index. Placeholder data includes 15+ bookmarks (with a hero Pinboard entry), **Current**, **Recent**, and **Suggested** tags for the This Page tab, and usage data for the Usage tab. Side panel images (This Page, By Tag, Tabs, Bookmarks, Usage) are captured at **360px** width: **pinboard-side-panel-bookmark.png**, **side-panel-bookmark.png**, **side-panel-tags-tree.png**, **side-panel-tabs.png**, **side-panel-bookmarks.png**, **side-panel-usage.png**. Custom seed: `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js` (see `scripts/screenshot-seed.example.json`). **Demo GIFs** (Bookmark, Tags tree, Tabs, Usage): run `node scripts/record-demo-bookmark.js`, `node scripts/record-demo-tags-tree.js`, `node scripts/record-demo-tabs.js`, and `node scripts/record-demo-usage.js` after `npm run build`; each writes to `docs/` (e.g. `docs/demo-bookmark.gif`, `docs/demo-usage.gif`).
 
 ### Popup (dark theme)
 

@@ -1,0 +1,88 @@
+IMPL-BOOKMARK_USAGE_TRACKING:
+  name: Bookmark Usage Tracking Implementation
+  status: Active
+  cross_references:
+    - ARCH-BOOKMARK_USAGE_TRACKING
+    - REQ-BOOKMARK_USAGE_TRACKING
+  rationale:
+    why: Single module for all usage and graph logic; URL normalization matches bookmark-router cleanUrl; message handler exposes getBookmarkUsage, getBookmarkUsageStats, getBookmarkNavigationGraph.
+    problems_solved: []
+    benefits:
+      - Testable in isolation with storage mocks
+      - Same URL normalization as rest of storage layer
+  implementation_approach:
+    summary: 'BookmarkUsageTracker in src/features/storage/bookmark-usage-tracker.js. cleanUrl matches bookmark-router. recordVisit(url, referrer) updates usage map and nav edges; debounce via _lastRecordedVisit (url -> timestamp). getUsage, getAllUsage, getMostFrequent(n), getMostRecent(n), getInboundLinks(url), getOutboundLinks(url), getNavigationGraph(), clearUsage(url). Service worker: after updateBadgeForTab, if bookmark.url then get referrer via scripting.executeScript, then usageTracker.recordVisit(tab.url, referrer). Message handler: handleGetBookmarkUsage, handleGetBookmarkUsageStats, handleGetBookmarkNavigationGraph.'
+    details:
+      - STORAGE_KEY_USAGE = 'hoverboard_bookmark_usage'
+      - STORAGE_KEY_EDGES = 'hoverboard_bookmark_nav_edges'
+      - RECENT_VISITS_CAP = 10
+      - DEBOUNCE_MS = 60000
+      - Referrer normalized with cleanUrl; empty or non-http(s) not stored as edge
+  code_locations:
+    files:
+      - path: src/features/storage/bookmark-usage-tracker.js
+      - path: src/core/service-worker.js
+      - path: src/core/message-handler.js
+      - path: src/shared/message-schemas.js
+      - path: src/shared/message-types.d.ts
+    functions:
+      - name: recordVisit
+        file: src/features/storage/bookmark-usage-tracker.js
+      - name: getInboundLinks
+        file: src/features/storage/bookmark-usage-tracker.js
+      - name: getOutboundLinks
+        file: src/features/storage/bookmark-usage-tracker.js
+      - name: getNavigationGraph
+        file: src/features/storage/bookmark-usage-tracker.js
+  traceability:
+    architecture:
+      - ARCH-BOOKMARK_USAGE_TRACKING
+    requirements:
+      - REQ-BOOKMARK_USAGE_TRACKING
+    tests:
+      - tests/unit/bookmark-usage-tracker.test.js
+    code_annotations:
+      - IMPL-BOOKMARK_USAGE_TRACKING
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - IMPL-BOOKMARK_ROUTER
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+    composed_with:
+      - IMPL-MESSAGE_HANDLING
+  essence_pseudocode: |
+    # [IMPL-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [REQ-BOOKMARK_USAGE_TRACKING]
+    # Record visit and optional referrer; debounce; persist usage + nav edges in chrome.storage.local.
+
+    cleanUrl(url): trim, strip trailing slash (match bookmark-router)
+
+    recordVisit(url, referrer?):
+      url = cleanUrl(url); if !url return
+      IF now - _lastRecordedVisit[url] < DEBOUNCE_MS return  // debounce
+      _lastRecordedVisit[url] = now
+      usage = read usage[url] or create { visitCount:0, firstVisitedAt:'', lastVisitedAt:'', recentVisits:[] }
+      usage.visitCount++; usage.lastVisitedAt = now; if !usage.firstVisitedAt then usage.firstVisitedAt = now
+      usage.recentVisits = [now, ...usage.recentVisits].slice(0, RECENT_VISITS_CAP)
+      write usage map
+      IF referrer: ref = cleanUrl(referrer); IF ref && ref !== url && /^https?:/.test(ref): add/increment edge ref→url; write edges map
+
+    getUsage(url), getAllUsage(): read from storage; return normalized records
+    getMostFrequent(n), getMostRecent(n): sort by visitCount / lastVisitedAt; return top n
+    getInboundLinks(url): edges[url] or []
+    getOutboundLinks(url): all edges where sourceUrl === url (scan edges map)
+    getNavigationGraph(): all edges as { sourceUrl, targetUrl, count, ... }
+    clearUsage(url): delete usage[url]; delete edges[url]; remove url from any edge as sourceUrl
+  detail_file: implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING.yaml
+  metadata:
+    created:
+      date: "2026-03-03"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-03"
+      author: AI Agent
+      reason: Initial creation
+    last_validated:
+      date: "2026-03-03"
+      validator: AI Agent
+      result: pass
