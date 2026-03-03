@@ -1,6 +1,5 @@
 # [REQ-ICON_CLICK_BEHAVIOR] Extension icon single-click opens side panel or popup, user-configurable
 # Requirement: Single click on the extension toolbar icon opens the side panel by default; user can choose to open the popup instead via options.
-
 REQ-ICON_CLICK_BEHAVIOR:
   name: Extension Icon Single-Click Behavior
   category: Functional
@@ -12,11 +11,12 @@ REQ-ICON_CLICK_BEHAVIOR:
       - Icon click always opened popup; side panel required an extra step (footer or context menu)
       - No user choice for icon click target
     benefits:
-      - "Default: one click opens side panel (consistent with quick-access goal)"
-      - "Toggle: when side panel is open, click icon again to close it"
-      - "Options toggle: Single click opens side panel vs popup"
+      - 'Default: one click opens side panel (consistent with quick-access goal)'
+      - 'Toggle: when side panel is open, click icon again to close it'
+      - 'Options toggle: Single click opens side panel vs popup'
   satisfaction_criteria:
     - criterion: Single click on extension icon opens side panel by default
+    - criterion: Side panel opens in the window where the user clicked (current/focused window)
     - criterion: When "open side panel on click" is enabled, a click toggles the side panel (open if closed, close if already open)
     - criterion: User can set "Single click opens popup" in options; then icon click opens popup
     - criterion: Setting is persisted and applied on next icon click
@@ -44,9 +44,9 @@ REQ-ICON_CLICK_BEHAVIOR:
   detail_file: requirements/REQ-ICON_CLICK_BEHAVIOR.yaml
   metadata:
     created:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
-      reason: Initial creation for icon click behavior
+      reason: Add satisfaction criterion for panel opening in current (focused) window

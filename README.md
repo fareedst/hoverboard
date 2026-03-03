@@ -58,7 +58,7 @@ The configuration page provides comprehensive settings for customizing the exten
 
 - **AI Tagging** ([REQ-AI_TAGGING_CONFIG], [ARCH-AI_TAGGING_CONFIG], [IMPL-AI_CONFIG_OPTIONS], [IMPL-AI_TAG_TEST]): Optional AI API key (textbox with label), provider selector (OpenAI or Gemini), optional tag limit (default 64), and **Test API key** button. When no key is set, AI tagging is disabled; settings are persisted in config.
 
-- **Extension icon** ([REQ-ICON_CLICK_BEHAVIOR], [IMPL-ICON_CLICK_BEHAVIOR]): Toggle **Single click on extension icon opens side panel** (checked by default). When unchecked, clicking the toolbar icon opens the popup instead of the side panel.
+- **Extension icon** ([REQ-ICON_CLICK_BEHAVIOR], [IMPL-ICON_CLICK_BEHAVIOR]): Toggle **Single click on extension icon opens side panel** (checked by default). When unchecked, clicking the toolbar icon opens the popup instead of the side panel. The side panel opens in the window where you clicked (current window).
 
 - **Advanced Options**: 
   - URL hash stripping when saving bookmarks

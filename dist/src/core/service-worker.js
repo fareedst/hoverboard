@@ -22000,6 +22000,7 @@ function getLastActions(n = 20) {
 }
 
 // src/core/service-worker.js
+var _isRestrictedForSidePanel = (url2) => typeof url2 === "string" && (url2.startsWith("chrome://") || url2.startsWith("chrome-extension://"));
 var RecentTagsMemoryManager = class {
   constructor() {
     this.recentTags = [];
@@ -22148,18 +22149,7 @@ var HoverboardServiceWorker = class {
     safariEnhancements.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("[SERVICE-WORKER] Received message:", message);
       if (message.type === MESSAGE_TYPES.OPEN_SIDE_PANEL) {
-        const windowId = this._sidePanelWindowId;
-        const openFn = typeof globalThis.chrome !== "undefined" && globalThis.chrome.sidePanel && globalThis.chrome.sidePanel.open;
-        if (windowId != null && openFn) {
-          try {
-            globalThis.chrome.sidePanel.open({ windowId });
-            sendResponse({ success: true });
-          } catch (e) {
-            sendResponse({ success: false, error: e?.message ?? String(e) });
-          }
-        } else {
-          sendResponse({ success: false, error: windowId == null ? "No browser window available for side panel. Switch to a browser tab and try again." : "Side panel is not available." });
-        }
+        this._openSidePanelWithFallback((result) => sendResponse(result));
         return true;
       }
       this.handleMessage(message, sender).then((response) => {
@@ -22214,21 +22204,42 @@ var HoverboardServiceWorker = class {
   }
   /**
    * [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR]
-   * Handle extension icon click: open side panel (default) or popup per cached preference; if side panel, toggle (close when already open). Must run synchronously so sidePanel.open() is in user-gesture context.
+   * Handle extension icon click: open side panel (default) or popup per cached preference; if side panel, toggle (close when already open).
+   * Chrome requires sidePanel.open() in the same synchronous user-gesture stack; we call it only when we have a cached windowId (synchronous). When cache is null we cannot open from an async callback (gesture would be lost).
    */
   handleActionClick() {
     const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
     const openSidePanel = this._iconClickOpensSidePanel !== false;
-    if (openSidePanel && this._sidePanelWindowId != null && chromeApi?.sidePanel?.open) {
-      chromeApi.sidePanel.open({ windowId: this._sidePanelWindowId });
-      if (chromeApi?.runtime?.sendMessage) {
-        const p = chromeApi.runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE });
-        if (p && typeof p.catch === "function") p.catch(() => {
-        });
-      }
-    } else if (chromeApi?.action?.openPopup) {
-      chromeApi.action.openPopup();
+    if (!openSidePanel) {
+      if (chromeApi?.action?.openPopup) chromeApi.action.openPopup();
+      return;
     }
+    if (!chromeApi?.sidePanel?.open) {
+      if (chromeApi?.action?.openPopup) chromeApi.action.openPopup();
+      return;
+    }
+    if (this._sidePanelWindowId != null) {
+      try {
+        chromeApi.sidePanel.open({ windowId: this._sidePanelWindowId });
+        if (chromeApi?.windows?.update) chromeApi.windows.update(this._sidePanelWindowId, { focused: true }).catch(() => {
+        });
+        if (chromeApi?.runtime?.sendMessage) {
+          const p = chromeApi.runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE });
+          if (p && typeof p.catch === "function") p.catch(() => {
+          });
+        }
+      } catch (e) {
+      }
+      return;
+    }
+    const tabsApi = chromeApi?.tabs ?? (typeof safariEnhancements !== "undefined" ? safariEnhancements.tabs : null);
+    if (tabsApi?.query) {
+      tabsApi.query({ active: true, currentWindow: true }, (tabs) => {
+        const tab = tabs && tabs[0];
+        if (tab?.windowId != null && !_isRestrictedForSidePanel(tab.url)) this._sidePanelWindowId = tab.windowId;
+      });
+    }
+    if (chromeApi?.action?.openPopup) chromeApi.action.openPopup();
   }
   /**
    * [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]
@@ -22240,9 +22251,7 @@ var HoverboardServiceWorker = class {
     const getURL = runtime.getURL ? (path) => runtime.getURL(path) : () => "";
     const windowId = this._sidePanelWindowId;
     if (command === "open-side-panel") {
-      if (windowId != null && chromeApi?.sidePanel?.open) {
-        chromeApi.sidePanel.open({ windowId });
-      }
+      this._openSidePanelWithFallback();
       return;
     }
     if (command === "open-side-panel-bookmark" || command === "open-side-panel-tags-tree" || command === "open-side-panel-browser-tabs" || command === "open-side-panel-browser-bookmarks") {
@@ -22250,9 +22259,7 @@ var HoverboardServiceWorker = class {
       if (chromeApi?.storage?.local?.set) {
         await chromeApi.storage.local.set({ [SIDE_PANEL_TAB_STORAGE_KEY]: tabId });
       }
-      if (windowId != null && chromeApi?.sidePanel?.open) {
-        chromeApi.sidePanel.open({ windowId });
-      }
+      this._openSidePanelWithFallback();
       return;
     }
     if (command === "open-options") {
@@ -22273,19 +22280,78 @@ var HoverboardServiceWorker = class {
       }
     }
   }
-  /** [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Seed _sidePanelWindowId from active tab's normal window. Implements cache so OPEN_SIDE_PANEL handler can open panel without await (user gesture). */
+  /**
+   * [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] [IMPL-EXTENSION_COMMANDS] [IMPL-CONTEXT_MENU_QUICK_ACCESS]
+   * Open side panel using cached windowId or cold-start fallback (tabs.query callback). Preserves user gesture for sidePanel.open.
+   * @param {(result: { success: boolean; error?: string }) => void} [onComplete] Called when open completes (for OPEN_SIDE_PANEL message response).
+   */
+  _openSidePanelWithFallback(onComplete) {
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    if (!chromeApi?.sidePanel?.open) {
+      onComplete?.({ success: false, error: "Side panel is not available." });
+      return;
+    }
+    if (this._sidePanelWindowId != null) {
+      try {
+        chromeApi.sidePanel.open({ windowId: this._sidePanelWindowId });
+        onComplete?.({ success: true });
+      } catch (e) {
+        onComplete?.({ success: false, error: e?.message ?? String(e) });
+      }
+      return;
+    }
+    const tabsApi = chromeApi?.tabs ?? (typeof safariEnhancements !== "undefined" ? safariEnhancements.tabs : null);
+    if (tabsApi?.query) {
+      tabsApi.query({ active: true, currentWindow: true }, (tabs) => {
+        const tab = tabs && tabs[0];
+        const tryOpen = (target) => {
+          if (target?.windowId) {
+            try {
+              chromeApi.sidePanel.open({ windowId: target.windowId });
+              onComplete?.({ success: true });
+            } catch (e) {
+              onComplete?.({ success: false, error: e?.message ?? String(e) });
+            }
+          } else if (target?.id) {
+            try {
+              chromeApi.sidePanel.open({ tabId: target.id });
+              onComplete?.({ success: true });
+            } catch (e) {
+              onComplete?.({ success: false, error: e?.message ?? String(e) });
+            }
+          } else {
+            onComplete?.({ success: false, error: "No browser window available for side panel. Switch to a browser tab and try again." });
+          }
+        };
+        if (tab && _isRestrictedForSidePanel(tab.url)) {
+          tabsApi.query({ url: ["http://*/*", "https://*/*"] }, (webTabs) => {
+            tryOpen(webTabs && webTabs[0] ? webTabs[0] : tab);
+          });
+        } else {
+          tryOpen(tab);
+        }
+      });
+    } else {
+      onComplete?.({ success: false, error: "Side panel is not available." });
+    }
+  }
+  /** [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Seed _sidePanelWindowId from active tab's normal window. Implements cache so OPEN_SIDE_PANEL handler can open panel without await (user gesture). [IMPL-ICON_CLICK_BEHAVIOR] Skip seeding when active tab is chrome:// or chrome-extension:// (Chrome does not show side panel on those pages). */
   _seedSidePanelWindowCache() {
     const winApi = typeof globalThis.chrome !== "undefined" && globalThis.chrome.windows ? globalThis.chrome.windows : safariEnhancements.windows;
     const tabsApi = typeof globalThis.chrome !== "undefined" && globalThis.chrome.tabs ? globalThis.chrome.tabs : safariEnhancements.tabs;
     const setCache = (windowId) => {
-      if (windowId != null) this._sidePanelWindowId = windowId;
+      if (windowId != null) {
+        this._sidePanelWindowId = windowId;
+      }
     };
     tabsApi.query({ active: true }).then((tabs) => {
       const tab = tabs && tabs[0];
-      if (tab?.windowId != null && winApi.get) winApi.get(tab.windowId).then((w) => {
-        if (w?.type === "normal") setCache(w.id);
-      }).catch(() => {
-      });
+      if (tab?.windowId != null && !_isRestrictedForSidePanel(tab?.url) && winApi.get) {
+        winApi.get(tab.windowId).then((w) => {
+          if (w?.type === "normal") setCache(w.id);
+        }).catch(() => {
+        });
+      }
     }).catch(() => {
     });
   }
@@ -22639,9 +22705,7 @@ var HoverboardServiceWorker = class {
     api.onClicked.addListener((info) => {
       const menuId = info?.menuItemId;
       if (menuId === "hoverboard-open-side-panel") {
-        const windowId = self2._sidePanelWindowId;
-        const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
-        if (windowId != null && chromeApi?.sidePanel?.open) chromeApi.sidePanel.open({ windowId });
+        self2._openSidePanelWithFallback();
         return;
       }
       if (menuId === "hoverboard-open-options") {

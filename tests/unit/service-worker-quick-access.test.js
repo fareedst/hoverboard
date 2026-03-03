@@ -90,6 +90,27 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COM
       url: 'chrome-extension://test-id/src/ui/browser-bookmark-import/browser-bookmark-import.html'
     })
   })
+
+  // [IMPL-EXTENSION_COMMANDS] Cold-start fallback: when _sidePanelWindowId null, command uses tabs.query callback.
+  test('command open-side-panel with _sidePanelWindowId null uses tabs.query and opens panel [IMPL-EXTENSION_COMMANDS]', async () => {
+    sw._sidePanelWindowId = null
+    let queryCallback
+    global.chrome.tabs.query.mockImplementation((queryInfo, cb) => {
+      if (typeof cb === 'function') {
+        queryCallback = cb
+        return undefined
+      }
+      return Promise.resolve([])
+    })
+    const listener = global.chrome.commands.onCommand.addListener.mock.calls[0][0]
+    listener('open-side-panel')
+    expect(global.chrome.tabs.query).toHaveBeenCalledWith(
+      { active: true, currentWindow: true },
+      expect.any(Function)
+    )
+    queryCallback([{ id: 1, windowId: 88 }])
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 88 })
+  })
 })
 
 describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_QUICK_ACCESS] Context menu quick access', () => {
@@ -130,6 +151,24 @@ describe('[REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_
     expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 10 })
   })
 
+  // [IMPL-CONTEXT_MENU_QUICK_ACCESS] Cold-start fallback: when _sidePanelWindowId null, context menu uses tabs.query.
+  test('context menu hoverboard-open-side-panel with _sidePanelWindowId null uses tabs.query [IMPL-CONTEXT_MENU_QUICK_ACCESS]', () => {
+    sw._sidePanelWindowId = null
+    let queryCallback
+    global.chrome.tabs.query.mockImplementation((queryInfo, cb) => {
+      if (typeof cb === 'function') {
+        queryCallback = cb
+        return undefined
+      }
+      return Promise.resolve([])
+    })
+    sw.setupContextMenus()
+    const onClicked = global.chrome.contextMenus.onClicked.addListener.mock.calls[0][0]
+    onClicked({ menuItemId: 'hoverboard-open-side-panel' }, {})
+    queryCallback([{ id: 2, windowId: 77 }])
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 77 })
+  })
+
   test('context menu onClicked hoverboard-open-bookmarks-index calls tabs.create', () => {
     sw.setupContextMenus()
     const onClicked = global.chrome.contextMenus.onClicked.addListener.mock.calls[0][0]
@@ -155,6 +194,7 @@ describe('[REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Extension icon cl
   beforeEach(() => {
     jest.clearAllMocks()
     global.chrome.runtime.getURL.mockImplementation((path) => `chrome-extension://test-id/${path}`)
+    global.chrome.windows.update = jest.fn().mockResolvedValue(undefined)
     sw = new HoverboardServiceWorker()
   })
 
@@ -163,11 +203,15 @@ describe('[REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Extension icon cl
     expect(typeof global.chrome.action.onClicked.addListener.mock.calls[0][0]).toBe('function')
   })
 
-  test('handleActionClick with _iconClickOpensSidePanel true opens side panel', () => {
-    sw._sidePanelWindowId = 42
+  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Icon click uses cached windowId when set (synchronous open for user gesture).
+  test('handleActionClick with _sidePanelWindowId set opens side panel synchronously and focuses window', () => {
     sw._iconClickOpensSidePanel = true
+    sw._sidePanelWindowId = 42
+    const queryCallsBefore = global.chrome.tabs.query.mock.calls.length
     sw.handleActionClick()
     expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
+    expect(global.chrome.windows.update).toHaveBeenCalledWith(42, { focused: true })
+    expect(global.chrome.tabs.query.mock.calls.length).toBe(queryCallsBefore)
     expect(global.chrome.action.openPopup).not.toHaveBeenCalled()
   })
 
@@ -178,18 +222,117 @@ describe('[REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Extension icon cl
     expect(global.chrome.action.openPopup).toHaveBeenCalledTimes(1)
   })
 
-  test('handleActionClick with cache undefined (default) opens side panel', () => {
-    sw._sidePanelWindowId = 42
-    sw._iconClickOpensSidePanel = undefined
+  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Cold start: no cache, seed cache from query and open popup (cannot call sidePanel.open in async callback).
+  test('handleActionClick with _sidePanelWindowId null seeds cache and opens popup [IMPL-ICON_CLICK_BEHAVIOR]', () => {
+    sw._iconClickOpensSidePanel = true
+    sw._sidePanelWindowId = null
+    let queryCallback
+    global.chrome.tabs.query.mockImplementation((queryInfo, cb) => {
+      if (typeof cb === 'function') {
+        queryCallback = cb
+        return undefined
+      }
+      return Promise.resolve([])
+    })
     sw.handleActionClick()
-    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 42 })
+    expect(global.chrome.tabs.query).toHaveBeenCalledWith({ active: true, currentWindow: true }, expect.any(Function))
+    expect(global.chrome.sidePanel.open).not.toHaveBeenCalled()
+    expect(global.chrome.action.openPopup).toHaveBeenCalledTimes(1)
+    queryCallback([{ id: 2, windowId: 42, url: 'https://example.com' }])
+    expect(sw._sidePanelWindowId).toBe(42)
   })
 
+  // [REQ-ICON_CLICK_BEHAVIOR] Icon click sends REQUEST_SIDE_PANEL_CLOSE when opening via cache.
   test('handleActionClick when opening side panel sends REQUEST_SIDE_PANEL_CLOSE for toggle [REQ-ICON_CLICK_BEHAVIOR]', () => {
-    sw._sidePanelWindowId = 42
     sw._iconClickOpensSidePanel = true
+    sw._sidePanelWindowId = 99
     global.chrome.runtime.sendMessage = jest.fn()
     sw.handleActionClick()
     expect(global.chrome.runtime.sendMessage).toHaveBeenCalledWith({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE })
+  })
+
+  // [IMPL-ICON_CLICK_BEHAVIOR] Icon click uses cached windowId when set (user gesture requires synchronous open).
+  test('handleActionClick uses cached windowId for synchronous sidePanel.open [IMPL-ICON_CLICK_BEHAVIOR]', () => {
+    sw._sidePanelWindowId = 99
+    sw._iconClickOpensSidePanel = true
+    sw.handleActionClick()
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 99 })
+    expect(global.chrome.windows.update).toHaveBeenCalledWith(99, { focused: true })
+  })
+
+  // [IMPL-ICON_CLICK_BEHAVIOR] Cold start: tabs.query seeds cache; sidePanel.open not called in callback (user gesture lost).
+  test('handleActionClick cold-start calls tabs.query and openPopup only [IMPL-ICON_CLICK_BEHAVIOR]', () => {
+    sw._sidePanelWindowId = null
+    sw._iconClickOpensSidePanel = true
+    let queryCallback
+    global.chrome.tabs.query.mockImplementation((queryInfo, cb) => {
+      if (typeof cb === 'function') {
+        queryCallback = cb
+        return undefined
+      }
+      return Promise.resolve([])
+    })
+    sw.handleActionClick()
+    expect(global.chrome.tabs.query).toHaveBeenCalledWith(
+      { active: true, currentWindow: true },
+      expect.any(Function)
+    )
+    expect(global.chrome.action.openPopup).toHaveBeenCalledTimes(1)
+    queryCallback([{ id: 1, windowId: 99, url: 'https://example.com' }])
+    expect(sw._sidePanelWindowId).toBe(99)
+    expect(global.chrome.sidePanel.open).not.toHaveBeenCalled()
+  })
+
+  test('handleActionClick cold-start with tab missing windowId does not set cache [IMPL-ICON_CLICK_BEHAVIOR]', () => {
+    sw._sidePanelWindowId = null
+    sw._iconClickOpensSidePanel = true
+    let queryCallback
+    global.chrome.tabs.query.mockImplementation((queryInfo, cb) => {
+      if (typeof cb === 'function') {
+        queryCallback = cb
+        return undefined
+      }
+      return Promise.resolve([])
+    })
+    sw.handleActionClick()
+    queryCallback([{ id: 7, windowId: undefined, url: 'https://example.com' }])
+    expect(sw._sidePanelWindowId).toBeNull()
+    expect(global.chrome.sidePanel.open).not.toHaveBeenCalled()
+  })
+
+  test('handleActionClick cold-start with no tabs still calls openPopup [IMPL-ICON_CLICK_BEHAVIOR]', () => {
+    sw._sidePanelWindowId = null
+    sw._iconClickOpensSidePanel = true
+    let queryCallback
+    global.chrome.tabs.query.mockImplementation((queryInfo, cb) => {
+      if (typeof cb === 'function') {
+        queryCallback = cb
+        return undefined
+      }
+      return Promise.resolve([])
+    })
+    sw.handleActionClick()
+    expect(global.chrome.action.openPopup).toHaveBeenCalledTimes(1)
+    queryCallback([])
+    expect(global.chrome.sidePanel.open).not.toHaveBeenCalled()
+  })
+
+  // [IMPL-ICON_CLICK_BEHAVIOR] Cold start on restricted tab: do not set cache, open popup only (no sidePanel.open in callback).
+  test('handleActionClick cold-start with restricted tab (chrome://) does not set cache and opens popup [IMPL-ICON_CLICK_BEHAVIOR]', () => {
+    sw._sidePanelWindowId = null
+    sw._iconClickOpensSidePanel = true
+    let queryCallback
+    global.chrome.tabs.query.mockImplementation((queryInfo, cb) => {
+      if (typeof cb === 'function') {
+        queryCallback = cb
+        return undefined
+      }
+      return Promise.resolve([])
+    })
+    sw.handleActionClick()
+    queryCallback([{ id: 1, windowId: 88, url: 'chrome://extensions/' }])
+    expect(sw._sidePanelWindowId).toBeNull()
+    expect(global.chrome.sidePanel.open).not.toHaveBeenCalled()
+    expect(global.chrome.action.openPopup).toHaveBeenCalledTimes(1)
   })
 })

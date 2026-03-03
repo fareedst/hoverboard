@@ -1,6 +1,5 @@
 # [IMPL-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [REQ-ICON_CLICK_BEHAVIOR]
 # Implementation: Remove default_popup; SW action.onClicked; config iconClickOpensSidePanel; options toggle.
-
 IMPL-ICON_CLICK_BEHAVIOR:
   name: Extension Icon Single-Click Behavior
   status: Active
@@ -14,13 +13,13 @@ IMPL-ICON_CLICK_BEHAVIOR:
     benefits:
       - Default side panel on click; options toggle to open popup instead; config persisted
   implementation_approach:
-    summary: manifest.json action has no default_popup; ConfigManager has iconClickOpensSidePanel (default true); options page has toggle; SW caches preference and handles action.onClicked synchronously (sidePanel.open in user-gesture context); SW sends REQUEST_SIDE_PANEL_CLOSE after opening so panel can toggle (close when already visible); side panel listens and closes via window.close() when visible and open long enough.
+    summary: manifest.json action has no default_popup; ConfigManager has iconClickOpensSidePanel (default true); options page has toggle; SW caches preference and _sidePanelWindowId; Chrome requires sidePanel.open() in the same synchronous user-gesture stack, so icon click uses cached windowId when set (synchronous open + windows.update focus); when cache is null (cold start) we only seed cache via tabs.query and open popup—we do not call sidePanel.open in the async callback (gesture would be lost). Commands/context menu/OPEN_SIDE_PANEL use _openSidePanelWithFallback() (cached or cold-start).
     details:
-      - "manifest.json: remove action.default_popup (keep default_icon, default_title)"
-      - "ConfigManager: getDefaultConfiguration() add iconClickOpensSidePanel: true; mergedConfigSchema add iconClickOpensSidePanel: z.boolean().optional()"
-      - "Options: new control (e.g. checkbox id icon-click-opens-side-panel); loadSettings/saveSettings read and write the key"
-      - "SW: _iconClickOpensSidePanel cache; _seedIconClickPreferenceCache() at startup and on storage.onChanged(hoverboard_settings); action.onClicked handler is synchronous: read cache, if openSidePanel then sidePanel.open() then sendMessage(REQUEST_SIDE_PANEL_CLOSE), else action.openPopup()"
-      - "Side panel: _sidePanelLoadTime at script load; bindToggleCloseRequest() listens for REQUEST_SIDE_PANEL_CLOSE; if visibilityState === 'visible' and (now - loadTime) > 300ms then window.close()"
+      - 'manifest.json: remove action.default_popup (keep default_icon, default_title)'
+      - 'ConfigManager: getDefaultConfiguration() add iconClickOpensSidePanel: true; mergedConfigSchema add iconClickOpensSidePanel: z.boolean().optional()'
+      - 'Options: new control (e.g. checkbox id icon-click-opens-side-panel); loadSettings/saveSettings read and write the key'
+      - 'SW: _iconClickOpensSidePanel cache; _seedIconClickPreferenceCache() at startup and on storage.onChanged(hoverboard_settings); action.onClicked (icon click) calls sidePanel.open({ windowId }) only when _sidePanelWindowId is set, synchronously in the same tick as the click (Chrome user-gesture requirement); then windows.update(..., { focused: true }), sendMessage(REQUEST_SIDE_PANEL_CLOSE). When _sidePanelWindowId is null, run tabs.query({ active: true, currentWindow: true }, cb) only to seed cache for next click and call action.openPopup() (do not call sidePanel.open in callback—gesture is lost). Commands/context menu/OPEN_SIDE_PANEL use _openSidePanelWithFallback().'
+      - 'Side panel: _sidePanelLoadTime at script load; bindToggleCloseRequest() listens for REQUEST_SIDE_PANEL_CLOSE; if visibilityState === ''visible'' and (now - loadTime) > 300ms then window.close()'
   code_locations:
     files:
       - path: manifest.json
@@ -32,7 +31,7 @@ IMPL-ICON_CLICK_BEHAVIOR:
       - path: src/ui/options/options.js
         description: bind and load/save toggle
       - path: src/core/service-worker.js
-        description: action.onClicked, cache seed, handleActionClick, REQUEST_SIDE_PANEL_CLOSE send
+        description: handleActionClick uses cached windowId for synchronous sidePanel.open when set; cold start seeds cache and openPopup only; _openSidePanelWithFallback for commands/menu/OPEN_SIDE_PANEL
       - path: src/ui/side-panel/side-panel.js
         description: bindToggleCloseRequest, REQUEST_SIDE_PANEL_CLOSE listener and window.close
       - path: src/core/message-handler.js
@@ -65,13 +64,20 @@ IMPL-ICON_CLICK_BEHAVIOR:
       storage.onChanged.addListener(changes, areaName => IF areaName === 'local' AND changes.hoverboard_settings THEN getConfig().then(...))
 
     # [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR]
-    # SW handleActionClick: synchronous; read cache; open panel then request close for toggle, or open popup.
+    # SW handleActionClick: Chrome requires sidePanel.open() in same synchronous user-gesture stack; use cache when set, else seed cache and open popup.
     handleActionClick():
       openSidePanel = (this._iconClickOpensSidePanel !== false)
-      IF openSidePanel AND _sidePanelWindowId != null AND chrome.sidePanel?.open:
-        chrome.sidePanel.open({ windowId: this._sidePanelWindowId })
-        IF chrome.runtime?.sendMessage: sendMessage({ type: REQUEST_SIDE_PANEL_CLOSE }); guard .catch if promise
-      ELSE IF chrome.action?.openPopup: chrome.action.openPopup()
+      IF NOT openSidePanel: action.openPopup(); RETURN
+      IF NOT sidePanel.open available: action.openPopup(); RETURN
+      # [IMPL-ICON_CLICK_BEHAVIOR] Cached path: open synchronously so user gesture is valid.
+      IF this._sidePanelWindowId != null:
+        sidePanel.open({ windowId: this._sidePanelWindowId }); windows.update(this._sidePanelWindowId, { focused: true }); sendMessage(REQUEST_SIDE_PANEL_CLOSE); RETURN
+      # Cold start: do NOT call sidePanel.open in async callback (gesture would be lost). Seed cache for next click; open popup as fallback.
+      tabs.query({ active: true, currentWindow: true }, (tabs) =>
+        tab = tabs?.[0]
+        IF tab?.windowId != null AND NOT _isRestrictedForSidePanel(tab.url): this._sidePanelWindowId = tab.windowId
+      )
+      action.openPopup()
 
     # [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR]
     # Side panel: on REQUEST_SIDE_PANEL_CLOSE close if visible and open long enough (toggle).
@@ -89,14 +95,17 @@ IMPL-ICON_CLICK_BEHAVIOR:
     tests:
       - tests/unit/service-worker-quick-access.test.js
       - tests/unit/side-panel-icon-toggle.test.js
+      - tests/playwright/extension-icon-click.spec.js
     code_annotations:
       - IMPL-ICON_CLICK_BEHAVIOR
       - REQ-ICON_CLICK_BEHAVIOR
   e2e_recommendations:
-    - "Icon click opens side panel: with extension loaded, simulate toolbar icon click (e.g. CDP or chrome.action API from test context) and assert side panel becomes visible or side-panel page is focused."
-    - "Icon click toggles (closes) side panel: open side panel (e.g. via command or direct URL), wait >400ms, simulate icon click again and assert panel closes (e.g. side panel page/window no longer visible)."
-    - "Options toggle: load options page, set 'Single click opens popup', save; simulate icon click and assert popup opens (e.g. popup URL in a new page) instead of side panel."
-    - "Suggested location: tests/playwright/extension-icon-click.spec.js or extend extension-messaging.spec.js; use same unpacked-extension fixture as other extension E2E."
+    - 'Icon click opens side panel: with extension loaded, simulate toolbar icon click (e.g. CDP or chrome.action API from test context) and assert side panel becomes visible or side-panel page is focused.'
+    - 'Icon click opens in current window: Playwright cannot click the toolbar icon; the same current-window path (tabs.query({ active: true, currentWindow: true })) is exercised by OPEN_SIDE_PANEL from popup (extension-icon-click.spec.js); no additional E2E required for current-window behavior.'
+    - 'Icon click cold-start: immediately after browser/extension load (before navigating), click extension icon and assert side panel opens (validates tabs.query callback when _sidePanelWindowId is null).'
+    - 'Icon click toggles (closes) side panel: open side panel (e.g. via command or direct URL), wait >400ms, simulate icon click again and assert panel closes (e.g. side panel page/window no longer visible).'
+    - 'Options toggle: load options page, set ''Single click opens popup'', save; simulate icon click and assert popup opens (e.g. popup URL in a new page) instead of side panel.'
+    - 'Suggested location: tests/playwright/extension-icon-click.spec.js or extend extension-messaging.spec.js; use same unpacked-extension fixture as other extension E2E.'
   related_decisions:
     depends_on:
       - ARCH-ICON_CLICK_BEHAVIOR
@@ -106,9 +115,9 @@ IMPL-ICON_CLICK_BEHAVIOR:
       - IMPL-EXTENSION_COMMANDS
   metadata:
     created:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
-      reason: Toggle behavior (REQUEST_SIDE_PANEL_CLOSE, panel close when visible); sync handler and cache; pseudo-code and e2e_recommendations
+      reason: Icon click always uses current-window query (no cached windowId); essence_pseudocode and implementation_approach updated
