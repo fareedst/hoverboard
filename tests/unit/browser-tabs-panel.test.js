@@ -10,6 +10,7 @@ import {
   getReferrerDisplayText,
   initBrowserTabsTab,
   parseImportantTagSources,
+  normalizeClosedSessions,
   DEFAULT_IMPORTANT_TAG_SOURCES,
   SEARCH_SCOPE_TAB_INFO,
   SEARCH_SCOPE_PAGE_TEXT,
@@ -182,6 +183,101 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] buildReco
     const yaml = buildRecordsYamlForCopy(list)
     expect(yaml).toContain('Title: with colon')
     expect(yaml).toContain('id: 1')
+  })
+
+  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+  // Closed tabs: include sessionId and lastModified in YAML output.
+  test('closed tab record includes sessionId and lastModified', () => {
+    const list = [
+      { id: 'sess-abc', sessionId: 'sess-abc', title: 'Closed Page', url: 'https://closed.com', isClosed: true, lastModified: 1709300000 }
+    ]
+    const yaml = buildRecordsYamlForCopy(list)
+    expect(yaml).toContain('sessionId:')
+    expect(yaml).toContain('sess-abc')
+    expect(yaml).toContain('lastModified:')
+    expect(yaml).toContain('1709300000')
+    expect(yaml).toContain('Closed Page')
+    expect(yaml).toContain('https://closed.com')
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+ * normalizeClosedSessions: pure function; flattens chrome.sessions Session[] to tab-like objects.
+ */
+describe('[REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] normalizeClosedSessions', () => {
+  test('empty array returns empty array', () => {
+    expect(normalizeClosedSessions([])).toEqual([])
+  })
+
+  test('single tab session produces one normalized entry', () => {
+    const sessions = [
+      { tab: { sessionId: 's1', title: 'Tab 1', url: 'https://a.com' }, lastModified: 1000 }
+    ]
+    const out = normalizeClosedSessions(sessions)
+    expect(out).toHaveLength(1)
+    expect(out[0]).toMatchObject({
+      id: 's1',
+      sessionId: 's1',
+      title: 'Tab 1',
+      url: 'https://a.com',
+      isClosed: true,
+      lastModified: 1000,
+      referrer: '',
+      pageText: '',
+      importantTags: ''
+    })
+  })
+
+  test('window session with tabs flattens to individual tab entries', () => {
+    const sessions = [
+      {
+        window: { tabs: [{ sessionId: 'w1t1', title: 'W1 Tab 1', url: 'https://b.com' }, { sessionId: 'w1t2', title: 'W1 Tab 2', url: 'https://c.com' }] },
+        lastModified: 2000
+      }
+    ]
+    const out = normalizeClosedSessions(sessions)
+    expect(out).toHaveLength(2)
+    expect(out[0]).toMatchObject({ id: 'w1t1', sessionId: 'w1t1', title: 'W1 Tab 1', url: 'https://b.com', isClosed: true, lastModified: 2000 })
+    expect(out[1]).toMatchObject({ id: 'w1t2', sessionId: 'w1t2', title: 'W1 Tab 2', url: 'https://c.com', isClosed: true, lastModified: 2000 })
+  })
+
+  test('mixed tab and window sessions produce correct flat list', () => {
+    const sessions = [
+      { tab: { sessionId: 't1', title: 'Single', url: 'https://single.com' }, lastModified: 100 },
+      { window: { tabs: [{ sessionId: 'wt1', title: 'Win Tab', url: 'https://win.com' }] }, lastModified: 200 }
+    ]
+    const out = normalizeClosedSessions(sessions)
+    expect(out).toHaveLength(2)
+    expect(out[0].sessionId).toBe('t1')
+    expect(out[1].sessionId).toBe('wt1')
+  })
+})
+
+/**
+ * [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+ * filterBrowserTabs with closed-tab objects: tabInfo scope matches title/url (referrer empty for closed).
+ */
+describe('[REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] filterBrowserTabs closed tabs', () => {
+  const closedTabs = [
+    { id: 's1', sessionId: 's1', title: 'Closed Google', url: 'https://google.com', isClosed: true, referrer: '', pageText: '', importantTags: '' },
+    { id: 's2', sessionId: 's2', title: 'Closed Example', url: 'https://example.com', isClosed: true, referrer: '', pageText: '', importantTags: '' }
+  ]
+
+  test('filters closed tabs by title in tabInfo scope', () => {
+    const out = filterBrowserTabs(closedTabs, 'Google', SEARCH_SCOPE_TAB_INFO)
+    expect(out).toHaveLength(1)
+    expect(out[0].sessionId).toBe('s1')
+  })
+
+  test('filters closed tabs by URL in tabInfo scope', () => {
+    const out = filterBrowserTabs(closedTabs, 'example.com', SEARCH_SCOPE_TAB_INFO)
+    expect(out).toHaveLength(1)
+    expect(out[0].sessionId).toBe('s2')
+  })
+
+  test('empty query returns all closed tabs', () => {
+    expect(filterBrowserTabs(closedTabs, '', SEARCH_SCOPE_TAB_INFO)).toEqual(closedTabs)
   })
 })
 

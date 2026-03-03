@@ -295,10 +295,10 @@ IMPL-RUNTIME_VALIDATION:
   detail_file: implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Add message-handler-runtime-validation.test.js; message-handler-local-save-recall.test.js; saveBookmark shared/toread yes/no for local storage
 IMPL-TYPESCRIPT_MIGRATION:
@@ -345,10 +345,10 @@ IMPL-TYPESCRIPT_MIGRATION:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Full TypeScript utilization; wire shared types; @ts-check on key files; add validation tests to REQ/ARCH/IMPL
 IMPL-PLAYWRIGHT_E2E_EXTENSION:
@@ -389,10 +389,10 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
   detail_file: implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Added messaging, evaluation, overlay, options snapshot, side panel, lower-priority E2E specs
 IMPL-SIDE_PANEL_SNAPSHOT:
@@ -427,10 +427,10 @@ IMPL-SIDE_PANEL_SNAPSHOT:
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml
   metadata:
     created:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Side panel snapshot E2E (Bookmark + Tags tree tabs)
 IMPL-OVERLAY:
@@ -967,10 +967,10 @@ IMPL-UI_ACTION_CONTRACT:
   detail_file: implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-UI_INSPECTOR:
@@ -1003,10 +1003,10 @@ IMPL-UI_INSPECTOR:
   detail_file: implementation-decisions/IMPL-UI_INSPECTOR.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-UI_TESTABILITY_HOOKS:
@@ -1038,10 +1038,10 @@ IMPL-UI_TESTABILITY_HOOKS:
   detail_file: implementation-decisions/IMPL-UI_TESTABILITY_HOOKS.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-DEV_COMMAND_INSPECTION:
@@ -1070,10 +1070,10 @@ IMPL-DEV_COMMAND_INSPECTION:
   detail_file: implementation-decisions/IMPL-DEV_COMMAND_INSPECTION.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-DEBUG_PANEL:
@@ -1105,10 +1105,10 @@ IMPL-DEBUG_PANEL:
   detail_file: implementation-decisions/IMPL-DEBUG_PANEL.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-POPUP_BUNDLE:
@@ -1139,10 +1139,10 @@ IMPL-POPUP_BUNDLE:
   detail_file: implementation-decisions/IMPL-POPUP_BUNDLE.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-BADGE_REFRESH:
@@ -1199,7 +1199,7 @@ IMPL-BADGE_REFRESH:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-URL_TAGS_DISPLAY:
@@ -1276,10 +1276,10 @@ IMPL-URL_TAGS_DISPLAY:
   detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-LOCAL_BOOKMARKS_INDEX:
@@ -1389,7 +1389,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
@@ -1450,7 +1450,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
       date: 2026-02-13T00:00:00.000Z
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
@@ -1514,14 +1514,14 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
   metadata:
     created:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
-      date: "2026-02-18"
+      date: '2026-02-18'
       validator: AI Agent
       result: pass
 IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
@@ -1577,14 +1577,14 @@ IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: New implementation for Add tags to selected
     last_validated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       validator: AI Agent
       result: pass
 IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
@@ -1638,14 +1638,14 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: New implementation for Regex find-and-replace on selected
     last_validated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       validator: AI Agent
       result: pass
 IMPL-BROWSER_BOOKMARK_IMPORT:
@@ -1696,14 +1696,14 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
   detail_file: implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
     created:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
-      date: "2026-02-18"
+      date: '2026-02-18'
       validator: AI Agent
       result: pass
 IMPL-CONFIG_STRUCT:
@@ -1969,11 +1969,11 @@ IMPL-CODE_STYLE:
       date: YYYY-MM-DD
       author: agent/contributor
     last_updated:
-      date: "2026-02-19"
+      date: '2026-02-19'
       author: agent
       reason: ESLint 10; @eslinter/eslint-config-standard; Node 20+; overrides minimatch and test-exclude for Jest 30 security
     last_validated:
-      date: "2026-02-19"
+      date: '2026-02-19'
       validator: agent
       result: pass
 IMPL-PINBOARD_POSTS_ADD_ENCODING:
@@ -2023,10 +2023,10 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
   detail_file: implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.yaml
   metadata:
     created:
-      date: "2026-02-13"
+      date: '2026-02-13'
       author: AI Agent
     last_updated:
-      date: "2026-02-13"
+      date: '2026-02-13'
       author: AI Agent
       reason: 'Bug fix: tag storage fails when special characters in tag'
 IMPL-RECENT_TAGS_POPUP_REFRESH:
@@ -2074,14 +2074,14 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-13"
+      date: '2026-02-13'
       author: AI Agent
     last_updated:
-      date: "2026-02-13"
+      date: '2026-02-13'
       author: AI Agent
       reason: Recent Tags refresh on every popup display per plan
     last_validated:
-      date: "2026-02-13"
+      date: '2026-02-13'
       validator: AI Agent
       result: pass
 IMPL-LOCAL_BOOKMARK_SERVICE:
@@ -2132,14 +2132,14 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml
   metadata:
     created:
-      date: "2026-02-13"
+      date: '2026-02-13'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Add message-handler-local-save-recall.test.js; local-bookmark-service shared/toread round-trip. Local storage mode implementation per plan
     last_validated:
-      date: "2026-02-13"
+      date: '2026-02-13'
       validator: AI Agent
       result: pass
 IMPL-FILE_BOOKMARK_SERVICE:
@@ -2226,14 +2226,14 @@ IMPL-FILE_BOOKMARK_SERVICE:
   detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
     last_validated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       validator: AI Agent
       result: pass
 IMPL-STORAGE_INDEX:
@@ -2279,10 +2279,10 @@ IMPL-STORAGE_INDEX:
   detail_file: implementation-decisions/IMPL-STORAGE_INDEX.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Storage index per plan
 IMPL-BOOKMARK_ROUTER:
@@ -2340,10 +2340,10 @@ IMPL-BOOKMARK_ROUTER:
   detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Add IMPL-MOVE_BOOKMARK_UI to composed_with
 IMPL-SYNC_BOOKMARK_SERVICE:
@@ -2365,10 +2365,10 @@ IMPL-SYNC_BOOKMARK_SERVICE:
   detail_file: implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml
   metadata:
     created:
-      date: "2026-02-15"
+      date: '2026-02-15'
       author: AI Agent
     last_updated:
-      date: "2026-02-15"
+      date: '2026-02-15'
       author: AI Agent
       reason: Extracted from index to detail file
 IMPL-MOVE_BOOKMARK_UI:
@@ -2428,10 +2428,10 @@ IMPL-MOVE_BOOKMARK_UI:
   detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
@@ -2475,10 +2475,10 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
   detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-NATIVE_HOST_WRAPPER:
@@ -2518,10 +2518,10 @@ IMPL-NATIVE_HOST_WRAPPER:
   detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Native host wrapper per plan
 IMPL-NATIVE_HOST_INSTALLER:
@@ -2561,10 +2561,10 @@ IMPL-NATIVE_HOST_INSTALLER:
   detail_file: implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Native host installer per plan
 IMPL-FILE_STORAGE_TYPED_PATH:
@@ -2621,10 +2621,10 @@ IMPL-FILE_STORAGE_TYPED_PATH:
   detail_file: implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Path-based file storage per plan
 IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
@@ -2668,10 +2668,10 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
   detail_file: implementation-decisions/IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Helper path normalization and post-write verification
 IMPL-CONFIG_BACKUP_RESTORE:
@@ -2706,10 +2706,10 @@ IMPL-CONFIG_BACKUP_RESTORE:
   detail_file: implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (CFG-001)
 IMPL-CONFIG_MIGRATION:
@@ -2742,10 +2742,10 @@ IMPL-CONFIG_MIGRATION:
   detail_file: implementation-decisions/IMPL-CONFIG_MIGRATION.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (CFG-002)
 IMPL-FEATURE_FLAGS:
@@ -2777,10 +2777,10 @@ IMPL-FEATURE_FLAGS:
   detail_file: implementation-decisions/IMPL-FEATURE_FLAGS.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (CFG-003)
 IMPL-URL_INHIBITION:
@@ -2818,10 +2818,10 @@ IMPL-URL_INHIBITION:
   detail_file: implementation-decisions/IMPL-URL_INHIBITION.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-URL_UTILITIES:
@@ -2861,10 +2861,10 @@ IMPL-URL_UTILITIES:
   detail_file: implementation-decisions/IMPL-URL_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-TEXT_UTILITIES:
@@ -2896,10 +2896,10 @@ IMPL-TEXT_UTILITIES:
   detail_file: implementation-decisions/IMPL-TEXT_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (UTIL-002)
 IMPL-ARRAY_OBJECT_UTILITIES:
@@ -2937,10 +2937,10 @@ IMPL-ARRAY_OBJECT_UTILITIES:
   detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-TIME_ASYNC_UTILITIES:
@@ -2972,10 +2972,10 @@ IMPL-TIME_ASYNC_UTILITIES:
   detail_file: implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (UTIL-004)
 IMPL-DOM_UTILITIES:
@@ -3007,10 +3007,10 @@ IMPL-DOM_UTILITIES:
   detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation (UTIL-005)
 IMPL-LOGGER_CONTEXT_LEVELS:
@@ -3050,10 +3050,10 @@ IMPL-LOGGER_CONTEXT_LEVELS:
   detail_file: implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-LOG_LEVEL_CONFIG:
@@ -3093,10 +3093,10 @@ IMPL-LOG_LEVEL_CONFIG:
   detail_file: implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-LOGGER_LEGACY:
@@ -3136,10 +3136,10 @@ IMPL-LOGGER_LEGACY:
   detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-SELECTION_TO_TAG_INPUT:
@@ -3182,10 +3182,10 @@ IMPL-SELECTION_TO_TAG_INPUT:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
       reason: Selection-to-tag input feature
 IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
@@ -3247,10 +3247,10 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
   detail_file: implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
     created:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Canonical detail rewrite; add essence_pseudocode and composed_with
 IMPL-SCREENSHOT_MODE:
@@ -3303,10 +3303,10 @@ IMPL-SCREENSHOT_MODE:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-19"
+      date: '2026-02-19'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Side panel captures at 240px viewport width (IMPL-SCREENSHOT_MODE)
 IMPL-POPUP_THEME_CSS:
@@ -3330,7 +3330,7 @@ IMPL-POPUP_THEME_CSS:
   code_locations:
     files:
       - path: src/ui/popup/popup.css
-        description: :root.hb-theme-dark block for popup dark theme
+        description: ':root.hb-theme-dark block for popup dark theme'
   traceability:
     requirements:
       - REQ-DARK_THEME
@@ -3346,10 +3346,10 @@ IMPL-POPUP_THEME_CSS:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-19"
+      date: '2026-02-19'
       author: AI Agent
     last_updated:
-      date: "2026-02-19"
+      date: '2026-02-19'
       author: AI Agent
       reason: Popup dark mode fix for screenshot and theme preference
 IMPL-TAB_SEARCH_SERVICE:
@@ -3401,10 +3401,10 @@ IMPL-TAB_SEARCH_SERVICE:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Create IMPL for tab-search-service tests; add to index
 IMPL-TAB_SEARCH_NO_MATCH_UI:
@@ -3461,10 +3461,10 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
       reason: Initial creation
 IMPL-AI_CONFIG_OPTIONS:
@@ -3505,10 +3505,10 @@ IMPL-AI_CONFIG_OPTIONS:
   detail_file: implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Initial creation
 IMPL-AI_TAG_TEST:
@@ -3554,10 +3554,10 @@ IMPL-AI_TAG_TEST:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Popup Test API key button; code_locations for options and popup
 IMPL-AI_TAGGING_READABILITY:
@@ -3600,10 +3600,10 @@ IMPL-AI_TAGGING_READABILITY:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-21"
+      date: '2026-02-21'
       author: AI Agent
       reason: GET_PAGE_CONTENT in SW via executeScript; content script early listener for Readability
 IMPL-AI_TAGGING_PROVIDER:
@@ -3645,10 +3645,10 @@ IMPL-AI_TAGGING_PROVIDER:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Initial creation
 IMPL-SESSION_TAGS:
@@ -3690,10 +3690,10 @@ IMPL-SESSION_TAGS:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Initial creation
 IMPL-AI_TAGGING_POPUP_UI:
@@ -3741,10 +3741,10 @@ IMPL-AI_TAGGING_POPUP_UI:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-21"
+      date: '2026-02-21'
       author: AI Agent
       reason: GET_PAGE_CONTENT via SW executeScript; popup shows content.error on failure
 IMPL-SIDE_PANEL_TAGS_TREE:
@@ -3806,10 +3806,10 @@ IMPL-SIDE_PANEL_TAGS_TREE:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-21"
+      date: '2026-02-21'
       author: AI Agent
     last_updated:
-      date: "2026-02-21"
+      date: '2026-02-21'
       author: AI Agent
       reason: Initial creation
 IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
@@ -3855,10 +3855,10 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
       reason: Initial creation
 IMPL-SIDE_PANEL_TABS:
@@ -3909,10 +3909,10 @@ IMPL-SIDE_PANEL_TABS:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Initial creation
 IMPL-SIDE_PANEL_BOOKMARK:
@@ -3960,10 +3960,10 @@ IMPL-SIDE_PANEL_BOOKMARK:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Initial creation
 IMPL-UIManager_SCOPED_ROOT:
@@ -4004,10 +4004,10 @@ IMPL-UIManager_SCOPED_ROOT:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Initial creation
 IMPL-EXTENSION_COMMANDS:
@@ -4036,10 +4036,10 @@ IMPL-EXTENSION_COMMANDS:
   detail_file: implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml
   metadata:
     created:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
       reason: Add tab-specific commands and suggested_key policy
 IMPL-ICON_CLICK_BEHAVIOR:
@@ -4071,10 +4071,10 @@ IMPL-ICON_CLICK_BEHAVIOR:
   detail_file: implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml
   metadata:
     created:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
       reason: Initial creation for icon click behavior
 IMPL-CONTEXT_MENU_QUICK_ACCESS:
@@ -4102,10 +4102,10 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
       reason: Initial creation for context menu quick access
 IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
@@ -4134,10 +4134,10 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
       reason: Initial creation for in-popup/panel keyboard quick access
 IMPL-EXT_IDENTITY:
@@ -4147,7 +4147,7 @@ IMPL-EXT_IDENTITY:
   rationale:
     why: Extension identity implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-UX_CORE:
@@ -4157,7 +4157,7 @@ IMPL-UX_CORE:
   rationale:
     why: Core UX implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-MV3_MIGRATION:
@@ -4167,7 +4167,7 @@ IMPL-MV3_MIGRATION:
   rationale:
     why: Manifest V3 migration
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-STORAGE:
@@ -4177,7 +4177,7 @@ IMPL-STORAGE:
   rationale:
     why: Storage implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-BOOKMARKING:
@@ -4187,7 +4187,7 @@ IMPL-BOOKMARKING:
   rationale:
     why: Bookmarking implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-THEME:
@@ -4197,7 +4197,7 @@ IMPL-THEME:
   rationale:
     why: Theme implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-BADGE:
@@ -4207,7 +4207,7 @@ IMPL-BADGE:
   rationale:
     why: Badge implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-SITE_MGMT:
@@ -4217,7 +4217,7 @@ IMPL-SITE_MGMT:
   rationale:
     why: Site management implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-SEARCH:
@@ -4227,7 +4227,7 @@ IMPL-SEARCH:
   rationale:
     why: Search implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-PRIVACY:
@@ -4237,7 +4237,7 @@ IMPL-PRIVACY:
   rationale:
     why: Privacy implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-CROSS_BROWSER:
@@ -4247,7 +4247,7 @@ IMPL-CROSS_BROWSER:
   rationale:
     why: Cross-browser implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-SERVICE_WORKER:
@@ -4257,7 +4257,7 @@ IMPL-SERVICE_WORKER:
   rationale:
     why: Service worker implementation
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 IMPL-SIDE_PANEL_BROWSER_TABS:
@@ -4301,10 +4301,10 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - IMPL-SIDE_PANEL_TABS
   metadata:
     created:
-      date: "2026-02-28"
+      date: '2026-02-28'
       author: AI Agent
     last_updated:
-      date: "2026-02-28"
+      date: '2026-02-28'
       author: AI Agent
       reason: Initial creation
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml
@@ -4355,10 +4355,10 @@ IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
       - IMPL-SIDE_PANEL_TABS
   metadata:
     created:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
       reason: Initial creation
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
@@ -4400,9 +4400,66 @@ IMPL-DEMO_OVERLAY:
   detail_file: implementation-decisions/IMPL-DEMO_OVERLAY.yaml
   metadata:
     created:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
       reason: Initial creation
+IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  name: Side Panel Recently Closed Tabs Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS with tab source toggle, GET_RECENTLY_CLOSED_TABS, merge, restore, scope restriction.
+    problems_solved:
+      - Integrate closed tabs into existing browser tabs panel
+    benefits:
+      - Testable normalizeClosedSessions; panel tab source; restore action
+  implementation_approach:
+    details:
+      - 'Tab source: open | recentlyClosed | both in Scope section; default open'
+      - 'GET_RECENTLY_CLOSED_TABS: SW calls chrome.sessions.getRecentlyClosed; flatten window sessions to tab entries; normalize to { id: sessionId, sessionId, title, url, lastModified, isClosed: true }'
+      - 'normalizeClosedSessions(sessions): pure function; flatten Session[] to tab-like objects; id = tab.sessionId for keying'
+      - 'Merge: when both, open tabs first then closed; hiddenTabIds uses id (numeric for open, sessionId string for closed)'
+      - 'Restore: data-action=restoreTab data-session-id; chrome.sessions.restore(sessionId); then loadTabs'
+      - 'Scope: when tabSource includes recentlyClosed, force searchScope to tabInfo; show note'
+      - 'buildRecordsYamlForCopy: include sessionId and lastModified for closed tabs'
+      - 'Sessions API check: if !chrome.sessions hide recentlyClosed and both options'
+  code_locations:
+    files:
+      - path: src/ui/side-panel/browser-tabs-panel.js
+        description: tab source, loadClosedTabs, merge, restore, scope restriction
+      - path: src/core/service-worker.js
+        description: GET_RECENTLY_CLOSED_TABS handler
+      - path: src/ui/side-panel/side-panel.html
+        description: Tab source radio group
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    requirements:
+      - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+    composed_with:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+  metadata:
+    created:
+      date: '2026-03-02'
+      author: AI Agent
+    last_updated:
+      date: '2026-03-02'
+      author: AI Agent
+      reason: Initial creation
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml

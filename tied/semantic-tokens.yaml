@@ -1700,8 +1700,8 @@ REQ-UI_INSPECTION:
   source_index: requirements.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 ARCH-UI_TESTABILITY:
   type: ARCH
   name: UI Testability and Inspection Architecture
@@ -1715,8 +1715,8 @@ ARCH-UI_TESTABILITY:
   source_index: architecture-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-UI_ACTION_CONTRACT:
   type: IMPL
   name: UI Action Contract
@@ -1728,8 +1728,8 @@ IMPL-UI_ACTION_CONTRACT:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-UI_INSPECTOR:
   type: IMPL
   name: UI Inspector
@@ -1741,8 +1741,8 @@ IMPL-UI_INSPECTOR:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-UI_TESTABILITY_HOOKS:
   type: IMPL
   name: UI Testability Hooks
@@ -1755,8 +1755,8 @@ IMPL-UI_TESTABILITY_HOOKS:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-DEV_COMMAND_INSPECTION:
   type: IMPL
   name: DEV_COMMAND storage and router inspection
@@ -1769,8 +1769,8 @@ IMPL-DEV_COMMAND_INSPECTION:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-DEBUG_PANEL:
   type: IMPL
   name: Debug panel and structured UI/message logging
@@ -1782,8 +1782,8 @@ IMPL-DEBUG_PANEL:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
   type: REQ
   name: Extension Bundled Entry Points
@@ -1796,8 +1796,8 @@ REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
   source_index: requirements.yaml
   detail_file: requirements/REQ-EXTENSION_BUNDLED_ENTRY_POINTS.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
   type: ARCH
   name: Extension Bundled Entry Points
@@ -1809,8 +1809,8 @@ ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
   source_index: architecture-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-POPUP_BUNDLE:
   type: IMPL
   name: Popup bundle build
@@ -1822,8 +1822,8 @@ IMPL-POPUP_BUNDLE:
   source_index: implementation-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 REQ-SHARED_UTILITIES:
   type: REQ
   name: Shared Utilities
@@ -1840,8 +1840,8 @@ REQ-SHARED_UTILITIES:
   source_index: requirements.yaml
   detail_file: requirements/REQ-SHARED_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 REQ-STRUCTURED_LOGGING:
   type: REQ
   name: Structured Logging
@@ -1856,8 +1856,8 @@ REQ-STRUCTURED_LOGGING:
   source_index: requirements.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 ARCH-SHARED_UTILITIES:
   type: ARCH
   name: Shared Utilities Module
@@ -1873,8 +1873,8 @@ ARCH-SHARED_UTILITIES:
   source_index: architecture-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 ARCH-STRUCTURED_LOGGING:
   type: ARCH
   name: Structured Logging
@@ -1888,8 +1888,8 @@ ARCH-STRUCTURED_LOGGING:
   source_index: architecture-decisions.yaml
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-CONFIG_BACKUP_RESTORE:
   type: IMPL
   name: Config Backup and Restore
@@ -1901,8 +1901,8 @@ IMPL-CONFIG_BACKUP_RESTORE:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-CONFIG_MIGRATION:
   type: IMPL
   name: Config Migration and Auth
@@ -1914,8 +1914,8 @@ IMPL-CONFIG_MIGRATION:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-CONFIG_MIGRATION.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-FEATURE_FLAGS:
   type: IMPL
   name: Feature Flags and Settings
@@ -1927,8 +1927,8 @@ IMPL-FEATURE_FLAGS:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-FEATURE_FLAGS.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-URL_INHIBITION:
   type: IMPL
   name: URL Inhibition
@@ -1940,8 +1940,8 @@ IMPL-URL_INHIBITION:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-URL_INHIBITION.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-URL_UTILITIES:
   type: IMPL
   name: URL Utilities
@@ -1953,8 +1953,8 @@ IMPL-URL_UTILITIES:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-URL_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-TEXT_UTILITIES:
   type: IMPL
   name: Text Utilities
@@ -1966,8 +1966,8 @@ IMPL-TEXT_UTILITIES:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-TEXT_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-ARRAY_OBJECT_UTILITIES:
   type: IMPL
   name: Array and Object Utilities
@@ -1979,8 +1979,8 @@ IMPL-ARRAY_OBJECT_UTILITIES:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-TIME_ASYNC_UTILITIES:
   type: IMPL
   name: Time and Async Utilities
@@ -1992,8 +1992,8 @@ IMPL-TIME_ASYNC_UTILITIES:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-DOM_UTILITIES:
   type: IMPL
   name: DOM Utilities
@@ -2005,8 +2005,8 @@ IMPL-DOM_UTILITIES:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-LOGGER_CONTEXT_LEVELS:
   type: IMPL
   name: Logger Context and Levels
@@ -2018,8 +2018,8 @@ IMPL-LOGGER_CONTEXT_LEVELS:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-LOG_LEVEL_CONFIG:
   type: IMPL
   name: Log Level Configuration
@@ -2031,8 +2031,8 @@ IMPL-LOG_LEVEL_CONFIG:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-LOGGER_LEGACY:
   type: IMPL
   name: Logger Legacy Compatibility
@@ -2044,8 +2044,8 @@ IMPL-LOGGER_LEGACY:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-LOGGER_LEGACY.yaml
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 TEST-OVERLAY_REFRESH:
   type: TEST
   name: Overlay Refresh Button Tests
@@ -2056,8 +2056,8 @@ TEST-OVERLAY_REFRESH:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 TEST-TAG_SYNC:
   type: TEST
   name: Tag Synchronization Tests
@@ -2068,8 +2068,8 @@ TEST-TAG_SYNC:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 TEST-SHOW_HOVER_CHECKBOX:
   type: TEST
   name: Show Hover Checkbox Tests
@@ -2080,8 +2080,8 @@ TEST-SHOW_HOVER_CHECKBOX:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 TEST-POPUP_CLOSE_BEHAVIOR:
   type: TEST
   name: Popup Close Behavior Tests
@@ -2092,8 +2092,8 @@ TEST-POPUP_CLOSE_BEHAVIOR:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: "2026-02-17"
-    last_updated: "2026-02-17"
+    registered: '2026-02-17'
+    last_updated: '2026-02-17'
 IMPL-SELECTION_TO_TAG_INPUT:
   type: IMPL
   name: Selection to tag input on icon click
@@ -2663,8 +2663,8 @@ REQ-SIDE_PANEL_BROWSER_TABS:
   source_index: requirements.yaml
   detail_file: requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml
   metadata:
-    registered: "2026-02-28T00:00:00.000Z"
-    last_updated: "2026-02-28T00:00:00.000Z"
+    registered: '2026-02-28T00:00:00.000Z'
+    last_updated: '2026-02-28T00:00:00.000Z'
 ARCH-SIDE_PANEL_BROWSER_TABS:
   type: ARCH
   name: Side Panel Browser Tabs Architecture
@@ -2676,8 +2676,8 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml
   metadata:
-    registered: "2026-02-28T00:00:00.000Z"
-    last_updated: "2026-02-28T00:00:00.000Z"
+    registered: '2026-02-28T00:00:00.000Z'
+    last_updated: '2026-02-28T00:00:00.000Z'
 IMPL-SIDE_PANEL_BROWSER_TABS:
   type: IMPL
   name: Side Panel Browser Tabs Implementation
@@ -2689,8 +2689,8 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml
   metadata:
-    registered: "2026-02-28T00:00:00.000Z"
-    last_updated: "2026-02-28T00:00:00.000Z"
+    registered: '2026-02-28T00:00:00.000Z'
+    last_updated: '2026-02-28T00:00:00.000Z'
 REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
   type: REQ
   name: Side Panel Browser Bookmarks
@@ -2703,21 +2703,21 @@ REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
   source_index: requirements.yaml
   detail_file: requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
   metadata:
-    registered: "2026-03-02"
-    last_updated: "2026-03-02"
+    registered: '2026-03-02'
+    last_updated: '2026-03-02'
 ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
   type: ARCH
   name: Side Panel Browser Bookmarks Architecture
   status: Active
-  description: New panel #browserBookmarksPanel; chrome.bookmarks.getTree; flatten to list; folder tree with counts; filter and click to open
+  description: New panel
   cross_references:
     - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
     - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
   metadata:
-    registered: "2026-03-02"
-    last_updated: "2026-03-02"
+    registered: '2026-03-02'
+    last_updated: '2026-03-02'
 IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
   type: IMPL
   name: Side Panel Browser Bookmarks Implementation
@@ -2729,8 +2729,8 @@ IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
   metadata:
-    registered: "2026-03-02"
-    last_updated: "2026-03-02"
+    registered: '2026-03-02'
+    last_updated: '2026-03-02'
 IMPL-DEMO_OVERLAY:
   type: IMPL
   name: Demo Recording Overlay
@@ -2743,5 +2743,45 @@ IMPL-DEMO_OVERLAY:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-DEMO_OVERLAY.yaml
   metadata:
-    registered: "2026-03-02"
-    last_updated: "2026-03-02"
+    registered: '2026-03-02'
+    last_updated: '2026-03-02'
+REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  type: REQ
+  name: Side Panel Recently Closed Tabs
+  category: Functional
+  status: Planned
+  description: List and search recently closed tabs as searchable page activity; tab source toggle; restore
+  cross_references:
+    - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    - IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml
+  metadata:
+    registered: '2026-03-02'
+    last_updated: '2026-03-02'
+ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  type: ARCH
+  name: Side Panel Recently Closed Tabs Architecture
+  status: Active
+  description: chrome.sessions API for recently closed; tab source toggle; merge with open tabs
+  cross_references:
+    - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    - IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml
+  metadata:
+    registered: '2026-03-02'
+    last_updated: '2026-03-02'
+IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  type: IMPL
+  name: Side Panel Recently Closed Tabs Implementation
+  status: Active
+  description: Tab source toggle; GET_RECENTLY_CLOSED_TABS; normalizeClosedSessions; restore
+  cross_references:
+    - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml
+  metadata:
+    registered: '2026-03-02'
+    last_updated: '2026-03-02'

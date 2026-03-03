@@ -3,6 +3,12 @@
  * Unit tests: extension commands and context menu for quick access (side panel, options, bookmarks index, import).
  */
 
+// [IMPL-ICON_CLICK_BEHAVIOR] [IMPL-EXTENSION_COMMANDS] Mock safari-shim so browser.tabs === chrome.tabs; ensures cold-start tabs.query callback form uses our mock (safari-shim's tabs.query is Promise-only).
+jest.mock('../../src/shared/safari-shim.js', () => ({
+  browser: typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : {},
+  platformUtils: {}
+}))
+
 import { HoverboardServiceWorker } from '../../src/core/service-worker.js'
 import { MESSAGE_TYPES } from '../../src/core/message-handler.js'
 

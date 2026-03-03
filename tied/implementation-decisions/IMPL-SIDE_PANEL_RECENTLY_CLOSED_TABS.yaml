@@ -1,0 +1,102 @@
+IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  name: Side Panel Recently Closed Tabs Implementation
+  status: Active
+  cross_references:
+    - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  rationale:
+    why: Implements ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS with tab source toggle, GET_RECENTLY_CLOSED_TABS, merge, restore, scope restriction.
+    problems_solved:
+      - Integrate closed tabs into existing browser tabs panel
+    benefits:
+      - Testable normalizeClosedSessions; panel tab source; restore action
+  implementation_approach:
+    details:
+      - 'Tab source: open | recentlyClosed | both in Scope section; default open'
+      - 'GET_RECENTLY_CLOSED_TABS: SW calls chrome.sessions.getRecentlyClosed; flatten window sessions to tab entries; normalize to { id: sessionId, sessionId, title, url, lastModified, isClosed: true }'
+      - 'normalizeClosedSessions(sessions): pure function; flatten Session[] to tab-like objects; id = tab.sessionId for keying'
+      - 'Merge: when both, open tabs first then closed; hiddenTabIds uses id (numeric for open, sessionId string for closed)'
+      - 'Restore: data-action=restoreTab data-session-id; chrome.sessions.restore(sessionId); then loadTabs'
+      - 'Scope: when tabSource includes recentlyClosed, force searchScope to tabInfo; show note'
+      - 'buildRecordsYamlForCopy: include sessionId and lastModified for closed tabs'
+      - 'Sessions API check: if !chrome.sessions hide recentlyClosed and both options'
+  code_locations:
+    files:
+      - path: src/ui/side-panel/browser-tabs-panel.js
+        description: tab source, loadClosedTabs, merge, restore, scope restriction
+      - path: src/core/service-worker.js
+        description: GET_RECENTLY_CLOSED_TABS handler
+      - path: src/ui/side-panel/side-panel.html
+        description: Tab source radio group
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    requirements:
+      - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+    code_annotations:
+      - IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  related_decisions:
+    depends_on:
+      - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    supersedes: []
+    see_also:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+    composed_with:
+      - IMPL-SIDE_PANEL_BROWSER_TABS
+  essence_pseudocode: |
+    # [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # Tab source toggle and recently closed tabs integration. Extends IMPL-SIDE_PANEL_BROWSER_TABS with open | recentlyClosed | both.
+
+    DATA: tabSource = 'open' | 'recentlyClosed' | 'both' (default 'open')
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # normalizeClosedSessions(sessions): pure. Flatten Session[] from getRecentlyClosed; each tab: id=sessionId, sessionId, title, url, lastModified, isClosed=true, referrer='', pageText='', importantTags=''. Window sessions: recurse into tabs.
+    normalizeClosedSessions(sessions):
+      result = []; FOR each s in sessions: IF s.tab: result.push({ id: s.tab.sessionId, sessionId: s.tab.sessionId, title: s.tab.title??'', url: s.tab.url??'', lastModified: s.lastModified, isClosed: true, referrer: '', pageText: '', importantTags: '' }); IF s.window && s.window.tabs: FOR each t in s.window.tabs: result.push({ id: t.sessionId, sessionId: t.sessionId, title: t.title??'', url: t.url??'', lastModified: s.lastModified, isClosed: true, referrer: '', pageText: '', importantTags: '' }); RETURN result
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # GET_RECENTLY_CLOSED_TABS (SW): sessions = chrome.sessions.getRecentlyClosed({ maxResults: 25 }); tabs = normalizeClosedSessions(sessions); RETURN { success: true, data: tabs }
+    ON GET_RECENTLY_CLOSED_TABS (service worker): sessions = AWAIT chrome.sessions.getRecentlyClosed({ maxResults: 25 }); tabs = normalizeClosedSessions(sessions); RETURN { success: true, data: tabs }
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # loadTabs: when tabSource=open: existing chrome.tabs path. When recentlyClosed: sendMessage GET_RECENTLY_CLOSED_TABS; allTabs = response.data. When both: openTabs = chrome.tabs.query; closedTabs = GET_RECENTLY_CLOSED_TABS; allTabs = openTabs.concat(closedTabs).
+    ON loadTabs: IF tabSource === 'open': (existing path); IF tabSource === 'recentlyClosed': allTabs = AWAIT sendMessage(GET_RECENTLY_CLOSED_TABS).data; IF tabSource === 'both': openTabs = AWAIT chrome.tabs.query(...); closedTabs = AWAIT sendMessage(GET_RECENTLY_CLOSED_TABS).data; allTabs = openTabs.concat(closedTabs)
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # Scope restriction: when tabSource includes recentlyClosed, searchScope forced to tabInfo; Page text and Elements disabled with note.
+    IF tabSource !== 'open': searchScope = 'tabInfo'; disable pageText/importantTags radios; show note
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # Restore: closed tab card has data-action=restoreTab data-session-id. ON click: chrome.sessions.restore(sessionId); loadTabs(). Open tab keeps data-action=closeTab.
+    RENDER (closed tab): Restore button (data-action=restoreTab, data-session-id); no Close button
+    ON restoreTab click: sessionId = data-session-id; AWAIT chrome.sessions.restore(sessionId); loadTabs()
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # buildRecordsYamlForCopy: for closed tabs include sessionId and lastModified; id may be sessionId string.
+    buildRecordsYamlForCopy: IF tab.isClosed: add sessionId, lastModified to YAML entry
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # hiddenTabIds: use tab.id (numeric for open, sessionId string for closed). getDisplayedTabs filters by !hiddenTabIds.has(t.id).
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # Sessions API check: if !chrome.sessions: hide tab source options recentlyClosed and both; show only Open.
+    IF !chrome.sessions: tabSourceOptions = ['open'] only
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # Gather/Distribute: when tabSource=recentlyClosed or all displayed are closed, hide or disable Gather and Distribute.
+    IF tabSource === 'recentlyClosed' OR (tabSource === 'both' AND getDisplayedTabs().every(t => t.isClosed)): hide Gather, Distribute
+
+    # [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+    # Close: only for open tabs. toClose = visibleTabs.filter(t => !t.isClosed); confirm; chrome.tabs.remove each; loadTabs()
+    ON Close: toClose = visibleTabs.filter(t => !t.isClosed); confirm; FOR each in toClose: chrome.tabs.remove(t.id); loadTabs()
+  metadata:
+    created:
+      date: "2026-03-02"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-02"
+      author: AI Agent
+      reason: Initial creation

@@ -211,8 +211,15 @@
         <h2 class="browser-tabs-title">Browser tabs</h2>
         <p class="browser-tabs-subtitle">Filter by title, URL, or referrer. Copy URLs or close visible tabs.</p>
       </header>
-      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Scope (window + search scope); control groups with very narrow margins -->
+      <!-- [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Section: Scope (tab source + window + search scope); control groups with very narrow margins -->
       <section class="browser-tabs-section-scope browser-tabs-section" aria-label="Scope">
+        <div class="browser-tabs-control-group" id="browserTabsSourceWrap">
+          <div class="browser-tabs-scope" role="group" aria-label="Tab source">
+            <label class="browser-tabs-scope-label" title="List open tabs only"><input type="radio" name="browserTabsTabSource" value="open" id="browserTabsSourceOpen" checked> Open</label>
+            <label class="browser-tabs-scope-label browser-tabs-source-closed" title="List recently closed tabs (Chrome only)" id="browserTabsSourceClosedLabel"><input type="radio" name="browserTabsTabSource" value="recentlyClosed" id="browserTabsSourceClosed"> Recently closed</label>
+            <label class="browser-tabs-scope-label browser-tabs-source-both" title="List open and recently closed tabs" id="browserTabsSourceBothLabel"><input type="radio" name="browserTabsTabSource" value="both" id="browserTabsSourceBoth"> Both</label>
+          </div>
+        </div>
         <div class="browser-tabs-control-group">
           <div class="browser-tabs-scope" role="group" aria-label="Window scope">
             <label class="browser-tabs-scope-label" title="List tabs from the current window only"><input type="radio" name="browserTabsWindowScope" value="currentWindow" id="browserTabsScopeCurrent" checked> Current window</label>

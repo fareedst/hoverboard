@@ -20141,6 +20141,8 @@ var MESSAGE_TYPES = {
   GET_SHARED_MEMORY_STATUS: "getSharedMemoryStatus",
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get document.referrer for tabs (run in SW so injection is in tab context)
   GET_TAB_REFERRERS: "getTabReferrers",
+  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Get recently closed tabs from chrome.sessions
+  GET_RECENTLY_CLOSED_TABS: "getRecentlyClosedTabs",
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for filter (SW executeScript per tab)
   GET_TABS_PAGE_TEXT: "getTabsPageText",
   // [REQ-SIDE_PANEL_BROWSER_TABS] Get important-tags snippet (alt, h1–h3, meta, og:title) per tab for filter (SW executeScript per tab)
@@ -22354,6 +22356,24 @@ var HoverboardServiceWorker = class {
         const out2 = { success: true, data: referrers };
         recordMessage(message.type, message.data, sender, out2);
         return out2;
+      }
+      if (message.type === MESSAGE_TYPES.GET_RECENTLY_CLOSED_TABS) {
+        const sessionsApi = typeof chrome !== "undefined" && chrome.sessions ? chrome.sessions : typeof safariEnhancements !== "undefined" && safariEnhancements.sessions ? safariEnhancements.sessions : null;
+        if (!sessionsApi || typeof sessionsApi.getRecentlyClosed !== "function") {
+          const out2 = { success: false, error: "sessions API unavailable" };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        }
+        try {
+          const sessions = await sessionsApi.getRecentlyClosed({ maxResults: 25 });
+          const out2 = { success: true, data: sessions || [] };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        } catch (err) {
+          const out2 = { success: false, error: String(err && err.message ? err.message : err) };
+          recordMessage(message.type, message.data, sender, out2);
+          return out2;
+        }
       }
       if (message.type === MESSAGE_TYPES.GET_TABS_PAGE_TEXT) {
         const tabs = message.data?.tabs || [];

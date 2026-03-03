@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Side panel Tabs tab: recently closed tabs as searchable page activity** ([REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS], [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS], [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]) – A tab source control lets you list **Open** tabs (default), **Recently closed** tabs (Chrome only), or **Both**. Recently closed tabs are fetched via `chrome.sessions.getRecentlyClosed` and normalized to the same format as open tabs. **Restore** reopens a closed tab. **Copy Records** for closed tabs includes `sessionId` and `lastModified`. When the tab source includes closed tabs, **Page text** and **Elements** search scopes are disabled (only **Tab info** applies). Gather and Distribute are hidden when the list contains only closed tabs. When `chrome.sessions` is unavailable (e.g. Safari), the Recently closed and Both options are hidden. Unit tests: `normalizeClosedSessions`, `filterBrowserTabs` with closed tabs, `buildRecordsYamlForCopy` with sessionId/lastModified, GET_RECENTLY_CLOSED_TABS in service worker. TIED: REQ/ARCH/IMPL with essence_pseudocode.
+
 ### Changed
 
 - **Side panel Tabs tab: labels "Important elements" and "Important tag sources" → "Elements"** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) – In the **Tabs** tab the search scope option and the DOM sources textbox label are both now **Elements** (was "Important elements" and "Important tag sources"). TIED: REQ/ARCH/IMPL updated; README and tests updated.

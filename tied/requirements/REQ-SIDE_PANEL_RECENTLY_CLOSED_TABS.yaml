@@ -1,0 +1,47 @@
+REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  name: Side Panel Recently Closed Tabs
+  category: Functional
+  priority: P1
+  status: Implemented
+  rationale:
+    why: Let users list and search recently closed tabs as a source of searchable page activity alongside open tabs.
+    problems_solved:
+      - No way to find or restore recently closed tabs from the side panel
+      - Closed tabs are not searchable as page activity
+    benefits:
+      - 'Tab source toggle: Open | Recently closed | Both; search by title/URL; restore closed tabs; copy URLs/records; batch bookmark actions'
+  satisfaction_criteria:
+    - criterion: 'User can select tab source: Open tabs (default), Recently closed, or Both'
+    - criterion: Recently closed tabs are listed with title, URL, lastModified; searchable by tabInfo (title/URL) only
+    - criterion: When tab source includes closed tabs, Page text and Elements search scopes are restricted or disabled with a note
+    - criterion: Closed tabs have a Restore action (reopen via chrome.sessions.restore) instead of Close
+    - criterion: Copy URLs and Copy Records work for closed tabs; records include sessionId and lastModified
+    - criterion: Batch bookmark actions (Add tags, Set to-read, Clear to-read) apply to closed tabs with http(s) URLs
+    - criterion: Closed tabs are visually distinguished (e.g. muted style, Closed badge)
+    - criterion: Gather and Distribute buttons are hidden or disabled when source includes only closed tabs
+    - criterion: When chrome.sessions API is unavailable (e.g. Safari), tab source options are hidden or disabled
+  validation_criteria:
+    - method: Unit tests
+      coverage: normalizeClosedSessions; filterBrowserTabs with closed-tab objects; buildRecordsYamlForCopy with sessionId/lastModified; restore action
+    - method: E2E
+      coverage: Select Recently closed; verify list; select Both; verify open+closed; click Restore on closed tab
+  traceability:
+    architecture:
+      - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    implementation:
+      - IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+    code_annotations:
+      - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    supersedes: []
+  metadata:
+    last_updated:
+      date: '2026-03-02'
+      author: AI Agent
+      reason: Implementation complete; TIED sync

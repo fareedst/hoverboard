@@ -24,6 +24,50 @@ export function parseImportantTagSources (str) {
   return str.trim().split(',').map((s) => s.trim()).filter(Boolean)
 }
 
+/**
+ * [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]
+ * Normalize chrome.sessions Session[] to tab-like objects. Flattens window sessions into individual tab entries.
+ * @param {{ tab?: { sessionId: string, title?: string, url?: string }, window?: { tabs: Array<{ sessionId: string, title?: string, url?: string }> }, lastModified: number }[]} sessions
+ * @returns {{ id: string, sessionId: string, title: string, url: string, lastModified: number, isClosed: boolean, referrer: string, pageText: string, importantTags: string }[]}
+ */
+export function normalizeClosedSessions (sessions) {
+  if (!Array.isArray(sessions)) return []
+  const result = []
+  for (const s of sessions) {
+    if (s.tab) {
+      const t = s.tab
+      result.push({
+        id: t.sessionId,
+        sessionId: t.sessionId,
+        title: (t.title ?? '').toString(),
+        url: (t.url ?? '').toString(),
+        lastModified: s.lastModified ?? 0,
+        isClosed: true,
+        referrer: '',
+        pageText: '',
+        importantTags: ''
+      })
+    }
+    if (s.window && Array.isArray(s.window.tabs)) {
+      const lastMod = s.lastModified ?? 0
+      for (const t of s.window.tabs) {
+        result.push({
+          id: t.sessionId,
+          sessionId: t.sessionId,
+          title: (t.title ?? '').toString(),
+          url: (t.url ?? '').toString(),
+          lastModified: lastMod,
+          isClosed: true,
+          referrer: '',
+          pageText: '',
+          importantTags: ''
+        })
+      }
+    }
+  }
+  return result
+}
+
 /** [IMPL-SIDE_PANEL_BROWSER_TABS] Storage key for persisted important-tag sources list */
 const STORAGE_KEY_IMPORTANT_TAG_SOURCES = 'hoverboard_tabs_important_tag_sources'
 
@@ -73,11 +117,16 @@ export function buildRecordsYamlForCopy (visibleTabs) {
   if (!visibleTabs || visibleTabs.length === 0) return ''
   const lines = []
   for (const tab of visibleTabs) {
-    lines.push('- id: ' + Number(tab.id))
+    lines.push('- id: ' + (tab.isClosed ? yamlQuoted(String(tab.id ?? '')) : Number(tab.id)))
     lines.push('  windowId: ' + (tab.windowId != null ? Number(tab.windowId) : ''))
     lines.push('  title: ' + yamlQuoted(String(tab.title ?? '')))
     lines.push('  url: ' + yamlQuoted(String(tab.url ?? '')))
     lines.push('  referrer: ' + yamlQuoted(String(tab.referrer ?? '')))
+    // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Closed tabs: include sessionId and lastModified
+    if (tab.isClosed) {
+      if (tab.sessionId != null) lines.push('  sessionId: ' + yamlQuoted(String(tab.sessionId)))
+      if (tab.lastModified != null) lines.push('  lastModified: ' + Number(tab.lastModified))
+    }
   }
   return lines.join('\n')
 }
@@ -116,6 +165,17 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const panel = document.getElementById('browserTabsPanel')
   if (!panel) return
 
+  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Sessions API check: hide Recently closed and Both when chrome.sessions unavailable (e.g. Safari)
+  const sessionsApi = typeof chrome !== 'undefined' && chrome.sessions ? chrome.sessions : (typeof browser !== 'undefined' && browser.sessions ? browser.sessions : null)
+  const hasSessionsApi = !!(sessionsApi && typeof sessionsApi.getRecentlyClosed === 'function')
+  const tabSourceWrap = panel.querySelector('#browserTabsSourceWrap')
+  if (tabSourceWrap) {
+    const closedLabel = tabSourceWrap.querySelector('#browserTabsSourceClosedLabel') || tabSourceWrap.querySelector('.browser-tabs-source-closed')
+    const bothLabel = tabSourceWrap.querySelector('#browserTabsSourceBothLabel') || tabSourceWrap.querySelector('.browser-tabs-source-both')
+    if (!hasSessionsApi && closedLabel) closedLabel.style.display = 'none'
+    if (!hasSessionsApi && bothLabel) bothLabel.style.display = 'none'
+  }
+
   const filterInput = panel.querySelector('#browserTabsFilterInput')
   const listEl = panel.querySelector('#browserTabsList') || panel.querySelector('.browser-tabs-list')
   const copyBtn = panel.querySelector('[data-action="copyUrls"]') || panel.querySelector('#browserTabsCopyBtn')
@@ -126,6 +186,9 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const refreshBtn = panel.querySelector('[data-action="refreshTabs"]') || panel.querySelector('#browserTabsRefreshBtn')
   const messageEl = panel.querySelector('#browserTabsMessage')
   const scopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsWindowScope"]')
+  const tabSourceRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsTabSource"]')
+  const tabSourceClosedLabel = panel.querySelector('#browserTabsSourceClosedLabel') || panel.querySelector('.browser-tabs-source-closed')
+  const tabSourceBothLabel = panel.querySelector('#browserTabsSourceBothLabel') || panel.querySelector('.browser-tabs-source-both')
   const searchScopeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsSearchScope"]')
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] List display mode: title | url | block (default block)
   const listDisplayModeRadios = panel.querySelectorAll && panel.querySelectorAll('input[name="browserTabsListDisplayMode"]')
@@ -143,9 +206,11 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] windowScope: currentWindow (default) or all; searchScope: tabInfo (default), pageText, or importantTags
   let windowScope = 'currentWindow'
   let searchScope = SEARCH_SCOPE_TAB_INFO
-  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] listDisplayMode: title | url | block (default block); hiddenTabIds: session-scoped set of tab IDs removed from display
+  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] tabSource: open (default), recentlyClosed, or both
+  let tabSource = 'open'
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] listDisplayMode: title | url | block (default block); hiddenTabIds: session-scoped set of tab IDs (number for open, string sessionId for closed)
   let listDisplayMode = 'block'
-  /** @type {Set<number>} */
+  /** @type {Set<number|string>} */
   const hiddenTabIds = new Set()
 
   /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string, bookmarkTags?: string[] }[]} */
@@ -163,6 +228,16 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       }
     }
     return 'currentWindow'
+  }
+
+  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Tab source: open | recentlyClosed | both
+  function getTabSource () {
+    if (tabSourceRadios && tabSourceRadios.length) {
+      for (let i = 0; i < tabSourceRadios.length; i++) {
+        if (tabSourceRadios[i].checked) return tabSourceRadios[i].value
+      }
+    }
+    return 'open'
   }
 
   function getSearchScope () {
@@ -220,6 +295,14 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     statsEl.textContent = `Windows: ${displayWindows} / ${totalWindows} · Tabs: ${displayTabs} / ${totalTabs}`
   }
 
+  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Hide Gather/Distribute when tabSource is recentlyClosed or all displayed are closed
+  function updateGatherDistributeVisibility () {
+    const displayed = getDisplayedTabs()
+    const allClosed = tabSource === 'recentlyClosed' || (displayed.length > 0 && displayed.every((t) => t.isClosed))
+    if (gatherBtn) gatherBtn.style.display = allClosed ? 'none' : ''
+    if (distributeBtn) distributeBtn.style.display = allClosed ? 'none' : ''
+  }
+
   // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Display list = visibleTabs minus hiddenTabIds; render per listDisplayMode (title | url | block); favicon before title/url in all modes; non-block: clickable text + remove icon after; block view includes remove icon before Tags
   function renderList () {
     if (!listEl) return
@@ -228,16 +311,19 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     listEl.innerHTML = ''
     displayList.forEach((tab) => {
       const card = document.createElement('div')
-      card.className = 'browser-tabs-card'
+      card.className = 'browser-tabs-card' + (tab.isClosed ? ' browser-tabs-card-closed' : '')
       const windowId = tab.windowId != null ? String(tab.windowId) : ''
       const tabId = tab.id != null ? String(tab.id) : ''
-      const idsDisplay = `Window ${escapeHtml(windowId)} · Tab ${escapeHtml(tabId)}`
-      const hasValidIds = windowId !== '' && tabId !== ''
+      const sessionId = tab.sessionId != null ? String(tab.sessionId) : tabId
+      const idsDisplay = tab.isClosed ? `Closed · Session ${escapeHtml(sessionId.slice(0, 12))}${sessionId.length > 12 ? '…' : ''}` : `Window ${escapeHtml(windowId)} · Tab ${escapeHtml(tabId)}`
+      const hasValidIds = !tab.isClosed && windowId !== '' && tabId !== ''
       const tagsArr = Array.isArray(tab.bookmarkTags) ? tab.bookmarkTags : []
       const tagsDisplay = tagsArr.length > 0 ? escapeHtml(tagsArr.join(', ')) : '—'
       const removeBtn = `<button type="button" class="browser-tabs-card-remove" data-action="removeFromDisplay" data-tab-id="${escapeHtml(tabId)}" aria-label="Remove from list" title="Remove from list">×</button>`
-      // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Per-row close-tab button before window id; remove button unchanged after tab id
-      const closeTabBtn = `<button type="button" class="browser-tabs-card-close-tab" data-action="closeTab" data-tab-id="${escapeHtml(tabId)}" aria-label="Close tab" title="Close tab">✕</button>`
+      // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Per-row close-tab for open; [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Restore for closed
+      const closeTabBtn = tab.isClosed
+        ? `<button type="button" class="browser-tabs-card-restore" data-action="restoreTab" data-session-id="${escapeHtml(sessionId)}" aria-label="Restore tab" title="Restore tab">↺</button>`
+        : `<button type="button" class="browser-tabs-card-close-tab" data-action="closeTab" data-tab-id="${escapeHtml(tabId)}" aria-label="Close tab" title="Close tab">✕</button>`
       const faviconSrc = getFaviconSrc(tab)
       const faviconImg = `<img class="browser-tabs-card-favicon" src="${escapeHtml(faviconSrc)}" alt="" width="16" height="16">`
       if (listDisplayMode === 'title') {
@@ -269,6 +355,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       listEl.appendChild(card)
     })
     updateStatsLine()
+    updateGatherDistributeVisibility()
   }
 
   function applyFilter () {
@@ -321,32 +408,68 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
 
   async function loadTabs () {
     const api = chromeTabs || (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null)
-    if (!api) return
-    windowScope = getWindowScope()
     const runtime = typeof chrome !== 'undefined' && chrome.runtime ? chrome.runtime : (typeof browser !== 'undefined' && browser.runtime ? browser.runtime : null)
     const windowsApi = chromeWindows || (typeof chrome !== 'undefined' && chrome.windows ? chrome.windows : null) || (typeof browser !== 'undefined' && browser.windows ? browser.windows : null)
+    tabSource = getTabSource()
+    windowScope = getWindowScope()
+
+    // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] When tab source includes closed, force searchScope to tabInfo and disable Page text/Elements
+    if (tabSource !== 'open' && searchScopeRadios && searchScopeRadios.length) {
+      searchScope = SEARCH_SCOPE_TAB_INFO
+      for (let i = 0; i < searchScopeRadios.length; i++) {
+        const r = searchScopeRadios[i]
+        if (r.value === SEARCH_SCOPE_TAB_INFO) r.checked = true
+        r.disabled = (r.value === SEARCH_SCOPE_PAGE_TEXT || r.value === SEARCH_SCOPE_IMPORTANT_TAGS)
+      }
+    } else if (searchScopeRadios && searchScopeRadios.length) {
+      for (let i = 0; i < searchScopeRadios.length; i++) searchScopeRadios[i].disabled = false
+    }
+
     try {
+      if (tabSource === 'recentlyClosed') {
+        // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Load only recently closed tabs
+        if (!runtime || !runtime.sendMessage) {
+          allTabs = []
+        } else {
+          try {
+            const reply = await new Promise((resolve, reject) => {
+              runtime.sendMessage({ type: 'getRecentlyClosedTabs' }, (r) => { if (chrome.runtime?.lastError) reject(new Error(chrome.runtime.lastError?.message)); else resolve(r) })
+            })
+            const sessions = reply && typeof reply === 'object' && reply.success && Array.isArray(reply.data) ? reply.data : []
+            allTabs = normalizeClosedSessions(sessions)
+          } catch (_) {
+            allTabs = []
+          }
+        }
+        totalWindows = 0
+        totalTabs = allTabs.length
+        if (runtime && typeof runtime.sendMessage === 'function') {
+          await Promise.all(allTabs.map(async (tab) => {
+            const url = (tab.url ?? '').trim()
+            if (!url.startsWith('http://') && !url.startsWith('https://')) { tab.bookmarkTags = []; return }
+            try {
+              const reply = await new Promise((resolve, reject) => {
+                runtime.sendMessage({ type: 'getCurrentBookmark', data: { url: tab.url, title: tab.title } }, (r) => { if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError?.message)); else resolve(r) })
+              })
+              tab.bookmarkTags = reply && reply.success && reply.data && Array.isArray(reply.data.tags) ? reply.data.tags : []
+            } catch (_) { tab.bookmarkTags = [] }
+          }))
+        } else { allTabs.forEach((t) => { t.bookmarkTags = [] }) }
+        searchScope = SEARCH_SCOPE_TAB_INFO
+        setFilterPlaceholder()
+        visibleTabs = filterBrowserTabs(allTabs, filterInput ? filterInput.value : '', searchScope)
+        renderList()
+        return
+      }
+
+      if (!api) return
       // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Stats line denominators: total windows and total tabs (browser-wide)
       if (windowsApi && typeof windowsApi.getAll === 'function') {
-        try {
-          const wins = await windowsApi.getAll()
-          totalWindows = Array.isArray(wins) ? wins.length : 0
-        } catch (_) {
-          totalWindows = 0
-        }
-      } else {
-        totalWindows = 0
-      }
+        try { const wins = await windowsApi.getAll(); totalWindows = Array.isArray(wins) ? wins.length : 0 } catch (_) { totalWindows = 0 }
+      } else { totalWindows = 0 }
       if (api && typeof api.query === 'function') {
-        try {
-          const all = await api.query({})
-          totalTabs = Array.isArray(all) ? all.length : 0
-        } catch (_) {
-          totalTabs = 0
-        }
-      } else {
-        totalTabs = 0
-      }
+        try { const all = await api.query({}); totalTabs = Array.isArray(all) ? all.length : 0 } catch (_) { totalTabs = 0 }
+      } else { totalTabs = 0 }
       const queryOpts = windowScope === 'currentWindow' ? { currentWindow: true } : {}
       const list = await api.query(queryOpts)
       // [REQ-SIDE_PANEL_BROWSER_TABS] Get referrers from service worker so executeScript runs in tab context (side panel context cannot inject into tabs).
@@ -356,16 +479,12 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       } else if (runtime && runtime.sendMessage) {
         try {
           const msg = { type: 'getTabReferrers', data: { tabs: list.map((t) => ({ id: t.id, url: t.url })) } }
-          const reply = await new Promise((resolve, reject) => {
-            runtime.sendMessage(msg, (r) => { if (chrome.runtime?.lastError) reject(new Error(chrome.runtime.lastError?.message)); else resolve(r) })
-          })
+          const reply = await new Promise((resolve, reject) => { runtime.sendMessage(msg, (r) => { if (chrome.runtime?.lastError) reject(new Error(chrome.runtime.lastError?.message)); else resolve(r) }) })
           const data = reply && typeof reply === 'object' && reply.success && reply.data && typeof reply.data === 'object' ? reply.data : {}
           referrersMap = data
-        } catch (_) {
-          referrersMap = {}
-        }
+        } catch (_) { referrersMap = {} }
       }
-      const withReferrer = list.map((tab) => ({
+      let withReferrer = list.map((tab) => ({
         id: tab.id,
         windowId: tab.windowId,
         title: tab.title ?? '',
@@ -373,6 +492,15 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         referrer: (tab.id != null && referrersMap[tab.id] !== undefined) ? referrersMap[tab.id] : '',
         favIconUrl: tab.favIconUrl ?? ''
       }))
+      // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] When both: merge open tabs with recently closed
+      if (tabSource === 'both' && runtime && runtime.sendMessage) {
+        try {
+          const reply = await new Promise((resolve, reject) => { runtime.sendMessage({ type: 'getRecentlyClosedTabs' }, (r) => { if (chrome.runtime?.lastError) reject(new Error(chrome.runtime.lastError?.message)); else resolve(r) }) })
+          const sessions = reply && typeof reply === 'object' && reply.success && Array.isArray(reply.data) ? reply.data : []
+          const closedTabs = normalizeClosedSessions(sessions)
+          withReferrer = withReferrer.concat(closedTabs)
+        } catch (_) { /* keep only open */ }
+      }
       allTabs = withReferrer
       // [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Fetch bookmark tags per tab (same source as popup)
       if (runtime && typeof runtime.sendMessage === 'function') {
@@ -428,10 +556,13 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
 
   if (scopeRadios && scopeRadios.length) {
     for (let i = 0; i < scopeRadios.length; i++) {
-      scopeRadios[i].addEventListener('change', () => {
-        windowScope = getWindowScope()
-        loadTabs()
-      })
+      scopeRadios[i].addEventListener('change', () => { windowScope = getWindowScope(); loadTabs() })
+    }
+  }
+  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Tab source change: reload
+  if (tabSourceRadios && tabSourceRadios.length) {
+    for (let i = 0; i < tabSourceRadios.length; i++) {
+      tabSourceRadios[i].addEventListener('change', () => { tabSource = getTabSource(); loadTabs() })
     }
   }
 
@@ -491,10 +622,26 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       if (removeBtn) {
         const tabId = removeBtn.getAttribute('data-tab-id')
         if (tabId != null) {
-          const id = Number(tabId)
-          if (!Number.isNaN(id)) {
-            hiddenTabIds.add(id)
-            renderList()
+          const num = Number(tabId)
+          hiddenTabIds.add(Number.isNaN(num) ? tabId : num)
+          renderList()
+        }
+        return
+      }
+      // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Restore closed tab via chrome.sessions.restore
+      const restoreBtn = e.target && e.target.closest && e.target.closest('[data-action="restoreTab"]')
+      if (restoreBtn) {
+        const sessionId = restoreBtn.getAttribute('data-session-id')
+        if (sessionId) {
+          const sessionsApi = typeof chrome !== 'undefined' && chrome.sessions ? chrome.sessions : (typeof browser !== 'undefined' && browser.sessions ? browser.sessions : null)
+          if (sessionsApi && typeof sessionsApi.restore === 'function') {
+            try {
+              await sessionsApi.restore(sessionId)
+              showMessage('Tab restored')
+              await loadTabs()
+            } catch (_) {
+              showMessage('Failed to restore tab')
+            }
           }
         }
         return
@@ -547,11 +694,16 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   if (closeBtn) {
     closeBtn.addEventListener('click', async () => {
       const displayed = getDisplayedTabs()
-      if (displayed.length === 0) return
-      if (!confirm(`Close ${displayed.length} tab${displayed.length !== 1 ? 's' : ''}?`)) return
+      const toClose = displayed.filter((t) => !t.isClosed)
+      if (toClose.length === 0) {
+        showMessage('No open tabs to close')
+        return
+      }
+      if (!confirm(`Close ${toClose.length} tab${toClose.length !== 1 ? 's' : ''}?`)) return
       const api = (typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null) || (typeof browser !== 'undefined' && browser.tabs ? browser.tabs : null) || chromeTabs
+      if (!api || typeof api.remove !== 'function') return
       let closed = 0
-      for (const tab of displayed) {
+      for (const tab of toClose) {
         try {
           await api.remove(tab.id)
           closed++
@@ -566,7 +718,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   if (closeTaggedBtn) {
     closeTaggedBtn.addEventListener('click', async () => {
       const displayed = getDisplayedTabs()
-      const toClose = displayed.filter((t) => Array.isArray(t.bookmarkTags) && t.bookmarkTags.length > 0)
+      const toClose = displayed.filter((t) => !t.isClosed && Array.isArray(t.bookmarkTags) && t.bookmarkTags.length > 0)
       if (toClose.length === 0) {
         showMessage('No tagged tabs to close')
         return
@@ -589,7 +741,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   if (closeUntaggedBtn) {
     closeUntaggedBtn.addEventListener('click', async () => {
       const displayed = getDisplayedTabs()
-      const toClose = displayed.filter((t) => !Array.isArray(t.bookmarkTags) || t.bookmarkTags.length === 0)
+      const toClose = displayed.filter((t) => !t.isClosed && (!Array.isArray(t.bookmarkTags) || t.bookmarkTags.length === 0))
       if (toClose.length === 0) {
         showMessage('No untagged tabs to close')
         return

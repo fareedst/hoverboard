@@ -1,0 +1,39 @@
+ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  name: Side Panel Recently Closed Tabs Architecture
+  status: Active
+  cross_references:
+    - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  rationale:
+    why: Use chrome.sessions API to add recently closed tabs as a searchable source; merge with open tabs when Both selected.
+    problems_solved:
+      - Closed tabs lack pageText/importantTags (no executeScript target)
+      - 'Different data shape: sessionId vs id, lastModified vs windowId'
+    benefits:
+      - Single unified list with tab source toggle; tabInfo-only search for closed; restore via sessions.restore
+  implementation_approach:
+    summary: 'Add tab source: open | recentlyClosed | both. GET_RECENTLY_CLOSED_TABS message returns normalized tab objects from chrome.sessions.getRecentlyClosed. Flatten window sessions into tab entries. Panel merges open+closed; filterBrowserTabs handles both; closed tabs use sessionId as key for hiddenTabIds; Restore action calls chrome.sessions.restore(sessionId). When source includes closed, restrict scope to tabInfo; hide Gather/Distribute for closed-only.'
+  traceability:
+    requirements:
+      - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    implementation:
+      - IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+    code_annotations:
+      - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  related_decisions:
+    depends_on:
+      - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    informs:
+      - IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    see_also:
+      - ARCH-SIDE_PANEL_BROWSER_TABS
+  metadata:
+    created:
+      date: '2026-03-02'
+      author: AI Agent
+    last_updated:
+      date: '2026-03-02'
+      author: AI Agent
+      reason: Initial creation

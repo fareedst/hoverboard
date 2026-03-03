@@ -178,10 +178,10 @@ ARCH-LANGUAGE_SELECTION:
   detail_file: architecture-decisions/ARCH-LANGUAGE_SELECTION.yaml
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
       reason: Flesh out for incremental TypeScript/JSDoc strategy
 ARCH-EXAMPLE_DECISION:
@@ -658,14 +658,14 @@ ARCH-SELECTION_TO_TAG_INPUT:
   detail_file: architecture-decisions/ARCH-SELECTION_TO_TAG_INPUT.yaml
   metadata:
     created:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
       reason: Selection-to-tag input architecture
     last_validated:
-      date: "2026-02-18"
+      date: '2026-02-18'
       validator: AI Agent
       result: pass
 ARCH-MV3_MIGRATION:
@@ -823,10 +823,10 @@ ARCH-URL_TAGS_DISPLAY:
   detail_file: architecture-decisions/ARCH-URL_TAGS_DISPLAY.yaml
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: 'Fixes: getCurrentBookmark always from router; getTagsForUrl message; popup use bookmark when needsAuth'
 ARCH-CROSS_BROWSER:
@@ -1308,8 +1308,8 @@ ARCH-UI_TESTABILITY:
       - IMPL-SIDE_PANEL_SNAPSHOT
   detail_file: null
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-25"
+    created: '2026-02-17'
+    last_updated: '2026-02-25'
     author: AI Agent
     reason: Added IMPL-SIDE_PANEL_SNAPSHOT for side panel snapshot (Bookmark + Tags tree tabs)
 ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
@@ -1333,8 +1333,8 @@ ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
       - IMPL-POPUP_BUNDLE
   detail_file: null
   metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-17"
+    created: '2026-02-17'
+    last_updated: '2026-02-17'
     author: AI Agent
 ARCH-SAFARI_ADAPTATION:
   name: Safari Adaptive Architecture
@@ -1576,14 +1576,14 @@ ARCH-LOCAL_STORAGE_PROVIDER:
   detail_file: architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.yaml
   metadata:
     created:
-      date: "2026-02-13"
+      date: '2026-02-13'
       author: AI Agent
     last_updated:
-      date: "2026-02-13"
+      date: '2026-02-13'
       author: AI Agent
       reason: Local storage mode implementation per plan
     last_validated:
-      date: "2026-02-13"
+      date: '2026-02-13'
       validator: AI Agent
       result: pass
 ARCH-SYNC_STORAGE_PROVIDER:
@@ -1611,9 +1611,9 @@ ARCH-SYNC_STORAGE_PROVIDER:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-15"
+      date: '2026-02-15'
     last_updated:
-      date: "2026-02-15"
+      date: '2026-02-15'
 ARCH-LOCAL_BOOKMARKS_INDEX:
   name: Local Bookmarks Index Architecture
   status: Active
@@ -1668,10 +1668,10 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-13"
+      date: '2026-02-13'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Index shows local + file with Storage column; getAggregatedBookmarksForIndex
 ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
@@ -1717,10 +1717,10 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-13"
+      date: '2026-02-13'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Implementation complete
 ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
@@ -1757,10 +1757,10 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
   metadata:
     created:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
       reason: New architecture for import UX
 ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
@@ -1796,10 +1796,10 @@ ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: New architecture for Add tags to selected
 ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
@@ -1835,10 +1835,10 @@ ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: New architecture for Regex find-and-replace on selected
 ARCH-BROWSER_BOOKMARK_IMPORT:
@@ -1874,10 +1874,10 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
   detail_file: architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
     created:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
       reason: New architecture for browser bookmark import
 ARCH-FILE_BOOKMARK_PROVIDER:
@@ -1927,10 +1927,10 @@ ARCH-FILE_BOOKMARK_PROVIDER:
   detail_file: architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: File-based storage per plan
 ARCH-STORAGE_INDEX_AND_ROUTER:
@@ -1984,10 +1984,10 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
   detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Per-bookmark storage and router per plan
 ARCH-MOVE_BOOKMARK_UI:
@@ -2024,10 +2024,10 @@ ARCH-MOVE_BOOKMARK_UI:
   detail_file: architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Move bookmark UI per plan
 ARCH-NATIVE_HOST:
@@ -2063,10 +2063,10 @@ ARCH-NATIVE_HOST:
   detail_file: architecture-decisions/ARCH-NATIVE_HOST.yaml
   metadata:
     created:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
     last_updated:
-      date: "2026-02-14"
+      date: '2026-02-14'
       author: AI Agent
       reason: Native host wrapper and installer per plan
 ARCH-CODE_QUALITY:
@@ -2119,14 +2119,14 @@ ARCH-CODE_QUALITY:
   detail_file: architecture-decisions/ARCH-CODE_QUALITY.yaml
   metadata:
     created:
-      date: "2025-02-17"
+      date: '2025-02-17'
       author: agent
     last_updated:
-      date: "2025-02-17"
+      date: '2025-02-17'
       author: agent
       reason: ESLint 9 flat config migration and security check level
     last_validated:
-      date: "2025-02-17"
+      date: '2025-02-17'
       validator: agent
       result: pass
 ARCH-SHARED_UTILITIES:
@@ -2166,10 +2166,10 @@ ARCH-SHARED_UTILITIES:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation
 ARCH-STRUCTURED_LOGGING:
@@ -2205,10 +2205,10 @@ ARCH-STRUCTURED_LOGGING:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
     last_updated:
-      date: "2026-02-17"
+      date: '2026-02-17'
       author: AI Agent
       reason: Numbered token reinterpretation
 ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
@@ -2243,10 +2243,10 @@ ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
   detail_file: architecture-decisions/ARCH-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
     created:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
     last_updated:
-      date: "2026-02-18"
+      date: '2026-02-18'
       author: AI Agent
       reason: Initial creation
   decision: '`time` = create-time (set once, never changed on update). `updated_at` = most-recent-update-time (same as time on create; set to now on every update). Normalization: missing `updated_at` -> `updated_at = time`. Pinboard: `updated_at = time` always.'
@@ -2289,10 +2289,10 @@ ARCH-AI_TAGGING_CONFIG:
   detail_file: architecture-decisions/ARCH-AI_TAGGING_CONFIG.yaml
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
       reason: Popup Test API key button
 ARCH-AI_TAGGING_FLOW:
@@ -2342,10 +2342,10 @@ ARCH-AI_TAGGING_FLOW:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-20"
+      date: '2026-02-20'
       author: AI Agent
     last_updated:
-      date: "2026-02-21"
+      date: '2026-02-21'
       author: AI Agent
       reason: GET_PAGE_CONTENT in SW via executeScript; popup shows SW error on failure
 ARCH-SIDE_PANEL_TAGS_TREE:
@@ -2388,10 +2388,10 @@ ARCH-SIDE_PANEL_TAGS_TREE:
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_TAGS_TREE.yaml
   metadata:
     created:
-      date: "2026-02-21"
+      date: '2026-02-21'
       author: AI Agent
     last_updated:
-      date: "2026-02-21"
+      date: '2026-02-21'
       author: AI Agent
       reason: Initial creation
 ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
@@ -2431,10 +2431,10 @@ ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_BOOKMARK_SEARCH.yaml
   metadata:
     created:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
     last_updated:
-      date: "2026-02-22"
+      date: '2026-02-22'
       author: AI Agent
       reason: Initial creation
 ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK:
@@ -2474,10 +2474,10 @@ ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK:
   detail_file: architecture-decisions/ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK.yaml
   metadata:
     created:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
       reason: Initial creation
 ARCH-SIDE_PANEL_TABS:
@@ -2529,10 +2529,10 @@ ARCH-SIDE_PANEL_TABS:
   detail_file: null
   metadata:
     created:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: '2026-02-25'
       author: AI Agent
       reason: Initial creation for tabbed side panel
 ARCH-QUICK_ACCESS_ENTRY:
@@ -2572,10 +2572,10 @@ ARCH-QUICK_ACCESS_ENTRY:
   detail_file: architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml
   metadata:
     created:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
     last_updated:
-      date: "2026-02-26"
+      date: '2026-02-26'
       author: AI Agent
       reason: Initial creation for quick access architecture
 ARCH-ICON_CLICK_BEHAVIOR:
@@ -2603,10 +2603,10 @@ ARCH-ICON_CLICK_BEHAVIOR:
   detail_file: architecture-decisions/ARCH-ICON_CLICK_BEHAVIOR.yaml
   metadata:
     created:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
       reason: Initial creation for icon click behavior
 ARCH-SITE_MGMT:
@@ -2616,7 +2616,7 @@ ARCH-SITE_MGMT:
   rationale:
     why: Site management architecture
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 ARCH-SEARCH:
@@ -2626,7 +2626,7 @@ ARCH-SEARCH:
   rationale:
     why: Search functionality architecture
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 ARCH-PRIVACY:
@@ -2636,7 +2636,7 @@ ARCH-PRIVACY:
   rationale:
     why: Privacy controls architecture
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 ARCH-CONFIG_STRUCTURE:
@@ -2646,7 +2646,7 @@ ARCH-CONFIG_STRUCTURE:
   rationale:
     why: Configuration structure architecture
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 ARCH-PROJECT_STRUCTURE:
@@ -2656,7 +2656,7 @@ ARCH-PROJECT_STRUCTURE:
   rationale:
     why: Project structure architecture
   implementation_approach:
-    summary: ""
+    summary: ''
   traceability: {}
   detail_file: null
 ARCH-SIDE_PANEL_BROWSER_TABS:
@@ -2691,10 +2691,10 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
       - ARCH-SIDE_PANEL_TABS
   metadata:
     created:
-      date: "2026-02-28"
+      date: '2026-02-28'
       author: AI Agent
     last_updated:
-      date: "2026-02-28"
+      date: '2026-02-28'
       author: AI Agent
       reason: Initial creation
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml
@@ -2709,7 +2709,7 @@ ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
       - How to display Chrome bookmarks in side panel
       - How to support folder navigation and search
     benefits:
-      - Single panel #browserBookmarksPanel; data from chrome.bookmarks.getTree; flatten to list; folder tree with counts; real-time search; click URL to open
+      - Single panel
   implementation_approach:
     summary: Panel uses chrome.bookmarks.getTree; flatten to flat list with folder path; folder tree built from nodes; filter by query and folder; actions on visible list.
   traceability:
@@ -2731,10 +2731,50 @@ ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
       - ARCH-BROWSER_BOOKMARK_IMPORT
   metadata:
     created:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: '2026-03-02'
       author: AI Agent
       reason: Initial creation
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_BOOKMARKS.yaml
+ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  name: Side Panel Recently Closed Tabs Architecture
+  status: Active
+  cross_references:
+    - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  rationale:
+    why: Use chrome.sessions API to add recently closed tabs as a searchable source; merge with open tabs when Both selected.
+    problems_solved:
+      - Closed tabs lack pageText/importantTags (no executeScript target)
+      - 'Different data shape: sessionId vs id, lastModified vs windowId'
+    benefits:
+      - Single unified list with tab source toggle; tabInfo-only search for closed; restore via sessions.restore
+  implementation_approach:
+    summary: 'Add tab source: open | recentlyClosed | both. GET_RECENTLY_CLOSED_TABS message returns normalized tab objects from chrome.sessions.getRecentlyClosed. Flatten window sessions into tab entries. Panel merges open+closed; filterBrowserTabs handles both; closed tabs use sessionId as key for hiddenTabIds; Restore action calls chrome.sessions.restore(sessionId). When source includes closed, restrict scope to tabInfo; hide Gather/Distribute for closed-only.'
+  traceability:
+    requirements:
+      - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    implementation:
+      - IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    tests:
+      - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+    code_annotations:
+      - ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  related_decisions:
+    depends_on:
+      - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    informs:
+      - IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS
+    see_also:
+      - ARCH-SIDE_PANEL_BROWSER_TABS
+  metadata:
+    created:
+      date: '2026-03-02'
+      author: AI Agent
+    last_updated:
+      date: '2026-03-02'
+      author: AI Agent
+      reason: Initial creation
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml

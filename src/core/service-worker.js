@@ -448,6 +448,26 @@ class HoverboardServiceWorker {
         return out
       }
 
+      // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Get recently closed tabs from chrome.sessions; returns raw Session[] for panel to normalize.
+      if (message.type === MESSAGE_TYPES.GET_RECENTLY_CLOSED_TABS) {
+        const sessionsApi = typeof chrome !== 'undefined' && chrome.sessions ? chrome.sessions : (typeof browser !== 'undefined' && browser.sessions ? browser.sessions : null)
+        if (!sessionsApi || typeof sessionsApi.getRecentlyClosed !== 'function') {
+          const out = { success: false, error: 'sessions API unavailable' }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
+        try {
+          const sessions = await sessionsApi.getRecentlyClosed({ maxResults: 25 })
+          const out = { success: true, data: sessions || [] }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        } catch (err) {
+          const out = { success: false, error: String(err && err.message ? err.message : err) }
+          uiInspector.recordMessage(message.type, message.data, sender, out)
+          return out
+        }
+      }
+
       // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Get page body text per tab for search scope "Page text". SW runs executeScript per tab; returns tabId -> string (title + body.innerText capped).
       if (message.type === MESSAGE_TYPES.GET_TABS_PAGE_TEXT) {
         const tabs = message.data?.tabs || []

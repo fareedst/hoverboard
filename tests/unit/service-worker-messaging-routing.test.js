@@ -30,6 +30,10 @@ describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] SW handleMessage routi
     expect(MESSAGE_TYPES.GET_TABS_IMPORTANT_TAGS).toBe('getTabsImportantTags')
   })
 
+  test('[REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] MESSAGE_TYPES includes GET_RECENTLY_CLOSED_TABS', () => {
+    expect(MESSAGE_TYPES.GET_RECENTLY_CLOSED_TABS).toBe('getRecentlyClosedTabs')
+  })
+
   test('NATIVE_PING returns success and data and does not call processMessage', async () => {
     const sw = new HoverboardServiceWorker()
     sw.pingNativeHost = jest.fn().mockResolvedValue({ pong: true })
@@ -136,6 +140,21 @@ describe('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] SW handleMessage routi
 
     expect(processMessageSpy).not.toHaveBeenCalled()
     expect(result).toEqual({ success: true, data: { 1: 'Title and body text here' } })
+    processMessageSpy.mockRestore()
+  })
+
+  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] GET_RECENTLY_CLOSED_TABS returns sessions from chrome.sessions
+  test('GET_RECENTLY_CLOSED_TABS returns success and sessions data when chrome.sessions available', async () => {
+    const mockSessions = [{ tab: { sessionId: 's1', title: 'Closed', url: 'https://example.com' }, lastModified: 1000 }]
+    if (!global.chrome.sessions) global.chrome.sessions = {}
+    global.chrome.sessions.getRecentlyClosed = jest.fn().mockResolvedValue(mockSessions)
+    const sw = new HoverboardServiceWorker()
+    const processMessageSpy = jest.spyOn(sw.messageHandler, 'processMessage')
+
+    const result = await sw.handleMessage({ type: MESSAGE_TYPES.GET_RECENTLY_CLOSED_TABS }, {})
+
+    expect(processMessageSpy).not.toHaveBeenCalled()
+    expect(result).toEqual({ success: true, data: mockSessions })
     processMessageSpy.mockRestore()
   })
 
