@@ -67,7 +67,8 @@ This document describes the YAML structure for individual REQ, ARCH, and IMPL to
 | `implementation_approach` | summary, details (list); optional phases, task_structure | map |
 | `code_locations` | files (path, description, lines?), functions (name, file, description) | map |
 | `traceability` | architecture, requirements, tests, code_annotations | map of lists |
-| `related_decisions` | depends_on, supersedes, see_also | map of lists |
+| `related_decisions` | depends_on, supersedes, see_also (optional composed_with) | map of lists |
+| `essence_pseudocode` | Language-agnostic step-wise pseudo-code (main steps, data flow, control flow). Mandatory when project mandates it; used for collision detection and token-ref validation. Multiline string (e.g. `\|-`). | string (multiline) |
 | `code_examples` | Optional: list of `{ language, body }` | list of maps |
 | `token_coverage` | code_files, tests (checklist strings) | map of lists |
 | `validation_evidence` | list of `{ date, commit?, result, notes? }`; optional validation_output (string) | list + optional string |
@@ -84,6 +85,6 @@ This document describes the YAML structure for individual REQ, ARCH, and IMPL to
 
 ## Transformations enabled
 
-- **Validation**: Parse detail YAML; check token id matches filename; validate cross-reference tokens exist.
+- **Validation**: Parse detail YAML; check token id matches filename; validate cross-reference tokens exist. Use the MCP tool `tied_validate_consistency` to validate indexes, detail files, REQ→ARCH→IMPL traceability, and IMPL `essence_pseudocode` token references.
 - **Merge / report**: Combine index + detail (e.g. deep merge) for full-doc generation or export.
-- **MCP / scripts**: Use `yq` or any YAML library to query criteria, traceability, code_locations, validation_evidence.
+- **MCP / scripts**: Use `yq` or any YAML library to query criteria, traceability, code_locations, validation_evidence, essence_pseudocode.

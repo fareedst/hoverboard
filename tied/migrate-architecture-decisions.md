@@ -25,7 +25,7 @@ Before starting migration:
 - [ ] Identify all `[ARCH-*]` tokens in the file
 - [ ] Verify `semantic-tokens.md` has entries for all `[ARCH-*]` tokens
 - [ ] Create a backup of the current file (or ensure git history is clean)
-- [ ] Review the target structure in `architecture-decisions.template.md`
+- [ ] Review the target structure in `architecture-decisions.md`
 
 ---
 

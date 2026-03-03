@@ -446,11 +446,135 @@ Active
    - Update README.md and CHANGELOG.md for user- and release-facing changes made in this session.
 
 9. **Write commit message**
-   - Write the commit message summarizing the session’s changes; where useful, reference the main REQ/ARCH/IMPL tokens touched per CONTRIBUTING.md ("## Commit Message Guidelines")
+   - Write the commit message **per [PROC-COMMIT_MESSAGES]**; where useful, reference the main REQ/ARCH/IMPL tokens touched in the body or footer.
 
 ### Artifacts & Metrics
 - **Artifacts**: Updated REQ/ARCH/IMPL (including `essence_pseudocode` and block comments), tests, managed source code, README.md, CHANGELOG.md, commit.
 - **Success Metrics**: All tests pass; `[PROC-TOKEN_VALIDATION]` passes; TIED docs match final code and tests; `[PROC-TOKEN_AUDIT]` can succeed.
+
+---
+
+## `[PROC-COMMIT_MESSAGES]` Commit message format and guidelines
+
+### Purpose
+Use a consistent format for git commit messages so that history is readable and, if needed, changelogs can be generated from commits. Supports traceability when TIED tokens are referenced in the body or footer.
+
+### Scope
+All commits in the repository.
+
+### Token references
+- `[PROC-TIED_DEV_CYCLE]` — step 9 invokes this process
+
+### Status
+Active
+
+### Commit message format
+
+Each commit message has a **header**, an optional **body**, and an optional **footer**. The header uses a **type**, an optional **scope**, and a **subject**:
+
+```
+<type>(<scope>): <subject>
+<BLANK LINE>
+<body>
+<BLANK LINE>
+<footer>
+```
+
+Keep the **subject** (header line) to 50 characters or fewer so it stays readable in logs and UIs. Keep body and footer lines to 100 characters or fewer.
+
+The footer may contain a closing reference to an issue (e.g. `Closes #123`).
+
+**Examples:**
+
+```
+docs(changelog): update changelog to v1.5.0
+```
+
+```
+fix(ui): correct popup theme when system preference changes
+
+Popup now re-reads prefers-color-scheme on visibility change.
+Fixes #42
+```
+
+### Revert
+
+To revert a previous commit, start the header with `revert: ` followed by the original commit header. In the body write: `This reverts commit <hash>.` (replace `<hash>` with the SHA of the reverted commit.)
+
+### Type
+
+Use exactly one of:
+
+| Type | Use for |
+|------|--------|
+| **build** | Build system or external dependencies (e.g. scripts, manifest, tooling) |
+| **ci** | CI configuration and scripts (e.g. `.github/workflows/`) |
+| **chore** | Repo maintenance, no code/docs change |
+| **docs** | Documentation only |
+| **feat** | A new feature |
+| **fix** | A bug fix |
+| **perf** | A change that improves performance |
+| **refactor** | A change that neither fixes a bug nor adds a feature |
+| **style** | Formatting, whitespace, semicolons; no meaning change |
+| **test** | Adding or correcting tests |
+
+### Scope
+
+The scope is the name of the area affected (as someone reading history or a changelog would understand it). It is optional but recommended.
+
+**Supported scopes:**
+
+| Scope | Area |
+|-------|------|
+| **core** | Service worker, message handling, badge manager (`src/core/`) |
+| **ui** | Popup, options, side-panel, bookmarks-table, components, styles (`src/ui/`) |
+| **features** | Content scripts, overlay, storage, AI, pinboard, search, tagging (`src/features/`) |
+| **shared** | Shared utilities, logger, ErrorHandler, message-schemas (`src/shared/`) |
+| **config** | Config manager and config service (`src/config/`) |
+| **offscreen** | Offscreen file-bookmark I/O (`src/offscreen/`) |
+| **safari** | Safari App Extension (`safari/`) |
+| **tied** | TIED methodology: requirements, architecture, implementation, semantic tokens (`tied/`, `semantic-tokens.yaml`) |
+| **docs** | Documentation outside `tied/` (`docs/`) |
+| **tests** | Test files, harnesses, Playwright E2E |
+| **build** | Build scripts, manifest, tooling (`scripts/`, `manifest.json`) |
+| **ci** | CI configuration (e.g. `.github/workflows/`) |
+| **changelog** | Release notes in `CHANGELOG.md` |
+
+**Exceptions:**
+
+- **packaging**: Use only when a change affects package/output layout across the repo (e.g. manifest or build layout for all outputs). Otherwise use **build**.
+- **Empty scope**: Allowed for `style`, `test`, `refactor`, or `docs` when the change spans many areas (e.g. `style: normalize line endings`).
+
+**Recommended for future use** (add as the codebase grows):
+
+- **popup**, **side-panel**, **options** — when UI work is often scoped to a single surface.
+- **storage**, **content**, **ai** — when features are split more finely than a single `features` scope.
+
+Projects may subset or extend this list to match their structure.
+
+### Subject
+
+- Keep to **50 characters or fewer** (the full header line: `type(scope): subject`).
+- Use imperative, present tense: "change" not "changed" nor "changes".
+- Do not capitalize the first letter.
+- No period at the end.
+
+### Body
+
+Use imperative, present tense. Include motivation for the change and how it differs from previous behavior when it helps.
+
+### Footer
+
+- **Breaking changes**: Start with `BREAKING CHANGE:` (with a space or two newlines). The rest of the message describes the break.
+- **Issues**: Use `Closes #123` or `Fixes #123` to link and close issues.
+
+### TIED and commit messages
+
+When a commit implements or touches a specific requirement or decision, you may reference TIED tokens in the body or footer (e.g. `REQ-SIDE_PANEL_TAGS_TREE`, `ARCH-*`, `IMPL-*`). This is optional but encouraged for traceability. Commit format is defined here; for token discipline in code and docs see [AGENTS.md](AGENTS.md) and `ai-principles.md`.
+
+### Artifacts & Metrics
+- **Artifacts**: Commit history; optionally generated changelog.
+- **Success Metrics**: Commits follow the format; history is readable; TIED tokens referenced when relevant.
 
 ---
 

@@ -17,6 +17,7 @@ This document centralizes every instruction AI coding assistants must follow whi
    - Review `semantic-tokens.yaml` (token registry YAML index) and `semantic-tokens.md` (token guide)
    - Review `architecture-decisions.yaml` and `implementation-decisions.yaml` (YAML indexes)
    - Understand priority order: Tests > Code > Basic Functions > Infrastructure
+   - Note: same filename everywhere—at repo root these files are templates; in `tied/` they are the project indexes.
 3. Confirm access to the documents above before continuing.
 
 ---
@@ -85,12 +86,14 @@ This document centralizes every instruction AI coding assistants must follow whi
 
 ## 5. Key Files & Responsibilities
 
+Same filename at repo root (template) and in `tied/` (project index); location distinguishes use.
+
 | File | Purpose |
 | --- | --- |
 | `ai-principles.md` | Master principles and process guide (read fully every session) |
 | `semantic-tokens.yaml` | YAML index/database of all semantic tokens (canonical registry) |
 | `semantic-tokens.md` | Semantic tokens guide with format, naming conventions, and usage examples |
-| `requirements.md` | Requirements guide with documentation (copy from template per project) |
+| `requirements.md` | Requirements guide with documentation (copy from root into project's tied/) |
 | `requirements.yaml` | Requirements YAML index/database with all requirement records |
 | `requirements/` | Individual requirement detail files (YAML, e.g., `REQ-TIED_SETUP.yaml`); schema: `detail-files-schema.md` |
 | `architecture-decisions.md` | Architecture decisions guide with documentation (copy from template per project) |

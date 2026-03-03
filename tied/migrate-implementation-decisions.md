@@ -25,7 +25,7 @@ Before starting migration:
 - [ ] Identify all `[IMPL-*]` tokens in the file
 - [ ] Verify `semantic-tokens.md` has entries for all `[IMPL-*]` tokens
 - [ ] Create a backup of the current file (or ensure git history is clean)
-- [ ] Review the target structure in `implementation-decisions.template.md`
+- [ ] Review the target structure in `implementation-decisions.md`
 
 ---
 

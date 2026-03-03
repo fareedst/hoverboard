@@ -791,23 +791,23 @@ This project follows AI-First Principles. Before making changes:
 
 ## 📚 Related Documents
 
-- `tied/requirements.md` - Requirements guide document (copy from `requirements.template.md` in TIED repository)
-  - `tied/requirements.yaml` - Requirements YAML index/database with all `[REQ-*]` records (copy from `requirements.template.yaml`)
+- `tied/requirements.md` - Requirements guide document (copy from `requirements.md` at TIED repo root)
+  - `tied/requirements.yaml` - Requirements YAML index/database with all `[REQ-*]` records (copy from `requirements.yaml` at TIED repo root)
   - `tied/requirements/` - Individual requirement detail files (YAML, e.g., `REQ-TIED_SETUP.yaml`, `REQ-MODULE_VALIDATION.yaml`); schema: `detail-files-schema.md`
-- `tied/architecture-decisions.md` - Architecture decisions guide document (copy from `architecture-decisions.template.md`)
-  - `tied/architecture-decisions.yaml` - Architecture decisions YAML index/database with all `[ARCH-*]` records dependent on requirements (copy from `architecture-decisions.template.yaml`)
+- `tied/architecture-decisions.md` - Architecture decisions guide document (copy from `architecture-decisions.md` at TIED repo root)
+  - `tied/architecture-decisions.yaml` - Architecture decisions YAML index/database with all `[ARCH-*]` records dependent on requirements (copy from `architecture-decisions.yaml` at TIED repo root)
   - All `[ARCH-*]` tokens must be documented in the YAML index
   - Must cross-reference `[REQ-*]` tokens from requirements
   - `tied/architecture-decisions/` - Individual architecture decision detail files (YAML, e.g., `ARCH-TIED_STRUCTURE.yaml`)
-- `tied/implementation-decisions.md` - Implementation decisions guide document (copy from `implementation-decisions.template.md`)
-  - `tied/implementation-decisions.yaml` - Implementation decisions YAML index/database with all `[IMPL-*]` records dependent on architecture and requirements (copy from `implementation-decisions.template.yaml`)
+- `tied/implementation-decisions.md` - Implementation decisions guide document (copy from `implementation-decisions.md` at TIED repo root)
+  - `tied/implementation-decisions.yaml` - Implementation decisions YAML index/database with all `[IMPL-*]` records dependent on architecture and requirements (copy from `implementation-decisions.yaml` at TIED repo root)
   - All `[IMPL-*]` tokens must be documented in the YAML index
   - Must cross-reference both `[ARCH-*]` and `[REQ-*]` tokens
   - `tied/implementation-decisions/` - Individual implementation decision detail files (YAML, e.g., `IMPL-MODULE_VALIDATION.yaml`)
 - `tied/semantic-tokens.yaml` - YAML index/database of all semantic tokens (canonical token registry)
-- `tied/semantic-tokens.md` - Semantic tokens guide with format, naming conventions, and usage examples (copy from `semantic-tokens.template.md`)
+- `tied/semantic-tokens.md` - Semantic tokens guide with format, naming conventions, and usage examples (copy from `semantic-tokens.md` at TIED repo root)
 - `detail-files-schema.md` - Schema for REQ/ARCH/IMPL detail YAML files (in TIED repo or tied/); see also `tied/requirements/*.yaml`, `tied/architecture-decisions/*.yaml`, `tied/implementation-decisions/*.yaml`
-- `tied/processes.md` - Active process tracking document (copy from `processes.template.md`)
+- `tied/processes.md` - Active process tracking document (copy from `processes.md` at TIED repo root)
 - `README.md` - Project overview and getting started guide
 
 ---
