@@ -16,16 +16,16 @@ IMPL-SIDE_PANEL_TABS:
     summary: side-panel.html has tab bar and two panels (#bookmarkPanel, #tagsTreePanel). side-panel.js on load reads persisted tab (chrome.storage.local), shows that panel, binds tab clicks. On first "This Page" select: init UISystem, createPopup({ container: bookmarkPanel }), controller.loadInitialData(), setupEventListeners. On "By Tag" select: call initTagsTreeTab() (extracted from tags-tree.js). Persist tab on switch. Build: bundle side-panel.js so popup stack and tags-tree modules are inlined.
     details:
       - manifest side_panel.default_path → side-panel.html
-      - 'Side panel header: after h1 "Hoverboard", show version (from chrome.runtime.getManifest().version) and compile time UTC (YYYY-MM-DD HH:mm) from build-time constant; element #side-panel-version.'
+      - 'Side panel header: single line with left "Hoverboard v{version}" (or "Hoverboard" if no version) and right build time UTC (YYYY-MM-DD HH:mm); elements #side-panel-title-version (left) and #side-panel-version (right); flex row, space-between.'
       - Tab buttons: data-tab="bookmark", data-tab="tagsTree", data-tab="browserTabs"; click handler switches panel, saves to storage, runs init for that tab if not yet inited
       - Storage key e.g. hoverboard_sidepanel_active_tab; values "bookmark" | "tagsTree" | "browserTabs"
       - This Page init runs once (guard); By Tag init can re-run on each show or once
       - On browser tab change (onActivated/onUpdated): if controller exists always call refreshPopupData() so currentPin is for new tab; then refresh By Tag tab when visible via refreshTagsTreeTabIfVisible (setSelectedTagsFromCurrentBookmark)
-      - 'Recommended E2E (IMPL-SIDE_PANEL_TABS): after loading side panel, assert header contains #side-panel-version with non-empty text matching pattern v* · YYYY-MM-DD HH:mm (version and compile time UTC).'
+      - 'Recommended E2E (IMPL-SIDE_PANEL_TABS): after loading side panel, assert header row has left text matching Hoverboard v* and right text matching YYYY-MM-DD HH:mm.'
   code_locations:
     files:
       - path: src/ui/side-panel/side-panel.html
-        description: Tab bar, #side-panel-version, and panel roots
+        description: Tab bar; single-line header row (#side-panel-title-version, #side-panel-version) and panel roots
       - path: src/ui/side-panel/side-panel.js
         description: Tab switching, persist, initSidePanelVersion, init This Page and By Tag tabs
       - path: src/ui/side-panel/build-info.js
@@ -61,7 +61,7 @@ IMPL-SIDE_PANEL_TABS:
         description: 'Pure helper: given controller, returns currentBookmarkTags for initTagsTreeTab (By Tag on open shows current URL record).'
       - name: setSidePanelVersion
         file: src/ui/side-panel/side-panel.js
-        description: Set #side-panel-version text to "v" + version + " · " + buildTimeUtc; no-op when element missing. Exported for tests.
+        description: Set #side-panel-title-version to "Hoverboard v" + version or "Hoverboard"; set #side-panel-version to buildTimeUtc. No-op when #side-panel-version missing. Exported for tests.
       - name: initSidePanelVersion
         file: src/ui/side-panel/side-panel.js
         description: Called on DOMContentLoaded; reads getManifest().version and BUILD_TIME_UTC, calls setSidePanelVersion().
@@ -139,7 +139,7 @@ IMPL-SIDE_PANEL_TABS:
       ELSE IF activeTab === "browserTabs": #browserTabsPanel visible, #bookmarkPanel hidden, #tagsTreePanel hidden
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS]
-    # Side panel header version and compile time: after h1 "Hoverboard", element #side-panel-version shows "v" + manifest.version + " · " + BUILD_TIME_UTC (build-time constant, format YYYY-MM-DD HH:mm UTC). setSidePanelVersion(version?, buildTimeUtc?): if element #side-panel-version missing RETURN (no-op, no throw); v = version ?? getManifest()?.version ?? ""; t = buildTimeUtc ?? BUILD_TIME_UTC; el.textContent = v ? "v" + v + " · " + t : t. initSidePanelVersion() called on DOMContentLoaded; guard for missing chrome.runtime (e.g. tests).
+    # Side panel header: single line; left #side-panel-title-version "Hoverboard v{version}" or "Hoverboard", right #side-panel-version build time UTC (YYYY-MM-DD HH:mm). setSidePanelVersion(version?, buildTimeUtc?): if #side-panel-version missing RETURN (no-op, no throw); v = version ?? getManifest()?.version ?? ""; t = buildTimeUtc ?? BUILD_TIME_UTC; if #side-panel-title-version present set text to v ? "Hoverboard v" + v : "Hoverboard"; set #side-panel-version text to t. initSidePanelVersion() called on DOMContentLoaded; guard for missing chrome.runtime (e.g. tests).
     ON panel page load (after bindTabButtons): initSidePanelVersion() → setSidePanelVersion()  // no-op when #side-panel-version missing
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS]
@@ -175,6 +175,6 @@ IMPL-SIDE_PANEL_TABS:
       date: "2026-02-25"
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: "2026-03-03"
       author: AI Agent
-      reason: Tab display labels This Page/By Tag; sync REQ/ARCH/IMPL; pseudo-code block comments with semantic tokens
+      reason: Side panel header single line (title+version left, build time right); IMPL pseudo-code and code_locations updated

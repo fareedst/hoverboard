@@ -68,7 +68,7 @@ The configuration page provides comprehensive settings for customizing the exten
 
 ![Pinboard.in with side panel (This Page tab)](images/pinboard-side-panel-bookmark.png)
 
-The snapshot above shows **pinboard.in** in the main content area with the Hoverboard **side panel** open and the **This Page** tab visible (popup-equivalent: quick actions, storage, tag management, search). The side panel header shows the extension version and compile time (UTC) below the "Hoverboard" title.
+The snapshot above shows **pinboard.in** in the main content area with the Hoverboard **side panel** open and the **This Page** tab visible (popup-equivalent: quick actions, storage, tag management, search). The side panel header is a single line: extension name and version on the left ("Hoverboard vX.Y.Z") and build time (UTC) on the right.
 
 #### This Page tab
 

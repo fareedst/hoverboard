@@ -11,10 +11,12 @@
   <link rel="stylesheet" href="side-panel.css">
 </head>
 <body id="side-panel-page">
-  <!-- [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] Tab bar -->
+  <!-- [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] Tab bar; single-line header row -->
   <header class="side-panel-header">
-    <h1 class="side-panel-title">Hoverboard</h1>
-    <p id="side-panel-version" class="side-panel-version" aria-hidden="true"></p>
+    <div class="side-panel-header-title-row">
+      <span id="side-panel-title-version" class="side-panel-title-version">Hoverboard</span>
+      <span id="side-panel-version" class="side-panel-version" aria-hidden="true"></span>
+    </div>
     <nav class="side-panel-tabs" role="tablist" aria-label="Panel tabs">
       <button type="button" class="side-panel-tab" role="tab" data-tab="bookmark" aria-selected="true">This Page</button>
       <button type="button" class="side-panel-tab" role="tab" data-tab="tagsTree" aria-selected="false">By Tag</button>

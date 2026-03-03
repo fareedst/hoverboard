@@ -6,15 +6,21 @@
   border-bottom: 1px solid var(--border-color, #333);
 }
 
-.side-panel-title {
-  margin: 0 0 0.25rem 0;
+/* [IMPL-SIDE_PANEL_TABS] Single-line header: left title+version, right build time (UTC); flex space-between */
+.side-panel-header-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 0 0.5rem 0;
+}
+
+.side-panel-title-version {
   font-size: 1rem;
   font-weight: 600;
 }
 
-/* [IMPL-SIDE_PANEL_TABS] Version and compile time (UTC) after h1 */
+/* [IMPL-SIDE_PANEL_TABS] Build time (right side of header row) */
 .side-panel-version {
-  margin: 0 0 0.5rem 0;
   font-size: 0.75rem;
   opacity: 0.85;
   color: var(--text-secondary, #999);

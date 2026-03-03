@@ -31,22 +31,25 @@ import { TAB_TAGS_TREE } from '../../src/ui/side-panel/side-panel-tab-state.js'
 
 describe('[IMPL-SIDE_PANEL_TABS] setSidePanelVersion', () => {
   beforeEach(() => {
-    document.body.innerHTML = '<p id="side-panel-version"></p>'
+    document.body.innerHTML = '<span id="side-panel-title-version"></span><span id="side-panel-version"></span>'
   })
 
-  test('sets version and compile time (UTC) text [IMPL-SIDE_PANEL_TABS]', () => {
+  // [IMPL-SIDE_PANEL_TABS] Single-line header: left "Hoverboard vX", right build time (UTC).
+  test('sets title+version (left) and build time (right) [IMPL-SIDE_PANEL_TABS]', () => {
     setSidePanelVersion('1.2.3', '2026-03-02 14:30')
-    expect(document.getElementById('side-panel-version').textContent).toBe('v1.2.3 · 2026-03-02 14:30')
+    expect(document.getElementById('side-panel-title-version').textContent).toBe('Hoverboard v1.2.3')
+    expect(document.getElementById('side-panel-version').textContent).toBe('2026-03-02 14:30')
   })
 
-  test('when version is empty string shows only build time', () => {
+  test('when version is empty string left shows "Hoverboard", right shows build time', () => {
     setSidePanelVersion('', '2026-03-02 14:30')
+    expect(document.getElementById('side-panel-title-version').textContent).toBe('Hoverboard')
     expect(document.getElementById('side-panel-version').textContent).toBe('2026-03-02 14:30')
   })
 
   // [IMPL-SIDE_PANEL_TABS] When #side-panel-version element is missing, setSidePanelVersion does not throw (no-op).
   test('when #side-panel-version element is missing does not throw', () => {
-    document.body.innerHTML = ''
+    document.body.innerHTML = '<span id="side-panel-title-version"></span>'
     expect(() => setSidePanelVersion('1.0.0', '2026-01-01 00:00')).not.toThrow()
   })
 })

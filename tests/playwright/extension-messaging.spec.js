@@ -198,6 +198,29 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Options ↔ background', () => {
 })
 
 test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Side panel ↔ background', () => {
+  // [IMPL-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Single-line header: left "Hoverboard v*", right build time YYYY-MM-DD HH:mm
+  test('side panel header shows single line (title+version left, build time right) [IMPL-SIDE_PANEL_TABS]', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(1500)
+
+    const titleEl = sidePanelPage.locator('#side-panel-title-version')
+    const versionEl = sidePanelPage.locator('#side-panel-version')
+    await expect(titleEl).toBeVisible()
+    await expect(versionEl).toBeVisible()
+
+    const leftText = await titleEl.textContent()
+    const rightText = await versionEl.textContent()
+    expect(leftText).toBeTruthy()
+    expect(leftText).toMatch(/^Hoverboard( v[\d.]+)?\s*$/)
+    expect(rightText).toBeTruthy()
+    expect(rightText).toMatch(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}\s*$/)
+
+    await sidePanelPage.close()
+  })
+
   test('side panel loads with This Page and By Tag tabs and By Tag tab fetches bookmarks', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const sidePanelPage = await context.newPage()
