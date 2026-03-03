@@ -71,11 +71,13 @@ const SIDE_PANEL_BOOKMARK_READY = '#bookmarkPanel [data-popup-ref="mainInterface
 const SIDE_PANEL_TAB_BOOKMARK = '.side-panel-tab[data-tab="bookmark"]'
 const SIDE_PANEL_TAB_TAGS_TREE = '.side-panel-tab[data-tab="tagsTree"]'
 const SIDE_PANEL_TAB_BROWSER_TABS = '.side-panel-tab[data-tab="browserTabs"]'
+const SIDE_PANEL_TAB_BROWSER_BOOKMARKS = '.side-panel-tab[data-tab="browserBookmarks"]'
 const SIDE_PANEL_BROWSER_TABS_READY = '#browserTabsPanel .browser-tabs-header'
+const SIDE_PANEL_BROWSER_BOOKMARKS_READY = '#browserBookmarksPanel #browserBookmarksList, #browserBookmarksPanel #browserBookmarksCount'
 // [IMPL-SCREENSHOT_MODE] Side panel captures at 240px width so README images match real Chrome side panel proportions
-const SIDE_PANEL_VIEWPORT = { width: 240, height: 600 }
+const SIDE_PANEL_VIEWPORT = { width: 240, height: 800 }
 // Viewport for Pinboard overlay page so composite (pinboard + side panel) has predictable dimensions
-const PINBOARD_VIEWPORT = { width: 1024 - 240, height: 600 }
+const PINBOARD_VIEWPORT = { width: 1024 - SIDE_PANEL_VIEWPORT.width, height: SIDE_PANEL_VIEWPORT.height }
 const PINBOARD_SIDE_PANEL_COMPOSITE_WIDTH = PINBOARD_VIEWPORT.width + SIDE_PANEL_VIEWPORT.width
 
 async function main () {
@@ -202,20 +204,20 @@ async function main () {
   console.log('Saved: images/local-bookmarks-index.png')
   await indexPage.close()
 
-  // 5) Side panel – tabbed page (Bookmark + Tags tree); 240px viewport so capture matches real side panel width [IMPL-SCREENSHOT_MODE]
+  // 5) Side panel – tabbed page (This Page + By Tag); 240px viewport so capture matches real side panel width [IMPL-SCREENSHOT_MODE]
   const sidePanelPage = await context.newPage()
   await sidePanelPage.setViewportSize(SIDE_PANEL_VIEWPORT)
   await sidePanelPage.goto(`${baseUrl}/src/ui/side-panel/side-panel.html`, { waitUntil: 'domcontentloaded', timeout: 15000 })
   await sidePanelPage.waitForTimeout(2000)
 
-  // 5a) Bookmark tab (default): wait for content then capture (file + buffer for pinboard+side-panel composite)
+  // 5a) This Page tab (default): wait for content then capture (file + buffer for pinboard+side-panel composite)
   await sidePanelPage.locator(SIDE_PANEL_BOOKMARK_READY).first().waitFor({ state: 'attached', timeout: 10000 })
   await sidePanelPage.waitForTimeout(800)
   const sidePanelBookmarkBuffer = await sidePanelPage.screenshot({ fullPage: true })
   fs.writeFileSync(path.join(imagesDir, 'side-panel-bookmark.png'), sidePanelBookmarkBuffer)
   console.log('Saved: images/side-panel-bookmark.png')
 
-  // 5a') Composite: Pinboard page (with overlay) + side panel Bookmark tab → pinboard-side-panel-bookmark.png [IMPL-SCREENSHOT_MODE]
+  // 5a') Composite: Pinboard page (with overlay) + side panel This Page tab → pinboard-side-panel-bookmark.png [IMPL-SCREENSHOT_MODE]
   const pinboardOnlyBuf = fs.readFileSync(pinboardOnlyPath)
   const panelTop = sharp(sidePanelBookmarkBuffer).extract({ left: 0, top: 0, width: SIDE_PANEL_VIEWPORT.width, height: SIDE_PANEL_VIEWPORT.height })
   const panelTopBuf = await panelTop.png().toBuffer()
@@ -234,10 +236,10 @@ async function main () {
     ])
     .png()
     .toFile(path.join(imagesDir, 'pinboard-side-panel-bookmark.png'))
-  console.log('Saved: images/pinboard-side-panel-bookmark.png (Pinboard + side panel Bookmark tab)')
+  console.log('Saved: images/pinboard-side-panel-bookmark.png (Pinboard + side panel This Page tab)')
   try { fs.unlinkSync(pinboardOnlyPath) } catch (_) {}
 
-  // 5b) Tags tree tab: switch tab, wait for tree content, capture
+  // 5b) By Tag tab: switch tab, wait for tree content, capture
   await sidePanelPage.locator(SIDE_PANEL_TAB_TAGS_TREE).click()
   await sidePanelPage.waitForTimeout(2000)
   await sidePanelPage.locator(SIDE_PANEL_READY_SELECTOR).first().waitFor({ state: 'attached', timeout: 10000 })
@@ -258,6 +260,17 @@ async function main () {
     fullPage: true
   })
   console.log('Saved: images/side-panel-tabs.png')
+
+  // 5d) Bookmarks tab: switch tab, wait for panel content, capture side-panel-bookmarks.png
+  await sidePanelPage.locator(SIDE_PANEL_TAB_BROWSER_BOOKMARKS).click()
+  await sidePanelPage.waitForTimeout(2000)
+  await sidePanelPage.locator(SIDE_PANEL_BROWSER_BOOKMARKS_READY).first().waitFor({ state: 'attached', timeout: 10000 })
+  await sidePanelPage.waitForTimeout(500)
+  await sidePanelPage.screenshot({
+    path: path.join(imagesDir, 'side-panel-bookmarks.png'),
+    fullPage: true
+  })
+  console.log('Saved: images/side-panel-bookmarks.png')
   await sidePanelPage.close()
 
   // 6) Browser Bookmark Import – table or empty state (uses chrome.bookmarks.getTree from profile)

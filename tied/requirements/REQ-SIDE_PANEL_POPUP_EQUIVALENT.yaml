@@ -9,24 +9,24 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
       - Popup closes when focus is lost; no persistent popup-equivalent view
       - Side panel previously showed only the tags tree
     benefits:
-      - One panel with tabs "Bookmark" and "Tags tree"; Bookmark tab = popup-equivalent UI; Tags tree tab = hierarchical view
-      - User switches between Bookmark and Tags tree inside the same panel
+      - One panel with tabs "This Page" and "By Tag"; This Page tab = popup-equivalent UI; By Tag tab = hierarchical view
+      - User switches between This Page and By Tag inside the same panel
   satisfaction_criteria:
-    - criterion: Side panel has a tab bar with "Bookmark" and "Tags tree"
-    - criterion: Bookmark tab shows functional equivalent of popup UI (quick actions, storage selector, tag management, search tabs, footer actions)
-    - criterion: Tags tree tab shows the existing tags-and-bookmarks tree (config, search, tag selector, tree)
+    - criterion: Side panel has a tab bar with "This Page" and "By Tag"
+    - criterion: This Page tab shows functional equivalent of popup UI (quick actions, storage selector, tag management, search tabs, footer actions)
+    - criterion: By Tag tab shows the existing tags-and-bookmarks tree (config, search, tag selector, tree)
     - criterion: Only one tab content is visible at a time; switching tabs shows the corresponding panel
     - criterion: Last-selected tab is persisted and restored when the panel is reopened
-    - criterion: In Bookmark tab, "Open Tags tree" (or equivalent) switches to the Tags tree tab instead of opening the panel again
-    - criterion: When the Bookmark tab is selected, its content reflects the current tab's bookmark state; when the Bookmark tab is visible, it refreshes promptly when the active browser tab changes or the tab's page completes (like the badge)
-    - criterion: When the side panel is open, both the Bookmark and Tags tree tabs update to display the DB record for the current tab's URL when the active browser tab changes or completes (same trigger as badge); the Tags tree tab's tag selector and tree reflect the current tab's bookmark tags
-    - criterion: When the user switches to the Tags tree tab, the tag selector checked state matches the current bookmark's tags (from the Bookmark tab), and the tree displays only bookmarks that have at least one of those tags
+    - criterion: In This Page tab, "By Tag" (or equivalent) switches to the By Tag tab instead of opening the panel again
+    - criterion: When the This Page tab is selected, its content reflects the current tab's bookmark state; when the This Page tab is visible, it refreshes promptly when the active browser tab changes or the tab's page completes (like the badge)
+    - criterion: When the side panel is open, both the This Page and By Tag tabs update to display the DB record for the current tab's URL when the active browser tab changes or completes (same trigger as badge); the By Tag tab's tag selector and tree reflect the current tab's bookmark tags
+    - criterion: When the user switches to the By Tag tab, the tag selector checked state matches the current bookmark's tags (from the This Page tab), and the tree displays only bookmarks that have at least one of those tags
     - criterion: Tab content fills the vertical space available in the side panel; the panel uses full panel width and height (not popup dimensions such as 350px width or 450px max-height)
     - criterion: 'Side panel header shows extension version and compile time (UTC YYYY-MM-DD HH:mm) after the title (e.g. element #side-panel-version).'
-    - criterion: 'Tags tree tab scroll behavior: the content above the list (inside #tagsTreePanel > div) can scroll off the page so the list section (#tagsTreePanel > section) can consume the full visible height'
+    - criterion: 'By Tag tab scroll behavior: the content above the list (inside #tagsTreePanel > div) can scroll off the page so the list section (#tagsTreePanel > section) can consume the full visible height'
   validation_criteria:
     - method: Manual verification
-      coverage: Open panel; see tabs; switch to Bookmark, verify popup-equivalent UI and current-tab bookmark; switch to Tags tree, verify tree; close and reopen panel, verify last tab restored
+      coverage: Open panel; see tabs; switch to This Page, verify popup-equivalent UI and current-tab bookmark; switch to By Tag, verify tree; close and reopen panel, verify last tab restored
     - method: Unit tests
       coverage: UIManager with scoped root (container) resolves elements from that root; tab switching shows/hides correct panel; tab persistence (mock storage)
     - method: E2E tests
@@ -56,4 +56,4 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
     last_updated:
       date: "2026-03-02"
       author: AI Agent
-      reason: Add header version/compile-time criterion; add side-panel-initial-tab-init.test.js to traceability
+      reason: Side panel tab display labels Bookmark→This Page, Tags tree→By Tag; satisfaction/validation criteria updated

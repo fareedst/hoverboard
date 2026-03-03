@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
- * Standalone script: launch extension with software rendering (SwiftShader), run Tags-tree-tab flow,
+ * Standalone script: launch extension with software rendering (SwiftShader), run By Tag-tab flow,
  * capture screenshot sequence, assemble GIF via ffmpeg two-pass palette.
  * Run: node scripts/record-demo-tags-tree.js
  * Output: docs/demo-tags-tree.gif
@@ -105,19 +105,19 @@ async function main () {
     })
   }
 
-  // Step 1: Open side panel (Bookmark tab first) — 3 frames
+  // Step 1: Open side panel (This Page tab first) — 3 frames
   await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html?demo=1`)
   await page.waitForLoadState('domcontentloaded')
   await page.waitForTimeout(1500)
-  await setOverlay('Opening the side panel', 'Hoverboard: switch to Tags tree', 'intro')
+  await setOverlay('Opening the side panel', 'Hoverboard: switch to By Tag', 'intro')
   await snap()
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
   await snap()
 
-  // Step 2: Switch to Tags tree tab — 4 frames
-  await setOverlay('Switching to Tags tree', 'Tags & bookmarks', 'navigation')
+  // Step 2: Switch to By Tag tab — 4 frames
+  await setOverlay('Switching to By Tag', 'Tags & bookmarks', 'navigation')
   await page.locator('.side-panel-tab[data-tab="tagsTree"]').click()
   await snap()
   await page.waitForTimeout(500)
@@ -127,15 +127,15 @@ async function main () {
   await page.waitForTimeout(500)
   await snap()
 
-  // Wait for Tags tree panel to be visible and data to load (tag selector or empty state)
+  // Wait for By Tag panel to be visible and data to load (tag selector or empty state)
   await page.waitForSelector('#tagsTreePanel:not([hidden])', { timeout: 3000 }).catch(() => {})
   await page.waitForTimeout(2000)
 
-  // Step 3: Tags tree loaded — 3 frames
+  // Step 3: By Tag loaded — 3 frames
   const hasTags = await page.locator('#tagSelector input[type="checkbox"]').first().isVisible().catch(() => false)
   const hasEmpty = await page.locator('#emptyState:not(.hidden)').isVisible().catch(() => false)
   await setOverlay(
-    'Tags tree loaded',
+    'By Tag loaded',
     hasTags ? 'Select tags to see bookmarks' : (hasEmpty ? 'No bookmarks yet' : 'Select tags to see bookmarks'),
     'navigation'
   )
@@ -221,7 +221,7 @@ async function main () {
     process.exit(1)
   }
 
-  // Two-pass ffmpeg: same as Tabs and Bookmark demos (1 fps, scale 400, palette 128)
+  // Two-pass ffmpeg: same as Tabs and This Page demos (1 fps, scale 400, palette 128)
   const palettePath = path.join(rootDir, 'test-results', 'demo-palette-tags-tree.png')
   const framesPattern = path.join(framesDir, 'frame-%04d.png')
   execSync(

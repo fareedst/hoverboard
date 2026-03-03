@@ -18,7 +18,7 @@ ARCH-SIDE_PANEL_TABS:
       - UIManager must support optional container; when set, cacheElements uses container.querySelector('[data-popup-ref="id"]') instead of document.getElementById
       - 'Bookmark panel markup: same structure as popup main (loading, error, main with quick actions, storage, tag management, search) with data-popup-ref on each element'
       - 'Tags tree panel: current tags-tree sections (config, search, tag selector, tree); IDs remain unique in document'
-      - '"Open Tags tree" in Bookmark footer: in panel context, switch to Tags tree tab instead of sending OPEN_SIDE_PANEL'
+      - '"By Tag" in This Page footer: in panel context, switch to By Tag tab instead of sending OPEN_SIDE_PANEL'
       - 'Layout: Page and tab content use full viewport height and panel width. Override popup-derived body constraints (max-height, width) when in side panel. Tab content area is a flex column so children can distribute space. Tags tree tab: #tagsTreePanel is the scroll container so the above-list div (.tags-tree-above-list) can scroll off the page; the tree list section (.tree-section) uses min-height: 100% so it consumes the full visible height and scrolls its own list.'
   traceability:
     requirements:
@@ -47,6 +47,6 @@ ARCH-SIDE_PANEL_TABS:
       - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
   metadata:
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
       reason: 'Tags tree tab scroll: panel scroll container; above-list div scrolls off; tree fills height'

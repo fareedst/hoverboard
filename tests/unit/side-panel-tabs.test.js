@@ -74,7 +74,7 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
     expect(v.browserBookmarksVisible).toBe(false)
   })
 
-  describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] refresh when switching to Bookmark tab', () => {
+  describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] refresh when switching to This Page tab', () => {
     test('shouldRefreshBookmarkTabWhenSwitching(true) when tab is Bookmark and already inited', () => {
       expect(shouldRefreshBookmarkTabWhenSwitching(TAB_BOOKMARK, true)).toBe(true)
     })

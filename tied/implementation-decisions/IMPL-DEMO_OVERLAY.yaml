@@ -31,9 +31,9 @@ IMPL-DEMO_OVERLAY:
       - path: scripts/record-demo-tabs.js
         description: setOverlay and removeOverlay; OVERLAY_CLASSES map; step-to-class mapping (Tabs demo)
       - path: scripts/record-demo-bookmark.js
-        description: same overlay helpers; Bookmark tab demo (Quick Actions, Storage, Add tag)
+        description: same overlay helpers; This Page tab demo (Quick Actions, Storage, Add tag)
       - path: scripts/record-demo-tags-tree.js
-        description: same overlay helpers; Tags tree tab demo (select tags, tree, search, click URL)
+        description: same overlay helpers; By Tag tab demo (select tags, tree, search, click URL)
   traceability:
     architecture: []
     requirements:
@@ -63,7 +63,7 @@ IMPL-DEMO_OVERLAY:
     removeOverlay(): remove #__demo_overlay__ if present
 
     # [IMPL-DEMO_OVERLAY] [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING]
-    # Tags tree demo (record-demo-tags-tree.js) loads side panel with ?demo=1, which triggers loadPlaceholderForScreenshot; tag toggles must update the tree per IMPL-SIDE_PANEL_TAGS_TREE (rawBookmarks set in placeholder path so refreshFromConfig runs on checkbox change).
+    # By Tag demo (record-demo-tags-tree.js) loads side panel with ?demo=1, which triggers loadPlaceholderForScreenshot; tag toggles must update the tree per IMPL-SIDE_PANEL_TAGS_TREE (rawBookmarks set in placeholder path so refreshFromConfig runs on checkbox change).
 
     # Step-to-class mapping (12 steps): 1,2 intro; 3,4 navigation; 5,6,8 state; 7,9,11 action; 10,12 result.
   test_coverage_note: Demo overlay styling verified by running record-demo-tabs.js and inspecting output GIF; no unit tests (standalone recording script).

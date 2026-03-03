@@ -198,20 +198,20 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] Options ↔ background', () => {
 })
 
 test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Side panel ↔ background', () => {
-  test('side panel loads with Bookmark and Tags tree tabs and Tags tree tab fetches bookmarks', async ({ context }) => {
+  test('side panel loads with This Page and By Tag tabs and By Tag tab fetches bookmarks', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const sidePanelPage = await context.newPage()
     await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
     await sidePanelPage.waitForLoadState('domcontentloaded')
     await sidePanelPage.waitForTimeout(1500)
 
-    // [IMPL-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_BROWSER_TABS] Tab bar has Bookmark, Tags tree, and Tabs
+    // [IMPL-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_BROWSER_TABS] Tab bar has This Page, By Tag, and Tabs
     await expect(sidePanelPage.locator('.side-panel-tab[data-tab="bookmark"]')).toBeVisible()
     await expect(sidePanelPage.locator('.side-panel-tab[data-tab="tagsTree"]')).toBeVisible()
     await expect(sidePanelPage.locator('.side-panel-tab[data-tab="browserTabs"]')).toBeVisible()
     await expect(sidePanelPage.locator('#bookmarkPanel, #tagsTreePanel, #browserTabsPanel')).toHaveCount(3)
 
-    // Default tab is Bookmark; switch to Tags tree and verify tree content loads
+    // Default tab is This Page; switch to By Tag and verify tree content loads
     await sidePanelPage.locator('.side-panel-tab[data-tab="tagsTree"]').click()
     await sidePanelPage.waitForTimeout(2000)
     const hasListOrEmpty = await sidePanelPage.locator('#treeContainer, #emptyState, #loadError').count() >= 1
@@ -219,7 +219,7 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
     await sidePanelPage.close()
   })
 
-  test('Tags tree shows either tree sections or empty state and does not show load error [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]', async ({ context }) => {
+  test('By Tag shows either tree sections or empty state and does not show load error [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const sidePanelPage = await context.newPage()
     await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
@@ -244,7 +244,7 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
 
   // [IMPL-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] In demo=1 mode, loadPlaceholderForScreenshot sets rawBookmarks so unchecking a tag runs refreshFromConfig and tree updates (section count decreases).
   // Skip: in Playwright extension E2E the section count goes to 0 after uncheck (needs investigation); manual verification and unit/data-flow tests cover the fix.
-  test.skip('Tags tree with ?demo=1: unchecking a tag updates the tree (section for that tag no longer shown)', async ({ context }) => {
+  test.skip('By Tag with ?demo=1: unchecking a tag updates the tree (section for that tag no longer shown)', async ({ context }) => {
     const extensionId = await getExtensionId(context)
     const sidePanelPage = await context.newPage()
     await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html?demo=1`)

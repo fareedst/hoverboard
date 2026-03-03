@@ -16,8 +16,8 @@
     <h1 class="side-panel-title">Hoverboard</h1>
     <p id="side-panel-version" class="side-panel-version" aria-hidden="true"></p>
     <nav class="side-panel-tabs" role="tablist" aria-label="Panel tabs">
-      <button type="button" class="side-panel-tab" role="tab" data-tab="bookmark" aria-selected="true">Bookmark</button>
-      <button type="button" class="side-panel-tab" role="tab" data-tab="tagsTree" aria-selected="false">Tags tree</button>
+      <button type="button" class="side-panel-tab" role="tab" data-tab="bookmark" aria-selected="true">This Page</button>
+      <button type="button" class="side-panel-tab" role="tab" data-tab="tagsTree" aria-selected="false">By Tag</button>
       <button type="button" class="side-panel-tab" role="tab" data-tab="browserTabs" aria-selected="false">Tabs</button>
       <button type="button" class="side-panel-tab" role="tab" data-tab="browserBookmarks" aria-selected="false">Bookmarks</button>
     </nav>
@@ -106,7 +106,7 @@
         <button type="button" data-popup-ref="reloadBtn" class="text-button" title="Reload">Reload</button>
         <button type="button" data-popup-ref="optionsBtn" class="text-button" title="Options">Options</button>
         <button type="button" data-popup-ref="bookmarksIndexBtn" class="text-button" title="Bookmarks index">Bookmarks index</button>
-        <button type="button" data-popup-ref="openTagsTreeBtn" class="text-button" title="Switch to Tags tree tab">Tags tree</button>
+        <button type="button" data-popup-ref="openTagsTreeBtn" class="text-button" title="Switch to By Tag tab">By Tag</button>
         <button type="button" data-popup-ref="browserBookmarkImportBtn" class="text-button" title="Browser bookmark import">Browser bookmark import</button>
       </div>
       <div class="footer-info">
@@ -223,19 +223,19 @@
           <div class="browser-tabs-search-scope" role="group" aria-label="Search in">
             <label class="browser-tabs-scope-label" title="Filter by tab title, URL, and referrer"><input type="radio" name="browserTabsSearchScope" value="tabInfo" id="browserTabsSearchScopeTabInfo" checked> Tab info</label>
             <label class="browser-tabs-scope-label" title="Filter by page body text"><input type="radio" name="browserTabsSearchScope" value="pageText" id="browserTabsSearchScopePageText"> Page text</label>
-            <label class="browser-tabs-scope-label" title="Filter by important elements (headings, alt, meta, etc.)"><input type="radio" name="browserTabsSearchScope" value="importantTags" id="browserTabsSearchScopeImportantTags"> Important elements</label>
+            <label class="browser-tabs-scope-label" title="Filter by elements (headings, alt, meta, etc.)"><input type="radio" name="browserTabsSearchScope" value="importantTags" id="browserTabsSearchScopeImportantTags"> Elements</label>
           </div>
         </div>
       </section>
-      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Filter & display; filter textbox and Important elements only (Title/URL/Block moved to list section) -->
+      <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Section: Filter & display; filter textbox and Elements only (Title/URL/Block moved to list section) -->
       <section class="browser-tabs-section-filter browser-tabs-section" aria-label="Filter and display">
         <div class="browser-tabs-control-group">
           <input type="text" id="browserTabsFilterInput" class="browser-tabs-filter-input" placeholder="Filter by title, URL, referrer…" aria-label="Filter tabs" title="Filter the list by the selected search scope">
         </div>
-        <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Important tag sources: textbox only; always use its value (or default when empty) for Important elements search -->
+        <!-- [IMPL-SIDE_PANEL_BROWSER_TABS] Elements: textbox only; always use its value (or default when empty) for Elements search -->
         <div class="browser-tabs-control-group browser-tabs-important-sources" id="browserTabsImportantSourcesWrap">
-          <label for="browserTabsImportantTagSources" class="browser-tabs-important-sources-label">Important tag sources</label>
-          <input type="text" id="browserTabsImportantTagSources" class="browser-tabs-important-sources-input" placeholder="title, meta description, og:title, h1, h2, h3, img alt, a title" aria-label="Comma-separated DOM sources for Important elements search" title="DOM sources to collect when filtering by Important elements (comma-separated); applied on next search or refresh">
+          <label for="browserTabsImportantTagSources" class="browser-tabs-important-sources-label">Elements</label>
+          <input type="text" id="browserTabsImportantTagSources" class="browser-tabs-important-sources-input" placeholder="title, meta description, og:title, h1, h2, h3, img alt, a title" aria-label="Comma-separated DOM sources for Elements search" title="DOM sources to collect when filtering by Elements (comma-separated); applied on next search or refresh">
         </div>
       </section>
       <div id="browserTabsMessage" class="browser-tabs-message hidden" aria-live="polite"></div>

@@ -111,7 +111,7 @@ async function main () {
     })
   }
 
-  // Step 1: Load side panel; hold on Bookmark tab (3 frames)
+  // Step 1: Load side panel; hold on This Page tab (3 frames)
   await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
   await page.waitForLoadState('domcontentloaded')
   await page.waitForTimeout(1500)
@@ -123,7 +123,7 @@ async function main () {
   await snap()
 
   // Step 2: Panel ready (3 frames)
-  await setOverlay('Side panel open', 'Bookmark tab visible; switch to Tabs next', 'intro')
+  await setOverlay('Side panel open', 'This Page tab visible; switch to Tabs next', 'intro')
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)

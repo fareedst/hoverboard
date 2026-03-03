@@ -36,7 +36,7 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     - criterion: UI controls in the Tabs panel are grouped into logical sections (Scope, Filter & display, Batch bookmark, List actions, Window actions) so their purpose is scannable.
     - criterion: Each interactive control in the Tabs panel has a short tooltip (title and where helpful aria-label) explaining its use.
     - criterion: Each tab in the display list shows the tab's favicon (in block view before the title; in Title/URL view before the title or URL text); fallback when favicon is missing.
-    - criterion: A text control (Important tag sources) allows editing the list of DOM sources used for "Important elements" search (e.g. title, meta description, og:title, h1, h2, h3, img alt, a title); this list is always used when that search scope is selected (empty textbox falls back to the default list); the value is persisted and applied on subsequent searches and refreshes.
+    - criterion: A text control (Elements) allows editing the list of DOM sources used for "Elements" search (e.g. title, meta description, og:title, h1, h2, h3, img alt, a title); this list is always used when that search scope is selected (empty textbox falls back to the default list); the value is persisted and applied on subsequent searches and refreshes.
     - criterion: A button "Gather into this window" moves all visible (displayed) tabs into the window that contains the side panel.
     - criterion: A button "One window per tab" (or Distribute) moves each visible tab into its own window; tabs that are already the only tab in their window are left unchanged.
     - criterion: The Title / URL / Block control (Show each tab as) is placed immediately above the tab list (in the list section), not in the filter section.

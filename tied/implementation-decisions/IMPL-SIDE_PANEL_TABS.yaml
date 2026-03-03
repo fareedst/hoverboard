@@ -1,5 +1,5 @@
 # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
-# Implementation: Tab bar and switching; init Bookmark tab with createPopup(container); init Tags tree tab with tags-tree load/render; persist selected tab.
+# Implementation: Tab bar and switching; init This Page tab with createPopup(container); init By Tag tab with tags-tree load/render; persist selected tab.
 IMPL-SIDE_PANEL_TABS:
   name: Side Panel Tabs Implementation
   status: Active
@@ -9,25 +9,25 @@ IMPL-SIDE_PANEL_TABS:
   rationale:
     why: Implements ARCH-SIDE_PANEL_TABS and REQ-SIDE_PANEL_POPUP_EQUIVALENT with one IMPL for tab UI and init flow.
     problems_solved:
-      - No tabbed panel; no single entry for Bookmark + Tags tree
+      - No tabbed panel; no single entry for This Page + By Tag
     benefits:
-      - Single side-panel entry script; tab bar; lazy init of Bookmark and Tags tree tabs; tab persistence
+      - Single side-panel entry script; tab bar; lazy init of This Page and By Tag tabs; tab persistence
   implementation_approach:
-    summary: side-panel.html has tab bar and two panels (#bookmarkPanel, #tagsTreePanel). side-panel.js on load reads persisted tab (chrome.storage.local), shows that panel, binds tab clicks. On first "Bookmark" select: init UISystem, createPopup({ container: bookmarkPanel }), controller.loadInitialData(), setupEventListeners. On "Tags tree" select: call initTagsTreeTab() (extracted from tags-tree.js). Persist tab on switch. Build: bundle side-panel.js so popup stack and tags-tree modules are inlined.
+    summary: side-panel.html has tab bar and two panels (#bookmarkPanel, #tagsTreePanel). side-panel.js on load reads persisted tab (chrome.storage.local), shows that panel, binds tab clicks. On first "This Page" select: init UISystem, createPopup({ container: bookmarkPanel }), controller.loadInitialData(), setupEventListeners. On "By Tag" select: call initTagsTreeTab() (extracted from tags-tree.js). Persist tab on switch. Build: bundle side-panel.js so popup stack and tags-tree modules are inlined.
     details:
       - manifest side_panel.default_path → side-panel.html
       - 'Side panel header: after h1 "Hoverboard", show version (from chrome.runtime.getManifest().version) and compile time UTC (YYYY-MM-DD HH:mm) from build-time constant; element #side-panel-version.'
       - Tab buttons: data-tab="bookmark", data-tab="tagsTree", data-tab="browserTabs"; click handler switches panel, saves to storage, runs init for that tab if not yet inited
       - Storage key e.g. hoverboard_sidepanel_active_tab; values "bookmark" | "tagsTree" | "browserTabs"
-      - Bookmark init runs once (guard); Tags tree init can re-run on each show or once
-      - On browser tab change (onActivated/onUpdated): if controller exists always call refreshPopupData() so currentPin is for new tab; then refresh Tags tree tab when visible via refreshTagsTreeTabIfVisible (setSelectedTagsFromCurrentBookmark)
+      - This Page init runs once (guard); By Tag init can re-run on each show or once
+      - On browser tab change (onActivated/onUpdated): if controller exists always call refreshPopupData() so currentPin is for new tab; then refresh By Tag tab when visible via refreshTagsTreeTabIfVisible (setSelectedTagsFromCurrentBookmark)
       - 'Recommended E2E (IMPL-SIDE_PANEL_TABS): after loading side panel, assert header contains #side-panel-version with non-empty text matching pattern v* · YYYY-MM-DD HH:mm (version and compile time UTC).'
   code_locations:
     files:
       - path: src/ui/side-panel/side-panel.html
         description: Tab bar, #side-panel-version, and panel roots
       - path: src/ui/side-panel/side-panel.js
-        description: Tab switching, persist, initSidePanelVersion, init Bookmark and Tags tree tabs
+        description: Tab switching, persist, initSidePanelVersion, init This Page and By Tag tabs
       - path: src/ui/side-panel/build-info.js
         description: BUILD_TIME_UTC (generated at build by scripts/build.js)
       - path: src/ui/side-panel/tags-tree.js
@@ -46,19 +46,19 @@ IMPL-SIDE_PANEL_TABS:
         description: Load bookmarks, config, render tag selector and tree
       - name: bindTabChangeRefresh
         file: src/ui/side-panel/side-panel.js
-        description: Register tabs.onActivated and tabs.onUpdated; always refresh controller when panel open; then refresh Bookmark UI (when visible) and Tags tree (when visible via refreshTagsTreeTabIfVisible)
+        description: Register tabs.onActivated and tabs.onUpdated; always refresh controller when panel open; then refresh This Page UI (when visible) and By Tag (when visible via refreshTagsTreeTabIfVisible)
       - name: refreshBookmarkTabIfVisible
         file: src/ui/side-panel/side-panel.js
-        description: Call controller.refreshPopupData() when Bookmark tab is visible and inited
+        description: Call controller.refreshPopupData() when This Page tab is visible and inited
       - name: refreshTagsTreeTabIfVisible
         file: src/ui/side-panel/side-panel.js
-        description: Call setSelectedTagsFromCurrentBookmark(controller tags) when Tags tree tab is visible and inited (on browser tab change)
+        description: Call setSelectedTagsFromCurrentBookmark(controller tags) when By Tag tab is visible and inited (on browser tab change)
       - name: runInitialTabInit
         file: src/ui/side-panel/side-panel.js
-        description: 'On panel load: when activeTab is tagsTree, await initBookmarkTab then init Tags tree with getTagsTreeInitOptions(controller); else initTabIfNeeded(activeTab). Exported for tests.'
+        description: 'On panel load: when activeTab is tagsTree, await initBookmarkTab then init By Tag with getTagsTreeInitOptions(controller); else initTabIfNeeded(activeTab). Exported for tests.'
       - name: getTagsTreeInitOptions
         file: src/ui/side-panel/side-panel-tab-state.js
-        description: 'Pure helper: given controller, returns currentBookmarkTags for initTagsTreeTab (Tags tree on open shows current URL record).'
+        description: 'Pure helper: given controller, returns currentBookmarkTags for initTagsTreeTab (By Tag on open shows current URL record).'
       - name: setSidePanelVersion
         file: src/ui/side-panel/side-panel.js
         description: Set #side-panel-version text to "v" + version + " · " + buildTimeUtc; no-op when element missing. Exported for tests.
@@ -73,6 +73,7 @@ IMPL-SIDE_PANEL_TABS:
     tests:
       - tests/unit/side-panel-tabs.test.js
       - tests/unit/side-panel-initial-tab-init.test.js
+      - tests/unit/side-panel-html.test.js
       - tests/playwright/extension-messaging.spec.js
     code_annotations:
       - IMPL-SIDE_PANEL_TABS
@@ -89,37 +90,37 @@ IMPL-SIDE_PANEL_TABS:
       - IMPL-SIDE_PANEL_TAGS_TREE
   essence_pseudocode: |
     # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
-    # This block defines the tabbed side panel: tab bar, two panels, switch + persist, and init of Bookmark and Tags tree tabs. Implements REQ by providing tabs and popup-equivalent + tags tree in one panel; implements ARCH by single page and scoped Bookmark init.
+    # This block defines the tabbed side panel: tab bar, two panels, switch + persist, and init of This Page and By Tag tabs. Implements REQ by providing tabs and popup-equivalent + tags tree in one panel; implements ARCH by single page and scoped This Page init.
 
-    INPUT: panel page load; user click on tab ("Bookmark", "Tags tree", or "Tabs")
-    OUTPUT: one panel visible; Bookmark, Tags tree, or browser Tabs content shown; selected tab persisted
+    INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+    OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted
     DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS]
-    # On panel load: restore last-selected tab and show that panel; bind tab button clicks; bind tab-change refresh. When restored tab is Tags tree, init Bookmark tab first so controller and current-tab data exist, then init Tags tree with currentBookmarkTags so it displays current URL's DB record. Implements "last-selected tab persisted and restored" and "both tabs display DB record for current tab's URL when panel opens or browser tab changes".
+    # On panel load: restore last-selected tab and show that panel; bind tab button clicks; bind tab-change refresh. When restored tab is By Tag (tagsTree), init This Page tab first so controller and current-tab data exist, then init By Tag with currentBookmarkTags so it displays current URL's DB record. Implements "last-selected tab persisted and restored" and "both tabs display DB record for current tab's URL when panel opens or browser tab changes".
     ON panel page load:
       activeTab = load from chrome.storage.local key hoverboard_sidepanel_active_tab OR default "bookmark"
       showPanel(activeTab)  // display #bookmarkPanel or #tagsTreePanel; hide the other
       bindTabButtons()  // on click: switchTab(tabId); save activeTab to storage; showPanel(activeTab); initTabIfNeeded(activeTab) or initTabIfNeeded(tabId, options)
       bindTabChangeRefresh()  // tabs.onActivated and tabs.onUpdated (active tab complete) → if controller exists always refreshPopupData(); then refreshBookmarkTabIfVisible(); then refreshTagsTreeTabIfVisible()
-      runInitialTabInit(activeTab)  // IF activeTab === "tagsTree": await initBookmarkTab(); initTabIfNeeded("tagsTree", getTagsTreeInitOptions(controller)). ELSE IF activeTab === "browserTabs": initTabIfNeeded("browserTabs"). ELSE: initTabIfNeeded(activeTab). Ensures Tags tree tab on open shows current URL's bookmark; Tabs tab on open loads browser tabs list (REQ-SIDE_PANEL_BROWSER_TABS).
+      runInitialTabInit(activeTab)  // IF activeTab === "tagsTree": await initBookmarkTab(); initTabIfNeeded("tagsTree", getTagsTreeInitOptions(controller)). ELSE IF activeTab === "browserTabs": initTabIfNeeded("browserTabs"). ELSE: initTabIfNeeded(activeTab). Ensures By Tag tab on open shows current URL's bookmark; Tabs tab on open loads browser tabs list (REQ-SIDE_PANEL_BROWSER_TABS).
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # getTagsTreeInitOptions(controller): returns { currentBookmarkTags } for initTagsTreeTab so Tags tree displays current tab's bookmark. Pure helper in side-panel-tab-state.js. controller?: { currentPin?: { tags }, normalizeTags(tags) }. Returns { currentBookmarkTags: controller ? (controller.normalizeTags(controller.currentPin?.tags) || []) : [] } as array.
+    # getTagsTreeInitOptions(controller): returns { currentBookmarkTags } for initTagsTreeTab so By Tag displays current tab's bookmark. Pure helper in side-panel-tab-state.js. controller?: { currentPin?: { tags }, normalizeTags(tags) }. Returns { currentBookmarkTags: controller ? (controller.normalizeTags(controller.currentPin?.tags) || []) : [] } as array.
     getTagsTreeInitOptions(controller):
       IF controller missing: RETURN { currentBookmarkTags: [] }
       raw = controller.normalizeTags(controller.currentPin?.tags) || []
       RETURN { currentBookmarkTags: Array.isArray(raw) ? raw : [] }
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # On browser tab change: always refresh controller (refreshPopupData) so currentPin is for the new tab; Bookmark tab UI is updated by refreshPopupData when visible; when Tags tree tab is visible and inited, refreshTagsTreeTabIfVisible() calls setSelectedTagsFromCurrentBookmark(controller.normalizeTags(controller.currentPin?.tags) || []). Implements "both tabs update to current tab's URL/DB record".
+    # On browser tab change: always refresh controller (refreshPopupData) so currentPin is for the new tab; This Page tab UI is updated by refreshPopupData when visible; when By Tag tab is visible and inited, refreshTagsTreeTabIfVisible() calls setSelectedTagsFromCurrentBookmark(controller.normalizeTags(controller.currentPin?.tags) || []). Implements "both tabs update to current tab's URL/DB record".
     ON tabs.onActivated / tabs.onUpdated (active tab complete):
       IF popupComponents?.controller: AWAIT controller.refreshPopupData()
-      IF Bookmark tab visible: UI already updated by refreshPopupData
-      IF Tags tree tab visible AND tagsTreeTabInited: refreshTagsTreeTabIfVisible() → setSelectedTagsFromCurrentBookmark(controller tags)
+      IF This Page tab visible: UI already updated by refreshPopupData
+      IF By Tag tab visible AND tagsTreeTabInited: refreshTagsTreeTabIfVisible() → setSelectedTagsFromCurrentBookmark(controller tags)
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS]
-    # switchTab: set activeTab, persist, show panel, run init for that tab. When switching to Tags tree: get current tags from popup controller; pass currentBookmarkTags to initTagsTreeTabIfNeeded; if Tags tree already inited call setSelectedTagsFromCurrentBookmark(tags). When switching to Bookmark tab and it was already inited, call controller.refreshPopupData(). Implements "only one tab visible", "switching shows corresponding panel", "Bookmark tab reflects current tab when selected", and "Tags tree tag selector and list match current bookmark tags".
+    # switchTab: set activeTab, persist, show panel, run init for that tab. When switching to By Tag: get current tags from popup controller; pass currentBookmarkTags to initTagsTreeTabIfNeeded; if By Tag already inited call setSelectedTagsFromCurrentBookmark(tags). When switching to This Page tab and it was already inited, call controller.refreshPopupData(). Implements "only one tab visible", "switching shows corresponding panel", "This Page tab reflects current tab when selected", and "By Tag tag selector and list match current bookmark tags".
     switchTab(tabId):
       wasBookmarkInited = bookmarkTabInited
       activeTab = tabId
@@ -147,17 +148,17 @@ IMPL-SIDE_PANEL_TABS:
     CSS .side-panel-content: flex 1 1 0; min-height 0; overflow auto; padding 0.5rem 0.75rem; display flex; flex-direction column
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT]
-    # initTabIfNeeded(Bookmark): run once. UISystem.init(); createPopup({ container: document.getElementById('bookmarkPanel') }); controller.loadInitialData(); uiManager.setupEventListeners(). Implements Bookmark tab = popup-equivalent; uses scoped root so elements are under bookmarkPanel.
+    # initTabIfNeeded(This Page, data-tab=bookmark): run once. UISystem.init(); createPopup({ container: document.getElementById('bookmarkPanel') }); controller.loadInitialData(); uiManager.setupEventListeners(). Implements This Page tab = popup-equivalent; uses scoped root so elements are under bookmarkPanel.
     initTabIfNeeded("bookmark"):
       IF bookmarkTabInited RETURN
       bookmarkTabInited = true
       uiSystem = AWAIT UISystem.init(); popupComponents = uiSystem.createPopup({ container: document.getElementById('bookmarkPanel'), errorHandler, config })
       AWAIT popupComponents.controller.loadInitialData()
       popupComponents.uiManager.setupEventListeners()
-      // Wire "Open Tags tree" in footer to switchTab("tagsTree") when in panel context
+      // Wire "By Tag" in footer to switchTab("tagsTree") when in panel context
 
     # [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # initTabIfNeeded(Tags tree): run when Tags tree tab first selected. Call initTagsTreeTab(options) with optional currentBookmarkTags so when loadBookmarks completes selected tags match current bookmark and tree shows only bookmarks that share at least one tag. Implements Tags tree tab content and tag sync from Bookmark tab.
+    # initTabIfNeeded(By Tag, data-tab=tagsTree): run when By Tag tab first selected. Call initTagsTreeTab(options) with optional currentBookmarkTags so when loadBookmarks completes selected tags match current bookmark and tree shows only bookmarks that share at least one tag. Implements By Tag tab content and tag sync from This Page tab.
     initTabIfNeeded("tagsTree", options):
       IF tagsTreeTabInited RETURN
       tagsTreeTabInited = true
@@ -176,4 +177,4 @@ IMPL-SIDE_PANEL_TABS:
     last_updated:
       date: "2026-03-02"
       author: AI Agent
-      reason: Side panel header version and compile time (UTC) after h1; BUILD_TIME_UTC from build-info
+      reason: Tab display labels This Page/By Tag; sync REQ/ARCH/IMPL; pseudo-code block comments with semantic tokens

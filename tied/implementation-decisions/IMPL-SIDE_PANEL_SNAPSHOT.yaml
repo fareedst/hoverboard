@@ -1,6 +1,5 @@
 # [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
 # Implementation: E2E snapshot helper for side panel returning two serializable state shapes (Bookmark tab, Tags tree tab).
-
 IMPL-SIDE_PANEL_SNAPSHOT:
   name: Side Panel Snapshot E2E Helper
   status: Active
@@ -18,7 +17,7 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       - Single helper snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }; E2E can assert required properties
       - Contract aligns with IMPL-SIDE_PANEL_TABS (two panels) and IMPL-SIDE_PANEL_BOOKMARK / IMPL-SIDE_PANEL_TAGS_TREE / IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
   implementation_approach:
-    summary: tests/e2e/helpers.js exports snapshotSidePanel(page); single page.evaluate returns { bookmarkTab, tagsTreeTab }; Bookmark tab snapshot queries #bookmarkPanel and data-popup-ref elements; Tags tree tab snapshot queries #tagsTreePanel and key IDs. E2E spec loads side-panel.html and asserts snapshot shapes.
+    summary: tests/e2e/helpers.js exports snapshotSidePanel(page); single page.evaluate returns { bookmarkTab, tagsTreeTab }; This Page tab snapshot queries #bookmarkPanel and data-popup-ref elements; By Tag tab snapshot queries #tagsTreePanel and key IDs. E2E spec loads side-panel.html and asserts snapshot shapes.
     details:
       - snapshotSidePanel(page) calls page.evaluate(() => { ... }) returning one object with bookmarkTab, tagsTreeTab, and browserTabsTab
       - bookmarkTab: root #bookmarkPanel; if absent return { panelPresent: false }; else query [data-popup-ref="loadingState"], [data-popup-ref="errorState"], [data-popup-ref="mainInterface"]; compute loadingVisible, errorVisible, mainVisible (not hidden); screen = loading|error|mainInterface|unknown; optional errorMessage
@@ -141,9 +140,9 @@ IMPL-SIDE_PANEL_SNAPSHOT:
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml
   metadata:
     created:
-      date: '2026-02-25'
+      date: "2026-02-25"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
       reason: Add browserBookmarksTab to snapshot contract and essence_pseudocode; cross-ref IMPL-SIDE_PANEL_BROWSER_BOOKMARKS

@@ -137,7 +137,7 @@ export async function snapshotSidePanel (page) {
       }
     }
 
-    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS] browserTabsTab: root #browserTabsPanel, layout (above-list + list-section), scope toggle, filter, copy/close, list, Gather/Distribute, important-tag sources, sections
+    // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS] browserTabsTab: root #browserTabsPanel, layout (above-list + list-section), scope toggle, filter, copy/close, list, Gather/Distribute, Elements, sections
     const browserTabsRoot = document.getElementById('browserTabsPanel')
     let browserTabsTab
     if (!browserTabsRoot) {

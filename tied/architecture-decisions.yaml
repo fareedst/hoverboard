@@ -2495,12 +2495,12 @@ ARCH-SIDE_PANEL_TABS:
       - Single panel entry (e.g. side-panel.html); tab bar; Bookmark panel uses UIManager/PopupController with scoped root (container); Tags tree panel hosts existing tags-tree UI
       - Only one panel visible at a time; last-selected tab persisted
   implementation_approach:
-    summary: Manifest side_panel.default_path points to one HTML (side-panel.html). Page has tab bar ("Bookmark" | "Tags tree"),
+    summary: Manifest side_panel.default_path points to one HTML (side-panel.html). Page has tab bar ("This Page" | "By Tag"),
     details:
       - Tab bar: two buttons; click switches visible panel and persists choice
       - UIManager supports optional container; when set, cacheElements uses container.querySelector('[data-popup-ref="id"]')
       - Bookmark panel markup: same structure as popup with data-popup-ref on each element
-      - '"Open Tags tree" in Bookmark footer: in panel context, switch to Tags tree tab'
+      - '"By Tag" in This Page footer: in panel context, switch to By Tag tab'
   traceability:
     requirements:
       - REQ-SIDE_PANEL_POPUP_EQUIVALENT

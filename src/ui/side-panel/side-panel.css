@@ -375,7 +375,7 @@
   color: var(--text-primary, #eee);
 }
 
-/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Important tag sources: label + textbox (always use textbox value or default when empty) */
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Elements: label + textbox (always use textbox value or default when empty) */
 .browser-tabs-important-sources {
   display: flex;
   align-items: center;

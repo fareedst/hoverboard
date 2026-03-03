@@ -187,7 +187,7 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] buildReco
 
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
- * parseImportantTagSources: comma-separated DOM sources for Important elements search; applied on GET_TABS_IMPORTANT_TAGS.
+ * parseImportantTagSources: comma-separated DOM sources for Elements search; applied on GET_TABS_IMPORTANT_TAGS.
  */
 describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] parseImportantTagSources', () => {
   test('comma-separated string returns trimmed non-empty array', () => {
@@ -221,8 +221,8 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] parseImpo
   })
 })
 
-/** [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Important-tag sources: persisted in chrome.storage.local; applied on GET_TABS_IMPORTANT_TAGS. */
-describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] important-tag sources persistence', () => {
+/** [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Elements: persisted in chrome.storage.local; applied on GET_TABS_IMPORTANT_TAGS. */
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Elements persistence', () => {
   const STORAGE_KEY = 'hoverboard_tabs_important_tag_sources'
 
   beforeEach(() => {

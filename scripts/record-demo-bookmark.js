@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK]
- * Standalone script: launch extension with software rendering (SwiftShader), run Bookmark-tab flow,
+ * Standalone script: launch extension with software rendering (SwiftShader), run This Page-tab flow,
  * capture screenshot sequence, assemble GIF via ffmpeg two-pass palette.
  * Run: node scripts/record-demo-bookmark.js
  * Output: docs/demo-bookmark.gif
@@ -109,22 +109,22 @@ async function main () {
     })
   }
 
-  // Step 1: Load side panel (Bookmark tab is default) — 3 frames
+  // Step 1: Load side panel (This Page tab is default) — 3 frames
   await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
   await page.waitForLoadState('domcontentloaded')
   await page.waitForTimeout(1500)
-  await setOverlay('Opening the side panel', 'Hoverboard: Bookmark tab', 'intro')
+  await setOverlay('Opening the side panel', 'Hoverboard: This Page tab', 'intro')
   await snap()
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
   await snap()
 
-  // Wait for Bookmark panel main interface (loading state may show first)
+  // Wait for This Page panel main interface (loading state may show first)
   await page.waitForSelector('#bookmarkPanel [data-popup-ref="mainInterface"]:not(.hidden)', { timeout: 8000 }).catch(() => {})
 
   // Step 2: Panel ready — 3 frames
-  await setOverlay('Bookmark tab', 'Quick actions, storage, tags for current tab', 'intro')
+  await setOverlay('This Page tab', 'Quick actions, storage, tags for current tab', 'intro')
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)

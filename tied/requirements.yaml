@@ -2398,18 +2398,18 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
       - Popup closes when focus is lost; no persistent popup-equivalent view
       - Side panel previously showed only the tags tree
     benefits:
-      - One panel with tabs "Bookmark" and "Tags tree"; Bookmark tab = popup-equivalent UI; Tags tree tab = hierarchical view
-      - User switches between Bookmark and Tags tree inside the same panel
+      - One panel with tabs "This Page" and "By Tag"; This Page tab = popup-equivalent UI; By Tag tab = hierarchical view
+      - User switches between This Page and By Tag inside the same panel
   satisfaction_criteria:
-    - criterion: Side panel has a tab bar with "Bookmark" and "Tags tree"
-    - criterion: Bookmark tab shows functional equivalent of popup UI (quick actions, storage selector, tag management, search tabs, footer actions)
-    - criterion: Tags tree tab shows the existing tags-and-bookmarks tree (config, search, tag selector, tree)
+    - criterion: Side panel has a tab bar with "This Page" and "By Tag"
+    - criterion: This Page tab shows functional equivalent of popup UI (quick actions, storage selector, tag management, search tabs, footer actions)
+    - criterion: By Tag tab shows the existing tags-and-bookmarks tree (config, search, tag selector, tree)
     - criterion: Only one tab content is visible at a time; switching tabs shows the corresponding panel
     - criterion: Last-selected tab is persisted and restored when the panel is reopened
-    - criterion: In Bookmark tab, "Open Tags tree" (or equivalent) switches to the Tags tree tab instead of opening the panel again
+    - criterion: In This Page tab, "By Tag" (or equivalent) switches to the By Tag tab instead of opening the panel again
   validation_criteria:
     - method: Manual verification
-      coverage: Open panel; see tabs; switch to Bookmark, verify popup-equivalent UI and current-tab bookmark; switch to Tags tree, verify tree; close and reopen panel, verify last tab restored
+      coverage: Open panel; see tabs; switch to This Page, verify popup-equivalent UI and current-tab bookmark; switch to By Tag, verify tree; close and reopen panel, verify last tab restored
     - method: Unit tests
       coverage: UIManager with scoped root (container) resolves elements from that root; tab switching shows/hides correct panel; tab persistence (mock storage)
     - method: E2E tests
