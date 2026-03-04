@@ -512,4 +512,30 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     expect(tabsPanelHidden).toBe(false)
     await sidePanelPage.close()
   })
+
+  // [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] Panel opens on By Tag tab when storage is set (demo script starts with By Tag visible).
+  test('side panel opens with By Tag tab visible when hoverboard_sidepanel_active_tab is set to tagsTree', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const optionsPage = await context.newPage()
+    await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded' })
+    await optionsPage.waitForTimeout(500)
+    await optionsPage.evaluate(() => {
+      return new Promise((resolve) => {
+        chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'tagsTree' }, () => resolve())
+      })
+    })
+    await optionsPage.close()
+
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(2000)
+
+    const tagsTreePanelHidden = await sidePanelPage.evaluate(() => {
+      const panel = document.getElementById('tagsTreePanel')
+      return panel ? panel.hidden : true
+    })
+    expect(tagsTreePanelHidden).toBe(false)
+    await sidePanelPage.close()
+  })
 })
