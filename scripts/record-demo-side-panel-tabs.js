@@ -3,8 +3,8 @@
  * [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-DEMO_OVERLAY]
  * Standalone script: launch extension with software rendering (SwiftShader), run Tabs-tab flow,
  * capture screenshot sequence, assemble GIF via ffmpeg two-pass palette.
- * Run: node scripts/record-demo-tabs.js
- * Output: docs/demo-tabs-export.gif
+ * Run: node scripts/record-demo-side-panel-tabs.js
+ * Output: docs/demo-side-panel-tabs.gif
  */
 
 import path from 'path'
@@ -17,7 +17,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.join(__dirname, '..')
 const pathToExtension = path.join(rootDir, 'dist')
 const framesDir = path.join(rootDir, 'test-results', 'demo-frames')
-const gifOut = path.join(rootDir, 'docs', 'demo-tabs-export.gif')
+const gifOut = path.join(rootDir, 'docs', 'demo-side-panel-tabs.gif')
 
 fs.mkdirSync(framesDir, { recursive: true })
 fs.mkdirSync(path.dirname(gifOut), { recursive: true })
@@ -111,11 +111,43 @@ async function main () {
     })
   }
 
+  // [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] Element highlight: panelId 'browserTabsPanel' scopes to #browserTabsPanel; null = document (tab bar/header).
+  async function highlightElement (selector, panelId = 'browserTabsPanel') {
+    await page.evaluate(({ sel, panelId }) => {
+      const root = panelId ? document.getElementById(panelId) : document
+      if (!root) return
+      const el = root.querySelector(sel)
+      if (!el) return
+      const prev = document.querySelector('[data-demo-highlight="1"]')
+      if (prev) {
+        prev.removeAttribute('data-demo-highlight')
+        prev.style.outline = ''
+        prev.style.boxShadow = ''
+      }
+      el.setAttribute('data-demo-highlight', '1')
+      el.style.outline = '3px solid #42a5f5'
+      el.style.boxShadow = '0 0 0 3px rgba(66,165,245,0.4)'
+    }, { sel: selector, panelId })
+  }
+
+  async function clearHighlight () {
+    await page.evaluate(() => {
+      const prev = document.querySelector('[data-demo-highlight="1"]')
+      if (prev) {
+        prev.removeAttribute('data-demo-highlight')
+        prev.style.outline = ''
+        prev.style.boxShadow = ''
+      }
+    })
+  }
+
   // Step 1: Load side panel; hold on This Page tab (3 frames)
   await page.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
   await page.waitForLoadState('domcontentloaded')
   await page.waitForTimeout(1500)
+  await clearHighlight()
   await setOverlay('Opening the side panel', 'Hoverboard: bookmarks, tabs & search', 'intro')
+  await highlightElement('.side-panel-tabs', null)
   await snap()
   await page.waitForTimeout(400)
   await snap()
@@ -123,7 +155,9 @@ async function main () {
   await snap()
 
   // Step 2: Panel ready (3 frames)
+  await clearHighlight()
   await setOverlay('Side panel open', 'This Page tab visible; switch to Tabs next', 'intro')
+  await highlightElement('.side-panel-tab[data-tab="browserTabs"]', null)
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
@@ -132,7 +166,9 @@ async function main () {
   await snap()
 
   // Step 3: Click Tabs tab; wait for list init (4 frames)
+  await clearHighlight()
   await setOverlay('Switching to the Tabs tab', 'Lists all open browser tabs', 'navigation')
+  await highlightElement('.side-panel-tab[data-tab="browserTabs"]', null)
   await page.locator('.side-panel-tab[data-tab="browserTabs"]').click()
   await snap()
   await page.waitForTimeout(400)
@@ -143,7 +179,9 @@ async function main () {
   await snap()
 
   // Step 4: List loading (3 frames)
+  await clearHighlight()
   await setOverlay('Tabs tab selected', 'Loading tab list…', 'navigation')
+  await highlightElement('#browserTabsList')
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
@@ -152,7 +190,9 @@ async function main () {
   await snap()
 
   // Step 5: List populated (4 frames)
+  await clearHighlight()
   await setOverlay('Tab list loaded', 'Each row: title, URL and referrer', 'state')
+  await highlightElement('#browserTabsList')
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
@@ -163,7 +203,9 @@ async function main () {
   await snap()
 
   // Step 5a: Display mode — Title view
+  await clearHighlight()
   await setOverlay('Switching to Title view', 'Each row shows only the tab title', 'state')
+  await highlightElement('#browserTabsListDisplayTitle')
   await page.locator('#browserTabsListDisplayTitle').click()
   await page.waitForTimeout(400)
   await snap()
@@ -173,7 +215,9 @@ async function main () {
   await snap()
 
   // Step 5b: Display mode — Block (restore)
+  await clearHighlight()
   await setOverlay('Switching back to Block view', 'Full card with title, URL, referrer', 'state')
+  await highlightElement('#browserTabsListDisplayBlock')
   await page.locator('#browserTabsListDisplayBlock').click()
   await page.waitForTimeout(300)
   await snap()
@@ -181,7 +225,9 @@ async function main () {
   await snap()
 
   // Step 6: Before filter (2 frames)
+  await clearHighlight()
   await setOverlay('Focusing filter', 'Type to narrow the list', 'state')
+  await highlightElement('#browserTabsFilterInput')
   const filterInput = page.locator('#browserTabsFilterInput')
   if (await filterInput.isVisible()) await filterInput.focus().catch(() => {})
   await page.waitForTimeout(300)
@@ -190,7 +236,9 @@ async function main () {
   await snap()
 
   // Step 7: Type filter (4 frames)
+  await clearHighlight()
   await setOverlay("Filtering: typing 'playwright'", 'Only matching tabs remain visible', 'action')
+  await highlightElement('#browserTabsFilterInput')
   if (await filterInput.isVisible()) {
     await filterInput.fill('playwright')
     await page.waitForTimeout(300)
@@ -204,7 +252,9 @@ async function main () {
   }
 
   // Step 8: Filter applied (3 frames)
+  await clearHighlight()
   await setOverlay('Filter applied', 'List shows matching tabs only', 'state')
+  await highlightElement('#browserTabsList')
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
@@ -213,7 +263,9 @@ async function main () {
   await snap()
 
   // Step 8a: Remove from list (tab hidden, not closed)
+  await clearHighlight()
   await setOverlay('Remove from list', 'Tab hidden from list (not closed)', 'action')
+  await highlightElement('[data-action="removeFromDisplay"]')
   await page.locator('#browserTabsPanel [data-action="removeFromDisplay"]').first().click()
   await page.waitForTimeout(400)
   await snap()
@@ -223,7 +275,9 @@ async function main () {
   await snap()
 
   // Step 8b: Refresh (list reloaded; hidden tab reappears)
+  await clearHighlight()
   await setOverlay('Refreshing tab list', 'List reloaded; hidden tabs reappear', 'action')
+  await highlightElement('#browserTabsRefreshBtn')
   await page.locator('#browserTabsPanel [data-action="refreshTabs"]').click()
   await page.waitForTimeout(700)
   await snap()
@@ -233,7 +287,9 @@ async function main () {
   await snap()
 
   // Step 9: Copy Records (4 frames)
+  await clearHighlight()
   await setOverlay('Clicking Copy Records', 'Exports visible tabs as YAML to clipboard', 'action')
+  await highlightElement('#browserTabsCopyRecordsBtn')
   await page.locator('#browserTabsCopyRecordsBtn').click()
   await page.waitForTimeout(300)
   await snap()
@@ -245,7 +301,9 @@ async function main () {
   await snap()
 
   // Step 10: Copy Records success (3 frames)
+  await clearHighlight()
   await setOverlay('Export complete (YAML)', 'YAML records copied — ready to paste', 'result')
+  await highlightElement('#browserTabsCopyRecordsBtn')
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)
@@ -254,7 +312,9 @@ async function main () {
   await snap()
 
   // Step 11: Copy URLs (3 frames)
+  await clearHighlight()
   await setOverlay('Clicking Copy URLs', 'Exports visible tab URLs to clipboard', 'action')
+  await highlightElement('#browserTabsCopyBtn')
   await page.locator('#browserTabsCopyBtn').click()
   await page.waitForTimeout(300)
   await snap()
@@ -264,7 +324,9 @@ async function main () {
   await snap()
 
   // Step 12: Copy URLs success (3 frames)
+  await clearHighlight()
   await setOverlay('Export complete (URLs)', 'URLs copied — ready to paste', 'result')
+  await highlightElement('#browserTabsCopyBtn')
   await page.waitForTimeout(400)
   await snap()
   await page.waitForTimeout(400)

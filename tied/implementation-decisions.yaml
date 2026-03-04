@@ -4481,7 +4481,7 @@ IMPL-DEMO_OVERLAY:
     summary: Overlay fixed at top of viewport; font 18-20px; setOverlay(action, achievement, textClass); five classes (intro, navigation, state, action, result) with assigned colors; 12 steps mapped to classes.
   code_locations:
     files:
-      - path: scripts/record-demo-tabs.js
+      - path: scripts/record-demo-side-panel-tabs.js
         description: setOverlay and removeOverlay; OVERLAY_CLASSES map; step-to-class mapping
   traceability:
     architecture: []

@@ -3,8 +3,8 @@
  * [PROC-DEMO_RECORDING] [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SCREENSHOT_MODE]
  * Standalone script: launch extension with software rendering (SwiftShader), seed placeholder bookmark data,
  * run This Page-tab flow with ?screenshot=1&url&title so panel shows rich Pinboard bookmark, capture sequence, assemble GIF.
- * Run: node scripts/record-demo-bookmark.js
- * Output: docs/demo-bookmark.gif
+ * Run: node scripts/record-demo-side-panel-this-page.js
+ * Output: docs/demo-side-panel-this-page.gif
  */
 
 import path from 'path'
@@ -22,7 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.join(__dirname, '..')
 const pathToExtension = path.join(rootDir, 'dist')
 const framesDir = path.join(rootDir, 'test-results', 'demo-frames-bookmark')
-const gifOut = path.join(rootDir, 'docs', 'demo-bookmark.gif')
+const gifOut = path.join(rootDir, 'docs', 'demo-side-panel-this-page.gif')
 
 fs.mkdirSync(framesDir, { recursive: true })
 fs.mkdirSync(path.dirname(gifOut), { recursive: true })

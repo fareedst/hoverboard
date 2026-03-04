@@ -14,6 +14,8 @@ IMPL-DEMO_OVERLAY:
     - IMPL-SIDE_PANEL_BROWSER_TABS
     - IMPL-SIDE_PANEL_BOOKMARK
     - IMPL-SIDE_PANEL_TAGS_TREE
+    - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
+    - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
   rationale:
     why: Implements PROC-DEMO_RECORDING overlay styling for Tabs demo; position, text size, and class-based colors so key-frame annotations are visible and semantically distinct.
     problems_solved:
@@ -30,16 +32,18 @@ IMPL-DEMO_OVERLAY:
       - setOverlay(action, achievement, textClass): create or reuse #__demo_overlay__; apply class color to action (strong) and achievement (span, muted); textClass one of intro, navigation, state, action, result.
       - OVERLAY_CLASSES: intro #e0e0e0, navigation #42a5f5, state #ffa726, action #26c6da, result #66bb6a.
       - Step mapping: 1-2 intro; 3-4 navigation; 5-6,8 state; 7,9,11 action; 10,12 result.
-      - Demo also shows display mode (Title then Block), remove-from-display, and Refresh; steps 5a/5b and 8a/8b in record-demo-tabs.js.
-      - Bookmark demo (record-demo-bookmark.js): highlightElement(selector) and clearHighlight() apply outline/box-shadow to first element matching selector inside #bookmarkPanel; selectors .quick-actions, .storage-section, [data-popup-ref="tagWithAiBtn"], .recent-tags, [data-popup-ref="suggestedTags"], .search-section, .popup-footer; step order Quick Actions row, Save to (Storage), add tags (demo/reading/tools), Tag with AI button highlight + overlay, Recent Tags, Suggested Tags, Search Tabs, Footer, result.
+      - Demo also shows display mode (Title then Block), remove-from-display, and Refresh; steps 5a/5b and 8a/8b in record-demo-side-panel-tabs.js.
+      - Bookmark demo (record-demo-side-panel-this-page.js): highlightElement(selector) and clearHighlight() apply outline/box-shadow to first element matching selector inside #bookmarkPanel; selectors .quick-actions, .storage-section, [data-popup-ref="tagWithAiBtn"], .recent-tags, [data-popup-ref="suggestedTags"], .search-section, .popup-footer; step order Quick Actions row, Save to (Storage), add tags (demo/reading/tools), Tag with AI button highlight + overlay, Recent Tags, Suggested Tags, Search Tabs, Footer, result.
   code_locations:
     files:
-      - path: scripts/record-demo-tabs.js
-        description: setOverlay and removeOverlay; OVERLAY_CLASSES map; step-to-class mapping (Tabs demo)
-      - path: scripts/record-demo-bookmark.js
+      - path: scripts/record-demo-side-panel-tabs.js
+        description: setOverlay, removeOverlay, highlightElement(selector, panelId), clearHighlight; Tabs demo with per-step highlight (steps 1-3 tab bar, steps 4-12 #browserTabsPanel); OVERLAY_CLASSES; step-to-class mapping
+      - path: scripts/record-demo-side-panel-this-page.js
         description: setOverlay, removeOverlay, highlightElement, clearHighlight; This Page tab demo with section highlights (Quick Actions, Save to, Tag with AI, Recent Tags, Suggested Tags, Search Tabs, Footer); add-tag flow to populate Recent Tags
-      - path: scripts/record-demo-tags-tree.js
-        description: setOverlay, removeOverlay, highlightElement, clearHighlight scoped to #tagsTreePanel; By Tag demo step order (Filtering by tag highlight + overlay, select tags, tree updated, Search bookmarks + #searchCount highlight + overlay, click URL); panel uses tagsTreePlaceholderBookmarks for rich demo data
+      - path: scripts/record-demo-side-panel-by-tag.js
+        description: setOverlay, removeOverlay, highlightElement, clearHighlight scoped to #tagsTreePanel; By Tag demo step order (Filtering by tag, select tags, Tree updated with #treeContainer highlight, Search + #searchCount, Click URL with .tree-bookmark-link highlight + extra end pause); tagsTreePlaceholderBookmarks
+      - path: scripts/record-demo-side-panel-bookmarks.js
+        description: setOverlay, removeOverlay, highlightElement, clearHighlight scoped to #browserBookmarksPanel; Bookmarks tab demo; seed Chrome bookmarks (folder + 5-10 items) via options page then open side panel; steps open, switch to Bookmarks, list loaded, search, folder, sort, count, click URL (Opens in new tab)
   traceability:
     architecture: []
     requirements:
@@ -47,6 +51,7 @@ IMPL-DEMO_OVERLAY:
       - REQ-SIDE_PANEL_POPUP_EQUIVALENT
       - REQ-SIDE_PANEL_TAGS_TREE
       - REQ-SIDE_PANEL_BOOKMARK_SEARCH
+      - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
       - REQ-MOVE_BOOKMARK_STORAGE_UI
       - REQ-RECENT_TAGS_SYSTEM
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
@@ -63,7 +68,7 @@ IMPL-DEMO_OVERLAY:
       - PROC-DEMO_RECORDING
   essence_pseudocode: |
     # [IMPL-DEMO_OVERLAY] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
-    # Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-tabs.js, record-demo-bookmark.js, record-demo-tags-tree.js.
+    # Demo overlay: DOM inject in side-panel page before key-frame groups; position top; larger font; five text classes with colors. Used by record-demo-side-panel-tabs.js, record-demo-side-panel-this-page.js, record-demo-side-panel-by-tag.js.
 
     setOverlay(action, achievement, textClass):
       el = getElementById('__demo_overlay__') or create and append div#__demo_overlay__
@@ -77,15 +82,19 @@ IMPL-DEMO_OVERLAY:
     highlightElement(selector): panel = getElementById('bookmarkPanel'); el = panel.querySelector(selector); clear any existing data-demo-highlight; set el.outline and el.boxShadow to 3px solid #42a5f5 and glow; set data-demo-highlight=1 on el
     clearHighlight(): find element with data-demo-highlight="1"; clear outline and boxShadow; remove data-demo-highlight
 
-    # [IMPL-DEMO_OVERLAY] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-RECENT_TAGS_SYSTEM] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-AI_TAGGING_POPUP] Bookmark demo step order (record-demo-bookmark.js): (1) Open side panel, (2) Panel ready, (3) Quick Actions row highlight + overlay, (4) Save to (Storage) section highlight + overlay, (5) Add tags demo/reading/tools to populate Recent Tags, (6) Tag with AI button highlight + overlay (selector [data-popup-ref="tagWithAiBtn"]; overlay text describes "Get AI-suggested tags for this page (set API key in Options)"), (7) Recent Tags section highlight + overlay, (8) Suggested Tags section highlight + overlay, (9) Search Tabs section highlight + overlay, (10) Footer highlight + overlay, (11) Result overlay; clearHighlight before each highlight and at end.
+    # [IMPL-DEMO_OVERLAY] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-RECENT_TAGS_SYSTEM] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-AI_TAGGING_POPUP] Bookmark demo step order (record-demo-side-panel-this-page.js): (1) Open side panel, (2) Panel ready, (3) Quick Actions row highlight + overlay, (4) Save to (Storage) section highlight + overlay, (5) Add tags demo/reading/tools to populate Recent Tags, (6) Tag with AI button highlight + overlay (selector [data-popup-ref="tagWithAiBtn"]; overlay text describes "Get AI-suggested tags for this page (set API key in Options)"), (7) Recent Tags section highlight + overlay, (8) Suggested Tags section highlight + overlay, (9) Search Tabs section highlight + overlay, (10) Footer highlight + overlay, (11) Result overlay; clearHighlight before each highlight and at end.
 
     # [IMPL-DEMO_OVERLAY] [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH]
-    # By Tag demo (record-demo-tags-tree.js): load side panel with ?demo=1 (loadPlaceholderForScreenshot, tagsTreePlaceholderBookmarks); tag toggles update the tree. Element highlight scoped to #tagsTreePanel so only By Tag tab content is highlighted.
+    # By Tag demo (record-demo-side-panel-by-tag.js): load side panel with ?demo=1 (loadPlaceholderForScreenshot, tagsTreePlaceholderBookmarks); tag toggles update the tree. Element highlight scoped to #tagsTreePanel so only By Tag tab content is highlighted.
     highlightElement(selector) for By Tag: panel = getElementById('tagsTreePanel'); el = panel.querySelector(selector); clear existing data-demo-highlight; set el.outline and el.boxShadow (3px solid #42a5f5, glow); set data-demo-highlight=1 on el. clearHighlight() same as Bookmark demo.
-    # Step order: (1) Open side panel, (2) Switch to By Tag, (3) By Tag loaded, (4) Filtering by tag — clearHighlight; setOverlay("Filtering by tag", "Only bookmarks that have at least one selected tag are shown in the tree.", state); highlightElement('.tag-selector-section'); snap. Then select tag(s) if hasTags. (5) Tree updated overlay. (6) Search bookmarks and # matches — clearHighlight; setOverlay("Search bookmarks", "Type to filter the list.", action); highlightElement('#searchInput'); fill('example'); wait; clearHighlight; setOverlay("Match count", "The count updates as you type; it shows how many bookmarks match your search.", action); highlightElement('#searchCount'); snap. (7) Click URL (result).
+    # Step order: (1) Open side panel, (2) Switch to By Tag, (3) By Tag loaded, (4) Filtering by tag — clearHighlight; setOverlay("Filtering by tag", "Only bookmarks that have at least one selected tag are shown in the tree.", state); highlightElement('.tag-selector-section'); snap. Then select tag(s) if hasTags. (5) Tree updated — clearHighlight; setOverlay("Tree updated", "Bookmarks under selected tags", state); highlightElement('#treeContainer'); snap. (6) Search bookmarks and # matches — clearHighlight; setOverlay("Search bookmarks", ...); highlightElement('#searchInput'); fill('example'); clearHighlight; setOverlay("Match count", ...); highlightElement('#searchCount'); snap. (7) Click URL — clearHighlight; highlightElement('.tree-bookmark-link'); setOverlay("Opening URL", "Opens in new tab", result); click first link; extra beat (2-3 wait+snap) before removeOverlay.
+
+    # [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Tabs demo (record-demo-side-panel-tabs.js): highlightElement(selector, panelId) with panelId 'browserTabsPanel' or null (document for tab bar). Every step has clearHighlight then highlightElement: 1-3 .side-panel-tabs / .side-panel-tab[data-tab="browserTabs"] (null); 4-12 #browserTabsList, #browserTabsListDisplayTitle, #browserTabsListDisplayBlock, #browserTabsFilterInput, [data-action="removeFromDisplay"], #browserTabsRefreshBtn, #browserTabsCopyRecordsBtn, #browserTabsCopyBtn (browserTabsPanel).
+
+    # [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] Bookmarks demo (record-demo-side-panel-bookmarks.js): seed Chrome bookmarks (folder "Hoverboard Demo" + 5-10 items) via options page evaluate(chrome.bookmarks.create); open side panel; switch to Bookmarks tab; highlightElement scoped to #browserBookmarksPanel. Step order: open, switch to Bookmarks, list loaded (#browserBookmarksList), search (#browserBookmarksSearchInput), folder (#browserBookmarksFolderSelect), sort (#browserBookmarksSortSelect), count (#browserBookmarksCount), click URL (.browser-bookmarks-row-url, "Opens in new tab").
 
     # Step-to-class mapping (12 steps): 1,2 intro; 3,4 navigation; 5,6,8 state; 7,9,11 action; 10,12 result.
-  test_coverage_note: Demo overlay styling verified by running record-demo-tabs.js and inspecting output GIF; no unit tests (standalone recording script).
+  test_coverage_note: Demo overlay styling verified by running record-demo-side-panel-tabs.js and inspecting output GIF; no unit tests (standalone recording script).
   metadata:
     created:
       date: "2026-03-02"
@@ -93,4 +102,4 @@ IMPL-DEMO_OVERLAY:
     last_updated:
       date: "2026-03-03"
       author: AI Agent
-      reason: 'By Tag demo: highlightElement/clearHighlight scoped to #tagsTreePanel; Filtering by tag and # matches highlights + overlay text; REQ-SIDE_PANEL_BOOKMARK_SEARCH'
+      reason: 'By Tag: #treeContainer and .tree-bookmark-link highlights + end pause; Tabs: per-step highlights; Bookmarks demo script + IMPL/REQ refs'

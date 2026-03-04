@@ -3,8 +3,8 @@
  * [PROC-DEMO_RECORDING] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI]
  * Standalone script: launch extension, open side panel, switch to Usage tab,
  * capture screenshot sequence, assemble GIF via ffmpeg two-pass palette.
- * Run: node scripts/record-demo-usage.js
- * Output: docs/demo-usage.gif
+ * Run: node scripts/record-demo-side-panel-usage.js
+ * Output: docs/demo-side-panel-usage.gif
  */
 
 import path from 'path'
@@ -22,7 +22,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootDir = path.join(__dirname, '..')
 const pathToExtension = path.join(rootDir, 'dist')
 const framesDir = path.join(rootDir, 'test-results', 'demo-usage-frames')
-const gifOut = path.join(rootDir, 'docs', 'demo-usage.gif')
+const gifOut = path.join(rootDir, 'docs', 'demo-side-panel-usage.gif')
 
 fs.mkdirSync(framesDir, { recursive: true })
 fs.mkdirSync(path.dirname(gifOut), { recursive: true })
@@ -179,7 +179,7 @@ async function main () {
     process.exit(1)
   }
 
-  // Two-pass ffmpeg: palettegen then paletteuse (same as record-demo-tabs.js)
+  // Two-pass ffmpeg: palettegen then paletteuse (same as record-demo-side-panel-tabs.js)
   const palettePath = path.join(rootDir, 'test-results', 'demo-usage-palette.png')
   const framesPattern = path.join(framesDir, 'frame-%04d.png')
   execSync(

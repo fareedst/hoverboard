@@ -74,9 +74,9 @@ The snapshot above shows **pinboard.in** in the main content area with the Hover
 
 ![Side Panel – This Page tab](images/side-panel-bookmark.png)
 
-![Demo: This Page tab](docs/demo-bookmark.gif)
+![Demo: This Page tab](docs/demo-side-panel-this-page.gif)
 
-A short demo animation walks through the **This Page** tab with highlighted sections and overlay descriptions: **Quick Actions** (Show Hover, Toggle Privacy, Read Later, Delete), **Save to** (Pinboard, File, Local, Sync), **Tag with AI** (AI-suggested tags; set API key in Options), **Recent Tags** and **Suggested Tags** (seeded in demo mode so both sections appear), **Search Tabs**, and the **footer** (Reload, Options, Bookmarks index, By Tag, Browser bookmark import). Produce the GIF with `node scripts/record-demo-bookmark.js`.
+A short demo animation walks through the **This Page** tab with highlighted sections and overlay descriptions: **Quick Actions** (Show Hover, Toggle Privacy, Read Later, Delete), **Save to** (Pinboard, File, Local, Sync), **Tag with AI** (AI-suggested tags; set API key in Options), **Recent Tags** and **Suggested Tags** (seeded in demo mode so both sections appear), **Search Tabs**, and the **footer** (Reload, Options, Bookmarks index, By Tag, Browser bookmark import). Produce the GIF with `node scripts/record-demo-side-panel-this-page.js`.
 
 Close-up of the **This Page** tab. When the current bookmark has visit data, a **Usage** section appears (visit count, last visited time, top referrer) ([REQ-BOOKMARK_USAGE_TRACKING], [ARCH-BOOKMARK_USAGE_TRACKING_UI], [IMPL-BOOKMARK_USAGE_TRACKING_UI]).
 
@@ -84,9 +84,9 @@ Close-up of the **This Page** tab. When the current bookmark has visit data, a *
 
 ![Side Panel – By Tag tab](images/side-panel-tags-tree.png)
 
-![Demo: By Tag tab](docs/demo-tags-tree.gif)
+![Demo: By Tag tab](docs/demo-side-panel-by-tag.gif)
 
-A short demo shows the **By Tag** tab: switching to it, selecting tags, and viewing or opening bookmarks. Overlays highlight **Filtering by tag** (only bookmarks with at least one selected tag) and the **# matches** count that updates as you type in **Search bookmarks**. The shared placeholder data (many tags and bookmarks, with time/domain and notes) makes the GIF illustrate the full workflow: tag selector, tree, filters, and search.
+A short demo shows the **By Tag** tab: switching to it, selecting tags, and viewing or opening bookmarks. Overlays and highlights cover **Filtering by tag**, **Bookmarks under selected tags** (tree container), **# matches** in Search bookmarks, and **Opens in new tab** (link highlight with an extra pause at the end). The shared placeholder data (many tags and bookmarks, with time/domain and notes) makes the GIF illustrate the full workflow: tag selector, tree, filters, and search.
 
 The snapshot above shows the **By Tag** tab (tag selector and collapsible tree with sample URLs).
 
@@ -94,15 +94,19 @@ The snapshot above shows the **By Tag** tab (tag selector and collapsible tree w
 
 ![Side Panel – Tabs tab](images/side-panel-tabs.png)
 
-![Demo: Tabs tab – find and export](docs/demo-tabs-export.gif)
+![Demo: Tabs tab – find and export](docs/demo-side-panel-tabs.gif)
 
-A short demo animation shows using the Tabs tab to find and export a set of pages (filter then **Copy Records** or **Copy URLs**).
+A short demo animation shows using the Tabs tab to find and export a set of pages (filter then **Copy Records** or **Copy URLs**). Each step has an on-screen highlight (tab bar, list, filter, display mode, Copy buttons, etc.). Produce the GIF with `node scripts/record-demo-side-panel-tabs.js`.
 
 **Tab source** ([REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS], [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]): Choose **Open** (default), **Recently closed**, or **Both** to list open tabs, recently closed tabs (Chrome only, via `chrome.sessions`), or both. Recently closed tabs are searchable by title and URL; **Restore** reopens a closed tab. **Copy Records** for closed tabs includes `sessionId` and `lastModified`. When the tab source includes closed tabs, **Page text** and **Elements** search scopes are disabled (only **Tab info** applies). Gather and Distribute are hidden when the list contains only closed tabs.
 
 The **Tabs** tab lists browser tabs with title, URL, and referrer. Each row has a **Close tab** button (✕) before the window/tab id (or before the title/URL in Title/URL mode) to close that tab; the remove-from-display control (×) remains after the tab id. Controls are grouped into sections (Scope, Filter & display, Batch bookmark, List actions, Window actions) with control groups using very narrow margins; each has a tooltip. Each list item shows the tab’s **favicon**. A textbox **Elements** (comma-separated) configures which DOM sources are used when filtering by **Elements** (saved on blur; empty uses default list). Control groups use very narrow margins; the **Title** | **URL** | **Block** line stays above the filter textbox. **Gather into this window** moves visible tabs into the current window; **One window per tab** puts each visible tab in its own window. You can choose how each tab is shown: **Title** only, **URL** only, or **Block** (default: full card with title, URL, referrer, window/tab ids, and Tags). In Title or URL mode the displayed text is clickable to switch to that window and tab; the remove icon (×) appears after the text. In Block view the remove icon is before the Tags line. **Refresh** clears the hidden set and reloads so all tabs can reappear. It includes a **Current window / All windows** toggle, **Search in** scope (Tab info, Page text, or Elements), a filter input, and batch bookmark actions: **Tags** textbox with **Add tags** (adds comma-separated tags to visible tabs’ bookmarks, creating a bookmark if missing), **Set to-read** (preserves existing tags when updating; creates bookmark if missing), and **Clear to-read** (only for existing bookmarks). Then **Copy URLs**, **Copy Records**, **Close visible tabs**, **Close tagged** (only tabs with bookmark tags), **Close untagged** (only tabs with no tags), and **Refresh** (reload the list). Each row shows window id and tab id (clickable: focuses that window and tab) and the bookmark tags for that tab's URL (or — if none).
 
 #### Bookmarks tab
+
+![Demo: Bookmarks tab](docs/demo-side-panel-bookmarks.gif)
+
+A short demo shows the **Bookmarks** tab: switching to it, then search, folder filter, sort, match count, and clicking a URL (opens in new tab). The script seeds a "Hoverboard Demo" folder with several bookmarks so the GIF uses medium-complexity data. Produce the GIF with `node scripts/record-demo-side-panel-bookmarks.js`.
 
 ([REQ-SIDE_PANEL_BROWSER_BOOKMARKS], [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS], [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]) The **Bookmarks** tab lists Chrome browser bookmarks from `chrome.bookmarks.getTree`. Each row shows checkbox, favicon, title, URL (click to open, double-click to edit), and folder path. **Search** filters by title, URL, or folder path (case-insensitive). **Folder** dropdown filters to a selected folder. **Sort** by Date (newest/oldest), Name (A–Z/Z–A), or Chrome default (persisted). **Bulk:** Select all / Deselect all; Open in tabs, Open in window; Copy URLs; Move to folder; Delete (with confirmation); Export selected or all as HTML (Netscape) or CSV. **Undo:** After delete, "Deleted N bookmarks. Undo" with 10s auto-dismiss. **Import:** HTML or CSV into selected folder; conflict resolution (skip duplicates or overwrite). **Keyboard:** Ctrl+F focus search, Escape clear selection. Command `open-side-panel-browser-bookmarks` opens the panel on this tab.
 
@@ -112,7 +116,7 @@ The **Tabs** tab lists browser tabs with title, URL, and referrer. Each row has 
 
 *Close-up of the Usage tab (Most Visited, Recently Visited, Navigation Graph).*
 
-![Demo: Usage tab](docs/demo-usage.gif)
+![Demo: Usage tab](docs/demo-side-panel-usage.gif)
 
 *Switching to the Usage tab and using Refresh.*
 
@@ -317,7 +321,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 
 ## 📸 Screenshots
 
-Screenshots use **placeholder bookmark data** (no live account) and **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script seeds storage, waits for the popup to signal content ready, and verifies the **Local (L)** store on the bookmarks index. Placeholder data includes 15+ bookmarks (with a hero Pinboard entry), **Current**, **Recent**, and **Suggested** tags for the This Page tab, and usage data for the Usage tab. Side panel images (This Page, By Tag, Tabs, Bookmarks, Usage) are captured at **360px** width: **pinboard-side-panel-bookmark.png**, **side-panel-bookmark.png**, **side-panel-tags-tree.png**, **side-panel-tabs.png**, **side-panel-bookmarks.png**, **side-panel-usage.png**. Custom seed: `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js` (see `scripts/screenshot-seed.example.json`). **Demo GIFs** (Bookmark, Tags tree, Tabs, Usage): run `node scripts/record-demo-bookmark.js`, `node scripts/record-demo-tags-tree.js`, `node scripts/record-demo-tabs.js`, and `node scripts/record-demo-usage.js` after `npm run build`; each writes to `docs/` (e.g. `docs/demo-bookmark.gif`, `docs/demo-usage.gif`).
+Screenshots use **placeholder bookmark data** (no live account) and **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script seeds storage, waits for the popup to signal content ready, and verifies the **Local (L)** store on the bookmarks index. Placeholder data includes 15+ bookmarks (with a hero Pinboard entry), **Current**, **Recent**, and **Suggested** tags for the This Page tab, and usage data for the Usage tab. Side panel images (This Page, By Tag, Tabs, Bookmarks, Usage) are captured at **360px** width: **pinboard-side-panel-bookmark.png**, **side-panel-bookmark.png**, **side-panel-tags-tree.png**, **side-panel-tabs.png**, **side-panel-bookmarks.png**, **side-panel-usage.png**. Custom seed: `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js` (see `scripts/screenshot-seed.example.json`). **Demo GIFs** (Bookmark, Tags tree, Tabs, Usage): run `node scripts/record-demo-side-panel-this-page.js`, `node scripts/record-demo-side-panel-by-tag.js`, `node scripts/record-demo-side-panel-tabs.js`, and `node scripts/record-demo-side-panel-usage.js` after `npm run build`; each writes to `docs/` (e.g. `docs/demo-side-panel-this-page.gif`, `docs/demo-side-panel-usage.gif`).
 
 ### Popup (dark theme)
 
