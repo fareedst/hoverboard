@@ -26,6 +26,30 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-BOOKMARK_USAGE_TRACKING] [IM
 
     await sidePanelPage.close()
   })
+
+  // [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] [PROC-DEMO_RECORDING] Panel opens on Usage tab when storage set (demo script relies on this).
+  test('side panel opens with Usage tab visible when hoverboard_sidepanel_active_tab is set to usage', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const optionsPage = await context.newPage()
+    await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded' })
+    await optionsPage.evaluate(() => {
+      return new Promise((resolve) => {
+        chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'usage' }, () => resolve())
+      })
+    })
+    await optionsPage.close()
+
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(2000)
+
+    await expect(sidePanelPage.locator('#usagePanel:not([hidden])')).toBeVisible()
+    await expect(sidePanelPage.locator('#usage-most-visited-heading')).toHaveText('Most Visited')
+    await expect(sidePanelPage.locator('[data-usage-refresh]')).toBeVisible()
+
+    await sidePanelPage.close()
+  })
 })
 
 test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Bookmarks index table columns', () => {

@@ -255,7 +255,7 @@ async function loadPersistedTab () {
   return new Promise((resolve) => {
     chrome.storage.local.get([SIDE_PANEL_TAB_STORAGE_KEY], (o) => {
       const stored = o[SIDE_PANEL_TAB_STORAGE_KEY]
-      resolve(stored === TAB_BOOKMARK || stored === TAB_TAGS_TREE || stored === TAB_BROWSER_TABS || stored === TAB_BROWSER_BOOKMARKS ? stored : getDefaultTab())
+      resolve(stored === TAB_BOOKMARK || stored === TAB_TAGS_TREE || stored === TAB_BROWSER_TABS || stored === TAB_BROWSER_BOOKMARKS || stored === TAB_USAGE ? stored : getDefaultTab())
     })
   })
 }
@@ -296,7 +296,7 @@ function bindStorageTabChange () {
     const change = changes[SIDE_PANEL_TAB_STORAGE_KEY]
     if (!change?.newValue) return
     const tabId = change.newValue
-    if (tabId !== TAB_BOOKMARK && tabId !== TAB_TAGS_TREE && tabId !== TAB_BROWSER_TABS && tabId !== TAB_BROWSER_BOOKMARKS) return
+    if (tabId !== TAB_BOOKMARK && tabId !== TAB_TAGS_TREE && tabId !== TAB_BROWSER_TABS && tabId !== TAB_BROWSER_BOOKMARKS && tabId !== TAB_USAGE) return
     if (tabId === activeTab) return
     switchTab(tabId)
   })

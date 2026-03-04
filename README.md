@@ -76,7 +76,7 @@ The snapshot above shows **pinboard.in** in the main content area with the Hover
 
 ![Demo: This Page tab](docs/demo-side-panel-this-page.gif)
 
-A short demo animation walks through the **This Page** tab with highlighted sections and overlay descriptions: **Quick Actions** (Show Hover, Toggle Privacy, Read Later, Delete), **Save to** (Pinboard, File, Local, Sync), **Tag with AI** (AI-suggested tags; set API key in Options), **Recent Tags** and **Suggested Tags** (seeded in demo mode so both sections appear), **Search Tabs**, and the **footer** (Reload, Options, Bookmarks index, By Tag, Browser bookmark import). Produce the GIF with `node scripts/record-demo-side-panel-this-page.js`.
+A short demo animation walks through the **This Page** tab with highlighted sections and overlay descriptions: **Quick Actions** (Show Hover, Toggle Privacy, Read Later, Delete), **Save to** (Pinboard, File, Local, Sync), **Tag with AI** (AI-suggested tags; set API key in Options), **Recent Tags** and **Suggested Tags**, **Search Tabs**, and the **footer** (Reload, Options, Bookmarks index, By Tag, Browser bookmark import).
 
 Close-up of the **This Page** tab. When the current bookmark has visit data, a **Usage** section appears (visit count, last visited time, top referrer) ([REQ-BOOKMARK_USAGE_TRACKING], [ARCH-BOOKMARK_USAGE_TRACKING_UI], [IMPL-BOOKMARK_USAGE_TRACKING_UI]).
 
@@ -86,7 +86,7 @@ Close-up of the **This Page** tab. When the current bookmark has visit data, a *
 
 ![Demo: By Tag tab](docs/demo-side-panel-by-tag.gif)
 
-A short demo shows the **By Tag** tab: switching to it, selecting tags, and viewing or opening bookmarks. Overlays and highlights cover **Filtering by tag**, **Bookmarks under selected tags** (tree container), **# matches** in Search bookmarks, and **Opens in new tab** (link highlight with an extra pause at the end). The shared placeholder data (many tags and bookmarks, with time/domain and notes) makes the GIF illustrate the full workflow: tag selector, tree, filters, and search.
+A short demo shows the **By Tag** tab: **Viewing the By Tag tab**, **Filtering by tag**, **Tree updated**, **Search bookmarks** and **Match count**, and **Opening URL** (opens in new tab).
 
 The snapshot above shows the **By Tag** tab (tag selector and collapsible tree with sample URLs).
 
@@ -96,7 +96,7 @@ The snapshot above shows the **By Tag** tab (tag selector and collapsible tree w
 
 ![Demo: Tabs tab – find and export](docs/demo-side-panel-tabs.gif)
 
-A short demo animation shows using the Tabs tab to find and export a set of pages (filter then **Copy Records** or **Copy URLs**). Each step has an on-screen highlight (tab bar, list, filter, display mode, Copy buttons, etc.). Produce the GIF with `node scripts/record-demo-side-panel-tabs.js`.
+A short demo shows using the Tabs tab to find and export a set of pages (filter then **Copy Records** or **Copy URLs**), with per-step highlights for the tab bar, list, filter, display mode, and Copy buttons.
 
 **Tab source** ([REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS], [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS]): Choose **Open** (default), **Recently closed**, or **Both** to list open tabs, recently closed tabs (Chrome only, via `chrome.sessions`), or both. Recently closed tabs are searchable by title and URL; **Restore** reopens a closed tab. **Copy Records** for closed tabs includes `sessionId` and `lastModified`. When the tab source includes closed tabs, **Page text** and **Elements** search scopes are disabled (only **Tab info** applies). Gather and Distribute are hidden when the list contains only closed tabs.
 
@@ -106,7 +106,7 @@ The **Tabs** tab lists browser tabs with title, URL, and referrer. Each row has 
 
 ![Demo: Bookmarks tab](docs/demo-side-panel-bookmarks.gif)
 
-A short demo shows the **Bookmarks** tab: switching to it, then search, folder filter, sort, match count, and clicking a URL (opens in new tab). The script seeds a "Hoverboard Demo" folder with several bookmarks so the GIF uses medium-complexity data. Produce the GIF with `node scripts/record-demo-side-panel-bookmarks.js`.
+A short demo shows the **Bookmarks** tab: list, search, folder filter, sort, match count, and clicking a URL (opens in new tab).
 
 ([REQ-SIDE_PANEL_BROWSER_BOOKMARKS], [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS], [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]) The **Bookmarks** tab lists Chrome browser bookmarks from `chrome.bookmarks.getTree`. Each row shows checkbox, favicon, title, URL (click to open, double-click to edit), and folder path. **Search** filters by title, URL, or folder path (case-insensitive). **Folder** dropdown filters to a selected folder. **Sort** by Date (newest/oldest), Name (A–Z/Z–A), or Chrome default (persisted). **Bulk:** Select all / Deselect all; Open in tabs, Open in window; Copy URLs; Move to folder; Delete (with confirmation); Export selected or all as HTML (Netscape) or CSV. **Undo:** After delete, "Deleted N bookmarks. Undo" with 10s auto-dismiss. **Import:** HTML or CSV into selected folder; conflict resolution (skip duplicates or overwrite). **Keyboard:** Ctrl+F focus search, Escape clear selection. Command `open-side-panel-browser-bookmarks` opens the panel on this tab.
 
@@ -118,7 +118,7 @@ A short demo shows the **Bookmarks** tab: switching to it, then search, folder f
 
 ![Demo: Usage tab](docs/demo-side-panel-usage.gif)
 
-*Switching to the Usage tab and using Refresh.*
+A short demo shows the **Usage** tab: Most Visited, Recently Visited, Refresh, and Navigation Graph with per-step highlights.
 
 ([REQ-BOOKMARK_USAGE_TRACKING], [ARCH-BOOKMARK_USAGE_TRACKING_UI], [IMPL-BOOKMARK_USAGE_TRACKING_UI]) The **Usage** tab shows bookmark visit analytics: **Most Visited** (top 10 by visit count), **Recently Visited** (top 10 by last visit time), and **Navigation Graph** (referrer → URL edges). Data is stored locally; a **Refresh** button reloads all three sections. Each URL is clickable to open in a new tab. The image and GIF use the same placeholder data so all three sections are populated.
 
@@ -321,7 +321,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 
 ## 📸 Screenshots
 
-Screenshots use **placeholder bookmark data** (no live account) and **dark theme**. Regenerate with `npm run screenshots:placeholder` (see [Development](#development)). The script seeds storage, waits for the popup to signal content ready, and verifies the **Local (L)** store on the bookmarks index. Placeholder data includes 15+ bookmarks (with a hero Pinboard entry), **Current**, **Recent**, and **Suggested** tags for the This Page tab, and usage data for the Usage tab. Side panel images (This Page, By Tag, Tabs, Bookmarks, Usage) are captured at **360px** width: **pinboard-side-panel-bookmark.png**, **side-panel-bookmark.png**, **side-panel-tags-tree.png**, **side-panel-tabs.png**, **side-panel-bookmarks.png**, **side-panel-usage.png**. Custom seed: `--seed=path/to/seed.json` or `SCREENSHOT_SEED_FILE=path node scripts/screenshots-placeholder.js` (see `scripts/screenshot-seed.example.json`). **Demo GIFs** (Bookmark, Tags tree, Tabs, Usage): run `node scripts/record-demo-side-panel-this-page.js`, `node scripts/record-demo-side-panel-by-tag.js`, `node scripts/record-demo-side-panel-tabs.js`, and `node scripts/record-demo-side-panel-usage.js` after `npm run build`; each writes to `docs/` (e.g. `docs/demo-side-panel-this-page.gif`, `docs/demo-side-panel-usage.gif`).
+Screenshots and demo GIFs in this README use **placeholder bookmark data** (no live account) and **dark theme**.
 
 ### Popup (dark theme)
 
@@ -404,13 +404,6 @@ npm run validate:tokens
 
 # Create release package
 npm run create-release
-
-# Screenshots (requires built extension and Playwright)
-npm run screenshots              # Capture popup, options, index (current tab state)
-npm run screenshots:placeholder  # Same, using placeholder data and dark-theme popup; writes to images/
-# Optional: use a custom seed file (JSON: hoverboard_local_bookmarks, hoverboard_storage_index, hoverboard_theme?, hoverboard_settings?)
-node scripts/screenshots-placeholder.js --seed=scripts/screenshot-seed.example.json
-# Or: SCREENSHOT_SEED_FILE=./my-seed.json node scripts/screenshots-placeholder.js
 ```
 
 ### Validating before push
