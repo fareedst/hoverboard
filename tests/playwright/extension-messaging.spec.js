@@ -460,4 +460,30 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
 
     await sidePanelPage.close()
   })
+
+  // [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [PROC-DEMO_RECORDING] Panel opens on Bookmarks tab when storage is set (demo script starts with Bookmarks visible).
+  test('side panel opens with Bookmarks tab visible when hoverboard_sidepanel_active_tab is set to browserBookmarks', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const optionsPage = await context.newPage()
+    await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded' })
+    await optionsPage.waitForTimeout(500)
+    await optionsPage.evaluate(() => {
+      return new Promise((resolve) => {
+        chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'browserBookmarks' }, () => resolve())
+      })
+    })
+    await optionsPage.close()
+
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(2000)
+
+    const bookmarksPanelHidden = await sidePanelPage.evaluate(() => {
+      const panel = document.getElementById('browserBookmarksPanel')
+      return panel ? panel.hidden : true
+    })
+    expect(bookmarksPanelHidden).toBe(false)
+    await sidePanelPage.close()
+  })
 })

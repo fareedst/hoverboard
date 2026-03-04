@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Bookmarks demo GIF: start on tab, end card, slower and clearer** ([IMPL-DEMO_OVERLAY], [PROC-DEMO_RECORDING], [REQ-SIDE_PANEL_BROWSER_BOOKMARKS]) – The Bookmarks tab demo ([docs/demo-side-panel-bookmarks.gif](docs/demo-side-panel-bookmarks.gif)) now **starts** with the Bookmarks tab already visible (script sets `hoverboard_sidepanel_active_tab` before opening the side panel). The GIF **ends** with a 0.5 s frame showing the Hoverboard icon centered on screen. Overlay descriptions are 30–50% longer; presentation rate is 25% slower (RATE=1.25); overlay header background is slightly more opaque (rgba 0.78). E2E test asserts the panel opens on the Bookmarks tab when storage is set. TIED: IMPL-DEMO_OVERLAY essence_pseudocode and code_locations updated.
+
 ### Added
 
 - **Demo scripts: By Tag and Tabs highlights; Bookmarks tab demo GIF** ([IMPL-DEMO_OVERLAY], [PROC-DEMO_RECORDING], [REQ-SIDE_PANEL_TAGS_TREE], [REQ-SIDE_PANEL_BROWSER_BOOKMARKS], [REQ-SIDE_PANEL_BROWSER_TABS]) – **By Tag** ([docs/demo-side-panel-by-tag.gif](docs/demo-side-panel-by-tag.gif)): added highlights for **Bookmarks under selected tags** (#treeContainer) and **Opens in new tab** (first .tree-bookmark-link), plus an extra beat at the end of the animation. **Tabs** ([docs/demo-side-panel-tabs.gif](docs/demo-side-panel-tabs.gif)): every step now has an element highlight (tab bar for steps 1–3, then #browserTabsPanel elements: list, display mode, filter, Copy Records/URLs, etc.). **Bookmarks**: new script `scripts/record-demo-side-panel-bookmarks.js` seeds Chrome bookmarks (folder + 5–10 items) and records the Bookmarks tab (search, folder, sort, count, click URL); output [docs/demo-side-panel-bookmarks.gif](docs/demo-side-panel-bookmarks.gif). TIED: IMPL-DEMO_OVERLAY and PROC-DEMO_RECORDING updated; README documents all three demos.
