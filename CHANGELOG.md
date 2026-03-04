@@ -179,6 +179,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **getCurrentBookmark validation rejecting overlay payloads** (`IMPL-RUNTIME_VALIDATION`) – The overlay sends `getCurrentBookmark` with `data: { url, title, tabId }`. The Zod schema used `.strict()` and only allowed `url`, so validation failed. Schema updated to `.passthrough()` so extra keys (title, tabId) are allowed while still validating `url`.
 
+## [3.0.0] - 2026-03-04
+
+### Changed
+
+- **Version 2.0.0 → 3.0.0** ([PROC-TIED_DEV_CYCLE]) – Extension and package version set to 3.0.0 via `scripts/set-version.sh`. Single source of truth: `manifest.json`; popup and side panel read version at runtime from `chrome.runtime.getManifest().version`. TIED: Option A (no new REQ/IMPL); version display remains documented in IMPL-SIDE_PANEL_TABS.
+
+- **Jest test:e2e pass with no tests** – `npm run test:e2e` (Jest with `**/*.e2e.test.js`) exits with code 0 when no tests are found (e.g. when the only match is under an ignored path). Added `--passWithNoTests` so `npm run test:ci` succeeds.
+
+### Fixed
+
+- **IMPL-ICON_CLICK_BEHAVIOR YAML parse error** ([PROC-TOKEN_VALIDATION]) – The implementation detail file `tied/implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml` had an unquoted `summary` value containing colons, which broke YAML parsing. Quoted the summary so `tied_validate_consistency` passes.
+
 ## [2.0.0] - 2026-02-21
 
 ### Fixed

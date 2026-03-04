@@ -22448,8 +22448,8 @@ var HoverboardServiceWorker = class {
       });
     }
     if (chromeApi?.action?.onClicked?.addListener) {
-      chromeApi.action.onClicked.addListener(() => {
-        this.handleActionClick();
+      chromeApi.action.onClicked.addListener((tab) => {
+        this.handleActionClick(tab);
       });
     }
   }
@@ -22476,8 +22476,9 @@ var HoverboardServiceWorker = class {
    * [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR]
    * Handle extension icon click: open side panel (default) or popup per cached preference; if side panel, toggle (close when already open).
    * Chrome requires sidePanel.open() in the same synchronous user-gesture stack; we call it only when we have a cached windowId (synchronous). When cache is null we cannot open from an async callback (gesture would be lost).
+   * @param {chrome.tabs.Tab|undefined} [tab] Tab where the action was clicked (Chrome passes this to onClicked); use its windowId for correct window.
    */
-  handleActionClick() {
+  handleActionClick(tab) {
     const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
     const openSidePanel = this._iconClickOpensSidePanel !== false;
     if (!openSidePanel) {
@@ -22488,10 +22489,14 @@ var HoverboardServiceWorker = class {
       if (chromeApi?.action?.openPopup) chromeApi.action.openPopup();
       return;
     }
-    if (this._sidePanelWindowId != null) {
+    const clickedWindowId = tab?.windowId != null ? tab.windowId : null;
+    const cachedWindowId = this._sidePanelWindowId;
+    const useWindowId = clickedWindowId != null ? clickedWindowId : cachedWindowId;
+    if (useWindowId != null) {
       try {
-        chromeApi.sidePanel.open({ windowId: this._sidePanelWindowId });
-        if (chromeApi?.windows?.update) chromeApi.windows.update(this._sidePanelWindowId, { focused: true }).catch(() => {
+        if (clickedWindowId != null && !_isRestrictedForSidePanel(tab?.url)) this._sidePanelWindowId = clickedWindowId;
+        chromeApi.sidePanel.open({ windowId: useWindowId });
+        if (chromeApi?.windows?.update) chromeApi.windows.update(useWindowId, { focused: true }).catch(() => {
         });
         if (chromeApi?.runtime?.sendMessage) {
           const p = chromeApi.runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE });
@@ -22505,8 +22510,8 @@ var HoverboardServiceWorker = class {
     const tabsApi = chromeApi?.tabs ?? (typeof safariEnhancements !== "undefined" ? safariEnhancements.tabs : null);
     if (tabsApi?.query) {
       tabsApi.query({ active: true, currentWindow: true }, (tabs) => {
-        const tab = tabs && tabs[0];
-        if (tab?.windowId != null && !_isRestrictedForSidePanel(tab.url)) this._sidePanelWindowId = tab.windowId;
+        const tabFromQuery = tabs && tabs[0];
+        if (tabFromQuery?.windowId != null && !_isRestrictedForSidePanel(tabFromQuery.url)) this._sidePanelWindowId = tabFromQuery.windowId;
       });
     }
     if (chromeApi?.action?.openPopup) chromeApi.action.openPopup();

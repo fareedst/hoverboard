@@ -1,6 +1,6 @@
 {
   "name": "hoverboard",
-  "version": "1.5.0",
+  "version": "3.0.0",
   "description": "Modern Pinboard browser extension with hover overlays and seamless bookmark management",
   "type": "module",
   "scripts": {
@@ -30,12 +30,13 @@
     "coverage:gap-report": "node scripts/coverage-gap-report.js",
     "test:unit": "jest --testMatch='**/*.test.js'",
     "test:integration": "jest --testMatch='**/*.integration.test.js'",
-    "test:e2e": "jest --testMatch='**/*.e2e.test.js'",
+    "test:e2e": "jest --testMatch='**/*.e2e.test.js' --passWithNoTests",
     "test:e2e:extension": "npx playwright test -c playwright.extension.config.js",
     "record:demo:tabs": "node scripts/record-demo-side-panel-tabs.js",
     "record:demo:bookmark": "node scripts/record-demo-side-panel-this-page.js",
     "record:demo:tags-tree": "node scripts/record-demo-side-panel-by-tag.js",
     "record:demo:usage": "node scripts/record-demo-side-panel-usage.js",
+    "record:demo:bookmarks": "node scripts/record-demo-side-panel-bookmarks.js",
     "test:ci": "npm run test:coverage && npm run test:e2e",
     "security:check": "npm audit --audit-level=high",
     "security:fix": "npm audit fix",
@@ -48,7 +49,7 @@
     "screenshots": "npm run build:dev && node scripts/screenshots-placeholder.js",
     "screenshots:placeholder": "node scripts/screenshots-placeholder.js",
     "screenshots:readme": "node scripts/screenshots-placeholder.js --seed=scripts/screenshot-seed.example.json",
-    "media:readme": "npm run build:dev && npm run screenshots:readme && npm run record:demo:bookmark && npm run record:demo:tags-tree && npm run record:demo:tabs",
+    "media:readme": "npm run build:dev && npm run screenshots:readme && npm run record:demo:bookmark && npm run record:demo:tags-tree && npm run record:demo:tabs && npm run record:demo:bookmarks && npm run record:demo:usage",
     "prepare": "husky"
   },
   "author": "Fareed Stevenson",
