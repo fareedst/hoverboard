@@ -60,7 +60,7 @@ IMPL-DEMO_OVERLAY:
       - path: scripts/record-demo-side-panel-tabs.js
         description: '[IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_TABS] setOverlay (header rgba 0.78), removeOverlay, highlightElement/clearHighlight; optional persist hoverboard_sidepanel_active_tab=browserTabs; 1s no overlay at start (frame 0), then overlay steps; end card (0.5s pause, logo frame); 3-part ffmpeg concat (no-overlay 1s, main 1fps, end 0.5s); RATE 1.25; descriptions 30-50% longer; per-step highlight (tab bar, #browserTabsPanel).'
       - path: scripts/record-demo-side-panel-this-page.js
-        description: setOverlay, removeOverlay, highlightElement, clearHighlight; This Page tab demo with section highlights (Quick Actions, Save to, Tag with AI, Recent Tags, Suggested Tags, Search Tabs, Footer); add-tag flow to populate Recent Tags
+        description: '[IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] setOverlay (header rgba 0.78), removeOverlay, highlightElement/clearHighlight scoped to #bookmarkPanel; 1s no overlay at start (frame 0 = useful static image), then overlay steps (Quick Actions, Save to, Tag with AI, Recent Tags, Suggested Tags, Search Tabs, Footer); end card (0.5s pause then Hoverboard icon centered, frame N-1, 0.5s in GIF); 3-part ffmpeg concat (no-overlay 1s, main 1fps, end 0.5s); RATE 1.25; descriptions 30-50% longer.'
       - path: scripts/record-demo-side-panel-by-tag.js
         description: setOverlay, removeOverlay, highlightElement, clearHighlight scoped to
       - path: scripts/record-demo-side-panel-bookmarks.js
@@ -86,6 +86,7 @@ IMPL-DEMO_OVERLAY:
       - 'extension-demo-tabs.spec.js: Tabs tab open panel switch to Tabs wait for list optional filter Copy Records'
       - 'extension-demo-tabs.spec.js: Tabs panel shows filter and Copy Records when opened with hoverboard_sidepanel_active_tab=browserTabs'
       - 'extension-usage-tracking.spec.js: side panel opens with Usage tab visible when hoverboard_sidepanel_active_tab is set to usage'
+      - 'extension-usage-tracking.spec.js: bookmark panel has Quick Actions, Storage, tag sections, Search Tabs, footer (This Page demo)'
     code_annotations:
       - IMPL-DEMO_OVERLAY
       - PROC-DEMO_RECORDING
@@ -112,6 +113,12 @@ IMPL-DEMO_OVERLAY:
     clearHighlight(): find element with data-demo-highlight="1"; clear outline and boxShadow; remove data-demo-highlight
 
     # [IMPL-DEMO_OVERLAY] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-RECENT_TAGS_SYSTEM] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-AI_TAGGING_POPUP] Bookmark demo step order (record-demo-side-panel-this-page.js): (1) Open side panel, (2) Panel ready, (3) Quick Actions row highlight + overlay, (4) Save to (Storage) section highlight + overlay, (5) Add tags demo/reading/tools to populate Recent Tags, (6) Tag with AI button highlight + overlay (selector [data-popup-ref="tagWithAiBtn"]; overlay text describes "Get AI-suggested tags for this page (set API key in Options)"), (7) Recent Tags section highlight + overlay, (8) Suggested Tags section highlight + overlay, (9) Search Tabs section highlight + overlay, (10) Footer highlight + overlay, (11) Result overlay; clearHighlight before each highlight and at end.
+
+    # [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] This Page demo (record-demo-side-panel-this-page.js):
+    # Block Start: After panel ready (mainInterface visible), removeOverlay(), wait 1000*RATE ms, snap (frame 0 = useful static image). No overlay before frame 0. Implements demo_gif_standard timing.
+    # Block Overlay steps: clearHighlight; setOverlay (header rgba 0.78); highlightElement scoped to #bookmarkPanel; per-step wait*RATE and snap. RATE=1.25; overlay descriptions 30-50% longer. Implements demo_gif_standard overlay and step order above.
+    # Block End: After step 11 (Result), clearHighlight(), removeOverlay(), wait 500*RATE, inject full-screen Hoverboard icon centered, snap (frame N-1); GIF end segment 0.5s. Implements demo_gif_standard interstitial.
+    # Block GIF build: 3-part concat (nooverlay from frame 0 duration 1s, main from frames 1..N-2 at 1fps, end from frame N-1 duration 0.5s); concat filter + re-encode; no -c copy. Implements demo_gif_standard gif_build.
 
     # [IMPL-DEMO_OVERLAY] [IMPL-SIDE_PANEL_TAGS_TREE] [PROC-DEMO_RECORDING] [REQ-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_BOOKMARK_SEARCH]
     # By Tag demo (record-demo-side-panel-by-tag.js): load side panel with ?demo=1 (loadPlaceholderForScreenshot, tagsTreePlaceholderBookmarks); tag toggles update the tree. Element highlight scoped to #tagsTreePanel so only By Tag tab content is highlighted.
@@ -143,4 +150,4 @@ IMPL-DEMO_OVERLAY:
     last_updated:
       date: "2026-03-04"
       author: AI Agent
-      reason: 'Session: Usage tab demo GIF per demo_gif_standard; IMPL-DEMO_OVERLAY code_locations, essence_pseudocode, traceability for Usage demo.'
+      reason: 'Session: This Page demo GIF per demo_gif_standard; IMPL-DEMO_OVERLAY code_locations, essence_pseudocode, traceability for This Page demo.'
