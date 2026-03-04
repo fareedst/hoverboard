@@ -486,4 +486,30 @@ test.describe('[IMPL-PLAYWRIGHT_E2E_EXTENSION] [IMPL-SIDE_PANEL_SNAPSHOT] Side p
     expect(bookmarksPanelHidden).toBe(false)
     await sidePanelPage.close()
   })
+
+  // [IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_TABS] [PROC-DEMO_RECORDING] Panel opens on Tabs tab when storage is set (demo script starts with Tabs visible).
+  test('side panel opens with Tabs tab visible when hoverboard_sidepanel_active_tab is set to browserTabs', async ({ context }) => {
+    const extensionId = await getExtensionId(context)
+    const optionsPage = await context.newPage()
+    await optionsPage.goto(`chrome-extension://${extensionId}/src/ui/options/options.html`, { waitUntil: 'domcontentloaded' })
+    await optionsPage.waitForTimeout(500)
+    await optionsPage.evaluate(() => {
+      return new Promise((resolve) => {
+        chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'browserTabs' }, () => resolve())
+      })
+    })
+    await optionsPage.close()
+
+    const sidePanelPage = await context.newPage()
+    await sidePanelPage.goto(`chrome-extension://${extensionId}/src/ui/side-panel/side-panel.html`)
+    await sidePanelPage.waitForLoadState('domcontentloaded')
+    await sidePanelPage.waitForTimeout(2000)
+
+    const tabsPanelHidden = await sidePanelPage.evaluate(() => {
+      const panel = document.getElementById('browserTabsPanel')
+      return panel ? panel.hidden : true
+    })
+    expect(tabsPanelHidden).toBe(false)
+    await sidePanelPage.close()
+  })
 })
