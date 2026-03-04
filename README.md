@@ -118,7 +118,7 @@ A short demo shows the **Bookmarks** tab: the animation **starts** with the Book
 
 ![Demo: Usage tab](docs/demo-side-panel-usage.gif)
 
-*Switching to the Usage tab and using Refresh.*
+A short demo shows the **Usage** tab: the animation **starts** with the Usage tab already visible (the script persists the tab choice before opening the panel), then walks through Most Visited, Recently Visited, Refresh, and Navigation Graph with per-step highlights. Presentation rate is 25% slower (RATE=1.25); overlay descriptions are 30–50% longer. The GIF **ends** with a 0.5 s frame of the Hoverboard icon centered on screen. Produce the GIF with `node scripts/record-demo-side-panel-usage.js` (or `npm run record:demo:usage`). **Standard for all demo GIFs** (timing, interstitial, opacity, build): see [Demo GIF standard](docs/development/demo-gif-standard.md) and [IMPL-DEMO_OVERLAY](tied/implementation-decisions/IMPL-DEMO_OVERLAY.yaml) `demo_gif_standard`.
 
 ([REQ-BOOKMARK_USAGE_TRACKING], [ARCH-BOOKMARK_USAGE_TRACKING_UI], [IMPL-BOOKMARK_USAGE_TRACKING_UI]) The **Usage** tab shows bookmark visit analytics: **Most Visited** (top 10 by visit count), **Recently Visited** (top 10 by last visit time), and **Navigation Graph** (referrer → URL edges). Data is stored locally; a **Refresh** button reloads all three sections. Each URL is clickable to open in a new tab. The image and GIF use the same placeholder data so all three sections are populated.
 

@@ -16,6 +16,8 @@ IMPL-DEMO_OVERLAY:
     - IMPL-SIDE_PANEL_TAGS_TREE
     - REQ-SIDE_PANEL_BROWSER_BOOKMARKS
     - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
+    - REQ-BOOKMARK_USAGE_TRACKING
+    - IMPL-BOOKMARK_USAGE_TRACKING_UI
   rationale:
     why: Implements PROC-DEMO_RECORDING overlay styling for Tabs demo; position, text size, and class-based colors so key-frame annotations are visible and semantically distinct.
     problems_solved:
@@ -63,6 +65,8 @@ IMPL-DEMO_OVERLAY:
         description: setOverlay, removeOverlay, highlightElement, clearHighlight scoped to
       - path: scripts/record-demo-side-panel-bookmarks.js
         description: '[IMPL-DEMO_OVERLAY] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] setOverlay (header rgba 0.78), removeOverlay, highlightElement/clearHighlight scoped to #browserBookmarksPanel; persist hoverboard_sidepanel_active_tab=browserBookmarks before opening panel; 1s no overlay at start (frame 0 = useful static image), then overlay steps (Viewing Bookmarks tab, list, search, folder, sort, count, click URL); end card (0.5s pause then Hoverboard icon centered, frame N-1, 0.5s in GIF); 3-part ffmpeg concat (no-overlay 1s, main 1fps, end 0.5s); overlay text 30-50% longer; RATE 1.25x; seed bookmarks then open side panel.'
+      - path: scripts/record-demo-side-panel-usage.js
+        description: '[IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] setOverlay (header rgba 0.78), removeOverlay, highlightElement/clearHighlight scoped to #usagePanel; persist hoverboard_sidepanel_active_tab=usage before opening panel; 1s no overlay at start (frame 0 = useful static image), then overlay steps (Viewing Usage tab, Most Visited, Recently Visited, Refresh, Navigation Graph); end card (0.5s pause then Hoverboard icon centered, frame N-1, 0.5s in GIF); 3-part ffmpeg concat (no-overlay 1s, main 1fps, end 0.5s); RATE 1.25; descriptions 30-50% longer.'
   traceability:
     architecture: []
     requirements:
@@ -75,11 +79,13 @@ IMPL-DEMO_OVERLAY:
       - REQ-RECENT_TAGS_SYSTEM
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
       - REQ-AI_TAGGING_POPUP
+      - REQ-BOOKMARK_USAGE_TRACKING
     tests:
       - 'extension-messaging.spec.js: side panel opens with Bookmarks tab visible when hoverboard_sidepanel_active_tab is set'
       - 'extension-messaging.spec.js: side panel opens with Tabs tab visible when hoverboard_sidepanel_active_tab is set to browserTabs'
       - 'extension-demo-tabs.spec.js: Tabs tab open panel switch to Tabs wait for list optional filter Copy Records'
       - 'extension-demo-tabs.spec.js: Tabs panel shows filter and Copy Records when opened with hoverboard_sidepanel_active_tab=browserTabs'
+      - 'extension-usage-tracking.spec.js: side panel opens with Usage tab visible when hoverboard_sidepanel_active_tab is set to usage'
     code_annotations:
       - IMPL-DEMO_OVERLAY
       - PROC-DEMO_RECORDING
@@ -125,10 +131,16 @@ IMPL-DEMO_OVERLAY:
     # Block: Interstitial logo once, at end. After click URL step, wait 0.5s (rate-adjusted), then inject full-screen overlay with Hoverboard icon centered; snap (frame N-1); GIF end segment 0.5s. Acts as interstitial between replays when GIF loops.
     # Block: GIF build 3-part concat. (1) No-overlay GIF from frame 0, duration 1 s. (2) Main GIF from frames 1..N-2 (image2 -start_number 1, -frames:v totalFrames-2), 1 fps. (3) End GIF from frame N-1, duration 0.5 s. Concat nooverlay + main + end. highlightElement scoped to #browserBookmarksPanel.
 
+    # [IMPL-DEMO_OVERLAY] [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Usage demo (record-demo-side-panel-usage.js):
+    # Block: Start with Usage tab visible. Persist chrome.storage.local[hoverboard_sidepanel_active_tab] = 'usage' in seed step (with usage/edges placeholder data) before opening side-panel.html. No overlay for 1 s at start: removeOverlay(), wait 1000*RATE ms, snap (frame 0 = useful static image). Then overlay steps from "Viewing the Usage tab" (frames 1..N-2).
+    # Block: Overlay header rgba(0,0,0,0.78). RATE=1.25; descriptions 30-50% longer. highlightElement/clearHighlight scoped to #usagePanel (panel = getElementById('usagePanel'); el = panel.querySelector(selector)).
+    # Block: Step order: (1) Viewing Usage tab (intro), (2) Most Visited section (state), (3) Recently Visited section (state), (4) Refresh button (action), (5) Navigation Graph section (navigation). clearHighlight before each highlight; per-step snap with wait*RATE.
+    # Block: Interstitial at end. After last content step: clearHighlight(), removeOverlay(), wait 500*RATE, inject full-screen Hoverboard icon, snap (frame N-1); GIF end segment 0.5s. GIF build 3-part concat (nooverlay 1s, main 1fps, end 0.5s).
+
     # Step-to-class mapping (12 steps): 1,2 intro; 3,4 navigation; 5,6,8 state; 7,9,11 action; 10,12 result.
   test_coverage_note: Demo overlay styling verified by running record-demo-side-panel-tabs.js and inspecting output GIF; no unit tests (standalone recording script). E2E extension-messaging.spec.js asserts side panel snapshot includes browserBookmarksTab; add test that panel opens on Bookmarks tab when storage hoverboard_sidepanel_active_tab is set.
   metadata:
     last_updated:
       date: "2026-03-04"
       author: AI Agent
-      reason: 'Session: Tabs demo GIF audit and PROC-TIED_DEV_CYCLE; essence_pseudocode Tabs block already complete with token comments.'
+      reason: 'Session: Usage tab demo GIF per demo_gif_standard; IMPL-DEMO_OVERLAY code_locations, essence_pseudocode, traceability for Usage demo.'
