@@ -3,8 +3,9 @@
  * E2E: Extension icon click and cold-start side panel opening.
  * Run with: npm run test:e2e:extension
  *
- * Note: Playwright cannot simulate clicking the extension toolbar icon directly.
- * We test the cold-start path via OPEN_SIDE_PANEL (popup) and keyboard shortcut.
+ * Note: Playwright cannot simulate clicking the extension toolbar icon directly (or per-window).
+ * Icon-click "correct window" (panel opens in the window where user clicked) is covered by unit tests
+ * (handleActionClick(tab) with tab from action.onClicked). We test the cold-start path via OPEN_SIDE_PANEL (popup) and keyboard shortcut.
  */
 
 import { test, expect, getExtensionId } from './extension-fixture.js'

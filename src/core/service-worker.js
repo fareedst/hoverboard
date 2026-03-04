@@ -267,7 +267,7 @@ class HoverboardServiceWorker {
 
     // [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Icon click: open side panel (default) or popup per config. Handler must be synchronous so sidePanel.open() runs in user-gesture context.
     if (chromeApi?.action?.onClicked?.addListener) {
-      chromeApi.action.onClicked.addListener(() => { this.handleActionClick() })
+      chromeApi.action.onClicked.addListener((tab) => { this.handleActionClick(tab) })
     }
   }
 
@@ -289,9 +289,11 @@ class HoverboardServiceWorker {
    * [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR]
    * Handle extension icon click: open side panel (default) or popup per cached preference; if side panel, toggle (close when already open).
    * Chrome requires sidePanel.open() in the same synchronous user-gesture stack; we call it only when we have a cached windowId (synchronous). When cache is null we cannot open from an async callback (gesture would be lost).
+   * @param {chrome.tabs.Tab|undefined} [tab] Tab where the action was clicked (Chrome passes this to onClicked); use its windowId for correct window.
    */
-  handleActionClick () {
+  handleActionClick (tab) {
     const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
+    // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Preference and API check; open popup when side panel disabled or unavailable.
     const openSidePanel = this._iconClickOpensSidePanel !== false
     if (!openSidePanel) {
       if (chromeApi?.action?.openPopup) chromeApi.action.openPopup()
@@ -301,11 +303,16 @@ class HoverboardServiceWorker {
       if (chromeApi?.action?.openPopup) chromeApi.action.openPopup()
       return
     }
-    // [IMPL-ICON_CLICK_BEHAVIOR] Call sidePanel.open() only synchronously (same tick as click) so Chrome's user-gesture requirement is satisfied. Use cached windowId when available.
-    if (this._sidePanelWindowId != null) {
+    // [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Prefer clicked window: use tab from onClicked when provided, else cached windowId.
+    const clickedWindowId = tab?.windowId != null ? tab.windowId : null
+    const cachedWindowId = this._sidePanelWindowId
+    const useWindowId = clickedWindowId != null ? clickedWindowId : cachedWindowId
+    // [IMPL-ICON_CLICK_BEHAVIOR] Synchronous open: update cache when clicked and not restricted; sidePanel.open; windows.update focus; send REQUEST_SIDE_PANEL_CLOSE.
+    if (useWindowId != null) {
       try {
-        chromeApi.sidePanel.open({ windowId: this._sidePanelWindowId })
-        if (chromeApi?.windows?.update) chromeApi.windows.update(this._sidePanelWindowId, { focused: true }).catch(() => {})
+        if (clickedWindowId != null && !_isRestrictedForSidePanel(tab?.url)) this._sidePanelWindowId = clickedWindowId
+        chromeApi.sidePanel.open({ windowId: useWindowId })
+        if (chromeApi?.windows?.update) chromeApi.windows.update(useWindowId, { focused: true }).catch(() => {})
         if (chromeApi?.runtime?.sendMessage) {
           const p = chromeApi.runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE })
           if (p && typeof p.catch === 'function') p.catch(() => {})
@@ -313,12 +320,12 @@ class HoverboardServiceWorker {
       } catch (e) {}
       return
     }
-    // Cold start: no cached window. tabs.query callback runs async and loses user gesture, so we must not call sidePanel.open() there. Seed cache for next click and open popup as fallback.
+    // [IMPL-ICON_CLICK_BEHAVIOR] Cold start: no clicked tab and no cached window; tabs.query seeds cache only, openPopup as fallback (do not call sidePanel.open in callback—user gesture would be lost).
     const tabsApi = chromeApi?.tabs ?? (typeof browser !== 'undefined' ? browser.tabs : null)
     if (tabsApi?.query) {
       tabsApi.query({ active: true, currentWindow: true }, (tabs) => {
-        const tab = tabs && tabs[0]
-        if (tab?.windowId != null && !_isRestrictedForSidePanel(tab.url)) this._sidePanelWindowId = tab.windowId
+        const tabFromQuery = tabs && tabs[0]
+        if (tabFromQuery?.windowId != null && !_isRestrictedForSidePanel(tabFromQuery.url)) this._sidePanelWindowId = tabFromQuery.windowId
       })
     }
     if (chromeApi?.action?.openPopup) chromeApi.action.openPopup()

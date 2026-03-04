@@ -12,10 +12,10 @@ ARCH-ICON_CLICK_BEHAVIOR:
     benefits:
       - Single entry point (onClicked); config (iconClickOpensSidePanel) decides side panel vs action.openPopup()
   implementation_approach:
-    summary: Manifest omits action.default_popup; SW registers chrome.action.onClicked; handler runs synchronously using a cached preference so sidePanel.open() runs in user-gesture context; when opening side panel, SW sends REQUEST_SIDE_PANEL_CLOSE so the panel can close itself if already visible (toggle). Config key iconClickOpensSidePanel (default true) stored via ConfigManager; options page toggle to set it.
+    summary: Manifest omits action.default_popup; SW registers chrome.action.onClicked; handler receives the tab from Chrome and uses that tab's windowId so the panel opens in the window where the user clicked; when tab is not provided (e.g. programmatic call), fall back to cached _sidePanelWindowId; handler runs synchronously so sidePanel.open() runs in user-gesture context; when opening side panel, SW sends REQUEST_SIDE_PANEL_CLOSE so the panel can close itself if already visible (toggle). Config key iconClickOpensSidePanel (default true) stored via ConfigManager; options page toggle to set it.
     details:
       - 'Manifest: remove action.default_popup so that clicking the icon does not open a popup automatically; onClicked will fire.'
-      - 'SW: cache iconClickOpensSidePanel at startup and on storage change; onClicked handler uses current window at click time (tabs.query({ active: true, currentWindow: true })) so the panel opens in the focused window; no await in handler (user gesture requirement).'
+      - 'SW: cache iconClickOpensSidePanel at startup and on storage change; onClicked handler receives the tab from chrome.action.onClicked; use that tab''s windowId so the panel opens in the window where the user clicked; when tab is not provided, fall back to cached _sidePanelWindowId; no await in handler (user gesture requirement).'
       - 'Side panel: on REQUEST_SIDE_PANEL_CLOSE, if document.visibilityState === ''visible'' and (Date.now() - loadTime) > threshold, window.close() to implement toggle.'
       - 'Config: iconClickOpensSidePanel boolean, default true; in getDefaultConfiguration and mergedConfigSchema; options UI bind and save.'
   traceability:
@@ -40,6 +40,6 @@ ARCH-ICON_CLICK_BEHAVIOR:
       date: "2026-03-02"
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: "2026-03-03"
       author: AI Agent
-      reason: Icon click uses current window at click time
+      reason: Handler uses tab from action.onClicked for correct window; fallback to cache when tab not provided

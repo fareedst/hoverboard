@@ -22,7 +22,7 @@ REQ-ICON_CLICK_BEHAVIOR:
     - criterion: Setting is persisted and applied on next icon click
   validation_criteria:
     - method: Unit tests
-      coverage: SW action.onClicked uses cached preference and calls sidePanel.open or action.openPopup; SW sends REQUEST_SIDE_PANEL_CLOSE when opening panel; options load/save iconClickOpensSidePanel; side panel closes itself on message when visible and open long enough (shouldClosePanelOnToggleMessage)
+      coverage: SW action.onClicked uses tab from Chrome (when provided) so panel opens in clicked window; fallback to cached windowId; SW sends REQUEST_SIDE_PANEL_CLOSE when opening panel; options load/save iconClickOpensSidePanel; side panel closes itself on message when visible and open long enough (shouldClosePanelOnToggleMessage)
     - method: Manual verification
       coverage: Click icon with default → side panel opens; click again → panel closes (toggle); set "open popup" in options, save, click icon → popup opens
     - method: E2E (recommended)
@@ -47,6 +47,6 @@ REQ-ICON_CLICK_BEHAVIOR:
       date: "2026-03-02"
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: "2026-03-03"
       author: AI Agent
-      reason: Add satisfaction criterion for panel opening in current (focused) window
+      reason: Validation note that implementation uses tab from action.onClicked for correct window; session fix for wrong-window bug

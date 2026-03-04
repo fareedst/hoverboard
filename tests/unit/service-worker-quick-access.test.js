@@ -260,6 +260,26 @@ describe('[REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Extension icon cl
     expect(global.chrome.windows.update).toHaveBeenCalledWith(99, { focused: true })
   })
 
+  // [IMPL-ICON_CLICK_BEHAVIOR] When action.onClicked provides tab, use its windowId so panel opens in the window where user clicked (not prior window).
+  test('handleActionClick with tab from onClicked uses tab.windowId not cache [IMPL-ICON_CLICK_BEHAVIOR]', () => {
+    sw._sidePanelWindowId = 42
+    sw._iconClickOpensSidePanel = true
+    sw.handleActionClick({ id: 100, windowId: 77, url: 'https://example.com' })
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 77 })
+    expect(global.chrome.windows.update).toHaveBeenCalledWith(77, { focused: true })
+    expect(sw._sidePanelWindowId).toBe(77)
+  })
+
+  // [IMPL-ICON_CLICK_BEHAVIOR] Tab from onClicked with restricted URL: still open in that window; do not update cache.
+  test('handleActionClick with tab from onClicked restricted URL opens in that window and does not update cache [IMPL-ICON_CLICK_BEHAVIOR]', () => {
+    sw._sidePanelWindowId = 42
+    sw._iconClickOpensSidePanel = true
+    sw.handleActionClick({ id: 1, windowId: 88, url: 'chrome://extensions/' })
+    expect(global.chrome.sidePanel.open).toHaveBeenCalledWith({ windowId: 88 })
+    expect(global.chrome.windows.update).toHaveBeenCalledWith(88, { focused: true })
+    expect(sw._sidePanelWindowId).toBe(42)
+  })
+
   // [IMPL-ICON_CLICK_BEHAVIOR] Cold start: tabs.query seeds cache; sidePanel.open not called in callback (user gesture lost).
   test('handleActionClick cold-start calls tabs.query and openPopup only [IMPL-ICON_CLICK_BEHAVIOR]', () => {
     sw._sidePanelWindowId = null
