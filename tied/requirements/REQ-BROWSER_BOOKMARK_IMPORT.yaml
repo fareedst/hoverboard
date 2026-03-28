@@ -37,14 +37,14 @@ REQ-BROWSER_BOOKMARK_IMPORT:
   detail_file: requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: New requirement for browser bookmark import page
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass
   cross-references: ARCH-BROWSER_BOOKMARK_IMPORT, IMPL-BROWSER_BOOKMARK_IMPORT, REQ-LOCAL_BOOKMARKS_INDEX, REQ-LOCAL_BOOKMARKS_INDEX_IMPORT

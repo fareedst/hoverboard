@@ -24,7 +24,7 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
     - criterion: '3. **Prioritizes title attribute over textContent**: When extracting element text, prefer the `title` attribute (on the element or child elements) over `textContent`.'
     - criterion: '4. **Filters noise, counts frequency, sorts by frequency**: Remove common English stop words, count word occurrences, and return suggestions sorted by frequency (descending), then alphabetically.'
     - criterion: '5. **Restricted-URL skip (popup path)**: When the current tab URL is not injectable (e.g. `chrome-extension://`, `chrome://`, `file://`), the popup must not attempt script injection; it must show no suggested tags and must not surface a runtime error (e.g. "Cannot access contents of url"). Only `http://` and `https://` URLs are considered injectable for suggested-tag extraction.'
-    - criterion: '--'
+    - criterion: --
   validation_criteria:
     - method: Manual verification
       coverage: See detail file
@@ -47,14 +47,14 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
   detail_file: requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-19'
+      date: "2026-02-19"
       author: AI agent
       reason: Document popup test mocking (mockResolvedValueOnce for executeScript)
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   '[arch-suggested_tags]': Multi-source extraction with frequency sorting and case preservation
@@ -75,12 +75,12 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
     | `safari/src/features/content/overlay-manager.js` | (mirror) | ~603-678 | Safari mirror of overlay display |
   context-aware_suggestions: Tags reflect the actual page content, improving discoverability and organization.
   coverage: Extraction algorithm, frequency sorting, noise filtering
-  created: '2025-07-14'
+  created: "2025-07-14"
   depends_on: None
   description: The extension must intelligently suggest tags based on page content (title, URL, headings, navigation, breadcrumbs, images, and links) to speed up bookmarking workflow. Suggestions appear below recent tags in both the popup and overlay interfaces, allowing users to quickly add relevant tags without manual typing.
   expected: '"Suggested tags tests" (referenced in requirements.yaml)'
   faster_tagging: Click-to-add suggestions reduce keystrokes and cognitive load.
-  last_updated: '2026-02-13'
+  last_updated: "2026-02-13"
   manual_tag_entry_required: Users previously had to type all tags manually, slowing down bookmarking.
   modifiable_decisions: |-
     The following design choices are documented in [IMPL-SUGGESTED_TAGS] and can be modified:

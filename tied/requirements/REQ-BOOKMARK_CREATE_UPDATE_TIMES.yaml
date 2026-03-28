@@ -45,14 +45,14 @@ REQ-BOOKMARK_CREATE_UPDATE_TIMES:
   detail_file: requirements/REQ-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: Initial creation for bookmark create/update times
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass
   summary: Each bookmark tracks create-time (`time`) and most-recent-update-time (`updated_at`). New records set both equal; local/file/sync set `updated_at` to now on save; Pinboard only has create-time so `updated_at` equals `time`.

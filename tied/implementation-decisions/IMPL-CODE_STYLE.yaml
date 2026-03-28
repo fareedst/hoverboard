@@ -18,7 +18,7 @@ IMPL-CODE_STYLE:
       - 'eslint.config.mjs: globalIgnores, spread @eslinter/eslint-config-standard, files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides'
       - package.json engines.node >= 20.19.0
       - 'package.json security:check: npm audit --audit-level=high'
-      - 'package.json overrides.minimatch ^10.2.1, test-exclude ^7.0.1 (Jest 30; fixes high ReDoS and deprecated glob 7/inflight)'
+      - package.json overrides.minimatch ^10.2.1, test-exclude ^7.0.1 (Jest 30; fixes high ReDoS and deprecated glob 7/inflight)
   code_locations:
     files:
       - path: .editorconfig

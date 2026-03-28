@@ -7,13 +7,32 @@ record_identity:
   procedure_token: PROC-AGENT_REQ_CHECKLIST
   procedure_version: v1.0.1
   session_completed_date: "2026-03-27"
+  s15_persisted_date: "2026-03-27"
+  citdp_record_path: docs/citdp/CITDP-REQ-THIS_PAGE_TAG_SORT.yaml
   primary_tokens:
     - REQ-THIS_PAGE_TAG_SORT
     - ARCH-THIS_PAGE_TAG_SORT
     - IMPL-THIS_PAGE_TAG_SORT
+  # S07 risk register also covers composed / adjacent stack (see risk_analysis.*.tied_token_references)
+  risk_scope_tokens:
+    - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+    - REQ-SUGGESTED_TAGS_DEDUPLICATION
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - REQ-TAG_INPUT_SANITIZATION
+    - ARCH-SUGGESTED_TAGS
+    - ARCH-SIDE_PANEL_TABS
+    - IMPL-SUGGESTED_TAGS
+    - IMPL-UIManager_SCOPED_ROOT
+    - IMPL-SIDE_PANEL_BOOKMARK
+    - IMPL-TAG_SYSTEM
+    - IMPL-PLAYWRIGHT_E2E_EXTENSION
   repository_path_note: /Users/fareed/Documents/dev/browser/hoverboard
 change_definition:
   summary: 'Add a shared sort mode for Current Tags, Recent Tags, and Suggested Tags chip rows on the side panel This Page tab only: alphabetical (case-insensitive display), bookmark usage frequency from hoverboard_tag_frequency, and DOM relevance from MAIN-world suggested-tags flow. Popup unchanged when sort UI absent; no cross-session persistence.'
+  refinements_post_s02:
+    - 'PopupController._normalizeSuggestedRowsFromMainWorld implements NORMALIZE_SUGGESTED_ROWS + FILTER_INVALID_ROWS: trim tag strings; drop empty or whitespace-only labels before FILTER_NOT_ON_CURRENT_BOOKMARK ([IMPL-THIS_PAGE_TAG_SORT], [IMPL-SUGGESTED_TAGS], [REQ-SUGGESTED_TAGS_FROM_CONTENT]).'
+    - loadInitialData awaits loadRecentTags before loadSuggestedTags so Recent chips are ready when suggestions refresh (popup and side panel).
   scope_in:
     - src/shared/tag-chip-sort.js
     - src/ui/popup/UIManager.js
@@ -32,7 +51,7 @@ impact_analysis:
     - name: UIManager
       role: Toggle UI, tagFrequencyMap, paint paths for current/recent/suggested
     - name: PopupController
-      role: refreshTagFrequencyMapForSort, _normalizeHoverboardTagFrequencyMap, loadSuggestedTags inject order
+      role: refreshTagFrequencyMapForSort, _normalizeHoverboardTagFrequencyMap, loadSuggestedTags (two-step MAIN inject), _normalizeSuggestedRowsFromMainWorld (trim/drop invalid suggested rows)
     - name: side-panel shell
       role: Markup and CSS for tagSortToggle
   tied_stack:
@@ -47,42 +66,259 @@ impact_analysis:
     - REQ-SUGGESTED_TAGS_FROM_CONTENT
     - REQ-UI_INSPECTION
 risk_analysis:
+  # [PROC-AGENT_REQ_CHECKLIST] S07 — severity / likelihood scales: low | medium | high
   risks:
     - id: R1
-      description: Invalid hoverboard_tag_frequency shape breaking frequency sort
-      mitigation: _normalizeHoverboardTagFrequencyMap coerces to plain object or {}
+      description: Invalid or unexpected hoverboard_tag_frequency storage shape breaks frequency sort or mis-ranks chips
+      severity: medium
+      likelihood: low
+      tied_token_references:
+        - REQ-THIS_PAGE_TAG_SORT
+        - ARCH-THIS_PAGE_TAG_SORT
+        - IMPL-THIS_PAGE_TAG_SORT
+      mitigation: PopupController._normalizeHoverboardTagFrequencyMap coerces payloads to a plain string-to-number map or {}; refresh path logs errors without throwing; unit tests in popup-refresh-tag-frequency-map.test.js lock coercion behavior
       residual: low
     - id: R2
-      description: MAIN inject ordering or snippet failure emptying suggested tags
-      mitigation: Documented two-step inject; filter and empty-on-error paths in IMPL pseudo-code
+      description: MAIN-world two-step inject (snippet file then extractor func) fails or returns empty — suggested tags missing while page is otherwise valid
+      severity: medium
+      likelihood: medium
+      tied_token_references:
+        - REQ-SUGGESTED_TAGS_FROM_CONTENT
+        - ARCH-SUGGESTED_TAGS
+        - IMPL-SUGGESTED_TAGS
+        - IMPL-THIS_PAGE_TAG_SORT
+      mitigation: File inject failure is non-fatal (log + continue); func inject wrapped in try/catch; non-http(s) tabs short-circuit to empty list; ordering and empty-on-error documented in IMPL essence_pseudocode; popup-suggested-tags unit tests cover skip paths and injectable URLs
       residual: low
     - id: R3
-      description: Side panel vs popup behavioral drift
-      mitigation: Gate sort on tagSortToggle presence; explicit REQ criteria for popup
+      description: Side panel vs standalone popup behavioral drift (sort UI, scoped DOM, suggested pipeline)
+      severity: medium
+      likelihood: low
+      tied_token_references:
+        - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+        - IMPL-UIManager_SCOPED_ROOT
+        - IMPL-SIDE_PANEL_BOOKMARK
+        - IMPL-THIS_PAGE_TAG_SORT
+      mitigation: Shared PopupController/UIManager code paths; sort applies only when tagSortToggle resolves (panel); popup remains unchanged when toggle absent; ui-manager-scoped-root and composition tests exercise container + data-popup-ref
+      residual: low
+    - id: R4
+      description: Overlay TagService.sanitizeTag vs MAIN-world inline sanitizer diverge on edge characters — user-visible suggestion string differs by surface
+      severity: low
+      likelihood: low
+      tied_token_references:
+        - ARCH-SUGGESTED_TAGS
+        - IMPL-SUGGESTED_TAGS
+        - IMPL-TAG_SYSTEM
+        - REQ-TAG_INPUT_SANITIZATION
+      mitigation: Documented cross-path note in IMPL-SUGGESTED_TAGS essence_pseudocode; tokenizer must stay identical; tag sanitization covered by IMPL-TAG_SYSTEM unit tests; prefer future alignment or shared primitive if drift is observed in the field
+      residual: low
+    - id: R5
+      description: Tokenizer / delimiter regex drifts between TagService and suggested-tags-main-world-snippet — inconsistent suggestions between overlay and popup for the same page
+      severity: high
+      likelihood: low
+      tied_token_references:
+        - ARCH-SUGGESTED_TAGS
+        - IMPL-SUGGESTED_TAGS
+      mitigation: ARCH-SUGGESTED_TAGS requires tokenizer sync; code review + tests for extractSuggestedTagsFromContent and snippet path (e.g. suggested-tag-original-case.test.js, popup-suggested-tags.test.js); LEAP update if either side changes delimiter rules
+      residual: low
+    - id: R6
+      description: Bookmark panel subtree missing data-popup-ref keys or wrong container passed to UIManager — null elements, broken This Page controls (including sort toggle discovery)
+      severity: high
+      likelihood: low
+      tied_token_references:
+        - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+        - ARCH-SIDE_PANEL_TABS
+        - IMPL-UIManager_SCOPED_ROOT
+        - IMPL-SIDE_PANEL_BOOKMARK
+      mitigation: side-panel.html mirrors popup ref keys; cacheElements tolerates nulls where callers allow; ui-manager-scoped-root.test.js asserts querySelector vs getElementById branching; integration/e2e catch gross regressions
+      residual: low
+    - id: R7
+      description: Canonical case ranking (pickBetterSuggestedOriginalCase) or tag-case toggle interaction regresses — duplicate chips, wrong stored casing on add-from-chip, or wrong display order
+      severity: medium
+      likelihood: low
+      tied_token_references:
+        - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+        - REQ-SUGGESTED_TAGS_FROM_CONTENT
+        - ARCH-SUGGESTED_TAGS
+        - IMPL-SUGGESTED_TAGS
+        - IMPL-THIS_PAGE_TAG_SORT
+      mitigation: REQ-SUGGESTED_TAGS_CASE_PRESERVATION + IMPL pseudo-code define single canonical row per key; tests/unit/suggested-tag-original-case.test.js and uIManager-tag-case-folding.test.js; sort uses displayKey from tagChipDisplayAndAddValue consistent with toggle mode
       residual: low
 test_strategy:
+  # [PROC-AGENT_REQ_CHECKLIST] S08 — [PROC-TEST_STRATEGY] [PROC-CITDP] step 5; [REQ-MODULE_VALIDATION]
   classification:
     unit:
       - tag-chip-sort comparators and tie-breaks
       - UIManager sort paths with toggle shim
       - PopupController suggested inject and frequency refresh normalization
+      - UIManager scoped root cacheElements / updateSectionLabelsVisibility
+      - TagService extractSuggestedTagsFromContent and shared suggested-tag-original-case picker
     integration_composition:
-      - loadInitialData ordering refreshTagFrequencyMapForSort before updateCurrentTags
+      - loadInitialData ordering refreshTagFrequencyMapForSort before updateCurrentTags; loadRecentTags before loadSuggestedTags
       - setupEventListeners data-sort-mode to setTagSortMode
+      - PopupController + UIManager wiring for sort mode and suggested rows (JSDOM); normalized rows reach updateSuggestedTags
     e2e_only:
       surface: Real chrome-extension:// side panel document with bundled side-panel.js/css
-      reason: Chromium MV3 extension origin and side-panel host not reproducible in JSDOM; see IMPL-THIS_PAGE_TAG_SORT.phase_h_e2e_only_surface.e2e_only_reason
+      reason: Chromium MV3 chrome-extension:// side panel page loads the production side-panel bundle in the extension origin; JSDOM composition tests cannot load unpacked extension HTML, reproduce the Chromium side-panel host (layout, hit targets, focus), or exercise chrome.runtime in that document. Same text as IMPL-THIS_PAGE_TAG_SORT.phase_h_e2e_only_surface.e2e_only_reason.
       spec: tests/playwright/extension-this-page-tag-sort.spec.js
+      impl_detail_ref: IMPL-THIS_PAGE_TAG_SORT.phase_h_e2e_only_surface
+# Per-procedure / block testability (every IMPL block listed has a classification)
+s08_impl_procedure_testability:
+  - impl_token: IMPL-THIS_PAGE_TAG_SORT
+    default_testability: integration
+    blocks:
+      - procedure: sortTagChipRows / tag-chip-sort comparators
+        testability: unit
+        notes: Pure module; no chrome APIs
+      - procedure: NORMALIZE_SUGGESTED_ROWS / FILTER_INVALID_ROWS / FILTER_NOT_ON_CURRENT_BOOKMARK
+        testability: unit
+        notes: PopupController._normalizeSuggestedRowsFromMainWorld + loadSuggestedTags; popup-suggested-tags.test.js with mocked chrome.scripting
+      - procedure: refreshTagFrequencyMapForSort / _normalizeHoverboardTagFrequencyMap
+        testability: unit
+        notes: Mock chrome.storage.local; assert map passed to UIManager
+      - procedure: loadSuggestedTags
+        testability: unit
+        notes: Mock chrome.scripting.executeScript; ordering file-then-func
+      - procedure: getEffectiveTagSortMode / setTagSortMode / chip paint (updateCurrentTags, updateRecentTags, _paintSuggestedTags)
+        testability: unit
+        notes: JSDOM + shims for elements.tagSortToggle
+      - procedure: loadInitialData awaits refresh before first updateCurrentTags; loadRecentTags before loadSuggestedTags
+        testability: integration
+        notes: Ordering contract across controller + uiManager; this-page-tag-sort-composition.integration.test.js
+      - procedure: setupEventListeners [data-sort-mode] -> setTagSortMode
+        testability: integration
+        notes: Event binding without full extension document
+      - procedure: side_panel_tag_sort_toolbar_e2e
+        testability: e2e_only
+        e2e_only_reason: Chromium MV3 extension origin side-panel host; see test_strategy.classification.e2e_only.reason
+  - impl_token: IMPL-SUGGESTED_TAGS
+    default_testability: unit
+    blocks:
+      - procedure: extractSuggestedTags overlay / extractSuggestedTagsFromContent
+        testability: unit
+        notes: JSDOM or mock document; Safari mirror parity by convention
+      - procedure: pickBetterSuggestedOriginalCase / canonical case map
+        testability: unit
+        notes: tests/unit/suggested-tag-original-case.test.js
+      - procedure: MAIN-world snippet global __hoverboardExtractSuggestedTagsWithRelevance
+        testability: unit
+        notes: Algorithm alignment tested indirectly via TagService + picker tests; file not executed in Node without bundling — contract enforced by popup inject tests + tokenizer sync discipline
+      - procedure: Popup path orchestration (cross-IMPL with IMPL-THIS_PAGE_TAG_SORT)
+        testability: unit
+        notes: popup-suggested-tags.test.js mocks page world
+  - impl_token: IMPL-UIManager_SCOPED_ROOT
+    default_testability: unit
+    blocks:
+      - procedure: constructor / cacheElements / updateSectionLabelsVisibility
+        testability: unit
+        notes: tests/unit/ui-manager-scoped-root.test.js
+# Test matrix: one row per primary automated test artifact
+s08_test_matrix:
+  - test_name: tests/unit/tag-chip-sort.test.js
+    impl_block_ref: IMPL-THIS_PAGE_TAG_SORT — sortTagChipRows / comparators
+    req_tokens:
+      - REQ-THIS_PAGE_TAG_SORT
+    token_comments: '[REQ-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT]'
+    testability: unit
+  - test_name: tests/unit/uIManager-tag-case-folding.test.js
+    impl_block_ref: IMPL-THIS_PAGE_TAG_SORT — getEffectiveTagSortMode; chip displayKey / sort paint paths
+    req_tokens:
+      - REQ-THIS_PAGE_TAG_SORT
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    token_comments: '[REQ-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT]'
+    testability: unit
+  - test_name: tests/unit/popup-suggested-tags.test.js
+    impl_block_ref: IMPL-THIS_PAGE_TAG_SORT — loadSuggestedTags + _normalizeSuggestedRowsFromMainWorld + dedupe; IMPL-SUGGESTED_TAGS — popup path
+    req_tokens:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+      - REQ-THIS_PAGE_TAG_SORT
+    token_comments: '[REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT]'
+    testability: unit
+  - test_name: tests/unit/popup-refresh-tag-frequency-map.test.js
+    impl_block_ref: IMPL-THIS_PAGE_TAG_SORT — refreshTagFrequencyMapForSort / _normalizeHoverboardTagFrequencyMap
+    req_tokens:
+      - REQ-THIS_PAGE_TAG_SORT
+    token_comments: '[IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT]'
+    testability: unit
+  - test_name: tests/unit/suggested-tag-original-case.test.js
+    impl_block_ref: IMPL-SUGGESTED_TAGS — extractSuggestedTagsFromContent / canonical case; shared picker module
+    req_tokens:
+      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    token_comments: '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [IMPL-SUGGESTED_TAGS]'
+    testability: unit
+  - test_name: tests/unit/ui-manager-scoped-root.test.js
+    impl_block_ref: IMPL-UIManager_SCOPED_ROOT — cacheElements / scoped queries
+    req_tokens:
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    token_comments: '[REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS]'
+    testability: unit
+  - test_name: tests/integration/this-page-tag-sort-composition.integration.test.js
+    impl_block_ref: IMPL-THIS_PAGE_TAG_SORT — composition bindings (loadInitialData order; sort toggle listeners)
+    req_tokens:
+      - REQ-THIS_PAGE_TAG_SORT
+    token_comments: '[REQ-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT]'
+    testability: integration
+  - test_name: tests/playwright/extension-this-page-tag-sort.spec.js
+    impl_block_ref: IMPL-THIS_PAGE_TAG_SORT — side_panel_tag_sort_toolbar_e2e; IMPL-PLAYWRIGHT_E2E_EXTENSION harness
+    req_tokens:
+      - REQ-THIS_PAGE_TAG_SORT
+    token_comments: '[REQ-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT] [IMPL-PLAYWRIGHT_E2E_EXTENSION]'
+    testability: e2e_only
+s08_module_boundaries_req_module_validation:
+  requirement_token: REQ-MODULE_VALIDATION
+  modules:
+    - boundary: tag-chip-sort.js
+      responsibility: Pure sort rows by mode; bookmark frequency lookup; stable tie-breaks
+      validation_criteria: 100% behavior via unit tests; no I/O; mocks unnecessary except row fixtures
+    - boundary: suggested-tag-original-case.js (shared)
+      responsibility: Canonical spelling choice for suggested tokens
+      validation_criteria: Unit tests independent of UI; used by TagService and snippet discipline
+    - boundary: TagService extractSuggestedTagsFromContent
+      responsibility: Overlay extraction pipeline + sanitizeTag delegation
+      validation_criteria: Unit tests with mock document; edge cases for empty/invalid document
+    - boundary: suggested-tags-main-world-snippet.js
+      responsibility: Page-world extractor global and tier scoring
+      validation_criteria: Tokenizer parity with TagService; no direct Jest import required if contract covered by popup mocks + unit tests on shared algorithms
+    - boundary: UIManager (sort + case display + scoped root)
+      responsibility: DOM chip paint; toggle state; optional container
+      validation_criteria: Unit tests per feature slice; null-tolerant elements
+    - boundary: PopupController (frequency refresh + loadSuggestedTags)
+      responsibility: chrome.storage / chrome.scripting orchestration
+      validation_criteria: Unit tests with chrome mocks; integration for ordering with UIManager
+  integration_gate: Do not treat side-panel production HTML/CSS as validated until composition + e2e_only surface pass for toolbar affordances
+s08_tdd_plan_ordered:
+  # Planned sequence [PROC-TIED_DEV_CYCLE] aligned with checklist S08
+  - order: 1
+    phase: Unit tests first
+    description: RED tests for tag-chip-sort, UIManager sort/case paths, PopupController suggested + frequency, scoped UIManager, suggested-tag-original-case / TagService extraction
+  - order: 2
+    phase: Unit code via TDD
+    description: GREEN minimal production code per IMPL essence_pseudocode; REFACTOR; SYNC tokens + pseudo-code
+  - order: 3
+    phase: Composition tests first
+    description: Failing integration tests for loadInitialData ordering and setupEventListeners sort bindings
+  - order: 4
+    phase: Composition code via TDD
+    description: GREEN wiring in PopupController/UIManager/side-panel until integration passes
+  - order: 5
+    phase: E2E
+    description: Playwright extension-this-page-tag-sort for chrome-extension:// side panel only where platform constraint applies
+  - order: 6
+    phase: Validate and sync
+    description: Full suite, lint, typecheck, validate_tokens, tied_validate_consistency; LEAP if code diverged from IMPL
 tdd_sequence:
   s09_unit:
-    summary: RED/GREEN/REFACTOR for sort module, UIManager, PopupController paths; SYNC pseudo-code and token order
+    summary: RED/GREEN/REFACTOR for sort module, UIManager, PopupController paths; suggested-row trim/whitespace-only drop via _normalizeSuggestedRowsFromMainWorld; SYNC pseudo-code and token comments with tests and JSDoc
     key_artifacts:
       - tests/unit/tag-chip-sort.test.js
       - tests/unit/uIManager-tag-case-folding.test.js
       - tests/unit/popup-suggested-tags.test.js
       - tests/unit/popup-refresh-tag-frequency-map.test.js
+      - tests/unit/suggested-tag-original-case.test.js
+      - tests/unit/ui-manager-scoped-root.test.js
   s10_composition:
-    summary: Failing integration tests first for bindings; then green
+    summary: Failing integration tests first for loadInitialData ordering (including recent-before-suggested) and sort toggle bindings; then green
     key_artifacts:
       - tests/integration/this-page-tag-sort-composition.integration.test.js
   s11_e2e:
@@ -91,16 +327,30 @@ tdd_sequence:
       - tests/playwright/extension-this-page-tag-sort.spec.js
 completion_criteria:
   s12_gates:
-    - Full Jest suite pass (unit + integration)
-    - npm run test:e2e:extension pass
+    - 'Full Jest suite pass (2026-03-27: 84 suites, 1163 passed, 1 skipped)'
+    - npm run test:e2e:extension pass (37 passed, 1 skipped)
     - npm run lint (src) and npm run typecheck pass
     - scripts/validate_tokens.sh pass
     - tied_validate_consistency ok true
+    - 'REQ-MODULE_VALIDATION: tag-chip-sort + suggested-tag-original-case + PopupController/UIManager unit; this-page-tag-sort-composition integration; Playwright e2e_only surface per IMPL-THIS_PAGE_TAG_SORT.phase_h_e2e_only_surface'
+    - 'Note: npm run security:check (npm audit --audit-level=high) may fail on transitive deps; address separately from Phase I functional gate'
   s13_sync:
     - REQ and ARCH detail traceability aligned with IMPL and shipped tests
   s14_docs:
-    - README.md and CHANGELOG.md updated for user and release notes
+    - README.md and CHANGELOG.md updated for user and release notes (suggested-tag normalization + load order; test counts)
+  s15_citdp:
+    - Record at WORKSPACE_ROOT/docs/citdp/CITDP-REQ-THIS_PAGE_TAG_SORT.yaml (client repo; not methodology-only checkout)
+    - Validate with lint_yaml on absolute path per [PROC-YAML_EDIT_LOOP]
+    - CALL SUB-YAML (PyYAML safe_load) on record file
 leap_feedback:
-  divergences_from_analysis: 'Minor: MCP yaml_detail_update merged IMPL validation_evidence; prior single entry restored to two-entry list in same session. Essence_pseudocode stored as flow scalar in YAML after MCP merge (formatting only).'
+  divergences_from_analysis: |
+    Minor: MCP yaml_detail_update merged IMPL validation_evidence; essence_pseudocode stored as flow scalar in YAML after MCP merge (formatting only).
+    Implementation detail: Explicit PopupController._normalizeSuggestedRowsFromMainWorld for trim and whitespace-only row drop; loadRecentTags-before-loadSuggestedTags in loadInitialData—documented in IMPL/TIED, tests, README, and CHANGELOG ([PROC-LEAP] stack aligned; no REQ scope change).
   tied_stack_updates_required: false
   record_status: complete
+  s08_test_determination:
+    date: "2026-03-27"
+    notes: Persisted s08_impl_procedure_testability, s08_test_matrix, s08_module_boundaries_req_module_validation, s08_tdd_plan_ordered; e2e_only reason duplicated from IMPL-THIS_PAGE_TAG_SORT.phase_h_e2e_only_surface
+  s15_persist:
+    date: "2026-03-27"
+    notes: CITDP YAML finalized per [PROC-CITDP] step 8 and [PROC-AGENT_REQ_CHECKLIST] S15; record_identity through leap_feedback populated/updated for handoff and audit.

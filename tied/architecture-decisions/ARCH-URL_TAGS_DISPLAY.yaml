@@ -37,14 +37,14 @@ ARCH-URL_TAGS_DISPLAY:
   detail_file: architecture-decisions/ARCH-URL_TAGS_DISPLAY.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
       reason: Converted from monolithic
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   decision: A single logical module owns "tags for a URL" and "badge display value." Normalization (tags as array, required fields defaulted) happens at the boundary so badge, popup, and overlay all consume the same contract and never diverge. Storage and retrieval remain in BookmarkRouter and the four providers; this module sits on top and provides display normalization and badge value derivation.

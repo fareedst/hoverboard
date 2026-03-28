@@ -4,6 +4,18 @@
  * when set, cacheElements resolves elements via container.querySelector('[data-popup-ref="id"]') for panel context.
  */
 
+import {
+  currentTagDisplayLabel,
+  isEmptyOrWhitespaceOnlyTag,
+  isTagCaseFoldingMode,
+  tagChipDisplayAndAddValue
+} from '../../shared/tag-case-folding.js'
+import {
+  isTagChipSortMode,
+  lookupBookmarkFrequency,
+  sortTagChipRows
+} from '../../shared/tag-chip-sort.js'
+
 export class UIManager {
   constructor ({ errorHandler, stateManager, config = {}, container = null } = {}) {
     this.errorHandler = errorHandler
@@ -12,6 +24,19 @@ export class UIManager {
     this.eventHandlers = new Map()
     // [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Scoped root for side panel Bookmark tab
     this.container = container || null
+
+    // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] This Page tag chip case folding (original | lower | upper); default first session load.
+    /** @type {import('../../shared/tag-case-folding.js').TagCaseFoldingMode} */
+    this.tagCaseFoldingMode = 'original'
+    // [REQ-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT] Side panel only when tagSortToggle present; default alphabetical.
+    /** @type {import('../../shared/tag-chip-sort.js').TagChipSortMode} */
+    this.tagSortMode = 'alphabetical'
+    /** @type {Record<string, number>} hoverboard_tag_frequency copy for chip ordering */
+    this.tagFrequencyMap = {}
+    /** @type {boolean} */
+    this._tagSortUiEnabled = false
+    /** @type {{ current: string[], recent: string[], suggested: Array<{ tag: string, relevance: number, inPageFrequency: number }> }} */
+    this._tagChipSourceCache = { current: [], recent: [], suggested: [] }
 
     // Cache DOM elements
     this.elements = {}
@@ -130,6 +155,10 @@ export class UIManager {
       currentTagsContainer: get('currentTagsContainer'),
       recentTagsContainer: get('recentTagsContainer'),
       suggestedTagsContainer: get('suggestedTagsContainer'),
+      // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Side panel This Page only; absent in standalone popup.html
+      tagCaseFoldingToggle: get('tagCaseFoldingToggle'),
+      // [REQ-THIS_PAGE_TAG_SORT] Side panel This Page only
+      tagSortToggle: get('tagSortToggle'),
 
       // Status displays
       privateIcon: get('privateIcon'),
@@ -148,6 +177,7 @@ export class UIManager {
       usageStatsText: get('usageStatsText'),
       usageReferrerText: get('usageReferrerText')
     }
+    this._tagSortUiEnabled = !!this.elements.tagSortToggle
   }
 
   /**
@@ -290,6 +320,145 @@ export class UIManager {
     this.elements.showHoverOnPageLoad?.addEventListener('change', () => {
       this.emit('showHoverOnPageLoadChange')
     })
+
+    // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Tag case folding (Original / lower / UPPER); only when side-panel markup includes toggle
+    const caseToggleRoot = this.elements.tagCaseFoldingToggle
+    if (caseToggleRoot) {
+      caseToggleRoot.querySelectorAll('[data-case-mode]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const m = btn.getAttribute('data-case-mode')
+          if (isTagCaseFoldingMode(m)) this.setTagCaseFoldingMode(m)
+        })
+      })
+      this.syncTagCaseFoldingToggleDom()
+    }
+
+    // [REQ-THIS_PAGE_TAG_SORT] Tag sort (A–Z | frequency | relevance); side-panel markup only
+    const sortToggleRoot = this.elements.tagSortToggle
+    if (sortToggleRoot) {
+      sortToggleRoot.querySelectorAll('[data-sort-mode]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const m = btn.getAttribute('data-sort-mode')
+          if (isTagChipSortMode(m)) this.setTagSortMode(m)
+        })
+      })
+      this.syncTagSortToggleDom()
+    }
+  }
+
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Session-only tag label casing for This Page tag chips.
+   * @returns {import('../../shared/tag-case-folding.js').TagCaseFoldingMode}
+   */
+  getTagCaseFoldingMode () {
+    return this.tagCaseFoldingMode
+  }
+
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Set casing mode and redraw cached tag chips (no refetch).
+   * @param {string} mode
+   */
+  setTagCaseFoldingMode (mode) {
+    if (!isTagCaseFoldingMode(mode)) return
+    this.tagCaseFoldingMode = mode
+    this.syncTagCaseFoldingToggleDom()
+    this.redrawTagChipsFromCache()
+  }
+
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Update aria-pressed on segment buttons when present.
+   */
+  syncTagCaseFoldingToggleDom () {
+    const root = this.elements.tagCaseFoldingToggle
+    if (!root) return
+    root.querySelectorAll('[data-case-mode]').forEach((btn) => {
+      const m = btn.getAttribute('data-case-mode')
+      const on = m === this.tagCaseFoldingMode
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false')
+    })
+  }
+
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Re-render Current / Recent / Suggested chips from last update* payload (mode change).
+   * [REQ-THIS_PAGE_TAG_SORT] Suggested list re-painted from normalized cache (objects with relevance).
+   */
+  redrawTagChipsFromCache () {
+    const { current, recent } = this._tagChipSourceCache
+    this.updateCurrentTags([...current])
+    this.updateRecentTags([...recent])
+    this._paintSuggestedTags()
+  }
+
+  /**
+   * [REQ-THIS_PAGE_TAG_SORT] Bookmark usage counts from chrome.storage.local (hoverboard_tag_frequency).
+   * @param {Record<string, number>|null|undefined} map
+   */
+  setTagFrequencyMapForSort (map) {
+    this.tagFrequencyMap = map && typeof map === 'object' ? { ...map } : {}
+    // Caller updates chip lists (updateCurrentTags / loadRecentTags) or calls redrawTagChipsFromCache after map changes.
+  }
+
+  /**
+   * [REQ-THIS_PAGE_TAG_SORT] When sort toggle absent (popup), preserve incoming list order from controller.
+   * @returns {import('../../shared/tag-chip-sort.js').TagChipSortMode | null}
+   */
+  getEffectiveTagSortMode () {
+    if (!this._tagSortUiEnabled) return null
+    return this.tagSortMode
+  }
+
+  /**
+   * [REQ-THIS_PAGE_TAG_SORT] Set sort mode and redraw cached chips.
+   * @param {string} mode
+   */
+  setTagSortMode (mode) {
+    if (!isTagChipSortMode(mode)) return
+    this.tagSortMode = mode
+    this.syncTagSortToggleDom()
+    this.redrawTagChipsFromCache()
+  }
+
+  /**
+   * [REQ-THIS_PAGE_TAG_SORT] aria-pressed on sort segment buttons.
+   */
+  syncTagSortToggleDom () {
+    const root = this.elements.tagSortToggle
+    if (!root) return
+    root.querySelectorAll('[data-sort-mode]').forEach((btn) => {
+      const m = btn.getAttribute('data-sort-mode')
+      const on = m === this.tagSortMode
+      btn.setAttribute('aria-pressed', on ? 'true' : 'false')
+    })
+  }
+
+  /**
+   * @param {unknown[]} input
+   * @returns {Array<{ tag: string, relevance: number, inPageFrequency: number }>}
+   */
+  _normalizeSuggestedList (input) {
+    if (!Array.isArray(input)) return []
+    const out = []
+    for (const item of input) {
+      if (typeof item === 'string') {
+        if (!isEmptyOrWhitespaceOnlyTag(item)) {
+          out.push({ tag: item.trim(), relevance: 0, inPageFrequency: 0 })
+        }
+        continue
+      }
+      if (item && typeof item === 'object' && typeof item.tag === 'string') {
+        const t = item.tag.trim()
+        if (isEmptyOrWhitespaceOnlyTag(t)) continue
+        const relevance = typeof item.relevance === 'number' && !Number.isNaN(item.relevance) ? item.relevance : 0
+        let inPageFrequency = 0
+        if (typeof item.inPageFrequency === 'number' && !Number.isNaN(item.inPageFrequency)) {
+          inPageFrequency = item.inPageFrequency
+        } else if (typeof item.frequency === 'number' && !Number.isNaN(item.frequency)) {
+          inPageFrequency = item.frequency
+        }
+        out.push({ tag: t, relevance, inPageFrequency })
+      }
+    }
+    return out
   }
 
   /**
@@ -487,6 +656,8 @@ export class UIManager {
 
   /**
    * Update current tags display
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Label casing from tagCaseFoldingMode; remove uses stored string.
+   * [REQ-THIS_PAGE_TAG_SORT] When side-panel sort toggle present, order by selected mode within Current Tags only.
    */
   updateCurrentTags (tags) {
     if (!this.elements.currentTagsContainer) return
@@ -494,16 +665,34 @@ export class UIManager {
     // Clear existing tags
     this.elements.currentTagsContainer.innerHTML = ''
 
+    // Create tag elements
+    const tagsArray = Array.isArray(tags) ? tags : tags.split(' ').filter(tag => tag.length > 0)
+    this._tagChipSourceCache.current = [...tagsArray]
+
+    const visible = tagsArray.filter(tag => !isEmptyOrWhitespaceOnlyTag(tag))
+
     // If no tags, show empty state
-    if (!tags || tags.length === 0) {
+    if (visible.length === 0) {
       this.elements.currentTagsContainer.innerHTML = '<div class="no-tags">No tags</div>'
       return
     }
 
-    // Create tag elements
-    const tagsArray = Array.isArray(tags) ? tags : tags.split(' ').filter(tag => tag.length > 0)
+    const mode = this.getEffectiveTagSortMode()
+    /** @type {string[]} */
+    let ordered = visible
+    if (mode) {
+      const rows = visible.map((tag, stableIndex) => ({
+        canonical: String(tag),
+        displayKey: tagChipDisplayAndAddValue(String(tag), this.tagCaseFoldingMode).display,
+        stableIndex,
+        bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, tag),
+        relevance: 0,
+        inPageFreq: 0
+      }))
+      ordered = sortTagChipRows(rows, mode).map((r) => r.canonical)
+    }
 
-    tagsArray.forEach(tag => {
+    ordered.forEach(tag => {
       const tagElement = this.createTagElement(tag)
       this.elements.currentTagsContainer.appendChild(tagElement)
     })
@@ -511,7 +700,8 @@ export class UIManager {
 
   /**
    * [IMMUTABLE-REQ-TAG-003] - Update recent tags display with user-driven behavior
-   * @param {string[]} recentTags - Array of recent tag names
+   * [REQ-THIS_PAGE_TAG_SORT] Sort within Recent Tags when side-panel toggle present (bookmark frequency map).
+   * @param {string[]|Array<{ name?: string }>} recentTags - Tag names or objects with name (from service)
    */
   updateRecentTags (recentTags) {
     if (!this.elements.recentTagsContainer) return
@@ -519,14 +709,38 @@ export class UIManager {
     // Clear existing recent tags
     this.elements.recentTagsContainer.innerHTML = ''
 
+    const raw = Array.isArray(recentTags) ? recentTags : []
+    const source = raw.map((t) => {
+      if (typeof t === 'string') return t
+      if (t && typeof t === 'object' && t.name != null) return String(t.name)
+      return String(t)
+    })
+    this._tagChipSourceCache.recent = [...source]
+    const visible = source.filter(tag => !isEmptyOrWhitespaceOnlyTag(tag))
+
     // [IMMUTABLE-REQ-TAG-003] - Show empty state for user-driven recent tags
-    if (!recentTags || recentTags.length === 0) {
+    if (visible.length === 0) {
       this.elements.recentTagsContainer.innerHTML = '<div class="no-tags">No recent tags</div>'
       return
     }
 
+    const mode = this.getEffectiveTagSortMode()
+    /** @type {string[]} */
+    let ordered = visible
+    if (mode) {
+      const rows = visible.map((tag, stableIndex) => ({
+        canonical: String(tag),
+        displayKey: tagChipDisplayAndAddValue(String(tag), this.tagCaseFoldingMode).display,
+        stableIndex,
+        bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, tag),
+        relevance: 0,
+        inPageFreq: 0
+      }))
+      ordered = sortTagChipRows(rows, mode).map((r) => r.canonical)
+    }
+
     // [IMMUTABLE-REQ-TAG-003] - Create recent tag elements (clickable to add to current site only)
-    recentTags.forEach(tag => {
+    ordered.forEach(tag => {
       const tagElement = this.createRecentTagElement(tag)
       this.elements.recentTagsContainer.appendChild(tagElement)
     })
@@ -538,15 +752,17 @@ export class UIManager {
    * @returns {HTMLElement} Tag element
    */
   createRecentTagElement (tag) {
+    const { display, addValue } = tagChipDisplayAndAddValue(tag, this.tagCaseFoldingMode)
     const tagElement = document.createElement('div')
     tagElement.className = 'tag recent clickable'
     tagElement.innerHTML = `
-      <span class="tag-text">${this.escapeHtml(tag)}</span>
+      <span class="tag-text">${this.escapeHtml(display)}</span>
     `
 
     // [IMMUTABLE-REQ-TAG-003] - Add click handler to add this tag to current site only
+    // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Persisted string matches displayed casing mode
     tagElement.addEventListener('click', () => {
-      this.emit('addTag', tag)
+      this.emit('addTag', addValue)
     })
 
     return tagElement
@@ -554,46 +770,73 @@ export class UIManager {
 
   /**
    * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS]
-   * Update suggested tags display
-   * @param {string[]} suggestedTags - Array of suggested tag names
+   * [REQ-THIS_PAGE_TAG_SORT] Accept legacy string[] or { tag, relevance, inPageFrequency } from page extract.
+   * @param {unknown[]} suggestedTags
    */
   updateSuggestedTags (suggestedTags) {
     if (!this.elements.suggestedTagsContainer) return
+    const normalized = this._normalizeSuggestedList(Array.isArray(suggestedTags) ? suggestedTags : [])
+    this._tagChipSourceCache.suggested = normalized
+    this._paintSuggestedTags()
+  }
 
-    // Clear existing suggested tags
+  /**
+   * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] Paint suggested chips from normalized cache (sort when toggle present).
+   */
+  _paintSuggestedTags () {
+    if (!this.elements.suggestedTagsContainer) return
+
     this.elements.suggestedTagsContainer.innerHTML = ''
 
     // [IMPL-UIManager_SCOPED_ROOT] Resolve suggestedTags section from container when set
     const suggestedTagsSection = this.container ? this.container.querySelector('[data-popup-ref="suggestedTags"]') : document.getElementById('suggestedTags')
 
-    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Show empty state or hide when no suggestions
-    if (!suggestedTags || suggestedTags.length === 0) {
+    const source = this._tagChipSourceCache.suggested
+    const visible = source.filter(s => !isEmptyOrWhitespaceOnlyTag(s.tag))
+
+    if (visible.length === 0) {
       if (suggestedTagsSection) {
         suggestedTagsSection.style.display = 'none'
       }
       return
     }
 
-    // Show the section
     if (suggestedTagsSection) {
       suggestedTagsSection.style.display = 'block'
     }
 
-    // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Create suggested tag elements (clickable to add to current site)
-    suggestedTags.forEach(tag => {
-      const tagElement = this.createRecentTagElement(tag) // Reuse same styling/behavior as recent tags
+    const mode = this.getEffectiveTagSortMode()
+    /** @type {typeof visible} */
+    let ordered = visible
+    if (mode) {
+      const rows = visible.map((item, stableIndex) => ({
+        canonical: item.tag,
+        displayKey: tagChipDisplayAndAddValue(item.tag, this.tagCaseFoldingMode).display,
+        stableIndex,
+        bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, item.tag),
+        relevance: item.relevance ?? 0,
+        inPageFreq: item.inPageFrequency ?? 0,
+        _itemRef: item
+      }))
+      ordered = sortTagChipRows(rows, mode).map((r) => r._itemRef)
+    }
+
+    ordered.forEach((item) => {
+      const tagElement = this.createRecentTagElement(item.tag)
       this.elements.suggestedTagsContainer.appendChild(tagElement)
     })
   }
 
   /**
    * Create a tag element
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Display label follows tagCaseFoldingMode; removeTag uses stored `tag`.
    */
   createTagElement (tag) {
+    const label = currentTagDisplayLabel(String(tag), this.tagCaseFoldingMode)
     const tagElement = document.createElement('div')
     tagElement.className = 'tag'
     tagElement.innerHTML = `
-      <span class="tag-text">${this.escapeHtml(tag)}</span>
+      <span class="tag-text">${this.escapeHtml(label)}</span>
       <button class="tag-remove" type="button" aria-label="Remove tag ${this.escapeHtml(tag)}" title="Remove tag">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
           <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>

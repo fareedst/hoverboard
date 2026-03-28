@@ -31,9 +31,9 @@ ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS:
       - ARCH-SIDE_PANEL_BROWSER_TABS
   metadata:
     created:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
       reason: Initial creation

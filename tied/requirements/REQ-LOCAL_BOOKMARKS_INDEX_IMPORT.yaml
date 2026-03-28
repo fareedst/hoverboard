@@ -37,18 +37,18 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
     supersedes: []
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: New requirement for import UX
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass
   cross_references:
     - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
     - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
     - REQ-LOCAL_BOOKMARKS_INDEX
-  summary: "From the Local Bookmarks Index page, the user can import bookmarks from a CSV or JSON file. Two modes: Import only new (skip URLs already in the index) and Import and overwrite existing. Optional Import to target (Local | File | Sync). Uses existing saveBookmark message; result message shows imported, skipped, and failed counts."
+  summary: 'From the Local Bookmarks Index page, the user can import bookmarks from a CSV or JSON file. Two modes: Import only new (skip URLs already in the index) and Import and overwrite existing. Optional Import to target (Local | File | Sync). Uses existing saveBookmark message; result message shows imported, skipped, and failed counts.'

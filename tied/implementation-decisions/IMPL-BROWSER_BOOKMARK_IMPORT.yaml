@@ -84,13 +84,13 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
   detail_file: implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass

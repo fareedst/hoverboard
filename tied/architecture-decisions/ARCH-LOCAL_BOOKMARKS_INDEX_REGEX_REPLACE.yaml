@@ -32,14 +32,14 @@ ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: New architecture for Regex find-and-replace on selected
     last_validated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       validator: AI Agent
       result: pass
   decision: 'Regex replace row in Actions for selected: Regex input, Replacement input, checkboxes Title/URL/Tags/Notes, Replace button. Validate regex before run; invalid regex → error, no save. Per bookmark, per checked field: new RegExp(pattern, "g"), string.replace(regex, replacementStr); build saveBookmark payload with preferredBackend; send saveBookmark. Refresh; retain selection for still-visible rows. Button disabled when no selection or empty pattern.'

@@ -1,0 +1,70 @@
+REQ-MODULE_VALIDATION:
+  name: Independent Module Validation Before Integration
+  category: Functional
+  priority: P0
+  status: Implemented
+  rationale:
+    why: To eliminate bugs related to code complexity by ensuring each module works correctly in isolation before combining with other modules
+    problems_solved:
+      - Integration complexity causing difficult-to-debug issues
+      - Bugs discovered too late in the development cycle
+      - Module contracts not properly validated before integration
+    benefits:
+      - Bugs caught early before integration
+      - Reduced integration complexity
+      - Clear module boundaries and contracts
+      - Easier debugging by isolating issues to specific modules
+  satisfaction_criteria:
+    - criterion: All logical modules identified and documented with clear boundaries before development
+    - criterion: Module interfaces and contracts defined and documented
+    - criterion: Module validation criteria specified for each module
+      metric: What 'validated' means is explicitly defined
+    - criterion: Each module developed independently
+    - criterion: Each module passes independent validation before integration
+      metric: Unit tests with mocks, integration tests with test doubles, contract validation, edge case testing, error handling validation all passing
+    - criterion: Module validation results documented
+    - criterion: Integration tasks separate from module development tasks
+    - criterion: Integration only occurs after module validation passes
+    - criterion: Minimize code measurable only from outside testing (E2E/manual); every IMPL has test strategy (unit/integration or E2E/glue-only with documented reason)
+    - criterion: No non-trivial logic in entry points unless documented as glue with reason
+  validation_criteria:
+    - method: Manual verification
+      coverage: Modules identified and documented before development starts
+    - method: Automated testing
+      coverage: Module validation tests exist and pass before integration
+    - method: Code review
+      coverage: Integration code references validated modules
+    - method: Documentation review
+      coverage: Module validation results are documented
+    - method: Integration testing
+      coverage: Integration tests validate combined behavior of validated modules
+    - method: Coverage gates and gap report
+      coverage: IMPL traceability.tests or test_coverage_note (E2E-only with reason) for every Active IMPL
+  traceability:
+    architecture:
+      - ARCH-MODULE_VALIDATION
+    implementation:
+      - IMPL-MODULE_VALIDATION
+    tests:
+      - testModuleName_IndependentValidation_REQ_MODULE_VALIDATION
+    code_annotations:
+      - REQ-MODULE_VALIDATION
+      - IMPL-MODULE_VALIDATION
+  related_requirements:
+    depends_on:
+      - REQ-TIED_SETUP
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-MODULE_VALIDATION.yaml
+  metadata:
+    created:
+      date: 2025-01-27
+      author: AI Agent
+    last_updated:
+      date: 2026-02-06
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
+    last_validated:
+      date: 2026-02-06
+      validator: AI Agent
+      result: pass

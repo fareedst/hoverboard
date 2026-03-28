@@ -40,9 +40,9 @@ ARCH-AI_TAGGING_CONFIG:
   detail_file: architecture-decisions/ARCH-AI_TAGGING_CONFIG.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Popup Test API key button; test callable from options and popup

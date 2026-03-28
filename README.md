@@ -80,6 +80,8 @@ A short demo animation walks through the **This Page** tab with highlighted sect
 
 Close-up of the **This Page** tab. When the current bookmark has visit data, a **Usage** section appears (visit count, last visited time, top referrer) ([REQ-BOOKMARK_USAGE_TRACKING], [ARCH-BOOKMARK_USAGE_TRACKING_UI], [IMPL-BOOKMARK_USAGE_TRACKING_UI]).
 
+On **http(s)** pages, **Suggested Tags** from the page extractor are **trimmed** and whitespace-only or invalid labels are **discarded** before display; tags already on the bookmark stay hidden. **Recent Tags** are loaded **before** suggested tags refresh so both chip rows stay consistent when the panel opens.
+
 #### By Tag tab
 
 ![Side Panel – By Tag tab](images/side-panel-tags-tree.png)
@@ -309,7 +311,7 @@ Hoverboard is a fully-featured Chrome extension that provides seamless bookmark 
 - ✅ **Customizable font sizes** - Configure font sizes for suggested tags, labels, tags, and UI elements in Options
 
 #### **Test Coverage:**
-- **950+ tests** across 70 test suites (1 skipped). **Coverage gates** ([PROC-TEST_STRATEGY]): Jest `coverageThreshold` in `jest.config.js` (global ~28% line/branch/function/statement) fails CI if coverage drops; `npm run coverage:gap-report` lists `src/` files below threshold and IMPLs with empty `traceability.tests`. See [Development](#development) for `npm run test:coverage` and `npm run coverage:gap-report`.
+- **1160+ tests** across 84 test suites (1 skipped). **Coverage gates** ([PROC-TEST_STRATEGY]): Jest `coverageThreshold` in `jest.config.js` (global ~28% line/branch/function/statement) fails CI if coverage drops; `npm run coverage:gap-report` lists `src/` files below threshold and IMPLs with empty `traceability.tests`. See [Development](#development) for `npm run test:coverage` and `npm run coverage:gap-report`.
 - **Complete Chrome extension testing** with Manifest V3 compliance
 - **Integration tests** ([PROC-TEST_STRATEGY], [IMPL-TESTING]) – MessageHandler + BookmarkRouter + StorageIndex + LocalBookmarkService (`tests/integration/message-handler-router-storage.integration.test.js`); ConfigManager auth and storage mode (`tests/integration/config-manager-load.integration.test.js`); This Page tag sort composition (`tests/integration/this-page-tag-sort-composition.integration.test.js`, [REQ-THIS_PAGE_TAG_SORT]). Run with `npm run test:integration`.
 - **Messaging protocol tests** ([IMPL-MESSAGE_HANDLING], [ARCH-MESSAGE_HANDLING]) – Unit and E2E tests validate extension messaging: MessageHandler contracts (all critical types, sender context), service worker routing (NATIVE_PING, SWITCH_STORAGE_MODE, DEV_COMMAND vs processMessage), content/offscreen/popup message contracts, MessageClient retry and lastError, moveBookmarkToStorage schema, message-type drift. See `docs/architecture/extension-messaging-protocols.md`. Tests: `message-handler-contracts.test.js`, `service-worker-messaging-routing.test.js`, `content-messaging-contracts.test.js`, `popup-message-contract.test.js`, `offscreen-file-bookmark-messaging.test.js`, `message-client.test.js`, `message-type-drift.test.js`, and E2E content→SW getTabId in `extension-messaging.spec.js`. **Recommended before push:** run full validation (see [Validating before push](#validating-before-push)).

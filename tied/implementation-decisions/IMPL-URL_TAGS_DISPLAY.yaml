@@ -26,7 +26,7 @@ IMPL-URL_TAGS_DISPLAY:
       - 'handleGetCurrentBookmark: use getBookmarkForDisplay(bookmarkProvider, targetUrl, data?.title); set normalized.needsAuth when !hasAuth'
       - 'handleSaveBookmark: previous tags from getTagsForUrl(bookmarkProvider, data.url)'
       - 'GET_TAGS_FOR_URL and handleGetTagsForUrl(data): return { tags } from getTagsForUrl(bookmarkProvider, data.url)'
-      - 'BookmarkRouter _hasTags/_isEmptyBookmark use normalizeBookmarkForDisplay'
+      - BookmarkRouter _hasTags/_isEmptyBookmark use normalizeBookmarkForDisplay
       - 'PopupController getBookmarkData: resolve(null) only when blocked; when needsAuth still return bookmark with tags'
       - 'PopupController: re-fetch before add/remove tag; validateBookmarkData normalizes tags to array'
   code_locations:
@@ -105,13 +105,13 @@ IMPL-URL_TAGS_DISPLAY:
   detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
       reason: Align essence_pseudocode with standard (AWAIT, one-action-per-step)
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass

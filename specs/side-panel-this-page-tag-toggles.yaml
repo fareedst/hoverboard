@@ -1,0 +1,150 @@
+# SPEC: Side panel "This Page" — tag display toggles
+# Consumed by an external system to derive REQ / ARCH / IMPL. Not TIED project YAML.
+# Scope: Current Tags, Recent Tags, and Suggested Tags in #bookmarkPanel (popup-equivalent).
+
+- order: 1
+  feature_name: "Tag case-folding toggle (This Page)"
+  goal: >-
+    On the side-panel "This Page" tab, show a three-way toggle that controls how tag labels
+    are rendered in the Current Tags, Recent Tags, and Suggested Tags lists. When the user
+    clicks a tag chip in any of those lists to add it to the current bookmark, the string
+    stored for the new tag MUST match the casing implied by the active toggle mode (display
+    and add behavior stay consistent).
+  rules:
+    - "The toggle exposes exactly three modes: original, lower, and upper."
+    - >-
+      In original mode, each tag is shown with the same character casing as supplied by the
+      source data for that list (no case transformation for display). On click, the bookmark
+      receives that exact string.
+    - >-
+      In lower mode, each tag label is shown in lower case. On click, the bookmark receives
+      the lower-case form (Unicode lower-case mapping as implemented by the product).
+    - >-
+      In upper mode, each tag label is shown in upper case. On click, the bookmark receives
+      the upper-case form (Unicode upper-case mapping as implemented by the product).
+    - >-
+      The toggle applies uniformly to all three lists (Current, Recent, Suggested) on This Page
+      for the same active tab session; switching mode re-renders visible chips without requiring
+      a page reload.
+    - >-
+      Current Tags already on the bookmark are shown for removal/editing per existing behavior;
+      case-folding affects display and any add-from-chip action, not the definition of identity
+      for tags already stored unless explicitly specified elsewhere.
+    - >-
+      Default mode at first load of This Page in a session is original unless a future
+      persistence requirement supersedes this spec.
+  examples:
+    - given: >-
+        Recent Tags includes the string "ReadLater" from storage and the toggle is set to original.
+      when: >-
+        The user opens This Page and clicks the chip for that tag to add it to the current bookmark
+        (which does not already have that tag).
+      then: >-
+        The chip shows "ReadLater" and the bookmark gains a tag equal to "ReadLater".
+    - given: >-
+        The same source tag "ReadLater" and the toggle is set to lower.
+      when: >-
+        The user clicks the chip to add the tag.
+      then: >-
+        The chip shows "readlater" (or locale-appropriate full lower-case) and the bookmark gains
+        that lower-case string.
+    - given: >-
+        Suggested Tags includes "api" from the page and the toggle is set to upper.
+      when: >-
+        The user clicks the chip to add the tag.
+      then: >-
+        The chip shows "API" (upper-case form) and the bookmark gains that upper-case string.
+  boundary_conditions:
+    - "Tags that are already all lower-case or all upper-case look unchanged in lower or upper mode except for any characters with locale-sensitive casing."
+    - "Empty or whitespace-only tags from source data are not shown as clickable chips; if they appear, case rules apply to the non-empty normalized form if defined by a later REQ."
+    - "Mixed scripts (non-Latin) use the product's Unicode case mapping; behavior for characters without case mapping is unchanged by lower/upper for those code points."
+    - "If the same logical tag appears in two lists with different source casings, original mode may show two visually distinct chips; lower/upper mode may collapse display to the same label while source identity rules are defined in downstream REQ."
+  out_of_scope: >-
+    Persisting the case-folding preference across browser sessions or devices; Options page
+    configuration; applying case-folding to the free-text "Add a tag" input before submit;
+    the By Tag tab, bookmarks table, or any surface outside This Page's tag-management section;
+    Pinboard sync casing rules; renaming existing stored tags in bulk.
+
+- order: 2
+  feature_name: "Tag sort toggle (This Page)"
+  goal: >-
+    On the side-panel "This Page" tab, show a three-way toggle that controls the ordering of
+    tags within each of Current Tags, Recent Tags, and Suggested Tags. Changing the sort mode
+    re-orders the visible chips in that list without changing which tags are eligible to appear
+    (membership rules stay as today unless specified elsewhere).
+  rules:
+    - "The toggle exposes exactly three modes: alphabetical, by frequency, and by relevance (HTML parents)."
+    - >-
+      Alphabetical mode: sort tags by a case-insensitive lexicographic order of their display
+      strings (after any case-folding toggle applied for display). Tie-breaker: stable or
+      implementation-defined secondary key documented in IMPL.
+    - >-
+      By frequency mode: sort tags by descending usage frequency (how often the tag appears on
+      bookmarks in local storage or the metric defined in downstream REQ). Higher frequency
+      first. Tie-breaker: alphabetical case-insensitive then secondary key as in IMPL.
+    - >-
+      By relevance (HTML parents) mode: for tags whose suggestions are derived from the active
+      tab's DOM, rank tags by proximity or ancestor depth of the originating element (closer or
+      more specific ancestors first per downstream ARCH). Tags without DOM provenance (e.g. pure
+      recent-list entries) sort after DOM-derived tags using tie-breakers defined in IMPL
+      (e.g. frequency or alphabetical).
+    - >-
+      The same sort mode applies to all three lists on This Page for consistency; each list is
+      sorted within its own membership set (Current vs Recent vs Suggested).
+    - >-
+      Default sort mode at first load is alphabetical unless persistence supersedes this spec.
+  examples:
+    - given: >-
+        Current Tags will show ["zebra", "Apple", "banana"] as display strings under the
+        active case mode and sort is alphabetical.
+      when: >-
+        The bookmark panel finishes rendering Current Tags.
+      then: >-
+        The visible order is Apple, banana, zebra (case-insensitive A before b before z).
+    - given: >-
+        Recent Tags candidates are "read", "work", "read" with frequencies 3, 1, and 3
+        for distinct bookmarks (deduplicated list shows read once with highest aggregate frequency).
+      when: >-
+        Sort mode is by frequency.
+      then: >-
+        "read" appears before "work" (higher frequency first).
+    - given: >-
+        Suggested Tags include "nav" from a child of main and "footer" from footer,
+        and relevance ranks shallower or more specific in-page ancestors higher.
+      when: >-
+        Sort mode is by relevance (HTML parents).
+      then: >-
+        The chip order reflects the relevance ranking (exact order documented in IMPL when DOM
+        heuristics are fixed); "nav" and "footer" are ordered by their computed relevance
+        scores, not alphabetically.
+  boundary_conditions:
+    - "Empty list: no chips; toggle change is a no-op visually."
+    - "Equal frequency: use alphabetical case-insensitive tie-break unless IMPL specifies otherwise."
+    - "Equal relevance score: use frequency then alphabetical tie-break unless IMPL specifies otherwise."
+    - "Tags with no frequency data (e.g. brand-new suggestions): treat frequency as zero or exclude from frequency sort per downstream REQ."
+    - "Non-DOM-sourced tags in relevance mode: defined fallback ordering as in rules."
+  out_of_scope: >-
+    Persisting sort preference across sessions; sort order inside the By Tag tree or tag selector;
+    global tag manager or import dialogs; reversing sort direction (asc/desc) as a separate control;
+    custom user-defined tag order beyond these three modes.
+
+- order: 3
+  feature_name: "The list of suggested tags with original case (not forced upper or lower)"
+  goal: >-
+    Display suggested tags as they appear in the HTML.
+  rules:
+    - If a single suggested tag is mixed case, eg. a proper name, use the mixed case version and discard single-case versions because the user can display those with the case toggle UI.
+    - A prior algorithm creates lower-case suggestions and adds them to the list. Those must not be created.
+  examples:
+    - given: >-
+        Suggested tags are ["apple", "Apple"].
+      when: >-
+        The suggested tag mode is original case.
+      then: >-
+        The suggested tag is "Apple".
+    - given: >-
+        Suggested tags are ["apple", "Apple"].
+      when: >-
+        The suggested tag mode is upper case.
+      then: >-
+        The suggested tag is "APPLE".

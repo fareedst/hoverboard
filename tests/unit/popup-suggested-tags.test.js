@@ -147,6 +147,39 @@ describe('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Popup suggested tags', () => {
     })
   })
 
+  /**
+   * [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT]
+   * Three-way sync: same token set as IMPL-THIS_PAGE_TAG_SORT essence_pseudocode (NORMALIZE_SUGGESTED_ROWS + FILTER_INVALID_ROWS) and PopupController._normalizeSuggestedRowsFromMainWorld.
+   * Validates trim + omit empty-after-trim before FILTER_NOT_ON_CURRENT_BOOKMARK; OUTPUT to updateSuggestedTags.
+   */
+  describe('loadSuggestedTags FILTER_INVALID_ROWS [REQ-SUGGESTED_TAGS_FROM_CONTENT]', () => {
+    function mockMainWorldExtract (rawResult) {
+      chrome.scripting.executeScript
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ result: rawResult }])
+    }
+
+    test('drops string entries and object rows whose tag is whitespace-only after trim', async () => {
+      popupController.currentTab = { id: 20, url: 'https://example.com/x' }
+      popupController.currentPin = { tags: [] }
+      popupController.normalizeTags = jest.fn((tags) => tags || [])
+      mockMainWorldExtract([
+        '  good  ',
+        '   ',
+        '\t',
+        { tag: 'also-good', relevance: 2, inPageFrequency: 1 },
+        { tag: '     ', relevance: 9, inPageFrequency: 9 }
+      ])
+
+      await popupController.loadSuggestedTags()
+
+      expect(uiManager.updateSuggestedTags).toHaveBeenCalledWith([
+        { tag: 'good', relevance: 0, inPageFrequency: 0 },
+        { tag: 'also-good', relevance: 2, inPageFrequency: 1 }
+      ])
+    })
+  })
+
   describe('loadDemoSuggestedTagsIfScreenshotMode [IMPL-SCREENSHOT_MODE] [REQ-SUGGESTED_TAGS_FROM_CONTENT]', () => {
     test('calls updateSuggestedTags with stored hoverboard_demo_suggested_tags when non-empty array', async () => {
       const demoTags = ['bookmarks', 'reading', 'reference']

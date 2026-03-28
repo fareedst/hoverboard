@@ -28,14 +28,14 @@ ARCH-NATIVE_HOST:
   detail_file: architecture-decisions/ARCH-NATIVE_HOST.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
       reason: Converted from monolithic
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   decision: 'The native messaging host is implemented as a **thin wrapper** plus **helper** plus **installer**:'

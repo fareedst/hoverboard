@@ -93,13 +93,13 @@ IMPL-FILE_BOOKMARK_SERVICE:
   detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Canonical YAML rewrite; add essence_pseudocode and composed_with
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass

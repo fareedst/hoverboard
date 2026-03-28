@@ -1,0 +1,81 @@
+ARCH-MODULE_VALIDATION:
+  name: Module Validation Strategy
+  status: Active
+  cross_references:
+    - REQ-MODULE_VALIDATION
+  rationale:
+    why: To eliminate bugs related to code complexity by ensuring each module works correctly in isolation
+    problems_solved:
+      - Integration complexity causing difficult-to-debug issues
+      - Bugs discovered too late in development cycle
+      - Module contracts not properly validated
+    benefits:
+      - Bugs caught early before integration
+      - Reduced integration complexity
+      - Easier debugging by isolating issues
+      - Enables parallel module development
+      - Clear module boundaries and contracts
+  alternatives_considered:
+    - name: Big Bang Integration
+      pros:
+        - Faster initial integration
+      cons:
+        - Too complex to debug
+        - Bugs compound during integration
+        - Difficult to isolate issues
+      rejected_reason: Makes debugging too difficult and bugs compound
+    - name: Minimal Validation
+      pros:
+        - Faster development cycle
+      cons:
+        - Insufficient to catch complexity bugs
+        - Doesn't validate contracts properly
+      rejected_reason: Insufficient validation leads to integration issues
+    - name: Post-Integration Validation Only
+      pros:
+        - All validation done at once
+      cons:
+        - Doesn't catch module-level bugs early
+        - Increases debugging complexity
+      rejected_reason: Bugs discovered too late, making fixes expensive
+  implementation_approach:
+    summary: Independent module validation before integration with comprehensive testing strategy
+    details:
+      - Identify modules and document boundaries before development
+      - Define module interfaces and contracts explicitly
+      - Specify validation criteria for each module
+      - Unit test modules with mocked dependencies
+      - Integration test with test doubles (mocks, stubs, fakes)
+      - Validate contracts (input/output validation)
+      - Test edge cases and error handling
+      - Document validation results before integration
+      - Only integrate after validation passes
+  traceability:
+    requirements:
+      - REQ-MODULE_VALIDATION
+    implementation:
+      - IMPL-MODULE_VALIDATION
+    tests:
+      - testModuleName_IndependentValidation_REQ_MODULE_VALIDATION
+    code_annotations:
+      - IMPL-MODULE_VALIDATION
+      - REQ-MODULE_VALIDATION
+  related_decisions:
+    depends_on:
+      - REQ-MODULE_VALIDATION
+    informs:
+      - IMPL-MODULE_VALIDATION
+    see_also: []
+  detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.yaml
+  metadata:
+    created:
+      date: 2025-12-18
+      author: AI Agent
+    last_updated:
+      date: 2026-02-06
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
+    last_validated:
+      date: 2026-02-06
+      validator: AI Agent
+      result: pass

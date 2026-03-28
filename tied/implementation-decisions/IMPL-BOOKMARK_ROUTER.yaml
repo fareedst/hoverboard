@@ -106,13 +106,13 @@ IMPL-BOOKMARK_ROUTER:
   detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: saveBookmark honors data.preferredBackend (save follows highlight)
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass

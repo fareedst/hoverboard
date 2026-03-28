@@ -31,14 +31,14 @@ REQ-STORAGE_MODE_DEFAULT:
   detail_file: requirements/REQ-STORAGE_MODE_DEFAULT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: Save-follows-highlight criterion and traceability (IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI)
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   configmanager: '`getDefaultConfiguration().storageMode === ''local''`; `getStorageMode()` / `setStorageMode(mode)`.'

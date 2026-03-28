@@ -450,6 +450,33 @@ export class PopupController {
   }
 
   /**
+   * [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT]
+   * NORMALIZE_SUGGESTED_ROWS + FILTER_INVALID_ROWS: map MAIN-world extract array to row objects; trim `tag`; omit empty-after-trim (matches IMPL-THIS_PAGE_TAG_SORT essence_pseudocode + unit test token set).
+   */
+  _normalizeSuggestedRowsFromMainWorld (raw) {
+    if (!Array.isArray(raw)) return []
+    return raw
+      .map((entry) => {
+        if (typeof entry === 'string') {
+          const tag = entry.trim()
+          if (!tag) return null
+          return { tag, relevance: 0, inPageFrequency: 0 }
+        }
+        if (entry && typeof entry === 'object' && typeof entry.tag === 'string') {
+          const tag = entry.tag.trim()
+          if (!tag) return null
+          return {
+            tag,
+            relevance: typeof entry.relevance === 'number' ? entry.relevance : 0,
+            inPageFrequency: typeof entry.inPageFrequency === 'number' ? entry.inPageFrequency : 0
+          }
+        }
+        return null
+      })
+      .filter(Boolean)
+  }
+
+  /**
    * [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT]
    * Load hoverboard_tag_frequency from storage, normalize via _normalizeHoverboardTagFrequencyMap, push into UIManager for chip ordering (side panel).
    */
@@ -511,28 +538,12 @@ export class PopupController {
 
         if (results && results[0] && results[0].result) {
           const raw = results[0].result
-          const suggestedList = Array.isArray(raw)
-            ? raw
-              .map((entry) => {
-                if (typeof entry === 'string') {
-                  return { tag: entry, relevance: 0, inPageFrequency: 0 }
-                }
-                if (entry && typeof entry === 'object' && typeof entry.tag === 'string') {
-                  return {
-                    tag: entry.tag,
-                    relevance: typeof entry.relevance === 'number' ? entry.relevance : 0,
-                    inPageFrequency: typeof entry.inPageFrequency === 'number' ? entry.inPageFrequency : 0
-                  }
-                }
-                return null
-              })
-              .filter(Boolean)
-            : []
+          const suggestedList = this._normalizeSuggestedRowsFromMainWorld(raw)
 
           const currentTags = this.normalizeTags(this.currentPin?.tags || [])
           const currentTagsLower = new Set(currentTags.map((t) => t.toLowerCase()))
           const filteredSuggestedTags = suggestedList.filter(
-            (item) => item.tag && !currentTagsLower.has(item.tag.toLowerCase())
+            (item) => !currentTagsLower.has(item.tag.toLowerCase())
           )
 
           debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted suggested tags:', filteredSuggestedTags)

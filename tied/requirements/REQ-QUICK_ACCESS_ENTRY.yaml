@@ -1,7 +1,6 @@
 # [REQ-QUICK_ACCESS_ENTRY] Quick access entry points for side panel, options, bookmarks index, import
 # Requirement: Users can open side panel, extension options page, bookmarks index (manager), and browser bookmark import
 # via (a) extension keyboard commands, (b) context menu, (c) keyboard shortcuts when popup or side panel has focus.
-
 REQ-QUICK_ACCESS_ENTRY:
   name: Quick Access Entry Points
   category: Functional
@@ -51,9 +50,9 @@ REQ-QUICK_ACCESS_ENTRY:
   detail_file: requirements/REQ-QUICK_ACCESS_ENTRY.yaml
   metadata:
     created:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
     last_updated:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
       reason: Initial creation for quick access commands, context menu, and in-popup/panel shortcuts

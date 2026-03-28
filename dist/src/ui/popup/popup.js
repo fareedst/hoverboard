@@ -16033,11 +16033,19 @@ var init_config_manager = __esm({
   }
 });
 
+// src/shared/suggested-tag-original-case.js
+var init_suggested_tag_original_case = __esm({
+  "src/shared/suggested-tag-original-case.js"() {
+    "use strict";
+  }
+});
+
 // src/features/tagging/tag-service.js
 var init_tag_service = __esm({
   "src/features/tagging/tag-service.js"() {
     "use strict";
     init_config_manager();
+    init_suggested_tag_original_case();
     init_utils();
     debugLog("[SAFARI-EXT-SHIM-001] tag-service.js: module loaded");
   }
@@ -17243,6 +17251,97 @@ var VisualAssetsManager = class {
   }
 };
 
+// src/shared/tag-case-folding.js
+var TAG_CASE_FOLDING_MODES = (
+  /** @type {const} */
+  ["original", "lower", "upper"]
+);
+function isTagCaseFoldingMode(mode) {
+  return TAG_CASE_FOLDING_MODES.includes(
+    /** @type {TagCaseFoldingMode} */
+    mode
+  );
+}
+function isEmptyOrWhitespaceOnlyTag(source) {
+  if (source == null) return true;
+  if (typeof source !== "string") return true;
+  return source.trim().length === 0;
+}
+function tagChipDisplayAndAddValue(source, mode) {
+  const t = typeof source === "string" ? source.trim() : "";
+  if (mode === "lower") return { display: t.toLowerCase(), addValue: t.toLowerCase() };
+  if (mode === "upper") return { display: t.toUpperCase(), addValue: t.toUpperCase() };
+  return { display: t, addValue: t };
+}
+function currentTagDisplayLabel(stored, mode) {
+  const { display } = tagChipDisplayAndAddValue(stored, mode);
+  return display;
+}
+
+// src/shared/tag-chip-sort.js
+var TAG_CHIP_SORT_MODES = (
+  /** @type {const} */
+  [
+    "alphabetical",
+    "frequency",
+    "relevance"
+  ]
+);
+function isTagChipSortMode(mode) {
+  return TAG_CHIP_SORT_MODES.includes(
+    /** @type {TagChipSortMode} */
+    mode
+  );
+}
+function lookupBookmarkFrequency(frequencyMap, tag) {
+  if (!frequencyMap || tag == null || typeof tag !== "string") return 0;
+  const t = tag.trim();
+  if (!t) return 0;
+  const n = frequencyMap[t];
+  if (typeof n === "number" && !Number.isNaN(n)) return n;
+  const lower = t.toLowerCase();
+  for (const k of Object.keys(frequencyMap)) {
+    if (k.toLowerCase() === lower) {
+      const v = frequencyMap[k];
+      return typeof v === "number" && !Number.isNaN(v) ? v : 0;
+    }
+  }
+  return 0;
+}
+function sortTagChipRows(rows, mode) {
+  if (!Array.isArray(rows) || rows.length === 0) return [];
+  const copy = rows.map((r) => ({ ...r }));
+  const disp = (r) => (r.displayKey || "").toLowerCase();
+  copy.sort((a, b) => {
+    if (mode === "alphabetical") {
+      const c = disp(a).localeCompare(disp(b));
+      if (c !== 0) return c;
+      return a.stableIndex - b.stableIndex;
+    }
+    if (mode === "frequency") {
+      const fa2 = a.bookmarkFreq ?? 0;
+      const fb2 = b.bookmarkFreq ?? 0;
+      if (fb2 !== fa2) return fb2 - fa2;
+      const c = disp(a).localeCompare(disp(b));
+      if (c !== 0) return c;
+      return a.stableIndex - b.stableIndex;
+    }
+    const ra = a.relevance ?? 0;
+    const rb = b.relevance ?? 0;
+    if (rb !== ra) return rb - ra;
+    const fa = a.bookmarkFreq ?? 0;
+    const fb = b.bookmarkFreq ?? 0;
+    if (fb !== fa) return fb - fa;
+    const ia = a.inPageFreq ?? 0;
+    const ib = b.inPageFreq ?? 0;
+    if (ib !== ia) return ib - ia;
+    const c2 = disp(a).localeCompare(disp(b));
+    if (c2 !== 0) return c2;
+    return a.stableIndex - b.stableIndex;
+  });
+  return copy;
+}
+
 // src/ui/popup/UIManager.js
 var UIManager = class {
   constructor({ errorHandler, stateManager, config: config2 = {}, container = null } = {}) {
@@ -17251,6 +17350,11 @@ var UIManager = class {
     this.config = config2;
     this.eventHandlers = /* @__PURE__ */ new Map();
     this.container = container || null;
+    this.tagCaseFoldingMode = "original";
+    this.tagSortMode = "alphabetical";
+    this.tagFrequencyMap = {};
+    this._tagSortUiEnabled = false;
+    this._tagChipSourceCache = { current: [], recent: [], suggested: [] };
     this.elements = {};
     this.cacheElements();
     this.applyConfiguration();
@@ -17348,6 +17452,10 @@ var UIManager = class {
       currentTagsContainer: get("currentTagsContainer"),
       recentTagsContainer: get("recentTagsContainer"),
       suggestedTagsContainer: get("suggestedTagsContainer"),
+      // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Side panel This Page only; absent in standalone popup.html
+      tagCaseFoldingToggle: get("tagCaseFoldingToggle"),
+      // [REQ-THIS_PAGE_TAG_SORT] Side panel This Page only
+      tagSortToggle: get("tagSortToggle"),
       // Status displays
       privateIcon: get("privateIcon"),
       privateStatus: get("privateStatus"),
@@ -17362,6 +17470,7 @@ var UIManager = class {
       usageStatsText: get("usageStatsText"),
       usageReferrerText: get("usageReferrerText")
     };
+    this._tagSortUiEnabled = !!this.elements.tagSortToggle;
   }
   /**
    * Setup all event listeners
@@ -17467,6 +17576,131 @@ var UIManager = class {
     this.elements.showHoverOnPageLoad?.addEventListener("change", () => {
       this.emit("showHoverOnPageLoadChange");
     });
+    const caseToggleRoot = this.elements.tagCaseFoldingToggle;
+    if (caseToggleRoot) {
+      caseToggleRoot.querySelectorAll("[data-case-mode]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const m = btn.getAttribute("data-case-mode");
+          if (isTagCaseFoldingMode(m)) this.setTagCaseFoldingMode(m);
+        });
+      });
+      this.syncTagCaseFoldingToggleDom();
+    }
+    const sortToggleRoot = this.elements.tagSortToggle;
+    if (sortToggleRoot) {
+      sortToggleRoot.querySelectorAll("[data-sort-mode]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const m = btn.getAttribute("data-sort-mode");
+          if (isTagChipSortMode(m)) this.setTagSortMode(m);
+        });
+      });
+      this.syncTagSortToggleDom();
+    }
+  }
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Session-only tag label casing for This Page tag chips.
+   * @returns {import('../../shared/tag-case-folding.js').TagCaseFoldingMode}
+   */
+  getTagCaseFoldingMode() {
+    return this.tagCaseFoldingMode;
+  }
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Set casing mode and redraw cached tag chips (no refetch).
+   * @param {string} mode
+   */
+  setTagCaseFoldingMode(mode) {
+    if (!isTagCaseFoldingMode(mode)) return;
+    this.tagCaseFoldingMode = mode;
+    this.syncTagCaseFoldingToggleDom();
+    this.redrawTagChipsFromCache();
+  }
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Update aria-pressed on segment buttons when present.
+   */
+  syncTagCaseFoldingToggleDom() {
+    const root = this.elements.tagCaseFoldingToggle;
+    if (!root) return;
+    root.querySelectorAll("[data-case-mode]").forEach((btn) => {
+      const m = btn.getAttribute("data-case-mode");
+      const on = m === this.tagCaseFoldingMode;
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+  /**
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Re-render Current / Recent / Suggested chips from last update* payload (mode change).
+   * [REQ-THIS_PAGE_TAG_SORT] Suggested list re-painted from normalized cache (objects with relevance).
+   */
+  redrawTagChipsFromCache() {
+    const { current, recent } = this._tagChipSourceCache;
+    this.updateCurrentTags([...current]);
+    this.updateRecentTags([...recent]);
+    this._paintSuggestedTags();
+  }
+  /**
+   * [REQ-THIS_PAGE_TAG_SORT] Bookmark usage counts from chrome.storage.local (hoverboard_tag_frequency).
+   * @param {Record<string, number>|null|undefined} map
+   */
+  setTagFrequencyMapForSort(map2) {
+    this.tagFrequencyMap = map2 && typeof map2 === "object" ? { ...map2 } : {};
+  }
+  /**
+   * [REQ-THIS_PAGE_TAG_SORT] When sort toggle absent (popup), preserve incoming list order from controller.
+   * @returns {import('../../shared/tag-chip-sort.js').TagChipSortMode | null}
+   */
+  getEffectiveTagSortMode() {
+    if (!this._tagSortUiEnabled) return null;
+    return this.tagSortMode;
+  }
+  /**
+   * [REQ-THIS_PAGE_TAG_SORT] Set sort mode and redraw cached chips.
+   * @param {string} mode
+   */
+  setTagSortMode(mode) {
+    if (!isTagChipSortMode(mode)) return;
+    this.tagSortMode = mode;
+    this.syncTagSortToggleDom();
+    this.redrawTagChipsFromCache();
+  }
+  /**
+   * [REQ-THIS_PAGE_TAG_SORT] aria-pressed on sort segment buttons.
+   */
+  syncTagSortToggleDom() {
+    const root = this.elements.tagSortToggle;
+    if (!root) return;
+    root.querySelectorAll("[data-sort-mode]").forEach((btn) => {
+      const m = btn.getAttribute("data-sort-mode");
+      const on = m === this.tagSortMode;
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
+  /**
+   * @param {unknown[]} input
+   * @returns {Array<{ tag: string, relevance: number, inPageFrequency: number }>}
+   */
+  _normalizeSuggestedList(input) {
+    if (!Array.isArray(input)) return [];
+    const out = [];
+    for (const item of input) {
+      if (typeof item === "string") {
+        if (!isEmptyOrWhitespaceOnlyTag(item)) {
+          out.push({ tag: item.trim(), relevance: 0, inPageFrequency: 0 });
+        }
+        continue;
+      }
+      if (item && typeof item === "object" && typeof item.tag === "string") {
+        const t = item.tag.trim();
+        if (isEmptyOrWhitespaceOnlyTag(t)) continue;
+        const relevance = typeof item.relevance === "number" && !Number.isNaN(item.relevance) ? item.relevance : 0;
+        let inPageFrequency = 0;
+        if (typeof item.inPageFrequency === "number" && !Number.isNaN(item.inPageFrequency)) {
+          inPageFrequency = item.inPageFrequency;
+        } else if (typeof item.frequency === "number" && !Number.isNaN(item.frequency)) {
+          inPageFrequency = item.frequency;
+        }
+        out.push({ tag: t, relevance, inPageFrequency });
+      }
+    }
+    return out;
   }
   /**
    * Event emitter - emit custom events
@@ -17642,32 +17876,71 @@ var UIManager = class {
   }
   /**
    * Update current tags display
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Label casing from tagCaseFoldingMode; remove uses stored string.
+   * [REQ-THIS_PAGE_TAG_SORT] When side-panel sort toggle present, order by selected mode within Current Tags only.
    */
   updateCurrentTags(tags) {
     if (!this.elements.currentTagsContainer) return;
     this.elements.currentTagsContainer.innerHTML = "";
-    if (!tags || tags.length === 0) {
+    const tagsArray = Array.isArray(tags) ? tags : tags.split(" ").filter((tag) => tag.length > 0);
+    this._tagChipSourceCache.current = [...tagsArray];
+    const visible = tagsArray.filter((tag) => !isEmptyOrWhitespaceOnlyTag(tag));
+    if (visible.length === 0) {
       this.elements.currentTagsContainer.innerHTML = '<div class="no-tags">No tags</div>';
       return;
     }
-    const tagsArray = Array.isArray(tags) ? tags : tags.split(" ").filter((tag) => tag.length > 0);
-    tagsArray.forEach((tag) => {
+    const mode = this.getEffectiveTagSortMode();
+    let ordered = visible;
+    if (mode) {
+      const rows = visible.map((tag, stableIndex) => ({
+        canonical: String(tag),
+        displayKey: tagChipDisplayAndAddValue(String(tag), this.tagCaseFoldingMode).display,
+        stableIndex,
+        bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, tag),
+        relevance: 0,
+        inPageFreq: 0
+      }));
+      ordered = sortTagChipRows(rows, mode).map((r) => r.canonical);
+    }
+    ordered.forEach((tag) => {
       const tagElement = this.createTagElement(tag);
       this.elements.currentTagsContainer.appendChild(tagElement);
     });
   }
   /**
    * [IMMUTABLE-REQ-TAG-003] - Update recent tags display with user-driven behavior
-   * @param {string[]} recentTags - Array of recent tag names
+   * [REQ-THIS_PAGE_TAG_SORT] Sort within Recent Tags when side-panel toggle present (bookmark frequency map).
+   * @param {string[]|Array<{ name?: string }>} recentTags - Tag names or objects with name (from service)
    */
   updateRecentTags(recentTags) {
     if (!this.elements.recentTagsContainer) return;
     this.elements.recentTagsContainer.innerHTML = "";
-    if (!recentTags || recentTags.length === 0) {
+    const raw = Array.isArray(recentTags) ? recentTags : [];
+    const source = raw.map((t) => {
+      if (typeof t === "string") return t;
+      if (t && typeof t === "object" && t.name != null) return String(t.name);
+      return String(t);
+    });
+    this._tagChipSourceCache.recent = [...source];
+    const visible = source.filter((tag) => !isEmptyOrWhitespaceOnlyTag(tag));
+    if (visible.length === 0) {
       this.elements.recentTagsContainer.innerHTML = '<div class="no-tags">No recent tags</div>';
       return;
     }
-    recentTags.forEach((tag) => {
+    const mode = this.getEffectiveTagSortMode();
+    let ordered = visible;
+    if (mode) {
+      const rows = visible.map((tag, stableIndex) => ({
+        canonical: String(tag),
+        displayKey: tagChipDisplayAndAddValue(String(tag), this.tagCaseFoldingMode).display,
+        stableIndex,
+        bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, tag),
+        relevance: 0,
+        inPageFreq: 0
+      }));
+      ordered = sortTagChipRows(rows, mode).map((r) => r.canonical);
+    }
+    ordered.forEach((tag) => {
       const tagElement = this.createRecentTagElement(tag);
       this.elements.recentTagsContainer.appendChild(tagElement);
     });
@@ -17678,26 +17951,38 @@ var UIManager = class {
    * @returns {HTMLElement} Tag element
    */
   createRecentTagElement(tag) {
+    const { display, addValue } = tagChipDisplayAndAddValue(tag, this.tagCaseFoldingMode);
     const tagElement = document.createElement("div");
     tagElement.className = "tag recent clickable";
     tagElement.innerHTML = `
-      <span class="tag-text">${this.escapeHtml(tag)}</span>
+      <span class="tag-text">${this.escapeHtml(display)}</span>
     `;
     tagElement.addEventListener("click", () => {
-      this.emit("addTag", tag);
+      this.emit("addTag", addValue);
     });
     return tagElement;
   }
   /**
    * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS]
-   * Update suggested tags display
-   * @param {string[]} suggestedTags - Array of suggested tag names
+   * [REQ-THIS_PAGE_TAG_SORT] Accept legacy string[] or { tag, relevance, inPageFrequency } from page extract.
+   * @param {unknown[]} suggestedTags
    */
   updateSuggestedTags(suggestedTags) {
     if (!this.elements.suggestedTagsContainer) return;
+    const normalized = this._normalizeSuggestedList(Array.isArray(suggestedTags) ? suggestedTags : []);
+    this._tagChipSourceCache.suggested = normalized;
+    this._paintSuggestedTags();
+  }
+  /**
+   * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] Paint suggested chips from normalized cache (sort when toggle present).
+   */
+  _paintSuggestedTags() {
+    if (!this.elements.suggestedTagsContainer) return;
     this.elements.suggestedTagsContainer.innerHTML = "";
     const suggestedTagsSection = this.container ? this.container.querySelector('[data-popup-ref="suggestedTags"]') : document.getElementById("suggestedTags");
-    if (!suggestedTags || suggestedTags.length === 0) {
+    const source = this._tagChipSourceCache.suggested;
+    const visible = source.filter((s) => !isEmptyOrWhitespaceOnlyTag(s.tag));
+    if (visible.length === 0) {
       if (suggestedTagsSection) {
         suggestedTagsSection.style.display = "none";
       }
@@ -17706,19 +17991,35 @@ var UIManager = class {
     if (suggestedTagsSection) {
       suggestedTagsSection.style.display = "block";
     }
-    suggestedTags.forEach((tag) => {
-      const tagElement = this.createRecentTagElement(tag);
+    const mode = this.getEffectiveTagSortMode();
+    let ordered = visible;
+    if (mode) {
+      const rows = visible.map((item, stableIndex) => ({
+        canonical: item.tag,
+        displayKey: tagChipDisplayAndAddValue(item.tag, this.tagCaseFoldingMode).display,
+        stableIndex,
+        bookmarkFreq: lookupBookmarkFrequency(this.tagFrequencyMap, item.tag),
+        relevance: item.relevance ?? 0,
+        inPageFreq: item.inPageFrequency ?? 0,
+        _itemRef: item
+      }));
+      ordered = sortTagChipRows(rows, mode).map((r) => r._itemRef);
+    }
+    ordered.forEach((item) => {
+      const tagElement = this.createRecentTagElement(item.tag);
       this.elements.suggestedTagsContainer.appendChild(tagElement);
     });
   }
   /**
    * Create a tag element
+   * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Display label follows tagCaseFoldingMode; removeTag uses stored `tag`.
    */
   createTagElement(tag) {
+    const label = currentTagDisplayLabel(String(tag), this.tagCaseFoldingMode);
     const tagElement = document.createElement("div");
     tagElement.className = "tag";
     tagElement.innerHTML = `
-      <span class="tag-text">${this.escapeHtml(tag)}</span>
+      <span class="tag-text">${this.escapeHtml(label)}</span>
       <button class="tag-remove" type="button" aria-label="Remove tag ${this.escapeHtml(tag)}" title="Remove tag">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
           <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -18906,6 +19207,7 @@ function formatTimeAge(value, nowMs = Date.now()) {
 }
 
 // src/ui/popup/PopupController.js
+var SUGGESTED_TAGS_MAIN_WORLD_FILE = "src/features/tagging/suggested-tags-main-world-snippet.js";
 var PopupController = class {
   constructor(dependencies = {}) {
     this.errorHandler = dependencies.errorHandler || new ErrorHandler();
@@ -18956,6 +19258,7 @@ var PopupController = class {
               this.uiManager.updatePrivateStatus(this.currentPin?.shared === "no");
               this.uiManager.updateReadLaterStatus(this.currentPin?.toread === "yes");
               const normalizedTags = this.normalizeTags(this.currentPin?.tags);
+              await this.refreshTagFrequencyMapForSort();
               this.uiManager.updateCurrentTags(normalizedTags);
               this.uiManager.showSuccess("Bookmark updated from another window");
             }
@@ -19093,6 +19396,7 @@ var PopupController = class {
         normalizedTagsIsArray: Array.isArray(normalizedTags)
       });
       debugLog("[POPUP-DATA-FLOW-001] loadInitialData: calling updateCurrentTags with:", normalizedTags);
+      await this.refreshTagFrequencyMapForSort();
       this.uiManager.updateCurrentTags(normalizedTags);
       this.uiManager.updateConnectionStatus(true);
       this.uiManager.updatePrivateStatus(this.currentPin?.shared === "no");
@@ -19227,6 +19531,53 @@ var PopupController = class {
     }
   }
   /**
+   * [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT]
+   * Coerce chrome.storage hoverboard_tag_frequency payload to a plain object map (tag → count); arrays / primitives / null → {}.
+   */
+  _normalizeHoverboardTagFrequencyMap(raw) {
+    return raw != null && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  }
+  /**
+   * [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT]
+   * NORMALIZE_SUGGESTED_ROWS + FILTER_INVALID_ROWS: map MAIN-world extract array to row objects; trim `tag`; omit empty-after-trim (matches IMPL-THIS_PAGE_TAG_SORT essence_pseudocode + unit test token set).
+   */
+  _normalizeSuggestedRowsFromMainWorld(raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw.map((entry) => {
+      if (typeof entry === "string") {
+        const tag = entry.trim();
+        if (!tag) return null;
+        return { tag, relevance: 0, inPageFrequency: 0 };
+      }
+      if (entry && typeof entry === "object" && typeof entry.tag === "string") {
+        const tag = entry.tag.trim();
+        if (!tag) return null;
+        return {
+          tag,
+          relevance: typeof entry.relevance === "number" ? entry.relevance : 0,
+          inPageFrequency: typeof entry.inPageFrequency === "number" ? entry.inPageFrequency : 0
+        };
+      }
+      return null;
+    }).filter(Boolean);
+  }
+  /**
+   * [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT]
+   * Load hoverboard_tag_frequency from storage, normalize via _normalizeHoverboardTagFrequencyMap, push into UIManager for chip ordering (side panel).
+   */
+  async refreshTagFrequencyMapForSort() {
+    try {
+      if (typeof chrome === "undefined" || !chrome.storage?.local?.get) return;
+      const result = await new Promise((resolve) => {
+        chrome.storage.local.get("hoverboard_tag_frequency", resolve);
+      });
+      const map2 = this._normalizeHoverboardTagFrequencyMap(result?.hoverboard_tag_frequency);
+      this.uiManager.setTagFrequencyMapForSort(map2);
+    } catch (e) {
+      debugError("[POPUP-CONTROLLER] [REQ-THIS_PAGE_TAG_SORT] refreshTagFrequencyMapForSort failed:", e);
+    }
+  }
+  /**
    * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS]
    * Load suggested tags from page headings
    */
@@ -19245,442 +19596,30 @@ var PopupController = class {
         return;
       }
       try {
+        try {
+          await chrome.scripting.executeScript({
+            target: { tabId: this.currentTab.id },
+            world: "MAIN",
+            files: [SUGGESTED_TAGS_MAIN_WORLD_FILE]
+          });
+        } catch (fileErr) {
+          debugLog("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Main-world snippet file inject failed (non-fatal):", fileErr);
+        }
         const results = await chrome.scripting.executeScript({
           target: { tabId: this.currentTab.id },
           world: "MAIN",
-          // Run in page context so we read the page's DOM, not an isolated copy
           func: () => {
-            const allTexts = [];
-            const extractElementText = (element) => {
-              if (element.title && element.title.trim().length > 0) {
-                return element.title.trim();
-              }
-              const childWithTitle = element.querySelector("[title]");
-              if (childWithTitle && childWithTitle.title && childWithTitle.title.trim().length > 0) {
-                return childWithTitle.title.trim();
-              }
-              return (element.textContent || "").trim();
-            };
-            if (document.title) {
-              allTexts.push(document.title);
-            }
-            try {
-              const urlObj = new URL(window.location.href);
-              const pathSegments = urlObj.pathname.split("/").filter((seg) => seg.length > 0);
-              const meaningfulSegments = pathSegments.filter((seg) => {
-                const lower = seg.toLowerCase();
-                return !["www", "com", "org", "net", "html", "htm", "php", "asp", "aspx", "index", "home", "page"].includes(lower) && !/^\d+$/.test(seg) && seg.length >= 2;
-              });
-              if (meaningfulSegments.length > 0) {
-                allTexts.push(meaningfulSegments.join(" "));
-              }
-            } catch (e) {
-            }
-            const metaKeywords = document.querySelector('meta[name="keywords"]');
-            if (metaKeywords && metaKeywords.content && metaKeywords.content.trim().length > 0) {
-              allTexts.push(metaKeywords.content.trim());
-            }
-            const metaDescription = document.querySelector('meta[name="description"]');
-            if (metaDescription && metaDescription.content && metaDescription.content.trim().length > 0) {
-              allTexts.push(metaDescription.content.trim());
-            }
-            const headings = document.querySelectorAll("h1, h2, h3");
-            if (headings.length > 0) {
-              const headingTexts = Array.from(headings).map((h) => extractElementText(h)).filter((t) => t.length > 0);
-              if (headingTexts.length > 0) {
-                allTexts.push(headingTexts.join(" "));
-              }
-            }
-            const emphasisElements = document.querySelectorAll('main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code, article strong, article b, article em, article i, article mark, article dfn, article cite, article kbd, article code, [role="main"] strong, [role="main"] b, [role="main"] em, [role="main"] i, [role="main"] mark, [role="main"] dfn, [role="main"] cite, [role="main"] kbd, [role="main"] code, .main strong, .main b, .main em, .main i, .main mark, .main dfn, .main cite, .main kbd, .main code, .content strong, .content b, .content em, .content i, .content mark, .content dfn, .content cite, .content kbd, .content code');
-            if (emphasisElements.length > 0) {
-              const emphasisTexts = Array.from(emphasisElements).slice(0, 60).map((el) => extractElementText(el)).filter((t) => t.length > 0);
-              if (emphasisTexts.length > 0) {
-                allTexts.push(emphasisTexts.join(" "));
-              }
-            }
-            const definitionTerms = document.querySelectorAll('main dl dt, article dl dt, [role="main"] dl dt, .main dl dt, .content dl dt');
-            if (definitionTerms.length > 0) {
-              const dtTexts = Array.from(definitionTerms).slice(0, 40).map((dt) => extractElementText(dt)).filter((t) => t.length > 0);
-              if (dtTexts.length > 0) {
-                allTexts.push(dtTexts.join(" "));
-              }
-            }
-            const tableHeaders = document.querySelectorAll('main th, main caption, article th, article caption, [role="main"] th, [role="main"] caption, .main th, .main caption, .content th, .content caption');
-            if (tableHeaders.length > 0) {
-              const thTexts = Array.from(tableHeaders).slice(0, 40).map((th) => extractElementText(th)).filter((t) => t.length > 0);
-              if (thTexts.length > 0) {
-                allTexts.push(thTexts.join(" "));
-              }
-            }
-            const nav = document.querySelector("nav") || document.querySelector("header nav") || document.querySelector('[role="navigation"]');
-            if (nav) {
-              const navLinks = nav.querySelectorAll("a");
-              const navTexts = Array.from(navLinks).slice(0, 40).map((link) => extractElementText(link)).filter((t) => t.length > 0);
-              if (navTexts.length > 0) {
-                allTexts.push(navTexts.join(" "));
-              }
-            }
-            const breadcrumb = document.querySelector('[aria-label*="breadcrumb" i], .breadcrumb, nav[aria-label*="breadcrumb" i], [itemtype*="BreadcrumbList"]');
-            if (breadcrumb) {
-              const breadcrumbLinks = breadcrumb.querySelectorAll('a, [itemprop="name"]');
-              const breadcrumbTexts = Array.from(breadcrumbLinks).map((link) => extractElementText(link)).filter((t) => t.length > 0);
-              if (breadcrumbTexts.length > 0) {
-                allTexts.push(breadcrumbTexts.join(" "));
-              }
-            }
-            const mainImages = document.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img');
-            if (mainImages.length > 0) {
-              const imageAlts = Array.from(mainImages).slice(0, 10).map((img) => img.alt || "").filter((alt) => alt.length > 0);
-              if (imageAlts.length > 0) {
-                allTexts.push(imageAlts.join(" "));
-              }
-            }
-            const mainLinks = document.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a');
-            if (mainLinks.length > 0) {
-              const linkTexts = Array.from(mainLinks).slice(0, 20).map((link) => extractElementText(link)).filter((t) => t.length > 0);
-              if (linkTexts.length > 0) {
-                allTexts.push(linkTexts.join(" "));
-              }
-            }
-            if (allTexts.length === 0 && document.body && document.body.innerText) {
-              const bodyText = (document.body.innerText || "").trim();
-              if (bodyText.length > 0) {
-                allTexts.push(bodyText.slice(0, 5e3));
-              }
-            }
-            if (allTexts.length === 0) return [];
-            const allText = allTexts.join(" ");
-            const words = allText.split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/).filter((word) => word.length > 0);
-            const noiseWords = /* @__PURE__ */ new Set([
-              "a",
-              "an",
-              "and",
-              "are",
-              "as",
-              "at",
-              "be",
-              "by",
-              "for",
-              "from",
-              "has",
-              "he",
-              "in",
-              "is",
-              "it",
-              "its",
-              "of",
-              "on",
-              "that",
-              "the",
-              "to",
-              "was",
-              "will",
-              "with",
-              "this",
-              "but",
-              "they",
-              "have",
-              "had",
-              "what",
-              "said",
-              "each",
-              "which",
-              "their",
-              "time",
-              "if",
-              "up",
-              "out",
-              "many",
-              "then",
-              "them",
-              "these",
-              "so",
-              "some",
-              "her",
-              "would",
-              "make",
-              "like",
-              "into",
-              "him",
-              "two",
-              "more",
-              "very",
-              "after",
-              "words",
-              "long",
-              "than",
-              "first",
-              "been",
-              "call",
-              "who",
-              "oil",
-              "sit",
-              "now",
-              "find",
-              "down",
-              "day",
-              "did",
-              "get",
-              "come",
-              "made",
-              "may",
-              "part",
-              "over",
-              "new",
-              "sound",
-              "take",
-              "only",
-              "little",
-              "work",
-              "know",
-              "place",
-              "year",
-              "live",
-              "me",
-              "back",
-              "give",
-              "most",
-              "thing",
-              "our",
-              "just",
-              "name",
-              "good",
-              "sentence",
-              "man",
-              "think",
-              "say",
-              "great",
-              "where",
-              "help",
-              "through",
-              "much",
-              "before",
-              "line",
-              "right",
-              "too",
-              "mean",
-              "old",
-              "any",
-              "same",
-              "tell",
-              "boy",
-              "follow",
-              "came",
-              "want",
-              "show",
-              "also",
-              "around",
-              "form",
-              "three",
-              "small",
-              "set",
-              "put",
-              "end",
-              "does",
-              "another",
-              "well",
-              "large",
-              "must",
-              "big",
-              "even",
-              "such",
-              "because",
-              "turn",
-              "here",
-              "why",
-              "ask",
-              "went",
-              "men",
-              "read",
-              "need",
-              "land",
-              "different",
-              "home",
-              "us",
-              "move",
-              "try",
-              "kind",
-              "hand",
-              "picture",
-              "again",
-              "change",
-              "off",
-              "play",
-              "spell",
-              "air",
-              "away",
-              "animal",
-              "house",
-              "point",
-              "page",
-              "letter",
-              "mother",
-              "answer",
-              "found",
-              "study",
-              "still",
-              "learn",
-              "should",
-              "america",
-              "world",
-              "high",
-              "every",
-              "near",
-              "add",
-              "food",
-              "between",
-              "own",
-              "below",
-              "country",
-              "plant",
-              "last",
-              "school",
-              "father",
-              "keep",
-              "tree",
-              "never",
-              "start",
-              "city",
-              "earth",
-              "eye",
-              "light",
-              "thought",
-              "head",
-              "under",
-              "story",
-              "saw",
-              "left",
-              "don't",
-              "few",
-              "while",
-              "along",
-              "might",
-              "close",
-              "something",
-              "seem",
-              "next",
-              "hard",
-              "open",
-              "example",
-              "begin",
-              "life",
-              "always",
-              "those",
-              "both",
-              "paper",
-              "together",
-              "got",
-              "group",
-              "often",
-              "run",
-              "important",
-              "until",
-              "children",
-              "side",
-              "feet",
-              "car",
-              "mile",
-              "night",
-              "walk",
-              "white",
-              "sea",
-              "began",
-              "grow",
-              "took",
-              "river",
-              "four",
-              "carry",
-              "state",
-              "once",
-              "book",
-              "hear",
-              "stop",
-              "without",
-              "second",
-              "later",
-              "miss",
-              "idea",
-              "enough",
-              "eat",
-              "face",
-              "watch",
-              "far",
-              "indian",
-              "really",
-              "almost",
-              "let",
-              "above",
-              "girl",
-              "sometimes",
-              "mountain",
-              "cut",
-              "young",
-              "talk",
-              "soon",
-              "list",
-              "song",
-              "leave",
-              "family",
-              "it's"
-            ]);
-            const wordFrequency = /* @__PURE__ */ new Map();
-            const originalCaseMap = /* @__PURE__ */ new Map();
-            words.forEach((word) => {
-              const trimmed = word.trim();
-              if (trimmed.length === 0) return;
-              const lowerWord = trimmed.toLowerCase();
-              const maxTagLen = 50;
-              if (trimmed.length >= 2 && trimmed.length <= maxTagLen && !noiseWords.has(lowerWord) && !/^\d+$/.test(trimmed)) {
-                const count = wordFrequency.get(lowerWord) || 0;
-                wordFrequency.set(lowerWord, count + 1);
-                if (!originalCaseMap.has(lowerWord)) {
-                  originalCaseMap.set(lowerWord, trimmed);
-                }
-              }
-            });
-            const tagsWithVersions = [];
-            const seenLowercase = /* @__PURE__ */ new Set();
-            const sortedEntries = Array.from(wordFrequency.entries()).sort((a, b) => {
-              if (b[1] !== a[1]) {
-                return b[1] - a[1];
-              }
-              return a[0].localeCompare(b[0]);
-            });
-            for (const [lowerWord, frequency] of sortedEntries) {
-              const originalCase = originalCaseMap.get(lowerWord) || lowerWord;
-              tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency });
-              if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
-                tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency });
-                seenLowercase.add(lowerWord);
-              } else if (originalCase === lowerWord) {
-                seenLowercase.add(lowerWord);
-              }
-            }
-            tagsWithVersions.sort((a, b) => {
-              if (b.frequency !== a.frequency) {
-                return b.frequency - a.frequency;
-              }
-              return a.lowerTag.localeCompare(b.lowerTag);
-            });
-            const sortedWords = tagsWithVersions.slice(0, 60).map((item) => item.tag);
-            const sanitizedTags = sortedWords.map((word) => word.replace(/[^a-zA-Z0-9_-]/g, "").substring(0, 50)).filter((tag) => tag !== null && tag.length > 0);
-            const uniqueTags = [];
-            const seenExact = /* @__PURE__ */ new Set();
-            for (const tag of sanitizedTags) {
-              if (!seenExact.has(tag)) {
-                uniqueTags.push(tag);
-                seenExact.add(tag);
-              }
-            }
-            return uniqueTags.slice(0, 60);
+            const fn = globalThis.__hoverboardExtractSuggestedTagsWithRelevance;
+            return typeof fn === "function" ? fn() : [];
           }
         });
         if (results && results[0] && results[0].result) {
-          const suggestedTags = results[0].result;
+          const raw = results[0].result;
+          const suggestedList = this._normalizeSuggestedRowsFromMainWorld(raw);
           const currentTags = this.normalizeTags(this.currentPin?.tags || []);
           const currentTagsLower = new Set(currentTags.map((t) => t.toLowerCase()));
-          const filteredSuggestedTags = suggestedTags.filter(
-            (tag) => tag && !currentTagsLower.has(tag.toLowerCase())
+          const filteredSuggestedTags = suggestedList.filter(
+            (item) => !currentTagsLower.has(item.tag.toLowerCase())
           );
           debugLog("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted suggested tags:", filteredSuggestedTags);
           this.uiManager.updateSuggestedTags(filteredSuggestedTags);
@@ -20637,6 +20576,8 @@ var PopupController = class {
     this.uiManager.updateCurrentTags(tags);
     this.uiManager.showSuccess("Tags updated successfully");
     await this.loadRecentTags();
+    await this.refreshTagFrequencyMapForSort();
+    this.uiManager.redrawTagChipsFromCache();
     await this.notifyOverlayOfTagChanges(tags);
     try {
       await this.sendToTab({
@@ -20696,6 +20637,8 @@ var PopupController = class {
     this.uiManager.updateCurrentTags(tags);
     this.uiManager.showSuccess("Bookmark created successfully");
     await this.loadRecentTags();
+    await this.refreshTagFrequencyMapForSort();
+    this.uiManager.redrawTagChipsFromCache();
   }
   /**
    * Handle search action - now uses tab search functionality

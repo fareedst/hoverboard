@@ -1,0 +1,73 @@
+IMPL-MCP_FEEDBACK_TOOLS:
+  name: MCP Feedback Tools (tied_feedback_add, tied_feedback_export)
+  status: Active
+  cross_references:
+    - ARCH-FEEDBACK_STORAGE
+    - REQ-FEEDBACK_TO_TIED
+  rationale:
+    why: Implement REQ-FEEDBACK_TO_TIED and ARCH-FEEDBACK_STORAGE via two MCP tools and a testable feedback module
+    problems_solved:
+      - No programmatic way to add or export feedback from a TIED project
+    benefits:
+      - Projects can record and export feedback for the TIED project
+      - Logic in pure/testable module; handlers stay thin
+  implementation_approach:
+    summary: Feedback module (load/append/export) under mcp-server/src/feedback.ts; two tool handlers in tools/index.ts
+    details:
+      - 'getFeedbackPath(basePath?): resolve {base}/feedback.yaml'
+      - 'loadFeedback(basePath?): read YAML or return { entries: [] }; create file if missing on first append'
+      - 'appendEntry(params): validate type/title/description; generate id (e.g. timestamp-based); set created_at; append to entries; write file'
+      - 'exportMarkdown(entries), exportJson(entries): format all entries for report'
+      - 'tied_feedback_add: parse args, call appendEntry, return ok/id/created_at and optional report_snippet (markdown)'
+      - 'tied_feedback_export: load entries, call exportMarkdown or exportJson, return string'
+  code_locations:
+    files:
+      - path: mcp-server/src/feedback.ts
+        description: Feedback load/append/export logic [REQ-FEEDBACK_TO_TIED] [ARCH-FEEDBACK_STORAGE] [IMPL-MCP_FEEDBACK_TOOLS]
+      - path: mcp-server/src/feedback.test.ts
+        description: Unit tests for feedback module
+      - path: mcp-server/src/tools/index.ts
+        description: Tool handlers tied_feedback_add, tied_feedback_export
+    functions:
+      - name: loadFeedback
+        file: mcp-server/src/feedback.ts
+        description: Load feedback.yaml or default structure
+      - name: appendEntry
+        file: mcp-server/src/feedback.ts
+        description: Append one entry with id and created_at
+      - name: exportMarkdown
+        file: mcp-server/src/feedback.ts
+        description: Export entries as markdown for TIED report
+      - name: exportJson
+        file: mcp-server/src/feedback.ts
+        description: Export entries as JSON string
+  traceability:
+    architecture:
+      - ARCH-FEEDBACK_STORAGE
+    requirements:
+      - REQ-FEEDBACK_TO_TIED
+    tests:
+      - feedback.test.ts
+    code_annotations:
+      - IMPL-MCP_FEEDBACK_TOOLS
+      - ARCH-FEEDBACK_STORAGE
+      - REQ-FEEDBACK_TO_TIED
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also:
+      - ARCH-FEEDBACK_STORAGE
+      - REQ-FEEDBACK_TO_TIED
+  detail_file: implementation-decisions/IMPL-MCP_FEEDBACK_TOOLS.yaml
+  metadata:
+    created:
+      date: 2026-03-03
+      author: AI Agent
+    last_updated:
+      date: 2026-03-03
+      author: AI Agent
+      reason: Initial creation
+    last_validated:
+      date: 2026-03-03
+      validator: AI Agent
+      result: pass

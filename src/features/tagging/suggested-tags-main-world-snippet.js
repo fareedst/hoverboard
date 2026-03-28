@@ -44,6 +44,23 @@
     'leave', 'family', 'it\'s'
   ])
 
+  // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Mirror src/shared/suggested-tag-original-case.js (no imports in MAIN-world file)
+  function suggestedOriginalCaseVariantRank (s) {
+    if (!s || typeof s !== 'string') return 0
+    const hasUpper = /[A-Z]/.test(s)
+    const hasLower = /[a-z]/.test(s)
+    if (hasUpper && hasLower) return 2
+    if (hasUpper && !hasLower) return 1
+    return 0
+  }
+  function pickBetterSuggestedOriginalCase (existing, candidate) {
+    const rNew = suggestedOriginalCaseVariantRank(candidate)
+    const rOld = suggestedOriginalCaseVariantRank(existing)
+    if (rNew > rOld) return candidate
+    if (rNew < rOld) return existing
+    return existing
+  }
+
   function extractElementText (element) {
     if (element.title && element.title.trim().length > 0) {
       return element.title.trim()
@@ -75,8 +92,11 @@
         }
         wordFrequency.set(lowerWord, (wordFrequency.get(lowerWord) || 0) + 1)
         wordRelevance.set(lowerWord, Math.max(wordRelevance.get(lowerWord) || 0, score))
-        if (!originalCaseMap.has(lowerWord)) {
+        const prev = originalCaseMap.get(lowerWord)
+        if (prev === undefined) {
           originalCaseMap.set(lowerWord, trimmed)
+        } else {
+          originalCaseMap.set(lowerWord, pickBetterSuggestedOriginalCase(prev, trimmed))
         }
       }
 
@@ -194,28 +214,12 @@
           return a[0].localeCompare(b[0])
         })
 
-      const tagsWithVersions = []
-      const seenLowercase = new Set()
-
-      for (const [lowerWord, frequency] of sortedEntries) {
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] One row per lowercase key; no duplicate lowercase-only chip
+      const sortedWords = sortedEntries.slice(0, 60).map(([lowerWord, frequency]) => {
         const originalCase = originalCaseMap.get(lowerWord) || lowerWord
         const rel = wordRelevance.get(lowerWord) || 0
-        tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency, relevance: rel })
-
-        if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
-          tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency, relevance: rel })
-          seenLowercase.add(lowerWord)
-        } else if (originalCase === lowerWord) {
-          seenLowercase.add(lowerWord)
-        }
-      }
-
-      tagsWithVersions.sort((a, b) => {
-        if (b.frequency !== a.frequency) return b.frequency - a.frequency
-        return a.lowerTag.localeCompare(b.lowerTag)
+        return { tag: originalCase, lowerTag: lowerWord, frequency, relevance: rel }
       })
-
-      const sortedWords = tagsWithVersions.slice(0, 60)
 
       function sanitizeTag (word) {
         if (!word || typeof word !== 'string') return null

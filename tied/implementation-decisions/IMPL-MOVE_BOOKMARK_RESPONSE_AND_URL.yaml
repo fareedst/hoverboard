@@ -33,7 +33,7 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
     requirements:
       - REQ-MOVE_BOOKMARK_STORAGE_UI
     tests: []
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: move bookmark response and URL handling in UI."
+    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: move bookmark response and URL handling in UI.'
     code_annotations:
       - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
   related_decisions:
@@ -76,13 +76,13 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
   detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass

@@ -4,6 +4,7 @@
  */
 
 import { ConfigManager } from '../../config/config-manager.js'
+import { pickBetterSuggestedOriginalCase } from '../../shared/suggested-tag-original-case.js'
 import { debugLog, debugError } from '../../shared/utils.js'
 
 debugLog('[SAFARI-EXT-SHIM-001] tag-service.js: module loaded');
@@ -1116,10 +1117,9 @@ export class TagService {
         'leave', 'family', 'it\'s'
       ])
 
-      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Track original case variants and frequency using lowercase keys
-      // Map structure: lowercaseWord -> { original: Set of original case variants, frequency: count }
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Track frequency by lowercase key; one canonical spelling per key (see pickBetterSuggestedOriginalCase)
       const wordFrequency = new Map()
-      const originalCaseMap = new Map() // lowercase -> most common original case variant
+      const originalCaseMap = new Map() // lowercase -> best HTML spelling for display (original mode)
 
       words.forEach(word => {
         const trimmed = word.trim()
@@ -1138,73 +1138,31 @@ export class TagService {
           const count = wordFrequency.get(lowerWord) || 0
           wordFrequency.set(lowerWord, count + 1)
 
-          // Track original case variants - keep the first occurrence of each original case
-          if (!originalCaseMap.has(lowerWord)) {
+          const prev = originalCaseMap.get(lowerWord)
+          if (prev === undefined) {
             originalCaseMap.set(lowerWord, trimmed)
           } else {
-            // If we've seen this lowercase word before, prefer the original case we've seen most
-            // For now, keep the first one; could be enhanced to track which original case appears most
-            const existing = originalCaseMap.get(lowerWord)
-            // If the new one matches the existing, keep it; otherwise keep existing
-            // This simple approach preserves the first original case we encounter
+            originalCaseMap.set(lowerWord, pickBetterSuggestedOriginalCase(prev, trimmed))
           }
         }
       })
 
       debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:', wordFrequency.size)
 
-      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Build list of tags with both original case and lowercase versions
-      // For words with uppercase letters, include both versions as separate tags
-      // For words already lowercase, include only once
-      const tagsWithVersions = []
-      const seenLowercase = new Set() // Track lowercase versions we've already added
-
-      // Sort by frequency (descending), then alphabetically for ties
       const sortedEntries = Array.from(wordFrequency.entries())
         .sort((a, b) => {
-          // Primary sort: frequency (descending)
           if (b[1] !== a[1]) {
             return b[1] - a[1]
           }
-          // Secondary sort: alphabetically (ascending) using lowercase
           return a[0].localeCompare(b[0])
         })
 
-      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] For each word, add original case version and lowercase version (if different)
-      for (const [lowerWord, frequency] of sortedEntries) {
-        const originalCase = originalCaseMap.get(lowerWord) || lowerWord
-        
-        // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Add original case version
-        tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency })
+      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] One suggestion per lowercase key; UI upper/lower modes use tagChipDisplayAndAddValue
+      const sortedWords = sortedEntries
+        .slice(0, limit)
+        .map(([lowerWord]) => originalCaseMap.get(lowerWord) || lowerWord)
 
-        // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] If word contains uppercase letters, also add lowercase version
-        // Only add lowercase version if it's different from original and we haven't seen it yet
-        if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
-          tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency })
-          seenLowercase.add(lowerWord)
-        } else if (originalCase === lowerWord) {
-          // Word is already lowercase, mark it as seen
-          seenLowercase.add(lowerWord)
-        }
-      }
-
-      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sort all tags (both versions) by frequency, then alphabetically
-      // This ensures both "Git" and "git" are sorted appropriately
-      tagsWithVersions.sort((a, b) => {
-        // Primary sort: frequency (descending)
-        if (b.frequency !== a.frequency) {
-          return b.frequency - a.frequency
-        }
-        // Secondary sort: alphabetically (ascending) using lowercase
-        return a.lowerTag.localeCompare(b.lowerTag)
-      })
-
-      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Extract tags and apply limit
-      const sortedWords = tagsWithVersions
-        .slice(0, limit * 2) // Allow more entries since we're adding lowercase versions
-        .map(item => item.tag)
-
-      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):', sortedWords)
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (canonical case per key):', sortedWords)
 
       // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sanitize each tag using existing sanitization logic
       // Sanitization may change case, so we preserve what we can
@@ -1214,23 +1172,19 @@ export class TagService {
 
       debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:', sanitizedTags)
 
-      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Remove exact duplicates (same string) while preserving both "Git" and "git"
-      // Use a Set to track exact strings we've seen, but allow both "Git" and "git" since they're different strings
       const uniqueTags = []
-      const seenExact = new Set() // Track exact strings to avoid true duplicates
-      
+      const seenExact = new Set()
+
       for (const tag of sanitizedTags) {
-        // Only skip if we've seen this exact string before
         if (!seenExact.has(tag)) {
           uniqueTags.push(tag)
           seenExact.add(tag)
         }
       }
 
-      // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Apply final limit to ensure we don't exceed reasonable bounds
-      const finalTags = uniqueTags.slice(0, limit * 2)
+      const finalTags = uniqueTags.slice(0, limit)
 
-      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):', finalTags.length, finalTags)
+      debugLog('TAG-SERVICE', '[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags:', finalTags.length, finalTags)
 
       return finalTags
     } catch (error) {

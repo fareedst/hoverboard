@@ -27,14 +27,14 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
   detail_file: requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
       reason: Converted from monolithic
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   cross-references: ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-STORAGE_INDEX, IMPL-BOOKMARK_ROUTER

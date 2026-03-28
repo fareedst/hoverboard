@@ -4,33 +4,52 @@ REQ-MODULE_VALIDATION:
   priority: P0
   status: Implemented
   rationale:
-    why: To eliminate bugs related to code complexity by ensuring each module works correctly in isolation before combining with other modules. Independent validation reduces integration complexity, catches bugs early in the development cycle, and ensures each module meets its defined contract before integration.
-    problems_solved: []
-    benefits: []
+    why: To eliminate bugs related to code complexity by ensuring each module works correctly in isolation before combining with other modules
+    problems_solved:
+      - Integration complexity causing difficult-to-debug issues
+      - Bugs discovered too late in the development cycle
+      - Module contracts not properly validated before integration
+    benefits:
+      - Bugs caught early before integration
+      - Reduced integration complexity
+      - Clear module boundaries and contracts
+      - Easier debugging by isolating issues to specific modules
   satisfaction_criteria:
-    - criterion: All logical modules are identified and documented with clear boundaries before development
-    - criterion: Module interfaces and contracts are defined and documented
-    - criterion: Module validation criteria are specified (what "validated" means for each module)
-    - criterion: Each module is developed independently
-    - criterion: Each module passes independent validation (unit tests with mocks, integration tests with test doubles, contract validation, edge case testing, error handling validation) before integration
-    - criterion: Module validation results are documented
-    - criterion: Integration tasks are separate from module development and validation tasks
+    - criterion: All logical modules identified and documented with clear boundaries before development
+    - criterion: Module interfaces and contracts defined and documented
+    - criterion: Module validation criteria specified for each module
+      metric: What 'validated' means is explicitly defined
+    - criterion: Each module developed independently
+    - criterion: Each module passes independent validation before integration
+      metric: Unit tests with mocks, integration tests with test doubles, contract validation, edge case testing, error handling validation all passing
+    - criterion: Module validation results documented
+    - criterion: Integration tasks separate from module development tasks
     - criterion: Integration only occurs after module validation passes
-    - criterion: "Minimize code measurable only from outside testing (E2E/manual): every IMPL that introduces or changes behavior has a test strategy (unit, integration, or E2E/glue-only with documented reason)"
-    - criterion: "No non-trivial logic in entry points (popup, service worker, content script main) unless explicitly documented as glue and the reason it cannot be extracted is stated"
+    - criterion: Minimize code measurable only from outside testing (E2E/manual); every IMPL has test strategy (unit/integration or E2E/glue-only with documented reason)
+    - criterion: No non-trivial logic in entry points unless documented as glue with reason
   validation_criteria:
-    - method: Manual verification that modules are identified and documented before development
-    - method: Automated verification that module validation tests exist and pass before integration
-    - method: Code review verification that integration code references validated modules
-    - method: Verification that module validation results are documented
-    - method: Verification that integration tests validate the combined behavior of validated modules
-    - method: "Coverage gates and coverage gap report; IMPL traceability.tests or test_coverage_note (E2E-only with reason) for every Active IMPL"
+    - method: Manual verification
+      coverage: Modules identified and documented before development starts
+    - method: Automated testing
+      coverage: Module validation tests exist and pass before integration
+    - method: Code review
+      coverage: Integration code references validated modules
+    - method: Documentation review
+      coverage: Module validation results are documented
+    - method: Integration testing
+      coverage: Integration tests validate combined behavior of validated modules
+    - method: Coverage gates and gap report
+      coverage: IMPL traceability.tests or test_coverage_note (E2E-only with reason) for every Active IMPL
   traceability:
-    architecture: []
-    implementation: []
-    tests: []
+    architecture:
+      - ARCH-MODULE_VALIDATION
+    implementation:
+      - IMPL-MODULE_VALIDATION
+    tests:
+      - testModuleName_IndependentValidation_REQ_MODULE_VALIDATION
     code_annotations:
       - REQ-MODULE_VALIDATION
+      - IMPL-MODULE_VALIDATION
   related_requirements:
     depends_on:
       - REQ-TIED_SETUP
@@ -39,23 +58,13 @@ REQ-MODULE_VALIDATION:
   detail_file: requirements/REQ-MODULE_VALIDATION.yaml
   metadata:
     created:
-      date: '2026-02-18'
-      author: MCP converter
+      date: 2025-01-27
+      author: AI Agent
     last_updated:
-      date: '2026-02-18'
-      author: MCP converter
-      reason: Converted from monolithic
+      date: 2026-02-06
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
     last_validated:
-      date: '2026-02-18'
-      validator: MCP converter
+      date: 2026-02-06
+      validator: AI Agent
       result: pass
-  architecture: '`ARCH-MODULE_VALIDATION` (see `architecture-decisions.yaml`)'
-  code: '`// [REQ-MODULE_VALIDATION] Module validated independently` in source files'
-  created: '2025-01-27'
-  depends_on: '[REQ-TIED_SETUP] (needs STDD methodology in place)'
-  description: Logical modules must be developed and validated independently before integration into code satisfying specific requirements. Each module must have clear boundaries, interfaces, and validation criteria defined before development begins.
-  implementation: '`IMPL-MODULE_VALIDATION` (see `implementation-decisions.yaml`)'
-  last_updated: '2026-02-06'
-  related_to: All feature requirements that involve modular design
-  supersedes: None
-  tests: '`testModuleName_IndependentValidation_REQ_MODULE_VALIDATION` in test files'

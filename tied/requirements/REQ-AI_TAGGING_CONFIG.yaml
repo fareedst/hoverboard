@@ -42,13 +42,13 @@ REQ-AI_TAGGING_CONFIG:
   detail_file: requirements/REQ-AI_TAGGING_CONFIG.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Popup Test API key button added; satisfaction_criteria updated
     last_validated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       validator: AI Agent
       result: pass

@@ -36,14 +36,14 @@ ARCH-BOOKMARK_USAGE_TRACKING:
   detail_file: architecture-decisions/ARCH-BOOKMARK_USAGE_TRACKING.yaml
   metadata:
     created:
-      date: '2026-03-03'
+      date: "2026-03-03"
       author: AI Agent
     last_updated:
-      date: '2026-03-03'
+      date: "2026-03-03"
       author: AI Agent
       reason: Initial creation
     last_validated:
-      date: '2026-03-03'
+      date: "2026-03-03"
       validator: AI Agent
       result: pass
-  decision: 'Separate storage keys for usage and nav edges; service worker hooks after getBookmarkForUrl; referrer via executeScript; 60s debounce per URL.'
+  decision: Separate storage keys for usage and nav edges; service worker hooks after getBookmarkForUrl; referrer via executeScript; 60s debounce per URL.

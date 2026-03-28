@@ -100,13 +100,13 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
   detail_file: implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; fix code_locations; remove extraneous
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass

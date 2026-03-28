@@ -71,13 +71,13 @@ IMPL-NATIVE_HOST_WRAPPER:
   detail_file: implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass

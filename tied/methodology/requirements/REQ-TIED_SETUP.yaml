@@ -1,0 +1,58 @@
+REQ-TIED_SETUP:
+  name: TIED Methodology Setup
+  category: Functional
+  priority: P0
+  status: Implemented
+  rationale:
+    why: To ensure traceability of intent from requirements to code and to maintain a consistent development process
+    problems_solved:
+      - Loss of intent during development lifecycle
+      - Difficulty tracking requirements through architecture to implementation
+      - Inconsistent documentation practices across projects
+    benefits:
+      - Complete traceability from requirements to code
+      - Consistent development methodology
+      - AI-friendly documentation structure
+  satisfaction_criteria:
+    - criterion: tied/ directory exists with proper structure
+    - criterion: All required documentation files exist and are populated from templates
+      metric: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml, semantic-tokens.md, processes.md all present
+    - criterion: Base files properly configured
+      metric: .cursorrules contains TIED rules, AGENTS.md contains canonical AI agent instructions
+    - criterion: Detail directories exist
+      metric: requirements/, architecture-decisions/, implementation-decisions/ directories present
+  validation_criteria:
+    - method: Manual verification
+      coverage: File existence checks for all required files and directories
+    - method: AI agent acknowledgment
+      coverage: Agent responds with 'Observing AI principles!' confirming rules are loaded
+    - method: Structure validation
+      coverage: All index files have corresponding detail directories with proper naming
+  traceability:
+    architecture:
+      - ARCH-TIED_STRUCTURE
+    implementation:
+      - IMPL-TIED_FILES
+    tests:
+      - Manual verification checklists
+    code_annotations:
+      - IMPL-TIED_FILES
+      - ARCH-TIED_STRUCTURE
+      - REQ-TIED_SETUP
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  detail_file: requirements/REQ-TIED_SETUP.yaml
+  metadata:
+    created:
+      date: 2025-11-08
+      author: AI Agent
+    last_updated:
+      date: 2026-02-06
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
+    last_validated:
+      date: 2026-02-06
+      validator: AI Agent
+      result: pass

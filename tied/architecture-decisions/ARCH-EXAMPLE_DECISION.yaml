@@ -44,14 +44,14 @@ ARCH-EXAMPLE_DECISION:
   detail_file: architecture-decisions/ARCH-EXAMPLE_DECISION.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
       reason: Converted from monolithic
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   decision: '[Your Architecture Choice - describe the high-level architectural decision]'

@@ -53,13 +53,13 @@ ARCH-SELECTION_TO_TAG_INPUT:
   detail_file: architecture-decisions/ARCH-SELECTION_TO_TAG_INPUT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: Selection-to-tag input architecture
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass

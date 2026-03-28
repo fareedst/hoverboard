@@ -25,14 +25,14 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
   detail_file: architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: Preferred backend so save follows popup highlight
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   decision: A **storage index** in chrome.storage.local maps each bookmark URL to its backend (`pinboard` | `local` | `file` | `sync`). The **BookmarkRouter** holds references to all providers and delegates getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag to the provider indicated by the index (or the default storage mode for new bookmarks). When the popup provides a preferred backend (UI selection), the router uses it for save so save follows the highlight. getRecentBookmarks aggregates results from all providers and returns a single list sorted by time. MessageHandler uses the router as its bookmark provider (duck-typed).

@@ -49,13 +49,13 @@ REQ-AI_TAGGING_POPUP:
   detail_file: requirements/REQ-AI_TAGGING_POPUP.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-21'
+      date: "2026-02-21"
       author: AI Agent
       reason: Satisfaction criteria updated for GET_PAGE_CONTENT via executeScript when content script not in tab
     last_validated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       validator: AI Agent
       result: pass

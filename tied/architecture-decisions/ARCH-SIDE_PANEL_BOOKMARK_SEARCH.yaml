@@ -1,6 +1,5 @@
 # [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_BOOKMARK_SEARCH]
 # Architecture: Client-side text filter on the list already filtered and sorted; search bar in panel; match count; Next/Previous with scroll and highlight.
-
 ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
   name: Side Panel Bookmark Search Architecture
   status: Active
@@ -38,9 +37,9 @@ ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_BOOKMARK_SEARCH.yaml
   metadata:
     created:
-      date: '2026-02-22'
+      date: "2026-02-22"
       author: AI Agent
     last_updated:
-      date: '2026-02-22'
+      date: "2026-02-22"
       author: AI Agent
       reason: Initial creation

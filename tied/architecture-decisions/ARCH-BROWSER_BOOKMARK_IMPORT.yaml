@@ -15,7 +15,7 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
       cons: Unnecessary; extension page with permission can call chrome.bookmarks directly
       rejected_reason: Simpler to call from page
   implementation_approach:
-    summary: 'Dedicated page in src/ui/browser-bookmark-import/; on load call chrome.bookmarks.getTree(), flatten to list of { url, title, dateAdded, id, folderPath }; build unique folder list for filter dropdown; table with Select, Title, URL (link), Folder path, Date added; search + folder filter; sort; selection; conflict mode (Skip / Overwrite / Merge); "Use folder names as tags" + "Add tags"; Import to Local | File | Sync; Import button sends getAggregatedBookmarksForIndex once, then for each selected item builds payload, applies conflict rule, sendMessage saveBookmark; show result.'
+    summary: Dedicated page in src/ui/browser-bookmark-import/; on load call chrome.bookmarks.getTree(), flatten to list of { url, title, dateAdded, id, folderPath }; build unique folder list for filter dropdown; table with Select, Title, URL (link), Folder path, Date added; search + folder filter; sort; selection; conflict mode (Skip / Overwrite / Merge); "Use folder names as tags" + "Add tags"; Import to Local | File | Sync; Import button sends getAggregatedBookmarksForIndex once, then for each selected item builds payload, applies conflict rule, sendMessage saveBookmark; show result.
     details: []
   traceability:
     requirements:
@@ -37,19 +37,19 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
   detail_file: architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: New architecture for browser bookmark import
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass
-  decision: 'Dedicated page; chrome.bookmarks.getTree in page; flatten with folder path; filter (search, folder), sort, select; conflict Skip/Overwrite/Merge via aggregated index; folder + extra tags; saveBookmark per row; no new backend message.'
+  decision: Dedicated page; chrome.bookmarks.getTree in page; flatten with folder path; filter (search, folder), sort, select; conflict Skip/Overwrite/Merge via aggregated index; folder + extra tags; saveBookmark per row; no new backend message.
   cross-references: REQ-BROWSER_BOOKMARK_IMPORT, IMPL-BROWSER_BOOKMARK_IMPORT
-  summary: 'Browser bookmark import page loads getTree in-page, flattens to table with folder path; search + folder filter; select; conflict mode; folder-as-tags + extra tags; Import to Local | File | Sync; saveBookmark per selected; result message.'
+  summary: Browser bookmark import page loads getTree in-page, flattens to table with folder path; search + folder filter; select; conflict mode; folder-as-tags + extra tags; Import to Local | File | Sync; saveBookmark per selected; result message.
   related:
     - IMPL-BROWSER_BOOKMARK_IMPORT (import page UI and flatten + save loop)
     - ARCH-LOCAL_BOOKMARKS_INDEX (layout reference)

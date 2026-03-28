@@ -15,7 +15,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     details:
       - 'bookmarks-table.js: exportBookmarks(scope); scope all -> allBookmarks, displayed -> filteredBookmarks, selected -> allBookmarks.filter(b => selectedUrls.has(b.url))'
       - 'CSV: escape quotes, columns description, url, tags, time, storage (Local|File|Sync), shared, toread, extended; filename hoverboard-bookmarks-{scope}-{ISO date}.csv'
-      - 'updateExportButtonState() disables Export selected when selectedUrls.size === 0; called from updateMoveControlsState()'
+      - updateExportButtonState() disables Export selected when selectedUrls.size === 0; called from updateMoveControlsState()
   code_locations:
     files:
       - path: src/ui/bookmarks-table/bookmarks-table.html
@@ -75,13 +75,13 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass

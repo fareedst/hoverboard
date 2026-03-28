@@ -14,9 +14,9 @@ ARCH-STRUCTURED_LOGGING:
   implementation_approach:
     summary: src/shared/logger.js — Logger class with context, getLogLevel(), shouldLog(), formatMessage(), debug/info/warn/error; createLogger(context); legacy log(context, ...args) and noisy
     details:
-      - "LOG-001 → IMPL-LOGGER_CONTEXT_LEVELS (context, levels, formatMessage, debug/info/warn/error)"
-      - "LOG-002 → IMPL-LOG_LEVEL_CONFIG (getLogLevel from process.env.NODE_ENV)"
-      - "LOG-003 → IMPL-LOGGER_LEGACY (log(), noisy export)"
+      - LOG-001 → IMPL-LOGGER_CONTEXT_LEVELS (context, levels, formatMessage, debug/info/warn/error)
+      - LOG-002 → IMPL-LOG_LEVEL_CONFIG (getLogLevel from process.env.NODE_ENV)
+      - LOG-003 → IMPL-LOGGER_LEGACY (log(), noisy export)
   traceability:
     requirements:
       - REQ-STRUCTURED_LOGGING

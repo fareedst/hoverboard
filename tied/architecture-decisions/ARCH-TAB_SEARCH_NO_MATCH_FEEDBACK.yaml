@@ -1,6 +1,5 @@
 # [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]
 # No-match case uses button border feedback (bright red then default over ≤2s) instead of error message; applies to popup and side panel.
-
 ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK:
   name: Tab Search No-Match Button Border Feedback
   status: Active

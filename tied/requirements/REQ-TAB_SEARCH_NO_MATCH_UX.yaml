@@ -1,6 +1,5 @@
 # [REQ-TAB_SEARCH_NO_MATCH_UX] Tab search no-match visual feedback only
 # When tab search is processed and no tab matches, do not show an error message; provide visual feedback only (e.g. search button border) that fades to default within 2 seconds.
-
 REQ-TAB_SEARCH_NO_MATCH_UX:
   name: Tab Search No-Match Visual Feedback Only
   category: Functional
@@ -9,7 +8,7 @@ REQ-TAB_SEARCH_NO_MATCH_UX:
   rationale:
     why: Avoid intrusive error messaging when the user simply got no matches; signal the outcome with subtle visual feedback instead.
     problems_solved:
-      - "\"No matching tabs found\" error message felt like an error when it is a valid outcome"
+      - '"No matching tabs found" error message felt like an error when it is a valid outcome'
       - Desire for visual feedback only when input is processed but no new tab is displayed
     benefits:
       - Clear feedback that search ran without showing an error state

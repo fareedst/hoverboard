@@ -19,18 +19,16 @@ IMPL-TIED_FILES:
     details:
       - Create tied/ directory at project root
       - Copy YAML index files from templates (requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml)
-      - Copy guide files from templates (semantic-tokens.md, processes.md)
+      - Copy guide files from templates (semantic-tokens.md, processes.md, commit-guidelines.md)
       - Create detail subdirectories (requirements/, architecture-decisions/, implementation-decisions/)
       - Copy base files to project root (.cursorrules, AGENTS.md, ai-principles.md)
   code_locations:
     files:
       - path: copy_files.sh
         description: Bootstrap script that sets up TIED structure
-        lines: [1, 163]
-    functions:
-      - name: setup_tied_structure
-        file: copy_files.sh
-        description: Creates directories and copies template files (if implemented as function)
+        lines:
+          - 1
+          - 352
   traceability:
     architecture:
       - ARCH-TIED_STRUCTURE
@@ -48,32 +46,16 @@ IMPL-TIED_FILES:
     see_also:
       - ARCH-TIED_STRUCTURE
       - REQ-TIED_SETUP
-    composed_with: []
-  essence_pseudocode: |
-    # [IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP]
-    # Bootstrap tied/ dir, subdirs, YAML indexes, guides, root files.
-    # Contract: project root and template source; tied/ and root files.
-    INPUT: project root; template source dir (or embedded templates)
-    OUTPUT: tied/ directory and files; root .cursorrules, AGENTS.md, ai-principles.md
-    DATA: copy_files.sh (or equivalent); template files for YAML indexes and guides
-
-    # Create tied/ and subdirs; copy YAML and guides; copy root files.
-    setup_tied_structure():
-      CREATE directory tied/
-      CREATE subdirs tied/requirements/, tied/architecture-decisions/, tied/implementation-decisions/
-      COPY template YAML indexes -> tied/*.yaml
-      COPY template guides -> tied/semantic-tokens.md, tied/processes.md
-      COPY .cursorrules, AGENTS.md, ai-principles.md -> project root
   detail_file: implementation-decisions/IMPL-TIED_FILES.yaml
   metadata:
     created:
-      date: "2025-12-18"
+      date: 2025-12-18
       author: AI Agent
     last_updated:
-      date: "2026-02-20"
+      date: 2026-03-27
       author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: copy_files.sh line range; remove phantom function entry [IMPL-TIED_FILES]
     last_validated:
-      date: "2026-02-06"
+      date: 2026-02-06
       validator: AI Agent
       result: pass

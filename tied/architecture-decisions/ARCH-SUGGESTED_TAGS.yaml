@@ -1,12 +1,12 @@
 ARCH-SUGGESTED_TAGS:
   name: Suggested Tags from Page Content Architecture
   status: Active
-  cross_references: &ref_0
+  cross_references:
     - REQ-SUGGESTED_TAGS_FROM_CONTENT
     - REQ-SUGGESTED_TAGS_DEDUPLICATION
     - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
   rationale:
-    why: Intelligent tag suggestions speed up bookmarking workflow by providing context-aware tag candidates without requiring manual typing. Multi-source extraction ensures comprehensive coverage of page semantics; frequency sorting prioritizes common/important terms; case preservation respects proper nouns and brand names while offering lowercase alternatives.
+    why: Intelligent tag suggestions speed up bookmarking workflow by providing context-aware tag candidates without requiring manual typing. Multi-source extraction ensures comprehensive coverage of page semantics; frequency sorting prioritizes common/important terms; case preservation picks one canonical spelling per word from the page (mixed case preferred over ALL CAPS over all-lowercase) without a duplicate all-lowercase chip; users choose lower/UPPER display via the tag case toggle.
     problems_solved: []
     benefits: []
   alternatives_considered:
@@ -19,16 +19,13 @@ ARCH-SUGGESTED_TAGS:
         ---
   implementation_approach:
     summary: |-
-      Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, preserving original case with lowercase variants, and deduplicating against current tags. The popup path must only run script injection on injectable URLs (`http://`, `https://`); on restricted URLs (e.g. `chrome-extension://`, `chrome://`) it skips injection and shows no suggestions, avoiding Chrome permission errors.
+      Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, choosing one canonical spelling per lowercase key (no extra lowercase-only suggestion), and deduplicating against current tags. The popup path must only run script injection on injectable URLs (`http://`, `https://`); on restricted URLs (e.g. `chrome-extension://`, `chrome://`) it skips injection and shows no suggestions, avoiding Chrome permission errors.
 
       ---
     details:
-      - |-
-        **Restricted-URL skip (popup)**: Before calling `chrome.scripting.executeScript` in the popup path, the implementation checks that the current tab URL starts with `http://` or `https://`. If not (e.g. extension page, chrome://, file://), it skips injection, calls `updateSuggestedTags([])`, and returns. This prevents "Cannot access contents of url ... Extension manifest must request permission to access this host" errors when the user opens the popup while the active tab is an extension page such as the bookmarks table.
-      - |-
-        **Popup unit test mocking**: In `tests/unit/popup-suggested-tags.test.js`, `chrome.scripting.executeScript` is mocked via Jest `mockResolvedValueOnce([{ result: [...] }])` on the global mock, not by replacing the function. This ensures the implementation's call to `chrome.scripting.executeScript` receives the configured return value reliably across test workers and full-suite runs (replacing the function reference can fail when the implementation uses the same global).
-      - |-
-        **Tokenizer sync (popup vs TagService)**: Popup path uses inlined tokenization; overlay uses TagService. Both must use the same delimiter regex and tokenization logic. Canonical regex: `/[\s\.,;:!?\-_\(\)\[\]{}"']+/`. Changing it in only one place breaks suggested tags (see IMPL-SUGGESTED_TAGS popup_tokenizer_sync, regression_lesson_dca25b3).
+      - '**Restricted-URL skip (popup)**: Before calling `chrome.scripting.executeScript` in the popup path, the implementation checks that the current tab URL starts with `http://` or `https://`. If not (e.g. extension page, chrome://, file://), it skips injection, calls `updateSuggestedTags([])`, and returns. This prevents "Cannot access contents of url ... Extension manifest must request permission to access this host" errors when the user opens the popup while the active tab is an extension page such as the bookmarks table.'
+      - '**Popup unit test mocking**: In `tests/unit/popup-suggested-tags.test.js`, `chrome.scripting.executeScript` is mocked via Jest `mockResolvedValueOnce([{ result: [...] }])` on the global mock, not by replacing the function. This ensures the implementation''s call to `chrome.scripting.executeScript` receives the configured return value reliably across test workers and full-suite runs (replacing the function reference can fail when the implementation uses the same global).'
+      - '**Tokenizer sync (popup vs TagService)**: Popup path uses inlined tokenization; overlay uses TagService. Both must use the same delimiter regex and tokenization logic. Canonical regex: `/[\s\.,;:!?\-_\(\)\[\]{}"'']+/`. Changing it in only one place breaks suggested tags (see IMPL-SUGGESTED_TAGS popup_tokenizer_sync, regression_lesson_dca25b3).'
       - |-
         #### 1. Extraction Sources (in order)
 
@@ -72,8 +69,8 @@ ARCH-SUGGESTED_TAGS:
             Count occurrences (case-insensitive)
                  ↓
             [Case Preservation]
-            ├─ Track original case (first occurrence)
-            ├─ Generate lowercase variant (if has uppercase)
+            ├─ Count by lowercase key
+            ├─ Canonical spelling (mixed > ALLCAPS > lower)
             └─ Remove exact duplicates
                  ↓
             [Sorting]
@@ -111,35 +108,34 @@ ARCH-SUGGESTED_TAGS:
       | Main images | `main img`, `article img`, etc. | First 5 images (alt text) | Low |
       | Main links | `main a`, `article a`, etc. | First 10 links | Low |
   traceability:
-    requirements: *ref_0
+    requirements:
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
+      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
     implementation:
       - IMPL-SUGGESTED_TAGS
     tests:
       - tests/unit/popup-suggested-tags.test.js
+      - tests/unit/suggested-tag-original-case.test.js
     code_annotations:
       - ARCH-SUGGESTED_TAGS
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
       - REQ-SUGGESTED_TAGS_DEDUPLICATION
       - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
   related_decisions:
-    depends_on: *ref_0
-    informs: []
-    see_also: []
+    depends_on: []
+    informs:
+      - IMPL-SUGGESTED_TAGS
+    see_also:
+      - ARCH-TAG_SYSTEM
   detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.yaml
   metadata:
-    created:
-      date: '2026-02-18'
-      author: MCP converter
     last_updated:
-      date: '2026-02-19'
-      author: AI agent
-      reason: Document popup test mocking (Jest mockResolvedValueOnce for executeScript)
-    last_validated:
-      date: '2026-02-18'
-      validator: MCP converter
-      result: pass
+      date: "2026-03-27"
+      author: AI Agent
+      reason: 'S05: related_decisions + traceability.tests + token audit list'
   decision: |-
-    Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, preserving original case with lowercase variants, and deduplicating against current tags.
+    Implement intelligent tag suggestions by extracting and analyzing text from multiple page content sources (title, URL, meta tags, headings, semantic emphasis elements, structured content, navigation, breadcrumbs, images, links), filtering noise words, counting word frequency, choosing one canonical spelling per lowercase key (no extra lowercase-only suggestion), and deduplicating against current tags.
 
     ---
   '[arch-tag_system]': General tag system architecture (recent tags, sanitization, storage)
@@ -150,7 +146,7 @@ ARCH-SUGGESTED_TAGS:
   centralize_extraction: Bundle TagService into content script so popup can call it directly
   context: Runs in page context (has access to page DOM)
   context-aware_suggestions: Tags reflect actual page content, improving discoverability.
-  created: '2025-07-14'
+  created: "2025-07-14"
   cross-references: '[REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]'
   current:
     - 'Overlay/TagService: `sanitizeTag()` (comprehensive XSS prevention)'
@@ -181,8 +177,8 @@ ARCH-SUGGESTED_TAGS:
         Count occurrences (case-insensitive)
              ↓
         [Case Preservation]
-        ├─ Track original case (first occurrence)
-        ├─ Generate lowercase variant (if has uppercase)
+        ├─ Count by lowercase key
+        ├─ Canonical spelling (mixed > ALLCAPS > lower)
         └─ Remove exact duplicates
              ↓
         [Sorting]
@@ -205,7 +201,7 @@ ARCH-SUGGESTED_TAGS:
     1. **Extract text** from multiple page sources (title, URL segments, meta tags, headings, emphasis elements, definition terms, table headers, nav, breadcrumbs, images, links)
     2. **Tokenize and filter** (remove noise words, short words, pure numbers)
     3. **Rank by frequency** (count occurrences, sort descending)
-    4. **Preserve case** (track original case, generate lowercase variants for capitalized words)
+    4. **Preserve case** (one canonical spelling per word; chip case toggle for lower/UPPER display)
     5. **Sanitize** (remove special characters, limit length)
     6. **Deduplicate** (exclude tags already in current bookmark, case-insensitive)
     7. **Display** (show suggestions in UI, allow click-to-add)
@@ -231,7 +227,7 @@ ARCH-SUGGESTED_TAGS:
     | Main images | `main img`, `article img`, etc. | First 5 images (alt text) | Low |
     | Main links | `main a`, `article a`, etc. | First 10 links | Low |
   key_modifiable_decisions: 'These design choices are implementation details that can be changed without breaking requirements:'
-  last_updated: '2026-02-13'
+  last_updated: "2026-02-13"
   localize: Add non-English stop word lists based on page language
   manual_tag_entry: Users previously typed all tags manually, slowing bookmarking.
   method: '`extractSuggestedTagsFromContent(document, url, limit)`'
@@ -247,25 +243,23 @@ ARCH-SUGGESTED_TAGS:
   smart_filtering: Use TF-IDF or other NLP techniques instead of static list
   tagservice: '`sanitizeTag()` method (strict XSS prevention, character filtering)'
   title_attribute_priority: For all elements, check `element.title` first, then `childElement.title`, then fall back to `textContent`.
-  token_coverage_`[proc-token_audit]`: |-
-    Code files carrying `[IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_*]` annotations:
+  token_coverage_`[proc-token_audit]`: |
+    Code files carrying `[IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_*]`:
 
-    - [x] `src/features/tagging/tag-service.js` - Extraction method with full token annotations
-    - [x] `src/features/content/overlay-manager.js` - Display section with token annotations
-    - [x] `src/ui/popup/PopupController.js` - Inlined extraction with token annotations
-    - [x] `src/ui/popup/UIManager.js` - Display method with token annotations
-    - [x] `safari/src/features/tagging/tag-service.js` - Safari mirror
-    - [x] `safari/src/features/content/overlay-manager.js` - Safari mirror
+    - src/features/tagging/tag-service.js
+    - src/features/tagging/suggested-tags-main-world-snippet.js
+    - src/shared/suggested-tag-original-case.js
+    - src/features/content/overlay-manager.js
+    - src/ui/popup/PopupController.js
+    - src/ui/popup/UIManager.js
+    - safari mirrors
 
-    Tests expected to reference tokens:
-    - [ ] `testExtractSuggestedTags_REQ_SUGGESTED_TAGS_FROM_CONTENT` (not yet implemented)
-    - [ ] `testSuggestedTagsDeduplication_REQ_SUGGESTED_TAGS_DEDUPLICATION` (not yet implemented)
-    - [ ] `testSuggestedTagsCasePreservation_REQ_SUGGESTED_TAGS_CASE_PRESERVATION` (not yet implemented)
-
-    ---
+    Tests:
+    - tests/unit/popup-suggested-tags.test.js
+    - tests/unit/suggested-tag-original-case.test.js
   url_path_segments: Exclude `www`, `com`, `org`, `net`, `html`, `htm`, `php`, `asp`, `aspx`, `index`, `home`, `page`; exclude pure numeric segments; exclude segments shorter than 2 characters.
   user-configurable: Allow users to add custom noise words
-  user_choice_in_capitalization: Both original and lowercase versions give users flexibility.
+  user_choice_in_capitalization: Tag case toggle (original / lower / UPPER) applies to suggested chips; extractors emit one canonical spelling per word.
   validation_evidence_`[proc-token_validation]`: |-
     | Date | Commit | Validation Result | Notes |
     |------|--------|-------------------|-------|
@@ -274,5 +268,5 @@ ARCH-SUGGESTED_TAGS:
     | 2026-02-13 | Detail files | ✅ Documented | Created ARCH detail file with modifiable decisions |
 
     ---
-  why_this_architecture: Intelligent tag suggestions speed up bookmarking workflow by providing context-aware tag candidates without requiring manual typing. Multi-source extraction ensures comprehensive coverage of page semantics; frequency sorting prioritizes common/important terms; case preservation respects proper nouns and brand names while offering lowercase alternatives.
+  why_this_architecture: Intelligent tag suggestions speed up bookmarking workflow by providing context-aware tag candidates without requiring manual typing. Multi-source extraction ensures comprehensive coverage of page semantics; frequency sorting prioritizes common/important terms; case preservation picks one canonical spelling per word from the page without redundant lowercase chips; users use the tag case toggle for lower/UPPER display.
   word_rules: Minimum length 2 characters; exclude pure numbers.

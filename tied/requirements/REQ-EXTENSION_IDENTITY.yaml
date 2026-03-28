@@ -31,21 +31,21 @@ REQ-EXTENSION_IDENTITY:
   detail_file: requirements/REQ-EXTENSION_IDENTITY.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
       reason: Converted from monolithic
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   architecture: See `architecture-decisions.yaml` § [ARCH-EXT_IDENTITY]
   code: manifest.json, README.md, all user-facing UI files
-  created: '2025-07-14'
+  created: "2025-07-14"
   description: The extension must maintain its core identity as "Hoverboard" - a Pinboard.in bookmarking interface enhancement. The name, purpose, and target platform (Chrome/Chromium-based browsers) must never change.
   implementation: See `implementation-decisions.yaml` § [IMPL-EXT_IDENTITY]
-  last_updated: '2026-02-13'
+  last_updated: "2026-02-13"
   notes: This is an immutable requirement - changes require major version bump and full rebranding.
   tests: Manifest validation tests, branding consistency tests

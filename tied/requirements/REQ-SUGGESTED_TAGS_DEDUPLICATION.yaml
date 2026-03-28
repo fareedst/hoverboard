@@ -11,7 +11,7 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
     - criterion: '1. **Case-insensitive comparison with current tags**: Compare suggested tags to current bookmark tags using lowercase normalization (e.g., "Git" in current tags excludes both "Git" and "git" from suggestions).'
     - criterion: '2. **Tags present in current list excluded from suggestions**: Any suggested tag whose lowercase form matches a current tag''s lowercase form is filtered out before display.'
     - criterion: '3. **Works in both popup and overlay**: Deduplication logic is applied in both popup (PopupController) and overlay (overlay-manager) contexts.'
-    - criterion: '--'
+    - criterion: --
   validation_criteria:
     - method: Manual verification
       coverage: See detail file
@@ -32,14 +32,14 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
   detail_file: requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
       reason: Converted from monolithic
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   '[arch-suggested_tags]': Multi-source extraction with case-insensitive deduplication
@@ -57,11 +57,11 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
     | `src/ui/popup/PopupController.js` | `loadSuggestedTags()` filtering | ~596-603 | Creates `currentTagsLower` Set from `currentPin.tags`, filters with `!currentTagsLower.has(tag.toLowerCase())` |
     | `safari/src/features/content/overlay-manager.js` | (mirror) | ~625-633 | Safari mirror of overlay deduplication |
   coverage: Case-insensitive filtering logic
-  created: '2025-07-14'
+  created: "2025-07-14"
   depends_on: None
   description: The extension must filter suggested tags to exclude any tags already present in the current bookmark's tag list, using case-insensitive comparison. This prevents redundant suggestions and keeps the suggestions list clean and relevant.
   expected: '"Suggested tags deduplication tests" (referenced in requirements.yaml)'
-  last_updated: '2026-02-13'
+  last_updated: "2026-02-13"
   modifiable_decisions: |-
     The following design choice is documented in [IMPL-SUGGESTED_TAGS] and can be modified:
 

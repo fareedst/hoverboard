@@ -26,14 +26,14 @@ REQ-FILE_BOOKMARK_STORAGE:
   detail_file: requirements/REQ-FILE_BOOKMARK_STORAGE.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
       reason: Converted from monolithic
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   cross-references: ARCH-FILE_BOOKMARK_PROVIDER, IMPL-FILE_BOOKMARK_SERVICE

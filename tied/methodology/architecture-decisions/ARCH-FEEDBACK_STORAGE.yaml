@@ -1,0 +1,62 @@
+ARCH-FEEDBACK_STORAGE:
+  name: Feedback Storage for TIED Reporting
+  status: Active
+  cross_references:
+    - REQ-FEEDBACK_TO_TIED
+  rationale:
+    why: Store user and project feedback in a single file under the TIED tree so it is versioned with the project and exportable for reporting to the TIED project
+    problems_solved:
+      - No standard location for feedback entries
+      - Feedback not tied to project context (TIED base path)
+    benefits:
+      - Single file tied/feedback.yaml; no new index type in REQ/ARCH/IMPL sense
+      - Same base path resolution as existing MCP tools (getBasePath())
+      - Entries have id, type, title, description, optional context, created_at
+  alternatives_considered:
+    - name: New YAML index (e.g. feedback.yaml as index)
+      pros:
+        - Consistent with requirements.yaml pattern
+      cons:
+        - Feedback is not a traceability index; different schema (entries array)
+      rejected_reason: Keep feedback as a separate artifact; schema is list of entries, not token-keyed records
+    - name: Store in requirements or implementation index
+      pros:
+        - No new file
+      cons:
+        - Pollutes REQ/IMPL with non-traceability data
+      rejected_reason: Feedback is not a requirement or implementation decision
+  implementation_approach:
+    summary: One file {TIED_BASE_PATH}/feedback.yaml with top-level key 'entries' (array of objects)
+    details:
+      - Use getBasePath() from yaml-loader for path resolution
+      - 'Each entry: id, type (feature_request | bug_report | methodology_improvement), title, description, context (optional), created_at (ISO 8601)'
+      - 'MCP tools: tied_feedback_add (append), tied_feedback_export (markdown or JSON)'
+  traceability:
+    requirements:
+      - REQ-FEEDBACK_TO_TIED
+    implementation:
+      - IMPL-MCP_FEEDBACK_TOOLS
+    tests:
+      - feedback.test.ts
+    code_annotations:
+      - ARCH-FEEDBACK_STORAGE
+      - IMPL-MCP_FEEDBACK_TOOLS
+  related_decisions:
+    depends_on:
+      - REQ-FEEDBACK_TO_TIED
+    informs:
+      - IMPL-MCP_FEEDBACK_TOOLS
+    see_also: []
+  detail_file: architecture-decisions/ARCH-FEEDBACK_STORAGE.yaml
+  metadata:
+    created:
+      date: 2026-03-03
+      author: AI Agent
+    last_updated:
+      date: 2026-03-03
+      author: AI Agent
+      reason: Initial creation
+    last_validated:
+      date: 2026-03-03
+      validator: AI Agent
+      result: pass

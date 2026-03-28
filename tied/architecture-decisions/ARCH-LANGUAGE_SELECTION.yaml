@@ -1,6 +1,5 @@
 # [ARCH-LANGUAGE_SELECTION] Language and static typing strategy
 # Records choice of JavaScript with incremental TypeScript/JSDoc typing.
-
 ARCH-LANGUAGE_SELECTION:
   name: Language and Static Typing Strategy
   status: Active

@@ -78,9 +78,9 @@ IMPL-AI_CONFIG_OPTIONS:
   detail_file: implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Initial creation

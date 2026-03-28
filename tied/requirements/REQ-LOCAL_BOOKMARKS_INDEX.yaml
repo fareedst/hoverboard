@@ -16,9 +16,9 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     architecture: []
     implementation: []
     tests:
-      - 'tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)'
-      - 'tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation, row count last in container, footer-spacer, footer-info sticky)'
-      - 'tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)'
+      - tests/unit/message-handler-bookmarks-index.test.js (handleGetAggregatedBookmarksForIndex)
+      - tests/unit/bookmarks-table-index.test.js (matchStorageFilter, matchStoresFilter, time range, exclude tags, delete confirmation, row count last in container, footer-spacer, footer-info sticky)
+      - tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)
     code_annotations:
       - REQ-LOCAL_BOOKMARKS_INDEX
   related_requirements:
@@ -28,14 +28,14 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   detail_file: requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: Agent
       reason: Bookmark count always at bottom of page (last in document; visual bottom when short)
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
   backend: 'Primary data via message `getAggregatedBookmarksForIndex` (BookmarkRouter aggregates LocalBookmarkService + FileBookmarkService + SyncBookmarkService, each item tagged with `storage: ''local''` | ''file'' | ''sync''). Fallback: `getLocalBookmarksForIndex` uses LocalBookmarkService only (all items tagged `storage: ''local''`) when aggregated is unavailable.'

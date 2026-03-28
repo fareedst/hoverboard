@@ -1,0 +1,68 @@
+ARCH-TIED_STRUCTURE:
+  name: TIED Project Structure
+  status: Active
+  cross_references:
+    - REQ-TIED_SETUP
+  rationale:
+    why: Keeps documentation close to code but organized in a dedicated namespace
+    problems_solved:
+      - Documentation scattered across project
+      - Difficulty finding all context in one place
+      - Meta-documentation mixed with source code
+    benefits:
+      - Clear separation of concerns
+      - Standard project layout for AI agents
+      - Easy discovery of all TIED documentation
+      - Testable and maintainable structure
+  alternatives_considered:
+    - name: Root-level files
+      pros:
+        - Immediately visible in repository root
+      cons:
+        - Clutters the root directory
+        - No clear organization
+      rejected_reason: Creates too much clutter at project root
+    - name: .github or .docs folder
+      pros:
+        - Common convention for documentation
+      cons:
+        - Too generic for methodology-specific files
+        - .github is typically for GitHub workflows
+      rejected_reason: tied/ is more specific to the methodology
+  implementation_approach:
+    summary: Create dedicated tied/ directory with YAML indexes and detail subdirectories
+    details:
+      - Create tied/ directory at project root
+      - 'Populate with YAML index files: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml'
+      - 'Create detail subdirectories: requirements/, architecture-decisions/, implementation-decisions/'
+      - 'Add guide files: semantic-tokens.md, processes.md'
+  traceability:
+    requirements:
+      - REQ-TIED_SETUP
+    implementation:
+      - IMPL-TIED_FILES
+    tests:
+      - TestTIEDSetup_REQ_TIED_SETUP
+    code_annotations:
+      - IMPL-TIED_FILES
+      - ARCH-TIED_STRUCTURE
+      - REQ-TIED_SETUP
+  related_decisions:
+    depends_on:
+      - REQ-TIED_SETUP
+    informs:
+      - IMPL-TIED_FILES
+    see_also: []
+  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
+  metadata:
+    created:
+      date: 2025-12-18
+      author: AI Agent
+    last_updated:
+      date: 2026-02-06
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
+    last_validated:
+      date: 2026-02-06
+      validator: AI Agent
+      result: pass

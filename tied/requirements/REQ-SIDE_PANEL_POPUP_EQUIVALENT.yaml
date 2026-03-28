@@ -1,68 +1,68 @@
 REQ-SIDE_PANEL_POPUP_EQUIVALENT:
-  name: "Side Panel Popup Equivalent with Tabs"
-  category: "Functional"
-  priority: "P1"
-  status: "Implemented"
+  name: Side Panel Popup Equivalent with Tabs
+  category: Functional
+  priority: P1
+  status: Implemented
   rationale:
-    why: "Users can keep the side panel open and still manage the current tab's bookmark and browse the tags tree without reopening the popup."
+    why: Users can keep the side panel open and still manage the current tab's bookmark and browse the tags tree without reopening the popup.
     problems_solved:
-      - "Popup closes when focus is lost; no persistent popup-equivalent view"
-      - "Side panel previously showed only the tags tree"
+      - Popup closes when focus is lost; no persistent popup-equivalent view
+      - Side panel previously showed only the tags tree
     benefits:
-      - "One panel with tabs \"This Page\" and \"By Tag\"; This Page tab = popup-equivalent UI; By Tag tab = hierarchical view"
-      - "User switches between This Page and By Tag inside the same panel"
+      - One panel with tabs "This Page" and "By Tag"; This Page tab = popup-equivalent UI; By Tag tab = hierarchical view
+      - User switches between This Page and By Tag inside the same panel
   satisfaction_criteria:
-    - criterion: "Side panel has a tab bar with \"This Page\" and \"By Tag\""
-    - criterion: "This Page tab shows functional equivalent of popup UI (quick actions, storage selector, tag management, search tabs, footer actions)"
-    - criterion: "By Tag tab shows the existing tags-and-bookmarks tree (config, search, tag selector, tree)"
-    - criterion: "Only one tab content is visible at a time; switching tabs shows the corresponding panel"
-    - criterion: "Last-selected tab is persisted and restored when the panel is reopened"
-    - criterion: "In This Page tab, \"By Tag\" (or equivalent) switches to the By Tag tab instead of opening the panel again"
-    - criterion: "When the This Page tab is selected, its content reflects the current tab's bookmark state; when the This Page tab is visible, it refreshes promptly when the active browser tab changes or the tab's page completes (like the badge)"
-    - criterion: "When the side panel is open, both the This Page and By Tag tabs update to display the DB record for the current tab's URL when the active browser tab changes or completes (same trigger as badge); the By Tag tab's tag selector and tree reflect the current tab's bookmark tags"
-    - criterion: "When the user switches to the By Tag tab, the tag selector checked state matches the current bookmark's tags (from the This Page tab), and the tree displays only bookmarks that have at least one of those tags"
-    - criterion: "Tab content fills the vertical space available in the side panel; the panel uses full panel width and height (not popup dimensions such as 350px width or 450px max-height)"
-    - criterion: "Side panel header shows extension version and compile time (UTC YYYY-MM-DD HH:mm) after the title (e.g. element #side-panel-version)."
-    - criterion: "By Tag tab scroll behavior: the content above the list (inside #tagsTreePanel > div) can scroll off the page so the list section (#tagsTreePanel > section) can consume the full visible height"
-    - criterion: "This Page tag management includes a three-way session toggle (original, lower, upper) for tag label casing; default on first panel load per session is original; preference is not persisted across browser sessions"
-    - criterion: "The toggle applies to Current Tags, Recent Tags, and Suggested Tags chip labels; switching mode re-renders visible chips without page reload"
-    - criterion: "In original mode, chip labels match source casing (after trim for non-empty); clicking a recent or suggested chip adds that exact stored source string to the bookmark"
-    - criterion: "In lower mode, chip labels use String toLowerCase; add-from-chip stores the lowercased string"
-    - criterion: "In upper mode, chip labels use String toUpperCase; add-from-chip stores the uppercased string"
-    - criterion: "Current Tags chips show labels per the active mode; remove still targets the stored tag string (identity unchanged)"
-    - criterion: "Empty or whitespace-only tag strings are not rendered as clickable chips in those lists"
+    - criterion: Side panel has a tab bar with "This Page" and "By Tag"
+    - criterion: This Page tab shows functional equivalent of popup UI (quick actions, storage selector, tag management, search tabs, footer actions)
+    - criterion: By Tag tab shows the existing tags-and-bookmarks tree (config, search, tag selector, tree)
+    - criterion: Only one tab content is visible at a time; switching tabs shows the corresponding panel
+    - criterion: Last-selected tab is persisted and restored when the panel is reopened
+    - criterion: In This Page tab, "By Tag" (or equivalent) switches to the By Tag tab instead of opening the panel again
+    - criterion: When the This Page tab is selected, its content reflects the current tab's bookmark state; when the This Page tab is visible, it refreshes promptly when the active browser tab changes or the tab's page completes (like the badge)
+    - criterion: When the side panel is open, both the This Page and By Tag tabs update to display the DB record for the current tab's URL when the active browser tab changes or completes (same trigger as badge); the By Tag tab's tag selector and tree reflect the current tab's bookmark tags
+    - criterion: When the user switches to the By Tag tab, the tag selector checked state matches the current bookmark's tags (from the This Page tab), and the tree displays only bookmarks that have at least one of those tags
+    - criterion: Tab content fills the vertical space available in the side panel; the panel uses full panel width and height (not popup dimensions such as 350px width or 450px max-height)
+    - criterion: 'Side panel header shows extension version and compile time (UTC YYYY-MM-DD HH:mm) after the title (e.g. element #side-panel-version).'
+    - criterion: 'By Tag tab scroll behavior: the content above the list (inside #tagsTreePanel > div) can scroll off the page so the list section (#tagsTreePanel > section) can consume the full visible height'
+    - criterion: This Page tag management includes a three-way session toggle (original, lower, upper) for tag label casing; default on first panel load per session is original; preference is not persisted across browser sessions
+    - criterion: The toggle applies to Current Tags, Recent Tags, and Suggested Tags chip labels; switching mode re-renders visible chips without page reload
+    - criterion: In original mode, chip labels match source casing (after trim for non-empty); clicking a recent or suggested chip adds that exact stored source string to the bookmark
+    - criterion: In lower mode, chip labels use String toLowerCase; add-from-chip stores the lowercased string
+    - criterion: In upper mode, chip labels use String toUpperCase; add-from-chip stores the uppercased string
+    - criterion: Current Tags chips show labels per the active mode; remove still targets the stored tag string (identity unchanged)
+    - criterion: Empty or whitespace-only tag strings are not rendered as clickable chips in those lists
   validation_criteria:
-    - method: "Manual verification"
-      coverage: "Open panel; see tabs; switch to This Page, verify popup-equivalent UI and current-tab bookmark; switch to By Tag, verify tree; close and reopen panel, verify last tab restored"
-    - method: "Unit tests"
-      coverage: "UIManager with scoped root (container) resolves elements from that root; tab switching shows/hides correct panel; tab persistence (mock storage); tag-case-folding helpers; UIManager toggle and chip add/remove casing (uIManager-tag-case-folding.test.js)"
-    - method: "E2E tests"
-      coverage: "Open side panel; assert tabs present; switch tabs and assert correct content visible; assert panel layout fills vertical space (body not capped at popup max-height, content area flex)"
+    - method: Manual verification
+      coverage: Open panel; see tabs; switch to This Page, verify popup-equivalent UI and current-tab bookmark; switch to By Tag, verify tree; close and reopen panel, verify last tab restored
+    - method: Unit tests
+      coverage: UIManager with scoped root (container) resolves elements from that root; tab switching shows/hides correct panel; tab persistence (mock storage); tag-case-folding helpers; UIManager toggle and chip add/remove casing (uIManager-tag-case-folding.test.js)
+    - method: E2E tests
+      coverage: Open side panel; assert tabs present; switch tabs and assert correct content visible; assert panel layout fills vertical space (body not capped at popup max-height, content area flex)
   traceability:
     architecture:
-      - "ARCH-SIDE_PANEL_TABS"
+      - ARCH-SIDE_PANEL_TABS
     implementation:
-      - "IMPL-SIDE_PANEL_TABS"
-      - "IMPL-SIDE_PANEL_BOOKMARK"
-      - "IMPL-UIManager_SCOPED_ROOT"
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-SIDE_PANEL_BOOKMARK
+      - IMPL-UIManager_SCOPED_ROOT
     tests:
-      - "tests/unit/ui-manager-scoped-root.test.js"
-      - "tests/unit/side-panel-tabs.test.js"
-      - "tests/unit/side-panel-initial-tab-init.test.js"
-      - "tests/unit/tag-case-folding.test.js"
-      - "tests/unit/uIManager-tag-case-folding.test.js"
-      - "tests/playwright/extension-messaging.spec.js"
+      - tests/unit/ui-manager-scoped-root.test.js
+      - tests/unit/side-panel-tabs.test.js
+      - tests/unit/side-panel-initial-tab-init.test.js
+      - tests/unit/tag-case-folding.test.js
+      - tests/unit/uIManager-tag-case-folding.test.js
+      - tests/playwright/extension-messaging.spec.js
     code_annotations:
-      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
   related_requirements:
     depends_on: []
     related_to:
-      - "REQ-SIDE_PANEL_TAGS_TREE"
-      - "REQ-AI_TAGGING_POPUP"
+      - REQ-SIDE_PANEL_TAGS_TREE
+      - REQ-AI_TAGGING_POPUP
     supersedes: []
-  detail_file: "requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml"
+  detail_file: requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml
   metadata:
     last_updated:
       date: "2026-03-27"
-      author: "AI Agent"
-      reason: "Document This Page tag label casing toggle (original | lower | upper) and validation coverage"
+      author: AI Agent
+      reason: Document This Page tag label casing toggle (original | lower | upper) and validation coverage

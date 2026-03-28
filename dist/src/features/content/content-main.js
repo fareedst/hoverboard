@@ -16061,6 +16061,28 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     }
   });
 
+  // src/shared/suggested-tag-original-case.js
+  function suggestedOriginalCaseVariantRank(s) {
+    if (!s || typeof s !== "string") return 0;
+    const hasUpper = /[A-Z]/.test(s);
+    const hasLower = /[a-z]/.test(s);
+    if (hasUpper && hasLower) return 2;
+    if (hasUpper && !hasLower) return 1;
+    return 0;
+  }
+  function pickBetterSuggestedOriginalCase(existing, candidate) {
+    const rNew = suggestedOriginalCaseVariantRank(candidate);
+    const rOld = suggestedOriginalCaseVariantRank(existing);
+    if (rNew > rOld) return candidate;
+    if (rNew < rOld) return existing;
+    return existing;
+  }
+  var init_suggested_tag_original_case = __esm({
+    "src/shared/suggested-tag-original-case.js"() {
+      "use strict";
+    }
+  });
+
   // node_modules/fast-xml-parser/src/util.js
   function getAllMatches(string4, regex) {
     const matches = [];
@@ -16080,7 +16102,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   function isExist(v) {
     return typeof v !== "undefined";
   }
-  var nameStartChar, nameChar, nameRegexp, regexName, isName;
+  var nameStartChar, nameChar, nameRegexp, regexName, isName, DANGEROUS_PROPERTY_NAMES, criticalProperties;
   var init_util2 = __esm({
     "node_modules/fast-xml-parser/src/util.js"() {
       "use strict";
@@ -16092,6 +16114,19 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         const match = regexName.exec(string4);
         return !(match === null || typeof match === "undefined");
       };
+      DANGEROUS_PROPERTY_NAMES = [
+        // '__proto__',
+        // 'constructor',
+        // 'prototype',
+        "hasOwnProperty",
+        "toString",
+        "valueOf",
+        "__defineGetter__",
+        "__defineSetter__",
+        "__lookupGetter__",
+        "__lookupSetter__"
+      ];
+      criticalProperties = ["__proto__", "constructor", "prototype"];
     }
   });
 
@@ -16409,6 +16444,22 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   });
 
   // node_modules/fast-xml-parser/src/xmlparser/OptionsBuilder.js
+  function validatePropertyName(propertyName, optionName) {
+    if (typeof propertyName !== "string") {
+      return;
+    }
+    const normalized = propertyName.toLowerCase();
+    if (DANGEROUS_PROPERTY_NAMES.some((dangerous) => normalized === dangerous.toLowerCase())) {
+      throw new Error(
+        `[SECURITY] Invalid ${optionName}: "${propertyName}" is a reserved JavaScript keyword that could cause prototype pollution`
+      );
+    }
+    if (criticalProperties.some((dangerous) => normalized === dangerous.toLowerCase())) {
+      throw new Error(
+        `[SECURITY] Invalid ${optionName}: "${propertyName}" is a reserved JavaScript keyword that could cause prototype pollution`
+      );
+    }
+  }
   function normalizeProcessEntities(value) {
     if (typeof value === "boolean") {
       return {
@@ -16418,6 +16469,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         maxExpansionDepth: 10,
         maxTotalExpansions: 1e3,
         maxExpandedLength: 1e5,
+        maxEntityCount: 100,
         allowedTags: null,
         tagFilter: null
       };
@@ -16425,20 +16477,27 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     if (typeof value === "object" && value !== null) {
       return {
         enabled: value.enabled !== false,
-        // default true if not specified
-        maxEntitySize: value.maxEntitySize ?? 1e4,
-        maxExpansionDepth: value.maxExpansionDepth ?? 10,
-        maxTotalExpansions: value.maxTotalExpansions ?? 1e3,
-        maxExpandedLength: value.maxExpandedLength ?? 1e5,
+        maxEntitySize: Math.max(1, value.maxEntitySize ?? 1e4),
+        maxExpansionDepth: Math.max(1, value.maxExpansionDepth ?? 10),
+        maxTotalExpansions: Math.max(1, value.maxTotalExpansions ?? 1e3),
+        maxExpandedLength: Math.max(1, value.maxExpandedLength ?? 1e5),
+        maxEntityCount: Math.max(1, value.maxEntityCount ?? 100),
         allowedTags: value.allowedTags ?? null,
         tagFilter: value.tagFilter ?? null
       };
     }
     return normalizeProcessEntities(true);
   }
-  var defaultOptions2, buildOptions;
+  var defaultOnDangerousProperty, defaultOptions2, buildOptions;
   var init_OptionsBuilder = __esm({
     "node_modules/fast-xml-parser/src/xmlparser/OptionsBuilder.js"() {
+      init_util2();
+      defaultOnDangerousProperty = (name) => {
+        if (DANGEROUS_PROPERTY_NAMES.includes(name)) {
+          return "__" + name;
+        }
+        return name;
+      };
       defaultOptions2 = {
         preserveOrder: false,
         attributeNamePrefix: "@_",
@@ -16484,11 +16543,37 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         // skipEmptyListItem: false
         captureMetaData: false,
         maxNestedTags: 100,
-        strictReservedNames: true
+        strictReservedNames: true,
+        jPath: true,
+        // if true, pass jPath string to callbacks; if false, pass matcher instance
+        onDangerousProperty: defaultOnDangerousProperty
       };
       buildOptions = function(options) {
         const built = Object.assign({}, defaultOptions2, options);
+        const propertyNameOptions = [
+          { value: built.attributeNamePrefix, name: "attributeNamePrefix" },
+          { value: built.attributesGroupName, name: "attributesGroupName" },
+          { value: built.textNodeName, name: "textNodeName" },
+          { value: built.cdataPropName, name: "cdataPropName" },
+          { value: built.commentPropName, name: "commentPropName" }
+        ];
+        for (const { value, name } of propertyNameOptions) {
+          if (value) {
+            validatePropertyName(value, name);
+          }
+        }
+        if (built.onDangerousProperty === null) {
+          built.onDangerousProperty = defaultOnDangerousProperty;
+        }
         built.processEntities = normalizeProcessEntities(built.processEntities);
+        if (built.stopNodes && Array.isArray(built.stopNodes)) {
+          built.stopNodes = built.stopNodes.map((node) => {
+            if (typeof node === "string" && node.startsWith("*.")) {
+              return ".." + node.substring(2);
+            }
+            return node;
+          });
+        }
         return built;
       };
     }
@@ -16557,6 +16642,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         readDocType(xmlData, i) {
           const entities = /* @__PURE__ */ Object.create(null);
+          let entityCount = 0;
           if (xmlData[i + 3] === "O" && xmlData[i + 4] === "C" && xmlData[i + 5] === "T" && xmlData[i + 6] === "Y" && xmlData[i + 7] === "P" && xmlData[i + 8] === "E") {
             i = i + 9;
             let angleBracketsCount = 1;
@@ -16569,11 +16655,17 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
                   let entityName, val;
                   [entityName, val, i] = this.readEntityExp(xmlData, i + 1, this.suppressValidationErr);
                   if (val.indexOf("&") === -1) {
-                    const escaped = entityName.replace(/[.\-+*:]/g, "\\.");
+                    if (this.options.enabled !== false && this.options.maxEntityCount != null && entityCount >= this.options.maxEntityCount) {
+                      throw new Error(
+                        `Entity count (${entityCount + 1}) exceeds maximum allowed (${this.options.maxEntityCount})`
+                      );
+                    }
+                    const escaped = entityName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
                     entities[entityName] = {
                       regx: RegExp(`&${escaped};`, "g"),
                       val
                     };
+                    entityCount++;
                   }
                 } else if (hasBody && hasSeq(xmlData, "!ELEMENT", i)) {
                   i += 8;
@@ -16617,11 +16709,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         readEntityExp(xmlData, i) {
           i = skipWhitespace(xmlData, i);
-          let entityName = "";
+          const startIndex = i;
           while (i < xmlData.length && !/\s/.test(xmlData[i]) && xmlData[i] !== '"' && xmlData[i] !== "'") {
-            entityName += xmlData[i];
             i++;
           }
+          let entityName = xmlData.substring(startIndex, i);
           validateEntityName(entityName);
           i = skipWhitespace(xmlData, i);
           if (!this.suppressValidationErr) {
@@ -16633,7 +16725,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           }
           let entityValue = "";
           [i, entityValue] = this.readIdentifierVal(xmlData, i, "entity");
-          if (this.options.enabled !== false && this.options.maxEntitySize && entityValue.length > this.options.maxEntitySize) {
+          if (this.options.enabled !== false && this.options.maxEntitySize != null && entityValue.length > this.options.maxEntitySize) {
             throw new Error(
               `Entity "${entityName}" size (${entityValue.length}) exceeds maximum allowed size (${this.options.maxEntitySize})`
             );
@@ -16643,11 +16735,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         readNotationExp(xmlData, i) {
           i = skipWhitespace(xmlData, i);
-          let notationName = "";
+          const startIndex = i;
           while (i < xmlData.length && !/\s/.test(xmlData[i])) {
-            notationName += xmlData[i];
             i++;
           }
+          let notationName = xmlData.substring(startIndex, i);
           !this.suppressValidationErr && validateEntityName(notationName);
           i = skipWhitespace(xmlData, i);
           const identifierType = xmlData.substring(i, i + 6).toUpperCase();
@@ -16679,10 +16771,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
             throw new Error(`Expected quoted string, found "${startChar}"`);
           }
           i++;
+          const startIndex = i;
           while (i < xmlData.length && xmlData[i] !== startChar) {
-            identifierVal += xmlData[i];
             i++;
           }
+          identifierVal = xmlData.substring(startIndex, i);
           if (xmlData[i] !== startChar) {
             throw new Error(`Unterminated ${type} value`);
           }
@@ -16691,11 +16784,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         readElementExp(xmlData, i) {
           i = skipWhitespace(xmlData, i);
-          let elementName = "";
+          const startIndex = i;
           while (i < xmlData.length && !/\s/.test(xmlData[i])) {
-            elementName += xmlData[i];
             i++;
           }
+          let elementName = xmlData.substring(startIndex, i);
           if (!this.suppressValidationErr && !isName(elementName)) {
             throw new Error(`Invalid element name: "${elementName}"`);
           }
@@ -16705,10 +16798,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           else if (xmlData[i] === "A" && hasSeq(xmlData, "NY", i)) i += 2;
           else if (xmlData[i] === "(") {
             i++;
+            const startIndex2 = i;
             while (i < xmlData.length && xmlData[i] !== ")") {
-              contentModel += xmlData[i];
               i++;
             }
+            contentModel = xmlData.substring(startIndex2, i);
             if (xmlData[i] !== ")") {
               throw new Error("Unterminated content model");
             }
@@ -16723,18 +16817,18 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         readAttlistExp(xmlData, i) {
           i = skipWhitespace(xmlData, i);
-          let elementName = "";
+          let startIndex = i;
           while (i < xmlData.length && !/\s/.test(xmlData[i])) {
-            elementName += xmlData[i];
             i++;
           }
+          let elementName = xmlData.substring(startIndex, i);
           validateEntityName(elementName);
           i = skipWhitespace(xmlData, i);
-          let attributeName = "";
+          startIndex = i;
           while (i < xmlData.length && !/\s/.test(xmlData[i])) {
-            attributeName += xmlData[i];
             i++;
           }
+          let attributeName = xmlData.substring(startIndex, i);
           if (!validateEntityName(attributeName)) {
             throw new Error(`Invalid attribute name: "${attributeName}"`);
           }
@@ -16750,11 +16844,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
             i++;
             let allowedNotations = [];
             while (i < xmlData.length && xmlData[i] !== ")") {
-              let notation = "";
+              const startIndex2 = i;
               while (i < xmlData.length && xmlData[i] !== "|" && xmlData[i] !== ")") {
-                notation += xmlData[i];
                 i++;
               }
+              let notation = xmlData.substring(startIndex2, i);
               notation = notation.trim();
               if (!validateEntityName(notation)) {
                 throw new Error(`Invalid notation name: "${notation}"`);
@@ -16771,10 +16865,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
             i++;
             attributeType += " (" + allowedNotations.join("|") + ")";
           } else {
+            const startIndex2 = i;
             while (i < xmlData.length && !/\s/.test(xmlData[i])) {
-              attributeType += xmlData[i];
               i++;
             }
+            attributeType += xmlData.substring(startIndex2, i);
             const validTypes = ["CDATA", "ID", "IDREF", "IDREFS", "ENTITY", "ENTITIES", "NMTOKEN", "NMTOKENS"];
             if (!this.suppressValidationErr && !validTypes.includes(attributeType.toUpperCase())) {
               throw new Error(`Invalid attribute type: "${attributeType}"`);
@@ -16814,10 +16909,13 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     options = Object.assign({}, consider, options);
     if (!str || typeof str !== "string") return str;
     let trimmedStr = str.trim();
-    if (options.skipLike !== void 0 && options.skipLike.test(trimmedStr)) return str;
-    else if (str === "0") return 0;
+    if (trimmedStr.length === 0) return str;
+    else if (options.skipLike !== void 0 && options.skipLike.test(trimmedStr)) return str;
+    else if (trimmedStr === "0") return 0;
     else if (options.hex && hexRegex.test(trimmedStr)) {
       return parse_int(trimmedStr, 16);
+    } else if (!isFinite(trimmedStr)) {
+      return handleInfinity(str, Number(trimmedStr), options);
     } else if (trimmedStr.includes("e") || trimmedStr.includes("E")) {
       return resolveEnotation(str, trimmedStr, options);
     } else {
@@ -16871,10 +16969,14 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       if (leadingZeros.length > 1 && eAdjacentToLeadingZeros) return str;
       else if (leadingZeros.length === 1 && (notation[3].startsWith(`.${eChar}`) || notation[3][0] === eChar)) {
         return Number(trimmedStr);
-      } else if (options.leadingZeros && !eAdjacentToLeadingZeros) {
-        trimmedStr = (notation[1] || "") + notation[3];
+      } else if (leadingZeros.length > 0) {
+        if (options.leadingZeros && !eAdjacentToLeadingZeros) {
+          trimmedStr = (notation[1] || "") + notation[3];
+          return Number(trimmedStr);
+        } else return str;
+      } else {
         return Number(trimmedStr);
-      } else return str;
+      }
     } else {
       return str;
     }
@@ -16895,6 +16997,21 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     else if (window && window.parseInt) return window.parseInt(numStr, base);
     else throw new Error("parseInt, Number.parseInt, window.parseInt are not supported");
   }
+  function handleInfinity(str, num, options) {
+    const isPositive = num === Infinity;
+    switch (options.infinity.toLowerCase()) {
+      case "null":
+        return null;
+      case "infinity":
+        return num;
+      // Return Infinity or -Infinity
+      case "string":
+        return isPositive ? "Infinity" : "-Infinity";
+      case "original":
+      default:
+        return str;
+    }
+  }
   var hexRegex, numRegex, consider, eNotationRegx;
   var init_strnum = __esm({
     "node_modules/strnum/strnum.js"() {
@@ -16905,8 +17022,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         // oct: false,
         leadingZeros: true,
         decimalPoint: ".",
-        eNotation: true
-        //skipLike: /regex/
+        eNotation: true,
+        //skipLike: /regex/,
+        infinity: "original"
+        // "null", "infinity" (Infinity type), "string" ("Infinity" (the string literal))
       };
       eNotationRegx = /^([-+])?(0*)(\d*(\.\d*)?[eE][-\+]?\d+)$/;
     }
@@ -16936,7 +17055,585 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     }
   });
 
+  // node_modules/path-expression-matcher/src/Expression.js
+  var Expression;
+  var init_Expression = __esm({
+    "node_modules/path-expression-matcher/src/Expression.js"() {
+      Expression = class {
+        /**
+         * Create a new Expression
+         * @param {string} pattern - Pattern string (e.g., "root.users.user", "..user[id]")
+         * @param {Object} options - Configuration options
+         * @param {string} options.separator - Path separator (default: '.')
+         */
+        constructor(pattern, options = {}) {
+          this.pattern = pattern;
+          this.separator = options.separator || ".";
+          this.segments = this._parse(pattern);
+          this._hasDeepWildcard = this.segments.some((seg) => seg.type === "deep-wildcard");
+          this._hasAttributeCondition = this.segments.some((seg) => seg.attrName !== void 0);
+          this._hasPositionSelector = this.segments.some((seg) => seg.position !== void 0);
+        }
+        /**
+         * Parse pattern string into segments
+         * @private
+         * @param {string} pattern - Pattern to parse
+         * @returns {Array} Array of segment objects
+         */
+        _parse(pattern) {
+          const segments = [];
+          let i = 0;
+          let currentPart = "";
+          while (i < pattern.length) {
+            if (pattern[i] === this.separator) {
+              if (i + 1 < pattern.length && pattern[i + 1] === this.separator) {
+                if (currentPart.trim()) {
+                  segments.push(this._parseSegment(currentPart.trim()));
+                  currentPart = "";
+                }
+                segments.push({ type: "deep-wildcard" });
+                i += 2;
+              } else {
+                if (currentPart.trim()) {
+                  segments.push(this._parseSegment(currentPart.trim()));
+                }
+                currentPart = "";
+                i++;
+              }
+            } else {
+              currentPart += pattern[i];
+              i++;
+            }
+          }
+          if (currentPart.trim()) {
+            segments.push(this._parseSegment(currentPart.trim()));
+          }
+          return segments;
+        }
+        /**
+         * Parse a single segment
+         * @private
+         * @param {string} part - Segment string (e.g., "user", "ns::user", "user[id]", "ns::user:first")
+         * @returns {Object} Segment object
+         */
+        _parseSegment(part) {
+          const segment = { type: "tag" };
+          let bracketContent = null;
+          let withoutBrackets = part;
+          const bracketMatch = part.match(/^([^\[]+)(\[[^\]]*\])(.*)$/);
+          if (bracketMatch) {
+            withoutBrackets = bracketMatch[1] + bracketMatch[3];
+            if (bracketMatch[2]) {
+              const content = bracketMatch[2].slice(1, -1);
+              if (content) {
+                bracketContent = content;
+              }
+            }
+          }
+          let namespace = void 0;
+          let tagAndPosition = withoutBrackets;
+          if (withoutBrackets.includes("::")) {
+            const nsIndex = withoutBrackets.indexOf("::");
+            namespace = withoutBrackets.substring(0, nsIndex).trim();
+            tagAndPosition = withoutBrackets.substring(nsIndex + 2).trim();
+            if (!namespace) {
+              throw new Error(`Invalid namespace in pattern: ${part}`);
+            }
+          }
+          let tag = void 0;
+          let positionMatch = null;
+          if (tagAndPosition.includes(":")) {
+            const colonIndex = tagAndPosition.lastIndexOf(":");
+            const tagPart = tagAndPosition.substring(0, colonIndex).trim();
+            const posPart = tagAndPosition.substring(colonIndex + 1).trim();
+            const isPositionKeyword = ["first", "last", "odd", "even"].includes(posPart) || /^nth\(\d+\)$/.test(posPart);
+            if (isPositionKeyword) {
+              tag = tagPart;
+              positionMatch = posPart;
+            } else {
+              tag = tagAndPosition;
+            }
+          } else {
+            tag = tagAndPosition;
+          }
+          if (!tag) {
+            throw new Error(`Invalid segment pattern: ${part}`);
+          }
+          segment.tag = tag;
+          if (namespace) {
+            segment.namespace = namespace;
+          }
+          if (bracketContent) {
+            if (bracketContent.includes("=")) {
+              const eqIndex = bracketContent.indexOf("=");
+              segment.attrName = bracketContent.substring(0, eqIndex).trim();
+              segment.attrValue = bracketContent.substring(eqIndex + 1).trim();
+            } else {
+              segment.attrName = bracketContent.trim();
+            }
+          }
+          if (positionMatch) {
+            const nthMatch = positionMatch.match(/^nth\((\d+)\)$/);
+            if (nthMatch) {
+              segment.position = "nth";
+              segment.positionValue = parseInt(nthMatch[1], 10);
+            } else {
+              segment.position = positionMatch;
+            }
+          }
+          return segment;
+        }
+        /**
+         * Get the number of segments
+         * @returns {number}
+         */
+        get length() {
+          return this.segments.length;
+        }
+        /**
+         * Check if expression contains deep wildcard
+         * @returns {boolean}
+         */
+        hasDeepWildcard() {
+          return this._hasDeepWildcard;
+        }
+        /**
+         * Check if expression has attribute conditions
+         * @returns {boolean}
+         */
+        hasAttributeCondition() {
+          return this._hasAttributeCondition;
+        }
+        /**
+         * Check if expression has position selectors
+         * @returns {boolean}
+         */
+        hasPositionSelector() {
+          return this._hasPositionSelector;
+        }
+        /**
+         * Get string representation
+         * @returns {string}
+         */
+        toString() {
+          return this.pattern;
+        }
+      };
+    }
+  });
+
+  // node_modules/path-expression-matcher/src/Matcher.js
+  var MUTATING_METHODS, Matcher;
+  var init_Matcher = __esm({
+    "node_modules/path-expression-matcher/src/Matcher.js"() {
+      MUTATING_METHODS = /* @__PURE__ */ new Set(["push", "pop", "reset", "updateCurrent", "restore"]);
+      Matcher = class {
+        /**
+         * Create a new Matcher
+         * @param {Object} options - Configuration options
+         * @param {string} options.separator - Default path separator (default: '.')
+         */
+        constructor(options = {}) {
+          this.separator = options.separator || ".";
+          this.path = [];
+          this.siblingStacks = [];
+        }
+        /**
+         * Push a new tag onto the path
+         * @param {string} tagName - Name of the tag
+         * @param {Object} attrValues - Attribute key-value pairs for current node (optional)
+         * @param {string} namespace - Namespace for the tag (optional)
+         */
+        push(tagName, attrValues = null, namespace = null) {
+          if (this.path.length > 0) {
+            const prev = this.path[this.path.length - 1];
+            prev.values = void 0;
+          }
+          const currentLevel = this.path.length;
+          if (!this.siblingStacks[currentLevel]) {
+            this.siblingStacks[currentLevel] = /* @__PURE__ */ new Map();
+          }
+          const siblings = this.siblingStacks[currentLevel];
+          const siblingKey = namespace ? `${namespace}:${tagName}` : tagName;
+          const counter = siblings.get(siblingKey) || 0;
+          let position = 0;
+          for (const count of siblings.values()) {
+            position += count;
+          }
+          siblings.set(siblingKey, counter + 1);
+          const node = {
+            tag: tagName,
+            position,
+            counter
+          };
+          if (namespace !== null && namespace !== void 0) {
+            node.namespace = namespace;
+          }
+          if (attrValues !== null && attrValues !== void 0) {
+            node.values = attrValues;
+          }
+          this.path.push(node);
+        }
+        /**
+         * Pop the last tag from the path
+         * @returns {Object|undefined} The popped node
+         */
+        pop() {
+          if (this.path.length === 0) {
+            return void 0;
+          }
+          const node = this.path.pop();
+          if (this.siblingStacks.length > this.path.length + 1) {
+            this.siblingStacks.length = this.path.length + 1;
+          }
+          return node;
+        }
+        /**
+         * Update current node's attribute values
+         * Useful when attributes are parsed after push
+         * @param {Object} attrValues - Attribute values
+         */
+        updateCurrent(attrValues) {
+          if (this.path.length > 0) {
+            const current = this.path[this.path.length - 1];
+            if (attrValues !== null && attrValues !== void 0) {
+              current.values = attrValues;
+            }
+          }
+        }
+        /**
+         * Get current tag name
+         * @returns {string|undefined}
+         */
+        getCurrentTag() {
+          return this.path.length > 0 ? this.path[this.path.length - 1].tag : void 0;
+        }
+        /**
+         * Get current namespace
+         * @returns {string|undefined}
+         */
+        getCurrentNamespace() {
+          return this.path.length > 0 ? this.path[this.path.length - 1].namespace : void 0;
+        }
+        /**
+         * Get current node's attribute value
+         * @param {string} attrName - Attribute name
+         * @returns {*} Attribute value or undefined
+         */
+        getAttrValue(attrName) {
+          if (this.path.length === 0) return void 0;
+          const current = this.path[this.path.length - 1];
+          return current.values?.[attrName];
+        }
+        /**
+         * Check if current node has an attribute
+         * @param {string} attrName - Attribute name
+         * @returns {boolean}
+         */
+        hasAttr(attrName) {
+          if (this.path.length === 0) return false;
+          const current = this.path[this.path.length - 1];
+          return current.values !== void 0 && attrName in current.values;
+        }
+        /**
+         * Get current node's sibling position (child index in parent)
+         * @returns {number}
+         */
+        getPosition() {
+          if (this.path.length === 0) return -1;
+          return this.path[this.path.length - 1].position ?? 0;
+        }
+        /**
+         * Get current node's repeat counter (occurrence count of this tag name)
+         * @returns {number}
+         */
+        getCounter() {
+          if (this.path.length === 0) return -1;
+          return this.path[this.path.length - 1].counter ?? 0;
+        }
+        /**
+         * Get current node's sibling index (alias for getPosition for backward compatibility)
+         * @returns {number}
+         * @deprecated Use getPosition() or getCounter() instead
+         */
+        getIndex() {
+          return this.getPosition();
+        }
+        /**
+         * Get current path depth
+         * @returns {number}
+         */
+        getDepth() {
+          return this.path.length;
+        }
+        /**
+         * Get path as string
+         * @param {string} separator - Optional separator (uses default if not provided)
+         * @param {boolean} includeNamespace - Whether to include namespace in output (default: true)
+         * @returns {string}
+         */
+        toString(separator, includeNamespace = true) {
+          const sep = separator || this.separator;
+          return this.path.map((n) => {
+            if (includeNamespace && n.namespace) {
+              return `${n.namespace}:${n.tag}`;
+            }
+            return n.tag;
+          }).join(sep);
+        }
+        /**
+         * Get path as array of tag names
+         * @returns {string[]}
+         */
+        toArray() {
+          return this.path.map((n) => n.tag);
+        }
+        /**
+         * Reset the path to empty
+         */
+        reset() {
+          this.path = [];
+          this.siblingStacks = [];
+        }
+        /**
+         * Match current path against an Expression
+         * @param {Expression} expression - The expression to match against
+         * @returns {boolean} True if current path matches the expression
+         */
+        matches(expression) {
+          const segments = expression.segments;
+          if (segments.length === 0) {
+            return false;
+          }
+          if (expression.hasDeepWildcard()) {
+            return this._matchWithDeepWildcard(segments);
+          }
+          return this._matchSimple(segments);
+        }
+        /**
+         * Match simple path (no deep wildcards)
+         * @private
+         */
+        _matchSimple(segments) {
+          if (this.path.length !== segments.length) {
+            return false;
+          }
+          for (let i = 0; i < segments.length; i++) {
+            const segment = segments[i];
+            const node = this.path[i];
+            const isCurrentNode = i === this.path.length - 1;
+            if (!this._matchSegment(segment, node, isCurrentNode)) {
+              return false;
+            }
+          }
+          return true;
+        }
+        /**
+         * Match path with deep wildcards
+         * @private
+         */
+        _matchWithDeepWildcard(segments) {
+          let pathIdx = this.path.length - 1;
+          let segIdx = segments.length - 1;
+          while (segIdx >= 0 && pathIdx >= 0) {
+            const segment = segments[segIdx];
+            if (segment.type === "deep-wildcard") {
+              segIdx--;
+              if (segIdx < 0) {
+                return true;
+              }
+              const nextSeg = segments[segIdx];
+              let found = false;
+              for (let i = pathIdx; i >= 0; i--) {
+                const isCurrentNode = i === this.path.length - 1;
+                if (this._matchSegment(nextSeg, this.path[i], isCurrentNode)) {
+                  pathIdx = i - 1;
+                  segIdx--;
+                  found = true;
+                  break;
+                }
+              }
+              if (!found) {
+                return false;
+              }
+            } else {
+              const isCurrentNode = pathIdx === this.path.length - 1;
+              if (!this._matchSegment(segment, this.path[pathIdx], isCurrentNode)) {
+                return false;
+              }
+              pathIdx--;
+              segIdx--;
+            }
+          }
+          return segIdx < 0;
+        }
+        /**
+         * Match a single segment against a node
+         * @private
+         * @param {Object} segment - Segment from Expression
+         * @param {Object} node - Node from path
+         * @param {boolean} isCurrentNode - Whether this is the current (last) node
+         * @returns {boolean}
+         */
+        _matchSegment(segment, node, isCurrentNode) {
+          if (segment.tag !== "*" && segment.tag !== node.tag) {
+            return false;
+          }
+          if (segment.namespace !== void 0) {
+            if (segment.namespace !== "*" && segment.namespace !== node.namespace) {
+              return false;
+            }
+          }
+          if (segment.attrName !== void 0) {
+            if (!isCurrentNode) {
+              return false;
+            }
+            if (!node.values || !(segment.attrName in node.values)) {
+              return false;
+            }
+            if (segment.attrValue !== void 0) {
+              const actualValue = node.values[segment.attrName];
+              if (String(actualValue) !== String(segment.attrValue)) {
+                return false;
+              }
+            }
+          }
+          if (segment.position !== void 0) {
+            if (!isCurrentNode) {
+              return false;
+            }
+            const counter = node.counter ?? 0;
+            if (segment.position === "first" && counter !== 0) {
+              return false;
+            } else if (segment.position === "odd" && counter % 2 !== 1) {
+              return false;
+            } else if (segment.position === "even" && counter % 2 !== 0) {
+              return false;
+            } else if (segment.position === "nth") {
+              if (counter !== segment.positionValue) {
+                return false;
+              }
+            }
+          }
+          return true;
+        }
+        /**
+         * Create a snapshot of current state
+         * @returns {Object} State snapshot
+         */
+        snapshot() {
+          return {
+            path: this.path.map((node) => ({ ...node })),
+            siblingStacks: this.siblingStacks.map((map2) => new Map(map2))
+          };
+        }
+        /**
+         * Restore state from snapshot
+         * @param {Object} snapshot - State snapshot
+         */
+        restore(snapshot) {
+          this.path = snapshot.path.map((node) => ({ ...node }));
+          this.siblingStacks = snapshot.siblingStacks.map((map2) => new Map(map2));
+        }
+        /**
+         * Return a read-only view of this matcher.
+         *
+         * The returned object exposes all query/inspection methods but throws a
+         * TypeError if any state-mutating method is called (`push`, `pop`, `reset`,
+         * `updateCurrent`, `restore`).  Property reads (e.g. `.path`, `.separator`)
+         * are allowed but the returned arrays/objects are frozen so callers cannot
+         * mutate internal state through them either.
+         *
+         * @returns {ReadOnlyMatcher} A proxy that forwards read operations and blocks writes.
+         *
+         * @example
+         * const matcher = new Matcher();
+         * matcher.push("root", {});
+         *
+         * const ro = matcher.readOnly();
+         * ro.matches(expr);      // ✓ works
+         * ro.getCurrentTag();    // ✓ works
+         * ro.push("child", {}); // ✗ throws TypeError
+         * ro.reset();            // ✗ throws TypeError
+         */
+        readOnly() {
+          const self2 = this;
+          return new Proxy(self2, {
+            get(target, prop, receiver) {
+              if (MUTATING_METHODS.has(prop)) {
+                return () => {
+                  throw new TypeError(
+                    `Cannot call '${prop}' on a read-only Matcher. Obtain a writable instance to mutate state.`
+                  );
+                };
+              }
+              const value = Reflect.get(target, prop, receiver);
+              if (prop === "path" || prop === "siblingStacks") {
+                return Object.freeze(
+                  Array.isArray(value) ? value.map(
+                    (item) => item instanceof Map ? Object.freeze(new Map(item)) : Object.freeze({ ...item })
+                    // freeze a copy of each node
+                  ) : value
+                );
+              }
+              if (typeof value === "function") {
+                return value.bind(target);
+              }
+              return value;
+            },
+            // Prevent any property assignment on the read-only view
+            set(_target, prop) {
+              throw new TypeError(
+                `Cannot set property '${String(prop)}' on a read-only Matcher.`
+              );
+            },
+            // Prevent property deletion
+            deleteProperty(_target, prop) {
+              throw new TypeError(
+                `Cannot delete property '${String(prop)}' from a read-only Matcher.`
+              );
+            }
+          });
+        }
+      };
+    }
+  });
+
+  // node_modules/path-expression-matcher/src/index.js
+  var init_src = __esm({
+    "node_modules/path-expression-matcher/src/index.js"() {
+      init_Expression();
+      init_Matcher();
+    }
+  });
+
   // node_modules/fast-xml-parser/src/xmlparser/OrderedObjParser.js
+  function extractRawAttributes(prefixedAttrs, options) {
+    if (!prefixedAttrs) return {};
+    const attrs = options.attributesGroupName ? prefixedAttrs[options.attributesGroupName] : prefixedAttrs;
+    if (!attrs) return {};
+    const rawAttrs = {};
+    for (const key in attrs) {
+      if (key.startsWith(options.attributeNamePrefix)) {
+        const rawName = key.substring(options.attributeNamePrefix.length);
+        rawAttrs[rawName] = attrs[key];
+      } else {
+        rawAttrs[key] = attrs[key];
+      }
+    }
+    return rawAttrs;
+  }
+  function extractNamespace(rawTagName) {
+    if (!rawTagName || typeof rawTagName !== "string") return void 0;
+    const colonIndex = rawTagName.indexOf(":");
+    if (colonIndex !== -1 && colonIndex > 0) {
+      const ns = rawTagName.substring(0, colonIndex);
+      if (ns !== "xmlns") {
+        return ns;
+      }
+    }
+    return void 0;
+  }
   function addExternalEntities(externalEntities) {
     const entKeys = Object.keys(externalEntities);
     for (let i = 0; i < entKeys.length; i++) {
@@ -16955,7 +17652,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       }
       if (val.length > 0) {
         if (!escapeEntities) val = this.replaceEntitiesValue(val, tagName, jPath);
-        const newval = this.options.tagValueProcessor(tagName, val, jPath, hasAttributes, isLeafNode);
+        const jPathOrMatcher = this.options.jPath ? jPath.toString() : jPath;
+        const newval = this.options.tagValueProcessor(tagName, val, jPathOrMatcher, hasAttributes, isLeafNode);
         if (newval === null || newval === void 0) {
           return val;
         } else if (typeof newval !== typeof val || newval !== val) {
@@ -16991,9 +17689,26 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       const matches = getAllMatches(attrStr, attrsRegx);
       const len = matches.length;
       const attrs = {};
+      const rawAttrsForMatcher = {};
       for (let i = 0; i < len; i++) {
         const attrName = this.resolveNameSpace(matches[i][1]);
-        if (this.ignoreAttributesFn(attrName, jPath)) {
+        const oldVal = matches[i][4];
+        if (attrName.length && oldVal !== void 0) {
+          let parsedVal = oldVal;
+          if (this.options.trimValues) {
+            parsedVal = parsedVal.trim();
+          }
+          parsedVal = this.replaceEntitiesValue(parsedVal, tagName, this.readonlyMatcher);
+          rawAttrsForMatcher[attrName] = parsedVal;
+        }
+      }
+      if (Object.keys(rawAttrsForMatcher).length > 0 && typeof jPath === "object" && jPath.updateCurrent) {
+        jPath.updateCurrent(rawAttrsForMatcher);
+      }
+      for (let i = 0; i < len; i++) {
+        const attrName = this.resolveNameSpace(matches[i][1]);
+        const jPathStr = this.options.jPath ? jPath.toString() : this.readonlyMatcher;
+        if (this.ignoreAttributesFn(attrName, jPathStr)) {
           continue;
         }
         let oldVal = matches[i][4];
@@ -17002,13 +17717,14 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           if (this.options.transformAttributeName) {
             aName = this.options.transformAttributeName(aName);
           }
-          if (aName === "__proto__") aName = "#__proto__";
+          aName = sanitizeName(aName, this.options);
           if (oldVal !== void 0) {
             if (this.options.trimValues) {
               oldVal = oldVal.trim();
             }
-            oldVal = this.replaceEntitiesValue(oldVal, tagName, jPath);
-            const newVal = this.options.attributeValueProcessor(attrName, oldVal, jPath);
+            oldVal = this.replaceEntitiesValue(oldVal, tagName, this.readonlyMatcher);
+            const jPathOrMatcher = this.options.jPath ? jPath.toString() : this.readonlyMatcher;
+            const newVal = this.options.attributeValueProcessor(attrName, oldVal, jPathOrMatcher);
             if (newVal === null || newVal === void 0) {
               attrs[aName] = oldVal;
             } else if (typeof newVal !== typeof oldVal || newVal !== oldVal) {
@@ -17036,9 +17752,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       return attrs;
     }
   }
-  function addChild(currentNode, childNode, jPath, startIndex) {
+  function addChild(currentNode, childNode, matcher, startIndex) {
     if (!this.options.captureMetaData) startIndex = void 0;
-    const result = this.options.updateTag(childNode.tagname, jPath, childNode[":@"]);
+    const jPathOrMatcher = this.options.jPath ? matcher.toString() : matcher;
+    const result = this.options.updateTag(childNode.tagname, jPathOrMatcher, childNode[":@"]);
     if (result === false) {
     } else if (typeof result === "string") {
       childNode.tagname = result;
@@ -17047,13 +17764,85 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       currentNode.addChild(childNode, startIndex);
     }
   }
-  function saveTextToParentTag(textData, parentNode, jPath, isLeafNode) {
+  function replaceEntitiesValue(val, tagName, jPath) {
+    const entityConfig = this.options.processEntities;
+    if (!entityConfig || !entityConfig.enabled) {
+      return val;
+    }
+    if (entityConfig.allowedTags) {
+      const jPathOrMatcher = this.options.jPath ? jPath.toString() : jPath;
+      const allowed = Array.isArray(entityConfig.allowedTags) ? entityConfig.allowedTags.includes(tagName) : entityConfig.allowedTags(tagName, jPathOrMatcher);
+      if (!allowed) {
+        return val;
+      }
+    }
+    if (entityConfig.tagFilter) {
+      const jPathOrMatcher = this.options.jPath ? jPath.toString() : jPath;
+      if (!entityConfig.tagFilter(tagName, jPathOrMatcher)) {
+        return val;
+      }
+    }
+    for (const entityName of Object.keys(this.docTypeEntities)) {
+      const entity = this.docTypeEntities[entityName];
+      const matches = val.match(entity.regx);
+      if (matches) {
+        this.entityExpansionCount += matches.length;
+        if (entityConfig.maxTotalExpansions && this.entityExpansionCount > entityConfig.maxTotalExpansions) {
+          throw new Error(
+            `Entity expansion limit exceeded: ${this.entityExpansionCount} > ${entityConfig.maxTotalExpansions}`
+          );
+        }
+        const lengthBefore = val.length;
+        val = val.replace(entity.regx, entity.val);
+        if (entityConfig.maxExpandedLength) {
+          this.currentExpandedLength += val.length - lengthBefore;
+          if (this.currentExpandedLength > entityConfig.maxExpandedLength) {
+            throw new Error(
+              `Total expanded content size exceeded: ${this.currentExpandedLength} > ${entityConfig.maxExpandedLength}`
+            );
+          }
+        }
+      }
+    }
+    for (const entityName of Object.keys(this.lastEntities)) {
+      const entity = this.lastEntities[entityName];
+      const matches = val.match(entity.regex);
+      if (matches) {
+        this.entityExpansionCount += matches.length;
+        if (entityConfig.maxTotalExpansions && this.entityExpansionCount > entityConfig.maxTotalExpansions) {
+          throw new Error(
+            `Entity expansion limit exceeded: ${this.entityExpansionCount} > ${entityConfig.maxTotalExpansions}`
+          );
+        }
+      }
+      val = val.replace(entity.regex, entity.val);
+    }
+    if (val.indexOf("&") === -1) return val;
+    if (this.options.htmlEntities) {
+      for (const entityName of Object.keys(this.htmlEntities)) {
+        const entity = this.htmlEntities[entityName];
+        const matches = val.match(entity.regex);
+        if (matches) {
+          this.entityExpansionCount += matches.length;
+          if (entityConfig.maxTotalExpansions && this.entityExpansionCount > entityConfig.maxTotalExpansions) {
+            throw new Error(
+              `Entity expansion limit exceeded: ${this.entityExpansionCount} > ${entityConfig.maxTotalExpansions}`
+            );
+          }
+        }
+        val = val.replace(entity.regex, entity.val);
+      }
+    }
+    val = val.replace(this.ampEntity.regex, this.ampEntity.val);
+    return val;
+  }
+  function saveTextToParentTag(textData, parentNode, matcher, isLeafNode) {
     if (textData) {
       if (isLeafNode === void 0) isLeafNode = parentNode.child.length === 0;
       textData = this.parseTextData(
         textData,
         parentNode.tagname,
-        jPath,
+        matcher,
         false,
         parentNode[":@"] ? Object.keys(parentNode[":@"]).length !== 0 : false,
         isLeafNode
@@ -17064,9 +17853,13 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     }
     return textData;
   }
-  function isItStopNode(stopNodesExact, stopNodesWildcard, jPath, currentTagName) {
-    if (stopNodesWildcard && stopNodesWildcard.has(currentTagName)) return true;
-    if (stopNodesExact && stopNodesExact.has(jPath)) return true;
+  function isItStopNode(stopNodeExpressions, matcher) {
+    if (!stopNodeExpressions || stopNodeExpressions.length === 0) return false;
+    for (let i = 0; i < stopNodeExpressions.length; i++) {
+      if (matcher.matches(stopNodeExpressions[i])) {
+        return true;
+      }
+    }
     return false;
   }
   function tagExpWithClosingIndex(xmlData, i, closingChar = ">") {
@@ -17196,7 +17989,26 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       return prefix + str + ";";
     }
   }
-  var OrderedObjParser, attrsRegx, parseXml, replaceEntitiesValue;
+  function transformTagName(fn, tagName, tagExp, options) {
+    if (fn) {
+      const newTagName = fn(tagName);
+      if (tagExp === tagName) {
+        tagExp = newTagName;
+      }
+      tagName = newTagName;
+    }
+    tagName = sanitizeName(tagName, options);
+    return { tagName, tagExp };
+  }
+  function sanitizeName(name, options) {
+    if (criticalProperties.includes(name)) {
+      throw new Error(`[SECURITY] Invalid name: "${name}" is a reserved JavaScript keyword that could cause prototype pollution`);
+    } else if (DANGEROUS_PROPERTY_NAMES.includes(name)) {
+      return options.onDangerousProperty(name);
+    }
+    return name;
+  }
+  var OrderedObjParser, attrsRegx, parseXml;
   var init_OrderedObjParser = __esm({
     "node_modules/fast-xml-parser/src/xmlparser/OrderedObjParser.js"() {
       "use strict";
@@ -17205,6 +18017,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       init_DocTypeReader();
       init_strnum();
       init_ignoreAttributes();
+      init_src();
       OrderedObjParser = class {
         constructor(options) {
           this.options = options;
@@ -17248,16 +18061,17 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           this.ignoreAttributesFn = getIgnoreAttributesFn(this.options.ignoreAttributes);
           this.entityExpansionCount = 0;
           this.currentExpandedLength = 0;
+          this.matcher = new Matcher();
+          this.readonlyMatcher = this.matcher.readOnly();
+          this.isCurrentNodeStopNode = false;
           if (this.options.stopNodes && this.options.stopNodes.length > 0) {
-            this.stopNodesExact = /* @__PURE__ */ new Set();
-            this.stopNodesWildcard = /* @__PURE__ */ new Set();
+            this.stopNodeExpressions = [];
             for (let i = 0; i < this.options.stopNodes.length; i++) {
               const stopNodeExp = this.options.stopNodes[i];
-              if (typeof stopNodeExp !== "string") continue;
-              if (stopNodeExp.startsWith("*.")) {
-                this.stopNodesWildcard.add(stopNodeExp.substring(2));
-              } else {
-                this.stopNodesExact.add(stopNodeExp);
+              if (typeof stopNodeExp === "string") {
+                this.stopNodeExpressions.push(new Expression(stopNodeExp));
+              } else if (stopNodeExp instanceof Expression) {
+                this.stopNodeExpressions.push(stopNodeExp);
               }
             }
           }
@@ -17269,7 +18083,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         const xmlObj = new XmlNode("!xml");
         let currentNode = xmlObj;
         let textData = "";
-        let jPath = "";
+        this.matcher.reset();
         this.entityExpansionCount = 0;
         this.currentExpandedLength = 0;
         const docTypeReader = new DocTypeReader(this.options.processEntities);
@@ -17285,46 +18099,42 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
                   tagName = tagName.substr(colonIndex + 1);
                 }
               }
-              if (this.options.transformTagName) {
-                tagName = this.options.transformTagName(tagName);
-              }
+              tagName = transformTagName(this.options.transformTagName, tagName, "", this.options).tagName;
               if (currentNode) {
-                textData = this.saveTextToParentTag(textData, currentNode, jPath);
+                textData = this.saveTextToParentTag(textData, currentNode, this.readonlyMatcher);
               }
-              const lastTagName = jPath.substring(jPath.lastIndexOf(".") + 1);
+              const lastTagName = this.matcher.getCurrentTag();
               if (tagName && this.options.unpairedTags.indexOf(tagName) !== -1) {
                 throw new Error(`Unpaired tag can not be used as closing tag: </${tagName}>`);
               }
-              let propIndex = 0;
               if (lastTagName && this.options.unpairedTags.indexOf(lastTagName) !== -1) {
-                propIndex = jPath.lastIndexOf(".", jPath.lastIndexOf(".") - 1);
+                this.matcher.pop();
                 this.tagsNodeStack.pop();
-              } else {
-                propIndex = jPath.lastIndexOf(".");
               }
-              jPath = jPath.substring(0, propIndex);
+              this.matcher.pop();
+              this.isCurrentNodeStopNode = false;
               currentNode = this.tagsNodeStack.pop();
               textData = "";
               i = closeIndex;
             } else if (xmlData[i + 1] === "?") {
               let tagData = readTagExp(xmlData, i, false, "?>");
               if (!tagData) throw new Error("Pi Tag is not closed.");
-              textData = this.saveTextToParentTag(textData, currentNode, jPath);
+              textData = this.saveTextToParentTag(textData, currentNode, this.readonlyMatcher);
               if (this.options.ignoreDeclaration && tagData.tagName === "?xml" || this.options.ignorePiTags) {
               } else {
                 const childNode = new XmlNode(tagData.tagName);
                 childNode.add(this.options.textNodeName, "");
                 if (tagData.tagName !== tagData.tagExp && tagData.attrExpPresent) {
-                  childNode[":@"] = this.buildAttributesMap(tagData.tagExp, jPath, tagData.tagName);
+                  childNode[":@"] = this.buildAttributesMap(tagData.tagExp, this.matcher, tagData.tagName);
                 }
-                this.addChild(currentNode, childNode, jPath, i);
+                this.addChild(currentNode, childNode, this.readonlyMatcher, i);
               }
               i = tagData.closeIndex + 1;
             } else if (xmlData.substr(i + 1, 3) === "!--") {
               const endIndex = findClosingIndex(xmlData, "-->", i + 4, "Comment is not closed.");
               if (this.options.commentPropName) {
                 const comment = xmlData.substring(i + 4, endIndex - 2);
-                textData = this.saveTextToParentTag(textData, currentNode, jPath);
+                textData = this.saveTextToParentTag(textData, currentNode, this.readonlyMatcher);
                 currentNode.add(this.options.commentPropName, [{ [this.options.textNodeName]: comment }]);
               }
               i = endIndex;
@@ -17335,8 +18145,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
             } else if (xmlData.substr(i + 1, 2) === "![") {
               const closeIndex = findClosingIndex(xmlData, "]]>", i, "CDATA is not closed.") - 2;
               const tagExp = xmlData.substring(i + 9, closeIndex);
-              textData = this.saveTextToParentTag(textData, currentNode, jPath);
-              let val = this.parseTextData(tagExp, currentNode.tagname, jPath, true, false, true, true);
+              textData = this.saveTextToParentTag(textData, currentNode, this.readonlyMatcher);
+              let val = this.parseTextData(tagExp, currentNode.tagname, this.readonlyMatcher, true, false, true, true);
               if (val == void 0) val = "";
               if (this.options.cdataPropName) {
                 currentNode.add(this.options.cdataPropName, [{ [this.options.textNodeName]: tagExp }]);
@@ -17346,45 +18156,60 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
               i = closeIndex + 2;
             } else {
               let result = readTagExp(xmlData, i, this.options.removeNSPrefix);
+              if (!result) {
+                const context = xmlData.substring(Math.max(0, i - 50), Math.min(xmlData.length, i + 50));
+                throw new Error(`readTagExp returned undefined at position ${i}. Context: "${context}"`);
+              }
               let tagName = result.tagName;
               const rawTagName = result.rawTagName;
               let tagExp = result.tagExp;
               let attrExpPresent = result.attrExpPresent;
               let closeIndex = result.closeIndex;
-              if (this.options.transformTagName) {
-                const newTagName = this.options.transformTagName(tagName);
-                if (tagExp === tagName) {
-                  tagExp = newTagName;
-                }
-                tagName = newTagName;
-              }
-              if (this.options.strictReservedNames && (tagName === this.options.commentPropName || tagName === this.options.cdataPropName)) {
+              ({ tagName, tagExp } = transformTagName(this.options.transformTagName, tagName, tagExp, this.options));
+              if (this.options.strictReservedNames && (tagName === this.options.commentPropName || tagName === this.options.cdataPropName || tagName === this.options.textNodeName || tagName === this.options.attributesGroupName)) {
                 throw new Error(`Invalid tag name: ${tagName}`);
               }
               if (currentNode && textData) {
                 if (currentNode.tagname !== "!xml") {
-                  textData = this.saveTextToParentTag(textData, currentNode, jPath, false);
+                  textData = this.saveTextToParentTag(textData, currentNode, this.readonlyMatcher, false);
                 }
               }
               const lastTag = currentNode;
               if (lastTag && this.options.unpairedTags.indexOf(lastTag.tagname) !== -1) {
                 currentNode = this.tagsNodeStack.pop();
-                jPath = jPath.substring(0, jPath.lastIndexOf("."));
+                this.matcher.pop();
+              }
+              let isSelfClosing = false;
+              if (tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1) {
+                isSelfClosing = true;
+                if (tagName[tagName.length - 1] === "/") {
+                  tagName = tagName.substr(0, tagName.length - 1);
+                  tagExp = tagName;
+                } else {
+                  tagExp = tagExp.substr(0, tagExp.length - 1);
+                }
+                attrExpPresent = tagName !== tagExp;
+              }
+              let prefixedAttrs = null;
+              let rawAttrs = {};
+              let namespace = void 0;
+              namespace = extractNamespace(rawTagName);
+              if (tagName !== xmlObj.tagname) {
+                this.matcher.push(tagName, {}, namespace);
+              }
+              if (tagName !== tagExp && attrExpPresent) {
+                prefixedAttrs = this.buildAttributesMap(tagExp, this.matcher, tagName);
+                if (prefixedAttrs) {
+                  rawAttrs = extractRawAttributes(prefixedAttrs, this.options);
+                }
               }
               if (tagName !== xmlObj.tagname) {
-                jPath += jPath ? "." + tagName : tagName;
+                this.isCurrentNodeStopNode = this.isItStopNode(this.stopNodeExpressions, this.matcher);
               }
               const startIndex = i;
-              if (this.isItStopNode(this.stopNodesExact, this.stopNodesWildcard, jPath, tagName)) {
+              if (this.isCurrentNodeStopNode) {
                 let tagContent = "";
-                if (tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1) {
-                  if (tagName[tagName.length - 1] === "/") {
-                    tagName = tagName.substr(0, tagName.length - 1);
-                    jPath = jPath.substr(0, jPath.length - 1);
-                    tagExp = tagName;
-                  } else {
-                    tagExp = tagExp.substr(0, tagExp.length - 1);
-                  }
+                if (isSelfClosing) {
                   i = result.closeIndex;
                 } else if (this.options.unpairedTags.indexOf(tagName) !== -1) {
                   i = result.closeIndex;
@@ -17395,44 +18220,31 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
                   tagContent = result2.tagContent;
                 }
                 const childNode = new XmlNode(tagName);
-                if (tagName !== tagExp && attrExpPresent) {
-                  childNode[":@"] = this.buildAttributesMap(tagExp, jPath, tagName);
+                if (prefixedAttrs) {
+                  childNode[":@"] = prefixedAttrs;
                 }
-                if (tagContent) {
-                  tagContent = this.parseTextData(tagContent, tagName, jPath, true, attrExpPresent, true, true);
-                }
-                jPath = jPath.substr(0, jPath.lastIndexOf("."));
                 childNode.add(this.options.textNodeName, tagContent);
-                this.addChild(currentNode, childNode, jPath, startIndex);
+                this.matcher.pop();
+                this.isCurrentNodeStopNode = false;
+                this.addChild(currentNode, childNode, this.readonlyMatcher, startIndex);
               } else {
-                if (tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1) {
-                  if (tagName[tagName.length - 1] === "/") {
-                    tagName = tagName.substr(0, tagName.length - 1);
-                    jPath = jPath.substr(0, jPath.length - 1);
-                    tagExp = tagName;
-                  } else {
-                    tagExp = tagExp.substr(0, tagExp.length - 1);
-                  }
-                  if (this.options.transformTagName) {
-                    const newTagName = this.options.transformTagName(tagName);
-                    if (tagExp === tagName) {
-                      tagExp = newTagName;
-                    }
-                    tagName = newTagName;
-                  }
+                if (isSelfClosing) {
+                  ({ tagName, tagExp } = transformTagName(this.options.transformTagName, tagName, tagExp, this.options));
                   const childNode = new XmlNode(tagName);
-                  if (tagName !== tagExp && attrExpPresent) {
-                    childNode[":@"] = this.buildAttributesMap(tagExp, jPath, tagName);
+                  if (prefixedAttrs) {
+                    childNode[":@"] = prefixedAttrs;
                   }
-                  this.addChild(currentNode, childNode, jPath, startIndex);
-                  jPath = jPath.substr(0, jPath.lastIndexOf("."));
+                  this.addChild(currentNode, childNode, this.readonlyMatcher, startIndex);
+                  this.matcher.pop();
+                  this.isCurrentNodeStopNode = false;
                 } else if (this.options.unpairedTags.indexOf(tagName) !== -1) {
                   const childNode = new XmlNode(tagName);
-                  if (tagName !== tagExp && attrExpPresent) {
-                    childNode[":@"] = this.buildAttributesMap(tagExp, jPath);
+                  if (prefixedAttrs) {
+                    childNode[":@"] = prefixedAttrs;
                   }
-                  this.addChild(currentNode, childNode, jPath, startIndex);
-                  jPath = jPath.substr(0, jPath.lastIndexOf("."));
+                  this.addChild(currentNode, childNode, this.readonlyMatcher, startIndex);
+                  this.matcher.pop();
+                  this.isCurrentNodeStopNode = false;
                   i = result.closeIndex;
                   continue;
                 } else {
@@ -17441,10 +18253,10 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
                     throw new Error("Maximum nested tags exceeded");
                   }
                   this.tagsNodeStack.push(currentNode);
-                  if (tagName !== tagExp && attrExpPresent) {
-                    childNode[":@"] = this.buildAttributesMap(tagExp, jPath, tagName);
+                  if (prefixedAttrs) {
+                    childNode[":@"] = prefixedAttrs;
                   }
-                  this.addChild(currentNode, childNode, jPath, startIndex);
+                  this.addChild(currentNode, childNode, this.readonlyMatcher, startIndex);
                   currentNode = childNode;
                 }
                 textData = "";
@@ -17457,87 +18269,50 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         return xmlObj.child;
       };
-      replaceEntitiesValue = function(val, tagName, jPath) {
-        if (val.indexOf("&") === -1) {
-          return val;
-        }
-        const entityConfig = this.options.processEntities;
-        if (!entityConfig.enabled) {
-          return val;
-        }
-        if (entityConfig.allowedTags) {
-          if (!entityConfig.allowedTags.includes(tagName)) {
-            return val;
-          }
-        }
-        if (entityConfig.tagFilter) {
-          if (!entityConfig.tagFilter(tagName, jPath)) {
-            return val;
-          }
-        }
-        for (let entityName in this.docTypeEntities) {
-          const entity = this.docTypeEntities[entityName];
-          const matches = val.match(entity.regx);
-          if (matches) {
-            this.entityExpansionCount += matches.length;
-            if (entityConfig.maxTotalExpansions && this.entityExpansionCount > entityConfig.maxTotalExpansions) {
-              throw new Error(
-                `Entity expansion limit exceeded: ${this.entityExpansionCount} > ${entityConfig.maxTotalExpansions}`
-              );
-            }
-            const lengthBefore = val.length;
-            val = val.replace(entity.regx, entity.val);
-            if (entityConfig.maxExpandedLength) {
-              this.currentExpandedLength += val.length - lengthBefore;
-              if (this.currentExpandedLength > entityConfig.maxExpandedLength) {
-                throw new Error(
-                  `Total expanded content size exceeded: ${this.currentExpandedLength} > ${entityConfig.maxExpandedLength}`
-                );
-              }
-            }
-          }
-        }
-        if (val.indexOf("&") === -1) return val;
-        for (let entityName in this.lastEntities) {
-          const entity = this.lastEntities[entityName];
-          val = val.replace(entity.regex, entity.val);
-        }
-        if (val.indexOf("&") === -1) return val;
-        if (this.options.htmlEntities) {
-          for (let entityName in this.htmlEntities) {
-            const entity = this.htmlEntities[entityName];
-            val = val.replace(entity.regex, entity.val);
-          }
-        }
-        val = val.replace(this.ampEntity.regex, this.ampEntity.val);
-        return val;
-      };
     }
   });
 
   // node_modules/fast-xml-parser/src/xmlparser/node2json.js
-  function prettify(node, options) {
-    return compress(node, options);
+  function stripAttributePrefix(attrs, prefix) {
+    if (!attrs || typeof attrs !== "object") return {};
+    if (!prefix) return attrs;
+    const rawAttrs = {};
+    for (const key in attrs) {
+      if (key.startsWith(prefix)) {
+        const rawName = key.substring(prefix.length);
+        rawAttrs[rawName] = attrs[key];
+      } else {
+        rawAttrs[key] = attrs[key];
+      }
+    }
+    return rawAttrs;
   }
-  function compress(arr, options, jPath) {
+  function prettify(node, options, matcher, readonlyMatcher) {
+    return compress(node, options, matcher, readonlyMatcher);
+  }
+  function compress(arr, options, matcher, readonlyMatcher) {
     let text;
     const compressedObj = {};
     for (let i = 0; i < arr.length; i++) {
       const tagObj = arr[i];
       const property = propName(tagObj);
-      let newJpath = "";
-      if (jPath === void 0) newJpath = property;
-      else newJpath = jPath + "." + property;
+      if (property !== void 0 && property !== options.textNodeName) {
+        const rawAttrs = stripAttributePrefix(
+          tagObj[":@"] || {},
+          options.attributeNamePrefix
+        );
+        matcher.push(property, rawAttrs);
+      }
       if (property === options.textNodeName) {
         if (text === void 0) text = tagObj[property];
         else text += "" + tagObj[property];
       } else if (property === void 0) {
         continue;
       } else if (tagObj[property]) {
-        let val = compress(tagObj[property], options, newJpath);
+        let val = compress(tagObj[property], options, matcher, readonlyMatcher);
         const isLeaf = isLeafTag(val, options);
         if (tagObj[":@"]) {
-          assignAttributes(val, tagObj[":@"], newJpath, options);
+          assignAttributes(val, tagObj[":@"], readonlyMatcher, options);
         } else if (Object.keys(val).length === 1 && val[options.textNodeName] !== void 0 && !options.alwaysCreateTextNode) {
           val = val[options.textNodeName];
         } else if (Object.keys(val).length === 0) {
@@ -17553,11 +18328,15 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           }
           compressedObj[property].push(val);
         } else {
-          if (options.isArray(property, newJpath, isLeaf)) {
+          const jPathOrMatcher = options.jPath ? readonlyMatcher.toString() : readonlyMatcher;
+          if (options.isArray(property, jPathOrMatcher, isLeaf)) {
             compressedObj[property] = [val];
           } else {
             compressedObj[property] = val;
           }
+        }
+        if (property !== void 0 && property !== options.textNodeName) {
+          matcher.pop();
         }
       }
     }
@@ -17573,13 +18352,15 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       if (key !== ":@") return key;
     }
   }
-  function assignAttributes(obj, attrMap, jpath, options) {
+  function assignAttributes(obj, attrMap, readonlyMatcher, options) {
     if (attrMap) {
       const keys = Object.keys(attrMap);
       const len = keys.length;
       for (let i = 0; i < len; i++) {
         const atrrName = keys[i];
-        if (options.isArray(atrrName, jpath + "." + atrrName, true, true)) {
+        const rawAttrName = atrrName.startsWith(options.attributeNamePrefix) ? atrrName.substring(options.attributeNamePrefix.length) : atrrName;
+        const jPathOrMatcher = options.jPath ? readonlyMatcher.toString() + "." + rawAttrName : readonlyMatcher;
+        if (options.isArray(atrrName, jPathOrMatcher, true, true)) {
           obj[atrrName] = [attrMap[atrrName]];
         } else {
           obj[atrrName] = attrMap[atrrName];
@@ -17643,7 +18424,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           orderedObjParser.addExternalEntities(this.externalEntities);
           const orderedResult = orderedObjParser.parseXml(xmlData);
           if (this.options.preserveOrder || orderedResult === void 0) return orderedResult;
-          else return prettify(orderedResult, this.options);
+          else return prettify(orderedResult, this.options, orderedObjParser.matcher, orderedObjParser.readonlyMatcher);
         }
         /**
          * Add Entity which is not by default supported by this library
@@ -18309,6 +19090,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     "src/features/tagging/tag-service.js"() {
       "use strict";
       init_config_manager();
+      init_suggested_tag_original_case();
       init_utils();
       debugLog2("[SAFARI-EXT-SHIM-001] tag-service.js: module loaded");
       TagService = class {
@@ -19429,40 +20211,23 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
               if (trimmed.length >= 2 && !noiseWords.has(lowerWord) && !/^\d+$/.test(trimmed)) {
                 const count = wordFrequency.get(lowerWord) || 0;
                 wordFrequency.set(lowerWord, count + 1);
-                if (!originalCaseMap.has(lowerWord)) {
+                const prev = originalCaseMap.get(lowerWord);
+                if (prev === void 0) {
                   originalCaseMap.set(lowerWord, trimmed);
                 } else {
-                  const existing = originalCaseMap.get(lowerWord);
+                  originalCaseMap.set(lowerWord, pickBetterSuggestedOriginalCase(prev, trimmed));
                 }
               }
             });
             debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Word frequency map size:", wordFrequency.size);
-            const tagsWithVersions = [];
-            const seenLowercase = /* @__PURE__ */ new Set();
             const sortedEntries = Array.from(wordFrequency.entries()).sort((a, b) => {
               if (b[1] !== a[1]) {
                 return b[1] - a[1];
               }
               return a[0].localeCompare(b[0]);
             });
-            for (const [lowerWord, frequency] of sortedEntries) {
-              const originalCase = originalCaseMap.get(lowerWord) || lowerWord;
-              tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency });
-              if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
-                tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency });
-                seenLowercase.add(lowerWord);
-              } else if (originalCase === lowerWord) {
-                seenLowercase.add(lowerWord);
-              }
-            }
-            tagsWithVersions.sort((a, b) => {
-              if (b.frequency !== a.frequency) {
-                return b.frequency - a.frequency;
-              }
-              return a.lowerTag.localeCompare(b.lowerTag);
-            });
-            const sortedWords = tagsWithVersions.slice(0, limit * 2).map((item) => item.tag);
-            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (with lowercase versions):", sortedWords);
+            const sortedWords = sortedEntries.slice(0, limit).map(([lowerWord]) => originalCaseMap.get(lowerWord) || lowerWord);
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sorted words (canonical case per key):", sortedWords);
             const sanitizedTags = sortedWords.map((word) => this.sanitizeTag(word)).filter((tag) => tag !== null && tag.length > 0);
             debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sanitized tags:", sanitizedTags);
             const uniqueTags = [];
@@ -19473,8 +20238,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
                 seenExact.add(tag);
               }
             }
-            const finalTags = uniqueTags.slice(0, limit * 2);
-            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags (with lowercase versions):", finalTags.length, finalTags);
+            const finalTags = uniqueTags.slice(0, limit);
+            debugLog2("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Final unique suggested tags:", finalTags.length, finalTags);
             return finalTags;
           } catch (error48) {
             debugError("TAG-SERVICE", "[REQ-SUGGESTED_TAGS_FROM_CONTENT] Error extracting suggested tags:", error48);

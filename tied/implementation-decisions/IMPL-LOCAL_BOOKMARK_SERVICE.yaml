@@ -15,7 +15,7 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
   implementation_approach:
     summary: LocalBookmarkService class in src/features/storage/local-bookmark-service.js; TagService integration for tag tracking.
     details:
-      - 'Default provider is local (ConfigManager getDefaultConfiguration().storageMode local)'
+      - Default provider is local (ConfigManager getDefaultConfiguration().storageMode local)
       - 'Storage key: hoverboard_local_bookmarks (object keyed by URL)'
       - Normalized bookmark shape matches PinboardService (url, description, extended, tags, time, shared, toread, hash)
       - trackBookmarkTags and extractTagsFromBookmarkData for recent-tag integration
@@ -94,13 +94,13 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
       reason: Align essence_pseudocode with standard (one-action-per-step)
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass

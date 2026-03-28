@@ -93,13 +93,13 @@ IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: New implementation for Add tags to selected
     last_validated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       validator: AI Agent
       result: pass

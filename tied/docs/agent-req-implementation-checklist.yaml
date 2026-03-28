@@ -1,0 +1,972 @@
+# Agent Requirement Implementation Checklist (executable YAML)
+#
+# HIGHEST PRIORITY: This file MUST be copied to a unique file for each request in a working folder.
+# Keep all such copies in that working folder. Do not track completion or run the checklist against
+# the canonical file in docs/; use the per-request copy. File name MUST include (1) the REQ semantic
+# token for the requirement (e.g. REQ-DATA_SAVE) and (2) a sortable timestamp value (e.g. ISO8601
+# compact YYYYMMDDHHMMSS or seconds since epoch). Example: <working_folder>/REQ-DATA_SAVE_20260316120000.yaml
+# or <working_folder>/REQ-DATA_SAVE_1710619200.yaml. Create the working folder if it does not exist.
+#
+# Source: docs/agent-req-implementation-checklist.md
+# Process token: [PROC-AGENT_REQ_CHECKLIST]
+# Each step is atomic (repeatable/skippable). Tracking supports completion gates and retry state.
+#
+# Step completion comments (above each item in steps and sub_procedures):
+#   Not completed:  # id <STEP_ID> time   (space after "time" is where seconds-in-epoch will be written)
+#   Completed:      # id <STEP_ID> time <seconds-in-epoch>
+#
+# Record completion time (id=step id, val=seconds since epoch, file=this YAML path):
+#   BSD/macOS:  sed -i '' "s/^  # id $id time$/& $val/" "$file"
+#   POSIX:      sed "s/^  # id $id time$/& $val/" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+#
+# Clear completion for loop-back: use loop_back_clearance.<target>.clear_ids; reset each listed id
+# so the comment is "  # id <ID> time" (no epoch). Commands (id=step id, file=this YAML path):
+#   BSD/macOS:  sed -i '' "s/^  # id $id time [0-9][0-9]*$/  # id $id time/" "$file"
+#   POSIX:      sed "s/^  # id $id time [0-9][0-9]*$/  # id $id time/" "$file" > "$file.tmp" && mv "$file.tmp" "$file"
+# Example: clear all IDs for target S06.1 (loop over clear_ids for S06.1):
+#   for id in S06.1 S06.2 S06.3 S06.4 S06.5 S06.5a S06.6 S07 S08 S09.RED S09.GREEN S09.REFACTOR S09.SYNC S10 S11 S12 S13; do
+#     sed -i '' "s/^  # id $id time [0-9][0-9]*$/  # id $id time/" "$file"   # BSD/macOS
+#   done
+name: agent_req_implementation_checklist
+description: |
+  Primary procedural template for every new requirement or change to the tested system. Unifies CITDP, TIED dev cycle, IMPL_CODE_TEST_SYNC, LEAP, YAML edit loop, and related processes. Mandatory order: IMPL pseudo-code (token-commented) -> RED tests -> code.
+source_document: docs/agent-req-implementation-checklist.md
+process_token: '[PROC-AGENT_REQ_CHECKLIST]'
+version: 1.0.1
+last_updated: "2026-03-21"
+# Absolute paths below use this workspace root. For a per-request copy in another project, replace
+# every occurrence of /Users/fareed/Documents/dev/chatgpt/stdd with that project's absolute root
+# (including CITDP_RECORDS). WORKSPACE_ROOT and CITDP_RECORDS must be the client project—the repo
+# whose project tied/ you edit—not a separate TIED methodology repo unless that is the workspace.
+workspace_paths:
+  WORKSPACE_ROOT: /Users/fareed/Documents/dev/chatgpt/stdd
+  TIED_BASE: /Users/fareed/Documents/dev/chatgpt/stdd/tied
+  TIED_DOCS: /Users/fareed/Documents/dev/chatgpt/stdd/tied/docs
+  REPO_DOCS: /Users/fareed/Documents/dev/chatgpt/stdd/docs
+  CITDP_RECORDS: /Users/fareed/Documents/dev/chatgpt/stdd/docs/citdp
+processes_unified:
+  - '[PROC-CITDP]'
+  - '[PROC-TIED_DEV_CYCLE]'
+  - '[PROC-IMPL_CODE_TEST_SYNC]'
+  - '[PROC-LEAP]'
+  - '[PROC-YAML_EDIT_LOOP]'
+  - '[PROC-IMPL_PSEUDOCODE_TOKENS]'
+  - '[PROC-PSEUDOCODE_VALIDATION]'
+  - '[PROC-TOKEN_AUDIT]'
+  - '[PROC-TOKEN_VALIDATION]'
+  - '[PROC-TEST_STRATEGY]'
+  - '[PROC-COMMIT_MESSAGES]'
+entry_points:
+  - scenario: New requirement
+    start_at: S01
+    notes: Full checklist applies
+  - scenario: Change to existing system
+    start_at: S01
+    notes: CITDP analysis applies at S02-S03; existing tokens loaded at S03
+  - scenario: TIED prepared; tests/code not updated
+    start_at: S01
+    notes: S04-S06 verify-only; use updated REQ/ARCH/IMPL as source of truth; follow [PROC-TIED_FIRST_IMPLEMENTATION]
+  - scenario: Bug fix
+    start_at: S01
+    notes: At S02, determine if a REQ is missing; if so, create REQ at S04 before defining the fix
+flow_control_notation:
+  - symbol: GOTO Sxx
+    meaning: Jump to step Sxx; resume from there
+  - symbol: IF condition THEN action
+    meaning: Conditional branch
+  - symbol: LOOP ... UNTIL condition
+    meaning: Repeat enclosed steps until condition is met
+  - symbol: CALL SUB-xxx
+    meaning: Invoke sub-procedure; return to the calling step when done
+  - symbol: RETURN
+    meaning: Return from a sub-procedure to the caller
+  - symbol: EXIT
+    meaning: Checklist complete
+# Loop-backs: for each GOTO target, clear these step IDs so all steps are available for the new pass.
+# When re-entering a step, reset completion comments (id STEP time) for every ID listed under that target.
+loop_back_clearance:
+  S04:
+    from_steps:
+      - S02
+      - S06.4
+      - SUB-LEAP-MICRO
+      - S13
+    clear_ids:
+      - S04
+      - S05
+      - S06.1
+      - S06.2
+      - S06.3
+      - S06.4
+      - S06.5
+      - S06.5a
+      - S06.6
+      - S07
+      - S08
+      - S09.RED
+      - S09.GREEN
+      - S09.REFACTOR
+      - S09.SYNC
+      - S10
+      - S11
+      - S12
+      - S13
+  S05:
+    from_steps:
+      - S06.4
+      - SUB-LEAP-MICRO
+      - S13
+    clear_ids:
+      - S05
+      - S06.1
+      - S06.2
+      - S06.3
+      - S06.4
+      - S06.5
+      - S06.5a
+      - S06.6
+      - S07
+      - S08
+      - S09.RED
+      - S09.GREEN
+      - S09.REFACTOR
+      - S09.SYNC
+      - S10
+      - S11
+      - S12
+      - S13
+  S06.1:
+    from_steps:
+      - S10
+      - S11
+      - S13
+    clear_ids:
+      - S06.1
+      - S06.2
+      - S06.3
+      - S06.4
+      - S06.5
+      - S06.5a
+      - S06.6
+      - S07
+      - S08
+      - S09.RED
+      - S09.GREEN
+      - S09.REFACTOR
+      - S09.SYNC
+      - S10
+      - S11
+      - S12
+      - S13
+  S06.5:
+    from_steps:
+      - S10
+    clear_ids:
+      - S06.5
+      - S06.5a
+      - S06.6
+      - S07
+      - S08
+      - S09.RED
+      - S09.GREEN
+      - S09.REFACTOR
+      - S09.SYNC
+      - S10
+      - S11
+      - S12
+      - S13
+  S09.RED:
+    from_steps:
+      - S09.SYNC
+      - S12
+    clear_ids:
+      - S09.RED
+      - S09.GREEN
+      - S09.REFACTOR
+      - S09.SYNC
+      - S10
+      - S11
+      - S12
+  S10:
+    from_steps:
+      - S12
+    clear_ids:
+      - S10
+      - S11
+      - S12
+  S11:
+    from_steps:
+      - S12
+    clear_ids:
+      - S11
+      - S12
+steps:
+  # id S01 time
+  - id: S01
+    title: Session Bootstrap
+    goals: Confirm access to all governing TIED documents; understand current project state and priorities.
+    tasks:
+      - Preface the response with "Observing AI principles!".
+      - 'Read completely: /Users/fareed/Documents/dev/chatgpt/stdd/ai-principles.md'
+      - 'Review token registry: /Users/fareed/Documents/dev/chatgpt/stdd/tied/semantic-tokens.yaml and guide: /Users/fareed/Documents/dev/chatgpt/stdd/tied/semantic-tokens.md'
+      - 'Review YAML indexes: /Users/fareed/Documents/dev/chatgpt/stdd/tied/architecture-decisions.yaml and /Users/fareed/Documents/dev/chatgpt/stdd/tied/implementation-decisions.yaml'
+      - 'Review IMPL schema and pseudo-code rules: /Users/fareed/Documents/dev/chatgpt/stdd/tied/implementation-decisions.md ([PROC-IMPL_PSEUDOCODE_TOKENS]).'
+      - Confirm tied-yaml MCP server availability; call MCP tied_config_get_base_path and align env TIED_BASE_PATH with /Users/fareed/Documents/dev/chatgpt/stdd/tied (or the active project equivalent when using a copied checklist).
+      - For every create/update/delete under project TIED YAML (/Users/fareed/Documents/dev/chatgpt/stdd/tied/*.yaml and /Users/fareed/Documents/dev/chatgpt/stdd/tied/requirements|architecture-decisions|implementation-decisions/*.yaml, excluding methodology/**), use tied-yaml MCP tools per /Users/fareed/Documents/dev/chatgpt/stdd/docs/yaml-update-mcp-runbook.md (also at /Users/fareed/Documents/dev/chatgpt/stdd/tied/docs/yaml-update-mcp-runbook.md after copy_files). Do not use IDE apply_patch/Write on those paths when an MCP tool exists; on MCP error, follow the runbook failure playbook (retry/fix args; do not silently fall back to direct file edit).
+      - 'Understand priority order: Tests > Code > Basic Functions > Developer Experience > Infrastructure > Security.'
+    outcomes: Agent has read all governing documents. Session context is established.
+    references:
+      - /Users/fareed/Documents/dev/chatgpt/stdd/AGENTS.md § 1-2
+      - /Users/fareed/Documents/dev/chatgpt/stdd/ai-principles.md § Mandatory Acknowledgment, § Checklist for AI Agents
+      - /Users/fareed/Documents/dev/chatgpt/stdd/docs/yaml-update-mcp-runbook.md
+      - /Users/fareed/Documents/dev/chatgpt/stdd/docs/ai-agent-tied-mcp-usage.md
+    flow:
+      next: S02
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: All governing documents read; session context established; priority order understood.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S02 time
+  - id: S02
+    title: Define Change or New Requirement
+    goals: Articulate what is changing or being added, why, what stays the same, and measurable success criteria.
+    tasks:
+      - State current behavior (or "none" for a new requirement).
+      - State desired behavior.
+      - State unchanged behavior (explicit boundaries of what is not affected).
+      - State non-goals (what this work intentionally does not address).
+      - State success criteria (measurable outcomes that determine when the work is done).
+    outcomes: A clear change definition exists. For CITDP records, this populates the change_definition section.
+    references:
+      - tied/processes.md § [PROC-CITDP] step 1
+      - ai-principles.md § Bugs vs requirements
+    flow:
+      next: S03
+      branches:
+        - condition: Bug fix AND no REQ exists for the expected behavior
+          action: GOTO S04 first, then return here to define the fix
+          target: S04
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: Change definition documented; current, desired, unchanged, non-goals, and success criteria stated.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S03 time
+  - id: S03
+    title: Impact Analysis and IMPL Discovery
+    goals: Identify all affected modules, tokens, code, and tests; build an IMPL inventory table that serves as the working context for the rest of the checklist.
+    tasks:
+      - Identify affected modules and functions with their tied tokens.
+      - Identify module boundaries the change touches or crosses.
+      - 'Build tied_context: tied_tokens_affected, tied_tokens_new.'
+      - 'IMPL Discovery A1: Load each affected IMPL detail via MCP yaml_detail_read or yaml_detail_read_many (preferred batch read); record cross_references, related_decisions (depends_on, composed_with, see_also), traceability. Resolve paths under /Users/fareed/Documents/dev/chatgpt/stdd/tied/implementation-decisions/ only after confirming tokens via MCP or index—do not assume files exist on disk before creation (Read failures are expected until S06.6).'
+      - 'IMPL Discovery A2: Discover related IMPLs via (a) composed_with/depends_on, (b) shared REQ/ARCH tokens, (c) code_locations overlap, (d) [IMPL-*] in source/tests.'
+      - 'IMPL Discovery A3: Build IMPL inventory table (IMPL token, Pseudo-code loaded, Code files, Test files, Testability).'
+      - Stop expanding when no new IMPLs share code paths, REQ/ARCH tokens, or composed_with links with the current set.
+    outcomes: Complete impact map; IMPL inventory table ready; all affected and related tokens identified.
+    references:
+      - tied/processes.md § [PROC-CITDP] step 2
+      - tied/processes.md § [PROC-IMPL_CODE_TEST_SYNC] Phase A (A1-A3)
+      - tied/docs/impl-code-test-linkage.md § Phase A — Discovery
+    flow:
+      next: S04
+      branches:
+        - condition: IMPL set is large (signal of high coupling)
+          action: Consider whether IMPLs need decomposition before proceeding
+          target: null
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: Impact map complete; IMPL inventory table built; expansion stopped per criteria.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S04 time
+  - id: S04
+    title: Author/Update REQ
+    goals: Create or update the requirement record so the change has a formal [REQ-*] token with full traceability fields.
+    tasks:
+      - Create or update the requirements index row via MCP (yaml_index_insert / yaml_index_update) or tied_token_create_with_detail on /Users/fareed/Documents/dev/chatgpt/stdd/tied/requirements.yaml — do not apply_patch the index file directly unless no MCP tool covers the operation (document one-line exception).
+      - Create or update REQ detail via MCP yaml_detail_create / yaml_detail_update (prefer yaml_detail_read then small updates) at /Users/fareed/Documents/dev/chatgpt/stdd/tied/requirements/REQ-{TOKEN}.yaml per /Users/fareed/Documents/dev/chatgpt/stdd/tied/detail-files-schema.md § REQ (or /Users/fareed/Documents/dev/chatgpt/stdd/detail-files-schema.md at template root).
+      - Register the REQ token in /Users/fareed/Documents/dev/chatgpt/stdd/tied/semantic-tokens.yaml via MCP yaml_index_insert / yaml_index_update on index semantic-tokens.
+      - CALL SUB-YAML for each changed YAML file under /Users/fareed/Documents/dev/chatgpt/stdd/tied/ (after MCP writes; for direct-edit exceptions only, run lint_yaml on that absolute path inside SUB-YAML—never raw multi-argument `yq` pretty-print on multiple paths in one process; see processes.md [PROC-YAML_EDIT_LOOP]).
+    outcomes: REQ record exists in both the index and the detail file; token is registered in semantic-tokens.yaml; all YAML validated.
+    references:
+      - tied/processes.md § [PROC-YAML_DB_OPERATIONS] § Appending a New Record
+      - tied/detail-files-schema.md § 1
+      - tied/semantic-tokens.md § Token Creation Requirements
+    flow:
+      next: S05
+      branches: []
+      calls:
+        - SUB-YAML
+    tracking:
+      status: pending
+      consideration_before_proceeding: REQ index and detail file complete; token in semantic-tokens.yaml; SUB-YAML passed for all changed files.
+      retry_count: 0
+      returned_from:
+        - S02
+        - S06.4
+        - SUB-LEAP-MICRO
+        - S13
+      state_history: []
+  # id S05 time
+  - id: S05
+    title: Author/Update ARCH
+    goals: Create or update architecture decision(s) that fulfill the REQ, with cross-references.
+    tasks:
+      - Identify architectural decisions needed (or update existing ones).
+      - Create or update /Users/fareed/Documents/dev/chatgpt/stdd/tied/architecture-decisions.yaml via MCP yaml_index_insert / yaml_index_update; never write to /Users/fareed/Documents/dev/chatgpt/stdd/tied/methodology/**.
+      - Create or update ARCH detail at /Users/fareed/Documents/dev/chatgpt/stdd/tied/architecture-decisions/ARCH-{TOKEN}.yaml via MCP yaml_detail_create / yaml_detail_update per detail-files-schema § ARCH.
+      - Register each new ARCH token in /Users/fareed/Documents/dev/chatgpt/stdd/tied/semantic-tokens.yaml via MCP.
+      - CALL SUB-YAML for each changed YAML file under /Users/fareed/Documents/dev/chatgpt/stdd/tied/ (direct-edit exception only with one-line logged gap per /Users/fareed/Documents/dev/chatgpt/stdd/docs/yaml-update-mcp-runbook.md).
+    outcomes: ARCH records exist with REQ cross-references; tokens registered; YAML validated.
+    references:
+      - tied/processes.md § [PROC-YAML_DB_OPERATIONS]
+      - tied/detail-files-schema.md § 2
+      - ai-principles.md § Phase 1
+    flow:
+      next: S06.1
+      branches: []
+      calls:
+        - SUB-YAML
+    tracking:
+      status: pending
+      consideration_before_proceeding: ARCH index and detail files complete; tokens in semantic-tokens.yaml; SUB-YAML passed for all changed files.
+      retry_count: 0
+      returned_from:
+        - S06.4
+        - SUB-LEAP-MICRO
+        - S13
+      state_history: []
+  # id S06.1 time
+  - id: S06.1
+    title: Read and Catalog Contracts (Phase B — Reasoning)
+    goals: Catalog IMPL pseudo-code contracts for reasoning and validation.
+    tasks:
+      - 'Read each IMPL''s essence_pseudocode sequentially. For each, note: INPUT/OUTPUT/DATA (and CONTROL when present); procedure names (UPPER_SNAKE or camelCase); key branches (IF/ELSE), loops (FOR ... IN), error paths (ON error, RETURN error); async boundaries (AWAIT, Promise).'
+    outcomes: Contracts cataloged; procedure names and structure noted.
+    references:
+      - tied/processes.md § [PROC-IMPL_CODE_TEST_SYNC] Phases B-C
+    flow:
+      next: S06.2
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: All IMPLs in inventory read; contracts cataloged.
+      retry_count: 0
+      returned_from:
+        - S06.4
+        - S10
+        - S11
+        - SUB-LEAP-MICRO
+        - S13
+      state_history: []
+  # id S06.2 time
+  - id: S06.2
+    title: Identify Insufficient Specs
+    goals: Flag incomplete specs that must be resolved before tests or code.
+    tasks:
+      - Flag missing INPUT or OUTPUT declarations.
+      - Flag procedures referenced but not defined.
+      - Flag branches without error handling on fallible paths.
+      - Flag stub or template pseudo-code on IMPL with status Active.
+      - Flag blocks with no token comment (violates [PROC-IMPL_PSEUDOCODE_TOKENS]).
+    outcomes: All insufficient specs flagged; resolution required before proceeding.
+    references: []
+    flow:
+      next: S06.3
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: Insufficient specs identified; all flagged for resolution in S06.4.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S06.3 time
+  - id: S06.3
+    title: Identify Contradictory Specs
+    goals: Compare across IMPLs for conflicts.
+    tasks:
+      - 'Compare across IMPLs: shared DATA conflict; ordering conflict; incompatible OUTPUT types; duplicate logic with different parameters or behavior.'
+    outcomes: Contradictions identified.
+    references: []
+    flow:
+      next: S06.4
+      branches:
+        - condition: Two IMPLs have irreconcilable assumptions
+          action: Refactor (split or restructure) one IMPL before proceeding; do not paper over contradictions
+          target: null
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: No irreconcilable contradictions remain; or refactor completed.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S06.4 time
+  - id: S06.4
+    title: Resolve and Update
+    goals: Resolve all issues from S06.2-S06.3; update pseudo-code; propagate scope changes to ARCH/REQ.
+    tasks:
+      - 'For each issue from S06.2-S06.3: update affected IMPL essence_pseudocode so contracts are compatible, ordering explicit, every block complete.'
+      - IF resolution changes scope of an ARCH THEN GOTO S05 to update ARCH, then return here.
+      - IF resolution changes scope of a REQ THEN GOTO S04 to update REQ, then return here.
+    outcomes: All issues resolved; contracts compatible; ordering explicit.
+    references: []
+    flow:
+      next: S06.5
+      branches:
+        - condition: Resolution changes scope of ARCH
+          action: GOTO S05, then return here
+          target: S05
+        - condition: Resolution changes scope of REQ
+          action: GOTO S04, then return here
+          target: S04
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: All flagged issues resolved; no scope change pending or ARCH/REQ updated and returned.
+      retry_count: 0
+      returned_from:
+        - S13
+      state_history: []
+  - id: S06.5
+    title: Apply Block Token Comments (Phase C — Documentation)
+    goals: Apply [PROC-IMPL_PSEUDOCODE_TOKENS] to every IMPL; document cross-IMPL dependencies and composition.
+    tasks:
+      - 'Apply top-level comment: # [IMPL-X] [ARCH-Y] [REQ-Z] plus one-line summary.'
+      - 'Sub-blocks (same token set): comment only the how.'
+      - 'Sub-blocks (different token set): open with # [IMPL-...] [ARCH-...] [REQ-...] and how the sub-block implements them.'
+      - 'Cross-IMPL dependency comments: when IMPL-A calls/depends on IMPL-B, calling block in IMPL-A names IMPL-B (and ARCH/REQ).'
+      - 'Collision and composition notes: for each composed_with pair or code-path overlap document ordering, shared data, pre/post conditions.'
+    outcomes: Every block has token comments; cross-IMPL dependencies and composition documented.
+    references:
+      - tied/processes.md § [PROC-IMPL_PSEUDOCODE_TOKENS]
+    flow:
+      next: S06.5a
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: All blocks token-commented; dependencies and composition notes in place.
+      retry_count: 0
+      returned_from:
+        - S10
+      state_history: []
+  # id S06.5a time
+  - id: S06.5a
+    title: Run Pseudo-Code Validation
+    goals: Ensure IMPL pseudo-code satisfies validation checklist before persisting or writing tests/code.
+    tasks:
+      - CALL SUB-PSEUDOCODE-VALIDATE. Run validation per [PROC-PSEUDOCODE_VALIDATION] using /Users/fareed/Documents/dev/chatgpt/stdd/tied/docs/pseudocode-validation-checklist.yaml or /Users/fareed/Documents/dev/chatgpt/stdd/docs/pseudocode-validation-checklist.yaml.
+      - Run validation passes in recommended order; record findings with severity and source location.
+      - Do not proceed to S06.6 until minimum gating rules are satisfied (or explicitly waived and documented).
+      - 'If no parser/tool: perform manual pass over checklist categories and document results.'
+    outcomes: Pseudo-code validation run; gating rules satisfied or waiver documented.
+    references:
+      - tied/docs/pseudocode-writing-and-validation.md
+      - tied/docs/pseudocode-validation-checklist.yaml
+      - tied/processes.md § [PROC-PSEUDOCODE_VALIDATION]
+    flow:
+      next: S06.6
+      branches: []
+      calls:
+        - SUB-PSEUDOCODE-VALIDATE
+    tracking:
+      status: pending
+      consideration_before_proceeding: SUB-PSEUDOCODE-VALIDATE returned; minimum gating rules satisfied or waiver documented.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S06.6 time
+  - id: S06.6
+    title: Persist IMPL Records
+    goals: Write IMPL index and detail files; register tokens; validate YAML.
+    tasks:
+      - Create or update /Users/fareed/Documents/dev/chatgpt/stdd/tied/implementation-decisions.yaml index entries via MCP (yaml_index_* or tied_token_create_with_detail); do not patch that file directly when MCP covers the change.
+      - Create or update IMPL detail at /Users/fareed/Documents/dev/chatgpt/stdd/tied/implementation-decisions/IMPL-{TOKEN}.yaml via MCP yaml_detail_*; include complete essence_pseudocode per /Users/fareed/Documents/dev/chatgpt/stdd/tied/detail-files-schema.md § IMPL.
+      - Register each new IMPL token in /Users/fareed/Documents/dev/chatgpt/stdd/tied/semantic-tokens.yaml via MCP.
+      - CALL SUB-YAML for each changed YAML file under /Users/fareed/Documents/dev/chatgpt/stdd/tied/.
+    outcomes: All IMPL pseudo-code complete, authoritative, token-commented; no contradictions or gaps; all YAML validated.
+    references:
+      - tied/implementation-decisions.md § Mandatory essence_pseudocode, § Preferred vocabulary
+      - tied/docs/impl-code-test-linkage.md §§ 2-3
+    flow:
+      next: S07
+      branches: []
+      calls:
+        - SUB-YAML
+    tracking:
+      status: pending
+      consideration_before_proceeding: IMPL index and detail files persisted; tokens registered; SUB-YAML passed for all changed files.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S07 time
+  - id: S07
+    title: Risk Analysis
+    goals: Identify and document risks associated with the change.
+    tasks:
+      - List risks with severity and likelihood.
+      - Where applicable, attach tied_token_references to each risk (which REQ/ARCH/IMPL the risk affects).
+      - Document mitigation strategies.
+    outcomes: Risks documented with token references. Mitigations identified.
+    references:
+      - tied/processes.md § [PROC-CITDP] step 4
+    flow:
+      next: S08
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: Risks and mitigations documented; token references attached.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S08 time
+  - id: S08
+    title: Test Determination and Planning
+    goals: Classify testability for each IMPL block; produce test matrix; plan TDD sequence.
+    tasks:
+      - For each IMPL block/procedure, classify as unit, integration, or e2e_only.
+      - IF e2e_only THEN document e2e_only_reason naming the specific platform constraint in IMPL detail.
+      - Build test matrix (Test name, IMPL block ref, REQ token, Token comments, Testability).
+      - 'Plan TDD sequence: (1) Unit tests first, (2) Unit code via TDD, (3) Composition tests first, (4) Composition code via TDD, (5) E2E, (6) Validate and sync.'
+      - Identify module boundaries and validation criteria per [REQ-MODULE_VALIDATION].
+    outcomes: Test matrix complete; every IMPL block has testability classification; TDD sequence planned; module boundaries documented.
+    references:
+      - tied/processes.md § [PROC-TEST_STRATEGY]
+      - tied/processes.md § [PROC-CITDP] step 5
+      - ai-principles.md § Thin Entry Points and Testability Classification
+      - tied/docs/implementation-order.md
+    flow:
+      next: S09.RED
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: Test matrix and TDD plan complete; module boundaries identified.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S09.RED time
+  - id: S09.RED
+    title: Write Failing Test (Phase D)
+    goals: Map pseudo-code to a failing test.
+    tasks:
+      - Map the pseudo-code block/procedure to one test group (describe/it or test function). One block maps to approximately one test group.
+      - Name the test group after the procedure and include the REQ token.
+      - Carry the same REQ/ARCH/IMPL token comment as the pseudo-code block, stating what the test validates.
+      - Write the failing test. Run the test suite. Confirm the test fails for the expected reason. No production code in this step.
+      - Verify the assertion corresponds to the OUTPUT or effect in the pseudo-code block.
+      - IF no programmatic assertion can be written THEN mark testability e2e_only in IMPL detail with e2e_only_reason; skip to next block.
+    outcomes: Failing test exists that matches pseudo-code; no production code written.
+    references:
+      - tied/processes.md § [PROC-IMPL_CODE_TEST_SYNC] Phases D-F
+      - tied/docs/impl-code-test-linkage.md § Stage 2 — Unit TDD
+    flow:
+      next: S09.GREEN
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: Failing test written and run; fails for expected reason; assertion matches pseudo-code OUTPUT/effect.
+      retry_count: 0
+      returned_from:
+        - S09.SYNC
+      state_history: []
+  # id S09.GREEN time
+  - id: S09.GREEN
+    title: Write Minimum Production Code (Phase E)
+    goals: Write the minimum code to pass the failing test.
+    tasks:
+      - Write only enough production code to make the failing test pass.
+      - Carry the same REQ/ARCH/IMPL token comment as the pseudo-code block, stating how the code implements.
+      - Run tests. IF tests fail THEN iterate on production code only (do not add new tests in GREEN).
+      - Run language-specific lint (Rust/TypeScript/Swift/YAML per project). IF lint fails THEN fix before proceeding.
+    outcomes: Test passes; lint clean; code carries correct token comments.
+    references: []
+    flow:
+      next: S09.REFACTOR
+      branches:
+        - condition: GREEN reveals pseudo-code incomplete, wrong, or requires new dependency
+          action: CALL SUB-LEAP-MICRO; do not silently diverge
+          target: SUB-LEAP-MICRO
+      calls:
+        - SUB-LEAP-MICRO
+    tracking:
+      status: pending
+      consideration_before_proceeding: Test passes; lint clean; token comments match pseudo-code block.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S09.REFACTOR time
+  - id: S09.REFACTOR
+    title: Refactor (optional)
+    goals: Improve code quality without changing behavior.
+    tasks:
+      - Clean up test or production code (extract functions, rename, simplify).
+      - Re-run tests + lint. Confirm no regressions.
+    outcomes: Code is cleaner; all tests still pass; lint still clean.
+    references: []
+    flow:
+      next: S09.SYNC
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: Refactor done; tests and lint still pass.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S09.SYNC time
+  - id: S09.SYNC
+    title: Three-Way Alignment Check (Phase F)
+    goals: Verify pseudo-code, tests, and code carry identical token sets with corresponding descriptions.
+    tasks:
+      - For every block in this iteration, verify the three artifacts carry the same token set (pseudo-code block, test block, code block). IF any artifact names or omits a token differently, alignment is broken.
+      - 'IF any diverge THEN update pseudo-code first, then test, then code (LEAP order: IMPL -> test -> code).'
+      - 'Run [PROC-TOKEN_AUDIT]: every token named in any of the three must exist in /Users/fareed/Documents/dev/chatgpt/stdd/tied/semantic-tokens.yaml. IF missing THEN register via MCP yaml_index_* on index semantic-tokens and CALL SUB-YAML.'
+    outcomes: Three-way alignment verified for the iteration. All tokens registered.
+    references: []
+    flow:
+      next: S09.RED
+      next_when_all_blocks_done: S10
+      branches: []
+      calls:
+        - SUB-YAML
+    tracking:
+      status: pending
+      consideration_before_proceeding: Three-way alignment verified for iteration; all tokens in semantic-tokens.yaml. If all unit/integration blocks covered and tests pass, proceed to S10; else loop to S09.RED.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S10 time
+  - id: S10
+    title: Composition Testing (Phase G)
+    goals: Test bindings between validated modules without invoking the UI. Every binding must have IMPL coverage and a composition test.
+    tasks:
+      - 'Identify bindings: event listeners, IPC channels, entry-point delegation, function wiring, platform hooks.'
+      - 'For each binding: locate IMPL that describes composition. IF none and binding belongs to existing IMPL THEN extend IMPL pseudo-code (persist via MCP yaml_detail_* under /Users/fareed/Documents/dev/chatgpt/stdd/tied/implementation-decisions/), GOTO S06.5, CALL SUB-YAML, return here. IF none and distinct design THEN create new IMPL, GOTO S06 (from S06.1), return here.'
+      - Write failing composition test for each binding (before composition code); carries IMPL token comments; verifies trigger -> unit called -> arguments -> effect; does not invoke UI.
+      - Write composition code to pass the test. No composition code without preceding failing test.
+      - Apply three-way alignment (same rules as S09.SYNC). Run tests + lint; fix any failures.
+    outcomes: All bindings have composition tests; composition code passes; three-way alignment holds.
+    references:
+      - tied/processes.md § [PROC-IMPL_CODE_TEST_SYNC] Phase G
+      - tied/docs/impl-code-test-linkage.md § 4 — From unit modules to composition
+      - tied/docs/composition-coverage.md
+    flow:
+      next: S11
+      branches:
+        - condition: No IMPL covers binding and binding belongs to existing IMPL
+          action: GOTO S06.5, CALL SUB-YAML, then return here
+          target: S06.5
+        - condition: No IMPL covers binding and it is distinct design decision
+          action: GOTO S06 (full IMPL from S06.1), then return here
+          target: S06.1
+      calls:
+        - SUB-YAML
+    tracking:
+      status: pending
+      consideration_before_proceeding: All bindings have IMPL coverage and composition tests; tests and lint pass.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S11 time
+  - id: S11
+    title: E2E Testing (Phase H)
+    goals: Cover behavior that genuinely requires UI invocation. E2E does not substitute for composition tests.
+    tasks:
+      - 'Identify E2E-only behavior: native OS menus, visual rendering, platform behavior that cannot be simulated below E2E.'
+      - Confirm IMPL detail has testability e2e_only, e2e_only_reason (named platform constraint), and E2E-only boundary comment in essence_pseudocode.
+      - Write E2E test referencing REQ and IMPL tokens; comment justifies why composition-level testing is insufficient.
+      - Ensure bindings testable below E2E have composition tests even if E2E also covers them.
+    outcomes: E2E tests exist for all UI-only behavior; each justified with named platform constraint.
+    references:
+      - tied/processes.md § [PROC-IMPL_CODE_TEST_SYNC] Phase H
+      - tied/docs/impl-code-test-linkage.md § 4 — The E2E decision
+    flow:
+      next: S12
+      branches:
+        - condition: E2E reveals missing IMPL block
+          action: GOTO S06 to create or extend IMPL pseudo-code, then return here
+          target: S06.1
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: E2E-only behavior identified and documented; E2E tests written and justified.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S12 time
+  - id: S12
+    title: Final Validation (Phase I)
+    goals: Confirm everything is aligned, passing, and consistent. Compound gate before work is complete.
+    tasks:
+      - Run full test suite (unit, composition, E2E). All must pass.
+      - Run lint for each language in scope.
+      - 'Run [PROC-TOKEN_VALIDATION]: tied_validate_consistency (MCP); fix any issues via MCP on /Users/fareed/Documents/dev/chatgpt/stdd/tied/ when possible.'
+      - 'Final three-way alignment audit: for every IMPL touched, verify pseudo-code/test/code same token set; document e2e_only blocks and e2e_only_reason.'
+      - Update IMPL detail metadata (traceability.tests, code_locations, metadata.last_updated) via MCP yaml_detail_update on /Users/fareed/Documents/dev/chatgpt/stdd/tied/implementation-decisions/IMPL-{TOKEN}.yaml; CALL SUB-YAML on each changed absolute path.
+      - 'Module validation per [REQ-MODULE_VALIDATION]: confirm each module validated independently; document results.'
+    outcomes: All tests pass; lint clean; token validation passes; three-way alignment verified; IMPL metadata current; module validation documented.
+    references:
+      - tied/processes.md § [PROC-IMPL_CODE_TEST_SYNC] Phase I
+      - tied/processes.md § [PROC-CITDP] step 7
+    flow:
+      next: S13
+      branches:
+        - condition: Test failure
+          action: Return to S09 (unit) or S10 (composition) or S11 (E2E)
+          target: S09.RED
+        - condition: Lint failure
+          action: Fix code, re-run lint
+          target: null
+        - condition: Token validation failure
+          action: Register missing tokens, fix traceability gaps
+          target: null
+        - condition: Three-way alignment failure
+          action: Apply LEAP order (pseudo-code first, then test, then code)
+          target: null
+      calls:
+        - SUB-YAML
+    tracking:
+      status: pending
+      consideration_before_proceeding: Full suite and lint pass; token validation ok; three-way audit done; IMPL metadata updated; module validation documented.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S13 time
+  - id: S13
+    title: Sync TIED to Code and Tests
+    goals: Ensure TIED documentation matches the final implementation. TIED docs remain single source of truth for intent.
+    tasks:
+      - Update REQ/ARCH/IMPL index and detail files under /Users/fareed/Documents/dev/chatgpt/stdd/tied/ via tied-yaml MCP so final code/tests match TIED; IMPLs reflect implemented code and block-level token comments.
+      - Sync /Users/fareed/Documents/dev/chatgpt/stdd/tied/semantic-tokens.yaml, requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml and detail dirs; no documentation drift; do not patch those YAML paths with IDE tools when MCP covers the mutation.
+      - CALL SUB-YAML on every changed TIED YAML file.
+      - Run tied_validate_consistency (MCP) — must report ok true.
+    outcomes: TIED docs consistent with implementation; tied_validate_consistency passes.
+    references:
+      - tied/processes.md § [PROC-TIED_DEV_CYCLE] steps 8-9
+      - tied/processes.md § [PROC-LEAP]
+    flow:
+      next: S14
+      branches:
+        - condition: Divergence between TIED docs and code/tests detected
+          action: 'Apply LEAP: update IMPL (GOTO S06.4 scope); if scope changed update ARCH (GOTO S05), REQ (GOTO S04); then return here and re-run consistency validation'
+          target: S06.4
+      calls:
+        - SUB-YAML
+    tracking:
+      status: pending
+      consideration_before_proceeding: TIED docs match code/tests; tied_validate_consistency reports ok true.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S14 time
+  - id: S14
+    title: Update README and CHANGELOG
+    goals: Record user-facing and release-facing changes made in this session.
+    tasks:
+      - Update README.md for any user-facing changes (new features, changed behavior, setup instructions).
+      - Update CHANGELOG.md for release-facing changes (features, fixes, breaking changes).
+    outcomes: External documentation reflects the session's changes.
+    references:
+      - tied/processes.md § [PROC-TIED_DEV_CYCLE] step 9
+    flow:
+      next: S15
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: README and CHANGELOG updated as needed.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S15 time
+  - id: S15
+    title: Persist CITDP Record
+    goals: Store the change-analysis record for future reference.
+    tasks:
+      - 'Populate CITDP YAML record: record identity; change definition (from S02); impact analysis (from S03); risk analysis (from S07); test strategy (from S08); TDD sequence (from S09-S11); completion criteria (from S12); LEAP feedback (divergences_from_analysis, tied_stack_updates_required, record_status).'
+      - Store as CITDP_RECORDS/CITDP-{change_request_id}.yaml (see workspace_paths; equals WORKSPACE_ROOT/docs/citdp). Must be the client project root—same repository as the project tied/ tree for this implementation. Do not persist CITDP only under a separate checkout of the TIED methodology repository when the client is another project; optional mirrors elsewhere are policy-specific and do not replace this path. Project-defined absolute path outside tied/ only when policy explicitly requires.
+      - Validate with lint_yaml on that absolute CITDP path (per [PROC-YAML_EDIT_LOOP] in processes.md; raw multi-argument `yq` merges documents—do not use that). CITDP files are not tied-yaml MCP index/detail unless a project adds a tool.
+      - CALL SUB-YAML on the record file.
+    outcomes: CITDP record stored and validated; analysis available for future reference.
+    references:
+      - tied/processes.md § [PROC-CITDP] step 8
+      - tied/processes.md § [PROC-YAML_DB_OPERATIONS]
+      - tied/docs/citdp-policy.md
+    flow:
+      next: S16
+      branches:
+        - condition: YAML validation fails
+          action: Fix and repeat SUB-YAML step
+          target: null
+      calls:
+        - SUB-YAML
+    tracking:
+      status: pending
+      consideration_before_proceeding: 'CITDP record written and SUB-YAML passed. Policy for when to create vs skip: tied/docs/citdp-policy.md.'
+      retry_count: 0
+      returned_from: []
+      state_history: []
+  # id S16 time
+  - id: S16
+    title: Commit
+    goals: Create a traceable commit with proper format and token references.
+    tasks:
+      - 'Write commit message per [PROC-COMMIT_MESSAGES]: header <type>(<scope>): <subject> (≤50 chars); type feat|fix|docs|refactor|test|build|ci|chore|perf|style; scope area affected; subject imperative present tense; body motivation/behavior; footer Closes/Fixes #issue and REQ/ARCH/IMPL tokens touched.'
+      - Stage relevant files. Commit.
+      - Do NOT push unless explicitly asked.
+    outcomes: 'Commit exists with proper format; TIED tokens referenced in body or footer. EXIT: Checklist complete. Do not create a stand-alone summary document.'
+    references:
+      - tied/processes.md § [PROC-COMMIT_MESSAGES]
+    flow:
+      next: EXIT
+      branches: []
+      calls: []
+    tracking:
+      status: pending
+      consideration_before_proceeding: Commit created; format per PROC-COMMIT_MESSAGES; tokens in body/footer.
+      retry_count: 0
+      returned_from: []
+      state_history: []
+sub_procedures:
+  # id SUB-YAML time
+  - id: SUB-YAML
+    title: YAML Edit and Validation Loop
+    invoked_by:
+      - S04
+      - S05
+      - S06.6
+      - S09.SYNC
+      - S10
+      - S12
+      - S13
+      - S15
+      - SUB-LEAP-MICRO
+    goals: Ensure every TIED YAML file is syntactically valid, MCP-safe where applicable, and consistent before use. Use lint_yaml per [PROC-YAML_EDIT_LOOP] (processes.md); it accepts one or more paths and must process each file independently. Never use raw multi-argument `yq` pretty-print on multiple paths in one process.
+    tasks:
+      - 'Mutation path: for create/update/delete under /Users/fareed/Documents/dev/chatgpt/stdd/tied/ on project-owned YAML (indexes, requirements/*.yaml, architecture-decisions/*.yaml, implementation-decisions/*.yaml, semantic-tokens.yaml, feedback.yaml), use tied-yaml MCP tools per /Users/fareed/Documents/dev/chatgpt/stdd/docs/yaml-update-mcp-runbook.md. Do not use apply_patch/Write on those absolute paths when an MCP tool exists.'
+      - Never mutate /Users/fareed/Documents/dev/chatgpt/stdd/tied/methodology/** (read-only). If MCP rejects a write as methodology-owned, fix the target token/path—do not bypass with direct file edit.
+      - 'IF MCP returns an error: interpret (payload, TIED_BASE_PATH, methodology vs project) and retry; do not silently fall back to IDE file tools on the same paths.'
+      - 'Direct-edit exception only when no MCP tool covers the operation: document one-line gap, edit minimal file, then run lint_yaml <absolute-path> until it passes (or one lint_yaml with multiple paths if your wrapper implements per-file safe passes per processes.md).'
+      - Run lint_yaml on each changed file that was direct-edited or when your workflow requires canonical formatting on disk—never raw multi-argument `yq` with multiple file arguments in one process. If validation fails, fix and repeat; file is invalid until lint_yaml succeeds.
+      - Run MCP tied_validate_consistency (required before marking TIED work complete; not optional when SUB-YAML is invoked for TIED changes).
+      - IF consistency check fails THEN fix the TIED stack via MCP (prefer yaml_detail_update / yaml_index_update) and RETURN to the calling step to re-validate.
+    outcomes: YAML valid and consistent; mutations used MCP where required; no silent bypass of tied-yaml.
+    references:
+      - /Users/fareed/Documents/dev/chatgpt/stdd/docs/yaml-update-mcp-runbook.md
+      - /Users/fareed/Documents/dev/chatgpt/stdd/docs/ai-agent-tied-mcp-usage.md
+      - /Users/fareed/Documents/dev/chatgpt/stdd/mcp-server/README.md
+      - /Users/fareed/Documents/dev/chatgpt/stdd/tied/processes.md § [PROC-YAML_EDIT_LOOP]
+      - /Users/fareed/Documents/dev/chatgpt/stdd/tied/docs/methodology-diagrams.md Diagram 6
+    flow:
+      return_to: caller
+    tracking:
+      status: pending
+      consideration_before_proceeding: MCP mutation path honored where applicable; lint_yaml passed for any direct-edited files (per processes.md [PROC-YAML_EDIT_LOOP]); tied_validate_consistency passed when TIED files changed.
+      retry_count: 0
+      state_history: []
+  # id SUB-PSEUDOCODE-VALIDATE time
+  - id: SUB-PSEUDOCODE-VALIDATE
+    title: Pseudo-Code Validation
+    invoked_by:
+      - S06.5a
+    goals: Ensure IMPL pseudo-code satisfies the application pseudo-code validation checklist before persisting or writing tests/code. Required checks are gating unless waived and documented.
+    tasks:
+      - Load the checklist from tied/docs/pseudocode-validation-checklist.yaml (or docs/pseudocode-validation-checklist.yaml at repo root).
+      - For each pseudo-code block in the IMPL set (from S06), run each validation category in the checklist's recommended_validation_order; collect findings with severity and block/location.
+      - IF any required check fails OR minimum gating rules are not met THEN fix pseudo-code (or ARCH/REQ if scope changed), then repeat from step 2. RETURN only when gating rules pass or a waiver is documented.
+      - RETURN to caller (S06.5a continues to S06.6).
+    outcomes: Pseudo-code validation report (findings by category, severity, location); all required checks pass or are waived; minimum gating rules satisfied.
+    references:
+      - tied/docs/pseudocode-writing-and-validation.md
+      - tied/docs/pseudocode-validation-checklist.yaml
+      - tied/processes.md § [PROC-PSEUDOCODE_VALIDATION]
+    flow:
+      return_to: S06.5a
+    tracking:
+      status: pending
+      consideration_before_proceeding: Gating rules pass or waiver documented; RETURN to S06.5a.
+      retry_count: 0
+      state_history: []
+  # id SUB-LEAP-MICRO time
+  - id: SUB-LEAP-MICRO
+    title: LEAP Micro-Cycle During TDD
+    invoked_by:
+      - S09.GREEN
+    goals: Keep pseudo-code authoritative at every point during TDD. Prevent silent divergence.
+    tasks:
+      - STOP writing production code immediately.
+      - Update IMPL essence_pseudocode via MCP yaml_detail_read then yaml_detail_update on /Users/fareed/Documents/dev/chatgpt/stdd/tied/implementation-decisions/IMPL-{TOKEN}.yaml (no direct patch of that path when MCP works).
+      - CALL SUB-YAML on the changed detail file (absolute path under /Users/fareed/Documents/dev/chatgpt/stdd/tied/).
+      - Update or add the test to match the corrected pseudo-code. Carry the same token comments.
+      - Update the production code to pass the corrected test. Carry the same token comments.
+      - Verify three-way alignment for the affected block (per S09.SYNC rules).
+      - 'IF the change affects ARCH scope THEN update ARCH via MCP: GOTO S05 (scoped to affected ARCH), CALL SUB-YAML, then return here.'
+      - 'IF the change affects REQ scope THEN update REQ via MCP: GOTO S04 (scoped to affected REQ), CALL SUB-YAML, then return here.'
+    outcomes: Pseudo-code remained authoritative. No silent divergence. Three-way alignment holds for the affected block.
+    references:
+      - tied/docs/impl-code-test-linkage.md § 3 — LEAP Micro-Cycle During TDD
+      - tied/processes.md § [PROC-LEAP] rule 1
+    flow:
+      return_to: S09.GREEN
+      branches:
+        - condition: Change affects ARCH scope
+          action: GOTO S05, CALL SUB-YAML, then return to S09.GREEN
+          target: S05
+        - condition: Change affects REQ scope
+          action: GOTO S04, CALL SUB-YAML, then return to S09.GREEN
+          target: S04
+    tracking:
+      status: pending
+      consideration_before_proceeding: IMPL/test/code updated; three-way alignment verified; ARCH/REQ updated if scope changed; RETURN to S09.GREEN.
+      retry_count: 0
+      state_history: []
+references:
+  - document: tied/processes.md
+    provides: Canonical definitions for all [PROC-*] tokens referenced in this checklist
+  - document: tied/docs/impl-code-test-linkage.md
+    provides: Three-way alignment guide with worked examples and the 33-step IMPL_CODE_TEST_SYNC procedure
+  - document: tied/docs/LEAP.md
+    provides: 'LEAP rationale: why IMPL pseudo-code beats hunting through source'
+  - document: tied/docs/implementation-order.md
+    provides: Mandatory implementation order (tests -> TDD -> glue -> E2E -> close loop)
+  - document: tied/docs/methodology-diagrams.md
+    provides: Visual diagrams for traceability stack, dev cycle, TDD inner loop, CITDP, YAML edit loop
+  - document: ai-principles.md
+    provides: Agent principles, checklists, change impact tracking matrix
+  - document: tied/implementation-decisions.md
+    provides: IMPL detail schema, pseudo-code rules, preferred vocabulary, collision detection
+  - document: tied/semantic-tokens.md
+    provides: Token format, naming convention, registry usage, creation requirements
+  - document: tied/detail-files-schema.md
+    provides: YAML schema for REQ, ARCH, and IMPL detail files
+  - document: AGENTS.md
+    provides: Agent operating guide; session bootstrap; mandatory acknowledgment
+  - document: tied/docs/ai-agent-tied-mcp-usage.md
+    provides: MCP workflow and rationale for TIED data access
+  - document: /Users/fareed/Documents/dev/chatgpt/stdd/docs/yaml-update-mcp-runbook.md
+    provides: MCP-first YAML mutations, tool cheat sheet, failure playbook, SUB-YAML alignment
+  - document: tied/docs/token-validation.md
+    provides: 'Project policy: token validation via MCP only; no local script'
+  - document: tied/docs/composition-coverage.md
+    provides: Binding inventory and composition vs E2E coverage for this project
+  - document: tied/docs/citdp-policy.md
+    provides: When to create vs skip a CITDP record
+  - document: tied/docs/pseudocode-writing-and-validation.md
+    provides: How to write and validate IMPL pseudo-code; when to run validation; minimum gating rules
+  - document: tied/docs/pseudocode-validation-checklist.yaml
+    provides: Canonical application pseudo-code validation checklist (categories, required/optional checks, order, tailoring)

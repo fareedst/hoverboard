@@ -1,7 +1,6 @@
 # [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
 # Architecture: Three entry mechanisms (extension commands, context menu, in-UI keyboard shortcuts) target the same four actions;
 # service worker owns commands and context menu; popup/panel UI owns in-focus shortcuts via existing event flow.
-
 ARCH-QUICK_ACCESS_ENTRY:
   name: Quick Access Entry Architecture
   status: Active
@@ -45,9 +44,9 @@ ARCH-QUICK_ACCESS_ENTRY:
   detail_file: architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml
   metadata:
     created:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
     last_updated:
-      date: '2026-02-26'
+      date: "2026-02-26"
       author: AI Agent
       reason: Initial creation for quick access architecture

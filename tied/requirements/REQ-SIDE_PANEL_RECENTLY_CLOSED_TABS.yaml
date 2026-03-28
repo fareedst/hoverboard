@@ -42,6 +42,6 @@ REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
     supersedes: []
   metadata:
     last_updated:
-      date: '2026-03-02'
+      date: "2026-03-02"
       author: AI Agent
       reason: Implementation complete; TIED sync

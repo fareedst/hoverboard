@@ -40,14 +40,14 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: New architecture for import UX
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass
   decision: 'Import is client-side: parse file (CSV/JSON), map to bookmark payload, use existing saveBookmark with preferredBackend; two modes (only new vs overwrite). No new backend message.'

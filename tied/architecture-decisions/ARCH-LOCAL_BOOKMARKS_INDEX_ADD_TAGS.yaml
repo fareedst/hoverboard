@@ -32,14 +32,14 @@ ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   detail_file: architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml
   metadata:
     created:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: New architecture for Add tags to selected
     last_validated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       validator: AI Agent
       result: pass
   decision: 'Add/Remove tags row in Actions for selected: label, input, Add tags and Delete tags buttons. Same input for both. Add: merge parsed tags with each selected bookmark; saveBookmark. Delete: remove parsed tags (case-insensitive) from each selected bookmark; saveBookmark with reduced tags. Both with preferredBackend; refresh; retain selection for rows still in the displayed list; clear tag input. Records no longer displayed are removed from selection.'

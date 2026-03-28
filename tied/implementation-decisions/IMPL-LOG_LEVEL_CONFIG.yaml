@@ -13,7 +13,7 @@ IMPL-LOG_LEVEL_CONFIG:
     summary: Logger.getLogLevel() in src/shared/logger.js; browser vs Node; NODE_ENV production => warn.
     details:
       - 'getLogLevel(): read NODE_ENV or browser equivalent; if production return warn else debug (or config override)'
-      - 'Logger.shouldLog(level) uses getLogLevel() to decide whether to emit'
+      - Logger.shouldLog(level) uses getLogLevel() to decide whether to emit
   code_locations:
     files:
       - path: src/shared/logger.js
@@ -25,7 +25,7 @@ IMPL-LOG_LEVEL_CONFIG:
     requirements:
       - REQ-STRUCTURED_LOGGING
     tests: []
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: log level config in options and logger init."
+    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: log level config in options and logger init.'
     code_annotations:
       - IMPL-LOG_LEVEL_CONFIG
   related_decisions:

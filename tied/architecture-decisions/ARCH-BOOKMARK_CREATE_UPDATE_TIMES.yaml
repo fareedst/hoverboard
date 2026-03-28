@@ -39,14 +39,14 @@ ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
   detail_file: architecture-decisions/ARCH-BOOKMARK_CREATE_UPDATE_TIMES.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
     last_updated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: AI Agent
       reason: Initial creation
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: AI Agent
       result: pass
   decision: '`time` = create-time (set once, never changed on update). `updated_at` = most-recent-update-time (same as time on create; set to now on every update). Normalization: missing `updated_at` -> `updated_at = time`. Pinboard: `updated_at = time` always.'

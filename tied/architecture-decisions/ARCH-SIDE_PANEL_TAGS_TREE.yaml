@@ -1,7 +1,6 @@
 # [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE]
 # Architecture: Chrome sidePanel API; single panel page; data from getAggregatedBookmarksForIndex;
 # open from popup via message to SW → chrome.sidePanel.open; UI: tag selector + order, then tree (tag → collapsible URLs); open URL via chrome.tabs.create.
-
 ARCH-SIDE_PANEL_TAGS_TREE:
   name: Side Panel Tags and Bookmarks Tree Architecture
   status: Active
@@ -46,9 +45,9 @@ ARCH-SIDE_PANEL_TAGS_TREE:
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_TAGS_TREE.yaml
   metadata:
     created:
-      date: '2026-02-21'
+      date: "2026-02-21"
       author: AI Agent
     last_updated:
-      date: '2026-02-25'
+      date: "2026-02-25"
       author: AI Agent
       reason: Add compact tag selector layout and all/checked toggle with persistence

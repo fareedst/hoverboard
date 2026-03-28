@@ -13,10 +13,10 @@ ARCH-CODE_QUALITY:
       - 'eslint.config.mjs: globalIgnores, spread @eslinter/eslint-config-standard, languageOptions and rules for src/**/*.js'
       - package.json engines.node >= 20.19.0 (required by ESLint 10)
       - 'security:check: npm audit --audit-level=high'
-      - 'package.json overrides.minimatch ^10.2.1 (fixes HIGH ReDoS GHSA-3ppc-4f35-3m26 in Jest/tooling transitive deps)'
-      - 'package.json overrides.test-exclude ^7.0.1 (coverage tree uses test-exclude 7.x with glob ^10; removes deprecated glob 7 and inflight)'
+      - package.json overrides.minimatch ^10.2.1 (fixes HIGH ReDoS GHSA-3ppc-4f35-3m26 in Jest/tooling transitive deps)
+      - package.json overrides.test-exclude ^7.0.1 (coverage tree uses test-exclude 7.x with glob ^10; removes deprecated glob 7 and inflight)
       - 'Remaining: MODERATE ajv (GHSA-2g4f-4pwh-qvx6) in ESLint; unfixable without breaking ESLint. Override to ajv ^8.18.0 was tried; ESLint 10 requires ajv 6 (e.g. json-schema-draft-04) removed in ajv 8, so override breaks lint. audit-level=high so validate passes.'
-      - '.npmrc legacy-peer-deps=true until @eslinter/eslint-config-standard declares eslint ^10; then re-evaluate and remove if install passes'
+      - .npmrc legacy-peer-deps=true until @eslinter/eslint-config-standard declares eslint ^10; then re-evaluate and remove if install passes
   traceability:
     requirements:
       - REQ-CODE_QUALITY

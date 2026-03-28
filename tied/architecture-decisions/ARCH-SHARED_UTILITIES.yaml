@@ -14,11 +14,11 @@ ARCH-SHARED_UTILITIES:
   implementation_approach:
     summary: src/shared/utils.js exports urlUtils, stringUtils, arrayUtils, objectUtils, timeUtils, domUtils
     details:
-      - "URL: processUrl, isValidUrl, getDomain (native URL constructor)"
-      - "Text: truncate, normalizeText, escapeHtml (textContent for XSS)"
-      - "Array: unique (Set), chunk, compact; Object: deepClone, isEmpty, pick"
-      - "Time: delay (Promise), formatTimestamp, getRelativeTime"
-      - "DOM: waitForElement (MutationObserver), createElement, legacy createPinFromFormData / validatePinFormData"
+      - 'URL: processUrl, isValidUrl, getDomain (native URL constructor)'
+      - 'Text: truncate, normalizeText, escapeHtml (textContent for XSS)'
+      - 'Array: unique (Set), chunk, compact; Object: deepClone, isEmpty, pick'
+      - 'Time: delay (Promise), formatTimestamp, getRelativeTime'
+      - 'DOM: waitForElement (MutationObserver), createElement, legacy createPinFromFormData / validatePinFormData'
   traceability:
     requirements:
       - REQ-SHARED_UTILITIES

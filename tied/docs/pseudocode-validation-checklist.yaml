@@ -1,0 +1,328 @@
+# Application Pseudo-Code Validation Checklist
+# Canonical checklist for validating IMPL essence_pseudocode in TIED projects.
+# Reference: tied/docs/pseudocode-writing-and-validation.md
+# Process token: [PROC-PSEUDOCODE_VALIDATION]
+name: application_pseudocode_validation_checklist
+description: |
+  Reusable checklist for projects whose pseudo-code blocks describe the full application, including implementation intent, unit tests, integration points, requirement traceability, and generation-readiness.
+usage:
+  intended_for:
+    - projects with pseudo-code as the primary application specification
+    - projects where pseudo-code drives unit-test and integration-test definitions
+    - projects that require requirement, architecture, and implementation traceability
+  how_to_apply:
+    - parse each pseudo-code block into a normalized internal representation
+    - run each validation pass in order
+    - record findings with severity and source location
+    - treat required checks as gating unless explicitly waived
+  result_severities:
+    - error
+    - warning
+    - info
+checklist:
+  - id: PARSE-001
+    category: parsing
+    required: true
+    title: Every pseudo-code block parses successfully
+    verify:
+      - the block conforms to the project grammar
+      - malformed syntax is rejected
+      - parsing produces a normalized internal representation
+    evidence:
+      - parse result exists for each block
+      - parse failures include source location
+    severity_on_failure: error
+  - id: PARSE-002
+    category: parsing
+    required: true
+    title: Source locations are preserved for diagnostics
+    verify:
+      - line and column are attached where available
+      - diagnostics can identify the exact block and step
+    evidence:
+      - each diagnostic includes block identifier
+      - line and column are present when the parser provides them
+    severity_on_failure: error
+  - id: SHAPE-001
+    category: schema
+    required: true
+    title: Required sections exist for each block kind
+    verify:
+      - required sections are present for the declared block kind
+      - section order follows project conventions if order is significant
+      - block headers and tags follow naming rules
+    evidence:
+      - section inventory per block kind
+      - no missing required fields
+    severity_on_failure: error
+  - id: SHAPE-002
+    category: schema
+    required: true
+    title: Inputs outputs and data declarations are internally consistent
+    verify:
+      - identifiers are declared before use
+      - duplicate declarations are rejected unless explicitly allowed
+      - output variants are structurally valid
+    evidence:
+      - declaration table matches block references
+    severity_on_failure: error
+  - id: TEST-UNIT-001
+    category: unit_test_spec
+    required: true
+    title: Each unit-test block declares exactly one subject under test
+    verify:
+      - the unit-test block targets one routine or one block
+      - helper references do not create ambiguity about the subject
+    evidence:
+      - exactly one target symbol is resolved
+    severity_on_failure: error
+  - id: TEST-UNIT-002
+    category: unit_test_spec
+    required: true
+    title: Unit-test phases are explicit or inferable
+    verify:
+      - setup exists
+      - act exists
+      - assertion or expected outcome exists
+      - error expectation is explicit when failure behavior is tested
+    evidence:
+      - normalized phase map exists for each unit-test block
+    severity_on_failure: error
+  - id: TEST-INT-001
+    category: integration_test_spec
+    required: true
+    title: Integration-test blocks declare participating collaborators
+    verify:
+      - all directly involved blocks or routines are named
+      - undeclared collaborators are rejected
+      - external boundaries are identified when present
+    evidence:
+      - collaborator list resolves against the application symbol table
+    severity_on_failure: error
+  - id: TEST-INT-002
+    category: integration_test_spec
+    required: true
+    title: Integration-test boundaries follow architecture rules
+    verify:
+      - only allowed dependency directions are used
+      - forbidden layers are not crossed
+      - collaborator usage matches architecture constraints
+    evidence:
+      - dependency graph analysis for each integration test
+    severity_on_failure: error
+  - id: RESOLVE-001
+    category: symbol_resolution
+    required: true
+    title: Every referenced symbol resolves uniquely
+    verify:
+      - referenced routines exist
+      - referenced blocks exist
+      - referenced tags exist
+      - names are not ambiguous
+    evidence:
+      - symbol table with unique bindings
+    severity_on_failure: error
+  - id: RESOLVE-002
+    category: symbol_resolution
+    required: true
+    title: Duplicate identifiers are controlled
+    verify:
+      - duplicate block identifiers are rejected unless intentionally versioned
+      - duplicate requirement or implementation tags are explainable
+    evidence:
+      - duplicate report reviewed and resolved
+    severity_on_failure: error
+  - id: CONTRACT-001
+    category: contract_validation
+    required: true
+    title: Test inputs conform to target block contracts
+    verify:
+      - test inputs match the declared input names and shapes
+      - preconditions are satisfied by setup
+      - undeclared inputs are rejected
+    evidence:
+      - contract comparison result for each test target
+    severity_on_failure: error
+  - id: CONTRACT-002
+    category: contract_validation
+    required: true
+    title: Expected outputs and errors conform to target block contracts
+    verify:
+      - expected success results match a declared output variant
+      - expected errors match declared error types or failure modes
+      - assertions refer only to observable behavior
+    evidence:
+      - output and error expectation comparison report
+    severity_on_failure: error
+  - id: CONTRACT-003
+    category: contract_validation
+    required: true
+    title: Safety and invariant claims are testable where required
+    verify:
+      - safety constraints stated in the target spec are reflected in tests
+      - invariants are asserted where the project requires them
+      - prohibited behaviors are explicitly checked when relevant
+    evidence:
+      - mapping from safety clauses to test assertions
+    severity_on_failure: warning
+  - id: GRAPH-001
+    category: dependency_graph
+    required: true
+    title: The application dependency graph is valid
+    verify:
+      - every dependency edge connects known nodes
+      - forbidden cycles are rejected
+      - allowed cycles are classified and documented
+    evidence:
+      - graph validation report
+    severity_on_failure: error
+  - id: GRAPH-002
+    category: dependency_graph
+    required: true
+    title: Unit tests do not silently depend on undeclared collaborators
+    verify:
+      - unit-test blocks use only the declared subject and allowed helpers
+      - hidden integration behavior is flagged
+    evidence:
+      - unit-test collaborator audit
+    severity_on_failure: warning
+  - id: COVER-001
+    category: behavioral_coverage
+    required: true
+    title: Each implementation block has success-path coverage
+    verify:
+      - at least one test exercises the intended success result
+    evidence:
+      - coverage map from implementation block to success-path tests
+    severity_on_failure: error
+  - id: COVER-002
+    category: behavioral_coverage
+    required: true
+    title: Each implementation block has failure-path coverage when failure is possible
+    verify:
+      - declared errors and failure modes are exercised by tests
+      - failure-path assertions check the expected error shape
+    evidence:
+      - coverage map from failure modes to tests
+    severity_on_failure: error
+  - id: COVER-003
+    category: behavioral_coverage
+    required: false
+    title: Boundary and edge cases are covered
+    verify:
+      - empty inputs are tested where meaningful
+      - minimal valid inputs are tested
+      - malformed or extreme values are tested where relevant
+    evidence:
+      - edge-case coverage inventory
+    severity_on_failure: warning
+  - id: TRACE-001
+    category: traceability
+    required: true
+    title: Every requirement tag has at least one test
+    verify:
+      - each requirement identifier maps to one or more test blocks
+      - orphan requirements are reported
+    evidence:
+      - requirement-to-test matrix
+    severity_on_failure: error
+  - id: TRACE-002
+    category: traceability
+    required: true
+    title: Every implementation tag has corresponding validation coverage
+    verify:
+      - each implementation identifier maps to unit or integration tests
+      - untested implementation blocks are reported
+    evidence:
+      - implementation-to-test matrix
+    severity_on_failure: error
+  - id: TRACE-003
+    category: traceability
+    required: false
+    title: Architecture relationships are reflected in integration tests
+    verify:
+      - architecture-level dependencies are exercised by one or more integration tests
+      - missing integration coverage is reported
+    evidence:
+      - architecture-to-integration-test matrix
+    severity_on_failure: warning
+  - id: LINT-001
+    category: linting
+    required: false
+    title: Pseudo-code steps use precise verbs and avoid ambiguous phrasing
+    verify:
+      - vague terms are flagged unless refined by context
+      - assertions are explicit rather than implied
+    evidence:
+      - lint findings for ambiguous steps
+    severity_on_failure: warning
+  - id: LINT-002
+    category: linting
+    required: false
+    title: Test blocks declare fixtures mocks and helpers explicitly
+    verify:
+      - hidden setup is not assumed
+      - mock or stub usage matches actual collaborators
+    evidence:
+      - fixture and mock declaration audit
+    severity_on_failure: warning
+  - id: SIM-001
+    category: semantic_simulation
+    required: false
+    title: Test pseudo-code is semantically coherent under symbolic interpretation
+    verify:
+      - setup can satisfy target preconditions
+      - assertions are reachable
+      - expected results do not contradict the target contract
+    evidence:
+      - symbolic validation report
+    severity_on_failure: warning
+  - id: GEN-001
+    category: generation_readiness
+    required: false
+    title: Test pseudo-code can be translated into executable tests
+    verify:
+      - each step maps to a supported test framework primitive
+      - fixtures can be materialized
+      - assertions are machine-translatable
+      - unresolved natural language steps are reported
+    evidence:
+      - generation feasibility report
+    severity_on_failure: warning
+  - id: DIAG-001
+    category: reporting
+    required: true
+    title: Findings are emitted with severity message and source location
+    verify:
+      - all findings include severity
+      - all findings include a concise explanation
+      - all findings point to block and source location when available
+    evidence:
+      - diagnostic output sample
+    severity_on_failure: error
+recommended_validation_order:
+  - parsing
+  - schema
+  - symbol_resolution
+  - contract_validation
+  - dependency_graph
+  - behavioral_coverage
+  - traceability
+  - linting
+  - semantic_simulation
+  - generation_readiness
+  - reporting
+minimum_gating_rules:
+  - all required checks pass
+  - no unresolved symbols remain
+  - every requirement tag is covered by at least one test
+  - every implementation block has success-path coverage
+  - every declared failure mode has coverage when failure is possible
+  - diagnostics include source locations where available
+tailoring:
+  notes:
+    - add project-specific block kinds under the schema category
+    - add domain-specific safety rules under contract_validation
+    - add project architecture constraints under dependency_graph
+    - add custom coverage thresholds per block kind if needed
+    - add generation backend constraints if pseudo-code drives test generation directly

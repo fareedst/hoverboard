@@ -20,7 +20,9 @@ IMPL-EXAMPLE_IMPLEMENTATION:
     files:
       - path: path/to/implementation.ext
         description: Main implementation
-        lines: [10, 50]
+        lines:
+          - 10
+          - 50
     functions:
       - name: exampleFunction
         file: path/to/implementation.ext

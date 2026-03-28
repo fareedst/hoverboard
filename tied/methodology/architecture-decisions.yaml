@@ -1,0 +1,296 @@
+# Architecture Decisions Index (YAML Database)
+#
+# This YAML file serves as the central index/registry for all architecture decisions in the project.
+# Each top-level key is a semantic token (e.g., ARCH-TIED_STRUCTURE).
+#
+# To append a new architecture decision:
+# 1. Copy the template block at the bottom of this file (ARCH-IDENTIFIER)
+# 2. Paste it at the end with a blank line before it
+# 3. Replace ARCH-IDENTIFIER with your new token
+# 4. Fill in all fields
+# 5. Update the detail_file path to match your new .yaml file in architecture-decisions/ directory
+#
+# Field descriptions:
+#   name: Short descriptive name of the decision
+#   status: Active | Deprecated | Template | Superseded
+#   cross_references: List of REQ-* tokens this decision fulfills
+#   rationale: Structured explanation with why, problems_solved, benefits
+#   alternatives_considered: List of alternative items with pros, cons, rejected_reason
+#   implementation_approach: Structured approach with summary and details
+#   traceability: Structured links to requirements, implementation, tests, code_annotations
+#   related_decisions: Lists of depends_on, informs, see_also (YAML lists or [])
+#   detail_file: Path to the detailed .yaml file in architecture-decisions/ directory
+#   metadata: Structured metadata with created, last_updated, last_validated info
+ARCH-TIED_STRUCTURE:
+  name: TIED Project Structure
+  status: Active
+  cross_references:
+    - REQ-TIED_SETUP
+  rationale:
+    why: Keeps documentation close to code but organized in a dedicated namespace
+    problems_solved:
+      - Documentation scattered across project
+      - Difficulty finding all context in one place
+      - Meta-documentation mixed with source code
+    benefits:
+      - Clear separation of concerns
+      - Standard project layout for AI agents
+      - Easy discovery of all TIED documentation
+      - Testable and maintainable structure
+  alternatives_considered:
+    - name: Root-level files
+      pros:
+        - Immediately visible in repository root
+      cons:
+        - Clutters the root directory
+        - No clear organization
+      rejected_reason: Creates too much clutter at project root
+    - name: .github or .docs folder
+      pros:
+        - Common convention for documentation
+      cons:
+        - Too generic for methodology-specific files
+        - .github is typically for GitHub workflows
+      rejected_reason: tied/ is more specific to the methodology
+  implementation_approach:
+    summary: Create dedicated tied/ directory with YAML indexes and detail subdirectories
+    details:
+      - Create tied/ directory at project root
+      - 'Populate with YAML index files: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml'
+      - 'Create detail subdirectories: requirements/, architecture-decisions/, implementation-decisions/'
+      - 'Add guide files: semantic-tokens.md, processes.md'
+  traceability:
+    requirements:
+      - REQ-TIED_SETUP
+    implementation:
+      - IMPL-TIED_FILES
+    tests:
+      - TestTIEDSetup_REQ_TIED_SETUP
+    code_annotations:
+      - IMPL-TIED_FILES
+      - ARCH-TIED_STRUCTURE
+      - REQ-TIED_SETUP
+  related_decisions:
+    depends_on:
+      - REQ-TIED_SETUP
+    informs:
+      - IMPL-TIED_FILES
+    see_also: []
+  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
+  metadata:
+    created:
+      date: 2025-12-18
+      author: AI Agent
+    last_updated:
+      date: 2026-02-06
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
+    last_validated:
+      date: 2026-02-06
+      validator: AI Agent
+      result: pass
+ARCH-MODULE_VALIDATION:
+  name: Module Validation Strategy
+  status: Active
+  cross_references:
+    - REQ-MODULE_VALIDATION
+  rationale:
+    why: To eliminate bugs related to code complexity by ensuring each module works correctly in isolation
+    problems_solved:
+      - Integration complexity causing difficult-to-debug issues
+      - Bugs discovered too late in development cycle
+      - Module contracts not properly validated
+    benefits:
+      - Bugs caught early before integration
+      - Reduced integration complexity
+      - Easier debugging by isolating issues
+      - Enables parallel module development
+      - Clear module boundaries and contracts
+  alternatives_considered:
+    - name: Big Bang Integration
+      pros:
+        - Faster initial integration
+      cons:
+        - Too complex to debug
+        - Bugs compound during integration
+        - Difficult to isolate issues
+      rejected_reason: Makes debugging too difficult and bugs compound
+    - name: Minimal Validation
+      pros:
+        - Faster development cycle
+      cons:
+        - Insufficient to catch complexity bugs
+        - Doesn't validate contracts properly
+      rejected_reason: Insufficient validation leads to integration issues
+    - name: Post-Integration Validation Only
+      pros:
+        - All validation done at once
+      cons:
+        - Doesn't catch module-level bugs early
+        - Increases debugging complexity
+      rejected_reason: Bugs discovered too late, making fixes expensive
+  implementation_approach:
+    summary: Independent module validation before integration with comprehensive testing strategy
+    details:
+      - Identify modules and document boundaries before development
+      - Define module interfaces and contracts explicitly
+      - Specify validation criteria for each module
+      - Unit test modules with mocked dependencies
+      - Integration test with test doubles (mocks, stubs, fakes)
+      - Validate contracts (input/output validation)
+      - Test edge cases and error handling
+      - Document validation results before integration
+      - Only integrate after validation passes
+  traceability:
+    requirements:
+      - REQ-MODULE_VALIDATION
+    implementation:
+      - IMPL-MODULE_VALIDATION
+    tests:
+      - testModuleName_IndependentValidation_REQ_MODULE_VALIDATION
+    code_annotations:
+      - IMPL-MODULE_VALIDATION
+      - REQ-MODULE_VALIDATION
+  related_decisions:
+    depends_on:
+      - REQ-MODULE_VALIDATION
+    informs:
+      - IMPL-MODULE_VALIDATION
+    see_also: []
+  detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.yaml
+  metadata:
+    created:
+      date: 2025-12-18
+      author: AI Agent
+    last_updated:
+      date: 2026-02-06
+      author: AI Agent
+      reason: Restructured to v1.5.0 schema with machine-parseable fields
+    last_validated:
+      date: 2026-02-06
+      validator: AI Agent
+      result: pass
+ARCH-FEEDBACK_STORAGE:
+  name: Feedback Storage for TIED Reporting
+  status: Active
+  cross_references:
+    - REQ-FEEDBACK_TO_TIED
+  rationale:
+    why: Store user and project feedback in a single file under the TIED tree so it is versioned with the project and exportable for reporting to the TIED project
+    problems_solved:
+      - No standard location for feedback entries
+      - Feedback not tied to project context (TIED base path)
+    benefits:
+      - Single file tied/feedback.yaml; no new index type in REQ/ARCH/IMPL sense
+      - Same base path resolution as existing MCP tools (getBasePath())
+      - Entries have id, type, title, description, optional context, created_at
+  alternatives_considered:
+    - name: New YAML index (e.g. feedback.yaml as index)
+      pros:
+        - Consistent with requirements.yaml pattern
+      cons:
+        - Feedback is not a traceability index; different schema (entries array)
+      rejected_reason: Keep feedback as a separate artifact; schema is list of entries, not token-keyed records
+    - name: Store in requirements or implementation index
+      pros:
+        - No new file
+      cons:
+        - Pollutes REQ/IMPL with non-traceability data
+      rejected_reason: Feedback is not a requirement or implementation decision
+  implementation_approach:
+    summary: One file {TIED_BASE_PATH}/feedback.yaml with top-level key 'entries' (array of objects)
+    details:
+      - Use getBasePath() from yaml-loader for path resolution
+      - 'Each entry: id, type (feature_request | bug_report | methodology_improvement), title, description, context (optional), created_at (ISO 8601)'
+      - 'MCP tools: tied_feedback_add (append), tied_feedback_export (markdown or JSON)'
+  traceability:
+    requirements:
+      - REQ-FEEDBACK_TO_TIED
+    implementation:
+      - IMPL-MCP_FEEDBACK_TOOLS
+    tests:
+      - feedback.test.ts
+    code_annotations:
+      - ARCH-FEEDBACK_STORAGE
+      - IMPL-MCP_FEEDBACK_TOOLS
+  related_decisions:
+    depends_on:
+      - REQ-FEEDBACK_TO_TIED
+    informs:
+      - IMPL-MCP_FEEDBACK_TOOLS
+    see_also: []
+  detail_file: architecture-decisions/ARCH-FEEDBACK_STORAGE.yaml
+  metadata:
+    created:
+      date: 2026-03-03
+      author: AI Agent
+    last_updated:
+      date: 2026-03-03
+      author: AI Agent
+      reason: Initial creation
+    last_validated:
+      date: 2026-03-03
+      validator: AI Agent
+      result: pass
+# ---
+# Template Record - Copy this block to create new architecture decisions
+# ---
+#
+# ARCH-IDENTIFIER:
+#   name: Architecture Decision Title
+#   status: Active
+#   cross_references:
+#     - REQ-RELATED_REQUIREMENT
+#   rationale:
+#     why: "Primary reason for this decision"
+#     problems_solved:
+#       - "Problem 1"
+#       - "Problem 2"
+#     benefits:
+#       - "Benefit 1"
+#       - "Benefit 2"
+#   alternatives_considered:
+#     - name: "Alternative 1"
+#       pros:
+#         - "Pro 1"
+#       cons:
+#         - "Con 1"
+#       rejected_reason: "Why it was rejected"
+#     - name: "Alternative 2"
+#       pros:
+#         - "Pro 1"
+#       cons:
+#         - "Con 1"
+#       rejected_reason: "Why it was rejected"
+#   implementation_approach:
+#     summary: "High-level description of the approach"
+#     details:
+#       - "Key component 1"
+#       - "Key component 2"
+#       - "Integration point 1"
+#   traceability:
+#     requirements:
+#       - REQ-IDENTIFIER
+#     implementation:
+#       - IMPL-IDENTIFIER
+#     tests:
+#       - testFeatureName_ARCH_IDENTIFIER
+#     code_annotations:
+#       - ARCH-IDENTIFIER
+#   related_decisions:
+#     depends_on: []
+#     informs: []
+#     see_also: []
+#   detail_file: architecture-decisions/ARCH-IDENTIFIER.yaml
+#   metadata:
+#     created:
+#       date: YYYY-MM-DD
+#       author: "agent/contributor"
+#     last_updated:
+#       date: YYYY-MM-DD
+#       author: "agent/contributor"
+#       reason: "Initial creation"
+#     last_validated:
+#       date: YYYY-MM-DD
+#       validator: "agent/contributor"
+#       result: "pass"

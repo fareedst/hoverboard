@@ -1,21 +1,24 @@
 /**
- * [REQ-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT] [IMPL-PLAYWRIGHT_E2E_EXTENSION]
+ * [REQ-THIS_PAGE_TAG_SORT] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT] [IMPL-PLAYWRIGHT_E2E_EXTENSION]
  *
- * Phase H — E2E-only surface: real Chromium MV3 extension side panel page
- * (chrome-extension://…/side-panel.html) with production side-panel.js/css and extension origin.
+ * Phase H (PROC-IMPL_CODE_TEST_SYNC): behavior that requires real UI invocation — not a substitute
+ * for composition tests (Phase G).
  *
- * e2e_only_reason (named platform constraint): JSDOM and Node composition tests cannot load
- * unpacked extension documents, reproduce the Chromium side-panel host, or run the bundled panel
- * entry against real chrome.* in that context. Sort-toggle *binding* logic is covered without UI
- * in tests/integration/this-page-tag-sort-composition.integration.test.js.
+ * IMPL-THIS_PAGE_TAG_SORT.phase_h_e2e_only_surface: testability e2e_only; e2e_only_reason names the
+ * platform constraint: Chromium MV3 chrome-extension:// side panel loads the production bundle in
+ * the extension origin; JSDOM cannot load unpacked extension HTML, reproduce the side-panel host
+ * (layout, hit targets, focus), or exercise chrome.runtime in that document.
  *
- * This spec asserts the toolbar is visible after mainInterface shows and that clicking Frequency
- * updates aria-pressed (real pointer + layout + bundled UIManager event path).
+ * Essence_pseudocode procedure: side_panel_tag_sort_toolbar_e2e (toolbar visible; aria-pressed on segment click).
+ *
+ * Composition-level coverage (insufficient here): tests/integration/this-page-tag-sort-composition.integration.test.js
+ * (PopupController ordering; [data-sort-mode] → setTagSortMode without chrome-extension:// document).
  */
 
 import { test, expect, getExtensionId } from './extension-fixture.js'
 
 test.describe('[REQ-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT] Side panel tag sort toolbar', () => {
+  /** Maps to IMPL essence_pseudocode side_panel_tag_sort_toolbar_e2e; requires real extension page + pointer. */
   test('tag sort toggle visible in extension panel; Frequency click updates aria-pressed', async ({ context }) => {
     const extensionId = await getExtensionId(context)
 

@@ -14,8 +14,8 @@ REQ-STRUCTURED_LOGGING:
       - Context-based log attribution; environment-aware level (debug in dev, warn+ in prod)
       - Legacy log() compatibility during migration
   satisfaction_criteria:
-    - criterion: "Logger class with context, getLogLevel, shouldLog, formatMessage, debug/info/warn/error"
-    - criterion: "createLogger(context) factory; legacy log(context, ...args) and noisy flag"
+    - criterion: Logger class with context, getLogLevel, shouldLog, formatMessage, debug/info/warn/error
+    - criterion: createLogger(context) factory; legacy log(context, ...args) and noisy flag
   validation_criteria:
     - method: Manual/unit
       coverage: Log level filtering and formatting

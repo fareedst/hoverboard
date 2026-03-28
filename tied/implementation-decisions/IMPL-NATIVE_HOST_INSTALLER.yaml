@@ -26,7 +26,7 @@ IMPL-NATIVE_HOST_INSTALLER:
     requirements:
       - REQ-NATIVE_HOST_WRAPPER
     tests: []
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: native host installer and platform setup."
+    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: native host installer and platform setup.'
     code_annotations:
       - IMPL-NATIVE_HOST_INSTALLER
       - ARCH-NATIVE_HOST
@@ -64,13 +64,13 @@ IMPL-NATIVE_HOST_INSTALLER:
   detail_file: implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-20'
+      date: "2026-02-20"
       author: AI Agent
       reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
     last_validated:
-      date: '2026-02-18'
+      date: "2026-02-18"
       validator: MCP converter
       result: pass
