@@ -7,11 +7,11 @@ IMPL-SUGGESTED_TAGS:
     - REQ-SUGGESTED_TAGS_DEDUPLICATION
     - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
   rationale:
-    why: Two extraction paths — TagService for overlay (content script), inlined script injection for popup (page context). Both use multi-source extraction, frequency ranking, case preservation, deduplication; limits and sanitization differ slightly.
+    why: Two extraction paths — TagService for overlay (content script), and Chromium popup path using MAIN-world script injection (snippet file + extractor function) into the active tab. Both apply multi-source extraction, frequency ranking, case preservation, and deduplication where applicable; popup normalization yields row objects for relevance-aware chip sort ([IMPL-THIS_PAGE_TAG_SORT]).
     problems_solved: []
     benefits: []
   implementation_approach:
-    summary: Extract from title, URL, meta, headings, emphasis elements, definition terms, table headers, nav, breadcrumbs, images, links (per-source limits). Tokenize, filter noise, frequency sort, case preservation, sanitize, deduplicate, apply limit. Overlay path uses TagService; popup path uses executeScript with inlined same algorithm.
+    summary: 'Extract from title, URL, meta, headings, emphasis, definitions, tables, nav, breadcrumbs, images, links (per-source limits). Tokenize, filter noise, frequency sort, case preservation, sanitize, deduplicate, apply limit. Overlay: TagService.extractSuggestedTagsFromContent. Popup (Chromium): chrome.scripting.executeScript MAIN files (suggested-tags-main-world-snippet.js) then func calling global extractor; PopupController normalizes to { tag, relevance, inPageFrequency } and filters current bookmark tags before updateSuggestedTags.'
     details: []
   code_locations:
     files:
@@ -20,9 +20,11 @@ IMPL-SUGGESTED_TAGS:
       - path: src/features/content/overlay-manager.js
         description: Suggested section display
       - path: src/ui/popup/PopupController.js
-        description: loadSuggestedTags inlined extraction
+        description: 'loadSuggestedTags: MAIN-world file + func inject; normalize rows; composed with IMPL-THIS_PAGE_TAG_SORT'
+      - path: src/features/tagging/suggested-tags-main-world-snippet.js
+        description: MAIN-world relevance tiers and extractor global for popup path
       - path: src/ui/popup/UIManager.js
-        description: updateSuggestedTags
+        description: updateSuggestedTags; optional three-way chip sort when tagSortToggle present
       - path: safari/src/features/tagging/tag-service.js
         description: Safari mirror extraction
       - path: safari/src/features/content/overlay-manager.js
@@ -33,7 +35,7 @@ IMPL-SUGGESTED_TAGS:
         description: Primary extraction for overlay; limit default; includes meta, emphasis, structured content
       - name: loadSuggestedTags
         file: src/ui/popup/PopupController.js
-        description: Popup extraction via executeScript; inlined function duplicates algorithm
+        description: 'Chromium popup: two-step MAIN inject then normalize/filter; see IMPL-THIS_PAGE_TAG_SORT'
   traceability:
     architecture:
       - ARCH-SUGGESTED_TAGS
@@ -57,47 +59,57 @@ IMPL-SUGGESTED_TAGS:
       - REQ-SUGGESTED_TAGS_FROM_CONTENT
       - REQ-SUGGESTED_TAGS_DEDUPLICATION
       - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+      - IMPL-THIS_PAGE_TAG_SORT
     composed_with:
       - IMPL-SELECTION_TO_TAG_INPUT
   essence_pseudocode: |
     # [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]
-    # Multi-source extraction, tokenize, frequency sort, case preservation, dedupe; overlay (TagService) and popup (executeScript inlined).
-    # Contract: document and url and limit; suggested tag list.
-    INPUT: document, url, limit (per-path defaults differ)
-    OUTPUT: list of suggested tag strings (frequency-ordered, case-preserved, deduplicated)
-    DATA: sources = title, URL segments, meta keywords/description, headings, emphasis elements (strong/b/em/...), definition terms, table headers/captions, nav links, breadcrumbs, images alt, main links (each with per-source cap); noise word set; delimiter regex for tokenize
+    # Summary: Suggested tags from page content — overlay via TagService pipeline; Chromium popup via MAIN-world snippet that registers the extractor global, then PopupController orchestration shared with [IMPL-THIS_PAGE_TAG_SORT].
+    # Composition: composed_with [IMPL-SELECTION_TO_TAG_INPUT] — selection prefill and suggested-tag load both touch UIManager tag input / chips but are independent flows (no required ordering); shared post-condition: user may add tags from either path. Cross-IMPL [IMPL-THIS_PAGE_TAG_SORT]: popup path relies on this IMPL for snippet tier semantics and global name __hoverboardExtractSuggestedTagsWithRelevance; inject file-before-func ordering is owned by IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags.
 
-    # Gather capped sources, tokenize, filter noise, frequency sort, case-preserve, sanitize, dedupe, slice to limit.
+    # How — Overlay IO contract: INPUT document, url, limit; OUTPUT deduplicated string list per pipeline below; DATA multi-source caps + noise/delimiter as in TagService.
+    INPUT: document, url, limit (defaults per path)
+    OUTPUT: list of tag strings (frequency-ordered within extractor, case-preserved, deduplicated)
+    DATA: sources = title, URL segments, meta, headings, emphasis, definitions, table headers/captions, nav, breadcrumbs, image alts, main links (each capped); noise set; delimiter regex
+
+    # How — Chromium popup consumer: after [IMPL-THIS_PAGE_TAG_SORT] normalizes inject results, UIManager receives { tag, relevance, inPageFrequency }[]; optional three-way chip reorder is IMPL-THIS_PAGE_TAG_SORT / UIManager.
+
+    # How — extractSuggestedTags core steps implement dedupe, case preservation, and limits per ARCH-SUGGESTED_TAGS.
     extractSuggestedTags(document, url, limit):
-      allTexts = []
-      allTexts.push( title, urlSegments, metaKeywords, metaDescription, headings, emphasisElements, definitionTerms, tableHeaders, navLinks, breadcrumbs, imageAlts, mainLinks )  // each source capped
-      text = join allTexts with space
-      words = tokenize(text)  // split on delimiter regex (whitespace, punctuation, brackets, quotes)
-      filtered = filter words: NOT noise AND length >= 2 AND NOT pure number
-      wordFrequency = count by lowercase key; originalCaseMap = first-seen case per lowercase
-      sorted = sort by frequency descending, then alphabetically by lowercase
-      tagsWithVersions = []
-      FOR each (lowerWord, count) in sorted:
-        originalCase = originalCaseMap[lowerWord]
-        tagsWithVersions.push(originalCase)
-        IF originalCase !== lowerWord THEN tagsWithVersions.push(lowerWord)
-      sanitized = map sanitize over tagsWithVersions, filter non-empty
-      unique = deduplicate exact strings
-      RETURN unique.slice(0, limit or limit*2 for case variants)
+      allTexts = gather capped sources
+      words = tokenize(join allTexts)
+      filtered = filter noise, min length, not pure number
+      wordFrequency = count by lowercase; originalCaseMap = first-seen case
+      sorted = sort by frequency desc then alphabetical lowercase
+      tagsWithVersions = expand case variants per dedupe rules
+      sanitized = sanitize, unique exact strings
+      RETURN slice to limit
 
-    # Overlay: TagService; popup: executeScript with inlined same algorithm; filter vs currentPin.tags.
-    overlay path: call TagService.extractSuggestedTagsFromContent(document, url, limit)
-    popup path: chrome.scripting.executeScript with inlined function implementing same algorithm; skip if URL not http(s); filter result vs currentPin.tags (case-insensitive) before display
+    # [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]
+    # How — Overlay entrypoint: TagService.extractSuggestedTagsFromContent(document, url, limit).
+
+    # [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT]
+    # How — Chromium popup: suggested-tags-main-world-snippet.js defines DOM tiering and sets global __hoverboardExtractSuggestedTagsWithRelevance; PopupController (IMPL-THIS_PAGE_TAG_SORT) runs executeScript MAIN files then func, normalizes rows, filters current bookmark tags CI, empty list on failure — see paired IMPL for full control flow.
   detail_file: implementation-decisions/IMPL-SUGGESTED_TAGS.yaml
   metadata:
     created:
-      date: '2026-02-18'
+      date: "2026-02-18"
       author: MCP converter
     last_updated:
-      date: '2026-02-20'
+      date: "2026-03-27"
       author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
-    last_validated:
-      date: '2026-02-18'
-      validator: MCP converter
+      reason: 'S06.6 PROC-AGENT_REQ_CHECKLIST: validation_evidence + token_coverage'
+  validation_evidence:
+    - date: "2026-03-27"
       result: pass
+      notes: 'S06.6 persist: popup-suggested-tags unit tests + tied_validate_consistency'
+  token_coverage:
+    code_files:
+      - src/features/tagging/tag-service.js
+      - src/features/content/overlay-manager.js
+      - src/ui/popup/PopupController.js
+      - src/features/tagging/suggested-tags-main-world-snippet.js
+      - src/ui/popup/UIManager.js
+    tests:
+      - tests/unit/popup-suggested-tags.test.js
+  decision: 'Overlay path: TagService.extractSuggestedTagsFromContent with multi-source token pipeline, dedupe, and case preservation. Chromium popup path: MAIN-world snippet (suggested-tags-main-world-snippet.js) registers __hoverboardExtractSuggestedTagsWithRelevance; PopupController injects file then func, normalizes to { tag, relevance, inPageFrequency }, filters current bookmark tags; UIManager displays and may reorder chips per IMPL-THIS_PAGE_TAG_SORT.'

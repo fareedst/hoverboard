@@ -14,6 +14,9 @@ import { splitAiTagsBySession } from '../../features/ai/ai-tagging-popup-utils.j
 import { testAiApiKey } from '../../features/ai/ai-api-test.js'
 import { formatTimeAge } from '../bookmarks-table/bookmarks-table-time.js'
 
+/** [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] Extension-root path for scripting.executeScript files */
+const SUGGESTED_TAGS_MAIN_WORLD_FILE = 'src/features/tagging/suggested-tags-main-world-snippet.js'
+
 export class PopupController {
   constructor (dependencies = {}) {
     // [DEP-INJ-001] Proper dependency injection with fallback creation
@@ -80,6 +83,7 @@ export class PopupController {
               this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
               this.uiManager.updateReadLaterStatus(this.currentPin?.toread === 'yes')
               const normalizedTags = this.normalizeTags(this.currentPin?.tags)
+              await this.refreshTagFrequencyMapForSort()
               this.uiManager.updateCurrentTags(normalizedTags)
               // Optionally, show a message to the user
               this.uiManager.showSuccess('Bookmark updated from another window')
@@ -258,6 +262,8 @@ export class PopupController {
       })
       // [POPUP-DATA-FLOW-001] Update UI with validated data
       debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling updateCurrentTags with:', normalizedTags)
+      // [REQ-THIS_PAGE_TAG_SORT] Bookmark tag counts for This Page frequency sort (side panel)
+      await this.refreshTagFrequencyMapForSort()
       this.uiManager.updateCurrentTags(normalizedTags)
       this.uiManager.updateConnectionStatus(true)
       this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
@@ -436,6 +442,31 @@ export class PopupController {
   }
 
   /**
+   * [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT]
+   * Coerce chrome.storage hoverboard_tag_frequency payload to a plain object map (tag → count); arrays / primitives / null → {}.
+   */
+  _normalizeHoverboardTagFrequencyMap (raw) {
+    return raw != null && typeof raw === 'object' && !Array.isArray(raw) ? raw : {}
+  }
+
+  /**
+   * [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT]
+   * Load hoverboard_tag_frequency from storage, normalize via _normalizeHoverboardTagFrequencyMap, push into UIManager for chip ordering (side panel).
+   */
+  async refreshTagFrequencyMapForSort () {
+    try {
+      if (typeof chrome === 'undefined' || !chrome.storage?.local?.get) return
+      const result = await new Promise((resolve) => {
+        chrome.storage.local.get('hoverboard_tag_frequency', resolve)
+      })
+      const map = this._normalizeHoverboardTagFrequencyMap(result?.hoverboard_tag_frequency)
+      this.uiManager.setTagFrequencyMapForSort(map)
+    } catch (e) {
+      debugError('[POPUP-CONTROLLER] [REQ-THIS_PAGE_TAG_SORT] refreshTagFrequencyMapForSort failed:', e)
+    }
+  }
+
+  /**
    * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS]
    * Load suggested tags from page headings
    */
@@ -457,298 +488,51 @@ export class PopupController {
         return
       }
 
-      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Extract suggested tags using content script injection
-      // (Injected func is self-contained; no TagService needed in popup context.)
+      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] MAIN world: snippet file then extractor (relevance + in-page frequency).
       try {
+        try {
+          await chrome.scripting.executeScript({
+            target: { tabId: this.currentTab.id },
+            world: 'MAIN',
+            files: [SUGGESTED_TAGS_MAIN_WORLD_FILE]
+          })
+        } catch (fileErr) {
+          debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Main-world snippet file inject failed (non-fatal):', fileErr)
+        }
+
         const results = await chrome.scripting.executeScript({
           target: { tabId: this.currentTab.id },
-          world: 'MAIN', // Run in page context so we read the page's DOM, not an isolated copy
+          world: 'MAIN',
           func: () => {
-            // Extract tags from multiple sources in the page context
-            const allTexts = []
-
-            // [REQ-SUGGESTED_TAGS_FROM_CONTENT] Helper function to extract text from element, preferring title attribute
-            const extractElementText = (element) => {
-              // Check for title attribute on the element itself
-              if (element.title && element.title.trim().length > 0) {
-                return element.title.trim()
-              }
-              // Check for title attribute on child elements (e.g., yt-formatted-string inside h1)
-              const childWithTitle = element.querySelector('[title]')
-              if (childWithTitle && childWithTitle.title && childWithTitle.title.trim().length > 0) {
-                return childWithTitle.title.trim()
-              }
-              // Fall back to textContent
-              return (element.textContent || '').trim()
-            }
-
-            // 1. Document title
-            if (document.title) {
-              allTexts.push(document.title)
-            }
-
-            // 2. URL path segments
-            try {
-              const urlObj = new URL(window.location.href)
-              const pathSegments = urlObj.pathname.split('/').filter(seg => seg.length > 0)
-              const meaningfulSegments = pathSegments.filter(seg => {
-                const lower = seg.toLowerCase()
-                return !['www', 'com', 'org', 'net', 'html', 'htm', 'php', 'asp', 'aspx', 'index', 'home', 'page'].includes(lower) &&
-                       !/^\d+$/.test(seg) && seg.length >= 2
-              })
-              if (meaningfulSegments.length > 0) {
-                allTexts.push(meaningfulSegments.join(' '))
-              }
-            } catch (e) {
-              // Ignore URL parsing errors
-            }
-
-            // 2.5. Meta keywords and description
-            const metaKeywords = document.querySelector('meta[name="keywords"]')
-            if (metaKeywords && metaKeywords.content && metaKeywords.content.trim().length > 0) {
-              allTexts.push(metaKeywords.content.trim())
-            }
-            const metaDescription = document.querySelector('meta[name="description"]')
-            if (metaDescription && metaDescription.content && metaDescription.content.trim().length > 0) {
-              allTexts.push(metaDescription.content.trim())
-            }
-
-            // 3. Headings
-            const headings = document.querySelectorAll('h1, h2, h3')
-            if (headings.length > 0) {
-              const headingTexts = Array.from(headings).map(h => extractElementText(h)).filter(t => t.length > 0)
-              if (headingTexts.length > 0) {
-                allTexts.push(headingTexts.join(' '))
-              }
-            }
-
-            // 3.5. Semantic emphasis elements within main content
-            const emphasisElements = document.querySelectorAll('main strong, main b, main em, main i, main mark, main dfn, main cite, main kbd, main code, article strong, article b, article em, article i, article mark, article dfn, article cite, article kbd, article code, [role="main"] strong, [role="main"] b, [role="main"] em, [role="main"] i, [role="main"] mark, [role="main"] dfn, [role="main"] cite, [role="main"] kbd, [role="main"] code, .main strong, .main b, .main em, .main i, .main mark, .main dfn, .main cite, .main kbd, .main code, .content strong, .content b, .content em, .content i, .content mark, .content dfn, .content cite, .content kbd, .content code')
-            if (emphasisElements.length > 0) {
-              const emphasisTexts = Array.from(emphasisElements).slice(0, 60).map(el => extractElementText(el)).filter(t => t.length > 0)
-              if (emphasisTexts.length > 0) {
-                allTexts.push(emphasisTexts.join(' '))
-              }
-            }
-
-            // 3.6. Definition lists and table headers
-            const definitionTerms = document.querySelectorAll('main dl dt, article dl dt, [role="main"] dl dt, .main dl dt, .content dl dt')
-            if (definitionTerms.length > 0) {
-              const dtTexts = Array.from(definitionTerms).slice(0, 40).map(dt => extractElementText(dt)).filter(t => t.length > 0)
-              if (dtTexts.length > 0) {
-                allTexts.push(dtTexts.join(' '))
-              }
-            }
-            const tableHeaders = document.querySelectorAll('main th, main caption, article th, article caption, [role="main"] th, [role="main"] caption, .main th, .main caption, .content th, .content caption')
-            if (tableHeaders.length > 0) {
-              const thTexts = Array.from(tableHeaders).slice(0, 40).map(th => extractElementText(th)).filter(t => t.length > 0)
-              if (thTexts.length > 0) {
-                allTexts.push(thTexts.join(' '))
-              }
-            }
-
-            // 4. Top-level navigation
-            const nav = document.querySelector('nav') || document.querySelector('header nav') || document.querySelector('[role="navigation"]')
-            if (nav) {
-              const navLinks = nav.querySelectorAll('a')
-              const navTexts = Array.from(navLinks).slice(0, 40).map(link => extractElementText(link)).filter(t => t.length > 0)
-              if (navTexts.length > 0) {
-                allTexts.push(navTexts.join(' '))
-              }
-            }
-
-            // 5. Breadcrumbs
-            const breadcrumb = document.querySelector('[aria-label*="breadcrumb" i], .breadcrumb, nav[aria-label*="breadcrumb" i], [itemtype*="BreadcrumbList"]')
-            if (breadcrumb) {
-              const breadcrumbLinks = breadcrumb.querySelectorAll('a, [itemprop="name"]')
-              const breadcrumbTexts = Array.from(breadcrumbLinks).map(link => extractElementText(link)).filter(t => t.length > 0)
-              if (breadcrumbTexts.length > 0) {
-                allTexts.push(breadcrumbTexts.join(' '))
-              }
-            }
-
-            // 6. First 10 images' alt text
-            const mainImages = document.querySelectorAll('main img, article img, [role="main"] img, .main img, .content img')
-            if (mainImages.length > 0) {
-              const imageAlts = Array.from(mainImages).slice(0, 10).map(img => img.alt || '').filter(alt => alt.length > 0)
-              if (imageAlts.length > 0) {
-                allTexts.push(imageAlts.join(' '))
-              }
-            }
-
-            // 7. First 20 anchor links within main content
-            const mainLinks = document.querySelectorAll('main a, article a, [role="main"] a, .main a, .content a')
-            if (mainLinks.length > 0) {
-              const linkTexts = Array.from(mainLinks).slice(0, 20).map(link => extractElementText(link)).filter(t => t.length > 0)
-              if (linkTexts.length > 0) {
-                allTexts.push(linkTexts.join(' '))
-              }
-            }
-
-            // 8. Fallback: if no structured content found, use body text (ensures we read the page when DOM is minimal or different)
-            if (allTexts.length === 0 && document.body && document.body.innerText) {
-              const bodyText = (document.body.innerText || '').trim()
-              if (bodyText.length > 0) {
-                allTexts.push(bodyText.slice(0, 5000))
-              }
-            }
-
-            if (allTexts.length === 0) return []
-
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Preserve original case from content
-            const allText = allTexts.join(' ')
-
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Tokenize preserving original case (keep in sync with tag-service.js)
-            const words = allText
-              .split(/[\s\.,;:!?\-_\(\)\[\]{}"']+/) // eslint-disable-line no-useless-escape -- ] must be escaped to be literal in character class
-              .filter(word => word.length > 0)
-
-            // Noise word list (common English stop words) - lowercase for case-insensitive matching
-            const noiseWords = new Set([
-              'a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'from',
-              'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'that', 'the',
-              'to', 'was', 'will', 'with', 'this', 'but', 'they', 'have',
-              'had', 'what', 'said', 'each', 'which', 'their', 'time', 'if', 'up',
-              'out', 'many', 'then', 'them', 'these', 'so', 'some', 'her', 'would',
-              'make', 'like', 'into', 'him', 'two', 'more', 'very', 'after',
-              'words', 'long', 'than', 'first', 'been', 'call', 'who', 'oil', 'sit',
-              'now', 'find', 'down', 'day', 'did', 'get', 'come', 'made', 'may',
-              'part', 'over', 'new', 'sound', 'take', 'only', 'little', 'work', 'know',
-              'place', 'year', 'live', 'me', 'back', 'give', 'most', 'thing', 'our',
-              'just', 'name', 'good', 'sentence', 'man', 'think', 'say', 'great',
-              'where', 'help', 'through', 'much', 'before', 'line', 'right', 'too',
-              'mean', 'old', 'any', 'same', 'tell', 'boy', 'follow', 'came', 'want',
-              'show', 'also', 'around', 'form', 'three', 'small', 'set', 'put', 'end',
-              'does', 'another', 'well', 'large', 'must', 'big', 'even', 'such',
-              'because', 'turn', 'here', 'why', 'ask', 'went', 'men', 'read', 'need',
-              'land', 'different', 'home', 'us', 'move', 'try', 'kind', 'hand', 'picture',
-              'again', 'change', 'off', 'play', 'spell', 'air', 'away', 'animal', 'house',
-              'point', 'page', 'letter', 'mother', 'answer', 'found', 'study', 'still',
-              'learn', 'should', 'america', 'world', 'high', 'every', 'near', 'add',
-              'food', 'between', 'own', 'below', 'country', 'plant', 'last', 'school',
-              'father', 'keep', 'tree', 'never', 'start', 'city', 'earth', 'eye', 'light',
-              'thought', 'head', 'under', 'story', 'saw', 'left', 'don\'t', 'few', 'while',
-              'along', 'might', 'close', 'something', 'seem', 'next', 'hard', 'open',
-              'example', 'begin', 'life', 'always', 'those', 'both', 'paper', 'together',
-              'got', 'group', 'often', 'run', 'important', 'until', 'children', 'side',
-              'feet', 'car', 'mile', 'night', 'walk', 'white', 'sea', 'began', 'grow',
-              'took', 'river', 'four', 'carry', 'state', 'once', 'book', 'hear', 'stop',
-              'without', 'second', 'later', 'miss', 'idea', 'enough', 'eat', 'face',
-              'watch', 'far', 'indian', 'really', 'almost', 'let', 'above', 'girl',
-              'sometimes', 'mountain', 'cut', 'young', 'talk', 'soon', 'list', 'song',
-              'leave', 'family', 'it\'s'
-            ])
-
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Track original case variants and frequency using lowercase keys
-            const wordFrequency = new Map()
-            const originalCaseMap = new Map() // lowercase -> most common original case variant
-
-            words.forEach(word => {
-              const trimmed = word.trim()
-              if (trimmed.length === 0) return
-
-              // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Generate lowercase version for case-insensitive operations
-              const lowerWord = trimmed.toLowerCase()
-
-              // Filter: not a noise word, length >= 2 and <= max tag length, not a number
-              // [REQ-SUGGESTED_TAGS_FROM_CONTENT] Skip only truly overlong tokens (e.g. spaceless title/URL); 50 matches sanitization cap
-              const maxTagLen = 50
-              if (
-                trimmed.length >= 2 &&
-                trimmed.length <= maxTagLen &&
-                !noiseWords.has(lowerWord) &&
-                !/^\d+$/.test(trimmed)
-              ) {
-                // Track frequency using lowercase key (groups case variants together)
-                const count = wordFrequency.get(lowerWord) || 0
-                wordFrequency.set(lowerWord, count + 1)
-
-                // Track original case variants - keep the first occurrence of each original case
-                if (!originalCaseMap.has(lowerWord)) {
-                  originalCaseMap.set(lowerWord, trimmed)
-                }
-              }
-            })
-
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Build list of tags with both original case and lowercase versions
-            // For words with uppercase letters, include both versions as separate tags
-            // For words already lowercase, include only once
-            const tagsWithVersions = []
-            const seenLowercase = new Set() // Track lowercase versions we've already added
-
-            // Sort by frequency (descending), then alphabetically for ties
-            const sortedEntries = Array.from(wordFrequency.entries())
-              .sort((a, b) => {
-                // Primary sort: frequency (descending)
-                if (b[1] !== a[1]) {
-                  return b[1] - a[1]
-                }
-                // Secondary sort: alphabetically (ascending) using lowercase
-                return a[0].localeCompare(b[0])
-              })
-
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] For each word, add original case version and lowercase version (if different)
-            for (const [lowerWord, frequency] of sortedEntries) {
-              const originalCase = originalCaseMap.get(lowerWord) || lowerWord
-
-              // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Add original case version
-              tagsWithVersions.push({ tag: originalCase, lowerTag: lowerWord, frequency })
-
-              // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] If word contains uppercase letters, also add lowercase version
-              // Only add lowercase version if it's different from original and we haven't seen it yet
-              if (originalCase !== lowerWord && !seenLowercase.has(lowerWord)) {
-                tagsWithVersions.push({ tag: lowerWord, lowerTag: lowerWord, frequency })
-                seenLowercase.add(lowerWord)
-              } else if (originalCase === lowerWord) {
-                // Word is already lowercase, mark it as seen
-                seenLowercase.add(lowerWord)
-              }
-            }
-
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Sort all tags (both versions) by frequency, then alphabetically
-            tagsWithVersions.sort((a, b) => {
-              // Primary sort: frequency (descending)
-              if (b.frequency !== a.frequency) {
-                return b.frequency - a.frequency
-              }
-              // Secondary sort: alphabetically (ascending) using lowercase
-              return a.lowerTag.localeCompare(b.lowerTag)
-            })
-
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Extract tags and apply limit
-            const sortedWords = tagsWithVersions
-              .slice(0, 60) // Allow more entries since we're adding lowercase versions
-              .map(item => item.tag)
-
-            // Simple sanitization (remove special chars, limit length)
-            const sanitizedTags = sortedWords
-              .map(word => word.replace(/[^a-zA-Z0-9_-]/g, '').substring(0, 50))
-              .filter(tag => tag !== null && tag.length > 0)
-
-            // [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] Remove exact duplicates (same string) while preserving both "Git" and "git"
-            const uniqueTags = []
-            const seenExact = new Set() // Track exact strings to avoid true duplicates
-
-            for (const tag of sanitizedTags) {
-              // Only skip if we've seen this exact string before
-              if (!seenExact.has(tag)) {
-                uniqueTags.push(tag)
-                seenExact.add(tag)
-              }
-            }
-
-            return uniqueTags.slice(0, 60) // Final limit
+            const fn = globalThis.__hoverboardExtractSuggestedTagsWithRelevance
+            return typeof fn === 'function' ? fn() : []
           }
         })
 
         if (results && results[0] && results[0].result) {
-          const suggestedTags = results[0].result
-          const currentTags = this.normalizeTags(this.currentPin?.tags || [])
+          const raw = results[0].result
+          const suggestedList = Array.isArray(raw)
+            ? raw
+              .map((entry) => {
+                if (typeof entry === 'string') {
+                  return { tag: entry, relevance: 0, inPageFrequency: 0 }
+                }
+                if (entry && typeof entry === 'object' && typeof entry.tag === 'string') {
+                  return {
+                    tag: entry.tag,
+                    relevance: typeof entry.relevance === 'number' ? entry.relevance : 0,
+                    inPageFrequency: typeof entry.inPageFrequency === 'number' ? entry.inPageFrequency : 0
+                  }
+                }
+                return null
+              })
+              .filter(Boolean)
+            : []
 
-          // [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] - Filter using case-insensitive comparison
-          const currentTagsLower = new Set(currentTags.map(t => t.toLowerCase()))
-          const filteredSuggestedTags = suggestedTags.filter(tag =>
-            tag && !currentTagsLower.has(tag.toLowerCase())
+          const currentTags = this.normalizeTags(this.currentPin?.tags || [])
+          const currentTagsLower = new Set(currentTags.map((t) => t.toLowerCase()))
+          const filteredSuggestedTags = suggestedList.filter(
+            (item) => item.tag && !currentTagsLower.has(item.tag.toLowerCase())
           )
 
           debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Extracted suggested tags:', filteredSuggestedTags)
@@ -1900,6 +1684,8 @@ export class PopupController {
 
     // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after updating bookmark
     await this.loadRecentTags()
+    await this.refreshTagFrequencyMapForSort()
+    this.uiManager.redrawTagChipsFromCache()
 
     // [TAG-SYNC-POPUP-001] - Notify overlay of tag changes
     await this.notifyOverlayOfTagChanges(tags)
@@ -1977,6 +1763,8 @@ export class PopupController {
 
     // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after creating bookmark
     await this.loadRecentTags()
+    await this.refreshTagFrequencyMapForSort()
+    this.uiManager.redrawTagChipsFromCache()
   }
 
   /**

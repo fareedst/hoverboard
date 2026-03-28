@@ -1,6 +1,7 @@
 /**
- * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS]
+ * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-THIS_PAGE_TAG_SORT]
  * Unit tests for popup suggested-tags: restricted-URL skip and injectable-URL extraction.
+ * String results from MAIN extract are normalized to { tag, relevance, inPageFrequency } for UIManager / sort.
  */
 
 import { PopupController } from '../../src/ui/popup/PopupController.js'
@@ -94,41 +95,55 @@ describe('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Popup suggested tags', () => {
   })
 
   describe('loadSuggestedTags injectable URL [REQ-SUGGESTED_TAGS_FROM_CONTENT]', () => {
+    /** MAIN file inject then func inject — loadSuggestedTags awaits both. */
+    function mockMainWorldExtract (rawResult) {
+      chrome.scripting.executeScript
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([{ result: rawResult }])
+    }
+
     test('calls executeScript and updates UI when currentTab.url is https://', async () => {
       popupController.currentTab = { id: 10, url: 'https://example.com/page' }
       popupController.currentPin = { tags: [] }
       popupController.normalizeTags = jest.fn((tags) => tags || [])
-      chrome.scripting.executeScript.mockResolvedValueOnce([{ result: ['suggested1', 'suggested2'] }])
+      mockMainWorldExtract(['suggested1', 'suggested2'])
 
       await popupController.loadSuggestedTags()
 
       expect(chrome.scripting.executeScript).toHaveBeenCalledWith(
         expect.objectContaining({ target: { tabId: 10 } })
       )
-      expect(uiManager.updateSuggestedTags).toHaveBeenCalledWith(['suggested1', 'suggested2'])
+      expect(uiManager.updateSuggestedTags).toHaveBeenCalledWith([
+        { tag: 'suggested1', relevance: 0, inPageFrequency: 0 },
+        { tag: 'suggested2', relevance: 0, inPageFrequency: 0 }
+      ])
     })
 
     test('calls executeScript when currentTab.url is http://', async () => {
       popupController.currentTab = { id: 11, url: 'http://example.org' }
       popupController.currentPin = { tags: [] }
       popupController.normalizeTags = jest.fn((tags) => tags || [])
-      chrome.scripting.executeScript.mockResolvedValueOnce([{ result: ['httpTag'] }])
+      mockMainWorldExtract(['httpTag'])
 
       await popupController.loadSuggestedTags()
 
       expect(chrome.scripting.executeScript).toHaveBeenCalled()
-      expect(uiManager.updateSuggestedTags).toHaveBeenCalledWith(['httpTag'])
+      expect(uiManager.updateSuggestedTags).toHaveBeenCalledWith([
+        { tag: 'httpTag', relevance: 0, inPageFrequency: 0 }
+      ])
     })
 
     test('deduplicates suggested tags against current bookmark tags (case-insensitive)', async () => {
       popupController.currentTab = { id: 12, url: 'https://example.com' }
       popupController.currentPin = { tags: ['existing', 'Suggested1'] }
       popupController.normalizeTags = jest.fn((tags) => tags || [])
-      chrome.scripting.executeScript.mockResolvedValueOnce([{ result: ['suggested1', 'suggested2', 'existing'] }])
+      mockMainWorldExtract(['suggested1', 'suggested2', 'existing'])
 
       await popupController.loadSuggestedTags()
 
-      expect(uiManager.updateSuggestedTags).toHaveBeenCalledWith(['suggested2'])
+      expect(uiManager.updateSuggestedTags).toHaveBeenCalledWith([
+        { tag: 'suggested2', relevance: 0, inPageFrequency: 0 }
+      ])
     })
   })
 

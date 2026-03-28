@@ -64,6 +64,72 @@
   display: none !important;
 }
 
+/* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Tag label casing toggle (This Page tag lists) */
+.tag-case-folding {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.tag-case-folding-label {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #999);
+  margin-right: 0.25rem;
+}
+
+.tag-case-folding-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.tag-case-folding .tag-case-mode-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  min-height: auto;
+  line-height: 1.2;
+}
+
+.tag-case-folding .tag-case-mode-btn[aria-pressed='true'] {
+  background: var(--bg-active, #444);
+  border-color: var(--accent, #5a9);
+}
+
+/* [REQ-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT] Tag list sort toggle (matches tag-case-folding row) */
+.tag-sort-toggle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.tag-sort-toggle-label {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #999);
+  margin-right: 0.25rem;
+}
+
+.tag-sort-toggle-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.tag-sort-toggle .tag-sort-mode-btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  min-height: auto;
+  line-height: 1.2;
+}
+
+.tag-sort-toggle .tag-sort-mode-btn[aria-pressed='true'] {
+  background: var(--bg-active, #444);
+  border-color: var(--accent, #5a9);
+}
+
 /* [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] Override popup body constraints so panel uses full viewport height and width; max-height none and width 100% implement "tab content fills vertical space". */
 #side-panel-page {
   display: flex;

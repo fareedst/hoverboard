@@ -1,0 +1,106 @@
+# [PROC-CITDP] [PROC-AGENT_REQ_CHECKLIST] Change Impact and Test Design Procedure — persisted record
+# Client: hoverboard (workspace root = repository containing project tied/)
+# Policy: tied/docs/citdp-policy.md referenced by checklist; file absent in this client — record created per S15 mandate.
+record_identity:
+  change_request_id: REQ-THIS_PAGE_TAG_SORT
+  title: Side panel This Page — three-way tag chip sort (A–Z, frequency, relevance)
+  procedure_token: PROC-AGENT_REQ_CHECKLIST
+  procedure_version: v1.0.1
+  session_completed_date: "2026-03-27"
+  primary_tokens:
+    - REQ-THIS_PAGE_TAG_SORT
+    - ARCH-THIS_PAGE_TAG_SORT
+    - IMPL-THIS_PAGE_TAG_SORT
+  repository_path_note: /Users/fareed/Documents/dev/browser/hoverboard
+change_definition:
+  summary: 'Add a shared sort mode for Current Tags, Recent Tags, and Suggested Tags chip rows on the side panel This Page tab only: alphabetical (case-insensitive display), bookmark usage frequency from hoverboard_tag_frequency, and DOM relevance from MAIN-world suggested-tags flow. Popup unchanged when sort UI absent; no cross-session persistence.'
+  scope_in:
+    - src/shared/tag-chip-sort.js
+    - src/ui/popup/UIManager.js
+    - src/ui/popup/PopupController.js
+    - src/features/tagging/suggested-tags-main-world-snippet.js
+    - src/ui/side-panel/side-panel.html
+    - src/ui/side-panel/side-panel.css
+    - tests/unit and tests/integration and tests/playwright as listed in IMPL traceability
+  scope_out:
+    - Pinboard API contract changes
+    - Persisting sort preference across sessions
+impact_analysis:
+  affected_modules:
+    - name: tag-chip-sort
+      role: Pure comparators and sortTagChipRows
+    - name: UIManager
+      role: Toggle UI, tagFrequencyMap, paint paths for current/recent/suggested
+    - name: PopupController
+      role: refreshTagFrequencyMapForSort, _normalizeHoverboardTagFrequencyMap, loadSuggestedTags inject order
+    - name: side-panel shell
+      role: Markup and CSS for tagSortToggle
+  tied_stack:
+    - REQ-THIS_PAGE_TAG_SORT
+    - ARCH-THIS_PAGE_TAG_SORT
+    - IMPL-THIS_PAGE_TAG_SORT
+    - IMPL-PLAYWRIGHT_E2E_EXTENSION
+    - IMPL-UIManager_SCOPED_ROOT
+    - IMPL-SUGGESTED_TAGS
+  downstream:
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - REQ-SUGGESTED_TAGS_FROM_CONTENT
+    - REQ-UI_INSPECTION
+risk_analysis:
+  risks:
+    - id: R1
+      description: Invalid hoverboard_tag_frequency shape breaking frequency sort
+      mitigation: _normalizeHoverboardTagFrequencyMap coerces to plain object or {}
+      residual: low
+    - id: R2
+      description: MAIN inject ordering or snippet failure emptying suggested tags
+      mitigation: Documented two-step inject; filter and empty-on-error paths in IMPL pseudo-code
+      residual: low
+    - id: R3
+      description: Side panel vs popup behavioral drift
+      mitigation: Gate sort on tagSortToggle presence; explicit REQ criteria for popup
+      residual: low
+test_strategy:
+  classification:
+    unit:
+      - tag-chip-sort comparators and tie-breaks
+      - UIManager sort paths with toggle shim
+      - PopupController suggested inject and frequency refresh normalization
+    integration_composition:
+      - loadInitialData ordering refreshTagFrequencyMapForSort before updateCurrentTags
+      - setupEventListeners data-sort-mode to setTagSortMode
+    e2e_only:
+      surface: Real chrome-extension:// side panel document with bundled side-panel.js/css
+      reason: Chromium MV3 extension origin and side-panel host not reproducible in JSDOM; see IMPL-THIS_PAGE_TAG_SORT.phase_h_e2e_only_surface.e2e_only_reason
+      spec: tests/playwright/extension-this-page-tag-sort.spec.js
+tdd_sequence:
+  s09_unit:
+    summary: RED/GREEN/REFACTOR for sort module, UIManager, PopupController paths; SYNC pseudo-code and token order
+    key_artifacts:
+      - tests/unit/tag-chip-sort.test.js
+      - tests/unit/uIManager-tag-case-folding.test.js
+      - tests/unit/popup-suggested-tags.test.js
+      - tests/unit/popup-refresh-tag-frequency-map.test.js
+  s10_composition:
+    summary: Failing integration tests first for bindings; then green
+    key_artifacts:
+      - tests/integration/this-page-tag-sort-composition.integration.test.js
+  s11_e2e:
+    summary: Playwright spec for side panel toolbar visibility and aria-pressed after click
+    key_artifacts:
+      - tests/playwright/extension-this-page-tag-sort.spec.js
+completion_criteria:
+  s12_gates:
+    - Full Jest suite pass (unit + integration)
+    - npm run test:e2e:extension pass
+    - npm run lint (src) and npm run typecheck pass
+    - scripts/validate_tokens.sh pass
+    - tied_validate_consistency ok true
+  s13_sync:
+    - REQ and ARCH detail traceability aligned with IMPL and shipped tests
+  s14_docs:
+    - README.md and CHANGELOG.md updated for user and release notes
+leap_feedback:
+  divergences_from_analysis: 'Minor: MCP yaml_detail_update merged IMPL validation_evidence; prior single entry restored to two-entry list in same session. Essence_pseudocode stored as flow scalar in YAML after MCP merge (formatting only).'
+  tied_stack_updates_required: false
+  record_status: complete

@@ -1,66 +1,72 @@
 IMPL-PLAYWRIGHT_E2E_EXTENSION:
-  name: Playwright E2E for extension (load unpacked, popup flow)
-  status: Active
+  name: "Playwright E2E for extension (load unpacked, popup flow)"
+  status: "Active"
   cross_references:
-    - REQ-UI_INSPECTION
-    - ARCH-UI_TESTABILITY
+    - "REQ-UI_INSPECTION"
+    - "ARCH-UI_TESTABILITY"
   rationale:
-    why: One reliable E2E flow that loads the built extension and asserts popup so refactors are guarded
+    why: "One reliable E2E flow that loads the built extension and asserts popup so refactors are guarded"
     problems_solved:
-      - No real-extension E2E; Jest E2E in tests/e2e does not load the extension
+      - "No real-extension E2E; Jest E2E in tests/e2e does not load the extension"
     benefits:
-      - Load unpacked dist/, open popup, assert structure; run in CI
+      - "Load unpacked dist/, open popup, assert structure; run in CI"
   implementation_approach:
-    summary: playwright.extension.config.js (no web server); global-setup builds extension; shared extension-fixture.js provides launchPersistentContext and getExtensionId; multiple specs cover popup, messaging, evaluation contexts, overlay, options, side panel, and lower-priority UIs.
+    summary: "playwright.extension.config.js (no web server); global-setup builds extension; shared extension-fixture.js provides launchPersistentContext and getExtensionId; multiple specs cover popup, messaging, evaluation contexts, overlay, options, side panel, and lower-priority UIs."
     details:
-      - tests/playwright/global-setup.js runs npm run build:only
-      - tests/playwright/extension-fixture.js: launchExtensionContext, getExtensionId, shared test fixture; used by all extension specs
-      - tests/playwright/extension-popup.spec.js: popup structure after load
-      - tests/playwright/extension-messaging.spec.js: popup↔background (GET_OPTIONS, GET_TAB_ID), popup→content (TOGGLE_HOVER, GET_OVERLAY_STATE), content↔background, options↔background (NATIVE_PING), side panel↔background (getAggregatedBookmarksForIndex), options page snapshot (snapshotOptions), side panel snapshot (snapshotSidePanel; IMPL-SIDE_PANEL_SNAPSHOT)
-      - tests/playwright/extension-evaluation.spec.js: GET_PAGE_CONTENT (SW executeScript), suggested tags (MAIN world), GET_PAGE_SELECTION, overlay visibility (snapshotOverlay)
-      - tests/playwright/extension-lower.spec.js: bookmarks table, browser bookmark import, READ_FILE_BOOKMARKS (offscreen)
-      - npm run test:e2e:extension runs Playwright with playwright.extension.config.js
+      - "tests/playwright/global-setup.js runs npm run build:only"
+      - tests/playwright/extension-fixture.js: "launchExtensionContext, getExtensionId, shared test fixture; used by all extension specs"
+      - tests/playwright/extension-popup.spec.js: "popup structure after load"
+      - tests/playwright/extension-messaging.spec.js: "popup↔background (GET_OPTIONS, GET_TAB_ID), popup→content (TOGGLE_HOVER, GET_OVERLAY_STATE), content↔background, options↔background (NATIVE_PING), side panel↔background (getAggregatedBookmarksForIndex), options page snapshot (snapshotOptions), side panel snapshot (snapshotSidePanel; IMPL-SIDE_PANEL_SNAPSHOT)"
+      - tests/playwright/extension-evaluation.spec.js: "GET_PAGE_CONTENT (SW executeScript), suggested tags (MAIN world), GET_PAGE_SELECTION, overlay visibility (snapshotOverlay)"
+      - tests/playwright/extension-lower.spec.js: "bookmarks table, browser bookmark import, READ_FILE_BOOKMARKS (offscreen)"
+      - tests/playwright/extension-this-page-tag-sort.spec.js: "side panel tag sort toolbar in real chrome-extension:// document (REQ/IMPL-THIS_PAGE_TAG_SORT Phase H)"
+      - "npm run test:e2e:extension runs Playwright with playwright.extension.config.js"
   code_locations:
     files:
-      - path: playwright.extension.config.js
-        description: Config for extension E2E only
-      - path: tests/playwright/global-setup.js
-        description: Builds extension before E2E
-      - path: tests/playwright/extension-fixture.js
-        description: Shared fixture and getExtensionId helper
-      - path: tests/playwright/extension-popup.spec.js
-        description: Extension popup E2E spec
-      - path: tests/playwright/extension-messaging.spec.js
-        description: Messaging interfaces E2E
-      - path: tests/playwright/extension-evaluation.spec.js
-        description: Evaluation contexts and overlay E2E
-      - path: tests/playwright/extension-lower.spec.js
-        description: Lower-priority UIs and offscreen E2E
+      - path: "playwright.extension.config.js"
+        description: "Config for extension E2E only"
+      - path: "tests/playwright/global-setup.js"
+        description: "Builds extension before E2E"
+      - path: "tests/playwright/extension-fixture.js"
+        description: "Shared fixture and getExtensionId helper"
+      - path: "tests/playwright/extension-popup.spec.js"
+        description: "Extension popup E2E spec"
+      - path: "tests/playwright/extension-messaging.spec.js"
+        description: "Messaging interfaces E2E"
+      - path: "tests/playwright/extension-evaluation.spec.js"
+        description: "Evaluation contexts and overlay E2E"
+      - path: "tests/playwright/extension-lower.spec.js"
+        description: "Lower-priority UIs and offscreen E2E"
+      - path: "tests/playwright/extension-this-page-tag-sort.spec.js"
+        description: "Side panel tag sort toolbar E2E (IMPL-THIS_PAGE_TAG_SORT Phase H surface)"
     functions: []
   traceability:
     architecture:
-      - ARCH-UI_TESTABILITY
-      - ARCH-MESSAGE_HANDLING
+      - "ARCH-UI_TESTABILITY"
+      - "ARCH-MESSAGE_HANDLING"
     requirements:
-      - REQ-UI_INSPECTION
-      - REQ-AI_TAGGING_POPUP
+      - "REQ-UI_INSPECTION"
+      - "REQ-AI_TAGGING_POPUP"
+      - "REQ-THIS_PAGE_TAG_SORT"
     tests:
-      - tests/playwright/extension-popup.spec.js
-      - tests/playwright/extension-messaging.spec.js
-      - tests/playwright/extension-evaluation.spec.js
-      - tests/playwright/extension-lower.spec.js
+      - "tests/playwright/extension-popup.spec.js"
+      - "tests/playwright/extension-messaging.spec.js"
+      - "tests/playwright/extension-evaluation.spec.js"
+      - "tests/playwright/extension-lower.spec.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
     code_annotations:
-      - IMPL-PLAYWRIGHT_E2E_EXTENSION
+      - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
   related_decisions:
     depends_on: []
     supersedes: []
     see_also: []
-  detail_file: implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml
+  detail_file: "implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml"
   metadata:
-    created:
-      date: "2026-02-22"
-      author: AI Agent
     last_updated:
-      date: "2026-02-25"
-      author: AI Agent
-      reason: Added messaging, evaluation, overlay, options snapshot, side panel, and lower-priority E2E specs per plan
+      date: "2026-03-27"
+      author: "AI Agent"
+      reason: "S12 Phase I: full Playwright suite 37 passed (1 skipped); npm run lint + typecheck + validate:tokens + tied_validate_consistency"
+  validation_evidence:
+    - date: "2026-03-27"
+      result: "pass"
+      notes: "S12 Phase I: npm run test:e2e:extension; REQ-MODULE_VALIDATION: extension E2E as integration of dist build + Chromium + unpacked extension load"

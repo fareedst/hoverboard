@@ -32,4 +32,15 @@ export default defineConfig([
       "prefer-promise-reject-errors": "off",
     },
   },
+  {
+    files: ["tests/**/*.js"],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: "module",
+      globals: {
+        ...globals.browser,
+        ...globals.jest,
+      },
+    },
+  },
 ]);
