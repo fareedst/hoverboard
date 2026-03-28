@@ -1,0 +1,70 @@
+REQ-RECENT_TAGS_SYSTEM:
+  name: Recent Tags System
+  category: Immutable
+  priority: P0
+  status: Implemented
+  description: 'User-driven recent tags MUST appear in This Page tag UI (popup and side panel). Recent tag candidates MUST survive Manifest V3 service worker restarts via persisted state (e.g. chrome.storage.local). A single configurable N (recentTagsActivityWindowMinutes) MUST bound: (1) only tags whose lastUsed falls within the last N minutes are offered; (2) if no qualifying Hoverboard tag activity occurred for N minutes, the entire recent list MUST be empty on next read/display. Cross-window: a tag added on a bookmark in one browser window MUST appear in Recent Tags in another window within N minutes when activity is within N minutes. This Page MUST refresh recent tags when the UI is shown (popup visibility; side panel window focus on Bookmark tab). Tags already assigned to the current bookmark remain excluded from Recent chips. Spec alignment: side-panel-this-page-tag-toggles order 4.'
+  rationale:
+    why: Recent tags are core to efficient bookmarking workflow; users expect consistency across windows and sessions within the same browser profile.
+    problems_solved:
+      - Slow tag entry
+      - Difficult tag reuse
+      - Stale or empty recent list after SW sleep or window switch
+    benefits:
+      - Fast bookmarking
+      - Efficient tag reuse
+      - Predictable time-bounded suggestions
+  satisfaction_criteria:
+    - criterion: Recent tags displayed in This Page tag sections (popup and side panel)
+    - criterion: User recent tag state persisted across service worker lifecycle
+    - criterion: Within N minutes and with qualifying activity, tag added in window A appears in Recent Tags in window B unless already on current bookmark
+    - criterion: After N minutes without qualifying Hoverboard tag activity, Recent Tags list is empty on next display
+    - criterion: Tags with lastUsed older than N minutes are not offered
+    - criterion: Side panel refreshes recent tags when its browser window gains focus while Bookmark tab is active
+  validation_criteria:
+    - method: Unit tests
+      coverage: tests/unit/recent-tags-memory-policy.test.js (idle + rolling window policy)
+    - method: Unit tests
+      coverage: tests/unit/tag-recent-behavior.test.js; message-handler recent paths
+    - method: Unit tests
+      coverage: tests/unit/side-panel-tabs.test.js — shouldInvokeLoadRecentTagsOnWindowFocusSync (IMPL-SIDE_PANEL_TABS)
+    - method: Integration tests
+      coverage: tests/integration/window-focus-recent-tags-composition.integration.test.js — bindWindowFocusRecentTagsRefresh wiring
+    - method: Playwright E2E
+      coverage: tests/playwright/extension-side-panel-recent-tags-e2e.spec.js — This Page Recent Tags in chrome-extension side panel
+    - method: Manual / E2E optional
+      coverage: Two-window add-tag then focus side panel within N minutes (cross-window; e2e_only per IMPL-SIDE_PANEL_TABS)
+  traceability:
+    architecture:
+      - ARCH-TAG_SYSTEM
+      - ARCH-POPUP_SESSION
+      - ARCH-SIDE_PANEL_TABS
+      - ARCH-MESSAGE_HANDLING
+    implementation:
+      - IMPL-TAG_SYSTEM
+      - IMPL-RECENT_TAGS_POPUP_REFRESH
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-MESSAGE_HANDLING
+      - IMPL-CONFIG_STRUCT
+    tests:
+      - tests/unit/recent-tags-memory-policy.test.js
+      - tests/unit/tag-recent-behavior.test.js
+      - tests/unit/tag-recent-tracking.test.js
+      - tests/unit/message-handler-contracts.test.js
+      - tests/unit/side-panel-tabs.test.js
+      - tests/integration/window-focus-recent-tags-composition.integration.test.js
+      - tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
+    code_annotations:
+      - REQ-RECENT_TAGS_SYSTEM
+  related_requirements:
+    depends_on: []
+    related_to:
+      - REQ-TAG_MANAGEMENT
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    supersedes: []
+  detail_file: requirements/REQ-RECENT_TAGS_SYSTEM.yaml
+  metadata:
+    last_updated:
+      date: "2026-03-28"
+      author: AI Agent
+      reason: 'S13 sync: side-panel recent-tags validation + tests'

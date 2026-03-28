@@ -15459,6 +15459,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         recentTagsSharedMemoryKey: external_exports.string().optional(),
         recentTagsEnableUserDriven: external_exports.boolean().optional(),
         recentTagsClearOnReload: external_exports.boolean().optional(),
+        /** N minutes: rolling window for recent-tag use + Hoverboard inactivity expiry ([REQ-RECENT_TAGS_SYSTEM]) */
+        recentTagsActivityWindowMinutes: external_exports.number().int().min(1).max(24 * 60).optional(),
         badgeTextIfNotBookmarked: external_exports.string().optional(),
         badgeTextIfPrivate: external_exports.string().optional(),
         badgeTextIfQueued: external_exports.string().optional(),
@@ -15559,6 +15561,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
             // Enable user-driven recent tags
             recentTagsClearOnReload: true,
             // Clear shared memory on extension reload
+            recentTagsActivityWindowMinutes: 15,
+            // [REQ-RECENT_TAGS_SYSTEM] Same N for tag-age window and idle expiry (spec side-panel order 4)
             // IMPL-FEATURE_FLAGS: Badge configuration - Extension icon indicator settings
             // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
             badgeTextIfNotBookmarked: "-",
@@ -19130,30 +19134,35 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         async getUserRecentTags() {
           try {
             debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Getting user recent tags from shared memory");
+            const getConfig = () => this.configManager.getConfig();
+            const resolveFromMemory = async (memory) => {
+              if (memory && typeof memory.getRecentTagsForUi === "function") {
+                const rows = await memory.getRecentTagsForUi(getConfig);
+                debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (policy):", rows.length);
+                return rows;
+              }
+              if (memory && typeof memory.getRecentTags === "function") {
+                const recentTags = memory.getRecentTags();
+                debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (legacy getRecentTags):", recentTags.length);
+                return recentTags.sort((a, b) => {
+                  const dateA = new Date(a.lastUsed);
+                  const dateB = new Date(b.lastUsed);
+                  return dateB - dateA;
+                });
+              }
+              return null;
+            };
             const directMemory = this.getDirectSharedMemory();
-            if (directMemory) {
-              const recentTags2 = directMemory.getRecentTags();
-              debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from direct shared memory:", recentTags2.length);
-              const sortedTags2 = recentTags2.sort((a, b) => {
-                const dateA = new Date(a.lastUsed);
-                const dateB = new Date(b.lastUsed);
-                return dateB - dateA;
-              });
-              return sortedTags2;
-            }
+            const fromDirect = await resolveFromMemory(directMemory);
+            if (fromDirect != null) return fromDirect;
             const backgroundPage = await this.getBackgroundPage();
             if (!backgroundPage || !backgroundPage.recentTagsMemory) {
               debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] No shared memory found, returning empty array");
               return [];
             }
-            const recentTags = backgroundPage.recentTagsMemory.getRecentTags();
-            debugLog2("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from shared memory:", recentTags.length);
-            const sortedTags = recentTags.sort((a, b) => {
-              const dateA = new Date(a.lastUsed);
-              const dateB = new Date(b.lastUsed);
-              return dateB - dateA;
-            });
-            return sortedTags;
+            const fromBg = await resolveFromMemory(backgroundPage.recentTagsMemory);
+            if (fromBg != null) return fromBg;
+            return [];
           } catch (error48) {
             debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to get user recent tags:", error48);
             return [];

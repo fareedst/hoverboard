@@ -15,7 +15,8 @@ import {
   getTagsTreeInitOptions,
   shouldRefreshBookmarkTabWhenSwitching,
   shouldRefreshBookmarkTabOnTabChange,
-  shouldRefreshTagsTreeTabOnTabChange
+  shouldRefreshTagsTreeTabOnTabChange,
+  shouldInvokeLoadRecentTagsOnWindowFocusSync
 } from '../../src/ui/side-panel/side-panel-tab-state.js'
 
 describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Side panel tab state', () => {
@@ -146,6 +147,66 @@ describe('[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQ
         normalizeTags: (t) => (t ? t.split(',').map((s) => s.trim()) : [])
       }
       expect(getTagsTreeInitOptions(controller)).toEqual({ currentBookmarkTags: ['work', 'personal'] })
+    })
+  })
+
+  /**
+   * [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]
+   * Maps essence_pseudocode procedure shouldInvokeLoadRecentTagsOnWindowFocusSync (sync guards used by bindWindowFocusRecentTagsRefresh before loadRecentTags).
+   * Validates OUTPUT/effect predicate: only when hasWindowsApi, activeTab === bookmark, controller initialized, and not loading
+   * should the panel invoke loadRecentTags (async window-id match is layered separately in side-panel.js).
+   */
+  describe('shouldInvokeLoadRecentTagsOnWindowFocusSync [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]', () => {
+    test('returns true when all sync guards pass (effect: loadRecentTags may run per pseudo)', () => {
+      expect(
+        shouldInvokeLoadRecentTagsOnWindowFocusSync({
+          hasWindowsApi: true,
+          activeTab: TAB_BOOKMARK,
+          isInitialized: true,
+          isLoading: false
+        })
+      ).toBe(true)
+    })
+
+    test('returns false when activeTab is not bookmark (no loadRecentTags)', () => {
+      expect(
+        shouldInvokeLoadRecentTagsOnWindowFocusSync({
+          hasWindowsApi: true,
+          activeTab: TAB_TAGS_TREE,
+          isInitialized: true,
+          isLoading: false
+        })
+      ).toBe(false)
+    })
+
+    test('returns false when controller not initialized or loading (no loadRecentTags)', () => {
+      expect(
+        shouldInvokeLoadRecentTagsOnWindowFocusSync({
+          hasWindowsApi: true,
+          activeTab: TAB_BOOKMARK,
+          isInitialized: false,
+          isLoading: false
+        })
+      ).toBe(false)
+      expect(
+        shouldInvokeLoadRecentTagsOnWindowFocusSync({
+          hasWindowsApi: true,
+          activeTab: TAB_BOOKMARK,
+          isInitialized: true,
+          isLoading: true
+        })
+      ).toBe(false)
+    })
+
+    test('returns false when windows API missing (early RETURN in pseudo)', () => {
+      expect(
+        shouldInvokeLoadRecentTagsOnWindowFocusSync({
+          hasWindowsApi: false,
+          activeTab: TAB_BOOKMARK,
+          isInitialized: true,
+          isLoading: false
+        })
+      ).toBe(false)
     })
   })
 })

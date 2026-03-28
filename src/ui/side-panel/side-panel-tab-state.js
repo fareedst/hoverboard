@@ -81,6 +81,23 @@ export function shouldRefreshTagsTreeTabOnTabChange (activeTab, tagsTreeTabInite
 }
 
 /**
+ * [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]
+ * Sync guards for bindWindowFocusRecentTagsRefresh before controller.loadRecentTags(): mirrors pseudo IF branches
+ * (windows API present, activeTab === bookmark, controller initialized, not loading). Window-id match stays in side-panel.js callback.
+ * @param {{ hasWindowsApi: boolean, activeTab: string, isInitialized: boolean, isLoading: boolean }} o
+ * @returns {boolean} true when loadRecentTags should be invoked (subject to async getCurrent checks)
+ */
+export function shouldInvokeLoadRecentTagsOnWindowFocusSync (o) {
+  const { hasWindowsApi, activeTab, isInitialized, isLoading } = o
+  return !!(
+    hasWindowsApi &&
+    activeTab === TAB_BOOKMARK &&
+    isInitialized &&
+    !isLoading
+  )
+}
+
+/**
  * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TAGS_TREE]
  * Returns options for initTagsTreeTab so the Tags tree tab displays the current URL's DB record (tag selector and tree reflect current bookmark tags). Pure helper; used on panel load when restored tab is Tags tree and when switching to Tags tree in switchTab.
  * @param {{ currentPin?: { tags?: string|string[] }, normalizeTags: (t: *) => string[] } | null | undefined} controller - PopupController-like object with currentPin and normalizeTags

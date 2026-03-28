@@ -41,6 +41,8 @@ const mergedConfigSchema = z.object({
   recentTagsSharedMemoryKey: z.string().optional(),
   recentTagsEnableUserDriven: z.boolean().optional(),
   recentTagsClearOnReload: z.boolean().optional(),
+  /** N minutes: rolling window for recent-tag use + Hoverboard inactivity expiry ([REQ-RECENT_TAGS_SYSTEM]) */
+  recentTagsActivityWindowMinutes: z.number().int().min(1).max(24 * 60).optional(),
   badgeTextIfNotBookmarked: z.string().optional(),
   badgeTextIfPrivate: z.string().optional(),
   badgeTextIfQueued: z.string().optional(),
@@ -125,6 +127,7 @@ export class ConfigManager {
       recentTagsSharedMemoryKey: 'hoverboard_recent_tags_shared', // Shared memory key
       recentTagsEnableUserDriven: true, // Enable user-driven recent tags
       recentTagsClearOnReload: true, // Clear shared memory on extension reload
+      recentTagsActivityWindowMinutes: 15, // [REQ-RECENT_TAGS_SYSTEM] Same N for tag-age window and idle expiry (spec side-panel order 4)
 
       // IMPL-FEATURE_FLAGS: Badge configuration - Extension icon indicator settings
       // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states

@@ -1,0 +1,80 @@
+ARCH-TAG_SYSTEM:
+  name: Tag System Architecture
+  status: Active
+  cross_references:
+    - REQ-RECENT_TAGS_SYSTEM
+    - REQ-TAG_MANAGEMENT
+    - REQ-TAG_INPUT_SANITIZATION
+  decision: Centralize tag sanitization, user-driven recent-tag persistence and time policy in the service worker, expose recent list to UI via TagService and message types; popup refreshes on visibility, side panel refreshes on window focus while Bookmark tab is active.
+  rationale:
+    why: Tags must be safe, reusable, and consistent across extension contexts; MV3 service workers are ephemeral so user-recent tags need durable storage and explicit refresh triggers in each UI surface.
+    problems_solved:
+      - Slow tag entry
+      - XSS via tag strings
+      - Stale or empty recent tags after SW sleep or when switching browser windows
+      - Cross-window surprise when recent list does not update
+    benefits:
+      - Fast tag reuse
+      - Secure handling
+      - Predictable N-minute window and idle semantics
+      - Single source of truth in background + storage
+  alternatives_considered:
+    - name: In-memory recent tags only
+      pros:
+        - Simple
+      cons:
+        - Lost on worker restart
+        - Poor cross-window reliability
+      rejected_reason: Violates REQ-RECENT_TAGS_SYSTEM persistence and cross-window expectations
+    - name: Separate idle TTL and tag-age TTL
+      pros:
+        - Finer control
+      cons:
+        - More config and cognitive load
+      rejected_reason: REQ specifies single N for both rules
+  implementation_approach:
+    summary: 'TagService sanitizes input. User-recent list lives in RecentTagsMemoryManager in the service worker with chrome.storage.local snapshot (tags + lastActivityAt). On read, apply policy: if now minus lastActivityAt exceeds N minutes, clear; else filter entries by lastUsed within N minutes. Config key recentTagsActivityWindowMinutes (default 15). TagService.getUserRecentTags uses getRecentTagsForUi when available. Mutations (addTagToUserRecentList) update lastActivityAt and persist. MessageHandler routes getRecentBookmarks and addTagToRecent. UI: PopupController visibilitychange loadRecentTags (ARCH-POPUP_SESSION / IMPL-RECENT_TAGS_POPUP_REFRESH); side panel chrome.windows.onFocusChanged plus getCurrent refreshes loadRecentTags when Bookmark tab active (ARCH-SIDE_PANEL_TABS). Browser runtime.onStartup clears persisted user-recent state for a fresh profile session.'
+    details:
+      - Sanitize before add/display per REQ-TAG_INPUT_SANITIZATION
+      - Do not treat opening the panel alone as activity; only tag mutations refresh lastActivityAt
+      - Exclude tags already on current bookmark in UI layer as today
+  traceability:
+    requirements:
+      - REQ-RECENT_TAGS_SYSTEM
+      - REQ-TAG_MANAGEMENT
+      - REQ-TAG_INPUT_SANITIZATION
+    implementation:
+      - IMPL-TAG_SYSTEM
+      - IMPL-MESSAGE_HANDLING
+      - IMPL-RECENT_TAGS_POPUP_REFRESH
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-CONFIG_STRUCT
+    tests:
+      - tests/unit/tag-recent-behavior.test.js
+      - tests/unit/recent-tags-memory-policy.test.js
+      - tests/unit/message-handler-contracts.test.js
+      - tests/unit/side-panel-tabs.test.js
+    code_annotations:
+      - ARCH-TAG_SYSTEM
+  related_decisions:
+    depends_on: []
+    informs:
+      - IMPL-TAG_SYSTEM
+    see_also:
+      - ARCH-MESSAGE_HANDLING
+      - ARCH-SIDE_PANEL_TABS
+      - ARCH-POPUP_SESSION
+      - ARCH-SUGGESTED_TAGS
+  validation_evidence:
+    - date: "2026-03-28"
+      result: pass
+      notes: S05 ARCH detail + index alignment; unit tests listed in traceability
+  detail_file: architecture-decisions/ARCH-TAG_SYSTEM.yaml
+  metadata:
+    created:
+      date: "2025-07-14"
+      author: AI Agent
+    last_updated:
+      date: "2026-03-28"
+      author: AI Agent
+      reason: 'S05: persistence, N-minute policy, cross-window, UI refresh boundaries'

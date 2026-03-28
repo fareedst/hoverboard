@@ -148,3 +148,24 @@
         The suggested tag mode is upper case.
       then: >-
         The suggested tag is "APPLE".
+
+- order: 4
+  feature_name: The list of recent tags is refreshed when displayed.
+  goal: >-
+    The list of recent tags contains tags used in the last N minutes in other windows.
+  rules:
+    - After adding a tag "T" in one window, and then switching to another window, the tag "T" must be offered as a recent tag unless it's already an assigned tag.
+    - After N minutes of inactivity, all recent tags are forgotten. eg, if the user activates Hoverboard after N minutes of inactivity, the recent tag list is empty.
+  examples:
+    - given: >-
+        A tag "bee" is added to the bookmark for window 1.
+      when: >-
+        The user switches to window 2 and the side-panel is displayed (within N minutes).
+      then: >-
+        The recent tag list must include "bee".
+    - given: >-
+        The recent tag list has tag "cod". The user has not interacted with Hoverboard for N minutes.
+      when: >-
+        The side-panel is displayed.
+      then: >-
+        The recent tag list must be empty.

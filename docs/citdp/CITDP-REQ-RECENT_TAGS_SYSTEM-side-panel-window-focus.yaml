@@ -1,0 +1,216 @@
+# [PROC-CITDP] [PROC-AGENT_REQ_CHECKLIST] Change Impact and Test Design Procedure — persisted record
+# Client: hoverboard (workspace root = repository containing project tied/)
+# Policy: tied/docs/citdp-policy.md referenced by checklist; file absent in this client — record created per S15 mandate.
+record_identity:
+  change_request_id: REQ-RECENT_TAGS_SYSTEM-side-panel-window-focus
+  title: Side panel This Page — Recent Tags refresh when browser window gains focus
+  procedure_token: PROC-AGENT_REQ_CHECKLIST
+  procedure_version: v1.0.1
+  session_completed_date: "2026-03-28"
+  s15_persisted_date: "2026-03-28"
+  citdp_record_path: docs/citdp/CITDP-REQ-RECENT_TAGS_SYSTEM-side-panel-window-focus.yaml
+  primary_tokens:
+    - REQ-RECENT_TAGS_SYSTEM
+    - ARCH-SIDE_PANEL_TABS
+    - ARCH-TAG_SYSTEM
+    - IMPL-SIDE_PANEL_TABS
+    - IMPL-RECENT_TAGS_POPUP_REFRESH
+  risk_scope_tokens:
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - IMPL-SIDE_PANEL_BOOKMARK
+    - IMPL-MESSAGE_HANDLING
+    - IMPL-TAG_SYSTEM
+    - IMPL-PLAYWRIGHT_E2E_EXTENSION
+  repository_path_note: /Users/fareed/Documents/dev/browser/hoverboard
+change_definition:
+  summary: 'Implement REQ-RECENT_TAGS_SYSTEM side-panel behavior: when the side panel browser window gains focus and the active tab is This Page (bookmark), call PopupController.loadRecentTags() after chrome.windows.getCurrent confirms the focused window, using sync guards (windows API present, Bookmark tab, controller initialized, not loading). Extract pure predicate shouldInvokeLoadRecentTagsOnWindowFocusSync in side-panel-tab-state.js; register chrome.windows.onFocusChanged in bindWindowFocusRecentTagsRefresh (side-panel.js). Same getRecentBookmarks family as popup visibility path ([IMPL-RECENT_TAGS_POPUP_REFRESH]).'
+  refinements_post_s02:
+    - Export bindWindowFocusRecentTagsRefresh and setActiveTabForTest for Phase G composition tests; three-way token alignment (IMPL pseudo, tests, JSDoc) per S09.SYNC.
+    - 'Phase H: Playwright extension-side-panel-recent-tags-e2e.spec.js for real chrome-extension:// Recent Tags mount; test.skip documents multi-window e2e_only gap (phase_h_window_focus_recent_tags_cross_window).'
+  scope_in:
+    - src/ui/side-panel/side-panel.js
+    - src/ui/side-panel/side-panel-tab-state.js
+    - tests/unit/side-panel-tabs.test.js
+    - tests/integration/window-focus-recent-tags-composition.integration.test.js
+    - tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
+    - tied/implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
+    - tied/requirements (REQ-RECENT_TAGS_SYSTEM index + detail traceability)
+    - tied/architecture-decisions (ARCH-SIDE_PANEL_TABS traceability.tests)
+    - README.md
+    - CHANGELOG.md
+  scope_out:
+    - Popup visibilitychange path for Recent Tags (existing IMPL-RECENT_TAGS_POPUP_REFRESH)
+    - TagService persistence policy (recentTagsActivityWindowMinutes) — unchanged
+    - Multi-window OS-level focus proof in Playwright (fixture limitation)
+impact_analysis:
+  affected_modules:
+    - name: side-panel-tab-state
+      role: Pure predicate shouldInvokeLoadRecentTagsOnWindowFocusSync; TAB_* constants used by side-panel.js
+    - name: side-panel.js
+      role: bindWindowFocusRecentTagsRefresh listener; getCurrent callback; delegates to controller.loadRecentTags
+    - name: PopupController (composed)
+      role: loadRecentTags unchanged contract; invoked from focus path
+  tied_stack:
+    - REQ-RECENT_TAGS_SYSTEM
+    - ARCH-SIDE_PANEL_TABS
+    - ARCH-TAG_SYSTEM
+    - IMPL-SIDE_PANEL_TABS
+    - IMPL-RECENT_TAGS_POPUP_REFRESH
+  downstream:
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - IMPL-SIDE_PANEL_BOOKMARK
+    - IMPL-PLAYWRIGHT_E2E_EXTENSION
+risk_analysis:
+  risks:
+    - id: R1
+      description: bindTabChangeRefresh refreshPopupData and bindWindowFocusRecentTagsRefresh loadRecentTags run close together — redundant work or transient UI flicker
+      severity: low
+      likelihood: medium
+      tied_token_references:
+        - IMPL-SIDE_PANEL_TABS
+        - REQ-RECENT_TAGS_SYSTEM
+      mitigation: Both paths idempotent for Recent Tags / currentPin; documented in IMPL essence_pseudocode composition note
+      residual: low
+    - id: R2
+      description: chrome.windows or getCurrent unavailable — listener not registered; Recent Tags stale until tab switch
+      severity: low
+      likelihood: low
+      tied_token_references:
+        - ARCH-SIDE_PANEL_TABS
+        - IMPL-SIDE_PANEL_TABS
+      mitigation: hasWindowsApi guard; early RETURN; unit and composition tests cover incomplete API
+      residual: low
+    - id: R3
+      description: chrome.runtime.lastError in getCurrent callback suppresses loadRecentTags incorrectly or masks real errors
+      severity: medium
+      likelihood: low
+      tied_token_references:
+        - IMPL-SIDE_PANEL_TABS
+      mitigation: Match pseudo RETURN on lastError; composition test asserts no loadRecentTags when lastError set
+      residual: low
+    - id: R4
+      description: Playwright cannot prove true multi-window focus parity for REQ cross-window narrative
+      severity: low
+      likelihood: high
+      tied_token_references:
+        - REQ-RECENT_TAGS_SYSTEM
+        - IMPL-SIDE_PANEL_TABS
+      mitigation: phase_h_window_focus_recent_tags_cross_window e2e_only_reason; manual two-window check; composition covers single-window wiring
+      residual: medium
+test_strategy:
+  classification:
+    unit:
+      - shouldInvokeLoadRecentTagsOnWindowFocusSync truth table (side-panel-tabs.test.js)
+    integration_composition:
+      - bindWindowFocusRecentTagsRefresh mocked chrome.windows — onFocusChanged → getCurrent → loadRecentTags / guard branches (window-focus-recent-tags-composition.integration.test.js)
+    e2e_only:
+      - surface: Real chrome-extension:// side panel — Recent Tags container populated after loadInitialData
+      - reason: Same family as IMPL-SIDE_PANEL_TABS.phase_h_side_panel_recent_tags_extension_document.e2e_only_reason
+      - spec: tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
+      - cross_window_skip: Multi-window onFocusChanged ordering not modeled in extension Playwright fixture (phase_h_window_focus_recent_tags_cross_window)
+s08_impl_procedure_testability:
+  - impl_token: IMPL-SIDE_PANEL_TABS
+    default_testability: integration
+    blocks:
+      - procedure: shouldInvokeLoadRecentTagsOnWindowFocusSync
+        testability: unit
+        notes: Pure predicate; side-panel-tabs.test.js
+      - procedure: bindWindowFocusRecentTagsRefresh
+        testability: integration
+        notes: chrome.windows listener wiring; window-focus-recent-tags-composition.integration.test.js
+      - procedure: This Page Recent Tags mount (extension document)
+        testability: e2e_only
+        e2e_only_reason: phase_h_side_panel_recent_tags_extension_document
+      - procedure: Cross-window focus refresh proof
+        testability: e2e_only
+        e2e_only_reason: phase_h_window_focus_recent_tags_cross_window
+s08_test_matrix:
+  - test_name: tests/unit/side-panel-tabs.test.js
+    impl_block_ref: IMPL-SIDE_PANEL_TABS — shouldInvokeLoadRecentTagsOnWindowFocusSync
+    req_tokens:
+      - REQ-RECENT_TAGS_SYSTEM
+    token_comments: '[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]'
+    testability: unit
+  - test_name: tests/integration/window-focus-recent-tags-composition.integration.test.js
+    impl_block_ref: IMPL-SIDE_PANEL_TABS — bindWindowFocusRecentTagsRefresh
+    req_tokens:
+      - REQ-RECENT_TAGS_SYSTEM
+    token_comments: '[IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH]'
+    testability: integration
+  - test_name: tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
+    impl_block_ref: IMPL-SIDE_PANEL_TABS — phase_h_side_panel_recent_tags_extension_document
+    req_tokens:
+      - REQ-RECENT_TAGS_SYSTEM
+    token_comments: '[REQ-RECENT_TAGS_SYSTEM] [IMPL-SIDE_PANEL_TABS] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-PLAYWRIGHT_E2E_EXTENSION]'
+    testability: e2e_only
+s08_module_boundaries_req_module_validation:
+  requirement_token: REQ-MODULE_VALIDATION
+  modules:
+    - boundary: side-panel-tab-state.js (predicate)
+      responsibility: Sync guards for window-focus loadRecentTags decision
+      validation_criteria: Unit tests with no chrome dependency for predicate logic
+    - boundary: side-panel.js (listener wiring)
+      responsibility: chrome.windows.onFocusChanged registration and getCurrent flow
+      validation_criteria: Composition tests with mocked chrome.windows and chrome.runtime
+    - boundary: Extension E2E
+      responsibility: Real side panel document + SW messaging for Recent Tags DOM
+      validation_criteria: Playwright spec passes; skipped test documents multi-window gap
+  integration_gate: Composition passes before relying on E2E for wiring; E2E does not replace composition for bindWindowFocusRecentTagsRefresh
+s08_tdd_plan_ordered:
+  - order: 1
+    phase: Unit tests first
+    description: RED for shouldInvokeLoadRecentTagsOnWindowFocusSync; GREEN in side-panel-tab-state.js
+  - order: 2
+    phase: Composition tests first
+    description: RED integration tests for bindWindowFocusRecentTagsRefresh; export hooks as needed
+  - order: 3
+    phase: Composition code
+    description: GREEN side-panel.js listener + alignment with pseudo
+  - order: 4
+    phase: E2E
+    description: Playwright Recent Tags mount; skip placeholder for multi-window
+  - order: 5
+    phase: Validate and sync
+    description: S12 full suite; tied_validate_consistency; S13 index/detail sync; S14 README/CHANGELOG
+tdd_sequence:
+  s09_unit:
+    summary: RED/GREEN/REFACTOR shouldInvokeLoadRecentTagsOnWindowFocusSync; SYNC tokens IMPL/tests/code
+    key_artifacts:
+      - tests/unit/side-panel-tabs.test.js
+      - src/ui/side-panel/side-panel-tab-state.js
+  s10_composition:
+    summary: window-focus-recent-tags-composition.integration.test.js; exports bindWindowFocusRecentTagsRefresh, setActiveTabForTest
+    key_artifacts:
+      - tests/integration/window-focus-recent-tags-composition.integration.test.js
+      - src/ui/side-panel/side-panel.js
+  s11_e2e:
+    summary: extension-side-panel-recent-tags-e2e.spec.js; IMPL phase_h surfaces documented
+    key_artifacts:
+      - tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
+      - tied/implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
+completion_criteria:
+  s12_gates:
+    - Full Jest suite pass (unit + integration)
+    - Jest E2E popup-snapshot when tests/e2e included via testPathIgnorePatterns override
+    - npm run test:e2e:extension pass (Playwright; some skips expected)
+    - npm run lint (src); iteration-scoped test files eslint clean
+    - npm run typecheck pass
+    - scripts/validate_tokens.sh pass
+    - tied_validate_consistency ok true
+    - lint_yaml on changed tied/**/*.yaml
+  s13_sync:
+    - implementation/architecture/requirements indexes aligned with detail for IMPL-SIDE_PANEL_TABS, ARCH-SIDE_PANEL_TABS, REQ-RECENT_TAGS_SYSTEM
+  s14_docs:
+    - README.md and CHANGELOG.md updated for side panel Recent Tags on window focus
+  s15_citdp:
+    - Record at WORKSPACE_ROOT/docs/citdp/CITDP-REQ-RECENT_TAGS_SYSTEM-side-panel-window-focus.yaml
+    - lint_yaml on absolute path per PROC-YAML_EDIT_LOOP
+leap_feedback:
+  divergences_from_analysis: |
+    MCP yaml_detail_update on IMPL-SIDE_PANEL_TABS occasionally truncated implementation_approach.summary and dropped metadata.created; repaired via direct file edit and S13 index sync.
+    test.skip in Playwright documents multi-window e2e_only scope instead of automating two OS windows in the extension fixture.
+  tied_stack_updates_required: false
+  record_status: complete
+  s15_persist:
+    date: "2026-03-28"
+    notes: CITDP YAML per PROC-CITDP step 8 and PROC-AGENT_REQ_CHECKLIST S15; REQ-RECENT_TAGS_SYSTEM side-panel window-focus slice.

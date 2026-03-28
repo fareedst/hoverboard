@@ -344,12 +344,17 @@ if (typeof window !== 'undefined') {
 global.mockBackgroundPage = {
   recentTagsMemory: {
     getRecentTags: jest.fn().mockReturnValue([
-      { name: 'test-tag-1', lastUsed: Date.now() },
-      { name: 'test-tag-2', lastUsed: Date.now() - 1000 },
-      { name: 'test-tag-3', lastUsed: Date.now() - 2000 }
+      { name: 'test-tag-1', lastUsed: '2022-01-01T00:00:02.000Z' },
+      { name: 'test-tag-2', lastUsed: '2022-01-01T00:00:01.000Z' },
+      { name: 'test-tag-3', lastUsed: '2022-01-01T00:00:00.000Z' }
+    ]),
+    getRecentTagsForUi: jest.fn().mockResolvedValue([
+      { name: 'test-tag-1', lastUsed: '2022-01-01T00:00:02.000Z' },
+      { name: 'test-tag-2', lastUsed: '2022-01-01T00:00:01.000Z' },
+      { name: 'test-tag-3', lastUsed: '2022-01-01T00:00:00.000Z' }
     ]),
     addTag: jest.fn().mockReturnValue(true),
-    clearRecentTags: jest.fn().mockReturnValue(true),
+    clearRecentTags: jest.fn().mockResolvedValue(undefined),
     getMemoryStatus: jest.fn().mockReturnValue({ status: 'active' })
   }
 };
@@ -369,12 +374,17 @@ global.fetch = jest.fn();
 if (!globalThis.recentTagsMemory) {
   globalThis.recentTagsMemory = {
     getRecentTags: jest.fn().mockReturnValue([
-      { name: 'test-tag-1', lastUsed: Date.now() },
-      { name: 'test-tag-2', lastUsed: Date.now() - 1000 },
-      { name: 'test-tag-3', lastUsed: Date.now() - 2000 }
+      { name: 'test-tag-1', lastUsed: '2022-01-01T00:00:02.000Z' },
+      { name: 'test-tag-2', lastUsed: '2022-01-01T00:00:01.000Z' },
+      { name: 'test-tag-3', lastUsed: '2022-01-01T00:00:00.000Z' }
+    ]),
+    getRecentTagsForUi: jest.fn().mockResolvedValue([
+      { name: 'test-tag-1', lastUsed: '2022-01-01T00:00:02.000Z' },
+      { name: 'test-tag-2', lastUsed: '2022-01-01T00:00:01.000Z' },
+      { name: 'test-tag-3', lastUsed: '2022-01-01T00:00:00.000Z' }
     ]),
     addTag: jest.fn().mockReturnValue(true),
-    clearRecentTags: jest.fn().mockReturnValue(true),
+    clearRecentTags: jest.fn().mockResolvedValue(undefined),
     getMemoryStatus: jest.fn().mockReturnValue({ status: 'active' })
   };
 }
@@ -437,6 +447,7 @@ beforeEach(() => {
   // [TEST-FIX-MOCK-2025-07-14] - Reset background page mocks
   if (global.mockBackgroundPage && global.mockBackgroundPage.recentTagsMemory) {
     global.mockBackgroundPage.recentTagsMemory.getRecentTags.mockClear();
+    global.mockBackgroundPage.recentTagsMemory.getRecentTagsForUi.mockClear();
     global.mockBackgroundPage.recentTagsMemory.addTag.mockClear();
     global.mockBackgroundPage.recentTagsMemory.clearRecentTags.mockClear();
     global.mockBackgroundPage.recentTagsMemory.getMemoryStatus.mockClear();

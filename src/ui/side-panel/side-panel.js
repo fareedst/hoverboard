@@ -16,7 +16,8 @@ import {
   getTagsTreeInitOptions,
   shouldRefreshBookmarkTabWhenSwitching,
   shouldRefreshBookmarkTabOnTabChange,
-  shouldRefreshTagsTreeTabOnTabChange
+  shouldRefreshTagsTreeTabOnTabChange,
+  shouldInvokeLoadRecentTagsOnWindowFocusSync
 } from './side-panel-tab-state.js'
 import { BUILD_TIME_UTC } from './build-info.js'
 import { initTagsTreeTab, setSelectedTagsFromCurrentBookmark } from './tags-tree.js'
@@ -286,6 +287,33 @@ function bindTabChangeRefresh () {
 }
 
 /**
+ * [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH]
+ * When this browser window gains focus, refresh Recent Tags (bindWindowFocusRecentTagsRefresh pseudo): after async window-id match,
+ * uses shouldInvokeLoadRecentTagsOnWindowFocusSync for the same sync guards as unit tests, then controller.loadRecentTags() (shared path with popup refresh IMPL).
+ * Exported for Phase G composition tests (trigger listener → getCurrent → loadRecentTags); production still calls this once from DOMContentLoaded.
+ */
+export function bindWindowFocusRecentTagsRefresh () {
+  const winApi = typeof chrome !== 'undefined' && chrome.windows ? chrome.windows : null
+  const hasWindowsApi = !!(winApi?.onFocusChanged?.addListener && winApi?.getCurrent)
+  if (!hasWindowsApi) return
+  winApi.onFocusChanged.addListener((windowId) => {
+    if (windowId === chrome.windows.WINDOW_ID_NONE) return
+    winApi.getCurrent((w) => {
+      if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.lastError) return
+      if (!w || w.id !== windowId) return
+      const c = popupComponents?.controller
+      if (!shouldInvokeLoadRecentTagsOnWindowFocusSync({
+        hasWindowsApi,
+        activeTab,
+        isInitialized: !!c?.isInitialized,
+        isLoading: !!c?.isLoading
+      })) return
+      c.loadRecentTags()
+    })
+  })
+}
+
+/**
  * [IMPL-EXTENSION_COMMANDS] [IMPL-SIDE_PANEL_TABS] When a tab-specific command runs (e.g. Ctrl+Shift+2), SW sets storage then opens panel.
  * If panel is already open, listen for storage change and switch to the requested tab.
  */
@@ -351,6 +379,15 @@ export function setPopupComponentsForTest (components) {
 }
 
 /**
+ * Test-only: set module `activeTab` so composition tests can drive bindWindowFocusRecentTagsRefresh guards without clicking the tab bar.
+ * [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-RECENT_TAGS_SYSTEM]
+ * @param {string} tabId - e.g. TAB_BOOKMARK from side-panel-tab-state
+ */
+export function setActiveTabForTest (tabId) {
+  activeTab = tabId
+}
+
+/**
  * Test-only hook to reset tagsTreeTabInited so runInitialTabInit('tagsTree') can be tested multiple times.
  * [IMPL-SIDE_PANEL_TABS]
  */
@@ -364,6 +401,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   showPanel()
   bindTabButtons()
   bindTabChangeRefresh()
+  bindWindowFocusRecentTagsRefresh()
   bindStorageTabChange()
   bindToggleCloseRequest()
   await runInitialTabInit(activeTab)

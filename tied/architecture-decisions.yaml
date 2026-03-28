@@ -501,11 +501,11 @@ ARCH-TAG_SYSTEM:
         - No cross-device sync
       rejected_reason: Users need sync
   implementation_approach:
-    summary: Recent tags with 5-min TTL, sanitization, sync storage
+    summary: TagService sanitization; SW RecentTagsMemoryManager + chrome.storage.local for user-recent tags; N-minute idle + rolling lastUsed (recentTagsActivityWindowMinutes); TagService.getRecentTagsForUi; MessageHandler getRecentBookmarks/addTagToRecent; popup visibility refresh; side panel window-focus refresh on Bookmark tab; onStartup clears user-recent store.
     details:
-      - 5-minute TTL caching
-      - Tag suggestions algorithm
-      - Strict sanitization before persistence/rendering
+      - Strict sanitization before persistence and rendering
+      - Single N for idle and tag-age per REQ-RECENT_TAGS_SYSTEM
+      - UI excludes current bookmark tags from recent chips
   traceability:
     requirements:
       - REQ-RECENT_TAGS_SYSTEM
@@ -513,23 +513,35 @@ ARCH-TAG_SYSTEM:
       - REQ-TAG_INPUT_SANITIZATION
     implementation:
       - IMPL-TAG_SYSTEM
-    tests: []
+      - IMPL-MESSAGE_HANDLING
+      - IMPL-RECENT_TAGS_POPUP_REFRESH
+      - IMPL-SIDE_PANEL_TABS
+      - IMPL-CONFIG_STRUCT
+    tests:
+      - tests/unit/tag-recent-behavior.test.js
+      - tests/unit/recent-tags-memory-policy.test.js
+      - tests/unit/message-handler-contracts.test.js
+      - tests/unit/side-panel-tabs.test.js
     code_annotations:
       - ARCH-TAG_SYSTEM
   related_decisions:
     depends_on: []
     informs:
       - IMPL-TAG_SYSTEM
-    see_also: []
-  detail_file: null
+    see_also:
+      - ARCH-MESSAGE_HANDLING
+      - ARCH-SIDE_PANEL_TABS
+      - ARCH-POPUP_SESSION
+      - ARCH-SUGGESTED_TAGS
+  detail_file: architecture-decisions/ARCH-TAG_SYSTEM.yaml
   metadata:
     created:
-      date: 2025-07-14T00:00:00.000Z
+      date: "2025-07-14T00:00:00.000Z"
       author: AI Agent
     last_updated:
-      date: 2026-02-13T00:00:00.000Z
+      date: "2026-03-28T00:00:00.000Z"
       author: AI Agent
-      reason: Migrated from STDD to TIED format
+      reason: 'S05: align index with ARCH-TAG_SYSTEM detail'
 ARCH-OVERLAY:
   name: Overlay System Architecture
   status: Active
@@ -1005,6 +1017,7 @@ ARCH-MESSAGE_HANDLING:
   cross_references:
     - REQ-SMART_BOOKMARKING
     - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+    - REQ-RECENT_TAGS_SYSTEM
   rationale:
     why: Centralized communication across extension contexts
     problems_solved:
@@ -1026,18 +1039,21 @@ ARCH-MESSAGE_HANDLING:
         - No request/response
       rejected_reason: Need synchronous responses
   implementation_approach:
-    summary: Centralized routing with standardized message format, async handling, BOOKMARK_UPDATED broadcasts
+    summary: Centralized routing with standardized message format, async handling, BOOKMARK_UPDATED broadcasts; user-recent tag reads/writes use getRecentBookmarks (TagService user-recent path) and addTagToRecent.
     details:
       - Standardized message types
       - Request/response pattern
       - Error handling and retry
       - BOOKMARK_UPDATED synchronization
+      - getRecentBookmarks returns recentTags from policy-backed TagService.getUserRecentTagsExcludingCurrent
   traceability:
     requirements:
       - REQ-SMART_BOOKMARKING
       - REQ-BOOKMARK_STATE_SYNCHRONIZATION
+      - REQ-RECENT_TAGS_SYSTEM
     implementation:
       - IMPL-MESSAGE_HANDLING
+      - IMPL-TAG_SYSTEM
     tests:
       - tests/unit/message-schemas.test.js
       - tests/unit/message-handler-runtime-validation.test.js
@@ -1048,6 +1064,7 @@ ARCH-MESSAGE_HANDLING:
       - tests/unit/content-messaging-contracts.test.js
       - tests/unit/popup-message-contract.test.js
       - tests/unit/message-type-drift.test.js
+      - tests/unit/tag-recent-behavior.test.js
       - tests/playwright/extension-messaging.spec.js
     code_annotations:
       - ARCH-MESSAGE_HANDLING
@@ -1055,16 +1072,14 @@ ARCH-MESSAGE_HANDLING:
     depends_on: []
     informs:
       - IMPL-MESSAGE_HANDLING
-    see_also: []
+    see_also:
+      - ARCH-TAG_SYSTEM
   detail_file: null
   metadata:
-    created:
-      date: 2025-07-14T00:00:00.000Z
-      author: AI Agent
     last_updated:
-      date: 2026-02-25T00:00:00.000Z
+      date: "2026-03-28"
       author: AI Agent
-      reason: Add messaging protocol test traceability
+      reason: 'S05: REQ-RECENT_TAGS_SYSTEM messaging surface'
 ARCH-THEME:
   name: Theme System Architecture
   status: Active
@@ -1114,6 +1129,7 @@ ARCH-POPUP_SESSION:
   status: Active
   cross_references:
     - REQ-POPUP_PERSISTENT_SESSION
+    - REQ-RECENT_TAGS_SYSTEM
   rationale:
     why: Multi-action workflows without popup reopening
     problems_solved:
@@ -1134,19 +1150,24 @@ ARCH-POPUP_SESSION:
         - Duplicated logic
       rejected_reason: Inconsistent error handling
   implementation_approach:
-    summary: Route actions through PopupController, update state without closing
+    summary: Route actions through PopupController, update state without closing; document.visibilityState listener refreshes Recent Tags when popup becomes visible so shared SW state is shown (composed with IMPL-RECENT_TAGS_POPUP_REFRESH).
     details:
       - PopupController handlers await async work
       - State manager updates
       - UIManager updates without close
       - Overlay toggle with GET_OVERLAY_STATE fallback
+      - 'setupAutoRefresh: visibilitychange → loadRecentTags when visible and initialized'
   traceability:
     requirements:
       - REQ-POPUP_PERSISTENT_SESSION
+      - REQ-RECENT_TAGS_SYSTEM
     implementation:
       - IMPL-POPUP_SESSION
+      - IMPL-RECENT_TAGS_POPUP_REFRESH
+      - IMPL-TAG_SYSTEM
     tests:
       - Popup close behavior tests
+      - tests/unit/tag-recent-behavior.test.js
     code_annotations:
       - ARCH-POPUP_SESSION
   related_decisions:
@@ -1156,15 +1177,14 @@ ARCH-POPUP_SESSION:
     see_also:
       - ARCH-UX_CORE
       - ARCH-MESSAGE_HANDLING
+      - ARCH-TAG_SYSTEM
+      - IMPL-RECENT_TAGS_POPUP_REFRESH
   detail_file: null
   metadata:
-    created:
-      date: 2025-07-14T00:00:00.000Z
-      author: AI Agent
     last_updated:
-      date: 2026-02-13T00:00:00.000Z
+      date: "2026-03-28"
       author: AI Agent
-      reason: Migrated from STDD to TIED format
+      reason: 'S05: REQ-RECENT_TAGS_SYSTEM visibility refresh'
 ARCH-BOOKMARK_STATE_SYNC:
   name: Bookmark State Synchronization Architecture
   status: Active
@@ -2630,6 +2650,7 @@ ARCH-SIDE_PANEL_TABS:
   cross_references:
     - REQ-SIDE_PANEL_POPUP_EQUIVALENT
     - REQ-SIDE_PANEL_TAGS_TREE
+    - REQ-RECENT_TAGS_SYSTEM
   rationale:
     why: One panel page avoids multiple default_path entries; tabs let users switch between popup-equivalent and tags tree without losing context.
     problems_solved:
@@ -2639,24 +2660,29 @@ ARCH-SIDE_PANEL_TABS:
       - Single panel entry (e.g. side-panel.html); tab bar; Bookmark panel uses UIManager/PopupController with scoped root (container); Tags tree panel hosts existing tags-tree UI
       - Only one panel visible at a time; last-selected tab persisted
   implementation_approach:
-    summary: Manifest side_panel.default_path points to one HTML (side-panel.html). Page has tab bar ("This Page" | "By Tag"),
+    summary: Manifest side_panel.default_path points to one HTML (side-panel.html). Tab bar (This Page | By Tag | …). Bookmark panel uses scoped UIManager/PopupController. When the panel's browser window gains focus and the Bookmark tab is active, refresh Recent Tags (loadRecentTags) so tags added in other windows appear without a tab switch.
     details:
-      - Tab bar: two buttons; click switches visible panel and persists choice
-      - UIManager supports optional container; when set, cacheElements uses container.querySelector('[data-popup-ref="id"]')
-      - Bookmark panel markup: same structure as popup with data-popup-ref on each element
+      - Tab bar: click switches visible panel and persists choice
+      - UIManager optional container; cacheElements uses data-popup-ref under container
+      - Bookmark panel markup: same structure as popup with data-popup-ref
       - '"By Tag" in This Page footer: in panel context, switch to By Tag tab'
+      - 'chrome.windows.onFocusChanged + getCurrent: when focused window matches and activeTab is Bookmark, call controller.loadRecentTags()'
   traceability:
     requirements:
       - REQ-SIDE_PANEL_POPUP_EQUIVALENT
       - REQ-SIDE_PANEL_TAGS_TREE
+      - REQ-RECENT_TAGS_SYSTEM
     implementation:
       - IMPL-SIDE_PANEL_TABS
       - IMPL-SIDE_PANEL_BOOKMARK
       - IMPL-UIManager_SCOPED_ROOT
+      - IMPL-RECENT_TAGS_POPUP_REFRESH
     tests:
       - tests/unit/ui-manager-scoped-root.test.js
       - tests/unit/side-panel-tabs.test.js
       - tests/playwright/extension-messaging.spec.js
+      - tests/integration/window-focus-recent-tags-composition.integration.test.js
+      - tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
     code_annotations:
       - ARCH-SIDE_PANEL_TABS
   related_decisions:
@@ -2670,15 +2696,13 @@ ARCH-SIDE_PANEL_TABS:
     see_also:
       - ARCH-SIDE_PANEL_TAGS_TREE
       - ARCH-EXTENSION_BUNDLED_ENTRY_POINTS
+      - ARCH-TAG_SYSTEM
   detail_file: null
   metadata:
-    created:
-      date: "2026-02-25"
-      author: AI Agent
     last_updated:
-      date: "2026-02-25"
+      date: "2026-03-28"
       author: AI Agent
-      reason: Initial creation for tabbed side panel
+      reason: 'S13: traceability.tests aligned with side-panel window-focus composition + Recent Tags Playwright'
 ARCH-QUICK_ACCESS_ENTRY:
   name: Quick Access Entry Architecture
   status: Active

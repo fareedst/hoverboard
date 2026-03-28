@@ -15431,6 +15431,8 @@ var init_config_manager = __esm({
       recentTagsSharedMemoryKey: external_exports.string().optional(),
       recentTagsEnableUserDriven: external_exports.boolean().optional(),
       recentTagsClearOnReload: external_exports.boolean().optional(),
+      /** N minutes: rolling window for recent-tag use + Hoverboard inactivity expiry ([REQ-RECENT_TAGS_SYSTEM]) */
+      recentTagsActivityWindowMinutes: external_exports.number().int().min(1).max(24 * 60).optional(),
       badgeTextIfNotBookmarked: external_exports.string().optional(),
       badgeTextIfPrivate: external_exports.string().optional(),
       badgeTextIfQueued: external_exports.string().optional(),
@@ -15531,6 +15533,8 @@ var init_config_manager = __esm({
           // Enable user-driven recent tags
           recentTagsClearOnReload: true,
           // Clear shared memory on extension reload
+          recentTagsActivityWindowMinutes: 15,
+          // [REQ-RECENT_TAGS_SYSTEM] Same N for tag-age window and idle expiry (spec side-panel order 4)
           // IMPL-FEATURE_FLAGS: Badge configuration - Extension icon indicator settings
           // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
           badgeTextIfNotBookmarked: "-",

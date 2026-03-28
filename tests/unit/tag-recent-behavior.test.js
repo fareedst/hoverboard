@@ -34,6 +34,7 @@ describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SY
     mockBackgroundPage = {
       recentTagsMemory: {
         getRecentTags: jest.fn(),
+        getRecentTagsForUi: jest.fn(),
         addTag: jest.fn(),
         clearRecentTags: jest.fn(),
         getMemoryStatus: jest.fn()
@@ -62,10 +63,10 @@ describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SY
     })
 
     test('should return empty array when shared memory has no tags', async () => {
-      mockBackgroundPage.recentTagsMemory.getRecentTags.mockReturnValue([])
-      
+      mockBackgroundPage.recentTagsMemory.getRecentTagsForUi.mockResolvedValue([])
+
       const result = await tagService.getUserRecentTags()
-      
+
       expect(result).toEqual([])
     })
 
@@ -75,11 +76,15 @@ describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SY
         { name: 'web', lastUsed: '2024-12-19T11:00:00Z', count: 3 },
         { name: 'development', lastUsed: '2024-12-19T09:00:00Z', count: 2 }
       ]
-      
-      mockBackgroundPage.recentTagsMemory.getRecentTags.mockReturnValue(mockTags)
-      
+
+      mockBackgroundPage.recentTagsMemory.getRecentTagsForUi.mockResolvedValue([
+        mockTags[1],
+        mockTags[0],
+        mockTags[2]
+      ])
+
       const result = await tagService.getUserRecentTags()
-      
+
       expect(result).toHaveLength(3)
       expect(result[0].name).toBe('web') // Most recent first
       expect(result[1].name).toBe('javascript')
@@ -108,9 +113,13 @@ describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SY
         { name: 'web', lastUsed: '2024-12-19T11:00:00Z', count: 3 },
         { name: 'development', lastUsed: '2024-12-19T09:00:00Z', count: 2 }
       ]
-      
-      mockBackgroundPage.recentTagsMemory.getRecentTags.mockReturnValue(mockTags)
-      
+
+      mockBackgroundPage.recentTagsMemory.getRecentTagsForUi.mockResolvedValue([
+        mockTags[1],
+        mockTags[0],
+        mockTags[2]
+      ])
+
       const currentTags = ['javascript', 'react']
       const result = await tagService.getUserRecentTagsExcludingCurrent(currentTags)
       
@@ -125,9 +134,12 @@ describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SY
         { name: 'javascript', lastUsed: '2024-12-19T10:30:00Z', count: 5 },
         { name: 'web', lastUsed: '2024-12-19T11:00:00Z', count: 3 }
       ]
-      
-      mockBackgroundPage.recentTagsMemory.getRecentTags.mockReturnValue(mockTags)
-      
+
+      mockBackgroundPage.recentTagsMemory.getRecentTagsForUi.mockResolvedValue([
+        mockTags[1],
+        mockTags[0]
+      ])
+
       const currentTags = ['javascript', 'web']
       const result = await tagService.getUserRecentTagsExcludingCurrent(currentTags)
       
@@ -141,9 +153,12 @@ describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SY
         { name: 'javascript', lastUsed: '2024-12-19T10:30:00Z', count: 5 },
         { name: 'web', lastUsed: '2024-12-19T11:00:00Z', count: 3 }
       ]
-      
-      mockBackgroundPage.recentTagsMemory.getRecentTags.mockReturnValue(mockTags)
-      
+
+      mockBackgroundPage.recentTagsMemory.getRecentTagsForUi.mockResolvedValue([
+        mockTags[1],
+        mockTags[0]
+      ])
+
       const data = { currentTags: ['javascript'] }
       const result = await messageHandler.handleGetRecentBookmarks(data, 'https://example.com')
       
@@ -177,9 +192,9 @@ describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SY
       const mockTags = [
         { name: 'javascript', lastUsed: '2024-12-19T10:30:00Z', count: 5 }
       ]
-      
-      mockBackgroundPage.recentTagsMemory.getRecentTags.mockReturnValue(mockTags)
-      
+
+      mockBackgroundPage.recentTagsMemory.getRecentTagsForUi.mockResolvedValue(mockTags)
+
       const result = await messageHandler.handleGetUserRecentTags({})
       
       expect(result.recentTags).toEqual(mockTags)
@@ -195,6 +210,7 @@ describe('[REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SY
       expect(config.recentTagsSharedMemoryKey).toBe('hoverboard_recent_tags_shared')
       expect(config.recentTagsEnableUserDriven).toBe(true)
       expect(config.recentTagsClearOnReload).toBe(true)
+      expect(config.recentTagsActivityWindowMinutes).toBe(15)
     })
   })
 

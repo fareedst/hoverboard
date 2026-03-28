@@ -25,114 +25,10 @@ import { SIDE_PANEL_TAB_STORAGE_KEY, TAB_BOOKMARK, TAB_TAGS_TREE, TAB_BROWSER_TA
 import { browser } from '../shared/safari-shim.js' // [SAFARI-EXT-SHIM-001]
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Optional message log for testing/debugging
 import * as uiInspector from '../shared/ui-inspector.js'
+import { RecentTagsMemoryManager } from '../features/tagging/recent-tags-memory-manager.js'
 
 /** [IMPL-ICON_CLICK_BEHAVIOR] Chrome does not show side panel when active tab is chrome:// or chrome-extension://. */
 const _isRestrictedForSidePanel = (url) => typeof url === 'string' && (url.startsWith('chrome://') || url.startsWith('chrome-extension://'))
-
-/**
- * [IMMUTABLE-REQ-TAG-003] - Recent Tags Memory Manager
- * Manages shared memory for user-driven recent tags across extension windows
- */
-class RecentTagsMemoryManager {
-  constructor () {
-    // [IMMUTABLE-REQ-TAG-003] - Shared memory for recent tags
-    this.recentTags = []
-    this.maxListSize = 50 // Configurable maximum list size
-    this.lastUpdated = null
-  }
-
-  /**
-   * [IMMUTABLE-REQ-TAG-003] - Get all recent tags from shared memory
-   * @returns {Array} Array of recent tag objects
-   */
-  getRecentTags () {
-    return [...this.recentTags] // Return copy to prevent external modification
-  }
-
-  /**
-   * [IMMUTABLE-REQ-TAG-003] - Add tag to recent list (current site only)
-   * @param {string} tagName - Tag name to add
-   * @param {string} currentSiteUrl - Current site URL for scope validation
-   * @returns {boolean} Success status
-   */
-  addTag (tagName, currentSiteUrl) {
-    try {
-      if (!tagName || !currentSiteUrl) {
-        console.error('[IMMUTABLE-REQ-TAG-003] Invalid parameters for addTag:', { tagName, currentSiteUrl })
-        return false
-      }
-
-      const now = new Date()
-
-      // Check if tag already exists in list
-      const existingTagIndex = this.recentTags.findIndex(tag => tag.name === tagName)
-
-      if (existingTagIndex >= 0) {
-        // Update existing tag
-        this.recentTags[existingTagIndex] = {
-          ...this.recentTags[existingTagIndex],
-          count: (this.recentTags[existingTagIndex].count || 0) + 1,
-          lastUsed: now.toISOString()
-        }
-      } else {
-        // Add new tag to list
-        const newTag = {
-          name: tagName,
-          count: 1,
-          lastUsed: now.toISOString(),
-          addedFromSite: currentSiteUrl
-        }
-        this.recentTags.push(newTag)
-      }
-
-      // Sort by lastUsed timestamp (most recent first) and limit list size
-      this.recentTags.sort((a, b) => {
-        const dateA = new Date(a.lastUsed)
-        const dateB = new Date(b.lastUsed)
-        return dateB - dateA
-      })
-
-      // Limit list size
-      if (this.recentTags.length > this.maxListSize) {
-        this.recentTags = this.recentTags.slice(0, this.maxListSize)
-      }
-
-      this.lastUpdated = now.toISOString()
-
-      console.log('[IMMUTABLE-REQ-TAG-003] Successfully added tag to shared memory:', { tagName, currentSiteUrl })
-      return true
-    } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-003] Error adding tag to shared memory:', error)
-      return false
-    }
-  }
-
-  /**
-   * [IMMUTABLE-REQ-TAG-003] - Clear all recent tags (called on extension reload)
-   */
-  clearRecentTags () {
-    this.recentTags = []
-    this.lastUpdated = null
-    console.log('[IMMUTABLE-REQ-TAG-003] Cleared recent tags from shared memory')
-  }
-
-  /**
-   * [IMMUTABLE-REQ-TAG-003] - Get memory status for debugging
-   * @returns {Object} Memory status information
-   */
-  getMemoryStatus () {
-    return {
-      tagCount: this.recentTags.length,
-      maxListSize: this.maxListSize,
-      lastUpdated: this.lastUpdated,
-      tags: this.recentTags.map(tag => ({
-        name: tag.name,
-        count: tag.count,
-        lastUsed: tag.lastUsed
-      }))
-    }
-  }
-}
 
 // MV3-001: Main service worker class for V3 architecture
 class HoverboardServiceWorker {
@@ -446,10 +342,10 @@ class HoverboardServiceWorker {
     }).catch(() => {})
   }
 
-  // [IMMUTABLE-REQ-TAG-003] - Handle extension startup (clears shared memory)
+  // [IMMUTABLE-REQ-TAG-003] Browser profile startup: clear persisted user recent tags ([REQ-RECENT_TAGS_SYSTEM] fresh session).
   async handleExtensionStartup () {
-    console.log('[IMMUTABLE-REQ-TAG-003] Extension startup - clearing recent tags shared memory')
-    this.recentTagsMemory.clearRecentTags()
+    console.log('[IMMUTABLE-REQ-TAG-003] Extension startup - clearing recent tags shared memory and storage')
+    await this.recentTagsMemory.clearRecentTags()
   }
 
   // MV3-001: Handle extension installation and updates

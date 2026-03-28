@@ -66,6 +66,7 @@ export class ConfigManager {
       recentTagsSharedMemoryKey: 'hoverboard_recent_tags_shared', // Shared memory key
       recentTagsEnableUserDriven: true, // Enable user-driven recent tags
       recentTagsClearOnReload: true, // Clear shared memory on extension reload
+      recentTagsActivityWindowMinutes: 15, // [REQ-RECENT_TAGS_SYSTEM] N-minute window + idle expiry
 
       // CFG-003: Badge configuration - Extension icon indicator settings
       // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states

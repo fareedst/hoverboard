@@ -57,40 +57,39 @@ export class TagService {
     try {
       debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Getting user recent tags from shared memory')
 
-      // First try to access shared memory directly (service worker context)
-      const directMemory = this.getDirectSharedMemory()
-      if (directMemory) {
-        const recentTags = directMemory.getRecentTags()
-        debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from direct shared memory:', recentTags.length)
-
-        // Sort by lastUsed timestamp (most recent first)
-        const sortedTags = recentTags.sort((a, b) => {
-          const dateA = new Date(a.lastUsed)
-          const dateB = new Date(b.lastUsed)
-          return dateB - dateA
-        })
-
-        return sortedTags
+      const getConfig = () => this.configManager.getConfig()
+      const resolveFromMemory = async (memory) => {
+        if (memory && typeof memory.getRecentTagsForUi === 'function') {
+          const rows = await memory.getRecentTagsForUi(getConfig)
+          debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (policy):', rows.length)
+          return rows
+        }
+        if (memory && typeof memory.getRecentTags === 'function') {
+          const recentTags = memory.getRecentTags()
+          debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (legacy getRecentTags):', recentTags.length)
+          return recentTags.sort((a, b) => {
+            const dateA = new Date(a.lastUsed)
+            const dateB = new Date(b.lastUsed)
+            return dateB - dateA
+          })
+        }
+        return null
       }
 
-      // Fallback to background page access
+      const directMemory = this.getDirectSharedMemory()
+      const fromDirect = await resolveFromMemory(directMemory)
+      if (fromDirect != null) return fromDirect
+
       const backgroundPage = await this.getBackgroundPage()
       if (!backgroundPage || !backgroundPage.recentTagsMemory) {
         debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] No shared memory found, returning empty array')
         return []
       }
 
-      const recentTags = backgroundPage.recentTagsMemory.getRecentTags()
-      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from shared memory:', recentTags.length)
+      const fromBg = await resolveFromMemory(backgroundPage.recentTagsMemory)
+      if (fromBg != null) return fromBg
 
-      // Sort by lastUsed timestamp (most recent first)
-      const sortedTags = recentTags.sort((a, b) => {
-        const dateA = new Date(a.lastUsed)
-        const dateB = new Date(b.lastUsed)
-        return dateB - dateA
-      })
-
-      return sortedTags
+      return []
     } catch (error) {
       debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to get user recent tags:', error)
       return []

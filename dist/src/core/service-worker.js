@@ -14354,6 +14354,8 @@ var init_config_manager = __esm({
       recentTagsSharedMemoryKey: external_exports.string().optional(),
       recentTagsEnableUserDriven: external_exports.boolean().optional(),
       recentTagsClearOnReload: external_exports.boolean().optional(),
+      /** N minutes: rolling window for recent-tag use + Hoverboard inactivity expiry ([REQ-RECENT_TAGS_SYSTEM]) */
+      recentTagsActivityWindowMinutes: external_exports.number().int().min(1).max(24 * 60).optional(),
       badgeTextIfNotBookmarked: external_exports.string().optional(),
       badgeTextIfPrivate: external_exports.string().optional(),
       badgeTextIfQueued: external_exports.string().optional(),
@@ -14454,6 +14456,8 @@ var init_config_manager = __esm({
           // Enable user-driven recent tags
           recentTagsClearOnReload: true,
           // Clear shared memory on extension reload
+          recentTagsActivityWindowMinutes: 15,
+          // [REQ-RECENT_TAGS_SYSTEM] Same N for tag-age window and idle expiry (spec side-panel order 4)
           // IMPL-FEATURE_FLAGS: Badge configuration - Extension icon indicator settings
           // IMPLEMENTATION DECISION: Clear visual indicators for different bookmark states
           badgeTextIfNotBookmarked: "-",
@@ -16104,30 +16108,35 @@ var init_tag_service = __esm({
       async getUserRecentTags() {
         try {
           debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Getting user recent tags from shared memory");
+          const getConfig = () => this.configManager.getConfig();
+          const resolveFromMemory = async (memory) => {
+            if (memory && typeof memory.getRecentTagsForUi === "function") {
+              const rows = await memory.getRecentTagsForUi(getConfig);
+              debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (policy):", rows.length);
+              return rows;
+            }
+            if (memory && typeof memory.getRecentTags === "function") {
+              const recentTags = memory.getRecentTags();
+              debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (legacy getRecentTags):", recentTags.length);
+              return recentTags.sort((a, b) => {
+                const dateA = new Date(a.lastUsed);
+                const dateB = new Date(b.lastUsed);
+                return dateB - dateA;
+              });
+            }
+            return null;
+          };
           const directMemory = this.getDirectSharedMemory();
-          if (directMemory) {
-            const recentTags2 = directMemory.getRecentTags();
-            debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from direct shared memory:", recentTags2.length);
-            const sortedTags2 = recentTags2.sort((a, b) => {
-              const dateA = new Date(a.lastUsed);
-              const dateB = new Date(b.lastUsed);
-              return dateB - dateA;
-            });
-            return sortedTags2;
-          }
+          const fromDirect = await resolveFromMemory(directMemory);
+          if (fromDirect != null) return fromDirect;
           const backgroundPage = await this.getBackgroundPage();
           if (!backgroundPage || !backgroundPage.recentTagsMemory) {
             debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] No shared memory found, returning empty array");
             return [];
           }
-          const recentTags = backgroundPage.recentTagsMemory.getRecentTags();
-          debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags from shared memory:", recentTags.length);
-          const sortedTags = recentTags.sort((a, b) => {
-            const dateA = new Date(a.lastUsed);
-            const dateB = new Date(b.lastUsed);
-            return dateB - dateA;
-          });
-          return sortedTags;
+          const fromBg = await resolveFromMemory(backgroundPage.recentTagsMemory);
+          if (fromBg != null) return fromBg;
+          return [];
         } catch (error48) {
           debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to get user recent tags:", error48);
           return [];
@@ -23033,27 +23042,150 @@ function getLastActions(n = 20) {
   return _actions.slice(len - n);
 }
 
-// src/core/service-worker.js
-var _isRestrictedForSidePanel = (url2) => typeof url2 === "string" && (url2.startsWith("chrome://") || url2.startsWith("chrome-extension://"));
+// src/features/tagging/recent-tags-memory-manager.js
+var RECENT_TAGS_USER_STATE_KEY = "hoverboard_user_recent_tags_state_v2";
+function applyRecentTagsIdleAndAge(tags, lastActivityAt, nowMs, windowMs) {
+  if (lastActivityAt != null && nowMs - lastActivityAt > windowMs) {
+    return { tags: [], lastActivityAt: null, mutated: tags.length > 0 || lastActivityAt != null };
+  }
+  const cutoff = nowMs - windowMs;
+  const kept = tags.filter((t) => {
+    const tms = new Date(t.lastUsed).getTime();
+    return !Number.isNaN(tms) && tms >= cutoff;
+  });
+  return {
+    tags: kept,
+    lastActivityAt,
+    mutated: kept.length !== tags.length
+  };
+}
+function inferLastActivityFromTags(tags) {
+  let max = 0;
+  for (const t of tags) {
+    const ms = new Date(t.lastUsed).getTime();
+    if (!Number.isNaN(ms) && ms > max) max = ms;
+  }
+  return max > 0 ? max : null;
+}
 var RecentTagsMemoryManager = class {
   constructor() {
     this.recentTags = [];
     this.maxListSize = 50;
     this.lastUpdated = null;
+    this.lastActivityAt = null;
+    this._hydrated = false;
+    this._persistScheduled = false;
+  }
+  _storageLocal() {
+    try {
+      if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.local) {
+        return chrome.storage.local;
+      }
+    } catch (_) {
+    }
+    return null;
+  }
+  async hydrate() {
+    if (this._hydrated) return;
+    const api = this._storageLocal();
+    if (!api || typeof api.get !== "function") {
+      this._hydrated = true;
+      return;
+    }
+    try {
+      const data = await new Promise((resolve, reject) => {
+        try {
+          api.get([RECENT_TAGS_USER_STATE_KEY], (r) => {
+            if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+              return;
+            }
+            resolve(r);
+          });
+        } catch (e) {
+          reject(e);
+        }
+      });
+      const row = data && data[RECENT_TAGS_USER_STATE_KEY];
+      if (row && Array.isArray(row.tags)) {
+        this.recentTags = row.tags.filter((t) => t && typeof t.name === "string" && t.lastUsed);
+        if (typeof row.lastActivityAt === "number" && !Number.isNaN(row.lastActivityAt)) {
+          this.lastActivityAt = row.lastActivityAt;
+        } else {
+          this.lastActivityAt = inferLastActivityFromTags(this.recentTags);
+        }
+        this.lastUpdated = this.recentTags[0]?.lastUsed ?? null;
+      }
+    } catch (e) {
+      console.error("[IMMUTABLE-REQ-TAG-003] hydrate recent tags failed:", e);
+    }
+    this._hydrated = true;
+  }
+  _enqueuePersist() {
+    if (this._persistScheduled) return;
+    this._persistScheduled = true;
+    queueMicrotask(() => {
+      this._persistScheduled = false;
+      this._flushPersist().catch((e) => console.error("[IMMUTABLE-REQ-TAG-003] persist failed:", e));
+    });
+  }
+  async _flushPersist() {
+    const api = this._storageLocal();
+    if (!api || typeof api.set !== "function") return;
+    const payload = {
+      tags: this.recentTags,
+      lastActivityAt: this.lastActivityAt
+    };
+    await new Promise((resolve, reject) => {
+      try {
+        api.set({ [RECENT_TAGS_USER_STATE_KEY]: payload }, () => {
+          if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.lastError) {
+            reject(new Error(chrome.runtime.lastError.message));
+            return;
+          }
+          resolve(void 0);
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Get all recent tags from shared memory
-   * @returns {Array} Array of recent tag objects
+   * Raw list (no TTL). Prefer getRecentTagsForUi for popup/side panel.
    */
   getRecentTags() {
     return [...this.recentTags];
   }
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Add tag to recent list (current site only)
-   * @param {string} tagName - Tag name to add
-   * @param {string} currentSiteUrl - Current site URL for scope validation
-   * @returns {boolean} Success status
+   * [REQ-RECENT_TAGS_SYSTEM] Load from storage, drop idle-expired and stale-by-lastUsed tags, persist if mutated.
+   * @param {() => Promise<Record<string, unknown>>} getConfig
+   * @returns {Promise<Array<{ name: string, lastUsed: string, count?: number, addedFromSite?: string }>>}
    */
+  async getRecentTagsForUi(getConfig) {
+    await this.hydrate();
+    const config2 = await getConfig();
+    const nMin = typeof config2.recentTagsActivityWindowMinutes === "number" && config2.recentTagsActivityWindowMinutes > 0 ? config2.recentTagsActivityWindowMinutes : 15;
+    const windowMs = nMin * 60 * 1e3;
+    const now = Date.now();
+    const { tags, lastActivityAt, mutated } = applyRecentTagsIdleAndAge(
+      this.recentTags,
+      this.lastActivityAt,
+      now,
+      windowMs
+    );
+    if (mutated) {
+      this.recentTags = tags;
+      this.lastActivityAt = lastActivityAt;
+      this.lastUpdated = tags[0]?.lastUsed ?? null;
+      await this._flushPersist();
+    }
+    const sorted = [...this.recentTags].sort((a, b) => {
+      const dateA = new Date(a.lastUsed);
+      const dateB = new Date(b.lastUsed);
+      return dateB - dateA;
+    });
+    return sorted;
+  }
   addTag(tagName, currentSiteUrl) {
     try {
       if (!tagName || !currentSiteUrl) {
@@ -23061,6 +23193,7 @@ var RecentTagsMemoryManager = class {
         return false;
       }
       const now = /* @__PURE__ */ new Date();
+      const nowMs = now.getTime();
       const existingTagIndex = this.recentTags.findIndex((tag) => tag.name === tagName);
       if (existingTagIndex >= 0) {
         this.recentTags[existingTagIndex] = {
@@ -23086,30 +23219,45 @@ var RecentTagsMemoryManager = class {
         this.recentTags = this.recentTags.slice(0, this.maxListSize);
       }
       this.lastUpdated = now.toISOString();
+      this.lastActivityAt = nowMs;
+      this._hydrated = true;
       console.log("[IMMUTABLE-REQ-TAG-003] Successfully added tag to shared memory:", { tagName, currentSiteUrl });
+      this._enqueuePersist();
       return true;
     } catch (error48) {
       console.error("[IMMUTABLE-REQ-TAG-003] Error adding tag to shared memory:", error48);
       return false;
     }
   }
-  /**
-   * [IMMUTABLE-REQ-TAG-003] - Clear all recent tags (called on extension reload)
-   */
-  clearRecentTags() {
+  async clearRecentTags() {
     this.recentTags = [];
     this.lastUpdated = null;
+    this.lastActivityAt = null;
+    this._hydrated = true;
     console.log("[IMMUTABLE-REQ-TAG-003] Cleared recent tags from shared memory");
+    const api = this._storageLocal();
+    if (api && typeof api.remove === "function") {
+      try {
+        await new Promise((resolve, reject) => {
+          api.remove([RECENT_TAGS_USER_STATE_KEY], () => {
+            if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.lastError) {
+              reject(new Error(chrome.runtime.lastError.message));
+              return;
+            }
+            resolve(void 0);
+          });
+        });
+      } catch (e) {
+        console.error("[IMMUTABLE-REQ-TAG-003] clearRecentTags storage.remove failed:", e);
+      }
+    }
   }
-  /**
-   * [IMMUTABLE-REQ-TAG-003] - Get memory status for debugging
-   * @returns {Object} Memory status information
-   */
   getMemoryStatus() {
     return {
       tagCount: this.recentTags.length,
       maxListSize: this.maxListSize,
       lastUpdated: this.lastUpdated,
+      lastActivityAt: this.lastActivityAt,
       tags: this.recentTags.map((tag) => ({
         name: tag.name,
         count: tag.count,
@@ -23118,6 +23266,9 @@ var RecentTagsMemoryManager = class {
     };
   }
 };
+
+// src/core/service-worker.js
+var _isRestrictedForSidePanel = (url2) => typeof url2 === "string" && (url2.startsWith("chrome://") || url2.startsWith("chrome-extension://"));
 var HoverboardServiceWorker = class {
   constructor() {
     this.messageHandler = new MessageHandler();
@@ -23395,10 +23546,10 @@ var HoverboardServiceWorker = class {
     }).catch(() => {
     });
   }
-  // [IMMUTABLE-REQ-TAG-003] - Handle extension startup (clears shared memory)
+  // [IMMUTABLE-REQ-TAG-003] Browser profile startup: clear persisted user recent tags ([REQ-RECENT_TAGS_SYSTEM] fresh session).
   async handleExtensionStartup() {
-    console.log("[IMMUTABLE-REQ-TAG-003] Extension startup - clearing recent tags shared memory");
-    this.recentTagsMemory.clearRecentTags();
+    console.log("[IMMUTABLE-REQ-TAG-003] Extension startup - clearing recent tags shared memory and storage");
+    await this.recentTagsMemory.clearRecentTags();
   }
   // MV3-001: Handle extension installation and updates
   async handleInstall(details) {

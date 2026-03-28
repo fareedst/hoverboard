@@ -1,139 +1,207 @@
 IMPL-THIS_PAGE_TAG_SORT:
-  summary: "UIManager: tagSortToggle wiring, tagFrequencyMap, sort applied in updateCurrentTags, updateRecentTags, _paintSuggestedTags when toggle present. PopupController: refreshTagFrequencyMapForSort; loadSuggestedTags uses two-step MAIN inject (suggested-tags-main-world-snippet.js + func). Shared tag-chip-sort.js."
-  essence_pseudocode: "# [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_FROM_CONTENT]\n# Summary: Three-way chip sort when tagSortToggle present; frequency map from storage; popup suggested rows from two-step MAIN inject; uses tag-chip-sort.sortTagChipRows.\n\n# [IMPL-THIS_PAGE_TAG_SORT] [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-THIS_PAGE_TAG_SORT]\n# How — cross-IMPL depends on IMPL-UIManager_SCOPED_ROOT: tagSortToggle and chip containers resolve under scoped container in side panel; pre — UIManager constructed with container=bookmarkPanel and cacheElements completed; post — non-null elements.tagSortToggle enables sort UI; shared data — this.elements from IMPL-UIManager_SCOPED_ROOT.\n\n# [IMPL-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION]\n# How — cross-IMPL depends on IMPL-SUGGESTED_TAGS MAIN-world path: snippet registers global; ordering — loadSuggestedTags runs file inject then func inject before NORMALIZE; shared data — raw extraction array; post — filtered rows passed to UIManager.updateSuggestedTags.\n\n# How — Shared DATA contract (same top-level tokens).\nDATA: tagFrequencyMap (tag string -> count from hoverboard_tag_frequency); suggested rows { tag, relevance?, inPageFrequency? } after normalize\n\n# [IMPL-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT]\n# How — NORMALIZE_SUGGESTED_ROWS + FILTER_INVALID_ROWS: PopupController maps MAIN extract to rows; trim string/object tags; omit entries empty after trim; then FILTER_NOT_ON_CURRENT_BOOKMARK.\nINPUT: raw (array of strings and/or objects from page world)\nOUTPUT: array of { tag: string, relevance: number, inPageFrequency: number }\nFOR each item in raw:\n  IF typeof item is string AND trim non-empty: PUSH { tag: trim, relevance: 0, inPageFrequency: 0 }\n  ELSE IF object AND item.tag is non-empty string after trim:\n    rel = number item.relevance or 0; freq = number item.inPageFrequency or item.frequency or 0\n    PUSH { tag: trim(item.tag), relevance: rel, inPageFrequency: freq }\n  ELSE: omit (invalid / whitespace-only tag)\nRETURN built list\n\n# [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_DEDUPLICATION]\n# How — FILTER_NOT_ON_CURRENT_BOOKMARK(rows, currentTagsNormalizedLower): drop row where lower(row.tag) in set.\n\n# How — refreshTagFrequencyMapForSort\nrefreshTagFrequencyMapForSort():\n  IF NOT chrome.storage.local THEN RETURN\n  TRY:\n    AWAIT get hoverboard_tag_frequency\n    map = _normalizeHoverboardTagFrequencyMap(raw)\n    uiManager.setTagFrequencyMapForSort(map)\n  CATCH:\n    debugError; RETURN\n\n# How — loadSuggestedTags (invokes IMPL-SUGGESTED_TAGS page-world contract; ordering explicit).\nloadSuggestedTags():\n  IF no tab id OR url not http(s) THEN updateSuggestedTags([]); RETURN\n  TRY:\n    TRY executeScript MAIN files [suggested-tags-main-world-snippet.js]; ON fileErr log non-fatal CONTINUE\n    AWAIT executeScript MAIN func -> globalThis.__hoverboardExtractSuggestedTagsWithRelevance()\n    rows = NORMALIZE_SUGGESTED_ROWS(result)\n    rows = FILTER_INVALID_ROWS(rows)\n    rows = FILTER_NOT_ON_CURRENT_BOOKMARK(rows, currentPinTagsLowerSet)\n    updateSuggestedTags(rows)\n  CATCH scriptError:\n    debugError; updateSuggestedTags([])\n\n# How — setTagFrequencyMapForSort: merge into tagFrequencyMap; caller redraws.\n\n# How — getEffectiveTagSortMode: IF no tagSortToggle element THEN RETURN null; ELSE RETURN mode from segment state.\n\n# How — updateCurrentTags / updateRecentTags / _paintSuggestedTags: IF getEffectiveTagSortMode() null THEN paint source order; ELSE build rows with displayKey=tagChipDisplayAndAddValue, bookmarkFreq, suggested relevance; sortTagChipRows(mode); paint.\n\n# How — Comparators (tag-chip-sort): alphabetical by displayKey localeCompare lower tie stableIndex; frequency by bookmarkFreq desc; relevance by relevance desc then bookmarkFreq then inPageFrequency.\n\n# How — loadInitialData: AWAIT refreshTagFrequencyMapForSort before first updateCurrentTags; AWAIT loadRecentTags before AWAIT loadSuggestedTags (PopupController orchestration binding).\n\n# How — setupEventListeners: click [data-sort-mode] under tagSortToggle -> setTagSortMode if isTagChipSortMode.\n\n# [IMPL-THIS_PAGE_TAG_SORT] [IMPL-PLAYWRIGHT_E2E_EXTENSION] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT]\n# How — E2E-only surface (phase_h_e2e_only_surface): Playwright chrome-extension:// side panel; complements JSDOM composition tests.\nside_panel_tag_sort_toolbar_e2e():\n  PRE: open side-panel.html; bookmarkPanel visible\n  ASSERT tagSortToggle visible\n  ON click frequency segment: aria-pressed matches selection\n"
+  summary: 'UIManager: tagSortToggle wiring, tagFrequencyMap, sort applied in updateCurrentTags, updateRecentTags, _paintSuggestedTags when toggle present. PopupController: refreshTagFrequencyMapForSort; loadSuggestedTags uses two-step MAIN inject (suggested-tags-main-world-snippet.js + func). Shared tag-chip-sort.js.'
+  essence_pseudocode: |
+    # [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_FROM_CONTENT]
+    # Summary: Three-way chip sort when tagSortToggle present; frequency map from storage; popup suggested rows from two-step MAIN inject; uses tag-chip-sort.sortTagChipRows.
+
+    # [IMPL-THIS_PAGE_TAG_SORT] [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-THIS_PAGE_TAG_SORT]
+    # How — cross-IMPL depends on IMPL-UIManager_SCOPED_ROOT: tagSortToggle and chip containers resolve under scoped container in side panel; pre — UIManager constructed with container=bookmarkPanel and cacheElements completed; post — non-null elements.tagSortToggle enables sort UI; shared data — this.elements from IMPL-UIManager_SCOPED_ROOT.
+
+    # [IMPL-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION]
+    # How — cross-IMPL depends on IMPL-SUGGESTED_TAGS MAIN-world path: snippet registers global; ordering — loadSuggestedTags runs file inject then func inject before NORMALIZE; shared data — raw extraction array; post — filtered rows passed to UIManager.updateSuggestedTags.
+
+    # How — Shared DATA contract (same top-level tokens).
+    DATA: tagFrequencyMap (tag string -> count from hoverboard_tag_frequency); suggested rows { tag, relevance?, inPageFrequency? } after normalize
+
+    # [IMPL-THIS_PAGE_TAG_SORT] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT]
+    # How — NORMALIZE_SUGGESTED_ROWS + FILTER_INVALID_ROWS: PopupController maps MAIN extract to rows; trim string/object tags; omit entries empty after trim; then FILTER_NOT_ON_CURRENT_BOOKMARK.
+    INPUT: raw (array of strings and/or objects from page world)
+    OUTPUT: array of { tag: string, relevance: number, inPageFrequency: number }
+    FOR each item in raw:
+      IF typeof item is string AND trim non-empty: PUSH { tag: trim, relevance: 0, inPageFrequency: 0 }
+      ELSE IF object AND item.tag is non-empty string after trim:
+        rel = number item.relevance or 0; freq = number item.inPageFrequency or item.frequency or 0
+        PUSH { tag: trim(item.tag), relevance: rel, inPageFrequency: freq }
+      ELSE: omit (invalid / whitespace-only tag)
+    RETURN built list
+
+    # [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_DEDUPLICATION]
+    # How — FILTER_NOT_ON_CURRENT_BOOKMARK(rows, currentTagsNormalizedLower): drop row where lower(row.tag) in set.
+
+    # How — refreshTagFrequencyMapForSort
+    refreshTagFrequencyMapForSort():
+      IF NOT chrome.storage.local THEN RETURN
+      TRY:
+        AWAIT get hoverboard_tag_frequency
+        map = _normalizeHoverboardTagFrequencyMap(raw)
+        uiManager.setTagFrequencyMapForSort(map)
+      CATCH:
+        debugError; RETURN
+
+    # How — loadSuggestedTags (invokes IMPL-SUGGESTED_TAGS page-world contract; ordering explicit).
+    loadSuggestedTags():
+      IF no tab id OR url not http(s) THEN updateSuggestedTags([]); RETURN
+      TRY:
+        TRY executeScript MAIN files [suggested-tags-main-world-snippet.js]; ON fileErr log non-fatal CONTINUE
+        AWAIT executeScript MAIN func -> globalThis.__hoverboardExtractSuggestedTagsWithRelevance()
+        rows = NORMALIZE_SUGGESTED_ROWS(result)
+        rows = FILTER_INVALID_ROWS(rows)
+        rows = FILTER_NOT_ON_CURRENT_BOOKMARK(rows, currentPinTagsLowerSet)
+        updateSuggestedTags(rows)
+      CATCH scriptError:
+        debugError; updateSuggestedTags([])
+
+    # How — setTagFrequencyMapForSort: merge into tagFrequencyMap; caller redraws.
+
+    # How — getEffectiveTagSortMode: IF no tagSortToggle element THEN RETURN null; ELSE RETURN mode from segment state.
+
+    # How — updateCurrentTags / updateRecentTags / _paintSuggestedTags: IF getEffectiveTagSortMode() null THEN paint source order; ELSE build rows with displayKey=tagChipDisplayAndAddValue, bookmarkFreq, suggested relevance; sortTagChipRows(mode); paint.
+
+    # How — Comparators (tag-chip-sort): alphabetical by displayKey localeCompare lower tie stableIndex; frequency by bookmarkFreq desc; relevance by relevance desc then bookmarkFreq then inPageFrequency.
+
+    # How — loadInitialData: AWAIT refreshTagFrequencyMapForSort before first updateCurrentTags; AWAIT loadRecentTags before AWAIT loadSuggestedTags (PopupController orchestration binding).
+
+    # How — setupEventListeners: click [data-sort-mode] under tagSortToggle -> setTagSortMode if isTagChipSortMode.
+
+    # [IMPL-THIS_PAGE_TAG_SORT] [IMPL-PLAYWRIGHT_E2E_EXTENSION] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT]
+    # How — E2E-only surface (phase_h_e2e_only_surface): Playwright chrome-extension:// side panel; complements JSDOM composition tests.
+    side_panel_tag_sort_toolbar_e2e():
+      PRE: open side-panel.html; bookmarkPanel visible
+      ASSERT tagSortToggle visible
+      ON click frequency segment: aria-pressed matches selection
   metadata:
     last_updated:
       date: "2026-03-27"
-      author: "AI Agent"
-      reason: "S13 PROC-AGENT_REQ_CHECKLIST: final TIED↔code↔tests sync; no LEAP drift"
-  name: "This Page tag sort implementation"
-  status: "Active"
-  testability: "integration"
+      author: AI Agent
+      reason: 'S13 PROC-AGENT_REQ_CHECKLIST: final TIED↔code↔tests sync; no LEAP drift'
+  name: This Page tag sort implementation
+  status: Active
+  testability: integration
   phase_h_e2e_only_surface:
-    testability: "e2e_only"
-    e2e_only_reason: "Chromium MV3 chrome-extension:// side panel page loads the production side-panel bundle in the extension origin; JSDOM composition tests cannot load unpacked extension HTML, reproduce the Chromium side-panel host (layout, hit targets, focus), or exercise chrome.runtime in that document. Binding logic remains covered by tests/integration/this-page-tag-sort-composition.integration.test.js."
-    playwright_spec: "tests/playwright/extension-this-page-tag-sort.spec.js"
+    testability: e2e_only
+    e2e_only_reason: Chromium MV3 chrome-extension:// side panel page loads the production side-panel bundle in the extension origin; JSDOM composition tests cannot load unpacked extension HTML, reproduce the Chromium side-panel host (layout, hit targets, focus), or exercise chrome.runtime in that document. Binding logic remains covered by tests/integration/this-page-tag-sort-composition.integration.test.js.
+    playwright_spec: tests/playwright/extension-this-page-tag-sort.spec.js
   cross_references:
-    - "ARCH-THIS_PAGE_TAG_SORT"
-    - "REQ-THIS_PAGE_TAG_SORT"
-    - "IMPL-UIManager_SCOPED_ROOT"
-    - "IMPL-SUGGESTED_TAGS"
-    - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
-  decision: "Side panel: three-way chip ordering (alphabetical, bookmark frequency, DOM relevance) when tagSortToggle is present; popup preserves controller order. PopupController loads hoverboard_tag_frequency and runs two-step MAIN-world inject (snippet file then extractor) for suggested rows; UIManager merges frequency map without auto-redraw and sorts via tag-chip-sort.sortTagChipRows."
+    - ARCH-THIS_PAGE_TAG_SORT
+    - REQ-THIS_PAGE_TAG_SORT
+    - IMPL-UIManager_SCOPED_ROOT
+    - IMPL-SUGGESTED_TAGS
+    - IMPL-PLAYWRIGHT_E2E_EXTENSION
+  decision: 'Side panel: three-way chip ordering (alphabetical, bookmark frequency, DOM relevance) when tagSortToggle is present; popup preserves controller order. PopupController loads hoverboard_tag_frequency and runs two-step MAIN-world inject (snippet file then extractor) for suggested rows; UIManager merges frequency map without auto-redraw and sorts via tag-chip-sort.sortTagChipRows.'
   rationale:
-    why: "Users need one shared sort mode across Current, Recent, and Suggested chips without changing membership."
+    why: Users need one shared sort mode across Current, Recent, and Suggested chips without changing membership.
     problems_solved:
-      - "Single-heuristic ordering insufficient"
-      - "Suggested tags need relevance-aware ordering"
+      - Single-heuristic ordering insufficient
+      - Suggested tags need relevance-aware ordering
     benefits:
-      - "Pure sort module shared by all chip lists"
-      - "Frequency from storage; relevance from page extract"
+      - Pure sort module shared by all chip lists
+      - Frequency from storage; relevance from page extract
   implementation_approach:
     details:
-      - "cacheElements: sort UI enabled when elements.tagSortToggle resolved under scoped container"
-      - "setTagFrequencyMapForSort merges map; caller redraws"
-      - "updateCurrentTags / updateRecentTags / _paintSuggestedTags build rows and sort when getEffectiveTagSortMode() non-null"
-      - "PopupController._normalizeHoverboardTagFrequencyMap: coerce storage payload to plain object for setTagFrequencyMapForSort"
-      - "Composition: loadInitialData awaits refreshTagFrequencyMapForSort before updateCurrentTags; awaits loadRecentTags before loadSuggestedTags"
-      - "Composition: setupEventListeners wires [data-sort-mode] clicks to setTagSortMode"
-      - "PopupController._normalizeSuggestedRowsFromMainWorld implements trim + invalid-row drop before FILTER_NOT_ON_CURRENT_BOOKMARK"
+      - 'cacheElements: sort UI enabled when elements.tagSortToggle resolved under scoped container'
+      - setTagFrequencyMapForSort merges map; caller redraws
+      - updateCurrentTags / updateRecentTags / _paintSuggestedTags build rows and sort when getEffectiveTagSortMode() non-null
+      - 'PopupController._normalizeHoverboardTagFrequencyMap: coerce storage payload to plain object for setTagFrequencyMapForSort'
+      - 'Composition: loadInitialData awaits refreshTagFrequencyMapForSort before updateCurrentTags; awaits loadRecentTags before loadSuggestedTags'
+      - 'Composition: setupEventListeners wires [data-sort-mode] clicks to setTagSortMode'
+      - PopupController._normalizeSuggestedRowsFromMainWorld implements trim + invalid-row drop before FILTER_NOT_ON_CURRENT_BOOKMARK
   code_locations:
     files:
-      - path: "src/shared/tag-chip-sort.js"
-        description: "sortTagChipRows and bookmark frequency lookup"
-      - path: "src/ui/popup/UIManager.js"
-        description: "tagSortToggle, tagFrequencyMap, getEffectiveTagSortMode, sorted chip paint"
-      - path: "src/ui/popup/PopupController.js"
-        description: "refreshTagFrequencyMapForSort; loadSuggestedTags (MAIN inject + _normalizeSuggestedRowsFromMainWorld + dedupe); loadInitialData orchestration"
-      - path: "src/features/tagging/suggested-tags-main-world-snippet.js"
-        description: "MAIN-world relevance tiers and extractor global"
-      - path: "src/ui/side-panel/side-panel.html"
-        description: "tagSortToggle markup"
-      - path: "src/ui/side-panel/side-panel.css"
-        description: "sort toggle styling"
+      - path: src/shared/tag-chip-sort.js
+        description: sortTagChipRows and bookmark frequency lookup
+      - path: src/ui/popup/UIManager.js
+        description: tagSortToggle, tagFrequencyMap, getEffectiveTagSortMode, sorted chip paint
+      - path: src/ui/popup/PopupController.js
+        description: refreshTagFrequencyMapForSort; loadSuggestedTags (MAIN inject + _normalizeSuggestedRowsFromMainWorld + dedupe); loadInitialData orchestration
+      - path: src/features/tagging/suggested-tags-main-world-snippet.js
+        description: MAIN-world relevance tiers and extractor global
+      - path: src/ui/side-panel/side-panel.html
+        description: tagSortToggle markup
+      - path: src/ui/side-panel/side-panel.css
+        description: sort toggle styling
     functions:
-      - name: "sortTagChipRows"
-        file: "src/shared/tag-chip-sort.js"
-        description: "Three-mode comparator dispatch"
-      - name: "refreshTagFrequencyMapForSort"
-        file: "src/ui/popup/PopupController.js"
-        description: "Storage read hoverboard_tag_frequency; normalize map then setTagFrequencyMapForSort"
-      - name: "_normalizeHoverboardTagFrequencyMap"
-        file: "src/ui/popup/PopupController.js"
-        description: "Coerce stored hoverboard_tag_frequency to plain object or {}"
-      - name: "_normalizeSuggestedRowsFromMainWorld"
-        file: "src/ui/popup/PopupController.js"
-        description: "NORMALIZE_SUGGESTED_ROWS + FILTER_INVALID_ROWS: trim tags; drop empty-after-trim"
-      - name: "loadSuggestedTags"
-        file: "src/ui/popup/PopupController.js"
-        description: "MAIN inject + _normalizeSuggestedRowsFromMainWorld + bookmark dedupe → updateSuggestedTags"
-      - name: "updateCurrentTags / updateRecentTags / _paintSuggestedTags"
-        file: "src/ui/popup/UIManager.js"
-        description: "Optional sort before paint"
+      - name: sortTagChipRows
+        file: src/shared/tag-chip-sort.js
+        description: Three-mode comparator dispatch
+      - name: refreshTagFrequencyMapForSort
+        file: src/ui/popup/PopupController.js
+        description: Storage read hoverboard_tag_frequency; normalize map then setTagFrequencyMapForSort
+      - name: _normalizeHoverboardTagFrequencyMap
+        file: src/ui/popup/PopupController.js
+        description: Coerce stored hoverboard_tag_frequency to plain object or {}
+      - name: _normalizeSuggestedRowsFromMainWorld
+        file: src/ui/popup/PopupController.js
+        description: 'NORMALIZE_SUGGESTED_ROWS + FILTER_INVALID_ROWS: trim tags; drop empty-after-trim'
+      - name: loadSuggestedTags
+        file: src/ui/popup/PopupController.js
+        description: MAIN inject + _normalizeSuggestedRowsFromMainWorld + bookmark dedupe → updateSuggestedTags
+      - name: updateCurrentTags / updateRecentTags / _paintSuggestedTags
+        file: src/ui/popup/UIManager.js
+        description: Optional sort before paint
   traceability:
     architecture:
-      - "ARCH-THIS_PAGE_TAG_SORT"
+      - ARCH-THIS_PAGE_TAG_SORT
     requirements:
-      - "REQ-THIS_PAGE_TAG_SORT"
-      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
-      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+      - REQ-THIS_PAGE_TAG_SORT
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+      - REQ-SUGGESTED_TAGS_FROM_CONTENT
     tests:
-      - "tests/unit/tag-chip-sort.test.js"
-      - "tests/unit/uIManager-tag-case-folding.test.js"
-      - "tests/unit/popup-suggested-tags.test.js"
-      - "tests/unit/popup-refresh-tag-frequency-map.test.js"
-      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
-      - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - tests/unit/tag-chip-sort.test.js
+      - tests/unit/uIManager-tag-case-folding.test.js
+      - tests/unit/popup-suggested-tags.test.js
+      - tests/unit/popup-refresh-tag-frequency-map.test.js
+      - tests/integration/this-page-tag-sort-composition.integration.test.js
+      - tests/playwright/extension-this-page-tag-sort.spec.js
     code_annotations:
-      - "IMPL-THIS_PAGE_TAG_SORT"
-      - "ARCH-THIS_PAGE_TAG_SORT"
-      - "REQ-THIS_PAGE_TAG_SORT"
+      - IMPL-THIS_PAGE_TAG_SORT
+      - ARCH-THIS_PAGE_TAG_SORT
+      - REQ-THIS_PAGE_TAG_SORT
   related_decisions:
     depends_on:
-      - "IMPL-UIManager_SCOPED_ROOT"
+      - IMPL-UIManager_SCOPED_ROOT
     supersedes: []
     see_also:
-      - "IMPL-SUGGESTED_TAGS"
-      - "ARCH-SUGGESTED_TAGS"
-      - "ARCH-SIDE_PANEL_TABS"
-      - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
+      - IMPL-SUGGESTED_TAGS
+      - ARCH-SUGGESTED_TAGS
+      - ARCH-SIDE_PANEL_TABS
+      - IMPL-PLAYWRIGHT_E2E_EXTENSION
     composed_with:
-      - "IMPL-SUGGESTED_TAGS"
+      - IMPL-SUGGESTED_TAGS
   token_coverage:
     code_files:
-      - "src/shared/tag-chip-sort.js"
-      - "src/ui/popup/UIManager.js"
-      - "src/ui/popup/PopupController.js"
-      - "src/features/tagging/suggested-tags-main-world-snippet.js"
-      - "src/ui/side-panel/side-panel.html"
-      - "src/ui/side-panel/side-panel.css"
+      - src/shared/tag-chip-sort.js
+      - src/ui/popup/UIManager.js
+      - src/ui/popup/PopupController.js
+      - src/features/tagging/suggested-tags-main-world-snippet.js
+      - src/ui/side-panel/side-panel.html
+      - src/ui/side-panel/side-panel.css
     tests:
-      - "tests/unit/tag-chip-sort.test.js"
-      - "tests/unit/uIManager-tag-case-folding.test.js"
-      - "tests/unit/popup-suggested-tags.test.js"
-      - "tests/unit/popup-refresh-tag-frequency-map.test.js"
-      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
-      - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - tests/unit/tag-chip-sort.test.js
+      - tests/unit/uIManager-tag-case-folding.test.js
+      - tests/unit/popup-suggested-tags.test.js
+      - tests/unit/popup-refresh-tag-frequency-map.test.js
+      - tests/integration/this-page-tag-sort-composition.integration.test.js
+      - tests/playwright/extension-this-page-tag-sort.spec.js
   validation_evidence:
     - date: "2026-03-27"
-      result: "pass"
-      notes: "S06.6 persist: unit tests + tied_validate_consistency"
+      result: pass
+      notes: 'S06.6 persist: unit tests + tied_validate_consistency'
     - date: "2026-03-27"
-      result: "pass"
-      notes: "S12 Phase I: jest (unit+integration) pass; Playwright extension 37 passed (1 skipped); npm run lint + typecheck + validate:tokens; REQ-MODULE_VALIDATION: tag-chip-sort unit, UIManager/PopupController unit+integration composition, Playwright e2e_only surface (phase_h_e2e_only_surface.e2e_only_reason)"
+      result: pass
+      notes: 'S12 Phase I: jest (unit+integration) pass; Playwright extension 37 passed (1 skipped); npm run lint + typecheck + validate:tokens; REQ-MODULE_VALIDATION: tag-chip-sort unit, UIManager/PopupController unit+integration composition, Playwright e2e_only surface (phase_h_e2e_only_surface.e2e_only_reason)'
     - date: "2026-03-27"
-      result: "pass"
-      notes: "S06.5a SUB-PSEUDOCODE-VALIDATE: manual checklist + tied_validate_consistency ok; REQ-SUGGESTED_TAGS_DEDUPLICATION behavior covered in popup-suggested-tags (dedupe vs current bookmark); integration this-page-tag-sort-composition + Playwright e2e"
+      result: pass
+      notes: 'S06.5a SUB-PSEUDOCODE-VALIDATE: manual checklist + tied_validate_consistency ok; REQ-SUGGESTED_TAGS_DEDUPLICATION behavior covered in popup-suggested-tags (dedupe vs current bookmark); integration this-page-tag-sort-composition + Playwright e2e'
     - date: "2026-03-27"
-      result: "pass"
-      notes: "S06.6 PROC-AGENT_REQ_CHECKLIST: IMPL index/detail + semantic-tokens authoritative; SUB-YAML (PyYAML) + yaml_index_validate + tied_validate_consistency ok"
+      result: pass
+      notes: 'S06.6 PROC-AGENT_REQ_CHECKLIST: IMPL index/detail + semantic-tokens authoritative; SUB-YAML (PyYAML) + yaml_index_validate + tied_validate_consistency ok'
     - date: "2026-03-27"
-      result: "pass"
-      notes: "S11 PROC-AGENT_REQ_CHECKLIST Phase H: phase_h_e2e_only_surface + side_panel_tag_sort_toolbar_e2e in essence_pseudocode; Playwright extension-this-page-tag-sort.spec.js passed (chrome-extension side panel; composition tests remain in this-page-tag-sort-composition.integration.test.js)"
+      result: pass
+      notes: 'S11 PROC-AGENT_REQ_CHECKLIST Phase H: phase_h_e2e_only_surface + side_panel_tag_sort_toolbar_e2e in essence_pseudocode; Playwright extension-this-page-tag-sort.spec.js passed (chrome-extension side panel; composition tests remain in this-page-tag-sort-composition.integration.test.js)'
     - date: "2026-03-27"
-      result: "pass"
-      notes: "S12 PROC-AGENT_REQ_CHECKLIST Phase I compound gate: Jest 84 suites 1163 passed (1 skipped); Playwright extension 38 runs 37 passed 1 skipped; eslint+tsc+validate:manifest+validate:tokens; tied_validate_consistency ok; REQ-MODULE_VALIDATION documented on IMPL (module boundaries); npm audit --audit-level=high reports upstream deps (not gated green this run)"
+      result: pass
+      notes: 'S12 PROC-AGENT_REQ_CHECKLIST Phase I compound gate: Jest 84 suites 1163 passed (1 skipped); Playwright extension 38 runs 37 passed 1 skipped; eslint+tsc+validate:manifest+validate:tokens; tied_validate_consistency ok; REQ-MODULE_VALIDATION documented on IMPL (module boundaries); npm audit --audit-level=high reports upstream deps (not gated green this run)'
     - date: "2026-03-27"
-      result: "pass"
-      notes: "S13 PROC-AGENT_REQ_CHECKLIST: PopupController loadSuggestedTags + _normalizeSuggestedRowsFromMainWorld match essence_pseudocode; REQ/ARCH/IMPL indexes consistent; tied_validate_consistency ok"
-  detail_file: "implementation-decisions/IMPL-THIS_PAGE_TAG_SORT.yaml"
+      result: pass
+      notes: 'S13 PROC-AGENT_REQ_CHECKLIST: PopupController loadSuggestedTags + _normalizeSuggestedRowsFromMainWorld match essence_pseudocode; REQ/ARCH/IMPL indexes consistent; tied_validate_consistency ok'
+  detail_file: implementation-decisions/IMPL-THIS_PAGE_TAG_SORT.yaml
