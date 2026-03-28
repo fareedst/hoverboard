@@ -121,6 +121,7 @@ When making changes, use this matrix to identify what needs updating:
 - [ ] All identified documents updated simultaneously
 - [ ] Cross-references validated and working
 - [ ] **All changed TIED YAML validated** with `lint_yaml` per [PROC-YAML_EDIT_LOOP]; YAML that does not validate is invalid for use
+- [ ] **Detail YAML structural rules** verified (no index-only fields such as `detail_file` in detail files, correct field shapes, quoted unsafe scalars) per `detail-files-schema.md` § Structural rules and common errors
 - [ ] Tests updated and passing
 - [ ] Code comments include semantic tokens
 - [ ] Behavioral contracts maintained
@@ -217,6 +218,7 @@ See `tied/processes.md` § LEAP for the canonical process definition.
 - [ ] **MANDATORY**: Record architecture/implementation decisions in YAML IMMEDIATELY when made
 - [ ] **MANDATORY**: Update `semantic-tokens.yaml` when creating new tokens
 - [ ] **MANDATORY**: When editing TIED YAML, validate with `lint_yaml` per [PROC-YAML_EDIT_LOOP]; YAML that does not validate is invalid for use
+- [ ] **MANDATORY**: When writing TIED detail YAML directly (not via MCP), verify: top-level key = token (matches filename), no index-only fields (`detail_file` in detail files), `cross_references` and `traceability.*` are lists, scalars with `: ` `@` `#` `!` or YAML-special characters are quoted — see `detail-files-schema.md` § Structural rules and common errors and `processes.md` § `[PROC-YAML_EDIT_LOOP]` 3.1.1
 - [ ] **MANDATORY**: Perform `[PROC-TOKEN_AUDIT]`; run `./scripts/validate_tokens.sh` and/or `tied_validate_consistency` (when using MCP)
 
 **AFTER COMPLETING WORK:**

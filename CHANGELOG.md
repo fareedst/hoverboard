@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Jest: chrome.storage mocks broke after the first test** ([IMPL-TESTING], [IMPL-RUNTIME_VALIDATION]) – `jest.config.js` had `restoreMocks: true`, which cleared `jest.fn()` implementations between tests while `global.chrome` was built once in `tests/setup.js`. That led to `chrome.storage` / `sync.get` returning `undefined` and cascading `TypeError`s (e.g. config-manager tests). **Fix:** set `restoreMocks: false` (keep `clearMocks: true` for call history only). **Setup:** `tests/setup.js` now defines `applyChromeMockImplementations` / `resetChromeMockImplementations`, moves `mockBackgroundPage` before `global.chrome`, merges a single `global.safari.extension`, consolidates one `beforeEach` that re-seeds chrome mocks and clears fetch / background helpers, removes the unused `jest-webextension-mock` import, and uses optional chaining so tests that replace `global.chrome` with a minimal stub still run. **Tests:** `message-schemas.test.js` adds regression cases for `getCurrentBookmark` passthrough (`url` + `title` + `tabId`), `saveBookmark` extra keys, and `.strict()` rejecting unknown keys.
+
+- **Content hover: saveTag / deleteTag payloads vs runtime validation** ([IMMUTABLE-REQ-TAG-003], [IMPL-RUNTIME_VALIDATION], [IMPL-MESSAGE_HANDLING]) – `hover-system.js` sent `addTag` / `deleteTag` with `{ pin, tag, description }`, which did not match Zod `saveTag` / `deleteTag` schemas (`url`, `value`). **Fix:** send `saveTag` with `{ url: pin.url, value: tag }` and `deleteTag` with `{ url: pin.url, value: tag }`, aligned with `overlay-manager.js` and `src/shared/message-schemas.js`.
+
+### Changed
+
+- **TIED: runtime validation decision and index** ([IMPL-RUNTIME_VALIDATION]) – Detail and `tied/implementation-decisions.yaml` now document `.strict()` vs `.passthrough()` for message data schemas and list `src/features/content/hover-system.js` as a code location for aligned payloads.
+
+### Documentation
+
+- **TIED detail YAML and agent checklists** – `tied/detail-files-schema.md` expanded with structural rules (no `detail_file` inside detail files, top-level token key, list shapes, quoting). `AGENTS.md` and `ai-principles.md` reference those rules and `[PROC-YAML_EDIT_LOOP]`. `tied/processes.md` and `tied/semantic-tokens.yaml` updated for methodology consistency.
+
 ### Added
 
 - **Side panel This Page: Recent Tags refresh when the window regains focus** ([REQ-RECENT_TAGS_SYSTEM], [ARCH-SIDE_PANEL_TABS], [ARCH-TAG_SYSTEM], [IMPL-SIDE_PANEL_TABS], [IMPL-RECENT_TAGS_POPUP_REFRESH]) – With the **This Page** tab selected, focusing the browser window that hosts the side panel runs the same **Recent Tags** reload as the popup (`loadRecentTags` / service worker), so recent activity in other windows can show up without changing tabs. **Tests:** `tests/unit/side-panel-tabs.test.js` (`shouldInvokeLoadRecentTagsOnWindowFocusSync`); `tests/integration/window-focus-recent-tags-composition.integration.test.js` (listener → `getCurrent` → `loadRecentTags`); Playwright `tests/playwright/extension-side-panel-recent-tags-e2e.spec.js` (real `chrome-extension://` side panel; skipped placeholder-documents multi-window focus). **TIED:** REQ/ARCH/IMPL indexes and `IMPL-SIDE_PANEL_TABS` detail (phase_h E2E surfaces, pseudocode boundary). **README:** This Page section, Core Features, Test Coverage, TIED doc link.

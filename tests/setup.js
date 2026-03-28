@@ -1,9 +1,9 @@
 import '@testing-library/jest-dom';
-import 'jest-webextension-mock';
 
 /**
  * Jest Test Setup Configuration
  * Sets up the testing environment for Hoverboard browser extension
+ * [TEST-FIX-ENV-002] jest-webextension-mock removed — global.chrome is defined here and replaced the package mock.
  */
 
 // Global test configuration
@@ -17,16 +17,146 @@ global.console = {
   error: jest.fn(),
 };
 
+// [TEST-FIX-MOCK-2025-07-14] - Before global.chrome so getBackgroundPage can resolve it (applyChromeMockImplementations)
+global.mockBackgroundPage = {
+  recentTagsMemory: {
+    getRecentTags: jest.fn().mockReturnValue([
+      { name: 'test-tag-1', lastUsed: '2022-01-01T00:00:02.000Z' },
+      { name: 'test-tag-2', lastUsed: '2022-01-01T00:00:01.000Z' },
+      { name: 'test-tag-3', lastUsed: '2022-01-01T00:00:00.000Z' }
+    ]),
+    getRecentTagsForUi: jest.fn().mockResolvedValue([
+      { name: 'test-tag-1', lastUsed: '2022-01-01T00:00:02.000Z' },
+      { name: 'test-tag-2', lastUsed: '2022-01-01T00:00:01.000Z' },
+      { name: 'test-tag-3', lastUsed: '2022-01-01T00:00:00.000Z' }
+    ]),
+    addTag: jest.fn().mockReturnValue(true),
+    clearRecentTags: jest.fn().mockResolvedValue(undefined),
+    getMemoryStatus: jest.fn().mockReturnValue({ status: 'active' })
+  }
+};
+
+global.mockMessageService = {
+  sendMessage: jest.fn().mockResolvedValue({ success: true }),
+  onMessage: jest.fn(),
+  removeListener: jest.fn()
+};
+
+/**
+ * [TEST-FIX-ENV-002] Re-attach chrome mock implementations (safe if restoreMocks or mockReset cleared them).
+ * @param {typeof global.chrome} chrome
+ */
+function applyChromeMockImplementations (chrome) {
+  if (!chrome?.runtime || !chrome?.storage) return;
+
+  // [TEST-FIX-ENV-002] Optional chaining: some tests replace global.chrome with a minimal stub (e.g. message-handler-runtime-validation.test.js)
+  chrome.runtime.getBackgroundPage?.mockImplementation(() => Promise.resolve(global.mockBackgroundPage));
+  chrome.runtime.getURL?.mockImplementation((path) => `chrome-extension://test-id/${path}`);
+  chrome.runtime.getManifest?.mockImplementation(() => ({ version: '1.0.0' }));
+
+  chrome.storage.local?.get?.mockImplementation((keys, callback) => {
+    const mockData = {
+      hoverboard_recent_tags_cache: {
+        tags: [
+          { name: 'test-tag-1', lastUsed: Date.now() },
+          { name: 'test-tag-2', lastUsed: Date.now() - 1000 },
+          { name: 'test-tag-3', lastUsed: Date.now() - 2000 }
+        ],
+        timestamp: Date.now()
+      },
+      hoverboard_tag_frequency: {
+        'test-tag-1': 5,
+        'test-tag-2': 3,
+        'test-tag-3': 2
+      }
+    };
+    const result = {};
+    if (Array.isArray(keys)) {
+      keys.forEach(key => {
+        result[key] = mockData[key] || null;
+      });
+    } else {
+      result[keys] = mockData[keys] || null;
+    }
+    if (callback) {
+      callback(result);
+    } else {
+      return Promise.resolve(result);
+    }
+  });
+  chrome.storage.local?.set?.mockImplementation((data, callback) => {
+    if (callback) callback(); else return Promise.resolve();
+  });
+  chrome.storage.local?.remove?.mockImplementation((keys, callback) => {
+    if (callback) callback(); else return Promise.resolve();
+  });
+  chrome.storage.local?.clear?.mockImplementation((callback) => {
+    if (callback) callback(); else return Promise.resolve();
+  });
+
+  chrome.storage.sync?.get?.mockImplementation((keys, callback) => {
+    const mockData = {
+      hoverboard_settings: {
+        recentTagsCountMax: 10,
+        initRecentPostsCount: 20,
+        showHoverOnPageLoad: true,
+        hoverShowRecentTags: true
+      },
+      hoverboard_auth_token: 'user-test-token:123456',
+      hoverboard_inhibit_urls: ''
+    };
+    const result = {};
+    if (Array.isArray(keys)) {
+      keys.forEach(key => {
+        result[key] = mockData[key] || null;
+      });
+    } else {
+      result[keys] = mockData[keys] || null;
+    }
+    if (callback) {
+      callback(result);
+    } else {
+      return Promise.resolve(result);
+    }
+  });
+  chrome.storage.sync?.set?.mockImplementation((data, callback) => {
+    if (callback) callback(); else return Promise.resolve();
+  });
+  chrome.storage.sync?.remove?.mockImplementation((keys, callback) => {
+    if (callback) callback(); else return Promise.resolve();
+  });
+  chrome.storage.sync?.clear?.mockImplementation((callback) => {
+    if (callback) callback(); else return Promise.resolve();
+  });
+
+  chrome.tabs?.query?.mockResolvedValue([]);
+  chrome.tabs?.sendMessage?.mockResolvedValue();
+  chrome.tabs?.create?.mockResolvedValue();
+  chrome.tabs?.update?.mockResolvedValue();
+  chrome.tabs?.get?.mockResolvedValue({ id: 1, url: 'https://example.com' });
+  chrome.windows?.get?.mockResolvedValue({ id: 1, type: 'normal' });
+  chrome.scripting?.executeScript?.mockResolvedValue();
+  chrome.scripting?.insertCSS?.mockResolvedValue();
+  chrome.scripting?.removeCSS?.mockResolvedValue();
+  chrome.permissions?.request?.mockResolvedValue();
+  chrome.permissions?.contains?.mockResolvedValue();
+  chrome.contextMenus?.removeAll?.mockImplementation((cb) => { if (typeof cb === 'function') cb(); });
+}
+
+function resetChromeMockImplementations () {
+  applyChromeMockImplementations(global.chrome);
+}
+
 // [TEST-FIX-IMPL-2025-07-14] - Enhanced Chrome extension API mocks
 global.chrome = {
   runtime: {
     sendMessage: jest.fn(),
-    getBackgroundPage: jest.fn().mockImplementation(() => Promise.resolve(global.mockBackgroundPage)),
+    getBackgroundPage: jest.fn(),
     onMessage: {
       addListener: jest.fn(),
       removeListener: jest.fn(),
     },
-    getURL: jest.fn((path) => `chrome-extension://test-id/${path}`),
+    getURL: jest.fn(),
     id: 'test-extension-id',
     // [TEST-FIX-IMPL-2025-07-14] - Add missing properties to prevent Object.values error
     connect: jest.fn(),
@@ -71,7 +201,7 @@ global.chrome = {
       addListener: jest.fn(),
       removeListener: jest.fn(),
     },
-    getManifest: jest.fn(() => ({ version: '1.0.0' })),
+    getManifest: jest.fn(),
     getPlatformInfo: jest.fn(),
     getPackageDirectoryEntry: jest.fn(),
     requestUpdateCheck: jest.fn(),
@@ -85,133 +215,38 @@ global.chrome = {
   },
   storage: {
     local: {
-      get: jest.fn().mockImplementation((keys, callback) => {
-        // [TEST-FIX-STORAGE-001] - Enhanced local storage mock with realistic data
-        const mockData = {
-          hoverboard_recent_tags_cache: {
-            tags: [
-              { name: 'test-tag-1', lastUsed: Date.now() },
-              { name: 'test-tag-2', lastUsed: Date.now() - 1000 },
-              { name: 'test-tag-3', lastUsed: Date.now() - 2000 }
-            ],
-            timestamp: Date.now()
-          },
-          hoverboard_tag_frequency: {
-            'test-tag-1': 5,
-            'test-tag-2': 3,
-            'test-tag-3': 2
-          }
-        };
-        
-        const result = {};
-        if (Array.isArray(keys)) {
-          keys.forEach(key => {
-            result[key] = mockData[key] || null;
-          });
-        } else {
-          result[keys] = mockData[keys] || null;
-        }
-        
-        if (callback) {
-          callback(result);
-        } else {
-          return Promise.resolve(result);
-        }
-      }),
-      set: jest.fn().mockImplementation((data, callback) => {
-        if (callback) {
-          callback();
-        } else {
-          return Promise.resolve();
-        }
-      }),
-      remove: jest.fn().mockImplementation((keys, callback) => {
-        if (callback) {
-          callback();
-        } else {
-          return Promise.resolve();
-        }
-      }),
-      clear: jest.fn().mockImplementation((callback) => {
-        if (callback) {
-          callback();
-        } else {
-          return Promise.resolve();
-        }
-      }),
+      get: jest.fn(),
+      set: jest.fn(),
+      remove: jest.fn(),
+      clear: jest.fn(),
     },
     sync: {
-      get: jest.fn().mockImplementation((keys, callback) => {
-        // [TEST-FIX-STORAGE-2025-07-14] - Enhanced sync storage mock
-        const mockData = {
-          hoverboard_settings: {
-            recentTagsCountMax: 10,
-            initRecentPostsCount: 20,
-            showHoverOnPageLoad: true,
-            hoverShowRecentTags: true
-          },
-          hoverboard_auth_token: 'user-test-token:123456',
-          hoverboard_inhibit_urls: ''
-        };
-        
-        const result = {};
-        if (Array.isArray(keys)) {
-          keys.forEach(key => {
-            result[key] = mockData[key] || null;
-          });
-        } else {
-          result[keys] = mockData[keys] || null;
-        }
-        
-        if (callback) {
-          callback(result);
-        } else {
-          return Promise.resolve(result);
-        }
-      }),
-      set: jest.fn().mockImplementation((data, callback) => {
-        if (callback) {
-          callback();
-        } else {
-          return Promise.resolve();
-        }
-      }),
-      remove: jest.fn().mockImplementation((keys, callback) => {
-        if (callback) {
-          callback();
-        } else {
-          return Promise.resolve();
-        }
-      }),
-      clear: jest.fn().mockImplementation((callback) => {
-        if (callback) {
-          callback();
-        } else {
-          return Promise.resolve();
-        }
-      }),
+      get: jest.fn(),
+      set: jest.fn(),
+      remove: jest.fn(),
+      clear: jest.fn(),
     },
   },
   tabs: {
-    query: jest.fn().mockResolvedValue([]),
-    sendMessage: jest.fn().mockResolvedValue(),
-    create: jest.fn().mockResolvedValue(),
-    update: jest.fn().mockResolvedValue(),
-    get: jest.fn().mockResolvedValue({ id: 1, url: 'https://example.com' }),
+    query: jest.fn(),
+    sendMessage: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    get: jest.fn(),
     onActivated: { addListener: jest.fn(), removeListener: jest.fn() },
     onUpdated: { addListener: jest.fn(), removeListener: jest.fn() },
   },
   windows: {
-    get: jest.fn().mockResolvedValue({ id: 1, type: 'normal' }),
+    get: jest.fn(),
   },
   scripting: {
-    executeScript: jest.fn().mockResolvedValue(),
-    insertCSS: jest.fn().mockResolvedValue(),
-    removeCSS: jest.fn().mockResolvedValue(),
+    executeScript: jest.fn(),
+    insertCSS: jest.fn(),
+    removeCSS: jest.fn(),
   },
   permissions: {
-    request: jest.fn().mockResolvedValue(),
-    contains: jest.fn().mockResolvedValue(),
+    request: jest.fn(),
+    contains: jest.fn(),
   },
   // [REQ-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS] [IMPL-CONTEXT_MENU_QUICK_ACCESS] Mocks for quick-access tests
   commands: {
@@ -222,7 +257,7 @@ global.chrome = {
   },
   contextMenus: {
     create: jest.fn(),
-    removeAll: jest.fn().mockImplementation((cb) => { if (typeof cb === 'function') cb(); }),
+    removeAll: jest.fn(),
     onClicked: { addListener: jest.fn() },
   },
   // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] action.onClicked and openPopup for icon click tests
@@ -232,10 +267,12 @@ global.chrome = {
   },
 };
 
+resetChromeMockImplementations();
+
 // Mock browser APIs for cross-browser compatibility
 global.browser = global.chrome;
 
-// [SAFARI-EXT-TEST-001] - Safari-specific mocks for testing
+// [SAFARI-EXT-TEST-001] - Safari-specific mocks for testing (single extension object: globalPage + settings)
 global.safari = {
   extension: {
     globalPage: {
@@ -249,9 +286,7 @@ global.safari = {
           clearRecentTags: jest.fn().mockReturnValue(true)
         }
       }
-    }
-  },
-  extension: {
+    },
     settings: {
       get: jest.fn().mockReturnValue({}),
       set: jest.fn().mockReturnValue(true)
@@ -295,27 +330,6 @@ global.Math.random = jest.fn(() => 0.5);
 const originalDateNow = Date.now;
 global.Date.now = jest.fn(() => 1640995200000); // 2022-01-01 00:00:00 UTC
 
-// [SAFARI-EXT-TEST-001] - Reset mocks before each test
-beforeEach(() => {
-  jest.clearAllMocks();
-  if (global.chrome && global.chrome.runtime) {
-    global.chrome.runtime.lastError = null;
-  }
-  // Only clear console mocks if they exist and are Jest mocks
-  if (global.console.warn && typeof global.console.warn.mockClear === 'function') {
-    global.console.warn.mockClear();
-  }
-  if (global.console.error && typeof global.console.error.mockClear === 'function') {
-    global.console.error.mockClear();
-  }
-  if (global.console.debug && typeof global.console.debug.mockClear === 'function') {
-    global.console.debug.mockClear();
-  }
-  if (global.console.log && typeof global.console.log.mockClear === 'function') {
-    global.console.log.mockClear();
-  }
-});
-
 // [SAFARI-EXT-TEST-001] - Restore original Date.now after tests
 afterAll(() => {
   global.Date.now = originalDateNow;
@@ -339,32 +353,6 @@ if (typeof window !== 'undefined') {
     // jsdom v26+ defines a non-configurable location; leave it as-is
   }
 }
-
-// [TEST-FIX-MOCK-2025-07-14] - Mock background page for recent tags functionality
-global.mockBackgroundPage = {
-  recentTagsMemory: {
-    getRecentTags: jest.fn().mockReturnValue([
-      { name: 'test-tag-1', lastUsed: '2022-01-01T00:00:02.000Z' },
-      { name: 'test-tag-2', lastUsed: '2022-01-01T00:00:01.000Z' },
-      { name: 'test-tag-3', lastUsed: '2022-01-01T00:00:00.000Z' }
-    ]),
-    getRecentTagsForUi: jest.fn().mockResolvedValue([
-      { name: 'test-tag-1', lastUsed: '2022-01-01T00:00:02.000Z' },
-      { name: 'test-tag-2', lastUsed: '2022-01-01T00:00:01.000Z' },
-      { name: 'test-tag-3', lastUsed: '2022-01-01T00:00:00.000Z' }
-    ]),
-    addTag: jest.fn().mockReturnValue(true),
-    clearRecentTags: jest.fn().mockResolvedValue(undefined),
-    getMemoryStatus: jest.fn().mockReturnValue({ status: 'active' })
-  }
-};
-
-// [TEST-FIX-MOCK-2025-07-14] - Mock message service for overlay functionality
-global.mockMessageService = {
-  sendMessage: jest.fn().mockResolvedValue({ success: true }),
-  onMessage: jest.fn(),
-  removeListener: jest.fn()
-};
 
 // Mock fetch for API calls
 global.fetch = jest.fn();
@@ -409,60 +397,33 @@ global.popupState = {
   clearPersistedState: jest.fn().mockResolvedValue(),
 };
 
-// [TEST-FIX-ENV-001] - Enhanced test setup with better error handling
+// [TEST-FIX-ENV-002] Per-test reset: jest clearMocks clears call history; re-seed chrome implementations; fetch cleared
 beforeEach(() => {
-  jest.clearAllMocks();
-  
-  // Reset fetch mock
-  fetch.mockClear();
-  
-  // [TEST-FIX-ENV-001] - Enhanced Chrome API mock reset
+  resetChromeMockImplementations();
+  if (global.fetch && typeof global.fetch.mockClear === 'function') {
+    global.fetch.mockClear();
+  }
   if (global.chrome && global.chrome.runtime) {
-    Object.values(global.chrome.runtime).forEach(mock => {
-      if (typeof mock?.mockClear === 'function') {
-        mock.mockClear();
-      }
-    });
-  }
-  
-  if (global.chrome && global.chrome.storage && global.chrome.storage.local) {
-    Object.values(global.chrome.storage.local).forEach(mock => {
-      if (typeof mock?.mockClear === 'function') {
-        mock.mockClear();
-      }
-    });
-  }
-  
-  if (global.chrome && global.chrome.storage && global.chrome.storage.sync) {
-    Object.values(global.chrome.storage.sync).forEach(mock => {
-      if (typeof mock?.mockClear === 'function') {
-        mock.mockClear();
-      }
-    });
-  }
-  
-  // [TEST-FIX-MOCK-2025-07-14] - Reset shared memory mocks (disabled in tests)
-  // global.recentTagsMemory is null in test environment
-  
-  // [TEST-FIX-MOCK-2025-07-14] - Reset background page mocks
-  if (global.mockBackgroundPage && global.mockBackgroundPage.recentTagsMemory) {
-    global.mockBackgroundPage.recentTagsMemory.getRecentTags.mockClear();
-    global.mockBackgroundPage.recentTagsMemory.getRecentTagsForUi.mockClear();
-    global.mockBackgroundPage.recentTagsMemory.addTag.mockClear();
-    global.mockBackgroundPage.recentTagsMemory.clearRecentTags.mockClear();
-    global.mockBackgroundPage.recentTagsMemory.getMemoryStatus.mockClear();
-  }
-  
-  // [TEST-FIX-MOCK-2025-07-14] - Reset message service mocks
-  if (global.mockMessageService) {
-    global.mockMessageService.sendMessage.mockClear();
-    global.mockMessageService.onMessage.mockClear();
-    global.mockMessageService.removeListener.mockClear();
-  }
-  
-  // [TEST-FIX-ENV-001] - Reset error mocks
-  if (global.chrome && global.chrome.runtime && global.chrome.runtime.lastError) {
     global.chrome.runtime.lastError = null;
+  }
+  if (global.mockBackgroundPage && global.mockBackgroundPage.recentTagsMemory) {
+    const m = global.mockBackgroundPage.recentTagsMemory;
+    if (typeof m.getRecentTags?.mockClear === 'function') m.getRecentTags.mockClear();
+    if (typeof m.getRecentTagsForUi?.mockClear === 'function') m.getRecentTagsForUi.mockClear();
+    if (typeof m.addTag?.mockClear === 'function') m.addTag.mockClear();
+    if (typeof m.clearRecentTags?.mockClear === 'function') m.clearRecentTags.mockClear();
+    if (typeof m.getMemoryStatus?.mockClear === 'function') m.getMemoryStatus.mockClear();
+  }
+  if (global.mockMessageService) {
+    if (typeof global.mockMessageService.sendMessage?.mockClear === 'function') {
+      global.mockMessageService.sendMessage.mockClear();
+    }
+    if (typeof global.mockMessageService.onMessage?.mockClear === 'function') {
+      global.mockMessageService.onMessage.mockClear();
+    }
+    if (typeof global.mockMessageService.removeListener?.mockClear === 'function') {
+      global.mockMessageService.removeListener.mockClear();
+    }
   }
 });
 

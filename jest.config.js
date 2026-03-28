@@ -64,9 +64,10 @@ export default {
   verbose: true,
   testTimeout: 15000, // 15 second timeout for all tests
   
-  // Clear mocks between tests
+  // Clear mocks between tests (call history only; keep implementations on global.chrome)
+  // [TEST-FIX-ENV-002] restoreMocks clears jest.fn implementations and broke chrome.storage mocks after first test
   clearMocks: true,
-  restoreMocks: true,
+  restoreMocks: false,
   
   // Transform for ESM support
   transform: {

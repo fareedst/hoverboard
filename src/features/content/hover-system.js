@@ -128,7 +128,7 @@ class HoverSystem {
       }
 
       // Enhance pin data with additional properties
-      const pin = response;
+      const pin = response
       this.logger.debug('Site data loaded:', pin)
       return pin
     } catch (error) {
@@ -430,11 +430,10 @@ class HoverSystem {
     try {
       this.logger.debug('[IMMUTABLE-REQ-TAG-003] Adding tag to current site:', tag)
 
-      // [IMMUTABLE-REQ-TAG-003] - Add tag to bookmark
-      await this.messageService.sendMessage('addTag', {
-        pin,
-        tag,
-        description: pin.description || this.document.title
+      // [IMMUTABLE-REQ-TAG-003] [IMPL-RUNTIME_VALIDATION] - saveTag payload must match message-schemas (url + value)
+      await this.messageService.sendMessage('saveTag', {
+        url: pin.url,
+        value: tag
       })
 
       // [IMMUTABLE-REQ-TAG-003] - Track tag addition for current site only
@@ -461,10 +460,10 @@ class HoverSystem {
     try {
       this.logger.debug('Deleting tag:', tag)
 
+      // [IMPL-RUNTIME_VALIDATION] deleteTag payload must match message-schemas (url + value)
       await this.messageService.sendMessage('deleteTag', {
-        pin,
-        tag,
-        description: pin.description || this.document.title
+        url: pin.url,
+        value: tag
       })
 
       setTimeout(() => this.refreshHover(), 500)

@@ -76,6 +76,105 @@ This document describes the YAML structure for individual REQ, ARCH, and IMPL to
 
 ---
 
+## Structural rules and common errors (agents)
+
+Agents often produce YAML that **parses** but **fails** `tied_validate_consistency` or downstream merge/report tooling. This section lists mandatory structural rules beyond raw YAML syntax.
+
+### Index-only fields
+
+- **`detail_file`** — belongs **only** on the **index** record in `requirements.yaml`, `architecture-decisions.yaml`, or `implementation-decisions.yaml`. It **MUST NOT** appear inside a detail YAML file under `requirements/`, `architecture-decisions/`, or `implementation-decisions/`.
+
+### Top-level key rule
+
+- Each detail file has **exactly one** top-level mapping key: the token id (e.g. `REQ-TIED_SETUP:`). **All** record fields are nested under that key.
+- The top-level key **must** match the filename stem (e.g. `REQ-TIED_SETUP.yaml` → key `REQ-TIED_SETUP`).
+
+### Field shape cheat-sheet
+
+| Field / area | Correct YAML shape | Common mistake |
+|--------------|-------------------|----------------|
+| `cross_references` (ARCH, IMPL) | List of strings: `- REQ-X` or `- ARCH-X` | Single string, or a map |
+| `traceability.*` (any sub-key) | List of strings | Bare string or scalar |
+| `related_requirements.*`, `related_decisions.*` | Each sub-key is a list; use `[]` when empty | Wrong type or omitted lists |
+| `satisfaction_criteria`, `validation_criteria` (REQ) | List of maps | Flat string or single map |
+| `essence_pseudocode` (IMPL) | Block scalar using `|-` (indented lines under the key) | Unquoted multi-line flow scalar |
+| `rationale`, `implementation_approach`, etc. | Maps per schema | Wrong nesting level (must be under token key) |
+
+### YAML quoting and unsafe scalars
+
+Quote scalars with **double quotes** when the value:
+
+- Contains **colon + space** (`: `) anywhere (YAML may parse as a nested mapping).
+- Starts with or contains YAML-significant characters: `@`, `#`, `!`, `*`, `&`, `%`, `` ` ``, `{`, `}`, `[`, `]`, or embedded `"` / `'` where ambiguity arises.
+- Contains backslash sequences that must be literal (prefer quoting or block scalars for paths and escape-like text).
+
+**Rule of thumb:** When in doubt, use double quotes. TIED MCP write tools (`yaml_detail_create`, `yaml_detail_update`, `tied_token_create_with_detail`) emit safe quoting; **direct file edits** must apply these rules manually.
+
+### Minimal correct skeletons
+
+**REQ** (`requirements/REQ-EXAMPLE.yaml`):
+
+```yaml
+REQ-EXAMPLE:
+  name: Short title
+  category: Functional
+  priority: P1
+  status: Planned
+  traceability:
+    architecture: []
+    implementation: []
+    tests: []
+    code_annotations: []
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+```
+
+**ARCH** (`architecture-decisions/ARCH-EXAMPLE.yaml`):
+
+```yaml
+ARCH-EXAMPLE:
+  name: Short title
+  status: Active
+  cross_references:
+    - REQ-EXAMPLE
+  traceability:
+    requirements: []
+    implementation: []
+    tests: []
+    code_annotations: []
+  related_decisions:
+    depends_on: []
+    informs: []
+    see_also: []
+```
+
+**IMPL** (`implementation-decisions/IMPL-EXAMPLE.yaml`):
+
+```yaml
+IMPL-EXAMPLE:
+  name: Short title
+  status: Active
+  cross_references:
+    - ARCH-EXAMPLE
+    - REQ-EXAMPLE
+  traceability:
+    architecture: []
+    requirements: []
+    tests: []
+    code_annotations: []
+  related_decisions:
+    depends_on: []
+    supersedes: []
+    see_also: []
+  essence_pseudocode: |-
+    # [IMPL-EXAMPLE] [ARCH-EXAMPLE] [REQ-EXAMPLE]
+    # Summary: One-line summary of this IMPL.
+```
+
+---
+
 ## Index relationship
 
 - Each index record (in `requirements.yaml`, `architecture-decisions.yaml`, `implementation-decisions.yaml`) includes `detail_file` pointing to the corresponding detail YAML (e.g. `requirements/REQ-TIED_SETUP.yaml`).

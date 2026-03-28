@@ -10,8 +10,8 @@ REQ-TIED_SETUP:
   source_index: requirements.yaml
   detail_file: requirements/REQ-TIED_SETUP.yaml
   metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-11-08
+    last_updated: 2026-02-08
 REQ-MODULE_VALIDATION:
   type: REQ
   name: Independent Module Validation Before Integration
@@ -24,8 +24,8 @@ REQ-MODULE_VALIDATION:
   source_index: requirements.yaml
   detail_file: requirements/REQ-MODULE_VALIDATION.yaml
   metadata:
-    registered: 2025-01-27T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-01-27
+    last_updated: 2026-02-08
 ARCH-TIED_STRUCTURE:
   type: ARCH
   name: TIED Project Structure
@@ -37,8 +37,8 @@ ARCH-TIED_STRUCTURE:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
   metadata:
-    registered: 2025-12-18T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-12-18
+    last_updated: 2026-02-08
 ARCH-MODULE_VALIDATION:
   type: ARCH
   name: Module Validation Strategy
@@ -50,8 +50,8 @@ ARCH-MODULE_VALIDATION:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.yaml
   metadata:
-    registered: 2025-12-18T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-12-18
+    last_updated: 2026-02-08
 IMPL-TIED_FILES:
   type: IMPL
   name: TIED File Creation
@@ -63,8 +63,8 @@ IMPL-TIED_FILES:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-TIED_FILES.yaml
   metadata:
-    registered: 2025-12-18T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-12-18
+    last_updated: 2026-02-08
 IMPL-MODULE_VALIDATION:
   type: IMPL
   name: Module Validation Implementation
@@ -76,8 +76,8 @@ IMPL-MODULE_VALIDATION:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.yaml
   metadata:
-    registered: 2025-12-18T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-12-18
+    last_updated: 2026-02-08
 PROC-PROJECT_SURVEY_AND_SETUP:
   type: PROC
   name: Project Survey and Setup Process
@@ -89,8 +89,8 @@ PROC-PROJECT_SURVEY_AND_SETUP:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-11-08
+    last_updated: 2026-02-08
 PROC-BUILD_PIPELINE_VALIDATION:
   type: PROC
   name: Build Pipeline Validation Process
@@ -101,8 +101,8 @@ PROC-BUILD_PIPELINE_VALIDATION:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-11-08
+    last_updated: 2026-02-08
 PROC-TOKEN_AUDIT:
   type: PROC
   name: Token Audit Process
@@ -112,8 +112,8 @@ PROC-TOKEN_AUDIT:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-11-08
+    last_updated: 2026-02-08
 PROC-TOKEN_VALIDATION:
   type: PROC
   name: Token Validation Process
@@ -123,8 +123,8 @@ PROC-TOKEN_VALIDATION:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-11-08
+    last_updated: 2026-02-08
 PROC-YAML_DB_OPERATIONS:
   type: PROC
   name: YAML Database Operations Process
@@ -136,8 +136,8 @@ PROC-YAML_DB_OPERATIONS:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
+    registered: 2025-11-08
+    last_updated: 2026-02-08
 PROC-TIED_METHODOLOGY_READONLY:
   type: PROC
   name: TIED-sourced YAML read-only in client
@@ -150,8 +150,8 @@ PROC-TIED_METHODOLOGY_READONLY:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-16T00:00:00.000Z
-    last_updated: 2026-03-16T00:00:00.000Z
+    registered: 2026-03-16
+    last_updated: 2026-03-16
 PROC-TEST_STRATEGY:
   type: PROC
   name: Test Strategy and Coverage (minimize untested code)
@@ -163,8 +163,8 @@ PROC-TEST_STRATEGY:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-01T00:00:00.000Z
-    last_updated: 2026-03-01T00:00:00.000Z
+    registered: 2026-03-01
+    last_updated: 2026-03-01
 PROC-TIED_DEV_CYCLE:
   type: PROC
   name: TIED Development Cycle (session workflow)
@@ -181,8 +181,8 @@ PROC-TIED_DEV_CYCLE:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-01T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
+    registered: 2026-03-01
+    last_updated: 2026-03-27
 PROC-COMMIT_MESSAGES:
   type: PROC
   name: Commit message format and guidelines
@@ -193,8 +193,8 @@ PROC-COMMIT_MESSAGES:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
+    registered: 2026-03-03
+    last_updated: 2026-03-03
 PROC-IMPL_PSEUDOCODE_TOKENS:
   type: PROC
   name: IMPL pseudo-code semantic token comments (most critical)
@@ -205,8 +205,8 @@ PROC-IMPL_PSEUDOCODE_TOKENS:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-05T00:00:00.000Z
-    last_updated: 2026-03-05T00:00:00.000Z
+    registered: 2026-03-05
+    last_updated: 2026-03-05
 PROC-RELEASE:
   type: PROC
   name: Release and version numbering
@@ -217,8 +217,8 @@ PROC-RELEASE:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
+    registered: 2026-03-03
+    last_updated: 2026-03-03
 PROC-LEAP:
   type: PROC
   name: Logic Elevation And Propagation (LEAP)
@@ -232,8 +232,8 @@ PROC-LEAP:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
+    registered: 2026-03-27
+    last_updated: 2026-03-27
 PROC-YAML_EDIT_LOOP:
   type: PROC
   name: YAML edit and validation loop
@@ -246,8 +246,8 @@ PROC-YAML_EDIT_LOOP:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
+    registered: 2026-03-27
+    last_updated: 2026-03-27
 PROC-AGENT_REQ_CHECKLIST:
   type: PROC
   name: Agent requirement implementation checklist
@@ -261,8 +261,8 @@ PROC-AGENT_REQ_CHECKLIST:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
+    registered: 2026-03-27
+    last_updated: 2026-03-27
 PROC-IMPL_CODE_TEST_SYNC:
   type: PROC
   name: IMPL code and test synchronization
@@ -281,8 +281,8 @@ PROC-IMPL_CODE_TEST_SYNC:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
+    registered: 2026-03-27
+    last_updated: 2026-03-27
 PROC-PSEUDOCODE_VALIDATION:
   type: PROC
   name: Application pseudo-code validation
@@ -295,8 +295,8 @@ PROC-PSEUDOCODE_VALIDATION:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
+    registered: 2026-03-27
+    last_updated: 2026-03-27
 PROC-TIED_VERIFICATION_GATED:
   type: PROC
   name: Verification-gated status (closed-loop)
@@ -309,8 +309,8 @@ PROC-TIED_VERIFICATION_GATED:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
+    registered: 2026-03-27
+    last_updated: 2026-03-27
 REQ-FEEDBACK_TO_TIED:
   type: REQ
   name: Feedback to TIED (Feature Requests, Bug Reports, Methodology)
@@ -323,8 +323,8 @@ REQ-FEEDBACK_TO_TIED:
   source_index: requirements.yaml
   detail_file: requirements/REQ-FEEDBACK_TO_TIED.yaml
   metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
+    registered: 2026-03-03
+    last_updated: 2026-03-03
 ARCH-FEEDBACK_STORAGE:
   type: ARCH
   name: Feedback Storage for TIED Reporting
@@ -336,8 +336,8 @@ ARCH-FEEDBACK_STORAGE:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-FEEDBACK_STORAGE.yaml
   metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
+    registered: 2026-03-03
+    last_updated: 2026-03-03
 IMPL-MCP_FEEDBACK_TOOLS:
   type: IMPL
   name: MCP Feedback Tools
@@ -349,8 +349,8 @@ IMPL-MCP_FEEDBACK_TOOLS:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-MCP_FEEDBACK_TOOLS.yaml
   metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
+    registered: 2026-03-03
+    last_updated: 2026-03-03
 REQ-THIS_PAGE_TAG_SORT:
   type: REQ
   description: 'This Page three-way tag chip sort (alphabetical, bookmark frequency, DOM relevance); side panel toggle; default A–Z; no persistence; popup order unchanged when no toggle. Trace: ARCH/IMPL-THIS_PAGE_TAG_SORT; unit + composition tests; Playwright extension-this-page-tag-sort.spec.js for chrome-extension:// side panel surface (Phase H). [REQ-SIDE_PANEL_POPUP_EQUIVALENT]'

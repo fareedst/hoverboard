@@ -50,6 +50,16 @@ describe('[IMPL-RUNTIME_VALIDATION] getCurrentBookmark data', () => {
     const result = validateMessageData('getCurrentBookmark', { url: 'https://a.com' })
     expect(result.success).toBe(true)
   })
+  test('accepts overlay-style payload with url, title, tabId (passthrough) [IMPL-RUNTIME_VALIDATION]', () => {
+    const result = validateMessageData('getCurrentBookmark', {
+      url: 'https://example.com/page',
+      title: 'Example',
+      tabId: 42
+    })
+    expect(result.success).toBe(true)
+    expect(result.data.title).toBe('Example')
+    expect(result.data.tabId).toBe(42)
+  })
 })
 
 describe('[IMPL-RUNTIME_VALIDATION] getTagsForUrl data', () => {
@@ -99,6 +109,17 @@ describe('[IMPL-RUNTIME_VALIDATION] saveBookmark data', () => {
   test('rejects empty url', () => {
     const result = validateMessageData('saveBookmark', { url: '' })
     expect(result.success).toBe(false)
+  })
+  test('accepts extra keys via passthrough [IMPL-RUNTIME_VALIDATION]', () => {
+    const result = validateMessageData('saveBookmark', {
+      url: 'https://x.com',
+      tags: ['a'],
+      clientRequestId: 'req-1',
+      source: 'overlay'
+    })
+    expect(result.success).toBe(true)
+    expect(result.data.clientRequestId).toBe('req-1')
+    expect(result.data.source).toBe('overlay')
   })
 })
 
@@ -172,5 +193,23 @@ describe('[IMPL-RUNTIME_VALIDATION] Unknown type passes through', () => {
     const result = validateMessageData('unknownType', { anything: 123 })
     expect(result.success).toBe(true)
     expect(result.data).toEqual({ anything: 123 })
+  })
+})
+
+describe('[IMPL-RUNTIME_VALIDATION] .strict() data schemas reject unknown keys', () => {
+  test('getTagsForUrl rejects extra keys', () => {
+    const result = validateMessageData('getTagsForUrl', {
+      url: 'https://example.com',
+      title: 'Extra'
+    })
+    expect(result.success).toBe(false)
+  })
+  test('deleteTag rejects extra keys', () => {
+    const result = validateMessageData('deleteTag', {
+      url: 'https://x.com',
+      value: 't',
+      pin: {}
+    })
+    expect(result.success).toBe(false)
   })
 })
