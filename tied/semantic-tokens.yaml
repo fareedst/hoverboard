@@ -10,8 +10,8 @@ REQ-TIED_SETUP:
   source_index: requirements.yaml
   detail_file: requirements/REQ-TIED_SETUP.yaml
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 REQ-MODULE_VALIDATION:
   type: REQ
   name: Independent Module Validation Before Integration
@@ -24,8 +24,8 @@ REQ-MODULE_VALIDATION:
   source_index: requirements.yaml
   detail_file: requirements/REQ-MODULE_VALIDATION.yaml
   metadata:
-    registered: 2025-01-27
-    last_updated: 2026-02-08
+    registered: 2025-01-27T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 ARCH-TIED_STRUCTURE:
   type: ARCH
   name: TIED Project Structure
@@ -37,8 +37,8 @@ ARCH-TIED_STRUCTURE:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
   metadata:
-    registered: 2025-12-18
-    last_updated: 2026-02-08
+    registered: 2025-12-18T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 ARCH-MODULE_VALIDATION:
   type: ARCH
   name: Module Validation Strategy
@@ -50,8 +50,8 @@ ARCH-MODULE_VALIDATION:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.yaml
   metadata:
-    registered: 2025-12-18
-    last_updated: 2026-02-08
+    registered: 2025-12-18T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 IMPL-TIED_FILES:
   type: IMPL
   name: TIED File Creation
@@ -63,8 +63,8 @@ IMPL-TIED_FILES:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-TIED_FILES.yaml
   metadata:
-    registered: 2025-12-18
-    last_updated: 2026-02-08
+    registered: 2025-12-18T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 IMPL-MODULE_VALIDATION:
   type: IMPL
   name: Module Validation Implementation
@@ -76,8 +76,8 @@ IMPL-MODULE_VALIDATION:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.yaml
   metadata:
-    registered: 2025-12-18
-    last_updated: 2026-02-08
+    registered: 2025-12-18T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-PROJECT_SURVEY_AND_SETUP:
   type: PROC
   name: Project Survey and Setup Process
@@ -89,8 +89,8 @@ PROC-PROJECT_SURVEY_AND_SETUP:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-BUILD_PIPELINE_VALIDATION:
   type: PROC
   name: Build Pipeline Validation Process
@@ -101,8 +101,8 @@ PROC-BUILD_PIPELINE_VALIDATION:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-TOKEN_AUDIT:
   type: PROC
   name: Token Audit Process
@@ -112,8 +112,8 @@ PROC-TOKEN_AUDIT:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-TOKEN_VALIDATION:
   type: PROC
   name: Token Validation Process
@@ -123,8 +123,8 @@ PROC-TOKEN_VALIDATION:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-YAML_DB_OPERATIONS:
   type: PROC
   name: YAML Database Operations Process
@@ -136,8 +136,8 @@ PROC-YAML_DB_OPERATIONS:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2025-11-08
-    last_updated: 2026-02-08
+    registered: 2025-11-08T00:00:00.000Z
+    last_updated: 2026-02-08T00:00:00.000Z
 PROC-TIED_METHODOLOGY_READONLY:
   type: PROC
   name: TIED-sourced YAML read-only in client
@@ -150,8 +150,8 @@ PROC-TIED_METHODOLOGY_READONLY:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-16
-    last_updated: 2026-03-16
+    registered: 2026-03-16T00:00:00.000Z
+    last_updated: 2026-03-16T00:00:00.000Z
 PROC-TEST_STRATEGY:
   type: PROC
   name: Test Strategy and Coverage (minimize untested code)
@@ -163,8 +163,8 @@ PROC-TEST_STRATEGY:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-01
-    last_updated: 2026-03-01
+    registered: 2026-03-01T00:00:00.000Z
+    last_updated: 2026-03-01T00:00:00.000Z
 PROC-TIED_DEV_CYCLE:
   type: PROC
   name: TIED Development Cycle (session workflow)
@@ -181,8 +181,8 @@ PROC-TIED_DEV_CYCLE:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-01
-    last_updated: 2026-03-27
+    registered: 2026-03-01T00:00:00.000Z
+    last_updated: 2026-03-27T00:00:00.000Z
 PROC-COMMIT_MESSAGES:
   type: PROC
   name: Commit message format and guidelines
@@ -193,8 +193,8 @@ PROC-COMMIT_MESSAGES:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-03
-    last_updated: 2026-03-03
+    registered: 2026-03-03T00:00:00.000Z
+    last_updated: 2026-03-03T00:00:00.000Z
 PROC-IMPL_PSEUDOCODE_TOKENS:
   type: PROC
   name: IMPL pseudo-code semantic token comments (most critical)
@@ -205,8 +205,8 @@ PROC-IMPL_PSEUDOCODE_TOKENS:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-05
-    last_updated: 2026-03-05
+    registered: 2026-03-05T00:00:00.000Z
+    last_updated: 2026-03-05T00:00:00.000Z
 PROC-RELEASE:
   type: PROC
   name: Release and version numbering
@@ -217,8 +217,8 @@ PROC-RELEASE:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-03
-    last_updated: 2026-03-03
+    registered: 2026-03-03T00:00:00.000Z
+    last_updated: 2026-03-03T00:00:00.000Z
 PROC-LEAP:
   type: PROC
   name: Logic Elevation And Propagation (LEAP)
@@ -232,8 +232,8 @@ PROC-LEAP:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27
-    last_updated: 2026-03-27
+    registered: 2026-03-27T00:00:00.000Z
+    last_updated: 2026-03-27T00:00:00.000Z
 PROC-YAML_EDIT_LOOP:
   type: PROC
   name: YAML edit and validation loop
@@ -246,8 +246,8 @@ PROC-YAML_EDIT_LOOP:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27
-    last_updated: 2026-03-27
+    registered: 2026-03-27T00:00:00.000Z
+    last_updated: 2026-03-27T00:00:00.000Z
 PROC-AGENT_REQ_CHECKLIST:
   type: PROC
   name: Agent requirement implementation checklist
@@ -261,8 +261,8 @@ PROC-AGENT_REQ_CHECKLIST:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27
-    last_updated: 2026-03-27
+    registered: 2026-03-27T00:00:00.000Z
+    last_updated: 2026-03-27T00:00:00.000Z
 PROC-IMPL_CODE_TEST_SYNC:
   type: PROC
   name: IMPL code and test synchronization
@@ -281,8 +281,8 @@ PROC-IMPL_CODE_TEST_SYNC:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27
-    last_updated: 2026-03-27
+    registered: 2026-03-27T00:00:00.000Z
+    last_updated: 2026-03-27T00:00:00.000Z
 PROC-PSEUDOCODE_VALIDATION:
   type: PROC
   name: Application pseudo-code validation
@@ -295,8 +295,8 @@ PROC-PSEUDOCODE_VALIDATION:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27
-    last_updated: 2026-03-27
+    registered: 2026-03-27T00:00:00.000Z
+    last_updated: 2026-03-27T00:00:00.000Z
 PROC-TIED_VERIFICATION_GATED:
   type: PROC
   name: Verification-gated status (closed-loop)
@@ -309,8 +309,8 @@ PROC-TIED_VERIFICATION_GATED:
   source_index: processes.md
   detail_file: null
   metadata:
-    registered: 2026-03-27
-    last_updated: 2026-03-27
+    registered: 2026-03-27T00:00:00.000Z
+    last_updated: 2026-03-27T00:00:00.000Z
 REQ-FEEDBACK_TO_TIED:
   type: REQ
   name: Feedback to TIED (Feature Requests, Bug Reports, Methodology)
@@ -323,8 +323,8 @@ REQ-FEEDBACK_TO_TIED:
   source_index: requirements.yaml
   detail_file: requirements/REQ-FEEDBACK_TO_TIED.yaml
   metadata:
-    registered: 2026-03-03
-    last_updated: 2026-03-03
+    registered: 2026-03-03T00:00:00.000Z
+    last_updated: 2026-03-03T00:00:00.000Z
 ARCH-FEEDBACK_STORAGE:
   type: ARCH
   name: Feedback Storage for TIED Reporting
@@ -336,8 +336,8 @@ ARCH-FEEDBACK_STORAGE:
   source_index: architecture-decisions.yaml
   detail_file: architecture-decisions/ARCH-FEEDBACK_STORAGE.yaml
   metadata:
-    registered: 2026-03-03
-    last_updated: 2026-03-03
+    registered: 2026-03-03T00:00:00.000Z
+    last_updated: 2026-03-03T00:00:00.000Z
 IMPL-MCP_FEEDBACK_TOOLS:
   type: IMPL
   name: MCP Feedback Tools
@@ -349,8 +349,8 @@ IMPL-MCP_FEEDBACK_TOOLS:
   source_index: implementation-decisions.yaml
   detail_file: implementation-decisions/IMPL-MCP_FEEDBACK_TOOLS.yaml
   metadata:
-    registered: 2026-03-03
-    last_updated: 2026-03-03
+    registered: 2026-03-03T00:00:00.000Z
+    last_updated: 2026-03-03T00:00:00.000Z
 REQ-THIS_PAGE_TAG_SORT:
   type: REQ
   description: 'This Page three-way tag chip sort (alphabetical, bookmark frequency, DOM relevance); side panel toggle; default A–Z; no persistence; popup order unchanged when no toggle. Trace: ARCH/IMPL-THIS_PAGE_TAG_SORT; unit + composition tests; Playwright extension-this-page-tag-sort.spec.js for chrome-extension:// side panel surface (Phase H). [REQ-SIDE_PANEL_POPUP_EQUIVALENT]'
@@ -578,3 +578,64 @@ IMPL-CONFIG_STRUCT:
   metadata:
     registered: "2026-03-28T00:00:00.000Z"
     last_updated: "2026-03-28T00:00:00.000Z"
+REQ-SIDE_PANEL_BROWSER_TABS:
+  type: REQ
+  name: Side Panel Browser Tabs List
+  category: Functional
+  status: Implemented
+  description: 'Side panel Tabs tab: list/filter/copy/close browser tabs; bookmark tags and to-read/private row indicators; batch Add tags, Set to-read, Clear to-read with post-batch refresh. Trace ARCH-SIDE_PANEL_BROWSER_TABS, IMPL-SIDE_PANEL_BROWSER_TABS; related REQ-SIDE_PANEL_POPUP_EQUIVALENT.'
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_BROWSER_TABS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+  source_index: requirements.yaml
+  detail_file: requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml
+  metadata:
+    registered: "2026-03-28T00:00:00.000Z"
+    last_updated: "2026-03-28T00:00:00.000Z"
+IMPL-SIDE_PANEL_BROWSER_TABS:
+  type: IMPL
+  name: Side Panel Browser Tabs Implementation
+  status: Active
+  description: 'browser-tabs-panel.js: list/filter/copy/close browser tabs; GET_TAB_REFERRERS, GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; filterBrowserTabs, getDisplayedTabs, mergeBookmarkReplyIntoTab, refreshBookmarkDisplayForAllTabs; batch bookmark with parseTagsInput/buildAddTagsPayload; composed_with IMPL-SIDE_PANEL_TABS. REQ-SIDE_PANEL_BROWSER_TABS, ARCH-SIDE_PANEL_BROWSER_TABS; cross-uses IMPL-URL_TAGS_DISPLAY, IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.'
+  cross_references:
+    - ARCH-SIDE_PANEL_BROWSER_TABS
+    - REQ-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_TABS
+    - IMPL-URL_TAGS_DISPLAY
+    - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml
+  metadata:
+    registered: "2026-03-28T12:00:00.000Z"
+    last_updated: "2026-03-28T12:00:00.000Z"
+ARCH-SIDE_PANEL_BROWSER_TABS:
+  type: ARCH
+  name: Side Panel Browser Tabs Architecture
+  status: Active
+  description: chrome.tabs list in side panel; referrer via SW executeScript; filter and actions on visible list. REQ-SIDE_PANEL_BROWSER_TABS; informs IMPL-SIDE_PANEL_BROWSER_TABS.
+  cross_references:
+    - REQ-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_BROWSER_TABS
+    - ARCH-SIDE_PANEL_TABS
+  source_index: architecture-decisions.yaml
+  detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml
+  metadata:
+    registered: "2026-03-28T18:00:00.000Z"
+    last_updated: "2026-03-28T18:00:00.000Z"
+IMPL-URL_TAGS_DISPLAY:
+  type: IMPL
+  name: URL Tags and Badge Display Module
+  status: Active
+  description: Single source for tags-for-URL and badge display; getCurrentBookmark shape; normalizeBookmarkForDisplay. Cross-used by IMPL-SIDE_PANEL_BROWSER_TABS mergeBookmarkReplyIntoTab. REQ-URL_TAGS_DISPLAY, ARCH-URL_TAGS_DISPLAY.
+  cross_references:
+    - ARCH-URL_TAGS_DISPLAY
+    - REQ-URL_TAGS_DISPLAY
+    - REQ-BADGE_INDICATORS
+    - REQ-PER_BOOKMARK_STORAGE_BACKEND
+    - IMPL-SIDE_PANEL_BROWSER_TABS
+  source_index: implementation-decisions.yaml
+  detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
+  metadata:
+    registered: "2026-03-28T18:00:00.000Z"
+    last_updated: "2026-03-28T18:00:00.000Z"

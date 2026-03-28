@@ -9,6 +9,7 @@ import {
   buildRecordsYamlForCopy,
   getReferrerDisplayText,
   initBrowserTabsTab,
+  mergeBookmarkReplyIntoTab,
   parseImportantTagSources,
   normalizeClosedSessions,
   DEFAULT_IMPORTANT_TAG_SOURCES,
@@ -22,6 +23,61 @@ const tabs = [
   { id: 2, title: 'Example Page', url: 'https://example.com/page', referrer: 'https://google.com/' },
   { id: 3, title: 'GitHub Docs', url: 'https://docs.github.com', referrer: 'https://example.com' }
 ]
+
+describe('[REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-URL_TAGS_DISPLAY] mergeBookmarkReplyIntoTab', () => {
+  test('blocked or failed reply clears tags and flags', () => {
+    const tab = { bookmarkTags: ['x'], bookmarkToread: true, bookmarkPrivate: true }
+    mergeBookmarkReplyIntoTab(tab, { success: true, data: { blocked: true } })
+    expect(tab.bookmarkTags).toEqual([])
+    expect(tab.bookmarkToread).toBe(false)
+    expect(tab.bookmarkPrivate).toBe(false)
+    mergeBookmarkReplyIntoTab(tab, null)
+    expect(tab.bookmarkTags).toEqual([])
+  })
+
+  test('exists and toread yes sets bookmarkToread; shared no sets bookmarkPrivate', () => {
+    const tab = {}
+    mergeBookmarkReplyIntoTab(tab, {
+      success: true,
+      data: { exists: true, tags: ['a'], toread: 'yes', shared: 'no' }
+    })
+    expect(tab.bookmarkTags).toEqual(['a'])
+    expect(tab.bookmarkToread).toBe(true)
+    expect(tab.bookmarkPrivate).toBe(true)
+  })
+
+  test('exists false does not show to-read or private even if payload has yes/no', () => {
+    const tab = {}
+    mergeBookmarkReplyIntoTab(tab, {
+      success: true,
+      data: { exists: false, tags: [], toread: 'yes', shared: 'no' }
+    })
+    expect(tab.bookmarkToread).toBe(false)
+    expect(tab.bookmarkPrivate).toBe(false)
+  })
+
+  // Procedure mergeBookmarkReplyIntoTab (essence_pseudocode): map getCurrentBookmark reply into tab.bookmarkTags, bookmarkToread, bookmarkPrivate — [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-URL_TAGS_DISPLAY]
+  describe('mergeBookmarkReplyIntoTab — padded toread/shared strings from getCurrentBookmark', () => {
+    /**
+     * Validates OUTPUT: exists true + semantic yes/no on toread/shared after normalizing bounded whitespace so row indicators match REQ satisfaction criteria for to-read and private.
+     */
+    test('recognizes toread yes and shared no with surrounding whitespace', () => {
+      const tab = {}
+      mergeBookmarkReplyIntoTab(tab, {
+        success: true,
+        data: {
+          exists: true,
+          tags: ['t1'],
+          toread: ' yes ',
+          shared: ' no '
+        }
+      })
+      expect(tab.bookmarkTags).toEqual(['t1'])
+      expect(tab.bookmarkToread).toBe(true)
+      expect(tab.bookmarkPrivate).toBe(true)
+    })
+  })
+})
 
 describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] filterBrowserTabs', () => {
   test('empty query returns all tabs', () => {
@@ -596,6 +652,8 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
       { id: 2, title: 'Tab B', url: 'https://b.com' }
     ]
     const saveCalls = []
+    /** @type {Record<string, string>} */
+    const toreadByUrl = { 'https://a.com': 'no', 'https://b.com': 'no' }
     const mockTabs = { query: async () => tabList }
     const getReferrers = async () => ({ 1: '', 2: '' })
     const origRuntime = global.chrome?.runtime
@@ -604,9 +662,20 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
       sendMessage (msg, cb) {
         if (msg.type === 'getCurrentBookmark') {
           const url = msg.data?.url ?? ''
-          cb({ success: true, data: { url, exists: true, toread: 'no', description: '', tags: [] } })
+          cb({
+            success: true,
+            data: {
+              url,
+              exists: true,
+              toread: toreadByUrl[url] ?? 'no',
+              shared: 'yes',
+              description: '',
+              tags: []
+            }
+          })
         } else if (msg.type === 'saveBookmark') {
           saveCalls.push(msg.data)
+          if (msg.data?.url) toreadByUrl[msg.data.url] = msg.data.toread ?? 'no'
           cb({ success: true })
         } else {
           cb({ success: true })
@@ -617,11 +686,13 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
       initBrowserTabsTab(doc, mockTabs, null, getReferrers)
       await new Promise(r => setTimeout(r, 150))
       setToReadBtn.click()
-      await new Promise(r => setTimeout(r, 200))
+      await new Promise(r => setTimeout(r, 350))
       expect(saveCalls.length).toBe(2)
       expect(saveCalls.every(d => d.toread === 'yes')).toBe(true)
       expect(saveCalls.map(d => d.url)).toEqual(['https://a.com', 'https://b.com'])
       expect(messageEl.textContent).toContain('Set to-read for 2 tabs')
+      const cards = listEl.querySelectorAll('.browser-tabs-card-toggle-toread')
+      expect(cards.length).toBe(2)
     } finally {
       if (origRuntime) global.chrome.runtime = origRuntime
     }
@@ -634,6 +705,7 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
       { id: 2, title: 'Tab B', url: 'https://b.com' }
     ]
     const saveCalls = []
+    let aToread = 'yes'
     const mockTabs = { query: async () => tabList }
     const getReferrers = async () => ({ 1: '', 2: '' })
     const origRuntime = global.chrome?.runtime
@@ -643,9 +715,20 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
         if (msg.type === 'getCurrentBookmark') {
           const url = msg.data?.url
           const exists = url === 'https://a.com'
-          cb({ success: true, data: { url: msg.data?.url, title: msg.data?.title, exists, toread: exists ? 'yes' : 'no' } })
+          cb({
+            success: true,
+            data: {
+              url: msg.data?.url,
+              title: msg.data?.title,
+              exists,
+              tags: [],
+              shared: 'yes',
+              toread: exists ? aToread : 'no'
+            }
+          })
         } else if (msg.type === 'saveBookmark') {
           saveCalls.push(msg.data)
+          if (msg.data?.url === 'https://a.com') aToread = msg.data.toread ?? 'no'
           cb({ success: true })
         } else cb({ success: true })
       }
@@ -653,12 +736,14 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
     try {
       initBrowserTabsTab(doc, mockTabs, null, getReferrers)
       await new Promise(r => setTimeout(r, 150))
+      expect(listEl.querySelectorAll('.browser-tabs-card-toggle-toread').length).toBe(1)
       clearToReadBtn.click()
-      await new Promise(r => setTimeout(r, 250))
+      await new Promise(r => setTimeout(r, 350))
       expect(saveCalls.length).toBe(1)
       expect(saveCalls[0].url).toBe('https://a.com')
       expect(saveCalls[0].toread).toBe('no')
       expect(messageEl.textContent).toContain('Cleared to-read for 1 tab')
+      expect(listEl.querySelectorAll('.browser-tabs-card-toggle-toread').length).toBe(0)
     } finally {
       if (origRuntime) global.chrome.runtime = origRuntime
     }
@@ -693,9 +778,10 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
   })
 
   test('Add tags with input sends getCurrentBookmark then saveBookmark (create or merge)', async () => {
-    const { doc, tagsInput, addTagsBtn, messageEl } = makePanelDocWithBatchButtons()
+    const { doc, listEl, tagsInput, addTagsBtn, messageEl } = makePanelDocWithBatchButtons()
     const tabList = [{ id: 1, title: 'Tab One', url: 'https://one.com' }]
     const saveCalls = []
+    let bookmarkCreated = false
     const mockTabs = { query: async () => tabList }
     const getReferrers = async () => ({ 1: '' })
     const origRuntime = global.chrome?.runtime
@@ -703,9 +789,23 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
     global.chrome.runtime = {
       sendMessage (msg, cb) {
         if (msg.type === 'getCurrentBookmark') {
-          cb({ success: true, data: { url: msg.data?.url, exists: false, tags: [] } })
+          if (bookmarkCreated) {
+            cb({
+              success: true,
+              data: {
+                url: msg.data?.url,
+                exists: true,
+                tags: ['foo', 'bar'],
+                toread: 'no',
+                shared: 'yes'
+              }
+            })
+          } else {
+            cb({ success: true, data: { url: msg.data?.url, exists: false, tags: [] } })
+          }
         } else if (msg.type === 'saveBookmark') {
           saveCalls.push(msg.data)
+          bookmarkCreated = true
           cb({ success: true })
         } else cb({ success: true })
       }
@@ -716,12 +816,15 @@ describe('[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] batch boo
       tagsInput.value = 'foo, bar'
       tagsInput.dispatchEvent(new Event('input', { bubbles: true }))
       addTagsBtn.click()
-      await new Promise(r => setTimeout(r, 150))
+      await new Promise(r => setTimeout(r, 350))
       expect(saveCalls.length).toBe(1)
       expect(saveCalls[0].url).toBe('https://one.com')
       expect(saveCalls[0].tags).toEqual(['foo', 'bar'])
       expect(saveCalls[0].preferredBackend).toBe('local')
       expect(messageEl.textContent).toContain('Added tags for 1 tab')
+      const tagsLine = listEl.querySelector('.browser-tabs-card-tags')
+      expect(tagsLine && tagsLine.textContent).toContain('foo')
+      expect(tagsLine && tagsLine.textContent).toContain('bar')
     } finally {
       if (origRuntime) global.chrome.runtime = origRuntime
     }

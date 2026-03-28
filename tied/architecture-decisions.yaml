@@ -2848,6 +2848,10 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
       - IMPL-SIDE_PANEL_BROWSER_TABS
     tests:
       - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/side-panel-tabs.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+      - tests/integration/browser-tabs-tab-composition.integration.test.js
+      - tests/playwright/extension-demo-tabs.spec.js
     code_annotations:
       - ARCH-SIDE_PANEL_BROWSER_TABS
   related_decisions:
@@ -2862,9 +2866,9 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
       date: "2026-02-28"
       author: AI Agent
     last_updated:
-      date: "2026-02-28"
+      date: "2026-03-28"
       author: AI Agent
-      reason: Initial creation
+      reason: 'S13 sync: index traceability.tests aligned with detail_file (composition + side-panel + SW routing + Playwright)'
   detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml
 ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
   name: Side Panel Browser Bookmarks Architecture

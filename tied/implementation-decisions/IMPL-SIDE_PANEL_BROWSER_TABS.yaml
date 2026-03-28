@@ -70,6 +70,7 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - tests/unit/browser-tabs-panel.test.js
       - tests/unit/side-panel-tabs.test.js
       - tests/unit/service-worker-messaging-routing.test.js
+      - tests/integration/browser-tabs-tab-composition.integration.test.js
       - tests/playwright/extension-demo-tabs.spec.js
     code_annotations:
       - IMPL-SIDE_PANEL_BROWSER_TABS
@@ -207,6 +208,6 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       date: "2026-02-28"
       author: AI Agent
     last_updated:
-      date: "2026-03-02"
+      date: "2026-03-28"
       author: AI Agent
-      reason: Traceability.tests + extension-demo-tabs.spec.js; recommendable E2E scenarios in implementation_approach
+      reason: S12 Phase I — traceability.tests aligned with index (browser-tabs-tab-composition.integration.test.js); full suite, eslint, tsc, validate_tokens.sh, tied_validate_consistency pass

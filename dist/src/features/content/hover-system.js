@@ -128,7 +128,7 @@ class HoverSystem {
       }
 
       // Enhance pin data with additional properties
-      const pin = response;
+      const pin = response
       this.logger.debug('Site data loaded:', pin)
       return pin
     } catch (error) {

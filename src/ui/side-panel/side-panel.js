@@ -395,6 +395,22 @@ export function resetTagsTreeTabInitedForTest () {
   tagsTreeTabInited = false
 }
 
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ * Phase G composition tests: drive internal switchTab(tabId) without tab-bar click (no UI). When tabId === TAB_BROWSER_TABS, invokes initTabIfNeeded → initBrowserTabsTabIfNeeded → initBrowserTabsTab().
+ */
+export function switchTabForTest (tabId) {
+  switchTab(tabId)
+}
+
+/**
+ * Test-only: reset browserTabsTabInited so runInitialTabInit(TAB_BROWSER_TABS) or switchTabForTest(TAB_BROWSER_TABS) can invoke initBrowserTabsTab again.
+ * [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+ */
+export function resetBrowserTabsTabInitedForTest () {
+  browserTabsTabInited = false
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   initSidePanelVersion()
   activeTab = await loadPersistedTab()

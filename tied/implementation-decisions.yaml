@@ -4057,6 +4057,7 @@ IMPL-SIDE_PANEL_TABS:
   cross_references:
     - ARCH-SIDE_PANEL_TABS
     - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - REQ-SIDE_PANEL_BROWSER_TABS
     - REQ-RECENT_TAGS_SYSTEM
     - ARCH-TAG_SYSTEM
   rationale:
@@ -4075,13 +4076,14 @@ IMPL-SIDE_PANEL_TABS:
       - This Page init runs once (guard); By Tag init can re-run on each show or once
       - 'On browser tab change (onActivated/onUpdated): if controller exists always call refreshPopupData() so currentPin is for new tab; then refresh By Tag tab when visible via refreshTagsTreeTabIfVisible (setSelectedTagsFromCurrentBookmark)'
       - 'bindWindowFocusRecentTagsRefresh: chrome.windows.onFocusChanged → getCurrent match → shouldInvokeLoadRecentTagsOnWindowFocusSync → controller.loadRecentTags (REQ-RECENT_TAGS_SYSTEM); Phase G composition + Phase H E2E per detail_file'
+      - 'S10 Phase G: tests/integration/browser-tabs-tab-composition.integration.test.js — runInitialTabInit/switchTabForTest(TAB_BROWSER_TABS) → initBrowserTabsTab (mocked); resetBrowserTabsTabInitedForTest'
       - See implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml for full S08–S12 testability notes
   code_locations:
     files:
       - path: src/ui/side-panel/side-panel.html
         description: 'Tab bar; single-line header row (#side-panel-title-version, #side-panel-version) and panel roots'
       - path: src/ui/side-panel/side-panel.js
-        description: Tab switching, persist, initSidePanelVersion, init This Page and By Tag tabs; bindWindowFocusRecentTagsRefresh; setActiveTabForTest
+        description: Tab switching, persist, initBrowserTabsTabIfNeeded, bindWindowFocusRecentTagsRefresh; switchTabForTest, resetBrowserTabsTabInitedForTest (Phase G); setActiveTabForTest
       - path: src/ui/side-panel/side-panel-tab-state.js
         description: TAB_* ids, visibility helpers, shouldInvokeLoadRecentTagsOnWindowFocusSync
       - path: src/ui/side-panel/build-info.js
@@ -4109,6 +4111,12 @@ IMPL-SIDE_PANEL_TABS:
       - name: setActiveTabForTest
         file: src/ui/side-panel/side-panel.js
         description: Test-only activeTab for composition tests
+      - name: switchTabForTest
+        file: src/ui/side-panel/side-panel.js
+        description: Phase G — exported switchTab(tabId) without tab-bar click; drives initBrowserTabsTab binding
+      - name: resetBrowserTabsTabInitedForTest
+        file: src/ui/side-panel/side-panel.js
+        description: Test-only — clear browserTabsTabInited for repeated composition assertions
       - name: shouldInvokeLoadRecentTagsOnWindowFocusSync
         file: src/ui/side-panel/side-panel-tab-state.js
         description: Pure sync guards before loadRecentTags
@@ -4130,6 +4138,7 @@ IMPL-SIDE_PANEL_TABS:
       - ARCH-TAG_SYSTEM
     requirements:
       - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+      - REQ-SIDE_PANEL_BROWSER_TABS
       - REQ-RECENT_TAGS_SYSTEM
     tests:
       - tests/unit/side-panel-tabs.test.js
@@ -4137,6 +4146,7 @@ IMPL-SIDE_PANEL_TABS:
       - tests/unit/side-panel-html.test.js
       - tests/playwright/extension-messaging.spec.js
       - tests/integration/window-focus-recent-tags-composition.integration.test.js
+      - tests/integration/browser-tabs-tab-composition.integration.test.js
       - tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
     code_annotations:
       - IMPL-SIDE_PANEL_TABS
@@ -4151,12 +4161,13 @@ IMPL-SIDE_PANEL_TABS:
     composed_with:
       - IMPL-SIDE_PANEL_BOOKMARK
       - IMPL-SIDE_PANEL_TAGS_TREE
+      - IMPL-SIDE_PANEL_BROWSER_TABS
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
   metadata:
     last_updated:
       date: "2026-03-28"
       author: AI Agent
-      reason: 'S13: sync implementation-decisions.yaml index to detail_file IMPL-SIDE_PANEL_TABS.yaml (code, tests, approach)'
+      reason: S10 Phase G browser-tabs composition test + index sync; S12 Phase I — detail_file aligned (REQ-SIDE_PANEL_BROWSER_TABS, composed_with, code_locations hooks); full validation gate
 IMPL-SIDE_PANEL_BOOKMARK:
   name: Side Panel Bookmark Tab Implementation
   status: Active
@@ -4528,6 +4539,10 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       - REQ-SIDE_PANEL_BROWSER_TABS
     tests:
       - tests/unit/browser-tabs-panel.test.js
+      - tests/unit/side-panel-tabs.test.js
+      - tests/unit/service-worker-messaging-routing.test.js
+      - tests/integration/browser-tabs-tab-composition.integration.test.js
+      - tests/playwright/extension-demo-tabs.spec.js
     code_annotations:
       - IMPL-SIDE_PANEL_BROWSER_TABS
   related_decisions:
@@ -4543,9 +4558,9 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
       date: "2026-02-28"
       author: AI Agent
     last_updated:
-      date: "2026-02-28"
+      date: "2026-03-28"
       author: AI Agent
-      reason: Initial creation
+      reason: S10 Phase G composition test; S12 Phase I — detail_file traceability + metadata; full suite, lint, validate_tokens, tied_validate_consistency
   detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml
 IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
   name: Side Panel Browser Bookmarks Implementation

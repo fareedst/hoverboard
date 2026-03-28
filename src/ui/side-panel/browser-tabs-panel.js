@@ -1,6 +1,7 @@
 /**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
- * Browser tabs panel: pure filter and URL list helpers; init and render (load tabs, referrer, UI); batch bookmark actions (set/clear to-read, add tags).
+ * Browser tabs panel: pure filter and URL list helpers; init and render (load tabs, referrer, UI); batch bookmark actions (set/clear to-read, add tags);
+ * per-row bookmark tags plus to-read/private icons; refresh bookmark fields after batch actions.
  */
 
 import { parseTagsInput, buildAddTagsPayload } from '../bookmarks-table/bookmarks-table-filter.js'
@@ -139,6 +140,52 @@ function yamlQuoted (s) {
 }
 
 /**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-URL_TAGS_DISPLAY]
+ * How: shared trim+lowercase compare used by mergeBookmarkReplyIntoTab for getCurrentBookmark toread/shared (padded API strings).
+ */
+function bookmarkApiStringIs (value, defaultWhenMissing, expectedLowercase) {
+  return String(value ?? defaultWhenMissing).trim().toLowerCase() === expectedLowercase
+}
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-URL_TAGS_DISPLAY]
+ * Apply getCurrentBookmark reply to tab list row: tags, to-read flag, private (shared === 'no' after trim + case-insensitive compare).
+ * Implements mergeBookmarkReplyIntoTab in IMPL essence_pseudocode; bookmark field shape from getCurrentBookmark ([IMPL-URL_TAGS_DISPLAY]).
+ * @param {{ bookmarkTags?: string[], bookmarkToread?: boolean, bookmarkPrivate?: boolean }} tab
+ * @param {{ success?: boolean, data?: { blocked?: boolean, tags?: unknown, exists?: boolean, toread?: string, shared?: string } } | null} reply
+ */
+export function mergeBookmarkReplyIntoTab (tab, reply) {
+  if (!reply || !reply.success || !reply.data || reply.data.blocked) {
+    tab.bookmarkTags = []
+    tab.bookmarkToread = false
+    tab.bookmarkPrivate = false
+    return
+  }
+  const d = reply.data
+  tab.bookmarkTags = Array.isArray(d.tags) ? d.tags : []
+  const exists = !!d.exists
+  tab.bookmarkToread = exists && bookmarkApiStringIs(d.toread, 'no', 'yes')
+  tab.bookmarkPrivate = exists && bookmarkApiStringIs(d.shared, 'yes', 'no')
+}
+
+/**
+ * [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Inline markers for to-read and private bookmark state (shown when true).
+ * @param {{ bookmarkToread?: boolean, bookmarkPrivate?: boolean }} tab
+ * @returns {string}
+ */
+function buildBookmarkTogglesMarkup (tab) {
+  const parts = []
+  if (tab.bookmarkToread) {
+    parts.push('<span class="browser-tabs-card-toggle browser-tabs-card-toggle-toread" title="To read" role="img" aria-label="To read">📖</span>')
+  }
+  if (tab.bookmarkPrivate) {
+    parts.push('<span class="browser-tabs-card-toggle browser-tabs-card-toggle-private" title="Private" role="img" aria-label="Private">🔒</span>')
+  }
+  if (parts.length === 0) return ''
+  return `<span class="browser-tabs-card-toggles" role="group" aria-label="Bookmark flags">${parts.join('')}</span>`
+}
+
+/**
  * [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
  * Return the string to display for a tab's referrer: '—' for null, undefined, empty, or the literal "null"; else the referrer URL.
  * @param {string | null | undefined} referrer
@@ -213,9 +260,9 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   /** @type {Set<number|string>} */
   const hiddenTabIds = new Set()
 
-  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string, bookmarkTags?: string[] }[]} */
+  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string, bookmarkTags?: string[], bookmarkToread?: boolean, bookmarkPrivate?: boolean }[]} */
   let allTabs = []
-  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string, bookmarkTags?: string[] }[]} */
+  /** @type {{ id: number, windowId?: number, title?: string, url?: string, referrer?: string, pageText?: string, importantTags?: string, bookmarkTags?: string[], bookmarkToread?: boolean, bookmarkPrivate?: boolean }[]} */
   let visibleTabs = []
   // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Total windows and tabs (browser-wide) for stats line; set in loadTabs from chrome.windows.getAll and chrome.tabs.query({})
   let totalWindows = 0
@@ -319,6 +366,8 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
       const hasValidIds = !tab.isClosed && windowId !== '' && tabId !== ''
       const tagsArr = Array.isArray(tab.bookmarkTags) ? tab.bookmarkTags : []
       const tagsDisplay = tagsArr.length > 0 ? escapeHtml(tagsArr.join(', ')) : '—'
+      // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Per-row bookmark flags: to-read and private icons when true (all display modes)
+      const togglesMarkup = buildBookmarkTogglesMarkup(tab)
       const removeBtn = `<button type="button" class="browser-tabs-card-remove" data-action="removeFromDisplay" data-tab-id="${escapeHtml(tabId)}" aria-label="Remove from list" title="Remove from list">×</button>`
       // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Per-row close-tab for open; [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Restore for closed
       const closeTabBtn = tab.isClosed
@@ -331,19 +380,19 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         const focusBtn = hasValidIds
           ? `<button type="button" class="browser-tabs-card-title browser-tabs-card-focus-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${titleText}</button>`
           : `<div class="browser-tabs-card-title">${titleText}</div>`
-        card.innerHTML = `${faviconImg} ${closeTabBtn} ${focusBtn} ${removeBtn}`
+        card.innerHTML = `${faviconImg}${togglesMarkup} ${closeTabBtn} ${focusBtn} ${removeBtn}`
       } else if (listDisplayMode === 'url') {
         const urlText = escapeHtml(tab.url || '')
         const focusBtn = hasValidIds
           ? `<button type="button" class="browser-tabs-card-url browser-tabs-card-focus-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${urlText}</button>`
           : `<div class="browser-tabs-card-url">${urlText}</div>`
-        card.innerHTML = `${faviconImg} ${closeTabBtn} ${focusBtn} ${removeBtn}`
+        card.innerHTML = `${faviconImg}${togglesMarkup} ${closeTabBtn} ${focusBtn} ${removeBtn}`
       } else {
         const idsMarkup = hasValidIds
           ? `<button type="button" class="browser-tabs-card-ids browser-tabs-card-ids-link" data-window-id="${escapeHtml(windowId)}" data-tab-id="${escapeHtml(tabId)}">${idsDisplay}</button>`
           : `<div class="browser-tabs-card-ids">${idsDisplay}</div>`
         card.innerHTML = `
-        <div class="browser-tabs-card-title-row">${faviconImg}<span class="browser-tabs-card-title">${escapeHtml(tab.title || '(no title)')}</span></div>
+        <div class="browser-tabs-card-title-row">${faviconImg}${togglesMarkup}<span class="browser-tabs-card-title">${escapeHtml(tab.title || '(no title)')}</span></div>
         <div class="browser-tabs-card-url">${escapeHtml(tab.url || '')}</div>
         <div class="browser-tabs-card-referrer">${escapeHtml(getReferrerDisplayText(tab.referrer))}</div>
         ${closeTabBtn}
@@ -446,15 +495,20 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
         if (runtime && typeof runtime.sendMessage === 'function') {
           await Promise.all(allTabs.map(async (tab) => {
             const url = (tab.url ?? '').trim()
-            if (!url.startsWith('http://') && !url.startsWith('https://')) { tab.bookmarkTags = []; return }
+            if (!url.startsWith('http://') && !url.startsWith('https://')) {
+              mergeBookmarkReplyIntoTab(tab, { success: false })
+              return
+            }
             try {
               const reply = await new Promise((resolve, reject) => {
                 runtime.sendMessage({ type: 'getCurrentBookmark', data: { url: tab.url, title: tab.title } }, (r) => { if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError?.message)); else resolve(r) })
               })
-              tab.bookmarkTags = reply && reply.success && reply.data && Array.isArray(reply.data.tags) ? reply.data.tags : []
-            } catch (_) { tab.bookmarkTags = [] }
+              mergeBookmarkReplyIntoTab(tab, reply)
+            } catch (_) {
+              mergeBookmarkReplyIntoTab(tab, { success: false })
+            }
           }))
-        } else { allTabs.forEach((t) => { t.bookmarkTags = [] }) }
+        } else { allTabs.forEach((t) => { mergeBookmarkReplyIntoTab(t, { success: false }) }) }
         searchScope = SEARCH_SCOPE_TAB_INFO
         setFilterPlaceholder()
         visibleTabs = filterBrowserTabs(allTabs, filterInput ? filterInput.value : '', searchScope)
@@ -508,7 +562,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
           await Promise.all(allTabs.map(async (tab) => {
             const url = (tab.url ?? '').trim()
             if (!url.startsWith('http://') && !url.startsWith('https://')) {
-              tab.bookmarkTags = []
+              mergeBookmarkReplyIntoTab(tab, { success: false })
               return
             }
             try {
@@ -518,16 +572,20 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
                   else resolve(r)
                 })
               })
-              tab.bookmarkTags = reply && reply.success && reply.data && Array.isArray(reply.data.tags) ? reply.data.tags : []
+              mergeBookmarkReplyIntoTab(tab, reply)
             } catch (_) {
-              tab.bookmarkTags = []
+              mergeBookmarkReplyIntoTab(tab, { success: false })
             }
           }))
         } catch (_) {
-          allTabs.forEach((t) => { t.bookmarkTags = t.bookmarkTags ?? [] })
+          allTabs.forEach((t) => {
+            t.bookmarkTags = t.bookmarkTags ?? []
+            t.bookmarkToread = t.bookmarkToread ?? false
+            t.bookmarkPrivate = t.bookmarkPrivate ?? false
+          })
         }
       } else {
-        allTabs.forEach((t) => { t.bookmarkTags = [] })
+        allTabs.forEach((t) => { mergeBookmarkReplyIntoTab(t, { success: false }) })
       }
       searchScope = getSearchScope()
       setFilterPlaceholder()
@@ -875,6 +933,28 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
     })
   }
 
+  // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] After batch bookmark actions, re-query getCurrentBookmark for each tab so tags and to-read/private icons match storage
+  async function refreshBookmarkDisplayForAllTabs () {
+    if (!runtime || !runtime.sendMessage) {
+      applyFilter()
+      return
+    }
+    await Promise.all(allTabs.map(async (tab) => {
+      const url = (tab.url ?? '').trim()
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        mergeBookmarkReplyIntoTab(tab, { success: false })
+        return
+      }
+      try {
+        const reply = await sendMessage({ type: 'getCurrentBookmark', data: { url: tab.url, title: tab.title } })
+        mergeBookmarkReplyIntoTab(tab, reply)
+      } catch (_) {
+        mergeBookmarkReplyIntoTab(tab, { success: false })
+      }
+    }))
+    applyFilter()
+  }
+
   if (setToReadBtn) {
     setToReadBtn.addEventListener('click', async () => {
       const displayed = getDisplayedTabs()
@@ -912,6 +992,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
           }
         } catch (_) { /* skip */ }
       }
+      await refreshBookmarkDisplayForAllTabs()
       buttons.forEach(b => { b.disabled = false })
       showMessage(`Set to-read for ${ok} tab${ok !== 1 ? 's' : ''}`)
     })
@@ -936,6 +1017,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
           }
         } catch (_) { /* skip */ }
       }
+      await refreshBookmarkDisplayForAllTabs()
       buttons.forEach(b => { b.disabled = false })
       showMessage(`Cleared to-read for ${ok} tab${ok !== 1 ? 's' : ''}`)
     })
@@ -982,6 +1064,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
           // ignore per-tab errors
         }
       }
+      await refreshBookmarkDisplayForAllTabs()
       buttons.forEach(b => { b.disabled = false })
       tagsInput.value = ''
       showMessage(`Added tags for ${ok} tab${ok !== 1 ? 's' : ''}`)

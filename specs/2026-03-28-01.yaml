@@ -1,0 +1,26 @@
+- order: 1
+  feature_name: in Tabs tag, for each item in the list, display toggles and refresh
+  goal: in Tabs tag, for each item in the list, display toggles and refresh
+  rules:
+    - display icon for to-read if true.
+    - display icon for private if true.
+    - refresh its tags after "Add tags", 'set to-read', 'clear to-read' operations.
+  examples:
+    - given: >-
+        One or more tabs are displayed.
+      when: >-
+        The user add a tag "T1" with the "Add tags" button.
+      then: >-
+        The tabs displayed are refreshed to display the additional tag "T1".
+    - given: >-
+        One or more tabs are displayed.
+      when: >-
+        The user clicks 'set-to-read'.
+      then: >-
+        The tabs displayed are refreshed to display the property 'to-read' toggled true.
+    - given: >-
+        One or more tabs are displayed.
+      when: >-
+        The user clicks 'clear to-read'.
+      then: >-
+        The tabs displayed are refreshed to display the property 'to-read' toggled false.

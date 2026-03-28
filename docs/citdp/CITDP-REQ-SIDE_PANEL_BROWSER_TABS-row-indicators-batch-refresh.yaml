@@ -1,0 +1,361 @@
+# [PROC-CITDP] [PROC-AGENT_REQ_CHECKLIST] Change Impact and Test Design Procedure — S07 risk analysis + S08 test strategy
+# Client: hoverboard. Finalized at S15 (persisted under docs/citdp per project policy).
+record_identity:
+  change_request_id: REQ-SIDE_PANEL_BROWSER_TABS-row-indicators-batch-refresh
+  title: 'Side panel Tabs tab: per-row to-read/private indicators; post-batch bookmark UI refresh'
+  procedure_token: PROC-AGENT_REQ_CHECKLIST
+  procedure_version: v1.0.1
+  session_started_date: "2026-03-28"
+  citdp_record_path: docs/citdp/CITDP-REQ-SIDE_PANEL_BROWSER_TABS-row-indicators-batch-refresh.yaml
+  primary_tokens:
+    - REQ-SIDE_PANEL_BROWSER_TABS
+    - ARCH-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_BROWSER_TABS
+  risk_scope_tokens:
+    - IMPL-SIDE_PANEL_TABS
+    - IMPL-URL_TAGS_DISPLAY
+    - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+  repository_path_note: /Users/fareed/Documents/dev/browser/hoverboard
+change_definition:
+  summary: Tabs list shows bookmark to-read and private (shared no) indicators per row; after batch Add tags, Set to-read, or Clear to-read, refreshBookmarkDisplayForAllTabs re-merges bookmark state into displayed rows without requiring Refresh. Displayed set for render, copy, close, and batch actions is unified via getDisplayedTabs(); mergeBookmarkReplyIntoTab maps SW/bookmark replies onto rows.
+  scope_in:
+    - src/ui/side-panel/browser-tabs-panel.js
+    - src/ui/side-panel/side-panel.js
+    - src/core/message-handler.js
+    - src/core/service-worker.js
+    - tests/unit/browser-tabs-panel.test.js
+    - tests/unit/side-panel-tabs.test.js
+    - tests/unit/service-worker-messaging-routing.test.js
+    - tests/integration/browser-tabs-tab-composition.integration.test.js
+    - tests/playwright/extension-demo-tabs.spec.js
+    - tied/requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml
+    - tied/architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml
+    - tied/implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml
+    - tied/implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
+  scope_out:
+    - Popup bookmark row display (separate IMPL path)
+    - Pinboard API semantics beyond existing bookmark model
+impact_analysis:
+  affected_modules:
+    - name: browser-tabs-panel
+      role: Row indicators; getDisplayedTabs; batch bookmark handlers; mergeBookmarkReplyIntoTab; refreshBookmarkDisplayForAllTabs
+    - name: side-panel
+      role: Composition with IMPL-SIDE_PANEL_TABS; messaging to SW for bookmark operations
+  tied_stack:
+    - REQ-SIDE_PANEL_BROWSER_TABS
+    - ARCH-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_BROWSER_TABS
+    - IMPL-SIDE_PANEL_TABS
+risk_analysis:
+  risks:
+    - id: R1
+      description: Batch bookmark refresh omits tabs or leaves stale tags or to-read/private flags if mergeBookmarkReplyIntoTab keys mismatch tab ids or replies arrive out of order
+      severity: high
+      likelihood: low
+      tied_token_references:
+        - REQ-SIDE_PANEL_BROWSER_TABS
+        - IMPL-SIDE_PANEL_BROWSER_TABS
+        - ARCH-SIDE_PANEL_BROWSER_TABS
+      mitigation: Merge by stable tab id from displayed list; await per-tab bookmark flows as defined in IMPL pseudo-code; unit tests for mergeBookmarkReplyIntoTab and refreshBookmarkDisplayForAllTabs after simulated batch replies
+      residual: low
+    - id: R2
+      description: getDisplayedTabs diverges from what the user sees (filter vs hidden-row state) so batch actions affect a different set than expected
+      severity: high
+      likelihood: low
+      tied_token_references:
+        - REQ-SIDE_PANEL_BROWSER_TABS
+        - IMPL-SIDE_PANEL_BROWSER_TABS
+      mitigation: Single source of truth for displayed rows across render, copy, close, and batch paths; unit tests assert batch uses same list as visible filter and remove-from-display rules
+      residual: low
+    - id: R3
+      description: Cross-IMPL inconsistency between popup URL tag display and Tabs row tags or flags after refresh
+      severity: medium
+      likelihood: low
+      tied_token_references:
+        - IMPL-SIDE_PANEL_BROWSER_TABS
+        - IMPL-URL_TAGS_DISPLAY
+        - REQ-SIDE_PANEL_BROWSER_TABS
+      mitigation: Reuse same bookmark fields (tags, toread, shared) as popup-equivalent sources; document composed_with and see_also in IMPL; regression tests in browser-tabs-panel and Playwright side-panel-browser-tabs
+      residual: low
+    - id: R4
+      description: Service worker or runtime messaging failures during post-batch refresh yield partial UI updates or silent errors
+      severity: medium
+      likelihood: medium
+      tied_token_references:
+        - ARCH-SIDE_PANEL_BROWSER_TABS
+        - IMPL-SIDE_PANEL_BROWSER_TABS
+      mitigation: Follow existing error-handling patterns for chrome.runtime callbacks; keep refresh path idempotent where possible; tests with mocked failed sends or empty responses
+      residual: medium
+    - id: R5
+      description: Performance regression when many tabs are displayed and refresh triggers multiple bookmark lookups
+      severity: low
+      likelihood: medium
+      tied_token_references:
+        - REQ-SIDE_PANEL_BROWSER_TABS
+        - IMPL-SIDE_PANEL_BROWSER_TABS
+      mitigation: Scope refresh to displayed/loaded tabs only per IMPL; avoid redundant full list rebuilds where pseudo-code allows incremental merge
+      residual: low
+    - id: R6
+      description: Private indicator misunderstood (shared flag vs product wording) leading to incorrect trust in UI
+      severity: low
+      likelihood: low
+      tied_token_references:
+        - REQ-SIDE_PANEL_BROWSER_TABS
+        - IMPL-SIDE_PANEL_BROWSER_TABS
+      mitigation: REQ satisfaction criterion locks product rule (private when shared no); tooltips/labels aligned; unit tests for indicator visibility from shared and toread fields
+      residual: low
+    - id: R7
+      description: Batch tag operations aligned with IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS semantics differ from per-tab create/merge in edge cases (e.g. duplicate tags, empty bookmark)
+      severity: medium
+      likelihood: low
+      tied_token_references:
+        - IMPL-SIDE_PANEL_BROWSER_TABS
+        - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+        - REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
+      mitigation: parseTagsInput/buildAddTagsPayload parity with batch bookmark IMPL; fetch-then-merge for existing bookmarks per REQ; tests for create vs merge paths
+      residual: low
+test_strategy:
+  classification:
+    unit:
+      - filterBrowserTabs (pure)
+      - mergeBookmarkReplyIntoTab when present in code exports (bookmark projection)
+      - buildUrlListForCopy / buildRecordsYamlForCopy (pure over tab rows)
+      - parseImportantTagSources / Elements persistence helpers
+      - getFaviconSrc / getReferrerDisplayText-style helpers
+      - updateStatsLine arithmetic (display vs total counts) when extracted or asserted via DOM text
+    integration:
+      - loadTabs + merge referrers / pageText / importantTags (mocked chrome.tabs, sendMessage)
+      - SW routing GET_TAB_REFERRERS, GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS (mocked chrome.scripting)
+      - renderList, listDisplayMode, hiddenTabIds / getDisplayedTabs, batch bookmark, copy/close, Gather/Distribute (JSDOM + mocks)
+      - composed_with IMPL-SIDE_PANEL_TABS — tab ids, visibility, lazy init (side-panel-tabs.test.js)
+    e2e_only:
+      - phase_h_browser_tabs_extension_side_panel — real chrome-extension:// side panel document
+      - phase_h_browser_tabs_multi_window_focus — optional OS-level second window focus proof
+s08_impl_procedure_testability:
+  - impl_token: IMPL-SIDE_PANEL_BROWSER_TABS
+    default_testability: integration
+    blocks:
+      - procedure: filterBrowserTabs
+        testability: unit
+        notes: tests/unit/browser-tabs-panel.test.js — scope tabInfo, pageText, importantTags; empty query
+      - procedure: loadTabs / merge referrers and optional pageText importantTags
+        testability: integration
+        notes: browser-tabs-panel.test.js — mocked tabs.query and runtime.sendMessage
+      - procedure: GET_TAB_REFERRERS / GET_TABS_PAGE_TEXT / GET_TABS_IMPORTANT_TAGS (SW)
+        testability: integration
+        notes: tests/unit/service-worker-messaging-routing.test.js
+      - procedure: RENDER / listDisplayMode / getDisplayedTabs / remove-from-display / per-row close
+        testability: integration
+        notes: browser-tabs-panel.test.js — DOM assertions and chrome.tabs.remove mocks
+      - procedure: Copy URLs / Copy Records / Close visible / Close tagged / Close untagged / Refresh
+        testability: integration
+        notes: browser-tabs-panel.test.js — clipboard and confirm mocks
+      - procedure: Batch bookmark (Add tags, Set to-read, Clear to-read) + refreshBookmarkDisplayForAllTabs
+        testability: integration
+        notes: browser-tabs-panel.test.js — batch bookmark describe; merge replies into rows
+      - procedure: Focus on click (windows.update / tabs.update)
+        testability: integration
+        notes: Mocks prove call order and ids; true multi-window focus is e2e_only
+      - procedure: phase_h_browser_tabs_extension_side_panel
+        testability: e2e_only
+        e2e_only_reason: IMPL.phase_h_browser_tabs_extension_side_panel.e2e_only_reason
+        notes: tests/playwright/extension-demo-tabs.spec.js
+      - procedure: phase_h_browser_tabs_multi_window_focus
+        testability: e2e_only
+        e2e_only_reason: IMPL.phase_h_browser_tabs_multi_window_focus.e2e_only_reason
+        notes: Documented; optional manual — not required for CI gate if integration mocks suffice
+      - procedure: composed_with IMPL-SIDE_PANEL_TABS (browserTabs tab host)
+        testability: integration
+        notes: tests/unit/side-panel-tabs.test.js
+s08_test_matrix:
+  - test_name: tests/unit/browser-tabs-panel.test.js
+    impl_block_ref: IMPL-SIDE_PANEL_BROWSER_TABS — filterBrowserTabs, loadTabs merge, renderList, batch bookmark, copy/close, display mode, getDisplayedTabs, stats, Gather/Distribute, focus mocks
+    req_tokens:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    token_comments: '[REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-URL_TAGS_DISPLAY] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]'
+    testability: integration
+  - test_name: tests/unit/service-worker-messaging-routing.test.js
+    impl_block_ref: IMPL-SIDE_PANEL_BROWSER_TABS — GET_TAB_REFERRERS, GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS
+    req_tokens:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    token_comments: '[REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-MESSAGE_HANDLING]'
+    testability: integration
+  - test_name: tests/unit/side-panel-tabs.test.js
+    impl_block_ref: IMPL-SIDE_PANEL_TABS + IMPL-SIDE_PANEL_BROWSER_TABS — tab bar ids and browserTabs panel visibility
+    req_tokens:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    token_comments: '[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_TABS]'
+    testability: integration
+  - test_name: tests/integration/browser-tabs-tab-composition.integration.test.js
+    impl_block_ref: IMPL-SIDE_PANEL_TABS + IMPL-SIDE_PANEL_BROWSER_TABS — Phase G shell→initBrowserTabsTab
+    req_tokens:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    token_comments: '[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]'
+    testability: integration
+  - test_name: tests/playwright/extension-demo-tabs.spec.js
+    impl_block_ref: IMPL-SIDE_PANEL_BROWSER_TABS — phase_h_browser_tabs_extension_side_panel (filter, Copy Records, storage default tab, stats/Tags/display mode)
+    req_tokens:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+    token_comments: '[REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [PROC-DEMO_RECORDING]'
+    testability: e2e_only
+  - test_name: tests/playwright/extension-messaging.spec.js
+    impl_block_ref: IMPL-SIDE_PANEL_TABS — side panel opens on Tabs tab (composed)
+    req_tokens:
+      - REQ-SIDE_PANEL_BROWSER_TABS
+      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    token_comments: '[IMPL-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_BROWSER_TABS]'
+    testability: e2e_only
+s08_tdd_plan_ordered:
+  - order: 1
+    phase: Unit tests first
+    description: RED pure helpers (filterBrowserTabs, copy builders, parseImportantTagSources, mergeBookmarkReplyIntoTab if exported) — browser-tabs-panel.test.js
+  - order: 2
+    phase: Unit code via TDD
+    description: GREEN browser-tabs-panel.js pure functions and exports to satisfy unit tests
+  - order: 3
+    phase: Composition tests first
+    description: RED integration-style tests — loadTabs/renderList/batch/SW message routing (browser-tabs-panel.test.js, service-worker-messaging-routing.test.js, side-panel-tabs.test.js)
+  - order: 4
+    phase: Composition code via TDD
+    description: GREEN wiring in browser-tabs-panel.js, side-panel.js, message-handler.js, service-worker.js
+  - order: 5
+    phase: E2E
+    description: Playwright extension-demo-tabs.spec.js and extension-messaging.spec.js for phase_h_browser_tabs_extension_side_panel and composed tab open
+  - order: 6
+    phase: Validate and sync
+    description: Full test suite, scripts/validate_tokens.sh, lint_yaml on changed tied YAML, tied_validate_consistency, LEAP sync if code diverged from IMPL
+s08_module_boundaries_req_module_validation:
+  requirement_token: REQ-MODULE_VALIDATION
+  modules:
+    - boundary: browser-tabs-panel.js (pure + panel module)
+      responsibility: Tab list state, filter, displayed set, bookmark row projection, batch actions, render
+      validation_criteria: Unit tests for pure functions; JSDOM integration tests with mocked chrome.* and runtime.sendMessage for panel flows
+    - boundary: message-handler.js + service-worker.js (GET_* scripting)
+      responsibility: executeScript in tab context for referrers, page text, important tags
+      validation_criteria: service-worker-messaging-routing.test.js with mocked chrome.scripting and tabs
+    - boundary: side-panel.js + side-panel-tab-state.js (shell)
+      responsibility: Tab bar, lazy init browserTabs, composed_with IMPL-SIDE_PANEL_TABS; switchTabForTest / resetBrowserTabsTabInitedForTest for Phase G
+      validation_criteria: side-panel-tabs.test.js; browser-tabs-tab-composition.integration.test.js; integration gate before relying on Playwright for shell wiring
+    - boundary: Playwright extension document
+      responsibility: Real chrome-extension:// side panel surface (phase_h_browser_tabs_extension_side_panel)
+      validation_criteria: extension-demo-tabs.spec.js passes (filter, Copy Records, persisted tab, stats, Tags row, Title/Block mode); multi-window focus remains documented e2e_only gap
+  integration_gate: Unit and Jest integration tests pass before E2E is treated as sufficient for wiring; E2E does not replace SW routing tests
+s07_checkpoint:
+  checklist_step: S07
+  next_step: S08
+  outcomes_met:
+    - Risks listed with severity and likelihood
+    - tied_token_references attached per risk
+    - Mitigations and residual risk noted
+s08_checkpoint:
+  checklist_step: S08
+  next_step: S09.RED
+  outcomes_met:
+    - Every IMPL block/procedure classified (unit, integration, or e2e_only)
+    - e2e_only_reason named on IMPL detail for phase_h_browser_tabs_extension_side_panel and phase_h_browser_tabs_multi_window_focus
+    - Test matrix and TDD sequence recorded
+    - REQ-MODULE_VALIDATION module boundaries documented
+s12_phase_i_final_validation:
+  checklist_step: S12
+  procedure_token: PROC-AGENT_REQ_CHECKLIST
+  date: "2026-03-28"
+  tests:
+    unit_and_integration: npm test (Jest — all *.test.js and *.integration.test.js)
+    jest_e2e_pattern: npm run test:e2e — no *.e2e.test.js in repo; exit 0
+    playwright_extension: npm run test:e2e:extension — 39 passed, 2 skipped
+  lint_and_types:
+    eslint: npm run lint — src/**/*.js
+    typescript: npm run typecheck — tsc --noEmit
+    languages_in_scope_note: No Rust/Swift packages in this repository; JS/TS only for this change
+  token_validation:
+    validate_tokens_sh: PASS (scripts/validate_tokens.sh)
+    tied_validate_consistency_mcp: ok true (TIED_BASE_PATH hoverboard/tied)
+  three_way_alignment_touched_impls:
+    - token: IMPL-SIDE_PANEL_BROWSER_TABS
+      pseudo_code_tokens: REQ-SIDE_PANEL_BROWSER_TABS, ARCH-SIDE_PANEL_BROWSER_TABS, IMPL-SIDE_PANEL_BROWSER_TABS; Phase H boundary comment names phase_h_browser_tabs_extension_side_panel and phase_h_browser_tabs_multi_window_focus
+      tests: tests/unit/browser-tabs-panel.test.js; tests/integration/browser-tabs-tab-composition.integration.test.js; tests/playwright/extension-demo-tabs.spec.js
+      code: src/ui/side-panel/browser-tabs-panel.js; src/core/message-handler.js; src/core/service-worker.js
+      e2e_only_blocks: phase_h_browser_tabs_extension_side_panel (playwright_spec extension-demo-tabs.spec.js); phase_h_browser_tabs_multi_window_focus (documented e2e_only, no automated spec)
+    - token: IMPL-SIDE_PANEL_TABS
+      pseudo_code_tokens: REQ-SIDE_PANEL_POPUP_EQUIVALENT, REQ-RECENT_TAGS_SYSTEM, REQ-SIDE_PANEL_BROWSER_TABS, ARCH-SIDE_PANEL_TABS, IMPL-SIDE_PANEL_TABS, composed_with IMPL-SIDE_PANEL_BROWSER_TABS
+      tests: tests/integration/browser-tabs-tab-composition.integration.test.js; tests/unit/side-panel-tabs.test.js; related Playwright as in IMPL traceability.tests
+      code: src/ui/side-panel/side-panel.js; src/ui/side-panel/side-panel-tab-state.js
+      e2e_only_blocks: phase_h_side_panel_recent_tags_extension_document; phase_h_window_focus_recent_tags_cross_window (reasons on IMPL detail)
+  req_module_validation_s12_signoff:
+    requirement_token: REQ-MODULE_VALIDATION
+    result: Each boundary in s08_module_boundaries_req_module_validation validated independently before integration — browser-tabs-panel (unit/JSDOM), SW routing (service-worker-messaging-routing.test.js), shell (side-panel-tabs + browser-tabs-tab-composition + window-focus composition), extension document (Playwright extension-demo-tabs + messaging snapshot for Tabs tab). No new failures; full suite green on 2026-03-28.
+s12_checkpoint:
+  checklist_step: S12
+  next_step: S13
+  outcomes_met:
+    - Full test suite and Playwright extension pass
+    - Lint and typecheck pass
+    - PROC-TOKEN_VALIDATION (validate_tokens + tied_validate_consistency) pass
+    - Three-way alignment recorded for IMPL-SIDE_PANEL_BROWSER_TABS and IMPL-SIDE_PANEL_TABS
+    - IMPL metadata.last_updated refreshed via MCP
+    - REQ-MODULE_VALIDATION results documented in this CITDP section
+s13_sync_tied_to_code_tests:
+  checklist_step: S13
+  procedure_token: PROC-AGENT_REQ_CHECKLIST
+  date: "2026-03-28"
+  tied_base_path_note: TIED YAML MCP uses workspace project tied/ (hoverboard/tied), not external template trees
+  sub_yaml_files_updated:
+    - tied/requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml
+    - tied/architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml
+  monolithic_indexes_updated:
+    - tied/requirements.yaml
+    - tied/architecture-decisions.yaml
+  changes_summary:
+    - REQ + ARCH traceability.tests now list tests/integration/browser-tabs-tab-composition.integration.test.js (Phase G shell→initBrowserTabsTab), matching IMPL-SIDE_PANEL_BROWSER_TABS / IMPL-SIDE_PANEL_TABS
+    - REQ validation_criteria adds Composition (integration) method (detail + requirements index)
+    - ARCH architecture-decisions.yaml index traceability.tests expanded from unit-only to full stack (was drift vs detail_file)
+    - No LEAP divergence requiring GOTO S06 — documentation catch-up only
+s13_checkpoint:
+  checklist_step: S13
+  next_step: S14
+  outcomes_met:
+    - REQ/ARCH index and detail aligned with implemented tests and IMPL traceability
+    - tied_validate_consistency ok true after edits
+s09_s11_tdd_execution:
+  checklist_steps: S09–S11
+  procedure_token: PROC-AGENT_REQ_CHECKLIST
+  summary:
+    - S09 (Phase E): Unit RED/GREEN for mergeBookmarkReplyIntoTab, bookmarkApiStringIs, per-row toggles, refreshBookmarkDisplayForAllTabs after batch operations; browser-tabs-panel.test.js expanded ([REQ-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS], [IMPL-URL_TAGS_DISPLAY]).
+    - S10 (Phase G): browser-tabs-tab-composition.integration.test.js added; side-panel.js exports switchTabForTest, resetBrowserTabsTabInitedForTest; IMPL-SIDE_PANEL_TABS detail/index aligned (composed_with IMPL-SIDE_PANEL_BROWSER_TABS).
+    - S11 (Phase H): extension-demo-tabs.spec.js — Phase H comments and third test (stats line, #browserTabsTagsInput, Title vs Block in real chrome-extension:// page); phase_h_browser_tabs_multi_window_focus remains documented e2e_only without automated spec.
+s14_checkpoint:
+  checklist_step: S14
+  next_step: S15
+  date: "2026-03-28"
+  outcomes_met:
+    - CHANGELOG.md [Unreleased] — Documentation (S13 TIED sync), Added (composition + Playwright Tabs E2E), README Test Coverage and Tabs tab / Extension E2E bullets updated
+completion_criteria:
+  source: S12 Phase I + S13
+  all_tests_pass: true
+  lint_and_typecheck_pass: true
+  token_validation_pass: true
+  tied_validate_consistency_ok: true
+  readme_changelog_updated: true
+  req_arch_impl_synced: true
+leap_feedback:
+  divergences_from_analysis: []
+  tied_stack_updates_required: false
+  notes: No production behavior drift vs S07/S08 risk register requiring GOTO S06; IMPL detail yaml_detail_update once corrupted IMPL-SIDE_PANEL_BROWSER_TABS — reverted from git; subsequent TIED edits used surgical file edits + MCP validate.
+record_status: complete
+s15_persist_record:
+  checklist_step: S15
+  procedure_token: PROC-AGENT_REQ_CHECKLIST
+  stored_path: /Users/fareed/Documents/dev/browser/hoverboard/docs/citdp/CITDP-REQ-SIDE_PANEL_BROWSER_TABS-row-indicators-batch-refresh.yaml
+  workspace_root: /Users/fareed/Documents/dev/browser/hoverboard
+  policy_note: CITDP lives in client repo docs/citdp (same tree as project tied/); not persisted only under TIED methodology checkout
+  next_step: S16
+s15_checkpoint:
+  checklist_step: S15
+  next_step: S16
+  outcomes_met:
+    - CITDP YAML record populated through S14; LEAP feedback and record_status set
+    - Record path equals WORKSPACE_ROOT/docs/citdp/CITDP-{change_request_id}.yaml
+    - lint_yaml passed on absolute CITDP path (SUB-YAML)

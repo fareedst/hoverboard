@@ -12,6 +12,7 @@ IMPL-SIDE_PANEL_TABS:
   cross_references:
     - ARCH-SIDE_PANEL_TABS
     - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+    - REQ-SIDE_PANEL_BROWSER_TABS
     - REQ-RECENT_TAGS_SYSTEM
     - ARCH-TAG_SYSTEM
   rationale:
@@ -32,7 +33,8 @@ IMPL-SIDE_PANEL_TABS:
       - 'Recommended E2E (IMPL-SIDE_PANEL_TABS): after loading side panel, assert header row has left text matching Hoverboard v* and right text matching YYYY-MM-DD HH:mm.'
       - 'S08 testability: bindWindowFocusRecentTagsRefresh — full two-window recent-tags sync (REQ-RECENT_TAGS_SYSTEM) is e2e_only for end-to-end proof; e2e_only_reason: requires live Chromium extension host with chrome.sidePanel + chrome.windows.onFocusChanged across multiple browser windows and real SW messaging; unit/integration cover guards and loadRecentTags via mocks (tests/unit/side-panel-tabs.test.js).'
       - 'S10 Phase G: tests/integration/window-focus-recent-tags-composition.integration.test.js exercises bindWindowFocusRecentTagsRefresh wiring (onFocusChanged → getCurrent → shouldInvokeLoadRecentTagsOnWindowFocusSync → loadRecentTags) without UI; setActiveTabForTest drives activeTab for guard branches.'
-      - 'S12 REQ-MODULE_VALIDATION: (1) side-panel-tab-state.js pure predicate shouldInvokeLoadRecentTagsOnWindowFocusSync — unit tests in tests/unit/side-panel-tabs.test.js; (2) side-panel.js bindWindowFocusRecentTagsRefresh wiring — composition tests in tests/integration/window-focus-recent-tags-composition.integration.test.js; (3) This Page Recent Tags mount in extension document — Playwright tests/playwright/extension-side-panel-recent-tags-e2e.spec.js; cross-window focus refresh remains e2e_only per phase_h_window_focus_recent_tags_cross_window.'
+      - 'S10 Phase G: tests/integration/browser-tabs-tab-composition.integration.test.js exercises runInitialTabInit(TAB_BROWSER_TABS) and switchTabForTest(TAB_BROWSER_TABS) → initBrowserTabsTab (mocked); resetBrowserTabsTabInitedForTest clears one-shot guard.'
+      - 'S12 REQ-MODULE_VALIDATION: (1) side-panel-tab-state.js pure predicate shouldInvokeLoadRecentTagsOnWindowFocusSync — unit tests in tests/unit/side-panel-tabs.test.js; (2) side-panel.js bindWindowFocusRecentTagsRefresh wiring — composition tests in tests/integration/window-focus-recent-tags-composition.integration.test.js; (3) browser Tabs tab init binding — tests/integration/browser-tabs-tab-composition.integration.test.js; (4) This Page Recent Tags mount in extension document — Playwright tests/playwright/extension-side-panel-recent-tags-e2e.spec.js; cross-window focus refresh remains e2e_only per phase_h_window_focus_recent_tags_cross_window.'
   code_locations:
     files:
       - path: src/ui/side-panel/side-panel.html
@@ -66,6 +68,12 @@ IMPL-SIDE_PANEL_TABS:
       - name: setActiveTabForTest
         file: src/ui/side-panel/side-panel.js
         description: 'Test-only: set module activeTab for composition tests of bindWindowFocusRecentTagsRefresh guards'
+      - name: switchTabForTest
+        file: src/ui/side-panel/side-panel.js
+        description: 'Phase G: exported wrapper for switchTab(tabId) — drives initBrowserTabsTab binding without tab-bar click'
+      - name: resetBrowserTabsTabInitedForTest
+        file: src/ui/side-panel/side-panel.js
+        description: 'Test-only: clear browserTabsTabInited so composition tests can re-invoke initBrowserTabsTab path'
       - name: refreshBookmarkTabIfVisible
         file: src/ui/side-panel/side-panel.js
         description: Call controller.refreshPopupData() when This Page tab is visible and inited
@@ -93,6 +101,7 @@ IMPL-SIDE_PANEL_TABS:
       - ARCH-TAG_SYSTEM
     requirements:
       - REQ-SIDE_PANEL_POPUP_EQUIVALENT
+      - REQ-SIDE_PANEL_BROWSER_TABS
       - REQ-RECENT_TAGS_SYSTEM
     code_annotations:
       - IMPL-SIDE_PANEL_TABS
@@ -102,6 +111,7 @@ IMPL-SIDE_PANEL_TABS:
       - tests/unit/side-panel-html.test.js
       - tests/playwright/extension-messaging.spec.js
       - tests/integration/window-focus-recent-tags-composition.integration.test.js
+      - tests/integration/browser-tabs-tab-composition.integration.test.js
       - tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
   related_decisions:
     depends_on:
@@ -114,6 +124,7 @@ IMPL-SIDE_PANEL_TABS:
     composed_with:
       - IMPL-SIDE_PANEL_BOOKMARK
       - IMPL-SIDE_PANEL_TAGS_TREE
+      - IMPL-SIDE_PANEL_BROWSER_TABS
   essence_pseudocode: |
     # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM]
     # Tabbed side panel: tab bar, panels, persist, init This Page / By Tag / browser Tabs; recent-tags refresh on window focus while Bookmark tab active (same loadRecentTags contract as [IMPL-RECENT_TAGS_POPUP_REFRESH]); single page + scoped popup root per ARCH-SIDE_PANEL_TABS.
@@ -215,6 +226,7 @@ IMPL-SIDE_PANEL_TABS:
       IF browserTabsTabInited RETURN
       browserTabsTabInited = true
       initBrowserTabsTab()  // load tabs, referrers; render #browserTabsPanel list; bind search input, Copy button, Close button
+    # Phase G: switchTabForTest(tabId) and resetBrowserTabsTabInitedForTest() exported for composition tests — same switchTab → initTabIfNeeded("browserTabs") path without clicking .side-panel-tab (no UI).
 
     # --- Composition: composed_with [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_TAGS_TREE] ---
     # Ordering: runInitialTabInit may await initBookmarkTab before By Tag so controller exists for getTagsTreeInitOptions. Shared DATA: popupComponents.controller (currentPin, normalizeTags) for both This Page and By Tag sync. Collision: bindTabChangeRefresh refreshPopupData and bindWindowFocusRecentTagsRefresh loadRecentTags can run close together — both read currentPin; safe (idempotent UI updates). Cross-IMPL: loadRecentTags matches [IMPL-RECENT_TAGS_POPUP_REFRESH] message path to [IMPL-MESSAGE_HANDLING] / [IMPL-TAG_SYSTEM].
@@ -225,4 +237,4 @@ IMPL-SIDE_PANEL_TABS:
     last_updated:
       date: "2026-03-28"
       author: AI Agent
-      reason: 'SUB-LEAP-MICRO: bindWindowFocusRecentTagsRefresh pseudo aligned with production (loadRecentTags not awaited in getCurrent callback)'
+      reason: SUB-LEAP-MICRO loadRecentTags fire-and-forget in pseudo; S12 Phase I — detail aligned with index (REQ-SIDE_PANEL_BROWSER_TABS, composed_with IMPL-SIDE_PANEL_BROWSER_TABS, browser-tabs composition test, switchTabForTest/resetBrowserTabsTabInitedForTest in code_locations); full suite + lint + token validation pass

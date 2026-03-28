@@ -627,6 +627,27 @@
   color: var(--text-primary, #eee);
 }
 
+/* [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Bookmark state markers (to-read, private) per row */
+.browser-tabs-card-toggles {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  margin-right: 0.35rem;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.browser-tabs-card-title-row .browser-tabs-card-toggles {
+  margin-right: 0.35rem;
+}
+
+.browser-tabs-card-toggle {
+  display: inline-block;
+  opacity: 0.95;
+}
+
 .browser-tabs-card-tags {
   margin-top: 0.15rem;
   font-size: 0.75rem;
