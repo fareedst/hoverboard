@@ -37,6 +37,7 @@
 | Storage backend change | `storageBackendChange` | `moveBookmarkToStorage` |
 | Show on page load | `showHoverOnPageLoadChange` | `updateOverlayConfig` |
 | Open By Tag | `openTagsTree` | `OPEN_SIDE_PANEL` |
+| Open Local Bookmarks Index | `openBookmarksIndex` | `OPEN_BOOKMARKS_INDEX` |
 
 ---
 
@@ -109,6 +110,7 @@ Exact constant keys and string values from `src/core/message-handler.js`:
 | Constant | Value |
 |----------|-------|
 | `OPEN_SIDE_PANEL` | `OPEN_SIDE_PANEL` |
+| `OPEN_BOOKMARKS_INDEX` | `OPEN_BOOKMARKS_INDEX` |
 | `REQUEST_SIDE_PANEL_CLOSE` | `REQUEST_SIDE_PANEL_CLOSE` |
 | `GET_RECENTLY_CLOSED_TABS` | `getRecentlyClosedTabs` |
 | `GET_TAB_REFERRERS` | `getTabReferrers` |

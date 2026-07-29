@@ -26,6 +26,6 @@ handleCommand(command):
     "open-side-panel-tags-tree": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'tagsTree' }); THEN sidePanel.open({ windowId })
     "open-side-panel-browser-tabs": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'browserTabs' }); THEN sidePanel.open({ windowId })
     "open-options": chrome.runtime.openOptionsPage()
-    "open-bookmarks-index": chrome.tabs.create({ url: ... bookmarks-table.html })
+    "open-bookmarks-index": OPEN_BOOKMARKS_INDEX_TAB  # tabs.create + REQUEST_SIDE_PANEL_CLOSE [IMPL-LOCAL_BOOKMARKS_INDEX]
     "open-import": chrome.tabs.create({ url: ... browser-bookmark-import.html })
 # Side panel: storage.onChanged for SIDE_PANEL_TAB_STORAGE_KEY → switchTab(newValue) when panel already open.

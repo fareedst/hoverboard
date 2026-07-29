@@ -19054,7 +19054,9 @@ var MESSAGE_TYPES = {
   RECORD_SESSION_TAGS: "recordSessionTags",
   // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Message type for opening side panel. Implements contract: popup sends this type; SW handles in onMessage and calls chrome.sidePanel.open({ windowId }).
   OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL",
-  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel; side panel closes itself if visible and open long enough (toggle).
+  // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Popup/command/menu open Local Bookmarks Index via SW OPEN_BOOKMARKS_INDEX_TAB.
+  OPEN_BOOKMARKS_INDEX: "OPEN_BOOKMARKS_INDEX",
+  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel (and on index tab create); side panel closes itself if visible and open long enough (toggle).
   REQUEST_SIDE_PANEL_CLOSE: "REQUEST_SIDE_PANEL_CLOSE"
 };
 
@@ -19093,8 +19095,8 @@ var POPUP_ACTION_TO_MESSAGE = {
   // no message; chrome.tabs.reload
   [POPUP_ACTION_IDS.openOptions]: null,
   // chrome.runtime.openOptionsPage
-  [POPUP_ACTION_IDS.openBookmarksIndex]: null,
-  // chrome.tabs.create
+  [POPUP_ACTION_IDS.openBookmarksIndex]: MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX,
+  // [REQ-LOCAL_BOOKMARKS_INDEX] SW OPEN_BOOKMARKS_INDEX_TAB
   [POPUP_ACTION_IDS.openBrowserBookmarkImport]: null,
   // chrome.tabs.create [REQ-BROWSER_BOOKMARK_IMPORT]
   [POPUP_ACTION_IDS.openTagsTree]: MESSAGE_TYPES.OPEN_SIDE_PANEL,
@@ -20761,14 +20763,13 @@ var PopupController = class {
   }
   /**
    * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
-   * Open the local bookmarks index page in a new tab.
+   * Open Local Bookmarks Index via SW OPEN_BOOKMARKS_INDEX_TAB (create tab + dismiss side panel).
    */
-  handleOpenBookmarksIndex() {
+  async handleOpenBookmarksIndex() {
     recordAction(POPUP_ACTION_IDS.openBookmarksIndex, void 0, "popup");
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openBookmarksIndex, payload: void 0 });
     try {
-      const url2 = chrome.runtime.getURL("src/ui/bookmarks-table/bookmarks-table.html");
-      chrome.tabs.create({ url: url2 });
+      await this.sendMessage({ type: MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX });
       this.uiManager.showSuccess("Bookmarks index opened in new tab");
     } catch (error48) {
       this.errorHandler.handleError("Failed to open bookmarks index", error48);

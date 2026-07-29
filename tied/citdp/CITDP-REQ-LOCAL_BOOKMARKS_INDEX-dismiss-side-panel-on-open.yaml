@@ -1,0 +1,59 @@
+CITDP-REQ-LOCAL_BOOKMARKS_INDEX-dismiss-side-panel-on-open:
+  change_definition:
+    current_behavior: "Opening Local Bookmarks Index via popup, command, or context menu creates a tab only; Chrome keeps an already-open side panel visible beside the new tab."
+    desired_behavior: "On index tab create (popup OPEN_BOOKMARKS_INDEX, command open-bookmarks-index, context menu hoverboard-open-bookmarks-index), SW OPEN_BOOKMARKS_INDEX_TAB creates the tab then broadcasts REQUEST_SIDE_PANEL_CLOSE. Index page refresh does not re-dismiss. Toolbar icon may reopen the side panel. Options href open unchanged (no dismiss)."
+    non_goals:
+      - "chrome.sidePanel.close API (does not exist)"
+      - "Close on index page load/refresh"
+      - "New REQ satellite token"
+      - "Options page href dismiss"
+    success_criteria:
+      - "bookmarks-table.js does not send REQUEST_SIDE_PANEL_CLOSE"
+      - "Command/menu/message create index URL and send REQUEST_SIDE_PANEL_CLOSE"
+      - "Icon toggle close still works"
+      - "Popup sends OPEN_BOOKMARKS_INDEX not direct tabs.create"
+    unchanged_behavior: "Icon click open/toggle; side panel 300ms guard; options bookmarks-index link href"
+  completion_criteria:
+    verification_gate_notes: "service-worker-open-bookmarks-index unit tests pass; icon-toggle and quick-access tests pass; tied_validate_consistency ok."
+  impact_analysis:
+    modules_or_boundaries: "service-worker _openBookmarksIndexTab; message-handler OPEN_BOOKMARKS_INDEX; PopupController.handleOpenBookmarksIndex; ui-action-contract mapping; IMPL-LOCAL_BOOKMARKS_INDEX pseudocode; vocab bookmarks-index/side-panel/ui-surfaces/ipc-messaging."
+    tied_tokens_affected:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-CONTEXT_MENU_QUICK_ACCESS"
+      - "IMPL-EXTENSION_COMMANDS"
+      - "IMPL-ICON_CLICK_BEHAVIOR"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "none"
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-LOCAL_BOOKMARKS_INDEX-dismiss-side-panel-on-open"
+    primary_tokens:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-29"
+    title: "Local Bookmarks Index: dismiss side panel on tab create"
+  risk_analysis:
+    risks:
+      - id: "R1"
+        description: "Broadcast REQUEST_SIDE_PANEL_CLOSE may close visible panels in other windows"
+        likelihood: "medium"
+        mitigation: "Panel visibilityState guard; accepted per sponsor (window or all)"
+        residual: "low"
+        severity: "low"
+      - id: "R2"
+        description: "Refresh re-closes panel after user reopens via icon"
+        likelihood: "high if close lived in page init"
+        mitigation: "Close only in SW OPEN_BOOKMARKS_INDEX_TAB; source guard test"
+        residual: "low"
+        severity: "medium"
+  tdd_sequence:
+    summary: "TIED + OPEN_BOOKMARKS_INDEX_TAB pseudocode → RED open-bookmarks-index tests → SW helper + message + popup → green → CITDP"
+  test_strategy:
+    matrix_notes: "Unit only (service-worker-open-bookmarks-index.test.js). No E2E; Chrome side panel chrome not unit-testable beyond cooperative message."
+    summary: "Unit: helper/command/menu/message create+close; popup OPEN_BOOKMARKS_INDEX; bookmarks-table.js must not reference REQUEST_SIDE_PANEL_CLOSE."

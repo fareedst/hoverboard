@@ -22794,7 +22794,9 @@ var MESSAGE_TYPES = {
   RECORD_SESSION_TAGS: "recordSessionTags",
   // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Message type for opening side panel. Implements contract: popup sends this type; SW handles in onMessage and calls chrome.sidePanel.open({ windowId }).
   OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL",
-  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel; side panel closes itself if visible and open long enough (toggle).
+  // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Popup/command/menu open Local Bookmarks Index via SW OPEN_BOOKMARKS_INDEX_TAB.
+  OPEN_BOOKMARKS_INDEX: "OPEN_BOOKMARKS_INDEX",
+  // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel (and on index tab create); side panel closes itself if visible and open long enough (toggle).
   REQUEST_SIDE_PANEL_CLOSE: "REQUEST_SIDE_PANEL_CLOSE"
 };
 var MessageHandler = class {
@@ -25131,6 +25133,26 @@ var RecentTagsMemoryManager = class {
   }
 };
 
+// src/shared/async-init-mutex.js
+function createProviderInitMutex(initFn) {
+  let inFlight = (
+    /** @type {Promise<void>|null} */
+    null
+  );
+  let done = false;
+  return async function ensureInitialized() {
+    if (done) return;
+    if (!inFlight) {
+      inFlight = Promise.resolve().then(() => initFn()).then(() => {
+        done = true;
+      }).finally(() => {
+        inFlight = null;
+      });
+    }
+    await inFlight;
+  };
+}
+
 // src/core/service-worker.js
 var _isRestrictedForSidePanel = (url2) => typeof url2 === "string" && (url2.startsWith("chrome://") || url2.startsWith("chrome-extension://"));
 var HoverboardServiceWorker = class {
@@ -25142,11 +25164,20 @@ var HoverboardServiceWorker = class {
     this.bookmarkProvider = this.messageHandler.bookmarkProvider;
     this.recentTagsMemory = new RecentTagsMemoryManager();
     this._providerInitialized = false;
+    this._ensureProviderInitialized = createProviderInitMutex(() => this.initBookmarkProvider());
     this._sidePanelWindowId = null;
     this._iconClickOpensSidePanel = void 0;
     this.setupEventListeners();
     this._seedSidePanelWindowCache();
     this._seedIconClickPreferenceCache();
+  }
+  /**
+   * [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Lazy provider init with mutex (concurrent cold-start safe).
+   * SWITCH_STORAGE_MODE still calls initBookmarkProvider() directly for forced re-init.
+   */
+  async ensureBookmarkProviderInitialized() {
+    if (this._providerInitialized) return;
+    await this._ensureProviderInitialized();
   }
   /**
    * [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] File adapter: path set → NativeHost; else picker → Message; else InMemory.
@@ -25200,6 +25231,11 @@ var HoverboardServiceWorker = class {
       console.log("[SERVICE-WORKER] Received message:", message);
       if (message.type === MESSAGE_TYPES.OPEN_SIDE_PANEL) {
         this._openSidePanelWithFallback((result) => sendResponse(result));
+        return true;
+      }
+      if (message.type === MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX) {
+        this._openBookmarksIndexTab();
+        sendResponse({ success: true });
         return true;
       }
       this.handleMessage(message, sender).then((response) => {
@@ -25322,10 +25358,7 @@ var HoverboardServiceWorker = class {
       return;
     }
     if (command === "open-bookmarks-index") {
-      const url2 = getURL("src/ui/bookmarks-table/bookmarks-table.html");
-      if (url2 && (chromeApi?.tabs?.create || safariEnhancements.tabs?.create)) {
-        (chromeApi?.tabs ?? safariEnhancements.tabs).create({ url: url2 });
-      }
+      this._openBookmarksIndexTab();
       return;
     }
     if (command === "open-import") {
@@ -25333,6 +25366,25 @@ var HoverboardServiceWorker = class {
       if (url2 && (chromeApi?.tabs?.create || safariEnhancements.tabs?.create)) {
         (chromeApi?.tabs ?? safariEnhancements.tabs).create({ url: url2 });
       }
+    }
+  }
+  /**
+   * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] [IMPL-ICON_CLICK_BEHAVIOR]
+   * OPEN_BOOKMARKS_INDEX_TAB: create Local Bookmarks Index tab then dismiss already-open side panel (tab-create only).
+   */
+  _openBookmarksIndexTab() {
+    const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
+    const runtime = chromeApi?.runtime || safariEnhancements.runtime;
+    const getURL = runtime?.getURL ? (path) => runtime.getURL(path) : () => "";
+    const url2 = getURL("src/ui/bookmarks-table/bookmarks-table.html");
+    const tabsApi = chromeApi?.tabs ?? safariEnhancements.tabs;
+    if (url2 && tabsApi?.create) {
+      tabsApi.create({ url: url2 });
+    }
+    if (runtime?.sendMessage) {
+      const p = runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE });
+      if (p && typeof p.catch === "function") p.catch(() => {
+      });
     }
   }
   /**
@@ -25436,9 +25488,7 @@ var HoverboardServiceWorker = class {
         recordMessage(message.type, message.data, sender, out2);
         return out2;
       }
-      if (!this._providerInitialized) {
-        await this.initBookmarkProvider();
-      }
+      await this.ensureBookmarkProviderInitialized();
       if (message.type === MESSAGE_TYPES.SWITCH_STORAGE_MODE) {
         await this.initBookmarkProvider();
         const out2 = { success: true, data: { switched: true } };
@@ -25792,9 +25842,7 @@ var HoverboardServiceWorker = class {
     const config2 = await this.configManager.getConfig();
     if (!config2.setIconOnLoad) return void 0;
     try {
-      if (!this._providerInitialized) {
-        await this.initBookmarkProvider();
-      }
+      await this.ensureBookmarkProviderInitialized();
       const raw = await this.bookmarkProvider.getBookmarkForUrl(tab.url);
       const bookmark = normalizeBookmarkForDisplay(raw);
       if (!bookmark.url) bookmark.url = tab.url;
@@ -25855,12 +25903,15 @@ var HoverboardServiceWorker = class {
         if (runtime?.openOptionsPage) runtime.openOptionsPage();
         return;
       }
-      if (menuId === "hoverboard-open-bookmarks-index" || menuId === "hoverboard-open-import") {
+      if (menuId === "hoverboard-open-bookmarks-index") {
+        this._openBookmarksIndexTab();
+        return;
+      }
+      if (menuId === "hoverboard-open-import") {
         const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
         const runtime = chromeApi?.runtime || safariEnhancements.runtime;
-        const getURL = runtime?.getURL ? (path2) => runtime.getURL(path2) : () => "";
-        const path = menuId === "hoverboard-open-bookmarks-index" ? "src/ui/bookmarks-table/bookmarks-table.html" : "src/ui/browser-bookmark-import/browser-bookmark-import.html";
-        const url2 = getURL(path);
+        const getURL = runtime?.getURL ? (path) => runtime.getURL(path) : () => "";
+        const url2 = getURL("src/ui/browser-bookmark-import/browser-bookmark-import.html");
         if (url2 && (chromeApi?.tabs?.create || safariEnhancements.tabs?.create)) (chromeApi?.tabs ?? safariEnhancements.tabs).create({ url: url2 });
       }
     });

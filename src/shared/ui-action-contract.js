@@ -46,7 +46,7 @@ export const POPUP_ACTION_TO_MESSAGE = {
   [POPUP_ACTION_IDS.refreshData]: 'getCurrentBookmark', // popup refresh uses getCurrentBookmark + getTagsForUrl
   [POPUP_ACTION_IDS.reloadExtension]: null, // no message; chrome.tabs.reload
   [POPUP_ACTION_IDS.openOptions]: null, // chrome.runtime.openOptionsPage
-  [POPUP_ACTION_IDS.openBookmarksIndex]: null, // chrome.tabs.create
+  [POPUP_ACTION_IDS.openBookmarksIndex]: MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX, // [REQ-LOCAL_BOOKMARKS_INDEX] SW OPEN_BOOKMARKS_INDEX_TAB
   [POPUP_ACTION_IDS.openBrowserBookmarkImport]: null, // chrome.tabs.create [REQ-BROWSER_BOOKMARK_IMPORT]
   [POPUP_ACTION_IDS.openTagsTree]: MESSAGE_TYPES.OPEN_SIDE_PANEL, // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Popup action maps to OPEN_SIDE_PANEL; SW opens side panel with cached windowId
   [POPUP_ACTION_IDS.storageBackendChange]: MESSAGE_TYPES.MOVE_BOOKMARK_TO_STORAGE,

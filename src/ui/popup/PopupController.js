@@ -1935,14 +1935,13 @@ export class PopupController {
 
   /**
    * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
-   * Open the local bookmarks index page in a new tab.
+   * Open Local Bookmarks Index via SW OPEN_BOOKMARKS_INDEX_TAB (create tab + dismiss side panel).
    */
-  handleOpenBookmarksIndex () {
+  async handleOpenBookmarksIndex () {
     recordAction(POPUP_ACTION_IDS.openBookmarksIndex, undefined, 'popup')
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.openBookmarksIndex, payload: undefined })
     try {
-      const url = chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html')
-      chrome.tabs.create({ url })
+      await this.sendMessage({ type: MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX })
       this.uiManager.showSuccess('Bookmarks index opened in new tab')
     } catch (error) {
       this.errorHandler.handleError('Failed to open bookmarks index', error)

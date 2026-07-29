@@ -43,7 +43,7 @@
 | Transparency | Opacity | `defaultTransparencyEnabled`, `defaultBackgroundOpacity` | `updateOverlayTransparency` | overlay |
 | Icon → side panel | Extension icon option | `iconClickOpensSidePanel` | `OPEN_SIDE_PANEL` / `REQUEST_SIDE_PANEL_CLOSE` | [IMPL-ICON_CLICK_BEHAVIOR](../implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml) |
 | Open tags tree | By Tag (footer) | — | `openTagsTree` → `OPEN_SIDE_PANEL` | popup |
-| Open index | Bookmarks index | — | `openBookmarksIndex` | chrome.tabs.create |
+| Open index | Bookmarks index | — | `OPEN_BOOKMARKS_INDEX` / `openBookmarksIndex` | SW `_openBookmarksIndexTab` (tabs.create + `REQUEST_SIDE_PANEL_CLOSE`) |
 | Open import | Browser bookmark import | — | `openBrowserBookmarkImport` | chrome.tabs.create |
 
 ### Overlay action IDs (`OVERLAY_ACTION_IDS`)

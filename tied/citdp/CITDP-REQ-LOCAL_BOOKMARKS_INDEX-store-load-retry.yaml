@@ -1,0 +1,55 @@
+CITDP-REQ-LOCAL_BOOKMARKS_INDEX-store-load-retry:
+  change_definition:
+    current_behavior: "Stores default unchecked (required). First getAggregatedBookmarksForIndex can leave allBookmarks empty (error+[] treated as success); store checkbox change only refilters, so checking L/F/S shows No local, file, or sync bookmarks until full page reload."
+    desired_behavior: "Stores stay default-unchecked. Aggregate error or success:false triggers local fallback even when bookmarks is []. Checking a store when allBookmarks is empty re-runs LOAD_LOCAL_BOOKMARKS_INDEX. SW provider init is serialized for concurrent cold-start messages."
+    non_goals:
+      - "Default-checking any Stores checkbox (REQ UX unchanged)"
+      - "New REQ token"
+      - "Pinboard in the index"
+    success_criteria:
+      - "Cold open → check Local → rows appear without reload when data exists"
+      - "Store change with populated allBookmarks does not refetch"
+      - "Stores still start unchecked"
+      - "{ bookmarks: [], error } triggers local fallback"
+    unchanged_behavior: "Stores default all unchecked; matchStoresFilter empty set shows no rows; filter pipeline otherwise unchanged."
+  completion_criteria:
+    verification_gate_notes: "bookmarks-table-load unit tests pass; tied_validate_consistency ok."
+  impact_analysis:
+    modules_or_boundaries: "bookmarks-table.js loadBookmarks/handleStoreFilterChange; bookmarks-table-load.js; shared/async-init-mutex.js; service-worker ensureBookmarkProviderInitialized; IMPL-LOCAL_BOOKMARKS_INDEX pseudocode; vocab bookmarks-index."
+    tied_tokens_affected:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "none"
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-LOCAL_BOOKMARKS_INDEX-store-load-retry"
+    primary_tokens:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-29"
+    title: "Local Bookmarks Index: recover empty first load on store check"
+  risk_analysis:
+    risks:
+      - id: "R1"
+        description: "Genuine empty store still triggers one extra fetch on first store check"
+        likelihood: "high"
+        mitigation: "Reload only when allBookmarks.length === 0; cheap no-op when empty"
+        residual: "low"
+        severity: "low"
+      - id: "R2"
+        description: "Concurrent loadBookmarks from init and store-change race"
+        likelihood: "medium"
+        mitigation: "Both writes allBookmarks then applySearchAndFilter; last write wins with consistent data"
+        residual: "low"
+        severity: "low"
+  tdd_sequence:
+    summary: "LEAP IMPL pseudocode → RED bookmarks-table-load tests → helpers + page wire + SW mutex → green → CITDP"
+  test_strategy:
+    matrix_notes: "Unit only (bookmarks-table-load.test.js). No E2E; page init() at load blocks composition of bookmarks-table.js itself."
+    summary: "Unit: isAggregatedIndexLoadFailure, shouldReloadBookmarksOnStoreChange, onStoreFilterChange, createProviderInitMutex."

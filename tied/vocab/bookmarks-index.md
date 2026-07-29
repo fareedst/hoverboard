@@ -24,6 +24,7 @@
 | **Use folder names as tags** | folder→tag | Import option mapping folder path to tags |
 | **Import to** | import target | Target backend Local \| File \| Sync |
 | **regex find-and-replace** | bulk replace | Title / URL / Tags / Notes fields on selection |
+| **index-open dismisses side panel** | close sidebar on index | On Local Bookmarks Index **tab create** (popup / command / context menu) only; broadcast `REQUEST_SIDE_PANEL_CLOSE`. Not on index page refresh. Toolbar icon may reopen the **side panel**. |
 
 ---
 
@@ -32,6 +33,7 @@
 | Canonical concept | UI label | Message / API | Storage / format | Code |
 |-------------------|----------|---------------|------------------|------|
 | Index load (local only) | Local Bookmarks Index | `getLocalBookmarksForIndex` | — | bookmarks-table |
+| Open index tab | Bookmarks index | `OPEN_BOOKMARKS_INDEX` | — | SW `_openBookmarksIndexTab` (create + `REQUEST_SIDE_PANEL_CLOSE`) |
 | Aggregated index | Storage column | `getAggregatedBookmarksForIndex` | storage field on row | BookmarkRouter aggregate |
 | Bulk Delete | Delete (Actions for selected) | `deleteBookmark` | `preferredBackend` from row **Storage column** (same bridge as Add tags) | `buildDeletePayload` → BookmarkRouter |
 | Delete status | `#delete-result` | — | pending `Deleting…` / final `Deleted N…` | `bookmarks-table-delete-status` |
@@ -58,7 +60,8 @@
 - **import result pending / final** — Pending: `Importing…` (accepted, warning color). Final: `Imported N…` counts (success color). Same `#import-result` element.
 - **delete result pending / final** — Pending: `Deleting…` (accepted, warning color). Final: `Deleted N…` counts (success color). Same `#delete-result` element next to **Delete**.
 - **Netscape Bookmark File Format** — Interchange HTML with doctype `NETSCAPE-Bookmark-file-1` (see `docs/BOOKMARK_HTML_FORMAT.md`).
-
+- **store-change reload** — When a **Stores (L / F / S)** checkbox changes and `allBookmarks` is empty while at least one store is checked, re-run **LOAD_LOCAL_BOOKMARKS_INDEX** so a failed/empty first fetch can recover without a full page reload.
+- **index-open dismisses side panel** — Creating the Local Bookmarks Index tab via popup, command, or context menu dismisses an already-open **side panel** (`REQUEST_SIDE_PANEL_CLOSE`). Refresh of the index document does not re-dismiss. Options page `href` open does not use this path.
 
 ---
 
@@ -66,7 +69,10 @@
 
 | Preferred term / concept | Procedure / block (existing) | Owning IMPL |
 |--------------------------|------------------------------|-------------|
-| Load index rows | `(proposed) LOAD_LOCAL_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Open index tab + dismiss panel | `OPEN_BOOKMARKS_INDEX_TAB` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Load index rows | `LOAD_LOCAL_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Store-change reload predicate | `shouldReloadBookmarksOnStoreChange` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| SW provider init mutex | `PROVIDER_INIT_MUTEX` / `ensureBookmarkProviderInitialized` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
 | Bulk Delete | `BULK_DELETE` / `runBulkDelete` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
 | Export CSV | `(proposed) EXPORT_BOOKMARKS_CSV` | [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml) |
 | Import records | `(proposed) IMPORT_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) |
@@ -88,10 +94,16 @@
 | Import to | Preferred terms |
 | Import control group | Named concepts |
 | import result pending / final | Named concepts |
+| index-open dismisses side panel | Preferred terms / Named concepts |
 | Local Bookmarks Index | Preferred terms |
+| OPEN_BOOKMARKS_INDEX_TAB | Pseudo-code block names |
 | Netscape Bookmark File Format | Named concepts |
+| PROVIDER_INIT_MUTEX | Pseudo-code block names |
 | regex find-and-replace | Preferred terms |
 | Skip / Overwrite / Merge tags | Named concepts |
 | Storage column | Preferred terms |
 | Stores (L / F / S) | Preferred terms |
+| store-change reload | Named concepts |
+| shouldReloadBookmarksOnStoreChange | Pseudo-code block names |
+| LOAD_LOCAL_BOOKMARKS_INDEX | Pseudo-code block names |
 | Use folder names as tags | Preferred terms |

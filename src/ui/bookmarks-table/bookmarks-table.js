@@ -12,6 +12,11 @@ import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
 import { setTableDisplayStickyHeight } from './bookmarks-table-sticky.js'
 import { setImportResultPending, setImportResultFinal, setImportResultError, formatImportResultMessage } from './bookmarks-table-import-status.js'
 import { runBulkDelete } from './bookmarks-table-bulk-delete.js'
+import {
+  isAggregatedIndexLoadFailure,
+  extractBookmarksList,
+  onStoreFilterChange
+} from './bookmarks-table-load.js'
 
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
@@ -653,14 +658,20 @@ async function runImport (file) {
   if (elements.importFile) elements.importFile.value = ''
 }
 
+/** [IMPL-LOCAL_BOOKMARKS_INDEX] LOAD_LOCAL_BOOKMARKS_INDEX: aggregate; error/success:false even with [] → local fallback. */
 async function loadBookmarks () {
   try {
     const response = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_AGGREGATED })
-    let list = response?.data?.bookmarks ?? response?.bookmarks
-    if (!Array.isArray(list)) {
+    let list = extractBookmarksList(response)
+    // [IMPL-LOCAL_BOOKMARKS_INDEX] Failure includes { bookmarks: [], error } — do not treat [] alone as success when error present
+    if (isAggregatedIndexLoadFailure(response) || !Array.isArray(list)) {
+      console.debug('[IMPL-LOCAL_BOOKMARKS_INDEX] aggregate load failure or non-array; falling back to local', {
+        failure: isAggregatedIndexLoadFailure(response),
+        isArray: Array.isArray(list)
+      })
       const fallback = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_LOCAL })
-      list = fallback?.data?.bookmarks ?? fallback?.bookmarks ?? []
-      list = list.map(b => ({ ...b, storage: 'local' }))
+      list = extractBookmarksList(fallback) ?? []
+      list = (Array.isArray(list) ? list : []).map(b => ({ ...b, storage: 'local' }))
     }
     list = Array.isArray(list) ? list : []
     // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] Merge usage (visits, lastVisited) for Index columns
@@ -684,15 +695,25 @@ async function loadBookmarks () {
   }
 }
 
+/** [IMPL-LOCAL_BOOKMARKS_INDEX] Store change: filter; reload when allBookmarks empty (cold SW recovery). */
+function handleStoreFilterChange () {
+  return onStoreFilterChange({
+    allBookmarksLength: allBookmarks.length,
+    allowedStoresSize: getAllowedStores().size,
+    applySearchAndFilter,
+    loadBookmarks
+  })
+}
+
 function init () {
   elements.searchInput.addEventListener('input', applySearchAndFilter)
   elements.searchClear.addEventListener('click', () => {
     elements.searchInput.value = ''
     applySearchAndFilter()
   })
-  if (elements.storeLocal) elements.storeLocal.addEventListener('change', applySearchAndFilter)
-  if (elements.storeFile) elements.storeFile.addEventListener('change', applySearchAndFilter)
-  if (elements.storeSync) elements.storeSync.addEventListener('change', applySearchAndFilter)
+  if (elements.storeLocal) elements.storeLocal.addEventListener('change', handleStoreFilterChange)
+  if (elements.storeFile) elements.storeFile.addEventListener('change', handleStoreFilterChange)
+  if (elements.storeSync) elements.storeSync.addEventListener('change', handleStoreFilterChange)
   if (elements.filterTags) elements.filterTags.addEventListener('input', applySearchAndFilter)
   if (elements.filterToread) elements.filterToread.addEventListener('change', applySearchAndFilter)
   if (elements.filterPrivate) elements.filterPrivate.addEventListener('change', applySearchAndFilter)

@@ -31,7 +31,7 @@ IMPL-ICON_CLICK_BEHAVIOR:
       - "ConfigManager: getDefaultConfiguration() add iconClickOpensSidePanel: true; mergedConfigSchema add iconClickOpensSidePanel: z.boolean().optional()"
       - "manifest.json: remove action.default_popup (keep default_icon, default_title)"
       - "Options: new control (e.g. checkbox id icon-click-opens-side-panel); loadSettings/saveSettings read and write the key"
-      - "Side panel: _sidePanelLoadTime at script load; bindToggleCloseRequest() listens for REQUEST_SIDE_PANEL_CLOSE; if visibilityState === 'visible' and (now - loadTime) > 300ms then window.close()"
+      - "Side panel: _sidePanelLoadTime at script load; bindToggleCloseRequest() listens for REQUEST_SIDE_PANEL_CLOSE; if visibilityState === 'visible' and (now - loadTime) > 300ms then window.close(). Same message is also sent by OPEN_BOOKMARKS_INDEX_TAB when creating the Local Bookmarks Index tab [IMPL-LOCAL_BOOKMARKS_INDEX]."
       - "SW: _iconClickOpensSidePanel cache; _seedIconClickPreferenceCache() at startup and on storage.onChanged(hoverboard_settings); action.onClicked.addListener((tab) => handleActionClick(tab)); handleActionClick(tab) uses clickedWindowId = tab?.windowId, useWindowId = clickedWindowId ?? cachedWindowId, calls sidePanel.open({ windowId: useWindowId }) synchronously (Chrome user-gesture requirement); when clickedWindowId present and tab URL not restricted, set _sidePanelWindowId = clickedWindowId; then windows.update(useWindowId, { focused: true }), sendMessage(REQUEST_SIDE_PANEL_CLOSE). Cold start (no tab, no cache): tabs.query({ active: true, currentWindow: true }, cb) to seed cache only, action.openPopup() (do not call sidePanel.open in callback—gesture is lost). Commands/context menu/OPEN_SIDE_PANEL use _openSidePanelWithFallback()."
     summary: "manifest.json action has no default_popup; ConfigManager has iconClickOpensSidePanel (default true); options page has toggle; SW caches preference and _sidePanelWindowId; action.onClicked.addListener((tab) => handleActionClick(tab)); handleActionClick(tab) uses clickedWindowId = tab?.windowId, useWindowId = clickedWindowId ?? cachedWindowId, calls sidePanel.open({ windowId: useWindowId }) synchronously; when clickedWindowId is set and tab URL is not restricted, set _sidePanelWindowId = clickedWindowId; cold start (no tab, no cache) seeds cache via tabs.query and openPopup only. Commands/context menu/OPEN_SIDE_PANEL use _openSidePanelWithFallback() (cached or cold-start)."
   metadata:
@@ -40,8 +40,8 @@ IMPL-ICON_CLICK_BEHAVIOR:
       date: "2026-03-02"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Note REQUEST_SIDE_PANEL_CLOSE also used on index open"
   name: "Extension Icon Single-Click Behavior"
   rationale:
     benefits:
@@ -55,6 +55,7 @@ IMPL-ICON_CLICK_BEHAVIOR:
       - "REQ-ICON_CLICK_BEHAVIOR"
     see_also:
       - "IMPL-EXTENSION_COMMANDS"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
     supersedes: []
   status: "Active"
   traceability:

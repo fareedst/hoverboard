@@ -26,6 +26,7 @@ import { browser } from '../shared/safari-shim.js' // [SAFARI-EXT-SHIM-001]
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] Optional message log for testing/debugging
 import * as uiInspector from '../shared/ui-inspector.js'
 import { RecentTagsMemoryManager } from '../features/tagging/recent-tags-memory-manager.js'
+import { createProviderInitMutex } from '../shared/async-init-mutex.js'
 
 /** [IMPL-ICON_CLICK_BEHAVIOR] Chrome does not show side panel when active tab is chrome:// or chrome-extension://. */
 const _isRestrictedForSidePanel = (url) => typeof url === 'string' && (url.startsWith('chrome://') || url.startsWith('chrome-extension://'))
@@ -46,6 +47,8 @@ class HoverboardServiceWorker {
     this.recentTagsMemory = new RecentTagsMemoryManager()
 
     this._providerInitialized = false
+    // [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Serialize cold-start init so concurrent first messages share one in-flight promise
+    this._ensureProviderInitialized = createProviderInitMutex(() => this.initBookmarkProvider())
     // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Cached normal windowId for sidePanel.open(). Implements open-from-popup by keeping a windowId so open() can be called synchronously in onMessage (user gesture requirement: no await before open).
     this._sidePanelWindowId = null
     // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Cached so handleActionClick can call sidePanel.open() synchronously (user gesture requirement: no await before open).
@@ -55,6 +58,15 @@ class HoverboardServiceWorker {
     this.setupEventListeners()
     this._seedSidePanelWindowCache()
     this._seedIconClickPreferenceCache()
+  }
+
+  /**
+   * [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Lazy provider init with mutex (concurrent cold-start safe).
+   * SWITCH_STORAGE_MODE still calls initBookmarkProvider() directly for forced re-init.
+   */
+  async ensureBookmarkProviderInitialized () {
+    if (this._providerInitialized) return
+    await this._ensureProviderInitialized()
   }
 
   /**
@@ -122,6 +134,13 @@ class HoverboardServiceWorker {
       // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] [IMPL-ICON_CLICK_BEHAVIOR] Handle OPEN_SIDE_PANEL; use cached windowId or cold-start fallback. Popup sends this; SW opens side panel.
       if (message.type === MESSAGE_TYPES.OPEN_SIDE_PANEL) {
         this._openSidePanelWithFallback((result) => sendResponse(result))
+        return true
+      }
+
+      // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Popup → SW OPEN_BOOKMARKS_INDEX_TAB (create + dismiss side panel).
+      if (message.type === MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX) {
+        this._openBookmarksIndexTab()
+        sendResponse({ success: true })
         return true
       }
 
@@ -255,10 +274,8 @@ class HoverboardServiceWorker {
       return
     }
     if (command === 'open-bookmarks-index') {
-      const url = getURL('src/ui/bookmarks-table/bookmarks-table.html')
-      if (url && (chromeApi?.tabs?.create || browser.tabs?.create)) {
-        (chromeApi?.tabs ?? browser.tabs).create({ url })
-      }
+      // [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] OPEN_BOOKMARKS_INDEX_TAB
+      this._openBookmarksIndexTab()
       return
     }
     if (command === 'open-import') {
@@ -266,6 +283,26 @@ class HoverboardServiceWorker {
       if (url && (chromeApi?.tabs?.create || browser.tabs?.create)) {
         (chromeApi?.tabs ?? browser.tabs).create({ url })
       }
+    }
+  }
+
+  /**
+   * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] [IMPL-ICON_CLICK_BEHAVIOR]
+   * OPEN_BOOKMARKS_INDEX_TAB: create Local Bookmarks Index tab then dismiss already-open side panel (tab-create only).
+   */
+  _openBookmarksIndexTab () {
+    const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
+    const runtime = chromeApi?.runtime || browser.runtime
+    const getURL = runtime?.getURL ? (path) => runtime.getURL(path) : () => ''
+    const url = getURL('src/ui/bookmarks-table/bookmarks-table.html')
+    const tabsApi = chromeApi?.tabs ?? browser.tabs
+    if (url && tabsApi?.create) {
+      tabsApi.create({ url })
+    }
+    // [IMPL-ICON_CLICK_BEHAVIOR] Cooperative close: panel closes if visible and open long enough.
+    if (runtime?.sendMessage) {
+      const p = runtime.sendMessage({ type: MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE })
+      if (p && typeof p.catch === 'function') p.catch(() => {})
     }
   }
 
@@ -379,10 +416,8 @@ class HoverboardServiceWorker {
         return out
       }
 
-      // [ARCH-LOCAL_STORAGE_PROVIDER] Lazy-init provider from config (storage mode)
-      if (!this._providerInitialized) {
-        await this.initBookmarkProvider()
-      }
+      // [ARCH-LOCAL_STORAGE_PROVIDER] [IMPL-LOCAL_BOOKMARKS_INDEX] Lazy-init provider (mutex for concurrent cold start)
+      await this.ensureBookmarkProviderInitialized()
 
       // [ARCH-LOCAL_STORAGE_PROVIDER] Storage mode switch: re-init provider and respond (no processMessage)
       if (message.type === MESSAGE_TYPES.SWITCH_STORAGE_MODE) {
@@ -755,9 +790,7 @@ class HoverboardServiceWorker {
     if (!config.setIconOnLoad) return undefined
 
     try {
-      if (!this._providerInitialized) {
-        await this.initBookmarkProvider()
-      }
+      await this.ensureBookmarkProviderInitialized()
       const raw = await this.bookmarkProvider.getBookmarkForUrl(tab.url)
       // [IMPL-URL_TAGS_DISPLAY] Normalize so badge and popup use same display contract (tags array)
       const bookmark = normalizeBookmarkForDisplay(raw)
@@ -821,12 +854,16 @@ class HoverboardServiceWorker {
         if (runtime?.openOptionsPage) runtime.openOptionsPage()
         return
       }
-      if (menuId === 'hoverboard-open-bookmarks-index' || menuId === 'hoverboard-open-import') {
+      if (menuId === 'hoverboard-open-bookmarks-index') {
+        // [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] OPEN_BOOKMARKS_INDEX_TAB
+        this._openBookmarksIndexTab()
+        return
+      }
+      if (menuId === 'hoverboard-open-import') {
         const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
         const runtime = chromeApi?.runtime || browser.runtime
         const getURL = runtime?.getURL ? (path) => runtime.getURL(path) : () => ''
-        const path = menuId === 'hoverboard-open-bookmarks-index' ? 'src/ui/bookmarks-table/bookmarks-table.html' : 'src/ui/browser-bookmark-import/browser-bookmark-import.html'
-        const url = getURL(path)
+        const url = getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html')
         if (url && (chromeApi?.tabs?.create || browser.tabs?.create)) (chromeApi?.tabs ?? browser.tabs).create({ url })
       }
     })

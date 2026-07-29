@@ -14,16 +14,16 @@ IMPL-EXTENSION_COMMANDS:
     details:
       - "manifest commands: open-side-panel (no suggested_key), open-side-panel-bookmark (Ctrl+Shift+1), open-side-panel-tags-tree (Ctrl+Shift+2), open-side-panel-browser-tabs (Ctrl+Shift+3), open-options (no suggested_key), open-bookmarks-index (Ctrl+Shift+B), open-import (no suggested_key). Exactly four suggested_key per Chrome limit."
       - "Side panel: chrome.storage.onChanged for SIDE_PANEL_TAB_STORAGE_KEY; on change call switchTab(newValue) so when panel is already open and user triggers tab command, visible tab updates."
-      - "SW handleCommand: open-side-panel: sidePanel.open; open-side-panel-bookmark/tags-tree/browser-tabs: set chrome.storage.local hoverboard_sidepanel_active_tab to 'bookmark'|'tagsTree'|'browserTabs', then sidePanel.open; open-options: openOptionsPage; open-bookmarks-index and open-import: tabs.create with getURL."
-    summary: "manifest.json \"commands\" with open-side-panel, open-side-panel-bookmark, open-side-panel-tags-tree, open-side-panel-browser-tabs, open-options, open-bookmarks-index, open-import. Exactly four commands have suggested_key (Chrome limit): the three side-panel tab commands and open-bookmarks-index; all others have no suggested_key. SW handleCommand switches on command; for tab-specific commands set storage then sidePanel.open; side panel listens for storage.onChanged to switch tab when already open."
+      - "SW handleCommand: open-side-panel: sidePanel.open; open-side-panel-bookmark/tags-tree/browser-tabs: set chrome.storage.local hoverboard_sidepanel_active_tab to 'bookmark'|'tagsTree'|'browserTabs', then sidePanel.open; open-options: openOptionsPage; open-bookmarks-index: OPEN_BOOKMARKS_INDEX_TAB (_openBookmarksIndexTab: tabs.create then REQUEST_SIDE_PANEL_CLOSE); open-import: tabs.create with getURL."
+    summary: "manifest.json commands for quick access; open-bookmarks-index uses OPEN_BOOKMARKS_INDEX_TAB (create + dismiss side panel)."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "open-bookmarks-index calls OPEN_BOOKMARKS_INDEX_TAB"
   name: "Extension Commands for Quick Access"
   rationale:
     benefits:
@@ -37,6 +37,7 @@ IMPL-EXTENSION_COMMANDS:
       - "REQ-QUICK_ACCESS_ENTRY"
     see_also:
       - "IMPL-CONTEXT_MENU_QUICK_ACCESS"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
       - "IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS"
       - "IMPL-SIDE_PANEL_TAGS_TREE"
     supersedes: []

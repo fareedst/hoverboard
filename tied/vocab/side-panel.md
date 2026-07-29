@@ -35,6 +35,7 @@
 | **private indicator** | lock icon, shared=no badge | Per-row Tabs card marker when bookmark `shared` is no (`.browser-tabs-card-toggle-private`) |
 | **post-batch bookmark refresh** | reload bookmark flags | After Set/Clear to-read or Add tags, re-query `getCurrentBookmark` for all tabs (`refreshBookmarkDisplayForAllTabs`) |
 | **window-focus Recent Tags refresh** | focus recent tags reload | On This Page, `windows.onFocusChanged` reloads Recent Tags (vs popup `visibilitychange`) |
+| **index-open dismisses side panel** | close on bookmarks index | See [`bookmarks-index.md`](bookmarks-index.md); SW sends `REQUEST_SIDE_PANEL_CLOSE` when creating the index tab |
 
 ---
 

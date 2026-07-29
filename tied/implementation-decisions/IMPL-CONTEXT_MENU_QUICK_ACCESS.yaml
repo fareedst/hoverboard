@@ -10,18 +10,17 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
   essence_pseudocode_path: "implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS-pseudocode.md"
   implementation_approach:
     details:
-      - "contextMenus.create({ id: 'hoverboard-open-side-panel', parentId: 'hoverboard-root', title: 'Open side panel', contexts: ['all'] }); same for open-options, open-bookmarks-index, open-import with appropriate titles"
-      - "contextMenus.create({ id: 'hoverboard-root', title: 'Hoverboard', contexts: ['all'] })"
-      - onClicked: "switch(info.menuItemId); same logic as handleCommand (sidePanel.open with _sidePanelWindowId, openOptionsPage, tabs.create for index and import). Use browser.contextMenus (or chrome.contextMenus) for cross-browser; guard for undefined."
-    summary: "In SW setupContextMenus(), use browser.contextMenus.create for parent (id e.g. hoverboard-root) and four children with parentId; browser.contextMenus.onClicked.addListener switches on info.menuItemId and performs same four actions. Call setupContextMenus from handleInstall (details.reason === 'install') so menus exist after install; ensure idempotent (remove existing then create, or create with fixed ids so update does not duplicate)."
+      - "onClicked: switch(info.menuItemId); same logic as handleCommand (sidePanel.open with _sidePanelWindowId, openOptionsPage, OPEN_BOOKMARKS_INDEX_TAB for index, tabs.create for import). Use browser.contextMenus (or chrome.contextMenus) for cross-browser; guard for undefined."
+      - "SW setupContextMenus (or init): create parent Hoverboard and four items; onClicked switch on menuItemId and perform same actions as handleCommand."
+    summary: "Parent Hoverboard with four items; hoverboard-open-bookmarks-index uses OPEN_BOOKMARKS_INDEX_TAB (create + REQUEST_SIDE_PANEL_CLOSE)."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Context menu index open uses OPEN_BOOKMARKS_INDEX_TAB"
   name: "Context Menu Quick Access"
   rationale:
     benefits:
@@ -35,7 +34,7 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
       - "REQ-QUICK_ACCESS_ENTRY"
     see_also:
       - "IMPL-EXTENSION_COMMANDS"
-      - "IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
     supersedes: []
   status: "Active"
   traceability:

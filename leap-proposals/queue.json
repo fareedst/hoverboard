@@ -1,0 +1,29 @@
+{
+  "schema_version": "leap-proposal-queue.v1",
+  "proposals": [
+    {
+      "kind": "manual",
+      "title": "Options bookmarks-index href should dismiss side panel",
+      "summary": "Out of scope for REQ-LOCAL_BOOKMARKS_INDEX-dismiss-side-panel-on-open: options page uses a plain href to bookmarks-table.html, so it does not call OPEN_BOOKMARKS_INDEX_TAB and leaves an open side panel visible. Future CITDP: route options open through SW OPEN_BOOKMARKS_INDEX (or click handler) so create+REQUEST_SIDE_PANEL_CLOSE applies consistently.",
+      "source": {
+        "type": "manual"
+      },
+      "suggested_leap_order": "impl",
+      "leap_hints": {
+        "tokens": [
+          "REQ-LOCAL_BOOKMARKS_INDEX",
+          "IMPL-LOCAL_BOOKMARKS_INDEX"
+        ],
+        "files": [
+          "src/ui/options/options.js",
+          "src/ui/options/options.html"
+        ]
+      },
+      "id": "lp-2026-07-29T18-39-51-509Z-33fe64b56887",
+      "status": "pending",
+      "non_canonical": true,
+      "created_at": "2026-07-29T18:39:51.513Z",
+      "updated_at": "2026-07-29T18:39:51.513Z"
+    }
+  ]
+}
