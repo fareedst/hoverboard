@@ -27360,7 +27360,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     title: external_exports.string().optional()
   }).passthrough();
   var deleteBookmarkDataSchema = external_exports.object({
-    url: requiredUrlSchema
+    url: requiredUrlSchema,
+    preferredBackend: external_exports.enum(["pinboard", "local", "file", "sync"]).optional()
   }).strict();
   var saveTagDataSchema = external_exports.object({
     url: requiredUrlSchema,

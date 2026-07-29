@@ -6,6 +6,8 @@ record_identity:
   procedure_token: PROC-AGENT_REQ_CHECKLIST
   procedure_version: v1.0.1
   session_started_date: "2026-03-28"
+  session_completed_date: "2026-07-29"
+  s15_persisted_date: "2026-03-28"
   citdp_record_path: docs/citdp/CITDP-REQ-SIDE_PANEL_BROWSER_TABS-row-indicators-batch-refresh.yaml
   primary_tokens:
     - REQ-SIDE_PANEL_BROWSER_TABS
@@ -32,7 +34,9 @@ change_definition:
     - tied/requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml
     - tied/architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml
     - tied/implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml
+    - tied/implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS-pseudocode.md
     - tied/implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
+    - tied/vocab/side-panel.md
   scope_out:
     - Popup bookmark row display (separate IMPL path)
     - Pinboard API semantics beyond existing bookmark model
@@ -343,7 +347,14 @@ completion_criteria:
 leap_feedback:
   divergences_from_analysis: []
   tied_stack_updates_required: false
-  notes: No production behavior drift vs S07/S08 risk register requiring GOTO S06; IMPL detail yaml_detail_update once corrupted IMPL-SIDE_PANEL_BROWSER_TABS — reverted from git; subsequent TIED edits used surgical file edits + MCP validate.
+  notes: >-
+    No production behavior drift vs S07/S08 risk register requiring GOTO S06;
+    IMPL detail yaml_detail_update once corrupted IMPL-SIDE_PANEL_BROWSER_TABS — reverted from git;
+    subsequent TIED edits used surgical file edits + MCP validate.
+    2026-07-29 LEAP close-loop: IMPL-SIDE_PANEL_BROWSER_TABS-pseudocode.md synced with code —
+    mergeBookmarkReplyIntoTab, buildBookmarkTogglesMarkup (to-read/private indicators),
+    refreshBookmarkDisplayForAllTabs after batch Set/Clear/Add; vocab RECORD in side-panel.md;
+    CHANGELOG product Added for row indicators + post-batch refresh (3.1.0 cut).
 record_status: complete
 s15_persist_record:
   checklist_step: S15

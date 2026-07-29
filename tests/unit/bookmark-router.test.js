@@ -143,6 +143,34 @@ describe('BookmarkRouter [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] 
     expect(backend).toBe(null)
   })
 
+  // [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER] Capture: URL-only delete with wrong index leaves File bookmark
+  test('deleteBookmark without preferredBackend leaves File when index says local [REQ-LOCAL_BOOKMARKS_INDEX]', async () => {
+    const url = 'https://example.com/file-only'
+    await file.saveBookmark({ url, description: 'In file', time: '2026-02-14T12:00:00.000Z' })
+    await storageIndex.setBackendForUrl(url, 'local')
+    const result = await router.deleteBookmark(url)
+    expect(result.success).toBe(true)
+    expect(local.deleteBookmark).toHaveBeenCalledWith(url)
+    expect(file.deleteBookmark).not.toHaveBeenCalled()
+    const remaining = await file.getAllBookmarks()
+    expect(remaining.some(b => b.url === url)).toBe(true)
+  })
+
+  // [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER] preferredBackend overrides index so Index Delete hits File
+  test('deleteBookmark with preferredBackend file removes File bookmark despite local index [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER]', async () => {
+    const url = 'https://example.com/file-pref'
+    await file.saveBookmark({ url, description: 'In file', time: '2026-02-14T12:00:00.000Z' })
+    await storageIndex.setBackendForUrl(url, 'local')
+    const result = await router.deleteBookmark({ url, preferredBackend: 'file' })
+    expect(result.success).toBe(true)
+    expect(file.deleteBookmark).toHaveBeenCalledWith(url)
+    expect(local.deleteBookmark).not.toHaveBeenCalled()
+    const remaining = await file.getAllBookmarks()
+    expect(remaining.some(b => b.url === url)).toBe(false)
+    const backend = await storageIndex.getBackendForUrl(url)
+    expect(backend).toBe(null)
+  })
+
   test('getRecentBookmarks aggregates all four providers [IMPL-BOOKMARK_ROUTER]', async () => {
     await pinboard.saveBookmark({ url: 'https://p.com', description: 'P', time: '2026-02-14T10:00:00.000Z' })
     await local.saveBookmark({ url: 'https://l.com', description: 'L', time: '2026-02-14T11:00:00.000Z' })

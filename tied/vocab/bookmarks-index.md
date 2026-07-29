@@ -6,7 +6,7 @@
 
 **Traceability:** [REQ-LOCAL_BOOKMARKS_INDEX](../requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml) · [REQ-BROWSER_BOOKMARK_IMPORT](../requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml) · [ARCH-LOCAL_BOOKMARKS_INDEX](../architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml) · [ARCH-BROWSER_BOOKMARK_IMPORT](../architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml) · [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) · [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml) · [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) · [IMPL-BROWSER_BOOKMARK_IMPORT](../implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml)
 
-**See also:** [`bookmarks.md`](bookmarks.md) · [`storage-backends.md`](storage-backends.md) · [`side-panel.md`](side-panel.md) · [`domain-references.md`](domain-references.md) · [`../../docs/BOOKMARK_HTML_FORMAT.md`](../../docs/BOOKMARK_HTML_FORMAT.md)
+**See also:** [`bookmarks.md`](bookmarks.md) · [`storage-backends.md`](storage-backends.md) · [`side-panel.md`](side-panel.md) · [`domain-references.md`](domain-references.md) · [`../../docs/BOOKMARK_IMPORT_EXPORT.md`](../../docs/BOOKMARK_IMPORT_EXPORT.md) (which surface for HTML vs rich CSV) · [`../../docs/BOOKMARK_HTML_FORMAT.md`](../../docs/BOOKMARK_HTML_FORMAT.md)
 
 ---
 
@@ -33,8 +33,11 @@
 |-------------------|----------|---------------|------------------|------|
 | Index load (local only) | Local Bookmarks Index | `getLocalBookmarksForIndex` | — | bookmarks-table |
 | Aggregated index | Storage column | `getAggregatedBookmarksForIndex` | storage field on row | BookmarkRouter aggregate |
+| Bulk Delete | Delete (Actions for selected) | `deleteBookmark` | `preferredBackend` from row **Storage column** (same bridge as Add tags) | `buildDeletePayload` → BookmarkRouter |
+| Delete status | `#delete-result` | — | pending `Deleting…` / final `Deleted N…` | `bookmarks-table-delete-status` |
 | Export CSV | Export all / displayed / selected | — | CSV columns Title←`description`, Notes←`extended` | `bookmarks-table-csv` |
-| Import CSV/JSON | Import | — | preferredBackend on save | bookmarks-table import |
+| Import CSV/JSON | Import (control group) | — | preferredBackend on save; pending/final in `#import-result` | bookmarks-table import |
+
 | Browser HTML import | Browser Bookmark Import | — | Netscape HTML | `browser-bookmark-import` |
 | Folder in HTML | Folder | `<H3>` + nested `<DL>` | — | BOOKMARK_HTML_FORMAT |
 | Link in HTML | Bookmark (URL) | `<A HREF>` | `ADD_DATE`, `LAST_MODIFIED` | same |
@@ -51,7 +54,11 @@
 - **Visits / Last Visited** — Usage columns when usage tracking data exists.
 - **Add tags / Delete tags** — Bulk tag ops on selected rows (merge/dedupe case-insensitive).
 - **Skip / Overwrite / Merge tags** — When imported URL already exists: leave alone; replace record; or merge tag sets.
+- **Import control group** — Dedicated fieldset on Local Bookmarks Index (sibling of **Actions for selected**): conflict radios, **Import to**, **Import** button last, then `#import-result`.
+- **import result pending / final** — Pending: `Importing…` (accepted, warning color). Final: `Imported N…` counts (success color). Same `#import-result` element.
+- **delete result pending / final** — Pending: `Deleting…` (accepted, warning color). Final: `Deleted N…` counts (success color). Same `#delete-result` element next to **Delete**.
 - **Netscape Bookmark File Format** — Interchange HTML with doctype `NETSCAPE-Bookmark-file-1` (see `docs/BOOKMARK_HTML_FORMAT.md`).
+
 
 ---
 
@@ -60,6 +67,7 @@
 | Preferred term / concept | Procedure / block (existing) | Owning IMPL |
 |--------------------------|------------------------------|-------------|
 | Load index rows | `(proposed) LOAD_LOCAL_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Bulk Delete | `BULK_DELETE` / `runBulkDelete` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
 | Export CSV | `(proposed) EXPORT_BOOKMARKS_CSV` | [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml) |
 | Import records | `(proposed) IMPORT_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) |
 | Regex replace | `(proposed) REGEX_REPLACE_BOOKMARK_FIELDS` | [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml) |
@@ -72,10 +80,14 @@
 | Term | Section |
 |------|---------|
 | Add tags / Delete tags | Named concepts |
+| Bulk Delete | Pseudo-code block names / Naming bridge |
+| delete result pending / final | Named concepts |
 | Browser Bookmark Import | Preferred terms |
 | export scope | Preferred terms |
 | import conflict policy | Preferred terms |
 | Import to | Preferred terms |
+| Import control group | Named concepts |
+| import result pending / final | Named concepts |
 | Local Bookmarks Index | Preferred terms |
 | Netscape Bookmark File Format | Named concepts |
 | regex find-and-replace | Preferred terms |

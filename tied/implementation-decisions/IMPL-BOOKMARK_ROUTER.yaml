@@ -24,8 +24,8 @@ IMPL-BOOKMARK_ROUTER:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Composition: preferredBackend delete via MessageHandler"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -33,6 +33,7 @@ IMPL-BOOKMARK_ROUTER:
   name: "Bookmark Router"
   rationale:
     benefits:
+      - "deleteBookmark accepts url string or { url, preferredBackend }; Index Delete passes preferredBackend from Storage column (REQ-LOCAL_BOOKMARKS_INDEX)"
       - "getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL"
       - "getRecentBookmarks aggregates pinboard + local + file + sync, sorted by time"
       - "getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI"
@@ -40,7 +41,7 @@ IMPL-BOOKMARK_ROUTER:
     problems_solved:
       - "Save not following highlighted storage when creating bookmark from popup"
       - "Single provider cannot support per-bookmark backends"
-    why: "Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks; save follows popup UI selection when preferredBackend is sent."
+    why: "Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks; save and delete follow preferredBackend when sent (popup Save to / Index Storage column)."
   related_decisions:
     composed_with:
       - "IMPL-FILE_BOOKMARK_SERVICE"
@@ -61,6 +62,7 @@ IMPL-BOOKMARK_ROUTER:
     code_annotations:
       - "IMPL-BOOKMARK_ROUTER"
     requirements:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
       - "REQ-STORAGE_MODE_DEFAULT"

@@ -59,3 +59,6 @@ outcomes:
   sidecars: project IMPL essence on IMPL-*-pseudocode.md (methodology-owned IMPLs unchanged)
   code_tests_docs: legacy numbered IDs replaced; SAFARI-* preserved
   superseded: docs/development/feature-tracking-matrix.md AI-002 marked superseded by TIED 2.2.0
+leap_feedback:
+  record_status: complete
+  notes: TIED 2.2.0 numbered→TIED close-loop completed 2026-07-28; SAFARI-* left unmodified by design.

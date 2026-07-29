@@ -1,6 +1,6 @@
 /**
  * Local Bookmarks Index storage filter logic - [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
- * Pure functions: matchStorageFilter (legacy), matchStoresFilter, time range, exclude tags, delete confirmation message.
+ * Pure functions: matchStorageFilter (legacy), matchStoresFilter, time range, exclude tags, delete confirmation message, buildDeletePayload.
  * Add tags: [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] parseTagsInput, mergeTags, buildAddTagsPayload, removeTags, buildRemoveTagsPayload.
  * Regex replace: [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] applyRegexReplace.
  * Time column integration: formatters used by index for Time column display.
@@ -22,6 +22,7 @@ import {
   buildAddTagsPayload,
   removeTags,
   buildRemoveTagsPayload,
+  buildDeletePayload,
   buildAddTagsConfirmMessage,
   buildRemoveTagsConfirmMessage,
   selectionStillVisible,
@@ -469,6 +470,34 @@ describe('bookmark count at bottom of page [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
   })
 })
 
+describe('Delete selected status UI [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]', () => {
+  test('index HTML has delete-result after delete-selected-btn with aria-live', () => {
+    const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    expect(html).toContain('id="delete-selected-btn"')
+    expect(html).toContain('id="delete-result"')
+    expect(html).toContain('class="delete-result"')
+    const btnPos = html.indexOf('id="delete-selected-btn"')
+    const resultPos = html.indexOf('id="delete-result"')
+    expect(resultPos).toBeGreaterThan(btnPos)
+    expect(html).toMatch(/id="delete-result"[^>]*aria-live="polite"/)
+  })
+})
+
+describe('Import result status UI [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT]', () => {
+  test('index HTML has import-result after import-trigger with aria-live', () => {
+    const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
+    const html = fs.readFileSync(htmlPath, 'utf8')
+    expect(html).toContain('id="import-trigger"')
+    expect(html).toContain('id="import-result"')
+    expect(html).toContain('class="import-result"')
+    const btnPos = html.indexOf('id="import-trigger"')
+    const resultPos = html.indexOf('id="import-result"')
+    expect(resultPos).toBeGreaterThan(btnPos)
+    expect(html).toMatch(/id="import-result"[^>]*aria-live="polite"/)
+  })
+})
+
 describe('Add tags to selected UI [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]', () => {
   test('index HTML has add-tags row with label, input and Add tags / Delete tags buttons in Actions for selected', () => {
     const htmlPath = path.join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.html')
@@ -536,6 +565,24 @@ describe('mergeTags [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_I
 
   test('preserves existing casing and appends new', () => {
     expect(mergeTags(['Work'], ['Dev'])).toEqual(['Work', 'Dev'])
+  })
+})
+
+describe('buildDeletePayload [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]', () => {
+  test('returns null when bookmark is null or missing url', () => {
+    expect(buildDeletePayload(null)).toBe(null)
+    expect(buildDeletePayload({})).toBe(null)
+    expect(buildDeletePayload({ description: 'No URL' })).toBe(null)
+  })
+
+  test('returns url and preferredBackend from bookmark.storage', () => {
+    const payload = buildDeletePayload({ url: 'https://example.com', storage: 'file', description: 'Ex' })
+    expect(payload).toEqual({ url: 'https://example.com', preferredBackend: 'file' })
+  })
+
+  test('defaults preferredBackend to local when storage missing', () => {
+    const payload = buildDeletePayload({ url: 'https://example.com' })
+    expect(payload).toEqual({ url: 'https://example.com', preferredBackend: 'local' })
   })
 })
 

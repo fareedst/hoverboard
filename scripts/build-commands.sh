@@ -19,3 +19,17 @@ export ECHO_EXEC_TIME_UTC='%H:%M:%S'
 
 alias bi='bkpdir inc'
 alias b.='bkpdir .'
+
+# Hoverboard
+
+# Install dependencies
+alias ni='bun install'
+
+# Build the extension
+alias nb='bun run build:dev'
+
+# Run tests
+alias nt='bun test'
+
+# Start development mode with hot reload
+alias nr='bun run dev'

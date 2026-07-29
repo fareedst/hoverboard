@@ -39,9 +39,10 @@ export const saveBookmarkDataSchema = z.object({
   title: z.string().optional()
 }).passthrough()
 
-// deleteBookmark: data.url required
+// deleteBookmark: data.url required; optional preferredBackend for Index Delete [REQ-LOCAL_BOOKMARKS_INDEX]
 export const deleteBookmarkDataSchema = z.object({
-  url: requiredUrlSchema
+  url: requiredUrlSchema,
+  preferredBackend: z.enum(['pinboard', 'local', 'file', 'sync']).optional()
 }).strict()
 
 // saveTag: url and value (tag name) required

@@ -31,6 +31,8 @@ This directory contains comprehensive documentation for the Hoverboard browser e
 
 ### 📚 **Reference Materials**
 - **[Reference Documentation](reference/README.md)** - Context, requirements, and specifications
+- **[Bookmark import/export](BOOKMARK_IMPORT_EXPORT.md)** - Index CSV vs Netscape HTML vs Browser Bookmark Import
+- **[Netscape Bookmark HTML format](BOOKMARK_HTML_FORMAT.md)** - `NETSCAPE-Bookmark-file-1` interchange spec
 
 ### 📝 **Development Sessions**
 - **[Session Logs](development-sessions/README.md)** - Development session documentation and AI interactions

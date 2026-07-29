@@ -124,7 +124,7 @@
       </table>
     </div>
 
-    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Actions for selected: export, move, delete, import -->
+    <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Actions for selected: export, move, delete, tags, regex -->
     <fieldset class="actions-below-table actions-group" aria-labelledby="actions-legend">
       <legend id="actions-legend" class="group-legend">Actions for selected</legend>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Export below table -->
@@ -145,6 +145,8 @@
       </div>
       <div class="delete-row">
         <button type="button" id="delete-selected-btn" class="btn btn-secondary btn-sm btn-danger" title="Delete selected bookmarks" aria-label="Delete selected bookmarks" disabled>Delete</button>
+        <!-- [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Pending/final status (mirrors #import-result) -->
+        <span id="delete-result" class="delete-result" aria-live="polite"></span>
       </div>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] Add tags / Delete tags to selected (same textbox) -->
       <div class="add-tags-row">
@@ -168,10 +170,13 @@
         <button type="button" id="regex-replace-btn" class="btn btn-secondary btn-sm" title="Run regex replace on selected bookmarks" aria-label="Replace in selected bookmarks" disabled>Replace</button>
         <span id="regex-replace-error" class="regex-replace-error hidden" aria-live="polite"></span>
       </div>
-      <!-- [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import from file -->
+    </fieldset>
+
+    <!-- [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Import control group: mode, Import to, Import last, result -->
+    <fieldset class="actions-below-table actions-group" aria-labelledby="import-legend">
+      <legend id="import-legend" class="group-legend">Import</legend>
       <div class="import-row">
-        <input type="file" id="import-file" accept=".csv,.json" style="display: none;" aria-label="Choose CSV or JSON file to import">
-        <button type="button" id="import-trigger" class="btn btn-secondary btn-sm" title="Import bookmarks from CSV or JSON file" aria-label="Import bookmarks">Import</button>
+        <input type="file" id="import-file" accept=".csv,.json" style="display: none;" aria-label="Choose Hoverboard CSV or JSON file to import (Title, URL, Tags, …)">
         <fieldset class="import-mode-fieldset" aria-label="Import mode">
           <label class="import-mode-label">
             <input type="radio" name="import-mode" value="only-new" checked>
@@ -188,6 +193,7 @@
           <option value="file">File</option>
           <option value="sync">Sync</option>
         </select>
+        <button type="button" id="import-trigger" class="btn btn-secondary btn-sm" title="Import Hoverboard CSV/JSON into Local, File, or Sync (not Netscape HTML — use side panel Bookmarks for HTML)" aria-label="Import bookmarks from CSV or JSON">Import</button>
         <span id="import-result" class="import-result" aria-live="polite"></span>
       </div>
     </fieldset>

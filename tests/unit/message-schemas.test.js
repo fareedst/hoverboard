@@ -132,6 +132,17 @@ describe('[IMPL-RUNTIME_VALIDATION] deleteBookmark data', () => {
     const result = validateMessageData('deleteBookmark', {})
     expect(result.success).toBe(false)
   })
+  // [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-RUNTIME_VALIDATION] Index Delete sends preferredBackend from Storage column
+  test('accepts optional preferredBackend file|local|sync|pinboard', () => {
+    for (const preferredBackend of ['file', 'local', 'sync', 'pinboard']) {
+      const result = validateMessageData('deleteBookmark', { url: 'https://example.com', preferredBackend })
+      expect(result.success).toBe(true)
+    }
+  })
+  test('rejects invalid preferredBackend', () => {
+    const result = validateMessageData('deleteBookmark', { url: 'https://example.com', preferredBackend: 'cloud' })
+    expect(result.success).toBe(false)
+  })
 })
 
 describe('[IMPL-RUNTIME_VALIDATION] saveTag data', () => {

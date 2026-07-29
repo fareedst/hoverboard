@@ -5,21 +5,21 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
       pros: "Single round-trip for large files"
       rejected_reason: "Deferred; can add later if needed"
   cross-references: "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT, IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
-  cross_references: &ref_0
+  cross_references:
     - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
   decision: "Import is client-side: parse file (CSV/JSON), map to bookmark payload, use existing saveBookmark with preferredBackend; two modes (only new vs overwrite). No new backend message."
   detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
   implementation_approach:
     details: []
-    summary: "Import is implemented **entirely on the index page** (client-side). User selects a file (CSV or JSON). CSV is parsed to match export format (Title, URL, Tags, Time, Storage, Shared, To read, Notes). No new background message: each record is sent via existing **saveBookmark** with **preferredBackend** (Import to: Local | File | Sync). \"Import only new\" filters out URLs already present in allBookmarks before sending; \"Import and overwrite\" sends all. Backend saveBookmark already upserts by URL."
+    summary: "Import is implemented entirely on the index page in a dedicated Import fieldset (sibling of Actions for selected). Control order: conflict radios, Import to, Import button last, #import-result. User selects a file (CSV or JSON). CSV matches export format including Time and Updated. Each record is sent via existing saveBookmark with preferredBackend. Create path preserves payload time/updated_at [ARCH-BOOKMARK_CREATE_UPDATE_TIMES]. Only new filters allBookmarks; overwrite upserts. UI shows Importing… then final counts."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "New architecture for import UX"
+      date: "2026-07-29"
+      reason: "Import control group + create-time preserve via saveBookmark"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -47,7 +47,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
       - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
   status: "Active"
-  summary: "Import is client-side: parse CSV/JSON (export format), send each record via saveBookmark with preferredBackend; \"only new\" skips URLs in allBookmarks; \"overwrite\" sends all. No new backend message."
+  summary: "Import is client-side in a dedicated Import control group: parse CSV/JSON (export format), send each record via saveBookmark with preferredBackend; only-new skips URLs in allBookmarks; overwrite sends all. Pending then final result in #import-result. No new backend message."
   traceability:
     code_annotations:
       - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
@@ -56,4 +56,5 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
     requirements:
       - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
     tests:
+      - "tests/unit/bookmarks-table-import-status.test.js"
       - "tests/unit/bookmarks-table-import.test.js"

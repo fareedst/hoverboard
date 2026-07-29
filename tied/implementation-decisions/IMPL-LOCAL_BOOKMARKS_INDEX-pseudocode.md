@@ -22,6 +22,27 @@ applySearchAndFilter():
   SORT by sortKey (e.g. time desc)
   renderTableBody(filteredBookmarks); updateRowCount()
 
+# [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER]
+# Bulk Delete uses row Storage column as preferredBackend; pending/final #delete-result mirrors Import status UX.
+# Orchestrator: runBulkDelete (bookmarks-table-bulk-delete.js) for composition-testable wiring.
+BULK_DELETE:
+  IF selectedUrls empty: RETURN
+  runBulkDelete(urls, bookmarksByUrl, sendMessage, confirmFn, #delete-result, onAfterDelete):
+    titles = descriptions for selected URLs from bookmarksByUrl
+    IF NOT confirmFn(buildDeleteConfirmMessage(count, titles)): RETURN cancelled
+    setDeleteResultPending(#delete-result)  # "Deleting…" warning color
+    FOR each url IN urls:
+      bookmark = lookup url in bookmarksByUrl
+      payload = buildDeletePayload(bookmark)  # { url, preferredBackend from storage }
+      SEND deleteBookmark with data = payload
+      COUNT ok / fail from response
+    onAfterDelete()  # CLEAR selectedUrls; loadBookmarks(); updateMoveControlsState()
+    setDeleteResultFinal(#delete-result, formatDeleteResultMessage({ deleted: ok, failed: fail }))
+
+# buildDeletePayload(bookmark):
+  IF bookmark missing or no url: RETURN null
+  RETURN { url: bookmark.url, preferredBackend: lowercase(bookmark.storage) OR "local" }
+
 # Popup button and options link open bookmarks-table tab.
 Entry points:
   Popup: bookmarksIndexBtn click -> openBookmarksIndex -> open tab to bookmarks-table.html

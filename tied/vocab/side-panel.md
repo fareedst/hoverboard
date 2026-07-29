@@ -31,6 +31,10 @@
 | **Close tab** | ✕ close | Actually close the browser tab |
 | **importantTagSources** | Elements sources | Comma-separated DOM sources for Elements search |
 | **no-match UX** | empty search feedback | Border feedback; preserve scroll in side panel |
+| **to-read indicator** | read-later icon, toread badge | Per-row Tabs card marker when bookmark `toread` is yes (`.browser-tabs-card-toggle-toread`) |
+| **private indicator** | lock icon, shared=no badge | Per-row Tabs card marker when bookmark `shared` is no (`.browser-tabs-card-toggle-private`) |
+| **post-batch bookmark refresh** | reload bookmark flags | After Set/Clear to-read or Add tags, re-query `getCurrentBookmark` for all tabs (`refreshBookmarkDisplayForAllTabs`) |
+| **window-focus Recent Tags refresh** | focus recent tags reload | On This Page, `windows.onFocusChanged` reloads Recent Tags (vs popup `visibilitychange`) |
 
 ---
 
@@ -60,6 +64,9 @@
 - **data-popup-ref** — Attribute bridging shared This Page / popup controls.
 - **TabSearchService** — `searchAndNavigate` / `findNextTab` with circular wrap; `lastSearchText`, `searchHistory`.
 - **Restore** — Reopen a recently closed tab from the Tabs panel.
+- **to-read / private indicators** — Inline Tabs-row flags from bookmark state after `mergeBookmarkReplyIntoTab`.
+- **post-batch bookmark refresh** — Re-apply bookmark tags/flags to all tab rows after batch bookmark actions.
+- **window-focus Recent Tags refresh** — This Page reloads Recent Tags when the hosting browser window regains focus.
 
 ---
 
@@ -69,6 +76,9 @@
 |--------------------------|------------------------------|-------------|
 | Active tab persist | `(proposed) PERSIST_SIDE_PANEL_TAB` | [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) |
 | Browser tabs list | `(proposed) LOAD_BROWSER_TABS_PANEL` | [IMPL-SIDE_PANEL_BROWSER_TABS](../implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml) |
+| Merge bookmark into tab row | `mergeBookmarkReplyIntoTab` | [IMPL-SIDE_PANEL_BROWSER_TABS](../implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml) |
+| Post-batch bookmark refresh | `refreshBookmarkDisplayForAllTabs` | [IMPL-SIDE_PANEL_BROWSER_TABS](../implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml) |
+| Window-focus Recent Tags | `bindWindowFocusRecentTagsRefresh` / `shouldInvokeLoadRecentTagsOnWindowFocusSync` | [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) |
 | Recently closed | `(proposed) GET_RECENTLY_CLOSED_TABS` | [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS](../implementation-decisions/IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml) |
 | Tags tree | `(proposed) RENDER_TAGS_TREE` | [IMPL-SIDE_PANEL_TAGS_TREE](../implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml) |
 | Tab search navigate | `searchAndNavigate` / `findNextTab` | [IMPL-TAB_SEARCH_SERVICE](../implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml) |
@@ -86,8 +96,11 @@
 | Gather into this window | Preferred terms |
 | importantTagSources | Preferred terms |
 | list display mode | Preferred terms |
+| mergeBookmarkReplyIntoTab | Pseudo-code block names |
 | no-match UX | Preferred terms |
 | One window per tab | Preferred terms |
+| post-batch bookmark refresh | Preferred terms |
+| private indicator | Preferred terms |
 | Remove from list | Preferred terms |
 | search scope | Preferred terms |
 | side panel | Preferred terms |
@@ -95,5 +108,7 @@
 | Tabs (panel) | Preferred terms |
 | TabSearchService | Named concepts |
 | This Page | Preferred terms |
+| to-read indicator | Preferred terms |
 | Usage (panel) | Preferred terms |
+| window-focus Recent Tags refresh | Preferred terms |
 | window scope | Preferred terms |

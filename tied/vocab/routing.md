@@ -25,7 +25,7 @@
 | 7 | [bookmarks.md](bookmarks.md) | pin, bookmark, description/extended/shared/toread, Read Later, Private, badge display, BOOKMARK_UPDATED, usage tracking, Pinboard API |
 | 7b | [bookmarks-index.md](bookmarks-index.md) | Local Bookmarks Index, export scope, Skip/Overwrite/Merge, Browser Bookmark Import, Netscape Bookmark File Format, regex replace |
 | 8 | [tags.md](tags.md) | Current/Recent/Suggested/Session tags, sanitizeTag, Sort tags, Frequency/Relevance, Tag with AI, Readability, selection to tag input |
-| 9 | [side-panel.md](side-panel.md) | side panel, This Page, By Tag, Tabs, Bookmarks panel, Usage panel, recently closed, tab search scopes, gather/distribute |
+| 9 | [side-panel.md](side-panel.md) | side panel, This Page, By Tag, Tabs, Bookmarks panel, Usage panel, recently closed, tab search scopes, gather/distribute, to-read/private indicator, post-batch bookmark refresh, window-focus Recent Tags refresh |
 | 10 | [ui-surfaces.md](ui-surfaces.md) | overlay, Show Hover, popup, theme, badge, quick access, icon click, OVERLAY_ACTION_IDS, POPUP_ACTION_IDS |
 | 11 | [ipc-messaging.md](ipc-messaging.md) | MESSAGE_TYPES, processMessage, service worker, CONTENT_MESSAGE_TYPES, POPUP_ACTION_TO_MESSAGE, OPEN_SIDE_PANEL |
 | 12 | [config-and-privacy.md](config-and-privacy.md) | ConfigManager, hoverboard_settings, inhibit URL, site management, feature flags, AI API key, storage mode |

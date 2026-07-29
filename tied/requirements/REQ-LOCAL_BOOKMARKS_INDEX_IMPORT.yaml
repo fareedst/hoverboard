@@ -10,8 +10,8 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "New requirement for import UX"
+      date: "2026-07-29"
+      reason: "Import control group UX and create-time preserve"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -35,11 +35,13 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
       - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
     supersedes: []
   satisfaction_criteria:
+    - criterion: "Import UI is a dedicated control group; Import button is last; #import-result shows pending then final counts."
     - criterion: "Import uses existing saveBookmark message; no new backend API."
+    - criterion: "On create, imported Time and Updated are retained when present in the file."
     - criterion: "User can choose to import only new records (skip URLs already in index) or import and overwrite existing records."
     - criterion: "User can select a file (CSV or JSON in export format) and target storage (Local | File | Sync)."
   status: "Implemented"
-  summary: "From the Local Bookmarks Index page, the user can import bookmarks from a CSV or JSON file. Two modes: Import only new (skip URLs already in the index) and Import and overwrite existing. Optional Import to target (Local | File | Sync). Uses existing saveBookmark message; result message shows imported, skipped, and failed counts."
+  summary: "From the Local Bookmarks Index page Import control group, the user can import bookmarks from a CSV or JSON file. Two modes: Import only new (skip URLs already in the index) and Import and overwrite existing. Import to target (Local | File | Sync). Import button is the final trigger; UI shows pending then imported/skipped/failed counts. New records retain Time and Updated from the file when present. Uses existing saveBookmark message."
   traceability:
     architecture:
       - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
@@ -48,7 +50,9 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
     implementation:
       - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
     tests:
+      - "tests/unit/bookmarks-table-import-status.test.js"
       - "tests/unit/bookmarks-table-import.test.js"
+      - "tests/unit/local-bookmark-service.test.js"
   validation_criteria:
     - method: "Manual verification and unit tests"
       coverage: "Parse CSV/JSON; only-new vs overwrite behavior; result message (imported, skipped, failed)."

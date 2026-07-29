@@ -96,6 +96,57 @@ describe('LocalBookmarkService [ARCH-LOCAL_STORAGE_PROVIDER] [IMPL-LOCAL_BOOKMAR
     expect(afterSecond.updated_at).not.toBe(createTime)
   })
 
+  test('create with payload time/updated_at preserves them [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]', async () => {
+    const time = '2024-06-15T10:00:00.000Z'
+    const updatedAt = '2024-06-16T11:00:00.000Z'
+    await service.saveBookmark({
+      url: 'https://example.com/import-times',
+      description: 'Imported',
+      tags: [],
+      time,
+      updated_at: updatedAt
+    })
+    const b = await service.getBookmarkForUrl('https://example.com/import-times')
+    expect(b.time).toBe(time)
+    expect(b.updated_at).toBe(updatedAt)
+  })
+
+  test('create with only time sets updated_at to time [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]', async () => {
+    const time = '2024-03-01T08:00:00.000Z'
+    await service.saveBookmark({
+      url: 'https://example.com/import-time-only',
+      description: 'Imported',
+      tags: [],
+      time
+    })
+    const b = await service.getBookmarkForUrl('https://example.com/import-time-only')
+    expect(b.time).toBe(time)
+    expect(b.updated_at).toBe(time)
+  })
+
+  test('overwrite update ignores payload times and bumps updated_at [REQ-BOOKMARK_CREATE_UPDATE_TIMES]', async () => {
+    await service.saveBookmark({
+      url: 'https://example.com/ow',
+      description: 'First',
+      tags: [],
+      time: '2020-01-01T00:00:00.000Z',
+      updated_at: '2020-01-02T00:00:00.000Z'
+    })
+    const afterFirst = await service.getBookmarkForUrl('https://example.com/ow')
+    await new Promise(r => setTimeout(r, 5))
+    await service.saveBookmark({
+      url: 'https://example.com/ow',
+      description: 'Overwrite',
+      tags: ['x'],
+      time: '1999-01-01T00:00:00.000Z',
+      updated_at: '1999-01-02T00:00:00.000Z'
+    })
+    const afterSecond = await service.getBookmarkForUrl('https://example.com/ow')
+    expect(afterSecond.time).toBe(afterFirst.time)
+    expect(afterSecond.updated_at).not.toBe(afterFirst.updated_at)
+    expect(afterSecond.updated_at).not.toBe('1999-01-02T00:00:00.000Z')
+  })
+
   test('legacy bookmark without updated_at normalizes updated_at to time [REQ-BOOKMARK_CREATE_UPDATE_TIMES]', async () => {
     stored['https://example.com/legacy'] = {
       url: 'https://example.com/legacy',

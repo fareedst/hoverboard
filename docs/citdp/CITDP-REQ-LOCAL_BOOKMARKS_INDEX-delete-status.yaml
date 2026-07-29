@@ -1,0 +1,47 @@
+CITDP-REQ-LOCAL_BOOKMARKS_INDEX-delete-status:
+  record_identity:
+    change_request_id: "REQ-LOCAL_BOOKMARKS_INDEX-delete-status"
+    title: "Local Bookmarks Index: Delete pending/final status like Import"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-29"
+    primary_tokens:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+  change_definition:
+    current_behavior: "Bulk Delete confirmed via dialog; progress/result only via console.warn on failures."
+    desired_behavior: "After confirm, #delete-result shows Deleting… (pending/warning); after loop, Deleted N… (final/success), mirroring #import-result."
+    non_goals:
+      - "Status for Move / Add tags / Delete tags / Regex"
+      - "Changing confirm dialog or File-delete routing"
+    success_criteria:
+      - "Pending Deleting… after confirm"
+      - "Final Deleted N. / Deleted N, M failed."
+      - "Cancel confirm leaves status unchanged"
+    unchanged_behavior: "Confirm dialog; preferredBackend delete payload; selection clear and table refresh."
+  impact_analysis:
+    modules_or_boundaries: "bookmarks-table HTML/CSS/JS; bookmarks-table-delete-status; bookmarks-table-bulk-delete (runBulkDelete); IMPL BULK_DELETE; vocab."
+    tied_tokens_affected:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    tied_tokens_new: []
+  risk_analysis:
+    risks:
+      - id: "R1"
+        description: "Long deletes leave pending text if loadBookmarks throws before final"
+        severity: "low"
+        likelihood: "low"
+        mitigation: "Final set after onAfterDelete; existing per-URL try/catch"
+        residual: "low"
+  test_strategy:
+    summary: "Unit tests for delete-status helpers and HTML #delete-result; composition for runBulkDelete pending/final/cancel."
+    matrix_notes: "Unit + composition (bookmarks-table-bulk-delete-composition.integration.test.js). No E2E."
+  tdd_sequence:
+    summary: "RED status helpers + HTML → LEAP BULK_DELETE → module/HTML/CSS/wire → extract runBulkDelete → composition → green → CITDP"
+  leap_feedback:
+    divergences_from_analysis: "2026-07-29: runBulkDelete extracted; composition covers cancel/pending/final preferredBackend wiring."
+    record_status: "complete"
+    tied_stack_updates_required: []
+  completion_criteria:
+    verification_gate_notes: "bookmarks-table-delete-status unit + bulk-delete composition tests pass; tied_validate_consistency ok."

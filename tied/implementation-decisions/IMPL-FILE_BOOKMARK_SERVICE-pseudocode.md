@@ -16,19 +16,24 @@ getBookmarkForUrl(url):
   urlNorm = normalize(url)
   RETURN bookmarks[urlNorm] or null
 
+# [IMPL-FILE_BOOKMARK_SERVICE] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE]
+# Persist via adapter; MessageFileBookmarkAdapter requires WRITE_FILE_BOOKMARKS response.success === true.
+writeViaAdapter(data):
+  adapter.writeBookmarksFile(data)  # production: reject unless response.success === true
+
 # Merge data into bookmark shape and write file.
 saveBookmark(data):
   bookmarks = LOAD bookmarks from file
   urlNorm = normalize(data.url)
   bookmarks[urlNorm] = merge(data into bookmark shape with url, description, extended, tags, time, shared, toread, hash)
-  adapter.writeBookmarksFile({ version: 1, bookmarks })
+  writeViaAdapter({ version: 1, bookmarks })
   RETURN { success: true }
 
 # Remove by normalized URL and write file.
 deleteBookmark(url):
   bookmarks = LOAD bookmarks from file
   REMOVE bookmarks[normalize(url)]
-  adapter.writeBookmarksFile({ version: 1, bookmarks })
+  writeViaAdapter({ version: 1, bookmarks })
   RETURN { success: true }
 
 # Update tags on bookmark and persist.

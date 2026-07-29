@@ -17,7 +17,7 @@
 | **storage backend** | storage method, provider name (alone) | One of `pinboard` \| `local` \| `file` \| `sync` |
 | **storage index** | backend map, URL→backend table | Key `hoverboard_storage_index`; maps URL → backend |
 | **BookmarkRouter** | storage router, aggregator (alone) | Delegates get/save/delete/tag/move across providers |
-| **preferredBackend** | selected backend, UI backend | Save-time override from **Save to** highlight |
+| **preferredBackend** | selected backend, UI backend | Override on save (**Save to**) and Index **Bulk Delete** (row Storage column via `buildDeletePayload`) |
 | **default storage mode** | global storage mode | Config `storageMode` / key `hoverboard_storage_mode` |
 | **Save to** | storage picker, backend buttons | UI label for per-bookmark backend selection |
 | **move bookmark to storage** | migrate bookmark, copy backend | Copy to target, delete source, update index |
@@ -34,7 +34,7 @@
 |-------------------|----------|----------------------|-----------------|------|
 | Default backend | Storage Mode | `hoverboard_storage_mode`, `storageMode` | `pinboard`\|`local`\|`file`\|`sync` | [REQ-STORAGE_MODE_DEFAULT](../requirements/REQ-STORAGE_MODE_DEFAULT.yaml) |
 | Per-URL backend map | Storage column (index) | `hoverboard_storage_index` | `StorageIndex` | [IMPL-STORAGE_INDEX](../implementation-decisions/IMPL-STORAGE_INDEX.yaml) |
-| Save-time override | Save to (highlight) | — | `preferredBackend`, `data-backend` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
+| Save / delete override | Save to (highlight); Index Bulk Delete | — | `preferredBackend` on `saveBookmark` / `deleteBookmark` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
 | Pinboard cloud | Pinboard | auth via `hoverboard_auth_token` | provider `pinboard` | [IMPL-PINBOARD_API](../implementation-decisions/IMPL-PINBOARD_API.yaml) |
 | Local offline | Local | `hoverboard_local_bookmarks` | provider `local` | [IMPL-LOCAL_BOOKMARK_SERVICE](../implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml) |
 | File via native host | File | `hoverboard_file_storage_path`, `hoverboard-bookmarks.json` | provider `file` | [IMPL-FILE_BOOKMARK_SERVICE](../implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml) |
@@ -50,7 +50,7 @@
 - **storage index** — `chrome.storage.local` map URL → backend under key `hoverboard_storage_index`.
 - **BookmarkRouter** — Facade: resolve provider, delegate CRUD/tag ops, aggregate `getRecentBookmarks`, perform `moveBookmarkToStorage`.
 - **resolveProvider** — Order: valid `preferredBackend` → index `getBackendForUrl` → `defaultStorageMode`.
-- **preferredBackend** — Field on save payload so **save follows highlight** of the Save to control.
+- **preferredBackend** — Field on save and delete payloads so resolve uses the intended backend before the storage index: **Save to** highlight on save; Local Bookmarks Index **Bulk Delete** from the row Storage column (`buildDeletePayload`). Same resolve order as save (`preferredBackend` → index → default).
 - **defaultStorageMode** — Global default when URL not in index; config default is `local`.
 - **moveBookmarkToStorage** — Get from source → ensure `time` → save to target → delete source → `setBackendForUrl`.
 - **hoverboard-bookmarks.json** — Filename written inside the File storage directory.
@@ -66,6 +66,7 @@
 |--------------------------|------------------------------|-------------|
 | Resolve provider | `resolveProvider` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
 | Save with preferred backend | `saveBookmark` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
+| Delete with preferred backend | `deleteBookmark` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
 | Aggregate recent | `getRecentBookmarks` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
 | Move between backends | `moveBookmarkToStorage` | [IMPL-BOOKMARK_ROUTER](../implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml) |
 | Index get/set | `getBackendForUrl` / `setBackendForUrl` | [IMPL-STORAGE_INDEX](../implementation-decisions/IMPL-STORAGE_INDEX.yaml) |
@@ -80,6 +81,7 @@
 |------|---------|
 | BookmarkRouter | Named concepts |
 | default storage mode | Preferred terms |
+| Delete with preferred backend | Pseudo-code block names |
 | File storage | Preferred terms |
 | hoverboard-bookmarks.json | Named concepts |
 | Local storage (backend) | Preferred terms |

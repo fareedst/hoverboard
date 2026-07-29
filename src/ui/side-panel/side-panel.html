@@ -206,11 +206,11 @@
           <button type="button" id="browserBookmarksExportAllCsvBtn" class="button secondary" title="Export all bookmarks as CSV" aria-label="Export all CSV">Export all CSV</button>
         </div>
       </section>
-      <!-- [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] Import HTML/CSV -->
-      <section class="browser-bookmarks-section-import browser-bookmarks-section" aria-label="Import">
+      <!-- [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] Import HTML/CSV into Chrome bookmark tree (not Hoverboard Index CSV) -->
+      <section class="browser-bookmarks-section-import browser-bookmarks-section" aria-label="Import into browser bookmarks">
         <div class="browser-bookmarks-control-group">
           <label for="browserBookmarksImportFolderSelect" class="browser-bookmarks-label">Import to folder</label>
-          <select id="browserBookmarksImportFolderSelect" class="browser-bookmarks-import-folder-select" aria-label="Target folder for import" title="Folder to import bookmarks into">
+          <select id="browserBookmarksImportFolderSelect" class="browser-bookmarks-import-folder-select" aria-label="Target folder for import" title="Chrome folder to import bookmarks into">
             <option value="1">Bookmarks Bar</option>
           </select>
           <label for="browserBookmarksConflictMode" class="browser-bookmarks-label">Conflict</label>
@@ -220,8 +220,8 @@
           </select>
         </div>
         <div class="browser-bookmarks-control-group">
-          <input type="file" id="browserBookmarksImportFileInput" class="browser-bookmarks-import-file-input" accept=".html,.htm,.csv,text/html,text/csv" aria-label="Choose HTML or CSV file" title="Select Netscape HTML or CSV file to import">
-          <button type="button" id="browserBookmarksImportBtn" class="button secondary" title="Import from selected file" aria-label="Import" disabled>Import</button>
+          <input type="file" id="browserBookmarksImportFileInput" class="browser-bookmarks-import-file-input" accept=".html,.htm,.csv,text/html,text/csv" aria-label="Choose Netscape HTML or simple CSV (title,url,folderPath)" title="Netscape HTML or simple CSV into Chrome bookmarks — for Hoverboard Tags/Notes CSV use Bookmarks index Import">
+          <button type="button" id="browserBookmarksImportBtn" class="button secondary" title="Import into Chrome bookmark tree from selected file" aria-label="Import into browser bookmarks" disabled>Import</button>
         </div>
         <div id="browserBookmarksImportProgress" class="browser-bookmarks-import-progress hidden" aria-live="polite"></div>
       </section>

@@ -16,6 +16,7 @@
 |-----------|----------------|-------|
 | **Current Tags** | bookmark tags (UI) | Tags already on this pin |
 | **Recent Tags** | user recent tags | User-driven recent chips from shared/user state — **not** `getRecentBookmarks` |
+| **window-focus Recent Tags refresh** | focus reload recent tags | Side panel This Page reloads Recent Tags on `windows.onFocusChanged` (popup uses `visibilitychange`; see [`side-panel.md`](side-panel.md)) |
 | **Suggested Tags** | content tags, AI chips (alone) | From page content and/or AI; deduped vs current |
 | **Session tags** | auto-applied AI tags | Tags applied this session; AI hits that match are auto-applied |
 | **Tag with AI** | AI suggest button | Preferred action label |
@@ -54,6 +55,7 @@
 
 - **Current Tags** — Tags on the active pin.
 - **Recent Tags** — User-driven recent list (shared memory + user state v2).
+- **window-focus Recent Tags refresh** — When This Page is selected, focusing the browser window that hosts the side panel runs the same Recent Tags reload as the popup (`loadRecentTags` / service worker).
 - **Suggested Tags** — Content- and/or AI-derived candidates, case-preserved, deduped against current.
 - **Session tags** — Tags recorded this extension session; overlap with AI suggestions is auto-applied to the bookmark.
 - **TAG_UPDATED** — Message for tag-change synchronization across surfaces.
@@ -93,6 +95,7 @@
 | Frequency (sort) | Preferred terms |
 | Recent Tags | Preferred terms |
 | Readability extraction | AI tagging |
+| window-focus Recent Tags refresh | Preferred terms |
 | Relevance (sort) | Preferred terms |
 | sanitizeTag | Pseudo-code block names |
 | selection → tag input | Preferred terms |

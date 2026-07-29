@@ -58,6 +58,11 @@ export class MessageFileBookmarkAdapter extends FileBookmarkStorageAdapter {
           reject(new Error(response.error))
           return
         }
+        // [IMPL-FILE_BOOKMARK_SERVICE] Require explicit success so a missing offscreen reply cannot fake a durable write.
+        if (!response || response.success !== true) {
+          reject(new Error('WRITE_FILE_BOOKMARKS did not return success'))
+          return
+        }
         resolve()
       })
     })

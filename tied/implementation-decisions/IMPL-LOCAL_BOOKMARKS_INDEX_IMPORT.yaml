@@ -2,18 +2,13 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
   code_locations:
     files:
       - path: "src/ui/bookmarks-table/bookmarks-table.html"
-        description: "Import row (file input, button, radios, Import to dropdown)"
+        description: "Import fieldset (file input, mode radios, Import to, Import button last, #import-result)"
       - path: "src/ui/bookmarks-table/bookmarks-table.js"
-        description: "runImport, file change handler, parseImportFile, result message"
+        description: "runImport, pending/final import-result, parseImportFile"
       - path: "src/ui/bookmarks-table/bookmarks-table-csv.js"
         description: "parseCsv for import"
-    functions:
-      - name: "parseCsv"
-        description: "Parse CSV string to array of bookmark-like objects (export format)"
-        file: "src/ui/bookmarks-table/bookmarks-table-csv.js"
-      - name: "runImport"
-        description: "Parse file, filter if only new, send saveBookmark per row, refresh, show result"
-        file: "src/ui/bookmarks-table/bookmarks-table.js"
+      - path: "src/ui/bookmarks-table/bookmarks-table.css"
+        description: "import-result is-pending / is-final colors"
   cross_references:
     - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
     - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
@@ -21,18 +16,18 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
   essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT-pseudocode.md"
   implementation_approach:
     details:
-      - "CSV: parseCsv skips header (title,url); parseCsvLine handles quoted fields and \"\"; rows with empty URL skipped; Shared/Private/toread normalized"
-      - "JSON: array or single object; normalizeJsonBookmark returns null for empty url; tags to array"
-      - "runImport: read file text; parseImportFile(text, filename) -> rows; if Only new filter rows where url NOT IN allBookmarks; for each row sendMessage saveBookmark({ ...row, preferredBackend }); count imported/skipped/failed; loadBookmarks(); show result in #import-result"
-    summary: "Import row in actions-below-table; parseCsv in bookmarks-table-csv.js; file input + Import button; only new filters by allBookmarks; per-row saveBookmark with preferredBackend; loadBookmarks + result."
+      - "CSV: parseCsv skips header (title,url); parseCsvLine handles quoted fields; rows with empty URL skipped; Shared/Private/toread normalized; Time/Updated mapped to time/updated_at"
+      - "JSON: array or single object; normalizeJsonBookmark returns null for empty url; tags to array; preserves time and updated_at"
+      - "runImport: read file; parseImportFile; if Only new filter; SHOW Importing… (is-pending); for each row saveBookmark({ ...row, preferredBackend }); count imported/skipped/failed; loadBookmarks(); SHOW final counts (is-final)"
+    summary: "Separate Import control group (sibling of Actions for selected): mode radios, Import to, Import button last, #import-result. parseCsv in bookmarks-table-csv.js; only new filters by allBookmarks; per-row saveBookmark with preferredBackend and file times; pending Importing… then final counts."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Import control group + pending/final result messaging"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -63,4 +58,5 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     requirements:
       - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
     tests:
+      - "tests/unit/bookmarks-table-import-status.test.js"
       - "tests/unit/bookmarks-table-import.test.js"

@@ -249,6 +249,20 @@ body {
   cursor: not-allowed;
 }
 
+.delete-row .delete-result {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+}
+
+/* [IMPL-LOCAL_BOOKMARKS_INDEX] Pending (accepted) vs final success colors in #delete-result */
+.delete-row .delete-result.is-pending {
+  color: var(--color-warning-600);
+}
+
+.delete-row .delete-result.is-final {
+  color: var(--color-success-600);
+}
+
 .btn-danger {
   background: var(--color-button-danger-bg, #c53030);
   color: var(--color-button-danger-text, #fff);
@@ -292,6 +306,15 @@ body {
 .import-row .import-result {
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+}
+
+/* [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] Pending (accepted) vs final success colors in #import-result */
+.import-row .import-result.is-pending {
+  color: var(--color-warning-600);
+}
+
+.import-row .import-result.is-final {
+  color: var(--color-success-600);
 }
 
 .sr-only {

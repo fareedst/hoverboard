@@ -6,10 +6,12 @@ INPUT: bookmark data (for save), API response (for Pinboard), raw record (for no
 OUTPUT: bookmark with time and updated_at set per provider and context
 DATA: time = create time; updated_at = last update time
 
-# Create: time = now, updated_at = now; update: keep time, updated_at = now; persist.
+# Create: prefer payload times (import/restore); else now. Update: keep existing create time; bump updated_at to now.
+# [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] — import create preserves CSV/JSON Time and Updated.
 Local/File/Sync saveBookmark(data):
   IF url not in store (create):
-    SET time = now, updated_at = now
+    SET time = nonEmpty(data.time) ? data.time : now
+    SET updated_at = nonEmpty(data.updated_at) ? data.updated_at : time
   ELSE (update):
     KEEP existing time; SET updated_at = now
   PERSIST

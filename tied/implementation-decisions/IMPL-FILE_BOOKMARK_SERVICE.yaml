@@ -5,6 +5,8 @@ IMPL-FILE_BOOKMARK_SERVICE:
         description: "FileBookmarkService and adapter usage"
       - path: "src/features/storage/file-bookmark-storage-adapter.js"
         description: "Adapter interface and in-memory implementation"
+      - path: "src/features/storage/message-file-bookmark-adapter.js"
+        description: "Production adapter; WRITE_FILE_BOOKMARKS requires response.success === true"
     functions: []
   cross_references:
     - "ARCH-FILE_BOOKMARK_PROVIDER"
@@ -15,16 +17,17 @@ IMPL-FILE_BOOKMARK_SERVICE:
     details:
       - "Adapter methods: readBookmarksFile() -> Promise<{ version, bookmarks }>, writeBookmarksFile(data) -> Promise<void>"
       - "Filename in directory: hoverboard-bookmarks.json"
+      - "MessageFileBookmarkAdapter.writeBookmarksFile: SEND WRITE_FILE_BOOKMARKS; resolve only when response.success === true; otherwise reject (undefined/no-success is failure)"
       - "Normalize URL and bookmark shape to match LocalBookmarkService (url, description, extended, tags, time, shared, toread, hash)"
-    summary: "FileBookmarkService in src/features/storage/file-bookmark-service.js; adapter interface; in-memory adapter for tests; real adapter (file I/O) for production."
+    summary: "FileBookmarkService in src/features/storage/file-bookmark-service.js; adapter interface; in-memory adapter for tests; MessageFileBookmarkAdapter for production with strict WRITE success."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Composition: FileBookmarkService + MessageFileBookmarkAdapter delete WRITE"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -57,5 +60,7 @@ IMPL-FILE_BOOKMARK_SERVICE:
     requirements:
       - "REQ-FILE_BOOKMARK_STORAGE"
     tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/unit/file-bookmark-service.test.js"
+      - "tests/unit/message-file-bookmark-adapter.test.js"
       - "tests/unit/offscreen-file-bookmark-messaging.test.js"

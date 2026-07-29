@@ -160,15 +160,18 @@ export class LocalBookmarkService {
       const now = new Date().toISOString()
       const all = await this._getAllBookmarks()
       const existing = all[url]
-      // [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] New: time and updated_at = now; update: preserve time (create-time), set updated_at = now.
-      const time = existing ? (existing.time || now) : now
+      // [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Create: use payload time/updated_at when present (import); else now. Update: keep create time, bump updated_at.
+      const payloadTime = typeof bookmarkData.time === 'string' ? bookmarkData.time.trim() : ''
+      const payloadUpdated = typeof bookmarkData.updated_at === 'string' ? bookmarkData.updated_at.trim() : ''
+      const time = existing ? (existing.time || now) : (payloadTime || now)
+      const updatedAt = existing ? now : (payloadUpdated || time)
       const bookmark = {
         url,
         description: bookmarkData.description ?? existing?.description ?? '',
         extended: bookmarkData.extended ?? existing?.extended ?? '',
         tags,
         time,
-        updated_at: now,
+        updated_at: updatedAt,
         shared: bookmarkData.shared !== undefined ? String(bookmarkData.shared) : (existing?.shared ?? 'yes'),
         toread: bookmarkData.toread !== undefined ? String(bookmarkData.toread) : (existing?.toread ?? 'no'),
         hash: existing?.hash ?? this._localHash(url)

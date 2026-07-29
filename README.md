@@ -142,6 +142,8 @@ A short demo shows the **Usage** tab: Most Visited, Recently Visited, Refresh, a
 
 ![Local Bookmarks Index](images/local-bookmarks-index.png)
 
+**Import/export guide:** [docs/BOOKMARK_IMPORT_EXPORT.md](docs/BOOKMARK_IMPORT_EXPORT.md) — use this page’s **Import** for Hoverboard CSV (`Title,URL,Tags,…`); use the side panel **Bookmarks** tab for Netscape HTML into Chrome.
+
 The snapshot above shows the dedicated full-page view of all locally stored bookmarks (placeholder data):
 
 - **Header:** Compact banner with Hoverboard logo and name, "Local Bookmarks Index" title, and subtitle (minimal height)

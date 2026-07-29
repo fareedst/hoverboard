@@ -59,10 +59,40 @@ ON windowScope toggle change: windowScope = selected; loadTabs()
 ON click .browser-tabs-card-ids-link OR .browser-tabs-card-focus-link: windowId = data-window-id; tabId = data-tab-id; IF both numeric: windows.update(windowId, { focused: true }); tabs.update(tabId, { active: true })
 
 # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-# Bookmark tags: after allTabs built (referrers merged), FOR each tab WHERE url is http(s): reply = getCurrentBookmark({ url, title }); tab.bookmarkTags = reply?.data?.tags ?? []. In RENDER show "Tags: " + join(tab.bookmarkTags) or "—".
-AFTER allTabs built: FOR each tab (http(s) URL): getCurrentBookmark({ url, title }) → tab.bookmarkTags = data.tags ?? []
+# Bookmark tags + row flags: after allTabs built (referrers merged), FOR each tab WHERE url is http(s): reply = getCurrentBookmark({ url, title }); mergeBookmarkReplyIntoTab(tab, reply). In RENDER show "Tags: " + join(tab.bookmarkTags) or "—" plus to-read/private indicators when flags are true.
+AFTER allTabs built: FOR each tab (http(s) URL): getCurrentBookmark({ url, title }) → mergeBookmarkReplyIntoTab(tab, reply)
 ON searchScope change: searchScope = selected; IF selected is pageText or importantTags THEN loadExtraForScope() (fetch and merge); applyFilter(); re-render
 ON searchInput input: searchQuery = value; visibleTabs = filterBrowserTabs(allTabs, searchQuery, searchScope); re-render list
+
+# [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] [IMPL-URL_TAGS_DISPLAY]
+# How: apply getCurrentBookmark reply to a tab row — tags array plus boolean bookmarkToread / bookmarkPrivate from toread/shared (trim + case-insensitive; defaults toread=no, shared=yes). Clear all three when reply missing, unsuccessful, or blocked.
+mergeBookmarkReplyIntoTab(tab, reply):
+  IF NOT reply OR NOT reply.success OR NOT reply.data OR reply.data.blocked:
+    tab.bookmarkTags = []; tab.bookmarkToread = false; tab.bookmarkPrivate = false; RETURN
+  d = reply.data
+  tab.bookmarkTags = Array.isArray(d.tags) ? d.tags : []
+  exists = !!d.exists
+  tab.bookmarkToread = exists AND (trim+lower(d.toread ?? 'no') === 'yes')
+  tab.bookmarkPrivate = exists AND (trim+lower(d.shared ?? 'yes') === 'no')
+
+# [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+# How: render inline to-read indicator and private indicator when tab.bookmarkToread / tab.bookmarkPrivate are true (classes browser-tabs-card-toggle-toread / -private inside .browser-tabs-card-toggles).
+buildBookmarkTogglesMarkup(tab):
+  parts = []
+  IF tab.bookmarkToread: parts.push span.browser-tabs-card-toggle-toread (title/aria "To read")
+  IF tab.bookmarkPrivate: parts.push span.browser-tabs-card-toggle-private (title/aria "Private")
+  IF parts empty: RETURN ''
+  RETURN span.browser-tabs-card-toggles wrapping parts
+RENDER (per card, with tags): include buildBookmarkTogglesMarkup(tab) near Tags line
+
+# [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
+# How: post-batch bookmark refresh — after Set/Clear to-read or Add tags, re-query getCurrentBookmark for every tab in allTabs and mergeBookmarkReplyIntoTab so tags and indicators match storage; then applyFilter().
+refreshBookmarkDisplayForAllTabs():
+  FOR each tab in allTabs:
+    IF tab.url is not http(s): mergeBookmarkReplyIntoTab(tab, { success: false }); CONTINUE
+    reply = AWAIT getCurrentBookmark({ url: tab.url, title: tab.title })
+    mergeBookmarkReplyIntoTab(tab, reply)  // on error: merge with { success: false }
+  applyFilter()
 
 # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
 # Copy URLs / Copy Records / Close: unchanged; act on visibleTabs.
@@ -81,10 +111,10 @@ ON Close untagged button click: toClose = visibleTabs.filter(t => !Array.isArray
 ON Refresh button click: hiddenTabIds.clear(); loadTabs()
 
 # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-# Batch bookmark actions: Set to-read (fetch then merge to preserve tags; create if missing), Clear to-read (skip if no bookmark), Add tags (create if missing; use reply.data.url). Only http(s) URLs. SW returns handler response as-is; handler getCurrentBookmark returns plain dataOut.
-ON Set to-read button click: FOR each tab in visibleTabs WHERE tab.url is http(s): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.data.exists AND reply.data.url: saveBookmark({ ...reply.data, toread: 'yes' }); ELSE: urlToSave = reply.data.url || tab.url; saveBookmark({ url: urlToSave, description: tab.title ?? '', tags: [], toread: 'yes', preferredBackend: 'local' }); show "Set to-read for N tabs"
-ON Clear to-read button click: FOR each tab in visibleTabs: reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.success AND reply.data AND NOT reply.data.blocked AND reply.data.exists: saveBookmark({ ...reply.data, toread: 'no' }); ELSE skip; show "Cleared to-read for N tabs"
-ON Add tags button click: newTags = parseTagsInput(tagsInput.value); IF newTags.length === 0 return; FOR each tab in visibleTabs WHERE tab.url is http(s): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.success AND reply.data AND reply.data.url AND NOT reply.data.blocked: IF reply.data.exists: payload = buildAddTagsPayload(reply.data, newTags); saveBookmark(payload); ELSE: urlToSave = reply.data.url || tab.url; saveBookmark({ url: urlToSave, description: tab.title ?? '', tags: newTags, preferredBackend: 'local' }); clear tagsInput; show "Added tags for N tabs"
+# Batch bookmark actions: Set to-read (fetch then merge to preserve tags; create if missing), Clear to-read (skip if no bookmark), Add tags (create if missing; use reply.data.url). Only http(s) URLs. After each batch, AWAIT refreshBookmarkDisplayForAllTabs() so row tags and to-read/private indicators match storage. SW returns handler response as-is; handler getCurrentBookmark returns plain dataOut.
+ON Set to-read button click: FOR each tab in getDisplayedTabs() WHERE tab.url is http(s): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.data.exists AND reply.data.url: saveBookmark({ ...reply.data, toread: 'yes' }); ELSE: urlToSave = reply.data.url || tab.url; saveBookmark({ url: urlToSave, description: tab.title ?? '', tags: [], toread: 'yes', preferredBackend: 'local' }); AWAIT refreshBookmarkDisplayForAllTabs(); show "Set to-read for N tabs"
+ON Clear to-read button click: FOR each tab in getDisplayedTabs(): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.success AND reply.data AND NOT reply.data.blocked AND reply.data.exists: saveBookmark({ ...reply.data, toread: 'no' }); ELSE skip; AWAIT refreshBookmarkDisplayForAllTabs(); show "Cleared to-read for N tabs"
+ON Add tags button click: newTags = parseTagsInput(tagsInput.value); IF newTags.length === 0 return; FOR each tab in getDisplayedTabs() WHERE tab.url is http(s): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.success AND reply.data AND reply.data.url AND NOT reply.data.blocked: IF reply.data.exists: payload = buildAddTagsPayload(reply.data, newTags); saveBookmark(payload); ELSE: urlToSave = reply.data.url || tab.url; saveBookmark({ url: urlToSave, description: tab.title ?? '', tags: newTags, preferredBackend: 'local' }); AWAIT refreshBookmarkDisplayForAllTabs(); clear tagsInput; show "Added tags for N tabs"
 
 # [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
 # Panel structure: same scroll behavior as Tags tree. Panel (#browserTabsPanel) is the scroll container. First child .browser-tabs-above-list (flex: none): header, window scope, search scope, filter, message, stats line (#browserTabsStats), batch bookmark, actions. Second child .browser-tabs-list-section (min-height: 100%, overflow-y: auto): Title/URL/Block control row immediately above #browserTabsList. Above block scrolls off; list section fills visible height and scrolls list. Implements "Title/URL/Block above list" and "stats line above Tags".

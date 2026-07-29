@@ -1,7 +1,7 @@
 ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
   cross_references:
     - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
-  decision: "`time` = create-time (set once, never changed on update). `updated_at` = most-recent-update-time (same as time on create; set to now on every update). Normalization: missing `updated_at` -> `updated_at = time`. Pinboard: `updated_at = time` always."
+  decision: "`time` = create-time (set once on create from payload when provided, else now; never changed on update). `updated_at` = most-recent-update-time (on create: payload when provided else time; on every update: now). Normalization: missing `updated_at` -> `updated_at = time`. Pinboard: `updated_at = time` always."
   detail_file: "architecture-decisions/ARCH-BOOKMARK_CREATE_UPDATE_TIMES.yaml"
   implementation_approach:
     details: []
@@ -12,8 +12,8 @@ ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "Initial creation"
+      date: "2026-07-29"
+      reason: "Create path honors import payload times"
     last_validated:
       date: "2026-02-18"
       result: "pass"

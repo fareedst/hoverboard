@@ -1,0 +1,61 @@
+CITDP-REQ-LOCAL_BOOKMARKS_INDEX-file-store-delete:
+  change_definition:
+    current_behavior: "Index Delete sent URL-only deleteBookmark; BookmarkRouter routed by storage index or default. Wrong-index deletes returned success while File rows remained after refresh. deleteBookmark schema rejected preferredBackend. MessageFileBookmarkAdapter treated undefined WRITE responses as success."
+    desired_behavior: "Delete builds preferredBackend from row Storage column (buildDeletePayload). Router deleteBookmark accepts url or {url, preferredBackend} via resolveProvider. Schema allows optional preferredBackend. WRITE adapter requires explicit success."
+    non_goals:
+      - "Cloud-sync restore of hoverboard-bookmarks.json after durable write"
+      - "UI toast for delete ok/fail counts"
+    success_criteria:
+      - "Import-to-File then Index Delete removes File rows after refresh"
+      - "preferredBackend file deletes despite local index"
+      - "Undefined WRITE response rejected"
+    unchanged_behavior: "Confirm dialog with count and titles when ≤8; selection clear and table refresh after delete; URL-only delete still uses index/default."
+  completion_criteria:
+    verification_gate_notes: "Unit suites plus npm run test:integration (preferredBackend delete + runBulkDelete + adapter WRITE) pass; tied_validate_consistency ok."
+  impact_analysis:
+    modules_or_boundaries: "bookmarks-table filter/JS/bulk-delete; message-schemas; message-handler; BookmarkRouter; MessageFileBookmarkAdapter; unit and composition tests"
+    tied_tokens_affected:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-RUNTIME_VALIDATION"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "2026-07-29 composition close-loop: extracted runBulkDelete; IPC and UI composition tests added; composition no longer deferred."
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-LOCAL_BOOKMARKS_INDEX-file-store-delete"
+    primary_tokens:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-RUNTIME_VALIDATION"
+      - "REQ-FILE_BOOKMARK_STORAGE"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-29"
+    title: "Local Bookmarks Index: Delete File-store rows via preferredBackend"
+  risk_analysis:
+    risks:
+      - id: "R1"
+        description: "URL-only delete callers still mis-route when storage index is wrong"
+        likelihood: "low"
+        mitigation: "Index UI always sends preferredBackend; composition test documents residual URL-only risk"
+        residual: "low"
+        severity: "medium"
+      - id: "R2"
+        description: "Strict WRITE success check breaks callers that previously ignored response shape"
+        likelihood: "low"
+        mitigation: "Offscreen already returns success:true; unit and composition tests cover contract"
+        residual: "low"
+        severity: "low"
+  tdd_sequence:
+    summary: "Capture failure RED → LEAP IMPL BULK_DELETE/resolveProvider → implement schema/router/handler/UI/adapter → green → composition → CITDP/validate"
+  test_strategy:
+    matrix_notes: "Unit + composition (no E2E). Composition: message-handler-router-storage.integration.test.js; bookmarks-table-bulk-delete-composition.integration.test.js."
+    summary: "Unit plus composition: router preferredBackend file delete; MessageHandler→Router→File; FileBookmarkService+MessageFileBookmarkAdapter WRITE; runBulkDelete orchestration."

@@ -27,18 +27,19 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
   essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES-pseudocode.md"
   implementation_approach:
     details:
-      - "Local/File/Sync: on create set time = now, updated_at = now; on update keep time, set updated_at = now"
+      - "Local/File/Sync create: time = data.time || now; updated_at = data.updated_at || time"
+      - "Local/File/Sync update: keep existing time; updated_at = now"
       - "Normalize/display/move/export/import: always include updated_at; if missing (legacy) use updated_at = time"
       - "Pinboard: API returns only time; set updated_at = time in parseBookmarkResponse/createEmptyBookmark; never send updated_at to API"
-    summary: "LocalBookmarkService, FileBookmarkService, SyncBookmarkService: createEmptyBookmark and _normalizeBookmark include updated_at; saveBookmark sets time and updated_at on create (both now), preserves time and sets updated_at on update. PinboardService: parseBookmarkResponse and createEmptyBookmark set updated_at = time; do not send updated_at to API. url-tags-manager normalizeBookmarkForDisplay, bookmark-router moveBookmarkToStorage, PopupController empty pin, export/import CSV and JSON include updated_at; legacy read normalizes updated_at = time."
+    summary: "Local/File/Sync saveBookmark: on create use non-empty data.time/data.updated_at when provided (import/restore), else now; on update keep existing time and set updated_at = now. Pinboard: updated_at = time; never send updated_at to API. Normalize/export/import always include updated_at (legacy missing -> time)."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Create path honors payload time/updated_at for import"
     last_validated:
       date: "2026-02-18"
       result: "pass"

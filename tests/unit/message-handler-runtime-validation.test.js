@@ -151,7 +151,24 @@ describe('[IMPL-RUNTIME_VALIDATION] processMessage deleteBookmark validation', (
     const handler = new MessageHandler(mockProvider)
     const result = await handler.processMessage({ type: 'deleteBookmark', data: { url: 'https://example.com' } }, {})
     expect(result).not.toMatchObject({ error: 'Invalid message' })
-    expect(deleteBookmark).toHaveBeenCalledWith('https://example.com')
+    expect(deleteBookmark).toHaveBeenCalledWith({ url: 'https://example.com' })
+  })
+
+  test('accepts deleteBookmark with preferredBackend and passes data [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-RUNTIME_VALIDATION]', async () => {
+    const deleteBookmark = jest.fn().mockResolvedValue({ success: true })
+    const mockProvider = {
+      getBookmarkForUrl: jest.fn(),
+      saveBookmark: jest.fn(),
+      deleteBookmark,
+      getRecentBookmarks: jest.fn(),
+      saveTag: jest.fn(),
+      deleteTag: jest.fn()
+    }
+    const handler = new MessageHandler(mockProvider)
+    const data = { url: 'https://example.com', preferredBackend: 'file' }
+    const result = await handler.processMessage({ type: 'deleteBookmark', data }, {})
+    expect(result).not.toMatchObject({ error: 'Invalid message' })
+    expect(deleteBookmark).toHaveBeenCalledWith(data)
   })
 })
 

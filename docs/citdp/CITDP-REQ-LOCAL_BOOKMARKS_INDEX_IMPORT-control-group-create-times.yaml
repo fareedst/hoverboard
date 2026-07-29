@@ -1,0 +1,60 @@
+CITDP-REQ-LOCAL_BOOKMARKS_INDEX_IMPORT-control-group-create-times:
+  record_identity:
+    change_request_id: "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT-control-group-create-times"
+    title: "Local Bookmarks Index: Import control group; pending/final result; create-path Time/Updated preserve"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-29"
+    primary_tokens:
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
+      - "ARCH-BOOKMARK_CREATE_UPDATE_TIMES"
+      - "IMPL-BOOKMARK_CREATE_UPDATE_TIMES"
+  change_definition:
+    current_behavior: "Import UI lived inside Actions for selected with Import button first. #import-result showed only final counts. Local/File/Sync saveBookmark on create always set time and updated_at to now, dropping CSV/JSON timestamps."
+    desired_behavior: "Dedicated Import control group (sibling of Actions for selected). Order: conflict radios, Import to, Import last, #import-result. Pending Importing… (warning), then final counts (success). On create only, non-empty payload time/updated_at are kept."
+    non_goals:
+      - "Replay CSV Storage column (Import to remains destination)"
+      - "Apply CSV times on overwrite/update"
+      - "Netscape HTML / Browser Bookmark Import surfaces"
+    success_criteria:
+      - "Import fieldset extracted; Import button last among controls"
+      - "Pending then final messaging with distinct colors"
+      - "Create with payload times persists; update still preserves create time and bumps updated_at"
+    unchanged_behavior: "Only new / Overwrite filtering; preferredBackend; parseCsv/JSON; overwrite update timestamp semantics (keep existing time, updated_at = now)."
+  impact_analysis:
+    modules_or_boundaries: "bookmarks-table HTML/CSS/JS; bookmarks-table-import-status helper; local/file/sync bookmark services; TIED import + create-update-times stack; vocab bookmarks-index."
+    tied_tokens_affected:
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
+      - "ARCH-BOOKMARK_CREATE_UPDATE_TIMES"
+      - "IMPL-BOOKMARK_CREATE_UPDATE_TIMES"
+    tied_tokens_new: []
+  risk_analysis:
+    risks:
+      - id: "R1"
+        description: "Normal UI saves that pass stale updated_at could freeze update times if create-path logic applied on update"
+        severity: "medium"
+        likelihood: "low"
+        mitigation: "Honor payload times only on create; update always sets updated_at = now"
+        residual: "low"
+      - id: "R2"
+        description: "Pending message never cleared if save loop throws unexpectedly"
+        severity: "low"
+        likelihood: "low"
+        mitigation: "Per-row try/catch; final message always set after loop; errors use setImportResultError"
+        residual: "low"
+  test_strategy:
+    summary: "Unit tests for create-path time preserve on local/file/sync; overwrite ignores payload times; import-status pending/final helpers; existing parseCsv/round-trip retained."
+    matrix_notes: "RED then green on provider create with time/updated_at; status helper unit tests; no E2E required (DOM status + saveBookmark covered at unit level). Composition deferred: UI runImport wiring; optional #import-result HTML fixture parity."
+  tdd_sequence:
+    summary: "LEAP IMPL pseudo-code → RED provider/status tests → UI extract + saveBookmark create path → green → CITDP/docs/validate"
+  leap_feedback:
+    divergences_from_analysis: "none"
+    record_status: "complete"
+    tied_stack_updates_required: []
+  completion_criteria:
+    verification_gate_notes: "Unit suites for local/file/sync bookmark services and bookmarks-table-import* pass; tied_validate_consistency after YAML updates."

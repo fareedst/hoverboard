@@ -36,8 +36,8 @@ IMPL-RUNTIME_VALIDATION:
       date: "2026-02-22"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: add REQ-CODE_QUALITY to runtime validation traceability"
+      date: "2026-07-29"
+      reason: "deleteBookmark optional preferredBackend for Index Delete"
   name: "Runtime validation with Zod for messages and config"
   rationale:
     benefits:

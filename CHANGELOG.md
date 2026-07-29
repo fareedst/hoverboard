@@ -7,7 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-07-29
+
+### Added
+
+- **Local Bookmarks Index: Delete composition tests** ([REQ-LOCAL_BOOKMARKS_INDEX], [IMPL-LOCAL_BOOKMARKS_INDEX], [IMPL-BOOKMARK_ROUTER], [IMPL-FILE_BOOKMARK_SERVICE]) – Phase G: `runBulkDelete` orchestrator; composition for confirm/pending/preferredBackend sendMessage (`bookmarks-table-bulk-delete-composition.integration.test.js`) and MessageHandler→Router→File delete plus FileBookmarkService+MessageFileBookmarkAdapter WRITE (`message-handler-router-storage.integration.test.js`).
+
+- **Local Bookmarks Index: Delete pending/final status** ([REQ-LOCAL_BOOKMARKS_INDEX], [ARCH-LOCAL_BOOKMARKS_INDEX], [IMPL-LOCAL_BOOKMARKS_INDEX]) – After Delete confirm, `#delete-result` shows **Deleting…** (warning) then **Deleted N…** counts (success), mirroring Import. **Tests:** `bookmarks-table-delete-status.test.js`. CITDP: `docs/citdp/CITDP-REQ-LOCAL_BOOKMARKS_INDEX-delete-status.yaml`.
+
+- **Local Bookmarks Index: Import control group and create-time preserve** ([REQ-LOCAL_BOOKMARKS_INDEX_IMPORT], [REQ-BOOKMARK_CREATE_UPDATE_TIMES], [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT], [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]) – Import is a dedicated fieldset (sibling of Actions); Import button last; `#import-result` pending/final. New Local/File/Sync records retain CSV/JSON `time` / `updated_at` when present. **Tests:** `bookmarks-table-import-status.test.js`, provider create-path cases. CITDP: `docs/citdp/CITDP-REQ-LOCAL_BOOKMARKS_INDEX_IMPORT-control-group-create-times.yaml`.
+
+### Fixed
+
+- **Local Bookmarks Index: File/Sync Delete via Storage column** ([REQ-LOCAL_BOOKMARKS_INDEX], [IMPL-BOOKMARK_ROUTER], [IMPL-FILE_BOOKMARK_SERVICE]) – Bulk Delete sends `preferredBackend` from the row Storage column (`buildDeletePayload`) so File/Sync rows delete from the correct provider even when the storage index is wrong. `WRITE_FILE_BOOKMARKS` requires `success === true`. **Tests:** `bookmark-router.test.js`, `message-file-bookmark-adapter.test.js`, schemas/handler. CITDP: `docs/citdp/CITDP-REQ-LOCAL_BOOKMARKS_INDEX-file-store-delete.yaml`.
+
 ### Changed
+
+- **Version 3.0.0 → 3.1.0** ([PROC-RELEASE]) – Extension and package version set to 3.1.0 via `scripts/set-version.sh`. Single source of truth: `manifest.json`; popup and side panel read version at runtime from `chrome.runtime.getManifest().version`. TIED: Option A (no new REQ/IMPL); version display remains documented in IMPL-SIDE_PANEL_TABS. Close-loop of unpushed work since 3.0.0 (tag sort, Recent Tags focus, Tabs row flags, Chrome-first platform, TIED 2.2.0).
 
 - **TIED 2.2.0 semantic-token standard close-loop** ([PROC-TOKEN_AUDIT], [PROC-TOKEN_VALIDATION]) – Expanded `tied/docs/numbered-token-mapping.md` (family collapse onto existing REQ/ARCH/IMPL). Relinked orphan detail files; created missing details; registered all index tokens in `tied/semantic-tokens.yaml`; migrated IMPL `essence_pseudocode` to `IMPL-*-pseudocode.md` sidecars; wired all project `essence_pseudocode_path` links; expanded stub sidecars with ARCH/REQ block leads; normalized token-comment brackets in `src/`/`tests/`; replaced legacy numbered IDs in `src/`, `tests/`, and docs (left `SAFARI-*` unmodified). Vocab: **family collapse** in `tied/vocab/tied-methodology.md`. Guides bumped to 2.2.0. CITDP: `docs/citdp/CITDP-TIED_TOKEN_STANDARD-numbered-to-tied.yaml`.
 
@@ -29,11 +45,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
+- **Bookmark import/export surfaces** ([REQ-LOCAL_BOOKMARKS_INDEX_IMPORT], [REQ-SIDE_PANEL_BROWSER_BOOKMARKS]) – New [docs/BOOKMARK_IMPORT_EXPORT.md](docs/BOOKMARK_IMPORT_EXPORT.md) explains when to use Local Bookmarks Index rich CSV/JSON vs side-panel Netscape HTML (Chrome tree) vs Browser Bookmark Import. Cross-link from [docs/BOOKMARK_HTML_FORMAT.md](docs/BOOKMARK_HTML_FORMAT.md). Import control tooltips clarify that Index CSV is for Hoverboard Tags/Notes and side-panel Import writes to Chrome bookmarks only.
+
 - **TIED: REQ/ARCH Tabs tab traceability (S13)** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [PROC-AGENT_REQ_CHECKLIST]) – REQ and ARCH detail files plus `tied/requirements.yaml` / `tied/architecture-decisions.yaml` now list **`tests/integration/browser-tabs-tab-composition.integration.test.js`** in **`traceability.tests`** and document a **Composition (integration)** validation row. CITDP (`docs/citdp/CITDP-REQ-SIDE_PANEL_BROWSER_TABS-row-indicators-batch-refresh.yaml`) records S12 final validation and S13 sync checkpoints.
 
 - **TIED detail YAML and agent checklists** – `tied/detail-files-schema.md` expanded with structural rules (no `detail_file` inside detail files, top-level token key, list shapes, quoting). `AGENTS.md` and `ai-principles.md` reference those rules and `[PROC-YAML_EDIT_LOOP]`. `tied/processes.md` and `tied/semantic-tokens.yaml` updated for methodology consistency.
 
 ### Added
+
+- **Side panel Tabs: per-row to-read/private indicators and post-batch bookmark refresh** ([REQ-SIDE_PANEL_BROWSER_TABS], [ARCH-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS]) – Each Tabs list row shows **to-read** and **private** indicators from the bookmark (`toread` / `shared`) via `mergeBookmarkReplyIntoTab`. After batch **Set to-read**, **Clear to-read**, or **Add tags**, `refreshBookmarkDisplayForAllTabs` re-queries bookmarks so tags and indicators match storage without a manual Refresh. **Tests:** `tests/unit/browser-tabs-panel.test.js`. **TIED:** `IMPL-SIDE_PANEL_BROWSER_TABS-pseudocode.md` LEAP sync; vocab in `tied/vocab/side-panel.md`. CITDP: `docs/citdp/CITDP-REQ-SIDE_PANEL_BROWSER_TABS-row-indicators-batch-refresh.yaml`.
 
 - **Testing: Tabs tab composition and extension E2E** ([REQ-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_BROWSER_TABS], [IMPL-SIDE_PANEL_TABS], [PROC-AGENT_REQ_CHECKLIST]) – **`tests/integration/browser-tabs-tab-composition.integration.test.js`** exercises the side panel shell path (`runInitialTabInit` / `switchTabForTest` for the **Tabs** tab → `initBrowserTabsTab`, mocked) without UI clicks. **`tests/playwright/extension-demo-tabs.spec.js`** adds a Phase H case that asserts the **stats** line (`#browserTabsStats`), batch **Tags** input, and **Title** vs **Block** display mode in a real `chrome-extension://` side panel (complements JSDOM unit tests). **README:** Test Coverage counts, integration and Extension E2E bullets, Tabs tab note on E2E.
 

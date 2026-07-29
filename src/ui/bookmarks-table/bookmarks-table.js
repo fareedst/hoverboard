@@ -6,16 +6,17 @@
  * [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]
  */
 
-import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, buildDeleteConfirmMessage, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
+import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
 import { setTableDisplayStickyHeight } from './bookmarks-table-sticky.js'
+import { setImportResultPending, setImportResultFinal, setImportResultError, formatImportResultMessage } from './bookmarks-table-import-status.js'
+import { runBulkDelete } from './bookmarks-table-bulk-delete.js'
 
 const MESSAGE_TYPE_AGGREGATED = 'getAggregatedBookmarksForIndex'
 const MESSAGE_TYPE_LOCAL = 'getLocalBookmarksForIndex'
 const MESSAGE_TYPE_MOVE = 'moveBookmarkToStorage'
 const MESSAGE_TYPE_SAVE = 'saveBookmark'
-const MESSAGE_TYPE_DELETE = 'deleteBookmark'
 /** [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] */
 const MESSAGE_TYPE_USAGE = 'getBookmarkUsage'
 
@@ -59,6 +60,7 @@ const elements = {
   moveTargetSelect: document.getElementById('move-target'),
   moveButton: document.getElementById('move-selected-btn'),
   deleteSelectedBtn: document.getElementById('delete-selected-btn'),
+  deleteResult: document.getElementById('delete-result'),
   addTagsInput: document.getElementById('add-tags-input'),
   addTagsBtn: document.getElementById('add-tags-btn'),
   deleteTagsBtn: document.getElementById('delete-tags-btn'),
@@ -305,32 +307,27 @@ async function moveSelectedToStorage () {
 }
 
 /**
- * [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Delete selected bookmarks; confirmation includes count and names if ≤8.
+ * [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER]
+ * Delete selected bookmarks; confirmation includes count and names if ≤8.
+ * Sends preferredBackend from row Storage column so File/Sync imports delete from the correct provider.
  */
 async function deleteSelectedBookmarks () {
   if (selectedUrls.size === 0) return
   const urls = Array.from(selectedUrls)
   const byUrl = new Map(filteredBookmarks.filter(b => b.url).map(b => [b.url, b]))
-  const titles = urls.map(u => (byUrl.get(u) && byUrl.get(u).description) || '(no title)')
-  const message = buildDeleteConfirmMessage(urls.length, titles)
-  if (!confirm(message)) return
   if (elements.deleteSelectedBtn) elements.deleteSelectedBtn.disabled = true
-  let ok = 0
-  let fail = 0
-  for (const url of urls) {
-    try {
-      const res = await chrome.runtime.sendMessage({ type: MESSAGE_TYPE_DELETE, data: { url } })
-      if (res && res.success) ok++
-      else fail++
-    } catch (e) {
-      console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX] deleteBookmark failed for', url, e)
-      fail++
+  await runBulkDelete({
+    urls,
+    bookmarksByUrl: byUrl,
+    sendMessage: (msg) => chrome.runtime.sendMessage(msg),
+    confirmFn: (message) => confirm(message),
+    deleteResultEl: elements.deleteResult,
+    onAfterDelete: async () => {
+      selectedUrls.clear()
+      await loadBookmarks()
+      updateMoveControlsState()
     }
-  }
-  selectedUrls.clear()
-  await loadBookmarks()
-  updateMoveControlsState()
-  if (fail > 0) console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX] Delete completed:', ok, 'deleted,', fail, 'failed')
+  })
 }
 
 /**
@@ -614,25 +611,26 @@ function parseImportFile (text, filename) {
  */
 async function runImport (file) {
   if (!file || !elements.importResult) return
-  elements.importResult.textContent = ''
+  setImportResultError(elements.importResult, '')
   const onlyNew = document.querySelector('input[name="import-mode"]:checked')?.value === 'only-new'
   const preferredBackend = (elements.importTarget && elements.importTarget.value) || 'local'
   let text
   try {
     text = await file.text()
   } catch (e) {
-    elements.importResult.textContent = 'Could not read file.'
+    setImportResultError(elements.importResult, 'Could not read file.')
     console.warn('[IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] file.text() failed:', e)
     return
   }
   const records = parseImportFile(text, file.name)
   if (records.length === 0) {
-    elements.importResult.textContent = 'No valid bookmarks in file (or invalid format).'
+    setImportResultError(elements.importResult, 'No valid bookmarks in file (or invalid format).')
     return
   }
   const existingUrls = new Set(allBookmarks.map(b => (b.url || '').trim()).filter(Boolean))
   const toSave = onlyNew ? records.filter(r => !existingUrls.has(r.url)) : records
   const skipped = records.length - toSave.length
+  setImportResultPending(elements.importResult)
   if (elements.importTrigger) elements.importTrigger.disabled = true
   let imported = 0
   let failed = 0
@@ -651,11 +649,7 @@ async function runImport (file) {
   }
   if (elements.importTrigger) elements.importTrigger.disabled = false
   await loadBookmarks()
-  const parts = []
-  if (imported > 0) parts.push(`Imported ${imported}`)
-  if (skipped > 0) parts.push(`skipped ${skipped}`)
-  if (failed > 0) parts.push(`${failed} failed`)
-  elements.importResult.textContent = parts.length ? parts.join(', ') + '.' : 'Done.'
+  setImportResultFinal(elements.importResult, formatImportResultMessage({ imported, skipped, failed }))
   if (elements.importFile) elements.importFile.value = ''
 }
 

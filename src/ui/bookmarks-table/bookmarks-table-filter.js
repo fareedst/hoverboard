@@ -203,6 +203,20 @@ export function mergeTags (existingTags, newTags) {
 }
 
 /**
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX]
+ * Build deleteBookmark payload with preferredBackend from row Storage column.
+ * @param {{ url?: string, storage?: string, [key: string]: unknown }} bookmark
+ * @returns {{ url: string, preferredBackend: string } | null}
+ */
+export function buildDeletePayload (bookmark) {
+  if (!bookmark || !bookmark.url) return null
+  return {
+    url: bookmark.url,
+    preferredBackend: (bookmark.storage && String(bookmark.storage).toLowerCase()) || 'local'
+  }
+}
+
+/**
  * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]
  * Build payload for saveBookmark when adding tags to a bookmark (merge tags, set preferredBackend).
  * @param {{ url?: string, storage?: string, tags?: string[], [key: string]: unknown }} bookmark

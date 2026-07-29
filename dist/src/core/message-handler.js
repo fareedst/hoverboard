@@ -715,8 +715,11 @@ export class MessageHandler {
     return result
   }
 
+  /**
+   * [IMPL-BOOKMARK_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX] Pass full data so preferredBackend reaches BookmarkRouter.
+   */
   async handleDeleteBookmark (data) {
-    return this.bookmarkProvider.deleteBookmark(data.url)
+    return this.bookmarkProvider.deleteBookmark(data)
   }
 
   async handleSaveTag (data) {

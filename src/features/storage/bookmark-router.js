@@ -138,11 +138,21 @@ export class BookmarkRouter {
     return result
   }
 
-  async deleteBookmark (url) {
+  /**
+   * [IMPL-BOOKMARK_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX] Delete by url string or { url, preferredBackend }.
+   * preferredBackend (Index Storage column) overrides storage index so File/Sync rows delete from the correct provider.
+   * @param {string|{ url?: string, preferredBackend?: string }} urlOrData
+   */
+  async deleteBookmark (urlOrData) {
+    const data = (urlOrData && typeof urlOrData === 'object') ? urlOrData : {}
+    const url = (typeof urlOrData === 'string') ? urlOrData : (data.url || '')
     const key = cleanUrl(url)
-    let backend = await this.storageIndex.getBackendForUrl(key)
+    const preferred = data?.preferredBackend ?? data?.backend
+    const usePreferred = preferred && ['pinboard', 'local', 'file', 'sync'].includes(preferred)
+    let backend = usePreferred ? preferred : await this.storageIndex.getBackendForUrl(key)
     if (!backend) backend = await this.getDefaultStorageMode()
     const provider = this._providerFor(backend)
+    debugLog('[IMPL-BOOKMARK_ROUTER] deleteBookmark:', key, 'backend:', backend, 'preferred:', usePreferred ? preferred : null)
     const result = await provider.deleteBookmark(url)
     if (result.success) {
       await this.storageIndex.removeUrl(key)

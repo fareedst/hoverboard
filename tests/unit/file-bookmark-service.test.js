@@ -160,6 +160,21 @@ describe('FileBookmarkService [REQ-FILE_BOOKMARK_STORAGE] [IMPL-FILE_BOOKMARK_SE
       expect(afterSecond.updated_at).toBeTruthy()
       expect(afterSecond.updated_at).not.toBe(createTime)
     })
+
+    test('create with payload time/updated_at preserves them [REQ-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-BOOKMARK_CREATE_UPDATE_TIMES]', async () => {
+      const time = '2024-06-15T10:00:00.000Z'
+      const updatedAt = '2024-06-16T11:00:00.000Z'
+      await service.saveBookmark({
+        url: 'https://example.com/import-times',
+        description: 'Imported',
+        tags: [],
+        time,
+        updated_at: updatedAt
+      })
+      const b = await service.getBookmarkForUrl('https://example.com/import-times')
+      expect(b.time).toBe(time)
+      expect(b.updated_at).toBe(updatedAt)
+    })
   })
 
   describe('deleteBookmark', () => {

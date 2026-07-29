@@ -22197,14 +22197,17 @@ var LocalBookmarkService = class {
       const now = (/* @__PURE__ */ new Date()).toISOString();
       const all = await this._getAllBookmarks();
       const existing = all[url2];
-      const time3 = existing ? existing.time || now : now;
+      const payloadTime = typeof bookmarkData.time === "string" ? bookmarkData.time.trim() : "";
+      const payloadUpdated = typeof bookmarkData.updated_at === "string" ? bookmarkData.updated_at.trim() : "";
+      const time3 = existing ? existing.time || now : payloadTime || now;
+      const updatedAt = existing ? now : payloadUpdated || time3;
       const bookmark = {
         url: url2,
         description: bookmarkData.description ?? existing?.description ?? "",
         extended: bookmarkData.extended ?? existing?.extended ?? "",
         tags,
         time: time3,
-        updated_at: now,
+        updated_at: updatedAt,
         shared: bookmarkData.shared !== void 0 ? String(bookmarkData.shared) : existing?.shared ?? "yes",
         toread: bookmarkData.toread !== void 0 ? String(bookmarkData.toread) : existing?.toread ?? "no",
         hash: existing?.hash ?? this._localHash(url2)
@@ -22669,7 +22672,8 @@ var saveBookmarkDataSchema = external_exports.object({
   title: external_exports.string().optional()
 }).passthrough();
 var deleteBookmarkDataSchema = external_exports.object({
-  url: requiredUrlSchema
+  url: requiredUrlSchema,
+  preferredBackend: external_exports.enum(["pinboard", "local", "file", "sync"]).optional()
 }).strict();
 var saveTagDataSchema = external_exports.object({
   url: requiredUrlSchema,
@@ -23312,8 +23316,11 @@ var MessageHandler = class {
     }
     return result;
   }
+  /**
+   * [IMPL-BOOKMARK_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX] Pass full data so preferredBackend reaches BookmarkRouter.
+   */
   async handleDeleteBookmark(data) {
-    return this.bookmarkProvider.deleteBookmark(data.url);
+    return this.bookmarkProvider.deleteBookmark(data);
   }
   async handleSaveTag(data) {
     const result = await this.bookmarkProvider.saveTag(data);
@@ -23655,14 +23662,17 @@ var SyncBookmarkService = class {
       const now = (/* @__PURE__ */ new Date()).toISOString();
       const all = await this._getAllBookmarks();
       const existing = all[url2];
-      const time3 = existing ? existing.time || now : now;
+      const payloadTime = typeof bookmarkData.time === "string" ? bookmarkData.time.trim() : "";
+      const payloadUpdated = typeof bookmarkData.updated_at === "string" ? bookmarkData.updated_at.trim() : "";
+      const time3 = existing ? existing.time || now : payloadTime || now;
+      const updatedAt = existing ? now : payloadUpdated || time3;
       const bookmark = {
         url: url2,
         description: bookmarkData.description ?? existing?.description ?? "",
         extended: bookmarkData.extended ?? existing?.extended ?? "",
         tags,
         time: time3,
-        updated_at: now,
+        updated_at: updatedAt,
         shared: bookmarkData.shared !== void 0 ? String(bookmarkData.shared) : existing?.shared ?? "yes",
         toread: bookmarkData.toread !== void 0 ? String(bookmarkData.toread) : existing?.toread ?? "no",
         hash: existing?.hash ?? this._syncHash(url2)
@@ -23917,14 +23927,17 @@ var FileBookmarkService = class {
       const now = (/* @__PURE__ */ new Date()).toISOString();
       const all = await this._getAllBookmarks();
       const existing = all[url2];
-      const time3 = existing ? existing.time || now : now;
+      const payloadTime = typeof bookmarkData.time === "string" ? bookmarkData.time.trim() : "";
+      const payloadUpdated = typeof bookmarkData.updated_at === "string" ? bookmarkData.updated_at.trim() : "";
+      const time3 = existing ? existing.time || now : payloadTime || now;
+      const updatedAt = existing ? now : payloadUpdated || time3;
       const bookmark = {
         url: url2,
         description: bookmarkData.description ?? existing?.description ?? "",
         extended: bookmarkData.extended ?? existing?.extended ?? "",
         tags,
         time: time3,
-        updated_at: now,
+        updated_at: updatedAt,
         shared: bookmarkData.shared !== void 0 ? String(bookmarkData.shared) : existing?.shared ?? "yes",
         toread: bookmarkData.toread !== void 0 ? String(bookmarkData.toread) : existing?.toread ?? "no",
         hash: existing?.hash ?? this._fileHash(url2)
@@ -24071,6 +24084,10 @@ var MessageFileBookmarkAdapter = class extends FileBookmarkStorageAdapter {
         }
         if (response?.error) {
           reject(new Error(response.error));
+          return;
+        }
+        if (!response || response.success !== true) {
+          reject(new Error("WRITE_FILE_BOOKMARKS did not return success"));
           return;
         }
         resolve();
@@ -24330,11 +24347,21 @@ var BookmarkRouter = class {
     }
     return result;
   }
-  async deleteBookmark(url2) {
+  /**
+   * [IMPL-BOOKMARK_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX] Delete by url string or { url, preferredBackend }.
+   * preferredBackend (Index Storage column) overrides storage index so File/Sync rows delete from the correct provider.
+   * @param {string|{ url?: string, preferredBackend?: string }} urlOrData
+   */
+  async deleteBookmark(urlOrData) {
+    const data = urlOrData && typeof urlOrData === "object" ? urlOrData : {};
+    const url2 = typeof urlOrData === "string" ? urlOrData : data.url || "";
     const key = cleanUrl2(url2);
-    let backend = await this.storageIndex.getBackendForUrl(key);
+    const preferred = data?.preferredBackend ?? data?.backend;
+    const usePreferred = preferred && ["pinboard", "local", "file", "sync"].includes(preferred);
+    let backend = usePreferred ? preferred : await this.storageIndex.getBackendForUrl(key);
     if (!backend) backend = await this.getDefaultStorageMode();
     const provider = this._providerFor(backend);
+    debugLog("[IMPL-BOOKMARK_ROUTER] deleteBookmark:", key, "backend:", backend, "preferred:", usePreferred ? preferred : null);
     const result = await provider.deleteBookmark(url2);
     if (result.success) {
       await this.storageIndex.removeUrl(key);
