@@ -406,60 +406,75 @@ IMPL-BOOKMARK_ROUTER:
       - path: "src/features/storage/bookmark-router.js"
         description: "BookmarkRouter implementation"
   cross_references:
+    - "ARCH-BROWSER_BOOKMARK_PROVIDER"
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
-    - "IMPL-MOVE_BOOKMARK_UI"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_ROUTER-pseudocode.md"
   implementation_approach:
     details:
-      - "moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index"
-      - "Resolve provider: (valid data.preferredBackend) || getBackendForUrl(url) || defaultStorageMode; map to one of four providers (pinboard, local, file, sync)"
-    summary: "BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, defaultStorageMode."
+      - "getAllBookmarksForIndex aggregates local+file+sync+browser with storage field"
+      - "getBookmarkForUrl: 2C race pinboard/local/file/sync only; consult browser via resolve or when no other non-empty candidate"
+      - "moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index; targetBackend may be browser"
+      - "Resolve provider: (valid data.preferredBackend) || getBackendForUrl(url) || defaultStorageMode; map to one of five providers (pinboard, local, file, sync, browser)"
+    summary: "BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, browserProvider, storageIndex, defaultStorageMode."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add IMPL-MOVE_BOOKMARK_UI to composed_with"
+      date: "2026-07-29"
+      reason: "Align index row with detail/sidecar for browser fifth provider and 2C"
   name: "Bookmark Router"
   rationale:
     benefits:
-      - "getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL"
-      - "getRecentBookmarks aggregates pinboard + local + file + sync, sorted by time"
-      - "getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI"
+      - "deleteBookmark accepts url string or { url, preferredBackend }; Index Delete passes preferredBackend from Storage column (REQ-LOCAL_BOOKMARKS_INDEX)"
+      - "getAllBookmarksForIndex aggregates local + file + sync + browser with storage field"
+      - "getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL; 2C excludes browser from best-of race (REQ-BROWSER_BOOKMARK_STORAGE)"
+      - "getRecentBookmarks aggregates pinboard + local + file + sync + browser, sorted by time"
+      - "getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI including browser"
       - "saveBookmark honors data.preferredBackend (popup UI selection) so save follows the highlight (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)"
     problems_solved:
       - "Save not following highlighted storage when creating bookmark from popup"
       - "Single provider cannot support per-bookmark backends"
-    why: "Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks; save follows popup UI selection when preferredBackend is sent"
+    why: "Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks; save and delete follow preferredBackend when sent (popup Save to / Index Storage column)."
   related_decisions:
     composed_with:
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-FILE_BOOKMARK_SERVICE"
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
       - "IMPL-MOVE_BOOKMARK_UI"
       - "IMPL-STORAGE_INDEX"
+      - "IMPL-SYNC_BOOKMARK_SERVICE"
     depends_on:
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
       - "IMPL-STORAGE_INDEX"
     see_also:
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-FILE_BOOKMARK_SERVICE"
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
     supersedes: []
   status: "Active"
+  summary: "BookmarkRouter with five providers (pinboard/local/file/sync/browser); preferredBackend; 2C getBookmarkForUrl; aggregate index includes browser; moveBookmarkToStorage."
   traceability:
     architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "IMPL-BOOKMARK_ROUTER"
     requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
       - "REQ-STORAGE_MODE_DEFAULT"
     tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/unit/bookmark-router.test.js"
 IMPL-BOOKMARK_STATE_SYNC:
   code_locations:
@@ -678,6 +693,11 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
       - "REQ-BROWSER_BOOKMARK_IMPORT"
     tests:
       - "tests/unit/browser-bookmark-import.test.js"
+IMPL-BROWSER_BOOKMARK_SERVICE:
+  detail_file: "implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml"
+  name: "Browser Bookmark Service"
+  status: "Active"
+  summary: "BrowserBookmarkService in src/features/storage/browser-bookmark-service.js over chrome.bookmarks; folder path tags with root strip; URL collapse; wired as BookmarkRouter fifth provider."
 IMPL-CODE_STYLE:
   code_locations:
     files:
@@ -1573,25 +1593,25 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
         file: "src/features/storage/bookmark-router.js"
   cross_references:
     - "ARCH-LOCAL_BOOKMARKS_INDEX"
-    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml"
-  essence_pseudocode: "INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)\nOUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list\nDATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode\n\nON page load:\n  SEND getAggregatedBookmarksForIndex\n  ON response: SET allBookmarks = response.bookmarks (each item has storage \"local\"|\"file\"|\"sync\")\n  ON failure: SEND getLocalBookmarksForIndex; SET allBookmarks = response.bookmarks with storage \"local\"\n  applySearchAndFilter()\n\napplySearchAndFilter():\n  filteredBookmarks = allBookmarks\n  APPLY stores filter (matchStoresFilter, getAllowedStores)\n  APPLY search (text)\n  APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)\n  APPLY exclude tags (matchExcludeTags)\n  SORT by sortKey (e.g. time desc)\n  renderTableBody(filteredBookmarks); updateRowCount()\n\nEntry points:\n  Popup: bookmarksIndexBtn click -> openBookmarksIndex -> open tab to bookmarks-table.html\n  Options: bookmarks-index-link href -> extension URL to bookmarks-table.html\n"
+  essence_pseudocode: ""
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX-pseudocode.md"
   implementation_approach:
     details:
-      - "BookmarkRouter.getAllBookmarksForIndex(): aggregates localProvider.getAllBookmarks() and fileProvider.getAllBookmarks(), adds storage 'local'|'file', merges and sorts by time desc"
-      - "MessageHandler: handleGetAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() when available; handleGetLocalBookmarksForIndex uses LocalBookmarkService only (fallback)"
-      - "Popup: bookmarksIndexBtn emits openBookmarksIndex; PopupController.handleOpenBookmarksIndex opens tab. Options: bookmarks-index-link href set to extension URL"
-      - "src/ui/bookmarks-table/: HTML (search, filters, table with Storage column, empty state), JS (loadBookmarks uses aggregated then fallback, renderTableBody shows Storage, sort by storage), CSS (table, sort indicators)"
-    summary: "Index page sends getAggregatedBookmarksForIndex first (BookmarkRouter.getAllBookmarksForIndex), fallback getLocalBookmarksForIndex; bookmarks-table with Storage column (Local | File), search/filter/sort/launch; entry point from popup/options"
+      - "Backend filter Store L/F/Y/B (local/file/sync/browser)"
+      - "Delete passes preferredBackend from Storage column"
+      - "getAllBookmarksForIndex aggregates local+file+sync+browser with storage field"
+    summary: "Bookmarks Index UI aggregates local/file/sync/browser; Store B for browser."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-13T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical detail rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-29"
+      reason: "Clear stale inline essence; align with browser aggregate sidecar"
     last_validated:
       date: "2026-02-13T00:00:00.000Z"
       result: "pass"
@@ -1599,10 +1619,10 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   name: "Local Bookmarks Index Implementation"
   rationale:
     benefits:
-      - "getAggregatedBookmarksForIndex (router aggregates local + file) with fallback getLocalBookmarksForIndex; table page with Storage column"
+      - "Users can filter and manage browser bookmarks in the Index alongside local/file/sync"
     problems_solved:
-      - "No single view of local and file bookmarks"
-    why: "Implement full index of local and file bookmarks with Storage column, search, filter, sort, launch"
+      - "Index previously omitted chrome.bookmarks-backed rows"
+    why: "Aggregate and filter Index rows across local/file/sync/browser with storage field."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"
@@ -1616,18 +1636,17 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
     supersedes: []
   status: "Active"
+  summary: "Bookmarks Index aggregates local+file+sync+browser; Store B filter; preferredBackend on delete."
   traceability:
     architecture:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
-      - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "IMPL-LOCAL_BOOKMARKS_INDEX"
     requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-LOCAL_BOOKMARKS_INDEX"
     tests:
       - "tests/unit/bookmarks-table-index.test.js"
-      - "tests/unit/bookmarks-table-time.test.js"
-      - "tests/unit/message-handler-bookmarks-index.test.js"
 IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   code_locations:
     files:
@@ -3781,29 +3800,32 @@ IMPL-STORAGE_INDEX:
         description: "StorageIndex implementation"
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
   detail_file: "implementation-decisions/IMPL-STORAGE_INDEX.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-STORAGE_INDEX-pseudocode.md"
   implementation_approach:
     details:
-      - "Index shape: { url: 'pinboard'|'local'|'file' }"
-      - "Migration: on first use, seed from LocalBookmarkService.getAllBookmarks() -> setBackendForUrl(url, 'local')"
-    summary: "StorageIndex class in src/features/storage/storage-index.js; chrome.storage.local."
+      - "Index shape: { url: pinboard|local|file|sync|browser }"
+      - "Migration: on first use, seed from LocalBookmarkService.getAllBookmarks() -> setBackendForUrl(url, local)"
+      - "VALID_BACKENDS includes browser"
+    summary: "StorageIndex class in src/features/storage/storage-index.js; chrome.storage.local; VALID_BACKENDS pinboard|local|file|sync|browser."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-14"
-      reason: "Storage index per plan"
+      date: "2026-07-29"
+      reason: "Align index row with detail for browser backend"
   name: "Storage Index"
   rationale:
     benefits:
       - "getIndex(), setBackendForUrl(url, backend), getBackendForUrl(url), removeUrl(url)"
-      - "Key: hoverboard_storage_index"
+      - "Key hoverboard_storage_index"
     problems_solved:
       - "Need to know which backend owns each URL"
-    why: "Persist per-URL storage backend (pinboard|local|file) in chrome.storage.local"
+    why: "Persist per-URL storage backend (pinboard|local|file|sync|browser) in chrome.storage.local so the router and UI know which backend owns each URL."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"
@@ -3814,14 +3836,17 @@ IMPL-STORAGE_INDEX:
       - "IMPL-BOOKMARK_ROUTER"
     supersedes: []
   status: "Active"
+  summary: "StorageIndex maps URL to pinboard|local|file|sync|browser in chrome.storage.local; VALID_BACKENDS includes browser."
   traceability:
     architecture:
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "IMPL-STORAGE_INDEX"
     requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/unit/storage-index.test.js"
 IMPL-SUGGESTED_TAGS:
   code_locations:

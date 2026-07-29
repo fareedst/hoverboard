@@ -42,6 +42,7 @@ const elements = {
   storeLocal: document.getElementById('store-local'),
   storeFile: document.getElementById('store-file'),
   storeSync: document.getElementById('store-sync'),
+  storeBrowser: document.getElementById('store-browser'),
   filterTags: document.getElementById('filter-tags'),
   filterToread: document.getElementById('filter-toread'),
   filterPrivate: document.getElementById('filter-private'),
@@ -112,6 +113,7 @@ function getAllowedStores () {
   if (elements.storeLocal && elements.storeLocal.checked) set.add('local')
   if (elements.storeFile && elements.storeFile.checked) set.add('file')
   if (elements.storeSync && elements.storeSync.checked) set.add('sync')
+  if (elements.storeBrowser && elements.storeBrowser.checked) set.add('browser')
   return set
 }
 
@@ -230,7 +232,8 @@ function renderTableBody () {
     )
     const shared = b.shared === 'no' ? 'Private' : 'Public'
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
-    const storage = escapeHtml(b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local'))
+    const storageLabel = b.storage === 'browser' ? 'Browser' : (b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local'))
+    const storage = escapeHtml(storageLabel)
     const urlLink = b.url
       ? `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" class="url-link" title="Opens in new tab">${urlEsc}<span class="url-external-icon" aria-hidden="true">↗</span></a>`
       : urlEsc
@@ -497,8 +500,8 @@ function toggleEmptyState () {
   const showEmpty = noStoreChecked || noData
   if (elements.emptyStateMessage) {
     elements.emptyStateMessage.textContent = noStoreChecked
-      ? 'Select at least one store (Local, File, Sync) to show bookmarks.'
-      : 'No local, file, or sync bookmarks. This index shows bookmarks stored in your browser (Local or Sync) or in a file you chose (File). Use Options to set Storage Mode and add bookmarks to see them here.'
+      ? 'Select at least one store (Local, File, Sync, Browser) to show bookmarks.'
+      : 'No local, file, sync, or browser bookmarks. This index shows bookmarks in Local/Sync storage, a File you chose, or native Browser bookmarks. Use Options to set Storage Mode and add bookmarks to see them here.'
   }
   elements.emptyState.classList.toggle('hidden', !showEmpty)
   elements.tableWrapper.classList.toggle('hidden', showEmpty)
@@ -714,6 +717,7 @@ function init () {
   if (elements.storeLocal) elements.storeLocal.addEventListener('change', handleStoreFilterChange)
   if (elements.storeFile) elements.storeFile.addEventListener('change', handleStoreFilterChange)
   if (elements.storeSync) elements.storeSync.addEventListener('change', handleStoreFilterChange)
+  if (elements.storeBrowser) elements.storeBrowser.addEventListener('change', handleStoreFilterChange)
   if (elements.filterTags) elements.filterTags.addEventListener('input', applySearchAndFilter)
   if (elements.filterToread) elements.filterToread.addEventListener('change', applySearchAndFilter)
   if (elements.filterPrivate) elements.filterPrivate.addEventListener('change', applySearchAndFilter)

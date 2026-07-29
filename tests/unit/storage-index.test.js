@@ -69,4 +69,9 @@ describe('StorageIndex [REQ-PER_BOOKMARK_STORAGE_BACKEND] [IMPL-STORAGE_INDEX]',
     expect(await index.getBackendForUrl('https://c.com')).toBe('file')
     expect(await index.getBackendForUrl('https://d.com')).toBe('sync')
   })
+
+  test('accepts browser backend [REQ-BROWSER_BOOKMARK_STORAGE] [IMPL-STORAGE_INDEX]', async () => {
+    await index.setBackendForUrl('https://chrome.example', 'browser')
+    expect(await index.getBackendForUrl('https://chrome.example')).toBe('browser')
+  })
 })

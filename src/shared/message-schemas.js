@@ -42,7 +42,7 @@ export const saveBookmarkDataSchema = z.object({
 // deleteBookmark: data.url required; optional preferredBackend for Index Delete [REQ-LOCAL_BOOKMARKS_INDEX]
 export const deleteBookmarkDataSchema = z.object({
   url: requiredUrlSchema,
-  preferredBackend: z.enum(['pinboard', 'local', 'file', 'sync']).optional()
+  preferredBackend: z.enum(['pinboard', 'local', 'file', 'sync', 'browser']).optional()
 }).strict()
 
 // saveTag: url and value (tag name) required
@@ -60,7 +60,7 @@ export const deleteTagDataSchema = z.object({
 // [IMPL-RUNTIME_VALIDATION] moveBookmarkToStorage: url and targetBackend required (per-bookmark storage move)
 export const moveBookmarkToStorageDataSchema = z.object({
   url: requiredUrlSchema,
-  targetBackend: z.string().min(1)
+  targetBackend: z.enum(['pinboard', 'local', 'file', 'sync', 'browser'])
 }).strict()
 
 // [REQ-BOOKMARK_USAGE_TRACKING] [IMPL-BOOKMARK_USAGE_TRACKING] getBookmarkUsage: optional url (single) or omit for all

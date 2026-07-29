@@ -1,0 +1,52 @@
+IMPL-BROWSER_BOOKMARK_SERVICE:
+  code_locations:
+    files:
+      - path: "src/features/storage/browser-bookmark-service.js"
+        description: "BrowserBookmarkService implementation"
+      - path: "src/ui/browser-bookmark-import/browser-bookmark-import-utils.js"
+        description: "Shared flatten, stripRoots, collapseByUrl helpers"
+  cross_references:
+    - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE-pseudocode.md"
+  implementation_approach:
+    summary: "BrowserBookmarkService in src/features/storage/browser-bookmark-service.js; shared helpers in browser-bookmark-import-utils.js for flatten, stripChromeRootSegments, folderPathToTags(stripRoots), collapseByUrl."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-29"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Wire tests and code locations after implementation"
+  name: "Browser Bookmark Service"
+  rationale:
+    benefits:
+      - "Index and Save-to can use native Chrome bookmarks"
+    problems_solved: []
+    why: "Implements chrome.bookmarks provider with same duck-typed contract as LocalBookmarkService so BookmarkRouter can delegate browser backend ops."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-STORAGE_INDEX"
+    depends_on: []
+    see_also:
+      - "IMPL-BROWSER_BOOKMARK_IMPORT"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    code_annotations:
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
+    requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/browser-bookmark-service.test.js"

@@ -4,24 +4,24 @@ REQ-STORAGE_MODE_DEFAULT:
   cross-references: "ARCH-LOCAL_STORAGE_PROVIDER, ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-LOCAL_BOOKMARK_SERVICE, IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI"
   detail_file: "requirements/REQ-STORAGE_MODE_DEFAULT.yaml"
   how_validated:
-    - "`getStorageMode()` returns `'local'` when no stored override, `'pinboard'` when stored, and `'pinboard'` for invalid stored value (fallback)."
-    - "`setStorageMode('local')` and `setStorageMode('pinboard')` call `updateConfig` with the correct value; invalid mode throws."
-    - "Default configuration includes `storageMode: 'local'`."
-    - "Unit tests in `tests/unit/config-manager.test.js`:"
+    - "Default configuration includes storageMode: local."
+    - "getStorageMode() returns local when no stored override, pinboard/file/sync/browser when stored, and pinboard for invalid stored value (fallback)."
+    - "setStorageMode accepts local|pinboard|file|sync|browser; invalid mode throws."
+    - "Unit tests in tests/unit/config-manager.test.js including browser mode."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "Save-follows-highlight criterion and traceability (IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI)"
+      date: "2026-07-29"
+      reason: "LEAP: Options Storage Mode includes Browser"
     last_validated:
       date: "2026-02-18"
       result: "pass"
       validator: "MCP converter"
   name: "Storage Mode Default and Dual-Use"
-  options_page: "Storage Mode section with radios \"Local Storage (offline)\" and \"Pinboard (cloud)\"; selection is persisted and triggers provider swap via `SWITCH_STORAGE_MODE` message."
+  options_page: "Storage Mode section with radios Local Storage (offline), Pinboard (cloud), File, Sync, and Browser (native Chrome bookmarks); selection is persisted and triggers provider swap via SWITCH_STORAGE_MODE message."
   priority: "P1"
   purpose:
     - "Make the dual-use case explicit: local-first, Pinboard optional."
@@ -37,24 +37,30 @@ REQ-STORAGE_MODE_DEFAULT:
     - "REQ-CHROME_STORAGE_USAGE (storage API usage)"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "See detail file"
-    - criterion: "When the popup shows a storage backend as selected (e.g. default Local), saving a bookmark uses that backend so save follows the highlight (REQ-MOVE_BOOKMARK_STORAGE_UI, IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI)."
+    - criterion: "Default config has storageMode local"
+    - criterion: "Options page allows switching among Local, Pinboard, File, Sync, and Browser storage modes"
+    - criterion: "Service worker uses active provider from config; no external service required for default path"
+    - criterion: "When popup shows a storage backend as selected, saving a bookmark uses that backend (save follows the highlight)"
   status: "Implemented"
-  summary: "The extension supports two bookmark storage modes: **local** (chrome.storage.local) and **Pinboard** (Pinboard.in API). The **default is local** so most users can use the extension without creating an account or configuring an API token. Users who want cloud sync may switch to Pinboard in the Options page (Storage Mode)."
+  summary: "The extension supports bookmark storage modes local, pinboard, file, sync, and browser. The default is local so most users need no account. Users may switch modes in Options (Storage Mode) and per-bookmark via Save to."
   traceability:
     architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-LOCAL_STORAGE_PROVIDER"
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "REQ-STORAGE_MODE_DEFAULT"
     implementation:
       - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
       - "IMPL-MOVE_BOOKMARK_UI"
-    tests: []
+    tests:
+      - "tests/unit/config-manager.test.js"
   validation_criteria:
     - method: "Manual verification"
       coverage: "See detail file"

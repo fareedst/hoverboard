@@ -283,3 +283,69 @@ describe('[IMPL-FILE_BOOKMARK_SERVICE] [REQ-FILE_BOOKMARK_STORAGE] FileBookmarkS
     await expect(service.deleteBookmark(url)).rejects.toThrow()
   })
 })
+
+describe('[REQ-BROWSER_BOOKMARK_STORAGE] [IMPL-BOOKMARK_ROUTER] [IMPL-MESSAGE_HANDLING] browser aggregate and move composition', () => {
+  test('getAggregatedBookmarksForIndex includes browser storage; moveBookmarkToStorage target browser', async () => {
+    const localProvider = new LocalBookmarkService(null)
+    const browserProvider = {
+      getBookmarkForUrl: jest.fn(async (url) => ({
+        url,
+        description: 'Chrome',
+        extended: '',
+        tags: ['work'],
+        time: '2026-02-14T15:00:00.000Z',
+        updated_at: '2026-02-14T15:00:00.000Z',
+        shared: 'yes',
+        toread: 'no',
+        hash: ''
+      })),
+      saveBookmark: jest.fn(async () => ({ success: true, code: 'done', message: 'ok' })),
+      deleteBookmark: jest.fn(async () => ({ success: true, code: 'done', message: 'ok' })),
+      getRecentBookmarks: jest.fn(async () => []),
+      saveTag: jest.fn(async () => ({ success: true })),
+      deleteTag: jest.fn(async () => ({ success: true })),
+      getAllBookmarks: jest.fn(async () => [{
+        url: 'https://example.com/browser-row',
+        description: 'Chrome row',
+        tags: ['work'],
+        time: '2026-02-14T15:00:00.000Z',
+        updated_at: '2026-02-14T15:00:00.000Z',
+        shared: 'yes',
+        toread: 'no',
+        hash: ''
+      }]),
+      testConnection: jest.fn(async () => true)
+    }
+    const storageIndex = new StorageIndex()
+    await localProvider.saveBookmark({
+      url: 'https://example.com/local-row',
+      description: 'Local row',
+      tags: ['a'],
+      time: '2026-02-14T12:00:00.000Z'
+    })
+    await storageIndex.setBackendForUrl('https://example.com/local-row', 'local')
+
+    const router = new BookmarkRouter(
+      stubProvider(),
+      localProvider,
+      stubProvider(),
+      stubProvider(),
+      storageIndex,
+      () => Promise.resolve('local'),
+      browserProvider
+    )
+    const handler = new MessageHandler(router)
+
+    const agg = await handler.processMessage({ type: 'getAggregatedBookmarksForIndex' }, {})
+    expect(agg.bookmarks.some(b => b.storage === 'browser')).toBe(true)
+    expect(agg.bookmarks.some(b => b.storage === 'local')).toBe(true)
+
+    const move = await handler.processMessage(
+      { type: 'moveBookmarkToStorage', data: { url: 'https://example.com/local-row', targetBackend: 'browser' } },
+      {}
+    )
+    expect(move.success).toBe(true)
+    expect(browserProvider.saveBookmark).toHaveBeenCalled()
+    expect(await storageIndex.getBackendForUrl('https://example.com/local-row')).toBe('browser')
+  })
+})

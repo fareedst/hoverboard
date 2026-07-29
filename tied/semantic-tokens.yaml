@@ -96,6 +96,22 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-BROWSER_BOOKMARK_PROVIDER:
+  cross_references:
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-BROWSER_BOOKMARK_SERVICE"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+  description: "Registry entry for ARCH-BROWSER_BOOKMARK_PROVIDER."
+  detail_file: "architecture-decisions/ARCH-BROWSER_BOOKMARK_PROVIDER.yaml"
+  metadata:
+    last_updated: "2026-07-29T00:00:00.000Z"
+    registered: "2026-07-29T00:00:00.000Z"
+  name: "Browser Bookmarks Storage Provider"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-CODE_QUALITY:
   cross_references:
     - "REQ-CODE_QUALITY"
@@ -1001,6 +1017,21 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Browser Bookmark Import Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BROWSER_BOOKMARK_SERVICE:
+  cross_references:
+    - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+  description: "Registry entry for IMPL-BROWSER_BOOKMARK_SERVICE."
+  detail_file: "implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml"
+  metadata:
+    last_updated: "2026-07-29T00:00:00.000Z"
+    registered: "2026-07-29T00:00:00.000Z"
+  name: "Browser Bookmark Service"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -2518,6 +2549,23 @@ REQ-BROWSER_BOOKMARK_IMPORT:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Browser Bookmark Import Page"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-BROWSER_BOOKMARK_STORAGE:
+  cross_references:
+    - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-BROWSER_BOOKMARK_SERVICE"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    - "IMPL-STORAGE_INDEX"
+  description: "Registry entry for REQ-BROWSER_BOOKMARK_STORAGE."
+  detail_file: "requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml"
+  metadata:
+    last_updated: "2026-07-29T00:00:00.000Z"
+    registered: "2026-07-29T00:00:00.000Z"
+  name: "Browser Bookmark Storage Backend"
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"

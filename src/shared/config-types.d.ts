@@ -3,7 +3,7 @@
  * Type definitions for merged extension config (aligned with ConfigManager.getDefaultConfiguration and mergedConfigSchema).
  */
 
-export type StorageMode = 'local' | 'pinboard' | 'file' | 'sync'
+export type StorageMode = 'local' | 'pinboard' | 'file' | 'sync' | 'browser'
 
 export interface MergedConfig {
   storageMode?: StorageMode

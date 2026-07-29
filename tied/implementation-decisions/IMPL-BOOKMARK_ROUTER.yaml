@@ -5,9 +5,10 @@ IMPL-BOOKMARK_ROUTER:
         description: "BookmarkRouter implementation"
     functions: []
   cross_references:
+    - "ARCH-BROWSER_BOOKMARK_PROVIDER"
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
-    - "IMPL-MOVE_BOOKMARK_UI"
-    - "IMPL-STORAGE_INDEX"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
@@ -15,9 +16,11 @@ IMPL-BOOKMARK_ROUTER:
   essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_ROUTER-pseudocode.md"
   implementation_approach:
     details:
-      - "moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index"
-      - "Resolve provider: (valid data.preferredBackend) || getBackendForUrl(url) || defaultStorageMode; map to one of four providers (pinboard, local, file, sync)"
-    summary: "BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, defaultStorageMode."
+      - "getAllBookmarksForIndex aggregates local+file+sync+browser with storage field"
+      - "getBookmarkForUrl: 2C race pinboard/local/file/sync only; consult browser via resolve or when no other non-empty candidate"
+      - "moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index; targetBackend may be browser"
+      - "Resolve provider: (valid data.preferredBackend) || getBackendForUrl(url) || defaultStorageMode; map to one of five providers (pinboard, local, file, sync, browser)"
+    summary: "BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, browserProvider, storageIndex, defaultStorageMode."
   metadata:
     created:
       author: "MCP converter"
@@ -25,7 +28,7 @@ IMPL-BOOKMARK_ROUTER:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Composition: preferredBackend delete via MessageHandler"
+      reason: "LEAP close-loop: five-provider summaries and rationale"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -34,9 +37,10 @@ IMPL-BOOKMARK_ROUTER:
   rationale:
     benefits:
       - "deleteBookmark accepts url string or { url, preferredBackend }; Index Delete passes preferredBackend from Storage column (REQ-LOCAL_BOOKMARKS_INDEX)"
-      - "getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL"
-      - "getRecentBookmarks aggregates pinboard + local + file + sync, sorted by time"
-      - "getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI"
+      - "getAllBookmarksForIndex aggregates local + file + sync + browser with storage field"
+      - "getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL; 2C excludes browser from best-of race (REQ-BROWSER_BOOKMARK_STORAGE)"
+      - "getRecentBookmarks aggregates pinboard + local + file + sync + browser, sorted by time"
+      - "getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI including browser"
       - "saveBookmark honors data.preferredBackend (popup UI selection) so save follows the highlight (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)"
     problems_solved:
       - "Save not following highlighted storage when creating bookmark from popup"
@@ -44,24 +48,29 @@ IMPL-BOOKMARK_ROUTER:
     why: "Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks; save and delete follow preferredBackend when sent (popup Save to / Index Storage column)."
   related_decisions:
     composed_with:
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-FILE_BOOKMARK_SERVICE"
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
       - "IMPL-MOVE_BOOKMARK_UI"
       - "IMPL-STORAGE_INDEX"
+      - "IMPL-SYNC_BOOKMARK_SERVICE"
     depends_on:
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
       - "IMPL-STORAGE_INDEX"
     see_also:
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-FILE_BOOKMARK_SERVICE"
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
     supersedes: []
   status: "Active"
   traceability:
     architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "IMPL-BOOKMARK_ROUTER"
     requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-LOCAL_BOOKMARKS_INDEX"
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"

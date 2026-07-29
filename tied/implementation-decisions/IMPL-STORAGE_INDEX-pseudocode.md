@@ -1,9 +1,9 @@
-# [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+# [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-BROWSER_BOOKMARK_STORAGE]
 # Per-URL backend in chrome.storage.local; getIndex, getBackendForUrl, setBackendForUrl, removeUrl; migration from local bookmarks.
 # Contract: storage key and optional provider; index map and persistence.
 INPUT: storage key (hoverboard_storage_index), optional localBookmarkProvider for migration
-OUTPUT: index map url -> backend (pinboard|local|file)
-DATA: index = map of url string to backend string; persisted in chrome.storage.local
+OUTPUT: index map url -> backend (pinboard|local|file|sync|browser)
+DATA: index = map of url string to backend string; persisted in chrome.storage.local; VALID_BACKENDS includes browser
 
 # Load and return index from storage (or {}).
 getIndex():

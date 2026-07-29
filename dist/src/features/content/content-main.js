@@ -15427,7 +15427,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
       "use strict";
       init_zod();
       mergedConfigSchema = external_exports.object({
-        storageMode: external_exports.enum(["local", "pinboard", "file", "sync"]).optional(),
+        storageMode: external_exports.enum(["local", "pinboard", "file", "sync", "browser"]).optional(),
         hoverShowRecentTags: external_exports.boolean().optional(),
         hoverShowTooltips: external_exports.boolean().optional(),
         showHoverOnPageLoad: external_exports.boolean().optional(),
@@ -15680,7 +15680,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         }
         /**
          * Get bookmark storage mode (default backend for new bookmarks when using router).
-         * @returns {Promise<string>} 'pinboard', 'local', 'file', or 'sync'
+         * @returns {Promise<string>} 'pinboard', 'local', 'file', 'sync', or 'browser'
          *
          * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Storage mode for provider selection and default for new bookmarks
          * IMPLEMENTATION DECISION: Stored in settings blob; invalid values fall back to 'local'
@@ -15688,17 +15688,17 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         async getStorageMode() {
           const config2 = await this.getConfig();
           const mode = config2.storageMode;
-          return mode === "local" || mode === "pinboard" || mode === "file" || mode === "sync" ? mode : "local";
+          return mode === "local" || mode === "pinboard" || mode === "file" || mode === "sync" || mode === "browser" ? mode : "local";
         }
         /**
          * Set bookmark storage mode
-         * @param {string} mode - 'pinboard', 'local', 'file', or 'sync'
+         * @param {string} mode - 'pinboard', 'local', 'file', 'sync', or 'browser'
          *
-         * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Persist storage mode
+         * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-BROWSER_BOOKMARK_STORAGE] Persist storage mode
          */
         async setStorageMode(mode) {
-          if (mode !== "pinboard" && mode !== "local" && mode !== "file" && mode !== "sync") {
-            throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', 'file', or 'sync'.`);
+          if (mode !== "pinboard" && mode !== "local" && mode !== "file" && mode !== "sync" && mode !== "browser") {
+            throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', 'file', 'sync', or 'browser'.`);
           }
           await this.updateConfig({ storageMode: mode });
         }
@@ -27361,7 +27361,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   }).passthrough();
   var deleteBookmarkDataSchema = external_exports.object({
     url: requiredUrlSchema,
-    preferredBackend: external_exports.enum(["pinboard", "local", "file", "sync"]).optional()
+    preferredBackend: external_exports.enum(["pinboard", "local", "file", "sync", "browser"]).optional()
   }).strict();
   var saveTagDataSchema = external_exports.object({
     url: requiredUrlSchema,
@@ -27373,7 +27373,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
   }).strict();
   var moveBookmarkToStorageDataSchema = external_exports.object({
     url: requiredUrlSchema,
-    targetBackend: external_exports.string().min(1)
+    targetBackend: external_exports.enum(["pinboard", "local", "file", "sync", "browser"])
   }).strict();
   var getBookmarkUsageDataSchema = external_exports.object({
     url: external_exports.string().optional().nullable()

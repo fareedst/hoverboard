@@ -1,0 +1,62 @@
+REQ-BROWSER_BOOKMARK_STORAGE:
+  category: "Functional"
+  description: "Treat the browser native bookmark store (chrome.bookmarks) as a fifth BookmarkRouter storage backend (id browser), peer to local/file/sync for Local Bookmarks Index Stores (Browser B), Save to, default storage mode, move, import, export, tags, and regex replace. Folder path segments become tags after stripping Chrome root labels (Bookmarks Bar / Other bookmarks; prefer folder ids 1/2). Duplicate Chrome nodes for the same URL collapse to one index row; mutations apply to all matching nodes. Chrome has no shared/toread/extended: read shared yes, toread no, extended empty; writes of those fields are no-ops. getBookmarkForUrl must not put browser in the multi-backend best-of race with pinboard/local/file/sync; consult browser only when preferredBackend/storage index/default storage mode resolves to browser, or when no other non-empty candidate exists."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-29"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "tied_verify after unit/composition tests pass"
+  name: "Browser Bookmark Storage Backend"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Avoids Chrome folder-tags stealing ownership of Hoverboard-stored URLs via 2C resolve rule"
+      - "Full parity filter/search/move/import/export/tags on native bookmarks"
+    problems_solved:
+      - "Native Chrome bookmarks are only available via side-panel Bookmarks and Browser Bookmark Import, not as a storage backend peer"
+    why: "Users need to manage native Chrome bookmarks with the same index and move/tag tooling as Hoverboard-local stores without copying through Browser Bookmark Import."
+  related_requirements:
+    depends_on:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_IMPORT"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-STORAGE_MODE_DEFAULT"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Canonical terms in tied/vocab/storage-backends.md and bookmarks-index.md"
+    - criterion: "Duplicate URL Chrome nodes collapse to one index row with merged tags; delete/save apply to all matching nodes"
+    - criterion: "Folder path segments map to tags with Chrome root strip; writes ensure nested folders under Other Bookmarks"
+    - criterion: "getBookmarkForUrl excludes browser from best-of unless preferred/index/default is browser or no other non-empty candidate"
+    - criterion: "Local Bookmarks Index Stores includes Browser (B) checkbox; aggregate getAllBookmarksForIndex tags storage browser; Pinboard stays out of index aggregation"
+    - criterion: "shared/toread/extended: documented read defaults and write no-ops on browser backend"
+    - criterion: "VALID_BACKENDS and StorageMode include browser alongside pinboard|local|file|sync"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    code_annotations:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+    implementation:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-STORAGE_INDEX"
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/bookmarks-table-index.test.js"
+      - "tests/unit/browser-bookmark-service.test.js"
+      - "tests/unit/config-manager.test.js"
+      - "tests/unit/storage-index.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "browser-bookmark-service.test.js; bookmark-router.test.js 2C and aggregate; storage-index.test.js; bookmarks-table-index.test.js matchStoresFilter; config-manager.test.js storageMode browser"
+    - method: "Composition"
+      coverage: "message-handler-router-storage.integration.test.js move/aggregate with browser"

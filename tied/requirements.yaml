@@ -342,6 +342,13 @@ REQ-BROWSER_BOOKMARK_IMPORT:
   validation_criteria:
     - method: "Manual verification"
       coverage: "Load page, filter, select, import with each conflict mode; confirm result and data in index"
+REQ-BROWSER_BOOKMARK_STORAGE:
+  category: "Functional"
+  detail_file: "requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml"
+  name: "Browser Bookmark Storage Backend"
+  priority: "P1"
+  status: "Implemented"
+  summary: "Fifth storage backend id browser over chrome.bookmarks; Local Bookmarks Index Store Browser (B) with full parity to Local/File/Sync; folder path maps to tags with Chrome root strip; URL-keyed collapse; getBookmarkForUrl excludes browser from best-of race unless preferred/index/default resolves to browser or no other non-empty candidate."
 REQ-CHROME_STORAGE_USAGE:
   category: "Immutable"
   detail_file: "requirements/REQ-CHROME_STORAGE_USAGE.yaml"
@@ -2503,6 +2510,7 @@ REQ-STORAGE_MODE_DEFAULT:
     - criterion: "Service worker uses active provider from config; no external service required for default path"
     - criterion: "When popup shows a storage backend as selected, saving a bookmark uses that backend (save follows the highlight)"
   status: "Implemented"
+  summary: "Default storage mode local; Options/Save-to support pinboard|local|file|sync|browser; save follows preferredBackend highlight."
   traceability:
     architecture:
       - "ARCH-LOCAL_STORAGE_PROVIDER"

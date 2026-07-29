@@ -1,11 +1,11 @@
-# [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX]
-# Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column.
+# [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE]
+# Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column; Stores L/F/S/B.
 # Contract: page load and user actions; displayed table and filtered list; state data.
 INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
 OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
-DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode
+DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
 
-# [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX]
+# [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE]
 # LOAD_LOCAL_BOOKMARKS_INDEX: aggregate first; treat error/success:false as failure even when bookmarks is []; then filter.
 LOAD_LOCAL_BOOKMARKS_INDEX:
   SEND getAggregatedBookmarksForIndex
@@ -13,7 +13,7 @@ LOAD_LOCAL_BOOKMARKS_INDEX:
     SEND getLocalBookmarksForIndex
     SET allBookmarks = response.bookmarks with storage "local"
   ELSE:
-    SET allBookmarks = response.bookmarks (each item has storage "local"|"file"|"sync")
+    SET allBookmarks = response.bookmarks (each item has storage "local"|"file"|"sync"|"browser")
   applySearchAndFilter()
 
 ON page load:
@@ -28,6 +28,11 @@ ON store checkbox change:
 
 shouldReloadBookmarksOnStoreChange(allBookmarksLength, allowedStoresSize):
   RETURN allBookmarksLength == 0 AND allowedStoresSize > 0
+
+# [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE]
+# getAllowedStores includes browser when #store-browser checked; Move/Import-to targets include browser.
+getAllowedStores():
+  SET from checked #store-local|#store-file|#store-sync|#store-browser → { local, file, sync, browser }
 
 # Apply stores filter, search, show-only, exclude tags; sort and render.
 applySearchAndFilter():

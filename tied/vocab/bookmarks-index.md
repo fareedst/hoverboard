@@ -4,7 +4,7 @@
 
 **Excludes:** Per-URL storage backend routing (see [`storage-backends.md`](storage-backends.md)); pin field semantics (see [`bookmarks.md`](bookmarks.md)); side-panel **Bookmarks** tab (browser `bookmarks.getTree` — see [`side-panel.md`](side-panel.md)).
 
-**Traceability:** [REQ-LOCAL_BOOKMARKS_INDEX](../requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml) · [REQ-BROWSER_BOOKMARK_IMPORT](../requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml) · [ARCH-LOCAL_BOOKMARKS_INDEX](../architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml) · [ARCH-BROWSER_BOOKMARK_IMPORT](../architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml) · [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) · [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml) · [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) · [IMPL-BROWSER_BOOKMARK_IMPORT](../implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml)
+**Traceability:** [REQ-LOCAL_BOOKMARKS_INDEX](../requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml) · [REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml) · [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE](../requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml) · [REQ-BROWSER_BOOKMARK_IMPORT](../requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml) · [ARCH-LOCAL_BOOKMARKS_INDEX](../architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml) · [ARCH-BROWSER_BOOKMARK_IMPORT](../architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml) · [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) · [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml) · [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml) · [IMPL-BROWSER_BOOKMARK_IMPORT](../implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml)
 
 **See also:** [`bookmarks.md`](bookmarks.md) · [`storage-backends.md`](storage-backends.md) · [`side-panel.md`](side-panel.md) · [`domain-references.md`](domain-references.md) · [`../../docs/BOOKMARK_IMPORT_EXPORT.md`](../../docs/BOOKMARK_IMPORT_EXPORT.md) (which surface for HTML vs rich CSV) · [`../../docs/BOOKMARK_HTML_FORMAT.md`](../../docs/BOOKMARK_HTML_FORMAT.md)
 
@@ -14,15 +14,16 @@
 
 | Preferred | Avoid / demote | Notes |
 |-----------|----------------|-------|
-| **Local Bookmarks Index** | bookmarks table, index page | Full-page table of Hoverboard-stored bookmarks (local+file+sync aggregation) |
+| **Local Bookmarks Index** | bookmarks table, index page | Full-page table of Hoverboard-stored bookmarks (local+file+sync+browser aggregation) |
 | **Storage column** | backend column | Shows which storage backend holds the row |
-| **Stores (L / F / S)** | store filters | Filter checkboxes for Local / File / Sync |
+| **Stores (L / F / S / B)** | Stores (L / F / S), store filters | Filter checkboxes for Local / File / Sync / Browser |
+| **Browser (B)** | Chrome store checkbox | Index Stores checkbox for **Browser storage (backend)** (`browser`) — not Pinboard, not side-panel Bookmarks |
 | **export scope** | export mode | `all` \| `displayed` \| `selected` |
 | **import conflict policy** | conflict mode | **Skip** \| **Overwrite** \| **Merge tags** |
 | **Browser Bookmark Import** | Chrome import page | Page that copies browser bookmarks into Hoverboard backends |
 | **Netscape Bookmark File Format** | bookmarks.html format | Doctype `NETSCAPE-Bookmark-file-1` |
 | **Use folder names as tags** | folder→tag | Import option mapping folder path to tags |
-| **Import to** | import target | Target backend Local \| File \| Sync |
+| **Import to** | import target | Target backend Local \| File \| Sync \| Browser |
 | **regex find-and-replace** | bulk replace | Title / URL / Tags / Notes fields on selection |
 | **index-open dismisses side panel** | close sidebar on index | On Local Bookmarks Index **tab create** (popup / command / context menu) only; broadcast `REQUEST_SIDE_PANEL_CLOSE`. Not on index page refresh. Toolbar icon may reopen the **side panel**. |
 
@@ -60,7 +61,8 @@
 - **import result pending / final** — Pending: `Importing…` (accepted, warning color). Final: `Imported N…` counts (success color). Same `#import-result` element.
 - **delete result pending / final** — Pending: `Deleting…` (accepted, warning color). Final: `Deleted N…` counts (success color). Same `#delete-result` element next to **Delete**.
 - **Netscape Bookmark File Format** — Interchange HTML with doctype `NETSCAPE-Bookmark-file-1` (see `docs/BOOKMARK_HTML_FORMAT.md`).
-- **store-change reload** — When a **Stores (L / F / S)** checkbox changes and `allBookmarks` is empty while at least one store is checked, re-run **LOAD_LOCAL_BOOKMARKS_INDEX** so a failed/empty first fetch can recover without a full page reload.
+- **store-change reload** — When a **Stores (L / F / S / B)** checkbox changes and `allBookmarks` is empty while at least one store is checked, re-run **LOAD_LOCAL_BOOKMARKS_INDEX** so a failed/empty first fetch can recover without a full page reload.
+- **Browser (B)** — Stores checkbox `#store-browser` for backend `browser` (native `chrome.bookmarks`); peer to Local/File/Sync for filter, move, and import targets.
 - **index-open dismisses side panel** — Creating the Local Bookmarks Index tab via popup, command, or context menu dismisses an already-open **side panel** (`REQUEST_SIDE_PANEL_CLOSE`). Refresh of the index document does not re-dismiss. Options page `href` open does not use this path.
 
 ---
@@ -102,7 +104,8 @@
 | regex find-and-replace | Preferred terms |
 | Skip / Overwrite / Merge tags | Named concepts |
 | Storage column | Preferred terms |
-| Stores (L / F / S) | Preferred terms |
+| Stores (L / F / S / B) | Preferred terms |
+| Browser (B) | Preferred terms |
 | store-change reload | Named concepts |
 | shouldReloadBookmarksOnStoreChange | Pseudo-code block names |
 | LOAD_LOCAL_BOOKMARKS_INDEX | Pseudo-code block names |

@@ -1,20 +1,30 @@
 ARCH-STORAGE_INDEX_AND_ROUTER:
   alternatives_considered: []
   cross-references: "REQ-PER_BOOKMARK_STORAGE_BACKEND, ARCH-LOCAL_STORAGE_PROVIDER, ARCH-FILE_BOOKMARK_PROVIDER, IMPL-STORAGE_INDEX, IMPL-BOOKMARK_ROUTER"
-  cross_references: &ref_0 []
-  decision: "A **storage index** in chrome.storage.local maps each bookmark URL to its backend (`pinboard` | `local` | `file` | `sync`). The **BookmarkRouter** holds references to all providers and delegates getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag to the provider indicated by the index (or the default storage mode for new bookmarks). When the popup provides a preferred backend (UI selection), the router uses it for save so save follows the highlight. getRecentBookmarks aggregates results from all providers and returns a single list sorted by time. MessageHandler uses the router as its bookmark provider (duck-typed)."
+  cross_references:
+    - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+    - "ARCH-FILE_BOOKMARK_PROVIDER"
+    - "ARCH-LOCAL_STORAGE_PROVIDER"
+    - "ARCH-SYNC_STORAGE_PROVIDER"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-STORAGE_INDEX"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  decision: "StorageIndex maps URL to pinboard|local|file|sync|browser. BookmarkRouter holds five providers; getAllBookmarksForIndex aggregates local+file+sync+browser; getBookmarkForUrl races pinboard/local/file/sync only (2C: browser consulted only via resolve or when no other non-empty candidate)."
   detail_file: "architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml"
   implementation_approach:
     details: []
-    summary: "A **storage index** in chrome.storage.local maps each bookmark URL to its backend (`pinboard` | `local` | `file` | `sync`). The **BookmarkRouter** holds references to all providers and delegates getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag to the provider indicated by the index (or the default storage mode for new bookmarks). When the popup sends a **preferred backend** (UI-selected storage), the router uses it for save so that save follows the highlighted option (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI). getRecentBookmarks aggregates results from all providers and returns a single list sorted by time. MessageHandler uses the router as its bookmark provider (duck-typed)."
+    summary: "A storage index in chrome.storage.local maps each bookmark URL to its backend (pinboard | local | file | sync | browser). The BookmarkRouter holds five providers and delegates get/save/delete/tag ops by index or default storage mode; preferredBackend on save/delete follows Save-to / Index Storage column. getBookmarkForUrl races pinboard/local/file/sync only (2C: browser consulted via resolve or when no other non-empty candidate). getAllBookmarksForIndex aggregates local+file+sync+browser. getRecentBookmarks aggregates all five. MessageHandler uses the router as bookmarkProvider."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "Preferred backend so save follows popup highlight"
+      date: "2026-07-29"
+      reason: "LEAP close-loop: sync summary/traceability with five-provider browser backend"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -28,14 +38,25 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
     - "ARCH-MOVE_BOOKMARK_UI (move = copy + delete + index update)"
     - "IMPL-STORAGE_INDEX, IMPL-BOOKMARK_ROUTER"
   related_decisions:
-    depends_on: *ref_0
+    depends_on: []
     informs: []
-    see_also: []
+    see_also:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
   status: "Active"
-  summary: "A **storage index** in chrome.storage.local maps each bookmark URL to its backend (`pinboard` | `local` | `file` | `sync`). The **BookmarkRouter** holds references to all providers and delegates getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag to the provider indicated by the index (or the default storage mode for new bookmarks). Popup can send a preferred backend so save follows the highlighted storage. getRecentBookmarks aggregates results from all providers and returns a single list sorted by time. MessageHandler uses the router as its bookmark provider (duck-typed)."
+  summary: "Storage index maps URL to pinboard|local|file|sync|browser. BookmarkRouter holds five providers; index aggregation includes browser; getBookmarkForUrl uses 2C exclusion for browser from best-of race."
   traceability:
     code_annotations:
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
-    implementation: []
-    requirements: *ref_0
-    tests: []
+    implementation:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
+      - "IMPL-STORAGE_INDEX"
+    requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+      - "REQ-STORAGE_MODE_DEFAULT"
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/storage-index.test.js"

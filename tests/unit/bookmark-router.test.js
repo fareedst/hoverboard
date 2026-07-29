@@ -1,5 +1,5 @@
 /**
- * [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI]
+ * [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-BROWSER_BOOKMARK_STORAGE]
  * Unit tests for BookmarkRouter.
  */
 
@@ -12,6 +12,7 @@ describe('BookmarkRouter [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] 
   let local
   let file
   let sync
+  let browser
   let storageIndex
   let defaultMode
 
@@ -45,6 +46,7 @@ describe('BookmarkRouter [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] 
     local = makeProvider('local')
     file = makeProvider('file')
     sync = makeProvider('sync')
+    browser = makeProvider('browser')
 
     let stored = {}
     global.chrome.storage.local.get.mockImplementation(async (key) => {
@@ -61,7 +63,7 @@ describe('BookmarkRouter [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] 
     })
     storageIndex = new StorageIndex()
     defaultMode = jest.fn().mockResolvedValue('local')
-    router = new BookmarkRouter(pinboard, local, file, sync, storageIndex, defaultMode)
+    router = new BookmarkRouter(pinboard, local, file, sync, storageIndex, defaultMode, browser)
   })
 
   test('getBookmarkForUrl uses default provider when URL not in index [REQ-PER_BOOKMARK_STORAGE_BACKEND]', async () => {
@@ -171,17 +173,20 @@ describe('BookmarkRouter [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] 
     expect(backend).toBe(null)
   })
 
-  test('getRecentBookmarks aggregates all four providers [IMPL-BOOKMARK_ROUTER]', async () => {
+  test('getRecentBookmarks aggregates all five providers including browser [IMPL-BOOKMARK_ROUTER] [REQ-BROWSER_BOOKMARK_STORAGE]', async () => {
     await pinboard.saveBookmark({ url: 'https://p.com', description: 'P', time: '2026-02-14T10:00:00.000Z' })
     await local.saveBookmark({ url: 'https://l.com', description: 'L', time: '2026-02-14T11:00:00.000Z' })
     await file.saveBookmark({ url: 'https://f.com', description: 'F', time: '2026-02-14T12:00:00.000Z' })
     await sync.saveBookmark({ url: 'https://s.com', description: 'S', time: '2026-02-14T13:00:00.000Z' })
+    await browser.saveBookmark({ url: 'https://b.com', description: 'B', time: '2026-02-14T14:00:00.000Z' })
     const list = await router.getRecentBookmarks(10)
-    expect(list.length).toBe(4)
+    expect(list.length).toBe(5)
+    expect(list.some(b => b.url === 'https://b.com')).toBe(true)
     expect(pinboard.getRecentBookmarks).toHaveBeenCalled()
     expect(local.getRecentBookmarks).toHaveBeenCalled()
     expect(file.getRecentBookmarks).toHaveBeenCalled()
     expect(sync.getRecentBookmarks).toHaveBeenCalled()
+    expect(browser.getRecentBookmarks).toHaveBeenCalled()
   })
 
   test('getStorageBackendForUrl returns index or default', async () => {
@@ -255,17 +260,75 @@ describe('BookmarkRouter [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] 
     expect(backend).toBe('local')
   })
 
-  test('getAllBookmarksForIndex includes local, file, and sync [REQ-LOCAL_BOOKMARKS_INDEX]', async () => {
+  test('getAllBookmarksForIndex includes local, file, sync, and browser [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE]', async () => {
     await local.saveBookmark({ url: 'https://l.com', description: 'L', time: '2026-02-14T11:00:00.000Z' })
     await file.saveBookmark({ url: 'https://f.com', description: 'F', time: '2026-02-14T12:00:00.000Z' })
     await sync.saveBookmark({ url: 'https://s.com', description: 'S', time: '2026-02-14T13:00:00.000Z' })
+    await browser.saveBookmark({ url: 'https://b.com', description: 'B', time: '2026-02-14T14:00:00.000Z', tags: ['chrome'] })
     const list = await router.getAllBookmarksForIndex()
     expect(list.some(b => b.storage === 'local')).toBe(true)
     expect(list.some(b => b.storage === 'file')).toBe(true)
     expect(list.some(b => b.storage === 'sync')).toBe(true)
+    expect(list.some(b => b.storage === 'browser')).toBe(true)
     expect(local.getAllBookmarks).toHaveBeenCalled()
     expect(file.getAllBookmarks).toHaveBeenCalled()
     expect(sync.getAllBookmarks).toHaveBeenCalled()
+    expect(browser.getAllBookmarks).toHaveBeenCalled()
+  })
+
+  // [REQ-BROWSER_BOOKMARK_STORAGE] 2C: browser folder-tags must not steal ownership when local has tags
+  test('getBookmarkForUrl prefers local over browser when both have tags (2C) [REQ-BROWSER_BOOKMARK_STORAGE]', async () => {
+    const url = 'https://example.com/2c'
+    await local.saveBookmark({
+      url,
+      description: 'Local',
+      tags: ['hoverboard'],
+      time: '2026-02-14T10:00:00.000Z'
+    })
+    await browser.saveBookmark({
+      url,
+      description: 'Chrome',
+      tags: ['folder_tag'],
+      time: '2026-02-14T12:00:00.000Z'
+    })
+    const b = await router.getBookmarkForUrl(url)
+    expect(b.description).toBe('Local')
+    expect(browser.getBookmarkForUrl).not.toHaveBeenCalled()
+    const backend = await storageIndex.getBackendForUrl(url)
+    expect(backend).toBe('local')
+  })
+
+  test('getBookmarkForUrl returns browser when only Chrome has bookmark [REQ-BROWSER_BOOKMARK_STORAGE]', async () => {
+    const url = 'https://example.com/browser-only'
+    await browser.saveBookmark({
+      url,
+      description: 'Chrome only',
+      tags: ['work'],
+      time: '2026-02-14T12:00:00.000Z'
+    })
+    await storageIndex.setBackendForUrl(url, 'browser')
+    const b = await router.getBookmarkForUrl(url)
+    expect(b.description).toBe('Chrome only')
+    expect(browser.getBookmarkForUrl).toHaveBeenCalled()
+  })
+
+  test('saveBookmark and moveBookmarkToStorage accept preferredBackend browser [REQ-BROWSER_BOOKMARK_STORAGE]', async () => {
+    const url = 'https://example.com/to-browser'
+    await local.saveBookmark({ url, description: 'Move', tags: ['t'], time: '2026-02-14T12:00:00.000Z' })
+    await storageIndex.setBackendForUrl(url, 'local')
+    const move = await router.moveBookmarkToStorage(url, 'browser')
+    expect(move.success).toBe(true)
+    expect(browser.saveBookmark).toHaveBeenCalled()
+    expect(local.deleteBookmark).toHaveBeenCalledWith(url)
+    expect(await storageIndex.getBackendForUrl(url)).toBe('browser')
+
+    const save = await router.saveBookmark({
+      url: 'https://example.com/save-browser',
+      description: 'Saved',
+      preferredBackend: 'browser'
+    })
+    expect(save.success).toBe(true)
+    expect(browser.saveBookmark).toHaveBeenCalled()
   })
 
   // [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] Move succeeds when source bookmark has url but no time

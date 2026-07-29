@@ -1,0 +1,62 @@
+ARCH-BROWSER_BOOKMARK_PROVIDER:
+  alternatives_considered:
+    - name: "Keep Browser Bookmark Import only"
+      cons:
+        - "No Store B parity, no Save to browser"
+      pros:
+        - "No router changes"
+      rejected_reason: "Sponsor requires equal Store parity"
+    - name: "Include browser in best-of race"
+      cons:
+        - "Chrome folder-tags can steal ownership of Hoverboard-stored URLs"
+      pros:
+        - "Simpler parallel query"
+      rejected_reason: "2C exclusion is required"
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+  decision: "Add BrowserBookmarkService over chrome.bookmarks as a fifth BookmarkRouter provider (backend id browser). Same contract as local/file/sync: getBookmarkForUrl, saveBookmark, deleteBookmark, getRecentBookmarks, getAllBookmarks, saveTag, deleteTag, testConnection. Map Chrome title to description, dateAdded to time, folder path segments (root-stripped) to tags. New bookmarks land under Other Bookmarks (id 2) with tag folders. Duplicate URL nodes collapse for index; mutations apply to all matching nodes. Router getBookmarkForUrl does not include browser in the parallel best-of with pinboard/local/file/sync unless preferred/index/default is browser or no other non-empty candidate (2C)."
+  implementation_approach:
+    details:
+      - "Extend VALID_BACKENDS, StorageMode, index Stores B, move/import targets"
+      - "Reuse/extend browser-bookmark-import-utils for flatten and folderPathToTags with stripRoots"
+      - "Wire fifth provider in service-worker initBookmarkProvider"
+    summary: "BrowserBookmarkService + BookmarkRouter/StorageIndex/config/UI wiring; shared flatten and folderPathToTags helpers with root strip."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-29"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Author browser bookmark provider architecture"
+  name: "Browser Bookmarks Storage Provider"
+  rationale:
+    benefits:
+      - "Clear ownership rule avoids folder-tags stealing Hoverboard URLs"
+      - "Uniform CRUD/move/index path"
+    problems_solved:
+      - "Chrome bookmarks only available via UI panels, not BookmarkRouter"
+    why: "Native Chrome bookmarks need a first-class provider so Index and Save-to can treat them as peers without a separate import path."
+  related_decisions:
+    depends_on:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    informs:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+    see_also:
+      - "ARCH-BROWSER_BOOKMARK_IMPORT"
+      - "ARCH-LOCAL_STORAGE_PROVIDER"
+      - "ARCH-SYNC_STORAGE_PROVIDER"
+  status: "Active"
+  traceability:
+    implementation:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-STORAGE_INDEX"
+    requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"

@@ -9,6 +9,7 @@ import { MessageHandler, MESSAGE_TYPES } from './message-handler.js'
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
 import { LocalBookmarkService } from '../features/storage/local-bookmark-service.js'
 import { SyncBookmarkService } from '../features/storage/sync-bookmark-service.js'
+import { BrowserBookmarkService } from '../features/storage/browser-bookmark-service.js'
 import { FileBookmarkService } from '../features/storage/file-bookmark-service.js'
 import { InMemoryFileBookmarkAdapter } from '../features/storage/file-bookmark-storage-adapter.js'
 import { MessageFileBookmarkAdapter, ensureOffscreenDocument } from '../features/storage/message-file-bookmark-adapter.js'
@@ -78,6 +79,7 @@ class HoverboardServiceWorker {
     const pinboardProvider = new PinboardService(tagService)
     const localProvider = new LocalBookmarkService(tagService)
     const syncProvider = new SyncBookmarkService(tagService)
+    const browserProvider = new BrowserBookmarkService(tagService)
 
     let fileAdapter = new InMemoryFileBookmarkAdapter()
     const storage = await chrome.storage.local.get(['hoverboard_file_storage_configured', 'hoverboard_file_storage_path'])
@@ -107,7 +109,8 @@ class HoverboardServiceWorker {
       fileProvider,
       syncProvider,
       storageIndex,
-      getDefaultStorageMode
+      getDefaultStorageMode,
+      browserProvider
     )
 
     tagService.pinboardService = router

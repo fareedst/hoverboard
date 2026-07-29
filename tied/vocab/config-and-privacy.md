@@ -4,7 +4,7 @@
 
 **Excludes:** Overlay/popup chrome labels (see [`ui-surfaces.md`](ui-surfaces.md)); backend routing semantics (see [`storage-backends.md`](storage-backends.md)); AI chip UX beyond config keys (see [`tags.md`](tags.md)).
 
-**Traceability:** [REQ-CONFIGURATION](../requirements/REQ-CONFIGURATION.yaml) · [REQ-CONFIG_PORTABILITY](../requirements/REQ-CONFIG_PORTABILITY.yaml) · [REQ-SITE_MANAGEMENT](../requirements/REQ-SITE_MANAGEMENT.yaml) · [REQ-PRIVACY_CONTROLS](../requirements/REQ-PRIVACY_CONTROLS.yaml) · [REQ-STORAGE_MODE_DEFAULT](../requirements/REQ-STORAGE_MODE_DEFAULT.yaml) · [REQ-AI_TAGGING_CONFIG](../requirements/REQ-AI_TAGGING_CONFIG.yaml) · [REQ-ICON_CLICK_BEHAVIOR](../requirements/REQ-ICON_CLICK_BEHAVIOR.yaml) · [ARCH-CONFIG_STRUCTURE](../architecture-decisions/ARCH-CONFIG_STRUCTURE.yaml) · [ARCH-PRIVACY](../architecture-decisions/ARCH-PRIVACY.yaml) · [ARCH-SITE_MGMT](../architecture-decisions/ARCH-SITE_MGMT.yaml) · [IMPL-CONFIG_STRUCT](../implementation-decisions/IMPL-CONFIG_STRUCT.yaml) · [IMPL-CONFIG_BACKUP_RESTORE](../implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml) · [IMPL-CONFIG_MIGRATION](../implementation-decisions/IMPL-CONFIG_MIGRATION.yaml) · [IMPL-FEATURE_FLAGS](../implementation-decisions/IMPL-FEATURE_FLAGS.yaml) · [IMPL-URL_INHIBITION](../implementation-decisions/IMPL-URL_INHIBITION.yaml) · [IMPL-PRIVACY](../implementation-decisions/IMPL-PRIVACY.yaml) · [IMPL-AI_CONFIG_OPTIONS](../implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml)
+**Traceability:** [REQ-CONFIGURATION](../requirements/REQ-CONFIGURATION.yaml) · [REQ-CONFIG_PORTABILITY](../requirements/REQ-CONFIG_PORTABILITY.yaml) · [REQ-SITE_MANAGEMENT](../requirements/REQ-SITE_MANAGEMENT.yaml) · [REQ-PRIVACY_CONTROLS](../requirements/REQ-PRIVACY_CONTROLS.yaml) · [REQ-STORAGE_MODE_DEFAULT](../requirements/REQ-STORAGE_MODE_DEFAULT.yaml) · [REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml) · [REQ-AI_TAGGING_CONFIG](../requirements/REQ-AI_TAGGING_CONFIG.yaml) · [REQ-ICON_CLICK_BEHAVIOR](../requirements/REQ-ICON_CLICK_BEHAVIOR.yaml) · [ARCH-CONFIG_STRUCTURE](../architecture-decisions/ARCH-CONFIG_STRUCTURE.yaml) · [ARCH-PRIVACY](../architecture-decisions/ARCH-PRIVACY.yaml) · [ARCH-SITE_MGMT](../architecture-decisions/ARCH-SITE_MGMT.yaml) · [IMPL-CONFIG_STRUCT](../implementation-decisions/IMPL-CONFIG_STRUCT.yaml) · [IMPL-CONFIG_BACKUP_RESTORE](../implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml) · [IMPL-CONFIG_MIGRATION](../implementation-decisions/IMPL-CONFIG_MIGRATION.yaml) · [IMPL-FEATURE_FLAGS](../implementation-decisions/IMPL-FEATURE_FLAGS.yaml) · [IMPL-URL_INHIBITION](../implementation-decisions/IMPL-URL_INHIBITION.yaml) · [IMPL-PRIVACY](../implementation-decisions/IMPL-PRIVACY.yaml) · [IMPL-AI_CONFIG_OPTIONS](../implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml)
 
 **See also:** [`storage-backends.md`](storage-backends.md) · [`ui-surfaces.md`](ui-surfaces.md) · [`tags.md`](tags.md) · [`ipc-messaging.md`](ipc-messaging.md) · [`domain-references.md`](domain-references.md) · `src/config/config-manager.js` · `src/ui/options/options.html`
 
@@ -16,7 +16,7 @@
 |-----------|----------------|-------|
 | **ConfigManager** | settings manager | Owns keys, defaults, merge |
 | **hoverboard_settings** | settings blob | Primary merged settings object key |
-| **storage mode** | storage backend default | Global default; key `hoverboard_storage_mode` |
+| **storage mode** | storage backend default | Global default; key `hoverboard_storage_mode`; values `pinboard` \| `local` \| `file` \| `sync` \| `browser` (see [`storage-backends.md`](storage-backends.md); **Browser** ≠ **Local**) |
 | **inhibit URL** / **disabled sites** | blocklist | Domains where extension will not activate |
 | **site management** | inhibit list UI | Options section for disabled sites |
 | **URL inhibition** | inhibit on load | Implementation of disabled sites (`INHIBIT_URL`) |
@@ -34,7 +34,7 @@
 |-------------------|------------|---------------------|-------------------|
 | Merged settings | Options page | `hoverboard_settings` | see `getDefaultConfiguration` |
 | Auth token | Authentication | `hoverboard_auth_token` | — |
-| Default backend | Storage Mode | `hoverboard_storage_mode` / `storageMode` | `local` |
+| Default backend | Storage Mode (Local / Pinboard / File / Sync / Browser) | `hoverboard_storage_mode` / `storageMode` | `local` (`pinboard`\|`local`\|`file`\|`sync`\|`browser`; [REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml)) |
 | Disabled sites | Site Management | `hoverboard_inhibit_urls` | — |
 | Legacy recent tags key | — | `hoverboard_recent_tags` | — |
 | Tag frequency | — | `hoverboard_tag_frequency` | — |

@@ -14335,7 +14335,7 @@ var init_config_manager = __esm({
     "use strict";
     init_zod();
     mergedConfigSchema = external_exports.object({
-      storageMode: external_exports.enum(["local", "pinboard", "file", "sync"]).optional(),
+      storageMode: external_exports.enum(["local", "pinboard", "file", "sync", "browser"]).optional(),
       hoverShowRecentTags: external_exports.boolean().optional(),
       hoverShowTooltips: external_exports.boolean().optional(),
       showHoverOnPageLoad: external_exports.boolean().optional(),
@@ -14588,7 +14588,7 @@ var init_config_manager = __esm({
       }
       /**
        * Get bookmark storage mode (default backend for new bookmarks when using router).
-       * @returns {Promise<string>} 'pinboard', 'local', 'file', or 'sync'
+       * @returns {Promise<string>} 'pinboard', 'local', 'file', 'sync', or 'browser'
        *
        * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Storage mode for provider selection and default for new bookmarks
        * IMPLEMENTATION DECISION: Stored in settings blob; invalid values fall back to 'local'
@@ -14596,17 +14596,17 @@ var init_config_manager = __esm({
       async getStorageMode() {
         const config2 = await this.getConfig();
         const mode = config2.storageMode;
-        return mode === "local" || mode === "pinboard" || mode === "file" || mode === "sync" ? mode : "local";
+        return mode === "local" || mode === "pinboard" || mode === "file" || mode === "sync" || mode === "browser" ? mode : "local";
       }
       /**
        * Set bookmark storage mode
-       * @param {string} mode - 'pinboard', 'local', 'file', or 'sync'
+       * @param {string} mode - 'pinboard', 'local', 'file', 'sync', or 'browser'
        *
-       * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Persist storage mode
+       * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-BROWSER_BOOKMARK_STORAGE] Persist storage mode
        */
       async setStorageMode(mode) {
-        if (mode !== "pinboard" && mode !== "local" && mode !== "file" && mode !== "sync") {
-          throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', 'file', or 'sync'.`);
+        if (mode !== "pinboard" && mode !== "local" && mode !== "file" && mode !== "sync" && mode !== "browser") {
+          throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', 'file', 'sync', or 'browser'.`);
         }
         await this.updateConfig({ storageMode: mode });
       }
@@ -22152,6 +22152,7 @@ var OptionsController = class {
     this.elements.storageModeLocal = document.getElementById("storage-mode-local");
     this.elements.storageModeFile = document.getElementById("storage-mode-file");
     this.elements.storageModeSync = document.getElementById("storage-mode-sync");
+    this.elements.storageModeBrowser = document.getElementById("storage-mode-browser");
     this.elements.selectFileStorageFolder = document.getElementById("select-file-storage-folder");
     this.elements.fileStorageFolderName = document.getElementById("file-storage-folder-name");
     this.elements.fileStoragePath = document.getElementById("file-storage-path");
@@ -22202,6 +22203,7 @@ var OptionsController = class {
     this.elements.storageModeLocal.addEventListener("change", () => this.onStorageModeChange("local"));
     this.elements.storageModeFile.addEventListener("change", () => this.onStorageModeChange("file"));
     this.elements.storageModeSync?.addEventListener("change", () => this.onStorageModeChange("sync"));
+    this.elements.storageModeBrowser?.addEventListener("change", () => this.onStorageModeChange("browser"));
     if (this.elements.selectFileStorageFolder) {
       this.elements.selectFileStorageFolder.addEventListener("click", () => this.selectFileStorageFolder());
     }
@@ -22235,11 +22237,12 @@ var OptionsController = class {
       const config2 = await this.configManager.getConfig();
       const authToken = await this.configManager.getAuthToken();
       const inhibitUrls = await this.configManager.getInhibitUrls();
-      const storageMode = ["local", "file", "sync"].includes(config2.storageMode) ? config2.storageMode : "pinboard";
+      const storageMode = ["local", "file", "sync", "browser"].includes(config2.storageMode) ? config2.storageMode : "pinboard";
       this.elements.storageModePinboard.checked = storageMode === "pinboard";
       this.elements.storageModeLocal.checked = storageMode === "local";
       this.elements.storageModeFile.checked = storageMode === "file";
       if (this.elements.storageModeSync) this.elements.storageModeSync.checked = storageMode === "sync";
+      if (this.elements.storageModeBrowser) this.elements.storageModeBrowser.checked = storageMode === "browser";
       this.updateAuthSectionVisibility(storageMode);
       await this.loadFileStorageFolderName();
       const pathResult = await chrome.storage.local.get("hoverboard_file_storage_path");
@@ -22292,7 +22295,7 @@ var OptionsController = class {
         this.showStatus(validation.message, "error");
         return;
       }
-      const storageMode = this.elements.storageModeFile.checked ? "file" : this.elements.storageModeSync?.checked ? "sync" : this.elements.storageModeLocal.checked ? "local" : "pinboard";
+      const storageMode = this.getSelectedStorageModeFromRadios();
       const settings = {
         storageMode,
         showHoverOnPageLoad: this.elements.showHoverOnLoad.checked,
@@ -22380,11 +22383,19 @@ var OptionsController = class {
   async persistFileStoragePath() {
     if (!this.elements.fileStoragePath) return;
     const path = this.elements.fileStoragePath.value.trim() || "~/.hoverboard";
-    const storageMode = this.elements.storageModeFile?.checked ? "file" : this.elements.storageModeSync?.checked ? "sync" : this.elements.storageModeLocal?.checked ? "local" : "pinboard";
+    const storageMode = this.getSelectedStorageModeFromRadios();
     await chrome.storage.local.set({
       hoverboard_file_storage_path: path,
       ...storageMode === "file" && path ? { hoverboard_file_storage_configured: true } : {}
     });
+  }
+  /** [REQ-BROWSER_BOOKMARK_STORAGE] Read checked storage-mode radio. */
+  getSelectedStorageModeFromRadios() {
+    if (this.elements.storageModeFile?.checked) return "file";
+    if (this.elements.storageModeSync?.checked) return "sync";
+    if (this.elements.storageModeBrowser?.checked) return "browser";
+    if (this.elements.storageModeLocal?.checked) return "local";
+    return "pinboard";
   }
   async selectFileStorageFolder() {
     const pickerUrl = typeof chrome !== "undefined" && chrome.runtime ? chrome.runtime.getURL("src/ui/options/folder-picker.html") : "";
@@ -22402,15 +22413,15 @@ var OptionsController = class {
   }
   updateAuthSectionVisibility(mode) {
     if (!this.elements.authSection) return;
-    if (mode === "local" || mode === "file" || mode === "sync") {
+    if (mode === "local" || mode === "file" || mode === "sync" || mode === "browser") {
       this.elements.authSection.classList.add("auth-section--disabled");
     } else {
       this.elements.authSection.classList.remove("auth-section--disabled");
     }
   }
   /**
-   * [ARCH-LOCAL_STORAGE_PROVIDER] Handle storage mode radio change: persist and notify service worker.
-   * @param {string} mode - 'pinboard' or 'local'
+   * [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-BROWSER_BOOKMARK_STORAGE] Handle storage mode radio change: persist and notify service worker.
+   * @param {string} mode - 'pinboard' | 'local' | 'file' | 'sync' | 'browser'
    */
   async onStorageModeChange(mode) {
     try {
@@ -22418,7 +22429,8 @@ var OptionsController = class {
       this.updateAuthSectionVisibility(mode);
       chrome.runtime.sendMessage({ type: "switchStorageMode" }).catch(() => {
       });
-      const modeLabel = mode === "local" ? "local storage" : mode === "file" ? "file storage" : mode === "sync" ? "sync storage" : "Pinboard";
+      const labels = { local: "local storage", file: "file storage", sync: "sync storage", browser: "browser bookmarks", pinboard: "Pinboard" };
+      const modeLabel = labels[mode] || mode;
       this.showStatus("Storage mode updated. Default for new bookmarks: " + modeLabel + ".", "success");
     } catch (error48) {
       console.error("Storage mode change failed:", error48);

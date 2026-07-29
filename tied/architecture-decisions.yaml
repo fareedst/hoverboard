@@ -364,6 +364,11 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
     requirements:
       - "REQ-BROWSER_BOOKMARK_IMPORT"
     tests: []
+ARCH-BROWSER_BOOKMARK_PROVIDER:
+  detail_file: "architecture-decisions/ARCH-BROWSER_BOOKMARK_PROVIDER.yaml"
+  name: "Browser Bookmarks Storage Provider"
+  status: "Active"
+  summary: "Provider over chrome.bookmarks implementing the same duck-typed contract as LocalBookmarkService; BookmarkRouter fifth backend; index Store B; folder path maps to tags with root strip; URL collapse; 2C getBookmarkForUrl exclusion from best-of race."
 ARCH-CODE_QUALITY:
   alternatives_considered:
     - name: "Keep ESLint 8 and eslintrc"
@@ -941,6 +946,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
       - "ARCH-LOCAL_STORAGE_PROVIDER"
       - "ARCH-MESSAGE_HANDLING"
   status: "Active"
+  summary: "Local Bookmarks Index page for local/file/sync/browser (Stores L/F/S/B); aggregate getAllBookmarksForIndex; store-change reload; Bulk Delete preferredBackend; index-open dismisses side panel."
   traceability:
     code_annotations:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
@@ -2368,8 +2374,10 @@ ARCH-STORAGE:
     tests: []
 ARCH-STORAGE_INDEX_AND_ROUTER:
   cross_references:
+    - "ARCH-BROWSER_BOOKMARK_PROVIDER"
     - "ARCH-FILE_BOOKMARK_PROVIDER"
     - "ARCH-LOCAL_STORAGE_PROVIDER"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
@@ -2412,6 +2420,7 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
     see_also:
       - "ARCH-MOVE_BOOKMARK_UI"
   status: "Active"
+  summary: "Storage index maps URL to pinboard|local|file|sync|browser. BookmarkRouter holds five providers; index aggregation includes browser; getBookmarkForUrl uses 2C exclusion for browser from best-of race."
   traceability:
     code_annotations:
       - "ARCH-STORAGE_INDEX_AND_ROUTER"

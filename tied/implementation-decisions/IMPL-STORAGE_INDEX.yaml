@@ -6,22 +6,24 @@ IMPL-STORAGE_INDEX:
     functions: []
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
   detail_file: "implementation-decisions/IMPL-STORAGE_INDEX.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-STORAGE_INDEX-pseudocode.md"
   implementation_approach:
     details:
-      - "Index shape: { url: pinboard|local|file }"
+      - "Index shape: { url: pinboard|local|file|sync|browser }"
       - "Migration: on first use, seed from LocalBookmarkService.getAllBookmarks() -> setBackendForUrl(url, local)"
-    summary: "StorageIndex class in src/features/storage/storage-index.js; chrome.storage.local."
+      - "VALID_BACKENDS includes browser"
+    summary: "StorageIndex class in src/features/storage/storage-index.js; chrome.storage.local; VALID_BACKENDS pinboard|local|file|sync|browser."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "LEAP close-loop: index shape and requirements include browser"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -33,7 +35,7 @@ IMPL-STORAGE_INDEX:
       - "Key hoverboard_storage_index"
     problems_solved:
       - "Need to know which backend owns each URL"
-    why: "Persist per-URL storage backend (pinboard|local|file) in chrome.storage.local so the router and UI know which backend owns each URL."
+    why: "Persist per-URL storage backend (pinboard|local|file|sync|browser) in chrome.storage.local so the router and UI know which backend owns each URL."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"
@@ -50,6 +52,7 @@ IMPL-STORAGE_INDEX:
     code_annotations:
       - "IMPL-STORAGE_INDEX"
     requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     tests:
       - "tests/integration/message-handler-router-storage.integration.test.js"

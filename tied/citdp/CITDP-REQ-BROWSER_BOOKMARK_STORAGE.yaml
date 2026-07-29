@@ -1,0 +1,72 @@
+CITDP-REQ-BROWSER_BOOKMARK_STORAGE:
+  change_definition:
+    current_behavior: "BookmarkRouter backends are pinboard|local|file|sync; Local Bookmarks Index Stores are L/F/S only; chrome.bookmarks used only by side-panel Bookmarks and Browser Bookmark Import."
+    desired_behavior: "Fifth backend browser over chrome.bookmarks; Index Store Browser (B); Save to / default storage mode / move / import include browser; folder path tags with Chrome root strip; URL collapse; getBookmarkForUrl excludes browser from best-of race (2C)."
+    non_goals:
+      - "Deprecate Browser Bookmark Import or side-panel Bookmarks"
+      - "Pinboard in index aggregation"
+      - "Store shared/toread/extended in Chrome nodes"
+    success_criteria:
+      - "2C: local wins over browser folder-tags in getBookmarkForUrl"
+      - "getAllBookmarksForIndex tags storage browser"
+      - "Stores B checkbox and Move/Import-to Browser"
+      - "VALID_BACKENDS and StorageMode include browser"
+    unchanged_behavior: "Pinboard excluded from index aggregation; Browser Bookmark Import page remains; side-panel Bookmarks remains."
+  completion_criteria:
+    verification_gate_notes: "browser-bookmark-service, bookmark-router, storage-index, bookmarks-table-index, config-manager, message-handler-router-storage integration tests pass; tied_validate_consistency. E2E not required: provider/router/index composition covers Store B without UI-only constraints."
+  impact_analysis:
+    modules_or_boundaries: "browser-bookmark-service; bookmark-router; storage-index; service-worker; config-manager; message-schemas; bookmarks-table; popup; options; browser-bookmark-import-utils"
+    tied_tokens_affected:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-STORAGE_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+      - "REQ-STORAGE_MODE_DEFAULT"
+    tied_tokens_new:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+  leap_feedback:
+    divergences_from_analysis: "IMPL-BOOKMARK_ROUTER-pseudocode updated to document existing parallel best-of plus 2C browser exclusion."
+    out_of_scope_notes: "tied/working/REQ-BROWSER_BOOKMARK_STORAGE_20260729120000-leap-notes.md"
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-BROWSER_BOOKMARK_STORAGE"
+    primary_tokens:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
+      - "IMPL-STORAGE_INDEX"
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-29"
+    title: "Browser storage backend (Store B) via chrome.bookmarks"
+  risk_analysis:
+    risks:
+      - id: "R1"
+        description: "Chrome folder-tags steal ownership of Hoverboard URLs via best-of race"
+        likelihood: "high"
+        mitigation: "2C: exclude browser from parallel race"
+        residual: "low"
+        severity: "high"
+      - id: "R2"
+        description: "Duplicate Chrome URLs confuse index"
+        likelihood: "medium"
+        mitigation: "collapseByUrl merge tags; delete all matching nodes"
+        residual: "low"
+        severity: "medium"
+      - id: "R3"
+        description: "Local (browser) label confused with Browser backend"
+        likelihood: "medium"
+        mitigation: "Clarify popup/options aria and help text"
+        residual: "low"
+        severity: "low"
+  tdd_sequence:
+    summary: "TIED stack + pseudocode → RED service/router/index/UI tests → green provider/router/SW/config/UI → composition → CITDP → tied_validate_consistency"
+  test_strategy:
+    matrix_notes: "Desired-behavior RED then green; do not lock browser excluded from Stores."
+    summary: "Unit: BrowserBookmarkService, StorageIndex browser, BookmarkRouter 2C/aggregate/move; bookmarks-table matchStoresFilter; ConfigManager. Composition: message-handler-router-storage browser aggregate/move. No E2E (not UI-only; covered at unit/composition)."

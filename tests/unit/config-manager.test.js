@@ -225,6 +225,21 @@ describe('ConfigManager', () => {
       });
     });
 
+    test('getStorageMode returns browser when stored [REQ-BROWSER_BOOKMARK_STORAGE]', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_settings: { storageMode: 'browser' }
+      });
+      const mode = await configManager.getStorageMode();
+      expect(mode).toBe('browser');
+    });
+
+    test('setStorageMode accepts browser [REQ-BROWSER_BOOKMARK_STORAGE]', async () => {
+      await configManager.setStorageMode('browser');
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_settings: expect.objectContaining({ storageMode: 'browser' })
+      });
+    });
+
     test('setStorageMode throws on invalid mode', async () => {
       await expect(configManager.setStorageMode('invalid')).rejects.toThrow('Invalid storage mode');
     });

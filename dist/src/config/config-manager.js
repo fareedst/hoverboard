@@ -17,7 +17,7 @@ import { z } from 'zod'
 
 // [IMPL-RUNTIME_VALIDATION] Schema for merged config (defaults + stored). Passthrough allows future keys.
 const mergedConfigSchema = z.object({
-  storageMode: z.enum(['local', 'pinboard', 'file', 'sync']).optional(),
+  storageMode: z.enum(['local', 'pinboard', 'file', 'sync', 'browser']).optional(),
   hoverShowRecentTags: z.boolean().optional(),
   hoverShowTooltips: z.boolean().optional(),
   showHoverOnPageLoad: z.boolean().optional(),
@@ -256,7 +256,7 @@ export class ConfigManager {
 
   /**
    * Get bookmark storage mode (default backend for new bookmarks when using router).
-   * @returns {Promise<string>} 'pinboard', 'local', 'file', or 'sync'
+   * @returns {Promise<string>} 'pinboard', 'local', 'file', 'sync', or 'browser'
    *
    * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Storage mode for provider selection and default for new bookmarks
    * IMPLEMENTATION DECISION: Stored in settings blob; invalid values fall back to 'local'
@@ -264,18 +264,18 @@ export class ConfigManager {
   async getStorageMode () {
     const config = await this.getConfig()
     const mode = config.storageMode
-    return (mode === 'local' || mode === 'pinboard' || mode === 'file' || mode === 'sync') ? mode : 'local'
+    return (mode === 'local' || mode === 'pinboard' || mode === 'file' || mode === 'sync' || mode === 'browser') ? mode : 'local'
   }
 
   /**
    * Set bookmark storage mode
-   * @param {string} mode - 'pinboard', 'local', 'file', or 'sync'
+   * @param {string} mode - 'pinboard', 'local', 'file', 'sync', or 'browser'
    *
-   * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] Persist storage mode
+   * [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-BROWSER_BOOKMARK_STORAGE] Persist storage mode
    */
   async setStorageMode (mode) {
-    if (mode !== 'pinboard' && mode !== 'local' && mode !== 'file' && mode !== 'sync') {
-      throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', 'file', or 'sync'.`)
+    if (mode !== 'pinboard' && mode !== 'local' && mode !== 'file' && mode !== 'sync' && mode !== 'browser') {
+      throw new Error(`Invalid storage mode: ${mode}. Use 'pinboard', 'local', 'file', 'sync', or 'browser'.`)
     }
     await this.updateConfig({ storageMode: mode })
   }

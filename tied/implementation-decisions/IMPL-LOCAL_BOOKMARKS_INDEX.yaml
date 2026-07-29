@@ -6,9 +6,9 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       - path: "src/core/message-handler.js"
         description: "GET_AGGREGATED_BOOKMARKS_FOR_INDEX, GET_LOCAL_BOOKMARKS_FOR_INDEX, OPEN_BOOKMARKS_INDEX, handleGetAggregatedBookmarksForIndex, handleGetLocalBookmarksForIndex"
       - path: "src/features/storage/bookmark-router.js"
-        description: "getAllBookmarksForIndex() aggregates local + file with storage field"
+        description: "getAllBookmarksForIndex() aggregates local+file+sync+browser with storage field"
       - path: "src/ui/bookmarks-table/bookmarks-table.html"
-        description: "Index page layout"
+        description: "Index page layout; Stores L/F/S/B"
       - path: "src/ui/bookmarks-table/bookmarks-table.js"
         description: "loadBookmarks, handleStoreFilterChange, applySearchAndFilter, renderTableBody, setSort"
       - path: "src/ui/bookmarks-table/bookmarks-table-load.js"
@@ -37,7 +37,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
         description: "Uses LocalBookmarkService, returns { bookmarks } (fallback)"
         file: "src/core/message-handler.js"
       - name: "getAllBookmarksForIndex"
-        description: "Aggregates local + file bookmarks with storage field, sorted by time desc"
+        description: "Aggregates local+file+sync+browser with storage field, sorted by time desc"
         file: "src/features/storage/bookmark-router.js"
       - name: "_openBookmarksIndexTab"
         description: "tabs.create index URL then REQUEST_SIDE_PANEL_CLOSE"
@@ -52,24 +52,20 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
         description: "Lazy SW provider init with in-flight mutex"
         file: "src/core/service-worker.js"
   cross_references:
+    - "ARCH-BROWSER_BOOKMARK_PROVIDER"
     - "ARCH-LOCAL_BOOKMARKS_INDEX"
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
-    - "IMPL-ICON_CLICK_BEHAVIOR"
-    - "REQ-ICON_CLICK_BEHAVIOR"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX-pseudocode.md"
   implementation_approach:
     details:
-      - "BookmarkRouter.getAllBookmarksForIndex(): aggregates localProvider.getAllBookmarks() and fileProvider.getAllBookmarks(), adds storage 'local'|'file', merges and sorts by time desc"
-      - "LOAD_LOCAL_BOOKMARKS_INDEX: treat aggregate response error or success:false as failure even when bookmarks is []; fallback getLocalBookmarksForIndex"
-      - "MessageHandler: handleGetAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() when available; handleGetLocalBookmarksForIndex uses LocalBookmarkService only (fallback)"
-      - "OPEN_BOOKMARKS_INDEX_TAB (SW _openBookmarksIndexTab): tabs.create index URL then runtime.sendMessage REQUEST_SIDE_PANEL_CLOSE; called from OPEN_BOOKMARKS_INDEX message, open-bookmarks-index command, hoverboard-open-bookmarks-index menu"
-      - "Popup: bookmarksIndexBtn emits openBookmarksIndex; PopupController.handleOpenBookmarksIndex sends OPEN_BOOKMARKS_INDEX (not direct tabs.create). Options: bookmarks-index-link href set to extension URL (no dismiss)"
-      - "Service worker: serialize initBookmarkProvider behind in-flight promise so concurrent cold-start messages share one init"
-      - "src/ui/bookmarks-table/: HTML (search, filters, table with Storage column, empty state), JS (loadBookmarks uses aggregated then fallback, renderTableBody shows Storage, sort by storage), CSS (table, sort indicators); index init must not send REQUEST_SIDE_PANEL_CLOSE"
-      - "Store checkbox change: applySearchAndFilter; if allBookmarks empty and at least one store checked, reload via shouldReloadBookmarksOnStoreChange (bookmarks-table-load.js)"
-    summary: "Index page with Storage column; OPEN_BOOKMARKS_INDEX_TAB creates tab and dismisses side panel; LOAD_LOCAL_BOOKMARKS_INDEX treats aggregate error/success:false as failure; store-change reload when allBookmarks empty; SW PROVIDER_INIT_MUTEX; Bulk Delete preferredBackend + #delete-result."
+      - "BookmarkRouter.getAllBookmarksForIndex aggregates local+file+sync+browser with storage field"
+      - "MessageHandler getAggregatedBookmarksForIndex / getLocalBookmarksForIndex fallback"
+      - "OPEN_BOOKMARKS_INDEX_TAB + PROVIDER_INIT_MUTEX; Bulk Delete preferredBackend"
+      - "Stores checkboxes Local/File/Sync/Browser; matchStoresFilter; Move/Import-to include browser"
+    summary: "Index page sends getAggregatedBookmarksForIndex first (BookmarkRouter local+file+sync+browser), fallback getLocalBookmarksForIndex; Stores L/F/S/B; Storage column; search/filter/sort/launch; entry from popup/options."
   metadata:
     created:
       author: "MCP converter"
@@ -77,7 +73,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "OPEN_BOOKMARKS_INDEX_TAB dismisses side panel; store-change reload + aggregate failure fallback + PROVIDER_INIT_MUTEX"
+      reason: "Fix code_locations descriptions for browser aggregation"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -85,10 +81,10 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   name: "Local Bookmarks Index Implementation"
   rationale:
     benefits:
-      - "getAggregatedBookmarksForIndex (router aggregates local + file) with fallback getLocalBookmarksForIndex; table page with Storage column"
+      - "getAggregatedBookmarksForIndex (router aggregates local+file+sync+browser) with fallback getLocalBookmarksForIndex; Stores L/F/S/B; Storage column"
     problems_solved:
-      - "No single view of local and file bookmarks"
-    why: "Implement full index of local and file bookmarks with Storage column, search, filter, sort, launch."
+      - "No single view of Hoverboard-stored and browser-native bookmarks in the index"
+    why: "Implement full index of local/file/sync/browser bookmarks with Storage column, search, filter, sort, launch"
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"
@@ -106,16 +102,16 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
   status: "Active"
   traceability:
     architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "IMPL-LOCAL_BOOKMARKS_INDEX"
     requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-LOCAL_BOOKMARKS_INDEX"
     tests:
-      - "tests/unit/bookmarks-table-delete-status.test.js"
+      - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/unit/bookmarks-table-index.test.js"
-      - "tests/unit/bookmarks-table-load.test.js"
       - "tests/unit/bookmarks-table-time.test.js"
       - "tests/unit/message-handler-bookmarks-index.test.js"
-      - "tests/unit/service-worker-open-bookmarks-index.test.js"

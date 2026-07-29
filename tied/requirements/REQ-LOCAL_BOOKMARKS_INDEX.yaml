@@ -1,5 +1,5 @@
 REQ-LOCAL_BOOKMARKS_INDEX:
-  backend: "Primary data via message `getAggregatedBookmarksForIndex` (BookmarkRouter aggregates LocalBookmarkService + FileBookmarkService + SyncBookmarkService, each item tagged with `storage: 'local'` | 'file' | 'sync'). Fallback: `getLocalBookmarksForIndex` uses LocalBookmarkService only (all items tagged `storage: 'local'`) when aggregated is unavailable or the aggregate response has error or success:false, even when bookmarks is []."
+  backend: "Primary data via message getAggregatedBookmarksForIndex (BookmarkRouter aggregates LocalBookmarkService + FileBookmarkService + SyncBookmarkService + BrowserBookmarkService, each item tagged with storage local|file|sync|browser). Fallback: getLocalBookmarksForIndex uses LocalBookmarkService only."
   category: "Functional"
   cross-references: "ARCH-LOCAL_BOOKMARKS_INDEX, IMPL-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER"
   detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml"
@@ -22,7 +22,7 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Store-change reload + aggregate failure fallback; index-open dismisses side panel"
+      reason: "LEAP: add Browser (B) store to Local Bookmarks Index"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -30,14 +30,14 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   name: "Local Bookmarks Index Page"
   priority: "P1"
   purpose:
-    - "Allow bulk delete of selected bookmarks from the index (confirmation with count and optionally titles; preferredBackend from Storage column; `#delete-result` pending/final)."
-    - "Allow bulk move of selected bookmarks to another storage (Local | File | Sync) via [REQ-MOVE_BOOKMARK_STORAGE_UI]."
-    - "Give users a single place to browse and search all non-Pinboard bookmarks (local + file + sync)."
+    - "Allow bulk delete of selected bookmarks from the index (confirmation with count and optionally titles; preferredBackend from Storage column; #delete-result pending/final)."
+    - "Allow bulk move of selected bookmarks to another storage (Local | File | Sync | Browser) via REQ-MOVE_BOOKMARK_STORAGE_UI."
+    - "Give users a single place to browse and search all non-Pinboard bookmarks (local + file + sync + browser)."
     - "Recover from a failed or empty first index fetch when the user checks a store: re-run load without a full page reload (store-change reload); Stores remain default-unchecked."
-    - "Show where each bookmark is stored (Local | File | Sync) via a Storage column."
+    - "Show where each bookmark is stored (Local | File | Sync | Browser) via a Storage column."
     - "Support finding and opening bookmarks without leaving the extension."
-    - "The bookmark count (# bookmarks) must always appear at the bottom of the page: last in document order; when content is shorter than the viewport, at the visual bottom of the viewport; when content is long, the count bar stays visible (sticky to the viewport bottom) when scrolling."
-    - "When the Local Bookmarks Index tab is created via popup/command/context menu, dismiss any already-open side panel; do not re-dismiss on index page refresh; allow toolbar icon to reopen the side panel."
+    - "The bookmark count (# bookmarks) must always appear at the bottom of the page."
+    - "When the Local Bookmarks Index tab is created via popup/command/context menu, dismiss any already-open side panel."
   rationale:
     benefits: []
     problems_solved: []
@@ -63,7 +63,7 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     - criterion: "Import UI is a dedicated control group (sibling of Actions for selected), not nested under Actions."
     - criterion: "Opening the Local Bookmarks Index tab via popup, command, or context menu sends REQUEST_SIDE_PANEL_CLOSE after tabs.create (index-open dismisses side panel); index page init does not send that message."
   status: "Implemented"
-  summary: "A dedicated extension page shows **local, file, and sync bookmarks** (chrome.storage.local/sync and file-backed). Data is **live only**. The page is **searchable** and **sortable**, with **launchable** URLs (opens in new tab with external-link indicator). Toolbar is organized into **Stores** (Local / File / Sync checkboxes; default all unchecked so no bookmarks shown initially), **Show only** (tags include, to-read, private, time range), **Hide** (tags exclude). A single **Time** column can show **create-time** or **last-updated** [REQ-BOOKMARK_CREATE_UPDATE_TIMES], with **Time format** (absolute or age). **Select** column allows **selection**; **Actions for selected** (Export, Move, **Delete** with confirmation). **Import** lives in a dedicated Import control group [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]. Delete confirmation shows count and, if ≤8, bookmark names; after confirm, `#delete-result` shows pending then final counts; delete payloads use preferredBackend from the row Storage column. Move and delete controls enabled only when at least one bookmark is selected."
+  summary: "A dedicated extension page shows local, file, sync, and browser bookmarks. Stores: Local (L), File (F), Sync (S), Browser (B); default all unchecked. Storage column and Move/Import targets include Browser. Pinboard stays out of index aggregation."
   table_page: "Search (single input). **Stores** group: checkboxes Local (L), File (F), Sync (S); default all unchecked so no bookmarks displayed until at least one store is selected; store checkboxes control which backends are included. **Show only** group: Tags (comma-separated, include), To read only, Private only, Time range (Start/End date-time, Time field: Create time | Last updated), **Clear** button to reset this group to defaults. **Table Display** group: **Time column** (Create time | Last updated) and **Time format** (Absolute | Age) toggles that modify the table. **Hide** group: Tags (comma-separated, exclude). **Select** column (checkboxes, select-all); sortable columns (Title, URL, Tags, Time, Storage, Shared, To read); URL column as links with **external-link indicator**. **Sticky behavior**: When the user scrolls past the Table Display section, the **Table Display** block and the **table column headers** remain at the top of the viewport; the table body scrolls below them. The **bookmark count** (# bookmarks) is sticky to the bottom of the viewport so it stays visible when scrolling long content; when content is short, a spacer pushes it to the visual bottom. **Actions for selected** (below table) scroll with the content. **Actions for selected**: Export all / Export displayed / Export selected, Move selected to (dropdown + Move), **Delete** (confirmation with count and names if ≤8; `#delete-result` pending/final; preferredBackend from Storage column) [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-MOVE_BOOKMARK_STORAGE_UI]. **Import** is a sibling control group [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]. Page layout is **compact** (reduced whitespace around and inside control groups) to give maximum space to the table."
   traceability:
     architecture: []

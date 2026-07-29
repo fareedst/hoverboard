@@ -7,9 +7,9 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "LEAP: add browser as fifth storage backend"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -29,15 +29,18 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
     - "REQ-MOVE_BOOKMARK_STORAGE_UI (move UI uses getStorageBackendForUrl and moveBookmarkToStorage)"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "BookmarkRouter: getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag use index or default; getRecentBookmarks aggregates all three, sorted by time."
-    - criterion: "Canonical terms for storage backends, storage index, and BookmarkRouter: `tied/vocab/storage-backends.md`."
-    - criterion: "Migration: existing local bookmarks get index entry 'local'."
-    - criterion: "Storage index: key `hoverboard_storage_index`, shape `{ \"<url>\": \"pinboard\"|\"local\"|\"file\" }`; getIndex, setBackendForUrl, getBackendForUrl, removeUrl."
+    - criterion: "BookmarkRouter: getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag use index or default; getRecentBookmarks aggregates all five providers, sorted by time."
+    - criterion: "Browser backend: see REQ-BROWSER_BOOKMARK_STORAGE (2C getBookmarkForUrl exclusion from best-of race)."
+    - criterion: "Canonical terms for storage backends, storage index, and BookmarkRouter: tied/vocab/storage-backends.md."
+    - criterion: "Migration: existing local bookmarks get index entry local."
+    - criterion: "Storage index: key hoverboard_storage_index, shape url to pinboard|local|file|sync|browser; getIndex, setBackendForUrl, getBackendForUrl, removeUrl."
   status: "Planned"
-  summary: "Each bookmark is **tagged with a storage method**: `pinboard`, `local`, or `file`. A **storage index** (in chrome.storage.local) maps URL → backend. A **BookmarkRouter** delegates get/save/delete to the correct provider per URL; new bookmarks use a **configurable default** backend when the URL is not in the index. getRecentBookmarks aggregates from all three providers."
+  summary: "Each bookmark is tagged with a storage method: pinboard, local, file, sync, or browser. A storage index maps URL to backend. BookmarkRouter delegates get/save/delete; getRecentBookmarks aggregates all five; getAllBookmarksForIndex aggregates local+file+sync+browser."
   traceability:
     architecture: []
     code_annotations:

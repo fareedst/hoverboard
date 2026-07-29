@@ -305,7 +305,7 @@ export class PopupController {
 
       // [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] [REQ-STORAGE_MODE_DEFAULT] When not bookmarked: show default storage (ARCH).
       const hasRealBookmark = !!(this.currentPin?.time)
-      const validBackends = ['pinboard', 'local', 'file', 'sync']
+      const validBackends = ['pinboard', 'local', 'file', 'sync', 'browser']
       let storageBackend
       if (!hasRealBookmark) {
         storageBackend = await this.configManager.getStorageMode()

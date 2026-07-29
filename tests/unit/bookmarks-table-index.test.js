@@ -91,6 +91,13 @@ describe('matchStoresFilter [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_IN
     expect(matchStoresFilter({ storage: 'sync' }, fileAndSync)).toBe(true)
   })
 
+  test('includes browser store [REQ-BROWSER_BOOKMARK_STORAGE] [REQ-LOCAL_BOOKMARKS_INDEX]', () => {
+    const browserOnly = new Set(['browser'])
+    expect(matchStoresFilter({ storage: 'browser' }, browserOnly)).toBe(true)
+    expect(matchStoresFilter({ storage: 'local' }, browserOnly)).toBe(false)
+    expect(matchStoresFilter({ storage: 'Browser' }, new Set(['browser']))).toBe(true)
+  })
+
   test('defaults missing storage to local and is case-insensitive', () => {
     const localOnly = new Set(['local'])
     expect(matchStoresFilter({}, localOnly)).toBe(true)

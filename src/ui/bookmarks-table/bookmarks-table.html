@@ -16,7 +16,7 @@
         <span class="extension-name">Hoverboard</span>
       </div>
       <h1>Local Bookmarks Index</h1>
-      <p class="subtitle">Search, filter, sort, and open bookmarks stored in browser or file (Storage column: Local | File | Sync)</p>
+      <p class="subtitle">Search, filter, sort, and open bookmarks stored in browser or file (Storage column: Local | File | Sync | Browser)</p>
     </header>
 
     <div class="toolbar">
@@ -35,6 +35,10 @@
           <label class="filter-checkbox">
             <input type="checkbox" id="store-sync" value="sync" aria-label="Include Sync store">
             <span>Sync (S)</span>
+          </label>
+          <label class="filter-checkbox">
+            <input type="checkbox" id="store-browser" value="browser" aria-label="Include Browser store (native Chrome bookmarks)">
+            <span>Browser (B)</span>
           </label>
         </div>
       </fieldset>
@@ -95,7 +99,7 @@
     </fieldset>
 
     <div id="empty-state" class="empty-state hidden">
-      <p id="empty-state-message">No local, file, or sync bookmarks. This index shows bookmarks stored in your browser (Local or Sync) or in a file you chose (File). Use Options to set Storage Mode and add bookmarks to see them here.</p>
+      <p id="empty-state-message">No local, file, sync, or browser bookmarks. This index shows bookmarks in Local/Sync storage, a File you chose, or native Browser bookmarks. Use Options to set Storage Mode and add bookmarks to see them here.</p>
     </div>
 
     <div id="table-wrapper" class="table-wrapper">
@@ -140,6 +144,7 @@
           <option value="local">Local</option>
           <option value="file">File</option>
           <option value="sync">Sync</option>
+          <option value="browser">Browser</option>
         </select>
         <button type="button" id="move-selected-btn" class="btn btn-secondary btn-sm" disabled aria-label="Move selected bookmarks to chosen storage">Move</button>
       </div>
@@ -192,8 +197,9 @@
           <option value="local">Local</option>
           <option value="file">File</option>
           <option value="sync">Sync</option>
+          <option value="browser">Browser</option>
         </select>
-        <button type="button" id="import-trigger" class="btn btn-secondary btn-sm" title="Import Hoverboard CSV/JSON into Local, File, or Sync (not Netscape HTML — use side panel Bookmarks for HTML)" aria-label="Import bookmarks from CSV or JSON">Import</button>
+        <button type="button" id="import-trigger" class="btn btn-secondary btn-sm" title="Import Hoverboard CSV/JSON into Local, File, Sync, or Browser (not Netscape HTML — use side panel Bookmarks for HTML)" aria-label="Import bookmarks from CSV or JSON">Import</button>
         <span id="import-result" class="import-result" aria-live="polite"></span>
       </div>
     </fieldset>

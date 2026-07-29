@@ -30,9 +30,9 @@
         <div class="form-group">
           <label class="radio-label">
             <input type="radio" name="storage-mode" id="storage-mode-local" value="local">
-            <span>Local Storage (offline)</span>
+            <span>Local Storage (chrome.storage.local)</span>
           </label>
-          <p class="help-text">Bookmarks will be stored locally in your browser. No external service is used.</p>
+          <p class="help-text">Bookmarks stored in extension local storage (not the native Chrome bookmarks tree). No external service is used.</p>
         </div>
         <div class="form-group">
           <label class="radio-label">
@@ -44,9 +44,16 @@
         <div class="form-group">
           <label class="radio-label">
             <input type="radio" name="storage-mode" id="storage-mode-sync" value="sync">
-            <span>Sync (browser, synced)</span>
+            <span>Sync (chrome.storage.sync)</span>
           </label>
           <p class="help-text">Bookmarks sync across devices signed into the same Chrome profile. <strong>Quota is approximately 100 KB</strong>; users with many bookmarks may hit the limit.</p>
+        </div>
+        <div class="form-group">
+          <label class="radio-label">
+            <input type="radio" name="storage-mode" id="storage-mode-browser" value="browser">
+            <span>Browser (native Chrome bookmarks)</span>
+          </label>
+          <p class="help-text">Store bookmarks in the browser's native bookmark tree via <code>chrome.bookmarks</code>. Tags map to folders under Other Bookmarks. Private / Read Later / notes are not stored in Chrome.</p>
         </div>
         <div class="form-group" id="file-storage-path-group">
           <label for="file-storage-path">Path (directory for bookmark file)</label>
