@@ -32,4 +32,4 @@
 ## References
 
 - Tool descriptor: `mcp-server/tool-descriptors/requirement_list_state_guide.json`
-- Operating guide: `AGENTS.md`, `ai-principles.md`
+- Operating guide: `AGENTS.md`, `tied/docs/ai-principles.md`

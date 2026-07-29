@@ -2,7 +2,7 @@
 
 This document describes the **MCP-first** process to establish and maintain REQ (requirements), ARCH (architecture decisions), and IMPL (implementation decisions) in a project using the TIED YAML Index MCP server. It is intended for developers and AI agents who are setting up TIED in a project and want to use the MCP server across multiple, ordered passes.
 
-**Related**: [REQ-CONVERSION_TOOL], [PROC-YAML_DB_OPERATIONS], [ARCH-TIED_STRUCTURE]
+**Related**: [PROC-YAML_DB_OPERATIONS], [ARCH-TIED_STRUCTURE]
 
 ---
 
@@ -16,8 +16,8 @@ This guide explains how to add the TIED MCP server to a development project and 
 
 ## 2. Prerequisites
 
-- **Node.js 18+** (required to run the MCP server).
-- **TIED repository** cloned or downloaded (the repo that contains `mcp-server/`, templates, and this doc).
+- **The `tied-yaml` command** on your `PATH` (same TIED YAML MCP used by this repo; install or link from your TIED toolchain).
+- **Node.js 18+** (required for Cursor to run some MCP stdio clients; the `tied-yaml` CLI is the recommended entry point).
 - **Target project** with a chosen workspace root (the project that will have a `tied/` directory).
 - **Cursor** (or another MCP client) for the configuration examples that use `.cursor/mcp.json`.
 
@@ -25,43 +25,52 @@ This guide explains how to add the TIED MCP server to a development project and 
 
 ## 3. Adding the TIED MCP to a project (one-time)
 
-### 3.1 Build the server
+### 3.1 Install the `tied-yaml` CLI (recommended)
 
-Build the MCP server **in the TIED repository** (not inside your project):
+Use the same **`tied-yaml`** stdio entrypoint the TIED project publishes (on your `PATH` in a dev shell, or a full path in **`TIED_MCP_CMD`** / Cursor **`command`**, or via your package manager’s global install if documented by TIED). That is the supported way to run the TIED YAML MCP in Cursor and from **`tied-cli.sh`**.
+
+**Alternative (clone-only):** if you do not have `tied-yaml` on `PATH`, build the server **in a TIED repository** and point at **`mcp-server/dist/index.js`**, then use **`"command": "node"`** and that path in **`args`**, *or* set **`TIED_MCP_BIN`** when using **`tied-cli.sh`**. See your TIED repo’s **`mcp-server/README.md`** (if present) for the exact build and layout.
 
 ```bash
-cd mcp-server
+cd /path/to/tied-repository/mcp-server
 npm install
 npm run build
+# dist/index.js — only needed when not using the `tied-yaml` CLI
 ```
-
-The server binary lives at `mcp-server/dist/index.js` inside the TIED repo. Your project does not contain the server; it only references it via MCP configuration.
 
 ### 3.2 Configure MCP in the project
 
-In your **development project** (the project that has or will have a `tied/` directory), add or edit the MCP config. For Cursor, this is typically `.cursor/mcp.json` in the project root (or Cursor Settings → MCP with the project as workspace).
+In your **development project** (the project that has or will have a `tied/` directory), add or edit the MCP config. For Cursor, this is typically **`.cursor/mcp.json`** in the project root (or Cursor **Settings → MCP** with the project as workspace).
 
-- **command**: `"node"`
-- **args**: Absolute path to the TIED repo’s built server, e.g. `"/path/to/tied/mcp-server/dist/index.js"`
-- **env.TIED_BASE_PATH**: Your project’s `tied/` directory — use an absolute path (e.g. `/path/to/your/project/tied`) or a path relative to the workspace root (e.g. `tied` or `./tied`)
+- **command**: **`"tied-yaml"`** (recommended when the CLI is on the PATH the Cursor process inherits)
+- **args**: `[]` (empty array)
+- **env.TIED_BASE_PATH**: This project’s **`tied/`** — use **`${workspaceFolder}/tied`** in Cursor, or an absolute path (e.g. `/path/to/your/project/tied`)
 
-Example:
+**Fallback** when the CLI is not on PATH: use **`"command": "node"`** and a single **arg** that is the absolute path to **`mcp-server/dist/index.js`** from a TIED clone, as in older docs.
+
+Example (preferred — `tied-yaml` on `PATH`):
 
 ```json
 {
   "mcpServers": {
     "tied-yaml": {
-      "command": "node",
-      "args": ["/path/to/tied/mcp-server/dist/index.js"],
+      "type": "stdio",
+      "disabled": false,
+      "command": "tied-yaml",
+      "args": [],
       "env": {
-        "TIED_BASE_PATH": "/path/to/your/project/tied"
+        "TIED_BASE_PATH": "${workspaceFolder}/tied"
       }
     }
   }
 }
 ```
 
-Path resolution: All path parameters (`output_base_path`, `file_path`, etc.) are resolved by the Node process. Absolute paths are used as-is; relative paths are resolved relative to the process current working directory (usually the workspace root). `TIED_BASE_PATH` is also cwd-relative unless you set it to an absolute path. See [mcp-server/README.md](../../mcp-server/README.md) for details.
+Path resolution: Path parameters on MCP tools are resolved by the server process. Absolute paths are used as-is; relative paths are resolved relative to the process current working directory (usually the workspace root). `TIED_BASE_PATH` is also cwd-relative unless you set it to an absolute path.
+
+**`copy_files.sh`** refreshes **`.cursor/mcp.json`** `mcpServers.tied-yaml` (stdio, absolute paths to the TIED repo’s built **`mcp-server/dist/index.js`** and the target project’s **`tied/`**). It installs **`tied/`** and **`.cursor/skills/tied-yaml/`** (including **`tied-cli.sh`**) from the git-tracked **`tools/bundled-tied-yaml-skill/`** in the TIED source tree (`.cursor/skills/tied-yaml` in the TIED repo is only a dev fallback when the bundle is missing). After bootstrap you may still run **`agent enable tied-yaml`** in Cursor. For **terminal-only** automation, run **`.cursor/skills/tied-yaml/scripts/tied-cli.sh`**: it prefers the **`tied-yaml` command** on `PATH` (or **`TIED_MCP_CMD`**), else **`TIED_MCP_BIN`** to **`mcp-server/dist/index.js`**, and sets **`TIED_BASE_PATH`**. See **`.cursor/skills/tied-yaml/SKILL.md`**.
+
+**Safety note (multi-repo risk):** If you have multiple TIED-enabled repos on disk, it is easy to accidentally point `env.TIED_BASE_PATH` at the *wrong* repo’s `tied/` directory. Before any write, call **`tied_config_get_base_path`** and confirm the reported base path is **under the current workspace root** and is the `tied/` you intend to mutate. If it is not, **STOP** and fix **`.cursor/mcp.json`**: set `env.TIED_BASE_PATH` to an absolute path to **this** workspace’s **`tied/`**, and ensure the **`tied-yaml` command** (or **`node`** + built **`dist/index.js`**) targets the build you intend. Re-running **`copy_files.sh`** does **not** repair MCP config.
 
 ### 3.3 Enable the server in Cursor (Cursor Agent CLI)
 
@@ -72,11 +81,11 @@ After **`copy_files.sh`** (or manual edits), `.cursor/mcp.json` may already list
 3. When Cursor prompts you to apply the **project MCP configuration**, **approve** the update.
 4. Type **`quit`** to exit the interactive `agent` session.
 
-You can still add or edit `.cursor/mcp.json` by hand; `copy_files.sh` only **merges** a `tied-yaml` entry when it is missing—it does not replace your whole MCP config.
+You can add or edit `.cursor/mcp.json` by hand; **`copy_files.sh` does not merge or refresh MCP entries** — keep **`tied-yaml`** `args` and `env.TIED_BASE_PATH` accurate when you clone configs between repos or move projects.
 
 ### 3.4 Verify
 
-- List MCP tools (e.g. `yaml_index_read`, `convert_monolithic_requirements`) to confirm the server is loaded.
+- List MCP tools (e.g. `yaml_index_read`, `tied_import_summary`) to confirm the server is loaded.
 - Call **`tied_config_get_base_path`** to see the effective TIED base path (and raw `TIED_BASE_PATH` env value) the server is using.
 - Read a resource such as `tied://requirements` (or attempt a read) to confirm the server sees your project’s `tied/` — you may get empty or missing-file behavior before bootstrap, which is expected.
 
@@ -88,39 +97,19 @@ Before the MCP server can manage REQ/ARCH/IMPL, the project must have a `tied/` 
 
 ### Option A — From templates (greenfield)
 
-Run from the **TIED repository** root:
+Run from your project root (or from wherever `copy_files.sh` is located, targeting your project path):
 
 ```bash
 ./copy_files.sh /path/to/your/project
 ```
 
-This copies template YAML indexes and guide docs into the project’s `tied/` directory. No MCP conversion is involved. After this, MCP tools operate on that `tied/` (with `TIED_BASE_PATH` pointing to it).
-
-### Option B — From monolithic docs (migration) [REQ-CONVERSION_TOOL]
-
-If you have existing monolithic `requirements.md`, `architecture-decisions.md`, and `implementation-decisions.md`, use the MCP conversion tools to create `tied/` with YAML indexes and detail files.
-
-**Single pass:** Call the tool `convert_monolithic_all` with:
-
-- `requirements_path`, `architecture_path`, `implementation_path` — paths to your monolithic markdown files (or use `requirements_content`, `architecture_content`, `implementation_content` to pass raw content; content overrides path when both are set).
-- `output_base_path` — e.g. `tied` or the value of `TIED_BASE_PATH`.
-- Optionally `dry_run: true` first to get `tokens`, `index_path`, and `detail_paths` without writing.
-
-**Three passes:** If you prefer to run conversions one document at a time (e.g. to inspect or fix between steps):
-
-1. Call `convert_monolithic_requirements` with `file_path` or `content`, and `output_base_path` (e.g. `tied`). Optionally `dry_run: true` first.
-2. Call `convert_monolithic_architecture` with the same `output_base_path`.
-3. Call `convert_monolithic_implementation` with the same `output_base_path`.
-
-Order (REQ → ARCH → IMPL) matches the dependency chain and the internal order of `convert_monolithic_all`.
-
-After conversion, update `semantic-tokens.yaml` with any new tokens (manually or via MCP index tools). See [mcp-server/README.md](../../mcp-server/README.md) and [using-tied-without-mcp.md](using-tied-without-mcp.md) for non-MCP alternatives.
+This copies template YAML indexes into the project’s `tied/` directory and guide/schema docs into `tied/docs/`. After this, MCP tools operate on that `tied/` (with `TIED_BASE_PATH` pointing to it).
 
 ---
 
 ## 5. Pass 2: Establish REQ → ARCH → IMPL (documentation-first, no code yet)
 
-This pass aligns with **TIED Phase 1: Requirements → Pseudo-Code** and the documentation-first rule in [ai-principles.md](../../ai-principles.md). No code changes; only YAML indexes and detail files.
+This pass aligns with **TIED Phase 1: Requirements → Pseudo-Code** and the documentation-first rule in [ai-principles.md](./ai-principles.md). No code changes; only YAML indexes and detail files.
 
 ### Pass 2a — Create a new requirement
 
@@ -190,7 +179,7 @@ Use these to load full context for the LLM or tooling.
 
 ### Token audit
 
-Follow [ai-principles.md](../../ai-principles.md) and [AGENTS.md](../../AGENTS.md): confirm that code and tests carry the correct `[REQ-*]`, `[ARCH-*]`, and `[IMPL-*]` tokens and that the registry matches usage. Run the project’s token validation script when available.
+Follow [ai-principles.md](./ai-principles.md) and [AGENTS.md](../../AGENTS.md): confirm that code and tests carry the correct `[REQ-*]`, `[ARCH-*]`, and `[IMPL-*]` tokens and that the registry matches usage. Run the project’s token validation script when available.
 
 ---
 
@@ -200,7 +189,7 @@ Follow [ai-principles.md](../../ai-principles.md) and [AGENTS.md](../../AGENTS.m
 flowchart LR
   subgraph setupFlow [Setup]
     BuildMcp[Build MCP server]
-    McpConfig["copy_files.sh\nor manual mcp.json"]
+    McpConfig["manual mcp.json\nor agent enable"]
     AgentEnable["agent enable tied-yaml"]
     ApproveQuit["Approve config\nquit"]
     VerifySetup[Verify MCP]
@@ -215,7 +204,7 @@ flowchart LR
   Pass3 --> Pass2
 ```
 
-- **Setup**: Build the MCP server in the TIED repo; ensure MCP config in the project (e.g. `./copy_files.sh` writes `.cursor/mcp.json` with `tied-yaml` and `TIED_BASE_PATH`, or set the same fields manually). Then run **`agent enable tied-yaml`** from the client project, **approve** the Cursor config update, and type **`quit`** to exit the Agent CLI; verify tools/resources load.
+- **Setup**: Ensure the **`tied-yaml` command** is on the PATH the IDE uses (or point **`node`** at a built **`dist/index.js`**, §3.2). Add **`tied-yaml`** to **`.cursor/mcp.json`** (JSON in §3.2) and use **`tied-cli.sh`** with **`TIED_MCP_CMD` / `TIED_MCP_BIN`** and **`TIED_BASE_PATH`** for terminal-only use. Then run **`agent enable tied-yaml`** from the client project when using editor MCP, **approve** the Cursor config update, and type **`quit`** to exit the Agent CLI; verify tools/resources load.
 - **Pass 1**: Bootstrap `tied/` via `copy_files.sh` (greenfield; overlaps the `copy_files.sh` step in Setup when you use that path) or conversion tools (single or three-pass).
 - **Pass 2**: Establish REQ → ARCH → IMPL with index/detail tools and register tokens (no code).
 - **Pass 3**: Maintain via traceability queries, bulk/single reads, updates, and token audit; iterate back to Pass 2 when adding new requirements or decisions.
@@ -229,5 +218,5 @@ flowchart LR
 | [mcp-server/README.md](../../mcp-server/README.md) | Full tool and resource list, Cursor config example, path resolution, conversion options |
 | [README.md](../../README.md) | Getting Started, Step 2 (MCP), TIED YAML MCP Server section, value of MCP, data flow |
 | [using-tied-without-mcp.md](using-tied-without-mcp.md) | Workflow when not using MCP (bootstrap and manual YAML management) |
-| [ai-principles.md](../../ai-principles.md) | TIED phases, documentation-first rule, token discipline, priority order |
+| [ai-principles.md](./ai-principles.md) | TIED phases, documentation-first rule, token discipline, priority order |
 | [AGENTS.md](../../AGENTS.md) | Canonical AI agent operating guide and checklists |

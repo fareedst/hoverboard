@@ -28,7 +28,7 @@
 ### 1.2 Preload samples, hook logs, and workspace path
 
 - **Re-ground the TIED base path every session** — Call `tied_config_get_base_path` (or rely on a correctly configured `TIED_BASE_PATH` for the **active** workspace). Treat absolute `tied/` paths in pasted `agent_preload` YAML, demo snapshots, or copied checklist text as **hints only** if they might refer to another clone or repo.
-- **Hook export YAML is not the TIED database** — Files such as `~/.cursor/logs/conv_*.yaml` are Cursor hook/conversation exports (large root-level lists and block scalars). Do not patch or rewrite them with IDE tools as if they were project TIED YAML; use offline tooling to shrink or analyze them (e.g. `scripts/dedupe_transcript_yaml.rb` in this repository). YAML-looking lines inside transcript `text` fields are **string payload**, not live R/A/I records; confusing layers causes invalid YAML (see [conversation-log-yaml-structure-and-agent-difficulties.md](conversation-log-yaml-structure-and-agent-difficulties.md)).
+- **Hook export YAML is not the TIED database** — Files such as `~/.cursor/logs/conv_*.yaml` are Cursor hook/conversation exports (large root-level lists and block scalars). Do not patch or rewrite them with IDE tools as if they were project TIED YAML; use offline tooling to shrink or analyze them (e.g. `scripts/dedupe_transcript_yaml.rb` in this repository). For a full catalog of Ruby preprocessors, metrics, and extractors, see [conversation-analysis-tools.md](conversation-analysis-tools.md). YAML-looking lines inside transcript `text` fields are **string payload**, not live R/A/I records; confusing layers causes invalid YAML (see [conversation-log-yaml-structure-and-agent-difficulties.md](conversation-log-yaml-structure-and-agent-difficulties.md)).
 - **Avoid redundant discovery** — When bootstrap or preload already recorded paths and MCP batch reads, skip repeating the same Grep/`yaml_detail_read_many` work; it adds noise without improving YAML safety.
 
 ---
@@ -37,13 +37,14 @@
 
 - **Use the TIED MCP server as the primary way to read and write TIED data** for the project.
 - **Avoid direct edits to `tied/**/*.yaml` for writes;** use MCP write tools so the server can emit valid YAML (e.g. values with colons are quoted correctly).
-- **Hard rule (project-owned YAML only)**: Do not use IDE `apply_patch` / `Write` on project index or detail YAML under the TIED base path when a tool in § 2 covers the operation. If MCP errors, follow the failure playbook in [yaml-update-mcp-runbook.md](yaml-update-mcp-runbook.md); do not silently switch to direct file edit.
+- **IMPL pseudo-code sidecar (`tied/implementation-decisions/IMPL-*-pseudocode.md`)** is **plain UTF-8 text** (not YAML). It may be edited **directly** in the editor when that is most efficient, then run **`tied_validate_consistency`**, or updated via **`impl_detail_set_essence_pseudocode`** (inline, **`essence_pseudocode_path`**, or **`tied-cli`** with **`TIED_CLI_IMPL_ESSENCE_FILE`** / stdin). Prefer those over constructing huge JSON-escaped strings when possible ([pseudocode-writing-and-validation.md § Mechanics](pseudocode-writing-and-validation.md#mechanics-editing-the-sidecar-mcp-and-cli)).
+- **Hard rule (project-owned YAML only)**: Do not use IDE `apply_patch` / `Write` on project index or **detail** `*.yaml` under the TIED base path when a tool in § 2 covers the operation. If MCP errors, follow the failure playbook in [yaml-update-mcp-runbook.md](yaml-update-mcp-runbook.md); do not silently switch to direct file edit on those YAML files.
 - Prefer **MCP tools** for:
   - Reading indexes and records: `yaml_index_read`, `yaml_index_list_tokens`, `yaml_index_filter`, `get_decisions_for_requirement`, `get_requirements_for_decision`
-  - Reading/writing detail files: `yaml_detail_read`, `yaml_detail_read_many`, `yaml_detail_list`, `yaml_detail_create`, `yaml_detail_update`, `yaml_detail_delete`
+  - Reading/writing detail files: `yaml_detail_read`, `yaml_detail_read_many`, `yaml_detail_list`, `yaml_detail_create`, `yaml_detail_update`, `impl_detail_set_essence_pseudocode` (IMPL-only `essence_pseudocode`), `yaml_detail_delete`
   - Creating or updating index records: `yaml_index_insert`, `yaml_index_update`, `tied_token_create_with_detail`
   - Validation: `yaml_index_validate`, `tied_validate_consistency`, `tied_config_get_base_path`
-  - Conversion and inspection: `convert_monolithic_*`, `convert_detail_markdown_to_yaml`, `tied_import_summary`
+  - Inspection: `tied_import_summary`
 - Prefer **MCP resources** (e.g. `tied://requirements`, `tied://requirement/{token}/detail`) when loading TIED context for reasoning or tool input.
 - Before changing TIED content, **read** the current state via MCP (tools or resources); after changing it, use the appropriate **write** or **update** tool so the on-disk TIED db stays consistent.
 
@@ -71,11 +72,11 @@
 | Create new token with index + detail | `tied_token_create_with_detail` |
 | Validate index YAML | `yaml_index_validate` |
 | Validate REQ/ARCH/IMPL consistency (tokens, traceability, detail files, pseudo-code) | `tied_validate_consistency` |
-| Migrate monolithic docs or detail markdown | `convert_monolithic_*`, `convert_detail_markdown_to_yaml` |
+| Inspect indexes and detail file presence | `tied_import_summary` |
 | Operation not covered by any tool | Direct file access; document the gap for future tooling |
 | How to mutate project YAML without invalid files / MCP abandonment | [yaml-update-mcp-runbook.md](yaml-update-mcp-runbook.md) |
 | Walk an ordered multi-requirement backlog (list on first call, then `continuation_state`) | `requirement_list_state_guide` — see [requirement-list-state-guide-agent-workflow.md](requirement-list-state-guide-agent-workflow.md) |
-| Single-requirement checklist S01–S16 | Follow [agent-req-implementation-checklist.md](agent-req-implementation-checklist.md) in the repo (no dedicated MCP tool for the linear step sequence) |
+| Single-requirement checklist session-bootstrap–traceable-commit | Follow [agent-req-implementation-checklist.md](agent-req-implementation-checklist.md) in the repo (no dedicated MCP tool for the linear step sequence) |
 
 ---
 
@@ -85,4 +86,4 @@
 - **Tool and resource list**: [mcp-server/README.md](../mcp-server/README.md)
 - **Multi-requirement walk + per-REQ checklist**: [requirement-list-state-guide-agent-workflow.md](requirement-list-state-guide-agent-workflow.md)
 - **Setup and passes**: [adding-tied-mcp-and-invoking-passes.md](adding-tied-mcp-and-invoking-passes.md)
-- **Agent operating guide**: [AGENTS.md](../AGENTS.md); **principles**: [ai-principles.md](../ai-principles.md)
+- **Agent operating guide**: [AGENTS.md](../AGENTS.md); **principles**: [ai-principles.md](./ai-principles.md)

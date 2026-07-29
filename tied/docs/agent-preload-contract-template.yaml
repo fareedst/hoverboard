@@ -1,0 +1,84 @@
+# Agent preload contract — generic template
+#
+# Applicability: A blank or generic copy of this file is not a substitute for a
+# REQ+ARCH-bounded system definition. Prefer not to treat agent_preload as
+# authoritative for stack, paths, or tests until after architecture decisions
+# exist; then update tied/agent-preload-contract.yaml after
+# author-architecture (ARCH-locked constants) and again after
+# persist-implementation-records (IMPL-locked code_locations and related fields)
+# per tied/docs/agent-req-implementation-checklist.yaml. sync-tied-stack re-checks
+# preload if TIED status or traceability to tests changed.
+#
+# If a field is present and true, the agent should treat it as authoritative
+# and avoid redundant tool calls unless a later result contradicts it.
+#
+# Copy this file per session or per workspace and fill values.
+agent_preload:
+  active_user_intent:
+    checklist_step_id: "" # e.g. session-bootstrap
+    # Instruction block for prompts (optional; paste near agent_preload in user rules)
+    checklist_token: "" # e.g. PROC-AGENT_REQ_CHECKLIST
+    primary_query_summary: ""
+  discovery_already_done:
+    gemfile_present: false
+    grep_patterns_satisfied:
+      repo_layout_scan: false # **/* or equivalent
+      token_scan_in_sources: false # REQ|ARCH|IMPL across rb/md/yaml
+    ruby_files_present: false
+    ruby_test_files_present: false
+    semantic_tokens_present: false
+  implementation_contract:
+    citdp_artifact_paths: []
+    invalid_input: "" # e.g. exception, nil, documented behavior
+    language: ""
+    language_version: ""
+    target_source_paths: []
+    test_cohabit_code: false
+    test_framework: ""
+  methodology_vs_project:
+    methodology_readonly: true # tied/methodology/** not edited in client
+    project_tokens_only_writable: true
+  session_bootstrap_docs:
+    agent_req_checklist_path: ./tied/docs/agent-req-implementation-checklist.md
+    ai_principles_path: ./tied/docs/ai-principles.md
+    architecture_decisions_index: ./tied/architecture-decisions.yaml
+    detail_files_schema: ./tied/docs/detail-files-schema.md
+    implementation_decisions_guide: ./tied/docs/implementation-decisions.md
+    # Client live file; TIED copy_files.sh copies it from tied/docs/processes.md when missing
+    implementation_decisions_index: ./tied/implementation-decisions.yaml
+    processes_path: ./tied/docs/processes.md
+    requirements_index: ./tied/requirements.yaml
+    semantic_tokens_guide: ./tied/docs/semantic-tokens.md
+    semantic_tokens_index: ./tied/semantic-tokens.yaml
+  tied_mcp:
+    base_path_resolved: false # if true, skip tied_config_get_base_path unless cwd changed
+    tied_cli_stdio_ok_without_cursor_mcp: false # true when Node + built server (e.g. TIED_MCP_BIN to dist/index.js): tied-cli.sh works over stdio; empty IDE MCP server list does not mean tied-cli is unavailable
+    # Paths below are relative to TIED_BASE_PATH unless noted. Match MCP env TIED_BASE_PATH.
+    yaml_detail_batch_done: false # if true, skip yaml_detail_read_many for same keys
+  tied_paths:
+    mcp_tied_yaml_verified_this_session: false # set true after a successful MCP read/write this session
+    methodology_readonly_glob: methodology/** # never agent-write; refreshed by copy_files.sh
+    project_yaml_writable_globs:
+      - '*.yaml' # index + feedback at base: requirements, architecture-decisions, implementation-decisions, semantic-tokens, feedback
+      - architecture-decisions/*.yaml
+      - implementation-decisions/*.yaml
+      - requirements/*.yaml
+    TIED_BASE_PATH: "" # e.g. tied or absolute path to .../project/tied
+  workspace:
+    cwd: "" # absolute path; must match session workspace_roots[0] when set
+    project_summary: ""
+    top_level_entries: [] # optional; omit if likely to go stale
+    vcs_present: false # e.g. true when .git exists
+preload_instructions: |
+  Treat agent_preload as authoritative context. If a value is present, do not spend
+  tool calls rediscovering it unless a later tool result or user message contradicts it.
+  Prefer preload facts over filesystem discovery. Do not search for MCP schema, server
+  metadata, `.cursor/mcp.json`, or pause to confirm MCP unavailability — especially when
+  the session is driven by Go tools/agentstream (MCP preflight there is optional; copy_files.sh
+  installs `.cursor/skills/tied-yaml/` only). Lack of Cursor MCP tools does not block tied-cli.sh
+  when Node and TIED_MCP_BIN (built mcp-server/dist/index.js) are available — see tied-yaml SKILL.md. Do not search project layout or target file
+  existence unless needed to resolve a contradiction. When tied_paths.TIED_BASE_PATH and
+  project_yaml_writable_globs are set,
+  align MCP TIED_BASE_PATH with them; never treat methodology_readonly_glob paths as
+  writable. Keep preload narrow and accurate; wrong preload costs more than one
+  discovery call.

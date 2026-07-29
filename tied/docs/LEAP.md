@@ -12,7 +12,7 @@
 - **Propagation**: Changes are **distributed and validated** through the stack. Top-down: REQ → ARCH → IMPL. Bottom-up (when TDD/E2E reveal divergence): IMPL → ARCH → REQ, in the same work item. Work can start at any layer, but for the work to be **complete**, the full stack (REQ, ARCH, IMPL, tests, code) must be consistent and traceable via tokens.
 - **Validity**: Code is valid only when **all tests pass** and **all requirements are met**. Validity implies the stack is consistent and the written record (R/A/I) matches the implementation.
 
-See `tied/processes.md` § LEAP for the canonical process definition and rules. For the executable LEAP procedure (what to do when code/tests diverge from IMPL), follow that section.
+See `tied/docs/processes.md` § LEAP for the canonical process definition and rules. For the executable LEAP procedure (what to do when code/tests diverge from IMPL), follow that section.
 
 ---
 

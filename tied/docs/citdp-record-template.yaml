@@ -1,0 +1,33 @@
+# CITDP analysis record template
+#
+# Copy to tied/citdp/CITDP-{change_request_id}.yaml at the client project root,
+# replace placeholders, then lint per persist-citdp-record in docs/agent-req-implementation-checklist.yaml.
+# Policy: tied/docs/citdp-policy.md
+change_definition:
+  current_behavior: ~
+  desired_behavior: ~
+  non_goals: []
+  success_criteria: []
+  unchanged_behavior: ~
+completion_criteria:
+  verification_gate_notes: ~
+impact_analysis:
+  impl_inventory_notes: ~
+  modules_or_boundaries: ~
+  tied_tokens_affected: []
+  tied_tokens_new: []
+leap_feedback:
+  divergences_from_analysis: none
+  record_status: draft
+  tied_stack_updates_required: []
+record_identity:
+  change_request_id: REQ-REPLACE_ME
+  recorded_at: YYYY-MM-DD
+  title: ~
+risk_analysis:
+  risks: []
+tdd_sequence:
+  summary: ~
+test_strategy:
+  matrix_notes: ~
+  summary: ~

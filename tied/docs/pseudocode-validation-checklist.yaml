@@ -1,328 +1,389 @@
 # Application Pseudo-Code Validation Checklist
-# Canonical checklist for validating IMPL essence_pseudocode in TIED projects.
-# Reference: tied/docs/pseudocode-writing-and-validation.md
+# Unified narrative guide (Definition, writing, MCP mechanics, block linkage, phases A-I, LEAP, validation): tied/docs/pseudocode-writing-and-validation.md
+# Layer A (TIED) before Layer B (this checklist): run tied_validate_consistency (include_pseudocode) for IMPL
+# before or alongside application categories. See ./tied/docs/pseudocode-writing-and-validation.md (Validation layers).
+# For IMPL, primary text to validate is the UTF-8 file tied/implementation-decisions/IMPL-{TOKEN}-pseudocode.md
+# (merged as essence_pseudocode by TIED; equivalent to yaml_detail_read for the body).
 # Process token: [PROC-PSEUDOCODE_VALIDATION]
-name: application_pseudocode_validation_checklist
-description: |
-  Reusable checklist for projects whose pseudo-code blocks describe the full application, including implementation intent, unit tests, integration points, requirement traceability, and generation-readiness.
-usage:
-  intended_for:
-    - projects with pseudo-code as the primary application specification
-    - projects where pseudo-code drives unit-test and integration-test definitions
-    - projects that require requirement, architecture, and implementation traceability
-  how_to_apply:
-    - parse each pseudo-code block into a normalized internal representation
-    - run each validation pass in order
-    - record findings with severity and source location
-    - treat required checks as gating unless explicitly waived
-  result_severities:
-    - error
-    - warning
-    - info
 checklist:
+  - id: TIED-POE-001
+    category: tied_data
+    evidence:
+      - or equivalent documented manual review only when MCP is unavailable and project policy allows
+      - tied_validate_consistency report with pseudocode section for the token
+    required: true
+    severity_on_failure: error
+    title: TIED data validation passes for changed IMPL essence (merged pseudo-code)
+    verify:
+      - do not use this checklist in isolation when TIED is available; qualify sidecar or merged text with TIED first
+      - for the affected IMPL, tied_validate_consistency returns ok with include_pseudocode (default) so merged essence from IMPL-TOKEN-pseudocode.md meets TIED token comment and token-ref rules
   - id: PARSE-001
     category: parsing
+    evidence:
+      - parse failures include source location
+      - parse result exists for each block
     required: true
+    severity_on_failure: error
     title: Every pseudo-code block parses successfully
     verify:
-      - the block conforms to the project grammar
       - malformed syntax is rejected
       - parsing produces a normalized internal representation
-    evidence:
-      - parse result exists for each block
-      - parse failures include source location
-    severity_on_failure: error
+      - the block conforms to the project grammar
   - id: PARSE-002
     category: parsing
-    required: true
-    title: Source locations are preserved for diagnostics
-    verify:
-      - line and column are attached where available
-      - diagnostics can identify the exact block and step
     evidence:
       - each diagnostic includes block identifier
       - line and column are present when the parser provides them
+    required: true
     severity_on_failure: error
+    title: Source locations are preserved for diagnostics
+    verify:
+      - diagnostics can identify the exact block and step
+      - line and column are attached where available
   - id: SHAPE-001
     category: schema
+    evidence:
+      - no missing required fields
+      - section inventory per block kind
     required: true
+    severity_on_failure: error
     title: Required sections exist for each block kind
     verify:
+      - block headers and tags follow naming rules
       - required sections are present for the declared block kind
       - section order follows project conventions if order is significant
-      - block headers and tags follow naming rules
-    evidence:
-      - section inventory per block kind
-      - no missing required fields
-    severity_on_failure: error
   - id: SHAPE-002
     category: schema
-    required: true
-    title: Inputs outputs and data declarations are internally consistent
-    verify:
-      - identifiers are declared before use
-      - duplicate declarations are rejected unless explicitly allowed
-      - output variants are structurally valid
     evidence:
       - declaration table matches block references
+    required: true
     severity_on_failure: error
+    title: Inputs outputs and data declarations are internally consistent
+    verify:
+      - duplicate declarations are rejected unless explicitly allowed
+      - identifiers are declared before use
+      - output variants are structurally valid
   - id: TEST-UNIT-001
     category: unit_test_spec
-    required: true
-    title: Each unit-test block declares exactly one subject under test
-    verify:
-      - the unit-test block targets one routine or one block
-      - helper references do not create ambiguity about the subject
     evidence:
       - exactly one target symbol is resolved
+    required: true
     severity_on_failure: error
+    title: Each unit-test block declares exactly one subject under test
+    verify:
+      - helper references do not create ambiguity about the subject
+      - the unit-test block targets one routine or one block
   - id: TEST-UNIT-002
     category: unit_test_spec
+    evidence:
+      - normalized phase map exists for each unit-test block
     required: true
+    severity_on_failure: error
     title: Unit-test phases are explicit or inferable
     verify:
-      - setup exists
       - act exists
       - assertion or expected outcome exists
       - error expectation is explicit when failure behavior is tested
-    evidence:
-      - normalized phase map exists for each unit-test block
-    severity_on_failure: error
+      - setup exists
   - id: TEST-INT-001
     category: integration_test_spec
+    evidence:
+      - collaborator list resolves against the application symbol table
     required: true
+    severity_on_failure: error
     title: Integration-test blocks declare participating collaborators
     verify:
       - all directly involved blocks or routines are named
-      - undeclared collaborators are rejected
       - external boundaries are identified when present
-    evidence:
-      - collaborator list resolves against the application symbol table
-    severity_on_failure: error
+      - undeclared collaborators are rejected
   - id: TEST-INT-002
     category: integration_test_spec
-    required: true
-    title: Integration-test boundaries follow architecture rules
-    verify:
-      - only allowed dependency directions are used
-      - forbidden layers are not crossed
-      - collaborator usage matches architecture constraints
     evidence:
       - dependency graph analysis for each integration test
+    required: true
     severity_on_failure: error
+    title: Integration-test boundaries follow architecture rules
+    verify:
+      - collaborator usage matches architecture constraints
+      - forbidden layers are not crossed
+      - only allowed dependency directions are used
   - id: RESOLVE-001
     category: symbol_resolution
-    required: true
-    title: Every referenced symbol resolves uniquely
-    verify:
-      - referenced routines exist
-      - referenced blocks exist
-      - referenced tags exist
-      - names are not ambiguous
     evidence:
       - symbol table with unique bindings
+    required: true
     severity_on_failure: error
+    title: Every referenced symbol resolves uniquely
+    verify:
+      - names are not ambiguous
+      - referenced blocks exist
+      - referenced routines exist
+      - referenced tags exist
   - id: RESOLVE-002
     category: symbol_resolution
+    evidence:
+      - duplicate report reviewed and resolved
     required: true
+    severity_on_failure: error
     title: Duplicate identifiers are controlled
     verify:
       - duplicate block identifiers are rejected unless intentionally versioned
       - duplicate requirement or implementation tags are explainable
-    evidence:
-      - duplicate report reviewed and resolved
-    severity_on_failure: error
   - id: CONTRACT-001
     category: contract_validation
-    required: true
-    title: Test inputs conform to target block contracts
-    verify:
-      - test inputs match the declared input names and shapes
-      - preconditions are satisfied by setup
-      - undeclared inputs are rejected
     evidence:
       - contract comparison result for each test target
+    required: true
     severity_on_failure: error
+    title: Test inputs conform to target block contracts
+    verify:
+      - preconditions are satisfied by setup
+      - test inputs match the declared input names and shapes
+      - undeclared inputs are rejected
   - id: CONTRACT-002
     category: contract_validation
-    required: true
-    title: Expected outputs and errors conform to target block contracts
-    verify:
-      - expected success results match a declared output variant
-      - expected errors match declared error types or failure modes
-      - assertions refer only to observable behavior
     evidence:
       - output and error expectation comparison report
+    required: true
     severity_on_failure: error
+    title: Expected outputs and errors conform to target block contracts
+    verify:
+      - assertions refer only to observable behavior
+      - expected errors match declared error types or failure modes
+      - expected success results match a declared output variant
   - id: CONTRACT-003
     category: contract_validation
-    required: true
-    title: Safety and invariant claims are testable where required
-    verify:
-      - safety constraints stated in the target spec are reflected in tests
-      - invariants are asserted where the project requires them
-      - prohibited behaviors are explicitly checked when relevant
     evidence:
       - mapping from safety clauses to test assertions
+    required: true
     severity_on_failure: warning
+    title: Safety and invariant claims are testable where required
+    verify:
+      - invariants are asserted where the project requires them
+      - prohibited behaviors are explicitly checked when relevant
+      - safety constraints stated in the target spec are reflected in tests
   - id: GRAPH-001
     category: dependency_graph
-    required: true
-    title: The application dependency graph is valid
-    verify:
-      - every dependency edge connects known nodes
-      - forbidden cycles are rejected
-      - allowed cycles are classified and documented
     evidence:
       - graph validation report
+    required: true
     severity_on_failure: error
+    title: The application dependency graph is valid
+    verify:
+      - allowed cycles are classified and documented
+      - every dependency edge connects known nodes
+      - forbidden cycles are rejected
   - id: GRAPH-002
     category: dependency_graph
-    required: true
-    title: Unit tests do not silently depend on undeclared collaborators
-    verify:
-      - unit-test blocks use only the declared subject and allowed helpers
-      - hidden integration behavior is flagged
     evidence:
       - unit-test collaborator audit
+    required: true
     severity_on_failure: warning
+    title: Unit tests do not silently depend on undeclared collaborators
+    verify:
+      - hidden integration behavior is flagged
+      - unit-test blocks use only the declared subject and allowed helpers
   - id: COVER-001
     category: behavioral_coverage
+    evidence:
+      - coverage map from implementation block to success-path tests
     required: true
+    severity_on_failure: error
     title: Each implementation block has success-path coverage
     verify:
       - at least one test exercises the intended success result
-    evidence:
-      - coverage map from implementation block to success-path tests
-    severity_on_failure: error
   - id: COVER-002
     category: behavioral_coverage
+    evidence:
+      - coverage map from failure modes to tests
     required: true
+    severity_on_failure: error
     title: Each implementation block has failure-path coverage when failure is possible
     verify:
       - declared errors and failure modes are exercised by tests
       - failure-path assertions check the expected error shape
-    evidence:
-      - coverage map from failure modes to tests
-    severity_on_failure: error
   - id: COVER-003
     category: behavioral_coverage
+    evidence:
+      - edge-case coverage inventory
     required: false
+    severity_on_failure: warning
     title: Boundary and edge cases are covered
     verify:
       - empty inputs are tested where meaningful
-      - minimal valid inputs are tested
       - malformed or extreme values are tested where relevant
-    evidence:
-      - edge-case coverage inventory
-    severity_on_failure: warning
+      - minimal valid inputs are tested
   - id: TRACE-001
     category: traceability
+    evidence:
+      - requirement-to-test matrix
     required: true
+    severity_on_failure: error
     title: Every requirement tag has at least one test
     verify:
       - each requirement identifier maps to one or more test blocks
       - orphan requirements are reported
-    evidence:
-      - requirement-to-test matrix
-    severity_on_failure: error
   - id: TRACE-002
     category: traceability
+    evidence:
+      - implementation-to-test matrix
     required: true
+    severity_on_failure: error
     title: Every implementation tag has corresponding validation coverage
     verify:
       - each implementation identifier maps to unit or integration tests
       - untested implementation blocks are reported
-    evidence:
-      - implementation-to-test matrix
-    severity_on_failure: error
   - id: TRACE-003
     category: traceability
+    evidence:
+      - architecture-to-integration-test matrix
     required: false
+    severity_on_failure: warning
     title: Architecture relationships are reflected in integration tests
     verify:
       - architecture-level dependencies are exercised by one or more integration tests
       - missing integration coverage is reported
-    evidence:
-      - architecture-to-integration-test matrix
-    severity_on_failure: warning
   - id: LINT-001
     category: linting
-    required: false
-    title: Pseudo-code steps use precise verbs and avoid ambiguous phrasing
-    verify:
-      - vague terms are flagged unless refined by context
-      - assertions are explicit rather than implied
     evidence:
       - lint findings for ambiguous steps
+    required: false
     severity_on_failure: warning
+    title: Pseudo-code steps use precise verbs and avoid ambiguous phrasing
+    verify:
+      - assertions are explicit rather than implied
+      - vague terms are flagged unless refined by context
   - id: LINT-002
     category: linting
+    evidence:
+      - fixture and mock declaration audit
     required: false
+    severity_on_failure: warning
     title: Test blocks declare fixtures mocks and helpers explicitly
     verify:
       - hidden setup is not assumed
       - mock or stub usage matches actual collaborators
+  - id: LINT-MD-001
+    category: linting
     evidence:
-      - fixture and mock declaration audit
-    severity_on_failure: warning
+      - read IMPL-TOKEN-pseudocode.md; compare to script/extract_test_pseudocode_to_impl_sidecars.py output
+    required: false
+    severity_on_failure: info
+    title: IMPL Markdown sidecar matches agreed heading structure when extract-generated
+    verify:
+      - a single H1 for the file intro with IMPL/ARCH/REQ bracket tokens (methodology order when all three appear); per coverage section H2 with a Source line when using the Comrak extract path
+  - id: LINT-MD-002
+    category: linting
+    evidence:
+      - NORM in src/tests vs impl sidecar; tied/docs/pseudocode-writing-and-validation.md
+    required: false
+    severity_on_failure: info
+    title: Rust NORM line comments keep structured NORM; optional /* */ is narrative
+    verify:
+      - // lines carry FILE/TEST/contract and bracket tokens as required by the project
+      - optional /* */ preface in the pre-test span is narrative; not a substitute for // tokens unless policy and extract tooling allow
   - id: SIM-001
     category: semantic_simulation
-    required: false
-    title: Test pseudo-code is semantically coherent under symbolic interpretation
-    verify:
-      - setup can satisfy target preconditions
-      - assertions are reachable
-      - expected results do not contradict the target contract
     evidence:
       - symbolic validation report
+    required: false
     severity_on_failure: warning
+    title: Test pseudo-code is semantically coherent under symbolic interpretation
+    verify:
+      - assertions are reachable
+      - expected results do not contradict the target contract
+      - setup can satisfy target preconditions
   - id: GEN-001
     category: generation_readiness
-    required: false
-    title: Test pseudo-code can be translated into executable tests
-    verify:
-      - each step maps to a supported test framework primitive
-      - fixtures can be materialized
-      - assertions are machine-translatable
-      - unresolved natural language steps are reported
     evidence:
       - generation feasibility report
+    required: false
     severity_on_failure: warning
+    title: Test pseudo-code can be translated into executable tests
+    verify:
+      - assertions are machine-translatable
+      - each step maps to a supported test framework primitive
+      - fixtures can be materialized
+      - unresolved natural language steps are reported
   - id: DIAG-001
     category: reporting
-    required: true
-    title: Findings are emitted with severity message and source location
-    verify:
-      - all findings include severity
-      - all findings include a concise explanation
-      - all findings point to block and source location when available
     evidence:
       - diagnostic output sample
+    required: true
     severity_on_failure: error
-recommended_validation_order:
-  - parsing
-  - schema
-  - symbol_resolution
-  - contract_validation
-  - dependency_graph
-  - behavioral_coverage
-  - traceability
-  - linting
-  - semantic_simulation
-  - generation_readiness
-  - reporting
+    title: Findings are emitted with severity message and source location
+    verify:
+      - all findings include a concise explanation
+      - all findings include severity
+      - all findings point to block and source location when available
+description: |
+  Reusable checklist for projects whose IMPL pseudo-code blocks describe implementation intent, unit and
+  integration tests, traceability, and (optionally) generation-readiness. Canonical definition and grammar
+  (language-agnostic TIED vocabulary, block-format sync to tests and code, LEAP when scope changes): see
+  tied/docs/pseudocode-writing-and-validation.md § Definition; sidecar body template: templates/impl-essence-pseudocode-template.md.
+
+  IMPL essence_pseudocode is language-agnostic: it uses INPUT/OUTPUT/DATA/CONTROL and procedure steps, not
+  host-language source. Full token lines use IMPL, ARCH, REQ bracket order when all three appear (see implementation-decisions.md).
+  Each logical block (e.g. Markdown ## section) is synchronized to tests and production code via literal block
+  leads (and optional full-block copy per project policy). Edits that change behavior or requirement/architecture
+  scope require [PROC-LEAP] validation (IMPL, then ARCH and REQ)—Layer A and Layer B do not replace that propagation.
+
+  In TIED IMPL layout, the canonical on-disk source for the pseudo-code body is
+  tied/implementation-decisions/IMPL-{TOKEN}-pseudocode.md (UTF-8). TIED merges that file into the logical
+  essence_pseudocode field for yaml_detail_read and for tied_validate_consistency (include_pseudocode: true
+  by default). Run that TIED gate to qualify the external file against index and token-reference rules before
+  or alongside the PARSE/SHAPE/... categories in this file.
+
+  The sidecar is Markdown. Layer A (tied_validate_consistency) still inspects the merged string; bracket
+  [IMPL-*/ARCH-*/REQ-*] tags may appear on any line, not a fixed comment prefix. When a project (e.g. Comrak)
+  has no custom pseudo-code grammar parser, treat each section between ## headings in IMPL-*-pseudocode.md as
+  one logical "block" for manual Layer B review. Optional items LINT-MD-001 and LINT-MD-002 below help reviewers
+  align with the extract-generated sidecar pattern where that script is used.
 minimum_gating_rules:
   - all required checks pass
-  - no unresolved symbols remain
-  - every requirement tag is covered by at least one test
-  - every implementation block has success-path coverage
-  - every declared failure mode has coverage when failure is possible
   - diagnostics include source locations where available
+  - every declared failure mode has coverage when failure is possible
+  - every implementation block has success-path coverage
+  - every requirement tag is covered by at least one test
+  - no unresolved symbols remain
+  - note: Full rules above assume pseudo-code drives or coexists with executable tests. Before RED tests, gate-pseudocode-validation applies a structural subset only—see tied/docs/pseudocode-writing-and-validation.md § Validation layers (Pre-RED vs post-test).
+name: application_pseudocode_validation_checklist
+recommended_validation_order:
+  - behavioral_coverage
+  - contract_validation
+  - dependency_graph
+  - generation_readiness
+  - linting
+  - parsing
+  - reporting
+  - schema
+  - semantic_simulation
+  - symbol_resolution
+  - tied_data
+  - traceability
 tailoring:
   notes:
-    - add project-specific block kinds under the schema category
-    - add domain-specific safety rules under contract_validation
-    - add project architecture constraints under dependency_graph
     - add custom coverage thresholds per block kind if needed
+    - add domain-specific safety rules under contract_validation
     - add generation backend constraints if pseudo-code drives test generation directly
+    - add project architecture constraints under dependency_graph
+    - add project-specific block kinds under the schema category
+    - for Comrak-style Markdown sidecars, optional LINT-MD-001 and LINT-MD-002 align manual Layer B with extract_test_pseudocode_to_impl_sidecars.py; mark N/A when the IMPL is purely procedural and not test-catalog-driven
+usage:
+  how_to_apply:
+    - for Comrak extract-generated IMPL-*-pseudocode.md, use script/extract_test_pseudocode_to_impl_sidecars.py as the source of truth for what a “block” is (H1 file intro, H2 per test, Source line, then list/blockquote body); do not re-invent a different block boundary without a project reason
+    - for IMPL, ingest the same text TIED uses—read IMPL-TOKEN-pseudocode.md, or the merged essence_pseudocode from yaml_detail_read; they are equivalent when the sidecar is present
+    - parse each pseudo-code block into a normalized internal representation
+    - record findings with severity and source location
+    - run each validation pass in the recommended order (tied_data first, then application categories below)
+    - run Layer A (tied_validate_consistency) before relying on Layer B rows; resolve LEAP (IMPL to ARCH/REQ) when edits change scope—not only checklist passes
+    - run tied_validate_consistency (Layer A) so the external or merged pseudo-code is qualified for repository traceability rules; Layer A and this checklist (Layer B) are complementary—traceability vs. contracts/structure
+    - treat required checks as gating unless explicitly waived
+  intended_for:
+    - projects that require REQ, ARCH, and IMPL traceability and LEAP-aligned updates when pseudocode scope changes
+    - projects where pseudo-code drives unit-test and integration-test definitions and literal block linkage to code
+    - projects with IMPL pseudo-code as the primary specification for behavior (language-agnostic contracts and steps)
+  result_severities:
+    - error
+    - info
+    - warning
