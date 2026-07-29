@@ -1,73 +1,58 @@
 IMPL-CONFIG_STRUCT:
-  name: Configuration Structure
-  status: Template
-  cross_references:
-    - ARCH-CONFIG_STRUCTURE
-    - REQ-CONFIGURATION
-    - REQ-RECENT_TAGS_SYSTEM
-  rationale:
-    why: Why this configuration structure was chosen
-    problems_solved:
-      - Problem 1
-    benefits:
-      - Benefit 1
-  implementation_approach:
-    summary: Configuration structure implementation approach
-    details:
-      - Specific technical detail 1
-      - Code structure or pattern
-      - API design decision
   code_locations:
     files:
-      - path: src/config/config-manager.js
-        description: Zod schema, defaults, getConfig merge (includes recent-tags keys)
+      - path: "src/config/config-manager.js"
+        description: "Zod schema, defaults, getConfig merge (includes recent-tags keys)"
     functions:
-      - name: getConfig
-        file: src/config/config-manager.js
-        description: Merged defaults + chrome.storage; supplies recentTagsActivityWindowMinutes to recent-tags policy
-  traceability:
-    architecture:
-      - ARCH-CONFIG_STRUCTURE
-    requirements:
-      - REQ-CONFIGURATION
-      - REQ-RECENT_TAGS_SYSTEM
-    tests:
-      - tests/unit/config-manager.test.js
-      - tests/unit/tag-recent-behavior.test.js
-      - tests/unit/recent-tags-memory-policy.test.js
-    code_annotations:
-      - IMPL-CONFIG_STRUCT
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also: []
-    composed_with: []
-  essence_pseudocode: |
-    # [IMPL-CONFIG_STRUCT] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIGURATION] [REQ-RECENT_TAGS_SYSTEM]
-    # Project extension (partial): recent-tags-related keys merged in getConfig and read by RecentTagsMemoryManager / TagService. Full config surface remains Template for other domains.
-    # Contract: getConfig() returns merged object; missing keys use defaults; invalid stored config falls back per ConfigManager rules.
-    INPUT: storage read on getConfig; optional partial patch on save
-    OUTPUT: merged config object (plain); recent-tags fields typed by Zod in config-manager
-    DATA: chrome.storage.local user settings + in-code defaults; keys include recentTagsActivityWindowMinutes (N for REQ-RECENT_TAGS_SYSTEM), recentTagsMaxListSize, recentTagsMaxDisplayCount, recentTagsSharedMemoryKey, recentTagsEnableUserDriven, recentTagsClearOnReload, recentTagsCountMax
-
-    # [IMPL-CONFIG_STRUCT] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIGURATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM]
-    # How: merged getConfig supplies recentTagsActivityWindowMinutes (default 15; schema 1..24*60) and sibling keys to SW policy; [IMPL-TAG_SYSTEM] reads via callback passed into recentTagsMemory.getRecentTagsForUi.
-    getConfig():
-      READ storage; MERGE with defaults; VALIDATE with Zod schema
-      RETURN merged config (recentTags* fields available to SW recent tags module)
-
-    # --- Cross-IMPL ---
-    # Recent-tags keys consumed by [IMPL-TAG_SYSTEM] / RecentTagsMemoryManager (not duplicated here). Wider config surface remains Template beyond this slice.
-  detail_file: implementation-decisions/IMPL-CONFIG_STRUCT.yaml
+      - name: "getConfig"
+        description: "Merged defaults + chrome.storage; supplies recentTagsActivityWindowMinutes to recent-tags policy"
+        file: "src/config/config-manager.js"
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "REQ-CONFIGURATION"
+    - "REQ-RECENT_TAGS_SYSTEM"
+  detail_file: "implementation-decisions/IMPL-CONFIG_STRUCT.yaml"
+  essence_pseudocode: "# [IMPL-CONFIG_STRUCT] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIGURATION] [REQ-RECENT_TAGS_SYSTEM]\n# Project extension (partial): recent-tags-related keys merged in getConfig and read by RecentTagsMemoryManager / TagService. Full config surface remains Template for other domains.\n# Contract: getConfig() returns merged object; missing keys use defaults; invalid stored config falls back per ConfigManager rules.\nINPUT: storage read on getConfig; optional partial patch on save\nOUTPUT: merged config object (plain); recent-tags fields typed by Zod in config-manager\nDATA: chrome.storage.local user settings + in-code defaults; keys include recentTagsActivityWindowMinutes (N for REQ-RECENT_TAGS_SYSTEM), recentTagsMaxListSize, recentTagsMaxDisplayCount, recentTagsSharedMemoryKey, recentTagsEnableUserDriven, recentTagsClearOnReload, recentTagsCountMax\n\n# [IMPL-CONFIG_STRUCT] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIGURATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM]\n# How: merged getConfig supplies recentTagsActivityWindowMinutes (default 15; schema 1..24*60) and sibling keys to SW policy; [IMPL-TAG_SYSTEM] reads via callback passed into recentTagsMemory.getRecentTagsForUi.\ngetConfig():\n  READ storage; MERGE with defaults; VALIDATE with Zod schema\n  RETURN merged config (recentTags* fields available to SW recent tags module)\n\n# --- Cross-IMPL ---\n# Recent-tags keys consumed by [IMPL-TAG_SYSTEM] / RecentTagsMemoryManager (not duplicated here). Wider config surface remains Template beyond this slice.\n"
+  implementation_approach:
+    details:
+      - "API design decision"
+      - "Code structure or pattern"
+      - "Specific technical detail 1"
+    summary: "Configuration structure implementation approach"
   metadata:
     created:
-      date: YYYY-MM-DD
-      author: agent/contributor
+      author: "agent/contributor"
+      date: "YYYY-MM-DD"
     last_updated:
+      author: "AI Agent"
       date: "2026-03-28"
-      author: AI Agent
-      reason: 'S06.4–S06.5: recent-tags config slice; [PROC-IMPL_PSEUDOCODE_TOKENS] getConfig block + cross-IMPL'
+      reason: "S06.4–S06.5: recent-tags config slice; [PROC-IMPL_PSEUDOCODE_TOKENS] getConfig block + cross-IMPL"
     last_validated:
-      date: YYYY-MM-DD
-      validator: agent/contributor
-      result: pass
+      date: "YYYY-MM-DD"
+      result: "pass"
+      validator: "agent/contributor"
+  name: "Configuration Structure"
+  rationale:
+    benefits:
+      - "Benefit 1"
+    problems_solved:
+      - "Problem 1"
+    why: "Why this configuration structure was chosen"
+  related_decisions:
+    composed_with: []
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Template"
+  traceability:
+    architecture:
+      - "ARCH-CONFIG_STRUCTURE"
+    code_annotations:
+      - "IMPL-CONFIG_STRUCT"
+    requirements:
+      - "REQ-CONFIGURATION"
+      - "REQ-RECENT_TAGS_SYSTEM"
+    tests:
+      - "tests/unit/config-manager.test.js"
+      - "tests/unit/recent-tags-memory-policy.test.js"
+      - "tests/unit/tag-recent-behavior.test.js"

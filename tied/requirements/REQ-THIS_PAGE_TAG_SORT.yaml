@@ -1,57 +1,57 @@
 REQ-THIS_PAGE_TAG_SORT:
-  name: This Page tag chip sort (three-way)
-  category: Functional
-  priority: P1
-  status: Implemented
-  description: 'Side panel This Page tab exposes a three-way toggle for ordering tags within Current Tags, Recent Tags, and Suggested Tags: alphabetical (case-insensitive display string after label casing), by bookmark usage frequency from local storage (hoverboard_tag_frequency), and by DOM-source relevance for suggestions. Same mode applies to all three lists; membership unchanged. Default mode alphabetical; no cross-session persistence.'
+  category: "Functional"
+  description: "Side panel This Page tab exposes a three-way toggle for ordering tags within Current Tags, Recent Tags, and Suggested Tags: alphabetical (case-insensitive display string after label casing), by bookmark usage frequency from local storage (hoverboard_tag_frequency), and by DOM-source relevance for suggestions. Same mode applies to all three lists; membership unchanged. Default mode alphabetical; no cross-session persistence."
+  detail_file: "requirements/REQ-THIS_PAGE_TAG_SORT.yaml"
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-03-27"
+      reason: "S13 PROC-AGENT_REQ_CHECKLIST: traceability.tests + validation_criteria aligned to IMPL and shipped tests"
+  name: "This Page tag chip sort (three-way)"
+  priority: "P1"
   rationale:
-    why: Users need predictable chip order and quick access to high-signal suggestions without changing which tags appear.
-    problems_solved:
-      - Fixed ordering only by one heuristic (e.g. frequency) does not match all tasks
-      - Suggested tags need a relevance signal visible in sort order
     benefits:
-      - One shared sort mode across Current, Recent, and Suggested when side-panel markup includes the toggle
-      - Popup remains unchanged when sort UI is absent
-  satisfaction_criteria:
-    - criterion: 'Three modes: alphabetical, frequency, relevance'
-    - criterion: Alphabetical uses display string after tag case mode; tie-break stable source index
-    - criterion: Frequency uses bookmark counts; missing counts treated as zero; tie-break alphabetical then stable index
-    - criterion: Relevance uses per-token scores from page extract; non-DOM entries score 0; equal relevance uses bookmark freq then in-page token freq then alphabetical
-    - criterion: Empty lists unchanged on toggle
-    - criterion: Popup without toggle keeps controller-provided order
-  validation_criteria:
-    - method: Unit tests
-      coverage: tag-chip-sort comparators; UIManager sort with toggle shim; PopupController suggested-tags double inject; _normalizeHoverboardTagFrequencyMap (popup-refresh-tag-frequency-map.test.js)
-    - method: Composition tests
-      coverage: this-page-tag-sort-composition.integration.test.js — loadInitialData order; setupEventListeners [data-sort-mode] → setTagSortMode
-    - method: Extension E2E (Playwright)
-      coverage: extension-this-page-tag-sort.spec.js — real chrome-extension:// side panel toolbar (phase_h_e2e_only_surface on IMPL)
-    - method: Manual verification
-      coverage: Open side panel This Page; cycle A–Z / frequency / relevance; confirm Current, Recent, and Suggested lists reorder consistently; popup has no sort row
-  traceability:
-    architecture:
-      - ARCH-THIS_PAGE_TAG_SORT
-    implementation:
-      - IMPL-THIS_PAGE_TAG_SORT
-    tests:
-      - tests/unit/tag-chip-sort.test.js
-      - tests/unit/uIManager-tag-case-folding.test.js
-      - tests/unit/popup-suggested-tags.test.js
-      - tests/unit/popup-refresh-tag-frequency-map.test.js
-      - tests/integration/this-page-tag-sort-composition.integration.test.js
-      - tests/playwright/extension-this-page-tag-sort.spec.js
-    code_annotations:
-      - REQ-THIS_PAGE_TAG_SORT
+      - "One shared sort mode across Current, Recent, and Suggested when side-panel markup includes the toggle"
+      - "Popup remains unchanged when sort UI is absent"
+    problems_solved:
+      - "Fixed ordering only by one heuristic (e.g. frequency) does not match all tasks"
+      - "Suggested tags need a relevance signal visible in sort order"
+    why: "Users need predictable chip order and quick access to high-signal suggestions without changing which tags appear."
   related_requirements:
     depends_on: []
     related_to:
-      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-      - REQ-SUGGESTED_TAGS_FROM_CONTENT
-      - IMMUTABLE-REQ-TAG-003
+      - "IMMUTABLE-REQ-TAG-003"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     supersedes: []
-  metadata:
-    last_updated:
-      date: "2026-03-27"
-      author: AI Agent
-      reason: 'S13 PROC-AGENT_REQ_CHECKLIST: traceability.tests + validation_criteria aligned to IMPL and shipped tests'
-  detail_file: requirements/REQ-THIS_PAGE_TAG_SORT.yaml
+  satisfaction_criteria:
+    - criterion: "Alphabetical uses display string after tag case mode; tie-break stable source index"
+    - criterion: "Empty lists unchanged on toggle"
+    - criterion: "Frequency uses bookmark counts; missing counts treated as zero; tie-break alphabetical then stable index"
+    - criterion: "Popup without toggle keeps controller-provided order"
+    - criterion: "Relevance uses per-token scores from page extract; non-DOM entries score 0; equal relevance uses bookmark freq then in-page token freq then alphabetical"
+    - criterion: "Three modes: alphabetical, frequency, relevance"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-THIS_PAGE_TAG_SORT"
+    code_annotations:
+      - "REQ-THIS_PAGE_TAG_SORT"
+    implementation:
+      - "IMPL-THIS_PAGE_TAG_SORT"
+    tests:
+      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - "tests/unit/popup-refresh-tag-frequency-map.test.js"
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/tag-chip-sort.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "tag-chip-sort comparators; UIManager sort with toggle shim; PopupController suggested-tags double inject; _normalizeHoverboardTagFrequencyMap (popup-refresh-tag-frequency-map.test.js)"
+    - method: "Composition tests"
+      coverage: "this-page-tag-sort-composition.integration.test.js — loadInitialData order; setupEventListeners [data-sort-mode] → setTagSortMode"
+    - method: "Extension E2E (Playwright)"
+      coverage: "extension-this-page-tag-sort.spec.js — real chrome-extension:// side panel toolbar (phase_h_e2e_only_surface on IMPL)"
+    - method: "Manual verification"
+      coverage: "Open side panel This Page; cycle A–Z / frequency / relevance; confirm Current, Recent, and Suggested lists reorder consistently; popup has no sort row"

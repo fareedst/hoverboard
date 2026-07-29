@@ -1,96 +1,71 @@
 IMPL-BROWSER_BOOKMARK_IMPORT:
-  name: Browser Bookmark Import Implementation
-  status: Active
-  cross_references:
-    - ARCH-BROWSER_BOOKMARK_IMPORT
-    - REQ-BROWSER_BOOKMARK_IMPORT
-  rationale:
-    why: Implement browser bookmark import page with getTree, flatten, filters, selection, conflict resolution, tags, and saveBookmark loop.
-    problems_solved:
-      - No UI or logic for importing browser bookmarks into Hoverboard
-    benefits:
-      - getTree + flattenTree with folderPath; toolbar search + folder filter; table with selection; conflict mode (Skip/Overwrite/Merge); folder names + extra tags; Import to dropdown; saveBookmark per row; result message
-  implementation_approach:
-    summary: src/ui/browser-bookmark-import/ with HTML (header, toolbar, table, actions), JS (loadBrowserBookmarks, flattenTree, applySearchAndFilter, runImport), CSS; popup and options entry.
-    details:
-      - 'browser-bookmark-import-utils.js: sanitizeTag, folderPathToTags, parseExtraTags, flattenTree (recurse nodes; if node.url push { id, url, title, dateAdded, folderPath })'
-      - 'Conflict: getAggregatedBookmarksForIndex (or getLocalBookmarksForIndex) -> existingByUrl; for each selected URL if in existing: Skip->skip; Overwrite->send; Merge->merge tags + existing description/extended then send'
-      - 'Tag sanitization: folder path segments and extra tags -> lowercase, non-alphanumeric to underscore, dedupe'
   code_locations:
     files:
-      - path: src/ui/browser-bookmark-import/browser-bookmark-import.html
-        description: Header, toolbar, table, actions-below-table
-      - path: src/ui/browser-bookmark-import/browser-bookmark-import.js
-        description: loadBrowserBookmarks, applySearchAndFilter, renderTable, selection, runImport
-      - path: src/ui/browser-bookmark-import/browser-bookmark-import.css
-        description: Layout and styles
-      - path: src/ui/browser-bookmark-import/browser-bookmark-import-utils.js
-        description: sanitizeTag, folderPathToTags, parseExtraTags, flattenTree
+      - path: "src/ui/browser-bookmark-import/browser-bookmark-import.html"
+        description: "Header, toolbar, table, actions-below-table"
+      - path: "src/ui/browser-bookmark-import/browser-bookmark-import.js"
+        description: "loadBrowserBookmarks, applySearchAndFilter, renderTable, selection, runImport"
+      - path: "src/ui/browser-bookmark-import/browser-bookmark-import.css"
+        description: "Layout and styles"
+      - path: "src/ui/browser-bookmark-import/browser-bookmark-import-utils.js"
+        description: "sanitizeTag, folderPathToTags, parseExtraTags, flattenTree"
     functions:
-      - name: flattenTree
-        file: src/ui/browser-bookmark-import/browser-bookmark-import-utils.js
-        description: Recurse bookmark tree; emit { id, url, title, dateAdded, folderPath } for each bookmark
-      - name: loadBrowserBookmarks
-        file: src/ui/browser-bookmark-import/browser-bookmark-import.js
-        description: getTree then flattenTree; store allBookmarks, build folder list, applySearchAndFilter
-      - name: runImport
-        file: src/ui/browser-bookmark-import/browser-bookmark-import.js
-        description: getAggregatedBookmarksForIndex -> existingByUrl; for each selected build payload; conflict handling; saveBookmark per row; count and show result
-  traceability:
-    architecture:
-      - ARCH-BROWSER_BOOKMARK_IMPORT
-    requirements:
-      - REQ-BROWSER_BOOKMARK_IMPORT
-    tests:
-      - tests/unit/browser-bookmark-import.test.js
-    code_annotations:
-      - IMPL-BROWSER_BOOKMARK_IMPORT
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-LOCAL_BOOKMARKS_INDEX
-      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
-    composed_with:
-      - IMPL-LOCAL_BOOKMARKS_INDEX
-      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
-      - IMPL-BOOKMARK_ROUTER
-  essence_pseudocode: |
-    # [IMPL-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [REQ-BROWSER_BOOKMARK_IMPORT]
-    # getTree, flattenTree, filters, selection, conflict resolution (Skip/Overwrite/Merge), folder+extra tags, saveBookmark per row.
-
-    # Contract: inputs = getTree, selection, conflict mode, tag options, Import to; output = counts and table.
-    INPUT: chrome.bookmarks.getTree(), user selection (selectedUrls), conflict mode (Skip|Overwrite|Merge), Use folder names as tags, Add tags, Import to (Local|File|Sync)
-    OUTPUT: imported/skipped/failed counts; table of browser bookmarks with Select, Title, URL, Folder, Date
-    DATA: allBookmarks (flattened), folderList, existingByUrl (from getAggregatedBookmarksForIndex), selectedUrls (set)
-
-    # getTree -> flattenTree -> allBookmarks; build folderList; applySearchAndFilter; render table.
-    ON load:
-      chrome.bookmarks.getTree() -> flattenTree -> allBookmarks (each { id, url, title, dateAdded, folderPath })
-      folderList = unique folder paths; applySearchAndFilter(); render table
-
-    # existingByUrl; folderTags + extraTags; per selected URL apply conflict mode; saveBookmark; show counts.
-    runImport():
-      existingByUrl = getAggregatedBookmarksForIndex() keyed by url (or getLocalBookmarksForIndex)
-      folderTags = folderPathToTags(selected folder paths) if "Use folder names as tags"; extraTags = parseExtraTags(input)
-      FOR each selected item IN allBookmarks WHERE url IN selectedUrls:
-        payload = { url, description: title, time: dateAdded ISO, tags: folderTags + extraTags, preferredBackend }
-        IF url IN existingByUrl:
-          IF Skip: skip; skipped++
-          IF Overwrite: SEND saveBookmark(payload); imported++
-          IF Merge: merge tags + keep existing description/extended; SEND saveBookmark(merged); imported++
-        ELSE: SEND saveBookmark(payload); imported++ (or failed++ on error)
-      SHOW "Imported N, skipped M, K failed"
-  detail_file: implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml
+      - name: "flattenTree"
+        description: "Recurse bookmark tree; emit { id, url, title, dateAdded, folderPath } for each bookmark"
+        file: "src/ui/browser-bookmark-import/browser-bookmark-import-utils.js"
+      - name: "loadBrowserBookmarks"
+        description: "getTree then flattenTree; store allBookmarks, build folder list, applySearchAndFilter"
+        file: "src/ui/browser-bookmark-import/browser-bookmark-import.js"
+      - name: "runImport"
+        description: "getAggregatedBookmarksForIndex -> existingByUrl; for each selected build payload; conflict handling; saveBookmark per row; count and show result"
+        file: "src/ui/browser-bookmark-import/browser-bookmark-import.js"
+  cross_references:
+    - "ARCH-BROWSER_BOOKMARK_IMPORT"
+    - "REQ-BROWSER_BOOKMARK_IMPORT"
+  detail_file: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml"
+  essence_pseudocode: "# [IMPL-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [REQ-BROWSER_BOOKMARK_IMPORT]\n# getTree, flattenTree, filters, selection, conflict resolution (Skip/Overwrite/Merge), folder+extra tags, saveBookmark per row.\n\n# Contract: inputs = getTree, selection, conflict mode, tag options, Import to; output = counts and table.\nINPUT: chrome.bookmarks.getTree(), user selection (selectedUrls), conflict mode (Skip|Overwrite|Merge), Use folder names as tags, Add tags, Import to (Local|File|Sync)\nOUTPUT: imported/skipped/failed counts; table of browser bookmarks with Select, Title, URL, Folder, Date\nDATA: allBookmarks (flattened), folderList, existingByUrl (from getAggregatedBookmarksForIndex), selectedUrls (set)\n\n# getTree -> flattenTree -> allBookmarks; build folderList; applySearchAndFilter; render table.\nON load:\n  chrome.bookmarks.getTree() -> flattenTree -> allBookmarks (each { id, url, title, dateAdded, folderPath })\n  folderList = unique folder paths; applySearchAndFilter(); render table\n\n# existingByUrl; folderTags + extraTags; per selected URL apply conflict mode; saveBookmark; show counts.\nrunImport():\n  existingByUrl = getAggregatedBookmarksForIndex() keyed by url (or getLocalBookmarksForIndex)\n  folderTags = folderPathToTags(selected folder paths) if \"Use folder names as tags\"; extraTags = parseExtraTags(input)\n  FOR each selected item IN allBookmarks WHERE url IN selectedUrls:\n    payload = { url, description: title, time: dateAdded ISO, tags: folderTags + extraTags, preferredBackend }\n    IF url IN existingByUrl:\n      IF Skip: skip; skipped++\n      IF Overwrite: SEND saveBookmark(payload); imported++\n      IF Merge: merge tags + keep existing description/extended; SEND saveBookmark(merged); imported++\n    ELSE: SEND saveBookmark(payload); imported++ (or failed++ on error)\n  SHOW \"Imported N, skipped M, K failed\"\n"
+  implementation_approach:
+    details:
+      - "browser-bookmark-import-utils.js: sanitizeTag, folderPathToTags, parseExtraTags, flattenTree (recurse nodes; if node.url push { id, url, title, dateAdded, folderPath })"
+      - "Conflict: getAggregatedBookmarksForIndex (or getLocalBookmarksForIndex) -> existingByUrl; for each selected URL if in existing: Skip->skip; Overwrite->send; Merge->merge tags + existing description/extended then send"
+      - "Tag sanitization: folder path segments and extra tags -> lowercase, non-alphanumeric to underscore, dedupe"
+    summary: "src/ui/browser-bookmark-import/ with HTML (header, toolbar, table, actions), JS (loadBrowserBookmarks, flattenTree, applySearchAndFilter, runImport), CSS; popup and options entry."
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-18"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
     last_validated:
       date: "2026-02-18"
-      validator: AI Agent
-      result: pass
+      result: "pass"
+      validator: "AI Agent"
+  name: "Browser Bookmark Import Implementation"
+  rationale:
+    benefits:
+      - "getTree + flattenTree with folderPath; toolbar search + folder filter; table with selection; conflict mode (Skip/Overwrite/Merge); folder names + extra tags; Import to dropdown; saveBookmark per row; result message"
+    problems_solved:
+      - "No UI or logic for importing browser bookmarks into Hoverboard"
+    why: "Implement browser bookmark import page with getTree, flatten, filters, selection, conflict resolution, tags, and saveBookmark loop."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    depends_on: []
+    see_also:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-BROWSER_BOOKMARK_IMPORT"
+    code_annotations:
+      - "IMPL-BROWSER_BOOKMARK_IMPORT"
+    requirements:
+      - "REQ-BROWSER_BOOKMARK_IMPORT"
+    tests:
+      - "tests/unit/browser-bookmark-import.test.js"

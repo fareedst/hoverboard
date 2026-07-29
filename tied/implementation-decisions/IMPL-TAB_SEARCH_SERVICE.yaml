@@ -1,89 +1,55 @@
 IMPL-TAB_SEARCH_SERVICE:
-  name: Tab Search Service Implementation
-  status: Active
-  cross_references:
-    - REQ-SEARCH_FUNCTIONALITY
-  rationale:
-    why: Implements in-extension tab search by title with navigate-to-match and circular navigation.
-    problems_solved:
-      - Finding and switching to browser tabs by title from the extension
-      - Repeating search cycles through multiple matches (circular navigation)
-    benefits:
-      - Fast tab discovery and focus from popup/overlay
-      - Search history and continuation from last position
-  implementation_approach:
-    summary: TabSearchService queries chrome.tabs, filters by title substring, selects next match (with wrap-around), activates tab and focuses window; maintains lastSearchText and lastMatchedTabId for continuation.
-    details:
-      - 'searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }'
-      - findNextTab(matchingTabs, restartTabId): circular navigation; addToSearchHistory
-      - Chrome API errors surfaced as rejected promise
   code_locations:
     files:
-      - path: src/features/search/tab-search-service.js
-        description: TabSearchService class
+      - path: "src/features/search/tab-search-service.js"
+        description: "TabSearchService class"
     functions:
-      - name: searchAndNavigate
-        file: src/features/search/tab-search-service.js
-        description: Search tabs by title and navigate to next match
-      - name: findNextTab
-        file: src/features/search/tab-search-service.js
-        description: Select next tab in match list with circular wrap
-      - name: addToSearchHistory
-        file: src/features/search/tab-search-service.js
-        description: Maintain search history (move to front if duplicate)
-  traceability:
-    architecture: []
-    requirements:
-      - REQ-SEARCH_FUNCTIONALITY
-    tests:
-      - tests/unit/tab-search-service.test.js
-    code_annotations:
-      - IMPL-TAB_SEARCH_SERVICE
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also: []
-    composed_with: []
-  essence_pseudocode: |
-    # [IMPL-TAB_SEARCH_SERVICE] [REQ-SEARCH_FUNCTIONALITY]
-    # Tab search by title; searchAndNavigate and findNextTab with circular wrap; search history.
-    # Contract: search text and current tab; result with matchCount and tabId/title or error.
-    INPUT: searchText (string), currentTabId (number)
-    OUTPUT: { success, matchCount, tabId?, tabTitle? } or { success: false, matchCount, message }
-    DATA: lastSearchText, lastMatchedTabId, searchHistory (list)
-
-    # Normalize search; filter tabs by title; find next with wrap; activate and focus; update state.
-    searchAndNavigate(searchText, currentTabId):
-      normalized = TRIM(LOWERCASE(searchText))
-      isNewSearch = (lastSearchText !== normalized)
-      restartTabId = isNewSearch ? currentTabId : (lastMatchedTabId OR currentTabId)
-      allTabs = getAllTabs()
-      matchingTabs = FILTER allTabs WHERE title CONTAINS normalized
-      nextTab = findNextTab(matchingTabs, restartTabId)
-      IF nextTab AND nextTab.id !== restartTabId:
-        activateTab(nextTab.id)
-        focusWindow(nextTab.windowId)
-        lastSearchText = normalized
-        lastMatchedTabId = nextTab.id
-        addToSearchHistory(normalized)
-        RETURN { success: true, matchCount: LEN(matchingTabs), tabId: nextTab.id, tabTitle: nextTab.title }
-      ELSE:
-        RETURN { success: false, matchCount: LEN(matchingTabs), message: "No matching tabs found" OR "Already on last match" }
-
-    # Circular: next after restartTabId or wrap to first.
-    findNextTab(matchingTabs, restartTabId):
-      order tabs after restartTabId; wrap to start if none after
-      RETURN next tab in sequence or null
-
-    # Move term to front if present else prepend.
-    addToSearchHistory(term):
-      IF term in searchHistory: MOVE term to front
-      ELSE: PREPEND term to searchHistory
+      - name: "searchAndNavigate"
+        description: "Search tabs by title and navigate to next match"
+        file: "src/features/search/tab-search-service.js"
+      - name: "findNextTab"
+        description: "Select next tab in match list with circular wrap"
+        file: "src/features/search/tab-search-service.js"
+      - name: "addToSearchHistory"
+        description: "Maintain search history (move to front if duplicate)"
+        file: "src/features/search/tab-search-service.js"
+  cross_references:
+    - "REQ-SEARCH_FUNCTIONALITY"
+  essence_pseudocode: "# [IMPL-TAB_SEARCH_SERVICE] [REQ-SEARCH_FUNCTIONALITY]\n# Tab search by title; searchAndNavigate and findNextTab with circular wrap; search history.\n# Contract: search text and current tab; result with matchCount and tabId/title or error.\nINPUT: searchText (string), currentTabId (number)\nOUTPUT: { success, matchCount, tabId?, tabTitle? } or { success: false, matchCount, message }\nDATA: lastSearchText, lastMatchedTabId, searchHistory (list)\n\n# Normalize search; filter tabs by title; find next with wrap; activate and focus; update state.\nsearchAndNavigate(searchText, currentTabId):\n  normalized = TRIM(LOWERCASE(searchText))\n  isNewSearch = (lastSearchText !== normalized)\n  restartTabId = isNewSearch ? currentTabId : (lastMatchedTabId OR currentTabId)\n  allTabs = getAllTabs()\n  matchingTabs = FILTER allTabs WHERE title CONTAINS normalized\n  nextTab = findNextTab(matchingTabs, restartTabId)\n  IF nextTab AND nextTab.id !== restartTabId:\n    activateTab(nextTab.id)\n    focusWindow(nextTab.windowId)\n    lastSearchText = normalized\n    lastMatchedTabId = nextTab.id\n    addToSearchHistory(normalized)\n    RETURN { success: true, matchCount: LEN(matchingTabs), tabId: nextTab.id, tabTitle: nextTab.title }\n  ELSE:\n    RETURN { success: false, matchCount: LEN(matchingTabs), message: \"No matching tabs found\" OR \"Already on last match\" }\n\n# Circular: next after restartTabId or wrap to first.\nfindNextTab(matchingTabs, restartTabId):\n  order tabs after restartTabId; wrap to start if none after\n  RETURN next tab in sequence or null\n\n# Move term to front if present else prepend.\naddToSearchHistory(term):\n  IF term in searchHistory: MOVE term to front\n  ELSE: PREPEND term to searchHistory\n"
+  implementation_approach:
+    details:
+      - "Chrome API errors surfaced as rejected promise"
+      - "searchAndNavigate(searchText, currentTabId): normalize search, get all tabs, filter by title, find next after current/last match (circular), activate tab and focus window; return { success, matchCount, tabId, tabTitle } or { success: false, message }"
+      - findNextTab(matchingTabs, restartTabId): "circular navigation; addToSearchHistory"
+    summary: "TabSearchService queries chrome.tabs, filters by title substring, selects next match (with wrap-around), activates tab and focuses window; maintains lastSearchText and lastMatchedTabId for continuation."
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Create IMPL for tab-search-service tests; essence_pseudocode from test behavior
+      reason: "Create IMPL for tab-search-service tests; essence_pseudocode from test behavior"
+  name: "Tab Search Service Implementation"
+  rationale:
+    benefits:
+      - "Fast tab discovery and focus from popup/overlay"
+      - "Search history and continuation from last position"
+    problems_solved:
+      - "Finding and switching to browser tabs by title from the extension"
+      - "Repeating search cycles through multiple matches (circular navigation)"
+    why: "Implements in-extension tab search by title with navigate-to-match and circular navigation."
+  related_decisions:
+    composed_with: []
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture: []
+    code_annotations:
+      - "IMPL-TAB_SEARCH_SERVICE"
+    requirements:
+      - "REQ-SEARCH_FUNCTIONALITY"
+    tests:
+      - "tests/unit/tab-search-service.test.js"

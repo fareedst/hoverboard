@@ -1,75 +1,47 @@
 IMPL-URL_INHIBITION:
-  name: URL Inhibition
-  status: Active
-  cross_references:
-    - REQ-SITE_MANAGEMENT
-    - ARCH-CONFIG_STRUCTURE
-  rationale:
-    why: getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited for site-specific behavior control.
-    problems_solved: []
-    benefits:
-      - Per-URL or pattern inhibition so extension can skip or alter behavior on listed sites
-  implementation_approach:
-    summary: ConfigManager getInhibitUrls (newline-separated), addInhibitUrl, setInhibitUrls; isUrlInhibited substring matching.
-    details:
-      - 'Storage: inhibit list as newline-separated string in config'
-      - 'isUrlInhibited(url): true if url contains any stored entry as substring (or exact match per implementation)'
   code_locations:
     files:
-      - path: src/config/config-manager.js
-        description: getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited
+      - path: "src/config/config-manager.js"
+        description: "getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-CONFIG_STRUCTURE
-    requirements:
-      - REQ-SITE_MANAGEMENT
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: URL inhibition list and site management.'
-    code_annotations:
-      - IMPL-URL_INHIBITION
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-CONFIG_BACKUP_RESTORE
-    composed_with:
-      - IMPL-CONFIG_BACKUP_RESTORE
-  essence_pseudocode: |
-    # [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT]
-    # getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited (substring match).
-    # Contract: url or newEntry/fullList; list or success or boolean.
-    INPUT: url (string), optional newEntry (for add), optional fullList (for set)
-    OUTPUT: list of inhibit URLs (get); success (add/set); boolean (isUrlInhibited)
-    DATA: inhibit list stored as newline-separated string in config
-
-    # Read config and return split trimmed non-empty lines.
-    getInhibitUrls():
-      READ config inhibit list
-      RETURN split by newline (trimmed, non-empty)
-
-    # Append if not present and persist.
-    addInhibitUrl(newEntry):
-      list = getInhibitUrls()
-      IF newEntry not in list: APPEND newEntry; setInhibitUrls(list)
-      PERSIST
-
-    # Write list as newline-separated and persist.
-    setInhibitUrls(fullList):
-      WRITE list as newline-separated string to config
-      PERSIST
-
-    # True if url contains any entry as substring.
-    isUrlInhibited(url):
-      list = getInhibitUrls()
-      FOR each entry IN list: IF url contains entry (substring) RETURN true
-      RETURN false
-  detail_file: implementation-decisions/IMPL-URL_INHIBITION.yaml
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "REQ-SITE_MANAGEMENT"
+  detail_file: "implementation-decisions/IMPL-URL_INHIBITION.yaml"
+  essence_pseudocode: "# [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT]\n# getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited (substring match).\n# Contract: url or newEntry/fullList; list or success or boolean.\nINPUT: url (string), optional newEntry (for add), optional fullList (for set)\nOUTPUT: list of inhibit URLs (get); success (add/set); boolean (isUrlInhibited)\nDATA: inhibit list stored as newline-separated string in config\n\n# Read config and return split trimmed non-empty lines.\ngetInhibitUrls():\n  READ config inhibit list\n  RETURN split by newline (trimmed, non-empty)\n\n# Append if not present and persist.\naddInhibitUrl(newEntry):\n  list = getInhibitUrls()\n  IF newEntry not in list: APPEND newEntry; setInhibitUrls(list)\n  PERSIST\n\n# Write list as newline-separated and persist.\nsetInhibitUrls(fullList):\n  WRITE list as newline-separated string to config\n  PERSIST\n\n# True if url contains any entry as substring.\nisUrlInhibited(url):\n  list = getInhibitUrls()\n  FOR each entry IN list: IF url contains entry (substring) RETURN true\n  RETURN false\n"
+  implementation_approach:
+    details:
+      - "isUrlInhibited(url): true if url contains any stored entry as substring (or exact match per implementation)"
+      - "Storage: inhibit list as newline-separated string in config"
+    summary: "ConfigManager getInhibitUrls (newline-separated), addInhibitUrl, setInhibitUrls; isUrlInhibited substring matching."
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add root key, essence_pseudocode, composed_with
+      reason: "Canonical YAML rewrite; add root key, essence_pseudocode, composed_with"
+  name: "URL Inhibition"
+  rationale:
+    benefits:
+      - "Per-URL or pattern inhibition so extension can skip or alter behavior on listed sites"
+    problems_solved: []
+    why: "getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited for site-specific behavior control."
+  related_decisions:
+    composed_with:
+      - "IMPL-CONFIG_BACKUP_RESTORE"
+    depends_on: []
+    see_also:
+      - "IMPL-CONFIG_BACKUP_RESTORE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-CONFIG_STRUCTURE"
+    code_annotations:
+      - "IMPL-URL_INHIBITION"
+    requirements:
+      - "REQ-SITE_MANAGEMENT"
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: URL inhibition list and site management."
+    tests: []

@@ -1,641 +1,641 @@
-REQ-TIED_SETUP:
-  type: REQ
-  name: TIED Methodology Setup
-  category: Core Functional
-  status: Active
-  description: TIED methodology setup requirement
-  cross_references:
-    - ARCH-TIED_STRUCTURE
-    - IMPL-TIED_FILES
-  source_index: requirements.yaml
-  detail_file: requirements/REQ-TIED_SETUP.yaml
-  metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-REQ-MODULE_VALIDATION:
-  type: REQ
-  name: Independent Module Validation Before Integration
-  category: Core Functional
-  status: Active
-  description: Independent module validation before integration requirement
-  cross_references:
-    - ARCH-MODULE_VALIDATION
-    - IMPL-MODULE_VALIDATION
-  source_index: requirements.yaml
-  detail_file: requirements/REQ-MODULE_VALIDATION.yaml
-  metadata:
-    registered: 2025-01-27T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-ARCH-TIED_STRUCTURE:
-  type: ARCH
-  name: TIED Project Structure
-  status: Active
-  description: TIED project structure decision
-  cross_references:
-    - REQ-TIED_SETUP
-    - IMPL-TIED_FILES
-  source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
-  metadata:
-    registered: 2025-12-18T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-ARCH-MODULE_VALIDATION:
-  type: ARCH
-  name: Module Validation Strategy
-  status: Active
-  description: Module validation strategy decision
-  cross_references:
-    - REQ-MODULE_VALIDATION
-    - IMPL-MODULE_VALIDATION
-  source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-MODULE_VALIDATION.yaml
-  metadata:
-    registered: 2025-12-18T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-IMPL-TIED_FILES:
-  type: IMPL
-  name: TIED File Creation
-  status: Active
-  description: TIED file creation implementation
-  cross_references:
-    - ARCH-TIED_STRUCTURE
-    - REQ-TIED_SETUP
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-TIED_FILES.yaml
-  metadata:
-    registered: 2025-12-18T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-IMPL-MODULE_VALIDATION:
-  type: IMPL
-  name: Module Validation Implementation
-  status: Active
-  description: Module validation implementation
-  cross_references:
-    - ARCH-MODULE_VALIDATION
-    - REQ-MODULE_VALIDATION
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-MODULE_VALIDATION.yaml
-  metadata:
-    registered: 2025-12-18T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-PROC-PROJECT_SURVEY_AND_SETUP:
-  type: PROC
-  name: Project Survey and Setup Process
-  status: Active
-  description: Survey and readiness process supporting REQ-TIED_SETUP and ARCH-TIED_STRUCTURE
-  cross_references:
-    - REQ-TIED_SETUP
-    - ARCH-TIED_STRUCTURE
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-PROC-BUILD_PIPELINE_VALIDATION:
-  type: PROC
-  name: Build Pipeline Validation Process
-  status: Active
-  description: Build/deploy validation tied to REQ-MODULE_VALIDATION
-  cross_references:
-    - REQ-MODULE_VALIDATION
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-PROC-TOKEN_AUDIT:
-  type: PROC
-  name: Token Audit Process
-  status: Active
-  description: Mandatory checklist ensuring every requirement → architecture → implementation → code/test path is annotated and documented
-  cross_references: []
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-PROC-TOKEN_VALIDATION:
-  type: PROC
-  name: Token Validation Process
-  status: Active
-  description: Automated validation workflow that proves all referenced tokens exist in the registry
-  cross_references: []
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-PROC-YAML_DB_OPERATIONS:
-  type: PROC
-  name: YAML Database Operations Process
-  status: Active
-  description: YAML database operations for reading, writing, querying, and validating YAML index files
-  cross_references:
-    - REQ-TIED_SETUP
-    - ARCH-TIED_STRUCTURE
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2025-11-08T00:00:00.000Z
-    last_updated: 2026-02-08T00:00:00.000Z
-PROC-TIED_METHODOLOGY_READONLY:
-  type: PROC
-  name: TIED-sourced YAML read-only in client
-  status: Active
-  description: Methodology YAML (tied/methodology/) is read-only in client; project YAML (tied/ root) holds client data only; refresh methodology via copy_files.sh
-  cross_references:
-    - REQ-TIED_SETUP
-    - ARCH-TIED_STRUCTURE
-    - PROC-YAML_DB_OPERATIONS
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-16T00:00:00.000Z
-    last_updated: 2026-03-16T00:00:00.000Z
-PROC-TEST_STRATEGY:
-  type: PROC
-  name: Test Strategy and Coverage (minimize untested code)
-  status: Active
-  description: Minimize code not covered by tests; unit/integration cover IMPL/ARCH/REQ logic; E2E reserved for critical journeys
-  cross_references:
-    - REQ-MODULE_VALIDATION
-    - IMPL-MODULE_VALIDATION
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-01T00:00:00.000Z
-    last_updated: 2026-03-01T00:00:00.000Z
-PROC-TIED_DEV_CYCLE:
-  type: PROC
-  name: TIED Development Cycle (session workflow)
-  status: Active
-  description: 'Session workflow: plan from TIED, author pseudo-code and tokens, add/align tests, implement (TDD), minimal glue, validate, sync TIED to code'
-  cross_references:
-    - REQ-TIED_SETUP
-    - REQ-MODULE_VALIDATION
-    - PROC-TOKEN_AUDIT
-    - PROC-TOKEN_VALIDATION
-    - PROC-IMPL_PSEUDOCODE_TOKENS
-    - PROC-COMMIT_MESSAGES
-    - PROC-AGENT_REQ_CHECKLIST
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-01T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
-PROC-COMMIT_MESSAGES:
-  type: PROC
-  name: Commit message format and guidelines
-  status: Active
-  description: Consistent commit message format (type/scope/subject, body, footer); optional TIED token references for traceability
-  cross_references:
-    - PROC-TIED_DEV_CYCLE
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
-PROC-IMPL_PSEUDOCODE_TOKENS:
-  type: PROC
-  name: IMPL pseudo-code semantic token comments (most critical)
-  status: Active
-  description: Every block in IMPL essence_pseudocode must have a comment naming REQ/ARCH/IMPL and how the block implements them; primary mechanism for implementation traceability
-  cross_references:
-    - PROC-TIED_DEV_CYCLE
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-05T00:00:00.000Z
-    last_updated: 2026-03-05T00:00:00.000Z
-PROC-RELEASE:
-  type: PROC
-  name: Release and version numbering
-  status: Active
-  description: Version numbering (major/minor/patch/build) for releases
-  cross_references:
-    - PROC-COMMIT_MESSAGES
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
-PROC-LEAP:
-  type: PROC
-  name: Logic Elevation And Propagation (LEAP)
-  status: Active
-  description: When code or tests differ from IMPL, update the stack in reverse order IMPL to ARCH to REQ in the same work item so tokens stay consistent and testable
-  cross_references:
-    - REQ-TIED_SETUP
-    - REQ-MODULE_VALIDATION
-    - PROC-TIED_DEV_CYCLE
-    - PROC-IMPL_PSEUDOCODE_TOKENS
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
-PROC-YAML_EDIT_LOOP:
-  type: PROC
-  name: YAML edit and validation loop
-  status: Active
-  description: Controlling loop for creating or editing TIED YAML; validate with lint_yaml before use; no record valid until it passes
-  cross_references:
-    - REQ-TIED_SETUP
-    - ARCH-TIED_STRUCTURE
-    - PROC-YAML_DB_OPERATIONS
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
-PROC-AGENT_REQ_CHECKLIST:
-  type: PROC
-  name: Agent requirement implementation checklist
-  status: Active
-  description: Unified LEAD+TIED checklist (S01–S16) for REQ implementation; pseudo-code, TDD, composition, E2E decision, validation; see tied/docs/agent-req-implementation-checklist.md
-  cross_references:
-    - PROC-TIED_DEV_CYCLE
-    - PROC-IMPL_PSEUDOCODE_TOKENS
-    - PROC-TOKEN_AUDIT
-    - REQ-MODULE_VALIDATION
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
-PROC-IMPL_CODE_TEST_SYNC:
-  type: PROC
-  name: IMPL code and test synchronization
-  status: Active
-  description: Map pseudo-code blocks to tests and production code; three-way alignment; Phase H E2E decision when e2e_only
-  cross_references:
-    - PROC-TIED_DEV_CYCLE
-    - PROC-IMPL_PSEUDOCODE_TOKENS
-    - PROC-PSEUDOCODE_VALIDATION
-    - PROC-TEST_STRATEGY
-    - PROC-LEAP
-    - PROC-TOKEN_AUDIT
-    - PROC-TOKEN_VALIDATION
-    - REQ-MODULE_VALIDATION
-    - PROC-AGENT_REQ_CHECKLIST
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
-PROC-PSEUDOCODE_VALIDATION:
-  type: PROC
-  name: Application pseudo-code validation
-  status: Active
-  description: Run the application pseudo-code validation checklist on IMPL essence_pseudocode; required checks are gating before tests or code
-  cross_references:
-    - PROC-IMPL_PSEUDOCODE_TOKENS
-    - PROC-IMPL_CODE_TEST_SYNC
-    - PROC-AGENT_REQ_CHECKLIST
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
-PROC-TIED_VERIFICATION_GATED:
-  type: PROC
-  name: Verification-gated status (closed-loop)
-  status: Active
-  description: When enabled, requirement and optionally IMPL status are derived only from test results; run verify step after tests; do not edit status by hand
-  cross_references:
-    - REQ-TIED_SETUP
-    - PROC-TIED_DEV_CYCLE
-    - PROC-TOKEN_VALIDATION
-  source_index: processes.md
-  detail_file: null
-  metadata:
-    registered: 2026-03-27T00:00:00.000Z
-    last_updated: 2026-03-27T00:00:00.000Z
-REQ-FEEDBACK_TO_TIED:
-  type: REQ
-  name: Feedback to TIED (Feature Requests, Bug Reports, Methodology)
-  category: Functional
-  status: Active
-  description: Projects and users can submit feature requests, bug reports, and methodology improvement suggestions; store under TIED tree and export for reporting to TIED project
-  cross_references:
-    - ARCH-FEEDBACK_STORAGE
-    - IMPL-MCP_FEEDBACK_TOOLS
-  source_index: requirements.yaml
-  detail_file: requirements/REQ-FEEDBACK_TO_TIED.yaml
-  metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
 ARCH-FEEDBACK_STORAGE:
-  type: ARCH
-  name: Feedback Storage for TIED Reporting
-  status: Active
-  description: Feedback stored in single file tied/feedback.yaml; MCP tools read/write via base path resolution
   cross_references:
-    - REQ-FEEDBACK_TO_TIED
-    - IMPL-MCP_FEEDBACK_TOOLS
-  source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-FEEDBACK_STORAGE.yaml
+    - "IMPL-MCP_FEEDBACK_TOOLS"
+    - "REQ-FEEDBACK_TO_TIED"
+  description: "Feedback stored in single file tied/feedback.yaml; MCP tools read/write via base path resolution"
+  detail_file: "architecture-decisions/ARCH-FEEDBACK_STORAGE.yaml"
   metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
-IMPL-MCP_FEEDBACK_TOOLS:
-  type: IMPL
-  name: MCP Feedback Tools
-  status: Active
-  description: Two MCP tools (tied_feedback_add, tied_feedback_export) and feedback module for load/append/export
+    last_updated: "2026-03-03T00:00:00.000Z"
+    registered: "2026-03-03T00:00:00.000Z"
+  name: "Feedback Storage for TIED Reporting"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-MODULE_VALIDATION:
   cross_references:
-    - ARCH-FEEDBACK_STORAGE
-    - REQ-FEEDBACK_TO_TIED
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-MCP_FEEDBACK_TOOLS.yaml
+    - "IMPL-MODULE_VALIDATION"
+    - "REQ-MODULE_VALIDATION"
+  description: "Module validation strategy decision"
+  detail_file: "architecture-decisions/ARCH-MODULE_VALIDATION.yaml"
   metadata:
-    registered: 2026-03-03T00:00:00.000Z
-    last_updated: 2026-03-03T00:00:00.000Z
-REQ-THIS_PAGE_TAG_SORT:
-  type: REQ
-  description: 'This Page three-way tag chip sort (alphabetical, bookmark frequency, DOM relevance); side panel toggle; default A–Z; no persistence; popup order unchanged when no toggle. Trace: ARCH/IMPL-THIS_PAGE_TAG_SORT; unit + composition tests; Playwright extension-this-page-tag-sort.spec.js for chrome-extension:// side panel surface (Phase H). [REQ-SIDE_PANEL_POPUP_EQUIVALENT]'
-ARCH-THIS_PAGE_TAG_SORT:
-  type: ARCH
-  description: 'This Page tag sort: pure module tag-chip-sort.js; frequency from hoverboard_tag_frequency; MAIN-world relevance tiers + two-step inject; UIManager gated on tagSortToggle. REQ-THIS_PAGE_TAG_SORT, REQ-SUGGESTED_TAGS_FROM_CONTENT; IMPL-THIS_PAGE_TAG_SORT.'
-IMPL-THIS_PAGE_TAG_SORT:
-  type: IMPL
-  description: 'UIManager three-way chip sort when tagSortToggle present; PopupController refreshTagFrequencyMapForSort (_normalizeHoverboardTagFrequencyMap) + loadSuggestedTags (MAIN file then func); tag-chip-sort.js; suggested-tags-main-world-snippet.js. Cross-refs ARCH/REQ-THIS_PAGE_TAG_SORT, IMPL-UIManager_SCOPED_ROOT, IMPL-SUGGESTED_TAGS, IMPL-PLAYWRIGHT_E2E_EXTENSION. Tests: unit + composition; Playwright extension-this-page-tag-sort (Phase H e2e_only surface).'
-  name: This Page tag sort implementation
-  status: Active
-  cross_references:
-    - ARCH-THIS_PAGE_TAG_SORT
-    - REQ-THIS_PAGE_TAG_SORT
-    - IMPL-UIManager_SCOPED_ROOT
-    - IMPL-SUGGESTED_TAGS
-    - IMPL-PLAYWRIGHT_E2E_EXTENSION
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-THIS_PAGE_TAG_SORT.yaml
-  metadata:
-    registered: "2026-03-27T00:00:00.000Z"
-    last_updated: "2026-03-27T00:00:00.000Z"
-IMPL-SUGGESTED_TAGS:
-  type: IMPL
-  name: Suggested Tags Implementation
-  status: Active
-  description: 'Multi-source page tag suggestions: overlay via TagService; Chromium popup via MAIN-world suggested-tags-main-world-snippet.js + __hoverboardExtractSuggestedTagsWithRelevance; PopupController normalizes rows; composed_with IMPL-SELECTION_TO_TAG_INPUT; see_also IMPL-THIS_PAGE_TAG_SORT.'
-  cross_references:
-    - ARCH-SUGGESTED_TAGS
-    - REQ-SUGGESTED_TAGS_FROM_CONTENT
-    - REQ-SUGGESTED_TAGS_DEDUPLICATION
-    - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
-    - IMPL-THIS_PAGE_TAG_SORT
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-SUGGESTED_TAGS.yaml
-  metadata:
-    registered: "2026-03-27T00:00:00.000Z"
-    last_updated: "2026-03-27T00:00:00.000Z"
-REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
-  type: REQ
-  name: Suggested Tags Case Preservation
-  category: Functional
-  status: Implemented
-  description: 'Suggested tags: one canonical spelling per case-insensitive word from HTML (mixed case preferred over ALL CAPS over all-lowercase); no separate all-lowercase duplicate chip; tag case toggle (original/lower/UPPER) controls chip display. Trace ARCH-SUGGESTED_TAGS, IMPL-SUGGESTED_TAGS; tests tests/unit/suggested-tag-original-case.test.js.'
-  cross_references:
-    - ARCH-SUGGESTED_TAGS
-    - IMPL-SUGGESTED_TAGS
-    - REQ-SUGGESTED_TAGS_FROM_CONTENT
-    - REQ-SUGGESTED_TAGS_DEDUPLICATION
-  source_index: requirements.yaml
-  detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml
-  metadata:
-    registered: "2025-07-14T00:00:00.000Z"
-    last_updated: "2026-03-27T00:00:00.000Z"
-ARCH-SUGGESTED_TAGS:
-  type: ARCH
-  name: Suggested Tags from Page Content Architecture
-  status: Active
-  description: Multi-source suggested tags from page (overlay TagService + popup MAIN-world snippet); frequency ranking; one canonical spelling per word (REQ-SUGGESTED_TAGS_CASE_PRESERVATION); tokenizer sync; http(s)-only popup inject. Informs IMPL-SUGGESTED_TAGS.
-  cross_references:
-    - REQ-SUGGESTED_TAGS_FROM_CONTENT
-    - REQ-SUGGESTED_TAGS_DEDUPLICATION
-    - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
-    - IMPL-SUGGESTED_TAGS
-    - ARCH-TAG_SYSTEM
-  source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-SUGGESTED_TAGS.yaml
-  metadata:
-    registered: "2025-07-14T00:00:00.000Z"
-    last_updated: "2026-03-27T00:00:00.000Z"
-IMPL-UIManager_SCOPED_ROOT:
-  type: IMPL
-  name: UIManager Scoped Root for Panel Context
-  status: Active
-  description: UIManager optional container for side-panel Bookmark subtree; cacheElements uses data-popup-ref under container or document.getElementById in popup. REQ-SIDE_PANEL_POPUP_EQUIVALENT; composed_with IMPL-SIDE_PANEL_BOOKMARK; used by IMPL-THIS_PAGE_TAG_SORT for tagSortToggle resolution.
-  cross_references:
-    - ARCH-SIDE_PANEL_TABS
-    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-    - IMPL-SIDE_PANEL_BOOKMARK
-    - IMPL-THIS_PAGE_TAG_SORT
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-UIManager_SCOPED_ROOT.yaml
-  metadata:
-    registered: "2026-03-27T00:00:00.000Z"
-    last_updated: "2026-03-27T00:00:00.000Z"
-REQ-SUGGESTED_TAGS_FROM_CONTENT:
-  type: REQ
-  name: Suggested Tags from Page Content
-  category: Functional
-  status: Implemented
-  description: Multi-source suggested tags from page content (overlay + popup MAIN-world path); normalize/trim row shape for UIManager; http(s) inject rules. Trace ARCH-SUGGESTED_TAGS, IMPL-SUGGESTED_TAGS, IMPL-THIS_PAGE_TAG_SORT.
-  cross_references:
-    - ARCH-SUGGESTED_TAGS
-    - IMPL-SUGGESTED_TAGS
-    - REQ-SUGGESTED_TAGS_DEDUPLICATION
-    - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
-  source_index: requirements.yaml
-  detail_file: requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml
-  metadata:
-    registered: "2026-03-27T00:00:00.000Z"
-    last_updated: "2026-03-27T00:00:00.000Z"
-REQ-RECENT_TAGS_SYSTEM:
-  type: REQ
-  name: Recent Tags System
-  category: Immutable
-  status: Implemented
-  description: 'This Page recent tags: persisted user-recent state; N-minute rolling lastUsed + N-minute idle expiry (recentTagsActivityWindowMinutes); cross-window; popup visibility + side panel window-focus refresh on Bookmark tab. Trace ARCH-TAG_SYSTEM, ARCH-POPUP_SESSION, ARCH-SIDE_PANEL_TABS, ARCH-MESSAGE_HANDLING; IMPL-TAG_SYSTEM, IMPL-RECENT_TAGS_POPUP_REFRESH, IMPL-SIDE_PANEL_TABS, IMPL-MESSAGE_HANDLING, IMPL-CONFIG_STRUCT. REQ-SIDE_PANEL_POPUP_EQUIVALENT.'
-  cross_references:
-    - ARCH-TAG_SYSTEM
-    - ARCH-POPUP_SESSION
-    - ARCH-SIDE_PANEL_TABS
-    - ARCH-MESSAGE_HANDLING
-    - IMPL-TAG_SYSTEM
-    - IMPL-RECENT_TAGS_POPUP_REFRESH
-    - IMPL-SIDE_PANEL_TABS
-    - IMPL-MESSAGE_HANDLING
-    - IMPL-CONFIG_STRUCT
-    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-    - REQ-TAG_MANAGEMENT
-  source_index: requirements.yaml
-  detail_file: requirements/REQ-RECENT_TAGS_SYSTEM.yaml
-  metadata:
-    registered: "2026-03-28T00:00:00.000Z"
-    last_updated: "2026-03-28T00:00:00.000Z"
-ARCH-TAG_SYSTEM:
-  type: ARCH
-  name: Tag System Architecture
-  status: Active
-  description: Sanitization; user-recent tags persisted in SW + chrome.storage.local; N-minute idle + rolling lastUsed; TagService getRecentTagsForUi; message types getRecentBookmarks/addTagToRecent; see ARCH-MESSAGE_HANDLING, ARCH-SIDE_PANEL_TABS, ARCH-POPUP_SESSION. REQ-RECENT_TAGS_SYSTEM, REQ-TAG_MANAGEMENT, REQ-TAG_INPUT_SANITIZATION.
-  cross_references:
-    - REQ-RECENT_TAGS_SYSTEM
-    - REQ-TAG_MANAGEMENT
-    - REQ-TAG_INPUT_SANITIZATION
-    - IMPL-TAG_SYSTEM
-    - ARCH-MESSAGE_HANDLING
-    - ARCH-SIDE_PANEL_TABS
-    - ARCH-POPUP_SESSION
-  source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-TAG_SYSTEM.yaml
-  metadata:
-    registered: "2026-03-28T00:00:00.000Z"
-    last_updated: "2026-03-28T00:00:00.000Z"
-IMPL-TAG_SYSTEM:
-  type: IMPL
-  name: Tag Service Implementation
-  status: Active
-  description: 'TagService: sanitizeTag; user-recent via recentTagsMemory + getRecentTagsForUi; getUserRecentTagsExcludingCurrent; addTagToUserRecentList; getRecentTags cache path; composed_with IMPL-SUGGESTED_TAGS. REQ-RECENT_TAGS_SYSTEM, REQ-TAG_MANAGEMENT, REQ-TAG_INPUT_SANITIZATION; ARCH-TAG_SYSTEM.'
-  cross_references:
-    - ARCH-TAG_SYSTEM
-    - REQ-RECENT_TAGS_SYSTEM
-    - REQ-TAG_MANAGEMENT
-    - REQ-TAG_INPUT_SANITIZATION
-    - IMPL-SUGGESTED_TAGS
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-TAG_SYSTEM.yaml
-  metadata:
-    registered: "2026-03-28T00:00:00.000Z"
-    last_updated: "2026-03-28T00:00:00.000Z"
-IMPL-RECENT_TAGS_POPUP_REFRESH:
-  type: IMPL
-  name: Recent Tags refresh on every popup display
-  status: Active
-  description: Popup visibilitychange to loadRecentTags and getRecentBookmarks; ties REQ-RECENT_TAGS_SYSTEM to IMPL-MESSAGE_HANDLING and IMPL-TAG_SYSTEM. ARCH-POPUP_SESSION, ARCH-TAG_SYSTEM.
-  cross_references:
-    - ARCH-POPUP_SESSION
-    - ARCH-TAG_SYSTEM
-    - REQ-RECENT_TAGS_SYSTEM
-    - IMPL-TAG_SYSTEM
-    - IMPL-MESSAGE_HANDLING
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml
-  metadata:
-    registered: "2026-03-28T00:00:00.000Z"
-    last_updated: "2026-03-28T00:00:00.000Z"
-IMPL-SIDE_PANEL_TABS:
-  type: IMPL
-  name: Side Panel Tabs Implementation
-  status: Active
-  description: Tabbed side panel; bindWindowFocusRecentTagsRefresh; composed_with IMPL-SIDE_PANEL_BOOKMARK and IMPL-SIDE_PANEL_TAGS_TREE. REQ-SIDE_PANEL_POPUP_EQUIVALENT, REQ-RECENT_TAGS_SYSTEM; ARCH-SIDE_PANEL_TABS, ARCH-TAG_SYSTEM.
-  cross_references:
-    - ARCH-SIDE_PANEL_TABS
-    - ARCH-TAG_SYSTEM
-    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-    - REQ-RECENT_TAGS_SYSTEM
-    - IMPL-SIDE_PANEL_BOOKMARK
-    - IMPL-SIDE_PANEL_TAGS_TREE
-    - IMPL-RECENT_TAGS_POPUP_REFRESH
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml
-  metadata:
-    registered: "2026-03-28T00:00:00.000Z"
-    last_updated: "2026-03-28T00:00:00.000Z"
-IMPL-MESSAGE_HANDLING:
-  type: IMPL
-  name: Message Handling System Implementation
-  status: Active
-  description: Allowlisted messages; handleGetRecentBookmarks, handleAddTagToRecent, handleGetUserRecentTags delegate to IMPL-TAG_SYSTEM. REQ-SMART_BOOKMARKING, REQ-BOOKMARK_STATE_SYNCHRONIZATION, REQ-RECENT_TAGS_SYSTEM; ARCH-MESSAGE_HANDLING, ARCH-TAG_SYSTEM; composed_with IMPL-POPUP_MESSAGE_TIMEOUT, IMPL-BOOKMARK_STATE_SYNC.
-  cross_references:
-    - ARCH-MESSAGE_HANDLING
-    - ARCH-TAG_SYSTEM
-    - REQ-SMART_BOOKMARKING
-    - REQ-BOOKMARK_STATE_SYNCHRONIZATION
-    - REQ-RECENT_TAGS_SYSTEM
-    - IMPL-TAG_SYSTEM
-    - IMPL-POPUP_MESSAGE_TIMEOUT
-    - IMPL-BOOKMARK_STATE_SYNC
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-MESSAGE_HANDLING.yaml
-  metadata:
-    registered: "2026-03-28T00:00:00.000Z"
-    last_updated: "2026-03-28T00:00:00.000Z"
-IMPL-CONFIG_STRUCT:
-  type: IMPL
-  name: Configuration Structure
-  status: Template
-  description: 'Partial project slice: getConfig merge exposes recentTags* keys for REQ-RECENT_TAGS_SYSTEM; full config IMPL remains Template. ARCH-CONFIG_STRUCTURE, REQ-CONFIGURATION.'
-  cross_references:
-    - ARCH-CONFIG_STRUCTURE
-    - REQ-CONFIGURATION
-    - REQ-RECENT_TAGS_SYSTEM
-    - ARCH-TAG_SYSTEM
-    - IMPL-TAG_SYSTEM
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-CONFIG_STRUCT.yaml
-  metadata:
-    registered: "2026-03-28T00:00:00.000Z"
-    last_updated: "2026-03-28T00:00:00.000Z"
-REQ-SIDE_PANEL_BROWSER_TABS:
-  type: REQ
-  name: Side Panel Browser Tabs List
-  category: Functional
-  status: Implemented
-  description: 'Side panel Tabs tab: list/filter/copy/close browser tabs; bookmark tags and to-read/private row indicators; batch Add tags, Set to-read, Clear to-read with post-batch refresh. Trace ARCH-SIDE_PANEL_BROWSER_TABS, IMPL-SIDE_PANEL_BROWSER_TABS; related REQ-SIDE_PANEL_POPUP_EQUIVALENT.'
-  cross_references:
-    - ARCH-SIDE_PANEL_BROWSER_TABS
-    - IMPL-SIDE_PANEL_BROWSER_TABS
-    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-  source_index: requirements.yaml
-  detail_file: requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml
-  metadata:
-    registered: "2026-03-28T00:00:00.000Z"
-    last_updated: "2026-03-28T00:00:00.000Z"
-IMPL-SIDE_PANEL_BROWSER_TABS:
-  type: IMPL
-  name: Side Panel Browser Tabs Implementation
-  status: Active
-  description: 'browser-tabs-panel.js: list/filter/copy/close browser tabs; GET_TAB_REFERRERS, GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; filterBrowserTabs, getDisplayedTabs, mergeBookmarkReplyIntoTab, refreshBookmarkDisplayForAllTabs; batch bookmark with parseTagsInput/buildAddTagsPayload; composed_with IMPL-SIDE_PANEL_TABS. REQ-SIDE_PANEL_BROWSER_TABS, ARCH-SIDE_PANEL_BROWSER_TABS; cross-uses IMPL-URL_TAGS_DISPLAY, IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.'
-  cross_references:
-    - ARCH-SIDE_PANEL_BROWSER_TABS
-    - REQ-SIDE_PANEL_BROWSER_TABS
-    - IMPL-SIDE_PANEL_TABS
-    - IMPL-URL_TAGS_DISPLAY
-    - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml
-  metadata:
-    registered: "2026-03-28T12:00:00.000Z"
-    last_updated: "2026-03-28T12:00:00.000Z"
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-12-18T00:00:00.000Z"
+  name: "Module Validation Strategy"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-SIDE_PANEL_BROWSER_TABS:
-  type: ARCH
-  name: Side Panel Browser Tabs Architecture
-  status: Active
-  description: chrome.tabs list in side panel; referrer via SW executeScript; filter and actions on visible list. REQ-SIDE_PANEL_BROWSER_TABS; informs IMPL-SIDE_PANEL_BROWSER_TABS.
   cross_references:
-    - REQ-SIDE_PANEL_BROWSER_TABS
-    - IMPL-SIDE_PANEL_BROWSER_TABS
-    - ARCH-SIDE_PANEL_TABS
-  source_index: architecture-decisions.yaml
-  detail_file: architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml
+    - "ARCH-SIDE_PANEL_TABS"
+    - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    - "REQ-SIDE_PANEL_BROWSER_TABS"
+  description: "chrome.tabs list in side panel; referrer via SW executeScript; filter and actions on visible list. REQ-SIDE_PANEL_BROWSER_TABS; informs IMPL-SIDE_PANEL_BROWSER_TABS."
+  detail_file: "architecture-decisions/ARCH-SIDE_PANEL_BROWSER_TABS.yaml"
   metadata:
-    registered: "2026-03-28T18:00:00.000Z"
     last_updated: "2026-03-28T18:00:00.000Z"
+    registered: "2026-03-28T18:00:00.000Z"
+  name: "Side Panel Browser Tabs Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SUGGESTED_TAGS:
+  cross_references:
+    - "ARCH-TAG_SYSTEM"
+    - "IMPL-SUGGESTED_TAGS"
+    - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+    - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+    - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+  description: "Multi-source suggested tags from page (overlay TagService + popup MAIN-world snippet); frequency ranking; one canonical spelling per word (REQ-SUGGESTED_TAGS_CASE_PRESERVATION); tokenizer sync; http(s)-only popup inject. Informs IMPL-SUGGESTED_TAGS."
+  detail_file: "architecture-decisions/ARCH-SUGGESTED_TAGS.yaml"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2025-07-14T00:00:00.000Z"
+  name: "Suggested Tags from Page Content Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-TAG_SYSTEM:
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-POPUP_SESSION"
+    - "ARCH-SIDE_PANEL_TABS"
+    - "IMPL-TAG_SYSTEM"
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-TAG_INPUT_SANITIZATION"
+    - "REQ-TAG_MANAGEMENT"
+  description: "Sanitization; user-recent tags persisted in SW + chrome.storage.local; N-minute idle + rolling lastUsed; TagService getRecentTagsForUi; message types getRecentBookmarks/addTagToRecent; see ARCH-MESSAGE_HANDLING, ARCH-SIDE_PANEL_TABS, ARCH-POPUP_SESSION. REQ-RECENT_TAGS_SYSTEM, REQ-TAG_MANAGEMENT, REQ-TAG_INPUT_SANITIZATION."
+  detail_file: "architecture-decisions/ARCH-TAG_SYSTEM.yaml"
+  metadata:
+    last_updated: "2026-03-28T00:00:00.000Z"
+    registered: "2026-03-28T00:00:00.000Z"
+  name: "Tag System Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-THIS_PAGE_TAG_SORT:
+  description: "This Page tag sort: pure module tag-chip-sort.js; frequency from hoverboard_tag_frequency; MAIN-world relevance tiers + two-step inject; UIManager gated on tagSortToggle. REQ-THIS_PAGE_TAG_SORT, REQ-SUGGESTED_TAGS_FROM_CONTENT; IMPL-THIS_PAGE_TAG_SORT."
+  type: "ARCH"
+ARCH-TIED_STRUCTURE:
+  cross_references:
+    - "IMPL-TIED_FILES"
+    - "REQ-TIED_SETUP"
+  description: "TIED project structure decision"
+  detail_file: "architecture-decisions/ARCH-TIED_STRUCTURE.yaml"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-12-18T00:00:00.000Z"
+  name: "TIED Project Structure"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+IMPL-CONFIG_STRUCT:
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "ARCH-TAG_SYSTEM"
+    - "IMPL-TAG_SYSTEM"
+    - "REQ-CONFIGURATION"
+    - "REQ-RECENT_TAGS_SYSTEM"
+  description: "Partial project slice: getConfig merge exposes recentTags* keys for REQ-RECENT_TAGS_SYSTEM; full config IMPL remains Template. ARCH-CONFIG_STRUCTURE, REQ-CONFIGURATION."
+  detail_file: "implementation-decisions/IMPL-CONFIG_STRUCT.yaml"
+  metadata:
+    last_updated: "2026-03-28T00:00:00.000Z"
+    registered: "2026-03-28T00:00:00.000Z"
+  name: "Configuration Structure"
+  source_index: "implementation-decisions.yaml"
+  status: "Template"
+  type: "IMPL"
+IMPL-MCP_FEEDBACK_TOOLS:
+  cross_references:
+    - "ARCH-FEEDBACK_STORAGE"
+    - "REQ-FEEDBACK_TO_TIED"
+  description: "Two MCP tools (tied_feedback_add, tied_feedback_export) and feedback module for load/append/export"
+  detail_file: "implementation-decisions/IMPL-MCP_FEEDBACK_TOOLS.yaml"
+  metadata:
+    last_updated: "2026-03-03T00:00:00.000Z"
+    registered: "2026-03-03T00:00:00.000Z"
+  name: "MCP Feedback Tools"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-MESSAGE_HANDLING:
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-TAG_SYSTEM"
+    - "IMPL-BOOKMARK_STATE_SYNC"
+    - "IMPL-POPUP_MESSAGE_TIMEOUT"
+    - "IMPL-TAG_SYSTEM"
+    - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-SMART_BOOKMARKING"
+  description: "Allowlisted messages; handleGetRecentBookmarks, handleAddTagToRecent, handleGetUserRecentTags delegate to IMPL-TAG_SYSTEM. REQ-SMART_BOOKMARKING, REQ-BOOKMARK_STATE_SYNCHRONIZATION, REQ-RECENT_TAGS_SYSTEM; ARCH-MESSAGE_HANDLING, ARCH-TAG_SYSTEM; composed_with IMPL-POPUP_MESSAGE_TIMEOUT, IMPL-BOOKMARK_STATE_SYNC."
+  detail_file: "implementation-decisions/IMPL-MESSAGE_HANDLING.yaml"
+  metadata:
+    last_updated: "2026-03-28T00:00:00.000Z"
+    registered: "2026-03-28T00:00:00.000Z"
+  name: "Message Handling System Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-MODULE_VALIDATION:
+  cross_references:
+    - "ARCH-MODULE_VALIDATION"
+    - "REQ-MODULE_VALIDATION"
+  description: "Module validation implementation"
+  detail_file: "implementation-decisions/IMPL-MODULE_VALIDATION.yaml"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-12-18T00:00:00.000Z"
+  name: "Module Validation Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-RECENT_TAGS_POPUP_REFRESH:
+  cross_references:
+    - "ARCH-POPUP_SESSION"
+    - "ARCH-TAG_SYSTEM"
+    - "IMPL-MESSAGE_HANDLING"
+    - "IMPL-TAG_SYSTEM"
+    - "REQ-RECENT_TAGS_SYSTEM"
+  description: "Popup visibilitychange to loadRecentTags and getRecentBookmarks; ties REQ-RECENT_TAGS_SYSTEM to IMPL-MESSAGE_HANDLING and IMPL-TAG_SYSTEM. ARCH-POPUP_SESSION, ARCH-TAG_SYSTEM."
+  detail_file: "implementation-decisions/IMPL-RECENT_TAGS_POPUP_REFRESH.yaml"
+  metadata:
+    last_updated: "2026-03-28T00:00:00.000Z"
+    registered: "2026-03-28T00:00:00.000Z"
+  name: "Recent Tags refresh on every popup display"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SIDE_PANEL_BROWSER_TABS:
+  cross_references:
+    - "ARCH-SIDE_PANEL_BROWSER_TABS"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
+    - "IMPL-SIDE_PANEL_TABS"
+    - "IMPL-URL_TAGS_DISPLAY"
+    - "REQ-SIDE_PANEL_BROWSER_TABS"
+  description: "browser-tabs-panel.js: list/filter/copy/close browser tabs; GET_TAB_REFERRERS, GET_TABS_PAGE_TEXT, GET_TABS_IMPORTANT_TAGS; filterBrowserTabs, getDisplayedTabs, mergeBookmarkReplyIntoTab, refreshBookmarkDisplayForAllTabs; batch bookmark with parseTagsInput/buildAddTagsPayload; composed_with IMPL-SIDE_PANEL_TABS. REQ-SIDE_PANEL_BROWSER_TABS, ARCH-SIDE_PANEL_BROWSER_TABS; cross-uses IMPL-URL_TAGS_DISPLAY, IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS."
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml"
+  metadata:
+    last_updated: "2026-03-28T12:00:00.000Z"
+    registered: "2026-03-28T12:00:00.000Z"
+  name: "Side Panel Browser Tabs Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SIDE_PANEL_TABS:
+  cross_references:
+    - "ARCH-SIDE_PANEL_TABS"
+    - "ARCH-TAG_SYSTEM"
+    - "IMPL-RECENT_TAGS_POPUP_REFRESH"
+    - "IMPL-SIDE_PANEL_BOOKMARK"
+    - "IMPL-SIDE_PANEL_TAGS_TREE"
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  description: "Tabbed side panel; bindWindowFocusRecentTagsRefresh; composed_with IMPL-SIDE_PANEL_BOOKMARK and IMPL-SIDE_PANEL_TAGS_TREE. REQ-SIDE_PANEL_POPUP_EQUIVALENT, REQ-RECENT_TAGS_SYSTEM; ARCH-SIDE_PANEL_TABS, ARCH-TAG_SYSTEM."
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml"
+  metadata:
+    last_updated: "2026-03-28T00:00:00.000Z"
+    registered: "2026-03-28T00:00:00.000Z"
+  name: "Side Panel Tabs Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SUGGESTED_TAGS:
+  cross_references:
+    - "ARCH-SUGGESTED_TAGS"
+    - "IMPL-THIS_PAGE_TAG_SORT"
+    - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+    - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+    - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+  description: "Multi-source page tag suggestions: overlay via TagService; Chromium popup via MAIN-world suggested-tags-main-world-snippet.js + __hoverboardExtractSuggestedTagsWithRelevance; PopupController normalizes rows; composed_with IMPL-SELECTION_TO_TAG_INPUT; see_also IMPL-THIS_PAGE_TAG_SORT."
+  detail_file: "implementation-decisions/IMPL-SUGGESTED_TAGS.yaml"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "Suggested Tags Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-TAG_SYSTEM:
+  cross_references:
+    - "ARCH-TAG_SYSTEM"
+    - "IMPL-SUGGESTED_TAGS"
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-TAG_INPUT_SANITIZATION"
+    - "REQ-TAG_MANAGEMENT"
+  description: "TagService: sanitizeTag; user-recent via recentTagsMemory + getRecentTagsForUi; getUserRecentTagsExcludingCurrent; addTagToUserRecentList; getRecentTags cache path; composed_with IMPL-SUGGESTED_TAGS. REQ-RECENT_TAGS_SYSTEM, REQ-TAG_MANAGEMENT, REQ-TAG_INPUT_SANITIZATION; ARCH-TAG_SYSTEM."
+  detail_file: "implementation-decisions/IMPL-TAG_SYSTEM.yaml"
+  metadata:
+    last_updated: "2026-03-28T00:00:00.000Z"
+    registered: "2026-03-28T00:00:00.000Z"
+  name: "Tag Service Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-THIS_PAGE_TAG_SORT:
+  cross_references:
+    - "ARCH-THIS_PAGE_TAG_SORT"
+    - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
+    - "IMPL-SUGGESTED_TAGS"
+    - "IMPL-UIManager_SCOPED_ROOT"
+    - "REQ-THIS_PAGE_TAG_SORT"
+  description: "UIManager three-way chip sort when tagSortToggle present; PopupController refreshTagFrequencyMapForSort (_normalizeHoverboardTagFrequencyMap) + loadSuggestedTags (MAIN file then func); tag-chip-sort.js; suggested-tags-main-world-snippet.js. Cross-refs ARCH/REQ-THIS_PAGE_TAG_SORT, IMPL-UIManager_SCOPED_ROOT, IMPL-SUGGESTED_TAGS, IMPL-PLAYWRIGHT_E2E_EXTENSION. Tests: unit + composition; Playwright extension-this-page-tag-sort (Phase H e2e_only surface)."
+  detail_file: "implementation-decisions/IMPL-THIS_PAGE_TAG_SORT.yaml"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "This Page tag sort implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-TIED_FILES:
+  cross_references:
+    - "ARCH-TIED_STRUCTURE"
+    - "REQ-TIED_SETUP"
+  description: "TIED file creation implementation"
+  detail_file: "implementation-decisions/IMPL-TIED_FILES.yaml"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-12-18T00:00:00.000Z"
+  name: "TIED File Creation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-UIManager_SCOPED_ROOT:
+  cross_references:
+    - "ARCH-SIDE_PANEL_TABS"
+    - "IMPL-SIDE_PANEL_BOOKMARK"
+    - "IMPL-THIS_PAGE_TAG_SORT"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  description: "UIManager optional container for side-panel Bookmark subtree; cacheElements uses data-popup-ref under container or document.getElementById in popup. REQ-SIDE_PANEL_POPUP_EQUIVALENT; composed_with IMPL-SIDE_PANEL_BOOKMARK; used by IMPL-THIS_PAGE_TAG_SORT for tagSortToggle resolution."
+  detail_file: "implementation-decisions/IMPL-UIManager_SCOPED_ROOT.yaml"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "UIManager Scoped Root for Panel Context"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-URL_TAGS_DISPLAY:
-  type: IMPL
-  name: URL Tags and Badge Display Module
-  status: Active
-  description: Single source for tags-for-URL and badge display; getCurrentBookmark shape; normalizeBookmarkForDisplay. Cross-used by IMPL-SIDE_PANEL_BROWSER_TABS mergeBookmarkReplyIntoTab. REQ-URL_TAGS_DISPLAY, ARCH-URL_TAGS_DISPLAY.
   cross_references:
-    - ARCH-URL_TAGS_DISPLAY
-    - REQ-URL_TAGS_DISPLAY
-    - REQ-BADGE_INDICATORS
-    - REQ-PER_BOOKMARK_STORAGE_BACKEND
-    - IMPL-SIDE_PANEL_BROWSER_TABS
-  source_index: implementation-decisions.yaml
-  detail_file: implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml
+    - "ARCH-URL_TAGS_DISPLAY"
+    - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    - "REQ-BADGE_INDICATORS"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-URL_TAGS_DISPLAY"
+  description: "Single source for tags-for-URL and badge display; getCurrentBookmark shape; normalizeBookmarkForDisplay. Cross-used by IMPL-SIDE_PANEL_BROWSER_TABS mergeBookmarkReplyIntoTab. REQ-URL_TAGS_DISPLAY, ARCH-URL_TAGS_DISPLAY."
+  detail_file: "implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml"
   metadata:
-    registered: "2026-03-28T18:00:00.000Z"
     last_updated: "2026-03-28T18:00:00.000Z"
+    registered: "2026-03-28T18:00:00.000Z"
+  name: "URL Tags and Badge Display Module"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+PROC-AGENT_REQ_CHECKLIST:
+  cross_references:
+    - "PROC-IMPL_PSEUDOCODE_TOKENS"
+    - "PROC-TIED_DEV_CYCLE"
+    - "PROC-TOKEN_AUDIT"
+    - "REQ-MODULE_VALIDATION"
+  description: "Unified LEAD+TIED checklist (S01–S16) for REQ implementation; pseudo-code, TDD, composition, E2E decision, validation; see tied/docs/agent-req-implementation-checklist.md"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "Agent requirement implementation checklist"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-BUILD_PIPELINE_VALIDATION:
+  cross_references:
+    - "REQ-MODULE_VALIDATION"
+  description: "Build/deploy validation tied to REQ-MODULE_VALIDATION"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-11-08T00:00:00.000Z"
+  name: "Build Pipeline Validation Process"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-COMMIT_MESSAGES:
+  cross_references:
+    - "PROC-TIED_DEV_CYCLE"
+  description: "Consistent commit message format (type/scope/subject, body, footer); optional TIED token references for traceability"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-03T00:00:00.000Z"
+    registered: "2026-03-03T00:00:00.000Z"
+  name: "Commit message format and guidelines"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-IMPL_CODE_TEST_SYNC:
+  cross_references:
+    - "PROC-AGENT_REQ_CHECKLIST"
+    - "PROC-IMPL_PSEUDOCODE_TOKENS"
+    - "PROC-LEAP"
+    - "PROC-PSEUDOCODE_VALIDATION"
+    - "PROC-TEST_STRATEGY"
+    - "PROC-TIED_DEV_CYCLE"
+    - "PROC-TOKEN_AUDIT"
+    - "PROC-TOKEN_VALIDATION"
+    - "REQ-MODULE_VALIDATION"
+  description: "Map pseudo-code blocks to tests and production code; three-way alignment; Phase H E2E decision when e2e_only"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "IMPL code and test synchronization"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-IMPL_PSEUDOCODE_TOKENS:
+  cross_references:
+    - "PROC-TIED_DEV_CYCLE"
+  description: "Every block in IMPL essence_pseudocode must have a comment naming REQ/ARCH/IMPL and how the block implements them; primary mechanism for implementation traceability"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-05T00:00:00.000Z"
+    registered: "2026-03-05T00:00:00.000Z"
+  name: "IMPL pseudo-code semantic token comments (most critical)"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-LEAP:
+  cross_references:
+    - "PROC-IMPL_PSEUDOCODE_TOKENS"
+    - "PROC-TIED_DEV_CYCLE"
+    - "REQ-MODULE_VALIDATION"
+    - "REQ-TIED_SETUP"
+  description: "When code or tests differ from IMPL, update the stack in reverse order IMPL to ARCH to REQ in the same work item so tokens stay consistent and testable"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "Logic Elevation And Propagation (LEAP)"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-PROJECT_SURVEY_AND_SETUP:
+  cross_references:
+    - "ARCH-TIED_STRUCTURE"
+    - "REQ-TIED_SETUP"
+  description: "Survey and readiness process supporting REQ-TIED_SETUP and ARCH-TIED_STRUCTURE"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-11-08T00:00:00.000Z"
+  name: "Project Survey and Setup Process"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-PSEUDOCODE_VALIDATION:
+  cross_references:
+    - "PROC-AGENT_REQ_CHECKLIST"
+    - "PROC-IMPL_CODE_TEST_SYNC"
+    - "PROC-IMPL_PSEUDOCODE_TOKENS"
+  description: "Run the application pseudo-code validation checklist on IMPL essence_pseudocode; required checks are gating before tests or code"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "Application pseudo-code validation"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-RELEASE:
+  cross_references:
+    - "PROC-COMMIT_MESSAGES"
+  description: "Version numbering (major/minor/patch/build) for releases"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-03T00:00:00.000Z"
+    registered: "2026-03-03T00:00:00.000Z"
+  name: "Release and version numbering"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-TEST_STRATEGY:
+  cross_references:
+    - "IMPL-MODULE_VALIDATION"
+    - "REQ-MODULE_VALIDATION"
+  description: "Minimize code not covered by tests; unit/integration cover IMPL/ARCH/REQ logic; E2E reserved for critical journeys"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-01T00:00:00.000Z"
+    registered: "2026-03-01T00:00:00.000Z"
+  name: "Test Strategy and Coverage (minimize untested code)"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-TIED_DEV_CYCLE:
+  cross_references:
+    - "PROC-AGENT_REQ_CHECKLIST"
+    - "PROC-COMMIT_MESSAGES"
+    - "PROC-IMPL_PSEUDOCODE_TOKENS"
+    - "PROC-TOKEN_AUDIT"
+    - "PROC-TOKEN_VALIDATION"
+    - "REQ-MODULE_VALIDATION"
+    - "REQ-TIED_SETUP"
+  description: "Session workflow: plan from TIED, author pseudo-code and tokens, add/align tests, implement (TDD), minimal glue, validate, sync TIED to code"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-01T00:00:00.000Z"
+  name: "TIED Development Cycle (session workflow)"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-TIED_METHODOLOGY_READONLY:
+  cross_references:
+    - "ARCH-TIED_STRUCTURE"
+    - "PROC-YAML_DB_OPERATIONS"
+    - "REQ-TIED_SETUP"
+  description: "Methodology YAML (tied/methodology/) is read-only in client; project YAML (tied/ root) holds client data only; refresh methodology via copy_files.sh"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-16T00:00:00.000Z"
+    registered: "2026-03-16T00:00:00.000Z"
+  name: "TIED-sourced YAML read-only in client"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-TIED_VERIFICATION_GATED:
+  cross_references:
+    - "PROC-TIED_DEV_CYCLE"
+    - "PROC-TOKEN_VALIDATION"
+    - "REQ-TIED_SETUP"
+  description: "When enabled, requirement and optionally IMPL status are derived only from test results; run verify step after tests; do not edit status by hand"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "Verification-gated status (closed-loop)"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-TOKEN_AUDIT:
+  cross_references: []
+  description: "Mandatory checklist ensuring every requirement → architecture → implementation → code/test path is annotated and documented"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-11-08T00:00:00.000Z"
+  name: "Token Audit Process"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-TOKEN_VALIDATION:
+  cross_references: []
+  description: "Automated validation workflow that proves all referenced tokens exist in the registry"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-11-08T00:00:00.000Z"
+  name: "Token Validation Process"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-YAML_DB_OPERATIONS:
+  cross_references:
+    - "ARCH-TIED_STRUCTURE"
+    - "REQ-TIED_SETUP"
+  description: "YAML database operations for reading, writing, querying, and validating YAML index files"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-11-08T00:00:00.000Z"
+  name: "YAML Database Operations Process"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+PROC-YAML_EDIT_LOOP:
+  cross_references:
+    - "ARCH-TIED_STRUCTURE"
+    - "PROC-YAML_DB_OPERATIONS"
+    - "REQ-TIED_SETUP"
+  description: "Controlling loop for creating or editing TIED YAML; validate with lint_yaml before use; no record valid until it passes"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "YAML edit and validation loop"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
+REQ-FEEDBACK_TO_TIED:
+  category: "Functional"
+  cross_references:
+    - "ARCH-FEEDBACK_STORAGE"
+    - "IMPL-MCP_FEEDBACK_TOOLS"
+  description: "Projects and users can submit feature requests, bug reports, and methodology improvement suggestions; store under TIED tree and export for reporting to TIED project"
+  detail_file: "requirements/REQ-FEEDBACK_TO_TIED.yaml"
+  metadata:
+    last_updated: "2026-03-03T00:00:00.000Z"
+    registered: "2026-03-03T00:00:00.000Z"
+  name: "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
+REQ-MODULE_VALIDATION:
+  category: "Core Functional"
+  cross_references:
+    - "ARCH-MODULE_VALIDATION"
+    - "IMPL-MODULE_VALIDATION"
+  description: "Independent module validation before integration requirement"
+  detail_file: "requirements/REQ-MODULE_VALIDATION.yaml"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-01-27T00:00:00.000Z"
+  name: "Independent Module Validation Before Integration"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
+REQ-RECENT_TAGS_SYSTEM:
+  category: "Immutable"
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-POPUP_SESSION"
+    - "ARCH-SIDE_PANEL_TABS"
+    - "ARCH-TAG_SYSTEM"
+    - "IMPL-CONFIG_STRUCT"
+    - "IMPL-MESSAGE_HANDLING"
+    - "IMPL-RECENT_TAGS_POPUP_REFRESH"
+    - "IMPL-SIDE_PANEL_TABS"
+    - "IMPL-TAG_SYSTEM"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    - "REQ-TAG_MANAGEMENT"
+  description: "This Page recent tags: persisted user-recent state; N-minute rolling lastUsed + N-minute idle expiry (recentTagsActivityWindowMinutes); cross-window; popup visibility + side panel window-focus refresh on Bookmark tab. Trace ARCH-TAG_SYSTEM, ARCH-POPUP_SESSION, ARCH-SIDE_PANEL_TABS, ARCH-MESSAGE_HANDLING; IMPL-TAG_SYSTEM, IMPL-RECENT_TAGS_POPUP_REFRESH, IMPL-SIDE_PANEL_TABS, IMPL-MESSAGE_HANDLING, IMPL-CONFIG_STRUCT. REQ-SIDE_PANEL_POPUP_EQUIVALENT."
+  detail_file: "requirements/REQ-RECENT_TAGS_SYSTEM.yaml"
+  metadata:
+    last_updated: "2026-03-28T00:00:00.000Z"
+    registered: "2026-03-28T00:00:00.000Z"
+  name: "Recent Tags System"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SIDE_PANEL_BROWSER_TABS:
+  category: "Functional"
+  cross_references:
+    - "ARCH-SIDE_PANEL_BROWSER_TABS"
+    - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  description: "Side panel Tabs tab: list/filter/copy/close browser tabs; bookmark tags and to-read/private row indicators; batch Add tags, Set to-read, Clear to-read with post-batch refresh. Trace ARCH-SIDE_PANEL_BROWSER_TABS, IMPL-SIDE_PANEL_BROWSER_TABS; related REQ-SIDE_PANEL_POPUP_EQUIVALENT."
+  detail_file: "requirements/REQ-SIDE_PANEL_BROWSER_TABS.yaml"
+  metadata:
+    last_updated: "2026-03-28T00:00:00.000Z"
+    registered: "2026-03-28T00:00:00.000Z"
+  name: "Side Panel Browser Tabs List"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
+  category: "Functional"
+  cross_references:
+    - "ARCH-SUGGESTED_TAGS"
+    - "IMPL-SUGGESTED_TAGS"
+    - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+    - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+  description: "Suggested tags: one canonical spelling per case-insensitive word from HTML (mixed case preferred over ALL CAPS over all-lowercase); no separate all-lowercase duplicate chip; tag case toggle (original/lower/UPPER) controls chip display. Trace ARCH-SUGGESTED_TAGS, IMPL-SUGGESTED_TAGS; tests tests/unit/suggested-tag-original-case.test.js."
+  detail_file: "requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2025-07-14T00:00:00.000Z"
+  name: "Suggested Tags Case Preservation"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SUGGESTED_TAGS_FROM_CONTENT:
+  category: "Functional"
+  cross_references:
+    - "ARCH-SUGGESTED_TAGS"
+    - "IMPL-SUGGESTED_TAGS"
+    - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+    - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+  description: "Multi-source suggested tags from page content (overlay + popup MAIN-world path); normalize/trim row shape for UIManager; http(s) inject rules. Trace ARCH-SUGGESTED_TAGS, IMPL-SUGGESTED_TAGS, IMPL-THIS_PAGE_TAG_SORT."
+  detail_file: "requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml"
+  metadata:
+    last_updated: "2026-03-27T00:00:00.000Z"
+    registered: "2026-03-27T00:00:00.000Z"
+  name: "Suggested Tags from Page Content"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-THIS_PAGE_TAG_SORT:
+  description: "This Page three-way tag chip sort (alphabetical, bookmark frequency, DOM relevance); side panel toggle; default A–Z; no persistence; popup order unchanged when no toggle. Trace: ARCH/IMPL-THIS_PAGE_TAG_SORT; unit + composition tests; Playwright extension-this-page-tag-sort.spec.js for chrome-extension:// side panel surface (Phase H). [REQ-SIDE_PANEL_POPUP_EQUIVALENT]"
+  type: "REQ"
+REQ-TIED_SETUP:
+  category: "Core Functional"
+  cross_references:
+    - "ARCH-TIED_STRUCTURE"
+    - "IMPL-TIED_FILES"
+  description: "TIED methodology setup requirement"
+  detail_file: "requirements/REQ-TIED_SETUP.yaml"
+  metadata:
+    last_updated: "2026-02-08T00:00:00.000Z"
+    registered: "2025-11-08T00:00:00.000Z"
+  name: "TIED Methodology Setup"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"

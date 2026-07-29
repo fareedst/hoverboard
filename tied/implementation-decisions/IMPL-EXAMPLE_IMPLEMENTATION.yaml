@@ -1,65 +1,57 @@
 IMPL-EXAMPLE_IMPLEMENTATION:
-  name: Core Implementation Example
-  status: Template
-  cross_references:
-    - ARCH-EXAMPLE_DECISION
-    - REQ-EXAMPLE_FEATURE
-  rationale:
-    why: Why this implementation approach was chosen
-    problems_solved:
-      - Problem 1 that implementation solves
-    benefits:
-      - Benefit 1 of implementation
-  implementation_approach:
-    summary: Main implementation approach
-    details:
-      - Specific technical detail 1
-      - Code structure or pattern
-      - API design decision
   code_locations:
     files:
-      - path: path/to/implementation.ext
-        description: Main implementation
+      - path: "path/to/implementation.ext"
+        description: "Main implementation"
         lines:
-          - 10
-          - 50
+          - "10"
+          - "50"
     functions:
-      - name: exampleFunction
-        file: path/to/implementation.ext
-        description: What it does
-  traceability:
-    architecture:
-      - ARCH-EXAMPLE_DECISION
-    requirements:
-      - REQ-EXAMPLE_FEATURE
-    tests:
-      - testFeatureName_REQ_EXAMPLE_FEATURE
-    code_annotations:
-      - IMPL-EXAMPLE_IMPLEMENTATION
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also: []
-    composed_with: []
-  essence_pseudocode: |
-    # [IMPL-EXAMPLE_IMPLEMENTATION] [ARCH-EXAMPLE_DECISION] [REQ-EXAMPLE_FEATURE]
-    # Placeholder for core implementation example.
-    # Contract: inputs and outputs to be defined per feature.
-    Template: placeholder for core implementation example.
-    INPUT: (to be defined per feature)
-    OUTPUT: (to be defined)
-    # Example procedure stub; fill steps with INPUT/OUTPUT/DATA and procedure names.
-    exampleFunction(...): (steps to be filled; use INPUT/OUTPUT/DATA and procedure names)
-  detail_file: implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.yaml
+      - name: "exampleFunction"
+        description: "What it does"
+        file: "path/to/implementation.ext"
+  cross_references:
+    - "ARCH-EXAMPLE_DECISION"
+    - "REQ-EXAMPLE_FEATURE"
+  detail_file: "implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.yaml"
+  essence_pseudocode: "# [IMPL-EXAMPLE_IMPLEMENTATION] [ARCH-EXAMPLE_DECISION] [REQ-EXAMPLE_FEATURE]\n# Placeholder for core implementation example.\n# Contract: inputs and outputs to be defined per feature.\nTemplate: placeholder for core implementation example.\nINPUT: (to be defined per feature)\nOUTPUT: (to be defined)\n# Example procedure stub; fill steps with INPUT/OUTPUT/DATA and procedure names.\nexampleFunction(...): (steps to be filled; use INPUT/OUTPUT/DATA and procedure names)\n"
+  implementation_approach:
+    details:
+      - "API design decision"
+      - "Code structure or pattern"
+      - "Specific technical detail 1"
+    summary: "Main implementation approach"
   metadata:
     created:
-      date: YYYY-MM-DD
-      author: agent/contributor
+      author: "agent/contributor"
+      date: "YYYY-MM-DD"
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode (template stub)
+      reason: "Add essence_pseudocode (template stub)"
     last_validated:
-      date: YYYY-MM-DD
-      validator: agent/contributor
-      result: pass
+      date: "YYYY-MM-DD"
+      result: "pass"
+      validator: "agent/contributor"
+  name: "Core Implementation Example"
+  rationale:
+    benefits:
+      - "Benefit 1 of implementation"
+    problems_solved:
+      - "Problem 1 that implementation solves"
+    why: "Why this implementation approach was chosen"
+  related_decisions:
+    composed_with: []
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Template"
+  traceability:
+    architecture:
+      - "ARCH-EXAMPLE_DECISION"
+    code_annotations:
+      - "IMPL-EXAMPLE_IMPLEMENTATION"
+    requirements:
+      - "REQ-EXAMPLE_FEATURE"
+    tests:
+      - "testFeatureName_REQ_EXAMPLE_FEATURE"

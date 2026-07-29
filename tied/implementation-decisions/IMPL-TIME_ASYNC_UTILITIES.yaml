@@ -1,65 +1,44 @@
 IMPL-TIME_ASYNC_UTILITIES:
-  name: Time and Async Utilities
-  status: Active
-  cross_references:
-    - REQ-SHARED_UTILITIES
-    - ARCH-SHARED_UTILITIES
-  rationale:
-    why: delay (Promise), formatTimestamp, getRelativeTime for API/UI timing
-    problems_solved: []
-    benefits: []
-  implementation_approach:
-    summary: timeUtils in src/shared/utils.js — delay, formatTimestamp, getRelativeTime
-    details: []
   code_locations:
     files:
-      - path: src/shared/utils.js
-        description: timeUtils
+      - path: "src/shared/utils.js"
+        description: "timeUtils"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-SHARED_UTILITIES
-    requirements:
-      - REQ-SHARED_UTILITIES
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: time/async helpers exercised indirectly.'
-    code_annotations:
-      - IMPL-TIME_ASYNC_UTILITIES
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-DOM_UTILITIES
-    composed_with:
-      - IMPL-DOM_UTILITIES
-  essence_pseudocode: |
-    # [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]
-    # delay (Promise), formatTimestamp, getRelativeTime for API/UI.
-    # Contract: ms or timestamp in; Promise or formatted/relative string out.
-    INPUT: milliseconds (delay); timestamp (formatTimestamp, getRelativeTime)
-    OUTPUT: Promise that resolves after ms (delay); formatted date string (formatTimestamp); relative time string (getRelativeTime)
-    DATA: current time for relative calculation
-
-    # Resolve after ms via setTimeout.
-    delay(ms):
-      RETURN new Promise such that resolve() is called after ms (e.g. setTimeout(resolve, ms))
-
-    # Convert to locale date/time string.
-    formatTimestamp(ts):
-      CONVERT timestamp to display format (e.g. locale date/time string)
-      RETURN formatted string
-
-    # Return "X s/m/h/d ago" from delta.
-    getRelativeTime(ts):
-      delta = now - ts
-      IF delta in seconds/minutes/hours/days THEN RETURN "X s/m/h/d ago" (or similar)
-      RETURN human-readable relative string
-  detail_file: implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "REQ-SHARED_UTILITIES"
+  detail_file: "implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml"
+  essence_pseudocode: "# [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]\n# delay (Promise), formatTimestamp, getRelativeTime for API/UI.\n# Contract: ms or timestamp in; Promise or formatted/relative string out.\nINPUT: milliseconds (delay); timestamp (formatTimestamp, getRelativeTime)\nOUTPUT: Promise that resolves after ms (delay); formatted date string (formatTimestamp); relative time string (getRelativeTime)\nDATA: current time for relative calculation\n\n# Resolve after ms via setTimeout.\ndelay(ms):\n  RETURN new Promise such that resolve() is called after ms (e.g. setTimeout(resolve, ms))\n\n# Convert to locale date/time string.\nformatTimestamp(ts):\n  CONVERT timestamp to display format (e.g. locale date/time string)\n  RETURN formatted string\n\n# Return \"X s/m/h/d ago\" from delta.\ngetRelativeTime(ts):\n  delta = now - ts\n  IF delta in seconds/minutes/hours/days THEN RETURN \"X s/m/h/d ago\" (or similar)\n  RETURN human-readable relative string\n"
+  implementation_approach:
+    details: []
+    summary: "timeUtils in src/shared/utils.js — delay, formatTimestamp, getRelativeTime"
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+  name: "Time and Async Utilities"
+  rationale:
+    benefits: []
+    problems_solved: []
+    why: "delay (Promise), formatTimestamp, getRelativeTime for API/UI timing"
+  related_decisions:
+    composed_with:
+      - "IMPL-DOM_UTILITIES"
+    depends_on: []
+    see_also:
+      - "IMPL-DOM_UTILITIES"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SHARED_UTILITIES"
+    code_annotations:
+      - "IMPL-TIME_ASYNC_UTILITIES"
+    requirements:
+      - "REQ-SHARED_UTILITIES"
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: time/async helpers exercised indirectly."
+    tests: []

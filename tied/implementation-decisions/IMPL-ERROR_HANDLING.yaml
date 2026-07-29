@@ -1,66 +1,58 @@
 IMPL-ERROR_HANDLING:
-  name: Error Handling Implementation
-  status: Template
-  cross_references:
-    - ARCH-ERROR_HANDLING
-    - REQ-ERROR_HANDLING
-  rationale:
-    why: Why this error handling implementation was chosen
-    problems_solved:
-      - Problem 1
-    benefits:
-      - Benefit 1
-  implementation_approach:
-    summary: Error handling implementation approach
-    details:
-      - Specific error handling pattern
-      - Error propagation strategy
-      - Error logging and reporting
   code_locations:
     files:
-      - path: src/shared/ErrorHandler.js
-        description: Centralized error handling for the extension
+      - path: "src/shared/ErrorHandler.js"
+        description: "Centralized error handling for the extension"
     functions:
-      - name: setupGlobalHandlers
-        file: src/shared/ErrorHandler.js
-        description: Global unhandledrejection and error handlers
-      - name: handleError
-        file: src/shared/ErrorHandler.js
-        description: Error handling logic
-  traceability:
-    architecture:
-      - ARCH-ERROR_HANDLING
-    requirements:
-      - REQ-ERROR_HANDLING
-    tests:
-      - tests/unit/module-import-fix.test.js
-      - testErrorHandling_IMPL_ERROR_HANDLING
-    code_annotations:
-      - IMPL-ERROR_HANDLING
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also: []
-    composed_with: []
-  essence_pseudocode: |
-    # [IMPL-ERROR_HANDLING] [ARCH-ERROR_HANDLING] [REQ-ERROR_HANDLING]
-    # Placeholder for centralized error handling (log, wrap, propagate).
-    # Contract: error in, handled result or rethrow out.
-    Template: placeholder for error handling implementation.
-    INPUT: (to be defined) error or throwable
-    OUTPUT: (to be defined) handled result or rethrow
-    # Main handler: log and optionally wrap or propagate.
-    handleError(err): LOG; optionally WRAP or PROPAGATE; (steps to be filled per project)
-  detail_file: implementation-decisions/IMPL-ERROR_HANDLING.yaml
+      - name: "setupGlobalHandlers"
+        description: "Global unhandledrejection and error handlers"
+        file: "src/shared/ErrorHandler.js"
+      - name: "handleError"
+        description: "Error handling logic"
+        file: "src/shared/ErrorHandler.js"
+  cross_references:
+    - "ARCH-ERROR_HANDLING"
+    - "REQ-ERROR_HANDLING"
+  detail_file: "implementation-decisions/IMPL-ERROR_HANDLING.yaml"
+  essence_pseudocode: "# [IMPL-ERROR_HANDLING] [ARCH-ERROR_HANDLING] [REQ-ERROR_HANDLING]\n# Placeholder for centralized error handling (log, wrap, propagate).\n# Contract: error in, handled result or rethrow out.\nTemplate: placeholder for error handling implementation.\nINPUT: (to be defined) error or throwable\nOUTPUT: (to be defined) handled result or rethrow\n# Main handler: log and optionally wrap or propagate.\nhandleError(err): LOG; optionally WRAP or PROPAGATE; (steps to be filled per project)\n"
+  implementation_approach:
+    details:
+      - "Error logging and reporting"
+      - "Error propagation strategy"
+      - "Specific error handling pattern"
+    summary: "Error handling implementation approach"
   metadata:
     created:
-      date: YYYY-MM-DD
-      author: agent/contributor
+      author: "agent/contributor"
+      date: "YYYY-MM-DD"
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode (template stub)
+      reason: "Add essence_pseudocode (template stub)"
     last_validated:
-      date: YYYY-MM-DD
-      validator: agent/contributor
-      result: pass
+      date: "YYYY-MM-DD"
+      result: "pass"
+      validator: "agent/contributor"
+  name: "Error Handling Implementation"
+  rationale:
+    benefits:
+      - "Benefit 1"
+    problems_solved:
+      - "Problem 1"
+    why: "Why this error handling implementation was chosen"
+  related_decisions:
+    composed_with: []
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Template"
+  traceability:
+    architecture:
+      - "ARCH-ERROR_HANDLING"
+    code_annotations:
+      - "IMPL-ERROR_HANDLING"
+    requirements:
+      - "REQ-ERROR_HANDLING"
+    tests:
+      - "testErrorHandling_IMPL_ERROR_HANDLING"
+      - "tests/unit/module-import-fix.test.js"

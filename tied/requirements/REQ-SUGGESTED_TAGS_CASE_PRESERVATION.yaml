@@ -1,73 +1,65 @@
 REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
-  name: Suggested Tags Case Preservation
-  category: Functional
-  priority: P1
-  status: Implemented
+  '[arch-suggested_tags]': "Canonical spelling per lowercase key; chip case toggle for lower/UPPER display"
+  '[impl-suggested_tags]': "pickBetterSuggestedOriginalCase; TagService.extractSuggestedTagsFromContent; suggested-tags-main-world-snippet.js; Safari mirrors"
+  '[req-suggested_tags_deduplication]': "Case-insensitive exclusion of suggestions already on the bookmark unchanged"
+  '[req-suggested_tags_from_content]': "Case preservation applied to extracted suggestions"
+  actual: "Implemented; unit tests in tests/unit/suggested-tag-original-case.test.js"
+  category: "Functional"
+  code_annotations: "Case preservation sections marked with `[REQ-SUGGESTED_TAGS_CASE_PRESERVATION]` in comments"
+  code_locations: "| Path | Role |\n| src/shared/suggested-tag-original-case.js | Canonical rank helper |\n| src/features/tagging/tag-service.js | Overlay extraction |\n| src/features/tagging/suggested-tags-main-world-snippet.js | Popup MAIN extraction |\n| safari/src/... | Mirrors |\n"
+  coverage: "Case preservation logic, dual-version generation"
+  created: "2025-07-14"
+  depends_on: "None"
+  description: "Suggested tags use one canonical spelling per word identity (case-insensitive) derived from page text; users use the tag case toggle for lower/UPPER display—not a second lowercase suggestion row."
+  detail_file: "requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml"
+  expected: "\"Suggested tags case preservation tests\" (referenced in requirements.yaml)"
+  last_updated: "2026-02-13"
+  lost_original_case_from_content: "Previous implementations might have lowercased all suggestions, losing important semantic information."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-03-27"
+      reason: "S04 PROC-AGENT_REQ_CHECKLIST: detail aligned to canonical-case behavior and traceability"
+  modifiable_decisions: "1. **Rank tie**: When two surface forms tie on mixed/ALLCAPS/lower rank, keep the incumbent. 2. **Sanitization**: sanitizeTag runs after canonical pick (REQ-TAG_INPUT_SANITIZATION). 3. **Tokenizer sync**: Popup MAIN snippet and TagService must share delimiter regex (ARCH-SUGGESTED_TAGS / IMPL-SUGGESTED_TAGS)."
+  name: "Suggested Tags Case Preservation"
+  no_capitalization_choice: "Users had no way to choose between \"JavaScript\" and \"javascript\" if only one was offered."
+  no_dedicated_unit_tests: "Superseded: suggested-tag-original-case.test.js covers picker, extractSuggestedTagsFromContent, upper-mode display."
+  preserved_original_case: "Proper nouns and brand names maintain their canonical capitalization."
+  priority: "P1"
   rationale:
-    why: Show suggested tags using the best spelling from the page (prefer mixed case over ALL CAPS over all-lowercase for each word). Do not add a second all-lowercase suggestion for the same word; users can switch display casing with the tag case toggle (original / lower / UPPER).
-    problems_solved:
-      - Lost original case from content
-      - Redundant lowercase duplicate chips
     benefits:
-      - Canonical spelling from HTML
-      - Case toggle controls display without duplicate suggestions
-  satisfaction_criteria:
-    - criterion: 'One suggested chip per word identity (case-insensitive): canonical spelling prefers mixed case (e.g. Apple) over ALL CAPS over all-lowercase when the page contained those variants.'
-    - criterion: No separate all-lowercase duplicate suggestion for a word that also appears with uppercase in content (e.g. not both apple and Apple).
-    - criterion: Words that appear only in all-lowercase in content still suggest once in that lowercase form.
-    - criterion: With tag case mode upper, the same canonical value displays as ALL CAPS (e.g. Apple → APPLE) via existing chip folding.
-  validation_criteria:
-    - method: Unit tests
-      coverage: pickBetterSuggestedOriginalCase; TagService.extractSuggestedTagsFromContent; tagChipDisplayAndAddValue upper mode (tests/unit/suggested-tag-original-case.test.js)
-  traceability:
-    architecture:
-      - ARCH-SUGGESTED_TAGS
-    implementation:
-      - IMPL-SUGGESTED_TAGS
-    tests:
-      - tests/unit/suggested-tag-original-case.test.js
-    code_annotations:
-      - REQ-SUGGESTED_TAGS_CASE_PRESERVATION
+      - "Canonical spelling from HTML"
+      - "Case toggle controls display without duplicate suggestions"
+    problems_solved:
+      - "Lost original case from content"
+      - "Redundant lowercase duplicate chips"
+    why: "Show suggested tags using the best spelling from the page (prefer mixed case over ALL CAPS over all-lowercase for each word). Do not add a second all-lowercase suggestion for the same word; users can switch display casing with the tag case toggle (original / lower / UPPER)."
+  recommended_tests_for_future_modification: "Non-Latin scripts, URL-only tokens, and sanitizeTag interaction edge cases if product scope expands."
   related_requirements:
     depends_on: []
     related_to:
-      - REQ-SUGGESTED_TAGS_FROM_CONTENT
-      - REQ-SUGGESTED_TAGS_DEDUPLICATION
+      - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     supersedes: []
-  detail_file: requirements/REQ-SUGGESTED_TAGS_CASE_PRESERVATION.yaml
-  metadata:
-    last_updated:
-      date: "2026-03-27"
-      author: AI Agent
-      reason: 'S04 PROC-AGENT_REQ_CHECKLIST: detail aligned to canonical-case behavior and traceability'
-  '[arch-suggested_tags]': Canonical spelling per lowercase key; chip case toggle for lower/UPPER display
-  '[impl-suggested_tags]': pickBetterSuggestedOriginalCase; TagService.extractSuggestedTagsFromContent; suggested-tags-main-world-snippet.js; Safari mirrors
-  '[req-suggested_tags_deduplication]': Case-insensitive exclusion of suggestions already on the bookmark unchanged
-  '[req-suggested_tags_from_content]': Case preservation applied to extracted suggestions
-  actual: Implemented; unit tests in tests/unit/suggested-tag-original-case.test.js
-  code_annotations: Case preservation sections marked with `[REQ-SUGGESTED_TAGS_CASE_PRESERVATION]` in comments
-  code_locations: |
-    | Path | Role |
-    | src/shared/suggested-tag-original-case.js | Canonical rank helper |
-    | src/features/tagging/tag-service.js | Overlay extraction |
-    | src/features/tagging/suggested-tags-main-world-snippet.js | Popup MAIN extraction |
-    | safari/src/... | Mirrors |
-  coverage: Case preservation logic, dual-version generation
-  created: "2025-07-14"
-  depends_on: None
-  description: Suggested tags use one canonical spelling per word identity (case-insensitive) derived from page text; users use the tag case toggle for lower/UPPER display—not a second lowercase suggestion row.
-  expected: '"Suggested tags case preservation tests" (referenced in requirements.yaml)'
-  last_updated: "2026-02-13"
-  lost_original_case_from_content: Previous implementations might have lowercased all suggestions, losing important semantic information.
-  modifiable_decisions: '1. **Rank tie**: When two surface forms tie on mixed/ALLCAPS/lower rank, keep the incumbent. 2. **Sanitization**: sanitizeTag runs after canonical pick (REQ-TAG_INPUT_SANITIZATION). 3. **Tokenizer sync**: Popup MAIN snippet and TagService must share delimiter regex (ARCH-SUGGESTED_TAGS / IMPL-SUGGESTED_TAGS).'
-  no_capitalization_choice: Users had no way to choose between "JavaScript" and "javascript" if only one was offered.
-  no_dedicated_unit_tests: 'Superseded: suggested-tag-original-case.test.js covers picker, extractSuggestedTagsFromContent, upper-mode display.'
-  preserved_original_case: Proper nouns and brand names maintain their canonical capitalization.
-  recommended_tests_for_future_modification: Non-Latin scripts, URL-only tokens, and sanitizeTag interaction edge cases if product scope expands.
-  supersedes: |-
-    None
-
-    ---
-  test_scope: '(currently **not implemented**; see "Current Test Gap" below):'
-  user_choice_in_capitalization: Tag case folding UI (REQ-SIDE_PANEL_POPUP_EQUIVALENT) applies to suggested chips; extractors emit one canonical string per key.
-  why_this_requirement_exists: Page text mixes proper nouns and plain words; users need HTML-faithful defaults without redundant chips, with explicit control over displayed casing.
+  satisfaction_criteria:
+    - criterion: "No separate all-lowercase duplicate suggestion for a word that also appears with uppercase in content (e.g. not both apple and Apple)."
+    - criterion: "One suggested chip per word identity (case-insensitive): canonical spelling prefers mixed case (e.g. Apple) over ALL CAPS over all-lowercase when the page contained those variants."
+    - criterion: "With tag case mode upper, the same canonical value displays as ALL CAPS (e.g. Apple → APPLE) via existing chip folding."
+    - criterion: "Words that appear only in all-lowercase in content still suggest once in that lowercase form."
+  status: "Implemented"
+  supersedes: "None\n\n---"
+  test_scope: "(currently **not implemented**; see \"Current Test Gap\" below):"
+  traceability:
+    architecture:
+      - "ARCH-SUGGESTED_TAGS"
+    code_annotations:
+      - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
+    implementation:
+      - "IMPL-SUGGESTED_TAGS"
+    tests:
+      - "tests/unit/suggested-tag-original-case.test.js"
+  user_choice_in_capitalization: "Tag case folding UI (REQ-SIDE_PANEL_POPUP_EQUIVALENT) applies to suggested chips; extractors emit one canonical string per key."
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "pickBetterSuggestedOriginalCase; TagService.extractSuggestedTagsFromContent; tagChipDisplayAndAddValue upper mode (tests/unit/suggested-tag-original-case.test.js)"
+  why_this_requirement_exists: "Page text mixes proper nouns and plain words; users need HTML-faithful defaults without redundant chips, with explicit control over displayed casing."

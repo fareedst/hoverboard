@@ -1,87 +1,66 @@
 IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
-  name: Local Bookmarks Index Import Implementation
-  status: Active
-  cross_references:
-    - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
-    - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
-  rationale:
-    why: Implement import UX and parse/save flow using existing saveBookmark and CSV/JSON format.
-    problems_solved:
-      - No import UI or parsing for index page
-    benefits:
-      - Hidden file input + Import button; Only new / Overwrite existing; Import to Local | File | Sync; parseCsv and JSON; saveBookmark per row; result message
-  implementation_approach:
-    summary: Import row in actions-below-table; parseCsv in bookmarks-table-csv.js; file input + Import button; only new filters by allBookmarks; per-row saveBookmark with preferredBackend; loadBookmarks + result.
-    details:
-      - 'CSV: parseCsv skips header (title,url); parseCsvLine handles quoted fields and ""; rows with empty URL skipped; Shared/Private/toread normalized'
-      - 'JSON: array or single object; normalizeJsonBookmark returns null for empty url; tags to array'
-      - 'runImport: read file text; parseImportFile(text, filename) -> rows; if Only new filter rows where url NOT IN allBookmarks; for each row sendMessage saveBookmark({ ...row, preferredBackend }); count imported/skipped/failed; loadBookmarks(); show result in #import-result'
   code_locations:
     files:
-      - path: src/ui/bookmarks-table/bookmarks-table.html
-        description: Import row (file input, button, radios, Import to dropdown)
-      - path: src/ui/bookmarks-table/bookmarks-table.js
-        description: runImport, file change handler, parseImportFile, result message
-      - path: src/ui/bookmarks-table/bookmarks-table-csv.js
-        description: parseCsv for import
+      - path: "src/ui/bookmarks-table/bookmarks-table.html"
+        description: "Import row (file input, button, radios, Import to dropdown)"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "runImport, file change handler, parseImportFile, result message"
+      - path: "src/ui/bookmarks-table/bookmarks-table-csv.js"
+        description: "parseCsv for import"
     functions:
-      - name: parseCsv
-        file: src/ui/bookmarks-table/bookmarks-table-csv.js
-        description: Parse CSV string to array of bookmark-like objects (export format)
-      - name: runImport
-        file: src/ui/bookmarks-table/bookmarks-table.js
-        description: Parse file, filter if only new, send saveBookmark per row, refresh, show result
-  traceability:
-    architecture:
-      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
-    requirements:
-      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
-    tests:
-      - tests/unit/bookmarks-table-import.test.js
-    code_annotations:
-      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
-  related_decisions:
-    depends_on:
-      - IMPL-LOCAL_BOOKMARKS_INDEX
-    supersedes: []
-    see_also:
-      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
-    composed_with:
-      - IMPL-LOCAL_BOOKMARKS_INDEX
-      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
-      - IMPL-BOOKMARK_ROUTER
-  essence_pseudocode: |
-    # [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]
-    # Import from CSV/JSON; Only new or Overwrite; saveBookmark per row; result message.
-    # Contract: file and mode and backend; counts and refreshed table.
-    INPUT: file (CSV or JSON), mode (Only new | Overwrite), preferredBackend (Local | File | Sync), allBookmarks (existing set for "Only new")
-    OUTPUT: imported count, skipped count, failed count; refreshed table
-    DATA: rows = array of { url, description, tags, time, shared, toread, extended }; existingByUrl = set of url from allBookmarks
-
-    # Parse file, filter if Only new, send saveBookmark per row, refresh and show result.
-    runImport(file):
-      text = read file as text
-      rows = parseImportFile(text, filename)   // CSV -> parseCsv; JSON -> normalize array; skip empty url
-      IF mode = "Only new": rows = rows FILTER url NOT IN existingByUrl
-      imported = 0; skipped = 0; failed = 0
-      FOR each row IN rows:
-        payload = { ...row, preferredBackend }
-        response = SEND saveBookmark(payload)
-        IF response.success: imported++
-        ELSE IF skipped (e.g. duplicate): skipped++
-        ELSE: failed++
-      loadBookmarks()   // refresh table
-      SHOW "Imported N, skipped M, K failed" in #import-result
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml
+      - name: "parseCsv"
+        description: "Parse CSV string to array of bookmark-like objects (export format)"
+        file: "src/ui/bookmarks-table/bookmarks-table-csv.js"
+      - name: "runImport"
+        description: "Parse file, filter if only new, send saveBookmark per row, refresh, show result"
+        file: "src/ui/bookmarks-table/bookmarks-table.js"
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
+  essence_pseudocode: "# [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]\n# Import from CSV/JSON; Only new or Overwrite; saveBookmark per row; result message.\n# Contract: file and mode and backend; counts and refreshed table.\nINPUT: file (CSV or JSON), mode (Only new | Overwrite), preferredBackend (Local | File | Sync), allBookmarks (existing set for \"Only new\")\nOUTPUT: imported count, skipped count, failed count; refreshed table\nDATA: rows = array of { url, description, tags, time, shared, toread, extended }; existingByUrl = set of url from allBookmarks\n\n# Parse file, filter if Only new, send saveBookmark per row, refresh and show result.\nrunImport(file):\n  text = read file as text\n  rows = parseImportFile(text, filename)   // CSV -> parseCsv; JSON -> normalize array; skip empty url\n  IF mode = \"Only new\": rows = rows FILTER url NOT IN existingByUrl\n  imported = 0; skipped = 0; failed = 0\n  FOR each row IN rows:\n    payload = { ...row, preferredBackend }\n    response = SEND saveBookmark(payload)\n    IF response.success: imported++\n    ELSE IF skipped (e.g. duplicate): skipped++\n    ELSE: failed++\n  loadBookmarks()   // refresh table\n  SHOW \"Imported N, skipped M, K failed\" in #import-result\n"
+  implementation_approach:
+    details:
+      - "CSV: parseCsv skips header (title,url); parseCsvLine handles quoted fields and \"\"; rows with empty URL skipped; Shared/Private/toread normalized"
+      - "JSON: array or single object; normalizeJsonBookmark returns null for empty url; tags to array"
+      - "runImport: read file text; parseImportFile(text, filename) -> rows; if Only new filter rows where url NOT IN allBookmarks; for each row sendMessage saveBookmark({ ...row, preferredBackend }); count imported/skipped/failed; loadBookmarks(); show result in #import-result"
+    summary: "Import row in actions-below-table; parseCsv in bookmarks-table-csv.js; file input + Import button; only new filters by allBookmarks; per-row saveBookmark with preferredBackend; loadBookmarks + result."
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-18"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
     last_validated:
       date: "2026-02-18"
-      validator: AI Agent
-      result: pass
+      result: "pass"
+      validator: "AI Agent"
+  name: "Local Bookmarks Index Import Implementation"
+  rationale:
+    benefits:
+      - "Hidden file input + Import button; Only new / Overwrite existing; Import to Local | File | Sync; parseCsv and JSON; saveBookmark per row; result message"
+    problems_solved:
+      - "No import UI or parsing for index page"
+    why: "Implement import UX and parse/save flow using existing saveBookmark and CSV/JSON format."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    depends_on:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    see_also:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    code_annotations:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    requirements:
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    tests:
+      - "tests/unit/bookmarks-table-import.test.js"

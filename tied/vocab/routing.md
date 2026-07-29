@@ -21,13 +21,21 @@
 | 4 | [agentstream.md](agentstream.md) | Go `agentstream`, pipeline, turns, checklist render, executor, HTML format, MCP preflight, feature-spec batch |
 | 4b | [agent-stream-ruby.md](agent-stream-ruby.md) | Ruby ATDD runner, `agent-stream`, TddLoopPrompts, export_tdd_prompts, stream-json, Open3 |
 | 5 | [pseudocode-and-citdp.md](pseudocode-and-citdp.md) | Domain vocab vs IMPL grammar, three-way alignment, UPPER_SNAKE blocks, CITDP record naming, essence_pseudocode, sub-vocabulary-sync |
+| 6 | [storage-backends.md](storage-backends.md) | storage backend, pinboard/local/file/sync, storage index, BookmarkRouter, preferredBackend, Save to, moveBookmarkToStorage, native host, hoverboard-bookmarks.json, `~/.hoverboard` |
+| 7 | [bookmarks.md](bookmarks.md) | pin, bookmark, description/extended/shared/toread, Read Later, Private, badge display, BOOKMARK_UPDATED, usage tracking, Pinboard API |
+| 7b | [bookmarks-index.md](bookmarks-index.md) | Local Bookmarks Index, export scope, Skip/Overwrite/Merge, Browser Bookmark Import, Netscape Bookmark File Format, regex replace |
+| 8 | [tags.md](tags.md) | Current/Recent/Suggested/Session tags, sanitizeTag, Sort tags, Frequency/Relevance, Tag with AI, Readability, selection to tag input |
+| 9 | [side-panel.md](side-panel.md) | side panel, This Page, By Tag, Tabs, Bookmarks panel, Usage panel, recently closed, tab search scopes, gather/distribute |
+| 10 | [ui-surfaces.md](ui-surfaces.md) | overlay, Show Hover, popup, theme, badge, quick access, icon click, OVERLAY_ACTION_IDS, POPUP_ACTION_IDS |
+| 11 | [ipc-messaging.md](ipc-messaging.md) | MESSAGE_TYPES, processMessage, service worker, CONTENT_MESSAGE_TYPES, POPUP_ACTION_TO_MESSAGE, OPEN_SIDE_PANEL |
+| 12 | [config-and-privacy.md](config-and-privacy.md) | ConfigManager, hoverboard_settings, inhibit URL, site management, feature flags, AI API key, storage mode |
 | — | [config-discovery.md](config-discovery.md) | Layered YAML config, project-local layer, exclude_patterns, `(proposed)` terms |
 
 ---
 
 ## Cross-topic lookup (on-demand only)
 
-The full [`domain-references.md`](domain-references.md) contains **Cross-topic notes** that map concepts spanning multiple glossaries (e.g. agentstream vs agent-stream naming, domain vocab vs IMPL grammar, TIED base path / project vs methodology YAML).
+The full [`domain-references.md`](domain-references.md) contains **Cross-topic notes** that map concepts spanning multiple glossaries (e.g. agentstream vs agent-stream naming, domain vocab vs IMPL grammar, TIED base path / project vs methodology YAML, Local vs Local Bookmarks Index, pin vs Pinboard).
 
 **Do not read the full file at bootstrap.** When your task touches a cross-cutting concern, open the full index and search for the note, or PRELOAD the two glossaries named in the routing table.
 
@@ -36,6 +44,9 @@ Examples of cross-topic notes:
 - Domain vocabulary vs IMPL grammar vocabulary (INPUT/OUTPUT/DATA)
 - TIED base path / project YAML vs methodology YAML
 - Non-canonical LEAP proposals never mutate project TIED YAML
+- Local (storage backend) vs Local Bookmarks Index; Sync backend vs bookmark state sync
+- pin / bookmark vs Pinboard; Bookmarks panel vs Hoverboard-stored bookmarks vs index page
+- hover / overlay vs product name Hoverboard; Recent Tags vs getRecentBookmarks
 
 ---
 

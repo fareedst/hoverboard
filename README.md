@@ -434,7 +434,7 @@ Development is guided by the TIED process: implementation decisions are captured
 ## Documentation
 
 ### TIED Documentation (Token-Integrated Engineering & Development)
-This project follows the TIED methodology for comprehensive requirements tracking and traceability:
+This project follows the TIED methodology for comprehensive requirements tracking and traceability. Canonical product and methodology terms: [`tied/vocab/routing.md`](tied/vocab/routing.md) (session PRELOAD) and [`tied/vocab/domain-references.md`](tied/vocab/domain-references.md) (full glossary index).
 - **Requirements**: [`tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml`](tied/requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml) - Detailed tag extraction requirements and validation criteria
 - **Architecture**: [`tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml`](tied/architecture-decisions/ARCH-SUGGESTED_TAGS.yaml) - Multi-source extraction architecture and design decisions
 - **Implementation**: [`tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml`](tied/implementation-decisions/IMPL-SUGGESTED_TAGS.yaml) - Implementation details, modifiable decisions, and performance considerations

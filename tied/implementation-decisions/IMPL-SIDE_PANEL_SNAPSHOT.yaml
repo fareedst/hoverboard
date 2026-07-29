@@ -1,148 +1,69 @@
 # [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
 # Implementation: E2E snapshot helper for side panel returning two serializable state shapes (Bookmark tab, Tags tree tab).
 IMPL-SIDE_PANEL_SNAPSHOT:
-  name: Side Panel Snapshot E2E Helper
-  status: Active
-  cross_references:
-    - ARCH-UI_TESTABILITY
-    - REQ-UI_INSPECTION
-    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-    - REQ-SIDE_PANEL_TAGS_TREE
-  rationale:
-    why: Enables E2E tests to assert on side panel structure and key elements for both tabs without DOM coupling; same pattern as snapshotPopup, snapshotOverlay, snapshotOptions.
-    problems_solved:
-      - No serializable snapshot of side panel for E2E regression
-      - Cannot assert Bookmark tab and Tags tree tab structure in one call
-    benefits:
-      - Single helper snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }; E2E can assert required properties
-      - Contract aligns with IMPL-SIDE_PANEL_TABS (two panels) and IMPL-SIDE_PANEL_BOOKMARK / IMPL-SIDE_PANEL_TAGS_TREE / IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
-  implementation_approach:
-    summary: tests/e2e/helpers.js exports snapshotSidePanel(page); single page.evaluate returns { bookmarkTab, tagsTreeTab }; This Page tab snapshot queries #bookmarkPanel and data-popup-ref elements; By Tag tab snapshot queries #tagsTreePanel and key IDs. E2E spec loads side-panel.html and asserts snapshot shapes.
-    details:
-      - snapshotSidePanel(page) calls page.evaluate(() => { ... }) returning one object with bookmarkTab, tagsTreeTab, and browserTabsTab
-      - bookmarkTab: root #bookmarkPanel; if absent return { panelPresent: false }; else query [data-popup-ref="loadingState"], [data-popup-ref="errorState"], [data-popup-ref="mainInterface"]; compute loadingVisible, errorVisible, mainVisible (not hidden); screen = loading|error|mainInterface|unknown; optional errorMessage
-      - tagsTreeTab: root #tagsTreePanel; if absent return { panelPresent: false }; else hasTagSelector = !!#tagSelector, hasTreeContainer = !!#treeContainer, hasSearchInput = !!#searchInput, hasConfigToggle = !!#configToggle; optional hasSearchCount, hasEmptyState, hasLoadError
-      - browserTabsTab: root #browserTabsPanel; if absent return { panelPresent: false }; else hasFilterInput, hasCopyButton, hasCloseButton, hasListContainer
-      - browserBookmarksTab: root #browserBookmarksPanel; if absent return { panelPresent: false }; else hasSearchInput, hasFolderSelect, hasSortSelect, hasListContainer, hasSelectAllBtn, hasUndoBar, hasImportFolderSelect, hasExportHtmlBtn, hasExportCsvBtn (REQ-SIDE_PANEL_BROWSER_BOOKMARKS)
   code_locations:
     files:
-      - path: tests/e2e/helpers.js
-        description: snapshotSidePanel(page) implementation
-      - path: tests/playwright/extension-messaging.spec.js
-        description: E2E test that loads side panel and asserts snapshotSidePanel return shape
-      - path: tests/e2e/popup-snapshot.e2e.test.js
-        description: Shape test for snapshotSidePanel return contract
+      - path: "tests/e2e/helpers.js"
+        description: "snapshotSidePanel(page) implementation"
+      - path: "tests/playwright/extension-messaging.spec.js"
+        description: "E2E test that loads side panel and asserts snapshotSidePanel return shape"
+      - path: "tests/e2e/popup-snapshot.e2e.test.js"
+        description: "Shape test for snapshotSidePanel return contract"
     functions:
-      - name: snapshotSidePanel
-        file: tests/e2e/helpers.js
-        description: Returns { bookmarkTab, tagsTreeTab } from page.evaluate
-  traceability:
-    architecture:
-      - ARCH-UI_TESTABILITY
-    requirements:
-      - REQ-UI_INSPECTION
-      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-      - REQ-SIDE_PANEL_TAGS_TREE
-    tests:
-      - tests/e2e/popup-snapshot.e2e.test.js (shape contract)
-      - tests/playwright/extension-messaging.spec.js (Side panel snapshot describe block)
-    code_annotations:
-      - IMPL-SIDE_PANEL_SNAPSHOT
-  related_decisions:
-    depends_on:
-      - IMPL-PLAYWRIGHT_E2E_EXTENSION
-      - IMPL-SIDE_PANEL_TABS
-    supersedes: []
-    see_also:
-      - IMPL-SIDE_PANEL_BOOKMARK
-      - IMPL-SIDE_PANEL_TAGS_TREE
-      - IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
-  essence_pseudocode: |
-    # [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]
-    # This block defines the side panel snapshot helper: one function returning bookmarkTab and tagsTreeTab shapes.
-    # Implements REQ-UI_INSPECTION by providing E2E-inspectable state for side panel; REQ-SIDE_PANEL_POPUP_EQUIVALENT (Bookmark tab) and REQ-SIDE_PANEL_TAGS_TREE (Tags tree tab) by capturing key elements per tab.
-
-    INPUT: page (Playwright/Puppeteer page navigated to side-panel.html)
-    OUTPUT: { bookmarkTab: {...}, tagsTreeTab: {...}, browserTabsTab: {...}, browserBookmarksTab: { panelPresent, hasSearchInput?, hasFolderSelect?, hasSortSelect?, hasListContainer?, hasSelectAllBtn?, hasUndoBar?, hasImportFolderSelect?, hasExportHtmlBtn?, hasExportCsvBtn? } }
-    DATA: document in page context
-
-    # [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BOOKMARK]
-    # Bookmark tab snapshot: root #bookmarkPanel; query by data-popup-ref for loadingState, errorState, mainInterface; derive visibility and screen. Implements "E2E can capture Bookmark tab state" and "Bookmark tab = popup-equivalent inspectable".
-    bookmarkTab = (function () {
-      const root = document.getElementById('bookmarkPanel')
-      if (!root) return { panelPresent: false }
-      const loading = root.querySelector('[data-popup-ref="loadingState"]')
-      const error = root.querySelector('[data-popup-ref="errorState"]')
-      const main = root.querySelector('[data-popup-ref="mainInterface"]')
-      const loadingVisible = loading && !loading.classList.contains('hidden')
-      const errorVisible = error && !error.classList.contains('hidden')
-      const mainVisible = main && !main.classList.contains('hidden')
-      let screen = 'unknown'
-      if (loadingVisible) screen = 'loading'
-      else if (errorVisible) screen = 'error'
-      else if (mainVisible) screen = 'mainInterface'
-      const errorMsg = root.querySelector('[data-popup-ref="errorMessage"]')
-      return { panelPresent: true, screen, loadingVisible, errorVisible, mainVisible, errorMessage: errorMsg ? errorMsg.textContent : undefined }
-    })()
-
-    # [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # Tags tree tab snapshot: root #tagsTreePanel; presence of #tagSelector, #treeContainer, #searchInput, #configToggle, etc. Implements "E2E can capture Tags tree tab state" and "Tags tree tab structure inspectable".
-    tagsTreeTab = (function () {
-      const root = document.getElementById('tagsTreePanel')
-      if (!root) return { panelPresent: false }
-      return {
-        panelPresent: true,
-        hasTagSelector: !!root.querySelector('#tagSelector') || !!document.getElementById('tagSelector'),
-        hasTreeContainer: !!root.querySelector('#treeContainer') || !!document.getElementById('treeContainer'),
-        hasSearchInput: !!root.querySelector('#searchInput') || !!document.getElementById('searchInput'),
-        hasConfigToggle: !!root.querySelector('#configToggle') || !!document.getElementById('configToggle'),
-        hasSearchCount: !!root.querySelector('#searchCount') || !!document.getElementById('searchCount'),
-        hasEmptyState: !!root.querySelector('#emptyState') || !!document.getElementById('emptyState'),
-        hasLoadError: !!root.querySelector('#loadError') || !!document.getElementById('loadError')
-      }
-    })()
-
-    # [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # browserTabsTab snapshot: root #browserTabsPanel; presence of filter input, Copy button, Close button, list container. Implements E2E-inspectable state for Tabs tab.
-    browserTabsTab = (function () {
-      const root = document.getElementById('browserTabsPanel')
-      if (!root) return { panelPresent: false }
-      return {
-        panelPresent: true,
-        hasFilterInput: !!root.querySelector('#browserTabsFilterInput') || !!document.getElementById('browserTabsFilterInput'),
-        hasCopyButton: !!root.querySelector('[data-action="copyUrls"]') || !!root.querySelector('#browserTabsCopyBtn'),
-        hasCloseButton: !!root.querySelector('[data-action="closeTabs"]') || !!root.querySelector('#browserTabsCloseBtn'),
-        hasListContainer: !!root.querySelector('#browserTabsList') || !!root.querySelector('.browser-tabs-list')
-      }
-    })()
-
-    # [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]
-    # browserBookmarksTab snapshot: root #browserBookmarksPanel; presence of search input, folder select, sort select, list container, Select all, Undo bar, Import folder select, Export HTML/CSV buttons. Implements E2E-inspectable state for Bookmarks tab.
-    browserBookmarksTab = (function () {
-      const root = document.getElementById('browserBookmarksPanel')
-      if (!root) return { panelPresent: false }
-      const byId = (id) => document.getElementById(id)
-      return {
-        panelPresent: true,
-        hasSearchInput: !!byId('browserBookmarksSearchInput'),
-        hasFolderSelect: !!byId('browserBookmarksFolderSelect'),
-        hasSortSelect: !!byId('browserBookmarksSortSelect'),
-        hasListContainer: !!byId('browserBookmarksList'),
-        hasSelectAllBtn: !!byId('browserBookmarksSelectAllBtn'),
-        hasUndoBar: !!byId('browserBookmarksUndoBar'),
-        hasImportFolderSelect: !!byId('browserBookmarksImportFolderSelect'),
-        hasExportHtmlBtn: !!byId('browserBookmarksExportHtmlBtn'),
-        hasExportCsvBtn: !!byId('browserBookmarksExportCsvBtn')
-      }
-    })()
-
-    RETURN { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }
-  detail_file: implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml
+      - name: "snapshotSidePanel"
+        description: "Returns { bookmarkTab, tagsTreeTab } from page.evaluate"
+        file: "tests/e2e/helpers.js"
+  cross_references:
+    - "ARCH-UI_TESTABILITY"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    - "REQ-SIDE_PANEL_TAGS_TREE"
+    - "REQ-UI_INSPECTION"
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml"
+  essence_pseudocode: "# [IMPL-SIDE_PANEL_SNAPSHOT] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_TAGS_TREE]\n# This block defines the side panel snapshot helper: one function returning bookmarkTab and tagsTreeTab shapes.\n# Implements REQ-UI_INSPECTION by providing E2E-inspectable state for side panel; REQ-SIDE_PANEL_POPUP_EQUIVALENT (Bookmark tab) and REQ-SIDE_PANEL_TAGS_TREE (Tags tree tab) by capturing key elements per tab.\n\nINPUT: page (Playwright/Puppeteer page navigated to side-panel.html)\nOUTPUT: { bookmarkTab: {...}, tagsTreeTab: {...}, browserTabsTab: {...}, browserBookmarksTab: { panelPresent, hasSearchInput?, hasFolderSelect?, hasSortSelect?, hasListContainer?, hasSelectAllBtn?, hasUndoBar?, hasImportFolderSelect?, hasExportHtmlBtn?, hasExportCsvBtn? } }\nDATA: document in page context\n\n# [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BOOKMARK]\n# Bookmark tab snapshot: root #bookmarkPanel; query by data-popup-ref for loadingState, errorState, mainInterface; derive visibility and screen. Implements \"E2E can capture Bookmark tab state\" and \"Bookmark tab = popup-equivalent inspectable\".\nbookmarkTab = (function () {\n  const root = document.getElementById('bookmarkPanel')\n  if (!root) return { panelPresent: false }\n  const loading = root.querySelector('[data-popup-ref=\"loadingState\"]')\n  const error = root.querySelector('[data-popup-ref=\"errorState\"]')\n  const main = root.querySelector('[data-popup-ref=\"mainInterface\"]')\n  const loadingVisible = loading && !loading.classList.contains('hidden')\n  const errorVisible = error && !error.classList.contains('hidden')\n  const mainVisible = main && !main.classList.contains('hidden')\n  let screen = 'unknown'\n  if (loadingVisible) screen = 'loading'\n  else if (errorVisible) screen = 'error'\n  else if (mainVisible) screen = 'mainInterface'\n  const errorMsg = root.querySelector('[data-popup-ref=\"errorMessage\"]')\n  return { panelPresent: true, screen, loadingVisible, errorVisible, mainVisible, errorMessage: errorMsg ? errorMsg.textContent : undefined }\n})()\n\n# [REQ-UI_INSPECTION] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_TAGS_TREE]\n# Tags tree tab snapshot: root #tagsTreePanel; presence of #tagSelector, #treeContainer, #searchInput, #configToggle, etc. Implements \"E2E can capture Tags tree tab state\" and \"Tags tree tab structure inspectable\".\ntagsTreeTab = (function () {\n  const root = document.getElementById('tagsTreePanel')\n  if (!root) return { panelPresent: false }\n  return {\n    panelPresent: true,\n    hasTagSelector: !!root.querySelector('#tagSelector') || !!document.getElementById('tagSelector'),\n    hasTreeContainer: !!root.querySelector('#treeContainer') || !!document.getElementById('treeContainer'),\n    hasSearchInput: !!root.querySelector('#searchInput') || !!document.getElementById('searchInput'),\n    hasConfigToggle: !!root.querySelector('#configToggle') || !!document.getElementById('configToggle'),\n    hasSearchCount: !!root.querySelector('#searchCount') || !!document.getElementById('searchCount'),\n    hasEmptyState: !!root.querySelector('#emptyState') || !!document.getElementById('emptyState'),\n    hasLoadError: !!root.querySelector('#loadError') || !!document.getElementById('loadError')\n  }\n})()\n\n# [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_TABS]\n# browserTabsTab snapshot: root #browserTabsPanel; presence of filter input, Copy button, Close button, list container. Implements E2E-inspectable state for Tabs tab.\nbrowserTabsTab = (function () {\n  const root = document.getElementById('browserTabsPanel')\n  if (!root) return { panelPresent: false }\n  return {\n    panelPresent: true,\n    hasFilterInput: !!root.querySelector('#browserTabsFilterInput') || !!document.getElementById('browserTabsFilterInput'),\n    hasCopyButton: !!root.querySelector('[data-action=\"copyUrls\"]') || !!root.querySelector('#browserTabsCopyBtn'),\n    hasCloseButton: !!root.querySelector('[data-action=\"closeTabs\"]') || !!root.querySelector('#browserTabsCloseBtn'),\n    hasListContainer: !!root.querySelector('#browserTabsList') || !!root.querySelector('.browser-tabs-list')\n  }\n})()\n\n# [REQ-SIDE_PANEL_BROWSER_BOOKMARKS] [IMPL-SIDE_PANEL_SNAPSHOT] [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS]\n# browserBookmarksTab snapshot: root #browserBookmarksPanel; presence of search input, folder select, sort select, list container, Select all, Undo bar, Import folder select, Export HTML/CSV buttons. Implements E2E-inspectable state for Bookmarks tab.\nbrowserBookmarksTab = (function () {\n  const root = document.getElementById('browserBookmarksPanel')\n  if (!root) return { panelPresent: false }\n  const byId = (id) => document.getElementById(id)\n  return {\n    panelPresent: true,\n    hasSearchInput: !!byId('browserBookmarksSearchInput'),\n    hasFolderSelect: !!byId('browserBookmarksFolderSelect'),\n    hasSortSelect: !!byId('browserBookmarksSortSelect'),\n    hasListContainer: !!byId('browserBookmarksList'),\n    hasSelectAllBtn: !!byId('browserBookmarksSelectAllBtn'),\n    hasUndoBar: !!byId('browserBookmarksUndoBar'),\n    hasImportFolderSelect: !!byId('browserBookmarksImportFolderSelect'),\n    hasExportHtmlBtn: !!byId('browserBookmarksExportHtmlBtn'),\n    hasExportCsvBtn: !!byId('browserBookmarksExportCsvBtn')\n  }\n})()\n\nRETURN { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }\n"
+  implementation_approach:
+    details:
+      - "snapshotSidePanel(page) calls page.evaluate(() => { ... }) returning one object with bookmarkTab, tagsTreeTab, and browserTabsTab"
+      - bookmarkTab: "root" #bookmarkPanel; if absent return { panelPresent: false }; else query [data-popup-ref="loadingState"], [data-popup-ref="errorState"], [data-popup-ref="mainInterface"]; compute loadingVisible, errorVisible, mainVisible (not hidden); screen = loading|error|mainInterface|unknown; optional errorMessage
+      - browserBookmarksTab: "root" #browserBookmarksPanel; if absent return { panelPresent: false }; else hasSearchInput, hasFolderSelect, hasSortSelect, hasListContainer, hasSelectAllBtn, hasUndoBar, hasImportFolderSelect, hasExportHtmlBtn, hasExportCsvBtn (REQ-SIDE_PANEL_BROWSER_BOOKMARKS)
+      - browserTabsTab: "root" #browserTabsPanel; if absent return { panelPresent: false }; else hasFilterInput, hasCopyButton, hasCloseButton, hasListContainer
+      - tagsTreeTab: "root" #tagsTreePanel; if absent return { panelPresent: false }; else hasTagSelector = !!#tagSelector, hasTreeContainer = !!#treeContainer, hasSearchInput = !!#searchInput, hasConfigToggle = !!#configToggle; optional hasSearchCount, hasEmptyState, hasLoadError
+    summary: "tests/e2e/helpers.js exports snapshotSidePanel(page); single page.evaluate returns { bookmarkTab, tagsTreeTab }; This Page tab snapshot queries" #bookmarkPanel and data-popup-ref elements; By Tag tab snapshot queries #tagsTreePanel and key IDs. E2E spec loads side-panel.html and asserts snapshot shapes.
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-25"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-03-02"
-      author: AI Agent
-      reason: Add browserBookmarksTab to snapshot contract and essence_pseudocode; cross-ref IMPL-SIDE_PANEL_BROWSER_BOOKMARKS
+      reason: "Add browserBookmarksTab to snapshot contract and essence_pseudocode; cross-ref IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+  name: "Side Panel Snapshot E2E Helper"
+  rationale:
+    benefits:
+      - "Contract aligns with IMPL-SIDE_PANEL_TABS (two panels) and IMPL-SIDE_PANEL_BOOKMARK / IMPL-SIDE_PANEL_TAGS_TREE / IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "Single helper snapshotSidePanel(page) returns { bookmarkTab, tagsTreeTab, browserTabsTab, browserBookmarksTab }; E2E can assert required properties"
+    problems_solved:
+      - "Cannot assert Bookmark tab and Tags tree tab structure in one call"
+      - "No serializable snapshot of side panel for E2E regression"
+    why: "Enables E2E tests to assert on side panel structure and key elements for both tabs without DOM coupling; same pattern as snapshotPopup, snapshotOverlay, snapshotOptions."
+  related_decisions:
+    depends_on:
+      - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
+      - "IMPL-SIDE_PANEL_TABS"
+    see_also:
+      - "IMPL-SIDE_PANEL_BOOKMARK"
+      - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "IMPL-SIDE_PANEL_TAGS_TREE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-UI_TESTABILITY"
+    code_annotations:
+      - "IMPL-SIDE_PANEL_SNAPSHOT"
+    requirements:
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SIDE_PANEL_TAGS_TREE"
+      - "REQ-UI_INSPECTION"
+    tests:
+      - "tests/e2e/popup-snapshot.e2e.test.js (shape contract)"
+      - "tests/playwright/extension-messaging.spec.js (Side panel snapshot describe block)"

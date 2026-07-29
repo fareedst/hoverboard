@@ -1,88 +1,55 @@
 IMPL-RECENT_TAGS_POPUP_REFRESH:
-  name: Recent Tags refresh on every popup display
-  status: Active
-  cross_references:
-    - REQ-RECENT_TAGS_SYSTEM
-    - ARCH-POPUP_SESSION
-    - ARCH-TAG_SYSTEM
-  rationale:
-    why: 'In reused popup documents the Recent Tags list might not refresh when popup is shown again; users expect list to reflect shared service-worker state every time. Fix: refresh on visibility change when popup becomes visible and initialized.'
-    problems_solved:
-      - Stale Recent Tags list when popup is reopened without full reload
-    benefits: []
-  implementation_approach:
-    summary: setupAutoRefresh() adds document visibilitychange listener; when visible and controller initialized and !isLoading, loadRecentTags() sends getRecentBookmarks with current bookmark tag names; handler uses TagService.getUserRecentTagsExcludingCurrent; UI updates chips; on failure empty list + log.
-    details: []
   code_locations:
     files:
-      - path: src/ui/popup/PopupController.js
-        description: setupAutoRefresh, loadRecentTags on visibilitychange
+      - path: "src/ui/popup/PopupController.js"
+        description: "setupAutoRefresh, loadRecentTags on visibilitychange"
     functions:
-      - name: setupAutoRefresh
-        file: src/ui/popup/PopupController.js
-        description: Adds visibilitychange listener that invokes loadRecentTags() when visible and initialized
-      - name: loadRecentTags
-        file: src/ui/popup/PopupController.js
-        description: Sends getRecentBookmarks; maps response to Recent Tags chip list; catch → empty chips
-  traceability:
-    architecture:
-      - ARCH-POPUP_SESSION
-      - ARCH-TAG_SYSTEM
-    requirements:
-      - REQ-RECENT_TAGS_SYSTEM
-    tests:
-      - tests/unit/tag-recent-behavior.test.js
-      - tests/unit/tag-recent-tracking.test.js
-    code_annotations:
-      - IMPL-RECENT_TAGS_POPUP_REFRESH
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also: []
-    composed_with: []
-  essence_pseudocode: |
-    # [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]
-    # Popup document: visibilitychange → loadRecentTags → extension messaging getRecentBookmarks → [IMPL-MESSAGE_HANDLING] → [IMPL-TAG_SYSTEM] user-recent policy; updates Recent Tags chips with current-bookmark exclusion. Register setupAutoRefresh after controller sets initialized / isLoading semantics (ARCH-POPUP_SESSION).
-    # Contract: event-driven async; void; failures → empty chips + logged error (no unhandled reject from loadRecentTags).
-    INPUT: none (event-driven)
-    OUTPUT: void (side effect — uiManager.updateRecentTags(string[]))
-    DATA: document.visibilityState; controller.initialized; controller.isLoading; currentPin.tags; getRecentBookmarks payload { currentTags, senderUrl }
-
-    # How: single visibilitychange listener for popup lifecycle (same tokens as top).
-    setupAutoRefresh():
-      REGISTER document.addEventListener("visibilitychange", handler)
-
-    # How: gate on visible + initialized + !isLoading; then await loadRecentTags (same tokens as top).
-    handler():
-      IF document.visibilityState !== "visible" THEN RETURN
-      IF NOT controller.initialized OR controller.isLoading THEN RETURN
-      AWAIT loadRecentTags()
-
-    # [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [IMPL-MESSAGE_HANDLING] [IMPL-TAG_SYSTEM]
-    # How: sendMessage routes to SW processMessage → handleGetRecentBookmarks → tagService.getUserRecentTagsExcludingCurrent; map to chip strings; defensive second filter vs currentTags; cross-IMPL dependency on message + TagService layers.
-    loadRecentTags():
-      currentTags = normalizeTags(controller.currentPin?.tags OR [])
-      TRY:
-        response = AWAIT sendMessage({ type: "getRecentBookmarks", data: { currentTags, senderUrl: currentTab.url } })
-        names = MAP response.recentTags to string names (string OR .name)
-        filtered = FILTER names where not in currentTags
-        uiManager.updateRecentTags(filtered)
-      CATCH:
-        LOG error; uiManager.updateRecentTags([])
-
-    # How: satisfies REQ-RECENT_TAGS_SYSTEM “refresh when UI shown” for popup; shared SW state with side panel path ([IMPL-SIDE_PANEL_TABS] loadRecentTags on focus) — either may refresh; ordering independent; both use same message contract.
-
-    # --- Composition / cross-IMPL ---
-    # Overlap: [IMPL-SIDE_PANEL_BOOKMARK] / panel PopupController also exposes loadRecentTags; identical getRecentBookmarks + exclusion semantics. Pre: chrome.runtime messaging available. Post: chips match policy snapshot at call time. No composed_with entry; see_also IMPL-TAG_SYSTEM for data owner.
+      - name: "setupAutoRefresh"
+        description: "Adds visibilitychange listener that invokes loadRecentTags() when visible and initialized"
+        file: "src/ui/popup/PopupController.js"
+      - name: "loadRecentTags"
+        description: "Sends getRecentBookmarks; maps response to Recent Tags chip list; catch → empty chips"
+        file: "src/ui/popup/PopupController.js"
+  cross_references:
+    - "ARCH-POPUP_SESSION"
+    - "ARCH-TAG_SYSTEM"
+    - "REQ-RECENT_TAGS_SYSTEM"
+  essence_pseudocode: "# [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]\n# Popup document: visibilitychange → loadRecentTags → extension messaging getRecentBookmarks → [IMPL-MESSAGE_HANDLING] → [IMPL-TAG_SYSTEM] user-recent policy; updates Recent Tags chips with current-bookmark exclusion. Register setupAutoRefresh after controller sets initialized / isLoading semantics (ARCH-POPUP_SESSION).\n# Contract: event-driven async; void; failures → empty chips + logged error (no unhandled reject from loadRecentTags).\nINPUT: none (event-driven)\nOUTPUT: void (side effect — uiManager.updateRecentTags(string[]))\nDATA: document.visibilityState; controller.initialized; controller.isLoading; currentPin.tags; getRecentBookmarks payload { currentTags, senderUrl }\n\n# How: single visibilitychange listener for popup lifecycle (same tokens as top).\nsetupAutoRefresh():\n  REGISTER document.addEventListener(\"visibilitychange\", handler)\n\n# How: gate on visible + initialized + !isLoading; then await loadRecentTags (same tokens as top).\nhandler():\n  IF document.visibilityState !== \"visible\" THEN RETURN\n  IF NOT controller.initialized OR controller.isLoading THEN RETURN\n  AWAIT loadRecentTags()\n\n# [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [IMPL-MESSAGE_HANDLING] [IMPL-TAG_SYSTEM]\n# How: sendMessage routes to SW processMessage → handleGetRecentBookmarks → tagService.getUserRecentTagsExcludingCurrent; map to chip strings; defensive second filter vs currentTags; cross-IMPL dependency on message + TagService layers.\nloadRecentTags():\n  currentTags = normalizeTags(controller.currentPin?.tags OR [])\n  TRY:\n    response = AWAIT sendMessage({ type: \"getRecentBookmarks\", data: { currentTags, senderUrl: currentTab.url } })\n    names = MAP response.recentTags to string names (string OR .name)\n    filtered = FILTER names where not in currentTags\n    uiManager.updateRecentTags(filtered)\n  CATCH:\n    LOG error; uiManager.updateRecentTags([])\n\n# How: satisfies REQ-RECENT_TAGS_SYSTEM “refresh when UI shown” for popup; shared SW state with side panel path ([IMPL-SIDE_PANEL_TABS] loadRecentTags on focus) — either may refresh; ordering independent; both use same message contract.\n\n# --- Composition / cross-IMPL ---\n# Overlap: [IMPL-SIDE_PANEL_BOOKMARK] / panel PopupController also exposes loadRecentTags; identical getRecentBookmarks + exclusion semantics. Pre: chrome.runtime messaging available. Post: chips match policy snapshot at call time. No composed_with entry; see_also IMPL-TAG_SYSTEM for data owner.\n"
+  implementation_approach:
+    details: []
+    summary: "setupAutoRefresh() adds document visibilitychange listener; when visible and controller initialized and !isLoading, loadRecentTags() sends getRecentBookmarks with current bookmark tag names; handler uses TagService.getUserRecentTagsExcludingCurrent; UI updates chips; on failure empty list + log."
   metadata:
     created:
+      author: "MCP converter"
       date: "2026-02-18"
-      author: MCP converter
     last_updated:
+      author: "AI Agent"
       date: "2026-03-28"
-      author: AI Agent
-      reason: 'S06.4–S06.5: getRecentBookmarks path; [PROC-IMPL_PSEUDOCODE_TOKENS] how-only sub-blocks + cross-IMPL'
+      reason: "S06.4–S06.5: getRecentBookmarks path; [PROC-IMPL_PSEUDOCODE_TOKENS] how-only sub-blocks + cross-IMPL"
     last_validated:
       date: "2026-02-18"
-      validator: MCP converter
-      result: pass
+      result: "pass"
+      validator: "MCP converter"
+  name: "Recent Tags refresh on every popup display"
+  rationale:
+    benefits: []
+    problems_solved:
+      - "Stale Recent Tags list when popup is reopened without full reload"
+    why: "In reused popup documents the Recent Tags list might not refresh when popup is shown again; users expect list to reflect shared service-worker state every time. Fix: refresh on visibility change when popup becomes visible and initialized."
+  related_decisions:
+    composed_with: []
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-POPUP_SESSION"
+      - "ARCH-TAG_SYSTEM"
+    code_annotations:
+      - "IMPL-RECENT_TAGS_POPUP_REFRESH"
+    requirements:
+      - "REQ-RECENT_TAGS_SYSTEM"
+    tests:
+      - "tests/unit/tag-recent-behavior.test.js"
+      - "tests/unit/tag-recent-tracking.test.js"

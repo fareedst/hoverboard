@@ -1,53 +1,53 @@
 REQ-FEEDBACK_TO_TIED:
-  name: Feedback to TIED (Feature Requests, Bug Reports, Methodology)
-  category: Functional
-  priority: P1
-  status: Implemented
+  category: "Functional"
+  detail_file: "requirements/REQ-FEEDBACK_TO_TIED.yaml"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-03-03"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-03-03"
+      reason: "Initial creation"
+    last_validated:
+      date: "2026-03-03"
+      result: "pass"
+      validator: "AI Agent"
+  name: "Feedback to TIED (Feature Requests, Bug Reports, Methodology)"
+  priority: "P1"
   rationale:
-    why: Projects and users need a standard way to submit feature requests, bug reports, and methodology improvement suggestions and to report them to the TIED project
-    problems_solved:
-      - No structured way to collect feedback from TIED adopters
-      - Methodology improvements from the field are not easily reported upstream
     benefits:
-      - Structured feedback stored under the project TIED tree
-      - Export format suitable for reporting to the TIED project (e.g. GitHub issues)
-      - Traceability of feedback types (feature_request, bug_report, methodology_improvement)
-  satisfaction_criteria:
-    - criterion: MCP tools allow adding feedback entries (type, title, description, optional context)
-      metric: tied_feedback_add creates/updates tied/feedback.yaml
-    - criterion: Feedback can be exported for reporting to TIED
-      metric: tied_feedback_export returns markdown or JSON of all entries
-  validation_criteria:
-    - method: Unit tests
-      coverage: Feedback module load/append/export and tool handlers
-    - method: Manual or E2E
-      coverage: MCP client can call tools and get valid output
-  traceability:
-    architecture:
-      - ARCH-FEEDBACK_STORAGE
-    implementation:
-      - IMPL-MCP_FEEDBACK_TOOLS
-    tests:
-      - feedback.test.ts
-    code_annotations:
-      - IMPL-MCP_FEEDBACK_TOOLS
-      - ARCH-FEEDBACK_STORAGE
-      - REQ-FEEDBACK_TO_TIED
+      - "Export format suitable for reporting to the TIED project (e.g. GitHub issues)"
+      - "Structured feedback stored under the project TIED tree"
+      - "Traceability of feedback types (feature_request, bug_report, methodology_improvement)"
+    problems_solved:
+      - "Methodology improvements from the field are not easily reported upstream"
+      - "No structured way to collect feedback from TIED adopters"
+    why: "Projects and users need a standard way to submit feature requests, bug reports, and methodology improvement suggestions and to report them to the TIED project"
   related_requirements:
     depends_on: []
     related_to:
-      - REQ-TIED_SETUP
+      - "REQ-TIED_SETUP"
     supersedes: []
-  detail_file: requirements/REQ-FEEDBACK_TO_TIED.yaml
-  metadata:
-    created:
-      date: 2026-03-03
-      author: AI Agent
-    last_updated:
-      date: 2026-03-03
-      author: AI Agent
-      reason: Initial creation
-    last_validated:
-      date: 2026-03-03
-      validator: AI Agent
-      result: pass
+  satisfaction_criteria:
+    - criterion: "MCP tools allow adding feedback entries (type, title, description, optional context)"
+      metric: "tied_feedback_add creates/updates tied/feedback.yaml"
+    - criterion: "Feedback can be exported for reporting to TIED"
+      metric: "tied_feedback_export returns markdown or JSON of all entries"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-FEEDBACK_STORAGE"
+    code_annotations:
+      - "ARCH-FEEDBACK_STORAGE"
+      - "IMPL-MCP_FEEDBACK_TOOLS"
+      - "REQ-FEEDBACK_TO_TIED"
+    implementation:
+      - "IMPL-MCP_FEEDBACK_TOOLS"
+    tests:
+      - "feedback.test.ts"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Feedback module load/append/export and tool handlers"
+    - method: "Manual or E2E"
+      coverage: "MCP client can call tools and get valid output"

@@ -1,60 +1,47 @@
 IMPL-POPUP_MESSAGE_TIMEOUT:
-  name: Popup Message Timeout Implementation
-  status: Active
-  cross_references: []
-  rationale:
-    why: Predictable refresh behavior in tests and runtime
-    problems_solved:
-      - Hanging messages
-      - Test timeouts
-    benefits:
-      - Reliable messaging
-      - Testable timeouts
-  implementation_approach:
-    summary: Promise-based message sending with timeout handling
-    details:
-      - Timeout logic
-      - Error handling
-      - Test mock support
   code_locations:
     files:
-      - path: src/ui/popup/PopupController.js
-        description: Popup controller
+      - path: "src/ui/popup/PopupController.js"
+        description: "Popup controller"
     functions: []
-  traceability:
-    architecture: []
-    requirements: []
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: message timeout wrapper around sendMessage.'
-    code_annotations:
-      - IMPL-POPUP_MESSAGE_TIMEOUT
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-MESSAGE_HANDLING
-    composed_with:
-      - IMPL-MESSAGE_HANDLING
-  essence_pseudocode: |
-    # [IMPL-POPUP_MESSAGE_TIMEOUT]
-    # Promise-based send with timeout; reject on timeout or error.
-    # Contract: message and timeout in; Promise resolve/reject out.
-    INPUT: message (type, payload); timeout (ms)
-    OUTPUT: Promise that resolves with response or rejects on timeout/error
-    DATA: timeout handle; optional test mock for timeout value
-
-    # Race send Promise with timeout; clear timeout on resolve/reject.
-    sendWithTimeout(message, timeoutMs):
-      promise = SEND message (Promise from message service)
-      timeoutId = SET timeout for timeoutMs -> REJECT with timeout error
-      ON promise resolve/reject: CLEAR timeoutId; RETURN promise result
-      RETURN promise (race with timeout)
-  detail_file: implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.yaml
+  cross_references: []
+  detail_file: "implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.yaml"
+  essence_pseudocode: "# [IMPL-POPUP_MESSAGE_TIMEOUT]\n# Promise-based send with timeout; reject on timeout or error.\n# Contract: message and timeout in; Promise resolve/reject out.\nINPUT: message (type, payload); timeout (ms)\nOUTPUT: Promise that resolves with response or rejects on timeout/error\nDATA: timeout handle; optional test mock for timeout value\n\n# Race send Promise with timeout; clear timeout on resolve/reject.\nsendWithTimeout(message, timeoutMs):\n  promise = SEND message (Promise from message service)\n  timeoutId = SET timeout for timeoutMs -> REJECT with timeout error\n  ON promise resolve/reject: CLEAR timeoutId; RETURN promise result\n  RETURN promise (race with timeout)\n"
+  implementation_approach:
+    details:
+      - "Error handling"
+      - "Test mock support"
+      - "Timeout logic"
+    summary: "Promise-based message sending with timeout handling"
   metadata:
     created:
+      author: "AI Agent"
       date: "2025-07-14"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: "Add essence_pseudocode and complete composed_with"
+  name: "Popup Message Timeout Implementation"
+  rationale:
+    benefits:
+      - "Reliable messaging"
+      - "Testable timeouts"
+    problems_solved:
+      - "Hanging messages"
+      - "Test timeouts"
+    why: "Predictable refresh behavior in tests and runtime"
+  related_decisions:
+    composed_with:
+      - "IMPL-MESSAGE_HANDLING"
+    depends_on: []
+    see_also:
+      - "IMPL-MESSAGE_HANDLING"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture: []
+    code_annotations:
+      - "IMPL-POPUP_MESSAGE_TIMEOUT"
+    requirements: []
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: message timeout wrapper around sendMessage."
+    tests: []

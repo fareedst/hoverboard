@@ -1,83 +1,83 @@
 ARCH-THIS_PAGE_TAG_SORT:
-  rationale:
-    why: Users need consistent control over chip order without changing membership.
-    problems_solved:
-      - Fixed frequency-only ordering from services
-      - No relevance signal in UI for suggestions
-    benefits:
-      - Single shared sort mode in UIManager when side-panel markup includes data-popup-ref tagSortToggle
-      - MAIN-world extract script returns tag + relevance + inPageFrequency for suggestion rows
-  implementation_approach:
-    summary: Pure comparators in tag-chip-sort.js; PopupController refreshes frequency map and uses two-step MAIN inject for relevance-bearing suggestions; UIManager gates sorting on toggle presence.
-    details:
-      - 'Pure sort module tag-chip-sort.js: alphabetical | frequency | relevance comparators per REQ'
-      - 'Bookmark frequency: chrome.storage.local hoverboard_tag_frequency; case-insensitive key lookup'
-      - 'Relevance: suggested-tags-main-world-snippet.js assigns integer tier per DOM bucket (headings in main > global headings > nav > breadcrumb > main links > images > meta > title > URL > footer > body fallback); max tier wins per lowercase token'
-      - 'executeScript: files inject snippet then func invokes global extractor'
-  name: This Page tag sort architecture
-  status: Active
-  cross_references:
-    - REQ-THIS_PAGE_TAG_SORT
-    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-    - REQ-SUGGESTED_TAGS_FROM_CONTENT
-  decision: Use a shared pure sort module for alphabetical, bookmark-frequency, and DOM-relevance order; UIManager applies it only when the side-panel exposes tagSortToggle. Relevance scores and in-page frequencies come from a MAIN-world snippet injected before the extractor function; bookmark counts come from hoverboard_tag_frequency in chrome.storage.local.
   alternatives_considered:
-    - name: Independent sort mode per list (Current vs Recent vs Suggested)
-      pros: Finer control per list
-      cons: Violates REQ single-mode contract; more UI and state
-      rejected_reason: REQ-THIS_PAGE_TAG_SORT requires one mode for all three chip lists
-    - name: Persist sort choice across sessions
-      pros: User preference recall
-      cons: Extra storage and migration; out of REQ scope
-      rejected_reason: REQ-THIS_PAGE_TAG_SORT specifies no cross-session persistence
-  traceability:
-    requirements:
-      - REQ-THIS_PAGE_TAG_SORT
-      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-      - REQ-SUGGESTED_TAGS_FROM_CONTENT
-    implementation:
-      - IMPL-THIS_PAGE_TAG_SORT
-    tests:
-      - tests/unit/tag-chip-sort.test.js
-      - tests/unit/uIManager-tag-case-folding.test.js
-      - tests/unit/popup-suggested-tags.test.js
-      - tests/unit/popup-refresh-tag-frequency-map.test.js
-      - tests/integration/this-page-tag-sort-composition.integration.test.js
-      - tests/playwright/extension-this-page-tag-sort.spec.js
-    code_annotations:
-      - ARCH-THIS_PAGE_TAG_SORT
+    - name: "Independent sort mode per list (Current vs Recent vs Suggested)"
+      cons: "Violates REQ single-mode contract; more UI and state"
+      pros: "Finer control per list"
+      rejected_reason: "REQ-THIS_PAGE_TAG_SORT requires one mode for all three chip lists"
+    - name: "Persist sort choice across sessions"
+      cons: "Extra storage and migration; out of REQ scope"
+      pros: "User preference recall"
+      rejected_reason: "REQ-THIS_PAGE_TAG_SORT specifies no cross-session persistence"
+  cross_references:
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+    - "REQ-THIS_PAGE_TAG_SORT"
+  decision: "Use a shared pure sort module for alphabetical, bookmark-frequency, and DOM-relevance order; UIManager applies it only when the side-panel exposes tagSortToggle. Relevance scores and in-page frequencies come from a MAIN-world snippet injected before the extractor function; bookmark counts come from hoverboard_tag_frequency in chrome.storage.local."
+  detail_file: "architecture-decisions/ARCH-THIS_PAGE_TAG_SORT.yaml"
+  implementation_approach:
+    details:
+      - "Bookmark frequency: chrome.storage.local hoverboard_tag_frequency; case-insensitive key lookup"
+      - "executeScript: files inject snippet then func invokes global extractor"
+      - "Pure sort module tag-chip-sort.js: alphabetical | frequency | relevance comparators per REQ"
+      - "Relevance: suggested-tags-main-world-snippet.js assigns integer tier per DOM bucket (headings in main > global headings > nav > breadcrumb > main links > images > meta > title > URL > footer > body fallback); max tier wins per lowercase token"
+    summary: "Pure comparators in tag-chip-sort.js; PopupController refreshes frequency map and uses two-step MAIN inject for relevance-bearing suggestions; UIManager gates sorting on toggle presence."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-03-27"
+      reason: "S13 PROC-AGENT_REQ_CHECKLIST: architecture detail synced to shipped implementation"
+  name: "This Page tag sort architecture"
+  rationale:
+    benefits:
+      - "MAIN-world extract script returns tag + relevance + inPageFrequency for suggestion rows"
+      - "Single shared sort mode in UIManager when side-panel markup includes data-popup-ref tagSortToggle"
+    problems_solved:
+      - "Fixed frequency-only ordering from services"
+      - "No relevance signal in UI for suggestions"
+    why: "Users need consistent control over chip order without changing membership."
   related_decisions:
     depends_on: []
     informs:
-      - IMPL-THIS_PAGE_TAG_SORT
+      - "IMPL-THIS_PAGE_TAG_SORT"
     see_also:
-      - ARCH-SIDE_PANEL_TABS
-      - ARCH-SUGGESTED_TAGS
+      - "ARCH-SIDE_PANEL_TABS"
+      - "ARCH-SUGGESTED_TAGS"
+  status: "Active"
   token_coverage:
     code_files:
-      - src/shared/tag-chip-sort.js
-      - src/ui/popup/UIManager.js
-      - src/ui/popup/PopupController.js
-      - src/features/tagging/suggested-tags-main-world-snippet.js
-      - src/ui/side-panel/side-panel.html
-      - src/ui/side-panel/side-panel.css
+      - "src/features/tagging/suggested-tags-main-world-snippet.js"
+      - "src/shared/tag-chip-sort.js"
+      - "src/ui/popup/PopupController.js"
+      - "src/ui/popup/UIManager.js"
+      - "src/ui/side-panel/side-panel.css"
+      - "src/ui/side-panel/side-panel.html"
     tests:
-      - tests/unit/tag-chip-sort.test.js
-      - tests/unit/uIManager-tag-case-folding.test.js
-      - tests/unit/popup-suggested-tags.test.js
-      - tests/unit/popup-refresh-tag-frequency-map.test.js
-      - tests/integration/this-page-tag-sort-composition.integration.test.js
-      - tests/playwright/extension-this-page-tag-sort.spec.js
+      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - "tests/unit/popup-refresh-tag-frequency-map.test.js"
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/tag-chip-sort.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
+  traceability:
+    code_annotations:
+      - "ARCH-THIS_PAGE_TAG_SORT"
+    implementation:
+      - "IMPL-THIS_PAGE_TAG_SORT"
+    requirements:
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+      - "REQ-THIS_PAGE_TAG_SORT"
+    tests:
+      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
+      - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - "tests/unit/popup-refresh-tag-frequency-map.test.js"
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/tag-chip-sort.test.js"
+      - "tests/unit/uIManager-tag-case-folding.test.js"
   validation_evidence:
     - date: "2026-03-27"
-      result: pass
-      notes: 'S05 checklist: ARCH detail completed; unit tests cover sort and inject paths'
+      notes: "S05 checklist: ARCH detail completed; unit tests cover sort and inject paths"
+      result: "pass"
     - date: "2026-03-27"
-      result: pass
-      notes: 'S13 PROC-AGENT_REQ_CHECKLIST: token_coverage + traceability match IMPL-THIS_PAGE_TAG_SORT and repo tests; no documentation drift'
-  metadata:
-    last_updated:
-      date: "2026-03-27"
-      author: AI Agent
-      reason: 'S13 PROC-AGENT_REQ_CHECKLIST: architecture detail synced to shipped implementation'
-  detail_file: architecture-decisions/ARCH-THIS_PAGE_TAG_SORT.yaml
+      notes: "S13 PROC-AGENT_REQ_CHECKLIST: token_coverage + traceability match IMPL-THIS_PAGE_TAG_SORT and repo tests; no documentation drift"
+      result: "pass"

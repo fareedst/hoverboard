@@ -1,65 +1,44 @@
 IMPL-TEXT_UTILITIES:
-  name: Text Utilities
-  status: Active
-  cross_references:
-    - REQ-SHARED_UTILITIES
-    - ARCH-SHARED_UTILITIES
-  rationale:
-    why: truncate, normalizeText, escapeHtml for UI display and user input
-    problems_solved: []
-    benefits: []
-  implementation_approach:
-    summary: stringUtils in src/shared/utils.js — truncate, normalizeText, escapeHtml (textContent)
-    details: []
   code_locations:
     files:
-      - path: src/shared/utils.js
-        description: stringUtils
+      - path: "src/shared/utils.js"
+        description: "stringUtils"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-SHARED_UTILITIES
-    requirements:
-      - REQ-SHARED_UTILITIES
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: text helpers in utils.js exercised indirectly.'
-    code_annotations:
-      - IMPL-TEXT_UTILITIES
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-URL_UTILITIES
-    composed_with:
-      - IMPL-URL_UTILITIES
-  essence_pseudocode: |
-    # [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]
-    # truncate, normalizeText, escapeHtml for UI and user input.
-    # Contract: string and optional maxLen; truncated/normalized/escaped string.
-    INPUT: string and optional max length (truncate); string (normalizeText, escapeHtml)
-    OUTPUT: string (truncated, normalized, or HTML-escaped)
-    DATA: ellipsis string (e.g. "…")
-
-    # Slice to maxLen and append ellipsis if longer.
-    truncate(str, maxLen):
-      IF str.length <= maxLen RETURN str
-      RETURN str.slice(0, maxLen) + ellipsis
-
-    # Trim and collapse whitespace; normalize Unicode.
-    normalizeText(str):
-      NORMALIZE whitespace and Unicode (e.g. trim, collapse spaces) for display or comparison
-      RETURN normalized string
-
-    # Encode <, >, &, " for safe textContent/attribute use.
-    escapeHtml(str):
-      ENCODE characters that are significant in HTML (e.g. <, >, &, ") so string is safe for textContent or attribute use
-      RETURN encoded string
-  detail_file: implementation-decisions/IMPL-TEXT_UTILITIES.yaml
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "REQ-SHARED_UTILITIES"
+  detail_file: "implementation-decisions/IMPL-TEXT_UTILITIES.yaml"
+  essence_pseudocode: "# [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]\n# truncate, normalizeText, escapeHtml for UI and user input.\n# Contract: string and optional maxLen; truncated/normalized/escaped string.\nINPUT: string and optional max length (truncate); string (normalizeText, escapeHtml)\nOUTPUT: string (truncated, normalized, or HTML-escaped)\nDATA: ellipsis string (e.g. \"…\")\n\n# Slice to maxLen and append ellipsis if longer.\ntruncate(str, maxLen):\n  IF str.length <= maxLen RETURN str\n  RETURN str.slice(0, maxLen) + ellipsis\n\n# Trim and collapse whitespace; normalize Unicode.\nnormalizeText(str):\n  NORMALIZE whitespace and Unicode (e.g. trim, collapse spaces) for display or comparison\n  RETURN normalized string\n\n# Encode <, >, &, \" for safe textContent/attribute use.\nescapeHtml(str):\n  ENCODE characters that are significant in HTML (e.g. <, >, &, \") so string is safe for textContent or attribute use\n  RETURN encoded string\n"
+  implementation_approach:
+    details: []
+    summary: "stringUtils in src/shared/utils.js — truncate, normalizeText, escapeHtml (textContent)"
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+  name: "Text Utilities"
+  rationale:
+    benefits: []
+    problems_solved: []
+    why: "truncate, normalizeText, escapeHtml for UI display and user input"
+  related_decisions:
+    composed_with:
+      - "IMPL-URL_UTILITIES"
+    depends_on: []
+    see_also:
+      - "IMPL-URL_UTILITIES"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SHARED_UTILITIES"
+    code_annotations:
+      - "IMPL-TEXT_UTILITIES"
+    requirements:
+      - "REQ-SHARED_UTILITIES"
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: text helpers in utils.js exercised indirectly."
+    tests: []

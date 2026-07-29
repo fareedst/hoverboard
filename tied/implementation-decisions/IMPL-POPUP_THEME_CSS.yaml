@@ -1,61 +1,48 @@
 IMPL-POPUP_THEME_CSS:
-  name: Popup CSS honors ThemeManager (hb-theme-dark)
-  status: Active
-  cross_references:
-    - REQ-DARK_THEME
-    - ARCH-THEME
-    - IMPL-SCREENSHOT_MODE
-  rationale:
-    why: 'Popup must reflect ThemeManager-applied theme so dark preference and screenshot seed (hoverboard_theme: dark) show dark popup'
-    problems_solved:
-      - Popup stayed light when hoverboard_theme was 'dark' because popup.css only overrode variables in @media (prefers-color-scheme: dark), not when document root had class hb-theme-dark
-    benefits:
-      - 'Dark theme preference applies to popup; placeholder screenshots show dark popup when seed includes hoverboard_theme: dark'
-  implementation_approach:
-    summary: Add :root.hb-theme-dark block in popup.css with same dark variable values as the prefers-color-scheme media query
-    details:
-      - ThemeManager applies hb-theme-dark to document.documentElement and sets --hb-* variables; popup uses --bg-primary, --text-primary, etc. from popup.css
-      - popup.css had no rule for :root.hb-theme-dark, so body stayed white; add :root.hb-theme-dark { --bg-primary: #1e1e1e; ... } so popup uses dark variables when ThemeManager sets dark
   code_locations:
     files:
-      - path: src/ui/popup/popup.css
-        description: :root.hb-theme-dark block for popup dark theme
+      - path: "src/ui/popup/popup.css"
+        description: ":root.hb-theme-dark block for popup dark theme"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-THEME
-    requirements:
-      - REQ-DARK_THEME
-    tests:
-      - tests/unit/dark-theme-default.test.js
-    code_annotations:
-      - IMPL-POPUP_THEME_CSS
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-SCREENSHOT_MODE
-    composed_with:
-      - IMPL-SCREENSHOT_MODE
-  essence_pseudocode: |
-    # [IMPL-POPUP_THEME_CSS] [ARCH-THEME] [REQ-DARK_THEME]
-    # :root.hb-theme-dark block in popup.css so ThemeManager dark applies to popup.
-    # Contract: root and ThemeManager vars; popup uses dark/light vars.
-    INPUT: document.documentElement (root); ThemeManager sets hb-theme-dark and --hb-* vars
-    OUTPUT: popup body uses dark background/text when theme is dark (same vars as prefers-color-scheme block)
-    DATA: popup.css :root.hb-theme-dark { --bg-primary: #1e1e1e; --text-primary: ...; ... }
-
-    # Prefer hb-theme-dark, else prefers-color-scheme, else light; elements use --bg-primary etc.
-    Style resolution:
-      IF root has class hb-theme-dark: APPLY :root.hb-theme-dark variables to popup
-      ELSE IF prefers-color-scheme dark: APPLY @media (prefers-color-scheme: dark) variables
-      ELSE: APPLY light variables
-    Popup elements USE --bg-primary, --text-primary, etc. from resolved rule
+  cross_references:
+    - "ARCH-THEME"
+    - "IMPL-SCREENSHOT_MODE"
+    - "REQ-DARK_THEME"
+  essence_pseudocode: "# [IMPL-POPUP_THEME_CSS] [ARCH-THEME] [REQ-DARK_THEME]\n# :root.hb-theme-dark block in popup.css so ThemeManager dark applies to popup.\n# Contract: root and ThemeManager vars; popup uses dark/light vars.\nINPUT: document.documentElement (root); ThemeManager sets hb-theme-dark and --hb-* vars\nOUTPUT: popup body uses dark background/text when theme is dark (same vars as prefers-color-scheme block)\nDATA: popup.css :root.hb-theme-dark { --bg-primary: #1e1e1e; --text-primary: ...; ... }\n\n# Prefer hb-theme-dark, else prefers-color-scheme, else light; elements use --bg-primary etc.\nStyle resolution:\n  IF root has class hb-theme-dark: APPLY :root.hb-theme-dark variables to popup\n  ELSE IF prefers-color-scheme dark: APPLY @media (prefers-color-scheme: dark) variables\n  ELSE: APPLY light variables\nPopup elements USE --bg-primary, --text-primary, etc. from resolved rule\n"
+  implementation_approach:
+    details:
+      - "ThemeManager applies hb-theme-dark to document.documentElement and sets --hb-* variables; popup uses --bg-primary, --text-primary, etc. from popup.css"
+      - popup.css had no rule for :root.hb-theme-dark, so body stayed white; add :root.hb-theme-dark { --bg-primary: "" #1e1e1e; ... } so popup uses dark variables when ThemeManager sets dark
+    summary: "Add :root.hb-theme-dark block in popup.css with same dark variable values as the prefers-color-scheme media query"
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-19"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: "Add essence_pseudocode and complete composed_with"
+  name: "Popup CSS honors ThemeManager (hb-theme-dark)"
+  rationale:
+    benefits:
+      - "Dark theme preference applies to popup; placeholder screenshots show dark popup when seed includes hoverboard_theme: dark"
+    problems_solved:
+      - Popup stayed light when hoverboard_theme was 'dark' because popup.css only overrode variables in @media (prefers-color-scheme: "dark), not when document root had class hb-theme-dark"
+    why: "Popup must reflect ThemeManager-applied theme so dark preference and screenshot seed (hoverboard_theme: dark) show dark popup"
+  related_decisions:
+    composed_with:
+      - "IMPL-SCREENSHOT_MODE"
+    depends_on: []
+    see_also:
+      - "IMPL-SCREENSHOT_MODE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-THEME"
+    code_annotations:
+      - "IMPL-POPUP_THEME_CSS"
+    requirements:
+      - "REQ-DARK_THEME"
+    tests:
+      - "tests/unit/dark-theme-default.test.js"

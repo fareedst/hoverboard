@@ -52,3 +52,4 @@ test-results
 *.log
 COMMIT_MSG_QUICK_ACCESS.txt
 COMMIT_*.txt
+TODO.md

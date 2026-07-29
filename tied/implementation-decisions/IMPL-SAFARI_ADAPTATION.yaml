@@ -1,75 +1,60 @@
 IMPL-SAFARI_ADAPTATION:
-  name: Safari Adaptive Implementation
-  status: Active
-  cross_references:
-    - ARCH-SAFARI_ADAPTATION
-    - REQ-SAFARI_ADAPTATION
-  rationale:
-    why: Safari stability and performance
-    problems_solved:
-      - Safari memory issues
-      - Messaging failures
-    benefits:
-      - Stable Safari support
-      - Bounded recovery
-  implementation_approach:
-    summary: Safari shim, content optimizations, error handler with degraded mode
-    details:
-      - Platform detection
-      - Safari config (timeouts, retries)
-      - Animation/memory optimizations
-      - Error handler with recovery
-      - Degraded mode
   code_locations:
     files:
-      - path: src/shared/safari-shim.js
-        description: Safari shim
-      - path: safari/src/shared/ErrorHandler.js
-        description: Safari error handler
+      - path: "src/shared/safari-shim.js"
+        description: "Safari shim"
+      - path: "safari/src/shared/ErrorHandler.js"
+        description: "Safari error handler"
     functions:
-      - name: getSafariConfig
-        file: src/shared/safari-shim.js
-        description: Safari config
-      - name: optimizeSafariAnimations
-        file: src/shared/safari-shim.js
-        description: Animation optimization
-  traceability:
-    architecture:
-      - ARCH-SAFARI_ADAPTATION
-    requirements:
-      - REQ-SAFARI_ADAPTATION
-    tests: []
-    test_coverage_note: Safari-only; out of scope for Chrome extension coverage. No unit tests for Safari adaptation.
-    code_annotations:
-      - IMPL-SAFARI_ADAPTATION
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-CROSS_BROWSER
-    composed_with: []
-  essence_pseudocode: |
-    # [IMPL-SAFARI_ADAPTATION] [ARCH-SAFARI_ADAPTATION] [REQ-SAFARI_ADAPTATION]
-    # Safari shim, config, animation optimizations, ErrorHandler with degraded mode.
-    # Contract: platform and config; Safari config and fallback/degraded behavior.
-    INPUT: platform (detect Safari); config (timeouts, retries); animation/content operations
-    OUTPUT: Safari-specific config; optimized or fallback behavior; degraded mode on unrecoverable error
-    DATA: getSafariConfig(); ErrorHandler with recovery
-
-    # Apply Safari timeouts/retries on init.
-    ON init: IF Safari: config = getSafariConfig(); APPLY timeouts/retries
-
-    # Reduce or replace heavy animations; bound memory.
-    optimizeSafariAnimations(): REDUCE or REPLACE heavy animations for Safari; BOUND memory
-
-      # Try recovery; enter degraded mode if unrecoverable.
-      ON error: ErrorHandler; TRY recovery; IF unrecoverable: ENTER degraded mode (minimal features)
-  detail_file: implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml
+      - name: "getSafariConfig"
+        description: "Safari config"
+        file: "src/shared/safari-shim.js"
+      - name: "optimizeSafariAnimations"
+        description: "Animation optimization"
+        file: "src/shared/safari-shim.js"
+  cross_references:
+    - "ARCH-SAFARI_ADAPTATION"
+    - "REQ-SAFARI_ADAPTATION"
+  detail_file: "implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml"
+  essence_pseudocode: "# [IMPL-SAFARI_ADAPTATION] [ARCH-SAFARI_ADAPTATION] [REQ-SAFARI_ADAPTATION]\n# Safari shim, config, animation optimizations, ErrorHandler with degraded mode.\n# Contract: platform and config; Safari config and fallback/degraded behavior.\nINPUT: platform (detect Safari); config (timeouts, retries); animation/content operations\nOUTPUT: Safari-specific config; optimized or fallback behavior; degraded mode on unrecoverable error\nDATA: getSafariConfig(); ErrorHandler with recovery\n\n# Apply Safari timeouts/retries on init.\nON init: IF Safari: config = getSafariConfig(); APPLY timeouts/retries\n\n# Reduce or replace heavy animations; bound memory.\noptimizeSafariAnimations(): REDUCE or REPLACE heavy animations for Safari; BOUND memory\n\n  # Try recovery; enter degraded mode if unrecoverable.\n  ON error: ErrorHandler; TRY recovery; IF unrecoverable: ENTER degraded mode (minimal features)\n"
+  implementation_approach:
+    details:
+      - "Animation/memory optimizations"
+      - "Degraded mode"
+      - "Error handler with recovery"
+      - "Platform detection"
+      - "Safari config (timeouts, retries)"
+    summary: "Safari shim, content optimizations, error handler with degraded mode"
   metadata:
     created:
+      author: "AI Agent"
       date: "2025-07-14"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: "Add essence_pseudocode and complete composed_with"
+  name: "Safari Adaptive Implementation"
+  rationale:
+    benefits:
+      - "Bounded recovery"
+      - "Stable Safari support"
+    problems_solved:
+      - "Messaging failures"
+      - "Safari memory issues"
+    why: "Safari stability and performance"
+  related_decisions:
+    composed_with: []
+    depends_on: []
+    see_also:
+      - "IMPL-CROSS_BROWSER"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SAFARI_ADAPTATION"
+    code_annotations:
+      - "IMPL-SAFARI_ADAPTATION"
+    requirements:
+      - "REQ-SAFARI_ADAPTATION"
+    test_coverage_note: "Safari-only; out of scope for Chrome extension coverage. No unit tests for Safari adaptation."
+    tests: []

@@ -1,72 +1,50 @@
 IMPL-URL_UTILITIES:
-  name: URL Utilities
-  status: Active
-  cross_references:
-    - REQ-SHARED_UTILITIES
-    - ARCH-SHARED_UTILITIES
-  rationale:
-    why: processUrl, isValidUrl, getDomain for bookmark management; native URL constructor.
-    problems_solved: []
-    benefits:
-      - Normalize and validate URLs; extract domain for display or matching
-  implementation_approach:
-    summary: urlUtils in src/shared/utils.js — processUrl(stripHash), isValidUrl, getDomain.
-    details:
-      - 'processUrl(url): normalize (e.g. strip hash) for storage/key consistency'
-      - 'isValidUrl(url): use native URL constructor or regex; return boolean'
-      - 'getDomain(url): extract hostname or domain for display'
   code_locations:
     files:
-      - path: src/shared/utils.js
-        description: urlUtils
+      - path: "src/shared/utils.js"
+        description: "urlUtils"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-SHARED_UTILITIES
-    requirements:
-      - REQ-SHARED_UTILITIES
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: URL helpers exercised indirectly by storage and content.'
-    code_annotations:
-      - IMPL-URL_UTILITIES
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-TEXT_UTILITIES
-      - IMPL-DOM_UTILITIES
-    composed_with:
-      - IMPL-ARRAY_OBJECT_UTILITIES
-      - IMPL-TEXT_UTILITIES
-  essence_pseudocode: |
-    # [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]
-    # processUrl (strip hash), isValidUrl, getDomain for bookmark management.
-    # Contract: url string in; normalized url or boolean or domain out.
-    INPUT: url (string)
-    OUTPUT: normalized url (processUrl), boolean (isValidUrl), domain string (getDomain)
-    DATA: pure functions in same file as arrayUtils, objectUtils, textUtils
-
-    # Normalize for storage: strip hash, trailing slash, scheme.
-    processUrl(url):
-      IF url empty or invalid: RETURN url or default
-      OPTIONALLY strip hash, trailing slash, normalize scheme
-      RETURN normalized url string
-
-    # Parse with URL constructor or regex; return true if valid.
-    isValidUrl(url):
-      TRY parse url with URL constructor (or regex)
-      RETURN true if valid else false
-
-    # Parse and return hostname or host.
-    getDomain(url):
-      parsed = parse url
-      RETURN parsed.hostname or parsed.host or ""
-  detail_file: implementation-decisions/IMPL-URL_UTILITIES.yaml
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "REQ-SHARED_UTILITIES"
+  detail_file: "implementation-decisions/IMPL-URL_UTILITIES.yaml"
+  essence_pseudocode: "# [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]\n# processUrl (strip hash), isValidUrl, getDomain for bookmark management.\n# Contract: url string in; normalized url or boolean or domain out.\nINPUT: url (string)\nOUTPUT: normalized url (processUrl), boolean (isValidUrl), domain string (getDomain)\nDATA: pure functions in same file as arrayUtils, objectUtils, textUtils\n\n# Normalize for storage: strip hash, trailing slash, scheme.\nprocessUrl(url):\n  IF url empty or invalid: RETURN url or default\n  OPTIONALLY strip hash, trailing slash, normalize scheme\n  RETURN normalized url string\n\n# Parse with URL constructor or regex; return true if valid.\nisValidUrl(url):\n  TRY parse url with URL constructor (or regex)\n  RETURN true if valid else false\n\n# Parse and return hostname or host.\ngetDomain(url):\n  parsed = parse url\n  RETURN parsed.hostname or parsed.host or \"\"\n"
+  implementation_approach:
+    details:
+      - "getDomain(url): extract hostname or domain for display"
+      - "isValidUrl(url): use native URL constructor or regex; return boolean"
+      - "processUrl(url): normalize (e.g. strip hash) for storage/key consistency"
+    summary: "urlUtils in src/shared/utils.js — processUrl(stripHash), isValidUrl, getDomain."
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add root key, essence_pseudocode, composed_with
+      reason: "Canonical YAML rewrite; add root key, essence_pseudocode, composed_with"
+  name: "URL Utilities"
+  rationale:
+    benefits:
+      - "Normalize and validate URLs; extract domain for display or matching"
+    problems_solved: []
+    why: "processUrl, isValidUrl, getDomain for bookmark management; native URL constructor."
+  related_decisions:
+    composed_with:
+      - "IMPL-ARRAY_OBJECT_UTILITIES"
+      - "IMPL-TEXT_UTILITIES"
+    depends_on: []
+    see_also:
+      - "IMPL-DOM_UTILITIES"
+      - "IMPL-TEXT_UTILITIES"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SHARED_UTILITIES"
+    code_annotations:
+      - "IMPL-URL_UTILITIES"
+    requirements:
+      - "REQ-SHARED_UTILITIES"
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: URL helpers exercised indirectly by storage and content."
+    tests: []

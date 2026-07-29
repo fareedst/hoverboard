@@ -1,70 +1,54 @@
 IMPL-OVERLAY_TEST_HARNESS:
-  name: Overlay Test Harness Implementation
-  status: Active
-  cross_references:
-    - ARCH-OVERLAY_TESTABILITY
-    - REQ-OVERLAY_SYSTEM
-  rationale:
-    why: Mock DOM for deterministic overlay testing
-    problems_solved:
-      - Stale test registries
-      - Heavy DOM emulation
-    benefits:
-      - Lightweight tests
-      - Auto-registration
-  implementation_approach:
-    summary: Mock DOM with className/id auto-registration, classList/attribute hooks
-    details:
-      - Auto-register on property assignments
-      - classList operations tracking
-      - Lightweight verification
   code_locations:
     files:
-      - path: tests/utils/mock-dom.js
-        description: Mock DOM utilities
+      - path: "tests/utils/mock-dom.js"
+        description: "Mock DOM utilities"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-OVERLAY_TESTABILITY
-    requirements:
-      - REQ-OVERLAY_SYSTEM
-      - REQ-OVERLAY_CONTROL_LAYOUT
-    tests:
-      - tests/unit/overlay-test-debug.test.js
-      - tests/utils/overlay-test-harness.js
-      - tests/utils/mock-dom.js
-    code_annotations:
-      - IMPL-OVERLAY_TEST_HARNESS
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-OVERLAY
-    composed_with:
-      - IMPL-OVERLAY
-  essence_pseudocode: |
-    # [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT]
-    # Mock DOM with auto-registration by className/id and classList tracking for overlay tests.
-    # Contract: test setup and overlay create calls; mock registry and classList log.
-    INPUT: test setup (no real DOM); overlay manager create calls
-    OUTPUT: mock DOM with auto-registered className/id; classList/attribute operations trackable
-    DATA: mock element registry (by className, id); classList add/remove log
-
-    # Register element when className or id is assigned.
-    ON element creation / property assign (className, id):
-      REGISTER element in registry by className and id
-
-    # Record classList operations for assertions.
-    classList.add/remove: RECORD operation for assertions
-
-    # Create mock document/body; inject overlay; run show; assert registry and classList.
-    Test setup: CREATE mock document/body; INJECT overlay into mock; RUN show(); ASSERT registry and classList state
-  detail_file: implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.yaml
+  cross_references:
+    - "ARCH-OVERLAY_TESTABILITY"
+    - "REQ-OVERLAY_SYSTEM"
+  detail_file: "implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.yaml"
+  essence_pseudocode: "# [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT]\n# Mock DOM with auto-registration by className/id and classList tracking for overlay tests.\n# Contract: test setup and overlay create calls; mock registry and classList log.\nINPUT: test setup (no real DOM); overlay manager create calls\nOUTPUT: mock DOM with auto-registered className/id; classList/attribute operations trackable\nDATA: mock element registry (by className, id); classList add/remove log\n\n# Register element when className or id is assigned.\nON element creation / property assign (className, id):\n  REGISTER element in registry by className and id\n\n# Record classList operations for assertions.\nclassList.add/remove: RECORD operation for assertions\n\n# Create mock document/body; inject overlay; run show; assert registry and classList.\nTest setup: CREATE mock document/body; INJECT overlay into mock; RUN show(); ASSERT registry and classList state\n"
+  implementation_approach:
+    details:
+      - "Auto-register on property assignments"
+      - "classList operations tracking"
+      - "Lightweight verification"
+    summary: "Mock DOM with className/id auto-registration, classList/attribute hooks"
   metadata:
     created:
+      author: "AI Agent"
       date: "2025-07-14"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: "Add essence_pseudocode and complete composed_with"
+  name: "Overlay Test Harness Implementation"
+  rationale:
+    benefits:
+      - "Auto-registration"
+      - "Lightweight tests"
+    problems_solved:
+      - "Heavy DOM emulation"
+      - "Stale test registries"
+    why: "Mock DOM for deterministic overlay testing"
+  related_decisions:
+    composed_with:
+      - "IMPL-OVERLAY"
+    depends_on: []
+    see_also:
+      - "IMPL-OVERLAY"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-OVERLAY_TESTABILITY"
+    code_annotations:
+      - "IMPL-OVERLAY_TEST_HARNESS"
+    requirements:
+      - "REQ-OVERLAY_CONTROL_LAYOUT"
+      - "REQ-OVERLAY_SYSTEM"
+    tests:
+      - "tests/unit/overlay-test-debug.test.js"
+      - "tests/utils/mock-dom.js"
+      - "tests/utils/overlay-test-harness.js"

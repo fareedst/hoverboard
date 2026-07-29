@@ -1,93 +1,62 @@
 IMPL-UIManager_SCOPED_ROOT:
-  name: UIManager Scoped Root for Panel Context
-  status: Active
-  cross_references:
-    - ARCH-SIDE_PANEL_TABS
-    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-    - IMPL-SIDE_PANEL_BOOKMARK
-  rationale:
-    why: In the tabbed side panel, Bookmark and Tags tree share one document; popup UI expects element ids. To avoid duplicate IDs, Bookmark panel is a subtree with data-popup-ref attributes; UIManager must resolve elements from that subtree when container is provided.
-    problems_solved:
-      - document.getElementById would clash if both panels had same ids
-      - Popup and panel could not share the same UIManager/PopupController without scoping
-    benefits:
-      - Popup remains document-scoped (no container); panel passes container = bookmarkPanel so all lookups are under that root
-      - One code path for both contexts
-  implementation_approach:
-    summary: UIManager constructor accepts optional container (DOM element). In cacheElements(), if container is set, for each element key (e.g. mainInterface) use container.querySelector('[data-popup-ref="mainInterface"]'); else use document.getElementById('mainInterface'). All other UIManager methods use this.elements so no further changes. Popup creates UIManager without container; side-panel creates UIManager with container = bookmarkPanel.
-    details:
-      - data-popup-ref value matches the id used in popup (mainInterface, loadingState, showHoverBtn, newTagInput, etc.)
-      - Section labels and other document.querySelectorAll in UIManager: when container set, scope to container (e.g. container.querySelectorAll('.section-title'))
   code_locations:
     files:
-      - path: src/ui/popup/UIManager.js
-        description: Constructor container option; cacheElements branch by container
+      - path: "src/ui/popup/UIManager.js"
+        description: "Constructor container option; cacheElements branch by container"
     functions:
-      - name: cacheElements
-        file: src/ui/popup/UIManager.js
-        description: 'If container: querySelector(''[data-popup-ref="key"]'') for each key; else getElementById'
-      - name: constructor
-        file: src/ui/popup/UIManager.js
-        description: this.container = options.container || null
-  traceability:
-    architecture:
-      - ARCH-SIDE_PANEL_TABS
-    requirements:
-      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-    tests:
-      - tests/unit/ui-manager-scoped-root.test.js
-    code_annotations:
-      - IMPL-UIManager_SCOPED_ROOT
-  related_decisions:
-    depends_on:
-      - ARCH-SIDE_PANEL_TABS
-    supersedes: []
-    see_also:
-      - IMPL-SIDE_PANEL_BOOKMARK
-      - IMPL-SIDE_PANEL_TABS
-    composed_with:
-      - IMPL-SIDE_PANEL_BOOKMARK
-  essence_pseudocode: |
-    # [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK]
-    # Summary: Scoped DOM resolution so UIManager runs in popup (document) or side-panel Bookmark subtree (container) without duplicate ids.
-
-    # [IMPL-UIManager_SCOPED_ROOT] [IMPL-SIDE_PANEL_BOOKMARK] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
-    # How — composed_with IMPL-SIDE_PANEL_BOOKMARK: pre — Bookmark panel subtree mounted with data-popup-ref values matching popup element keys; ordering — container passed into UIManager constructor before cacheElements; post — this.elements[key] reference nodes under container (or null if missing); shared data — elementKeys and data-popup-ref attribute names align with popup ids.
-
-    # How — INPUT/OUTPUT/DATA contract (same tokens as summary).
-    INPUT: constructor options { container?: Element }; cacheElements() at init; updateSectionLabelsVisibility(showLabels: boolean)
-    OUTPUT: this.elements populated; section title nodes toggled visible/hidden
-    DATA: container (optional); elementKeys; data-popup-ref attribute names matching popup ids
-
-    # How — constructor stores optional container then resolves elements.
-    UIManager constructor({ container, ... }):
-      this.container = container || null
-      cacheElements()
-
-    # How — cacheElements: per key resolve element; null if missing (caller must tolerate).
-    cacheElements():
-      FOR each key in elementKeys:
-        IF this.container:
-          this.elements[key] = this.container.querySelector('[data-popup-ref="' + key + '"]')
-        ELSE:
-          this.elements[key] = document.getElementById(key)
-
-    # How — section labels: scope query to container or document; no throw on empty NodeList.
-    updateSectionLabelsVisibility(showLabels):
-      root = this.container || document
-      sectionTitles = root.querySelectorAll('.section-title')
-      FOR each title in sectionTitles:
-        IF showLabels THEN title.style.display = ''
-        ELSE title.style.display = 'none'
+      - name: "cacheElements"
+        description: "If container: querySelector('[data-popup-ref=\"key\"]') for each key; else getElementById"
+        file: "src/ui/popup/UIManager.js"
+      - name: "constructor"
+        description: "this.container = options.container || null"
+        file: "src/ui/popup/UIManager.js"
+  cross_references:
+    - "ARCH-SIDE_PANEL_TABS"
+    - "IMPL-SIDE_PANEL_BOOKMARK"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  essence_pseudocode: "# [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK]\n# Summary: Scoped DOM resolution so UIManager runs in popup (document) or side-panel Bookmark subtree (container) without duplicate ids.\n\n# [IMPL-UIManager_SCOPED_ROOT] [IMPL-SIDE_PANEL_BOOKMARK] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]\n# How — composed_with IMPL-SIDE_PANEL_BOOKMARK: pre — Bookmark panel subtree mounted with data-popup-ref values matching popup element keys; ordering — container passed into UIManager constructor before cacheElements; post — this.elements[key] reference nodes under container (or null if missing); shared data — elementKeys and data-popup-ref attribute names align with popup ids.\n\n# How — INPUT/OUTPUT/DATA contract (same tokens as summary).\nINPUT: constructor options { container?: Element }; cacheElements() at init; updateSectionLabelsVisibility(showLabels: boolean)\nOUTPUT: this.elements populated; section title nodes toggled visible/hidden\nDATA: container (optional); elementKeys; data-popup-ref attribute names matching popup ids\n\n# How — constructor stores optional container then resolves elements.\nUIManager constructor({ container, ... }):\n  this.container = container || null\n  cacheElements()\n\n# How — cacheElements: per key resolve element; null if missing (caller must tolerate).\ncacheElements():\n  FOR each key in elementKeys:\n    IF this.container:\n      this.elements[key] = this.container.querySelector('[data-popup-ref=\"' + key + '\"]')\n    ELSE:\n      this.elements[key] = document.getElementById(key)\n\n# How — section labels: scope query to container or document; no throw on empty NodeList.\nupdateSectionLabelsVisibility(showLabels):\n  root = this.container || document\n  sectionTitles = root.querySelectorAll('.section-title')\n  FOR each title in sectionTitles:\n    IF showLabels THEN title.style.display = ''\n    ELSE title.style.display = 'none'\n"
+  implementation_approach:
+    details:
+      - "data-popup-ref value matches the id used in popup (mainInterface, loadingState, showHoverBtn, newTagInput, etc.)"
+      - Section labels and other document.querySelectorAll in UIManager: "when container set, scope to container (e.g. container.querySelectorAll('.section-title'))"
+    summary: "UIManager constructor accepts optional container (DOM element). In cacheElements(), if container is set, for each element key (e.g. mainInterface) use container.querySelector('[data-popup-ref=\"mainInterface\"]'); else use document.getElementById('mainInterface'). All other UIManager methods use this.elements so no further changes. Popup creates UIManager without container; side-panel creates UIManager with container = bookmarkPanel."
   metadata:
     last_updated:
+      author: "AI Agent"
       date: "2026-03-27"
-      author: AI Agent
-      reason: 'S06.6 PROC-AGENT_REQ_CHECKLIST: index detail_file linked; semantic-tokens registered'
+      reason: "S06.6 PROC-AGENT_REQ_CHECKLIST: index detail_file linked; semantic-tokens registered"
+  name: "UIManager Scoped Root for Panel Context"
+  rationale:
+    benefits:
+      - "One code path for both contexts"
+      - "Popup remains document-scoped (no container); panel passes container = bookmarkPanel so all lookups are under that root"
+    problems_solved:
+      - "document.getElementById would clash if both panels had same ids"
+      - "Popup and panel could not share the same UIManager/PopupController without scoping"
+    why: "In the tabbed side panel, Bookmark and Tags tree share one document; popup UI expects element ids. To avoid duplicate IDs, Bookmark panel is a subtree with data-popup-ref attributes; UIManager must resolve elements from that subtree when container is provided."
+  related_decisions:
+    composed_with:
+      - "IMPL-SIDE_PANEL_BOOKMARK"
+    depends_on:
+      - "ARCH-SIDE_PANEL_TABS"
+    see_also:
+      - "IMPL-SIDE_PANEL_BOOKMARK"
+      - "IMPL-SIDE_PANEL_TABS"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SIDE_PANEL_TABS"
+    code_annotations:
+      - "IMPL-UIManager_SCOPED_ROOT"
+    requirements:
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    tests:
+      - "tests/unit/ui-manager-scoped-root.test.js"
   validation_evidence:
     - date: "2026-03-27"
-      result: pass
-      notes: 'S06.5a SUB-PSEUDOCODE-VALIDATE: manual pass per tied/docs/pseudocode-validation-checklist.yaml (recommended order); tied_validate_consistency pseudocode ok=true; tailoring: PARSE/CONTRACT/TEST-* items without formal parser or embedded test blocks in essence_pseudocode'
+      notes: "S06.5a SUB-PSEUDOCODE-VALIDATE: manual pass per tied/docs/pseudocode-validation-checklist.yaml (recommended order); tied_validate_consistency pseudocode ok=true; tailoring: PARSE/CONTRACT/TEST-* items without formal parser or embedded test blocks in essence_pseudocode"
+      result: "pass"
     - date: "2026-03-27"
-      result: pass
-      notes: 'S06.6 PROC-AGENT_REQ_CHECKLIST: implementation index detail_file set; semantic-tokens IMPL-UIManager_SCOPED_ROOT; yaml_index_validate + tied_validate_consistency ok; SUB-YAML PyYAML parse on tied/*.yaml touched'
+      notes: "S06.6 PROC-AGENT_REQ_CHECKLIST: implementation index detail_file set; semantic-tokens IMPL-UIManager_SCOPED_ROOT; yaml_index_validate + tied_validate_consistency ok; SUB-YAML PyYAML parse on tied/*.yaml touched"
+      result: "pass"

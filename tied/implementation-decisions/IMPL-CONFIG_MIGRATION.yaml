@@ -1,75 +1,48 @@
 IMPL-CONFIG_MIGRATION:
-  name: Config Migration and Auth
-  status: Active
-  cross_references:
-    - REQ-CONFIG_PORTABILITY
-    - ARCH-CONFIG_STRUCTURE
-  rationale:
-    why: Secure auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam; API retry config
-    problems_solved: []
-    benefits: []
-  implementation_approach:
-    summary: ConfigManager auth token methods; sync storage for auth; graceful degradation on missing storage
-    details: []
   code_locations:
     files:
-      - path: src/config/config-manager.js
-        description: getAuthToken, setAuthToken, hasAuth, getAuthParam; default config retry
-      - path: src/ui/options/options.js
-        description: Save auth token on save settings
+      - path: "src/config/config-manager.js"
+        description: "getAuthToken, setAuthToken, hasAuth, getAuthParam; default config retry"
+      - path: "src/ui/options/options.js"
+        description: "Save auth token on save settings"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-CONFIG_STRUCTURE
-    requirements:
-      - REQ-CONFIG_PORTABILITY
-    tests:
-      - tests/unit/config-manager.test.js
-      - tests/integration/config-manager-load.integration.test.js
-    code_annotations:
-      - IMPL-CONFIG_MIGRATION
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-CONFIG_BACKUP_RESTORE
-    composed_with:
-      - IMPL-CONFIG_BACKUP_RESTORE
-      - IMPL-FEATURE_FLAGS
-  essence_pseudocode: |
-    # [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY]
-    # Auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam; options save writes token.
-
-    # Contract: setAuthToken takes token; getAuthToken/hasAuth/getAuthParam return token, boolean, or param value.
-    INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
-    OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
-    DATA: auth stored in sync storage; default config (retry settings)
-
-    # Load from sync storage; return token or null; write token; hasAuth = getAuthToken() !== null; getAuthParam from config.
-    getAuthToken():
-      TRY LOAD auth from sync storage
-      RETURN token or null
-
-    setAuthToken(token):
-      WRITE token to sync storage (auth key)
-
-    hasAuth():
-      RETURN getAuthToken() !== null
-
-    getAuthParam(name):
-      LOAD default config or stored config
-      RETURN value for name (e.g. retry count)
-
-    # Read token from UI; setAuthToken(token).
-    on save settings (options UI):
-      READ token from UI
-      setAuthToken(token)
-  detail_file: implementation-decisions/IMPL-CONFIG_MIGRATION.yaml
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "REQ-CONFIG_PORTABILITY"
+  detail_file: "implementation-decisions/IMPL-CONFIG_MIGRATION.yaml"
+  essence_pseudocode: "# [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY]\n# Auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam; options save writes token.\n\n# Contract: setAuthToken takes token; getAuthToken/hasAuth/getAuthParam return token, boolean, or param value.\nINPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)\nOUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)\nDATA: auth stored in sync storage; default config (retry settings)\n\n# Load from sync storage; return token or null; write token; hasAuth = getAuthToken() !== null; getAuthParam from config.\ngetAuthToken():\n  TRY LOAD auth from sync storage\n  RETURN token or null\n\nsetAuthToken(token):\n  WRITE token to sync storage (auth key)\n\nhasAuth():\n  RETURN getAuthToken() !== null\n\ngetAuthParam(name):\n  LOAD default config or stored config\n  RETURN value for name (e.g. retry count)\n\n# Read token from UI; setAuthToken(token).\non save settings (options UI):\n  READ token from UI\n  setAuthToken(token)\n"
+  implementation_approach:
+    details: []
+    summary: "ConfigManager auth token methods; sync storage for auth; graceful degradation on missing storage"
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+  name: "Config Migration and Auth"
+  rationale:
+    benefits: []
+    problems_solved: []
+    why: "Secure auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam; API retry config"
+  related_decisions:
+    composed_with:
+      - "IMPL-CONFIG_BACKUP_RESTORE"
+      - "IMPL-FEATURE_FLAGS"
+    depends_on: []
+    see_also:
+      - "IMPL-CONFIG_BACKUP_RESTORE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-CONFIG_STRUCTURE"
+    code_annotations:
+      - "IMPL-CONFIG_MIGRATION"
+    requirements:
+      - "REQ-CONFIG_PORTABILITY"
+    tests:
+      - "tests/integration/config-manager-load.integration.test.js"
+      - "tests/unit/config-manager.test.js"

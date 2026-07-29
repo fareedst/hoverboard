@@ -1,133 +1,105 @@
 IMPL-LOCAL_BOOKMARKS_INDEX:
-  name: Local Bookmarks Index Implementation
-  status: Active
-  cross_references:
-    - ARCH-LOCAL_BOOKMARKS_INDEX
-    - REQ-LOCAL_BOOKMARKS_INDEX
-    - ARCH-STORAGE_INDEX_AND_ROUTER
-  rationale:
-    why: Implement full index of local and file bookmarks with Storage column, search, filter, sort, launch.
-    problems_solved:
-      - No single view of local and file bookmarks
-    benefits:
-      - getAggregatedBookmarksForIndex (router aggregates local + file) with fallback getLocalBookmarksForIndex; table page with Storage column
-  implementation_approach:
-    summary: Index page sends getAggregatedBookmarksForIndex first (BookmarkRouter.getAllBookmarksForIndex), fallback getLocalBookmarksForIndex; bookmarks-table with Storage column (Local | File | Sync), search/filter/sort/launch; entry point from popup/options.
-    details:
-      - 'MessageHandler: handleGetAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() when available; handleGetLocalBookmarksForIndex uses LocalBookmarkService only (fallback)'
-      - 'BookmarkRouter.getAllBookmarksForIndex(): aggregates localProvider, fileProvider, syncProvider getAllBookmarks(), adds storage ''local''|''file''|''sync'', merges and sorts by time desc'
-      - 'Index page loadBookmarks: send getAggregatedBookmarksForIndex; on response set allBookmarks; on failure send getLocalBookmarksForIndex, set allBookmarks with storage ''local'''
-      - 'Filter pipeline: stores (matchStoresFilter) -> search -> show-only (tags, toread, private, time range, getShowOnlyDefaultState/Clear) -> exclude tags (matchExcludeTags); then sort and render'
-      - 'Table: Storage column, sortable columns, Select; actions for selected Export, Move, Delete, Import. Entry: popup bookmarksIndexBtn -> openBookmarksIndex -> open tab; options bookmarks-index-link href to extension URL'
   code_locations:
     files:
-      - path: src/features/storage/local-bookmark-service.js
-        description: getAllBookmarks() method
-      - path: src/core/message-handler.js
-        description: GET_AGGREGATED_BOOKMARKS_FOR_INDEX, GET_LOCAL_BOOKMARKS_FOR_INDEX, handleGetAggregatedBookmarksForIndex, handleGetLocalBookmarksForIndex
-      - path: src/features/storage/bookmark-router.js
-        description: getAllBookmarksForIndex() aggregates local + file + sync with storage field
-      - path: src/ui/bookmarks-table/bookmarks-table.html
-        description: Index page layout
-      - path: src/ui/bookmarks-table/bookmarks-table.js
-        description: loadBookmarks, applySearchAndFilter, renderTableBody, setSort
-      - path: src/ui/bookmarks-table/bookmarks-table.css
-        description: Table and toolbar styles
-      - path: src/ui/bookmarks-table/bookmarks-table-filter.js
-        description: Filter pipeline and getShowOnlyDefaultState
-      - path: src/ui/bookmarks-table/bookmarks-table-time.js
-        description: Time column and format
-      - path: src/ui/bookmarks-table/bookmarks-table-sticky.js
-        description: Sticky table display and footer
-      - path: src/ui/popup/popup.html
-        description: bookmarksIndexBtn entry point
-      - path: src/ui/popup/PopupController.js
-        description: handleOpenBookmarksIndex
-      - path: src/ui/options/options.html
-        description: bookmarks-index-link in footer
-      - path: src/ui/options/options.js
-        description: bookmarksIndexLink href set in init()
+      - path: "src/features/storage/local-bookmark-service.js"
+        description: "getAllBookmarks() method"
+      - path: "src/core/message-handler.js"
+        description: "GET_AGGREGATED_BOOKMARKS_FOR_INDEX, GET_LOCAL_BOOKMARKS_FOR_INDEX, handleGetAggregatedBookmarksForIndex, handleGetLocalBookmarksForIndex"
+      - path: "src/features/storage/bookmark-router.js"
+        description: "getAllBookmarksForIndex() aggregates local + file + sync with storage field"
+      - path: "src/ui/bookmarks-table/bookmarks-table.html"
+        description: "Index page layout"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "loadBookmarks, applySearchAndFilter, renderTableBody, setSort"
+      - path: "src/ui/bookmarks-table/bookmarks-table.css"
+        description: "Table and toolbar styles"
+      - path: "src/ui/bookmarks-table/bookmarks-table-filter.js"
+        description: "Filter pipeline and getShowOnlyDefaultState"
+      - path: "src/ui/bookmarks-table/bookmarks-table-time.js"
+        description: "Time column and format"
+      - path: "src/ui/bookmarks-table/bookmarks-table-sticky.js"
+        description: "Sticky table display and footer"
+      - path: "src/ui/popup/popup.html"
+        description: "bookmarksIndexBtn entry point"
+      - path: "src/ui/popup/PopupController.js"
+        description: "handleOpenBookmarksIndex"
+      - path: "src/ui/options/options.html"
+        description: "bookmarks-index-link in footer"
+      - path: "src/ui/options/options.js"
+        description: "bookmarksIndexLink href set in init()"
     functions:
-      - name: getAllBookmarks
-        file: src/features/storage/local-bookmark-service.js
-        description: Returns full normalized array of local bookmarks, sorted by time desc
-      - name: handleGetLocalBookmarksForIndex
-        file: src/core/message-handler.js
-        description: Uses LocalBookmarkService, returns { bookmarks } (fallback)
-      - name: getAllBookmarksForIndex
-        file: src/features/storage/bookmark-router.js
-        description: Aggregates local + file + sync bookmarks with storage field, sorted by time desc
-      - name: loadBookmarks
-        file: src/ui/bookmarks-table/bookmarks-table.js
-        description: Sends getAggregatedBookmarksForIndex then fallback getLocalBookmarksForIndex
-      - name: applySearchAndFilter
-        file: src/ui/bookmarks-table/bookmarks-table.js
-        description: Applies filter pipeline and updates displayed rows
-  traceability:
-    architecture:
-      - ARCH-LOCAL_BOOKMARKS_INDEX
-      - ARCH-STORAGE_INDEX_AND_ROUTER
-    requirements:
-      - REQ-LOCAL_BOOKMARKS_INDEX
-    tests:
-      - tests/unit/message-handler-bookmarks-index.test.js
-      - tests/unit/bookmarks-table-index.test.js
-      - tests/unit/bookmarks-table-time.test.js
-    code_annotations:
-      - IMPL-LOCAL_BOOKMARKS_INDEX
-  related_decisions:
-    depends_on:
-      - ARCH-LOCAL_BOOKMARKS_INDEX
-    supersedes: []
-    see_also:
-      - IMPL-LOCAL_BOOKMARK_SERVICE
-      - IMPL-BOOKMARK_ROUTER
-    composed_with:
-      - IMPL-BOOKMARK_ROUTER
-      - IMPL-LOCAL_BOOKMARK_SERVICE
-      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
-      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
-      - IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS
-      - IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE
-  essence_pseudocode: |
-    # [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX]
-    # Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column.
-    # Contract: page load and user actions; displayed table and filtered list; state data.
-    INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
-    OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
-    DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode
-
-    # Request aggregated bookmarks; on failure fallback to local; then apply filter.
-    ON page load:
-      SEND getAggregatedBookmarksForIndex
-      ON response: SET allBookmarks = response.bookmarks (each item has storage "local"|"file"|"sync")
-      ON failure: SEND getLocalBookmarksForIndex; SET allBookmarks = response.bookmarks with storage "local"
-      applySearchAndFilter()
-
-    # Apply stores filter, search, show-only, exclude tags; sort and render.
-    applySearchAndFilter():
-      filteredBookmarks = allBookmarks
-      APPLY stores filter (matchStoresFilter, getAllowedStores)
-      APPLY search (text)
-      APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)
-      APPLY exclude tags (matchExcludeTags)
-      SORT by sortKey (e.g. time desc)
-      renderTableBody(filteredBookmarks); updateRowCount()
-
-    # Popup button and options link open bookmarks-table tab.
-    Entry points:
-      Popup: bookmarksIndexBtn click -> openBookmarksIndex -> open tab to bookmarks-table.html
-      Options: bookmarks-index-link href -> extension URL to bookmarks-table.html
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml
+      - name: "getAllBookmarks"
+        description: "Returns full normalized array of local bookmarks, sorted by time desc"
+        file: "src/features/storage/local-bookmark-service.js"
+      - name: "handleGetLocalBookmarksForIndex"
+        description: "Uses LocalBookmarkService, returns { bookmarks } (fallback)"
+        file: "src/core/message-handler.js"
+      - name: "getAllBookmarksForIndex"
+        description: "Aggregates local + file + sync bookmarks with storage field, sorted by time desc"
+        file: "src/features/storage/bookmark-router.js"
+      - name: "loadBookmarks"
+        description: "Sends getAggregatedBookmarksForIndex then fallback getLocalBookmarksForIndex"
+        file: "src/ui/bookmarks-table/bookmarks-table.js"
+      - name: "applySearchAndFilter"
+        description: "Applies filter pipeline and updates displayed rows"
+        file: "src/ui/bookmarks-table/bookmarks-table.js"
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml"
+  essence_pseudocode: "# [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX]\n# Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column.\n# Contract: page load and user actions; displayed table and filtered list; state data.\nINPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)\nOUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list\nDATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode\n\n# Request aggregated bookmarks; on failure fallback to local; then apply filter.\nON page load:\n  SEND getAggregatedBookmarksForIndex\n  ON response: SET allBookmarks = response.bookmarks (each item has storage \"local\"|\"file\"|\"sync\")\n  ON failure: SEND getLocalBookmarksForIndex; SET allBookmarks = response.bookmarks with storage \"local\"\n  applySearchAndFilter()\n\n# Apply stores filter, search, show-only, exclude tags; sort and render.\napplySearchAndFilter():\n  filteredBookmarks = allBookmarks\n  APPLY stores filter (matchStoresFilter, getAllowedStores)\n  APPLY search (text)\n  APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)\n  APPLY exclude tags (matchExcludeTags)\n  SORT by sortKey (e.g. time desc)\n  renderTableBody(filteredBookmarks); updateRowCount()\n\n# Popup button and options link open bookmarks-table tab.\nEntry points:\n  Popup: bookmarksIndexBtn click -> openBookmarksIndex -> open tab to bookmarks-table.html\n  Options: bookmarks-index-link href -> extension URL to bookmarks-table.html\n"
+  implementation_approach:
+    details:
+      - "BookmarkRouter.getAllBookmarksForIndex(): aggregates localProvider, fileProvider, syncProvider getAllBookmarks(), adds storage 'local'|'file'|'sync', merges and sorts by time desc"
+      - "Filter pipeline: stores (matchStoresFilter) -> search -> show-only (tags, toread, private, time range, getShowOnlyDefaultState/Clear) -> exclude tags (matchExcludeTags); then sort and render"
+      - "Index page loadBookmarks: send getAggregatedBookmarksForIndex; on response set allBookmarks; on failure send getLocalBookmarksForIndex, set allBookmarks with storage 'local'"
+      - "MessageHandler: handleGetAggregatedBookmarksForIndex calls bookmarkProvider.getAllBookmarksForIndex() when available; handleGetLocalBookmarksForIndex uses LocalBookmarkService only (fallback)"
+      - "Table: Storage column, sortable columns, Select; actions for selected Export, Move, Delete, Import. Entry: popup bookmarksIndexBtn -> openBookmarksIndex -> open tab; options bookmarks-index-link href to extension URL"
+    summary: "Index page sends getAggregatedBookmarksForIndex first (BookmarkRouter.getAllBookmarksForIndex), fallback getLocalBookmarksForIndex; bookmarks-table with Storage column (Local | File | Sync), search/filter/sort/launch; entry point from popup/options."
   metadata:
     created:
+      author: "MCP converter"
       date: "2026-02-18"
-      author: MCP converter
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
     last_validated:
       date: "2026-02-18"
-      validator: MCP converter
-      result: pass
+      result: "pass"
+      validator: "MCP converter"
+  name: "Local Bookmarks Index Implementation"
+  rationale:
+    benefits:
+      - "getAggregatedBookmarksForIndex (router aggregates local + file) with fallback getLocalBookmarksForIndex; table page with Storage column"
+    problems_solved:
+      - "No single view of local and file bookmarks"
+    why: "Implement full index of local and file bookmarks with Storage column, search, filter, sort, launch."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
+    depends_on:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+    see_also:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    code_annotations:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    requirements:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    tests:
+      - "tests/unit/bookmarks-table-index.test.js"
+      - "tests/unit/bookmarks-table-time.test.js"
+      - "tests/unit/message-handler-bookmarks-index.test.js"

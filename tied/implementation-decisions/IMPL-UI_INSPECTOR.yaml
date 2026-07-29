@@ -1,67 +1,51 @@
 IMPL-UI_INSPECTOR:
-  name: UI Inspector
-  status: Active
-  cross_references:
-    - ARCH-UI_TESTABILITY
-    - REQ-UI_INSPECTION
-  rationale:
-    why: Optional action and message log for testing and debugging when enabled
-    problems_solved:
-      - Cannot inspect message flow and UI actions in tests or manually
-    benefits:
-      - recordMessage/recordAction ring buffers; getLastMessages/getLastActions; gated by DEBUG_HOVERBOARD_UI or setEnabled
-  implementation_approach:
-    summary: src/shared/ui-inspector.js; wired in service-worker (recordMessage), PopupController (recordAction), content-main (recordAction)
   code_locations:
     files:
-      - path: src/shared/ui-inspector.js
-        description: UI inspector
-      - path: src/core/service-worker.js
-        description: recordMessage wiring
-      - path: src/ui/popup/PopupController.js
-        description: recordAction wiring
-      - path: src/features/content/content-main.js
-        description: recordAction wiring
+      - path: "src/shared/ui-inspector.js"
+        description: "UI inspector"
+      - path: "src/core/service-worker.js"
+        description: "recordMessage wiring"
+      - path: "src/ui/popup/PopupController.js"
+        description: "recordAction wiring"
+      - path: "src/features/content/content-main.js"
+        description: "recordAction wiring"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-UI_TESTABILITY
-    requirements:
-      - REQ-UI_INSPECTION
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: UI inspector and dev tooling.'
-    code_annotations:
-      - IMPL-UI_INSPECTOR
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also: []
-    composed_with:
-      - IMPL-UI_ACTION_CONTRACT
-      - IMPL-MESSAGE_HANDLING
-  essence_pseudocode: |
-    # [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
-    # recordMessage/recordAction ring buffers; getLastMessages/getLastActions; debug-gated.
-    # Contract: message or action in; ring buffers and getters; enabled flag.
-    INPUT: message (recordMessage); action (recordAction); gated by DEBUG_HOVERBOARD_UI or setEnabled(true)
-    OUTPUT: ring buffers of last N messages and last N actions; getLastMessages(), getLastActions()
-    DATA: message ring buffer; action ring buffer; enabled flag
-
-    # Append to buffer when enabled; drop oldest if full.
-    recordMessage(msg): IF enabled: APPEND to message buffer; DROP oldest if full
-    recordAction(action): IF enabled: APPEND to action buffer; DROP oldest if full
-
-    # Return copy of buffers.
-    getLastMessages(), getLastActions(): RETURN copy of buffer(s)
-
-    # Service-worker records message; PopupController/content record action.
-    Wiring: service-worker after handle message -> recordMessage; PopupController/content-main on action -> recordAction
-  detail_file: implementation-decisions/IMPL-UI_INSPECTOR.yaml
+  cross_references:
+    - "ARCH-UI_TESTABILITY"
+    - "REQ-UI_INSPECTION"
+  detail_file: "implementation-decisions/IMPL-UI_INSPECTOR.yaml"
+  essence_pseudocode: "# [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]\n# recordMessage/recordAction ring buffers; getLastMessages/getLastActions; debug-gated.\n# Contract: message or action in; ring buffers and getters; enabled flag.\nINPUT: message (recordMessage); action (recordAction); gated by DEBUG_HOVERBOARD_UI or setEnabled(true)\nOUTPUT: ring buffers of last N messages and last N actions; getLastMessages(), getLastActions()\nDATA: message ring buffer; action ring buffer; enabled flag\n\n# Append to buffer when enabled; drop oldest if full.\nrecordMessage(msg): IF enabled: APPEND to message buffer; DROP oldest if full\nrecordAction(action): IF enabled: APPEND to action buffer; DROP oldest if full\n\n# Return copy of buffers.\ngetLastMessages(), getLastActions(): RETURN copy of buffer(s)\n\n# Service-worker records message; PopupController/content record action.\nWiring: service-worker after handle message -> recordMessage; PopupController/content-main on action -> recordAction\n"
+  implementation_approach:
+    summary: "src/shared/ui-inspector.js; wired in service-worker (recordMessage), PopupController (recordAction), content-main (recordAction)"
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: "Add essence_pseudocode and complete composed_with"
+  name: "UI Inspector"
+  rationale:
+    benefits:
+      - "recordMessage/recordAction ring buffers; getLastMessages/getLastActions; gated by DEBUG_HOVERBOARD_UI or setEnabled"
+    problems_solved:
+      - "Cannot inspect message flow and UI actions in tests or manually"
+    why: "Optional action and message log for testing and debugging when enabled"
+  related_decisions:
+    composed_with:
+      - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-UI_ACTION_CONTRACT"
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-UI_TESTABILITY"
+    code_annotations:
+      - "IMPL-UI_INSPECTOR"
+    requirements:
+      - "REQ-UI_INSPECTION"
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: UI inspector and dev tooling."
+    tests: []

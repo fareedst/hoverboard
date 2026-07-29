@@ -1,47 +1,47 @@
 REQ-MOVE_BOOKMARK_STORAGE_UI:
-  name: Move Bookmark Storage UI
-  category: Functional
-  priority: P1
-  status: Implemented
+  category: "Functional"
+  cross_references:
+    - "ARCH-MOVE_BOOKMARK_UI"
+    - "IMPL-MOVE_BOOKMARK_UI"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+  metadata:
+    created:
+      author: "MCP converter"
+      date: "2026-02-18"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-02-18"
+      reason: "Save-follows-highlight criterion and traceability"
+    last_validated:
+      date: "2026-02-18"
+      result: "pass"
+      validator: "MCP converter"
+  name: "Move Bookmark Storage UI"
+  priority: "P1"
   rationale:
-    why: See detail file
-    problems_solved: []
     benefits: []
-  satisfaction_criteria:
-    - criterion: Popup shows current bookmark storage and a control (e.g. dropdown) to move to Pinboard, Local, or File.
-    - criterion: When the bookmark is stored in **Local (browser)** or **File (folder)**, a dedicated one-click control allows toggling between file and browser storage ("Move to File" when current is local, "Move to browser" when current is file). Hidden when storage is Pinboard or when there is no bookmark for the current URL.
-    - criterion: 'Save follows the highlight: creating or updating a bookmark from the popup uses the currently selected (highlighted) storage backend; popup sends preferredBackend and router honors it (REQ-STORAGE_MODE_DEFAULT, IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI).'
-  validation_criteria:
-    - method: Manual verification
-      coverage: See detail file
-  traceability:
-    architecture:
-      - ARCH-MOVE_BOOKMARK_UI
-      - ARCH-STORAGE_INDEX_AND_ROUTER
-    implementation:
-      - IMPL-MOVE_BOOKMARK_UI
-      - IMPL-BOOKMARK_ROUTER
-    tests: []
-    code_annotations:
-      - REQ-MOVE_BOOKMARK_STORAGE_UI
+    problems_solved: []
+    why: "See detail file"
   related_requirements:
     depends_on: []
     related_to: []
     supersedes: []
-  metadata:
-    created:
-      date: "2026-02-18"
-      author: MCP converter
-    last_updated:
-      date: "2026-02-18"
-      author: AI Agent
-      reason: Save-follows-highlight criterion and traceability
-    last_validated:
-      date: "2026-02-18"
-      validator: MCP converter
-      result: pass
-  cross_references:
-    - ARCH-MOVE_BOOKMARK_UI
-    - IMPL-MOVE_BOOKMARK_UI
-    - REQ-PER_BOOKMARK_STORAGE_BACKEND
-  summary: The user can see the current storage of the current page bookmark (Pinboard, Local, or File) and move it to another storage method via a UI control in the popup. Move is implemented as copy to target backend, delete from source, and update storage index. Options page explains default storage for new bookmarks with a three-way choice.
+  satisfaction_criteria:
+    - criterion: "Popup shows current bookmark storage and a control (e.g. dropdown) to move to Pinboard, Local, or File."
+    - criterion: "Save follows the highlight: creating or updating a bookmark from the popup uses the currently selected (highlighted) storage backend; popup sends preferredBackend and router honors it (REQ-STORAGE_MODE_DEFAULT, IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI)."
+    - criterion: "When the bookmark is stored in **Local (browser)** or **File (folder)**, a dedicated one-click control allows toggling between file and browser storage (\"Move to File\" when current is local, \"Move to browser\" when current is file). Hidden when storage is Pinboard or when there is no bookmark for the current URL."
+  status: "Implemented"
+  summary: "The user can see the current storage of the current page bookmark (Pinboard, Local, or File) and move it to another storage method via a UI control in the popup. Move is implemented as copy to target backend, delete from source, and update storage index. Options page explains default storage for new bookmarks with a three-way choice."
+  traceability:
+    architecture:
+      - "ARCH-MOVE_BOOKMARK_UI"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    code_annotations:
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    implementation:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-MOVE_BOOKMARK_UI"
+    tests: []
+  validation_criteria:
+    - method: "Manual verification"
+      coverage: "See detail file"

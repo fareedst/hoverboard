@@ -1,117 +1,73 @@
 IMPL-MESSAGE_HANDLING:
-  name: Message Handling System Implementation
-  status: Active
-  cross_references:
-    - ARCH-MESSAGE_HANDLING
-    - REQ-SMART_BOOKMARKING
-    - REQ-RECENT_TAGS_SYSTEM
-    - ARCH-TAG_SYSTEM
-  rationale:
-    why: Concrete message routing and handling
-    problems_solved:
-      - Complex routing logic
-      - Message validation
-    benefits:
-      - Centralized communication
-      - Type-safe messages
-  implementation_approach:
-    summary: Message service with type validation, routing, error handling
-    details:
-      - Standardized message types
-      - Async request/response
-      - Error handling
-      - Input validation
-      - Messaging protocol tests validate SW routing, MessageHandler contracts, content/offscreen/popup contracts, MessageClient retry, and type drift (see traceability.tests and docs/architecture/extension-messaging-protocols.md)
   code_locations:
     files:
-      - path: src/core/message-service.js
-        description: Message service
-      - path: src/core/message-handler.js
-        description: Message handler
+      - path: "src/core/message-service.js"
+        description: "Message service"
+      - path: "src/core/message-handler.js"
+        description: "Message handler"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-MESSAGE_HANDLING
-      - ARCH-TAG_SYSTEM
-    requirements:
-      - REQ-SMART_BOOKMARKING
-      - REQ-BOOKMARK_STATE_SYNCHRONIZATION
-      - REQ-RECENT_TAGS_SYSTEM
-    tests:
-      - tests/unit/module-import-fix.test.js
-      - tests/unit/message-service.test.js
-      - tests/unit/message-handler-runtime-validation.test.js
-      - tests/unit/message-handler-local-save-recall.test.js
-      - tests/unit/message-schemas.test.js
-      - tests/unit/message-handler-contracts.test.js
-      - tests/unit/service-worker-messaging-routing.test.js
-      - tests/unit/content-messaging-contracts.test.js
-      - tests/unit/popup-message-contract.test.js
-      - tests/unit/offscreen-file-bookmark-messaging.test.js
-      - tests/unit/message-client.test.js
-      - tests/unit/message-type-drift.test.js
-      - tests/playwright/extension-messaging.spec.js
-      - tests/integration/message-handler-router-storage.integration.test.js
-    code_annotations:
-      - IMPL-MESSAGE_HANDLING
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also: []
-    composed_with:
-      - IMPL-POPUP_MESSAGE_TIMEOUT
-      - IMPL-BOOKMARK_STATE_SYNC
-  essence_pseudocode: |
-    # [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM]
-    # Central message allowlist + validation + handler dispatch; recent-tag message types delegate to [IMPL-TAG_SYSTEM] TagService and SW recentTagsMemory policy per ARCH-TAG_SYSTEM. Contract: Promise result or reject on validation; recent handlers return safe shapes on internal failure.
-    INPUT: message { type, payload/data }; sender (tab/popup/background)
-    OUTPUT: Promise resolving to handler result or rejecting on validation/routing error
-    DATA: MESSAGE_TYPES allowlist; handler map type → async fn; TagService instance for tag/recent paths
-
-    # [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING]
-    # How: client-side validate type/payload; dispatch to background; return Promise (path for popup/content/offscreen callers).
-    send(message):
-      VALIDATE message.type in allowlist
-      VALIDATE payload shape
-      ROUTE to handler for message.type
-      handler(message) -> result; RETURN Promise.resolve(result)
-      ON error: RETURN Promise.reject; optional log
-
-    # How: SW entry resolves handler by message.type; missing handler → reject or structured error per router; AWAIT handler(data, senderUrl); optional BOOKMARK_UPDATED broadcast after mutating handlers ([REQ-BOOKMARK_STATE_SYNCHRONIZATION]).
-    processMessage(message) (in message-handler):
-      handler = lookup(message.type)
-      IF handler is null/undefined: RETURN reject OR { error: "unknown_type" } per existing router rules
-      result = AWAIT handler(message.payload OR message.data, senderUrl)
-      RETURN result; (caller may broadcast BOOKMARK_UPDATED etc.)
-
-    # [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] [IMPL-TAG_SYSTEM]
-    # How: getRecentBookmarks UI contract — delegate tagService.getUserRecentTagsExcludingCurrent; merges payload; primary caller [IMPL-RECENT_TAGS_POPUP_REFRESH] / panel loadRecentTags; senderUrl from router for logging.
-    handleGetRecentBookmarks(data, senderUrl):
-      recentTags = AWAIT tagService.getUserRecentTagsExcludingCurrent(data?.currentTags OR [])
-      RETURN { ...data, recentTags }
-
-    # How: addTagToRecent — validate tagName + currentSiteUrl; tagService.addTagToUserRecentList; structured { success } / error (same REQ/ARCH/IMPL cross-IMPL set as handleGetRecentBookmarks).
-    handleAddTagToRecent(data):
-      VALIDATE tagName AND currentSiteUrl present
-      success = AWAIT tagService.addTagToUserRecentList(tagName, currentSiteUrl)
-      RETURN { success } OR { success: false, error: message }
-
-    # How: getUserRecentTags message — raw policy list for diagnostics/tools; TRY/CATCH → { recentTags: [], error } on failure.
-    handleGetUserRecentTags(data):
-      TRY: RETURN { recentTags: AWAIT tagService.getUserRecentTags() }
-      CATCH: LOG; RETURN { recentTags: [], error }
-
-    # --- Composition: composed_with [IMPL-POPUP_MESSAGE_TIMEOUT] [IMPL-BOOKMARK_STATE_SYNC] ---
-    # Ordering: client send may apply timeout/retry ([IMPL-POPUP_MESSAGE_TIMEOUT]) before this IMPL’s send completes. Post successful bookmark mutations, [IMPL-BOOKMARK_STATE_SYNC] may broadcast; recent-tag handlers are read/mutation for user-recent only unless caller chains. Shared DATA: single MessageHandler TagService reference; no second recentTagsMemory writer.
-
-    # --- Cross-IMPL ---
-    # Recent paths call [IMPL-TAG_SYSTEM] only (no direct memory access from handler). Config N flows via TagService → getConfig ([IMPL-CONFIG_STRUCT]).
-  detail_file: implementation-decisions/IMPL-MESSAGE_HANDLING.yaml
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-TAG_SYSTEM"
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-SMART_BOOKMARKING"
+  detail_file: "implementation-decisions/IMPL-MESSAGE_HANDLING.yaml"
+  essence_pseudocode: "# [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM]\n# Central message allowlist + validation + handler dispatch; recent-tag message types delegate to [IMPL-TAG_SYSTEM] TagService and SW recentTagsMemory policy per ARCH-TAG_SYSTEM. Contract: Promise result or reject on validation; recent handlers return safe shapes on internal failure.\nINPUT: message { type, payload/data }; sender (tab/popup/background)\nOUTPUT: Promise resolving to handler result or rejecting on validation/routing error\nDATA: MESSAGE_TYPES allowlist; handler map type → async fn; TagService instance for tag/recent paths\n\n# [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING]\n# How: client-side validate type/payload; dispatch to background; return Promise (path for popup/content/offscreen callers).\nsend(message):\n  VALIDATE message.type in allowlist\n  VALIDATE payload shape\n  ROUTE to handler for message.type\n  handler(message) -> result; RETURN Promise.resolve(result)\n  ON error: RETURN Promise.reject; optional log\n\n# How: SW entry resolves handler by message.type; missing handler → reject or structured error per router; AWAIT handler(data, senderUrl); optional BOOKMARK_UPDATED broadcast after mutating handlers ([REQ-BOOKMARK_STATE_SYNCHRONIZATION]).\nprocessMessage(message) (in message-handler):\n  handler = lookup(message.type)\n  IF handler is null/undefined: RETURN reject OR { error: \"unknown_type\" } per existing router rules\n  result = AWAIT handler(message.payload OR message.data, senderUrl)\n  RETURN result; (caller may broadcast BOOKMARK_UPDATED etc.)\n\n# [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] [IMPL-TAG_SYSTEM]\n# How: getRecentBookmarks UI contract — delegate tagService.getUserRecentTagsExcludingCurrent; merges payload; primary caller [IMPL-RECENT_TAGS_POPUP_REFRESH] / panel loadRecentTags; senderUrl from router for logging.\nhandleGetRecentBookmarks(data, senderUrl):\n  recentTags = AWAIT tagService.getUserRecentTagsExcludingCurrent(data?.currentTags OR [])\n  RETURN { ...data, recentTags }\n\n# How: addTagToRecent — validate tagName + currentSiteUrl; tagService.addTagToUserRecentList; structured { success } / error (same REQ/ARCH/IMPL cross-IMPL set as handleGetRecentBookmarks).\nhandleAddTagToRecent(data):\n  VALIDATE tagName AND currentSiteUrl present\n  success = AWAIT tagService.addTagToUserRecentList(tagName, currentSiteUrl)\n  RETURN { success } OR { success: false, error: message }\n\n# How: getUserRecentTags message — raw policy list for diagnostics/tools; TRY/CATCH → { recentTags: [], error } on failure.\nhandleGetUserRecentTags(data):\n  TRY: RETURN { recentTags: AWAIT tagService.getUserRecentTags() }\n  CATCH: LOG; RETURN { recentTags: [], error }\n\n# --- Composition: composed_with [IMPL-POPUP_MESSAGE_TIMEOUT] [IMPL-BOOKMARK_STATE_SYNC] ---\n# Ordering: client send may apply timeout/retry ([IMPL-POPUP_MESSAGE_TIMEOUT]) before this IMPL’s send completes. Post successful bookmark mutations, [IMPL-BOOKMARK_STATE_SYNC] may broadcast; recent-tag handlers are read/mutation for user-recent only unless caller chains. Shared DATA: single MessageHandler TagService reference; no second recentTagsMemory writer.\n\n# --- Cross-IMPL ---\n# Recent paths call [IMPL-TAG_SYSTEM] only (no direct memory access from handler). Config N flows via TagService → getConfig ([IMPL-CONFIG_STRUCT]).\n"
+  implementation_approach:
+    details:
+      - "Async request/response"
+      - "Error handling"
+      - "Input validation"
+      - "Messaging protocol tests validate SW routing, MessageHandler contracts, content/offscreen/popup contracts, MessageClient retry, and type drift (see traceability.tests and docs/architecture/extension-messaging-protocols.md)"
+      - "Standardized message types"
+    summary: "Message service with type validation, routing, error handling"
   metadata:
     created:
+      author: "AI Agent"
       date: "2025-07-14"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-03-28"
-      author: AI Agent
-      reason: 'S06.4–S06.5: recent handlers + [PROC-IMPL_PSEUDOCODE_TOKENS] how-only blocks; composition notes'
+      reason: "S06.4–S06.5: recent handlers + [PROC-IMPL_PSEUDOCODE_TOKENS] how-only blocks; composition notes"
+  name: "Message Handling System Implementation"
+  rationale:
+    benefits:
+      - "Centralized communication"
+      - "Type-safe messages"
+    problems_solved:
+      - "Complex routing logic"
+      - "Message validation"
+    why: "Concrete message routing and handling"
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_STATE_SYNC"
+      - "IMPL-POPUP_MESSAGE_TIMEOUT"
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-TAG_SYSTEM"
+    code_annotations:
+      - "IMPL-MESSAGE_HANDLING"
+    requirements:
+      - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+      - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-SMART_BOOKMARKING"
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/playwright/extension-messaging.spec.js"
+      - "tests/unit/content-messaging-contracts.test.js"
+      - "tests/unit/message-client.test.js"
+      - "tests/unit/message-handler-contracts.test.js"
+      - "tests/unit/message-handler-local-save-recall.test.js"
+      - "tests/unit/message-handler-runtime-validation.test.js"
+      - "tests/unit/message-schemas.test.js"
+      - "tests/unit/message-service.test.js"
+      - "tests/unit/message-type-drift.test.js"
+      - "tests/unit/module-import-fix.test.js"
+      - "tests/unit/offscreen-file-bookmark-messaging.test.js"
+      - "tests/unit/popup-message-contract.test.js"
+      - "tests/unit/service-worker-messaging-routing.test.js"

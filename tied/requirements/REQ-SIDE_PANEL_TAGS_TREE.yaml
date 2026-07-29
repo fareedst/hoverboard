@@ -2,64 +2,64 @@
 # Requirement: Chrome side panel shows hierarchical tree of tags (top level) and bookmarks (leaves);
 # launched from popup; user selects tags and order; collapsible URL lists; click URL opens in new tab.
 REQ-SIDE_PANEL_TAGS_TREE:
-  name: Side Panel Tags and Bookmarks Tree
-  category: Functional
-  priority: P1
-  status: Implemented
+  category: "Functional"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-02-21"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-02-25"
+      reason: "Add compact tag selector and all/checked toggle criteria and validation"
+  name: "Side Panel Tags and Bookmarks Tree"
+  priority: "P1"
   rationale:
-    why: Give users a dedicated side-panel view of bookmarks grouped by tag, without leaving the current window.
-    problems_solved:
-      - No at-a-glance tag-based browse of bookmarks in the extension
-      - Opening full index page loses current tab context
     benefits:
-      - Side panel stays open across tab changes; hierarchical tag → URLs view; user chooses which tags and order
-      - Click URL opens in new tab; URL list per tag is collapsible
-  satisfaction_criteria:
-    - criterion: Side panel opens from popup (e.g. footer button "Tags tree" or "Side panel")
-    - criterion: User can select one or more tags to display and control their order
-    - criterion: 'Below tag selector, hierarchical display: tags at top level, URLs as leaf nodes showing bookmark name and URL'
-    - criterion: The list of URLs under each tag is collapsible
-    - criterion: Clicking a URL opens it in a new tab
-    - criterion: User can filter bookmarks by create time or update time (time range)
-    - criterion: 'User can filter bookmarks by tags (include set: show only bookmarks that have at least one of the selected tags)'
-    - criterion: User can filter bookmarks by domain(s) in URL (hostname)
-    - criterion: Display can be sorted by create date, update date, tags, or domain; sort order (asc/desc) is configurable
-    - criterion: Display can be grouped by create date, update date, tags, or domain (or none for flat list); grouped sections are collapsible
-    - criterion: Selection and display configuration region is expandable for use and collapsible to maximize space for the bookmarks list
-    - criterion: Config state (expanded/collapsed, filter values, sort/group choices) is persisted (e.g. chrome.storage.local)
-    - criterion: Tag selector uses a compact layout (reduced spacing/size) to maximize space for the bookmarks list
-    - criterion: User can switch between viewing all tags and only selected (checked) tags; the choice is persisted
-  validation_criteria:
-    - method: Manual verification
-      coverage: Open panel from popup; select/reorder tags; expand/collapse tag sections; click URL opens in new tab; expand/collapse config; set filters (time, tags, domain), sort and group; verify persistence; verify compact tag list and toggle between all tags / only checked tags; verify toggle state persists
-    - method: Unit tests
-      coverage: buildTagToBookmarks from bookmarks array; tag order; open-URL action with mock chrome.tabs; getDomainFromUrl; filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters; sortBookmarks; groupBookmarksBy; getTagsToDisplay (all vs only checked)
-    - method: Integration tests (mocks)
-      coverage: Popup button sends open-panel message; SW calls chrome.sidePanel.open; panel load sends getAggregatedBookmarksForIndex and renders tree
-    - method: Manual verification
-      coverage: In placeholder/demo mode (?demo=1), toggling a tag checkbox updates the tree (sections for unchecked tags are not shown).
-  traceability:
-    architecture:
-      - ARCH-SIDE_PANEL_TAGS_TREE
-    implementation:
-      - IMPL-SIDE_PANEL_TAGS_TREE
-    tests:
-      - tests/unit/tags-tree-data.test.js
-      - tests/unit/tags-tree-filter.test.js
-      - tests/unit/tags-tree-ui.test.js
-      - tests/unit/side-panel-open.test.js
-    code_annotations:
-      - REQ-SIDE_PANEL_TAGS_TREE
+      - "Click URL opens in new tab; URL list per tag is collapsible"
+      - "Side panel stays open across tab changes; hierarchical tag → URLs view; user chooses which tags and order"
+    problems_solved:
+      - "No at-a-glance tag-based browse of bookmarks in the extension"
+      - "Opening full index page loses current tab context"
+    why: "Give users a dedicated side-panel view of bookmarks grouped by tag, without leaving the current window."
   related_requirements:
     depends_on: []
     related_to:
-      - REQ-LOCAL_BOOKMARKS_INDEX
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
     supersedes: []
-  metadata:
-    created:
-      date: "2026-02-21"
-      author: AI Agent
-    last_updated:
-      date: "2026-02-25"
-      author: AI Agent
-      reason: Add compact tag selector and all/checked toggle criteria and validation
+  satisfaction_criteria:
+    - criterion: "Below tag selector, hierarchical display: tags at top level, URLs as leaf nodes showing bookmark name and URL"
+    - criterion: "Clicking a URL opens it in a new tab"
+    - criterion: "Config state (expanded/collapsed, filter values, sort/group choices) is persisted (e.g. chrome.storage.local)"
+    - criterion: "Display can be grouped by create date, update date, tags, or domain (or none for flat list); grouped sections are collapsible"
+    - criterion: "Display can be sorted by create date, update date, tags, or domain; sort order (asc/desc) is configurable"
+    - criterion: "Selection and display configuration region is expandable for use and collapsible to maximize space for the bookmarks list"
+    - criterion: "Side panel opens from popup (e.g. footer button \"Tags tree\" or \"Side panel\")"
+    - criterion: "Tag selector uses a compact layout (reduced spacing/size) to maximize space for the bookmarks list"
+    - criterion: "The list of URLs under each tag is collapsible"
+    - criterion: "User can filter bookmarks by create time or update time (time range)"
+    - criterion: "User can filter bookmarks by domain(s) in URL (hostname)"
+    - criterion: "User can filter bookmarks by tags (include set: show only bookmarks that have at least one of the selected tags)"
+    - criterion: "User can select one or more tags to display and control their order"
+    - criterion: "User can switch between viewing all tags and only selected (checked) tags; the choice is persisted"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-SIDE_PANEL_TAGS_TREE"
+    code_annotations:
+      - "REQ-SIDE_PANEL_TAGS_TREE"
+    implementation:
+      - "IMPL-SIDE_PANEL_TAGS_TREE"
+    tests:
+      - "tests/unit/side-panel-open.test.js"
+      - "tests/unit/tags-tree-data.test.js"
+      - "tests/unit/tags-tree-filter.test.js"
+      - "tests/unit/tags-tree-ui.test.js"
+  validation_criteria:
+    - method: "Manual verification"
+      coverage: "Open panel from popup; select/reorder tags; expand/collapse tag sections; click URL opens in new tab; expand/collapse config; set filters (time, tags, domain), sort and group; verify persistence; verify compact tag list and toggle between all tags / only checked tags; verify toggle state persists"
+    - method: "Unit tests"
+      coverage: "buildTagToBookmarks from bookmarks array; tag order; open-URL action with mock chrome.tabs; getDomainFromUrl; filterByTimeRange, filterByTagsInclude, filterByDomains, applyFilters; sortBookmarks; groupBookmarksBy; getTagsToDisplay (all vs only checked)"
+    - method: "Integration tests (mocks)"
+      coverage: "Popup button sends open-panel message; SW calls chrome.sidePanel.open; panel load sends getAggregatedBookmarksForIndex and renders tree"
+    - method: "Manual verification"
+      coverage: "In placeholder/demo mode (?demo=1), toggling a tag checkbox updates the tree (sections for unchecked tags are not shown)."

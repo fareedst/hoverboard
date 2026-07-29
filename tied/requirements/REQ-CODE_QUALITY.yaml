@@ -1,21 +1,21 @@
 REQ-CODE_QUALITY:
   rationale:
-    why: Ensure consistent code style, linting, and build-time quality checks without blocking on unfixable transitive vulnerabilities
-    problems_solved:
-      - Inconsistent style and undefined globals
-      - Build failures due to moderate audit findings in tooling deps
     benefits:
-      - Single source of truth for lint rules (ESLint 10 flat config)
-      - 'Predictable builds: validate fails only on high/critical'
+      - "Predictable builds: validate fails only on high/critical"
+      - "Single source of truth for lint rules (ESLint 10 flat config)"
+    problems_solved:
+      - "Build failures due to moderate audit findings in tooling deps"
+      - "Inconsistent style and undefined globals"
+    why: "Ensure consistent code style, linting, and build-time quality checks without blocking on unfixable transitive vulnerabilities"
   satisfaction_criteria:
-    - criterion: ESLint runs with flat config and Standard-style preset
-      metric: eslint.config.mjs with @eslinter/eslint-config-standard; npm run lint/lint:fix succeed
-    - criterion: Node.js version documented
-      metric: package.json engines.node >= 20.19.0
-    - criterion: Security audit does not block for moderate-only
-      metric: security:check uses --audit-level=high
+    - criterion: "ESLint runs with flat config and Standard-style preset"
+      metric: "eslint.config.mjs with @eslinter/eslint-config-standard; npm run lint/lint:fix succeed"
+    - criterion: "Node.js version documented"
+      metric: "package.json engines.node >= 20.19.0"
+    - criterion: "Security audit does not block for moderate-only"
+      metric: "security:check uses --audit-level=high"
   traceability:
     architecture:
-      - ARCH-CODE_QUALITY
+      - "ARCH-CODE_QUALITY"
     implementation:
-      - IMPL-CODE_STYLE
+      - "IMPL-CODE_STYLE"

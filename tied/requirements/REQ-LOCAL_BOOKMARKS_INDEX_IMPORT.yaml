@@ -1,54 +1,54 @@
 REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
-  name: Local Bookmarks Index Import
-  category: Functional
-  priority: P1
-  status: Implemented
+  category: "Functional"
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-02-18"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-02-18"
+      reason: "New requirement for import UX"
+    last_validated:
+      date: "2026-02-18"
+      result: "pass"
+      validator: "AI Agent"
+  name: "Local Bookmarks Index Import"
+  priority: "P1"
   rationale:
-    why: Allow users to import bookmarks from a file (CSV or JSON) into the index storage (Local | File | Sync) with control over duplicates.
-    problems_solved:
-      - No way to restore or merge previously exported bookmark data into the index
-      - No way to bring in bookmarks from external CSV/JSON files (e.g. from another tool or backup)
     benefits:
-      - Import only new: merge external data without overwriting existing bookmarks (by URL)
-      - Import and overwrite: full restore or update of records from a file
-      - Same file formats as export (CSV with Title, URL, Tags, Time, Storage, Shared, To read, Notes; JSON array of bookmark objects) for round-trip and portability
-      - Import to Local | File | Sync so user chooses target storage; uses existing saveBookmark message (no new backend API)
-  satisfaction_criteria:
-    - criterion: User can choose to import only new records (skip URLs already in index) or import and overwrite existing records.
-    - criterion: User can select a file (CSV or JSON in export format) and target storage (Local | File | Sync).
-    - criterion: Import uses existing saveBookmark message; no new backend API.
-  validation_criteria:
-    - method: Manual verification and unit tests
-      coverage: Parse CSV/JSON; only-new vs overwrite behavior; result message (imported, skipped, failed).
-  traceability:
-    architecture:
-      - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
-    implementation:
-      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
-    tests:
-      - tests/unit/bookmarks-table-import.test.js
-    code_annotations:
-      - REQ-LOCAL_BOOKMARKS_INDEX_IMPORT
+      - "Import to Local | File | Sync so user chooses target storage; uses existing saveBookmark message (no new backend API)"
+      - "Same file formats as export (CSV with Title, URL, Tags, Time, Storage, Shared, To read, Notes; JSON array of bookmark objects) for round-trip and portability"
+      - Import and overwrite: "full restore or update of records from a file"
+      - Import only new: "merge external data without overwriting existing bookmarks (by URL)"
+    problems_solved:
+      - "No way to bring in bookmarks from external CSV/JSON files (e.g. from another tool or backup)"
+      - "No way to restore or merge previously exported bookmark data into the index"
+    why: "Allow users to import bookmarks from a file (CSV or JSON) into the index storage (Local | File | Sync) with control over duplicates."
   related_requirements:
     depends_on: []
     related_to:
-      - REQ-LOCAL_BOOKMARKS_INDEX
-      - REQ-LOCAL_BOOKMARKS_INDEX_EXPORT
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
     supersedes: []
-  metadata:
-    created:
-      date: "2026-02-18"
-      author: AI Agent
-    last_updated:
-      date: "2026-02-18"
-      author: AI Agent
-      reason: New requirement for import UX
-    last_validated:
-      date: "2026-02-18"
-      validator: AI Agent
-      result: pass
-  cross_references:
-    - ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT
-    - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
-    - REQ-LOCAL_BOOKMARKS_INDEX
-  summary: 'From the Local Bookmarks Index page, the user can import bookmarks from a CSV or JSON file. Two modes: Import only new (skip URLs already in the index) and Import and overwrite existing. Optional Import to target (Local | File | Sync). Uses existing saveBookmark message; result message shows imported, skipped, and failed counts.'
+  satisfaction_criteria:
+    - criterion: "Import uses existing saveBookmark message; no new backend API."
+    - criterion: "User can choose to import only new records (skip URLs already in index) or import and overwrite existing records."
+    - criterion: "User can select a file (CSV or JSON in export format) and target storage (Local | File | Sync)."
+  status: "Implemented"
+  summary: "From the Local Bookmarks Index page, the user can import bookmarks from a CSV or JSON file. Two modes: Import only new (skip URLs already in the index) and Import and overwrite existing. Optional Import to target (Local | File | Sync). Uses existing saveBookmark message; result message shows imported, skipped, and failed counts."
+  traceability:
+    architecture:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    code_annotations:
+      - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    implementation:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    tests:
+      - "tests/unit/bookmarks-table-import.test.js"
+  validation_criteria:
+    - method: "Manual verification and unit tests"
+      coverage: "Parse CSV/JSON; only-new vs overwrite behavior; result message (imported, skipped, failed)."

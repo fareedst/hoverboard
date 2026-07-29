@@ -8,7 +8,7 @@
 
 **Standards:** [`../docs/vocabulary-index-analysis-and-standards.md`](../docs/vocabulary-index-analysis-and-standards.md).
 
-**See also:** [`routing.md`](routing.md) (primary entry / PRELOAD) · [`../docs/client-development-index.md`](../docs/client-development-index.md) · [`tied-methodology.md`](tied-methodology.md) · [`tied-yaml-mcp.md`](tied-yaml-mcp.md) · [`feedback-to-tied.md`](feedback-to-tied.md) · [`leap-proposal-queue.md`](leap-proposal-queue.md) · [`agentstream.md`](agentstream.md) · [`agent-stream-ruby.md`](agent-stream-ruby.md) · [`pseudocode-and-citdp.md`](pseudocode-and-citdp.md) · [`config-discovery.md`](config-discovery.md)
+**See also:** [`routing.md`](routing.md) (primary entry / PRELOAD) · [`../docs/client-development-index.md`](../docs/client-development-index.md) · [`tied-methodology.md`](tied-methodology.md) · [`tied-yaml-mcp.md`](tied-yaml-mcp.md) · [`feedback-to-tied.md`](feedback-to-tied.md) · [`leap-proposal-queue.md`](leap-proposal-queue.md) · [`agentstream.md`](agentstream.md) · [`agent-stream-ruby.md`](agent-stream-ruby.md) · [`pseudocode-and-citdp.md`](pseudocode-and-citdp.md) · [`storage-backends.md`](storage-backends.md) · [`bookmarks.md`](bookmarks.md) · [`bookmarks-index.md`](bookmarks-index.md) · [`tags.md`](tags.md) · [`side-panel.md`](side-panel.md) · [`ui-surfaces.md`](ui-surfaces.md) · [`ipc-messaging.md`](ipc-messaging.md) · [`config-and-privacy.md`](config-and-privacy.md) · [`config-discovery.md`](config-discovery.md)
 
 ---
 
@@ -32,6 +32,14 @@
 | 4 | [`agentstream.md`](agentstream.md) | Go `agentstream` CLI: pipeline, turns, checklist render, executor, HTML format, MCP preflight |
 | 4b | [`agent-stream-ruby.md`](agent-stream-ruby.md) | Ruby ATDD runner parity with Go |
 | 5 | [`pseudocode-and-citdp.md`](pseudocode-and-citdp.md) | Domain vocab vs IMPL grammar; three-way alignment; CITDP record naming |
+| 6 | [`storage-backends.md`](storage-backends.md) | Storage backends, storage index, BookmarkRouter, native host / File path |
+| 7 | [`bookmarks.md`](bookmarks.md) | Pinboard-shaped pin model, badge, usage tracking, state sync |
+| 7b | [`bookmarks-index.md`](bookmarks-index.md) | Local Bookmarks Index, import/export, Netscape HTML, Browser Bookmark Import |
+| 8 | [`tags.md`](tags.md) | Current/Recent/Suggested/Session tags, sort, AI tagging |
+| 9 | [`side-panel.md`](side-panel.md) | Side panel tabs: This Page, By Tag, Tabs, Bookmarks, Usage |
+| 10 | [`ui-surfaces.md`](ui-surfaces.md) | Overlay, popup, theme, badge, quick access, icon click |
+| 11 | [`ipc-messaging.md`](ipc-messaging.md) | MESSAGE_TYPES, content messages, action→message bridges |
+| 12 | [`config-and-privacy.md`](config-and-privacy.md) | ConfigManager keys, inhibit URLs, feature flags, AI/auth settings |
 | — | [`config-discovery.md`](config-discovery.md) | Planned layered YAML config (stub; `(proposed)` terms) |
 
 ---
@@ -56,6 +64,12 @@
 - **Domain vocabulary** (this tree) vs **IMPL grammar vocabulary** (INPUT/OUTPUT/DATA keywords) — define once in [`pseudocode-and-citdp.md`](pseudocode-and-citdp.md).
 - **TIED base path** / **project YAML** vs **methodology YAML** — define once in [`tied-methodology.md`](tied-methodology.md); referenced from [`tied-yaml-mcp.md`](tied-yaml-mcp.md).
 - **Non-canonical LEAP proposals** (`leap-proposals/`) never mutate project TIED YAML — see [`leap-proposal-queue.md`](leap-proposal-queue.md).
+- **Local (storage backend)** vs **Local Bookmarks Index** — backend `local` (`hoverboard_local_bookmarks`) is defined in [`storage-backends.md`](storage-backends.md); the management page is [`bookmarks-index.md`](bookmarks-index.md).
+- **Sync (storage backend)** vs **bookmark state synchronization** — backend `sync` (`chrome.storage.sync`) in [`storage-backends.md`](storage-backends.md); cross-surface pin/tag broadcast (`BOOKMARK_UPDATED`) in [`bookmarks.md`](bookmarks.md) / [`ipc-messaging.md`](ipc-messaging.md).
+- **pin / bookmark** vs **Pinboard** — pin record shape and UI dual names in [`bookmarks.md`](bookmarks.md); Pinboard as product/API/backend in [`bookmarks.md`](bookmarks.md) and [`storage-backends.md`](storage-backends.md).
+- **Bookmarks overloaded** — Hoverboard-stored pins ([`bookmarks.md`](bookmarks.md)), side-panel **Bookmarks** tab (browser tree, [`side-panel.md`](side-panel.md)), and **Local Bookmarks Index** ([`bookmarks-index.md`](bookmarks-index.md)) are distinct.
+- **hover / overlay** vs **Hoverboard** — product name vs on-page overlay UI; preferred terms in [`ui-surfaces.md`](ui-surfaces.md).
+- **Recent Tags** vs **getRecentBookmarks** — recent tag chips ([`tags.md`](tags.md)) vs aggregated recent pin list ([`storage-backends.md`](storage-backends.md) / [`ipc-messaging.md`](ipc-messaging.md)).
 
 ---
 
@@ -65,7 +79,13 @@
 |------|---------|
 | agent-stream | Cross-topic notes |
 | agentstream | Cross-topic notes |
+| Bookmarks overloaded | Cross-topic notes |
 | Domain vocabulary index | Title |
+| hover / overlay vs Hoverboard | Cross-topic notes |
 | IMPL grammar vocabulary | Authoring guides |
+| Local vs Local Bookmarks Index | Cross-topic notes |
+| pin vs Pinboard | Cross-topic notes |
+| Recent Tags vs getRecentBookmarks | Cross-topic notes |
 | sub-vocabulary-sync | Scope |
+| Sync vs state synchronization | Cross-topic notes |
 | VOCAB_INDEX | Scope |

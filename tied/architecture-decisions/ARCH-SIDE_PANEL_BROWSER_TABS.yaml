@@ -1,45 +1,45 @@
 ARCH-SIDE_PANEL_BROWSER_TABS:
-  name: Side Panel Browser Tabs Architecture
-  status: Active
   cross_references:
-    - REQ-SIDE_PANEL_BROWSER_TABS
-  rationale:
-    why: New panel lists browser tabs from chrome.tabs; referrer must be fetched by the service worker so scripting runs in tab context; filter and actions operate on visible list.
-    problems_solved:
-      - How to get referrer (not in chrome.tabs API)
-      - Scripting from the side panel does not run in tab context; injection must be done from the service worker
-      - How to scope copy/close to filtered list
-      - How to keep row bookmark tags, to-read, and private indicators aligned with getCurrentBookmark after batch bookmark actions without forcing a full tab reload
-    benefits:
-      - 'Single panel #browserTabsPanel; data from chrome.tabs; referrer via GET_TAB_REFERRERS; search scope Tab info / Page text / Elements via GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS (SW executeScript per tab); scope-aware filter; list render, copy/close, and batch bookmark actions all use the same displayed set (filtered visible tabs minus session hiddenTabIds)'
-      - Bookmark row state comes from the same getCurrentBookmark contract as elsewhere (tags, exists, toread, shared); panel merges into per-row fields and can re-merge all rows after batch set/clear to-read or add tags
+    - "REQ-SIDE_PANEL_BROWSER_TABS"
   implementation_approach:
-    summary: 'Panel uses chrome.tabs.query; scope is chosen by user (Current window default, or All windows). Referrer via GET_TAB_REFERRERS (SW executeScript per tab). Search scope: user selects Tab info (title/url/referrer), Page text (body), or Elements (alt, h1–h3, meta, etc.); GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS return tabId-to-string maps via SW executeScript; fetch when scope is selected or on load. Filter is scope-aware; loading state during fetch. List display mode (Title | URL | Block) is in the list section immediately above the tab list (not in the filter section). Control groups use very narrow margins. Above the batch bookmark (Tags) section a stats line shows: windows in display group / total windows open, tabs in display group / total tabs open (totals from chrome.windows.getAll and chrome.tabs.query({})). Elements: DOM sources textbox (Elements) is always used for importantTagSources when scope is Elements; empty textbox falls back to default list. Panel controls are grouped into sections with inner control-group wrappers (very narrow margins). Copy URLs, copy records as YAML, close, gather/distribute, and batch bookmark iterate the displayed list (same as render). Row UI shows bookmark tags plus optional to-read/private indicators when the merged bookmark state says so; after batch bookmark actions the panel re-runs getCurrentBookmark merge for all loaded tabs then reapplies the filter so the list reflects storage without requiring Refresh. Favicon and tooltips as before.'
-  traceability:
-    requirements:
-      - REQ-SIDE_PANEL_BROWSER_TABS
-    implementation:
-      - IMPL-SIDE_PANEL_BROWSER_TABS
-    tests:
-      - tests/unit/browser-tabs-panel.test.js
-      - tests/unit/side-panel-tabs.test.js
-      - tests/unit/service-worker-messaging-routing.test.js
-      - tests/integration/browser-tabs-tab-composition.integration.test.js
-      - tests/playwright/extension-demo-tabs.spec.js
-    code_annotations:
-      - ARCH-SIDE_PANEL_BROWSER_TABS
-  related_decisions:
-    depends_on:
-      - REQ-SIDE_PANEL_BROWSER_TABS
-    informs:
-      - IMPL-SIDE_PANEL_BROWSER_TABS
-    see_also:
-      - ARCH-SIDE_PANEL_TABS
+    summary: "Panel uses chrome.tabs.query; scope is chosen by user (Current window default, or All windows). Referrer via GET_TAB_REFERRERS (SW executeScript per tab). Search scope: user selects Tab info (title/url/referrer), Page text (body), or Elements (alt, h1–h3, meta, etc.); GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS return tabId-to-string maps via SW executeScript; fetch when scope is selected or on load. Filter is scope-aware; loading state during fetch. List display mode (Title | URL | Block) is in the list section immediately above the tab list (not in the filter section). Control groups use very narrow margins. Above the batch bookmark (Tags) section a stats line shows: windows in display group / total windows open, tabs in display group / total tabs open (totals from chrome.windows.getAll and chrome.tabs.query({})). Elements: DOM sources textbox (Elements) is always used for importantTagSources when scope is Elements; empty textbox falls back to default list. Panel controls are grouped into sections with inner control-group wrappers (very narrow margins). Copy URLs, copy records as YAML, close, gather/distribute, and batch bookmark iterate the displayed list (same as render). Row UI shows bookmark tags plus optional to-read/private indicators when the merged bookmark state says so; after batch bookmark actions the panel re-runs getCurrentBookmark merge for all loaded tabs then reapplies the filter so the list reflects storage without requiring Refresh. Favicon and tooltips as before."
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-28"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-03-28"
-      author: AI Agent
-      reason: 'S06.4 displayed-list + bookmark projection; S13 sync: traceability.tests include browser-tabs-tab-composition (Phase G) alongside unit/E2E'
+      reason: "S06.4 displayed-list + bookmark projection; S13 sync: traceability.tests include browser-tabs-tab-composition (Phase G) alongside unit/E2E"
+  name: "Side Panel Browser Tabs Architecture"
+  rationale:
+    benefits:
+      - "Bookmark row state comes from the same getCurrentBookmark contract as elsewhere (tags, exists, toread, shared); panel merges into per-row fields and can re-merge all rows after batch set/clear to-read or add tags"
+      - "Single panel #browserTabsPanel; data from chrome.tabs; referrer via GET_TAB_REFERRERS; search scope Tab info / Page text / Elements via GET_TABS_PAGE_TEXT and GET_TABS_IMPORTANT_TAGS (SW executeScript per tab); scope-aware filter; list render, copy/close, and batch bookmark actions all use the same displayed set (filtered visible tabs minus session hiddenTabIds)"
+    problems_solved:
+      - "How to get referrer (not in chrome.tabs API)"
+      - "How to keep row bookmark tags, to-read, and private indicators aligned with getCurrentBookmark after batch bookmark actions without forcing a full tab reload"
+      - "How to scope copy/close to filtered list"
+      - "Scripting from the side panel does not run in tab context; injection must be done from the service worker"
+    why: "New panel lists browser tabs from chrome.tabs; referrer must be fetched by the service worker so scripting runs in tab context; filter and actions operate on visible list."
+  related_decisions:
+    depends_on:
+      - "REQ-SIDE_PANEL_BROWSER_TABS"
+    informs:
+      - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    see_also:
+      - "ARCH-SIDE_PANEL_TABS"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-SIDE_PANEL_BROWSER_TABS"
+    implementation:
+      - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    requirements:
+      - "REQ-SIDE_PANEL_BROWSER_TABS"
+    tests:
+      - "tests/integration/browser-tabs-tab-composition.integration.test.js"
+      - "tests/playwright/extension-demo-tabs.spec.js"
+      - "tests/unit/browser-tabs-panel.test.js"
+      - "tests/unit/service-worker-messaging-routing.test.js"
+      - "tests/unit/side-panel-tabs.test.js"

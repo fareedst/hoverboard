@@ -1,80 +1,65 @@
 IMPL-POPUP_SESSION:
-  name: Popup Session Persistence Implementation
-  status: Active
-  cross_references:
-    - ARCH-POPUP_SESSION
-    - REQ-POPUP_PERSISTENT_SESSION
-  rationale:
-    why: Multi-action workflows without reopening
-    problems_solved:
-      - Popup closing interrupts work
-      - State management complexity
-    benefits:
-      - Continuous workflows
-      - Better UX
-  implementation_approach:
-    summary: PopupController routing with StateManager, UIManager, no window.close
-    details:
-      - PopupController handlers await async work
-      - StateManager mutations
-      - UIManager updates
-      - GET_OVERLAY_STATE fallback
-      - Inline notifications
   code_locations:
     files:
-      - path: src/ui/popup/PopupController.js
-        description: Popup controller
-      - path: src/ui/popup/UIManager.js
-        description: UI manager
+      - path: "src/ui/popup/PopupController.js"
+        description: "Popup controller"
+      - path: "src/ui/popup/UIManager.js"
+        description: "UI manager"
     functions:
-      - name: handleShowHoverboard
-        file: src/ui/popup/PopupController.js
-        description: Overlay toggle handler
-      - name: handleTogglePrivate
-        file: src/ui/popup/PopupController.js
-        description: Privacy toggle
-      - name: updateShowHoverButtonState
-        file: src/ui/popup/UIManager.js
-        description: Button state updater
-  traceability:
-    architecture:
-      - ARCH-POPUP_SESSION
-    requirements:
-      - REQ-POPUP_PERSISTENT_SESSION
-    tests:
-      - tests/unit/popup-close-behavior.test.js
-      - tests/unit/popup-checkbox.test.js
-    code_annotations:
-      - IMPL-POPUP_SESSION
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-MESSAGE_HANDLING
-    composed_with:
-      - IMPL-MESSAGE_HANDLING
-  essence_pseudocode: |
-    # [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION]
-    # PopupController handlers await messages; StateManager and UIManager updates; no window.close.
-    # Contract: user actions and GET_OVERLAY_STATE; popup open and state/UI in sync.
-    INPUT: user actions (show overlay, toggle private, save, etc.); GET_OVERLAY_STATE fallback
-    OUTPUT: popup stays open; state and UI updated; no window.close
-    DATA: StateManager (overlay visible, bookmark, etc.); UIManager (button states, labels)
-
-    # Await message; update state and UI; inline notification; do not close.
-    PopupController handler (e.g. handleShowHoverboard):
-      AWAIT send message (e.g. TOGGLE_OVERLAY)
-      StateManager.update(...); UIManager.updateShowHoverButtonState(...)
-      INLINE notification if needed; DO NOT call window.close
-
-    # On open sync overlay state to StateManager and UIManager.
-    ON popup open: SEND GET_OVERLAY_STATE; SYNC state to StateManager and UIManager
-  detail_file: implementation-decisions/IMPL-POPUP_SESSION.yaml
+      - name: "handleShowHoverboard"
+        description: "Overlay toggle handler"
+        file: "src/ui/popup/PopupController.js"
+      - name: "handleTogglePrivate"
+        description: "Privacy toggle"
+        file: "src/ui/popup/PopupController.js"
+      - name: "updateShowHoverButtonState"
+        description: "Button state updater"
+        file: "src/ui/popup/UIManager.js"
+  cross_references:
+    - "ARCH-POPUP_SESSION"
+    - "REQ-POPUP_PERSISTENT_SESSION"
+  detail_file: "implementation-decisions/IMPL-POPUP_SESSION.yaml"
+  essence_pseudocode: "# [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION]\n# PopupController handlers await messages; StateManager and UIManager updates; no window.close.\n# Contract: user actions and GET_OVERLAY_STATE; popup open and state/UI in sync.\nINPUT: user actions (show overlay, toggle private, save, etc.); GET_OVERLAY_STATE fallback\nOUTPUT: popup stays open; state and UI updated; no window.close\nDATA: StateManager (overlay visible, bookmark, etc.); UIManager (button states, labels)\n\n# Await message; update state and UI; inline notification; do not close.\nPopupController handler (e.g. handleShowHoverboard):\n  AWAIT send message (e.g. TOGGLE_OVERLAY)\n  StateManager.update(...); UIManager.updateShowHoverButtonState(...)\n  INLINE notification if needed; DO NOT call window.close\n\n# On open sync overlay state to StateManager and UIManager.\nON popup open: SEND GET_OVERLAY_STATE; SYNC state to StateManager and UIManager\n"
+  implementation_approach:
+    details:
+      - "GET_OVERLAY_STATE fallback"
+      - "Inline notifications"
+      - "PopupController handlers await async work"
+      - "StateManager mutations"
+      - "UIManager updates"
+    summary: "PopupController routing with StateManager, UIManager, no window.close"
   metadata:
     created:
+      author: "AI Agent"
       date: "2025-07-14"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: "Add essence_pseudocode and complete composed_with"
+  name: "Popup Session Persistence Implementation"
+  rationale:
+    benefits:
+      - "Better UX"
+      - "Continuous workflows"
+    problems_solved:
+      - "Popup closing interrupts work"
+      - "State management complexity"
+    why: "Multi-action workflows without reopening"
+  related_decisions:
+    composed_with:
+      - "IMPL-MESSAGE_HANDLING"
+    depends_on: []
+    see_also:
+      - "IMPL-MESSAGE_HANDLING"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-POPUP_SESSION"
+    code_annotations:
+      - "IMPL-POPUP_SESSION"
+    requirements:
+      - "REQ-POPUP_PERSISTENT_SESSION"
+    tests:
+      - "tests/unit/popup-checkbox.test.js"
+      - "tests/unit/popup-close-behavior.test.js"

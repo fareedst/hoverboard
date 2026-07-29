@@ -1,105 +1,61 @@
 IMPL-FILE_BOOKMARK_SERVICE:
-  name: File Bookmark Service
-  status: Active
-  cross_references:
-    - REQ-FILE_BOOKMARK_STORAGE
-    - ARCH-FILE_BOOKMARK_PROVIDER
-  rationale:
-    why: Implement file-based bookmark provider with same contract as Local/Pinboard; testable via adapter abstraction.
-    problems_solved:
-      - No file-based storage implementation
-    benefits:
-      - 'FileBookmarkStorageAdapter: readBookmarksFile(), writeBookmarksFile(data); mockable for tests'
-      - 'FileBookmarkService: getBookmarkForUrl, getRecentBookmarks, saveBookmark, deleteBookmark, saveTag, deleteTag, testConnection'
-      - 'File format: { version: 1, bookmarks: { url: bookmark } }; same bookmark shape as local'
-  implementation_approach:
-    summary: FileBookmarkService in src/features/storage/file-bookmark-service.js; adapter interface; in-memory adapter for tests; real adapter (file I/O) for production.
-    details:
-      - 'Adapter methods: readBookmarksFile() -> Promise<{ version, bookmarks }>, writeBookmarksFile(data) -> Promise<void>'
-      - Normalize URL and bookmark shape to match LocalBookmarkService (url, description, extended, tags, time, shared, toread, hash)
-      - 'Filename in directory: hoverboard-bookmarks.json'
   code_locations:
     files:
-      - path: src/features/storage/file-bookmark-service.js
-        description: FileBookmarkService and adapter usage
-      - path: src/features/storage/file-bookmark-storage-adapter.js
-        description: Adapter interface and in-memory implementation
+      - path: "src/features/storage/file-bookmark-service.js"
+        description: "FileBookmarkService and adapter usage"
+      - path: "src/features/storage/file-bookmark-storage-adapter.js"
+        description: "Adapter interface and in-memory implementation"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-FILE_BOOKMARK_PROVIDER
-    requirements:
-      - REQ-FILE_BOOKMARK_STORAGE
-    tests:
-      - tests/unit/file-bookmark-service.test.js
-      - tests/unit/offscreen-file-bookmark-messaging.test.js
-    code_annotations:
-      - IMPL-FILE_BOOKMARK_SERVICE
-  related_decisions:
-    depends_on:
-      - ARCH-FILE_BOOKMARK_PROVIDER
-    supersedes: []
-    see_also:
-      - IMPL-LOCAL_BOOKMARK_SERVICE
-    composed_with:
-      - IMPL-BOOKMARK_ROUTER
-      - IMPL-STORAGE_INDEX
-      - IMPL-LOCAL_BOOKMARK_SERVICE
-  essence_pseudocode: |
-    # [IMPL-FILE_BOOKMARK_SERVICE] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE]
-    # File-based bookmark provider via adapter; same contract as Local/Pinboard.
-    # Contract: url/bookmark/tag inputs and provider-shaped outputs; adapter and file shape.
-    INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
-    OUTPUT: bookmark object or list of bookmarks or success/error; shape matches provider contract
-    DATA: adapter (readBookmarksFile, writeBookmarksFile); file shape = { version: 1, bookmarks: map url -> bookmark }
-
-    # Read file via adapter and return bookmarks map (or {}).
-    LOAD bookmarks from file:
-      data = adapter.readBookmarksFile()
-      RETURN data.bookmarks (or {} if missing); in-memory map urlNorm -> bookmark
-
-    # Lookup by normalized URL.
-    getBookmarkForUrl(url):
-      bookmarks = LOAD bookmarks from file
-      urlNorm = normalize(url)
-      RETURN bookmarks[urlNorm] or null
-
-    # Merge data into bookmark shape and write file.
-    saveBookmark(data):
-      bookmarks = LOAD bookmarks from file
-      urlNorm = normalize(data.url)
-      bookmarks[urlNorm] = merge(data into bookmark shape with url, description, extended, tags, time, shared, toread, hash)
-      adapter.writeBookmarksFile({ version: 1, bookmarks })
-      RETURN { success: true }
-
-    # Remove by normalized URL and write file.
-    deleteBookmark(url):
-      bookmarks = LOAD bookmarks from file
-      REMOVE bookmarks[normalize(url)]
-      adapter.writeBookmarksFile({ version: 1, bookmarks })
-      RETURN { success: true }
-
-    # Update tags on bookmark and persist.
-    saveTag(data), deleteTag(data):
-      bookmark = getBookmarkForUrl(data.url); update tags; saveBookmark(bookmark) or equivalent
-      RETURN { success: true }
-
-    # Sort by time descending and return first count.
-    getRecentBookmarks(count):
-      bookmarks = LOAD bookmarks from file
-      list = values(bookmarks)
-      SORT list BY time DESCENDING
-      RETURN list[0..count-1]
-  detail_file: implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml
+  cross_references:
+    - "ARCH-FILE_BOOKMARK_PROVIDER"
+    - "REQ-FILE_BOOKMARK_STORAGE"
+  detail_file: "implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml"
+  essence_pseudocode: "# [IMPL-FILE_BOOKMARK_SERVICE] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE]\n# File-based bookmark provider via adapter; same contract as Local/Pinboard.\n# Contract: url/bookmark/tag inputs and provider-shaped outputs; adapter and file shape.\nINPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)\nOUTPUT: bookmark object or list of bookmarks or success/error; shape matches provider contract\nDATA: adapter (readBookmarksFile, writeBookmarksFile); file shape = { version: 1, bookmarks: map url -> bookmark }\n\n# Read file via adapter and return bookmarks map (or {}).\nLOAD bookmarks from file:\n  data = adapter.readBookmarksFile()\n  RETURN data.bookmarks (or {} if missing); in-memory map urlNorm -> bookmark\n\n# Lookup by normalized URL.\ngetBookmarkForUrl(url):\n  bookmarks = LOAD bookmarks from file\n  urlNorm = normalize(url)\n  RETURN bookmarks[urlNorm] or null\n\n# Merge data into bookmark shape and write file.\nsaveBookmark(data):\n  bookmarks = LOAD bookmarks from file\n  urlNorm = normalize(data.url)\n  bookmarks[urlNorm] = merge(data into bookmark shape with url, description, extended, tags, time, shared, toread, hash)\n  adapter.writeBookmarksFile({ version: 1, bookmarks })\n  RETURN { success: true }\n\n# Remove by normalized URL and write file.\ndeleteBookmark(url):\n  bookmarks = LOAD bookmarks from file\n  REMOVE bookmarks[normalize(url)]\n  adapter.writeBookmarksFile({ version: 1, bookmarks })\n  RETURN { success: true }\n\n# Update tags on bookmark and persist.\nsaveTag(data), deleteTag(data):\n  bookmark = getBookmarkForUrl(data.url); update tags; saveBookmark(bookmark) or equivalent\n  RETURN { success: true }\n\n# Sort by time descending and return first count.\ngetRecentBookmarks(count):\n  bookmarks = LOAD bookmarks from file\n  list = values(bookmarks)\n  SORT list BY time DESCENDING\n  RETURN list[0..count-1]\n"
+  implementation_approach:
+    details:
+      - "Adapter methods: readBookmarksFile() -> Promise<{ version, bookmarks }>, writeBookmarksFile(data) -> Promise<void>"
+      - "Filename in directory: hoverboard-bookmarks.json"
+      - "Normalize URL and bookmark shape to match LocalBookmarkService (url, description, extended, tags, time, shared, toread, hash)"
+    summary: "FileBookmarkService in src/features/storage/file-bookmark-service.js; adapter interface; in-memory adapter for tests; real adapter (file I/O) for production."
   metadata:
     created:
+      author: "MCP converter"
       date: "2026-02-18"
-      author: MCP converter
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
     last_validated:
       date: "2026-02-18"
-      validator: MCP converter
-      result: pass
+      result: "pass"
+      validator: "MCP converter"
+  name: "File Bookmark Service"
+  rationale:
+    benefits:
+      - "File format: { version: 1, bookmarks: { url: bookmark } }; same bookmark shape as local"
+      - "FileBookmarkService: getBookmarkForUrl, getRecentBookmarks, saveBookmark, deleteBookmark, saveTag, deleteTag, testConnection"
+      - "FileBookmarkStorageAdapter: readBookmarksFile(), writeBookmarksFile(data); mockable for tests"
+    problems_solved:
+      - "No file-based storage implementation"
+    why: "Implement file-based bookmark provider with same contract as Local/Pinboard; testable via adapter abstraction."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+      - "IMPL-STORAGE_INDEX"
+    depends_on:
+      - "ARCH-FILE_BOOKMARK_PROVIDER"
+    see_also:
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-FILE_BOOKMARK_PROVIDER"
+    code_annotations:
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+    requirements:
+      - "REQ-FILE_BOOKMARK_STORAGE"
+    tests:
+      - "tests/unit/file-bookmark-service.test.js"
+      - "tests/unit/offscreen-file-bookmark-messaging.test.js"

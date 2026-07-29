@@ -1,49 +1,49 @@
 # [ARCH-SHARED_UTILITIES] Shared utils module (URL, text, array/object, time, DOM)
 # Migrated from UTIL-001..005
 ARCH-SHARED_UTILITIES:
-  name: Shared Utilities Module
-  status: Active
   cross_references:
-    - REQ-SHARED_UTILITIES
-  rationale:
-    why: Single shared module for URL validation, text processing, arrays/objects, timing, DOM helpers used by overlay, popup, config
-    problems_solved:
-      - Scattered duplicate logic
-    benefits:
-      - Consistent behavior and single place to test
+    - "REQ-SHARED_UTILITIES"
   implementation_approach:
-    summary: src/shared/utils.js exports urlUtils, stringUtils, arrayUtils, objectUtils, timeUtils, domUtils
     details:
-      - 'URL: processUrl, isValidUrl, getDomain (native URL constructor)'
-      - 'Text: truncate, normalizeText, escapeHtml (textContent for XSS)'
-      - 'Array: unique (Set), chunk, compact; Object: deepClone, isEmpty, pick'
-      - 'Time: delay (Promise), formatTimestamp, getRelativeTime'
-      - 'DOM: waitForElement (MutationObserver), createElement, legacy createPinFromFormData / validatePinFormData'
-  traceability:
-    requirements:
-      - REQ-SHARED_UTILITIES
-    implementation:
-      - IMPL-URL_UTILITIES
-      - IMPL-TEXT_UTILITIES
-      - IMPL-ARRAY_OBJECT_UTILITIES
-      - IMPL-TIME_ASYNC_UTILITIES
-      - IMPL-DOM_UTILITIES
-    code_annotations:
-      - ARCH-SHARED_UTILITIES
-  related_decisions:
-    depends_on:
-      - REQ-SHARED_UTILITIES
-    informs:
-      - IMPL-URL_UTILITIES
-      - IMPL-TEXT_UTILITIES
-      - IMPL-ARRAY_OBJECT_UTILITIES
-      - IMPL-TIME_ASYNC_UTILITIES
-    see_also: []
+      - "Array: unique (Set), chunk, compact; Object: deepClone, isEmpty, pick"
+      - "DOM: waitForElement (MutationObserver), createElement, legacy createPinFromFormData / validatePinFormData"
+      - "Text: truncate, normalizeText, escapeHtml (textContent for XSS)"
+      - "Time: delay (Promise), formatTimestamp, getRelativeTime"
+      - "URL: processUrl, isValidUrl, getDomain (native URL constructor)"
+    summary: "src/shared/utils.js exports urlUtils, stringUtils, arrayUtils, objectUtils, timeUtils, domUtils"
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
-      reason: Numbered token reinterpretation
+      reason: "Numbered token reinterpretation"
+  name: "Shared Utilities Module"
+  rationale:
+    benefits:
+      - "Consistent behavior and single place to test"
+    problems_solved:
+      - "Scattered duplicate logic"
+    why: "Single shared module for URL validation, text processing, arrays/objects, timing, DOM helpers used by overlay, popup, config"
+  related_decisions:
+    depends_on:
+      - "REQ-SHARED_UTILITIES"
+    informs:
+      - "IMPL-ARRAY_OBJECT_UTILITIES"
+      - "IMPL-TEXT_UTILITIES"
+      - "IMPL-TIME_ASYNC_UTILITIES"
+      - "IMPL-URL_UTILITIES"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-SHARED_UTILITIES"
+    implementation:
+      - "IMPL-ARRAY_OBJECT_UTILITIES"
+      - "IMPL-DOM_UTILITIES"
+      - "IMPL-TEXT_UTILITIES"
+      - "IMPL-TIME_ASYNC_UTILITIES"
+      - "IMPL-URL_UTILITIES"
+    requirements:
+      - "REQ-SHARED_UTILITIES"

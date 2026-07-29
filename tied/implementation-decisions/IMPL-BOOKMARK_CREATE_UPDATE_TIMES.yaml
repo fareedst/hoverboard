@@ -1,112 +1,86 @@
 IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
-  name: Bookmark Create and Update Time Implementation
-  status: Active
-  cross_references:
-    - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
-    - REQ-BOOKMARK_CREATE_UPDATE_TIMES
-  rationale:
-    why: Provider-specific rules for setting and normalizing time and updated_at.
-    problems_solved:
-      - No consistent create/update timestamps across local, file, sync, and Pinboard
-    benefits:
-      - Every bookmark has time (create) and updated_at (last update); export/import and display use them
-  implementation_approach:
-    summary: 'LocalBookmarkService, FileBookmarkService, SyncBookmarkService: createEmptyBookmark and _normalizeBookmark include updated_at; saveBookmark sets time and updated_at on create (both now), preserves time and sets updated_at on update. PinboardService: parseBookmarkResponse and createEmptyBookmark set updated_at = time; do not send updated_at to API. url-tags-manager normalizeBookmarkForDisplay, bookmark-router moveBookmarkToStorage, PopupController empty pin, export/import CSV and JSON include updated_at; legacy read normalizes updated_at = time.'
-    details:
-      - 'Local/File/Sync: on create set time = now, updated_at = now; on update keep time, set updated_at = now'
-      - 'Pinboard: API returns only time; set updated_at = time in parseBookmarkResponse/createEmptyBookmark; never send updated_at to API'
-      - 'Normalize/display/move/export/import: always include updated_at; if missing (legacy) use updated_at = time'
   code_locations:
     files:
-      - path: src/features/storage/local-bookmark-service.js
-        description: createEmptyBookmark, _normalizeBookmark, saveBookmark time/updated_at
-      - path: src/features/storage/file-bookmark-service.js
-        description: same contract as local
-      - path: src/features/storage/sync-bookmark-service.js
-        description: same contract as local
-      - path: src/features/pinboard/pinboard-service.js
-        description: parseBookmarkResponse, createEmptyBookmark updated_at = time
-      - path: safari/src/features/pinboard/pinboard-service.js
-        description: Safari Pinboard time/updated_at
-      - path: src/features/storage/url-tags-manager.js
-        description: normalizeBookmarkForDisplay updated_at
-      - path: src/features/storage/bookmark-router.js
-        description: moveBookmarkToStorage toSave time/updated_at
-      - path: src/ui/popup/PopupController.js
-        description: empty pin time/updated_at
-      - path: safari/src/ui/popup/PopupController.js
-        description: Safari popup empty pin
-      - path: src/ui/bookmarks-table/bookmarks-table-csv.js
-        description: export/import CSV updated_at
-      - path: src/ui/bookmarks-table/bookmarks-table.js
-        description: table display updated_at
+      - path: "src/features/storage/local-bookmark-service.js"
+        description: "createEmptyBookmark, _normalizeBookmark, saveBookmark time/updated_at"
+      - path: "src/features/storage/file-bookmark-service.js"
+        description: "same contract as local"
+      - path: "src/features/storage/sync-bookmark-service.js"
+        description: "same contract as local"
+      - path: "src/features/pinboard/pinboard-service.js"
+        description: "parseBookmarkResponse, createEmptyBookmark updated_at = time"
+      - path: "safari/src/features/pinboard/pinboard-service.js"
+        description: "Safari Pinboard time/updated_at"
+      - path: "src/features/storage/url-tags-manager.js"
+        description: "normalizeBookmarkForDisplay updated_at"
+      - path: "src/features/storage/bookmark-router.js"
+        description: "moveBookmarkToStorage toSave time/updated_at"
+      - path: "src/ui/popup/PopupController.js"
+        description: "empty pin time/updated_at"
+      - path: "safari/src/ui/popup/PopupController.js"
+        description: "Safari popup empty pin"
+      - path: "src/ui/bookmarks-table/bookmarks-table-csv.js"
+        description: "export/import CSV updated_at"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "table display updated_at"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-BOOKMARK_CREATE_UPDATE_TIMES
-    requirements:
-      - REQ-BOOKMARK_CREATE_UPDATE_TIMES
-    tests:
-      - tests/unit/file-bookmark-service.test.js
-      - tests/unit/sync-bookmark-service.test.js
-      - tests/unit/local-bookmark-service.test.js
-      - tests/unit/url-tags-manager.test.js
-      - tests/unit/bookmarks-table-export.test.js
-      - tests/unit/bookmarks-table-import.test.js
-      - tests/unit/pinboard-bookmark-times.test.js
-      - tests/unit/bookmark-router.test.js
-    code_annotations:
-      - IMPL-BOOKMARK_CREATE_UPDATE_TIMES
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-LOCAL_BOOKMARK_SERVICE
-      - IMPL-FILE_BOOKMARK_SERVICE
-      - IMPL-URL_TAGS_DISPLAY
-    composed_with:
-      - IMPL-LOCAL_BOOKMARK_SERVICE
-      - IMPL-FILE_BOOKMARK_SERVICE
-      - IMPL-BOOKMARK_ROUTER
-      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
-      - IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT
-  essence_pseudocode: |
-    # [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES]
-    # Every bookmark has time (create) and updated_at (last update); provider-specific set/normalize; export/import include.
-
-    # Contract: inputs = bookmark data, API response, or raw record; output = bookmark with time and updated_at.
-    INPUT: bookmark data (for save), API response (for Pinboard), raw record (for normalize)
-    OUTPUT: bookmark with time and updated_at set per provider and context
-    DATA: time = create time; updated_at = last update time
-
-    # Create: time = now, updated_at = now; update: keep time, updated_at = now; persist.
-    Local/File/Sync saveBookmark(data):
-      IF url not in store (create):
-        SET time = now, updated_at = now
-      ELSE (update):
-        KEEP existing time; SET updated_at = now
-      PERSIST
-
-    # API has no updated_at; set updated_at = time in parse/create; do not send updated_at to API.
-    Pinboard:
-      parseBookmarkResponse / createEmptyBookmark: SET updated_at = time (API has no updated_at)
-      SEND to API: do NOT include updated_at
-
-    # If missing updated_at set to time (legacy); include updated_at in payload/CSV/JSON.
-    Normalize (url-tags-manager, display, move, export/import):
-      IF bookmark has no updated_at: SET updated_at = time   // legacy
-      ELSE: keep updated_at
-      Include updated_at in payload/CSV/JSON
-  detail_file: implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml
+  cross_references:
+    - "ARCH-BOOKMARK_CREATE_UPDATE_TIMES"
+    - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
+  detail_file: "implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml"
+  essence_pseudocode: "# [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES]\n# Every bookmark has time (create) and updated_at (last update); provider-specific set/normalize; export/import include.\n\n# Contract: inputs = bookmark data, API response, or raw record; output = bookmark with time and updated_at.\nINPUT: bookmark data (for save), API response (for Pinboard), raw record (for normalize)\nOUTPUT: bookmark with time and updated_at set per provider and context\nDATA: time = create time; updated_at = last update time\n\n# Create: time = now, updated_at = now; update: keep time, updated_at = now; persist.\nLocal/File/Sync saveBookmark(data):\n  IF url not in store (create):\n    SET time = now, updated_at = now\n  ELSE (update):\n    KEEP existing time; SET updated_at = now\n  PERSIST\n\n# API has no updated_at; set updated_at = time in parse/create; do not send updated_at to API.\nPinboard:\n  parseBookmarkResponse / createEmptyBookmark: SET updated_at = time (API has no updated_at)\n  SEND to API: do NOT include updated_at\n\n# If missing updated_at set to time (legacy); include updated_at in payload/CSV/JSON.\nNormalize (url-tags-manager, display, move, export/import):\n  IF bookmark has no updated_at: SET updated_at = time   // legacy\n  ELSE: keep updated_at\n  Include updated_at in payload/CSV/JSON\n"
+  implementation_approach:
+    details:
+      - "Local/File/Sync: on create set time = now, updated_at = now; on update keep time, set updated_at = now"
+      - "Normalize/display/move/export/import: always include updated_at; if missing (legacy) use updated_at = time"
+      - "Pinboard: API returns only time; set updated_at = time in parseBookmarkResponse/createEmptyBookmark; never send updated_at to API"
+    summary: "LocalBookmarkService, FileBookmarkService, SyncBookmarkService: createEmptyBookmark and _normalizeBookmark include updated_at; saveBookmark sets time and updated_at on create (both now), preserves time and sets updated_at on update. PinboardService: parseBookmarkResponse and createEmptyBookmark set updated_at = time; do not send updated_at to API. url-tags-manager normalizeBookmarkForDisplay, bookmark-router moveBookmarkToStorage, PopupController empty pin, export/import CSV and JSON include updated_at; legacy read normalizes updated_at = time."
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-18"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; fix code_locations; remove extraneous
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; fix code_locations; remove extraneous"
     last_validated:
       date: "2026-02-18"
-      validator: AI Agent
-      result: pass
+      result: "pass"
+      validator: "AI Agent"
+  name: "Bookmark Create and Update Time Implementation"
+  rationale:
+    benefits:
+      - "Every bookmark has time (create) and updated_at (last update); export/import and display use them"
+    problems_solved:
+      - "No consistent create/update timestamps across local, file, sync, and Pinboard"
+    why: "Provider-specific rules for setting and normalizing time and updated_at."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    depends_on: []
+    see_also:
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+      - "IMPL-URL_TAGS_DISPLAY"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-BOOKMARK_CREATE_UPDATE_TIMES"
+    code_annotations:
+      - "IMPL-BOOKMARK_CREATE_UPDATE_TIMES"
+    requirements:
+      - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
+    tests:
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/bookmarks-table-export.test.js"
+      - "tests/unit/bookmarks-table-import.test.js"
+      - "tests/unit/file-bookmark-service.test.js"
+      - "tests/unit/local-bookmark-service.test.js"
+      - "tests/unit/pinboard-bookmark-times.test.js"
+      - "tests/unit/sync-bookmark-service.test.js"
+      - "tests/unit/url-tags-manager.test.js"

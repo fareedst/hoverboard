@@ -1,73 +1,44 @@
 IMPL-DOM_UTILITIES:
-  name: DOM Utilities
-  status: Active
-  cross_references:
-    - REQ-SHARED_UTILITIES
-    - ARCH-SHARED_UTILITIES
-  rationale:
-    why: waitForElement (MutationObserver), createElement; legacy createPinFromFormData, validatePinFormData
-    problems_solved: []
-    benefits: []
-  implementation_approach:
-    summary: domUtils in src/shared/utils.js — waitForElement, createElement; createPinFromFormData, validatePinFormData
-    details: []
   code_locations:
     files:
-      - path: src/shared/utils.js
-        description: domUtils, createPinFromFormData, validatePinFormData
+      - path: "src/shared/utils.js"
+        description: "domUtils, createPinFromFormData, validatePinFormData"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-SHARED_UTILITIES
-    requirements:
-      - REQ-SHARED_UTILITIES
-    tests:
-      - tests/unit/dom-utils.test.js
-    code_annotations:
-      - IMPL-DOM_UTILITIES
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-TIME_ASYNC_UTILITIES
-    composed_with:
-      - IMPL-TIME_ASYNC_UTILITIES
-  essence_pseudocode: |
-    # [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]
-    # DOM helpers: waitForElement (MutationObserver), createElement, and pin form helpers.
-    # Contract: inputs and outputs for each utility.
-    INPUT: selector (waitForElement); tag and attrs (createElement); form data (createPinFromFormData / validatePinFormData)
-    OUTPUT: element or null (waitForElement); element (createElement); pin object or validation result
-
-    # Wait for selector in container via MutationObserver with optional timeout.
-    waitForElement(container, selector, options):
-      IF element = container.querySelector(selector) THEN RETURN resolve(element)
-      observer = new MutationObserver(callback)
-      observer.observe(container, { childList, subtree })
-      ON mutation: IF element = container.querySelector(selector) THEN resolve(element), disconnect observer
-      ON timeout (if given): reject or resolve null, disconnect observer
-
-    # Create element with tag and attributes.
-    createElement(tag, attrs):
-      el = document.createElement(tag)
-      FOR each attr in attrs: SET el[attr] or setAttribute
-      RETURN el
-
-    # Build pin object from form fields.
-    createPinFromFormData(formData):
-      BUILD pin object from form fields (url, description, tags, etc.)
-      RETURN pin object
-
-    # Validate required fields and formats for pin/form.
-    validatePinFormData(formData or pin):
-      CHECK required fields and formats
-      RETURN valid boolean or validation errors
-  detail_file: implementation-decisions/IMPL-DOM_UTILITIES.yaml
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "REQ-SHARED_UTILITIES"
+  detail_file: "implementation-decisions/IMPL-DOM_UTILITIES.yaml"
+  essence_pseudocode: "# [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]\n# DOM helpers: waitForElement (MutationObserver), createElement, and pin form helpers.\n# Contract: inputs and outputs for each utility.\nINPUT: selector (waitForElement); tag and attrs (createElement); form data (createPinFromFormData / validatePinFormData)\nOUTPUT: element or null (waitForElement); element (createElement); pin object or validation result\n\n# Wait for selector in container via MutationObserver with optional timeout.\nwaitForElement(container, selector, options):\n  IF element = container.querySelector(selector) THEN RETURN resolve(element)\n  observer = new MutationObserver(callback)\n  observer.observe(container, { childList, subtree })\n  ON mutation: IF element = container.querySelector(selector) THEN resolve(element), disconnect observer\n  ON timeout (if given): reject or resolve null, disconnect observer\n\n# Create element with tag and attributes.\ncreateElement(tag, attrs):\n  el = document.createElement(tag)\n  FOR each attr in attrs: SET el[attr] or setAttribute\n  RETURN el\n\n# Build pin object from form fields.\ncreatePinFromFormData(formData):\n  BUILD pin object from form fields (url, description, tags, etc.)\n  RETURN pin object\n\n# Validate required fields and formats for pin/form.\nvalidatePinFormData(formData or pin):\n  CHECK required fields and formats\n  RETURN valid boolean or validation errors\n"
+  implementation_approach:
+    details: []
+    summary: "domUtils in src/shared/utils.js — waitForElement, createElement; createPinFromFormData, validatePinFormData"
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+  name: "DOM Utilities"
+  rationale:
+    benefits: []
+    problems_solved: []
+    why: "waitForElement (MutationObserver), createElement; legacy createPinFromFormData, validatePinFormData"
+  related_decisions:
+    composed_with:
+      - "IMPL-TIME_ASYNC_UTILITIES"
+    depends_on: []
+    see_also:
+      - "IMPL-TIME_ASYNC_UTILITIES"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SHARED_UTILITIES"
+    code_annotations:
+      - "IMPL-DOM_UTILITIES"
+    requirements:
+      - "REQ-SHARED_UTILITIES"
+    tests:
+      - "tests/unit/dom-utils.test.js"

@@ -1,68 +1,68 @@
 ARCH-TIED_STRUCTURE:
-  name: TIED Project Structure
-  status: Active
-  cross_references:
-    - REQ-TIED_SETUP
-  rationale:
-    why: Keeps documentation close to code but organized in a dedicated namespace
-    problems_solved:
-      - Documentation scattered across project
-      - Difficulty finding all context in one place
-      - Meta-documentation mixed with source code
-    benefits:
-      - Clear separation of concerns
-      - Standard project layout for AI agents
-      - Easy discovery of all TIED documentation
-      - Testable and maintainable structure
   alternatives_considered:
-    - name: Root-level files
-      pros:
-        - Immediately visible in repository root
+    - name: "Root-level files"
       cons:
-        - Clutters the root directory
-        - No clear organization
-      rejected_reason: Creates too much clutter at project root
-    - name: .github or .docs folder
+        - "Clutters the root directory"
+        - "No clear organization"
       pros:
-        - Common convention for documentation
+        - "Immediately visible in repository root"
+      rejected_reason: "Creates too much clutter at project root"
+    - name: ".github or .docs folder"
       cons:
-        - Too generic for methodology-specific files
-        - .github is typically for GitHub workflows
-      rejected_reason: tied/ is more specific to the methodology
+        - ".github is typically for GitHub workflows"
+        - "Too generic for methodology-specific files"
+      pros:
+        - "Common convention for documentation"
+      rejected_reason: "tied/ is more specific to the methodology"
+  cross_references:
+    - "REQ-TIED_SETUP"
+  detail_file: "architecture-decisions/ARCH-TIED_STRUCTURE.yaml"
   implementation_approach:
-    summary: Create dedicated tied/ directory with YAML indexes and detail subdirectories
     details:
-      - Create tied/ directory at project root
-      - 'Populate with YAML index files: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml'
-      - 'Create detail subdirectories: requirements/, architecture-decisions/, implementation-decisions/'
-      - 'Add guide files: semantic-tokens.md, processes.md'
-  traceability:
-    requirements:
-      - REQ-TIED_SETUP
-    implementation:
-      - IMPL-TIED_FILES
-    tests:
-      - TestTIEDSetup_REQ_TIED_SETUP
-    code_annotations:
-      - IMPL-TIED_FILES
-      - ARCH-TIED_STRUCTURE
-      - REQ-TIED_SETUP
-  related_decisions:
-    depends_on:
-      - REQ-TIED_SETUP
-    informs:
-      - IMPL-TIED_FILES
-    see_also: []
-  detail_file: architecture-decisions/ARCH-TIED_STRUCTURE.yaml
+      - "Add guide files: semantic-tokens.md, processes.md"
+      - "Create detail subdirectories: requirements/, architecture-decisions/, implementation-decisions/"
+      - "Create tied/ directory at project root"
+      - "Populate with YAML index files: requirements.yaml, architecture-decisions.yaml, implementation-decisions.yaml, semantic-tokens.yaml"
+    summary: "Create dedicated tied/ directory with YAML indexes and detail subdirectories"
   metadata:
     created:
-      date: 2025-12-18
-      author: AI Agent
+      author: "AI Agent"
+      date: "2025-12-18"
     last_updated:
-      date: 2026-02-06
-      author: AI Agent
-      reason: Restructured to v1.5.0 schema with machine-parseable fields
+      author: "AI Agent"
+      date: "2026-02-06"
+      reason: "Restructured to v1.5.0 schema with machine-parseable fields"
     last_validated:
-      date: 2026-02-06
-      validator: AI Agent
-      result: pass
+      date: "2026-02-06"
+      result: "pass"
+      validator: "AI Agent"
+  name: "TIED Project Structure"
+  rationale:
+    benefits:
+      - "Clear separation of concerns"
+      - "Easy discovery of all TIED documentation"
+      - "Standard project layout for AI agents"
+      - "Testable and maintainable structure"
+    problems_solved:
+      - "Difficulty finding all context in one place"
+      - "Documentation scattered across project"
+      - "Meta-documentation mixed with source code"
+    why: "Keeps documentation close to code but organized in a dedicated namespace"
+  related_decisions:
+    depends_on:
+      - "REQ-TIED_SETUP"
+    informs:
+      - "IMPL-TIED_FILES"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-TIED_STRUCTURE"
+      - "IMPL-TIED_FILES"
+      - "REQ-TIED_SETUP"
+    implementation:
+      - "IMPL-TIED_FILES"
+    requirements:
+      - "REQ-TIED_SETUP"
+    tests:
+      - "TestTIEDSetup_REQ_TIED_SETUP"

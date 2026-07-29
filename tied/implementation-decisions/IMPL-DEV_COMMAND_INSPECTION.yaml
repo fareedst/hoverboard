@@ -1,64 +1,51 @@
 IMPL-DEV_COMMAND_INSPECTION:
-  name: DEV_COMMAND storage and router inspection
-  status: Active
-  cross_references:
-    - REQ-UI_INSPECTION
-    - REQ-URL_TAGS_DISPLAY
-    - REQ-PER_BOOKMARK_STORAGE_BACKEND
-  rationale:
-    why: Tests and debug panel can read current bookmark, tags for URL, storage backend, and storage key list
-    problems_solved:
-      - Cannot inspect stored state without manual steps
-    benefits:
-      - processDevCommand in MessageHandler; getStorageSnapshot in SW when DEBUG_HOVERBOARD_UI set
-  implementation_approach:
-    summary: DEV_COMMAND subcommands getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl (message-handler); getStorageSnapshot (service worker, returns key names only)
   code_locations:
     files:
-      - path: src/core/message-handler.js
-        description: processDevCommand
-      - path: src/core/service-worker.js
-        description: getStorageSnapshot
-      - path: tests/utils/test-helpers.js
-        description: Test helpers
+      - path: "src/core/message-handler.js"
+        description: "processDevCommand"
+      - path: "src/core/service-worker.js"
+        description: "getStorageSnapshot"
+      - path: "tests/utils/test-helpers.js"
+        description: "Test helpers"
     functions: []
-  traceability:
-    architecture: []
-    requirements:
-      - REQ-UI_INSPECTION
-      - REQ-URL_TAGS_DISPLAY
-      - REQ-PER_BOOKMARK_STORAGE_BACKEND
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: dev-only command inspection and inspector hooks.'
-    code_annotations:
-      - IMPL-DEV_COMMAND_INSPECTION
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also: []
-    composed_with:
-      - IMPL-DEBUG_PANEL
-      - IMPL-MESSAGE_HANDLING
-  essence_pseudocode: |
-    # [IMPL-DEV_COMMAND_INSPECTION] [REQ-UI_INSPECTION] [REQ-URL_TAGS_DISPLAY] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
-    # DEV_COMMAND routing for current bookmark, tags, backend, and storage snapshot (debug-gated).
-    # Contract: message shape, returned data, and handler locations.
-    INPUT: DEV_COMMAND message with subcommand (getCurrentBookmark | getTagsForUrl | getStorageBackendForUrl | getStorageSnapshot); optional url/context
-    OUTPUT: current bookmark for URL, tags for URL, backend for URL, or storage key list (SW only); gated by DEBUG_HOVERBOARD_UI
-    DATA: MessageHandler.processDevCommand; service worker getStorageSnapshot
-
-    # Dispatch by subcommand and return bookmark/tags/backend/snapshot.
-    processDevCommand(cmd):
-      IF subcommand getCurrentBookmark: RETURN bookmarkRouter.getBookmarkForUrl(url) or current tab url
-      IF getTagsForUrl: RETURN tags for url
-      IF getStorageBackendForUrl: RETURN storageIndex.getBackendForUrl(url)
-      IF getStorageSnapshot (SW): RETURN list of storage key names only
-  detail_file: implementation-decisions/IMPL-DEV_COMMAND_INSPECTION.yaml
+  cross_references:
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-UI_INSPECTION"
+    - "REQ-URL_TAGS_DISPLAY"
+  detail_file: "implementation-decisions/IMPL-DEV_COMMAND_INSPECTION.yaml"
+  essence_pseudocode: "# [IMPL-DEV_COMMAND_INSPECTION] [REQ-UI_INSPECTION] [REQ-URL_TAGS_DISPLAY] [REQ-PER_BOOKMARK_STORAGE_BACKEND]\n# DEV_COMMAND routing for current bookmark, tags, backend, and storage snapshot (debug-gated).\n# Contract: message shape, returned data, and handler locations.\nINPUT: DEV_COMMAND message with subcommand (getCurrentBookmark | getTagsForUrl | getStorageBackendForUrl | getStorageSnapshot); optional url/context\nOUTPUT: current bookmark for URL, tags for URL, backend for URL, or storage key list (SW only); gated by DEBUG_HOVERBOARD_UI\nDATA: MessageHandler.processDevCommand; service worker getStorageSnapshot\n\n# Dispatch by subcommand and return bookmark/tags/backend/snapshot.\nprocessDevCommand(cmd):\n  IF subcommand getCurrentBookmark: RETURN bookmarkRouter.getBookmarkForUrl(url) or current tab url\n  IF getTagsForUrl: RETURN tags for url\n  IF getStorageBackendForUrl: RETURN storageIndex.getBackendForUrl(url)\n  IF getStorageSnapshot (SW): RETURN list of storage key names only\n"
+  implementation_approach:
+    summary: "DEV_COMMAND subcommands getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl (message-handler); getStorageSnapshot (service worker, returns key names only)"
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-17"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: "Add essence_pseudocode and complete composed_with"
+  name: "DEV_COMMAND storage and router inspection"
+  rationale:
+    benefits:
+      - "processDevCommand in MessageHandler; getStorageSnapshot in SW when DEBUG_HOVERBOARD_UI set"
+    problems_solved:
+      - "Cannot inspect stored state without manual steps"
+    why: "Tests and debug panel can read current bookmark, tags for URL, storage backend, and storage key list"
+  related_decisions:
+    composed_with:
+      - "IMPL-DEBUG_PANEL"
+      - "IMPL-MESSAGE_HANDLING"
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture: []
+    code_annotations:
+      - "IMPL-DEV_COMMAND_INSPECTION"
+    requirements:
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+      - "REQ-UI_INSPECTION"
+      - "REQ-URL_TAGS_DISPLAY"
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: dev-only command inspection and inspector hooks."
+    tests: []

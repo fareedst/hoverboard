@@ -1,106 +1,60 @@
 IMPL-LOCAL_BOOKMARK_SERVICE:
-  name: Local Bookmark Service
-  status: Active
-  cross_references:
-    - REQ-STORAGE_MODE_DEFAULT
-    - ARCH-LOCAL_STORAGE_PROVIDER
-    - ARCH-STORAGE
-  rationale:
-    why: Implement bookmark provider contract using chrome.storage.local for local-only mode; no local storage existed before.
-    problems_solved:
-      - No implementation for storing bookmarks locally without the Pinboard API
-    benefits:
-      - Same provider contract as PinboardService; default storage mode is local; TagService integration for recent-tag tracking
-      - Bookmarks keyed by URL in hoverboard_local_bookmarks; recent by time sort
-  implementation_approach:
-    summary: LocalBookmarkService class in src/features/storage/local-bookmark-service.js; TagService integration for tag tracking.
-    details:
-      - Default provider is local (ConfigManager getDefaultConfiguration().storageMode local)
-      - 'Storage key: hoverboard_local_bookmarks (object keyed by URL)'
-      - Normalized bookmark shape matches PinboardService (url, description, extended, tags, time, shared, toread, hash)
-      - trackBookmarkTags and extractTagsFromBookmarkData for recent-tag integration
   code_locations:
     files:
-      - path: src/features/storage/local-bookmark-service.js
-        description: LocalBookmarkService implementation
+      - path: "src/features/storage/local-bookmark-service.js"
+        description: "LocalBookmarkService implementation"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-LOCAL_STORAGE_PROVIDER
-      - ARCH-STORAGE
-    requirements:
-      - REQ-STORAGE_MODE_DEFAULT
-    tests:
-      - tests/unit/local-bookmark-service.test.js
-      - tests/unit/message-handler-local-save-recall.test.js
-    code_annotations:
-      - IMPL-LOCAL_BOOKMARK_SERVICE
-  related_decisions:
-    depends_on:
-      - ARCH-LOCAL_STORAGE_PROVIDER
-    supersedes: []
-    see_also:
-      - ARCH-STORAGE
-    composed_with:
-      - IMPL-BOOKMARK_ROUTER
-      - IMPL-STORAGE_INDEX
-  essence_pseudocode: |
-    # [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE] [REQ-STORAGE_MODE_DEFAULT]
-    # chrome.storage.local bookmark provider; same contract as Pinboard; keyed by URL.
-    # Contract: url/bookmark/tag inputs and provider-shaped outputs; storage key and shape.
-    INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
-    OUTPUT: bookmark object or list of bookmarks or success/error; shape matches provider contract
-    DATA: storage key = hoverboard_local_bookmarks; value = object keyed by normalized URL -> bookmark
-
-    # Read from storage and return parsed object or {}.
-    LOAD bookmarks:
-      READ from storage under key
-      RETURN parsed object (or {} if missing)
-
-    # Lookup by normalized URL.
-    getBookmarkForUrl(url):
-      bookmarks = LOAD bookmarks
-      urlNorm = normalize(url)
-      RETURN bookmarks[urlNorm] or null
-
-    # Merge data into bookmark shape and persist to storage.
-    saveBookmark(data):
-      bookmarks = LOAD bookmarks
-      urlNorm = normalize(data.url)
-      bookmarks[urlNorm] = merge(data into bookmark shape with url, description, extended, tags, time, shared, toread, hash)
-      PERSIST bookmarks to storage under key
-      RETURN { success: true }
-
-    # Remove by normalized URL and persist.
-    deleteBookmark(url):
-      bookmarks = LOAD bookmarks
-      REMOVE bookmarks[normalize(url)]
-      PERSIST bookmarks to storage
-      RETURN { success: true }
-
-    # Update tags on bookmark and persist.
-    saveTag(data), deleteTag(data):
-      bookmark = getBookmarkForUrl(data.url)
-      update tags on bookmark
-      saveBookmark(bookmark) or equivalent
-      RETURN { success: true }
-
-    # Sort by time descending and return first count.
-    getRecentBookmarks(count):
-      bookmarks = LOAD bookmarks
-      list = values(bookmarks)
-      SORT list BY time DESCENDING
-      RETURN list[0..count-1]
-  detail_file: implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml
+  cross_references:
+    - "ARCH-LOCAL_STORAGE_PROVIDER"
+    - "ARCH-STORAGE"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml"
+  essence_pseudocode: "# [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE] [REQ-STORAGE_MODE_DEFAULT]\n# chrome.storage.local bookmark provider; same contract as Pinboard; keyed by URL.\n# Contract: url/bookmark/tag inputs and provider-shaped outputs; storage key and shape.\nINPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)\nOUTPUT: bookmark object or list of bookmarks or success/error; shape matches provider contract\nDATA: storage key = hoverboard_local_bookmarks; value = object keyed by normalized URL -> bookmark\n\n# Read from storage and return parsed object or {}.\nLOAD bookmarks:\n  READ from storage under key\n  RETURN parsed object (or {} if missing)\n\n# Lookup by normalized URL.\ngetBookmarkForUrl(url):\n  bookmarks = LOAD bookmarks\n  urlNorm = normalize(url)\n  RETURN bookmarks[urlNorm] or null\n\n# Merge data into bookmark shape and persist to storage.\nsaveBookmark(data):\n  bookmarks = LOAD bookmarks\n  urlNorm = normalize(data.url)\n  bookmarks[urlNorm] = merge(data into bookmark shape with url, description, extended, tags, time, shared, toread, hash)\n  PERSIST bookmarks to storage under key\n  RETURN { success: true }\n\n# Remove by normalized URL and persist.\ndeleteBookmark(url):\n  bookmarks = LOAD bookmarks\n  REMOVE bookmarks[normalize(url)]\n  PERSIST bookmarks to storage\n  RETURN { success: true }\n\n# Update tags on bookmark and persist.\nsaveTag(data), deleteTag(data):\n  bookmark = getBookmarkForUrl(data.url)\n  update tags on bookmark\n  saveBookmark(bookmark) or equivalent\n  RETURN { success: true }\n\n# Sort by time descending and return first count.\ngetRecentBookmarks(count):\n  bookmarks = LOAD bookmarks\n  list = values(bookmarks)\n  SORT list BY time DESCENDING\n  RETURN list[0..count-1]\n"
+  implementation_approach:
+    details:
+      - "Default provider is local (ConfigManager getDefaultConfiguration().storageMode local)"
+      - "Normalized bookmark shape matches PinboardService (url, description, extended, tags, time, shared, toread, hash)"
+      - "Storage key: hoverboard_local_bookmarks (object keyed by URL)"
+      - "trackBookmarkTags and extractTagsFromBookmarkData for recent-tag integration"
+    summary: "LocalBookmarkService class in src/features/storage/local-bookmark-service.js; TagService integration for tag tracking."
   metadata:
     created:
+      author: "MCP converter"
       date: "2026-02-18"
-      author: MCP converter
     last_updated:
+      author: "AI Agent"
       date: "2026-02-26"
-      author: AI Agent
-      reason: Align essence_pseudocode with standard (one-action-per-step)
+      reason: "Align essence_pseudocode with standard (one-action-per-step)"
     last_validated:
       date: "2026-02-18"
-      validator: MCP converter
-      result: pass
+      result: "pass"
+      validator: "MCP converter"
+  name: "Local Bookmark Service"
+  rationale:
+    benefits:
+      - "Bookmarks keyed by URL in hoverboard_local_bookmarks; recent by time sort"
+      - "Same provider contract as PinboardService; default storage mode is local; TagService integration for recent-tag tracking"
+    problems_solved:
+      - "No implementation for storing bookmarks locally without the Pinboard API"
+    why: "Implement bookmark provider contract using chrome.storage.local for local-only mode; no local storage existed before."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-STORAGE_INDEX"
+    depends_on:
+      - "ARCH-LOCAL_STORAGE_PROVIDER"
+    see_also:
+      - "ARCH-STORAGE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-LOCAL_STORAGE_PROVIDER"
+      - "ARCH-STORAGE"
+    code_annotations:
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+    requirements:
+      - "REQ-STORAGE_MODE_DEFAULT"
+    tests:
+      - "tests/unit/local-bookmark-service.test.js"
+      - "tests/unit/message-handler-local-save-recall.test.js"

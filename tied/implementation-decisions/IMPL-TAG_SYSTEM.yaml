@@ -1,128 +1,76 @@
 IMPL-TAG_SYSTEM:
-  name: Tag Service Implementation
-  status: Active
-  cross_references:
-    - ARCH-TAG_SYSTEM
-    - REQ-RECENT_TAGS_SYSTEM
-    - REQ-TAG_INPUT_SANITIZATION
-  rationale:
-    why: Concrete tag management logic
-    problems_solved:
-      - Tag sanitization
-      - Recent tags tracking
-    benefits:
-      - Secure tag handling
-      - Fast tag reuse
-  implementation_approach:
-    summary: TagService with sanitization; user-driven recent tags via service-worker recentTagsMemory + chrome.storage.local policy (N-minute window); optional display cache and frequency for suggestions
-    details:
-      - sanitizeTag before persist/display
-      - getUserRecentTags / getRecentTagsForUi policy path; getRecentTags cache-first then user-recent
-      - addTagToUserRecentList → recentTagsMemory.addTag
-      - getUserRecentTagsExcludingCurrent for getRecentBookmarks handler and UI chips
-      - Tag frequency / processTagsForDisplay for suggestions
   code_locations:
     files:
-      - path: src/features/tagging/tag-service.js
-        description: Tag service
+      - path: "src/features/tagging/tag-service.js"
+        description: "Tag service"
     functions:
-      - name: sanitizeTag
-        file: src/features/tagging/tag-service.js
-        description: Tag sanitization
-      - name: getRecentTags
-        file: src/features/tagging/tag-service.js
-        description: Display-oriented recent tags; cache-valid path else getUserRecentTags
-      - name: getUserRecentTags
-        file: src/features/tagging/tag-service.js
-        description: Policy-backed rows from recentTagsMemory.getRecentTagsForUi
-      - name: getUserRecentTagsExcludingCurrent
-        file: src/features/tagging/tag-service.js
-        description: User-recent rows filtered by current bookmark tag names
-      - name: addTagToUserRecentList
-        file: src/features/tagging/tag-service.js
-        description: Sanitized add to user-recent via recentTagsMemory
-  traceability:
-    architecture:
-      - ARCH-TAG_SYSTEM
-    requirements:
-      - REQ-RECENT_TAGS_SYSTEM
-      - REQ-TAG_MANAGEMENT
-      - REQ-TAG_INPUT_SANITIZATION
-    tests:
-      - tests/unit/tag-sanitization-fix.test.js
-      - tests/unit/tag-recent-behavior.test.js
-      - tests/unit/tag-recent-tracking.test.js
-      - tests/unit/tag-synchronization.test.js
-      - tests/unit/tag-storage.test.js
-      - tests/unit/overlay-tag-persistence.test.js
-    code_annotations:
-      - IMPL-TAG_SYSTEM
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-SUGGESTED_TAGS
-    composed_with:
-      - IMPL-SUGGESTED_TAGS
-  essence_pseudocode: |
-    # [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [REQ-TAG_MANAGEMENT] [REQ-TAG_INPUT_SANITIZATION]
-    # TagService: sanitizeTag; user-recent via SW recentTagsMemory + persisted snapshot + ConfigManager (N-minute policy keys); display cache + frequency for suggestions; single background source per ARCH-TAG_SYSTEM.
-    # Contract: sanitized strings; policy-filtered recent rows; fallible reads return [] or false and log (no throw to callers).
-    INPUT: raw tag string (sanitize); options (getRecentTags); currentTags string[] (exclude for UI); tagName + currentSiteUrl (add user-recent); bookmark/tag mutation data (recordTagUsage, caches)
-    OUTPUT: sanitized string; arrays of { name, lastUsed, ... } for display/suggestions; boolean for add success
-    DATA: self/globalThis.recentTagsMemory (RecentTagsMemoryManager): in-memory entries + chrome.storage.local snapshot; ConfigManager keys including recentTagsActivityWindowMinutes (N), recentTagsMaxListSize, recentTagsMaxDisplayCount, recentTagsSharedMemoryKey; TagService hoverboard_recent_tags_cache + tagFrequencyKey for TTL cache and frequency map
-
-    # [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] [REQ-TAG_MANAGEMENT]
-    # How: normalize and enforce charset/length before persist or display; invalid → empty or reject per existing rules.
-    sanitizeTag(raw):
-      TRIM; normalize whitespace; apply allowed charset/length
-      RETURN sanitized string
-
-    # [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]
-    # How: resolve recentTagsMemory (direct self/globalThis or background bridge); getRecentTagsForUi(() => getConfig()) applies idle N + lastUsed window; legacy memory.getRecentTags if ForUi missing; ON error LOG; RETURN [].
-    getUserRecentTags():
-      memory = getDirectSharedMemory() OR await getBackgroundPage().recentTagsMemory
-      IF NOT memory: RETURN []
-      IF typeof memory.getRecentTagsForUi === "function": RETURN AWAIT memory.getRecentTagsForUi(() => configManager.getConfig())
-      IF typeof memory.getRecentTags === "function": RETURN sortByLastUsed(memory.getRecentTags())
-      RETURN []
-
-    # How: filter getUserRecentTags rows where name ∉ normalized currentTags; supplies IMPL-MESSAGE_HANDLING handleGetRecentBookmarks and UI second-pass exclusion per REQ-RECENT_TAGS_SYSTEM.
-    getUserRecentTagsExcludingCurrent(currentTags):
-      base = AWAIT getUserRecentTags()
-      RETURN FILTER base by name not in normalize(currentTags)
-
-    # How: validate inputs; sanitize via sanitizeTag; recentTagsMemory.addTag updates lastActivityAt + persist; ON error LOG; RETURN false.
-    addTagToUserRecentList(tagName, currentSiteUrl):
-      IF NOT tagName OR NOT currentSiteUrl: RETURN false
-      tag = sanitizeTag(tagName); IF NOT tag: RETURN false
-      RETURN memory.addTag(tag, currentSiteUrl) OR false
-
-    # [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [REQ-TAG_MANAGEMENT]
-    # How: display-oriented merge — valid TTL cache → processTagsForDisplay; else user-recent rows then processTagsForDisplay; else []; ties suggestions path to same TagService without duplicating policy in UI.
-    getRecentTags(options):
-      cached = AWAIT getCachedTags()
-      IF cached AND isCacheValid(cached.timestamp): RETURN processTagsForDisplay(cached.tags, options)
-      userRows = AWAIT getUserRecentTags()
-      IF userRows.length > 0: RETURN processTagsForDisplay(userRows, options)
-      RETURN []
-
-    # [IMPL-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]
-    # How: persist hoverboard_tag_frequency and refresh display cache slice; does not advance user-recent lastActivityAt (per ARCH-TAG_SYSTEM: only tag mutations do).
-    recordTagUsage(tagName):
-      AWAIT persist frequency map; AWAIT updateRecentTagsCache(...)
-
-    # --- Composition: composed_with [IMPL-SUGGESTED_TAGS] ---
-    # Shared DATA: same TagService instance; getTagSuggestions → getRecentTags → user-recent and/or cache + frequency ordering. Pre: config + storage readable. Post: suggestion list capped by limit param. Ordering vs IMPL-MESSAGE_HANDLING: TagService only used from SW handlers or direct UI bridge, not parallel writers to recentTagsMemory except addTag paths.
-
-    # --- Cross-IMPL ---
-    # Called by [IMPL-MESSAGE_HANDLING] handleGetRecentBookmarks / handleAddTagToRecent / handleGetUserRecentTags (SW). Config N supplied via [IMPL-CONFIG_STRUCT] getConfig merge consumed inside getRecentTagsForUi callback.
-  detail_file: implementation-decisions/IMPL-TAG_SYSTEM.yaml
+      - name: "sanitizeTag"
+        description: "Tag sanitization"
+        file: "src/features/tagging/tag-service.js"
+      - name: "getRecentTags"
+        description: "Display-oriented recent tags; cache-valid path else getUserRecentTags"
+        file: "src/features/tagging/tag-service.js"
+      - name: "getUserRecentTags"
+        description: "Policy-backed rows from recentTagsMemory.getRecentTagsForUi"
+        file: "src/features/tagging/tag-service.js"
+      - name: "getUserRecentTagsExcludingCurrent"
+        description: "User-recent rows filtered by current bookmark tag names"
+        file: "src/features/tagging/tag-service.js"
+      - name: "addTagToUserRecentList"
+        description: "Sanitized add to user-recent via recentTagsMemory"
+        file: "src/features/tagging/tag-service.js"
+  cross_references:
+    - "ARCH-TAG_SYSTEM"
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-TAG_INPUT_SANITIZATION"
+  detail_file: "implementation-decisions/IMPL-TAG_SYSTEM.yaml"
+  essence_pseudocode: "# [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [REQ-TAG_MANAGEMENT] [REQ-TAG_INPUT_SANITIZATION]\n# TagService: sanitizeTag; user-recent via SW recentTagsMemory + persisted snapshot + ConfigManager (N-minute policy keys); display cache + frequency for suggestions; single background source per ARCH-TAG_SYSTEM.\n# Contract: sanitized strings; policy-filtered recent rows; fallible reads return [] or false and log (no throw to callers).\nINPUT: raw tag string (sanitize); options (getRecentTags); currentTags string[] (exclude for UI); tagName + currentSiteUrl (add user-recent); bookmark/tag mutation data (recordTagUsage, caches)\nOUTPUT: sanitized string; arrays of { name, lastUsed, ... } for display/suggestions; boolean for add success\nDATA: self/globalThis.recentTagsMemory (RecentTagsMemoryManager): in-memory entries + chrome.storage.local snapshot; ConfigManager keys including recentTagsActivityWindowMinutes (N), recentTagsMaxListSize, recentTagsMaxDisplayCount, recentTagsSharedMemoryKey; TagService hoverboard_recent_tags_cache + tagFrequencyKey for TTL cache and frequency map\n\n# [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] [REQ-TAG_MANAGEMENT]\n# How: normalize and enforce charset/length before persist or display; invalid → empty or reject per existing rules.\nsanitizeTag(raw):\n  TRIM; normalize whitespace; apply allowed charset/length\n  RETURN sanitized string\n\n# [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]\n# How: resolve recentTagsMemory (direct self/globalThis or background bridge); getRecentTagsForUi(() => getConfig()) applies idle N + lastUsed window; legacy memory.getRecentTags if ForUi missing; ON error LOG; RETURN [].\ngetUserRecentTags():\n  memory = getDirectSharedMemory() OR await getBackgroundPage().recentTagsMemory\n  IF NOT memory: RETURN []\n  IF typeof memory.getRecentTagsForUi === \"function\": RETURN AWAIT memory.getRecentTagsForUi(() => configManager.getConfig())\n  IF typeof memory.getRecentTags === \"function\": RETURN sortByLastUsed(memory.getRecentTags())\n  RETURN []\n\n# How: filter getUserRecentTags rows where name ∉ normalized currentTags; supplies IMPL-MESSAGE_HANDLING handleGetRecentBookmarks and UI second-pass exclusion per REQ-RECENT_TAGS_SYSTEM.\ngetUserRecentTagsExcludingCurrent(currentTags):\n  base = AWAIT getUserRecentTags()\n  RETURN FILTER base by name not in normalize(currentTags)\n\n# How: validate inputs; sanitize via sanitizeTag; recentTagsMemory.addTag updates lastActivityAt + persist; ON error LOG; RETURN false.\naddTagToUserRecentList(tagName, currentSiteUrl):\n  IF NOT tagName OR NOT currentSiteUrl: RETURN false\n  tag = sanitizeTag(tagName); IF NOT tag: RETURN false\n  RETURN memory.addTag(tag, currentSiteUrl) OR false\n\n# [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [REQ-TAG_MANAGEMENT]\n# How: display-oriented merge — valid TTL cache → processTagsForDisplay; else user-recent rows then processTagsForDisplay; else []; ties suggestions path to same TagService without duplicating policy in UI.\ngetRecentTags(options):\n  cached = AWAIT getCachedTags()\n  IF cached AND isCacheValid(cached.timestamp): RETURN processTagsForDisplay(cached.tags, options)\n  userRows = AWAIT getUserRecentTags()\n  IF userRows.length > 0: RETURN processTagsForDisplay(userRows, options)\n  RETURN []\n\n# [IMPL-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]\n# How: persist hoverboard_tag_frequency and refresh display cache slice; does not advance user-recent lastActivityAt (per ARCH-TAG_SYSTEM: only tag mutations do).\nrecordTagUsage(tagName):\n  AWAIT persist frequency map; AWAIT updateRecentTagsCache(...)\n\n# --- Composition: composed_with [IMPL-SUGGESTED_TAGS] ---\n# Shared DATA: same TagService instance; getTagSuggestions → getRecentTags → user-recent and/or cache + frequency ordering. Pre: config + storage readable. Post: suggestion list capped by limit param. Ordering vs IMPL-MESSAGE_HANDLING: TagService only used from SW handlers or direct UI bridge, not parallel writers to recentTagsMemory except addTag paths.\n\n# --- Cross-IMPL ---\n# Called by [IMPL-MESSAGE_HANDLING] handleGetRecentBookmarks / handleAddTagToRecent / handleGetUserRecentTags (SW). Config N supplied via [IMPL-CONFIG_STRUCT] getConfig merge consumed inside getRecentTagsForUi callback.\n"
+  implementation_approach:
+    details:
+      - "addTagToUserRecentList → recentTagsMemory.addTag"
+      - "getUserRecentTags / getRecentTagsForUi policy path; getRecentTags cache-first then user-recent"
+      - "getUserRecentTagsExcludingCurrent for getRecentBookmarks handler and UI chips"
+      - "sanitizeTag before persist/display"
+      - "Tag frequency / processTagsForDisplay for suggestions"
+    summary: "TagService with sanitization; user-driven recent tags via service-worker recentTagsMemory + chrome.storage.local policy (N-minute window); optional display cache and frequency for suggestions"
   metadata:
     created:
+      author: "AI Agent"
       date: "2025-07-14"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-03-28"
-      author: AI Agent
-      reason: 'S06.4–S06.5: recent-tags contracts; S06.5 block tokens + composition/cross-IMPL notes'
+      reason: "S06.4–S06.5: recent-tags contracts; S06.5 block tokens + composition/cross-IMPL notes"
+  name: "Tag Service Implementation"
+  rationale:
+    benefits:
+      - "Fast tag reuse"
+      - "Secure tag handling"
+    problems_solved:
+      - "Recent tags tracking"
+      - "Tag sanitization"
+    why: "Concrete tag management logic"
+  related_decisions:
+    composed_with:
+      - "IMPL-SUGGESTED_TAGS"
+    depends_on: []
+    see_also:
+      - "IMPL-SUGGESTED_TAGS"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-TAG_SYSTEM"
+    code_annotations:
+      - "IMPL-TAG_SYSTEM"
+    requirements:
+      - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-TAG_INPUT_SANITIZATION"
+      - "REQ-TAG_MANAGEMENT"
+    tests:
+      - "tests/unit/overlay-tag-persistence.test.js"
+      - "tests/unit/tag-recent-behavior.test.js"
+      - "tests/unit/tag-recent-tracking.test.js"
+      - "tests/unit/tag-sanitization-fix.test.js"
+      - "tests/unit/tag-storage.test.js"
+      - "tests/unit/tag-synchronization.test.js"

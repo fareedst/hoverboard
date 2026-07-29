@@ -1,73 +1,53 @@
 IMPL-PINBOARD_API:
-  name: Pinboard API Service Implementation
-  status: Active
-  cross_references:
-    - ARCH-PINBOARD_API
-    - REQ-PINBOARD_COMPATIBILITY
-  rationale:
-    why: Concrete API integration with error handling
-    problems_solved:
-      - API communication complexity
-      - Rate limiting issues
-    benefits:
-      - Reliable API access
-      - Proper error handling
-  implementation_approach:
-    summary: Token-based auth with endpoint wrappers, rate limiting, retry logic
-    details:
-      - 'API endpoints: /posts/get, /posts/recent, /posts/add, /posts/delete'
-      - Token authentication
-      - 429 retry logic
-      - 401 error handling
   code_locations:
     files:
-      - path: src/features/pinboard/pinboard-service.js
-        description: Pinboard API service
-      - path: src/features/pinboard/pinboard-service-browser.js
-        description: Browser-specific Pinboard API usage
+      - path: "src/features/pinboard/pinboard-service.js"
+        description: "Pinboard API service"
+      - path: "src/features/pinboard/pinboard-service-browser.js"
+        description: "Browser-specific Pinboard API usage"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-PINBOARD_API
-    requirements:
-      - REQ-PINBOARD_COMPATIBILITY
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: Pinboard API calls covered indirectly by pinboard-bookmark-times.test.js and tag-storage tests.'
-    code_annotations:
-      - IMPL-PINBOARD_API
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also: []
-    composed_with:
-      - IMPL-BOOKMARK_ROUTER
-  essence_pseudocode: |
-    # [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]
-    # Token auth, endpoint wrappers, 429 retry, 401 handling; get/save/delete/recent.
-    # Contract: token and params; API response; base URL and endpoints.
-    INPUT: auth token; endpoint params (url, tag, etc.); optional retry policy
-    OUTPUT: API response (bookmark list, success/error); 401/429 handled
-    DATA: base URL; token in query; endpoints /posts/get, /posts/recent, /posts/add, /posts/delete
-
-    # Build URL with token and params; fetch; retry on 429; return error on 401.
-    request(endpoint, params):
-      URL = base + endpoint + "?auth_token=" + token + queryString(params)
-      response = FETCH URL
-      IF 429: WAIT; RETRY with backoff
-      IF 401: RETURN error (auth failed)
-      RETURN parsed response
-
-    # Provider methods delegate to request with appropriate endpoint.
-    getBookmarkForUrl(url): request("/posts/get", { url }); RETURN single post or null
-    getRecentBookmarks(count): request("/posts/recent", { count }); RETURN list
-    saveBookmark(data): request("/posts/add", data); RETURN result
-    deleteBookmark(url): request("/posts/delete", { url }); RETURN result
-  detail_file: implementation-decisions/IMPL-PINBOARD_API.yaml
+  cross_references:
+    - "ARCH-PINBOARD_API"
+    - "REQ-PINBOARD_COMPATIBILITY"
+  detail_file: "implementation-decisions/IMPL-PINBOARD_API.yaml"
+  essence_pseudocode: "# [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]\n# Token auth, endpoint wrappers, 429 retry, 401 handling; get/save/delete/recent.\n# Contract: token and params; API response; base URL and endpoints.\nINPUT: auth token; endpoint params (url, tag, etc.); optional retry policy\nOUTPUT: API response (bookmark list, success/error); 401/429 handled\nDATA: base URL; token in query; endpoints /posts/get, /posts/recent, /posts/add, /posts/delete\n\n# Build URL with token and params; fetch; retry on 429; return error on 401.\nrequest(endpoint, params):\n  URL = base + endpoint + \"?auth_token=\" + token + queryString(params)\n  response = FETCH URL\n  IF 429: WAIT; RETRY with backoff\n  IF 401: RETURN error (auth failed)\n  RETURN parsed response\n\n# Provider methods delegate to request with appropriate endpoint.\ngetBookmarkForUrl(url): request(\"/posts/get\", { url }); RETURN single post or null\ngetRecentBookmarks(count): request(\"/posts/recent\", { count }); RETURN list\nsaveBookmark(data): request(\"/posts/add\", data); RETURN result\ndeleteBookmark(url): request(\"/posts/delete\", { url }); RETURN result\n"
+  implementation_approach:
+    details:
+      - "401 error handling"
+      - "429 retry logic"
+      - "API endpoints: /posts/get, /posts/recent, /posts/add, /posts/delete"
+      - "Token authentication"
+    summary: "Token-based auth with endpoint wrappers, rate limiting, retry logic"
   metadata:
     created:
+      author: "AI Agent"
       date: "2025-07-14"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: "Add essence_pseudocode and complete composed_with"
+  name: "Pinboard API Service Implementation"
+  rationale:
+    benefits:
+      - "Proper error handling"
+      - "Reliable API access"
+    problems_solved:
+      - "API communication complexity"
+      - "Rate limiting issues"
+    why: "Concrete API integration with error handling"
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-PINBOARD_API"
+    code_annotations:
+      - "IMPL-PINBOARD_API"
+    requirements:
+      - "REQ-PINBOARD_COMPATIBILITY"
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: Pinboard API calls covered indirectly by pinboard-bookmark-times.test.js and tag-storage tests."
+    tests: []

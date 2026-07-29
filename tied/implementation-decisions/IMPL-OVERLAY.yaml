@@ -1,89 +1,69 @@
 IMPL-OVERLAY:
-  name: Overlay Implementation
-  status: Active
-  cross_references:
-    - ARCH-OVERLAY
-    - REQ-OVERLAY_SYSTEM
-  rationale:
-    why: Concrete overlay rendering and interaction
-    problems_solved:
-      - Overlay display complexity
-      - Interaction handling
-    benefits:
-      - Working overlay
-      - Proper lifecycle
-  implementation_approach:
-    summary: Overlay manager with show/hide, content rendering, control creation
-    details:
-      - Overlay DOM injection
-      - Transparency controls
-      - Auto-show logic
-      - Refresh control
-      - Theme integration
   code_locations:
     files:
-      - path: src/features/content/content-script.js
-        description: Content script entry; bootstraps overlay and content
-      - path: src/features/content/overlay-manager.js
-        description: Overlay manager
+      - path: "src/features/content/content-script.js"
+        description: "Content script entry; bootstraps overlay and content"
+      - path: "src/features/content/overlay-manager.js"
+        description: "Overlay manager"
     functions:
-      - name: show
-        file: src/features/content/overlay-manager.js
-        description: Display overlay
-      - name: hide
-        file: src/features/content/overlay-manager.js
-        description: Hide overlay
-      - name: createCloseButton
-        file: src/features/content/overlay-manager.js
-        description: Create close control
-      - name: createRefreshButton
-        file: src/features/content/overlay-manager.js
-        description: Create refresh control
-  traceability:
-    architecture:
-      - ARCH-OVERLAY
-    requirements:
-      - REQ-OVERLAY_SYSTEM
-      - REQ-OVERLAY_AUTO_SHOW_CONTROL
-      - REQ-OVERLAY_REFRESH_ACTION
-    tests:
-      - tests/unit/overlay-tag-persistence.test.js
-    code_annotations:
-      - IMPL-OVERLAY
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-OVERLAY_CONTROLS
-    composed_with:
-      - IMPL-OVERLAY_CONTROLS
-  essence_pseudocode: |
-    # [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION]
-    # Overlay show/hide, DOM injection, close/refresh controls, auto-show.
-    # Contract: show/hide and auto-show and theme; overlay state and controls.
-    INPUT: show/hide command; optional auto-show condition; theme vars
-    OUTPUT: overlay visible/hidden; DOM injected; controls (close, refresh) created
-    DATA: overlay root element; content container; control elements; visibility state
-
-    # Create/inject root; apply theme and content; attach close/refresh; set visible.
-    show():
-      CREATE overlay root (or reuse); INJECT into document body
-      APPLY theme CSS variables; RENDER content (bookmark form, etc.)
-      createCloseButton(); createRefreshButton(); ATTACH handlers
-      SET visibility = true
-
-    # Remove overlay or hide; set visibility false.
-    hide():
-      REMOVE overlay from DOM (or set display none); SET visibility = false
-
-    # Show when message or storage condition met.
-    Auto-show: IF condition (e.g. message or storage): show()
-  detail_file: implementation-decisions/IMPL-OVERLAY.yaml
+      - name: "show"
+        description: "Display overlay"
+        file: "src/features/content/overlay-manager.js"
+      - name: "hide"
+        description: "Hide overlay"
+        file: "src/features/content/overlay-manager.js"
+      - name: "createCloseButton"
+        description: "Create close control"
+        file: "src/features/content/overlay-manager.js"
+      - name: "createRefreshButton"
+        description: "Create refresh control"
+        file: "src/features/content/overlay-manager.js"
+  cross_references:
+    - "ARCH-OVERLAY"
+    - "REQ-OVERLAY_SYSTEM"
+  detail_file: "implementation-decisions/IMPL-OVERLAY.yaml"
+  essence_pseudocode: "# [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION]\n# Overlay show/hide, DOM injection, close/refresh controls, auto-show.\n# Contract: show/hide and auto-show and theme; overlay state and controls.\nINPUT: show/hide command; optional auto-show condition; theme vars\nOUTPUT: overlay visible/hidden; DOM injected; controls (close, refresh) created\nDATA: overlay root element; content container; control elements; visibility state\n\n# Create/inject root; apply theme and content; attach close/refresh; set visible.\nshow():\n  CREATE overlay root (or reuse); INJECT into document body\n  APPLY theme CSS variables; RENDER content (bookmark form, etc.)\n  createCloseButton(); createRefreshButton(); ATTACH handlers\n  SET visibility = true\n\n# Remove overlay or hide; set visibility false.\nhide():\n  REMOVE overlay from DOM (or set display none); SET visibility = false\n\n# Show when message or storage condition met.\nAuto-show: IF condition (e.g. message or storage): show()\n"
+  implementation_approach:
+    details:
+      - "Auto-show logic"
+      - "Overlay DOM injection"
+      - "Refresh control"
+      - "Theme integration"
+      - "Transparency controls"
+    summary: "Overlay manager with show/hide, content rendering, control creation"
   metadata:
     created:
+      author: "AI Agent"
       date: "2025-07-14"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Add essence_pseudocode and complete composed_with
+      reason: "Add essence_pseudocode and complete composed_with"
+  name: "Overlay Implementation"
+  rationale:
+    benefits:
+      - "Proper lifecycle"
+      - "Working overlay"
+    problems_solved:
+      - "Interaction handling"
+      - "Overlay display complexity"
+    why: "Concrete overlay rendering and interaction"
+  related_decisions:
+    composed_with:
+      - "IMPL-OVERLAY_CONTROLS"
+    depends_on: []
+    see_also:
+      - "IMPL-OVERLAY_CONTROLS"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-OVERLAY"
+    code_annotations:
+      - "IMPL-OVERLAY"
+    requirements:
+      - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
+      - "REQ-OVERLAY_REFRESH_ACTION"
+      - "REQ-OVERLAY_SYSTEM"
+    tests:
+      - "tests/unit/overlay-tag-persistence.test.js"

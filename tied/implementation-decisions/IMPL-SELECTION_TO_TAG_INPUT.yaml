@@ -1,97 +1,70 @@
 IMPL-SELECTION_TO_TAG_INPUT:
-  name: Selection to Tag Input on Icon Click Implementation
-  status: Active
-  cross_references:
-    - ARCH-SELECTION_TO_TAG_INPUT
-    - REQ-SELECTION_TO_TAG_INPUT
-    - REQ-TAG_MANAGEMENT
-  rationale:
-    why: Prefill New Tag input from page selection when user opens popup so they can submit selection as tags without manual copy-paste.
-    problems_solved:
-      - Manual copy-paste of selection into tag input
-    benefits:
-      - One-click flow: select text, click icon, submit as tags
-  implementation_approach:
-    summary: Content script handles GET_PAGE_SELECTION; popup loadInitialData requests selection, normalizes (strip punctuation, first 8 words), sets tag input via setTagInputValue; on timeout or failure leave tag input unchanged.
-    details:
-      - 'Content script (Chrome + Safari): handleMessage case GET_PAGE_SELECTION returns { success: true, data: { selection: window.getSelection().toString() } }'
-      - 'Shared utils: normalizeSelectionForTagInput(selection, maxWords=8) — replace with space, collapse spaces, trim, split on whitespace, slice(0, maxWords), join'
-      - 'UIManager: setTagInputValue(value) sets newTagInput.value and removes invalid class'
-      - 'PopupController loadInitialData: after loadSuggestedTags (Chrome) or loadRecentTags (Safari), try/catch sendToTab GET_PAGE_SELECTION; if data.selection non-empty, setTagInputValue(normalizeSelectionForTagInput(raw, 8))'
   code_locations:
     files:
-      - path: src/features/content/content-main.js
-        description: GET_PAGE_SELECTION handler
-      - path: safari/src/features/content/content-main.js
-        description: GET_PAGE_SELECTION handler
-      - path: src/ui/popup/PopupController.js
-        description: loadInitialData selection prefill
-      - path: safari/src/ui/popup/PopupController.js
-        description: loadInitialData selection prefill
-      - path: src/ui/popup/UIManager.js
-        description: setTagInputValue
-      - path: safari/src/ui/popup/UIManager.js
-        description: setTagInputValue
-      - path: src/shared/utils.js
-        description: normalizeSelectionForTagInput
-      - path: safari/src/shared/utils.js
-        description: normalizeSelectionForTagInput
-  traceability:
-    architecture:
-      - ARCH-SELECTION_TO_TAG_INPUT
-    requirements:
-      - REQ-SELECTION_TO_TAG_INPUT
-      - REQ-TAG_MANAGEMENT
-    tests:
-      - tests/unit/selection-to-tag-input.test.js
-    code_annotations:
-      - IMPL-SELECTION_TO_TAG_INPUT
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - ARCH-SELECTION_TO_TAG_INPUT
-      - REQ-SELECTION_TO_TAG_INPUT
-      - IMPL-SUGGESTED_TAGS
-    composed_with:
-      - IMPL-SUGGESTED_TAGS
-  essence_pseudocode: |
-    # [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT]
-    # Prefill tag input from page selection on popup open; GET_PAGE_SELECTION and normalizeSelectionForTagInput.
-    # Contract: selection via message; tag input prefilled.
-    INPUT: none at popup open (selection read from page via message); raw selection string (normalizeSelectionForTagInput)
-    OUTPUT: tag input field prefilled with normalized words (side effect)
-    DATA: current tab; newTagInput element; maxWords = 8
-
-    # Return current selection from page.
-    content script on GET_PAGE_SELECTION:
-      selection = window.getSelection().toString()
-      RETURN { success: true, data: { selection } }
-
-    # Strip punctuation, collapse spaces, first maxWords words.
-    normalizeSelectionForTagInput(selection, maxWords):
-      text = replace non-word non-space chars with space in selection
-      text = collapse spaces, trim
-      words = split text on whitespace
-      RETURN first maxWords words joined by space
-
-    # Request selection; if present set tag input to normalized value.
-    popup loadInitialData (after loadSuggestedTags or loadRecentTags):
-      TRY response = sendToTab(GET_PAGE_SELECTION)
-      ON timeout or failure LEAVE tag input unchanged, RETURN
-      raw = response.data.selection
-      IF raw non-empty:
-        normalized = normalizeSelectionForTagInput(raw, 8)
-        setTagInputValue(normalized)
+      - path: "src/features/content/content-main.js"
+        description: "GET_PAGE_SELECTION handler"
+      - path: "safari/src/features/content/content-main.js"
+        description: "GET_PAGE_SELECTION handler"
+      - path: "src/ui/popup/PopupController.js"
+        description: "loadInitialData selection prefill"
+      - path: "safari/src/ui/popup/PopupController.js"
+        description: "loadInitialData selection prefill"
+      - path: "src/ui/popup/UIManager.js"
+        description: "setTagInputValue"
+      - path: "safari/src/ui/popup/UIManager.js"
+        description: "setTagInputValue"
+      - path: "src/shared/utils.js"
+        description: "normalizeSelectionForTagInput"
+      - path: "safari/src/shared/utils.js"
+        description: "normalizeSelectionForTagInput"
+  cross_references:
+    - "ARCH-SELECTION_TO_TAG_INPUT"
+    - "REQ-SELECTION_TO_TAG_INPUT"
+    - "REQ-TAG_MANAGEMENT"
+  essence_pseudocode: "# [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT]\n# Prefill tag input from page selection on popup open; GET_PAGE_SELECTION and normalizeSelectionForTagInput.\n# Contract: selection via message; tag input prefilled.\nINPUT: none at popup open (selection read from page via message); raw selection string (normalizeSelectionForTagInput)\nOUTPUT: tag input field prefilled with normalized words (side effect)\nDATA: current tab; newTagInput element; maxWords = 8\n\n# Return current selection from page.\ncontent script on GET_PAGE_SELECTION:\n  selection = window.getSelection().toString()\n  RETURN { success: true, data: { selection } }\n\n# Strip punctuation, collapse spaces, first maxWords words.\nnormalizeSelectionForTagInput(selection, maxWords):\n  text = replace non-word non-space chars with space in selection\n  text = collapse spaces, trim\n  words = split text on whitespace\n  RETURN first maxWords words joined by space\n\n# Request selection; if present set tag input to normalized value.\npopup loadInitialData (after loadSuggestedTags or loadRecentTags):\n  TRY response = sendToTab(GET_PAGE_SELECTION)\n  ON timeout or failure LEAVE tag input unchanged, RETURN\n  raw = response.data.selection\n  IF raw non-empty:\n    normalized = normalizeSelectionForTagInput(raw, 8)\n    setTagInputValue(normalized)\n"
+  implementation_approach:
+    details:
+      - "Content script (Chrome + Safari): handleMessage case GET_PAGE_SELECTION returns { success: true, data: { selection: window.getSelection().toString() } }"
+      - "PopupController loadInitialData: after loadSuggestedTags (Chrome) or loadRecentTags (Safari), try/catch sendToTab GET_PAGE_SELECTION; if data.selection non-empty, setTagInputValue(normalizeSelectionForTagInput(raw, 8))"
+      - "Shared utils: normalizeSelectionForTagInput(selection, maxWords=8) — replace with space, collapse spaces, trim, split on whitespace, slice(0, maxWords), join"
+      - "UIManager: setTagInputValue(value) sets newTagInput.value and removes invalid class"
+    summary: "Content script handles GET_PAGE_SELECTION; popup loadInitialData requests selection, normalizes (strip punctuation, first 8 words), sets tag input via setTagInputValue; on timeout or failure leave tag input unchanged."
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-18"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
     last_validated:
       date: "2026-02-18"
-      validator: AI Agent
-      result: pass
+      result: "pass"
+      validator: "AI Agent"
+  name: "Selection to Tag Input on Icon Click Implementation"
+  rationale:
+    benefits:
+      - One-click flow: "select text, click icon, submit as tags"
+    problems_solved:
+      - "Manual copy-paste of selection into tag input"
+    why: "Prefill New Tag input from page selection when user opens popup so they can submit selection as tags without manual copy-paste."
+  related_decisions:
+    composed_with:
+      - "IMPL-SUGGESTED_TAGS"
+    depends_on: []
+    see_also:
+      - "ARCH-SELECTION_TO_TAG_INPUT"
+      - "IMPL-SUGGESTED_TAGS"
+      - "REQ-SELECTION_TO_TAG_INPUT"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SELECTION_TO_TAG_INPUT"
+    code_annotations:
+      - "IMPL-SELECTION_TO_TAG_INPUT"
+    requirements:
+      - "REQ-SELECTION_TO_TAG_INPUT"
+      - "REQ-TAG_MANAGEMENT"
+    tests:
+      - "tests/unit/selection-to-tag-input.test.js"

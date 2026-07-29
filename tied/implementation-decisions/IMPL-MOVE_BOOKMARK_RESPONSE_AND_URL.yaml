@@ -1,88 +1,61 @@
 IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
-  name: Move Bookmark Response Handling and URL
-  status: Active
-  cross_references:
-    - REQ-MOVE_BOOKMARK_STORAGE_UI
-    - IMPL-MOVE_BOOKMARK_UI
-    - IMPL-BOOKMARK_ROUTER
-  rationale:
-    why: UI must reflect actual move result; move must use bookmark URL and allow bookmark without time.
-    problems_solved:
-      - Popup showed success when move failed (service worker wraps response)
-      - Move failed when tab URL differed from stored bookmark URL
-      - Move failed when source bookmark had no time field
-    benefits:
-      - Popup uses inner result (response.data) so success/error matches router outcome
-      - Move uses currentPin.url when available so key matches storage
-      - Router sets bookmark.time when missing so legacy/bookmarks without time can move
-  implementation_approach:
-    summary: Popup uses inner result (response.data); move URL from currentPin when available; router accepts bookmark.url and sets time when missing.
-    details:
-      - 'Service worker wraps handler responses as { success: true, data: routerResult }; popup must use result = response?.data ?? response then result?.success / result?.message'
-      - 'handleStorageBackendChange: url = currentPin?.url || currentTab?.url when sending moveBookmarkToStorage'
-      - 'Router moveBookmarkToStorage: treat bookmark as found when bookmark.url present; if bookmark.time missing, set toSave.time = now when saving to target'
   code_locations:
     files:
-      - path: src/ui/popup/PopupController.js
-        description: handleStorageBackendChange uses url from currentPin, result from response.data
-      - path: src/features/storage/bookmark-router.js
-        description: moveBookmarkToStorage checks bookmark.url, sets time on toSave if missing
+      - path: "src/ui/popup/PopupController.js"
+        description: "handleStorageBackendChange uses url from currentPin, result from response.data"
+      - path: "src/features/storage/bookmark-router.js"
+        description: "moveBookmarkToStorage checks bookmark.url, sets time on toSave if missing"
     functions: []
-  traceability:
-    architecture: []
-    requirements:
-      - REQ-MOVE_BOOKMARK_STORAGE_UI
-    tests: []
-    test_coverage_note: 'No unit tests; coverage via E2E or manual. Reason: move bookmark response and URL handling in UI.'
-    code_annotations:
-      - IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-MOVE_BOOKMARK_UI
-      - IMPL-BOOKMARK_ROUTER
-    composed_with:
-      - IMPL-MOVE_BOOKMARK_UI
-      - IMPL-BOOKMARK_ROUTER
-  essence_pseudocode: |
-    # [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] [REQ-MOVE_BOOKMARK_STORAGE_UI]
-    # Popup uses response.data for success/error; move uses currentPin.url; router sets time when missing.
-    # Contract: response and currentPin/currentTab; UI and move request and router behavior.
-    INPUT: response (from moveBookmarkToStorage message), currentPin (bookmark), currentTab (tab URL)
-    OUTPUT: correct success/error UI; move request with correct URL; router allows no-time bookmark
-    DATA: service worker returns { success: true, data: routerResult }; routerResult = { success, message?, ... }
-
-    # Use inner result for success/error and refresh.
-    Popup — unwrap inner result:
-      result = response?.data ?? response
-      IF result?.success: show success; refresh bookmark; update storage UI
-      ELSE: show error (result?.message or generic)
-
-    # Prefer currentPin.url so key matches storage.
-    Popup — URL for move:
-      url = currentPin?.url || currentTab?.url
-      SEND moveBookmarkToStorage(url, targetBackend)   // same key as storage, avoids tab-URL mismatch
-
-    # Set time when missing; save to target, delete from source, update index.
-    Router — move when bookmark has no time:
-      bookmark = sourceProvider.getBookmarkForUrl(url)
-      IF bookmark has url and (time missing or invalid):
-        toSave = { ...bookmark, time: now ISO }
-      ELSE: toSave = bookmark
-      targetProvider.saveBookmark(toSave)
-      sourceProvider.deleteBookmark(url)
-      storageIndex.setBackendForUrl(url, targetBackend)
-  detail_file: implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml
+  cross_references:
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-MOVE_BOOKMARK_UI"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+  detail_file: "implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml"
+  essence_pseudocode: "# [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] [REQ-MOVE_BOOKMARK_STORAGE_UI]\n# Popup uses response.data for success/error; move uses currentPin.url; router sets time when missing.\n# Contract: response and currentPin/currentTab; UI and move request and router behavior.\nINPUT: response (from moveBookmarkToStorage message), currentPin (bookmark), currentTab (tab URL)\nOUTPUT: correct success/error UI; move request with correct URL; router allows no-time bookmark\nDATA: service worker returns { success: true, data: routerResult }; routerResult = { success, message?, ... }\n\n# Use inner result for success/error and refresh.\nPopup — unwrap inner result:\n  result = response?.data ?? response\n  IF result?.success: show success; refresh bookmark; update storage UI\n  ELSE: show error (result?.message or generic)\n\n# Prefer currentPin.url so key matches storage.\nPopup — URL for move:\n  url = currentPin?.url || currentTab?.url\n  SEND moveBookmarkToStorage(url, targetBackend)   // same key as storage, avoids tab-URL mismatch\n\n# Set time when missing; save to target, delete from source, update index.\nRouter — move when bookmark has no time:\n  bookmark = sourceProvider.getBookmarkForUrl(url)\n  IF bookmark has url and (time missing or invalid):\n    toSave = { ...bookmark, time: now ISO }\n  ELSE: toSave = bookmark\n  targetProvider.saveBookmark(toSave)\n  sourceProvider.deleteBookmark(url)\n  storageIndex.setBackendForUrl(url, targetBackend)\n"
+  implementation_approach:
+    details:
+      - "handleStorageBackendChange: url = currentPin?.url || currentTab?.url when sending moveBookmarkToStorage"
+      - "Router moveBookmarkToStorage: treat bookmark as found when bookmark.url present; if bookmark.time missing, set toSave.time = now when saving to target"
+      - "Service worker wraps handler responses as { success: true, data: routerResult }; popup must use result = response?.data ?? response then result?.success / result?.message"
+    summary: "Popup uses inner result (response.data); move URL from currentPin when available; router accepts bookmark.url and sets time when missing."
   metadata:
     created:
+      author: "MCP converter"
       date: "2026-02-18"
-      author: MCP converter
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
     last_validated:
       date: "2026-02-18"
-      validator: MCP converter
-      result: pass
+      result: "pass"
+      validator: "MCP converter"
+  name: "Move Bookmark Response Handling and URL"
+  rationale:
+    benefits:
+      - "Move uses currentPin.url when available so key matches storage"
+      - "Popup uses inner result (response.data) so success/error matches router outcome"
+      - "Router sets bookmark.time when missing so legacy/bookmarks without time can move"
+    problems_solved:
+      - "Move failed when source bookmark had no time field"
+      - "Move failed when tab URL differed from stored bookmark URL"
+      - "Popup showed success when move failed (service worker wraps response)"
+    why: "UI must reflect actual move result; move must use bookmark URL and allow bookmark without time."
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-MOVE_BOOKMARK_UI"
+    depends_on: []
+    see_also:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-MOVE_BOOKMARK_UI"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture: []
+    code_annotations:
+      - "IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL"
+    requirements:
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: move bookmark response and URL handling in UI."
+    tests: []

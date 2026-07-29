@@ -1,118 +1,69 @@
 IMPL-BOOKMARK_ROUTER:
-  name: Bookmark Router
-  status: Active
-  cross_references:
-    - REQ-PER_BOOKMARK_STORAGE_BACKEND
-    - REQ-STORAGE_MODE_DEFAULT
-    - REQ-MOVE_BOOKMARK_STORAGE_UI
-    - ARCH-STORAGE_INDEX_AND_ROUTER
-    - IMPL-STORAGE_INDEX
-    - IMPL-MOVE_BOOKMARK_UI
-  rationale:
-    why: Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks; save follows popup UI selection when preferredBackend is sent.
-    problems_solved:
-      - Single provider cannot support per-bookmark backends
-      - Save not following highlighted storage when creating bookmark from popup
-    benefits:
-      - getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL
-      - saveBookmark honors data.preferredBackend (popup UI selection) so save follows the highlight (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)
-      - getRecentBookmarks aggregates pinboard + local + file + sync, sorted by time
-      - getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI
-  implementation_approach:
-    summary: BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, defaultStorageMode.
-    details:
-      - 'Resolve provider: (valid data.preferredBackend) || getBackendForUrl(url) || defaultStorageMode; map to one of four providers (pinboard, local, file, sync)'
-      - 'moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index'
   code_locations:
     files:
-      - path: src/features/storage/bookmark-router.js
-        description: BookmarkRouter implementation
+      - path: "src/features/storage/bookmark-router.js"
+        description: "BookmarkRouter implementation"
     functions: []
-  traceability:
-    architecture:
-      - ARCH-STORAGE_INDEX_AND_ROUTER
-    requirements:
-      - REQ-PER_BOOKMARK_STORAGE_BACKEND
-      - REQ-STORAGE_MODE_DEFAULT
-      - REQ-MOVE_BOOKMARK_STORAGE_UI
-    tests:
-      - tests/unit/bookmark-router.test.js
-      - tests/integration/message-handler-router-storage.integration.test.js
-    code_annotations:
-      - IMPL-BOOKMARK_ROUTER
-  related_decisions:
-    depends_on:
-      - IMPL-STORAGE_INDEX
-      - ARCH-STORAGE_INDEX_AND_ROUTER
-    supersedes: []
-    see_also:
-      - IMPL-LOCAL_BOOKMARK_SERVICE
-      - IMPL-FILE_BOOKMARK_SERVICE
-    composed_with:
-      - IMPL-STORAGE_INDEX
-      - IMPL-LOCAL_BOOKMARK_SERVICE
-      - IMPL-FILE_BOOKMARK_SERVICE
-      - IMPL-MOVE_BOOKMARK_UI
-  essence_pseudocode: |
-    # [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI]
-    # Delegate by URL via storage index; preferredBackend for save; aggregate getRecentBookmarks; moveBookmarkToStorage.
-
-    # Contract: inputs = url, data (optional preferredBackend), count; output = bookmark or list or success/error.
-    INPUT: url, data (for save/tag), count (for getRecentBookmarks); optional data.preferredBackend
-    OUTPUT: bookmark or list of bookmarks or success/error; providers = { pinboard, local, file, sync }
-    DATA: storageIndex, defaultStorageMode, providerMap (backend name -> provider instance)
-
-    # preferredBackend if valid, else index.getBackendForUrl(url), else defaultStorageMode.
-    resolveProvider(url, data):
-      IF data.preferredBackend is valid (pinboard|local|file|sync): RETURN providerMap[data.preferredBackend]
-      backend = storageIndex.getBackendForUrl(url)
-      IF backend: RETURN providerMap[backend]
-      RETURN providerMap[defaultStorageMode]
-
-    # Resolve provider; delegate get/save/delete/saveTag/deleteTag; on save success update index.
-    getBookmarkForUrl(url):
-      provider = resolveProvider(url, {})
-      RETURN provider.getBookmarkForUrl(url)
-
-    saveBookmark(data):
-      url = data.url
-      provider = resolveProvider(url, data)
-      result = provider.saveBookmark(data)
-      IF result.success: storageIndex.setBackendForUrl(url, providerBackend)
-      RETURN result
-
-    deleteBookmark(url), saveTag(data), deleteTag(data):
-      provider = resolveProvider(url, data)
-      RETURN provider.<operation>(...)
-
-    # Aggregate all four providers; sort by time descending; return top count.
-    getRecentBookmarks(count):
-      merged = []
-      FOR each provider IN [pinboard, local, file, sync]:
-        merged = merged CONCAT provider.getRecentBookmarks(count)
-      SORT merged BY time DESCENDING
-      RETURN merged[0..count-1]
-
-    # Get from source; ensure time; save to target; delete from source; update index.
-    moveBookmarkToStorage(url, targetBackend):
-      sourceBackend = storageIndex.getBackendForUrl(url)
-      sourceProvider = providerMap[sourceBackend]
-      targetProvider = providerMap[targetBackend]
-      bookmark = sourceProvider.getBookmarkForUrl(url)
-      IF bookmark lacks time: SET bookmark.time = now
-      targetProvider.saveBookmark(bookmark)
-      sourceProvider.deleteBookmark(url)
-      storageIndex.setBackendForUrl(url, targetBackend)
-  detail_file: implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-MOVE_BOOKMARK_UI"
+    - "IMPL-STORAGE_INDEX"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  detail_file: "implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml"
+  essence_pseudocode: "# [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI]\n# Delegate by URL via storage index; preferredBackend for save; aggregate getRecentBookmarks; moveBookmarkToStorage.\n\n# Contract: inputs = url, data (optional preferredBackend), count; output = bookmark or list or success/error.\nINPUT: url, data (for save/tag), count (for getRecentBookmarks); optional data.preferredBackend\nOUTPUT: bookmark or list of bookmarks or success/error; providers = { pinboard, local, file, sync }\nDATA: storageIndex, defaultStorageMode, providerMap (backend name -> provider instance)\n\n# preferredBackend if valid, else index.getBackendForUrl(url), else defaultStorageMode.\nresolveProvider(url, data):\n  IF data.preferredBackend is valid (pinboard|local|file|sync): RETURN providerMap[data.preferredBackend]\n  backend = storageIndex.getBackendForUrl(url)\n  IF backend: RETURN providerMap[backend]\n  RETURN providerMap[defaultStorageMode]\n\n# Resolve provider; delegate get/save/delete/saveTag/deleteTag; on save success update index.\ngetBookmarkForUrl(url):\n  provider = resolveProvider(url, {})\n  RETURN provider.getBookmarkForUrl(url)\n\nsaveBookmark(data):\n  url = data.url\n  provider = resolveProvider(url, data)\n  result = provider.saveBookmark(data)\n  IF result.success: storageIndex.setBackendForUrl(url, providerBackend)\n  RETURN result\n\ndeleteBookmark(url), saveTag(data), deleteTag(data):\n  provider = resolveProvider(url, data)\n  RETURN provider.<operation>(...)\n\n# Aggregate all four providers; sort by time descending; return top count.\ngetRecentBookmarks(count):\n  merged = []\n  FOR each provider IN [pinboard, local, file, sync]:\n    merged = merged CONCAT provider.getRecentBookmarks(count)\n  SORT merged BY time DESCENDING\n  RETURN merged[0..count-1]\n\n# Get from source; ensure time; save to target; delete from source; update index.\nmoveBookmarkToStorage(url, targetBackend):\n  sourceBackend = storageIndex.getBackendForUrl(url)\n  sourceProvider = providerMap[sourceBackend]\n  targetProvider = providerMap[targetBackend]\n  bookmark = sourceProvider.getBookmarkForUrl(url)\n  IF bookmark lacks time: SET bookmark.time = now\n  targetProvider.saveBookmark(bookmark)\n  sourceProvider.deleteBookmark(url)\n  storageIndex.setBackendForUrl(url, targetBackend)\n"
+  implementation_approach:
+    details:
+      - "moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index"
+      - "Resolve provider: (valid data.preferredBackend) || getBackendForUrl(url) || defaultStorageMode; map to one of four providers (pinboard, local, file, sync)"
+    summary: "BookmarkRouter in src/features/storage/bookmark-router.js; holds pinboardProvider, localProvider, fileProvider, syncProvider, storageIndex, defaultStorageMode."
   metadata:
     created:
+      author: "MCP converter"
       date: "2026-02-18"
-      author: MCP converter
     last_updated:
+      author: "AI Agent"
       date: "2026-02-18"
-      author: AI Agent
-      reason: saveBookmark honors data.preferredBackend (save follows highlight)
+      reason: "saveBookmark honors data.preferredBackend (save follows highlight)"
     last_validated:
       date: "2026-02-18"
-      validator: MCP converter
-      result: pass
+      result: "pass"
+      validator: "MCP converter"
+  name: "Bookmark Router"
+  rationale:
+    benefits:
+      - "getBookmarkForUrl, saveBookmark, deleteBookmark, saveTag, deleteTag delegate by URL"
+      - "getRecentBookmarks aggregates pinboard + local + file + sync, sorted by time"
+      - "getStorageBackendForUrl(url), moveBookmarkToStorage(url, targetBackend) for move UI"
+      - "saveBookmark honors data.preferredBackend (popup UI selection) so save follows the highlight (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)"
+    problems_solved:
+      - "Save not following highlighted storage when creating bookmark from popup"
+      - "Single provider cannot support per-bookmark backends"
+    why: "Delegate bookmark operations to correct provider per URL using storage index; aggregate getRecentBookmarks; save follows popup UI selection when preferredBackend is sent."
+  related_decisions:
+    composed_with:
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+      - "IMPL-MOVE_BOOKMARK_UI"
+      - "IMPL-STORAGE_INDEX"
+    depends_on:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+      - "IMPL-STORAGE_INDEX"
+    see_also:
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    code_annotations:
+      - "IMPL-BOOKMARK_ROUTER"
+    requirements:
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+      - "REQ-STORAGE_MODE_DEFAULT"
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"

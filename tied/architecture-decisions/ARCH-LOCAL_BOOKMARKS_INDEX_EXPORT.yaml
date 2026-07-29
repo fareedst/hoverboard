@@ -1,51 +1,51 @@
 ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
-  name: Local Bookmarks Index Export Architecture
-  status: Active
-  cross_references: &ref_0 []
-  rationale:
-    why: See detail file
-    problems_solved: []
-    benefits: []
+  allbookmarks: "Full list returned by getAggregatedBookmarksForIndex (or getLocalBookmarksForIndex fallback); used for \"Export all\". Items include `storage` field ('local' | 'file')."
   alternatives_considered: []
+  cross-references: "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT, IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+  cross_references: &ref_0 []
+  csv: "Header row (Title, URL, Tags, Time, Storage, Shared, To read, Notes). Data rows: quoted fields; internal double-quotes escaped as `\"\"`; tags joined (e.g. comma); Storage column (Local | File). Enables use in spreadsheets."
+  decision: "Export is implemented **entirely on the index page** (client-side). Data comes from the in-memory arrays already present: **allBookmarks** (all local bookmarks) or **filteredBookmarks** (currently displayed after search/filter/sort). No new background message is required. The chosen scope is serialized to **CSV** (columns: title, url, tags, time, shared, toread, notes) and/or **JSON** (full bookmark objects). Download is triggered via Blob, object URL, and a temporary anchor with the `download` attribute."
+  download_mechanism:
+    - "Build string (CSV or JSON)."
+    - "Create Blob (e.g. `text/csv; charset=utf-8` or `application/json`)."
+    - "Create object URL; create `<a download=\"filename\">`, set href to object URL; programmatic click(); revokeObjectURL; remove anchor."
+  filteredbookmarks: "Result of applying search and filters (and current sort); used for \"Export displayed\"."
   implementation_approach:
-    summary: 'Export is implemented **entirely on the index page** (client-side). Data comes from the in-memory arrays already present: **allBookmarks** (all local bookmarks) or **filteredBookmarks** (currently displayed after search/filter/sort). No new background message is required. The chosen scope is serialized to **CSV** (columns: title, url, tags, time, shared, toread, notes) and/or **JSON** (full bookmark objects). Download is triggered via Blob, object URL, and a temporary anchor with the `download` attribute.'
     details: []
-  traceability:
-    requirements: *ref_0
-    implementation:
-      - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
-    tests:
-      - tests/unit/bookmarks-table-export.test.js
-    code_annotations:
-      - ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT
+    summary: "Export is implemented **entirely on the index page** (client-side). Data comes from the in-memory arrays already present: **allBookmarks** (all local bookmarks) or **filteredBookmarks** (currently displayed after search/filter/sort). No new background message is required. The chosen scope is serialized to **CSV** (columns: title, url, tags, time, shared, toread, notes) and/or **JSON** (full bookmark objects). Download is triggered via Blob, object URL, and a temporary anchor with the `download` attribute."
+  json: "(optional): Array of bookmark objects as returned from the index (description, url, tags, time, shared, toread, extended, etc.)."
+  metadata:
+    created:
+      author: "MCP converter"
+      date: "2026-02-18"
+    last_updated:
+      author: "MCP converter"
+      date: "2026-02-18"
+      reason: "Converted from monolithic"
+    last_validated:
+      date: "2026-02-18"
+      result: "pass"
+      validator: "MCP converter"
+  name: "Local Bookmarks Index Export Architecture"
+  rationale:
+    benefits: []
+    problems_solved: []
+    why: "See detail file"
+  related:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX (index page this export extends)"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT (export UI and exportBookmarks implementation)"
   related_decisions:
     depends_on: *ref_0
     informs: []
     see_also: []
-  metadata:
-    created:
-      date: "2026-02-18"
-      author: MCP converter
-    last_updated:
-      date: "2026-02-18"
-      author: MCP converter
-      reason: Converted from monolithic
-    last_validated:
-      date: "2026-02-18"
-      validator: MCP converter
-      result: pass
-  decision: 'Export is implemented **entirely on the index page** (client-side). Data comes from the in-memory arrays already present: **allBookmarks** (all local bookmarks) or **filteredBookmarks** (currently displayed after search/filter/sort). No new background message is required. The chosen scope is serialized to **CSV** (columns: title, url, tags, time, shared, toread, notes) and/or **JSON** (full bookmark objects). Download is triggered via Blob, object URL, and a temporary anchor with the `download` attribute.'
-  allbookmarks: Full list returned by getAggregatedBookmarksForIndex (or getLocalBookmarksForIndex fallback); used for "Export all". Items include `storage` field ('local' | 'file').
-  cross-references: REQ-LOCAL_BOOKMARKS_INDEX_EXPORT, IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT
-  csv: 'Header row (Title, URL, Tags, Time, Storage, Shared, To read, Notes). Data rows: quoted fields; internal double-quotes escaped as `""`; tags joined (e.g. comma); Storage column (Local | File). Enables use in spreadsheets.'
-  download_mechanism:
-    - Build string (CSV or JSON).
-    - Create Blob (e.g. `text/csv; charset=utf-8` or `application/json`).
-    - Create object URL; create `<a download="filename">`, set href to object URL; programmatic click(); revokeObjectURL; remove anchor.
-  filteredbookmarks: Result of applying search and filters (and current sort); used for "Export displayed".
-  selected_scope: '"Export selected" uses bookmarks whose URL is in the current selection (selectedUrls); list built from allBookmarks.filter(b => selectedUrls.has(b.url)). Export and Move UI are placed below the table; index page header is compact (minimal height).'
-  json: '(optional): Array of bookmark objects as returned from the index (description, url, tags, time, shared, toread, extended, etc.).'
-  related:
-    - IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT (export UI and exportBookmarks implementation)
-    - ARCH-LOCAL_BOOKMARKS_INDEX (index page this export extends)
-  summary: 'Export is implemented **entirely on the index page** (client-side). Data comes from the in-memory arrays already present: **allBookmarks** (all local bookmarks) or **filteredBookmarks** (currently displayed after search/filter/sort). No new background message is required. The chosen scope is serialized to **CSV** (columns: title, url, tags, time, shared, toread, notes) and/or **JSON** (full bookmark objects). Download is triggered via Blob, object URL, and a temporary anchor with the `download` attribute.'
+  selected_scope: "\"Export selected\" uses bookmarks whose URL is in the current selection (selectedUrls); list built from allBookmarks.filter(b => selectedUrls.has(b.url)). Export and Move UI are placed below the table; index page header is compact (minimal height)."
+  status: "Active"
+  summary: "Export is implemented **entirely on the index page** (client-side). Data comes from the in-memory arrays already present: **allBookmarks** (all local bookmarks) or **filteredBookmarks** (currently displayed after search/filter/sort). No new background message is required. The chosen scope is serialized to **CSV** (columns: title, url, tags, time, shared, toread, notes) and/or **JSON** (full bookmark objects). Download is triggered via Blob, object URL, and a temporary anchor with the `download` attribute."
+  traceability:
+    code_annotations:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    implementation:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    requirements: *ref_0
+    tests:
+      - "tests/unit/bookmarks-table-export.test.js"

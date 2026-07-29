@@ -1,72 +1,54 @@
 IMPL-PINBOARD_POSTS_ADD_ENCODING:
-  name: Pinboard posts/add query parameter encoding
-  status: Active
-  cross_references:
-    - IMPL-PINBOARD_API
-    - IMPL-TAG_SYSTEM
-  rationale:
-    why: Store-tag API failed when tags contained #, +, . because URL was not safely encoded; unencoded # starts fragment so server may not receive auth_token; unencoded + interpreted as space. Fix: explicit percent-encoding via encodeURIComponent for all posts/add params.
-    problems_solved:
-      - Broken API requests when tags or other fields contain #, +, ., &, =
-    benefits: []
-  implementation_approach:
-    summary: buildSaveParams(bookmarkData) builds query string from key=encodeURIComponent(value) pairs joined by '&'; used for posts/add URL so encoding is guaranteed in all runtimes (extension and Safari).
-    details: []
   code_locations:
     files:
-      - path: src/features/pinboard/pinboard-service.js
-        description: buildSaveParams
-      - path: safari/src/features/pinboard/pinboard-service.js
-        description: buildSaveParams
+      - path: "src/features/pinboard/pinboard-service.js"
+        description: "buildSaveParams"
+      - path: "safari/src/features/pinboard/pinboard-service.js"
+        description: "buildSaveParams"
     functions:
-      - name: buildSaveParams
-        file: src/features/pinboard/pinboard-service.js
-        description: Builds pairs with encodeURIComponent for url, description, extended, tags, shared, toread; returns pairs.join('&')
-  traceability:
-    architecture: []
-    requirements: []
-    tests:
-      - tests/unit/tag-storage.test.js
-    code_annotations:
-      - IMPL-PINBOARD_POSTS_ADD_ENCODING
-  related_decisions:
-    depends_on: []
-    supersedes: []
-    see_also:
-      - IMPL-PINBOARD_API
-      - IMPL-TAG_SYSTEM
-    composed_with:
-      - IMPL-PINBOARD_API
-      - IMPL-TAG_SYSTEM
-  essence_pseudocode: |
-    # [IMPL-PINBOARD_POSTS_ADD_ENCODING] [IMPL-PINBOARD_API] [IMPL-TAG_SYSTEM]
-    # buildSaveParams with encodeURIComponent for posts/add so #, +, etc. are safe.
-    # Contract: bookmarkData in; encoded query string out.
-    INPUT: bookmarkData (url, description, extended, tags, shared, toread)
-    OUTPUT: query string safe for posts/add URL (no raw #, +, &, = in values)
-    DATA: param names and values from bookmarkData
-
-    # Encode each param value and join as key=value&...
-    buildSaveParams(bookmarkData):
-      pairs = []
-      FOR each key in [url, description, extended, tags, shared, toread]:
-        value = bookmarkData[key] (or default)
-        encoded = encodeURIComponent(value)
-        pairs.push(key + "=" + encoded)
-      RETURN pairs.join("&")
-
-    # Use result in posts/add URL so fragment and plus are not misinterpreted.
-    usage: BUILD posts/add request URL as baseUrl + "?" + buildSaveParams(bookmarkData) so fragment and plus are not misinterpreted by server or transport.
-  detail_file: implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.yaml
+      - name: "buildSaveParams"
+        description: "Builds pairs with encodeURIComponent for url, description, extended, tags, shared, toread; returns pairs.join('&')"
+        file: "src/features/pinboard/pinboard-service.js"
+  cross_references:
+    - "IMPL-PINBOARD_API"
+    - "IMPL-TAG_SYSTEM"
+  detail_file: "implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.yaml"
+  essence_pseudocode: "# [IMPL-PINBOARD_POSTS_ADD_ENCODING] [IMPL-PINBOARD_API] [IMPL-TAG_SYSTEM]\n# buildSaveParams with encodeURIComponent for posts/add so #, +, etc. are safe.\n# Contract: bookmarkData in; encoded query string out.\nINPUT: bookmarkData (url, description, extended, tags, shared, toread)\nOUTPUT: query string safe for posts/add URL (no raw #, +, &, = in values)\nDATA: param names and values from bookmarkData\n\n# Encode each param value and join as key=value&...\nbuildSaveParams(bookmarkData):\n  pairs = []\n  FOR each key in [url, description, extended, tags, shared, toread]:\n    value = bookmarkData[key] (or default)\n    encoded = encodeURIComponent(value)\n    pairs.push(key + \"=\" + encoded)\n  RETURN pairs.join(\"&\")\n\n# Use result in posts/add URL so fragment and plus are not misinterpreted.\nusage: BUILD posts/add request URL as baseUrl + \"?\" + buildSaveParams(bookmarkData) so fragment and plus are not misinterpreted by server or transport.\n"
+  implementation_approach:
+    details: []
+    summary: "buildSaveParams(bookmarkData) builds query string from key=encodeURIComponent(value) pairs joined by '&'; used for posts/add URL so encoding is guaranteed in all runtimes (extension and Safari)."
   metadata:
     created:
+      author: "MCP converter"
       date: "2026-02-18"
-      author: MCP converter
     last_updated:
+      author: "AI Agent"
       date: "2026-02-20"
-      author: AI Agent
-      reason: Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys
+      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
     last_validated:
       date: "2026-02-18"
-      validator: MCP converter
-      result: pass
+      result: "pass"
+      validator: "MCP converter"
+  name: "Pinboard posts/add query parameter encoding"
+  rationale:
+    benefits: []
+    problems_solved:
+      - "Broken API requests when tags or other fields contain" #, +, ., &, =
+    why: "Store-tag API failed when tags contained" #, +, . because URL was not safely encoded; unencoded # starts fragment so server may not receive auth_token; unencoded + interpreted as space. Fix: explicit percent-encoding via encodeURIComponent for all posts/add params.
+  related_decisions:
+    composed_with:
+      - "IMPL-PINBOARD_API"
+      - "IMPL-TAG_SYSTEM"
+    depends_on: []
+    see_also:
+      - "IMPL-PINBOARD_API"
+      - "IMPL-TAG_SYSTEM"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture: []
+    code_annotations:
+      - "IMPL-PINBOARD_POSTS_ADD_ENCODING"
+    requirements: []
+    tests:
+      - "tests/unit/tag-storage.test.js"

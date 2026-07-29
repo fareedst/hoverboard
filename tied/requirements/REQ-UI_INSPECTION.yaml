@@ -1,63 +1,63 @@
 REQ-UI_INSPECTION:
-  name: UI Inspection and Testability
-  category: Non-Functional
-  priority: P1
-  status: Implemented
+  category: "Non-Functional"
+  metadata:
+    author: "AI Agent"
+    created: "2026-02-17"
+    last_updated: "2026-02-25"
+    reason: "Add messaging protocol test traceability (ARCH-MESSAGE_HANDLING, IMPL-MESSAGE_HANDLING)"
+  name: "UI Inspection and Testability"
+  priority: "P1"
   rationale:
-    why: Enable thorough testing and debugging of extension UI by inspecting inputs, actions, message flow, and outputs
-    problems_solved:
-      - Difficult to assert on UI actions and message flow in tests
-      - No single source of truth for message types and action IDs
-      - Hard to inspect stored/displayed state for regression testing
     benefits:
-      - Tests can assert on action/message sequence without DOM
-      - E2E and unit tests share same contract (message types, action IDs)
-      - Debug and dev panel can show last N actions and state
-  satisfaction_criteria:
-    - criterion: UI action contract exports MESSAGE_TYPES and popup/overlay action IDs
-      metric: src/shared/ui-action-contract.js
-    - criterion: Optional inspector records messages and actions when enabled
-      metric: src/shared/ui-inspector.js; gated by DEBUG_HOVERBOARD_UI or setEnabled
-    - criterion: Service worker, popup, and content script wire inspector
-      metric: recordMessage in SW; recordAction in popup and content script
-    - criterion: 'Side panel snapshot: E2E can capture two serializable state shapes (Bookmark tab, Tags tree tab)'
-      metric: snapshotSidePanel(page) in tests/e2e/helpers.js returns bookmarkTab and tagsTreeTab with required properties
-  validation_criteria:
-    - method: Unit tests
-      coverage: Contract and inspector API used in tests
-    - method: Manual
-      coverage: Set DEBUG_HOVERBOARD_UI and verify no-op when unset
-    - method: Extension E2E (Playwright)
-      coverage: 'tests/playwright/extension-*.spec.js – popup structure; popup↔background (GET_OPTIONS, GET_TAB_ID); popup→content (TOGGLE_HOVER, GET_OVERLAY_STATE); GET_PAGE_CONTENT (SW executeScript); suggested tags (MAIN world); GET_PAGE_SELECTION; overlay visibility (snapshotOverlay); options/side panel messaging; options snapshot (snapshotOptions); side panel snapshot (snapshotSidePanel returns bookmarkTab and tagsTreeTab); bookmarks table, browser import, offscreen (READ_FILE_BOOKMARKS). Run: npm run test:e2e:extension.'
-  traceability:
-    architecture:
-      - ARCH-UI_TESTABILITY
-      - ARCH-MESSAGE_HANDLING
-    implementation:
-      - IMPL-UI_ACTION_CONTRACT
-      - IMPL-UI_INSPECTOR
-      - IMPL-PLAYWRIGHT_E2E_EXTENSION
-      - IMPL-SIDE_PANEL_SNAPSHOT
-      - IMPL-MESSAGE_HANDLING
-    tests:
-      - tests/playwright/extension-messaging.spec.js
-      - tests/unit/message-handler-contracts.test.js
-      - tests/unit/popup-message-contract.test.js
-      - tests/unit/content-messaging-contracts.test.js
-      - tests/unit/service-worker-messaging-routing.test.js
-      - tests/unit/message-type-drift.test.js
-    code_annotations:
-      - IMPL-UI_ACTION_CONTRACT
-      - IMPL-UI_INSPECTOR
-      - ARCH-UI_TESTABILITY
-      - REQ-UI_INSPECTION
+      - "Debug and dev panel can show last N actions and state"
+      - "E2E and unit tests share same contract (message types, action IDs)"
+      - "Tests can assert on action/message sequence without DOM"
+    problems_solved:
+      - "Difficult to assert on UI actions and message flow in tests"
+      - "Hard to inspect stored/displayed state for regression testing"
+      - "No single source of truth for message types and action IDs"
+    why: "Enable thorough testing and debugging of extension UI by inspecting inputs, actions, message flow, and outputs"
   related_requirements:
     depends_on: []
     related_to:
-      - REQ-MODULE_VALIDATION
-      - REQ-OVERLAY_SYSTEM
-  metadata:
-    created: "2026-02-17"
-    last_updated: "2026-02-25"
-    author: AI Agent
-    reason: Add messaging protocol test traceability (ARCH-MESSAGE_HANDLING, IMPL-MESSAGE_HANDLING)
+      - "REQ-MODULE_VALIDATION"
+      - "REQ-OVERLAY_SYSTEM"
+  satisfaction_criteria:
+    - criterion: "UI action contract exports MESSAGE_TYPES and popup/overlay action IDs"
+      metric: "src/shared/ui-action-contract.js"
+    - criterion: "Optional inspector records messages and actions when enabled"
+      metric: "src/shared/ui-inspector.js; gated by DEBUG_HOVERBOARD_UI or setEnabled"
+    - criterion: "Service worker, popup, and content script wire inspector"
+      metric: "recordMessage in SW; recordAction in popup and content script"
+    - criterion: "Side panel snapshot: E2E can capture two serializable state shapes (Bookmark tab, Tags tree tab)"
+      metric: "snapshotSidePanel(page) in tests/e2e/helpers.js returns bookmarkTab and tagsTreeTab with required properties"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-UI_TESTABILITY"
+    code_annotations:
+      - "ARCH-UI_TESTABILITY"
+      - "IMPL-UI_ACTION_CONTRACT"
+      - "IMPL-UI_INSPECTOR"
+      - "REQ-UI_INSPECTION"
+    implementation:
+      - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
+      - "IMPL-SIDE_PANEL_SNAPSHOT"
+      - "IMPL-UI_ACTION_CONTRACT"
+      - "IMPL-UI_INSPECTOR"
+    tests:
+      - "tests/playwright/extension-messaging.spec.js"
+      - "tests/unit/content-messaging-contracts.test.js"
+      - "tests/unit/message-handler-contracts.test.js"
+      - "tests/unit/message-type-drift.test.js"
+      - "tests/unit/popup-message-contract.test.js"
+      - "tests/unit/service-worker-messaging-routing.test.js"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Contract and inspector API used in tests"
+    - method: "Manual"
+      coverage: "Set DEBUG_HOVERBOARD_UI and verify no-op when unset"
+    - method: "Extension E2E (Playwright)"
+      coverage: "tests/playwright/extension-*.spec.js – popup structure; popup↔background (GET_OPTIONS, GET_TAB_ID); popup→content (TOGGLE_HOVER, GET_OVERLAY_STATE); GET_PAGE_CONTENT (SW executeScript); suggested tags (MAIN world); GET_PAGE_SELECTION; overlay visibility (snapshotOverlay); options/side panel messaging; options snapshot (snapshotOptions); side panel snapshot (snapshotSidePanel returns bookmarkTab and tagsTreeTab); bookmarks table, browser import, offscreen (READ_FILE_BOOKMARKS). Run: npm run test:e2e:extension."

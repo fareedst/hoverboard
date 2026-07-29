@@ -1,240 +1,136 @@
 IMPL-SIDE_PANEL_TABS:
-  name: Side Panel Tabs Implementation
-  status: Active
-  testability: mixed
-  phase_h_side_panel_recent_tags_extension_document:
-    testability: e2e_only
-    e2e_only_reason: 'This Page Recent Tags must be validated in a real chrome-extension:// side-panel.html document — scoped UIManager resolves data-popup-ref under #bookmarkPanel and paints after PopupController.loadInitialData with live chrome.runtime messaging to the service worker. Jest and Phase G composition tests mock runtime/controller and do not load the bundled extension page in Chromium.'
-    playwright_spec: tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
-  phase_h_window_focus_recent_tags_cross_window:
-    testability: e2e_only
-    e2e_only_reason: REQ-RECENT_TAGS_SYSTEM cross-window refresh depends on chrome.windows.onFocusChanged when focus moves between separate browser windows; the Playwright extension fixture uses one persistent Chromium window (extra pages are tabs, not OS-level multi-window focus parity). bindWindowFocusRecentTagsRefresh wiring and sync guards are covered by tests/integration/window-focus-recent-tags-composition.integration.test.js.
-  cross_references:
-    - ARCH-SIDE_PANEL_TABS
-    - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-    - REQ-SIDE_PANEL_BROWSER_TABS
-    - REQ-RECENT_TAGS_SYSTEM
-    - ARCH-TAG_SYSTEM
-  rationale:
-    why: Implements ARCH-SIDE_PANEL_TABS and REQ-SIDE_PANEL_POPUP_EQUIVALENT with one IMPL for tab UI and init flow.
-    problems_solved:
-      - No tabbed panel; no single entry for This Page + By Tag
-    benefits:
-      - Single side-panel entry script; tab bar; lazy init of This Page and By Tag tabs; tab persistence
-  implementation_approach:
-    summary: 'side-panel.html: tab bar; panels #bookmarkPanel, #tagsTreePanel, #browserTabsPanel; persist hoverboard_sidepanel_active_tab; lazy init This Page / By Tag / Tabs; bindTabChangeRefresh and bindWindowFocusRecentTagsRefresh (REQ-RECENT_TAGS_SYSTEM) when Bookmark tab active; composed_with IMPL-SIDE_PANEL_BOOKMARK, IMPL-SIDE_PANEL_TAGS_TREE, IMPL-SIDE_PANEL_BROWSER_TABS.'
-    details:
-      - manifest side_panel.default_path → side-panel.html
-      - 'Side panel header: single line with left "Hoverboard v{version}" (or "Hoverboard" if no version) and right build time UTC (YYYY-MM-DD HH:mm); elements #side-panel-title-version (left) and #side-panel-version (right); flex row, space-between.'
-      - 'Tab buttons: data-tab="bookmark", data-tab="tagsTree", data-tab="browserTabs"; click handler switches panel, saves to storage, runs init for that tab if not yet inited'
-      - Storage key e.g. hoverboard_sidepanel_active_tab; values "bookmark" | "tagsTree" | "browserTabs"
-      - This Page init runs once (guard); By Tag init can re-run on each show or once
-      - 'On browser tab change (onActivated/onUpdated): if controller exists always call refreshPopupData() so currentPin is for new tab; then refresh By Tag tab when visible via refreshTagsTreeTabIfVisible (setSelectedTagsFromCurrentBookmark)'
-      - 'Recommended E2E (IMPL-SIDE_PANEL_TABS): after loading side panel, assert header row has left text matching Hoverboard v* and right text matching YYYY-MM-DD HH:mm.'
-      - 'S08 testability: bindWindowFocusRecentTagsRefresh — full two-window recent-tags sync (REQ-RECENT_TAGS_SYSTEM) is e2e_only for end-to-end proof; e2e_only_reason: requires live Chromium extension host with chrome.sidePanel + chrome.windows.onFocusChanged across multiple browser windows and real SW messaging; unit/integration cover guards and loadRecentTags via mocks (tests/unit/side-panel-tabs.test.js).'
-      - 'S10 Phase G: tests/integration/window-focus-recent-tags-composition.integration.test.js exercises bindWindowFocusRecentTagsRefresh wiring (onFocusChanged → getCurrent → shouldInvokeLoadRecentTagsOnWindowFocusSync → loadRecentTags) without UI; setActiveTabForTest drives activeTab for guard branches.'
-      - 'S10 Phase G: tests/integration/browser-tabs-tab-composition.integration.test.js exercises runInitialTabInit(TAB_BROWSER_TABS) and switchTabForTest(TAB_BROWSER_TABS) → initBrowserTabsTab (mocked); resetBrowserTabsTabInitedForTest clears one-shot guard.'
-      - 'S12 REQ-MODULE_VALIDATION: (1) side-panel-tab-state.js pure predicate shouldInvokeLoadRecentTagsOnWindowFocusSync — unit tests in tests/unit/side-panel-tabs.test.js; (2) side-panel.js bindWindowFocusRecentTagsRefresh wiring — composition tests in tests/integration/window-focus-recent-tags-composition.integration.test.js; (3) browser Tabs tab init binding — tests/integration/browser-tabs-tab-composition.integration.test.js; (4) This Page Recent Tags mount in extension document — Playwright tests/playwright/extension-side-panel-recent-tags-e2e.spec.js; cross-window focus refresh remains e2e_only per phase_h_window_focus_recent_tags_cross_window.'
   code_locations:
     files:
-      - path: src/ui/side-panel/side-panel.html
-        description: 'Tab bar; single-line header row (#side-panel-title-version, #side-panel-version) and panel roots'
-      - path: src/ui/side-panel/side-panel.js
-        description: Tab switching, persist, initSidePanelVersion, init This Page and By Tag tabs; bindWindowFocusRecentTagsRefresh
-      - path: src/ui/side-panel/side-panel-tab-state.js
-        description: TAB_* ids, visibility helpers, shouldInvokeLoadRecentTagsOnWindowFocusSync, getTagsTreeInitOptions
-      - path: src/ui/side-panel/build-info.js
-        description: BUILD_TIME_UTC (generated at build by scripts/build.js)
-      - path: src/ui/side-panel/tags-tree.js
-        description: Export initTagsTreeTab for side-panel.js
-      - path: manifest.json
-        description: side_panel.default_path
+      - path: "src/ui/side-panel/side-panel.html"
+        description: "Tab bar; single-line header row (#side-panel-title-version, #side-panel-version) and panel roots"
+      - path: "src/ui/side-panel/side-panel.js"
+        description: "Tab switching, persist, initSidePanelVersion, init This Page and By Tag tabs; bindWindowFocusRecentTagsRefresh"
+      - path: "src/ui/side-panel/side-panel-tab-state.js"
+        description: "TAB_* ids, visibility helpers, shouldInvokeLoadRecentTagsOnWindowFocusSync, getTagsTreeInitOptions"
+      - path: "src/ui/side-panel/build-info.js"
+        description: "BUILD_TIME_UTC (generated at build by scripts/build.js)"
+      - path: "src/ui/side-panel/tags-tree.js"
+        description: "Export initTagsTreeTab for side-panel.js"
+      - path: "manifest.json"
+        description: "side_panel.default_path"
     functions:
-      - name: switchTab
-        file: src/ui/side-panel/side-panel.js
-        description: Show panel for tab, hide other; persist; init tab if needed
-      - name: initBookmarkTab
-        file: src/ui/side-panel/side-panel.js
-        description: UISystem init, createPopup(container), loadInitialData, setupEventListeners
-      - name: initTagsTreeTab
-        file: src/ui/side-panel/tags-tree.js
-        description: Load bookmarks, config, render tag selector and tree
-      - name: bindTabChangeRefresh
-        file: src/ui/side-panel/side-panel.js
-        description: Register tabs.onActivated and tabs.onUpdated; always refresh controller when panel open; then refresh This Page UI (when visible) and By Tag (when visible via refreshTagsTreeTabIfVisible)
-      - name: bindWindowFocusRecentTagsRefresh
-        file: src/ui/side-panel/side-panel.js
-        description: chrome.windows.onFocusChanged; exported for Phase G composition tests; when Bookmark tab active and controller ready after window-id match, controller.loadRecentTags()
-      - name: setActiveTabForTest
-        file: src/ui/side-panel/side-panel.js
-        description: 'Test-only: set module activeTab for composition tests of bindWindowFocusRecentTagsRefresh guards'
-      - name: switchTabForTest
-        file: src/ui/side-panel/side-panel.js
-        description: 'Phase G: exported wrapper for switchTab(tabId) — drives initBrowserTabsTab binding without tab-bar click'
-      - name: resetBrowserTabsTabInitedForTest
-        file: src/ui/side-panel/side-panel.js
-        description: 'Test-only: clear browserTabsTabInited so composition tests can re-invoke initBrowserTabsTab path'
-      - name: refreshBookmarkTabIfVisible
-        file: src/ui/side-panel/side-panel.js
-        description: Call controller.refreshPopupData() when This Page tab is visible and inited
-      - name: refreshTagsTreeTabIfVisible
-        file: src/ui/side-panel/side-panel.js
-        description: Call setSelectedTagsFromCurrentBookmark(controller tags) when By Tag tab is visible and inited (on browser tab change)
-      - name: runInitialTabInit
-        file: src/ui/side-panel/side-panel.js
-        description: 'On panel load: when activeTab is tagsTree, await initBookmarkTab then init By Tag with getTagsTreeInitOptions(controller); else initTabIfNeeded(activeTab). Exported for tests.'
-      - name: getTagsTreeInitOptions
-        file: src/ui/side-panel/side-panel-tab-state.js
-        description: 'Pure helper: given controller, returns currentBookmarkTags for initTagsTreeTab (By Tag on open shows current URL record).'
-      - name: shouldInvokeLoadRecentTagsOnWindowFocusSync
-        file: src/ui/side-panel/side-panel-tab-state.js
-        description: Pure sync guards for bindWindowFocusRecentTagsRefresh before loadRecentTags; unit-tested in side-panel-tabs.test.js
-      - name: setSidePanelVersion
-        file: src/ui/side-panel/side-panel.js
-        description: 'Set #side-panel-title-version to "Hoverboard v" + version or "Hoverboard"; set #side-panel-version to buildTimeUtc. No-op when #side-panel-version missing. Exported for tests.'
-      - name: initSidePanelVersion
-        file: src/ui/side-panel/side-panel.js
-        description: Called on DOMContentLoaded; reads getManifest().version and BUILD_TIME_UTC, calls setSidePanelVersion().
-  traceability:
-    architecture:
-      - ARCH-SIDE_PANEL_TABS
-      - ARCH-TAG_SYSTEM
-    requirements:
-      - REQ-SIDE_PANEL_POPUP_EQUIVALENT
-      - REQ-SIDE_PANEL_BROWSER_TABS
-      - REQ-RECENT_TAGS_SYSTEM
-    code_annotations:
-      - IMPL-SIDE_PANEL_TABS
-    tests:
-      - tests/unit/side-panel-tabs.test.js
-      - tests/unit/side-panel-initial-tab-init.test.js
-      - tests/unit/side-panel-html.test.js
-      - tests/playwright/extension-messaging.spec.js
-      - tests/integration/window-focus-recent-tags-composition.integration.test.js
-      - tests/integration/browser-tabs-tab-composition.integration.test.js
-      - tests/playwright/extension-side-panel-recent-tags-e2e.spec.js
-  related_decisions:
-    depends_on:
-      - ARCH-SIDE_PANEL_TABS
-    supersedes: []
-    see_also:
-      - IMPL-SIDE_PANEL_BOOKMARK
-      - IMPL-SIDE_PANEL_TAGS_TREE
-      - IMPL-UIManager_SCOPED_ROOT
-    composed_with:
-      - IMPL-SIDE_PANEL_BOOKMARK
-      - IMPL-SIDE_PANEL_TAGS_TREE
-      - IMPL-SIDE_PANEL_BROWSER_TABS
-  essence_pseudocode: |
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM]
-    # Tabbed side panel: tab bar, panels, persist, init This Page / By Tag / browser Tabs; recent-tags refresh on window focus while Bookmark tab active (same loadRecentTags contract as [IMPL-RECENT_TAGS_POPUP_REFRESH]); single page + scoped popup root per ARCH-SIDE_PANEL_TABS.
-
-    INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
-    OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted
-    DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
-
-    # How: restore tab; showPanel; bindTabButtons; bindTabChangeRefresh; bindWindowFocusRecentTagsRefresh (RECENT_TAGS ordering with tab listeners); runInitialTabInit — if restored tagsTree, await bookmark init then By Tag with currentBookmarkTags so DB row for current URL shows.
-    ON panel page load:
-      activeTab = load from chrome.storage.local key hoverboard_sidepanel_active_tab OR default "bookmark"
-      showPanel(activeTab)  // display #bookmarkPanel or #tagsTreePanel; hide the other
-      bindTabButtons()  // on click: switchTab(tabId); save activeTab to storage; showPanel(activeTab); initTabIfNeeded(activeTab) or initTabIfNeeded(tabId, options)
-      bindTabChangeRefresh()  // tabs.onActivated and tabs.onUpdated (active tab complete) → if controller exists always refreshPopupData(); then refreshBookmarkTabIfVisible(); then refreshTagsTreeTabIfVisible()
-      bindWindowFocusRecentTagsRefresh()  // REQ-RECENT_TAGS_SYSTEM: when this window gains focus and Bookmark tab active, loadRecentTags() (same getRecentBookmarks path as popup)
-      runInitialTabInit(activeTab)  // IF activeTab === "tagsTree": await initBookmarkTab(); initTabIfNeeded("tagsTree", getTagsTreeInitOptions(controller)). ELSE IF activeTab === "browserTabs": initTabIfNeeded("browserTabs"). ELSE: initTabIfNeeded(activeTab). Ensures By Tag tab on open shows current URL's bookmark; Tabs tab on open loads browser tabs list (REQ-SIDE_PANEL_BROWSER_TABS).
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # How: pure helper for By Tag init — { currentBookmarkTags } from controller.currentPin.tags via normalizeTags; lives in side-panel-tab-state.js.
-    getTagsTreeInitOptions(controller):
-      IF controller missing: RETURN { currentBookmarkTags: [] }
-      raw = controller.normalizeTags(controller.currentPin?.tags) || []
-      RETURN { currentBookmarkTags: Array.isArray(raw) ? raw : [] }
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH]
-    # How: cross-IMPL — invokes PopupController.loadRecentTags() (async; same family as popup). chrome.windows.getCurrent callback does not await the returned promise (fire-and-forget; matches production side-panel.js). Register after bindTabChangeRefresh on panel load. Focus to this window (not WINDOW_ID_NONE), getCurrent id match; sync guards via shouldInvokeLoadRecentTagsOnWindowFocusSync in side-panel-tab-state.js (matches unit tests); no-op without chrome.windows. Phase G: exported for composition tests; setActiveTabForTest sets activeTab in tests only.
-    bindWindowFocusRecentTagsRefresh():
-      hasWindowsApi = !!(onFocusChanged AND getCurrent); IF NOT hasWindowsApi: RETURN
-      REGISTER onFocusChanged(windowId):
-        IF windowId === WINDOW_ID_NONE: RETURN
-        getCurrent → IF runtime.lastError OR window id mismatch: RETURN
-        IF NOT shouldInvokeLoadRecentTagsOnWindowFocusSync({ hasWindowsApi, activeTab, isInitialized: controller?.isInitialized, isLoading: controller?.isLoading }): RETURN
-        controller.loadRecentTags()  // async; not AWAIT in callback (S09.GREEN LEAP alignment)
-
-    # --- Phase H E2E-only boundary [REQ-RECENT_TAGS_SYSTEM] [IMPL-SIDE_PANEL_TABS] ---
-    # Cross-window "return focus to this browser window → Recent Tags refresh" is e2e_only: phase_h_window_focus_recent_tags_cross_window (multi-window + real onFocusChanged). Phase G: tests/integration/window-focus-recent-tags-composition.integration.test.js.
-    # This Page Recent Tags mount in chrome-extension:// side-panel.html is e2e_only: phase_h_side_panel_recent_tags_extension_document — tests/playwright/extension-side-panel-recent-tags-e2e.spec.js.
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]
-    # How: pure predicate for window-focus recent refresh sync gates (tested in side-panel-tabs.test.js); implementation is single boolean AND (same semantics as chained IFs). Token set aligned with side-panel-tab-state.js and tests (S09.SYNC).
-    shouldInvokeLoadRecentTagsOnWindowFocusSync({ hasWindowsApi, activeTab, isInitialized, isLoading }):
-      RETURN !!(hasWindowsApi AND activeTab === "bookmark" AND isInitialized AND NOT isLoading)
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # How: onActivated/onUpdated — refreshPopupData updates controller.currentPin; By Tag visible → refreshTagsTreeTabIfVisible / setSelectedTagsFromCurrentBookmark.
-    ON tabs.onActivated / tabs.onUpdated (active tab complete):
-      IF popupComponents?.controller: AWAIT controller.refreshPopupData()
-      IF This Page tab visible: UI already updated by refreshPopupData
-      IF By Tag tab visible AND tagsTreeTabInited: refreshTagsTreeTabIfVisible() → setSelectedTagsFromCurrentBookmark(controller tags)
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
-    # How: persist activeTab; showPanel; tagsTree branch passes currentBookmarkTags / setSelectedTagsFromCurrentBookmark; returning to bookmark when already inited → refreshPopupData.
-    switchTab(tabId):
-      wasBookmarkInited = bookmarkTabInited
-      activeTab = tabId
-      chrome.storage.local.set({ hoverboard_sidepanel_active_tab: tabId })
-      showPanel(activeTab)
-      IF tabId === "tagsTree": currentTags = controller.normalizeTags(controller.currentPin?.tags) OR []; wasTagsTreeInited = tagsTreeTabInited; initTabIfNeeded(tabId, { currentBookmarkTags: currentTags }); IF wasTagsTreeInited: setSelectedTagsFromCurrentBookmark(currentTags)
-      ELSE IF tabId === "browserTabs": initTabIfNeeded("browserTabs")
-      ELSE: initTabIfNeeded(tabId)
-      IF tabId === "bookmark" AND wasBookmarkInited AND popupComponents.controller: popupComponents.controller.refreshPopupData()
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_BROWSER_TABS]
-    # How: toggle visibility of #bookmarkPanel / #tagsTreePanel / #browserTabsPanel so exactly one content panel shows.
-    showPanel(activeTab):
-      IF activeTab === "bookmark": #bookmarkPanel visible, #tagsTreePanel hidden, #browserTabsPanel hidden
-      ELSE IF activeTab === "tagsTree": #tagsTreePanel visible, #bookmarkPanel hidden, #browserTabsPanel hidden
-      ELSE IF activeTab === "browserTabs": #browserTabsPanel visible, #bookmarkPanel hidden, #tagsTreePanel hidden
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
-    # How: header row — setSidePanelVersion / initSidePanelVersion; no-op if #side-panel-version missing; guards for tests without chrome.runtime.
-    ON panel page load (after bindTabButtons): initSidePanelVersion() → setSidePanelVersion()  // no-op when #side-panel-version missing
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]
-    # How: CSS flex column on body + .side-panel-content flex 1 so tab content fills viewport.
-    CSS #side-panel-page (body): display flex; flex-direction column; height 100vh; margin 0; max-height none; width 100%
-    CSS .side-panel-content: flex 1 1 0; min-height 0; overflow auto; padding 0.5rem 0.75rem; display flex; flex-direction column
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT]
-    # How: composed_with — single init of popup stack in #bookmarkPanel; pre: DOM ready; post: controller + loadInitialData + setupEventListeners; wires footer By Tag → switchTab("tagsTree").
-    initTabIfNeeded("bookmark"):
-      IF bookmarkTabInited RETURN
-      bookmarkTabInited = true
-      uiSystem = AWAIT UISystem.init(); popupComponents = uiSystem.createPopup({ container: document.getElementById('bookmarkPanel'), errorHandler, config })
-      AWAIT popupComponents.controller.loadInitialData()
-      popupComponents.uiManager.setupEventListeners()
-      // Wire "By Tag" in footer to switchTab("tagsTree") when in panel context
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]
-    # How: composed_with — lazy initTagsTreeTab(options); currentBookmarkTags aligns selector after loadBookmarks; depends on bookmark tab controller when switching from This Page.
-    initTabIfNeeded("tagsTree", options):
-      IF tagsTreeTabInited RETURN
-      tagsTreeTabInited = true
-      initTagsTreeTab(options)  // load getAggregatedBookmarksForIndex; if options.currentBookmarkTags set, apply at end of loadBookmarks
-
-    # [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]
-    # How: composed_with — initBrowserTabsTab once; chrome.tabs list + optional referrers; visibility when activeTab === "browserTabs".
-    initTabIfNeeded("browserTabs"):
-      IF browserTabsTabInited RETURN
-      browserTabsTabInited = true
-      initBrowserTabsTab()  // load tabs, referrers; render #browserTabsPanel list; bind search input, Copy button, Close button
-    # Phase G: switchTabForTest(tabId) and resetBrowserTabsTabInitedForTest() exported for composition tests — same switchTab → initTabIfNeeded("browserTabs") path without clicking .side-panel-tab (no UI).
-
-    # --- Composition: composed_with [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_TAGS_TREE] ---
-    # Ordering: runInitialTabInit may await initBookmarkTab before By Tag so controller exists for getTagsTreeInitOptions. Shared DATA: popupComponents.controller (currentPin, normalizeTags) for both This Page and By Tag sync. Collision: bindTabChangeRefresh refreshPopupData and bindWindowFocusRecentTagsRefresh loadRecentTags can run close together — both read currentPin; safe (idempotent UI updates). Cross-IMPL: loadRecentTags matches [IMPL-RECENT_TAGS_POPUP_REFRESH] message path to [IMPL-MESSAGE_HANDLING] / [IMPL-TAG_SYSTEM].
+      - name: "switchTab"
+        description: "Show panel for tab, hide other; persist; init tab if needed"
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "initBookmarkTab"
+        description: "UISystem init, createPopup(container), loadInitialData, setupEventListeners"
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "initTagsTreeTab"
+        description: "Load bookmarks, config, render tag selector and tree"
+        file: "src/ui/side-panel/tags-tree.js"
+      - name: "bindTabChangeRefresh"
+        description: "Register tabs.onActivated and tabs.onUpdated; always refresh controller when panel open; then refresh This Page UI (when visible) and By Tag (when visible via refreshTagsTreeTabIfVisible)"
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "bindWindowFocusRecentTagsRefresh"
+        description: "chrome.windows.onFocusChanged; exported for Phase G composition tests; when Bookmark tab active and controller ready after window-id match, controller.loadRecentTags()"
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "setActiveTabForTest"
+        description: "Test-only: set module activeTab for composition tests of bindWindowFocusRecentTagsRefresh guards"
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "switchTabForTest"
+        description: "Phase G: exported wrapper for switchTab(tabId) — drives initBrowserTabsTab binding without tab-bar click"
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "resetBrowserTabsTabInitedForTest"
+        description: "Test-only: clear browserTabsTabInited so composition tests can re-invoke initBrowserTabsTab path"
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "refreshBookmarkTabIfVisible"
+        description: "Call controller.refreshPopupData() when This Page tab is visible and inited"
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "refreshTagsTreeTabIfVisible"
+        description: "Call setSelectedTagsFromCurrentBookmark(controller tags) when By Tag tab is visible and inited (on browser tab change)"
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "runInitialTabInit"
+        description: "On panel load: when activeTab is tagsTree, await initBookmarkTab then init By Tag with getTagsTreeInitOptions(controller); else initTabIfNeeded(activeTab). Exported for tests."
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "getTagsTreeInitOptions"
+        description: "Pure helper: given controller, returns currentBookmarkTags for initTagsTreeTab (By Tag on open shows current URL record)."
+        file: "src/ui/side-panel/side-panel-tab-state.js"
+      - name: "shouldInvokeLoadRecentTagsOnWindowFocusSync"
+        description: "Pure sync guards for bindWindowFocusRecentTagsRefresh before loadRecentTags; unit-tested in side-panel-tabs.test.js"
+        file: "src/ui/side-panel/side-panel-tab-state.js"
+      - name: "setSidePanelVersion"
+        description: "Set #side-panel-title-version to \"Hoverboard v\" + version or \"Hoverboard\"; set #side-panel-version to buildTimeUtc. No-op when #side-panel-version missing. Exported for tests."
+        file: "src/ui/side-panel/side-panel.js"
+      - name: "initSidePanelVersion"
+        description: "Called on DOMContentLoaded; reads getManifest().version and BUILD_TIME_UTC, calls setSidePanelVersion()."
+        file: "src/ui/side-panel/side-panel.js"
+  cross_references:
+    - "ARCH-SIDE_PANEL_TABS"
+    - "ARCH-TAG_SYSTEM"
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-SIDE_PANEL_BROWSER_TABS"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  essence_pseudocode: "# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM]\n# Tabbed side panel: tab bar, panels, persist, init This Page / By Tag / browser Tabs; recent-tags refresh on window focus while Bookmark tab active (same loadRecentTags contract as [IMPL-RECENT_TAGS_POPUP_REFRESH]); single page + scoped popup root per ARCH-SIDE_PANEL_TABS.\n\nINPUT: panel page load; user click on tab (\"This Page\", \"By Tag\", or \"Tabs\")\nOUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted\nDATA: activeTab (\"bookmark\" | \"tagsTree\" | \"browserTabs\"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = \"browserTabs\"; TAB_IDS includes browserTabs.\n\n# How: restore tab; showPanel; bindTabButtons; bindTabChangeRefresh; bindWindowFocusRecentTagsRefresh (RECENT_TAGS ordering with tab listeners); runInitialTabInit — if restored tagsTree, await bookmark init then By Tag with currentBookmarkTags so DB row for current URL shows.\nON panel page load:\n  activeTab = load from chrome.storage.local key hoverboard_sidepanel_active_tab OR default \"bookmark\"\n  showPanel(activeTab)  // display #bookmarkPanel or #tagsTreePanel; hide the other\n  bindTabButtons()  // on click: switchTab(tabId); save activeTab to storage; showPanel(activeTab); initTabIfNeeded(activeTab) or initTabIfNeeded(tabId, options)\n  bindTabChangeRefresh()  // tabs.onActivated and tabs.onUpdated (active tab complete) → if controller exists always refreshPopupData(); then refreshBookmarkTabIfVisible(); then refreshTagsTreeTabIfVisible()\n  bindWindowFocusRecentTagsRefresh()  // REQ-RECENT_TAGS_SYSTEM: when this window gains focus and Bookmark tab active, loadRecentTags() (same getRecentBookmarks path as popup)\n  runInitialTabInit(activeTab)  // IF activeTab === \"tagsTree\": await initBookmarkTab(); initTabIfNeeded(\"tagsTree\", getTagsTreeInitOptions(controller)). ELSE IF activeTab === \"browserTabs\": initTabIfNeeded(\"browserTabs\"). ELSE: initTabIfNeeded(activeTab). Ensures By Tag tab on open shows current URL's bookmark; Tabs tab on open loads browser tabs list (REQ-SIDE_PANEL_BROWSER_TABS).\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]\n# How: pure helper for By Tag init — { currentBookmarkTags } from controller.currentPin.tags via normalizeTags; lives in side-panel-tab-state.js.\ngetTagsTreeInitOptions(controller):\n  IF controller missing: RETURN { currentBookmarkTags: [] }\n  raw = controller.normalizeTags(controller.currentPin?.tags) || []\n  RETURN { currentBookmarkTags: Array.isArray(raw) ? raw : [] }\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH]\n# How: cross-IMPL — invokes PopupController.loadRecentTags() (async; same family as popup). chrome.windows.getCurrent callback does not await the returned promise (fire-and-forget; matches production side-panel.js). Register after bindTabChangeRefresh on panel load. Focus to this window (not WINDOW_ID_NONE), getCurrent id match; sync guards via shouldInvokeLoadRecentTagsOnWindowFocusSync in side-panel-tab-state.js (matches unit tests); no-op without chrome.windows. Phase G: exported for composition tests; setActiveTabForTest sets activeTab in tests only.\nbindWindowFocusRecentTagsRefresh():\n  hasWindowsApi = !!(onFocusChanged AND getCurrent); IF NOT hasWindowsApi: RETURN\n  REGISTER onFocusChanged(windowId):\n    IF windowId === WINDOW_ID_NONE: RETURN\n    getCurrent → IF runtime.lastError OR window id mismatch: RETURN\n    IF NOT shouldInvokeLoadRecentTagsOnWindowFocusSync({ hasWindowsApi, activeTab, isInitialized: controller?.isInitialized, isLoading: controller?.isLoading }): RETURN\n    controller.loadRecentTags()  // async; not AWAIT in callback (S09.GREEN LEAP alignment)\n\n# --- Phase H E2E-only boundary [REQ-RECENT_TAGS_SYSTEM] [IMPL-SIDE_PANEL_TABS] ---\n# Cross-window \"return focus to this browser window → Recent Tags refresh\" is e2e_only: phase_h_window_focus_recent_tags_cross_window (multi-window + real onFocusChanged). Phase G: tests/integration/window-focus-recent-tags-composition.integration.test.js.\n# This Page Recent Tags mount in chrome-extension:// side-panel.html is e2e_only: phase_h_side_panel_recent_tags_extension_document — tests/playwright/extension-side-panel-recent-tags-e2e.spec.js.\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM]\n# How: pure predicate for window-focus recent refresh sync gates (tested in side-panel-tabs.test.js); implementation is single boolean AND (same semantics as chained IFs). Token set aligned with side-panel-tab-state.js and tests (S09.SYNC).\nshouldInvokeLoadRecentTagsOnWindowFocusSync({ hasWindowsApi, activeTab, isInitialized, isLoading }):\n  RETURN !!(hasWindowsApi AND activeTab === \"bookmark\" AND isInitialized AND NOT isLoading)\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]\n# How: onActivated/onUpdated — refreshPopupData updates controller.currentPin; By Tag visible → refreshTagsTreeTabIfVisible / setSelectedTagsFromCurrentBookmark.\nON tabs.onActivated / tabs.onUpdated (active tab complete):\n  IF popupComponents?.controller: AWAIT controller.refreshPopupData()\n  IF This Page tab visible: UI already updated by refreshPopupData\n  IF By Tag tab visible AND tagsTreeTabInited: refreshTagsTreeTabIfVisible() → setSelectedTagsFromCurrentBookmark(controller tags)\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]\n# How: persist activeTab; showPanel; tagsTree branch passes currentBookmarkTags / setSelectedTagsFromCurrentBookmark; returning to bookmark when already inited → refreshPopupData.\nswitchTab(tabId):\n  wasBookmarkInited = bookmarkTabInited\n  activeTab = tabId\n  chrome.storage.local.set({ hoverboard_sidepanel_active_tab: tabId })\n  showPanel(activeTab)\n  IF tabId === \"tagsTree\": currentTags = controller.normalizeTags(controller.currentPin?.tags) OR []; wasTagsTreeInited = tagsTreeTabInited; initTabIfNeeded(tabId, { currentBookmarkTags: currentTags }); IF wasTagsTreeInited: setSelectedTagsFromCurrentBookmark(currentTags)\n  ELSE IF tabId === \"browserTabs\": initTabIfNeeded(\"browserTabs\")\n  ELSE: initTabIfNeeded(tabId)\n  IF tabId === \"bookmark\" AND wasBookmarkInited AND popupComponents.controller: popupComponents.controller.refreshPopupData()\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_BROWSER_TABS]\n# How: toggle visibility of #bookmarkPanel / #tagsTreePanel / #browserTabsPanel so exactly one content panel shows.\nshowPanel(activeTab):\n  IF activeTab === \"bookmark\": #bookmarkPanel visible, #tagsTreePanel hidden, #browserTabsPanel hidden\n  ELSE IF activeTab === \"tagsTree\": #tagsTreePanel visible, #bookmarkPanel hidden, #browserTabsPanel hidden\n  ELSE IF activeTab === \"browserTabs\": #browserTabsPanel visible, #bookmarkPanel hidden, #tagsTreePanel hidden\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]\n# How: header row — setSidePanelVersion / initSidePanelVersion; no-op if #side-panel-version missing; guards for tests without chrome.runtime.\nON panel page load (after bindTabButtons): initSidePanelVersion() → setSidePanelVersion()  // no-op when #side-panel-version missing\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT]\n# How: CSS flex column on body + .side-panel-content flex 1 so tab content fills viewport.\nCSS #side-panel-page (body): display flex; flex-direction column; height 100vh; margin 0; max-height none; width 100%\nCSS .side-panel-content: flex 1 1 0; min-height 0; overflow auto; padding 0.5rem 0.75rem; display flex; flex-direction column\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-UIManager_SCOPED_ROOT]\n# How: composed_with — single init of popup stack in #bookmarkPanel; pre: DOM ready; post: controller + loadInitialData + setupEventListeners; wires footer By Tag → switchTab(\"tagsTree\").\ninitTabIfNeeded(\"bookmark\"):\n  IF bookmarkTabInited RETURN\n  bookmarkTabInited = true\n  uiSystem = AWAIT UISystem.init(); popupComponents = uiSystem.createPopup({ container: document.getElementById('bookmarkPanel'), errorHandler, config })\n  AWAIT popupComponents.controller.loadInitialData()\n  popupComponents.uiManager.setupEventListeners()\n  // Wire \"By Tag\" in footer to switchTab(\"tagsTree\") when in panel context\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE]\n# How: composed_with — lazy initTagsTreeTab(options); currentBookmarkTags aligns selector after loadBookmarks; depends on bookmark tab controller when switching from This Page.\ninitTabIfNeeded(\"tagsTree\", options):\n  IF tagsTreeTabInited RETURN\n  tagsTreeTabInited = true\n  initTagsTreeTab(options)  // load getAggregatedBookmarksForIndex; if options.currentBookmarkTags set, apply at end of loadBookmarks\n\n# [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS]\n# How: composed_with — initBrowserTabsTab once; chrome.tabs list + optional referrers; visibility when activeTab === \"browserTabs\".\ninitTabIfNeeded(\"browserTabs\"):\n  IF browserTabsTabInited RETURN\n  browserTabsTabInited = true\n  initBrowserTabsTab()  // load tabs, referrers; render #browserTabsPanel list; bind search input, Copy button, Close button\n# Phase G: switchTabForTest(tabId) and resetBrowserTabsTabInitedForTest() exported for composition tests — same switchTab → initTabIfNeeded(\"browserTabs\") path without clicking .side-panel-tab (no UI).\n\n# --- Composition: composed_with [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_TAGS_TREE] ---\n# Ordering: runInitialTabInit may await initBookmarkTab before By Tag so controller exists for getTagsTreeInitOptions. Shared DATA: popupComponents.controller (currentPin, normalizeTags) for both This Page and By Tag sync. Collision: bindTabChangeRefresh refreshPopupData and bindWindowFocusRecentTagsRefresh loadRecentTags can run close together — both read currentPin; safe (idempotent UI updates). Cross-IMPL: loadRecentTags matches [IMPL-RECENT_TAGS_POPUP_REFRESH] message path to [IMPL-MESSAGE_HANDLING] / [IMPL-TAG_SYSTEM].\n"
+  implementation_approach:
+    details:
+      - "manifest side_panel.default_path → side-panel.html"
+      - "On browser tab change (onActivated/onUpdated): if controller exists always call refreshPopupData() so currentPin is for new tab; then refresh By Tag tab when visible via refreshTagsTreeTabIfVisible (setSelectedTagsFromCurrentBookmark)"
+      - "Recommended E2E (IMPL-SIDE_PANEL_TABS): after loading side panel, assert header row has left text matching Hoverboard v* and right text matching YYYY-MM-DD HH:mm."
+      - "S08 testability: bindWindowFocusRecentTagsRefresh — full two-window recent-tags sync (REQ-RECENT_TAGS_SYSTEM) is e2e_only for end-to-end proof; e2e_only_reason: requires live Chromium extension host with chrome.sidePanel + chrome.windows.onFocusChanged across multiple browser windows and real SW messaging; unit/integration cover guards and loadRecentTags via mocks (tests/unit/side-panel-tabs.test.js)."
+      - "S10 Phase G: tests/integration/browser-tabs-tab-composition.integration.test.js exercises runInitialTabInit(TAB_BROWSER_TABS) and switchTabForTest(TAB_BROWSER_TABS) → initBrowserTabsTab (mocked); resetBrowserTabsTabInitedForTest clears one-shot guard."
+      - "S10 Phase G: tests/integration/window-focus-recent-tags-composition.integration.test.js exercises bindWindowFocusRecentTagsRefresh wiring (onFocusChanged → getCurrent → shouldInvokeLoadRecentTagsOnWindowFocusSync → loadRecentTags) without UI; setActiveTabForTest drives activeTab for guard branches."
+      - "S12 REQ-MODULE_VALIDATION: (1) side-panel-tab-state.js pure predicate shouldInvokeLoadRecentTagsOnWindowFocusSync — unit tests in tests/unit/side-panel-tabs.test.js; (2) side-panel.js bindWindowFocusRecentTagsRefresh wiring — composition tests in tests/integration/window-focus-recent-tags-composition.integration.test.js; (3) browser Tabs tab init binding — tests/integration/browser-tabs-tab-composition.integration.test.js; (4) This Page Recent Tags mount in extension document — Playwright tests/playwright/extension-side-panel-recent-tags-e2e.spec.js; cross-window focus refresh remains e2e_only per phase_h_window_focus_recent_tags_cross_window."
+      - "Side panel header: single line with left \"Hoverboard v{version}\" (or \"Hoverboard\" if no version) and right build time UTC (YYYY-MM-DD HH:mm); elements #side-panel-title-version (left) and #side-panel-version (right); flex row, space-between."
+      - "Storage key e.g. hoverboard_sidepanel_active_tab; values \"bookmark\" | \"tagsTree\" | \"browserTabs\""
+      - "Tab buttons: data-tab=\"bookmark\", data-tab=\"tagsTree\", data-tab=\"browserTabs\"; click handler switches panel, saves to storage, runs init for that tab if not yet inited"
+      - "This Page init runs once (guard); By Tag init can re-run on each show or once"
+    summary: "side-panel.html: tab bar; panels #bookmarkPanel, #tagsTreePanel, #browserTabsPanel; persist hoverboard_sidepanel_active_tab; lazy init This Page / By Tag / Tabs; bindTabChangeRefresh and bindWindowFocusRecentTagsRefresh (REQ-RECENT_TAGS_SYSTEM) when Bookmark tab active; composed_with IMPL-SIDE_PANEL_BOOKMARK, IMPL-SIDE_PANEL_TAGS_TREE, IMPL-SIDE_PANEL_BROWSER_TABS."
   metadata:
     created:
+      author: "AI Agent"
       date: "2026-02-25"
-      author: AI Agent
     last_updated:
+      author: "AI Agent"
       date: "2026-03-28"
-      author: AI Agent
-      reason: SUB-LEAP-MICRO loadRecentTags fire-and-forget in pseudo; S12 Phase I — detail aligned with index (REQ-SIDE_PANEL_BROWSER_TABS, composed_with IMPL-SIDE_PANEL_BROWSER_TABS, browser-tabs composition test, switchTabForTest/resetBrowserTabsTabInitedForTest in code_locations); full suite + lint + token validation pass
+      reason: "SUB-LEAP-MICRO loadRecentTags fire-and-forget in pseudo; S12 Phase I — detail aligned with index (REQ-SIDE_PANEL_BROWSER_TABS, composed_with IMPL-SIDE_PANEL_BROWSER_TABS, browser-tabs composition test, switchTabForTest/resetBrowserTabsTabInitedForTest in code_locations); full suite + lint + token validation pass"
+  name: "Side Panel Tabs Implementation"
+  phase_h_side_panel_recent_tags_extension_document:
+    e2e_only_reason: "This Page Recent Tags must be validated in a real chrome-extension:// side-panel.html document — scoped UIManager resolves data-popup-ref under #bookmarkPanel and paints after PopupController.loadInitialData with live chrome.runtime messaging to the service worker. Jest and Phase G composition tests mock runtime/controller and do not load the bundled extension page in Chromium."
+    playwright_spec: "tests/playwright/extension-side-panel-recent-tags-e2e.spec.js"
+    testability: "e2e_only"
+  phase_h_window_focus_recent_tags_cross_window:
+    e2e_only_reason: "REQ-RECENT_TAGS_SYSTEM cross-window refresh depends on chrome.windows.onFocusChanged when focus moves between separate browser windows; the Playwright extension fixture uses one persistent Chromium window (extra pages are tabs, not OS-level multi-window focus parity). bindWindowFocusRecentTagsRefresh wiring and sync guards are covered by tests/integration/window-focus-recent-tags-composition.integration.test.js."
+    testability: "e2e_only"
+  rationale:
+    benefits:
+      - "Single side-panel entry script; tab bar; lazy init of This Page and By Tag tabs; tab persistence"
+    problems_solved:
+      - "No tabbed panel; no single entry for This Page + By Tag"
+    why: "Implements ARCH-SIDE_PANEL_TABS and REQ-SIDE_PANEL_POPUP_EQUIVALENT with one IMPL for tab UI and init flow."
+  related_decisions:
+    composed_with:
+      - "IMPL-SIDE_PANEL_BOOKMARK"
+      - "IMPL-SIDE_PANEL_BROWSER_TABS"
+      - "IMPL-SIDE_PANEL_TAGS_TREE"
+    depends_on:
+      - "ARCH-SIDE_PANEL_TABS"
+    see_also:
+      - "IMPL-SIDE_PANEL_BOOKMARK"
+      - "IMPL-SIDE_PANEL_TAGS_TREE"
+      - "IMPL-UIManager_SCOPED_ROOT"
+    supersedes: []
+  status: "Active"
+  testability: "mixed"
+  traceability:
+    architecture:
+      - "ARCH-SIDE_PANEL_TABS"
+      - "ARCH-TAG_SYSTEM"
+    code_annotations:
+      - "IMPL-SIDE_PANEL_TABS"
+    requirements:
+      - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-SIDE_PANEL_BROWSER_TABS"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    tests:
+      - "tests/integration/browser-tabs-tab-composition.integration.test.js"
+      - "tests/integration/window-focus-recent-tags-composition.integration.test.js"
+      - "tests/playwright/extension-messaging.spec.js"
+      - "tests/playwright/extension-side-panel-recent-tags-e2e.spec.js"
+      - "tests/unit/side-panel-html.test.js"
+      - "tests/unit/side-panel-initial-tab-init.test.js"
+      - "tests/unit/side-panel-tabs.test.js"
