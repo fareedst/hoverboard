@@ -1,12 +1,12 @@
 REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
-  '[arch-suggested_tags]': "Canonical spelling per lowercase key; chip case toggle for lower/UPPER display"
-  '[impl-suggested_tags]': "pickBetterSuggestedOriginalCase; TagService.extractSuggestedTagsFromContent; suggested-tags-main-world-snippet.js; Safari mirrors"
-  '[req-suggested_tags_deduplication]': "Case-insensitive exclusion of suggestions already on the bookmark unchanged"
-  '[req-suggested_tags_from_content]': "Case preservation applied to extracted suggestions"
+  "[arch-suggested_tags]": "Canonical spelling per lowercase key; chip case toggle for lower/UPPER display"
+  "[impl-suggested_tags]": "pickBetterSuggestedOriginalCase; TagService.extractSuggestedTagsFromContent; suggested-tags-main-world-snippet.js"
+  "[req-suggested_tags_deduplication]": "Case-insensitive exclusion of suggestions already on the bookmark unchanged"
+  "[req-suggested_tags_from_content]": "Case preservation applied to extracted suggestions"
   actual: "Implemented; unit tests in tests/unit/suggested-tag-original-case.test.js"
   category: "Functional"
   code_annotations: "Case preservation sections marked with `[REQ-SUGGESTED_TAGS_CASE_PRESERVATION]` in comments"
-  code_locations: "| Path | Role |\n| src/shared/suggested-tag-original-case.js | Canonical rank helper |\n| src/features/tagging/tag-service.js | Overlay extraction |\n| src/features/tagging/suggested-tags-main-world-snippet.js | Popup MAIN extraction |\n| safari/src/... | Mirrors |\n"
+  code_locations: "| Path | Role |\n| src/shared/suggested-tag-original-case.js | Canonical rank helper |\n| src/features/tagging/tag-service.js | Overlay extraction |\n| src/features/tagging/suggested-tags-main-world-snippet.js | Popup MAIN extraction |\n"
   coverage: "Case preservation logic, dual-version generation"
   created: "2025-07-14"
   depends_on: "None"
@@ -18,8 +18,8 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27"
-      reason: "S04 PROC-AGENT_REQ_CHECKLIST: detail aligned to canonical-case behavior and traceability"
+      date: "2026-07-28"
+      reason: "Remove safari/ mirror references"
   modifiable_decisions: "1. **Rank tie**: When two surface forms tie on mixed/ALLCAPS/lower rank, keep the incumbent. 2. **Sanitization**: sanitizeTag runs after canonical pick (REQ-TAG_INPUT_SANITIZATION). 3. **Tokenizer sync**: Popup MAIN snippet and TagService must share delimiter regex (ARCH-SUGGESTED_TAGS / IMPL-SUGGESTED_TAGS)."
   name: "Suggested Tags Case Preservation"
   no_capitalization_choice: "Users had no way to choose between \"JavaScript\" and \"javascript\" if only one was offered."

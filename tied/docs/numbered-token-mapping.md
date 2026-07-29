@@ -2,7 +2,7 @@
 
 **Purpose**: Maps legacy numbered semantic tokens (e.g. CFG-001, UTIL-001) to TIED tokens (REQ/ARCH/IMPL/TEST) for traceability. Use this table for find/replace and audit.
 
-**SAFARI-*** tokens are out of scope (prior Safari-extension effort); leave unmodified in source and docs.
+**SAFARI-*** numbered tokens are out of scope (prior Safari-extension effort); leave unmodified in source and docs. TIED `REQ/ARCH/IMPL-SAFARI_ADAPTATION` are **Deferred** (Chrome-first now); active browser API shim is `ARCH/IMPL-CROSS_BROWSER`.
 
 ---
 

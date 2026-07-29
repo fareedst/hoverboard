@@ -12,9 +12,9 @@ REQ-EXTENSION_IDENTITY:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Relate Chrome identity to REQ-CROSS_BROWSER"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -28,7 +28,9 @@ REQ-EXTENSION_IDENTITY:
     why: "Core extension identity is fundamental to user recognition and brand consistency. Changing this would break user expectations and require complete rebranding."
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-CROSS_BROWSER"
+      - "REQ-SAFARI_ADAPTATION"
     supersedes: []
   satisfaction_criteria:
     - criterion: "Architecture remains browser extension with content script injection"

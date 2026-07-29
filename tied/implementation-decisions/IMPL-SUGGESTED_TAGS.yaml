@@ -11,10 +11,6 @@ IMPL-SUGGESTED_TAGS:
         description: "MAIN-world relevance tiers and extractor global for popup path"
       - path: "src/ui/popup/UIManager.js"
         description: "updateSuggestedTags; optional three-way chip sort when tagSortToggle present"
-      - path: "safari/src/features/tagging/tag-service.js"
-        description: "Safari mirror extraction"
-      - path: "safari/src/features/content/overlay-manager.js"
-        description: "Safari mirror overlay"
     functions:
       - name: "extractSuggestedTagsFromContent"
         description: "Primary extraction for overlay; limit default; includes meta, emphasis, structured content"
@@ -32,15 +28,15 @@ IMPL-SUGGESTED_TAGS:
     - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
   decision: "Overlay path: TagService.extractSuggestedTagsFromContent with multi-source token pipeline, dedupe, and case preservation. Chromium popup path: MAIN-world snippet (suggested-tags-main-world-snippet.js) registers __hoverboardExtractSuggestedTagsWithRelevance; PopupController injects file then func, normalizes to { tag, relevance, inPageFrequency }, filters current bookmark tags; UIManager displays and may reorder chips per IMPL-THIS_PAGE_TAG_SORT."
   detail_file: "implementation-decisions/IMPL-SUGGESTED_TAGS.yaml"
-  essence_pseudocode: "# [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION]\n# Summary: Suggested tags from page — overlay TagService.extractSuggestedTagsFromContent; Chromium popup via MAIN-world snippet global and IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags (inject, normalize, filter, UIManager handoff).\n\n# [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [REQ-THIS_PAGE_TAG_SORT]\n# How — cross-IMPL: Popup path depends on IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags; ordering invariant — executeScript file (snippet) then func (global extractor); shared data — raw array from page world; post — NORMALIZE_SUGGESTED_ROWS then filters then updateSuggestedTags(rows); on error or non-http(s) — updateSuggestedTags([]).\n\n# [IMPL-SUGGESTED_TAGS] [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SUGGESTED_TAGS]\n# How — composed_with IMPL-SELECTION_TO_TAG_INPUT: pre — suggested chips rendered in UIManager; post — selection/tag-input add flows attach to chip DOM per IMPL-SELECTION_TO_TAG_INPUT (shared surface only; no ordering constraint on extraction).\n\n# How — MAIN-world extractor contract (implementation: suggested-tags-main-world-snippet.js; tier rules live only there).\nINPUT: active page document (implicit)\nOUTPUT: array of { tag: string, relevance: number, inPageFrequency: number }; tag sanitized by snippet inline rules; canonical case per pickBetterSuggestedOriginalCase rank\nDATA: noise set; delimiter regex MUST match TagService tokenization (ARCH-SUGGESTED_TAGS tokenizer sync)\n\n# How — Overlay pipeline contract (TagService.extractSuggestedTagsFromContent).\nINPUT: document, url, limit\nOUTPUT: list of tag strings; frequency-ordered; one canonical spelling per lowercase key; exact-deduped; at most limit items\nDATA: multi-source capped texts; noise; delimiter; wordFrequency + originalCaseMap with pickBetterSuggestedOriginalCase\nCONTROL: IF document null OR no querySelectorAll THEN RETURN []\n\n# How — extractSuggestedTags overlay body through sortedWords (same token set as summary).\nextractSuggestedTags(document, url, limit):\n  IF document invalid THEN RETURN []\n  TRY:\n    allTexts = GATHER_SOURCES(document, url)\n    IF allTexts empty THEN RETURN []\n    words = TOKENIZE(join allTexts) using shared delimiter regex\n    FOR each token: increment wordFrequency(lower); update originalCaseMap with pickBetterSuggestedOriginalCase\n    sortedEntries = SORT wordFrequency by count desc then key asc\n    sortedWords = PLUCK canonical string per key from originalCaseMap\n\n    # [IMPL-SUGGESTED_TAGS] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION]\n    # How — map each candidate through TagService.sanitizeTag (overlay path delegates to IMPL-TAG_SYSTEM).\n\n    sanitized = MAP each sortedWord through SANITIZE_OVERLAY (= TagService.sanitizeTag)\n    unique = DEDUPE exact adjacent duplicates preserving order\n    RETURN slice(unique, 0, limit)\n  CATCH:\n    RETURN []\n\n# How — Cross-path note (S06.3): overlay sanitizeTag vs snippet inline sanitizer may differ on edge characters; tokenizer must remain identical. See ARCH-SUGGESTED_TAGS.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SUGGESTED_TAGS-pseudocode.md"
   implementation_approach:
     details: []
     summary: "Extract from title, URL, meta, headings, emphasis, definitions, tables, nav, breadcrumbs, images, links (per-source limits). Tokenize, filter noise, frequency sort, case preservation, sanitize, deduplicate, apply limit. Overlay: TagService.extractSuggestedTagsFromContent. Popup (Chromium): chrome.scripting.executeScript MAIN files (suggested-tags-main-world-snippet.js) then func calling global extractor; PopupController normalizes to { tag, relevance, inPageFrequency } and filters current bookmark tags before updateSuggestedTags."
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27"
-      reason: "S13 PROC-AGENT_REQ_CHECKLIST: Sync TIED to final code/tests; token_coverage.tests = traceability.tests"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Suggested Tags Implementation"
   rationale:
     benefits: []

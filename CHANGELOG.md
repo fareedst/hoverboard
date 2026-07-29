@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- **Chrome-first platform; Safari App Extension deferred** ([REQ-CROSS_BROWSER], [ARCH-CROSS_BROWSER], [IMPL-CROSS_BROWSER], [REQ-SAFARI_ADAPTATION]) – Removed the live `safari/` package, Safari CI job, Safari build/release scripts, and Safari install docs. Shared `src/shared/safari-shim.js` is the Chrome-first **browser API shim** (`isSafari()` always false; no Safari messaging/tab filter). New thin **REQ-CROSS_BROWSER**; Safari REQ/ARCH/IMPL marked **Deferred**. Vocab: `tied/vocab/platform-targets.md`. CITDP: `docs/citdp/CITDP-REQ-CROSS_BROWSER-chrome-first-safari-deferred.yaml`. Unit: `tests/unit/browser-api-shim-platform.test.js`. Same change set includes npm dependency overrides, `bun.lock`, and tracked `dist/` rebuild.
+
+### Removed
+
+- **Safari App Extension delivery path** – `safari/` tree, `scripts/safari-*.js`, `safari-build-config.js`, `safari-manifest.json`, GitHub Actions `safari-build` job, and Safari-specific development docs under `docs/development/ai-development/SAFARI_*` and `docs/architecture/safari-extension-architecture.md`.
+
 ### Fixed
 
 - **Jest: chrome.storage mocks broke after the first test** ([IMPL-TESTING], [IMPL-RUNTIME_VALIDATION]) – `jest.config.js` had `restoreMocks: true`, which cleared `jest.fn()` implementations between tests while `global.chrome` was built once in `tests/setup.js`. That led to `chrome.storage` / `sync.get` returning `undefined` and cascading `TypeError`s (e.g. config-manager tests). **Fix:** set `restoreMocks: false` (keep `clearMocks: true` for call history only). **Setup:** `tests/setup.js` now defines `applyChromeMockImplementations` / `resetChromeMockImplementations`, moves `mockBackgroundPage` before `global.chrome`, merges a single `global.safari.extension`, consolidates one `beforeEach` that re-seeds chrome mocks and clears fetch / background helpers, removes the unused `jest-webextension-mock` import, and uses optional chaining so tests that replace `global.chrome` with a minimal stub still run. **Tests:** `message-schemas.test.js` adds regression cases for `getCurrentBookmark` passthrough (`url` + `title` + `tabId`), `saveBookmark` extra keys, and `.strict()` rejecting unknown keys.

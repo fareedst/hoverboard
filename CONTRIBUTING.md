@@ -47,7 +47,6 @@ This project follows a code of conduct that we expect all contributors to adhere
 - Node.js 18+ and npm
 - Git
 - Chrome browser for development
-- Safari browser for testing (macOS required)
 - Basic knowledge of JavaScript, HTML, and CSS
 
 ### Fork and Clone
@@ -81,19 +80,6 @@ npm test
 npm run dev
 ```
 
-### Safari Development
-
-```bash
-# Setup Safari development environment
-npm run safari:setup
-
-# Build Safari extension
-npm run safari:build
-
-# Validate Safari extension
-npm run safari:validate
-```
-
 ## Project Structure
 
 ```
@@ -103,7 +89,6 @@ hoverboard/
 │   ├── features/          # Feature implementations
 │   ├── shared/            # Shared utilities
 │   └── ui/                # User interface components
-├── safari/                # Safari-specific code
 ├── tests/                 # Test files
 ├── docs/                  # Documentation
 ├── .github/               # GitHub workflows and templates
@@ -115,8 +100,7 @@ hoverboard/
 - **`src/core/`**: Service worker, message handling, badge management
 - **`src/features/`**: Content scripts, pinboard integration, tagging
 - **`src/ui/`**: Popup, options page, components
-- **`src/shared/`**: Utilities, error handling, logging
-- **`safari/`**: Safari App Extension specific code
+- **`src/shared/`**: Utilities, error handling, logging (includes browser API shim)
 - **`tests/`**: Unit, integration, and e2e tests
 
 ## Contributing Guidelines
@@ -134,15 +118,14 @@ hoverboard/
 - **New features**: Add new functionality
 - **Documentation**: Improve or add documentation
 - **Tests**: Add or improve test coverage
-- **Safari improvements**: Enhance Safari compatibility
 - **Performance**: Optimize existing code
 
 ### Semantic Tokens
 
 This project uses semantic tokens for cross-referencing. All features must include appropriate tokens:
 
-- `CHROME-EXT-*`: Chrome-specific features
-- `SAFARI-EXT-*`: Safari-specific features
+- `CHROME-EXT-*`: Chrome-specific features (legacy numbered tokens)
+- `SAFARI-EXT-*`: Legacy numbered tokens (out of scope; Safari product deferred)
 - `CORE-*`: Core functionality
 - `UI-*`: User interface features
 - `TEST-*`: Testing-related features
@@ -170,7 +153,7 @@ This project uses semantic tokens for cross-referencing. All features must inclu
 6. **Build and test** the extension:
    ```bash
    npm run build:dev
-   # Test in Chrome and Safari
+   # Test in Chrome
    ```
 
 ### Pull Request Guidelines
@@ -186,7 +169,7 @@ This project uses semantic tokens for cross-referencing. All features must inclu
 
 1. **Automated checks** must pass
 2. **Code review** by maintainers
-3. **Testing** on both Chrome and Safari
+3. **Testing** on Chrome/Chromium
 4. **Documentation review** if applicable
 
 ## Testing
@@ -196,7 +179,7 @@ This project uses semantic tokens for cross-referencing. All features must inclu
 - **Unit Tests**: Individual function testing
 - **Integration Tests**: Component interaction testing
 - **E2E Tests**: End-to-end user workflows
-- **Cross-Browser Tests**: Chrome and Safari compatibility
+- **Browser API shim tests**: Chrome messaging/storage via `safari-shim.js` (historical filename)
 
 ### Running Tests
 
@@ -222,9 +205,9 @@ npm run test:watch
 - Test both success and failure cases
 - Include edge cases
 - Mock external dependencies
-- Test cross-browser compatibility
+- Prefer the shared browser API shim (`src/shared/safari-shim.js`) for future expansion readiness
 
-## Cross-Browser Compatibility
+## Browser Target (Chrome-first)
 
 ### Chrome Development
 
@@ -233,19 +216,11 @@ npm run test:watch
 - Ensure all permissions are necessary
 - Follow Chrome extension best practices
 
-### Safari Development
+### Shared browser API shim
 
-- Use Safari App Extension APIs
-- Test with latest Safari version
-- Include Safari-specific optimizations
-- Follow Apple's guidelines
-
-### Shared Code
-
-- Use `webextension-polyfill` for compatibility
-- Implement feature detection
-- Provide graceful degradation
-- Test on both platforms
+- Import `{ browser }` from the shared shim (or `utils.js` re-export) where messaging needs Promise wrappers
+- Keep capability guards for missing APIs; do not maintain a Safari package fork
+- Safari App Extension support is deferred (`REQ-SAFARI_ADAPTATION`); see `tied/vocab/platform-targets.md`
 
 ## Documentation
 
@@ -360,7 +335,7 @@ The scope is the name of the area affected (as someone reading history or a chan
 | **shared** | Shared utilities, logger, ErrorHandler, message-schemas (`src/shared/`) |
 | **config** | Config manager and config service (`src/config/`) |
 | **offscreen** | Offscreen file-bookmark I/O (`src/offscreen/`) |
-| **safari** | Safari App Extension (`safari/`) |
+| **safari** | Deferred — do not use for new commits (Safari package removed) |
 | **tied** | TIED methodology: requirements, architecture, implementation, semantic tokens (`tied/`, `semantic-tokens.yaml`) |
 | **docs** | Documentation outside `tied/` (`docs/`) |
 | **tests** | Test files, harnesses, Playwright E2E |

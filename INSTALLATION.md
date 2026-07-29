@@ -39,38 +39,9 @@
    - Click "Load unpacked"
    - Select the `dist` folder from the cloned repository
 
-## Safari Extension Installation
+## Safari
 
-### Prerequisites
-- macOS with Safari 14+ 
-- Xcode (for building from source)
-
-### Method 1: Install from GitHub Releases
-
-1. **Download the Extension**
-   - Go to the [Releases page](https://github.com/fareedst/hoverboard/releases)
-   - Download the latest `hoverboard-safari-extension.zip` file
-
-2. **Extract and Install**
-   - Extract the downloaded zip file
-   - Double-click the `.safariextz` file to install in Safari
-   - Follow Safari's installation prompts
-
-### Method 2: Build from Source
-
-1. **Build the Safari Extension**
-   ```bash
-   git clone https://github.com/fareedst/hoverboard.git
-   cd hoverboard
-   npm install
-   npm run safari:build
-   ```
-
-2. **Install in Safari**
-   - Open Safari
-   - Go to Safari > Preferences > Extensions
-   - Click "Turn On" next to Hoverboard
-   - Grant necessary permissions when prompted
+Safari is not currently supported (deferred). Active delivery is Chrome/Chromium only.
 
 ## First-Time Setup
 
@@ -113,18 +84,6 @@
 - Check that the extension has storage permissions
 - Try clearing extension data and reconfiguring
 
-### Safari Extension Issues
-
-**Extension not installing:**
-- Ensure you're using Safari 14+
-- Check that the extension file isn't corrupted
-- Try rebuilding from source
-
-**Performance issues:**
-- The extension includes performance monitoring
-- Check the extension's options for performance settings
-- Consider disabling some features if needed
-
 ## Support
 
 - **Issues:** [GitHub Issues](https://github.com/fareedst/hoverboard/issues)
@@ -138,12 +97,6 @@
 2. Find Hoverboard in the list
 3. Click "Remove"
 4. Confirm removal
-
-### Safari
-1. Go to Safari > Preferences > Extensions
-2. Find Hoverboard in the list
-3. Click "Turn Off"
-4. Optionally delete the extension file
 
 ## Privacy
 

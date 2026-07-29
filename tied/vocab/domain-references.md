@@ -70,6 +70,7 @@
 - **Bookmarks overloaded** — Hoverboard-stored pins ([`bookmarks.md`](bookmarks.md)), side-panel **Bookmarks** tab (browser tree, [`side-panel.md`](side-panel.md)), and **Local Bookmarks Index** ([`bookmarks-index.md`](bookmarks-index.md)) are distinct.
 - **hover / overlay** vs **Hoverboard** — product name vs on-page overlay UI; preferred terms in [`ui-surfaces.md`](ui-surfaces.md).
 - **Recent Tags** vs **getRecentBookmarks** — recent tag chips ([`tags.md`](tags.md)) vs aggregated recent pin list ([`storage-backends.md`](storage-backends.md) / [`ipc-messaging.md`](ipc-messaging.md)).
+- **browser API shim** vs **Safari App Extension (deferred)** — shared `browser` export in `src/shared/safari-shim.js` (historical filename) is Chrome-first under [REQ-CROSS_BROWSER](../requirements/REQ-CROSS_BROWSER.yaml) / [`platform-targets.md`](platform-targets.md); Safari product package is Deferred ([REQ-SAFARI_ADAPTATION](../requirements.yaml)). **API availability checks** are not Safari product support.
 
 ---
 
@@ -79,7 +80,9 @@
 |------|---------|
 | agent-stream | Cross-topic notes |
 | agentstream | Cross-topic notes |
+| API availability check | Cross-topic notes |
 | Bookmarks overloaded | Cross-topic notes |
+| browser API shim vs Safari App Extension | Cross-topic notes |
 | Domain vocabulary index | Title |
 | hover / overlay vs Hoverboard | Cross-topic notes |
 | IMPL grammar vocabulary | Authoring guides |

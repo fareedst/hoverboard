@@ -212,7 +212,7 @@ export function initBrowserTabsTab (doc, chromeTabs, chromeScripting, getReferre
   const panel = document.getElementById('browserTabsPanel')
   if (!panel) return
 
-  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Sessions API check: hide Recently closed and Both when chrome.sessions unavailable (e.g. Safari)
+  // [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] Sessions API check: hide Recently closed and Both when chrome.sessions unavailable
   const sessionsApi = typeof chrome !== 'undefined' && chrome.sessions ? chrome.sessions : (typeof browser !== 'undefined' && browser.sessions ? browser.sessions : null)
   const hasSessionsApi = !!(sessionsApi && typeof sessionsApi.getRecentlyClosed === 'function')
   const tabSourceWrap = panel.querySelector('#browserTabsSourceWrap')

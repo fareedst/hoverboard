@@ -1,3 +1,32 @@
+ARCH-CROSS_BROWSER:
+  cross_references:
+    - "ARCH-EXT_IDENTITY"
+    - "IMPL-CROSS_BROWSER"
+    - "REQ-CROSS_BROWSER"
+    - "REQ-EXTENSION_IDENTITY"
+    - "REQ-SAFARI_ADAPTATION"
+  description: "Chrome-first browser API shim architecture; primary REQ-CROSS_BROWSER."
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Cross-Browser Compatibility Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-EXT_IDENTITY:
+  cross_references:
+    - "IMPL-EXT_IDENTITY"
+    - "REQ-EXTENSION_IDENTITY"
+  description: "Chrome/Chromium target platform architecture."
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Extension Identity Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-FEEDBACK_STORAGE:
   cross_references:
     - "IMPL-MCP_FEEDBACK_TOOLS"
@@ -23,6 +52,20 @@ ARCH-MODULE_VALIDATION:
   name: "Module Validation Strategy"
   source_index: "architecture-decisions.yaml"
   status: "Active"
+  type: "ARCH"
+ARCH-SAFARI_ADAPTATION:
+  cross_references:
+    - "ARCH-CROSS_BROWSER"
+    - "IMPL-SAFARI_ADAPTATION"
+    - "REQ-SAFARI_ADAPTATION"
+  description: "Deferred Safari-specific architecture; active shim under ARCH-CROSS_BROWSER."
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Safari Adaptive Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Deferred"
   type: "ARCH"
 ARCH-SIDE_PANEL_BROWSER_TABS:
   cross_references:
@@ -104,6 +147,34 @@ IMPL-CONFIG_STRUCT:
   source_index: "implementation-decisions.yaml"
   status: "Template"
   type: "IMPL"
+IMPL-CROSS_BROWSER:
+  cross_references:
+    - "ARCH-CROSS_BROWSER"
+    - "REQ-CROSS_BROWSER"
+    - "REQ-EXTENSION_IDENTITY"
+    - "REQ-SAFARI_ADAPTATION"
+  description: "Chrome-first browser API shim implementation; primary REQ-CROSS_BROWSER."
+  detail_file: "implementation-decisions/IMPL-CROSS_BROWSER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Cross-Browser Browser API Shim"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-EXT_IDENTITY:
+  cross_references:
+    - "ARCH-EXT_IDENTITY"
+    - "REQ-EXTENSION_IDENTITY"
+  description: "Extension identity implementation stub for Chrome target."
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Extension Identity Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-MCP_FEEDBACK_TOOLS:
   cross_references:
     - "ARCH-FEEDBACK_STORAGE"
@@ -164,6 +235,20 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
   name: "Recent Tags refresh on every popup display"
   source_index: "implementation-decisions.yaml"
   status: "Active"
+  type: "IMPL"
+IMPL-SAFARI_ADAPTATION:
+  cross_references:
+    - "ARCH-SAFARI_ADAPTATION"
+    - "IMPL-CROSS_BROWSER"
+    - "REQ-SAFARI_ADAPTATION"
+  description: "Deferred Safari adaptations; safari/ package removed. Chrome shim owned by IMPL-CROSS_BROWSER."
+  detail_file: "implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Safari Adaptive Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Deferred"
   type: "IMPL"
 IMPL-SIDE_PANEL_BROWSER_TABS:
   cross_references:
@@ -497,6 +582,20 @@ PROC-TOKEN_VALIDATION:
   source_index: "processes.md"
   status: "Active"
   type: "PROC"
+PROC-VOCABULARY_INDEX:
+  cross_references:
+    - "PROC-AGENT_REQ_CHECKLIST"
+    - "PROC-IMPL_PSEUDOCODE_TOKENS"
+    - "PROC-TOKEN_AUDIT"
+  description: "Consult and maintain domain vocabulary index files at tied/vocab/*.md whenever a concept is named or expressed; distinct from IMPL pseudo-code grammar vocabulary"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-05-29"
+    registered: "2026-05-29"
+  name: "Domain vocabulary index discipline"
+  source_index: "processes.md"
+  status: "Active"
+  type: "PROC"
 PROC-YAML_DB_OPERATIONS:
   cross_references:
     - "ARCH-TIED_STRUCTURE"
@@ -524,6 +623,34 @@ PROC-YAML_EDIT_LOOP:
   source_index: "processes.md"
   status: "Active"
   type: "PROC"
+REQ-CROSS_BROWSER:
+  cross_references:
+    - "ARCH-CROSS_BROWSER"
+    - "IMPL-CROSS_BROWSER"
+    - "REQ-EXTENSION_IDENTITY"
+    - "REQ-SAFARI_ADAPTATION"
+  description: "Chrome-first shared browser API shim; Safari product Deferred under REQ-SAFARI_ADAPTATION."
+  detail_file: "requirements/REQ-CROSS_BROWSER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Chrome-First Browser API Shim"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
+REQ-EXTENSION_IDENTITY:
+  cross_references:
+    - "ARCH-EXT_IDENTITY"
+    - "IMPL-EXT_IDENTITY"
+  description: "Chrome/Chromium target platform identity for Hoverboard."
+  detail_file: "requirements/REQ-EXTENSION_IDENTITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Extension Identity"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
 REQ-FEEDBACK_TO_TIED:
   category: "Functional"
   cross_references:
@@ -574,6 +701,22 @@ REQ-RECENT_TAGS_SYSTEM:
   name: "Recent Tags System"
   source_index: "requirements.yaml"
   status: "Implemented"
+  type: "REQ"
+REQ-SAFARI_ADAPTATION:
+  cross_references:
+    - "ARCH-CROSS_BROWSER"
+    - "ARCH-SAFARI_ADAPTATION"
+    - "IMPL-CROSS_BROWSER"
+    - "IMPL-SAFARI_ADAPTATION"
+    - "REQ-EXTENSION_IDENTITY"
+  description: "Deferred Safari App Extension adaptations; Chrome-first now. Related to ARCH/IMPL-SAFARI_ADAPTATION and ARCH-CROSS_BROWSER."
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Safari Adaptive Behavior"
+  source_index: "requirements.yaml"
+  status: "Deferred"
   type: "REQ"
 REQ-SIDE_PANEL_BROWSER_TABS:
   category: "Functional"

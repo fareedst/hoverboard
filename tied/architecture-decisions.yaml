@@ -436,50 +436,56 @@ ARCH-CONFIG_STRUCTURE:
   traceability: {}
 ARCH-CROSS_BROWSER:
   alternatives_considered:
-    - name: "Platform-specific code"
+    - name: "Platform-specific code forks"
       cons:
+        - "Divergent feature sets"
         - "Too much duplication"
       pros: []
-      rejected_reason: "Maintenance burden"
-    - name: "Chrome-only"
+      rejected_reason: "Maintenance burden; prefer shared browser API shim"
+    - name: "Chrome-only forever with no abstraction"
       cons:
-        - "Limited audience"
+        - "Call sites tied to chrome.* only"
+        - "Harder future multi-browser expansion"
       pros:
-        - "Simpler"
-      rejected_reason: "Users want Safari support"
+        - "Simpler short term"
+      rejected_reason: "Shared browser API shim keeps Chrome delivery while enabling future browsers"
   cross_references:
+    - "IMPL-CROSS_BROWSER"
+    - "REQ-CROSS_BROWSER"
     - "REQ-EXTENSION_IDENTITY"
     - "REQ-SAFARI_ADAPTATION"
   detail_file: "null"
   implementation_approach:
     details:
-      - "Platform detection utilities"
-      - "Promise-based message passing"
-      - "Safari-specific optimizations"
-      - "Storage API abstraction"
-    summary: "Unified browser API shim with platform detection and Safari adaptations"
+      - "Browser API abstraction exporting browser from safari-shim.js"
+      - "platformUtils reserved for future non-Chromium targets (deferred)"
+      - "Promise-based message passing and retries for Chrome MV3"
+      - "Safari product adaptations deferred under ARCH-SAFARI_ADAPTATION"
+      - "Storage helpers for Chromium storage APIs"
+    summary: "Chrome-first unified browser API shim (src/shared/safari-shim.js) with Promise messaging and storage helpers; platform hooks reserved for deferred multi-browser expansion."
   metadata:
     created:
       author: "AI Agent"
       date: "2025-07-14T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-13T00:00:00.000Z"
-      reason: "Migrated from STDD to TIED format"
+      date: "2026-07-28"
+      reason: "Primary REQ is REQ-CROSS_BROWSER"
   name: "Cross-Browser Compatibility Architecture"
   rationale:
     benefits:
-      - "Broader reach"
-      - "Unified codebase"
+      - "Chrome delivery uses one shim"
+      - "Future multi-browser expansion without rewriting call sites"
     problems_solved:
       - "Platform-specific code duplication"
-      - "Safari quirks"
-    why: "Expand user base, provide Safari support"
+      - "Stale Safari-as-current rationale conflicting with identity"
+    why: "Chrome is the active browser target; keep a shared browser API layer so future Safari/Firefox work can expand without forking call sites."
   related_decisions:
     depends_on: []
     informs:
       - "IMPL-CROSS_BROWSER"
     see_also:
+      - "ARCH-EXT_IDENTITY"
       - "ARCH-SAFARI_ADAPTATION"
   status: "Active"
   traceability:
@@ -488,9 +494,13 @@ ARCH-CROSS_BROWSER:
     implementation:
       - "IMPL-CROSS_BROWSER"
     requirements:
-      - "REQ-EXTENSION_IDENTITY"
-      - "REQ-SAFARI_ADAPTATION"
-    tests: []
+      - "REQ-CROSS_BROWSER"
+    tests:
+      - "tests/unit/badge-refresh-service-worker.test.js"
+      - "tests/unit/browser-api-shim-platform.test.js"
+      - "tests/unit/message-client.test.js"
+      - "tests/unit/native-host-ping.test.js"
+      - "tests/unit/service-worker-quick-access.test.js"
 ARCH-ERROR_HANDLING:
   alternatives_considered:
     - name: "Exceptions"
@@ -1826,30 +1836,27 @@ ARCH-SAFARI_ADAPTATION:
   detail_file: "null"
   implementation_approach:
     details:
-      - "Animation/memory optimizations"
-      - "Bounded recovery, degraded mode"
-      - "Categorized error handler"
-      - "Performance monitoring"
-      - "Safari config (timeouts, retries, opacity)"
-    summary: "Safari-specific config, optimizations, error handler with degraded mode"
+      - "Active Chrome path: ARCH-CROSS_BROWSER / src/shared/safari-shim.js"
+      - "Deferred: Animation/memory optimizations for Safari"
+      - "Deferred: Bounded recovery and degraded mode"
+      - "Deferred: Safari config (timeouts, retries, opacity)"
+    summary: "Deferred Safari-specific config, optimizations, and error handler. Active browser API shim lives under ARCH-CROSS_BROWSER. safari/ package removed from tree."
   metadata:
     created:
       author: "AI Agent"
       date: "2025-07-14T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-13T00:00:00.000Z"
-      reason: "Migrated from STDD to TIED format"
+      date: "2026-07-28"
+      reason: "Demote Safari adaptation architecture to Deferred"
   name: "Safari Adaptive Architecture"
   rationale:
     benefits:
-      - "Cross-browser identity"
-      - "Stable Safari experience"
+      - "Clear deferred boundary for Safari product work"
+      - "Cross-browser identity preserved via ARCH-CROSS_BROWSER"
     problems_solved:
-      - "Messaging quirks"
-      - "Performance issues"
-      - "Safari memory limits"
-    why: "Safari requires explicit adaptations for stability"
+      - "Active Safari architecture conflicting with Chrome-only identity"
+    why: "Safari requires explicit adaptations when that target is supported again; not part of current Chrome delivery."
   related_decisions:
     depends_on: []
     informs:
@@ -1858,7 +1865,7 @@ ARCH-SAFARI_ADAPTATION:
       - "ARCH-CROSS_BROWSER"
       - "ARCH-MESSAGE_HANDLING"
       - "ARCH-OVERLAY"
-  status: "Active"
+  status: "Deferred"
   traceability:
     code_annotations:
       - "ARCH-SAFARI_ADAPTATION"
@@ -1866,8 +1873,7 @@ ARCH-SAFARI_ADAPTATION:
       - "IMPL-SAFARI_ADAPTATION"
     requirements:
       - "REQ-SAFARI_ADAPTATION"
-    tests:
-      - "Safari unit test suites"
+    tests: []
 ARCH-SEARCH:
   cross_references: []
   detail_file: "null"

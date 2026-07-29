@@ -686,7 +686,7 @@ The scope is the name of the area affected (as someone reading history or a chan
 | **shared** | Shared utilities, logger, ErrorHandler, message-schemas (`src/shared/`) |
 | **config** | Config manager and config service (`src/config/`) |
 | **offscreen** | Offscreen file-bookmark I/O (`src/offscreen/`) |
-| **safari** | Safari App Extension (`safari/`) |
+| **safari** | Deferred — Safari App Extension (package removed; see REQ-SAFARI_ADAPTATION) |
 | **tied** | TIED methodology: requirements, architecture, implementation, semantic tokens (`tied/`, `semantic-tokens.yaml`) |
 | **docs** | Documentation outside `tied/` (`docs/`) |
 | **tests** | Test files, harnesses, Playwright E2E |

@@ -3,8 +3,8 @@ REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-02"
-      reason: "Implementation complete; TIED sync"
+      date: "2026-07-28"
+      reason: "Generalize sessions-unavailable criterion"
   name: "Side Panel Recently Closed Tabs"
   priority: "P1"
   rationale:
@@ -27,7 +27,7 @@ REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
     - criterion: "Gather and Distribute buttons are hidden or disabled when source includes only closed tabs"
     - criterion: "Recently closed tabs are listed with title, URL, lastModified; searchable by tabInfo (title/URL) only"
     - criterion: "User can select tab source: Open tabs (default), Recently closed, or Both"
-    - criterion: "When chrome.sessions API is unavailable (e.g. Safari), tab source options are hidden or disabled"
+    - criterion: "When chrome.sessions API is unavailable, tab source options are hidden or disabled"
     - criterion: "When tab source includes closed tabs, Page text and Elements search scopes are restricted or disabled with a note"
   status: "Implemented"
   traceability:

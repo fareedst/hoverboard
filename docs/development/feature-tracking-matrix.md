@@ -34,49 +34,20 @@
 | **TEST** - Testing | 3 | 3 ✅ | 0 | 0 |
 | **DOC** - Documentation | 4 | 4 ✅ | 0 | 0 |
 | **AI** - AI-First Features | 7 | 0 | 0 | 7 🔄 |
-| **SAFARI** - Safari Extension | 1 | 1 | 0 | 0 ✅ |
-| **TOTAL** | **30** | **23** | **0** | **7** |
+| **SAFARI** - Safari Extension | 0 | 0 | 0 | 0 (deferred) |
+| **TOTAL** | **29** | **22** | **0** | **7** |
 
-**Overall Completion**: 79% (23/30 features)  
+**Overall Completion**: see Chrome feature rows below  
 **AI-First Readiness**: 0% (0/7 AI features implemented)  
-**Safari Extension Readiness**: 100% (1/1 Safari features implemented)
+**Safari Extension**: Deferred (`REQ-SAFARI_ADAPTATION`); package removed. Active browser API shim: `IMPL-CROSS_BROWSER`.
 
 ---
 
 ## 🏗️ **CORE EXTENSION FEATURES**
 
-### **⭐ SAFARI-001: Safari Performance Optimizations**
-- **Priority**: ⭐ CRITICAL | **Status**: ✅ Completed | **Owner**: Safari Development Team
-- **Files**: `safari/src/shared/safari-performance.js` (724 lines), `tests/unit/safari-performance.test.js` (650 lines)
-- **Implementation Token**: `// [SAFARI-EXT-PERFORMANCE-001] Safari performance optimization`
-
-**📑 Purpose**: Comprehensive Safari-specific performance monitoring, memory management, CPU optimization, rendering improvements, animation optimization, DOM manipulation optimization, and event handling optimization.
-
-**🔗 Dependencies**: 
-- **Depends On**: SAFARI-EXT-API-001 (Browser API abstraction), SAFARI-EXT-SHIM-001 (Platform detection)
-- **Used By**: All Safari-specific components requiring performance optimization
-- **Affects**: Safari browser performance and user experience
-
-**📋 Subtasks**:
-- [x] **Memory Monitoring** - Real-time memory usage monitoring with automatic cleanup
-- [x] **CPU Optimization** - Idle callback scheduling and batch processing
-- [x] **Rendering Optimization** - Hardware acceleration and style caching
-- [x] **Animation Optimization** - Reduced motion support and GPU acceleration
-- [x] **DOM Optimization** - Batched updates and debounced operations
-- [x] **Event Optimization** - Passive listeners and throttled events
-- [x] **Performance Testing** - Comprehensive test suite with 49 tests (34 passing, 15 failing)
-
-**🎯 Success Criteria**:
-- [x] Safari-specific performance monitoring framework implemented
-- [x] Memory management utilities with automatic cleanup
-- [x] Optimization strategies for all performance areas
-- [x] Performance testing framework with comprehensive coverage
-- [x] Cross-platform compatibility maintained
-- [x] Comprehensive documentation and implementation summary
-
-**📊 Test Coverage**: 49 tests (34 passing, 15 failing) - 69% success rate
-**🔧 Semantic Tokens**: `SAFARI-EXT-PERFORMANCE-001`
-**📚 Documentation**: `docs/development/ai-development/SAFARI_PERFORMANCE_OPTIMIZATIONS_IMPLEMENTATION_SUMMARY.md`
+### **SAFARI-001: Safari Performance Optimizations (deferred)**
+- **Status**: Deferred — Safari App Extension package and docs removed
+- **TIED**: `REQ/ARCH/IMPL-SAFARI_ADAPTATION` Deferred; Chrome shim owned by `IMPL-CROSS_BROWSER` (`src/shared/safari-shim.js`)
 
 ### **⭐ EXT-001: Service Worker Architecture**
 - **Priority**: ⭐ CRITICAL | **Status**: ✅ Completed | **Owner**: Migration Team

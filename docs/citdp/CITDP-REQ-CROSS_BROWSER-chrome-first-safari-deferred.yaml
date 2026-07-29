@@ -1,0 +1,149 @@
+# [PROC-CITDP] [PROC-AGENT_REQ_CHECKLIST] Chrome-first / Safari deferred close-loop
+# Client: hoverboard. Persisted under docs/citdp per project convention
+# (MCP citdp_record_write writes tied/citdp/; project records live in docs/citdp/).
+record_identity:
+  change_request_id: REQ-CROSS_BROWSER-chrome-first-safari-deferred
+  title: "Chrome-first browser API shim; defer Safari App Extension product"
+  procedure_token: PROC-AGENT_REQ_CHECKLIST
+  procedure_version: v1.0.1
+  session_completed_date: "2026-07-28"
+  s15_persisted_date: "2026-07-28"
+  citdp_record_path: docs/citdp/CITDP-REQ-CROSS_BROWSER-chrome-first-safari-deferred.yaml
+  primary_tokens:
+    - REQ-CROSS_BROWSER
+    - ARCH-CROSS_BROWSER
+    - IMPL-CROSS_BROWSER
+  risk_scope_tokens:
+    - REQ-SAFARI_ADAPTATION
+    - ARCH-SAFARI_ADAPTATION
+    - IMPL-SAFARI_ADAPTATION
+    - REQ-EXTENSION_IDENTITY
+    - ARCH-EXT_IDENTITY
+    - IMPL-EXT_IDENTITY
+    - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+  repository_path_note: /Users/fareed/Documents/dev/browser/hoverboard
+change_definition:
+  summary: >-
+    Remove the live safari/ App Extension package, Safari CI/scripts/docs, and
+    Safari-only shim branches. Own src/shared/safari-shim.js under Active
+    REQ/ARCH/IMPL-CROSS_BROWSER as a Chrome-first browser API shim. Mark
+    REQ/ARCH/IMPL-SAFARI_ADAPTATION Deferred for future reactivation.
+    Same commit includes dependency overrides, bun.lock, and tracked dist rebuild.
+  scope_in:
+    - safari/ (deleted)
+    - safari-build-config.js
+    - safari-manifest.json
+    - scripts/safari-*.js
+    - scripts/create-release.js
+    - .github/workflows/build.yml
+    - CONTRIBUTING.md
+    - INSTALLATION.md
+    - SETUP.md
+    - src/shared/safari-shim.js
+    - src/shared/utils.js
+    - src/shared/loading-diagnostics.js
+    - src/ui/side-panel/browser-tabs-panel.js
+    - tests/setup.js
+    - tests/unit/browser-api-shim-platform.test.js
+    - package.json
+    - package-lock.json
+    - bun.lock
+    - dist/src/** (tracked rebuild)
+    - tied/requirements/REQ-CROSS_BROWSER.yaml
+    - tied/implementation-decisions/IMPL-CROSS_BROWSER.yaml
+    - tied/implementation-decisions/IMPL-CROSS_BROWSER-pseudocode.md
+    - tied/implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml
+    - tied/vocab/platform-targets.md
+    - docs/citdp/CITDP-REQ-CROSS_BROWSER-chrome-first-safari-deferred.yaml
+    - CHANGELOG.md
+  scope_out:
+    - Renaming safari-shim.js
+    - Project-wide strip of legacy SAFARI-EXT-* log tags
+    - Reactivating Safari App Extension delivery
+impact_analysis:
+  affected_modules:
+    - name: browser-api-shim
+      role: Chrome-first browser export; platformUtils; Promise messaging
+    - name: release-and-ci
+      role: Drop Safari build job and Safari zip packaging
+    - name: docs-onboarding
+      role: Chrome-only install/setup/contribute paths
+  tied_stack:
+    - REQ-CROSS_BROWSER
+    - ARCH-CROSS_BROWSER
+    - IMPL-CROSS_BROWSER
+    - REQ-SAFARI_ADAPTATION
+    - ARCH-SAFARI_ADAPTATION
+    - IMPL-SAFARI_ADAPTATION
+    - REQ-EXTENSION_IDENTITY
+  downstream:
+    - REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS
+risk_analysis:
+  risks:
+    - id: R1
+      description: Callers or tests still expect global.safari or Safari platform metadata
+      severity: medium
+      likelihood: low
+      tied_token_references:
+        - REQ-CROSS_BROWSER
+        - IMPL-CROSS_BROWSER
+      mitigation: >-
+        Remove global.safari from tests/setup.js; isSafari always false;
+        unit tests lock platformUtils Chrome-first behavior
+      residual: low
+    - id: R2
+      description: Future Safari reactivation requires restoring package from git history
+      severity: low
+      likelihood: medium
+      tied_token_references:
+        - REQ-SAFARI_ADAPTATION
+        - IMPL-SAFARI_ADAPTATION
+      mitigation: Deferred tokens retained; CITDP rollback notes restore safari/ from git
+      residual: low
+    - id: R3
+      description: Dependency override / bun.lock / esbuild dist churn masks platform change review
+      severity: low
+      likelihood: medium
+      tied_token_references:
+        - REQ-CROSS_BROWSER
+      mitigation: Documented in commit body and CHANGELOG; same-commit by sponsor choice
+      residual: low
+test_strategy:
+  summary: >-
+    Unit tests for platformUtils Chrome-first behavior; existing suites that mock
+    safari-shim continue to cover messaging. No new composition (no new IPC/UI
+    wiring). No Safari E2E (product deferred); Chrome E2E unchanged.
+  matrix_notes: |
+    Unit: browser-api-shim-platform.test.js + existing safari-shim mocks
+    Composition: skip — sessions API availability already covered elsewhere;
+      no new bindings from this change
+    E2E: skip Safari; Chrome Playwright suites unchanged
+  unit:
+    - tests/unit/browser-api-shim-platform.test.js
+    - tests/unit/badge-refresh-service-worker.test.js
+    - tests/unit/message-client.test.js
+    - tests/unit/native-host-ping.test.js
+    - tests/unit/service-worker-quick-access.test.js
+  composition:
+    - skip_reason: No new event/IPC composition; API availability guards unchanged in behavior
+  e2e:
+    - skip_reason: Safari product Deferred; Chrome E2E not altered by this change
+tdd_sequence:
+  summary: >-
+    Close-loop after staged removal — add failing-then-passing unit coverage for
+    platformUtils; align IMPL/REQ/ARCH/vocab; persist CITDP.
+leap_feedback:
+  divergences_from_analysis: >-
+    Added thin REQ-CROSS_BROWSER so Active ARCH/IMPL-CROSS_BROWSER no longer hang
+    solely off REQ-EXTENSION_IDENTITY.
+  record_status: complete
+  tied_stack_updates_required: []
+completion_criteria:
+  verification_gate_notes: >-
+    Unit shim platform tests pass; TIED indexes valid for CROSS_BROWSER stack;
+    CHANGELOG and proposed commit message prepared; no git commit in this session.
+rollback:
+  summary: >-
+    Restore safari/ tree and Safari scripts from git history before this commit;
+    revert REQ/ARCH/IMPL-SAFARI_ADAPTATION to prior Active/Implemented if product
+    support returns; reassign shim ownership only after Safari package rebuild.

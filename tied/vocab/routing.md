@@ -29,6 +29,7 @@
 | 10 | [ui-surfaces.md](ui-surfaces.md) | overlay, Show Hover, popup, theme, badge, quick access, icon click, OVERLAY_ACTION_IDS, POPUP_ACTION_IDS |
 | 11 | [ipc-messaging.md](ipc-messaging.md) | MESSAGE_TYPES, processMessage, service worker, CONTENT_MESSAGE_TYPES, POPUP_ACTION_TO_MESSAGE, OPEN_SIDE_PANEL |
 | 12 | [config-and-privacy.md](config-and-privacy.md) | ConfigManager, hoverboard_settings, inhibit URL, site management, feature flags, AI API key, storage mode |
+| 13 | [platform-targets.md](platform-targets.md) | browser target, Chromium-first, browser API shim, cross-browser (deferred), Safari App Extension (deferred), safari-shim.js |
 | — | [config-discovery.md](config-discovery.md) | Layered YAML config, project-local layer, exclude_patterns, `(proposed)` terms |
 
 ---
@@ -47,6 +48,7 @@ Examples of cross-topic notes:
 - Local (storage backend) vs Local Bookmarks Index; Sync backend vs bookmark state sync
 - pin / bookmark vs Pinboard; Bookmarks panel vs Hoverboard-stored bookmarks vs index page
 - hover / overlay vs product name Hoverboard; Recent Tags vs getRecentBookmarks
+- browser API shim vs Safari App Extension (deferred); API availability check vs Safari product
 
 ---
 

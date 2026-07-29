@@ -1,7 +1,10 @@
 /**
- * [IMPL-SAFARI_ADAPTATION] [ARCH-SAFARI_ADAPTATION] [REQ-SAFARI_ADAPTATION]
- * Safari browser API abstraction; webextension-polyfill fallback; minimal mock when unavailable.
- * [SAFARI-EXT-SHIM-001] All extension code should import { browser } from './safari-shim.js' instead of chrome.*.
+ * [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER]
+ * Chrome-first browser API shim; webextension-polyfill fallback; minimal mock when unavailable.
+ * Filename is historical; prefer term "browser API shim" (tied/vocab/platform-targets.md).
+ * Callers should import { browser } from './safari-shim.js' (or utils.js re-export).
+ * Safari product adaptations are deferred ([REQ-SAFARI_ADAPTATION]).
+ * Related: [REQ-EXTENSION_IDENTITY] Chrome/Chromium identity.
  */
 
 import { logger } from './logger.js'
@@ -573,12 +576,6 @@ const safariEnhancements = {
             version: browser.runtime.getManifest().version
           }
 
-          // [SAFARI-EXT-MESSAGING-001] Only add platform property if actually running in Safari
-          if (typeof safari !== 'undefined') {
-            enhancedMessage.platform = 'safari'
-            console.log('[SAFARI-EXT-MESSAGING-001] Safari platform detected, adding platform info')
-          }
-
           if (logger && logger.debug) {
             logger.debug('[SAFARI-EXT-MESSAGING-001] Sending message:', enhancedMessage)
           }
@@ -670,19 +667,6 @@ const safariEnhancements = {
         try {
           const tabs = await browser.tabs.query(queryInfo)
           console.log('[SAFARI-EXT-CONTENT-001] Tab query successful, found tabs:', tabs.length)
-
-          // Safari-specific tab filtering
-          if (typeof safari !== 'undefined') {
-            // Filter out Safari's internal pages if needed
-            const filteredTabs = tabs.filter(tab => !tab.url.startsWith('safari-extension://'))
-            console.log('[SAFARI-EXT-CONTENT-001] Filtered tabs:', { original: tabs.length, filtered: filteredTabs.length })
-
-            if (logger && logger.debug) {
-              logger.debug('[SAFARI-EXT-CONTENT-001] Filtered tabs:', { original: tabs.length, filtered: filteredTabs.length })
-            }
-            return filteredTabs
-          }
-
           return tabs
         } catch (error) {
           console.error('[SAFARI-EXT-CONTENT-001] Tab query failed:', error.message)
@@ -765,27 +749,26 @@ export { safariEnhancements as browser }
 
 // [SAFARI-EXT-SHIM-001] Enhanced platform detection utilities
 export const platformUtils = {
+  // Reserved for deferred Safari App Extension reactivation ([REQ-SAFARI_ADAPTATION]).
   isSafari: () => {
-    const isSafari = typeof safari !== 'undefined'
-    console.log('[SAFARI-EXT-SHIM-001] Safari detection:', isSafari)
-    return isSafari
+    console.log('[IMPL-CROSS_BROWSER] Safari detection: false (Chrome-first; Safari deferred)')
+    return false
   },
 
   isChrome: () => {
-    const isChrome = typeof chrome !== 'undefined' && !platformUtils.isSafari()
-    console.log('[SAFARI-EXT-SHIM-001] Chrome detection:', isChrome)
+    const isChrome = typeof chrome !== 'undefined'
+    console.log('[IMPL-CROSS_BROWSER] Chrome detection:', isChrome)
     return isChrome
   },
 
   isFirefox: () => {
-    const isFirefox = typeof browser !== 'undefined' && browser.runtime.getBrowserInfo
-    console.log('[SAFARI-EXT-SHIM-001] Firefox detection:', isFirefox)
+    const isFirefox = typeof browser !== 'undefined' && browser.runtime && typeof browser.runtime.getBrowserInfo === 'function'
+    console.log('[IMPL-CROSS_BROWSER] Firefox detection:', isFirefox)
     return isFirefox
   },
 
-  // [SAFARI-EXT-SHIM-001] Get current platform for feature detection
+  // [IMPL-CROSS_BROWSER] Get current platform for feature detection (future multi-browser)
   getPlatform: () => {
-    if (platformUtils.isSafari()) return 'safari'
     if (platformUtils.isChrome()) return 'chrome'
     if (platformUtils.isFirefox()) return 'firefox'
     return 'unknown'
@@ -921,14 +904,8 @@ export const platformUtils = {
         loadEventEnd: performance?.timing?.loadEventEnd || 0,
         domContentLoaded: performance?.timing?.domContentLoadedEventEnd || 0
       },
-      // [SAFARI-EXT-SHIM-001] Platform-specific performance indicators
+      // [IMPL-CROSS_BROWSER] Platform-specific performance indicators
       platformSpecific: {
-        safari: platform === 'safari'
-          ? {
-              extensionAPIAvailable: typeof safari?.extension !== 'undefined',
-              globalPageAvailable: typeof safari?.extension?.globalPage !== 'undefined'
-            }
-          : {},
         chrome: platform === 'chrome'
           ? {
               runtimeAPIAvailable: typeof chrome?.runtime !== 'undefined',

@@ -1,7 +1,12 @@
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __esm = (fn, res) => function __init() {
-  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+var __esm = (fn, res, err) => function __init() {
+  if (err) throw err[0];
+  try {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  } catch (e) {
+    throw err = [e], e;
+  }
 };
 var __export = (target, all) => {
   for (var name in all)
@@ -545,10 +550,6 @@ var init_safari_shim = __esm({
                 timestamp: Date.now(),
                 version: browser2.runtime.getManifest().version
               };
-              if (typeof safari !== "undefined") {
-                enhancedMessage.platform = "safari";
-                console.log("[SAFARI-EXT-MESSAGING-001] Safari platform detected, adding platform info");
-              }
               if (logger && logger.debug) {
                 logger.debug("[SAFARI-EXT-MESSAGING-001] Sending message:", enhancedMessage);
               }
@@ -624,14 +625,6 @@ var init_safari_shim = __esm({
             try {
               const tabs = await browser2.tabs.query(queryInfo);
               console.log("[SAFARI-EXT-CONTENT-001] Tab query successful, found tabs:", tabs.length);
-              if (typeof safari !== "undefined") {
-                const filteredTabs = tabs.filter((tab) => !tab.url.startsWith("safari-extension://"));
-                console.log("[SAFARI-EXT-CONTENT-001] Filtered tabs:", { original: tabs.length, filtered: filteredTabs.length });
-                if (logger && logger.debug) {
-                  logger.debug("[SAFARI-EXT-CONTENT-001] Filtered tabs:", { original: tabs.length, filtered: filteredTabs.length });
-                }
-                return filteredTabs;
-              }
               return tabs;
             } catch (error48) {
               console.error("[SAFARI-EXT-CONTENT-001] Tab query failed:", error48.message);
@@ -674,24 +667,23 @@ var init_safari_shim = __esm({
       }
     };
     platformUtils = {
+      // Reserved for deferred Safari App Extension reactivation ([REQ-SAFARI_ADAPTATION]).
       isSafari: () => {
-        const isSafari = typeof safari !== "undefined";
-        console.log("[SAFARI-EXT-SHIM-001] Safari detection:", isSafari);
-        return isSafari;
+        console.log("[IMPL-CROSS_BROWSER] Safari detection: false (Chrome-first; Safari deferred)");
+        return false;
       },
       isChrome: () => {
-        const isChrome = typeof chrome !== "undefined" && !platformUtils.isSafari();
-        console.log("[SAFARI-EXT-SHIM-001] Chrome detection:", isChrome);
+        const isChrome = typeof chrome !== "undefined";
+        console.log("[IMPL-CROSS_BROWSER] Chrome detection:", isChrome);
         return isChrome;
       },
       isFirefox: () => {
-        const isFirefox = typeof browser2 !== "undefined" && browser2.runtime.getBrowserInfo;
-        console.log("[SAFARI-EXT-SHIM-001] Firefox detection:", isFirefox);
+        const isFirefox = typeof browser2 !== "undefined" && browser2.runtime && typeof browser2.runtime.getBrowserInfo === "function";
+        console.log("[IMPL-CROSS_BROWSER] Firefox detection:", isFirefox);
         return isFirefox;
       },
-      // [SAFARI-EXT-SHIM-001] Get current platform for feature detection
+      // [IMPL-CROSS_BROWSER] Get current platform for feature detection (future multi-browser)
       getPlatform: () => {
-        if (platformUtils.isSafari()) return "safari";
         if (platformUtils.isChrome()) return "chrome";
         if (platformUtils.isFirefox()) return "firefox";
         return "unknown";
@@ -821,12 +813,8 @@ var init_safari_shim = __esm({
             loadEventEnd: performance?.timing?.loadEventEnd || 0,
             domContentLoaded: performance?.timing?.domContentLoadedEventEnd || 0
           },
-          // [SAFARI-EXT-SHIM-001] Platform-specific performance indicators
+          // [IMPL-CROSS_BROWSER] Platform-specific performance indicators
           platformSpecific: {
-            safari: platform === "safari" ? {
-              extensionAPIAvailable: typeof safari?.extension !== "undefined",
-              globalPageAvailable: typeof safari?.extension?.globalPage !== "undefined"
-            } : {},
             chrome: platform === "chrome" ? {
               runtimeAPIAvailable: typeof chrome?.runtime !== "undefined",
               storageAPIAvailable: typeof chrome?.storage !== "undefined"

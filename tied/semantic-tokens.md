@@ -123,7 +123,7 @@ Legacy numbered tokens (e.g. CFG-001, UTIL-001, LOG-001) have been reinterpreted
 - **Logging**: LOG-001 → IMPL-LOGGER_CONTEXT_LEVELS; LOG-002 → IMPL-LOG_LEVEL_CONFIG; LOG-003 → IMPL-LOGGER_LEGACY (REQ-STRUCTURED_LOGGING, ARCH-STRUCTURED_LOGGING).
 - **Tests**: OVERLAY-REFRESH-TEST-001 → TEST-OVERLAY_REFRESH; TAG-SYNC-TEST-001 → TEST-TAG_SYNC; SHOW-HOVER-CHECKBOX-TEST-* → TEST-SHOW_HOVER_CHECKBOX; POPUP-CLOSE-BEHAVIOR-TEST-* → TEST-POPUP_CLOSE_BEHAVIOR.
 
-**Full mapping table**: `tied/docs/numbered-token-mapping.md`. SAFARI-* tokens are out of scope and left unmodified.
+**Full mapping table**: `tied/docs/numbered-token-mapping.md`. SAFARI-* numbered tokens are out of scope and left unmodified. TIED `REQ/ARCH/IMPL-SAFARI_ADAPTATION` are Deferred; active shim is `ARCH/IMPL-CROSS_BROWSER`.
 
 ## Token Relationships
 

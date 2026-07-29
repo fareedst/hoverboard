@@ -269,32 +269,10 @@ global.chrome = {
 
 resetChromeMockImplementations();
 
-// Mock browser APIs for cross-browser compatibility
+// Mock browser APIs for Chrome / browser API shim tests
 global.browser = global.chrome;
 
-// [SAFARI-EXT-TEST-001] - Safari-specific mocks for testing (single extension object: globalPage + settings)
-global.safari = {
-  extension: {
-    globalPage: {
-      contentWindow: {
-        recentTagsMemory: {
-          getRecentTags: jest.fn().mockReturnValue([
-            { name: 'safari-test-tag-1', lastUsed: Date.now() },
-            { name: 'safari-test-tag-2', lastUsed: Date.now() - 1000 }
-          ]),
-          addTag: jest.fn().mockReturnValue(true),
-          clearRecentTags: jest.fn().mockReturnValue(true)
-        }
-      }
-    },
-    settings: {
-      get: jest.fn().mockReturnValue({}),
-      set: jest.fn().mockReturnValue(true)
-    }
-  }
-};
-
-// [SAFARI-EXT-TEST-001] - Mock navigator.storage for Safari storage tests
+// Mock navigator.storage for storage quota helpers in browser API shim
 if (!global.navigator) global.navigator = {};
 global.navigator.storage = {
   estimate: jest.fn().mockResolvedValue({

@@ -8,15 +8,12 @@ This guide will help you set up the Hoverboard browser extension for development
 
 - **Node.js 18+** - [Download here](https://nodejs.org/)
 - **Git** - [Download here](https://git-scm.com/)
-- **Chrome Browser** - For Chrome extension development
-- **Safari Browser** - For Safari extension development (macOS only)
-- **Xcode** - For Safari App Extension development (macOS only)
+- **Chrome Browser** - For Chrome/Chromium extension development
 
 ### Optional Software
 
 - **Visual Studio Code** - Recommended editor with extensions
 - **Chrome DevTools** - For debugging
-- **Safari Web Inspector** - For Safari debugging
 
 ## Quick Start
 
@@ -38,24 +35,16 @@ npm install
 ```bash
 # Build Chrome extension
 npm run build:dev
-
-# Build Safari extension (macOS only)
-npm run safari:build
 ```
 
 ### 4. Load in Browser
 
-#### Chrome
 1. Open Chrome and go to `chrome://extensions/`
 2. Enable "Developer mode"
 3. Click "Load unpacked"
 4. Select the `dist` folder
 
-#### Safari
-1. Open Safari
-2. Go to Safari > Preferences > Extensions
-3. Enable "Developer mode"
-4. Click "Turn On" next to Hoverboard
+> Safari is not currently supported (deferred). See `tied/vocab/platform-targets.md`.
 
 ## Development Workflow
 
@@ -87,11 +76,8 @@ npm run build:prod
 # Create release packages
 npm run release
 
-# Create Chrome-only release
+# Create Chrome release package
 npm run release:chrome
-
-# Create Safari-only release
-npm run release:safari
 ```
 
 ## Project Structure
@@ -101,7 +87,6 @@ hoverboard/
 ├── .github/                 # GitHub workflows and templates
 ├── docs/                    # Documentation
 ├── icons/                   # Extension icons
-├── safari/                  # Safari App Extension
 ├── scripts/                 # Build and utility scripts
 ├── src/                     # Source code
 │   ├── core/               # Core functionality
@@ -121,7 +106,6 @@ hoverboard/
    - ESLint
    - Prettier
    - Chrome Extension Pack
-   - Safari Extension Pack
 
 2. **Configure Settings:**
    ```json
@@ -152,22 +136,6 @@ hoverboard/
    - Use Chrome DevTools
    - Check `chrome://extensions/` for errors
    - Use `chrome://extensions/shortcuts` for keyboard shortcuts
-
-### Safari Development
-
-1. **Enable Developer Mode:**
-   - Safari > Preferences > Advanced
-   - Check "Show Develop menu in menu bar"
-
-2. **Load Extension:**
-   - Build with `npm run safari:build`
-   - Double-click the `.safariextz` file
-   - Enable in Safari Preferences > Extensions
-
-3. **Debug:**
-   - Use Safari Web Inspector
-   - Check Console for errors
-   - Use Safari > Develop > Extension
 
 ## Testing
 
@@ -219,22 +187,6 @@ npm run build:prod
 npm run release:chrome
 ```
 
-### Safari Extension
-
-```bash
-# Setup Safari environment
-npm run safari:setup
-
-# Build Safari extension
-npm run safari:build
-
-# Validate Safari extension
-npm run safari:validate
-
-# Create release package
-npm run release:safari
-```
-
 ## Debugging
 
 ### Common Issues
@@ -257,7 +209,6 @@ npm run release:safari
 ### Debug Tools
 
 - **Chrome DevTools**: For Chrome extension debugging
-- **Safari Web Inspector**: For Safari extension debugging
 - **Browser Console**: For runtime errors
 - **Extension Management**: For permission and loading issues
 
@@ -327,7 +278,7 @@ npm test -- --testNamePattern="specific test name"
 
 1. **Read the code** to understand the architecture
 2. **Run the tests** to see what's working
-3. **Try the extension** in both Chrome and Safari
+3. **Try the extension** in Chrome
 4. **Pick an issue** to work on
 5. **Submit a pull request**
 

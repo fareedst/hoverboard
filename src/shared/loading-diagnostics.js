@@ -3,7 +3,7 @@
  * [SAFARI-EXT-DEBUG-001] Extension loading diagnostics
  *
  * This module tracks the extension loading process, timing stages, and errors
- * to help debug initialization issues and Safari-specific problems.
+ * to help debug initialization issues and browser API shim problems.
  */
 
 import { debugLogger } from './debug-logger.js'

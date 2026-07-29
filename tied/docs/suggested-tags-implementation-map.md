@@ -25,8 +25,6 @@
 | `src/ui/popup/PopupController.js` | `loadSuggestedTags()` + inlined | ~342-650 | Popup extraction via script injection (includes all new sources) |
 | `src/ui/popup/UIManager.js` | `updateSuggestedTags()` | ~410-440 | Popup display |
 
-**Safari Mirrors**: `safari/src/features/tagging/tag-service.js` (~921-1240), `safari/src/features/content/overlay-manager.js` (~603-678)
-
 **Tests**: ❌ None (see [REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml](../requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml) "Current Test Gap")
 
 ---

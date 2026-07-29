@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - OS: [e.g. macOS, Windows, Linux]
- - Browser: [e.g. Chrome, Safari, Firefox]
+ - Browser: [e.g. Chrome / Chromium]
  - Browser Version: [e.g. 22]
  - Extension Version: [e.g. 1.0.6.80]
 

@@ -1,54 +1,40 @@
 IMPL-SAFARI_ADAPTATION:
   code_locations:
-    files:
-      - path: "src/shared/safari-shim.js"
-        description: "Safari shim"
-      - path: "safari/src/shared/ErrorHandler.js"
-        description: "Safari error handler"
-    functions:
-      - name: "getSafariConfig"
-        description: "Safari config"
-        file: "src/shared/safari-shim.js"
-      - name: "optimizeSafariAnimations"
-        description: "Animation optimization"
-        file: "src/shared/safari-shim.js"
+    files: []
+    functions: []
   cross_references:
     - "ARCH-SAFARI_ADAPTATION"
     - "REQ-SAFARI_ADAPTATION"
   detail_file: "implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml"
-  essence_pseudocode: "# [IMPL-SAFARI_ADAPTATION] [ARCH-SAFARI_ADAPTATION] [REQ-SAFARI_ADAPTATION]\n# Safari shim, config, animation optimizations, ErrorHandler with degraded mode.\n# Contract: platform and config; Safari config and fallback/degraded behavior.\nINPUT: platform (detect Safari); config (timeouts, retries); animation/content operations\nOUTPUT: Safari-specific config; optimized or fallback behavior; degraded mode on unrecoverable error\nDATA: getSafariConfig(); ErrorHandler with recovery\n\n# Apply Safari timeouts/retries on init.\nON init: IF Safari: config = getSafariConfig(); APPLY timeouts/retries\n\n# Reduce or replace heavy animations; bound memory.\noptimizeSafariAnimations(): REDUCE or REPLACE heavy animations for Safari; BOUND memory\n\n  # Try recovery; enter degraded mode if unrecoverable.\n  ON error: ErrorHandler; TRY recovery; IF unrecoverable: ENTER degraded mode (minimal features)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SAFARI_ADAPTATION-pseudocode.md"
   implementation_approach:
     details:
-      - "Animation/memory optimizations"
-      - "Degraded mode"
-      - "Error handler with recovery"
-      - "Platform detection"
-      - "Safari config (timeouts, retries)"
-    summary: "Safari shim, content optimizations, error handler with degraded mode"
+      - "Chrome runtime uses IMPL-CROSS_BROWSER shim"
+      - "Future: platform detection and Safari config when Safari target returns"
+      - "No active safari/ code_locations"
+    summary: "Deferred Safari adaptations. Chrome browser API shim owned by IMPL-CROSS_BROWSER (src/shared/safari-shim.js). safari/ package removed."
   metadata:
     created:
       author: "AI Agent"
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Safari Adaptive Implementation"
   rationale:
     benefits:
-      - "Bounded recovery"
-      - "Stable Safari support"
+      - "No maintenance of stale Safari fork"
     problems_solved:
-      - "Messaging failures"
-      - "Safari memory issues"
-    why: "Safari stability and performance"
+      - "Orphaned safari/ mirrors listed as active code"
+    why: "Safari product implementation is deferred; keep token for future reactivation."
   related_decisions:
     composed_with: []
     depends_on: []
     see_also:
       - "IMPL-CROSS_BROWSER"
     supersedes: []
-  status: "Active"
+  status: "Deferred"
   traceability:
     architecture:
       - "ARCH-SAFARI_ADAPTATION"
@@ -56,5 +42,5 @@ IMPL-SAFARI_ADAPTATION:
       - "IMPL-SAFARI_ADAPTATION"
     requirements:
       - "REQ-SAFARI_ADAPTATION"
-    test_coverage_note: "Safari-only; out of scope for Chrome extension coverage. No unit tests for Safari adaptation."
+    test_coverage_note: "Deferred; out of scope for Chrome extension coverage."
     tests: []

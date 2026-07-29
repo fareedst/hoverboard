@@ -9,16 +9,12 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
         description: "same contract as local"
       - path: "src/features/pinboard/pinboard-service.js"
         description: "parseBookmarkResponse, createEmptyBookmark updated_at = time"
-      - path: "safari/src/features/pinboard/pinboard-service.js"
-        description: "Safari Pinboard time/updated_at"
       - path: "src/features/storage/url-tags-manager.js"
         description: "normalizeBookmarkForDisplay updated_at"
       - path: "src/features/storage/bookmark-router.js"
         description: "moveBookmarkToStorage toSave time/updated_at"
       - path: "src/ui/popup/PopupController.js"
         description: "empty pin time/updated_at"
-      - path: "safari/src/ui/popup/PopupController.js"
-        description: "Safari popup empty pin"
       - path: "src/ui/bookmarks-table/bookmarks-table-csv.js"
         description: "export/import CSV updated_at"
       - path: "src/ui/bookmarks-table/bookmarks-table.js"
@@ -28,7 +24,7 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
     - "ARCH-BOOKMARK_CREATE_UPDATE_TIMES"
     - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml"
-  essence_pseudocode: "# [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES]\n# Every bookmark has time (create) and updated_at (last update); provider-specific set/normalize; export/import include.\n\n# Contract: inputs = bookmark data, API response, or raw record; output = bookmark with time and updated_at.\nINPUT: bookmark data (for save), API response (for Pinboard), raw record (for normalize)\nOUTPUT: bookmark with time and updated_at set per provider and context\nDATA: time = create time; updated_at = last update time\n\n# Create: time = now, updated_at = now; update: keep time, updated_at = now; persist.\nLocal/File/Sync saveBookmark(data):\n  IF url not in store (create):\n    SET time = now, updated_at = now\n  ELSE (update):\n    KEEP existing time; SET updated_at = now\n  PERSIST\n\n# API has no updated_at; set updated_at = time in parse/create; do not send updated_at to API.\nPinboard:\n  parseBookmarkResponse / createEmptyBookmark: SET updated_at = time (API has no updated_at)\n  SEND to API: do NOT include updated_at\n\n# If missing updated_at set to time (legacy); include updated_at in payload/CSV/JSON.\nNormalize (url-tags-manager, display, move, export/import):\n  IF bookmark has no updated_at: SET updated_at = time   // legacy\n  ELSE: keep updated_at\n  Include updated_at in payload/CSV/JSON\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES-pseudocode.md"
   implementation_approach:
     details:
       - "Local/File/Sync: on create set time = now, updated_at = now; on update keep time, set updated_at = now"
@@ -41,8 +37,8 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; fix code_locations; remove extraneous"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

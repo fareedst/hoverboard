@@ -9,14 +9,14 @@
  * [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] DOM utilities for extension content scripts
  */
 
-// [SAFARI-EXT-SHIM-001] 2025-07-15: Safari/Firefox/Chrome browser API abstraction for cross-browser extension support
-// This module provides a unified browser API using webextension-polyfill for cross-browser compatibility.
-// All extension code should import { browser } from './utils' instead of using chrome.* directly.
+// [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-EXTENSION_IDENTITY]
+// Chrome-first browser API re-export from safari-shim.js (historical filename; browser API shim).
+// Prefer import { browser } from './utils' (or safari-shim) for Promise-friendly messaging.
 
 import { logger } from './logger.js'
 import { browser } from './safari-shim.js'
 
-// [SAFARI-EXT-SHIM-001] Export browser API from Safari shim
+// [IMPL-CROSS_BROWSER] Export browser API from browser API shim
 export { browser }
 
 /**

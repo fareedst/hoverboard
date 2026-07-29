@@ -3,8 +3,6 @@ IMPL-BADGE_REFRESH:
     files:
       - path: "src/core/service-worker.js"
         description: "Chrome service worker handleMessage badge refresh after saveTag/deleteTag/saveBookmark"
-      - path: "safari/src/core/service-worker.js"
-        description: "Safari service worker handleMessage badge refresh"
     functions:
       - name: "handleMessage"
         description: "After processMessage success for saveTag/deleteTag/saveBookmark, resolve tab and call updateBadgeForTab"
@@ -13,12 +11,11 @@ IMPL-BADGE_REFRESH:
     - "ARCH-BADGE"
     - "REQ-BADGE_INDICATORS"
   detail_file: "implementation-decisions/IMPL-BADGE_REFRESH.yaml"
-  essence_pseudocode: "# [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS]\n# Service worker refreshes badge after saveTag, deleteTag, saveBookmark so icon reflects tag count and flags.\n\n# Contract: input = processMessage result (saveTag | deleteTag | saveBookmark); output = badge updated for tab.\nINPUT: message result (after processMessage) with type saveTag | deleteTag | saveBookmark\nOUTPUT: badge updated for the affected tab (icon label and optional private/toread indicators)\nDATA: handleMessage in service worker; updateBadgeForTab(tab)\n\n# Resolve tab (sender.tab or query active for saveBookmark); call updateBadgeForTab(tab).\nAFTER processMessage(message) succeeds:\n  IF message.type IN [saveTag, deleteTag, saveBookmark]:\n    tab = sender.tab IF present\n    IF no tab AND message.type = saveBookmark: tab = query active tab\n    IF tab: updateBadgeForTab(tab)\n(Chrome and Safari: same control flow; Safari uses string literals and tabs.query)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BADGE_REFRESH-pseudocode.md"
   implementation_approach:
     details:
-      - "Chrome: in handleMessage, after processMessage success, if message type is saveTag, deleteTag, or saveBookmark, resolve tab (sender.tab when present; for saveBookmark with no sender tab, query active tab) and call updateBadgeForTab(tab)"
       - "Covers overlay-originated and popup-originated changes"
-      - "Safari: same logic in safari service worker with string literals saveTag, deleteTag, saveBookmark and chrome.tabs.query for active tab"
+      - "In handleMessage, after processMessage success, if message type is saveTag, deleteTag, or saveBookmark, resolve tab (sender.tab when present; for saveBookmark with no sender tab, query active tab) and call updateBadgeForTab(tab)"
     summary: "Service worker refreshes badge after saveTag, deleteTag, and saveBookmark when message succeeds."
   metadata:
     created:
@@ -26,8 +23,8 @@ IMPL-BADGE_REFRESH:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

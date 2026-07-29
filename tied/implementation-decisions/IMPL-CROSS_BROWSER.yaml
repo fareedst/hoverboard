@@ -1,0 +1,61 @@
+IMPL-CROSS_BROWSER:
+  code_locations:
+    files:
+      - path: "src/shared/safari-shim.js"
+        description: "Browser API shim (Chrome-first; filename historical)"
+      - path: "src/shared/utils.js"
+        description: "Re-exports browser from safari-shim"
+    functions:
+      - name: "initializeBrowserAPI"
+        description: "Chrome / polyfill / minimal mock selection"
+        file: "src/shared/safari-shim.js"
+  cross_references:
+    - "ARCH-CROSS_BROWSER"
+    - "REQ-CROSS_BROWSER"
+    - "REQ-EXTENSION_IDENTITY"
+    - "REQ-SAFARI_ADAPTATION"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CROSS_BROWSER-pseudocode.md"
+  implementation_approach:
+    details:
+      - "Export browser for service worker, content scripts, message-handler"
+      - "Promise wrappers and retries around runtime/tabs messaging"
+      - "Safari product code deferred to IMPL-SAFARI_ADAPTATION"
+      - "Storage quota helpers for Chromium"
+    summary: "Own src/shared/safari-shim.js as Chrome-first browser API abstraction; Promise messaging, retries, storage helpers; platform hooks reserved for deferred multi-browser."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Primary REQ REQ-CROSS_BROWSER; wire essence_pseudocode_path"
+  name: "Cross-Browser Browser API Shim"
+  rationale:
+    benefits:
+      - "Single import path for browser APIs"
+      - "Tests can mock safari-shim.js"
+    problems_solved:
+      - "Empty IMPL-CROSS_BROWSER stub"
+      - "Safari ownership of Chrome-critical shim"
+    why: "Chrome runtime needs a stable browser API layer; keeping the shim enables future non-Chromium targets without forking call sites."
+  related_decisions:
+    depends_on: []
+    see_also:
+      - "IMPL-EXT_IDENTITY"
+      - "IMPL-SAFARI_ADAPTATION"
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-CROSS_BROWSER"
+    code_annotations:
+      - "IMPL-CROSS_BROWSER"
+    requirements:
+      - "REQ-CROSS_BROWSER"
+    tests:
+      - "tests/unit/badge-refresh-service-worker.test.js"
+      - "tests/unit/browser-api-shim-platform.test.js"
+      - "tests/unit/message-client.test.js"
+      - "tests/unit/native-host-ping.test.js"
+      - "tests/unit/service-worker-quick-access.test.js"

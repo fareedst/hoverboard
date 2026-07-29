@@ -288,8 +288,6 @@ IMPL-BADGE_REFRESH:
     files:
       - path: "src/core/service-worker.js"
         description: "Chrome service worker handleMessage badge refresh"
-      - path: "safari/src/core/service-worker.js"
-        description: "Safari service worker handleMessage badge refresh"
     functions:
       - name: "handleMessage"
         description: "Calls updateBadgeForTab after saveTag/deleteTag/saveBookmark"
@@ -301,8 +299,8 @@ IMPL-BADGE_REFRESH:
   essence_pseudocode: "After processMessage success for saveTag/deleteTag/saveBookmark: resolve tab (sender.tab or query active); updateBadgeForTab(tab).\n"
   implementation_approach:
     details:
-      - "Chrome and Safari service workers: after processMessage success, if message type is saveTag, deleteTag, or saveBookmark, resolve tab (sender.tab or for saveBookmark query active tab) and call updateBadgeForTab(tab)"
       - "Covers overlay-originated and popup-originated changes"
+      - "In handleMessage, after processMessage success, if message type is saveTag, deleteTag, or saveBookmark, resolve tab (sender.tab when present; for saveBookmark with no sender tab, query active tab) and call updateBadgeForTab(tab)"
     summary: "Service worker refreshes badge after saveTag, deleteTag, and saveBookmark when message succeeds"
   metadata:
     created:
@@ -310,8 +308,8 @@ IMPL-BADGE_REFRESH:
       date: "2026-02-13T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical detail rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-28"
+      reason: "Remove safari/ mirror paths"
   name: "Badge refresh on overlay and popup changes"
   rationale:
     benefits:
@@ -342,7 +340,6 @@ IMPL-BADGE_REFRESH:
 IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
   code_locations:
     files:
-      - path: "safari/src/features/pinboard/pinboard-service.js"
       - path: "src/features/pinboard/pinboard-service.js"
       - path: "src/features/storage/bookmark-router.js"
       - path: "src/features/storage/file-bookmark-service.js"
@@ -366,8 +363,8 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical detail rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-28"
+      reason: "Remove safari/ mirror paths"
   name: "Bookmark Create and Update Time Implementation"
   rationale:
     benefits: []
@@ -893,15 +890,63 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
     tests:
       - "tests/unit/service-worker-quick-access.test.js"
 IMPL-CROSS_BROWSER:
-  cross_references: []
-  detail_file: "null"
+  code_locations:
+    files:
+      - path: "src/shared/safari-shim.js"
+        description: "Browser API shim (Chrome-first; filename historical)"
+      - path: "src/shared/utils.js"
+        description: "Re-exports browser from safari-shim"
+    functions:
+      - name: "initializeBrowserAPI"
+        description: "Chrome / polyfill / minimal mock selection"
+        file: "src/shared/safari-shim.js"
+  cross_references:
+    - "ARCH-CROSS_BROWSER"
+    - "REQ-CROSS_BROWSER"
+    - "REQ-EXTENSION_IDENTITY"
+    - "REQ-SAFARI_ADAPTATION"
+  detail_file: "implementation-decisions/IMPL-CROSS_BROWSER.yaml"
   implementation_approach:
-    summary: ""
-  name: "Cross Browser"
+    details:
+      - "Export browser for service worker, content scripts, message-handler"
+      - "Promise wrappers and retries around runtime/tabs messaging"
+      - "Safari product code deferred to IMPL-SAFARI_ADAPTATION"
+      - "Storage quota helpers for Chromium"
+    summary: "Own src/shared/safari-shim.js as Chrome-first browser API abstraction; Promise messaging, retries, storage helpers; platform hooks reserved for deferred multi-browser."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Primary REQ is REQ-CROSS_BROWSER"
+  name: "Cross-Browser Browser API Shim"
   rationale:
-    why: "Cross-browser implementation"
+    benefits:
+      - "Single import path for browser APIs"
+      - "Tests can mock safari-shim.js"
+    problems_solved:
+      - "Empty IMPL-CROSS_BROWSER stub"
+      - "Safari ownership of Chrome-critical shim"
+    why: "Chrome runtime needs a stable browser API layer; keeping the shim enables future non-Chromium targets without forking call sites."
+  related_decisions:
+    depends_on: []
+    see_also:
+      - "IMPL-EXT_IDENTITY"
+      - "IMPL-SAFARI_ADAPTATION"
+    supersedes: []
   status: "Active"
-  traceability: {}
+  traceability:
+    architecture:
+      - "ARCH-CROSS_BROWSER"
+    code_annotations:
+      - "IMPL-CROSS_BROWSER"
+    requirements:
+      - "REQ-CROSS_BROWSER"
+    tests:
+      - "tests/unit/badge-refresh-service-worker.test.js"
+      - "tests/unit/browser-api-shim-platform.test.js"
+      - "tests/unit/message-client.test.js"
+      - "tests/unit/native-host-ping.test.js"
+      - "tests/unit/service-worker-quick-access.test.js"
 IMPL-DEBUG_PANEL:
   code_locations:
     files:
@@ -2584,21 +2629,20 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
     files:
       - path: "src/features/pinboard/pinboard-service.js"
         description: "buildSaveParams uses encodeURIComponent for all params"
-      - path: "safari/src/features/pinboard/pinboard-service.js"
-        description: "Mirror buildSaveParams encoding"
     functions:
       - name: "buildSaveParams"
         description: "Builds encoded query string for posts/add"
         file: "src/features/pinboard/pinboard-service.js"
   cross_references:
+    - "ARCH-PINBOARD_API"
     - "IMPL-PINBOARD_API"
     - "IMPL-TAG_SYSTEM"
+    - "REQ-PINBOARD_COMPATIBILITY"
   detail_file: "implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.yaml"
   implementation_approach:
     details:
-      - "Applied to url, description, extended, tags, shared, toread in src and safari pinboard-service"
+      - "Applied to url, description, extended, tags, shared, toread in pinboard-service"
       - "buildSaveParams builds key=encodeURIComponent(value) pairs and join('&') instead of URLSearchParams"
-      - "Same logic in safari/src/features/pinboard/pinboard-service.js for consistency"
     summary: "Build posts/add query string with encodeURIComponent for every user-controlled parameter value"
   metadata:
     created:
@@ -2606,12 +2650,12 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
       date: "2026-02-13"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-13"
-      reason: "Bug fix: tag storage fails when special characters in tag"
+      date: "2026-07-28"
+      reason: "Remove safari/ mirror paths"
   name: "Pinboard posts/add query parameter encoding"
   rationale:
     benefits:
-      - "Explicit encodeURIComponent guarantees correct encoding across extension and Safari runtimes"
+      - "Explicit encodeURIComponent guarantees correct encoding in the Chrome extension runtime"
       - "Tags (and description, extended, url) with #, +, ., &, = etc. can be stored without breaking the API call"
     problems_solved:
       - "Pinboard API requires all arguments to be URL-encoded"
@@ -2626,10 +2670,12 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
     supersedes: []
   status: "Active"
   traceability:
-    architecture: []
+    architecture:
+      - "ARCH-PINBOARD_API"
     code_annotations:
-      - "PIN-003 (parameter encoding comment in buildSaveParams)"
-    requirements: []
+      - "IMPL-PINBOARD_POSTS_ADD_ENCODING"
+    requirements:
+      - "REQ-PINBOARD_COMPATIBILITY"
     tests:
       - "tag-storage.test.js: should save tag with special characters (#, +, .) with percent-encoded URL"
 IMPL-PLAYWRIGHT_E2E_EXTENSION:
@@ -3018,53 +3064,39 @@ IMPL-RUNTIME_VALIDATION:
       - "tests/unit/message-schemas.test.js"
 IMPL-SAFARI_ADAPTATION:
   code_locations:
-    files:
-      - path: "src/shared/safari-shim.js"
-        description: "Safari shim"
-      - path: "safari/src/shared/ErrorHandler.js"
-        description: "Safari error handler"
-    functions:
-      - name: "getSafariConfig"
-        description: "Safari config"
-        file: "src/shared/safari-shim.js"
-      - name: "optimizeSafariAnimations"
-        description: "Animation optimization"
-        file: "src/shared/safari-shim.js"
+    files: []
+    functions: []
   cross_references:
     - "ARCH-SAFARI_ADAPTATION"
     - "REQ-SAFARI_ADAPTATION"
   detail_file: "implementation-decisions/IMPL-SAFARI_ADAPTATION.yaml"
   implementation_approach:
     details:
-      - "Animation/memory optimizations"
-      - "Degraded mode"
-      - "Error handler with recovery"
-      - "Platform detection"
-      - "Safari config (timeouts, retries)"
-    summary: "Safari shim, content optimizations, error handler with degraded mode"
+      - "Chrome runtime uses IMPL-CROSS_BROWSER shim"
+      - "Future: platform detection and Safari config when Safari target returns"
+      - "No active safari/ code_locations"
+    summary: "Deferred Safari adaptations. Chrome browser API shim owned by IMPL-CROSS_BROWSER (src/shared/safari-shim.js). safari/ package removed."
   metadata:
     created:
       author: "AI Agent"
       date: "2025-07-14T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-13T00:00:00.000Z"
-      reason: "Migrated from STDD to TIED format"
+      date: "2026-07-28"
+      reason: "Demote to Deferred; clear safari/ code_locations"
   name: "Safari Adaptive Implementation"
   rationale:
     benefits:
-      - "Bounded recovery"
-      - "Stable Safari support"
+      - "No maintenance of stale Safari fork"
     problems_solved:
-      - "Messaging failures"
-      - "Safari memory issues"
-    why: "Safari stability and performance"
+      - "Orphaned safari/ mirrors listed as active code"
+    why: "Safari product implementation is deferred; keep token for future reactivation."
   related_decisions:
     depends_on: []
     see_also:
       - "IMPL-CROSS_BROWSER"
     supersedes: []
-  status: "Active"
+  status: "Deferred"
   traceability:
     architecture:
       - "ARCH-SAFARI_ADAPTATION"
@@ -3072,6 +3104,7 @@ IMPL-SAFARI_ADAPTATION:
       - "IMPL-SAFARI_ADAPTATION"
     requirements:
       - "REQ-SAFARI_ADAPTATION"
+    test_coverage_note: "Deferred; out of scope for Chrome extension coverage."
     tests: []
 IMPL-SCREENSHOT_MODE:
   code_locations:
@@ -3142,10 +3175,6 @@ IMPL-SEARCH:
 IMPL-SELECTION_TO_TAG_INPUT:
   code_locations:
     files:
-      - path: "safari/src/features/content/content-main.js"
-      - path: "safari/src/shared/utils.js"
-      - path: "safari/src/ui/popup/PopupController.js"
-      - path: "safari/src/ui/popup/UIManager.js"
       - path: "src/features/content/content-main.js"
       - path: "src/shared/utils.js"
       - path: "src/ui/popup/PopupController.js"
@@ -3153,11 +3182,13 @@ IMPL-SELECTION_TO_TAG_INPUT:
   cross_references:
     - "ARCH-SELECTION_TO_TAG_INPUT"
     - "REQ-SELECTION_TO_TAG_INPUT"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml"
   implementation_approach:
     details:
-      - "Chrome and Safari content-main and PopupController"
-      - "normalizeSelectionForTagInput in shared utils; UIManager.setTagInputValue"
+      - "Content script: handleMessage case GET_PAGE_SELECTION returns selection string"
+      - "PopupController loadInitialData: after loadSuggestedTags, try/catch sendToTab GET_PAGE_SELECTION; if data.selection non-empty, setTagInputValue(normalizeSelectionForTagInput(raw, 8))"
+      - "Shared utils: normalizeSelectionForTagInput(selection, maxWords=8)"
+      - "UIManager: setTagInputValue(value) sets newTagInput.value"
     summary: "Content script GET_PAGE_SELECTION; popup loadInitialData requests selection, normalizes (strip punctuation, first 8 words), sets tag input via setTagInputValue"
   metadata:
     created:
@@ -3165,8 +3196,8 @@ IMPL-SELECTION_TO_TAG_INPUT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "Selection-to-tag input feature"
+      date: "2026-07-28"
+      reason: "Fix detail_file null drift"
   name: "Selection to tag input on icon click"
   rationale:
     benefits:
@@ -3805,10 +3836,6 @@ IMPL-SUGGESTED_TAGS:
         description: "MAIN-world relevance tiers and extractor global for popup path"
       - path: "src/ui/popup/UIManager.js"
         description: "updateSuggestedTags; optional three-way chip sort when tagSortToggle present"
-      - path: "safari/src/features/tagging/tag-service.js"
-        description: "Safari mirror extraction"
-      - path: "safari/src/features/content/overlay-manager.js"
-        description: "Safari mirror overlay"
     functions:
       - name: "extractSuggestedTagsFromContent"
         description: "Primary extraction for overlay; limit default; includes meta, emphasis, structured content"
@@ -3831,8 +3858,8 @@ IMPL-SUGGESTED_TAGS:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27"
-      reason: "S13 PROC-AGENT_REQ_CHECKLIST: implementation index matches detail YAML"
+      date: "2026-07-28"
+      reason: "Remove safari/ mirror code_locations"
   name: "Suggested Tags Implementation"
   rationale:
     benefits: []

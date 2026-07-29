@@ -1,7 +1,7 @@
 ARCH-SUGGESTED_TAGS:
-  '[arch-tag_system]': "General tag system architecture (recent tags, sanitization, storage)"
-  '[impl-suggested_tags]': "Implementation details for extraction, display, and user interaction"
-  '[impl-tag_system]': "Tag service implementation"
+  "[arch-tag_system]": "General tag system architecture (recent tags, sanitization, storage)"
+  "[impl-suggested_tags]": "Implementation details for extraction, display, and user interaction"
+  "[impl-tag_system]": "Tag service implementation"
   alternatives_considered:
     - name: "See detail file"
       cons: []
@@ -49,8 +49,8 @@ ARCH-SUGGESTED_TAGS:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27"
-      reason: "S05: related_decisions + traceability.tests + token audit list"
+      date: "2026-07-28"
+      reason: "Remove safari mirrors from token coverage"
   method: "`extractSuggestedTagsFromContent(document, url, limit)`"
   modifiable: "Unify sanitization; inline full `sanitizeTag` logic in popup script; or document and accept the difference."
   name: "Suggested Tags from Page Content Architecture"
@@ -76,7 +76,7 @@ ARCH-SUGGESTED_TAGS:
   status: "Active"
   tagservice: "`sanitizeTag()` method (strict XSS prevention, character filtering)"
   title_attribute_priority: "For all elements, check `element.title` first, then `childElement.title`, then fall back to `textContent`."
-  token_coverage_`[proc-token_audit]`: "Code files carrying `[IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_*]`:\n\n- src/features/tagging/tag-service.js\n- src/features/tagging/suggested-tags-main-world-snippet.js\n- src/shared/suggested-tag-original-case.js\n- src/features/content/overlay-manager.js\n- src/ui/popup/PopupController.js\n- src/ui/popup/UIManager.js\n- safari mirrors\n\nTests:\n- tests/unit/popup-suggested-tags.test.js\n- tests/unit/suggested-tag-original-case.test.js\n"
+  token_coverage_`[proc-token_audit]`: "Code files carrying `[IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_*]`:\n\n- src/features/tagging/tag-service.js\n- src/features/tagging/suggested-tags-main-world-snippet.js\n- src/shared/suggested-tag-original-case.js\n- src/features/content/overlay-manager.js\n- src/ui/popup/PopupController.js\n- src/ui/popup/UIManager.js\n\nTests:\n- tests/unit/popup-suggested-tags.test.js\n- tests/unit/suggested-tag-original-case.test.js\n"
   traceability:
     code_annotations:
       - "ARCH-SUGGESTED_TAGS"

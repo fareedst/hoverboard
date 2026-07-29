@@ -1,0 +1,53 @@
+REQ-CROSS_BROWSER:
+  category: "Functional"
+  description: "The extension must expose a shared browser API shim for Chrome/Chromium delivery so messaging and storage helpers use one Promise-friendly browser export. Future multi-browser expansion reuses this shim. Safari App Extension product support is out of scope here and remains Deferred under REQ-SAFARI_ADAPTATION."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Chrome-first shim REQ for ARCH/IMPL-CROSS_BROWSER"
+  name: "Chrome-First Browser API Shim"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Future multi-browser expansion without forking call sites"
+      - "Safari product work stays Deferred under REQ-SAFARI_ADAPTATION"
+      - "Single import path for browser APIs"
+    problems_created: []
+    problems_solved:
+      - "Missing dedicated REQ for Active ARCH/IMPL-CROSS_BROWSER"
+      - "Safari ownership of Chrome-critical shim"
+    why: "Active delivery is Chrome/Chromium; a shared browser API shim keeps call sites expandable without a live Safari package."
+  related_requirements:
+    depends_on:
+      - "REQ-EXTENSION_IDENTITY"
+    related_to:
+      - "REQ-SAFARI_ADAPTATION"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "API availability checks guard features when APIs are missing; they are not treated as Safari product support"
+    - criterion: "Callers import browser from the shared browser API shim (safari-shim.js or utils re-export) for Promise-friendly messaging"
+    - criterion: "No live safari/ App Extension package in the repository tree"
+    - criterion: "Safari product adaptations remain Deferred under REQ-SAFARI_ADAPTATION"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-CROSS_BROWSER"
+    code_annotations:
+      - "REQ-CROSS_BROWSER"
+    implementation:
+      - "IMPL-CROSS_BROWSER"
+    tests:
+      - "tests/unit/badge-refresh-service-worker.test.js"
+      - "tests/unit/browser-api-shim-platform.test.js"
+      - "tests/unit/message-client.test.js"
+      - "tests/unit/native-host-ping.test.js"
+      - "tests/unit/service-worker-quick-access.test.js"
+  validation_criteria:
+    - method: "Unit tests for platformUtils Chrome-first behavior"
+      coverage: "isSafari false; getPlatform chrome/firefox/unknown"
+    - method: "Unit tests that mock safari-shim module"
+      coverage: "Service worker and message-client Chrome messaging paths"

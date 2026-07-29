@@ -6,14 +6,13 @@ Brief description of what this PR does.
 - [ ] New feature (non-breaking change which adds functionality)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] Documentation update
-- [ ] Safari extension improvements
 - [ ] Cross-browser compatibility fixes
 
 ## Testing
 - [ ] Unit tests pass
 - [ ] Integration tests pass
 - [ ] Manual testing completed
-- [ ] Cross-browser testing completed (Chrome/Safari)
+- [ ] Chrome/Chromium testing completed
 
 ## Checklist
 - [ ] My code follows the project's style guidelines
