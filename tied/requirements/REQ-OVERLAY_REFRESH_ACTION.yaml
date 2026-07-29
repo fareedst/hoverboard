@@ -1,0 +1,47 @@
+REQ-OVERLAY_REFRESH_ACTION:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-OVERLAY_REFRESH_ACTION)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Overlay Refresh Control"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Better multi-context editing"
+      - "Current data without closing"
+    problems_solved:
+      - "No way to refresh without closing"
+      - "Stale bookmark data in overlay"
+    why: "Users edit bookmarks from multiple contexts; refresh prevents stale data"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-OVERLAY_CONTROL_LAYOUT"
+      - "REQ-OVERLAY_SYSTEM"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Clicking/keybinding requests updated data and re-renders"
+    - criterion: "Errors surface non-destructive messaging"
+    - criterion: "Overlay renders refresh button with tooltip, ARIA label, keyboard handlers"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-OVERLAY"
+    code_annotations:
+      - "REQ-OVERLAY_REFRESH_ACTION"
+    implementation:
+      - "IMPL-OVERLAY"
+    tests:
+      - "Overlay refresh accessibility tests"
+      - "Overlay refresh button tests"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Rendering, handler logic, error handling, accessibility"
+    - method: "Manual tests"
+      coverage: "Refresh after remote edits, layout consistency"

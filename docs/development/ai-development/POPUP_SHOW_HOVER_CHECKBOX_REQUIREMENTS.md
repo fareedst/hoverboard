@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-19  
 **Status:** Requirements Analysis  
-**Cross-References:** `[POPUP-ARCH-001]`, `[POPUP-CLOSE-BEHAVIOR-001]`, `[CFG-003]`, `[SHOW-HOVER-CHECKBOX-001]`
+**Cross-References:** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]`, `[[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)]`, `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-001)]`
 
 ## 🎯 Problem Statement
 
@@ -60,7 +60,7 @@ getDefaultConfiguration () {
 
 ## 🎯 Requirements Specification
 
-### **Primary Requirement `[SHOW-HOVER-CHECKBOX-001]`
+### **Primary Requirement `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-001)]`
 **The popup must include a checkbox to the right of the 'Show Hover' button that controls the "Show hover overlay on page load" setting**
 
 **Rationale:**
@@ -71,14 +71,14 @@ getDefaultConfiguration () {
 
 ### **Secondary Requirements**
 
-#### **`[SHOW-HOVER-CHECKBOX-002]` - Database Field Manipulation**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-002)]` - Database Field Manipulation**
 The checkbox must manipulate the same database field as the existing configuration page row:
 - **Database Field**: `showHoverOnPageLoad` (boolean)
 - **Storage Key**: `hoverboard_settings` (via ConfigManager)
 - **Default Value**: `false` (conservative default)
 - **Persistence**: Changes must be saved immediately to storage
 
-#### **`[SHOW-HOVER-CHECKBOX-003]` - UI Integration**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-003)]` - UI Integration**
 The checkbox must be properly integrated into the popup interface:
 - **Position**: To the right of the Show Hover button
 - **Label**: "Show on page load" (concise)
@@ -86,14 +86,14 @@ The checkbox must be properly integrated into the popup interface:
 - **Accessibility**: Proper ARIA labels and keyboard navigation
 - **Visual Design**: Consistent with existing popup styling
 
-#### **`[SHOW-HOVER-CHECKBOX-004]` - State Synchronization**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-004)]` - State Synchronization**
 The checkbox state must remain synchronized across all interfaces:
 - **Options Page**: Checkbox state reflects popup changes
 - **Popup**: Checkbox state reflects options page changes
 - **Content Scripts**: Receive configuration updates immediately
 - **Storage**: All changes persist across extension reloads
 
-#### **`[SHOW-HOVER-CHECKBOX-005]` - User Experience**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-005)]` - User Experience**
 The checkbox must provide clear user feedback:
 - **Immediate Effect**: Changes take effect on next page load
 - **Visual Feedback**: Clear indication of current state
@@ -102,7 +102,7 @@ The checkbox must provide clear user feedback:
 
 ## 🔧 Implementation Requirements
 
-### **`[SHOW-HOVER-CHECKBOX-006]` - HTML Structure**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-006)]` - HTML Structure**
 ```html
 <!-- New structure in popup.html -->
 <div class="action-grid">
@@ -124,7 +124,7 @@ The checkbox must provide clear user feedback:
 </div>
 ```
 
-### **`[SHOW-HOVER-CHECKBOX-007]` - JavaScript Integration**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-007)]` - JavaScript Integration**
 ```javascript
 // New method in PopupController.js
 async handleShowHoverOnPageLoadChange() {
@@ -151,7 +151,7 @@ async handleShowHoverOnPageLoadChange() {
 }
 ```
 
-### **`[SHOW-HOVER-CHECKBOX-008]` - Configuration Loading**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-008)]` - Configuration Loading**
 ```javascript
 // New method in PopupController.js
 async loadShowHoverOnPageLoadSetting() {
@@ -166,7 +166,7 @@ async loadShowHoverOnPageLoadSetting() {
 
 ## 🧪 Testing Requirements
 
-### **`[SHOW-HOVER-CHECKBOX-009]` - Functional Testing**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-009)]` - Functional Testing**
 1. **Checkbox State Test**
    - Verify checkbox reflects current configuration on popup load
    - Verify checkbox state persists across popup opens/closes
@@ -182,7 +182,7 @@ async loadShowHoverOnPageLoadSetting() {
    - Verify tooltip provides helpful information
    - Verify keyboard navigation works correctly
 
-### **`[SHOW-HOVER-CHECKBOX-010]` - Integration Testing**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-010)]` - Integration Testing**
 1. **Options Page Synchronization**
    - Verify popup changes reflect in options page
    - Verify options page changes reflect in popup
@@ -196,19 +196,19 @@ async loadShowHoverOnPageLoadSetting() {
 ## 📚 Cross-Reference Coordination
 
 ### **Existing Requirements Coordination**
-- **`[POPUP-CLOSE-BEHAVIOR-001]`**: Popup must remain open after checkbox changes
-- **`[CFG-003]`**: Configuration management patterns must be followed
-- **`[POPUP-ARCH-001]`**: Architecture must support new UI element
-- **`[UI-BEHAVIOR-001]`**: UI behavior patterns must be consistent
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]`**: Popup must remain open after checkbox changes
+- **`[[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)]`**: Configuration management patterns must be followed
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`**: Architecture must support new UI element
+- **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]`**: UI behavior patterns must be consistent
 
 ### **Architectural Decisions**
-- **`[SHOW-HOVER-CHECKBOX-ARCH-001]`**: Checkbox must use existing ConfigManager patterns
-- **`[SHOW-HOVER-CHECKBOX-ARCH-002]`**: UI must integrate seamlessly with existing popup design
-- **`[SHOW-HOVER-CHECKBOX-ARCH-003]`**: State synchronization must use existing message patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-001)]`**: Checkbox must use existing ConfigManager patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)]`**: UI must integrate seamlessly with existing popup design
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-003)]`**: State synchronization must use existing message patterns
 
 ## 🎯 Success Criteria
 
-### **`[SHOW-HOVER-CHECKBOX-011]` - Primary Success Criteria**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-011)]` - Primary Success Criteria**
 - ✅ Checkbox appears to the right of Show Hover button
 - ✅ Checkbox controls `showHoverOnPageLoad` database field
 - ✅ Changes save immediately to storage
@@ -216,7 +216,7 @@ async loadShowHoverOnPageLoadSetting() {
 - ✅ Content scripts receive configuration updates
 - ✅ No service worker errors or "Loading error" messages
 
-### **`[SHOW-HOVER-CHECKBOX-012]` - User Experience Success Criteria**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-012)]` - User Experience Success Criteria**
 - ✅ Clear visual feedback for state changes
 - ✅ Intuitive placement and labeling
 - ✅ Accessibility standards maintained
@@ -225,18 +225,18 @@ async loadShowHoverOnPageLoadSetting() {
 
 ## 📝 Documentation Requirements
 
-### **`[SHOW-HOVER-CHECKBOX-013]` - Implementation Documentation**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-013)]` - Implementation Documentation**
 - Document new HTML structure and CSS classes
 - Document new JavaScript methods and event handlers
 - Document configuration update patterns
 - Document testing procedures and results
 
-### **`[SHOW-HOVER-CHECKBOX-014]` - User Documentation**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-014)]` - User Documentation**
 - Update user guides to explain new checkbox functionality
 - Document the relationship between popup and options page settings
 - Provide troubleshooting guidance for configuration issues
 
-### **`[SHOW-HOVER-CHECKBOX-015]` - Bug Fix Documentation**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-015)]` - Bug Fix Documentation**
 - Document the service worker message type fix
 - Explain the use of existing `updateOverlayConfig` message type
 - Document error handling improvements for message broadcasting
@@ -244,31 +244,31 @@ async loadShowHoverOnPageLoadSetting() {
 ## 🔍 Semantic Tokens
 
 ### **Primary Tokens**
-- **`[SHOW-HOVER-CHECKBOX-001]`**: Primary requirement for popup checkbox
-- **`[SHOW-HOVER-CHECKBOX-002]`**: Database field manipulation requirement
-- **`[SHOW-HOVER-CHECKBOX-003]`**: UI integration requirement
-- **`[SHOW-HOVER-CHECKBOX-004]`**: State synchronization requirement
-- **`[SHOW-HOVER-CHECKBOX-005]`**: User experience requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-001)]`**: Primary requirement for popup checkbox
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-002)]`**: Database field manipulation requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-003)]`**: UI integration requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-004)]`**: State synchronization requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-005)]`**: User experience requirement
 
 ### **Implementation Tokens**
-- **`[SHOW-HOVER-CHECKBOX-006]`**: HTML structure requirement
-- **`[SHOW-HOVER-CHECKBOX-007]`**: JavaScript integration requirement
-- **`[SHOW-HOVER-CHECKBOX-008]`**: Configuration loading requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-006)]`**: HTML structure requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-007)]`**: JavaScript integration requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-008)]`**: Configuration loading requirement
 
 ### **Testing Tokens**
-- **`[SHOW-HOVER-CHECKBOX-009]`**: Functional testing requirement
-- **`[SHOW-HOVER-CHECKBOX-010]`**: Integration testing requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-009)]`**: Functional testing requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-010)]`**: Integration testing requirement
 
 ### **Success Criteria Tokens**
-- **`[SHOW-HOVER-CHECKBOX-011]`**: Primary success criteria
-- **`[SHOW-HOVER-CHECKBOX-012]`**: User experience success criteria
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-011)]`**: Primary success criteria
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-012)]`**: User experience success criteria
 
 ### **Documentation Tokens**
-- **`[SHOW-HOVER-CHECKBOX-013]`**: Implementation documentation requirement
-- **`[SHOW-HOVER-CHECKBOX-014]`**: User documentation requirement
-- **`[SHOW-HOVER-CHECKBOX-015]`**: Bug fix documentation requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-013)]`**: Implementation documentation requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-014)]`**: User documentation requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-015)]`**: Bug fix documentation requirement
 
 ### **Architectural Tokens**
-- **`[SHOW-HOVER-CHECKBOX-ARCH-001]`**: ConfigManager pattern requirement
-- **`[SHOW-HOVER-CHECKBOX-ARCH-002]`**: UI integration requirement
-- **`[SHOW-HOVER-CHECKBOX-ARCH-003]`**: Message pattern requirement 
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-001)]`**: ConfigManager pattern requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)]`**: UI integration requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-003)]`**: Message pattern requirement 

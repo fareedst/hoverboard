@@ -1,0 +1,45 @@
+REQ-SAFARI_ADAPTATION:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-SAFARI_ADAPTATION)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Safari Adaptive Behavior"
+  priority: "P2"
+  rationale:
+    benefits:
+      - "Does not block Chrome delivery"
+      - "Preserves future Safari expansion path"
+    problems_solved:
+      - "Stale Implemented status conflicting with Chrome-only identity"
+    why: "Safari App Extension adaptations are deferred; Chrome/Chromium is the active browser target. Kept for future reactivation via the cross-browser shim."
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-CROSS_BROWSER"
+      - "REQ-EXTENSION_IDENTITY"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Deferred: messaging retries and Safari metadata when Safari package is rebuilt"
+    - criterion: "Deferred: Safari detection injects configuration (timeouts, retries, opacity)"
+    - criterion: "Deferred: Safari error handler tracks recovery and degraded mode"
+    - criterion: "Deferred: when Safari target returns, content scripts apply Safari DOM/animation optimizations"
+  status: "Deferred"
+  traceability:
+    architecture:
+      - "ARCH-CROSS_BROWSER"
+      - "ARCH-SAFARI_ADAPTATION"
+    code_annotations:
+      - "REQ-SAFARI_ADAPTATION"
+    implementation:
+      - "IMPL-CROSS_BROWSER"
+      - "IMPL-SAFARI_ADAPTATION"
+    tests: []
+  validation_criteria:
+    - method: "Deferred"
+      coverage: "No Safari package or Safari-specific suites in active Chrome delivery"

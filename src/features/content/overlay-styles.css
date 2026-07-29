@@ -1,7 +1,7 @@
-/* MV3-003: Overlay styles for V3 content script injection */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Overlay styles for V3 content script injection */
 /* Modern CSS for Hoverboard hover overlay functionality */
 
-/* MV3-003: Base overlay container */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Base overlay container */
 .hoverboard-overlay {
   position: fixed;
   z-index: 999999;
@@ -17,11 +17,11 @@
   animation: hoverboard-fade-in 0.2s ease-out;
 }
 
-/* UI-VIS-001/002: User-controlled overlay visibility - superseded UI-005 */
+/* [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]/002: User-controlled overlay visibility - superseded [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] */
 /* Note: Overlay transparency is now controlled via VisibilityControls component */
 /* See: src/ui/components/VisibilityControls.js for user-controlled transparency */
 
-/* MV3-003: Overlay fade-in animation */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Overlay fade-in animation */
 @keyframes hoverboard-fade-in {
   from {
     opacity: 0;
@@ -33,14 +33,14 @@
   }
 }
 
-/* MV3-003: Overlay content container */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Overlay content container */
 .hoverboard-overlay-content {
   padding: 0;
   border-radius: 8px;
   overflow: hidden;
 }
 
-/* MV3-003: Overlay header */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Overlay header */
 .hoverboard-overlay-header {
   background: #2c3e50;
   padding: 12px 16px;
@@ -50,7 +50,7 @@
   border-bottom: 1px solid #34495e;
 }
 
-/* MV3-003: Overlay title */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Overlay title */
 .hoverboard-overlay-title {
   font-weight: 600;
   font-size: 16px;
@@ -58,7 +58,7 @@
   margin: 0;
 }
 
-/* MV3-003: Close button */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Close button */
 .hoverboard-overlay-close {
   background: none;
   border: none;
@@ -80,13 +80,13 @@
   color: #ffffff;
 }
 
-/* MV3-003: Overlay body */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Overlay body */
 .hoverboard-overlay-body {
   padding: 16px;
   background: #34495e;
 }
 
-/* MV3-003: Form inputs */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Form inputs */
 .hoverboard-overlay input,
 .hoverboard-overlay textarea {
   width: 100%;
@@ -114,30 +114,30 @@
   color: #95a5a6;
 }
 
-/* MV3-003: URL input */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: URL input */
 .hoverboard-url-input {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 13px;
 }
 
-/* MV3-003: Title input */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Title input */
 .hoverboard-title-input {
   font-weight: 500;
 }
 
-/* MV3-003: Description textarea */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Description textarea */
 .hoverboard-description-input {
   min-height: 60px;
   resize: vertical;
 }
 
-/* MV3-003: Tags input */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Tags input */
 .hoverboard-tags-input {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
   font-size: 13px;
 }
 
-/* MV3-003: Actions container */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Actions container */
 .hoverboard-overlay-actions {
   display: flex;
   justify-content: space-between;
@@ -145,7 +145,7 @@
   margin-top: 16px;
 }
 
-/* MV3-003: Save button */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Save button */
 .hoverboard-save-button {
   background: #27ae60;
   color: #ffffff;
@@ -166,7 +166,7 @@
   background: #1e8449;
 }
 
-/* MV3-003: Private label and checkbox */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Private label and checkbox */
 .hoverboard-private-label {
   display: flex;
   align-items: center;
@@ -183,7 +183,7 @@
   cursor: pointer;
 }
 
-/* MV3-003: Loading state */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Loading state */
 .hoverboard-overlay.loading {
   pointer-events: none;
 }
@@ -198,7 +198,7 @@
   animation: hoverboard-loading-dots 1.5s infinite;
 }
 
-/* MV3-003: Loading animation */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Loading animation */
 @keyframes hoverboard-loading-dots {
   0%, 20% { content: ''; }
   40% { content: '.'; }
@@ -206,7 +206,7 @@
   80%, 100% { content: '...'; }
 }
 
-/* MV3-003: Error state */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Error state */
 .hoverboard-overlay.error {
   border: 2px solid #e74c3c;
 }
@@ -215,7 +215,7 @@
   background: #c0392b;
 }
 
-/* MV3-003: Success state */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Success state */
 .hoverboard-overlay.success {
   border: 2px solid #27ae60;
 }
@@ -224,7 +224,7 @@
   background: #229954;
 }
 
-/* MV3-003: Responsive design for smaller screens */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Responsive design for smaller screens */
 @media (max-width: 480px) {
   .hoverboard-overlay {
     min-width: 280px;
@@ -248,7 +248,7 @@
   }
 }
 
-/* MV3-003: High contrast mode support */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: High contrast mode support */
 @media (prefers-contrast: high) {
   .hoverboard-overlay {
     background: #000000;
@@ -271,10 +271,10 @@
     color: #ffffff;
   }
 
-  /* UI-VIS-001/002: High contrast support handled by VisibilityControls */
+  /* [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]/002: High contrast support handled by VisibilityControls */
 }
 
-/* MV3-003: Reduced motion support */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   .hoverboard-overlay {
     animation: none;
@@ -288,7 +288,7 @@
   }
 }
 
-/* MV3-003: Dark mode support (if system preference) */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Dark mode support (if system preference) */
 @media (prefers-color-scheme: dark) {
   .hoverboard-overlay {
     background: rgba(0, 0, 0, 0.9);
@@ -311,18 +311,18 @@
   }
 }
 
-/* MV3-003: Focus management for accessibility */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Focus management for accessibility */
 .hoverboard-overlay:focus-within {
   outline: 2px solid #3498db;
   outline-offset: 2px;
 }
 
-/* MV3-003: Ensure overlay doesn't interfere with page content */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Ensure overlay doesn't interfere with page content */
 .hoverboard-overlay * {
   box-sizing: border-box;
 }
 
-/* MV3-003: Prevent overlay from being affected by page styles */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Prevent overlay from being affected by page styles */
 .hoverboard-overlay,
 .hoverboard-overlay * {
   all: unset;
@@ -330,7 +330,7 @@
   box-sizing: border-box;
 }
 
-/* MV3-003: Re-apply necessary styles after reset */
+/* [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Re-apply necessary styles after reset */
 .hoverboard-overlay {
   position: fixed !important;
   z-index: 999999 !important;
@@ -662,7 +662,7 @@
     width: 100%;
   }
 
-  /* UI-VIS-001/002: Mobile responsiveness handled by VisibilityControls */
+  /* [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]/002: Mobile responsiveness handled by VisibilityControls */
 }
 
 /* Dark mode support */

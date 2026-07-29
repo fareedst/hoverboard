@@ -1,7 +1,7 @@
-# IMMUTABLE-REQ-TAG-002: Tab Search Feature
+# [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002): Tab Search Feature
 
 ## Requirement ID
-IMMUTABLE-REQ-TAG-002
+[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)
 
 ## Feature Name
 Tab Search and Navigation
@@ -57,7 +57,7 @@ Enable users to search through all browser tabs by title and navigate to matchin
 6. Error states are handled gracefully with user feedback
 
 ## Dependencies
-- IMMUTABLE-REQ-TAG-001: Tag Management System (existing)
+- [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001): Tag Management System (existing)
 - Chrome Extension Manifest V3 APIs
 - Existing message handler architecture
 - Existing UI component system
@@ -88,7 +88,7 @@ Enable users to search through all browser tabs by title and navigate to matchin
 5. **Phase 5**: Performance optimization and testing
 
 ## Semantic Tokens
-- `[IMMUTABLE-REQ-TAG-002]` - All code implementing tab search functionality
+- `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)]` - All code implementing tab search functionality
 - `[TAB-SEARCH-CORE]` - Core tab search business logic
 - `[TAB-SEARCH-UI]` - User interface components for tab search
 - `[TAB-SEARCH-NAV]` - Tab navigation and activation logic

@@ -3,7 +3,7 @@
 **Date**: 2025-07-14  
 **Status**: ✅ **COMPLETED** - All architectural decisions implemented and validated  
 **Version**: 2.0  
-**Semantic Token**: `[TEST-FIX-ARCH-001]`
+**Semantic Token**: `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 ## 🏗️ Overview
 
@@ -23,14 +23,14 @@ This document captures all strategic and architectural decisions specific to the
 
 ## 🎯 Platform-Specific Decisions
 
-### Chrome Extension Architecture `[TEST-FIX-ARCH-001]`
+### Chrome Extension Architecture `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ Jest + Playwright Test Separation**: Maintained and properly configured
 - **✅ ES Module Support in Jest**: Fully implemented and validated
 - **✅ Chrome API Mocking Strategy**: Comprehensive mocking with realistic behavior
 - **✅ Global Object Handling**: Proper handling of browser APIs in Node.js test environment
 
-### JavaScript/ES6+ Language Decisions `[TEST-FIX-ARCH-001]`
+### JavaScript/ES6+ Language Decisions `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ Async/Await Pattern for Test Operations**: Fully implemented and validated
 - **✅ Proper Error Handling in Test Setup**: Comprehensive error handling implemented
@@ -41,14 +41,14 @@ This document captures all strategic and architectural decisions specific to the
 
 ## 🔒 Security Decisions
 
-### Input Validation and Sanitization `[TEST-FIX-ARCH-001]`
+### Input Validation and Sanitization `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ HTML Tag Sanitization**: Enhanced regex-based processing with proper edge case handling
 - **✅ XSS Prevention**: Comprehensive script tag removal and attribute stripping
 - **✅ Input Validation**: Proper null/undefined handling with graceful degradation
 - **✅ Length Limitation**: 50-character limit enforced with proper truncation
 
-### Error Handling and Recovery `[TEST-FIX-ARCH-001]`
+### Error Handling and Recovery `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ Graceful Degradation**: All test failures handled without breaking test suite
 - **✅ Comprehensive Logging**: Detailed error messages for debugging
@@ -59,14 +59,14 @@ This document captures all strategic and architectural decisions specific to the
 
 ## 🧪 Testing Architecture Decisions
 
-### Jest Configuration `[TEST-FIX-ARCH-001]`
+### Jest Configuration `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ Test Environment**: jsdom environment for browser API simulation
 - **✅ Timeout Settings**: 15-second timeout for complex async operations
 - **✅ Mock Strategy**: Comprehensive Chrome extension API mocking
 - **✅ Module Resolution**: Proper ES6 module handling with Babel transformation
 
-### Test Infrastructure `[TEST-FIX-ARCH-001]`
+### Test Infrastructure `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ Setup Files**: Enhanced test setup with comprehensive mocking
 - **✅ Utility Functions**: Reusable test utilities for common operations
@@ -77,14 +77,14 @@ This document captures all strategic and architectural decisions specific to the
 
 ## 🔧 Implementation Decisions
 
-### Mock Strategy `[TEST-FIX-ARCH-001]`
+### Mock Strategy `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ Chrome Storage Mocking**: Realistic storage behavior with async operations
 - **✅ Message Passing Mocking**: Proper message routing and response handling
 - **✅ Background Page Mocking**: Comprehensive shared memory simulation
 - **✅ API Response Mocking**: Realistic Pinboard API response simulation
 
-### Test Data Management `[TEST-FIX-ARCH-001]`
+### Test Data Management `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ Test Isolation**: Each test runs with clean state
 - **✅ Data Persistence**: Realistic data persistence across test operations
@@ -95,14 +95,14 @@ This document captures all strategic and architectural decisions specific to the
 
 ## 📊 Performance Decisions
 
-### Test Execution Performance `[TEST-FIX-ARCH-001]`
+### Test Execution Performance `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ Async Operation Optimization**: Efficient async test patterns
 - **✅ Mock Performance**: Optimized mock implementations for fast execution
 - **✅ Memory Management**: Proper cleanup to prevent memory leaks
 - **✅ Parallel Execution**: Tests designed for parallel execution where possible
 
-### Resource Management `[TEST-FIX-ARCH-001]`
+### Resource Management `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ Memory Usage**: Efficient memory usage in test environment
 - **✅ Network Simulation**: Realistic network latency simulation
@@ -113,14 +113,14 @@ This document captures all strategic and architectural decisions specific to the
 
 ## 🔄 Cross-Referencing
 
-### Semantic Token Usage `[TEST-FIX-ARCH-001]`
+### Semantic Token Usage `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
-- **✅ TEST-FIX-001**: Primary test fix implementation token
-- **✅ TEST-FIX-ARCH-001**: This architectural decisions document
-- **✅ TEST-FIX-SUMMARY-001**: Test fix summary document
+- **✅ [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001)**: Primary test fix implementation token
+- **✅ [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)**: This architectural decisions document
+- **✅ [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-SUMMARY-001)**: Test fix summary document
 - **✅ All tokens properly cross-referenced** throughout implementation
 
-### Documentation Compliance `[TEST-FIX-ARCH-001]`
+### Documentation Compliance `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 - **✅ AI-First Development Framework**: All changes follow established protocols
 - **✅ Immutable Requirements**: All fixes maintain compliance with core requirements

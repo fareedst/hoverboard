@@ -100,7 +100,7 @@ The **single** maintained copy of the hand-authored template body is the file **
 
 **Layer A — TIED (mandatory for changed essence):** Run **`tied_validate_consistency`** with default options so **`include_pseudocode`** runs. This checks the **merged** `essence_pseudocode` (sidecar + YAML) against indexes, token references, and TIED’s pseudo-code rules. Do this after any edit to the sidecar or after setting essence via API/CLI.
 
-**Layer B — Application (optional depth, project-scaled):** A checklist covering parsing, schema/shape, contracts, dependency/coverage, traceability to tests, and optional lint/simulation. If the project has **no** custom grammar parser, treat each **H2 section** (or the project’s defined “block”) as one unit for **manual** Layer B review. A minimal Layer B should still require: **TIED-POE-001** (do not use Layer B alone; Layer A must pass for the same text).
+**Layer B — Application (optional depth, project-scaled):** A checklist covering parsing, schema/shape, contracts, dependency/coverage, traceability to tests, and optional lint/simulation. If the project has **no** custom grammar parser, treat each **H2 section** (or the project’s defined “block”) as one unit for **manual** Layer B review. A minimal Layer B should still require: **[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was TIED-POE-001)** (do not use Layer B alone; Layer A must pass for the same text).
 
 ```mermaid
 flowchart LR

@@ -3,7 +3,7 @@ import '@testing-library/jest-dom';
 /**
  * Jest Test Setup Configuration
  * Sets up the testing environment for Hoverboard browser extension
- * [TEST-FIX-ENV-002] jest-webextension-mock removed — global.chrome is defined here and replaced the package mock.
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] jest-webextension-mock removed — global.chrome is defined here and replaced the package mock.
  */
 
 // Global test configuration
@@ -43,13 +43,13 @@ global.mockMessageService = {
 };
 
 /**
- * [TEST-FIX-ENV-002] Re-attach chrome mock implementations (safe if restoreMocks or mockReset cleared them).
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Re-attach chrome mock implementations (safe if restoreMocks or mockReset cleared them).
  * @param {typeof global.chrome} chrome
  */
 function applyChromeMockImplementations (chrome) {
   if (!chrome?.runtime || !chrome?.storage) return;
 
-  // [TEST-FIX-ENV-002] Optional chaining: some tests replace global.chrome with a minimal stub (e.g. message-handler-runtime-validation.test.js)
+  // [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Optional chaining: some tests replace global.chrome with a minimal stub (e.g. message-handler-runtime-validation.test.js)
   chrome.runtime.getBackgroundPage?.mockImplementation(() => Promise.resolve(global.mockBackgroundPage));
   chrome.runtime.getURL?.mockImplementation((path) => `chrome-extension://test-id/${path}`);
   chrome.runtime.getManifest?.mockImplementation(() => ({ version: '1.0.0' }));
@@ -375,7 +375,7 @@ global.popupState = {
   clearPersistedState: jest.fn().mockResolvedValue(),
 };
 
-// [TEST-FIX-ENV-002] Per-test reset: jest clearMocks clears call history; re-seed chrome implementations; fetch cleared
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Per-test reset: jest clearMocks clears call history; re-seed chrome implementations; fetch cleared
 beforeEach(() => {
   resetChromeMockImplementations();
   if (global.fetch && typeof global.fetch.mockClear === 'function') {

@@ -1,0 +1,30 @@
+ARCH-PRIVACY:
+  alternatives_considered: []
+  cross_references: []
+  decision: "Thin architecture stub for ARCH-PRIVACY."
+  implementation_approach:
+    summary: ""
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: link REQ-PRIVACY_CONTROLS and IMPL-PRIVACY"
+  name: "Privacy"
+  rationale:
+    why: "Privacy controls architecture"
+  related_decisions:
+    depends_on: []
+    informs: []
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-PRIVACY"
+    implementation:
+      - "IMPL-PRIVACY"
+    requirements:
+      - "REQ-PRIVACY_CONTROLS"
+    tests: []

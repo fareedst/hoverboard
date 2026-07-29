@@ -19,12 +19,12 @@ const SUGGESTED_TAGS_MAIN_WORLD_FILE = 'src/features/tagging/suggested-tags-main
 
 export class PopupController {
   constructor (dependencies = {}) {
-    // [DEP-INJ-001] Proper dependency injection with fallback creation
+    // [IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION] Proper dependency injection with fallback creation
     this.errorHandler = dependencies.errorHandler || new ErrorHandler()
     this.stateManager = dependencies.stateManager || new StateManager()
     this.configManager = dependencies.configManager || new ConfigManager()
 
-    // [DEP-INJ-001] UIManager with proper dependency injection
+    // [IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION] UIManager with proper dependency injection
     this.uiManager = dependencies.uiManager || new UIManager({
       errorHandler: this.errorHandler,
       stateManager: this.stateManager,
@@ -64,7 +64,7 @@ export class PopupController {
 
     this.setupEventListeners()
 
-    // [POPUP-REFRESH-001] Setup refresh mechanisms
+    // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Setup refresh mechanisms
     this.setupAutoRefresh()
     this.setupRealTimeUpdates()
 
@@ -73,7 +73,7 @@ export class PopupController {
       chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         if (message.type === 'BOOKMARK_UPDATED') {
           try {
-            debugLog('[POPUP-REFRESH-001] Received BOOKMARK_UPDATED, refreshing data')
+            debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data')
             // [TOGGLE_SYNC_POPUP] Fetch latest bookmark data for current tab
             if (this.currentTab && this.currentTab.url) {
               const updatedPin = await this.getBookmarkData(this.currentTab.url)
@@ -94,18 +94,18 @@ export class PopupController {
         }
       })
     }
-    debugLog('[CHROME-DEBUG-001] PopupController constructor called', { platform: navigator.userAgent })
+    debugLog('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] PopupController constructor called', { platform: navigator.userAgent })
     // Platform detection
     if (typeof chrome !== 'undefined' && chrome.runtime) {
-      debugLog('[CHROME-DEBUG-001] Detected Chrome runtime in PopupController')
+      debugLog('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] Detected Chrome runtime in PopupController')
     } else if (typeof browser !== 'undefined' && browser.runtime) {
-      debugLog('[CHROME-DEBUG-001] Detected browser polyfill runtime in PopupController')
+      debugLog('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] Detected browser polyfill runtime in PopupController')
     } else {
-      debugError('[CHROME-DEBUG-001] No recognized extension runtime detected in PopupController')
+      debugError('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] No recognized extension runtime detected in PopupController')
     }
     // Check utils.js access
     if (!debugLog || !debugError) {
-      console.error('[CHROME-DEBUG-001] utils.js functions missing in PopupController')
+      console.error('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] utils.js functions missing in PopupController')
     }
   }
 
@@ -155,10 +155,10 @@ export class PopupController {
     // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser one-click toggle reuses same move handler
     this.uiManager.on('storageLocalToggle', (targetBackend) => this.handleStorageBackendChange(targetBackend))
 
-    // [POPUP-REFRESH-001] Add refresh event handler
+    // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Add refresh event handler
     this.uiManager.on('refreshData', this.refreshPopupData.bind(this))
 
-    // [SHOW-HOVER-CHECKBOX-CONTROLLER-001] - Add checkbox event handler binding
+    // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Add checkbox event handler binding
     this.uiManager.on('showHoverOnPageLoadChange', this.handleShowHoverOnPageLoadChange.bind(this))
   }
 
@@ -178,10 +178,10 @@ export class PopupController {
 
   /**
    * Load initial data when popup opens
-   * [POPUP-DATA-FLOW-001] Enhanced data flow validation
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Enhanced data flow validation
    */
   async loadInitialData () {
-    debugLog('[POPUP-DATA-FLOW-001] loadInitialData: start')
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: start')
     try {
       this.setLoading(true)
 
@@ -201,9 +201,9 @@ export class PopupController {
         debugLog('[IMPL-SCREENSHOT_MODE] loadInitialData: using fake tab from params', this.currentTab)
       } else {
         // Get current tab information
-        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getCurrentTab')
+        debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: calling getCurrentTab')
         this.currentTab = await this.getCurrentTab()
-        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentTab', this.currentTab)
+        debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: got currentTab', this.currentTab)
       }
       if (!this.currentTab) {
         throw new Error('Unable to get current tab information')
@@ -216,14 +216,14 @@ export class PopupController {
         title: this.currentTab.title
       })
 
-      // [POPUP-DATA-FLOW-001] Get and validate bookmark data
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling getBookmarkData', this.currentTab.url)
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Get and validate bookmark data
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: calling getBookmarkData', this.currentTab.url)
       this.currentPin = await this.getBookmarkData(this.currentTab.url)
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: got currentPin', this.currentPin)
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: got currentPin', this.currentPin)
 
-      // [POPUP-DATA-FLOW-001] Handle both bookmarked and non-bookmarked sites
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Handle both bookmarked and non-bookmarked sites
       if (!this.currentPin) {
-        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: No bookmark data, creating empty bookmark for current site')
+        debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: No bookmark data, creating empty bookmark for current site')
         this.currentPin = {
           url: this.currentTab.url,
           description: this.currentTab.title || '',
@@ -235,14 +235,14 @@ export class PopupController {
           extended: '',
           hash: ''
         }
-        // [POPUP-DATA-FLOW-001] Log the created empty bookmark for test compatibility
-        debugLog('[POPUP-DATA-FLOW-001] loadInitialData: created empty bookmark', this.currentPin)
+        // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Log the created empty bookmark for test compatibility
+        debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: created empty bookmark', this.currentPin)
       }
 
       this.stateManager.setState({ currentPin: this.currentPin })
 
-      // [POPUP-DATA-FLOW-001] Enhanced debug logging for bookmark data
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: bookmark data validation:', {
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Enhanced debug logging for bookmark data
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: bookmark data validation:', {
         hasBookmark: !!this.currentPin,
         url: this.currentPin?.url,
         description: this.currentPin?.description,
@@ -251,17 +251,17 @@ export class PopupController {
         isReadLater: this.currentPin?.toread === 'yes'
       })
 
-      // [POPUP-DATA-FLOW-001] Process and validate tags
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Process and validate tags
       const normalizedTags = this.normalizeTags(this.currentPin?.tags)
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: tags processing:', {
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: tags processing:', {
         originalTags: this.currentPin?.tags,
         originalTagsType: typeof this.currentPin?.tags,
         normalizedTags,
         normalizedTagsLength: normalizedTags.length,
         normalizedTagsIsArray: Array.isArray(normalizedTags)
       })
-      // [POPUP-DATA-FLOW-001] Update UI with validated data
-      debugLog('[POPUP-DATA-FLOW-001] loadInitialData: calling updateCurrentTags with:', normalizedTags)
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Update UI with validated data
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: calling updateCurrentTags with:', normalizedTags)
       // [REQ-THIS_PAGE_TAG_SORT] Bookmark tag counts for This Page frequency sort (side panel)
       await this.refreshTagFrequencyMapForSort()
       this.uiManager.updateCurrentTags(normalizedTags)
@@ -296,7 +296,7 @@ export class PopupController {
         // Content script not injected or no selection: leave tag input unchanged
       }
 
-      // [SHOW-HOVER-CHECKBOX-CONTROLLER-002] - Load checkbox state
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Load checkbox state
       await this.loadShowHoverOnPageLoadSetting()
 
       // Set version info
@@ -332,12 +332,12 @@ export class PopupController {
 
       // Mark as initialized
       this.isInitialized = true
-      debugLog('[POPUP-DATA-FLOW-001] Popup initialization completed successfully')
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Popup initialization completed successfully')
       if (this._onStateChange) {
         this._onStateChange({ screen: 'mainInterface', state: { bookmark: this.currentPin } })
       }
     } catch (error) {
-      debugError('[POPUP-DATA-FLOW-001] Failed to load initial data:', error)
+      debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Failed to load initial data:', error)
       if (this._onStateChange) this._onStateChange({ screen: 'error', state: {} })
       if (this.errorHandler) {
         this.errorHandler.handleError('Failed to load initial data', error)
@@ -378,12 +378,12 @@ export class PopupController {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Load user-driven recent tags from shared memory
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Load user-driven recent tags from shared memory
    * Excludes tags already assigned to the current site
    */
   async loadRecentTags () {
     try {
-      debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Loading user-driven recent tags')
+      debugLog('[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Loading user-driven recent tags')
 
       // [IMPL-SCREENSHOT_MODE] [REQ-RECENT_TAGS_SYSTEM] In screenshot/demo mode use seeded demo recent tags so Recent Tags section is visible.
       if (this._screenshotMode) {
@@ -391,11 +391,11 @@ export class PopupController {
         if (applied) return
       }
 
-      // [IMMUTABLE-REQ-TAG-003] - Get current tags to exclude from recent tags
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get current tags to exclude from recent tags
       const currentTags = this.normalizeTags(this.currentPin?.tags || [])
-      debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Current tags to exclude:', currentTags)
+      debugLog('[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Current tags to exclude:', currentTags)
 
-      // [IMMUTABLE-REQ-TAG-003] - Get user recent tags excluding current site
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get user recent tags excluding current site
       const response = await this.sendMessage({
         type: 'getRecentBookmarks',
         data: {
@@ -404,12 +404,12 @@ export class PopupController {
         }
       })
 
-      debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Recent bookmarks response received:', response)
+      debugLog('[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Recent bookmarks response received:', response)
 
       if (response && response.recentTags) {
-        debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Recent tags from response:', response.recentTags)
+        debugLog('[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Recent tags from response:', response.recentTags)
 
-        // [IMMUTABLE-REQ-TAG-003] - Extract tag names from recent tags data
+        // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Extract tag names from recent tags data
         // Handle both string arrays and object arrays
         const recentTagNames = response.recentTags.map(tag => {
           if (typeof tag === 'string') {
@@ -421,22 +421,22 @@ export class PopupController {
           }
         })
 
-        debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Extracted recent tag names:', recentTagNames)
+        debugLog('[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Extracted recent tag names:', recentTagNames)
 
-        // [IMMUTABLE-REQ-TAG-003] - Tags are already filtered by the service, but double-check
+        // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Tags are already filtered by the service, but double-check
         const filteredRecentTags = recentTagNames.filter(tag =>
           !currentTags.includes(tag)
         )
 
-        debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Final filtered recent tags:', filteredRecentTags)
+        debugLog('[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Final filtered recent tags:', filteredRecentTags)
 
         this.uiManager.updateRecentTags(filteredRecentTags)
       } else {
-        debugLog('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] No recent tags in response, updating with empty array')
+        debugLog('[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] No recent tags in response, updating with empty array')
         this.uiManager.updateRecentTags([])
       }
     } catch (error) {
-      debugError('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Failed to load recent tags:', error)
+      debugError('[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to load recent tags:', error)
       this.uiManager.updateRecentTags([])
     }
   }
@@ -583,7 +583,7 @@ export class PopupController {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Validate tag input
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate tag input
    * @param {string} tag - Tag to validate
    * @returns {boolean} Whether tag is valid
    */
@@ -597,13 +597,13 @@ export class PopupController {
       return false
     }
 
-    // [IMMUTABLE-REQ-TAG-001] - Check for invalid characters
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Check for invalid characters
     const invalidChars = /[<>]/g
     if (invalidChars.test(trimmedTag)) {
       return false
     }
 
-    // [IMMUTABLE-REQ-TAG-001] - Check for only safe characters (allow #, +, . for e.g. C#, node.js; API encodes via buildSaveParams)
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Check for only safe characters (allow #, +, . for e.g. C#, node.js; API encodes via buildSaveParams)
     const safeChars = /^[\w\s.#+-]+$/
     if (!safeChars.test(trimmedTag)) {
       return false
@@ -616,12 +616,12 @@ export class PopupController {
    * Get current active tab
    */
   async getCurrentTab () {
-    debugLog('[CHROME-DEBUG-001] getCurrentTab: calling chrome.tabs.query')
+    debugLog('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] getCurrentTab: calling chrome.tabs.query')
     return new Promise((resolve, reject) => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        debugLog('[CHROME-DEBUG-001] getCurrentTab: chrome.tabs.query callback', tabs, chrome.runtime.lastError)
+        debugLog('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] getCurrentTab: chrome.tabs.query callback', tabs, chrome.runtime.lastError)
         if (chrome.runtime.lastError) {
-          debugError('[CHROME-DEBUG-001] getCurrentTab: chrome.runtime.lastError', chrome.runtime.lastError)
+          debugError('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] getCurrentTab: chrome.runtime.lastError', chrome.runtime.lastError)
           reject(new Error(chrome.runtime.lastError.message))
           return
         }
@@ -629,7 +629,7 @@ export class PopupController {
         if (tabs && tabs.length > 0) {
           resolve(tabs[0])
         } else {
-          debugError('[CHROME-DEBUG-001] getCurrentTab: No active tab found')
+          debugError('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] getCurrentTab: No active tab found')
           reject(new Error('No active tab found'))
         }
       })
@@ -638,10 +638,10 @@ export class PopupController {
 
   /**
    * Get bookmark data for a URL
-   * [POPUP-DATA-FLOW-001] Enhanced data extraction with validation
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Enhanced data extraction with validation
    */
   async getBookmarkData (url) {
-    debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: calling chrome.runtime.sendMessage', url)
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: calling chrome.runtime.sendMessage', url)
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
@@ -649,16 +649,16 @@ export class PopupController {
           data: { url }
         },
         (response) => {
-          debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.sendMessage callback', response, chrome.runtime.lastError)
+          debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: chrome.runtime.sendMessage callback', response, chrome.runtime.lastError)
           if (chrome.runtime.lastError) {
-            debugError('[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.lastError', chrome.runtime.lastError)
+            debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: chrome.runtime.lastError', chrome.runtime.lastError)
             reject(new Error(chrome.runtime.lastError.message))
             return
           }
 
           if (response && response.success) {
-            // [POPUP-DATA-FLOW-001] Enhanced response structure validation
-            debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: response structure:', {
+            // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Enhanced response structure validation
+            debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: response structure:', {
               response,
               responseSuccess: response.success,
               responseData: response.data,
@@ -669,30 +669,30 @@ export class PopupController {
               tagCount: response.data?.tags ? (Array.isArray(response.data.tags) ? response.data.tags.length : 'not-array') : 0
             })
 
-            // [POPUP-DATA-FLOW-001] Extract and validate bookmark data
+            // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Extract and validate bookmark data
             const bookmarkData = response.data
 
-            // [POPUP-DATA-FLOW-001] Only treat as no bookmark when URL is blocked; needsAuth still has bookmark from local/file/sync
+            // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Only treat as no bookmark when URL is blocked; needsAuth still has bookmark from local/file/sync
             if (bookmarkData?.blocked) {
-              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: URL blocked', bookmarkData)
+              debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: URL blocked', bookmarkData)
               resolve(null)
               return
             }
 
-            // [POPUP-DATA-FLOW-001] Validate extracted data
+            // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Validate extracted data
             const isValid = this.validateBookmarkData(bookmarkData)
             if (!isValid) {
-              debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: Invalid bookmark data structure, treating as no bookmark', bookmarkData)
+              debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: Invalid bookmark data structure, treating as no bookmark', bookmarkData)
               resolve(null)
               return
             }
 
-            // [POPUP-DATA-FLOW-001] Extract the actual bookmark data (handle both direct and nested structures)
+            // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Extract the actual bookmark data (handle both direct and nested structures)
             const extractedData = bookmarkData?.data || bookmarkData
-            debugLog('[POPUP-DATA-FLOW-001] getBookmarkData: extracted and validated bookmark data:', extractedData)
+            debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: extracted and validated bookmark data:', extractedData)
             resolve(extractedData)
           } else {
-            debugError('[POPUP-DATA-FLOW-001] getBookmarkData: Failed to get bookmark data', response)
+            debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: Failed to get bookmark data', response)
             reject(new Error(response?.error || 'Failed to get bookmark data'))
           }
         }
@@ -769,7 +769,7 @@ export class PopupController {
   }
 
   /**
-   * [POPUP-DEBUG-001] Validate bookmark data structure
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Validate bookmark data structure
    * @param {Object} bookmarkData - Bookmark data to validate
    * @returns {boolean} Whether the data is valid
    */
@@ -783,7 +783,7 @@ export class PopupController {
     const data = bookmarkData?.data || bookmarkData
 
     if (!data || typeof data !== 'object' || !data.url) {
-      debugLog('[POPUP-DEBUG-001] Bookmark data validation: missing url or invalid object')
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Bookmark data validation: missing url or invalid object')
       return false
     }
 
@@ -795,7 +795,7 @@ export class PopupController {
     }
 
     const isValid = true
-    debugLog('[POPUP-DEBUG-001] Bookmark data validation:', {
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Bookmark data validation:', {
       isValid,
       hasUrl: !!data?.url,
       hasTags: Array.isArray(data?.tags),
@@ -1395,7 +1395,7 @@ export class PopupController {
 
   /**
    * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Handle show/hide hoverboard; no window.close.
-   * [POPUP-CLOSE-BEHAVIOR-004] Modified to NOT close popup after toggling overlay visibility
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Modified to NOT close popup after toggling overlay visibility
    */
   async handleShowHoverboard () {
     recordAction(POPUP_ACTION_IDS.showHoverboard, { tabId: this.currentTab?.id }, 'popup')
@@ -1415,11 +1415,11 @@ export class PopupController {
         }
       })
 
-      // [POPUP-CLOSE-BEHAVIOR-004] Remove closePopup() call and add overlay state tracking
-      // [POPUP-CLOSE-BEHAVIOR-ARCH-004] Use response data for immediate UI update
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Remove closePopup() call and add overlay state tracking
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Use response data for immediate UI update
       if (toggleResponse && toggleResponse.data) {
         this.uiManager.updateShowHoverButtonState(toggleResponse.data.isVisible)
-        debugLog('[POPUP-CLOSE-BEHAVIOR-ARCH-004] Updated UI with toggle response:', toggleResponse.data)
+        debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Updated UI with toggle response:', toggleResponse.data)
       } else {
         // Fallback to querying overlay state
         await this.updateOverlayState()
@@ -1461,14 +1461,14 @@ export class PopupController {
         this.uiManager.updatePrivateStatus(newSharedStatus === 'no')
         this.uiManager.showSuccess(`Bookmark is now ${isPrivate ? 'public' : 'private'}`)
 
-        // [TOGGLE-SYNC-POPUP-001] - Notify overlay of changes (if visible)
+        // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Notify overlay of changes (if visible)
         try {
           await this.sendToTab({
             type: 'BOOKMARK_UPDATED',
             data: updatedPin
           })
         } catch (error) {
-          debugError('[TOGGLE-SYNC-POPUP-001] Failed to notify overlay:', error)
+          debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to notify overlay:', error)
           // Don't fail the entire operation if overlay notification fails
         }
       } else {
@@ -1518,14 +1518,14 @@ export class PopupController {
         const statusMessage = newToReadStatus === 'yes' ? 'Added to read later' : 'Removed from read later'
         this.uiManager.showSuccess(statusMessage)
 
-        // [TOGGLE-SYNC-POPUP-001] - Notify overlay of changes (if visible)
+        // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Notify overlay of changes (if visible)
         try {
           await this.sendToTab({
             type: 'BOOKMARK_UPDATED',
             data: updatedPin
           })
         } catch (error) {
-          debugError('[TOGGLE-SYNC-POPUP-001] Failed to notify overlay:', error)
+          debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to notify overlay:', error)
           // Don't fail the entire operation if overlay notification fails
         }
       } else {
@@ -1543,7 +1543,7 @@ export class PopupController {
 
   /**
    * Handle add tag action
-   * [IMMUTABLE-REQ-TAG-003] - Enhanced with user-driven recent tags tracking
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Enhanced with user-driven recent tags tracking
    */
   async handleAddTag (tagText) {
     recordAction(POPUP_ACTION_IDS.addTag, { tag: tagText }, 'popup')
@@ -1556,10 +1556,10 @@ export class PopupController {
     try {
       this.setLoading(true)
 
-      // [IMMUTABLE-REQ-TAG-001] - Sanitize and validate tags
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Sanitize and validate tags
       const newTags = tagText.trim().split(/\s+/).filter(tag => tag.length > 0)
 
-      // [IMMUTABLE-REQ-TAG-001] - Validate each tag
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate each tag
       for (const tag of newTags) {
         if (!this.isValidTag(tag)) {
           this.errorHandler.handleError(`Invalid tag: ${tag}`)
@@ -1584,11 +1584,11 @@ export class PopupController {
         const allTags = [...new Set([...currentTagsArray, ...newTags])]
         await this.addTagsToBookmark(allTags)
       } else {
-        // [IMMUTABLE-REQ-TAG-001] - Create new bookmark with tags
+        // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Create new bookmark with tags
         await this.createBookmark(newTags)
       }
 
-      // [IMMUTABLE-REQ-TAG-003] - Track newly added tags for current site only
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Track newly added tags for current site only
       for (const tag of newTags) {
         try {
           await this.sendMessage({
@@ -1599,20 +1599,20 @@ export class PopupController {
             }
           })
         } catch (error) {
-          debugError('[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Failed to track tag addition:', error)
+          debugError('[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to track tag addition:', error)
           // Don't fail the entire operation if tag tracking fails
         }
       }
 
-      // [IMMUTABLE-REQ-TAG-001] - Clear the input
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Clear the input
       this.uiManager.clearTagInput()
 
-      // [IMMUTABLE-REQ-TAG-003] - Refresh recent tags after adding a tag
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Refresh recent tags after adding a tag
       await this.loadRecentTags()
     } catch (error) {
       this.errorHandler.handleError('Failed to add tags', error)
 
-      // [IMMUTABLE-REQ-TAG-001] - Even on failure, update UI with current tags and recent tags
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Even on failure, update UI with current tags and recent tags
       if (this.currentPin) {
         const currentTagsArray = this.normalizeTags(this.currentPin.tags)
         this.uiManager.updateCurrentTags(currentTagsArray)
@@ -1661,10 +1661,10 @@ export class PopupController {
 
   /**
    * Add tags to bookmark
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking and validation
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced with tag tracking and validation
    */
   async addTagsToBookmark (tags) {
-    // [IMMUTABLE-REQ-TAG-001] - Validate all tags before saving
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate all tags before saving
     for (const tag of tags) {
       if (!this.isValidTag(tag)) {
         this.errorHandler.handleError(`Invalid tag: ${tag}`)
@@ -1687,38 +1687,38 @@ export class PopupController {
       data: pinData
     })
 
-    // [IMMUTABLE-REQ-TAG-001] - Update current pin with new tags
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Update current pin with new tags
     this.currentPin.tags = tagsString
     this.stateManager.setState({ currentPin: this.currentPin })
     this.uiManager.updateCurrentTags(tags)
     this.uiManager.showSuccess('Tags updated successfully')
 
-    // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after updating bookmark
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Refresh recent tags after updating bookmark
     await this.loadRecentTags()
     await this.refreshTagFrequencyMapForSort()
     this.uiManager.redrawTagChipsFromCache()
 
-    // [TAG-SYNC-POPUP-001] - Notify overlay of tag changes
+    // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Notify overlay of tag changes
     await this.notifyOverlayOfTagChanges(tags)
 
-    // [TAG-SYNC-POPUP-001] - Also send BOOKMARK_UPDATED to ensure overlay updates tags
+    // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Also send BOOKMARK_UPDATED to ensure overlay updates tags
     try {
       await this.sendToTab({
         type: 'BOOKMARK_UPDATED',
         data: pinData
       })
     } catch (error) {
-      debugError('[TAG-SYNC-POPUP-001] Failed to notify overlay of BOOKMARK_UPDATED after tag change:', error)
+      debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to notify overlay of BOOKMARK_UPDATED after tag change:', error)
     }
   }
 
   /**
-   * [TAG-SYNC-POPUP-001] - Notify overlay of tag changes
+   * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Notify overlay of tag changes
    * @param {string[]} tags - Array of updated tags
    */
   async notifyOverlayOfTagChanges (tags) {
     try {
-      // [TAG-SYNC-POPUP-001] Send TAG_UPDATED message to overlay/content script
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Send TAG_UPDATED message to overlay/content script
       const updatedBookmark = {
         url: this.currentTab?.url,
         description: this.currentTab?.title,
@@ -1729,17 +1729,17 @@ export class PopupController {
         data: updatedBookmark
       })
     } catch (error) {
-      debugError('[TAG-SYNC-POPUP-001] Failed to notify overlay of TAG_UPDATED:', error)
+      debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to notify overlay of TAG_UPDATED:', error)
       // Don't fail the entire operation if overlay notification fails
     }
   }
 
   /**
    * Create new bookmark
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking and validation
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced with tag tracking and validation
    */
   async createBookmark (tags, sharedStatus = 'yes', toreadStatus = 'no') {
-    // [IMMUTABLE-REQ-TAG-001] - Validate all tags before creating bookmark
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate all tags before creating bookmark
     for (const tag of tags) {
       if (!this.isValidTag(tag)) {
         this.errorHandler.handleError(`Invalid tag: ${tag}`)
@@ -1766,13 +1766,13 @@ export class PopupController {
       data: pinData
     })
 
-    // [IMMUTABLE-REQ-TAG-001] - Update current pin with new bookmark data
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Update current pin with new bookmark data
     this.currentPin = pinData
     this.stateManager.setState({ currentPin: this.currentPin })
     this.uiManager.updateCurrentTags(tags)
     this.uiManager.showSuccess('Bookmark created successfully')
 
-    // [IMMUTABLE-REQ-TAG-001] - Refresh recent tags after creating bookmark
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Refresh recent tags after creating bookmark
     await this.loadRecentTags()
     await this.refreshTagFrequencyMapForSort()
     this.uiManager.redrawTagChipsFromCache()
@@ -1854,7 +1854,7 @@ export class PopupController {
   }
 
   /**
-   * [POPUP-CLOSE-BEHAVIOR-FIX-001] Handle delete bookmark action
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Handle delete bookmark action
    * Modified to NOT close popup after deletion - popup stays open for continued interaction
    */
   async handleDeletePin () {
@@ -1890,7 +1890,7 @@ export class PopupController {
       // Refresh hover data
       await this.sendToTab({ message: 'refreshData' })
 
-      // [POPUP-CLOSE-BEHAVIOR-FIX-001] Popup stays open - user can continue working
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Popup stays open - user can continue working
     } catch (error) {
       this.errorHandler.handleError('Failed to delete bookmark', error)
     } finally {
@@ -1899,7 +1899,7 @@ export class PopupController {
   }
 
   /**
-   * [POPUP-CLOSE-BEHAVIOR-FIX-001] Handle reload extension action
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Handle reload extension action
    * Modified to NOT close popup after reload - popup stays open for continued interaction
    */
   async handleReloadExtension () {
@@ -1911,14 +1911,14 @@ export class PopupController {
         await chrome.tabs.reload(this.currentTab.id)
       }
       this.uiManager.showSuccess('Extension reloaded successfully')
-      // [POPUP-CLOSE-BEHAVIOR-FIX-001] Popup stays open - user can continue working
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Popup stays open - user can continue working
     } catch (error) {
       this.errorHandler.handleError('Failed to reload extension', error)
     }
   }
 
   /**
-   * [POPUP-CLOSE-BEHAVIOR-FIX-001] Handle open options action
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Handle open options action
    * Modified to NOT close popup after opening options - popup stays open for continued interaction
    */
   async handleOpenOptions () {
@@ -1927,7 +1927,7 @@ export class PopupController {
     try {
       chrome.runtime.openOptionsPage()
       this.uiManager.showSuccess('Options page opened in new tab')
-      // [POPUP-CLOSE-BEHAVIOR-FIX-001] Popup stays open - user can continue working
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Popup stays open - user can continue working
     } catch (error) {
       this.errorHandler.handleError('Failed to open options', error)
     }
@@ -2139,7 +2139,7 @@ export class PopupController {
   }
 
   /**
-   * [POPUP-CLOSE-BEHAVIOR-005] Update popup UI to reflect overlay state
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Update popup UI to reflect overlay state
    */
   async updateOverlayState () {
     if (!this.currentTab || !this.canInjectIntoTab(this.currentTab)) {
@@ -2152,16 +2152,16 @@ export class PopupController {
         type: 'GET_OVERLAY_STATE'
       })
 
-      // [POPUP-CLOSE-BEHAVIOR-005] Handle response data structure
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Handle response data structure
       const stateData = overlayState.data || overlayState
 
       // Update button appearance based on overlay visibility
       this.uiManager.updateShowHoverButtonState(stateData.isVisible)
 
-      debugLog('[POPUP-CLOSE-BEHAVIOR-005] Updated overlay state:', stateData)
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Updated overlay state:', stateData)
     } catch (error) {
-      debugError('[POPUP-CLOSE-BEHAVIOR-005] Failed to update overlay state:', error)
-      // [POPUP-CLOSE-BEHAVIOR-ARCH-005] Graceful degradation - fallback to default state
+      debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Failed to update overlay state:', error)
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Graceful degradation - fallback to default state
       this.uiManager.updateShowHoverButtonState(false)
     }
   }
@@ -2224,23 +2224,23 @@ export class PopupController {
   }
 
   /**
-   * [POPUP-REFRESH-001] Manual refresh capability
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Manual refresh capability
    */
   async refreshPopupData () {
     recordAction(POPUP_ACTION_IDS.refreshData, undefined, 'popup')
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.refreshData, payload: undefined })
-    debugLog('[POPUP-REFRESH-001] Starting manual refresh')
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Starting manual refresh')
     try {
       this.setLoading(true)
       await this.loadInitialData()
 
-      // [POPUP-CLOSE-BEHAVIOR-ARCH-007] Update overlay state after refresh
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Update overlay state after refresh
       await this.updateOverlayState()
 
       this.uiManager.showSuccess('Data refreshed successfully')
-      debugLog('[POPUP-REFRESH-001] Manual refresh completed successfully')
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Manual refresh completed successfully')
     } catch (error) {
-      debugError('[POPUP-REFRESH-001] Refresh failed:', error)
+      debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Refresh failed:', error)
       this.uiManager.showError('Failed to refresh data')
     } finally {
       this.setLoading(false)
@@ -2248,13 +2248,13 @@ export class PopupController {
   }
 
   /**
-   * [POPUP-REFRESH-001] Setup auto-refresh on focus
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Setup auto-refresh on focus
    * [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [REQ-RECENT_TAGS_SYSTEM] Refresh Recent Tags when popup becomes visible (visibilitychange).
    */
   setupAutoRefresh () {
     window.addEventListener('focus', () => {
       if (this.isInitialized && !this.isLoading) {
-        debugLog('[POPUP-REFRESH-001] Auto-refresh on focus triggered')
+        debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Auto-refresh on focus triggered')
         this.refreshPopupData()
       }
     })
@@ -2269,19 +2269,19 @@ export class PopupController {
   }
 
   /**
-   * [POPUP-REFRESH-001] Enhanced real-time update handling
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Enhanced real-time update handling
    */
   setupRealTimeUpdates () {
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
       chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         if (message.type === 'BOOKMARK_UPDATED') {
-          debugLog('[POPUP-REFRESH-001] Received BOOKMARK_UPDATED, refreshing data')
+          debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data')
           try {
             await this.refreshPopupData()
-            // [POPUP-CLOSE-BEHAVIOR-ARCH-008] Update overlay state after bookmark changes
+            // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Update overlay state after bookmark changes
             await this.updateOverlayState()
           } catch (error) {
-            debugError('[POPUP-REFRESH-001] Failed to refresh on update:', error)
+            debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Failed to refresh on update:', error)
           }
         }
       })
@@ -2289,7 +2289,7 @@ export class PopupController {
   }
 
   /**
-   * [POPUP-SYNC-001] Ensure popup and badge show same data
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Ensure popup and badge show same data
    */
   async validateBadgeSynchronization () {
     try {
@@ -2300,7 +2300,7 @@ export class PopupController {
         data: { url: currentTab.url }
       })
 
-      debugLog('[POPUP-SYNC-001] Badge synchronization check:', {
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Badge synchronization check:', {
         popupTags: popupData?.tags,
         badgeTags: badgeData?.tags,
         popupTagCount: popupData?.tags?.length || 0,
@@ -2314,13 +2314,13 @@ export class PopupController {
         badgeData
       }
     } catch (error) {
-      debugError('[POPUP-SYNC-001] Badge synchronization check failed:', error)
+      debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Badge synchronization check failed:', error)
       return { synchronized: false, error: error.message }
     }
   }
 
   /**
-   * [POPUP-SYNC-001] Ensure popup and overlay show same data
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Ensure popup and overlay show same data
    */
   async validateOverlaySynchronization () {
     try {
@@ -2329,7 +2329,7 @@ export class PopupController {
         data: { url: this.currentTab.url }
       })
 
-      debugLog('[POPUP-SYNC-001] Overlay synchronization check:', {
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Overlay synchronization check:', {
         popupData: this.currentPin,
         overlayData,
         popupTagCount: this.currentPin?.tags?.length || 0,
@@ -2343,13 +2343,13 @@ export class PopupController {
         overlayData
       }
     } catch (error) {
-      debugError('[POPUP-SYNC-001] Overlay synchronization check failed:', error)
+      debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Overlay synchronization check failed:', error)
       return { synchronized: false, error: error.message }
     }
   }
 
   /**
-   * [SHOW-HOVER-CHECKBOX-CONTROLLER-003] - Handle checkbox state change
+   * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Handle checkbox state change
    */
   async handleShowHoverOnPageLoadChange () {
     recordAction(POPUP_ACTION_IDS.showHoverOnPageLoadChange, undefined, 'popup')
@@ -2375,7 +2375,7 @@ export class PopupController {
   }
 
   /**
-   * [SHOW-HOVER-CHECKBOX-CONTROLLER-004] - Load checkbox state from configuration
+   * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Load checkbox state from configuration
    */
   async loadShowHoverOnPageLoadSetting () {
     try {
@@ -2387,7 +2387,7 @@ export class PopupController {
   }
 
   /**
-   * [SHOW-HOVER-CHECKBOX-CONTROLLER-005] - Broadcast configuration updates to content scripts
+   * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Broadcast configuration updates to content scripts
    */
   async broadcastConfigUpdate () {
     try {

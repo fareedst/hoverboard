@@ -1,7 +1,7 @@
-# IMMUTABLE-REQ-TAG-002: Task Tracking
+# [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002): Task Tracking
 
 ## Overview
-This document tracks the implementation tasks for the tab search feature (IMMUTABLE-REQ-TAG-002).
+This document tracks the implementation tasks for the tab search feature ([IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)).
 
 ## Task Status Legend
 - 🔴 **Not Started**: Task not yet begun

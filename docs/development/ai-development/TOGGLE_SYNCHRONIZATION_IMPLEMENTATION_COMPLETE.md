@@ -3,7 +3,7 @@
 **Date**: 2025-07-14  
 **Status**: ✅ Implementation Complete  
 **Version**: 1.0  
-**Semantic Token**: `[TOGGLE-SYNC-001]`
+**Semantic Token**: `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 ## 🎯 Implementation Summary
 
@@ -16,7 +16,7 @@ The toggle button synchronization feature has been successfully implemented. The
 
 ## 🏗️ Implementation Details
 
-### Phase 1: Overlay Manager Fixes `[TOGGLE-SYNC-OVERLAY-001]`
+### Phase 1: Overlay Manager Fixes `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-OVERLAY-001)]`
 
 **File**: `src/features/content/overlay-manager.js`
 
@@ -34,7 +34,7 @@ The toggle button synchronization feature has been successfully implemented. The
 - **Added**: Success/error message display
 - **Added**: Comprehensive error handling
 
-### Phase 2: Message Handler Integration `[TOGGLE-SYNC-MESSAGE-001]`
+### Phase 2: Message Handler Integration `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-MESSAGE-001)]`
 
 **File**: `src/core/message-handler.js`
 
@@ -43,7 +43,7 @@ The toggle button synchronization feature has been successfully implemented. The
 - **Lines 150-155**: Added case handler for `BOOKMARK_UPDATED` message type
 - **Lines 520-535**: Added `handleBookmarkUpdated` method with broadcast functionality
 
-### Phase 3: Content Script Integration `[TOGGLE-SYNC-CONTENT-001]`
+### Phase 3: Content Script Integration `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-CONTENT-001)]`
 
 **File**: `src/features/content/content-main.js`
 
@@ -51,7 +51,7 @@ The toggle button synchronization feature has been successfully implemented. The
 - **Lines 170-180**: Added case handler for `BOOKMARK_UPDATED` message type
 - **Lines 600-620**: Added `handleBookmarkUpdated` method for overlay refresh
 
-### Phase 4: Popup Controller Integration `[TOGGLE-SYNC-POPUP-001]`
+### Phase 4: Popup Controller Integration `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-POPUP-001)]`
 
 **File**: `src/ui/popup/PopupController.js`
 
@@ -118,11 +118,11 @@ Time:        0.853 s
 ## 🔍 Code Quality
 
 ### Semantic Tokens
-- `[TOGGLE-SYNC-OVERLAY-001]`: Overlay manager fixes
-- `[TOGGLE-SYNC-MESSAGE-001]`: Message handler integration
-- `[TOGGLE-SYNC-CONTENT-001]`: Content script integration
-- `[TOGGLE-SYNC-POPUP-001]`: Popup controller integration
-- `[TOGGLE-SYNC-TEST-001]`: Test implementation
+- `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-OVERLAY-001)]`: Overlay manager fixes
+- `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-MESSAGE-001)]`: Message handler integration
+- `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-CONTENT-001)]`: Content script integration
+- `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-POPUP-001)]`: Popup controller integration
+- `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-TEST-001)]`: Test implementation
 
 ### Code Standards
 - **ES6+ async/await**: Modern JavaScript patterns

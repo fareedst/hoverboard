@@ -1,5 +1,3 @@
-# [IMPL-CONTEXT_MENU_QUICK_ACCESS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
-# Implementation: Context menu parent "Hoverboard" and four child items; onClicked performs same four actions as extension commands.
 IMPL-CONTEXT_MENU_QUICK_ACCESS:
   code_locations:
     files:
@@ -9,7 +7,7 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
   cross_references:
     - "ARCH-QUICK_ACCESS_ENTRY"
     - "REQ-QUICK_ACCESS_ENTRY"
-  essence_pseudocode: "# [IMPL-CONTEXT_MENU_QUICK_ACCESS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]\n# This block defines context menu for quick access. Implements REQ \"context menu\" with same four actions as commands; implements ARCH by having SW own context menu.\nINPUT: user right-clicks (any context); user selects one of four Hoverboard menu items\nOUTPUT: same as extension commands (side panel, options, bookmarks index, or import opens)\n\n# [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_QUICK_ACCESS]\n# setupContextMenus: creates parent and four children so REQ \"context menu with parent Hoverboard and four items\" is satisfied. Call on install (handleInstall) so menus appear after install.\nsetupContextMenus():\n  api = browser.contextMenus || chrome.contextMenus\n  IF !api THEN RETURN\n  api.removeAll(() => {  // idempotent: clear then create so update does not duplicate\n    api.create({ id: 'hoverboard-root', title: 'Hoverboard', contexts: ['all'] })\n    api.create({ id: 'hoverboard-open-side-panel', parentId: 'hoverboard-root', title: 'Open side panel', contexts: ['all'] })\n    api.create({ id: 'hoverboard-open-options', parentId: 'hoverboard-root', title: 'Open options', contexts: ['all'] })\n    api.create({ id: 'hoverboard-open-bookmarks-index', parentId: 'hoverboard-root', title: 'Open bookmarks index', contexts: ['all'] })\n    api.create({ id: 'hoverboard-open-import', parentId: 'hoverboard-root', title: 'Open browser bookmark import', contexts: ['all'] })\n  })\n\n# [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_QUICK_ACCESS]\n# onClicked: implements same four actions as command handler so REQ and ARCH are satisfied (single behavior, multiple entry points).\napi.onClicked.addListener((info, tab) => {\n  SWITCH info.menuItemId:\n    \"hoverboard-open-side-panel\": same as open-side-panel command (chrome.sidePanel.open({ windowId: this._sidePanelWindowId }))\n    \"hoverboard-open-options\": chrome.runtime.openOptionsPage()\n    \"hoverboard-open-bookmarks-index\": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html') })\n    \"hoverboard-open-import\": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html') })\n})\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS-pseudocode.md"
   implementation_approach:
     details:
       - "contextMenus.create({ id: 'hoverboard-open-side-panel', parentId: 'hoverboard-root', title: 'Open side panel', contexts: ['all'] }); same for open-options, open-bookmarks-index, open-import with appropriate titles"
@@ -22,8 +20,8 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-26"
-      reason: "Initial creation for context menu quick access"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Context Menu Quick Access"
   rationale:
     benefits:

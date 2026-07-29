@@ -13,7 +13,7 @@ IMPL-UI_TESTABILITY_HOOKS:
     - "REQ-MODULE_VALIDATION"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-UI_TESTABILITY_HOOKS.yaml"
-  essence_pseudocode: "# [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION]\n# setOnMessageProcessed, setOnAction, setOnStateChange so tests assert without DOM.\n# Contract: callbacks set by tests; message/action/state trigger callbacks.\nINPUT: optional callback fn (set by tests); message (processMessage); popup/overlay action or state change\nOUTPUT: test can assert on message payload, action id, state without DOM\nDATA: MessageHandler._onMessageProcessed; PopupController._onAction, _onStateChange; OverlayManager._onStateChange\n\n# After processMessage invoke callback with msg/result.\nMessageHandler: AFTER processMessage(msg): IF _onMessageProcessed: CALL with msg/result\n# On action/state change invoke callbacks.\nPopupController: ON action: IF _onAction: CALL with actionId; ON state change: IF _onStateChange: CALL with state\nOverlayManager: ON visibility/content change: IF _onStateChange: CALL with { visible, contentSnapshot }\n\n# Set callbacks, trigger, assert args.\nTests: SET callbacks; TRIGGER message/action; ASSERT callback invoked with expected args\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-UI_TESTABILITY_HOOKS-pseudocode.md"
   implementation_approach:
     summary: "Optional _onMessageProcessed in MessageHandler (called after processMessage); _onAction/_onStateChange in PopupController; _onStateChange in OverlayManager (visible, contentSnapshot)"
   metadata:
@@ -22,8 +22,8 @@ IMPL-UI_TESTABILITY_HOOKS:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "UI Testability Hooks"
   rationale:
     benefits:

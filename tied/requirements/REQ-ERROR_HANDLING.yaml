@@ -1,0 +1,30 @@
+REQ-ERROR_HANDLING:
+  category: "Non-Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-ERROR_HANDLING)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Error Handling"
+  priority: "P2"
+  rationale:
+    why: "Consistent error handling"
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "REQ-ERROR_HANDLING documented in TIED"
+  status: "Active"
+  traceability:
+    architecture: []
+    code_annotations:
+      - "REQ-ERROR_HANDLING"
+    implementation: []
+    tests: []
+  validation_criteria:
+    - method: "TIED consistency validation"

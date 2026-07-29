@@ -1,0 +1,48 @@
+ARCH-SERVICE_WORKER:
+  alternatives_considered:
+    - name: "Background scripts"
+      cons:
+        - "V3 doesn't support"
+      pros: []
+      rejected_reason: "Not V3 compatible"
+  cross_references:
+    - "REQ-MANIFEST_V3_MIGRATION"
+  decision: "Thin architecture stub for ARCH-SERVICE_WORKER."
+  implementation_approach:
+    details:
+      - "Extension context integration"
+      - "Install/activate/update events"
+      - "Message routing"
+    summary: "Service worker with lifecycle management, message routing, async patterns"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Service Worker Architecture"
+  rationale:
+    benefits:
+      - "Better performance"
+      - "Modern architecture"
+    problems_solved:
+      - "Background script deprecation"
+      - "V3 compliance"
+    why: "V3 requirement, modern async patterns"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-SERVICE_WORKER"
+    see_also:
+      - "ARCH-MV3_MIGRATION"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-SERVICE_WORKER"
+    implementation:
+      - "IMPL-SERVICE_WORKER"
+    requirements:
+      - "REQ-MANIFEST_V3_MIGRATION"
+    tests: []

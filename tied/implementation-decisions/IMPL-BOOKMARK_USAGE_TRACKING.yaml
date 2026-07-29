@@ -19,7 +19,7 @@ IMPL-BOOKMARK_USAGE_TRACKING:
     - "ARCH-BOOKMARK_USAGE_TRACKING"
     - "REQ-BOOKMARK_USAGE_TRACKING"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING.yaml"
-  essence_pseudocode: "# [IMPL-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [REQ-BOOKMARK_USAGE_TRACKING]\n# Record visit and optional referrer; debounce; persist usage + nav edges in chrome.storage.local.\n\ncleanUrl(url): trim, strip trailing slash (match bookmark-router)\n\nrecordVisit(url, referrer?):\n  url = cleanUrl(url); if !url return\n  IF now - _lastRecordedVisit[url] < DEBOUNCE_MS return  // debounce\n  _lastRecordedVisit[url] = now\n  usage = read usage[url] or create { visitCount:0, firstVisitedAt:'', lastVisitedAt:'', recentVisits:[] }\n  usage.visitCount++; usage.lastVisitedAt = now; if !usage.firstVisitedAt then usage.firstVisitedAt = now\n  usage.recentVisits = [now, ...usage.recentVisits].slice(0, RECENT_VISITS_CAP)\n  write usage map\n  IF referrer: ref = cleanUrl(referrer); IF ref && ref !== url && /^https?:/.test(ref): add/increment edge ref→url; write edges map\n\ngetUsage(url), getAllUsage(): read from storage; return normalized records\ngetMostFrequent(n), getMostRecent(n): sort by visitCount / lastVisitedAt; return top n\ngetInboundLinks(url): edges[url] or []\ngetOutboundLinks(url): all edges where sourceUrl === url (scan edges map)\ngetNavigationGraph(): all edges as { sourceUrl, targetUrl, count, ... }\nclearUsage(url): delete usage[url]; delete edges[url]; remove url from any edge as sourceUrl\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING-pseudocode.md"
   implementation_approach:
     details:
       - "DEBOUNCE_MS = 60000"
@@ -34,8 +34,8 @@ IMPL-BOOKMARK_USAGE_TRACKING:
       date: "2026-03-03"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-03"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-03-03"
       result: "pass"

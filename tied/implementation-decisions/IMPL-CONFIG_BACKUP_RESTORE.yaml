@@ -8,7 +8,7 @@ IMPL-CONFIG_BACKUP_RESTORE:
     - "ARCH-CONFIG_STRUCTURE"
     - "REQ-CONFIG_PORTABILITY"
   detail_file: "implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml"
-  essence_pseudocode: "# [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY]\n# exportConfig/importConfig: gather settings, auth, inhibit URLs for backup and portability.\n\n# Contract: export has no input, returns config object; import takes blob, writes to storage or errors.\nINPUT: none (export); serialized config blob (import)\nOUTPUT: config object (export); void or error (import)\nDATA: settings, auth, inhibit URLs (from storage / to storage)\n\n# Parallel get settings, auth, inhibitUrlList; build serializable config object.\nexportConfig():\n  PARALLEL_GET settings, auth, inhibitUrlList from storage (or config manager)\n  BUILD config object = { settings, auth, inhibitUrls: inhibitUrlList }\n  RETURN config object (serializable)\n\n# Parse and validate blob; write settings, auth, inhibit URLs to storage; handle conflicts per product rule.\nimportConfig(configBlob):\n  PARSE configBlob\n  VALIDATE structure\n  WRITE settings to storage\n  WRITE auth to storage\n  WRITE inhibit URLs to storage (if present)\n  HANDLE conflicts or overwrite per product rule\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE-pseudocode.md"
   implementation_approach:
     details: []
     summary: "ConfigManager.exportConfig() and importConfig(); parallel get of settings and auth for export"
@@ -18,8 +18,8 @@ IMPL-CONFIG_BACKUP_RESTORE:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Config Backup and Restore"
   rationale:
     benefits: []

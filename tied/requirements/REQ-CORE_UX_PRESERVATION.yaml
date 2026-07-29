@@ -1,0 +1,50 @@
+REQ-CORE_UX_PRESERVATION:
+  category: "Immutable"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-CORE_UX_PRESERVATION)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Core User Experience Preservation"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Maintained feature expectations"
+      - "Preserved user workflows"
+    problems_solved:
+      - "Loss of core functionality"
+      - "Risk of breaking user workflows"
+    why: "These features define the essential user experience"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-OVERLAY_SYSTEM"
+      - "REQ-RECENT_TAGS_SYSTEM"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Hover interface activates on webpage hover"
+    - criterion: "Overlay is semi-transparent and non-intrusive"
+    - criterion: "Private bookmark toggle available"
+    - criterion: "Quick bookmark actions available without page navigation"
+    - criterion: "Recent tags system functional"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-UX_CORE"
+    code_annotations:
+      - "REQ-CORE_UX_PRESERVATION"
+    implementation:
+      - "IMPL-UX_CORE"
+    tests:
+      - "UX workflow tests"
+  validation_criteria:
+    - method: "User acceptance testing"
+      coverage: "All core UX workflows"
+    - method: "Workflow validation"
+      coverage: "Critical user paths"
+    - method: "Feature parity testing"
+      coverage: "All essential features"

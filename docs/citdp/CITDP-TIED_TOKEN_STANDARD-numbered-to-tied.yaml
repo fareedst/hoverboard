@@ -1,0 +1,61 @@
+# [PROC-CITDP] [PROC-TOKEN_AUDIT] [PROC-TOKEN_VALIDATION] TIED semantic-token standard close-loop
+# Client: hoverboard. Persisted under docs/citdp per project convention.
+record_identity:
+  change_request_id: TIED_TOKEN_STANDARD-numbered-to-tied
+  title: "TIED 2.2.0 semantic-token standard — numbered→TIED close-loop"
+  procedure_token: PROC-AGENT_REQ_CHECKLIST
+  procedure_version: v1.0.1
+  session_completed_date: "2026-07-28"
+  s15_persisted_date: "2026-07-28"
+  citdp_record_path: docs/citdp/CITDP-TIED_TOKEN_STANDARD-numbered-to-tied.yaml
+  primary_tokens:
+    - PROC-TOKEN_AUDIT
+    - PROC-TOKEN_VALIDATION
+    - REQ-TIED_SETUP
+  risk_scope_tokens:
+    - REQ-CODE_QUALITY
+    - ARCH-CODE_QUALITY
+    - IMPL-CODE_STYLE
+    - REQ-CROSS_BROWSER
+    - REQ-SAFARI_ADAPTATION
+  repository_path_note: /Users/fareed/Documents/dev/browser/hoverboard
+change_definition:
+  summary: >-
+    Close the 2026-02-17 prompt and TIED 2.2.0 debt: expand numbered-token
+    mapping (family collapse onto existing REQ/ARCH/IMPL), complete
+    semantic-tokens registry, re-link/create detail files, migrate IMPL
+    essence_pseudocode to sidecars, replace legacy numbered IDs in src/tests/docs
+    (leave SAFARI-* unmodified), bump project guide versions to 2.2.0.
+  scope_in:
+    - tied/docs/numbered-token-mapping.md
+    - tied/semantic-tokens.yaml
+    - tied/semantic-tokens.md
+    - tied/requirements.yaml
+    - tied/architecture-decisions.yaml
+    - tied/implementation-decisions.yaml
+    - tied/requirements/*.yaml
+    - tied/architecture-decisions/*.yaml
+    - tied/implementation-decisions/*.yaml
+    - tied/implementation-decisions/*-pseudocode.md
+    - tied/migrate-*.md
+    - src/**
+    - tests/**
+    - docs/**
+    - CONTRIBUTING.md
+    - CHANGELOG.md
+    - docs/citdp/CITDP-TIED_TOKEN_STANDARD-numbered-to-tied.yaml
+  scope_out:
+    - SAFARI-* numbered token strings (left unmodified)
+    - tied/methodology/** (read-only)
+    - Renaming safari-shim.js
+gates:
+  tied_validate_consistency: required
+  validate_tokens_sh: required
+  unit_smoke: browser-api-shim-platform|popup-checkbox|overlay-refresh-button|tag-sanitization
+outcomes:
+  mapping: family collapse rules in numbered-token-mapping.md
+  registry: all REQ/ARCH/IMPL index tokens registered in semantic-tokens.yaml
+  details: orphan detail_file links restored; missing details created
+  sidecars: project IMPL essence on IMPL-*-pseudocode.md (methodology-owned IMPLs unchanged)
+  code_tests_docs: legacy numbered IDs replaced; SAFARI-* preserved
+  superseded: docs/development/feature-tracking-matrix.md AI-002 marked superseded by TIED 2.2.0

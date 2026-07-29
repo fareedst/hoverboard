@@ -1,7 +1,7 @@
 # OVERLAY REFRESH TEST PLAN
 
-**Semantic Token:** [OVERLAY-REFRESH-001]
-**Cross-References:** [OVERLAY-DATA-DISPLAY-001], [OVERLAY-THEMING-001], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
+**Semantic Token:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]
+**Cross-References:** [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
 **Date:** 2025-01-27
 **Status:** Test Planning
 
@@ -56,8 +56,8 @@ This document outlines the comprehensive testing strategy for the overlay refres
 
 #### Test Suite Structure
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Overlay refresh button unit tests
-describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Overlay refresh button unit tests
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)] Overlay Refresh Button', () => {
   let overlayManager
   let mockMessageService
   let mockDocument
@@ -81,9 +81,9 @@ describe('[OVERLAY-REFRESH-001] Overlay Refresh Button', () => {
 
 ##### Button Rendering Tests
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Button rendering tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Button rendering tests
 describe('Button Rendering', () => {
-  test('[OVERLAY-REFRESH-UI-001] Should render refresh button correctly', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Should render refresh button correctly', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -100,7 +100,7 @@ describe('Button Rendering', () => {
     expect(refreshButton.getAttribute('tabindex')).toBe('0')
   })
 
-  test('[OVERLAY-REFRESH-UI-001] Should position refresh button in top-left corner', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Should position refresh button in top-left corner', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -115,7 +115,7 @@ describe('Button Rendering', () => {
     expect(computedStyle.left).toBe('8px')
   })
 
-  test('[OVERLAY-REFRESH-UI-001] Should apply correct CSS classes', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Should apply correct CSS classes', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -131,9 +131,9 @@ describe('Button Rendering', () => {
 
 ##### Click Handler Tests
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Click handler tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Click handler tests
 describe('Click Handler', () => {
-  test('[OVERLAY-REFRESH-HANDLER-001] Should handle successful refresh', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)] Should handle successful refresh', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     const updatedContent = createMockUpdatedBookmarkContent()
@@ -155,7 +155,7 @@ describe('Click Handler', () => {
     expect(overlayManager.show).toHaveBeenCalledWith(updatedContent)
   })
 
-  test('[OVERLAY-REFRESH-HANDLER-001] Should show loading message during refresh', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)] Should show loading message during refresh', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     mockMessageService.sendMessage.mockResolvedValue({
@@ -172,7 +172,7 @@ describe('Click Handler', () => {
     expect(overlayManager.showMessage).toHaveBeenCalledWith('Refreshing data...', 'info')
   })
 
-  test('[OVERLAY-REFRESH-HANDLER-001] Should show success message after refresh', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)] Should show success message after refresh', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     mockMessageService.sendMessage.mockResolvedValue({
@@ -193,9 +193,9 @@ describe('Click Handler', () => {
 
 ##### Error Handling Tests
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Error handling tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Error handling tests
 describe('Error Handling', () => {
-  test('[OVERLAY-REFRESH-ERROR-001] Should handle network errors gracefully', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)] Should handle network errors gracefully', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     mockMessageService.sendMessage.mockRejectedValue(new Error('Network error'))
@@ -209,7 +209,7 @@ describe('Error Handling', () => {
     expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
   })
 
-  test('[OVERLAY-REFRESH-ERROR-001] Should handle invalid response data', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)] Should handle invalid response data', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     mockMessageService.sendMessage.mockResolvedValue({
@@ -226,7 +226,7 @@ describe('Error Handling', () => {
     expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
   })
 
-  test('[OVERLAY-REFRESH-ERROR-001] Should handle missing response data', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)] Should handle missing response data', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     mockMessageService.sendMessage.mockResolvedValue(null)
@@ -250,8 +250,8 @@ describe('Error Handling', () => {
 
 #### Test Suite Structure
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Overlay refresh integration tests
-describe('[OVERLAY-REFRESH-001] Integration Tests', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Overlay refresh integration tests
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)] Integration Tests', () => {
   let overlayManager
   let messageService
   let mockBackgroundScript
@@ -277,9 +277,9 @@ describe('[OVERLAY-REFRESH-001] Integration Tests', () => {
 
 ##### Message Service Integration
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Message service integration tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Message service integration tests
 describe('Message Service Integration', () => {
-  test('[OVERLAY-REFRESH-INTEGRATION-001] Should communicate with background script', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Should communicate with background script', async () => {
     // Arrange
     const mockBookmarkData = createMockBookmarkData()
     mockBackgroundScript.handleMessage.mockResolvedValue({
@@ -302,7 +302,7 @@ describe('Message Service Integration', () => {
     })
   })
 
-  test('[OVERLAY-REFRESH-INTEGRATION-001] Should handle background script errors', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Should handle background script errors', async () => {
     // Arrange
     mockBackgroundScript.handleMessage.mockRejectedValue(new Error('Background script error'))
     
@@ -317,9 +317,9 @@ describe('Message Service Integration', () => {
 
 ##### Data Flow Integration
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Data flow integration tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Data flow integration tests
 describe('Data Flow Integration', () => {
-  test('[OVERLAY-REFRESH-INTEGRATION-001] Should update overlay with fresh data', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Should update overlay with fresh data', async () => {
     // Arrange
     const originalContent = createMockBookmarkContent()
     const updatedBookmarkData = createMockUpdatedBookmarkData()
@@ -341,7 +341,7 @@ describe('Data Flow Integration', () => {
     })
   })
 
-  test('[OVERLAY-REFRESH-INTEGRATION-001] Should preserve existing content on refresh failure', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Should preserve existing content on refresh failure', async () => {
     // Arrange
     const originalContent = createMockBookmarkContent()
     mockBackgroundScript.handleMessage.mockRejectedValue(new Error('Network error'))
@@ -365,8 +365,8 @@ describe('Data Flow Integration', () => {
 
 #### Test Suite Structure
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Accessibility tests
-describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Accessibility tests
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)] Accessibility Tests', () => {
   let overlayManager
   let mockDocument
 
@@ -387,9 +387,9 @@ describe('[OVERLAY-REFRESH-001] Accessibility Tests', () => {
 
 ##### ARIA Attributes
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] ARIA attributes tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] ARIA attributes tests
 describe('ARIA Attributes', () => {
-  test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have correct ARIA attributes', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Should have correct ARIA attributes', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -403,7 +403,7 @@ describe('ARIA Attributes', () => {
     expect(refreshButton.getAttribute('tabindex')).toBe('0')
   })
 
-  test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have descriptive tooltip', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Should have descriptive tooltip', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -419,9 +419,9 @@ describe('ARIA Attributes', () => {
 
 ##### Keyboard Navigation
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Keyboard navigation tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Keyboard navigation tests
 describe('Keyboard Navigation', () => {
-  test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should handle Enter key press', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Should handle Enter key press', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     mockMessageService.sendMessage.mockResolvedValue({
@@ -439,7 +439,7 @@ describe('Keyboard Navigation', () => {
     expect(mockMessageService.sendMessage).toHaveBeenCalled()
   })
 
-  test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should handle Space key press', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Should handle Space key press', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     mockMessageService.sendMessage.mockResolvedValue({
@@ -457,7 +457,7 @@ describe('Keyboard Navigation', () => {
     expect(mockMessageService.sendMessage).toHaveBeenCalled()
   })
 
-  test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should prevent default on keyboard activation', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Should prevent default on keyboard activation', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -476,9 +476,9 @@ describe('Keyboard Navigation', () => {
 
 ##### Focus Management
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Focus management tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Focus management tests
 describe('Focus Management', () => {
-  test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should be focusable', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Should be focusable', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -490,7 +490,7 @@ describe('Focus Management', () => {
     expect(refreshButton.getAttribute('tabindex')).toBe('0')
   })
 
-  test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have visible focus indicator', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Should have visible focus indicator', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -513,8 +513,8 @@ describe('Focus Management', () => {
 
 #### Test Suite Structure
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Theme integration tests
-describe('[OVERLAY-REFRESH-001] Theme Integration Tests', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Theme integration tests
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)] Theme Integration Tests', () => {
   let overlayManager
   let mockDocument
 
@@ -535,9 +535,9 @@ describe('[OVERLAY-REFRESH-001] Theme Integration Tests', () => {
 
 ##### Theme-Aware Styling
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Theme-aware styling tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Theme-aware styling tests
 describe('Theme-Aware Styling', () => {
-  test('[OVERLAY-REFRESH-THEME-001] Should use theme CSS variables', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)] Should use theme CSS variables', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -552,7 +552,7 @@ describe('Theme-Aware Styling', () => {
     expect(computedStyle.borderColor).toBe('var(--theme-border)')
   })
 
-  test('[OVERLAY-REFRESH-THEME-001] Should have hover state styling', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)] Should have hover state styling', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -565,7 +565,7 @@ describe('Theme-Aware Styling', () => {
     expect(hoverStyle.backgroundColor).toBe('var(--theme-button-hover)')
   })
 
-  test('[OVERLAY-REFRESH-THEME-001] Should have focus state styling', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)] Should have focus state styling', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -582,9 +582,9 @@ describe('Theme-Aware Styling', () => {
 
 ##### Theme Transitions
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Theme transition tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Theme transition tests
 describe('Theme Transitions', () => {
-  test('[OVERLAY-REFRESH-THEME-001] Should have smooth transitions', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)] Should have smooth transitions', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -597,7 +597,7 @@ describe('Theme Transitions', () => {
     expect(computedStyle.transition).toBe('var(--theme-transition)')
   })
 
-  test('[OVERLAY-REFRESH-THEME-001] Should adapt to theme changes', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)] Should adapt to theme changes', () => {
     // Arrange
     const content = createMockBookmarkContent()
     
@@ -627,8 +627,8 @@ describe('Theme Transitions', () => {
 
 #### Test Suite Structure
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Performance tests
-describe('[OVERLAY-REFRESH-001] Performance Tests', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Performance tests
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)] Performance Tests', () => {
   let overlayManager
   let mockDocument
 
@@ -649,9 +649,9 @@ describe('[OVERLAY-REFRESH-001] Performance Tests', () => {
 
 ##### Refresh Operation Performance
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Performance tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Performance tests
 describe('Refresh Operation Performance', () => {
-  test('[OVERLAY-REFRESH-PERFORMANCE-001] Should complete refresh within acceptable time', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Should complete refresh within acceptable time', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     const startTime = performance.now()
@@ -667,7 +667,7 @@ describe('Refresh Operation Performance', () => {
     expect(duration).toBeLessThan(1000) // Should complete within 1 second
   })
 
-  test('[OVERLAY-REFRESH-PERFORMANCE-001] Should not cause memory leaks', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Should not cause memory leaks', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     const initialMemory = performance.memory?.usedJSHeapSize || 0
@@ -690,9 +690,9 @@ describe('Refresh Operation Performance', () => {
 
 ##### DOM Manipulation Performance
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] DOM performance tests
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] DOM performance tests
 describe('DOM Manipulation Performance', () => {
-  test('[OVERLAY-REFRESH-PERFORMANCE-001] Should minimize DOM queries', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Should minimize DOM queries', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     const querySelectorSpy = jest.spyOn(mockDocument, 'querySelector')
@@ -706,7 +706,7 @@ describe('DOM Manipulation Performance', () => {
     expect(querySelectorSpy).toHaveBeenCalledTimes(1) // Should only query once for the button
   })
 
-  test('[OVERLAY-REFRESH-PERFORMANCE-001] Should not create unnecessary elements', async () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Should not create unnecessary elements', async () => {
     // Arrange
     const content = createMockBookmarkContent()
     const createElementSpy = jest.spyOn(mockDocument, 'createElement')
@@ -915,4 +915,4 @@ const testUtils = {
 
 ---
 
-**[OVERLAY-REFRESH-001]** - Master semantic token for overlay refresh button functionality 
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]** - Master semantic token for overlay refresh button functionality 

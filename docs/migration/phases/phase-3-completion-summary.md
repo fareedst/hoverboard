@@ -7,7 +7,7 @@ This phase focused on migrating the extension's feature modules from legacy jQue
 
 ## 📋 Completed Migrations
 
-### ✅ MIGRATION-005: Content Script System (COMPLETED)
+### ✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-005): Content Script System (COMPLETED)
 
 **Duration**: 4-5 days as planned  
 **Status**: ✅ **FULLY IMPLEMENTED**
@@ -49,7 +49,7 @@ This phase focused on migrating the extension's feature modules from legacy jQue
 - **Performance**: Optimized DOM manipulation and event handling
 - **Accessibility**: ARIA labels, keyboard navigation, screen reader support
 
-### ✅ MIGRATION-006: User Interface Migration (COMPLETED)
+### ✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-006): User Interface Migration (COMPLETED)
 
 **Duration**: 3-4 days as planned  
 **Status**: ✅ **FULLY IMPLEMENTED**
@@ -194,8 +194,8 @@ BEFORE (Legacy)                    →    AFTER (Modern)
 **Phase 3 is COMPLETE** and the extension is ready to proceed to:
 
 **Phase 4: Integration & Testing**
-- MIGRATION-007: Testing Infrastructure
-- MIGRATION-008: Documentation & Deployment
+- [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-007): Testing Infrastructure
+- [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-008): Documentation & Deployment
 
 All feature modules have been successfully migrated with:
 - ✅ Modern architecture implementation

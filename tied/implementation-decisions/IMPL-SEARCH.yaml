@@ -1,0 +1,35 @@
+IMPL-SEARCH:
+  code_locations:
+    files: []
+    functions: []
+  cross_references:
+    - "ARCH-SEARCH"
+    - "REQ-SEARCH_FUNCTIONALITY"
+  decision: "Thin implementation stub for IMPL-SEARCH."
+  essence_pseudocode_path: "implementation-decisions/IMPL-SEARCH-pseudocode.md"
+  implementation_approach:
+    summary: "Bookmark/tab search with consistent no-match feedback"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: align detail traceability with expanded sidecar"
+  name: "Search"
+  rationale:
+    why: "Search implementation"
+  related_decisions:
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SEARCH"
+    code_annotations:
+      - "IMPL-SEARCH"
+    requirements:
+      - "REQ-SEARCH_FUNCTIONALITY"
+    tests: []

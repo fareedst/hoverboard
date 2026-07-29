@@ -1,0 +1,52 @@
+REQ-BOOKMARK_STATE_SYNCHRONIZATION:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-BOOKMARK_STATE_SYNCHRONIZATION)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Bookmark State Synchronization"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Consistent state everywhere"
+      - "Reliable synchronization"
+    problems_solved:
+      - "Conflicting bookmark states"
+      - "Confusing UI feedback"
+    why: "Prevent desynchronized states across UI surfaces"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-POPUP_PERSISTENT_SESSION"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Badge logic compares states, detects mismatches"
+    - criterion: "Canonical MESSAGE_TYPES and sync message terminology: `tied/vocab/ipc-messaging.md`."
+    - criterion: "Overlay toggles persist via saveBookmark, broadcast BOOKMARK_UPDATED"
+    - criterion: "Popup listens for broadcast, re-fetches data, updates UI"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-MESSAGE_HANDLING"
+    code_annotations:
+      - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+    implementation:
+      - "IMPL-MESSAGE_HANDLING"
+    tests:
+      - "Popup live data tests"
+      - "tests/playwright/extension-messaging.spec.js (popup↔background, content↔background, getTabId round-trip)"
+      - "tests/unit/content-messaging-contracts.test.js (content message contracts)"
+      - "tests/unit/message-handler-contracts.test.js (MessageHandler contracts, BOOKMARK_UPDATED flow)"
+      - "tests/unit/popup-message-contract.test.js (popup → message type)"
+      - "tests/unit/service-worker-messaging-routing.test.js (SW handleMessage routing)"
+      - "Toggle synchronization tests"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Toggle synchronization, broadcast handling"
+    - method: "Live data tests"
+      coverage: "Cross-surface updates"

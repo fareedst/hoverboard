@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-14  
 **Status:** Active Development  
-**Semantic Tokens:** `ARCH-OVERVIEW-001`, `SAFARI-EXT-COORD-001`
+**Semantic Tokens:** `[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-OVERVIEW-001)`, `SAFARI-EXT-COORD-001`
 
 ## Overview
 
@@ -33,7 +33,7 @@ This document provides a high-level overview of the Hoverboard browser extension
 - `[REQ-CONFIG_PORTABILITY]` is fulfilled by `[ARCH-STORAGE]` and implemented via `ConfigManager.exportConfig()` / `importConfig()`.
 - `[REQ-TAG_INPUT_SANITIZATION]` is fulfilled by `[ARCH-TAG_SYSTEM]` with validation centralized in `TagService.sanitizeTag`.
 
-## [ARCH-OVERVIEW-001] Core Architecture Principles
+## [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-OVERVIEW-001)] Core Architecture Principles
 
 ### Cross-Browser Compatibility
 
@@ -140,7 +140,7 @@ This document provides a high-level overview of the Hoverboard browser extension
 
 | Semantic Token | Description | Files | Status |
 |----------------|-------------|-------|--------|
-| `ARCH-OVERVIEW-001` | Architecture overview | This document | ✅ Complete |
+| `[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-OVERVIEW-001)` | Architecture overview | This document | ✅ Complete |
 | `SAFARI-EXT-COORD-001` | Safari architecture coordination | All architecture docs | ✅ Complete |
 | `SAFARI-EXT-API-001` | Browser API abstraction | safari-shim.js | ✅ Complete |
 | `SAFARI-EXT-STORAGE-001` | Storage quota management | tag-service.js, safari-shim.js | ✅ Complete |

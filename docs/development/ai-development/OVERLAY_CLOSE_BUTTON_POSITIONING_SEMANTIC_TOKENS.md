@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-19  
 **Status:** ✅ **COMPLETE** - Implementation Successful  
-**Cross-References:** [OVERLAY-CLOSE-POSITION-001], [OVERLAY-REFRESH-001], [OVERLAY-THEMING-001], [OVERLAY-DATA-DISPLAY-001], [SAFARI-EXT-SHIM-001]
+**Cross-References:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)], [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [SAFARI-EXT-SHIM-001]
 
 ---
 
@@ -10,11 +10,11 @@
 
 ### **Primary Tokens**
 
-#### **[OVERLAY-CLOSE-POSITION-001] - Master Semantic Token**
+#### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)] - Master Semantic Token**
 **Description**: Master semantic token for overlay close button positioning functionality  
 **Usage Scope**: All close button positioning documentation and implementation  
 **Priority**: Core  
-**Cross-References**: [OVERLAY-REFRESH-001], [OVERLAY-THEMING-001], [OVERLAY-DATA-DISPLAY-001], [SAFARI-EXT-SHIM-001]
+**Cross-References**: [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [SAFARI-EXT-SHIM-001]
 
 **Usage Guidelines**:
 - Use in all documentation related to close button positioning
@@ -24,7 +24,7 @@
 
 **Implementation Examples**:
 ```javascript
-// [OVERLAY-CLOSE-POSITION-001] Close button positioning implementation
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)] Close button positioning implementation
 const closeBtn = this.document.createElement('span')
 closeBtn.className = 'close-button'
 closeBtn.innerHTML = '✕'
@@ -51,11 +51,11 @@ closeBtn.style.cssText = `
 
 ---
 
-#### **[OVERLAY-CLOSE-POSITION-UI-001] - Close Button UI Implementation**
+#### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] - Close Button UI Implementation**
 **Description**: Close button UI implementation and styling  
 **Usage Scope**: Button rendering, styling, and positioning  
 **Priority**: Core  
-**Cross-References**: [OVERLAY-CLOSE-POSITION-001], [OVERLAY-THEMING-001]
+**Cross-References**: [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]
 
 **Usage Guidelines**:
 - Use in code comments for close button element creation
@@ -65,7 +65,7 @@ closeBtn.style.cssText = `
 
 **Implementation Examples**:
 ```javascript
-// [OVERLAY-CLOSE-POSITION-UI-001] Close button element creation
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Close button element creation
 const closeBtn = this.document.createElement('span')
 closeBtn.className = 'close-button'
 closeBtn.innerHTML = '✕'
@@ -77,7 +77,7 @@ closeBtn.onclick = () => this.hide()
 ```
 
 ```css
-/* [OVERLAY-CLOSE-POSITION-UI-001] Close button styling */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Close button styling */
 .close-button {
   position: absolute;
   top: 8px;
@@ -101,11 +101,11 @@ closeBtn.onclick = () => this.hide()
 
 ---
 
-#### **[OVERLAY-CLOSE-POSITION-ADJUST-001] - Refresh Button Position Adjustment**
+#### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ADJUST-001)] - Refresh Button Position Adjustment**
 **Description**: Refresh button position adjustment to accommodate close button  
 **Usage Scope**: Refresh button repositioning and spacing  
 **Priority**: Core  
-**Cross-References**: [OVERLAY-REFRESH-001], [OVERLAY-CLOSE-POSITION-001]
+**Cross-References**: [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)], [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)]
 
 **Usage Guidelines**:
 - Use in code comments for refresh button positioning changes
@@ -115,7 +115,7 @@ closeBtn.onclick = () => this.hide()
 
 **Implementation Examples**:
 ```javascript
-// [OVERLAY-CLOSE-POSITION-ADJUST-001] Adjusted refresh button positioning
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ADJUST-001)] Adjusted refresh button positioning
 refreshBtn.style.cssText = `
   position: absolute;
   top: 8px;
@@ -139,11 +139,11 @@ refreshBtn.style.cssText = `
 
 ---
 
-#### **[OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] - Accessibility Features**
+#### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001)] - Accessibility Features**
 **Description**: Accessibility features for close button positioning  
 **Usage Scope**: ARIA attributes, keyboard support, screen reader compatibility  
 **Priority**: Core  
-**Cross-References**: [OVERLAY-CLOSE-POSITION-001], [SAFARI-EXT-SHIM-001]
+**Cross-References**: [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)], [SAFARI-EXT-SHIM-001]
 
 **Usage Guidelines**:
 - Use in accessibility implementation code
@@ -153,12 +153,12 @@ refreshBtn.style.cssText = `
 
 **Implementation Examples**:
 ```javascript
-// [OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Accessibility attributes
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001)] Accessibility attributes
 closeBtn.setAttribute('aria-label', 'Close Overlay')
 closeBtn.setAttribute('role', 'button')
 closeBtn.setAttribute('tabindex', '0')
 
-// [OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Keyboard event handlers
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001)] Keyboard event handlers
 closeBtn.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault()
@@ -169,11 +169,11 @@ closeBtn.addEventListener('keydown', (e) => {
 
 ---
 
-#### **[OVERLAY-CLOSE-POSITION-THEME-001] - Theme Integration**
+#### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-THEME-001)] - Theme Integration**
 **Description**: Theme integration for close button positioning  
 **Usage Scope**: CSS styling, theme variables, responsive design  
 **Priority**: Core  
-**Cross-References**: [OVERLAY-THEMING-001], [OVERLAY-CLOSE-POSITION-001]
+**Cross-References**: [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)]
 
 **Usage Guidelines**:
 - Use in CSS styling code
@@ -183,7 +183,7 @@ closeBtn.addEventListener('keydown', (e) => {
 
 **Implementation Examples**:
 ```css
-/* [OVERLAY-CLOSE-POSITION-THEME-001] Theme-aware close button styling */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-THEME-001)] Theme-aware close button styling */
 .close-button {
   position: absolute;
   top: 8px;
@@ -219,11 +219,11 @@ closeBtn.addEventListener('keydown', (e) => {
 
 ### **Feature Tokens**
 
-#### **[OVERLAY-CLOSE-POSITION-TEST-001] - Test Cases**
+#### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-001)] - Test Cases**
 **Description**: Test cases for close button positioning functionality  
 **Usage Scope**: Test files, validation, quality assurance  
 **Priority**: Feature  
-**Cross-References**: [OVERLAY-CLOSE-POSITION-001], [OVERLAY-REFRESH-001]
+**Cross-References**: [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)], [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]
 
 **Usage Guidelines**:
 - Use in test file names and descriptions
@@ -233,13 +233,13 @@ closeBtn.addEventListener('keydown', (e) => {
 
 **Implementation Examples**:
 ```javascript
-// [OVERLAY-CLOSE-POSITION-TEST-001] Positioning validation tests
-test('[OVERLAY-CLOSE-POSITION-UI-001] Should position close button at left: 8px', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-001)] Positioning validation tests
+test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Should position close button at left: 8px', () => {
   const closeButton = mockDocument.querySelector('.close-button')
   expect(closeButton.style.cssText).toContain('left: 8px')
 })
 
-test('[OVERLAY-CLOSE-POSITION-ADJUST-001] Should position refresh button at left: 40px', () => {
+test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ADJUST-001)] Should position refresh button at left: 40px', () => {
   const refreshButton = mockDocument.querySelector('.refresh-button')
   expect(refreshButton.style.cssText).toContain('left: 40px')
 })
@@ -247,11 +247,11 @@ test('[OVERLAY-CLOSE-POSITION-ADJUST-001] Should position refresh button at left
 
 ---
 
-#### **[OVERLAY-CLOSE-POSITION-RESPONSIVE-001] - Responsive Behavior**
+#### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-RESPONSIVE-001)] - Responsive Behavior**
 **Description**: Responsive behavior for close button positioning  
 **Usage Scope**: Mobile, screen size adaptation, touch interfaces  
 **Priority**: Feature  
-**Cross-References**: [OVERLAY-CLOSE-POSITION-001], [SAFARI-EXT-SHIM-001]
+**Cross-References**: [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)], [SAFARI-EXT-SHIM-001]
 
 **Usage Guidelines**:
 - Use in responsive CSS implementations
@@ -261,7 +261,7 @@ test('[OVERLAY-CLOSE-POSITION-ADJUST-001] Should position refresh button at left
 
 **Implementation Examples**:
 ```css
-/* [OVERLAY-CLOSE-POSITION-RESPONSIVE-001] Mobile responsive positioning */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-RESPONSIVE-001)] Mobile responsive positioning */
 @media (max-width: 480px) {
   .close-button {
     left: 4px;  // Reduced left margin for mobile
@@ -279,11 +279,11 @@ test('[OVERLAY-CLOSE-POSITION-ADJUST-001] Should position refresh button at left
 
 ---
 
-#### **[OVERLAY-CLOSE-POSITION-ERROR-001] - Error Handling**
+#### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ERROR-001)] - Error Handling**
 **Description**: Error handling for close button positioning issues  
 **Usage Scope**: Error management, debugging, fallback behavior  
 **Priority**: Feature  
-**Cross-References**: [OVERLAY-CLOSE-POSITION-001], [SAFARI-EXT-SHIM-001]
+**Cross-References**: [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)], [SAFARI-EXT-SHIM-001]
 
 **Usage Guidelines**:
 - Use in error handling code
@@ -293,9 +293,9 @@ test('[OVERLAY-CLOSE-POSITION-ADJUST-001] Should position refresh button at left
 
 **Implementation Examples**:
 ```javascript
-// [OVERLAY-CLOSE-POSITION-ERROR-001] Error handling for positioning
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ERROR-001)] Error handling for positioning
 try {
-  // [OVERLAY-CLOSE-POSITION-UI-001] Close button positioning
+  // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Close button positioning
   closeBtn.style.cssText = `
     position: absolute;
     top: 8px;
@@ -316,8 +316,8 @@ try {
     justify-content: center;
   `
 } catch (error) {
-  // [OVERLAY-CLOSE-POSITION-ERROR-001] Fallback to float positioning
-  debugError('[OVERLAY-CLOSE-POSITION-ERROR-001] Failed to position close button:', error)
+  // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ERROR-001)] Fallback to float positioning
+  debugError('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ERROR-001)] Failed to position close button:', error)
   closeBtn.style.cssText = 'float: right; margin: 2px;'
 }
 ```
@@ -328,13 +328,13 @@ try {
 
 ### **Code Comments**
 ```javascript
-// [OVERLAY-CLOSE-POSITION-UI-001] Close button element creation
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Close button element creation
 const closeBtn = this.document.createElement('span')
 closeBtn.className = 'close-button'
 closeBtn.innerHTML = '✕'
 closeBtn.title = 'Close Overlay'
 
-// [OVERLAY-CLOSE-POSITION-ADJUST-001] Adjusted refresh button positioning
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ADJUST-001)] Adjusted refresh button positioning
 refreshBtn.style.cssText = `
   position: absolute;
   top: 8px;
@@ -355,12 +355,12 @@ refreshBtn.style.cssText = `
   justify-content: center;
 `
 
-// [OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Accessibility attributes
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001)] Accessibility attributes
 closeBtn.setAttribute('aria-label', 'Close Overlay')
 closeBtn.setAttribute('role', 'button')
 closeBtn.setAttribute('tabindex', '0')
 
-// [OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Keyboard event handlers
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001)] Keyboard event handlers
 closeBtn.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault()
@@ -371,7 +371,7 @@ closeBtn.addEventListener('keydown', (e) => {
 
 ### **CSS Styling**
 ```css
-/* [OVERLAY-CLOSE-POSITION-THEME-001] Theme-aware close button styling */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-THEME-001)] Theme-aware close button styling */
 .close-button {
   position: absolute;
   top: 8px;
@@ -402,7 +402,7 @@ closeBtn.addEventListener('keydown', (e) => {
   outline-offset: 2px;
 }
 
-/* [OVERLAY-CLOSE-POSITION-RESPONSIVE-001] Mobile responsive positioning */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-RESPONSIVE-001)] Mobile responsive positioning */
 @media (max-width: 480px) {
   .close-button {
     left: 4px;  // Reduced left margin for mobile
@@ -420,19 +420,19 @@ closeBtn.addEventListener('keydown', (e) => {
 
 ### **Test Implementation**
 ```javascript
-// [OVERLAY-CLOSE-POSITION-TEST-001] Positioning validation tests
-describe('[OVERLAY-CLOSE-POSITION-001] Close Button Positioning', () => {
-  test('[OVERLAY-CLOSE-POSITION-UI-001] Should position close button at left: 8px', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-001)] Positioning validation tests
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)] Close Button Positioning', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Should position close button at left: 8px', () => {
     const closeButton = mockDocument.querySelector('.close-button')
     expect(closeButton.style.cssText).toContain('left: 8px')
   })
 
-  test('[OVERLAY-CLOSE-POSITION-ADJUST-001] Should position refresh button at left: 40px', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ADJUST-001)] Should position refresh button at left: 40px', () => {
     const refreshButton = mockDocument.querySelector('.refresh-button')
     expect(refreshButton.style.cssText).toContain('left: 40px')
   })
 
-  test('[OVERLAY-CLOSE-POSITION-UI-001] Should close overlay when clicked', () => {
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Should close overlay when clicked', () => {
     const closeButton = mockDocument.querySelector('.close-button')
     closeButton.click()
     expect(overlayManager.hide).toHaveBeenCalled()
@@ -445,21 +445,21 @@ describe('[OVERLAY-CLOSE-POSITION-001] Close Button Positioning', () => {
 ## 📚 Cross-Reference Coordination
 
 ### **Existing Token Coordination**
-- **`[OVERLAY-REFRESH-001]`**: ✅ Coordinates with refresh button positioning
-- **`[OVERLAY-THEMING-001]`**: ✅ Maintains theme-aware styling
-- **`[OVERLAY-DATA-DISPLAY-001]`**: ✅ Integrates with overlay data display
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]`**: ✅ Coordinates with refresh button positioning
+- **`[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`**: ✅ Maintains theme-aware styling
+- **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`**: ✅ Integrates with overlay data display
 - **`[SAFARI-EXT-SHIM-001]`**: ✅ Supports cross-platform compatibility
 
 ### **Implementation Coordination**
-- **`[OVERLAY-CLOSE-POSITION-UI-001]`**: ✅ Close button UI implementation
-- **`[OVERLAY-CLOSE-POSITION-ADJUST-001]`**: ✅ Refresh button position adjustment
-- **`[OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001]`**: ✅ Accessibility features
-- **`[OVERLAY-CLOSE-POSITION-THEME-001]`**: ✅ Theme integration
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)]`**: ✅ Close button UI implementation
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ADJUST-001)]`**: ✅ Refresh button position adjustment
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001)]`**: ✅ Accessibility features
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-THEME-001)]`**: ✅ Theme integration
 
 ### **Feature Coordination**
-- **`[OVERLAY-CLOSE-POSITION-TEST-001]`**: ✅ Test cases for positioning
-- **`[OVERLAY-CLOSE-POSITION-RESPONSIVE-001]`**: ✅ Responsive behavior
-- **`[OVERLAY-CLOSE-POSITION-ERROR-001]`**: ✅ Error handling
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-001)]`**: ✅ Test cases for positioning
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-RESPONSIVE-001)]`**: ✅ Responsive behavior
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ERROR-001)]`**: ✅ Error handling
 
 ---
 
@@ -489,19 +489,19 @@ describe('[OVERLAY-CLOSE-POSITION-001] Close Button Positioning', () => {
 
 | Token Name | Description | Usage Scope | Priority |
 |------------|-------------|-------------|----------|
-| `OVERLAY-CLOSE-POSITION-001` | Master semantic token for close button positioning | All close button positioning docs | Core |
-| `OVERLAY-CLOSE-POSITION-UI-001` | Close button UI implementation | Button rendering, styling | Core |
-| `OVERLAY-CLOSE-POSITION-OVERLAY-001` | Overlay-relative positioning | Button positioning relative to overlay element | Core |
-| `OVERLAY-CLOSE-POSITION-ADJUST-001` | Refresh button position adjustment | Refresh button repositioning | Core |
-| `OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001` | Accessibility features | ARIA, keyboard support | Core |
-| `OVERLAY-CLOSE-POSITION-THEME-001` | Theme integration for close button | CSS, styling | Core |
-| `OVERLAY-CLOSE-POSITION-TEST-001` | Test cases for positioning functionality | Test files, validation | Feature |
-| `OVERLAY-CLOSE-POSITION-RESPONSIVE-001` | Responsive behavior for close button | Mobile, screen size adaptation | Feature |
-| `OVERLAY-CLOSE-POSITION-ERROR-001` | Error handling for positioning issues | Error management | Feature |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)` | Master semantic token for close button positioning | All close button positioning docs | Core |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)` | Close button UI implementation | Button rendering, styling | Core |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-OVERLAY-001)` | Overlay-relative positioning | Button positioning relative to overlay element | Core |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ADJUST-001)` | Refresh button position adjustment | Refresh button repositioning | Core |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001)` | Accessibility features | ARIA, keyboard support | Core |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-THEME-001)` | Theme integration for close button | CSS, styling | Core |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-001)` | Test cases for positioning functionality | Test files, validation | Feature |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-RESPONSIVE-001)` | Responsive behavior for close button | Mobile, screen size adaptation | Feature |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ERROR-001)` | Error handling for positioning issues | Error management | Feature |
 
 ---
 
-**Semantic Token:** [OVERLAY-CLOSE-POSITION-001]  
-**Cross-References:** [OVERLAY-REFRESH-001], [OVERLAY-THEMING-001], [OVERLAY-DATA-DISPLAY-001], [SAFARI-EXT-SHIM-001]  
+**Semantic Token:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)]  
+**Cross-References:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [SAFARI-EXT-SHIM-001]  
 **Date:** 2025-07-19  
 **Status:** Active Semantic Tokens 

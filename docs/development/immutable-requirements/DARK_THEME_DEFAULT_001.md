@@ -1,4 +1,4 @@
-# 🌙 DARK-THEME-DEFAULT-001: Dark Theme as Default
+# 🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001): Dark Theme as Default
 
 **Status**: ✅ **IMPLEMENTED**  
 **Type**: 🎨 **UI ENHANCEMENT - THEME PREFERENCE**  
@@ -8,26 +8,26 @@
 
 ## 📋 Requirement Statement
 
-**🌙 DARK-THEME-DEFAULT-001**: The overlay window shall default to dark theme (`light-on-dark`) instead of light theme (`dark-on-light`) for all new installations and reset configurations.
+**🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)**: The overlay window shall default to dark theme (`light-on-dark`) instead of light theme (`dark-on-light`) for all new installations and reset configurations.
 
 ### **Core Requirements**
 
-1. **REQ-DARK-001: Default Theme Setting**
+1. **[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-DARK-001): Default Theme Setting**
    - **Requirement**: All new overlay instances shall default to dark theme (`light-on-dark`)
    - **Rationale**: Modern user preference for dark themes, reduced eye strain, better visual experience
    - **Status**: ✅ **IMPLEMENTED**
 
-2. **REQ-DARK-002: Backward Compatibility**
+2. **[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-DARK-002): Backward Compatibility**
    - **Requirement**: Existing users shall retain their saved theme preferences
    - **Rationale**: Preserve user choice and avoid disrupting existing workflows
    - **Status**: ✅ **IMPLEMENTED**
 
-3. **REQ-DARK-003: Theme Display Consistency**
+3. **[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-DARK-003): Theme Display Consistency**
    - **Requirement**: Theme shall display correctly immediately upon overlay creation
    - **Rationale**: Eliminate user confusion and provide consistent experience
    - **Status**: ✅ **IMPLEMENTED** (Fixed in Theme Initialization Fix)
 
-4. **REQ-DARK-004: Theme Toggle Functionality**
+4. **[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-DARK-004): Theme Toggle Functionality**
    - **Requirement**: Users shall be able to toggle between dark and light themes
    - **Rationale**: Maintain user choice and flexibility
    - **Status**: ✅ **IMPLEMENTED**
@@ -82,10 +82,10 @@
 
 | Requirement | Implementation | Testing | Status |
 |-------------|---------------|---------|--------|
-| REQ-DARK-001 | ConfigManager + VisibilityControls | Unit Tests | ✅ **PASS** |
-| REQ-DARK-002 | Backward compatibility preserved | Integration Tests | ✅ **PASS** |
-| REQ-DARK-003 | Theme initialization fix | Manual Tests | ✅ **PASS** |
-| REQ-DARK-004 | Toggle functionality | Unit + Manual Tests | ✅ **PASS** |
+| [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-DARK-001) | ConfigManager + VisibilityControls | Unit Tests | ✅ **PASS** |
+| [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-DARK-002) | Backward compatibility preserved | Integration Tests | ✅ **PASS** |
+| [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-DARK-003) | Theme initialization fix | Manual Tests | ✅ **PASS** |
+| [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-DARK-004) | Toggle functionality | Unit + Manual Tests | ✅ **PASS** |
 
 ## 🔧 Technical Implementation Details
 
@@ -128,18 +128,18 @@ this.applyVisibilitySettings(initialSettings)
 ## 📋 Semantic Tokens
 
 ### **Primary Token**
-- `🌙 DARK-THEME-DEFAULT-001` - Main requirement token
+- `🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)` - Main requirement token
 
 ### **Implementation Tokens**
-- `🎨 THEME-SYSTEM-001` - Theme management system
-- `⚙️ CONFIG-DEFAULT-001` - Configuration defaults
-- `👁️ UX-VISUAL-001` - User experience visual preferences
-- `🌙 THEME-INIT-FIX-001` - Theme initialization fix
+- `🎨 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was THEME-SYSTEM-001)` - Theme management system
+- `⚙️ [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CONFIG-DEFAULT-001)` - Configuration defaults
+- `👁️ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UX-VISUAL-001)` - User experience visual preferences
+- `🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was THEME-INIT-FIX-001)` - Theme initialization fix
 
 ### **Testing Tokens**
-- `🧪 TEST-DARK-001` - Testing and validation
-- `📚 DOC-DARK-001` - Documentation
-- `🔧 IMPL-DARK-001` - Implementation details
+- `🧪 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-DARK-001)` - Testing and validation
+- `📚 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DOC-DARK-001)` - Documentation
+- `🔧 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was IMPL-DARK-001)` - Implementation details
 
 ## 🔗 Related Documentation
 
@@ -163,7 +163,7 @@ this.applyVisibilitySettings(initialSettings)
 
 ## 🎯 Conclusion
 
-**🌙 DARK-THEME-DEFAULT-001** has been successfully implemented with comprehensive testing and validation. The dark theme now defaults correctly for all new installations, existing users retain their preferences, and the theme displays immediately without requiring user intervention.
+**🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)** has been successfully implemented with comprehensive testing and validation. The dark theme now defaults correctly for all new installations, existing users retain their preferences, and the theme displays immediately without requiring user intervention.
 
 **Additional Fix**: The theme initialization issue has been resolved, ensuring the overlay displays with the correct theme immediately upon creation, eliminating the need for users to toggle themes to get the proper appearance.
 

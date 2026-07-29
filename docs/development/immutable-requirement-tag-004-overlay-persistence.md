@@ -1,9 +1,9 @@
-# [IMMUTABLE-REQ-TAG-004] Overlay Window Tag Persistence
+# [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Overlay Window Tag Persistence
 
 **Date**: 2025-07-14  
 **Status**: Immutable Requirement  
 **Version**: 1.1  
-**Semantic Token**: `[IMMUTABLE-REQ-TAG-004]`
+**Semantic Token**: `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 ## 🎯 Overview
 
@@ -11,9 +11,9 @@ This document defines the immutable requirements for implementing tag persistenc
 
 ## 📋 Core Requirements
 
-### [IMMUTABLE-REQ-TAG-004] Overlay Window Tag Persistence
+### [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Overlay Window Tag Persistence
 
-**Semantic Token**: `[IMMUTABLE-REQ-TAG-004]`
+**Semantic Token**: `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 #### Primary Requirements
 

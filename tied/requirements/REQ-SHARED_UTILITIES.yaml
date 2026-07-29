@@ -1,5 +1,5 @@
 # [REQ-SHARED_UTILITIES] Shared utilities for extension
-# Migrated from legacy UTIL-001..005 (numbered-token-mapping)
+# Migrated from legacy [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-001)..005 (numbered-token-mapping)
 REQ-SHARED_UTILITIES:
   category: "Non-Functional"
   detail_file: "requirements/REQ-SHARED_UTILITIES.yaml"
@@ -10,7 +10,7 @@ REQ-SHARED_UTILITIES:
     last_updated:
       author: "AI Agent"
       date: "2026-02-17"
-      reason: "Numbered token reinterpretation (UTIL-001..005)"
+      reason: "Numbered token reinterpretation ([IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-001)..005)"
   name: "Shared Utilities"
   priority: "P2"
   rationale:

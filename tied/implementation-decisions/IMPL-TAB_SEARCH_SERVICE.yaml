@@ -15,7 +15,7 @@ IMPL-TAB_SEARCH_SERVICE:
         file: "src/features/search/tab-search-service.js"
   cross_references:
     - "REQ-SEARCH_FUNCTIONALITY"
-  essence_pseudocode: "# [IMPL-TAB_SEARCH_SERVICE] [REQ-SEARCH_FUNCTIONALITY]\n# Tab search by title; searchAndNavigate and findNextTab with circular wrap; search history.\n# Contract: search text and current tab; result with matchCount and tabId/title or error.\nINPUT: searchText (string), currentTabId (number)\nOUTPUT: { success, matchCount, tabId?, tabTitle? } or { success: false, matchCount, message }\nDATA: lastSearchText, lastMatchedTabId, searchHistory (list)\n\n# Normalize search; filter tabs by title; find next with wrap; activate and focus; update state.\nsearchAndNavigate(searchText, currentTabId):\n  normalized = TRIM(LOWERCASE(searchText))\n  isNewSearch = (lastSearchText !== normalized)\n  restartTabId = isNewSearch ? currentTabId : (lastMatchedTabId OR currentTabId)\n  allTabs = getAllTabs()\n  matchingTabs = FILTER allTabs WHERE title CONTAINS normalized\n  nextTab = findNextTab(matchingTabs, restartTabId)\n  IF nextTab AND nextTab.id !== restartTabId:\n    activateTab(nextTab.id)\n    focusWindow(nextTab.windowId)\n    lastSearchText = normalized\n    lastMatchedTabId = nextTab.id\n    addToSearchHistory(normalized)\n    RETURN { success: true, matchCount: LEN(matchingTabs), tabId: nextTab.id, tabTitle: nextTab.title }\n  ELSE:\n    RETURN { success: false, matchCount: LEN(matchingTabs), message: \"No matching tabs found\" OR \"Already on last match\" }\n\n# Circular: next after restartTabId or wrap to first.\nfindNextTab(matchingTabs, restartTabId):\n  order tabs after restartTabId; wrap to start if none after\n  RETURN next tab in sequence or null\n\n# Move term to front if present else prepend.\naddToSearchHistory(term):\n  IF term in searchHistory: MOVE term to front\n  ELSE: PREPEND term to searchHistory\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TAB_SEARCH_SERVICE-pseudocode.md"
   implementation_approach:
     details:
       - "Chrome API errors surfaced as rejected promise"
@@ -28,8 +28,8 @@ IMPL-TAB_SEARCH_SERVICE:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Create IMPL for tab-search-service tests; essence_pseudocode from test behavior"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Tab Search Service Implementation"
   rationale:
     benefits:

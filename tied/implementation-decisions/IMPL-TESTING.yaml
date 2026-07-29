@@ -10,7 +10,7 @@ IMPL-TESTING:
   cross_references:
     - "ARCH-TESTING_STRATEGY"
   detail_file: "implementation-decisions/IMPL-TESTING.yaml"
-  essence_pseudocode: "# [IMPL-TESTING] [ARCH-TESTING_STRATEGY]\n# Test layout and conventions; setupTestEnvironment; naming and REQ/IMPL references.\n# Meta: no single executable algorithm; contract is test layout and setup.\nMeta: test layout and conventions; no single executable algorithm.\nsetupTestEnvironment(): (create mocks, load fixtures, set env)\n# Naming, location, token references, unit then integration.\nTest files: FOLLOW naming and location; REFERENCE [REQ-*]/[IMPL-*] in names/comments; RUN unit then integration per strategy\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TESTING-pseudocode.md"
   implementation_approach:
     details:
       - "Integration testing implementation details"
@@ -24,8 +24,8 @@ IMPL-TESTING:
       date: "YYYY-MM-DD"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode (meta stub)"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "YYYY-MM-DD"
       result: "pass"

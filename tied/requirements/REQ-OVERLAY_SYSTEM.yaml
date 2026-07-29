@@ -1,0 +1,45 @@
+REQ-OVERLAY_SYSTEM:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-OVERLAY_SYSTEM)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Overlay System"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "No page disruption"
+      - "Seamless bookmarking experience"
+    problems_solved:
+      - "Context switching"
+      - "Intrusive bookmark dialogs"
+    why: "Non-intrusive interface is core to UX"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
+      - "REQ-OVERLAY_CONTROL_LAYOUT"
+      - "REQ-OVERLAY_REFRESH_ACTION"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Non-intrusive positioning"
+    - criterion: "Overlay displays on hover/activation"
+    - criterion: "Semi-transparent design"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-OVERLAY"
+    code_annotations:
+      - "REQ-OVERLAY_SYSTEM"
+    implementation:
+      - "IMPL-OVERLAY"
+    tests:
+      - "Overlay tests"
+  validation_criteria:
+    - method: "Overlay display tests"
+      coverage: "All activation scenarios"

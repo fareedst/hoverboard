@@ -107,7 +107,7 @@ REQ-AI_TAGGING_POPUP:
       coverage: "Popup button flow end-to-end"
 REQ-BADGE_INDICATORS:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-BADGE_INDICATORS.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -197,7 +197,7 @@ REQ-BOOKMARK_CREATE_UPDATE_TIMES:
     - method: "Unit tests for services (new/update/legacy normalization)"
 REQ-BOOKMARK_STATE_SYNCHRONIZATION:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -344,7 +344,7 @@ REQ-BROWSER_BOOKMARK_IMPORT:
       coverage: "Load page, filter, select, import with each conflict mode; confirm result and data in index"
 REQ-CHROME_STORAGE_USAGE:
   category: "Immutable"
-  detail_file: "null"
+  detail_file: "requirements/REQ-CHROME_STORAGE_USAGE.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -442,7 +442,7 @@ REQ-CODE_QUALITY:
       coverage: "npm run validate runs lint, manifest validation, and security:check"
 REQ-CONFIG_PORTABILITY:
   category: "Non-Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-CONFIG_PORTABILITY.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -487,7 +487,7 @@ REQ-CONFIG_PORTABILITY:
       coverage: "Cross-profile migration"
 REQ-CONFIGURATION:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-CONFIGURATION.yaml"
   name: "Configuration"
   priority: "P2"
   rationale:
@@ -498,7 +498,7 @@ REQ-CONFIGURATION:
   traceability: {}
 REQ-CORE_UX_PRESERVATION:
   category: "Immutable"
-  detail_file: "null"
+  detail_file: "requirements/REQ-CORE_UX_PRESERVATION.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -606,7 +606,7 @@ REQ-CROSS_BROWSER:
       coverage: "Service worker and message-client Chrome messaging paths"
 REQ-DARK_THEME:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-DARK_THEME.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -648,7 +648,7 @@ REQ-DARK_THEME:
       coverage: "Dark theme rendering"
 REQ-ERROR_HANDLING:
   category: "Non-Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-ERROR_HANDLING.yaml"
   name: "Error Handling"
   priority: "P2"
   rationale:
@@ -658,7 +658,7 @@ REQ-ERROR_HANDLING:
   traceability: {}
 REQ-EXAMPLE_FEATURE:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-EXAMPLE_FEATURE.yaml"
   name: "Example Feature"
   priority: "P2"
   rationale:
@@ -1035,15 +1035,15 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
       coverage: "Export all and Export displayed produce correct CSV; file downloads"
 REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "New requirement for import UX"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -1080,15 +1080,15 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
       coverage: "Parse CSV/JSON; only-new vs overwrite; result message"
 REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml"
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "New requirement for Regex find-and-replace on selected"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
     last_validated:
       date: "2026-02-20"
       result: "pass"
@@ -1128,7 +1128,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       coverage: "Regex replace row visible; Replace disabled with no selection; valid regex updates and refreshes"
 REQ-MAINTAINABILITY:
   category: "Non-Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-MAINTAINABILITY.yaml"
   name: "Maintainability"
   priority: "P2"
   rationale:
@@ -1138,7 +1138,7 @@ REQ-MAINTAINABILITY:
   traceability: {}
 REQ-MANIFEST_V3_MIGRATION:
   category: "Immutable"
-  detail_file: "null"
+  detail_file: "requirements/REQ-MANIFEST_V3_MIGRATION.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -1254,15 +1254,15 @@ REQ-MODULE_VALIDATION:
       coverage: "IMPL traceability.tests or test_coverage_note (E2E-only with reason) for every Active IMPL"
 REQ-MOVE_BOOKMARK_STORAGE_UI:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml"
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "Save-follows-highlight criterion and traceability"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Move Bookmark Storage UI"
   priority: "P1"
   rationale:
@@ -1346,7 +1346,7 @@ REQ-NATIVE_HOST_WRAPPER:
       coverage: "macOS first; optional Linux/Windows"
 REQ-OVERLAY_AUTO_SHOW_CONTROL:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-OVERLAY_AUTO_SHOW_CONTROL.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -1394,7 +1394,7 @@ REQ-OVERLAY_AUTO_SHOW_CONTROL:
       coverage: "Inhibited URLs and tag-conditional rules"
 REQ-OVERLAY_CONTROL_LAYOUT:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-OVERLAY_CONTROL_LAYOUT.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -1442,7 +1442,7 @@ REQ-OVERLAY_CONTROL_LAYOUT:
       coverage: "Layout consistency with refresh control"
 REQ-OVERLAY_REFRESH_ACTION:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-OVERLAY_REFRESH_ACTION.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -1489,7 +1489,7 @@ REQ-OVERLAY_REFRESH_ACTION:
       coverage: "Refresh after remote edits, layout consistency"
 REQ-OVERLAY_SYSTEM:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-OVERLAY_SYSTEM.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -1584,7 +1584,7 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
       coverage: "Index get/set/remove; router delegates to correct provider; default used when URL not in index"
 REQ-PERFORMANCE:
   category: "Non-Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-PERFORMANCE.yaml"
   name: "Performance"
   priority: "P2"
   rationale:
@@ -1594,7 +1594,7 @@ REQ-PERFORMANCE:
   traceability: {}
 REQ-PINBOARD_COMPATIBILITY:
   category: "Immutable"
-  detail_file: "null"
+  detail_file: "requirements/REQ-PINBOARD_COMPATIBILITY.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -1641,7 +1641,7 @@ REQ-PINBOARD_COMPATIBILITY:
       coverage: "Token-based auth"
 REQ-POPUP_PERSISTENT_SESSION:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-POPUP_PERSISTENT_SESSION.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -1687,7 +1687,7 @@ REQ-POPUP_PERSISTENT_SESSION:
       coverage: "Session remains active while updating status"
 REQ-PRIVACY_CONTROLS:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-PRIVACY_CONTROLS.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -1855,7 +1855,7 @@ REQ-RECENT_TAGS_SYSTEM:
       coverage: "Two-window add-tag then focus side panel within N minutes (cross-window; e2e_only per IMPL-SIDE_PANEL_TABS)"
 REQ-RELIABILITY:
   category: "Non-Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-RELIABILITY.yaml"
   name: "Reliability"
   priority: "P2"
   rationale:
@@ -1872,7 +1872,7 @@ REQ-SAFARI_ADAPTATION:
     - "IMPL-SAFARI_ADAPTATION"
     - "REQ-CROSS_BROWSER"
     - "REQ-EXTENSION_IDENTITY"
-  detail_file: "null"
+  detail_file: "requirements/REQ-SAFARI_ADAPTATION.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -1917,7 +1917,7 @@ REQ-SAFARI_ADAPTATION:
       coverage: "No Safari package or Safari-specific suites in active Chrome delivery"
 REQ-SEARCH_FUNCTIONALITY:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-SEARCH_FUNCTIONALITY.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -2040,15 +2040,15 @@ REQ-SHARED_UTILITIES:
       - "IMPL-URL_UTILITIES"
 REQ-SIDE_PANEL_BOOKMARK_SEARCH:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-SIDE_PANEL_BOOKMARK_SEARCH.yaml"
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-22"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-22"
-      reason: "Initial creation for side panel bookmark search"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Side Panel Bookmark Search"
   priority: "P1"
   rationale:
@@ -2322,15 +2322,15 @@ REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
       coverage: "Select Recently closed; verify list; select Both; verify open+closed; click Restore on closed tab"
 REQ-SIDE_PANEL_TAGS_TREE:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml"
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-21"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-21"
-      reason: "Initial creation for side panel tags tree"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Side Panel Tags and Bookmarks Tree"
   priority: "P1"
   rationale:
@@ -2373,7 +2373,7 @@ REQ-SIDE_PANEL_TAGS_TREE:
       coverage: "Popup button sends open-panel message; SW calls chrome.sidePanel.open; panel load sends getAggregatedBookmarksForIndex and renders tree"
 REQ-SITE_MANAGEMENT:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-SITE_MANAGEMENT.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -2417,7 +2417,7 @@ REQ-SITE_MANAGEMENT:
       coverage: "List storage"
 REQ-SMART_BOOKMARKING:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-SMART_BOOKMARKING.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -2517,11 +2517,14 @@ REQ-STORAGE_MODE_DEFAULT:
       coverage: "ConfigManager default storageMode, getStorageMode, setStorageMode (tests/unit/config-manager.test.js)"
 REQ-STRUCTURED_LOGGING:
   category: "Non-Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-STRUCTURED_LOGGING.yaml"
   metadata:
     author: "AI Agent"
     created: "2026-02-17"
-    last_updated: "2026-02-17"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Structured Logging"
   priority: "P2"
   rationale:
@@ -2678,15 +2681,15 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       coverage: "Extraction algorithm, frequency sorting, noise filtering"
 REQ-TAB_SEARCH_NO_MATCH_UX:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-TAB_SEARCH_NO_MATCH_UX.yaml"
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-26"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Tab Search No-Match Visual Feedback Only"
   priority: "P1"
   rationale:
@@ -2730,7 +2733,7 @@ REQ-TAB_SEARCH_NO_MATCH_UX:
       coverage: "Popup and side panel; search with non-matching substring; confirm no error message, red border on button, fade within 2s"
 REQ-TAG_INPUT_SANITIZATION:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-TAG_INPUT_SANITIZATION.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -2777,7 +2780,7 @@ REQ-TAG_INPUT_SANITIZATION:
       coverage: "Sanitized tags propagate without breaking layout"
 REQ-TAG_MANAGEMENT:
   category: "Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-TAG_MANAGEMENT.yaml"
   metadata:
     created:
       author: "AI Agent"
@@ -2892,11 +2895,14 @@ REQ-TIED_SETUP:
       coverage: "All index files have corresponding detail directories with proper naming"
 REQ-UI_INSPECTION:
   category: "Non-Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-UI_INSPECTION.yaml"
   metadata:
     author: "AI Agent"
     created: "2026-02-17"
-    last_updated: "2026-02-25"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
     reason: "Add messaging protocol test traceability (ARCH-MESSAGE_HANDLING, IMPL-MESSAGE_HANDLING)"
   name: "UI Inspection and Testability"
   priority: "P1"
@@ -2992,7 +2998,7 @@ REQ-URL_TAGS_DISPLAY:
     - method: "Unit tests for url-tags-manager (normalize, getBadgeDisplayValue)"
 REQ-USABILITY:
   category: "Non-Functional"
-  detail_file: "null"
+  detail_file: "requirements/REQ-USABILITY.yaml"
   name: "Usability"
   priority: "P2"
   rationale:

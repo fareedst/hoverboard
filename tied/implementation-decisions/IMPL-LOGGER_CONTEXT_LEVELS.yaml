@@ -8,7 +8,7 @@ IMPL-LOGGER_CONTEXT_LEVELS:
     - "ARCH-STRUCTURED_LOGGING"
     - "REQ-STRUCTURED_LOGGING"
   detail_file: "implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml"
-  essence_pseudocode: "# [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING]\n# Logger with context, shouldLog, formatMessage, debug/info/warn/error; default logger and createLogger.\n# Contract: context and level/args in; formatted line out; uses getLogLevel.\nINPUT: context (string), level (debug|info|warn|error), message/args\nOUTPUT: formatted log line to console (or transport); no return\nDATA: Logger instance; getLogLevel() from IMPL-LOG_LEVEL_CONFIG\n\n# Store context on instance.\nLogger(context):\n  this.context = context\n\n# Compare level to getLogLevel(); return true if should emit.\nshouldLog(level):\n  minLevel = getLogLevel()\n  RETURN level >= minLevel (by severity order)\n\n# Prefix with context and level; format args.\nformatMessage(level, ...args):\n  RETURN \"[context] level: args...\" or structured format\n\n# Emit only when shouldLog(level); output formatMessage.\ndebug(...), info(...), warn(...), error(...):\n  IF shouldLog(level): OUTPUT formatMessage(level, ...args)\n\nlogger = default Logger; createLogger(context) = new Logger(context).\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS-pseudocode.md"
   implementation_approach:
     details:
       - "debug/info/warn/error(...): if shouldLog(level) then emit formatMessage output"
@@ -22,8 +22,8 @@ IMPL-LOGGER_CONTEXT_LEVELS:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add root key, essence_pseudocode, composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Logger Context and Levels"
   rationale:
     benefits:

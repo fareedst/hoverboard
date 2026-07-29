@@ -1,10 +1,10 @@
 // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] Mock DOM for overlay tests; className/id auto-registration, classList tracking.
-// [OVERLAY-TEST-MOCK-001] Enhanced mock DOM utility for UI/overlay-related tests
-// [OVERLAY-TEST-CLASS-001] Improved class and ID tracking with dynamic updates
-// [OVERLAY-TEST-APPEND-001] Enhanced appendChild simulation with proper registration
-// [OVERLAY-TEST-QUERY-001] Improved query selector with accurate results
+// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced mock DOM utility for UI/overlay-related tests
+// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Improved class and ID tracking with dynamic updates
+// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced appendChild simulation with proper registration
+// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Improved query selector with accurate results
 
-// [OVERLAY-TEST-LOG-001] Debug logging for mock DOM operations
+// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Debug logging for mock DOM operations
 const mockLogger = {
   log: (level, component, message, data = null) => {
     const timestamp = new Date().toISOString()
@@ -93,7 +93,7 @@ function createMockClassList (element) {
 }
 
 function createMockButton(className = '', id = '', registerElement) {
-  // [OVERLAY-TEST-ELEMENT-001] Enhanced button creation with debug logging
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced button creation with debug logging
   mockLogger.log('DEBUG', 'MockDOM', 'Creating button element', { className, id })
   
   const eventListeners = {}
@@ -104,7 +104,7 @@ function createMockButton(className = '', id = '', registerElement) {
     innerHTML: '',
     style: { cssText: '' },
     setAttribute: jest.fn(function (attr, value) {
-      // [OVERLAY-TEST-CLASS-001] Enhanced attribute tracking with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute tracking with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'Button setAttribute called', { attr, value })
       
       if (attr === 'class') {
@@ -120,12 +120,12 @@ function createMockButton(className = '', id = '', registerElement) {
       this[attr] = value
     }),
     getAttribute: jest.fn(function (attr) {
-      // [OVERLAY-TEST-QUERY-001] Enhanced attribute retrieval with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute retrieval with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'Button getAttribute called', { attr, value: this[attr] })
       return this[attr]
     }),
     addEventListener: jest.fn((event, cb) => {
-      // [OVERLAY-TEST-ELEMENT-001] Enhanced event listener tracking
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced event listener tracking
       mockLogger.log('DEBUG', 'MockDOM', 'Button addEventListener called', { event })
       eventListeners[event] = cb
     }),
@@ -141,19 +141,19 @@ function createMockButton(className = '', id = '', registerElement) {
     tabIndex: 0,
     _eventListeners: eventListeners,
     _triggerClick: async function () {
-      // [OVERLAY-TEST-ELEMENT-001] Enhanced click simulation with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced click simulation with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'Button click triggered')
       if (typeof this.onclick === 'function') await this.onclick({ preventDefault: jest.fn() })
       if (eventListeners['click']) await eventListeners['click']({ preventDefault: jest.fn() })
     },
     _triggerKeydown: async function (event) {
-      // [OVERLAY-TEST-ELEMENT-001] Enhanced keyboard simulation with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced keyboard simulation with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'Button keydown triggered', { key: event.key })
       if (typeof this.onkeydown === 'function') await this.onkeydown(event)
       if (eventListeners['keydown']) await eventListeners['keydown'](event)
     },
     appendChild: jest.fn(function (child) {
-      // [OVERLAY-TEST-APPEND-001] Enhanced appendChild with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced appendChild with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'Button appendChild called', { child })
       child.parentNode = this
     }),
@@ -170,7 +170,7 @@ function createMockButton(className = '', id = '', registerElement) {
 }
 
 function createMockInput(className = '', id = '', registerElement) {
-  // [OVERLAY-TEST-ELEMENT-001] Enhanced input creation with debug logging
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced input creation with debug logging
   mockLogger.log('DEBUG', 'MockDOM', 'Creating input element', { className, id })
   
   const input = {
@@ -179,7 +179,7 @@ function createMockInput(className = '', id = '', registerElement) {
     id,
     value: '',
     setAttribute: jest.fn(function (attr, value) {
-      // [OVERLAY-TEST-CLASS-001] Enhanced attribute tracking for input
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute tracking for input
       mockLogger.log('DEBUG', 'MockDOM', 'Input setAttribute called', { attr, value })
       
       if (attr === 'class') {
@@ -195,12 +195,12 @@ function createMockInput(className = '', id = '', registerElement) {
       this[attr] = value
     }),
     getAttribute: jest.fn(function (attr) {
-      // [OVERLAY-TEST-QUERY-001] Enhanced attribute retrieval for input
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute retrieval for input
       mockLogger.log('DEBUG', 'MockDOM', 'Input getAttribute called', { attr, value: this[attr] })
       return this[attr]
     }),
     addEventListener: jest.fn((event, cb) => {
-      // [OVERLAY-TEST-ELEMENT-001] Enhanced event listener tracking for input
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced event listener tracking for input
       mockLogger.log('DEBUG', 'MockDOM', 'Input addEventListener called', { event })
     }),
     dispatchEvent: jest.fn(),
@@ -215,7 +215,7 @@ function createMockInput(className = '', id = '', registerElement) {
 }
 
 function createMockSpan(className = '', id = '', registerElement) {
-  // [OVERLAY-TEST-ELEMENT-001] Enhanced span creation with debug logging
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced span creation with debug logging
   mockLogger.log('DEBUG', 'MockDOM', 'Creating span element', { className, id })
 
   const eventListeners = {}
@@ -225,7 +225,7 @@ function createMockSpan(className = '', id = '', registerElement) {
     id,
     textContent: '',
     setAttribute: jest.fn(function (attr, value) {
-      // [OVERLAY-TEST-CLASS-001] Enhanced attribute tracking for span
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute tracking for span
       mockLogger.log('DEBUG', 'MockDOM', 'Span setAttribute called', { attr, value })
       
       if (attr === 'class') {
@@ -241,12 +241,12 @@ function createMockSpan(className = '', id = '', registerElement) {
       this[attr] = value
     }),
     getAttribute: jest.fn(function (attr) {
-      // [OVERLAY-TEST-QUERY-001] Enhanced attribute retrieval for span
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute retrieval for span
       mockLogger.log('DEBUG', 'MockDOM', 'Span getAttribute called', { attr, value: this[attr] })
       return this[attr]
     }),
     addEventListener: jest.fn((event, cb) => {
-      // [OVERLAY-TEST-ELEMENT-001] Enhanced event listener tracking for span
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced event listener tracking for span
       mockLogger.log('DEBUG', 'MockDOM', 'Span addEventListener called', { event })
       eventListeners[event] = cb
     }),
@@ -279,7 +279,7 @@ function createMockSpan(className = '', id = '', registerElement) {
 }
 
 function createMockDiv(className = '', id = '', registerElement) {
-  // [OVERLAY-TEST-ELEMENT-001] Enhanced div creation with debug logging
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced div creation with debug logging
   mockLogger.log('DEBUG', 'MockDOM', 'Creating div element', { className, id })
   
   const div = {
@@ -289,7 +289,7 @@ function createMockDiv(className = '', id = '', registerElement) {
     innerHTML: '',
     style: { cssText: '' },
     setAttribute: jest.fn(function (attr, value) {
-      // [OVERLAY-TEST-CLASS-001] Enhanced attribute tracking for div
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute tracking for div
       mockLogger.log('DEBUG', 'MockDOM', 'Div setAttribute called', { attr, value })
       
       if (attr === 'class') {
@@ -305,17 +305,17 @@ function createMockDiv(className = '', id = '', registerElement) {
       this[attr] = value
     }),
     getAttribute: jest.fn(function (attr) {
-      // [OVERLAY-TEST-QUERY-001] Enhanced attribute retrieval for div
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute retrieval for div
       mockLogger.log('DEBUG', 'MockDOM', 'Div getAttribute called', { attr, value: this[attr] })
       return this[attr]
     }),
     addEventListener: jest.fn((event, cb) => {
-      // [OVERLAY-TEST-ELEMENT-001] Enhanced event listener tracking for div
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced event listener tracking for div
       mockLogger.log('DEBUG', 'MockDOM', 'Div addEventListener called', { event })
     }),
     dispatchEvent: jest.fn(),
     appendChild: jest.fn(function (child) {
-      // [OVERLAY-TEST-APPEND-001] Enhanced appendChild for div with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced appendChild for div with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'Div appendChild called', { child })
       // Register the child element
       registerElement(child)
@@ -332,7 +332,7 @@ function createMockDiv(className = '', id = '', registerElement) {
 }
 
 function createMockDocument() {
-  // [OVERLAY-TEST-MOCK-001] Enhanced mock document with comprehensive tracking
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced mock document with comprehensive tracking
   mockLogger.log('DEBUG', 'MockDOM', 'Creating enhanced mock document')
   
   const elementsByClass = new Map()
@@ -340,7 +340,7 @@ function createMockDocument() {
   const allElements = []
 
   function registerElement(el) {
-    // [OVERLAY-TEST-CLASS-001] Enhanced element registration with debug logging
+    // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced element registration with debug logging
     mockLogger.log('DEBUG', 'MockDOM', 'Registering element', {
       tagName: el.tagName,
       className: el.className,
@@ -404,7 +404,7 @@ function createMockDocument() {
 
   return {
     createElement: jest.fn((tag) => {
-      // [OVERLAY-TEST-ELEMENT-001] Enhanced element creation with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced element creation with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'createElement called', { tag })
       
       let el
@@ -417,7 +417,7 @@ function createMockDocument() {
       } else if (tag.toLowerCase() === 'div') {
         el = createMockDiv('', '', registerElement)
       } else {
-        // [OVERLAY-TEST-ELEMENT-001] Generic element creation for other tags
+        // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Generic element creation for other tags
         mockLogger.log('DEBUG', 'MockDOM', 'Creating generic element', { tag })
         el = {
           tagName: tag.toUpperCase(),
@@ -426,7 +426,7 @@ function createMockDocument() {
           innerHTML: '',
           style: { cssText: '' },
           setAttribute: jest.fn(function (attr, value) {
-            // [OVERLAY-TEST-CLASS-001] Enhanced attribute tracking for generic elements
+            // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute tracking for generic elements
             mockLogger.log('DEBUG', 'MockDOM', 'Generic element setAttribute called', { tag, attr, value })
             
             if (attr === 'class') {
@@ -440,17 +440,17 @@ function createMockDocument() {
             this[attr] = value
           }),
           getAttribute: jest.fn(function (attr) {
-            // [OVERLAY-TEST-QUERY-001] Enhanced attribute retrieval for generic elements
+            // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced attribute retrieval for generic elements
             mockLogger.log('DEBUG', 'MockDOM', 'Generic element getAttribute called', { tag, attr, value: this[attr] })
             return this[attr]
           }),
           addEventListener: jest.fn((event, cb) => {
-            // [OVERLAY-TEST-ELEMENT-001] Enhanced event listener tracking for generic elements
+            // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced event listener tracking for generic elements
             mockLogger.log('DEBUG', 'MockDOM', 'Generic element addEventListener called', { tag, event })
           }),
           dispatchEvent: jest.fn(),
           appendChild: jest.fn(function (child) {
-            // [OVERLAY-TEST-APPEND-001] Enhanced appendChild for generic elements
+            // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced appendChild for generic elements
             mockLogger.log('DEBUG', 'MockDOM', 'Generic element appendChild called', { tag, child })
             registerElement(child)
             child.parentNode = this
@@ -466,7 +466,7 @@ function createMockDocument() {
     }),
     
     querySelector: jest.fn((selector) => {
-      // [OVERLAY-TEST-QUERY-001] Enhanced querySelector with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced querySelector with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'querySelector called', { selector })
       
       let result = null
@@ -498,7 +498,7 @@ function createMockDocument() {
     }),
     
     querySelectorAll: jest.fn((selector) => {
-      // [OVERLAY-TEST-QUERY-001] Enhanced querySelectorAll with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced querySelectorAll with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'querySelectorAll called', { selector })
       
       let results = []
@@ -526,7 +526,7 @@ function createMockDocument() {
     }),
     
     getElementById: jest.fn((id) => {
-      // [OVERLAY-TEST-QUERY-001] Enhanced getElementById with debug logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced getElementById with debug logging
       mockLogger.log('DEBUG', 'MockDOM', 'getElementById called', { id })
       const result = elementsById.get(id) || null
       mockLogger.log('DEBUG', 'MockDOM', 'getElementById result', { id, found: !!result })
@@ -535,14 +535,14 @@ function createMockDocument() {
     
     body: {
       appendChild: jest.fn((el) => {
-        // [OVERLAY-TEST-APPEND-001] Enhanced body.appendChild with debug logging
+        // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced body.appendChild with debug logging
         mockLogger.log('DEBUG', 'MockDOM', 'body.appendChild called', { element: el.tagName })
         registerElement(el)
         el.parentNode = 'body'
         mockLogger.log('DEBUG', 'MockDOM', 'Element registered in body')
       }),
       removeChild: jest.fn((el) => {
-        // [OVERLAY-TEST-ELEMENT-001] Enhanced body.removeChild with debug logging
+        // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced body.removeChild with debug logging
         mockLogger.log('DEBUG', 'MockDOM', 'body.removeChild called', { element: el.tagName })
       }),
       contains: jest.fn((el) => allElements.includes(el)),
@@ -556,7 +556,7 @@ function createMockDocument() {
       removeChild: jest.fn()
     },
     
-    // [OVERLAY-TEST-RESET-001] Enhanced reset functionality for test isolation
+    // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced reset functionality for test isolation
     reset: () => {
       mockLogger.log('DEBUG', 'MockDOM', 'Resetting mock document state')
       elementsByClass.clear()

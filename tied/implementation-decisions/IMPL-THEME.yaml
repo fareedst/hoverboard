@@ -1,0 +1,35 @@
+IMPL-THEME:
+  code_locations:
+    files: []
+    functions: []
+  cross_references:
+    - "ARCH-THEME"
+    - "REQ-DARK_THEME"
+  decision: "Thin implementation stub for IMPL-THEME."
+  essence_pseudocode_path: "implementation-decisions/IMPL-THEME-pseudocode.md"
+  implementation_approach:
+    summary: "Dark theme default with toggle and persistence"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: align detail traceability with expanded sidecar"
+  name: "Theme"
+  rationale:
+    why: "Theme implementation"
+  related_decisions:
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-THEME"
+    code_annotations:
+      - "IMPL-THEME"
+    requirements:
+      - "REQ-DARK_THEME"
+    tests: []

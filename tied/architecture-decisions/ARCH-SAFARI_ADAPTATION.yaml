@@ -1,0 +1,56 @@
+ARCH-SAFARI_ADAPTATION:
+  alternatives_considered:
+    - name: "Treat Safari like Chrome"
+      cons:
+        - "Known instability"
+      pros: []
+      rejected_reason: "Safari needs adaptations"
+    - name: "Separate Safari codebase"
+      cons:
+        - "Duplicated logic"
+      pros:
+        - "Independent optimization"
+      rejected_reason: "High maintenance cost"
+  cross_references:
+    - "REQ-SAFARI_ADAPTATION"
+  decision: "Thin architecture stub for ARCH-SAFARI_ADAPTATION."
+  implementation_approach:
+    details:
+      - "Active Chrome path: ARCH-CROSS_BROWSER / src/shared/safari-shim.js"
+      - "Deferred: Animation/memory optimizations for Safari"
+      - "Deferred: Bounded recovery and degraded mode"
+      - "Deferred: Safari config (timeouts, retries, opacity)"
+    summary: "Deferred Safari-specific config, optimizations, and error handler. Active browser API shim lives under ARCH-CROSS_BROWSER. safari/ package removed from tree."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Safari Adaptive Architecture"
+  rationale:
+    benefits:
+      - "Clear deferred boundary for Safari product work"
+      - "Cross-browser identity preserved via ARCH-CROSS_BROWSER"
+    problems_solved:
+      - "Active Safari architecture conflicting with Chrome-only identity"
+    why: "Safari requires explicit adaptations when that target is supported again; not part of current Chrome delivery."
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-SAFARI_ADAPTATION"
+    see_also:
+      - "ARCH-CROSS_BROWSER"
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-OVERLAY"
+  status: "Deferred"
+  traceability:
+    code_annotations:
+      - "ARCH-SAFARI_ADAPTATION"
+    implementation:
+      - "IMPL-SAFARI_ADAPTATION"
+    requirements:
+      - "REQ-SAFARI_ADAPTATION"
+    tests: []

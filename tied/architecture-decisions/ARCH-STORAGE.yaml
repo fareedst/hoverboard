@@ -1,0 +1,56 @@
+ARCH-STORAGE:
+  alternatives_considered:
+    - name: "All local storage"
+      cons:
+        - "No cross-device sync"
+      pros:
+        - "Simpler"
+      rejected_reason: "Users need settings sync"
+    - name: "External storage"
+      cons:
+        - "Privacy concerns"
+      pros:
+        - "More capacity"
+      rejected_reason: "Privacy is core value"
+  cross_references:
+    - "REQ-CHROME_STORAGE_USAGE"
+    - "REQ-CONFIG_PORTABILITY"
+  decision: "Thin architecture stub for ARCH-STORAGE."
+  implementation_approach:
+    details:
+      - "Export/import for config portability"
+      - "Local storage for temporary data"
+      - "Sync storage for user settings"
+    summary: "chrome.storage.sync for settings, local for temp data, export/import workflows"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Storage Strategy"
+  rationale:
+    benefits:
+      - "Cross-device settings"
+      - "Data portability"
+    problems_solved:
+      - "Privacy violations"
+      - "Settings lost across devices"
+    why: "Cross-device sync and privacy preservation"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-STORAGE"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-STORAGE"
+    implementation:
+      - "IMPL-STORAGE"
+    requirements:
+      - "REQ-CHROME_STORAGE_USAGE"
+      - "REQ-CONFIG_PORTABILITY"
+    tests: []

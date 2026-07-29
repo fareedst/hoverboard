@@ -520,7 +520,7 @@ The same checklist file applies in two **invocation contexts** (no YAML profiles
 
 | Invocation | When | Layer A | Layer B scope | Gating |
 |------------|------|---------|---------------|--------|
-| `gate-pseudocode-validation` → `sub-pseudocode-validation-pass` | Before RED; no executable tests yet | Required (`TIED-POE-001`) | parsing, schema, symbol_resolution, contract_validation, dependency_graph, reporting | Structural rows must pass; **behavioral_coverage** and **traceability** rows that require test artifacts → mark **N/A** with rationale ("no tests yet"), not ad-hoc waivers |
+| `gate-pseudocode-validation` → `sub-pseudocode-validation-pass` | Before RED; no executable tests yet | Required (`[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was TIED-POE-001)`) | parsing, schema, symbol_resolution, contract_validation, dependency_graph, reporting | Structural rows must pass; **behavioral_coverage** and **traceability** rows that require test artifacts → mark **N/A** with rationale ("no tests yet"), not ad-hoc waivers |
 | `verification-gate` → `sub-pseudocode-validation-pass` | After unit/composition tests exist | Re-run if essence changed | Full checklist including **minimum_gating_rules** | All required rows + minimum gating rules must pass or be documented N/A with rationale |
 
 A pre-RED pass does **not** replace **[PROC-LEAP]** when pseudo-code changes alter REQ or ARCH scope.

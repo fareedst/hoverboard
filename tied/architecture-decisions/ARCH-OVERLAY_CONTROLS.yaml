@@ -1,0 +1,59 @@
+ARCH-OVERLAY_CONTROLS:
+  alternatives_considered:
+    - name: "Dynamic positioning"
+      cons:
+        - "Risk of overlaps"
+      pros: []
+      rejected_reason: "Complex pages cause issues"
+    - name: "CSS-only"
+      cons:
+        - "Host styles override"
+      pros: []
+      rejected_reason: "Need JS enforcement"
+  cross_references:
+    - "REQ-OVERLAY_CONTROL_LAYOUT"
+    - "REQ-OVERLAY_REFRESH_ACTION"
+  decision: "Thin architecture stub for ARCH-OVERLAY_CONTROLS."
+  implementation_approach:
+    details:
+      - "32px spacing, 24px min touch targets"
+      - "Close at top: 8px; left: 8px"
+      - "Full ARIA metadata"
+      - "Refresh at top: 8px; left: 40px"
+      - "Theme CSS variables"
+    summary: "Fixed absolute positioning with inline styles, theme variables, accessibility metadata"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Overlay Control Layout Architecture"
+  rationale:
+    benefits:
+      - "Consistent layout"
+      - "Full accessibility"
+    problems_solved:
+      - "Accessibility issues"
+      - "Control overlaps"
+    why: "Predictable, accessible control placement"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-OVERLAY_CONTROLS"
+    see_also:
+      - "ARCH-OVERLAY"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-OVERLAY_CONTROLS"
+    implementation:
+      - "IMPL-OVERLAY_CONTROLS"
+    requirements:
+      - "REQ-OVERLAY_CONTROL_LAYOUT"
+      - "REQ-OVERLAY_REFRESH_ACTION"
+    tests:
+      - "Overlay close button positioning tests"
+      - "Overlay refresh button tests"

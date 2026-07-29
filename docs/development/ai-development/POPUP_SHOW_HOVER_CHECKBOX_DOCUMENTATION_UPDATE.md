@@ -10,34 +10,34 @@ This document summarizes the documentation updates made to reflect the bug fix a
 
 ## 📋 Documents Updated
 
-### **1. Requirements Document** `[SHOW-HOVER-CHECKBOX-REQ-001]`
+### **1. Requirements Document** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-REQ-001)]`
 **File:** `docs/development/ai-development/POPUP_SHOW_HOVER_CHECKBOX_REQUIREMENTS.md`
 
 **Updates Made:**
 - ✅ Added new success criteria for error-free operation
-- ✅ Added new semantic token `[SHOW-HOVER-CHECKBOX-015]` for bug fix documentation
+- ✅ Added new semantic token `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-015)]` for bug fix documentation
 - ✅ Updated success criteria to include "No service worker errors or 'Loading error' messages"
 - ✅ Updated user experience criteria to include "Smooth operation without requiring page reloads"
 
 **New Content:**
 ```markdown
-### **`[SHOW-HOVER-CHECKBOX-015]` - Bug Fix Documentation**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-015)]` - Bug Fix Documentation**
 - Document the service worker message type fix
 - Explain the use of existing `updateOverlayConfig` message type
 - Document error handling improvements for message broadcasting
 ```
 
-### **2. Semantic Tokens Document** `[SHOW-HOVER-CHECKBOX-TOKENS-001]`
+### **2. Semantic Tokens Document** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-TOKENS-001)]`
 **File:** `docs/development/ai-development/POPUP_SHOW_HOVER_CHECKBOX_SEMANTIC_TOKENS.md`
 
 **Updates Made:**
-- ✅ Added new semantic token `[SHOW-HOVER-CHECKBOX-015]` for bug fix documentation
+- ✅ Added new semantic token `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-015)]` for bug fix documentation
 - ✅ Updated cross-references to include the new token
 - ✅ Added usage guidelines for bug fix documentation
 
 **New Content:**
 ```markdown
-### **`[SHOW-HOVER-CHECKBOX-015]` - Bug Fix Documentation**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-015)]` - Bug Fix Documentation**
 **Definition**: Bug fix documentation requirement
 
 **Usage**:
@@ -46,11 +46,11 @@ This document summarizes the documentation updates made to reflect the bug fix a
 - Service worker message type fixes
 
 **Cross-References**:
-- `[SHOW-HOVER-CHECKBOX-TASK-006]` - Documentation task
-- `[SHOW-HOVER-CHECKBOX-ARCH-003]` - Message pattern requirement
+- `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-TASK-006)]` - Documentation task
+- `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-003)]` - Message pattern requirement
 ```
 
-### **3. Implementation Summary** `[SHOW-HOVER-CHECKBOX-SUMMARY-001]`
+### **3. Implementation Summary** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-SUMMARY-001)]`
 **File:** `docs/development/ai-development/POPUP_SHOW_HOVER_CHECKBOX_IMPLEMENTATION_SUMMARY.md`
 
 **Updates Made:**
@@ -80,20 +80,20 @@ This document summarizes the documentation updates made to reflect the bug fix a
 **Result**: ✅ No more service worker errors or "Loading error" messages
 ```
 
-### **4. Architectural Decisions** `[SHOW-HOVER-CHECKBOX-ARCH-001]`
+### **4. Architectural Decisions** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-001)]`
 **File:** `docs/development/ai-development/POPUP_SHOW_HOVER_CHECKBOX_ARCHITECTURAL_DECISIONS.md`
 
 **Updates Made:**
 - ✅ Added bug fix documentation section
 - ✅ Updated message pattern usage to reflect the fix
-- ✅ Added new semantic token `[SHOW-HOVER-CHECKBOX-BUG-001]` for the bug fix
+- ✅ Added new semantic token `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-BUG-001)]` for the bug fix
 - ✅ Updated implementation details to show the corrected message type
 
 **New Content:**
 ```markdown
 ## 🐛 Bug Fix Documentation
 
-### **`[SHOW-HOVER-CHECKBOX-BUG-001]` - Service Worker Message Type Error**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-BUG-001)]` - Service Worker Message Type Error**
 **Issue**: The initial implementation used an undefined `BROADCAST_CONFIG_UPDATE` message type, causing service worker errors and "Loading error" messages.
 
 **Root Cause**: The service worker's message handler only recognizes predefined message types from `MESSAGE_TYPES` constants. The undefined message type was rejected, causing the error.
@@ -107,7 +107,7 @@ This document summarizes the documentation updates made to reflect the bug fix a
 **Architectural Impact**: This fix demonstrates the importance of using existing, tested message patterns rather than creating new ones unnecessarily.
 ```
 
-### **5. Impact Analysis** `[SHOW-HOVER-CHECKBOX-IMPACT-001]`
+### **5. Impact Analysis** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-IMPACT-001)]`
 **File:** `docs/development/ai-development/POPUP_SHOW_HOVER_CHECKBOX_IMPACT_ANALYSIS.md`
 
 **Updates Made:**
@@ -120,7 +120,7 @@ This document summarizes the documentation updates made to reflect the bug fix a
 **Bug Fix Applied**: The initial implementation had a service worker message type error that was resolved by using the existing `updateOverlayConfig` message type instead of an undefined `BROADCAST_CONFIG_UPDATE` type. This fix ensures smooth operation without any service worker errors or loading issues.
 ```
 
-### **6. Implementation Plan** `[SHOW-HOVER-CHECKBOX-PLAN-001]`
+### **6. Implementation Plan** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-PLAN-001)]`
 **File:** `docs/development/ai-development/POPUP_SHOW_HOVER_CHECKBOX_IMPLEMENTATION_PLAN.md`
 
 **Updates Made:**
@@ -149,15 +149,15 @@ This document summarizes the documentation updates made to reflect the bug fix a
 
 ## 📋 New Semantic Tokens Added
 
-### **`[SHOW-HOVER-CHECKBOX-015]` - Bug Fix Documentation**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-015)]` - Bug Fix Documentation**
 **Definition**: Bug fix documentation requirement
 **Usage**: Bug fix documentation, error resolution documentation, service worker message type fixes
-**Cross-References**: `[SHOW-HOVER-CHECKBOX-TASK-006]`, `[SHOW-HOVER-CHECKBOX-ARCH-003]`
+**Cross-References**: `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-TASK-006)]`, `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-003)]`
 
-### **`[SHOW-HOVER-CHECKBOX-BUG-001]` - Service Worker Message Type Error**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-BUG-001)]` - Service Worker Message Type Error**
 **Definition**: Service worker message type error and resolution
 **Usage**: Bug fix documentation, architectural decisions, implementation guidance
-**Cross-References**: `[SHOW-HOVER-CHECKBOX-ARCH-003]`, `[SHOW-HOVER-CHECKBOX-015]`
+**Cross-References**: `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-003)]`, `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-015)]`
 
 ## 📋 Code Changes Reflected
 
@@ -228,14 +228,14 @@ expect(popupController.sendMessage).toHaveBeenCalledWith({
 ## 📋 Cross-Reference Coordination
 
 ### **Existing Requirements Coordination**
-- **`[POPUP-CLOSE-BEHAVIOR-001]`**: ✅ Popup must remain open after checkbox changes
-- **`[CFG-003]`**: ✅ Configuration management patterns must be followed
-- **`[POPUP-ARCH-001]`**: ✅ Architecture must support new UI element
-- **`[UI-BEHAVIOR-001]`**: ✅ UI behavior patterns must be consistent
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]`**: ✅ Popup must remain open after checkbox changes
+- **`[[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)]`**: ✅ Configuration management patterns must be followed
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`**: ✅ Architecture must support new UI element
+- **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]`**: ✅ UI behavior patterns must be consistent
 
 ### **New Requirements Coordination**
-- **`[SHOW-HOVER-CHECKBOX-015]`**: ✅ Bug fix documentation requirement
-- **`[SHOW-HOVER-CHECKBOX-BUG-001]`**: ✅ Service worker message type error resolution
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-015)]`**: ✅ Bug fix documentation requirement
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-BUG-001)]`**: ✅ Service worker message type error resolution
 
 ## 📋 Future Considerations
 

@@ -48,7 +48,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml"
-  essence_pseudocode: "# [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-LOCAL_BOOKMARKS_INDEX]\n# Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column.\n# Contract: page load and user actions; displayed table and filtered list; state data.\nINPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)\nOUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list\nDATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode\n\n# Request aggregated bookmarks; on failure fallback to local; then apply filter.\nON page load:\n  SEND getAggregatedBookmarksForIndex\n  ON response: SET allBookmarks = response.bookmarks (each item has storage \"local\"|\"file\"|\"sync\")\n  ON failure: SEND getLocalBookmarksForIndex; SET allBookmarks = response.bookmarks with storage \"local\"\n  applySearchAndFilter()\n\n# Apply stores filter, search, show-only, exclude tags; sort and render.\napplySearchAndFilter():\n  filteredBookmarks = allBookmarks\n  APPLY stores filter (matchStoresFilter, getAllowedStores)\n  APPLY search (text)\n  APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)\n  APPLY exclude tags (matchExcludeTags)\n  SORT by sortKey (e.g. time desc)\n  renderTableBody(filteredBookmarks); updateRowCount()\n\n# Popup button and options link open bookmarks-table tab.\nEntry points:\n  Popup: bookmarksIndexBtn click -> openBookmarksIndex -> open tab to bookmarks-table.html\n  Options: bookmarks-index-link href -> extension URL to bookmarks-table.html\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX-pseudocode.md"
   implementation_approach:
     details:
       - "BookmarkRouter.getAllBookmarksForIndex(): aggregates localProvider, fileProvider, syncProvider getAllBookmarks(), adds storage 'local'|'file'|'sync', merges and sorts by time desc"
@@ -63,8 +63,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

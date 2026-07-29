@@ -1,6 +1,6 @@
 /**
  * Dark theme default - [REQ-DARK_THEME] [IMPL-POPUP_THEME_CSS] [ARCH-THEME]
- * 🌙 DARK-THEME-DEFAULT-001: Tests for dark theme as default.
+ * 🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME]: Tests for dark theme as default.
  */
 
 import { ConfigManager } from '../../src/config/config-manager.js';

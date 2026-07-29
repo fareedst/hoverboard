@@ -1,12 +1,12 @@
-# 🛡️ UI-005 Transparent Overlay System - PROTECTION DOCUMENT
+# 🛡️ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Transparent Overlay System - PROTECTION DOCUMENT
 
 ## 🚨 CRITICAL PRODUCTION FEATURE - PROTECTED STATUS
 
-**WARNING**: This document protects the UI-005 Transparent Overlay System from inadvertent changes during AI-assisted development. All requirements, implementations, and specifications contained herein are **IMMUTABLE** and must be preserved.
+**WARNING**: This document protects the [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Transparent Overlay System from inadvertent changes during AI-assisted development. All requirements, implementations, and specifications contained herein are **IMMUTABLE** and must be preserved.
 
 ## 📋 FEATURE OVERVIEW
 
-**UI-005** is the **Transparent Overlay System** that provides advanced transparency functionality for the Hoverboard extension's overlay interface. This system enables users to have overlays that adapt their visibility based on user interaction, mouse proximity, and configuration settings.
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)** is the **Transparent Overlay System** that provides advanced transparency functionality for the Hoverboard extension's overlay interface. This system enables users to have overlays that adapt their visibility based on user interaction, mouse proximity, and configuration settings.
 
 ### 🎯 Core Functionality
 - **Multi-mode Transparency**: Three distinct transparency modes for different use cases
@@ -85,7 +85,7 @@
 
 #### `src/features/content/content-main.js`
 **PROTECTED SECTIONS**:
-- Lines 38, 47, 85, 230: UI-005 transparency configuration integration
+- Lines 38, 47, 85, 230: [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) transparency configuration integration
 - Transparency settings initialization and management
 
 #### `src/features/content/overlay-styles.css`
@@ -93,7 +93,7 @@
 - `.hoverboard-overlay-transparent` - Nearly-transparent styling
 - `.hoverboard-overlay-invisible` - Fully-transparent styling
 - `.proximity-active` - Adaptive visibility state
-- All UI-005 related CSS rules and selectors
+- All [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) related CSS rules and selectors
 
 ## 🚫 PROHIBITED MODIFICATIONS
 
@@ -152,17 +152,17 @@
 
 ## 🔄 RELATIONSHIP WITH OTHER SYSTEMS
 
-### UI-VIS-001/002 Integration
-- **UI-005** provides the **foundational transparency engine**
-- **UI-VIS-001/002** provides the **user interface controls**
+### [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)/002 Integration
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)** provides the **foundational transparency engine**
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)/002** provides the **user interface controls**
 - **Both systems are complementary and MUST coexist**
-- UI-VIS-001/002 builds upon UI-005's transparency capabilities
+- [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)/002 builds upon [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)'s transparency capabilities
 - Neither system should replace or supersede the other
 
 ### ConfigManager Dependencies
-- UI-005 requires configuration values from ConfigManager
+- [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) requires configuration values from ConfigManager
 - Opacity settings must be preserved in configuration schema
-- Any ConfigManager changes must maintain UI-005 compatibility
+- Any ConfigManager changes must maintain [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) compatibility
 
 ## 📊 IMPLEMENTATION STATUS
 
@@ -174,18 +174,18 @@
 
 ## 🚨 VIOLATION CONSEQUENCES
 
-Any unauthorized modifications to UI-005 protected elements will:
+Any unauthorized modifications to [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) protected elements will:
 1. Break transparency functionality for existing users
 2. Cause accessibility regression for keyboard/screen reader users
 3. Disable adaptive visibility features
 4. Potentially cause CSS rendering failures
 5. Break configuration integration
 
-**ALL UI-005 MODIFICATIONS REQUIRE EXPLICIT HUMAN APPROVAL**
+**ALL [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) MODIFICATIONS REQUIRE EXPLICIT HUMAN APPROVAL**
 
 ## 📞 ESCALATION PROTOCOL
 
-If AI-assisted development encounters UI-005 protected elements:
+If AI-assisted development encounters [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) protected elements:
 1. **STOP** - Do not proceed with modifications
 2. **DOCUMENT** - Record what changes were attempted
 3. **ESCALATE** - Request human review and approval
@@ -199,4 +199,4 @@ If AI-assisted development encounters UI-005 protected elements:
 
 ---
 
-**🛡️ This document serves as the definitive protection specification for UI-005. All AI development must respect and preserve these requirements.** 
+**🛡️ This document serves as the definitive protection specification for [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005). All AI development must respect and preserve these requirements.** 

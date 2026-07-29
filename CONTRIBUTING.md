@@ -122,13 +122,12 @@ hoverboard/
 
 ### Semantic Tokens
 
-This project uses semantic tokens for cross-referencing. All features must include appropriate tokens:
+This project uses TIED semantic tokens for cross-referencing (`REQ-*`, `ARCH-*`, `IMPL-*`, optional `TEST-*`). Annotate code and tests with the triplet that matches the requirement stack, e.g. `[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM]`.
 
-- `CHROME-EXT-*`: Chrome-specific features (legacy numbered tokens)
-- `SAFARI-EXT-*`: Legacy numbered tokens (out of scope; Safari product deferred)
-- `CORE-*`: Core functionality
-- `UI-*`: User interface features
-- `TEST-*`: Testing-related features
+- Registry: `tied/semantic-tokens.yaml`
+- Legacy numbered IDs (`CFG-001`, `OVERLAY-REFRESH-001`, …) map to TIED tokens in [`tied/docs/numbered-token-mapping.md`](tied/docs/numbered-token-mapping.md)
+- `SAFARI-*` numbered tokens are out of scope (Safari product deferred; leave unmodified if still present)
+- Validate with `./scripts/validate_tokens.sh` / `npm run validate:tokens`
 
 ## Pull Request Process
 

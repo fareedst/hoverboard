@@ -1,0 +1,36 @@
+ARCH-SYNC_STORAGE_PROVIDER:
+  alternatives_considered: []
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  decision: "Thin architecture stub for ARCH-SYNC_STORAGE_PROVIDER."
+  implementation_approach:
+    summary: "SyncBookmarkService mirrors LocalBookmarkService using chrome.storage.sync and key hoverboard_sync_bookmarks; VALID_BACKENDS and BookmarkRouter extended with sync."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Sync Storage Bookmark Provider (Fourth Backend)"
+  rationale:
+    benefits:
+      - "Quota ~100 KB; documented so users can choose"
+      - "Sync across devices signed into same Chrome profile"
+    problems_solved:
+      - "No built-in sync option besides Pinboard"
+    why: "Offer bookmarks synced across Chrome profile devices without external API; same provider contract as local/file"
+  related_decisions:
+    depends_on: []
+    informs: []
+    see_also: []
+  status: "Active"
+  traceability:
+    implementation:
+      - "IMPL-SYNC_BOOKMARK_SERVICE"
+    requirements:
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+      - "REQ-STORAGE_MODE_DEFAULT"

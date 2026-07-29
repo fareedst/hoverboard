@@ -1,7 +1,7 @@
 # OVERLAY DATA DISPLAY SUMMARY
 
-**Semantic Token:** [OVERLAY-DATA-DISPLAY-001]
-**Cross-References:** [OVERLAY-DATA-FIX-001], [OVERLAY-DATA-REFRESH-001], [OVERLAY-DATA-STRUCTURE-001], [TOGGLE_SYNC_OVERLAY], [TAG_SYNC_OVERLAY], [SAFARI-EXT-SHIM-001]
+**Semantic Token:** [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]
+**Cross-References:** [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-FIX-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-REFRESH-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-STRUCTURE-001)], [TOGGLE_SYNC_OVERLAY], [TAG_SYNC_OVERLAY], [SAFARI-EXT-SHIM-001]
 **Date:** 2025-07-15
 **Status:** ✅ Implemented and Tested
 
@@ -35,7 +35,7 @@ The `actualResponse` was the entire response object `{ success: true, data: { ..
 ## Solution Implementation
 
 ### 1. Content Script Response Handling Fix
-**[OVERLAY-DATA-FIX-001]** - Content script response handling fix
+**[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-FIX-001)]** - Content script response handling fix
 
 **Fix Applied:**
 ```javascript
@@ -49,7 +49,7 @@ this.currentBookmark = actualResponse.data || actualResponse
 - Ensure data structure consistency
 
 ### 2. Overlay Content Refresh Mechanism
-**[OVERLAY-DATA-REFRESH-001]** - Overlay content refresh mechanism
+**[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-REFRESH-001)]** - Overlay content refresh mechanism
 
 **Decision:**
 - Disabled automatic refresh to prevent data loss
@@ -62,7 +62,7 @@ this.currentBookmark = actualResponse.data || actualResponse
 - Prevents data loss during overlay display
 
 ### 3. Data Structure Validation
-**[OVERLAY-DATA-STRUCTURE-001]** - Bookmark data structure validation
+**[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-STRUCTURE-001)]** - Bookmark data structure validation
 
 **Enhancements:**
 - Added comprehensive debug logging
@@ -143,21 +143,21 @@ console.log('🎨 [Overlay Debug] - Tags is array:', Array.isArray(content.bookm
 
 ### Code Comments
 ```javascript
-// [OVERLAY-DATA-FIX-001] Content script response handling fix
+// [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-FIX-001)] Content script response handling fix
 this.currentBookmark = actualResponse.data || actualResponse
 
-// [OVERLAY-DATA-REFRESH-001] Disabled automatic refresh to prevent data loss
-debugLog('[OVERLAY-DATA-FIX-001] Using original content data')
+// [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-REFRESH-001)] Disabled automatic refresh to prevent data loss
+debugLog('[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-FIX-001)] Using original content data')
 
-// [OVERLAY-DATA-DEBUG-001] Enhanced debugging for overlay content
+// [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DEBUG-001)] Enhanced debugging for overlay content
 console.log('🎨 [Overlay Debug] Content received:', content)
 ```
 
 ### Test Cases
 ```javascript
-// [OVERLAY-DATA-TEST-001] Overlay data display test
+// [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-TEST-001)] Overlay data display test
 describe('Overlay Data Display', () => {
-  it('[OVERLAY-DATA-FIX-001] should display bookmark tags correctly', () => {
+  it('[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-FIX-001)] should display bookmark tags correctly', () => {
     // Test overlay tag display functionality
   });
 });
@@ -201,4 +201,4 @@ describe('Overlay Data Display', () => {
 
 ---
 
-**[OVERLAY-DATA-DISPLAY-001]** - Master semantic token for overlay data display functionality 
+**[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]** - Master semantic token for overlay data display functionality 

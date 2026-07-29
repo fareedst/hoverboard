@@ -2,14 +2,14 @@
 
 **Date:** 2025-07-19  
 **Status:** Active Planning  
-**Semantic Tokens:** `OVERLAY-TEST-DEBUG-001`, `OVERLAY-TEST-MOCK-001`, `OVERLAY-TEST-LOG-001`, `OVERLAY-TEST-ACCESS-001`  
-**Cross-References:** `OVERLAY-REFRESH-001`, `SAFARI-EXT-TEST-001`, `SAFARI-EXT-DEBUG-001`, `OVERLAY-DATA-DISPLAY-001`
+**Semantic Tokens:** `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-DEBUG-001)`, `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`, `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)`, `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)`  
+**Cross-References:** `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)`, `SAFARI-EXT-TEST-001`, `SAFARI-EXT-DEBUG-001`, `[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)`
 
 ## 🎯 Overview
 
 This document outlines a comprehensive plan for debugging overlay accessibility testing issues and implementing enhanced console logging for critical information and branching decisions. The plan addresses the specific problems identified with mock DOM and OverlayManager integration, and establishes robust logging standards for diagnosing communications.
 
-## [OVERLAY-TEST-DEBUG-001] Core Debugging Strategy
+## [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-DEBUG-001)] Core Debugging Strategy
 
 ### Problem Analysis
 
@@ -51,7 +51,7 @@ This document outlines a comprehensive plan for debugging overlay accessibility 
 - Implement communication diagnostic logging
 - Create logging level management
 
-## [OVERLAY-TEST-MOCK-001] Mock DOM Enhancement Plan
+## [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Mock DOM Enhancement Plan
 
 ### Current Mock DOM Analysis
 
@@ -101,9 +101,9 @@ function createMockDocument() {
 
 **Task 1: Enhanced Element Creation**
 ```javascript
-// [OVERLAY-TEST-MOCK-001] Enhanced element creation with debug output
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Enhanced element creation with debug output
 function createMockElement(tagName, className = '', id = '') {
-  console.log(`[OVERLAY-TEST-MOCK-001] Creating element: ${tagName}, class: ${className}, id: ${id}`)
+  console.log(`[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Creating element: ${tagName}, class: ${className}, id: ${id}`)
   
   const element = {
     tagName: tagName.toUpperCase(),
@@ -112,16 +112,16 @@ function createMockElement(tagName, className = '', id = '') {
     // Enhanced properties and methods
   }
   
-  console.log(`[OVERLAY-TEST-MOCK-001] Element created:`, element)
+  console.log(`[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Element created:`, element)
   return element
 }
 ```
 
 **Task 2: Improved Class Tracking**
 ```javascript
-// [OVERLAY-TEST-MOCK-001] Enhanced class tracking with debug output
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Enhanced class tracking with debug output
 function registerElementByClass(element, className) {
-  console.log(`[OVERLAY-TEST-MOCK-001] Registering element by class: ${className}`)
+  console.log(`[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Registering element by class: ${className}`)
   
   if (!className) return
   
@@ -129,11 +129,11 @@ function registerElementByClass(element, className) {
     if (!cls) return
     if (!elementsByClass.has(cls)) {
       elementsByClass.set(cls, [])
-      console.log(`[OVERLAY-TEST-MOCK-001] Created new class registry: ${cls}`)
+      console.log(`[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Created new class registry: ${cls}`)
     }
     if (!elementsByClass.get(cls).includes(element)) {
       elementsByClass.get(cls).push(element)
-      console.log(`[OVERLAY-TEST-MOCK-001] Added element to class: ${cls}`)
+      console.log(`[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Added element to class: ${cls}`)
     }
   })
 }
@@ -141,9 +141,9 @@ function registerElementByClass(element, className) {
 
 **Task 3: Enhanced appendChild**
 ```javascript
-// [OVERLAY-TEST-MOCK-001] Enhanced appendChild with proper registration
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Enhanced appendChild with proper registration
 appendChild: jest.fn((child) => {
-  console.log(`[OVERLAY-TEST-MOCK-001] appendChild called with:`, child)
+  console.log(`[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] appendChild called with:`, child)
   
   // Register the child element
   registerElement(child)
@@ -151,11 +151,11 @@ appendChild: jest.fn((child) => {
   // Update parent-child relationship
   child.parentNode = this
   
-  console.log(`[OVERLAY-TEST-MOCK-001] Child registered and parent set`)
+  console.log(`[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Child registered and parent set`)
 })
 ```
 
-## [OVERLAY-TEST-LOG-001] Console Logging Enhancement Plan
+## [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Console Logging Enhancement Plan
 
 ### Critical Information Logging Requirements
 
@@ -181,7 +181,7 @@ appendChild: jest.fn((child) => {
 
 **Log Level Definitions:**
 ```javascript
-// [OVERLAY-TEST-LOG-001] Log level definitions
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Log level definitions
 const LOG_LEVELS = {
   ERROR: 0,    // Critical errors and failures
   WARN: 1,     // Warnings and potential issues
@@ -193,7 +193,7 @@ const LOG_LEVELS = {
 
 **Log Format Standards:**
 ```javascript
-// [OVERLAY-TEST-LOG-001] Standard log format
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Standard log format
 function logMessage(level, component, message, data = null) {
   const timestamp = new Date().toISOString()
   const prefix = `[${timestamp}] [${level}] [${component}]`
@@ -208,7 +208,7 @@ function logMessage(level, component, message, data = null) {
 
 **Critical Information Logging:**
 ```javascript
-// [OVERLAY-TEST-LOG-001] Critical information logging examples
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Critical information logging examples
 logMessage('INFO', 'OverlayManager', 'show() called', { content })
 logMessage('DEBUG', 'OverlayManager', 'Creating overlay element')
 logMessage('DEBUG', 'OverlayManager', 'Element created', { element })
@@ -217,7 +217,7 @@ logMessage('INFO', 'OverlayManager', 'Overlay shown successfully')
 
 **Branching Decision Logging:**
 ```javascript
-// [OVERLAY-TEST-LOG-001] Branching decision logging
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Branching decision logging
 if (condition) {
   logMessage('DEBUG', 'Component', 'Condition met, executing branch A')
   // Branch A logic
@@ -231,7 +231,7 @@ if (condition) {
 
 **Task 1: OverlayManager Logging Enhancement**
 ```javascript
-// [OVERLAY-TEST-LOG-001] Enhanced OverlayManager logging
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Enhanced OverlayManager logging
 class OverlayManager {
   async show(content) {
     this.logger.log('INFO', 'OverlayManager', 'show() called', { content })
@@ -259,7 +259,7 @@ class OverlayManager {
 
 **Task 2: Mock DOM Logging Enhancement**
 ```javascript
-// [OVERLAY-TEST-LOG-001] Enhanced mock DOM logging
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Enhanced mock DOM logging
 function createMockDocument() {
   const logger = new Logger('MockDOM')
   
@@ -285,7 +285,7 @@ function createMockDocument() {
 }
 ```
 
-## [OVERLAY-TEST-ACCESS-001] Accessibility Testing Enhancement Plan
+## [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Accessibility Testing Enhancement Plan
 
 ### Current Accessibility Test Issues
 
@@ -319,8 +319,8 @@ function createMockDocument() {
 
 **Task 1: Enhanced ARIA Testing**
 ```javascript
-// [OVERLAY-TEST-ACCESS-001] Enhanced ARIA attribute testing
-test('[OVERLAY-TEST-ACCESS-001] Should have proper ARIA attributes', async () => {
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Enhanced ARIA attribute testing
+test('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Should have proper ARIA attributes', async () => {
   // Arrange
   const content = createMockBookmarkContent()
   
@@ -329,39 +329,39 @@ test('[OVERLAY-TEST-ACCESS-001] Should have proper ARIA attributes', async () =>
   const refreshButton = mockDocument.querySelector('.refresh-button')
   
   // Enhanced assertions with detailed logging
-  console.log('[OVERLAY-TEST-ACCESS-001] Testing ARIA attributes for button:', refreshButton)
+  console.log('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Testing ARIA attributes for button:', refreshButton)
   
   expect(refreshButton).not.toBeNull()
   expect(refreshButton.getAttribute('aria-label')).toBe('Refresh Data')
   expect(refreshButton.getAttribute('role')).toBe('button')
   expect(refreshButton.getAttribute('tabindex')).toBe('0')
   
-  console.log('[OVERLAY-TEST-ACCESS-001] ARIA attributes test passed')
+  console.log('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] ARIA attributes test passed')
 })
 ```
 
 **Task 2: Enhanced Keyboard Testing**
 ```javascript
-// [OVERLAY-TEST-ACCESS-001] Enhanced keyboard navigation testing
-test('[OVERLAY-TEST-ACCESS-001] Should handle keyboard navigation', async () => {
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Enhanced keyboard navigation testing
+test('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Should handle keyboard navigation', async () => {
   // Arrange
   const content = createMockBookmarkContent()
   await overlayManager.show(content)
   const refreshButton = mockDocument.querySelector('.refresh-button')
   
-  console.log('[OVERLAY-TEST-ACCESS-001] Testing keyboard navigation for button:', refreshButton)
+  console.log('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Testing keyboard navigation for button:', refreshButton)
   
   // Test Enter key
   const enterEvent = { key: 'Enter', preventDefault: jest.fn() }
   await refreshButton._triggerKeydown(enterEvent)
   
-  console.log('[OVERLAY-TEST-ACCESS-001] Enter key test completed')
+  console.log('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Enter key test completed')
   
   // Test Space key
   const spaceEvent = { key: ' ', preventDefault: jest.fn() }
   await refreshButton._triggerKeydown(spaceEvent)
   
-  console.log('[OVERLAY-TEST-ACCESS-001] Space key test completed')
+  console.log('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Space key test completed')
   
   // Assertions
   expect(enterEvent.preventDefault).toHaveBeenCalled()
@@ -374,19 +374,19 @@ test('[OVERLAY-TEST-ACCESS-001] Should handle keyboard navigation', async () => 
 ### Phase 1: Mock DOM Enhancement (Week 1)
 
 **Tasks:**
-1. **Enhanced Element Creation** (`OVERLAY-TEST-MOCK-001`)
+1. **Enhanced Element Creation** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`)
    - Improve element type support
    - Add comprehensive attribute tracking
    - Implement element lifecycle simulation
    - Add debug output for element creation
 
-2. **Improved Class and ID Tracking** (`OVERLAY-TEST-MOCK-001`)
+2. **Improved Class and ID Tracking** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`)
    - Enhance class name parsing
    - Add dynamic class update support
    - Improve ID registration and lookup
    - Add class/ID change event simulation
 
-3. **Enhanced appendChild Simulation** (`OVERLAY-TEST-MOCK-001`)
+3. **Enhanced appendChild Simulation** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`)
    - Proper element registration
    - Parent-child relationship tracking
    - DOM tree structure simulation
@@ -395,19 +395,19 @@ test('[OVERLAY-TEST-ACCESS-001] Should handle keyboard navigation', async () => 
 ### Phase 2: OverlayManager Debug Enhancement (Week 1)
 
 **Tasks:**
-1. **Detailed Element Creation Logging** (`OVERLAY-TEST-LOG-001`)
+1. **Detailed Element Creation Logging** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)`)
    - Log element creation flow
    - Track element registration
    - Log class assignment
    - Add state tracking
 
-2. **Critical Decision Logging** (`OVERLAY-TEST-LOG-001`)
+2. **Critical Decision Logging** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)`)
    - Log all conditional branches
    - Track function entry/exit
    - Log error conditions
    - Track state changes
 
-3. **Communication Diagnostic Logging** (`OVERLAY-TEST-LOG-001`)
+3. **Communication Diagnostic Logging** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)`)
    - Log message passing
    - Track API calls
    - Log event handling
@@ -416,19 +416,19 @@ test('[OVERLAY-TEST-ACCESS-001] Should handle keyboard navigation', async () => 
 ### Phase 3: Test Environment Improvements (Week 2)
 
 **Tasks:**
-1. **Enhanced beforeEach Reset** (`OVERLAY-TEST-MOCK-001`)
+1. **Enhanced beforeEach Reset** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`)
    - Complete mock document reset
    - Element registry cleanup
    - State isolation
    - Test execution tracing
 
-2. **Test State Validation** (`OVERLAY-TEST-MOCK-001`)
+2. **Test State Validation** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`)
    - Pre-test state verification
    - Post-test cleanup validation
    - Test isolation verification
    - State consistency checks
 
-3. **Comprehensive Test Isolation** (`OVERLAY-TEST-MOCK-001`)
+3. **Comprehensive Test Isolation** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`)
    - Independent test execution
    - State isolation mechanisms
    - Resource cleanup
@@ -437,19 +437,19 @@ test('[OVERLAY-TEST-ACCESS-001] Should handle keyboard navigation', async () => 
 ### Phase 4: Accessibility Testing Enhancement (Week 2)
 
 **Tasks:**
-1. **ARIA Attribute Testing** (`OVERLAY-TEST-ACCESS-001`)
+1. **ARIA Attribute Testing** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)`)
    - Proper attribute simulation
    - ARIA role management
    - Accessibility tree simulation
    - Screen reader compatibility
 
-2. **Keyboard Navigation Testing** (`OVERLAY-TEST-ACCESS-001`)
+2. **Keyboard Navigation Testing** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)`)
    - Complete event simulation
    - Focus management
    - Tab order simulation
    - Keyboard shortcut handling
 
-3. **Focus Management Testing** (`OVERLAY-TEST-ACCESS-001`)
+3. **Focus Management Testing** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)`)
    - Focus state tracking
    - Focus indicator simulation
    - Focus restoration
@@ -461,9 +461,9 @@ test('[OVERLAY-TEST-ACCESS-001] Should handle keyboard navigation', async () => 
 
 **Mock DOM Testing:**
 ```javascript
-// [OVERLAY-TEST-MOCK-001] Mock DOM unit tests
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Mock DOM unit tests
 describe('Enhanced Mock DOM', () => {
-  test('[OVERLAY-TEST-MOCK-001] Should properly register elements', () => {
+  test('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Should properly register elements', () => {
     const mockDoc = createMockDocument()
     const button = mockDoc.createElement('button')
     button.className = 'test-button'
@@ -472,7 +472,7 @@ describe('Enhanced Mock DOM', () => {
     expect(foundButton).toBe(button)
   })
   
-  test('[OVERLAY-TEST-MOCK-001] Should handle appendChild correctly', () => {
+  test('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Should handle appendChild correctly', () => {
     const mockDoc = createMockDocument()
     const parent = mockDoc.createElement('div')
     const child = mockDoc.createElement('span')
@@ -486,9 +486,9 @@ describe('Enhanced Mock DOM', () => {
 
 **OverlayManager Testing:**
 ```javascript
-// [OVERLAY-TEST-LOG-001] OverlayManager logging tests
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] OverlayManager logging tests
 describe('OverlayManager Logging', () => {
-  test('[OVERLAY-TEST-LOG-001] Should log critical decisions', () => {
+  test('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Should log critical decisions', () => {
     const consoleSpy = jest.spyOn(console, 'log')
     
     overlayManager.show(mockContent)
@@ -502,9 +502,9 @@ describe('OverlayManager Logging', () => {
 
 **Accessibility Testing:**
 ```javascript
-// [OVERLAY-TEST-ACCESS-001] Accessibility testing
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Accessibility testing
 describe('Accessibility Features', () => {
-  test('[OVERLAY-TEST-ACCESS-001] Should have proper ARIA attributes', async () => {
+  test('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Should have proper ARIA attributes', async () => {
     await overlayManager.show(mockContent)
     const button = mockDocument.querySelector('.refresh-button')
     
@@ -550,7 +550,7 @@ describe('Accessibility Features', () => {
 
 ## 🔧 Architectural Decisions
 
-### [OVERLAY-TEST-DEBUG-001] Debug Strategy Architecture
+### [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-DEBUG-001)] Debug Strategy Architecture
 
 **Decision:** Implement comprehensive logging system with multiple levels and component tracking.
 
@@ -566,7 +566,7 @@ describe('Accessibility Features', () => {
 - Add component-specific logging for targeted debugging
 - Coordinate with existing `SAFARI-EXT-DEBUG-001` logging system
 
-### [OVERLAY-TEST-MOCK-001] Mock DOM Architecture
+### [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Mock DOM Architecture
 
 **Decision:** Enhance mock DOM to properly simulate real DOM behavior with comprehensive element tracking.
 
@@ -582,7 +582,7 @@ describe('Accessibility Features', () => {
 - Enhance appendChild and querySelector functionality
 - Add debug output for element operations
 
-### [OVERLAY-TEST-LOG-001] Logging Architecture
+### [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Logging Architecture
 
 **Decision:** Establish standardized logging system for critical information and branching decisions.
 
@@ -598,7 +598,7 @@ describe('Accessibility Features', () => {
 - Add critical decision point logging
 - Coordinate with existing logging infrastructure
 
-### [OVERLAY-TEST-ACCESS-001] Accessibility Testing Architecture
+### [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Accessibility Testing Architecture
 
 **Decision:** Enhance accessibility testing with proper ARIA and keyboard navigation simulation.
 
@@ -637,10 +637,10 @@ describe('Accessibility Features', () => {
 ## 🔄 Coordination with Existing Requirements
 
 ### Cross-Reference Coordination
-- **`OVERLAY-REFRESH-001`**: Coordinates with overlay refresh button testing
+- **`[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)`**: Coordinates with overlay refresh button testing
 - **`SAFARI-EXT-TEST-001`**: Coordinates with Safari extension testing
 - **`SAFARI-EXT-DEBUG-001`**: Coordinates with Safari debugging system
-- **`OVERLAY-DATA-DISPLAY-001`**: Coordinates with overlay data display testing
+- **`[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)`**: Coordinates with overlay data display testing
 
 ### Architecture Coordination
 - **Safari Extension Architecture**: Coordinates with Safari testing requirements
@@ -658,18 +658,18 @@ describe('Accessibility Features', () => {
 
 | Task | Semantic Token | Priority | Status |
 |------|----------------|----------|--------|
-| Enhanced Mock DOM Implementation | `OVERLAY-TEST-MOCK-001` | High | Planned |
-| OverlayManager Debug Enhancement | `OVERLAY-TEST-LOG-001` | High | Planned |
-| Test Environment Improvements | `OVERLAY-TEST-MOCK-001` | Medium | Planned |
-| Accessibility Testing Enhancement | `OVERLAY-TEST-ACCESS-001` | Medium | Planned |
-| Console Logging Standards | `OVERLAY-TEST-LOG-001` | High | Planned |
+| Enhanced Mock DOM Implementation | `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)` | High | Planned |
+| OverlayManager Debug Enhancement | `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)` | High | Planned |
+| Test Environment Improvements | `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)` | Medium | Planned |
+| Accessibility Testing Enhancement | `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)` | Medium | Planned |
+| Console Logging Standards | `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)` | High | Planned |
 
 ## 🎯 Next Steps
 
-1. **Implement Enhanced Mock DOM** (`OVERLAY-TEST-MOCK-001`)
-2. **Enhance OverlayManager Logging** (`OVERLAY-TEST-LOG-001`)
-3. **Improve Test Environment** (`OVERLAY-TEST-MOCK-001`)
-4. **Enhance Accessibility Testing** (`OVERLAY-TEST-ACCESS-001`)
-5. **Establish Logging Standards** (`OVERLAY-TEST-LOG-001`)
+1. **Implement Enhanced Mock DOM** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`)
+2. **Enhance OverlayManager Logging** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)`)
+3. **Improve Test Environment** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`)
+4. **Enhance Accessibility Testing** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)`)
+5. **Establish Logging Standards** (`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)`)
 
 This plan provides a comprehensive approach to debugging overlay testing issues and implementing robust console logging for critical information and branching decisions, following the established semantic token system and coordinating with all existing requirements. 

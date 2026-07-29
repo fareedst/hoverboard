@@ -5,19 +5,19 @@ ARCH-EXAMPLE_DECISION:
   alternatives_considered: []
   created: "YYYY-MM-DD"
   cross-references: "[REQ-EXAMPLE_FEATURE]"
-  cross_references: &ref_0
+  cross_references: &ref_1
     - "REQ-EXAMPLE_FEATURE"
   decision: "[Your Architecture Choice - describe the high-level architectural decision]"
   detail_file: "architecture-decisions/ARCH-EXAMPLE_DECISION.yaml"
   implementation_approach:
     details:
       - "1. **Component A**: Description of what it does\n2. **Component B**: Description of what it does\n3. **Component C**: Description of what it does"
-    integration_points: &ref_1
+    integration_points: &ref_0
       - "External System 1: How we integrate"
       - "External System 2: How we integrate"
     key_components: "1. **Component A**: Description of what it does\n2. **Component B**: Description of what it does\n3. **Component C**: Description of what it does"
     summary: "High-level approach description\nKey components and their responsibilities\nIntegration points with other systems\nData flow overview"
-  integration_points: *ref_1
+  integration_points: *ref_0
   key_components: "1. **Component A**: Description of what it does\n2. **Component B**: Description of what it does\n3. **Component C**: Description of what it does"
   last_updated: "YYYY-MM-DD"
   metadata:
@@ -25,9 +25,9 @@ ARCH-EXAMPLE_DECISION:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Normalize token_coverage and validation_evidence keys"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -38,16 +38,21 @@ ARCH-EXAMPLE_DECISION:
     problems_solved: []
     why: "Matches requirement [REQ-EXAMPLE_FEATURE]\nProvides benefits X, Y, Z\nSimpler implementation\n[Add more rationale points]"
   related_decisions:
-    depends_on: *ref_0
+    depends_on: *ref_1
     informs: []
     see_also: []
   status: "Active"
-  token_coverage_`[proc-token_audit]`: "Code files expected to carry `[IMPL-*] [ARCH-*] [REQ-*]` comments:\n- [ ] `path/to/main.ext` - Annotate entry points with `[IMPL-EXAMPLE_IMPLEMENTATION] [ARCH-EXAMPLE_DECISION] [REQ-EXAMPLE_FEATURE]`\n\nTests expected to reference `[REQ-*]` / `[TEST-*]` tokens:\n- [ ] `testCoreFeature_REQ_EXAMPLE_FEATURE` plus inline `[REQ-EXAMPLE_FEATURE]` comments validate behavior"
+  token_coverage:
+    code_files: []
+    tests: []
   traceability:
     code_annotations:
       - "ARCH-EXAMPLE_DECISION"
       - "REQ-EXAMPLE_FEATURE"
     implementation: []
-    requirements: *ref_0
+    requirements: *ref_1
     tests: []
-  validation_evidence_`[proc-token_validation]`: "| Date | Commit | Validation Result | Notes |\n|------|--------|-------------------|-------|\n| YYYY-MM-DD | `abc1234` | ⏳ Pending | Awaiting implementation |"
+  validation_evidence:
+    - date: "2026-07-28"
+      notes: "Template example"
+      result: "Pending"

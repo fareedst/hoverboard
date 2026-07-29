@@ -17,7 +17,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   cross_references:
     - "ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
     - "REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
-  essence_pseudocode: "# [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]\n# Regex find-and-replace on selected fields; applyRegexReplace (pure); regexReplaceSelected sends saveBookmark when changed.\n# Pure function: build payload and set changed iff any selected field value changed.\napplyRegexReplace(bookmark, patternStr, replacementStr, options { title, url, tags, notes }):\n  TRY reg = new RegExp(patternStr, 'g')\n  CATCH e RETURN { payload: null, error: e.message }\n  IF !bookmark || !bookmark.url RETURN { payload: null, error: 'missing bookmark or url' }\n  IF !patternStr || !patternStr.trim() RETURN { payload: null, error: 'empty pattern' }\n  IF !options.title && !options.url && !options.tags && !options.notes RETURN { payload: null, error: 'no fields selected' }\n  origDesc = String(bookmark.description ?? ''); origUrl = String(bookmark.url ?? ''); origTags = [...]; origExt = String(bookmark.extended ?? '')\n  desc = origDesc; u = origUrl; tagsArr = [...]; ext = origExt\n  TRY IF options.title: desc = desc.replace(reg, replacementStr); IF options.url: u = u.replace(reg, replacementStr); IF options.tags: tagsArr = ...; IF options.notes: ext = ext.replace(reg, replacementStr)\n  CATCH e RETURN { payload: null, error: e.message }\n  changed = (opts.title && desc !== origDesc) || (opts.url && u !== origUrl) || (opts.tags && tagsArr differs from origTags) || (opts.notes && ext !== origExt)\n  payload = { url, description: desc, tags: tagsArr, extended: ext, preferredBackend, ...time/updated_at/shared/toread }\n  RETURN { payload, error: null, changed }\n\n# Per selected URL apply regex; save only when changed; refresh and restore selection.\nregexReplaceSelected():\n  patternStr = regexInput.value.trim(); replacementStr = replacementInput.value\n  IF !patternStr || selectedUrls.size === 0 RETURN\n  options = { title, url, tags, notes } from checkboxes\n  IF no field selected: show error; RETURN\n  TRY RegExp(patternStr); CATCH: show error; RETURN\n  byUrl = Map(allBookmarks: url -> bookmark)\n  FOR url IN selectedUrls: b = byUrl.get(url); IF !b CONTINUE; result = applyRegexReplace(b, patternStr, replacementStr, options); IF result.error show and RETURN; IF !result.payload CONTINUE; IF result.changed === false CONTINUE; SEND saveBookmark(result.payload)\n  urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); selectionStillVisible; renderTableBody(); clear error; updateMoveControlsState()\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE-pseudocode.md"
   implementation_approach:
     details:
       - "applyRegexReplace: compute new desc, u, tagsArr, ext from replace; compare only selected fields to originals; changed = true if any selected field differs; RETURN { payload, error: null, changed }. Preserve time, shared, toread in payload."
@@ -29,8 +29,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "New implementation for Regex find-and-replace on selected"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-20"
       result: "pass"

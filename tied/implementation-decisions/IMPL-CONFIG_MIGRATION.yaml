@@ -10,7 +10,7 @@ IMPL-CONFIG_MIGRATION:
     - "ARCH-CONFIG_STRUCTURE"
     - "REQ-CONFIG_PORTABILITY"
   detail_file: "implementation-decisions/IMPL-CONFIG_MIGRATION.yaml"
-  essence_pseudocode: "# [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY]\n# Auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam; options save writes token.\n\n# Contract: setAuthToken takes token; getAuthToken/hasAuth/getAuthParam return token, boolean, or param value.\nINPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)\nOUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)\nDATA: auth stored in sync storage; default config (retry settings)\n\n# Load from sync storage; return token or null; write token; hasAuth = getAuthToken() !== null; getAuthParam from config.\ngetAuthToken():\n  TRY LOAD auth from sync storage\n  RETURN token or null\n\nsetAuthToken(token):\n  WRITE token to sync storage (auth key)\n\nhasAuth():\n  RETURN getAuthToken() !== null\n\ngetAuthParam(name):\n  LOAD default config or stored config\n  RETURN value for name (e.g. retry count)\n\n# Read token from UI; setAuthToken(token).\non save settings (options UI):\n  READ token from UI\n  setAuthToken(token)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CONFIG_MIGRATION-pseudocode.md"
   implementation_approach:
     details: []
     summary: "ConfigManager auth token methods; sync storage for auth; graceful degradation on missing storage"
@@ -20,8 +20,8 @@ IMPL-CONFIG_MIGRATION:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Config Migration and Auth"
   rationale:
     benefits: []

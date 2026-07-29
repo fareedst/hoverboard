@@ -11,7 +11,7 @@ IMPL-AI_TAGGING_PROVIDER:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
     - "REQ-TAG_INPUT_SANITIZATION"
-  essence_pseudocode: "# [IMPL-AI_TAGGING_PROVIDER] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-TAG_INPUT_SANITIZATION]\n# Call provider API (OpenAI or Gemini) with prompt + text; parse lines, sanitizeTag each, dedupe, slice to limit.\n\n# Contract: inputs = provider, apiKey, text, limit; output = array of sanitized tags up to limit.\nINPUT: provider, apiKey, text (string), limit (number)\nOUTPUT: string[] (sanitized tags, max length limit)\n\n# Build prompt; per-provider POST (chat completions / generateContent); split response on newlines; trim, sanitizeTag, dedupe case-insensitive, cap at limit.\nrequestAiTags(provider, apiKey, text, limit):\n  prompt = \"Return only a list of up to \" + limit + \" tags for this page, one tag per line. No numbering or explanation.\\n\\nPage content:\\n\" + text.slice(0, 12000)\n  IF provider === 'openai':\n    body = { model: 'gpt-4o-mini', messages: [{ role: 'user', content: prompt }], max_tokens: 1024 }\n    res = fetch('https://api.openai.com/v1/chat/completions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + apiKey }, body: JSON.stringify(body) })\n    data = await res.json()\n    raw = data.choices[0].message.content\n  IF provider === 'gemini':\n    body = { contents: [{ parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 1024 } }\n    res = fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' + apiKey, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })\n    data = await res.json()\n    raw = data.candidates[0].content.parts[0].text\n  lines = raw.split(/\\r?\\n/).map(l => l.trim()).filter(Boolean)\n  tags = []\n  seen = new Set()\n  FOR line IN lines:\n    tag = sanitizeTag(line)\n    IF tag && !seen.has(tag.toLowerCase()): tags.push(tag); seen.add(tag.toLowerCase())\n    IF tags.length >= limit BREAK\n  RETURN tags\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_TAGGING_PROVIDER-pseudocode.md"
   implementation_approach:
     details:
       - "Split response on newlines; each line trim; sanitizeTag(line); filter out null/empty; unique; slice(0, limit)"
@@ -24,8 +24,8 @@ IMPL-AI_TAGGING_PROVIDER:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "OpenAI/Gemini Tag Request"
   rationale:
     benefits:

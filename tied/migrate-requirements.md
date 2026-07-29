@@ -1,6 +1,6 @@
 # Migration Guide: Requirements File Structure
 
-**TIED Methodology Version**: 1.4.0  
+**TIED Methodology Version**: 2.2.0  
 **Audience**: AI Agents and Contributors
 
 This document provides step-by-step instructions for migrating a project from a **monolithic** `requirements.md` file to the **scalable index + detail files** structure.

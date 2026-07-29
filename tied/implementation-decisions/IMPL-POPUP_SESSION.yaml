@@ -19,7 +19,7 @@ IMPL-POPUP_SESSION:
     - "ARCH-POPUP_SESSION"
     - "REQ-POPUP_PERSISTENT_SESSION"
   detail_file: "implementation-decisions/IMPL-POPUP_SESSION.yaml"
-  essence_pseudocode: "# [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION]\n# PopupController handlers await messages; StateManager and UIManager updates; no window.close.\n# Contract: user actions and GET_OVERLAY_STATE; popup open and state/UI in sync.\nINPUT: user actions (show overlay, toggle private, save, etc.); GET_OVERLAY_STATE fallback\nOUTPUT: popup stays open; state and UI updated; no window.close\nDATA: StateManager (overlay visible, bookmark, etc.); UIManager (button states, labels)\n\n# Await message; update state and UI; inline notification; do not close.\nPopupController handler (e.g. handleShowHoverboard):\n  AWAIT send message (e.g. TOGGLE_OVERLAY)\n  StateManager.update(...); UIManager.updateShowHoverButtonState(...)\n  INLINE notification if needed; DO NOT call window.close\n\n# On open sync overlay state to StateManager and UIManager.\nON popup open: SEND GET_OVERLAY_STATE; SYNC state to StateManager and UIManager\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_SESSION-pseudocode.md"
   implementation_approach:
     details:
       - "GET_OVERLAY_STATE fallback"
@@ -34,8 +34,8 @@ IMPL-POPUP_SESSION:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Popup Session Persistence Implementation"
   rationale:
     benefits:

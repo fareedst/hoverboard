@@ -12,7 +12,7 @@ IMPL-NATIVE_HOST_WRAPPER:
     - "ARCH-NATIVE_HOST"
     - "REQ-NATIVE_HOST_WRAPPER"
   detail_file: "implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml"
-  essence_pseudocode: "# [IMPL-NATIVE_HOST_WRAPPER] [ARCH-NATIVE_HOST] [REQ-NATIVE_HOST_WRAPPER]\n# Length-prefixed JSON on stdin/stdout; ping/pong; delegate to helper for other messages.\n# Contract: stdin length+JSON in; stdout length+JSON out; helper path from install dir.\nINPUT: stdin — 4-byte length (native byte order) then UTF-8 JSON message (max 64 MiB from Chrome)\nOUTPUT: stdout — 4-byte length then UTF-8 JSON response (max 1 MB to Chrome); stderr for debug/TRACE\nDATA: install_dir = dir of executable; helper = helper.sh (Unix) or helper.exe then helper.ps1 (Windows)\n\n# Read length-prefixed message; ping->pong; else invoke helper and forward response.\nloop:\n  READ 4-byte length L\n  READ L bytes UTF-8 into message\n  PARSE message as JSON\n\n  # Respond to ping with pong.\n  IF message.type === \"ping\":\n    WRITE length-prefixed JSON {\"type\":\"pong\"} to stdout\n    CONTINUE\n\n  # Resolve helper; if missing echo request or pong per product rule.\n  RESOLVE helper path from install_dir (helper.sh or helper.ps1/helper.exe)\n  IF no helper:\n    ECHO request or pong to stdout (per product rule)\n    CONTINUE\n\n  # Invoke helper; read single JSON from stdout; write length-prefixed to stdout.\n  INVOKE helper with message JSON on stdin\n  READ helper stdout as single JSON object\n  WRITE length-prefixed response to stdout\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-NATIVE_HOST_WRAPPER-pseudocode.md"
   implementation_approach:
     details: []
     summary: "Go binary in native_host/; 4-byte length (native order) + UTF-8 JSON; max 64 MiB in, 1 MB out; ping/pong; helper in same dir (helper.sh or helper.ps1 on Windows)."
@@ -22,8 +22,8 @@ IMPL-NATIVE_HOST_WRAPPER:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

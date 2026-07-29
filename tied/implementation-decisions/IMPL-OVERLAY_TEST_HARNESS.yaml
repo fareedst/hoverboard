@@ -8,7 +8,7 @@ IMPL-OVERLAY_TEST_HARNESS:
     - "ARCH-OVERLAY_TESTABILITY"
     - "REQ-OVERLAY_SYSTEM"
   detail_file: "implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.yaml"
-  essence_pseudocode: "# [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT]\n# Mock DOM with auto-registration by className/id and classList tracking for overlay tests.\n# Contract: test setup and overlay create calls; mock registry and classList log.\nINPUT: test setup (no real DOM); overlay manager create calls\nOUTPUT: mock DOM with auto-registered className/id; classList/attribute operations trackable\nDATA: mock element registry (by className, id); classList add/remove log\n\n# Register element when className or id is assigned.\nON element creation / property assign (className, id):\n  REGISTER element in registry by className and id\n\n# Record classList operations for assertions.\nclassList.add/remove: RECORD operation for assertions\n\n# Create mock document/body; inject overlay; run show; assert registry and classList.\nTest setup: CREATE mock document/body; INJECT overlay into mock; RUN show(); ASSERT registry and classList state\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-OVERLAY_TEST_HARNESS-pseudocode.md"
   implementation_approach:
     details:
       - "Auto-register on property assignments"
@@ -21,8 +21,8 @@ IMPL-OVERLAY_TEST_HARNESS:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Overlay Test Harness Implementation"
   rationale:
     benefits:

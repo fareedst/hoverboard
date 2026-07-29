@@ -6,7 +6,7 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
     functions: []
   cross_references: []
   detail_file: "implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.yaml"
-  essence_pseudocode: "# [IMPL-POPUP_MESSAGE_TIMEOUT]\n# Promise-based send with timeout; reject on timeout or error.\n# Contract: message and timeout in; Promise resolve/reject out.\nINPUT: message (type, payload); timeout (ms)\nOUTPUT: Promise that resolves with response or rejects on timeout/error\nDATA: timeout handle; optional test mock for timeout value\n\n# Race send Promise with timeout; clear timeout on resolve/reject.\nsendWithTimeout(message, timeoutMs):\n  promise = SEND message (Promise from message service)\n  timeoutId = SET timeout for timeoutMs -> REJECT with timeout error\n  ON promise resolve/reject: CLEAR timeoutId; RETURN promise result\n  RETURN promise (race with timeout)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT-pseudocode.md"
   implementation_approach:
     details:
       - "Error handling"
@@ -19,8 +19,8 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Popup Message Timeout Implementation"
   rationale:
     benefits:

@@ -74,8 +74,8 @@ export class ConfigManager {
       SETTINGS: 'hoverboard_settings',
       STORAGE_MODE: 'hoverboard_storage_mode', // [ARCH-LOCAL_STORAGE_PROVIDER] - Bookmark storage mode (pinboard | local)
       INHIBIT_URLS: 'hoverboard_inhibit_urls',
-      RECENT_TAGS: 'hoverboard_recent_tags', // [IMMUTABLE-REQ-TAG-001] - Tag storage key
-      TAG_FREQUENCY: 'hoverboard_tag_frequency' // [IMMUTABLE-REQ-TAG-001] - Tag frequency storage key
+      RECENT_TAGS: 'hoverboard_recent_tags', // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Tag storage key
+      TAG_FREQUENCY: 'hoverboard_tag_frequency' // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Tag frequency storage key
     }
 
     // IMPL-FEATURE_FLAGS: Default configuration provides baseline behavior
@@ -120,7 +120,7 @@ export class ConfigManager {
       uxUrlStripHash: false, // Preserve URL hash by default (maintain full URL context)
       uxShowSectionLabels: false, // Show section labels in popup (Quick Actions, Search Tabs)
 
-      // [IMMUTABLE-REQ-TAG-003] - Recent tags configuration
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Recent tags configuration
       // IMPLEMENTATION DECISION: Conservative defaults for shared memory management
       recentTagsMaxListSize: 50, // Maximum recent tags in shared memory
       recentTagsMaxDisplayCount: 10, // Maximum tags to display in UI
@@ -141,7 +141,7 @@ export class ConfigManager {
       pinRetryCountMax: 2, // Maximum retry attempts
       pinRetryDelay: 1000, // in ms - delay between retries
 
-      // ⭐ UI-006: Visibility Controls - 🎨 Per-window overlay appearance defaults
+      // ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility Controls - 🎨 Per-window overlay appearance defaults
       // IMPLEMENTATION DECISION: Conservative defaults for broad compatibility and readability
       defaultVisibilityTheme: 'light-on-dark', // 'light-on-dark' | 'dark-on-light' - Dark theme default
       defaultTransparencyEnabled: false, // Conservative default - solid background for readability
@@ -225,7 +225,7 @@ export class ConfigManager {
       recentPostsCount: config.initRecentPostsCount,
       showHoverOnPageLoad: config.showHoverOnPageLoad,
       hoverShowTooltips: config.hoverShowTooltips,
-      // UI-006: Visibility defaults for configuration UI
+      // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility defaults for configuration UI
       defaultVisibilityTheme: config.defaultVisibilityTheme,
       defaultTransparencyEnabled: config.defaultTransparencyEnabled,
       defaultBackgroundOpacity: config.defaultBackgroundOpacity,
@@ -284,7 +284,7 @@ export class ConfigManager {
    * Get visibility default settings
    * @returns {Promise<Object>} Visibility defaults object
    *
-   * UI-006: Visibility defaults retrieval
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility defaults retrieval
    * IMPLEMENTATION DECISION: Dedicated method for overlay visibility configuration
    */
   async getVisibilityDefaults () {
@@ -300,7 +300,7 @@ export class ConfigManager {
    * Update visibility default settings
    * @param {{ textTheme?: string, transparencyEnabled?: boolean, backgroundOpacity?: number }} visibilitySettings - New visibility defaults
    *
-   * UI-006: Visibility defaults update
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility defaults update
    * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
    */
   async updateVisibilityDefaults (visibilitySettings) {
@@ -581,24 +581,24 @@ export class ConfigManager {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced tag storage management
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced tag storage management
    * @param {string[]} tags - Array of tags to store
    * @returns {Promise<void>}
    */
   async updateRecentTags (tags) {
     try {
-      // [IMMUTABLE-REQ-TAG-001] - Validate tags array
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate tags array
       if (!Array.isArray(tags)) {
-        console.warn('[IMMUTABLE-REQ-TAG-001] Invalid tags array provided')
+        console.warn('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Invalid tags array provided')
         return
       }
 
-      // [IMMUTABLE-REQ-TAG-001] - Enforce storage limits
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enforce storage limits
       const config = await this.getConfig()
       const maxTags = config.recentTagsCountMax || 50
       const limitedTags = tags.slice(0, maxTags)
 
-      // [IMMUTABLE-REQ-TAG-001] - Store tags with timestamp
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Store tags with timestamp
       await chrome.storage.sync.set({
         [this.storageKeys.RECENT_TAGS]: {
           tags: limitedTags,
@@ -607,9 +607,9 @@ export class ConfigManager {
         }
       })
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to update recent tags:', error)
+      console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to update recent tags:', error)
 
-      // [IMMUTABLE-REQ-TAG-001] - Fallback to local storage
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Fallback to local storage
       try {
         await chrome.storage.local.set({
           [this.storageKeys.RECENT_TAGS]: {
@@ -619,24 +619,24 @@ export class ConfigManager {
           }
         })
       } catch (fallbackError) {
-        console.error('[IMMUTABLE-REQ-TAG-001] Fallback storage also failed:', fallbackError)
+        console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Fallback storage also failed:', fallbackError)
       }
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Get recent tags with deduplication
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get recent tags with deduplication
    * @returns {Promise<string[]>} Array of recent tags
    */
   async getRecentTags () {
     try {
-      // [IMMUTABLE-REQ-TAG-001] - Try sync storage first
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Try sync storage first
       const syncResult = await chrome.storage.sync.get(this.storageKeys.RECENT_TAGS)
       if (syncResult[this.storageKeys.RECENT_TAGS]) {
         return syncResult[this.storageKeys.RECENT_TAGS].tags || []
       }
 
-      // [IMMUTABLE-REQ-TAG-001] - Fallback to local storage
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Fallback to local storage
       const localResult = await chrome.storage.local.get(this.storageKeys.RECENT_TAGS)
       if (localResult[this.storageKeys.RECENT_TAGS]) {
         return localResult[this.storageKeys.RECENT_TAGS].tags || []
@@ -644,13 +644,13 @@ export class ConfigManager {
 
       return []
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to get recent tags:', error)
+      console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to get recent tags:', error)
       return []
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Get tag frequency data
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get tag frequency data
    * @returns {Promise<Object>} Tag frequency map
    */
   async getTagFrequency () {
@@ -658,13 +658,13 @@ export class ConfigManager {
       const result = await chrome.storage.local.get(this.storageKeys.TAG_FREQUENCY)
       return result[this.storageKeys.TAG_FREQUENCY] || {}
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to get tag frequency:', error)
+      console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to get tag frequency:', error)
       return {}
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Update tag frequency
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Update tag frequency
    * @param {Object} frequency - Updated frequency map
    * @returns {Promise<void>}
    */
@@ -674,12 +674,12 @@ export class ConfigManager {
         [this.storageKeys.TAG_FREQUENCY]: frequency
       })
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to update tag frequency:', error)
+      console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to update tag frequency:', error)
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Clean up old tags to manage storage
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Clean up old tags to manage storage
    * @returns {Promise<void>}
    */
   async cleanupOldTags () {
@@ -693,7 +693,7 @@ export class ConfigManager {
         await this.updateRecentTags(trimmedTags)
       }
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-001] Failed to cleanup old tags:', error)
+      console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to cleanup old tags:', error)
     }
   }
 }

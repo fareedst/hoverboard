@@ -1,5 +1,5 @@
 /**
- * [POPUP-CLOSE-BEHAVIOR-006] Popup close behavior - [REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION]
+ * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Popup close behavior - [REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION]
  */
 
 import { PopupController } from '../../src/ui/popup/PopupController.js'
@@ -67,7 +67,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
   })
 
   describe('handleShowHoverboard', () => {
-    test('[POPUP-CLOSE-BEHAVIOR-006] should not call closePopup after toggle', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] should not call closePopup after toggle', async () => {
       // Mock successful toggle response
       popupController.sendToTab.mockResolvedValue({
         success: true,
@@ -95,7 +95,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
       expect(mockUIManager.updateShowHoverButtonState).toHaveBeenCalledWith(true)
     })
 
-    test('[POPUP-CLOSE-BEHAVIOR-006] should handle toggle response data correctly', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] should handle toggle response data correctly', async () => {
       // Mock toggle response with overlay state
       popupController.sendToTab.mockResolvedValue({
         success: true,
@@ -110,7 +110,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
       expect(mockUIManager.updateShowHoverButtonState).toHaveBeenCalledWith(false)
     })
 
-    test('[POPUP-CLOSE-BEHAVIOR-006] should fallback to updateOverlayState when no response data', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] should fallback to updateOverlayState when no response data', async () => {
       // Mock toggle response without data
       popupController.sendToTab.mockResolvedValue({
         success: true
@@ -129,7 +129,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
   })
 
   describe('updateOverlayState', () => {
-    test('[POPUP-CLOSE-BEHAVIOR-005] should update UI with overlay state', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] should update UI with overlay state', async () => {
       popupController.currentTab = { id: 1, url: 'https://example.com' }
       // Mock GET_OVERLAY_STATE response
       popupController.sendToTab.mockResolvedValue({
@@ -152,7 +152,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
       expect(mockUIManager.updateShowHoverButtonState).toHaveBeenCalledWith(true)
     })
 
-    test('[POPUP-CLOSE-BEHAVIOR-ARCH-005] should handle errors gracefully', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] should handle errors gracefully', async () => {
       // Mock error response
       popupController.sendToTab.mockRejectedValue(new Error('Network error'))
 
@@ -164,7 +164,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
   })
 
   describe('Other button handlers', () => {
-    test('[POPUP-CLOSE-BEHAVIOR-006] handleTogglePrivate should NOT call closePopup', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] handleTogglePrivate should NOT call closePopup', async () => {
       // Test handleTogglePrivate
       popupController.sendMessage = jest.fn().mockResolvedValue({ success: true })
       popupController.currentPin = { shared: 'yes' }
@@ -175,7 +175,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
       expect(popupController.closePopup).not.toHaveBeenCalled()
     })
 
-    test('[POPUP-CLOSE-BEHAVIOR-006] handleReadLater should NOT call closePopup', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] handleReadLater should NOT call closePopup', async () => {
       // Test handleReadLater
       popupController.sendMessage = jest.fn().mockResolvedValue({ success: true })
       popupController.currentPin = { toread: 'no' }
@@ -186,7 +186,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
       expect(popupController.closePopup).not.toHaveBeenCalled()
     })
 
-    test('[POPUP-CLOSE-BEHAVIOR-FIX-001] handleDeletePin should NOT call closePopup', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] handleDeletePin should NOT call closePopup', async () => {
       // Test handleDeletePin with new behavior - popup stays open
       popupController.currentPin = { url: 'https://example.com' }
       
@@ -243,7 +243,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
       expect(popupController.uiManager.showSuccess).toHaveBeenCalledWith('Bookmark deleted successfully')
     })
 
-    test('[POPUP-CLOSE-BEHAVIOR-FIX-001] handleReloadExtension should NOT call closePopup', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] handleReloadExtension should NOT call closePopup', async () => {
       // Test handleReloadExtension with new behavior - popup stays open
       popupController.currentTab = { id: 123 }
 
@@ -263,7 +263,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
       expect(popupController.uiManager.showSuccess).toHaveBeenCalled()
     })
 
-    test('[POPUP-CLOSE-BEHAVIOR-FIX-001] handleOpenOptions should NOT call closePopup', async () => {
+    test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] handleOpenOptions should NOT call closePopup', async () => {
       // Test handleOpenOptions with new behavior - popup stays open
       
       // Mock chrome API
@@ -284,7 +284,7 @@ describe('[REQ-POPUP_PERSISTENT_SESSION] [IMPL-POPUP_SESSION] Popup Close Behavi
   })
 })
 
-describe('[POPUP-CLOSE-BEHAVIOR-005] UIManager Show Hover Button State', () => {
+describe('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] UIManager Show Hover Button State', () => {
   let uiManager
 
   beforeEach(() => {
@@ -311,7 +311,7 @@ describe('[POPUP-CLOSE-BEHAVIOR-005] UIManager Show Hover Button State', () => {
     uiManager.elements.showHoverBtn = mockShowHoverBtn
   })
 
-  test('[POPUP-CLOSE-BEHAVIOR-005] should update button text and icon for visible overlay', () => {
+  test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] should update button text and icon for visible overlay', () => {
     const mockActionIcon = { textContent: '' }
 
     uiManager.elements.showHoverBtn.querySelector
@@ -324,7 +324,7 @@ describe('[POPUP-CLOSE-BEHAVIOR-005] UIManager Show Hover Button State', () => {
     expect(uiManager.elements.showHoverBtn.setAttribute).toHaveBeenCalledWith('aria-label', 'Hide hoverboard overlay')
   })
 
-  test('[POPUP-CLOSE-BEHAVIOR-005] should update button text and icon for hidden overlay', () => {
+  test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] should update button text and icon for hidden overlay', () => {
     const mockActionIcon = { textContent: '' }
 
     uiManager.elements.showHoverBtn.querySelector
@@ -337,7 +337,7 @@ describe('[POPUP-CLOSE-BEHAVIOR-005] UIManager Show Hover Button State', () => {
     expect(uiManager.elements.showHoverBtn.setAttribute).toHaveBeenCalledWith('aria-label', 'Show hoverboard overlay')
   })
 
-  test('[POPUP-CLOSE-BEHAVIOR-005] should handle missing button elements gracefully', () => {
+  test('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] should handle missing button elements gracefully', () => {
     uiManager.elements.showHoverBtn = null
 
     // Should not throw error

@@ -8,7 +8,7 @@ IMPL-URL_INHIBITION:
     - "ARCH-CONFIG_STRUCTURE"
     - "REQ-SITE_MANAGEMENT"
   detail_file: "implementation-decisions/IMPL-URL_INHIBITION.yaml"
-  essence_pseudocode: "# [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT]\n# getInhibitUrls, addInhibitUrl, setInhibitUrls, isUrlInhibited (substring match).\n# Contract: url or newEntry/fullList; list or success or boolean.\nINPUT: url (string), optional newEntry (for add), optional fullList (for set)\nOUTPUT: list of inhibit URLs (get); success (add/set); boolean (isUrlInhibited)\nDATA: inhibit list stored as newline-separated string in config\n\n# Read config and return split trimmed non-empty lines.\ngetInhibitUrls():\n  READ config inhibit list\n  RETURN split by newline (trimmed, non-empty)\n\n# Append if not present and persist.\naddInhibitUrl(newEntry):\n  list = getInhibitUrls()\n  IF newEntry not in list: APPEND newEntry; setInhibitUrls(list)\n  PERSIST\n\n# Write list as newline-separated and persist.\nsetInhibitUrls(fullList):\n  WRITE list as newline-separated string to config\n  PERSIST\n\n# True if url contains any entry as substring.\nisUrlInhibited(url):\n  list = getInhibitUrls()\n  FOR each entry IN list: IF url contains entry (substring) RETURN true\n  RETURN false\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-URL_INHIBITION-pseudocode.md"
   implementation_approach:
     details:
       - "isUrlInhibited(url): true if url contains any stored entry as substring (or exact match per implementation)"
@@ -20,8 +20,8 @@ IMPL-URL_INHIBITION:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add root key, essence_pseudocode, composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "URL Inhibition"
   rationale:
     benefits:

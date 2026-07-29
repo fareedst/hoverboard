@@ -10,7 +10,7 @@
 
 ## 🏆 Major Accomplishments
 
-### ✅ MIGRATION-003: Configuration System Migration (COMPLETE)
+### ✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-003): Configuration System Migration (COMPLETE)
 **Status**: 🟢 **FULLY MIGRATED**
 
 #### **Configuration Architecture**
@@ -39,7 +39,7 @@
 
 ---
 
-### ✅ MIGRATION-004: Core Service Layer (COMPLETE)
+### ✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-004): Core Service Layer (COMPLETE)
 **Status**: 🟢 **FULLY MIGRATED**
 
 #### **Background Service Migration**

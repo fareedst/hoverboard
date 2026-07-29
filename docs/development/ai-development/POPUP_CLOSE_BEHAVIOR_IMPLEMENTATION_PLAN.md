@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-15  
 **Status:** Implementation Planning  
-**Cross-References:** `[POPUP-CLOSE-BEHAVIOR-001]` through `[POPUP-CLOSE-BEHAVIOR-014]`, `[POPUP-ARCH-001]`, `[POPUP-REFRESH-001]`
+**Cross-References:** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-014)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`
 
 ## 🎯 Implementation Overview
 
@@ -10,7 +10,7 @@ This plan addresses the requirement that the Show Hover button must NOT close th
 
 ## 📋 Task Breakdown
 
-### **Task 1: Code Analysis and Preparation** `[POPUP-CLOSE-BEHAVIOR-TASK-001]`
+### **Task 1: Code Analysis and Preparation** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-001)]`
 
 #### **Subtask 1.1: Current State Analysis**
 - **Objective**: Understand current popup close behavior patterns
@@ -28,7 +28,7 @@ This plan addresses the requirement that the Show Hover button must NOT close th
   - Communication patterns between popup and overlay
   - State synchronization requirements
 
-### **Task 2: Core Implementation** `[POPUP-CLOSE-BEHAVIOR-TASK-002]`
+### **Task 2: Core Implementation** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-002)]`
 
 #### **Subtask 2.1: Modify Show Hover Handler**
 - **Objective**: Remove `closePopup()` call from `handleShowHoverboard()`
@@ -77,7 +77,7 @@ This plan addresses the requirement that the Show Hover button must NOT close th
 - **New Method Required**:
   ```javascript
   /**
-   * [POPUP-CLOSE-BEHAVIOR-005] Update popup UI to reflect overlay state
+   * [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)] Update popup UI to reflect overlay state
    */
   async updateOverlayState() {
     try {
@@ -89,9 +89,9 @@ This plan addresses the requirement that the Show Hover button must NOT close th
       // Update button appearance based on overlay visibility
       this.uiManager.updateShowHoverButtonState(overlayState.isVisible)
       
-      debugLog('[POPUP-CLOSE-BEHAVIOR-005] Updated overlay state:', overlayState)
+      debugLog('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)] Updated overlay state:', overlayState)
     } catch (error) {
-      debugError('[POPUP-CLOSE-BEHAVIOR-005] Failed to update overlay state:', error)
+      debugError('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)] Failed to update overlay state:', error)
     }
   }
   ```
@@ -102,7 +102,7 @@ This plan addresses the requirement that the Show Hover button must NOT close th
 - **New Method Required**:
   ```javascript
   /**
-   * [POPUP-CLOSE-BEHAVIOR-005] Update Show Hover button state
+   * [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)] Update Show Hover button state
    */
   updateShowHoverButtonState(isOverlayVisible) {
     const showHoverBtn = this.elements.showHoverBtn
@@ -123,7 +123,7 @@ This plan addresses the requirement that the Show Hover button must NOT close th
   }
   ```
 
-### **Task 3: Content Script Integration** `[POPUP-CLOSE-BEHAVIOR-TASK-003]`
+### **Task 3: Content Script Integration** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-003)]`
 
 #### **Subtask 3.1: Add Overlay State Query Handler**
 - **Objective**: Allow popup to query current overlay visibility state
@@ -156,14 +156,14 @@ This plan addresses the requirement that the Show Hover button must NOT close th
     break
   ```
 
-### **Task 4: Testing Implementation** `[POPUP-CLOSE-BEHAVIOR-TASK-004]`
+### **Task 4: Testing Implementation** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-004)]`
 
 #### **Subtask 4.1: Unit Tests**
 - **Objective**: Test individual components in isolation
 - **Files**: `tests/unit/popup-close-behavior.test.js` (new file)
 - **Test Cases**:
   ```javascript
-  describe('[POPUP-CLOSE-BEHAVIOR-006] Popup Close Behavior', () => {
+  describe('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)] Popup Close Behavior', () => {
     test('Show Hover button should not close popup', async () => {
       // Test implementation
     })
@@ -183,7 +183,7 @@ This plan addresses the requirement that the Show Hover button must NOT close th
 - **Files**: `tests/integration/popup-close-behavior.integration.test.js` (new file)
 - **Test Cases**:
   ```javascript
-  describe('[POPUP-CLOSE-BEHAVIOR-007] Popup-Overlay Integration', () => {
+  describe('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)] Popup-Overlay Integration', () => {
     test('Popup and overlay should stay synchronized', async () => {
       // Test implementation
     })
@@ -203,13 +203,13 @@ This plan addresses the requirement that the Show Hover button must NOT close th
   4. Check button text updates → Verify "Show"/"Hide" text changes
   5. Test with no bookmark → Verify appropriate error handling
 
-### **Task 5: Documentation Updates** `[POPUP-CLOSE-BEHAVIOR-TASK-005]`
+### **Task 5: Documentation Updates** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-005)]`
 
 #### **Subtask 5.1: Code Documentation**
 - **Objective**: Document all changes with semantic tokens
 - **Files**: All modified files
 - **Requirements**:
-  - Add `[POPUP-CLOSE-BEHAVIOR-001]` comments to modified methods
+  - Add `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]` comments to modified methods
   - Document new methods with full semantic token references
   - Update existing documentation to reflect changes
 
@@ -223,7 +223,7 @@ This plan addresses the requirement that the Show Hover button must NOT close th
 
 ## 🧪 Testing Strategy
 
-### **`[POPUP-CLOSE-BEHAVIOR-TEST-001]` - Automated Testing**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-001)]` - Automated Testing**
 
 #### **Unit Test Coverage**
 ```javascript
@@ -237,15 +237,15 @@ describe('PopupController Show Hover Behavior', () => {
     // Setup mocks
   })
 
-  test('[POPUP-CLOSE-BEHAVIOR-006] handleShowHoverboard should not call closePopup', async () => {
+  test('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)] handleShowHoverboard should not call closePopup', async () => {
     // Test implementation
   })
 
-  test('[POPUP-CLOSE-BEHAVIOR-006] other handlers should still call closePopup', async () => {
+  test('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)] other handlers should still call closePopup', async () => {
     // Test implementation
   })
 
-  test('[POPUP-CLOSE-BEHAVIOR-005] updateOverlayState should update UI', async () => {
+  test('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)] updateOverlayState should update UI', async () => {
     // Test implementation
   })
 })
@@ -255,17 +255,17 @@ describe('PopupController Show Hover Behavior', () => {
 ```javascript
 // Test file: tests/integration/popup-close-behavior.integration.test.js
 describe('Popup-Overlay Communication', () => {
-  test('[POPUP-CLOSE-BEHAVIOR-007] Toggle should maintain popup state', async () => {
+  test('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)] Toggle should maintain popup state', async () => {
     // Test implementation
   })
 
-  test('[POPUP-CLOSE-BEHAVIOR-007] State synchronization should work', async () => {
+  test('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)] State synchronization should work', async () => {
     // Test implementation
   })
 })
 ```
 
-### **`[POPUP-CLOSE-BEHAVIOR-TEST-002]` - Manual Testing**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-002)]` - Manual Testing**
 
 #### **Test Scenarios**
 1. **Basic Functionality**
@@ -288,19 +288,19 @@ describe('Popup-Overlay Communication', () => {
 
 ## 🎯 Success Criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-SUCCESS-001]` - Functional Success**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-001)]` - Functional Success**
 - ✅ Show Hover button toggles overlay without closing popup
 - ✅ All other buttons continue to close popup after action
 - ✅ Button text updates to reflect overlay state ("Show"/"Hide")
 - ✅ No regression in existing functionality
 
-### **`[POPUP-CLOSE-BEHAVIOR-SUCCESS-002]` - User Experience Success**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-002)]` - User Experience Success**
 - ✅ Intuitive interaction flow maintained
 - ✅ No user confusion about popup state
 - ✅ Accessibility standards maintained
 - ✅ Performance not degraded
 
-### **`[POPUP-CLOSE-BEHAVIOR-SUCCESS-003]` - Technical Success**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-003)]` - Technical Success**
 - ✅ All tests pass
 - ✅ Code coverage maintained or improved
 - ✅ Documentation updated with semantic tokens
@@ -330,24 +330,24 @@ describe('Popup-Overlay Communication', () => {
 
 ## 🔄 Risk Mitigation
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-001]` - Regression Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-001)]` - Regression Risk**
 - **Risk**: Changes could break existing functionality
 - **Mitigation**: Comprehensive testing of all button behaviors
 - **Fallback**: Revert capability with minimal impact
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-002]` - State Synchronization Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-002)]` - State Synchronization Risk**
 - **Risk**: Popup and overlay could become out of sync
 - **Mitigation**: Robust state querying and error handling
 - **Fallback**: Graceful degradation with user feedback
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-003]` - User Experience Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-003)]` - User Experience Risk**
 - **Risk**: Users might be confused by new behavior
 - **Mitigation**: Clear visual feedback and documentation
 - **Fallback**: User testing and feedback collection 
 
 ## 🆕 **NEW TASKS: Fix Inconsistent Popup Close Behavior**
 
-### **Task 6: Remove Action Button closePopup() Calls** `[POPUP-CLOSE-BEHAVIOR-TASK-006]`
+### **Task 6: Remove Action Button closePopup() Calls** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-006)]`
 
 #### **Subtask 6.1: Remove closePopup() from Delete Pin Handler**
 - **Objective**: Remove `closePopup()` call from `handleDeletePin()` method
@@ -432,7 +432,7 @@ describe('Popup-Overlay Communication', () => {
   }
   ```
 
-### **Task 7: Update Testing for New Behavior** `[POPUP-CLOSE-BEHAVIOR-TASK-007]`
+### **Task 7: Update Testing for New Behavior** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-007)]`
 
 #### **Subtask 7.1: Update Unit Tests for Action Buttons**
 - **Objective**: Update tests to reflect that action buttons no longer close popup
@@ -447,21 +447,21 @@ describe('Popup-Overlay Communication', () => {
   })
 
   // AFTER - Tests expect NO closePopup() calls
-  test('[POPUP-CLOSE-BEHAVIOR-FIX-001] handleDeletePin should NOT call closePopup', async () => {
+  test('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)] handleDeletePin should NOT call closePopup', async () => {
     // ... test setup ...
     await popupController.handleDeletePin()
     expect(popupController.closePopup).not.toHaveBeenCalled() // ✅ ADD
     expect(mockUIManager.showSuccess).toHaveBeenCalledWith('Bookmark deleted successfully')
   })
 
-  test('[POPUP-CLOSE-BEHAVIOR-FIX-001] handleReloadExtension should NOT call closePopup', async () => {
+  test('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)] handleReloadExtension should NOT call closePopup', async () => {
     // ... test setup ...
     await popupController.handleReloadExtension()
     expect(popupController.closePopup).not.toHaveBeenCalled() // ✅ ADD
     expect(mockUIManager.showSuccess).toHaveBeenCalledWith('Extension reloaded successfully')
   })
 
-  test('[POPUP-CLOSE-BEHAVIOR-FIX-001] handleOpenOptions should NOT call closePopup', async () => {
+  test('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)] handleOpenOptions should NOT call closePopup', async () => {
     // ... test setup ...
     await popupController.handleOpenOptions()
     expect(popupController.closePopup).not.toHaveBeenCalled() // ✅ ADD
@@ -474,7 +474,7 @@ describe('Popup-Overlay Communication', () => {
 - **Files**: `tests/integration/popup-close-behavior.integration.test.js`
 - **New Test Cases**:
   ```javascript
-  describe('[POPUP-CLOSE-BEHAVIOR-FIX-002] Persistent Popup Behavior', () => {
+  describe('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-002)] Persistent Popup Behavior', () => {
     test('Popup should stay open after Delete Pin action', async () => {
       // Test that popup remains open after delete action
       // Verify user can continue working with popup
@@ -516,14 +516,14 @@ describe('Popup-Overlay Communication', () => {
      - Verify success messages provide clear feedback
      - Verify no confusion about popup state
 
-### **Task 8: Update Requirements Documentation** `[POPUP-CLOSE-BEHAVIOR-TASK-008]`
+### **Task 8: Update Requirements Documentation** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-008)]`
 
 #### **Subtask 8.1: Update Primary Requirements**
 - **Objective**: Update requirements to reflect new consistent behavior
 - **Files**: `docs/development/ai-development/POPUP_CLOSE_BEHAVIOR_REQUIREMENTS.md`
 - **New Requirements**:
   ```markdown
-  ### **`[POPUP-CLOSE-BEHAVIOR-FIX-001]` - Consistent Popup Behavior**
+  ### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)]` - Consistent Popup Behavior**
   **All action buttons must NOT close the popup window after completing their actions**
 
   **Rationale**:
@@ -543,7 +543,7 @@ describe('Popup-Overlay Communication', () => {
   - Remove Tag button (already correct)
   - Search button (already correct)
 
-  ### **`[POPUP-CLOSE-BEHAVIOR-FIX-002]` - Popup Close Icon Behavior**
+  ### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-002)]` - Popup Close Icon Behavior**
   **Only the popup close icon (X) should close the popup window**
 
   **Rationale**:
@@ -557,7 +557,7 @@ describe('Popup-Overlay Communication', () => {
 - **Files**: `docs/development/ai-development/POPUP_CLOSE_BEHAVIOR_REQUIREMENTS.md`
 - **Updated Success Criteria**:
   ```markdown
-  ### **`[POPUP-CLOSE-BEHAVIOR-FIX-003]` - Updated Success Criteria**
+  ### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-003)]` - Updated Success Criteria**
   - ✅ All action buttons keep popup open after action completion
   - ✅ Only popup close icon closes the popup
   - ✅ Success messages provide clear feedback for completed actions
@@ -587,12 +587,12 @@ describe('Popup-Overlay Communication', () => {
 
 ## 🔄 **Updated Risk Mitigation**
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-004]` - User Expectation Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-004)]` - User Expectation Risk**
 - **Risk**: Users might expect action buttons to close popup
 - **Mitigation**: Clear success messages and visual feedback
 - **Fallback**: User testing and feedback collection
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-005]` - Popup Management Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-005)]` - Popup Management Risk**
 - **Risk**: Users might have too many popups open
 - **Mitigation**: Clear close icon and intuitive behavior
 - **Fallback**: User education and documentation 

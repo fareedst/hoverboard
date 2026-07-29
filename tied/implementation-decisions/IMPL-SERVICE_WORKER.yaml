@@ -1,0 +1,37 @@
+IMPL-SERVICE_WORKER:
+  code_locations:
+    files:
+      - path: "src/core/service-worker.js"
+        description: "MV3 service worker entry"
+    functions: []
+  cross_references:
+    - "ARCH-SERVICE_WORKER"
+    - "REQ-MANIFEST_V3_MIGRATION"
+  decision: "Thin implementation stub for IMPL-SERVICE_WORKER."
+  essence_pseudocode_path: "implementation-decisions/IMPL-SERVICE_WORKER-pseudocode.md"
+  implementation_approach:
+    summary: "MV3 service worker messaging, badge, recent-tags memory lifecycle"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: align detail traceability with expanded sidecar"
+  name: "Service Worker"
+  rationale:
+    why: "Service worker implementation"
+  related_decisions:
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SERVICE_WORKER"
+    code_annotations:
+      - "IMPL-SERVICE_WORKER"
+    requirements:
+      - "REQ-MANIFEST_V3_MIGRATION"
+    tests: []

@@ -20,7 +20,7 @@ IMPL-URL_TAGS_DISPLAY:
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-URL_TAGS_DISPLAY"
   detail_file: "implementation-decisions/IMPL-URL_TAGS_DISPLAY.yaml"
-  essence_pseudocode: "# [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND]\n# normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue; handler and popup use router and re-fetch.\n# Contract: bookmark or provider+url; normalized bookmark, tags, or badge value.\nINPUT: bookmark (raw from provider), provider + url + title (for getBookmarkForDisplay), provider + url (for getTagsForUrl)\nOUTPUT: normalized bookmark (tags array), tags array, badge display value (text, tagCount, flags)\nDATA: single module url-tags-manager; used by message-handler, service-worker, badge-manager, popup, bookmark-router\n\n# Tags as array; required defaults; null -> empty shape.\nnormalizeBookmarkForDisplay(bookmark):\n  IF bookmark null: RETURN null or empty shape\n  tags = bookmark.tags IF array ELSE (bookmark.tags split by spaces or [])\n  RETURN { ...bookmark, tags, ...requiredDefaults }\n\n# Get raw from provider and normalize; caller sets needsAuth.\ngetBookmarkForDisplay(provider, url, title):\n  raw = AWAIT provider.getBookmarkForUrl(url)\n  RETURN normalizeBookmarkForDisplay(raw); caller sets needsAuth when !hasAuth\n\n# Get bookmark for url and return tags array.\ngetTagsForUrl(provider, url):\n  bookmark = AWAIT getBookmarkForDisplay(provider, url, null)\n  RETURN bookmark?.tags ?? []\n\n# Normalize and return text, tagCount, isPrivate, isToRead, isBookmarked, title.\ngetBadgeDisplayValue(bookmark, config):\n  normalized = normalizeBookmarkForDisplay(bookmark)\n  RETURN { text, tagCount, isPrivate, isToRead, isBookmarked, title }\n\n# Handler and popup and router usage (same IMPL set).\nMessage handler: handleGetCurrentBookmark always via getBookmarkForDisplay(router)\nMessage handler: handleGetTagsForUrl returns getTagsForUrl\nPopup: getBookmarkData null only when blocked; re-fetch tags before add/remove\nRouter: _hasTags/_isEmptyBookmark use normalizeBookmarkForDisplay\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-URL_TAGS_DISPLAY-pseudocode.md"
   implementation_approach:
     details:
       - "BookmarkRouter _hasTags/_isEmptyBookmark use normalizeBookmarkForDisplay"
@@ -40,8 +40,8 @@ IMPL-URL_TAGS_DISPLAY:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-26"
-      reason: "Align essence_pseudocode with standard (AWAIT, one-action-per-step)"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

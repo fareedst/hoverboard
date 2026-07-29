@@ -12,7 +12,7 @@ IMPL-CONFIG_STRUCT:
     - "REQ-CONFIGURATION"
     - "REQ-RECENT_TAGS_SYSTEM"
   detail_file: "implementation-decisions/IMPL-CONFIG_STRUCT.yaml"
-  essence_pseudocode: "# [IMPL-CONFIG_STRUCT] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIGURATION] [REQ-RECENT_TAGS_SYSTEM]\n# Project extension (partial): recent-tags-related keys merged in getConfig and read by RecentTagsMemoryManager / TagService. Full config surface remains Template for other domains.\n# Contract: getConfig() returns merged object; missing keys use defaults; invalid stored config falls back per ConfigManager rules.\nINPUT: storage read on getConfig; optional partial patch on save\nOUTPUT: merged config object (plain); recent-tags fields typed by Zod in config-manager\nDATA: chrome.storage.local user settings + in-code defaults; keys include recentTagsActivityWindowMinutes (N for REQ-RECENT_TAGS_SYSTEM), recentTagsMaxListSize, recentTagsMaxDisplayCount, recentTagsSharedMemoryKey, recentTagsEnableUserDriven, recentTagsClearOnReload, recentTagsCountMax\n\n# [IMPL-CONFIG_STRUCT] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIGURATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM]\n# How: merged getConfig supplies recentTagsActivityWindowMinutes (default 15; schema 1..24*60) and sibling keys to SW policy; [IMPL-TAG_SYSTEM] reads via callback passed into recentTagsMemory.getRecentTagsForUi.\ngetConfig():\n  READ storage; MERGE with defaults; VALIDATE with Zod schema\n  RETURN merged config (recentTags* fields available to SW recent tags module)\n\n# --- Cross-IMPL ---\n# Recent-tags keys consumed by [IMPL-TAG_SYSTEM] / RecentTagsMemoryManager (not duplicated here). Wider config surface remains Template beyond this slice.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CONFIG_STRUCT-pseudocode.md"
   implementation_approach:
     details:
       - "API design decision"
@@ -25,8 +25,8 @@ IMPL-CONFIG_STRUCT:
       date: "YYYY-MM-DD"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-28"
-      reason: "S06.4–S06.5: recent-tags config slice; [PROC-IMPL_PSEUDOCODE_TOKENS] getConfig block + cross-IMPL"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "YYYY-MM-DD"
       result: "pass"

@@ -18,7 +18,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
     - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
-  essence_pseudocode: "# [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]\n# Import from CSV/JSON; Only new or Overwrite; saveBookmark per row; result message.\n# Contract: file and mode and backend; counts and refreshed table.\nINPUT: file (CSV or JSON), mode (Only new | Overwrite), preferredBackend (Local | File | Sync), allBookmarks (existing set for \"Only new\")\nOUTPUT: imported count, skipped count, failed count; refreshed table\nDATA: rows = array of { url, description, tags, time, shared, toread, extended }; existingByUrl = set of url from allBookmarks\n\n# Parse file, filter if Only new, send saveBookmark per row, refresh and show result.\nrunImport(file):\n  text = read file as text\n  rows = parseImportFile(text, filename)   // CSV -> parseCsv; JSON -> normalize array; skip empty url\n  IF mode = \"Only new\": rows = rows FILTER url NOT IN existingByUrl\n  imported = 0; skipped = 0; failed = 0\n  FOR each row IN rows:\n    payload = { ...row, preferredBackend }\n    response = SEND saveBookmark(payload)\n    IF response.success: imported++\n    ELSE IF skipped (e.g. duplicate): skipped++\n    ELSE: failed++\n  loadBookmarks()   // refresh table\n  SHOW \"Imported N, skipped M, K failed\" in #import-result\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT-pseudocode.md"
   implementation_approach:
     details:
       - "CSV: parseCsv skips header (title,url); parseCsvLine handles quoted fields and \"\"; rows with empty URL skipped; Shared/Private/toread normalized"
@@ -31,8 +31,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

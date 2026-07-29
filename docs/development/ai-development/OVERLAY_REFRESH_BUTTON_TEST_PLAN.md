@@ -1,7 +1,7 @@
 # 🧪 Overlay Refresh Button Test Plan
 
-**Semantic Token:** [OVERLAY-REFRESH-BUTTON-001]
-**Cross-References:** [OVERLAY-DATA-DISPLAY-001], [POPUP-REFRESH-001], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
+**Semantic Token:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-BUTTON-001)]
+**Cross-References:** [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
 **Date:** 2025-01-27
 **Status:** Test Plan
 
@@ -46,17 +46,17 @@ This document outlines the comprehensive testing strategy for the overlay refres
 ### **Test File: `tests/unit/overlay-refresh-button.test.js`**
 
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Unit tests for overlay refresh button
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Unit tests for overlay refresh button
 import { jest } from '@jest/globals'
 import { OverlayManager } from '../../../src/features/content/overlay-manager.js'
 
-describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () => {
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-BUTTON-001)] Overlay Refresh Button Unit Tests', () => {
   let overlayManager
   let mockDocument
   let mockMessageService
 
   beforeEach(() => {
-    // [OVERLAY-REFRESH-TEST-001] Setup test environment
+    // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Setup test environment
     mockDocument = {
       createElement: jest.fn(),
       body: { appendChild: jest.fn() },
@@ -72,13 +72,13 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
       messageTimeout: 3000
     })
 
-    // [OVERLAY-REFRESH-TEST-001] Mock message service
+    // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Mock message service
     overlayManager.messageService = mockMessageService
   })
 
-  describe('[OVERLAY-REFRESH-UI-001] Refresh Button UI Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Refresh Button UI Tests', () => {
     test('should render refresh button in correct position', () => {
-      // [OVERLAY-REFRESH-UI-001] Test button placement
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Test button placement
       const mockButton = {
         className: '',
         innerHTML: '',
@@ -104,7 +104,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
     })
 
     test('should apply theme-aware styling', () => {
-      // [OVERLAY-REFRESH-UI-001] Test theme integration
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Test theme integration
       const mockButton = {
         className: '',
         style: { cssText: '' }
@@ -121,7 +121,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
     })
 
     test('should include accessibility attributes', () => {
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Test accessibility features
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Test accessibility features
       const mockButton = {
         className: '',
         title: '',
@@ -139,9 +139,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
     })
   })
 
-  describe('[OVERLAY-REFRESH-HANDLER-001] Refresh Button Handler Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)] Refresh Button Handler Tests', () => {
     test('should handle refresh button click successfully', async () => {
-      // [OVERLAY-REFRESH-HANDLER-001] Test click handler
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)] Test click handler
       const mockResponse = {
         success: true,
         data: {
@@ -177,7 +177,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
     })
 
     test('should handle refresh errors gracefully', async () => {
-      // [OVERLAY-REFRESH-ERROR-001] Test error handling
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)] Test error handling
       mockMessageService.sendMessage.mockRejectedValue(new Error('API Error'))
 
       overlayManager.showMessage = jest.fn()
@@ -189,7 +189,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
     })
 
     test('should handle empty response gracefully', async () => {
-      // [OVERLAY-REFRESH-ERROR-001] Test empty response handling
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)] Test empty response handling
       mockMessageService.sendMessage.mockResolvedValue({ success: false })
 
       overlayManager.showMessage = jest.fn()
@@ -201,9 +201,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
     })
   })
 
-  describe('[OVERLAY-REFRESH-INTEGRATION-001] Data Integration Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Data Integration Tests', () => {
     test('should refresh overlay content with updated data', async () => {
-      // [OVERLAY-REFRESH-INTEGRATION-001] Test data refresh
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Test data refresh
       const mockResponse = {
         success: true,
         data: {
@@ -227,7 +227,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
     })
 
     test('should handle network errors during refresh', async () => {
-      // [OVERLAY-REFRESH-ERROR-001] Test network error handling
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)] Test network error handling
       mockMessageService.sendMessage.mockRejectedValue(new Error('Network Error'))
 
       const result = await overlayManager.refreshOverlayContent()
@@ -236,9 +236,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
     })
   })
 
-  describe('[OVERLAY-REFRESH-SAFARI-001] Cross-Platform Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-SAFARI-001)] Cross-Platform Tests', () => {
     test('should work with Safari extension shim', async () => {
-      // [OVERLAY-REFRESH-SAFARI-001] Test Safari compatibility
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-SAFARI-001)] Test Safari compatibility
       const mockBrowser = {
         runtime: {
           sendMessage: jest.fn()
@@ -271,13 +271,13 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Overlay Refresh Button Unit Tests', () =>
 ### **Test File: `tests/integration/overlay-refresh-integration.test.js`**
 
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Integration tests for overlay refresh button
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Integration tests for overlay refresh button
 import { jest } from '@jest/globals'
 
-describe('[OVERLAY-REFRESH-BUTTON-001] Integration Tests', () => {
-  describe('[OVERLAY-REFRESH-INTEGRATION-001] Popup Coordination Tests', () => {
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-BUTTON-001)] Integration Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Popup Coordination Tests', () => {
     test('should coordinate with popup refresh mechanisms', async () => {
-      // [OVERLAY-REFRESH-INTEGRATION-001] Test popup coordination
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Test popup coordination
       const mockPopupController = {
         refreshPopupData: jest.fn()
       }
@@ -294,7 +294,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Integration Tests', () => {
     })
 
     test('should use same message types as popup refresh', async () => {
-      // [OVERLAY-REFRESH-INTEGRATION-001] Test message consistency
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Test message consistency
       const expectedMessage = {
         type: 'getCurrentBookmark',
         data: {
@@ -308,9 +308,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Integration Tests', () => {
     })
   })
 
-  describe('[OVERLAY-REFRESH-DATA-COORDINATION-001] Data Flow Integration Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-DATA-COORDINATION-001)] Data Flow Integration Tests', () => {
     test('should integrate with overlay data display patterns', async () => {
-      // [OVERLAY-REFRESH-DATA-COORDINATION-001] Test data flow integration
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-DATA-COORDINATION-001)] Test data flow integration
       const mockContent = {
         bookmark: {
           url: 'https://example.com',
@@ -332,7 +332,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Integration Tests', () => {
     })
 
     test('should maintain data validation patterns', async () => {
-      // [OVERLAY-REFRESH-DATA-COORDINATION-001] Test data validation
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-DATA-COORDINATION-001)] Test data validation
       const invalidData = {
         success: true,
         data: {
@@ -350,9 +350,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Integration Tests', () => {
     })
   })
 
-  describe('[OVERLAY-REFRESH-SYNC-COORDINATION-001] Synchronization Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-SYNC-COORDINATION-001)] Synchronization Tests', () => {
     test('should coordinate with toggle synchronization', async () => {
-      // [OVERLAY-REFRESH-SYNC-COORDINATION-001] Test toggle sync
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-SYNC-COORDINATION-001)] Test toggle sync
       const mockToggleSync = {
         updateToggleState: jest.fn()
       }
@@ -365,7 +365,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Integration Tests', () => {
     })
 
     test('should coordinate with tag synchronization', async () => {
-      // [OVERLAY-REFRESH-SYNC-COORDINATION-001] Test tag sync
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-SYNC-COORDINATION-001)] Test tag sync
       const mockTagSync = {
         updateTagState: jest.fn()
       }
@@ -387,13 +387,13 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Integration Tests', () => {
 ### **Test File: `tests/accessibility/overlay-refresh-accessibility.test.js`**
 
 ```javascript
-// [OVERLAY-REFRESH-ACCESSIBILITY-001] Accessibility tests for overlay refresh button
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Accessibility tests for overlay refresh button
 import { jest } from '@jest/globals'
 
-describe('[OVERLAY-REFRESH-BUTTON-001] Accessibility Tests', () => {
-  describe('[OVERLAY-REFRESH-ACCESSIBILITY-001] Screen Reader Tests', () => {
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-BUTTON-001)] Accessibility Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Screen Reader Tests', () => {
     test('should have proper ARIA labels', () => {
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Test ARIA labels
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Test ARIA labels
       const refreshButton = document.querySelector('.refresh-button')
       
       expect(refreshButton).toHaveAttribute('aria-label', 'Refresh Data')
@@ -401,7 +401,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Accessibility Tests', () => {
     })
 
     test('should announce refresh status to screen readers', () => {
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Test status announcements
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Test status announcements
       const mockAriaLive = document.createElement('div')
       mockAriaLive.setAttribute('aria-live', 'polite')
       
@@ -413,9 +413,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Accessibility Tests', () => {
     })
   })
 
-  describe('[OVERLAY-REFRESH-ACCESSIBILITY-001] Keyboard Navigation Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Keyboard Navigation Tests', () => {
     test('should be focusable with keyboard', () => {
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Test keyboard focus
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Test keyboard focus
       const refreshButton = document.querySelector('.refresh-button')
       
       refreshButton.focus()
@@ -424,7 +424,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Accessibility Tests', () => {
     })
 
     test('should be activatable with Enter key', () => {
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Test Enter key activation
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Test Enter key activation
       const refreshButton = document.querySelector('.refresh-button')
       const clickHandler = jest.fn()
       
@@ -438,7 +438,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Accessibility Tests', () => {
     })
 
     test('should be activatable with Space key', () => {
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Test Space key activation
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Test Space key activation
       const refreshButton = document.querySelector('.refresh-button')
       const clickHandler = jest.fn()
       
@@ -452,9 +452,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Accessibility Tests', () => {
     })
   })
 
-  describe('[OVERLAY-REFRESH-ACCESSIBILITY-001] Focus Management Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Focus Management Tests', () => {
     test('should maintain focus during refresh operation', () => {
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Test focus management
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Test focus management
       const refreshButton = document.querySelector('.refresh-button')
       
       refreshButton.focus()
@@ -468,7 +468,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Accessibility Tests', () => {
     })
 
     test('should restore focus after error', () => {
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Test focus restoration
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Test focus restoration
       const refreshButton = document.querySelector('.refresh-button')
       
       refreshButton.focus()
@@ -483,9 +483,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Accessibility Tests', () => {
     })
   })
 
-  describe('[OVERLAY-REFRESH-ACCESSIBILITY-001] High Contrast Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] High Contrast Tests', () => {
     test('should be visible in high contrast mode', () => {
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Test high contrast
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Test high contrast
       const refreshButton = document.querySelector('.refresh-button')
       const computedStyle = window.getComputedStyle(refreshButton)
       
@@ -515,13 +515,13 @@ function calculateContrastRatio(bg, fg) {
 ### **Test File: `tests/performance/overlay-refresh-performance.test.js`**
 
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Performance tests for overlay refresh button
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Performance tests for overlay refresh button
 import { jest } from '@jest/globals'
 
-describe('[OVERLAY-REFRESH-BUTTON-001] Performance Tests', () => {
-  describe('[OVERLAY-REFRESH-PERFORMANCE-001] Refresh Operation Timing', () => {
+describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-BUTTON-001)] Performance Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Refresh Operation Timing', () => {
     test('should complete refresh operation within 100ms', async () => {
-      // [OVERLAY-REFRESH-PERFORMANCE-001] Test refresh timing
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Test refresh timing
       const startTime = performance.now()
       
       await overlayManager.handleRefreshButtonClick()
@@ -533,7 +533,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Performance Tests', () => {
     })
 
     test('should not block UI during refresh', async () => {
-      // [OVERLAY-REFRESH-PERFORMANCE-001] Test UI responsiveness
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Test UI responsiveness
       const mockShowMessage = jest.fn()
       overlayManager.showMessage = mockShowMessage
       
@@ -551,9 +551,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Performance Tests', () => {
     })
   })
 
-  describe('[OVERLAY-REFRESH-PERFORMANCE-001] Memory Usage Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Memory Usage Tests', () => {
     test('should not cause memory leaks', async () => {
-      // [OVERLAY-REFRESH-PERFORMANCE-001] Test memory usage
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Test memory usage
       const initialMemory = performance.memory?.usedJSHeapSize || 0
       
       // Perform multiple refresh operations
@@ -569,9 +569,9 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Performance Tests', () => {
     })
   })
 
-  describe('[OVERLAY-REFRESH-PERFORMANCE-001] Rendering Performance Tests', () => {
+  describe('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Rendering Performance Tests', () => {
     test('should not cause layout thrashing', async () => {
-      // [OVERLAY-REFRESH-PERFORMANCE-001] Test rendering performance
+      // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-PERFORMANCE-001)] Test rendering performance
       const mockGetBoundingClientRect = jest.fn()
       const mockRefreshButton = {
         getBoundingClientRect: mockGetBoundingClientRect
@@ -594,7 +594,7 @@ describe('[OVERLAY-REFRESH-BUTTON-001] Performance Tests', () => {
 
 ### **Test Environment Setup**
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Test environment configuration
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Test environment configuration
 const testConfig = {
   // Mock browser APIs
   chrome: {
@@ -668,4 +668,4 @@ const testConfig = {
 
 ---
 
-**[OVERLAY-REFRESH-BUTTON-001]** - Master semantic token for overlay refresh button functionality 
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-BUTTON-001)]** - Master semantic token for overlay refresh button functionality 

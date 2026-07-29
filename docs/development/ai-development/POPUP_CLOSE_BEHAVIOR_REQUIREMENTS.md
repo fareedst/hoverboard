@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-15  
 **Status:** Requirements Analysis  
-**Cross-References:** `[POPUP-ARCH-001]`, `[POPUP-REFRESH-001]`, `[TOGGLE-SYNC-POPUP-001]`, `[UI-BEHAVIOR-001]`, `[POPUP-CLOSE-BEHAVIOR-001]`
+**Cross-References:** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`, `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-POPUP-001)]`, `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]`
 
 ## 🎯 Problem Statement
 
@@ -55,7 +55,7 @@ async handleDeletePin () {
 
 ## 🎯 Requirements Specification
 
-### **Primary Requirement `[POPUP-CLOSE-BEHAVIOR-001]`
+### **Primary Requirement `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]`
 **Show Hover button must NOT close the popup window after toggling overlay visibility**
 
 **Rationale:**
@@ -66,7 +66,7 @@ async handleDeletePin () {
 
 ### **Secondary Requirements**
 
-#### **`[POPUP-CLOSE-BEHAVIOR-002]` - Other Button Consistency**
+#### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-002)]` - Other Button Consistency**
 All other popup buttons must continue to close the popup after their respective actions:
 - Toggle Private button
 - Read Later button  
@@ -76,7 +76,7 @@ All other popup buttons must continue to close the popup after their respective 
 - Reload Extension button
 - Open Options button
 
-#### **`[POPUP-CLOSE-BEHAVIOR-003]` - Overlay State Coordination**
+#### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-003)]` - Overlay State Coordination**
 The popup must remain synchronized with overlay visibility state:
 - Show current overlay visibility status
 - Provide toggle functionality without popup closure
@@ -84,7 +84,7 @@ The popup must remain synchronized with overlay visibility state:
 
 ## 🔧 Implementation Requirements
 
-### **`[POPUP-CLOSE-BEHAVIOR-004]` - Show Hover Handler Modification**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-004)]` - Show Hover Handler Modification**
 ```javascript
 async handleShowHoverboard () {
   try {
@@ -105,7 +105,7 @@ async handleShowHoverboard () {
 }
 ```
 
-### **`[POPUP-CLOSE-BEHAVIOR-005]` - Overlay State Tracking**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Overlay State Tracking**
 ```javascript
 // New method required
 updateOverlayState() {
@@ -116,7 +116,7 @@ updateOverlayState() {
 
 ## 🧪 Testing Requirements
 
-### **`[POPUP-CLOSE-BEHAVIOR-006]` - Functional Testing**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)]` - Functional Testing**
 1. **Show Hover Button Test**
    - Click Show Hover button
    - Verify overlay toggles visibility
@@ -127,7 +127,7 @@ updateOverlayState() {
    - Verify all other buttons still close popup after action
    - Verify no regression in existing functionality
 
-### **`[POPUP-CLOSE-BEHAVIOR-007]` - Integration Testing**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration Testing**
 1. **Popup-Overlay Synchronization**
    - Verify popup and overlay show consistent data
    - Verify state changes propagate correctly
@@ -141,25 +141,25 @@ updateOverlayState() {
 ## 📚 Cross-Reference Coordination
 
 ### **Existing Requirements Coordination**
-- **`[POPUP-REFRESH-001]`**: Refresh mechanisms must work with open popup
-- **`[TOGGLE-SYNC-POPUP-001]`**: Toggle synchronization must handle persistent popup
-- **`[POPUP-ARCH-001]`**: Architecture must support persistent popup state
-- **`[UI-BEHAVIOR-001]`**: UI behavior patterns must be consistent
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`**: Refresh mechanisms must work with open popup
+- **`[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-POPUP-001)]`**: Toggle synchronization must handle persistent popup
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`**: Architecture must support persistent popup state
+- **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]`**: UI behavior patterns must be consistent
 
 ### **Architectural Decisions**
-- **`[POPUP-CLOSE-BEHAVIOR-008]`**: Popup state management must handle persistent visibility
-- **`[POPUP-CLOSE-BEHAVIOR-009]`**: Event handling must distinguish between close and non-close actions
-- **`[POPUP-CLOSE-BEHAVIOR-010]`**: UI updates must reflect overlay state without popup closure
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-008)]`**: Popup state management must handle persistent visibility
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-009)]`**: Event handling must distinguish between close and non-close actions
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-010)]`**: UI updates must reflect overlay state without popup closure
 
 ## 🎯 Success Criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-011]` - Primary Success Criteria**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-011)]` - Primary Success Criteria**
 - ✅ Show Hover button toggles overlay without closing popup
 - ✅ All other buttons continue to close popup after action
 - ✅ No regression in existing functionality
 - ✅ Popup and overlay remain synchronized
 
-### **`[POPUP-CLOSE-BEHAVIOR-012]` - User Experience Success Criteria**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-012)]` - User Experience Success Criteria**
 - ✅ Intuitive interaction flow maintained
 - ✅ No user confusion about popup state
 - ✅ Accessibility standards maintained
@@ -167,13 +167,13 @@ updateOverlayState() {
 
 ## 📝 Documentation Requirements
 
-### **`[POPUP-CLOSE-BEHAVIOR-013]` - Implementation Documentation**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-013)]` - Implementation Documentation**
 - Document modified `handleShowHoverboard()` method
 - Document new `updateOverlayState()` method
 - Document testing procedures and results
 - Document any architectural changes required
 
-### **`[POPUP-CLOSE-BEHAVIOR-014]` - User Documentation**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-014)]` - User Documentation**
 - Update user guides to reflect new behavior
 - Document expected interaction patterns
 - Provide troubleshooting guidance if needed 

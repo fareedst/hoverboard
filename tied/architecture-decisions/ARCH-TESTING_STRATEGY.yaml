@@ -1,0 +1,53 @@
+ARCH-TESTING_STRATEGY:
+  alternatives_considered:
+    - name: "Test Approach 1"
+      cons:
+        - "Con 1"
+      pros:
+        - "Pro 1"
+      rejected_reason: "Why rejected or why chosen"
+    - name: "Test Approach 2"
+      cons:
+        - "Con 1"
+      pros:
+        - "Pro 1"
+      rejected_reason: "Why rejected or why chosen"
+  cross_references: []
+  decision: "Thin architecture stub for ARCH-TESTING_STRATEGY."
+  implementation_approach:
+    details:
+      - "End-to-end testing approach"
+      - "Integration testing approach"
+      - "Test coverage goals"
+      - "Unit testing approach"
+    summary: "Overall testing strategy for the project"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Testing Strategy"
+  rationale:
+    benefits:
+      - "Benefit 1 of this strategy"
+    problems_solved:
+      - "Problem 1 with testing"
+    why: "Why this testing strategy was chosen"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-TESTING"
+    see_also: []
+  status: "Template"
+  traceability:
+    code_annotations:
+      - "ARCH-TESTING_STRATEGY"
+    implementation:
+      - "IMPL-TESTING"
+    requirements:
+      - "REQ-CODE_QUALITY"
+    tests:
+      - "All test files follow this strategy"

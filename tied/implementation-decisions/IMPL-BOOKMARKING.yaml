@@ -1,0 +1,37 @@
+IMPL-BOOKMARKING:
+  code_locations:
+    files: []
+    functions: []
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-UX_CORE"
+    - "REQ-SMART_BOOKMARKING"
+  decision: "Thin implementation stub for IMPL-BOOKMARKING."
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARKING-pseudocode.md"
+  implementation_approach:
+    summary: "Create/update/delete bookmarks via MessageHandler without leaving the page"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: align detail traceability with expanded sidecar"
+  name: "Bookmarking"
+  rationale:
+    why: "Bookmarking implementation"
+  related_decisions:
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-UX_CORE"
+    code_annotations:
+      - "IMPL-BOOKMARKING"
+    requirements:
+      - "REQ-SMART_BOOKMARKING"
+    tests: []

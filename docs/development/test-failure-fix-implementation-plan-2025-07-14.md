@@ -359,20 +359,20 @@ test('should add tag through popup and persist to storage', async () => {
 
 ## 📊 Compliance with Existing Specifications
 
-### [IMMUTABLE-REQ-TAG-001] Compliance `[TEST-FIX-IMPL-2025-07-14]`
+### [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] Compliance `[TEST-FIX-IMPL-2025-07-14]`
 - ✅ Tags added to records are stored in Recent Tags list
 - ✅ Duplicate tags are not displayed on current tab
 - ✅ Recent Tags persist across browser sessions
 - ✅ Tag addition works in both popup and overlay interfaces
 
-### [IMMUTABLE-REQ-TAG-003] Compliance `[TEST-FIX-IMPL-2025-07-14]`
+### [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)] Compliance `[TEST-FIX-IMPL-2025-07-14]`
 - ✅ User-driven recent tags (not bookmark-based)
 - ✅ Current site exclusion for tag display
 - ✅ Cross-window consistency via shared memory
 - ✅ Memory clearing on extension reload
 - ✅ Tag scope validation (current site only)
 
-### [IMMUTABLE-REQ-TAG-004] Compliance `[TEST-FIX-IMPL-2025-07-14]`
+### [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Compliance `[TEST-FIX-IMPL-2025-07-14]`
 - ✅ Tags added in overlay are permanently saved
 - ✅ Tags immediately appear in Current tags list
 - ✅ Overlay processing matches popup window behavior

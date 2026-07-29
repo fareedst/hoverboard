@@ -1,0 +1,35 @@
+IMPL-EXT_IDENTITY:
+  code_locations:
+    files: []
+    functions: []
+  cross_references:
+    - "ARCH-EXT_IDENTITY"
+    - "REQ-EXTENSION_IDENTITY"
+  decision: "Thin implementation stub for IMPL-EXT_IDENTITY."
+  essence_pseudocode_path: "implementation-decisions/IMPL-EXT_IDENTITY-pseudocode.md"
+  implementation_approach:
+    summary: "Chromium extension identity: SW, content scripts, popup, options, side panel"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: align detail traceability with expanded sidecar"
+  name: "Extension Identity"
+  rationale:
+    why: "Extension identity implementation"
+  related_decisions:
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-EXT_IDENTITY"
+    code_annotations:
+      - "IMPL-EXT_IDENTITY"
+    requirements:
+      - "REQ-EXTENSION_IDENTITY"
+    tests: []

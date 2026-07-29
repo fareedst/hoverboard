@@ -1,5 +1,5 @@
 /**
- * [OVERLAY-REFRESH-TEST-001] Overlay Refresh Button Accessibility - [REQ-UI_INSPECTION] [IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] [ARCH-OVERLAY_TESTABILITY]
+ * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Overlay Refresh Button Accessibility - [REQ-UI_INSPECTION] [IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] [ARCH-OVERLAY_TESTABILITY]
  * Accessibility tests for the overlay refresh button (ARIA, keyboard, screen reader).
  */
 
@@ -36,7 +36,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
   let mockMessageService
 
   beforeEach(() => {
-    // [OVERLAY-REFRESH-TEST-001] Setup accessibility test environment
+    // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Setup accessibility test environment
     mockDocument = createMockDocument()
     mockMessageService = {
       sendMessage: jest.fn()
@@ -50,7 +50,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
   })
 
   afterEach(() => {
-    // [OVERLAY-REFRESH-TEST-001] Cleanup accessibility test environment
+    // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Cleanup accessibility test environment
     jest.clearAllMocks()
     if (mockDocument.reset) {
       mockDocument.reset()
@@ -142,9 +142,9 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
     expect(refreshButton).not.toBeNull()
   })
 
-  // [OVERLAY-REFRESH-TEST-001] ARIA attributes tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] ARIA attributes tests
   describe('ARIA Attributes', () => {
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have proper ARIA attributes', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have proper ARIA attributes', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -162,7 +162,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.setAttribute).toHaveBeenCalledWith('tabindex', '0')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have descriptive title attribute', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have descriptive title attribute', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -178,7 +178,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.title).toBe('Refresh Data')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have proper button role', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have proper button role', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -198,9 +198,9 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Keyboard navigation tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Keyboard navigation tests
   describe('Keyboard Navigation', () => {
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should be focusable with tabindex', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should be focusable with tabindex', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -217,7 +217,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.tabIndex).toBe(0)
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should respond to Enter key', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should respond to Enter key', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -237,7 +237,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(mockMessageService.sendMessage.mock.calls.length).toBeGreaterThan(initialCalls)
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should respond to Space key', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should respond to Space key', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -257,7 +257,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(mockMessageService.sendMessage.mock.calls.length).toBeGreaterThan(initialCalls)
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should not respond to other keys', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should not respond to other keys', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -277,7 +277,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(mockMessageService.sendMessage.mock.calls.length).toBe(initialCalls)
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should prevent default on Enter key', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should prevent default on Enter key', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -296,9 +296,9 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Focus management tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Focus management tests
   describe('Focus Management', () => {
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should maintain focus during loading', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should maintain focus during loading', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -316,7 +316,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.focus).toHaveBeenCalled()
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should restore focus after completion', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should restore focus after completion', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -335,9 +335,9 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Screen reader compatibility tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Screen reader compatibility tests
   describe('Screen Reader Compatibility', () => {
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have meaningful aria-label', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have meaningful aria-label', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -352,7 +352,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.setAttribute).toHaveBeenCalledWith('aria-label', 'Refresh Data')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should announce loading state to screen readers', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should announce loading state to screen readers', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -369,7 +369,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Refreshing data...', 'info')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should announce completion to screen readers', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should announce completion to screen readers', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -386,7 +386,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Data refreshed successfully', 'success')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should announce errors to screen readers', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should announce errors to screen readers', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -405,9 +405,9 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Visual accessibility tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Visual accessibility tests
   describe('Visual Accessibility', () => {
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have sufficient color contrast', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have sufficient color contrast', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -423,7 +423,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.style.cssText).toContain('var(--theme-text-primary)')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have focus indicator', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have focus indicator', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -438,7 +438,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.style.cssText).toContain('outline')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have hover state indicator', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have hover state indicator', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -454,9 +454,9 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] State management accessibility tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] State management accessibility tests
   describe('State Management Accessibility', () => {
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should disable button during loading', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should disable button during loading', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -474,7 +474,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       await clickPromise
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should re-enable button after completion', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should re-enable button after completion', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -491,7 +491,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.disabled).toBe(false)
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should re-enable button after error', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should re-enable button after error', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -510,9 +510,9 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] Semantic HTML tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Semantic HTML tests
   describe('Semantic HTML', () => {
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should use button element', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should use button element', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -527,7 +527,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.tagName).toBe('BUTTON')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have meaningful content', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have meaningful content', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -543,9 +543,9 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
     })
   })
 
-  // [OVERLAY-REFRESH-TEST-001] WCAG compliance tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] WCAG compliance tests
   describe('WCAG Compliance', () => {
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should meet WCAG 2.1 AA standards', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should meet WCAG 2.1 AA standards', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -563,7 +563,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.title).toBe('Refresh Data')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should support keyboard-only navigation', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should support keyboard-only navigation', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -579,7 +579,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
       expect(refreshButton.onkeydown).toBeDefined()
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should provide clear visual feedback', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should provide clear visual feedback', async () => {
       // Arrange
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
@@ -597,7 +597,7 @@ describe('[IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] Accessibility Test
   })
 })
 
-// [OVERLAY-REFRESH-TEST-001] Export test utilities for other test files
+// [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Export test utilities for other test files
 export {
   createMockDocument
 } 

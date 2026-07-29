@@ -36,7 +36,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
     - "ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
     - "REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml"
-  essence_pseudocode: "# [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS]\n# Add/delete tags to selected bookmarks; parseTagsInput, mergeTags, removeTags, selectionStillVisible; saveBookmark per row.\n# Parse comma-separated input; trim and dedupe case-insensitive.\nparseTagsInput(raw): IF !raw || !raw.trim() RETURN []; parts = raw.split(',').map(s => s.trim()).filter(Boolean); seen = Set(); result = []; FOR p IN parts: low = p.toLowerCase(); IF !seen.has(low): seen.add(low); result.push(p); RETURN result\n\n# Merge new tags with existing; case-insensitive dedupe.\nmergeTags(existingTags, newTags): existing = existingTags || []; new = newTags || []; lowerSet = Set(existing.map(t => String(t).toLowerCase())); result = [...existing]; FOR tag IN new: t = tag.trim(); IF t && !lowerSet.has(t.toLowerCase()): result.push(t); lowerSet.add(t.toLowerCase()); RETURN result\n\n# Remove given tags from existing list (case-insensitive).\nremoveTags(existingTags, tagsToRemove): removeSet = Set(tagsToRemove.map(t => String(t).trim().toLowerCase()).filter(Boolean)); RETURN existing.filter(t => !removeSet.has(String(t).toLowerCase()))\n\n# Return set of selected URLs that remain in filtered list.\nselectionStillVisible(selectedUrls, filteredBookmarks): visibleUrls = Set(filteredBookmarks.map(b => b.url).filter(Boolean)); RETURN new Set([...selectedUrls].filter(url => visibleUrls.has(url)))\n\n# For each selected URL merge new tags and send saveBookmark; refresh and restore selection for still-visible.\naddTagsToSelected(): newTags = parseTagsInput(addTagsInput.value); IF newTags.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildAddTagsPayload(b, newTags); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = \"\"; updateMoveControlsState()\n\n# For each selected URL remove tags and send saveBookmark; refresh and restore selection for still-visible.\ndeleteTagsFromSelected(): tagsToRemove = parseTagsInput(addTagsInput.value); IF tagsToRemove.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildRemoveTagsPayload(b, tagsToRemove); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = \"\"; updateMoveControlsState()\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS-pseudocode.md"
   implementation_approach:
     details:
       - "addTagsToSelected(): newTags = parseTagsInput(addTagsInput.value); for each selected URL buildAddTagsPayload and send saveBookmark; urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); restore selectedUrls from selectionStillVisible(urlsToRestore, filteredBookmarks); renderTableBody(); clear input; updateMoveControlsState()"
@@ -52,8 +52,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "New implementation for Add tags to selected"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-20"
       result: "pass"

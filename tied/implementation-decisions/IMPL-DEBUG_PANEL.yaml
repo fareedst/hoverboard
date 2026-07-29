@@ -18,7 +18,7 @@ IMPL-DEBUG_PANEL:
     - "ARCH-UI_TESTABILITY"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-DEBUG_PANEL.yaml"
-  essence_pseudocode: "# [IMPL-DEBUG_PANEL] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]\n# Debug logging by category and debug panel showing last actions, messages, and current bookmark/backend.\n# Contract: inputs, outputs, and data for logging and panel.\nINPUT: LOG_CATEGORIES (ui, message, overlay, storage); optional debug panel open\nOUTPUT: debugLogger.trace/debug in message-handler, PopupController, content-main; debug panel shows last actions, last messages, current bookmark/tags/backend\nDATA: debug-logger.js; debug.html + debug.js; inspector ring buffers\n\n# Logging: emit trace/debug when category enabled.\nLogging: WHEN category enabled: debugLogger.trace(msg) or debugLogger.debug(msg) with category\n\n# Debug panel: on load request last actions/messages/current bookmark and render.\nDebug panel (debug.html): ON load SEND DEV_COMMAND getLastActions/getLastMessages/getCurrentBookmark (or getStorageSnapshot); RENDER in panel\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-DEBUG_PANEL-pseudocode.md"
   implementation_approach:
     summary: "LOG_CATEGORIES in debug-logger; debugLogger.trace/debug in message-handler, PopupController, content-main; src/ui/debug/debug.html + debug.js (last actions, last messages, current bookmark/tags/backend)"
   metadata:
@@ -27,8 +27,8 @@ IMPL-DEBUG_PANEL:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Debug panel and structured UI/message logging"
   rationale:
     benefits:

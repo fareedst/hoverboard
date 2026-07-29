@@ -14,7 +14,7 @@ IMPL-CODE_STYLE:
     - "ARCH-CODE_QUALITY"
     - "REQ-CODE_QUALITY"
   detail_file: "implementation-decisions/IMPL-CODE_STYLE.yaml"
-  essence_pseudocode: "# [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY]\n# Conventions and tooling: ESLint 10 flat config, audit-level=high, overrides for minimatch/test-exclude; no runtime algorithm.\n\n# Contract: lint, security:check, and code conventions; no INPUT/OUTPUT at runtime.\n# Run ESLint (flat config, Standard) on src/**/*.js; report violations.\nlint: RUN ESLint (flat config, @eslinter/eslint-config-standard) on src/**/*.js; APPLY rule overrides; REPORT violations\n# Run npm audit --audit-level=high; overrides for minimatch/test-exclude where needed.\nsecurity:check: RUN npm audit --audit-level=high; OVERRIDES for minimatch/test-exclude where needed\n# Follow .editorconfig, ESLint, formatter; no bare specifiers in extension output.\nCode: FOLLOW .editorconfig, ESLint, formatter config; no bare specifiers in output\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-CODE_STYLE-pseudocode.md"
   implementation_approach:
     details:
       - "eslint.config.mjs: globalIgnores, spread @eslinter/eslint-config-standard, files src/**/*.js, languageOptions (ecmaVersion 2022, globals.browser), six rule overrides"
@@ -28,8 +28,8 @@ IMPL-CODE_STYLE:
       date: "YYYY-MM-DD"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-19"
       result: "pass"

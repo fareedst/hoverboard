@@ -1,4 +1,4 @@
-# [IMMUTABLE-REQ-TAG-003] Recent Tags Behavior Specification
+# [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)] Recent Tags Behavior Specification
 
 ## Overview
 
@@ -10,9 +10,9 @@ The current Recent tags list is populated using tags in the recent bookmarks (th
 
 ## Requirements
 
-### [IMMUTABLE-REQ-TAG-003] Recent Tags List Behavior
+### [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)] Recent Tags List Behavior
 
-**Semantic Token:** `[IMMUTABLE-REQ-TAG-003]`
+**Semantic Token:** `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 #### Core Requirements
 
@@ -81,8 +81,8 @@ The current Recent tags list is populated using tags in the recent bookmarks (th
 
 ## Related Documents
 
-- [IMMUTABLE-REQ-TAG-001] - Tag Management System
-- [IMMUTABLE-REQ-TAG-002] - Tab Search Feature
+- [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Tag Management System
+- [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] - Tab Search Feature
 - Architecture Overview - Tag Service Integration
 - Development Guide - Shared Memory Patterns
 

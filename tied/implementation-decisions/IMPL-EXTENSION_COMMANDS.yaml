@@ -1,5 +1,3 @@
-# [IMPL-EXTENSION_COMMANDS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
-# Implementation: Manifest commands + SW onCommand; four commands open side panel, options, bookmarks index, import.
 IMPL-EXTENSION_COMMANDS:
   code_locations:
     files:
@@ -11,7 +9,7 @@ IMPL-EXTENSION_COMMANDS:
   cross_references:
     - "ARCH-QUICK_ACCESS_ENTRY"
     - "REQ-QUICK_ACCESS_ENTRY"
-  essence_pseudocode: "# [IMPL-EXTENSION_COMMANDS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]\n# Extension commands for quick access; SW owns command handling.\n# Contract: shortcut in; one of four targets opens.\nINPUT: user presses assigned shortcut (or default Ctrl+Shift+B/O/M/I)\nOUTPUT: side panel opens, or options page opens, or bookmarks index tab opens, or import page tab opens\nDATA: command names (open-side-panel, open-options, open-bookmarks-index, open-import); SW onCommand handler\n\n# [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]\n# Manifest: four commands so Chrome shows them in chrome://extensions/shortcuts; user can reassign.\nmanifest.json:\n  \"commands\": {\n    \"open-side-panel\": { \"suggested_key\": { \"default\": \"Ctrl+Shift+B\" }, \"description\": \"Open Hoverboard side panel\" },\n    \"open-options\": { \"suggested_key\": { \"default\": \"Ctrl+Shift+O\" }, \"description\": \"Open Hoverboard options\" },\n    \"open-bookmarks-index\": { \"suggested_key\": { \"default\": \"Ctrl+Shift+M\" }, \"description\": \"Open bookmarks index\" },\n    \"open-import\": { \"suggested_key\": { \"default\": \"Ctrl+Shift+I\" }, \"description\": \"Open browser bookmark import\" }\n  }\n\n# [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS]\n# SW onCommand: handle each command; side panel via _sidePanelWindowId; openOptionsPage and tabs.create for options, index, import.\nSW setupEventListeners (or init):\n  IF chrome.commands THEN chrome.commands.onCommand.addListener((command) => handleCommand(command))\nhandleCommand(command):\n  SWITCH command:\n    \"open-side-panel\": windowId = this._sidePanelWindowId; IF windowId != null AND chrome.sidePanel?.open THEN chrome.sidePanel.open({ windowId })\n    \"open-side-panel-bookmark\": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'bookmark' }); THEN sidePanel.open({ windowId })\n    \"open-side-panel-tags-tree\": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'tagsTree' }); THEN sidePanel.open({ windowId })\n    \"open-side-panel-browser-tabs\": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'browserTabs' }); THEN sidePanel.open({ windowId })\n    \"open-options\": chrome.runtime.openOptionsPage()\n    \"open-bookmarks-index\": chrome.tabs.create({ url: ... bookmarks-table.html })\n    \"open-import\": chrome.tabs.create({ url: ... browser-bookmark-import.html })\n# Side panel: storage.onChanged for SIDE_PANEL_TAB_STORAGE_KEY → switchTab(newValue) when panel already open.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-EXTENSION_COMMANDS-pseudocode.md"
   implementation_approach:
     details:
       - "manifest commands: open-side-panel (no suggested_key), open-side-panel-bookmark (Ctrl+Shift+1), open-side-panel-tags-tree (Ctrl+Shift+2), open-side-panel-browser-tabs (Ctrl+Shift+3), open-options (no suggested_key), open-bookmarks-index (Ctrl+Shift+B), open-import (no suggested_key). Exactly four suggested_key per Chrome limit."
@@ -24,8 +22,8 @@ IMPL-EXTENSION_COMMANDS:
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-26"
-      reason: "Align essence_pseudocode with standard (Contract, DATA, sub-block comments)"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Extension Commands for Quick Access"
   rationale:
     benefits:

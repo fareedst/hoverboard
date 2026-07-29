@@ -8,7 +8,7 @@ IMPL-SYNC_BOOKMARK_SERVICE:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
   detail_file: "implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml"
-  essence_pseudocode: "# [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND]\n# chrome.storage.sync provider; same contract as LocalBookmarkService; quota ~100 KB.\n# Contract: url/bookmark/tag inputs and provider-shaped outputs; sync key and shape.\nINPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)\nOUTPUT: bookmark object or list of bookmarks or success/error; same provider contract as LocalBookmarkService\nDATA: chrome.storage.sync key = hoverboard_sync_bookmarks; value = object keyed by URL -> bookmark (quota ~100 KB)\n\n# Read from sync storage and return parsed object or {}.\nLOAD bookmarks:\n  READ from chrome.storage.sync under key\n  RETURN parsed object (or {} if missing)\n\n# Lookup by normalized URL.\ngetBookmarkForUrl(url):\n  bookmarks = LOAD bookmarks\n  RETURN bookmarks[normalize(url)] or null\n\n# Merge data and persist to sync.\nsaveBookmark(data):\n  bookmarks = LOAD bookmarks\n  bookmarks[normalize(data.url)] = merge(data into bookmark shape)\n  PERSIST bookmarks to chrome.storage.sync\n  RETURN { success: true }\n\n# Update bookmarks/tags and persist; return success.\ndeleteBookmark(url), saveTag(data), deleteTag(data):\n  UPDATE bookmarks; PERSIST;       RETURN { success: true }\n\n# Sort by time descending and return first count.\ngetRecentBookmarks(count):\n  list = values(LOAD bookmarks); SORT BY time DESCENDING; RETURN list[0..count-1]\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE-pseudocode.md"
   implementation_approach:
     summary: "SyncBookmarkService in src/features/storage/sync-bookmark-service.js; chrome.storage.sync key hoverboard_sync_bookmarks."
   metadata:
@@ -17,8 +17,8 @@ IMPL-SYNC_BOOKMARK_SERVICE:
       date: "2026-02-15"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Sync Bookmark Service"
   rationale:
     benefits:

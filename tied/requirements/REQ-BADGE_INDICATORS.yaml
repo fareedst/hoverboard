@@ -1,0 +1,44 @@
+REQ-BADGE_INDICATORS:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-BADGE_INDICATORS)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Badge Indicators"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Better user awareness"
+      - "Instant status visibility"
+    problems_solved:
+      - "No at-a-glance status"
+      - "Unclear bookmark state"
+    why: "Quick visual feedback for bookmark status"
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Badge refreshes immediately when private or to-read toggle is changed from overlay or popup"
+    - criterion: "Badge refreshes immediately when tags are added or removed from overlay or popup"
+    - criterion: "Badge shows bookmark status"
+    - criterion: "State indicators clear"
+    - criterion: "Tag count displayed"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-BADGE"
+    code_annotations:
+      - "REQ-BADGE_INDICATORS"
+    implementation:
+      - "IMPL-BADGE"
+    tests:
+      - "Badge tests"
+  validation_criteria:
+    - method: "Badge update tests"
+      coverage: "State indicator logic"

@@ -1,0 +1,42 @@
+REQ-DARK_THEME:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-DARK_THEME)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Dark Theme Support"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Comfortable viewing"
+      - "Consistent theme support"
+    problems_solved:
+      - "Eye strain in dark environments"
+      - "Inconsistent UI appearance"
+    why: "User preference for dark mode"
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Dark theme available"
+    - criterion: "Theme switches without restart"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-THEME"
+    code_annotations:
+      - "REQ-DARK_THEME"
+    implementation:
+      - "IMPL-POPUP_THEME_CSS"
+      - "IMPL-THEME"
+    tests:
+      - "Theme tests"
+  validation_criteria:
+    - method: "Theme tests"
+      coverage: "Dark theme rendering"

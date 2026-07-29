@@ -206,11 +206,11 @@ class HoverSystem {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Build recent tags section with user-driven behavior
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Build recent tags section with user-driven behavior
    */
   async buildRecentTagsSection (pin) {
     try {
-      // [IMMUTABLE-REQ-TAG-003] - Get user recent tags excluding current site
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get user recent tags excluding current site
       const response = await this.messageService.sendMessage('getRecentBookmarks', {
         currentTags: pin.tags || [], // Pass current tags for exclusion
         senderUrl: pin.url
@@ -218,7 +218,7 @@ class HoverSystem {
 
       const recentTags = response?.recentTags || []
 
-      // [IMMUTABLE-REQ-TAG-003] - Show empty state for user-driven recent tags
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Show empty state for user-driven recent tags
       if (!recentTags || recentTags.length === 0) {
         return null
       }
@@ -240,16 +240,16 @@ class HoverSystem {
       tagsContainer.className = 'tags-container'
       section.appendChild(tagsContainer)
 
-      // [IMMUTABLE-REQ-TAG-003] - Tags are already filtered by the service, but double-check
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Tags are already filtered by the service, but double-check
       const currentTags = pin.tags || []
       const availableTags = recentTags.filter(tag => !currentTags.includes(tag))
 
-      // [IMMUTABLE-REQ-TAG-003] - Render recent tags (limited count)
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Render recent tags (limited count)
       const displayCount = Math.min(availableTags.length, this.config.recentTagsDisplayLimit || 10)
       for (let i = 0; i < displayCount; i++) {
         const tag = availableTags[i]
         const tagElement = this.tagRenderer.createRecentTag(tag, pin, (tagToAdd) => {
-          // [IMMUTABLE-REQ-TAG-003] - Add tag to current site only
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Add tag to current site only
           this.handleAddTag(pin, tagToAdd)
         })
         tagsContainer.appendChild(tagElement)
@@ -257,7 +257,7 @@ class HoverSystem {
 
       return section
     } catch (error) {
-      this.logger.error('[IMMUTABLE-REQ-TAG-003] Error building recent tags section:', error)
+      this.logger.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error building recent tags section:', error)
       return null
     }
   }
@@ -424,32 +424,32 @@ class HoverSystem {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Handle adding a tag to current site only
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Handle adding a tag to current site only
    */
   async handleAddTag (pin, tag) {
     try {
-      this.logger.debug('[IMMUTABLE-REQ-TAG-003] Adding tag to current site:', tag)
+      this.logger.debug('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Adding tag to current site:', tag)
 
-      // [IMMUTABLE-REQ-TAG-003] [IMPL-RUNTIME_VALIDATION] - saveTag payload must match message-schemas (url + value)
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] [IMPL-RUNTIME_VALIDATION] - saveTag payload must match message-schemas (url + value)
       await this.messageService.sendMessage('saveTag', {
         url: pin.url,
         value: tag
       })
 
-      // [IMMUTABLE-REQ-TAG-003] - Track tag addition for current site only
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Track tag addition for current site only
       try {
         await this.messageService.sendMessage('addTagToRecent', {
           tagName: tag,
           currentSiteUrl: pin.url
         })
       } catch (error) {
-        this.logger.error('[IMMUTABLE-REQ-TAG-003] Failed to track tag addition:', error)
+        this.logger.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to track tag addition:', error)
         // Don't fail the entire operation if tag tracking fails
       }
 
       setTimeout(() => this.refreshHover(), 500)
     } catch (error) {
-      this.logger.error('[IMMUTABLE-REQ-TAG-003] Error adding tag:', error)
+      this.logger.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error adding tag:', error)
     }
   }
 

@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-19  
 **Status:** Architectural Planning  
-**Cross-References:** `[SHOW-HOVER-CHECKBOX-001]` through `[SHOW-HOVER-CHECKBOX-014]`, `[POPUP-ARCH-001]`, `[CFG-003]`, `[UI-BEHAVIOR-001]`
+**Cross-References:** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-001)]` through `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-014)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`, `[[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)]`, `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]`
 
 ## 🎯 Decision Context
 
@@ -12,11 +12,11 @@ This document outlines architectural decisions specific to adding a checkbox to 
 
 ### **Browser Extension Architecture Constraints**
 
-#### **`[SHOW-HOVER-CHECKBOX-ARCH-001]` - ConfigManager Pattern Usage**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-001)]` - ConfigManager Pattern Usage**
 **Decision**: Use existing ConfigManager patterns for configuration management.
 
 **Rationale**: 
-- Maintains consistency with existing configuration system (`[CFG-003]`)
+- Maintains consistency with existing configuration system (`[[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)]`)
 - Leverages proven storage and retrieval mechanisms
 - Ensures proper error handling and validation
 - Follows established architectural patterns
@@ -28,7 +28,7 @@ This document outlines architectural decisions specific to adding a checkbox to 
 
 **Implementation Details**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-001] Use existing ConfigManager patterns
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-001)] Use existing ConfigManager patterns
 await this.configManager.updateConfig({
   showHoverOnPageLoad: isChecked
 })
@@ -37,7 +37,7 @@ const config = await this.configManager.getConfig()
 this.elements.showHoverOnPageLoad.checked = config.showHoverOnPageLoad
 ```
 
-#### **`[SHOW-HOVER-CHECKBOX-ARCH-002]` - UI Integration Pattern**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)]` - UI Integration Pattern**
 **Decision**: Integrate checkbox seamlessly with existing popup design.
 
 **Rationale**:
@@ -53,7 +53,7 @@ this.elements.showHoverOnPageLoad.checked = config.showHoverOnPageLoad
 
 **Implementation Details**:
 ```css
-/* [SHOW-HOVER-CHECKBOX-ARCH-002] Use existing design patterns */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)] Use existing design patterns */
 .show-hover-controls {
   display: flex;
   align-items: center;
@@ -76,7 +76,7 @@ this.elements.showHoverOnPageLoad.checked = config.showHoverOnPageLoad
 }
 ```
 
-#### **`[SHOW-HOVER-CHECKBOX-ARCH-003]` - Message Pattern Usage**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-003)]` - Message Pattern Usage**
 **Decision**: Use existing message passing patterns for configuration updates.
 
 **Rationale**:
@@ -92,7 +92,7 @@ this.elements.showHoverOnPageLoad.checked = config.showHoverOnPageLoad
 
 **Implementation Details**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-003] Use existing message patterns
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-003)] Use existing message patterns
 await this.sendToTab({
   type: 'UPDATE_CONFIG',
   data: { showHoverOnPageLoad: config.showHoverOnPageLoad }
@@ -107,7 +107,7 @@ await this.sendMessage({
 
 ### **State Management Architecture**
 
-#### **`[SHOW-HOVER-CHECKBOX-ARCH-004]` - Configuration State Synchronization**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-004)]` - Configuration State Synchronization**
 **Decision**: Use existing configuration synchronization patterns.
 
 **Rationale**:
@@ -123,7 +123,7 @@ await this.sendMessage({
 
 **Implementation Details**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-004] Use existing synchronization patterns
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-004)] Use existing synchronization patterns
 async broadcastConfigUpdate() {
   try {
     const config = await this.configManager.getConfig()
@@ -148,7 +148,7 @@ async broadcastConfigUpdate() {
 }
 ```
 
-#### **`[SHOW-HOVER-CHECKBOX-ARCH-005]` - Event Handling Architecture**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-005)]` - Event Handling Architecture**
 **Decision**: Use existing event handling patterns for checkbox interactions.
 
 **Rationale**:
@@ -164,11 +164,11 @@ async broadcastConfigUpdate() {
 
 **Implementation Details**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-005] Use existing event handling patterns
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-005)] Use existing event handling patterns
 setupEventListeners() {
   // ... existing event listeners ...
   
-  // [SHOW-HOVER-CHECKBOX-ARCH-005] - Add checkbox event handler
+  // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-005)] - Add checkbox event handler
   this.uiManager.on('showHoverOnPageLoadChange', this.handleShowHoverOnPageLoadChange.bind(this))
 }
 
@@ -198,7 +198,7 @@ async handleShowHoverOnPageLoadChange() {
 
 ### **Content Script Integration**
 
-#### **`[SHOW-HOVER-CHECKBOX-ARCH-006]` - Configuration Update Handling**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-006)]` - Configuration Update Handling**
 **Decision**: Use existing configuration update patterns in content scripts.
 
 **Rationale**:
@@ -214,14 +214,14 @@ async handleShowHoverOnPageLoadChange() {
 
 **Implementation Details**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-006] Use existing configuration update patterns
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-006)] Use existing configuration update patterns
 async handleMessage(message, sender, sendResponse) {
   try {
     switch (message.type) {
       // ... existing cases ...
       
       case 'UPDATE_CONFIG':
-        // [SHOW-HOVER-CHECKBOX-ARCH-006] - Update local configuration
+        // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-006)] - Update local configuration
         this.config = { ...this.config, ...message.data }
         
         // Log configuration change
@@ -239,7 +239,7 @@ async handleMessage(message, sender, sendResponse) {
 }
 ```
 
-#### **`[SHOW-HOVER-CHECKBOX-ARCH-007]` - Page Load Behavior Integration**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-007)]` - Page Load Behavior Integration**
 **Decision**: Use existing page load behavior patterns.
 
 **Rationale**:
@@ -255,7 +255,7 @@ async handleMessage(message, sender, sendResponse) {
 
 **Implementation Details**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-007] Use existing page load behavior patterns
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-007)] Use existing page load behavior patterns
 shouldShowHoverOnPageLoad(options) {
   if (!this.currentBookmark) return false
 
@@ -272,7 +272,7 @@ shouldShowHoverOnPageLoad(options) {
 
 ## 🐛 Bug Fix Documentation
 
-### **`[SHOW-HOVER-CHECKBOX-BUG-001]` - Service Worker Message Type Error**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-BUG-001)]` - Service Worker Message Type Error**
 **Issue**: The initial implementation used an undefined `BROADCAST_CONFIG_UPDATE` message type, causing service worker errors and "Loading error" messages.
 
 **Root Cause**: The service worker's message handler only recognizes predefined message types from `MESSAGE_TYPES` constants. The undefined message type was rejected, causing the error.
@@ -287,11 +287,11 @@ shouldShowHoverOnPageLoad(options) {
 
 ## 🎨 UI/UX Platform Decisions
 
-### **Chrome Extension UI Patterns** `[SHOW-HOVER-CHECKBOX-ARCH-002]`
+### **Chrome Extension UI Patterns** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)]`
 
-#### Decision: Responsive Popup Design `[SHOW-HOVER-CHECKBOX-ARCH-002]`
+#### Decision: Responsive Popup Design `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)]`
 ```css
-/* [SHOW-HOVER-CHECKBOX-ARCH-002] - Responsive popup design */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)] - Responsive popup design */
 .show-hover-controls {
   display: flex;
   align-items: center;
@@ -311,9 +311,9 @@ shouldShowHoverOnPageLoad(options) {
 - **Alternative Considered**: Fixed layout with overflow
 - **Impact**: Adapts to different popup sizes and user preferences
 
-#### Decision: Consistent Checkbox Styling `[SHOW-HOVER-CHECKBOX-ARCH-002]`
+#### Decision: Consistent Checkbox Styling `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)]`
 ```css
-/* [SHOW-HOVER-CHECKBOX-ARCH-002] - Consistent checkbox styling */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)] - Consistent checkbox styling */
 .page-load-checkbox .checkbox-label {
   display: flex;
   align-items: center;
@@ -331,11 +331,11 @@ shouldShowHoverOnPageLoad(options) {
 - **Alternative Considered**: Custom checkbox styling
 - **Impact**: Familiar user experience for Chrome users
 
-### **Safari Extension UI Patterns** `[SHOW-HOVER-CHECKBOX-ARCH-002]`
+### **Safari Extension UI Patterns** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)]`
 
-#### Decision: Cross-Browser CSS Compatibility `[SHOW-HOVER-CHECKBOX-ARCH-002]`
+#### Decision: Cross-Browser CSS Compatibility `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)]`
 ```css
-/* [SHOW-HOVER-CHECKBOX-ARCH-002] - Cross-browser CSS compatibility */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)] - Cross-browser CSS compatibility */
 .page-load-checkbox {
   display: flex;
   align-items: center;
@@ -353,7 +353,7 @@ shouldShowHoverOnPageLoad(options) {
 
 ## 🔧 Performance and Resource Considerations
 
-### **`[SHOW-HOVER-CHECKBOX-ARCH-008]` - Storage Efficiency**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-008)]` - Storage Efficiency**
 **Decision**: Use existing storage patterns to minimize overhead.
 
 **Rationale**:
@@ -364,13 +364,13 @@ shouldShowHoverOnPageLoad(options) {
 
 **Implementation Details**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-008] Use existing storage patterns
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-008)] Use existing storage patterns
 await this.configManager.updateConfig({
   showHoverOnPageLoad: isChecked
 })
 ```
 
-### **`[SHOW-HOVER-CHECKBOX-ARCH-009]` - Message Passing Efficiency**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-009)]` - Message Passing Efficiency**
 **Decision**: Use existing message passing patterns to minimize overhead.
 
 **Rationale**:
@@ -381,7 +381,7 @@ await this.configManager.updateConfig({
 
 **Implementation Details**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-009] Use existing message passing patterns
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-009)] Use existing message passing patterns
 await this.sendToTab({
   type: 'UPDATE_CONFIG',
   data: { showHoverOnPageLoad: config.showHoverOnPageLoad }
@@ -391,25 +391,25 @@ await this.sendToTab({
 ## 📚 Cross-Reference Coordination
 
 ### **Existing Requirements Coordination**
-- **`[POPUP-CLOSE-BEHAVIOR-001]`**: ✅ Popup must remain open after checkbox changes
-- **`[CFG-003]`**: ✅ Configuration management patterns must be followed
-- **`[POPUP-ARCH-001]`**: ✅ Architecture must support new UI element
-- **`[UI-BEHAVIOR-001]`**: ✅ UI behavior patterns must be consistent
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]`**: ✅ Popup must remain open after checkbox changes
+- **`[[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)]`**: ✅ Configuration management patterns must be followed
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`**: ✅ Architecture must support new UI element
+- **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]`**: ✅ UI behavior patterns must be consistent
 
 ### **Architectural Decisions**
-- **`[SHOW-HOVER-CHECKBOX-ARCH-001]`**: ✅ Checkbox must use existing ConfigManager patterns
-- **`[SHOW-HOVER-CHECKBOX-ARCH-002]`**: ✅ UI must integrate seamlessly with existing popup design
-- **`[SHOW-HOVER-CHECKBOX-ARCH-003]`**: ✅ State synchronization must use existing message patterns
-- **`[SHOW-HOVER-CHECKBOX-ARCH-004]`**: ✅ Configuration state synchronization must use existing patterns
-- **`[SHOW-HOVER-CHECKBOX-ARCH-005]`**: ✅ Event handling must use existing patterns
-- **`[SHOW-HOVER-CHECKBOX-ARCH-006]`**: ✅ Content script configuration updates must use existing patterns
-- **`[SHOW-HOVER-CHECKBOX-ARCH-007]`**: ✅ Page load behavior must use existing patterns
-- **`[SHOW-HOVER-CHECKBOX-ARCH-008]`**: ✅ Storage efficiency must use existing patterns
-- **`[SHOW-HOVER-CHECKBOX-ARCH-009]`**: ✅ Message passing efficiency must use existing patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-001)]`**: ✅ Checkbox must use existing ConfigManager patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-002)]`**: ✅ UI must integrate seamlessly with existing popup design
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-003)]`**: ✅ State synchronization must use existing message patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-004)]`**: ✅ Configuration state synchronization must use existing patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-005)]`**: ✅ Event handling must use existing patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-006)]`**: ✅ Content script configuration updates must use existing patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-007)]`**: ✅ Page load behavior must use existing patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-008)]`**: ✅ Storage efficiency must use existing patterns
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-009)]`**: ✅ Message passing efficiency must use existing patterns
 
 ## 🎯 Implementation Coordination
 
-### **`[SHOW-HOVER-CHECKBOX-ARCH-010]` - Integration with Existing Systems**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-010)]` - Integration with Existing Systems**
 **Decision**: Ensure seamless integration with all existing systems.
 
 **Rationale**:
@@ -420,12 +420,12 @@ await this.sendToTab({
 
 **Implementation Coordination**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-010] Coordinate with existing systems
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-010)] Coordinate with existing systems
 async loadInitialData() {
   try {
     // ... existing data loading ...
     
-    // [SHOW-HOVER-CHECKBOX-ARCH-010] - Load checkbox state
+    // [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-010)] - Load checkbox state
     await this.loadShowHoverOnPageLoadSetting()
     
   } catch (error) {
@@ -434,7 +434,7 @@ async loadInitialData() {
 }
 ```
 
-### **`[SHOW-HOVER-CHECKBOX-ARCH-011]` - Error Handling Integration**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-011)]` - Error Handling Integration**
 **Decision**: Use existing error handling patterns.
 
 **Rationale**:
@@ -445,7 +445,7 @@ async loadInitialData() {
 
 **Implementation Coordination**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-ARCH-011] Use existing error handling patterns
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-011)] Use existing error handling patterns
 async handleShowHoverOnPageLoadChange() {
   try {
     // ... implementation ...
@@ -457,7 +457,7 @@ async handleShowHoverOnPageLoadChange() {
 
 ## 🎯 Success Criteria
 
-### **`[SHOW-HOVER-CHECKBOX-ARCH-012]` - Architectural Success Criteria**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-012)]` - Architectural Success Criteria**
 - ✅ Checkbox uses existing ConfigManager patterns
 - ✅ UI integrates seamlessly with existing popup design
 - ✅ State synchronization uses existing message patterns
@@ -470,7 +470,7 @@ async handleShowHoverOnPageLoadChange() {
 - ✅ Integration with existing systems is seamless
 - ✅ Error handling uses existing patterns
 
-### **`[SHOW-HOVER-CHECKBOX-ARCH-013]` - Platform Success Criteria**
+### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-ARCH-013)]` - Platform Success Criteria**
 - ✅ Chrome extension compatibility maintained
 - ✅ Safari extension compatibility maintained
 - ✅ Cross-browser compatibility maintained

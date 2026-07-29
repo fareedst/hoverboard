@@ -1,0 +1,35 @@
+IMPL-PRIVACY:
+  code_locations:
+    files: []
+    functions: []
+  cross_references:
+    - "ARCH-PRIVACY"
+    - "REQ-PRIVACY_CONTROLS"
+  decision: "Thin implementation stub for IMPL-PRIVACY."
+  essence_pseudocode_path: "implementation-decisions/IMPL-PRIVACY-pseudocode.md"
+  implementation_approach:
+    summary: "Private/shared flags and URL inhibition privacy controls"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: align detail traceability with expanded sidecar"
+  name: "Privacy"
+  rationale:
+    why: "Privacy implementation"
+  related_decisions:
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-PRIVACY"
+    code_annotations:
+      - "IMPL-PRIVACY"
+    requirements:
+      - "REQ-PRIVACY_CONTROLS"
+    tests: []

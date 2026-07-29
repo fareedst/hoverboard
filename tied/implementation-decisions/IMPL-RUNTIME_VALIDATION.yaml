@@ -17,6 +17,7 @@ IMPL-RUNTIME_VALIDATION:
     - "ARCH-MESSAGE_HANDLING"
     - "IMPL-MESSAGE_HANDLING"
   detail_file: "implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-RUNTIME_VALIDATION-pseudocode.md"
   implementation_approach:
     details:
       - "Config schema validates merged (defaults + stored) config in ConfigManager.getConfig(); on failure use defaults"
@@ -35,8 +36,8 @@ IMPL-RUNTIME_VALIDATION:
       date: "2026-02-22"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-28"
-      reason: "Document .strict() vs .passthrough() policy; hover-system.js; message-schemas regression tests for overlay/extra keys"
+      date: "2026-07-28"
+      reason: "LEAP: add REQ-CODE_QUALITY to runtime validation traceability"
   name: "Runtime validation with Zod for messages and config"
   rationale:
     benefits:
@@ -60,7 +61,8 @@ IMPL-RUNTIME_VALIDATION:
       - "ARCH-MESSAGE_HANDLING"
     code_annotations:
       - "IMPL-RUNTIME_VALIDATION"
-    requirements: []
+    requirements:
+      - "REQ-CODE_QUALITY"
     tests:
       - "tests/unit/config-manager.test.js (describe IMPL-RUNTIME_VALIDATION)"
       - "tests/unit/message-handler-contracts.test.js"

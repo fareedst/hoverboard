@@ -1,6 +1,6 @@
 /**
  * Popup checkbox (show hover on page load) - [REQ-OVERLAY_AUTO_SHOW_CONTROL] [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION]
- * [SHOW-HOVER-CHECKBOX-TEST-001] through [SHOW-HOVER-CHECKBOX-TEST-003]
+ * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] through [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX]
  */
 
 import { PopupController } from '../../src/ui/popup/PopupController.js'
@@ -152,7 +152,7 @@ describe('[REQ-OVERLAY_AUTO_SHOW_CONTROL] [IMPL-POPUP_SESSION] Popup Checkbox Fu
     popupController.sendMessage = jest.fn().mockResolvedValue({ success: true })
   })
 
-  describe('[SHOW-HOVER-CHECKBOX-TEST-001] - Checkbox state loading', () => {
+  describe('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Checkbox state loading', () => {
     test('should load checkbox state from configuration', async () => {
       // Mock config with showHoverOnPageLoad: true
       configManager.getConfig.mockResolvedValue({
@@ -177,7 +177,7 @@ describe('[REQ-OVERLAY_AUTO_SHOW_CONTROL] [IMPL-POPUP_SESSION] Popup Checkbox Fu
     })
   })
 
-  describe('[SHOW-HOVER-CHECKBOX-TEST-002] - Checkbox state saving', () => {
+  describe('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Checkbox state saving', () => {
     test('should save checkbox state to configuration', async () => {
       uiManager.elements.showHoverOnPageLoad.checked = true
 
@@ -213,7 +213,7 @@ describe('[REQ-OVERLAY_AUTO_SHOW_CONTROL] [IMPL-POPUP_SESSION] Popup Checkbox Fu
     })
   })
 
-  describe('[SHOW-HOVER-CHECKBOX-TEST-003] - Configuration broadcasting', () => {
+  describe('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Configuration broadcasting', () => {
     test('should broadcast configuration updates to content scripts', async () => {
       configManager.getConfig.mockResolvedValue({
         showHoverOnPageLoad: true

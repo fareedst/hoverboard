@@ -1,5 +1,5 @@
 /**
- * [TOGGLE-SYNC-TEST-001] Toggle synchronization - [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC]
+ * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Toggle synchronization - [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC]
  * Tests for toggle button synchronization between popup and overlay.
  */
 
@@ -34,7 +34,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
   })
 
   describe('Overlay Toggle Persistence', () => {
-    test('[TOGGLE-SYNC-TEST-001] Overlay privacy toggle sends saveBookmark message', async () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Overlay privacy toggle sends saveBookmark message', async () => {
       // Mock message service
       const mockMessageService = {
         sendMessage: jest.fn().mockResolvedValue({ success: true })
@@ -84,28 +84,28 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
               shared: newSharedStatus
             }
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Send saveBookmark message for persistence
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Send saveBookmark message for persistence
             await mockMessageService.sendMessage({
               type: 'saveBookmark',
               data: updatedBookmark
             })
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Update local content immediately for display
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Update local content immediately for display
             mockContent.bookmark.shared = newSharedStatus
             mockShow(mockContent) // Refresh overlay with updated local content
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Show success message
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Show success message
             mockShowMessage(`Bookmark is now ${isPrivate ? 'public' : 'private'}`, 'success')
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Notify popup of changes (if open)
             await mockMessageService.sendMessage({
               type: 'BOOKMARK_UPDATED',
               data: updatedBookmark
             })
             
-            debugLog('[TOGGLE-SYNC-OVERLAY-001] Privacy toggled', mockContent.bookmark.shared)
+            debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Privacy toggled', mockContent.bookmark.shared)
           } catch (error) {
-            debugError('[TOGGLE-SYNC-OVERLAY-001] Failed to toggle privacy:', error)
+            debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to toggle privacy:', error)
             mockShowMessage('Failed to update privacy setting', 'error')
           }
         }
@@ -142,7 +142,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
       expect(mockShowMessage).toHaveBeenCalledWith('Bookmark is now public', 'success')
     })
 
-    test('[TOGGLE-SYNC-TEST-001] Overlay read later toggle sends saveBookmark message', async () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Overlay read later toggle sends saveBookmark message', async () => {
       // Mock message service
       const mockMessageService = {
         sendMessage: jest.fn().mockResolvedValue({ success: true })
@@ -193,29 +193,29 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
               description: mockContent.bookmark.description || 'Test Page'
             }
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Send saveBookmark message for persistence
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Send saveBookmark message for persistence
             await mockMessageService.sendMessage({
               type: 'saveBookmark',
               data: updatedBookmark
             })
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Update local content immediately for display
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Update local content immediately for display
             mockContent.bookmark.toread = newToReadStatus
             mockShow(mockContent) // Refresh overlay with updated local content
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Show success message
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Show success message
             const statusMessage = newToReadStatus === 'yes' ? 'Added to read later' : 'Removed from read later'
             mockShowMessage(statusMessage, 'success')
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Notify popup of changes (if open)
             await mockMessageService.sendMessage({
               type: 'BOOKMARK_UPDATED',
               data: updatedBookmark
             })
             
-            debugLog('[TOGGLE-SYNC-OVERLAY-001] Read status toggled', mockContent.bookmark.toread)
+            debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Read status toggled', mockContent.bookmark.toread)
           } catch (error) {
-            debugError('[TOGGLE-SYNC-OVERLAY-001] Failed to toggle read later status:', error)
+            debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to toggle read later status:', error)
             mockShowMessage('Failed to update read later status', 'error')
           }
         }
@@ -254,7 +254,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
   })
 
   describe('Error Handling', () => {
-    test('[TOGGLE-SYNC-TEST-001] Handles network failure gracefully', async () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Handles network failure gracefully', async () => {
       // Mock message service that throws an error
       const mockMessageService = {
         sendMessage: jest.fn().mockRejectedValue(new Error('Network error'))
@@ -291,28 +291,28 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
               shared: newSharedStatus
             }
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Send saveBookmark message for persistence
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Send saveBookmark message for persistence
             await mockMessageService.sendMessage({
               type: 'saveBookmark',
               data: updatedBookmark
             })
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Update local content immediately for display
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Update local content immediately for display
             mockContent.bookmark.shared = newSharedStatus
             mockShow(mockContent) // Refresh overlay with updated local content
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Show success message
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Show success message
             mockShowMessage(`Bookmark is now ${isPrivate ? 'public' : 'private'}`, 'success')
             
-            // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Notify popup of changes (if open)
             await mockMessageService.sendMessage({
               type: 'BOOKMARK_UPDATED',
               data: updatedBookmark
             })
             
-            debugLog('[TOGGLE-SYNC-OVERLAY-001] Privacy toggled', mockContent.bookmark.shared)
+            debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Privacy toggled', mockContent.bookmark.shared)
           } catch (error) {
-            debugError('[TOGGLE-SYNC-OVERLAY-001] Failed to toggle privacy:', error)
+            debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to toggle privacy:', error)
             mockShowMessage('Failed to update privacy setting', 'error')
           }
         }
@@ -325,7 +325,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
       expect(mockShowMessage).toHaveBeenCalledWith('Failed to update privacy setting', 'error')
 
       // Verify error was logged
-      expect(debugError).toHaveBeenCalledWith('[TOGGLE-SYNC-OVERLAY-001] Failed to toggle privacy:', expect.any(Error))
+      expect(debugError).toHaveBeenCalledWith('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to toggle privacy:', expect.any(Error))
 
       // Verify local content was NOT updated (should remain unchanged due to error)
       expect(mockContent.bookmark.shared).toBe('no')
@@ -336,7 +336,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
   })
 
   describe('Message Handler Integration', () => {
-    test('[TOGGLE-SYNC-TEST-001] BOOKMARK_UPDATED message type is defined', () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] BOOKMARK_UPDATED message type is defined', () => {
       // This test verifies that the BOOKMARK_UPDATED message type is properly defined
       const MESSAGE_TYPES = {
         // ... other message types ...
@@ -346,7 +346,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
       expect(MESSAGE_TYPES.BOOKMARK_UPDATED).toBe('bookmarkUpdated')
     })
 
-    test('[TOGGLE-SYNC-TEST-001] handleBookmarkUpdated method exists', () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] handleBookmarkUpdated method exists', () => {
       // Mock message handler
       const mockMessageHandler = {
         handleBookmarkUpdated: jest.fn().mockResolvedValue({ success: true })
@@ -358,7 +358,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
   })
 
   describe('Popup and Overlay Message Reception', () => {
-    test('[TOGGLE-SYNC-TEST-001] Popup updates UI on BOOKMARK_UPDATED', async () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Popup updates UI on BOOKMARK_UPDATED', async () => {
       // [TOGGLE_SYNC_POPUP] Simulate popup receiving BOOKMARK_UPDATED
       const mockGetBookmarkData = jest.fn().mockResolvedValue({
         url: 'https://example.com',
@@ -400,7 +400,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
       expect(mockUIManager.showSuccess).toHaveBeenCalledWith('Bookmark updated from another window')
     })
 
-    test('[TOGGLE-SYNC-TEST-001] Overlay updates UI on BOOKMARK_UPDATED', async () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Overlay updates UI on BOOKMARK_UPDATED', async () => {
       // [TOGGLE_SYNC_OVERLAY] Simulate overlay receiving BOOKMARK_UPDATED
       const mockShow = jest.fn()
       const overlayManager = {
@@ -429,7 +429,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
   })
 
   describe('Edge Cases', () => {
-    test('[TOGGLE-SYNC-TEST-001] Handles rapid toggling', async () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Handles rapid toggling', async () => {
       // [TOGGLE_SYNC_TEST] Simulate rapid toggling and ensure all messages are sent
       const mockMessageService = { sendMessage: jest.fn().mockResolvedValue({ success: true }) }
       const mockContent = { bookmark: { url: 'https://example.com', shared: 'no', toread: 'no', tags: [] } }
@@ -453,7 +453,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
       expect(toggleCount).toBe(3)
       expect(mockMessageService.sendMessage).toHaveBeenCalledTimes(6) // 2 per toggle
     })
-    test('[TOGGLE-SYNC-TEST-001] Handles reload scenario', async () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Handles reload scenario', async () => {
       // [TOGGLE_SYNC_TEST] Simulate reload and ensure state is restored from shared record
       const mockGetBookmarkData = jest.fn().mockResolvedValue({ url: 'https://example.com', shared: 'no', toread: 'yes', tags: ['test'] })
       const mockStateManager = { setState: jest.fn() }
@@ -482,7 +482,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
   })
 
   describe('Tag Synchronization', () => {
-    test('[TAG-SYNC-POPUP-001] Adding a tag in popup updates overlay', async () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Adding a tag in popup updates overlay', async () => {
       // Mock sendToTab and overlay show
       const mockSendToTab = jest.fn().mockResolvedValue({ success: true })
       const mockShow = jest.fn()
@@ -507,7 +507,7 @@ describe('[REQ-BOOKMARK_STATE_SYNCHRONIZATION] [IMPL-BOOKMARK_STATE_SYNC] Toggle
       expect(mockSendToTab).toHaveBeenCalledWith({ type: 'BOOKMARK_UPDATED', data: pinData })
       expect(mockShow).toHaveBeenCalledWith(updatedContent)
     })
-    test('[TAG-SYNC-POPUP-001] Deleting a tag in popup updates overlay', async () => {
+    test('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Deleting a tag in popup updates overlay', async () => {
       // Mock sendToTab and overlay show
       const mockSendToTab = jest.fn().mockResolvedValue({ success: true })
       const mockShow = jest.fn()

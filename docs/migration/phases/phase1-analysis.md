@@ -1,6 +1,6 @@
 # 🔍 PHASE 1: Foundation & Analysis
 
-## MIGRATION-001: Project Structure Analysis
+## [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-001): Project Structure Analysis
 **Status**: ✅ COMPLETE  
 **Date**: $(date)  
 **Priority**: ⭐ CRITICAL
@@ -217,7 +217,7 @@ const msgTabRefreshData = 'b2fRefreshData';
 
 ---
 
-## ✅ MIGRATION-001 DELIVERABLES
+## ✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-001) DELIVERABLES
 
 ### **📋 Completed Analysis**
 - [x] **Current architecture documentation** - Comprehensive file inventory
@@ -233,14 +233,14 @@ const msgTabRefreshData = 'b2fRefreshData';
 5. **Manifest V3** template is ready for implementation
 
 ### **📈 Next Steps**
-- Proceed to **MIGRATION-002**: Fresh Extension Template Setup
+- Proceed to **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-002)**: Fresh Extension Template Setup
 - Focus on completing the service worker migration
 - Begin jQuery dependency removal planning
 - Establish modern build system for ES6 modules
 
 ---
 
-## MIGRATION-002: Fresh Extension Template Setup
+## [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-002): Fresh Extension Template Setup
 **Status**: ✅ COMPLETE  
 **Date**: $(date)  
 **Priority**: ⭐ CRITICAL
@@ -384,7 +384,7 @@ export class MessageHandler {
 
 ---
 
-## 📊 MIGRATION-002 DELIVERABLES
+## 📊 [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-002) DELIVERABLES
 
 ### **✅ Completed Infrastructure**
 - [x] **Manifest V3 template** - Complete and validated
@@ -416,8 +416,8 @@ export class MessageHandler {
 
 **PHASE 1: Foundation & Analysis** is now **COMPLETE** with both critical migrations finished:
 
-1. **MIGRATION-001**: Comprehensive analysis of current architecture ✅
-2. **MIGRATION-002**: Modern extension template with full infrastructure ✅
+1. **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-001)**: Comprehensive analysis of current architecture ✅
+2. **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-002)**: Modern extension template with full infrastructure ✅
 
 ### **Ready for Phase 2**
 The foundation is now solid for proceeding to **PHASE 2: Core Module Migration** with:
@@ -429,7 +429,7 @@ The foundation is now solid for proceeding to **PHASE 2: Core Module Migration**
 
 **📅 Total Phase 1 Duration**: 3-4 days (as estimated)  
 **🎯 Success Rate**: 100% - All deliverables completed  
-**📈 Next Phase**: Ready to begin MIGRATION-003 (Configuration System) and MIGRATION-004 (Core Service Layer)
+**📈 Next Phase**: Ready to begin [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-003) (Configuration System) and [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-004) (Core Service Layer)
 
 ---
 

@@ -1,0 +1,35 @@
+IMPL-BADGE:
+  code_locations:
+    files: []
+    functions: []
+  cross_references:
+    - "ARCH-BADGE"
+    - "REQ-BADGE_INDICATORS"
+  decision: "Thin implementation stub for IMPL-BADGE."
+  essence_pseudocode_path: "implementation-decisions/IMPL-BADGE-pseudocode.md"
+  implementation_approach:
+    summary: "Tab-scoped badge text/color from bookmark state; composes with IMPL-BADGE_REFRESH"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: align detail traceability with expanded sidecar"
+  name: "Badge"
+  rationale:
+    why: "Badge implementation"
+  related_decisions:
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-BADGE"
+    code_annotations:
+      - "IMPL-BADGE"
+    requirements:
+      - "REQ-BADGE_INDICATORS"
+    tests: []

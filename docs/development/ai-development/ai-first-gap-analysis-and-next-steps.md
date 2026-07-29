@@ -120,23 +120,23 @@ compliance_gaps:
 ### **⭐ CRITICAL PRIORITY (Week 1)**
 | Task | Impact | Effort | Dependencies | Deliverable |
 |------|--------|--------|--------------|-------------|
-| **AI-001: AI Assistant Protocol** | 🔴 HIGH | 2-3 days | None | `docs/ai-assistant-protocol.md` |
-| **AI-002: Feature Registry** | 🔴 HIGH | 1-2 days | AI-001 | `docs/feature-tracking-matrix.md` |
-| **AI-003: Token Specification** | 🔴 HIGH | 1 day | AI-001, AI-002 | Token format standards |
+| **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-001): AI Assistant Protocol** | 🔴 HIGH | 2-3 days | None | `docs/ai-assistant-protocol.md` |
+| **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-002): Feature Registry** | 🔴 HIGH | 1-2 days | [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-001) | `docs/feature-tracking-matrix.md` |
+| **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-003): Token Specification** | 🔴 HIGH | 1 day | [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-001), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-002) | Token format standards |
 
 ### **🔺 HIGH PRIORITY (Week 2)**
 | Task | Impact | Effort | Dependencies | Deliverable |
 |------|--------|--------|--------------|-------------|
-| **AI-004: Token Implementation** | 🟡 MEDIUM | 3-4 days | AI-003 | All `src-new/` files with tokens |
-| **AI-005: Validation Scripts** | 🔴 HIGH | 2-3 days | AI-002, AI-003 | Automated validation suite |
-| **AI-006: Cross-Reference System** | 🟡 MEDIUM | 2 days | AI-002, AI-004 | Bidirectional linking system |
+| **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-004): Token Implementation** | 🟡 MEDIUM | 3-4 days | [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-003) | All `src-new/` files with tokens |
+| **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-005): Validation Scripts** | 🔴 HIGH | 2-3 days | [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-002), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-003) | Automated validation suite |
+| **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-006): Cross-Reference System** | 🟡 MEDIUM | 2 days | [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-002), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-004) | Bidirectional linking system |
 
 ### **🔶 MEDIUM PRIORITY (Week 3)**
 | Task | Impact | Effort | Dependencies | Deliverable |
 |------|--------|--------|--------------|-------------|
-| **AI-007: Documentation Cascade** | 🟡 MEDIUM | 2-3 days | AI-005, AI-006 | Automated doc updates |
-| **AI-008: Monitoring Dashboard** | 🟢 LOW | 2 days | AI-005 | Real-time metrics system |
-| **AI-009: CI/CD Integration** | 🟡 MEDIUM | 1-2 days | AI-005 | Enhanced pipeline |
+| **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-007): Documentation Cascade** | 🟡 MEDIUM | 2-3 days | [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-005), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-006) | Automated doc updates |
+| **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-008): Monitoring Dashboard** | 🟢 LOW | 2 days | [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-005) | Real-time metrics system |
+| **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-009): CI/CD Integration** | 🟡 MEDIUM | 1-2 days | [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-005) | Enhanced pipeline |
 
 ---
 
@@ -144,7 +144,7 @@ compliance_gaps:
 
 ### **WEEK 1: Foundation (Critical Infrastructure)**
 
-#### **Day 1-2: AI Assistant Protocol (AI-001)**
+#### **Day 1-2: AI Assistant Protocol ([IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-001))**
 ```yaml
 deliverables:
   - docs/ai-assistant-protocol.md: "Complete decision framework"
@@ -159,7 +159,7 @@ success_criteria:
   - ai_behavioral_contracts: "Explicit AI behavior definitions"
 ```
 
-#### **Day 3-4: Feature Registry (AI-002)**
+#### **Day 3-4: Feature Registry ([IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-002))**
 ```yaml
 deliverables:
   - docs/feature-tracking-matrix.md: "Central feature registry"
@@ -174,7 +174,7 @@ success_criteria:
   - cross_reference_foundation: "Links to documentation and code"
 ```
 
-#### **Day 5-7: Token Specification (AI-003)**
+#### **Day 5-7: Token Specification ([IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-003))**
 ```yaml
 deliverables:
   - token_format_specification: "Standardized implementation token format"
@@ -191,7 +191,7 @@ success_criteria:
 
 ### **WEEK 2: Implementation (Core Systems)**
 
-#### **Day 8-11: Token Implementation (AI-004)**
+#### **Day 8-11: Token Implementation ([IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-004))**
 ```yaml
 scope:
   target_files: "All files in src-new/ directory (~25 files)"
@@ -210,7 +210,7 @@ success_criteria:
   - automated_validation_working: "Scripts successfully validate tokens"
 ```
 
-#### **Day 12-14: Validation Framework (AI-005)**
+#### **Day 12-14: Validation Framework ([IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-005))**
 ```yaml
 deliverables:
   - scripts/validate-ai-compliance.sh: "Master validation script"
@@ -232,7 +232,7 @@ success_criteria:
 
 ### **WEEK 3: Enhancement (Advanced Features)**
 
-#### **Day 15-17: Advanced Integration (AI-006, AI-007)**
+#### **Day 15-17: Advanced Integration ([IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-006), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-007))**
 ```yaml
 cross_reference_system:
   bidirectional_validation: "Ensure consistency in both directions"
@@ -251,7 +251,7 @@ success_criteria:
   - template_system_functional: "Automated update templates working"
 ```
 
-#### **Day 18-21: Monitoring and Optimization (AI-008, AI-009)**
+#### **Day 18-21: Monitoring and Optimization ([IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-008), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-009))**
 ```yaml
 monitoring_dashboard:
   ai_performance_metrics: "Decision time, success rate, compliance"

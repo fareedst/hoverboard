@@ -10,7 +10,7 @@ IMPL-FILE_BOOKMARK_SERVICE:
     - "ARCH-FILE_BOOKMARK_PROVIDER"
     - "REQ-FILE_BOOKMARK_STORAGE"
   detail_file: "implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml"
-  essence_pseudocode: "# [IMPL-FILE_BOOKMARK_SERVICE] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE]\n# File-based bookmark provider via adapter; same contract as Local/Pinboard.\n# Contract: url/bookmark/tag inputs and provider-shaped outputs; adapter and file shape.\nINPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)\nOUTPUT: bookmark object or list of bookmarks or success/error; shape matches provider contract\nDATA: adapter (readBookmarksFile, writeBookmarksFile); file shape = { version: 1, bookmarks: map url -> bookmark }\n\n# Read file via adapter and return bookmarks map (or {}).\nLOAD bookmarks from file:\n  data = adapter.readBookmarksFile()\n  RETURN data.bookmarks (or {} if missing); in-memory map urlNorm -> bookmark\n\n# Lookup by normalized URL.\ngetBookmarkForUrl(url):\n  bookmarks = LOAD bookmarks from file\n  urlNorm = normalize(url)\n  RETURN bookmarks[urlNorm] or null\n\n# Merge data into bookmark shape and write file.\nsaveBookmark(data):\n  bookmarks = LOAD bookmarks from file\n  urlNorm = normalize(data.url)\n  bookmarks[urlNorm] = merge(data into bookmark shape with url, description, extended, tags, time, shared, toread, hash)\n  adapter.writeBookmarksFile({ version: 1, bookmarks })\n  RETURN { success: true }\n\n# Remove by normalized URL and write file.\ndeleteBookmark(url):\n  bookmarks = LOAD bookmarks from file\n  REMOVE bookmarks[normalize(url)]\n  adapter.writeBookmarksFile({ version: 1, bookmarks })\n  RETURN { success: true }\n\n# Update tags on bookmark and persist.\nsaveTag(data), deleteTag(data):\n  bookmark = getBookmarkForUrl(data.url); update tags; saveBookmark(bookmark) or equivalent\n  RETURN { success: true }\n\n# Sort by time descending and return first count.\ngetRecentBookmarks(count):\n  bookmarks = LOAD bookmarks from file\n  list = values(bookmarks)\n  SORT list BY time DESCENDING\n  RETURN list[0..count-1]\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE-pseudocode.md"
   implementation_approach:
     details:
       - "Adapter methods: readBookmarksFile() -> Promise<{ version, bookmarks }>, writeBookmarksFile(data) -> Promise<void>"
@@ -23,8 +23,8 @@ IMPL-FILE_BOOKMARK_SERVICE:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

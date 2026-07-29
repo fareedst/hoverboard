@@ -17,7 +17,7 @@ IMPL-AI_TAGGING_READABILITY:
   cross_references:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
-  essence_pseudocode: "# [IMPL-AI_TAGGING_READABILITY] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP]\n# Extract main content from document: Readability when available, else title + body.innerText; cap at maxLength.\n\n# Contract: input = document (or run in page context); output = { title, textContent }; maxLength cap (e.g. 16k).\nINPUT: document (or run in page context)\nOUTPUT: { title: string, textContent: string }\nDATA: maxLength (e.g. 16000)\n\n# Clone document; Readability.parse; use result title/text or fallback to document.title and body.innerText; cap text length.\nextractPageContent(document):\n  clone = document.cloneNode(true)\n  result = Readability.parse(clone)  // @mozilla/readability\n  IF result:\n    title = result.title ?? document.title\n    text = result.textContent ?? ''\n  ELSE:\n    title = document.title\n    text = document.body ? document.body.innerText : ''\n  IF text.length > maxLength THEN text = text.slice(0, maxLength)\n  RETURN { title, textContent: text }\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_TAGGING_READABILITY-pseudocode.md"
   implementation_approach:
     details:
       - "Content script: early browser.runtime.onMessage listener (registered before init() / waitForDOM()) handles GET_PAGE_CONTENT by calling extractPageContent(document) and sendResponse. When present, this provides Readability-based extraction; the class handleMessage no longer handles GET_PAGE_CONTENT to avoid double response."
@@ -30,8 +30,8 @@ IMPL-AI_TAGGING_READABILITY:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-21"
-      reason: "GET_PAGE_CONTENT implemented in SW via executeScript (no content script dependency); content script early listener for Readability when present"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Page Content via Readability"
   rationale:
     benefits:

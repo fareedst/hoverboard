@@ -1,9 +1,9 @@
 # Test Fix Implementation Plan - 2025-07-15
 
 **Status**: 🚨 CRITICAL - Implementation plan for test failure resolution  
-**Feature ID**: `[TEST-FIX-IMPL-001]`  
+**Feature ID**: `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-IMPL-001)]`  
 **Priority**: ⭐ CRITICAL  
-**Cross-References**: `[POPUP-ARCH-001]`, `[UI-SYSTEM-001]`, `[DEP-INJ-001]`, `[TEST-ARCH-001]`
+**Cross-References**: `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`, `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-SYSTEM-001)]`, `[[IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION] (was DEP-INJ-001)]`, `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)]`
 
 > **🤖 AI ASSISTANT REQUIREMENTS**: This plan coordinates with all existing architecture documents and follows the AI-First Development Framework. All implementation must maintain consistency with established patterns.
 
@@ -20,18 +20,18 @@ This implementation plan addresses the failing popup tag integration tests while
 
 ### 🚨 Critical Issue Context
 The failing test `should retrieve tags added in previous popup instance` requires architectural decisions that coordinate with:
-- **Popup Architecture**: Component interaction patterns (`[POPUP-ARCH-001]`)
-- **Tag Management Architecture**: Tag persistence and validation (`[TAG-SYNC-001]`)
-- **Testing Architecture**: Async test handling patterns (`[TEST-ARCH-001]`)
-- **Error Handling Architecture**: Consistent error management (`[ERROR-HANDLING-001]`)
+- **Popup Architecture**: Component interaction patterns (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`)
+- **Tag Management Architecture**: Tag persistence and validation (`[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] (was TAG-SYNC-001)]`)
+- **Testing Architecture**: Async test handling patterns (`[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)]`)
+- **Error Handling Architecture**: Consistent error management (`[[IMPL-ERROR_HANDLING] [ARCH-ERROR_HANDLING] [REQ-ERROR_HANDLING] (was ERROR-HANDLING-001)]`)
 
 ---
 
 ## 🏗️ Platform-Specific Architectural Decisions
 
-### **JavaScript/Chrome Extension Platform Decisions** `[TEST-FIX-IMPL-001]`
+### **JavaScript/Chrome Extension Platform Decisions** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-IMPL-001)]`
 
-#### **Decision 1: Dependency Injection Pattern Standardization** `[DEP-INJ-001]`
+#### **Decision 1: Dependency Injection Pattern Standardization** `[[IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION] (was DEP-INJ-001)]`
 **Technology**: Constructor-based dependency injection with object destructuring  
 **Rationale**: Chrome extension components require explicit dependency management for testability  
 **Alternative Considered**: Global service locator pattern  
@@ -39,7 +39,7 @@ The failing test `should retrieve tags added in previous popup instance` require
 
 **Implementation Pattern**:
 ```javascript
-// [DEP-INJ-001] Standardized dependency injection pattern
+// [[IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION] (was DEP-INJ-001)] Standardized dependency injection pattern
 export class UIManager {
   constructor ({ errorHandler, stateManager, config = {} }) {
     this.errorHandler = errorHandler
@@ -49,7 +49,7 @@ export class UIManager {
   }
 }
 
-// [DEP-INJ-001] PopupController with proper dependency injection
+// [[IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION] (was DEP-INJ-001)] PopupController with proper dependency injection
 export class PopupController {
   constructor (dependencies = {}) {
     this.uiManager = dependencies.uiManager || new UIManager({
@@ -62,7 +62,7 @@ export class PopupController {
 }
 ```
 
-#### **Decision 2: Test Mock Architecture Consistency** `[TEST-ARCH-001]`
+#### **Decision 2: Test Mock Architecture Consistency** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)]`
 **Technology**: Jest mocking with realistic behavior simulation  
 **Rationale**: Chrome extension APIs require comprehensive mocking for reliable testing  
 **Alternative Considered**: Manual mock implementation  
@@ -70,9 +70,9 @@ export class PopupController {
 
 **Implementation Pattern**:
 ```javascript
-// [TEST-ARCH-001] Comprehensive Chrome API mocking
+// [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Comprehensive Chrome API mocking
 beforeEach(() => {
-  // [TEST-ARCH-001] Mock Chrome API with realistic behavior
+  // [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Mock Chrome API with realistic behavior
   chrome.runtime.sendMessage.mockImplementation((message, callback) => {
     if (message.type === 'saveBookmark') {
       callback({ success: true, data: { result_code: 'done' } })
@@ -92,7 +92,7 @@ beforeEach(() => {
 })
 ```
 
-#### **Decision 3: Async Test Pattern Standardization** `[TEST-ARCH-001]`
+#### **Decision 3: Async Test Pattern Standardization** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)]`
 **Technology**: Jest + Async/Await + Promise-based testing  
 **Rationale**: Chrome extension APIs are inherently asynchronous, requiring proper async test patterns  
 **Alternative Considered**: Callback-based testing with manual promise management  
@@ -100,16 +100,16 @@ beforeEach(() => {
 
 **Implementation Pattern**:
 ```javascript
-// [TEST-ARCH-001] Standardized async test patterns
+// [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Standardized async test patterns
 test('should retrieve tags added in previous popup instance', async () => {
-  // [TEST-ARCH-001] Setup with proper async initialization
+  // [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Setup with proper async initialization
   const popupController = new PopupController()
   await popupController.initialize()
   
-  // [TEST-ARCH-001] Async operations with proper error handling
+  // [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Async operations with proper error handling
   await popupController.loadBookmarkData()
   
-  // [TEST-ARCH-001] Assertions with proper async validation
+  // [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Assertions with proper async validation
   expect(uiManager.updateCurrentTags).toHaveBeenCalledWith(
     expect.arrayContaining([previouslyAddedTag])
   )
@@ -120,19 +120,19 @@ test('should retrieve tags added in previous popup instance', async () => {
 
 ## 🔧 Implementation Strategy
 
-### **Phase 1: Core Architecture Fix** `[TEST-FIX-IMPL-001]`
+### **Phase 1: Core Architecture Fix** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-IMPL-001)]`
 
-#### **Task 1.1: PopupController Constructor Fix** `[POPUP-ARCH-001]`
+#### **Task 1.1: PopupController Constructor Fix** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`
 **File**: `src/ui/popup/PopupController.js`  
 **Priority**: ⭐ CRITICAL  
 **Duration**: 30 minutes  
 
 **Implementation**:
 ```javascript
-// [POPUP-ARCH-001] Fix dependency injection in PopupController constructor
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)] Fix dependency injection in PopupController constructor
 export class PopupController {
   constructor (dependencies = {}) {
-    // [DEP-INJ-001] Proper dependency injection with fallback creation
+    // [[IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION] (was DEP-INJ-001)] Proper dependency injection with fallback creation
     this.uiManager = dependencies.uiManager || new UIManager({
       errorHandler: this.errorHandler,
       stateManager: this.stateManager,
@@ -152,16 +152,16 @@ export class PopupController {
 - [ ] Maintains existing functionality
 - [ ] Passes all existing tests
 
-#### **Task 1.2: Test Setup Consistency** `[TEST-ARCH-001]`
+#### **Task 1.2: Test Setup Consistency** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)]`
 **File**: `tests/integration/popup-tag-integration.test.js`  
 **Priority**: ⭐ CRITICAL  
 **Duration**: 45 minutes  
 
 **Implementation**:
 ```javascript
-// [TEST-ARCH-001] Consistent test setup with proper dependency injection
+// [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Consistent test setup with proper dependency injection
 beforeEach(() => {
-  // [TEST-ARCH-001] Create mock instances with proper interfaces
+  // [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Create mock instances with proper interfaces
   uiManager = new UIManager({
     errorHandler: errorHandler,
     stateManager: stateManager,
@@ -170,13 +170,13 @@ beforeEach(() => {
   stateManager = new StateManager()
   errorHandler = new ErrorHandler()
 
-  // [TEST-ARCH-001] Mock UIManager methods for testing
+  // [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Mock UIManager methods for testing
   uiManager.updateCurrentTags = jest.fn()
   uiManager.updateRecentTags = jest.fn()
   uiManager.showSuccess = jest.fn()
   uiManager.on = jest.fn()
 
-  // [TEST-ARCH-001] Create popup controller with injected dependencies
+  // [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Create popup controller with injected dependencies
   popupController = new PopupController({
     uiManager,
     stateManager,
@@ -191,9 +191,9 @@ beforeEach(() => {
 - [ ] Dependency injection works correctly
 - [ ] Tests pass consistently
 
-### **Phase 2: Architecture Validation** `[TEST-FIX-IMPL-001]`
+### **Phase 2: Architecture Validation** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-IMPL-001)]`
 
-#### **Task 2.1: Cross-Architecture Coordination** `[ARCH-COORD-001]`
+#### **Task 2.1: Cross-Architecture Coordination** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-COORD-001)]`
 **Priority**: 🔺 HIGH  
 **Duration**: 60 minutes  
 
@@ -209,13 +209,13 @@ beforeEach(() => {
 - [ ] Semantic tokens properly applied
 - [ ] Cross-references maintained
 
-#### **Task 2.2: Comprehensive Test Suite Validation** `[TEST-ARCH-001]`
+#### **Task 2.2: Comprehensive Test Suite Validation** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)]`
 **Priority**: ⭐ CRITICAL  
 **Duration**: 30 minutes  
 
 **Implementation**:
 ```bash
-# [TEST-ARCH-001] Run comprehensive test validation
+# [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Run comprehensive test validation
 npm test -- --verbose
 npm run test:coverage
 npm test -- tests/integration/popup-tag-integration.test.js
@@ -227,9 +227,9 @@ npm test -- tests/integration/popup-tag-integration.test.js
 - [ ] Coverage maintained or improved
 - [ ] Performance within acceptable limits
 
-### **Phase 3: Documentation and Cross-Reference Updates** `[DOC-UPDATE-001]`
+### **Phase 3: Documentation and Cross-Reference Updates** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-UPDATE-001)]`
 
-#### **Task 3.1: Architecture Documentation Updates** `[ARCH-DOC-001]`
+#### **Task 3.1: Architecture Documentation Updates** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-DOC-001)]`
 **Priority**: 🔺 HIGH  
 **Duration**: 45 minutes  
 
@@ -240,7 +240,7 @@ npm test -- tests/integration/popup-tag-integration.test.js
 
 **Implementation**:
 ```markdown
-## [DEP-INJ-001] Dependency Injection Architecture
+## [[IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION] (was DEP-INJ-001)] Dependency Injection Architecture
 
 ### Standardized Constructor Pattern
 All UI components must follow the standardized dependency injection pattern:
@@ -267,7 +267,7 @@ this.component = dependencies.component || new ComponentName({
 ```
 ```
 
-#### **Task 3.2: Test Documentation Updates** `[TEST-DOC-001]`
+#### **Task 3.2: Test Documentation Updates** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was TEST-DOC-001)]`
 **Priority**: 🔶 MEDIUM  
 **Duration**: 30 minutes  
 
@@ -278,21 +278,21 @@ this.component = dependencies.component || new ComponentName({
 
 **Implementation**:
 ```markdown
-## [TEST-ARCH-001] Standardized Test Setup Patterns
+## [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Standardized Test Setup Patterns
 
 ### Dependency Injection in Tests
 All test setups must use proper dependency injection:
 
 ```javascript
 beforeEach(() => {
-  // [TEST-ARCH-001] Create components with proper dependencies
+  // [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Create components with proper dependencies
   uiManager = new UIManager({
     errorHandler: errorHandler,
     stateManager: stateManager,
     config: {}
   })
   
-  // [TEST-ARCH-001] Inject dependencies into controller
+  // [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)] Inject dependencies into controller
   popupController = new PopupController({
     uiManager,
     stateManager,
@@ -307,38 +307,38 @@ beforeEach(() => {
 ## 🎯 Semantic Tokens for Cross-Referencing
 
 ### **Primary Implementation Tokens**
-- `[TEST-FIX-IMPL-001]` - Main implementation plan
-- `[DEP-INJ-001]` - Dependency injection architecture
-- `[TEST-ARCH-001]` - Testing architecture patterns
-- `[POPUP-ARCH-001]` - Popup architecture coordination
+- `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-IMPL-001)]` - Main implementation plan
+- `[[IMPL-MODULE_VALIDATION] [ARCH-MODULE_VALIDATION] [REQ-MODULE_VALIDATION] (was DEP-INJ-001)]` - Dependency injection architecture
+- `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)]` - Testing architecture patterns
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]` - Popup architecture coordination
 
 ### **Component Tokens**
-- `[UI-SYSTEM-001]` - UI system integration
-- `[ERROR-HANDLING-001]` - Error handling patterns
-- `[TAG-SYNC-001]` - Tag synchronization coordination
-- `[ARCH-COORD-001]` - Architecture coordination
+- `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-SYSTEM-001)]` - UI system integration
+- `[[IMPL-ERROR_HANDLING] [ARCH-ERROR_HANDLING] [REQ-ERROR_HANDLING] (was ERROR-HANDLING-001)]` - Error handling patterns
+- `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] (was TAG-SYNC-001)]` - Tag synchronization coordination
+- `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-COORD-001)]` - Architecture coordination
 
 ### **Documentation Tokens**
-- `[DOC-UPDATE-001]` - Documentation updates
-- `[ARCH-DOC-001]` - Architecture documentation
-- `[TEST-DOC-001]` - Test documentation
+- `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-UPDATE-001)]` - Documentation updates
+- `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-DOC-001)]` - Architecture documentation
+- `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was TEST-DOC-001)]` - Test documentation
 
 ---
 
 ## 🔒 Security and Quality Assurance
 
-### **Input Validation** `[TEST-FIX-IMPL-001]`
+### **Input Validation** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-IMPL-001)]`
 - **Constructor Parameter Validation**: Ensure all constructor parameters are properly validated
 - **Dependency Injection Safety**: Prevent undefined parameter destructuring
 - **Error Handling**: Comprehensive error handling for all dependency injection scenarios
 
-### **Test Coverage Requirements** `[TEST-ARCH-001]`
+### **Test Coverage Requirements** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-ARCH-001)]`
 - **Unit Tests**: 100% coverage for constructor patterns
 - **Integration Tests**: All popup tag integration scenarios
 - **Error Scenarios**: Test all error conditions and edge cases
 - **Performance Tests**: Ensure no performance degradation
 
-### **Architecture Compliance** `[ARCH-COORD-001]`
+### **Architecture Compliance** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-COORD-001)]`
 - **Immutable Requirements**: No violations of core requirements
 - **AI-First Framework**: All changes follow established protocols
 - **Cross-Browser Compatibility**: Maintains Safari extension support

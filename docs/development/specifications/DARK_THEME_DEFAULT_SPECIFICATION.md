@@ -1,4 +1,4 @@
-# 🌙 DARK-THEME-DEFAULT-001: Implementation Specification
+# 🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001): Implementation Specification
 
 **Status**: ✅ **COMPLETED**  
 **Type**: 🎨 **UI ENHANCEMENT - THEME PREFERENCE**  
@@ -8,7 +8,7 @@
 
 ## 📋 Specification Overview
 
-**🌙 DARK-THEME-DEFAULT-001**: Comprehensive implementation plan to make dark theme the default for all new overlay instances while maintaining backward compatibility for existing users.
+**🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)**: Comprehensive implementation plan to make dark theme the default for all new overlay instances while maintaining backward compatibility for existing users.
 
 ### **Implementation Goals**
 1. **Primary Goal**: Change default theme from light to dark for new installations ✅ **ACHIEVED**
@@ -327,7 +327,7 @@ The dark theme implementation has been enhanced with Safari-specific optimizatio
 
 ## 🎯 Conclusion
 
-**🌙 DARK-THEME-DEFAULT-001** has been successfully implemented with comprehensive testing and validation. The specification has been fully executed, resulting in:
+**🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)** has been successfully implemented with comprehensive testing and validation. The specification has been fully executed, resulting in:
 
 1. **Dark theme default** for all new installations
 2. **Backward compatibility** for existing users

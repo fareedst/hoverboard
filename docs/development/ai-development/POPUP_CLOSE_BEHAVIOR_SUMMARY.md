@@ -18,17 +18,17 @@ The `closePopup()` call has been removed from the `handleShowHoverboard()` metho
 
 ## 📋 Documentation Created
 
-### **1. Requirements Document** `[POPUP-CLOSE-BEHAVIOR-001]`
+### **1. Requirements Document** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]`
 **File**: `POPUP_CLOSE_BEHAVIOR_REQUIREMENTS.md`
 
 **Key Requirements**:
-- ✅ `[POPUP-CLOSE-BEHAVIOR-001]`: Show Hover button must NOT close popup
-- ✅ `[POPUP-CLOSE-BEHAVIOR-002]`: Other buttons must continue to close popup
-- ✅ `[POPUP-CLOSE-BEHAVIOR-003]`: Popup must remain synchronized with overlay state
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]`: Show Hover button must NOT close popup
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-002)]`: Other buttons must continue to close popup
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-003)]`: Popup must remain synchronized with overlay state
 
-**Cross-References**: `[POPUP-ARCH-001]`, `[POPUP-REFRESH-001]`, `[TOGGLE-SYNC-POPUP-001]`
+**Cross-References**: `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`, `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-POPUP-001)]`
 
-### **2. Implementation Plan** `[POPUP-CLOSE-BEHAVIOR-TASK-001]` through `[POPUP-CLOSE-BEHAVIOR-TASK-005]`
+### **2. Implementation Plan** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-005)]`
 **File**: `POPUP_CLOSE_BEHAVIOR_IMPLEMENTATION_PLAN.md`
 
 **Key Tasks**:
@@ -39,40 +39,40 @@ The `closePopup()` call has been removed from the `handleShowHoverboard()` metho
 - ✅ **Task 5**: Documentation updates
 
 **Testing Strategy**:
-- ✅ `[POPUP-CLOSE-BEHAVIOR-TEST-001]`: Automated testing
-- ✅ `[POPUP-CLOSE-BEHAVIOR-TEST-002]`: Manual testing
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-001)]`: Automated testing
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-002)]`: Manual testing
 
-### **3. Architectural Decisions** `[POPUP-CLOSE-BEHAVIOR-ARCH-001]` through `[POPUP-CLOSE-BEHAVIOR-ARCH-013]`
+### **3. Architectural Decisions** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-013)]`
 **File**: `POPUP_CLOSE_BEHAVIOR_ARCHITECTURAL_DECISIONS.md`
 
 **Key Decisions**:
-- ✅ `[POPUP-CLOSE-BEHAVIOR-ARCH-001]`: Popup lifecycle management
-- ✅ `[POPUP-CLOSE-BEHAVIOR-ARCH-002]`: Message passing architecture
-- ✅ `[POPUP-CLOSE-BEHAVIOR-ARCH-003]`: Overlay state query pattern
-- ✅ `[POPUP-CLOSE-BEHAVIOR-ARCH-004]`: UI state synchronization
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-001)]`: Popup lifecycle management
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-002)]`: Message passing architecture
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-003)]`: Overlay state query pattern
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-004)]`: UI state synchronization
 
 **Platform Considerations**:
 - ✅ Browser extension constraints
 - ✅ Message passing efficiency
 - ✅ Error handling and resilience
 
-### **4. Semantic Tokens** `[POPUP-CLOSE-BEHAVIOR-001]` through `[POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-003]`
+### **4. Semantic Tokens** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-003)]`
 **File**: `POPUP_CLOSE_BEHAVIOR_SEMANTIC_TOKENS.md`
 
 **Token Categories**:
-- **Requirements**: 14 tokens (`[POPUP-CLOSE-BEHAVIOR-001]` through `[POPUP-CLOSE-BEHAVIOR-014]`)
-- **Tasks**: 5 tokens (`[POPUP-CLOSE-BEHAVIOR-TASK-001]` through `[POPUP-CLOSE-BEHAVIOR-TASK-005]`)
-- **Testing**: 2 tokens (`[POPUP-CLOSE-BEHAVIOR-TEST-001]` through `[POPUP-CLOSE-BEHAVIOR-TEST-002]`)
-- **Success**: 3 tokens (`[POPUP-CLOSE-BEHAVIOR-SUCCESS-001]` through `[POPUP-CLOSE-BEHAVIOR-SUCCESS-003]`)
-- **Risk**: 3 tokens (`[POPUP-CLOSE-BEHAVIOR-RISK-001]` through `[POPUP-CLOSE-BEHAVIOR-RISK-003]`)
-- **Architecture**: 13 tokens (`[POPUP-CLOSE-BEHAVIOR-ARCH-001]` through `[POPUP-CLOSE-BEHAVIOR-ARCH-013]`)
-- **Architectural Success**: 3 tokens (`[POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-001]` through `[POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-003]`)
+- **Requirements**: 14 tokens (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-014)]`)
+- **Tasks**: 5 tokens (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-005)]`)
+- **Testing**: 2 tokens (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-002)]`)
+- **Success**: 3 tokens (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-003)]`)
+- **Risk**: 3 tokens (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-003)]`)
+- **Architecture**: 13 tokens (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-013)]`)
+- **Architectural Success**: 3 tokens (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-003)]`)
 
 ## 🔧 Implementation Overview
 
 ### **Core Changes Completed**
 
-#### **1. Modified Show Hover Handler** `[POPUP-CLOSE-BEHAVIOR-004]`
+#### **1. Modified Show Hover Handler** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-004)]`
 **File**: `src/ui/popup/PopupController.js`
 **Lines**: 978-1000
 
@@ -105,13 +105,13 @@ async handleShowHoverboard () {
 }
 ```
 
-#### **2. Added Overlay State Tracking** `[POPUP-CLOSE-BEHAVIOR-005]`
+#### **2. Added Overlay State Tracking** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]`
 **File**: `src/ui/popup/PopupController.js`
 **New Method**:
 
 ```javascript
 /**
- * [POPUP-CLOSE-BEHAVIOR-005] Update popup UI to reflect overlay state
+ * [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)] Update popup UI to reflect overlay state
  */
 async updateOverlayState() {
   try {
@@ -119,20 +119,20 @@ async updateOverlayState() {
       type: 'GET_OVERLAY_STATE'
     })
     this.uiManager.updateShowHoverButtonState(overlayState.isVisible)
-    debugLog('[POPUP-CLOSE-BEHAVIOR-005] Updated overlay state:', overlayState)
+    debugLog('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)] Updated overlay state:', overlayState)
   } catch (error) {
-    debugError('[POPUP-CLOSE-BEHAVIOR-005] Failed to update overlay state:', error)
+    debugError('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)] Failed to update overlay state:', error)
   }
 }
 ```
 
-#### **3. Enhanced UIManager** `[POPUP-CLOSE-BEHAVIOR-005]`
+#### **3. Enhanced UIManager** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]`
 **File**: `src/ui/popup/UIManager.js`
 **New Method**:
 
 ```javascript
 /**
- * [POPUP-CLOSE-BEHAVIOR-005] Update Show Hover button state
+ * [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)] Update Show Hover button state
  */
 updateShowHoverButtonState(isOverlayVisible) {
   const showHoverBtn = this.elements.showHoverBtn
@@ -153,7 +153,7 @@ updateShowHoverButtonState(isOverlayVisible) {
 }
 ```
 
-#### **4. Added Content Script Handler** `[POPUP-CLOSE-BEHAVIOR-ARCH-012]`
+#### **4. Added Content Script Handler** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-012)]`
 **File**: `src/features/content/content-main.js`
 **New Message Handler**:
 
@@ -170,7 +170,7 @@ case 'GET_OVERLAY_STATE':
 
 ## 🧪 Testing Strategy
 
-### **Automated Testing** `[POPUP-CLOSE-BEHAVIOR-TEST-001]`
+### **Automated Testing** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-001)]`
 **Files**: 
 - `tests/unit/popup-close-behavior.test.js` (new)
 - `tests/integration/popup-close-behavior.integration.test.js` (new)
@@ -181,7 +181,7 @@ case 'GET_OVERLAY_STATE':
 - ✅ Overlay state should be tracked correctly
 - ✅ Popup and overlay should stay synchronized
 
-### **Manual Testing** `[POPUP-CLOSE-BEHAVIOR-TEST-002]`
+### **Manual Testing** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-002)]`
 **Test Scenarios**:
 1. ✅ Click Show Hover button → Verify overlay toggles, popup stays open
 2. ✅ Click other buttons → Verify popup closes after action
@@ -191,19 +191,19 @@ case 'GET_OVERLAY_STATE':
 
 ## 🎯 Success Criteria
 
-### **Functional Success** `[POPUP-CLOSE-BEHAVIOR-SUCCESS-001]`
+### **Functional Success** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-001)]`
 - ✅ Show Hover button toggles overlay without closing popup
 - ✅ All other buttons continue to close popup after action
 - ✅ Button text updates to reflect overlay state ("Show"/"Hide")
 - ✅ No regression in existing functionality
 
-### **User Experience Success** `[POPUP-CLOSE-BEHAVIOR-SUCCESS-002]`
+### **User Experience Success** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-002)]`
 - ✅ Intuitive interaction flow maintained
 - ✅ No user confusion about popup state
 - ✅ Accessibility standards maintained
 - ✅ Performance not degraded
 
-### **Technical Success** `[POPUP-CLOSE-BEHAVIOR-SUCCESS-003]`
+### **Technical Success** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-003)]`
 - ✅ All tests pass
 - ✅ Code coverage maintained or improved
 - ✅ Documentation updated with semantic tokens
@@ -211,17 +211,17 @@ case 'GET_OVERLAY_STATE':
 
 ## 🔄 Risk Mitigation
 
-### **Regression Risk** `[POPUP-CLOSE-BEHAVIOR-RISK-001]`
+### **Regression Risk** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-001)]`
 - **Risk**: Changes could break existing functionality
 - **Mitigation**: ✅ Comprehensive testing of all button behaviors
 - **Fallback**: ✅ Revert capability with minimal impact
 
-### **State Synchronization Risk** `[POPUP-CLOSE-BEHAVIOR-RISK-002]`
+### **State Synchronization Risk** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-002)]`
 - **Risk**: Popup and overlay could become out of sync
 - **Mitigation**: ✅ Robust state querying and error handling
 - **Fallback**: ✅ Graceful degradation with user feedback
 
-### **User Experience Risk** `[POPUP-CLOSE-BEHAVIOR-RISK-003]`
+### **User Experience Risk** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-003)]`
 - **Risk**: Users might be confused by new behavior
 - **Mitigation**: ✅ Clear visual feedback and documentation
 - **Fallback**: ✅ User testing and feedback collection
@@ -246,15 +246,15 @@ case 'GET_OVERLAY_STATE':
 ## 📚 Cross-Reference Coordination
 
 ### **Existing Requirements Coordination**
-- **`[POPUP-REFRESH-001]`**: ✅ Refresh mechanisms work with open popup
-- **`[TOGGLE-SYNC-POPUP-001]`**: ✅ Toggle synchronization handles persistent popup
-- **`[POPUP-ARCH-001]`**: ✅ Architecture supports persistent popup state
-- **`[UI-BEHAVIOR-001]`**: ✅ UI behavior patterns are consistent
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`**: ✅ Refresh mechanisms work with open popup
+- **`[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-POPUP-001)]`**: ✅ Toggle synchronization handles persistent popup
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`**: ✅ Architecture supports persistent popup state
+- **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]`**: ✅ UI behavior patterns are consistent
 
 ### **Architectural Decisions**
-- **`[POPUP-CLOSE-BEHAVIOR-ARCH-001]`**: ✅ Popup state management handles persistent visibility
-- **`[POPUP-CLOSE-BEHAVIOR-ARCH-002]`**: ✅ Event handling distinguishes between close and non-close actions
-- **`[POPUP-CLOSE-BEHAVIOR-ARCH-003]`**: ✅ UI updates reflect overlay state without popup closure
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-001)]`**: ✅ Popup state management handles persistent visibility
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-002)]`**: ✅ Event handling distinguishes between close and non-close actions
+- **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-003)]`**: ✅ UI updates reflect overlay state without popup closure
 
 ## 🎯 Implementation Status: ✅ SATISFACTORY
 

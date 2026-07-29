@@ -1,0 +1,44 @@
+REQ-SITE_MANAGEMENT:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-SITE_MANAGEMENT)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Site Management"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Granular site control"
+      - "Improved user experience"
+    problems_solved:
+      - "No per-site control"
+      - "Unwanted extension activation on certain sites"
+    why: "User control over extension behavior per site"
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Disabled sites list persists"
+    - criterion: "Extension respects disabled sites"
+    - criterion: "Sites can be disabled"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-SITE_MGMT"
+    code_annotations:
+      - "REQ-SITE_MANAGEMENT"
+    implementation:
+      - "IMPL-SITE_MGMT"
+    tests:
+      - "Site management tests"
+  validation_criteria:
+    - method: "Site blocking tests"
+      coverage: "Disable/enable functionality"
+    - method: "Persistence tests"
+      coverage: "List storage"

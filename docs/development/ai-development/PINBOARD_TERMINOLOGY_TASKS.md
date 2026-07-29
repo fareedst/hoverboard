@@ -8,7 +8,7 @@ This document provides the detailed implementation tasks for updating pinboard b
 
 ## 📊 Task Overview
 
-| Task | Priority | Estimated Hours | UI-005 Impact | Status |
+| Task | Priority | Estimated Hours | [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact | Status |
 |------|----------|-----------------|---------------|--------|
 | **Task 1**: UI Component Updates | 🔺 HIGH | 2-3 hours | ✅ Text Only | ✅ COMPLETED |
 | **Task 2**: Status and Message Updates | 🔺 HIGH | 1-2 hours | ✅ None | ✅ COMPLETED |
@@ -20,12 +20,12 @@ This document provides the detailed implementation tasks for updating pinboard b
 ---
 
 ## 📋 Task 1: UI Component Updates
-**Priority**: 🔺 HIGH | **Estimated**: 2-3 hours | **UI-005 Impact**: ✅ Text Only
+**Priority**: 🔺 HIGH | **Estimated**: 2-3 hours | **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ Text Only
 
 ### Subtask 1.1: Popup Interface Updates
 **Files**: `src/ui/popup/PopupController.js`, `src/ui/popup/UIManager.js`, `src/ui/popup/popup.html`
 **Duration**: 60-90 minutes
-**UI-005 Impact**: ✅ None - only text changes
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - only text changes
 
 #### 🔧 Specific Changes Required:
 
@@ -59,7 +59,7 @@ This document provides the detailed implementation tasks for updating pinboard b
 ### Subtask 1.2: Hover Overlay Updates
 **Files**: `src/features/content/hover-system.js`, `src/features/content/overlay-manager.js`
 **Duration**: 45-60 minutes  
-**UI-005 Impact**: ✅ Text only - preserve all transparency functionality
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ Text only - preserve all transparency functionality
 
 #### 🔧 Specific Changes Required:
 
@@ -68,7 +68,7 @@ This document provides the detailed implementation tasks for updating pinboard b
   - **Current**: `pin.toread === 'yes' ? 'Mark as Read' : 'Mark to Read'`
   - **New**: `pin.toread === 'yes' ? 'Remove from Read Later' : 'Mark for Read Later'`
 
-**File: `src/features/content/overlay-manager.js`** ⚠️ **UI-005 PROTECTED FILE**
+**File: `src/features/content/overlay-manager.js`** ⚠️ **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) PROTECTED FILE**
 - [ ] **Line 382**: Update button text (TEXT ONLY CHANGE)
   - **Current**: `readBtn.textContent = isToRead ? '📖 To Read' : '📋 Read'`
   - **New**: `readBtn.textContent = isToRead ? '📖 Read Later' : '📋 Not marked'`
@@ -81,7 +81,7 @@ This document provides the detailed implementation tasks for updating pinboard b
 ### Subtask 1.3: Content Script Updates
 **Files**: `src/features/content/content-main.js`
 **Duration**: 15-30 minutes
-**UI-005 Impact**: ✅ None - only debug text changes
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - only debug text changes
 
 #### 🔧 Specific Changes Required:
 
@@ -93,12 +93,12 @@ This document provides the detailed implementation tasks for updating pinboard b
 ---
 
 ## 📋 Task 2: Status and Message Updates
-**Priority**: 🔺 HIGH | **Estimated**: 1-2 hours | **UI-005 Impact**: ✅ None
+**Priority**: 🔺 HIGH | **Estimated**: 1-2 hours | **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None
 
 ### Subtask 2.1: Status Message Updates
 **Files**: `src/ui/popup/PopupController.js`, `src/features/content/hover-system.js`
 **Duration**: 30-45 minutes
-**UI-005 Impact**: ✅ None - only message text
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - only message text
 
 #### 🔧 Specific Changes Required:
 
@@ -114,7 +114,7 @@ This document provides the detailed implementation tasks for updating pinboard b
 ### Subtask 2.2: Badge Text Updates  
 **Files**: `src/core/badge-manager.js`
 **Duration**: 30-45 minutes
-**UI-005 Impact**: ✅ None - badge system separate from overlay
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - badge system separate from overlay
 
 #### 🔧 Specific Changes Required:
 
@@ -126,12 +126,12 @@ This document provides the detailed implementation tasks for updating pinboard b
 ---
 
 ## 📋 Task 3: Options and Configuration Updates
-**Priority**: 🔶 MEDIUM | **Estimated**: 1 hour | **UI-005 Impact**: ✅ None
+**Priority**: 🔶 MEDIUM | **Estimated**: 1 hour | **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None
 
 ### Subtask 3.1: Options Page Updates
 **Files**: `src/ui/options/options.js`, `src/ui/options/options-browser.js`
 **Duration**: 60 minutes
-**UI-005 Impact**: ✅ None - options page separate from overlay
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - options page separate from overlay
 
 #### 🔧 Specific Changes Required:
 
@@ -154,12 +154,12 @@ This document provides the detailed implementation tasks for updating pinboard b
 ---
 
 ## 📋 Task 4: Documentation Updates
-**Priority**: 🔶 MEDIUM | **Estimated**: 1 hour | **UI-005 Impact**: ✅ None
+**Priority**: 🔶 MEDIUM | **Estimated**: 1 hour | **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None
 
 ### Subtask 4.1: Architecture Documentation
 **Files**: `docs/architecture/popup-architecture.md`, `docs/troubleshooting/overlay-development.md`
 **Duration**: 30 minutes
-**UI-005 Impact**: ✅ None - documentation only
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - documentation only
 
 #### 🔧 Specific Changes Required:
 
@@ -176,7 +176,7 @@ This document provides the detailed implementation tasks for updating pinboard b
 ### Subtask 4.2: Development Documentation
 **Files**: Various documentation files
 **Duration**: 30 minutes
-**UI-005 Impact**: ✅ None - documentation only
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - documentation only
 
 #### 🔧 Files to Review and Update:
 - [ ] Search all `.md` files for "to read" references
@@ -187,11 +187,11 @@ This document provides the detailed implementation tasks for updating pinboard b
 ---
 
 ## 📋 Task 5: Testing and Validation
-**Priority**: 🔺 HIGH | **Estimated**: 2 hours | **UI-005 Impact**: ✅ Validation Required
+**Priority**: 🔺 HIGH | **Estimated**: 2 hours | **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ Validation Required
 
 ### Subtask 5.1: UI Testing
 **Duration**: 60 minutes
-**UI-005 Impact**: ✅ Verify transparency system unaffected
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ Verify transparency system unaffected
 
 #### 🧪 Test Cases:
 
@@ -201,19 +201,19 @@ This document provides the detailed implementation tasks for updating pinboard b
 - [ ] **Test 3**: Button toggles work correctly with new labels
 - [ ] **Test 4**: Status messages display correctly
 
-**Hover Overlay Testing:** ⚠️ **UI-005 VALIDATION CRITICAL**
+**Hover Overlay Testing:** ⚠️ **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) VALIDATION CRITICAL**
 - [ ] **Test 5**: Overlay buttons display correct terminology
 - [ ] **Test 6**: Button actions work correctly
-- [ ] **UI-005 Test 7**: Verify `nearly-transparent` mode works correctly
-- [ ] **UI-005 Test 8**: Verify `fully-transparent` mode works correctly  
-- [ ] **UI-005 Test 9**: Verify `opaque` mode works correctly
-- [ ] **UI-005 Test 10**: Verify hover/focus interactions work correctly
-- [ ] **UI-005 Test 11**: Verify backdrop filter effects work correctly
-- [ ] **UI-005 Test 12**: Verify adaptive visibility works correctly
+- [ ] **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Test 7**: Verify `nearly-transparent` mode works correctly
+- [ ] **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Test 8**: Verify `fully-transparent` mode works correctly  
+- [ ] **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Test 9**: Verify `opaque` mode works correctly
+- [ ] **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Test 10**: Verify hover/focus interactions work correctly
+- [ ] **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Test 11**: Verify backdrop filter effects work correctly
+- [ ] **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Test 12**: Verify adaptive visibility works correctly
 
 ### Subtask 5.2: Integration Testing
 **Duration**: 60 minutes
-**UI-005 Impact**: ✅ Verify all overlay modes function correctly
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ Verify all overlay modes function correctly
 
 #### 🧪 Test Cases:
 
@@ -228,7 +228,7 @@ This document provides the detailed implementation tasks for updating pinboard b
 - [ ] **Test 18**: Firefox compatibility maintained
 - [ ] **Test 19**: Edge compatibility maintained
 
-**UI-005 Comprehensive Testing:**
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Comprehensive Testing:**
 - [ ] **Test 20**: All transparency modes accessible via controls
 - [ ] **Test 21**: Configuration-driven opacity values work correctly
 - [ ] **Test 22**: Bottom-fixed positioning works correctly  
@@ -243,7 +243,7 @@ This document provides the detailed implementation tasks for updating pinboard b
 **Morning (2 hours)**
 - Execute Task 1: UI Component Updates
   - Complete Subtask 1.1: Popup Interface Updates
-  - Complete Subtask 1.2: Hover Overlay Updates (UI-005 text only)
+  - Complete Subtask 1.2: Hover Overlay Updates ([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) text only)
   - Complete Subtask 1.3: Content Script Updates
 
 **Afternoon (1-2 hours)**  
@@ -258,7 +258,7 @@ This document provides the detailed implementation tasks for updating pinboard b
 
 **Afternoon (2-3 hours)**
 - Execute Task 5: Testing and Validation
-  - Complete all UI testing including UI-005 validation
+  - Complete all UI testing including [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) validation
   - Complete integration testing
   - Complete cross-browser testing
 
@@ -267,7 +267,7 @@ This document provides the detailed implementation tasks for updating pinboard b
 ## ✅ Task Completion Checklist
 
 ### Pre-Implementation Checklist
-- [ ] UI-005 protection requirements reviewed and understood
+- [ ] [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) protection requirements reviewed and understood
 - [ ] All target files identified and backed up
 - [ ] Testing environment prepared
 - [ ] Implementation plan reviewed and approved
@@ -277,14 +277,14 @@ This document provides the detailed implementation tasks for updating pinboard b
 - [x] **Task 2 Complete**: All status messages and badge text updated
 - [ ] **Task 3 Complete**: Options page terminology updated
 - [x] **Task 4 Complete**: Documentation terminology updated
-- [x] **Task 5 Complete**: All testing passed including UI-005 validation
+- [x] **Task 5 Complete**: All testing passed including [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) validation
 
 ### Validation Checklist
 - [x] All terminology consistently uses "Read Later" vs "Not marked"
 - [x] No references to "have read" state anywhere
 - [x] `toread` attribute functionality unchanged
 - [x] Pinboard API integration unaffected
-- [x] UI-005 transparency system fully preserved and functional
+- [x] [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) transparency system fully preserved and functional
 - [x] Cross-browser compatibility maintained
 - [x] Performance unaffected
 
@@ -292,11 +292,11 @@ This document provides the detailed implementation tasks for updating pinboard b
 
 ## 🚨 Critical Reminders
 
-### UI-005 Protection
+### [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Protection
 - **ONLY** text changes permitted in `src/features/content/overlay-manager.js`
 - **MUST** validate all transparency modes after changes
 - **NO** logic changes to transparency system
-- **EXTENSIVE** testing of UI-005 functionality required
+- **EXTENSIVE** testing of [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) functionality required
 
 ### Quality Assurance
 - **PRESERVE** all existing functionality
@@ -308,4 +308,4 @@ This document provides the detailed implementation tasks for updating pinboard b
 
 **Status**: 📋 PLANNED  
 **Ready for Implementation**: ✅ YES
-**UI-005 Protection Level**: 🛡️ MAXIMUM 
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Protection Level**: 🛡️ MAXIMUM 

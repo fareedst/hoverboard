@@ -23,7 +23,7 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
     - "ARCH-BROWSER_BOOKMARK_IMPORT"
     - "REQ-BROWSER_BOOKMARK_IMPORT"
   detail_file: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml"
-  essence_pseudocode: "# [IMPL-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [REQ-BROWSER_BOOKMARK_IMPORT]\n# getTree, flattenTree, filters, selection, conflict resolution (Skip/Overwrite/Merge), folder+extra tags, saveBookmark per row.\n\n# Contract: inputs = getTree, selection, conflict mode, tag options, Import to; output = counts and table.\nINPUT: chrome.bookmarks.getTree(), user selection (selectedUrls), conflict mode (Skip|Overwrite|Merge), Use folder names as tags, Add tags, Import to (Local|File|Sync)\nOUTPUT: imported/skipped/failed counts; table of browser bookmarks with Select, Title, URL, Folder, Date\nDATA: allBookmarks (flattened), folderList, existingByUrl (from getAggregatedBookmarksForIndex), selectedUrls (set)\n\n# getTree -> flattenTree -> allBookmarks; build folderList; applySearchAndFilter; render table.\nON load:\n  chrome.bookmarks.getTree() -> flattenTree -> allBookmarks (each { id, url, title, dateAdded, folderPath })\n  folderList = unique folder paths; applySearchAndFilter(); render table\n\n# existingByUrl; folderTags + extraTags; per selected URL apply conflict mode; saveBookmark; show counts.\nrunImport():\n  existingByUrl = getAggregatedBookmarksForIndex() keyed by url (or getLocalBookmarksForIndex)\n  folderTags = folderPathToTags(selected folder paths) if \"Use folder names as tags\"; extraTags = parseExtraTags(input)\n  FOR each selected item IN allBookmarks WHERE url IN selectedUrls:\n    payload = { url, description: title, time: dateAdded ISO, tags: folderTags + extraTags, preferredBackend }\n    IF url IN existingByUrl:\n      IF Skip: skip; skipped++\n      IF Overwrite: SEND saveBookmark(payload); imported++\n      IF Merge: merge tags + keep existing description/extended; SEND saveBookmark(merged); imported++\n    ELSE: SEND saveBookmark(payload); imported++ (or failed++ on error)\n  SHOW \"Imported N, skipped M, K failed\"\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT-pseudocode.md"
   implementation_approach:
     details:
       - "browser-bookmark-import-utils.js: sanitizeTag, folderPathToTags, parseExtraTags, flattenTree (recurse nodes; if node.url push { id, url, title, dateAdded, folderPath })"
@@ -36,8 +36,8 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

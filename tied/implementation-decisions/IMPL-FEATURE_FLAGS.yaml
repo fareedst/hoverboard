@@ -8,7 +8,7 @@ IMPL-FEATURE_FLAGS:
     - "ARCH-CONFIG_STRUCTURE"
     - "REQ-CONFIG_PORTABILITY"
   detail_file: "implementation-decisions/IMPL-FEATURE_FLAGS.yaml"
-  essence_pseudocode: "# [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY]\n# Default config, ensureDefaults, getConfigForUI, updateConfig, getSettings/setSettings, resetToDefaults.\n# Contract: config patch and getter/setter inputs and outputs.\nINPUT: config patch (updateConfig); key/value (setSettings); none (getters, reset)\nOUTPUT: full config or UI-safe config (getConfigForUI); settings object (getSettings); void (setters, reset)\nDATA: default configuration (feature flags, UI behavior, badge settings); persisted settings\n\n# Return static default config object.\ngetDefaultConfiguration():\n  RETURN static default config object (all feature flags and defaults)\n\n# Load from storage and merge defaults if missing; persist.\nensureDefaults():\n  current = LOAD from storage\n  IF current missing or keys missing THEN MERGE getDefaultConfiguration() into current, PERSIST\n\n# Return UI-safe subset of full config (e.g. strip secrets).\ngetConfigForUI():\n  config = get full config (ensureDefaults applied)\n  RETURN subset or shape safe for UI (e.g. strip secrets)\n\n# Load config, merge patch, persist.\nupdateConfig(patch):\n  current = LOAD config\n  MERGE patch into current\n  PERSIST current\n\n# Load settings from storage; on error return defaults or empty.\ngetSettings():\n  TRY LOAD settings from storage\n  ON error RETURN defaults or empty\n  RETURN settings object\n\n# Validate/sanitize and persist; on error handle (log/throw).\nsetSettings(settings):\n  VALIDATE or sanitize\n  PERSIST settings\n  ON error handle (e.g. log, throw)\n\n# Overwrite storage with default configuration.\nresetToDefaults():\n  defaults = getDefaultConfiguration()\n  PERSIST defaults (overwrite)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-FEATURE_FLAGS-pseudocode.md"
   implementation_approach:
     details: []
     summary: "getDefaultConfiguration(); ensureDefaults(); getConfigForUI(); updateConfig(); getSettings/setSettings with error handling; resetToDefaults"
@@ -18,8 +18,8 @@ IMPL-FEATURE_FLAGS:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Feature Flags and Settings"
   rationale:
     benefits: []

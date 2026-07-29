@@ -14,7 +14,7 @@ IMPL-EXAMPLE_IMPLEMENTATION:
     - "ARCH-EXAMPLE_DECISION"
     - "REQ-EXAMPLE_FEATURE"
   detail_file: "implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.yaml"
-  essence_pseudocode: "# [IMPL-EXAMPLE_IMPLEMENTATION] [ARCH-EXAMPLE_DECISION] [REQ-EXAMPLE_FEATURE]\n# Placeholder for core implementation example.\n# Contract: inputs and outputs to be defined per feature.\nTemplate: placeholder for core implementation example.\nINPUT: (to be defined per feature)\nOUTPUT: (to be defined)\n# Example procedure stub; fill steps with INPUT/OUTPUT/DATA and procedure names.\nexampleFunction(...): (steps to be filled; use INPUT/OUTPUT/DATA and procedure names)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION-pseudocode.md"
   implementation_approach:
     details:
       - "API design decision"
@@ -27,8 +27,8 @@ IMPL-EXAMPLE_IMPLEMENTATION:
       date: "YYYY-MM-DD"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode (template stub)"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "YYYY-MM-DD"
       result: "pass"

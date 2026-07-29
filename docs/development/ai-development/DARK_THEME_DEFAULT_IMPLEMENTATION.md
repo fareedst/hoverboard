@@ -104,15 +104,15 @@ defaultVisibilityTheme: 'light-on-dark', // Dark theme default
 
 ## 🔗 Related Components
 
-### **UI-VIS-001: VisibilityControls**
+### **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): VisibilityControls**
 - **Status**: ✅ Updated with dark theme default
 - **Location**: Top-right corner of overlay
 - **Function**: Theme toggle, transparency, opacity controls
 
-### **UI-005: Transparent Overlay System**
+### **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005): Transparent Overlay System**
 - **Status**: ✅ Compatible with dark theme defaults
 - **Integration**: Works seamlessly with new theme system
-- **Protection**: All UI-005 functionality preserved
+- **Protection**: All [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) functionality preserved
 
 ## ✅ Completion Checklist
 

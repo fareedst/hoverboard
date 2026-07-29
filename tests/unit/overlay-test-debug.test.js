@@ -1,5 +1,5 @@
 /**
- * [OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests
+ * [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Overlay Testing Debug Unit Tests
  * [ARCH-OVERLAY_TESTABILITY] [IMPL-OVERLAY_TEST_HARNESS] [REQ-UI_INSPECTION]
  * Comprehensive unit tests for enhanced mock DOM and debug logging
  * Tests element creation, registration, querying, displayed state snapshot, and action log
@@ -15,14 +15,14 @@ import {
 } from '../utils/overlay-test-harness.js'
 const { createMockDocument } = require('../utils/mock-dom')
 
-// [OVERLAY-TEST-UNIT-001] Enhanced overlay testing debug unit tests
-describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
+// [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced overlay testing debug unit tests
+describe('[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Overlay Testing Debug Unit Tests', () => {
   let overlayManager
   let mockDocument
   let mockMessageService
 
   beforeEach(() => {
-    // [OVERLAY-TEST-RESET-001] Enhanced test environment setup with reset functionality
+    // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced test environment setup with reset functionality
     mockDocument = createMockDocument()
     mockMessageService = {
       sendMessage: jest.fn()
@@ -40,7 +40,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
   })
 
   afterEach(() => {
-    // [OVERLAY-TEST-RESET-001] Enhanced cleanup with mock document reset
+    // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced cleanup with mock document reset
     clearOverlayTestHarness()
     jest.clearAllMocks()
     if (mockDocument.reset) {
@@ -48,10 +48,10 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     }
   })
 
-  // [OVERLAY-TEST-MOCK-001] Test enhanced mock DOM element creation
-  describe('[OVERLAY-TEST-MOCK-001] Enhanced Mock DOM Tests', () => {
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test enhanced mock DOM element creation
+  describe('[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced Mock DOM Tests', () => {
     test('should create and register button elements correctly', () => {
-      // [OVERLAY-TEST-ELEMENT-001] Test button element creation
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test button element creation
       const button = mockDocument.createElement('button')
       button.className = 'test-button'
       button.id = 'test-id'
@@ -71,7 +71,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should create and register div elements correctly', () => {
-      // [OVERLAY-TEST-ELEMENT-001] Test div element creation
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test div element creation
       const div = mockDocument.createElement('div')
       div.className = 'test-div'
       div.id = 'div-id'
@@ -91,7 +91,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should handle appendChild correctly', () => {
-      // [OVERLAY-TEST-APPEND-001] Test appendChild functionality
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test appendChild functionality
       const parent = mockDocument.createElement('div')
       const child = mockDocument.createElement('span')
       
@@ -102,7 +102,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should query elements by class correctly', () => {
-      // [OVERLAY-TEST-QUERY-001] Test class-based querying
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test class-based querying
       const button1 = mockDocument.createElement('button')
       button1.className = 'refresh-button'
       
@@ -117,7 +117,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should query elements by id correctly', () => {
-      // [OVERLAY-TEST-QUERY-001] Test id-based querying
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test id-based querying
       const element = mockDocument.createElement('div')
       element.id = 'test-element'
       
@@ -126,7 +126,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should handle multiple elements with same class', () => {
-      // [OVERLAY-TEST-QUERY-001] Test multiple elements with same class
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test multiple elements with same class
       const button1 = mockDocument.createElement('button')
       button1.className = 'test-class'
       
@@ -194,10 +194,10 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
   })
 
-  // [OVERLAY-TEST-LOG-001] Test enhanced debug logging
-  describe('[OVERLAY-TEST-LOG-001] Enhanced Debug Logging Tests', () => {
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test enhanced debug logging
+  describe('[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced Debug Logging Tests', () => {
     test('should log critical information during overlay creation', async () => {
-      // [OVERLAY-TEST-LOG-001] Test debug logging during overlay creation
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test debug logging during overlay creation
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
         pageTitle: 'Test Page',
@@ -220,7 +220,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should log branching decisions during element creation', async () => {
-      // [OVERLAY-TEST-LOG-001] Test branching decision logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test branching decision logging
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
         pageTitle: 'Test Page',
@@ -240,7 +240,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should log error information when refresh fails', async () => {
-      // [OVERLAY-TEST-LOG-001] Test error logging
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test error logging
       overlayManager.refreshOverlayContent = jest.fn().mockRejectedValue(new Error('Test error'))
       
       const logSpy = jest.spyOn(overlayManager.logger, 'log')
@@ -254,10 +254,10 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
   })
 
-  // [OVERLAY-TEST-ACCESS-001] Test accessibility features
-  describe('[OVERLAY-TEST-ACCESS-001] Accessibility Tests', () => {
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test accessibility features
+  describe('[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Accessibility Tests', () => {
     test('should create refresh button with proper ARIA attributes', async () => {
-      // [OVERLAY-TEST-ARIA-001] Test ARIA attribute creation
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test ARIA attribute creation
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
         pageTitle: 'Test Page',
@@ -276,7 +276,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should create close button with proper ARIA attributes', async () => {
-      // [OVERLAY-TEST-ARIA-001] Test close button ARIA attributes
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test close button ARIA attributes
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
         pageTitle: 'Test Page',
@@ -295,7 +295,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should handle keyboard events for refresh button', async () => {
-      // [OVERLAY-TEST-KEYBOARD-001] Test keyboard event handling
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test keyboard event handling
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
         pageTitle: 'Test Page',
@@ -312,7 +312,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should handle keyboard events for close button', async () => {
-      // [OVERLAY-TEST-KEYBOARD-001] Test close button keyboard handling
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test close button keyboard handling
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
         pageTitle: 'Test Page',
@@ -378,10 +378,10 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
   })
 
-  // [OVERLAY-TEST-INTEGRATION-001] Test integration between components
-  describe('[OVERLAY-TEST-INTEGRATION-001] Integration Tests', () => {
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test integration between components
+  describe('[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Integration Tests', () => {
     test('should integrate mock DOM with OverlayManager correctly', async () => {
-      // [OVERLAY-TEST-INTEGRATION-001] Test full integration
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test full integration
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
         pageTitle: 'Test Page',
@@ -406,7 +406,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should handle refresh button click with enhanced logging', async () => {
-      // [OVERLAY-TEST-INTEGRATION-001] Test refresh button integration
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test refresh button integration
       const content = {
         bookmark: { url: 'https://example.com', tags: ['test'] },
         pageTitle: 'Test Page',
@@ -429,10 +429,10 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
   })
 
-  // [OVERLAY-TEST-PERFORMANCE-001] Test performance aspects
-  describe('[OVERLAY-TEST-PERFORMANCE-001] Performance Tests', () => {
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test performance aspects
+  describe('[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Performance Tests', () => {
     test('should handle multiple element creations efficiently', () => {
-      // [OVERLAY-TEST-PERFORMANCE-001] Test element creation performance
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test element creation performance
       const startTime = Date.now()
       
       // Create multiple elements
@@ -456,7 +456,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should handle query operations efficiently', () => {
-      // [OVERLAY-TEST-PERFORMANCE-001] Test query performance
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test query performance
       // Create elements first
       for (let i = 0; i < 50; i++) {
         const element = mockDocument.createElement('div')
@@ -479,10 +479,10 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
   })
 
-  // [OVERLAY-TEST-ERROR-001] Test error handling
-  describe('[OVERLAY-TEST-ERROR-001] Error Handling Tests', () => {
+  // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test error handling
+  describe('[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Error Handling Tests', () => {
     test('should handle missing elements gracefully', () => {
-      // [OVERLAY-TEST-ERROR-001] Test missing element handling
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test missing element handling
       const result = mockDocument.querySelector('.non-existent')
       expect(result).toBeNull()
       
@@ -491,7 +491,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should handle invalid selectors gracefully', () => {
-      // [OVERLAY-TEST-ERROR-001] Test invalid selector handling
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test invalid selector handling
       const result = mockDocument.querySelector('invalid-selector')
       expect(result).toBeNull()
       
@@ -500,7 +500,7 @@ describe('[OVERLAY-TEST-UNIT-001] Overlay Testing Debug Unit Tests', () => {
     })
 
     test('should handle refresh errors gracefully', async () => {
-      // [OVERLAY-TEST-ERROR-001] Test refresh error handling
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Test refresh error handling
       overlayManager.refreshOverlayContent = jest.fn().mockRejectedValue(new Error('Network error'))
       
       const logSpy = jest.spyOn(overlayManager.logger, 'log')

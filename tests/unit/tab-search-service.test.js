@@ -1,5 +1,5 @@
 /**
- * [IMMUTABLE-REQ-TAG-002] Tab search - [REQ-SEARCH_FUNCTIONALITY] [IMPL-TAB_SEARCH_SERVICE]
+ * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tab search - [REQ-SEARCH_FUNCTIONALITY] [IMPL-TAB_SEARCH_SERVICE]
  * Unit tests for TabSearchService (searchAndNavigate, tab focus).
  */
 

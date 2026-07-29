@@ -8,7 +8,7 @@ IMPL-STORAGE_INDEX:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
   detail_file: "implementation-decisions/IMPL-STORAGE_INDEX.yaml"
-  essence_pseudocode: "# [IMPL-STORAGE_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND]\n# Per-URL backend in chrome.storage.local; getIndex, getBackendForUrl, setBackendForUrl, removeUrl; migration from local bookmarks.\n# Contract: storage key and optional provider; index map and persistence.\nINPUT: storage key (hoverboard_storage_index), optional localBookmarkProvider for migration\nOUTPUT: index map url -> backend (pinboard|local|file)\nDATA: index = map of url string to backend string; persisted in chrome.storage.local\n\n# Load and return index from storage (or {}).\ngetIndex():\n  LOAD index from storage under key\n  RETURN index (or empty map if missing)\n\n# Lookup backend for URL.\ngetBackendForUrl(url):\n  index = getIndex()\n  RETURN index[url] or null\n\n# Set backend for URL and persist.\nsetBackendForUrl(url, backend):\n  index = getIndex()\n  SET index[url] = backend\n  PERSIST index to storage\n\n# Remove URL from index and persist.\nremoveUrl(url):\n  index = getIndex()\n  REMOVE index[url]\n  PERSIST index to storage\n\n# Seed index from local bookmarks when empty.\nmigration (on first use or when index empty):\n  IF getIndex() is empty AND localBookmarkProvider given:\n    bookmarks = localBookmarkProvider.getAllBookmarks()\n    FOR each bookmark WITH url:\n      setBackendForUrl(url, \"local\")\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-STORAGE_INDEX-pseudocode.md"
   implementation_approach:
     details:
       - "Index shape: { url: pinboard|local|file }"
@@ -19,9 +19,9 @@ IMPL-STORAGE_INDEX:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

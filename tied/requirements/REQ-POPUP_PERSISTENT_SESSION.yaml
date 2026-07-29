@@ -1,0 +1,46 @@
+REQ-POPUP_PERSISTENT_SESSION:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-POPUP_PERSISTENT_SESSION)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Popup Session Persistence"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Better workflow efficiency"
+      - "Chained actions possible"
+    problems_solved:
+      - "Popup closes after each action"
+      - "Tedious repeated opening"
+    why: "Multi-action workflows without reopening UI"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-CORE_UX_PRESERVATION"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "handleShowHoverboard never closes popup, updates button state"
+    - criterion: "Privacy/read-later/delete/reload/options handlers keep popup open"
+    - criterion: "UI state updates after successful messaging"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-UX_CORE"
+    code_annotations:
+      - "REQ-POPUP_PERSISTENT_SESSION"
+    implementation:
+      - "IMPL-UX_CORE"
+    tests:
+      - "Popup close behavior tests"
+      - "Popup live data tests"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Handler paths never call closePopup, update overlay state, handle errors"
+    - method: "Live data tests"
+      coverage: "Session remains active while updating status"

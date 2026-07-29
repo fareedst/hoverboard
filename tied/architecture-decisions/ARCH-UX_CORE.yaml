@@ -1,0 +1,44 @@
+ARCH-UX_CORE:
+  alternatives_considered: []
+  cross_references:
+    - "REQ-CORE_UX_PRESERVATION"
+    - "REQ-POPUP_PERSISTENT_SESSION"
+  decision: "Thin architecture stub for ARCH-UX_CORE."
+  implementation_approach:
+    details:
+      - "Overlay visibility reflected"
+      - "Popup stays open during actions"
+      - "State updates without closing"
+    summary: "Popup session persistence, multi-action support"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "User Experience Architecture"
+  rationale:
+    benefits:
+      - "Multi-action workflows"
+      - "Persistent popup"
+    problems_solved:
+      - "Popup closes after actions"
+      - "Tedious workflows"
+    why: "Preserve essential user workflows"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-UX_CORE"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-UX_CORE"
+    implementation:
+      - "IMPL-UX_CORE"
+    requirements:
+      - "REQ-CORE_UX_PRESERVATION"
+      - "REQ-POPUP_PERSISTENT_SESSION"
+    tests: []

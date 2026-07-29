@@ -14,7 +14,7 @@ IMPL-ERROR_HANDLING:
     - "ARCH-ERROR_HANDLING"
     - "REQ-ERROR_HANDLING"
   detail_file: "implementation-decisions/IMPL-ERROR_HANDLING.yaml"
-  essence_pseudocode: "# [IMPL-ERROR_HANDLING] [ARCH-ERROR_HANDLING] [REQ-ERROR_HANDLING]\n# Placeholder for centralized error handling (log, wrap, propagate).\n# Contract: error in, handled result or rethrow out.\nTemplate: placeholder for error handling implementation.\nINPUT: (to be defined) error or throwable\nOUTPUT: (to be defined) handled result or rethrow\n# Main handler: log and optionally wrap or propagate.\nhandleError(err): LOG; optionally WRAP or PROPAGATE; (steps to be filled per project)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-ERROR_HANDLING-pseudocode.md"
   implementation_approach:
     details:
       - "Error logging and reporting"
@@ -27,8 +27,8 @@ IMPL-ERROR_HANDLING:
       date: "YYYY-MM-DD"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode (template stub)"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "YYYY-MM-DD"
       result: "pass"

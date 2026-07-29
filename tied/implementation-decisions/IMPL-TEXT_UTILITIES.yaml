@@ -8,7 +8,7 @@ IMPL-TEXT_UTILITIES:
     - "ARCH-SHARED_UTILITIES"
     - "REQ-SHARED_UTILITIES"
   detail_file: "implementation-decisions/IMPL-TEXT_UTILITIES.yaml"
-  essence_pseudocode: "# [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]\n# truncate, normalizeText, escapeHtml for UI and user input.\n# Contract: string and optional maxLen; truncated/normalized/escaped string.\nINPUT: string and optional max length (truncate); string (normalizeText, escapeHtml)\nOUTPUT: string (truncated, normalized, or HTML-escaped)\nDATA: ellipsis string (e.g. \"…\")\n\n# Slice to maxLen and append ellipsis if longer.\ntruncate(str, maxLen):\n  IF str.length <= maxLen RETURN str\n  RETURN str.slice(0, maxLen) + ellipsis\n\n# Trim and collapse whitespace; normalize Unicode.\nnormalizeText(str):\n  NORMALIZE whitespace and Unicode (e.g. trim, collapse spaces) for display or comparison\n  RETURN normalized string\n\n# Encode <, >, &, \" for safe textContent/attribute use.\nescapeHtml(str):\n  ENCODE characters that are significant in HTML (e.g. <, >, &, \") so string is safe for textContent or attribute use\n  RETURN encoded string\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TEXT_UTILITIES-pseudocode.md"
   implementation_approach:
     details: []
     summary: "stringUtils in src/shared/utils.js — truncate, normalizeText, escapeHtml (textContent)"
@@ -18,8 +18,8 @@ IMPL-TEXT_UTILITIES:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Text Utilities"
   rationale:
     benefits: []

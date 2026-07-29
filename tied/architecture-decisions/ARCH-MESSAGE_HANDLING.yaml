@@ -1,0 +1,72 @@
+ARCH-MESSAGE_HANDLING:
+  alternatives_considered:
+    - name: "Direct function calls"
+      cons:
+        - "Doesn't work across contexts"
+      pros: []
+      rejected_reason: "Extension contexts are isolated"
+    - name: "Event-based only"
+      cons:
+        - "No request/response"
+      pros:
+        - "Decoupled"
+      rejected_reason: "Need synchronous responses"
+  cross_references:
+    - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-SMART_BOOKMARKING"
+  decision: "Thin architecture stub for ARCH-MESSAGE_HANDLING."
+  implementation_approach:
+    details:
+      - "BOOKMARK_UPDATED synchronization"
+      - "Error handling and retry"
+      - "getRecentBookmarks returns recentTags from policy-backed TagService.getUserRecentTagsExcludingCurrent"
+      - "Request/response pattern"
+      - "Standardized message types"
+    summary: "Centralized routing with standardized message format, async handling, BOOKMARK_UPDATED broadcasts; user-recent tag reads/writes use getRecentBookmarks (TagService user-recent path) and addTagToRecent."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Message Handling Architecture"
+  rationale:
+    benefits:
+      - "Reliable communication"
+      - "Simplified routing"
+    problems_solved:
+      - "Complex context communication"
+      - "Inconsistent messaging"
+    why: "Centralized communication across extension contexts"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-MESSAGE_HANDLING"
+    see_also:
+      - "ARCH-TAG_SYSTEM"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-MESSAGE_HANDLING"
+    implementation:
+      - "IMPL-MESSAGE_HANDLING"
+      - "IMPL-TAG_SYSTEM"
+    requirements:
+      - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+      - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-SMART_BOOKMARKING"
+    tests:
+      - "tests/playwright/extension-messaging.spec.js"
+      - "tests/unit/content-messaging-contracts.test.js"
+      - "tests/unit/message-handler-contracts.test.js"
+      - "tests/unit/message-handler-local-save-recall.test.js"
+      - "tests/unit/message-handler-runtime-validation.test.js"
+      - "tests/unit/message-handler-url-tags.test.js"
+      - "tests/unit/message-schemas.test.js"
+      - "tests/unit/message-type-drift.test.js"
+      - "tests/unit/popup-message-contract.test.js"
+      - "tests/unit/service-worker-messaging-routing.test.js"
+      - "tests/unit/tag-recent-behavior.test.js"

@@ -65,10 +65,10 @@ For detailed guidelines on how to document and track features, please refer to t
 ### 🚨 Manifest V3 Migration [PRIORITY: CRITICAL]
 | Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
 |------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
-| MV3-001 | Manifest V3 structure | V3 compliance | Service Worker | TestManifestV3 | ✅ Implemented | `// MV3-001: Manifest V3 conversion` | 🚨 CRITICAL |
-| MV3-002 | Service worker setup | Background to SW | Worker Architecture | TestServiceWorker | 📋 Planned | `// MV3-002: Service worker` | 🚨 CRITICAL |
-| MV3-003 | Content script injection | V3 injection patterns | Content Script Engine | TestContentInjection | ✅ Implemented | `// MV3-003: Content injection` | 🚨 CRITICAL |
-| MV3-004 | Permission migration | V3 permissions | Permission System | TestPermissions | 📋 Planned | `// MV3-004: V3 permissions` | 🚨 CRITICAL |
+| [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001) | Manifest V3 structure | V3 compliance | Service Worker | TestManifestV3 | ✅ Implemented | `// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Manifest V3 conversion` | 🚨 CRITICAL |
+| [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-002) | Service worker setup | Background to SW | Worker Architecture | TestServiceWorker | 📋 Planned | `// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-002): Service worker` | 🚨 CRITICAL |
+| [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-003) | Content script injection | V3 injection patterns | Content Script Engine | TestContentInjection | ✅ Implemented | `// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-003): Content injection` | 🚨 CRITICAL |
+| [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-004) | Permission migration | V3 permissions | Permission System | TestPermissions | 📋 Planned | `// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-004): V3 permissions` | 🚨 CRITICAL |
 
 ### 🔧 Configuration System [PRIORITY: CRITICAL]
 | Feature ID (TIED) | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
@@ -78,7 +78,7 @@ For detailed guidelines on how to document and track features, please refer to t
 | IMPL-FEATURE_FLAGS | Settings, validation | REQ-CONFIG_PORTABILITY | ARCH-CONFIG_STRUCTURE | TestConfigValidation | ✅ Implemented | `[IMPL-FEATURE_FLAGS]` | 🔺 HIGH |
 | IMPL-URL_INHIBITION | URL inhibition | REQ-SITE_MANAGEMENT | ARCH-CONFIG_STRUCTURE | TestConfigBackup | ✅ Implemented | `[IMPL-URL_INHIBITION]` | 🔺 HIGH |
 
-*Legacy IDs (CFG-001–004) mapped to TIED tokens; see `tied/docs/numbered-token-mapping.md`.*
+*Legacy IDs ([IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001)–004) mapped to TIED tokens; see `tied/docs/numbered-token-mapping.md`.*
 
 ### 🛠️ Shared Utilities [PRIORITY: HIGH]
 | Feature ID (TIED) | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
@@ -89,7 +89,7 @@ For detailed guidelines on how to document and track features, please refer to t
 | IMPL-TIME_ASYNC_UTILITIES | Time/async utils | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | TestDateUtils | ✅ Implemented | `[IMPL-TIME_ASYNC_UTILITIES]` | 🔺 HIGH |
 | IMPL-DOM_UTILITIES | DOM utilities | REQ-SHARED_UTILITIES | ARCH-SHARED_UTILITIES | TestDOMUtils | ✅ Implemented | `[IMPL-DOM_UTILITIES]` | 🔺 HIGH |
 
-*Legacy IDs (UTIL-001–005) mapped to TIED; see `tied/docs/numbered-token-mapping.md`.*
+*Legacy IDs ([IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-001)–005) mapped to TIED; see `tied/docs/numbered-token-mapping.md`.*
 
 ### 📊 Logging & Debugging [PRIORITY: HIGH]
 | Feature ID (TIED) | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
@@ -98,58 +98,58 @@ For detailed guidelines on how to document and track features, please refer to t
 | IMPL-LOG_LEVEL_CONFIG | Log level config | REQ-STRUCTURED_LOGGING | ARCH-STRUCTURED_LOGGING | TestDebugUtils | ✅ Implemented | `[IMPL-LOG_LEVEL_CONFIG]` | 🔺 HIGH |
 | IMPL-LOGGER_LEGACY | Legacy compatibility | REQ-STRUCTURED_LOGGING | ARCH-STRUCTURED_LOGGING | TestErrorTracking | ✅ Implemented | `[IMPL-LOGGER_LEGACY]` | 🔺 HIGH |
 
-*Legacy IDs (LOG-001–003) mapped to TIED; see `tied/docs/numbered-token-mapping.md`.*
+*Legacy IDs ([IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001)–003) mapped to TIED; see `tied/docs/numbered-token-mapping.md`.*
 
 ### 🔗 Pinboard Integration [PRIORITY: HIGH]
 | Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
 |------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
-| PIN-001 | API client modernization | Modern API client | PinboardClient class | TestPinboardClient | 📋 Planned | `// PIN-001: API client` | 🔺 HIGH |
-| PIN-002 | Authentication system | Token management | Auth system | TestAuthentication | 📋 Planned | `// PIN-002: Authentication` | 🔺 HIGH |
-| PIN-003 | Bookmark operations | CRUD operations | Bookmark service | TestBookmarkOps | 📋 Planned | `// PIN-003: Bookmark ops` | 🔺 HIGH |
-| PIN-004 | Tag management | Tag operations | Tag service | TestTagManagement | 📋 Planned | `// PIN-004: Tag management` | 🔺 HIGH |
+| [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001) | API client modernization | Modern API client | PinboardClient class | TestPinboardClient | 📋 Planned | `// [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001): API client` | 🔺 HIGH |
+| [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-002) | Authentication system | Token management | Auth system | TestAuthentication | 📋 Planned | `// [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-002): Authentication` | 🔺 HIGH |
+| [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-003) | Bookmark operations | CRUD operations | Bookmark service | TestBookmarkOps | 📋 Planned | `// [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-003): Bookmark ops` | 🔺 HIGH |
+| [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-004) | Tag management | Tag operations | Tag service | TestTagManagement | 📋 Planned | `// [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-004): Tag management` | 🔺 HIGH |
 
 ### 🎨 Overlay Visibility Controls [PRIORITY: HIGH]
 | Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
 |------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
-| UI-VIS-001 | Visibility controls component | Per-window overlay controls | VisibilityControls class | TestVisibilityControls | ✅ Implemented | `// UI-VIS-001: Visibility controls` | 🔺 HIGH |
-| UI-VIS-002 | Global visibility defaults | Options page integration | ConfigManager integration | TestVisibilityDefaults | ✅ Implemented | `// UI-VIS-002: Global defaults` | 🔺 HIGH |
-| UI-VIS-003 | Window state management | Per-window state system | WindowStateManager | TestWindowState | 📋 Planned | `// UI-VIS-003: Window state` | 🔺 HIGH |
-| UI-VIS-004 | Production integration | OverlayManager integration | Integration layer | TestProduction | 📋 Planned | `// UI-VIS-004: Production ready` | 🔺 HIGH |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001) | Visibility controls component | Per-window overlay controls | VisibilityControls class | TestVisibilityControls | ✅ Implemented | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Visibility controls` | 🔺 HIGH |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002) | Global visibility defaults | Options page integration | ConfigManager integration | TestVisibilityDefaults | ✅ Implemented | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Global defaults` | 🔺 HIGH |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-003) | Window state management | Per-window state system | WindowStateManager | TestWindowState | 📋 Planned | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-003): Window state` | 🔺 HIGH |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-004) | Production integration | OverlayManager integration | Integration layer | TestProduction | 📋 Planned | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-004): Production ready` | 🔺 HIGH |
 
 ### 🎨 Overlay Data Display [PRIORITY: HIGH]
 | Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
 |------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
-| UI-OVERLAY-001 | Overlay data display fix | Content script response handling | OverlayManager integration | TestOverlayData | ✅ Implemented | `// UI-OVERLAY-001: Data display fix` | 🔺 HIGH |
-| UI-OVERLAY-002 | Overlay content refresh | Data refresh mechanism | Overlay refresh system | TestOverlayRefresh | ✅ Implemented | `// UI-OVERLAY-002: Content refresh` | 🔺 HIGH |
-| UI-OVERLAY-003 | Data structure validation | Bookmark data validation | Data validation system | TestDataValidation | ✅ Implemented | `// UI-OVERLAY-003: Data validation` | 🔺 HIGH |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-001) | Overlay data display fix | Content script response handling | OverlayManager integration | TestOverlayData | ✅ Implemented | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-001): Data display fix` | 🔺 HIGH |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-002) | Overlay content refresh | Data refresh mechanism | Overlay refresh system | TestOverlayRefresh | ✅ Implemented | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-002): Content refresh` | 🔺 HIGH |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-003) | Data structure validation | Bookmark data validation | Data validation system | TestDataValidation | ✅ Implemented | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-003): Data validation` | 🔺 HIGH |
 
 ### 🎨 User Interface [PRIORITY: MEDIUM]
 | Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
 |------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
-| UI-001 | Modern popup UI | V3 popup interface | Popup components | TestPopupUI | 📋 Planned | `// UI-001: Popup UI` | 🔶 MEDIUM |
-| UI-002 | Hover overlay | Modern overlay | Overlay system | TestHoverOverlay | 📋 Planned | `// UI-002: Hover overlay` | 🔶 MEDIUM |
-| UI-003 | Options page | V3 options page | Options interface | TestOptionsPage | 📋 Planned | `// UI-003: Options page` | 🔶 MEDIUM |
-| UI-004 | Responsive design | Mobile-friendly UI | Responsive system | TestResponsive | 📋 Planned | `// UI-004: Responsive design` | 🔶 MEDIUM |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) | Modern popup UI | V3 popup interface | Popup components | TestPopupUI | 📋 Planned | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001): Popup UI` | 🔶 MEDIUM |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002) | Hover overlay | Modern overlay | Overlay system | TestHoverOverlay | 📋 Planned | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002): Hover overlay` | 🔶 MEDIUM |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003) | Options page | V3 options page | Options interface | TestOptionsPage | 📋 Planned | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003): Options page` | 🔶 MEDIUM |
+| [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-004) | Responsive design | Mobile-friendly UI | Responsive system | TestResponsive | 📋 Planned | `// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-004): Responsive design` | 🔶 MEDIUM |
 
 ### 🧪 Testing Infrastructure [PRIORITY: MEDIUM]
 | Feature ID | Specification | Requirements | Architecture | Testing | Status | Implementation Tokens | AI Priority |
 |------------|---------------|--------------|--------------|---------|--------|----------------------|-------------|
-| TEST-001 | Unit test framework | Jest testing setup | Test infrastructure | TestFramework | ✅ Implemented | `// TEST-001: Test framework` | 🔶 MEDIUM |
-| TEST-002 | Integration tests | End-to-end testing | E2E test suite | TestIntegration | ✅ Implemented | `// TEST-002: Integration tests` | 🔶 MEDIUM |
-| TEST-003 | Mock services | Testing utilities | Mock framework | TestMockServices | ✅ Implemented | `// TEST-003: Mock services` | 🔶 MEDIUM |
-| TEST-FIX-001 | Test failure resolution | Jest configuration fixes | Test infrastructure | TestFailureFix | ✅ Implemented | `// TEST-FIX-001: Test fixes` | 🚨 CRITICAL |
+| [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001) | Unit test framework | Jest testing setup | Test infrastructure | TestFramework | ✅ Implemented | `// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001): Test framework` | 🔶 MEDIUM |
+| [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-002) | Integration tests | End-to-end testing | E2E test suite | TestIntegration | ✅ Implemented | `// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-002): Integration tests` | 🔶 MEDIUM |
+| [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003) | Mock services | Testing utilities | Mock framework | TestMockServices | ✅ Implemented | `// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003): Mock services` | 🔶 MEDIUM |
+| [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001) | Test failure resolution | Jest configuration fixes | Test infrastructure | TestFailureFix | ✅ Implemented | `// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Test fixes` | 🚨 CRITICAL |
 
 ## 📋 Detailed Feature Specifications
 
-### **✅ MV3-001: Manifest V3 Migration - ✅ Implemented**
+### **✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Manifest V3 Migration - ✅ Implemented**
 
 **Status**: ✅ **IMPLEMENTED (6/6 Subtasks)** - Phase 1 Complete
 
 **📑 Purpose**: Convert extension from Manifest V2 to V3 architecture while preserving all functionality.
 
-**🔧 Implementation Summary**: **🚨 MV3-001: Critical Manifest V3 migration for modern extension architecture.** Complete conversion from V2 to V3 manifest structure, service worker implementation, and permission updates. This is the foundation requirement for all other Phase 1 work.
+**🔧 Implementation Summary**: **🚨 [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Critical Manifest V3 migration for modern extension architecture.** Complete conversion from V2 to V3 manifest structure, service worker implementation, and permission updates. This is the foundation requirement for all other Phase 1 work.
 
-**🔧 MV3-001 Subtasks:**
+**🔧 [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001) Subtasks:**
 
 1. **[x] Manifest Structure Update** (⭐ CRITICAL) - **COMPLETED**
    - [x] **Update manifest_version to 3** - Core structural change ✅
@@ -161,7 +161,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: CRITICAL - Blocking for all other work ⭐
    - **Implementation Areas**: manifest.v3.json, service worker setup
    - **Dependencies**: None (foundational)
-   - **Implementation Tokens**: `// ⭐ MV3-001: Manifest structure`
+   - **Implementation Tokens**: `// ⭐ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Manifest structure`
    - **Expected Outcomes**: Extension loads with V3 manifest ✅
 
 2. **[x] Service Worker Architecture** (⭐ CRITICAL) - **COMPLETED**
@@ -174,7 +174,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: CRITICAL - Core architecture change ⭐
    - **Implementation Areas**: src-new/core/service-worker.js
    - **Dependencies**: Subtask 1 (manifest structure) ✅
-   - **Implementation Tokens**: `// ⭐ MV3-001: Service worker`
+   - **Implementation Tokens**: `// ⭐ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Service worker`
    - **Expected Outcomes**: Functional service worker replacing background scripts ✅
 
 3. **[x] Content Script Updates** (🔺 HIGH) - **COMPLETED**
@@ -187,7 +187,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: HIGH - Essential functionality 🔺
    - **Implementation Areas**: src-new/features/content/content-main.js, overlay-styles.css
    - **Dependencies**: Subtasks 1-2 (manifest and service worker) ✅
-   - **Implementation Tokens**: `// 🔺 MV3-001: Content scripts`
+   - **Implementation Tokens**: `// 🔺 [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Content scripts`
    - **Expected Outcomes**: Content scripts work identically to V2 ✅
 
 4. **[x] Permission Updates** (🔺 HIGH) - **COMPLETED**
@@ -200,7 +200,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: HIGH - Security and functionality 🔺
    - **Implementation Areas**: manifest.v3.json permissions section
    - **Dependencies**: Subtasks 1-3 (core architecture complete) ✅
-   - **Implementation Tokens**: `// 🔺 MV3-001: Permissions`
+   - **Implementation Tokens**: `// 🔺 [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Permissions`
    - **Expected Outcomes**: All features work with V3 permissions ✅
 
 5. **[x] Testing and Validation** (🔶 MEDIUM) - **COMPLETED**
@@ -212,15 +212,15 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Status**: COMPLETED
    - **Priority**: MEDIUM - Quality assurance 🔶
 
-### **✅ UI-OVERLAY-001: Overlay Data Display Fix - ✅ Implemented**
+### **✅ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-001): Overlay Data Display Fix - ✅ Implemented**
 
 **Status**: ✅ **IMPLEMENTED (3/3 Subtasks)** - Overlay Data Display Complete
 
 **📑 Purpose**: Fix overlay data display to ensure overlay shows same bookmark data as popup and badge.
 
-**🔧 Implementation Summary**: **🔺 UI-OVERLAY-001: Critical overlay data display fix for consistent bookmark data across all UI components.** Fixed content script response handling and disabled problematic automatic refresh mechanism to ensure overlay displays correct bookmark information.
+**🔧 Implementation Summary**: **🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-001): Critical overlay data display fix for consistent bookmark data across all UI components.** Fixed content script response handling and disabled problematic automatic refresh mechanism to ensure overlay displays correct bookmark information.
 
-**🔧 UI-OVERLAY-001 Subtasks:**
+**🔧 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-001) Subtasks:**
 
 1. **[x] Content Script Response Handling** (⭐ CRITICAL) - **COMPLETED**
    - [x] **Fix response data extraction** - Extract bookmark data from response object ✅
@@ -232,7 +232,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: CRITICAL - Core data flow fix ⭐
    - **Implementation Areas**: src/features/content/content-main.js
    - **Dependencies**: None (standalone fix)
-   - **Implementation Tokens**: `// ⭐ UI-OVERLAY-001: Content script response fix`
+   - **Implementation Tokens**: `// ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-001): Content script response fix`
    - **Expected Outcomes**: Overlay displays correct bookmark data ✅
 
 2. **[x] Overlay Content Refresh Mechanism** (🔺 HIGH) - **COMPLETED**
@@ -245,7 +245,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: HIGH - Data integrity fix 🔺
    - **Implementation Areas**: src/features/content/overlay-manager.js
    - **Dependencies**: Subtask 1 (response handling fix) ✅
-   - **Implementation Tokens**: `// 🔺 UI-OVERLAY-001: Content refresh fix`
+   - **Implementation Tokens**: `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-001): Content refresh fix`
    - **Expected Outcomes**: No data loss during overlay display ✅
 
 3. **[x] Data Structure Validation** (🔶 MEDIUM) - **COMPLETED**
@@ -258,11 +258,11 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: MEDIUM - Quality assurance 🔶
    - **Implementation Areas**: Debug logging, validation tests
    - **Dependencies**: Subtasks 1-2 (core fixes complete) ✅
-   - **Implementation Tokens**: `// 🔶 UI-OVERLAY-001: Data validation`
+   - **Implementation Tokens**: `// 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-OVERLAY-001): Data validation`
    - **Expected Outcomes**: Consistent data display across all UI components ✅
    - **Implementation Areas**: Existing test infrastructure validated
    - **Dependencies**: Subtasks 1-4 (implementation complete) ✅
-   - **Implementation Tokens**: `// 🔶 MV3-001: Testing`
+   - **Implementation Tokens**: `// 🔶 [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Testing`
    - **Expected Outcomes**: Complete test coverage for V3 functionality ✅
 
 6. **[x] Documentation Updates** (🔶 MEDIUM) - **COMPLETED**
@@ -275,10 +275,10 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: MEDIUM - Documentation compliance 🔶
    - **Implementation Areas**: docs/context/ documentation system
    - **Dependencies**: Subtasks 1-5 (implementation and testing complete) ✅
-   - **Implementation Tokens**: `// 🔶 MV3-001: Documentation`
+   - **Implementation Tokens**: `// 🔶 [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Documentation`
    - **Expected Outcomes**: Complete V3 documentation ✅
 
-**🎯 MV3-001 Success Criteria:**
+**🎯 [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001) Success Criteria:**
 - ✅ **Extension Loading**: Extension loads and activates with Manifest V3
 - ✅ **Service Worker**: Service worker properly handles all background functionality
 - ✅ **Content Scripts**: All content script functionality preserved
@@ -294,30 +294,30 @@ For detailed guidelines on how to document and track features, please refer to t
 **🚨 BLOCKING DEPENDENCIES:**
 - **Blocks All**: All other Phase 1 features depend on V3 migration completion
 
-### **✅ CFG-001: Modern Configuration Manager - ✅ Implemented**
+### **✅ [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001): Modern Configuration Manager - ✅ Implemented**
 
 **Status**: ✅ **IMPLEMENTED** - Foundation Complete
 
 **📑 Purpose**: Modern configuration management system replacing legacy config.js constants.
 
-**🔧 Implementation Summary**: **✅ CFG-001: Modern ConfigManager class implemented successfully.** Comprehensive configuration management with storage integration, default values, authentication handling, and settings migration support. Forms the foundation for all other configuration features.
+**🔧 Implementation Summary**: **✅ [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001): Modern ConfigManager class implemented successfully.** Comprehensive configuration management with storage integration, default values, authentication handling, and settings migration support. Forms the foundation for all other configuration features.
 
-**🎯 CFG-001 Success Criteria:**
+**🎯 [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) Success Criteria:**
 - **Configuration Access**: Centralized configuration management ✅
 - **Storage Integration**: Chrome storage API integration ✅
 - **Default Values**: Comprehensive default configuration ✅
 - **Authentication**: Token management system ✅
 - **Settings Migration**: Support for legacy settings ✅
 
-### **✅ UI-VIS-001: Visibility Controls Component - ✅ Implemented**
+### **✅ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Visibility Controls Component - ✅ Implemented**
 
 **Status**: ✅ **IMPLEMENTED (6/6 Subtasks)** - Phase 1 Complete
 
 **📑 Purpose**: Implement per-window overlay visibility controls with theme toggle, transparency toggle, and opacity slider.
 
-**🔧 Implementation Summary**: **🔺 UI-VIS-001: Complete visibility controls component for per-window overlay customization.** Full-featured component with light/dark theme toggle, transparency control, opacity slider, and real-time visual feedback. Non-persistent per-window settings with self-contained styling.
+**🔧 Implementation Summary**: **🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Complete visibility controls component for per-window overlay customization.** Full-featured component with light/dark theme toggle, transparency control, opacity slider, and real-time visual feedback. Non-persistent per-window settings with self-contained styling.
 
-**🔧 UI-VIS-001 Subtasks:**
+**🔧 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001) Subtasks:**
 
 1. **[x] Core Component Architecture** (⭐ CRITICAL) - **COMPLETED**
    - [x] **Settings object structure** - { textTheme, transparencyEnabled, backgroundOpacity } ✅
@@ -329,7 +329,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: CRITICAL - Core functionality ⭐
    - **Implementation Areas**: src/ui/components/VisibilityControls.js
    - **Dependencies**: None (self-contained)
-   - **Implementation Tokens**: `// ⭐ UI-VIS-001: Component architecture`
+   - **Implementation Tokens**: `// ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Component architecture`
    - **Expected Outcomes**: Functional visibility controls component ✅
 
 2. **[x] Theme Toggle System** (🔺 HIGH) - **COMPLETED**
@@ -342,7 +342,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: HIGH - User experience critical 🔺
    - **Implementation Areas**: VisibilityControls.js theme handling
    - **Dependencies**: Subtask 1 (core architecture) ✅
-   - **Implementation Tokens**: `// 🔺 UI-VIS-001: Theme toggle`
+   - **Implementation Tokens**: `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Theme toggle`
    - **Expected Outcomes**: Working theme toggle with visual feedback ✅
 
 3. **[x] Transparency Controls** (🔺 HIGH) - **COMPLETED**
@@ -355,7 +355,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: HIGH - Essential feature 🔺
    - **Implementation Areas**: VisibilityControls.js transparency logic
    - **Dependencies**: Subtask 1 (core architecture) ✅
-   - **Implementation Tokens**: `// 🔺 UI-VIS-001: Transparency controls`
+   - **Implementation Tokens**: `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Transparency controls`
    - **Expected Outcomes**: Working transparency and opacity controls ✅
 
 4. **[x] Collapsible UI Design** (🔶 MEDIUM) - **COMPLETED**
@@ -368,7 +368,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: MEDIUM - UI/UX enhancement 🔶
    - **Implementation Areas**: VisibilityControls.js UI layout
    - **Dependencies**: Subtasks 1-3 (core functionality) ✅
-   - **Implementation Tokens**: `// 🔶 UI-VIS-001: Collapsible UI`
+   - **Implementation Tokens**: `// 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Collapsible UI`
    - **Expected Outcomes**: Smooth collapsible interface ✅
 
 5. **[x] Browser Compatibility** (🔶 MEDIUM) - **COMPLETED**
@@ -381,7 +381,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: MEDIUM - Compatibility assurance 🔶
    - **Implementation Areas**: VisibilityControls.js compatibility layer
    - **Dependencies**: Subtasks 1-4 (implementation complete) ✅
-   - **Implementation Tokens**: `// 🔶 UI-VIS-001: Browser compatibility`
+   - **Implementation Tokens**: `// 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Browser compatibility`
    - **Expected Outcomes**: Cross-browser compatible component ✅
 
 6. **[x] Testing and Validation** (🔶 MEDIUM) - **COMPLETED**
@@ -394,10 +394,10 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: MEDIUM - Quality assurance 🔶
    - **Implementation Areas**: test-visibility-controls.html
    - **Dependencies**: Subtasks 1-5 (full implementation) ✅
-   - **Implementation Tokens**: `// 🔶 UI-VIS-001: Testing`
+   - **Implementation Tokens**: `// 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Testing`
    - **Expected Outcomes**: Comprehensive test validation ✅
 
-**🎯 UI-VIS-001 Success Criteria:**
+**🎯 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001) Success Criteria:**
 - ✅ **Theme Toggle**: Working light/dark theme toggle with visual feedback
 - ✅ **Transparency Control**: Functional transparency toggle and opacity slider
 - ✅ **Visual Feedback**: Real-time preview of all changes
@@ -405,15 +405,15 @@ For detailed guidelines on how to document and track features, please refer to t
 - ✅ **Browser Compatibility**: Cross-browser compatible implementation
 - ✅ **User Validation**: Confirmed working by end user
 
-### **✅ UI-VIS-002: Global Visibility Defaults - ✅ Implemented**
+### **✅ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Global Visibility Defaults - ✅ Implemented**
 
 **Status**: ✅ **IMPLEMENTED (6/6 Subtasks)** - Phase 1 Complete
 
 **📑 Purpose**: Implement global default visibility settings configurable via options page.
 
-**🔧 Implementation Summary**: **🔺 UI-VIS-002: Complete global visibility defaults system with options page integration.** ConfigManager backend with visibility API, full options page UI with real-time preview, and comprehensive browser compatibility layer.
+**🔧 Implementation Summary**: **🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Complete global visibility defaults system with options page integration.** ConfigManager backend with visibility API, full options page UI with real-time preview, and comprehensive browser compatibility layer.
 
-**🔧 UI-VIS-002 Subtasks:**
+**🔧 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002) Subtasks:**
 
 1. **[x] ConfigManager Integration** (⭐ CRITICAL) - **COMPLETED**
    - [x] **Visibility defaults API** - getVisibilityDefaults() and updateVisibilityDefaults() ✅
@@ -425,7 +425,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: CRITICAL - Core functionality ⭐
    - **Implementation Areas**: src/config/config-manager.js
    - **Dependencies**: None (foundational)
-   - **Implementation Tokens**: `// ⭐ UI-VIS-002: ConfigManager integration`
+   - **Implementation Tokens**: `// ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): ConfigManager integration`
    - **Expected Outcomes**: Working visibility defaults backend ✅
 
 2. **[x] Options Page UI** (🔺 HIGH) - **COMPLETED**
@@ -438,7 +438,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: HIGH - User experience 🔺
    - **Implementation Areas**: src/ui/options/options.html, options.css, options.js
    - **Dependencies**: Subtask 1 (ConfigManager backend) ✅
-   - **Implementation Tokens**: `// 🔺 UI-VIS-002: Options UI`
+   - **Implementation Tokens**: `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Options UI`
    - **Expected Outcomes**: Working options page with visibility defaults ✅
 
 3. **[x] Real-time Preview System** (🔺 HIGH) - **COMPLETED**
@@ -451,7 +451,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: HIGH - User experience 🔺
    - **Implementation Areas**: options.js preview functionality
    - **Dependencies**: Subtasks 1-2 (backend and UI) ✅
-   - **Implementation Tokens**: `// 🔺 UI-VIS-002: Real-time preview`
+   - **Implementation Tokens**: `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Real-time preview`
    - **Expected Outcomes**: Working real-time settings preview ✅
 
 4. **[x] Browser Compatibility Layer** (🔶 MEDIUM) - **COMPLETED**
@@ -464,7 +464,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: MEDIUM - Development support 🔶
    - **Implementation Areas**: Browser mock services and test pages
    - **Dependencies**: Subtasks 1-3 (core functionality) ✅
-   - **Implementation Tokens**: `// 🔶 UI-VIS-002: Browser compatibility`
+   - **Implementation Tokens**: `// 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Browser compatibility`
    - **Expected Outcomes**: Browser-testable implementation ✅
 
 5. **[x] Settings Persistence** (🔶 MEDIUM) - **COMPLETED**
@@ -477,7 +477,7 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: MEDIUM - Data integrity 🔶
    - **Implementation Areas**: ConfigManager storage operations
    - **Dependencies**: Subtask 1 (ConfigManager backend) ✅
-   - **Implementation Tokens**: `// 🔶 UI-VIS-002: Settings persistence`
+   - **Implementation Tokens**: `// 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Settings persistence`
    - **Expected Outcomes**: Reliable settings storage and retrieval ✅
 
 6. **[x] Testing and Validation** (🔶 MEDIUM) - **COMPLETED**
@@ -490,10 +490,10 @@ For detailed guidelines on how to document and track features, please refer to t
    - **Priority**: MEDIUM - Quality assurance 🔶
    - **Implementation Areas**: Multiple test environments
    - **Dependencies**: Subtasks 1-5 (full implementation) ✅
-   - **Implementation Tokens**: `// 🔶 UI-VIS-002: Testing`
+   - **Implementation Tokens**: `// 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Testing`
    - **Expected Outcomes**: Comprehensive test validation ✅
 
-**🎯 UI-VIS-002 Success Criteria:**
+**🎯 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002) Success Criteria:**
 - ✅ **Backend Integration**: ConfigManager with visibility defaults API
 - ✅ **Options Page UI**: Complete options page with all controls
 - ✅ **Real-time Preview**: Working preview system with visual feedback
@@ -504,17 +504,17 @@ For detailed guidelines on how to document and track features, please refer to t
 ## 🚨 Current Development Status
 
 ### **✅ COMPLETED PHASE 1 TASKS**
-1. **✅ MV3-001**: Manifest V3 migration - COMPLETED ✅
-2. **✅ CFG-001**: Modern configuration manager - COMPLETED ✅
-3. **✅ UI-VIS-001**: Visibility controls component - COMPLETED ✅
-4. **✅ UI-VIS-002**: Global visibility defaults - COMPLETED ✅
+1. **✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001)**: Manifest V3 migration - COMPLETED ✅
+2. **✅ [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001)**: Modern configuration manager - COMPLETED ✅
+3. **✅ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)**: Visibility controls component - COMPLETED ✅
+4. **✅ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002)**: Global visibility defaults - COMPLETED ✅
 5. **✅ Multiple utilities and services**: Core functionality established ✅
 
 ### **📋 NEXT PHASE 2 PRIORITIES (HIGH PRIORITY)**
-1. **🔺 UI-VIS-003**: Window state management (IN PROGRESS)
-2. **🔺 UI-VIS-004**: Production integration with OverlayManager (PLANNED)
-3. **🔺 PIN-001 to PIN-004**: Complete Pinboard integration modernization
-4. **🔶 TEST-001 to TEST-003**: Comprehensive testing framework
+1. **🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-003)**: Window state management (IN PROGRESS)
+2. **🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-004)**: Production integration with OverlayManager (PLANNED)
+3. **🔺 [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001) to [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-004)**: Complete Pinboard integration modernization
+4. **🔶 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001) to [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003)**: Comprehensive testing framework
 
 ## 🎯 Success Metrics for Feature Tracking
 
@@ -567,12 +567,12 @@ For detailed guidelines on how to document and track features, please refer to t
 - **✅ Quality Assurance**: User-validated functionality across multiple test scenarios
 
 ### **🔧 IMPLEMENTATION TOKENS USED**
-- `// ⭐ UI-VIS-001: Component architecture` - Core visibility controls component
-- `// 🔺 UI-VIS-001: Theme toggle` - Light/dark theme switching system
-- `// 🔺 UI-VIS-001: Transparency controls` - Background transparency and opacity
-- `// ⭐ UI-VIS-002: ConfigManager integration` - Backend visibility defaults system
-- `// 🔺 UI-VIS-002: Options UI` - Options page interface and controls
-- `// 🔺 UI-VIS-002: Real-time preview` - Live settings preview functionality
+- `// ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Component architecture` - Core visibility controls component
+- `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Theme toggle` - Light/dark theme switching system
+- `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Transparency controls` - Background transparency and opacity
+- `// ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): ConfigManager integration` - Backend visibility defaults system
+- `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Options UI` - Options page interface and controls
+- `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Real-time preview` - Live settings preview functionality
 
 ### **🎯 KEY ACHIEVEMENTS**
 - **Per-Window Controls**: Non-persistent settings for individual window customization
@@ -583,24 +583,24 @@ For detailed guidelines on how to document and track features, please refer to t
 
 ### **📋 READY FOR PHASE 2**
 The overlay visibility controls foundation is complete and ready for:
-1. **Window State Management** (UI-VIS-003) - Per-window state persistence
-2. **Production Integration** (UI-VIS-004) - Integration with existing OverlayManager system
+1. **Window State Management** ([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-003)) - Per-window state persistence
+2. **Production Integration** ([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-004)) - Integration with existing OverlayManager system
 
 ## 📋 Quick Reference
 
 **Search Commands:**
-- `grep "CFG-001"` - Configuration management features
-- `grep "MV3-001"` - Manifest V3 migration features  
-- `grep "PIN-001"` - Pinboard integration features
-- `grep "UI-001"` - User interface features
-- `grep "UTIL-001"` - Shared utilities features
-- `grep "LOG-001"` - Logging features
-- `grep "TEST-001"` - Testing features
-- `grep "STAB-001"` - Code stability features
+- `grep "[IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001)"` - Configuration management features
+- `grep "[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001)"` - Manifest V3 migration features  
+- `grep "[IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001)"` - Pinboard integration features
+- `grep "[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001)"` - User interface features
+- `grep "[IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-001)"` - Shared utilities features
+- `grep "[IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001)"` - Logging features
+- `grep "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001)"` - Testing features
+- `grep "[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was STAB-001)"` - Code stability features
 
 ## 🔥 Critical Priority Features
 
-### MV3-001: Service Worker Architecture
+### [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Service Worker Architecture
 **Priority:** 🔴 Critical | **Status:** ✅ Implemented | **Tokens Required:** YES
 
 Core service worker implementation replacing background scripts.
@@ -614,10 +614,10 @@ Core service worker implementation replacing background scripts.
 6. ✅ Documentation updates
 
 **Implementation Areas:** `src-new/core/service-worker.js`, `manifest.v3.json`
-**Dependencies:** CFG-001 (configuration), PIN-001 (API integration)
+**Dependencies:** [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (configuration), [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001) (API integration)
 **Success Criteria:** ✅ All subtasks completed, V3 functionality validated
 
-### CFG-001: Configuration Management System  
+### [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001): Configuration Management System  
 **Priority:** 🔴 Critical | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Centralized configuration and settings management.
@@ -634,7 +634,7 @@ Centralized configuration and settings management.
 **Dependencies:** None (foundational)
 **Success Criteria:** ✅ All configuration operations working, annotations complete
 
-### PIN-001: Core Pinboard API Integration
+### [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001): Core Pinboard API Integration
 **Priority:** 🔴 Critical | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Essential Pinboard API integration for bookmark operations.
@@ -648,12 +648,12 @@ Essential Pinboard API integration for bookmark operations.
 6. ✅ Code stability annotations
 
 **Implementation Areas:** `src-new/features/pinboard/pinboard-service.js`
-**Dependencies:** CFG-001 (auth token storage)
+**Dependencies:** [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (auth token storage)
 **Success Criteria:** ✅ Core bookmark operations working, annotations complete
 
 ## 🟡 High Priority Features
 
-### MV3-002: Message Passing System
+### [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-002): Message Passing System
 **Priority:** 🟡 High | **Status:** 🔄 In Progress | **Tokens Required:** YES
 
 Implement chrome.runtime messaging for V3 compatibility.
@@ -667,10 +667,10 @@ Implement chrome.runtime messaging for V3 compatibility.
 6. ⏳ Documentation
 
 **Implementation Areas:** `src-new/core/messaging.js`
-**Dependencies:** MV3-001 (service worker)
+**Dependencies:** [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001) (service worker)
 **Success Criteria:** All extension components can communicate reliably
 
-### CFG-002: Authentication Management
+### [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-002): Authentication Management
 **Priority:** 🟡 High | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Secure authentication token storage and validation.
@@ -684,10 +684,10 @@ Secure authentication token storage and validation.
 6. ✅ Code stability annotations
 
 **Implementation Areas:** `src-new/config/config-manager.js`
-**Dependencies:** CFG-001 (base configuration)
+**Dependencies:** [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (base configuration)
 **Success Criteria:** ✅ Secure token management, annotations complete
 
-### UI-001: Core UI System Architecture  
+### [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001): Core UI System Architecture  
 **Priority:** 🟡 High | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Foundational UI system with theme and component management.
@@ -701,10 +701,10 @@ Foundational UI system with theme and component management.
 6. ✅ Code stability annotations
 
 **Implementation Areas:** `src-new/ui/index.js`
-**Dependencies:** UI-002 (themes), UI-003 (icons/assets)
+**Dependencies:** [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002) (themes), [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003) (icons/assets)
 **Success Criteria:** ✅ UI system initialization and management, annotations complete
 
-### UTIL-001: Core Utilities System
+### [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-001): Core Utilities System
 **Priority:** 🟡 High | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Essential utility functions for URL, string, array, and DOM operations.
@@ -718,12 +718,12 @@ Essential utility functions for URL, string, array, and DOM operations.
 6. ✅ Code stability annotations
 
 **Implementation Areas:** `src-new/shared/utils.js`
-**Dependencies:** LOG-001 (logging)
+**Dependencies:** [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001) (logging)
 **Success Criteria:** ✅ All utility functions working, annotations complete
 
 ## 🟢 Medium Priority Features
 
-### MV3-003: Storage API Updates
+### [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-003): Storage API Updates
 **Priority:** 🟢 Medium | **Status:** ✅ Implemented | **Tokens Required:** YES
 
 Update to chrome.storage API patterns for V3.
@@ -737,10 +737,10 @@ Update to chrome.storage API patterns for V3.
 6. ✅ Testing
 
 **Implementation Areas:** `src-new/config/config-manager.js`
-**Dependencies:** CFG-001 (configuration system)
+**Dependencies:** [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (configuration system)
 **Success Criteria:** ✅ All data persistence working in V3
 
-### CFG-003: User Settings Management
+### [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003): User Settings Management
 **Priority:** 🟢 Medium | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 User-configurable settings and preferences.
@@ -754,10 +754,10 @@ User-configurable settings and preferences.
 6. ✅ Code stability annotations
 
 **Implementation Areas:** `src-new/config/config-manager.js`
-**Dependencies:** CFG-001 (base configuration)
+**Dependencies:** [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (base configuration)
 **Success Criteria:** ✅ User settings persistence and validation, annotations complete
 
-### CFG-004: URL Inhibition System
+### [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] (was CFG-004): URL Inhibition System
 **Priority:** 🟢 Medium | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Site-specific behavior control through URL pattern management.
@@ -771,10 +771,10 @@ Site-specific behavior control through URL pattern management.
 6. ✅ Code stability annotations
 
 **Implementation Areas:** `src-new/config/config-manager.js`
-**Dependencies:** CFG-001 (configuration storage)
+**Dependencies:** [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (configuration storage)
 **Success Criteria:** ✅ Site-specific behavior control working, annotations complete
 
-### PIN-002: Bookmark Retrieval Operations
+### [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-002): Bookmark Retrieval Operations
 **Priority:** 🟢 Medium | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Advanced bookmark retrieval and display operations.
@@ -788,10 +788,10 @@ Advanced bookmark retrieval and display operations.
 6. ✅ Code stability annotations
 
 **Implementation Areas:** `src-new/features/pinboard/pinboard-service.js`
-**Dependencies:** PIN-001 (core API), CFG-001 (configuration)
+**Dependencies:** [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001) (core API), [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (configuration)
 **Success Criteria:** ✅ Bookmark retrieval operations working, annotations complete
 
-### PIN-003: Tag Management Operations
+### [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-003): Tag Management Operations
 **Priority:** 🟢 Medium | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Tag-specific operations and bookmark modification.
@@ -805,10 +805,10 @@ Tag-specific operations and bookmark modification.
 6. ✅ Code stability annotations
 
 **Implementation Areas:** `src-new/features/pinboard/pinboard-service.js`
-**Dependencies:** PIN-001 (core API), PIN-002 (bookmark retrieval)
+**Dependencies:** [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001) (core API), [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-002) (bookmark retrieval)
 **Success Criteria:** ✅ Tag operations working reliably, annotations complete
 
-### UI-002: Theme Management System
+### [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002): Theme Management System
 **Priority:** 🟢 Medium | **Status:** ⏳ Planned | **Tokens Required:** YES
 
 Theme switching and visual consistency management.
@@ -822,10 +822,10 @@ Theme switching and visual consistency management.
 6. ⏳ Code stability annotations
 
 **Implementation Areas:** `src-new/ui/components/ThemeManager.js`
-**Dependencies:** UI-001 (core UI system)
+**Dependencies:** [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) (core UI system)
 **Success Criteria:** Theme switching and consistency across components
 
-### UI-003: Icon and Asset Management
+### [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003): Icon and Asset Management
 **Priority:** 🟢 Medium | **Status:** ⏳ Planned | **Tokens Required:** YES
 
 Icon system and visual asset loading management.
@@ -839,10 +839,10 @@ Icon system and visual asset loading management.
 6. ⏳ Code stability annotations
 
 **Implementation Areas:** `src-new/ui/components/IconManager.js`, `src-new/ui/components/VisualAssetsManager.js`
-**Dependencies:** UI-001 (core UI), UI-002 (theming)
+**Dependencies:** [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) (core UI), [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002) (theming)
 **Success Criteria:** Efficient asset loading and management
 
-### UTIL-002: String Processing Utilities
+### [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-002): String Processing Utilities
 **Priority:** 🟢 Medium | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Text processing utilities for UI display and security.
@@ -859,7 +859,7 @@ Text processing utilities for UI display and security.
 **Dependencies:** None
 **Success Criteria:** ✅ Text processing utilities working, annotations complete
 
-### UTIL-003: Data Structure Utilities
+### [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-003): Data Structure Utilities
 **Priority:** 🟢 Medium | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Array and object manipulation utilities for data processing.
@@ -876,7 +876,7 @@ Array and object manipulation utilities for data processing.
 **Dependencies:** None
 **Success Criteria:** ✅ Data manipulation utilities working, annotations complete
 
-### LOG-001: Structured Logging System
+### [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001): Structured Logging System
 **Priority:** 🟢 Medium | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Environment-aware logging with levels and context.
@@ -895,7 +895,7 @@ Environment-aware logging with levels and context.
 
 ## 🔵 Low Priority Features
 
-### MV3-004: Permissions Optimization
+### [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-004): Permissions Optimization
 **Priority:** 🔵 Low | **Status:** ✅ Implemented | **Tokens Required:** YES
 
 Minimal permissions for enhanced security and user trust.
@@ -909,10 +909,10 @@ Minimal permissions for enhanced security and user trust.
 6. ✅ Testing
 
 **Implementation Areas:** `manifest.v3.json`
-**Dependencies:** MV3-001 (service worker)
+**Dependencies:** [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001) (service worker)
 **Success Criteria:** ✅ Minimal required permissions, enhanced security
 
-### PIN-004: Error Handling and Resilience
+### [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-004): Error Handling and Resilience
 **Priority:** 🔵 Low | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Advanced error handling and network resilience.
@@ -926,10 +926,10 @@ Advanced error handling and network resilience.
 6. ✅ Code stability annotations
 
 **Implementation Areas:** `src-new/features/pinboard/pinboard-service.js`
-**Dependencies:** PIN-001 (core API), CFG-001 (retry configuration)
+**Dependencies:** [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001) (core API), [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (retry configuration)
 **Success Criteria:** ✅ Robust error handling and recovery, annotations complete
 
-### UI-004: Popup Management System
+### [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-004): Popup Management System
 **Priority:** 🔵 Low | **Status:** ⏳ Planned | **Tokens Required:** YES
 
 Popup creation and interaction management.
@@ -943,10 +943,10 @@ Popup creation and interaction management.
 6. ⏳ Code stability annotations
 
 **Implementation Areas:** `src-new/ui/popup/`
-**Dependencies:** UI-001 (core UI), UI-002 (themes), UI-003 (assets)
+**Dependencies:** [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) (core UI), [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002) (themes), [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003) (assets)
 **Success Criteria:** Consistent popup behavior and interactions
 
-### UTIL-004: Time and Async Utilities
+### [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-004): Time and Async Utilities
 **Priority:** 🔵 Low | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 Time formatting and async operation utilities.
@@ -963,7 +963,7 @@ Time formatting and async operation utilities.
 **Dependencies:** None
 **Success Criteria:** ✅ Time utilities working, annotations complete
 
-### UTIL-005: DOM Utilities
+### [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-005): DOM Utilities
 **Priority:** 🔵 Low | **Status:** ✅ Annotated | **Tokens Required:** YES
 
 DOM manipulation utilities for content scripts and UI.
@@ -980,7 +980,7 @@ DOM manipulation utilities for content scripts and UI.
 **Dependencies:** None
 **Success Criteria:** ✅ DOM utilities working, annotations complete
 
-### LOG-002: Performance Logging
+### [IMPL-LOG_LEVEL_CONFIG] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-002): Performance Logging
 **Priority:** 🔵 Low | **Status:** ⏳ Planned | **Tokens Required:** YES
 
 Performance monitoring and metrics collection.
@@ -994,10 +994,10 @@ Performance monitoring and metrics collection.
 6. ⏳ Code stability annotations
 
 **Implementation Areas:** `src-new/shared/performance-logger.js`
-**Dependencies:** LOG-001 (base logging)
+**Dependencies:** [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001) (base logging)
 **Success Criteria:** Performance monitoring and optimization insights
 
-### LOG-003: Debug and Development Tools
+### [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-003): Debug and Development Tools
 **Priority:** 🔵 Low | **Status:** ⏳ Planned | **Tokens Required:** YES
 
 Enhanced debugging and development utilities.
@@ -1011,10 +1011,10 @@ Enhanced debugging and development utilities.
 6. ⏳ Code stability annotations
 
 **Implementation Areas:** `src-new/shared/debug-tools.js`
-**Dependencies:** LOG-001 (base logging)
+**Dependencies:** [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001) (base logging)
 **Success Criteria:** Enhanced development and debugging experience
 
-### TEST-001: Unit Testing Framework
+### [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001): Unit Testing Framework
 **Priority:** 🔵 Low | **Status:** ⏳ Planned | **Tokens Required:** YES
 
 Comprehensive unit testing for all components.
@@ -1031,7 +1031,7 @@ Comprehensive unit testing for all components.
 **Dependencies:** All implemented features
 **Success Criteria:** 80%+ test coverage with reliable test suite
 
-### TEST-002: Integration Testing
+### [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-002): Integration Testing
 **Priority:** 🔵 Low | **Status:** ⏳ Planned | **Tokens Required:** YES
 
 End-to-end integration testing for user workflows.
@@ -1045,10 +1045,10 @@ End-to-end integration testing for user workflows.
 6. ⏳ Code stability annotations
 
 **Implementation Areas:** `tests/integration/`
-**Dependencies:** TEST-001 (unit tests), all features
+**Dependencies:** [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001) (unit tests), all features
 **Success Criteria:** Core user workflows validated through automated tests
 
-### TEST-003: Browser Compatibility Testing
+### [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003): Browser Compatibility Testing
 **Priority:** 🔵 Low | **Status:** ⏳ Planned | **Tokens Required:** YES
 
 Cross-browser compatibility validation.
@@ -1067,7 +1067,7 @@ Cross-browser compatibility validation.
 
 ## 🛡️ Code Stability Features
 
-### STAB-001: Implementation Token System
+### [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was STAB-001): Implementation Token System
 **Priority:** 🔴 Critical | **Status:** ✅ Implemented | **Tokens Required:** N/A
 
 AI-first development annotations for feature stability and persistence.
@@ -1084,15 +1084,15 @@ AI-first development annotations for feature stability and persistence.
 **Dependencies:** AI-first framework (docs/context/)
 **Success Criteria:** ✅ All existing code annotated with implementation decisions and specifications
 
-### **✅ TEST-FIX-001: Test Failure Resolution - ✅ Implemented**
+### **✅ [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Test Failure Resolution - ✅ Implemented**
 
 **Status**: ✅ **IMPLEMENTED (6/6 Subtasks)** - All test failures resolved
 
 **📑 Purpose**: Resolve all failing tests in the test suite to achieve 100% test pass rate and ensure robust test infrastructure.
 
-**🔧 Implementation Summary**: **🚨 TEST-FIX-001: Critical test failure resolution for comprehensive test suite reliability.** Fixed Jest configuration errors, tag service mock issues, performance test failures, and window object handling problems. Achieved 100% test pass rate (254/254 tests) with comprehensive error handling and proper semantic token usage.
+**🔧 Implementation Summary**: **🚨 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Critical test failure resolution for comprehensive test suite reliability.** Fixed Jest configuration errors, tag service mock issues, performance test failures, and window object handling problems. Achieved 100% test pass rate (254/254 tests) with comprehensive error handling and proper semantic token usage.
 
-**🔧 TEST-FIX-001 Subtasks:**
+**🔧 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001) Subtasks:**
 
 1. **[x] Jest Configuration Fix** (⭐ CRITICAL) - **COMPLETED**
    - [x] **Remove global object overrides** - Fixed Jest internal state corruption ✅
@@ -1104,7 +1104,7 @@ AI-first development annotations for feature stability and persistence.
    - **Priority**: CRITICAL - Blocking for all other tests ⭐
    - **Implementation Areas**: tests/setup.js, jest.config.js
    - **Dependencies**: None (foundational)
-   - **Implementation Tokens**: `// ⭐ TEST-FIX-001: Jest configuration`
+   - **Implementation Tokens**: `// ⭐ [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Jest configuration`
    - **Expected Outcomes**: Jest configuration errors resolved ✅
 
 2. **[x] Tag Service Mock Fix** (⭐ CRITICAL) - **COMPLETED**
@@ -1117,7 +1117,7 @@ AI-first development annotations for feature stability and persistence.
    - **Priority**: CRITICAL - Core functionality testing ⭐
    - **Implementation Areas**: tests/unit/tag-recent-behavior.test.js
    - **Dependencies**: Subtask 1 (Jest configuration) ✅
-   - **Implementation Tokens**: `// ⭐ TEST-FIX-001: Tag service mocking`
+   - **Implementation Tokens**: `// ⭐ [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Tag service mocking`
    - **Expected Outcomes**: All tag service tests pass ✅
 
 3. **[x] Performance Test Fix** (🔺 HIGH) - **COMPLETED**
@@ -1130,7 +1130,7 @@ AI-first development annotations for feature stability and persistence.
    - **Priority**: HIGH - Performance critical 🔺
    - **Implementation Areas**: tests/performance/tag-performance.test.js
    - **Dependencies**: Subtasks 1-2 (Jest and tag service fixes) ✅
-   - **Implementation Tokens**: `// 🔺 TEST-FIX-001: Performance optimization`
+   - **Implementation Tokens**: `// 🔺 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Performance optimization`
    - **Expected Outcomes**: All performance tests pass with optimized execution ✅
 
 4. **[x] Window Object Handling** (🔺 HIGH) - **COMPLETED**
@@ -1143,7 +1143,7 @@ AI-first development annotations for feature stability and persistence.
    - **Priority**: HIGH - Environment compatibility 🔺
    - **Implementation Areas**: tests/setup.js, test environment configuration
    - **Dependencies**: Subtasks 1-3 (core fixes complete) ✅
-   - **Implementation Tokens**: `// 🔺 TEST-FIX-001: Window object handling`
+   - **Implementation Tokens**: `// 🔺 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Window object handling`
    - **Expected Outcomes**: Tests work in both Node.js and browser environments ✅
 
 5. **[x] Test Infrastructure Enhancement** (🔶 MEDIUM) - **COMPLETED**
@@ -1156,7 +1156,7 @@ AI-first development annotations for feature stability and persistence.
    - **Priority**: MEDIUM - Infrastructure improvement 🔶
    - **Implementation Areas**: tests/setup.js, test utilities, mock factories
    - **Dependencies**: Subtasks 1-4 (all core fixes complete) ✅
-   - **Implementation Tokens**: `// 🔶 TEST-FIX-001: Test infrastructure`
+   - **Implementation Tokens**: `// 🔶 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Test infrastructure`
    - **Expected Outcomes**: Robust test infrastructure for continued development ✅
 
 6. **[x] Comprehensive Validation** (🔶 MEDIUM) - **COMPLETED**
@@ -1169,7 +1169,7 @@ AI-first development annotations for feature stability and persistence.
    - **Priority**: MEDIUM - Quality assurance 🔶
    - **Implementation Areas**: All test files, documentation updates
    - **Dependencies**: Subtasks 1-5 (all fixes complete) ✅
-   - **Implementation Tokens**: `// 🔶 TEST-FIX-001: Comprehensive validation`
+   - **Implementation Tokens**: `// 🔶 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Comprehensive validation`
    - **Expected Outcomes**: 100% test pass rate with complete documentation ✅
 
 **📊 Final Test Results (2025-07-14)**:

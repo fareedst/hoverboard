@@ -1,0 +1,53 @@
+ARCH-BADGE:
+  alternatives_considered:
+    - name: "No badges"
+      cons:
+        - "Loses visual feedback"
+      pros: []
+      rejected_reason: "Important for UX"
+    - name: "Static badges"
+      cons:
+        - "Not informative"
+      pros:
+        - "Simpler"
+      rejected_reason: "Need dynamic state"
+  cross_references:
+    - "REQ-BADGE_INDICATORS"
+  decision: "Thin architecture stub for ARCH-BADGE."
+  implementation_approach:
+    details:
+      - "Bookmark status indicators"
+      - "Color-coded states"
+      - "Tab-specific badges"
+    summary: "Dynamic badge text with color coding, tab-specific management"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Badge System Architecture"
+  rationale:
+    benefits:
+      - "Quick status visibility"
+      - "Tab-specific state"
+    problems_solved:
+      - "No at-a-glance info"
+      - "Unclear bookmark status"
+    why: "Visual feedback improves UX"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-BADGE"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-BADGE"
+    implementation:
+      - "IMPL-BADGE"
+    requirements:
+      - "REQ-BADGE_INDICATORS"
+    tests: []

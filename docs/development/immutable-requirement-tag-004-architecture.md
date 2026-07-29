@@ -1,9 +1,9 @@
-# [IMMUTABLE-REQ-TAG-004] Overlay Window Tag Persistence - Architecture
+# [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Overlay Window Tag Persistence - Architecture
 
 **Date**: 2025-07-14  
 **Status**: Architecture Document  
 **Version**: 1.1  
-**Semantic Token**: `[IMMUTABLE-REQ-TAG-004]`
+**Semantic Token**: `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 ## 🏗️ Architecture Overview
 
@@ -33,7 +33,7 @@ This document outlines the architectural design for implementing tag persistence
 
 ## 📋 System Components
 
-### 1. Overlay Manager `[IMMUTABLE-REQ-TAG-004]`
+### 1. Overlay Manager `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **File**: `src/features/content/overlay-manager.js`
 
@@ -72,7 +72,7 @@ showMessage(message, type) {
 }
 ```
 
-### 2. Message Client `[IMMUTABLE-REQ-TAG-004]`
+### 2. Message Client `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **File**: `src/features/content/message-client.js`
 
@@ -93,7 +93,7 @@ async sendMessage(messageData) {
 }
 ```
 
-### 3. Background Service Integration `[IMMUTABLE-REQ-TAG-004]`
+### 3. Background Service Integration `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Files**: 
 - `src/core/message-handler.js`
@@ -109,7 +109,7 @@ async sendMessage(messageData) {
 
 ## 🔄 Data Flow Architecture
 
-### 1. Tag Input Flow `[IMMUTABLE-REQ-TAG-004]`
+### 1. Tag Input Flow `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 ```
 User Input → Validation → Message Service → Background Service → Pinboard API
@@ -125,7 +125,7 @@ Local Content Update → UI Refresh → Success Message
 5. Overlay refreshed with updated local content
 6. Success message displayed to user
 
-### 2. Recent Tag Click Flow `[IMMUTABLE-REQ-TAG-004]`
+### 2. Recent Tag Click Flow `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 ```
 Recent Tag Click → Message Service → Background Service → Pinboard API
@@ -140,7 +140,7 @@ Local Content Update → UI Refresh → Success Message
 4. Overlay refreshed with updated local content
 5. Success message displayed to user
 
-### 3. Error Handling Flow `[IMMUTABLE-REQ-TAG-004]`
+### 3. Error Handling Flow `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 ```
 Error Detection → Error Classification → User Feedback → Fallback Behavior
@@ -153,7 +153,7 @@ Error Detection → Error Classification → User Feedback → Fallback Behavior
 
 ## 🎨 UI/UX Architecture
 
-### 1. Message Display System `[IMMUTABLE-REQ-TAG-004]`
+### 1. Message Display System `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Fixed Positioning**:
 - Messages appear in top-right corner
@@ -170,7 +170,7 @@ Error Detection → Error Classification → User Feedback → Fallback Behavior
 - Smooth opacity transition
 - Auto-removal after 3 seconds
 
-### 2. Tag Display Updates `[IMMUTABLE-REQ-TAG-004]`
+### 2. Tag Display Updates `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Immediate Updates**:
 - Tags appear in Current tags list immediately
@@ -182,7 +182,7 @@ Error Detection → Error Classification → User Feedback → Fallback Behavior
 - Consistent positioning and layout
 - Smooth transitions
 
-### 3. Input Field Management `[IMMUTABLE-REQ-TAG-004]`
+### 3. Input Field Management `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Clear After Success**:
 - Input field cleared after successful tag addition
@@ -196,7 +196,7 @@ Error Detection → Error Classification → User Feedback → Fallback Behavior
 
 ## 🔧 Technical Architecture
 
-### 1. Message Passing Architecture `[IMMUTABLE-REQ-TAG-004]`
+### 1. Message Passing Architecture `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Chrome Extension Pattern**:
 ```javascript
@@ -221,7 +221,7 @@ try {
 }
 ```
 
-### 2. Local Content Management `[IMMUTABLE-REQ-TAG-004]`
+### 2. Local Content Management `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Immediate Updates**:
 ```javascript
@@ -240,7 +240,7 @@ this.show(content)
 - UI updates based on local data
 - Background persistence happens asynchronously
 
-### 3. Validation Architecture `[IMMUTABLE-REQ-TAG-004]`
+### 3. Validation Architecture `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Client-Side Validation**:
 ```javascript
@@ -261,7 +261,7 @@ isValidTag(tag) {
 
 ## 🧪 Testing Architecture
 
-### 1. Unit Testing `[IMMUTABLE-REQ-TAG-004]`
+### 1. Unit Testing `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Test Files**:
 - `tests/unit/overlay-tag-persistence.test.js`
@@ -273,7 +273,7 @@ isValidTag(tag) {
 - Tag validation
 - Error handling
 
-### 2. Integration Testing `[IMMUTABLE-REQ-TAG-004]`
+### 2. Integration Testing `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Test Files**:
 - `tests/integration/overlay-tag-integration.test.js`
@@ -284,7 +284,7 @@ isValidTag(tag) {
 - Error handling scenarios
 - Validation testing
 
-### 3. E2E Testing `[IMMUTABLE-REQ-TAG-004]`
+### 3. E2E Testing `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Test Files**:
 - `tests/e2e/overlay-tag-e2e.test.js`
@@ -295,7 +295,7 @@ isValidTag(tag) {
 - Session persistence testing
 - Concurrent operations testing
 
-### 4. Manual Testing `[IMMUTABLE-REQ-TAG-004]`
+### 4. Manual Testing `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Test Files**:
 - `test-overlay-tag-persistence.html`
@@ -309,7 +309,7 @@ isValidTag(tag) {
 
 ## 🔒 Security Architecture
 
-### 1. Input Validation `[IMMUTABLE-REQ-TAG-004]`
+### 1. Input Validation `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Tag Format Validation**:
 - Maximum length: 50 characters
@@ -322,7 +322,7 @@ isValidTag(tag) {
 - Safe DOM manipulation
 - Content Security Policy compliance
 
-### 2. Message Security `[IMMUTABLE-REQ-TAG-004]`
+### 2. Message Security `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Message Validation**:
 - Validate message structure before processing
@@ -336,7 +336,7 @@ isValidTag(tag) {
 
 ## 📊 Performance Architecture
 
-### 1. Response Time Optimization `[IMMUTABLE-REQ-TAG-004]`
+### 1. Response Time Optimization `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Immediate Display**:
 - Tag display must be immediate (< 100ms)
@@ -348,7 +348,7 @@ isValidTag(tag) {
 - Non-blocking message operations
 - Smooth animations
 
-### 2. Memory Management `[IMMUTABLE-REQ-TAG-004]`
+### 2. Memory Management `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Message Cleanup**:
 - Auto-removal of message elements
@@ -362,7 +362,7 @@ isValidTag(tag) {
 
 ## 🔄 Integration Architecture
 
-### 1. Existing System Integration `[IMMUTABLE-REQ-TAG-004]`
+### 1. Existing System Integration `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Backward Compatibility**:
 - Maintains existing overlay functionality
@@ -374,7 +374,7 @@ isValidTag(tag) {
 - Uses existing validation rules
 - Maintains existing UI patterns
 
-### 2. Cross-Interface Consistency `[IMMUTABLE-REQ-TAG-004]`
+### 2. Cross-Interface Consistency `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Popup Consistency**:
 - Same processing logic as popup window
@@ -388,7 +388,7 @@ isValidTag(tag) {
 
 ## 📝 Architecture Decisions
 
-### 1. Immediate Local Updates `[IMMUTABLE-REQ-TAG-004]`
+### 1. Immediate Local Updates `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Decision**: Update local content immediately after successful persistence for instant visual feedback
 
@@ -409,7 +409,7 @@ if (!content.bookmark.tags.includes(tagText)) {
 this.show(content)
 ```
 
-### 2. Local UI Refresh `[IMMUTABLE-REQ-TAG-004]`
+### 2. Local UI Refresh `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Decision**: Use `this.show(content)` instead of `refreshOverlayContent()` for immediate display
 
@@ -418,7 +418,7 @@ this.show(content)
 - Uses local data for instant updates
 - Maintains UI responsiveness
 
-### 3. Non-blocking Operations `[IMMUTABLE-REQ-TAG-004]`
+### 3. Non-blocking Operations `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Decision**: All tag operations are asynchronous to maintain UI responsiveness
 
@@ -427,7 +427,7 @@ this.show(content)
 - Maintains smooth user experience
 - Allows for proper error handling
 
-### 4. Comprehensive Error Handling `[IMMUTABLE-REQ-TAG-004]`
+### 4. Comprehensive Error Handling `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Decision**: Try-catch blocks around all async operations with user-friendly error messages
 
@@ -438,21 +438,21 @@ this.show(content)
 
 ## 🎯 Success Metrics
 
-### 1. Functional Metrics `[IMMUTABLE-REQ-TAG-004]`
+### 1. Functional Metrics `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 - **Tag Persistence**: 100% of tags added in overlay are permanently saved
 - **Tag Display**: Tags appear in Current tags list within 100ms
 - **Popup Consistency**: Overlay processing matches popup window behavior
 - **User Feedback**: Clear success/error messages for all operations
 
-### 2. Performance Metrics `[IMMUTABLE-REQ-TAG-004]`
+### 2. Performance Metrics `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 - **Response Time**: Tag display immediate (< 100ms)
 - **Message Feedback**: Success/error messages within 500ms
 - **UI Responsiveness**: No blocking during operations
 - **Memory Usage**: Minimal increase in memory footprint
 
-### 3. Reliability Metrics `[IMMUTABLE-REQ-TAG-004]`
+### 3. Reliability Metrics `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 - **Error Rate**: Less than 1% of tag operations fail
 - **Recovery**: System handles all error conditions gracefully

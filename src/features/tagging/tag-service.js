@@ -25,7 +25,7 @@ export class TagService {
     this.cacheTimeout = 5 * 60 * 1000 // 5 minutes
     this.tagFrequencyKey = 'hoverboard_tag_frequency'
 
-    // [IMMUTABLE-REQ-TAG-003] - Shared memory key for user-driven recent tags
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Shared memory key for user-driven recent tags
     this.sharedMemoryKey = 'hoverboard_recent_tags_shared'
   }
 
@@ -50,23 +50,23 @@ export class TagService {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Get user-driven recent tags from shared memory
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get user-driven recent tags from shared memory
    * @returns {Promise<Object[]>} Array of recent tag objects sorted by lastUsed timestamp
    */
   async getUserRecentTags () {
     try {
-      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Getting user recent tags from shared memory')
+      debugLog('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Getting user recent tags from shared memory')
 
       const getConfig = () => this.configManager.getConfig()
       const resolveFromMemory = async (memory) => {
         if (memory && typeof memory.getRecentTagsForUi === 'function') {
           const rows = await memory.getRecentTagsForUi(getConfig)
-          debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (policy):', rows.length)
+          debugLog('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Retrieved recent tags (policy):', rows.length)
           return rows
         }
         if (memory && typeof memory.getRecentTags === 'function') {
           const recentTags = memory.getRecentTags()
-          debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (legacy getRecentTags):', recentTags.length)
+          debugLog('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Retrieved recent tags (legacy getRecentTags):', recentTags.length)
           return recentTags.sort((a, b) => {
             const dateA = new Date(a.lastUsed)
             const dateB = new Date(b.lastUsed)
@@ -82,7 +82,7 @@ export class TagService {
 
       const backgroundPage = await this.getBackgroundPage()
       if (!backgroundPage || !backgroundPage.recentTagsMemory) {
-        debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] No shared memory found, returning empty array')
+        debugLog('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] No shared memory found, returning empty array')
         return []
       }
 
@@ -91,13 +91,13 @@ export class TagService {
 
       return []
     } catch (error) {
-      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to get user recent tags:', error)
+      debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to get user recent tags:', error)
       return []
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Get direct access to shared memory (service worker context)
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get direct access to shared memory (service worker context)
    * @returns {Object|null} Shared memory object or null
    */
   getDirectSharedMemory () {
@@ -113,31 +113,31 @@ export class TagService {
 
       return null
     } catch (error) {
-      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Error getting direct shared memory:', error)
+      debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error getting direct shared memory:', error)
       return null
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Add tag to user recent list (current site only)
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Add tag to user recent list (current site only)
    * @param {string} tagName - Tag name to add
    * @param {string} currentSiteUrl - Current site URL for scope validation
    * @returns {Promise<boolean>} Success status
    */
   async addTagToUserRecentList (tagName, currentSiteUrl) {
     try {
-      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Adding tag to user recent list:', { tagName, currentSiteUrl })
+      debugLog('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Adding tag to user recent list:', { tagName, currentSiteUrl })
 
       // Sanitize tag name
       const sanitizedTag = this.sanitizeTag(tagName)
       if (!sanitizedTag) {
-        debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Invalid tag name:', tagName)
+        debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Invalid tag name:', tagName)
         return false
       }
 
       // Validate currentSiteUrl
       if (!currentSiteUrl || typeof currentSiteUrl !== 'string' || !/^https?:\/\//.test(currentSiteUrl)) {
-        debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Invalid or missing currentSiteUrl:', currentSiteUrl)
+        debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Invalid or missing currentSiteUrl:', currentSiteUrl)
         return false
       }
 
@@ -147,11 +147,11 @@ export class TagService {
         const success = directMemory.addTag(sanitizedTag, currentSiteUrl)
 
         if (success) {
-          debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Successfully added tag to user recent list via direct access')
+          debugLog('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Successfully added tag to user recent list via direct access')
           // Update tag frequency for suggestions
           await this.recordTagUsage(sanitizedTag)
         } else {
-          debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to add tag to user recent list via direct access')
+          debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to add tag to user recent list via direct access')
         }
 
         return !!success
@@ -160,7 +160,7 @@ export class TagService {
       // Fallback to background page access
       const backgroundPage = await this.getBackgroundPage()
       if (!backgroundPage || !backgroundPage.recentTagsMemory) {
-        debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Shared memory not available')
+        debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Shared memory not available')
         return false
       }
 
@@ -168,48 +168,48 @@ export class TagService {
       const success = backgroundPage.recentTagsMemory.addTag(sanitizedTag, currentSiteUrl)
 
       if (success) {
-        debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Successfully added tag to user recent list')
+        debugLog('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Successfully added tag to user recent list')
         // Update tag frequency for suggestions
         await this.recordTagUsage(sanitizedTag)
       } else {
-        debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to add tag to user recent list')
+        debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to add tag to user recent list')
       }
 
       return !!success
     } catch (error) {
-      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Error adding tag to user recent list:', error)
+      debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error adding tag to user recent list:', error)
       return false
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Get recent tags excluding current site
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get recent tags excluding current site
    * @param {string[]} currentTags - Tags currently assigned to the current site
    * @returns {Promise<Object[]>} Filtered array of recent tags
    */
   async getUserRecentTagsExcludingCurrent (currentTags = []) {
     try {
-      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Getting recent tags excluding current:', currentTags)
+      debugLog('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Getting recent tags excluding current:', currentTags)
 
       // Get all user recent tags from shared memory
       const allRecentTags = await this.getUserRecentTags()
 
-      // [IMMUTABLE-REQ-TAG-003] - Filter out tags already on current site (case-insensitive)
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Filter out tags already on current site (case-insensitive)
       const normalizedCurrentTags = currentTags.map(tag => tag.toLowerCase())
       const filteredTags = allRecentTags.filter(tag =>
         !normalizedCurrentTags.includes(tag.name.toLowerCase())
       )
 
-      debugLog('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Filtered recent tags:', filteredTags.length)
+      debugLog('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Filtered recent tags:', filteredTags.length)
       return filteredTags
     } catch (error) {
-      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Error getting filtered recent tags:', error)
+      debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error getting filtered recent tags:', error)
       return []
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Get background page for shared memory access
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get background page for shared memory access
    * @returns {Promise<Object|null>} Background page object or null
    */
   async getBackgroundPage () {
@@ -241,7 +241,7 @@ export class TagService {
         return null
       }
     } catch (error) {
-      debugError('TAG-SERVICE', '[IMMUTABLE-REQ-TAG-003] Failed to get background page:', error)
+      debugError('TAG-SERVICE', '[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to get background page:', error)
       return null
     }
   }
@@ -254,31 +254,31 @@ export class TagService {
   // [TEST-FIX-IMPL-2025-07-14] - Standardize getRecentTags return format
   async getRecentTags (options = {}) {
     try {
-      debugLog('TAG-SERVICE', '[TEST-FIX-STORAGE-001] Getting recent tags with enhanced storage integration')
+      debugLog('TAG-SERVICE', '[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Getting recent tags with enhanced storage integration')
 
-      // [TEST-FIX-STORAGE-001] - Try to get cached tags first
+      // [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Try to get cached tags first
       const cached = await this.getCachedTags()
 
       if (cached && this.isCacheValid(cached.timestamp)) {
-        debugLog('TAG-SERVICE', '[TEST-FIX-STORAGE-001] Returning cached tags:', cached.tags.length)
+        debugLog('TAG-SERVICE', '[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Returning cached tags:', cached.tags.length)
         // [TEST-FIX-IMPL-2025-07-14] - Ensure consistent object structure
         return this.processTagsForDisplay(cached.tags, options)
       }
 
-      // [TEST-FIX-STORAGE-001] - Fallback to user-driven recent tags from shared memory
+      // [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Fallback to user-driven recent tags from shared memory
       const userRecentTags = await this.getUserRecentTags()
 
       if (userRecentTags.length > 0) {
-        debugLog('TAG-SERVICE', '[TEST-FIX-STORAGE-001] Returning user recent tags:', userRecentTags.length)
+        debugLog('TAG-SERVICE', '[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Returning user recent tags:', userRecentTags.length)
         // [TEST-FIX-IMPL-2025-07-14] - Ensure consistent object structure
         return this.processTagsForDisplay(userRecentTags, options)
       }
 
-      // [TEST-FIX-STORAGE-001] - Final fallback to empty array
-      debugLog('TAG-SERVICE', '[TEST-FIX-STORAGE-001] No tags found, returning empty array')
+      // [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Final fallback to empty array
+      debugLog('TAG-SERVICE', '[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] No tags found, returning empty array')
       return []
     } catch (error) {
-      debugError('TAG-SERVICE', '[TEST-FIX-STORAGE-001] Failed to get recent tags:', error)
+      debugError('TAG-SERVICE', '[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Failed to get recent tags:', error)
       return []
     }
   }
@@ -294,7 +294,7 @@ export class TagService {
       const recentTags = await this.getRecentTags()
       const frequency = await this.getTagFrequency()
 
-      // [IMMUTABLE-REQ-TAG-003] - Filter tags that start with input (case-insensitive)
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Filter tags that start with input (case-insensitive)
       const filtered = recentTags
         .filter(tag => tag.name.toLowerCase().startsWith(input.toLowerCase()))
         .map(tag => ({
@@ -601,7 +601,7 @@ export class TagService {
    */
   isRecentTag (lastUsed) {
     if (!lastUsed) return false
-    // [TAG-SYNC-FIX-001] Ensure lastUsed is a Date object
+    // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Ensure lastUsed is a Date object
     let lastUsedDate = lastUsed
     if (!(lastUsed instanceof Date)) {
       if (typeof lastUsed === 'string' || typeof lastUsed === 'number') {
@@ -757,86 +757,86 @@ export class TagService {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags when added to record
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Add tag to recent tags when added to record
    * @param {string} tag - Tag to add to recent tags
    * @param {string} recordId - ID of the record the tag was added to
    * @returns {Promise<void>}
    */
   async addTagToRecent (tag, recordId) {
     try {
-      // [IMMUTABLE-REQ-TAG-001] - Sanitize tag input
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Sanitize tag input
       const sanitizedTag = this.sanitizeTag(tag)
       if (!sanitizedTag) {
-        console.warn('[IMMUTABLE-REQ-TAG-001] Invalid tag provided:', tag)
+        console.warn('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Invalid tag provided:', tag)
         return
       }
 
-      // [IMMUTABLE-REQ-TAG-001] - Get current recent tags
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get current recent tags
       const recentTags = await this.getRecentTags()
 
-      // [IMMUTABLE-REQ-TAG-001] - Check for duplicates in recent tags (case-insensitive)
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Check for duplicates in recent tags (case-insensitive)
       const isDuplicate = recentTags.some(existingTag =>
         existingTag.name.toLowerCase() === sanitizedTag.toLowerCase()
       )
 
       if (!isDuplicate) {
-        // [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags list
+        // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Add tag to recent tags list
         await this.recordTagUsage(sanitizedTag)
-        debugLog('IMMUTABLE-REQ-TAG-001', 'Tag added to recent tags:', sanitizedTag)
+        debugLog('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]', 'Tag added to recent tags:', sanitizedTag)
       } else {
-        debugLog('IMMUTABLE-REQ-TAG-001', 'Tag already exists in recent tags:', sanitizedTag)
+        debugLog('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]', 'Tag already exists in recent tags:', sanitizedTag)
       }
     } catch (error) {
-      debugError('IMMUTABLE-REQ-TAG-001', 'Failed to add tag to recent:', error)
+      debugError('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]', 'Failed to add tag to recent:', error)
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Get recent tags excluding current tab duplicates
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get recent tags excluding current tab duplicates
    * @param {string[]} currentTags - Tags currently displayed on the tab
    * @returns {Promise<Object[]>} Array of recent tags excluding current
    */
   async getRecentTagsExcludingCurrent (currentTags = []) {
     try {
-      // [IMMUTABLE-REQ-TAG-001] - Get all recent tags
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get all recent tags
       const allRecentTags = await this.getRecentTags()
 
-      // [IMMUTABLE-REQ-TAG-001] - Normalize current tags for comparison (case-insensitive)
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Normalize current tags for comparison (case-insensitive)
       const normalizedCurrentTags = currentTags.map(tag => {
         const sanitized = this.sanitizeTag(tag)
         return sanitized ? sanitized.toLowerCase() : null
       }).filter(tag => tag)
 
-      // [IMMUTABLE-REQ-TAG-001] - Filter out current tab duplicates (case-insensitive)
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Filter out current tab duplicates (case-insensitive)
       const filteredTags = allRecentTags.filter(tag =>
         !normalizedCurrentTags.includes(tag.name.toLowerCase())
       )
 
-      debugLog('IMMUTABLE-REQ-TAG-001', 'Recent tags excluding current:', filteredTags.length)
+      debugLog('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]', 'Recent tags excluding current:', filteredTags.length)
       return filteredTags
     } catch (error) {
-      debugError('IMMUTABLE-REQ-TAG-001', 'Failed to get recent tags excluding current:', error)
+      debugError('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]', 'Failed to get recent tags excluding current:', error)
       return []
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Handle tag addition during bookmark operations
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Handle tag addition during bookmark operations
    * @param {string} tag - Tag to add
    * @param {Object} bookmarkData - Bookmark data
    * @returns {Promise<void>}
    */
   async handleTagAddition (tag, bookmarkData) {
     try {
-      // [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Add tag to recent tags
       await this.addTagToRecent(tag, bookmarkData.url)
 
-      // [IMMUTABLE-REQ-TAG-001] - Update bookmark record if needed
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Update bookmark record if needed
       if (bookmarkData.url) {
-        debugLog('IMMUTABLE-REQ-TAG-001', 'Tag addition handled for bookmark:', bookmarkData.url)
+        debugLog('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]', 'Tag addition handled for bookmark:', bookmarkData.url)
       }
     } catch (error) {
-      debugError('IMMUTABLE-REQ-TAG-001', 'Failed to handle tag addition:', error)
+      debugError('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]', 'Failed to handle tag addition:', error)
     }
   }
 

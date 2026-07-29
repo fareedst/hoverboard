@@ -13,6 +13,8 @@
 | Preferred | Avoid in docs/code | Notes |
 |-----------|-------------------|-------|
 | **semantic token** | token string alone | Always `[REQ-*]`, `[ARCH-*]`, `[IMPL-*]`, or `[PROC-*]` in prose when naming the registry entry |
+| **numbered-token mapping** | legacy CFG/UI token map | Find/replace bible: [`../docs/numbered-token-mapping.md`](../docs/numbered-token-mapping.md); collapses numbered IDs onto TIED stacks; `SAFARI-*` out of scope |
+| **family collapse** | one token per legacy ID; explode mapping | Many numbered IDs share one REQ/ARCH/IMPL stack; see [`../docs/numbered-token-mapping.md`](../docs/numbered-token-mapping.md) § Family collapse rules |
 | **project YAML** | client YAML, root yaml | Writable REQ/ARCH/IMPL under `tied/` root (not `tied/methodology/`) |
 | **methodology YAML** | template yaml, inherited yaml | Read-only under `tied/methodology/`; refreshed by `copy_files.sh` |
 | **detail file** | sidecar yaml (for REQ/ARCH/IMPL index rows) | YAML under `tied/requirements/`, `tied/architecture-decisions/`, `tied/implementation-decisions/` |
@@ -104,8 +106,10 @@ Exact spellings for checklist and docs cross-reference:
 | AGENTS.md | Naming bridge |
 | copy_files.sh | Naming bridge |
 | detail file | Preferred terms |
+| family collapse | Preferred terms |
 | methodology YAML | Preferred terms |
 | module validation | Preferred terms |
+| numbered-token mapping | Preferred terms |
 | Observing AI principles! | Preferred terms |
 | PROC-AGENT_REQ_CHECKLIST | PROC catalog |
 | PROC-VOCABULARY_INDEX | PROC catalog |

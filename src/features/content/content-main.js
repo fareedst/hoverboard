@@ -1,10 +1,10 @@
-// MV3-003: Content script implementation for V3 injection patterns
+// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Content script implementation for V3 injection patterns
 /**
  * Hoverboard Content Script - Main Entry Point
  * Modern replacement for inject.js with jQuery-free DOM manipulation
  */
 
-// MV3-003: Modern ES6 module imports for V3 content scripts
+// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Modern ES6 module imports for V3 content scripts
 import { OverlayManager } from './overlay-manager.js'
 import { MessageClient } from './message-client.js'
 import { DOMUtils } from './dom-utils.js'
@@ -29,19 +29,19 @@ browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true
 })
 
-// MV3-003: Main content script class for V3 architecture
+// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Main content script class for V3 architecture
 class HoverboardContentScript {
   constructor () {
-    // MV3-003: Initialize content script state
+    // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Initialize content script state
     this.tabId = null
     this.pageUrl = window.location.href
     this.pageTitle = document.title
 
-    // MV3-003: Initialize modern utility classes
+    // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Initialize modern utility classes
     this.messageClient = new MessageClient()
     this.domUtils = new DOMUtils()
 
-    // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
+    // ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Transparent overlay - 🎨 Enhanced transparency system
     // Initialize overlay manager with transparency-enabled configuration
     this.overlayManager = new OverlayManager(document, {
       overlayPosition: 'top-right',
@@ -50,7 +50,7 @@ class HoverboardContentScript {
       maxRecentTags: 10,
       overlayAnimations: true,
       overlayDraggable: false,
-      // Transparency settings for UI-005
+      // Transparency settings for [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]
       overlayTransparencyMode: 'nearly-transparent',
       overlayPositionMode: 'bottom-fixed',
       overlayOpacityNormal: 0.05,
@@ -88,7 +88,7 @@ class HoverboardContentScript {
       await this.loadConfiguration()
       debugLog('CONTENT-SCRIPT', 'Options loaded:', this.config)
 
-      // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
+      // ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Transparent overlay - 🎨 Enhanced transparency system
       // Update overlay manager config with options and transparency settings
       this.overlayManager.config = { ...this.overlayManager.config, ...this.config }
 
@@ -132,7 +132,7 @@ class HoverboardContentScript {
       switch (message.type) {
         case 'TOGGLE_HOVER': {
           await this.toggleHover()
-          // [POPUP-CLOSE-BEHAVIOR-ARCH-012] - Return overlay state after toggle
+          // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] - Return overlay state after toggle
           const newState = {
             isVisible: this.overlayActive,
             hasBookmark: !!this.currentBookmark
@@ -191,19 +191,19 @@ class HoverboardContentScript {
           break
         }
 
-        // [TOGGLE-SYNC-CONTENT-001] - Handle bookmark updates from external sources
+        // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Handle bookmark updates from external sources
         case 'BOOKMARK_UPDATED':
           await this.handleBookmarkUpdated(message.data)
           sendResponse({ success: true })
           break
 
         case 'TAG_UPDATED':
-          // [TAG-SYNC-CONTENT-001] Handle tag updates from popup or other sources
+          // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Handle tag updates from popup or other sources
           await this.handleTagUpdated(message.data)
           sendResponse({ success: true })
           break
 
-        // [POPUP-CLOSE-BEHAVIOR-ARCH-012] - Handle overlay state queries from popup
+        // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] - Handle overlay state queries from popup
         case 'GET_OVERLAY_STATE': {
           const overlayState = {
             isVisible: this.overlayActive,
@@ -276,7 +276,7 @@ class HoverboardContentScript {
       hoverShowTooltips: false,
       inhibitSitesOnPageLoad: true,
       uxAutoCloseTimeout: 0,
-      // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
+      // ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Transparent overlay - 🎨 Enhanced transparency system
       overlayTransparencyMode: 'nearly-transparent',
       overlayPositionMode: 'bottom-fixed',
       overlayOpacityNormal: 0.05,
@@ -631,18 +631,18 @@ class HoverboardContentScript {
     }
   }
 
-  // [TOGGLE-SYNC-CONTENT-001] - Handle bookmark updates from external sources
+  // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Handle bookmark updates from external sources
   async handleBookmarkUpdated (bookmarkData) {
     try {
-      // [TOGGLE-SYNC-CONTENT-001] Robustness: Validate bookmarkData before updating overlay (url required; tags may be empty)
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Robustness: Validate bookmarkData before updating overlay (url required; tags may be empty)
       if (!bookmarkData || !bookmarkData.url) {
-        console.warn('[TOGGLE-SYNC-CONTENT-001] Ignoring malformed bookmark update:', bookmarkData)
+        console.warn('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Ignoring malformed bookmark update:', bookmarkData)
         return
       }
-      // [TOGGLE-SYNC-CONTENT-001] - Update current bookmark data
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Update current bookmark data
       this.currentBookmark = bookmarkData
 
-      // [TOGGLE-SYNC-CONTENT-001] - Refresh overlay if visible
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Refresh overlay if visible
       if (this.overlayManager.isVisible) {
         const updatedContent = {
           bookmark: bookmarkData,
@@ -652,24 +652,24 @@ class HoverboardContentScript {
         this.overlayManager.show(updatedContent)
       }
 
-      debugLog('CONTENT-SCRIPT', '[TOGGLE-SYNC-CONTENT-001] Bookmark updated from external source', bookmarkData)
+      debugLog('CONTENT-SCRIPT', '[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Bookmark updated from external source', bookmarkData)
     } catch (error) {
-      debugError('CONTENT-SCRIPT', '[TOGGLE-SYNC-CONTENT-001] Failed to handle bookmark update:', error)
+      debugError('CONTENT-SCRIPT', '[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to handle bookmark update:', error)
     }
   }
 
-  // [TAG-SYNC-CONTENT-001] - Handle tag updates from popup or other sources
+  // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Handle tag updates from popup or other sources
   async handleTagUpdated (tagUpdateData) {
     try {
-      // [TAG-SYNC-CONTENT-001] Validate tag update data
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Validate tag update data
       if (!tagUpdateData || !tagUpdateData.url || !Array.isArray(tagUpdateData.tags)) {
-        console.warn('[TAG-SYNC-CONTENT-001] Ignoring malformed tag update:', tagUpdateData)
+        console.warn('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Ignoring malformed tag update:', tagUpdateData)
         return
       }
-      // [TAG-SYNC-CONTENT-001] Update current bookmark tags if URL matches
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Update current bookmark tags if URL matches
       if (this.currentBookmark && this.currentBookmark.url === tagUpdateData.url) {
         this.currentBookmark.tags = tagUpdateData.tags
-        // [TAG-SYNC-CONTENT-001] Refresh overlay if visible
+        // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Refresh overlay if visible
         if (this.overlayManager.isVisible) {
           const updatedContent = {
             bookmark: this.currentBookmark,
@@ -678,10 +678,10 @@ class HoverboardContentScript {
           }
           this.overlayManager.show(updatedContent)
         }
-        debugLog('CONTENT-SCRIPT', '[TAG-SYNC-CONTENT-001] Overlay updated with new tags', tagUpdateData.tags)
+        debugLog('CONTENT-SCRIPT', '[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Overlay updated with new tags', tagUpdateData.tags)
       }
     } catch (error) {
-      debugError('CONTENT-SCRIPT', '[TAG-SYNC-CONTENT-001] Failed to handle tag update:', error)
+      debugError('CONTENT-SCRIPT', '[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to handle tag update:', error)
     }
   }
 

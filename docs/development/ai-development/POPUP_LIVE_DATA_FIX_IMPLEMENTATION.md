@@ -2,8 +2,8 @@
 
 **Date:** 2025-07-15  
 **Status:** ✅ **IMPLEMENTED** - All fixes applied and tested  
-**Semantic Tokens:** `[POPUP-LIVE-DATA-001]`, `[POPUP-DATA-FLOW-001]`, `[POPUP-REFRESH-001]`, `[POPUP-SYNC-001]`, `[POPUP-DEBUG-001]`  
-**Cross-References:** `[OVERLAY-DATA-DISPLAY-001]`, `[TOGGLE_SYNC_POPUP]`, `[SAFARI-EXT-SHIM-001]`, `[MESSAGE-HANDLER-001]`
+**Semantic Tokens:** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-LIVE-DATA-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-DATA-FLOW-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-SYNC-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-DEBUG-001)]`  
+**Cross-References:** `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`, `[TOGGLE_SYNC_POPUP]`, `[SAFARI-EXT-SHIM-001]`, `[[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] (was MESSAGE-HANDLER-001)]`
 
 ---
 
@@ -26,7 +26,7 @@ The popup window live data issue has been successfully resolved. The popup now d
 
 ## 🔧 Technical Implementation Details
 
-### **1. Enhanced Data Flow `[POPUP-DATA-FLOW-001]`**
+### **1. Enhanced Data Flow `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-DATA-FLOW-001)]`**
 
 **Fixed Issues:**
 - **Response Structure Handling**: Updated to handle both direct and nested response structures
@@ -53,14 +53,14 @@ const extractedData = bookmarkData?.data || bookmarkData;
 throw error;
 ```
 
-### **3. Enhanced Debug Logging `[POPUP-DEBUG-001]`**
+### **3. Enhanced Debug Logging `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-DEBUG-001)]`**
 
 **Fixed Issues:**
 - **Missing Debug Logs**: Added comprehensive debug logging for data flow validation
 - **Test Compatibility**: Fixed debug function mocking for test compatibility
 - **Error Diagnosis**: Improved error diagnosis capabilities
 
-### **4. Refresh Mechanism Enhancement `[POPUP-REFRESH-001]`**
+### **4. Refresh Mechanism Enhancement `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`**
 
 **Implemented Features:**
 - **Manual Refresh**: Users can manually refresh popup data
@@ -97,10 +97,10 @@ The following integration tests were skipped due to data flow issues that are no
 ## 📋 Compliance with Existing Requirements
 
 ### **Semantic Token Compliance**
-- ✅ `[POPUP-DATA-FLOW-001]`: Enhanced data flow with proper validation
-- ✅ `[POPUP-REFRESH-001]`: Refresh mechanism with manual and auto-refresh
-- ✅ `[POPUP-SYNC-001]`: Cross-component synchronization validation
-- ✅ `[POPUP-DEBUG-001]`: Comprehensive debug logging
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-DATA-FLOW-001)]`: Enhanced data flow with proper validation
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`: Refresh mechanism with manual and auto-refresh
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-SYNC-001)]`: Cross-component synchronization validation
+- ✅ `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-DEBUG-001)]`: Comprehensive debug logging
 - ✅ `[TOGGLE_SYNC_POPUP]`: Maintains existing toggle synchronization
 
 ### **Architectural Decisions**
@@ -112,8 +112,8 @@ The following integration tests were skipped due to data flow issues that are no
 ### **Platform/Language Specific Decisions**
 - ✅ **Chrome Extension API**: Proper use of `chrome.runtime.sendMessage` and error handling
 - ✅ **Safari Extension Shim**: Maintains compatibility with `[SAFARI-EXT-SHIM-001]`
-- ✅ **Message Handler Integration**: Coordinates with `[MESSAGE-HANDLER-001]` requirements
-- ✅ **Overlay Data Display**: Aligns with `[OVERLAY-DATA-DISPLAY-001]` patterns
+- ✅ **Message Handler Integration**: Coordinates with `[[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] (was MESSAGE-HANDLER-001)]` requirements
+- ✅ **Overlay Data Display**: Aligns with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]` patterns
 
 ---
 

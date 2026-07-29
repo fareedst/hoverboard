@@ -12,7 +12,7 @@ IMPL-BOOKMARK_STATE_SYNC:
     - "ARCH-BOOKMARK_STATE_SYNC"
     - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.yaml"
-  essence_pseudocode: "# [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION]\n# BOOKMARK_UPDATED broadcast after overlay persist; popup and badge refresh so state is consistent.\n\n# Contract: input = user actions and processMessage result; output = consistent state across overlay, popup, badge.\nINPUT: user actions (overlay toggle, tag save/delete, bookmark save); processMessage result\nOUTPUT: consistent bookmark state across overlay, popup, badge\nDATA: overlay state, popup state, badge state; BOOKMARK_UPDATED broadcast\n\n# Send message to backend; on success broadcast BOOKMARK_UPDATED.\nON overlay toggle (saveBookmark / saveTag / deleteTag):\n  SEND message to backend; await processMessage result\n  BROADCAST BOOKMARK_UPDATED (so other surfaces can refresh)\n\n# Re-fetch bookmark state for current URL.\nPopupController (listener for BOOKMARK_UPDATED):\n  ON BOOKMARK_UPDATED: refresh popup data (re-fetch bookmark state for current URL)\n\n# On saveTag/deleteTag/saveBookmark result compare tab URL state and update icon/count.\nBadge manager:\n  ON message result (saveTag | deleteTag | saveBookmark): compare current tab URL state with stored state; UPDATE badge icon/count\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_STATE_SYNC-pseudocode.md"
   implementation_approach:
     details:
       - "Badge compares states"
@@ -26,8 +26,8 @@ IMPL-BOOKMARK_STATE_SYNC:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Bookmark State Synchronization Implementation"
   rationale:
     benefits:

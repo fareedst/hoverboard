@@ -13,7 +13,7 @@ IMPL-SESSION_TAGS:
   cross_references:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
-  essence_pseudocode: "# [IMPL-SESSION_TAGS] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP]\n# In-session tags (lowercase) for auto-apply when AI returns; getSessionTags, recordSessionTags; session or in-memory.\n# Contract: recordSessionTags(tags) or getSessionTags(); array of lowercase tags or void.\nINPUT: recordSessionTags(tags: string[]); getSessionTags(): no args\nOUTPUT: getSessionTags() -> string[] (lowercase); recordSessionTags -> void\nDATA: storage key hoverboard_session_tags; use chrome.storage.session or in-memory Map in SW\n\n# Read from session storage or in-memory set; return lowercase array.\ngetSessionTags():\n  IF chrome.storage.session:\n    result = await chrome.storage.session.get('hoverboard_session_tags')\n    RETURN (result.hoverboard_session_tags ?? []).map(t => t.toLowerCase())\n  RETURN inMemorySet ? Array.from(inMemorySet) : []\n\n# Merge tags (lowercase) into set; persist to session storage or in-memory.\nrecordSessionTags(tags):\n  current = await getSessionTags()\n  set = new Set(current.map(t => t.toLowerCase()))\n  FOR tag IN tags: set.add(String(tag).trim().toLowerCase())\n  arr = Array.from(set)\n  IF chrome.storage.session: await chrome.storage.session.set({ hoverboard_session_tags: arr })\n  ELSE: inMemorySet = set\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SESSION_TAGS-pseudocode.md"
   implementation_approach:
     details:
       - "getSessionTags returns array of lowercase tags for current session"
@@ -26,8 +26,8 @@ IMPL-SESSION_TAGS:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Session Tags for Auto-Apply"
   rationale:
     benefits:

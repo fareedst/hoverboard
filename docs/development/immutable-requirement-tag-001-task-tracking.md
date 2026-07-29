@@ -1,6 +1,6 @@
-# Task Tracking: Immutable Requirement TAG-001 Implementation
+# Task Tracking: Immutable Requirement [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was TAG-001) Implementation
 
-**Requirement**: `[IMMUTABLE-REQ-TAG-001]` - When a tag is added to a record, it shall be added to the Recent Tags list (but not displayed on the current tab if it is a duplicate of an existing tag)
+**Requirement**: `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]` - When a tag is added to a record, it shall be added to the Recent Tags list (but not displayed on the current tab if it is a duplicate of an existing tag)
 
 **Status**: Implementation Started  
 **Start Date**: [Current Date]  
@@ -8,25 +8,25 @@
 
 ## 📋 Implementation Progress Overview
 
-### Phase 1: Core Tag Service Enhancement `[IMMUTABLE-REQ-TAG-001]`
+### Phase 1: Core Tag Service Enhancement `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 - [ ] **Task 1.1**: Implement `addTagToRecent()` method in TagService
 - [ ] **Task 1.2**: Implement `getRecentTagsExcludingCurrent()` method
 - [ ] **Task 1.3**: Add unit tests for core functionality
 - [ ] **Task 1.4**: Update storage integration
 
-### Phase 2: Pinboard Service Integration `[IMMUTABLE-REQ-TAG-001]`
+### Phase 2: Pinboard Service Integration `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 - [ ] **Task 2.1**: Enhance `addBookmark()` method with tag tracking
 - [ ] **Task 2.2**: Enhance `editBookmark()` method with tag tracking
 - [ ] **Task 2.3**: Add integration tests
 - [ ] **Task 2.4**: Update API error handling
 
-### Phase 3: UI Component Updates `[IMMUTABLE-REQ-TAG-001]`
+### Phase 3: UI Component Updates `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 - [ ] **Task 3.1**: Update popup tag management
 - [ ] **Task 3.2**: Update overlay tag management
 - [ ] **Task 3.3**: Add E2E tests
 - [ ] **Task 3.4**: Update UI event handlers
 
-### Phase 4: Testing and Validation `[IMMUTABLE-REQ-TAG-001]`
+### Phase 4: Testing and Validation `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 - [ ] **Task 4.1**: Complete unit test suite
 - [ ] **Task 4.2**: Complete integration test suite
 - [ ] **Task 4.3**: Complete E2E test suite
@@ -35,9 +35,9 @@
 
 ## 🔄 Detailed Task Breakdown
 
-### Phase 1: Core Tag Service Enhancement `[IMMUTABLE-REQ-TAG-001]`
+### Phase 1: Core Tag Service Enhancement `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Task 1.1: Implement `addTagToRecent()` method in TagService `[IMMUTABLE-REQ-TAG-001]`
+#### Task 1.1: Implement `addTagToRecent()` method in TagService `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: High  
 **Estimated Time**: 2 hours  
@@ -52,11 +52,11 @@
 - [x] **1.1.6**: Add logging for debugging
 
 **Files to Modify**:
-- `src/features/tagging/tag-service.js` `[IMMUTABLE-REQ-TAG-001]`
+- `src/features/tagging/tag-service.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: None
 
-#### Task 1.2: Implement `getRecentTagsExcludingCurrent()` method `[IMMUTABLE-REQ-TAG-001]`
+#### Task 1.2: Implement `getRecentTagsExcludingCurrent()` method `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: High  
 **Estimated Time**: 1.5 hours  
@@ -70,11 +70,11 @@
 - [x] **1.2.5**: Add caching for performance
 
 **Files to Modify**:
-- `src/features/tagging/tag-service.js` `[IMMUTABLE-REQ-TAG-001]`
+- `src/features/tagging/tag-service.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Task 1.1
 
-#### Task 1.3: Add unit tests for core functionality `[IMMUTABLE-REQ-TAG-001]`
+#### Task 1.3: Add unit tests for core functionality `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: High  
 **Estimated Time**: 3 hours  
@@ -89,11 +89,11 @@
 - [x] **1.3.6**: Test edge cases
 
 **Files to Create**:
-- `tests/unit/tag-recent-tracking.test.js` `[IMMUTABLE-REQ-TAG-001]`
+- `tests/unit/tag-recent-tracking.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Tasks 1.1, 1.2
 
-#### Task 1.4: Update storage integration `[IMMUTABLE-REQ-TAG-001]`
+#### Task 1.4: Update storage integration `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: Medium  
 **Estimated Time**: 1 hour  
@@ -106,13 +106,13 @@
 - [x] **1.4.4**: Add migration support
 
 **Files to Modify**:
-- `src/config/config-manager.js` `[IMMUTABLE-REQ-TAG-001]`
+- `src/config/config-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Tasks 1.1, 1.2
 
-### Phase 2: Pinboard Service Integration `[IMMUTABLE-REQ-TAG-001]`
+### Phase 2: Pinboard Service Integration `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Task 2.1: Enhance `addBookmark()` method with tag tracking `[IMMUTABLE-REQ-TAG-001]`
+#### Task 2.1: Enhance `addBookmark()` method with tag tracking `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: High  
 **Estimated Time**: 2 hours  
@@ -126,11 +126,11 @@
 - [x] **2.1.5**: Add logging for tag tracking
 
 **Files to Modify**:
-- `src/features/pinboard/pinboard-service.js` `[IMMUTABLE-REQ-TAG-001]`
+- `src/features/pinboard/pinboard-service.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Phase 1 completion
 
-#### Task 2.2: Enhance `editBookmark()` method with tag tracking `[IMMUTABLE-REQ-TAG-001]`
+#### Task 2.2: Enhance `editBookmark()` method with tag tracking `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: High  
 **Estimated Time**: 2 hours  
@@ -144,11 +144,11 @@
 - [x] **2.2.5**: Add error handling
 
 **Files to Modify**:
-- `src/features/pinboard/pinboard-service.js` `[IMMUTABLE-REQ-TAG-001]`
+- `src/features/pinboard/pinboard-service.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Task 2.1
 
-#### Task 2.3: Add integration tests `[IMMUTABLE-REQ-TAG-001]`
+#### Task 2.3: Add integration tests `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: Medium  
 **Estimated Time**: 2.5 hours  
@@ -162,11 +162,11 @@
 - [x] **2.3.5**: Test error scenarios
 
 **Files to Create**:
-- `tests/integration/tag-integration.test.js` `[IMMUTABLE-REQ-TAG-001]`
+- `tests/integration/tag-integration.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Tasks 2.1, 2.2
 
-#### Task 2.4: Update API error handling `[IMMUTABLE-REQ-TAG-001]`
+#### Task 2.4: Update API error handling `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: Medium  
 **Estimated Time**: 1 hour  
@@ -179,13 +179,13 @@
 - [x] **2.4.4**: Add retry logic for tag operations
 
 **Files to Modify**:
-- `src/features/pinboard/pinboard-service.js` `[IMMUTABLE-REQ-TAG-001]`
+- `src/features/pinboard/pinboard-service.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Tasks 2.1, 2.2
 
-### Phase 3: UI Component Updates `[IMMUTABLE-REQ-TAG-001]`
+### Phase 3: UI Component Updates `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Task 3.1: Update popup tag management `[IMMUTABLE-REQ-TAG-001]`
+#### Task 3.1: Update popup tag management `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: High  
 **Estimated Time**: 3 hours  
@@ -200,13 +200,13 @@
 - [x] **3.1.6**: Add tag removal functionality
 
 **Files to Modify**:
-- `src/ui/popup/popup.js` `[IMMUTABLE-REQ-TAG-001]`
-- `src/ui/popup/popup.html` `[IMMUTABLE-REQ-TAG-001]`
-- `src/ui/popup/popup.css` `[IMMUTABLE-REQ-TAG-001]`
+- `src/ui/popup/popup.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
+- `src/ui/popup/popup.html` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
+- `src/ui/popup/popup.css` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Phase 2 completion
 
-#### Task 3.2: Update overlay tag management `[IMMUTABLE-REQ-TAG-001]`
+#### Task 3.2: Update overlay tag management `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: High  
 **Estimated Time**: 3 hours  
@@ -221,12 +221,12 @@
 - [x] **3.2.6**: Add tag removal functionality
 
 **Files to Modify**:
-- `src/features/content/overlay-manager.js` `[IMMUTABLE-REQ-TAG-001]`
-- `src/features/content/overlay-styles.css` `[IMMUTABLE-REQ-TAG-001]`
+- `src/features/content/overlay-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
+- `src/features/content/overlay-styles.css` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Task 3.1
 
-#### Task 3.3: Add E2E tests `[IMMUTABLE-REQ-TAG-001]`
+#### Task 3.3: Add E2E tests `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: Medium  
 **Estimated Time**: 2 hours  
@@ -240,11 +240,11 @@
 - [x] **3.3.5**: Test duplicate prevention
 
 **Files to Create**:
-- `tests/e2e/tag-e2e.test.js` `[IMMUTABLE-REQ-TAG-001]`
+- `tests/e2e/tag-e2e.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Tasks 3.1, 3.2
 
-#### Task 3.4: Update UI event handlers `[IMMUTABLE-REQ-TAG-001]`
+#### Task 3.4: Update UI event handlers `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: Medium  
 **Estimated Time**: 1.5 hours  
@@ -257,14 +257,14 @@
 - [x] **3.4.4**: Add accessibility support
 
 **Files to Modify**:
-- `src/ui/popup/popup.js` `[IMMUTABLE-REQ-TAG-001]`
-- `src/features/content/overlay-manager.js` `[IMMUTABLE-REQ-TAG-001]`
+- `src/ui/popup/popup.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
+- `src/features/content/overlay-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: Tasks 3.1, 3.2
 
-### Phase 4: Testing and Validation `[IMMUTABLE-REQ-TAG-001]`
+### Phase 4: Testing and Validation `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Task 4.1: Complete unit test suite `[IMMUTABLE-REQ-TAG-001]`
+#### Task 4.1: Complete unit test suite `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: High  
 **Estimated Time**: 1 hour  
@@ -278,7 +278,7 @@
 
 **Dependencies**: All previous phases
 
-#### Task 4.2: Complete integration test suite `[IMMUTABLE-REQ-TAG-001]`
+#### Task 4.2: Complete integration test suite `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: Medium  
 **Estimated Time**: 1 hour  
@@ -292,7 +292,7 @@
 
 **Dependencies**: All previous phases
 
-#### Task 4.3: Complete E2E test suite `[IMMUTABLE-REQ-TAG-001]`
+#### Task 4.3: Complete E2E test suite `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: Medium  
 **Estimated Time**: 1 hour  
@@ -306,7 +306,7 @@
 
 **Dependencies**: All previous phases
 
-#### Task 4.4: Performance testing `[IMMUTABLE-REQ-TAG-001]`
+#### Task 4.4: Performance testing `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: Low  
 **Estimated Time**: 1 hour  
@@ -319,11 +319,11 @@
 - [x] **4.4.4**: Test memory usage
 
 **Files to Create**:
-- `tests/performance/tag-performance.test.js` `[IMMUTABLE-REQ-TAG-001]`
+- `tests/performance/tag-performance.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: All previous phases
 
-#### Task 4.5: User acceptance testing `[IMMUTABLE-REQ-TAG-001]`
+#### Task 4.5: User acceptance testing `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 **Status**: ✅ Completed  
 **Priority**: Low  
 **Estimated Time**: 2 hours  
@@ -336,7 +336,7 @@
 - [x] **4.5.4**: Document findings
 
 **Files to Create**:
-- `tests/uat/tag-uat.test.js` `[IMMUTABLE-REQ-TAG-001]`
+- `tests/uat/tag-uat.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Dependencies**: All previous phases
 
@@ -367,12 +367,12 @@
 - **Next Task**: Task 3.1.1 - Update popup controller for tag handling
 
 ### Files Modified So Far
-- `src/features/tagging/tag-service.js` `[IMMUTABLE-REQ-TAG-001]` - Added required methods
-- `src/config/config-manager.js` `[IMMUTABLE-REQ-TAG-001]` - Added tag storage functionality
-- `tests/unit/tag-recent-tracking.test.js` `[IMMUTABLE-REQ-TAG-001]` - Created comprehensive unit tests
-- `src/features/pinboard/pinboard-service.js` `[IMMUTABLE-REQ-TAG-001]` - Enhanced with tag tracking
-- `src/core/message-handler.js` `[IMMUTABLE-REQ-TAG-001]` - Enhanced with tag tracking
-- `tests/integration/tag-integration.test.js` `[IMMUTABLE-REQ-TAG-001]` - Created integration tests
+- `src/features/tagging/tag-service.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]` - Added required methods
+- `src/config/config-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]` - Added tag storage functionality
+- `tests/unit/tag-recent-tracking.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]` - Created comprehensive unit tests
+- `src/features/pinboard/pinboard-service.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]` - Enhanced with tag tracking
+- `src/core/message-handler.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]` - Enhanced with tag tracking
+- `tests/integration/tag-integration.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]` - Created integration tests
 
 ### Key Decisions Made
 - All architectural decisions documented in `immutable-requirement-tag-001-architectural-decisions.md`
@@ -386,7 +386,7 @@
 ## 📝 Notes and Observations
 
 ### Implementation Notes
-- All code must be marked with `[IMMUTABLE-REQ-TAG-001]` token
+- All code must be marked with `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]` token
 - Follow architectural decisions document for implementation
 - Maintain backward compatibility
 - Ensure proper error handling
@@ -402,5 +402,5 @@
 
 **Document Version**: 1.0  
 **Last Updated**: [Current Date]  
-**Requirement Token**: `[IMMUTABLE-REQ-TAG-001]`  
+**Requirement Token**: `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`  
 **Status**: Task Tracking Active - Implementation Started 

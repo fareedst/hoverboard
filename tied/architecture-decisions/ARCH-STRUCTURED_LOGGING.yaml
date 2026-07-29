@@ -1,13 +1,13 @@
 # [ARCH-STRUCTURED_LOGGING] Structured logging with context and levels
-# Migrated from LOG-001..003
+# Migrated from [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001)..003
 ARCH-STRUCTURED_LOGGING:
   cross_references:
     - "REQ-STRUCTURED_LOGGING"
   implementation_approach:
     details:
-      - "LOG-001 → IMPL-LOGGER_CONTEXT_LEVELS (context, levels, formatMessage, debug/info/warn/error)"
-      - "LOG-002 → IMPL-LOG_LEVEL_CONFIG (getLogLevel from process.env.NODE_ENV)"
-      - "LOG-003 → IMPL-LOGGER_LEGACY (log(), noisy export)"
+      - "[IMPL-LOG_LEVEL_CONFIG] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-002) → IMPL-LOG_LEVEL_CONFIG (getLogLevel from process.env.NODE_ENV)"
+      - "[IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001) → IMPL-LOGGER_CONTEXT_LEVELS (context, levels, formatMessage, debug/info/warn/error)"
+      - "[IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-003) → IMPL-LOGGER_LEGACY (log(), noisy export)"
     summary: "src/shared/logger.js — Logger class with context, getLogLevel(), shouldLog(), formatMessage(), debug/info/warn/error; createLogger(context); legacy log(context, ...args) and noisy"
   metadata:
     created:

@@ -4,7 +4,7 @@
 
 **Date:** 2025-07-15  
 **Semantic Tokens:** [TOGGLE_SYNC_ARCH_DECISION], [TOGGLE_SYNC_MESSAGE], [TOGGLE_SYNC_SITE_RECORD], [TOGGLE_SYNC_POPUP], [TOGGLE_SYNC_OVERLAY], [TOGGLE_SYNC_SPEC]
-**Cross-References:** [OVERLAY-DATA-DISPLAY-001], [OVERLAY-DATA-FIX-001], [SAFARI-EXT-SHIM-001]
+**Cross-References:** [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-FIX-001)], [SAFARI-EXT-SHIM-001]
 
 ---
 
@@ -49,11 +49,11 @@
   **[TOGGLE_SYNC_SPEC]**
 
 ### 6. Overlay Data Display Coordination
-**[OVERLAY-DATA-DISPLAY-001]** - Master semantic token for overlay data display functionality
+**[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]** - Master semantic token for overlay data display functionality
 
 #### Data Display Synchronization
 - **Requirement**: Overlay must display same bookmark data as popup and badge
-- **Implementation**: Fixed content script response handling **[OVERLAY-DATA-FIX-001]**
+- **Implementation**: Fixed content script response handling **[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-FIX-001)]**
 - **Validation**: Enhanced debugging ensures data structure consistency
 - **Cross-Reference**: Coordinates with toggle synchronization for consistent state management
 

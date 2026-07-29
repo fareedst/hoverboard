@@ -13,7 +13,7 @@ IMPL-DEV_COMMAND_INSPECTION:
     - "REQ-UI_INSPECTION"
     - "REQ-URL_TAGS_DISPLAY"
   detail_file: "implementation-decisions/IMPL-DEV_COMMAND_INSPECTION.yaml"
-  essence_pseudocode: "# [IMPL-DEV_COMMAND_INSPECTION] [REQ-UI_INSPECTION] [REQ-URL_TAGS_DISPLAY] [REQ-PER_BOOKMARK_STORAGE_BACKEND]\n# DEV_COMMAND routing for current bookmark, tags, backend, and storage snapshot (debug-gated).\n# Contract: message shape, returned data, and handler locations.\nINPUT: DEV_COMMAND message with subcommand (getCurrentBookmark | getTagsForUrl | getStorageBackendForUrl | getStorageSnapshot); optional url/context\nOUTPUT: current bookmark for URL, tags for URL, backend for URL, or storage key list (SW only); gated by DEBUG_HOVERBOARD_UI\nDATA: MessageHandler.processDevCommand; service worker getStorageSnapshot\n\n# Dispatch by subcommand and return bookmark/tags/backend/snapshot.\nprocessDevCommand(cmd):\n  IF subcommand getCurrentBookmark: RETURN bookmarkRouter.getBookmarkForUrl(url) or current tab url\n  IF getTagsForUrl: RETURN tags for url\n  IF getStorageBackendForUrl: RETURN storageIndex.getBackendForUrl(url)\n  IF getStorageSnapshot (SW): RETURN list of storage key names only\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-DEV_COMMAND_INSPECTION-pseudocode.md"
   implementation_approach:
     summary: "DEV_COMMAND subcommands getCurrentBookmark, getTagsForUrl, getStorageBackendForUrl (message-handler); getStorageSnapshot (service worker, returns key names only)"
   metadata:
@@ -22,8 +22,8 @@ IMPL-DEV_COMMAND_INSPECTION:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "DEV_COMMAND storage and router inspection"
   rationale:
     benefits:

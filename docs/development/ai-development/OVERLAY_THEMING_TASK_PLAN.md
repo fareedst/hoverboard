@@ -47,7 +47,7 @@
 
 ## 📋 Requirements Specification
 
-### **REQ-THEME-001: Complete Theme Integration**
+### **[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-THEME-001): Complete Theme Integration**
 - **Priority**: 🔺 HIGH
 - **Description**: All overlay elements must respond to theme changes (`light-on-dark` vs `dark-on-light`)
 - **Acceptance Criteria**:
@@ -56,7 +56,7 @@
   - Button and input styling matches theme
   - No hardcoded colors remain in overlay elements
 
-### **REQ-THEME-002: Transparency Awareness**
+### **[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-THEME-002): Transparency Awareness**
 - **Priority**: 🔺 HIGH  
 - **Description**: Elements must be visible and usable under different transparency/opacity settings
 - **Acceptance Criteria**:
@@ -65,7 +65,7 @@
   - Contrast ratios meet accessibility standards
   - Backgrounds adapt to transparency mode
 
-### **REQ-THEME-003: Dynamic Style Application**
+### **[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-THEME-003): Dynamic Style Application**
 - **Priority**: 🔶 MEDIUM
 - **Description**: Style changes apply immediately without requiring overlay refresh
 - **Acceptance Criteria**:
@@ -74,7 +74,7 @@
   - No visual glitches during theme transitions
   - Smooth visual feedback for user interactions
 
-### **REQ-THEME-004: Accessibility Compliance**
+### **[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was REQ-THEME-004): Accessibility Compliance**
 - **Priority**: 🔺 HIGH
 - **Description**: Themed overlay must maintain accessibility standards
 - **Acceptance Criteria**:

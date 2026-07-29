@@ -9,7 +9,7 @@
  * [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] DOM utilities for extension content scripts
  */
 
-// [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-EXTENSION_IDENTITY]
+// [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER]
 // Chrome-first browser API re-export from safari-shim.js (historical filename; browser API shim).
 // Prefer import { browser } from './utils' (or safari-shim) for Promise-friendly messaging.
 

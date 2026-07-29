@@ -1,4 +1,4 @@
-# IMMUTABLE-REQ-TAG-002: Implementation Plan
+# [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002): Implementation Plan
 
 ## Overview
 This document outlines the detailed implementation plan for the tab search feature, including code changes, tests, and architectural decisions specific to the Chrome extension platform.
@@ -10,7 +10,7 @@ This document outlines the detailed implementation plan for the tab search featu
 
 ```javascript
 /**
- * [IMMUTABLE-REQ-TAG-002] TabSearchService - Core tab search functionality
+ * [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] TabSearchService - Core tab search functionality
  * Handles tab discovery, filtering, and navigation logic
  */
 
@@ -182,7 +182,7 @@ export class TabSearchService {
 **File**: `src/core/message-handler.js`
 
 ```javascript
-// [IMMUTABLE-REQ-TAG-002] Add new message types for tab search
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Add new message types for tab search
 export const MESSAGE_TYPES = {
   // ... existing types ...
   
@@ -197,14 +197,14 @@ export const MESSAGE_TYPES = {
 **File**: `src/core/message-handler.js`
 
 ```javascript
-// [IMMUTABLE-REQ-TAG-002] Import TabSearchService
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Import TabSearchService
 import { TabSearchService } from '../features/search/tab-search-service.js'
 
 export class MessageHandler {
   constructor(pinboardService = null, tagService = null) {
     // ... existing initialization ...
     
-    // [IMMUTABLE-REQ-TAG-002] Initialize tab search service
+    // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Initialize tab search service
     this.tabSearchService = new TabSearchService()
   }
 
@@ -215,7 +215,7 @@ export class MessageHandler {
     switch (type) {
       // ... existing cases ...
       
-      // [IMMUTABLE-REQ-TAG-002] Handle tab search messages
+      // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Handle tab search messages
       case MESSAGE_TYPES.SEARCH_TABS:
         return this.handleSearchTabs(data, tabId)
         
@@ -287,7 +287,7 @@ export class MessageHandler {
 **File**: `src/ui/popup/popup.html`
 
 ```html
-<!-- [IMMUTABLE-REQ-TAG-002] Update search section for tab search -->
+<!-- [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Update search section for tab search -->
 <section class="search-section">
   <h3 class="section-title">Search</h3>
   <div class="search-container">
@@ -314,7 +314,7 @@ export class MessageHandler {
 **File**: `src/ui/popup/PopupController.js`
 
 ```javascript
-// [IMMUTABLE-REQ-TAG-002] Add tab search methods to PopupController
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Add tab search methods to PopupController
 
 export class PopupController {
   // ... existing methods ...
@@ -372,7 +372,7 @@ export class PopupController {
 **File**: `src/ui/popup/UIManager.js`
 
 ```javascript
-// [IMMUTABLE-REQ-TAG-002] Add tab search UI methods to UIManager
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Add tab search UI methods to UIManager
 
 export class UIManager {
   // ... existing methods ...
@@ -434,7 +434,7 @@ export class UIManager {
 **File**: `src/features/content/overlay-manager.js`
 
 ```javascript
-// [IMMUTABLE-REQ-TAG-002] Add tab search to overlay
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Add tab search to overlay
 
 class OverlayManager {
   // ... existing methods ...
@@ -511,7 +511,7 @@ class OverlayManager {
 
 ```javascript
 /**
- * [IMMUTABLE-REQ-TAG-002] Unit tests for TabSearchService
+ * [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Unit tests for TabSearchService
  */
 
 import { TabSearchService } from '../../src/features/search/tab-search-service.js'
@@ -646,7 +646,7 @@ describe('TabSearchService', () => {
 
 ```javascript
 /**
- * [IMMUTABLE-REQ-TAG-002] Integration tests for tab search
+ * [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Integration tests for tab search
  */
 
 describe('Tab Search Integration', () => {
@@ -728,7 +728,7 @@ describe('Tab Search Integration', () => {
 **File**: `src/ui/popup/popup.css`
 
 ```css
-/* [IMMUTABLE-REQ-TAG-002] Tab search styles */
+/* [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-002)] Tab search styles */
 
 .tab-search-container {
   margin-bottom: 12px;

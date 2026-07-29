@@ -3,7 +3,7 @@
 
 **Date**: 2025-07-14  
 **Status**: 🚨 CRITICAL - Test timeout failure  
-**Feature ID**: TEST-FIX-001  
+**Feature ID**: [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001)  
 **Priority**: ⭐ CRITICAL  
 
 > **🤖 AI ASSISTANT REQUIREMENTS**: This plan follows the AI-First Development Framework. All implementations must include semantic tokens and follow the established protocols.
@@ -58,16 +58,16 @@ await popupController.handleAddTag('new-tag') // ❌ Called after promise resolv
 - ✅ **Security**: No security implications for test fixes
 
 ### 📋 AI-First Development Framework Compliance
-- ✅ **Feature Tracking**: TEST-FIX-001 feature ID established
+- ✅ **Feature Tracking**: [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001) feature ID established
 - ✅ **Implementation Tokens**: All code changes will include semantic tokens
 - ✅ **Documentation Cascade**: This plan serves as comprehensive documentation
 - ✅ **Validation Requirements**: Full test suite must pass after fix
 
 ### 🎯 Semantic Token Strategy
 ```javascript
-// TEST-FIX-001: Test async handling fix - 🧪 Integration test repair
-// TEST-FIX-002: Mock structure improvement - 🔧 Test infrastructure enhancement
-// TEST-FIX-003: Error handling enhancement - 🛡️ Test reliability improvement
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Test async handling fix - 🧪 Integration test repair
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-002): Mock structure improvement - 🔧 Test infrastructure enhancement
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-003): Error handling enhancement - 🛡️ Test reliability improvement
 ```
 
 ---
@@ -80,7 +80,7 @@ await popupController.handleAddTag('new-tag') // ❌ Called after promise resolv
 
 #### **Task 1.1: Fix Promise Structure**
 ```javascript
-// TEST-FIX-001: Test async handling fix - 🧪 Integration test repair
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001): Test async handling fix - 🧪 Integration test repair
 test('should add tag through popup and persist to storage', async () => {
   // Set up stateful mock WITHOUT premature resolution
   let currentTags = ['existing-tag']
@@ -143,7 +143,7 @@ test('should add tag through popup and persist to storage', async () => {
 
 #### **Task 1.2: Add Error Handling**
 ```javascript
-// TEST-FIX-003: Error handling enhancement - 🛡️ Test reliability improvement
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-003): Error handling enhancement - 🛡️ Test reliability improvement
 test('should handle API failures gracefully', async () => {
   chrome.runtime.sendMessage.mockImplementation((message, callback) => {
     // Simulate API failure
@@ -164,7 +164,7 @@ test('should handle API failures gracefully', async () => {
 
 #### **Task 2.1: Create Reusable Mock Factory**
 ```javascript
-// TEST-FIX-002: Mock structure improvement - 🔧 Test infrastructure enhancement
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-002): Mock structure improvement - 🔧 Test infrastructure enhancement
 class TagTestMockFactory {
   constructor() {
     this.currentTags = ['existing-tag']
@@ -215,7 +215,7 @@ class TagTestMockFactory {
 
 #### **Task 3.1: Add Edge Case Tests**
 ```javascript
-// TEST-FIX-004: Edge case coverage - 🧪 Comprehensive test validation
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-004): Edge case coverage - 🧪 Comprehensive test validation
 test('should handle empty tag input gracefully', async () => {
   await popupController.handleAddTag('')
   
@@ -271,15 +271,15 @@ test('should normalize tag input (trim whitespace)', async () => {
 
 ### **Pre-Implementation Validation**
 - [ ] **🛡️ Immutable Check**: Verify no conflicts with core requirements
-- [ ] **📋 Feature Registry**: TEST-FIX-001 properly registered
+- [ ] **📋 Feature Registry**: [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001) properly registered
 - [ ] **🔍 Architecture Review**: Changes align with documented patterns
 - [ ] **🧪 Test Analysis**: Understand current test failure patterns
 
 ### **Implementation Tasks**
-- [ ] **TEST-FIX-001**: Fix promise structure in failing test
-- [ ] **TEST-FIX-002**: Create reusable mock factory
-- [ ] **TEST-FIX-003**: Add comprehensive error handling tests
-- [ ] **TEST-FIX-004**: Add edge case test coverage
+- [ ] **[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001)**: Fix promise structure in failing test
+- [ ] **[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-002)**: Create reusable mock factory
+- [ ] **[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-003)**: Add comprehensive error handling tests
+- [ ] **[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-004)**: Add edge case test coverage
 
 ### **Post-Implementation Validation**
 - [ ] **🧪 Full Test Suite**: All tests pass (`npm test`)
@@ -355,10 +355,10 @@ test('should normalize tag input (trim whitespace)', async () => {
 - ✅ All tests in `tests/integration/popup-tag-integration.test.js` now pass successfully.
 
 ### Semantic Tokens Used
-- `TEST-FIX-001`: Test async handling fix - 🧪 Integration test repair
-- `TEST-FIX-002`: Mock structure improvement - 🔧 Test infrastructure enhancement
-- `TEST-FIX-003`: Error handling enhancement - 🛡️ Test reliability improvement
-- `TEST-FIX-004`: Edge case coverage - 🧪 Comprehensive test validation
+- `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001)`: Test async handling fix - 🧪 Integration test repair
+- `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-002)`: Mock structure improvement - 🔧 Test infrastructure enhancement
+- `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-003)`: Error handling enhancement - 🛡️ Test reliability improvement
+- `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-004)`: Edge case coverage - 🧪 Comprehensive test validation
 
 ---
 

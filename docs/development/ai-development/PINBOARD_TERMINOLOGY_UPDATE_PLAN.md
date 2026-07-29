@@ -10,16 +10,16 @@
 **Target State**: Consistent terminology using "read later" vs "not marked"
 **No "have read" state**: Only binary toggle between marked for reading later and not marked
 
-## 🚨 UI-005 Protection Requirements
+## 🚨 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Protection Requirements
 
-**CRITICAL**: This update must preserve all UI-005 Transparent Overlay System functionality. UI-005 is a **PROTECTED FEATURE** that cannot be modified during this terminology update.
+**CRITICAL**: This update must preserve all [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Transparent Overlay System functionality. [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) is a **PROTECTED FEATURE** that cannot be modified during this terminology update.
 
-### ✅ Permitted Changes for UI-005
+### ✅ Permitted Changes for [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)
 - Text label updates only (terminology changes)
 - Code comments improvements
 - Variable name clarifications (if needed)
 
-### 🚫 Prohibited Changes for UI-005  
+### 🚫 Prohibited Changes for [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)  
 - No modifications to transparency mode logic
 - No changes to opacity configuration parameters
 - No alterations to backdrop filter implementations
@@ -43,7 +43,7 @@
 
 ## 🗂️ Requirements Updates
 
-### REQ-TERM-001: Terminology Standardization
+### [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was REQ-TERM-001): Terminology Standardization
 **Priority**: 🔺 HIGH
 **Description**: Standardize all bookmark toggle terminology to eliminate confusion between "to read" and "read later" states.
 
@@ -54,7 +54,7 @@
 4. Status messages use "read later" terminology
 5. No references to "have read" state anywhere in the application
 
-### REQ-TERM-002: UI Consistency
+### [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was REQ-TERM-002): UI Consistency
 **Priority**: 🔺 HIGH  
 **Description**: Ensure consistent terminology across all UI components (popup, overlay, options).
 
@@ -65,7 +65,7 @@
 4. Badge text uses consistent terminology
 5. All tooltips and help text updated
 
-### REQ-TERM-003: Backend Compatibility
+### [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was REQ-TERM-003): Backend Compatibility
 **Priority**: 🔶 MEDIUM
 **Description**: Ensure terminology updates don't affect backend data storage or Pinboard API integration.
 
@@ -84,17 +84,17 @@
 #### Subtask 1.1: Popup Interface Updates
 - **Files**: `src/ui/popup/PopupController.js`, `src/ui/popup/UIManager.js`, `src/ui/popup/popup.html`
 - **Changes**: Update button text, status displays, and tooltips
-- **UI-005 Impact**: ✅ None - only text changes
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - only text changes
 
 #### Subtask 1.2: Hover Overlay Updates  
 - **Files**: `src/features/content/hover-system.js`, `src/features/content/overlay-manager.js`
 - **Changes**: Update button labels and tooltip text
-- **UI-005 Impact**: ✅ Text only - preserve all transparency functionality
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ Text only - preserve all transparency functionality
 
 #### Subtask 1.3: Content Script Updates
 - **Files**: `src/features/content/content-main.js`
 - **Changes**: Update console messages and debug text
-- **UI-005 Impact**: ✅ None - only debug text changes
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - only debug text changes
 
 ### Task 2: Status and Message Updates
 **Priority**: 🔺 HIGH  
@@ -103,12 +103,12 @@
 #### Subtask 2.1: Status Message Updates
 - **Files**: `src/ui/popup/PopupController.js`, `src/features/content/hover-system.js`
 - **Changes**: Update success/error messages for consistency
-- **UI-005 Impact**: ✅ None - only message text
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - only message text
 
 #### Subtask 2.2: Badge Text Updates
 - **Files**: `src/core/badge-manager.js`
 - **Changes**: Update badge text for marked bookmarks
-- **UI-005 Impact**: ✅ None - badge system separate from overlay
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - badge system separate from overlay
 
 ### Task 3: Options and Configuration Updates
 **Priority**: 🔶 MEDIUM
@@ -117,7 +117,7 @@
 #### Subtask 3.1: Options Page Updates
 - **Files**: `src/ui/options/options.js`, `src/ui/options/options-browser.js`
 - **Changes**: Update option labels and descriptions
-- **UI-005 Impact**: ✅ None - options page separate from overlay
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - options page separate from overlay
 
 ### Task 4: Documentation Updates  
 **Priority**: 🔶 MEDIUM
@@ -126,12 +126,12 @@
 #### Subtask 4.1: Architecture Documentation
 - **Files**: `docs/architecture/popup-architecture.md`, `docs/troubleshooting/overlay-development.md`
 - **Changes**: Update examples and terminology in documentation
-- **UI-005 Impact**: ✅ None - documentation only
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - documentation only
 
 #### Subtask 4.2: Development Documentation
 - **Files**: Various documentation files
 - **Changes**: Update terminology references throughout docs
-- **UI-005 Impact**: ✅ None - documentation only
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Impact**: ✅ None - documentation only
 
 ### Task 5: Testing and Validation
 **Priority**: 🔺 HIGH
@@ -141,13 +141,13 @@
 - **Test**: All UI components display correct terminology
 - **Test**: Button actions work correctly with new labels
 - **Test**: Status messages display correctly
-- **UI-005 Validation**: ✅ Verify transparency system unaffected
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Validation**: ✅ Verify transparency system unaffected
 
 #### Subtask 5.2: Integration Testing
 - **Test**: Pinboard API integration unaffected
 - **Test**: Configuration persistence works correctly
 - **Test**: Cross-browser compatibility maintained
-- **UI-005 Validation**: ✅ Verify all overlay modes function correctly
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Validation**: ✅ Verify all overlay modes function correctly
 
 ## 📂 Files Requiring Changes
 
@@ -156,7 +156,7 @@
 2. `src/ui/popup/UIManager.js` - Status display text  
 3. `src/ui/popup/popup.html` - HTML text content
 4. `src/features/content/hover-system.js` - Button labels and tooltips
-5. `src/features/content/overlay-manager.js` - Button text (UI-005 protected file - text only)
+5. `src/features/content/overlay-manager.js` - Button text ([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) protected file - text only)
 6. `src/core/badge-manager.js` - Badge text content
 
 ### Medium Priority Files (Documentation/Config)
@@ -173,7 +173,7 @@
 
 ### Phase 1: Core UI Updates (Day 1)
 - Update popup interface terminology
-- Update hover overlay button labels (UI-005 text only)
+- Update hover overlay button labels ([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) text only)
 - Test basic functionality
 
 ### Phase 2: Status and Messages (Day 1)  
@@ -189,7 +189,7 @@
 ### Phase 4: Documentation and Testing (Day 2)
 - Update documentation terminology
 - Comprehensive testing across all components
-- UI-005 protection validation
+- [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) protection validation
 
 ## ✅ Success Criteria
 
@@ -205,7 +205,7 @@
 - [ ] Pinboard API integration unaffected
 - [ ] Configuration system unaffected
 - [ ] All existing functionality preserved
-- [ ] UI-005 transparency system fully preserved and functional
+- [ ] [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) transparency system fully preserved and functional
 
 ### Quality Requirements
 - [ ] Cross-browser compatibility maintained
@@ -215,9 +215,9 @@
 
 ## 🚨 Risk Mitigation
 
-### UI-005 Protection Risks
+### [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Protection Risks
 - **Risk**: Accidental modification of transparency system
-- **Mitigation**: Only text changes in UI-005 files, extensive testing of transparency modes
+- **Mitigation**: Only text changes in [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) files, extensive testing of transparency modes
 
 ### Functional Risks
 - **Risk**: Breaking existing bookmark functionality
@@ -236,13 +236,13 @@
 
 ### Integration Testing  
 - [ ] Popup interface fully functional with new terminology
-- [ ] Hover overlay fully functional with new terminology (UI-005 validation)
+- [ ] Hover overlay fully functional with new terminology ([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) validation)
 - [ ] Options page saves and loads correctly
 
 ### Regression Testing
 - [ ] All existing bookmark operations work correctly
 - [ ] Pinboard API integration unaffected
-- [ ] UI-005 transparency modes all function correctly
+- [ ] [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) transparency modes all function correctly
 - [ ] Configuration system unchanged
 
 ### User Acceptance Testing
@@ -253,7 +253,7 @@
 ## 📋 Implementation Checklist
 
 ### Pre-Implementation
-- [ ] Review UI-005 protection requirements
+- [ ] Review [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) protection requirements
 - [ ] Identify all files requiring changes  
 - [ ] Create backup of current implementation
 - [ ] Set up testing environment
@@ -266,7 +266,7 @@
 
 ### Post-Implementation
 - [ ] Comprehensive functionality testing
-- [ ] UI-005 protection validation
+- [ ] [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) protection validation
 - [ ] Cross-browser compatibility testing
 - [ ] Documentation review and updates
 - [ ] Code review and approval
@@ -276,10 +276,10 @@
 1. **Updated Source Code** - All terminology consistently updated
 2. **Updated Documentation** - All references corrected  
 3. **Test Results** - Comprehensive testing validation
-4. **UI-005 Protection Report** - Confirmation of transparency system preservation
+4. **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Protection Report** - Confirmation of transparency system preservation
 
 ---
 
 **Status**: ✅ IMPLEMENTATION COMPLETE
 **Next Action**: Ready for production deployment  
-**UI-005 Protection**: ✅ VERIFIED AND MAINTAINED - All transparency functions preserved 
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Protection**: ✅ VERIFIED AND MAINTAINED - All transparency functions preserved 

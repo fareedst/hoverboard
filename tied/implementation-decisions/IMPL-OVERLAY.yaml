@@ -22,7 +22,7 @@ IMPL-OVERLAY:
     - "ARCH-OVERLAY"
     - "REQ-OVERLAY_SYSTEM"
   detail_file: "implementation-decisions/IMPL-OVERLAY.yaml"
-  essence_pseudocode: "# [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION]\n# Overlay show/hide, DOM injection, close/refresh controls, auto-show.\n# Contract: show/hide and auto-show and theme; overlay state and controls.\nINPUT: show/hide command; optional auto-show condition; theme vars\nOUTPUT: overlay visible/hidden; DOM injected; controls (close, refresh) created\nDATA: overlay root element; content container; control elements; visibility state\n\n# Create/inject root; apply theme and content; attach close/refresh; set visible.\nshow():\n  CREATE overlay root (or reuse); INJECT into document body\n  APPLY theme CSS variables; RENDER content (bookmark form, etc.)\n  createCloseButton(); createRefreshButton(); ATTACH handlers\n  SET visibility = true\n\n# Remove overlay or hide; set visibility false.\nhide():\n  REMOVE overlay from DOM (or set display none); SET visibility = false\n\n# Show when message or storage condition met.\nAuto-show: IF condition (e.g. message or storage): show()\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-OVERLAY-pseudocode.md"
   implementation_approach:
     details:
       - "Auto-show logic"
@@ -37,8 +37,8 @@ IMPL-OVERLAY:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Overlay Implementation"
   rationale:
     benefits:

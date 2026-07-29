@@ -26,13 +26,13 @@ Before any code implementation, the following context documentation has been est
 
 ### **🎯 Feature ID System**
 All Phase 1 work now uses structured Feature IDs:
-- **MV3-001 to MV3-004**: Manifest V3 migration features
-- **CFG-001 to CFG-004**: Configuration system features  
-- **UTIL-001 to UTIL-005**: Shared utilities features
-- **LOG-001 to LOG-003**: Logging and debugging features
-- **PIN-001 to PIN-004**: Pinboard integration features
-- **UI-001 to UI-004**: User interface features
-- **TEST-001 to TEST-003**: Testing infrastructure features
+- **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001) to [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-004)**: Manifest V3 migration features
+- **[IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) to [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] (was CFG-004)**: Configuration system features  
+- **[IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-001) to [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-005)**: Shared utilities features
+- **[IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001) to [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-003)**: Logging and debugging features
+- **[IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001) to [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-004)**: Pinboard integration features
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) to [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-004)**: User interface features
+- **[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001) to [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003)**: Testing infrastructure features
 
 ### **🏷️ Implementation Token Requirements**
 Every code modification must include implementation tokens:
@@ -45,13 +45,13 @@ Every code modification must include implementation tokens:
 ### **STEP 1: Manifest V3 Migration** ⭐ **CRITICAL** 
 **Priority**: Must be first - everything depends on this  
 **Effort**: 4-6 hours  
-**Feature ID**: **MV3-001** (see [Feature Tracking](../../reference/feature-tracking.md#mv3-001))  
+**Feature ID**: **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001)** (see [Feature Tracking](../../reference/feature-tracking.md#mv3-001))  
 **Files**: `manifest.json` → `manifest.v3.json` → Update to V3
 
 **🤖 AI Assistant Requirements:**
 - **📋 Follow Protocol**: [NEW FEATURE Protocol](../../reference/ai-assistant-protocol.md#-new-feature-protocol-priority-critical)
 - **🛡️ Immutable Check**: Verify no conflicts with [core requirements](../../reference/immutable.md)
-- **🏷️ Implementation Tokens**: Add `// MV3-001: [description]` to all modified code
+- **🏷️ Implementation Tokens**: Add `// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): [description]` to all modified code
 
 **Tasks:**
 1. **Convert Manifest V2 → V3**
@@ -71,7 +71,7 @@ Every code modification must include implementation tokens:
 - ✅ Service worker activates correctly
 - ✅ No manifest validation errors
 - ✅ Basic extension icon and popup functional
-- ✅ **Feature MV3-001 marked complete in feature tracking**
+- ✅ **Feature [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001) marked complete in feature tracking**
 - ✅ **All implementation tokens added to modified code**
 
 ---
@@ -79,44 +79,44 @@ Every code modification must include implementation tokens:
 ### **STEP 2: Configuration System Foundation** ⭐ **CRITICAL**
 **Priority**: Core dependency for all components  
 **Effort**: 8-12 hours  
-**Feature IDs**: **CFG-001** (✅ Complete), **CFG-002** (Migration), **CFG-003** (Validation), **CFG-004** (Backup)  
-**Files**: `src/shared/config.js` → `src-new/config/config-manager.js` (✅ CFG-001 complete)
+**Feature IDs**: **[IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001)** (✅ Complete), **[IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-002)** (Migration), **[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)** (Validation), **[IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] (was CFG-004)** (Backup)  
+**Files**: `src/shared/config.js` → `src-new/config/config-manager.js` (✅ [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) complete)
 
 **🤖 AI Assistant Requirements:**
 - **📋 Follow Protocol**: [MODIFICATION Protocol](../../reference/ai-assistant-protocol.md#-modification-protocol-priority-critical) 
 - **🛡️ Immutable Check**: Preserve [configuration compatibility](../../reference/immutable.md#configuration-system-preserve-compatibility)
-- **🏷️ Implementation Tokens**: Add `// CFG-002: [description]` for migration features
+- **🏷️ Implementation Tokens**: Add `// [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-002): [description]` for migration features
 
 **Tasks:**
-1. **✅ Complete ConfigManager Implementation** (CFG-001 - COMPLETED)
+1. **✅ Complete ConfigManager Implementation** ([IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) - COMPLETED)
    - ✅ ConfigManager class implemented with full API
    - ✅ Storage integration and default values working
    - ✅ Authentication token management functional
    - ✅ Foundation ready for enhancement
 
-2. **Legacy Config Migration** (CFG-002 - CRITICAL)
+2. **Legacy Config Migration** ([IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-002) - CRITICAL)
    - Create migration utility for existing user settings
    - Map old config variables to new structure
    - Validate and sanitize legacy data
    - Ensure backward compatibility during transition
 
-3. **Configuration Validation** (CFG-003 - HIGH PRIORITY)
+3. **Configuration Validation** ([IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003) - HIGH PRIORITY)
    - Add schema validation system
    - Implement type checking and constraint validation
    - Add configuration integrity checks
    - Create validation error handling
 
-4. **Configuration Backup/Restore** (CFG-004 - HIGH PRIORITY)
+4. **Configuration Backup/Restore** ([IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] (was CFG-004) - HIGH PRIORITY)
    - Implement configuration export functionality
    - Add configuration import with validation
    - Create backup scheduling system
    - Add restore point management
 
 **Success Criteria:**
-- ✅ **CFG-001**: ConfigManager foundation complete (DONE)
-- ⏳ **CFG-002**: All legacy config variables migrated seamlessly
-- ⏳ **CFG-003**: Configuration validation working with comprehensive schema
-- ⏳ **CFG-004**: Backup/restore system functional
+- ✅ **[IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001)**: ConfigManager foundation complete (DONE)
+- ⏳ **[IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-002)**: All legacy config variables migrated seamlessly
+- ⏳ **[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)**: Configuration validation working with comprehensive schema
+- ⏳ **[IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] (was CFG-004)**: Backup/restore system functional
 - ✅ 90%+ test coverage for all configuration features
 - ✅ Options page can read/write new config format
 - ✅ **All feature IDs marked complete in feature tracking**

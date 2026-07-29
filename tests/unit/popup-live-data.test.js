@@ -1,6 +1,6 @@
 /**
  * Popup Live Data Tests
- * [POPUP-LIVE-DATA-001] Test popup live data functionality
+ * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Test popup live data functionality
  */
 
 import { PopupController } from '../../src/ui/popup/PopupController.js'
@@ -39,7 +39,7 @@ global.chrome = {
   }
 }
 
-describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
+describe('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Popup Live Data Tests', () => {
   let popupController
   let uiManager
   let stateManager
@@ -65,7 +65,7 @@ describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
     })
   })
 
-  describe('[POPUP-DATA-FLOW-001] Data Flow Validation', () => {
+  describe('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Data Flow Validation', () => {
     test('should extract bookmark data correctly from service worker response', async () => {
       const mockResponse = {
         success: true,
@@ -172,7 +172,7 @@ describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
     })
   })
 
-  describe('[POPUP-REFRESH-001] Refresh Mechanism', () => {
+  describe('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Refresh Mechanism', () => {
     test('should perform manual refresh successfully', async () => {
       const mockBookmark = {
         url: 'https://example.com',
@@ -237,7 +237,7 @@ describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
     })
   })
 
-  describe('[POPUP-SYNC-001] Cross-Component Synchronization', () => {
+  describe('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Cross-Component Synchronization', () => {
     test('should validate badge synchronization correctly', async () => {
       const mockBookmark = {
         url: 'https://example.com',
@@ -336,7 +336,7 @@ describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
     })
   })
 
-  describe('[POPUP-DEBUG-001] Debug Logging', () => {
+  describe('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Debug Logging', () => {
     test('should log comprehensive debug information', async () => {
       const mockBookmark = {
         url: 'https://example.com',
@@ -358,14 +358,14 @@ describe('[POPUP-LIVE-DATA-001] Popup Live Data Tests', () => {
       
       // Verify debug logs were called
       expect(debugLog).toHaveBeenCalledWith(
-        '[POPUP-DATA-FLOW-001] loadInitialData: start'
+        '[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: start'
       )
       expect(debugLog).toHaveBeenCalledWith(
-        '[POPUP-DATA-FLOW-001] loadInitialData: calling getBookmarkData',
+        '[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: calling getBookmarkData',
         'https://example.com'
       )
       expect(debugLog).toHaveBeenCalledWith(
-        '[POPUP-DATA-FLOW-001] loadInitialData: got currentPin',
+        '[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: got currentPin',
         mockBookmark
       )
     })

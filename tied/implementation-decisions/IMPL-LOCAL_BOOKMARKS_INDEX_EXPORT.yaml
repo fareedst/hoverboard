@@ -18,7 +18,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
     - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
     - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml"
-  essence_pseudocode: "# [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT]\n# Export all/displayed/selected to CSV; buildCsv and programmatic download.\n# Contract: scope and bookmark sets; CSV download and column shape.\nINPUT: scope ('all' | 'displayed' | 'selected'), allBookmarks, filteredBookmarks, selectedUrls (set)\nOUTPUT: CSV file download (Blob -> object URL -> <a download> click -> revoke)\nDATA: CSV header + rows; columns description, url, tags, time, storage, shared, toread, extended\n\n# Pick source by scope, build CSV, trigger download and revoke URL.\nexportBookmarks(scope):\n  IF scope = 'all': source = allBookmarks\n  IF scope = 'displayed': source = filteredBookmarks\n  IF scope = 'selected': source = allBookmarks FILTER url IN selectedUrls\n  csvString = buildCsv(source)   // header row + one row per bookmark; escape quotes; storage Local|File|Sync\n  filename = \"hoverboard-bookmarks-{scope}-{ISO date}.csv\"\n  blob = new Blob([csvString]); url = createObjectURL(blob)\n  trigger <a download=filename href=url> click; revokeObjectURL(url)\n\n# Disable export buttons when scope has no data.\nupdateExportButtonState():\n  DISABLE \"Export selected\" when selectedUrls.size === 0\n  DISABLE \"Export displayed\" when filteredBookmarks.length === 0\n  DISABLE \"Export all\" when allBookmarks.length === 0\n  (called when selection or filter changes, e.g. from updateMoveControlsState)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT-pseudocode.md"
   implementation_approach:
     details:
       - "bookmarks-table.js: exportBookmarks(scope); scope all -> allBookmarks, displayed -> filteredBookmarks, selected -> allBookmarks.filter(b => selectedUrls.has(b.url))"
@@ -31,8 +31,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

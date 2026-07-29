@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-15  
 **Status:** Architectural Planning  
-**Cross-References:** `[POPUP-CLOSE-BEHAVIOR-001]` through `[POPUP-CLOSE-BEHAVIOR-014]`, `[POPUP-ARCH-001]`, `[POPUP-REFRESH-001]`, `[TOGGLE-SYNC-POPUP-001]`, `[UI-BEHAVIOR-001]`, `SAFARI-EXT-CONTENT-001`
+**Cross-References:** `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-014)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`, `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-POPUP-001)]`, `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]`, `SAFARI-EXT-CONTENT-001`
 
 ## 🎯 Decision Context
 
@@ -12,7 +12,7 @@ This document outlines architectural decisions specific to the popup close behav
 
 ### **Browser Extension Architecture Constraints**
 
-#### **`[POPUP-CLOSE-BEHAVIOR-ARCH-001]` - Popup Lifecycle Management**
+#### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-001)]` - Popup Lifecycle Management**
 **Decision**: Popup windows in browser extensions have specific lifecycle constraints that must be respected.
 
 **Rationale**: 
@@ -25,17 +25,17 @@ This document outlines architectural decisions specific to the popup close behav
 - Overlay state must be queried from content script, not stored in popup
 - UI updates must be reactive to external state changes
 
-#### **`[POPUP-CLOSE-BEHAVIOR-ARCH-002]` - Message Passing Architecture**
+#### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-002)]` - Message Passing Architecture**
 **Decision**: Use existing message passing patterns for popup-overlay communication.
 
 **Rationale**:
 - Existing `sendToTab()` and `sendMessage()` patterns are proven
-- Maintains consistency with current architecture (`[POPUP-REFRESH-001]`)
+- Maintains consistency with current architecture (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`)
 - Leverages existing error handling and timeout mechanisms
 
 **Implementation Details**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-002] Use existing message patterns
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-002)] Use existing message patterns
 await this.sendToTab({
   type: 'GET_OVERLAY_STATE'
 })
@@ -48,7 +48,7 @@ await this.sendToTab({
 
 ### **State Management Architecture**
 
-#### **`[POPUP-CLOSE-BEHAVIOR-ARCH-003]` - Overlay State Query Pattern**
+#### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-003)]` - Overlay State Query Pattern**
 **Decision**: Implement reactive state querying rather than persistent state storage in popup.
 
 **Rationale**:
@@ -58,7 +58,7 @@ await this.sendToTab({
 
 **Implementation Pattern**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-003] Query overlay state when needed
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-003)] Query overlay state when needed
 async updateOverlayState() {
   const overlayState = await this.sendToTab({
     type: 'GET_OVERLAY_STATE'
@@ -67,7 +67,7 @@ async updateOverlayState() {
 }
 ```
 
-#### **`[POPUP-CLOSE-BEHAVIOR-ARCH-004]` - UI State Synchronization**
+#### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-004)]` - UI State Synchronization**
 **Decision**: Update UI state immediately after toggle operations, then query for confirmation.
 
 **Rationale**:
@@ -77,7 +77,7 @@ async updateOverlayState() {
 
 **Implementation Pattern**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-004] Optimistic UI updates with fallback
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-004)] Optimistic UI updates with fallback
 async handleShowHoverboard() {
   // Optimistic update
   this.uiManager.updateShowHoverButtonState(!this.currentOverlayState)
@@ -92,7 +92,7 @@ async handleShowHoverboard() {
 
 ### **Error Handling and Resilience**
 
-#### **`[POPUP-CLOSE-BEHAVIOR-ARCH-005]` - Graceful Degradation**
+#### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-005)]` - Graceful Degradation**
 **Decision**: Implement graceful degradation when overlay state cannot be determined.
 
 **Rationale**:
@@ -102,7 +102,7 @@ async handleShowHoverboard() {
 
 **Implementation Pattern**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-005] Graceful degradation
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-005)] Graceful degradation
 async updateOverlayState() {
   try {
     const overlayState = await this.sendToTab({
@@ -112,12 +112,12 @@ async updateOverlayState() {
   } catch (error) {
     // Fallback to default state
     this.uiManager.updateShowHoverButtonState(false)
-    debugError('[POPUP-CLOSE-BEHAVIOR-ARCH-005] Failed to query overlay state:', error)
+    debugError('[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-005)] Failed to query overlay state:', error)
   }
 }
 ```
 
-#### **`[POPUP-CLOSE-BEHAVIOR-ARCH-006]` - Timeout Handling**
+#### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-006)]` - Timeout Handling**
 **Decision**: Implement appropriate timeouts for overlay state queries.
 
 **Rationale**:
@@ -127,7 +127,7 @@ async updateOverlayState() {
 
 **Implementation Pattern**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-006] Timeout handling
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-006)] Timeout handling
 async sendToTabWithTimeout(message, timeoutMs = 1000) {
   return Promise.race([
     this.sendToTab(message),
@@ -140,7 +140,7 @@ async sendToTabWithTimeout(message, timeoutMs = 1000) {
 
 ## 🔄 Coordination with Existing Requirements
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-007]` - Integration with [POPUP-REFRESH-001]**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-007)]` - Integration with [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]**
 **Decision**: Ensure popup close behavior changes do not interfere with refresh mechanisms.
 
 **Rationale**:
@@ -150,17 +150,17 @@ async sendToTabWithTimeout(message, timeoutMs = 1000) {
 
 **Implementation Coordination**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-007] Coordinate with refresh mechanisms
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-007)] Coordinate with refresh mechanisms
 async refreshPopupData() {
   // Existing refresh logic
   await this.loadInitialData()
   
-  // [POPUP-CLOSE-BEHAVIOR-ARCH-007] Update overlay state after refresh
+  // [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-007)] Update overlay state after refresh
   await this.updateOverlayState()
 }
 ```
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-008]` - Integration with [TOGGLE-SYNC-POPUP-001]**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-008)]` - Integration with [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-POPUP-001)]**
 **Decision**: Ensure toggle synchronization works with persistent popup state.
 
 **Rationale**:
@@ -170,19 +170,19 @@ async refreshPopupData() {
 
 **Implementation Coordination**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-008] Coordinate with toggle synchronization
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-008)] Coordinate with toggle synchronization
 setupRealTimeUpdates() {
   chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
     if (message.type === 'BOOKMARK_UPDATED') {
       await this.refreshPopupData()
-      // [POPUP-CLOSE-BEHAVIOR-ARCH-008] Update overlay state after bookmark changes
+      // [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-008)] Update overlay state after bookmark changes
       await this.updateOverlayState()
     }
   })
 }
 ```
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-009]` - Integration with [UI-BEHAVIOR-001]**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-009)]` - Integration with [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]**
 **Decision**: Ensure UI behavior patterns remain consistent across all popup interactions.
 
 **Rationale**:
@@ -192,11 +192,11 @@ setupRealTimeUpdates() {
 
 **Implementation Coordination**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-009] Consistent UI behavior patterns
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-009)] Consistent UI behavior patterns
 updateShowHoverButtonState(isOverlayVisible) {
   const showHoverBtn = this.elements.showHoverBtn
   if (showHoverBtn) {
-    // [UI-BEHAVIOR-001] Maintain consistent button patterns
+    // [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)] Maintain consistent button patterns
     const buttonText = showHoverBtn.querySelector('.button-text')
     const actionIcon = showHoverBtn.querySelector('.action-icon')
     
@@ -217,7 +217,7 @@ updateShowHoverButtonState(isOverlayVisible) {
 
 ## 🎯 Performance and Resource Considerations
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-010]` - Message Passing Efficiency**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-010)]` - Message Passing Efficiency**
 **Decision**: Minimize message passing overhead for overlay state queries.
 
 **Rationale**:
@@ -231,7 +231,7 @@ updateShowHoverButtonState(isOverlayVisible) {
 - Query actual state only when necessary
 - Implement appropriate debouncing for rapid interactions
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-011]` - Memory Management**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-011)]` - Memory Management**
 **Decision**: Ensure proper cleanup of event listeners and state references.
 
 **Rationale**:
@@ -241,19 +241,19 @@ updateShowHoverButtonState(isOverlayVisible) {
 
 **Implementation Pattern**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-011] Proper cleanup
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-011)] Proper cleanup
 cleanup() {
   // Existing cleanup logic
   this.uiManager?.off('showHoverboard', this.handleShowHoverboard)
   
-  // [POPUP-CLOSE-BEHAVIOR-ARCH-011] Clear overlay state references
+  // [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-011)] Clear overlay state references
   this.currentOverlayState = null
 }
 ```
 
 ## 🔧 Technical Implementation Decisions
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-012]` - Content Script Message Handler**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-012)]` - Content Script Message Handler**
 **Decision**: Add new message handler for overlay state queries without modifying existing handlers.
 
 **Rationale**:
@@ -263,7 +263,7 @@ cleanup() {
 
 **Implementation Pattern**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-012] Add new message handler
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-012)] Add new message handler
 case 'GET_OVERLAY_STATE':
   const overlayState = {
     isVisible: this.overlayActive,
@@ -274,7 +274,7 @@ case 'GET_OVERLAY_STATE':
   break
 ```
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-013]` - UI Manager Extension**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-013)]` - UI Manager Extension**
 **Decision**: Extend UIManager with overlay state update capabilities while maintaining existing patterns.
 
 **Rationale**:
@@ -284,7 +284,7 @@ case 'GET_OVERLAY_STATE':
 
 **Implementation Pattern**:
 ```javascript
-// [POPUP-CLOSE-BEHAVIOR-ARCH-013] Extend UIManager
+// [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-013)] Extend UIManager
 updateShowHoverButtonState(isOverlayVisible) {
   // Use existing element selection patterns
   const showHoverBtn = this.elements.showHoverBtn
@@ -298,19 +298,19 @@ updateShowHoverButtonState(isOverlayVisible) {
 
 ## 🎯 Success Criteria for Architectural Decisions
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-001]` - Technical Coordination**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-001)]` - Technical Coordination**
 - ✅ All existing requirements continue to function
 - ✅ No regression in existing functionality
 - ✅ Performance impact is minimal
 - ✅ Resource usage remains efficient
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-002]` - Platform Compatibility**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-002)]` - Platform Compatibility**
 - ✅ Works across supported browser platforms
 - ✅ Handles browser-specific constraints gracefully
 - ✅ Maintains extension reliability
 - ✅ Follows browser extension best practices
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-003]` - Maintainability**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-003)]` - Maintainability**
 - ✅ Code follows existing patterns and conventions
 - ✅ Documentation is comprehensive and accurate
 - ✅ Testing covers all architectural decisions

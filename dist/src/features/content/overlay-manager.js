@@ -46,21 +46,21 @@ class OverlayManager {
     this.overlayId = 'hoverboard-overlay'
     this.overlayClass = 'hoverboard-overlay'
 
-    // UI-VIS-001/002: Transparency now controlled by VisibilityControls component
+    // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]/002: Transparency now controlled by VisibilityControls component
     // Legacy transparency properties maintained for compatibility
     this.transparencyMode = config?.overlayTransparencyMode || 'opaque'
     this.positionMode = config?.overlayPositionMode || 'default'
     this.adaptiveVisibility = config?.overlayAdaptiveVisibility || false
     this.proximityListener = null
 
-    // UI-VIS-001: Initialize VisibilityControls component
+    // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Initialize VisibilityControls component
     this.visibilityControls = null
     this.visibilityControlsCallback = (settings) => {
       debugLog('Visibility settings changed', settings)
       this.applyVisibilitySettings(settings)
     }
 
-    // [IMMUTABLE-REQ-TAG-004] - Initialize message service for tag persistence
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Initialize message service for tag persistence
     this.messageService = new MessageClient()
 
     // [REQ-SUGGESTED_TAGS_FROM_CONTENT] [IMPL-SUGGESTED_TAGS] - Initialize tag service for suggested tags extraction
@@ -92,7 +92,7 @@ class OverlayManager {
    * Show overlay with content
    */
   async show (content) {
-    // [OVERLAY-TEST-LOG-001] Enhanced debug logging for critical information and branching decisions
+    // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced debug logging for critical information and branching decisions
     this.logger.log('INFO', 'OverlayManager', 'show() called', { content })
     this.logger.log('DEBUG', 'OverlayManager', 'Platform detection', { platform: navigator.userAgent })
 
@@ -108,7 +108,7 @@ class OverlayManager {
     try {
       this.logger.log('DEBUG', 'OverlayManager', 'Starting overlay creation process')
 
-      // [OVERLAY-TEST-LOG-001] Enhanced debugging for overlay content with critical information
+      // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced debugging for overlay content with critical information
       this.logger.log('DEBUG', 'OverlayManager', 'Content analysis', {
         hasBookmark: !!content.bookmark,
         bookmarkTags: content.bookmark?.tags,
@@ -118,7 +118,7 @@ class OverlayManager {
         pageUrl: content.pageUrl
       })
 
-      // [OVERLAY-DATA-FIX-001] - Use original content (refresh was causing data loss)
+      // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] - Use original content (refresh was causing data loss)
       this.logger.log('DEBUG', 'OverlayManager', 'Using original content data')
 
       // Store content for refresh operations
@@ -136,11 +136,11 @@ class OverlayManager {
       this.clearContent()
       this.logger.log('DEBUG', 'OverlayManager', 'Content cleared')
 
-      // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Position buttons relative to overlay itself
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Position buttons relative to overlay itself
       // Create main container div with padding to accommodate buttons
       this.logger.log('DEBUG', 'OverlayManager', 'Creating main container')
       const mainContainer = this.document.createElement('div')
-      mainContainer.style.cssText = 'padding: 8px; padding-top: 40px;' // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Add top padding for buttons
+      mainContainer.style.cssText = 'padding: 8px; padding-top: 40px;' // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Add top padding for buttons
 
       // Create current tags section (matching desired overlay)
       this.logger.log('DEBUG', 'OverlayManager', 'Creating tags container')
@@ -153,7 +153,7 @@ class OverlayManager {
       `
 
       // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Refresh button: position, ARIA, 24px min touch target, keyboard.
-      // [OVERLAY-REFRESH-UI-001] Add refresh button to overlay structure with enhanced styling
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Add refresh button to overlay structure with enhanced styling
       this.logger.log('DEBUG', 'OverlayManager', 'Creating refresh button')
       const refreshBtn = this.document.createElement('button')
       refreshBtn.className = 'refresh-button'
@@ -167,7 +167,7 @@ class OverlayManager {
       refreshBtn.style.cssText = `
         position: absolute;
         top: 8px;
-        left: 40px;  // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Position relative to overlay
+        left: 40px;  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Position relative to overlay
         background: var(--theme-button-bg);
         color: var(--theme-text-primary);
         border: 1px solid var(--theme-border);
@@ -186,13 +186,13 @@ class OverlayManager {
         box-shadow: 0 0 0 2px transparent;
       `
 
-      // [OVERLAY-REFRESH-HANDLER-001] Add click handler
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Add click handler
       this.logger.log('DEBUG', 'OverlayManager', 'Adding refresh button click handler')
       refreshBtn.onclick = async () => {
         await this.handleRefreshButtonClick()
       }
 
-      // [OVERLAY-REFRESH-ACCESSIBILITY-001] Add keyboard event handlers
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Add keyboard event handlers
       this.logger.log('DEBUG', 'OverlayManager', 'Adding refresh button keyboard handlers')
       refreshBtn.addEventListener('keydown', async (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -202,7 +202,7 @@ class OverlayManager {
       })
 
       // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Close button: position, ARIA, 24px min touch target.
-      // [OVERLAY-CLOSE-POSITION-UI-001] Close button positioned in top-left corner
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Close button positioned in top-left corner
       this.logger.log('DEBUG', 'OverlayManager', 'Creating close button')
       const closeBtn = this.document.createElement('span')
       closeBtn.className = 'close-button'
@@ -215,7 +215,7 @@ class OverlayManager {
       closeBtn.style.cssText = `
         position: absolute;
         top: 8px;
-        left: 8px;  // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Position relative to overlay
+        left: 8px;  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Position relative to overlay
         background: var(--theme-button-bg);
         color: var(--theme-text-primary);
         border: 1px solid var(--theme-border);
@@ -236,7 +236,7 @@ class OverlayManager {
         this.hide()
       }
 
-      // [OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Keyboard event handlers
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Keyboard event handlers
       this.logger.log('DEBUG', 'OverlayManager', 'Adding close button keyboard handlers')
       closeBtn.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -245,7 +245,7 @@ class OverlayManager {
         }
       })
 
-      // [OVERLAY-CLOSE-POSITION-OVERLAY-001] Append buttons directly to overlay element
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Append buttons directly to overlay element
       this.logger.log('DEBUG', 'OverlayManager', 'Appending buttons to overlay')
       this.overlayElement.appendChild(closeBtn)
       this.overlayElement.appendChild(refreshBtn)
@@ -258,7 +258,7 @@ class OverlayManager {
       currentLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
       currentTagsContainer.appendChild(currentLabel)
 
-      // [IMMUTABLE-REQ-TAG-001] - Add current tags with enhanced validation
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Add current tags with enhanced validation
       this.logger.log('DEBUG', 'OverlayManager', 'Processing current tags', {
         hasBookmark: !!content.bookmark,
         bookmarkKeys: content.bookmark ? Object.keys(content.bookmark) : [],
@@ -270,7 +270,7 @@ class OverlayManager {
       if (content.bookmark?.tags) {
         this.logger.log('DEBUG', 'OverlayManager', 'Adding current tags', { tags: content.bookmark.tags })
         content.bookmark.tags.forEach(tag => {
-          // [IMMUTABLE-REQ-TAG-001] - Validate tag before displaying
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate tag before displaying
           if (this.isValidTag(tag)) {
             this.logger.log('DEBUG', 'OverlayManager', 'Creating tag element', { tag })
             const tagElement = this.document.createElement('span')
@@ -316,7 +316,7 @@ class OverlayManager {
         this.logger.log('DEBUG', 'OverlayManager', 'No tags found in bookmark data')
       }
 
-      // [IMMUTABLE-REQ-TAG-004] - Enhanced tag input with persistence
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Enhanced tag input with persistence
       const tagInput = this.document.createElement('input')
       tagInput.className = 'tag-input'
       tagInput.placeholder = 'New Tag'
@@ -329,10 +329,10 @@ class OverlayManager {
       tagInput.addEventListener('keypress', async (e) => {
         if (e.key === 'Enter') {
           const tagText = tagInput.value.trim()
-          // [IMMUTABLE-REQ-TAG-004] - Validate tag before adding
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Validate tag before adding
           if (tagText && this.isValidTag(tagText) && content.bookmark) {
             try {
-              // [IMMUTABLE-REQ-TAG-004] - Send saveTag message for persistence
+              // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Send saveTag message for persistence
               await this.messageService.sendMessage({
                 type: 'saveTag',
                 data: {
@@ -342,24 +342,24 @@ class OverlayManager {
                 }
               })
 
-              // [IMMUTABLE-REQ-TAG-004] - Update local content immediately for display
+              // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Update local content immediately for display
               if (!content.bookmark.tags) content.bookmark.tags = []
               if (!content.bookmark.tags.includes(tagText)) {
                 content.bookmark.tags.push(tagText)
               }
 
-              // [IMMUTABLE-REQ-TAG-004] - Clear input and refresh overlay with updated content
+              // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Clear input and refresh overlay with updated content
               tagInput.value = ''
               this.show(content) // Refresh overlay with updated local content
               if (this._onOverlayAction) this._onOverlayAction('tag-added')
-              debugLog('[IMMUTABLE-REQ-TAG-004] Tag persisted successfully', tagText)
+              debugLog('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Tag persisted successfully', tagText)
               this.showMessage('Tag saved successfully', 'success')
             } catch (error) {
-              debugError('[IMMUTABLE-REQ-TAG-004] Failed to persist tag:', error)
+              debugError('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to persist tag:', error)
               this.showMessage('Failed to save tag', 'error')
             }
           } else if (tagText && !this.isValidTag(tagText)) {
-            debugLog('[IMMUTABLE-REQ-TAG-004] Invalid tag rejected:', tagText)
+            debugLog('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Invalid tag rejected:', tagText)
             this.showMessage('Invalid tag format', 'error')
           }
         }
@@ -383,14 +383,14 @@ class OverlayManager {
       recentLabel.style.cssText = 'padding: 0.2em 0.5em; margin-right: 4px;'
       recentContainer.appendChild(recentLabel)
 
-      // [TAG-SYNC-OVERLAY-001] - Load dynamic recent tags from shared memory
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Load dynamic recent tags from shared memory
       try {
         const recentTags = await this.loadRecentTagsForOverlay(content)
 
         if (recentTags && recentTags.length > 0) {
-          // [TAG-SYNC-OVERLAY-001] - Display dynamic recent tags
+          // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Display dynamic recent tags
           recentTags.slice(0, 3).forEach(tag => {
-            // [TAG-SYNC-OVERLAY-001] - Only show tags not already in current tags
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Only show tags not already in current tags
             if (!content.bookmark?.tags?.includes(tag)) {
               const tagElement = this.document.createElement('span')
               tagElement.className = 'tag-element tiny'
@@ -398,7 +398,7 @@ class OverlayManager {
               tagElement.onclick = async () => {
                 if (content.bookmark) {
                   try {
-                    // [TAG-SYNC-OVERLAY-001] - Send saveTag message for persistence
+                    // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Send saveTag message for persistence
                     await this.messageService.sendMessage({
                       type: 'saveTag',
                       data: {
@@ -408,19 +408,19 @@ class OverlayManager {
                       }
                     })
 
-                    // [TAG-SYNC-OVERLAY-001] - Update local content immediately for display
+                    // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Update local content immediately for display
                     if (!content.bookmark.tags) content.bookmark.tags = []
                     if (!content.bookmark.tags.includes(tag)) {
                       content.bookmark.tags.push(tag)
                     }
 
-                    // [TAG-SYNC-OVERLAY-001] - Refresh overlay with updated local content
+                    // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Refresh overlay with updated local content
                     this.show(content) // Refresh overlay with updated local content
                     if (this._onOverlayAction) this._onOverlayAction('tag-added')
-                    debugLog('[TAG-SYNC-OVERLAY-001] Tag persisted from recent', tag)
+                    debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Tag persisted from recent', tag)
                     this.showMessage('Tag saved successfully', 'success')
                   } catch (error) {
-                    debugError('[TAG-SYNC-OVERLAY-001] Failed to persist tag from recent:', error)
+                    debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to persist tag from recent:', error)
                     this.showMessage('Failed to save tag', 'error')
                   }
                 }
@@ -429,7 +429,7 @@ class OverlayManager {
             }
           })
         } else {
-          // [TAG-SYNC-OVERLAY-001] - Show empty state for recent tags
+          // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Show empty state for recent tags
           const emptyState = this.document.createElement('span')
           emptyState.className = 'empty-state tiny'
           emptyState.textContent = 'No recent tags'
@@ -437,8 +437,8 @@ class OverlayManager {
           recentContainer.appendChild(emptyState)
         }
       } catch (error) {
-        debugError('[TAG-SYNC-OVERLAY-001] Failed to load recent tags:', error)
-        // [TAG-SYNC-OVERLAY-001] - Fallback to static tags on error
+        debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to load recent tags:', error)
+        // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Fallback to static tags on error
         const fallbackTags = ['development', 'web', 'tutorial']
         fallbackTags.forEach(tag => {
           if (!content.bookmark?.tags?.includes(tag)) {
@@ -463,10 +463,10 @@ class OverlayManager {
                   }
 
                   this.show(content)
-                  debugLog('[TAG-SYNC-OVERLAY-001] Fallback tag persisted', tag)
+                  debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Fallback tag persisted', tag)
                   this.showMessage('Tag saved successfully', 'success')
                 } catch (error) {
-                  debugError('[TAG-SYNC-OVERLAY-001] Failed to persist fallback tag:', error)
+                  debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to persist fallback tag:', error)
                   this.showMessage('Failed to save tag', 'error')
                 }
               }
@@ -476,7 +476,7 @@ class OverlayManager {
         })
       }
 
-      // UI-VIS-001: VisibilityControls component - Replace legacy transparency controls
+      // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: VisibilityControls component - Replace legacy transparency controls
       let visibilityControlsContainer = null
       if (!this.visibilityControls) {
         // Initialize VisibilityControls component
@@ -515,7 +515,7 @@ class OverlayManager {
         font-weight: 600;
       `
       privateBtn.textContent = isPrivate ? '🔒 Private' : '🌐 Public'
-      // [TOGGLE-SYNC-OVERLAY-001] - Fix privacy toggle in overlay
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Fix privacy toggle in overlay
       privateBtn.onclick = async () => {
         if (content.bookmark) {
           try {
@@ -527,29 +527,29 @@ class OverlayManager {
               shared: newSharedStatus
             }
 
-            // [TOGGLE-SYNC-OVERLAY-001] - Send saveBookmark message for persistence
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Send saveBookmark message for persistence
             await this.messageService.sendMessage({
               type: 'saveBookmark',
               data: updatedBookmark
             })
 
-            // [TOGGLE-SYNC-OVERLAY-001] - Update local content immediately for display
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Update local content immediately for display
             content.bookmark.shared = newSharedStatus
             this.show(content) // Refresh overlay with updated local content
 
-            // [TOGGLE-SYNC-OVERLAY-001] - Show success message
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Show success message
             this.showMessage(`Bookmark is now ${isPrivate ? 'public' : 'private'}`, 'success')
 
-            // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
-            debugLog('[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background', updatedBookmark)
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Notify popup of changes (if open)
+            debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Sending BOOKMARK_UPDATED to background', updatedBookmark)
             await browser.runtime.sendMessage({
               type: 'BOOKMARK_UPDATED',
               data: updatedBookmark
             })
 
-            debugLog('[TOGGLE-SYNC-OVERLAY-001] Privacy toggled', content.bookmark.shared)
+            debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Privacy toggled', content.bookmark.shared)
           } catch (error) {
-            debugError('[TOGGLE-SYNC-OVERLAY-001] Failed to toggle privacy:', error)
+            debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to toggle privacy:', error)
             this.showMessage('Failed to update privacy setting', 'error')
           }
         }
@@ -564,7 +564,7 @@ class OverlayManager {
         font-weight: 600;
       `
       readBtn.textContent = isToRead ? '📖 Read Later' : '📋 Not marked'
-      // [TOGGLE-SYNC-OVERLAY-001] - Fix read later toggle in overlay
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Fix read later toggle in overlay
       readBtn.onclick = async () => {
         if (content.bookmark) {
           try {
@@ -577,30 +577,30 @@ class OverlayManager {
               description: content.bookmark.description || this.document.title
             }
 
-            // [TOGGLE-SYNC-OVERLAY-001] - Send saveBookmark message for persistence
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Send saveBookmark message for persistence
             await this.messageService.sendMessage({
               type: 'saveBookmark',
               data: updatedBookmark
             })
 
-            // [TOGGLE-SYNC-OVERLAY-001] - Update local content immediately for display
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Update local content immediately for display
             content.bookmark.toread = newToReadStatus
             this.show(content) // Refresh overlay with updated local content
 
-            // [TOGGLE-SYNC-OVERLAY-001] - Show success message
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Show success message
             const statusMessage = newToReadStatus === 'yes' ? 'Added to read later' : 'Removed from read later'
             this.showMessage(statusMessage, 'success')
 
-            // [TOGGLE-SYNC-OVERLAY-001] - Notify popup of changes (if open)
-            debugLog('[TOGGLE-SYNC-OVERLAY-001] Sending BOOKMARK_UPDATED to background', updatedBookmark)
+            // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Notify popup of changes (if open)
+            debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Sending BOOKMARK_UPDATED to background', updatedBookmark)
             await browser.runtime.sendMessage({
               type: 'BOOKMARK_UPDATED',
               data: updatedBookmark
             })
 
-            debugLog('[TOGGLE-SYNC-OVERLAY-001] Read status toggled', content.bookmark.toread)
+            debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Read status toggled', content.bookmark.toread)
           } catch (error) {
-            debugError('[TOGGLE-SYNC-OVERLAY-001] Failed to toggle read later status:', error)
+            debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to toggle read later status:', error)
             this.showMessage('Failed to update read later status', 'error')
           }
         }
@@ -628,7 +628,7 @@ class OverlayManager {
 
       debugLog('Overlay structure created with enhanced styling')
 
-      // [IMMUTABLE-REQ-TAG-002] Add tab search section to overlay
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Add tab search section to overlay
       this.addTabSearchSection(mainContainer)
 
       // Assemble the overlay (matching desired structure)
@@ -794,11 +794,11 @@ class OverlayManager {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-004] - Enhanced message display for tag operations
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Enhanced message display for tag operations
    */
   showMessage (message, type = 'info') {
     try {
-      // [IMMUTABLE-REQ-TAG-004] - Create message element with enhanced styling
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Create message element with enhanced styling
       const messageElement = this.document.createElement('div')
       messageElement.className = `overlay-message overlay-message-${type}`
       messageElement.textContent = message
@@ -815,7 +815,7 @@ class OverlayManager {
         font-weight: 600;
       `
 
-      // [IMMUTABLE-REQ-TAG-004] - Style based on message type
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Style based on message type
       if (type === 'error') {
         messageElement.style.background = 'var(--theme-danger, #e74c3c)'
       } else if (type === 'success') {
@@ -824,30 +824,30 @@ class OverlayManager {
         messageElement.style.background = 'var(--theme-info, #3498db)'
       }
 
-      // [IMMUTABLE-REQ-TAG-004] - Add to document
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Add to document
       this.document.body.appendChild(messageElement)
 
-      // [IMMUTABLE-REQ-TAG-004] - Auto-remove after 3 seconds
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Auto-remove after 3 seconds
       setTimeout(() => {
         if (messageElement.parentNode) {
           messageElement.parentNode.removeChild(messageElement)
         }
       }, 3000)
 
-      debugLog('[IMMUTABLE-REQ-TAG-004] Message displayed:', { message, type })
+      debugLog('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Message displayed:', { message, type })
     } catch (error) {
-      debugError('[IMMUTABLE-REQ-TAG-004] Failed to show message:', error)
+      debugError('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to show message:', error)
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-004] - Refresh overlay content with latest bookmark data
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Refresh overlay content with latest bookmark data
    */
-  // [OVERLAY-REFRESH-INTEGRATION-001] Refresh overlay content with latest bookmark data
-  // Coordinates with [OVERLAY-DATA-DISPLAY-001] for data refresh mechanism
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Refresh overlay content with latest bookmark data
+  // Coordinates with [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] for data refresh mechanism
   async refreshOverlayContent () {
     try {
-      // [OVERLAY-REFRESH-INTEGRATION-001] Prepare refresh request data
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Prepare refresh request data
       // Use content.pageTitle if available, fallback to document.title
       const pageTitle = this.currentContent?.pageTitle || this.document.title || ''
       const refreshData = {
@@ -856,16 +856,16 @@ class OverlayManager {
         tabId: this.currentContent?.tabId || null
       }
 
-      debugLog('[OVERLAY-REFRESH-INTEGRATION-001] Refresh request data:', refreshData)
+      debugLog('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Refresh request data:', refreshData)
 
-      // [OVERLAY-REFRESH-INTEGRATION-001] [IMPL-RUNTIME_VALIDATION] Get updated bookmark data via message service; payload may include url, title, tabId (schema allows passthrough).
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] [IMPL-RUNTIME_VALIDATION] Get updated bookmark data via message service; payload may include url, title, tabId (schema allows passthrough).
       const response = await this.messageService.sendMessage({
         type: 'getCurrentBookmark',
         data: refreshData
       })
 
       if (response && response.success && response.data) {
-        // [OVERLAY-REFRESH-INTEGRATION-001] Create updated content object with fresh data
+        // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Create updated content object with fresh data
         // Preserve pageTitle and pageUrl from original content
         const updatedContent = {
           bookmark: response.data,
@@ -873,7 +873,7 @@ class OverlayManager {
           pageUrl: this.currentContent?.pageUrl || window.location.href
         }
 
-        debugLog('[OVERLAY-REFRESH-INTEGRATION-001] Overlay content refreshed with updated data')
+        debugLog('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Overlay content refreshed with updated data')
         debugLog('[OVERLAY-DEBUG] Refreshed bookmark data:', {
           responseData: response.data,
           responseDataKeys: Object.keys(response.data),
@@ -883,22 +883,22 @@ class OverlayManager {
         })
         return updatedContent
       } else {
-        // [OVERLAY-REFRESH-ERROR-001] Handle invalid response structure
-        debugError('[OVERLAY-REFRESH-INTEGRATION-001] Invalid response structure:', response)
+        // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Handle invalid response structure
+        debugError('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Invalid response structure:', response)
       }
     } catch (error) {
-      // [OVERLAY-REFRESH-ERROR-001] Handle message service communication errors
-      debugError('[OVERLAY-REFRESH-INTEGRATION-001] Failed to refresh overlay content:', error)
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Handle message service communication errors
+      debugError('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Failed to refresh overlay content:', error)
     }
     return null
   }
 
   /**
-   * [OVERLAY-REFRESH-HANDLER-001] Refresh button click handler
+   * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Refresh button click handler
    */
-  // [OVERLAY-REFRESH-HANDLER-001] Handle refresh button click with comprehensive error handling and loading state
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Handle refresh button click with comprehensive error handling and loading state
   async handleRefreshButtonClick () {
-    // [OVERLAY-TEST-LOG-001] Enhanced debug logging for refresh button click
+    // [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] Enhanced debug logging for refresh button click
     this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
     if (this._onOverlayAction) this._onOverlayAction('refresh')
 
@@ -906,37 +906,37 @@ class OverlayManager {
     this.logger.log('DEBUG', 'OverlayManager', 'Found refresh button', { found: !!refreshButton })
 
     try {
-      // [OVERLAY-REFRESH-HANDLER-001] Add loading state to button
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Add loading state to button
       if (refreshButton) {
         this.logger.log('DEBUG', 'OverlayManager', 'Adding loading state to refresh button')
         refreshButton.classList.add('loading')
         refreshButton.disabled = true
       }
 
-      // [OVERLAY-REFRESH-HANDLER-001] Show loading state for user feedback
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Show loading state for user feedback
       this.showMessage('Refreshing data...', 'info')
 
-      // [OVERLAY-REFRESH-INTEGRATION-001] Get fresh bookmark data via message service
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Get fresh bookmark data via message service
       this.logger.log('DEBUG', 'OverlayManager', 'Starting overlay content refresh')
       const updatedContent = await this.refreshOverlayContent()
 
       if (updatedContent) {
-        // [OVERLAY-REFRESH-INTEGRATION-001] Update overlay with fresh data
+        // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Update overlay with fresh data
         this.logger.log('DEBUG', 'OverlayManager', 'Content refresh successful', { updatedContent })
         this.show(updatedContent)
         this.showMessage('Data refreshed successfully', 'success')
         this.logger.log('INFO', 'OverlayManager', 'Overlay refreshed successfully')
       } else {
-        // [OVERLAY-REFRESH-ERROR-001] Handle case where no data was returned
+        // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Handle case where no data was returned
         this.logger.log('ERROR', 'OverlayManager', 'No updated content received')
         throw new Error('Failed to get updated data')
       }
     } catch (error) {
-      // [OVERLAY-REFRESH-ERROR-001] Comprehensive error handling with user feedback
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Comprehensive error handling with user feedback
       this.logger.log('ERROR', 'OverlayManager', 'Refresh failed', { error })
       this.showMessage('Failed to refresh data', 'error')
     } finally {
-      // [OVERLAY-REFRESH-HANDLER-001] Remove loading state from button
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Remove loading state from button
       if (refreshButton) {
         this.logger.log('DEBUG', 'OverlayManager', 'Removing loading state from refresh button')
         refreshButton.classList.remove('loading')
@@ -946,13 +946,13 @@ class OverlayManager {
   }
 
   /**
-   * [TAG-SYNC-OVERLAY-001] - Load recent tags from shared memory for overlay
+   * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Load recent tags from shared memory for overlay
    * @param {Object} content - Content object with bookmark data
    * @returns {Promise<string[]>} Array of recent tag names
    */
   async loadRecentTagsForOverlay (content) {
     try {
-      debugLog('[TAG-SYNC-OVERLAY-001] Loading recent tags for overlay')
+      debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Loading recent tags for overlay')
 
       const response = await this.messageService.sendMessage({
         type: 'getRecentBookmarks',
@@ -962,10 +962,10 @@ class OverlayManager {
         }
       })
 
-      debugLog('[TAG-SYNC-OVERLAY-001] Recent tags response:', response)
+      debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Recent tags response:', response)
 
       if (response && response.recentTags) {
-        // [TAG-SYNC-OVERLAY-001] - Extract tag names from recent tags data
+        // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Extract tag names from recent tags data
         const recentTagNames = response.recentTags.map(tag => {
           if (typeof tag === 'string') {
             return tag
@@ -976,14 +976,14 @@ class OverlayManager {
           }
         })
 
-        debugLog('[TAG-SYNC-OVERLAY-001] Extracted recent tag names:', recentTagNames)
+        debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Extracted recent tag names:', recentTagNames)
         return recentTagNames
       }
 
-      debugLog('[TAG-SYNC-OVERLAY-001] No recent tags found')
+      debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] No recent tags found')
       return []
     } catch (error) {
-      debugError('[TAG-SYNC-OVERLAY-001] Failed to load recent tags:', error)
+      debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to load recent tags:', error)
       return []
     }
   }
@@ -1059,7 +1059,7 @@ class OverlayManager {
       return
     }
 
-    // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
+    // ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Transparent overlay - 🎨 Enhanced transparency system
     // Check if using bottom-fixed positioning mode
     if (this.positionMode === 'bottom-fixed') {
       // Apply bottom-fixed positioning instead of calculated position
@@ -1196,13 +1196,13 @@ class OverlayManager {
 
     Object.assign(this.overlayElement.style, styles)
 
-    // ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
+    // ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Transparent overlay - 🎨 Enhanced transparency system
     // Apply transparency mode after base styles
     this.applyTransparencyMode()
   }
 
   /**
-   * 🔺 UI-005: Transparent overlay manager - 🔧 Position and transparency control
+   * 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Transparent overlay manager - 🔧 Position and transparency control
    * Apply bottom-fixed positioning for transparent overlays
    */
   applyBottomFixedPositioning () {
@@ -1228,7 +1228,7 @@ class OverlayManager {
   }
 
   /**
-   * 🔺 UI-005: Transparency manager - 🔧 Opacity and positioning control
+   * 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Transparency manager - 🔧 Opacity and positioning control
    * Apply transparency styling based on configuration
    */
   applyTransparencyMode () {
@@ -1288,7 +1288,7 @@ class OverlayManager {
   }
 
   /**
-   * Legacy adaptive visibility - superseded by UI-VIS-001/002
+   * Legacy adaptive visibility - superseded by [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]/002
    * Setup adaptive visibility based on mouse proximity
    */
   setupAdaptiveVisibility () {
@@ -1311,7 +1311,7 @@ class OverlayManager {
   }
 
   /**
-   * Legacy transparency interactions - superseded by UI-VIS-001/002
+   * Legacy transparency interactions - superseded by [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]/002
    * Setup hover and focus interactions for transparent overlays
    */
   setupTransparencyInteractions () {
@@ -1509,7 +1509,7 @@ class OverlayManager {
     // Combine overlay CSS with VisibilityControls CSS
     let cssContent = this.getOverlayCSS()
 
-    // UI-VIS-001: Add VisibilityControls CSS if available
+    // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Add VisibilityControls CSS if available
     if (this.visibilityControls) {
       cssContent += '\n' + this.visibilityControls.getControlsCSS()
     }
@@ -1874,7 +1874,7 @@ class OverlayManager {
         border-color: var(--theme-info);
       }
 
-      /* [OVERLAY-REFRESH-UI-001] Refresh button styling */
+      /* [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Refresh button styling */
       .hoverboard-overlay .refresh-button {
         background: var(--theme-button-bg);
         color: var(--theme-text-primary);
@@ -2092,7 +2092,7 @@ class OverlayManager {
         }
       }
 
-      /* ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system */
+      /* ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Transparent overlay - 🎨 Enhanced transparency system */
       .hoverboard-overlay-transparent {
         background: rgba(255, 255, 255, 0.1) !important;
         backdrop-filter: blur(2px);
@@ -2102,7 +2102,7 @@ class OverlayManager {
         transition: background-color 0.2s ease-in-out;
       }
 
-      /* [OVERLAY-REFRESH-THEME-001] Refresh button theme-aware styling */
+      /* [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Refresh button theme-aware styling */
       .hoverboard-overlay .refresh-button {
         position: absolute;
         top: 8px;
@@ -2139,7 +2139,7 @@ class OverlayManager {
         outline-offset: 2px;
       }
 
-      /* [OVERLAY-REFRESH-THEME-001] Loading state for refresh button */
+      /* [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Loading state for refresh button */
       .hoverboard-overlay .refresh-button.loading {
         opacity: 0.7;
         pointer-events: none;
@@ -2169,7 +2169,7 @@ class OverlayManager {
         transition: background-color 0.2s ease-in-out;
       }
 
-      /* 🔺 UI-005: Transparent overlay positioning - 🎨 Bottom-fixed transparency */
+      /* 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Transparent overlay positioning - 🎨 Bottom-fixed transparency */
       .hoverboard-overlay-bottom {
         position: fixed !important;
         bottom: 0 !important;
@@ -2288,7 +2288,7 @@ class OverlayManager {
         background: rgba(255, 255, 255, 0.4) !important;
       }
 
-      /* 🔶 UI-005: Adaptive visibility - 🎯 Context-aware transparency */
+      /* 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Adaptive visibility - 🎯 Context-aware transparency */
       .hoverboard-overlay-transparent.proximity-active,
       .hoverboard-overlay-invisible.proximity-active {
         background: rgba(255, 255, 255, 0.2) !important;
@@ -2306,7 +2306,7 @@ class OverlayManager {
         }
       }
 
-      /* [IMMUTABLE-REQ-TAG-004] - Slide-in animation for messages */
+      /* [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Slide-in animation for messages */
       @keyframes slideIn {
         from {
           transform: translateX(100%);
@@ -2329,7 +2329,7 @@ class OverlayManager {
 
   /**
    * Apply visibility settings from VisibilityControls component
-   * UI-VIS-001: Callback for VisibilityControls component
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Callback for VisibilityControls component
    * Enhanced with comprehensive theme integration
    */
   applyVisibilitySettings (settings) {
@@ -2412,7 +2412,7 @@ class OverlayManager {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Validate tag input
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate tag input
    * @param {string} tag - Tag to validate
    * @returns {boolean} Whether tag is valid
    */
@@ -2426,13 +2426,13 @@ class OverlayManager {
       return false
     }
 
-    // [IMMUTABLE-REQ-TAG-001] - Check for invalid characters
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Check for invalid characters
     const invalidChars = /[<>]/g
     if (invalidChars.test(trimmedTag)) {
       return false
     }
 
-    // [IMMUTABLE-REQ-TAG-001] - Check for only safe characters (allow #, +, . for e.g. C#, node.js; API encodes via buildSaveParams)
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Check for only safe characters (allow #, +, . for e.g. C#, node.js; API encodes via buildSaveParams)
     const safeChars = /^[\w\s.#+-]+$/
     if (!safeChars.test(trimmedTag)) {
       return false
@@ -2447,14 +2447,14 @@ class OverlayManager {
   destroy () {
     this.removeOverlay()
 
-    // 🔻 UI-005: Content protection - 🛡️ Page interaction safeguards
+    // 🔻 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Content protection - 🛡️ Page interaction safeguards
     // Clean up transparency-related listeners
     if (this.proximityListener) {
       this.document.removeEventListener('mousemove', this.proximityListener)
       this.proximityListener = null
     }
 
-    // UI-VIS-001: Clean up VisibilityControls component
+    // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Clean up VisibilityControls component
     if (this.visibilityControls) {
       this.visibilityControls.destroy()
       this.visibilityControls = null

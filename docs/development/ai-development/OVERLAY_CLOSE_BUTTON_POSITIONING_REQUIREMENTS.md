@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-19  
 **Status:** ✅ **COMPLETE** - Implementation Successful  
-**Cross-References:** [OVERLAY-REFRESH-001], [OVERLAY-THEMING-001], [OVERLAY-DATA-DISPLAY-001], [SAFARI-EXT-SHIM-001]
+**Cross-References:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [SAFARI-EXT-SHIM-001]
 
 ---
 
@@ -31,7 +31,7 @@ The 'close overlay' button is currently positioned in the wrong location. It mus
 
 ## 📋 Requirements Specification
 
-### **[OVERLAY-CLOSE-POSITION-001] - Close Button Positioning Requirement**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)] - Close Button Positioning Requirement**
 
 **Requirement**: The close overlay button must be positioned next to, and to the left of, the Refresh Data button at the top left corner of the overlay.
 
@@ -50,14 +50,14 @@ The 'close overlay' button is currently positioned in the wrong location. It mus
 - ✅ Works across all themes and platforms
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-REFRESH-001]` for refresh button positioning
-- Maintains compatibility with `[OVERLAY-THEMING-001]` for theme integration
+- Coordinates with `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]` for refresh button positioning
+- Maintains compatibility with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for theme integration
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform patterns
-- Integrates with `[OVERLAY-DATA-DISPLAY-001]` for overlay structure
+- Integrates with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]` for overlay structure
 
 ---
 
-### **[OVERLAY-CLOSE-POSITION-002] - Button Spacing and Layout**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-002)] - Button Spacing and Layout**
 
 **Requirement**: The close button and refresh button must have appropriate spacing and visual relationship.
 
@@ -76,7 +76,7 @@ The 'close overlay' button is currently positioned in the wrong location. It mus
 
 ---
 
-### **[OVERLAY-CLOSE-POSITION-003] - Responsive Behavior**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-003)] - Responsive Behavior**
 
 **Requirement**: The close button positioning must work correctly across different screen sizes and overlay configurations.
 
@@ -97,7 +97,7 @@ The 'close overlay' button is currently positioned in the wrong location. It mus
 
 ## 🏗️ Architectural Decisions
 
-### **[OVERLAY-CLOSE-POSITION-ARCH-001] - Positioning Strategy**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-001)] - Positioning Strategy**
 
 **Decision**: Use absolute positioning relative to the overlay element itself, not the container div
 
@@ -110,7 +110,7 @@ The 'close overlay' button is currently positioned in the wrong location. It mus
 
 **Implementation**:
 ```javascript
-// [OVERLAY-CLOSE-POSITION-OVERLAY-001] Close button positioning relative to overlay
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-OVERLAY-001)] Close button positioning relative to overlay
 closeBtn.style.cssText = `
   position: absolute;
   top: 8px;
@@ -131,12 +131,12 @@ closeBtn.style.cssText = `
   justify-content: center;
 `
 
-// [OVERLAY-CLOSE-POSITION-OVERLAY-001] Append directly to overlay element
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-OVERLAY-001)] Append directly to overlay element
 this.overlayElement.appendChild(closeBtn)
 this.overlayElement.appendChild(refreshBtn)
 ```
 
-### **[OVERLAY-CLOSE-POSITION-ARCH-002] - Refresh Button Adjustment**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-002)] - Refresh Button Adjustment**
 
 **Decision**: Adjust refresh button positioning to accommodate close button
 
@@ -148,7 +148,7 @@ this.overlayElement.appendChild(refreshBtn)
 
 **Implementation**:
 ```javascript
-// [OVERLAY-REFRESH-UI-001] Adjusted refresh button positioning
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Adjusted refresh button positioning
 refreshBtn.style.cssText = `
   position: absolute;
   top: 8px;
@@ -174,7 +174,7 @@ refreshBtn.style.cssText = `
 
 ## 🧪 Testing Requirements
 
-### **[OVERLAY-CLOSE-POSITION-TEST-001] - Positioning Tests**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-001)] - Positioning Tests**
 
 **Test Cases**:
 1. **Visual Positioning**: Verify close button appears to left of refresh button
@@ -184,7 +184,7 @@ refreshBtn.style.cssText = `
 5. **Responsive Behavior**: Verify positioning on different screen sizes
 6. **Platform Compatibility**: Test on Chrome and Safari extensions
 
-### **[OVERLAY-CLOSE-POSITION-TEST-002] - Functionality Tests**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-002)] - Functionality Tests**
 
 **Test Cases**:
 1. **Click Functionality**: Verify close button still closes overlay
@@ -199,15 +199,15 @@ refreshBtn.style.cssText = `
 ## 📚 Cross-Reference Coordination
 
 ### **Existing Requirements Coordination**
-- **`[OVERLAY-REFRESH-001]`**: ✅ Coordinates with refresh button positioning
-- **`[OVERLAY-THEMING-001]`**: ✅ Maintains theme-aware styling
-- **`[OVERLAY-DATA-DISPLAY-001]`**: ✅ Integrates with overlay data display
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]`**: ✅ Coordinates with refresh button positioning
+- **`[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`**: ✅ Maintains theme-aware styling
+- **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`**: ✅ Integrates with overlay data display
 - **`[SAFARI-EXT-SHIM-001]`**: ✅ Supports cross-platform compatibility
 
 ### **Architectural Decisions**
-- **`[OVERLAY-CLOSE-POSITION-ARCH-001]`**: ✅ Absolute positioning strategy
-- **`[OVERLAY-CLOSE-POSITION-ARCH-002]`**: ✅ Refresh button adjustment
-- **`[OVERLAY-REFRESH-ARCH-001]`**: ✅ Coordinates with existing refresh positioning
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-001)]`**: ✅ Absolute positioning strategy
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-002)]`**: ✅ Refresh button adjustment
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-001)]`**: ✅ Coordinates with existing refresh positioning
 
 ---
 
@@ -241,7 +241,7 @@ refreshBtn.style.cssText = `
 
 ---
 
-**Semantic Token:** [OVERLAY-CLOSE-POSITION-001]  
-**Cross-References:** [OVERLAY-REFRESH-001], [OVERLAY-THEMING-001], [OVERLAY-DATA-DISPLAY-001], [SAFARI-EXT-SHIM-001]  
+**Semantic Token:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)]  
+**Cross-References:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [SAFARI-EXT-SHIM-001]  
 **Date:** 2025-07-19  
 **Status:** Active Requirements 

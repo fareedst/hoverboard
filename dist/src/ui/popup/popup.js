@@ -15451,9 +15451,9 @@ var init_config_manager = __esm({
           // [ARCH-LOCAL_STORAGE_PROVIDER] - Bookmark storage mode (pinboard | local)
           INHIBIT_URLS: "hoverboard_inhibit_urls",
           RECENT_TAGS: "hoverboard_recent_tags",
-          // [IMMUTABLE-REQ-TAG-001] - Tag storage key
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Tag storage key
           TAG_FREQUENCY: "hoverboard_tag_frequency"
-          // [IMMUTABLE-REQ-TAG-001] - Tag frequency storage key
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Tag frequency storage key
         };
         this.defaultConfig = this.getDefaultConfiguration();
       }
@@ -15509,7 +15509,7 @@ var init_config_manager = __esm({
           // Preserve URL hash by default (maintain full URL context)
           uxShowSectionLabels: false,
           // Show section labels in popup (Quick Actions, Search Tabs)
-          // [IMMUTABLE-REQ-TAG-003] - Recent tags configuration
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Recent tags configuration
           // IMPLEMENTATION DECISION: Conservative defaults for shared memory management
           recentTagsMaxListSize: 50,
           // Maximum recent tags in shared memory
@@ -15539,7 +15539,7 @@ var init_config_manager = __esm({
           // Maximum retry attempts
           pinRetryDelay: 1e3,
           // in ms - delay between retries
-          // ⭐ UI-006: Visibility Controls - 🎨 Per-window overlay appearance defaults
+          // ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility Controls - 🎨 Per-window overlay appearance defaults
           // IMPLEMENTATION DECISION: Conservative defaults for broad compatibility and readability
           defaultVisibilityTheme: "light-on-dark",
           // 'light-on-dark' | 'dark-on-light' - Dark theme default
@@ -15620,7 +15620,7 @@ var init_config_manager = __esm({
           recentPostsCount: config2.initRecentPostsCount,
           showHoverOnPageLoad: config2.showHoverOnPageLoad,
           hoverShowTooltips: config2.hoverShowTooltips,
-          // UI-006: Visibility defaults for configuration UI
+          // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility defaults for configuration UI
           defaultVisibilityTheme: config2.defaultVisibilityTheme,
           defaultTransparencyEnabled: config2.defaultTransparencyEnabled,
           defaultBackgroundOpacity: config2.defaultBackgroundOpacity,
@@ -15674,7 +15674,7 @@ var init_config_manager = __esm({
        * Get visibility default settings
        * @returns {Promise<Object>} Visibility defaults object
        *
-       * UI-006: Visibility defaults retrieval
+       * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility defaults retrieval
        * IMPLEMENTATION DECISION: Dedicated method for overlay visibility configuration
        */
       async getVisibilityDefaults() {
@@ -15689,7 +15689,7 @@ var init_config_manager = __esm({
        * Update visibility default settings
        * @param {{ textTheme?: string, transparencyEnabled?: boolean, backgroundOpacity?: number }} visibilitySettings - New visibility defaults
        *
-       * UI-006: Visibility defaults update
+       * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility defaults update
        * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
        */
       async updateVisibilityDefaults(visibilitySettings) {
@@ -15922,14 +15922,14 @@ var init_config_manager = __esm({
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Enhanced tag storage management
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced tag storage management
        * @param {string[]} tags - Array of tags to store
        * @returns {Promise<void>}
        */
       async updateRecentTags(tags) {
         try {
           if (!Array.isArray(tags)) {
-            console.warn("[IMMUTABLE-REQ-TAG-001] Invalid tags array provided");
+            console.warn("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Invalid tags array provided");
             return;
           }
           const config2 = await this.getConfig();
@@ -15943,7 +15943,7 @@ var init_config_manager = __esm({
             }
           });
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to update recent tags:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to update recent tags:", error48);
           try {
             await chrome.storage.local.set({
               [this.storageKeys.RECENT_TAGS]: {
@@ -15953,12 +15953,12 @@ var init_config_manager = __esm({
               }
             });
           } catch (fallbackError) {
-            console.error("[IMMUTABLE-REQ-TAG-001] Fallback storage also failed:", fallbackError);
+            console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Fallback storage also failed:", fallbackError);
           }
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Get recent tags with deduplication
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get recent tags with deduplication
        * @returns {Promise<string[]>} Array of recent tags
        */
       async getRecentTags() {
@@ -15973,12 +15973,12 @@ var init_config_manager = __esm({
           }
           return [];
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to get recent tags:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to get recent tags:", error48);
           return [];
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Get tag frequency data
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get tag frequency data
        * @returns {Promise<Object>} Tag frequency map
        */
       async getTagFrequency() {
@@ -15986,12 +15986,12 @@ var init_config_manager = __esm({
           const result = await chrome.storage.local.get(this.storageKeys.TAG_FREQUENCY);
           return result[this.storageKeys.TAG_FREQUENCY] || {};
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to get tag frequency:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to get tag frequency:", error48);
           return {};
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Update tag frequency
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Update tag frequency
        * @param {Object} frequency - Updated frequency map
        * @returns {Promise<void>}
        */
@@ -16001,11 +16001,11 @@ var init_config_manager = __esm({
             [this.storageKeys.TAG_FREQUENCY]: frequency
           });
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to update tag frequency:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to update tag frequency:", error48);
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Clean up old tags to manage storage
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Clean up old tags to manage storage
        * @returns {Promise<void>}
        */
       async cleanupOldTags() {
@@ -16018,7 +16018,7 @@ var init_config_manager = __esm({
             await this.updateRecentTags(trimmedTags);
           }
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to cleanup old tags:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to cleanup old tags:", error48);
         }
       }
     };
@@ -17453,7 +17453,7 @@ var UIManager = class {
       privateStatus: get("privateStatus"),
       readIcon: get("readIcon"),
       readStatus: get("readStatus"),
-      // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Add checkbox element reference
       showHoverOnPageLoad: get("showHoverOnPageLoad"),
       // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend select-one buttons (pinboard | file | local | sync)
       storageBackendButtons: get("storageBackendButtons"),
@@ -17900,7 +17900,7 @@ var UIManager = class {
     });
   }
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Update recent tags display with user-driven behavior
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Update recent tags display with user-driven behavior
    * [REQ-THIS_PAGE_TAG_SORT] Sort within Recent Tags when side-panel toggle present (bookmark frequency map).
    * @param {string[]|Array<{ name?: string }>} recentTags - Tag names or objects with name (from service)
    */
@@ -17938,7 +17938,7 @@ var UIManager = class {
     });
   }
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Create a recent tag element (clickable to add to current site only)
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Create a recent tag element (clickable to add to current site only)
    * @param {string} tag - Tag name
    * @returns {HTMLElement} Tag element
    */
@@ -18206,7 +18206,7 @@ var UIManager = class {
     }
   }
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Validate tag input
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate tag input
    * @param {string} tag - Tag to validate
    * @returns {boolean} Whether tag is valid
    */
@@ -19009,19 +19009,19 @@ var MESSAGE_TYPES = {
   REFRESH_DATA: "refreshData",
   REFRESH_HOVER: "refreshHover",
   BOOKMARK_UPDATED: "bookmarkUpdated",
-  // [TOGGLE-SYNC-MESSAGE-001] - New message type
+  // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - New message type
   TAG_UPDATED: "TAG_UPDATED",
-  // [TAG-SYNC-MESSAGE-001] - New message type for tag synchronization
+  // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - New message type for tag synchronization
   // Site management
   INHIBIT_URL: "inhibitUrl",
   // Search operations
   SEARCH_TITLE: "searchTitle",
   SEARCH_TITLE_TEXT: "searchTitleText",
-  // [IMMUTABLE-REQ-TAG-002] Tab search operations
+  // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tab search operations
   SEARCH_TABS: "searchTabs",
   GET_SEARCH_HISTORY: "getSearchHistory",
   CLEAR_SEARCH_STATE: "clearSearchState",
-  // [IMMUTABLE-REQ-TAG-003] Recent tags operations
+  // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Recent tags operations
   ADD_TAG_TO_RECENT: "addTagToRecent",
   GET_USER_RECENT_TAGS: "getUserRecentTags",
   GET_SHARED_MEMORY_STATUS: "getSharedMemoryStatus",
@@ -19242,7 +19242,7 @@ var PopupController = class {
       chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         if (message.type === "BOOKMARK_UPDATED") {
           try {
-            debugLog("[POPUP-REFRESH-001] Received BOOKMARK_UPDATED, refreshing data");
+            debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data");
             if (this.currentTab && this.currentTab.url) {
               const updatedPin = await this.getBookmarkData(this.currentTab.url);
               this.currentPin = updatedPin;
@@ -19260,16 +19260,16 @@ var PopupController = class {
         }
       });
     }
-    debugLog("[CHROME-DEBUG-001] PopupController constructor called", { platform: navigator.userAgent });
+    debugLog("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] PopupController constructor called", { platform: navigator.userAgent });
     if (typeof chrome !== "undefined" && chrome.runtime) {
-      debugLog("[CHROME-DEBUG-001] Detected Chrome runtime in PopupController");
+      debugLog("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] Detected Chrome runtime in PopupController");
     } else if (typeof browser !== "undefined" && browser.runtime) {
-      debugLog("[CHROME-DEBUG-001] Detected browser polyfill runtime in PopupController");
+      debugLog("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] Detected browser polyfill runtime in PopupController");
     } else {
-      debugError("[CHROME-DEBUG-001] No recognized extension runtime detected in PopupController");
+      debugError("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] No recognized extension runtime detected in PopupController");
     }
     if (!debugLog || !debugError) {
-      console.error("[CHROME-DEBUG-001] utils.js functions missing in PopupController");
+      console.error("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] utils.js functions missing in PopupController");
     }
   }
   /**
@@ -19323,10 +19323,10 @@ var PopupController = class {
   }
   /**
    * Load initial data when popup opens
-   * [POPUP-DATA-FLOW-001] Enhanced data flow validation
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Enhanced data flow validation
    */
   async loadInitialData() {
-    debugLog("[POPUP-DATA-FLOW-001] loadInitialData: start");
+    debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: start");
     try {
       this.setLoading(true);
       const params = typeof window !== "undefined" && window.location && window.location.search ? new URLSearchParams(window.location.search) : null;
@@ -19340,9 +19340,9 @@ var PopupController = class {
         this.currentTab = { url: decodedUrl, title: decodedTitle };
         debugLog("[IMPL-SCREENSHOT_MODE] loadInitialData: using fake tab from params", this.currentTab);
       } else {
-        debugLog("[POPUP-DATA-FLOW-001] loadInitialData: calling getCurrentTab");
+        debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: calling getCurrentTab");
         this.currentTab = await this.getCurrentTab();
-        debugLog("[POPUP-DATA-FLOW-001] loadInitialData: got currentTab", this.currentTab);
+        debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: got currentTab", this.currentTab);
       }
       if (!this.currentTab) {
         throw new Error("Unable to get current tab information");
@@ -19352,11 +19352,11 @@ var PopupController = class {
         url: this.currentTab.url,
         title: this.currentTab.title
       });
-      debugLog("[POPUP-DATA-FLOW-001] loadInitialData: calling getBookmarkData", this.currentTab.url);
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: calling getBookmarkData", this.currentTab.url);
       this.currentPin = await this.getBookmarkData(this.currentTab.url);
-      debugLog("[POPUP-DATA-FLOW-001] loadInitialData: got currentPin", this.currentPin);
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: got currentPin", this.currentPin);
       if (!this.currentPin) {
-        debugLog("[POPUP-DATA-FLOW-001] loadInitialData: No bookmark data, creating empty bookmark for current site");
+        debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: No bookmark data, creating empty bookmark for current site");
         this.currentPin = {
           url: this.currentTab.url,
           description: this.currentTab.title || "",
@@ -19368,10 +19368,10 @@ var PopupController = class {
           extended: "",
           hash: ""
         };
-        debugLog("[POPUP-DATA-FLOW-001] loadInitialData: created empty bookmark", this.currentPin);
+        debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: created empty bookmark", this.currentPin);
       }
       this.stateManager.setState({ currentPin: this.currentPin });
-      debugLog("[POPUP-DATA-FLOW-001] loadInitialData: bookmark data validation:", {
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: bookmark data validation:", {
         hasBookmark: !!this.currentPin,
         url: this.currentPin?.url,
         description: this.currentPin?.description,
@@ -19380,14 +19380,14 @@ var PopupController = class {
         isReadLater: this.currentPin?.toread === "yes"
       });
       const normalizedTags = this.normalizeTags(this.currentPin?.tags);
-      debugLog("[POPUP-DATA-FLOW-001] loadInitialData: tags processing:", {
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: tags processing:", {
         originalTags: this.currentPin?.tags,
         originalTagsType: typeof this.currentPin?.tags,
         normalizedTags,
         normalizedTagsLength: normalizedTags.length,
         normalizedTagsIsArray: Array.isArray(normalizedTags)
       });
-      debugLog("[POPUP-DATA-FLOW-001] loadInitialData: calling updateCurrentTags with:", normalizedTags);
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] loadInitialData: calling updateCurrentTags with:", normalizedTags);
       await this.refreshTagFrequencyMapForSort();
       this.uiManager.updateCurrentTags(normalizedTags);
       this.uiManager.updateConnectionStatus(true);
@@ -19433,12 +19433,12 @@ var PopupController = class {
       if (tagWithAiBtn) tagWithAiBtn.disabled = !aiApiKey || !urlOk;
       await this.refreshUsageSection();
       this.isInitialized = true;
-      debugLog("[POPUP-DATA-FLOW-001] Popup initialization completed successfully");
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Popup initialization completed successfully");
       if (this._onStateChange) {
         this._onStateChange({ screen: "mainInterface", state: { bookmark: this.currentPin } });
       }
     } catch (error48) {
-      debugError("[POPUP-DATA-FLOW-001] Failed to load initial data:", error48);
+      debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Failed to load initial data:", error48);
       if (this._onStateChange) this._onStateChange({ screen: "error", state: {} });
       if (this.errorHandler) {
         this.errorHandler.handleError("Failed to load initial data", error48);
@@ -19475,18 +19475,18 @@ var PopupController = class {
     });
   }
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Load user-driven recent tags from shared memory
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Load user-driven recent tags from shared memory
    * Excludes tags already assigned to the current site
    */
   async loadRecentTags() {
     try {
-      debugLog("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Loading user-driven recent tags");
+      debugLog("[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Loading user-driven recent tags");
       if (this._screenshotMode) {
         const applied = await this.loadDemoRecentTagsIfScreenshotMode();
         if (applied) return;
       }
       const currentTags = this.normalizeTags(this.currentPin?.tags || []);
-      debugLog("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Current tags to exclude:", currentTags);
+      debugLog("[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Current tags to exclude:", currentTags);
       const response = await this.sendMessage({
         type: "getRecentBookmarks",
         data: {
@@ -19495,9 +19495,9 @@ var PopupController = class {
           senderUrl: this.currentTab?.url
         }
       });
-      debugLog("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Recent bookmarks response received:", response);
+      debugLog("[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Recent bookmarks response received:", response);
       if (response && response.recentTags) {
-        debugLog("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Recent tags from response:", response.recentTags);
+        debugLog("[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Recent tags from response:", response.recentTags);
         const recentTagNames = response.recentTags.map((tag) => {
           if (typeof tag === "string") {
             return tag;
@@ -19507,18 +19507,18 @@ var PopupController = class {
             return String(tag);
           }
         });
-        debugLog("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Extracted recent tag names:", recentTagNames);
+        debugLog("[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Extracted recent tag names:", recentTagNames);
         const filteredRecentTags = recentTagNames.filter(
           (tag) => !currentTags.includes(tag)
         );
-        debugLog("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Final filtered recent tags:", filteredRecentTags);
+        debugLog("[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Final filtered recent tags:", filteredRecentTags);
         this.uiManager.updateRecentTags(filteredRecentTags);
       } else {
-        debugLog("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] No recent tags in response, updating with empty array");
+        debugLog("[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] No recent tags in response, updating with empty array");
         this.uiManager.updateRecentTags([]);
       }
     } catch (error48) {
-      debugError("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Failed to load recent tags:", error48);
+      debugError("[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to load recent tags:", error48);
       this.uiManager.updateRecentTags([]);
     }
   }
@@ -19647,7 +19647,7 @@ var PopupController = class {
     });
   }
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Validate tag input
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate tag input
    * @param {string} tag - Tag to validate
    * @returns {boolean} Whether tag is valid
    */
@@ -19673,19 +19673,19 @@ var PopupController = class {
    * Get current active tab
    */
   async getCurrentTab() {
-    debugLog("[CHROME-DEBUG-001] getCurrentTab: calling chrome.tabs.query");
+    debugLog("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] getCurrentTab: calling chrome.tabs.query");
     return new Promise((resolve, reject) => {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-        debugLog("[CHROME-DEBUG-001] getCurrentTab: chrome.tabs.query callback", tabs, chrome.runtime.lastError);
+        debugLog("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] getCurrentTab: chrome.tabs.query callback", tabs, chrome.runtime.lastError);
         if (chrome.runtime.lastError) {
-          debugError("[CHROME-DEBUG-001] getCurrentTab: chrome.runtime.lastError", chrome.runtime.lastError);
+          debugError("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] getCurrentTab: chrome.runtime.lastError", chrome.runtime.lastError);
           reject(new Error(chrome.runtime.lastError.message));
           return;
         }
         if (tabs && tabs.length > 0) {
           resolve(tabs[0]);
         } else {
-          debugError("[CHROME-DEBUG-001] getCurrentTab: No active tab found");
+          debugError("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] getCurrentTab: No active tab found");
           reject(new Error("No active tab found"));
         }
       });
@@ -19693,10 +19693,10 @@ var PopupController = class {
   }
   /**
    * Get bookmark data for a URL
-   * [POPUP-DATA-FLOW-001] Enhanced data extraction with validation
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Enhanced data extraction with validation
    */
   async getBookmarkData(url2) {
-    debugLog("[POPUP-DATA-FLOW-001] getBookmarkData: calling chrome.runtime.sendMessage", url2);
+    debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: calling chrome.runtime.sendMessage", url2);
     return new Promise((resolve, reject) => {
       chrome.runtime.sendMessage(
         {
@@ -19704,14 +19704,14 @@ var PopupController = class {
           data: { url: url2 }
         },
         (response) => {
-          debugLog("[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.sendMessage callback", response, chrome.runtime.lastError);
+          debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: chrome.runtime.sendMessage callback", response, chrome.runtime.lastError);
           if (chrome.runtime.lastError) {
-            debugError("[POPUP-DATA-FLOW-001] getBookmarkData: chrome.runtime.lastError", chrome.runtime.lastError);
+            debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: chrome.runtime.lastError", chrome.runtime.lastError);
             reject(new Error(chrome.runtime.lastError.message));
             return;
           }
           if (response && response.success) {
-            debugLog("[POPUP-DATA-FLOW-001] getBookmarkData: response structure:", {
+            debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: response structure:", {
               response,
               responseSuccess: response.success,
               responseData: response.data,
@@ -19723,21 +19723,21 @@ var PopupController = class {
             });
             const bookmarkData = response.data;
             if (bookmarkData?.blocked) {
-              debugLog("[POPUP-DATA-FLOW-001] getBookmarkData: URL blocked", bookmarkData);
+              debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: URL blocked", bookmarkData);
               resolve(null);
               return;
             }
             const isValid = this.validateBookmarkData(bookmarkData);
             if (!isValid) {
-              debugLog("[POPUP-DATA-FLOW-001] getBookmarkData: Invalid bookmark data structure, treating as no bookmark", bookmarkData);
+              debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: Invalid bookmark data structure, treating as no bookmark", bookmarkData);
               resolve(null);
               return;
             }
             const extractedData = bookmarkData?.data || bookmarkData;
-            debugLog("[POPUP-DATA-FLOW-001] getBookmarkData: extracted and validated bookmark data:", extractedData);
+            debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: extracted and validated bookmark data:", extractedData);
             resolve(extractedData);
           } else {
-            debugError("[POPUP-DATA-FLOW-001] getBookmarkData: Failed to get bookmark data", response);
+            debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] getBookmarkData: Failed to get bookmark data", response);
             reject(new Error(response?.error || "Failed to get bookmark data"));
           }
         }
@@ -19808,7 +19808,7 @@ var PopupController = class {
     }
   }
   /**
-   * [POPUP-DEBUG-001] Validate bookmark data structure
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Validate bookmark data structure
    * @param {Object} bookmarkData - Bookmark data to validate
    * @returns {boolean} Whether the data is valid
    */
@@ -19818,14 +19818,14 @@ var PopupController = class {
     }
     const data = bookmarkData?.data || bookmarkData;
     if (!data || typeof data !== "object" || !data.url) {
-      debugLog("[POPUP-DEBUG-001] Bookmark data validation: missing url or invalid object");
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Bookmark data validation: missing url or invalid object");
       return false;
     }
     if (!Array.isArray(data.tags)) {
       data.tags = data.tags == null ? [] : typeof data.tags === "string" ? data.tags.split(/\s+/).filter((t) => t.trim()) : [];
     }
     const isValid = true;
-    debugLog("[POPUP-DEBUG-001] Bookmark data validation:", {
+    debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Bookmark data validation:", {
       isValid,
       hasUrl: !!data?.url,
       hasTags: Array.isArray(data?.tags),
@@ -20328,7 +20328,7 @@ var PopupController = class {
   }
   /**
    * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Handle show/hide hoverboard; no window.close.
-   * [POPUP-CLOSE-BEHAVIOR-004] Modified to NOT close popup after toggling overlay visibility
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Modified to NOT close popup after toggling overlay visibility
    */
   async handleShowHoverboard() {
     recordAction(POPUP_ACTION_IDS.showHoverboard, { tabId: this.currentTab?.id }, "popup");
@@ -20347,7 +20347,7 @@ var PopupController = class {
       });
       if (toggleResponse && toggleResponse.data) {
         this.uiManager.updateShowHoverButtonState(toggleResponse.data.isVisible);
-        debugLog("[POPUP-CLOSE-BEHAVIOR-ARCH-004] Updated UI with toggle response:", toggleResponse.data);
+        debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Updated UI with toggle response:", toggleResponse.data);
       } else {
         await this.updateOverlayState();
       }
@@ -20387,7 +20387,7 @@ var PopupController = class {
             data: updatedPin
           });
         } catch (error48) {
-          debugError("[TOGGLE-SYNC-POPUP-001] Failed to notify overlay:", error48);
+          debugError("[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to notify overlay:", error48);
         }
       } else {
         await this.createBookmark([], "yes");
@@ -20433,7 +20433,7 @@ var PopupController = class {
             data: updatedPin
           });
         } catch (error48) {
-          debugError("[TOGGLE-SYNC-POPUP-001] Failed to notify overlay:", error48);
+          debugError("[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to notify overlay:", error48);
         }
       } else {
         await this.createBookmark([], "yes", "yes");
@@ -20448,7 +20448,7 @@ var PopupController = class {
   }
   /**
    * Handle add tag action
-   * [IMMUTABLE-REQ-TAG-003] - Enhanced with user-driven recent tags tracking
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Enhanced with user-driven recent tags tracking
    */
   async handleAddTag(tagText) {
     recordAction(POPUP_ACTION_IDS.addTag, { tag: tagText }, "popup");
@@ -20494,7 +20494,7 @@ var PopupController = class {
             }
           });
         } catch (error48) {
-          debugError("[POPUP-CONTROLLER] [IMMUTABLE-REQ-TAG-003] Failed to track tag addition:", error48);
+          debugError("[POPUP-CONTROLLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to track tag addition:", error48);
         }
       }
       this.uiManager.clearTagInput();
@@ -20542,7 +20542,7 @@ var PopupController = class {
   }
   /**
    * Add tags to bookmark
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking and validation
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced with tag tracking and validation
    */
   async addTagsToBookmark(tags) {
     for (const tag of tags) {
@@ -20577,11 +20577,11 @@ var PopupController = class {
         data: pinData
       });
     } catch (error48) {
-      debugError("[TAG-SYNC-POPUP-001] Failed to notify overlay of BOOKMARK_UPDATED after tag change:", error48);
+      debugError("[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to notify overlay of BOOKMARK_UPDATED after tag change:", error48);
     }
   }
   /**
-   * [TAG-SYNC-POPUP-001] - Notify overlay of tag changes
+   * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Notify overlay of tag changes
    * @param {string[]} tags - Array of updated tags
    */
   async notifyOverlayOfTagChanges(tags) {
@@ -20596,12 +20596,12 @@ var PopupController = class {
         data: updatedBookmark
       });
     } catch (error48) {
-      debugError("[TAG-SYNC-POPUP-001] Failed to notify overlay of TAG_UPDATED:", error48);
+      debugError("[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to notify overlay of TAG_UPDATED:", error48);
     }
   }
   /**
    * Create new bookmark
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking and validation
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced with tag tracking and validation
    */
   async createBookmark(tags, sharedStatus = "yes", toreadStatus = "no") {
     for (const tag of tags) {
@@ -20696,7 +20696,7 @@ var PopupController = class {
     }
   }
   /**
-   * [POPUP-CLOSE-BEHAVIOR-FIX-001] Handle delete bookmark action
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Handle delete bookmark action
    * Modified to NOT close popup after deletion - popup stays open for continued interaction
    */
   async handleDeletePin() {
@@ -20729,7 +20729,7 @@ var PopupController = class {
     }
   }
   /**
-   * [POPUP-CLOSE-BEHAVIOR-FIX-001] Handle reload extension action
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Handle reload extension action
    * Modified to NOT close popup after reload - popup stays open for continued interaction
    */
   async handleReloadExtension() {
@@ -20745,7 +20745,7 @@ var PopupController = class {
     }
   }
   /**
-   * [POPUP-CLOSE-BEHAVIOR-FIX-001] Handle open options action
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Handle open options action
    * Modified to NOT close popup after opening options - popup stays open for continued interaction
    */
   async handleOpenOptions() {
@@ -20941,7 +20941,7 @@ var PopupController = class {
     setTimeout(() => window.close(), 100);
   }
   /**
-   * [POPUP-CLOSE-BEHAVIOR-005] Update popup UI to reflect overlay state
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Update popup UI to reflect overlay state
    */
   async updateOverlayState() {
     if (!this.currentTab || !this.canInjectIntoTab(this.currentTab)) {
@@ -20954,9 +20954,9 @@ var PopupController = class {
       });
       const stateData = overlayState.data || overlayState;
       this.uiManager.updateShowHoverButtonState(stateData.isVisible);
-      debugLog("[POPUP-CLOSE-BEHAVIOR-005] Updated overlay state:", stateData);
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Updated overlay state:", stateData);
     } catch (error48) {
-      debugError("[POPUP-CLOSE-BEHAVIOR-005] Failed to update overlay state:", error48);
+      debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Failed to update overlay state:", error48);
       this.uiManager.updateShowHoverButtonState(false);
     }
   }
@@ -21013,33 +21013,33 @@ var PopupController = class {
     }
   }
   /**
-   * [POPUP-REFRESH-001] Manual refresh capability
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Manual refresh capability
    */
   async refreshPopupData() {
     recordAction(POPUP_ACTION_IDS.refreshData, void 0, "popup");
     if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.refreshData, payload: void 0 });
-    debugLog("[POPUP-REFRESH-001] Starting manual refresh");
+    debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Starting manual refresh");
     try {
       this.setLoading(true);
       await this.loadInitialData();
       await this.updateOverlayState();
       this.uiManager.showSuccess("Data refreshed successfully");
-      debugLog("[POPUP-REFRESH-001] Manual refresh completed successfully");
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Manual refresh completed successfully");
     } catch (error48) {
-      debugError("[POPUP-REFRESH-001] Refresh failed:", error48);
+      debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Refresh failed:", error48);
       this.uiManager.showError("Failed to refresh data");
     } finally {
       this.setLoading(false);
     }
   }
   /**
-   * [POPUP-REFRESH-001] Setup auto-refresh on focus
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Setup auto-refresh on focus
    * [IMPL-RECENT_TAGS_POPUP_REFRESH] [ARCH-POPUP_SESSION] [REQ-RECENT_TAGS_SYSTEM] Refresh Recent Tags when popup becomes visible (visibilitychange).
    */
   setupAutoRefresh() {
     window.addEventListener("focus", () => {
       if (this.isInitialized && !this.isLoading) {
-        debugLog("[POPUP-REFRESH-001] Auto-refresh on focus triggered");
+        debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Auto-refresh on focus triggered");
         this.refreshPopupData();
       }
     });
@@ -21051,25 +21051,25 @@ var PopupController = class {
     });
   }
   /**
-   * [POPUP-REFRESH-001] Enhanced real-time update handling
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Enhanced real-time update handling
    */
   setupRealTimeUpdates() {
     if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
       chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
         if (message.type === "BOOKMARK_UPDATED") {
-          debugLog("[POPUP-REFRESH-001] Received BOOKMARK_UPDATED, refreshing data");
+          debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data");
           try {
             await this.refreshPopupData();
             await this.updateOverlayState();
           } catch (error48) {
-            debugError("[POPUP-REFRESH-001] Failed to refresh on update:", error48);
+            debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Failed to refresh on update:", error48);
           }
         }
       });
     }
   }
   /**
-   * [POPUP-SYNC-001] Ensure popup and badge show same data
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Ensure popup and badge show same data
    */
   async validateBadgeSynchronization() {
     try {
@@ -21079,7 +21079,7 @@ var PopupController = class {
         type: "getCurrentBookmark",
         data: { url: currentTab.url }
       });
-      debugLog("[POPUP-SYNC-001] Badge synchronization check:", {
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Badge synchronization check:", {
         popupTags: popupData?.tags,
         badgeTags: badgeData?.tags,
         popupTagCount: popupData?.tags?.length || 0,
@@ -21092,12 +21092,12 @@ var PopupController = class {
         badgeData
       };
     } catch (error48) {
-      debugError("[POPUP-SYNC-001] Badge synchronization check failed:", error48);
+      debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Badge synchronization check failed:", error48);
       return { synchronized: false, error: error48.message };
     }
   }
   /**
-   * [POPUP-SYNC-001] Ensure popup and overlay show same data
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Ensure popup and overlay show same data
    */
   async validateOverlaySynchronization() {
     try {
@@ -21105,7 +21105,7 @@ var PopupController = class {
         type: "getCurrentBookmark",
         data: { url: this.currentTab.url }
       });
-      debugLog("[POPUP-SYNC-001] Overlay synchronization check:", {
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Overlay synchronization check:", {
         popupData: this.currentPin,
         overlayData,
         popupTagCount: this.currentPin?.tags?.length || 0,
@@ -21118,12 +21118,12 @@ var PopupController = class {
         overlayData
       };
     } catch (error48) {
-      debugError("[POPUP-SYNC-001] Overlay synchronization check failed:", error48);
+      debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Overlay synchronization check failed:", error48);
       return { synchronized: false, error: error48.message };
     }
   }
   /**
-   * [SHOW-HOVER-CHECKBOX-CONTROLLER-003] - Handle checkbox state change
+   * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Handle checkbox state change
    */
   async handleShowHoverOnPageLoadChange() {
     recordAction(POPUP_ACTION_IDS.showHoverOnPageLoadChange, void 0, "popup");
@@ -21142,7 +21142,7 @@ var PopupController = class {
     }
   }
   /**
-   * [SHOW-HOVER-CHECKBOX-CONTROLLER-004] - Load checkbox state from configuration
+   * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Load checkbox state from configuration
    */
   async loadShowHoverOnPageLoadSetting() {
     try {
@@ -21153,7 +21153,7 @@ var PopupController = class {
     }
   }
   /**
-   * [SHOW-HOVER-CHECKBOX-CONTROLLER-005] - Broadcast configuration updates to content scripts
+   * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Broadcast configuration updates to content scripts
    */
   async broadcastConfigUpdate() {
     try {
@@ -21523,7 +21523,7 @@ var UISystem = class {
   /**
    * Initialize the UI system
    *
-   * UI-001: System initialization with dependency management
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: System initialization with dependency management
    * SPECIFICATION: Initialize components in dependency order (themes → icons → assets)
    * IMPLEMENTATION DECISION: Options-based initialization for flexible component inclusion
    */
@@ -21564,7 +21564,7 @@ var UISystem = class {
   /**
    * Create popup application instance
    *
-   * UI-004: Popup application factory with integrated components
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Popup application factory with integrated components
    * SPECIFICATION: Create popup with all UI system components integrated
    * IMPLEMENTATION DECISION: Inject UI managers into popup for seamless integration
    */
@@ -21608,7 +21608,7 @@ var UISystem = class {
   /**
    * Get icon element
    *
-   * UI-003: Icon retrieval through UI system
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Icon retrieval through UI system
    * SPECIFICATION: Provide centralized icon access with error handling
    * IMPLEMENTATION DECISION: Return null on failure for safe UI operations
    */
@@ -21622,7 +21622,7 @@ var UISystem = class {
   /**
    * Create icon button
    *
-   * UI-003: Icon button creation through UI system
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Icon button creation through UI system
    * SPECIFICATION: Create interactive icon buttons with consistent styling
    * IMPLEMENTATION DECISION: Centralized button creation for consistency
    */
@@ -21636,7 +21636,7 @@ var UISystem = class {
   /**
    * Set theme
    *
-   * UI-002: Theme switching through UI system
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Theme switching through UI system
    * SPECIFICATION: Apply theme across all UI components
    * IMPLEMENTATION DECISION: Centralized theme control with automatic propagation
    */
@@ -21650,7 +21650,7 @@ var UISystem = class {
   /**
    * Get current theme
    *
-   * UI-002: Current theme retrieval
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Current theme retrieval
    * SPECIFICATION: Provide current resolved theme for component consistency
    * IMPLEMENTATION DECISION: Default to 'light' if theme manager unavailable
    */
@@ -21663,7 +21663,7 @@ var UISystem = class {
   /**
    * Create theme switcher
    *
-   * UI-002: Theme switcher UI component creation
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Theme switcher UI component creation
    * SPECIFICATION: Create theme switching control widget
    * IMPLEMENTATION DECISION: Delegate to theme manager for consistent behavior
    */
@@ -21677,7 +21677,7 @@ var UISystem = class {
   /**
    * Get asset
    *
-   * UI-003: Asset retrieval through UI system
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Asset retrieval through UI system
    * SPECIFICATION: Provide centralized asset access with loading management
    * IMPLEMENTATION DECISION: Return null on failure for safe UI operations
    */
@@ -21691,7 +21691,7 @@ var UISystem = class {
   /**
    * Create responsive image
    *
-   * UI-003: Responsive image creation through UI system
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Responsive image creation through UI system
    * SPECIFICATION: Create responsive image elements with proper sizing
    * IMPLEMENTATION DECISION: Centralized image creation for consistent behavior
    */
@@ -21705,7 +21705,7 @@ var UISystem = class {
   /**
    * Preload assets
    *
-   * UI-003: Asset preloading through UI system
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Asset preloading through UI system
    * SPECIFICATION: Preload specified assets for performance optimization
    * IMPLEMENTATION DECISION: Allow caller-specified asset lists for flexible preloading
    */
@@ -21719,7 +21719,7 @@ var UISystem = class {
   /**
    * Apply theme styles to element
    *
-   * UI-002: Theme styling application utility
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Theme styling application utility
    * SPECIFICATION: Apply theme-specific styles to DOM elements
    * IMPLEMENTATION DECISION: Direct style application for dynamic theming
    */
@@ -21732,7 +21732,7 @@ var UISystem = class {
   /**
    * Inject CSS into document
    *
-   * UI-001: CSS injection utility for dynamic styling
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: CSS injection utility for dynamic styling
    * SPECIFICATION: Add CSS styles to document head with optional ID
    * IMPLEMENTATION DECISION: Support ID-based replacement for style updates
    */
@@ -21754,7 +21754,7 @@ var UISystem = class {
   /**
    * Load CSS from URL
    *
-   * UI-001: External CSS loading utility
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: External CSS loading utility
    * SPECIFICATION: Load CSS from external URL with optional ID
    * IMPLEMENTATION DECISION: Promise-based loading for async integration
    */
@@ -21780,7 +21780,7 @@ var UISystem = class {
   /**
    * Load default styles
    *
-   * UI-001: Default styling system loader
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Default styling system loader
    * SPECIFICATION: Load core extension styles for consistent appearance
    * IMPLEMENTATION DECISION: Centralized style loading for initialization
    */
@@ -21801,7 +21801,7 @@ var UISystem = class {
   /**
    * Get system capabilities
    *
-   * UI-001: System capability reporting
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: System capability reporting
    * SPECIFICATION: Report available UI system features
    * IMPLEMENTATION DECISION: Boolean flags for feature detection
    */
@@ -21816,13 +21816,13 @@ var UISystem = class {
   /**
    * Get system statistics
    *
-   * UI-001: System statistics reporting
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: System statistics reporting
    * SPECIFICATION: Provide system usage and performance statistics
    * IMPLEMENTATION DECISION: Aggregate statistics from all managers
    */
   getStats() {
     const stats = {
-      // UI-001: Base system statistics
+      // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Base system statistics
       isInitialized: this.isInitialized,
       componentsLoaded: 0
     };
@@ -21843,7 +21843,7 @@ var UISystem = class {
   /**
    * Cleanup resources
    *
-   * UI-001: Resource cleanup for proper disposal
+   * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Resource cleanup for proper disposal
    * SPECIFICATION: Clean up all UI system resources and event listeners
    * IMPLEMENTATION DECISION: Comprehensive cleanup to prevent memory leaks
    */

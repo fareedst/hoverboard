@@ -1,5 +1,3 @@
-# [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_BOOKMARK_SEARCH]
-# Implementation: Pure filterBookmarksBySearch in tags-tree-filter; panel search input, count, Next/Previous; scroll and highlight current match.
 IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
   code_locations:
     files:
@@ -18,7 +16,7 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
   cross_references:
     - "ARCH-SIDE_PANEL_BOOKMARK_SEARCH"
     - "REQ-SIDE_PANEL_BOOKMARK_SEARCH"
-  essence_pseudocode: "# [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_BOOKMARK_SEARCH]\n# This block defines the search feature: pure filter plus panel UI. Implements REQ by providing search, count, and Next/Previous; implements ARCH by client-side filter and scroll/highlight.\n\n# [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]\n# filterBookmarksBySearch: implements \"search displayed list by text\" by returning bookmarks where query (trimmed, case-insensitive) appears in description, url, tags (joined), or extended. Empty/whitespace query returns full list.\nfilterBookmarksBySearch(bookmarks, query):\n  q = String(query).trim().toLowerCase()\n  IF q === '' RETURN bookmarks\n  RETURN bookmarks WHERE bookmarkMatches(b, q)\nbookmarkMatches(b, q):\n  title = (b.description ?? '').toLowerCase()\n  url = (b.url ?? '').toLowerCase()\n  tags = (b.tags ?? []).join(' ').toLowerCase()\n  extended = (b.extended ?? '').toLowerCase()\n  RETURN title.includes(q) OR url.includes(q) OR tags.includes(q) OR extended.includes(q)\n\n# [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]\n# Pipeline integration: after applyFilters and sortBookmarks, if searchQuery.trim() then matchingBookmarks = filterBookmarksBySearch(displayedBookmarks, searchQuery); else matchingBookmarks = displayedBookmarks. Build tagToBookmarks or grouped from matchingBookmarks. Implements \"filter displayed list\" and \"count of matching records\".\nON refresh / load: displayedBookmarks = sortBookmarks(applyFilters(rawBookmarks, filterState), sortBy, sortAsc)\n  IF searchQuery.trim(): matchingBookmarks = filterBookmarksBySearch(displayedBookmarks, searchQuery)\n  ELSE: matchingBookmarks = displayedBookmarks\n  build tree/grouped from matchingBookmarks; display count = matchingBookmarks.length\n\n# [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]\n# Search UI: search input, count span, Previous/Next buttons. Implements \"display count\" and \"advance to next/previous record\".\nsearchInput: on input/change set searchQuery; re-run pipeline; set searchMatchIndex = 0; update searchCount text (\"N matches\" or \"No matches\")\nsearchCount: textContent = matchingBookmarks.length === 0 ? \"No matches\" : matchingBookmarks.length + \" matches\"\nsearchPrev: searchMatchIndex = (searchMatchIndex - 1 + total) % total; scrollToMatch(searchMatchIndex); setHighlight(searchMatchIndex)\nsearchNext: searchMatchIndex = (searchMatchIndex + 1) % total; scrollToMatch(searchMatchIndex); setHighlight(searchMatchIndex)\n\n# [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]\n# Render: each bookmark link gets data-search-index = flat index in display order so Nth match can be found. Implements \"scroll and highlight\" by finding element with data-search-index === searchMatchIndex, scrollIntoView, classList.add('search-current'); clear previous highlight.\nWHEN rendering tree or grouped: for each bookmark link set data-search-index = index (0-based in display order)\nscrollToMatch(idx): links = querySelectorAll('.tree-bookmark-link[data-search-index]'); el = links[idx]; IF el THEN el.scrollIntoView({ block: 'nearest' }); remove .search-current from all; el.classList.add('search-current')\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK_SEARCH-pseudocode.md"
   implementation_approach:
     details:
       - tags-tree-filter.js: "filterBookmarksBySearch(bookmarks, query) - substring match on description, url, tags joined, extended; case-insensitive; empty/whitespace returns full list"
@@ -32,8 +30,8 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
       date: "2026-02-22"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-22"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Side Panel Bookmark Search Implementation"
   rationale:
     benefits:

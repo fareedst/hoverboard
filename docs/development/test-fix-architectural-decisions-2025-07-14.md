@@ -3,7 +3,7 @@
 
 **Date**: 2025-07-14  
 **Status**: 🚨 CRITICAL - Architectural decisions for test failure fix  
-**Feature ID**: TEST-FIX-ARCH-001  
+**Feature ID**: [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)  
 **Priority**: ⭐ CRITICAL  
 
 > **🤖 AI ASSISTANT REQUIREMENTS**: This document coordinates with all existing architecture documents and follows the AI-First Development Framework. All decisions must maintain consistency with established patterns.
@@ -30,9 +30,9 @@ The failing test `should add tag through popup and persist to storage` requires 
 
 ## 🏗️ Platform-Specific Architectural Decisions
 
-### **JavaScript/Chrome Extension Platform Decisions** `[TEST-FIX-ARCH-001]`
+### **JavaScript/Chrome Extension Platform Decisions** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
-#### **Decision 1: Async Test Pattern Standardization** `[TEST-FIX-ARCH-001]`
+#### **Decision 1: Async Test Pattern Standardization** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: Jest + Async/Await + Promise-based testing  
 **Rationale**: Chrome extension APIs are inherently asynchronous, requiring proper async test patterns  
 **Alternative Considered**: Callback-based testing with manual promise management  
@@ -40,7 +40,7 @@ The failing test `should add tag through popup and persist to storage` requires 
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Async test pattern standardization - 🧪 Integration test architecture
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Async test pattern standardization - 🧪 Integration test architecture
 test('should handle async operations correctly', async () => {
   // Set up mocks without premature resolution
   const mockFactory = new TagTestMockFactory()
@@ -65,7 +65,7 @@ test('should handle async operations correctly', async () => {
 - **Testing Architecture**: Establishes standard async test patterns
 - **Error Handling Architecture**: Consistent async error handling
 
-#### **Decision 2: Mock Infrastructure Architecture** `[TEST-FIX-ARCH-001]`
+#### **Decision 2: Mock Infrastructure Architecture** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: Jest mock factories with stateful behavior simulation  
 **Rationale**: Chrome extension APIs require realistic simulation for reliable testing  
 **Alternative Considered**: Real Chrome extension testing with browser automation  
@@ -73,7 +73,7 @@ test('should handle async operations correctly', async () => {
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Mock infrastructure architecture - 🔧 Test infrastructure design
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Mock infrastructure architecture - 🔧 Test infrastructure design
 class TagTestMockFactory {
   constructor() {
     this.currentTags = ['existing-tag']
@@ -125,7 +125,7 @@ class TagTestMockFactory {
 - **Storage Architecture**: Simulates storage behavior accurately
 - **UI Architecture**: Maintains UI update patterns
 
-#### **Decision 3: Error Handling Test Architecture** `[TEST-FIX-ARCH-001]`
+#### **Decision 3: Error Handling Test Architecture** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: Comprehensive error scenario testing with proper validation  
 **Rationale**: Chrome extensions must handle network failures and API errors gracefully  
 **Alternative Considered**: Minimal error testing with focus on happy path  
@@ -133,7 +133,7 @@ class TagTestMockFactory {
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Error handling test architecture - 🛡️ Test reliability design
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Error handling test architecture - 🛡️ Test reliability design
 test('should handle API failures gracefully', async () => {
   chrome.runtime.sendMessage.mockImplementation((message, callback) => {
     // Simulate API failure
@@ -158,9 +158,9 @@ test('should handle API failures gracefully', async () => {
 
 ## 🔒 Security Architecture Decisions
 
-### **Input Validation and Sanitization** `[TEST-FIX-ARCH-001]`
+### **Input Validation and Sanitization** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
-#### **Decision 4: Tag Input Validation Testing** `[TEST-FIX-ARCH-001]`
+#### **Decision 4: Tag Input Validation Testing** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: Comprehensive input validation testing with edge case coverage  
 **Rationale**: Tag input must be validated to prevent security vulnerabilities  
 **Alternative Considered**: Basic validation testing only  
@@ -168,7 +168,7 @@ test('should handle API failures gracefully', async () => {
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Tag input validation testing - 🛡️ Security test architecture
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Tag input validation testing - 🛡️ Security test architecture
 test('should handle empty tag input gracefully', async () => {
   await popupController.handleAddTag('')
   
@@ -211,9 +211,9 @@ test('should normalize tag input (trim whitespace)', async () => {
 
 ## 📊 Performance Architecture Decisions
 
-### **Test Execution Performance** `[TEST-FIX-ARCH-001]`
+### **Test Execution Performance** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
-#### **Decision 5: Test Timeout Management** `[TEST-FIX-ARCH-001]`
+#### **Decision 5: Test Timeout Management** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: Reasonable timeout limits with proper async handling  
 **Rationale**: Tests must complete within reasonable time limits for CI/CD efficiency  
 **Alternative Considered**: No timeout limits with indefinite waiting  
@@ -221,7 +221,7 @@ test('should normalize tag input (trim whitespace)', async () => {
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Test timeout management - 📊 Performance test architecture
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Test timeout management - 📊 Performance test architecture
 test('should complete within reasonable time', async () => {
   // Set up mocks efficiently
   const mockFactory = new TagTestMockFactory()
@@ -241,7 +241,7 @@ test('should complete within reasonable time', async () => {
 - **Development Workflow Architecture**: Ensures developer productivity
 - **Monitoring Architecture**: Maintains performance tracking
 
-#### **Decision 6: Mock Performance Optimization** `[TEST-FIX-ARCH-001]`
+#### **Decision 6: Mock Performance Optimization** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: Efficient mock setup and cleanup with minimal overhead  
 **Rationale**: Tests must execute quickly while maintaining accuracy  
 **Alternative Considered**: Complex mock setup with maximum realism  
@@ -249,7 +249,7 @@ test('should complete within reasonable time', async () => {
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Mock performance optimization - 📊 Test efficiency architecture
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Mock performance optimization - 📊 Test efficiency architecture
 beforeEach(() => {
   // Efficient mock setup
   jest.clearAllMocks()
@@ -275,9 +275,9 @@ afterEach(() => {
 
 ## 🔧 Technology Stack Architecture Decisions
 
-### **JavaScript/ES6+ Language Decisions** `[TEST-FIX-ARCH-001]`
+### **JavaScript/ES6+ Language Decisions** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
-#### **Decision 7: Modern JavaScript Testing Patterns** `[TEST-FIX-ARCH-001]`
+#### **Decision 7: Modern JavaScript Testing Patterns** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: ES6+ async/await with Jest modern features  
 **Rationale**: Modern JavaScript patterns provide better readability and maintainability  
 **Alternative Considered**: ES5 callback patterns with manual promise management  
@@ -285,7 +285,7 @@ afterEach(() => {
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Modern JavaScript testing patterns - 🔧 Language architecture
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Modern JavaScript testing patterns - 🔧 Language architecture
 describe('Tag Management Integration', () => {
   let mockFactory
   
@@ -313,7 +313,7 @@ describe('Tag Management Integration', () => {
 - **Maintenance Architecture**: Ensures long-term maintainability
 - **Tooling Architecture**: Supports modern development tools
 
-#### **Decision 8: Module System Integration** `[TEST-FIX-ARCH-001]`
+#### **Decision 8: Module System Integration** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: ES6 modules with proper import/export patterns  
 **Rationale**: Chrome extension V3 requires ES6 module support  
 **Alternative Considered**: CommonJS require patterns  
@@ -321,7 +321,7 @@ describe('Tag Management Integration', () => {
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Module system integration - 🔧 Module architecture
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Module system integration - 🔧 Module architecture
 import { PopupController } from '../../src/ui/popup/PopupController.js'
 import { UIManager } from '../../src/ui/popup/UIManager.js'
 import { StateManager } from '../../src/ui/popup/StateManager.js'
@@ -359,9 +359,9 @@ describe('Popup Tag Integration', () => {
 
 ## 🧪 Testing Architecture Decisions
 
-### **Test Organization and Structure** `[TEST-FIX-ARCH-001]`
+### **Test Organization and Structure** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
-#### **Decision 9: Test Category Organization** `[TEST-FIX-ARCH-001]`
+#### **Decision 9: Test Category Organization** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: Hierarchical test organization with clear categorization  
 **Rationale**: Complex extension requires organized test structure for maintainability  
 **Alternative Considered**: Flat test structure with minimal organization  
@@ -369,7 +369,7 @@ describe('Popup Tag Integration', () => {
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Test category organization - 🧪 Test architecture
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Test category organization - 🧪 Test architecture
 describe('Popup Tag Integration Tests', () => {
   describe('Tag Management', () => {
     test('should add tag through popup and persist to storage', async () => {
@@ -407,7 +407,7 @@ describe('Popup Tag Integration Tests', () => {
 - **Maintenance Architecture**: Ensures test maintainability
 - **Coverage Architecture**: Supports comprehensive test coverage
 
-#### **Decision 10: Test Data Management** `[TEST-FIX-ARCH-001]`
+#### **Decision 10: Test Data Management** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 **Technology**: Centralized test data management with factory patterns  
 **Rationale**: Consistent test data improves test reliability and maintainability  
 **Alternative Considered**: Inline test data with minimal organization  
@@ -415,7 +415,7 @@ describe('Popup Tag Integration Tests', () => {
 
 **Implementation Pattern**:
 ```javascript
-// TEST-FIX-ARCH-001: Test data management - 🧪 Data architecture
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001): Test data management - 🧪 Data architecture
 class TagTestDataFactory {
   static createMockBookmark() {
     return {
@@ -478,19 +478,19 @@ test('should handle tag operations with consistent data', async () => {
 
 ### **Cross-Architecture Validation**
 
-#### **Popup Architecture Coordination** `[TEST-FIX-ARCH-001]`
+#### **Popup Architecture Coordination** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 - ✅ **Async Pattern Consistency**: Maintains popup async operation patterns
 - ✅ **UI Update Patterns**: Preserves UI update timing and sequence
 - ✅ **Error Display Patterns**: Maintains error display consistency
 - ✅ **State Management Patterns**: Preserves popup state management
 
-#### **Tag Management Architecture Coordination** `[TEST-FIX-ARCH-001]`
+#### **Tag Management Architecture Coordination** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 - ✅ **Tag Service Contracts**: Maintains tag service method signatures
 - ✅ **Tag Validation Patterns**: Preserves tag validation logic
 - ✅ **Tag Persistence Patterns**: Maintains tag storage patterns
 - ✅ **Recent Tags Behavior**: Preserves recent tags functionality
 
-#### **Testing Architecture Coordination** `[TEST-FIX-ARCH-001]`
+#### **Testing Architecture Coordination** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 - ✅ **Test Organization**: Maintains hierarchical test structure
 - ✅ **Mock Patterns**: Preserves consistent mock implementation
 - ✅ **Async Test Patterns**: Establishes standard async testing
@@ -500,7 +500,7 @@ test('should handle tag operations with consistent data', async () => {
 
 ## 📊 Success Metrics and Validation
 
-### **Architecture Compliance Metrics** `[TEST-FIX-ARCH-001]`
+### **Architecture Compliance Metrics** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 
 #### **Functional Compliance**
 - ✅ **Popup Integration**: All popup tag operations work correctly
@@ -530,19 +530,19 @@ test('should handle tag operations with consistent data', async () => {
 
 ## 🎯 Implementation Strategy
 
-### **Phase 1: Core Architecture Implementation** `[TEST-FIX-ARCH-001]`
+### **Phase 1: Core Architecture Implementation** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 1. **Implement async test patterns** following established architecture
 2. **Create mock infrastructure** with proper state management
 3. **Add error handling tests** with comprehensive coverage
 4. **Validate against all architecture documents**
 
-### **Phase 2: Architecture Validation** `[TEST-FIX-ARCH-001]`
+### **Phase 2: Architecture Validation** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 1. **Run comprehensive test suite** to validate all patterns
 2. **Verify architecture compliance** with all documents
 3. **Document any architecture adjustments** needed
 4. **Update architecture documentation** if required
 
-### **Phase 3: Integration and Coordination** `[TEST-FIX-ARCH-001]`
+### **Phase 3: Integration and Coordination** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-ARCH-001)]`
 1. **Coordinate with popup architecture** for UI patterns
 2. **Validate tag management integration** for persistence patterns
 3. **Ensure testing architecture consistency** for organization patterns
@@ -573,10 +573,10 @@ The implementation will follow the AI-First Development Framework with proper se
 - ✅ All architectural decisions have been validated in practice and are now confirmed as effective for robust, maintainable, and cross-referenced test infrastructure.
 
 ### Semantic Tokens Used
-- `TEST-FIX-001`: Test async handling fix - 🧪 Integration test repair
-- `TEST-FIX-002`: Mock structure improvement - 🔧 Test infrastructure enhancement
-- `TEST-FIX-003`: Error handling enhancement - 🛡️ Test reliability improvement
-- `TEST-FIX-004`: Edge case coverage - 🧪 Comprehensive test validation
+- `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001)`: Test async handling fix - 🧪 Integration test repair
+- `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-002)`: Mock structure improvement - 🔧 Test infrastructure enhancement
+- `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-003)`: Error handling enhancement - 🛡️ Test reliability improvement
+- `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-004)`: Edge case coverage - 🧪 Comprehensive test validation
 
 ---
 

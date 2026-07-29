@@ -105,7 +105,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
 
   // [TEST-OVERLAY_REFRESH] Button rendering tests
   describe('Button Rendering', () => {
-    test('[OVERLAY-REFRESH-UI-001] Should render refresh button correctly', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should render refresh button correctly', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -122,7 +122,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(refreshButton.getAttribute('tabindex')).toBe('0')
     })
 
-    test('[OVERLAY-REFRESH-UI-001] Should position refresh button in top-left corner', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should position refresh button in top-left corner', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -136,7 +136,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(refreshButton.style.cssText).toContain('left: 40px')
     })
 
-    test('[OVERLAY-REFRESH-UI-001] Should apply correct CSS classes', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should apply correct CSS classes', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -148,7 +148,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(refreshButton.className).toContain('refresh-button')
     })
 
-    test('[OVERLAY-REFRESH-THEME-001] Should use theme-aware CSS variables', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should use theme-aware CSS variables', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -166,7 +166,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
 
   // [TEST-OVERLAY_REFRESH] Click handler tests
   describe('Click Handler', () => {
-    test('[OVERLAY-REFRESH-HANDLER-001] Should handle successful refresh', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle successful refresh', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       const updatedContent = createMockUpdatedBookmarkContent()
@@ -197,7 +197,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       })
     })
 
-    test('[OVERLAY-REFRESH-HANDLER-001] Should show loading message during refresh', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should show loading message during refresh', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { bookmark: content.bookmark })
@@ -211,7 +211,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Refreshing data...', 'info')
     })
 
-    test('[OVERLAY-REFRESH-HANDLER-001] Should show success message after refresh', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should show success message after refresh', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { bookmark: content.bookmark })
@@ -228,7 +228,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
 
   // [TEST-OVERLAY_REFRESH] Error handling tests
   describe('Error Handling', () => {
-    test('[OVERLAY-REFRESH-ERROR-001] Should handle network errors gracefully', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle network errors gracefully', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { error: new Error('Network error') })
@@ -242,7 +242,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
     })
 
-    test('[OVERLAY-REFRESH-ERROR-001] Should handle invalid response data', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle invalid response data', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { rawResponse: { success: false, data: null } })
@@ -256,7 +256,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
     })
 
-    test('[OVERLAY-REFRESH-ERROR-001] Should handle missing response data', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle missing response data', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { rawResponse: null })
@@ -270,7 +270,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
     })
 
-    test('[OVERLAY-REFRESH-ERROR-001] Should handle empty response data', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle empty response data', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { rawResponse: { success: true, data: null } })
@@ -287,7 +287,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
 
   // [TEST-OVERLAY_REFRESH] Accessibility tests
   describe('Accessibility', () => {
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have correct ARIA attributes', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have correct ARIA attributes', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -301,7 +301,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(refreshButton.getAttribute('tabindex')).toBe('0')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should have descriptive tooltip', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should have descriptive tooltip', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -313,7 +313,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(refreshButton.title).toBe('Refresh Data')
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should handle Enter key press', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle Enter key press', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { bookmark: content.bookmark })
@@ -330,7 +330,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(mockMessageService.sendMessage.mock.calls.length).toBeGreaterThan(initialCalls)
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should handle Space key press', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle Space key press', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { bookmark: content.bookmark })
@@ -347,7 +347,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(mockMessageService.sendMessage.mock.calls.length).toBeGreaterThan(initialCalls)
     })
 
-    test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should not handle other key presses', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should not handle other key presses', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -366,7 +366,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
 
   // [TEST-OVERLAY_REFRESH] Integration tests
   describe('Integration', () => {
-    test('[OVERLAY-REFRESH-INTEGRATION-001] Should integrate with message service', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should integrate with message service', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       const updatedContent = createMockUpdatedBookmarkContent()
@@ -388,7 +388,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       })
     })
 
-    test('[OVERLAY-REFRESH-INTEGRATION-001] Should update overlay with fresh data', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should update overlay with fresh data', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       const updatedContent = createMockUpdatedBookmarkContent()
@@ -410,7 +410,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       })
     })
 
-    test('[OVERLAY-REFRESH-INTEGRATION-001] Should preserve existing content on refresh failure', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should preserve existing content on refresh failure', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { error: new Error('Network error') })
@@ -429,7 +429,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
 
   // [TEST-OVERLAY_REFRESH] Performance tests
   describe('Performance', () => {
-    test('[OVERLAY-REFRESH-PERFORMANCE-001] Should complete refresh within reasonable time', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should complete refresh within reasonable time', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       mockRefreshResponse(mockMessageService, { bookmark: content.bookmark })
@@ -446,7 +446,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(duration).toBeLessThan(1000) // Should complete within 1 second
     })
 
-    test('[OVERLAY-REFRESH-PERFORMANCE-001] Should not create unnecessary DOM elements', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should not create unnecessary DOM elements', async () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -473,7 +473,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
 
   // [TEST-OVERLAY_REFRESH] Edge case tests
   describe('Edge Cases', () => {
-    test('[OVERLAY-REFRESH-ERROR-001] Should handle undefined content', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle undefined content', async () => {
       // Arrange
       const content = undefined
       mockRefreshResponse(mockMessageService, {
@@ -516,7 +516,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       }
     })
 
-    test('[OVERLAY-REFRESH-ERROR-001] Should handle null bookmark data', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle null bookmark data', async () => {
       // Arrange
       const content = { bookmark: null, pageTitle: 'Test', pageUrl: 'https://example.com' }
       mockRefreshResponse(mockMessageService, { rawResponse: { success: true, data: null } })
@@ -530,7 +530,7 @@ describe('[REQ-OVERLAY_REFRESH_ACTION] [IMPL-OVERLAY_CONTROLS] Overlay Refresh B
       expect(overlayManager.showMessage).toHaveBeenCalledWith('Failed to refresh data', 'error')
     })
 
-    test('[OVERLAY-REFRESH-ERROR-001] Should handle empty bookmark data', async () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Should handle empty bookmark data', async () => {
       // Arrange
       const content = { bookmark: {}, pageTitle: 'Test', pageUrl: 'https://example.com' }
       mockRefreshResponse(mockMessageService, { rawResponse: { success: true, data: {} } })

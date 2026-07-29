@@ -1,0 +1,30 @@
+ARCH-SITE_MGMT:
+  alternatives_considered: []
+  cross_references: []
+  decision: "Thin architecture stub for ARCH-SITE_MGMT."
+  implementation_approach:
+    summary: ""
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: link REQ-SITE_MANAGEMENT and IMPL-SITE_MGMT"
+  name: "Site Management"
+  rationale:
+    why: "Site management architecture"
+  related_decisions:
+    depends_on: []
+    informs: []
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-SITE_MGMT"
+    implementation:
+      - "IMPL-SITE_MGMT"
+    requirements:
+      - "REQ-SITE_MANAGEMENT"
+    tests: []

@@ -59,7 +59,7 @@ IMPL-AI_TAG_TEST:
   cross_references:
     - "ARCH-AI_TAGGING_CONFIG"
     - "REQ-AI_TAGGING_CONFIG"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-AI_TAG_TEST.yaml"
   implementation_approach:
     summary: "testAiApiKey(apiKey, provider) performs minimal request (OpenAI/Gemini); returns { ok, error }. Options and popup each have Test API key button showing \"API key OK\" or error; unit-testable with fetch mock."
   metadata:
@@ -68,8 +68,8 @@ IMPL-AI_TAG_TEST:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Popup Test API key button; code_locations for options and popup"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "AI API Key Test"
   rationale:
     benefits: []
@@ -105,7 +105,7 @@ IMPL-AI_TAGGING_POPUP_UI:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
     - "REQ-STORAGE_MODE_DEFAULT"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-AI_TAGGING_POPUP_UI.yaml"
   implementation_approach:
     summary: "Popup \"Tag with AI\" button; GET_PAGE_CONTENT sent to SW (SW uses scripting.executeScript in tab); GET_AI_TAGS, getSessionTags; popup shows content.error when extraction fails; split inSession vs suggested; save bookmark with preferredBackend = getStorageMode() when new; updateSuggestedTags(suggested)."
   metadata:
@@ -114,8 +114,8 @@ IMPL-AI_TAGGING_POPUP_UI:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-21"
-      reason: "GET_PAGE_CONTENT via SW executeScript; popup shows content.error on failure"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "AI Tagging Popup Button and Flow"
   rationale:
     benefits: []
@@ -153,7 +153,7 @@ IMPL-AI_TAGGING_PROVIDER:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
     - "REQ-TAG_INPUT_SANITIZATION"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml"
   implementation_approach:
     summary: "requestAiTags(provider, apiKey, text, limit) calls OpenAI or Gemini, parses response to lines, sanitizeTag each, filter null, dedupe, slice(0, limit)."
   metadata:
@@ -162,8 +162,8 @@ IMPL-AI_TAGGING_PROVIDER:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "OpenAI/Gemini Tag Request"
   rationale:
     benefits: []
@@ -201,7 +201,7 @@ IMPL-AI_TAGGING_READABILITY:
   cross_references:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-AI_TAGGING_READABILITY.yaml"
   implementation_approach:
     summary: "SW handleGetPageContent uses scripting.executeScript with inline func (title + body.innerText, 16k cap). Content script early listener for GET_PAGE_CONTENT runs extractPageContent (Readability) when present."
   metadata:
@@ -210,8 +210,8 @@ IMPL-AI_TAGGING_READABILITY:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-21"
-      reason: "GET_PAGE_CONTENT in SW via executeScript; content script early listener for Readability"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Page Content via Readability"
   rationale:
     benefits: []
@@ -275,7 +275,7 @@ IMPL-ARRAY_OBJECT_UTILITIES:
       - "REQ-SHARED_UTILITIES"
 IMPL-BADGE:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-BADGE.yaml"
   implementation_approach:
     summary: ""
   name: "Badge"
@@ -613,7 +613,7 @@ IMPL-BOOKMARK_USAGE_TRACKING_UI:
       - "tests/unit/usage-panel.test.js"
 IMPL-BOOKMARKING:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-BOOKMARKING.yaml"
   implementation_approach:
     summary: ""
   name: "Bookmarking"
@@ -865,7 +865,7 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
   cross_references:
     - "ARCH-QUICK_ACCESS_ENTRY"
     - "REQ-QUICK_ACCESS_ENTRY"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS.yaml"
   implementation_approach:
     summary: "setupContextMenus creates parent Hoverboard and four children; contextMenus.onClicked performs same four actions as commands."
   metadata:
@@ -874,8 +874,8 @@ IMPL-CONTEXT_MENU_QUICK_ACCESS:
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-26"
-      reason: "Initial creation for context menu quick access"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Context Menu Quick Access"
   rationale:
     why: "Implements REQ-QUICK_ACCESS_ENTRY by providing right-click menu entry to the same four targets."
@@ -1202,7 +1202,7 @@ IMPL-EXAMPLE_IMPLEMENTATION:
       - "testFeatureName_REQ_EXAMPLE_FEATURE"
 IMPL-EXT_IDENTITY:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-EXT_IDENTITY.yaml"
   implementation_approach:
     summary: ""
   name: "Extension Identity"
@@ -1833,7 +1833,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   cross_references:
     - "ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
     - "REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml"
   essence_pseudocode: "applyRegexReplace(bookmark, patternStr, replacementStr, options): try RegExp(patternStr,'g'); catch return error; for each option field replace; return payload. regexReplaceSelected: read inputs/checkboxes; validate regex; for each selected applyRegexReplace and saveBookmark; loadBookmarks; selectionStillVisible; render.\n"
   implementation_approach:
     details: []
@@ -1844,8 +1844,8 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "New implementation for Regex find-and-replace on selected"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
     last_validated:
       date: "2026-02-20"
       result: "pass"
@@ -2315,7 +2315,7 @@ IMPL-MOVE_BOOKMARK_UI:
       - "REQ-STORAGE_MODE_DEFAULT"
 IMPL-MV3_MIGRATION:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-MV3_MIGRATION.yaml"
   implementation_approach:
     summary: ""
   name: "MV3 Migration"
@@ -2808,7 +2808,7 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
   cross_references:
     - "ARCH-QUICK_ACCESS_ENTRY"
     - "REQ-QUICK_ACCESS_ENTRY"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS.yaml"
   implementation_approach:
     summary: "KeyboardManager shortcuts Ctrl+Shift+KeyB/O/M/I emit openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport; side panel enableKeyboard true and setupKeyboardNavigation."
   metadata:
@@ -2817,8 +2817,8 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-26"
-      reason: "Initial creation for in-popup/panel keyboard quick access"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "In-Popup and In-Panel Keyboard Shortcuts for Quick Access"
   rationale:
     why: "Implements REQ-QUICK_ACCESS_ENTRY by allowing keyboard shortcuts when popup or side panel has focus; reuses PopupController handlers via emit."
@@ -2901,7 +2901,7 @@ IMPL-POPUP_THEME_CSS:
     - "ARCH-THEME"
     - "IMPL-SCREENSHOT_MODE"
     - "REQ-DARK_THEME"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-POPUP_THEME_CSS.yaml"
   implementation_approach:
     details:
       - "ThemeManager applies hb-theme-dark to document.documentElement and sets --hb-* variables; popup uses --bg-primary, --text-primary, etc. from popup.css"
@@ -2913,8 +2913,8 @@ IMPL-POPUP_THEME_CSS:
       date: "2026-02-19"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-19"
-      reason: "Popup dark mode fix for screenshot and theme preference"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Popup CSS honors ThemeManager (hb-theme-dark)"
   rationale:
     benefits:
@@ -2937,7 +2937,7 @@ IMPL-POPUP_THEME_CSS:
       - "REQ-DARK_THEME"
 IMPL-PRIVACY:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-PRIVACY.yaml"
   implementation_approach:
     summary: ""
   name: "Privacy"
@@ -3123,7 +3123,7 @@ IMPL-SCREENSHOT_MODE:
     - "IMPL-LOCAL_BOOKMARK_SERVICE"
     - "IMPL-UI_TESTABILITY_HOOKS"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-SCREENSHOT_MODE.yaml"
   implementation_approach:
     details:
       - "Popup must honor hoverboard_theme so screenshot shows dark popup when seed includes hoverboard_theme: 'dark' (see IMPL-POPUP_THEME_CSS)"
@@ -3139,8 +3139,8 @@ IMPL-SCREENSHOT_MODE:
       date: "2026-02-19"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Side panel captures at 240px viewport width (IMPL-SCREENSHOT_MODE)"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Screenshot/Demo mode for placeholder screenshots"
   rationale:
     benefits:
@@ -3164,7 +3164,7 @@ IMPL-SCREENSHOT_MODE:
       - "IMPL-SCREENSHOT_MODE"
 IMPL-SEARCH:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-SEARCH.yaml"
   implementation_approach:
     summary: ""
   name: "Search"
@@ -3218,7 +3218,7 @@ IMPL-SELECTION_TO_TAG_INPUT:
       - "REQ-SELECTION_TO_TAG_INPUT"
 IMPL-SERVICE_WORKER:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-SERVICE_WORKER.yaml"
   implementation_approach:
     summary: ""
   name: "Service Worker"
@@ -3239,7 +3239,7 @@ IMPL-SESSION_TAGS:
   cross_references:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-SESSION_TAGS.yaml"
   implementation_approach:
     summary: "getSessionTags() and recordSessionTags(tags); chrome.storage.session or in-memory in SW; add on saveTag/saveBookmark success."
   metadata:
@@ -3248,8 +3248,8 @@ IMPL-SESSION_TAGS:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Session Tags for Auto-Apply"
   rationale:
     benefits: []
@@ -3282,7 +3282,7 @@ IMPL-SIDE_PANEL_BOOKMARK:
     - "ARCH-SIDE_PANEL_TABS"
     - "IMPL-UIManager_SCOPED_ROOT"
     - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml"
   implementation_approach:
     summary: "null"
   metadata:
@@ -3291,8 +3291,8 @@ IMPL-SIDE_PANEL_BOOKMARK:
       date: "2026-02-25"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-25"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Side Panel Bookmark Tab Implementation"
   rationale:
     benefits:
@@ -3335,7 +3335,7 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
   cross_references:
     - "ARCH-SIDE_PANEL_BOOKMARK_SEARCH"
     - "REQ-SIDE_PANEL_BOOKMARK_SEARCH"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK_SEARCH.yaml"
   implementation_approach:
     summary: "filterBookmarksBySearch in tags-tree-filter.js; tags-tree.js/html/css: search input, count, Next/Previous; data-search-index on links; scroll and highlight current match."
   metadata:
@@ -3344,8 +3344,8 @@ IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
       date: "2026-02-22"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-22"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Side Panel Bookmark Search Implementation"
   rationale:
     benefits:
@@ -3711,7 +3711,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
   cross_references:
     - "ARCH-SIDE_PANEL_TAGS_TREE"
     - "REQ-SIDE_PANEL_TAGS_TREE"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml"
   implementation_approach:
     details:
       - Panel: "tags-tree.html, tags-tree.js, tags-tree.css; tags-tree-data.js (pure buildTagToBookmarks) for unit tests"
@@ -3725,8 +3725,8 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       date: "2026-02-21"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-21"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Side Panel Tags and Bookmarks Tree Implementation"
   rationale:
     benefits:
@@ -3756,7 +3756,7 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - "tests/unit/tags-tree-filter.test.js"
 IMPL-SITE_MGMT:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-SITE_MGMT.yaml"
   implementation_approach:
     summary: ""
   name: "Site Management"
@@ -3766,7 +3766,7 @@ IMPL-SITE_MGMT:
   traceability: {}
 IMPL-STORAGE:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-STORAGE.yaml"
   implementation_approach:
     summary: ""
   name: "Storage"
@@ -3938,7 +3938,7 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
   cross_references:
     - "ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK"
     - "REQ-TAB_SEARCH_NO_MATCH_UX"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI.yaml"
   implementation_approach:
     details:
       - "CSS: .button.secondary.search-no-match { border-color: bright red; transition: border-color 2s ease; }"
@@ -3953,8 +3953,8 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-26"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Tab Search No-Match UI Feedback"
   rationale:
     benefits:
@@ -3996,7 +3996,7 @@ IMPL-TAB_SEARCH_SERVICE:
         file: "src/features/search/tab-search-service.js"
   cross_references:
     - "REQ-SEARCH_FUNCTIONALITY"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml"
   implementation_approach:
     details:
       - "Chrome API errors surfaced as rejected promise"
@@ -4009,8 +4009,8 @@ IMPL-TAB_SEARCH_SERVICE:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Create IMPL for tab-search-service tests; add to index"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Tab Search Service Implementation"
   rationale:
     benefits:
@@ -4195,7 +4195,7 @@ IMPL-TEXT_UTILITIES:
       - "REQ-SHARED_UTILITIES"
 IMPL-THEME:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-THEME.yaml"
   implementation_approach:
     summary: ""
   name: "Theme"
@@ -4330,7 +4330,7 @@ IMPL-TYPESCRIPT_MIGRATION:
     - "ARCH-MESSAGE_HANDLING"
     - "IMPL-MESSAGE_HANDLING"
     - "IMPL-RUNTIME_VALIDATION"
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml"
   implementation_approach:
     details:
       - "getConfig/getOptions/updateConfig/saveSettings use MergedConfig; processMessage and message client use MessageEnvelope and payload types"
@@ -4344,8 +4344,8 @@ IMPL-TYPESCRIPT_MIGRATION:
       date: "2026-02-22"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-25"
-      reason: "Full TypeScript utilization; wire shared types; @ts-check on key files; add validation tests to REQ/ARCH/IMPL"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Incremental TypeScript and JSDoc typing"
   rationale:
     benefits:
@@ -4672,7 +4672,7 @@ IMPL-URL_UTILITIES:
       - "REQ-SHARED_UTILITIES"
 IMPL-UX_CORE:
   cross_references: []
-  detail_file: "null"
+  detail_file: "implementation-decisions/IMPL-UX_CORE.yaml"
   implementation_approach:
     summary: ""
   name: "UX Core"

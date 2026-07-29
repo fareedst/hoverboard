@@ -2,14 +2,14 @@
 
 **Date:** 2025-07-19  
 **Status:** ✅ **IMPLEMENTED** - Enhanced Mock DOM and Debug Logging  
-**Semantic Tokens:** `OVERLAY-TEST-ARCH-001`, `OVERLAY-TEST-STRATEGY-001`, `OVERLAY-TEST-COORD-001`  
-**Cross-References:** `OVERLAY-REFRESH-001`, `SAFARI-EXT-TEST-001`, `SAFARI-EXT-DEBUG-001`, `OVERLAY-DATA-DISPLAY-001`
+**Semantic Tokens:** `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ARCH-001)`, `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-STRATEGY-001)`, `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-COORD-001)`  
+**Cross-References:** `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)`, `SAFARI-EXT-TEST-001`, `SAFARI-EXT-DEBUG-001`, `[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)`
 
 ## Overview
 
 This document outlines the architectural decisions and strategic planning for debugging overlay accessibility testing issues and implementing enhanced console logging. All decisions are coordinated with existing architecture documents and use semantic tokens for complete cross-referencing.
 
-## [OVERLAY-TEST-ARCH-001] Core Architectural Decisions
+## [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ARCH-001)] Core Architectural Decisions
 
 ### Debug Strategy Architecture
 
@@ -28,9 +28,9 @@ This document outlines the architectural decisions and strategic planning for de
 - **Layer 4**: Standardized console logging for critical information ✅ **COMPLETE**
 
 **Cross-References:**
-- `OVERLAY-TEST-DEBUG-001`: Core debugging strategy implementation
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-DEBUG-001)`: Core debugging strategy implementation
 - `SAFARI-EXT-DEBUG-001`: Safari debugging system coordination
-- `OVERLAY-TEST-MOCK-001`: Mock DOM enhancement coordination
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`: Mock DOM enhancement coordination
 
 ### Mock DOM Enhancement Architecture
 
@@ -49,10 +49,10 @@ This document outlines the architectural decisions and strategic planning for de
 - **Query Selector Enhancement**: Accurate element querying with debug output ✅ **COMPLETE**
 
 **Cross-References:**
-- `OVERLAY-TEST-MOCK-001`: Mock DOM enhancement implementation
-- `OVERLAY-TEST-ELEMENT-001`: Element creation enhancement
-- `OVERLAY-TEST-CLASS-001`: Class and ID tracking
-- `OVERLAY-TEST-APPEND-001`: appendChild simulation
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`: Mock DOM enhancement implementation
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ELEMENT-001)`: Element creation enhancement
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-CLASS-001)`: Class and ID tracking
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-APPEND-001)`: appendChild simulation
 
 ### Console Logging Architecture
 
@@ -71,9 +71,9 @@ This document outlines the architectural decisions and strategic planning for de
 - **Communication Diagnostics**: Message passing, API calls, and event handling ✅ **COMPLETE**
 
 **Cross-References:**
-- `OVERLAY-TEST-LOG-001`: Console logging enhancement implementation
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)`: Console logging enhancement implementation
 - `SAFARI-EXT-DEBUG-001`: Safari debugging system coordination
-- `OVERLAY-TEST-ACCESS-001`: Accessibility testing coordination
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)`: Accessibility testing coordination
 
 ### Accessibility Testing Architecture
 
@@ -92,12 +92,12 @@ This document outlines the architectural decisions and strategic planning for de
 - **Screen Reader Compatibility**: Accessibility tree simulation and ARIA role testing ✅ **COMPLETE**
 
 **Cross-References:**
-- `OVERLAY-TEST-ACCESS-001`: Accessibility testing enhancement implementation
-- `OVERLAY-TEST-ARIA-001`: ARIA attribute testing
-- `OVERLAY-TEST-KEYBOARD-001`: Keyboard navigation testing
-- `OVERLAY-TEST-FOCUS-001`: Focus management testing
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)`: Accessibility testing enhancement implementation
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ARIA-001)`: ARIA attribute testing
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-KEYBOARD-001)`: Keyboard navigation testing
+- `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-FOCUS-001)`: Focus management testing
 
-## [OVERLAY-TEST-STRATEGY-001] Strategic Planning
+## [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-STRATEGY-001)] Strategic Planning
 
 ### Phase-Based Implementation Strategy
 
@@ -157,7 +157,7 @@ This document outlines the architectural decisions and strategic planning for de
 - ✅ Mock DOM operations remain fast and reliable
 - ✅ Test execution time remains acceptable
 
-## [OVERLAY-TEST-COORD-001] Coordination with Existing Architecture
+## [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-COORD-001)] Coordination with Existing Architecture
 
 ### Safari Extension Coordination
 
@@ -176,16 +176,16 @@ This document outlines the architectural decisions and strategic planning for de
 ### Overlay System Coordination
 
 **Overlay Refresh Button Coordination:**
-- **`OVERLAY-REFRESH-001`**: Coordinate with overlay refresh button testing
-- **`OVERLAY-REFRESH-UI-001`**: Ensure UI testing compatibility
-- **`OVERLAY-REFRESH-ACCESSIBILITY-001`**: Coordinate accessibility testing
-- **`OVERLAY-REFRESH-INTEGRATION-001`**: Ensure integration testing compatibility
+- **`[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)`**: Coordinate with overlay refresh button testing
+- **`[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)`**: Ensure UI testing compatibility
+- **`[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)`**: Coordinate accessibility testing
+- **`[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)`**: Ensure integration testing compatibility
 
 **Overlay Data Display Coordination:**
-- **`OVERLAY-DATA-DISPLAY-001`**: Coordinate with overlay data display testing
-- **`OVERLAY-DATA-FIX-001`**: Ensure data fix testing compatibility
-- **`OVERLAY-DATA-REFRESH-001`**: Coordinate refresh mechanism testing
-- **`OVERLAY-DATA-STRUCTURE-001`**: Ensure data structure testing compatibility
+- **`[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)`**: Coordinate with overlay data display testing
+- **`[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-FIX-001)`**: Ensure data fix testing compatibility
+- **`[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-REFRESH-001)`**: Coordinate refresh mechanism testing
+- **`[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-STRUCTURE-001)`**: Ensure data structure testing compatibility
 
 ### Testing Infrastructure Coordination
 
@@ -207,7 +207,7 @@ This document outlines the architectural decisions and strategic planning for de
 
 **Mock DOM Enhancement:**
 ```javascript
-// [OVERLAY-TEST-MOCK-001] Enhanced mock DOM implementation
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Enhanced mock DOM implementation
 function createMockDocument() {
   const logger = new Logger('MockDOM')
   
@@ -227,7 +227,7 @@ function createMockDocument() {
 
 **OverlayManager Debug Enhancement:**
 ```javascript
-// [OVERLAY-TEST-LOG-001] Enhanced OverlayManager logging
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Enhanced OverlayManager logging
 class OverlayManager {
   async show(content) {
     this.logger.log('INFO', 'OverlayManager', 'show() called', { content })
@@ -247,8 +247,8 @@ class OverlayManager {
 
 **Accessibility Testing Enhancement:**
 ```javascript
-// [OVERLAY-TEST-ACCESS-001] Enhanced accessibility testing
-test('[OVERLAY-TEST-ARIA-001] Should have proper ARIA attributes', async () => {
+// [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)] Enhanced accessibility testing
+test('[[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ARIA-001)] Should have proper ARIA attributes', async () => {
   // Enhanced ARIA testing with proper simulation
   const button = mockDocument.querySelector('.refresh-button')
   
@@ -304,10 +304,10 @@ test('[OVERLAY-TEST-ARIA-001] Should have proper ARIA attributes', async () => {
 
 | Decision | Semantic Token | Rationale | Implementation |
 |----------|----------------|-----------|----------------|
-| Comprehensive Debug Strategy | `OVERLAY-TEST-DEBUG-001` | Multi-layer debugging needed for complex overlay issues | Enhanced mock DOM + logging + test environment |
-| Mock DOM Enhancement | `OVERLAY-TEST-MOCK-001` | Current mock DOM lacks proper element tracking | Comprehensive element lifecycle simulation |
-| Console Logging Standards | `OVERLAY-TEST-LOG-001` | Critical information and branching decisions must be logged | Multi-level logging with component tracking |
-| Accessibility Testing Enhancement | `OVERLAY-TEST-ACCESS-001` | Current accessibility tests fail due to mock limitations | Proper ARIA and keyboard simulation |
+| Comprehensive Debug Strategy | `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-DEBUG-001)` | Multi-layer debugging needed for complex overlay issues | Enhanced mock DOM + logging + test environment |
+| Mock DOM Enhancement | `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)` | Current mock DOM lacks proper element tracking | Comprehensive element lifecycle simulation |
+| Console Logging Standards | `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)` | Critical information and branching decisions must be logged | Multi-level logging with component tracking |
+| Accessibility Testing Enhancement | `[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)` | Current accessibility tests fail due to mock limitations | Proper ARIA and keyboard simulation |
 
 ### Implementation Strategy
 
@@ -336,15 +336,15 @@ test('[OVERLAY-TEST-ARIA-001] Should have proper ARIA attributes', async () => {
 - **`OVERLAY_THEMING_SEMANTIC_TOKENS.md`**: Overlay theming coordination
 
 ### Implementation Coordination
-- **`OVERLAY-TEST-DEBUG-001`**: Core debugging strategy
-- **`OVERLAY-TEST-MOCK-001`**: Mock DOM enhancement
-- **`OVERLAY-TEST-LOG-001`**: Console logging enhancement
-- **`OVERLAY-TEST-ACCESS-001`**: Accessibility testing enhancement
+- **`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-DEBUG-001)`**: Core debugging strategy
+- **`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)`**: Mock DOM enhancement
+- **`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)`**: Console logging enhancement
+- **`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ACCESS-001)`**: Accessibility testing enhancement
 
 ### Testing Coordination
-- **`OVERLAY-TEST-UNIT-001`**: Unit testing for debug features
-- **`OVERLAY-TEST-INTEGRATION-001`**: Integration testing
-- **`OVERLAY-TEST-PERFORMANCE-001`**: Performance testing
-- **`OVERLAY-TEST-ERROR-001`**: Error handling testing
+- **`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-UNIT-001)`**: Unit testing for debug features
+- **`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-INTEGRATION-001)`**: Integration testing
+- **`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-PERFORMANCE-001)`**: Performance testing
+- **`[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ERROR-001)`**: Error handling testing
 
 This document provides comprehensive architectural guidance for overlay testing debug implementation, ensuring proper coordination with all existing requirements and architecture while establishing clear strategic direction for the debugging enhancements. 

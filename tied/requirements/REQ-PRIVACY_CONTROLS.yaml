@@ -1,0 +1,44 @@
+REQ-PRIVACY_CONTROLS:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-PRIVACY_CONTROLS)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Privacy Controls"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Better organization"
+      - "Privacy preservation"
+    problems_solved:
+      - "No private bookmark support"
+      - "No to-read marking"
+    why: "User privacy and organization needs"
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Private toggle works"
+    - criterion: "State persists"
+    - criterion: "To-read toggle works"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-PRIVACY"
+    code_annotations:
+      - "REQ-PRIVACY_CONTROLS"
+    implementation:
+      - "IMPL-PRIVACY"
+    tests:
+      - "Privacy control tests"
+  validation_criteria:
+    - method: "Toggle functionality tests"
+      coverage: "Private and to-read states"
+    - method: "State persistence tests"
+      coverage: "Storage and retrieval"

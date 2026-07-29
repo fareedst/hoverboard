@@ -22,6 +22,7 @@ IMPL-TYPESCRIPT_MIGRATION:
     - "ARCH-MESSAGE_HANDLING"
     - "IMPL-MESSAGE_HANDLING"
     - "IMPL-RUNTIME_VALIDATION"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TYPESCRIPT_MIGRATION-pseudocode.md"
   implementation_approach:
     details:
       - "config-manager.js, message-handler.js, message-schemas.js, message-client.js are type-checked; expand by adding @ts-check to more files or enabling checkJs true"
@@ -37,8 +38,8 @@ IMPL-TYPESCRIPT_MIGRATION:
       date: "2026-02-22"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-25"
-      reason: "Full TypeScript utilization; wire shared types; @ts-check on config/message files; document approach"
+      date: "2026-07-28"
+      reason: "LEAP: add REQ-MAINTAINABILITY to TypeScript migration traceability"
   name: "Incremental TypeScript and JSDoc typing"
   rationale:
     benefits:
@@ -62,7 +63,8 @@ IMPL-TYPESCRIPT_MIGRATION:
       - "ARCH-MESSAGE_HANDLING"
     code_annotations:
       - "IMPL-TYPESCRIPT_MIGRATION"
-    requirements: []
+    requirements:
+      - "REQ-MAINTAINABILITY"
     tests:
       - "npm run typecheck (tsc --noEmit) validates type-checked .js files and .d.ts"
       - "npm run validate (includes typecheck) is the gate before build; run before pushing"

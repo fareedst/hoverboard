@@ -23,7 +23,7 @@ IMPL-AI_TAG_TEST:
   cross_references:
     - "ARCH-AI_TAGGING_CONFIG"
     - "REQ-AI_TAGGING_CONFIG"
-  essence_pseudocode: "# [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG]\n# Minimal API request to verify key; return { ok } or { ok, error }; used by Options and Popup Test button.\n\n# Contract: inputs = apiKey and provider; output = success or error result.\nINPUT: apiKey (string), provider ('openai' | 'gemini')\nOUTPUT: { ok: boolean, error?: string }\n\n# Validate key/provider; per-provider fetch (OpenAI GET models, Gemini GET models); map status to invalid-key or generic error; never log key.\ntestAiApiKey(apiKey, provider):\n  IF !apiKey or !provider RETURN { ok: false, error: 'Missing key or provider' }\n  IF provider === 'openai':\n    res = fetch('https://api.openai.com/v1/models', { headers: { Authorization: 'Bearer ' + apiKey } })\n    IF res.ok RETURN { ok: true }\n    IF res.status === 401 or 403 RETURN { ok: false, error: 'Invalid API key' }\n    RETURN { ok: false, error: res.statusText or 'Request failed' }\n  IF provider === 'gemini':\n    res = fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + apiKey)\n    IF res.ok RETURN { ok: true }\n    IF res.status === 400 or 403 RETURN { ok: false, error: 'Invalid API key' }\n    RETURN { ok: false, error: res.statusText or 'Request failed' }\n  RETURN { ok: false, error: 'Unknown provider' }\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_TAG_TEST-pseudocode.md"
   implementation_approach:
     details:
       - "On 401/403 return invalid key message; on network error return error message"
@@ -37,8 +37,8 @@ IMPL-AI_TAG_TEST:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Popup Test API key button and handleTestAiApiKey; code_locations for options and popup"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "AI API Key Test"
   rationale:
     benefits:

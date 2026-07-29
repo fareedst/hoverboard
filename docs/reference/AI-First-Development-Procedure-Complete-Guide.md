@@ -70,7 +70,7 @@ Implementation Tokens in Code ← Bidirectional Traceability →
 ```
 
 **Key Features:**
-- **Unique Feature IDs**: Format: `CATEGORY-NNN` (e.g., `ARCH-001`, `CFG-005`)
+- **Unique Feature IDs**: Format: `CATEGORY-NNN` (e.g., `[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-001)`, `[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-005)`)
 - **Multi-Document Cascade**: Changes propagate across specification, requirements, architecture, and testing documents
 - **Status Tracking**: Real-time implementation status with completion verification
 - **Priority Hierarchy**: Visual priority system using standardized icons
@@ -80,10 +80,10 @@ Implementation Tokens in Code ← Bidirectional Traceability →
 **Bidirectional traceability** between code and documentation using standardized tokens:
 
 ```go
-// ⭐ ARCH-001: Archive naming convention - 🔧 Core functionality
-// 🔺 CFG-005: Configuration inheritance - 📝 Template processing
-// 🔶 GIT-004: Submodule support - 🔍 Discovery and validation
-// 🔻 DOC-013: Documentation strategy - 📝 AI-first maintenance
+// ⭐ [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-001): Archive naming convention - 🔧 Core functionality
+// 🔺 [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-005): Configuration inheritance - 📝 Template processing
+// 🔶 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was GIT-004): Submodule support - 🔍 Discovery and validation
+// 🔻 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-013): Documentation strategy - 📝 AI-first maintenance
 ```
 
 **Token Components:**
@@ -158,7 +158,7 @@ Implementation Tokens in Code ← Bidirectional Traceability →
 ### 📋 Feature Registry Structure
 
 Each feature entry includes:
-- **Feature ID**: Unique identifier (e.g., `ARCH-001`)
+- **Feature ID**: Unique identifier (e.g., `[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-001)`)
 - **Documentation Links**: Direct links to specification, requirements, architecture, testing
 - **Implementation Status**: Current development status
 - **Implementation Tokens**: Code traceability markers
@@ -169,9 +169,9 @@ Each feature entry includes:
 
 **Bidirectional Relationship Tracking:**
 ```
-ARCH-001 (Archive Naming)
-├── Depends On: CFG-001 (Config Discovery), GIT-001 (Git Integration)
-├── Used By: ARCH-002 (Archive Creation), LIST-001 (Archive Listing)
+[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-001) (Archive Naming)
+├── Depends On: [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (Config Discovery), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was GIT-001) (Git Integration)
+├── Used By: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-002) (Archive Creation), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LIST-001) (Archive Listing)
 ├── Affects: All archive-related output formatting
 └── Testing: Changes must not break TestListArchives, TestCreateFullArchive
 ```
@@ -192,10 +192,10 @@ ARCH-001 (Archive Naming)
 
 **Examples:**
 ```go
-// ⭐ ARCH-001: Archive naming convention - 🔧 Core functionality
-// 🔺 CFG-003: Template formatting logic - 📝 Format string processing
-// 🔶 GIT-004: Git submodule support - 🔍 Discovery and validation
-// 🔻 DOC-013: AI documentation strategy - 📝 AI-first maintenance
+// ⭐ [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-001): Archive naming convention - 🔧 Core functionality
+// 🔺 [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003): Template formatting logic - 📝 Format string processing
+// 🔶 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was GIT-004): Git submodule support - 🔍 Discovery and validation
+// 🔻 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-013): AI documentation strategy - 📝 AI-first maintenance
 ```
 
 ### 🎯 Priority Icon System
@@ -302,7 +302,7 @@ AI assistants use decision trees to classify changes and execute appropriate pro
 
 **Level 1: Feature Identity Preservation**
 ```yaml
-feature_id: ARCH-001
+feature_id: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-001)
 name: Archive Naming Convention
 fingerprint: "archive-naming-yyyy-mm-dd-hhmmss-format"
 immutable_core: "Timestamp format YYYY-MM-DD-HH-MM"
@@ -311,9 +311,9 @@ behavior_contract: "Must generate unique, sortable filenames"
 
 **Level 2: Dependency Mapping**
 ```
-ARCH-001 (Archive Naming)
-├── Depends On: CFG-001, GIT-001
-├── Used By: ARCH-002, LIST-001
+[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-001) (Archive Naming)
+├── Depends On: [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was GIT-001)
+├── Used By: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ARCH-002), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LIST-001)
 ├── Affects: All archive-related output
 └── Testing: TestGenerateArchiveName, TestListArchives
 ```

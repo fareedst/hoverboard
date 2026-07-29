@@ -1,7 +1,7 @@
 # OVERLAY REFRESH ARCHITECTURAL DECISIONS
 
-**Semantic Token:** [OVERLAY-REFRESH-001]
-**Cross-References:** [OVERLAY-DATA-DISPLAY-001], [OVERLAY-THEMING-001], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
+**Semantic Token:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]
+**Cross-References:** [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
 **Date:** 2025-01-27
 **Status:** Active Implementation
 
@@ -25,7 +25,7 @@ This document outlines the architectural decisions made for the overlay refresh 
 
 ## 📋 Architectural Decisions
 
-### [OVERLAY-REFRESH-ARCH-001] Button Placement Strategy
+### [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-001)] Button Placement Strategy
 
 **Decision**: Position refresh button in top-left corner of overlay window
 
@@ -46,12 +46,12 @@ This document outlines the architectural decisions made for the overlay refresh 
 - **Risk**: None identified
 
 **Cross-References**:
-- `[OVERLAY-THEMING-001]`: Theme integration for button styling
-- `[OVERLAY-DATA-DISPLAY-001]`: Data refresh mechanism coordination
+- `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`: Theme integration for button styling
+- `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`: Data refresh mechanism coordination
 
 ---
 
-### [OVERLAY-REFRESH-ARCH-002] Data Refresh Strategy
+### [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-002)] Data Refresh Strategy
 
 **Decision**: Use existing `MessageClient` infrastructure for data fetching
 
@@ -63,7 +63,7 @@ This document outlines the architectural decisions made for the overlay refresh 
 
 **Implementation Details**:
 ```javascript
-// [OVERLAY-REFRESH-INTEGRATION-001] Use existing message service
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Use existing message service
 const response = await this.messageService.sendMessage({
   type: 'getCurrentBookmark',
   data: { url: window.location.href }
@@ -81,12 +81,12 @@ const response = await this.messageService.sendMessage({
 - **Risk**: None identified
 
 **Cross-References**:
-- `[OVERLAY-DATA-DISPLAY-001]`: Data refresh mechanism coordination
+- `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`: Data refresh mechanism coordination
 - `[SAFARI-EXT-SHIM-001]`: Cross-browser compatibility
 
 ---
 
-### [OVERLAY-REFRESH-ARCH-003] User Feedback System
+### [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-003)] User Feedback System
 
 **Decision**: Use existing `showMessage()` system for user feedback with enhanced debug logging
 
@@ -99,15 +99,15 @@ const response = await this.messageService.sendMessage({
 
 **Implementation Details**:
 ```javascript
-// [OVERLAY-REFRESH-HANDLER-001] Show loading state with enhanced logging
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)] Show loading state with enhanced logging
 this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
 this.showMessage('Refreshing data...', 'info')
 
-// [OVERLAY-REFRESH-HANDLER-001] Show success state with enhanced logging
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)] Show success state with enhanced logging
 this.logger.log('DEBUG', 'OverlayManager', 'Content refresh successful', { updatedContent })
 this.showMessage('Data refreshed successfully', 'success')
 
-// [OVERLAY-REFRESH-ERROR-001] Show error state with enhanced logging
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)] Show error state with enhanced logging
 this.logger.log('ERROR', 'OverlayManager', 'Refresh failed', { error })
 this.showMessage('Failed to refresh data', 'error')
 ```
@@ -123,24 +123,24 @@ this.showMessage('Failed to refresh data', 'error')
 - **Risk**: None identified
 
 **Cross-References**:
-- `[OVERLAY-THEMING-001]`: Theme integration for message styling
+- `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`: Theme integration for message styling
 - `[TOGGLE-SYNC-OVERLAY]`: State synchronization patterns
 
 ---
 
-### [OVERLAY-REFRESH-ARCH-004] Theme Integration Strategy
+### [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-004)] Theme Integration Strategy
 
 **Decision**: Use CSS custom properties for theme-aware styling
 
 **Rationale**:
-- **Consistency**: Coordinates with `[OVERLAY-THEMING-001]` implementation
+- **Consistency**: Coordinates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` implementation
 - **Dynamic Updates**: Supports real-time theme changes without overlay refresh
 - **Cross-Theme Support**: Works with both light and dark themes
 - **Smooth Transitions**: Provides smooth visual transitions between themes
 
 **Implementation Details**:
 ```css
-/* [OVERLAY-REFRESH-THEME-001] Theme-aware refresh button styling */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)] Theme-aware refresh button styling */
 .refresh-button {
   background: var(--theme-button-bg);
   color: var(--theme-text-primary);
@@ -169,12 +169,12 @@ this.showMessage('Failed to refresh data', 'error')
 - **Risk**: None identified
 
 **Cross-References**:
-- `[OVERLAY-THEMING-001]`: Theme integration specifications
+- `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`: Theme integration specifications
 - `[OVERLAY-THEMING-PHASE1_COMPLETE.md]`: Theme system implementation
 
 ---
 
-### [OVERLAY-REFRESH-ARCH-005] Accessibility Implementation
+### [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-005)] Accessibility Implementation
 
 **Decision**: Implement comprehensive accessibility features
 
@@ -186,12 +186,12 @@ this.showMessage('Failed to refresh data', 'error')
 
 **Implementation Details**:
 ```javascript
-// [OVERLAY-REFRESH-ACCESSIBILITY-001] Accessibility attributes
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Accessibility attributes
 refreshBtn.setAttribute('aria-label', 'Refresh Data')
 refreshBtn.setAttribute('role', 'button')
 refreshBtn.setAttribute('tabindex', '0')
 
-// [OVERLAY-REFRESH-ACCESSIBILITY-001] Keyboard event handlers
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Keyboard event handlers
 refreshBtn.addEventListener('keydown', async (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault()
@@ -216,12 +216,12 @@ refreshBtn.addEventListener('keydown', async (e) => {
 - **Risk**: None identified
 
 **Cross-References**:
-- `[OVERLAY-THEMING-001]`: Theme integration for focus indicators
+- `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`: Theme integration for focus indicators
 - `[SAFARI-EXT-SHIM-001]`: Cross-browser accessibility support
 
 ---
 
-### [OVERLAY-REFRESH-ARCH-006] Error Handling Strategy
+### [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-006)] Error Handling Strategy
 
 **Decision**: Implement graceful error handling with user feedback
 
@@ -233,9 +233,9 @@ refreshBtn.addEventListener('keydown', async (e) => {
 
 **Implementation Details**:
 ```javascript
-// [OVERLAY-REFRESH-ERROR-001] Comprehensive error handling with enhanced logging
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)] Comprehensive error handling with enhanced logging
 async handleRefreshButtonClick() {
-  // [OVERLAY-TEST-LOG-001] Enhanced debug logging for refresh button click
+  // [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Enhanced debug logging for refresh button click
   this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
   
   try {
@@ -277,7 +277,7 @@ async handleRefreshButtonClick() {
 - **Risk**: None identified
 
 **Cross-References**:
-- `[OVERLAY-DATA-DISPLAY-001]`: Data refresh mechanism coordination
+- `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`: Data refresh mechanism coordination
 - `[TAG-SYNC-OVERLAY]`: Message passing coordination
 
 ---
@@ -290,11 +290,11 @@ async handleRefreshButtonClick() {
 The refresh button integrates seamlessly with the existing overlay manager:
 
 ```javascript
-// [OVERLAY-REFRESH-UI-001] Integration with overlay structure
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Integration with overlay structure
 const currentTagsContainer = this.document.createElement('div')
 currentTagsContainer.className = 'scrollmenu tags-container'
 
-// [OVERLAY-REFRESH-UI-001] Add refresh button to overlay structure
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Add refresh button to overlay structure
 const refreshBtn = this.document.createElement('button')
 refreshBtn.className = 'refresh-button'
 refreshBtn.innerHTML = '🔄'
@@ -307,7 +307,7 @@ currentTagsContainer.appendChild(refreshBtn)
 Uses existing message service for reliable data communication:
 
 ```javascript
-// [OVERLAY-REFRESH-INTEGRATION-001] Message service integration
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Message service integration
 async refreshOverlayContent() {
   try {
     const response = await this.messageService.sendMessage({
@@ -323,7 +323,7 @@ async refreshOverlayContent() {
       }
     }
   } catch (error) {
-    debugError('[OVERLAY-REFRESH-INTEGRATION-001] Failed to refresh overlay content:', error)
+    debugError('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Failed to refresh overlay content:', error)
   }
   return null
 }
@@ -335,7 +335,7 @@ async refreshOverlayContent() {
 Leverages existing theme system for consistent styling:
 
 ```css
-/* [OVERLAY-REFRESH-THEME-001] Theme-aware refresh button styling */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)] Theme-aware refresh button styling */
 .refresh-button {
   position: absolute;
   top: 8px;
@@ -370,7 +370,7 @@ Maintains compatibility with Safari extension via existing shim:
 // [SAFARI-EXT-SHIM-001] Cross-browser compatibility
 import { browser, debugLog, debugError } from '../../shared/utils'
 
-// [OVERLAY-REFRESH-INTEGRATION-001] Use browser API abstraction
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Use browser API abstraction
 const response = await this.messageService.sendMessage({
   type: 'getCurrentBookmark',
   data: { url: window.location.href }
@@ -405,8 +405,8 @@ const response = await this.messageService.sendMessage({
 ## 🔗 Cross-Reference Integration
 
 ### Existing Architecture Coordination
-- **`[OVERLAY-DATA-DISPLAY-001]`**: Data refresh mechanism coordination
-- **`[OVERLAY-THEMING-001]`**: Theme integration for button styling
+- **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`**: Data refresh mechanism coordination
+- **`[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`**: Theme integration for button styling
 - **`[TOGGLE-SYNC-OVERLAY]`**: State synchronization patterns
 - **`[TAG-SYNC-OVERLAY]`**: Message passing coordination
 - **`[SAFARI-EXT-SHIM-001]`**: Cross-browser compatibility
@@ -457,4 +457,4 @@ const response = await this.messageService.sendMessage({
 
 ---
 
-**[OVERLAY-REFRESH-001]** - Master semantic token for overlay refresh button functionality 
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]** - Master semantic token for overlay refresh button functionality 

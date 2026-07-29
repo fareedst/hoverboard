@@ -1,7 +1,7 @@
 # Test Fix Strategic and Architectural Decisions - 2025-07-15
 
 **Status**: 🚨 CRITICAL - Strategic decisions for test failure resolution  
-**Feature ID**: `[TEST-FIX-STRAT-001]`  
+**Feature ID**: `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-STRAT-001)]`  
 **Platform**: Chrome Extension (Manifest V3)  
 **Language**: JavaScript (ES6+)  
 **Technology Stack**: Jest + jsdom + Chrome Extension APIs  
@@ -12,19 +12,19 @@
 
 ## 🏗️ Platform-Specific Strategic Decisions
 
-### **Chrome Extension Architecture Decisions** `[CHROME-EXT-STRAT-001]`
+### **Chrome Extension Architecture Decisions** `[[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] (was CHROME-EXT-STRAT-001)]`
 
-#### **Decision 1: Manifest V3 Service Worker Architecture** `[MV3-ARCH-001]`
+#### **Decision 1: Manifest V3 Service Worker Architecture** `[[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-ARCH-001)]`
 **Platform Constraint**: Chrome Extension Manifest V3 requires service worker-based background scripts  
 **Strategic Impact**: All background processing must use service worker patterns  
 **Implementation Pattern**:
 ```javascript
-// [MV3-ARCH-001] Service worker architecture for V3 compliance
+// [[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-ARCH-001)] Service worker architecture for V3 compliance
 class HoverboardServiceWorker {
   constructor() {
     this.messageHandler = new MessageHandler()
     this.pinboardService = new PinboardService()
-    // [MV3-ARCH-001] V3-specific initialization patterns
+    // [[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-ARCH-001)] V3-specific initialization patterns
   }
 }
 ```
@@ -34,12 +34,12 @@ class HoverboardServiceWorker {
 - `src/core/service-worker.js`: V3 service worker implementation
 - `docs/migration/migration-plan.md`: V2 to V3 migration strategy
 
-#### **Decision 2: Chrome Storage API Strategy** `[CHROME-STORAGE-STRAT-001]`
+#### **Decision 2: Chrome Storage API Strategy** `[[IMPL-STORAGE] [ARCH-STORAGE] [REQ-CHROME_STORAGE_USAGE] (was CHROME-STORAGE-STRAT-001)]`
 **Platform Constraint**: Chrome extensions must use chrome.storage API for data persistence  
 **Strategic Impact**: All data storage must use chrome.storage.sync or chrome.storage.local  
 **Implementation Pattern**:
 ```javascript
-// [CHROME-STORAGE-STRAT-001] Chrome storage API usage
+// [[IMPL-STORAGE] [ARCH-STORAGE] [REQ-CHROME_STORAGE_USAGE] (was CHROME-STORAGE-STRAT-001)] Chrome storage API usage
 async function saveUserData(data) {
   return new Promise((resolve, reject) => {
     chrome.storage.sync.set(data, () => {
@@ -57,12 +57,12 @@ async function saveUserData(data) {
 - `docs/development/immutable-requirement-tag-001-architectural-decisions.md`: Tag storage patterns
 - `src/config/config-manager.js`: Configuration storage implementation
 
-#### **Decision 3: Chrome Runtime Messaging Architecture** `[CHROME-MSG-STRAT-001]`
+#### **Decision 3: Chrome Runtime Messaging Architecture** `[[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] (was CHROME-MSG-STRAT-001)]`
 **Platform Constraint**: Chrome extensions use chrome.runtime.sendMessage for inter-component communication  
 **Strategic Impact**: All component communication must use runtime messaging patterns  
 **Implementation Pattern**:
 ```javascript
-// [CHROME-MSG-STRAT-001] Runtime messaging patterns
+// [[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] (was CHROME-MSG-STRAT-001)] Runtime messaging patterns
 async function sendMessage(message) {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(message, (response) => {
@@ -84,21 +84,21 @@ async function sendMessage(message) {
 
 ## 🎯 Language-Specific Strategic Decisions
 
-### **JavaScript/ES6+ Language Decisions** `[JS-STRAT-001]`
+### **JavaScript/ES6+ Language Decisions** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was JS-STRAT-001)]`
 
-#### **Decision 1: ES6 Module System Architecture** `[ES6-MODULE-STRAT-001]`
+#### **Decision 1: ES6 Module System Architecture** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ES6-MODULE-STRAT-001)]`
 **Language Constraint**: Chrome Extension V3 requires ES6 module support  
 **Strategic Impact**: All code must use ES6 import/export patterns  
 **Implementation Pattern**:
 ```javascript
-// [ES6-MODULE-STRAT-001] ES6 module architecture
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ES6-MODULE-STRAT-001)] ES6 module architecture
 import { UIManager } from './UIManager.js'
 import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
 
 export class PopupController {
   constructor(dependencies = {}) {
-    // [ES6-MODULE-STRAT-001] Module-based dependency injection
+    // [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ES6-MODULE-STRAT-001)] Module-based dependency injection
   }
 }
 ```
@@ -107,12 +107,12 @@ export class PopupController {
 - `docs/migration/structured-development-framework.md`: Module migration patterns
 - `src/ui/index.js`: UI system module architecture
 
-#### **Decision 2: Async/Await Pattern Standardization** `[ASYNC-STRAT-001]`
+#### **Decision 2: Async/Await Pattern Standardization** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ASYNC-STRAT-001)]`
 **Language Constraint**: Chrome extension APIs are inherently asynchronous  
 **Strategic Impact**: All async operations must use async/await patterns  
 **Implementation Pattern**:
 ```javascript
-// [ASYNC-STRAT-001] Async/await patterns for Chrome APIs
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ASYNC-STRAT-001)] Async/await patterns for Chrome APIs
 async function loadBookmarkData(url) {
   try {
     const response = await sendMessage({
@@ -130,12 +130,12 @@ async function loadBookmarkData(url) {
 - `docs/development/test-fix-architectural-decisions.md`: Async test patterns
 - `src/ui/popup/PopupController.js`: Async popup operations
 
-#### **Decision 3: Constructor Parameter Destructuring** `[DESTRUCT-STRAT-001]`
+#### **Decision 3: Constructor Parameter Destructuring** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DESTRUCT-STRAT-001)]`
 **Language Constraint**: JavaScript supports object destructuring for clean parameter handling  
 **Strategic Impact**: All constructors must use destructuring for dependency injection  
 **Implementation Pattern**:
 ```javascript
-// [DESTRUCT-STRAT-001] Constructor parameter destructuring
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DESTRUCT-STRAT-001)] Constructor parameter destructuring
 export class UIManager {
   constructor({ errorHandler, stateManager, config = {} }) {
     this.errorHandler = errorHandler
@@ -153,14 +153,14 @@ export class UIManager {
 
 ## 🧪 Testing Platform-Specific Decisions
 
-### **Jest Testing Framework Decisions** `[JEST-STRAT-001]`
+### **Jest Testing Framework Decisions** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was JEST-STRAT-001)]`
 
-#### **Decision 1: Jest + jsdom Environment** `[JEST-ENV-STRAT-001]`
+#### **Decision 1: Jest + jsdom Environment** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was JEST-ENV-STRAT-001)]`
 **Platform Constraint**: Chrome extension testing requires DOM simulation  
 **Strategic Impact**: All tests must run in jsdom environment with Chrome API mocks  
 **Implementation Pattern**:
 ```javascript
-// [JEST-ENV-STRAT-001] Jest configuration for Chrome extension testing
+// [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was JEST-ENV-STRAT-001)] Jest configuration for Chrome extension testing
 export default {
   testEnvironment: 'jsdom',
   setupFilesAfterEnv: ['<rootDir>/tests/setup.js'],
@@ -175,12 +175,12 @@ export default {
 - `jest.config.js`: Jest configuration implementation
 - `tests/setup.js`: Test environment setup
 
-#### **Decision 2: Chrome API Mocking Strategy** `[CHROME-MOCK-STRAT-001]`
+#### **Decision 2: Chrome API Mocking Strategy** `[[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] (was CHROME-MOCK-STRAT-001)]`
 **Platform Constraint**: Chrome APIs are not available in Node.js test environment  
 **Strategic Impact**: Comprehensive Chrome API mocking required for reliable testing  
 **Implementation Pattern**:
 ```javascript
-// [CHROME-MOCK-STRAT-001] Chrome API mocking patterns
+// [[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] (was CHROME-MOCK-STRAT-001)] Chrome API mocking patterns
 beforeEach(() => {
   chrome.runtime.sendMessage.mockImplementation((message, callback) => {
     if (message.type === 'saveBookmark') {
@@ -194,12 +194,12 @@ beforeEach(() => {
 - `tests/setup.js`: Chrome API mock setup
 - `docs/development/test-error-discovery-process.md`: Mock troubleshooting
 
-#### **Decision 3: Async Test Pattern Standardization** `[ASYNC-TEST-STRAT-001]`
+#### **Decision 3: Async Test Pattern Standardization** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was ASYNC-TEST-STRAT-001)]`
 **Platform Constraint**: Chrome extension operations are asynchronous  
 **Strategic Impact**: All tests must handle async operations properly  
 **Implementation Pattern**:
 ```javascript
-// [ASYNC-TEST-STRAT-001] Async test patterns
+// [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was ASYNC-TEST-STRAT-001)] Async test patterns
 test('should handle async operations', async () => {
   const popupController = new PopupController()
   await popupController.initialize()
@@ -217,14 +217,14 @@ test('should handle async operations', async () => {
 
 ## 🔧 Technology Stack-Specific Decisions
 
-### **Development Toolchain Decisions** `[TOOLCHAIN-STRAT-001]`
+### **Development Toolchain Decisions** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was TOOLCHAIN-STRAT-001)]`
 
-#### **Decision 1: ESBuild for Module Bundling** `[ESBUILD-STRAT-001]`
+#### **Decision 1: ESBuild for Module Bundling** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ESBUILD-STRAT-001)]`
 **Technology Constraint**: Chrome Extension V3 requires modern bundling  
 **Strategic Impact**: All builds must use ESBuild for optimal performance  
 **Implementation Pattern**:
 ```javascript
-// [ESBUILD-STRAT-001] ESBuild configuration
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ESBUILD-STRAT-001)] ESBuild configuration
 esbuild src/core/service-worker.js --bundle --outfile=dist/src/core/service-worker.js --format=esm --platform=browser
 ```
 
@@ -232,12 +232,12 @@ esbuild src/core/service-worker.js --bundle --outfile=dist/src/core/service-work
 - `package.json`: Build script configuration
 - `scripts/build.js`: Build process implementation
 
-#### **Decision 2: ESLint for Code Quality** `[ESLINT-STRAT-001]`
+#### **Decision 2: ESLint for Code Quality** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ESLINT-STRAT-001)]`
 **Technology Constraint**: Chrome Extension requires strict code quality standards  
 **Strategic Impact**: All code must pass ESLint validation  
 **Implementation Pattern**:
 ```javascript
-// [ESLINT-STRAT-001] ESLint configuration
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was ESLINT-STRAT-001)] ESLint configuration
 module.exports = {
   extends: ['eslint:recommended'],
   env: {
@@ -252,12 +252,12 @@ module.exports = {
 - `eslint.config.mjs`: ESLint 9 flat config
 - `package.json`: Lint script configuration
 
-#### **Decision 3: Jest for Testing Framework** `[JEST-FRAMEWORK-STRAT-001]`
+#### **Decision 3: Jest for Testing Framework** `[[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was JEST-FRAMEWORK-STRAT-001)]`
 **Technology Constraint**: Chrome extension testing requires comprehensive framework  
 **Strategic Impact**: Jest provides optimal testing capabilities for extension development  
 **Implementation Pattern**:
 ```javascript
-// [JEST-FRAMEWORK-STRAT-001] Jest test patterns
+// [[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was JEST-FRAMEWORK-STRAT-001)] Jest test patterns
 describe('Popup Tag Integration', () => {
   beforeEach(() => {
     // Setup mocks and dependencies
@@ -277,14 +277,14 @@ describe('Popup Tag Integration', () => {
 
 ## 🛡️ Security and Performance Decisions
 
-### **Security Architecture Decisions** `[SECURITY-STRAT-001]`
+### **Security Architecture Decisions** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was SECURITY-STRAT-001)]`
 
-#### **Decision 1: Content Security Policy Compliance** `[CSP-STRAT-001]`
+#### **Decision 1: Content Security Policy Compliance** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was CSP-STRAT-001)]`
 **Platform Constraint**: Chrome Extension V3 requires strict CSP compliance  
 **Strategic Impact**: No inline scripts or eval() usage allowed  
 **Implementation Pattern**:
 ```javascript
-// [CSP-STRAT-001] CSP-compliant code patterns
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was CSP-STRAT-001)] CSP-compliant code patterns
 // ✅ Allowed: External script files
 import { UIManager } from './UIManager.js'
 
@@ -296,12 +296,12 @@ import { UIManager } from './UIManager.js'
 - `manifest.json`: CSP configuration
 - `docs/reference/immutable.md`: Security requirements
 
-#### **Decision 2: Input Validation and Sanitization** `[INPUT-VALIDATION-STRAT-001]`
+#### **Decision 2: Input Validation and Sanitization** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was INPUT-VALIDATION-STRAT-001)]`
 **Platform Constraint**: Chrome extensions must handle user input safely  
 **Strategic Impact**: All user input must be validated and sanitized  
 **Implementation Pattern**:
 ```javascript
-// [INPUT-VALIDATION-STRAT-001] Input validation patterns
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was INPUT-VALIDATION-STRAT-001)] Input validation patterns
 function sanitizeTag(tag) {
   if (!tag || typeof tag !== 'string') return ''
   
@@ -314,14 +314,14 @@ function sanitizeTag(tag) {
 - `src/features/tagging/tag-service.js`: Tag sanitization implementation
 - `docs/development/immutable-requirement-tag-001-architectural-decisions.md`: Tag validation
 
-### **Performance Architecture Decisions** `[PERFORMANCE-STRAT-001]`
+### **Performance Architecture Decisions** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was PERFORMANCE-STRAT-001)]`
 
-#### **Decision 1: Lazy Loading for UI Components** `[LAZY-LOAD-STRAT-001]`
+#### **Decision 1: Lazy Loading for UI Components** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LAZY-LOAD-STRAT-001)]`
 **Platform Constraint**: Chrome extensions must load quickly  
 **Strategic Impact**: UI components should load on-demand  
 **Implementation Pattern**:
 ```javascript
-// [LAZY-LOAD-STRAT-001] Lazy loading patterns
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LAZY-LOAD-STRAT-001)] Lazy loading patterns
 async function loadUIComponent() {
   const { UIManager } = await import('./UIManager.js')
   return new UIManager(dependencies)
@@ -332,12 +332,12 @@ async function loadUIComponent() {
 - `src/ui/index.js`: UI system lazy loading
 - `docs/architecture/popup-architecture.md`: Popup loading patterns
 
-#### **Decision 2: Memory Management for Shared State** `[MEMORY-STRAT-001]`
+#### **Decision 2: Memory Management for Shared State** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was MEMORY-STRAT-001)]`
 **Platform Constraint**: Chrome extensions have memory limitations  
 **Strategic Impact**: Shared state must be managed efficiently  
 **Implementation Pattern**:
 ```javascript
-// [MEMORY-STRAT-001] Memory management patterns
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was MEMORY-STRAT-001)] Memory management patterns
 class SharedMemoryManager {
   constructor() {
     this.maxSize = 50
@@ -364,12 +364,12 @@ class SharedMemoryManager {
 
 ### **Safari Extension Compatibility** `[SAFARI-COMPAT-STRAT-001]`
 
-#### **Decision 1: Unified Browser API Abstraction** `[BROWSER-API-STRAT-001]`
+#### **Decision 1: Unified Browser API Abstraction** `[[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was BROWSER-API-STRAT-001)]`
 **Platform Constraint**: Extension must work across Chrome, Firefox, and Safari  
 **Strategic Impact**: All browser APIs must be abstracted through unified interface  
 **Implementation Pattern**:
 ```javascript
-// [BROWSER-API-STRAT-001] Unified browser API abstraction
+// [[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was BROWSER-API-STRAT-001)] Unified browser API abstraction
 import { browser } from '../../shared/safari-shim.js'
 
 // Use unified API instead of chrome.* directly
@@ -382,12 +382,12 @@ browser.runtime.sendMessage(message).then(response => {
 - `src/shared/safari-shim.js`: Safari compatibility implementation
 - `docs/architecture/safari-extension-architecture.md`: Safari architecture
 
-#### **Decision 2: Cross-Browser Storage Strategy** `[CROSS-STORAGE-STRAT-001]`
+#### **Decision 2: Cross-Browser Storage Strategy** `[[IMPL-STORAGE] [ARCH-STORAGE] [REQ-CHROME_STORAGE_USAGE] (was CROSS-STORAGE-STRAT-001)]`
 **Platform Constraint**: Different browsers have different storage APIs  
 **Strategic Impact**: Storage operations must work across all supported browsers  
 **Implementation Pattern**:
 ```javascript
-// [CROSS-STORAGE-STRAT-001] Cross-browser storage patterns
+// [[IMPL-STORAGE] [ARCH-STORAGE] [REQ-CHROME_STORAGE_USAGE] (was CROSS-STORAGE-STRAT-001)] Cross-browser storage patterns
 async function saveData(key, value) {
   if (typeof browser !== 'undefined' && browser.storage) {
     return browser.storage.sync.set({ [key]: value })

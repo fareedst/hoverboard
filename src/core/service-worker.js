@@ -1,10 +1,10 @@
-// MV3-001: Service worker implementation for Manifest V3 migration
+// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Service worker implementation for Manifest V3 migration
 /**
  * Hoverboard Extension - Service Worker (Manifest V3)
  * Main background service for handling extension events and API communication
  */
 
-// MV3-001: Modern ES6 module imports for V3 architecture
+// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Modern ES6 module imports for V3 architecture
 import { MessageHandler, MESSAGE_TYPES } from './message-handler.js'
 import { PinboardService } from '../features/pinboard/pinboard-service.js'
 import { LocalBookmarkService } from '../features/storage/local-bookmark-service.js'
@@ -30,10 +30,10 @@ import { RecentTagsMemoryManager } from '../features/tagging/recent-tags-memory-
 /** [IMPL-ICON_CLICK_BEHAVIOR] Chrome does not show side panel when active tab is chrome:// or chrome-extension://. */
 const _isRestrictedForSidePanel = (url) => typeof url === 'string' && (url.startsWith('chrome://') || url.startsWith('chrome-extension://'))
 
-// MV3-001: Main service worker class for V3 architecture
+// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Main service worker class for V3 architecture
 class HoverboardServiceWorker {
   constructor () {
-    // MV3-001: Initialize core service components (default provider until async init)
+    // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Initialize core service components (default provider until async init)
     this.messageHandler = new MessageHandler()
     this.configManager = new ConfigManager()
     this.badgeManager = new BadgeManager()
@@ -42,7 +42,7 @@ class HoverboardServiceWorker {
     // [ARCH-LOCAL_STORAGE_PROVIDER] Active bookmark provider (set by initBookmarkProvider)
     this.bookmarkProvider = this.messageHandler.bookmarkProvider
 
-    // [IMMUTABLE-REQ-TAG-003] - Initialize shared memory for recent tags
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Initialize shared memory for recent tags
     this.recentTagsMemory = new RecentTagsMemoryManager()
 
     this._providerInitialized = false
@@ -51,7 +51,7 @@ class HoverboardServiceWorker {
     // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Cached so handleActionClick can call sidePanel.open() synchronously (user gesture requirement: no await before open).
     this._iconClickOpensSidePanel = undefined
 
-    // MV3-001: Set up V3 event listeners
+    // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Set up V3 event listeners
     this.setupEventListeners()
     this._seedSidePanelWindowCache()
     this._seedIconClickPreferenceCache()
@@ -106,14 +106,14 @@ class HoverboardServiceWorker {
     console.log('[SERVICE-WORKER] [ARCH-STORAGE_INDEX_AND_ROUTER] Bookmark router initialized; default mode:', mode)
   }
 
-  // MV3-001: Set up all V3 service worker event listeners
+  // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Set up all V3 service worker event listeners
   setupEventListeners () {
-    // MV3-001: Handle extension installation and updates
+    // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Handle extension installation and updates
     browser.runtime.onInstalled.addListener((details) => {
       this.handleInstall(details)
     })
 
-    // MV3-001: Handle messages from content scripts and popup
+    // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Handle messages from content scripts and popup
     // [SAFARI-EXT-IMPL-001] Use browser API for cross-browser compatibility
     /** @type {(message: { type: string, data?: Record<string, unknown> }, sender: chrome.runtime.MessageSender, sendResponse: (response?: unknown) => void) => void} */
     browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -140,17 +140,17 @@ class HoverboardServiceWorker {
       return true
     })
 
-    // MV3-001: Handle tab activation for badge updates
+    // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Handle tab activation for badge updates
     browser.tabs.onActivated.addListener((activeInfo) => {
       this.handleTabActivated(activeInfo)
     })
 
-    // MV3-EXT-IMPL-001: Handle tab updates for badge management
+    // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Handle tab updates for badge management
     browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       this.handleTabUpdated(tabId, changeInfo, tab)
     })
 
-    // [IMMUTABLE-REQ-TAG-003] - Handle extension reload to clear shared memory
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Handle extension reload to clear shared memory
     browser.runtime.onStartup.addListener(() => {
       this.handleExtensionStartup()
     })
@@ -342,21 +342,21 @@ class HoverboardServiceWorker {
     }).catch(() => {})
   }
 
-  // [IMMUTABLE-REQ-TAG-003] Browser profile startup: clear persisted user recent tags ([REQ-RECENT_TAGS_SYSTEM] fresh session).
+  // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Browser profile startup: clear persisted user recent tags ([REQ-RECENT_TAGS_SYSTEM] fresh session).
   async handleExtensionStartup () {
-    console.log('[IMMUTABLE-REQ-TAG-003] Extension startup - clearing recent tags shared memory and storage')
+    console.log('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Extension startup - clearing recent tags shared memory and storage')
     await this.recentTagsMemory.clearRecentTags()
   }
 
-  // MV3-001: Handle extension installation and updates
+  // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Handle extension installation and updates
   async handleInstall (details) {
     console.log('🚀 Hoverboard installed/updated:', details.reason)
 
     if (details.reason === 'install') {
-      // MV3-001: Initialize default settings for first-time installation
+      // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Initialize default settings for first-time installation
       await this.configManager.initializeDefaults()
 
-      // MV3-001: Set up context menus if needed
+      // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Set up context menus if needed
       this.setupContextMenus()
     }
   }
@@ -833,17 +833,17 @@ class HoverboardServiceWorker {
   }
 }
 
-// MV3-001: Initialize the service worker for V3 architecture
+// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Initialize the service worker for V3 architecture
 const serviceWorker = new HoverboardServiceWorker()
 
-// [IMMUTABLE-REQ-TAG-003] - Make shared memory accessible globally
+// [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Make shared memory accessible globally
 if (serviceWorker.recentTagsMemory) {
   self.recentTagsMemory = serviceWorker.recentTagsMemory
   globalThis.recentTagsMemory = serviceWorker.recentTagsMemory
 }
 
-// MV3-001: Export for testing and external access
+// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Export for testing and external access
 export { HoverboardServiceWorker }
 
-// MV3-001: Global service worker ready indicator
+// [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Global service worker ready indicator
 console.log('✅ Hoverboard Service Worker (V3) loaded and ready!')

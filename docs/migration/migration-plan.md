@@ -47,7 +47,7 @@ CURRENT PATTERNS                         →    TARGET PATTERNS
 
 ### 🚀 PHASE 1: Foundation & Analysis ✅ **COMPLETED** (Dec 21, 2024)
 
-#### **MIGRATION-001: Project Structure Analysis** ✅ **COMPLETED**
+#### **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-001): Project Structure Analysis** ✅ **COMPLETED**
 **Priority**: ⭐ CRITICAL | **Duration**: 2-3 days | **Actual**: 4 hours
 
 **📋 Completed Tasks:**
@@ -75,7 +75,7 @@ CURRENT PATTERNS                         →    TARGET PATTERNS
 - ✅ Migration complexity assessment with priority scoring
 - ✅ Comprehensive dependency analysis
 
-#### **MIGRATION-002: Fresh Extension Template Setup** ✅ **COMPLETED**
+#### **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-002): Fresh Extension Template Setup** ✅ **COMPLETED**
 **Priority**: ⭐ CRITICAL | **Duration**: 1-2 days | **Actual**: 2 hours
 
 **📋 Completed Tasks:**
@@ -105,7 +105,7 @@ CURRENT PATTERNS                         →    TARGET PATTERNS
 
 ### ⚡ PHASE 2: Core Module Migration ✅ **COMPLETED** (Dec 21, 2024)
 
-#### **MIGRATION-003: Configuration System Migration** ✅ **COMPLETED**
+#### **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-003): Configuration System Migration** ✅ **COMPLETED**
 **Priority**: 🔺 HIGH | **Duration**: 3-4 days | **Actual**: 3 hours
 
 **📋 Completed Tasks:**
@@ -133,7 +133,7 @@ CURRENT PATTERNS                         →    TARGET PATTERNS
 - ✅ Secure token storage and retrieval
 - ✅ Configuration backup/restore capabilities
 
-#### **MIGRATION-004: Core Service Layer** ✅ **COMPLETED**
+#### **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-004): Core Service Layer** ✅ **COMPLETED**
 **Priority**: 🔺 HIGH | **Duration**: 4-5 days | **Actual**: 5 hours
 
 **📋 Completed Tasks:**
@@ -164,7 +164,7 @@ CURRENT PATTERNS                         →    TARGET PATTERNS
 
 ### 🔄 PHASE 3: Feature Module Migration ✅ **COMPLETED** (Dec 21, 2024)
 
-#### **MIGRATION-005: Content Script System** ✅ **COMPLETED**
+#### **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-005): Content Script System** ✅ **COMPLETED**
 **Priority**: 🔶 MEDIUM | **Duration**: 4-5 days | **Actual**: 4 hours
 
 **📋 Completed Tasks:**
@@ -193,7 +193,7 @@ CURRENT PATTERNS                         →    TARGET PATTERNS
 - ✅ `src-new/features/content/tag-renderer.js` - Visual tag system
 - ✅ `src-new/features/content/content-injector.js` - Style/script injection
 
-#### **MIGRATION-006: User Interface Migration** ✅ **COMPLETED**
+#### **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-006): User Interface Migration** ✅ **COMPLETED**
 **Priority**: 🔶 MEDIUM | **Duration**: 3-4 days | **Actual**: 3 hours
 
 **📋 Completed Tasks:**
@@ -223,7 +223,7 @@ CURRENT PATTERNS                         →    TARGET PATTERNS
 
 ### 🏁 PHASE 4: Integration & Testing ✅ **COMPLETED** (Dec 21, 2024)
 
-#### **MIGRATION-007: Testing Infrastructure** ✅ **COMPLETED**
+#### **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-007): Testing Infrastructure** ✅ **COMPLETED**
 **Priority**: 🔻 LOW | **Duration**: 3-4 days | **Actual**: 2 hours
 
 **📋 Completed Tasks:**
@@ -251,7 +251,7 @@ CURRENT PATTERNS                         →    TARGET PATTERNS
 - ✅ `.github/workflows/ci.yml` - Automated CI/CD pipeline
 - ✅ Quality assurance automation and security validation
 
-#### **MIGRATION-008: Documentation & Deployment** ✅ **COMPLETED**
+#### **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-008): Documentation & Deployment** ✅ **COMPLETED**
 **Priority**: 🔻 LOW | **Duration**: 2-3 days | **Actual**: 2 hours
 
 **📋 Completed Tasks:**

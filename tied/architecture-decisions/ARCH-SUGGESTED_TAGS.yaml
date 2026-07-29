@@ -50,7 +50,7 @@ ARCH-SUGGESTED_TAGS:
     last_updated:
       author: "AI Agent"
       date: "2026-07-28"
-      reason: "Remove safari mirrors from token coverage"
+      reason: "Normalize token_coverage and validation_evidence keys"
   method: "`extractSuggestedTagsFromContent(document, url, limit)`"
   modifiable: "Unify sanitization; inline full `sanitizeTag` logic in popup script; or document and accept the difference."
   name: "Suggested Tags from Page Content Architecture"
@@ -76,7 +76,17 @@ ARCH-SUGGESTED_TAGS:
   status: "Active"
   tagservice: "`sanitizeTag()` method (strict XSS prevention, character filtering)"
   title_attribute_priority: "For all elements, check `element.title` first, then `childElement.title`, then fall back to `textContent`."
-  token_coverage_`[proc-token_audit]`: "Code files carrying `[IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_*]`:\n\n- src/features/tagging/tag-service.js\n- src/features/tagging/suggested-tags-main-world-snippet.js\n- src/shared/suggested-tag-original-case.js\n- src/features/content/overlay-manager.js\n- src/ui/popup/PopupController.js\n- src/ui/popup/UIManager.js\n\nTests:\n- tests/unit/popup-suggested-tags.test.js\n- tests/unit/suggested-tag-original-case.test.js\n"
+  token_coverage:
+    code_files:
+      - "src/features/content/overlay-manager.js"
+      - "src/features/tagging/suggested-tags-main-world-snippet.js"
+      - "src/features/tagging/tag-service.js"
+      - "src/shared/suggested-tag-original-case.js"
+      - "src/ui/popup/PopupController.js"
+      - "src/ui/popup/UIManager.js"
+    tests:
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/suggested-tag-original-case.test.js"
   traceability:
     code_annotations:
       - "ARCH-SUGGESTED_TAGS"
@@ -95,6 +105,15 @@ ARCH-SUGGESTED_TAGS:
   url_path_segments: "Exclude `www`, `com`, `org`, `net`, `html`, `htm`, `php`, `asp`, `aspx`, `index`, `home`, `page`; exclude pure numeric segments; exclude segments shorter than 2 characters."
   user-configurable: "Allow users to add custom noise words"
   user_choice_in_capitalization: "Tag case toggle (original / lower / UPPER) applies to suggested chips; extractors emit one canonical spelling per word."
-  validation_evidence_`[proc-token_validation]`: "| Date | Commit | Validation Result | Notes |\n|------|--------|-------------------|-------|\n| 2025-07-14 | Initial | ✅ Implemented | Feature implemented and deployed |\n| 2026-02-13 | Migration | ✅ Documented | Migrated from STDD to TIED format |\n| 2026-02-13 | Detail files | ✅ Documented | Created ARCH detail file with modifiable decisions |\n\n---"
+  validation_evidence:
+    - date: "2025-07-14"
+      notes: "Feature implemented and deployed"
+      result: "Implemented"
+    - date: "2026-02-13"
+      notes: "Migrated from STDD to TIED format"
+      result: "Documented"
+    - date: "2026-07-28"
+      notes: "Schema keys normalized for TIED 2.2.0"
+      result: "Documented"
   why_this_architecture: "Intelligent tag suggestions speed up bookmarking workflow by providing context-aware tag candidates without requiring manual typing. Multi-source extraction ensures comprehensive coverage of page semantics; frequency sorting prioritizes common/important terms; case preservation picks one canonical spelling per word from the page without redundant lowercase chips; users use the tag case toggle for lower/UPPER display."
   word_rules: "Minimum length 2 characters; exclude pure numbers."

@@ -1,0 +1,60 @@
+ARCH-ERROR_HANDLING:
+  alternatives_considered:
+    - name: "Exceptions"
+      cons:
+        - "Con 1"
+      pros:
+        - "Pro 1"
+      rejected_reason: "Why rejected or why chosen"
+    - name: "Error codes"
+      cons:
+        - "Con 1"
+      pros:
+        - "Pro 1"
+      rejected_reason: "Why rejected or why chosen"
+    - name: "Result types"
+      cons:
+        - "Con 1"
+      pros:
+        - "Pro 1"
+      rejected_reason: "Why rejected or why chosen"
+  cross_references:
+    - "REQ-ERROR_HANDLING"
+  decision: "Thin architecture stub for ARCH-ERROR_HANDLING."
+  implementation_approach:
+    details:
+      - "Error logging approach"
+      - "Error propagation strategy"
+      - "User-facing error messages"
+    summary: "How errors will be handled throughout the application"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Error Handling Strategy"
+  rationale:
+    benefits:
+      - "Benefit 1 of this approach"
+    problems_solved:
+      - "Problem 1 with error handling"
+    why: "Why this error handling approach was chosen"
+  related_decisions:
+    depends_on:
+      - "REQ-ERROR_HANDLING"
+    informs:
+      - "IMPL-ERROR_HANDLING"
+    see_also: []
+  status: "Template"
+  traceability:
+    code_annotations:
+      - "ARCH-ERROR_HANDLING"
+    implementation:
+      - "IMPL-ERROR_HANDLING"
+    requirements:
+      - "REQ-ERROR_HANDLING"
+    tests:
+      - "testErrorHandling_ARCH_ERROR_HANDLING"

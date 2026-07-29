@@ -1,5 +1,5 @@
 /**
- * [IMMUTABLE-REQ-TAG-003] Recent tags behavior - [REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SYSTEM]
+ * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Recent tags behavior - [REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] [IMPL-TAG_SYSTEM]
  */
 
 import { TagService } from '../../src/features/tagging/tag-service.js'

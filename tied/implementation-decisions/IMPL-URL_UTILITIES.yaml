@@ -8,7 +8,7 @@ IMPL-URL_UTILITIES:
     - "ARCH-SHARED_UTILITIES"
     - "REQ-SHARED_UTILITIES"
   detail_file: "implementation-decisions/IMPL-URL_UTILITIES.yaml"
-  essence_pseudocode: "# [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]\n# processUrl (strip hash), isValidUrl, getDomain for bookmark management.\n# Contract: url string in; normalized url or boolean or domain out.\nINPUT: url (string)\nOUTPUT: normalized url (processUrl), boolean (isValidUrl), domain string (getDomain)\nDATA: pure functions in same file as arrayUtils, objectUtils, textUtils\n\n# Normalize for storage: strip hash, trailing slash, scheme.\nprocessUrl(url):\n  IF url empty or invalid: RETURN url or default\n  OPTIONALLY strip hash, trailing slash, normalize scheme\n  RETURN normalized url string\n\n# Parse with URL constructor or regex; return true if valid.\nisValidUrl(url):\n  TRY parse url with URL constructor (or regex)\n  RETURN true if valid else false\n\n# Parse and return hostname or host.\ngetDomain(url):\n  parsed = parse url\n  RETURN parsed.hostname or parsed.host or \"\"\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-URL_UTILITIES-pseudocode.md"
   implementation_approach:
     details:
       - "getDomain(url): extract hostname or domain for display"
@@ -21,8 +21,8 @@ IMPL-URL_UTILITIES:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add root key, essence_pseudocode, composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "URL Utilities"
   rationale:
     benefits:

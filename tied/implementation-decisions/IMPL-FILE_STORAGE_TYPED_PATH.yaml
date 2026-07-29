@@ -19,7 +19,7 @@ IMPL-FILE_STORAGE_TYPED_PATH:
     - "IMPL-NATIVE_HOST_WRAPPER"
     - "REQ-FILE_BOOKMARK_STORAGE"
   detail_file: "implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml"
-  essence_pseudocode: "# [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE]\n# User-typed path for file storage; Options persist path; native host read/write; initBookmarkProvider path vs picker.\n# Contract: path input and storage; persisted path and file I/O via native host.\nINPUT: path string (user-typed, default ~/.hoverboard); read/write requests with path\nOUTPUT: persisted path in hoverboard_file_storage_path; file contents read/written via native host\nDATA: hoverboard_file_storage_path (storage); path -> if dir then path/hoverboard-bookmarks.json else path as file\n\n# Load path on init; save on blur/save.\nOptions (path input):\n  ON load: READ hoverboard_file_storage_path; display in input (default ~/.hoverboard)\n  ON save/blur: WRITE path to storage\n\n# Expand ~ and resolve dir vs .json file (uses IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE).\nresolveFilePath(path):\n  path = expand_tilde(path)  // IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE\n  IF path ends with .json: RETURN path AS file\n  ELSE: RETURN path + \"/hoverboard-bookmarks.json\"\n\n# Send native message to helper for read/write; return result.\nreadBookmarksFile(path), writeBookmarksFile(path, data):\n  path = resolveFilePath(path)\n  SEND native message (type, path) to helper; helper reads/writes file; RETURN result\n\n# Prefer path adapter when path set; else picker adapter.\ninitBookmarkProvider():\n  IF path set in storage: USE NativeHostFileBookmarkAdapter(path)\n  ELSE IF picker configured: USE MessageFileBookmarkAdapter\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH-pseudocode.md"
   implementation_approach:
     details:
       - "Helper: path as directory -> path/hoverboard-bookmarks.json; path ending .json as file; create dir on write; see IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE for HOME normalization and post-write check"
@@ -33,8 +33,8 @@ IMPL-FILE_STORAGE_TYPED_PATH:
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "File Storage User-Typed Path"
   rationale:
     benefits:

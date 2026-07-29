@@ -1,8 +1,8 @@
-# [IMMUTABLE-REQ-TAG-003] Recent Tags Behavior Implementation Plan
+# [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)] Recent Tags Behavior Implementation Plan
 
 ## Overview
 
-This document outlines the implementation plan for the Recent tags behavior requirements specified in [IMMUTABLE-REQ-TAG-003]. The plan includes code changes, tests, and architectural decisions specific to the Chrome extension platform.
+This document outlines the implementation plan for the Recent tags behavior requirements specified in [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]. The plan includes code changes, tests, and architectural decisions specific to the Chrome extension platform.
 
 ## Implementation Strategy
 
@@ -10,7 +10,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 1.1 Tag Service Modifications ✅
 
-**File:** `src/features/tagging/tag-service.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `src/features/tagging/tag-service.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Implemented Methods:**
 - `getUserRecentTags()` - Get user-driven recent tags from shared memory
@@ -33,7 +33,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 1.2 Message Handler Integration ✅
 
-**File:** `src/core/message-handler.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `src/core/message-handler.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Implemented Message Types:**
 - `ADD_TAG_TO_RECENT` - Handle tag addition to recent list
@@ -55,7 +55,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 1.3 Shared Memory Management ✅
 
-**File:** `src/core/service-worker.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `src/core/service-worker.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Implemented Class:**
 - `RecentTagsMemoryManager` - Manages shared memory for recent tags
@@ -79,7 +79,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 1.4 Configuration Manager Updates ✅
 
-**File:** `src/config/config-manager.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `src/config/config-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Added Configuration Options:**
 - `recentTagsMaxListSize: 50` - Maximum recent tags in shared memory
@@ -92,7 +92,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 2.1 Popup Controller Modifications ✅
 
-**File:** `src/ui/popup/PopupController.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `src/ui/popup/PopupController.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Updated Methods:**
 - `loadRecentTags()` - Now uses user-driven recent tags from shared memory
@@ -107,7 +107,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 2.2 UI Manager Updates ✅
 
-**File:** `src/ui/popup/UIManager.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `src/ui/popup/UIManager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Updated Methods:**
 - `updateRecentTags()` - Handle empty state for user-driven recent tags
@@ -123,7 +123,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 3.1 Overlay Manager Updates ✅
 
-**File:** `src/features/content/overlay-manager.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `src/features/content/overlay-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Key Features:**
 - Tag tracking when tags are added via overlay to current site only
@@ -132,7 +132,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 3.2 Hover System Updates ✅
 
-**File:** `src/features/content/hover-system.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `src/features/content/hover-system.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Updated Methods:**
 - `buildRecentTagsSection()` - Use new tag service with user-driven behavior
@@ -148,7 +148,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 4.1 Unit Tests ✅
 
-**File:** `tests/unit/tag-recent-behavior.test.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `tests/unit/tag-recent-behavior.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Test Coverage:**
 - Empty initial state
@@ -163,7 +163,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 #### 4.2 Integration Tests ✅
 
-**File:** `tests/integration/recent-tags-integration.test.js` `[IMMUTABLE-REQ-TAG-003]`
+**File:** `tests/integration/recent-tags-integration.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 **Test Coverage:**
 - End-to-end tag addition flow (current site only)
@@ -251,21 +251,21 @@ This document outlines the implementation plan for the Recent tags behavior requ
 ## Files Modified
 
 ### Core Service Files ✅
-- `src/features/tagging/tag-service.js` `[IMMUTABLE-REQ-TAG-003]`
-- `src/core/message-handler.js` `[IMMUTABLE-REQ-TAG-003]`
-- `src/core/service-worker.js` `[IMMUTABLE-REQ-TAG-003]`
-- `src/config/config-manager.js` `[IMMUTABLE-REQ-TAG-003]`
+- `src/features/tagging/tag-service.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
+- `src/core/message-handler.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
+- `src/core/service-worker.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
+- `src/config/config-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 ### UI Component Files ✅
-- `src/ui/popup/PopupController.js` `[IMMUTABLE-REQ-TAG-003]`
-- `src/ui/popup/UIManager.js` `[IMMUTABLE-REQ-TAG-003]`
+- `src/ui/popup/PopupController.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
+- `src/ui/popup/UIManager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 ### Content Script Files ✅
-- `src/features/content/hover-system.js` `[IMMUTABLE-REQ-TAG-003]`
+- `src/features/content/hover-system.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 ### Test Files ✅
-- `tests/unit/tag-recent-behavior.test.js` `[IMMUTABLE-REQ-TAG-003]`
-- `tests/integration/recent-tags-integration.test.js` `[IMMUTABLE-REQ-TAG-003]`
+- `tests/unit/tag-recent-behavior.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
+- `tests/integration/recent-tags-integration.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]`
 
 ## Risk Mitigation Implemented
 
@@ -297,7 +297,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 ## Notes
 
-- ✅ All code changes marked with `[IMMUTABLE-REQ-TAG-003]` semantic token
+- ✅ All code changes marked with `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)]` semantic token
 - ✅ Feature flags ready for gradual rollout
 - ✅ Comprehensive testing implemented
 - ✅ Documentation updated for all changes
@@ -317,7 +317,7 @@ This document outlines the implementation plan for the Recent tags behavior requ
 
 ## Conclusion
 
-The [IMMUTABLE-REQ-TAG-003] Recent Tags Behavior implementation has been successfully completed according to the specification. All requirements have been met, comprehensive testing has been implemented, and the system is ready for deployment. The user-driven recent tags functionality provides a significantly improved user experience while maintaining performance and reliability.
+The [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-003)] Recent Tags Behavior implementation has been successfully completed according to the specification. All requirements have been met, comprehensive testing has been implemented, and the system is ready for deployment. The user-driven recent tags functionality provides a significantly improved user experience while maintaining performance and reliability.
 
 **Critical Achievement:** Successfully resolved Manifest V3 service worker context limitations while maintaining cross-context compatibility and performance. 
 
@@ -326,4 +326,4 @@ The [IMMUTABLE-REQ-TAG-003] Recent Tags Behavior implementation has been success
 ## 🏁 Implementation Status Update (2025-07-14)
 
 - ✅ Implementation and tests confirm that, for tag addition, the UI is updated even on error (e.g., failed API call), matching the actual behavior of PopupController. This ensures user feedback and state consistency even in error scenarios.
-- ✅ See semantic tokens: `TEST-FIX-001`, `TEST-FIX-003` for cross-referenced implementation and test details. 
+- ✅ See semantic tokens: `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-001)`, `[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-FIX-003)` for cross-referenced implementation and test details. 

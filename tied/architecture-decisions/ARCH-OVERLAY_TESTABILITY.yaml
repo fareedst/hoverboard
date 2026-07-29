@@ -1,0 +1,58 @@
+ARCH-OVERLAY_TESTABILITY:
+  alternatives_considered:
+    - name: "setAttribute-only registration"
+      cons:
+        - "Misses direct assignments"
+      pros: []
+      rejected_reason: "Code uses className/id directly"
+    - name: "jsdom"
+      cons:
+        - "Heavy, non-deterministic"
+      pros:
+        - "Full DOM"
+      rejected_reason: "Tests need to be lightweight"
+  cross_references:
+    - "REQ-OVERLAY_CONTROL_LAYOUT"
+    - "REQ-OVERLAY_SYSTEM"
+  decision: "Thin architecture stub for ARCH-OVERLAY_TESTABILITY."
+  implementation_approach:
+    details:
+      - "Auto-register on property assignments"
+      - "classList/attribute hooks"
+      - "Lightweight verification"
+    summary: "Mock DOM with automatic element registration on className/id changes"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Overlay Test Harness Architecture"
+  rationale:
+    benefits:
+      - "Deterministic discovery"
+      - "Lightweight tests"
+    problems_solved:
+      - "False negatives"
+      - "Stale test registries"
+    why: "Deterministic overlay verification without real DOM"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-OVERLAY_TEST_HARNESS"
+    see_also:
+      - "ARCH-OVERLAY"
+      - "ARCH-OVERLAY_CONTROLS"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-OVERLAY_TESTABILITY"
+    implementation:
+      - "IMPL-OVERLAY_TEST_HARNESS"
+    requirements:
+      - "REQ-OVERLAY_CONTROL_LAYOUT"
+      - "REQ-OVERLAY_SYSTEM"
+    tests:
+      - "All overlay tests"

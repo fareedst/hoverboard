@@ -1,5 +1,5 @@
 /**
- * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_RELEVANCE] [IMPL-THIS_PAGE_TAG_SORT]
+ * [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [IMPL-THIS_PAGE_TAG_SORT]
  * Injected into page MAIN world via chrome.scripting.executeScript({ files: [...] }).
  * Defines globalThis.__hoverboardExtractSuggestedTagsWithRelevance → Array<{ tag, relevance, inPageFrequency }>.
  * No imports; must stay plain script for MV3 executeScript files.

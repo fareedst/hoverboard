@@ -23,13 +23,13 @@ The Hoverboard extension project has been successfully enhanced with a comprehen
 ### **🎯 Feature ID System Implementation**
 
 #### **Structured Feature Categories**
-- **MV3-001 to MV3-004**: Manifest V3 migration features
-- **CFG-001 to CFG-004**: Configuration system features  
-- **UTIL-001 to UTIL-005**: Shared utilities features
-- **LOG-001 to LOG-003**: Logging and debugging features
-- **PIN-001 to PIN-004**: Pinboard integration features
-- **UI-001 to UI-004**: User interface features
-- **TEST-001 to TEST-003**: Testing infrastructure features
+- **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001) to [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-004)**: Manifest V3 migration features
+- **[IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) to [IMPL-URL_INHIBITION] [ARCH-CONFIG_STRUCTURE] [REQ-SITE_MANAGEMENT] (was CFG-004)**: Configuration system features  
+- **[IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-001) to [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-005)**: Shared utilities features
+- **[IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001) to [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-003)**: Logging and debugging features
+- **[IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001) to [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-004)**: Pinboard integration features
+- **[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) to [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-004)**: User interface features
+- **[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001) to [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003)**: Testing infrastructure features
 
 #### **Implementation Token Requirements**
 Every code modification now requires implementation tokens:
@@ -39,7 +39,7 @@ Every code modification now requires implementation tokens:
 
 ### **🚨 Critical Manifest V3 Migration - COMPLETED**
 
-#### **✅ MV3-001: Manifest V3 Migration - Fully Implemented**
+#### **✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MV3-001): Manifest V3 Migration - Fully Implemented**
 
 **Status**: ✅ **IMPLEMENTED (6/6 Subtasks)** - Phase 1 Complete
 
@@ -97,7 +97,7 @@ Every code modification now requires implementation tokens:
 
 ### **🔧 Enhanced Configuration System**
 
-#### **✅ CFG-001: Modern Configuration Manager - Implemented**
+#### **✅ [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001): Modern Configuration Manager - Implemented**
 - ✅ ConfigManager class with full API
 - ✅ Chrome storage integration
 - ✅ Default configuration values
@@ -162,14 +162,14 @@ Every code modification now requires implementation tokens:
 ## 🚀 Next Phase Priorities
 
 ### **Week 1-2: Foundation Completion**
-1. **🚨 CFG-002**: Implement configuration migration system
-2. **🔺 UTIL-001 to UTIL-005**: Modularize shared utilities
-3. **🔺 LOG-001 to LOG-003**: Implement logging infrastructure
+1. **🚨 [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-002)**: Implement configuration migration system
+2. **🔺 [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-001) to [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-005)**: Modularize shared utilities
+3. **🔺 [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001) to [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-003)**: Implement logging infrastructure
 
 ### **Week 3-4: Services Integration**
-1. **🔺 PIN-001 to PIN-004**: Modernize Pinboard integration
-2. **🔶 TEST-001 to TEST-003**: Establish testing framework
-3. **🔶 UI-001**: Begin UI modernization
+1. **🔺 [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-001) to [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY] (was PIN-004)**: Modernize Pinboard integration
+2. **🔶 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001) to [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003)**: Establish testing framework
+3. **🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001)**: Begin UI modernization
 
 ## 🎯 Success Metrics Achieved
 

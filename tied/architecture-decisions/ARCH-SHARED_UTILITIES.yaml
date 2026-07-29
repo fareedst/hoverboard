@@ -1,5 +1,5 @@
 # [ARCH-SHARED_UTILITIES] Shared utils module (URL, text, array/object, time, DOM)
-# Migrated from UTIL-001..005
+# Migrated from [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] (was UTIL-001)..005
 ARCH-SHARED_UTILITIES:
   cross_references:
     - "REQ-SHARED_UTILITIES"

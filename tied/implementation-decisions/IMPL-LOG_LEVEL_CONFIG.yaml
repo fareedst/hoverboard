@@ -8,7 +8,7 @@ IMPL-LOG_LEVEL_CONFIG:
     - "ARCH-STRUCTURED_LOGGING"
     - "REQ-STRUCTURED_LOGGING"
   detail_file: "implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml"
-  essence_pseudocode: "# [IMPL-LOG_LEVEL_CONFIG] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING]\n# getLogLevel from environment; production => warn, else debug; used by shouldLog.\n# Contract: no input; returns current log level; env and defaults.\nINPUT: none (reads environment)\nOUTPUT: current log level (e.g. \"debug\" | \"info\" | \"warn\" | \"error\")\nDATA: NODE_ENV or browser equivalent; production => warn, else => debug\n\n# Read env and return warn in production else debug (or config override).\ngetLogLevel():\n  env = read NODE_ENV or process.env (browser fallback)\n  IF env = \"production\": RETURN \"warn\"\n  RETURN \"debug\" (or override from config)\n\n# Logger.shouldLog(level): emit only if level >= getLogLevel().\nUsed by Logger.shouldLog(level): IF level >= getLogLevel() then emit else skip.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOG_LEVEL_CONFIG-pseudocode.md"
   implementation_approach:
     details:
       - "getLogLevel(): read NODE_ENV or browser equivalent; if production return warn else debug (or config override)"
@@ -20,8 +20,8 @@ IMPL-LOG_LEVEL_CONFIG:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add root key, essence_pseudocode, composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Log Level Configuration"
   rationale:
     benefits:

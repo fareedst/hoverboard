@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-19  
 **Status:** Impact Analysis Complete  
-**Cross-References:** `[SHOW-HOVER-CHECKBOX-001]` through `[SHOW-HOVER-CHECKBOX-014]`, `[POPUP-ARCH-001]`, `[CFG-003]`, `[UI-BEHAVIOR-001]`
+**Cross-References:** `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-001)]` through `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-014)]`, `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]`, `[[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)]`, `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]`
 
 ## 🎯 Impact Overview
 
@@ -10,12 +10,12 @@ This document analyzes how the popup show hover checkbox implementation affects 
 
 ## 📋 Existing Semantic Tokens Analysis
 
-### **`[CFG-003]` - Configuration Management**
+### **`[[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)]` - Configuration Management**
 **Current Usage**: Controls feature flags and UI behavior defaults
 **Impact**: ✅ **POSITIVE** - The checkbox implementation leverages existing `showHoverOnPageLoad` configuration field
 **Changes Required**: None - uses existing field and patterns
 
-### **`[POPUP-ARCH-001]` - Popup Architecture**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]` - Popup Architecture**
 **Current Usage**: Defines popup structure and component relationships
 **Impact**: ✅ **POSITIVE** - Checkbox integrates seamlessly with existing popup patterns
 **Changes Required**: 
@@ -23,7 +23,7 @@ This document analyzes how the popup show hover checkbox implementation affects 
 - Extend UIManager with checkbox handling
 - Add event handling to PopupController
 
-### **`[UI-BEHAVIOR-001]` - UI Behavior Patterns**
+### **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]` - UI Behavior Patterns**
 **Current Usage**: Defines user interface interaction patterns
 **Impact**: ✅ **POSITIVE** - Checkbox follows existing UI patterns
 **Changes Required**: 
@@ -69,14 +69,14 @@ This document analyzes how the popup show hover checkbox implementation affects 
 **Current State**: Contains action-grid and action-icon-button styles
 **Changes Required**: 
 ```css
-/* [SHOW-HOVER-CHECKBOX-CSS-001] - Show hover controls layout */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-CSS-001)] - Show hover controls layout */
 .show-hover-controls {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
 }
 
-/* [SHOW-HOVER-CHECKBOX-CSS-002] - Page load checkbox styling */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-CSS-002)] - Page load checkbox styling */
 .page-load-checkbox {
   display: flex;
   align-items: center;
@@ -101,7 +101,7 @@ This document analyzes how the popup show hover checkbox implementation affects 
 **Current State**: Contains element caching and event handling
 **Changes Required**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-UIMANAGER-001)] - Add checkbox element reference
 cacheElements() {
   this.elements = {
     // ... existing elements ...
@@ -109,7 +109,7 @@ cacheElements() {
   }
 }
 
-// [SHOW-HOVER-CHECKBOX-UIMANAGER-002] - Add checkbox event listener
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-UIMANAGER-002)] - Add checkbox event listener
 setupEventListeners() {
   // ... existing event listeners ...
   
@@ -123,13 +123,13 @@ setupEventListeners() {
 **Current State**: Contains business logic and event handling
 **Changes Required**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-CONTROLLER-001] - Add event handler binding
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-CONTROLLER-001)] - Add event handler binding
 setupEventListeners() {
   // ... existing event listeners ...
   this.uiManager.on('showHoverOnPageLoadChange', this.handleShowHoverOnPageLoadChange.bind(this))
 }
 
-// [SHOW-HOVER-CHECKBOX-CONTROLLER-002] - Add checkbox state loading
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-CONTROLLER-002)] - Add checkbox state loading
 async loadInitialData() {
   try {
     // ... existing data loading ...
@@ -139,7 +139,7 @@ async loadInitialData() {
   }
 }
 
-// [SHOW-HOVER-CHECKBOX-CONTROLLER-003] - Add checkbox change handler
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-CONTROLLER-003)] - Add checkbox change handler
 async handleShowHoverOnPageLoadChange() {
   try {
     const isChecked = this.elements.showHoverOnPageLoad.checked
@@ -159,7 +159,7 @@ async handleShowHoverOnPageLoadChange() {
   }
 }
 
-// [SHOW-HOVER-CHECKBOX-CONTROLLER-004] - Add configuration loading
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-CONTROLLER-004)] - Add configuration loading
 async loadShowHoverOnPageLoadSetting() {
   try {
     const config = await this.configManager.getConfig()
@@ -169,7 +169,7 @@ async loadShowHoverOnPageLoadSetting() {
   }
 }
 
-// [SHOW-HOVER-CHECKBOX-CONTROLLER-005] - Add configuration broadcasting
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-CONTROLLER-005)] - Add configuration broadcasting
 async broadcastConfigUpdate() {
   try {
     const config = await this.configManager.getConfig()
@@ -230,17 +230,17 @@ async broadcastConfigUpdate() {
 **Purpose**: Test popup checkbox functionality
 **Test Cases**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-TEST-001] - Test checkbox state loading
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-TEST-001)] - Test checkbox state loading
 test('should load checkbox state from configuration', async () => {
   // Test implementation
 })
 
-// [SHOW-HOVER-CHECKBOX-TEST-002] - Test checkbox state saving
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-TEST-002)] - Test checkbox state saving
 test('should save checkbox state to configuration', async () => {
   // Test implementation
 })
 
-// [SHOW-HOVER-CHECKBOX-TEST-003] - Test configuration broadcasting
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-TEST-003)] - Test configuration broadcasting
 test('should broadcast configuration updates', async () => {
   // Test implementation
 })
@@ -250,12 +250,12 @@ test('should broadcast configuration updates', async () => {
 **Purpose**: Test popup checkbox integration
 **Test Cases**:
 ```javascript
-// [SHOW-HOVER-CHECKBOX-INTEGRATION-001] - Test popup-options synchronization
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-INTEGRATION-001)] - Test popup-options synchronization
 test('should synchronize checkbox state with options page', async () => {
   // Test implementation
 })
 
-// [SHOW-HOVER-CHECKBOX-INTEGRATION-002] - Test content script updates
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-INTEGRATION-002)] - Test content script updates
 test('should update content scripts when checkbox changes', async () => {
   // Test implementation
 })
@@ -265,25 +265,25 @@ test('should update content scripts when checkbox changes', async () => {
 
 ### **New Semantic Tokens Required**
 
-#### **`[SHOW-HOVER-CHECKBOX-UI-001]` - Popup Checkbox UI**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-UI-001)]` - Popup Checkbox UI**
 **Definition**: The checkbox UI component in the popup
 **Usage**: HTML structure, CSS styling, JavaScript handling
 
-#### **`[SHOW-HOVER-CHECKBOX-EVENT-001]` - Checkbox Change Event**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-EVENT-001)]` - Checkbox Change Event**
 **Definition**: Event emitted when checkbox state changes
 **Usage**: Event handling, state synchronization
 
-#### **`[SHOW-HOVER-CHECKBOX-CONFIG-001]` - Checkbox Configuration**
+#### **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] (was SHOW-HOVER-CHECKBOX-CONFIG-001)]` - Checkbox Configuration**
 **Definition**: Configuration loading and saving for checkbox
 **Usage**: Configuration management, persistence
 
 ### **Existing Semantic Tokens Enhanced**
 
-#### **`[POPUP-ARCH-001]` - Enhanced Popup Architecture**
+#### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-ARCH-001)]` - Enhanced Popup Architecture**
 **Enhancement**: Now includes checkbox component
 **Impact**: Extends existing architecture without breaking changes
 
-#### **`[CFG-003]` - Enhanced Configuration Management**
+#### **`[[IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003)]` - Enhanced Configuration Management**
 **Enhancement**: Now includes popup checkbox configuration
 **Impact**: Leverages existing configuration patterns
 

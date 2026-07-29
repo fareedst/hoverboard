@@ -166,7 +166,7 @@ export class UIManager {
       readIcon: get('readIcon'),
       readStatus: get('readStatus'),
 
-      // [SHOW-HOVER-CHECKBOX-UIMANAGER-001] - Add checkbox element reference
+      // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Add checkbox element reference
       showHoverOnPageLoad: get('showHoverOnPageLoad'),
 
       // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend select-one buttons (pinboard | file | local | sync)
@@ -202,7 +202,7 @@ export class UIManager {
     })
 
     this.elements.reloadBtn?.addEventListener('click', () => {
-      // [POPUP-REFRESH-001] Emit refreshData event for manual refresh
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Emit refreshData event for manual refresh
       this.emit('refreshData')
       // Also emit reloadExtension for backward compatibility
       this.emit('reloadExtension')
@@ -238,15 +238,15 @@ export class UIManager {
       this.emit('openOptions')
     })
 
-    // [IMMUTABLE-REQ-TAG-001] - Enhanced input handling with validation
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced input handling with validation
     this.elements.addTagBtn?.addEventListener('click', () => {
       const tagText = this.elements.newTagInput?.value
       if (tagText && this.isValidTag(tagText)) {
         this.emit('addTag', tagText)
-        // [IMMUTABLE-REQ-TAG-001] - Clear input after successful addition
+        // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Clear input after successful addition
         this.elements.newTagInput.value = ''
       } else if (tagText && !this.isValidTag(tagText)) {
-        // [IMMUTABLE-REQ-TAG-001] - Show validation error
+        // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Show validation error
         this.showError('Invalid tag format')
       }
     })
@@ -266,16 +266,16 @@ export class UIManager {
         const tagText = this.elements.newTagInput?.value
         if (tagText && this.isValidTag(tagText)) {
           this.emit('addTag', tagText)
-          // [IMMUTABLE-REQ-TAG-001] - Clear input after successful addition
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Clear input after successful addition
           this.elements.newTagInput.value = ''
         } else if (tagText && !this.isValidTag(tagText)) {
-          // [IMMUTABLE-REQ-TAG-001] - Show validation error
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Show validation error
           this.showError('Invalid tag format')
         }
       }
     })
 
-    // [IMMUTABLE-REQ-TAG-001] - Add input validation on blur
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Add input validation on blur
     this.elements.newTagInput?.addEventListener('blur', () => {
       const tagText = this.elements.newTagInput?.value
       if (tagText && !this.isValidTag(tagText)) {
@@ -283,7 +283,7 @@ export class UIManager {
       }
     })
 
-    // [IMMUTABLE-REQ-TAG-001] - Add input validation on input change
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Add input validation on input change
     this.elements.newTagInput?.addEventListener('input', () => {
       const tagText = this.elements.newTagInput?.value
       if (tagText && !this.isValidTag(tagText)) {
@@ -316,7 +316,7 @@ export class UIManager {
       this.emit('retry')
     })
 
-    // [SHOW-HOVER-CHECKBOX-UIMANAGER-002] - Add checkbox event listener
+    // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Add checkbox event listener
     this.elements.showHoverOnPageLoad?.addEventListener('change', () => {
       this.emit('showHoverOnPageLoadChange')
     })
@@ -699,7 +699,7 @@ export class UIManager {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Update recent tags display with user-driven behavior
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Update recent tags display with user-driven behavior
    * [REQ-THIS_PAGE_TAG_SORT] Sort within Recent Tags when side-panel toggle present (bookmark frequency map).
    * @param {string[]|Array<{ name?: string }>} recentTags - Tag names or objects with name (from service)
    */
@@ -718,7 +718,7 @@ export class UIManager {
     this._tagChipSourceCache.recent = [...source]
     const visible = source.filter(tag => !isEmptyOrWhitespaceOnlyTag(tag))
 
-    // [IMMUTABLE-REQ-TAG-003] - Show empty state for user-driven recent tags
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Show empty state for user-driven recent tags
     if (visible.length === 0) {
       this.elements.recentTagsContainer.innerHTML = '<div class="no-tags">No recent tags</div>'
       return
@@ -739,7 +739,7 @@ export class UIManager {
       ordered = sortTagChipRows(rows, mode).map((r) => r.canonical)
     }
 
-    // [IMMUTABLE-REQ-TAG-003] - Create recent tag elements (clickable to add to current site only)
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Create recent tag elements (clickable to add to current site only)
     ordered.forEach(tag => {
       const tagElement = this.createRecentTagElement(tag)
       this.elements.recentTagsContainer.appendChild(tagElement)
@@ -747,7 +747,7 @@ export class UIManager {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Create a recent tag element (clickable to add to current site only)
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Create a recent tag element (clickable to add to current site only)
    * @param {string} tag - Tag name
    * @returns {HTMLElement} Tag element
    */
@@ -759,7 +759,7 @@ export class UIManager {
       <span class="tag-text">${this.escapeHtml(display)}</span>
     `
 
-    // [IMMUTABLE-REQ-TAG-003] - Add click handler to add this tag to current site only
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Add click handler to add this tag to current site only
     // [REQ-SIDE_PANEL_POPUP_EQUIVALENT] Persisted string matches displayed casing mode
     tagElement.addEventListener('click', () => {
       this.emit('addTag', addValue)
@@ -1069,7 +1069,7 @@ export class UIManager {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Validate tag input
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Validate tag input
    * @param {string} tag - Tag to validate
    * @returns {boolean} Whether tag is valid
    */
@@ -1083,13 +1083,13 @@ export class UIManager {
       return false
     }
 
-    // [IMMUTABLE-REQ-TAG-001] - Check for invalid characters
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Check for invalid characters
     const invalidChars = /[<>]/g
     if (invalidChars.test(trimmedTag)) {
       return false
     }
 
-    // [IMMUTABLE-REQ-TAG-001] - Check for only safe characters (allow #, +, . for e.g. C#, node.js; API encodes via buildSaveParams)
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Check for only safe characters (allow #, +, . for e.g. C#, node.js; API encodes via buildSaveParams)
     const safeChars = /^[\w\s.#+-]+$/
     if (!safeChars.test(trimmedTag)) {
       return false

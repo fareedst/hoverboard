@@ -114,13 +114,13 @@ Tasks can be restored from hibernation when:
 **Documentation**: `docs/development/feature-tracking-matrix.md`
 
 #### **Hibernated Features**:
-- **AI-001**: AI Assistant Protocol System
-- **AI-002**: Implementation Token System  
-- **AI-003**: Cross-Reference System
-- **AI-004**: Validation Automation
-- **AI-005**: Feature Impact Analysis
-- **AI-006**: Documentation Cascade System
-- **AI-007**: Metrics and Monitoring Dashboard
+- **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-001)**: AI Assistant Protocol System
+- **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-002)**: Implementation Token System  
+- **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-003)**: Cross-Reference System
+- **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-004)**: Validation Automation
+- **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-005)**: Feature Impact Analysis
+- **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-006)**: Documentation Cascade System
+- **[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-007)**: Metrics and Monitoring Dashboard
 
 #### **Restoration Triggers**:
 - AI-first development initiative launch
@@ -131,7 +131,7 @@ Tasks can be restored from hibernation when:
 #### **Restoration Process**:
 1. Review `feature-tracking-matrix.md`
 2. Prioritize AI features based on current needs
-3. Begin with AI-001 (AI Assistant Protocol System)
+3. Begin with [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-001) (AI Assistant Protocol System)
 4. Update status from hibernated to in progress
 
 ---

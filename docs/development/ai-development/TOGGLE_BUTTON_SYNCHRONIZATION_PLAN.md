@@ -3,7 +3,7 @@
 **Date**: 2025-07-14  
 **Status**: Implementation Plan  
 **Version**: 1.0  
-**Semantic Token**: `[TOGGLE-SYNC-001]`
+**Semantic Token**: `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 ## 🎯 Problem Analysis
 
@@ -42,9 +42,9 @@ const response = await this.sendMessage({
 
 ## 📋 Implementation Requirements
 
-### [TOGGLE-SYNC-001] Toggle Button Site Record Persistence
+### [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Toggle Button Site Record Persistence
 
-**Semantic Token**: `[TOGGLE-SYNC-001]`
+**Semantic Token**: `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 #### Primary Requirements
 1. **Site Record Updates**: Toggle buttons must send `saveBookmark` message to persist changes
@@ -75,7 +75,7 @@ const response = await this.sendMessage({
 
 ## 🏗️ Architecture Decisions
 
-### 1. Message-Based Synchronization `[TOGGLE-SYNC-001]`
+### 1. Message-Based Synchronization `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Decision**: Use the existing message passing system for cross-interface communication
 
@@ -99,7 +99,7 @@ await this.messageService.sendMessage({
 })
 ```
 
-### 2. Immediate Local Updates `[TOGGLE-SYNC-001]`
+### 2. Immediate Local Updates `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Decision**: Update local content immediately after successful persistence for instant visual feedback
 
@@ -115,7 +115,7 @@ content.bookmark.shared = newSharedStatus
 this.show(content) // Refresh overlay with updated local content
 ```
 
-### 3. Non-blocking Operations `[TOGGLE-SYNC-001]`
+### 3. Non-blocking Operations `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Decision**: All toggle operations are asynchronous to maintain UI responsiveness
 
@@ -124,7 +124,7 @@ this.show(content) // Refresh overlay with updated local content
 - Maintains smooth user experience
 - Allows for proper error handling
 
-### 4. Comprehensive Error Handling `[TOGGLE-SYNC-001]`
+### 4. Comprehensive Error Handling `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Decision**: Try-catch blocks around all async operations with user-friendly error messages
 
@@ -135,10 +135,10 @@ this.show(content) // Refresh overlay with updated local content
 
 ## 📂 Implementation Tasks
 
-### Task 1: Overlay Manager Toggle Fix `[TOGGLE-SYNC-001]`
+### Task 1: Overlay Manager Toggle Fix `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 #### Subtask 1.1: Fix Privacy Toggle
-**File**: `src/features/content/overlay-manager.js` `[TOGGLE-SYNC-001]`
+**File**: `src/features/content/overlay-manager.js` `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Current Implementation** (lines 300-310):
 ```javascript
@@ -165,28 +165,28 @@ privateBtn.onclick = async () => {
         shared: newSharedStatus
       }
       
-      // [TOGGLE-SYNC-001] - Send saveBookmark message for persistence
+      // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Send saveBookmark message for persistence
       await this.messageService.sendMessage({
         type: 'saveBookmark',
         data: updatedBookmark
       })
       
-      // [TOGGLE-SYNC-001] - Update local content immediately for display
+      // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Update local content immediately for display
       content.bookmark.shared = newSharedStatus
       this.show(content) // Refresh overlay with updated local content
       
-      // [TOGGLE-SYNC-001] - Show success message
+      // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Show success message
       this.showMessage(`Bookmark is now ${isPrivate ? 'public' : 'private'}`, 'success')
       
-      // [TOGGLE-SYNC-001] - Notify popup of changes (if open)
+      // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Notify popup of changes (if open)
       await this.messageService.sendMessage({
         type: 'BOOKMARK_UPDATED',
         data: updatedBookmark
       })
       
-      debugLog('[TOGGLE-SYNC-001] Privacy toggled', content.bookmark.shared)
+      debugLog('[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Privacy toggled', content.bookmark.shared)
     } catch (error) {
-      debugError('[TOGGLE-SYNC-001] Failed to toggle privacy:', error)
+      debugError('[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Failed to toggle privacy:', error)
       this.showMessage('Failed to update privacy setting', 'error')
     }
   }
@@ -194,7 +194,7 @@ privateBtn.onclick = async () => {
 ```
 
 #### Subtask 1.2: Fix Read Later Toggle
-**File**: `src/features/content/overlay-manager.js` `[TOGGLE-SYNC-001]`
+**File**: `src/features/content/overlay-manager.js` `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Current Implementation** (lines 315-325):
 ```javascript
@@ -222,74 +222,74 @@ readBtn.onclick = async () => {
         description: content.bookmark.description || document.title
       }
       
-      // [TOGGLE-SYNC-001] - Send saveBookmark message for persistence
+      // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Send saveBookmark message for persistence
       await this.messageService.sendMessage({
         type: 'saveBookmark',
         data: updatedBookmark
       })
       
-      // [TOGGLE-SYNC-001] - Update local content immediately for display
+      // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Update local content immediately for display
       content.bookmark.toread = newToReadStatus
       this.show(content) // Refresh overlay with updated local content
       
-      // [TOGGLE-SYNC-001] - Show success message
+      // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Show success message
       const statusMessage = newToReadStatus === 'yes' ? 'Added to read later' : 'Removed from read later'
       this.showMessage(statusMessage, 'success')
       
-      // [TOGGLE-SYNC-001] - Notify popup of changes (if open)
+      // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Notify popup of changes (if open)
       await this.messageService.sendMessage({
         type: 'BOOKMARK_UPDATED',
         data: updatedBookmark
       })
       
-      debugLog('[TOGGLE-SYNC-001] Read status toggled', content.bookmark.toread)
+      debugLog('[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Read status toggled', content.bookmark.toread)
     } catch (error) {
-      debugError('[TOGGLE-SYNC-001] Failed to toggle read later status:', error)
+      debugError('[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Failed to toggle read later status:', error)
       this.showMessage('Failed to update read later status', 'error')
     }
   }
 }
 ```
 
-### Task 2: Popup Controller Synchronization `[TOGGLE-SYNC-001]`
+### Task 2: Popup Controller Synchronization `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 #### Subtask 2.1: Add Overlay Notification
-**File**: `src/ui/popup/PopupController.js` `[TOGGLE-SYNC-001]`
+**File**: `src/ui/popup/PopupController.js` `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Implementation**: Add overlay notification to existing toggle methods
 
 **Privacy Toggle Enhancement**:
 ```javascript
-// [TOGGLE-SYNC-001] - Notify overlay of changes (if visible)
+// [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Notify overlay of changes (if visible)
 try {
   await this.sendToTab({
     type: 'BOOKMARK_UPDATED',
     data: updatedPin
   })
 } catch (error) {
-  debugError('[TOGGLE-SYNC-001] Failed to notify overlay:', error)
+  debugError('[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Failed to notify overlay:', error)
   // Don't fail the entire operation if overlay notification fails
 }
 ```
 
 **Read Later Toggle Enhancement**:
 ```javascript
-// [TOGGLE-SYNC-001] - Notify overlay of changes (if visible)
+// [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Notify overlay of changes (if visible)
 try {
   await this.sendToTab({
     type: 'BOOKMARK_UPDATED',
     data: updatedPin
   })
 } catch (error) {
-  debugError('[TOGGLE-SYNC-001] Failed to notify overlay:', error)
+  debugError('[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Failed to notify overlay:', error)
   // Don't fail the entire operation if overlay notification fails
 }
 ```
 
-### Task 3: Content Script Message Handler `[TOGGLE-SYNC-001]`
+### Task 3: Content Script Message Handler `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 #### Subtask 3.1: Add BOOKMARK_UPDATED Handler
-**File**: `src/features/content/content-main.js` `[TOGGLE-SYNC-001]`
+**File**: `src/features/content/content-main.js` `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Implementation**:
 ```javascript
@@ -303,10 +303,10 @@ case 'BOOKMARK_UPDATED':
 ```javascript
 async handleBookmarkUpdated(bookmarkData) {
   try {
-    // [TOGGLE-SYNC-001] - Update current bookmark data
+    // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Update current bookmark data
     this.currentBookmark = bookmarkData
     
-    // [TOGGLE-SYNC-001] - Refresh overlay if visible
+    // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Refresh overlay if visible
     if (this.overlayManager.isVisible) {
       const updatedContent = {
         bookmark: bookmarkData,
@@ -316,17 +316,17 @@ async handleBookmarkUpdated(bookmarkData) {
       this.overlayManager.show(updatedContent)
     }
     
-    debugLog('[TOGGLE-SYNC-001] Bookmark updated from external source', bookmarkData)
+    debugLog('[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Bookmark updated from external source', bookmarkData)
   } catch (error) {
-    debugError('[TOGGLE-SYNC-001] Failed to handle bookmark update:', error)
+    debugError('[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Failed to handle bookmark update:', error)
   }
 }
 ```
 
-### Task 4: Message Handler Integration `[TOGGLE-SYNC-001]`
+### Task 4: Message Handler Integration `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 #### Subtask 4.1: Add BOOKMARK_UPDATED Message Type
-**File**: `src/core/message-handler.js` `[TOGGLE-SYNC-001]`
+**File**: `src/core/message-handler.js` `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Implementation**:
 ```javascript
@@ -335,11 +335,11 @@ TOGGLE_HOVER: 'toggleHover',
 HIDE_OVERLAY: 'hideOverlay',
 REFRESH_DATA: 'refreshData',
 REFRESH_HOVER: 'refreshHover',
-BOOKMARK_UPDATED: 'bookmarkUpdated', // [TOGGLE-SYNC-001] - New message type
+BOOKMARK_UPDATED: 'bookmarkUpdated', // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - New message type
 ```
 
 #### Subtask 4.2: Add Handler Method
-**File**: `src/core/message-handler.js` `[TOGGLE-SYNC-001]`
+**File**: `src/core/message-handler.js` `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 
 **Implementation**:
 ```javascript
@@ -351,7 +351,7 @@ case MESSAGE_TYPES.BOOKMARK_UPDATED:
 ```javascript
 async handleBookmarkUpdated(data, tabId) {
   try {
-    // [TOGGLE-SYNC-001] - Broadcast bookmark update to all tabs
+    // [[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] - Broadcast bookmark update to all tabs
     await this.broadcastToAllTabs({
       type: 'BOOKMARK_UPDATED',
       data: data
@@ -359,7 +359,7 @@ async handleBookmarkUpdated(data, tabId) {
     
     return { success: true, updated: data }
   } catch (error) {
-    debugError('[TOGGLE-SYNC-001] Failed to handle bookmark update:', error)
+    debugError('[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)] Failed to handle bookmark update:', error)
     throw new Error('Failed to update bookmark across interfaces')
   }
 }
@@ -367,41 +367,41 @@ async handleBookmarkUpdated(data, tabId) {
 
 ## 🧪 Testing Strategy
 
-### Test 1: Overlay Toggle Persistence `[TOGGLE-SYNC-001]`
+### Test 1: Overlay Toggle Persistence `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 - Click privacy toggle in overlay
 - Verify `saveBookmark` message is sent
 - Verify local content is updated
 - Verify overlay display is refreshed
 - Verify success message is shown
 
-### Test 2: Popup Toggle Synchronization `[TOGGLE-SYNC-001]`
+### Test 2: Popup Toggle Synchronization `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 - Click privacy toggle in popup
 - Verify `saveBookmark` message is sent
 - Verify overlay is notified of changes
 - Verify overlay display is updated
 - Verify success message is shown
 
-### Test 3: Cross-Interface Consistency `[TOGGLE-SYNC-001]`
+### Test 3: Cross-Interface Consistency `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 - Toggle privacy in overlay
 - Open popup and verify toggle state matches
 - Toggle privacy in popup
 - Verify overlay toggle state matches
 
-### Test 4: Error Handling `[TOGGLE-SYNC-001]`
+### Test 4: Error Handling `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-001)]`
 - Simulate network failure
 - Verify error message is shown
 - Verify UI remains functional
 - Verify local state is preserved
 
-## 🚨 UI-005 Protection Requirements
+## 🚨 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Protection Requirements
 
-### ✅ Permitted Changes for UI-005
+### ✅ Permitted Changes for [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)
 - Text label updates only (terminology changes)
 - Code comments improvements
 - Variable name clarifications (if needed)
 - Message handling additions (non-transparency related)
 
-### 🚫 Prohibited Changes for UI-005
+### 🚫 Prohibited Changes for [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)
 - No modifications to transparency mode logic
 - No changes to opacity configuration parameters
 - No alterations to backdrop filter implementations
@@ -421,7 +421,7 @@ async handleBookmarkUpdated(data, tabId) {
 ### Technical Requirements
 - [ ] `saveBookmark` message functionality unchanged
 - [ ] Pinboard API integration unaffected
-- [ ] UI-005 transparency system preserved
+- [ ] [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) transparency system preserved
 - [ ] Message passing system enhanced
 - [ ] Cross-interface communication implemented
 - [ ] Error handling comprehensive
@@ -452,17 +452,17 @@ async handleBookmarkUpdated(data, tabId) {
 ### Phase 5: Testing and Validation (Day 2)
 - Comprehensive testing across all scenarios
 - Error handling validation
-- UI-005 protection verification
+- [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) protection verification
 - Performance impact assessment
 
 ## 🔄 Integration with Existing Systems
 
-### [IMMUTABLE-REQ-TAG-004] Integration
+### [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Integration
 - Leverages existing message service infrastructure
 - Maintains tag persistence functionality
 - Preserves overlay tag processing patterns
 
-### UI-005 Integration
+### [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Integration
 - No impact on transparency system
 - Preserves all existing overlay functionality
 - Maintains adaptive visibility features

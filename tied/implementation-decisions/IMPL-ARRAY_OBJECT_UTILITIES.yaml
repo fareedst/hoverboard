@@ -8,7 +8,7 @@ IMPL-ARRAY_OBJECT_UTILITIES:
     - "ARCH-SHARED_UTILITIES"
     - "REQ-SHARED_UTILITIES"
   detail_file: "implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml"
-  essence_pseudocode: "# [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]\n# Array and object helpers: unique, chunk, compact; deepClone, isEmpty, pick; pure, no mutation.\n\n# Contract: inputs = array or object plus optional keys/size; output = transformed array or object.\nINPUT: array or object; optional keys (for pick), size (for chunk)\nOUTPUT: transformed array or object; no mutation of inputs\nDATA: pure functions; same file as urlUtils, textUtils\n\n# Dedupe, partition, remove falsy; deep copy, empty check, key subset.\nunique(arr):\n  RETURN array of distinct elements (order preserved or by first occurrence)\n\nchunk(arr, size):\n  SPLIT arr into subarrays of length size; last chunk may be shorter\n  RETURN array of chunks\n\ncompact(arr):\n  RETURN array with falsy elements removed (false, null, undefined, 0, \"\", NaN)\n\ndeepClone(obj):\n  RETURN deep copy of obj (nested objects/arrays copied recursively)\n\nisEmpty(obj):\n  IF obj is null or undefined: RETURN true\n  FOR each enumerable key: IF any exists RETURN false\n  RETURN true\n\npick(obj, keys):\n  result = {}\n  FOR each key IN keys: IF obj[key] present THEN result[key] = obj[key]\n  RETURN result\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES-pseudocode.md"
   implementation_approach:
     details:
       - "arrayUtils: unique(arr) dedupes; chunk(arr, size) splits into size-sized arrays; compact(arr) removes falsy"
@@ -20,8 +20,8 @@ IMPL-ARRAY_OBJECT_UTILITIES:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add root key, essence_pseudocode, composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Array and Object Utilities"
   rationale:
     benefits:

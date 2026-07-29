@@ -22,6 +22,7 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
     - "ARCH-UI_TESTABILITY"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml"
+  essence_pseudocode_path: "implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION-pseudocode.md"
   implementation_approach:
     details:
       - "npm run test:e2e:extension runs Playwright with playwright.extension.config.js"
@@ -36,8 +37,8 @@ IMPL-PLAYWRIGHT_E2E_EXTENSION:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27"
-      reason: "S12 Phase I: full Playwright suite 37 passed (1 skipped); npm run lint + typecheck + validate:tokens + tied_validate_consistency"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Playwright E2E for extension (load unpacked, popup flow)"
   rationale:
     benefits:

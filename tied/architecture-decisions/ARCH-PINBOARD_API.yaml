@@ -1,0 +1,56 @@
+ARCH-PINBOARD_API:
+  alternatives_considered:
+    - name: "OAuth"
+      cons:
+        - "Pinboard uses token auth"
+      pros:
+        - "More complex auth"
+      rejected_reason: "Pinboard API standard is token-based"
+    - name: "Caching only"
+      cons:
+        - "Stale data"
+      pros:
+        - "Reduced API calls"
+      rejected_reason: "Real-time sync required"
+  cross_references:
+    - "REQ-PINBOARD_COMPATIBILITY"
+    - "REQ-SMART_BOOKMARKING"
+  decision: "Thin architecture stub for ARCH-PINBOARD_API."
+  implementation_approach:
+    details:
+      - "401 auth error handling"
+      - "429 status retry logic"
+      - "Endpoints: /posts/get, /posts/recent, /posts/add, /posts/delete"
+    summary: "Token-based auth with rate limiting, retry logic, error handling"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Pinboard API Integration Architecture"
+  rationale:
+    benefits:
+      - "Reliable API access"
+      - "Secure token auth"
+    problems_solved:
+      - "Data access reliability"
+      - "Rate limiting issues"
+    why: "Pinboard API is core data source"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-PINBOARD_API"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-PINBOARD_API"
+    implementation:
+      - "IMPL-PINBOARD_API"
+    requirements:
+      - "REQ-PINBOARD_COMPATIBILITY"
+      - "REQ-SMART_BOOKMARKING"
+    tests: []

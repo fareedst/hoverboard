@@ -63,7 +63,7 @@ For each protocol:
 **🚨 MANDATORY ACTIONS (Execute in Order):**
 
 **Phase 1: Pre-Implementation Validation 🔍**
-1. **📋 Feature ID Verification**: Must exist in feature-tracking.md with valid `FEATURE-001` format
+1. **📋 Feature ID Verification**: Must exist in feature-tracking.md with valid `[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was FEATURE-001)` format
 2. **🛡️ Immutable Check**: Verify no conflicts with immutable.md requirements
 3. **🔍 Dependency Analysis**: Identify dependencies on other features or systems
 
@@ -104,7 +104,7 @@ For each protocol:
 
 **Phase 1: Feature Discovery 🔍**
 1. **📋 Lookup existing Feature ID** in feature-tracking.md
-2. **🆔 Create modification entry** - Add `-MOD-001` suffix to Feature ID
+2. **🆔 Create modification entry** - Add `-[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was MOD-001)` suffix to Feature ID
 3. **🛡️ Immutable Check**: Verify modifications don't violate core requirements
 
 **Phase 2: Impact Analysis 📊**
@@ -125,7 +125,7 @@ For each protocol:
 **Phase 4: Implementation 💻**
 6. **🏷️ Update implementation tokens:**
    ```javascript
-   // FEATURE-ID-MOD-001: Modification description
+   // [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was FEATURE-ID-MOD-001): Modification description
    ```
 
 **🏁 COMPLETION CRITERIA:**

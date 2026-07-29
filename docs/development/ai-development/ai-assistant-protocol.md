@@ -40,10 +40,10 @@ safety_gates:
     override: "NEVER"
     
   protected_features:
-    rule: "UI-005 Transparent Overlay System is PROTECTED"
+    rule: "[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Transparent Overlay System is PROTECTED"
     files: "src/features/content/overlay-manager.js, src/features/content/content-main.js"
     restriction: "NO modifications without explicit human approval"
-    documentation: "docs/development/ai-development/UI-005-PROTECTION.md"
+    documentation: "docs/development/ai-development/[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)-PROTECTION.md"
     override: "NEVER"
     
   backward_compatibility: 

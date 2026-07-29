@@ -1,3 +1,124 @@
+ARCH-AI_TAGGING_CONFIG:
+  cross_references:
+    - "REQ-AI_TAGGING_CONFIG"
+  description: "Registry entry for ARCH-AI_TAGGING_CONFIG."
+  detail_file: "architecture-decisions/ARCH-AI_TAGGING_CONFIG.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "AI Tagging Config Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-AI_TAGGING_FLOW:
+  cross_references:
+    - "REQ-AI_TAGGING_CONFIG"
+    - "REQ-AI_TAGGING_POPUP"
+  description: "Registry entry for ARCH-AI_TAGGING_FLOW."
+  detail_file: "architecture-decisions/ARCH-AI_TAGGING_FLOW.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "AI Tagging Flow Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-BADGE:
+  cross_references:
+    - "REQ-BADGE_INDICATORS"
+  description: "Registry entry for ARCH-BADGE."
+  detail_file: "architecture-decisions/ARCH-BADGE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Badge System Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
+  cross_references:
+    - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
+  description: "`time` = create-time (set once, never changed on update). `updated_at` = most-recent-update-time (same as time on create; set to now on every update). Normalization: missing `updated_at` -> `updated_at = time`. Pinboard: `updated_at = time` always."
+  detail_file: "architecture-decisions/ARCH-BOOKMARK_CREATE_UPDATE_TIMES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark Create and Update Time Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-BOOKMARK_STATE_SYNC:
+  cross_references:
+    - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+  description: "Registry entry for ARCH-BOOKMARK_STATE_SYNC."
+  detail_file: "architecture-decisions/ARCH-BOOKMARK_STATE_SYNC.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark State Synchronization Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-BOOKMARK_USAGE_TRACKING:
+  cross_references:
+    - "REQ-BOOKMARK_USAGE_TRACKING"
+  description: "Separate storage keys for usage and nav edges; service worker hooks after getBookmarkForUrl; referrer via executeScript; 60s debounce per URL."
+  detail_file: "architecture-decisions/ARCH-BOOKMARK_USAGE_TRACKING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark Usage Tracking Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-BOOKMARK_USAGE_TRACKING_UI:
+  cross_references:
+    - "ARCH-BOOKMARK_USAGE_TRACKING"
+    - "REQ-BOOKMARK_USAGE_TRACKING"
+  description: "Three surfaces – This Page inline, Index columns, Usage tab. Query via getBookmarkUsage, getBookmarkUsageStats, getBookmarkNavigationGraph."
+  detail_file: "architecture-decisions/ARCH-BOOKMARK_USAGE_TRACKING_UI.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark Usage Tracking UI Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-BROWSER_BOOKMARK_IMPORT:
+  cross_references:
+    - "REQ-BROWSER_BOOKMARK_IMPORT"
+  description: "Registry entry for ARCH-BROWSER_BOOKMARK_IMPORT."
+  detail_file: "architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Browser Bookmark Import Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-CODE_QUALITY:
+  cross_references:
+    - "REQ-CODE_QUALITY"
+  description: "Registry entry for ARCH-CODE_QUALITY."
+  detail_file: "architecture-decisions/ARCH-CODE_QUALITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Code Quality Tooling (ESLint and Security Audit)"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-CONFIG_STRUCTURE:
+  cross_references: []
+  description: "Registry entry for ARCH-CONFIG_STRUCTURE."
+  detail_file: "architecture-decisions/ARCH-CONFIG_STRUCTURE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Config Structure"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-CROSS_BROWSER:
   cross_references:
     - "ARCH-EXT_IDENTITY"
@@ -14,6 +135,30 @@ ARCH-CROSS_BROWSER:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-ERROR_HANDLING:
+  cross_references:
+    - "REQ-ERROR_HANDLING"
+  description: "Registry entry for ARCH-ERROR_HANDLING."
+  detail_file: "architecture-decisions/ARCH-ERROR_HANDLING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Error Handling Strategy"
+  source_index: "architecture-decisions.yaml"
+  status: "Template"
+  type: "ARCH"
+ARCH-EXAMPLE_DECISION:
+  cross_references:
+    - "REQ-EXAMPLE_FEATURE"
+  description: "Registry entry for ARCH-EXAMPLE_DECISION."
+  detail_file: "architecture-decisions/ARCH-EXAMPLE_DECISION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Core Architecture Example"
+  source_index: "architecture-decisions.yaml"
+  status: "Template"
+  type: "ARCH"
 ARCH-EXT_IDENTITY:
   cross_references:
     - "IMPL-EXT_IDENTITY"
@@ -24,6 +169,19 @@ ARCH-EXT_IDENTITY:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Extension Identity Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
+  cross_references:
+    - "IMPL-POPUP_BUNDLE"
+    - "REQ-EXTENSION_BUNDLED_ENTRY_POINTS"
+  description: "Registry entry for ARCH-EXTENSION_BUNDLED_ENTRY_POINTS."
+  detail_file: "architecture-decisions/ARCH-EXTENSION_BUNDLED_ENTRY_POINTS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Extension Bundled Entry Points"
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
@@ -40,6 +198,133 @@ ARCH-FEEDBACK_STORAGE:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-FILE_BOOKMARK_PROVIDER:
+  cross_references:
+    - "ARCH-LOCAL_STORAGE_PROVIDER"
+    - "REQ-FILE_BOOKMARK_STORAGE"
+  description: "Registry entry for ARCH-FILE_BOOKMARK_PROVIDER."
+  detail_file: "architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "File-Based Bookmark Provider"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-ICON_CLICK_BEHAVIOR:
+  cross_references:
+    - "REQ-ICON_CLICK_BEHAVIOR"
+  description: "Registry entry for ARCH-ICON_CLICK_BEHAVIOR."
+  detail_file: "architecture-decisions/ARCH-ICON_CLICK_BEHAVIOR.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Extension Icon Click Behavior Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-LANGUAGE_SELECTION:
+  cross_references:
+    - "IMPL-RUNTIME_VALIDATION"
+    - "IMPL-TYPESCRIPT_MIGRATION"
+  description: "Registry entry for ARCH-LANGUAGE_SELECTION."
+  detail_file: "architecture-decisions/ARCH-LANGUAGE_SELECTION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Language and Static Typing Strategy"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-LOCAL_BOOKMARKS_INDEX:
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
+  description: "Registry entry for ARCH-LOCAL_BOOKMARKS_INDEX."
+  detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  cross_references:
+    - "REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
+  description: "Registry entry for ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS."
+  detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Add Tags to Selected Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  cross_references:
+    - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
+  description: "Registry entry for ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT."
+  detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Export Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  cross_references:
+    - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+  description: "Registry entry for ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT."
+  detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Import Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  cross_references:
+    - "REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
+  description: "Registry entry for ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE."
+  detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Regex Find-and-Replace Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-LOCAL_STORAGE_PROVIDER:
+  cross_references:
+    - "ARCH-PINBOARD_API"
+    - "ARCH-STORAGE"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  description: "Registry entry for ARCH-LOCAL_STORAGE_PROVIDER."
+  detail_file: "architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Storage Bookmark Provider (Strategy Pattern)"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-MESSAGE_HANDLING:
+  cross_references:
+    - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-SMART_BOOKMARKING"
+  description: "Registry entry for ARCH-MESSAGE_HANDLING."
+  detail_file: "architecture-decisions/ARCH-MESSAGE_HANDLING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Message Handling Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-MODULE_VALIDATION:
   cross_references:
     - "IMPL-MODULE_VALIDATION"
@@ -50,6 +335,144 @@ ARCH-MODULE_VALIDATION:
     last_updated: "2026-02-08T00:00:00.000Z"
     registered: "2025-12-18T00:00:00.000Z"
   name: "Module Validation Strategy"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-MOVE_BOOKMARK_UI:
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+  description: "Registry entry for ARCH-MOVE_BOOKMARK_UI."
+  detail_file: "architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Move Bookmark Storage UI"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-MV3_MIGRATION:
+  cross_references:
+    - "REQ-MANIFEST_V3_MIGRATION"
+  description: "Registry entry for ARCH-MV3_MIGRATION."
+  detail_file: "architecture-decisions/ARCH-MV3_MIGRATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Manifest V3 Migration Strategy"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-NATIVE_HOST:
+  cross_references:
+    - "REQ-NATIVE_HOST_WRAPPER"
+  description: "Registry entry for ARCH-NATIVE_HOST."
+  detail_file: "architecture-decisions/ARCH-NATIVE_HOST.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Native Host Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-OVERLAY:
+  cross_references:
+    - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
+    - "REQ-OVERLAY_CONTROL_LAYOUT"
+    - "REQ-OVERLAY_REFRESH_ACTION"
+    - "REQ-OVERLAY_SYSTEM"
+  description: "Registry entry for ARCH-OVERLAY."
+  detail_file: "architecture-decisions/ARCH-OVERLAY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay System Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-OVERLAY_CONTROLS:
+  cross_references:
+    - "REQ-OVERLAY_CONTROL_LAYOUT"
+    - "REQ-OVERLAY_REFRESH_ACTION"
+  description: "Registry entry for ARCH-OVERLAY_CONTROLS."
+  detail_file: "architecture-decisions/ARCH-OVERLAY_CONTROLS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay Control Layout Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-OVERLAY_TESTABILITY:
+  cross_references:
+    - "REQ-OVERLAY_CONTROL_LAYOUT"
+    - "REQ-OVERLAY_SYSTEM"
+  description: "Registry entry for ARCH-OVERLAY_TESTABILITY."
+  detail_file: "architecture-decisions/ARCH-OVERLAY_TESTABILITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay Test Harness Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-PINBOARD_API:
+  cross_references:
+    - "REQ-PINBOARD_COMPATIBILITY"
+    - "REQ-SMART_BOOKMARKING"
+  description: "Registry entry for ARCH-PINBOARD_API."
+  detail_file: "architecture-decisions/ARCH-PINBOARD_API.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Pinboard API Integration Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-POPUP_SESSION:
+  cross_references:
+    - "REQ-POPUP_PERSISTENT_SESSION"
+    - "REQ-RECENT_TAGS_SYSTEM"
+  description: "Registry entry for ARCH-POPUP_SESSION."
+  detail_file: "architecture-decisions/ARCH-POPUP_SESSION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Popup Session Persistence Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-PRIVACY:
+  cross_references: []
+  description: "Registry entry for ARCH-PRIVACY."
+  detail_file: "architecture-decisions/ARCH-PRIVACY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Privacy"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-PROJECT_STRUCTURE:
+  cross_references: []
+  description: "Registry entry for ARCH-PROJECT_STRUCTURE."
+  detail_file: "architecture-decisions/ARCH-PROJECT_STRUCTURE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Project Structure"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-QUICK_ACCESS_ENTRY:
+  cross_references:
+    - "REQ-QUICK_ACCESS_ENTRY"
+  description: "Registry entry for ARCH-QUICK_ACCESS_ENTRY."
+  detail_file: "architecture-decisions/ARCH-QUICK_ACCESS_ENTRY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Quick Access Entry Architecture"
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
@@ -67,6 +490,78 @@ ARCH-SAFARI_ADAPTATION:
   source_index: "architecture-decisions.yaml"
   status: "Deferred"
   type: "ARCH"
+ARCH-SEARCH:
+  cross_references: []
+  description: "Registry entry for ARCH-SEARCH."
+  detail_file: "architecture-decisions/ARCH-SEARCH.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Search"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SELECTION_TO_TAG_INPUT:
+  cross_references:
+    - "REQ-SELECTION_TO_TAG_INPUT"
+    - "REQ-TAG_MANAGEMENT"
+  description: "Registry entry for ARCH-SELECTION_TO_TAG_INPUT."
+  detail_file: "architecture-decisions/ARCH-SELECTION_TO_TAG_INPUT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Selection to Tag Input Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SERVICE_WORKER:
+  cross_references:
+    - "REQ-MANIFEST_V3_MIGRATION"
+  description: "Registry entry for ARCH-SERVICE_WORKER."
+  detail_file: "architecture-decisions/ARCH-SERVICE_WORKER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Service Worker Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SHARED_UTILITIES:
+  cross_references:
+    - "REQ-SHARED_UTILITIES"
+  description: "Registry entry for ARCH-SHARED_UTILITIES."
+  detail_file: "architecture-decisions/ARCH-SHARED_UTILITIES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Shared Utilities Module"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SIDE_PANEL_BOOKMARK_SEARCH:
+  cross_references:
+    - "REQ-SIDE_PANEL_BOOKMARK_SEARCH"
+  description: "Registry entry for ARCH-SIDE_PANEL_BOOKMARK_SEARCH."
+  detail_file: "architecture-decisions/ARCH-SIDE_PANEL_BOOKMARK_SEARCH.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Bookmark Search Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
+  cross_references:
+    - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+  description: "Registry entry for ARCH-SIDE_PANEL_BROWSER_BOOKMARKS."
+  detail_file: "architecture-decisions/ARCH-SIDE_PANEL_BROWSER_BOOKMARKS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Browser Bookmarks Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-SIDE_PANEL_BROWSER_TABS:
   cross_references:
     - "ARCH-SIDE_PANEL_TABS"
@@ -78,6 +573,96 @@ ARCH-SIDE_PANEL_BROWSER_TABS:
     last_updated: "2026-03-28T18:00:00.000Z"
     registered: "2026-03-28T18:00:00.000Z"
   name: "Side Panel Browser Tabs Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  cross_references:
+    - "REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS"
+  description: "Registry entry for ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS."
+  detail_file: "architecture-decisions/ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Recently Closed Tabs Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SIDE_PANEL_TABS:
+  cross_references:
+    - "REQ-RECENT_TAGS_SYSTEM"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    - "REQ-SIDE_PANEL_TAGS_TREE"
+  description: "Registry entry for ARCH-SIDE_PANEL_TABS."
+  detail_file: "architecture-decisions/ARCH-SIDE_PANEL_TABS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Tabs Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SIDE_PANEL_TAGS_TREE:
+  cross_references:
+    - "REQ-SIDE_PANEL_TAGS_TREE"
+  description: "Registry entry for ARCH-SIDE_PANEL_TAGS_TREE."
+  detail_file: "architecture-decisions/ARCH-SIDE_PANEL_TAGS_TREE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Tags and Bookmarks Tree Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SITE_MGMT:
+  cross_references: []
+  description: "Registry entry for ARCH-SITE_MGMT."
+  detail_file: "architecture-decisions/ARCH-SITE_MGMT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Site Management"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-STORAGE:
+  cross_references:
+    - "REQ-CHROME_STORAGE_USAGE"
+    - "REQ-CONFIG_PORTABILITY"
+  description: "Registry entry for ARCH-STORAGE."
+  detail_file: "architecture-decisions/ARCH-STORAGE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Storage Strategy"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-STORAGE_INDEX_AND_ROUTER:
+  cross_references:
+    - "ARCH-FILE_BOOKMARK_PROVIDER"
+    - "ARCH-LOCAL_STORAGE_PROVIDER"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  description: "Registry entry for ARCH-STORAGE_INDEX_AND_ROUTER."
+  detail_file: "architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Storage Index and Bookmark Router"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-STRUCTURED_LOGGING:
+  cross_references:
+    - "REQ-STRUCTURED_LOGGING"
+  description: "Registry entry for ARCH-STRUCTURED_LOGGING."
+  detail_file: "architecture-decisions/ARCH-STRUCTURED_LOGGING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Structured Logging"
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
@@ -94,6 +679,32 @@ ARCH-SUGGESTED_TAGS:
     last_updated: "2026-03-27T00:00:00.000Z"
     registered: "2025-07-14T00:00:00.000Z"
   name: "Suggested Tags from Page Content Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-SYNC_STORAGE_PROVIDER:
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  description: "Registry entry for ARCH-SYNC_STORAGE_PROVIDER."
+  detail_file: "architecture-decisions/ARCH-SYNC_STORAGE_PROVIDER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Sync Storage Bookmark Provider (Fourth Backend)"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK:
+  cross_references:
+    - "REQ-TAB_SEARCH_NO_MATCH_UX"
+  description: "Registry entry for ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK."
+  detail_file: "architecture-decisions/ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Tab Search No-Match Button Border Feedback"
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
@@ -115,6 +726,29 @@ ARCH-TAG_SYSTEM:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-TESTING_STRATEGY:
+  cross_references: []
+  description: "Registry entry for ARCH-TESTING_STRATEGY."
+  detail_file: "architecture-decisions/ARCH-TESTING_STRATEGY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Testing Strategy"
+  source_index: "architecture-decisions.yaml"
+  status: "Template"
+  type: "ARCH"
+ARCH-THEME:
+  cross_references:
+    - "REQ-DARK_THEME"
+  description: "Registry entry for ARCH-THEME."
+  detail_file: "architecture-decisions/ARCH-THEME.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Theme System Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-THIS_PAGE_TAG_SORT:
   description: "This Page tag sort: pure module tag-chip-sort.js; frequency from hoverboard_tag_frequency; MAIN-world relevance tiers + two-step inject; UIManager gated on tagSortToggle. REQ-THIS_PAGE_TAG_SORT, REQ-SUGGESTED_TAGS_FROM_CONTENT; IMPL-THIS_PAGE_TAG_SORT."
   type: "ARCH"
@@ -131,6 +765,284 @@ ARCH-TIED_STRUCTURE:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-UI_TESTABILITY:
+  cross_references:
+    - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
+    - "IMPL-UI_ACTION_CONTRACT"
+    - "IMPL-UI_INSPECTOR"
+    - "REQ-UI_INSPECTION"
+  description: "Registry entry for ARCH-UI_TESTABILITY."
+  detail_file: "architecture-decisions/ARCH-UI_TESTABILITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "UI Testability and Inspection Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-URL_TAGS_DISPLAY:
+  cross_references:
+    - "REQ-BADGE_INDICATORS"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-URL_TAGS_DISPLAY"
+  description: "Registry entry for ARCH-URL_TAGS_DISPLAY."
+  detail_file: "architecture-decisions/ARCH-URL_TAGS_DISPLAY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "URL Tags and Badge Single Source"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+ARCH-UX_CORE:
+  cross_references:
+    - "REQ-CORE_UX_PRESERVATION"
+    - "REQ-POPUP_PERSISTENT_SESSION"
+  description: "Registry entry for ARCH-UX_CORE."
+  detail_file: "architecture-decisions/ARCH-UX_CORE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "User Experience Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Active"
+  type: "ARCH"
+IMPL-AI_CONFIG_OPTIONS:
+  cross_references:
+    - "ARCH-AI_TAGGING_CONFIG"
+    - "REQ-AI_TAGGING_CONFIG"
+  description: "Registry entry for IMPL-AI_CONFIG_OPTIONS."
+  detail_file: "implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "AI Config in Options"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-AI_TAG_TEST:
+  cross_references:
+    - "ARCH-AI_TAGGING_CONFIG"
+    - "REQ-AI_TAGGING_CONFIG"
+  description: "Registry entry for IMPL-AI_TAG_TEST."
+  detail_file: "implementation-decisions/IMPL-AI_TAG_TEST.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "AI API Key Test"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-AI_TAGGING_POPUP_UI:
+  cross_references:
+    - "ARCH-AI_TAGGING_FLOW"
+    - "REQ-AI_TAGGING_POPUP"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  description: "Registry entry for IMPL-AI_TAGGING_POPUP_UI."
+  detail_file: "implementation-decisions/IMPL-AI_TAGGING_POPUP_UI.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "AI Tagging Popup Button and Flow"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-AI_TAGGING_PROVIDER:
+  cross_references:
+    - "ARCH-AI_TAGGING_FLOW"
+    - "REQ-AI_TAGGING_POPUP"
+    - "REQ-TAG_INPUT_SANITIZATION"
+  description: "Registry entry for IMPL-AI_TAGGING_PROVIDER."
+  detail_file: "implementation-decisions/IMPL-AI_TAGGING_PROVIDER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "OpenAI/Gemini Tag Request"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-AI_TAGGING_READABILITY:
+  cross_references:
+    - "ARCH-AI_TAGGING_FLOW"
+    - "REQ-AI_TAGGING_POPUP"
+  description: "Registry entry for IMPL-AI_TAGGING_READABILITY."
+  detail_file: "implementation-decisions/IMPL-AI_TAGGING_READABILITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Page Content via Readability"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-ARRAY_OBJECT_UTILITIES:
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "REQ-SHARED_UTILITIES"
+  description: "Registry entry for IMPL-ARRAY_OBJECT_UTILITIES."
+  detail_file: "implementation-decisions/IMPL-ARRAY_OBJECT_UTILITIES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Array and Object Utilities"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BADGE:
+  cross_references: []
+  description: "Registry entry for IMPL-BADGE."
+  detail_file: "implementation-decisions/IMPL-BADGE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Badge"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BADGE_REFRESH:
+  cross_references:
+    - "ARCH-BADGE"
+    - "REQ-BADGE_INDICATORS"
+  description: "Registry entry for IMPL-BADGE_REFRESH."
+  detail_file: "implementation-decisions/IMPL-BADGE_REFRESH.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Badge refresh on overlay and popup changes"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
+  cross_references:
+    - "ARCH-BOOKMARK_CREATE_UPDATE_TIMES"
+    - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
+  description: "Registry entry for IMPL-BOOKMARK_CREATE_UPDATE_TIMES."
+  detail_file: "implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark Create and Update Time Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BOOKMARK_ROUTER:
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-MOVE_BOOKMARK_UI"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  description: "Registry entry for IMPL-BOOKMARK_ROUTER."
+  detail_file: "implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark Router"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BOOKMARK_STATE_SYNC:
+  cross_references:
+    - "ARCH-BOOKMARK_STATE_SYNC"
+    - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+  description: "Registry entry for IMPL-BOOKMARK_STATE_SYNC."
+  detail_file: "implementation-decisions/IMPL-BOOKMARK_STATE_SYNC.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark State Synchronization Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BOOKMARK_USAGE_TRACKING:
+  cross_references:
+    - "ARCH-BOOKMARK_USAGE_TRACKING"
+    - "REQ-BOOKMARK_USAGE_TRACKING"
+  description: "Registry entry for IMPL-BOOKMARK_USAGE_TRACKING."
+  detail_file: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark Usage Tracking Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BOOKMARK_USAGE_TRACKING_UI:
+  cross_references:
+    - "ARCH-BOOKMARK_USAGE_TRACKING_UI"
+    - "IMPL-BOOKMARK_USAGE_TRACKING"
+    - "REQ-BOOKMARK_USAGE_TRACKING"
+  description: "Registry entry for IMPL-BOOKMARK_USAGE_TRACKING_UI."
+  detail_file: "implementation-decisions/IMPL-BOOKMARK_USAGE_TRACKING_UI.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark Usage Tracking UI Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BOOKMARKING:
+  cross_references: []
+  description: "Registry entry for IMPL-BOOKMARKING."
+  detail_file: "implementation-decisions/IMPL-BOOKMARKING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmarking"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-BROWSER_BOOKMARK_IMPORT:
+  cross_references:
+    - "ARCH-BROWSER_BOOKMARK_IMPORT"
+    - "REQ-BROWSER_BOOKMARK_IMPORT"
+  description: "Registry entry for IMPL-BROWSER_BOOKMARK_IMPORT."
+  detail_file: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Browser Bookmark Import Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-CODE_STYLE:
+  cross_references:
+    - "ARCH-CODE_QUALITY"
+    - "REQ-CODE_QUALITY"
+  description: "Registry entry for IMPL-CODE_STYLE."
+  detail_file: "implementation-decisions/IMPL-CODE_STYLE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Code Style and Conventions"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-CONFIG_BACKUP_RESTORE:
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "REQ-CONFIG_PORTABILITY"
+  description: "Registry entry for IMPL-CONFIG_BACKUP_RESTORE."
+  detail_file: "implementation-decisions/IMPL-CONFIG_BACKUP_RESTORE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Config Backup and Restore"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-CONFIG_MIGRATION:
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "REQ-CONFIG_PORTABILITY"
+  description: "Registry entry for IMPL-CONFIG_MIGRATION."
+  detail_file: "implementation-decisions/IMPL-CONFIG_MIGRATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Config Migration and Auth"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-CONFIG_STRUCT:
   cross_references:
     - "ARCH-CONFIG_STRUCTURE"
@@ -147,6 +1059,19 @@ IMPL-CONFIG_STRUCT:
   source_index: "implementation-decisions.yaml"
   status: "Template"
   type: "IMPL"
+IMPL-CONTEXT_MENU_QUICK_ACCESS:
+  cross_references:
+    - "ARCH-QUICK_ACCESS_ENTRY"
+    - "REQ-QUICK_ACCESS_ENTRY"
+  description: "Registry entry for IMPL-CONTEXT_MENU_QUICK_ACCESS."
+  detail_file: "implementation-decisions/IMPL-CONTEXT_MENU_QUICK_ACCESS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Context Menu Quick Access"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-CROSS_BROWSER:
   cross_references:
     - "ARCH-CROSS_BROWSER"
@@ -162,6 +1087,87 @@ IMPL-CROSS_BROWSER:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
+IMPL-DEBUG_PANEL:
+  cross_references:
+    - "ai-principles.md"
+    - "ARCH-UI_TESTABILITY"
+    - "REQ-UI_INSPECTION"
+  description: "Registry entry for IMPL-DEBUG_PANEL."
+  detail_file: "implementation-decisions/IMPL-DEBUG_PANEL.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Debug panel and structured UI/message logging"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-DEMO_OVERLAY:
+  cross_references:
+    - "IMPL-SIDE_PANEL_BROWSER_TABS"
+    - "PROC-DEMO_RECORDING"
+    - "REQ-SIDE_PANEL_BROWSER_TABS"
+  description: "Registry entry for IMPL-DEMO_OVERLAY."
+  detail_file: "implementation-decisions/IMPL-DEMO_OVERLAY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Demo Recording Overlay"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-DEV_COMMAND_INSPECTION:
+  cross_references:
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-UI_INSPECTION"
+    - "REQ-URL_TAGS_DISPLAY"
+  description: "Registry entry for IMPL-DEV_COMMAND_INSPECTION."
+  detail_file: "implementation-decisions/IMPL-DEV_COMMAND_INSPECTION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "DEV_COMMAND storage and router inspection"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-DOM_UTILITIES:
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "REQ-SHARED_UTILITIES"
+  description: "Registry entry for IMPL-DOM_UTILITIES."
+  detail_file: "implementation-decisions/IMPL-DOM_UTILITIES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "DOM Utilities"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-ERROR_HANDLING:
+  cross_references:
+    - "ARCH-ERROR_HANDLING"
+    - "REQ-ERROR_HANDLING"
+  description: "Registry entry for IMPL-ERROR_HANDLING."
+  detail_file: "implementation-decisions/IMPL-ERROR_HANDLING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Error Handling Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Template"
+  type: "IMPL"
+IMPL-EXAMPLE_IMPLEMENTATION:
+  cross_references:
+    - "ARCH-EXAMPLE_DECISION"
+    - "REQ-EXAMPLE_FEATURE"
+  description: "Registry entry for IMPL-EXAMPLE_IMPLEMENTATION."
+  detail_file: "implementation-decisions/IMPL-EXAMPLE_IMPLEMENTATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Core Implementation Example"
+  source_index: "implementation-decisions.yaml"
+  status: "Template"
+  type: "IMPL"
 IMPL-EXT_IDENTITY:
   cross_references:
     - "ARCH-EXT_IDENTITY"
@@ -172,6 +1178,204 @@ IMPL-EXT_IDENTITY:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Extension Identity Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-EXTENSION_COMMANDS:
+  cross_references:
+    - "ARCH-QUICK_ACCESS_ENTRY"
+    - "REQ-QUICK_ACCESS_ENTRY"
+  description: "Registry entry for IMPL-EXTENSION_COMMANDS."
+  detail_file: "implementation-decisions/IMPL-EXTENSION_COMMANDS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Extension Commands for Quick Access"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-FEATURE_FLAGS:
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "REQ-CONFIG_PORTABILITY"
+  description: "Registry entry for IMPL-FEATURE_FLAGS."
+  detail_file: "implementation-decisions/IMPL-FEATURE_FLAGS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Feature Flags and Settings"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-FILE_BOOKMARK_SERVICE:
+  cross_references:
+    - "ARCH-FILE_BOOKMARK_PROVIDER"
+    - "REQ-FILE_BOOKMARK_STORAGE"
+  description: "Registry entry for IMPL-FILE_BOOKMARK_SERVICE."
+  detail_file: "implementation-decisions/IMPL-FILE_BOOKMARK_SERVICE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "File Bookmark Service"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
+  cross_references:
+    - "IMPL-FILE_STORAGE_TYPED_PATH"
+    - "REQ-FILE_BOOKMARK_STORAGE"
+  description: "Registry entry for IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE."
+  detail_file: "implementation-decisions/IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "File Storage Helper Path Normalization"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-FILE_STORAGE_TYPED_PATH:
+  cross_references:
+    - "ARCH-FILE_BOOKMARK_PROVIDER"
+    - "IMPL-NATIVE_HOST_WRAPPER"
+    - "REQ-FILE_BOOKMARK_STORAGE"
+  description: "Registry entry for IMPL-FILE_STORAGE_TYPED_PATH."
+  detail_file: "implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "File Storage User-Typed Path"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-ICON_CLICK_BEHAVIOR:
+  cross_references:
+    - "ARCH-ICON_CLICK_BEHAVIOR"
+    - "REQ-ICON_CLICK_BEHAVIOR"
+  description: "Registry entry for IMPL-ICON_CLICK_BEHAVIOR."
+  detail_file: "implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Extension Icon Single-Click Behavior"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOCAL_BOOKMARK_SERVICE:
+  cross_references:
+    - "ARCH-LOCAL_STORAGE_PROVIDER"
+    - "ARCH-STORAGE"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  description: "Registry entry for IMPL-LOCAL_BOOKMARK_SERVICE."
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmark Service"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOCAL_BOOKMARKS_INDEX:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
+  description: "Registry entry for IMPL-LOCAL_BOOKMARKS_INDEX."
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
+    - "REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
+  description: "Registry entry for IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS."
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Add Tags to Selected Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
+  description: "Registry entry for IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT."
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Export Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
+  description: "Registry entry for IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT."
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Import Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
+    - "REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
+  description: "Registry entry for IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE."
+  detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Regex Find-and-Replace Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOG_LEVEL_CONFIG:
+  cross_references:
+    - "ARCH-STRUCTURED_LOGGING"
+    - "REQ-STRUCTURED_LOGGING"
+  description: "Registry entry for IMPL-LOG_LEVEL_CONFIG."
+  detail_file: "implementation-decisions/IMPL-LOG_LEVEL_CONFIG.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Log Level Configuration"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOGGER_CONTEXT_LEVELS:
+  cross_references:
+    - "ARCH-STRUCTURED_LOGGING"
+    - "REQ-STRUCTURED_LOGGING"
+  description: "Registry entry for IMPL-LOGGER_CONTEXT_LEVELS."
+  detail_file: "implementation-decisions/IMPL-LOGGER_CONTEXT_LEVELS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Logger Context and Levels"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOGGER_LEGACY:
+  cross_references:
+    - "ARCH-STRUCTURED_LOGGING"
+    - "REQ-STRUCTURED_LOGGING"
+  description: "Registry entry for IMPL-LOGGER_LEGACY."
+  detail_file: "implementation-decisions/IMPL-LOGGER_LEGACY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Logger Legacy Compatibility"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -220,6 +1424,230 @@ IMPL-MODULE_VALIDATION:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
+IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
+  cross_references:
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-MOVE_BOOKMARK_UI"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+  description: "Registry entry for IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL."
+  detail_file: "implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Move Bookmark Response Handling and URL"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-MOVE_BOOKMARK_UI:
+  cross_references:
+    - "ARCH-MOVE_BOOKMARK_UI"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  description: "Registry entry for IMPL-MOVE_BOOKMARK_UI."
+  detail_file: "implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Move Bookmark Storage UI"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-MV3_MIGRATION:
+  cross_references: []
+  description: "Registry entry for IMPL-MV3_MIGRATION."
+  detail_file: "implementation-decisions/IMPL-MV3_MIGRATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "MV3 Migration"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-NATIVE_HOST_INSTALLER:
+  cross_references:
+    - "ARCH-NATIVE_HOST"
+    - "REQ-NATIVE_HOST_WRAPPER"
+  description: "Registry entry for IMPL-NATIVE_HOST_INSTALLER."
+  detail_file: "implementation-decisions/IMPL-NATIVE_HOST_INSTALLER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Native Host Installer Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-NATIVE_HOST_WRAPPER:
+  cross_references:
+    - "ARCH-NATIVE_HOST"
+    - "REQ-NATIVE_HOST_WRAPPER"
+  description: "Registry entry for IMPL-NATIVE_HOST_WRAPPER."
+  detail_file: "implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Native Host Wrapper Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-OVERLAY:
+  cross_references:
+    - "ARCH-OVERLAY"
+    - "REQ-OVERLAY_SYSTEM"
+  description: "Registry entry for IMPL-OVERLAY."
+  detail_file: "implementation-decisions/IMPL-OVERLAY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-OVERLAY_CONTROLS:
+  cross_references:
+    - "ARCH-OVERLAY_CONTROLS"
+    - "REQ-OVERLAY_CONTROL_LAYOUT"
+  description: "Registry entry for IMPL-OVERLAY_CONTROLS."
+  detail_file: "implementation-decisions/IMPL-OVERLAY_CONTROLS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay Control Layout Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-OVERLAY_TEST_HARNESS:
+  cross_references:
+    - "ARCH-OVERLAY_TESTABILITY"
+    - "REQ-OVERLAY_SYSTEM"
+  description: "Registry entry for IMPL-OVERLAY_TEST_HARNESS."
+  detail_file: "implementation-decisions/IMPL-OVERLAY_TEST_HARNESS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay Test Harness Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-PINBOARD_API:
+  cross_references:
+    - "ARCH-PINBOARD_API"
+    - "REQ-PINBOARD_COMPATIBILITY"
+  description: "Registry entry for IMPL-PINBOARD_API."
+  detail_file: "implementation-decisions/IMPL-PINBOARD_API.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Pinboard API Service Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-PINBOARD_POSTS_ADD_ENCODING:
+  cross_references:
+    - "ARCH-PINBOARD_API"
+    - "IMPL-PINBOARD_API"
+    - "IMPL-TAG_SYSTEM"
+    - "REQ-PINBOARD_COMPATIBILITY"
+  description: "Registry entry for IMPL-PINBOARD_POSTS_ADD_ENCODING."
+  detail_file: "implementation-decisions/IMPL-PINBOARD_POSTS_ADD_ENCODING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Pinboard posts/add query parameter encoding"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-PLAYWRIGHT_E2E_EXTENSION:
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-UI_TESTABILITY"
+    - "REQ-AI_TAGGING_POPUP"
+    - "REQ-THIS_PAGE_TAG_SORT"
+    - "REQ-UI_INSPECTION"
+  description: "Registry entry for IMPL-PLAYWRIGHT_E2E_EXTENSION."
+  detail_file: "implementation-decisions/IMPL-PLAYWRIGHT_E2E_EXTENSION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Playwright E2E for extension (load unpacked, popup, messaging, evaluation, overlay)"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-POPUP_BUNDLE:
+  cross_references:
+    - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+    - "REQ-EXTENSION_BUNDLED_ENTRY_POINTS"
+  description: "Registry entry for IMPL-POPUP_BUNDLE."
+  detail_file: "implementation-decisions/IMPL-POPUP_BUNDLE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Popup bundle build"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-POPUP_MESSAGE_TIMEOUT:
+  cross_references: []
+  description: "Registry entry for IMPL-POPUP_MESSAGE_TIMEOUT."
+  detail_file: "implementation-decisions/IMPL-POPUP_MESSAGE_TIMEOUT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Popup Message Timeout Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
+  cross_references:
+    - "ARCH-QUICK_ACCESS_ENTRY"
+    - "REQ-QUICK_ACCESS_ENTRY"
+  description: "Registry entry for IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS."
+  detail_file: "implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "In-Popup and In-Panel Keyboard Shortcuts for Quick Access"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-POPUP_SESSION:
+  cross_references:
+    - "ARCH-POPUP_SESSION"
+    - "REQ-POPUP_PERSISTENT_SESSION"
+  description: "Registry entry for IMPL-POPUP_SESSION."
+  detail_file: "implementation-decisions/IMPL-POPUP_SESSION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Popup Session Persistence Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-POPUP_THEME_CSS:
+  cross_references:
+    - "ARCH-THEME"
+    - "IMPL-SCREENSHOT_MODE"
+    - "REQ-DARK_THEME"
+  description: "Registry entry for IMPL-POPUP_THEME_CSS."
+  detail_file: "implementation-decisions/IMPL-POPUP_THEME_CSS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Popup CSS honors ThemeManager (hb-theme-dark)"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-PRIVACY:
+  cross_references: []
+  description: "Registry entry for IMPL-PRIVACY."
+  detail_file: "implementation-decisions/IMPL-PRIVACY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Privacy"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-RECENT_TAGS_POPUP_REFRESH:
   cross_references:
     - "ARCH-POPUP_SESSION"
@@ -233,6 +1661,20 @@ IMPL-RECENT_TAGS_POPUP_REFRESH:
     last_updated: "2026-03-28T00:00:00.000Z"
     registered: "2026-03-28T00:00:00.000Z"
   name: "Recent Tags refresh on every popup display"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-RUNTIME_VALIDATION:
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "ARCH-MESSAGE_HANDLING"
+    - "IMPL-MESSAGE_HANDLING"
+  description: "Registry entry for IMPL-RUNTIME_VALIDATION."
+  detail_file: "implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Runtime validation with Zod for messages and config"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -250,6 +1692,108 @@ IMPL-SAFARI_ADAPTATION:
   source_index: "implementation-decisions.yaml"
   status: "Deferred"
   type: "IMPL"
+IMPL-SCREENSHOT_MODE:
+  cross_references:
+    - "IMPL-LOCAL_BOOKMARK_SERVICE"
+    - "IMPL-UI_TESTABILITY_HOOKS"
+    - "REQ-LOCAL_BOOKMARKS_INDEX"
+  description: "Registry entry for IMPL-SCREENSHOT_MODE."
+  detail_file: "implementation-decisions/IMPL-SCREENSHOT_MODE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Screenshot/Demo mode for placeholder screenshots"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SEARCH:
+  cross_references: []
+  description: "Registry entry for IMPL-SEARCH."
+  detail_file: "implementation-decisions/IMPL-SEARCH.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Search"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SELECTION_TO_TAG_INPUT:
+  cross_references:
+    - "ARCH-SELECTION_TO_TAG_INPUT"
+    - "REQ-SELECTION_TO_TAG_INPUT"
+  description: "Registry entry for IMPL-SELECTION_TO_TAG_INPUT."
+  detail_file: "implementation-decisions/IMPL-SELECTION_TO_TAG_INPUT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Selection to tag input on icon click"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SERVICE_WORKER:
+  cross_references: []
+  description: "Registry entry for IMPL-SERVICE_WORKER."
+  detail_file: "implementation-decisions/IMPL-SERVICE_WORKER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Service Worker"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SESSION_TAGS:
+  cross_references:
+    - "ARCH-AI_TAGGING_FLOW"
+    - "REQ-AI_TAGGING_POPUP"
+  description: "Registry entry for IMPL-SESSION_TAGS."
+  detail_file: "implementation-decisions/IMPL-SESSION_TAGS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Session Tags for Auto-Apply"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SIDE_PANEL_BOOKMARK:
+  cross_references:
+    - "ARCH-SIDE_PANEL_TABS"
+    - "IMPL-UIManager_SCOPED_ROOT"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  description: "Registry entry for IMPL-SIDE_PANEL_BOOKMARK."
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Bookmark Tab Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SIDE_PANEL_BOOKMARK_SEARCH:
+  cross_references:
+    - "ARCH-SIDE_PANEL_BOOKMARK_SEARCH"
+    - "REQ-SIDE_PANEL_BOOKMARK_SEARCH"
+  description: "Registry entry for IMPL-SIDE_PANEL_BOOKMARK_SEARCH."
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BOOKMARK_SEARCH.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Bookmark Search Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
+  cross_references:
+    - "ARCH-SIDE_PANEL_BROWSER_BOOKMARKS"
+    - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+  description: "Registry entry for IMPL-SIDE_PANEL_BROWSER_BOOKMARKS."
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Browser Bookmarks Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-SIDE_PANEL_BROWSER_TABS:
   cross_references:
     - "ARCH-SIDE_PANEL_BROWSER_TABS"
@@ -263,6 +1807,34 @@ IMPL-SIDE_PANEL_BROWSER_TABS:
     last_updated: "2026-03-28T12:00:00.000Z"
     registered: "2026-03-28T12:00:00.000Z"
   name: "Side Panel Browser Tabs Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  cross_references:
+    - "ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS"
+    - "REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS"
+  description: "Registry entry for IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS."
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Recently Closed Tabs Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SIDE_PANEL_SNAPSHOT:
+  cross_references:
+    - "ARCH-UI_TESTABILITY"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    - "REQ-SIDE_PANEL_TAGS_TREE"
+    - "REQ-UI_INSPECTION"
+  description: "Registry entry for IMPL-SIDE_PANEL_SNAPSHOT."
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_SNAPSHOT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Snapshot E2E Helper"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -284,6 +1856,54 @@ IMPL-SIDE_PANEL_TABS:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
+IMPL-SIDE_PANEL_TAGS_TREE:
+  cross_references:
+    - "ARCH-SIDE_PANEL_TAGS_TREE"
+    - "REQ-SIDE_PANEL_TAGS_TREE"
+  description: "Registry entry for IMPL-SIDE_PANEL_TAGS_TREE."
+  detail_file: "implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Tags and Bookmarks Tree Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-SITE_MGMT:
+  cross_references: []
+  description: "Registry entry for IMPL-SITE_MGMT."
+  detail_file: "implementation-decisions/IMPL-SITE_MGMT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Site Management"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-STORAGE:
+  cross_references: []
+  description: "Registry entry for IMPL-STORAGE."
+  detail_file: "implementation-decisions/IMPL-STORAGE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Storage"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-STORAGE_INDEX:
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+  description: "Registry entry for IMPL-STORAGE_INDEX."
+  detail_file: "implementation-decisions/IMPL-STORAGE_INDEX.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Storage Index"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-SUGGESTED_TAGS:
   cross_references:
     - "ARCH-SUGGESTED_TAGS"
@@ -300,6 +1920,44 @@ IMPL-SUGGESTED_TAGS:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
+IMPL-SYNC_BOOKMARK_SERVICE:
+  cross_references:
+    - "ARCH-SYNC_STORAGE_PROVIDER"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+  description: "Registry entry for IMPL-SYNC_BOOKMARK_SERVICE."
+  detail_file: "implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Sync Bookmark Service"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-TAB_SEARCH_NO_MATCH_UI:
+  cross_references:
+    - "ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK"
+    - "REQ-TAB_SEARCH_NO_MATCH_UX"
+  description: "Registry entry for IMPL-TAB_SEARCH_NO_MATCH_UI."
+  detail_file: "implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Tab Search No-Match UI Feedback"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-TAB_SEARCH_SERVICE:
+  cross_references:
+    - "REQ-SEARCH_FUNCTIONALITY"
+  description: "Registry entry for IMPL-TAB_SEARCH_SERVICE."
+  detail_file: "implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Tab Search Service Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-TAG_SYSTEM:
   cross_references:
     - "ARCH-TAG_SYSTEM"
@@ -313,6 +1971,42 @@ IMPL-TAG_SYSTEM:
     last_updated: "2026-03-28T00:00:00.000Z"
     registered: "2026-03-28T00:00:00.000Z"
   name: "Tag Service Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-TESTING:
+  cross_references:
+    - "ARCH-TESTING_STRATEGY"
+  description: "Registry entry for IMPL-TESTING."
+  detail_file: "implementation-decisions/IMPL-TESTING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Testing Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Template"
+  type: "IMPL"
+IMPL-TEXT_UTILITIES:
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "REQ-SHARED_UTILITIES"
+  description: "Registry entry for IMPL-TEXT_UTILITIES."
+  detail_file: "implementation-decisions/IMPL-TEXT_UTILITIES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Text Utilities"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-THEME:
+  cross_references: []
+  description: "Registry entry for IMPL-THEME."
+  detail_file: "implementation-decisions/IMPL-THEME.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Theme"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -345,6 +2039,75 @@ IMPL-TIED_FILES:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
+IMPL-TIME_ASYNC_UTILITIES:
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "REQ-SHARED_UTILITIES"
+  description: "Registry entry for IMPL-TIME_ASYNC_UTILITIES."
+  detail_file: "implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Time and Async Utilities"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-TYPESCRIPT_MIGRATION:
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "ARCH-LANGUAGE_SELECTION"
+    - "ARCH-MESSAGE_HANDLING"
+    - "IMPL-MESSAGE_HANDLING"
+    - "IMPL-RUNTIME_VALIDATION"
+  description: "Registry entry for IMPL-TYPESCRIPT_MIGRATION."
+  detail_file: "implementation-decisions/IMPL-TYPESCRIPT_MIGRATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Incremental TypeScript and JSDoc typing"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-UI_ACTION_CONTRACT:
+  cross_references:
+    - "ARCH-UI_TESTABILITY"
+    - "REQ-UI_INSPECTION"
+  description: "Registry entry for IMPL-UI_ACTION_CONTRACT."
+  detail_file: "implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "UI Action Contract"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-UI_INSPECTOR:
+  cross_references:
+    - "ARCH-UI_TESTABILITY"
+    - "REQ-UI_INSPECTION"
+  description: "Registry entry for IMPL-UI_INSPECTOR."
+  detail_file: "implementation-decisions/IMPL-UI_INSPECTOR.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "UI Inspector"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-UI_TESTABILITY_HOOKS:
+  cross_references:
+    - "ARCH-UI_TESTABILITY"
+    - "REQ-MODULE_VALIDATION"
+    - "REQ-UI_INSPECTION"
+  description: "Registry entry for IMPL-UI_TESTABILITY_HOOKS."
+  detail_file: "implementation-decisions/IMPL-UI_TESTABILITY_HOOKS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "UI Testability Hooks"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-UIManager_SCOPED_ROOT:
   cross_references:
     - "ARCH-SIDE_PANEL_TABS"
@@ -357,6 +2120,19 @@ IMPL-UIManager_SCOPED_ROOT:
     last_updated: "2026-03-27T00:00:00.000Z"
     registered: "2026-03-27T00:00:00.000Z"
   name: "UIManager Scoped Root for Panel Context"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-URL_INHIBITION:
+  cross_references:
+    - "ARCH-CONFIG_STRUCTURE"
+    - "REQ-SITE_MANAGEMENT"
+  description: "Registry entry for IMPL-URL_INHIBITION."
+  detail_file: "implementation-decisions/IMPL-URL_INHIBITION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "URL Inhibition"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -373,6 +2149,30 @@ IMPL-URL_TAGS_DISPLAY:
     last_updated: "2026-03-28T18:00:00.000Z"
     registered: "2026-03-28T18:00:00.000Z"
   name: "URL Tags and Badge Display Module"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-URL_UTILITIES:
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "REQ-SHARED_UTILITIES"
+  description: "Registry entry for IMPL-URL_UTILITIES."
+  detail_file: "implementation-decisions/IMPL-URL_UTILITIES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "URL Utilities"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-UX_CORE:
+  cross_references: []
+  description: "Registry entry for IMPL-UX_CORE."
+  detail_file: "implementation-decisions/IMPL-UX_CORE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "UX Core"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -623,6 +2423,167 @@ PROC-YAML_EDIT_LOOP:
   source_index: "processes.md"
   status: "Active"
   type: "PROC"
+REQ-AI_TAGGING_CONFIG:
+  cross_references:
+    - "ARCH-AI_TAGGING_CONFIG"
+    - "IMPL-AI_CONFIG_OPTIONS"
+    - "IMPL-AI_TAG_TEST"
+  description: "Registry entry for REQ-AI_TAGGING_CONFIG."
+  detail_file: "requirements/REQ-AI_TAGGING_CONFIG.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "AI Tagging Configuration"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-AI_TAGGING_POPUP:
+  cross_references:
+    - "ARCH-AI_TAGGING_FLOW"
+    - "ARCH-SUGGESTED_TAGS"
+    - "IMPL-AI_TAGGING_POPUP_UI"
+    - "IMPL-AI_TAGGING_PROVIDER"
+    - "IMPL-AI_TAGGING_READABILITY"
+    - "IMPL-SESSION_TAGS"
+  description: "Registry entry for REQ-AI_TAGGING_POPUP."
+  detail_file: "requirements/REQ-AI_TAGGING_POPUP.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "AI Tagging from Popup"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-BADGE_INDICATORS:
+  cross_references:
+    - "ARCH-BADGE"
+    - "IMPL-BADGE"
+  description: "Registry entry for REQ-BADGE_INDICATORS."
+  detail_file: "requirements/REQ-BADGE_INDICATORS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Badge Indicators"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-BOOKMARK_CREATE_UPDATE_TIMES:
+  cross_references:
+    - "ARCH-BOOKMARK_CREATE_UPDATE_TIMES"
+    - "IMPL-BOOKMARK_CREATE_UPDATE_TIMES"
+  description: "Registry entry for REQ-BOOKMARK_CREATE_UPDATE_TIMES."
+  detail_file: "requirements/REQ-BOOKMARK_CREATE_UPDATE_TIMES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark Create-Time and Most-Recent-Update-Time"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-BOOKMARK_STATE_SYNCHRONIZATION:
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "IMPL-MESSAGE_HANDLING"
+  description: "Registry entry for REQ-BOOKMARK_STATE_SYNCHRONIZATION."
+  detail_file: "requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark State Synchronization"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-BOOKMARK_USAGE_TRACKING:
+  cross_references:
+    - "ARCH-BOOKMARK_USAGE_TRACKING"
+    - "ARCH-BOOKMARK_USAGE_TRACKING_UI"
+    - "IMPL-BOOKMARK_USAGE_TRACKING"
+    - "IMPL-BOOKMARK_USAGE_TRACKING_UI"
+  description: "Registry entry for REQ-BOOKMARK_USAGE_TRACKING."
+  detail_file: "requirements/REQ-BOOKMARK_USAGE_TRACKING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Bookmark Usage Tracking"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-BROWSER_BOOKMARK_IMPORT:
+  cross_references:
+    - "ARCH-BROWSER_BOOKMARK_IMPORT"
+    - "IMPL-BROWSER_BOOKMARK_IMPORT"
+  description: "Registry entry for REQ-BROWSER_BOOKMARK_IMPORT."
+  detail_file: "requirements/REQ-BROWSER_BOOKMARK_IMPORT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Browser Bookmark Import Page"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-CHROME_STORAGE_USAGE:
+  cross_references:
+    - "ARCH-STORAGE"
+    - "IMPL-STORAGE"
+  description: "Registry entry for REQ-CHROME_STORAGE_USAGE."
+  detail_file: "requirements/REQ-CHROME_STORAGE_USAGE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Chrome Storage API Usage"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-CODE_QUALITY:
+  cross_references:
+    - "ARCH-CODE_QUALITY"
+    - "IMPL-CODE_STYLE"
+  description: "Registry entry for REQ-CODE_QUALITY."
+  detail_file: "requirements/REQ-CODE_QUALITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Code Quality and Tooling"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-CONFIG_PORTABILITY:
+  cross_references:
+    - "ARCH-STORAGE"
+    - "IMPL-STORAGE"
+  description: "Registry entry for REQ-CONFIG_PORTABILITY."
+  detail_file: "requirements/REQ-CONFIG_PORTABILITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Configuration Import/Export"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-CONFIGURATION:
+  cross_references: []
+  description: "Registry entry for REQ-CONFIGURATION."
+  detail_file: "requirements/REQ-CONFIGURATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Configuration"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
+REQ-CORE_UX_PRESERVATION:
+  cross_references:
+    - "ARCH-UX_CORE"
+    - "IMPL-UX_CORE"
+  description: "Registry entry for REQ-CORE_UX_PRESERVATION."
+  detail_file: "requirements/REQ-CORE_UX_PRESERVATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Core User Experience Preservation"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
 REQ-CROSS_BROWSER:
   cross_references:
     - "ARCH-CROSS_BROWSER"
@@ -637,6 +2598,55 @@ REQ-CROSS_BROWSER:
   name: "Chrome-First Browser API Shim"
   source_index: "requirements.yaml"
   status: "Active"
+  type: "REQ"
+REQ-DARK_THEME:
+  cross_references:
+    - "ARCH-THEME"
+    - "IMPL-POPUP_THEME_CSS"
+    - "IMPL-THEME"
+  description: "Registry entry for REQ-DARK_THEME."
+  detail_file: "requirements/REQ-DARK_THEME.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Dark Theme Support"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-ERROR_HANDLING:
+  cross_references: []
+  description: "Registry entry for REQ-ERROR_HANDLING."
+  detail_file: "requirements/REQ-ERROR_HANDLING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Error Handling"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
+REQ-EXAMPLE_FEATURE:
+  cross_references: []
+  description: "Registry entry for REQ-EXAMPLE_FEATURE."
+  detail_file: "requirements/REQ-EXAMPLE_FEATURE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Example Feature"
+  source_index: "requirements.yaml"
+  status: "Template"
+  type: "REQ"
+REQ-EXTENSION_BUNDLED_ENTRY_POINTS:
+  cross_references:
+    - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+    - "IMPL-POPUP_BUNDLE"
+  description: "Registry entry for REQ-EXTENSION_BUNDLED_ENTRY_POINTS."
+  detail_file: "requirements/REQ-EXTENSION_BUNDLED_ENTRY_POINTS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Extension Bundled Entry Points"
+  source_index: "requirements.yaml"
+  status: "Implemented"
   type: "REQ"
 REQ-EXTENSION_IDENTITY:
   cross_references:
@@ -665,6 +2675,122 @@ REQ-FEEDBACK_TO_TIED:
   source_index: "requirements.yaml"
   status: "Active"
   type: "REQ"
+REQ-FILE_BOOKMARK_STORAGE:
+  cross_references:
+    - "ARCH-FILE_BOOKMARK_PROVIDER"
+    - "IMPL-FILE_BOOKMARK_SERVICE"
+  description: "Registry entry for REQ-FILE_BOOKMARK_STORAGE."
+  detail_file: "requirements/REQ-FILE_BOOKMARK_STORAGE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "File-Based Bookmark Storage"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-ICON_CLICK_BEHAVIOR:
+  cross_references:
+    - "ARCH-ICON_CLICK_BEHAVIOR"
+    - "IMPL-ICON_CLICK_BEHAVIOR"
+  description: "Registry entry for REQ-ICON_CLICK_BEHAVIOR."
+  detail_file: "requirements/REQ-ICON_CLICK_BEHAVIOR.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Extension Icon Single-Click Behavior"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-LOCAL_BOOKMARKS_INDEX:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX"
+  description: "Registry entry for REQ-LOCAL_BOOKMARKS_INDEX."
+  detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Page"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS"
+  description: "Registry entry for REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS."
+  detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Add Tags to Selected"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+  description: "Registry entry for REQ-LOCAL_BOOKMARKS_INDEX_EXPORT."
+  detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Export"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
+  description: "Registry entry for REQ-LOCAL_BOOKMARKS_INDEX_IMPORT."
+  detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Import"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
+  cross_references:
+    - "ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
+    - "IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
+  description: "Registry entry for REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE."
+  detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Local Bookmarks Index Regex Find-and-Replace on Selected"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-MAINTAINABILITY:
+  cross_references: []
+  description: "Registry entry for REQ-MAINTAINABILITY."
+  detail_file: "requirements/REQ-MAINTAINABILITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Maintainability"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
+REQ-MANIFEST_V3_MIGRATION:
+  cross_references:
+    - "ARCH-MV3_MIGRATION"
+    - "IMPL-MV3_MIGRATION"
+  description: "Registry entry for REQ-MANIFEST_V3_MIGRATION."
+  detail_file: "requirements/REQ-MANIFEST_V3_MIGRATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Manifest V3 Migration"
+  source_index: "requirements.yaml"
+  status: "Planned"
+  type: "REQ"
 REQ-MODULE_VALIDATION:
   category: "Core Functional"
   cross_references:
@@ -678,6 +2804,167 @@ REQ-MODULE_VALIDATION:
   name: "Independent Module Validation Before Integration"
   source_index: "requirements.yaml"
   status: "Active"
+  type: "REQ"
+REQ-MOVE_BOOKMARK_STORAGE_UI:
+  cross_references:
+    - "ARCH-MOVE_BOOKMARK_UI"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL"
+    - "IMPL-MOVE_BOOKMARK_UI"
+  description: "Registry entry for REQ-MOVE_BOOKMARK_STORAGE_UI."
+  detail_file: "requirements/REQ-MOVE_BOOKMARK_STORAGE_UI.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Move Bookmark Storage UI"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-NATIVE_HOST_WRAPPER:
+  cross_references:
+    - "ARCH-NATIVE_HOST"
+    - "IMPL-NATIVE_HOST_INSTALLER"
+    - "IMPL-NATIVE_HOST_WRAPPER"
+  description: "Registry entry for REQ-NATIVE_HOST_WRAPPER."
+  detail_file: "requirements/REQ-NATIVE_HOST_WRAPPER.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Native Host Wrapper"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-OVERLAY_AUTO_SHOW_CONTROL:
+  cross_references:
+    - "ARCH-OVERLAY"
+    - "IMPL-OVERLAY"
+  description: "Registry entry for REQ-OVERLAY_AUTO_SHOW_CONTROL."
+  detail_file: "requirements/REQ-OVERLAY_AUTO_SHOW_CONTROL.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Hover Auto-Show Controls"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-OVERLAY_CONTROL_LAYOUT:
+  cross_references:
+    - "ARCH-OVERLAY"
+    - "IMPL-OVERLAY"
+  description: "Registry entry for REQ-OVERLAY_CONTROL_LAYOUT."
+  detail_file: "requirements/REQ-OVERLAY_CONTROL_LAYOUT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay Control Layout"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-OVERLAY_REFRESH_ACTION:
+  cross_references:
+    - "ARCH-OVERLAY"
+    - "IMPL-OVERLAY"
+  description: "Registry entry for REQ-OVERLAY_REFRESH_ACTION."
+  detail_file: "requirements/REQ-OVERLAY_REFRESH_ACTION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay Refresh Control"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-OVERLAY_SYSTEM:
+  cross_references:
+    - "ARCH-OVERLAY"
+    - "IMPL-OVERLAY"
+  description: "Registry entry for REQ-OVERLAY_SYSTEM."
+  detail_file: "requirements/REQ-OVERLAY_SYSTEM.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay System"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-PER_BOOKMARK_STORAGE_BACKEND:
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-BOOKMARK_ROUTER"
+    - "IMPL-STORAGE_INDEX"
+  description: "Registry entry for REQ-PER_BOOKMARK_STORAGE_BACKEND."
+  detail_file: "requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Per-Bookmark Storage Backend"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-PERFORMANCE:
+  cross_references: []
+  description: "Registry entry for REQ-PERFORMANCE."
+  detail_file: "requirements/REQ-PERFORMANCE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Performance"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
+REQ-PINBOARD_COMPATIBILITY:
+  cross_references:
+    - "ARCH-PINBOARD_API"
+    - "IMPL-PINBOARD_API"
+  description: "Registry entry for REQ-PINBOARD_COMPATIBILITY."
+  detail_file: "requirements/REQ-PINBOARD_COMPATIBILITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Pinboard API Compatibility"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-POPUP_PERSISTENT_SESSION:
+  cross_references:
+    - "ARCH-UX_CORE"
+    - "IMPL-UX_CORE"
+  description: "Registry entry for REQ-POPUP_PERSISTENT_SESSION."
+  detail_file: "requirements/REQ-POPUP_PERSISTENT_SESSION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Popup Session Persistence"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-PRIVACY_CONTROLS:
+  cross_references:
+    - "ARCH-PRIVACY"
+    - "IMPL-PRIVACY"
+  description: "Registry entry for REQ-PRIVACY_CONTROLS."
+  detail_file: "requirements/REQ-PRIVACY_CONTROLS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Privacy Controls"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-QUICK_ACCESS_ENTRY:
+  cross_references:
+    - "ARCH-QUICK_ACCESS_ENTRY"
+    - "IMPL-CONTEXT_MENU_QUICK_ACCESS"
+    - "IMPL-EXTENSION_COMMANDS"
+    - "IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS"
+  description: "Registry entry for REQ-QUICK_ACCESS_ENTRY."
+  detail_file: "requirements/REQ-QUICK_ACCESS_ENTRY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Quick Access Entry Points"
+  source_index: "requirements.yaml"
+  status: "Implemented"
   type: "REQ"
 REQ-RECENT_TAGS_SYSTEM:
   category: "Immutable"
@@ -702,6 +2989,17 @@ REQ-RECENT_TAGS_SYSTEM:
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"
+REQ-RELIABILITY:
+  cross_references: []
+  description: "Registry entry for REQ-RELIABILITY."
+  detail_file: "requirements/REQ-RELIABILITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Reliability"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
 REQ-SAFARI_ADAPTATION:
   cross_references:
     - "ARCH-CROSS_BROWSER"
@@ -718,6 +3016,75 @@ REQ-SAFARI_ADAPTATION:
   source_index: "requirements.yaml"
   status: "Deferred"
   type: "REQ"
+REQ-SEARCH_FUNCTIONALITY:
+  cross_references:
+    - "ARCH-SEARCH"
+    - "IMPL-SEARCH"
+  description: "Registry entry for REQ-SEARCH_FUNCTIONALITY."
+  detail_file: "requirements/REQ-SEARCH_FUNCTIONALITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Search Functionality"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SELECTION_TO_TAG_INPUT:
+  cross_references:
+    - "ARCH-SELECTION_TO_TAG_INPUT"
+    - "IMPL-SELECTION_TO_TAG_INPUT"
+  description: "Registry entry for REQ-SELECTION_TO_TAG_INPUT."
+  detail_file: "requirements/REQ-SELECTION_TO_TAG_INPUT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Selection to Tag Input on Extension Icon Click"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SHARED_UTILITIES:
+  cross_references:
+    - "ARCH-SHARED_UTILITIES"
+    - "IMPL-ARRAY_OBJECT_UTILITIES"
+    - "IMPL-DOM_UTILITIES"
+    - "IMPL-TEXT_UTILITIES"
+    - "IMPL-TIME_ASYNC_UTILITIES"
+    - "IMPL-URL_UTILITIES"
+  description: "Registry entry for REQ-SHARED_UTILITIES."
+  detail_file: "requirements/REQ-SHARED_UTILITIES.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Shared Utilities"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SIDE_PANEL_BOOKMARK_SEARCH:
+  cross_references:
+    - "ARCH-SIDE_PANEL_BOOKMARK_SEARCH"
+    - "IMPL-SIDE_PANEL_BOOKMARK_SEARCH"
+  description: "Registry entry for REQ-SIDE_PANEL_BOOKMARK_SEARCH."
+  detail_file: "requirements/REQ-SIDE_PANEL_BOOKMARK_SEARCH.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Bookmark Search"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
+  cross_references:
+    - "ARCH-SIDE_PANEL_BROWSER_BOOKMARKS"
+    - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
+  description: "Registry entry for REQ-SIDE_PANEL_BROWSER_BOOKMARKS."
+  detail_file: "requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Browser Bookmarks"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
 REQ-SIDE_PANEL_BROWSER_TABS:
   category: "Functional"
   cross_references:
@@ -730,6 +3097,103 @@ REQ-SIDE_PANEL_BROWSER_TABS:
     last_updated: "2026-03-28T00:00:00.000Z"
     registered: "2026-03-28T00:00:00.000Z"
   name: "Side Panel Browser Tabs List"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SIDE_PANEL_POPUP_EQUIVALENT:
+  cross_references:
+    - "ARCH-SIDE_PANEL_TABS"
+    - "IMPL-SIDE_PANEL_BOOKMARK"
+    - "IMPL-SIDE_PANEL_TABS"
+    - "IMPL-UIManager_SCOPED_ROOT"
+  description: "Registry entry for REQ-SIDE_PANEL_POPUP_EQUIVALENT."
+  detail_file: "requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Popup Equivalent with Tabs"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
+  cross_references:
+    - "ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS"
+    - "IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS"
+  description: "Registry entry for REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS."
+  detail_file: "requirements/REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Recently Closed Tabs"
+  source_index: "requirements.yaml"
+  status: "Planned"
+  type: "REQ"
+REQ-SIDE_PANEL_TAGS_TREE:
+  cross_references:
+    - "ARCH-SIDE_PANEL_TAGS_TREE"
+    - "IMPL-SIDE_PANEL_TAGS_TREE"
+  description: "Registry entry for REQ-SIDE_PANEL_TAGS_TREE."
+  detail_file: "requirements/REQ-SIDE_PANEL_TAGS_TREE.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Side Panel Tags and Bookmarks Tree"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SITE_MANAGEMENT:
+  cross_references:
+    - "ARCH-SITE_MGMT"
+    - "IMPL-SITE_MGMT"
+  description: "Registry entry for REQ-SITE_MANAGEMENT."
+  detail_file: "requirements/REQ-SITE_MANAGEMENT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Site Management"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-SMART_BOOKMARKING:
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-UX_CORE"
+    - "IMPL-BOOKMARKING"
+    - "IMPL-MESSAGE_HANDLING"
+  description: "Registry entry for REQ-SMART_BOOKMARKING."
+  detail_file: "requirements/REQ-SMART_BOOKMARKING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Smart Bookmarking"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-STORAGE_MODE_DEFAULT:
+  cross_references:
+    - "ARCH-LOCAL_STORAGE_PROVIDER"
+    - "IMPL-LOCAL_BOOKMARK_SERVICE"
+  description: "Registry entry for REQ-STORAGE_MODE_DEFAULT."
+  detail_file: "requirements/REQ-STORAGE_MODE_DEFAULT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Storage Mode Default and Dual-Use"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-STRUCTURED_LOGGING:
+  cross_references:
+    - "ARCH-STRUCTURED_LOGGING"
+    - "IMPL-LOG_LEVEL_CONFIG"
+    - "IMPL-LOGGER_CONTEXT_LEVELS"
+    - "IMPL-LOGGER_LEGACY"
+  description: "Registry entry for REQ-STRUCTURED_LOGGING."
+  detail_file: "requirements/REQ-STRUCTURED_LOGGING.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Structured Logging"
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"
@@ -749,6 +3213,19 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"
+REQ-SUGGESTED_TAGS_DEDUPLICATION:
+  cross_references:
+    - "ARCH-SUGGESTED_TAGS"
+    - "IMPL-SUGGESTED_TAGS"
+  description: "Registry entry for REQ-SUGGESTED_TAGS_DEDUPLICATION."
+  detail_file: "requirements/REQ-SUGGESTED_TAGS_DEDUPLICATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Suggested Tags Deduplication"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
 REQ-SUGGESTED_TAGS_FROM_CONTENT:
   category: "Functional"
   cross_references:
@@ -762,6 +3239,45 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
     last_updated: "2026-03-27T00:00:00.000Z"
     registered: "2026-03-27T00:00:00.000Z"
   name: "Suggested Tags from Page Content"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-TAB_SEARCH_NO_MATCH_UX:
+  cross_references:
+    - "ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK"
+    - "IMPL-TAB_SEARCH_NO_MATCH_UI"
+  description: "Registry entry for REQ-TAB_SEARCH_NO_MATCH_UX."
+  detail_file: "requirements/REQ-TAB_SEARCH_NO_MATCH_UX.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Tab Search No-Match Visual Feedback Only"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-TAG_INPUT_SANITIZATION:
+  cross_references:
+    - "ARCH-TAG_SYSTEM"
+    - "IMPL-TAG_SYSTEM"
+  description: "Registry entry for REQ-TAG_INPUT_SANITIZATION."
+  detail_file: "requirements/REQ-TAG_INPUT_SANITIZATION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Tag Input Sanitization"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-TAG_MANAGEMENT:
+  cross_references:
+    - "ARCH-TAG_SYSTEM"
+    - "IMPL-TAG_SYSTEM"
+  description: "Registry entry for REQ-TAG_MANAGEMENT."
+  detail_file: "requirements/REQ-TAG_MANAGEMENT.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Tag Management"
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"
@@ -782,3 +3298,122 @@ REQ-TIED_SETUP:
   source_index: "requirements.yaml"
   status: "Active"
   type: "REQ"
+REQ-UI_INSPECTION:
+  cross_references:
+    - "ARCH-MESSAGE_HANDLING"
+    - "ARCH-UI_TESTABILITY"
+    - "IMPL-MESSAGE_HANDLING"
+    - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
+    - "IMPL-SIDE_PANEL_SNAPSHOT"
+    - "IMPL-UI_ACTION_CONTRACT"
+    - "IMPL-UI_INSPECTOR"
+  description: "Registry entry for REQ-UI_INSPECTION."
+  detail_file: "requirements/REQ-UI_INSPECTION.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "UI Inspection and Testability"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-URL_TAGS_DISPLAY:
+  cross_references:
+    - "ARCH-URL_TAGS_DISPLAY"
+    - "IMPL-URL_TAGS_DISPLAY"
+  description: "Registry entry for REQ-URL_TAGS_DISPLAY."
+  detail_file: "requirements/REQ-URL_TAGS_DISPLAY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "URL Tags and Badge Single Source"
+  source_index: "requirements.yaml"
+  status: "Implemented"
+  type: "REQ"
+REQ-USABILITY:
+  cross_references: []
+  description: "Registry entry for REQ-USABILITY."
+  detail_file: "requirements/REQ-USABILITY.yaml"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Usability"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
+TEST-OVERLAY_HARNESS:
+  cross_references: []
+  description: "Overlay test harness"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay test harness"
+  source_index: "tests"
+  status: "Active"
+  type: "TEST"
+TEST-OVERLAY_REFRESH:
+  cross_references: []
+  description: "Overlay refresh tests"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Overlay refresh tests"
+  source_index: "tests"
+  status: "Active"
+  type: "TEST"
+TEST-POPUP_CLOSE_BEHAVIOR:
+  cross_references: []
+  description: "Popup close behavior tests"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Popup close behavior tests"
+  source_index: "tests"
+  status: "Active"
+  type: "TEST"
+TEST-SHOW_HOVER_CHECKBOX:
+  cross_references: []
+  description: "Show-hover checkbox tests"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Show-hover checkbox tests"
+  source_index: "tests"
+  status: "Active"
+  type: "TEST"
+TEST-TAG_SYNC:
+  cross_references: []
+  description: "Tag sync tests"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Tag sync tests"
+  source_index: "tests"
+  status: "Active"
+  type: "TEST"
+TEST-TOGGLE_SYNC:
+  cross_references: []
+  description: "Toggle sync tests"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Toggle sync tests"
+  source_index: "tests"
+  status: "Active"
+  type: "TEST"
+TEST-UNIT_FRAMEWORK:
+  cross_references: []
+  description: "Unit test framework"
+  detail_file: "null"
+  metadata:
+    last_updated: "2026-07-28T00:00:00.000Z"
+    registered: "2026-07-28T00:00:00.000Z"
+  name: "Unit test framework"
+  source_index: "tests"
+  status: "Active"
+  type: "TEST"

@@ -1,0 +1,64 @@
+ARCH-POPUP_SESSION:
+  alternatives_considered:
+    - name: "Auto-close after actions"
+      cons:
+        - "Interrupts workflows"
+      pros: []
+      rejected_reason: "Contradicts test expectations"
+    - name: "Direct DOM manipulation"
+      cons:
+        - "Duplicated logic"
+      pros: []
+      rejected_reason: "Inconsistent error handling"
+  cross_references:
+    - "REQ-POPUP_PERSISTENT_SESSION"
+    - "REQ-RECENT_TAGS_SYSTEM"
+  decision: "Thin architecture stub for ARCH-POPUP_SESSION."
+  implementation_approach:
+    details:
+      - "Overlay toggle with GET_OVERLAY_STATE fallback"
+      - "PopupController handlers await async work"
+      - "setupAutoRefresh: visibilitychange → loadRecentTags when visible and initialized"
+      - "State manager updates"
+      - "UIManager updates without close"
+    summary: "Route actions through PopupController, update state without closing; document.visibilityState listener refreshes Recent Tags when popup becomes visible so shared SW state is shown (composed with IMPL-RECENT_TAGS_POPUP_REFRESH)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Popup Session Persistence Architecture"
+  rationale:
+    benefits:
+      - "Better UX"
+      - "Chained operations"
+    problems_solved:
+      - "Popup closes after each action"
+      - "Workflow interruption"
+    why: "Multi-action workflows without popup reopening"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-POPUP_SESSION"
+    see_also:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-TAG_SYSTEM"
+      - "ARCH-UX_CORE"
+      - "IMPL-RECENT_TAGS_POPUP_REFRESH"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-POPUP_SESSION"
+    implementation:
+      - "IMPL-POPUP_SESSION"
+      - "IMPL-RECENT_TAGS_POPUP_REFRESH"
+      - "IMPL-TAG_SYSTEM"
+    requirements:
+      - "REQ-POPUP_PERSISTENT_SESSION"
+      - "REQ-RECENT_TAGS_SYSTEM"
+    tests:
+      - "Popup close behavior tests"
+      - "tests/unit/tag-recent-behavior.test.js"

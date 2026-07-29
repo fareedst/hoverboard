@@ -14,7 +14,7 @@ IMPL-UI_INSPECTOR:
     - "ARCH-UI_TESTABILITY"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-UI_INSPECTOR.yaml"
-  essence_pseudocode: "# [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]\n# recordMessage/recordAction ring buffers; getLastMessages/getLastActions; debug-gated.\n# Contract: message or action in; ring buffers and getters; enabled flag.\nINPUT: message (recordMessage); action (recordAction); gated by DEBUG_HOVERBOARD_UI or setEnabled(true)\nOUTPUT: ring buffers of last N messages and last N actions; getLastMessages(), getLastActions()\nDATA: message ring buffer; action ring buffer; enabled flag\n\n# Append to buffer when enabled; drop oldest if full.\nrecordMessage(msg): IF enabled: APPEND to message buffer; DROP oldest if full\nrecordAction(action): IF enabled: APPEND to action buffer; DROP oldest if full\n\n# Return copy of buffers.\ngetLastMessages(), getLastActions(): RETURN copy of buffer(s)\n\n# Service-worker records message; PopupController/content record action.\nWiring: service-worker after handle message -> recordMessage; PopupController/content-main on action -> recordAction\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-UI_INSPECTOR-pseudocode.md"
   implementation_approach:
     summary: "src/shared/ui-inspector.js; wired in service-worker (recordMessage), PopupController (recordAction), content-main (recordAction)"
   metadata:
@@ -23,8 +23,8 @@ IMPL-UI_INSPECTOR:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "UI Inspector"
   rationale:
     benefits:

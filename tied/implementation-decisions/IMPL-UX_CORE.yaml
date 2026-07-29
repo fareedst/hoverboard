@@ -1,0 +1,37 @@
+IMPL-UX_CORE:
+  code_locations:
+    files: []
+    functions: []
+  cross_references:
+    - "ARCH-UX_CORE"
+    - "REQ-CORE_UX_PRESERVATION"
+    - "REQ-POPUP_PERSISTENT_SESSION"
+  decision: "Thin implementation stub for IMPL-UX_CORE."
+  essence_pseudocode_path: "implementation-decisions/IMPL-UX_CORE-pseudocode.md"
+  implementation_approach:
+    summary: "Preserve multi-action popup/overlay workflows and persistent popup session"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: align detail traceability with expanded sidecar"
+  name: "UX Core"
+  rationale:
+    why: "Core UX implementation"
+  related_decisions:
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-UX_CORE"
+    code_annotations:
+      - "IMPL-UX_CORE"
+    requirements:
+      - "REQ-CORE_UX_PRESERVATION"
+      - "REQ-POPUP_PERSISTENT_SESSION"
+    tests: []

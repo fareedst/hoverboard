@@ -1,5 +1,3 @@
-# [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]
-# Popup/side-panel tab-search UI: no-match triggers search button border feedback, not error message.
 IMPL-TAB_SEARCH_NO_MATCH_UI:
   code_locations:
     files:
@@ -19,7 +17,7 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
   cross_references:
     - "ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK"
     - "REQ-TAB_SEARCH_NO_MATCH_UX"
-  essence_pseudocode: "# [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]\n# Block 1: When handleSearch receives response.success === false and response indicates no matches,\n# do not call showError; call showSearchNoMatchFeedback(). Other failures (e.g. \"Already on last match\") still call showError.\nhandleSearch(response):\n  IF response.success:\n    showSuccess(...); RETURN\n  isNoMatch = (response.message === \"No matching tabs found\" OR response.matchCount === 0)\n  IF isNoMatch:\n    showSearchNoMatchFeedback()\n  ELSE:\n    showError(response.message OR \"No matching tabs found\")\n\n# [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]\n# Block 2: showSearchNoMatchFeedback adds class to elements.searchBtn; after 2s remove class. Ensures bright red border then fade to default.\nshowSearchNoMatchFeedback():\n  IF NOT elements.searchBtn: RETURN\n  elements.searchBtn.classList.add(\"search-no-match\")\n  setTimeout(2000, () => elements.searchBtn.classList.remove(\"search-no-match\"))\n\n# [IMPL-TAB_SEARCH_NO_MATCH_UI] [ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK] [REQ-TAB_SEARCH_NO_MATCH_UX]\n# Block 3: CSS class on search button sets border to bright red and transition (2s) to default; when class removed, border fades back.\n# .button.secondary.search-no-match { border-color: #e00 or similar; transition: border-color 2s ease; }\n\n# [IMPL-TAB_SEARCH_NO_MATCH_UI] handleSearch scroll restore when side panel (uiManager.container) exists\nhandleSearch_try_finally_scroll():\n  scrollContainer = uiManager?.container\n  savedScrollTop = scrollContainer ? scrollContainer.scrollTop : undefined\n  TRY:\n    setLoading(true)   # may reset scroll in UI\n    # ... search logic ...\n  FINALLY:\n    setLoading(false)\n    IF scrollContainer != null AND savedScrollTop !== undefined:\n      scrollContainer.scrollTop = savedScrollTop\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TAB_SEARCH_NO_MATCH_UI-pseudocode.md"
   implementation_approach:
     details:
       - "CSS: .button.secondary.search-no-match { border-color: bright red; transition: border-color 2s ease; } (default button already has border so removal fades back)"
@@ -34,8 +32,8 @@ IMPL-TAB_SEARCH_NO_MATCH_UI:
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-26"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Tab Search No-Match UI Feedback"
   rationale:
     benefits:

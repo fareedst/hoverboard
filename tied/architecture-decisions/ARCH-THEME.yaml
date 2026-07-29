@@ -1,0 +1,44 @@
+ARCH-THEME:
+  alternatives_considered: []
+  cross_references:
+    - "REQ-DARK_THEME"
+  decision: "Thin architecture stub for ARCH-THEME."
+  implementation_approach:
+    details:
+      - "Dark theme default"
+      - "Preference persistence"
+      - "Theme toggle"
+    summary: "Dark theme default with toggle, persisted preference"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Theme System Architecture"
+  rationale:
+    benefits:
+      - "Modern appearance"
+      - "User comfort"
+    problems_solved:
+      - "Eye strain"
+      - "No theme choice"
+    why: "Dark theme is modern UI expectation"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-POPUP_THEME_CSS"
+      - "IMPL-THEME"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-THEME"
+    implementation:
+      - "IMPL-POPUP_THEME_CSS"
+      - "IMPL-THEME"
+    requirements:
+      - "REQ-DARK_THEME"
+    tests: []

@@ -1,7 +1,7 @@
 # OVERLAY REFRESH SEMANTIC TOKENS
 
-**Semantic Token:** [OVERLAY-REFRESH-001]
-**Cross-References:** [OVERLAY-DATA-DISPLAY-001], [OVERLAY-THEMING-001], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
+**Semantic Token:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]
+**Cross-References:** [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
 **Date:** 2025-01-27
 **Status:** ✅ **IMPLEMENTED** - Enhanced Testing Support
 
@@ -11,18 +11,18 @@
 
 | Token Name                    | Description                                                | Usage Scope                        | Priority |
 |-------------------------------|------------------------------------------------------------|------------------------------------|----------|
-| `OVERLAY-REFRESH-001`        | Master semantic token for overlay refresh button           | All overlay refresh button docs    | Core     |
-| `OVERLAY-REFRESH-UI-001`     | Refresh button UI implementation                          | Button rendering, styling          | Core     |
-| `OVERLAY-REFRESH-HANDLER-001`| Refresh button click handler                              | Event handling, data refresh       | Core     |
-| `OVERLAY-REFRESH-ACCESSIBILITY-001` | Accessibility features                            | ARIA, keyboard support             | Core     |
-| `OVERLAY-REFRESH-INTEGRATION-001` | Data integration with existing systems           | Message passing, data flow         | Core     |
-| `OVERLAY-REFRESH-TEST-001`   | Test cases for refresh functionality                      | Test files, validation             | Feature  |
-| `OVERLAY-REFRESH-THEME-001`  | Theme integration for refresh button                     | CSS, styling                      | Feature  |
-| `OVERLAY-REFRESH-ERROR-001`  | Error handling for refresh operations                     | Error management                   | Feature  |
-| `OVERLAY-REFRESH-ARCH-001`   | Button placement architectural decision                   | Architecture docs                  | Core     |
-| `OVERLAY-REFRESH-ARCH-002`   | Data refresh strategy architectural decision              | Architecture docs                  | Core     |
-| `OVERLAY-REFRESH-ARCH-003`   | User feedback system architectural decision               | Architecture docs                  | Core     |
-| `OVERLAY-REFRESH-ARCH-004`   | Theme integration architectural decision                  | Architecture docs                  | Core     |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)`        | Master semantic token for overlay refresh button           | All overlay refresh button docs    | Core     |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)`     | Refresh button UI implementation                          | Button rendering, styling          | Core     |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)`| Refresh button click handler                              | Event handling, data refresh       | Core     |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)` | Accessibility features                            | ARIA, keyboard support             | Core     |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)` | Data integration with existing systems           | Message passing, data flow         | Core     |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)`   | Test cases for refresh functionality                      | Test files, validation             | Feature  |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)`  | Theme integration for refresh button                     | CSS, styling                      | Feature  |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)`  | Error handling for refresh operations                     | Error management                   | Feature  |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-001)`   | Button placement architectural decision                   | Architecture docs                  | Core     |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-002)`   | Data refresh strategy architectural decision              | Architecture docs                  | Core     |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-003)`   | User feedback system architectural decision               | Architecture docs                  | Core     |
+| `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-004)`   | Theme integration architectural decision                  | Architecture docs                  | Core     |
 
 ---
 
@@ -30,24 +30,24 @@
 
 ### Core Tokens
 Essential tokens for overlay refresh button functionality:
-- `OVERLAY-REFRESH-001`: Master registry
-- `OVERLAY-REFRESH-UI-001`: Button UI implementation
-- `OVERLAY-REFRESH-HANDLER-001`: Click event handling
-- `OVERLAY-REFRESH-ACCESSIBILITY-001`: Accessibility features
-- `OVERLAY-REFRESH-INTEGRATION-001`: Data integration
+- `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)`: Master registry
+- `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)`: Button UI implementation
+- `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)`: Click event handling
+- `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)`: Accessibility features
+- `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)`: Data integration
 
 ### Feature Tokens
 Tokens for specific feature implementations:
-- Testing: `OVERLAY-REFRESH-TEST-001`
-- Theming: `OVERLAY-REFRESH-THEME-001`
-- Error Handling: `OVERLAY-REFRESH-ERROR-001`
+- Testing: `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)`
+- Theming: `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)`
+- Error Handling: `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)`
 
 ### Architecture Tokens
 Tokens for architectural decisions:
-- `OVERLAY-REFRESH-ARCH-001`: Button placement
-- `OVERLAY-REFRESH-ARCH-002`: Data refresh strategy
-- `OVERLAY-REFRESH-ARCH-003`: User feedback system
-- `OVERLAY-REFRESH-ARCH-004`: Theme integration
+- `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-001)`: Button placement
+- `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-002)`: Data refresh strategy
+- `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-003)`: User feedback system
+- `[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ARCH-004)`: Theme integration
 
 ---
 
@@ -61,7 +61,7 @@ Tokens for architectural decisions:
 
 ### Cross-Reference Requirements
 - All tokens must cross-reference with existing architecture tokens
-- Coordinate with: `[OVERLAY-DATA-DISPLAY-001]`, `[OVERLAY-THEMING-001]`, `[TOGGLE-SYNC-OVERLAY]`, `[TAG-SYNC-OVERLAY]`
+- Coordinate with: `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`, `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`, `[TOGGLE-SYNC-OVERLAY]`, `[TAG-SYNC-OVERLAY]`
 - Maintain compatibility with: `[SAFARI-EXT-SHIM-001]`
 
 ### Token Evolution
@@ -76,25 +76,25 @@ Tokens for architectural decisions:
 ### Documentation Headers
 ```markdown
 # Overlay Refresh Button Implementation
-**Semantic Token:** [OVERLAY-REFRESH-001]
-**Cross-References:** [OVERLAY-DATA-DISPLAY-001], [OVERLAY-THEMING-001], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
+**Semantic Token:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]
+**Cross-References:** [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001]
 **Date:** 2025-01-27
 ```
 
 ### Code Comments
 ```javascript
-// [OVERLAY-REFRESH-UI-001] Refresh button element creation
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Refresh button element creation
 const refreshBtn = this.document.createElement('button')
 refreshBtn.className = 'refresh-button'
 refreshBtn.innerHTML = '🔄'
 refreshBtn.title = 'Refresh Data'
 
-// [OVERLAY-REFRESH-HANDLER-001] Refresh button click handler
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)] Refresh button click handler
 refreshBtn.onclick = async () => {
   await this.handleRefreshButtonClick()
 }
 
-// [OVERLAY-REFRESH-ACCESSIBILITY-001] Keyboard event handlers
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Keyboard event handlers
 refreshBtn.addEventListener('keydown', async (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault()
@@ -102,9 +102,9 @@ refreshBtn.addEventListener('keydown', async (e) => {
   }
 })
 
-// [OVERLAY-REFRESH-INTEGRATION-001] Handle refresh button click with enhanced logging
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Handle refresh button click with enhanced logging
 async handleRefreshButtonClick() {
-  // [OVERLAY-TEST-LOG-001] Enhanced debug logging for refresh button click
+  // [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Enhanced debug logging for refresh button click
   this.logger.log('INFO', 'OverlayManager', 'Refresh button clicked')
   
   try {
@@ -131,7 +131,7 @@ async handleRefreshButtonClick() {
 
 ### CSS Styling
 ```css
-/* [OVERLAY-REFRESH-THEME-001] Theme-aware refresh button styling */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)] Theme-aware refresh button styling */
 .refresh-button {
   position: absolute;
   top: 8px;
@@ -159,10 +159,10 @@ async handleRefreshButtonClick() {
 
 ### Test Cases
 ```javascript
-// [OVERLAY-REFRESH-TEST-001] Refresh button functionality tests with enhanced mock DOM
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-TEST-001)] Refresh button functionality tests with enhanced mock DOM
 describe('Overlay Refresh Button', () => {
-  test('[OVERLAY-REFRESH-UI-001] Should render refresh button correctly', () => {
-    // [OVERLAY-TEST-MOCK-001] Enhanced mock DOM provides proper element registration
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-UI-001)] Should render refresh button correctly', () => {
+    // [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Enhanced mock DOM provides proper element registration
     const refreshButton = mockDocument.querySelector('.refresh-button')
     expect(refreshButton).not.toBeNull()
     
@@ -171,8 +171,8 @@ describe('Overlay Refresh Button', () => {
     // Test accessibility attributes
   })
 
-  test('[OVERLAY-REFRESH-HANDLER-001] Should handle refresh button click with enhanced logging', async () => {
-    // [OVERLAY-TEST-LOG-001] Enhanced debug logging for troubleshooting
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-HANDLER-001)] Should handle refresh button click with enhanced logging', async () => {
+    // [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-LOG-001)] Enhanced debug logging for troubleshooting
     const logSpy = jest.spyOn(overlayManager.logger, 'log')
     
     await overlayManager.handleRefreshButtonClick()
@@ -188,8 +188,8 @@ describe('Overlay Refresh Button', () => {
     // Test user feedback
   })
 
-  test('[OVERLAY-REFRESH-ACCESSIBILITY-001] Should support keyboard navigation', () => {
-    // [OVERLAY-TEST-ARIA-001] Verify ARIA attributes were set
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)] Should support keyboard navigation', () => {
+    // [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ARIA-001)] Verify ARIA attributes were set
     const refreshButton = mockDocument.querySelector('.refresh-button')
     expect(refreshButton.setAttribute).toHaveBeenCalledWith('aria-label', 'Refresh Data')
     expect(refreshButton.setAttribute).toHaveBeenCalledWith('role', 'button')
@@ -200,15 +200,15 @@ describe('Overlay Refresh Button', () => {
     // Test ARIA attributes
   })
 
-  test('[OVERLAY-REFRESH-INTEGRATION-001] Should integrate with message service', async () => {
-    // [OVERLAY-TEST-MOCK-001] Enhanced mock DOM enables proper integration testing
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-INTEGRATION-001)] Should integrate with message service', async () => {
+    // [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-MOCK-001)] Enhanced mock DOM enables proper integration testing
     // Test message service communication
     // Test data flow coordination
     // Test overlay content updates
   })
 
-  test('[OVERLAY-REFRESH-ERROR-001] Should handle refresh errors gracefully', async () => {
-    // [OVERLAY-TEST-ERROR-001] Enhanced error handling with detailed logging
+  test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)] Should handle refresh errors gracefully', async () => {
+    // [[IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [TEST-OVERLAY_HARNESS] (was OVERLAY-TEST-ERROR-001)] Enhanced error handling with detailed logging
     // Test network failure scenarios
     // Test invalid data responses
     // Test user error feedback
@@ -221,8 +221,8 @@ describe('Overlay Refresh Button', () => {
 ## Coordination with Existing Architecture
 
 ### Primary Cross-References
-- `[OVERLAY-DATA-DISPLAY-001]`: Data refresh mechanism coordination
-- `[OVERLAY-THEMING-001]`: Theme integration for button styling
+- `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`: Data refresh mechanism coordination
+- `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`: Theme integration for button styling
 - `[TOGGLE-SYNC-OVERLAY]`: State synchronization patterns
 - `[TAG-SYNC-OVERLAY]`: Message passing coordination
 - `[SAFARI-EXT-SHIM-001]`: Cross-browser compatibility
@@ -303,4 +303,4 @@ describe('Overlay Refresh Button', () => {
 
 ---
 
-**[OVERLAY-REFRESH-001]** - Master semantic token for overlay refresh button functionality 
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]** - Master semantic token for overlay refresh button functionality 

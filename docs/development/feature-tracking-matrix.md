@@ -49,16 +49,16 @@
 - **Status**: Deferred — Safari App Extension package and docs removed
 - **TIED**: `REQ/ARCH/IMPL-SAFARI_ADAPTATION` Deferred; Chrome shim owned by `IMPL-CROSS_BROWSER` (`src/shared/safari-shim.js`)
 
-### **⭐ EXT-001: Service Worker Architecture**
+### **⭐ [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Service Worker Architecture**
 - **Priority**: ⭐ CRITICAL | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/core/service-worker.js` (114 lines)
-- **Implementation Token**: `// ⭐ EXT-001: Service worker architecture - 🔧 Core background service`
+- **Implementation Token**: `// ⭐ [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Service worker architecture - 🔧 Core background service`
 
 **📑 Purpose**: Modern service worker replacing legacy background scripts with lifecycle management.
 
 **🔗 Dependencies**: 
-- **Depends On**: CFG-001 (Configuration System)
-- **Used By**: UI-001 (Popup), API-001 (Pinboard), EXT-002 (Message Handling)
+- **Depends On**: [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (Configuration System)
+- **Used By**: [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) (Popup), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-001) (Pinboard), [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-002) (Message Handling)
 - **Affects**: All extension components requiring background processing
 
 **📋 Subtasks**:
@@ -77,16 +77,16 @@
 
 ---
 
-### **🔺 EXT-002: Message Handling System**
+### **🔺 [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-002): Message Handling System**
 - **Priority**: 🔺 HIGH | **Status**: ✅ Completed | **Owner**: Migration Team  
 - **Files**: `src-new/core/message-handler.js` (202 lines)
-- **Implementation Token**: `// 🔺 EXT-002: Message handling system - 📝 Route and process messages`
+- **Implementation Token**: `// 🔺 [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-002): Message handling system - 📝 Route and process messages`
 
 **📑 Purpose**: Centralized message routing system for inter-component communication.
 
 **🔗 Dependencies**:
-- **Depends On**: EXT-001 (Service Worker)
-- **Used By**: UI-001 (Popup), UI-002 (Content Scripts), API-001 (Pinboard API)
+- **Depends On**: [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001) (Service Worker)
+- **Used By**: [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) (Popup), [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002) (Content Scripts), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-001) (Pinboard API)
 - **Affects**: All component-to-component communication
 
 **📋 Subtasks**:
@@ -101,16 +101,16 @@
 
 ---
 
-### **🔶 EXT-003: Badge Management System**
+### **🔶 [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-003): Badge Management System**
 - **Priority**: 🔶 MEDIUM | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/core/badge-manager.js` (184 lines)
-- **Implementation Token**: `// 🔶 EXT-003: Badge management - 🔧 Browser action indicators`
+- **Implementation Token**: `// 🔶 [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-003): Badge management - 🔧 Browser action indicators`
 
 **📑 Purpose**: Browser action badge management for visual feedback and status indicators.
 
 **🔗 Dependencies**:
-- **Depends On**: EXT-001 (Service Worker), CFG-001 (Configuration)
-- **Used By**: API-001 (Pinboard Status), UI-003 (Tab Status)
+- **Depends On**: [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001) (Service Worker), [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (Configuration)
+- **Used By**: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-001) (Pinboard Status), [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003) (Tab Status)
 - **Affects**: Browser toolbar visual indicators
 
 **📋 Subtasks**:
@@ -121,10 +121,10 @@
 
 ---
 
-### **🔻 EXT-004: Error Handling Framework**
+### **🔻 [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-004): Error Handling Framework**
 - **Priority**: 🔻 LOW | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/shared/ErrorHandler.js` (369 lines)
-- **Implementation Token**: `// 🔻 EXT-004: Error handling - 🛡️ Comprehensive error management`
+- **Implementation Token**: `// 🔻 [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-004): Error handling - 🛡️ Comprehensive error management`
 
 **📑 Purpose**: Centralized error handling with logging, reporting, and recovery mechanisms.
 
@@ -135,10 +135,10 @@
 
 ---
 
-### **🔻 EXT-005: Logging System**
+### **🔻 [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-005): Logging System**
 - **Priority**: 🔻 LOW | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/shared/logger.js` (67 lines) 
-- **Implementation Token**: `// 🔻 EXT-005: Logging system - 📝 Structured logging and debugging`
+- **Implementation Token**: `// 🔻 [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-005): Logging system - 📝 Structured logging and debugging`
 
 **📑 Purpose**: Structured logging system for debugging and monitoring.
 
@@ -146,16 +146,16 @@
 
 ## 🎨 **USER INTERFACE FEATURES**
 
-### **⭐ UI-001: Popup Interface System**
+### **⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001): Popup Interface System**
 - **Priority**: ⭐ CRITICAL | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/ui/popup/` (6 modules, 800+ lines total)
-- **Implementation Token**: `// ⭐ UI-001: Popup interface - 🔍 User interaction handling`
+- **Implementation Token**: `// ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001): Popup interface - 🔍 User interaction handling`
 
 **📑 Purpose**: Complete popup interface system with bookmark management and settings.
 
 **🔗 Dependencies**:
-- **Depends On**: EXT-001 (Service Worker), EXT-002 (Message Handling), CFG-001 (Configuration)
-- **Used By**: API-001 (Pinboard Integration), TAG-001 (Tag Management)
+- **Depends On**: [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001) (Service Worker), [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-002) (Message Handling), [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (Configuration)
+- **Used By**: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-001) (Pinboard Integration), [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was TAG-001) (Tag Management)
 - **Affects**: Primary user interface and extension usability
 
 **📋 Subtasks**:
@@ -168,44 +168,44 @@
 
 ---
 
-### **🔺 UI-002: Content Script System**
+### **🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002): Content Script System**
 - **Priority**: 🔺 HIGH | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/features/content/` (5 modules, 1200+ lines total)
-- **Implementation Token**: `// 🔺 UI-002: Content scripts - 🔍 Page-level user interfaces`
+- **Implementation Token**: `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002): Content scripts - 🔍 Page-level user interfaces`
 
 **📑 Purpose**: Modern content script system with hover overlays and page integration.
 
 **🔗 Dependencies**:
-- **Depends On**: EXT-002 (Message Handling), TAG-001 (Tag Service)
-- **Used By**: API-001 (Pinboard Status), UI-004 (Overlay System)
+- **Depends On**: [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-002) (Message Handling), [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was TAG-001) (Tag Service)
+- **Used By**: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-001) (Pinboard Status), [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-004) (Overlay System)
 - **Affects**: On-page user experience and bookmark interaction
 
 ---
 
-### **🔶 UI-003: Tab Status Management**
+### **🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003): Tab Status Management**
 - **Priority**: 🔶 MEDIUM | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: Integrated in content scripts and service worker
-- **Implementation Token**: `// 🔶 UI-003: Tab status - 📝 Per-tab state management`
+- **Implementation Token**: `// 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003): Tab status - 📝 Per-tab state management`
 
 **📑 Purpose**: Per-tab status tracking and visual indicators for bookmark state.
 
 ---
 
-### **🔻 UI-004: Overlay System**
+### **🔻 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-004): Overlay System**
 - **Priority**: 🔻 LOW | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/features/content/overlay-manager.js`
-- **Implementation Token**: `// 🔻 UI-004: Overlay system - 🎨 Visual overlay management`
+- **Implementation Token**: `// 🔻 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-004): Overlay system - 🎨 Visual overlay management`
 
 **📑 Purpose**: Advanced overlay positioning, animations, and accessibility features.
 
 ---
 
-### **✅ UI-VIS-001/002: Overlay Visibility Controls - SUPERSEDED UI-005**
+### **✅ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)/002: Overlay Visibility Controls - SUPERSEDED [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)**
 - **Priority**: 🔺 HIGH | **Status**: ✅ Implemented | **Owner**: AI Development Team
 - **Files**: `src/ui/components/VisibilityControls.js`, `src/config/config-manager.js`, `src/ui/options/options.js`
-- **Implementation Token**: `// 🔺 UI-VIS-001: Visibility controls`, `// 🔺 UI-VIS-002: Global visibility defaults`
+- **Implementation Token**: `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001): Visibility controls`, `// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-002): Global visibility defaults`
 
-**📑 Purpose**: User-controlled overlay visibility with theme toggle, transparency controls, and opacity slider. Supersedes planned UI-005 fixed transparency with superior user-controlled approach.
+**📑 Purpose**: User-controlled overlay visibility with theme toggle, transparency controls, and opacity slider. Supersedes planned [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) fixed transparency with superior user-controlled approach.
 
 **🔗 Dependencies**:
 - **Depends On**: ConfigManager (configuration backend), Options page (UI)
@@ -228,23 +228,23 @@
 - `test-config-visibility.html` - ConfigManager backend testing
 
 **📖 Documentation**:
-- **Implementation**: Complete task tracking in `docs/context/feature-tracking.md` (UI-VIS-001/002)
+- **Implementation**: Complete task tracking in `docs/context/feature-tracking.md` ([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)/002)
 - **Status**: ✅ Phase 1 Complete, Ready for Phase 2 (WindowStateManager integration)
 
 ---
 
 ## 🌐 **EXTERNAL API FEATURES**
 
-### **⭐ API-001: Pinboard Integration**
+### **⭐ [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-001): Pinboard Integration**
 - **Priority**: ⭐ CRITICAL | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/features/pinboard/pinboard-service.js` (396 lines)
-- **Implementation Token**: `// ⭐ API-001: Pinboard integration - 🌐 External API service`
+- **Implementation Token**: `// ⭐ [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-001): Pinboard integration - 🌐 External API service`
 
 **📑 Purpose**: Complete Pinboard API integration with authentication, CRUD operations, and error handling.
 
 **🔗 Dependencies**:
-- **Depends On**: CFG-001 (Configuration), EXT-004 (Error Handling)
-- **Used By**: UI-001 (Popup), UI-002 (Content Scripts), TAG-001 (Tag Service)
+- **Depends On**: [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (Configuration), [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-004) (Error Handling)
+- **Used By**: [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) (Popup), [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002) (Content Scripts), [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was TAG-001) (Tag Service)
 - **Affects**: Core bookmark functionality and data synchronization
 
 **📋 Subtasks**:
@@ -257,10 +257,10 @@
 
 ---
 
-### **🔺 API-002: Browser API Integration**
+### **🔺 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-002): Browser API Integration**
 - **Priority**: 🔺 HIGH | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: Distributed across core components
-- **Implementation Token**: `// 🔺 API-002: Browser APIs - 🔧 Chrome extension APIs`
+- **Implementation Token**: `// 🔺 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-002): Browser APIs - 🔧 Chrome extension APIs`
 
 **📑 Purpose**: Chrome extension API integration for storage, tabs, and browser actions.
 
@@ -268,10 +268,10 @@
 
 ## ⚙️ **CONFIGURATION FEATURES**
 
-### **⭐ CFG-001: Configuration Management System**
+### **⭐ [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001): Configuration Management System**
 - **Priority**: ⭐ CRITICAL | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/config/config-manager.js` (284 lines)
-- **Implementation Token**: `// ⭐ CFG-001: Configuration system - ⚙️ Settings and preferences`
+- **Implementation Token**: `// ⭐ [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001): Configuration system - ⚙️ Settings and preferences`
 
 **📑 Purpose**: Centralized configuration management with validation, inheritance, and real-time updates.
 
@@ -290,19 +290,19 @@
 
 ---
 
-### **🔺 CFG-002: Theme and UI Configuration**
+### **🔺 [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-002): Theme and UI Configuration**
 - **Priority**: 🔺 HIGH | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `src-new/ui/components/theme-manager.js`
-- **Implementation Token**: `// 🔺 CFG-002: Theme configuration - 🎨 UI customization`
+- **Implementation Token**: `// 🔺 [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-002): Theme configuration - 🎨 UI customization`
 
 **📑 Purpose**: Theme management, dark mode support, and UI customization options.
 
 ---
 
-### **🔶 CFG-003: Feature Flags System**
+### **🔶 [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003): Feature Flags System**
 - **Priority**: 🔶 MEDIUM | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: Integrated in configuration system
-- **Implementation Token**: `// 🔶 CFG-003: Feature flags - 🔧 Feature toggles`
+- **Implementation Token**: `// 🔶 [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-003): Feature flags - 🔧 Feature toggles`
 
 **📑 Purpose**: Feature flag system for gradual rollouts and A/B testing capabilities.
 
@@ -310,16 +310,16 @@
 
 ## 🏷️ **TAG MANAGEMENT FEATURES**
 
-### **🔺 TAG-001: Tag Service System**
+### **🔺 [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was TAG-001): Tag Service System**
 - **Priority**: 🔺 HIGH | **Status**: ✅ **IMPLEMENTATION COMPLETE** | **Owner**: Migration Team
 - **Files**: `src-new/features/tagging/tag-service.js` (404 lines)
-- **Implementation Token**: `// 🔺 TAG-001: Tag management - 🏷️ Tag operations and caching`
+- **Implementation Token**: `// 🔺 [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was TAG-001): Tag management - 🏷️ Tag operations and caching`
 
 **📑 Purpose**: Advanced tag management with intelligent caching, suggestions, and synchronization.
 
 **🔗 Dependencies**:
-- **Depends On**: API-001 (Pinboard), CFG-001 (Configuration)
-- **Used By**: UI-001 (Popup), UI-002 (Content Scripts)
+- **Depends On**: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-001) (Pinboard), [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001) (Configuration)
+- **Used By**: [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001) (Popup), [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-002) (Content Scripts)
 - **Affects**: Tag suggestions, recent tags, and tag-based filtering
 
 **📋 Subtasks**:
@@ -345,28 +345,28 @@
 
 ## 🧪 **TESTING INFRASTRUCTURE**
 
-### **⭐ TEST-001: Unit Testing Framework**
+### **⭐ [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001): Unit Testing Framework**
 - **Priority**: ⭐ CRITICAL | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `jest.config.js`, `tests/unit/` directory
-- **Implementation Token**: `// ⭐ TEST-001: Unit testing - 🧪 Component testing framework`
+- **Implementation Token**: `// ⭐ [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001): Unit testing - 🧪 Component testing framework`
 
 **📑 Purpose**: Comprehensive unit testing framework with Jest and mocking capabilities.
 
 ---
 
-### **🔺 TEST-002: Integration Testing**  
+### **🔺 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-002): Integration Testing**  
 - **Priority**: 🔺 HIGH | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `tests/integration/` directory
-- **Implementation Token**: `// 🔺 TEST-002: Integration testing - 🔄 Component interaction testing`
+- **Implementation Token**: `// 🔺 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-002): Integration testing - 🔄 Component interaction testing`
 
 **📑 Purpose**: Integration testing for component interactions and message flow validation.
 
 ---
 
-### **🔶 TEST-003: End-to-End Testing**
+### **🔶 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003): End-to-End Testing**
 - **Priority**: 🔶 MEDIUM | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `tests/e2e/` directory  
-- **Implementation Token**: `// 🔶 TEST-003: E2E testing - 🌐 Full workflow testing`
+- **Implementation Token**: `// 🔶 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003): E2E testing - 🌐 Full workflow testing`
 
 **📑 Purpose**: End-to-end testing with Puppeteer for complete user workflow validation.
 
@@ -374,37 +374,37 @@
 
 ## 📖 **DOCUMENTATION FEATURES**
 
-### **⭐ DOC-001: Architecture Documentation**
+### **⭐ [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-001): Architecture Documentation**
 - **Priority**: ⭐ CRITICAL | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `docs/ARCHITECTURE.md` (417 lines)
-- **Implementation Token**: `// ⭐ DOC-001: Architecture docs - 📖 System design documentation`
+- **Implementation Token**: `// ⭐ [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-001): Architecture docs - 📖 System design documentation`
 
 **📑 Purpose**: Comprehensive system architecture documentation with diagrams and specifications.
 
 ---
 
-### **🔺 DOC-002: Development Documentation**
+### **🔺 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-002): Development Documentation**
 - **Priority**: 🔺 HIGH | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `docs/DEVELOPMENT.md` (530 lines)
-- **Implementation Token**: `// 🔺 DOC-002: Development docs - 🛠️ Developer setup and guidelines`
+- **Implementation Token**: `// 🔺 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-002): Development docs - 🛠️ Developer setup and guidelines`
 
 **📑 Purpose**: Complete development setup guide with workflows and best practices.
 
 ---
 
-### **🔶 DOC-003: Migration Documentation**
+### **🔶 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-003): Migration Documentation**
 - **Priority**: 🔶 MEDIUM | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: Multiple migration documents (1500+ lines total)
-- **Implementation Token**: `// 🔶 DOC-003: Migration docs - 📝 Project migration records`
+- **Implementation Token**: `// 🔶 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-003): Migration docs - 📝 Project migration records`
 
 **📑 Purpose**: Comprehensive migration documentation with lessons learned and metrics.
 
 ---
 
-### **🔻 DOC-004: User Documentation**
+### **🔻 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-004): User Documentation**
 - **Priority**: 🔻 LOW | **Status**: ✅ Completed | **Owner**: Migration Team
 - **Files**: `docs/README.md`
-- **Implementation Token**: `// 🔻 DOC-004: User docs - 📚 User-facing documentation`
+- **Implementation Token**: `// 🔻 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-004): User docs - 📚 User-facing documentation`
 
 **📑 Purpose**: User-facing documentation for installation, usage, and troubleshooting.
 
@@ -412,15 +412,15 @@
 
 ## 🤖 **AI-FIRST ENHANCEMENT FEATURES** (Planned)
 
-### **⭐ AI-001: AI Assistant Protocol System**
+### **⭐ [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-001): AI Assistant Protocol System**
 - **Priority**: ⭐ CRITICAL | **Status**: 🛌 Hibernated | **Owner**: AI Enhancement Team
 - **Files**: `docs/ai-assistant-protocol.md` (Planned)
-- **Implementation Token**: `// ⭐ AI-001: AI assistant protocol - 🤖 AI decision framework`
+- **Implementation Token**: `// ⭐ [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-001): AI assistant protocol - 🤖 AI decision framework`
 
 **📑 Purpose**: Complete AI assistant protocol with decision framework and safety gates.
 
 **🔗 Dependencies**:
-- **Depends On**: DOC-001 (Architecture), DOC-002 (Development)
+- **Depends On**: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-001) (Architecture), [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DOC-002) (Development)
 - **Used By**: All AI-first features
 - **Affects**: AI assistant behavior and decision-making
 
@@ -446,38 +446,27 @@
 
 ---
 
-### **⭐ AI-002: Implementation Token System**
-- **Priority**: ⭐ CRITICAL | **Status**: 🛌 Hibernated | **Owner**: AI Enhancement Team
-- **Files**: All `src-new/` files (Tokens to be added)
-- **Implementation Token**: `// ⭐ AI-002: Implementation tokens - 🔗 Bidirectional traceability`
+### **⭐ AI-002 → TIED semantic tokens (superseded)**
+- **Priority**: ⭐ CRITICAL | **Status**: ✅ Superseded by TIED 2.2.0 | **Owner**: AI Enhancement Team
+- **Files**: `tied/semantic-tokens.yaml`, `src/`, `tests/`, `docs/`
+- **TIED**: `[PROC-TOKEN_AUDIT]` `[PROC-TOKEN_VALIDATION]` — registry + `./scripts/validate_tokens.sh`
 
-**📑 Purpose**: Bidirectional traceability system linking code to documentation with priority and action context.
+**📑 Purpose**: Bidirectional traceability via TIED `REQ` / `ARCH` / `IMPL` / `TEST` tokens (replaces legacy numbered Implementation Token System).
 
-**🔗 Dependencies**:
-- **Depends On**: AI-001 (AI Protocol), This feature registry
-- **Used By**: AI-003 (Cross-references), AI-004 (Validation)
-- **Affects**: All code files and AI comprehension
+**📋 Completion (2026-07-28)**:
+- [x] **Token Format Specification** — TIED `[TYPE-IDENTIFIER]` in `tied/docs/semantic-tokens.md`
+- [x] **Retroactive Token Application** — numbered IDs mapped per `tied/docs/numbered-token-mapping.md`
+- [x] **Automated Token Validation** — `validate_tokens.sh` + `tied_validate_consistency`
+- [x] **Cross-reference Generation** — REQ→ARCH→IMPL indexes and detail files
 
-**📋 Subtasks**:
-- [ ] **Token Format Specification** - Standardized token format with priority and action icons
-- [ ] **Retroactive Token Application** - Add tokens to all existing code files  
-- [ ] **Automated Token Validation** - Scripts to validate token format and consistency
-- [ ] **Cross-reference Generation** - Bidirectional links between code and documentation
-
-**🎯 Success Criteria**:
-- 100% token coverage across all source files
-- Automated validation with zero format errors
-- Bidirectional traceability functioning
-- AI comprehension improvement measurable
-
-**🛌 Hibernation Status**: Placed in hibernation as popup close behavior is now satisfactory. Can be restored when AI-first development initiative is launched.
+**🎯 Success Criteria**: Met by TIED close-loop (registry complete, consistency green, code/tests/docs updated).
 
 ---
 
-### **🔺 AI-003: Cross-Reference System**
+### **🔺 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-003): Cross-Reference System**
 - **Priority**: 🔺 HIGH | **Status**: 🛌 Hibernated | **Owner**: AI Enhancement Team  
 - **Files**: `docs/cross-reference-system.md` (Planned)
-- **Implementation Token**: `// 🔺 AI-003: Cross-references - 🔗 Relationship mapping`
+- **Implementation Token**: `// 🔺 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-003): Cross-references - 🔗 Relationship mapping`
 
 **📑 Purpose**: Automated cross-reference system with dependency mapping and integrity validation.
 
@@ -485,10 +474,10 @@
 
 ---
 
-### **🔺 AI-004: Validation Automation**
+### **🔺 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-004): Validation Automation**
 - **Priority**: 🔺 HIGH | **Status**: 🛌 Hibernated | **Owner**: AI Enhancement Team
 - **Files**: `scripts/validate-ai-compliance.sh` (Planned)  
-- **Implementation Token**: `// 🔺 AI-004: Validation automation - 🛡️ Compliance checking`
+- **Implementation Token**: `// 🔺 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-004): Validation automation - 🛡️ Compliance checking`
 
 **📑 Purpose**: Automated validation system for AI-first compliance with real-time feedback.
 
@@ -496,10 +485,10 @@
 
 ---
 
-### **🔶 AI-005: Feature Impact Analysis**
+### **🔶 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-005): Feature Impact Analysis**
 - **Priority**: 🔶 MEDIUM | **Status**: 🛌 Hibernated | **Owner**: AI Enhancement Team
 - **Files**: `scripts/analyze-feature-impact.js` (Planned)
-- **Implementation Token**: `// 🔶 AI-005: Impact analysis - 📊 Change impact assessment`
+- **Implementation Token**: `// 🔶 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-005): Impact analysis - 📊 Change impact assessment`
 
 **📑 Purpose**: Automated impact analysis for feature changes with dependency tracking.
 
@@ -507,10 +496,10 @@
 
 ---
 
-### **🔶 AI-006: Documentation Cascade System**  
+### **🔶 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-006): Documentation Cascade System**  
 - **Priority**: 🔶 MEDIUM | **Status**: 🛌 Hibernated | **Owner**: AI Enhancement Team
 - **Files**: `scripts/update-documentation-cascade.js` (Planned)
-- **Implementation Token**: `// 🔶 AI-006: Documentation cascade - 📝 Automated doc updates`
+- **Implementation Token**: `// 🔶 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-006): Documentation cascade - 📝 Automated doc updates`
 
 **📑 Purpose**: Automated documentation updates based on change type and impact analysis.
 
@@ -518,10 +507,10 @@
 
 ---
 
-### **🔻 AI-007: Metrics and Monitoring Dashboard**
+### **🔻 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-007): Metrics and Monitoring Dashboard**
 - **Priority**: 🔻 LOW | **Status**: 🛌 Hibernated | **Owner**: AI Enhancement Team
 - **Files**: `docs/ai-metrics-dashboard.md` (Planned)
-- **Implementation Token**: `// 🔻 AI-007: Metrics dashboard - 📈 AI performance monitoring`
+- **Implementation Token**: `// 🔻 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-007): Metrics dashboard - 📈 AI performance monitoring`
 
 **📑 Purpose**: Real-time metrics dashboard for AI-first development effectiveness and compliance.
 
@@ -562,10 +551,10 @@ All AI-first features have been placed in hibernation as the popup close behavio
 - Cross-reference validation needs
 
 ### **Restoration Priority (When Restored)**:
-1. **🤖 AI-001**: Create AI Assistant Protocol System
-2. **🔗 AI-002**: Implement token system in existing codebase  
-3. **🔺 AI-003**: Set up cross-reference validation
-4. **🛡️ AI-004**: Configure automated validation pipeline
+1. **🤖 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-001)**: Create AI Assistant Protocol System
+2. **🔗 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-002)**: Implement token system in existing codebase  
+3. **🔺 [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-003)**: Set up cross-reference validation
+4. **🛡️ [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AI-004)**: Configure automated validation pipeline
 
 ### **Success Criteria** (When Restored):
 - **100% Token Coverage**: All code files include implementation tokens

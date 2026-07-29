@@ -1,0 +1,58 @@
+ARCH-BOOKMARK_STATE_SYNC:
+  alternatives_considered:
+    - name: "Polling Pinboard"
+      cons:
+        - "High latency"
+        - "Rate limits"
+      pros: []
+      rejected_reason: "Too slow"
+    - name: "Separate local stores"
+      cons:
+        - "Race conditions"
+      pros: []
+      rejected_reason: "Inconsistent UX"
+  cross_references:
+    - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+  decision: "Thin architecture stub for ARCH-BOOKMARK_STATE_SYNC."
+  implementation_approach:
+    details:
+      - "Badge updates from payload"
+      - "Broadcast BOOKMARK_UPDATED"
+      - "Overlay persists via saveBookmark"
+      - "Popup listens and refreshes"
+    summary: "BOOKMARK_UPDATED broadcast pattern with normalized payloads"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Bookmark State Synchronization Architecture"
+  rationale:
+    benefits:
+      - "Consistent state"
+      - "Observable contract"
+    problems_solved:
+      - "Conflicting bookmark states"
+      - "Race conditions"
+    why: "Prevent desynchronized states across UI surfaces"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-BOOKMARK_STATE_SYNC"
+    see_also:
+      - "ARCH-BADGE"
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-OVERLAY"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-BOOKMARK_STATE_SYNC"
+    implementation:
+      - "IMPL-BOOKMARK_STATE_SYNC"
+    requirements:
+      - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+    tests:
+      - "Toggle synchronization tests"

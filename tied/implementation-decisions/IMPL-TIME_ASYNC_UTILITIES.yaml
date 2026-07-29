@@ -8,7 +8,7 @@ IMPL-TIME_ASYNC_UTILITIES:
     - "ARCH-SHARED_UTILITIES"
     - "REQ-SHARED_UTILITIES"
   detail_file: "implementation-decisions/IMPL-TIME_ASYNC_UTILITIES.yaml"
-  essence_pseudocode: "# [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES]\n# delay (Promise), formatTimestamp, getRelativeTime for API/UI.\n# Contract: ms or timestamp in; Promise or formatted/relative string out.\nINPUT: milliseconds (delay); timestamp (formatTimestamp, getRelativeTime)\nOUTPUT: Promise that resolves after ms (delay); formatted date string (formatTimestamp); relative time string (getRelativeTime)\nDATA: current time for relative calculation\n\n# Resolve after ms via setTimeout.\ndelay(ms):\n  RETURN new Promise such that resolve() is called after ms (e.g. setTimeout(resolve, ms))\n\n# Convert to locale date/time string.\nformatTimestamp(ts):\n  CONVERT timestamp to display format (e.g. locale date/time string)\n  RETURN formatted string\n\n# Return \"X s/m/h/d ago\" from delta.\ngetRelativeTime(ts):\n  delta = now - ts\n  IF delta in seconds/minutes/hours/days THEN RETURN \"X s/m/h/d ago\" (or similar)\n  RETURN human-readable relative string\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-TIME_ASYNC_UTILITIES-pseudocode.md"
   implementation_approach:
     details: []
     summary: "timeUtils in src/shared/utils.js — delay, formatTimestamp, getRelativeTime"
@@ -18,8 +18,8 @@ IMPL-TIME_ASYNC_UTILITIES:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Time and Async Utilities"
   rationale:
     benefits: []

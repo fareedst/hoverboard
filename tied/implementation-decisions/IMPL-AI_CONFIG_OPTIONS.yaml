@@ -12,7 +12,7 @@ IMPL-AI_CONFIG_OPTIONS:
     - "ARCH-AI_TAGGING_CONFIG"
     - "REQ-AI_TAGGING_CONFIG"
   detail_file: "implementation-decisions/IMPL-AI_CONFIG_OPTIONS.yaml"
-  essence_pseudocode: "# [IMPL-AI_CONFIG_OPTIONS] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG]\n# Options page exposes and persists AI API key, provider, and tag limit; load/save from config; no key = feature disabled elsewhere.\n\n# How: inputs = user edits in form; outputs = persisted config and Test result.\nINPUT: user edits in options (apiKey, provider, optional limit)\nOUTPUT: persisted config; Test result (ok or error message)\n\n# How: getDefaultConfiguration provides aiApiKey (''), aiProvider ('openai'), aiTagLimit (64) so options and storage share one default source.\ngetDefaultConfiguration() includes:\n  aiApiKey '', aiProvider 'openai', aiTagLimit 64\n\n# How: populate form from stored config (aiApiKey, aiProvider, aiTagLimit).\nloadSettings():\n  settings = getStoredSettings()\n  SET aiApiKey input = settings.aiApiKey ?? ''\n  SET provider select = settings.aiProvider ?? 'openai'\n  SET limit input = settings.aiTagLimit ?? 64\n\n# How: collect trim/number from form and persist via updateConfig.\nsaveSettings():\n  settings = { aiApiKey: trim(aiApiKey input), aiProvider: provider select value, aiTagLimit: number(limit input) }\n  updateConfig(settings)\n\n# [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG]\n# Nested block: options-page \"Test API key\" button; require key, call testAiApiKey(apiKey, provider), show \"API key OK\" or error.\non Test click:\n  apiKey = trim(aiApiKey input)\n  provider = provider select value\n  IF !apiKey THEN show error; RETURN\n  result = testAiApiKey(apiKey, provider)  // or send message to SW\n  IF result.ok THEN show success ELSE show result.error\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_CONFIG_OPTIONS-pseudocode.md"
   implementation_approach:
     details:
       - getDefaultConfiguration: "aiApiKey '', aiProvider 'openai', aiTagLimit 64"
@@ -25,8 +25,8 @@ IMPL-AI_CONFIG_OPTIONS:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Initial creation"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "AI Config in Options"
   rationale:
     benefits:

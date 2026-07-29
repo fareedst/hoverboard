@@ -1,6 +1,6 @@
 # Semantic Tokens Directory
 
-**TIED Methodology Version**: 1.6.0
+**TIED Methodology Version**: 2.2.0
 
 ## Overview
 This document serves as the **central directory/registry** for all semantic tokens used in the project. Semantic tokens (`[REQ-*]`, `[ARCH-*]`, `[IMPL-*]`) provide a consistent vocabulary and traceability mechanism that ties together all documentation, code, and tests.
@@ -114,16 +114,13 @@ This YAML index serves as the single source of truth for "does this token exist?
 - **Implementation tokens**: See `implementation-decisions.yaml` (YAML index) and `implementation-decisions/` (detail files)
 - **Process tokens**: See `processes.md`
 
-### Migrated tokens (legacy numbered → TIED)
+### Migrated tokens (legacy numbered → TIED) — complete
 
-Legacy numbered tokens (e.g. CFG-001, UTIL-001, LOG-001) have been reinterpreted into TIED tokens. Use the mapping table for lookups and audits:
+Legacy numbered tokens (e.g. `CFG-001`, `OVERLAY-REFRESH-001`, `IMMUTABLE-REQ-TAG-003`) have been **fully reinterpreted** into TIED `REQ` / `ARCH` / `IMPL` / `TEST` tokens across `src/`, `tests/`, `docs/`, and tied prose (TIED 2.2.0 close-loop, 2026-07-28). Families collapse onto existing stacks (overlay, popup, tags, Pinboard, MV3, theme, code quality, etc.).
 
-- **Configuration**: CFG-001 → IMPL-CONFIG_BACKUP_RESTORE; CFG-002 → IMPL-CONFIG_MIGRATION; CFG-003 → IMPL-FEATURE_FLAGS; CFG-004 → IMPL-URL_INHIBITION (REQ-CONFIG_PORTABILITY, REQ-SITE_MANAGEMENT, ARCH-CONFIG_STRUCTURE).
-- **Shared utilities**: UTIL-001 → IMPL-URL_UTILITIES; UTIL-002 → IMPL-TEXT_UTILITIES; UTIL-003 → IMPL-ARRAY_OBJECT_UTILITIES; UTIL-004 → IMPL-TIME_ASYNC_UTILITIES; UTIL-005 → IMPL-DOM_UTILITIES (REQ-SHARED_UTILITIES, ARCH-SHARED_UTILITIES).
-- **Logging**: LOG-001 → IMPL-LOGGER_CONTEXT_LEVELS; LOG-002 → IMPL-LOG_LEVEL_CONFIG; LOG-003 → IMPL-LOGGER_LEGACY (REQ-STRUCTURED_LOGGING, ARCH-STRUCTURED_LOGGING).
-- **Tests**: OVERLAY-REFRESH-TEST-001 → TEST-OVERLAY_REFRESH; TAG-SYNC-TEST-001 → TEST-TAG_SYNC; SHOW-HOVER-CHECKBOX-TEST-* → TEST-SHOW_HOVER_CHECKBOX; POPUP-CLOSE-BEHAVIOR-TEST-* → TEST-POPUP_CLOSE_BEHAVIOR.
+**Full mapping table**: [`tied/docs/numbered-token-mapping.md`](docs/numbered-token-mapping.md).
 
-**Full mapping table**: `tied/docs/numbered-token-mapping.md`. SAFARI-* numbered tokens are out of scope and left unmodified. TIED `REQ/ARCH/IMPL-SAFARI_ADAPTATION` are Deferred; active shim is `ARCH/IMPL-CROSS_BROWSER`.
+**Out of scope**: `SAFARI-*` numbered tokens (left unmodified). TIED `REQ/ARCH/IMPL-SAFARI_ADAPTATION` are Deferred; active browser API shim is `ARCH/IMPL-CROSS_BROWSER`.
 
 ## Token Relationships
 

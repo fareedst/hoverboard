@@ -1,0 +1,35 @@
+IMPL-SITE_MGMT:
+  code_locations:
+    files: []
+    functions: []
+  cross_references:
+    - "ARCH-SITE_MGMT"
+    - "REQ-SITE_MANAGEMENT"
+  decision: "Thin implementation stub for IMPL-SITE_MGMT."
+  essence_pseudocode_path: "implementation-decisions/IMPL-SITE_MGMT-pseudocode.md"
+  implementation_approach:
+    summary: "Per-site allow/inhibit policy for content UI"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: align detail traceability with expanded sidecar"
+  name: "Site Management"
+  rationale:
+    why: "Site management implementation"
+  related_decisions:
+    depends_on: []
+    see_also: []
+    supersedes: []
+  status: "Active"
+  traceability:
+    architecture:
+      - "ARCH-SITE_MGMT"
+    code_annotations:
+      - "IMPL-SITE_MGMT"
+    requirements:
+      - "REQ-SITE_MANAGEMENT"
+    tests: []

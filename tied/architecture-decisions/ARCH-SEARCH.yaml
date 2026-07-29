@@ -1,0 +1,30 @@
+ARCH-SEARCH:
+  alternatives_considered: []
+  cross_references: []
+  decision: "Thin architecture stub for ARCH-SEARCH."
+  implementation_approach:
+    summary: ""
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "LEAP: link REQ-SEARCH_FUNCTIONALITY and IMPL-SEARCH"
+  name: "Search"
+  rationale:
+    why: "Search functionality architecture"
+  related_decisions:
+    depends_on: []
+    informs: []
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-SEARCH"
+    implementation:
+      - "IMPL-SEARCH"
+    requirements:
+      - "REQ-SEARCH_FUNCTIONALITY"
+    tests: []

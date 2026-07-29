@@ -1,0 +1,67 @@
+ARCH-CROSS_BROWSER:
+  alternatives_considered:
+    - name: "Platform-specific code forks"
+      cons:
+        - "Divergent feature sets"
+        - "Too much duplication"
+      pros: []
+      rejected_reason: "Maintenance burden; prefer shared browser API shim"
+    - name: "Chrome-only forever with no abstraction"
+      cons:
+        - "Call sites tied to chrome.* only"
+        - "Harder future multi-browser expansion"
+      pros:
+        - "Simpler short term"
+      rejected_reason: "Shared browser API shim keeps Chrome delivery while enabling future browsers"
+  cross_references:
+    - "IMPL-CROSS_BROWSER"
+    - "REQ-CROSS_BROWSER"
+    - "REQ-EXTENSION_IDENTITY"
+    - "REQ-SAFARI_ADAPTATION"
+  decision: "Thin architecture stub for ARCH-CROSS_BROWSER."
+  implementation_approach:
+    details:
+      - "Browser API abstraction exporting browser from safari-shim.js"
+      - "platformUtils reserved for future non-Chromium targets (deferred)"
+      - "Promise-based message passing and retries for Chrome MV3"
+      - "Safari product adaptations deferred under ARCH-SAFARI_ADAPTATION"
+      - "Storage helpers for Chromium storage APIs"
+    summary: "Chrome-first unified browser API shim (src/shared/safari-shim.js) with Promise messaging and storage helpers; platform hooks reserved for deferred multi-browser expansion."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Cross-Browser Compatibility Architecture"
+  rationale:
+    benefits:
+      - "Chrome delivery uses one shim"
+      - "Future multi-browser expansion without rewriting call sites"
+    problems_solved:
+      - "Platform-specific code duplication"
+      - "Stale Safari-as-current rationale conflicting with identity"
+    why: "Chrome is the active browser target; keep a shared browser API layer so future Safari/Firefox work can expand without forking call sites."
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-CROSS_BROWSER"
+    see_also:
+      - "ARCH-EXT_IDENTITY"
+      - "ARCH-SAFARI_ADAPTATION"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-CROSS_BROWSER"
+    implementation:
+      - "IMPL-CROSS_BROWSER"
+    requirements:
+      - "REQ-CROSS_BROWSER"
+    tests:
+      - "tests/unit/badge-refresh-service-worker.test.js"
+      - "tests/unit/browser-api-shim-platform.test.js"
+      - "tests/unit/message-client.test.js"
+      - "tests/unit/native-host-ping.test.js"
+      - "tests/unit/service-worker-quick-access.test.js"

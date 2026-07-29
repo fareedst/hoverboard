@@ -10,7 +10,7 @@ This document defines all semantic tokens used in the popup close behavior requi
 
 ## 📋 Primary Requirements Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-001]` - Primary Requirement**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]` - Primary Requirement**
 **Definition**: Show Hover button must NOT close the popup window after toggling overlay visibility
 
 **Usage**: 
@@ -20,11 +20,11 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Success validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-004]` - Implementation requirement
-- `[POPUP-CLOSE-BEHAVIOR-006]` - Testing requirement
-- `[POPUP-CLOSE-BEHAVIOR-011]` - Success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-004)]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)]` - Testing requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-011)]` - Success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-002]` - Other Button Consistency**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-002)]` - Other Button Consistency**
 **Definition**: All other popup buttons must continue to close the popup after their respective actions
 
 **Usage**:
@@ -33,10 +33,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Implementation validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-006]` - Testing requirement
-- `[POPUP-CLOSE-BEHAVIOR-011]` - Success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)]` - Testing requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-011)]` - Success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-003]` - Overlay State Coordination**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-003)]` - Overlay State Coordination**
 **Definition**: The popup must remain synchronized with overlay visibility state
 
 **Usage**:
@@ -45,13 +45,13 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Integration testing
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-003]` - Architectural decision
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-003)]` - Architectural decision
 
 ## 🔧 Implementation Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-004]` - Show Hover Handler Modification**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-004)]` - Show Hover Handler Modification**
 **Definition**: Remove `closePopup()` call from `handleShowHoverboard()` method
 
 **Usage**:
@@ -60,10 +60,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Testing validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-002]` - Implementation task
-- `[POPUP-CLOSE-BEHAVIOR-006]` - Testing requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-002)]` - Implementation task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)]` - Testing requirement
 
-### **`[POPUP-CLOSE-BEHAVIOR-005]` - Overlay State Tracking**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Overlay State Tracking**
 **Definition**: Add method to track and reflect overlay visibility state
 
 **Usage**:
@@ -72,13 +72,13 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Integration testing
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-002]` - Implementation task
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-003]` - Architectural decision
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-002)]` - Implementation task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-003)]` - Architectural decision
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
 
 ## 🧪 Testing Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-006]` - Functional Testing**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)]` - Functional Testing**
 **Definition**: Test individual components in isolation for popup close behavior
 
 **Usage**:
@@ -87,10 +87,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Regression testing
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-004]` - Testing task
-- `[POPUP-CLOSE-BEHAVIOR-TEST-001]` - Testing strategy
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-004)]` - Testing task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-001)]` - Testing strategy
 
-### **`[POPUP-CLOSE-BEHAVIOR-007]` - Integration Testing**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration Testing**
 **Definition**: Test popup-overlay communication and synchronization
 
 **Usage**:
@@ -99,12 +99,12 @@ This document defines all semantic tokens used in the popup close behavior requi
 - User experience testing
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-004]` - Testing task
-- `[POPUP-CLOSE-BEHAVIOR-TEST-001]` - Testing strategy
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-004)]` - Testing task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-001)]` - Testing strategy
 
 ## 🎯 Success Criteria Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-011]` - Primary Success Criteria**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-011)]` - Primary Success Criteria**
 **Definition**: Functional success criteria for popup close behavior
 
 **Usage**:
@@ -113,10 +113,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Implementation completion
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-001]` - Primary requirement
-- `[POPUP-CLOSE-BEHAVIOR-002]` - Secondary requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-001)]` - Primary requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-002)]` - Secondary requirement
 
-### **`[POPUP-CLOSE-BEHAVIOR-012]` - User Experience Success Criteria**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-012)]` - User Experience Success Criteria**
 **Definition**: User experience success criteria for popup close behavior
 
 **Usage**:
@@ -125,12 +125,12 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Performance validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
-- `[POPUP-CLOSE-BEHAVIOR-TEST-002]` - Manual testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-002)]` - Manual testing
 
 ## 📝 Documentation Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-013]` - Implementation Documentation**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-013)]` - Implementation Documentation**
 **Definition**: Documentation requirements for implementation changes
 
 **Usage**:
@@ -139,9 +139,9 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Maintenance documentation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-005]` - Documentation task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-005)]` - Documentation task
 
-### **`[POPUP-CLOSE-BEHAVIOR-014]` - User Documentation**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-014)]` - User Documentation**
 **Definition**: User-facing documentation requirements
 
 **Usage**:
@@ -150,11 +150,11 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Troubleshooting documentation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-005]` - Documentation task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-005)]` - Documentation task
 
 ## 🏗️ Task Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-TASK-001]` - Code Analysis and Preparation**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-001)]` - Code Analysis and Preparation**
 **Definition**: Task for analyzing current code and preparing for implementation
 
 **Usage**:
@@ -163,9 +163,9 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Resource allocation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-004]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-004)]` - Implementation requirement
 
-### **`[POPUP-CLOSE-BEHAVIOR-TASK-002]` - Core Implementation**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-002)]` - Core Implementation**
 **Definition**: Task for implementing core popup close behavior changes
 
 **Usage**:
@@ -174,10 +174,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Testing coordination
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-004]` - Implementation requirement
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-004)]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
 
-### **`[POPUP-CLOSE-BEHAVIOR-TASK-003]` - Content Script Integration**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-003)]` - Content Script Integration**
 **Definition**: Task for integrating content script changes
 
 **Usage**:
@@ -186,10 +186,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Testing coordination
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
 
-### **`[POPUP-CLOSE-BEHAVIOR-TASK-004]` - Testing Implementation**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-004)]` - Testing Implementation**
 **Definition**: Task for implementing testing requirements
 
 **Usage**:
@@ -198,10 +198,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Quality assurance
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-006]` - Testing requirement
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)]` - Testing requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
 
-### **`[POPUP-CLOSE-BEHAVIOR-TASK-005]` - Documentation Updates**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-005)]` - Documentation Updates**
 **Definition**: Task for updating documentation
 
 **Usage**:
@@ -210,12 +210,12 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Maintenance coordination
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-013]` - Implementation documentation
-- `[POPUP-CLOSE-BEHAVIOR-014]` - User documentation
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-013)]` - Implementation documentation
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-014)]` - User documentation
 
 ## 🧪 Testing Strategy Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-TEST-001]` - Automated Testing**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-001)]` - Automated Testing**
 **Definition**: Automated testing strategy for popup close behavior
 
 **Usage**:
@@ -224,10 +224,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Quality assurance
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-006]` - Functional testing
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-006)]` - Functional testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
 
-### **`[POPUP-CLOSE-BEHAVIOR-TEST-002]` - Manual Testing**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-002)]` - Manual Testing**
 **Definition**: Manual testing strategy for popup close behavior
 
 **Usage**:
@@ -236,12 +236,12 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Quality assurance
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
-- `[POPUP-CLOSE-BEHAVIOR-012]` - User experience success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-012)]` - User experience success criteria
 
 ## 🎯 Success Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-SUCCESS-001]` - Functional Success**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-001)]` - Functional Success**
 **Definition**: Functional success criteria for implementation
 
 **Usage**:
@@ -250,9 +250,9 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Quality assurance
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-011]` - Primary success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-011)]` - Primary success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-SUCCESS-002]` - User Experience Success**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-002)]` - User Experience Success**
 **Definition**: User experience success criteria for implementation
 
 **Usage**:
@@ -261,9 +261,9 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Performance validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-012]` - User experience success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-012)]` - User experience success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-SUCCESS-003]` - Technical Success**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-SUCCESS-003)]` - Technical Success**
 **Definition**: Technical success criteria for implementation
 
 **Usage**:
@@ -272,12 +272,12 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Documentation validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-013]` - Implementation documentation
-- `[POPUP-CLOSE-BEHAVIOR-014]` - User documentation
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-013)]` - Implementation documentation
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-014)]` - User documentation
 
 ## 🔄 Risk Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-001]` - Regression Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-001)]` - Regression Risk**
 **Definition**: Risk that changes could break existing functionality
 
 **Usage**:
@@ -286,10 +286,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Fallback planning
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-004]` - Testing task
-- `[POPUP-CLOSE-BEHAVIOR-TEST-001]` - Testing strategy
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-004)]` - Testing task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-001)]` - Testing strategy
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-002]` - State Synchronization Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-002)]` - State Synchronization Risk**
 **Definition**: Risk that popup and overlay could become out of sync
 
 **Usage**:
@@ -298,10 +298,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Error handling
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-005]` - Architectural decision
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-005)]` - Architectural decision
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-003]` - User Experience Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-003)]` - User Experience Risk**
 **Definition**: Risk that users might be confused by new behavior
 
 **Usage**:
@@ -310,12 +310,12 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Documentation requirements
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TEST-002]` - Manual testing
-- `[POPUP-CLOSE-BEHAVIOR-TASK-005]` - Documentation task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TEST-002)]` - Manual testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-005)]` - Documentation task
 
 ## 🏗️ Architecture Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-001]` - Popup Lifecycle Management**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-001)]` - Popup Lifecycle Management**
 **Definition**: Architectural decision for popup lifecycle management
 
 **Usage**:
@@ -324,10 +324,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - System integration
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-002]` - Implementation task
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-002)]` - Implementation task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-002]` - Message Passing Architecture**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-002)]` - Message Passing Architecture**
 **Definition**: Architectural decision for message passing between popup and content script
 
 **Usage**:
@@ -336,10 +336,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Integration planning
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-003]` - Content script integration
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-003)]` - Content script integration
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-003]` - Overlay State Query Pattern**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-003)]` - Overlay State Query Pattern**
 **Definition**: Architectural decision for querying overlay state
 
 **Usage**:
@@ -348,10 +348,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Data flow design
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-004]` - UI State Synchronization**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-004)]` - UI State Synchronization**
 **Definition**: Architectural decision for UI state synchronization
 
 **Usage**:
@@ -360,10 +360,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - User experience design
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
-- `[POPUP-CLOSE-BEHAVIOR-012]` - User experience success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-012)]` - User experience success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-005]` - Graceful Degradation**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-005)]` - Graceful Degradation**
 **Definition**: Architectural decision for graceful degradation when overlay state cannot be determined
 
 **Usage**:
@@ -372,10 +372,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Resilience design
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-RISK-002]` - State synchronization risk
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-002)]` - State synchronization risk
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-006]` - Message Passing Efficiency**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-006)]` - Message Passing Efficiency**
 **Definition**: Architectural decision for efficient message passing
 
 **Usage**:
@@ -384,10 +384,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Resource optimization
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-002]` - Message passing architecture
-- `[POPUP-CLOSE-BEHAVIOR-012]` - User experience success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-002)]` - Message passing architecture
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-012)]` - User experience success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-007]` - Refresh Integration**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-007)]` - Refresh Integration**
 **Definition**: Architectural decision for integrating with refresh mechanisms
 
 **Usage**:
@@ -396,10 +396,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - System coordination
 
 **Cross-References**:
-- `[POPUP-REFRESH-001]` - Refresh requirement
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]` - Refresh requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-008]` - Toggle Synchronization**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-008)]` - Toggle Synchronization**
 **Definition**: Architectural decision for coordinating with toggle synchronization
 
 **Usage**:
@@ -408,10 +408,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - System coordination
 
 **Cross-References**:
-- `[TOGGLE-SYNC-POPUP-001]` - Toggle synchronization requirement
-- `[POPUP-CLOSE-BEHAVIOR-005]` - Implementation requirement
+- `[[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] (was TOGGLE-SYNC-POPUP-001)]` - Toggle synchronization requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-005)]` - Implementation requirement
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-009]` - UI Behavior Consistency**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-009)]` - UI Behavior Consistency**
 **Definition**: Architectural decision for maintaining consistent UI behavior patterns
 
 **Usage**:
@@ -420,10 +420,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - User experience design
 
 **Cross-References**:
-- `[UI-BEHAVIOR-001]` - UI behavior requirement
-- `[POPUP-CLOSE-BEHAVIOR-012]` - User experience success criteria
+- `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-BEHAVIOR-001)]` - UI behavior requirement
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-012)]` - User experience success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-010]` - Performance Optimization**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-010)]` - Performance Optimization**
 **Definition**: Architectural decision for performance optimization
 
 **Usage**:
@@ -432,10 +432,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Resource optimization
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-006]` - Message passing efficiency
-- `[POPUP-CLOSE-BEHAVIOR-012]` - User experience success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-006)]` - Message passing efficiency
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-012)]` - User experience success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-011]` - Error Recovery**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-011)]` - Error Recovery**
 **Definition**: Architectural decision for error recovery mechanisms
 
 **Usage**:
@@ -444,10 +444,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Resilience design
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-005]` - Graceful degradation
-- `[POPUP-CLOSE-BEHAVIOR-RISK-001]` - Regression risk
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-005)]` - Graceful degradation
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-001)]` - Regression risk
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-012]` - Content Script Handler**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-012)]` - Content Script Handler**
 **Definition**: Architectural decision for content script message handling
 
 **Usage**:
@@ -456,10 +456,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Message handling design
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-003]` - Content script integration
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-003)]` - Content script integration
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-013]` - State Persistence**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-013)]` - State Persistence**
 **Definition**: Architectural decision for state persistence across popup sessions
 
 **Usage**:
@@ -468,12 +468,12 @@ This document defines all semantic tokens used in the popup close behavior requi
 - User experience design
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-003]` - Overlay state coordination
-- `[POPUP-CLOSE-BEHAVIOR-012]` - User experience success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-003)]` - Overlay state coordination
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-012)]` - User experience success criteria
 
 ## 🏗️ Architectural Success Tokens
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-001]` - Architecture Success Criteria**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-001)]` - Architecture Success Criteria**
 **Definition**: Success criteria for architectural decisions
 
 **Usage**:
@@ -482,9 +482,9 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Implementation completion
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-001]` through `[POPUP-CLOSE-BEHAVIOR-ARCH-013]` - All architectural decisions
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-001)]` through `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-013)]` - All architectural decisions
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-002]` - Integration Success Criteria**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-002)]` - Integration Success Criteria**
 **Definition**: Success criteria for system integration
 
 **Usage**:
@@ -493,10 +493,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - End-to-end validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-007]` - Integration testing
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-002]` - Message passing architecture
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-007)]` - Integration testing
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-002)]` - Message passing architecture
 
-### **`[POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-003]` - Performance Success Criteria**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-SUCCESS-003)]` - Performance Success Criteria**
 **Definition**: Success criteria for performance optimization
 
 **Usage**:
@@ -505,12 +505,12 @@ This document defines all semantic tokens used in the popup close behavior requi
 - User experience validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-006]` - Message passing efficiency
-- `[POPUP-CLOSE-BEHAVIOR-ARCH-010]` - Performance optimization
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-006)]` - Message passing efficiency
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-ARCH-010)]` - Performance optimization
 
 ## 🆕 **NEW TOKENS: Popup Close Behavior Fix**
 
-### **`[POPUP-CLOSE-BEHAVIOR-FIX-001]` - Consistent Popup Behavior**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)]` - Consistent Popup Behavior**
 **Definition**: All action buttons must NOT close the popup window after completing their actions
 
 **Usage**:
@@ -520,11 +520,11 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Success validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-006]` - Implementation task
-- `[POPUP-CLOSE-BEHAVIOR-TASK-007]` - Testing task
-- `[POPUP-CLOSE-BEHAVIOR-FIX-003]` - Success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-006)]` - Implementation task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-007)]` - Testing task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-003)]` - Success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-FIX-002]` - Popup Close Icon Behavior**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-002)]` - Popup Close Icon Behavior**
 **Definition**: Only the popup close icon (X) should close the popup window
 
 **Usage**:
@@ -534,11 +534,11 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Testing criteria
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-TASK-006]` - Implementation task
-- `[POPUP-CLOSE-BEHAVIOR-TASK-007]` - Testing task
-- `[POPUP-CLOSE-BEHAVIOR-FIX-003]` - Success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-006)]` - Implementation task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-007)]` - Testing task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-003)]` - Success criteria
 
-### **`[POPUP-CLOSE-BEHAVIOR-FIX-003]` - Updated Success Criteria**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-003)]` - Updated Success Criteria**
 **Definition**: Success criteria for the fixed popup close behavior
 
 **Usage**:
@@ -548,13 +548,13 @@ This document defines all semantic tokens used in the popup close behavior requi
 - User experience validation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-FIX-001]` - Consistent popup behavior
-- `[POPUP-CLOSE-BEHAVIOR-FIX-002]` - Popup close icon behavior
-- `[POPUP-CLOSE-BEHAVIOR-TASK-007]` - Testing task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)]` - Consistent popup behavior
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-002)]` - Popup close icon behavior
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-007)]` - Testing task
 
 ## 🆕 **NEW TASK TOKENS: Popup Close Behavior Fix**
 
-### **`[POPUP-CLOSE-BEHAVIOR-TASK-006]` - Remove Action Button closePopup() Calls**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-006)]` - Remove Action Button closePopup() Calls**
 **Definition**: Task for removing closePopup() calls from action button handlers
 
 **Usage**:
@@ -563,10 +563,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Testing coordination
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-FIX-001]` - Consistent popup behavior
-- `[POPUP-CLOSE-BEHAVIOR-TASK-007]` - Testing task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)]` - Consistent popup behavior
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-007)]` - Testing task
 
-### **`[POPUP-CLOSE-BEHAVIOR-TASK-007]` - Update Testing for New Behavior**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-007)]` - Update Testing for New Behavior**
 **Definition**: Task for updating tests to reflect new popup close behavior
 
 **Usage**:
@@ -575,11 +575,11 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Quality assurance
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-FIX-001]` - Consistent popup behavior
-- `[POPUP-CLOSE-BEHAVIOR-FIX-002]` - Popup close icon behavior
-- `[POPUP-CLOSE-BEHAVIOR-TASK-006]` - Implementation task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)]` - Consistent popup behavior
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-002)]` - Popup close icon behavior
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-006)]` - Implementation task
 
-### **`[POPUP-CLOSE-BEHAVIOR-TASK-008]` - Update Requirements Documentation**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-008)]` - Update Requirements Documentation**
 **Definition**: Task for updating requirements documentation to reflect new behavior
 
 **Usage**:
@@ -588,13 +588,13 @@ This document defines all semantic tokens used in the popup close behavior requi
 - Change documentation
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-FIX-001]` - Consistent popup behavior
-- `[POPUP-CLOSE-BEHAVIOR-FIX-002]` - Popup close icon behavior
-- `[POPUP-CLOSE-BEHAVIOR-FIX-003]` - Success criteria
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)]` - Consistent popup behavior
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-002)]` - Popup close icon behavior
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-003)]` - Success criteria
 
 ## 🆕 **NEW RISK TOKENS: Popup Close Behavior Fix**
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-004]` - User Expectation Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-004)]` - User Expectation Risk**
 **Definition**: Risk that users might expect action buttons to close popup
 
 **Usage**:
@@ -603,10 +603,10 @@ This document defines all semantic tokens used in the popup close behavior requi
 - User testing planning
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-FIX-001]` - Consistent popup behavior
-- `[POPUP-CLOSE-BEHAVIOR-TASK-007]` - Testing task
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-001)]` - Consistent popup behavior
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-007)]` - Testing task
 
-### **`[POPUP-CLOSE-BEHAVIOR-RISK-005]` - Popup Management Risk**
+### **`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-RISK-005)]` - Popup Management Risk**
 **Definition**: Risk that users might have too many popups open
 
 **Usage**:
@@ -615,5 +615,5 @@ This document defines all semantic tokens used in the popup close behavior requi
 - User education planning
 
 **Cross-References**:
-- `[POPUP-CLOSE-BEHAVIOR-FIX-002]` - Popup close icon behavior
-- `[POPUP-CLOSE-BEHAVIOR-TASK-008]` - Documentation task 
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-FIX-002)]` - Popup close icon behavior
+- `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] (was POPUP-CLOSE-BEHAVIOR-TASK-008)]` - Documentation task 

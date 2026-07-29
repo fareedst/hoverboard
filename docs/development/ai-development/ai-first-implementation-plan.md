@@ -9,7 +9,7 @@
 
 ## 📋 **PHASE 1: Core AI-First Infrastructure** (Week 1)
 
-### **🤖 TASK AF-001: AI Assistant Protocol Implementation**
+### **🤖 TASK [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AF-001): AI Assistant Protocol Implementation**
 **Priority**: ⭐ CRITICAL | **Duration**: 2-3 days
 
 #### **Deliverables:**
@@ -33,7 +33,7 @@ ai_decision_framework:
     - context_updates: "Required documentation cascade per protocol"
 ```
 
-### **🔗 TASK AF-002: Implementation Token System**
+### **🔗 TASK [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AF-002): Implementation Token System**
 **Priority**: ⭐ CRITICAL | **Duration**: 2-3 days
 
 #### **Deliverables:**
@@ -44,24 +44,24 @@ ai_decision_framework:
 
 #### **Token Implementation Strategy:**
 ```javascript
-// ⭐ EXT-001: Service worker architecture - 🔧 Core background service
+// ⭐ [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Service worker architecture - 🔧 Core background service
 class HoverboardServiceWorker {
-  // 🔺 MSG-002: Message handling system - 📝 Route and process messages
+  // 🔺 [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] (was MSG-002): Message handling system - 📝 Route and process messages
   async handleMessage(message, sender) {
     // Implementation with tokens
   }
 }
 
-// 🔶 UI-003: Popup interface - 🔍 User interaction handling
+// 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003): Popup interface - 🔍 User interaction handling
 class PopupManager {
-  // 🔻 CFG-001: Configuration access - 📝 Settings management
+  // 🔻 [IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001): Configuration access - 📝 Settings management
   async loadConfiguration() {
     // Implementation with tokens
   }
 }
 ```
 
-### **📋 TASK AF-003: Feature Registry and Cross-Reference System**
+### **📋 TASK [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AF-003): Feature Registry and Cross-Reference System**
 **Priority**: 🔺 HIGH | **Duration**: 3-4 days
 
 #### **Deliverables:**
@@ -73,7 +73,7 @@ class PopupManager {
 #### **Feature Registry Structure:**
 ```yaml
 features:
-  EXT-001:
+  [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001):
     name: "Service Worker Architecture"
     priority: "⭐ CRITICAL"
     status: "✅ Completed"
@@ -82,7 +82,7 @@ features:
       - "src-new/core/message-handler.js"
     dependencies:
       depends_on: []
-      used_by: ["UI-001", "API-002", "CFG-001"]
+      used_by: ["[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-001)", "[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was API-002)", "[IMPL-CONFIG_BACKUP_RESTORE] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CFG-001)"]
     testing:
       unit_tests: ["tests/unit/service-worker.test.js"]
       integration_tests: ["tests/integration/background.test.js"]
@@ -96,7 +96,7 @@ features:
 
 ## 🛡️ **PHASE 2: Validation and Enforcement Framework** (Week 2)
 
-### **🔧 TASK AF-004: Automated Validation System**
+### **🔧 TASK [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AF-004): Automated Validation System**
 **Priority**: 🔺 HIGH | **Duration**: 2-3 days
 
 #### **Deliverables:**
@@ -127,7 +127,7 @@ echo "🤖 Running AI-First Compliance Validation..."
 echo "✅ AI-First compliance validation complete"
 ```
 
-### **📊 TASK AF-005: Real-Time Monitoring Dashboard**
+### **📊 TASK [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AF-005): Real-Time Monitoring Dashboard**
 **Priority**: 🔶 MEDIUM | **Duration**: 2-3 days
 
 #### **Deliverables:**
@@ -140,7 +140,7 @@ echo "✅ AI-First compliance validation complete"
 
 ## 🚀 **PHASE 3: Enhanced Documentation Architecture** (Week 3)
 
-### **📖 TASK AF-006: AI-Centric Documentation Restructure**
+### **📖 TASK [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AF-006): AI-Centric Documentation Restructure**
 **Priority**: 🔺 HIGH | **Duration**: 2-3 days
 
 #### **Current → AI-First Transformation:**
@@ -169,7 +169,7 @@ docs/
 └── validation-automation.md     # NEW: Compliance checking
 ```
 
-### **🔄 TASK AF-007: Legacy Documentation Enhancement**
+### **🔄 TASK [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AF-007): Legacy Documentation Enhancement**
 **Priority**: 🔶 MEDIUM | **Duration**: 3-4 days
 
 #### **Enhancement Strategy:**
@@ -254,4 +254,4 @@ docs/
 
 **🚀 Ready to Begin AI-First Enhancement Phase**
 
-**Next Action**: Start with TASK AF-001 (AI Assistant Protocol) - Foundation for all subsequent enhancements 
+**Next Action**: Start with TASK [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was AF-001) (AI Assistant Protocol) - Foundation for all subsequent enhancements 

@@ -340,14 +340,14 @@ section:last-child {
   pointer-events: none;
 }
 
-/* [SHOW-HOVER-CHECKBOX-CSS-001] - Show hover controls layout */
+/* [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Show hover controls layout */
 .show-hover-controls {
   display: flex;
   align-items: center;
   gap: var(--spacing-md);
 }
 
-/* [SHOW-HOVER-CHECKBOX-CSS-002] - Page load checkbox styling */
+/* [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [TEST-SHOW_HOVER_CHECKBOX] - Page load checkbox styling */
 .page-load-checkbox {
   display: flex;
   align-items: center;
@@ -643,7 +643,7 @@ section:last-child {
   box-shadow: var(--shadow-medium);
 }
 
-/* [IMMUTABLE-REQ-TAG-002] Tab search styles */
+/* [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tab search styles */
 .tab-search-section {
   margin-top: var(--spacing-lg);
 }

@@ -4,7 +4,7 @@
  */
 
 import { ConfigManager } from '../../config/config-manager.js'
-import { TagService } from '../tagging/tag-service.js' // [IMMUTABLE-REQ-TAG-001] - Import TagService
+import { TagService } from '../tagging/tag-service.js' // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Import TagService
 import { XMLParser } from 'fast-xml-parser'
 import { debugLog, debugError, debugWarn } from '../../shared/utils.js'
 
@@ -12,18 +12,18 @@ debugLog('[SAFARI-EXT-SHIM-001] pinboard-service.js: module loaded')
 
 export class PinboardService {
   constructor (tagService = null) {
-    // PIN-001: Configuration manager integration for authentication and settings
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Configuration manager integration for authentication and settings
     this.configManager = new ConfigManager()
-    // [IMMUTABLE-REQ-TAG-001] - Tag service integration for tag tracking
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Tag service integration for tag tracking
     this.tagService = tagService || new TagService(this)
-    // PIN-001: Pinboard API base URL - official API endpoint
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Pinboard API base URL - official API endpoint
     // SPECIFICATION: Use official Pinboard API v1 endpoint for all operations
     this.apiBase = 'https://api.pinboard.in/v1/'
-    // PIN-004: Progressive retry delays for rate limiting compliance
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Progressive retry delays for rate limiting compliance
     // IMPLEMENTATION DECISION: Exponential backoff to respect API rate limits
     this.retryDelays = [1000, 2000, 5000] // Progressive retry delays
 
-    // PIN-001: XML parser configuration for Pinboard API responses
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: XML parser configuration for Pinboard API responses
     // SPECIFICATION: Pinboard API returns XML, parse with attribute support
     // IMPLEMENTATION DECISION: Configure parser for Pinboard's XML structure
     this.xmlParser = new XMLParser({
@@ -39,20 +39,20 @@ export class PinboardService {
    * @param {string} title - Page title (fallback for description)
    * @returns {Promise<Object>} Bookmark data
    *
-   * PIN-002: Single bookmark retrieval by URL
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Single bookmark retrieval by URL
    * SPECIFICATION: Use posts/get endpoint to fetch bookmark for specific URL
    * IMPLEMENTATION DECISION: Provide fallback data on failure for UI stability
    */
   async getBookmarkForUrl (url, title = '') {
     try {
-      // PIN-001: Do not call Pinboard API when credentials are not present
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Do not call Pinboard API when credentials are not present
       const hasAuth = await this.configManager.hasAuthToken()
       if (!hasAuth) {
         debugLog('[PINBOARD-SERVICE] No auth token configured, returning empty bookmark without API call')
         return this.createEmptyBookmark(url, title)
       }
 
-      // PIN-002: Clean URL before API request for consistent matching
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Clean URL before API request for consistent matching
       const cleanUrl = this.cleanUrl(url)
       const endpoint = `posts/get?url=${encodeURIComponent(cleanUrl)}`
 
@@ -66,7 +66,7 @@ export class PinboardService {
 
       debugLog('📥 Pinboard API response received:', response)
 
-      // PIN-002: Parse XML response into bookmark object
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Parse XML response into bookmark object
       const parsed = this.parseBookmarkResponse(response, cleanUrl, title)
 
       debugLog('📋 Parsed bookmark result:', parsed)
@@ -77,7 +77,7 @@ export class PinboardService {
       debugError('❌ Error details:', error.message)
       debugError('❌ Full error:', error)
 
-      // PIN-002: Return empty bookmark structure on failure for UI consistency
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Return empty bookmark structure on failure for UI consistency
       const emptyBookmark = this.createEmptyBookmark(url, title)
       debugLog('📝 Returning empty bookmark due to error:', emptyBookmark)
 
@@ -90,13 +90,13 @@ export class PinboardService {
    * @param {number} count - Number of recent bookmarks to fetch
    * @returns {Promise<Object[]>} Array of recent bookmarks
    *
-   * PIN-002: Recent bookmarks retrieval for dashboard display
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Recent bookmarks retrieval for dashboard display
    * SPECIFICATION: Use posts/recent endpoint with count parameter
    * IMPLEMENTATION DECISION: Return empty array on failure to prevent UI errors
    */
   async getRecentBookmarks (count = 15) {
     try {
-      // PIN-001: Do not call Pinboard API when credentials are not present
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Do not call Pinboard API when credentials are not present
       const hasAuth = await this.configManager.hasAuthToken()
       if (!hasAuth) {
         debugLog('[PINBOARD-SERVICE] No auth token configured, returning empty recent list without API call')
@@ -105,13 +105,13 @@ export class PinboardService {
 
       debugLog('[PINBOARD-SERVICE] Getting recent bookmarks, count:', count)
 
-      // PIN-002: Fetch recent bookmarks with specified count
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Fetch recent bookmarks with specified count
       const endpoint = `posts/recent?count=${count}`
       const response = await this.makeApiRequest(endpoint)
 
       debugLog('[PINBOARD-SERVICE] Raw API response received')
 
-      // PIN-002: Parse XML response into bookmark array
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Parse XML response into bookmark array
       const result = this.parseRecentBookmarksResponse(response)
       debugLog('[PINBOARD-SERVICE] Parsed recent bookmarks:', result.map(b => ({
         url: b.url,
@@ -122,7 +122,7 @@ export class PinboardService {
       return result
     } catch (error) {
       debugError('[PINBOARD-SERVICE] Failed to get recent bookmarks:', error)
-      // PIN-002: Return empty array on failure for UI stability
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Return empty array on failure for UI stability
       return []
     }
   }
@@ -132,33 +132,33 @@ export class PinboardService {
    * @param {Object} bookmarkData - Bookmark data to save
    * @returns {Promise<Object>} Save result
    *
-   * PIN-003: Bookmark creation/update operation
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Bookmark creation/update operation
    * SPECIFICATION: Use posts/add endpoint to save bookmark with all metadata
    * IMPLEMENTATION DECISION: Re-throw errors to allow caller error handling
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced with tag tracking
    */
   async saveBookmark (bookmarkData) {
     try {
-      // PIN-001: Do not call Pinboard API when credentials are not present
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Do not call Pinboard API when credentials are not present
       const hasAuth = await this.configManager.hasAuthToken()
       if (!hasAuth) {
         debugLog('[PINBOARD-SERVICE] No auth token configured, skipping save without API call')
         return { success: false, code: 'no_auth', message: 'No authentication token configured' }
       }
 
-      // PIN-003: Build URL parameters from bookmark data
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Build URL parameters from bookmark data
       const params = this.buildSaveParams(bookmarkData)
       const endpoint = `posts/add?${params}`
       const response = await this.makeApiRequest(endpoint, 'GET')
 
-      // [IMMUTABLE-REQ-TAG-001] - Track tags after successful save
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Track tags after successful save
       await this.trackBookmarkTags(bookmarkData)
 
-      // PIN-003: Parse API response for save confirmation
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Parse API response for save confirmation
       return this.parseApiResponse(response)
     } catch (error) {
       debugError('Failed to save bookmark:', error)
-      // PIN-003: Re-throw to allow caller to handle save failures
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Re-throw to allow caller to handle save failures
       throw error
     }
   }
@@ -168,33 +168,33 @@ export class PinboardService {
    * @param {Object} tagData - Tag data to save
    * @returns {Promise<Object>} Save result
    *
-   * PIN-003: Tag addition to existing bookmark
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Tag addition to existing bookmark
    * SPECIFICATION: Retrieve current bookmark, add tag, then save updated bookmark
    * IMPLEMENTATION DECISION: Merge tags to preserve existing tags while adding new ones
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced with tag tracking
    */
   async saveTag (tagData) {
     try {
-      // PIN-003: Get current bookmark data to preserve existing tags
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Get current bookmark data to preserve existing tags
       const currentBookmark = await this.getBookmarkForUrl(tagData.url)
 
-      // PIN-003: Add new tag to existing tags array
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Add new tag to existing tags array
       const existingTags = currentBookmark.tags || []
       const newTags = [...existingTags]
 
       if (tagData.value && !existingTags.includes(tagData.value)) {
-        // PIN-003: Only add tag if it doesn't already exist
+        // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Only add tag if it doesn't already exist
         newTags.push(tagData.value)
       }
 
-      // PIN-003: Save updated bookmark with merged tags
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Save updated bookmark with merged tags
       const updatedBookmark = {
         ...currentBookmark,
         ...tagData,
         tags: newTags.join(' ')
       }
 
-      // [IMMUTABLE-REQ-TAG-001] - Track the new tag specifically
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Track the new tag specifically
       if (tagData.value) {
         await this.tagService.handleTagAddition(tagData.value, updatedBookmark)
       }
@@ -202,7 +202,7 @@ export class PinboardService {
       return this.saveBookmark(updatedBookmark)
     } catch (error) {
       debugError('Failed to save tag:', error)
-      // PIN-003: Re-throw to allow caller error handling
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Re-throw to allow caller error handling
       throw error
     }
   }
@@ -212,123 +212,123 @@ export class PinboardService {
    * @param {string} url - URL of bookmark to delete
    * @returns {Promise<Object>} Delete result
    *
-   * PIN-003: Bookmark deletion operation
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Bookmark deletion operation
    * SPECIFICATION: Use posts/delete endpoint to remove bookmark by URL
    * IMPLEMENTATION DECISION: Clean URL before deletion for consistent matching
    */
   async deleteBookmark (url) {
     try {
-      // PIN-001: Do not call Pinboard API when credentials are not present
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Do not call Pinboard API when credentials are not present
       const hasAuth = await this.configManager.hasAuthToken()
       if (!hasAuth) {
         debugLog('[PINBOARD-SERVICE] No auth token configured, skipping delete without API call')
         return { success: false, code: 'no_auth', message: 'No authentication token configured' }
       }
 
-      // PIN-003: Clean URL for consistent deletion matching
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Clean URL for consistent deletion matching
       const cleanUrl = this.cleanUrl(url)
       const endpoint = `posts/delete?url=${encodeURIComponent(cleanUrl)}`
       const response = await this.makeApiRequest(endpoint)
 
-      // PIN-003: Parse API response for deletion confirmation
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Parse API response for deletion confirmation
       return this.parseApiResponse(response)
     } catch (error) {
       debugError('Failed to delete bookmark:', error)
-      // PIN-003: Re-throw to allow caller error handling
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Re-throw to allow caller error handling
       throw error
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Track tags from bookmark data
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Track tags from bookmark data
    * @param {Object} bookmarkData - Bookmark data containing tags
    * @returns {Promise<void>}
    */
   async trackBookmarkTags (bookmarkData) {
     try {
-      // [IMMUTABLE-REQ-TAG-001] - Extract tags from bookmark data
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Extract tags from bookmark data
       const tags = this.extractTagsFromBookmarkData(bookmarkData)
       // Sanitize, deduplicate, and filter empty tags
       const sanitizedTags = Array.from(new Set(tags.map(tag => this.tagService.sanitizeTag(tag)).filter(Boolean)))
       if (sanitizedTags.length > 0) {
-        // [IMMUTABLE-REQ-TAG-001] - Track each tag individually
+        // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Track each tag individually
         for (const sanitizedTag of sanitizedTags) {
           await this.tagService.handleTagAddition(sanitizedTag, bookmarkData)
         }
-        debugLog('[IMMUTABLE-REQ-TAG-001] Tracked tags for bookmark:', sanitizedTags)
+        debugLog('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tracked tags for bookmark:', sanitizedTags)
       }
     } catch (error) {
-      debugError('[IMMUTABLE-REQ-TAG-001] Failed to track bookmark tags:', error)
-      // [IMMUTABLE-REQ-TAG-001] - Don't throw error to avoid breaking bookmark save
+      debugError('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to track bookmark tags:', error)
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Don't throw error to avoid breaking bookmark save
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Enhanced error handling for tag operations
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced error handling for tag operations
    * @param {Error} error - The error that occurred
    * @param {string} operation - The operation that failed
    * @param {Object} context - Additional context data
    * @returns {Promise<void>}
    */
   async handleTagError (error, operation, context = {}) {
-    // [IMMUTABLE-REQ-TAG-001] - Log error with context
-    debugError(`[IMMUTABLE-REQ-TAG-001] Tag operation failed: ${operation}`, {
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Log error with context
+    debugError(`[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tag operation failed: ${operation}`, {
       error: error.message,
       stack: error.stack,
       context
     })
 
-    // [IMMUTABLE-REQ-TAG-001] - Attempt recovery based on error type
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Attempt recovery based on error type
     if (error.name === 'QuotaExceededError') {
       try {
         await this.tagService.cleanupOldTags()
-        debugLog('[IMMUTABLE-REQ-TAG-001] Attempted cleanup after quota exceeded')
+        debugLog('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Attempted cleanup after quota exceeded')
       } catch (cleanupError) {
-        debugError('[IMMUTABLE-REQ-TAG-001] Cleanup also failed:', cleanupError)
+        debugError('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Cleanup also failed:', cleanupError)
       }
     }
 
-    // [IMMUTABLE-REQ-TAG-001] - Notify user of tag operation failure
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Notify user of tag operation failure
     try {
       await this.notifyUserOfTagError(operation, error.message)
     } catch (notificationError) {
-      debugError('[IMMUTABLE-REQ-TAG-001] Failed to notify user:', notificationError)
+      debugError('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to notify user:', notificationError)
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Notify user of tag operation errors
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Notify user of tag operation errors
    * @param {string} operation - The operation that failed
    * @param {string} errorMessage - The error message
    * @returns {Promise<void>}
    */
   async notifyUserOfTagError (operation, errorMessage) {
-    // [IMMUTABLE-REQ-TAG-001] - Create user-friendly error message
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Create user-friendly error message
     const userMessage = `Tag ${operation} failed, but bookmark was saved. Error: ${errorMessage}`
 
-    // [IMMUTABLE-REQ-TAG-001] - Log user notification
-    debugWarn('[IMMUTABLE-REQ-TAG-001] User notification:', userMessage)
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Log user notification
+    debugWarn('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] User notification:', userMessage)
 
-    // [IMMUTABLE-REQ-TAG-001] - Could be extended to show browser notification
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Could be extended to show browser notification
     // For now, just log the message
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-001] - Extract tags from bookmark data
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Extract tags from bookmark data
    * @param {Object} bookmarkData - Bookmark data
    * @returns {string[]} Array of tags
    */
   extractTagsFromBookmarkData (bookmarkData) {
     const tags = []
 
-    // [IMMUTABLE-REQ-TAG-001] - Extract tags from tags field
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Extract tags from tags field
     if (bookmarkData.tags) {
       if (typeof bookmarkData.tags === 'string') {
-        // [IMMUTABLE-REQ-TAG-001] - Split space-separated tags
+        // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Split space-separated tags
         const tagArray = bookmarkData.tags.split(/\s+/).filter(tag => tag.trim())
         tags.push(...tagArray)
       } else if (Array.isArray(bookmarkData.tags)) {
-        // [IMMUTABLE-REQ-TAG-001] - Use array of tags directly
+        // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Use array of tags directly
         tags.push(...bookmarkData.tags.filter(tag => tag && tag.trim()))
       }
     }
@@ -341,7 +341,7 @@ export class PinboardService {
    * @param {Object} tagData - Tag removal data
    * @returns {Promise<Object>} Update result
    *
-   * PIN-003: Tag removal from existing bookmark
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Tag removal from existing bookmark
    * SPECIFICATION: Retrieve bookmark, remove specified tag, save updated bookmark
    * IMPLEMENTATION DECISION: Filter out specific tag while preserving other tags
    * [action:delete] [sync:site-record] [arch:atomic-sync]
@@ -366,7 +366,7 @@ export class PinboardService {
       return this.saveBookmark(updatedBookmark)
     } catch (error) {
       debugError('Failed to delete tag:', error) // [test:tag-deletion]
-      // PIN-003: Re-throw to allow caller error handling
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Re-throw to allow caller error handling
       throw error
     }
   }
@@ -375,28 +375,28 @@ export class PinboardService {
    * Test authentication with Pinboard API
    * @returns {Promise<boolean>} True if authentication is valid
    *
-   * PIN-001: Authentication validation using API endpoint
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Authentication validation using API endpoint
    * SPECIFICATION: Use user/api_token endpoint to verify authentication
    * IMPLEMENTATION DECISION: Simple boolean return for easy authentication checking
    */
   async testConnection () {
     try {
-      // PIN-001: Do not call Pinboard API when credentials are not present
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Do not call Pinboard API when credentials are not present
       const hasAuth = await this.configManager.hasAuthToken()
       if (!hasAuth) {
         debugLog('[PINBOARD-SERVICE] No auth token configured, testConnection returns false without API call')
         return false
       }
 
-      // PIN-001: Use the user/api_token endpoint to test authentication
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Use the user/api_token endpoint to test authentication
       const endpoint = 'user/api_token'
       const response = await this.makeApiRequest(endpoint)
 
-      // PIN-001: If the request succeeds without throwing an error, authentication is valid
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: If the request succeeds without throwing an error, authentication is valid
       return true
     } catch (error) {
       debugError('Connection test failed:', error)
-      // PIN-001: Return false on any authentication failure
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Return false on any authentication failure
       return false
     }
   }
@@ -407,12 +407,12 @@ export class PinboardService {
    * @param {string} method - HTTP method
    * @returns {Promise<Document>} Parsed XML response
    *
-   * PIN-001: Authenticated API request with configuration integration
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Authenticated API request with configuration integration
    * SPECIFICATION: All API requests must include authentication token
    * IMPLEMENTATION DECISION: Centralized authentication and retry logic
    */
   async makeApiRequest (endpoint, method = 'GET') {
-    // PIN-001: Verify authentication token exists before making request
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Verify authentication token exists before making request
     const hasAuth = await this.configManager.hasAuthToken()
     debugLog('🔐 Auth token check:', hasAuth)
 
@@ -420,13 +420,13 @@ export class PinboardService {
       throw new Error('No authentication token configured')
     }
 
-    // PIN-001: Get formatted authentication parameter from config manager
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Get formatted authentication parameter from config manager
     const authParam = await this.configManager.getAuthTokenParam()
     const url = `${this.apiBase}${endpoint}&${authParam}`
 
     debugLog('🌐 Making API request to:', url.replace(/auth_token=[^&]+/, 'auth_token=***HIDDEN***'))
 
-    // PIN-004: Use retry logic for network resilience
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Use retry logic for network resilience
     return this.makeRequestWithRetry(url, method)
   }
 
@@ -437,28 +437,28 @@ export class PinboardService {
    * @param {number} retryCount - Current retry attempt
    * @returns {Promise<Document>} Response
    *
-   * PIN-004: Network resilience with exponential backoff retry
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Network resilience with exponential backoff retry
    * SPECIFICATION: Handle rate limiting and network failures gracefully
    * IMPLEMENTATION DECISION: Progressive retry delays with configured maximum attempts
    */
   async makeRequestWithRetry (url, method = 'GET', retryCount = 0) {
-    // PIN-004: Get retry configuration from config manager
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Get retry configuration from config manager
     const config = await this.configManager.getConfig()
 
     try {
       debugLog(`🚀 Attempting HTTP ${method} request (attempt ${retryCount + 1})`)
 
-      // PIN-004: Make HTTP request using fetch API
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Make HTTP request using fetch API
       const response = await fetch(url, { method })
 
       debugLog(`📡 HTTP response status: ${response.status} ${response.statusText}`)
 
-      // PIN-004: Check for HTTP error responses
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Check for HTTP error responses
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`)
       }
 
-      // PIN-004: Parse XML response text
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Parse XML response text
       const xmlText = await response.text()
       debugLog('📄 Raw XML response:', xmlText.substring(0, 500) + (xmlText.length > 500 ? '...' : ''))
 
@@ -469,23 +469,23 @@ export class PinboardService {
     } catch (error) {
       debugError('💥 HTTP request failed:', error.message)
 
-      // PIN-004: Determine if error is retryable (network/rate limit issues)
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Determine if error is retryable (network/rate limit issues)
       const isRetryable = this.isRetryableError(error)
       const maxRetries = config.pinRetryCountMax || 2
 
       if (isRetryable && retryCount < maxRetries) {
-        // PIN-004: Calculate delay for progressive backoff
+        // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Calculate delay for progressive backoff
         const delay = this.retryDelays[retryCount] || config.pinRetryDelay || 1000
         debugWarn(`🔄 API request failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${maxRetries})`)
 
-        // PIN-004: Wait before retry
+        // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Wait before retry
         await this.sleep(delay)
         return this.makeRequestWithRetry(url, method, retryCount + 1)
       }
 
       debugError('❌ Max retries exceeded or non-retryable error. Giving up.')
 
-      // PIN-004: Re-throw error if not retryable or max retries exceeded
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Re-throw error if not retryable or max retries exceeded
       throw error
     }
   }
@@ -495,18 +495,18 @@ export class PinboardService {
    * @param {string} xmlText - XML response text
    * @returns {Object} Parsed XML object
    *
-   * PIN-001: XML response parsing with error handling
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: XML response parsing with error handling
    * SPECIFICATION: All Pinboard API responses are in XML format
    * IMPLEMENTATION DECISION: Use configured XML parser with error handling
    */
   parseXmlResponse (xmlText) {
     try {
-      // PIN-001: Parse XML using configured parser
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Parse XML using configured parser
       return this.xmlParser.parse(xmlText)
     } catch (error) {
       debugError('Failed to parse XML response:', error)
       debugError('XML content:', xmlText)
-      // PIN-001: Re-throw parsing errors for caller handling
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Re-throw parsing errors for caller handling
       throw new Error('Invalid XML response from Pinboard API')
     }
   }
@@ -518,7 +518,7 @@ export class PinboardService {
    * @param {string} title - Fallback title
    * @returns {Object} Bookmark object
    *
-   * PIN-002: Bookmark data parsing from Pinboard XML format
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Bookmark data parsing from Pinboard XML format
    * SPECIFICATION: Handle Pinboard's XML structure for bookmark data
    * IMPLEMENTATION DECISION: Normalize XML attributes to standard bookmark object
    */
@@ -526,7 +526,7 @@ export class PinboardService {
     try {
       debugLog('Parsing XML object structure:', JSON.stringify(xmlObj, null, 2))
 
-      // PIN-002: Extract posts array from XML structure
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Extract posts array from XML structure
       const posts = xmlObj?.posts?.post
 
       debugLog('📋 Posts extracted:', posts)
@@ -535,12 +535,12 @@ export class PinboardService {
       debugLog('📋 Posts length:', posts?.length)
 
       if (posts && posts.length > 0) {
-        // PIN-002: Get first post (should only be one for specific URL)
+        // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Get first post (should only be one for specific URL)
         const post = Array.isArray(posts) ? posts[0] : posts
 
         debugLog('📄 Processing post:', post)
 
-        // PIN-002: Extract bookmark data from XML attributes. [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Pinboard has only create-time; updated_at = time.
+        // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Extract bookmark data from XML attributes. [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Pinboard has only create-time; updated_at = time.
         const pinTime = post['@_time'] || ''
         const result = {
           url: post['@_href'] || url,
@@ -580,11 +580,11 @@ export class PinboardService {
       }
 
       debugLog('⚠️ No posts found in XML structure')
-      // PIN-002: Return empty bookmark if no posts found
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Return empty bookmark if no posts found
       return this.createEmptyBookmark(url, title)
     } catch (error) {
       debugError('❌ Failed to parse bookmark response:', error)
-      // PIN-002: Return empty bookmark on parsing error
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Return empty bookmark on parsing error
       return this.createEmptyBookmark(url, title)
     }
   }
@@ -594,7 +594,7 @@ export class PinboardService {
    * @param {Object} xmlObj - Parsed XML object
    * @returns {Array} Array of bookmark objects
    *
-   * PIN-002: Recent bookmarks parsing from Pinboard XML format
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Recent bookmarks parsing from Pinboard XML format
    * SPECIFICATION: Handle array of bookmarks from posts/recent endpoint
    * IMPLEMENTATION DECISION: Normalize each bookmark and handle empty responses
    */
@@ -603,20 +603,20 @@ export class PinboardService {
       debugLog('[PINBOARD-SERVICE] Parsing recent bookmarks XML object')
       debugLog('[PINBOARD-SERVICE] XML object structure:', JSON.stringify(xmlObj, null, 2))
 
-      // PIN-002: Extract posts array from XML structure
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Extract posts array from XML structure
       const posts = xmlObj?.posts?.post
 
       if (!posts) {
         debugLog('[PINBOARD-SERVICE] No posts found in XML response')
-        // PIN-002: Return empty array if no posts
+        // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Return empty array if no posts
         return []
       }
 
-      // PIN-002: Ensure posts is an array for consistent processing
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Ensure posts is an array for consistent processing
       const postsArray = Array.isArray(posts) ? posts : [posts]
       debugLog('[PINBOARD-SERVICE] Processing posts array, count:', postsArray.length)
 
-      // PIN-002: Parse each post into normalized bookmark object
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Parse each post into normalized bookmark object
       const result = postsArray.map((post, index) => {
         debugLog(`[PINBOARD-SERVICE] Processing post ${index + 1}:`, {
           href: post['@_href'],
@@ -651,7 +651,7 @@ export class PinboardService {
       return result
     } catch (error) {
       debugError('[PINBOARD-SERVICE] Failed to parse recent bookmarks response:', error)
-      // PIN-002: Return empty array on parsing error
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Return empty array on parsing error
       return []
     }
   }
@@ -661,16 +661,16 @@ export class PinboardService {
    * @param {Object} xmlObj - Parsed XML object
    * @returns {Object} Result object
    *
-   * PIN-003: API operation response parsing
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: API operation response parsing
    * SPECIFICATION: Handle success/error responses from add/delete operations
    * IMPLEMENTATION DECISION: Extract result code and message for operation feedback
    */
   parseApiResponse (xmlObj) {
     try {
-      // PIN-003: Extract result from XML structure
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Extract result from XML structure
       const result = xmlObj?.result
 
-      // PIN-003: Return normalized result object
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Return normalized result object
       return {
         success: result?.['@_code'] === 'done',
         code: result?.['@_code'] || 'unknown',
@@ -678,7 +678,7 @@ export class PinboardService {
       }
     } catch (error) {
       debugError('Failed to parse API response:', error)
-      // PIN-003: Return failure result on parsing error
+      // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Return failure result on parsing error
       return {
         success: false,
         code: 'parse_error',
@@ -693,12 +693,12 @@ export class PinboardService {
    * @param {string} title - Title for description
    * @returns {Object} Empty bookmark object
    *
-   * PIN-002: Default bookmark structure creation
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Default bookmark structure creation
    * SPECIFICATION: Provide consistent bookmark object structure
    * IMPLEMENTATION DECISION: Include all standard Pinboard bookmark fields with defaults
    */
   createEmptyBookmark (url, title) {
-    // PIN-002: Create bookmark object with all standard fields. [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] updated_at = time (empty here).
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Create bookmark object with all standard fields. [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] updated_at = time (empty here).
     return {
       url: url || '',
       description: title || '',
@@ -750,14 +750,14 @@ export class PinboardService {
    * @param {string} url - URL to clean
    * @returns {string} Cleaned URL
    *
-   * PIN-001: URL normalization for consistent API requests
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: URL normalization for consistent API requests
    * SPECIFICATION: Ensure URLs are properly formatted for Pinboard API
    * IMPLEMENTATION DECISION: Basic trimming and validation, preserve URL structure
    */
   cleanUrl (url) {
     if (!url) return ''
 
-    // PIN-001: Trim whitespace and remove trailing slashes for consistency
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Trim whitespace and remove trailing slashes for consistency
     return url.trim().replace(/\/+$/, '')
   }
 
@@ -766,12 +766,12 @@ export class PinboardService {
    * @param {Error} error - Error to check
    * @returns {boolean} Whether error is retryable
    *
-   * PIN-004: Error classification for retry logic
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Error classification for retry logic
    * SPECIFICATION: Only retry network and rate limit errors, not authentication/validation errors
    * IMPLEMENTATION DECISION: Conservative retry logic to avoid infinite loops
    */
   isRetryableError (error) {
-    // PIN-004: Check for network-related errors that may be temporary
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Check for network-related errors that may be temporary
     if (error.message.includes('fetch')) return true
     if (error.message.includes('timeout')) return true
     if (error.message.includes('429')) return true // Rate limited
@@ -779,7 +779,7 @@ export class PinboardService {
     if (error.message.includes('502')) return true // Bad gateway
     if (error.message.includes('503')) return true // Service unavailable
 
-    // PIN-004: Don't retry authentication or validation errors
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Don't retry authentication or validation errors
     return false
   }
 
@@ -788,11 +788,11 @@ export class PinboardService {
    * @param {number} ms - Milliseconds to sleep
    * @returns {Promise} Promise that resolves after delay
    *
-   * PIN-004: Async delay utility for retry logic
+   * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Async delay utility for retry logic
    * IMPLEMENTATION DECISION: Promise-based sleep for async/await compatibility
    */
   sleep (ms) {
-    // PIN-004: Promise-based delay for retry timing
+    // [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Promise-based delay for retry timing
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 }

@@ -14391,9 +14391,9 @@ var init_config_manager = __esm({
           // [ARCH-LOCAL_STORAGE_PROVIDER] - Bookmark storage mode (pinboard | local)
           INHIBIT_URLS: "hoverboard_inhibit_urls",
           RECENT_TAGS: "hoverboard_recent_tags",
-          // [IMMUTABLE-REQ-TAG-001] - Tag storage key
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Tag storage key
           TAG_FREQUENCY: "hoverboard_tag_frequency"
-          // [IMMUTABLE-REQ-TAG-001] - Tag frequency storage key
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Tag frequency storage key
         };
         this.defaultConfig = this.getDefaultConfiguration();
       }
@@ -14449,7 +14449,7 @@ var init_config_manager = __esm({
           // Preserve URL hash by default (maintain full URL context)
           uxShowSectionLabels: false,
           // Show section labels in popup (Quick Actions, Search Tabs)
-          // [IMMUTABLE-REQ-TAG-003] - Recent tags configuration
+          // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Recent tags configuration
           // IMPLEMENTATION DECISION: Conservative defaults for shared memory management
           recentTagsMaxListSize: 50,
           // Maximum recent tags in shared memory
@@ -14479,7 +14479,7 @@ var init_config_manager = __esm({
           // Maximum retry attempts
           pinRetryDelay: 1e3,
           // in ms - delay between retries
-          // ⭐ UI-006: Visibility Controls - 🎨 Per-window overlay appearance defaults
+          // ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility Controls - 🎨 Per-window overlay appearance defaults
           // IMPLEMENTATION DECISION: Conservative defaults for broad compatibility and readability
           defaultVisibilityTheme: "light-on-dark",
           // 'light-on-dark' | 'dark-on-light' - Dark theme default
@@ -14560,7 +14560,7 @@ var init_config_manager = __esm({
           recentPostsCount: config2.initRecentPostsCount,
           showHoverOnPageLoad: config2.showHoverOnPageLoad,
           hoverShowTooltips: config2.hoverShowTooltips,
-          // UI-006: Visibility defaults for configuration UI
+          // [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility defaults for configuration UI
           defaultVisibilityTheme: config2.defaultVisibilityTheme,
           defaultTransparencyEnabled: config2.defaultTransparencyEnabled,
           defaultBackgroundOpacity: config2.defaultBackgroundOpacity,
@@ -14614,7 +14614,7 @@ var init_config_manager = __esm({
        * Get visibility default settings
        * @returns {Promise<Object>} Visibility defaults object
        *
-       * UI-006: Visibility defaults retrieval
+       * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility defaults retrieval
        * IMPLEMENTATION DECISION: Dedicated method for overlay visibility configuration
        */
       async getVisibilityDefaults() {
@@ -14629,7 +14629,7 @@ var init_config_manager = __esm({
        * Update visibility default settings
        * @param {{ textTheme?: string, transparencyEnabled?: boolean, backgroundOpacity?: number }} visibilitySettings - New visibility defaults
        *
-       * UI-006: Visibility defaults update
+       * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION]: Visibility defaults update
        * IMPLEMENTATION DECISION: Dedicated method for clean visibility settings management
        */
       async updateVisibilityDefaults(visibilitySettings) {
@@ -14862,14 +14862,14 @@ var init_config_manager = __esm({
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Enhanced tag storage management
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced tag storage management
        * @param {string[]} tags - Array of tags to store
        * @returns {Promise<void>}
        */
       async updateRecentTags(tags) {
         try {
           if (!Array.isArray(tags)) {
-            console.warn("[IMMUTABLE-REQ-TAG-001] Invalid tags array provided");
+            console.warn("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Invalid tags array provided");
             return;
           }
           const config2 = await this.getConfig();
@@ -14883,7 +14883,7 @@ var init_config_manager = __esm({
             }
           });
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to update recent tags:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to update recent tags:", error48);
           try {
             await chrome.storage.local.set({
               [this.storageKeys.RECENT_TAGS]: {
@@ -14893,12 +14893,12 @@ var init_config_manager = __esm({
               }
             });
           } catch (fallbackError) {
-            console.error("[IMMUTABLE-REQ-TAG-001] Fallback storage also failed:", fallbackError);
+            console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Fallback storage also failed:", fallbackError);
           }
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Get recent tags with deduplication
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get recent tags with deduplication
        * @returns {Promise<string[]>} Array of recent tags
        */
       async getRecentTags() {
@@ -14913,12 +14913,12 @@ var init_config_manager = __esm({
           }
           return [];
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to get recent tags:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to get recent tags:", error48);
           return [];
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Get tag frequency data
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get tag frequency data
        * @returns {Promise<Object>} Tag frequency map
        */
       async getTagFrequency() {
@@ -14926,12 +14926,12 @@ var init_config_manager = __esm({
           const result = await chrome.storage.local.get(this.storageKeys.TAG_FREQUENCY);
           return result[this.storageKeys.TAG_FREQUENCY] || {};
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to get tag frequency:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to get tag frequency:", error48);
           return {};
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Update tag frequency
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Update tag frequency
        * @param {Object} frequency - Updated frequency map
        * @returns {Promise<void>}
        */
@@ -14941,11 +14941,11 @@ var init_config_manager = __esm({
             [this.storageKeys.TAG_FREQUENCY]: frequency
           });
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to update tag frequency:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to update tag frequency:", error48);
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Clean up old tags to manage storage
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Clean up old tags to manage storage
        * @returns {Promise<void>}
        */
       async cleanupOldTags() {
@@ -14958,7 +14958,7 @@ var init_config_manager = __esm({
             await this.updateRecentTags(trimmedTags);
           }
         } catch (error48) {
-          console.error("[IMMUTABLE-REQ-TAG-001] Failed to cleanup old tags:", error48);
+          console.error("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to cleanup old tags:", error48);
         }
       }
     };
@@ -16090,22 +16090,22 @@ var init_tag_service = __esm({
         return this._pinboardServicePromise;
       }
       /**
-       * [IMMUTABLE-REQ-TAG-003] - Get user-driven recent tags from shared memory
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get user-driven recent tags from shared memory
        * @returns {Promise<Object[]>} Array of recent tag objects sorted by lastUsed timestamp
        */
       async getUserRecentTags() {
         try {
-          debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Getting user recent tags from shared memory");
+          debugLog("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Getting user recent tags from shared memory");
           const getConfig = () => this.configManager.getConfig();
           const resolveFromMemory = async (memory) => {
             if (memory && typeof memory.getRecentTagsForUi === "function") {
               const rows = await memory.getRecentTagsForUi(getConfig);
-              debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (policy):", rows.length);
+              debugLog("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Retrieved recent tags (policy):", rows.length);
               return rows;
             }
             if (memory && typeof memory.getRecentTags === "function") {
               const recentTags = memory.getRecentTags();
-              debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Retrieved recent tags (legacy getRecentTags):", recentTags.length);
+              debugLog("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Retrieved recent tags (legacy getRecentTags):", recentTags.length);
               return recentTags.sort((a, b) => {
                 const dateA = new Date(a.lastUsed);
                 const dateB = new Date(b.lastUsed);
@@ -16119,19 +16119,19 @@ var init_tag_service = __esm({
           if (fromDirect != null) return fromDirect;
           const backgroundPage = await this.getBackgroundPage();
           if (!backgroundPage || !backgroundPage.recentTagsMemory) {
-            debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] No shared memory found, returning empty array");
+            debugLog("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] No shared memory found, returning empty array");
             return [];
           }
           const fromBg = await resolveFromMemory(backgroundPage.recentTagsMemory);
           if (fromBg != null) return fromBg;
           return [];
         } catch (error48) {
-          debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to get user recent tags:", error48);
+          debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to get user recent tags:", error48);
           return [];
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-003] - Get direct access to shared memory (service worker context)
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get direct access to shared memory (service worker context)
        * @returns {Object|null} Shared memory object or null
        */
       getDirectSharedMemory() {
@@ -16144,79 +16144,79 @@ var init_tag_service = __esm({
           }
           return null;
         } catch (error48) {
-          debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Error getting direct shared memory:", error48);
+          debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error getting direct shared memory:", error48);
           return null;
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-003] - Add tag to user recent list (current site only)
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Add tag to user recent list (current site only)
        * @param {string} tagName - Tag name to add
        * @param {string} currentSiteUrl - Current site URL for scope validation
        * @returns {Promise<boolean>} Success status
        */
       async addTagToUserRecentList(tagName, currentSiteUrl) {
         try {
-          debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Adding tag to user recent list:", { tagName, currentSiteUrl });
+          debugLog("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Adding tag to user recent list:", { tagName, currentSiteUrl });
           const sanitizedTag = this.sanitizeTag(tagName);
           if (!sanitizedTag) {
-            debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Invalid tag name:", tagName);
+            debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Invalid tag name:", tagName);
             return false;
           }
           if (!currentSiteUrl || typeof currentSiteUrl !== "string" || !/^https?:\/\//.test(currentSiteUrl)) {
-            debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Invalid or missing currentSiteUrl:", currentSiteUrl);
+            debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Invalid or missing currentSiteUrl:", currentSiteUrl);
             return false;
           }
           const directMemory = this.getDirectSharedMemory();
           if (directMemory) {
             const success3 = directMemory.addTag(sanitizedTag, currentSiteUrl);
             if (success3) {
-              debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Successfully added tag to user recent list via direct access");
+              debugLog("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Successfully added tag to user recent list via direct access");
               await this.recordTagUsage(sanitizedTag);
             } else {
-              debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to add tag to user recent list via direct access");
+              debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to add tag to user recent list via direct access");
             }
             return !!success3;
           }
           const backgroundPage = await this.getBackgroundPage();
           if (!backgroundPage || !backgroundPage.recentTagsMemory) {
-            debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Shared memory not available");
+            debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Shared memory not available");
             return false;
           }
           const success2 = backgroundPage.recentTagsMemory.addTag(sanitizedTag, currentSiteUrl);
           if (success2) {
-            debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Successfully added tag to user recent list");
+            debugLog("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Successfully added tag to user recent list");
             await this.recordTagUsage(sanitizedTag);
           } else {
-            debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to add tag to user recent list");
+            debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to add tag to user recent list");
           }
           return !!success2;
         } catch (error48) {
-          debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Error adding tag to user recent list:", error48);
+          debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error adding tag to user recent list:", error48);
           return false;
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-003] - Get recent tags excluding current site
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get recent tags excluding current site
        * @param {string[]} currentTags - Tags currently assigned to the current site
        * @returns {Promise<Object[]>} Filtered array of recent tags
        */
       async getUserRecentTagsExcludingCurrent(currentTags = []) {
         try {
-          debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Getting recent tags excluding current:", currentTags);
+          debugLog("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Getting recent tags excluding current:", currentTags);
           const allRecentTags = await this.getUserRecentTags();
           const normalizedCurrentTags = currentTags.map((tag) => tag.toLowerCase());
           const filteredTags = allRecentTags.filter(
             (tag) => !normalizedCurrentTags.includes(tag.name.toLowerCase())
           );
-          debugLog("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Filtered recent tags:", filteredTags.length);
+          debugLog("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Filtered recent tags:", filteredTags.length);
           return filteredTags;
         } catch (error48) {
-          debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Error getting filtered recent tags:", error48);
+          debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error getting filtered recent tags:", error48);
           return [];
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-003] - Get background page for shared memory access
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get background page for shared memory access
        * @returns {Promise<Object|null>} Background page object or null
        */
       async getBackgroundPage() {
@@ -16239,7 +16239,7 @@ var init_tag_service = __esm({
             return null;
           }
         } catch (error48) {
-          debugError("TAG-SERVICE", "[IMMUTABLE-REQ-TAG-003] Failed to get background page:", error48);
+          debugError("TAG-SERVICE", "[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to get background page:", error48);
           return null;
         }
       }
@@ -16251,21 +16251,21 @@ var init_tag_service = __esm({
       // [TEST-FIX-IMPL-2025-07-14] - Standardize getRecentTags return format
       async getRecentTags(options = {}) {
         try {
-          debugLog("TAG-SERVICE", "[TEST-FIX-STORAGE-001] Getting recent tags with enhanced storage integration");
+          debugLog("TAG-SERVICE", "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Getting recent tags with enhanced storage integration");
           const cached2 = await this.getCachedTags();
           if (cached2 && this.isCacheValid(cached2.timestamp)) {
-            debugLog("TAG-SERVICE", "[TEST-FIX-STORAGE-001] Returning cached tags:", cached2.tags.length);
+            debugLog("TAG-SERVICE", "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Returning cached tags:", cached2.tags.length);
             return this.processTagsForDisplay(cached2.tags, options);
           }
           const userRecentTags = await this.getUserRecentTags();
           if (userRecentTags.length > 0) {
-            debugLog("TAG-SERVICE", "[TEST-FIX-STORAGE-001] Returning user recent tags:", userRecentTags.length);
+            debugLog("TAG-SERVICE", "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Returning user recent tags:", userRecentTags.length);
             return this.processTagsForDisplay(userRecentTags, options);
           }
-          debugLog("TAG-SERVICE", "[TEST-FIX-STORAGE-001] No tags found, returning empty array");
+          debugLog("TAG-SERVICE", "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] No tags found, returning empty array");
           return [];
         } catch (error48) {
-          debugError("TAG-SERVICE", "[TEST-FIX-STORAGE-001] Failed to get recent tags:", error48);
+          debugError("TAG-SERVICE", "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Failed to get recent tags:", error48);
           return [];
         }
       }
@@ -16658,7 +16658,7 @@ var init_tag_service = __esm({
         };
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Add tag to recent tags when added to record
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Add tag to recent tags when added to record
        * @param {string} tag - Tag to add to recent tags
        * @param {string} recordId - ID of the record the tag was added to
        * @returns {Promise<void>}
@@ -16667,7 +16667,7 @@ var init_tag_service = __esm({
         try {
           const sanitizedTag = this.sanitizeTag(tag);
           if (!sanitizedTag) {
-            console.warn("[IMMUTABLE-REQ-TAG-001] Invalid tag provided:", tag);
+            console.warn("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Invalid tag provided:", tag);
             return;
           }
           const recentTags = await this.getRecentTags();
@@ -16676,16 +16676,16 @@ var init_tag_service = __esm({
           );
           if (!isDuplicate) {
             await this.recordTagUsage(sanitizedTag);
-            debugLog("IMMUTABLE-REQ-TAG-001", "Tag added to recent tags:", sanitizedTag);
+            debugLog("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]", "Tag added to recent tags:", sanitizedTag);
           } else {
-            debugLog("IMMUTABLE-REQ-TAG-001", "Tag already exists in recent tags:", sanitizedTag);
+            debugLog("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]", "Tag already exists in recent tags:", sanitizedTag);
           }
         } catch (error48) {
-          debugError("IMMUTABLE-REQ-TAG-001", "Failed to add tag to recent:", error48);
+          debugError("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]", "Failed to add tag to recent:", error48);
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Get recent tags excluding current tab duplicates
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Get recent tags excluding current tab duplicates
        * @param {string[]} currentTags - Tags currently displayed on the tab
        * @returns {Promise<Object[]>} Array of recent tags excluding current
        */
@@ -16699,15 +16699,15 @@ var init_tag_service = __esm({
           const filteredTags = allRecentTags.filter(
             (tag) => !normalizedCurrentTags.includes(tag.name.toLowerCase())
           );
-          debugLog("IMMUTABLE-REQ-TAG-001", "Recent tags excluding current:", filteredTags.length);
+          debugLog("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]", "Recent tags excluding current:", filteredTags.length);
           return filteredTags;
         } catch (error48) {
-          debugError("IMMUTABLE-REQ-TAG-001", "Failed to get recent tags excluding current:", error48);
+          debugError("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]", "Failed to get recent tags excluding current:", error48);
           return [];
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Handle tag addition during bookmark operations
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Handle tag addition during bookmark operations
        * @param {string} tag - Tag to add
        * @param {Object} bookmarkData - Bookmark data
        * @returns {Promise<void>}
@@ -16716,10 +16716,10 @@ var init_tag_service = __esm({
         try {
           await this.addTagToRecent(tag, bookmarkData.url);
           if (bookmarkData.url) {
-            debugLog("IMMUTABLE-REQ-TAG-001", "Tag addition handled for bookmark:", bookmarkData.url);
+            debugLog("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]", "Tag addition handled for bookmark:", bookmarkData.url);
           }
         } catch (error48) {
-          debugError("IMMUTABLE-REQ-TAG-001", "Failed to handle tag addition:", error48);
+          debugError("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT]", "Failed to handle tag addition:", error48);
         }
       }
       /**
@@ -21486,7 +21486,7 @@ var init_pinboard_service = __esm({
        * @param {string} title - Page title (fallback for description)
        * @returns {Promise<Object>} Bookmark data
        *
-       * PIN-002: Single bookmark retrieval by URL
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Single bookmark retrieval by URL
        * SPECIFICATION: Use posts/get endpoint to fetch bookmark for specific URL
        * IMPLEMENTATION DECISION: Provide fallback data on failure for UI stability
        */
@@ -21523,7 +21523,7 @@ var init_pinboard_service = __esm({
        * @param {number} count - Number of recent bookmarks to fetch
        * @returns {Promise<Object[]>} Array of recent bookmarks
        *
-       * PIN-002: Recent bookmarks retrieval for dashboard display
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Recent bookmarks retrieval for dashboard display
        * SPECIFICATION: Use posts/recent endpoint with count parameter
        * IMPLEMENTATION DECISION: Return empty array on failure to prevent UI errors
        */
@@ -21555,10 +21555,10 @@ var init_pinboard_service = __esm({
        * @param {Object} bookmarkData - Bookmark data to save
        * @returns {Promise<Object>} Save result
        *
-       * PIN-003: Bookmark creation/update operation
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Bookmark creation/update operation
        * SPECIFICATION: Use posts/add endpoint to save bookmark with all metadata
        * IMPLEMENTATION DECISION: Re-throw errors to allow caller error handling
-       * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced with tag tracking
        */
       async saveBookmark(bookmarkData) {
         try {
@@ -21582,10 +21582,10 @@ var init_pinboard_service = __esm({
        * @param {Object} tagData - Tag data to save
        * @returns {Promise<Object>} Save result
        *
-       * PIN-003: Tag addition to existing bookmark
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Tag addition to existing bookmark
        * SPECIFICATION: Retrieve current bookmark, add tag, then save updated bookmark
        * IMPLEMENTATION DECISION: Merge tags to preserve existing tags while adding new ones
-       * [IMMUTABLE-REQ-TAG-001] - Enhanced with tag tracking
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced with tag tracking
        */
       async saveTag(tagData) {
         try {
@@ -21614,7 +21614,7 @@ var init_pinboard_service = __esm({
        * @param {string} url - URL of bookmark to delete
        * @returns {Promise<Object>} Delete result
        *
-       * PIN-003: Bookmark deletion operation
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Bookmark deletion operation
        * SPECIFICATION: Use posts/delete endpoint to remove bookmark by URL
        * IMPLEMENTATION DECISION: Clean URL before deletion for consistent matching
        */
@@ -21635,7 +21635,7 @@ var init_pinboard_service = __esm({
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Track tags from bookmark data
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Track tags from bookmark data
        * @param {Object} bookmarkData - Bookmark data containing tags
        * @returns {Promise<void>}
        */
@@ -21647,21 +21647,21 @@ var init_pinboard_service = __esm({
             for (const sanitizedTag of sanitizedTags) {
               await this.tagService.handleTagAddition(sanitizedTag, bookmarkData);
             }
-            debugLog("[IMMUTABLE-REQ-TAG-001] Tracked tags for bookmark:", sanitizedTags);
+            debugLog("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tracked tags for bookmark:", sanitizedTags);
           }
         } catch (error48) {
-          debugError("[IMMUTABLE-REQ-TAG-001] Failed to track bookmark tags:", error48);
+          debugError("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to track bookmark tags:", error48);
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Enhanced error handling for tag operations
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced error handling for tag operations
        * @param {Error} error - The error that occurred
        * @param {string} operation - The operation that failed
        * @param {Object} context - Additional context data
        * @returns {Promise<void>}
        */
       async handleTagError(error48, operation, context = {}) {
-        debugError(`[IMMUTABLE-REQ-TAG-001] Tag operation failed: ${operation}`, {
+        debugError(`[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tag operation failed: ${operation}`, {
           error: error48.message,
           stack: error48.stack,
           context
@@ -21669,29 +21669,29 @@ var init_pinboard_service = __esm({
         if (error48.name === "QuotaExceededError") {
           try {
             await this.tagService.cleanupOldTags();
-            debugLog("[IMMUTABLE-REQ-TAG-001] Attempted cleanup after quota exceeded");
+            debugLog("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Attempted cleanup after quota exceeded");
           } catch (cleanupError) {
-            debugError("[IMMUTABLE-REQ-TAG-001] Cleanup also failed:", cleanupError);
+            debugError("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Cleanup also failed:", cleanupError);
           }
         }
         try {
           await this.notifyUserOfTagError(operation, error48.message);
         } catch (notificationError) {
-          debugError("[IMMUTABLE-REQ-TAG-001] Failed to notify user:", notificationError);
+          debugError("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to notify user:", notificationError);
         }
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Notify user of tag operation errors
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Notify user of tag operation errors
        * @param {string} operation - The operation that failed
        * @param {string} errorMessage - The error message
        * @returns {Promise<void>}
        */
       async notifyUserOfTagError(operation, errorMessage) {
         const userMessage = `Tag ${operation} failed, but bookmark was saved. Error: ${errorMessage}`;
-        debugWarn("[IMMUTABLE-REQ-TAG-001] User notification:", userMessage);
+        debugWarn("[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] User notification:", userMessage);
       }
       /**
-       * [IMMUTABLE-REQ-TAG-001] - Extract tags from bookmark data
+       * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Extract tags from bookmark data
        * @param {Object} bookmarkData - Bookmark data
        * @returns {string[]} Array of tags
        */
@@ -21712,7 +21712,7 @@ var init_pinboard_service = __esm({
        * @param {Object} tagData - Tag removal data
        * @returns {Promise<Object>} Update result
        *
-       * PIN-003: Tag removal from existing bookmark
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Tag removal from existing bookmark
        * SPECIFICATION: Retrieve bookmark, remove specified tag, save updated bookmark
        * IMPLEMENTATION DECISION: Filter out specific tag while preserving other tags
        * [action:delete] [sync:site-record] [arch:atomic-sync]
@@ -21737,7 +21737,7 @@ var init_pinboard_service = __esm({
        * Test authentication with Pinboard API
        * @returns {Promise<boolean>} True if authentication is valid
        *
-       * PIN-001: Authentication validation using API endpoint
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Authentication validation using API endpoint
        * SPECIFICATION: Use user/api_token endpoint to verify authentication
        * IMPLEMENTATION DECISION: Simple boolean return for easy authentication checking
        */
@@ -21762,7 +21762,7 @@ var init_pinboard_service = __esm({
        * @param {string} method - HTTP method
        * @returns {Promise<Document>} Parsed XML response
        *
-       * PIN-001: Authenticated API request with configuration integration
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Authenticated API request with configuration integration
        * SPECIFICATION: All API requests must include authentication token
        * IMPLEMENTATION DECISION: Centralized authentication and retry logic
        */
@@ -21784,7 +21784,7 @@ var init_pinboard_service = __esm({
        * @param {number} retryCount - Current retry attempt
        * @returns {Promise<Document>} Response
        *
-       * PIN-004: Network resilience with exponential backoff retry
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Network resilience with exponential backoff retry
        * SPECIFICATION: Handle rate limiting and network failures gracefully
        * IMPLEMENTATION DECISION: Progressive retry delays with configured maximum attempts
        */
@@ -21821,7 +21821,7 @@ var init_pinboard_service = __esm({
        * @param {string} xmlText - XML response text
        * @returns {Object} Parsed XML object
        *
-       * PIN-001: XML response parsing with error handling
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: XML response parsing with error handling
        * SPECIFICATION: All Pinboard API responses are in XML format
        * IMPLEMENTATION DECISION: Use configured XML parser with error handling
        */
@@ -21841,7 +21841,7 @@ var init_pinboard_service = __esm({
        * @param {string} title - Fallback title
        * @returns {Object} Bookmark object
        *
-       * PIN-002: Bookmark data parsing from Pinboard XML format
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Bookmark data parsing from Pinboard XML format
        * SPECIFICATION: Handle Pinboard's XML structure for bookmark data
        * IMPLEMENTATION DECISION: Normalize XML attributes to standard bookmark object
        */
@@ -21900,7 +21900,7 @@ var init_pinboard_service = __esm({
        * @param {Object} xmlObj - Parsed XML object
        * @returns {Array} Array of bookmark objects
        *
-       * PIN-002: Recent bookmarks parsing from Pinboard XML format
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Recent bookmarks parsing from Pinboard XML format
        * SPECIFICATION: Handle array of bookmarks from posts/recent endpoint
        * IMPLEMENTATION DECISION: Normalize each bookmark and handle empty responses
        */
@@ -21953,7 +21953,7 @@ var init_pinboard_service = __esm({
        * @param {Object} xmlObj - Parsed XML object
        * @returns {Object} Result object
        *
-       * PIN-003: API operation response parsing
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: API operation response parsing
        * SPECIFICATION: Handle success/error responses from add/delete operations
        * IMPLEMENTATION DECISION: Extract result code and message for operation feedback
        */
@@ -21980,7 +21980,7 @@ var init_pinboard_service = __esm({
        * @param {string} title - Title for description
        * @returns {Object} Empty bookmark object
        *
-       * PIN-002: Default bookmark structure creation
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Default bookmark structure creation
        * SPECIFICATION: Provide consistent bookmark object structure
        * IMPLEMENTATION DECISION: Include all standard Pinboard bookmark fields with defaults
        */
@@ -22030,7 +22030,7 @@ var init_pinboard_service = __esm({
        * @param {string} url - URL to clean
        * @returns {string} Cleaned URL
        *
-       * PIN-001: URL normalization for consistent API requests
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: URL normalization for consistent API requests
        * SPECIFICATION: Ensure URLs are properly formatted for Pinboard API
        * IMPLEMENTATION DECISION: Basic trimming and validation, preserve URL structure
        */
@@ -22043,7 +22043,7 @@ var init_pinboard_service = __esm({
        * @param {Error} error - Error to check
        * @returns {boolean} Whether error is retryable
        *
-       * PIN-004: Error classification for retry logic
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Error classification for retry logic
        * SPECIFICATION: Only retry network and rate limit errors, not authentication/validation errors
        * IMPLEMENTATION DECISION: Conservative retry logic to avoid infinite loops
        */
@@ -22061,7 +22061,7 @@ var init_pinboard_service = __esm({
        * @param {number} ms - Milliseconds to sleep
        * @returns {Promise} Promise that resolves after delay
        *
-       * PIN-004: Async delay utility for retry logic
+       * [IMPL-PINBOARD_API] [ARCH-PINBOARD_API] [REQ-PINBOARD_COMPATIBILITY]: Async delay utility for retry logic
        * IMPLEMENTATION DECISION: Promise-based sleep for async/await compatibility
        */
       sleep(ms) {

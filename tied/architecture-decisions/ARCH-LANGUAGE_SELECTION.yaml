@@ -1,5 +1,3 @@
-# [ARCH-LANGUAGE_SELECTION] Language and static typing strategy
-# Records choice of JavaScript with incremental TypeScript/JSDoc typing.
 ARCH-LANGUAGE_SELECTION:
   alternatives_considered:
     - name: "Remain JavaScript-only"
@@ -29,8 +27,8 @@ ARCH-LANGUAGE_SELECTION:
       date: "2026-02-22"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-22"
-      reason: "Flesh out from template for incremental TypeScript/JSDoc strategy"
+      date: "2026-07-28"
+      reason: "LEAP: link REQ-MAINTAINABILITY for TypeScript migration"
   name: "Language and Static Typing Strategy"
   rationale:
     benefits:
@@ -53,7 +51,8 @@ ARCH-LANGUAGE_SELECTION:
       - "ARCH-LANGUAGE_SELECTION"
     implementation:
       - "IMPL-TYPESCRIPT_MIGRATION"
-    requirements: []
+    requirements:
+      - "REQ-MAINTAINABILITY"
     tests:
       - "npm run typecheck (validates type-checked .js and .d.ts)"
       - "npm run validate (lint + typecheck + validate:manifest + security:check)"

@@ -1,0 +1,48 @@
+REQ-OVERLAY_AUTO_SHOW_CONTROL:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-OVERLAY_AUTO_SHOW_CONTROL)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Hover Auto-Show Controls"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Immediate access for frequent sites"
+      - "User-controlled automation"
+    problems_solved:
+      - "Manual overlay activation required"
+      - "No auto-show option"
+    why: "Configurable automation for power users while keeping default non-intrusive"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-OVERLAY_SYSTEM"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Configuration persists via ConfigManager"
+    - criterion: "Content scripts respect inhibit list and conditions"
+    - criterion: "showHoverOnPageLoad checkbox in popup and options"
+    - criterion: "Updates broadcast to active tabs"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-OVERLAY"
+    code_annotations:
+      - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
+    implementation:
+      - "IMPL-OVERLAY"
+    tests:
+      - "Popup checkbox tests"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Checkbox state loading, saving, broadcasting"
+    - method: "Integration tests"
+      coverage: "Config broadcast to active tabs"
+    - method: "Manual verification"
+      coverage: "Inhibited URLs and tag-conditional rules"

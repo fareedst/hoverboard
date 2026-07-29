@@ -1,5 +1,5 @@
 /**
- * [OVERLAY-CLOSE-POSITION-TEST-001] Overlay close button positioning - [REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS]
+ * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Overlay close button positioning - [REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS]
  */
 import { OverlayManager } from '../../src/features/content/overlay-manager.js'
 
@@ -151,14 +151,14 @@ const createMockBookmarkContent = () => ({
   pageUrl: 'https://example.com'
 })
 
-// [OVERLAY-CLOSE-POSITION-TEST-001] Test suite for overlay close button positioning
+// [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Test suite for overlay close button positioning
 describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close Button Positioning', () => {
   let overlayManager
   let mockMessageService
   let mockDocument
 
   beforeEach(() => {
-    // [OVERLAY-CLOSE-POSITION-TEST-001] Setup test environment
+    // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Setup test environment
     mockDocument = createMockDocument()
     mockMessageService = createMockMessageService()
     overlayManager = new OverlayManager(mockDocument, {})
@@ -175,13 +175,13 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
   })
 
   afterEach(() => {
-    // [OVERLAY-CLOSE-POSITION-TEST-001] Cleanup test environment
+    // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Cleanup test environment
     jest.clearAllMocks()
   })
 
-  // [OVERLAY-CLOSE-POSITION-TEST-001] Positioning tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Positioning tests
   describe('Button Positioning', () => {
-    test('[OVERLAY-CLOSE-POSITION-UI-001] Should position close button at left: 8px', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should position close button at left: 8px', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -196,7 +196,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(closeButton.style.cssText).toContain('top: 8px')
     })
 
-    test('[OVERLAY-CLOSE-POSITION-ADJUST-001] Should position refresh button at left: 40px', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should position refresh button at left: 40px', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -211,7 +211,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(refreshButton.style.cssText).toContain('top: 8px')
     })
 
-    test('[OVERLAY-CLOSE-POSITION-UI-001] Should have adequate spacing between buttons', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should have adequate spacing between buttons', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -229,7 +229,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(refreshButton.style.cssText).toContain('left: 40px')
     })
 
-    test('[OVERLAY-CLOSE-POSITION-UI-001] Should position both buttons in top-left corner area', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should position both buttons in top-left corner area', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -246,9 +246,9 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
     })
   })
 
-  // [OVERLAY-CLOSE-POSITION-TEST-001] Functionality tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Functionality tests
   describe('Button Functionality', () => {
-    test('[OVERLAY-CLOSE-POSITION-UI-001] Should close overlay when close button is clicked', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should close overlay when close button is clicked', () => {
       // Arrange
       const content = createMockBookmarkContent()
       const closeButton = mockDocument.querySelector('.close-button')
@@ -260,7 +260,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(closeButton.click).toHaveBeenCalled()
     })
 
-    test('[OVERLAY-CLOSE-POSITION-UI-001] Should maintain refresh button functionality', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should maintain refresh button functionality', () => {
       // Arrange
       const content = createMockBookmarkContent()
       overlayManager.show(content)
@@ -274,7 +274,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(refreshButton.style.cssText).toContain('left: 40px')
     })
 
-    test('[OVERLAY-CLOSE-POSITION-UI-001] Should have proper button styling', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should have proper button styling', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -300,9 +300,9 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
     })
   })
 
-  // [OVERLAY-CLOSE-POSITION-TEST-001] Accessibility tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Accessibility tests
   describe('Accessibility', () => {
-    test('[OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Should have proper ARIA attributes', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should have proper ARIA attributes', () => {
       // Arrange
       const content = createMockBookmarkContent()
       const closeButton = mockDocument.querySelector('.close-button')
@@ -319,7 +319,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(closeButton.setAttribute).toHaveBeenCalledWith('tabindex', '0')
     })
 
-    test('[OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Should have proper title attribute', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should have proper title attribute', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -331,7 +331,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(closeButton.title).toBe('Close Overlay')
     })
 
-    test('[OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Should have keyboard event handlers', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should have keyboard event handlers', () => {
       // Arrange
       const content = createMockBookmarkContent()
       const closeButton = mockDocument.querySelector('.close-button')
@@ -344,7 +344,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(closeButton.addEventListener).toHaveBeenCalledWith('keydown', expect.any(Function))
     })
 
-    test('[OVERLAY-CLOSE-POSITION-ACCESSIBILITY-001] Should have proper touch target size', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should have proper touch target size', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -361,9 +361,9 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
     })
   })
 
-  // [OVERLAY-CLOSE-POSITION-TEST-001] Theme integration tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Theme integration tests
   describe('Theme Integration', () => {
-    test('[OVERLAY-CLOSE-POSITION-THEME-001] Should use theme-aware CSS variables', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should use theme-aware CSS variables', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -384,7 +384,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(refreshButton.style.cssText).toContain('var(--theme-transition)')
     })
 
-    test('[OVERLAY-CLOSE-POSITION-THEME-001] Should have consistent styling with refresh button', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should have consistent styling with refresh button', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -409,9 +409,9 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
     })
   })
 
-  // [OVERLAY-CLOSE-POSITION-TEST-001] Container positioning tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Container positioning tests
   describe('Container Positioning', () => {
-    test('[OVERLAY-CLOSE-POSITION-OVERLAY-001] Buttons should be positioned relative to overlay element', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Buttons should be positioned relative to overlay element', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -423,7 +423,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(overlayManager.overlayElement.appendChild).toHaveBeenCalled()
     })
 
-    test('[OVERLAY-CLOSE-POSITION-OVERLAY-001] Main container should have appropriate padding for buttons', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Main container should have appropriate padding for buttons', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -436,9 +436,9 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
     })
   })
 
-  // [OVERLAY-CLOSE-POSITION-TEST-001] Error handling tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Error handling tests
   describe('Error Handling', () => {
-    test('[OVERLAY-CLOSE-POSITION-ERROR-001] Should handle positioning errors gracefully', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should handle positioning errors gracefully', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -450,9 +450,9 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
     })
   })
 
-  // [OVERLAY-CLOSE-POSITION-TEST-001] Integration tests
+  // [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Integration tests
   describe('Integration', () => {
-    test('[OVERLAY-CLOSE-POSITION-TEST-001] Should work with existing overlay functionality', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should work with existing overlay functionality', () => {
       // Arrange
       const content = createMockBookmarkContent()
       
@@ -467,7 +467,7 @@ describe('[REQ-OVERLAY_CONTROL_LAYOUT] [IMPL-OVERLAY_CONTROLS] Overlay Close But
       expect(overlayManager.overlayElement.appendChild).toHaveBeenCalled()
     })
 
-    test('[OVERLAY-CLOSE-POSITION-TEST-001] Should maintain overlay state correctly', () => {
+    test('[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] Should maintain overlay state correctly', () => {
       // Arrange
       const content = createMockBookmarkContent()
       const closeButton = mockDocument.querySelector('.close-button')

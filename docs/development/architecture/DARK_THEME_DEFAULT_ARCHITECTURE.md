@@ -1,4 +1,4 @@
-# 🌙 DARK-THEME-DEFAULT-001: Architecture Decisions
+# 🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001): Architecture Decisions
 
 **Status**: ✅ **IMPLEMENTED**  
 **Type**: 🏗️ **ARCHITECTURAL DECISION RECORD**  
@@ -9,7 +9,7 @@
 
 ## 📋 Architecture Overview
 
-**🌙 DARK-THEME-DEFAULT-001**: Strategic architectural decisions for implementing dark theme as the default for overlay controls while maintaining backward compatibility and user choice.
+**🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)**: Strategic architectural decisions for implementing dark theme as the default for overlay controls while maintaining backward compatibility and user choice.
 
 ### **Architecture Goals**
 1. **Primary**: Change default theme from light to dark for new installations ✅ **ACHIEVED**
@@ -283,7 +283,7 @@ User Action → VisibilityControls → OverlayManager → DOM Update
 ### **Unit Testing Strategy**
 ```javascript
 // Test file: tests/unit/dark-theme-default.test.js
-describe('🌙 DARK-THEME-DEFAULT-001', () => {
+describe('🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)', () => {
   // Configuration tests
   // Component tests
   // Integration tests
@@ -386,18 +386,18 @@ npm run validate
 ## 📋 Architecture Tokens
 
 ### **Primary Tokens**
-- `🌙 DARK-THEME-DEFAULT-001` - Main architectural decision
-- `🏗️ ARCH-DARK-001` - Architecture implementation
+- `🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)` - Main architectural decision
+- `🏗️ [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was ARCH-DARK-001)` - Architecture implementation
 
 ### **Component Tokens**
-- `🎨 THEME-SYSTEM-001` - Theme system architecture
-- `⚙️ CONFIG-DEFAULT-001` - Configuration architecture
-- `👁️ UX-VISUAL-001` - Visual architecture
+- `🎨 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was THEME-SYSTEM-001)` - Theme system architecture
+- `⚙️ [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CONFIG-DEFAULT-001)` - Configuration architecture
+- `👁️ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UX-VISUAL-001)` - Visual architecture
 
 ### **Technical Tokens**
-- `🔧 IMPL-DARK-001` - Implementation architecture
-- `🧪 TEST-DARK-001` - Testing architecture
-- `📚 DOC-DARK-001` - Documentation architecture
+- `🔧 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was IMPL-DARK-001)` - Implementation architecture
+- `🧪 [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-DARK-001)` - Testing architecture
+- `📚 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DOC-DARK-001)` - Documentation architecture
 
 ## 🔗 Related Architecture
 
@@ -433,7 +433,7 @@ npm run validate
 
 ## 🎯 Architecture Conclusion
 
-**🌙 DARK-THEME-DEFAULT-001** architecture successfully implements dark theme as the default while maintaining backward compatibility and user choice. The architecture provides:
+**🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)** architecture successfully implements dark theme as the default while maintaining backward compatibility and user choice. The architecture provides:
 
 1. **Clean Component Architecture**: Modular, testable components
 2. **Flexible Configuration System**: Centralized theme management

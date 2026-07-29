@@ -122,12 +122,12 @@ if (this.visibilityControls) {
 ## 📋 Implementation Tokens
 
 ### **Primary Token**
-- `🌙 THEME-INIT-FIX-001` - Theme initialization fix
+- `🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was THEME-INIT-FIX-001)` - Theme initialization fix
 
 ### **Related Tokens**
-- `🌙 DARK-THEME-DEFAULT-001` - Dark theme default implementation
-- `🎨 THEME-SYSTEM-001` - Theme system integration
-- `⚙️ CONFIG-DEFAULT-001` - Configuration defaults
+- `🌙 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was DARK-THEME-DEFAULT-001)` - Dark theme default implementation
+- `🎨 [IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was THEME-SYSTEM-001)` - Theme system integration
+- `⚙️ [IMPL-FEATURE_FLAGS] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] (was CONFIG-DEFAULT-001)` - Configuration defaults
 
 ## 🚀 User Instructions
 

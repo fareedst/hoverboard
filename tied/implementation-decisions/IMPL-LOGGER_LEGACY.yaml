@@ -8,7 +8,7 @@ IMPL-LOGGER_LEGACY:
     - "ARCH-STRUCTURED_LOGGING"
     - "REQ-STRUCTURED_LOGGING"
   detail_file: "implementation-decisions/IMPL-LOGGER_LEGACY.yaml"
-  essence_pseudocode: "# [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING]\n# log() and noisy() for legacy compatibility; log maps to debug; noisy always emits.\n# Contract: context and args in; log line out.\nINPUT: context (string), ...args (message or interpolated values)\nOUTPUT: log line to console\nDATA: log and noisy in same logger module\n\n# Call default logger.debug or createLogger(context).debug; level filtering applies.\nlog(context, ...args):\n  CALL default logger.debug or createLogger(context).debug(...args)\n  (Same as Logger.debug so level filtering applies)\n\n# Emit regardless of level; for migration/debug; remove when call sites use Logger.\nnoisy(context, ...args):\n  EMIT log line regardless of level (or at debug)\n  Used for temporary migration/debug; can be removed when call sites use Logger directly.\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOGGER_LEGACY-pseudocode.md"
   implementation_approach:
     details:
       - "log(context, ...args): equivalent to logger.debug or createLogger(context).debug(...)"
@@ -20,8 +20,8 @@ IMPL-LOGGER_LEGACY:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add root key, essence_pseudocode, composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Logger Legacy Compatibility"
   rationale:
     benefits:

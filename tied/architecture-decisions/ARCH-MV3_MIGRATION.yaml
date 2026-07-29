@@ -1,0 +1,54 @@
+ARCH-MV3_MIGRATION:
+  alternatives_considered:
+    - name: "Stay on V2"
+      cons:
+        - "Will be unsupported"
+      pros: []
+      rejected_reason: "V2 deprecated"
+    - name: "Complete rewrite"
+      cons:
+        - "Too risky"
+      pros:
+        - "Clean slate"
+      rejected_reason: "Prefer incremental migration"
+  cross_references:
+    - "REQ-MANIFEST_V3_MIGRATION"
+  decision: "Thin architecture stub for ARCH-MV3_MIGRATION."
+  implementation_approach:
+    details:
+      - "Preserved content script injection"
+      - "Service worker for background tasks"
+      - "V3 permissions model"
+    summary: "Replace background scripts with service worker, maintain functionality"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Manifest V3 Migration Strategy"
+  rationale:
+    benefits:
+      - "Continued store support"
+      - "Modern architecture"
+    problems_solved:
+      - "Future compatibility"
+      - "V2 deprecation"
+    why: "V3 required for Chrome Web Store, better security/performance"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-MV3_MIGRATION"
+    see_also:
+      - "ARCH-SERVICE_WORKER"
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-MV3_MIGRATION"
+    implementation:
+      - "IMPL-MV3_MIGRATION"
+    requirements:
+      - "REQ-MANIFEST_V3_MIGRATION"
+    tests: []

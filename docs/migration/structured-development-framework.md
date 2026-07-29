@@ -145,7 +145,7 @@ UI Components
 #### **Feature Documentation Template**
 
 ```markdown
-### **EXT-001: Extension Core Architecture**
+### **[IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Extension Core Architecture**
 **Priority**: ⭐ CRITICAL | **Status**: 🔄 In Progress | **Owner**: Developer
 
 **📑 Purpose**: Implement the core extension architecture with service worker and message passing.
@@ -177,7 +177,7 @@ UI Components
 - Performance tests for startup time
 - Cross-browser compatibility tests
 
-**📝 Implementation Tokens**: `// EXT-001: Core architecture`
+**📝 Implementation Tokens**: `// [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Core architecture`
 ```
 
 ### 🔍 Implementation Token System
@@ -186,17 +186,17 @@ UI Components
 
 **Examples:**
 ```javascript
-// EXT-001: Core architecture - Service worker initialization
+// [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Core architecture - Service worker initialization
 class ExtensionCore {
   async initialize() {
     // Implementation
   }
 }
 
-// UI-003: Popup interface - Tag component rendering
+// [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-003): Popup interface - Tag component rendering
 class TagComponent extends BaseComponent {
   render() {
-    // EXT-001: Core architecture - Message bus integration
+    // [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Core architecture - Message bus integration
     this.messageBus.subscribe('tag-updated', this.handleTagUpdate);
   }
 }
@@ -218,14 +218,14 @@ class TagComponent extends BaseComponent {
 
 #### **Unit Testing Standards**
 ```javascript
-// TEST-001: Unit testing framework
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-001): Unit testing framework
 describe('PinboardService', () => {
   beforeEach(() => {
     // Setup test environment
   });
 
   test('should fetch pin for URL', async () => {
-    // EXT-002: Pinboard integration test
+    // [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-002): Pinboard integration test
     const service = new PinboardService(mockAuth, mockHttp);
     const result = await service.fetchPinForUrl('https://example.com');
     
@@ -237,10 +237,10 @@ describe('PinboardService', () => {
 
 #### **Integration Testing Standards**
 ```javascript
-// TEST-002: Integration testing framework
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-002): Integration testing framework
 describe('Extension Integration', () => {
   test('popup communicates with service worker', async () => {
-    // EXT-001: Core architecture integration test
+    // [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Core architecture integration test
     const popup = new PopupManager();
     const response = await popup.requestTagData();
     
@@ -284,7 +284,7 @@ describe('Extension Integration', () => {
 /**
  * PinboardService - Handles all Pinboard API interactions
  * 
- * Implementation Token: SVC-002
+ * Implementation Token: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was SVC-002)
  * Dependencies: AuthService, HttpClient, CacheService
  * 
  * @class PinboardService
@@ -299,7 +299,7 @@ class PinboardService {
    * @returns {Promise<BookmarkData>} The bookmark data
    * @throws {PinboardError} When API request fails
    * 
-   * Implementation Token: SVC-002: URL bookmark fetching
+   * Implementation Token: [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was SVC-002): URL bookmark fetching
    */
   async fetchPinForUrl(url, options = {}) {
     // Implementation
@@ -313,7 +313,7 @@ class PinboardService {
 
 #### **ESLint Configuration**
 ```javascript
-// eslint.config.js (flat config) - EXT-001: Code quality standards
+// eslint.config.js (flat config) - [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Code quality standards
 module.exports = {
   extends: [
     'eslint:recommended',
@@ -358,7 +358,7 @@ module.exports = {
 
 #### **Performance Testing**
 ```javascript
-// TEST-003: Performance testing framework
+// [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-003): Performance testing framework
 describe('Performance Tests', () => {
   test('extension starts within time limit', async () => {
     const startTime = performance.now();
@@ -376,7 +376,7 @@ describe('Performance Tests', () => {
 
 #### **Build Configuration**
 ```javascript
-// webpack.config.js - EXT-001: Build system
+// webpack.config.js - [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Build system
 module.exports = {
   entry: {
     serviceWorker: './src/core/ServiceWorker.js',
@@ -415,7 +415,7 @@ module.exports = {
 
 #### **CI Pipeline**
 ```yaml
-# .github/workflows/ci.yml - EXT-001: CI/CD pipeline
+# .github/workflows/ci.yml - [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): CI/CD pipeline
 name: Extension CI/CD
 
 on: [push, pull_request]
@@ -448,7 +448,7 @@ jobs:
 #### **Implementation Token Validation**
 ```bash
 #!/bin/bash
-# scripts/validate-tokens.sh - EXT-001: Token validation
+# scripts/validate-tokens.sh - [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Token validation
 
 echo "Validating implementation tokens..."
 
@@ -467,7 +467,7 @@ echo "✅ All implementation tokens validated"
 #### **Documentation Validation**
 ```bash
 #!/bin/bash
-# scripts/validate-docs.sh - EXT-001: Documentation validation
+# scripts/validate-docs.sh - [IMPL-MV3_MIGRATION] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] (was EXT-001): Documentation validation
 
 echo "Validating documentation..."
 

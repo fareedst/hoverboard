@@ -14,7 +14,7 @@ IMPL-OVERLAY_CONTROLS:
     - "ARCH-OVERLAY_CONTROLS"
     - "REQ-OVERLAY_CONTROL_LAYOUT"
   detail_file: "implementation-decisions/IMPL-OVERLAY_CONTROLS.yaml"
-  essence_pseudocode: "# [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT]\n# Close and refresh buttons with fixed position, 24px min touch target, ARIA, theme vars.\n# Contract: parent and theme and callback; control elements and styles.\nINPUT: parent element; theme CSS variables; callback (close/refresh)\nOUTPUT: control elements with fixed position, min 24px touch target, ARIA, keyboard handlers\nDATA: inline styles (position absolute); theme vars for colors; ARIA labels/roles\n\n# Create close button with position, size, ARIA, theme, click and Escape handler.\ncreateCloseButton():\n  CREATE button; SET position, size (min 24px); SET aria-label\n  APPLY theme vars; ATTACH click -> callback; ATTACH key (Escape)\n  RETURN element\n\n# Create refresh button with position, size, ARIA, theme, click handler.\ncreateRefreshButton():\n  CREATE button; SET position, size; SET aria-label\n  APPLY theme vars; ATTACH click -> callback\n  RETURN element\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-OVERLAY_CONTROLS-pseudocode.md"
   implementation_approach:
     details:
       - "24px min touch targets"
@@ -29,8 +29,8 @@ IMPL-OVERLAY_CONTROLS:
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "Overlay Control Layout Implementation"
   rationale:
     benefits:

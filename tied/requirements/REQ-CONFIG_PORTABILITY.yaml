@@ -1,0 +1,45 @@
+REQ-CONFIG_PORTABILITY:
+  category: "Non-Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-CONFIG_PORTABILITY)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Configuration Import/Export"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Easy backup and restore"
+      - "Seamless device migration"
+    problems_solved:
+      - "Difficult multi-device setup"
+      - "Lost configuration on device changes"
+    why: "Portable configuration reduces friction for backups and multi-device sync"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-CHROME_STORAGE_USAGE"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "exportConfig returns version, date, settings, auth token, inhibit URLs"
+    - criterion: "importConfig accepts full or partial payloads"
+    - criterion: "Operations reuse existing storage keys"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-STORAGE"
+    code_annotations:
+      - "REQ-CONFIG_PORTABILITY"
+    implementation:
+      - "IMPL-STORAGE"
+    tests:
+      - "Config manager tests"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "Data fidelity, partial imports, error handling"
+    - method: "Manual QA"
+      coverage: "Cross-profile migration"

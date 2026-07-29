@@ -1,0 +1,56 @@
+ARCH-OVERLAY:
+  alternatives_considered:
+    - name: "Modal dialogs"
+      cons:
+        - "Intrusive"
+      pros:
+        - "Simpler"
+      rejected_reason: "Breaks flow"
+  cross_references:
+    - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
+    - "REQ-OVERLAY_CONTROL_LAYOUT"
+    - "REQ-OVERLAY_REFRESH_ACTION"
+    - "REQ-OVERLAY_SYSTEM"
+  decision: "Thin architecture stub for ARCH-OVERLAY."
+  implementation_approach:
+    details:
+      - "Configurable auto-show on page load"
+      - "Fixed control layout (8px, 40px spacing)"
+      - "Hover-based activation"
+      - "Refresh control for current data"
+      - "Transparency controls"
+    summary: "Semi-transparent overlay with hover activation, auto-show controls, refresh action"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Overlay System Architecture"
+  rationale:
+    benefits:
+      - "No page disruption"
+      - "Seamless experience"
+    problems_solved:
+      - "Context switching"
+      - "Intrusive bookmark dialogs"
+    why: "Non-intrusive bookmarking interface"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-OVERLAY"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-OVERLAY"
+    implementation:
+      - "IMPL-OVERLAY"
+    requirements:
+      - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
+      - "REQ-OVERLAY_CONTROL_LAYOUT"
+      - "REQ-OVERLAY_REFRESH_ACTION"
+      - "REQ-OVERLAY_SYSTEM"
+    tests: []

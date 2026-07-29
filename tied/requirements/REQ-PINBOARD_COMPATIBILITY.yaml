@@ -1,0 +1,47 @@
+REQ-PINBOARD_COMPATIBILITY:
+  category: "Immutable"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-PINBOARD_COMPATIBILITY)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Pinboard API Compatibility"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Maintained data access"
+      - "Reliable bookmarking"
+    problems_solved:
+      - "API breaking changes"
+      - "Risk of non-functional extension"
+    why: "Pinboard API is the core data source"
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "All current API endpoints functional"
+    - criterion: "Error handling for API failures"
+    - criterion: "Rate limiting respected"
+    - criterion: "Token-based authentication working"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-PINBOARD_API"
+    code_annotations:
+      - "REQ-PINBOARD_COMPATIBILITY"
+    implementation:
+      - "IMPL-PINBOARD_API"
+    tests:
+      - "API integration tests"
+  validation_criteria:
+    - method: "API integration tests"
+      coverage: "All endpoints"
+    - method: "Rate limit compliance testing"
+      coverage: "API request throttling"
+    - method: "Authentication flow validation"
+      coverage: "Token-based auth"

@@ -1,5 +1,5 @@
 # [REQ-STRUCTURED_LOGGING] Structured logging with context and levels
-# Migrated from legacy LOG-001..003 (numbered-token-mapping)
+# Migrated from legacy [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001)..003 (numbered-token-mapping)
 REQ-STRUCTURED_LOGGING:
   category: "Non-Functional"
   metadata:
@@ -9,7 +9,7 @@ REQ-STRUCTURED_LOGGING:
     last_updated:
       author: "AI Agent"
       date: "2026-02-17"
-      reason: "Numbered token reinterpretation (LOG-001..003)"
+      reason: "Numbered token reinterpretation ([IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] (was LOG-001)..003)"
   name: "Structured Logging"
   priority: "P2"
   rationale:

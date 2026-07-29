@@ -1,0 +1,47 @@
+REQ-TAG_INPUT_SANITIZATION:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-TAG_INPUT_SANITIZATION)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Tag Input Sanitization"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Data integrity"
+      - "Secure tag handling"
+    problems_solved:
+      - "Invalid tag data"
+      - "XSS vulnerabilities"
+    why: "Prevent XSS, ensure data integrity, avoid sync pollution"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-TAG_MANAGEMENT"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Allows safe characters only"
+    - criterion: "Enforces 50-character max length"
+    - criterion: "Returns null for invalid inputs"
+    - criterion: "sanitizeTag eliminates HTML, encoded markup, special characters"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-TAG_SYSTEM"
+    code_annotations:
+      - "REQ-TAG_INPUT_SANITIZATION"
+    implementation:
+      - "IMPL-TAG_SYSTEM"
+    tests:
+      - "Tag recent behavior tests"
+      - "Tag sanitization tests"
+  validation_criteria:
+    - method: "Unit tests"
+      coverage: "HTML stripping, special character removal, length enforcement"
+    - method: "Overlay interaction tests"
+      coverage: "Sanitized tags propagate without breaking layout"

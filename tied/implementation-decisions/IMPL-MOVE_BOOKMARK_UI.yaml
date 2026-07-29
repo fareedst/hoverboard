@@ -14,7 +14,7 @@ IMPL-MOVE_BOOKMARK_UI:
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-MOVE_BOOKMARK_UI.yaml"
-  essence_pseudocode: "# [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT]\n# Popup storage buttons; load backend, move on click, preferredBackend on save.\n# Contract: URL and bookmark and actions; highlighted button and move/save requests.\nINPUT: currentUrl (tab), currentPin (current bookmark if any), user action (select storage button, save, toggle file/browser)\nOUTPUT: highlighted storage button; move request; save request with preferredBackend\nDATA: storage section with four buttons (Pinboard, Local, File, Sync); one has aria-pressed=\"true\"\n\n# Set highlighted button from getStorageBackendForUrl or default; show/hide Move toggle; update Pinboard enabled.\nON popup load (or bookmark data load):\n  IF currentPin exists: backend = send getStorageBackendForUrl(currentUrl)\n  ELSE: backend = defaultStorageMode\n  SET highlighted button to backend (data-backend attribute)\n  IF backend is local or file: SHOW \"Move to File\" / \"Move to browser\" toggle\n  ELSE: HIDE toggle\n  updateStoragePinboardEnabled(hasApiToken)\n\n# Send move; use inner result; refresh and update UI on success.\nON storage button click (user selects different backend):\n  url = currentPin?.url || currentTab?.url\n  SEND moveBookmarkToStorage(url, targetBackend)\n  result = response?.data ?? response   // inner result (IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL)\n  IF result.success: refresh bookmark data; update highlighted button and toggle\n  ELSE: show error from result\n\n# Set preferredBackend from selected button; send saveBookmark so router uses highlighted storage.\nON save (createBookmark, addTagsToBookmark, toggle private, toggle read-later):\n  data.preferredBackend = getSelectedStorageBackend()   // button with aria-pressed=\"true\"\n  SEND saveBookmark(data)   // router uses preferredBackend\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-MOVE_BOOKMARK_UI-pseudocode.md"
   implementation_approach:
     details:
       - "On save (createBookmark, addTagsToBookmark, handleTogglePrivate, handleReadLater): add data.preferredBackend = getSelectedStorageBackend() so save follows highlight"
@@ -29,8 +29,8 @@ IMPL-MOVE_BOOKMARK_UI:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

@@ -12,7 +12,7 @@ IMPL-BOOKMARK_ROUTER:
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-BOOKMARK_ROUTER.yaml"
-  essence_pseudocode: "# [IMPL-BOOKMARK_ROUTER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] [REQ-STORAGE_MODE_DEFAULT] [REQ-MOVE_BOOKMARK_STORAGE_UI]\n# Delegate by URL via storage index; preferredBackend for save; aggregate getRecentBookmarks; moveBookmarkToStorage.\n\n# Contract: inputs = url, data (optional preferredBackend), count; output = bookmark or list or success/error.\nINPUT: url, data (for save/tag), count (for getRecentBookmarks); optional data.preferredBackend\nOUTPUT: bookmark or list of bookmarks or success/error; providers = { pinboard, local, file, sync }\nDATA: storageIndex, defaultStorageMode, providerMap (backend name -> provider instance)\n\n# preferredBackend if valid, else index.getBackendForUrl(url), else defaultStorageMode.\nresolveProvider(url, data):\n  IF data.preferredBackend is valid (pinboard|local|file|sync): RETURN providerMap[data.preferredBackend]\n  backend = storageIndex.getBackendForUrl(url)\n  IF backend: RETURN providerMap[backend]\n  RETURN providerMap[defaultStorageMode]\n\n# Resolve provider; delegate get/save/delete/saveTag/deleteTag; on save success update index.\ngetBookmarkForUrl(url):\n  provider = resolveProvider(url, {})\n  RETURN provider.getBookmarkForUrl(url)\n\nsaveBookmark(data):\n  url = data.url\n  provider = resolveProvider(url, data)\n  result = provider.saveBookmark(data)\n  IF result.success: storageIndex.setBackendForUrl(url, providerBackend)\n  RETURN result\n\ndeleteBookmark(url), saveTag(data), deleteTag(data):\n  provider = resolveProvider(url, data)\n  RETURN provider.<operation>(...)\n\n# Aggregate all four providers; sort by time descending; return top count.\ngetRecentBookmarks(count):\n  merged = []\n  FOR each provider IN [pinboard, local, file, sync]:\n    merged = merged CONCAT provider.getRecentBookmarks(count)\n  SORT merged BY time DESCENDING\n  RETURN merged[0..count-1]\n\n# Get from source; ensure time; save to target; delete from source; update index.\nmoveBookmarkToStorage(url, targetBackend):\n  sourceBackend = storageIndex.getBackendForUrl(url)\n  sourceProvider = providerMap[sourceBackend]\n  targetProvider = providerMap[targetBackend]\n  bookmark = sourceProvider.getBookmarkForUrl(url)\n  IF bookmark lacks time: SET bookmark.time = now\n  targetProvider.saveBookmark(bookmark)\n  sourceProvider.deleteBookmark(url)\n  storageIndex.setBackendForUrl(url, targetBackend)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_ROUTER-pseudocode.md"
   implementation_approach:
     details:
       - "moveBookmarkToStorage: get bookmark from current backend, save to target, delete from source, update index"
@@ -24,8 +24,8 @@ IMPL-BOOKMARK_ROUTER:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "saveBookmark honors data.preferredBackend (save follows highlight)"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"

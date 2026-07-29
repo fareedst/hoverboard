@@ -1,0 +1,44 @@
+REQ-TAG_MANAGEMENT:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-TAG_MANAGEMENT)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Tag Management"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Efficient retrieval"
+      - "Organized bookmarks"
+    problems_solved:
+      - "Difficult bookmark organization"
+      - "Inconsistent tagging"
+    why: "Tags are essential for bookmark organization"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-TAG_INPUT_SANITIZATION"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Tag editing capabilities"
+    - criterion: "Tag input with suggestions"
+    - criterion: "Tag sanitization"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-TAG_SYSTEM"
+    code_annotations:
+      - "REQ-TAG_MANAGEMENT"
+    implementation:
+      - "IMPL-TAG_SYSTEM"
+    tests:
+      - "Tag management tests"
+  validation_criteria:
+    - method: "Tag management tests"
+      coverage: "All tag operations"

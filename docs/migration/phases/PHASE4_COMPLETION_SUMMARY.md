@@ -4,7 +4,7 @@
 
 Phase 4 of the Hoverboard browser extension migration has been successfully completed! This phase focused on implementing comprehensive testing infrastructure, creating detailed documentation, and establishing deployment automation.
 
-## ✅ MIGRATION-007: Testing Infrastructure - **COMPLETED**
+## ✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-007): Testing Infrastructure - **COMPLETED**
 
 ### 🧪 Testing Framework Setup
 
@@ -56,7 +56,7 @@ Phase 4 of the Hoverboard browser extension migration has been successfully comp
 🎯 Quality Gates: Established and functional
 ```
 
-## ✅ MIGRATION-008: Documentation & Deployment - **COMPLETED**
+## ✅ [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-008): Documentation & Deployment - **COMPLETED**
 
 ### 📚 Technical Documentation
 

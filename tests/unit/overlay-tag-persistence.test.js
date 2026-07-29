@@ -1,5 +1,5 @@
 /**
- * [IMMUTABLE-REQ-TAG-004] Overlay tag persistence - [IMPL-OVERLAY] [IMPL-TAG_SYSTEM] [ARCH-OVERLAY]
+ * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Overlay tag persistence - [IMPL-OVERLAY] [IMPL-TAG_SYSTEM] [ARCH-OVERLAY]
  * Tests for overlay window tag persistence functionality.
  */
 
@@ -74,17 +74,17 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
     // Reset mocks
     jest.clearAllMocks()
     
-    // [TEST-FIX-MODULE-001] - Mock the MessageClient import with virtual module
+    // [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Mock the MessageClient import with virtual module
     jest.doMock('../../../src/features/content/message-client.js', () => ({
       MessageClient: jest.fn(() => mockMessageService)
     }), { virtual: true })
 
-          // [TEST-FIX-MODULE-001] - Import the class using dynamic import with error handling
+          // [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Import the class using dynamic import with error handling
       try {
         const module = await import('../../../src/features/content/overlay-manager.js')
         OverlayManager = module.OverlayManager
       } catch (error) {
-        console.error('[TEST-FIX-MODULE-001] Failed to import OverlayManager:', error)
+        console.error('[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Failed to import OverlayManager:', error)
         // Fallback to mock implementation
         OverlayManager = class MockOverlayManager {
           constructor(document, config) {
@@ -136,8 +136,8 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
                   try {
                     await this.handleTagInput(tagInput.value)
                   } catch (error) {
-                    // [TEST-FIX-MODULE-001] - Handle error gracefully in mock
-                    console.log('[TEST-FIX-MODULE-001] Mock error handling:', error.message)
+                    // [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Handle error gracefully in mock
+                    console.log('[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Mock error handling:', error.message)
                   }
                 }
               })
@@ -149,7 +149,7 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
                 try {
                   await this.handleTagInput('recent-tag')
                 } catch (error) {
-                  console.log('[TEST-FIX-MODULE-001] Mock recent tag error handling:', error.message)
+                  console.log('[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Mock recent tag error handling:', error.message)
                 }
               }
             }
@@ -158,7 +158,7 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
           hide() {}
           
           showMessage(message, type) {
-            // [TEST-FIX-MODULE-001] - Mock showMessage method
+            // [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Mock showMessage method
             const messageElement = this.document.createElement('div')
             messageElement.textContent = message
             return messageElement
@@ -184,12 +184,12 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
                 this.show(updatedContent)
               }
             } catch (error) {
-              console.log('[TEST-FIX-MODULE-001] Mock refresh error handling:', error.message)
+              console.log('[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] Mock refresh error handling:', error.message)
             }
           }
           
           isValidTag(tag) {
-            // [TEST-FIX-MODULE-001] - Mock isValidTag method
+            // [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Mock isValidTag method
             if (!tag || typeof tag !== 'string') return false
             const trimmed = tag.trim()
             if (trimmed.length === 0 || trimmed.length > 50) return false
@@ -206,15 +206,15 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
     })
   })
 
-  describe('[IMMUTABLE-REQ-TAG-004] Tag Input Persistence', () => {
-    test('[IMMUTABLE-REQ-TAG-004] Should persist tag from new tag input', async () => {
-      // [IMMUTABLE-REQ-TAG-004] - Mock successful message response
+  describe('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Tag Input Persistence', () => {
+    test('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Should persist tag from new tag input', async () => {
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock successful message response
       mockMessageService.sendMessage.mockResolvedValue({
         success: true,
         data: { result_code: 'done' }
       })
 
-      // [IMMUTABLE-REQ-TAG-004] - Create mock content with bookmark
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Create mock content with bookmark
       const content = {
         bookmark: {
           url: 'https://example.com',
@@ -225,7 +225,7 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         pageUrl: 'https://example.com'
       }
 
-      // [IMMUTABLE-REQ-TAG-004] - Mock tag input element
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock tag input element
       const tagInput = {
         value: 'test-tag',
         addEventListener: jest.fn((event, callback) => {
@@ -236,7 +236,7 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         })
       }
 
-      // [IMMUTABLE-REQ-TAG-004] - Mock document.createElement to return our tag input
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock document.createElement to return our tag input
       mockDocument.createElement.mockImplementation((tagName) => {
         if (tagName === 'input') {
           return tagInput
@@ -277,7 +277,7 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         }
       }
 
-      // [IMMUTABLE-REQ-TAG-004] - Verify message was sent
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Verify message was sent
       expect(mockMessageService.sendMessage).toHaveBeenCalledWith({
         type: 'saveTag',
         data: {
@@ -291,11 +291,11 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
       expect(content.bookmark.tags).toContain('test-tag')
     })
 
-    test('[IMMUTABLE-REQ-TAG-004] Should handle tag persistence errors', async () => {
-      // [IMMUTABLE-REQ-TAG-004] - Mock failed message response
+    test('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Should handle tag persistence errors', async () => {
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock failed message response
       mockMessageService.sendMessage.mockRejectedValue(new Error('Network error'))
 
-      // [IMMUTABLE-REQ-TAG-004] - Create mock content
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Create mock content
       const content = {
         bookmark: {
           url: 'https://example.com',
@@ -306,7 +306,7 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         pageUrl: 'https://example.com'
       }
 
-      // [IMMUTABLE-REQ-TAG-004] - Mock tag input element
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock tag input element
       const tagInput = {
         value: 'test-tag',
         addEventListener: jest.fn((event, callback) => {
@@ -344,23 +344,23 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         }
       })
 
-      // [IMMUTABLE-REQ-TAG-004] - Call show method
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Call show method
       overlayManager.show(content)
 
-      // [IMMUTABLE-REQ-TAG-004] - Verify error handling
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Verify error handling
       expect(mockMessageService.sendMessage).toHaveBeenCalled()
     })
   })
 
-  describe('[IMMUTABLE-REQ-TAG-004] Recent Tags Persistence', () => {
-    test('[IMMUTABLE-REQ-TAG-004] Should persist tag from recent tags', async () => {
-      // [IMMUTABLE-REQ-TAG-004] - Mock successful message response
+  describe('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Recent Tags Persistence', () => {
+    test('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Should persist tag from recent tags', async () => {
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock successful message response
       mockMessageService.sendMessage.mockResolvedValue({
         success: true,
         data: { result_code: 'done' }
       })
 
-      // [IMMUTABLE-REQ-TAG-004] - Create mock content
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Create mock content
       const content = {
         bookmark: {
           url: 'https://example.com',
@@ -371,7 +371,7 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         pageUrl: 'https://example.com'
       }
 
-      // [IMMUTABLE-REQ-TAG-004] - Mock recent tag element
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock recent tag element
       const recentTagElement = {
         textContent: 'recent-tag',
         onclick: null,
@@ -407,15 +407,15 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         }
       })
 
-      // [IMMUTABLE-REQ-TAG-004] - Call show method to create recent tags
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Call show method to create recent tags
       overlayManager.show(content)
 
-      // [IMMUTABLE-REQ-TAG-004] - Simulate recent tag click
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Simulate recent tag click
       if (recentTagElement.onclick) {
         await recentTagElement.onclick()
       }
 
-      // [IMMUTABLE-REQ-TAG-004] - Verify message was sent
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Verify message was sent
       expect(mockMessageService.sendMessage).toHaveBeenCalledWith({
         type: 'saveTag',
         data: {
@@ -427,9 +427,9 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
     })
   })
 
-  describe('[IMMUTABLE-REQ-TAG-004] Message Display', () => {
-    test('[IMMUTABLE-REQ-TAG-004] Should display success message', () => {
-      // [IMMUTABLE-REQ-TAG-004] - Mock message element
+  describe('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Message Display', () => {
+    test('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Should display success message', () => {
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock message element
       const messageElement = {
         style: {},
         textContent: '',
@@ -464,16 +464,16 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         }
       })
 
-      // [IMMUTABLE-REQ-TAG-004] - Call showMessage
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Call showMessage
       overlayManager.showMessage('Tag saved successfully', 'success')
 
-      // [IMMUTABLE-REQ-TAG-004] - Verify message element was created
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Verify message element was created
       expect(mockDocument.createElement).toHaveBeenCalledWith('div')
       expect(messageElement.textContent).toBe('Tag saved successfully')
     })
 
-    test('[IMMUTABLE-REQ-TAG-004] Should display error message', () => {
-      // [IMMUTABLE-REQ-TAG-004] - Mock message element
+    test('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Should display error message', () => {
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock message element
       const messageElement = {
         style: {},
         textContent: '',
@@ -508,18 +508,18 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         }
       })
 
-      // [IMMUTABLE-REQ-TAG-004] - Call showMessage
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Call showMessage
       overlayManager.showMessage('Failed to save tag', 'error')
 
-      // [IMMUTABLE-REQ-TAG-004] - Verify message element was created
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Verify message element was created
       expect(mockDocument.createElement).toHaveBeenCalledWith('div')
       expect(messageElement.textContent).toBe('Failed to save tag')
     })
   })
 
-  describe('[IMMUTABLE-REQ-TAG-004] Content Refresh', () => {
-    test('[IMMUTABLE-REQ-TAG-004] Should refresh overlay content', async () => {
-      // [IMMUTABLE-REQ-TAG-004] - Mock successful bookmark response
+  describe('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Content Refresh', () => {
+    test('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Should refresh overlay content', async () => {
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock successful bookmark response
       mockMessageService.sendMessage.mockResolvedValue({
         success: true,
         data: {
@@ -529,13 +529,13 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         }
       })
 
-      // [IMMUTABLE-REQ-TAG-004] - Mock show method
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock show method
       overlayManager.show = jest.fn()
 
-      // [IMMUTABLE-REQ-TAG-004] - Call refreshOverlayContent
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Call refreshOverlayContent
       await overlayManager.refreshOverlayContent()
 
-      // [IMMUTABLE-REQ-TAG-004] - Verify message was sent
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Verify message was sent
       expect(mockMessageService.sendMessage).toHaveBeenCalledWith({
         type: 'getCurrentBookmark',
         data: {
@@ -543,7 +543,7 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
         }
       })
 
-      // [IMMUTABLE-REQ-TAG-004] - Verify show was called with updated content
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Verify show was called with updated content
       expect(overlayManager.show).toHaveBeenCalledWith({
         bookmark: {
           url: 'https://example.com',
@@ -555,31 +555,31 @@ describe('[IMPL-OVERLAY] [IMPL-TAG_SYSTEM] Overlay Tag Persistence', () => {
       })
     })
 
-    test('[IMMUTABLE-REQ-TAG-004] Should handle refresh errors', async () => {
-      // [IMMUTABLE-REQ-TAG-004] - Mock failed response
+    test('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Should handle refresh errors', async () => {
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock failed response
       mockMessageService.sendMessage.mockRejectedValue(new Error('Network error'))
 
-      // [IMMUTABLE-REQ-TAG-004] - Mock show method
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Mock show method
       overlayManager.show = jest.fn()
 
-      // [IMMUTABLE-REQ-TAG-004] - Call refreshOverlayContent
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Call refreshOverlayContent
       await overlayManager.refreshOverlayContent()
 
-      // [IMMUTABLE-REQ-TAG-004] - Verify show was not called
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Verify show was not called
       expect(overlayManager.show).not.toHaveBeenCalled()
     })
   })
 
-  describe('[IMMUTABLE-REQ-TAG-004] Tag Validation', () => {
-    test('[IMMUTABLE-REQ-TAG-004] Should validate valid tags', () => {
-      // [IMMUTABLE-REQ-TAG-004] - Test valid tags
+  describe('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Tag Validation', () => {
+    test('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Should validate valid tags', () => {
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Test valid tags
       expect(overlayManager.isValidTag('valid-tag')).toBe(true)
       expect(overlayManager.isValidTag('another_tag')).toBe(true)
       expect(overlayManager.isValidTag('tag with spaces')).toBe(true)
     })
 
-    test('[IMMUTABLE-REQ-TAG-004] Should reject invalid tags', () => {
-      // [IMMUTABLE-REQ-TAG-004] - Test invalid tags
+    test('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Should reject invalid tags', () => {
+      // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Test invalid tags
       expect(overlayManager.isValidTag('')).toBe(false)
       expect(overlayManager.isValidTag('   ')).toBe(false)
       expect(overlayManager.isValidTag('tag<with>invalid')).toBe(false)

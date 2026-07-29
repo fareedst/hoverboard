@@ -133,8 +133,8 @@ test-extension/
 ## ✅ MIGRATION STATUS
 
 ### **Phase 1 Completion**
-- ✅ **MIGRATION-001**: Project Structure Analysis - **COMPLETE**
-- ✅ **MIGRATION-002**: Fresh Extension Template Setup - **COMPLETE**
+- ✅ **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-001)**: Project Structure Analysis - **COMPLETE**
+- ✅ **[IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] (was MIGRATION-002)**: Fresh Extension Template Setup - **COMPLETE**
 
 ### **Ready for Phase 2**
 - ✅ **Foundation**: Solid base for core module migration

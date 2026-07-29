@@ -1,7 +1,7 @@
 # 🏗️ Overlay Refresh Button Architectural Decisions
 
-**Semantic Token:** [OVERLAY-REFRESH-BUTTON-001]
-**Cross-References:** [OVERLAY-DATA-DISPLAY-001], [POPUP-REFRESH-001], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001], [OVERLAY-THEMING-001]
+**Semantic Token:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-BUTTON-001)]
+**Cross-References:** [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)], [TOGGLE-SYNC-OVERLAY], [TAG-SYNC-OVERLAY], [SAFARI-EXT-SHIM-001], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]
 **Date:** 2025-01-27
 **Status:** Active Implementation
 
@@ -16,7 +16,7 @@ This document outlines the architectural decisions made for implementing the ove
 ## 🏗️ Core Architectural Decisions
 
 ### **Decision 1: Button Placement Strategy**
-**[OVERLAY-REFRESH-POSITION-001]** - Refresh button positioning
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-POSITION-001)]** - Refresh button positioning
 
 **Decision**: Place refresh button at `left: 40px` in top-left area of overlay window, to the right of close button
 **Status**: Accepted
@@ -45,19 +45,19 @@ This document outlines the architectural decisions made for implementing the ove
 **Consequences**:
 - ✅ Maintains clear visual hierarchy with grouped control buttons
 - ✅ Follows established UI patterns for button grouping
-- ✅ Coordinates with `[OVERLAY-THEMING-001]` for styling
+- ✅ Coordinates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for styling
 - ✅ Uses overlay-relative positioning for better stability
 - ✅ Provides adequate spacing (32px) between buttons for accessibility
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-THEMING-001]` for theme integration
-- Maintains compatibility with `[OVERLAY-DATA-DISPLAY-001]` data flow
+- Coordinates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for theme integration
+- Maintains compatibility with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]` data flow
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform patterns
 
 ---
 
 ### **Decision 2: Icon and Visual Design**
-**[OVERLAY-REFRESH-VISUAL-001]** - Visual design for refresh button
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-VISUAL-001)]** - Visual design for refresh button
 
 **Decision**: Use circular arrow icon (🔄) with "Refresh Data" tooltip
 **Status**: Accepted
@@ -87,13 +87,13 @@ This document outlines the architectural decisions made for implementing the ove
 - ✅ Works across all themes and platforms
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-THEMING-001]` for theme-aware styling
+- Coordinates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for theme-aware styling
 - Maintains consistency with existing button patterns in `[TOGGLE-SYNC-OVERLAY]`
 
 ---
 
 ### **Decision 3: Data Refresh Mechanism**
-**[OVERLAY-REFRESH-DATAFLOW-001]** - Data refresh implementation strategy
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-DATAFLOW-001)]** - Data refresh implementation strategy
 
 **Decision**: Implement atomic refresh that updates all overlay content
 **Status**: Accepted
@@ -119,19 +119,19 @@ This document outlines the architectural decisions made for implementing the ove
 
 **Consequences**:
 - ✅ Ensures data consistency across all overlay elements
-- ✅ Maintains existing `[OVERLAY-DATA-REFRESH-001]` patterns
-- ✅ Coordinates with `[POPUP-REFRESH-001]` mechanisms
+- ✅ Maintains existing `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-REFRESH-001)]` patterns
+- ✅ Coordinates with `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]` mechanisms
 - ✅ Supports `[TAG-SYNC-OVERLAY]` and `[TOGGLE-SYNC-OVERLAY]` synchronization
 
 **Cross-References**:
-- Integrates with `[OVERLAY-DATA-DISPLAY-001]` for data display
-- Coordinates with `[POPUP-REFRESH-001]` for consistent refresh behavior
+- Integrates with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]` for data display
+- Coordinates with `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]` for consistent refresh behavior
 - Maintains compatibility with `[TAG-SYNC-OVERLAY]` and `[TOGGLE-SYNC-OVERLAY]`
 
 ---
 
 ### **Decision 4: Error Handling Strategy**
-**[OVERLAY-REFRESH-ERROR-001]** - Error handling for refresh operations
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)]** - Error handling for refresh operations
 
 **Decision**: Implement graceful error handling with user feedback
 **Status**: Accepted
@@ -162,8 +162,8 @@ This document outlines the architectural decisions made for implementing the ove
 - ✅ Coordinates with existing error handling systems
 
 **Cross-References**:
-- Coordinates with existing error handling in `[OVERLAY-DATA-DISPLAY-001]`
-- Maintains consistency with `[POPUP-REFRESH-001]` error handling
+- Coordinates with existing error handling in `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`
+- Maintains consistency with `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]` error handling
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform error handling
 
 ---
@@ -171,7 +171,7 @@ This document outlines the architectural decisions made for implementing the ove
 ## 🔧 Technical Implementation Decisions
 
 ### **Decision 5: Message Passing Architecture**
-**[OVERLAY-REFRESH-MESSAGE-001]** - Message passing for refresh operations
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-MESSAGE-001)]** - Message passing for refresh operations
 
 **Decision**: Use existing message service patterns for refresh data requests
 **Status**: Accepted
@@ -183,7 +183,7 @@ This document outlines the architectural decisions made for implementing the ove
 1. **Use existing message service patterns** (✅ Selected)
    - Maintains consistency with existing code
    - Leverages proven message passing infrastructure
-   - Coordinates with `[POPUP-REFRESH-001]` patterns
+   - Coordinates with `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]` patterns
    
 2. **Create new message service**
    - Would duplicate existing functionality
@@ -197,19 +197,19 @@ This document outlines the architectural decisions made for implementing the ove
 
 **Consequences**:
 - ✅ Maintains consistency with existing message patterns
-- ✅ Coordinates with `[POPUP-REFRESH-001]` mechanisms
+- ✅ Coordinates with `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]` mechanisms
 - ✅ Supports `[SAFARI-EXT-SHIM-001]` cross-platform compatibility
 - ✅ Leverages existing error handling and logging
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-DATA-DISPLAY-001]` message patterns
+- Coordinates with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]` message patterns
 - Maintains compatibility with `[TOGGLE-SYNC-OVERLAY]` and `[TAG-SYNC-OVERLAY]`
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform patterns
 
 ---
 
 ### **Decision 6: Theme Integration Strategy**
-**[OVERLAY-REFRESH-THEME-001]** - Theme integration for refresh button
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)]** - Theme integration for refresh button
 
 **Decision**: Use CSS custom properties for theme-aware styling
 **Status**: Accepted
@@ -219,7 +219,7 @@ This document outlines the architectural decisions made for implementing the ove
 
 **Options Considered**:
 1. **Use CSS custom properties** (✅ Selected)
-   - Coordinates with existing `[OVERLAY-THEMING-001]` system
+   - Coordinates with existing `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` system
    - Automatic theme switching
    - Consistent with existing button styling
    
@@ -235,19 +235,19 @@ This document outlines the architectural decisions made for implementing the ove
 
 **Consequences**:
 - ✅ Automatic theme adaptation
-- ✅ Coordinates with `[OVERLAY-THEMING-001]` system
+- ✅ Coordinates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` system
 - ✅ Consistent with existing button styling
 - ✅ Supports both light and dark themes
 
 **Cross-References**:
-- Integrates with `[OVERLAY-THEMING-001]` theme system
+- Integrates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` theme system
 - Maintains consistency with existing button styling in `[TOGGLE-SYNC-OVERLAY]`
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform theming
 
 ---
 
 ### **Decision 7: Accessibility Implementation**
-**[OVERLAY-REFRESH-ACCESSIBILITY-001]** - Accessibility features for refresh button
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)]** - Accessibility features for refresh button
 
 **Decision**: Implement comprehensive accessibility features including ARIA labels and keyboard navigation
 **Status**: Accepted
@@ -280,21 +280,21 @@ This document outlines the architectural decisions made for implementing the ove
 
 **Cross-References**:
 - Coordinates with existing accessibility patterns in overlay system
-- Maintains consistency with `[OVERLAY-THEMING-001]` accessibility features
+- Maintains consistency with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` accessibility features
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform accessibility
 
 ---
 
 ## 🔄 Coordination with Existing Requirements
 
-### **Integration with [POPUP-REFRESH-001]**
-**[OVERLAY-REFRESH-POPUP-COORDINATION-001]** - Coordination with popup refresh mechanisms
+### **Integration with [[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]**
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-POPUP-COORDINATION-001)]** - Coordination with popup refresh mechanisms
 
 **Decision**: Coordinate refresh operations with existing popup refresh mechanisms
 **Status**: Accepted
 **Date**: 2025-01-27
 
-**Rationale**: The popup already has refresh functionality (`[POPUP-REFRESH-001]`). The overlay refresh should coordinate with this to ensure consistent behavior across all UI components.
+**Rationale**: The popup already has refresh functionality (`[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]`). The overlay refresh should coordinate with this to ensure consistent behavior across all UI components.
 
 **Implementation**:
 - Use same message types for refresh requests
@@ -303,20 +303,20 @@ This document outlines the architectural decisions made for implementing the ove
 - Maintain consistent user feedback patterns
 
 **Cross-References**:
-- Coordinates with `[POPUP-REFRESH-001]` message patterns
+- Coordinates with `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]` message patterns
 - Maintains consistency with existing refresh error handling
 - Supports same data sources and validation patterns
 
 ---
 
-### **Integration with [OVERLAY-DATA-DISPLAY-001]**
-**[OVERLAY-REFRESH-DATA-COORDINATION-001]** - Coordination with overlay data display
+### **Integration with [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]**
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-DATA-COORDINATION-001)]** - Coordination with overlay data display
 
 **Decision**: Integrate refresh functionality with existing overlay data display patterns
 **Status**: Accepted
 **Date**: 2025-01-27
 
-**Rationale**: The overlay already has data display functionality (`[OVERLAY-DATA-DISPLAY-001]`). The refresh button should work within this existing system.
+**Rationale**: The overlay already has data display functionality (`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`). The refresh button should work within this existing system.
 
 **Implementation**:
 - Use existing `refreshOverlayContent()` method
@@ -325,14 +325,14 @@ This document outlines the architectural decisions made for implementing the ove
 - Preserve existing data flow patterns
 
 **Cross-References**:
-- Integrates with `[OVERLAY-DATA-DISPLAY-001]` data flow
-- Maintains compatibility with `[OVERLAY-DATA-FIX-001]` fixes
-- Coordinates with `[OVERLAY-DATA-REFRESH-001]` patterns
+- Integrates with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]` data flow
+- Maintains compatibility with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-FIX-001)]` fixes
+- Coordinates with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-REFRESH-001)]` patterns
 
 ---
 
 ### **Integration with [TOGGLE-SYNC-OVERLAY] and [TAG-SYNC-OVERLAY]**
-**[OVERLAY-REFRESH-SYNC-COORDINATION-001]** - Coordination with synchronization systems
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-SYNC-COORDINATION-001)]** - Coordination with synchronization systems
 
 **Decision**: Ensure refresh operations coordinate with existing synchronization systems
 **Status**: Accepted
@@ -363,11 +363,11 @@ This document outlines the architectural decisions made for implementing the ove
 - ✅ Works on both Chrome and Safari extensions
 
 ### **Integration Success Criteria**
-- ✅ Coordinates with existing `[POPUP-REFRESH-001]` mechanisms
-- ✅ Integrates with `[OVERLAY-DATA-DISPLAY-001]` data flow
+- ✅ Coordinates with existing `[[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] (was POPUP-REFRESH-001)]` mechanisms
+- ✅ Integrates with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]` data flow
 - ✅ Maintains compatibility with `[TOGGLE-SYNC-OVERLAY]` and `[TAG-SYNC-OVERLAY]`
 - ✅ Supports `[SAFARI-EXT-SHIM-001]` cross-platform patterns
-- ✅ Coordinates with `[OVERLAY-THEMING-001]` theme system
+- ✅ Coordinates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` theme system
 
 ### **Quality Success Criteria**
 - ✅ Button styling matches existing overlay theme
@@ -382,14 +382,14 @@ This document outlines the architectural decisions made for implementing the ove
 
 | Decision ID | Decision | Status | Impact |
 |-------------|----------|--------|--------|
-| `[OVERLAY-REFRESH-POSITION-001]` | Top-left corner placement | Accepted | High |
-| `[OVERLAY-REFRESH-VISUAL-001]` | Circular arrow icon with tooltip | Accepted | Medium |
-| `[OVERLAY-REFRESH-DATAFLOW-001]` | Atomic refresh mechanism | Accepted | High |
-| `[OVERLAY-REFRESH-ERROR-001]` | Graceful error handling | Accepted | High |
-| `[OVERLAY-REFRESH-MESSAGE-001]` | Existing message service patterns | Accepted | Medium |
-| `[OVERLAY-REFRESH-THEME-001]` | CSS custom properties | Accepted | Medium |
-| `[OVERLAY-REFRESH-ACCESSIBILITY-001]` | Comprehensive accessibility | Accepted | High |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-POSITION-001)]` | Top-left corner placement | Accepted | High |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-VISUAL-001)]` | Circular arrow icon with tooltip | Accepted | Medium |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-DATAFLOW-001)]` | Atomic refresh mechanism | Accepted | High |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ERROR-001)]` | Graceful error handling | Accepted | High |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-MESSAGE-001)]` | Existing message service patterns | Accepted | Medium |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-THEME-001)]` | CSS custom properties | Accepted | Medium |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-ACCESSIBILITY-001)]` | Comprehensive accessibility | Accepted | High |
 
 ---
 
-**[OVERLAY-REFRESH-BUTTON-001]** - Master semantic token for overlay refresh button functionality 
+**[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-BUTTON-001)]** - Master semantic token for overlay refresh button functionality 

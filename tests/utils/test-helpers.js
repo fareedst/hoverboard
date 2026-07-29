@@ -1,10 +1,10 @@
 /**
- * [TEST-FIX-001] - Test helper utilities for common operations
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Test helper utilities for common operations
  * Provides factory functions and utilities for consistent test setup
  */
 
 /**
- * [TEST-FIX-001] - Create mock message service
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock message service
  * @returns {Object} Mock message service
  */
 export const createMockMessageService = () => ({
@@ -20,7 +20,7 @@ export const createMockMessageService = () => ({
 });
 
 /**
- * [TEST-FIX-001] - Create mock tag service
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock tag service
  * @returns {Object} Mock tag service
  */
 export const createMockTagService = () => ({
@@ -38,7 +38,7 @@ export const createMockTagService = () => ({
 });
 
 /**
- * [TEST-FIX-001] - Create mock Chrome API
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock Chrome API
  * @returns {Object} Mock Chrome API
  */
 export const createMockChromeAPI = () => ({
@@ -81,7 +81,7 @@ export const createMockChromeAPI = () => ({
 });
 
 /**
- * [TEST-FIX-001] - Create mock tag data
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock tag data
  * @param {Object} options - Tag options
  * @returns {Object} Mock tag data
  */
@@ -93,7 +93,7 @@ export const createMockTagData = (options = {}) => ({
 });
 
 /**
- * [TEST-FIX-001] - Create mock bookmark data
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock bookmark data
  * @param {Object} options - Bookmark options
  * @returns {Object} Mock bookmark data
  */
@@ -109,7 +109,7 @@ export const createMockBookmarkData = (options = {}) => ({
 });
 
 /**
- * [TEST-FIX-001] - Create mock overlay content
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock overlay content
  * @param {Object} options - Content options
  * @returns {Object} Mock overlay content
  */
@@ -120,7 +120,7 @@ export const createMockOverlayContent = (options = {}) => ({
 });
 
 /**
- * [TEST-FIX-001] - Create mock document element
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock document element
  * @param {string} tagName - Element tag name
  * @param {Object} options - Element options
  * @returns {Object} Mock DOM element
@@ -150,7 +150,7 @@ export const createMockElement = (tagName, options = {}) => ({
 });
 
 /**
- * [TEST-FIX-001] - Create mock document
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock document
  * @returns {Object} Mock document
  */
 export const createMockDocument = () => ({
@@ -165,7 +165,7 @@ export const createMockDocument = () => ({
 });
 
 /**
- * [TEST-FIX-001] - Wait for async operations
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Wait for async operations
  * @param {Function} fn - Function to check
  * @param {number} timeout - Timeout in milliseconds
  * @returns {Promise} Promise that resolves when condition is met
@@ -196,7 +196,7 @@ export const waitFor = (fn, timeout = 1000) => {
 };
 
 /**
- * [TEST-FIX-001] - Create mock Pinboard API response
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock Pinboard API response
  * @param {Object} data - Response data
  * @param {number} status - HTTP status code
  * @returns {Object} Mock API response
@@ -209,14 +209,14 @@ export const createMockPinboardResponse = (data, status = 200) => ({
 });
 
 /**
- * [TEST-FIX-001] - Create mock storage response
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock storage response
  * @param {Object} data - Storage data
  * @returns {Promise} Promise that resolves with data
  */
 export const createStorageResponse = (data) => Promise.resolve(data);
 
 /**
- * [TEST-FIX-001] - Create mock tabs response
+ * [IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] - Create mock tabs response
  * @param {Array} tabs - Tabs data
  * @returns {Promise} Promise that resolves with tabs
  */

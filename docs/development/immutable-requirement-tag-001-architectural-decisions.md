@@ -1,8 +1,8 @@
-# Architectural Decisions: Immutable Requirement TAG-001
+# Architectural Decisions: Immutable Requirement [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was TAG-001)
 
-**Requirement**: `[IMMUTABLE-REQ-TAG-001]` - When a tag is added to a record, it shall be added to the Recent Tags list (but not displayed on the current tab if it is a duplicate of an existing tag)
+**Requirement**: `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]` - When a tag is added to a record, it shall be added to the Recent Tags list (but not displayed on the current tab if it is a duplicate of an existing tag)
 
-**Document Purpose**: Capture platform and language-specific architectural decisions for implementing `[IMMUTABLE-REQ-TAG-001]`
+**Document Purpose**: Capture platform and language-specific architectural decisions for implementing `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 **Status**: Implementation Complete  
 **Version**: 1.1  
@@ -10,9 +10,9 @@
 
 ## 🏗️ Platform-Specific Decisions
 
-### Chrome Extension Architecture `[IMMUTABLE-REQ-TAG-001]`
+### Chrome Extension Architecture `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: Chrome Storage API for Tag Persistence `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Chrome Storage API for Tag Persistence `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 - **Technology**: `chrome.storage.sync` for cross-device tag synchronization
 - **Rationale**: Recent tags should be available across user's devices
 - **Alternative Considered**: `chrome.storage.local` for device-only storage
@@ -20,7 +20,7 @@
 - **Implementation Status**: ✅ **COMPLETED** - Enhanced with comprehensive test coverage
 - **Test Results**: 100% pass rate for tag sanitization and persistence tests
 
-#### Decision: Service Worker for Background Tag Operations `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Service Worker for Background Tag Operations `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 - **Technology**: Manifest V3 service worker for background tag processing
 - **Rationale**: Non-blocking tag operations during bookmark creation
 - **Alternative Considered**: Background script (Manifest V2 approach)
@@ -28,24 +28,24 @@
 - **Implementation Status**: ✅ **COMPLETED** - Enhanced with Jest configuration fixes
 - **Test Results**: 99.6% overall test pass rate (236/237 tests)
 
-#### Decision: Content Script Injection for Tag UI Updates `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Content Script Injection for Tag UI Updates `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 - **Technology**: Content script injection for overlay tag management
 - **Rationale**: Direct DOM manipulation for tag display updates
 - **Alternative Considered**: Message passing to background script
 - **Impact**: Real-time UI updates without page refresh
 
-### JavaScript/ES6+ Language Decisions `[IMMUTABLE-REQ-TAG-001]`
+### JavaScript/ES6+ Language Decisions `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: Async/Await Pattern for Tag Operations `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Async/Await Pattern for Tag Operations `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Async tag operations
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Async tag operations
 async addTagToRecent(tag, recordId) {
   try {
     const recentTags = await this.getRecentTags();
     const updatedTags = this.deduplicateTags([...recentTags, tag]);
     await this.storage.set({ recentTags: updatedTags });
   } catch (error) {
-    this.logger.error('[IMMUTABLE-REQ-TAG-001] Tag addition failed', error);
+    this.logger.error('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] Tag addition failed', error);
   }
 }
 ```
@@ -53,16 +53,16 @@ async addTagToRecent(tag, recordId) {
 - **Alternative Considered**: Promise chains
 - **Impact**: Cleaner code and better error handling
 
-#### Decision: ES6 Classes for Tag Service Architecture `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: ES6 Classes for Tag Service Architecture `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Tag Service Class Structure
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Tag Service Class Structure
 class TagService {
   constructor() {
     this.storage = chrome.storage.sync;
-    this.logger = new Logger('[IMMUTABLE-REQ-TAG-001]');
+    this.logger = new Logger('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]');
   }
   
-  // [IMMUTABLE-REQ-TAG-001] - Tag management methods
+  // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Tag management methods
   async addTagToRecent(tag, recordId) { /* implementation */ }
   async getRecentTagsExcludingCurrent(currentTags) { /* implementation */ }
 }
@@ -71,12 +71,12 @@ class TagService {
 - **Alternative Considered**: Functional programming approach
 - **Impact**: Better code organization and maintainability
 
-#### Decision: WeakMap for Tag-to-Record Mapping `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: WeakMap for Tag-to-Record Mapping `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Tag mapping with WeakMap
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Tag mapping with WeakMap
 class TagService {
   constructor() {
-    this.tagRecordMap = new WeakMap(); // [IMMUTABLE-REQ-TAG-001]
+    this.tagRecordMap = new WeakMap(); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
   }
 }
 ```
@@ -86,18 +86,18 @@ class TagService {
 
 ## 🔧 Browser Extension Specific Decisions
 
-### Manifest V3 Compliance `[IMMUTABLE-REQ-TAG-001]`
+### Manifest V3 Compliance `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: Service Worker Lifecycle Management `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Service Worker Lifecycle Management `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Service Worker Tag Operations
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Service Worker Tag Operations
 self.addEventListener('install', (event) => {
-  // [IMMUTABLE-REQ-TAG-001] - Initialize tag service
+  // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Initialize tag service
   self.tagService = new TagService();
 });
 
 self.addEventListener('message', (event) => {
-  if (event.data.type === '[IMMUTABLE-REQ-TAG-001]') {
+  if (event.data.type === '[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]') {
     // Handle tag operations
   }
 });
@@ -106,9 +106,9 @@ self.addEventListener('message', (event) => {
 - **Alternative Considered**: Background script approach
 - **Impact**: Manifest V3 compliance with proper lifecycle management
 
-#### Decision: Content Security Policy Compliance `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Content Security Policy Compliance `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - CSP Compliant Tag Operations
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - CSP Compliant Tag Operations
 // No inline scripts, all code in separate files
 // No eval() usage for tag processing
 // Secure origins only for API calls
@@ -117,30 +117,30 @@ self.addEventListener('message', (event) => {
 - **Alternative Considered**: Inline script usage
 - **Impact**: Enhanced security and CSP compliance
 
-### Storage Strategy `[IMMUTABLE-REQ-TAG-001]`
+### Storage Strategy `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: Hierarchical Storage for Tag Data `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Hierarchical Storage for Tag Data `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Storage Structure
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Storage Structure
 const storageStructure = {
-  recentTags: ['tag1', 'tag2', 'tag3'], // [IMMUTABLE-REQ-TAG-001]
-  tagUsageCount: { 'tag1': 5, 'tag2': 3 }, // [IMMUTABLE-REQ-TAG-001]
-  tagLastUsed: { 'tag1': timestamp, 'tag2': timestamp } // [IMMUTABLE-REQ-TAG-001]
+  recentTags: ['tag1', 'tag2', 'tag3'], // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
+  tagUsageCount: { 'tag1': 5, 'tag2': 3 }, // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
+  tagLastUsed: { 'tag1': timestamp, 'tag2': timestamp } // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
 };
 ```
 - **Rationale**: Organized storage structure for efficient tag management
 - **Alternative Considered**: Flat storage structure
 - **Impact**: Better data organization and retrieval performance
 
-#### Decision: Storage Quota Management `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Storage Quota Management `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Storage quota management
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Storage quota management
 class TagStorageManager {
-  static MAX_TAGS = 1000; // [IMMUTABLE-REQ-TAG-001]
-  static MAX_TAG_LENGTH = 50; // [IMMUTABLE-REQ-TAG-001]
+  static MAX_TAGS = 1000; // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
+  static MAX_TAG_LENGTH = 50; // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
   
   async enforceStorageLimits() {
-    // [IMMUTABLE-REQ-TAG-001] - Implement storage limits
+    // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Implement storage limits
   }
 }
 ```
@@ -150,15 +150,15 @@ class TagStorageManager {
 
 ## 🎨 UI/UX Platform Decisions
 
-### Chrome Extension UI Patterns `[IMMUTABLE-REQ-TAG-001]`
+### Chrome Extension UI Patterns `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: Popup-Based Tag Management `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Popup-Based Tag Management `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Popup tag interface
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Popup tag interface
 class PopupTagManager {
   constructor() {
-    this.popup = document.getElementById('tag-popup'); // [IMMUTABLE-REQ-TAG-001]
-    this.tagInput = document.getElementById('tag-input'); // [IMMUTABLE-REQ-TAG-001]
+    this.popup = document.getElementById('tag-popup'); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
+    this.tagInput = document.getElementById('tag-input'); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
   }
 }
 ```
@@ -166,13 +166,13 @@ class PopupTagManager {
 - **Alternative Considered**: Modal dialogs or custom overlays
 - **Impact**: Familiar user experience for Chrome users
 
-#### Decision: Content Script Overlay for Page Integration `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Content Script Overlay for Page Integration `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Content script overlay
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Content script overlay
 class OverlayTagManager {
   constructor() {
-    this.overlay = this.createOverlay(); // [IMMUTABLE-REQ-TAG-001]
-    this.injectOverlay(); // [IMMUTABLE-REQ-TAG-001]
+    this.overlay = this.createOverlay(); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
+    this.injectOverlay(); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
   }
 }
 ```
@@ -180,11 +180,11 @@ class OverlayTagManager {
 - **Alternative Considered**: Separate popup windows
 - **Impact**: Non-intrusive tag management experience
 
-### CSS/Styling Decisions `[IMMUTABLE-REQ-TAG-001]`
+### CSS/Styling Decisions `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: CSS Custom Properties for Theme Consistency `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: CSS Custom Properties for Theme Consistency `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```css
-/* [IMMUTABLE-REQ-TAG-001] - Tag styling with CSS custom properties */
+/* [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Tag styling with CSS custom properties */
 .tag-element {
   --tag-background: var(--primary-color);
   --tag-text: var(--text-color);
@@ -199,9 +199,9 @@ class OverlayTagManager {
 - **Alternative Considered**: Hard-coded colors
 - **Impact**: Maintainable and themeable tag styling
 
-#### Decision: CSS Grid for Tag Layout `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: CSS Grid for Tag Layout `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```css
-/* [IMMUTABLE-REQ-TAG-001] - Tag grid layout */
+/* [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Tag grid layout */
 .tag-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -214,14 +214,14 @@ class OverlayTagManager {
 
 ## 🔄 Performance Decisions
 
-### Memory Management `[IMMUTABLE-REQ-TAG-001]`
+### Memory Management `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: Tag Deduplication Algorithm `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Tag Deduplication Algorithm `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Efficient tag deduplication
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Efficient tag deduplication
 class TagDeduplicator {
   static deduplicateTags(tags) {
-    const seen = new Set(); // [IMMUTABLE-REQ-TAG-001]
+    const seen = new Set(); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
     return tags.filter(tag => {
       const normalized = tag.toLowerCase().trim();
       if (seen.has(normalized)) return false;
@@ -235,17 +235,17 @@ class TagDeduplicator {
 - **Alternative Considered**: Array-based deduplication
 - **Impact**: Scalable performance for large tag datasets
 
-#### Decision: Lazy Loading for Tag Suggestions `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Lazy Loading for Tag Suggestions `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Lazy tag loading
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Lazy tag loading
 class TagSuggestionManager {
   async loadTagSuggestions(query) {
     if (this.cachedSuggestions.has(query)) {
-      return this.cachedSuggestions.get(query); // [IMMUTABLE-REQ-TAG-001]
+      return this.cachedSuggestions.get(query); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
     }
     
     const suggestions = await this.fetchSuggestions(query);
-    this.cachedSuggestions.set(query, suggestions); // [IMMUTABLE-REQ-TAG-001]
+    this.cachedSuggestions.set(query, suggestions); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
     return suggestions;
   }
 }
@@ -254,23 +254,23 @@ class TagSuggestionManager {
 - **Alternative Considered**: Always fetch fresh suggestions
 - **Impact**: Better performance and reduced server load
 
-### Caching Strategy `[IMMUTABLE-REQ-TAG-001]`
+### Caching Strategy `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: LRU Cache for Recent Tags `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: LRU Cache for Recent Tags `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - LRU cache for recent tags
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - LRU cache for recent tags
 class RecentTagCache {
   constructor(maxSize = 100) {
-    this.cache = new Map(); // [IMMUTABLE-REQ-TAG-001]
-    this.maxSize = maxSize; // [IMMUTABLE-REQ-TAG-001]
+    this.cache = new Map(); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
+    this.maxSize = maxSize; // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
   }
   
   addTag(tag) {
     if (this.cache.size >= this.maxSize) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey); // [IMMUTABLE-REQ-TAG-001]
+      this.cache.delete(firstKey); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
     }
-    this.cache.set(tag, Date.now()); // [IMMUTABLE-REQ-TAG-001]
+    this.cache.set(tag, Date.now()); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
   }
 }
 ```
@@ -280,18 +280,18 @@ class RecentTagCache {
 
 ## 🔒 Security Decisions
 
-### Data Validation `[IMMUTABLE-REQ-TAG-001]`
+### Data Validation `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: Tag Input Sanitization `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Tag Input Sanitization `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Tag sanitization
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Tag sanitization
 class TagSanitizer {
   static sanitizeTag(tag) {
     return tag
       .trim()
-      .replace(/[<>]/g, '') // [IMMUTABLE-REQ-TAG-001] - Remove HTML tags
-      .replace(/[^\w\s-]/g, '') // [IMMUTABLE-REQ-TAG-001] - Allow only safe chars
-      .substring(0, 50); // [IMMUTABLE-REQ-TAG-001] - Limit length
+      .replace(/[<>]/g, '') // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Remove HTML tags
+      .replace(/[^\w\s-]/g, '') // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Allow only safe chars
+      .substring(0, 50); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Limit length
   }
 }
 ```
@@ -299,9 +299,9 @@ class TagSanitizer {
 - **Alternative Considered**: No sanitization
 - **Impact**: Secure tag handling
 
-#### Decision: Content Security Policy for Tag Operations `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Content Security Policy for Tag Operations `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - CSP compliant tag operations
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - CSP compliant tag operations
 // No dynamic code execution
 // No inline event handlers
 // Secure origins only for API calls
@@ -312,19 +312,19 @@ class TagSanitizer {
 
 ## 📊 Error Handling Decisions
 
-### Graceful Degradation `[IMMUTABLE-REQ-TAG-001]`
+### Graceful Degradation `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: Fallback Tag Storage `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Fallback Tag Storage `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Fallback storage strategy
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Fallback storage strategy
 class TagStorageManager {
   async saveTags(tags) {
     try {
-      await chrome.storage.sync.set({ recentTags: tags }); // [IMMUTABLE-REQ-TAG-001]
+      await chrome.storage.sync.set({ recentTags: tags }); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
     } catch (error) {
-      // [IMMUTABLE-REQ-TAG-001] - Fallback to local storage
+      // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Fallback to local storage
       await chrome.storage.local.set({ recentTags: tags });
-      this.logger.warn('[IMMUTABLE-REQ-TAG-001] Using local storage fallback');
+      this.logger.warn('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] Using local storage fallback');
     }
   }
 }
@@ -333,19 +333,19 @@ class TagStorageManager {
 - **Alternative Considered**: Fail completely on storage errors
 - **Impact**: Reliable tag functionality
 
-#### Decision: Error Recovery for Tag Operations `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Error Recovery for Tag Operations `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Error recovery
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Error recovery
 class TagErrorHandler {
   static async handleTagError(error, operation) {
-    this.logger.error(`[IMMUTABLE-REQ-TAG-001] ${operation} failed:`, error);
+    this.logger.error(`[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] ${operation} failed:`, error);
     
-    // [IMMUTABLE-REQ-TAG-001] - Attempt recovery
+    // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Attempt recovery
     if (error.name === 'QuotaExceededError') {
       await this.cleanupOldTags();
     }
     
-    // [IMMUTABLE-REQ-TAG-001] - Notify user of issue
+    // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Notify user of issue
     this.notifyUser('Tag operation failed, but bookmark was saved');
   }
 }
@@ -356,21 +356,21 @@ class TagErrorHandler {
 
 ## 🔄 Migration Decisions
 
-### Manifest V2 to V3 Migration `[IMMUTABLE-REQ-TAG-001]`
+### Manifest V2 to V3 Migration `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
-#### Decision: Backward-Compatible Tag Storage `[IMMUTABLE-REQ-TAG-001]`
+#### Decision: Backward-Compatible Tag Storage `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 ```javascript
-// [IMMUTABLE-REQ-TAG-001] - Migration strategy
+// [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] - Migration strategy
 class TagMigrationManager {
   async migrateFromV2() {
     try {
-      const v2Tags = await this.getV2Tags(); // [IMMUTABLE-REQ-TAG-001]
+      const v2Tags = await this.getV2Tags(); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
       if (v2Tags) {
-        await this.saveToV3(v2Tags); // [IMMUTABLE-REQ-TAG-001]
-        await this.cleanupV2Data(); // [IMMUTABLE-REQ-TAG-001]
+        await this.saveToV3(v2Tags); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
+        await this.cleanupV2Data(); // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]
       }
     } catch (error) {
-      this.logger.error('[IMMUTABLE-REQ-TAG-001] Migration failed:', error);
+      this.logger.error('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)] Migration failed:', error);
     }
   }
 }
@@ -379,7 +379,7 @@ class TagMigrationManager {
 - **Alternative Considered**: Start fresh with no migration
 - **Impact**: Seamless user experience during updates
 
-## 📋 Decision Summary `[IMMUTABLE-REQ-TAG-001]`
+## 📋 Decision Summary `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`
 
 ### Technology Stack Decisions
 - **Storage**: Chrome Storage Sync API for cross-device persistence
@@ -423,5 +423,5 @@ class TagMigrationManager {
 
 **Document Version**: 1.1  
 **Last Updated**: 2025-07-14  
-**Requirement Token**: `[IMMUTABLE-REQ-TAG-001]`  
+**Requirement Token**: `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] (was IMMUTABLE-REQ-TAG-001)]`  
 **Status**: Implementation Complete - All Test Fixes Applied 

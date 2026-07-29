@@ -11,7 +11,7 @@ This directory contains documentation for the AI-assisted development approach u
 | **[AI-First Gap Analysis](ai-first-gap-analysis-and-next-steps.md)** | Analysis and next steps for AI development | 🔶 MEDIUM |
 | **[AI Assistant Protocol](ai-assistant-protocol.md)** | Guidelines for AI interaction and assistance | ⭐ HIGH |
 | **[Phase 1 Action Plan](PHASE1_ACTION_PLAN.md)** | Initial AI development phase planning | 🔶 MEDIUM |
-| **[UI-005 Protection](UI-005-PROTECTION.md)** | **CRITICAL** - Protected feature documentation | 🚨 CRITICAL |
+| **[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Protection]([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)-PROTECTION.md)** | **CRITICAL** - Protected feature documentation | 🚨 CRITICAL |
 
 ## 🎯 AI Development Approach
 
@@ -55,11 +55,11 @@ This directory contains documentation for the AI-assisted development approach u
 
 ## 🛡️ CRITICAL FEATURE PROTECTION
 
-### ⭐ UI-005: Transparent Overlay System - **PROTECTED FEATURE**
+### ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005): Transparent Overlay System - **PROTECTED FEATURE**
 
-**🚨 IMMUTABLE REQUIREMENT**: UI-005 is a **CRITICAL PRODUCTION FEATURE** that MUST be preserved and protected from any inadvertent changes during AI-assisted development.
+**🚨 IMMUTABLE REQUIREMENT**: [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) is a **CRITICAL PRODUCTION FEATURE** that MUST be preserved and protected from any inadvertent changes during AI-assisted development.
 
-#### 📋 UI-005 Core Requirements (MUST PRESERVE):
+#### 📋 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Core Requirements (MUST PRESERVE):
 - **Multiple Transparency Modes**: `nearly-transparent`, `fully-transparent`, `opaque`
 - **Dynamic Opacity Control**: Configuration-driven opacity values with hover/focus interactions
 - **Bottom-Fixed Positioning**: Alternative positioning mode for enhanced usability
@@ -68,7 +68,7 @@ This directory contains documentation for the AI-assisted development approach u
 - **Accessibility Support**: Focus enhancement for screen readers and keyboard navigation
 - **Configuration Integration**: Seamless integration with ConfigManager settings
 
-#### 🔧 UI-005 Implementation Files (PROTECTED):
+#### 🔧 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Implementation Files (PROTECTED):
 - **`src/features/content/overlay-manager.js`** - Core transparency system
   - `applyTransparencyMode()` method (lines 750-810)
   - `setupTransparencyInteractions()` method (lines 833-888)
@@ -77,18 +77,18 @@ This directory contains documentation for the AI-assisted development approach u
 - **`src/features/content/content-main.js`** - Transparency configuration integration
 - **`src/features/content/overlay-styles.css`** - Transparency CSS classes
 
-#### 🔍 UI-005 Implementation Tokens (MUST PRESERVE):
+#### 🔍 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Implementation Tokens (MUST PRESERVE):
 ```javascript
-// ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system
-// 🔺 UI-005: Transparent overlay manager - 🔧 Position and transparency control
-// 🔺 UI-005: Transparency manager - 🔧 Opacity and positioning control
-/* ⭐ UI-005: Transparent overlay - 🎨 Enhanced transparency system */
-/* 🔺 UI-005: Transparent overlay positioning - 🎨 Bottom-fixed transparency */
-/* 🔶 UI-005: Adaptive visibility - 🎯 Context-aware transparency */
-// 🔻 UI-005: Content protection - 🛡️ Page interaction safeguards
+// ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005): Transparent overlay - 🎨 Enhanced transparency system
+// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005): Transparent overlay manager - 🔧 Position and transparency control
+// 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005): Transparency manager - 🔧 Opacity and positioning control
+/* ⭐ [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005): Transparent overlay - 🎨 Enhanced transparency system */
+/* 🔺 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005): Transparent overlay positioning - 🎨 Bottom-fixed transparency */
+/* 🔶 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005): Adaptive visibility - 🎯 Context-aware transparency */
+// 🔻 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005): Content protection - 🛡️ Page interaction safeguards
 ```
 
-#### ⚠️ AI Development Restrictions for UI-005:
+#### ⚠️ AI Development Restrictions for [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005):
 1. **NO MODIFICATIONS** to transparency mode logic without explicit approval
 2. **NO REMOVAL** of opacity configuration parameters
 3. **NO CHANGES** to backdrop filter implementations
@@ -96,7 +96,7 @@ This directory contains documentation for the AI-assisted development approach u
 5. **NO DELETION** of accessibility focus enhancements
 6. **NO REFACTORING** of transparency interaction handlers
 
-#### ✅ Permitted AI-Assisted Changes for UI-005:
+#### ✅ Permitted AI-Assisted Changes for [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005):
 - **Code comments** improvements for clarity
 - **Error handling** enhancements
 - **Performance optimizations** that preserve functionality
@@ -104,10 +104,10 @@ This directory contains documentation for the AI-assisted development approach u
 - **Configuration validation** additions
 - **Unit test** additions
 
-#### 🔄 UI-005 Relationship with UI-VIS-001/002:
-UI-005 provides the **foundational transparency system** that UI-VIS-001/002 builds upon. While UI-VIS-001/002 provides user-facing controls, UI-005 contains the core transparency implementation that powers those controls. **Both systems must coexist and be preserved.**
+#### 🔄 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Relationship with [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)/002:
+[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) provides the **foundational transparency system** that [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)/002 builds upon. While [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)/002 provides user-facing controls, [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) contains the core transparency implementation that powers those controls. **Both systems must coexist and be preserved.**
 
-#### 🧪 UI-005 Testing Requirements:
+#### 🧪 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Testing Requirements:
 - Transparency mode switching must work correctly
 - Opacity values must respond to configuration changes
 - Hover/focus interactions must enhance visibility
@@ -115,7 +115,7 @@ UI-005 provides the **foundational transparency system** that UI-VIS-001/002 bui
 - Adaptive visibility must respond to mouse proximity
 - All transparency CSS classes must render correctly
 
-#### 📖 UI-005 Documentation References:
+#### 📖 [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Documentation References:
 - **Feature Tracking**: `docs/development/feature-tracking-matrix.md`
 - **Implementation Status**: ✅ COMPLETED AND PRODUCTION-READY
 - **Dependencies**: ConfigManager (configuration), CSS overlay styles
@@ -125,6 +125,6 @@ UI-005 provides the **foundational transparency system** that UI-VIS-001/002 bui
 
 ## 🚨 PROTECTED FEATURES NOTICE
 
-**UI-005 Transparent Overlay System** is a **CRITICAL PRODUCTION FEATURE** protected from inadvertent AI modifications. See **[UI-005 Protection Documentation](UI-005-PROTECTION.md)** for complete protection specifications.
+**[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Transparent Overlay System** is a **CRITICAL PRODUCTION FEATURE** protected from inadvertent AI modifications. See **[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) Protection Documentation]([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005)-PROTECTION.md)** for complete protection specifications.
 
-All AI development must respect protected feature boundaries and escalate any UI-005 related changes for human approval. 
+All AI development must respect protected feature boundaries and escalate any [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-005) related changes for human approval. 

@@ -47,7 +47,7 @@ ARCH-AI_TAGGING_FLOW:
   cross_references:
     - "REQ-AI_TAGGING_CONFIG"
     - "REQ-AI_TAGGING_POPUP"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-AI_TAGGING_FLOW.yaml"
   implementation_approach:
     details:
       - "GET_AI_TAGS uses config, calls provider, parses and sanitizes tags"
@@ -61,8 +61,8 @@ ARCH-AI_TAGGING_FLOW:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-21"
-      reason: "GET_PAGE_CONTENT in SW via executeScript; popup shows SW error on failure"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "AI Tagging Flow Architecture"
   rationale:
     benefits:
@@ -111,7 +111,7 @@ ARCH-BADGE:
       rejected_reason: "Need dynamic state"
   cross_references:
     - "REQ-BADGE_INDICATORS"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-BADGE.yaml"
   implementation_approach:
     details:
       - "Bookmark status indicators"
@@ -203,7 +203,7 @@ ARCH-BOOKMARK_STATE_SYNC:
       rejected_reason: "Inconsistent UX"
   cross_references:
     - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-BOOKMARK_STATE_SYNC.yaml"
   implementation_approach:
     details:
       - "Badge updates from payload"
@@ -426,7 +426,7 @@ ARCH-CODE_QUALITY:
       - "npm run lint; npm run validate"
 ARCH-CONFIG_STRUCTURE:
   cross_references: []
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-CONFIG_STRUCTURE.yaml"
   implementation_approach:
     summary: ""
   name: "Config Structure"
@@ -454,7 +454,7 @@ ARCH-CROSS_BROWSER:
     - "REQ-CROSS_BROWSER"
     - "REQ-EXTENSION_IDENTITY"
     - "REQ-SAFARI_ADAPTATION"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-CROSS_BROWSER.yaml"
   implementation_approach:
     details:
       - "Browser API abstraction exporting browser from safari-shim.js"
@@ -523,7 +523,7 @@ ARCH-ERROR_HANDLING:
       rejected_reason: "Why rejected or why chosen"
   cross_references:
     - "REQ-ERROR_HANDLING"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-ERROR_HANDLING.yaml"
   implementation_approach:
     details:
       - "Error logging approach"
@@ -641,7 +641,7 @@ ARCH-EXT_IDENTITY:
       rejected_reason: "Cannot inject into pages"
   cross_references:
     - "REQ-EXTENSION_IDENTITY"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-EXT_IDENTITY.yaml"
   implementation_approach:
     details:
       - "Chrome/Chromium target platform"
@@ -683,13 +683,16 @@ ARCH-EXTENSION_BUNDLED_ENTRY_POINTS:
   cross_references:
     - "IMPL-POPUP_BUNDLE"
     - "REQ-EXTENSION_BUNDLED_ENTRY_POINTS"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-EXTENSION_BUNDLED_ENTRY_POINTS.yaml"
   implementation_approach:
     summary: "Build script runs four bundle steps; copyDir skips service-worker.js, options.js, content-main.js, popup.js"
   metadata:
     author: "AI Agent"
     created: "2026-02-17"
-    last_updated: "2026-02-17"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Extension Bundled Entry Points"
   rationale:
     benefits:
@@ -902,7 +905,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
     - "REQ-LOCAL_BOOKMARKS_INDEX"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX.yaml"
   implementation_approach:
     details:
       - "Empty state when no local or file bookmarks"
@@ -917,8 +920,8 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
       date: "2026-02-13"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-14"
-      reason: "Index shows local + file with Storage column; getAggregatedBookmarksForIndex"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Local Bookmarks Index Architecture"
   rationale:
     benefits:
@@ -995,7 +998,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
       rejected_reason: "Client has full data; client-side is sufficient"
   cross_references:
     - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml"
   implementation_approach:
     details:
       - "CSV: columns Title, URL, Tags, Time, Storage (Local | File), Shared, To read, Notes; quoted fields, escaped quotes"
@@ -1009,8 +1012,8 @@ ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT:
       date: "2026-02-13"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-14"
-      reason: "Implementation complete"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Local Bookmarks Index Export Architecture"
   rationale:
     benefits:
@@ -1199,7 +1202,7 @@ ARCH-MESSAGE_HANDLING:
     - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
     - "REQ-RECENT_TAGS_SYSTEM"
     - "REQ-SMART_BOOKMARKING"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-MESSAGE_HANDLING.yaml"
   implementation_approach:
     details:
       - "BOOKMARK_UPDATED synchronization"
@@ -1387,7 +1390,7 @@ ARCH-MV3_MIGRATION:
       rejected_reason: "Prefer incremental migration"
   cross_references:
     - "REQ-MANIFEST_V3_MIGRATION"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-MV3_MIGRATION.yaml"
   implementation_approach:
     details:
       - "Preserved content script injection"
@@ -1478,7 +1481,7 @@ ARCH-OVERLAY:
     - "REQ-OVERLAY_CONTROL_LAYOUT"
     - "REQ-OVERLAY_REFRESH_ACTION"
     - "REQ-OVERLAY_SYSTEM"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-OVERLAY.yaml"
   implementation_approach:
     details:
       - "Configurable auto-show on page load"
@@ -1536,7 +1539,7 @@ ARCH-OVERLAY_CONTROLS:
   cross_references:
     - "REQ-OVERLAY_CONTROL_LAYOUT"
     - "REQ-OVERLAY_REFRESH_ACTION"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-OVERLAY_CONTROLS.yaml"
   implementation_approach:
     details:
       - "32px spacing, 24px min touch targets"
@@ -1596,7 +1599,7 @@ ARCH-OVERLAY_TESTABILITY:
   cross_references:
     - "REQ-OVERLAY_CONTROL_LAYOUT"
     - "REQ-OVERLAY_SYSTEM"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-OVERLAY_TESTABILITY.yaml"
   implementation_approach:
     details:
       - "Auto-register on property assignments"
@@ -1655,7 +1658,7 @@ ARCH-PINBOARD_API:
   cross_references:
     - "REQ-PINBOARD_COMPATIBILITY"
     - "REQ-SMART_BOOKMARKING"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-PINBOARD_API.yaml"
   implementation_approach:
     details:
       - "401 auth error handling"
@@ -1709,7 +1712,7 @@ ARCH-POPUP_SESSION:
   cross_references:
     - "REQ-POPUP_PERSISTENT_SESSION"
     - "REQ-RECENT_TAGS_SYSTEM"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-POPUP_SESSION.yaml"
   implementation_approach:
     details:
       - "Overlay toggle with GET_OVERLAY_STATE fallback"
@@ -1757,7 +1760,7 @@ ARCH-POPUP_SESSION:
       - "tests/unit/tag-recent-behavior.test.js"
 ARCH-PRIVACY:
   cross_references: []
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-PRIVACY.yaml"
   implementation_approach:
     summary: ""
   name: "Privacy"
@@ -1767,7 +1770,7 @@ ARCH-PRIVACY:
   traceability: {}
 ARCH-PROJECT_STRUCTURE:
   cross_references: []
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-PROJECT_STRUCTURE.yaml"
   implementation_approach:
     summary: ""
   name: "Project Structure"
@@ -1833,7 +1836,7 @@ ARCH-SAFARI_ADAPTATION:
       rejected_reason: "High maintenance cost"
   cross_references:
     - "REQ-SAFARI_ADAPTATION"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-SAFARI_ADAPTATION.yaml"
   implementation_approach:
     details:
       - "Active Chrome path: ARCH-CROSS_BROWSER / src/shared/safari-shim.js"
@@ -1876,7 +1879,7 @@ ARCH-SAFARI_ADAPTATION:
     tests: []
 ARCH-SEARCH:
   cross_references: []
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-SEARCH.yaml"
   implementation_approach:
     summary: ""
   name: "Search"
@@ -1944,7 +1947,7 @@ ARCH-SERVICE_WORKER:
       rejected_reason: "Not V3 compatible"
   cross_references:
     - "REQ-MANIFEST_V3_MIGRATION"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-SERVICE_WORKER.yaml"
   implementation_approach:
     details:
       - "Extension context integration"
@@ -1986,7 +1989,7 @@ ARCH-SERVICE_WORKER:
 ARCH-SHARED_UTILITIES:
   cross_references:
     - "REQ-SHARED_UTILITIES"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-SHARED_UTILITIES.yaml"
   implementation_approach:
     details: []
     summary: "src/shared/utils.js exports urlUtils, stringUtils, arrayUtils, objectUtils, timeUtils, domUtils"
@@ -1996,8 +1999,8 @@ ARCH-SHARED_UTILITIES:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-17"
-      reason: "Numbered token reinterpretation"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Shared Utilities Module"
   rationale:
     benefits:
@@ -2197,7 +2200,7 @@ ARCH-SIDE_PANEL_TABS:
     - "REQ-RECENT_TAGS_SYSTEM"
     - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     - "REQ-SIDE_PANEL_TAGS_TREE"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-SIDE_PANEL_TABS.yaml"
   implementation_approach:
     details:
       - "\"By Tag\" in This Page footer: in panel context, switch to By Tag tab"
@@ -2209,8 +2212,8 @@ ARCH-SIDE_PANEL_TABS:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-28"
-      reason: "S13: traceability.tests aligned with side-panel window-focus composition + Recent Tags Playwright"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Side Panel Tabs Architecture"
   rationale:
     benefits:
@@ -2299,7 +2302,7 @@ ARCH-SIDE_PANEL_TAGS_TREE:
       - "tests/unit/tags-tree-filter.test.js"
 ARCH-SITE_MGMT:
   cross_references: []
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-SITE_MGMT.yaml"
   implementation_approach:
     summary: ""
   name: "Site Management"
@@ -2324,7 +2327,7 @@ ARCH-STORAGE:
   cross_references:
     - "REQ-CHROME_STORAGE_USAGE"
     - "REQ-CONFIG_PORTABILITY"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-STORAGE.yaml"
   implementation_approach:
     details:
       - "Export/import for config portability"
@@ -2423,7 +2426,7 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
 ARCH-STRUCTURED_LOGGING:
   cross_references:
     - "REQ-STRUCTURED_LOGGING"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-STRUCTURED_LOGGING.yaml"
   implementation_approach:
     details: []
     summary: "src/shared/logger.js Logger class, createLogger, legacy log() and noisy"
@@ -2433,8 +2436,8 @@ ARCH-STRUCTURED_LOGGING:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-17"
-      reason: "Numbered token reinterpretation"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
   name: "Structured Logging"
   rationale:
     benefits:
@@ -2516,7 +2519,7 @@ ARCH-SYNC_STORAGE_PROVIDER:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-SYNC_STORAGE_PROVIDER.yaml"
   implementation_approach:
     summary: "SyncBookmarkService mirrors LocalBookmarkService using chrome.storage.sync and key hoverboard_sync_bookmarks; VALID_BACKENDS and BookmarkRouter extended with sync."
   metadata:
@@ -2667,7 +2670,7 @@ ARCH-TESTING_STRATEGY:
         - "Pro 1"
       rejected_reason: "Why rejected or why chosen"
   cross_references: []
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-TESTING_STRATEGY.yaml"
   implementation_approach:
     details:
       - "End-to-end testing approach"
@@ -2713,7 +2716,7 @@ ARCH-THEME:
   alternatives_considered: []
   cross_references:
     - "REQ-DARK_THEME"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-THEME.yaml"
   implementation_approach:
     details:
       - "Dark theme default"
@@ -2840,7 +2843,7 @@ ARCH-UI_TESTABILITY:
     - "IMPL-UI_ACTION_CONTRACT"
     - "IMPL-UI_INSPECTOR"
     - "REQ-UI_INSPECTION"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-UI_TESTABILITY.yaml"
   implementation_approach:
     details:
       - "Inspector enabled via localStorage DEBUG_HOVERBOARD_UI or setEnabled in SW (from chrome.storage.local)"
@@ -2850,7 +2853,10 @@ ARCH-UI_TESTABILITY:
   metadata:
     author: "AI Agent"
     created: "2026-02-17"
-    last_updated: "2026-02-25"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
     reason: "Added IMPL-SIDE_PANEL_SNAPSHOT for side panel snapshot (Bookmark + Tags tree tabs)"
   name: "UI Testability and Inspection Architecture"
   rationale:
@@ -2930,7 +2936,7 @@ ARCH-UX_CORE:
   cross_references:
     - "REQ-CORE_UX_PRESERVATION"
     - "REQ-POPUP_PERSISTENT_SESSION"
-  detail_file: "null"
+  detail_file: "architecture-decisions/ARCH-UX_CORE.yaml"
   implementation_approach:
     details:
       - "Overlay visibility reflected"

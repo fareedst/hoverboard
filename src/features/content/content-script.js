@@ -90,7 +90,7 @@ class ContentScript {
       await this.handleConfigUpdate(config)
     })
 
-    // [TAG-SYNC-CONTENT-001] - Handle tag update notifications from popup
+    // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Handle tag update notifications from popup
     this.messageService.onMessage('TAG_UPDATED', async (data) => {
       await this.handleTagUpdate(data)
     })
@@ -252,26 +252,26 @@ class ContentScript {
   }
 
   /**
-   * [TAG-SYNC-CONTENT-001] - Handle tag update notifications from popup
+   * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Handle tag update notifications from popup
    * @param {Object} data - Tag update data
    */
   async handleTagUpdate (data) {
     try {
-      this.logger.debug('[TAG-SYNC-CONTENT-001] Handling tag update:', data)
+      this.logger.debug('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Handling tag update:', data)
 
-      // [TAG-SYNC-CONTENT-001] - Validate tag update data
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Validate tag update data
       if (!data || !data.url || !Array.isArray(data.tags)) {
-        this.logger.warn('[TAG-SYNC-CONTENT-001] Invalid tag update data:', data)
+        this.logger.warn('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Invalid tag update data:', data)
         return
       }
 
-      // [TAG-SYNC-CONTENT-001] - Check if update is for current page
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Check if update is for current page
       if (data.url !== this.currentTab.url) {
-        this.logger.debug('[TAG-SYNC-CONTENT-001] Tag update is for different URL, ignoring')
+        this.logger.debug('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Tag update is for different URL, ignoring')
         return
       }
 
-      // [TAG-SYNC-CONTENT-001] - Update overlay if visible
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Update overlay if visible
       if (this.overlayManager && this.hoverSystem.isHoverVisible()) {
         const updatedContent = {
           bookmark: {
@@ -283,12 +283,12 @@ class ContentScript {
           pageUrl: this.currentTab.url
         }
 
-        // [TAG-SYNC-CONTENT-001] - Refresh overlay with updated content
+        // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Refresh overlay with updated content
         await this.overlayManager.show(updatedContent)
-        this.logger.debug('[TAG-SYNC-CONTENT-001] Overlay refreshed with updated tags')
+        this.logger.debug('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Overlay refreshed with updated tags')
       }
     } catch (error) {
-      this.logger.error('[TAG-SYNC-CONTENT-001] Failed to handle tag update:', error)
+      this.logger.error('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to handle tag update:', error)
     }
   }
 

@@ -1,5 +1,3 @@
-# [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]
-# Implementation: KeyboardManager adds four shortcuts; side panel Bookmark tab enables keyboard and setupKeyboardNavigation so same shortcuts work in panel.
 IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
   code_locations:
     files:
@@ -11,7 +9,7 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
   cross_references:
     - "ARCH-QUICK_ACCESS_ENTRY"
     - "REQ-QUICK_ACCESS_ENTRY"
-  essence_pseudocode: "# [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY]\n# This block defines in-popup and in-panel keyboard shortcuts. Implements REQ \"keyboard shortcuts when popup or side panel has focus\"; implements ARCH by reusing UI event flow (emit → PopupController handlers).\nINPUT: user focuses popup or side panel Bookmark tab; user presses Ctrl+Shift+B/O/M/I\nOUTPUT: same as footer button click (side panel opens, options opens, bookmarks index tab, or import tab)\n\n# [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS]\n# KeyboardManager shortcuts: add four entries so handleKeyDown finds handler and calls emit; PopupController already listens for openTagsTree, openOptions, openBookmarksIndex, openBrowserBookmarkImport. Implements REQ \"in-popup/panel shortcuts\".\nKeyboardManager constructor shortcuts:\n  \"Ctrl+Shift+KeyB\": () => this.uiManager.emit('openTagsTree')\n  \"Ctrl+Shift+KeyO\": () => this.uiManager.emit('openOptions')\n  \"Ctrl+Shift+KeyM\": () => this.uiManager.emit('openBookmarksIndex')\n  \"Ctrl+Shift+KeyI\": () => this.uiManager.emit('openBrowserBookmarkImport')\n\n# [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS]\n# Side panel Bookmark tab: enable keyboard and setup so panel has same shortcuts. Implements REQ \"when popup or side panel has focus\".\ninitBookmarkTab() (side-panel.js):\n  popupComponents = popup({ ..., enableKeyboard: true, ... })\n  ...\n  popupComponents.uiManager.setupEventListeners()\n  IF popupComponents.keyboardManager THEN popupComponents.keyboardManager.setupKeyboardNavigation()\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS-pseudocode.md"
   implementation_approach:
     details:
       - "side-panel.js initBookmarkTab: popup with enableKeyboard true; after uiManager.setupEventListeners(), if popupComponents.keyboardManager then popupComponents.keyboardManager.setupKeyboardNavigation()"
@@ -23,8 +21,8 @@ IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
       date: "2026-02-26"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-26"
-      reason: "Initial creation for in-popup/panel keyboard quick access"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "In-Popup and In-Panel Keyboard Shortcuts for Quick Access"
   rationale:
     benefits:

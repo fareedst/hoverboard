@@ -2,7 +2,7 @@
 
 **Date:** 2025-07-19  
 **Status:** ✅ **COMPLETE** - Implementation Successful  
-**Cross-References:** [OVERLAY-CLOSE-POSITION-001], [OVERLAY-REFRESH-001], [OVERLAY-THEMING-001], [OVERLAY-DATA-DISPLAY-001], [SAFARI-EXT-SHIM-001]
+**Cross-References:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)], [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [SAFARI-EXT-SHIM-001]
 
 ---
 
@@ -32,7 +32,7 @@ This document outlines the architectural decisions made for repositioning the cl
 
 ## 📋 Architectural Decisions
 
-### **[OVERLAY-CLOSE-POSITION-ARCH-001] - Close Button Positioning Strategy**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-001)] - Close Button Positioning Strategy**
 
 **Decision**: Use absolute positioning relative to the overlay element itself, not the container div
 
@@ -59,14 +59,14 @@ This document outlines the architectural decisions made for repositioning the cl
 - ⚠️ **Neutral**: Slightly more complex than container-relative positioning
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-REFRESH-001]` for refresh button positioning
-- Maintains compatibility with `[OVERLAY-THEMING-001]` for theme integration
+- Coordinates with `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]` for refresh button positioning
+- Maintains compatibility with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for theme integration
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform patterns
-- Integrates with `[OVERLAY-DATA-DISPLAY-001]` for overlay structure
+- Integrates with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]` for overlay structure
 
 ---
 
-### **[OVERLAY-CLOSE-POSITION-ARCH-002] - Refresh Button Adjustment Strategy**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-002)] - Refresh Button Adjustment Strategy**
 
 **Decision**: Move refresh button to `left: 40px` to accommodate close button
 
@@ -90,13 +90,13 @@ This document outlines the architectural decisions made for repositioning the cl
 - ⚠️ **Neutral**: Slightly more complex than current single-button positioning
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-REFRESH-001]` for refresh button functionality
-- Maintains compatibility with `[OVERLAY-THEMING-001]` for theme integration
+- Coordinates with `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]` for refresh button functionality
+- Maintains compatibility with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for theme integration
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform patterns
 
 ---
 
-### **[OVERLAY-CLOSE-POSITION-ARCH-003] - Container Positioning Context**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-003)] - Container Positioning Context**
 
 **Decision**: Ensure container has `position: relative` for absolute positioned buttons
 
@@ -120,13 +120,13 @@ This document outlines the architectural decisions made for repositioning the cl
 - ⚠️ **Neutral**: Slightly more complex than current float-based layout
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-DATA-DISPLAY-001]` for overlay structure
-- Maintains compatibility with `[OVERLAY-THEMING-001]` for theme integration
+- Coordinates with `[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]` for overlay structure
+- Maintains compatibility with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for theme integration
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform patterns
 
 ---
 
-### **[OVERLAY-CLOSE-POSITION-ARCH-004] - Button Spacing and Visual Relationship**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-004)] - Button Spacing and Visual Relationship**
 
 **Decision**: Use 32px spacing between close and refresh buttons
 
@@ -150,13 +150,13 @@ This document outlines the architectural decisions made for repositioning the cl
 - ⚠️ **Neutral**: Slightly more complex than current single-button layout
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-THEMING-001]` for theme-aware spacing
+- Coordinates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for theme-aware spacing
 - Maintains compatibility with `[SAFARI-EXT-SHIM-001]` cross-platform patterns
 - Supports accessibility requirements across all platforms
 
 ---
 
-### **[OVERLAY-CLOSE-POSITION-ARCH-005] - Theme Integration Strategy**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-005)] - Theme Integration Strategy**
 
 **Decision**: Use existing theme variables for close button styling
 
@@ -180,13 +180,13 @@ This document outlines the architectural decisions made for repositioning the cl
 - ⚠️ **Neutral**: Slightly more complex than current float-based styling
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-THEMING-001]` for theme integration
-- Maintains compatibility with `[OVERLAY-REFRESH-001]` for button styling
+- Coordinates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for theme integration
+- Maintains compatibility with `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]` for button styling
 - Supports `[SAFARI-EXT-SHIM-001]` cross-platform patterns
 
 ---
 
-### **[OVERLAY-CLOSE-POSITION-ARCH-006] - Responsive Design Strategy**
+### **[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-006)] - Responsive Design Strategy**
 
 **Decision**: Maintain positioning across all screen sizes with minimal adjustments
 
@@ -210,7 +210,7 @@ This document outlines the architectural decisions made for repositioning the cl
 - ⚠️ **Neutral**: Slightly more complex than current single-device layout
 
 **Cross-References**:
-- Coordinates with `[OVERLAY-THEMING-001]` for responsive theme behavior
+- Coordinates with `[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]` for responsive theme behavior
 - Maintains compatibility with `[SAFARI-EXT-SHIM-001]` cross-platform patterns
 - Supports accessibility requirements across all screen sizes
 
@@ -222,7 +222,7 @@ This document outlines the architectural decisions made for repositioning the cl
 
 #### **Close Button Positioning**
 ```javascript
-// [OVERLAY-CLOSE-POSITION-UI-001] Close button positioning
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Close button positioning
 closeBtn.style.cssText = `
   position: absolute;
   top: 8px;
@@ -246,7 +246,7 @@ closeBtn.style.cssText = `
 
 #### **Refresh Button Adjusted Positioning**
 ```javascript
-// [OVERLAY-CLOSE-POSITION-ADJUST-001] Adjusted refresh button positioning
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ADJUST-001)] Adjusted refresh button positioning
 refreshBtn.style.cssText = `
   position: absolute;
   top: 8px;
@@ -270,7 +270,7 @@ refreshBtn.style.cssText = `
 
 #### **Container Positioning Context**
 ```javascript
-// [OVERLAY-CLOSE-POSITION-UI-001] Container positioning context
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Container positioning context
 currentTagsContainer.style.cssText = `
   margin-bottom: 8px;
   padding: 4px;
@@ -283,7 +283,7 @@ currentTagsContainer.style.cssText = `
 
 #### **CSS Variables Usage**
 ```css
-/* [OVERLAY-CLOSE-POSITION-THEME-001] Theme-aware close button styling */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-THEME-001)] Theme-aware close button styling */
 .close-button {
   position: absolute;
   top: 8px;
@@ -319,7 +319,7 @@ currentTagsContainer.style.cssText = `
 
 #### **Mobile Responsive CSS**
 ```css
-/* [OVERLAY-CLOSE-POSITION-RESPONSIVE-001] Mobile responsive positioning */
+/* [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-RESPONSIVE-001)] Mobile responsive positioning */
 @media (max-width: 480px) {
   .close-button {
     left: 4px;  // Reduced left margin for mobile
@@ -343,13 +343,13 @@ currentTagsContainer.style.cssText = `
 
 #### **Positioning Tests**
 ```javascript
-// [OVERLAY-CLOSE-POSITION-TEST-001] Positioning validation tests
-test('[OVERLAY-CLOSE-POSITION-UI-001] Should position close button at left: 8px', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-001)] Positioning validation tests
+test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Should position close button at left: 8px', () => {
   const closeButton = mockDocument.querySelector('.close-button')
   expect(closeButton.style.cssText).toContain('left: 8px')
 })
 
-test('[OVERLAY-CLOSE-POSITION-ADJUST-001] Should position refresh button at left: 40px', () => {
+test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ADJUST-001)] Should position refresh button at left: 40px', () => {
   const refreshButton = mockDocument.querySelector('.refresh-button')
   expect(refreshButton.style.cssText).toContain('left: 40px')
 })
@@ -357,8 +357,8 @@ test('[OVERLAY-CLOSE-POSITION-ADJUST-001] Should position refresh button at left
 
 #### **Functionality Tests**
 ```javascript
-// [OVERLAY-CLOSE-POSITION-TEST-001] Functionality validation tests
-test('[OVERLAY-CLOSE-POSITION-UI-001] Should close overlay when clicked', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-001)] Functionality validation tests
+test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Should close overlay when clicked', () => {
   const closeButton = mockDocument.querySelector('.close-button')
   closeButton.click()
   expect(overlayManager.hide).toHaveBeenCalled()
@@ -369,8 +369,8 @@ test('[OVERLAY-CLOSE-POSITION-UI-001] Should close overlay when clicked', () => 
 
 #### **End-to-End Tests**
 ```javascript
-// [OVERLAY-CLOSE-POSITION-TEST-001] End-to-end positioning tests
-test('[OVERLAY-CLOSE-POSITION-UI-001] Should render both buttons with correct positioning', () => {
+// [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-TEST-001)] End-to-end positioning tests
+test('[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-UI-001)] Should render both buttons with correct positioning', () => {
   overlayManager.show(content)
   
   const closeButton = mockDocument.querySelector('.close-button')
@@ -388,18 +388,18 @@ test('[OVERLAY-CLOSE-POSITION-UI-001] Should render both buttons with correct po
 ## 📚 Cross-Reference Coordination
 
 ### **Existing Requirements Coordination**
-- **`[OVERLAY-REFRESH-001]`**: ✅ Coordinates with refresh button positioning
-- **`[OVERLAY-THEMING-001]`**: ✅ Maintains theme-aware styling
-- **`[OVERLAY-DATA-DISPLAY-001]`**: ✅ Integrates with overlay data display
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)]`**: ✅ Coordinates with refresh button positioning
+- **`[[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)]`**: ✅ Maintains theme-aware styling
+- **`[[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)]`**: ✅ Integrates with overlay data display
 - **`[SAFARI-EXT-SHIM-001]`**: ✅ Supports cross-platform compatibility
 
 ### **Architectural Decisions**
-- **`[OVERLAY-CLOSE-POSITION-ARCH-001]`**: ✅ Absolute positioning strategy
-- **`[OVERLAY-CLOSE-POSITION-ARCH-002]`**: ✅ Refresh button adjustment
-- **`[OVERLAY-CLOSE-POSITION-ARCH-003]`**: ✅ Container positioning context
-- **`[OVERLAY-CLOSE-POSITION-ARCH-004]`**: ✅ Button spacing strategy
-- **`[OVERLAY-CLOSE-POSITION-ARCH-005]`**: ✅ Theme integration strategy
-- **`[OVERLAY-CLOSE-POSITION-ARCH-006]`**: ✅ Responsive design strategy
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-001)]`**: ✅ Absolute positioning strategy
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-002)]`**: ✅ Refresh button adjustment
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-003)]`**: ✅ Container positioning context
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-004)]`**: ✅ Button spacing strategy
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-005)]`**: ✅ Theme integration strategy
+- **`[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-006)]`**: ✅ Responsive design strategy
 
 ---
 
@@ -427,16 +427,16 @@ test('[OVERLAY-CLOSE-POSITION-UI-001] Should render both buttons with correct po
 
 | Decision ID | Decision | Status | Impact |
 |-------------|----------|--------|--------|
-| `[OVERLAY-CLOSE-POSITION-ARCH-001]` | Absolute positioning for close button | Accepted | High |
-| `[OVERLAY-CLOSE-POSITION-ARCH-002]` | Refresh button adjustment to left: 40px | Accepted | High |
-| `[OVERLAY-CLOSE-POSITION-ARCH-003]` | Container positioning context | Accepted | Medium |
-| `[OVERLAY-CLOSE-POSITION-ARCH-004]` | 32px spacing between buttons | Accepted | Medium |
-| `[OVERLAY-CLOSE-POSITION-ARCH-005]` | Theme integration strategy | Accepted | Medium |
-| `[OVERLAY-CLOSE-POSITION-ARCH-006]` | Responsive design strategy | Accepted | Medium |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-001)]` | Absolute positioning for close button | Accepted | High |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-002)]` | Refresh button adjustment to left: 40px | Accepted | High |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-003)]` | Container positioning context | Accepted | Medium |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-004)]` | 32px spacing between buttons | Accepted | Medium |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-005)]` | Theme integration strategy | Accepted | Medium |
+| `[[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-ARCH-006)]` | Responsive design strategy | Accepted | Medium |
 
 ---
 
-**Semantic Token:** [OVERLAY-CLOSE-POSITION-001]  
-**Cross-References:** [OVERLAY-REFRESH-001], [OVERLAY-THEMING-001], [OVERLAY-DATA-DISPLAY-001], [SAFARI-EXT-SHIM-001]  
+**Semantic Token:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] (was OVERLAY-CLOSE-POSITION-001)]  
+**Cross-References:** [[IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] (was OVERLAY-REFRESH-001)], [[IMPL-THEME] [ARCH-THEME] [REQ-DARK_THEME] (was OVERLAY-THEMING-001)], [[IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] (was OVERLAY-DATA-DISPLAY-001)], [SAFARI-EXT-SHIM-001]  
 **Date:** 2025-07-19  
 **Status:** Active Architectural Decisions 

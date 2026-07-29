@@ -49,8 +49,8 @@ export const MESSAGE_TYPES = {
   HIDE_OVERLAY: 'hideOverlay',
   REFRESH_DATA: 'refreshData',
   REFRESH_HOVER: 'refreshHover',
-  BOOKMARK_UPDATED: 'bookmarkUpdated', // [TOGGLE-SYNC-MESSAGE-001] - New message type
-  TAG_UPDATED: 'TAG_UPDATED', // [TAG-SYNC-MESSAGE-001] - New message type for tag synchronization
+  BOOKMARK_UPDATED: 'bookmarkUpdated', // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - New message type
+  TAG_UPDATED: 'TAG_UPDATED', // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - New message type for tag synchronization
 
   // Site management
   INHIBIT_URL: 'inhibitUrl',
@@ -59,12 +59,12 @@ export const MESSAGE_TYPES = {
   SEARCH_TITLE: 'searchTitle',
   SEARCH_TITLE_TEXT: 'searchTitleText',
 
-  // [IMMUTABLE-REQ-TAG-002] Tab search operations
+  // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Tab search operations
   SEARCH_TABS: 'searchTabs',
   GET_SEARCH_HISTORY: 'getSearchHistory',
   CLEAR_SEARCH_STATE: 'clearSearchState',
 
-  // [IMMUTABLE-REQ-TAG-003] Recent tags operations
+  // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Recent tags operations
   ADD_TAG_TO_RECENT: 'addTagToRecent',
   GET_USER_RECENT_TAGS: 'getUserRecentTags',
   GET_SHARED_MEMORY_STATUS: 'getSharedMemoryStatus',
@@ -113,7 +113,7 @@ export class MessageHandler {
     this.tagService = tagService || new TagService(this.bookmarkProvider)
     this.configManager = new ConfigManager()
 
-    // [IMMUTABLE-REQ-TAG-002] Initialize tab search service
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Initialize tab search service
     this.tabSearchService = new TabSearchService()
   }
 
@@ -371,22 +371,22 @@ export class MessageHandler {
       throw new Error('No URL provided')
     }
 
-    debugLog('[POPUP-DATA-FLOW-001] Getting bookmark for URL:', targetUrl)
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Getting bookmark for URL:', targetUrl)
 
     // Check if URL is allowed (not in inhibit list)
-    debugLog('[POPUP-DATA-FLOW-001] Checking if URL is allowed...')
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Checking if URL is allowed...')
     const isAllowed = await this.configManager.isUrlAllowed(targetUrl)
     if (!isAllowed) {
       return { success: true, data: { blocked: true, url: targetUrl } }
     }
-    debugLog('[POPUP-DATA-FLOW-001] URL is allowed, getting bookmark data...')
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] URL is allowed, getting bookmark data...')
 
     // [IMPL-URL_TAGS_DISPLAY] Single source: getBookmarkForDisplay (router + normalize); do not short-circuit when no Pinboard auth so local/file/sync bookmarks and tags are shown
     const hasAuth = await this.configManager.hasAuthToken()
-    debugLog('[POPUP-DATA-FLOW-001] Getting bookmark data from provider (router)...')
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Getting bookmark data from provider (router)...')
     const raw = await this.bookmarkProvider.getBookmarkForUrl(targetUrl, data?.title)
     const normalized = normalizeBookmarkForDisplay(raw)
-    debugLog('[POPUP-DATA-FLOW-001] Bookmark data retrieved:', normalized)
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Bookmark data retrieved:', normalized)
 
     normalized.url = normalized.url || targetUrl
     // [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] Flag so panel can skip creating bookmark when clearing to-read
@@ -409,7 +409,7 @@ export class MessageHandler {
     if (normalized.needsAuth) dataOut.needsAuth = true
 
     const response = { success: true, data: dataOut }
-    debugLog('[POPUP-DATA-FLOW-001] Service worker response structure:', {
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Service worker response structure:', {
       success: response.success,
       dataType: typeof response.data,
       dataKeys: response.data ? Object.keys(response.data) : null,
@@ -446,20 +446,20 @@ export class MessageHandler {
   }
 
   async handleGetRecentBookmarks (data, senderUrl) {
-    debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Handling getRecentBookmarks request:', data)
-    debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Sender URL:', senderUrl)
+    debugLog('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Handling getRecentBookmarks request:', data)
+    debugLog('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Sender URL:', senderUrl)
 
-    // [IMMUTABLE-REQ-TAG-003] - Get user recent tags excluding current site
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get user recent tags excluding current site
     const recentTags = await this.tagService.getUserRecentTagsExcludingCurrent(data.currentTags || [])
 
-    debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] User recent tags (excluding current):', recentTags)
+    debugLog('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] User recent tags (excluding current):', recentTags)
 
     const response = {
       ...data,
       recentTags
     }
 
-    debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Returning response:', response)
+    debugLog('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Returning response:', response)
     return response
   }
 
@@ -501,7 +501,7 @@ export class MessageHandler {
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Handle tag addition to recent list (current site only)
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Handle tag addition to recent list (current site only)
    * @param {Object} data - Message data containing tagName and currentSiteUrl
    * @returns {Promise<Object>} Success status
    */
@@ -509,7 +509,7 @@ export class MessageHandler {
     try {
       const { tagName, currentSiteUrl } = data
 
-      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Adding tag to recent list:', { tagName, currentSiteUrl })
+      debugLog('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Adding tag to recent list:', { tagName, currentSiteUrl })
 
       if (!tagName || !currentSiteUrl) {
         throw new Error('tagName and currentSiteUrl are required')
@@ -518,42 +518,42 @@ export class MessageHandler {
       // Add tag to user recent list for current site only
       const success = await this.tagService.addTagToUserRecentList(tagName, currentSiteUrl)
 
-      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Tag addition result:', success)
+      debugLog('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Tag addition result:', success)
 
       return { success }
     } catch (error) {
-      debugError('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Error adding tag to recent:', error)
+      debugError('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error adding tag to recent:', error)
       return { success: false, error: error.message }
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Handle get user recent tags request
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Handle get user recent tags request
    * @param {Object} data - Message data
    * @returns {Promise<Object>} Recent tags data
    */
   async handleGetUserRecentTags (data) {
     try {
-      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Getting user recent tags')
+      debugLog('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Getting user recent tags')
 
       const recentTags = await this.tagService.getUserRecentTags()
 
-      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] User recent tags:', recentTags)
+      debugLog('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] User recent tags:', recentTags)
 
       return { recentTags }
     } catch (error) {
-      debugError('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Error getting user recent tags:', error)
+      debugError('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error getting user recent tags:', error)
       return { recentTags: [], error: error.message }
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Handle get shared memory status request
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Handle get shared memory status request
    * @returns {Promise<Object>} Shared memory status
    */
   async handleGetSharedMemoryStatus () {
     try {
-      debugLog('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Getting shared memory status')
+      debugLog('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Getting shared memory status')
 
       // Get the service worker instance to access shared memory
       const serviceWorker = await this.getServiceWorker()
@@ -564,13 +564,13 @@ export class MessageHandler {
 
       return { recentTagsMemory: null, status: 'not_available' }
     } catch (error) {
-      debugError('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Error getting shared memory status:', error)
+      debugError('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error getting shared memory status:', error)
       return { recentTagsMemory: null, status: 'error', error: error.message }
     }
   }
 
   /**
-   * [IMMUTABLE-REQ-TAG-003] - Get service worker instance
+   * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Get service worker instance
    * @returns {Promise<Object|null>} Service worker instance or null
    */
   async getServiceWorker () {
@@ -588,7 +588,7 @@ export class MessageHandler {
 
       return null
     } catch (error) {
-      debugError('[MESSAGE-HANDLER] [IMMUTABLE-REQ-TAG-003] Error getting service worker:', error)
+      debugError('[MESSAGE-HANDLER] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error getting service worker:', error)
       return null
     }
   }
@@ -679,25 +679,25 @@ export class MessageHandler {
 
     const result = await this.bookmarkProvider.saveBookmark(data)
 
-    // [IMMUTABLE-REQ-TAG-001] - Only track newly added tags
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Only track newly added tags
     for (const tag of addedTags) {
       if (tag.trim()) {
         try {
           await this.tagService.handleTagAddition(tag.trim(), data)
         } catch (error) {
-          debugError(`[IMMUTABLE-REQ-TAG-001] Failed to track tag "${tag}":`, error)
+          debugError(`[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to track tag "${tag}":`, error)
           // Don't fail the entire operation if tag tracking fails
         }
       }
     }
 
-    // [IMMUTABLE-REQ-TAG-003] - Track newly added tags for current site only
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Track newly added tags for current site only
     for (const tag of addedTags) {
       if (tag.trim()) {
         try {
           await this.tagService.addTagToUserRecentList(tag.trim(), data.url)
         } catch (error) {
-          debugError(`[IMMUTABLE-REQ-TAG-003] Failed to add tag "${tag}" to user recent list:`, error)
+          debugError(`[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to add tag "${tag}" to user recent list:`, error)
           // Don't fail the entire operation if tag tracking fails
         }
       }
@@ -722,22 +722,22 @@ export class MessageHandler {
   async handleSaveTag (data) {
     const result = await this.bookmarkProvider.saveTag(data)
 
-    // [IMMUTABLE-REQ-TAG-001] - Enhanced tag tracking for tag save
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] - Enhanced tag tracking for tag save
     if (data.value && data.value.trim()) {
       try {
         await this.tagService.handleTagAddition(data.value.trim(), data)
       } catch (error) {
-        debugError(`[IMMUTABLE-REQ-TAG-001] Failed to track tag "${data.value}":`, error)
+        debugError(`[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_MANAGEMENT] Failed to track tag "${data.value}":`, error)
         // Don't fail the entire operation if tag tracking fails
       }
     }
 
-    // [IMMUTABLE-REQ-TAG-003] - Track tag addition for current site only
+    // [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] - Track tag addition for current site only
     if (data.value && data.value.trim() && data.url) {
       try {
         await this.tagService.addTagToUserRecentList(data.value.trim(), data.url)
       } catch (error) {
-        debugError(`[IMMUTABLE-REQ-TAG-003] Failed to add tag "${data.value}" to user recent list:`, error)
+        debugError(`[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Failed to add tag "${data.value}" to user recent list:`, error)
         // Don't fail the entire operation if tag tracking fails
       }
     }
@@ -889,7 +889,7 @@ export class MessageHandler {
   }
 
   /**
-   * [TOGGLE-SYNC-MESSAGE-001] - Handle bookmark updates across interfaces
+   * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] - Handle bookmark updates across interfaces
    * @param {Object} data - Bookmark data
    * @param {number} tabId - Tab ID
    */
@@ -907,35 +907,35 @@ export class MessageHandler {
       debugLog('[MessageHandler] BOOKMARK_UPDATED broadcasted to all tabs', { data })
       return { success: true, updated: data }
     } catch (error) {
-      debugError('[TOGGLE-SYNC-MESSAGE-001] Failed to handle bookmark update:', error)
+      debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TOGGLE_SYNC] Failed to handle bookmark update:', error)
       throw new Error('Failed to update bookmark across interfaces')
     }
   }
 
   /**
-   * [TAG-SYNC-MESSAGE-001] - Handle tag updates across interfaces
+   * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Handle tag updates across interfaces
    * @param {Object} data - Tag update data
    * @param {number} tabId - Tab ID
    */
   async handleTagUpdated (data, tabId) {
     try {
-      debugLog('[TAG-SYNC-MESSAGE-001] Handling tag update:', data)
+      debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Handling tag update:', data)
 
-      // [TAG-SYNC-MESSAGE-001] - Validate tag update data
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Validate tag update data
       if (!data || !data.url || !Array.isArray(data.tags)) {
         throw new Error('Invalid tag update data')
       }
 
-      // [TAG-SYNC-MESSAGE-001] - Broadcast tag update to all tabs
+      // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] - Broadcast tag update to all tabs
       await this.broadcastToAllTabs({
         type: 'TAG_UPDATED',
         data
       })
 
-      debugLog('[TAG-SYNC-MESSAGE-001] Tag update broadcasted successfully')
+      debugLog('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Tag update broadcasted successfully')
       return { success: true, updated: data }
     } catch (error) {
-      debugError('[TAG-SYNC-MESSAGE-001] Failed to handle tag update:', error)
+      debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [TEST-TAG_SYNC] Failed to handle tag update:', error)
       if (error && error.message === 'Invalid tag update data') {
         throw error
       } else {

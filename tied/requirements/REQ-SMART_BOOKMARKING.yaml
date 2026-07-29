@@ -1,0 +1,55 @@
+REQ-SMART_BOOKMARKING:
+  category: "Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-SMART_BOOKMARKING)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Smart Bookmarking"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Fast in-page bookmarking"
+      - "Maintained browsing flow"
+    problems_solved:
+      - "Context switching required"
+      - "Slow bookmark creation"
+    why: "Primary function of the extension"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-OVERLAY_SYSTEM"
+      - "REQ-TAG_MANAGEMENT"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Auto-populated fields from page metadata"
+    - criterion: "Bookmark creation without leaving page"
+    - criterion: "Tag suggestions available"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-UX_CORE"
+    code_annotations:
+      - "REQ-SMART_BOOKMARKING"
+    implementation:
+      - "IMPL-BOOKMARKING"
+      - "IMPL-MESSAGE_HANDLING"
+    tests:
+      - "Bookmark creation tests"
+      - "tests/unit/content-messaging-contracts.test.js (content script message contracts)"
+      - "tests/unit/local-bookmark-service.test.js (shared/toread round-trip)"
+      - "tests/unit/message-handler-contracts.test.js (MessageHandler contracts for message types used by bookmarking)"
+      - "tests/unit/message-handler-local-save-recall.test.js (save then getCurrentBookmark local storage path)"
+      - "tests/unit/message-handler-runtime-validation.test.js (processMessage saveBookmark acceptance)"
+      - "tests/unit/message-schemas.test.js (saveBookmark payload validation)"
+      - "tests/unit/message-type-drift.test.js (message type consistency)"
+      - "tests/unit/popup-message-contract.test.js (popup action → message type)"
+      - "tests/unit/service-worker-messaging-routing.test.js (SW routing for getOptions, processMessage)"
+  validation_criteria:
+    - method: "Bookmarking workflow tests"
+      coverage: "All bookmark operations"

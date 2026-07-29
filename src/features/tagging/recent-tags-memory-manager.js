@@ -40,7 +40,7 @@ function inferLastActivityFromTags (tags) {
 }
 
 /**
- * [IMMUTABLE-REQ-TAG-003] Recent tags: in-memory + chrome.storage.local; cross-window; SW-safe.
+ * [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Recent tags: in-memory + chrome.storage.local; cross-window; SW-safe.
  */
 export class RecentTagsMemoryManager {
   constructor () {
@@ -95,7 +95,7 @@ export class RecentTagsMemoryManager {
         this.lastUpdated = this.recentTags[0]?.lastUsed ?? null
       }
     } catch (e) {
-      console.error('[IMMUTABLE-REQ-TAG-003] hydrate recent tags failed:', e)
+      console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] hydrate recent tags failed:', e)
     }
     this._hydrated = true
   }
@@ -105,7 +105,7 @@ export class RecentTagsMemoryManager {
     this._persistScheduled = true
     queueMicrotask(() => {
       this._persistScheduled = false
-      this._flushPersist().catch((e) => console.error('[IMMUTABLE-REQ-TAG-003] persist failed:', e))
+      this._flushPersist().catch((e) => console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] persist failed:', e))
     })
   }
 
@@ -176,7 +176,7 @@ export class RecentTagsMemoryManager {
   addTag (tagName, currentSiteUrl) {
     try {
       if (!tagName || !currentSiteUrl) {
-        console.error('[IMMUTABLE-REQ-TAG-003] Invalid parameters for addTag:', { tagName, currentSiteUrl })
+        console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Invalid parameters for addTag:', { tagName, currentSiteUrl })
         return false
       }
 
@@ -215,11 +215,11 @@ export class RecentTagsMemoryManager {
       this.lastActivityAt = nowMs
       this._hydrated = true
 
-      console.log('[IMMUTABLE-REQ-TAG-003] Successfully added tag to shared memory:', { tagName, currentSiteUrl })
+      console.log('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Successfully added tag to shared memory:', { tagName, currentSiteUrl })
       this._enqueuePersist()
       return true
     } catch (error) {
-      console.error('[IMMUTABLE-REQ-TAG-003] Error adding tag to shared memory:', error)
+      console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Error adding tag to shared memory:', error)
       return false
     }
   }
@@ -229,7 +229,7 @@ export class RecentTagsMemoryManager {
     this.lastUpdated = null
     this.lastActivityAt = null
     this._hydrated = true
-    console.log('[IMMUTABLE-REQ-TAG-003] Cleared recent tags from shared memory')
+    console.log('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] Cleared recent tags from shared memory')
     const api = this._storageLocal()
     if (api && typeof api.remove === 'function') {
       try {
@@ -243,7 +243,7 @@ export class RecentTagsMemoryManager {
           })
         })
       } catch (e) {
-        console.error('[IMMUTABLE-REQ-TAG-003] clearRecentTags storage.remove failed:', e)
+        console.error('[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] clearRecentTags storage.remove failed:', e)
       }
     }
   }

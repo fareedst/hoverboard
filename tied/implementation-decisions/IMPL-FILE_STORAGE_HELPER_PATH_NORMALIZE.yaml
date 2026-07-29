@@ -8,7 +8,7 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
     - "IMPL-FILE_STORAGE_TYPED_PATH"
     - "REQ-FILE_BOOKMARK_STORAGE"
   detail_file: "implementation-decisions/IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE.yaml"
-  essence_pseudocode: "# [IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE]\n# Path normalization (~ expansion without double slash) and write verification (file exists and non-empty).\n# Contract: path/data inputs and resolved path or success/error.\nINPUT: path string (may contain ~); file path and data (for write)\nOUTPUT: resolved path (no double slash from HOME); success only if file exists and non-empty after write\nDATA: HOME with trailing slash stripped (H = ${HOME%/})\n\n# Resolve ~ using stripped HOME to avoid double slash.\nexpand_tilde(path):\n  H = strip_trailing_slash(HOME)\n  IF path is ~ or ~/...: REPLACE ~ with H; RETURN (no // in result)\n  RETURN path\n\n# Write data to path; fail if file missing or empty after write.\nwriteBookmarksFile(path, data):\n  path = expand_tilde(path)\n  WRITE data to path (create dir if needed)\n  IF file missing OR file empty: OUTPUT error; EXIT failure\n  ELSE: OUTPUT success\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE-pseudocode.md"
   implementation_approach:
     details:
       - "expand_tilde: H=\"${HOME%/}\"; use H in all branches so ~/.hoverboard becomes /home/user/.hoverboard not /home/user//.hoverboard"
@@ -20,8 +20,8 @@ IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE:
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Add essence_pseudocode and complete composed_with"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "File Storage Helper Path Normalization"
   rationale:
     benefits:

@@ -1,0 +1,48 @@
+REQ-CHROME_STORAGE_USAGE:
+  category: "Immutable"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-CHROME_STORAGE_USAGE)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Chrome Storage API Usage"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Persistent user settings"
+      - "Privacy-preserving architecture"
+    problems_solved:
+      - "Data loss across sessions"
+      - "Privacy violations from external tracking"
+    why: "Storage API is required for persistence and privacy is a core value"
+  related_requirements:
+    depends_on: []
+    related_to:
+      - "REQ-CONFIG_PORTABILITY"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Configuration migration works"
+    - criterion: "No external data collection"
+    - criterion: "Privacy policy compliance"
+    - criterion: "User settings persist across sessions"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-STORAGE"
+    code_annotations:
+      - "REQ-CHROME_STORAGE_USAGE"
+    implementation:
+      - "IMPL-STORAGE"
+    tests:
+      - "Storage API tests"
+  validation_criteria:
+    - method: "Storage API tests"
+      coverage: "Read/write operations"
+    - method: "Migration testing"
+      coverage: "Configuration portability"
+    - method: "Privacy audit"
+      coverage: "No external data transmission"

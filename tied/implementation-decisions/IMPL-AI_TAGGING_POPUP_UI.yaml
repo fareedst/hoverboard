@@ -16,7 +16,7 @@ IMPL-AI_TAGGING_POPUP_UI:
     - "ARCH-AI_TAGGING_FLOW"
     - "REQ-AI_TAGGING_POPUP"
     - "REQ-STORAGE_MODE_DEFAULT"
-  essence_pseudocode: "# [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-STORAGE_MODE_DEFAULT]\n# Popup \"Tag with AI\" flow: get page content, get AI tags, split by session, create/update bookmark with default backend, update suggested tags.\n\n# Contract: input = user click; outputs = bookmark updated, suggested tags list updated.\nINPUT: user click \"Tag with AI\"\nOUTPUT: bookmark updated; suggested tags updated\n\n# Guard on API key and http(s) URL; GET_PAGE_CONTENT then GET_AI_TAGS via SW; split inSession vs suggested; save with preferredBackend (REQ-STORAGE_MODE_DEFAULT); refresh state.\nonTagWithAiClick():\n  IF !config.aiApiKey or !currentTab.url.startsWith('http') THEN show message; RETURN\n  content = await sendToSW({ type: 'GET_PAGE_CONTENT', data: { tabId } })  // SW uses scripting.executeScript in tab\n  IF !content?.textContent THEN show (content.error if content.success === false else generic error); RETURN\n  aiTags = await sendToSW({ type: 'GET_AI_TAGS', data: { text: content.textContent, limit: config.aiTagLimit } })\n  sessionSet = new Set(await sendToSW({ type: 'getSessionTags' }))\n  inSession = aiTags.filter(t => sessionSet.has(t.toLowerCase()))\n  suggested = aiTags.filter(t => !sessionSet.has(t.toLowerCase()))\n  bookmark = await getCurrentBookmark()\n  defaultBackend = await configManager.getStorageMode()\n  IF !bookmark?.time:\n    create bookmark with url, title, tags: inSession, preferredBackend: defaultBackend\n  ELSE:\n    merged = merge(bookmark.tags, inSession)  // dedupe case-insensitive\n    saveBookmark({ ...bookmark, tags: merged, preferredBackend: bookmark backend or defaultBackend })\n  updateSuggestedTags(suggested)  // so AI tags appear first in Suggested section\n  refresh bookmark state / badge\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-AI_TAGGING_POPUP_UI-pseudocode.md"
   implementation_approach:
     details:
       - "Button disabled when no API key in config or tab URL not http(s)"
@@ -31,8 +31,8 @@ IMPL-AI_TAGGING_POPUP_UI:
       date: "2026-02-20"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-21"
-      reason: "GET_PAGE_CONTENT via SW executeScript; popup shows content.error on extraction failure"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
   name: "AI Tagging Popup Button and Flow"
   rationale:
     benefits:

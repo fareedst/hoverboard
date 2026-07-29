@@ -1,0 +1,46 @@
+REQ-MANIFEST_V3_MIGRATION:
+  category: "Immutable"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-MANIFEST_V3_MIGRATION)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Manifest V3 Migration"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Continued Chrome Web Store support"
+      - "Modern extension architecture"
+    problems_solved:
+      - "Extension will be delisted from Chrome Web Store"
+      - "Loss of future browser compatibility"
+    why: "Manifest V2 is deprecated and V3 is required for Chrome Web Store"
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "All V2 functionality preserved in V3"
+    - criterion: "Content script injection patterns maintained"
+    - criterion: "Permissions model updated to V3"
+    - criterion: "Service worker replaces background scripts"
+  status: "Planned"
+  traceability:
+    architecture:
+      - "ARCH-MV3_MIGRATION"
+    code_annotations:
+      - "REQ-MANIFEST_V3_MIGRATION"
+    implementation:
+      - "IMPL-MV3_MIGRATION"
+    tests: []
+  validation_criteria:
+    - method: "Manifest validation"
+      coverage: "V3 schema compliance"
+    - method: "Feature parity testing"
+      coverage: "All existing features"
+    - method: "Performance benchmarking"
+      coverage: "Service worker performance"

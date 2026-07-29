@@ -1,9 +1,9 @@
-# [IMMUTABLE-REQ-TAG-004] Overlay Window Tag Persistence - Implementation Specification
+# [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Overlay Window Tag Persistence - Implementation Specification
 
 **Date**: 2025-07-14  
 **Status**: Implementation Complete  
 **Version**: 1.2  
-**Semantic Token**: `[IMMUTABLE-REQ-TAG-004]`  
+**Semantic Token**: `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`  
 **Last Updated**: 2025-07-14
 
 ## 🎯 Implementation Overview
@@ -12,10 +12,10 @@ This specification provides a detailed plan for implementing tag persistence in 
 
 ## 📋 Implementation Tasks
 
-### Task 1: Overlay Manager Message Integration `[IMMUTABLE-REQ-TAG-004]`
+### Task 1: Overlay Manager Message Integration `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 #### Subtask 1.1: Update Tag Input Event Handler
-**File**: `src/features/content/overlay-manager.js` `[IMMUTABLE-REQ-TAG-004]`
+**File**: `src/features/content/overlay-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Current Implementation**:
 ```javascript
@@ -42,10 +42,10 @@ tagInput.addEventListener('keypress', async (e) => {
         // Clear input and refresh overlay with updated content
         tagInput.value = ''
         this.show(content) // Refresh overlay with updated local content
-        debugLog('[IMMUTABLE-REQ-TAG-004] Tag persisted successfully', tagText)
+        debugLog('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Tag persisted successfully', tagText)
         this.showMessage('Tag saved successfully', 'success')
       } catch (error) {
-        debugError('[IMMUTABLE-REQ-TAG-004] Failed to persist tag:', error)
+        debugError('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Failed to persist tag:', error)
         this.showMessage('Failed to save tag', 'error')
       }
     }
@@ -59,7 +59,7 @@ tagInput.addEventListener('keypress', async (e) => {
 - Ensures tags appear in Current tags list immediately
 
 #### Subtask 1.2: Update Recent Tags Click Handler
-**File**: `src/features/content/overlay-manager.js` `[IMMUTABLE-REQ-TAG-004]`
+**File**: `src/features/content/overlay-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Current Implementation**:
 ```javascript
@@ -83,10 +83,10 @@ tagElement.onclick = async () => {
       
       // Refresh overlay with updated local content
       this.show(content) // Refresh overlay with updated local content
-      debugLog('[IMMUTABLE-REQ-TAG-004] Tag persisted from recent', tag)
+      debugLog('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Tag persisted from recent', tag)
       this.showMessage('Tag saved successfully', 'success')
     } catch (error) {
-      debugError('[IMMUTABLE-REQ-TAG-004] Failed to persist tag from recent:', error)
+      debugError('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Failed to persist tag from recent:', error)
       this.showMessage('Failed to save tag', 'error')
     }
   }
@@ -98,10 +98,10 @@ tagElement.onclick = async () => {
 - Changed from `refreshOverlayContent()` to `this.show(content)` for immediate display
 - Ensures tags from recent list appear in Current tags list immediately
 
-### Task 2: Message Service Integration `[IMMUTABLE-REQ-TAG-004]`
+### Task 2: Message Service Integration `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 #### Subtask 2.1: Add MessageClient Import
-**File**: `src/features/content/overlay-manager.js` `[IMMUTABLE-REQ-TAG-004]`
+**File**: `src/features/content/overlay-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Implementation**:
 ```javascript
@@ -109,24 +109,24 @@ import { MessageClient } from './message-client.js'
 ```
 
 #### Subtask 2.2: Initialize MessageClient in Constructor
-**File**: `src/features/content/overlay-manager.js` `[IMMUTABLE-REQ-TAG-004]`
+**File**: `src/features/content/overlay-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Implementation**:
 ```javascript
 constructor (document, config) {
   // ... existing initialization ...
   
-  // [IMMUTABLE-REQ-TAG-004] - Initialize message service for tag persistence
+  // [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] - Initialize message service for tag persistence
   this.messageService = new MessageClient()
   
   // ... rest of initialization ...
 }
 ```
 
-### Task 3: Enhanced Message Display `[IMMUTABLE-REQ-TAG-004]`
+### Task 3: Enhanced Message Display `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 #### Subtask 3.1: Update showMessage Method
-**File**: `src/features/content/overlay-manager.js` `[IMMUTABLE-REQ-TAG-004]`
+**File**: `src/features/content/overlay-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Implementation**:
 ```javascript
@@ -166,21 +166,21 @@ showMessage (message, type = 'info') {
       }
     }, 3000)
     
-    debugLog('[IMMUTABLE-REQ-TAG-004] Message displayed:', { message, type })
+    debugLog('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Message displayed:', { message, type })
   } catch (error) {
-    debugError('[IMMUTABLE-REQ-TAG-004] Failed to show message:', error)
+    debugError('[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] Failed to show message:', error)
   }
 }
 ```
 
-### Task 4: CSS Animation Support `[IMMUTABLE-REQ-TAG-004]`
+### Task 4: CSS Animation Support `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 #### Subtask 4.1: Add Slide-in Animation
-**File**: `src/features/content/overlay-manager.js` `[IMMUTABLE-REQ-TAG-004]`
+**File**: `src/features/content/overlay-manager.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Implementation**:
 ```css
-/* [IMMUTABLE-REQ-TAG-004] - Slide-in animation for messages */
+/* [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] - Slide-in animation for messages */
 @keyframes slideIn {
   from {
     transform: translateX(100%);
@@ -193,7 +193,7 @@ showMessage (message, type = 'info') {
 }
 ```
 
-### Task 5: Testing Implementation `[IMMUTABLE-REQ-TAG-004]`
+### Task 5: Testing Implementation `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 #### Test Infrastructure Note
 - The test infrastructure now uses ESM-compatible Jest configuration and setup files.
@@ -201,7 +201,7 @@ showMessage (message, type = 'info') {
 - Setup files use `.js` extension with `"type": "module"` in `package.json`.
 
 #### Subtask 5.1: Unit Tests
-**File**: `tests/unit/overlay-tag-persistence.test.js` `[IMMUTABLE-REQ-TAG-004]`
+**File**: `tests/unit/overlay-tag-persistence.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Test Cases**:
 1. Tag input persistence with immediate display
@@ -211,7 +211,7 @@ showMessage (message, type = 'info') {
 5. Error handling
 
 #### Subtask 5.2: Integration Tests
-**File**: `tests/integration/overlay-tag-integration.test.js` `[IMMUTABLE-REQ-TAG-004]`
+**File**: `tests/integration/overlay-tag-integration.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Test Cases**:
 1. End-to-end tag persistence workflow
@@ -220,7 +220,7 @@ showMessage (message, type = 'info') {
 4. Validation testing
 
 #### Subtask 5.3: E2E Tests
-**File**: `tests/e2e/overlay-tag-e2e.test.js` `[IMMUTABLE-REQ-TAG-004]`
+**File**: `tests/e2e/overlay-tag-e2e.test.js` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Test Cases**:
 1. Full user workflow testing
@@ -230,8 +230,8 @@ showMessage (message, type = 'info') {
 
 #### Subtask 5.4: Manual Tests
 **Files**: 
-- `test-overlay-tag-persistence.html` `[IMMUTABLE-REQ-TAG-004]`
-- `test-tag-display-fix.html` `[IMMUTABLE-REQ-TAG-004]`
+- `test-overlay-tag-persistence.html` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
+- `test-tag-display-fix.html` `[[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)]`
 
 **Test Features**:
 1. Interactive message display testing
@@ -359,6 +359,6 @@ showMessage (message, type = 'info') {
 
 ## 🎉 Conclusion
 
-The [IMMUTABLE-REQ-TAG-004] overlay tag persistence implementation successfully addresses the core requirement while ensuring immediate visual feedback for users. The key fix of updating local content immediately after successful persistence ensures that tags appear in the Current tags list right away, providing the expected user experience.
+The [[IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION] (was IMMUTABLE-REQ-TAG-004)] overlay tag persistence implementation successfully addresses the core requirement while ensuring immediate visual feedback for users. The key fix of updating local content immediately after successful persistence ensures that tags appear in the Current tags list right away, providing the expected user experience.
 
 The implementation maintains backward compatibility, follows established patterns, and includes comprehensive error handling and testing frameworks. The modular design allows for easy testing and future enhancements while providing a solid foundation for overlay tag management functionality. 

@@ -1,0 +1,30 @@
+REQ-MAINTAINABILITY:
+  category: "Non-Functional"
+  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-MAINTAINABILITY)."
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Maintainability"
+  priority: "P2"
+  rationale:
+    why: "Codebase maintainability and clarity"
+  related_requirements:
+    depends_on: []
+    related_to: []
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "REQ-MAINTAINABILITY documented in TIED"
+  status: "Active"
+  traceability:
+    architecture: []
+    code_annotations:
+      - "REQ-MAINTAINABILITY"
+    implementation: []
+    tests: []
+  validation_criteria:
+    - method: "TIED consistency validation"

@@ -1,0 +1,54 @@
+ARCH-EXT_IDENTITY:
+  alternatives_considered:
+    - name: "Multi-platform native apps"
+      cons:
+        - "Loss of browser integration benefits"
+      pros:
+        - "Deep OS integration"
+      rejected_reason: "Browser extension provides better integration"
+    - name: "Web app approach"
+      cons:
+        - "Loses browser integration"
+      pros:
+        - "No extension store requirements"
+      rejected_reason: "Cannot inject into pages"
+  cross_references:
+    - "REQ-EXTENSION_IDENTITY"
+  decision: "Thin architecture stub for ARCH-EXT_IDENTITY."
+  implementation_approach:
+    details:
+      - "Chrome/Chromium target platform"
+      - "Content script injection for non-intrusive interaction"
+      - "Pinboard.in bookmarking interface"
+    summary: "Browser extension with content script injection for Pinboard integration"
+  metadata:
+    created:
+      author: "AI Agent"
+      date: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-28"
+      reason: "Create missing detail for TIED 2.2.0"
+  name: "Extension Identity Architecture"
+  rationale:
+    benefits:
+      - "Clear value proposition"
+      - "Consistent identity"
+    problems_solved:
+      - "Brand consistency risk"
+      - "User expectation breaks"
+    why: "Core extension identity fundamental to user recognition"
+  related_decisions:
+    depends_on: []
+    informs:
+      - "IMPL-EXT_IDENTITY"
+    see_also: []
+  status: "Active"
+  traceability:
+    code_annotations:
+      - "ARCH-EXT_IDENTITY"
+    implementation:
+      - "IMPL-EXT_IDENTITY"
+    requirements:
+      - "REQ-EXTENSION_IDENTITY"
+    tests: []

@@ -11,7 +11,7 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
     - "IMPL-MOVE_BOOKMARK_UI"
     - "REQ-MOVE_BOOKMARK_STORAGE_UI"
   detail_file: "implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL.yaml"
-  essence_pseudocode: "# [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL] [REQ-MOVE_BOOKMARK_STORAGE_UI]\n# Popup uses response.data for success/error; move uses currentPin.url; router sets time when missing.\n# Contract: response and currentPin/currentTab; UI and move request and router behavior.\nINPUT: response (from moveBookmarkToStorage message), currentPin (bookmark), currentTab (tab URL)\nOUTPUT: correct success/error UI; move request with correct URL; router allows no-time bookmark\nDATA: service worker returns { success: true, data: routerResult }; routerResult = { success, message?, ... }\n\n# Use inner result for success/error and refresh.\nPopup — unwrap inner result:\n  result = response?.data ?? response\n  IF result?.success: show success; refresh bookmark; update storage UI\n  ELSE: show error (result?.message or generic)\n\n# Prefer currentPin.url so key matches storage.\nPopup — URL for move:\n  url = currentPin?.url || currentTab?.url\n  SEND moveBookmarkToStorage(url, targetBackend)   // same key as storage, avoids tab-URL mismatch\n\n# Set time when missing; save to target, delete from source, update index.\nRouter — move when bookmark has no time:\n  bookmark = sourceProvider.getBookmarkForUrl(url)\n  IF bookmark has url and (time missing or invalid):\n    toSave = { ...bookmark, time: now ISO }\n  ELSE: toSave = bookmark\n  targetProvider.saveBookmark(toSave)\n  sourceProvider.deleteBookmark(url)\n  storageIndex.setBackendForUrl(url, targetBackend)\n"
+  essence_pseudocode_path: "implementation-decisions/IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL-pseudocode.md"
   implementation_approach:
     details:
       - "handleStorageBackendChange: url = currentPin?.url || currentTab?.url when sending moveBookmarkToStorage"
@@ -24,8 +24,8 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical YAML rewrite; add essence_pseudocode and composed_with; remove extraneous keys"
+      date: "2026-07-28"
+      reason: "Wire essence_pseudocode_path sidecar"
     last_validated:
       date: "2026-02-18"
       result: "pass"
