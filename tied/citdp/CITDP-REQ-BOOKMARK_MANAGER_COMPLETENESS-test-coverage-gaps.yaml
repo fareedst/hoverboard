@@ -1,0 +1,46 @@
+CITDP-REQ-BOOKMARK_MANAGER_COMPLETENESS-test-coverage-gaps:
+  change_definition:
+    current_behavior: "Index Check link health / Refresh API snapshot / ?q= prefill were inline in bookmarks-table init (untestable without loading page); snapshot integration only spy-mocked _refreshApiSnapshot; link-health SW missing batch-cap/501/404/_getLinkHealthMap cases; localapi had httptest.Recorder only."
+    desired_behavior: "Extracted Index orchestrators with composition tests; real _refreshApiSnapshot sendNativeMessage write path tested; SW edge cases covered; Go httptest.NewServer HTTP contract test."
+    non_goals:
+      - "Implement link-health inhibit-list or fetch timeouts (not in production code)"
+      - "Playwright E2E"
+    success_criteria:
+      - "bookmarks-table-link-health / api-snapshot composition green"
+      - "link-health-sw batch/501/404/getMap green"
+      - "local-query-api-snapshot-write integration green"
+      - "prefillSearchFromQuery unit green"
+      - "TestHTTPContractViaServer green"
+      - "tied_validate_consistency ok"
+  completion_criteria:
+    verification_gate_notes: "Unit + composition + Go httptest; no E2E; inhibit/timeout product work out of scope."
+  impact_analysis:
+    modules_or_boundaries: "src/ui/bookmarks-table/{bookmarks-table-library-search,bookmarks-table-link-health,bookmarks-table-api-snapshot}.js; bookmarks-table.js wiring; tests/integration/*; tests/unit/link-health-sw; native_host/localapi/api_test.go"
+    tied_tokens_affected:
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+      - "IMPL-LINK_HEALTH"
+      - "IMPL-LOCAL_QUERY_API"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: []
+    notes: "Closeout: PREFILL/RUN_* contracts; IMPL-FULL-BLOCK sync; vocab RECORD Index orchestrators; IMPL index + REQ detail tests synced; ARCH unchanged."
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-BOOKMARK_MANAGER_COMPLETENESS-test-coverage-gaps"
+    primary_tokens:
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+      - "IMPL-LINK_HEALTH"
+      - "IMPL-LOCAL_QUERY_API"
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+      - "REQ-LINK_HEALTH"
+      - "REQ-LOCAL_QUERY_API"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-30"
+    title: "Bookmark manager completeness — post-ship test coverage gaps 1-4"
+  risk_analysis:
+    risks: []
+  tdd_sequence:
+    summary: "Failing composition/unit/Go tests first; extract Index orchestrators; SW/Go harnesses; green gates."
+  test_strategy:
+    summary: "Index composition extracts; snapshot native-write composition; SW edge unit; Go httptest contract; no Playwright"

@@ -34,4 +34,7 @@ REQ-LOCAL_QUERY_API:
       - "IMPL-LOCAL_QUERY_API"
     tests:
       - "native_host/localapi/api_test.go"
+      - "tests/integration/bookmarks-table-api-snapshot-composition.integration.test.js"
+      - "tests/integration/local-query-api-snapshot-write.integration.test.js"
+      - "tests/integration/local-query-api-snapshot.integration.test.js"
       - "tests/unit/library-search-and-snapshot.test.js"

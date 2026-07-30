@@ -1498,17 +1498,18 @@
  *
  * ## Prefill Index search from URL
  *
- * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, read ?q= into search field and apply filter.
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, set search field from ?q= via prefillSearchFromQuery; filter applied later by loadBookmarks / applySearchAndFilter.
  * - Contract:
- *   - INPUT: window.location.search
- *   - PRE: Index DOM search input exists
- *   - OUTPUT: search input value set; filter applied when q present
+ *   - INPUT: window.location.search; searchInput
+ *   - PRE: Index DOM search input exists (or helper no-ops when null)
+ *   - OUTPUT: search input value set when q present; empty q leaves prior value
+ *   - POST:
+ *     - success => searchInput.value equals decoded q when q non-empty; subsequent applySearchAndFilter uses that value
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: PREFILL_INDEX_SEARCH_FROM_QUERY
- *   - 1. params = URLSearchParams(location.search)
- *   - 2. q = params.get("q")
- *   - 3. IF q THEN SET searchInput.value = q; APPLY index filter
+ *   - 1. CALL prefillSearchFromQuery(URLSearchParams(location.search), searchInput)  // bookmarks-table-library-search.js
+ *   - 2. ON loadBookmarks / applySearchAndFilter: filter uses searchInput.value (including prefilled q)
  *
  * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
  */

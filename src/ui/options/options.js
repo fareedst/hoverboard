@@ -553,6 +553,23 @@
  *   - 4. ON success RETURN { success: true, count: payload.bookmarks.length }
  *   - 5. ON failure RETURN { success: false, error }
  *
+ * ## Index Refresh API snapshot UI
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: Index orchestrator runRefreshApiSnapshot (bookmarks-table-api-snapshot.js) for composition tests.
+ * - Contract:
+ *   - INPUT: sendMessage; resultEl
+ *   - PRE: sendMessage available
+ *   - OUTPUT: status text with count or error
+ *   - POST:
+ *     - success => resultEl shows Snapshot updated (N bookmarks)
+ *     - failure => resultEl shows error; no throw to caller
+ *   - FAILURE_MODES: SnapshotFailed, SendThrow
+ *   - EFFECTS: Async
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_REFRESH_API_SNAPSHOT_UI
+ *   - 1. CALL runRefreshApiSnapshot({ sendMessage, resultEl })
+ *   - 2. sendMessage REFRESH_API_SNAPSHOT → SW REFRESH_API_SNAPSHOT
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
  */
 import { ConfigManager } from '../../config/config-manager.js'

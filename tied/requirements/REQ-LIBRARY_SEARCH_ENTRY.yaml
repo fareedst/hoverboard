@@ -30,5 +30,7 @@ REQ-LIBRARY_SEARCH_ENTRY:
     implementation:
       - "IMPL-LIBRARY_SEARCH_ENTRY"
     tests:
+      - "tests/integration/library-search-entry.integration.test.js"
+      - "tests/unit/bookmarks-table-library-search.test.js"
       - "tests/unit/library-search-and-snapshot.test.js"
       - "tests/unit/service-worker-open-bookmarks-index.test.js"

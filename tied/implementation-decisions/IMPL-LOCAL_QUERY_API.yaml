@@ -10,7 +10,9 @@ IMPL-LOCAL_QUERY_API:
       - path: "src/core/service-worker.js"
         description: "REFRESH_API_SNAPSHOT handler"
       - path: "src/ui/bookmarks-table/bookmarks-table.js"
-        description: "Refresh API snapshot Index action"
+        description: "Refresh API snapshot Index wiring"
+      - path: "src/ui/bookmarks-table/bookmarks-table-api-snapshot.js"
+        description: "runRefreshApiSnapshot orchestrator"
       - path: "src/ui/options/options.js"
         description: "Options Refresh API snapshot"
       - path: "docs/LOCAL_API.md"
@@ -20,6 +22,7 @@ IMPL-LOCAL_QUERY_API:
       - "buildAggregateSnapshotPayload"
       - "EnsureToken"
       - "FilterBookmarks"
+      - "runRefreshApiSnapshot"
   essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_QUERY_API-pseudocode.md"
   implementation_approach:
     details:
@@ -33,7 +36,7 @@ IMPL-LOCAL_QUERY_API:
     last_updated:
       author: "agent"
       date: "2026-07-30"
-      reason: "Add composition snapshot wiring test and expand code_locations"
+      reason: "Coverage-gaps closeout: RUN_REFRESH_API_SNAPSHOT_UI contracts + full-block sync"
   name: "Local Query API"
   related_decisions:
     composed_with:
@@ -55,5 +58,7 @@ IMPL-LOCAL_QUERY_API:
       - "REQ-LOCAL_QUERY_API"
     tests:
       - "native_host/localapi/api_test.go"
+      - "tests/integration/bookmarks-table-api-snapshot-composition.integration.test.js"
+      - "tests/integration/local-query-api-snapshot-write.integration.test.js"
       - "tests/integration/local-query-api-snapshot.integration.test.js"
       - "tests/unit/library-search-and-snapshot.test.js"

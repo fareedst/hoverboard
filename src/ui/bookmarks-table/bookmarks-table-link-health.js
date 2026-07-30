@@ -102,71 +102,60 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LINK_HEALTH ===
  */
-export const LINK_HEALTH_STORAGE_KEY = 'hoverboard_link_health'
+export const MESSAGE_TYPE_CHECK_LINK_HEALTH = 'CHECK_LINK_HEALTH'
 
 /**
- * @param {number} status
- * @returns {'ok'|'redirect'|'client_error'|'server_error'|'unknown'}
+ * Format Health column cell label from a stored record.
+ * @param {{ status?: string, httpStatus?: number|null }|null|undefined} rec
+ * @returns {string} label without HTML escaping (caller escapes)
  */
-export function classifyHttpStatus (status) {
-  const n = Number(status)
-  if (!Number.isFinite(n) || n <= 0) return 'unknown'
-  if (n >= 200 && n < 300) return 'ok'
-  if (n >= 300 && n < 400) return 'redirect'
-  if (n >= 400 && n < 500) return 'client_error'
-  if (n >= 500 && n < 600) return 'server_error'
-  return 'unknown'
+export function formatHealthCellLabel (rec) {
+  if (!rec || !rec.status) return '—'
+  if (rec.httpStatus != null) return `${rec.status} (${rec.httpStatus})`
+  return String(rec.status)
 }
 
 /**
- * @param {{ ok?: boolean, status?: number, error?: string }} result
- * @returns {{ status: string, httpStatus: number|null, error: string|null, checkedAt: string }}
+ * Run Index Check link health for the given URLs.
+ * @param {object} opts
+ * @param {string[]} opts.urls
+ * @param {(msg: { type: string, data: object }) => Promise<object>} opts.sendMessage
+ * @param {HTMLElement|null} [opts.resultEl]
+ * @param {(results: Record<string, object>) => void|Promise<void>} [opts.onResults]
+ * @returns {Promise<{ success: boolean, checked?: number, error?: string }>}
  */
-export function buildHealthRecord (result = {}) {
-  const checkedAt = new Date().toISOString()
-  if (result.error) {
-    return {
-      status: 'unreachable',
-      httpStatus: null,
-      error: String(result.error),
-      checkedAt
+export async function runCheckLinkHealth ({
+  urls,
+  sendMessage,
+  resultEl,
+  onResults
+}) {
+  const list = Array.isArray(urls) ? urls.filter(Boolean) : []
+  if (!list.length) {
+    if (resultEl) resultEl.textContent = 'No URLs to check'
+    return { success: false, error: 'No URLs to check' }
+  }
+  if (resultEl) resultEl.textContent = `Checking ${list.length}…`
+  try {
+    const response = await sendMessage({
+      type: MESSAGE_TYPE_CHECK_LINK_HEALTH,
+      data: { urls: list }
+    })
+    if (response?.success) {
+      if (typeof onResults === 'function') {
+        await onResults(response.results || {})
+      }
+      if (resultEl) {
+        resultEl.textContent = `Checked ${response.checked ?? list.length}`
+      }
+      return { success: true, checked: response.checked ?? list.length }
     }
+    const error = response?.error || 'Check failed'
+    if (resultEl) resultEl.textContent = error
+    return { success: false, error }
+  } catch (e) {
+    const error = e.message || 'Check failed'
+    if (resultEl) resultEl.textContent = error
+    return { success: false, error }
   }
-  const httpStatus = result.status != null ? Number(result.status) : null
-  return {
-    status: classifyHttpStatus(httpStatus),
-    httpStatus,
-    error: null,
-    checkedAt
-  }
-}
-
-/**
- * Merge one URL health into the map.
- * @param {Record<string, object>} map
- * @param {string} url
- * @param {object} record
- */
-export function mergeHealthMap (map, url, record) {
-  const next = { ...(map || {}) }
-  if (!url) return next
-  next[url] = record
-  return next
-}
-
-/**
- * Filter bookmarks by health status class.
- * @param {Array<object>} bookmarks
- * @param {Record<string, object>} healthMap
- * @param {string} statusFilter - '' | ok | redirect | client_error | server_error | unreachable | unknown
- */
-export function filterBookmarksByHealth (bookmarks, healthMap, statusFilter) {
-  const f = String(statusFilter || '').trim()
-  if (!f) return bookmarks || []
-  const map = healthMap || {}
-  return (bookmarks || []).filter((b) => {
-    const rec = map[b.url]
-    const st = rec?.status || 'unknown'
-    return st === f
-  })
 }

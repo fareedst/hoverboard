@@ -79,3 +79,21 @@
 - PROCEDURE: FILTER_BOOKMARKS_BY_HEALTH
   - 1. IF statusFilter empty THEN RETURN bookmarks
   - 2. KEEP rows where (healthMap[url].status OR "unknown") == statusFilter
+
+## Index Check link health UI
+
+- [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Index orchestrator runCheckLinkHealth (bookmarks-table-link-health.js) for composition tests; applySearchAndFilter uses FILTER_BOOKMARKS_BY_HEALTH; Health cell via formatHealthCellLabel.
+- Contract:
+  - INPUT: selectedUrls OR filteredBookmarks urls; sendMessage; resultEl; onResults
+  - PRE: sendMessage available; urls may be empty
+  - OUTPUT: status text; linkHealthMap merge; table refresh on success
+  - POST:
+    - success => onResults called with results; resultEl shows Checked N
+    - empty urls => resultEl "No URLs to check"; no sendMessage
+  - FAILURE_MODES: EmptyUrls, CheckFailed, SendThrow
+  - EFFECTS: Async, State
+  - TERMINATION: total
+- PROCEDURE: RUN_CHECK_LINK_HEALTH_UI
+  - 1. urls = selected OR filtered URLs
+  - 2. CALL runCheckLinkHealth({ urls, sendMessage, resultEl, onResults })
+  - 3. onResults: merge into linkHealthMap; applySearchAndFilter

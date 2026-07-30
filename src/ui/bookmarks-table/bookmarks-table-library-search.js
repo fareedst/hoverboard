@@ -53,10 +53,14 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
  */
-export function buildBookmarksIndexUrlWithQuery (baseUrl, query = '') {
-  const q = String(query || '').trim()
-  if (!baseUrl) return ''
-  if (!q) return baseUrl
-  const sep = baseUrl.includes('?') ? '&' : '?'
-  return `${baseUrl}${sep}q=${encodeURIComponent(q)}`
+export function prefillSearchFromQuery (searchParams, searchInput) {
+  if (!searchInput || !searchParams || typeof searchParams.get !== 'function') {
+    return ''
+  }
+  const q = searchParams.get('q')
+  if (q == null || q === '') {
+    return ''
+  }
+  searchInput.value = q
+  return q
 }

@@ -42,6 +42,9 @@
 | Library search entry | Search Bookmarks | `OPEN_BOOKMARKS_INDEX` `{ q }` | Index search prefill | [IMPL-LIBRARY_SEARCH_ENTRY] |
 | Link health check | Check link health | `CHECK_LINK_HEALTH` / `GET_LINK_HEALTH` | `hoverboard_link_health` | [IMPL-LINK_HEALTH] |
 | API snapshot refresh | Refresh API snapshot | `REFRESH_API_SNAPSHOT` | `aggregate-snapshot.json` | [IMPL-LOCAL_QUERY_API] |
+| Index prefill helper | Search Bookmarks (`?q=`) | — | — | `prefillSearchFromQuery` ([IMPL-LIBRARY_SEARCH_ENTRY]) |
+| Index Check link health UI | Check link health | `CHECK_LINK_HEALTH` | — | `runCheckLinkHealth` / `formatHealthCellLabel` ([IMPL-LINK_HEALTH]) |
+| Index Refresh API snapshot UI | Refresh API snapshot | `REFRESH_API_SNAPSHOT` | — | `runRefreshApiSnapshot` ([IMPL-LOCAL_QUERY_API]) |
 | Aggregated index | Storage column | `getAggregatedBookmarksForIndex` | storage field on row | BookmarkRouter aggregate |
 | Bulk Delete | Delete (Actions for selected) | `deleteBookmark` | `preferredBackend` from row **Storage column** (same bridge as Add tags) | `buildDeletePayload` → BookmarkRouter |
 | Delete status | `#delete-result` | — | pending `Deleting…` / final `Deleted N…` | `bookmarks-table-delete-status` |
@@ -74,6 +77,7 @@
 - **Search Bookmarks** — Popup/This Page control; opens Local Bookmarks Index with encoded `?q=` prefilled into the Index search field. Distinct from Search tabs.
 - **link health** — SW fetch HEAD then GET; results in `chrome.storage.local` key `hoverboard_link_health`; Index **Health column** and status filter.
 - **Refresh API snapshot** — Writes multi-backend `aggregate-snapshot.json` under the File storage directory for Local Query API GET preference (Phase 2).
+- **Index orchestrators** — Composition-testable Index UI helpers: `prefillSearchFromQuery` (`bookmarks-table-library-search.js`), `runCheckLinkHealth` / `formatHealthCellLabel` (`bookmarks-table-link-health.js`), `runRefreshApiSnapshot` (`bookmarks-table-api-snapshot.js`). Wired thinly from `bookmarks-table.js` init / button handlers.
 
 ---
 
@@ -90,6 +94,8 @@
 | Check link health batch | `CHECK_LINK_HEALTH` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
 | Get link health map | `GET_LINK_HEALTH` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
 | Filter Index by health | `FILTER_BOOKMARKS_BY_HEALTH` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
+| Index Check link health UI | `RUN_CHECK_LINK_HEALTH_UI` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
+| Index Refresh API snapshot UI | `RUN_REFRESH_API_SNAPSHOT_UI` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
 | Load index rows | `LOAD_LOCAL_BOOKMARKS_INDEX` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
 | Store-change reload predicate | `shouldReloadBookmarksOnStoreChange` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
 | SW provider init mutex | `PROVIDER_INIT_MUTEX` / `ensureBookmarkProviderInitialized` | [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
@@ -127,7 +133,14 @@
 | OPEN_BOOKMARKS_INDEX_TAB | Pseudo-code block names |
 | OPEN_LIBRARY_SEARCH | Pseudo-code block names |
 | PREFILL_INDEX_SEARCH_FROM_QUERY | Pseudo-code block names |
+| prefillSearchFromQuery | Named concepts / Naming bridge |
 | Refresh API snapshot | Preferred terms / Named concepts |
+| RUN_CHECK_LINK_HEALTH_UI | Pseudo-code block names |
+| RUN_REFRESH_API_SNAPSHOT_UI | Pseudo-code block names |
+| runCheckLinkHealth | Named concepts / Naming bridge |
+| runRefreshApiSnapshot | Named concepts / Naming bridge |
+| formatHealthCellLabel | Named concepts / Naming bridge |
+| Index orchestrators | Named concepts |
 | Search Bookmarks | Preferred terms / Named concepts |
 | Netscape Bookmark File Format | Named concepts |
 | PROVIDER_INIT_MUTEX | Pseudo-code block names |

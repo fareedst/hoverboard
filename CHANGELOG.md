@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Post-ship test coverage gaps (Index / snapshot / link-health / Local API)** ([REQ-LINK_HEALTH], [REQ-LIBRARY_SEARCH_ENTRY], [REQ-LOCAL_QUERY_API]) – Extracted Index orchestrators `prefillSearchFromQuery`, `runCheckLinkHealth`, `runRefreshApiSnapshot` (composition-testable; Index uses `filterBookmarksByHealth`). **Tests:** `bookmarks-table-library-search.test.js`; composition `bookmarks-table-link-health-composition`, `bookmarks-table-api-snapshot-composition`; `local-query-api-snapshot-write.integration.test.js` (real `_refreshApiSnapshot` → `sendNativeMessage`); SW edges in `link-health-sw.test.js` (batch cap 50, non-http filter, HEAD 501→GET, HEAD 404 no GET, `_getLinkHealthMap`); Go `TestHTTPContractViaServer` (`httptest.NewServer` + Bearer). CITDP: `tied/citdp/CITDP-REQ-BOOKMARK_MANAGER_COMPLETENESS-test-coverage-gaps.yaml`. **No Playwright E2E**; inhibit/timeout product behavior still out of scope.
+
 - **Link health monitoring** ([REQ-LINK_HEALTH], [ARCH-LINK_HEALTH], [IMPL-LINK_HEALTH]) – Index **Check link health** (selected or displayed URLs); HEAD then GET; store `hoverboard_link_health`; Health column + filter. **Tests:** unit `link-health.test.js`, `link-health-sw.test.js`; composition `link-health.integration.test.js` (`CHECK_LINK_HEALTH` / `GET_LINK_HEALTH` SW wiring). CITDP: `tied/citdp/CITDP-REQ-BOOKMARK_MANAGER_COMPLETENESS-notes-search-health-local-api.yaml`. **No Playwright E2E** (unit/composition sufficient).
 
 - **Collections / collaboration docs** – `docs/COLLECTIONS_AND_COLLABORATION.md` (tags-as-collections; File-share ad hoc collaboration). Deferred features listed in `docs/DEFERRED_BOOKMARK_MANAGER_FEATURES.md` (decision 1A).

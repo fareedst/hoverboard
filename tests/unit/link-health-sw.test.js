@@ -82,6 +82,24 @@
  *   - 1. IF statusFilter empty THEN RETURN bookmarks
  *   - 2. KEEP rows where (healthMap[url].status OR "unknown") == statusFilter
  *
+ * ## Index Check link health UI
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Index orchestrator runCheckLinkHealth (bookmarks-table-link-health.js) for composition tests; applySearchAndFilter uses FILTER_BOOKMARKS_BY_HEALTH; Health cell via formatHealthCellLabel.
+ * - Contract:
+ *   - INPUT: selectedUrls OR filteredBookmarks urls; sendMessage; resultEl; onResults
+ *   - PRE: sendMessage available; urls may be empty
+ *   - OUTPUT: status text; linkHealthMap merge; table refresh on success
+ *   - POST:
+ *     - success => onResults called with results; resultEl shows Checked N
+ *     - empty urls => resultEl "No URLs to check"; no sendMessage
+ *   - FAILURE_MODES: EmptyUrls, CheckFailed, SendThrow
+ *   - EFFECTS: Async, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_CHECK_LINK_HEALTH_UI
+ *   - 1. urls = selected OR filtered URLs
+ *   - 2. CALL runCheckLinkHealth({ urls, sendMessage, resultEl, onResults })
+ *   - 3. onResults: merge into linkHealthMap; applySearchAndFilter
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LINK_HEALTH ===
  */
 jest.mock('../../src/shared/safari-shim.js', () => ({
@@ -139,5 +157,59 @@ describe('[REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] SW _checkLinkHealth', () => {
     global.fetch = jest.fn().mockRejectedValue(new Error('network down'))
     await sw._checkLinkHealth(['https://down.example/'])
     expect(storage[LINK_HEALTH_STORAGE_KEY]['https://down.example/'].status).toBe('unreachable')
+  })
+
+  test('batch cap slices to 50 http(s) URLs', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 })
+    const urls = Array.from({ length: 55 }, (_, i) => `https://batch.example/${i}`)
+    const result = await sw._checkLinkHealth(urls)
+    expect(result.checked).toBe(50)
+    expect(global.fetch).toHaveBeenCalledTimes(50)
+    expect(Object.keys(storage[LINK_HEALTH_STORAGE_KEY])).toHaveLength(50)
+  })
+
+  test('non-http URLs and non-strings are filtered out', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 })
+    const result = await sw._checkLinkHealth([
+      'ftp://x.example/',
+      null,
+      42,
+      'https://keep.example/'
+    ])
+    expect(result.checked).toBe(1)
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(storage[LINK_HEALTH_STORAGE_KEY]['https://keep.example/'].status).toBe('ok')
+  })
+
+  test('HEAD 501 falls back to GET', async () => {
+    global.fetch = jest.fn()
+      .mockResolvedValueOnce({ ok: false, status: 501 })
+      .mockResolvedValueOnce({ ok: true, status: 200 })
+    await sw._checkLinkHealth(['https://501.example/'])
+    expect(global.fetch).toHaveBeenNthCalledWith(1, 'https://501.example/', expect.objectContaining({ method: 'HEAD' }))
+    expect(global.fetch).toHaveBeenNthCalledWith(2, 'https://501.example/', expect.objectContaining({ method: 'GET' }))
+    expect(storage[LINK_HEALTH_STORAGE_KEY]['https://501.example/'].status).toBe('ok')
+  })
+
+  test('HEAD 404 does not fall back to GET', async () => {
+    global.fetch = jest.fn().mockResolvedValue({ ok: false, status: 404 })
+    await sw._checkLinkHealth(['https://404.example/'])
+    expect(global.fetch).toHaveBeenCalledTimes(1)
+    expect(global.fetch).toHaveBeenCalledWith('https://404.example/', expect.objectContaining({ method: 'HEAD' }))
+    expect(storage[LINK_HEALTH_STORAGE_KEY]['https://404.example/'].status).toBe('client_error')
+    expect(storage[LINK_HEALTH_STORAGE_KEY]['https://404.example/'].httpStatus).toBe(404)
+  })
+
+  test('_getLinkHealthMap returns empty object when unset', async () => {
+    const map = await sw._getLinkHealthMap()
+    expect(map).toEqual({})
+  })
+
+  test('_getLinkHealthMap returns stored map', async () => {
+    storage[LINK_HEALTH_STORAGE_KEY] = {
+      'https://stored.example/': { status: 'ok', httpStatus: 200 }
+    }
+    const map = await sw._getLinkHealthMap()
+    expect(map['https://stored.example/'].status).toBe('ok')
   })
 })

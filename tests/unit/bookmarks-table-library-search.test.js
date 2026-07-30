@@ -53,10 +53,24 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
  */
-export function buildBookmarksIndexUrlWithQuery (baseUrl, query = '') {
-  const q = String(query || '').trim()
-  if (!baseUrl) return ''
-  if (!q) return baseUrl
-  const sep = baseUrl.includes('?') ? '&' : '?'
-  return `${baseUrl}${sep}q=${encodeURIComponent(q)}`
-}
+import { prefillSearchFromQuery } from '../../src/ui/bookmarks-table/bookmarks-table-library-search.js'
+
+describe('[REQ-LIBRARY_SEARCH_ENTRY] prefillSearchFromQuery', () => {
+  test('sets input from q param', () => {
+    const input = document.createElement('input')
+    const applied = prefillSearchFromQuery(new URLSearchParams('q=hello%20world'), input)
+    expect(applied).toBe('hello world')
+    expect(input.value).toBe('hello world')
+  })
+
+  test('empty q leaves input unchanged', () => {
+    const input = document.createElement('input')
+    input.value = 'prior'
+    expect(prefillSearchFromQuery(new URLSearchParams(''), input)).toBe('')
+    expect(input.value).toBe('prior')
+  })
+
+  test('null input is a no-op', () => {
+    expect(prefillSearchFromQuery(new URLSearchParams('q=x'), null)).toBe('')
+  })
+})

@@ -10,11 +10,14 @@ IMPL-LIBRARY_SEARCH_ENTRY:
       - path: "src/core/service-worker.js"
         description: "OPEN_BOOKMARKS_INDEX_TAB with BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY"
       - path: "src/ui/bookmarks-table/bookmarks-table.js"
-        description: "PREFILL_INDEX_SEARCH_FROM_QUERY"
+        description: "Prefill wiring via prefillSearchFromQuery"
+      - path: "src/ui/bookmarks-table/bookmarks-table-library-search.js"
+        description: "prefillSearchFromQuery helper"
     functions:
       - "_openBookmarksIndexTab"
       - "buildBookmarksIndexUrlWithQuery"
       - "handleLibrarySearch"
+      - "prefillSearchFromQuery"
   cross_references:
     - "ARCH-LIBRARY_SEARCH_ENTRY"
     - "REQ-LIBRARY_SEARCH_ENTRY"
@@ -30,7 +33,7 @@ IMPL-LIBRARY_SEARCH_ENTRY:
     last_updated:
       author: "agent"
       date: "2026-07-30"
-      reason: "Fill code_locations and composition test traceability for three-way alignment"
+      reason: "Coverage-gaps closeout: PREFILL contract + full-block sync"
   name: "Library Search Entry"
   related_decisions:
     composed_with:
@@ -40,7 +43,7 @@ IMPL-LIBRARY_SEARCH_ENTRY:
     see_also: []
     supersedes: []
   status: "Active"
-  summary: "Shared URL builder; PopupController opens Index with q; bookmarks-table applies search on load."
+  summary: "Shared URL builder; PopupController opens Index with q; Index prefill via prefillSearchFromQuery."
   traceability:
     architecture:
       - "ARCH-LIBRARY_SEARCH_ENTRY"
@@ -51,5 +54,6 @@ IMPL-LIBRARY_SEARCH_ENTRY:
       - "REQ-LIBRARY_SEARCH_ENTRY"
     tests:
       - "tests/integration/library-search-entry.integration.test.js"
+      - "tests/unit/bookmarks-table-library-search.test.js"
       - "tests/unit/library-search-and-snapshot.test.js"
       - "tests/unit/service-worker-open-bookmarks-index.test.js"

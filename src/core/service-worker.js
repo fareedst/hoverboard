@@ -1090,17 +1090,18 @@
  *
  * ## Prefill Index search from URL
  *
- * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, read ?q= into search field and apply filter.
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, set search field from ?q= via prefillSearchFromQuery; filter applied later by loadBookmarks / applySearchAndFilter.
  * - Contract:
- *   - INPUT: window.location.search
- *   - PRE: Index DOM search input exists
- *   - OUTPUT: search input value set; filter applied when q present
+ *   - INPUT: window.location.search; searchInput
+ *   - PRE: Index DOM search input exists (or helper no-ops when null)
+ *   - OUTPUT: search input value set when q present; empty q leaves prior value
+ *   - POST:
+ *     - success => searchInput.value equals decoded q when q non-empty; subsequent applySearchAndFilter uses that value
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: PREFILL_INDEX_SEARCH_FROM_QUERY
- *   - 1. params = URLSearchParams(location.search)
- *   - 2. q = params.get("q")
- *   - 3. IF q THEN SET searchInput.value = q; APPLY index filter
+ *   - 1. CALL prefillSearchFromQuery(URLSearchParams(location.search), searchInput)  // bookmarks-table-library-search.js
+ *   - 2. ON loadBookmarks / applySearchAndFilter: filter uses searchInput.value (including prefilled q)
  *
  * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
  */
@@ -1187,6 +1188,24 @@
  * - PROCEDURE: FILTER_BOOKMARKS_BY_HEALTH
  *   - 1. IF statusFilter empty THEN RETURN bookmarks
  *   - 2. KEEP rows where (healthMap[url].status OR "unknown") == statusFilter
+ *
+ * ## Index Check link health UI
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Index orchestrator runCheckLinkHealth (bookmarks-table-link-health.js) for composition tests; applySearchAndFilter uses FILTER_BOOKMARKS_BY_HEALTH; Health cell via formatHealthCellLabel.
+ * - Contract:
+ *   - INPUT: selectedUrls OR filteredBookmarks urls; sendMessage; resultEl; onResults
+ *   - PRE: sendMessage available; urls may be empty
+ *   - OUTPUT: status text; linkHealthMap merge; table refresh on success
+ *   - POST:
+ *     - success => onResults called with results; resultEl shows Checked N
+ *     - empty urls => resultEl "No URLs to check"; no sendMessage
+ *   - FAILURE_MODES: EmptyUrls, CheckFailed, SendThrow
+ *   - EFFECTS: Async, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_CHECK_LINK_HEALTH_UI
+ *   - 1. urls = selected OR filtered URLs
+ *   - 2. CALL runCheckLinkHealth({ urls, sendMessage, resultEl, onResults })
+ *   - 3. onResults: merge into linkHealthMap; applySearchAndFilter
  *
  * === END IMPL-FULL-BLOCK: IMPL-LINK_HEALTH ===
  */
@@ -1296,6 +1315,23 @@
  *   - 3. SEND native writeBookmarksFile path ~/.hoverboard/aggregate-snapshot.json data payload
  *   - 4. ON success RETURN { success: true, count: payload.bookmarks.length }
  *   - 5. ON failure RETURN { success: false, error }
+ *
+ * ## Index Refresh API snapshot UI
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: Index orchestrator runRefreshApiSnapshot (bookmarks-table-api-snapshot.js) for composition tests.
+ * - Contract:
+ *   - INPUT: sendMessage; resultEl
+ *   - PRE: sendMessage available
+ *   - OUTPUT: status text with count or error
+ *   - POST:
+ *     - success => resultEl shows Snapshot updated (N bookmarks)
+ *     - failure => resultEl shows error; no throw to caller
+ *   - FAILURE_MODES: SnapshotFailed, SendThrow
+ *   - EFFECTS: Async
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_REFRESH_API_SNAPSHOT_UI
+ *   - 1. CALL runRefreshApiSnapshot({ sendMessage, resultEl })
+ *   - 2. sendMessage REFRESH_API_SNAPSHOT → SW REFRESH_API_SNAPSHOT
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
  */

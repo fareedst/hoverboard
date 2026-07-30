@@ -6,7 +6,9 @@ IMPL-LINK_HEALTH:
       - path: "src/core/service-worker.js"
         description: "CHECK_LINK_HEALTH / GET_LINK_HEALTH handlers"
       - path: "src/ui/bookmarks-table/bookmarks-table.js"
-        description: "Health column, filter, Check link health action"
+        description: "Health column, filter, Check link health wiring"
+      - path: "src/ui/bookmarks-table/bookmarks-table-link-health.js"
+        description: "runCheckLinkHealth + formatHealthCellLabel orchestrator"
       - path: "src/ui/bookmarks-table/bookmarks-table.html"
         description: "Health column and filter UI"
       - path: "src/core/message-handler.js"
@@ -17,7 +19,9 @@ IMPL-LINK_HEALTH:
       - "buildHealthRecord"
       - "classifyHttpStatus"
       - "filterBookmarksByHealth"
+      - "formatHealthCellLabel"
       - "mergeHealthMap"
+      - "runCheckLinkHealth"
   cross_references:
     - "ARCH-LINK_HEALTH"
     - "REQ-LINK_HEALTH"
@@ -32,7 +36,7 @@ IMPL-LINK_HEALTH:
     last_updated:
       author: "agent"
       date: "2026-07-30"
-      reason: "Fill code_locations and composition test traceability for three-way alignment"
+      reason: "Coverage-gaps closeout: RUN_CHECK_LINK_HEALTH_UI contracts + full-block sync"
   name: "Link Health"
   related_decisions:
     composed_with:
@@ -42,7 +46,7 @@ IMPL-LINK_HEALTH:
     see_also: []
     supersedes: []
   status: "Active"
-  summary: "Pure helpers + SW batch check + Index UI."
+  summary: "Pure helpers + SW batch check + Index UI via runCheckLinkHealth."
   traceability:
     architecture:
       - "ARCH-LINK_HEALTH"
@@ -52,6 +56,7 @@ IMPL-LINK_HEALTH:
     requirements:
       - "REQ-LINK_HEALTH"
     tests:
+      - "tests/integration/bookmarks-table-link-health-composition.integration.test.js"
       - "tests/integration/link-health.integration.test.js"
       - "tests/unit/link-health-sw.test.js"
       - "tests/unit/link-health.test.js"

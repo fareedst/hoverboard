@@ -411,17 +411,18 @@
  *
  * ## Prefill Index search from URL
  *
- * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, read ?q= into search field and apply filter.
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, set search field from ?q= via prefillSearchFromQuery; filter applied later by loadBookmarks / applySearchAndFilter.
  * - Contract:
- *   - INPUT: window.location.search
- *   - PRE: Index DOM search input exists
- *   - OUTPUT: search input value set; filter applied when q present
+ *   - INPUT: window.location.search; searchInput
+ *   - PRE: Index DOM search input exists (or helper no-ops when null)
+ *   - OUTPUT: search input value set when q present; empty q leaves prior value
+ *   - POST:
+ *     - success => searchInput.value equals decoded q when q non-empty; subsequent applySearchAndFilter uses that value
  *   - EFFECTS: State
  *   - TERMINATION: total
  * - PROCEDURE: PREFILL_INDEX_SEARCH_FROM_QUERY
- *   - 1. params = URLSearchParams(location.search)
- *   - 2. q = params.get("q")
- *   - 3. IF q THEN SET searchInput.value = q; APPLY index filter
+ *   - 1. CALL prefillSearchFromQuery(URLSearchParams(location.search), searchInput)  // bookmarks-table-library-search.js
+ *   - 2. ON loadBookmarks / applySearchAndFilter: filter uses searchInput.value (including prefilled q)
  *
  * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
  */
@@ -508,6 +509,24 @@
  * - PROCEDURE: FILTER_BOOKMARKS_BY_HEALTH
  *   - 1. IF statusFilter empty THEN RETURN bookmarks
  *   - 2. KEEP rows where (healthMap[url].status OR "unknown") == statusFilter
+ *
+ * ## Index Check link health UI
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Index orchestrator runCheckLinkHealth (bookmarks-table-link-health.js) for composition tests; applySearchAndFilter uses FILTER_BOOKMARKS_BY_HEALTH; Health cell via formatHealthCellLabel.
+ * - Contract:
+ *   - INPUT: selectedUrls OR filteredBookmarks urls; sendMessage; resultEl; onResults
+ *   - PRE: sendMessage available; urls may be empty
+ *   - OUTPUT: status text; linkHealthMap merge; table refresh on success
+ *   - POST:
+ *     - success => onResults called with results; resultEl shows Checked N
+ *     - empty urls => resultEl "No URLs to check"; no sendMessage
+ *   - FAILURE_MODES: EmptyUrls, CheckFailed, SendThrow
+ *   - EFFECTS: Async, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_CHECK_LINK_HEALTH_UI
+ *   - 1. urls = selected OR filtered URLs
+ *   - 2. CALL runCheckLinkHealth({ urls, sendMessage, resultEl, onResults })
+ *   - 3. onResults: merge into linkHealthMap; applySearchAndFilter
  *
  * === END IMPL-FULL-BLOCK: IMPL-LINK_HEALTH ===
  */
@@ -618,6 +637,23 @@
  *   - 4. ON success RETURN { success: true, count: payload.bookmarks.length }
  *   - 5. ON failure RETURN { success: false, error }
  *
+ * ## Index Refresh API snapshot UI
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: Index orchestrator runRefreshApiSnapshot (bookmarks-table-api-snapshot.js) for composition tests.
+ * - Contract:
+ *   - INPUT: sendMessage; resultEl
+ *   - PRE: sendMessage available
+ *   - OUTPUT: status text with count or error
+ *   - POST:
+ *     - success => resultEl shows Snapshot updated (N bookmarks)
+ *     - failure => resultEl shows error; no throw to caller
+ *   - FAILURE_MODES: SnapshotFailed, SendThrow
+ *   - EFFECTS: Async
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_REFRESH_API_SNAPSHOT_UI
+ *   - 1. CALL runRefreshApiSnapshot({ sendMessage, resultEl })
+ *   - 2. sendMessage REFRESH_API_SNAPSHOT → SW REFRESH_API_SNAPSHOT
+ *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
  */
 import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
@@ -626,6 +662,10 @@ import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
 import { setTableDisplayStickyHeight } from './bookmarks-table-sticky.js'
 import { setImportResultPending, setImportResultFinal, setImportResultError, formatImportResultMessage } from './bookmarks-table-import-status.js'
 import { runBulkDelete } from './bookmarks-table-bulk-delete.js'
+import { prefillSearchFromQuery } from './bookmarks-table-library-search.js'
+import { runCheckLinkHealth, formatHealthCellLabel } from './bookmarks-table-link-health.js'
+import { runRefreshApiSnapshot } from './bookmarks-table-api-snapshot.js'
+import { filterBookmarksByHealth } from '../../shared/link-health.js'
 import {
   isAggregatedIndexLoadFailure,
   extractBookmarksList,
@@ -780,13 +820,7 @@ function applySearchAndFilter () {
   list = list.filter(b => matchSearch(b, q) && matchFilters(b))
   list = list.filter(matchExcludeTags)
   // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
-  const healthFilter = elements.filterHealth?.value || ''
-  if (healthFilter) {
-    list = list.filter((b) => {
-      const st = linkHealthMap[b.url]?.status || 'unknown'
-      return st === healthFilter
-    })
-  }
+  list = filterBookmarksByHealth(list, linkHealthMap, elements.filterHealth?.value || '')
   filteredBookmarks = list
   sortTable()
   renderTableBody()
@@ -865,9 +899,7 @@ function renderTableBody () {
     const storage = escapeHtml(storageLabel)
     // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
     const healthRec = linkHealthMap[url]
-    const healthLabel = healthRec
-      ? escapeHtml(`${healthRec.status}${healthRec.httpStatus != null ? ` (${healthRec.httpStatus})` : ''}`)
-      : '—'
+    const healthLabel = escapeHtml(formatHealthCellLabel(healthRec))
     const urlLink = b.url
       ? `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" class="url-link" title="Opens in new tab">${urlEsc}<span class="url-external-icon" aria-hidden="true">↗</span></a>`
       : urlEsc
@@ -1442,11 +1474,7 @@ function init () {
 
   // [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY] Prefill search from ?q=
   try {
-    const params = new URLSearchParams(window.location.search || '')
-    const q = params.get('q')
-    if (q && elements.searchInput) {
-      elements.searchInput.value = q
-    }
+    prefillSearchFromQuery(new URLSearchParams(window.location.search || ''), elements.searchInput)
   } catch (_) { /* ignore */ }
 
   // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
@@ -1455,25 +1483,15 @@ function init () {
     const urls = selectedUrls.size
       ? Array.from(selectedUrls)
       : filteredBookmarks.map((b) => b.url).filter(Boolean)
-    if (!urls.length) {
-      if (elements.linkHealthResult) elements.linkHealthResult.textContent = 'No URLs to check'
-      return
-    }
-    if (elements.linkHealthResult) elements.linkHealthResult.textContent = `Checking ${urls.length}…`
-    try {
-      const response = await chrome.runtime.sendMessage({ type: 'CHECK_LINK_HEALTH', data: { urls } })
-      if (response?.success) {
-        Object.assign(linkHealthMap, response.results || {})
+    await runCheckLinkHealth({
+      urls,
+      sendMessage: (msg) => chrome.runtime.sendMessage(msg),
+      resultEl: elements.linkHealthResult,
+      onResults: (results) => {
+        Object.assign(linkHealthMap, results || {})
         applySearchAndFilter()
-        if (elements.linkHealthResult) {
-          elements.linkHealthResult.textContent = `Checked ${response.checked ?? urls.length}`
-        }
-      } else if (elements.linkHealthResult) {
-        elements.linkHealthResult.textContent = response?.error || 'Check failed'
       }
-    } catch (e) {
-      if (elements.linkHealthResult) elements.linkHealthResult.textContent = e.message || 'Check failed'
-    }
+    })
   })
   chrome.runtime.sendMessage({ type: 'GET_LINK_HEALTH' }, (response) => {
     if (response?.success && response.data) {
@@ -1484,21 +1502,10 @@ function init () {
 
   // [REQ-LOCAL_QUERY_API] [IMPL-LOCAL_QUERY_API]
   elements.refreshApiSnapshot?.addEventListener('click', async () => {
-    if (elements.apiSnapshotResult) elements.apiSnapshotResult.textContent = 'Writing snapshot…'
-    try {
-      const response = await chrome.runtime.sendMessage({ type: 'REFRESH_API_SNAPSHOT' })
-      if (response?.success) {
-        if (elements.apiSnapshotResult) {
-          elements.apiSnapshotResult.textContent = `Snapshot updated (${response.count ?? 0} bookmarks)`
-        }
-      } else {
-        if (elements.apiSnapshotResult) {
-          elements.apiSnapshotResult.textContent = response?.error || 'Snapshot failed'
-        }
-      }
-    } catch (e) {
-      if (elements.apiSnapshotResult) elements.apiSnapshotResult.textContent = e.message || 'Snapshot failed'
-    }
+    await runRefreshApiSnapshot({
+      sendMessage: (msg) => chrome.runtime.sendMessage(msg),
+      resultEl: elements.apiSnapshotResult
+    })
   })
 
   loadBookmarks()

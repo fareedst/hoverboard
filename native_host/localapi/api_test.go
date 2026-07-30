@@ -3,6 +3,7 @@ package localapi
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -183,5 +184,133 @@ func TestPreferAggregateSnapshot(t *testing.T) {
 	}
 	if len(body.Bookmarks) != 1 || body.Bookmarks[0].URL != "https://snap.test/" {
 		t.Fatalf("expected snapshot bookmarks, got %#v", body.Bookmarks)
+	}
+}
+
+// TestHTTPContractViaServer exercises the handler over a real httptest TCP server + http.Client.
+func TestHTTPContractViaServer(t *testing.T) {
+	dir := t.TempDir()
+	filePath := filepath.Join(dir, BookmarksFileName)
+	snapPath := filepath.Join(dir, SnapshotFileName)
+	store := fileStore{
+		Version: 1,
+		Bookmarks: map[string]*Bookmark{
+			"https://file.contract/": {URL: "https://file.contract/", Description: "FileRow", Extended: "hello-contract", Tags: "t"},
+		},
+	}
+	raw, _ := json.Marshal(store)
+	if err := os.WriteFile(filePath, raw, 0o600); err != nil {
+		t.Fatal(err)
+	}
+	snap := map[string]interface{}{
+		"version": 1,
+		"bookmarks": []Bookmark{
+			{URL: "https://snap.contract/", Description: "SnapRow", Storage: "local"},
+		},
+	}
+	snapRaw, _ := json.Marshal(snap)
+	if err := os.WriteFile(snapPath, snapRaw, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	srv, err := NewServer(Config{
+		InstallDir:    dir,
+		Port:          1,
+		Token:         "secret",
+		BookmarksPath: filePath,
+		SnapshotPath:  snapPath,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	ts := httptest.NewServer(srv.Handler())
+	defer ts.Close()
+	client := ts.Client()
+
+	// 401 without Bearer
+	res, err := client.Get(ts.URL + "/v1/bookmarks")
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	if res.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("expected 401, got %d", res.StatusCode)
+	}
+
+	authGet := func(path string) (*http.Response, error) {
+		req, err := http.NewRequest(http.MethodGet, ts.URL+path, nil)
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Authorization", "Bearer secret")
+		return client.Do(req)
+	}
+
+	res, err = authGet("/v1/health")
+	if err != nil {
+		t.Fatal(err)
+	}
+	healthBody, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("health: %d %s", res.StatusCode, healthBody)
+	}
+	var health map[string]interface{}
+	if err := json.Unmarshal(healthBody, &health); err != nil {
+		t.Fatal(err)
+	}
+	if health["source"] != "snapshot" {
+		t.Fatalf("expected source snapshot, got %#v", health["source"])
+	}
+
+	res, err = authGet("/v1/bookmarks?q=Snap")
+	if err != nil {
+		t.Fatal(err)
+	}
+	listBody, _ := io.ReadAll(res.Body)
+	res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("list: %d %s", res.StatusCode, listBody)
+	}
+	var list struct {
+		Count     int        `json:"count"`
+		Bookmarks []Bookmark `json:"bookmarks"`
+	}
+	if err := json.Unmarshal(listBody, &list); err != nil {
+		t.Fatal(err)
+	}
+	if list.Count != 1 || list.Bookmarks[0].URL != "https://snap.contract/" {
+		t.Fatalf("unexpected list: %#v", list)
+	}
+
+	// POST/DELETE against File store (mutations ignore snapshot preference for write path)
+	postBody := `{"url":"https://w.contract/","description":"W","extended":"n","tags":"a"}`
+	req, err := http.NewRequest(http.MethodPost, ts.URL+"/v1/bookmarks", strings.NewReader(postBody))
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Authorization", "Bearer secret")
+	req.Header.Set("Content-Type", "application/json")
+	res, err = client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("POST: %d", res.StatusCode)
+	}
+
+	req, err = http.NewRequest(http.MethodDelete, ts.URL+"/v1/bookmarks?url=https://w.contract/", nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Authorization", "Bearer secret")
+	res, err = client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	res.Body.Close()
+	if res.StatusCode != http.StatusOK {
+		t.Fatalf("DELETE: %d", res.StatusCode)
 	}
 }

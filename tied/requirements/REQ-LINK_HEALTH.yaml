@@ -29,5 +29,7 @@ REQ-LINK_HEALTH:
     implementation:
       - "IMPL-LINK_HEALTH"
     tests:
+      - "tests/integration/bookmarks-table-link-health-composition.integration.test.js"
+      - "tests/integration/link-health.integration.test.js"
       - "tests/unit/link-health-sw.test.js"
       - "tests/unit/link-health.test.js"

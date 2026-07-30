@@ -1643,10 +1643,10 @@ IMPL-LIBRARY_SEARCH_ENTRY:
     last_updated:
       author: "agent"
       date: "2026-07-30"
-      reason: "Three-way alignment: composition test + full-block sync"
+      reason: "Coverage-gaps closeout: index tests + Index prefill extract"
   name: "Library Search Entry"
   status: "Active"
-  summary: "Shared URL builder; PopupController opens Index with q; bookmarks-table applies search on load; composition covers UIManager→OPEN_BOOKMARKS_INDEX."
+  summary: "Shared URL builder; PopupController opens Index with q; Index prefill via prefillSearchFromQuery; composition covers UIManager→OPEN_BOOKMARKS_INDEX."
   traceability:
     architecture:
       - "ARCH-LIBRARY_SEARCH_ENTRY"
@@ -1657,6 +1657,7 @@ IMPL-LIBRARY_SEARCH_ENTRY:
       - "REQ-LIBRARY_SEARCH_ENTRY"
     tests:
       - "tests/integration/library-search-entry.integration.test.js"
+      - "tests/unit/bookmarks-table-library-search.test.js"
       - "tests/unit/library-search-and-snapshot.test.js"
       - "tests/unit/service-worker-open-bookmarks-index.test.js"
 IMPL-LINK_HEALTH:
@@ -1668,10 +1669,10 @@ IMPL-LINK_HEALTH:
     last_updated:
       author: "agent"
       date: "2026-07-30"
-      reason: "Three-way alignment: composition test + full-block sync"
+      reason: "Coverage-gaps closeout: index tests + Index Check UI extract"
   name: "Link Health"
   status: "Active"
-  summary: "Pure helpers + SW batch check + Index UI; composition covers CHECK/GET_LINK_HEALTH wiring."
+  summary: "Pure helpers + SW batch check + Index UI via runCheckLinkHealth; composition covers CHECK/GET and Index orchestrator."
   traceability:
     architecture:
       - "ARCH-LINK_HEALTH"
@@ -1681,6 +1682,7 @@ IMPL-LINK_HEALTH:
     requirements:
       - "REQ-LINK_HEALTH"
     tests:
+      - "tests/integration/bookmarks-table-link-health-composition.integration.test.js"
       - "tests/integration/link-health.integration.test.js"
       - "tests/unit/link-health-sw.test.js"
       - "tests/unit/link-health.test.js"
@@ -2106,10 +2108,10 @@ IMPL-LOCAL_QUERY_API:
     last_updated:
       author: "agent"
       date: "2026-07-30"
-      reason: "Three-way alignment: composition snapshot test"
+      reason: "Coverage-gaps closeout: index tests + snapshot write composition"
   name: "Local Query API"
   status: "Active"
-  summary: "native_host/localapi + aggregate-snapshot.js + REFRESH_API_SNAPSHOT; composition covers SW snapshot wiring."
+  summary: "native_host/localapi + aggregate-snapshot.js + REFRESH_API_SNAPSHOT; Index runRefreshApiSnapshot; composition covers SW snapshot write and Index UI."
   traceability:
     architecture:
       - "ARCH-LOCAL_QUERY_API"
@@ -2120,6 +2122,8 @@ IMPL-LOCAL_QUERY_API:
       - "REQ-LOCAL_QUERY_API"
     tests:
       - "native_host/localapi/api_test.go"
+      - "tests/integration/bookmarks-table-api-snapshot-composition.integration.test.js"
+      - "tests/integration/local-query-api-snapshot-write.integration.test.js"
       - "tests/integration/local-query-api-snapshot.integration.test.js"
       - "tests/unit/library-search-and-snapshot.test.js"
 IMPL-LOG_LEVEL_CONFIG:

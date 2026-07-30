@@ -1,59 +1,4 @@
 /**
- * === IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
- * [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] — Capture UI Search Bookmarks opens Index with ?q=; distinct from Search tabs.
- *
- * ## Build Index URL with query
- *
- * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Pure URL builder shared by SW and tests; append encoded q.
- * - Contract:
- *   - INPUT: baseUrl (string), query (string)
- *   - PRE: baseUrl may be empty
- *   - OUTPUT: baseUrl unchanged when query empty; else baseUrl + ?q= or &q= encodeURIComponent(query)
- *   - POST:
- *     - success => empty query returns baseUrl; non-empty query includes encoded q
- *   - EFFECTS: pure
- *   - TERMINATION: total
- * - PROCEDURE: BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY
- *   - 1. q = trim(query)
- *   - 2. IF baseUrl empty THEN RETURN ""
- *   - 3. IF q empty THEN RETURN baseUrl
- *   - 4. sep = IF baseUrl contains "?" THEN "&" ELSE "?"
- *   - 5. RETURN baseUrl + sep + "q=" + encodeURIComponent(q)
- *
- * ## Open library search from capture UI
- *
- * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Read Search Bookmarks input; send OPEN_BOOKMARKS_INDEX with q (does not replace Search tabs).
- * - Contract:
- *   - INPUT: librarySearchInput value (string)
- *   - PRE: sendMessage available
- *   - OUTPUT: OPEN_BOOKMARKS_INDEX message with data.q
- *   - POST:
- *     - success => SW opens Index tab; Index search prefilled when q non-empty
- *   - EFFECTS: Async, State
- *   - TERMINATION: total
- * - PROCEDURE: OPEN_LIBRARY_SEARCH
- *   - 1. q = trim(librarySearchInput.value)
- *   - 2. SEND OPEN_BOOKMARKS_INDEX { q }
- *   - 3. (SW) OPEN_BOOKMARKS_INDEX_TAB(q) via BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY then REQUEST_SIDE_PANEL_CLOSE
- *
- * ## Prefill Index search from URL
- *
- * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, set search field from ?q= via prefillSearchFromQuery; filter applied later by loadBookmarks / applySearchAndFilter.
- * - Contract:
- *   - INPUT: window.location.search; searchInput
- *   - PRE: Index DOM search input exists (or helper no-ops when null)
- *   - OUTPUT: search input value set when q present; empty q leaves prior value
- *   - POST:
- *     - success => searchInput.value equals decoded q when q non-empty; subsequent applySearchAndFilter uses that value
- *   - EFFECTS: State
- *   - TERMINATION: total
- * - PROCEDURE: PREFILL_INDEX_SEARCH_FROM_QUERY
- *   - 1. CALL prefillSearchFromQuery(URLSearchParams(location.search), searchInput)  // bookmarks-table-library-search.js
- *   - 2. ON loadBookmarks / applySearchAndFilter: filter uses searchInput.value (including prefilled q)
- *
- * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
- */
-/**
  * === IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
  * [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] — Localhost HTTP API over File bookmarks + optional aggregate-snapshot; bearer token; 127.0.0.1 only; extension REFRESH_API_SNAPSHOT.
  *
@@ -179,33 +124,31 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
  */
-import { buildBookmarksIndexUrlWithQuery } from '../../src/shared/library-search-entry.js'
-import { buildAggregateSnapshotPayload } from '../../src/shared/aggregate-snapshot.js'
+export const MESSAGE_TYPE_REFRESH_API_SNAPSHOT = 'REFRESH_API_SNAPSHOT'
 
-describe('[REQ-LIBRARY_SEARCH_ENTRY] buildBookmarksIndexUrlWithQuery', () => {
-  test('appends encoded q', () => {
-    expect(buildBookmarksIndexUrlWithQuery('chrome-extension://x/bookmarks-table.html', 'foo bar'))
-      .toBe('chrome-extension://x/bookmarks-table.html?q=foo%20bar')
-  })
-
-  test('empty query returns base', () => {
-    expect(buildBookmarksIndexUrlWithQuery('http://x/a.html', '  ')).toBe('http://x/a.html')
-  })
-})
-
-describe('[REQ-LOCAL_QUERY_API] buildAggregateSnapshotPayload', () => {
-  test('maps aggregated rows', () => {
-    const snap = buildAggregateSnapshotPayload([
-      { url: 'https://a.test/', description: 'A', extended: 'n', tags: 't', storage: 'local' },
-      { url: '', description: 'skip' }
-    ])
-    expect(snap.version).toBe(1)
-    expect(snap.bookmarks).toHaveLength(1)
-    expect(snap.bookmarks[0]).toMatchObject({
-      url: 'https://a.test/',
-      description: 'A',
-      storage: 'local'
-    })
-    expect(snap.updatedAt).toBeTruthy()
-  })
-})
+/**
+ * Run Index Refresh API snapshot.
+ * @param {object} opts
+ * @param {(msg: { type: string }) => Promise<object>} opts.sendMessage
+ * @param {HTMLElement|null} [opts.resultEl]
+ * @returns {Promise<{ success: boolean, count?: number, error?: string }>}
+ */
+export async function runRefreshApiSnapshot ({ sendMessage, resultEl }) {
+  if (resultEl) resultEl.textContent = 'Writing snapshot…'
+  try {
+    const response = await sendMessage({ type: MESSAGE_TYPE_REFRESH_API_SNAPSHOT })
+    if (response?.success) {
+      if (resultEl) {
+        resultEl.textContent = `Snapshot updated (${response.count ?? 0} bookmarks)`
+      }
+      return { success: true, count: response.count ?? 0 }
+    }
+    const error = response?.error || 'Snapshot failed'
+    if (resultEl) resultEl.textContent = error
+    return { success: false, error }
+  } catch (e) {
+    const error = e.message || 'Snapshot failed'
+    if (resultEl) resultEl.textContent = error
+    return { success: false, error }
+  }
+}
