@@ -154,7 +154,8 @@ def read_detail_paths(token: str) -> tuple[list[str], list[str]]:
 def wrap_comment(content: str) -> str:
     # Escape */ in content
     safe = content.replace("*/", "* /")
-    body = "\n".join(" * " + (ln if ln else "") for ln in safe.splitlines())
+    # Empty sidecar lines become " *" (no trailing space) so eslint no-trailing-spaces passes.
+    body = "\n".join((" * " + ln) if ln else " *" for ln in safe.splitlines())
     return f"/**\n{body}\n */\n"
 
 

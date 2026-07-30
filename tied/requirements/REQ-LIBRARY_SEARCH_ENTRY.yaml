@@ -1,0 +1,34 @@
+REQ-LIBRARY_SEARCH_ENTRY:
+  category: "Functional"
+  description: "Popup and This Page expose a Search bookmarks control that opens the Local Bookmarks Index with the query prefilled. This is distinct from Search tabs (open-tab title search)."
+  name: "Library Search Entry"
+  priority: "P1"
+  rationale:
+    benefits:
+      - "Clear path to title/URL/tags/notes search"
+    problems_solved:
+      - "Users confuse tab search with library search"
+    why: "Library metadata search exists on Index/By Tag but was not obvious from capture UI."
+  related_requirements:
+    depends_on:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-SEARCH_FUNCTIONALITY"
+    related_to:
+      - "REQ-SIDE_PANEL_BOOKMARK_SEARCH"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Does not replace Search tabs control"
+    - criterion: "Opens Index URL with ?q= encoded query"
+    - criterion: "Search bookmarks control on popup and This Page"
+    - criterion: "Unit tests for URL builder"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-LIBRARY_SEARCH_ENTRY"
+    code_annotations:
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+    implementation:
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+    tests:
+      - "tests/unit/library-search-and-snapshot.test.js"
+      - "tests/unit/service-worker-open-bookmarks-index.test.js"

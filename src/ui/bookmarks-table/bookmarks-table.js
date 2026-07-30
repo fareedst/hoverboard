@@ -371,6 +371,255 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE ===
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
+ * [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] — Capture UI Search Bookmarks opens Index with ?q=; distinct from Search tabs.
+ *
+ * ## Build Index URL with query
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Pure URL builder shared by SW and tests; append encoded q.
+ * - Contract:
+ *   - INPUT: baseUrl (string), query (string)
+ *   - PRE: baseUrl may be empty
+ *   - OUTPUT: baseUrl unchanged when query empty; else baseUrl + ?q= or &q= encodeURIComponent(query)
+ *   - POST:
+ *     - success => empty query returns baseUrl; non-empty query includes encoded q
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY
+ *   - 1. q = trim(query)
+ *   - 2. IF baseUrl empty THEN RETURN ""
+ *   - 3. IF q empty THEN RETURN baseUrl
+ *   - 4. sep = IF baseUrl contains "?" THEN "&" ELSE "?"
+ *   - 5. RETURN baseUrl + sep + "q=" + encodeURIComponent(q)
+ *
+ * ## Open library search from capture UI
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Read Search Bookmarks input; send OPEN_BOOKMARKS_INDEX with q (does not replace Search tabs).
+ * - Contract:
+ *   - INPUT: librarySearchInput value (string)
+ *   - PRE: sendMessage available
+ *   - OUTPUT: OPEN_BOOKMARKS_INDEX message with data.q
+ *   - POST:
+ *     - success => SW opens Index tab; Index search prefilled when q non-empty
+ *   - EFFECTS: Async, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OPEN_LIBRARY_SEARCH
+ *   - 1. q = trim(librarySearchInput.value)
+ *   - 2. SEND OPEN_BOOKMARKS_INDEX { q }
+ *   - 3. (SW) OPEN_BOOKMARKS_INDEX_TAB(q) via BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY then REQUEST_SIDE_PANEL_CLOSE
+ *
+ * ## Prefill Index search from URL
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, read ?q= into search field and apply filter.
+ * - Contract:
+ *   - INPUT: window.location.search
+ *   - PRE: Index DOM search input exists
+ *   - OUTPUT: search input value set; filter applied when q present
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: PREFILL_INDEX_SEARCH_FROM_QUERY
+ *   - 1. params = URLSearchParams(location.search)
+ *   - 2. q = params.get("q")
+ *   - 3. IF q THEN SET searchInput.value = q; APPLY index filter
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LINK_HEALTH ===
+ * [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] — Index batch link health via SW fetch HEAD→GET; store hoverboard_link_health; Health column/filter.
+ *
+ * ## Classify HTTP status
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Map numeric status to ok|redirect|client_error|server_error|unknown.
+ * - Contract:
+ *   - INPUT: status (number)
+ *   - PRE: status may be non-finite
+ *   - OUTPUT: status class string
+ *   - POST:
+ *     - success => 2xx ok; 3xx redirect; 4xx client_error; 5xx server_error; else unknown
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: CLASSIFY_HTTP_STATUS
+ *   - 1. IF status not finite or <= 0 THEN RETURN "unknown"
+ *   - 2. IF 200..299 THEN RETURN "ok"
+ *   - 3. IF 300..399 THEN RETURN "redirect"
+ *   - 4. IF 400..499 THEN RETURN "client_error"
+ *   - 5. IF 500..599 THEN RETURN "server_error"
+ *   - 6. RETURN "unknown"
+ *
+ * ## Build health record
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Normalize fetch result into persisted record with checkedAt.
+ * - Contract:
+ *   - INPUT: { ok?, status?, error? }
+ *   - OUTPUT: { status, httpStatus, error, checkedAt }
+ *   - EFFECTS: pure (clock for checkedAt)
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_HEALTH_RECORD
+ *   - 1. checkedAt = now ISO
+ *   - 2. IF error THEN RETURN { status: "unreachable", httpStatus: null, error, checkedAt }
+ *   - 3. RETURN { status: CLASSIFY_HTTP_STATUS(status), httpStatus, error: null, checkedAt }
+ *
+ * ## Check link health batch
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: SW CHECK_LINK_HEALTH; HEAD then GET on 405/501; merge into chrome.storage.local.
+ * - Contract:
+ *   - INPUT: urls[] (http/https only; max 50)
+ *   - PRE: chrome.storage.local available; fetch available
+ *   - OUTPUT: { success, results, checked }
+ *   - POST:
+ *     - success => hoverboard_link_health updated for each checked URL
+ *   - FAILURE_MODES: network error → unreachable record
+ *   - EFFECTS: Http, IO, State, Async
+ *   - DATA: hoverboard_link_health
+ *   - DATA_TRANSITION: map[url] = health record
+ *   - TERMINATION: total
+ * - PROCEDURE: CHECK_LINK_HEALTH
+ *   - 1. list = filter http(s) urls; slice(0, 50)
+ *   - 2. map = READ hoverboard_link_health OR {}
+ *   - 3. FOR each url IN list:
+ *   - 4.   TRY: res = fetch HEAD; IF status 405 or 501 THEN res = fetch GET
+ *   - 5.        record = BUILD_HEALTH_RECORD({ status: res.status, ok: res.ok })
+ *   - 6.   CATCH: record = BUILD_HEALTH_RECORD({ error })
+ *   - 7.   map = MERGE_HEALTH_MAP(map, url, record)
+ *   - 8. WRITE hoverboard_link_health = map
+ *   - 9. RETURN { success: true, results, checked: list.length }
+ *
+ * ## Get link health map
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: GET_LINK_HEALTH reads stored map for Index column/filter.
+ * - Contract:
+ *   - INPUT: none
+ *   - OUTPUT: health map object
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_LINK_HEALTH
+ *   - 1. RETURN chrome.storage.local[hoverboard_link_health] OR {}
+ *
+ * ## Filter Index by health
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Pure filter for Health column status filter.
+ * - Contract:
+ *   - INPUT: bookmarks[], healthMap, statusFilter
+ *   - OUTPUT: filtered bookmarks
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: FILTER_BOOKMARKS_BY_HEALTH
+ *   - 1. IF statusFilter empty THEN RETURN bookmarks
+ *   - 2. KEEP rows where (healthMap[url].status OR "unknown") == statusFilter
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LINK_HEALTH ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
+ * [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] — Localhost HTTP API over File bookmarks + optional aggregate-snapshot; bearer token; 127.0.0.1 only; extension REFRESH_API_SNAPSHOT.
+ *
+ * ## Auth and bind
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: Bind loopback only; require Bearer token from api-token file.
+ * - Contract:
+ *   - INPUT: installDir, port, request Authorization header
+ *   - PRE: token file exists or generated on first start
+ *   - OUTPUT: authorized request proceeds | { error: Unauthorized | ForbiddenBind }
+ *   - POST:
+ *     - success => listen address is 127.0.0.1:port
+ *     - error Unauthorized => HTTP 401
+ *   - FAILURE_MODES: Unauthorized, ForbiddenBind
+ *   - EFFECTS: IO, Http
+ *   - TERMINATION: may_diverge (HTTP server loop — intentional)
+ * - PROCEDURE: ENSURE_TOKEN_AND_LISTEN
+ *   - 1. IF api-token missing THEN generate random token; WRITE installDir/api-token
+ *   - 2. LISTEN only on 127.0.0.1:port
+ *   - 3. ON each request: IF Authorization != "Bearer "+token THEN 401
+ *
+ * ## Load bookmarks (File or snapshot)
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: Prefer aggregate-snapshot.json when present; else hoverboard-bookmarks.json version-1 shape.
+ * - Contract:
+ *   - INPUT: bookmarksFilePath, snapshotFilePath
+ *   - PRE: paths may be missing
+ *   - OUTPUT: list of bookmark objects | empty list
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_BOOKMARKS
+ *   - 1. IF aggregate-snapshot.json exists THEN TRY PARSE snapshot.bookmarks; RETURN list
+ *   - 2. IF hoverboard-bookmarks.json missing THEN RETURN []
+ *   - 3. PARSE JSON { version, bookmarks: map url -> pin }
+ *   - 4. RETURN values as array (default storage "file")
+ *
+ * ## List and filter
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: GET /v1/bookmarks with q, tag, url filters.
+ * - Contract:
+ *   - INPUT: bookmarks[], query params q, tag, url
+ *   - PRE: auth passed
+ *   - OUTPUT: JSON { bookmarks: [...], count }
+ *   - EFFECTS: pure (filter) + Http
+ *   - TERMINATION: total
+ * - PROCEDURE: FILTER_BOOKMARKS
+ *   - 1. IF url set THEN keep exact url match
+ *   - 2. IF tag set THEN keep bookmarks whose tags contain tag (case-insensitive)
+ *   - 3. IF q set THEN keep substring match on description, url, tags, extended (case-insensitive)
+ *   - 4. RETURN filtered
+ *
+ * ## File write and delete
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: POST/PATCH merge pin into File JSON; DELETE by url query (File only, not snapshot).
+ * - Contract:
+ *   - INPUT: pin JSON (POST/PATCH) or url query (DELETE)
+ *   - PRE: auth passed; url required
+ *   - OUTPUT: { ok, bookmark|deleted } | HTTP 400/500
+ *   - FAILURE_MODES: MissingUrl, InvalidJSON, IO
+ *   - EFFECTS: IO, Http
+ *   - TERMINATION: total
+ * - PROCEDURE: WRITE_OR_DELETE_FILE_BOOKMARK
+ *   - 1. POST/PATCH: Decode pin; IF url empty THEN 400; MERGE into hoverboard-bookmarks.json; RETURN ok
+ *   - 2. DELETE: IF url query empty THEN 400; REMOVE url from File map; RETURN ok
+ *
+ * ## Health
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: GET /v1/health returns ok, source file|snapshot, bind.
+ * - Contract:
+ *   - INPUT: none (auth required)
+ *   - OUTPUT: { ok: true, source, bind, port }
+ *   - EFFECTS: Http, IO (stat snapshot)
+ *   - TERMINATION: total
+ * - PROCEDURE: HEALTH
+ *   - 1. source = IF snapshot exists THEN "snapshot" ELSE "file"
+ *   - 2. RETURN { ok: true, source, bind: "127.0.0.1", port }
+ *
+ * ## Build aggregate snapshot payload
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: Pure map from aggregated Index rows to snapshot JSON.
+ * - Contract:
+ *   - INPUT: bookmarks[] from getAggregatedBookmarksForIndex
+ *   - OUTPUT: { version: 1, updatedAt, bookmarks: [...] }
+ *   - EFFECTS: pure (clock for updatedAt)
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_AGGREGATE_SNAPSHOT_PAYLOAD
+ *   - 1. MAP each row to pin fields + storage; DROP rows without url
+ *   - 2. RETURN { version: 1, updatedAt: now ISO, bookmarks }
+ *
+ * ## Refresh API snapshot (extension)
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: REFRESH_API_SNAPSHOT aggregates providers and writes aggregate-snapshot.json via native host.
+ * - Contract:
+ *   - INPUT: none (message from Index/Options)
+ *   - PRE: BookmarkRouter ready; native messaging available
+ *   - OUTPUT: { success, count } | { success: false, error }
+ *   - FAILURE_MODES: RouterNotReady, NativeUnavailable, WriteFailed
+ *   - EFFECTS: IO, Async, State
+ *   - TERMINATION: total
+ * - PROCEDURE: REFRESH_API_SNAPSHOT
+ *   - 1. agg = handleGetAggregatedBookmarksForIndex()
+ *   - 2. payload = BUILD_AGGREGATE_SNAPSHOT_PAYLOAD(agg.bookmarks)
+ *   - 3. SEND native writeBookmarksFile path ~/.hoverboard/aggregate-snapshot.json data payload
+ *   - 4. ON success RETURN { success: true, count: payload.bookmarks.length }
+ *   - 5. ON failure RETURN { success: false, error }
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
+ */
 import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'
@@ -400,6 +649,8 @@ let timeColumnSource = 'updated_at'
 let timeDisplayMode = 'age'
 /** [REQ-LOCAL_BOOKMARKS_INDEX] Selected bookmark URLs for bulk operations (e.g. move to storage). */
 const selectedUrls = new Set()
+/** [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] url -> health record */
+let linkHealthMap = {}
 
 const elements = {
   searchInput: document.getElementById('search-input'),
@@ -421,6 +672,11 @@ const elements = {
   exportAll: document.getElementById('export-all'),
   exportDisplayed: document.getElementById('export-displayed'),
   exportSelected: document.getElementById('export-selected'),
+  refreshApiSnapshot: document.getElementById('refresh-api-snapshot'),
+  apiSnapshotResult: document.getElementById('api-snapshot-result'),
+  checkLinkHealth: document.getElementById('check-link-health'),
+  filterHealth: document.getElementById('filter-health'),
+  linkHealthResult: document.getElementById('link-health-result'),
   emptyState: document.getElementById('empty-state'),
   emptyStateMessage: document.getElementById('empty-state-message'),
   tableWrapper: document.getElementById('table-wrapper'),
@@ -523,6 +779,14 @@ function applySearchAndFilter () {
   const q = elements.searchInput.value.trim()
   list = list.filter(b => matchSearch(b, q) && matchFilters(b))
   list = list.filter(matchExcludeTags)
+  // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
+  const healthFilter = elements.filterHealth?.value || ''
+  if (healthFilter) {
+    list = list.filter((b) => {
+      const st = linkHealthMap[b.url]?.status || 'unknown'
+      return st === healthFilter
+    })
+  }
   filteredBookmarks = list
   sortTable()
   renderTableBody()
@@ -599,6 +863,11 @@ function renderTableBody () {
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
     const storageLabel = b.storage === 'browser' ? 'Browser' : (b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local'))
     const storage = escapeHtml(storageLabel)
+    // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
+    const healthRec = linkHealthMap[url]
+    const healthLabel = healthRec
+      ? escapeHtml(`${healthRec.status}${healthRec.httpStatus != null ? ` (${healthRec.httpStatus})` : ''}`)
+      : '—'
     const urlLink = b.url
       ? `<a href="${escapeHtml(b.url)}" target="_blank" rel="noopener" class="url-link" title="Opens in new tab">${urlEsc}<span class="url-external-icon" aria-hidden="true">↗</span></a>`
       : urlEsc
@@ -611,6 +880,7 @@ function renderTableBody () {
       <td class="col-visits">${visits}</td>
       <td class="col-last-visited">${lastVisited}</td>
       <td class="col-storage">${storage}</td>
+      <td class="col-health" title="${escapeHtml(healthRec?.checkedAt || '')}">${healthLabel}</td>
       <td class="col-shared">${shared}</td>
       <td class="col-toread">${toread}</td>
     `
@@ -1169,6 +1439,67 @@ function init () {
     }, { threshold: 0, rootMargin: '0px' })
     io.observe(tableDisplayEl)
   }
+
+  // [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY] Prefill search from ?q=
+  try {
+    const params = new URLSearchParams(window.location.search || '')
+    const q = params.get('q')
+    if (q && elements.searchInput) {
+      elements.searchInput.value = q
+    }
+  } catch (_) { /* ignore */ }
+
+  // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
+  elements.filterHealth?.addEventListener('change', applySearchAndFilter)
+  elements.checkLinkHealth?.addEventListener('click', async () => {
+    const urls = selectedUrls.size
+      ? Array.from(selectedUrls)
+      : filteredBookmarks.map((b) => b.url).filter(Boolean)
+    if (!urls.length) {
+      if (elements.linkHealthResult) elements.linkHealthResult.textContent = 'No URLs to check'
+      return
+    }
+    if (elements.linkHealthResult) elements.linkHealthResult.textContent = `Checking ${urls.length}…`
+    try {
+      const response = await chrome.runtime.sendMessage({ type: 'CHECK_LINK_HEALTH', data: { urls } })
+      if (response?.success) {
+        Object.assign(linkHealthMap, response.results || {})
+        applySearchAndFilter()
+        if (elements.linkHealthResult) {
+          elements.linkHealthResult.textContent = `Checked ${response.checked ?? urls.length}`
+        }
+      } else if (elements.linkHealthResult) {
+        elements.linkHealthResult.textContent = response?.error || 'Check failed'
+      }
+    } catch (e) {
+      if (elements.linkHealthResult) elements.linkHealthResult.textContent = e.message || 'Check failed'
+    }
+  })
+  chrome.runtime.sendMessage({ type: 'GET_LINK_HEALTH' }, (response) => {
+    if (response?.success && response.data) {
+      linkHealthMap = response.data
+      applySearchAndFilter()
+    }
+  })
+
+  // [REQ-LOCAL_QUERY_API] [IMPL-LOCAL_QUERY_API]
+  elements.refreshApiSnapshot?.addEventListener('click', async () => {
+    if (elements.apiSnapshotResult) elements.apiSnapshotResult.textContent = 'Writing snapshot…'
+    try {
+      const response = await chrome.runtime.sendMessage({ type: 'REFRESH_API_SNAPSHOT' })
+      if (response?.success) {
+        if (elements.apiSnapshotResult) {
+          elements.apiSnapshotResult.textContent = `Snapshot updated (${response.count ?? 0} bookmarks)`
+        }
+      } else {
+        if (elements.apiSnapshotResult) {
+          elements.apiSnapshotResult.textContent = response?.error || 'Snapshot failed'
+        }
+      }
+    } catch (e) {
+      if (elements.apiSnapshotResult) elements.apiSnapshotResult.textContent = e.message || 'Snapshot failed'
+    }
+  })
 
   loadBookmarks()
   updateMoveControlsState()

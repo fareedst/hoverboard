@@ -1,0 +1,33 @@
+REQ-LINK_HEALTH:
+  category: "Functional"
+  description: "Users can run batch link health checks on Index-selected or displayed bookmarks. The extension performs direct HTTP HEAD (fallback GET) from the service worker, stores last status and checked_at in chrome.storage.local, and surfaces results on the Index. Inhibit-list and privacy: no third-party uptime SaaS."
+  name: "Link Health Monitoring"
+  priority: "P2"
+  rationale:
+    benefits:
+      - "Local, private health checks"
+    problems_solved:
+      - "No way to find dead bookmarks"
+    why: "Self-hosted bookmark managers differentiate with broken-link detection; Hoverboard can do this without leaving the browser."
+  related_requirements:
+    depends_on:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    related_to:
+      - "REQ-PRIVACY_CONTROLS"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "CHECK_LINK_HEALTH message checks URLs via fetch HEAD then GET"
+    - criterion: "Index shows Health column and optional status filter"
+    - criterion: "Results persisted under hoverboard_link_health"
+    - criterion: "Unit tests for classify/filter helpers"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-LINK_HEALTH"
+    code_annotations:
+      - "REQ-LINK_HEALTH"
+    implementation:
+      - "IMPL-LINK_HEALTH"
+    tests:
+      - "tests/unit/link-health-sw.test.js"
+      - "tests/unit/link-health.test.js"

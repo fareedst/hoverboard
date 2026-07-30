@@ -1,0 +1,21 @@
+ARCH-LOCAL_QUERY_API:
+  cross_references:
+    - "ARCH-NATIVE_HOST"
+    - "IMPL-LOCAL_QUERY_API"
+    - "REQ-LOCAL_QUERY_API"
+  decision: "Separate long-running companion process (not Chrome stdio host) with shared install dir; GET prefers aggregate-snapshot.json when present else File JSON; writes target File JSON only; extension REFRESH_API_SNAPSHOT builds multi-backend snapshot."
+  name: "Local Query API Architecture"
+  rationale:
+    alternatives_considered:
+      - "Extension-only messaging — not enough for shell scripts"
+      - "Public REST — rejected"
+    why: "Chrome native messaging is request-response; HTTP needs a daemon. Aggregate snapshot lets scripts query Local/File/Sync/Browser without a public REST surface."
+  status: "Accepted"
+  summary: "Ship hoverboard-local-api Go binary installed to ~/.hoverboard; Authorization Bearer from api-token; bind 127.0.0.1; Phase 1 File read + Phase 2 snapshot preference and File write API."
+  traceability:
+    code_annotations:
+      - "ARCH-LOCAL_QUERY_API"
+    implementation:
+      - "IMPL-LOCAL_QUERY_API"
+    requirements:
+      - "REQ-LOCAL_QUERY_API"

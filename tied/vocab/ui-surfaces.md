@@ -28,6 +28,8 @@
 | **Quick Actions** | action row | Show Hover, Toggle Privacy, Read Later, Delete |
 | **non-scriptable URL** | cannot inject (alone) | Browser-forbidden scripting target (restricted schemes + extensions gallery); see [`side-panel.md`](side-panel.md); not user **inhibit URL** |
 | **injectionOutcome** | inject log (alone) | UI inspector `recordAction` id for precheck/skip/fail of content or suggested-tags scripting |
+| **Search Bookmarks** | library search, search library | Capture UI control opening Local Bookmarks Index with `?q=`; **not** Search tabs (`search` / `SEARCH_TABS`) — [REQ-LIBRARY_SEARCH_ENTRY] |
+| **Title/Notes Details** | details section | Popup/This Page Title (`description`) + Notes (`extended`) editors — [REQ-BOOKMARK_NOTES_UI] |
 
 ---
 
@@ -46,6 +48,8 @@
 | Icon → side panel | Extension icon option | `iconClickOpensSidePanel` | `OPEN_SIDE_PANEL` / `REQUEST_SIDE_PANEL_CLOSE` | [IMPL-ICON_CLICK_BEHAVIOR](../implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml) |
 | Open tags tree | By Tag (footer) | — | `openTagsTree` → `OPEN_SIDE_PANEL` | popup |
 | Open index | Bookmarks index | — | `OPEN_BOOKMARKS_INDEX` / `openBookmarksIndex` | SW `_openBookmarksIndexTab` (tabs.create + `REQUEST_SIDE_PANEL_CLOSE`) |
+| Search Bookmarks | Search Bookmarks | — | `OPEN_BOOKMARKS_INDEX` + `{ q }` | [IMPL-LIBRARY_SEARCH_ENTRY] `OPEN_LIBRARY_SEARCH` |
+| Title/Notes Details | Title / Notes / Save details | — | `saveBookmark` (via Details) | [IMPL-BOOKMARK_NOTES_UI] |
 | Open import | Browser bookmark import | — | `openBrowserBookmarkImport` | chrome.tabs.create |
 
 ### Overlay action IDs (`OVERLAY_ACTION_IDS`)
@@ -75,6 +79,8 @@
 - **CONTENT_MESSAGE_TYPES** — Content-script handled types (`TOGGLE_HOVER`, `HIDE_OVERLAY`, `GET_OVERLAY_STATE`, …).
 - **non-scriptable URL** — Target where inject/suggested-tags scripting must precheck-skip; expected skips record **injectionOutcome**, not error spam.
 - **injectionOutcome** — Structured inspector action (`phase`, `trigger`, `reason`: `missing_url` \| `restricted_scheme` \| `extensions_gallery` \| `ok`).
+- **Search Bookmarks** — Popup/This Page library-search entry; opens Index with encoded query; does not replace Search tabs.
+- **Title/Notes Details** — Editable Title and Notes bound to `currentPin.description` / `currentPin.extended`; Notes disabled for Browser backend.
 
 ---
 
@@ -89,6 +95,11 @@
 | Record injection outcome | `RECORD_INJECTION_OUTCOME` | [IMPL-UI_INSPECTOR](../implementation-decisions/IMPL-UI_INSPECTOR.yaml) |
 | Icon click toggle | `(proposed) ICON_CLICK_SIDE_PANEL_TOGGLE` | [IMPL-ICON_CLICK_BEHAVIOR](../implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml) |
 | Action → message map | `POPUP_ACTION_TO_MESSAGE` | [IMPL-UI_ACTION_CONTRACT](../implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml) |
+| Notes editable by backend | `NOTES_EDITABLE_FOR_BACKEND` | [IMPL-BOOKMARK_NOTES_UI](../implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml) |
+| Build Title/Notes save payload | `BUILD_BOOKMARK_NOTES_SAVE_PAYLOAD` | [IMPL-BOOKMARK_NOTES_UI](../implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml) |
+| Sync Title/Notes fields | `SYNC_BOOKMARK_NOTES_FIELDS` | [IMPL-BOOKMARK_NOTES_UI](../implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml) |
+| Persist Title/Notes | `SAVE_BOOKMARK_DETAILS` | [IMPL-BOOKMARK_NOTES_UI](../implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml) |
+| Open library search | `OPEN_LIBRARY_SEARCH` | [IMPL-LIBRARY_SEARCH_ENTRY](../implementation-decisions/IMPL-LIBRARY_SEARCH_ENTRY.yaml) |
 
 ---
 
@@ -111,6 +122,10 @@
 | popup | Preferred terms |
 | Quick Actions | Preferred terms |
 | quick access | Preferred terms |
+| SAVE_BOOKMARK_DETAILS | Pseudo-code block names |
+| Search Bookmarks | Preferred terms / Named concepts |
 | Show Hover | Preferred terms |
 | Show on page load | Preferred terms |
+| SYNC_BOOKMARK_NOTES_FIELDS | Pseudo-code block names |
+| Title/Notes Details | Preferred terms / Named concepts |
 | UI action contract | Named concepts |

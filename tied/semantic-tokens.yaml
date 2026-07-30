@@ -47,6 +47,16 @@ ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-BOOKMARK_NOTES_UI:
+  cross_references:
+    - "IMPL-BOOKMARK_NOTES_UI"
+    - "REQ-BOOKMARK_NOTES_UI"
+  description: "Registry entry for ARCH-BOOKMARK_NOTES_UI."
+  detail_file: "architecture-decisions/ARCH-BOOKMARK_NOTES_UI.yaml"
+  name: "Bookmark Title and Notes UI Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Accepted"
+  type: "ARCH"
 ARCH-BOOKMARK_STATE_SYNC:
   cross_references:
     - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
@@ -252,6 +262,22 @@ ARCH-LANGUAGE_SELECTION:
   source_index: "architecture-decisions.yaml"
   status: "Active"
   type: "ARCH"
+ARCH-LIBRARY_SEARCH_ENTRY:
+  cross_references: []
+  description: "Registry entry."
+  detail_file: "architecture-decisions/ARCH-LIBRARY_SEARCH_ENTRY.yaml"
+  name: "Library Search Entry Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Accepted"
+  type: "ARCH"
+ARCH-LINK_HEALTH:
+  cross_references: []
+  description: "Registry entry for ARCH-LINK_HEALTH."
+  detail_file: "requirements/ARCH-LINK_HEALTH.yaml"
+  name: "Link Health"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "ARCH"
 ARCH-LOCAL_BOOKMARKS_INDEX:
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
@@ -312,6 +338,16 @@ ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   name: "Local Bookmarks Index Regex Find-and-Replace Architecture"
   source_index: "architecture-decisions.yaml"
   status: "Active"
+  type: "ARCH"
+ARCH-LOCAL_QUERY_API:
+  cross_references:
+    - "IMPL-LOCAL_QUERY_API"
+    - "REQ-LOCAL_QUERY_API"
+  description: "Registry entry for ARCH-LOCAL_QUERY_API."
+  detail_file: "architecture-decisions/ARCH-LOCAL_QUERY_API.yaml"
+  name: "Local Query API Architecture"
+  source_index: "architecture-decisions.yaml"
+  status: "Accepted"
   type: "ARCH"
 ARCH-LOCAL_STORAGE_PROVIDER:
   cross_references:
@@ -940,6 +976,16 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
+IMPL-BOOKMARK_NOTES_UI:
+  cross_references:
+    - "ARCH-BOOKMARK_NOTES_UI"
+    - "REQ-BOOKMARK_NOTES_UI"
+  description: "Registry entry for IMPL-BOOKMARK_NOTES_UI."
+  detail_file: "implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml"
+  name: "Bookmark Title and Notes UI"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-BOOKMARK_ROUTER:
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
@@ -1291,6 +1337,22 @@ IMPL-ICON_CLICK_BEHAVIOR:
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
+IMPL-LIBRARY_SEARCH_ENTRY:
+  cross_references: []
+  description: "Registry entry."
+  detail_file: "implementation-decisions/IMPL-LIBRARY_SEARCH_ENTRY.yaml"
+  name: "Library Search Entry"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LINK_HEALTH:
+  cross_references: []
+  description: "Registry entry for IMPL-LINK_HEALTH."
+  detail_file: "requirements/IMPL-LINK_HEALTH.yaml"
+  name: "Link Health"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "IMPL"
 IMPL-LOCAL_BOOKMARK_SERVICE:
   cross_references:
     - "ARCH-LOCAL_STORAGE_PROVIDER"
@@ -1368,6 +1430,16 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
     last_updated: "2026-07-28T00:00:00.000Z"
     registered: "2026-07-28T00:00:00.000Z"
   name: "Local Bookmarks Index Regex Find-and-Replace Implementation"
+  source_index: "implementation-decisions.yaml"
+  status: "Active"
+  type: "IMPL"
+IMPL-LOCAL_QUERY_API:
+  cross_references:
+    - "ARCH-LOCAL_QUERY_API"
+    - "REQ-LOCAL_QUERY_API"
+  description: "Registry entry for IMPL-LOCAL_QUERY_API."
+  detail_file: "implementation-decisions/IMPL-LOCAL_QUERY_API.yaml"
+  name: "Local Query API"
   source_index: "implementation-decisions.yaml"
   status: "Active"
   type: "IMPL"
@@ -2511,6 +2583,16 @@ REQ-BOOKMARK_CREATE_UPDATE_TIMES:
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"
+REQ-BOOKMARK_NOTES_UI:
+  cross_references:
+    - "ARCH-BOOKMARK_NOTES_UI"
+    - "IMPL-BOOKMARK_NOTES_UI"
+  description: "Registry entry for REQ-BOOKMARK_NOTES_UI."
+  detail_file: "requirements/REQ-BOOKMARK_NOTES_UI.yaml"
+  name: "Bookmark Title and Notes UI"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
 REQ-BOOKMARK_STATE_SYNCHRONIZATION:
   cross_references:
     - "ARCH-MESSAGE_HANDLING"
@@ -2749,6 +2831,22 @@ REQ-ICON_CLICK_BEHAVIOR:
   source_index: "requirements.yaml"
   status: "Implemented"
   type: "REQ"
+REQ-LIBRARY_SEARCH_ENTRY:
+  cross_references: []
+  description: "Registry entry."
+  detail_file: "requirements/REQ-LIBRARY_SEARCH_ENTRY.yaml"
+  name: "Library Search Entry"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
+REQ-LINK_HEALTH:
+  cross_references: []
+  description: "Registry entry for REQ-LINK_HEALTH."
+  detail_file: "requirements/REQ-LINK_HEALTH.yaml"
+  name: "Link Health"
+  source_index: "requirements.yaml"
+  status: "Active"
+  type: "REQ"
 REQ-LOCAL_BOOKMARKS_INDEX:
   cross_references:
     - "ARCH-LOCAL_BOOKMARKS_INDEX"
@@ -2814,6 +2912,16 @@ REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
   name: "Local Bookmarks Index Regex Find-and-Replace on Selected"
   source_index: "requirements.yaml"
   status: "Implemented"
+  type: "REQ"
+REQ-LOCAL_QUERY_API:
+  cross_references:
+    - "ARCH-LOCAL_QUERY_API"
+    - "IMPL-LOCAL_QUERY_API"
+  description: "Registry entry for REQ-LOCAL_QUERY_API."
+  detail_file: "requirements/REQ-LOCAL_QUERY_API.yaml"
+  name: "Local Query API"
+  source_index: "requirements.yaml"
+  status: "Active"
   type: "REQ"
 REQ-MAINTAINABILITY:
   cross_references: []

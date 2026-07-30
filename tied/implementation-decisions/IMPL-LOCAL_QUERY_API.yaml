@@ -1,0 +1,59 @@
+IMPL-LOCAL_QUERY_API:
+  code_locations:
+    files:
+      - path: "native_host/localapi/api.go"
+        description: "HTTP handlers + snapshot preference + File write/delete"
+      - path: "native_host/cmd/hoverboard-local-api/main.go"
+        description: "Entrypoint"
+      - path: "src/shared/aggregate-snapshot.js"
+        description: "Snapshot payload builder"
+      - path: "src/core/service-worker.js"
+        description: "REFRESH_API_SNAPSHOT handler"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "Refresh API snapshot Index action"
+      - path: "src/ui/options/options.js"
+        description: "Options Refresh API snapshot"
+      - path: "docs/LOCAL_API.md"
+        description: "User docs"
+    functions:
+      - "_refreshApiSnapshot"
+      - "buildAggregateSnapshotPayload"
+      - "EnsureToken"
+      - "FilterBookmarks"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_QUERY_API-pseudocode.md"
+  implementation_approach:
+    details:
+      - "Bearer token from ~/.hoverboard/api-token"
+      - "GET /v1/bookmarks?q=&tag=&url= prefers aggregate-snapshot.json when present"
+      - "GET /v1/health reports source file|snapshot"
+      - "POST/PATCH/DELETE mutate File hoverboard-bookmarks.json only"
+      - "REFRESH_API_SNAPSHOT aggregates providers and writes aggregate-snapshot.json via native host"
+    summary: "Go HTTP server package with unit tests; installer copy; Options/Index snapshot refresh; shared buildAggregateSnapshotPayload."
+  metadata:
+    last_updated:
+      author: "agent"
+      date: "2026-07-30"
+      reason: "Add composition snapshot wiring test and expand code_locations"
+  name: "Local Query API"
+  related_decisions:
+    composed_with:
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+      - "IMPL-NATIVE_HOST_INSTALLER"
+    depends_on:
+      - "ARCH-LOCAL_QUERY_API"
+    see_also: []
+    supersedes: []
+  status: "Active"
+  summary: "native_host/localapi + cmd/hoverboard-local-api; File GET/POST/DELETE; prefer aggregate-snapshot.json; extension REFRESH_API_SNAPSHOT + aggregate-snapshot.js; install copies binary; Options/Index refresh; docs/LOCAL_API.md."
+  traceability:
+    architecture:
+      - "ARCH-LOCAL_QUERY_API"
+    code_annotations:
+      - "IMPL-LOCAL_QUERY_API"
+      - "REQ-LOCAL_QUERY_API"
+    requirements:
+      - "REQ-LOCAL_QUERY_API"
+    tests:
+      - "native_host/localapi/api_test.go"
+      - "tests/integration/local-query-api-snapshot.integration.test.js"
+      - "tests/unit/library-search-and-snapshot.test.js"

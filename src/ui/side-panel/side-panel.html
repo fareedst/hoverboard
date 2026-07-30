@@ -67,6 +67,7 @@
             <button type="button" class="storage-backend-btn" data-backend="file" aria-pressed="false">File</button>
             <button type="button" class="storage-backend-btn" data-backend="local" aria-pressed="false">Local</button>
             <button type="button" class="storage-backend-btn" data-backend="sync" aria-pressed="false">Sync</button>
+            <button type="button" class="storage-backend-btn" data-backend="browser" aria-pressed="false">Browser</button>
           </div>
         </div>
       </section>
@@ -75,6 +76,20 @@
         <h3 class="section-title">Usage</h3>
         <div class="usage-stats" data-popup-ref="usageStatsText"></div>
         <div class="usage-referrer" data-popup-ref="usageReferrerText" aria-hidden="true"></div>
+      </section>
+      <!-- [REQ-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Title/Notes (popup-equivalent) -->
+      <section class="details-section" data-popup-ref="detailsSection">
+        <h3 class="section-title">Details</h3>
+        <div class="details-fields">
+          <label class="details-label" for="bookmarkTitleInputPanel">Title</label>
+          <input type="text" id="bookmarkTitleInputPanel" data-popup-ref="bookmarkTitleInput" class="details-input" autocomplete="off" aria-label="Bookmark title">
+          <label class="details-label" for="bookmarkNotesInputPanel">Notes</label>
+          <textarea id="bookmarkNotesInputPanel" data-popup-ref="bookmarkNotesInput" class="details-textarea" rows="2" aria-label="Bookmark notes"></textarea>
+          <p data-popup-ref="bookmarkNotesHint" class="help-text details-notes-hint" hidden>
+            Notes are not stored on the Browser backend.
+          </p>
+          <button type="button" data-popup-ref="saveBookmarkDetailsBtn" class="button secondary">Save details</button>
+        </div>
       </section>
       <section class="tag-management">
         <!-- [REQ-SIDE_PANEL_POPUP_EQUIVALENT] This Page only: session tag label casing (Original / lower / UPPER) -->
@@ -115,6 +130,17 @@
         <div class="suggested-tags" data-popup-ref="suggestedTags">
           <h4 class="tags-subtitle">Suggested Tags</h4>
           <div class="tags-container" data-popup-ref="suggestedTagsContainer"></div>
+        </div>
+      </section>
+      <!-- [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY] -->
+      <section class="search-section library-search-section">
+        <h3 class="section-title">Search Bookmarks</h3>
+        <div class="search-container">
+          <div class="input-group">
+            <input type="text" data-popup-ref="librarySearchInput" class="search-input" placeholder="Search bookmarks (title, URL, tags, notes)..." aria-label="Search bookmarks library">
+            <button type="button" data-popup-ref="librarySearchBtn" class="button secondary">Search</button>
+          </div>
+          <p class="help-text">Opens the Bookmarks index with your query.</p>
         </div>
       </section>
       <section class="search-section">

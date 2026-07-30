@@ -1050,6 +1050,255 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-PLAYWRIGHT_E2E_EXTENSION ===
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
+ * [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] — Capture UI Search Bookmarks opens Index with ?q=; distinct from Search tabs.
+ *
+ * ## Build Index URL with query
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Pure URL builder shared by SW and tests; append encoded q.
+ * - Contract:
+ *   - INPUT: baseUrl (string), query (string)
+ *   - PRE: baseUrl may be empty
+ *   - OUTPUT: baseUrl unchanged when query empty; else baseUrl + ?q= or &q= encodeURIComponent(query)
+ *   - POST:
+ *     - success => empty query returns baseUrl; non-empty query includes encoded q
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY
+ *   - 1. q = trim(query)
+ *   - 2. IF baseUrl empty THEN RETURN ""
+ *   - 3. IF q empty THEN RETURN baseUrl
+ *   - 4. sep = IF baseUrl contains "?" THEN "&" ELSE "?"
+ *   - 5. RETURN baseUrl + sep + "q=" + encodeURIComponent(q)
+ *
+ * ## Open library search from capture UI
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Read Search Bookmarks input; send OPEN_BOOKMARKS_INDEX with q (does not replace Search tabs).
+ * - Contract:
+ *   - INPUT: librarySearchInput value (string)
+ *   - PRE: sendMessage available
+ *   - OUTPUT: OPEN_BOOKMARKS_INDEX message with data.q
+ *   - POST:
+ *     - success => SW opens Index tab; Index search prefilled when q non-empty
+ *   - EFFECTS: Async, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OPEN_LIBRARY_SEARCH
+ *   - 1. q = trim(librarySearchInput.value)
+ *   - 2. SEND OPEN_BOOKMARKS_INDEX { q }
+ *   - 3. (SW) OPEN_BOOKMARKS_INDEX_TAB(q) via BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY then REQUEST_SIDE_PANEL_CLOSE
+ *
+ * ## Prefill Index search from URL
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, read ?q= into search field and apply filter.
+ * - Contract:
+ *   - INPUT: window.location.search
+ *   - PRE: Index DOM search input exists
+ *   - OUTPUT: search input value set; filter applied when q present
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: PREFILL_INDEX_SEARCH_FROM_QUERY
+ *   - 1. params = URLSearchParams(location.search)
+ *   - 2. q = params.get("q")
+ *   - 3. IF q THEN SET searchInput.value = q; APPLY index filter
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LINK_HEALTH ===
+ * [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] — Index batch link health via SW fetch HEAD→GET; store hoverboard_link_health; Health column/filter.
+ *
+ * ## Classify HTTP status
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Map numeric status to ok|redirect|client_error|server_error|unknown.
+ * - Contract:
+ *   - INPUT: status (number)
+ *   - PRE: status may be non-finite
+ *   - OUTPUT: status class string
+ *   - POST:
+ *     - success => 2xx ok; 3xx redirect; 4xx client_error; 5xx server_error; else unknown
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: CLASSIFY_HTTP_STATUS
+ *   - 1. IF status not finite or <= 0 THEN RETURN "unknown"
+ *   - 2. IF 200..299 THEN RETURN "ok"
+ *   - 3. IF 300..399 THEN RETURN "redirect"
+ *   - 4. IF 400..499 THEN RETURN "client_error"
+ *   - 5. IF 500..599 THEN RETURN "server_error"
+ *   - 6. RETURN "unknown"
+ *
+ * ## Build health record
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Normalize fetch result into persisted record with checkedAt.
+ * - Contract:
+ *   - INPUT: { ok?, status?, error? }
+ *   - OUTPUT: { status, httpStatus, error, checkedAt }
+ *   - EFFECTS: pure (clock for checkedAt)
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_HEALTH_RECORD
+ *   - 1. checkedAt = now ISO
+ *   - 2. IF error THEN RETURN { status: "unreachable", httpStatus: null, error, checkedAt }
+ *   - 3. RETURN { status: CLASSIFY_HTTP_STATUS(status), httpStatus, error: null, checkedAt }
+ *
+ * ## Check link health batch
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: SW CHECK_LINK_HEALTH; HEAD then GET on 405/501; merge into chrome.storage.local.
+ * - Contract:
+ *   - INPUT: urls[] (http/https only; max 50)
+ *   - PRE: chrome.storage.local available; fetch available
+ *   - OUTPUT: { success, results, checked }
+ *   - POST:
+ *     - success => hoverboard_link_health updated for each checked URL
+ *   - FAILURE_MODES: network error → unreachable record
+ *   - EFFECTS: Http, IO, State, Async
+ *   - DATA: hoverboard_link_health
+ *   - DATA_TRANSITION: map[url] = health record
+ *   - TERMINATION: total
+ * - PROCEDURE: CHECK_LINK_HEALTH
+ *   - 1. list = filter http(s) urls; slice(0, 50)
+ *   - 2. map = READ hoverboard_link_health OR {}
+ *   - 3. FOR each url IN list:
+ *   - 4.   TRY: res = fetch HEAD; IF status 405 or 501 THEN res = fetch GET
+ *   - 5.        record = BUILD_HEALTH_RECORD({ status: res.status, ok: res.ok })
+ *   - 6.   CATCH: record = BUILD_HEALTH_RECORD({ error })
+ *   - 7.   map = MERGE_HEALTH_MAP(map, url, record)
+ *   - 8. WRITE hoverboard_link_health = map
+ *   - 9. RETURN { success: true, results, checked: list.length }
+ *
+ * ## Get link health map
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: GET_LINK_HEALTH reads stored map for Index column/filter.
+ * - Contract:
+ *   - INPUT: none
+ *   - OUTPUT: health map object
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_LINK_HEALTH
+ *   - 1. RETURN chrome.storage.local[hoverboard_link_health] OR {}
+ *
+ * ## Filter Index by health
+ *
+ * - [IMPL-LINK_HEALTH] [ARCH-LINK_HEALTH] [REQ-LINK_HEALTH] How: Pure filter for Health column status filter.
+ * - Contract:
+ *   - INPUT: bookmarks[], healthMap, statusFilter
+ *   - OUTPUT: filtered bookmarks
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: FILTER_BOOKMARKS_BY_HEALTH
+ *   - 1. IF statusFilter empty THEN RETURN bookmarks
+ *   - 2. KEEP rows where (healthMap[url].status OR "unknown") == statusFilter
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LINK_HEALTH ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
+ * [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] — Localhost HTTP API over File bookmarks + optional aggregate-snapshot; bearer token; 127.0.0.1 only; extension REFRESH_API_SNAPSHOT.
+ *
+ * ## Auth and bind
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: Bind loopback only; require Bearer token from api-token file.
+ * - Contract:
+ *   - INPUT: installDir, port, request Authorization header
+ *   - PRE: token file exists or generated on first start
+ *   - OUTPUT: authorized request proceeds | { error: Unauthorized | ForbiddenBind }
+ *   - POST:
+ *     - success => listen address is 127.0.0.1:port
+ *     - error Unauthorized => HTTP 401
+ *   - FAILURE_MODES: Unauthorized, ForbiddenBind
+ *   - EFFECTS: IO, Http
+ *   - TERMINATION: may_diverge (HTTP server loop — intentional)
+ * - PROCEDURE: ENSURE_TOKEN_AND_LISTEN
+ *   - 1. IF api-token missing THEN generate random token; WRITE installDir/api-token
+ *   - 2. LISTEN only on 127.0.0.1:port
+ *   - 3. ON each request: IF Authorization != "Bearer "+token THEN 401
+ *
+ * ## Load bookmarks (File or snapshot)
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: Prefer aggregate-snapshot.json when present; else hoverboard-bookmarks.json version-1 shape.
+ * - Contract:
+ *   - INPUT: bookmarksFilePath, snapshotFilePath
+ *   - PRE: paths may be missing
+ *   - OUTPUT: list of bookmark objects | empty list
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_BOOKMARKS
+ *   - 1. IF aggregate-snapshot.json exists THEN TRY PARSE snapshot.bookmarks; RETURN list
+ *   - 2. IF hoverboard-bookmarks.json missing THEN RETURN []
+ *   - 3. PARSE JSON { version, bookmarks: map url -> pin }
+ *   - 4. RETURN values as array (default storage "file")
+ *
+ * ## List and filter
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: GET /v1/bookmarks with q, tag, url filters.
+ * - Contract:
+ *   - INPUT: bookmarks[], query params q, tag, url
+ *   - PRE: auth passed
+ *   - OUTPUT: JSON { bookmarks: [...], count }
+ *   - EFFECTS: pure (filter) + Http
+ *   - TERMINATION: total
+ * - PROCEDURE: FILTER_BOOKMARKS
+ *   - 1. IF url set THEN keep exact url match
+ *   - 2. IF tag set THEN keep bookmarks whose tags contain tag (case-insensitive)
+ *   - 3. IF q set THEN keep substring match on description, url, tags, extended (case-insensitive)
+ *   - 4. RETURN filtered
+ *
+ * ## File write and delete
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: POST/PATCH merge pin into File JSON; DELETE by url query (File only, not snapshot).
+ * - Contract:
+ *   - INPUT: pin JSON (POST/PATCH) or url query (DELETE)
+ *   - PRE: auth passed; url required
+ *   - OUTPUT: { ok, bookmark|deleted } | HTTP 400/500
+ *   - FAILURE_MODES: MissingUrl, InvalidJSON, IO
+ *   - EFFECTS: IO, Http
+ *   - TERMINATION: total
+ * - PROCEDURE: WRITE_OR_DELETE_FILE_BOOKMARK
+ *   - 1. POST/PATCH: Decode pin; IF url empty THEN 400; MERGE into hoverboard-bookmarks.json; RETURN ok
+ *   - 2. DELETE: IF url query empty THEN 400; REMOVE url from File map; RETURN ok
+ *
+ * ## Health
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: GET /v1/health returns ok, source file|snapshot, bind.
+ * - Contract:
+ *   - INPUT: none (auth required)
+ *   - OUTPUT: { ok: true, source, bind, port }
+ *   - EFFECTS: Http, IO (stat snapshot)
+ *   - TERMINATION: total
+ * - PROCEDURE: HEALTH
+ *   - 1. source = IF snapshot exists THEN "snapshot" ELSE "file"
+ *   - 2. RETURN { ok: true, source, bind: "127.0.0.1", port }
+ *
+ * ## Build aggregate snapshot payload
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: Pure map from aggregated Index rows to snapshot JSON.
+ * - Contract:
+ *   - INPUT: bookmarks[] from getAggregatedBookmarksForIndex
+ *   - OUTPUT: { version: 1, updatedAt, bookmarks: [...] }
+ *   - EFFECTS: pure (clock for updatedAt)
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_AGGREGATE_SNAPSHOT_PAYLOAD
+ *   - 1. MAP each row to pin fields + storage; DROP rows without url
+ *   - 2. RETURN { version: 1, updatedAt: now ISO, bookmarks }
+ *
+ * ## Refresh API snapshot (extension)
+ *
+ * - [IMPL-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [REQ-LOCAL_QUERY_API] How: REFRESH_API_SNAPSHOT aggregates providers and writes aggregate-snapshot.json via native host.
+ * - Contract:
+ *   - INPUT: none (message from Index/Options)
+ *   - PRE: BookmarkRouter ready; native messaging available
+ *   - OUTPUT: { success, count } | { success: false, error }
+ *   - FAILURE_MODES: RouterNotReady, NativeUnavailable, WriteFailed
+ *   - EFFECTS: IO, Async, State
+ *   - TERMINATION: total
+ * - PROCEDURE: REFRESH_API_SNAPSHOT
+ *   - 1. agg = handleGetAggregatedBookmarksForIndex()
+ *   - 2. payload = BUILD_AGGREGATE_SNAPSHOT_PAYLOAD(agg.bookmarks)
+ *   - 3. SEND native writeBookmarksFile path ~/.hoverboard/aggregate-snapshot.json data payload
+ *   - 4. ON success RETURN { success: true, count: payload.bookmarks.length }
+ *   - 5. ON failure RETURN { success: false, error }
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_QUERY_API ===
+ */
 // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Service worker implementation for Manifest V3 migration
 /**
  * Hoverboard Extension - Service Worker (Manifest V3)
@@ -1080,6 +1329,7 @@ import { browser } from '../shared/safari-shim.js' // [SAFARI-EXT-SHIM-001]
 import * as uiInspector from '../shared/ui-inspector.js'
 import { RecentTagsMemoryManager } from '../features/tagging/recent-tags-memory-manager.js'
 import { createProviderInitMutex } from '../shared/async-init-mutex.js'
+import { buildBookmarksIndexUrlWithQuery } from '../shared/library-search-entry.js'
 
 /** [IMPL-ICON_CLICK_BEHAVIOR] Chrome does not show side panel when active tab is chrome:// or chrome-extension://. */
 const _isRestrictedForSidePanel = (url) => typeof url === 'string' && (url.startsWith('chrome://') || url.startsWith('chrome-extension://'))
@@ -1193,9 +1443,32 @@ class HoverboardServiceWorker {
       }
 
       // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Popup → SW OPEN_BOOKMARKS_INDEX_TAB (create + dismiss side panel).
+      // [REQ-LIBRARY_SEARCH_ENTRY] Optional message.data.q prefills Index search via ?q=
       if (message.type === MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX) {
-        this._openBookmarksIndexTab()
+        this._openBookmarksIndexTab(message.data?.q || message.q || '')
         sendResponse({ success: true })
+        return true
+      }
+
+      // [REQ-LOCAL_QUERY_API] [IMPL-LOCAL_QUERY_API] Write aggregate-snapshot.json for Local Query API
+      if (message.type === 'REFRESH_API_SNAPSHOT' || message.type === MESSAGE_TYPES.REFRESH_API_SNAPSHOT) {
+        this._refreshApiSnapshot()
+          .then((result) => sendResponse(result))
+          .catch((error) => sendResponse({ success: false, error: error.message }))
+        return true
+      }
+
+      // [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH]
+      if (message.type === 'CHECK_LINK_HEALTH' || message.type === MESSAGE_TYPES.CHECK_LINK_HEALTH) {
+        this._checkLinkHealth(message.data?.urls || [])
+          .then((result) => sendResponse(result))
+          .catch((error) => sendResponse({ success: false, error: error.message }))
+        return true
+      }
+      if (message.type === 'GET_LINK_HEALTH' || message.type === MESSAGE_TYPES.GET_LINK_HEALTH) {
+        this._getLinkHealthMap()
+          .then((map) => sendResponse({ success: true, data: map }))
+          .catch((error) => sendResponse({ success: false, error: error.message }))
         return true
       }
 
@@ -1344,12 +1617,14 @@ class HoverboardServiceWorker {
   /**
    * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] [IMPL-ICON_CLICK_BEHAVIOR]
    * OPEN_BOOKMARKS_INDEX_TAB: create Local Bookmarks Index tab then dismiss already-open side panel (tab-create only).
+   * [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY] Optional q via BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY
    */
-  _openBookmarksIndexTab () {
+  _openBookmarksIndexTab (q = '') {
     const chromeApi = typeof globalThis.chrome !== 'undefined' ? globalThis.chrome : null
     const runtime = chromeApi?.runtime || browser.runtime
     const getURL = runtime?.getURL ? (path) => runtime.getURL(path) : () => ''
-    const url = getURL('src/ui/bookmarks-table/bookmarks-table.html')
+    const baseUrl = getURL('src/ui/bookmarks-table/bookmarks-table.html')
+    const url = buildBookmarksIndexUrlWithQuery(baseUrl, q)
     const tabsApi = chromeApi?.tabs ?? browser.tabs
     if (url && tabsApi?.create) {
       tabsApi.create({ url })
@@ -1803,6 +2078,81 @@ class HoverboardServiceWorker {
         resolve(response || { error: 'No response' })
       })
     })
+  }
+
+  /**
+   * [REQ-LINK_HEALTH] [ARCH-LINK_HEALTH] [IMPL-LINK_HEALTH]
+   * Direct HEAD then GET; persist under hoverboard_link_health.
+   */
+  async _checkLinkHealth (urls = []) {
+    const { buildHealthRecord, mergeHealthMap, LINK_HEALTH_STORAGE_KEY } = await import('../shared/link-health.js')
+    const list = (Array.isArray(urls) ? urls : []).filter((u) => typeof u === 'string' && /^https?:/i.test(u)).slice(0, 50)
+    const stored = await chrome.storage.local.get(LINK_HEALTH_STORAGE_KEY)
+    let map = stored[LINK_HEALTH_STORAGE_KEY] || {}
+    const results = {}
+    for (const url of list) {
+      let record
+      try {
+        let res = await fetch(url, { method: 'HEAD', redirect: 'follow' })
+        if (!res.ok && (res.status === 405 || res.status === 501)) {
+          res = await fetch(url, { method: 'GET', redirect: 'follow' })
+        }
+        record = buildHealthRecord({ status: res.status, ok: res.ok })
+      } catch (e) {
+        record = buildHealthRecord({ error: e.message || String(e) })
+      }
+      map = mergeHealthMap(map, url, record)
+      results[url] = record
+    }
+    await chrome.storage.local.set({ [LINK_HEALTH_STORAGE_KEY]: map })
+    return { success: true, results, checked: list.length }
+  }
+
+  async _getLinkHealthMap () {
+    const { LINK_HEALTH_STORAGE_KEY } = await import('../shared/link-health.js')
+    const stored = await chrome.storage.local.get(LINK_HEALTH_STORAGE_KEY)
+    return stored[LINK_HEALTH_STORAGE_KEY] || {}
+  }
+
+  /**
+   * [REQ-LOCAL_QUERY_API] [IMPL-LOCAL_QUERY_API] Aggregate Local+File+Sync+Browser into aggregate-snapshot.json via native host.
+   */
+  async _refreshApiSnapshot () {
+    try {
+      if (!this.messageHandler?.handleGetAggregatedBookmarksForIndex) {
+        return { success: false, error: 'Bookmark router not ready' }
+      }
+      const agg = await this.messageHandler.handleGetAggregatedBookmarksForIndex()
+      const bookmarks = agg?.bookmarks || []
+      const { buildAggregateSnapshotPayload } = await import('../shared/aggregate-snapshot.js')
+      const payload = buildAggregateSnapshotPayload(bookmarks)
+      if (typeof chrome === 'undefined' || !chrome.runtime?.sendNativeMessage) {
+        return { success: false, error: 'Native messaging not available' }
+      }
+      const response = await new Promise((resolve) => {
+        chrome.runtime.sendNativeMessage(
+          'com.hoverboard.native_host',
+          {
+            type: 'writeBookmarksFile',
+            path: '~/.hoverboard/aggregate-snapshot.json',
+            data: payload
+          },
+          (r) => {
+            if (chrome.runtime.lastError) {
+              resolve({ error: chrome.runtime.lastError.message })
+              return
+            }
+            resolve(r || { error: 'No response' })
+          }
+        )
+      })
+      if (response?.error || response?.type === 'error') {
+        return { success: false, error: response.error || response.message || 'write failed' }
+      }
+      return { success: true, count: payload.bookmarks.length }
+    } catch (e) {
+      return { success: false, error: e.message || String(e) }
+    }
   }
 
   // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Update _sidePanelWindowId when user activates a tab in a normal window. Implements cache maintenance so "open Tags tree" has a valid windowId.

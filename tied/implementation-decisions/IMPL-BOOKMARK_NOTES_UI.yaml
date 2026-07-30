@@ -1,0 +1,59 @@
+IMPL-BOOKMARK_NOTES_UI:
+  code_locations:
+    files:
+      - path: "src/shared/bookmark-notes-ui.js"
+        description: "Pure helpers"
+      - path: "src/ui/popup/popup.html"
+        description: "Title/Notes markup"
+      - path: "src/ui/side-panel/side-panel.html"
+        description: "This Page Title/Notes markup (popup-equivalent)"
+      - path: "src/ui/popup/UIManager.js"
+        description: "Field sync and blur/save emit"
+      - path: "src/ui/popup/PopupController.js"
+        description: "SAVE_BOOKMARK_DETAILS"
+    functions:
+      - "bookmarkDetailsUnchanged"
+      - "buildBookmarkNotesSavePayload"
+      - "handleSaveBookmarkDetails"
+      - "notesEditableForBackend"
+      - "syncBookmarkNotesFields"
+  cross_references:
+    - "ARCH-BOOKMARK_NOTES_UI"
+    - "REQ-BOOKMARK_NOTES_UI"
+  essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_NOTES_UI-pseudocode.md"
+  implementation_approach:
+    details:
+      - "popup.html Details section above tags"
+      - "PopupController: saveBookmarkDetails on blur"
+      - "src/shared/bookmark-notes-ui.js: NOTES_EDITABLE_FOR_BACKEND, BUILD_BOOKMARK_NOTES_SAVE_PAYLOAD"
+      - "UIManager: syncBookmarkNotesFields"
+    summary: "Shared pure helpers plus popup Details section wired through PopupController blur/save."
+  metadata:
+    last_updated:
+      author: "agent"
+      date: "2026-07-30"
+      reason: "Align code_locations with side-panel markup and full-block sync"
+  name: "Bookmark Title and Notes UI"
+  related_decisions:
+    composed_with:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-MOVE_BOOKMARK_UI"
+    depends_on:
+      - "ARCH-BOOKMARK_NOTES_UI"
+    see_also: []
+    supersedes: []
+  status: "Active"
+  summary: "Details section Title/Notes on popup and This Page; pure helpers in bookmark-notes-ui.js; PopupController SAVE_BOOKMARK_DETAILS; UIManager SYNC_BOOKMARK_NOTES_FIELDS."
+  traceability:
+    architecture:
+      - "ARCH-BOOKMARK_NOTES_UI"
+    code_annotations:
+      - "IMPL-BOOKMARK_NOTES_UI"
+      - "REQ-BOOKMARK_NOTES_UI"
+    requirements:
+      - "REQ-BOOKMARK_NOTES_UI"
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    tests:
+      - "tests/integration/bookmark-notes-ui.integration.test.js"
+      - "tests/unit/bookmark-notes-ui.test.js"

@@ -1,0 +1,37 @@
+REQ-LOCAL_QUERY_API:
+  category: "Functional"
+  description: "Provide an opt-in local HTTP API for scripts and integrations to list and search Hoverboard bookmarks on the same machine. Phase 1: File-backend hoverboard-bookmarks.json. Phase 2: prefer aggregate-snapshot.json (Local+File+Sync+Browser) when present; File POST/PATCH/DELETE; extension REFRESH_API_SNAPSHOT writes the snapshot. The API binds only to 127.0.0.1, requires a bearer token from ~/.hoverboard/api-token, and does not expose a public/cloud REST surface."
+  name: "Local Query API"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Scriptable integrations without Pinboard cloud"
+    problems_solved:
+      - "No machine-local query API for File bookmarks"
+    why: "Bookmark-manager parity expects an integration API; an extension cannot host public REST, so a native-host companion on loopback is the fit."
+  related_requirements:
+    depends_on:
+      - "REQ-FILE_BOOKMARK_STORAGE"
+      - "REQ-NATIVE_HOST_WRAPPER"
+    related_to:
+      - "REQ-PINBOARD_COMPATIBILITY"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Companion binary listens on 127.0.0.1 only (default port 8787)"
+    - criterion: "Docs LOCAL_API.md and Options copy describe opt-in loopback scope"
+    - criterion: "Extension REFRESH_API_SNAPSHOT writes aggregate-snapshot.json via native host"
+    - criterion: "GET /v1/health and GET /v1/bookmarks with q, tag, url filters; prefer aggregate-snapshot.json when present else File JSON"
+    - criterion: "Go unit tests cover auth, filters, and snapshot preference"
+    - criterion: "POST/PATCH/DELETE mutate File hoverboard-bookmarks.json only"
+    - criterion: "Requests require Authorization Bearer token matching installDir/api-token"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-LOCAL_QUERY_API"
+    code_annotations:
+      - "REQ-LOCAL_QUERY_API"
+    implementation:
+      - "IMPL-LOCAL_QUERY_API"
+    tests:
+      - "native_host/localapi/api_test.go"
+      - "tests/unit/library-search-and-snapshot.test.js"

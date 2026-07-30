@@ -190,6 +190,16 @@ ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
       - "IMPL-BOOKMARK_CREATE_UPDATE_TIMES"
     requirements:
       - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
+ARCH-BOOKMARK_NOTES_UI:
+  category: "UI"
+  cross_references:
+    - "IMPL-BOOKMARK_NOTES_UI"
+    - "REQ-BOOKMARK_NOTES_UI"
+  detail_file: "architecture-decisions/ARCH-BOOKMARK_NOTES_UI.yaml"
+  name: "Bookmark Title and Notes UI Architecture"
+  priority: "P0"
+  status: "Accepted"
+  summary: "Title/Notes fields on popup and This Page map to description/extended; shared pure helpers; browser disables notes."
 ARCH-BOOKMARK_STATE_SYNC:
   alternatives_considered:
     - name: "Polling Pinboard"
@@ -960,6 +970,22 @@ ARCH-LANGUAGE_SELECTION:
     tests:
       - "npm run typecheck (validates type-checked .js and .d.ts)"
       - "npm run validate (lint + typecheck + validate:manifest + security:check)"
+ARCH-LIBRARY_SEARCH_ENTRY:
+  cross_references:
+    - "IMPL-LIBRARY_SEARCH_ENTRY"
+    - "REQ-LIBRARY_SEARCH_ENTRY"
+  detail_file: "architecture-decisions/ARCH-LIBRARY_SEARCH_ENTRY.yaml"
+  name: "Library Search Entry Architecture"
+  status: "Accepted"
+  summary: "OPEN_BOOKMARKS_INDEX with optional q; Index reads URLSearchParams."
+ARCH-LINK_HEALTH:
+  cross_references:
+    - "IMPL-LINK_HEALTH"
+    - "REQ-LINK_HEALTH"
+  detail_file: "architecture-decisions/ARCH-LINK_HEALTH.yaml"
+  name: "Link Health Architecture"
+  status: "Accepted"
+  summary: "SW fetch HEAD/GET; storage map; Index UI."
 ARCH-LOCAL_BOOKMARKS_INDEX:
   alternatives_considered:
     - name: "Include Pinboard in index aggregate"
@@ -1192,6 +1218,14 @@ ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       - "REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE"
     tests:
       - "tests/unit/bookmarks-table-index.test.js"
+ARCH-LOCAL_QUERY_API:
+  cross_references:
+    - "IMPL-LOCAL_QUERY_API"
+    - "REQ-LOCAL_QUERY_API"
+  detail_file: "architecture-decisions/ARCH-LOCAL_QUERY_API.yaml"
+  name: "Local Query API Architecture"
+  status: "Accepted"
+  summary: "hoverboard-local-api on 127.0.0.1; prefer aggregate-snapshot.json; File CRUD; extension snapshot refresh."
 ARCH-LOCAL_STORAGE_PROVIDER:
   alternatives_considered:
     - name: "Hybrid per-bookmark local/remote"

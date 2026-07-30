@@ -22071,6 +22071,99 @@ var init_pinboard_service = __esm({
   }
 });
 
+// src/shared/link-health.js
+var link_health_exports = {};
+__export(link_health_exports, {
+  LINK_HEALTH_STORAGE_KEY: () => LINK_HEALTH_STORAGE_KEY,
+  buildHealthRecord: () => buildHealthRecord,
+  classifyHttpStatus: () => classifyHttpStatus,
+  filterBookmarksByHealth: () => filterBookmarksByHealth,
+  mergeHealthMap: () => mergeHealthMap
+});
+function classifyHttpStatus(status) {
+  const n = Number(status);
+  if (!Number.isFinite(n) || n <= 0) return "unknown";
+  if (n >= 200 && n < 300) return "ok";
+  if (n >= 300 && n < 400) return "redirect";
+  if (n >= 400 && n < 500) return "client_error";
+  if (n >= 500 && n < 600) return "server_error";
+  return "unknown";
+}
+function buildHealthRecord(result = {}) {
+  const checkedAt = (/* @__PURE__ */ new Date()).toISOString();
+  if (result.error) {
+    return {
+      status: "unreachable",
+      httpStatus: null,
+      error: String(result.error),
+      checkedAt
+    };
+  }
+  const httpStatus = result.status != null ? Number(result.status) : null;
+  return {
+    status: classifyHttpStatus(httpStatus),
+    httpStatus,
+    error: null,
+    checkedAt
+  };
+}
+function mergeHealthMap(map2, url2, record2) {
+  const next = { ...map2 || {} };
+  if (!url2) return next;
+  next[url2] = record2;
+  return next;
+}
+function filterBookmarksByHealth(bookmarks, healthMap, statusFilter) {
+  const f = String(statusFilter || "").trim();
+  if (!f) return bookmarks || [];
+  const map2 = healthMap || {};
+  return (bookmarks || []).filter((b) => {
+    const rec = map2[b.url];
+    const st = rec?.status || "unknown";
+    return st === f;
+  });
+}
+var LINK_HEALTH_STORAGE_KEY;
+var init_link_health = __esm({
+  "src/shared/link-health.js"() {
+    "use strict";
+    LINK_HEALTH_STORAGE_KEY = "hoverboard_link_health";
+  }
+});
+
+// src/shared/aggregate-snapshot.js
+var aggregate_snapshot_exports = {};
+__export(aggregate_snapshot_exports, {
+  AGGREGATE_SNAPSHOT_RELATIVE_PATH: () => AGGREGATE_SNAPSHOT_RELATIVE_PATH,
+  buildAggregateSnapshotPayload: () => buildAggregateSnapshotPayload
+});
+function buildAggregateSnapshotPayload(bookmarks = []) {
+  const list = Array.isArray(bookmarks) ? bookmarks : [];
+  const mapped = list.map((b) => ({
+    url: b.url || "",
+    description: b.description || "",
+    extended: b.extended || "",
+    tags: b.tags != null ? b.tags : "",
+    shared: b.shared != null ? b.shared : "yes",
+    toread: b.toread != null ? b.toread : "no",
+    time: b.time || b.dt || "",
+    hash: b.hash || "",
+    storage: b.storage || b.preferredBackend || ""
+  })).filter((b) => b.url);
+  return {
+    version: 1,
+    updatedAt: (/* @__PURE__ */ new Date()).toISOString(),
+    bookmarks: mapped
+  };
+}
+var AGGREGATE_SNAPSHOT_RELATIVE_PATH;
+var init_aggregate_snapshot = __esm({
+  "src/shared/aggregate-snapshot.js"() {
+    "use strict";
+    AGGREGATE_SNAPSHOT_RELATIVE_PATH = "aggregate-snapshot.json";
+  }
+});
+
 // src/core/message-handler.js
 init_pinboard_service();
 
@@ -22796,6 +22889,11 @@ var MESSAGE_TYPES = {
   OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL",
   // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Popup/command/menu open Local Bookmarks Index via SW OPEN_BOOKMARKS_INDEX_TAB.
   OPEN_BOOKMARKS_INDEX: "OPEN_BOOKMARKS_INDEX",
+  // [REQ-LOCAL_QUERY_API] Write ~/.hoverboard/aggregate-snapshot.json for Local Query API
+  REFRESH_API_SNAPSHOT: "REFRESH_API_SNAPSHOT",
+  // [REQ-LINK_HEALTH] Batch URL health checks
+  CHECK_LINK_HEALTH: "CHECK_LINK_HEALTH",
+  GET_LINK_HEALTH: "GET_LINK_HEALTH",
   // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel (and on index tab create); side panel closes itself if visible and open long enough (toggle).
   REQUEST_SIDE_PANEL_CLOSE: "REQUEST_SIDE_PANEL_CLOSE"
 };
@@ -25491,6 +25589,15 @@ function createProviderInitMutex(initFn) {
   };
 }
 
+// src/shared/library-search-entry.js
+function buildBookmarksIndexUrlWithQuery(baseUrl, query = "") {
+  const q = String(query || "").trim();
+  if (!baseUrl) return "";
+  if (!q) return baseUrl;
+  const sep2 = baseUrl.includes("?") ? "&" : "?";
+  return `${baseUrl}${sep2}q=${encodeURIComponent(q)}`;
+}
+
 // src/core/service-worker.js
 var _isRestrictedForSidePanel = (url2) => typeof url2 === "string" && (url2.startsWith("chrome://") || url2.startsWith("chrome-extension://"));
 var HoverboardServiceWorker = class {
@@ -25574,8 +25681,20 @@ var HoverboardServiceWorker = class {
         return true;
       }
       if (message.type === MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX) {
-        this._openBookmarksIndexTab();
+        this._openBookmarksIndexTab(message.data?.q || message.q || "");
         sendResponse({ success: true });
+        return true;
+      }
+      if (message.type === "REFRESH_API_SNAPSHOT" || message.type === MESSAGE_TYPES.REFRESH_API_SNAPSHOT) {
+        this._refreshApiSnapshot().then((result) => sendResponse(result)).catch((error48) => sendResponse({ success: false, error: error48.message }));
+        return true;
+      }
+      if (message.type === "CHECK_LINK_HEALTH" || message.type === MESSAGE_TYPES.CHECK_LINK_HEALTH) {
+        this._checkLinkHealth(message.data?.urls || []).then((result) => sendResponse(result)).catch((error48) => sendResponse({ success: false, error: error48.message }));
+        return true;
+      }
+      if (message.type === "GET_LINK_HEALTH" || message.type === MESSAGE_TYPES.GET_LINK_HEALTH) {
+        this._getLinkHealthMap().then((map2) => sendResponse({ success: true, data: map2 })).catch((error48) => sendResponse({ success: false, error: error48.message }));
         return true;
       }
       this.handleMessage(message, sender).then((response) => {
@@ -25711,12 +25830,14 @@ var HoverboardServiceWorker = class {
   /**
    * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] [IMPL-ICON_CLICK_BEHAVIOR]
    * OPEN_BOOKMARKS_INDEX_TAB: create Local Bookmarks Index tab then dismiss already-open side panel (tab-create only).
+   * [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY] Optional q via BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY
    */
-  _openBookmarksIndexTab() {
+  _openBookmarksIndexTab(q = "") {
     const chromeApi = typeof globalThis.chrome !== "undefined" ? globalThis.chrome : null;
     const runtime = chromeApi?.runtime || safariEnhancements.runtime;
     const getURL = runtime?.getURL ? (path) => runtime.getURL(path) : () => "";
-    const url2 = getURL("src/ui/bookmarks-table/bookmarks-table.html");
+    const baseUrl = getURL("src/ui/bookmarks-table/bookmarks-table.html");
+    const url2 = buildBookmarksIndexUrlWithQuery(baseUrl, q);
     const tabsApi = chromeApi?.tabs ?? safariEnhancements.tabs;
     if (url2 && tabsApi?.create) {
       tabsApi.create({ url: url2 });
@@ -26143,6 +26264,78 @@ var HoverboardServiceWorker = class {
         resolve(response || { error: "No response" });
       });
     });
+  }
+  /**
+   * [REQ-LINK_HEALTH] [ARCH-LINK_HEALTH] [IMPL-LINK_HEALTH]
+   * Direct HEAD then GET; persist under hoverboard_link_health.
+   */
+  async _checkLinkHealth(urls = []) {
+    const { buildHealthRecord: buildHealthRecord2, mergeHealthMap: mergeHealthMap2, LINK_HEALTH_STORAGE_KEY: LINK_HEALTH_STORAGE_KEY2 } = await Promise.resolve().then(() => (init_link_health(), link_health_exports));
+    const list = (Array.isArray(urls) ? urls : []).filter((u) => typeof u === "string" && /^https?:/i.test(u)).slice(0, 50);
+    const stored = await chrome.storage.local.get(LINK_HEALTH_STORAGE_KEY2);
+    let map2 = stored[LINK_HEALTH_STORAGE_KEY2] || {};
+    const results = {};
+    for (const url2 of list) {
+      let record2;
+      try {
+        let res = await fetch(url2, { method: "HEAD", redirect: "follow" });
+        if (!res.ok && (res.status === 405 || res.status === 501)) {
+          res = await fetch(url2, { method: "GET", redirect: "follow" });
+        }
+        record2 = buildHealthRecord2({ status: res.status, ok: res.ok });
+      } catch (e) {
+        record2 = buildHealthRecord2({ error: e.message || String(e) });
+      }
+      map2 = mergeHealthMap2(map2, url2, record2);
+      results[url2] = record2;
+    }
+    await chrome.storage.local.set({ [LINK_HEALTH_STORAGE_KEY2]: map2 });
+    return { success: true, results, checked: list.length };
+  }
+  async _getLinkHealthMap() {
+    const { LINK_HEALTH_STORAGE_KEY: LINK_HEALTH_STORAGE_KEY2 } = await Promise.resolve().then(() => (init_link_health(), link_health_exports));
+    const stored = await chrome.storage.local.get(LINK_HEALTH_STORAGE_KEY2);
+    return stored[LINK_HEALTH_STORAGE_KEY2] || {};
+  }
+  /**
+   * [REQ-LOCAL_QUERY_API] [IMPL-LOCAL_QUERY_API] Aggregate Local+File+Sync+Browser into aggregate-snapshot.json via native host.
+   */
+  async _refreshApiSnapshot() {
+    try {
+      if (!this.messageHandler?.handleGetAggregatedBookmarksForIndex) {
+        return { success: false, error: "Bookmark router not ready" };
+      }
+      const agg = await this.messageHandler.handleGetAggregatedBookmarksForIndex();
+      const bookmarks = agg?.bookmarks || [];
+      const { buildAggregateSnapshotPayload: buildAggregateSnapshotPayload2 } = await Promise.resolve().then(() => (init_aggregate_snapshot(), aggregate_snapshot_exports));
+      const payload = buildAggregateSnapshotPayload2(bookmarks);
+      if (typeof chrome === "undefined" || !chrome.runtime?.sendNativeMessage) {
+        return { success: false, error: "Native messaging not available" };
+      }
+      const response = await new Promise((resolve) => {
+        chrome.runtime.sendNativeMessage(
+          "com.hoverboard.native_host",
+          {
+            type: "writeBookmarksFile",
+            path: "~/.hoverboard/aggregate-snapshot.json",
+            data: payload
+          },
+          (r) => {
+            if (chrome.runtime.lastError) {
+              resolve({ error: chrome.runtime.lastError.message });
+              return;
+            }
+            resolve(r || { error: "No response" });
+          }
+        );
+      });
+      if (response?.error || response?.type === "error") {
+        return { success: false, error: response.error || response.message || "write failed" };
+      }
+      return { success: true, count: payload.bookmarks.length };
+    } catch (e) {
+      return { success: false, error: e.message || String(e) };
+    }
   }
   // [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] Update _sidePanelWindowId when user activates a tab in a normal window. Implements cache maintenance so "open Tags tree" has a valid windowId.
   async handleTabActivated(activeInfo) {

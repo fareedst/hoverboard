@@ -427,6 +427,16 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
       - "tests/unit/pinboard-bookmark-times.test.js"
       - "tests/unit/sync-bookmark-service.test.js"
       - "tests/unit/url-tags-manager.test.js"
+IMPL-BOOKMARK_NOTES_UI:
+  cross_references:
+    - "ARCH-BOOKMARK_NOTES_UI"
+    - "REQ-BOOKMARK_NOTES_UI"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  detail_file: "implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml"
+  name: "Bookmark Title and Notes UI"
+  status: "Active"
+  summary: "Details section Title/Notes on popup and This Page; pure helpers; saveBookmark with preferredBackend; browser notes disabled."
 IMPL-BOOKMARK_ROUTER:
   code_locations:
     files:
@@ -1624,6 +1634,56 @@ IMPL-ICON_CLICK_BEHAVIOR:
       - "tests/playwright/extension-icon-click.spec.js"
       - "tests/unit/service-worker-quick-access.test.js"
       - "tests/unit/side-panel-icon-toggle.test.js"
+IMPL-LIBRARY_SEARCH_ENTRY:
+  cross_references:
+    - "ARCH-LIBRARY_SEARCH_ENTRY"
+    - "REQ-LIBRARY_SEARCH_ENTRY"
+  detail_file: "implementation-decisions/IMPL-LIBRARY_SEARCH_ENTRY.yaml"
+  metadata:
+    last_updated:
+      author: "agent"
+      date: "2026-07-30"
+      reason: "Three-way alignment: composition test + full-block sync"
+  name: "Library Search Entry"
+  status: "Active"
+  summary: "Shared URL builder; PopupController opens Index with q; bookmarks-table applies search on load; composition covers UIManager→OPEN_BOOKMARKS_INDEX."
+  traceability:
+    architecture:
+      - "ARCH-LIBRARY_SEARCH_ENTRY"
+    code_annotations:
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+    requirements:
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+    tests:
+      - "tests/integration/library-search-entry.integration.test.js"
+      - "tests/unit/library-search-and-snapshot.test.js"
+      - "tests/unit/service-worker-open-bookmarks-index.test.js"
+IMPL-LINK_HEALTH:
+  cross_references:
+    - "ARCH-LINK_HEALTH"
+    - "REQ-LINK_HEALTH"
+  detail_file: "implementation-decisions/IMPL-LINK_HEALTH.yaml"
+  metadata:
+    last_updated:
+      author: "agent"
+      date: "2026-07-30"
+      reason: "Three-way alignment: composition test + full-block sync"
+  name: "Link Health"
+  status: "Active"
+  summary: "Pure helpers + SW batch check + Index UI; composition covers CHECK/GET_LINK_HEALTH wiring."
+  traceability:
+    architecture:
+      - "ARCH-LINK_HEALTH"
+    code_annotations:
+      - "IMPL-LINK_HEALTH"
+      - "REQ-LINK_HEALTH"
+    requirements:
+      - "REQ-LINK_HEALTH"
+    tests:
+      - "tests/integration/link-health.integration.test.js"
+      - "tests/unit/link-health-sw.test.js"
+      - "tests/unit/link-health.test.js"
 IMPL-LOCAL_BOOKMARK_SERVICE:
   code_locations:
     files:
@@ -2037,6 +2097,31 @@ IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
     tests:
       - "tests/unit/bookmarks-table-index.test.js (applyRegexReplace, regex replace UI)"
       - "tests/unit/bookmarks-table-index.test.js"
+IMPL-LOCAL_QUERY_API:
+  cross_references:
+    - "ARCH-LOCAL_QUERY_API"
+    - "REQ-LOCAL_QUERY_API"
+  detail_file: "implementation-decisions/IMPL-LOCAL_QUERY_API.yaml"
+  metadata:
+    last_updated:
+      author: "agent"
+      date: "2026-07-30"
+      reason: "Three-way alignment: composition snapshot test"
+  name: "Local Query API"
+  status: "Active"
+  summary: "native_host/localapi + aggregate-snapshot.js + REFRESH_API_SNAPSHOT; composition covers SW snapshot wiring."
+  traceability:
+    architecture:
+      - "ARCH-LOCAL_QUERY_API"
+    code_annotations:
+      - "IMPL-LOCAL_QUERY_API"
+      - "REQ-LOCAL_QUERY_API"
+    requirements:
+      - "REQ-LOCAL_QUERY_API"
+    tests:
+      - "native_host/localapi/api_test.go"
+      - "tests/integration/local-query-api-snapshot.integration.test.js"
+      - "tests/unit/library-search-and-snapshot.test.js"
 IMPL-LOG_LEVEL_CONFIG:
   code_locations:
     files:

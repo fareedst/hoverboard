@@ -17344,6 +17344,70 @@ function sortTagChipRows(rows, mode) {
   return copy;
 }
 
+// src/shared/bookmark-notes-ui.js
+function notesEditableForBackend(backendId) {
+  if (String(backendId || "").toLowerCase() === "browser") return false;
+  return true;
+}
+function buildBookmarkNotesSavePayload({
+  currentPin = null,
+  url: url2 = null,
+  tabTitle = "",
+  titleText = "",
+  notesText = "",
+  preferredBackend = null,
+  notesEditable = true
+} = {}) {
+  const resolvedUrl = currentPin && currentPin.url || url2 || "";
+  if (!resolvedUrl || !String(resolvedUrl).trim()) {
+    return { error: "MissingUrl" };
+  }
+  let description = String(titleText ?? "").trim();
+  if (!description) description = String(tabTitle ?? "").trim() || "";
+  const extended = notesEditable ? String(notesText ?? "") : String(currentPin && currentPin.extended || "");
+  const tags = currentPin?.tags != null ? currentPin.tags : "";
+  const shared = currentPin?.shared != null ? currentPin.shared : "yes";
+  const toread = currentPin?.toread != null ? currentPin.toread : "no";
+  const payload = {
+    url: resolvedUrl,
+    description,
+    extended,
+    tags,
+    shared,
+    toread
+  };
+  if (preferredBackend) payload.preferredBackend = preferredBackend;
+  return payload;
+}
+function bookmarkDetailsUnchanged(currentPin, payload, notesEditable) {
+  if (!currentPin || payload?.error) return false;
+  const sameTitle = String(currentPin.description || "") === String(payload.description || "");
+  if (!notesEditable) return sameTitle;
+  const sameNotes = String(currentPin.extended || "") === String(payload.extended || "");
+  return sameTitle && sameNotes;
+}
+function syncBookmarkNotesFields({
+  pin = null,
+  backendId = null,
+  titleInput = null,
+  notesInput = null,
+  notesHintEl = null
+} = {}) {
+  const notesEditable = notesEditableForBackend(backendId);
+  if (titleInput) {
+    titleInput.value = pin && pin.description || "";
+  }
+  if (notesInput) {
+    notesInput.value = notesEditable ? pin && pin.extended || "" : "";
+    notesInput.disabled = !notesEditable;
+  }
+  if (notesHintEl) {
+    notesHintEl.hidden = notesEditable;
+    notesHintEl.style.display = notesEditable ? "none" : "";
+  }
+  return { notesEditable };
+}
+
 // src/ui/popup/UIManager.js
 var UIManager = class {
   constructor({ errorHandler, stateManager, config: config2 = {}, container = null } = {}) {
@@ -17450,6 +17514,9 @@ var UIManager = class {
       searchInput: get("searchInput"),
       searchBtn: get("searchBtn"),
       searchSuggestions: get("searchSuggestions"),
+      // [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY]
+      librarySearchInput: get("librarySearchInput"),
+      librarySearchBtn: get("librarySearchBtn"),
       // Tag display
       currentTagsContainer: get("currentTagsContainer"),
       recentTagsContainer: get("recentTagsContainer"),
@@ -17470,7 +17537,12 @@ var UIManager = class {
       // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] This Page inline usage section
       usageStatsSection: get("usageStatsSection"),
       usageStatsText: get("usageStatsText"),
-      usageReferrerText: get("usageReferrerText")
+      usageReferrerText: get("usageReferrerText"),
+      // [REQ-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Title/Notes fields
+      bookmarkTitleInput: get("bookmarkTitleInput"),
+      bookmarkNotesInput: get("bookmarkNotesInput"),
+      bookmarkNotesHint: get("bookmarkNotesHint"),
+      saveBookmarkDetailsBtn: get("saveBookmarkDetailsBtn")
     };
     this._tagSortUiEnabled = !!this.elements.tagSortToggle;
   }
@@ -17555,6 +17627,24 @@ var UIManager = class {
       } else {
         this.elements.newTagInput.classList.remove("invalid");
       }
+    });
+    const emitSaveDetails = () => this.emit("saveBookmarkDetails");
+    this.elements.bookmarkTitleInput?.addEventListener("blur", emitSaveDetails);
+    this.elements.bookmarkNotesInput?.addEventListener("blur", emitSaveDetails);
+    this.elements.saveBookmarkDetailsBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      emitSaveDetails();
+    });
+    const emitLibrarySearch = () => {
+      const q = this.elements.librarySearchInput?.value || "";
+      this.emit("librarySearch", q);
+    };
+    this.elements.librarySearchBtn?.addEventListener("click", (e) => {
+      e.preventDefault();
+      emitLibrarySearch();
+    });
+    this.elements.librarySearchInput?.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") emitLibrarySearch();
     });
     this.elements.searchBtn?.addEventListener("click", (e) => {
       e.preventDefault();
@@ -17845,6 +17935,20 @@ var UIManager = class {
     buttons.forEach((btn) => {
       const isSelected = btn.getAttribute("data-backend") === backend;
       btn.setAttribute("aria-pressed", isSelected ? "true" : "false");
+    });
+  }
+  /**
+   * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] How: Populate Title/Notes inputs; disable Notes for browser.
+   * @param {object|null} pin
+   * @param {string|null} backendId
+   */
+  syncBookmarkNotesFields(pin, backendId) {
+    return syncBookmarkNotesFields({
+      pin,
+      backendId,
+      titleInput: this.elements.bookmarkTitleInput,
+      notesInput: this.elements.bookmarkNotesInput,
+      notesHintEl: this.elements.bookmarkNotesHint
     });
   }
   /**
@@ -19119,6 +19223,11 @@ var MESSAGE_TYPES = {
   OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL",
   // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Popup/command/menu open Local Bookmarks Index via SW OPEN_BOOKMARKS_INDEX_TAB.
   OPEN_BOOKMARKS_INDEX: "OPEN_BOOKMARKS_INDEX",
+  // [REQ-LOCAL_QUERY_API] Write ~/.hoverboard/aggregate-snapshot.json for Local Query API
+  REFRESH_API_SNAPSHOT: "REFRESH_API_SNAPSHOT",
+  // [REQ-LINK_HEALTH] Batch URL health checks
+  CHECK_LINK_HEALTH: "CHECK_LINK_HEALTH",
+  GET_LINK_HEALTH: "GET_LINK_HEALTH",
   // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel (and on index tab create); side panel closes itself if visible and open long enough (toggle).
   REQUEST_SIDE_PANEL_CLOSE: "REQUEST_SIDE_PANEL_CLOSE"
 };
@@ -19297,6 +19406,8 @@ var PopupController = class {
     this.handleOpenBookmarksIndex = this.handleOpenBookmarksIndex.bind(this);
     this.handleOpenBrowserBookmarkImport = this.handleOpenBrowserBookmarkImport.bind(this);
     this.handleStorageBackendChange = this.handleStorageBackendChange.bind(this);
+    this.handleSaveBookmarkDetails = this.handleSaveBookmarkDetails.bind(this);
+    this.handleLibrarySearch = this.handleLibrarySearch.bind(this);
     this.handleTagWithAi = this.handleTagWithAi.bind(this);
     this.handleTestAiApiKey = this.handleTestAiApiKey.bind(this);
     this.handleOpenTagsTree = this.handleOpenTagsTree.bind(this);
@@ -19357,6 +19468,8 @@ var PopupController = class {
     this.uiManager.on("tagWithAi", this.handleTagWithAi);
     this.uiManager.on("testAiApiKey", this.handleTestAiApiKey);
     this.uiManager.on("storageBackendChange", this.handleStorageBackendChange);
+    this.uiManager.on("saveBookmarkDetails", this.handleSaveBookmarkDetails);
+    this.uiManager.on("librarySearch", this.handleLibrarySearch);
     this.uiManager.on("storageLocalToggle", (targetBackend) => this.handleStorageBackendChange(targetBackend));
     this.uiManager.on("refreshData", this.refreshPopupData.bind(this));
     this.uiManager.on("showHoverOnPageLoadChange", this.handleShowHoverOnPageLoadChange.bind(this));
@@ -19474,6 +19587,8 @@ var PopupController = class {
       }
       const backend = validBackends.includes(storageBackend) ? storageBackend : await this.configManager.getStorageMode() || "local";
       this.uiManager.updateStorageBackendValue(backend);
+      this._resolvedStorageBackend = backend;
+      this.uiManager.syncBookmarkNotesFields(this.currentPin, backend);
       this.uiManager.updateStorageLocalToggle(backend, hasRealBookmark);
       const token = await this.configManager.getAuthToken();
       this.uiManager.updateStoragePinboardEnabled(!!(token && token.trim()));
@@ -19878,12 +19993,59 @@ var PopupController = class {
         this.uiManager.updatePrivateStatus(this.currentPin?.shared === "no");
         this.uiManager.updateReadLaterStatus(this.currentPin?.toread === "yes");
         this.uiManager.updateCurrentTags(this.normalizeTags(this.currentPin?.tags));
+        this._resolvedStorageBackend = targetBackend;
+        this.uiManager.syncBookmarkNotesFields(this.currentPin, targetBackend);
       } else {
         this.uiManager.showError(result?.message || "Move failed");
       }
     } catch (e) {
       debugError("[IMPL-MOVE_BOOKMARK_UI] handleStorageBackendChange failed:", e);
       this.uiManager.showError(e.message || "Move failed");
+    }
+  }
+  /**
+   * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] How: Build payload and send saveBookmark with preferredBackend.
+   * PROCEDURE: SAVE_BOOKMARK_DETAILS
+   */
+  async handleSaveBookmarkDetails() {
+    const titleText = this.uiManager.elements.bookmarkTitleInput?.value ?? "";
+    const notesText = this.uiManager.elements.bookmarkNotesInput?.value ?? "";
+    const preferredBackend = this.getSelectedStorageBackend();
+    const resolvedBackend = this._resolvedStorageBackend || preferredBackend;
+    const notesEditable = notesEditableForBackend(resolvedBackend);
+    const payload = buildBookmarkNotesSavePayload({
+      currentPin: this.currentPin,
+      url: this.currentPin?.url || this.currentTab?.url,
+      tabTitle: this.currentTab?.title || "",
+      titleText,
+      notesText,
+      preferredBackend,
+      notesEditable
+    });
+    if (payload.error === "MissingUrl") {
+      this.uiManager.showError("No URL to save");
+      return;
+    }
+    if (bookmarkDetailsUnchanged(this.currentPin, payload, notesEditable)) {
+      return;
+    }
+    try {
+      const response = await this.sendMessage({ type: "saveBookmark", data: payload });
+      const ok = response?.success !== false && !response?.error;
+      if (!ok) {
+        this.uiManager.showError(response?.error || response?.message || "Failed to save details");
+        return;
+      }
+      this.currentPin = {
+        ...this.currentPin || {},
+        ...payload
+      };
+      this.stateManager.setState({ currentPin: this.currentPin });
+      this.uiManager.syncBookmarkNotesFields(this.currentPin, resolvedBackend);
+      this.uiManager.showSuccess("Details saved");
+    } catch (e) {
+      debugError("[IMPL-BOOKMARK_NOTES_UI] handleSaveBookmarkDetails failed:", e);
+      this.uiManager.showError(e.message || "Failed to save details");
     }
   }
   /**
@@ -20893,6 +21055,19 @@ var PopupController = class {
     }
   }
   /**
+   * [REQ-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY]
+   * Open Index with library query (not tab search).
+   */
+  async handleLibrarySearch(query) {
+    const q = String(query || "").trim();
+    try {
+      await this.sendMessage({ type: MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX, data: { q } });
+    } catch (e) {
+      debugError("[IMPL-LIBRARY_SEARCH_ENTRY] open index failed:", e);
+      this.uiManager.showError("Failed to open bookmarks search");
+    }
+  }
+  /**
    * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
    * Open Local Bookmarks Index via SW OPEN_BOOKMARKS_INDEX_TAB (create tab + dismiss side panel).
    */
@@ -21245,6 +21420,7 @@ var PopupController = class {
       const normalizedTags = this.normalizeTags(this.currentPin?.tags);
       await this.refreshTagFrequencyMapForSort();
       this.uiManager.updateCurrentTags(normalizedTags);
+      this.uiManager.syncBookmarkNotesFields(this.currentPin, this._resolvedStorageBackend || this.getSelectedStorageBackend());
       this.uiManager.showSuccess("Bookmark updated from another window");
     } catch (error48) {
       debugError("[TOGGLE_SYNC_POPUP] Failed to update popup on BOOKMARK_UPDATED:", error48);

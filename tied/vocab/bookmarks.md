@@ -34,8 +34,8 @@
 
 | Canonical concept | UI label | Pin / API field | Config / storage | Code |
 |-------------------|----------|-----------------|------------------|------|
-| Page title | Title (CSV/index) | `description` | — | `newPin().description` |
-| Notes | Notes | `extended` | — | `newPin().extended` |
+| Page title | Title (CSV/index; Details) | `description` | — | `newPin().description`; [REQ-BOOKMARK_NOTES_UI] popup/This Page `#bookmarkTitleInput` |
+| Notes | Notes (Details) | `extended` | — | `newPin().extended`; [REQ-BOOKMARK_NOTES_UI] `#bookmarkNotesInput` (disabled for Browser backend) |
 | Tags on pin | Current Tags | `tags` (string or array) | — | TagService |
 | Private flag | Private / Toggle Privacy | `shared`: `'yes'`\|`'no'` | — | `isPrivate` in UI state |
 | Read Later flag | Read Later | `toread`: `'yes'`\|`'no'` | — | `toggleReadLater` |

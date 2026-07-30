@@ -1,0 +1,79 @@
+CITDP-REQ-BOOKMARK_MANAGER_COMPLETENESS-notes-search-health-local-api:
+  change_definition:
+    current_behavior: "Capture UI lacked Title/Notes editors and Search Bookmarks entry; Index lacked link-health checks; no loopback Local Query API or aggregate snapshot."
+    desired_behavior: "Title/Notes Details on popup/This Page with Save-to preferredBackend; Search Bookmarks opens Index with ?q=; Index Check link health persists hoverboard_link_health; hoverboard-local-api on 127.0.0.1 with bearer token, File CRUD, prefer aggregate-snapshot.json; REFRESH_API_SNAPSHOT writes snapshot."
+    non_goals:
+      - "Playwright E2E for popup/Index (unit and composition cover wiring)"
+      - "Public/cloud REST API"
+      - "Separate Collections entity (tags remain the model)"
+      - "Third-party uptime SaaS for link health"
+    success_criteria:
+      - "Composition: handleSaveBookmarkDetails → saveBookmark with preferredBackend"
+      - "Composition: SW CHECK_LINK_HEALTH / GET_LINK_HEALTH / REFRESH_API_SNAPSHOT wiring"
+      - "Composition: UIManager librarySearch → OPEN_BOOKMARKS_INDEX { q }"
+      - "Full-block sync for four Active IMPLs"
+      - "Go: auth, filters, File write/delete, snapshot preference"
+      - "tied_validate_consistency ok"
+      - "Unit: bookmark-notes-ui, library-search-and-snapshot, link-health helpers"
+      - "Unit: OPEN_BOOKMARKS_INDEX data.q → Index tab ?q="
+      - "Vocab RECORD for Search Bookmarks, link health, Refresh API snapshot, new MESSAGE_TYPES"
+    unchanged_behavior: "Search tabs remains tab-title search; Pinboard-shaped pin fields; File native-host I/O; Index open dismisses side panel"
+  completion_criteria:
+    verification_gate_notes: "Unit + composition + Go tests; CHANGELOG Unreleased; CITDP complete; E2E omitted (composition/unit sufficient for helpers and SW message wiring). Full-block checker clean for four IMPLs."
+  impact_analysis:
+    modules_or_boundaries: "src/shared/{bookmark-notes-ui,library-search-entry,link-health,aggregate-snapshot}.js; PopupController/UIManager; bookmarks-table; service-worker; message-handler MESSAGE_TYPES; native_host/localapi; docs/LOCAL_API.md; vocab bookmarks-index ui-surfaces ipc-messaging storage-backends."
+    tied_tokens_affected: []
+    tied_tokens_new:
+      - "ARCH-BOOKMARK_NOTES_UI"
+      - "ARCH-LIBRARY_SEARCH_ENTRY"
+      - "ARCH-LINK_HEALTH"
+      - "ARCH-LOCAL_QUERY_API"
+      - "IMPL-BOOKMARK_NOTES_UI"
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+      - "IMPL-LINK_HEALTH"
+      - "IMPL-LOCAL_QUERY_API"
+      - "REQ-BOOKMARK_NOTES_UI"
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+      - "REQ-LINK_HEALTH"
+      - "REQ-LOCAL_QUERY_API"
+  leap_feedback:
+    divergences_from_analysis: "REQ/ARCH/IMPL LOCAL_QUERY_API updated for Phase-2 snapshot preference and File write API to match code; LIBRARY_SEARCH/LINK_HEALTH IMPL sidecars expanded from stubs; three-way alignment pass filled code_locations and composition tests (library-search-entry, link-health, local-query-api-snapshot integration)."
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-BOOKMARK_MANAGER_COMPLETENESS-notes-search-health-local-api"
+    primary_tokens:
+      - "ARCH-BOOKMARK_NOTES_UI"
+      - "ARCH-LIBRARY_SEARCH_ENTRY"
+      - "ARCH-LINK_HEALTH"
+      - "ARCH-LOCAL_QUERY_API"
+      - "IMPL-BOOKMARK_NOTES_UI"
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+      - "IMPL-LINK_HEALTH"
+      - "IMPL-LOCAL_QUERY_API"
+      - "REQ-BOOKMARK_NOTES_UI"
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+      - "REQ-LINK_HEALTH"
+      - "REQ-LOCAL_QUERY_API"
+    procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+    recorded_at: "2026-07-30"
+    title: "Bookmark manager completeness: Notes UI, Library Search, Link Health, Local Query API"
+  risk_analysis:
+    risks:
+      - id: "R1"
+        description: "Darwin/arm64 hoverboard-local-api binary in git is platform-specific"
+        likelihood: "medium"
+        mitigation: "Docs instruct go build; installer copies binary when present"
+        residual: "low"
+        severity: "low"
+      - id: "R2"
+        description: "Link-health HEAD may be blocked; GET fallback may download large bodies"
+        likelihood: "medium"
+        mitigation: "HEAD then GET only on 405/501; batch capped at 50 URLs"
+        residual: "medium"
+        severity: "low"
+  tdd_sequence:
+    summary: "Helpers first (notes payload, URL builder, classify/filter, snapshot payload); Go auth/filter/write; then composition Save details / library search / link-health / snapshot wiring; SW ?q= open-index."
+  test_strategy:
+    matrix_notes: "Unit for pure helpers; composition for PopupController save details, UIManager→OPEN_BOOKMARKS_INDEX, SW CHECK/GET_LINK_HEALTH and REFRESH_API_SNAPSHOT; SW unit for OPEN_BOOKMARKS_INDEX q; Go for localapi including snapshot preference; no E2E (callable at unit/composition)"
+    summary: "Unit + composition + Go; E2E omitted with justification"

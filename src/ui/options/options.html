@@ -110,6 +110,22 @@
         <span id="native-host-status" class="help-text" style="margin-left: 0.5em;"></span>
       </section>
 
+      <!-- [REQ-LOCAL_QUERY_API] [ARCH-LOCAL_QUERY_API] [IMPL-LOCAL_QUERY_API] Localhost File query API -->
+      <section class="section" id="local-api-section">
+        <h2>Local Query API</h2>
+        <p class="help-text">
+          Optional <strong>localhost-only</strong> HTTP API for scripts (File bookmarks / aggregate snapshot).
+          Not a public cloud API. Bind: <code>127.0.0.1:8787</code>. Auth: bearer token in <code>~/.hoverboard/api-token</code>.
+          Start: <code>~/.hoverboard/hoverboard-local-api</code> after building and running <code>native_host/install.sh</code>.
+          See <code>docs/LOCAL_API.md</code> in the project for endpoints and curl examples.
+        </p>
+        <p class="help-text" id="local-api-hint">
+          Example: <code>curl -H "Authorization: Bearer $(cat ~/.hoverboard/api-token)" http://127.0.0.1:8787/v1/health</code>
+        </p>
+        <button type="button" id="refresh-api-snapshot-options" class="btn btn-secondary">Refresh API snapshot</button>
+        <span id="api-snapshot-options-status" class="help-text" style="margin-left: 0.5em;"></span>
+      </section>
+
       <!-- [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] Single click on extension icon: side panel (default) or popup -->
       <section class="section" id="icon-click-section">
         <h2>Extension icon</h2>

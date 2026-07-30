@@ -817,6 +817,146 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-UIManager_SCOPED_ROOT ===
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_NOTES_UI ===
+ * [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] — Title/Notes capture UI; payload helpers; browser notes no-op.
+ *
+ * ## Notes editability by backend
+ *
+ * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] How: Browser backend cannot store extended; other backends allow notes.
+ * - Contract:
+ *   - INPUT: backendId (string or null)
+ *   - PRE: caller may pass null/unknown
+ *   - OUTPUT: boolean notesEditable
+ *   - POST:
+ *     - success => true iff backendId is not "browser"
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: NOTES_EDITABLE_FOR_BACKEND
+ *   - 1. IF lowercase(backendId) == "browser" THEN RETURN false
+ *   - 2. RETURN true
+ *
+ * ## Build save payload for title and notes
+ *
+ * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] How: Merge title/notes into pin-shaped save data with preferredBackend.
+ * - Contract:
+ *   - INPUT: currentPin (or null), tabTitle, titleText, notesText, preferredBackend, notesEditable
+ *   - PRE: url available from currentPin.url or caller supplies url
+ *   - OUTPUT: { url, description, extended, tags, shared, toread, preferredBackend? } | { error: MissingUrl }
+ *   - POST:
+ *     - success => description is trimmed title or tabTitle fallback; extended is notes when notesEditable else preserved or empty string; preferredBackend set when provided
+ *     - error MissingUrl => no save payload
+ *   - FAILURE_MODES: MissingUrl
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_BOOKMARK_NOTES_SAVE_PAYLOAD
+ *   - 1. url = currentPin.url OR caller.url
+ *   - 2. IF url empty THEN RETURN { error: MissingUrl }
+ *   - 3. description = trim(titleText); IF description empty THEN description = tabTitle OR ""
+ *   - 4. IF notesEditable THEN extended = notesText OR "" ELSE extended = currentPin.extended OR ""
+ *   - 5. tags = currentPin.tags OR ""; shared = currentPin.shared OR "yes"; toread = currentPin.toread OR "no"
+ *   - 6. payload = { url, description, extended, tags, shared, toread }
+ *   - 7. IF preferredBackend THEN payload.preferredBackend = preferredBackend
+ *   - 8. RETURN payload
+ *
+ * ## Sync Details fields from pin
+ *
+ * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] How: Populate Title/Notes inputs; disable Notes for browser.
+ * - Contract:
+ *   - INPUT: pin, backendId, titleInput, notesInput, notesHintEl
+ *   - PRE: DOM elements exist when called from UIManager
+ *   - OUTPUT: inputs updated; notes disabled when not editable
+ *   - POST:
+ *     - success => titleInput.value = pin.description; notesInput.value = pin.extended when editable else ""; notesInput.disabled = !notesEditable; hint visible iff !notesEditable
+ *   - EFFECTS: State
+ *   - DATA: titleInput, notesInput, notesHintEl
+ *   - DATA_TRANSITION: field values and disabled state match pin and backend
+ *   - TERMINATION: total
+ * - PROCEDURE: SYNC_BOOKMARK_NOTES_FIELDS
+ *   - 1. notesEditable = NOTES_EDITABLE_FOR_BACKEND(backendId)
+ *   - 2. SET titleInput.value = pin.description OR ""
+ *   - 3. SET notesInput.value = IF notesEditable THEN (pin.extended OR "") ELSE ""
+ *   - 4. SET notesInput.disabled = NOT notesEditable
+ *   - 5. SHOW notesHintEl iff NOT notesEditable
+ *
+ * ## Persist on blur or Save details
+ *
+ * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] How: Build payload and send saveBookmark with preferredBackend.
+ * - Contract:
+ *   - INPUT: titleText, notesText, currentPin, currentTab, getSelectedStorageBackend, resolvedBackend
+ *   - PRE: sendMessage available
+ *   - OUTPUT: saveBookmark sent | no-op when unchanged | { error: MissingUrl | SaveFailed }
+ *   - POST:
+ *     - success => pin refreshed; fields re-synced
+ *   - FAILURE_MODES: MissingUrl, SaveFailed
+ *   - EFFECTS: Http, State, Async
+ *   - TERMINATION: total
+ * - PROCEDURE: SAVE_BOOKMARK_DETAILS
+ *   - 1. preferredBackend = getSelectedStorageBackend()
+ *   - 2. notesEditable = NOTES_EDITABLE_FOR_BACKEND(resolvedBackend OR preferredBackend)
+ *   - 3. payload = BUILD_BOOKMARK_NOTES_SAVE_PAYLOAD(...)
+ *   - 4. IF payload.error THEN show error; RETURN
+ *   - 5. IF payload matches currentPin description/extended (and notesEditable) THEN RETURN no-op
+ *   - 6. SEND saveBookmark(payload)
+ *   - 7. ON success: update currentPin; SYNC_BOOKMARK_NOTES_FIELDS; show success
+ *   - 8. ON failure: show error
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_NOTES_UI ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
+ * [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] — Capture UI Search Bookmarks opens Index with ?q=; distinct from Search tabs.
+ *
+ * ## Build Index URL with query
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Pure URL builder shared by SW and tests; append encoded q.
+ * - Contract:
+ *   - INPUT: baseUrl (string), query (string)
+ *   - PRE: baseUrl may be empty
+ *   - OUTPUT: baseUrl unchanged when query empty; else baseUrl + ?q= or &q= encodeURIComponent(query)
+ *   - POST:
+ *     - success => empty query returns baseUrl; non-empty query includes encoded q
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY
+ *   - 1. q = trim(query)
+ *   - 2. IF baseUrl empty THEN RETURN ""
+ *   - 3. IF q empty THEN RETURN baseUrl
+ *   - 4. sep = IF baseUrl contains "?" THEN "&" ELSE "?"
+ *   - 5. RETURN baseUrl + sep + "q=" + encodeURIComponent(q)
+ *
+ * ## Open library search from capture UI
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Read Search Bookmarks input; send OPEN_BOOKMARKS_INDEX with q (does not replace Search tabs).
+ * - Contract:
+ *   - INPUT: librarySearchInput value (string)
+ *   - PRE: sendMessage available
+ *   - OUTPUT: OPEN_BOOKMARKS_INDEX message with data.q
+ *   - POST:
+ *     - success => SW opens Index tab; Index search prefilled when q non-empty
+ *   - EFFECTS: Async, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OPEN_LIBRARY_SEARCH
+ *   - 1. q = trim(librarySearchInput.value)
+ *   - 2. SEND OPEN_BOOKMARKS_INDEX { q }
+ *   - 3. (SW) OPEN_BOOKMARKS_INDEX_TAB(q) via BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY then REQUEST_SIDE_PANEL_CLOSE
+ *
+ * ## Prefill Index search from URL
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, read ?q= into search field and apply filter.
+ * - Contract:
+ *   - INPUT: window.location.search
+ *   - PRE: Index DOM search input exists
+ *   - OUTPUT: search input value set; filter applied when q present
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: PREFILL_INDEX_SEARCH_FROM_QUERY
+ *   - 1. params = URLSearchParams(location.search)
+ *   - 2. q = params.get("q")
+ *   - 3. IF q THEN SET searchInput.value = q; APPLY index filter
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
+ */
 import {
   currentTagDisplayLabel,
   isEmptyOrWhitespaceOnlyTag,
@@ -828,6 +968,7 @@ import {
   lookupBookmarkFrequency,
   sortTagChipRows
 } from '../../shared/tag-chip-sort.js'
+import { syncBookmarkNotesFields as syncBookmarkNotesFieldsHelper } from '../../shared/bookmark-notes-ui.js'
 
 export class UIManager {
   constructor ({ errorHandler, stateManager, config = {}, container = null } = {}) {
@@ -963,6 +1104,9 @@ export class UIManager {
       searchInput: get('searchInput'),
       searchBtn: get('searchBtn'),
       searchSuggestions: get('searchSuggestions'),
+      // [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY]
+      librarySearchInput: get('librarySearchInput'),
+      librarySearchBtn: get('librarySearchBtn'),
 
       // Tag display
       currentTagsContainer: get('currentTagsContainer'),
@@ -988,7 +1132,13 @@ export class UIManager {
       // [REQ-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [IMPL-BOOKMARK_USAGE_TRACKING_UI] This Page inline usage section
       usageStatsSection: get('usageStatsSection'),
       usageStatsText: get('usageStatsText'),
-      usageReferrerText: get('usageReferrerText')
+      usageReferrerText: get('usageReferrerText'),
+
+      // [REQ-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Title/Notes fields
+      bookmarkTitleInput: get('bookmarkTitleInput'),
+      bookmarkNotesInput: get('bookmarkNotesInput'),
+      bookmarkNotesHint: get('bookmarkNotesHint'),
+      saveBookmarkDetailsBtn: get('saveBookmarkDetailsBtn')
     }
     this._tagSortUiEnabled = !!this.elements.tagSortToggle
   }
@@ -1104,6 +1254,28 @@ export class UIManager {
       } else {
         this.elements.newTagInput.classList.remove('invalid')
       }
+    })
+
+    // [REQ-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Persist title/notes on blur or Save details
+    const emitSaveDetails = () => this.emit('saveBookmarkDetails')
+    this.elements.bookmarkTitleInput?.addEventListener('blur', emitSaveDetails)
+    this.elements.bookmarkNotesInput?.addEventListener('blur', emitSaveDetails)
+    this.elements.saveBookmarkDetailsBtn?.addEventListener('click', (e) => {
+      e.preventDefault()
+      emitSaveDetails()
+    })
+
+    // [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY]
+    const emitLibrarySearch = () => {
+      const q = this.elements.librarySearchInput?.value || ''
+      this.emit('librarySearch', q)
+    }
+    this.elements.librarySearchBtn?.addEventListener('click', (e) => {
+      e.preventDefault()
+      emitLibrarySearch()
+    })
+    this.elements.librarySearchInput?.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') emitLibrarySearch()
     })
 
     this.elements.searchBtn?.addEventListener('click', (e) => {
@@ -1431,6 +1603,21 @@ export class UIManager {
     buttons.forEach(btn => {
       const isSelected = btn.getAttribute('data-backend') === backend
       btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false')
+    })
+  }
+
+  /**
+   * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] How: Populate Title/Notes inputs; disable Notes for browser.
+   * @param {object|null} pin
+   * @param {string|null} backendId
+   */
+  syncBookmarkNotesFields (pin, backendId) {
+    return syncBookmarkNotesFieldsHelper({
+      pin,
+      backendId,
+      titleInput: this.elements.bookmarkTitleInput,
+      notesInput: this.elements.bookmarkNotesInput,
+      notesHintEl: this.elements.bookmarkNotesHint
     })
   }
 

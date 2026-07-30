@@ -119,6 +119,8 @@
             <th data-sort="visits" class="sortable">Visits <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="lastVisited" class="sortable">Last Visited <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="storage" class="sortable">Storage <span class="sort-icon" aria-hidden="true"></span></th>
+            <!-- [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] -->
+            <th data-sort="health" class="sortable">Health <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="shared" class="sortable">Shared <span class="sort-icon" aria-hidden="true"></span></th>
             <th data-sort="toread" class="sortable">To read <span class="sort-icon" aria-hidden="true"></span></th>
           </tr>
@@ -132,6 +134,26 @@
     <fieldset class="actions-below-table actions-group" aria-labelledby="actions-legend">
       <legend id="actions-legend" class="group-legend">Actions for selected</legend>
       <!-- [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] Export below table -->
+      <!-- [REQ-LOCAL_QUERY_API] Refresh aggregate-snapshot.json for Local Query API -->
+      <div class="export-row">
+        <button type="button" id="refresh-api-snapshot" class="btn btn-secondary btn-sm" title="Write aggregate snapshot for Local Query API" aria-label="Refresh API snapshot">Refresh API snapshot</button>
+        <span id="api-snapshot-result" class="help-text" aria-live="polite"></span>
+      </div>
+      <!-- [REQ-LINK_HEALTH] [IMPL-LINK_HEALTH] -->
+      <div class="export-row">
+        <button type="button" id="check-link-health" class="btn btn-secondary btn-sm" title="Check selected (or displayed) URLs" aria-label="Check link health">Check link health</button>
+        <label for="filter-health">Health:</label>
+        <select id="filter-health" class="filter-select" aria-label="Filter by link health">
+          <option value="">All</option>
+          <option value="ok">ok</option>
+          <option value="redirect">redirect</option>
+          <option value="client_error">client_error</option>
+          <option value="server_error">server_error</option>
+          <option value="unreachable">unreachable</option>
+          <option value="unknown">unknown</option>
+        </select>
+        <span id="link-health-result" class="help-text" aria-live="polite"></span>
+      </div>
       <div class="export-row">
         <button type="button" id="export-all" class="btn btn-secondary btn-sm" title="Export all bookmarks to CSV" aria-label="Export all bookmarks">Export all</button>
         <button type="button" id="export-displayed" class="btn btn-secondary btn-sm" title="Export currently displayed (filtered) bookmarks to CSV" aria-label="Export displayed bookmarks">Export displayed</button>

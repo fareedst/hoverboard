@@ -91,6 +91,30 @@
         </div>
       </section>
 
+      <!-- [REQ-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Title/Notes (description/extended) -->
+      <section class="details-section" id="detailsSection">
+        <h3 class="section-title">Details</h3>
+        <div class="details-fields">
+          <label class="details-label" for="bookmarkTitleInput">Title</label>
+          <input
+            type="text"
+            id="bookmarkTitleInput"
+            class="details-input"
+            autocomplete="off"
+            aria-label="Bookmark title">
+          <label class="details-label" for="bookmarkNotesInput">Notes</label>
+          <textarea
+            id="bookmarkNotesInput"
+            class="details-textarea"
+            rows="2"
+            aria-label="Bookmark notes"></textarea>
+          <p id="bookmarkNotesHint" class="help-text details-notes-hint" hidden>
+            Notes are not stored on the Browser backend.
+          </p>
+          <button type="button" id="saveBookmarkDetailsBtn" class="button secondary">Save details</button>
+        </div>
+      </section>
+
       <!-- Tag Management -->
       <section class="tag-management">
         
@@ -135,6 +159,23 @@
           <div class="tags-container" id="suggestedTagsContainer">
             <!-- Suggested tags will be populated here -->
           </div>
+        </div>
+      </section>
+
+      <!-- [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY] Library search (Index) — distinct from Search tabs -->
+      <section class="search-section library-search-section">
+        <h3 class="section-title">Search Bookmarks</h3>
+        <div class="search-container">
+          <div class="input-group">
+            <input
+              type="text"
+              id="librarySearchInput"
+              class="search-input"
+              placeholder="Search bookmarks (title, URL, tags, notes)..."
+              aria-label="Search bookmarks library">
+            <button type="button" id="librarySearchBtn" class="button secondary">Search</button>
+          </div>
+          <p class="help-text">Opens the Bookmarks index with your query. Not the same as Search tabs.</p>
         </div>
       </section>
 

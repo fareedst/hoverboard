@@ -1,0 +1,39 @@
+REQ-BOOKMARK_NOTES_UI:
+  category: "Functional"
+  description: "Users can view and edit the bookmark title (pin description) and notes (pin extended) from the popup and side-panel This Page surfaces, with popup-equivalent parity. Changes persist via saveBookmark. When the resolved storage backend is browser, Notes is disabled with a hint because Chrome bookmarks do not store extended; Title still maps to the Chrome bookmark title."
+  name: "Bookmark Title and Notes UI"
+  priority: "P0"
+  rationale:
+    benefits:
+      - "Metadata-first bookmark manager completeness"
+      - "Parity with Pinboard-shaped fields in daily capture UI"
+    problems_solved:
+      - "Cannot edit notes from popup or This Page"
+      - "Title not editable after initial capture"
+    why: "Pin model already stores description and extended, but capture UI had no Notes editor, leaving P0 save-with-notes incomplete."
+  related_requirements:
+    depends_on:
+      - "REQ-PINBOARD_COMPATIBILITY"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-SMART_BOOKMARKING"
+    supersedes: []
+  satisfaction_criteria:
+    - criterion: "Blur or explicit Save persists title and notes via saveBookmark with preferredBackend from Save to highlight"
+    - criterion: "Empty title falls back to current tab title on save when creating or updating"
+    - criterion: "Popup and This Page show Title and Notes inputs bound to currentPin.description and currentPin.extended"
+    - criterion: "Unit and composition tests cover payload build, browser notes disable, and save wiring"
+    - criterion: "When storage backend is browser, Notes input is disabled and shows a no-op hint; Title remains editable"
+  status: "Implemented"
+  traceability:
+    architecture:
+      - "ARCH-BOOKMARK_NOTES_UI"
+    code_annotations:
+      - "REQ-BOOKMARK_NOTES_UI"
+    implementation:
+      - "IMPL-BOOKMARK_NOTES_UI"
+    tests:
+      - "tests/integration/bookmark-notes-ui.integration.test.js"
+      - "tests/unit/bookmark-notes-ui.test.js"

@@ -1372,6 +1372,146 @@
  *
  * === END IMPL-FULL-BLOCK: IMPL-POPUP_THEME_CSS ===
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_NOTES_UI ===
+ * [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] — Title/Notes capture UI; payload helpers; browser notes no-op.
+ *
+ * ## Notes editability by backend
+ *
+ * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] How: Browser backend cannot store extended; other backends allow notes.
+ * - Contract:
+ *   - INPUT: backendId (string or null)
+ *   - PRE: caller may pass null/unknown
+ *   - OUTPUT: boolean notesEditable
+ *   - POST:
+ *     - success => true iff backendId is not "browser"
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: NOTES_EDITABLE_FOR_BACKEND
+ *   - 1. IF lowercase(backendId) == "browser" THEN RETURN false
+ *   - 2. RETURN true
+ *
+ * ## Build save payload for title and notes
+ *
+ * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] How: Merge title/notes into pin-shaped save data with preferredBackend.
+ * - Contract:
+ *   - INPUT: currentPin (or null), tabTitle, titleText, notesText, preferredBackend, notesEditable
+ *   - PRE: url available from currentPin.url or caller supplies url
+ *   - OUTPUT: { url, description, extended, tags, shared, toread, preferredBackend? } | { error: MissingUrl }
+ *   - POST:
+ *     - success => description is trimmed title or tabTitle fallback; extended is notes when notesEditable else preserved or empty string; preferredBackend set when provided
+ *     - error MissingUrl => no save payload
+ *   - FAILURE_MODES: MissingUrl
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_BOOKMARK_NOTES_SAVE_PAYLOAD
+ *   - 1. url = currentPin.url OR caller.url
+ *   - 2. IF url empty THEN RETURN { error: MissingUrl }
+ *   - 3. description = trim(titleText); IF description empty THEN description = tabTitle OR ""
+ *   - 4. IF notesEditable THEN extended = notesText OR "" ELSE extended = currentPin.extended OR ""
+ *   - 5. tags = currentPin.tags OR ""; shared = currentPin.shared OR "yes"; toread = currentPin.toread OR "no"
+ *   - 6. payload = { url, description, extended, tags, shared, toread }
+ *   - 7. IF preferredBackend THEN payload.preferredBackend = preferredBackend
+ *   - 8. RETURN payload
+ *
+ * ## Sync Details fields from pin
+ *
+ * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] How: Populate Title/Notes inputs; disable Notes for browser.
+ * - Contract:
+ *   - INPUT: pin, backendId, titleInput, notesInput, notesHintEl
+ *   - PRE: DOM elements exist when called from UIManager
+ *   - OUTPUT: inputs updated; notes disabled when not editable
+ *   - POST:
+ *     - success => titleInput.value = pin.description; notesInput.value = pin.extended when editable else ""; notesInput.disabled = !notesEditable; hint visible iff !notesEditable
+ *   - EFFECTS: State
+ *   - DATA: titleInput, notesInput, notesHintEl
+ *   - DATA_TRANSITION: field values and disabled state match pin and backend
+ *   - TERMINATION: total
+ * - PROCEDURE: SYNC_BOOKMARK_NOTES_FIELDS
+ *   - 1. notesEditable = NOTES_EDITABLE_FOR_BACKEND(backendId)
+ *   - 2. SET titleInput.value = pin.description OR ""
+ *   - 3. SET notesInput.value = IF notesEditable THEN (pin.extended OR "") ELSE ""
+ *   - 4. SET notesInput.disabled = NOT notesEditable
+ *   - 5. SHOW notesHintEl iff NOT notesEditable
+ *
+ * ## Persist on blur or Save details
+ *
+ * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] How: Build payload and send saveBookmark with preferredBackend.
+ * - Contract:
+ *   - INPUT: titleText, notesText, currentPin, currentTab, getSelectedStorageBackend, resolvedBackend
+ *   - PRE: sendMessage available
+ *   - OUTPUT: saveBookmark sent | no-op when unchanged | { error: MissingUrl | SaveFailed }
+ *   - POST:
+ *     - success => pin refreshed; fields re-synced
+ *   - FAILURE_MODES: MissingUrl, SaveFailed
+ *   - EFFECTS: Http, State, Async
+ *   - TERMINATION: total
+ * - PROCEDURE: SAVE_BOOKMARK_DETAILS
+ *   - 1. preferredBackend = getSelectedStorageBackend()
+ *   - 2. notesEditable = NOTES_EDITABLE_FOR_BACKEND(resolvedBackend OR preferredBackend)
+ *   - 3. payload = BUILD_BOOKMARK_NOTES_SAVE_PAYLOAD(...)
+ *   - 4. IF payload.error THEN show error; RETURN
+ *   - 5. IF payload matches currentPin description/extended (and notesEditable) THEN RETURN no-op
+ *   - 6. SEND saveBookmark(payload)
+ *   - 7. ON success: update currentPin; SYNC_BOOKMARK_NOTES_FIELDS; show success
+ *   - 8. ON failure: show error
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_NOTES_UI ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
+ * [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] — Capture UI Search Bookmarks opens Index with ?q=; distinct from Search tabs.
+ *
+ * ## Build Index URL with query
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Pure URL builder shared by SW and tests; append encoded q.
+ * - Contract:
+ *   - INPUT: baseUrl (string), query (string)
+ *   - PRE: baseUrl may be empty
+ *   - OUTPUT: baseUrl unchanged when query empty; else baseUrl + ?q= or &q= encodeURIComponent(query)
+ *   - POST:
+ *     - success => empty query returns baseUrl; non-empty query includes encoded q
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY
+ *   - 1. q = trim(query)
+ *   - 2. IF baseUrl empty THEN RETURN ""
+ *   - 3. IF q empty THEN RETURN baseUrl
+ *   - 4. sep = IF baseUrl contains "?" THEN "&" ELSE "?"
+ *   - 5. RETURN baseUrl + sep + "q=" + encodeURIComponent(q)
+ *
+ * ## Open library search from capture UI
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: Read Search Bookmarks input; send OPEN_BOOKMARKS_INDEX with q (does not replace Search tabs).
+ * - Contract:
+ *   - INPUT: librarySearchInput value (string)
+ *   - PRE: sendMessage available
+ *   - OUTPUT: OPEN_BOOKMARKS_INDEX message with data.q
+ *   - POST:
+ *     - success => SW opens Index tab; Index search prefilled when q non-empty
+ *   - EFFECTS: Async, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OPEN_LIBRARY_SEARCH
+ *   - 1. q = trim(librarySearchInput.value)
+ *   - 2. SEND OPEN_BOOKMARKS_INDEX { q }
+ *   - 3. (SW) OPEN_BOOKMARKS_INDEX_TAB(q) via BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY then REQUEST_SIDE_PANEL_CLOSE
+ *
+ * ## Prefill Index search from URL
+ *
+ * - [IMPL-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [REQ-LIBRARY_SEARCH_ENTRY] How: On Index load, read ?q= into search field and apply filter.
+ * - Contract:
+ *   - INPUT: window.location.search
+ *   - PRE: Index DOM search input exists
+ *   - OUTPUT: search input value set; filter applied when q present
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: PREFILL_INDEX_SEARCH_FROM_QUERY
+ *   - 1. params = URLSearchParams(location.search)
+ *   - 2. q = params.get("q")
+ *   - 3. IF q THEN SET searchInput.value = q; APPLY index filter
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LIBRARY_SEARCH_ENTRY ===
+ */
 import { UIManager } from './UIManager.js'
 import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
@@ -1387,6 +1527,11 @@ import { POPUP_ACTION_IDS, MESSAGE_TYPES } from '../../shared/ui-action-contract
 import { splitAiTagsBySession } from '../../features/ai/ai-tagging-popup-utils.js'
 import { testAiApiKey } from '../../features/ai/ai-api-test.js'
 import { formatTimeAge } from '../bookmarks-table/bookmarks-table-time.js'
+import {
+  buildBookmarkNotesSavePayload,
+  bookmarkDetailsUnchanged,
+  notesEditableForBackend
+} from '../../shared/bookmark-notes-ui.js'
 
 /** [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-THIS_PAGE_TAG_SORT] Extension-root path for scripting.executeScript files */
 const SUGGESTED_TAGS_MAIN_WORLD_FILE = 'src/features/tagging/suggested-tags-main-world-snippet.js'
@@ -1431,6 +1576,8 @@ export class PopupController {
     this.handleOpenBookmarksIndex = this.handleOpenBookmarksIndex.bind(this)
     this.handleOpenBrowserBookmarkImport = this.handleOpenBrowserBookmarkImport.bind(this)
     this.handleStorageBackendChange = this.handleStorageBackendChange.bind(this)
+    this.handleSaveBookmarkDetails = this.handleSaveBookmarkDetails.bind(this)
+    this.handleLibrarySearch = this.handleLibrarySearch.bind(this)
     this.handleTagWithAi = this.handleTagWithAi.bind(this)
     this.handleTestAiApiKey = this.handleTestAiApiKey.bind(this)
     this.handleOpenTagsTree = this.handleOpenTagsTree.bind(this)
@@ -1511,6 +1658,10 @@ export class PopupController {
 
     // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend change (move bookmark)
     this.uiManager.on('storageBackendChange', this.handleStorageBackendChange)
+    // [REQ-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI]
+    this.uiManager.on('saveBookmarkDetails', this.handleSaveBookmarkDetails)
+    // [REQ-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY]
+    this.uiManager.on('librarySearch', this.handleLibrarySearch)
     // [REQ-MOVE_BOOKMARK_STORAGE_UI] Legacy storageLocalToggle event (unused in five-button Save to UI); keep wired to same move handler
     this.uiManager.on('storageLocalToggle', (targetBackend) => this.handleStorageBackendChange(targetBackend))
 
@@ -1673,6 +1824,9 @@ export class PopupController {
       }
       const backend = validBackends.includes(storageBackend) ? storageBackend : (await this.configManager.getStorageMode()) || 'local'
       this.uiManager.updateStorageBackendValue(backend)
+      // [REQ-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Sync Title/Notes; disable notes for browser
+      this._resolvedStorageBackend = backend
+      this.uiManager.syncBookmarkNotesFields(this.currentPin, backend)
       this.uiManager.updateStorageLocalToggle(backend, hasRealBookmark)
       // [REQ-MOVE_BOOKMARK_STORAGE_UI] Disable Pinboard storage option when no API token configured
       const token = await this.configManager.getAuthToken()
@@ -2145,12 +2299,61 @@ export class PopupController {
         this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
         this.uiManager.updateReadLaterStatus(this.currentPin?.toread === 'yes')
         this.uiManager.updateCurrentTags(this.normalizeTags(this.currentPin?.tags))
+        // [REQ-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Re-sync details after move (browser disables notes)
+        this._resolvedStorageBackend = targetBackend
+        this.uiManager.syncBookmarkNotesFields(this.currentPin, targetBackend)
       } else {
         this.uiManager.showError(result?.message || 'Move failed')
       }
     } catch (e) {
       debugError('[IMPL-MOVE_BOOKMARK_UI] handleStorageBackendChange failed:', e)
       this.uiManager.showError(e.message || 'Move failed')
+    }
+  }
+
+  /**
+   * - [IMPL-BOOKMARK_NOTES_UI] [ARCH-BOOKMARK_NOTES_UI] [REQ-BOOKMARK_NOTES_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] How: Build payload and send saveBookmark with preferredBackend.
+   * PROCEDURE: SAVE_BOOKMARK_DETAILS
+   */
+  async handleSaveBookmarkDetails () {
+    const titleText = this.uiManager.elements.bookmarkTitleInput?.value ?? ''
+    const notesText = this.uiManager.elements.bookmarkNotesInput?.value ?? ''
+    const preferredBackend = this.getSelectedStorageBackend()
+    const resolvedBackend = this._resolvedStorageBackend || preferredBackend
+    const notesEditable = notesEditableForBackend(resolvedBackend)
+    const payload = buildBookmarkNotesSavePayload({
+      currentPin: this.currentPin,
+      url: this.currentPin?.url || this.currentTab?.url,
+      tabTitle: this.currentTab?.title || '',
+      titleText,
+      notesText,
+      preferredBackend,
+      notesEditable
+    })
+    if (payload.error === 'MissingUrl') {
+      this.uiManager.showError('No URL to save')
+      return
+    }
+    if (bookmarkDetailsUnchanged(this.currentPin, payload, notesEditable)) {
+      return
+    }
+    try {
+      const response = await this.sendMessage({ type: 'saveBookmark', data: payload })
+      const ok = response?.success !== false && !response?.error
+      if (!ok) {
+        this.uiManager.showError(response?.error || response?.message || 'Failed to save details')
+        return
+      }
+      this.currentPin = {
+        ...(this.currentPin || {}),
+        ...payload
+      }
+      this.stateManager.setState({ currentPin: this.currentPin })
+      this.uiManager.syncBookmarkNotesFields(this.currentPin, resolvedBackend)
+      this.uiManager.showSuccess('Details saved')
+    } catch (e) {
+      debugError('[IMPL-BOOKMARK_NOTES_UI] handleSaveBookmarkDetails failed:', e)
+      this.uiManager.showError(e.message || 'Failed to save details')
     }
   }
 
@@ -3371,6 +3574,20 @@ export class PopupController {
   }
 
   /**
+   * [REQ-LIBRARY_SEARCH_ENTRY] [ARCH-LIBRARY_SEARCH_ENTRY] [IMPL-LIBRARY_SEARCH_ENTRY]
+   * Open Index with library query (not tab search).
+   */
+  async handleLibrarySearch (query) {
+    const q = String(query || '').trim()
+    try {
+      await this.sendMessage({ type: MESSAGE_TYPES.OPEN_BOOKMARKS_INDEX, data: { q } })
+    } catch (e) {
+      debugError('[IMPL-LIBRARY_SEARCH_ENTRY] open index failed:', e)
+      this.uiManager.showError('Failed to open bookmarks search')
+    }
+  }
+
+  /**
    * [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX]
    * Open Local Bookmarks Index via SW OPEN_BOOKMARKS_INDEX_TAB (create tab + dismiss side panel).
    */
@@ -3772,6 +3989,8 @@ export class PopupController {
       const normalizedTags = this.normalizeTags(this.currentPin?.tags)
       await this.refreshTagFrequencyMapForSort()
       this.uiManager.updateCurrentTags(normalizedTags)
+      // [REQ-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI]
+      this.uiManager.syncBookmarkNotesFields(this.currentPin, this._resolvedStorageBackend || this.getSelectedStorageBackend())
       this.uiManager.showSuccess('Bookmark updated from another window')
     } catch (error) {
       debugError('[TOGGLE_SYNC_POPUP] Failed to update popup on BOOKMARK_UPDATED:', error)

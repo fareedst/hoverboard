@@ -27460,6 +27460,11 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     OPEN_SIDE_PANEL: "OPEN_SIDE_PANEL",
     // [REQ-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Popup/command/menu open Local Bookmarks Index via SW OPEN_BOOKMARKS_INDEX_TAB.
     OPEN_BOOKMARKS_INDEX: "OPEN_BOOKMARKS_INDEX",
+    // [REQ-LOCAL_QUERY_API] Write ~/.hoverboard/aggregate-snapshot.json for Local Query API
+    REFRESH_API_SNAPSHOT: "REFRESH_API_SNAPSHOT",
+    // [REQ-LINK_HEALTH] Batch URL health checks
+    CHECK_LINK_HEALTH: "CHECK_LINK_HEALTH",
+    GET_LINK_HEALTH: "GET_LINK_HEALTH",
     // [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] SW sends after opening panel (and on index tab create); side panel closes itself if visible and open long enough (toggle).
     REQUEST_SIDE_PANEL_CLOSE: "REQUEST_SIDE_PANEL_CLOSE"
   };

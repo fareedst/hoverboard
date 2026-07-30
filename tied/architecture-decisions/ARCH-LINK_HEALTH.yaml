@@ -1,0 +1,10 @@
+ARCH-LINK_HEALTH:
+  decision: "Direct fetch from SW; store side table not on pin."
+  name: "Link Health Architecture"
+  status: "Accepted"
+  summary: "Service worker checks URLs; chrome.storage.local map; Index column/filter."
+  traceability:
+    implementation:
+      - "IMPL-LINK_HEALTH"
+    requirements:
+      - "REQ-LINK_HEALTH"

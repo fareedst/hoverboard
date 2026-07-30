@@ -195,6 +195,15 @@ REQ-BOOKMARK_CREATE_UPDATE_TIMES:
     - method: "Unit tests for export/import with updated_at"
     - method: "Unit tests for Pinboard parse and createEmptyBookmark"
     - method: "Unit tests for services (new/update/legacy normalization)"
+REQ-BOOKMARK_NOTES_UI:
+  architecture: "[ARCH-BOOKMARK_NOTES_UI](architecture-decisions/ARCH-BOOKMARK_NOTES_UI.yaml)"
+  category: "Functional"
+  detail_file: "requirements/REQ-BOOKMARK_NOTES_UI.yaml"
+  implementation: "[IMPL-BOOKMARK_NOTES_UI](implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml)"
+  name: "Bookmark Title and Notes UI"
+  priority: "P0"
+  status: "Implemented"
+  summary: "Popup and This Page expose editable Title and Notes fields that persist to pin description and extended; Browser backend notes are disabled as no-ops."
 REQ-BOOKMARK_STATE_SYNCHRONIZATION:
   category: "Functional"
   detail_file: "requirements/REQ-BOOKMARK_STATE_SYNCHRONIZATION.yaml"
@@ -890,6 +899,20 @@ REQ-ICON_CLICK_BEHAVIOR:
       coverage: "SW action.onClicked reads config and calls sidePanel.open or action.openPopup; options load/save iconClickOpensSidePanel"
     - method: "Manual verification"
       coverage: "Click icon with default → side panel; set \"open popup\" in options → icon click opens popup"
+REQ-LIBRARY_SEARCH_ENTRY:
+  category: "Functional"
+  detail_file: "requirements/REQ-LIBRARY_SEARCH_ENTRY.yaml"
+  name: "Library Search Entry"
+  priority: "P1"
+  status: "Implemented"
+  summary: "Capture UI offers Search bookmarks distinct from Search tabs; opens Index with q."
+REQ-LINK_HEALTH:
+  category: "Functional"
+  detail_file: "requirements/REQ-LINK_HEALTH.yaml"
+  name: "Link Health Monitoring"
+  priority: "P2"
+  status: "Implemented"
+  summary: "Optional direct HEAD/GET checks of bookmarked URLs; Index column and filter; no third-party uptime service."
 REQ-LOCAL_BOOKMARKS_INDEX:
   category: "Functional"
   detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX.yaml"
@@ -1138,6 +1161,13 @@ REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE:
       coverage: "applyRegexReplace and regex replace UI in bookmarks-table-index.test.js"
     - method: "Manual verification"
       coverage: "Regex replace row visible; Replace disabled with no selection; valid regex updates and refreshes"
+REQ-LOCAL_QUERY_API:
+  category: "Functional"
+  detail_file: "requirements/REQ-LOCAL_QUERY_API.yaml"
+  name: "Local Query API"
+  priority: "P0"
+  status: "Implemented"
+  summary: "Opt-in loopback Local Query API: File + optional aggregate-snapshot; bearer token; File write; REFRESH_API_SNAPSHOT."
 REQ-MAINTAINABILITY:
   category: "Non-Functional"
   detail_file: "requirements/REQ-MAINTAINABILITY.yaml"

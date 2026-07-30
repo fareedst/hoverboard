@@ -1,5 +1,7 @@
 # Tags and AI tagging (canonical)
 
+**Collections (product language):** Hoverboard has no separate Collections entity — use **tags** and By Tag / Browser folders. See `docs/COLLECTIONS_AND_COLLABORATION.md`.
+
 **Scope:** **Current**, **Recent**, **Suggested**, and **Session** tags; sanitization; sort modes (A–Z / Frequency / Relevance); selection→tag input; **Tag with AI** flow (Readability, providers, session auto-apply). **Vocabulary only** — ranking and provider call algorithms stay in IMPL.
 
 **Excludes:** Pin field `tags` wire format details beyond naming (see [`bookmarks.md`](bookmarks.md)); bulk index tag ops UI names that belong to the index page (see [`bookmarks-index.md`](bookmarks-index.md)); IPC message catalog (see [`ipc-messaging.md`](ipc-messaging.md)).

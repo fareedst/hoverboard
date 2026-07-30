@@ -83,6 +83,16 @@ chmod +x "$INSTALL_DIR/native_host"
 [ -f "$SOURCE_DIR/helper.sh" ] && cp "$SOURCE_DIR/helper.sh" "$INSTALL_DIR/helper.sh" && chmod +x "$INSTALL_DIR/helper.sh"
 [ -f "$SOURCE_DIR/helper.ps1" ] && cp "$SOURCE_DIR/helper.ps1" "$INSTALL_DIR/helper.ps1"
 
+# [REQ-LOCAL_QUERY_API] [IMPL-LOCAL_QUERY_API] Optional localhost API companion
+LOCAL_API_NAME="hoverboard-local-api"
+if [ -f "$SOURCE_DIR/$LOCAL_API_NAME" ]; then
+  cp "$SOURCE_DIR/$LOCAL_API_NAME" "$INSTALL_DIR/$LOCAL_API_NAME"
+  chmod +x "$INSTALL_DIR/$LOCAL_API_NAME"
+  echo "DEBUG: Installed local API binary $INSTALL_DIR/$LOCAL_API_NAME"
+else
+  echo "DEBUG: hoverboard-local-api not in SOURCE_DIR (build with: go build -o hoverboard-local-api ./cmd/hoverboard-local-api)"
+fi
+
 WRAPPER_PATH="$INSTALL_DIR/native_host"
 # macOS paths must be absolute
 WRAPPER_PATH="$(cd "$INSTALL_DIR" && pwd)/native_host"

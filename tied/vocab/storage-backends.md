@@ -66,6 +66,9 @@
 - **moveBookmarkToStorage** — Get from source → ensure `time` → save to target → delete source → `setBackendForUrl`.
 - **hoverboard-bookmarks.json** — Filename written inside the File storage directory.
 - **native host** — Length-prefixed JSON stdin/stdout helper (`helper.sh` / `helper.exe` / `helper.ps1`); install under `~/.hoverboard` or `%LOCALAPPDATA%\Hoverboard`.
+- **Local Query API** — Opt-in companion `hoverboard-local-api` on `127.0.0.1` with bearer token `api-token`; reads File JSON and optional `aggregate-snapshot.json` ([REQ-LOCAL_QUERY_API]).
+- **aggregate-snapshot.json** — Extension-written snapshot of Local+File+Sync+Browser for Local Query API GET (Phase 2).
+- **Refresh API snapshot** — UI/Options/Index action that sends `REFRESH_API_SNAPSHOT`; SW aggregates providers and writes `aggregate-snapshot.json` via native host File path.
 - **offscreen file I/O** — Offscreen document handles `READ_FILE_BOOKMARKS` / `WRITE_FILE_BOOKMARKS` for File backend.
 - **aggregated bookmarks** — Union across providers for Local Bookmarks Index (`getAggregatedBookmarksForIndex`); includes **Browser storage (backend)** with `storage: 'browser'`.
 - **2C (browser race exclusion)** — Router rule for `getBookmarkForUrl`: exclude browser from the parallel non-empty best-of race; still reachable via `preferredBackend` / storage index / `defaultStorageMode`, or when no other provider returns a non-empty pin ([REQ-BROWSER_BOOKMARK_STORAGE]).
@@ -92,6 +95,11 @@
 | Strip Chrome roots | `stripChromeRootSegments` | [IMPL-BROWSER_BOOKMARK_SERVICE](../implementation-decisions/IMPL-BROWSER_BOOKMARK_SERVICE.yaml) |
 | Typed file path | `(proposed) NORMALIZE_FILE_STORAGE_PATH` | [IMPL-FILE_STORAGE_TYPED_PATH](../implementation-decisions/IMPL-FILE_STORAGE_TYPED_PATH.yaml) |
 | Native host wrap | `(proposed) NATIVE_HOST_IO` | [IMPL-NATIVE_HOST_WRAPPER](../implementation-decisions/IMPL-NATIVE_HOST_WRAPPER.yaml) |
+| Auth and bind Local Query API | `ENSURE_TOKEN_AND_LISTEN` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
+| Load File or snapshot bookmarks | `LOAD_BOOKMARKS` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
+| Filter Local Query API list | `FILTER_BOOKMARKS` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
+| Build aggregate snapshot payload | `BUILD_AGGREGATE_SNAPSHOT_PAYLOAD` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
+| Refresh API snapshot (SW) | `REFRESH_API_SNAPSHOT` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
 
 ---
 
@@ -100,20 +108,28 @@
 | Term | Section |
 |------|---------|
 | 2C (browser race exclusion) | Named concepts |
+| aggregate-snapshot.json | Named concepts |
 | BookmarkRouter | Named concepts |
 | Browser storage (backend) | Preferred terms |
+| BUILD_AGGREGATE_SNAPSHOT_PAYLOAD | Pseudo-code block names |
 | collapseByUrl | Named concepts |
 | default storage mode | Preferred terms |
 | Delete with preferred backend | Pseudo-code block names |
 | ENSURE_TAG_FOLDERS | Pseudo-code block names |
+| ENSURE_TOKEN_AND_LISTEN | Pseudo-code block names |
 | File storage | Preferred terms |
+| FILTER_BOOKMARKS | Pseudo-code block names |
 | getSelectedStorageBackend | Preferred terms |
 | hoverboard-bookmarks.json | Named concepts |
+| LOAD_BOOKMARKS | Pseudo-code block names |
+| Local Query API | Named concepts |
 | Local storage (backend) | Preferred terms |
 | move bookmark to storage | Preferred terms |
 | native host | Named concepts |
 | offscreen file I/O | Named concepts |
 | preferredBackend | Naming bridge |
+| Refresh API snapshot | Named concepts |
+| REFRESH_API_SNAPSHOT | Pseudo-code block names |
 | resolveProvider | Pseudo-code block names |
 | Save to | Preferred terms |
 | storage backend | Preferred terms |

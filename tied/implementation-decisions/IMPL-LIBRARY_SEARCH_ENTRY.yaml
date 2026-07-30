@@ -1,0 +1,55 @@
+IMPL-LIBRARY_SEARCH_ENTRY:
+  code_locations:
+    files:
+      - path: "src/shared/library-search-entry.js"
+        description: "Pure Index URL builder with optional q"
+      - path: "src/ui/popup/PopupController.js"
+        description: "OPEN_LIBRARY_SEARCH / handleLibrarySearch"
+      - path: "src/ui/popup/UIManager.js"
+        description: "Search Bookmarks control wiring"
+      - path: "src/core/service-worker.js"
+        description: "OPEN_BOOKMARKS_INDEX_TAB with BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "PREFILL_INDEX_SEARCH_FROM_QUERY"
+    functions:
+      - "_openBookmarksIndexTab"
+      - "buildBookmarksIndexUrlWithQuery"
+      - "handleLibrarySearch"
+  cross_references:
+    - "ARCH-LIBRARY_SEARCH_ENTRY"
+    - "REQ-LIBRARY_SEARCH_ENTRY"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LIBRARY_SEARCH_ENTRY-pseudocode.md"
+  implementation_approach:
+    details:
+      - "bookmarks-table PREFILL_INDEX_SEARCH_FROM_QUERY on load"
+      - "PopupController OPEN_LIBRARY_SEARCH sends OPEN_BOOKMARKS_INDEX { q }"
+      - "src/shared/library-search-entry.js: BUILD_BOOKMARKS_INDEX_URL_WITH_QUERY"
+      - "SW _openBookmarksIndexTab uses shared URL builder then REQUEST_SIDE_PANEL_CLOSE"
+    summary: "Pure URL helper + capture UI + Index bootstrap from ?q="
+  metadata:
+    last_updated:
+      author: "agent"
+      date: "2026-07-30"
+      reason: "Fill code_locations and composition test traceability for three-way alignment"
+  name: "Library Search Entry"
+  related_decisions:
+    composed_with:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    depends_on:
+      - "ARCH-LIBRARY_SEARCH_ENTRY"
+    see_also: []
+    supersedes: []
+  status: "Active"
+  summary: "Shared URL builder; PopupController opens Index with q; bookmarks-table applies search on load."
+  traceability:
+    architecture:
+      - "ARCH-LIBRARY_SEARCH_ENTRY"
+    code_annotations:
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+    requirements:
+      - "REQ-LIBRARY_SEARCH_ENTRY"
+    tests:
+      - "tests/integration/library-search-entry.integration.test.js"
+      - "tests/unit/library-search-and-snapshot.test.js"
+      - "tests/unit/service-worker-open-bookmarks-index.test.js"

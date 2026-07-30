@@ -296,6 +296,40 @@ section:last-child {
   margin: 0.2rem 0;
 }
 
+/* [REQ-BOOKMARK_NOTES_UI] [IMPL-BOOKMARK_NOTES_UI] Title/Notes details section */
+.details-section {
+  margin-top: var(--spacing-sm);
+}
+.details-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.details-label {
+  font-size: 12px;
+  color: var(--text-secondary, #666);
+}
+.details-input,
+.details-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 12px;
+  padding: 4px 6px;
+  border: 1px solid var(--border-color, #ccc);
+  border-radius: 4px;
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #333);
+  resize: vertical;
+}
+.details-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.details-notes-hint {
+  margin: 0;
+  font-size: 11px;
+}
+
 /* [REQ-MOVE_BOOKMARK_STORAGE_UI] [IMPL-MOVE_BOOKMARK_UI] Storage section: select-one buttons */
 .storage-section {
   margin-top: var(--spacing-sm);

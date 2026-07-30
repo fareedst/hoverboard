@@ -1,0 +1,12 @@
+ARCH-LIBRARY_SEARCH_ENTRY:
+  decision: "Open Index with ?q= rather than new search surface."
+  name: "Library Search Entry Architecture"
+  status: "Accepted"
+  summary: "Reuse Index search field; pass q via tab URL; pure URL builder."
+  traceability:
+    code_annotations:
+      - "ARCH-LIBRARY_SEARCH_ENTRY"
+    implementation:
+      - "IMPL-LIBRARY_SEARCH_ENTRY"
+    requirements:
+      - "REQ-LIBRARY_SEARCH_ENTRY"

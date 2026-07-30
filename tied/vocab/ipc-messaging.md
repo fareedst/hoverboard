@@ -37,7 +37,10 @@
 | Storage backend change | `storageBackendChange` | `moveBookmarkToStorage` |
 | Show on page load | `showHoverOnPageLoadChange` | `updateOverlayConfig` |
 | Open By Tag | `openTagsTree` | `OPEN_SIDE_PANEL` |
-| Open Local Bookmarks Index | `openBookmarksIndex` | `OPEN_BOOKMARKS_INDEX` |
+| Open Local Bookmarks Index | `openBookmarksIndex` | `OPEN_BOOKMARKS_INDEX` (optional data `q` for library search) |
+| Search Bookmarks | library search control | `OPEN_BOOKMARKS_INDEX` + `{ q }` |
+| Check / get link health | Index Check link health | `CHECK_LINK_HEALTH` / `GET_LINK_HEALTH` |
+| Refresh API snapshot | Refresh API snapshot | `REFRESH_API_SNAPSHOT` |
 
 ---
 
@@ -111,6 +114,9 @@ Exact constant keys and string values from `src/core/message-handler.js`:
 |----------|-------|
 | `OPEN_SIDE_PANEL` | `OPEN_SIDE_PANEL` |
 | `OPEN_BOOKMARKS_INDEX` | `OPEN_BOOKMARKS_INDEX` |
+| `REFRESH_API_SNAPSHOT` | `REFRESH_API_SNAPSHOT` |
+| `CHECK_LINK_HEALTH` | `CHECK_LINK_HEALTH` |
+| `GET_LINK_HEALTH` | `GET_LINK_HEALTH` |
 | `REQUEST_SIDE_PANEL_CLOSE` | `REQUEST_SIDE_PANEL_CLOSE` |
 | `GET_RECENTLY_CLOSED_TABS` | `getRecentlyClosedTabs` |
 | `GET_TAB_REFERRERS` | `getTabReferrers` |
@@ -154,6 +160,9 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 - **observer listener** — A `runtime.onMessage` listener that only watches broadcasts (e.g. `BOOKMARK_UPDATED` in popup and side panel) and never answers a message. Must be declared **synchronous** and return `undefined`: from Chrome 144 a listener that returns a promise is treated as answering, and an `async` listener with no return resolves `undefined`, which Chrome delivers to the sender as `null`.
 - **response-channel race** — Every extension context receives each `runtime.sendMessage`; the first context to answer wins. An observer listener that answers by accident beats the SW reply, so senders see `null` instead of the handler result.
 - **missing response** — A `null` or `undefined` reply where a handler result was expected. Callers unwrap with `unwrapMessageResponse` and record a `messageResponseMissing` inspector action rather than dereferencing `response.success`.
+- **OPEN_BOOKMARKS_INDEX `q`** — Optional query on open-index message; SW builds Index tab URL with `?q=` via `buildBookmarksIndexUrlWithQuery` ([REQ-LIBRARY_SEARCH_ENTRY]).
+- **link health messages** — `CHECK_LINK_HEALTH` (batch HEAD→GET + persist) and `GET_LINK_HEALTH` (read `hoverboard_link_health`).
+- **REFRESH_API_SNAPSHOT** — Extension writes `aggregate-snapshot.json` for Local Query API multi-backend GET.
 
 ---
 
@@ -166,6 +175,9 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 | Action contract map | `POPUP_ACTION_TO_MESSAGE` | [IMPL-UI_ACTION_CONTRACT](../implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml) |
 | Envelope validate | `validateMessageEnvelope` / `validateMessageData` | [IMPL-RUNTIME_VALIDATION](../implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml) |
 | Missing response unwrap | `unwrapMessageResponse` / `isMissingMessageResponse` / `readMessageResponse` | [IMPL-MESSAGE_HANDLING](../implementation-decisions/IMPL-MESSAGE_HANDLING.yaml) |
+| Open Index with optional `q` | `OPEN_BOOKMARKS_INDEX` / `OPEN_BOOKMARKS_INDEX_TAB` | [IMPL-LIBRARY_SEARCH_ENTRY](../implementation-decisions/IMPL-LIBRARY_SEARCH_ENTRY.yaml) / [IMPL-LOCAL_BOOKMARKS_INDEX](../implementation-decisions/IMPL-LOCAL_BOOKMARKS_INDEX.yaml) |
+| Check / get link health | `CHECK_LINK_HEALTH` / `GET_LINK_HEALTH` | [IMPL-LINK_HEALTH](../implementation-decisions/IMPL-LINK_HEALTH.yaml) |
+| Refresh API snapshot | `REFRESH_API_SNAPSHOT` | [IMPL-LOCAL_QUERY_API](../implementation-decisions/IMPL-LOCAL_QUERY_API.yaml) |
 
 ---
 
@@ -174,17 +186,21 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 | Term | Section |
 |------|---------|
 | BOOKMARK_UPDATED | Catalog |
+| CHECK_LINK_HEALTH | Catalog / Named concepts |
 | CONTENT_MESSAGE_TYPES | Content script types |
 | envelope | Preferred terms |
+| GET_LINK_HEALTH | Catalog / Named concepts |
 | MESSAGE_TYPES | Preferred terms |
 | MessageHandler | Named concepts |
 | missing response | Named concepts |
 | NATIVE_PING | File / native |
 | observer listener | Named concepts |
+| OPEN_BOOKMARKS_INDEX | Catalog / Named concepts |
 | OPEN_SIDE_PANEL | Catalog |
 | POPUP_ACTION_TO_MESSAGE | Preferred terms |
 | processMessage | Pseudo-code block names |
 | READ_FILE_BOOKMARKS | File / native |
+| REFRESH_API_SNAPSHOT | Catalog / Named concepts |
 | response-channel race | Named concepts |
 | unwrapMessageResponse | Pseudo-code block names |
 | service worker (SW) | Preferred terms |

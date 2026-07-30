@@ -1,0 +1,57 @@
+IMPL-LINK_HEALTH:
+  code_locations:
+    files:
+      - path: "src/shared/link-health.js"
+        description: "Pure classify/filter/merge helpers"
+      - path: "src/core/service-worker.js"
+        description: "CHECK_LINK_HEALTH / GET_LINK_HEALTH handlers"
+      - path: "src/ui/bookmarks-table/bookmarks-table.js"
+        description: "Health column, filter, Check link health action"
+      - path: "src/ui/bookmarks-table/bookmarks-table.html"
+        description: "Health column and filter UI"
+      - path: "src/core/message-handler.js"
+        description: "MESSAGE_TYPES CHECK_LINK_HEALTH / GET_LINK_HEALTH"
+    functions:
+      - "_checkLinkHealth"
+      - "_getLinkHealthMap"
+      - "buildHealthRecord"
+      - "classifyHttpStatus"
+      - "filterBookmarksByHealth"
+      - "mergeHealthMap"
+  cross_references:
+    - "ARCH-LINK_HEALTH"
+    - "REQ-LINK_HEALTH"
+  essence_pseudocode_path: "implementation-decisions/IMPL-LINK_HEALTH-pseudocode.md"
+  implementation_approach:
+    details:
+      - "Index Check link health + Health filter column"
+      - "src/shared/link-health.js: CLASSIFY_HTTP_STATUS, BUILD_HEALTH_RECORD, FILTER_BOOKMARKS_BY_HEALTH"
+      - "SW CHECK_LINK_HEALTH batch capped at 50; persist hoverboard_link_health"
+    summary: "Shared classify/filter; SW fetch HEAD then GET; Index Health column"
+  metadata:
+    last_updated:
+      author: "agent"
+      date: "2026-07-30"
+      reason: "Fill code_locations and composition test traceability for three-way alignment"
+  name: "Link Health"
+  related_decisions:
+    composed_with:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    depends_on:
+      - "ARCH-LINK_HEALTH"
+    see_also: []
+    supersedes: []
+  status: "Active"
+  summary: "Pure helpers + SW batch check + Index UI."
+  traceability:
+    architecture:
+      - "ARCH-LINK_HEALTH"
+    code_annotations:
+      - "IMPL-LINK_HEALTH"
+      - "REQ-LINK_HEALTH"
+    requirements:
+      - "REQ-LINK_HEALTH"
+    tests:
+      - "tests/integration/link-health.integration.test.js"
+      - "tests/unit/link-health-sw.test.js"
+      - "tests/unit/link-health.test.js"

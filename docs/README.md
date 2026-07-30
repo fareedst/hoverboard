@@ -32,6 +32,9 @@ This directory contains comprehensive documentation for the Hoverboard browser e
 ### 📚 **Reference Materials**
 - **[Reference Documentation](reference/README.md)** - Context, requirements, and specifications
 - **[Bookmark import/export](BOOKMARK_IMPORT_EXPORT.md)** - Index CSV vs Netscape HTML vs Browser Bookmark Import
+- **[Local Query API](LOCAL_API.md)** - Localhost HTTP API for File/snapshot bookmarks
+- **[Collections and collaboration](COLLECTIONS_AND_COLLABORATION.md)** - Tags-as-collections; File-share collaboration
+- **[Deferred bookmark-manager features](DEFERRED_BOOKMARK_MANAGER_FEATURES.md)** - Archive/reader/public REST out of scope (1A)
 - **[Netscape Bookmark HTML format](BOOKMARK_HTML_FORMAT.md)** - `NETSCAPE-Bookmark-file-1` interchange spec
 
 ### 📝 **Development Sessions**

@@ -1,0 +1,23 @@
+ARCH-BOOKMARK_NOTES_UI:
+  cross_references:
+    - "REQ-BOOKMARK_NOTES_UI"
+    - "REQ-BROWSER_BOOKMARK_STORAGE"
+    - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+  decision: "Use compact Title input and Notes textarea in a Details section above Tag Management; wire blur-to-save via PopupController; extract pure helpers in src/shared/bookmark-notes-ui.js for TDD."
+  implementation: "[IMPL-BOOKMARK_NOTES_UI](../implementation-decisions/IMPL-BOOKMARK_NOTES_UI.yaml)"
+  name: "Bookmark Title and Notes UI Architecture"
+  rationale:
+    alternatives_considered:
+      - "Index-only notes editing — rejected for capture-path gap"
+      - "Overlay notes — deferred to keep overlay minimal"
+    why: "Keeps capture UI complete for metadata without Index-only notes editing."
+  requirements: "[REQ-BOOKMARK_NOTES_UI](../requirements/REQ-BOOKMARK_NOTES_UI.yaml)"
+  status: "Accepted"
+  summary: "Add a Details section on popup/This Page with Title and Notes controls. Shared pure module builds save payloads and decides notes editability from backend id. Persist through existing saveBookmark message path with preferredBackend. Side panel reuses the same popup.html markup (popup-equivalent)."
+  traceability:
+    code_annotations:
+      - "ARCH-BOOKMARK_NOTES_UI"
+    implementation:
+      - "IMPL-BOOKMARK_NOTES_UI"
+    requirements:
+      - "REQ-BOOKMARK_NOTES_UI"

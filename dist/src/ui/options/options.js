@@ -22192,6 +22192,8 @@ var OptionsController = class {
     this.elements.browserBookmarkImportLink = document.getElementById("browser-bookmark-import-link");
     this.elements.testNativeHost = document.getElementById("test-native-host");
     this.elements.nativeHostStatus = document.getElementById("native-host-status");
+    this.elements.refreshApiSnapshotOptions = document.getElementById("refresh-api-snapshot-options");
+    this.elements.apiSnapshotOptionsStatus = document.getElementById("api-snapshot-options-status");
     this.elements.aiApiKey = document.getElementById("ai-api-key");
     this.elements.aiProvider = document.getElementById("ai-provider");
     this.elements.aiTagLimit = document.getElementById("ai-tag-limit");
@@ -22216,6 +22218,9 @@ var OptionsController = class {
     }
     if (this.elements.testNativeHost) {
       this.elements.testNativeHost.addEventListener("click", () => this.testNativeHost());
+    }
+    if (this.elements.refreshApiSnapshotOptions) {
+      this.elements.refreshApiSnapshotOptions.addEventListener("click", () => this.refreshApiSnapshot());
     }
     this.elements.defaultThemeToggle.addEventListener("click", () => this.toggleDefaultTheme());
     this.elements.defaultTransparencyEnabled.addEventListener("change", () => this.updateTransparencyState());
@@ -22460,6 +22465,21 @@ var OptionsController = class {
       this.showStatus("Authentication test failed: " + error48.message, "error");
     } finally {
       this.setLoading(false);
+    }
+  }
+  /** [REQ-LOCAL_QUERY_API] [IMPL-LOCAL_QUERY_API] Ask SW to write aggregate-snapshot.json. */
+  async refreshApiSnapshot() {
+    if (!this.elements.apiSnapshotOptionsStatus) return;
+    this.elements.apiSnapshotOptionsStatus.textContent = "Writing snapshot\u2026";
+    try {
+      const response = await chrome.runtime.sendMessage({ type: "REFRESH_API_SNAPSHOT" });
+      if (response?.success) {
+        this.elements.apiSnapshotOptionsStatus.textContent = `Snapshot updated (${response.count ?? 0} bookmarks)`;
+      } else {
+        this.elements.apiSnapshotOptionsStatus.textContent = response?.error || "Snapshot failed";
+      }
+    } catch (e) {
+      this.elements.apiSnapshotOptionsStatus.textContent = `Error: ${e.message}`;
     }
   }
   /** [REQ-NATIVE_HOST_WRAPPER] Send NATIVE_PING to service worker and show result. */
