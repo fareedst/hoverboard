@@ -1,0 +1,27 @@
+CITDP-REQ-LOCAL_BOOKMARKS_INDEX_EXPORT-browser-storage-label:
+  change_definition:
+    current_behavior: "buildCsv maps storage browser to Local (falls through ternary)."
+    desired_behavior: "buildCsv Storage column emits Browser for storage browser; Local|File|Sync unchanged."
+    non_goals:
+      - "Change import parseCsv Storage semantics"
+      - "E2E for export"
+    success_criteria:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT pseudocode documents Local|File|Sync|Browser"
+      - "Unit test in bookmarks-table-export.test.js asserts Browser label"
+  completion_criteria:
+    verification_gate_notes: "bun test tests/unit/bookmarks-table-export.test.js; tied_validate_consistency"
+  impact_analysis:
+    modules_or_boundaries: "bookmarks-table-csv.js buildCsv"
+    tied_tokens_affected:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
+  leap_feedback:
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT-browser-storage-label"
+    primary_tokens:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
+      - "REQ-LOCAL_BOOKMARKS_INDEX_EXPORT"
+    related_plan: "tied/working/REQ_CORPUS_REVIEW_20260729132400-plan.md"

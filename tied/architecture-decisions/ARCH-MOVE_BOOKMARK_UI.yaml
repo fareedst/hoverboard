@@ -1,8 +1,11 @@
 ARCH-MOVE_BOOKMARK_UI:
   alternatives_considered: []
   cross-references: "REQ-MOVE_BOOKMARK_STORAGE_UI, ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-MOVE_BOOKMARK_UI"
-  cross_references: &ref_0 []
-  decision: "Popup displays the **current storage backend** for the current tab's bookmark and allows the user to **move** it to another backend (Pinboard, Local, File). Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. When the bookmark is in Local or File, a dedicated control (file ↔ browser toggle) offers one-click move between those two backends; the same move path is used (moveBookmarkToStorage)."
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "IMPL-MOVE_BOOKMARK_UI"
+    - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+  decision: "Popup displays the current storage backend for the current tab's bookmark via five Save to select-one buttons (Pinboard, Local, File, Sync, Browser) and allows the user to move it to another backend. Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. There is no separate Local/File toggle; Local↔File↔Browser moves use the same Save to buttons and moveBookmarkToStorage path."
   detail_file: "architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml"
   implementation_approach:
     details:
@@ -17,7 +20,7 @@ ARCH-MOVE_BOOKMARK_UI:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Corpus remediation Phase 1: Move UI five backends"
+      reason: "Corpus close-loop: five Save to; drop file↔browser toggle; fill traceability"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -34,14 +37,22 @@ ARCH-MOVE_BOOKMARK_UI:
     - "ARCH-STORAGE_INDEX_AND_ROUTER (router.moveBookmarkToStorage)"
     - "IMPL-MOVE_BOOKMARK_UI (popup select and messaging)"
   related_decisions:
-    depends_on: *ref_0
-    informs: []
-    see_also: []
+    depends_on:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    informs:
+      - "IMPL-MOVE_BOOKMARK_UI"
+    see_also:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
   status: "Active"
-  summary: "Popup displays the **current storage backend** for the current tab's bookmark and allows the user to **move** it to another backend (Pinboard, Local, File). Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. When the bookmark is in Local or File, a dedicated control (file ↔ browser toggle) offers one-click move between those two backends; the same move path is used (moveBookmarkToStorage)."
+  summary: "Popup Save to five backends (Pinboard, Local, File, Sync, Browser); move via moveBookmarkToStorage; save sends preferredBackend."
   traceability:
     code_annotations:
       - "ARCH-MOVE_BOOKMARK_UI"
-    implementation: []
-    requirements: *ref_0
-    tests: []
+    implementation:
+      - "IMPL-MOVE_BOOKMARK_UI"
+    requirements:
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"

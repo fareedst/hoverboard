@@ -10,7 +10,7 @@ exportBookmarks(scope):
   IF scope = 'all': source = allBookmarks
   IF scope = 'displayed': source = filteredBookmarks
   IF scope = 'selected': source = allBookmarks FILTER url IN selectedUrls
-  csvString = buildCsv(source)   // header row + one row per bookmark; escape quotes; storage Local|File|Sync
+  csvString = buildCsv(source)   // header row + one row per bookmark; escape quotes; storage Local|File|Sync|Browser
   filename = "hoverboard-bookmarks-{scope}-{ISO date}.csv"
   blob = new Blob([csvString]); url = createObjectURL(blob)
   trigger <a download=filename href=url> click; revokeObjectURL(url)

@@ -11,7 +11,7 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Corpus remediation Phase 1: Save to five backends + fill traceability.tests"
+      reason: "Corpus close-loop: moves via Save to only; drop dedicated Local/File toggle criterion"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -27,9 +27,9 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
     related_to: []
     supersedes: []
   satisfaction_criteria:
+    - criterion: "Local↔File↔Browser (and other backend) moves use the same Save to buttons; there is no separate dedicated Local/File toggle control."
     - criterion: "Popup Save to shows current bookmark storage and select-one buttons for Pinboard, Local, File, Sync, and Browser; click moves via moveBookmarkToStorage when a bookmark exists."
     - criterion: "Save follows the highlight: creating or updating a bookmark from the popup uses the currently selected (highlighted) storage backend; popup sends preferredBackend and router honors it (REQ-STORAGE_MODE_DEFAULT, IMPL-BOOKMARK_ROUTER, IMPL-MOVE_BOOKMARK_UI)."
-    - criterion: "When the bookmark is stored in Local or File, a dedicated one-click control allows toggling between file and local storage (Move to File / Move to Local). Hidden when storage is Pinboard/Sync/Browser or when there is no bookmark for the current URL."
   status: "Implemented"
   summary: "The user can see the current storage of the current page bookmark (Pinboard, Local, File, Sync, or Browser) and move it to another storage backend via Save to buttons in the popup. Move is implemented as copy to target backend, delete from source, and update storage index. Options page explains default storage for new bookmarks with a five-way choice (Local | Pinboard | File | Sync | Browser). Index Actions also support Move selected to (Local | File | Sync | Browser)."
   traceability:

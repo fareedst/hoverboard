@@ -11,7 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Browser storage backend (Store B)** ([REQ-BROWSER_BOOKMARK_STORAGE], [ARCH-BROWSER_BOOKMARK_PROVIDER], [IMPL-BROWSER_BOOKMARK_SERVICE], [IMPL-BOOKMARK_ROUTER], [IMPL-STORAGE_INDEX], [IMPL-LOCAL_BOOKMARKS_INDEX]) – Fifth backend `browser` over `chrome.bookmarks`; Index **Browser (B)**; Save-to / default storage mode / move / import; folder-path tags with Chrome root strip; URL collapse; **2C** excludes browser from `getBookmarkForUrl` best-of race (consult via preferred/index/default or empty peers). Unit + MessageHandler composition coverage; E2E not required (provider/router composition). CITDP: `tied/citdp/CITDP-REQ-BROWSER_BOOKMARK_STORAGE.yaml`.
 
+### Changed
+
+- **REQ corpus remediation LEAP** ([REQ-PER_BOOKMARK_STORAGE_BACKEND], [REQ-LOCAL_BOOKMARKS_INDEX], [REQ-MOVE_BOOKMARK_STORAGE_UI], [ARCH-STORAGE_INDEX_AND_ROUTER], [ARCH-MOVE_BOOKMARK_UI], [IMPL-MOVE_BOOKMARK_UI], [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT], [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]) – Sibling storage REQs/ARCH/IMPL and vocab aligned to five backends; index↔detail status sync; Manifest V3 Implemented; suggested-tags cleanup; stub/NFR umbrellas; orphan `REQ-IDENTIFIER` removed; Bookmarks panel vs Store B boundary; Save to only (no dedicated Local/File toggle). CITDP: `tied/working/REQ_CORPUS_REVIEW_20260729132400-plan.md`.
+
 ### Fixed
+
+- **Local Bookmarks Index CSV Storage Browser label** ([REQ-LOCAL_BOOKMARKS_INDEX_EXPORT], [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]) – `buildCsv` emits `Browser` for Store B rows (was falling through to Local). **Tests:** `bookmarks-table-export.test.js`. CITDP: `tied/citdp/CITDP-REQ-LOCAL_BOOKMARKS_INDEX_EXPORT-browser-storage-label.yaml`.
 
 - **Local Bookmarks Index: store-change reload after empty first load** ([REQ-LOCAL_BOOKMARKS_INDEX], [ARCH-LOCAL_BOOKMARKS_INDEX], [IMPL-LOCAL_BOOKMARKS_INDEX]) – Aggregate `error` / `success:false` (even with `bookmarks: []`) falls back to local; checking a Stores checkbox when `allBookmarks` is empty re-runs `LOAD_LOCAL_BOOKMARKS_INDEX`; SW provider init uses `PROVIDER_INIT_MUTEX`. **Tests:** `bookmarks-table-load.test.js`. CITDP: `tied/citdp/CITDP-REQ-LOCAL_BOOKMARKS_INDEX-store-load-retry.yaml`.
 

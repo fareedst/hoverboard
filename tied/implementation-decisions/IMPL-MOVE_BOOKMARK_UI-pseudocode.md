@@ -1,17 +1,15 @@
 # [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT]
-# Popup storage buttons; load backend, move on click, preferredBackend on save.
+# Popup Save to five buttons; load backend, move on click, preferredBackend on save.
 # Contract: URL and bookmark and actions; highlighted button and move/save requests.
-INPUT: currentUrl (tab), currentPin (current bookmark if any), user action (select storage button, save, toggle file/browser)
+INPUT: currentUrl (tab), currentPin (current bookmark if any), user action (select storage button, save)
 OUTPUT: highlighted storage button; move request; save request with preferredBackend
-DATA: storage section with four buttons (Pinboard, Local, File, Sync); one has aria-pressed="true"
+DATA: storage section with five buttons (Pinboard, Local, File, Sync, Browser); one has aria-pressed="true"
 
-# Set highlighted button from getStorageBackendForUrl or default; show/hide Move toggle; update Pinboard enabled.
+# Set highlighted button from getStorageBackendForUrl or default; update Pinboard enabled.
 ON popup load (or bookmark data load):
   IF currentPin exists: backend = send getStorageBackendForUrl(currentUrl)
   ELSE: backend = defaultStorageMode
   SET highlighted button to backend (data-backend attribute)
-  IF backend is local or file: SHOW "Move to File" / "Move to browser" toggle
-  ELSE: HIDE toggle
   updateStoragePinboardEnabled(hasApiToken)
 
 # Send move; use inner result; refresh and update UI on success.
@@ -19,7 +17,7 @@ ON storage button click (user selects different backend):
   url = currentPin?.url || currentTab?.url
   SEND moveBookmarkToStorage(url, targetBackend)
   result = response?.data ?? response   // inner result (IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL)
-  IF result.success: refresh bookmark data; update highlighted button and toggle
+  IF result.success: refresh bookmark data; update highlighted button
   ELSE: show error from result
 
 # Set preferredBackend from selected button; send saveBookmark so router uses highlighted storage.

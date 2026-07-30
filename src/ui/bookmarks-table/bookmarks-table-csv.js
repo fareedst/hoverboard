@@ -14,9 +14,10 @@ export function escapeCsvField (str) {
 }
 
 /**
- * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] Build CSV with Time (create) and Updated (most-recent-update-time).
+ * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT]
+ * Build CSV with Time (create) and Updated (most-recent-update-time).
  * Columns: Title, URL, Tags, Time, Updated, Storage, Shared, To read, Notes.
- * Storage column: Local | File | Sync.
+ * Storage column: Local | File | Sync | Browser.
  */
 export function buildCsv (bookmarks) {
   const header = 'Title,URL,Tags,Time,Updated,Storage,Shared,To read,Notes'
@@ -26,7 +27,9 @@ export function buildCsv (bookmarks) {
     const tags = Array.isArray(b.tags) ? b.tags.join(', ') : String(b.tags ?? '')
     const time = b.time ? new Date(b.time).toISOString() : ''
     const updated = (b.updated_at ?? b.time) ? new Date(b.updated_at ?? b.time).toISOString() : ''
-    const storage = b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local')
+    const storage = b.storage === 'browser'
+      ? 'Browser'
+      : (b.storage === 'sync' ? 'Sync' : (b.storage === 'file' ? 'File' : 'Local'))
     const shared = b.shared === 'no' ? 'Private' : 'Public'
     const toread = b.toread === 'yes' ? 'Yes' : 'No'
     const notes = b.extended ?? ''

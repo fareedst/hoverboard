@@ -102,8 +102,8 @@ Align with `[PROC-YAML_EDIT_LOOP]` and **sub-yaml-edit-loop** in [agent-req-impl
 
 1. Prefer **MCP** for the mutation (§ 1).
 2. On any path you **direct-edited** (exception only), run `scripts/yaml_tool.sh <file> [file ...]` or `scripts/lint_yaml.sh <file> [file ...]` (or `lint_yaml` if installed) until it passes.
-   - Never run raw multi-argument `yq -i -P file1 file2 ...`; it can merge documents and corrupt files.
-   - If you can only use `yq` directly, run `yq -i -P <file>` in a per-file loop.
+   - Never run raw multi-argument `yq -i … file1 file2 ...`; it can merge documents and corrupt files.
+   - If you can only use `yq` directly, run `yq -i 'sort_keys(.. style="double")' <file>` in a per-file loop (same as `yaml_tool` / `lint_yaml` default).
 3. Run **`tied_validate_consistency`** before marking TIED work complete (and when the checklist calls for it).
 
 ---

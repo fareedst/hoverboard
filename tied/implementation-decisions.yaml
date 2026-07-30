@@ -2302,8 +2302,8 @@ IMPL-MOVE_BOOKMARK_UI:
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-20"
-      reason: "Canonical detail rewrite; add essence_pseudocode and composed_with"
+      date: "2026-07-29"
+      reason: "Corpus close-loop: five Save to backends"
   name: "Move Bookmark Storage UI"
   rationale:
     benefits:
@@ -2324,6 +2324,7 @@ IMPL-MOVE_BOOKMARK_UI:
       - "IMPL-BOOKMARK_ROUTER"
     supersedes: []
   status: "Active"
+  summary: "Popup Save to five buttons (pinboard/local/file/sync/browser); moveBookmarkToStorage on click; preferredBackend on save."
   traceability:
     architecture:
       - "ARCH-MOVE_BOOKMARK_UI"

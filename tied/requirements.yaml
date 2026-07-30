@@ -1275,7 +1275,7 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Corpus remediation Phase 1: index five backends + tests"
+      reason: "Corpus close-loop: Save to only (no dedicated toggle)"
   name: "Move Bookmark Storage UI"
   priority: "P1"
   rationale:
@@ -1297,6 +1297,7 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
     - criterion: "Popup Save to shows current bookmark storage and select-one buttons for Pinboard, Local, File, Sync, and Browser"
     - criterion: "Save follows the highlight via preferredBackend on create/update"
   status: "Implemented"
+  summary: "Popup Save to five backends; move via moveBookmarkToStorage; save preferredBackend; Index Move selected to Local|File|Sync|Browser."
   traceability:
     architecture:
       - "ARCH-MOVE_BOOKMARK_UI"

@@ -120,3 +120,11 @@ Full exec completed via tied-yaml MCP / `tied-cli.sh`:
 5. Phase 5 — CODE_QUALITY engines.node ≥20.19.0; thin stubs/NFRs expanded as umbrellas with related_to.
 6. Phase 6 — Orphan `REQ-IDENTIFIER` deleted; panel vs Store B boundary; empty `traceability.tests` filled for MOVE / URL_TAGS / NATIVE_HOST.
 7. Vocab RECORD — `routing.md`, `side-panel.md`, `bookmarks-index.md`.
+
+## Close-loop execution (2026-07-29)
+
+8. IMPL LEAP — `IMPL-MOVE_BOOKMARK_UI` five Save to; Index Import/Export Browser in sidecars + YAML.
+9. ARCH/REQ LEAP — `ARCH-MOVE_BOOKMARK_UI` decision/summary/traceability; `REQ-MOVE_BOOKMARK_STORAGE_UI` drops dedicated Local/File toggle criterion.
+10. Vocab RECORD — demote file↔browser toggle under Save to in `storage-backends.md`.
+11. Code/test — `buildCsv` Storage emits Browser; unit test in `bookmarks-table-export.test.js`; stale popup comment sync.
+12. CHANGELOG Unreleased + proposed commit message (no commit).

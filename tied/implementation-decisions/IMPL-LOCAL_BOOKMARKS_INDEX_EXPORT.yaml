@@ -22,17 +22,17 @@ IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT:
   implementation_approach:
     details:
       - "bookmarks-table.js: exportBookmarks(scope); scope all -> allBookmarks, displayed -> filteredBookmarks, selected -> allBookmarks.filter(b => selectedUrls.has(b.url))"
-      - "CSV: escape quotes, columns description, url, tags, time, storage (Local|File|Sync), shared, toread, extended; filename hoverboard-bookmarks-{scope}-{ISO date}.csv"
+      - "CSV: escape quotes, columns description, url, tags, time, storage (Local|File|Sync|Browser), shared, toread, extended; filename hoverboard-bookmarks-{scope}-{ISO date}.csv"
       - "updateExportButtonState() disables Export selected when selectedUrls.size === 0; called from updateMoveControlsState()"
-    summary: "Export controls in bookmarks-table toolbar; exportBookmarks(scope) with scope 'all', 'displayed', or 'selected'; serialize to CSV including Storage column; Blob + object URL + <a download> click; revoke URL."
+    summary: "Export controls in bookmarks-table toolbar; exportBookmarks(scope) with scope 'all', 'displayed', or 'selected'; serialize to CSV including Storage column (Local|File|Sync|Browser); Blob + object URL + <a download> click; revoke URL."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Corpus close-loop: CSV Storage includes Browser"
     last_validated:
       date: "2026-02-18"
       result: "pass"

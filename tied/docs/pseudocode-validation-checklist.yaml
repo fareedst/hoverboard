@@ -6,7 +6,7 @@
 # (merged as essence_pseudocode by TIED; equivalent to yaml_detail_read for the body).
 # Process token: [PROC-PSEUDOCODE_VALIDATION]
 checklist:
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was TIED-POE-001)"
+  - id: "TIED-POE-001"
     category: "tied_data"
     evidence:
       - "or equivalent documented manual review only when MCP is unavailable and project policy allows"
@@ -17,7 +17,7 @@ checklist:
     verify:
       - "do not use this checklist in isolation when TIED is available; qualify sidecar or merged text with TIED first"
       - "for the affected IMPL, tied_validate_consistency returns ok with include_pseudocode (default) so merged essence from IMPL-TOKEN-pseudocode.md meets TIED token comment and token-ref rules"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was PARSE-001)"
+  - id: "PARSE-001"
     category: "parsing"
     evidence:
       - "parse failures include source location"
@@ -29,7 +29,7 @@ checklist:
       - "malformed syntax is rejected"
       - "parsing produces a normalized internal representation"
       - "the block conforms to the project grammar"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was PARSE-002)"
+  - id: "PARSE-002"
     category: "parsing"
     evidence:
       - "each diagnostic includes block identifier"
@@ -40,7 +40,7 @@ checklist:
     verify:
       - "diagnostics can identify the exact block and step"
       - "line and column are attached where available"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was SHAPE-001)"
+  - id: "SHAPE-001"
     category: "schema"
     evidence:
       - "no missing required fields"
@@ -52,7 +52,7 @@ checklist:
       - "block headers and tags follow naming rules"
       - "required sections are present for the declared block kind"
       - "section order follows project conventions if order is significant"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was SHAPE-002)"
+  - id: "SHAPE-002"
     category: "schema"
     evidence:
       - "declaration table matches block references"
@@ -63,7 +63,50 @@ checklist:
       - "duplicate declarations are rejected unless explicitly allowed"
       - "identifiers are declared before use"
       - "output variants are structurally valid"
-  - id: "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-UNIT-001)"
+  - id: "SHAPE-003"
+    category: "schema"
+    evidence:
+      - "contract field inventory per Active procedure block (PRE POST EFFECTS INPUT OUTPUT)"
+    required: "true"
+    severity_on_failure: "error"
+    title: "Active procedure blocks declare PRE POST and EFFECTS"
+    verify:
+      - "N/A allowed for status Template stubs or unchanged legacy Active blocks with rationale pre-contract-grammar"
+      - "new or changed Active non-stub procedure blocks declare PRE POST and EFFECTS alongside INPUT and OUTPUT"
+      - "PRE true is used only when the block is genuinely unconstrained and the choice is documented"
+  - id: "SHAPE-004"
+    category: "schema"
+    evidence:
+      - "FAILURE_MODES set vs OUTPUT error variants and step-level error names"
+    required: "true"
+    severity_on_failure: "error"
+    title: "FAILURE_MODES closed set when errors are possible"
+    verify:
+      - "every error name used in steps appears in FAILURE_MODES"
+      - "FAILURE_MODES is present when OUTPUT includes error or steps use ON error or fallible returns"
+      - "N/A when the block has no error OUTPUT and no fallible error paths"
+  - id: "SHAPE-005"
+    category: "schema"
+    evidence:
+      - "DATA_TRANSITION present when DATA mutates or EFFECTS includes State"
+    required: "true"
+    severity_on_failure: "error"
+    title: "DATA_TRANSITION when mutable DATA or State effects"
+    verify:
+      - "DATA_TRANSITION states before-to-after rules when DATA is mutated or EFFECTS includes State"
+      - "N/A when DATA is absent or read-only and EFFECTS does not include State"
+  - id: "SHAPE-006"
+    category: "schema"
+    evidence:
+      - "TERMINATION declared for recursion WHILE or open wait"
+    required: "true"
+    severity_on_failure: "error"
+    title: "TERMINATION when recursion WHILE or open-ended wait"
+    verify:
+      - "N/A when no recursion WHILE or open-ended wait (or document TERMINATION total)"
+      - "prefer TERMINATION total when the block is clearly total"
+      - "TERMINATION total or may_diverge with justification when recursion WHILE or open-ended wait is present"
+  - id: "TEST-UNIT-001"
     category: "unit_test_spec"
     evidence:
       - "exactly one target symbol is resolved"
@@ -73,7 +116,7 @@ checklist:
     verify:
       - "helper references do not create ambiguity about the subject"
       - "the unit-test block targets one routine or one block"
-  - id: "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-UNIT-002)"
+  - id: "TEST-UNIT-002"
     category: "unit_test_spec"
     evidence:
       - "normalized phase map exists for each unit-test block"
@@ -85,7 +128,7 @@ checklist:
       - "assertion or expected outcome exists"
       - "error expectation is explicit when failure behavior is tested"
       - "setup exists"
-  - id: "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-INT-001)"
+  - id: "TEST-INT-001"
     category: "integration_test_spec"
     evidence:
       - "collaborator list resolves against the application symbol table"
@@ -96,7 +139,7 @@ checklist:
       - "all directly involved blocks or routines are named"
       - "external boundaries are identified when present"
       - "undeclared collaborators are rejected"
-  - id: "[IMPL-TESTING] [ARCH-TESTING_STRATEGY] [REQ-CODE_QUALITY] [TEST-UNIT_FRAMEWORK] (was TEST-INT-002)"
+  - id: "TEST-INT-002"
     category: "integration_test_spec"
     evidence:
       - "dependency graph analysis for each integration test"
@@ -107,7 +150,7 @@ checklist:
       - "collaborator usage matches architecture constraints"
       - "forbidden layers are not crossed"
       - "only allowed dependency directions are used"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was RESOLVE-001)"
+  - id: "RESOLVE-001"
     category: "symbol_resolution"
     evidence:
       - "symbol table with unique bindings"
@@ -119,7 +162,7 @@ checklist:
       - "referenced blocks exist"
       - "referenced routines exist"
       - "referenced tags exist"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was RESOLVE-002)"
+  - id: "RESOLVE-002"
     category: "symbol_resolution"
     evidence:
       - "duplicate report reviewed and resolved"
@@ -129,40 +172,46 @@ checklist:
     verify:
       - "duplicate block identifiers are rejected unless intentionally versioned"
       - "duplicate requirement or implementation tags are explainable"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was CONTRACT-001)"
+  - id: "CONTRACT-001"
     category: "contract_validation"
     evidence:
       - "contract comparison result for each test target"
+      - "PRE clauses vs test setup"
     required: "true"
     severity_on_failure: "error"
     title: "Test inputs conform to target block contracts"
     verify:
       - "preconditions are satisfied by setup"
       - "test inputs match the declared input names and shapes"
+      - "test setup satisfies declared PRE predicates"
       - "undeclared inputs are rejected"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was CONTRACT-002)"
+  - id: "CONTRACT-002"
     category: "contract_validation"
     evidence:
       - "output and error expectation comparison report"
+      - "POST and FAILURE_MODES vs assertions"
     required: "true"
     severity_on_failure: "error"
     title: "Expected outputs and errors conform to target block contracts"
     verify:
       - "assertions refer only to observable behavior"
       - "expected errors match declared error types or failure modes"
-      - "expected success results match a declared output variant"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was CONTRACT-003)"
+      - "expected errors match declared FAILURE_MODES names and error POST where stated"
+      - "expected success results match a declared output variant and success POST where stated"
+  - id: "CONTRACT-003"
     category: "contract_validation"
     evidence:
       - "mapping from safety clauses to test assertions"
+      - "POST invariants mapped to tests"
     required: "true"
     severity_on_failure: "warning"
     title: "Safety and invariant claims are testable where required"
     verify:
       - "invariants are asserted where the project requires them"
+      - "POST invariants are asserted where stated"
       - "prohibited behaviors are explicitly checked when relevant"
       - "safety constraints stated in the target spec are reflected in tests"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was GRAPH-001)"
+  - id: "GRAPH-001"
     category: "dependency_graph"
     evidence:
       - "graph validation report"
@@ -173,7 +222,7 @@ checklist:
       - "allowed cycles are classified and documented"
       - "every dependency edge connects known nodes"
       - "forbidden cycles are rejected"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was GRAPH-002)"
+  - id: "GRAPH-002"
     category: "dependency_graph"
     evidence:
       - "unit-test collaborator audit"
@@ -183,7 +232,7 @@ checklist:
     verify:
       - "hidden integration behavior is flagged"
       - "unit-test blocks use only the declared subject and allowed helpers"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was COVER-001)"
+  - id: "COVER-001"
     category: "behavioral_coverage"
     evidence:
       - "coverage map from implementation block to success-path tests"
@@ -192,17 +241,18 @@ checklist:
     title: "Each implementation block has success-path coverage"
     verify:
       - "at least one test exercises the intended success result"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was COVER-002)"
+  - id: "COVER-002"
     category: "behavioral_coverage"
     evidence:
       - "coverage map from failure modes to tests"
+      - "FAILURE_MODES names used in failure-path assertions"
     required: "true"
     severity_on_failure: "error"
     title: "Each implementation block has failure-path coverage when failure is possible"
     verify:
-      - "declared errors and failure modes are exercised by tests"
-      - "failure-path assertions check the expected error shape"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was COVER-003)"
+      - "declared errors and FAILURE_MODES are exercised by tests"
+      - "failure-path assertions use names from FAILURE_MODES and check the expected error shape"
+  - id: "COVER-003"
     category: "behavioral_coverage"
     evidence:
       - "edge-case coverage inventory"
@@ -213,7 +263,7 @@ checklist:
       - "empty inputs are tested where meaningful"
       - "malformed or extreme values are tested where relevant"
       - "minimal valid inputs are tested"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was TRACE-001)"
+  - id: "TRACE-001"
     category: "traceability"
     evidence:
       - "requirement-to-test matrix"
@@ -223,7 +273,7 @@ checklist:
     verify:
       - "each requirement identifier maps to one or more test blocks"
       - "orphan requirements are reported"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was TRACE-002)"
+  - id: "TRACE-002"
     category: "traceability"
     evidence:
       - "implementation-to-test matrix"
@@ -233,7 +283,7 @@ checklist:
     verify:
       - "each implementation identifier maps to unit or integration tests"
       - "untested implementation blocks are reported"
-  - id: "[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was TRACE-003)"
+  - id: "TRACE-003"
     category: "traceability"
     evidence:
       - "architecture-to-integration-test matrix"
@@ -243,7 +293,7 @@ checklist:
     verify:
       - "architecture-level dependencies are exercised by one or more integration tests"
       - "missing integration coverage is reported"
-  - id: "[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LINT-001)"
+  - id: "LINT-001"
     category: "linting"
     evidence:
       - "lint findings for ambiguous steps"
@@ -253,7 +303,7 @@ checklist:
     verify:
       - "assertions are explicit rather than implied"
       - "vague terms are flagged unless refined by context"
-  - id: "[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LINT-002)"
+  - id: "LINT-002"
     category: "linting"
     evidence:
       - "fixture and mock declaration audit"
@@ -263,7 +313,7 @@ checklist:
     verify:
       - "hidden setup is not assumed"
       - "mock or stub usage matches actual collaborators"
-  - id: "[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LINT-MD-001)"
+  - id: "LINT-MD-001"
     category: "linting"
     evidence:
       - "read IMPL-TOKEN-pseudocode.md; compare to script/extract_test_pseudocode_to_impl_sidecars.py output"
@@ -272,7 +322,7 @@ checklist:
     title: "IMPL Markdown sidecar matches agreed heading structure when extract-generated"
     verify:
       - "a single H1 for the file intro with IMPL/ARCH/REQ bracket tokens (methodology order when all three appear); per coverage section H2 with a Source line when using the Comrak extract path"
-  - id: "[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LINT-MD-002)"
+  - id: "LINT-MD-002"
     category: "linting"
     evidence:
       - "NORM in src/tests vs impl sidecar; tied/docs/pseudocode-writing-and-validation.md"
@@ -282,7 +332,7 @@ checklist:
     verify:
       - "// lines carry FILE/TEST/contract and bracket tokens as required by the project"
       - "optional /* */ preface in the pre-test span is narrative; not a substitute for // tokens unless policy and extract tooling allow"
-  - id: "[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was SIM-001)"
+  - id: "SIM-001"
     category: "semantic_simulation"
     evidence:
       - "symbolic validation report"
@@ -291,9 +341,9 @@ checklist:
     title: "Test pseudo-code is semantically coherent under symbolic interpretation"
     verify:
       - "assertions are reachable"
-      - "expected results do not contradict the target contract"
-      - "setup can satisfy target preconditions"
-  - id: "[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was GEN-001)"
+      - "expected results do not contradict the target contract POST or OUTPUT"
+      - "setup can satisfy target PRE / preconditions"
+  - id: "GEN-001"
     category: "generation_readiness"
     evidence:
       - "generation feasibility report"
@@ -305,7 +355,7 @@ checklist:
       - "each step maps to a supported test framework primitive"
       - "fixtures can be materialized"
       - "unresolved natural language steps are reported"
-  - id: "[IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was DIAG-001)"
+  - id: "DIAG-001"
     category: "reporting"
     evidence:
       - "diagnostic output sample"
@@ -316,15 +366,19 @@ checklist:
       - "all findings include a concise explanation"
       - "all findings include severity"
       - "all findings point to block and source location when available"
-description: "Reusable checklist for projects whose IMPL pseudo-code blocks describe implementation intent, unit and\nintegration tests, traceability, and (optionally) generation-readiness. Canonical definition and grammar\n(language-agnostic TIED vocabulary, block-format sync to tests and code, LEAP when scope changes): see\ntied/docs/pseudocode-writing-and-validation.md § Definition; sidecar body template: templates/impl-essence-pseudocode-template.md.\n\nIMPL essence_pseudocode is language-agnostic: it uses INPUT/OUTPUT/DATA/CONTROL and procedure steps, not\nhost-language source. Full token lines use IMPL, ARCH, REQ bracket order when all three appear (see implementation-decisions.md).\nEach logical block (e.g. Markdown ## section) is synchronized to tests and production code via literal block\nleads (and optional full-block copy per project policy). Edits that change behavior or requirement/architecture\nscope require [PROC-LEAP] validation (IMPL, then ARCH and REQ)—Layer A and Layer B do not replace that propagation.\n\nIn TIED IMPL layout, the canonical on-disk source for the pseudo-code body is\ntied/implementation-decisions/IMPL-{TOKEN}-pseudocode.md (UTF-8). TIED merges that file into the logical\nessence_pseudocode field for yaml_detail_read and for tied_validate_consistency (include_pseudocode: true\nby default). Run that TIED gate to qualify the external file against index and token-reference rules before\nor alongside the PARSE/SHAPE/... categories in this file.\n\nThe sidecar is Markdown. Layer A (tied_validate_consistency) still inspects the merged string; bracket\n[IMPL-*/ARCH-*/REQ-*] tags may appear on any line, not a fixed comment prefix. When a project (e.g. Comrak)\nhas no custom pseudo-code grammar parser, treat each section between ## headings in IMPL-*-pseudocode.md as\none logical \"block\" for manual Layer B review. Optional items [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LINT-MD-001) and [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LINT-MD-002) below help reviewers\nalign with the extract-generated sidecar pattern where that script is used.\n"
+description: "Reusable checklist for projects whose IMPL pseudo-code blocks describe implementation intent, unit and\nintegration tests, traceability, and (optionally) generation-readiness. Canonical definition and grammar\n(language-agnostic TIED vocabulary, block-format sync to tests and code, LEAP when scope changes): see\ntied/docs/pseudocode-writing-and-validation.md § Definition; sidecar body template: templates/impl-essence-pseudocode-template.md.\n\nIMPL essence_pseudocode is language-agnostic: it uses INPUT/OUTPUT/DATA/CONTROL, precision fields\nPRE/POST/EFFECTS/FAILURE_MODES/DATA_TRANSITION/TERMINATION, and procedure steps—not host-language source.\nFull token lines use IMPL, ARCH, REQ bracket order when all three appear (see implementation-decisions.md).\nEach logical block (e.g. Markdown ## section) is synchronized to tests and production code via literal block\nleads (and optional full-block copy per project policy). Edits that change behavior or requirement/architecture\nscope require [PROC-LEAP] validation (IMPL, then ARCH and REQ)—Layer A and Layer B do not replace that propagation.\n\nContract precision (SHAPE-003..006): required for new/changed Active procedure blocks; N/A for Template stubs;\nN/A rationale pre-contract-grammar only for unchanged legacy Active blocks until next edit. CONTROL remains\noptional (env/flags/ordering) and is distinct from EFFECTS (effect row).\n\nIn TIED IMPL layout, the canonical on-disk source for the pseudo-code body is\ntied/implementation-decisions/IMPL-{TOKEN}-pseudocode.md (UTF-8). TIED merges that file into the logical\nessence_pseudocode field for yaml_detail_read and for tied_validate_consistency (include_pseudocode: true\nby default). Run that TIED gate to qualify the external file against index and token-reference rules before\nor alongside the PARSE/SHAPE/... categories in this file.\n\nThe sidecar is Markdown. Layer A (tied_validate_consistency) still inspects the merged string; bracket\n[IMPL-*/ARCH-*/REQ-*] tags may appear on any line, not a fixed comment prefix. When a project (e.g. Comrak)\nhas no custom pseudo-code grammar parser, treat each section between ## headings in IMPL-*-pseudocode.md as\none logical \"block\" for manual Layer B review. Optional items LINT-MD-001 and LINT-MD-002 below help reviewers\nalign with the extract-generated sidecar pattern where that script is used.\n"
 minimum_gating_rules:
   - "all required checks pass"
+  - "DATA_TRANSITION when mutable DATA or EFFECTS includes State (SHAPE-005)"
   - "diagnostics include source locations where available"
   - "every declared failure mode has coverage when failure is possible"
   - "every implementation block has success-path coverage"
   - "every requirement tag is covered by at least one test"
+  - "FAILURE_MODES closed set when errors are possible (SHAPE-004); failure-path tests use those names"
+  - "new or changed Active procedure blocks declare PRE POST and EFFECTS (SHAPE-003)"
   - "no unresolved symbols remain"
-  - note: "Full rules above assume pseudo-code drives or coexists with executable tests. Before RED tests, gate-pseudocode-validation applies a structural subset only—see tied/docs/pseudocode-writing-and-validation.md § Validation layers (Pre-RED vs post-test)."
+  - "TERMINATION when recursion WHILE or open-ended wait (SHAPE-006)"
+  - note: "Full rules above assume pseudo-code drives or coexists with executable tests. Before RED tests, gate-pseudocode-validation applies a structural subset only—see tied/docs/pseudocode-writing-and-validation.md § Validation layers (Pre-RED vs post-test). N/A for Template stubs; N/A rationale pre-contract-grammar only for unchanged legacy Active blocks; new/changed Active blocks may not use pre-contract-grammar."
 name: "application_pseudocode_validation_checklist"
 recommended_validation_order:
   - "behavioral_coverage"
@@ -346,7 +400,8 @@ tailoring:
     - "add generation backend constraints if pseudo-code drives test generation directly"
     - "add project architecture constraints under dependency_graph"
     - "add project-specific block kinds under the schema category"
-    - "for Comrak-style Markdown sidecars, optional [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LINT-MD-001) and [IMPL-CODE_STYLE] [ARCH-CODE_QUALITY] [REQ-CODE_QUALITY] (was LINT-MD-002) align manual Layer B with extract_test_pseudocode_to_impl_sidecars.py; mark N/A when the IMPL is purely procedural and not test-catalog-driven"
+    - "for Comrak-style Markdown sidecars, optional LINT-MD-001 and LINT-MD-002 align manual Layer B with extract_test_pseudocode_to_impl_sidecars.py; mark N/A when the IMPL is purely procedural and not test-catalog-driven"
+    - "SHAPE-003..006 contract precision: do not weaken requiredness for new/changed Active blocks; pre-contract-grammar N/A is only for unchanged legacy Active blocks until next edit"
 usage:
   how_to_apply:
     - "for Comrak extract-generated IMPL-*-pseudocode.md, use script/extract_test_pseudocode_to_impl_sidecars.py as the source of truth for what a “block” is (H1 file intro, H2 per test, Source line, then list/blockquote body); do not re-invent a different block boundary without a project reason"

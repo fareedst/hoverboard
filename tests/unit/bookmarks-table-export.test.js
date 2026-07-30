@@ -58,6 +58,15 @@ describe('buildCsv [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT]', () => {
     expect(csv).toContain('"Sync"')
   })
 
+  test('outputs Storage column as Browser when storage is browser [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]', () => {
+    const bookmarks = [
+      { description: 'B', url: 'https://b.com', storage: 'browser' }
+    ]
+    const csv = buildCsv(bookmarks)
+    expect(csv).toContain('"Browser"')
+    expect(csv).not.toContain('"Local"')
+  })
+
   test('joins tags with comma and space', () => {
     const bookmarks = [
       { description: 'T', url: 'https://t.com', tags: ['a', 'b'], storage: 'local' }

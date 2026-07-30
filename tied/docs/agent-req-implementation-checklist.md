@@ -10,7 +10,7 @@
 
 **Mandatory order**: IMPL pseudo-code (every block token-commented) → RED tests (with token comments) → code (with token comments). No code before RED; no RED before complete IMPL pseudo-code.
 
-**Domain vocabulary discipline** (`[PROC-VOCABULARY_INDEX]`): three mandatory **touchpoints** govern when agents use `tied/vocab/*.md` (plain Markdown; filenames have **no** `-vocabulary` suffix). Inline during work: **RESOLVE** before naming/writing; **RECORD** as concepts are generated and after artifacts change. **CALL sub-vocabulary-sync** at each touchpoint and naming point. This is **distinct** from the IMPL pseudo-code grammar "preferred vocabulary" (INPUT/OUTPUT/DATA keywords). Standards: [vocabulary-index-analysis-and-standards.md](vocabulary-index-analysis-and-standards.md).
+**Domain vocabulary discipline** (`[PROC-VOCABULARY_INDEX]`): three mandatory **touchpoints** govern when agents use `tied/vocab/*.md` (plain Markdown; filenames have **no** `-vocabulary` suffix). Inline during work: **RESOLVE** before naming/writing; **RECORD** as concepts are generated and after artifacts change. **CALL sub-vocabulary-sync** at each touchpoint and naming point. This is **distinct** from the IMPL pseudo-code grammar "preferred vocabulary" (INPUT/OUTPUT/DATA/PRE/POST/EFFECTS keywords). Standards: [vocabulary-index-analysis-and-standards.md](vocabulary-index-analysis-and-standards.md).
 
 ## Three vocabulary touchpoints
 
@@ -132,7 +132,7 @@ This section is **optional guidance** only. Checklist order and gating are uncha
 3. Review `tied/semantic-tokens.yaml` (token registry) and `tied/docs/semantic-tokens.md` (token guide).
 4. Review `tied/architecture-decisions.yaml` and `tied/implementation-decisions.yaml` (YAML indexes).
 5. Review `tied/docs/implementation-decisions.md` (IMPL schema, pseudo-code rules, block token rules per `[PROC-IMPL_PSEUDOCODE_TOKENS]`).
-5a. **Domain vocabulary index** (`[PROC-VOCABULARY_INDEX]`): scan `tied/vocab/*.md` (preferred terms; filenames have no `-vocabulary` suffix) and the standards in [vocabulary-index-analysis-and-standards.md](vocabulary-index-analysis-and-standards.md) so concept names stay consistent this session. If `tied/vocab/` is absent, note it (immature client) and apply the discipline when concepts arise. Distinct from the IMPL grammar "preferred vocabulary" (INPUT/OUTPUT/DATA).
+5a. **Domain vocabulary index** (`[PROC-VOCABULARY_INDEX]`): scan `tied/vocab/*.md` (preferred terms; filenames have no `-vocabulary` suffix) and the standards in [vocabulary-index-analysis-and-standards.md](vocabulary-index-analysis-and-standards.md) so concept names stay consistent this session. If `tied/vocab/` is absent, note it (immature client) and apply the discipline when concepts arise. Distinct from the IMPL grammar "preferred vocabulary" (INPUT/OUTPUT/DATA/PRE/POST/EFFECTS).
 5b. **Touchpoint 2 (pre-read):** **CALL sub-vocabulary-sync** (**PRELOAD**) — read `tied/vocab/routing.md`, match task keywords to the routing table, open only matched glossaries, skim preferred-term and naming-bridge tables; produce a brief term map for this session. For cross-cutting concerns, search `tied/vocab/domain-references.md` on demand.
 6. **Tied-yaml skill (required)**: Read [.cursor/skills/tied-yaml/SKILL.md](../../.cursor/skills/tied-yaml/SKILL.md). For a single page linking the skill, MCP runbook, detail schema, and payload patterns, read [tied-yaml-agent-index.md](tied-yaml-agent-index.md). For **creating, updating, or deleting** project-owned YAML under the TIED base path (indexes, `requirements/` / `architecture-decisions/` / `implementation-decisions/` details, `semantic-tokens.yaml`, `feedback.yaml`, etc.), invoke tools only through `.cursor/skills/tied-yaml/scripts/tied-cli.sh <tool_name> '<args_json>'` (full catalog in [.cursor/skills/tied-yaml/reference.md](../../.cursor/skills/tied-yaml/reference.md)). Set **`TIED_BASE_PATH`** and **`TIED_MCP_CMD` / `TIED_MCP_BIN` / `tied-yaml` on `PATH`** as in the skill **Environment overrides** (Cursor: **`"command": "tied-yaml"`** in **`.cursor/mcp.json`**; shell: `tied-cli.sh` uses the same `tied-yaml` CLI or a built **`dist/index.js`**). `copy_files.sh` copies the skill into `.cursor/skills/tied-yaml/` (from the TIED repo’s `.cursor/skills/tied-yaml` if present, else from `tools/bundled-tied-yaml-skill/` in the TIED source tree). If `SKILL.md` is still missing, re-run `copy_files.sh` from a full TIED checkout, or `cp -R <TIED_repo>/tools/bundled-tied-yaml-skill .cursor/skills/tied-yaml`. Note: the **`tied-yaml` server** is separate from the **`tied-cli.sh` + Node** stdio client; both are required for terminal use—see SKILL.md. Do not use `apply_patch` or `Write` on those paths when a `tied-cli.sh` tool covers the operation (document a one-line exception only when no tool covers the operation), and do not use **`TIED_YAML_BYPASS`** for routine project TIED work when the supported path is to fix the missing skill bundle.
 7. **Mandatory global sequence** (before any RED test or production code): token-commented IMPL `essence_pseudocode` → `gate-pseudocode-validation` → `persist-implementation-records` when authoring new IMPL — then RED tests → GREEN code.
@@ -269,15 +269,20 @@ This section is **optional guidance** only. Checklist order and gating are uncha
 
 1. Read each IMPL's `essence_pseudocode` sequentially. For each, note:
    - INPUT/OUTPUT/DATA declarations (and CONTROL when present).
+   - PRE/POST/EFFECTS; FAILURE_MODES when errors are possible; DATA_TRANSITION when DATA is mutated or EFFECTS includes State; TERMINATION when recursion/WHILE/open wait (prefer `total` otherwise).
    - Procedure names (UPPER_SNAKE or camelCase).
-   - Key branches (IF/ELSE), loops (FOR ... IN), error paths (ON error, RETURN error).
-   - Async boundaries (AWAIT, Promise).
+   - Key branches (IF/ELSE), loops (FOR ... IN), error paths (ON error, RETURN error) and whether names appear in FAILURE_MODES.
+   - Async boundaries (AWAIT, Promise) and whether EFFECTS includes `Async`.
    - **Name logical units from canonical vocabulary** (`[PROC-VOCABULARY_INDEX]`): **CALL sub-vocabulary-sync** (RESOLVE) so procedure names and UPPER_SNAKE block names map to the preferred domain term in `tied/vocab/*.md` (the preferred term **is** the block name); **CALL sub-vocabulary-sync** (RECORD) for any new block-name/procedure term.
 
 ### flag-insufficient-specs (flag-insufficient-specs): Blockers before tests or code
 
 2. Flag any of the following as incomplete (resolution required before tests or code):
    - Missing INPUT or OUTPUT declarations.
+   - Missing PRE, POST, or EFFECTS on a new or **changed** Active procedure block (Template stubs exempt; untouched legacy Active blocks may defer with N/A `pre-contract-grammar` until next edit).
+   - Missing FAILURE_MODES when OUTPUT includes error or steps use ON error / fallible returns.
+   - Missing DATA_TRANSITION when DATA is mutated or EFFECTS includes State.
+   - Missing TERMINATION when recursion / WHILE / open-ended wait is present.
    - Procedures referenced but not defined (called by name but body absent).
    - Branches without error handling on a fallible path.
    - Stub or template pseudo-code on an IMPL with `status: Active`.
@@ -286,9 +291,10 @@ This section is **optional guidance** only. Checklist order and gating are uncha
 ### flag-contradictory-specs (flag-contradictory-specs): Cross-IMPL conflicts
 
 3. Compare across IMPLs in the inventory table:
-   - **Shared DATA conflict** — two IMPLs read/write the same DATA key with different assumptions.
+   - **Shared DATA conflict** — two IMPLs read/write the same DATA key with different assumptions, or incompatible DATA_TRANSITION / PRE/POST.
+   - **EFFECTS conflict** — composed IMPLs claim incompatible effect rows on the same path.
    - **Ordering conflict** — IMPL-A expects to run before IMPL-B, but IMPL-B has no ordering constraint or assumes the reverse.
-   - **Incompatible OUTPUT types** — IMPL-A produces `{ result }` but IMPL-B expects `{ result, metadata }` from the same procedure.
+   - **Incompatible OUTPUT types** — IMPL-A produces `{ result }` but IMPL-B expects `{ result, metadata }` from the same procedure; or FAILURE_MODES disagree.
    - **Duplicate logic** — the same step appears in two IMPLs with different parameters or behavior.
 
 **Branch**: IF two IMPLs have irreconcilable assumptions THEN refactor (split or restructure) one IMPL before proceeding. Do not paper over contradictions.
@@ -316,7 +322,7 @@ This section is **optional guidance** only. Checklist order and gating are uncha
 
 ### gate-pseudocode-validation (gate-pseudocode-validation): sub-pseudocode-validation-pass and gating before persist
 
-**CALL sub-pseudocode-validation-pass.** Run pseudo-code validation per `[PROC-PSEUDOCODE_VALIDATION]` using `tied/docs/pseudocode-validation-checklist.yaml` (or `docs/pseudocode-validation-checklist.yaml` at repo root). **Pre-RED context** (before executable tests): Layer A (`tied_validate_consistency`) plus structural Layer B (parsing, schema, symbol resolution, contract validation, dependency graph, reporting). Mark **behavioral_coverage** and **traceability** rows that require test artifacts as **N/A** with rationale ("no tests yet")—not ad-hoc waivers. Run validation passes in the recommended order; record findings with severity and source location. Do not proceed to persist-implementation-records until pre-RED structural gating is satisfied. If the project has no parser or tool yet, perform a **manual pass** over the applicable checklist categories and document results.
+**CALL sub-pseudocode-validation-pass.** Run pseudo-code validation per `[PROC-PSEUDOCODE_VALIDATION]` using `tied/docs/pseudocode-validation-checklist.yaml` (or `docs/pseudocode-validation-checklist.yaml` at repo root). **Pre-RED context** (before executable tests): Layer A (`tied_validate_consistency`) plus structural Layer B (parsing, schema including SHAPE-003..006, symbol resolution, contract validation, dependency graph, reporting). Mark **behavioral_coverage** and **traceability** rows that require test artifacts as **N/A** with rationale ("no tests yet")—not ad-hoc waivers. Precision-contract rows: N/A only for Template stubs, applicability skips, or unchanged legacy Active blocks with rationale `pre-contract-grammar`; new/changed Active blocks must satisfy PRE/POST/EFFECTS and applicable FAILURE_MODES/DATA_TRANSITION/TERMINATION. Run validation passes in the recommended order; record findings with severity and source location. Do not proceed to persist-implementation-records until pre-RED structural gating is satisfied. If the project has no parser or tool yet, perform a **manual pass** over the applicable checklist categories and document results.
 
 ### persist-implementation-records (persist-implementation-records): IMPL index/detail via tied-cli.sh; sub-yaml-edit-loop
 
@@ -398,7 +404,7 @@ LOOP FOR each IMPL block classified as unit or integration in test-strategy:
    //   when input is valid and DEPENDENCY succeeds.
    ```
 4. Write the failing test. Run the test suite. Confirm the test fails for the expected reason. No production code is written in this step.
-5. Verify the assertion corresponds to the OUTPUT or effect described in the pseudo-code block.
+5. Verify the assertion corresponds to the OUTPUT, POST predicates, and named FAILURE_MODES in the pseudo-code block (not only a coarse success/error shape). Test setup must satisfy PRE (CONTRACT-001).
 6. IF no programmatic assertion can be written for the block THEN mark it `testability: e2e_only` in the IMPL detail with `e2e_only_reason`; skip to the next block.
 
 **Outcomes**: Failing test exists that matches pseudo-code; no production code written.
@@ -665,8 +671,8 @@ END LOOP (repeat unit-test-red → unit-test-green → unit-refactor → three-w
 **Tasks**:
 1. Load the checklist from `tied/docs/pseudocode-validation-checklist.yaml` (or `docs/pseudocode-validation-checklist.yaml` at repo root).
 2. Branch on **caller**:
-   - **From gate-pseudocode-validation** (no tests yet): run structural categories; mark behavioral_coverage and traceability rows that require test artifacts as N/A with rationale.
-   - **From verification-gate** (tests exist): run full checklist including **minimum_gating_rules**; evaluate coverage and traceability rows now that tests exist.
+   - **From gate-pseudocode-validation** (no tests yet): run structural categories (including SHAPE-003..006); mark behavioral_coverage and traceability rows that require test artifacts as N/A with rationale. Precision-contract N/A: Template stubs, applicability skips, or unchanged legacy Active blocks with rationale `pre-contract-grammar` only.
+   - **From verification-gate** (tests exist): run full checklist including **minimum_gating_rules**; evaluate coverage and traceability rows now that tests exist. New/changed Active blocks may not use `pre-contract-grammar`.
 3. For each pseudo-code block in the IMPL set (from S06), run each validation category in the checklist's **recommended_validation_order**; collect findings with severity and block/location.
 4. IF any required check fails OR gating for the active caller context is not met THEN fix pseudo-code (or ARCH/REQ if scope changed), then repeat from step 2. **RETURN** only when gating passes or N/A rows are documented with rationale.
 5. **RETURN** to caller (gate-pseudocode-validation continues to persist-implementation-records; verification-gate continues after post-test pass).
@@ -715,7 +721,7 @@ END LOOP (repeat unit-test-red → unit-test-green → unit-refactor → three-w
 3. **RECORD** (inline during work): add or update the term immediately—preferred-term-vs-synonym row, naming bridge row (concept ↔ token ↔ storage name ↔ UI label), and UPPER_SNAKE block name—keep the alphabetical index in sync, and cite the relevant REQ/ARCH/IMPL.
 4. **VALIDATE** (Touchpoint 3 — before commit): enumerate named concepts changed this pass across vocab, TIED records, `semantic-tokens.yaml`, pseudo-code blocks, tests, code, and README/CHANGELOG; confirm each resolves to exactly one preferred term; emit pass/fail report; RETURN failures to caller for RECORD/RESOLVE before re-VALIDATE.
 
-**Distinct** from the IMPL pseudo-code grammar "preferred vocabulary" (INPUT/OUTPUT/DATA/CONTROL keywords in `implementation-decisions.md`): this governs which **domain term** names a concept, not the grammar of a block.
+**Distinct** from the IMPL pseudo-code grammar "preferred vocabulary" (INPUT/OUTPUT/DATA/CONTROL/PRE/POST/EFFECTS/FAILURE_MODES/DATA_TRANSITION/TERMINATION keywords in `implementation-decisions.md`): this governs which **domain term** names a concept, not the grammar of a block.
 
 **Immature client**: if `tied/vocab/` or its `*.md` files do not exist, create `tied/vocab/` and seed an index file when the change introduces enough named concepts; otherwise do a lightweight consistency pass or skip with an explicit note in the per-request checklist copy. Do not fabricate terms; VALIDATE must not fake pass.
 

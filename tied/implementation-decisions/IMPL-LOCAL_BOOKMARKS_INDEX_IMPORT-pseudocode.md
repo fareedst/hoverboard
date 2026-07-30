@@ -1,7 +1,7 @@
 # [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT]
 # Separate Import control group below Actions for selected; CSV/JSON import; Only new or Overwrite; saveBookmark per row; pending then final result in #import-result.
 # Contract: file and mode and backend; counts and refreshed table; Import button is last control before result.
-INPUT: file (CSV or JSON), mode (Only new | Overwrite), preferredBackend (Local | File | Sync), allBookmarks (existing set for "Only new")
+INPUT: file (CSV or JSON), mode (Only new | Overwrite), preferredBackend (Local | File | Sync | Browser), allBookmarks (existing set for "Only new")
 OUTPUT: imported count, skipped count, failed count; refreshed table; #import-result pending then final
 DATA: rows = array of { url, description, tags, time, updated_at, shared, toread, extended }; existingByUrl = set of url from allBookmarks
 

@@ -89,10 +89,10 @@ When authoring an IMPL, classify each major code path or block as unit-testable,
 
 Every IMPL detail file **must** include an `essence_pseudocode` field. **Address all implementation issues (logical and flow) in pseudo-code before writing tests or code.** Pseudo-code is the **authoritative source of consistent logic**; tests and code follow from it. It is used to:
 
-- Capture the implementation’s core algorithm in language-agnostic form (INPUT/OUTPUT/DATA, and CONTROL when relevant), procedure names, key branches.
-- Support **collision detection**: when IMPLs are composed or share code paths, comparing their `essence_pseudocode` blocks helps identify overlapping steps, shared data, ordering dependencies, and conflicting assumptions.
+- Capture the implementation’s core algorithm in language-agnostic form (INPUT/OUTPUT/DATA, PRE/POST/EFFECTS, and CONTROL when relevant), procedure names, key branches.
+- Support **collision detection**: when IMPLs are composed or share code paths, comparing their `essence_pseudocode` blocks helps identify overlapping steps, shared data, ordering dependencies, effect rows, and conflicting assumptions.
 - Once implemented, keep pseudo-code aligned with code and tests so documentation remains the single source of truth.
-- **Algol-style notation:** Prefer Algol-style readability: clear control flow (if/then/else, loops, ON/WHEN), explicit INPUT/OUTPUT/DATA (and CONTROL when relevant), and procedure names in UPPER_SNAKE so blocks are easy to read and compare.
+- **Algol-style notation:** Prefer Algol-style readability: clear control flow (if/then/else, loops, ON/WHEN), explicit contracts (INPUT/OUTPUT/DATA, PRE/POST/EFFECTS, and CONTROL when relevant), and procedure names in UPPER_SNAKE so blocks are easy to read and compare.
 - **One action per step:** Each logical step in `essence_pseudocode` should express one clear action or decision (or one small, coherent block). Avoid long prose lines that mix multiple actions; that weakens collision detection and makes it harder to compare IMPLs and spot overlapping steps or ordering.
 - **Traceability to tests:** Key branches and procedures in `essence_pseudocode` should be reflected in test names or test structure (e.g. one procedure or branch ≈ one `describe`/`it` or test section). That keeps the pseudo-code precise enough to guide tests and to detect when an IMPL’s behavior has drifted from its description. Optionally, note the intended test level in a comment at block start (e.g. `# unit-testable: NORMALIZE_INPUT`, `# E2E-only: platform onMessage binding`) so E2E-only code is visible and justified at design time.
 - **Token comments in every block (critical)** `[PROC-IMPL_PSEUDOCODE_TOKENS]`: Every block in `essence_pseudocode` must include a comment that names the REQ, ARCH, and IMPL reflected in that block and states how the block implements them. Top-level: one comment naming IMPL, ARCH, and REQ plus a one-line summary of what the pseudo-code implements. For each logical sub-block (e.g. INPUT/OUTPUT, a procedure, an event handler): if it implements the same set as the top level, comment only the *how* (no token list); if a sub-block implements a different set (e.g. depends on another IMPL), start that sub-block with a comment listing the tokens for that set and how the sub-block implements them. This is the primary mechanism for traceability from requirements to implementation.
@@ -102,28 +102,45 @@ Every IMPL detail file **must** include an `essence_pseudocode` field. **Address
 
 Using a consistent vocabulary keeps blocks comparable and gives a stable description for tooling or AI. Prefer these keywords for the common cases:
 
-- **Contract / structure:** INPUT, OUTPUT, DATA, CONTROL.
+- **Contract / structure (I/O and state):** INPUT, OUTPUT, DATA, CONTROL.
+- **Contract / precision (required for new and changed Active procedure blocks):** PRE, POST, EFFECTS, FAILURE_MODES (when errors are possible), DATA_TRANSITION (when DATA is mutated or EFFECTS includes State), TERMINATION (when recursion / WHILE / open-ended wait; otherwise prefer `total`).
 - **Events:** ON, WHEN.
-- **Effects:** SEND, BROADCAST, RETURN.
+- **Step-level effects / outcomes:** SEND, BROADCAST, RETURN (step style). Distinct from the contract keyword **EFFECTS** (effect row).
 - **Branches:** IF, ELSE.
 - **Procedure names:** UPPER_SNAKE (e.g. `MODULE_IDENTIFICATION`); camelCase (e.g. `searchAndNavigate`) is acceptable when matching code. Authors may introduce domain terms but should prefer these keywords so collision detection and automated comparison remain reliable.
 - **Loops:** `FOR item IN collection`, `FOR each (key, value) IN map` (or equivalent). Prefer `FOR ... IN` for iteration; add `WHILE condition` only if needed for clarity.
-- **Errors and failure paths:** `ON error`, `ON failure` (event-style); `RETURN error` or `RETURN { error, ... }` for error results; `EXIT failure` for abort; `CATCH e RETURN ...` for caught exceptions. Use one consistent pattern per IMPL (e.g. all `ON error` or all `RETURN error`).
-- **Async:** `AWAIT` for awaiting a promise; `Promise` in OUTPUT when the result is async; `SEND` implies async message send. Callers may `AWAIT` the result when relevant.
+- **Errors and failure paths:** `ON error`, `ON failure` (event-style); `RETURN error` or `RETURN { error, ... }` for error results; `EXIT failure` for abort; `CATCH e RETURN ...` for caught exceptions. Use one consistent pattern per IMPL (e.g. all `ON error` or all `RETURN error`). Step-level error names must appear in contract **FAILURE_MODES** when that set is required.
+- **Async:** `AWAIT` for awaiting a promise; `Promise` in OUTPUT when the result is async; include `Async` in **EFFECTS** when the block awaits; `SEND` implies async message send. Callers may `AWAIT` the result when relevant.
 - **Data structures (optional):** Prefer `(list)`, `(array)`, `(set)`, `(map)` or key–value; object shapes as `{ key, key? }` or `{ key: type }`. Keep language-agnostic; no need to list every type.
+
+**Contract precision keywords (language-agnostic; not host-language or Vera syntax):**
+
+| Keyword | Role | When required (Active, non-stub procedure block) |
+|---------|------|--------------------------------------------------|
+| `PRE` | Preconditions on inputs / caller obligations | Always. Use `PRE: true` only when genuinely unconstrained (discouraged). |
+| `POST` | Postconditions on success and (when applicable) error outcomes | Always: at least one success POST; error POSTs when failure modes exist. |
+| `FAILURE_MODES` | Closed set of named error variants | When OUTPUT includes error, or steps use ON error / fallible returns. |
+| `EFFECTS` | Effect row: `pure` or named effects (`IO`, `Http`, `State`, `Async`, `DB`, `Exn`, `Random`, `Diverge`, …) | Always. |
+| `DATA_TRANSITION` | Before→after rules for mutable DATA | When DATA is mutated or EFFECTS includes `State`. |
+| `TERMINATION` | `total` or `may_diverge` (with justification) | When recursion / `WHILE` / open-ended wait; otherwise prefer `TERMINATION: total`. |
+| `CONTROL` | Env, feature flags, ordering constraints | Optional when relevant — **not** replaced by EFFECTS. |
+
+Predicates in PRE/POST/DATA_TRANSITION stay prose/Algol-ish (no host-language snippets, no slot indices).
+
+**Migration grace:** Untouched existing Active IMPL blocks may omit the precision keywords with documented Layer B N/A rationale `pre-contract-grammar` until that block is next edited; then the full Active contract is required. New and **changed** Active procedure blocks must include the extended contract. See [pseudocode-validation-checklist.yaml](pseudocode-validation-checklist.yaml) (SHAPE-003..006) and [PROC-PSEUDOCODE_VALIDATION](processes.md).
 
 Using these forms keeps collision detection and comparison reliable across IMPLs.
 
 ### Expressing sequence and structure
 
 - **Order of steps:** Use numbered steps (`1.`, `2.`, …) for a fixed sequence (e.g. phases); use indentation under procedure names or `ON`/`WHEN` for the body of a step.
-- **Contract block:** Start with a short "Contract:" line and/or explicit `INPUT:`, `OUTPUT:`, `DATA:`, and `CONTROL:` (when relevant) so readers and tooling can compare IMPLs by contract.
+- **Contract block:** Start with a short "Contract:" line and/or explicit contract fields so readers and tooling can compare IMPLs by contract. For Active procedure blocks (new or changed), include at least: `INPUT:`, `PRE:`, `OUTPUT:`, `POST:`, `EFFECTS:`, plus `DATA:` when state/config exists, `FAILURE_MODES:` when errors are possible, `DATA_TRANSITION:` when DATA is mutated or EFFECTS includes State, `TERMINATION:` when loops/recursion/open wait apply (prefer `total` otherwise), and `CONTROL:` when env/flags/ordering matter.
 - Consistent sequence notation makes ordering dependencies visible during collision detection.
 
 ### Template and stub pseudo-code
 
-- When an IMPL is a placeholder (e.g. status Template or early draft), `essence_pseudocode` may use a stub: a line `Template: placeholder for …` plus minimal `INPUT:`/`OUTPUT:` (possibly "(to be defined)") and one procedure stub. See IMPL-ERROR_HANDLING and IMPL-EXAMPLE_IMPLEMENTATION for examples.
-- When status is Active, `essence_pseudocode` must be complete (no Template line; full contract and steps). This avoids ambiguity when comparing or composing IMPLs.
+- When an IMPL is a placeholder (e.g. status Template or early draft), `essence_pseudocode` may use a stub: a line `Template: placeholder for …` plus minimal `INPUT:`/`OUTPUT:` (possibly "(to be defined)") and one procedure stub. Precision keywords (PRE/POST/EFFECTS/…) are not required on Template stubs. See IMPL-ERROR_HANDLING and IMPL-EXAMPLE_IMPLEMENTATION for examples.
+- When status is Active, `essence_pseudocode` must be complete (no Template line; full contract including precision keywords for new/changed procedure blocks, and steps). This avoids ambiguity when comparing or composing IMPLs.
 
 ### Validating essence_pseudocode
 
@@ -152,25 +169,33 @@ These rules apply to **managed code** everywhere (source, tests, data, and pseud
 
 ### Minimal example of essence_pseudocode
 
-The following is the minimal structure authors should follow; real IMPLs may be longer. It includes a top-level token comment, contract block, one procedure with one-action-per-step lines, and preferred keywords (IF/ELSE, RETURN, ON error).
+The following is the minimal structure authors should follow for a new or changed Active procedure block; real IMPLs may be longer. It includes a top-level token comment, precise contract block, one procedure with one-action-per-step lines, and preferred keywords (IF/ELSE, RETURN, named FAILURE_MODES).
 
 ```
 # [IMPL-EXAMPLE] [ARCH-EXAMPLE] [REQ-EXAMPLE]
 # One-line summary of what this pseudo-code implements.
-# Contract: input and output; key data.
-INPUT: key (string), options (optional)
-OUTPUT: { result } or { error }; Promise when async
-DATA: cache (map), lastKey (string)
+Contract:
+  INPUT: key (string), options (optional)
+  PRE: key.length > 0
+  OUTPUT: { result: value } | { error: EmptyKey | ComputeFailed }
+  POST:
+    success => cache.contains(key)
+    error EmptyKey => cache unchanged
+  FAILURE_MODES: EmptyKey, ComputeFailed
+  DATA: cache (map), lastKey (string)
+  DATA_TRANSITION: on success, cache[key] := value and lastKey := key; else unchanged
+  EFFECTS: pure
+  TERMINATION: total
 
 # How this procedure implements the contract.
 doWork(key, options):
-  IF key empty: RETURN { error: "key required" }
+  IF key empty: RETURN { error: EmptyKey }
   lookup = cache.get(key)
   IF lookup: RETURN { result: lookup }
   value = compute(key, options)
+  IF compute failed: RETURN { error: ComputeFailed }
   cache.set(key, value); lastKey = key
   RETURN { result: value }
-  ON error: RETURN { error: message }
 ```
 
 ### Extra fields

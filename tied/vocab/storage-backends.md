@@ -20,7 +20,7 @@
 | **BookmarkRouter** | storage router, aggregator (alone) | Delegates get/save/delete/tag/move across providers |
 | **preferredBackend** | selected backend, UI backend | Override on save (**Save to**) and Index **Bulk Delete** (row Storage column via `buildDeletePayload`) |
 | **default storage mode** | global storage mode | Config `storageMode` / key `hoverboard_storage_mode` |
-| **Save to** | storage picker, backend buttons | UI label for per-bookmark backend selection |
+| **Save to** | storage picker, backend buttons; file ↔ browser toggle; Move to browser | UI label for five select-one buttons (Pinboard, Local, File, Sync, Browser); click moves via `moveBookmarkToStorage` when a bookmark exists. Do not invent a separate Local/File toggle control |
 | **move bookmark to storage** | migrate bookmark, copy backend | Copy to target, delete source, update index |
 | **native host** | native messaging host, helper process | Local process for File storage I/O |
 | **File storage** | cloud-sync folder (Options marketing) | Backend `file`; path under `~/.hoverboard` by default |

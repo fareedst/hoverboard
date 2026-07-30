@@ -152,7 +152,7 @@ export class PopupController {
 
     // [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Storage backend change (move bookmark)
     this.uiManager.on('storageBackendChange', this.handleStorageBackendChange)
-    // [REQ-MOVE_BOOKMARK_STORAGE_UI] File ↔ browser one-click toggle reuses same move handler
+    // [REQ-MOVE_BOOKMARK_STORAGE_UI] Legacy storageLocalToggle event (unused in five-button Save to UI); keep wired to same move handler
     this.uiManager.on('storageLocalToggle', (targetBackend) => this.handleStorageBackendChange(targetBackend))
 
     // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Add refresh event handler

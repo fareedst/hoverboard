@@ -17,20 +17,20 @@ IMPL-MOVE_BOOKMARK_UI:
   essence_pseudocode_path: "implementation-decisions/IMPL-MOVE_BOOKMARK_UI-pseudocode.md"
   implementation_approach:
     details:
+      - "No separate Local/File toggle control; Local↔File↔Browser moves use the same Save to buttons"
       - "On save (createBookmark, addTagsToBookmark, handleTogglePrivate, handleReadLater): add data.preferredBackend = getSelectedStorageBackend() so save follows highlight"
       - "On select change: send moveBookmarkToStorage(url, targetBackend); refresh bookmark data"
       - "Pinboard storage option disabled in popup when no API token (updateStoragePinboardEnabled from getAuthToken)"
       - "PopupController: on load get storage backend for current URL (or default when no bookmark); set highlighted button"
-      - "When current backend is local or file, show \"Move to File\" or \"Move to browser\" toggle; click reuses move path; hidden when backend is pinboard or no bookmark"
-    summary: "Popup: storage section with four select-one buttons (Pinboard, File, Local, Sync); load backend on data load; on click send moveBookmarkToStorage; on save send preferredBackend so router uses highlighted storage."
+    summary: "Popup: storage section with five select-one buttons (Pinboard, File, Local, Sync, Browser); load backend on data load; on click send moveBookmarkToStorage; on save send preferredBackend so router uses highlighted storage."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Corpus close-loop: five Save to buttons; drop file↔browser toggle"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -38,12 +38,12 @@ IMPL-MOVE_BOOKMARK_UI:
   name: "Move Bookmark Storage UI"
   rationale:
     benefits:
-      - "Storage select-one buttons (Pinboard, File, Local, Sync) in popup; current highlighted; click sends moveBookmarkToStorage"
-      - Save follows highlight: "getSelectedStorageBackend() and data.preferredBackend on createBookmark, addTagsToBookmark, toggle private/read-later (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)"
+      - "Save follows highlight: getSelectedStorageBackend() and data.preferredBackend on createBookmark, addTagsToBookmark, toggle private/read-later (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)"
+      - "Storage select-one buttons (Pinboard, File, Local, Sync, Browser) in popup; current highlighted; click sends moveBookmarkToStorage"
     problems_solved:
       - "Save not following highlighted storage on create/update from popup"
       - "User cannot move bookmark between backends"
-    why: "Popup control to show and change current bookmark storage backend; save must use highlighted backend."
+    why: "Popup control to show and change current bookmark storage backend across five backends; save must use highlighted backend."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"
@@ -55,6 +55,7 @@ IMPL-MOVE_BOOKMARK_UI:
       - "IMPL-BOOKMARK_ROUTER"
     supersedes: []
   status: "Active"
+  summary: "Popup Save to five select-one buttons (Pinboard, Local, File, Sync, Browser); load backend on data load; on click send moveBookmarkToStorage; on save send preferredBackend so router uses highlighted storage."
   traceability:
     architecture:
       - "ARCH-MOVE_BOOKMARK_UI"
@@ -64,4 +65,6 @@ IMPL-MOVE_BOOKMARK_UI:
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-STORAGE_MODE_DEFAULT"
     test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: move bookmark UI flow in side panel/popup."
-    tests: []
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"

@@ -26,6 +26,7 @@
 | **bundled skill** | .cursor skill source | Git-tracked canonical: `tools/bundled-tied-yaml-skill/`; installed to client `.cursor/skills/tied-yaml/` |
 | **yaml_semantic_compare** | YAML equality check (alone) | `scripts/yaml_semantic_compare.rb` — semantic value compare for post-sort validation and directory diffs; see [`tied-methodology.md`](tied-methodology.md) |
 | **compare_yaml_dirs** | recursive yaml directory diff | `scripts/compare_yaml_dirs.rb` — pairs YAML by relative path across two dirs; see [`tied-methodology.md`](tied-methodology.md) |
+| **double-quoted scalar lint** (rename) | `yq -i -P` after rename | `tied_token_rename` pretty-prints modified YAML with the same expression as **yaml_tool** default lint: `sort_keys(.. style="double")` (one file per yq); see [`tied-methodology.md`](tied-methodology.md) |
 
 ---
 

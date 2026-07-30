@@ -59,7 +59,7 @@ Read during **session-bootstrap** alongside the skill; these do not replace `tie
 
 | Topic | Document |
 |--------|----------|
-| Domain vocabulary (**PRELOAD** before reading TIED/resources) | [`tied/vocab/domain-references.md`](../vocab/domain-references.md), [`tied/docs/vocabulary-index-analysis-and-standards.md`](vocabulary-index-analysis-and-standards.md) |
+| Domain vocabulary (**PRELOAD** before reading TIED/resources) | [`tied/vocab/routing.md`](../vocab/routing.md) (primary entry; then matched glossaries), [`tied/docs/vocabulary-index-analysis-and-standards.md`](vocabulary-index-analysis-and-standards.md); full catalog [`tied/vocab/domain-references.md`](../vocab/domain-references.md) on-demand only |
 | Token registry and guide | [`tied/semantic-tokens.yaml`](../semantic-tokens.yaml), [`tied/docs/semantic-tokens.md`](semantic-tokens.md) |
 | IMPL pseudo-code and `[PROC-IMPL_PSEUDOCODE_TOKENS]` | [`tied/docs/implementation-decisions.md`](implementation-decisions.md) |
 | AI principles and ordering | [`ai-principles.md`](./ai-principles.md) |

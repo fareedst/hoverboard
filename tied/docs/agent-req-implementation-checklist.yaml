@@ -286,7 +286,7 @@ steps:
       - "Read .cursor/skills/tied-yaml/SKILL.md. For every create/update/delete under project TIED YAML (./tied/*.yaml and detail trees under ./tied/requirements, ./tied/architecture-decisions, ./tied/implementation-decisions, excluding methodology), invoke tools only through .cursor/skills/tied-yaml/scripts/tied-cli.sh with tool name and JSON arguments per the skill and .cursor/skills/tied-yaml/reference.md. Set TIED_BASE_PATH and the built dist/index.js path per the skill Environment overrides. When .cursor/skills/tied-yaml/ or tied-cli.sh is missing, follow this step's preconditions (defer, lightweight pass, or explicit note in the per-request checklist copy)—do not leave the checklist to obtain tooling. In agentstream or headless runs, rely on tied-cli.sh only. Do not use apply_patch or Write on those paths when tied-cli.sh covers the operation; on errors retry with corrected JSON; do not silently fall back to direct file edit."
       - "Read completely: tied/docs/ai-principles.md"
       - "Review IMPL schema and pseudo-code rules: ./tied/docs/implementation-decisions.md ([PROC-IMPL_PSEUDOCODE_TOKENS])."
-      - "Review the domain vocabulary index ([PROC-VOCABULARY_INDEX]): scan ./tied/vocab/*.md (preferred terms; filenames have no -vocabulary suffix) and the standards in tied/docs/vocabulary-index-analysis-and-standards.md so concept names stay consistent this session. If ./tied/vocab/ is absent, note it (immature client) and apply the discipline when concepts arise. This is distinct from the IMPL grammar \"preferred vocabulary\" (INPUT/OUTPUT/DATA)."
+      - "Review the domain vocabulary index ([PROC-VOCABULARY_INDEX]): scan ./tied/vocab/*.md (preferred terms; filenames have no -vocabulary suffix) and the standards in tied/docs/vocabulary-index-analysis-and-standards.md so concept names stay consistent this session. If ./tied/vocab/ is absent, note it (immature client) and apply the discipline when concepts arise. This is distinct from the IMPL grammar \"preferred vocabulary\" (INPUT/OUTPUT/DATA/PRE/POST/EFFECTS)."
       - "Review token registry: ./tied/semantic-tokens.yaml and guide: ./tied/docs/semantic-tokens.md"
       - "Review YAML indexes: ./tied/architecture-decisions.yaml and ./tied/implementation-decisions.yaml"
       - "Touchpoint 2 (pre-read): CALL sub-vocabulary-sync (PRELOAD) — read ./tied/vocab/routing.md, match task keywords to the routing table, open only matched glossaries (from sponsor context or prior checklist copy), skim preferred-term and naming-bridge tables; produce a brief term map for this session; for cross-cutting concerns search ./tied/vocab/domain-references.md on demand; note immature-client deferral when ./tied/vocab/ is absent."
@@ -490,7 +490,7 @@ steps:
       - "tied/docs/processes.md § [PROC-IMPL_CODE_TEST_SYNC] Phases B-C"
       - "tied/docs/vocabulary-index-analysis-and-standards.md"
     tasks:
-      - "For each in-scope project/feature IMPL, read essence_pseudocode sequentially. For each, note: INPUT/OUTPUT/DATA (and CONTROL when present); procedure names (UPPER_SNAKE or camelCase); key branches (IF/ELSE), loops (FOR ... IN), error paths (ON error, RETURN error); async boundaries (AWAIT, Promise)."
+      - "For each in-scope project/feature IMPL, read essence_pseudocode sequentially. For each, note: INPUT/OUTPUT/DATA (and CONTROL when present); PRE/POST/EFFECTS; FAILURE_MODES when errors are possible; DATA_TRANSITION when DATA is mutated or EFFECTS includes State; TERMINATION when recursion/WHILE/open wait (prefer total otherwise); procedure names (UPPER_SNAKE or camelCase); key branches (IF/ELSE), loops (FOR ... IN), error paths (ON error, RETURN error) and whether names appear in FAILURE_MODES; async boundaries (AWAIT, Promise) and whether EFFECTS includes Async."
       - "Methodology-only IMPLs (inherited merged view): at most one short note that essence_pseudocode may be null and contracts are not extracted here—do not produce large empty tables."
       - "Name logical units from canonical vocabulary: when noting procedure names and UPPER_SNAKE block names, CALL sub-vocabulary-sync (RESOLVE) so each maps to the preferred domain term in ./tied/vocab/*.md (the preferred term IS the block name); CALL sub-vocabulary-sync (RECORD) for any new block-name/procedure term so it is captured immediately ([PROC-VOCABULARY_INDEX])."
       - "Responsibility: pseudo-code owner step. Define contract-level logic intent only; do not author production code or automated test logic here."
@@ -521,7 +521,11 @@ steps:
       - "Apply flags to project/feature IMPLs for this REQ only. Do not flag inherited methodology IMPLs under [PROC-TIED_METHODOLOGY_READONLY] (null essence_pseudocode, Active status) as client debt unless change-definition explicitly requires methodology edits."
       - "Flag blocks with no token comment (violates [PROC-IMPL_PSEUDOCODE_TOKENS])."
       - "Flag branches without error handling on fallible paths."
+      - "Flag missing DATA_TRANSITION when DATA is mutated or EFFECTS includes State."
+      - "Flag missing FAILURE_MODES when OUTPUT includes error or steps use ON error / fallible returns."
       - "Flag missing INPUT or OUTPUT declarations."
+      - "Flag missing PRE, POST, or EFFECTS on new or changed Active procedure blocks (Template stubs exempt; untouched legacy Active blocks may use N/A rationale pre-contract-grammar until next edit)."
+      - "Flag missing TERMINATION when recursion / WHILE / open-ended wait is present."
       - "Flag procedures referenced but not defined."
       - "Flag stub or template pseudo-code on IMPL with status Active (for in-scope project IMPLs)."
       - "Responsibility: pseudo-code owner step. This step blocks tests/code when logic intent is incomplete."
@@ -547,7 +551,7 @@ steps:
       - "flag-insufficient-specs complete (or waived with note) so contradictions are assessed on the same IMPL set."
     references: []
     tasks:
-      - "Compare across in-scope project/feature IMPLs (and overlapping verified-present code paths): shared DATA conflict; ordering conflict; incompatible OUTPUT types; duplicate logic with different parameters or behavior. Skip pairwise comparison of unrelated inherited methodology IMPL records."
+      - "Compare across in-scope project/feature IMPLs (and overlapping verified-present code paths): shared DATA conflict (including DATA_TRANSITION / PRE/POST mismatch); EFFECTS conflict on the same path; ordering conflict; incompatible OUTPUT types or FAILURE_MODES; duplicate logic with different parameters or behavior. Skip pairwise comparison of unrelated inherited methodology IMPL records."
       - "Responsibility: pseudo-code owner step. Resolve logic contradictions before test/code execution continues."
     title: "Cross-IMPL conflicts"
     tracking:
@@ -640,7 +644,8 @@ steps:
       - "CALL sub-pseudocode-validation-pass. Run validation per [PROC-PSEUDOCODE_VALIDATION] using ./tied/docs/pseudocode-validation-checklist.yaml or ./docs/pseudocode-validation-checklist.yaml."
       - "Do not proceed to persist-implementation-records until pre-RED structural gating is satisfied (see pseudocode-writing-and-validation.md § Validation layers)."
       - "If no parser/tool: perform manual pass over checklist categories and document results."
-      - "Pre-RED structural gate (before unit-test-red): satisfy parsing/schema/symbol/contract/graph/reporting checks applicable to IMPL-only pseudo-code; mark behavioral_coverage and traceability rows that require executable tests as N/A with rationale (no tests yet)—not ad-hoc waiver IDs."
+      - "Pre-RED structural gate (before unit-test-red): satisfy parsing/schema (including SHAPE-003..006)/symbol/contract/graph/reporting checks applicable to IMPL-only pseudo-code; mark behavioral_coverage and traceability rows that require executable tests as N/A with rationale (no tests yet)—not ad-hoc waiver IDs."
+      - "Precision-contract rows (SHAPE-003..006 and related): N/A only for Template stubs, applicability skips, or unchanged legacy Active blocks with rationale pre-contract-grammar; new/changed Active blocks must satisfy PRE/POST/EFFECTS and applicable FAILURE_MODES/DATA_TRANSITION/TERMINATION."
       - "Responsibility: pseudo-code owner step. This is the final logic-intent gate before tests/code steps may proceed."
       - "Run validation passes in recommended order; record findings with severity and source location."
     title: "Pseudo-code validation pass and gating before persist"
@@ -767,11 +772,11 @@ steps:
       - "Name the test group after the procedure and include the REQ token."
       - "Refer to vocab before writing the test: CALL sub-vocabulary-sync (RESOLVE) so test group names, identifiers, and fixture names use the preferred domain terms in ./tied/vocab/*.md (and match the IMPL block name); the block lead literal copy still governs the comment text ([PROC-VOCABULARY_INDEX])."
       - "Responsibility: test/code owner step. Write tests only for pseudocode-defined logic; if a missing behavior is discovered, route back to pseudo-code-owner steps."
-      - "Verify the assertion corresponds to the OUTPUT or effect in the pseudo-code block."
+      - "Verify the assertion corresponds to the OUTPUT, POST predicates, and named FAILURE_MODES in the pseudo-code block (not only a coarse success/error shape). Test setup must satisfy PRE (CONTRACT-001)."
       - "Write the test; run the suite. IF the test is intended to fail on a wrong implementation, confirm failure is due to implementation vs contract mismatch—not a buggy assertion. Do not add real REQ satisfying production implementation in this step (Pattern B shim-only when needed)."
     title: "One failing test per pseudo-code block (Phase D)"
     tracking:
-      consideration_before_proceeding: "Test written and run; test/identifier/fixture names resolved against the canonical vocabulary; block lead comment copied literally from IMPL; assertion matches pseudo-code OUTPUT/effect; failure reason honest (implementation gap, fixture, or brownfield baseline pass)—not wrong expected data."
+      consideration_before_proceeding: "Test written and run; test/identifier/fixture names resolved against the canonical vocabulary; block lead comment copied literally from IMPL; assertion matches pseudo-code OUTPUT/POST/FAILURE_MODES and setup satisfies PRE; failure reason honest (implementation gap, fixture, or brownfield baseline pass)—not wrong expected data."
       retry_count: "0"
       returned_from:
         - "three-way-alignment-unit"
@@ -1176,8 +1181,8 @@ sub_procedures:
       - "IF any required check fails OR gating for the active caller context is not met THEN fix pseudo-code (or ARCH/REQ if scope changed), then repeat from step 2. RETURN only when gating passes or N/A rows are documented with rationale."
       - "Load the checklist from tied/docs/pseudocode-validation-checklist.yaml (or docs/pseudocode-validation-checklist.yaml at repo root)."
       - "RETURN to caller (gate-pseudocode-validation continues to persist-implementation-records; verification-gate continues after post-test pass)."
-      - "When invoked from gate-pseudocode-validation before tests exist—apply pre-RED structural subset only; mark behavioral_coverage and traceability rows that require test artifacts as N/A with rationale (see pseudocode-writing-and-validation.md § Validation layers)."
-      - "When invoked from verification-gate—evaluate full Layer B including minimum_gating_rules; behavioral/traceability rows that require executable tests must pass now that tests exist (or mark N/A with rationale)."
+      - "When invoked from gate-pseudocode-validation before tests exist—apply pre-RED structural subset only (include SHAPE-003..006); mark behavioral_coverage and traceability rows that require test artifacts as N/A with rationale (see pseudocode-writing-and-validation.md § Validation layers). Precision-contract N/A: Template stubs, applicability skips, or unchanged legacy Active blocks with rationale pre-contract-grammar only."
+      - "When invoked from verification-gate—evaluate full Layer B including minimum_gating_rules; behavioral/traceability rows that require executable tests must pass now that tests exist (or mark N/A with rationale). New/changed Active blocks may not use pre-contract-grammar."
     title: "Checklist-ordered passes until gating satisfied"
     tracking:
       consideration_before_proceeding: "Gating rules pass or waiver documented; RETURN to gate-pseudocode-validation."
@@ -1254,7 +1259,7 @@ sub_procedures:
       - "./tied/docs/processes.md § [PROC-VOCABULARY_INDEX]"
       - "tied/docs/vocabulary-index-analysis-and-standards.md"
     tasks:
-      - "Distinguish from the IMPL pseudo-code grammar \"preferred vocabulary\" (INPUT/OUTPUT/DATA/CONTROL keywords in implementation-decisions.md); this sub-procedure governs which DOMAIN term names a concept, not the grammar of a block."
+      - "Distinguish from the IMPL pseudo-code grammar \"preferred vocabulary\" (INPUT/OUTPUT/DATA/CONTROL/PRE/POST/EFFECTS/FAILURE_MODES/DATA_TRANSITION/TERMINATION keywords in implementation-decisions.md); this sub-procedure governs which DOMAIN term names a concept, not the grammar of a block."
       - "Follow the structure/format/content/governance standards in tied/docs/vocabulary-index-analysis-and-standards.md (preferred-term tables, naming bridges, define-once-link-many, vocabulary-not-algorithm, alphabetical index)."
       - "IF vocab files are absent and the change does not yet warrant seeding an index: pick internally consistent terms for this pass and note the deferral; do not block the caller (except VALIDATE must not fake pass—use explicit deferral note)."
       - "PRELOAD mode (Touchpoint 2 — before reading TIED indexes, detail files, source, or tests): read ./tied/vocab/routing.md; match task keywords to the routing table; from caller scope (change-definition, sponsor context, affected modules) list concepts/subsystems in play; open only matched ./tied/vocab/<topic>.md files; extract preferred terms, avoid-list synonyms, naming-bridge rows, and UPPER_SNAKE block names; produce a brief term map in step output or the per-request checklist copy for use when reading subsequent artifacts; for cross-cutting concerns search ./tied/vocab/domain-references.md on demand."

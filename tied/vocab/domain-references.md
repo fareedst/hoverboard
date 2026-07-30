@@ -74,6 +74,16 @@
 
 ---
 
+## Preferred terms vs synonyms (directory entry)
+
+| Preferred | Avoid | Notes |
+|-----------|-------|-------|
+| **routing.md** | `domain-references-routing.md` | Primary `tied/vocab/` directory entry; PRELOAD starts here |
+| **routing index** / **Vocab directory routing index** | Domain vocabulary routing index (old title) | Lightweight keyword → glossary table in `routing.md` |
+| **full catalog** / **domain-references.md** (on-demand) | “canonical index read at bootstrap” | This file — Priority table, authoring guides, cross-topic notes only |
+
+---
+
 ## Alphabetical index
 
 | Term | Section |
@@ -84,11 +94,16 @@
 | Bookmarks overloaded | Cross-topic notes |
 | browser API shim vs Safari App Extension | Cross-topic notes |
 | Domain vocabulary index | Title |
+| domain-references.md | Preferred terms (directory entry) |
+| full catalog | Preferred terms (directory entry) |
 | hover / overlay vs Hoverboard | Cross-topic notes |
 | IMPL grammar vocabulary | Authoring guides |
 | Local vs Local Bookmarks Index | Cross-topic notes |
 | pin vs Pinboard | Cross-topic notes |
 | Recent Tags vs getRecentBookmarks | Cross-topic notes |
+| routing index | Preferred terms (directory entry) |
+| routing.md | Directory entry (bootstrap) |
 | sub-vocabulary-sync | Scope |
 | Sync vs state synchronization | Cross-topic notes |
 | VOCAB_INDEX | Scope |
+| Vocab directory routing index | Preferred terms (directory entry) |

@@ -1,10 +1,10 @@
 # Pseudocode and CITDP (canonical)
 
-**Scope:** Distinction between **domain vocabulary** (`tied/vocab/`) and **IMPL grammar vocabulary** (INPUT/OUTPUT/DATA/CONTROL); three-way alignment; pseudo-code validation; CITDP record naming; checklist per-request copy conventions. **Vocabulary only** — validation algorithms in [`../docs/pseudocode-writing-and-validation.md`](../docs/pseudocode-writing-and-validation.md) and [`../docs/processes.md`](../docs/processes.md).
+**Scope:** Distinction between **domain vocabulary** (`tied/vocab/`) and **IMPL grammar vocabulary** (INPUT/OUTPUT/DATA/CONTROL, PRE/POST/EFFECTS/FAILURE_MODES/DATA_TRANSITION/TERMINATION); three-way alignment; pseudo-code validation; CITDP record naming; checklist per-request copy conventions. **Vocabulary only** — validation algorithms in [`../docs/pseudocode-writing-and-validation.md`](../docs/pseudocode-writing-and-validation.md) and [`../docs/processes.md`](../docs/processes.md).
 
 **Traceability:** [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) · [PROC-CITDP](../docs/processes.md) · [PROC-IMPL_PSEUDOCODE_TOKENS](../docs/processes.md) · [PROC-IMPL_CODE_TEST_SYNC](../docs/processes.md) · [PROC-VOCABULARY_INDEX](../docs/processes.md) · [REQ-TIED_SETUP](../requirements/REQ-TIED_SETUP.yaml)
 
-**See also:** [`domain-references.md`](domain-references.md) · [`tied-methodology.md`](tied-methodology.md) · [`../docs/citdp-policy.md`](../docs/citdp-policy.md) · [`../docs/pseudocode-format-and-practices.md`](../docs/pseudocode-format-and-practices.md)
+**See also:** [`routing.md`](routing.md) (PRELOAD primary entry) · [`domain-references.md`](domain-references.md) (full catalog, on-demand) · [`tied-methodology.md`](tied-methodology.md) · [`../docs/citdp-policy.md`](../docs/citdp-policy.md) · [`../docs/pseudocode-format-and-practices.md`](../docs/pseudocode-format-and-practices.md)
 
 ---
 
@@ -13,9 +13,9 @@
 | Layer | Location | Governs |
 |-------|----------|---------|
 | **Domain vocabulary** | `tied/vocab/*.md` | Which **name** a concept has (REQ token suffix, file path, UPPER_SNAKE block name, UI label) |
-| **IMPL grammar vocabulary** | [`../docs/implementation-decisions.md`](../docs/implementation-decisions.md) § Preferred vocabulary | How a **block** is written (INPUT, OUTPUT, DATA, ON, IF, AWAIT, …) |
+| **IMPL grammar vocabulary** | [`../docs/implementation-decisions.md`](../docs/implementation-decisions.md) § Preferred vocabulary | How a **block** is written (INPUT, OUTPUT, DATA, CONTROL, PRE, POST, EFFECTS, FAILURE_MODES, DATA_TRANSITION, TERMINATION, ON, IF, AWAIT, …) |
 
-Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with INPUT/OUTPUT/DATA keywords.
+Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with INPUT/OUTPUT/DATA/PRE/POST/EFFECTS keywords.
 
 ---
 
@@ -32,8 +32,15 @@ Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with 
 | **per-request checklist copy** | checklist yaml | Never run completion against canonical checklist in `tied/docs/` |
 | **LEAP** | stack update | Reverse order IMPL → ARCH → REQ when scope changes |
 | **block-lead bracket format** | token comment line | Exact pattern: `[IMPL-*] [ARCH-*] [REQ-*]` then `How: …` (IMPL, ARCH, REQ order when all three appear) |
+| **contract precision** | precise contracts, extended contract | Active-block PRE/POST/EFFECTS (+ FAILURE_MODES/DATA_TRANSITION/TERMINATION when applicable); Layer B SHAPE-003..006 |
+| **SHAPE-003** | — | Schema check: Active procedure blocks declare PRE, POST, EFFECTS |
+| **SHAPE-004** | — | Schema check: FAILURE_MODES closed set when errors are possible |
+| **SHAPE-005** | — | Schema check: DATA_TRANSITION when mutable DATA or State effects |
+| **SHAPE-006** | — | Schema check: TERMINATION when recursion / WHILE / open-ended wait |
 | **sub-vocabulary-sync RESOLVE** | lookup vocab | Before naming/writing: map fuzzy terms to one preferred term in `tied/vocab/*.md` |
+| **sub-vocabulary-sync PRELOAD** | read full catalog at bootstrap | Before reading TIED/docs/code: read [`routing.md`](routing.md), match keywords, open only matched glossaries ([PROC-VOCABULARY_INDEX] Touchpoint 2) |
 | **sub-vocabulary-sync RECORD** | update vocab | After artifacts change: add preferred-term rows, naming bridges, alphabetical index entries |
+| **sub-vocabulary-sync VALIDATE** | skip vocab audit | Before commit: audit names in docs/tokens/code against `tied/vocab/` ([PROC-VOCABULARY_INDEX] Touchpoint 3) |
 
 ---
 
@@ -48,6 +55,7 @@ Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with 
 | CITDP record | `tied/citdp/CITDP-REQ-{TOKEN}.yaml` (pattern) | [PROC-CITDP](../docs/processes.md) |
 | Validation checklist | `tied/docs/pseudocode-validation-checklist.yaml` | [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) |
 | Domain vocab index | `tied/vocab/*.md` | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
+| Vocab routing index (PRELOAD) | `tied/vocab/routing.md` | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 
 ---
 
@@ -57,13 +65,20 @@ Prefer in `essence_pseudocode` (not domain terms):
 
 | Keyword | Use |
 |---------|-----|
-| `INPUT` / `OUTPUT` / `DATA` / `CONTROL` | Block I/O contract |
+| `INPUT` / `OUTPUT` / `DATA` / `CONTROL` | Block I/O and optional env/ordering (`CONTROL` = flags/env/ordering — **not** the contract keyword `EFFECTS`) |
+| `PRE` / `POST` | Preconditions / postconditions (required on new/changed Active procedure blocks) |
+| `EFFECTS` | Contract effect row: `pure` or named (`IO`, `Http`, `State`, `Async`, `DB`, `Exn`, `Random`, `Diverge`, …). Distinct from step-level SEND/BROADCAST/RETURN and from `CONTROL`. |
+| `FAILURE_MODES` | Closed set of named error variants (when errors are possible) |
+| `DATA_TRANSITION` | Before→after rules for mutable DATA / State |
+| `TERMINATION` | `total` or `may_diverge` (loops/recursion/open wait) |
 | `ON` / `WHEN` | Event/trigger |
 | `IF` / `ELSE` | Branch |
 | `FOR` / `WHILE` | Iteration |
-| `RETURN` / `ON error` | Outcomes |
-| `AWAIT` / `Promise` | Async boundary |
+| `RETURN` / `ON error` | Step-level outcomes (names must match `FAILURE_MODES` when required) |
+| `AWAIT` / `Promise` | Async boundary (also reflect `Async` in `EFFECTS` when awaiting) |
 | `procedure NAME` | Named procedure (often maps to domain UPPER_SNAKE block) |
+
+**Migration:** Untouched legacy Active blocks may omit precision keywords with Layer B N/A `pre-contract-grammar` until next edit. See [`../docs/implementation-decisions.md`](../docs/implementation-decisions.md) and [`../docs/pseudocode-validation-checklist.yaml`](../docs/pseudocode-validation-checklist.yaml).
 
 ---
 
@@ -94,14 +109,31 @@ Prefer in `essence_pseudocode` (not domain terms):
 | block lead comment | Preferred terms |
 | block-lead bracket format | Preferred terms |
 | CITDP record | Preferred terms |
+| contract precision | Preferred terms |
+| CONTROL | IMPL grammar keywords |
+| DATA_TRANSITION | IMPL grammar keywords |
 | domain vocabulary | Domain vs grammar |
+| EFFECTS | IMPL grammar keywords |
 | essence_pseudocode | Preferred terms |
+| FAILURE_MODES | IMPL grammar keywords |
 | IMPL grammar vocabulary | Domain vs grammar |
 | LEAP | Preferred terms |
 | per-request checklist copy | Preferred terms |
+| POST | IMPL grammar keywords |
+| PRE | IMPL grammar keywords |
+| pre-contract-grammar | IMPL grammar keywords |
 | pseudo-code sidecar | Preferred terms |
+| routing.md | Naming bridge |
+| SHAPE-003 | Preferred terms |
+| SHAPE-004 | Preferred terms |
+| SHAPE-005 | Preferred terms |
+| SHAPE-006 | Preferred terms |
 | sub-vocabulary-sync | Pseudo-code blocks |
+| sub-vocabulary-sync PRELOAD | Preferred terms |
 | sub-vocabulary-sync RECORD | Preferred terms |
 | sub-vocabulary-sync RESOLVE | Preferred terms |
+| sub-vocabulary-sync VALIDATE | Preferred terms |
+| TERMINATION | IMPL grammar keywords |
 | three-way alignment | Preferred terms |
 | UPPER_SNAKE block name | Preferred terms |
+| Vocab routing index | Naming bridge |

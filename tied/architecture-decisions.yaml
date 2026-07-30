@@ -1357,8 +1357,8 @@ ARCH-MOVE_BOOKMARK_UI:
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-14"
-      reason: "Move bookmark UI per plan"
+      date: "2026-07-29"
+      reason: "Corpus close-loop: five Save to backends"
   name: "Move Bookmark Storage UI"
   rationale:
     benefits:
@@ -1374,6 +1374,7 @@ ARCH-MOVE_BOOKMARK_UI:
       - "IMPL-MOVE_BOOKMARK_UI"
     see_also: []
   status: "Active"
+  summary: "Popup Save to five backends (pinboard/local/file/sync/browser); moveBookmarkToStorage; preferredBackend on save."
   traceability:
     code_annotations:
       - "ARCH-MOVE_BOOKMARK_UI"

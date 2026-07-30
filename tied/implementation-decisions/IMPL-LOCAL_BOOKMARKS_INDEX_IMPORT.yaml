@@ -27,7 +27,7 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Import control group + pending/final result messaging"
+      reason: "Corpus close-loop: Import to includes Browser"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -35,10 +35,10 @@ IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT:
   name: "Local Bookmarks Index Import Implementation"
   rationale:
     benefits:
-      - "Hidden file input + Import button; Only new / Overwrite existing; Import to Local | File | Sync; parseCsv and JSON; saveBookmark per row; result message"
+      - "Hidden file input + Import button; Only new / Overwrite existing; Import to Local | File | Sync | Browser; parseCsv and JSON; saveBookmark per row; result message"
     problems_solved:
       - "No import UI or parsing for index page"
-    why: "Implement import UX and parse/save flow using existing saveBookmark and CSV/JSON format."
+    why: "Implement import UX and parse/save flow using existing saveBookmark and CSV/JSON format; Import to includes Browser (Index import; distinct from Browser Bookmark Import page which excludes Browser as target)."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"

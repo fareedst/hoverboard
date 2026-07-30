@@ -27,8 +27,8 @@ isProject: false
 
 - It is the **authoritative and primary source of implementation logic**. Resolve logical and **flow** issues in pseudo-code **before** writing tests or production code; tests and code are derived from it and must stay aligned.
 - **No code chunks are allowed** in `essence_pseudocode`: do not include language-specific source snippets, compilable fragments, or pasted production/test code blocks.
-- It supports **collision detection**: when IMPLs are composed or share code paths, compare blocks to see overlapping steps, shared **DATA**, ordering, and conflicting assumptions.
-- **Algol-style** readability: explicit control flow (IF/ELSE, loops, ON/WHEN), explicit **INPUT** / **OUTPUT** / **DATA** (and **CONTROL** when relevant), procedure names often in **UPPER_SNAKE**.
+- It supports **collision detection**: when IMPLs are composed or share code paths, compare blocks to see overlapping steps, shared **DATA**, **EFFECTS** rows, ordering, and conflicting assumptions.
+- **Algol-style** readability: explicit control flow (IF/ELSE, loops, ON/WHEN), explicit contracts (**INPUT** / **OUTPUT** / **DATA**, **PRE** / **POST** / **EFFECTS**, and **CONTROL** when relevant), procedure names often in **UPPER_SNAKE**.
 - **One action per step** (or one small coherent block). Avoid long lines that mix many actions; that weakens review and differencing.
 - **Traceability to tests:** key branches and procedures should map to test names or structure (e.g. one procedure or branch to one test section), so drift is detectable. Optionally mark test level at a block (e.g. `unit-testable: …`, `E2E-only: …` with a short reason) when policy requires.
 
@@ -64,19 +64,22 @@ Use these keywords consistently so different IMPLs and tooling stay comparable.
 
 | Category | Keywords / forms |
 |----------|------------------|
-| Contract | **INPUT**, **OUTPUT**, **DATA**, **CONTROL** (use CONTROL for flags, environment, or policy not pure data) |
+| Contract (I/O) | **INPUT**, **OUTPUT**, **DATA**, **CONTROL** (CONTROL = flags, environment, or ordering — not the effect row) |
+| Contract (precision) | **PRE**, **POST**, **EFFECTS** (`pure` or named: `IO`, `Http`, `State`, `Async`, `DB`, `Exn`, `Random`, `Diverge`, …), **FAILURE_MODES**, **DATA_TRANSITION**, **TERMINATION** (`total` \| `may_diverge`) |
 | Events / conditions | **ON**, **WHEN** |
-| Effects | **SEND**, **BROADCAST**, **RETURN** |
+| Step-level effects | **SEND**, **BROADCAST**, **RETURN** (distinct from contract **EFFECTS**) |
 | Branches | **IF**, **ELSE** |
 | Procedures | **UPPER_SNAKE** (e.g. `NORMALIZE_INPUT`); **camelCase** is acceptable when mirroring real API names |
 | Loops | `FOR item IN collection`, or `FOR each (k, v) IN map` |
-| Errors | **ON error** / **ON failure**; **RETURN error**; **EXIT failure**; **CATCH e RETURN …** — pick **one** style per IMPL and stick to it |
-| Async | **AWAIT**; name **Promise** in OUTPUT when the result is async; **SEND** for message-style async |
+| Errors | **ON error** / **ON failure**; **RETURN error**; **EXIT failure**; **CATCH e RETURN …** — pick **one** style per IMPL; names must match **FAILURE_MODES** when that set is required |
+| Async | **AWAIT**; name **Promise** in OUTPUT when async; include `Async` in **EFFECTS** when the block awaits; **SEND** for message-style async |
 | Shapes (optional) | **(list)**, **(map)**, `{ key, key? }` — stay language-agnostic |
 
-**Sequence:** Use numbered steps `1.`, `2.`, … for fixed order; indent under a procedure or **ON** / **WHEN** for the body. Start substantive blocks with a **Contract** line and/or **INPUT:** / **OUTPUT:** / **DATA:** / **CONTROL:** so two IMPLs can be compared by contract.
+**Requiredness (Active, non-stub procedure blocks — new or changed):** Always **PRE**, **POST**, **EFFECTS** (with **INPUT**/**OUTPUT**). Add **FAILURE_MODES** when errors are possible; **DATA_TRANSITION** when DATA is mutated or EFFECTS includes `State`; **TERMINATION** when recursion/`WHILE`/open wait (else prefer `total`). **CONTROL** remains optional. Untouched legacy Active blocks may use Layer B N/A `pre-contract-grammar` until next edit. Full table: [implementation-decisions.md](implementation-decisions.md) § Preferred vocabulary.
 
-**Placeholders:** For IMPLs still in draft/Template state, a stub is acceptable: a line `Template: placeholder for …` plus minimal INPUT/OUTPUT (e.g. “(to be defined)”). For **Active** status, the pseudo-code should be **complete** (no Template stub line).
+**Sequence:** Use numbered steps `1.`, `2.`, … for fixed order; indent under a procedure or **ON** / **WHEN** for the body. Start substantive blocks with a **Contract** that includes the precision fields above so two IMPLs can be compared by contract.
+
+**Placeholders:** For IMPLs still in draft/Template state, a stub is acceptable: a line `Template: placeholder for …` plus minimal INPUT/OUTPUT (e.g. “(to be defined)”). Precision keywords are not required on Template stubs. For **Active** status, the pseudo-code should be **complete** (no Template stub line; full contract on new/changed blocks).
 
 ---
 
@@ -100,7 +103,7 @@ The **single** maintained copy of the hand-authored template body is the file **
 
 **Layer A — TIED (mandatory for changed essence):** Run **`tied_validate_consistency`** with default options so **`include_pseudocode`** runs. This checks the **merged** `essence_pseudocode` (sidecar + YAML) against indexes, token references, and TIED’s pseudo-code rules. Do this after any edit to the sidecar or after setting essence via API/CLI.
 
-**Layer B — Application (optional depth, project-scaled):** A checklist covering parsing, schema/shape, contracts, dependency/coverage, traceability to tests, and optional lint/simulation. If the project has **no** custom grammar parser, treat each **H2 section** (or the project’s defined “block”) as one unit for **manual** Layer B review. A minimal Layer B should still require: **[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was TIED-POE-001)** (do not use Layer B alone; Layer A must pass for the same text).
+**Layer B — Application (optional depth, project-scaled):** A checklist covering parsing, schema/shape, contracts, dependency/coverage, traceability to tests, and optional lint/simulation. If the project has **no** custom grammar parser, treat each **H2 section** (or the project’s defined “block”) as one unit for **manual** Layer B review. A minimal Layer B should still require: **TIED-POE-001** (do not use Layer B alone; Layer A must pass for the same text).
 
 ```mermaid
 flowchart LR

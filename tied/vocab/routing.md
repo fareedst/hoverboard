@@ -42,7 +42,7 @@ The full [`domain-references.md`](domain-references.md) contains **Cross-topic n
 
 Examples of cross-topic notes:
 - agentstream (Go) vs agent-stream (Ruby) vs run-feature-batch drivers
-- Domain vocabulary vs IMPL grammar vocabulary (INPUT/OUTPUT/DATA)
+- Domain vocabulary vs IMPL grammar vocabulary (INPUT/OUTPUT/DATA/PRE/POST/EFFECTS)
 - TIED base path / project YAML vs methodology YAML
 - Non-canonical LEAP proposals never mutate project TIED YAML
 - Local (storage backend) vs Local Bookmarks Index; Sync backend vs bookmark state sync

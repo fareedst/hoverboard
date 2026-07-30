@@ -76,7 +76,7 @@ Executable step-by-step procedure: [agent-req-implementation-checklist.md](agent
 
 | Checklist slug (YAML) | Role for pseudo-code | Where in this document |
 |----------------------|----------------------|-------------------------|
-| `catalog-pseudocode-contracts` (Phase B) | Read `essence_pseudocode`; extract INPUT/OUTPUT/DATA, procedures, branches | [Three-way alignment § Phase B](#phase-b--reasoning); [Foundations](#foundations-how-to-write-impl-pseudo-code) |
+| `catalog-pseudocode-contracts` (Phase B) | Read `essence_pseudocode`; extract INPUT/OUTPUT/DATA, PRE/POST/EFFECTS/FAILURE_MODES/DATA_TRANSITION/TERMINATION, procedures, branches | [Three-way alignment § Phase B](#phase-b--reasoning); [Foundations](#foundations-how-to-write-impl-pseudo-code) |
 | `flag-insufficient-specs` / `flag-contradictory-specs` | Feed `resolve-pseudocode` | Phase B |
 | `resolve-pseudocode` | Edit IMPL sidecar; compatible contracts; every block token-commented | Phase B–C; [Block lead](#block-lead-and-literal-copy-in-tests-and-code) |
 | `gate-pseudocode-validation` | Layer A + pre-RED structural Layer B pass | [Validation layers](#validation-layers) (Pre-RED vs post-test) |
@@ -136,17 +136,17 @@ The merged field is the **primary and authoritative source of implementation log
 
 Hand-authored IMPL bodies usually start from [templates/impl-essence-pseudocode-template.md](../../templates/impl-essence-pseudocode-template.md) (copy the Markdown after the `---` separator into `IMPL-{TOKEN}-pseudocode.md`). For a standalone summary of vocabulary and validation, see [pseudocode-format-and-practices.md](pseudocode-format-and-practices.md).
 
-**markdown_exec project conventions (this repo):** File title uses H1 with bracket tokens in order **IMPL, ARCH, REQ** (stay consistent with [implementation-decisions.md](implementation-decisions.md) top-level naming). Open with `## Summary contract` when the IMPL needs file-level INPUT/OUTPUT/DATA before the first runtime H2. Under `## EMBEDDED_MINITEST: …`, express each block lead as a **list item** (`- [IMPL-…] [ARCH-…] [REQ-…] …`), not a second H1. Prefer **language-agnostic** steps in CONTRACT/CONTROL.
+**markdown_exec project conventions (this repo):** File title uses H1 with bracket tokens in order **IMPL, ARCH, REQ** (stay consistent with [implementation-decisions.md](implementation-decisions.md) top-level naming). Open with `## Summary contract` when the IMPL needs file-level INPUT/OUTPUT/DATA (and PRE/POST/EFFECTS when documenting a shared Active contract) before the first runtime H2. Under `## EMBEDDED_MINITEST: …`, express each block lead as a **list item** (`- [IMPL-…] [ARCH-…] [REQ-…] …`), not a second H1. Prefer **language-agnostic** steps in CONTRACT/CONTROL/EFFECTS.
 
 ### Writing rules (summary)
 
 - **Mandatory structure**: Address all logical and flow issues in essence **before** writing tests or code.
 - **No code chunks in pseudocode (mandatory)**: `essence_pseudocode` must not contain language-specific snippets or pasted production/test code. Keep logic language-agnostic.
-- **Contract block**: Use explicit `INPUT:`, `OUTPUT:`, `DATA:` (and `CONTROL:` when relevant). Procedure names in UPPER_SNAKE or camelCase.
+- **Contract block**: Use explicit `INPUT:`, `OUTPUT:`, `DATA:` when needed, plus precision fields for new/changed Active procedure blocks: `PRE:`, `POST:`, `EFFECTS:`, and when applicable `FAILURE_MODES:`, `DATA_TRANSITION:`, `TERMINATION:`; `CONTROL:` when env/flags/ordering matter. Procedure names in UPPER_SNAKE or camelCase.
 - **One action per step**: Each logical step expresses one clear action or decision.
 - **Token comments in every block** ([PROC-IMPL_PSEUDOCODE_TOKENS]): Every block names the relevant REQ, ARCH, and IMPL tokens and states **how** the block implements them. When listing all three in one line, use bracket order **IMPL, ARCH, REQ** (same as the top-level file heading). Top-level file heading: `# [IMPL-X] [ARCH-Y] [REQ-Z]` (H1). Sub-blocks with the same token set: *how* only. Sub-blocks with a different set: full token list and *how*.
-- **Preferred vocabulary**: INPUT, OUTPUT, DATA, CONTROL; ON, WHEN; IF, ELSE; ON error, RETURN error; AWAIT, Promise. Full list: [implementation-decisions.md](implementation-decisions.md).
-- **Collision detection**: When IMPLs compose or share code paths, document ordering, shared data, and pre/post conditions.
+- **Preferred vocabulary**: INPUT, OUTPUT, DATA, CONTROL; PRE, POST, EFFECTS, FAILURE_MODES, DATA_TRANSITION, TERMINATION; ON, WHEN; IF, ELSE; ON error, RETURN error; AWAIT, Promise. Full list and requiredness: [implementation-decisions.md](implementation-decisions.md).
+- **Collision detection**: When IMPLs compose or share code paths, document ordering, shared data, EFFECTS rows, and PRE/POST conditions.
 - **LEAP drift rule**: If tests or code contain logic not in pseudocode, update IMPL first, then ARCH/REQ if needed.
 
 **Full methodology:** [implementation-decisions.md](implementation-decisions.md) — mandatory essence, vocabulary, sequence, managed code.
@@ -332,7 +332,7 @@ IMPL `essence_pseudocode` is the **source of consistent logic**. Tests validate 
 
 **Goal:** Resolve gaps/conflicts **before** tests or code.
 
-- **B1.** Catalog INPUT/OUTPUT/DATA and procedure names per IMPL.
+- **B1.** Catalog INPUT/OUTPUT/DATA, PRE/POST/EFFECTS/FAILURE_MODES/DATA_TRANSITION/TERMINATION (when present or required), and procedure names per IMPL.
 - **B2.** Flag insufficient specs, stubs on Active IMPLs, blocks without token comments.
 - **B3.** Flag contradictions across IMPLs.
 - **B4.** Update pseudo-code; LEAP to ARCH/REQ if scope changed; **`lint_yaml`** on touched YAML.
@@ -350,7 +350,7 @@ IMPL `essence_pseudocode` is the **source of consistent logic**. Tests validate 
 
 - One pseudo-code block maps to one test group.
 - **D3.** RED before production code; REQ token in test naming.
-- **D4.** Assertions match pseudo-code OUTPUT; else `e2e_only` + reason.
+- **D4.** Assertions match pseudo-code OUTPUT, POST, and named FAILURE_MODES; else `e2e_only` + reason.
 
 **Shell pitfall (Bash):** `out=$(cmd)` strips trailing newlines—use temp files/`cmp` for exact byte contracts.
 
@@ -384,16 +384,26 @@ Full suite; lint; **`tied_validate_consistency`**; three-way audit; update **`tr
 # [IMPL-SAVE] [ARCH-PERSISTENCE] [REQ-DATA_SAVE]
 # Validates input and persists a record via the storage index.
 
-INPUT: record (object), options? (object)
-OUTPUT: { ok: boolean } or { error: string }
+Contract:
+  INPUT: record (object), options? (object)
+  PRE: record is non-empty
+  OUTPUT: { ok: true } | { error: EmptyRecord | PersistFailed }
+  POST:
+    success => index contains normalized record
+    error EmptyRecord => index unchanged
+  FAILURE_MODES: EmptyRecord, PersistFailed
+  DATA: storage index (map)
+  DATA_TRANSITION: on success, index updated with normalized record; else unchanged
+  EFFECTS: pure
+  TERMINATION: total
 
 SAVE_WORKFLOW(record, options):
-  IF record empty: RETURN { error: "record required" }
+  IF record empty: RETURN { error: EmptyRecord }
   normalized = NORMALIZE(record)
   # [IMPL-INDEX] [ARCH-PERSISTENCE] [REQ-DATA_SAVE] — delegates index update to IMPL-INDEX.
   INDEX_UPDATE(normalized)
+  IF index update failed: RETURN { error: PersistFailed }
   RETURN { ok: true }
-  ON error: RETURN { error: message }
 ```
 
 **Test:**
@@ -520,10 +530,12 @@ The same checklist file applies in two **invocation contexts** (no YAML profiles
 
 | Invocation | When | Layer A | Layer B scope | Gating |
 |------------|------|---------|---------------|--------|
-| `gate-pseudocode-validation` → `sub-pseudocode-validation-pass` | Before RED; no executable tests yet | Required (`[IMPL-TIED_FILES] [ARCH-TIED_STRUCTURE] [REQ-TIED_SETUP] (was TIED-POE-001)`) | parsing, schema, symbol_resolution, contract_validation, dependency_graph, reporting | Structural rows must pass; **behavioral_coverage** and **traceability** rows that require test artifacts → mark **N/A** with rationale ("no tests yet"), not ad-hoc waivers |
-| `verification-gate` → `sub-pseudocode-validation-pass` | After unit/composition tests exist | Re-run if essence changed | Full checklist including **minimum_gating_rules** | All required rows + minimum gating rules must pass or be documented N/A with rationale |
+| `gate-pseudocode-validation` → `sub-pseudocode-validation-pass` | Before RED; no executable tests yet | Required (`TIED-POE-001`) | parsing, schema (including SHAPE-003..006), symbol_resolution, contract_validation, dependency_graph, reporting | Structural rows must pass; **behavioral_coverage** and **traceability** rows that require test artifacts → mark **N/A** with rationale ("no tests yet"), not ad-hoc waivers. Precision-contract rows: N/A only for `status Template`, or unchanged legacy Active blocks with rationale `pre-contract-grammar` |
+| `verification-gate` → `sub-pseudocode-validation-pass` | After unit/composition tests exist | Re-run if essence changed | Full checklist including **minimum_gating_rules** | All required rows + minimum gating rules must pass or be documented N/A with rationale. New/changed Active blocks may not use `pre-contract-grammar` |
 
 A pre-RED pass does **not** replace **[PROC-LEAP]** when pseudo-code changes alter REQ or ARCH scope.
+
+**Contract precision N/A policy:** `SHAPE-003`..`SHAPE-006` and related CONTRACT/COVER checks that depend on PRE/POST/EFFECTS/FAILURE_MODES/DATA_TRANSITION/TERMINATION accept N/A for (1) Template/stub IMPLs, (2) applicability skips (e.g. no error OUTPUT → FAILURE_MODES N/A; read-only DATA and EFFECTS without State → DATA_TRANSITION N/A; no recursion/WHILE/open wait → TERMINATION may be N/A or stated `total`), and (3) **unchanged** legacy Active blocks with rationale `pre-contract-grammar` until that block is next edited — then the full Active contract is required.
 
 ### Intended use
 
