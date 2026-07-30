@@ -15,7 +15,7 @@ ARCH-MESSAGE_HANDLING:
     - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
     - "REQ-RECENT_TAGS_SYSTEM"
     - "REQ-SMART_BOOKMARKING"
-  decision: "Thin architecture stub for ARCH-MESSAGE_HANDLING."
+  decision: "Centralized MessageHandler in the service worker routes standardized MESSAGE_TYPES (request/response + BOOKMARK_UPDATED broadcasts) across popup, content, and side panel; Zod/runtime validation on envelopes where implemented."
   implementation_approach:
     details:
       - "BOOKMARK_UPDATED synchronization"
@@ -30,8 +30,8 @@ ARCH-MESSAGE_HANDLING:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: real decision sentence"
   name: "Message Handling Architecture"
   rationale:
     benefits:

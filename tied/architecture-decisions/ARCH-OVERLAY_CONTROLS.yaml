@@ -13,23 +13,22 @@ ARCH-OVERLAY_CONTROLS:
   cross_references:
     - "REQ-OVERLAY_CONTROL_LAYOUT"
     - "REQ-OVERLAY_REFRESH_ACTION"
-  decision: "Thin architecture stub for ARCH-OVERLAY_CONTROLS."
+  decision: "Canonical overlay control layout: Close at top 8px left 8px; Refresh at top 8px left 40px (32px horizontal gap from Close); minimum 24px touch targets; fixed absolute positioning with inline styles and theme CSS variables; full ARIA. Child of ARCH-OVERLAY; primary owner of REQ-OVERLAY_CONTROL_LAYOUT and REQ-OVERLAY_REFRESH_ACTION."
   implementation_approach:
     details:
-      - "32px spacing, 24px min touch targets"
+      - "24px minimum touch targets"
       - "Close at top: 8px; left: 8px"
-      - "Full ARIA metadata"
-      - "Refresh at top: 8px; left: 40px"
-      - "Theme CSS variables"
-    summary: "Fixed absolute positioning with inline styles, theme variables, accessibility metadata"
+      - "Full ARIA metadata; theme CSS variables"
+      - "Refresh at top: 8px; left: 40px (32px gap)"
+    summary: "Fixed absolute positioning; Close 8/8; Refresh 8/40; 24px min touch; ARIA; theme variables."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 6: resolve spacing contradiction; own layout REQs"
   name: "Overlay Control Layout Architecture"
   rationale:
     benefits:
@@ -40,11 +39,12 @@ ARCH-OVERLAY_CONTROLS:
       - "Control overlaps"
     why: "Predictable, accessible control placement"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "ARCH-OVERLAY"
     informs:
       - "IMPL-OVERLAY_CONTROLS"
     see_also:
-      - "ARCH-OVERLAY"
+      - "ARCH-OVERLAY_TESTABILITY"
   status: "Active"
   traceability:
     code_annotations:

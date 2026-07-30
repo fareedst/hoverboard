@@ -15,6 +15,7 @@
 | Preferred | Avoid / demote | Notes |
 |-----------|----------------|-------|
 | **ConfigManager** | settings manager | Owns keys, defaults, merge |
+| **Chrome storage settings** ([ARCH-STORAGE](../architecture-decisions/ARCH-STORAGE.yaml)) | storage strategy (alone), bookmark storage | `chrome.storage.sync`/`local` for settings and config portability — **not** bookmark **storage backends** ([`storage-backends.md`](storage-backends.md) / [ARCH-STORAGE_INDEX_AND_ROUTER](../architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml)) |
 | **hoverboard_settings** | settings blob | Primary merged settings object key |
 | **storage mode** | storage backend default | Global default; key `hoverboard_storage_mode`; values `pinboard` \| `local` \| `file` \| `sync` \| `browser` (see [`storage-backends.md`](storage-backends.md); **Browser** ≠ **Local**) |
 | **inhibit URL** / **disabled sites** | blocklist | Domains where extension will not activate |

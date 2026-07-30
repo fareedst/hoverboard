@@ -5,21 +5,24 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
       pros: "Centralized API"
       rejected_reason: "Simpler to call from page"
   cross-references: "REQ-BROWSER_BOOKMARK_IMPORT, IMPL-BROWSER_BOOKMARK_IMPORT"
-  cross_references: &ref_0
+  cross_references:
     - "REQ-BROWSER_BOOKMARK_IMPORT"
-  decision: "Dedicated page; chrome.bookmarks.getTree in page; flatten with folder path; filter (search, folder), sort, select; conflict Skip/Overwrite/Merge via aggregated index; folder + extra tags; saveBookmark per row; no new backend message."
+  decision: "Dedicated page loads chrome.bookmarks.getTree as the import *source*, flattens to a selectable table, and imports into Hoverboard via saveBookmark with Import-to Local|File|Sync. Browser is intentionally excluded as Import-to target because source rows already are Chrome bookmarks; destination is Hoverboard-owned stores (aligned with REQ-BROWSER_BOOKMARK_IMPORT)."
   detail_file: "architecture-decisions/ARCH-BROWSER_BOOKMARK_IMPORT.yaml"
   implementation_approach:
-    details: []
-    summary: "Dedicated page in src/ui/browser-bookmark-import/; on load call chrome.bookmarks.getTree(), flatten to list of { url, title, dateAdded, id, folderPath }; build unique folder list for filter dropdown; table with Select, Title, URL (link), Folder path, Date added; search + folder filter; sort; selection; conflict mode (Skip / Overwrite / Merge); \"Use folder names as tags\" + \"Add tags\"; Import to Local | File | Sync; Import button sends getAggregatedBookmarksForIndex once, then for each selected item builds payload, applies conflict rule, sendMessage saveBookmark; show result."
+    details:
+      - "Conflict Skip/Overwrite/Merge; folder names as tags option"
+      - "getTree flatten with folder path"
+      - "Import to Local|File|Sync only; Browser not a destination"
+    summary: "Chrome tree source → Import to Local|File|Sync; Browser excluded as destination."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18"
-      reason: "New architecture for browser bookmark import"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 1: document Browser import-target exclusion"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -44,7 +47,7 @@ ARCH-BROWSER_BOOKMARK_IMPORT:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
       - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
   status: "Active"
-  summary: "Browser bookmark import page loads getTree in-page, flattens to table with folder path; search + folder filter; select; conflict mode; folder-as-tags + extra tags; Import to Local | File | Sync; saveBookmark per selected; result message."
+  summary: "Browser bookmark import page: Chrome tree source; Import to Local|File|Sync; Browser excluded as import target."
   traceability:
     code_annotations:
       - "ARCH-BROWSER_BOOKMARK_IMPORT"

@@ -1,6 +1,7 @@
 ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
   cross_references:
     - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+  decision: "The Bookmarks panel (Chrome tree UI) talks directly to chrome.bookmarks for folder-tree UX (getTree, create/update/move/remove, HTML/CSV import-export of the native tree). It is not wired through BookmarkRouter. Distinct from ARCH-BROWSER_BOOKMARK_PROVIDER (Store B): that peer provider exposes chrome.bookmarks bookmarks to Save-to, Index Storage column B, and router CRUD with folder→tags mapping and 2C race exclusion. Both may read/write the same Chrome bookmark nodes; panel owns tree-centric management UI; provider owns Hoverboard storage-backend parity. This remediation documents the dual path; it does not force panel mutations through the router."
   implementation_approach:
     details:
       - Bulk: "selectedIds Set; Select all/Deselect all; Open in tabs (chrome.tabs.create per URL), Open in window (chrome.windows.create); Copy URLs (buildUrlListForCopy + clipboard); Move (folder picker + chrome.bookmarks.move); Delete (confirm + chrome.bookmarks.remove); Export selected/all (buildBookmarksHtml/buildBookmarksCsv + Blob download)"
@@ -20,16 +21,16 @@ ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
       date: "2026-03-02"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-02"
-      reason: "Add implementation_approach details for bulk, undo, import, inline edit, keyboard, command; fix filter to parentId only"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 3: panel vs Store B boundary"
   name: "Side Panel Browser Bookmarks Architecture"
   rationale:
     benefits:
-      - "Single panel" #browserBookmarksPanel; data from chrome.bookmarks.getTree; flatten to list; folder tree with counts; real-time search; click URL to open
+      - "Panel can show full folder hierarchy and native import/export"
+      - "Store B participates in Index/Save-to without replacing the panel"
     problems_solved:
-      - "How to display Chrome bookmarks in side panel"
-      - "How to support folder navigation and search"
-    why: "New panel lists Chrome browser bookmarks from chrome.bookmarks API; data fetched in panel; filter and folder selection operate on flattened list."
+      - "Ambiguity between side-panel Chrome tree UI and Browser storage backend"
+    why: "Chrome folder tree UX needs direct bookmarks API; Hoverboard Store B needs a router peer — keep both paths with an explicit boundary"
   related_decisions:
     depends_on:
       - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
@@ -37,7 +38,9 @@ ARCH-SIDE_PANEL_BROWSER_BOOKMARKS:
       - "IMPL-SIDE_PANEL_BROWSER_BOOKMARKS"
     see_also:
       - "ARCH-BROWSER_BOOKMARK_IMPORT"
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-SIDE_PANEL_TABS"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
   status: "Active"
   traceability:
     code_annotations:

@@ -1,8 +1,9 @@
 # [IMPL-BROWSER_BOOKMARK_IMPORT] [ARCH-BROWSER_BOOKMARK_IMPORT] [REQ-BROWSER_BOOKMARK_IMPORT]
 # getTree, flattenTree, filters, selection, conflict resolution (Skip/Overwrite/Merge), folder+extra tags, saveBookmark per row.
+# Import to is Local|File|Sync only: Browser excluded as target because source is already chrome.bookmarks (distinct from Index Import which allows Store B).
 
 # Contract: inputs = getTree, selection, conflict mode, tag options, Import to; output = counts and table.
-INPUT: chrome.bookmarks.getTree(), user selection (selectedUrls), conflict mode (Skip|Overwrite|Merge), Use folder names as tags, Add tags, Import to (Local|File|Sync)
+INPUT: chrome.bookmarks.getTree(), user selection (selectedUrls), conflict mode (Skip|Overwrite|Merge), Use folder names as tags, Add tags, Import to (Local|File|Sync; Browser excluded)
 OUTPUT: imported/skipped/failed counts; table of browser bookmarks with Select, Title, URL, Folder, Date
 DATA: allBookmarks (flattened), folderList, existingByUrl (from getAggregatedBookmarksForIndex), selectedUrls (set)
 

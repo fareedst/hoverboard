@@ -2965,16 +2965,22 @@ REQ-UI_INSPECTION:
     - method: "Extension E2E (Playwright)"
       coverage: "Popup, popup↔background, popup→content, GET_PAGE_CONTENT, suggested tags, GET_PAGE_SELECTION, overlay (snapshotOverlay), options/side panel messaging, options snapshot (snapshotOptions), side panel snapshot (snapshotSidePanel), side panel tag sort toolbar (extension-this-page-tag-sort.spec.js; REQ-THIS_PAGE_TAG_SORT), bookmarks table, browser import, offscreen. See IMPL-PLAYWRIGHT_E2E_EXTENSION, IMPL-SIDE_PANEL_SNAPSHOT."
 REQ-URL_TAGS_DISPLAY:
+  acceptance_criteria:
+    - criterion: "Message handler returns normalized bookmark (tags array) for getCurrentBookmark; never short-circuits on no Pinboard auth so router (local/file/sync/browser) data is returned"
   category: "Functional"
   detail_file: "requirements/REQ-URL_TAGS_DISPLAY.yaml"
+  implementation_approach:
+    details:
+      - "getCurrentBookmark always from router (no short-circuit when no Pinboard auth); popup shows tags from local/file/sync/browser"
+    summary: "Normalize tags for badge/popup across five storage providers; no auth short-circuit."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-17"
-      reason: "URL tags module fixes: always use router for getCurrentBookmark; getTagsForUrl message; popup use bookmark when needsAuth"
+      date: "2026-07-29"
+      reason: "ARCH close-out: five-backend URL tags"
   name: "URL Tags and Badge Single Source"
   priority: "P1"
   rationale:
@@ -2985,11 +2991,8 @@ REQ-URL_TAGS_DISPLAY:
       - "Single module normalizes bookmark/tags for display; badge and popup use same contract"
       - "Tags for a URL always normalized to array; badge value (count, flags) from same source"
     problems_solved:
-      - "Adding a tag overwrites existing tags when popup state was stale"
-      - "Inconsistent tags shape (string vs array) across providers"
-      - "Popup empty when no Pinboard auth even though bookmark exists in local/file/sync"
-      - "Popup shows no current tags when badge shows correct count"
-    why: "Badge and popup must show the same tag count and tag list for a URL; a single logical source prevents popup showing no tags or losing prior tags on add"
+      - "Popup empty when no Pinboard auth even though bookmark exists in local/file/sync/browser"
+    why: "Same tags contract across pinboard/local/file/sync/browser for badge and popup."
   related_requirements:
     depends_on: []
     related_to:

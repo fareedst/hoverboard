@@ -6,7 +6,8 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
     functions: []
   cross_references:
     - "ARCH-LOCAL_STORAGE_PROVIDER"
-    - "ARCH-STORAGE"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE-pseudocode.md"
@@ -23,8 +24,8 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "ARCH close-out: untangle ARCH-STORAGE bookmark role"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -33,10 +34,10 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
   rationale:
     benefits:
       - "Bookmarks keyed by URL in hoverboard_local_bookmarks; recent by time sort"
-      - "Same provider contract as PinboardService; default storage mode is local; TagService integration for recent-tag tracking"
+      - "Same provider contract as other BookmarkRouter peers; default storage mode local"
     problems_solved:
       - "No implementation for storing bookmarks locally without the Pinboard API"
-    why: "Implement bookmark provider contract using chrome.storage.local for local-only mode; no local storage existed before."
+    why: "Local is one of five BookmarkRouter peer providers on chrome.storage.local; ARCH-STORAGE covers settings/portability only."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"
@@ -45,15 +46,16 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       - "ARCH-LOCAL_STORAGE_PROVIDER"
     see_also:
       - "ARCH-STORAGE"
+      - "IMPL-STORAGE"
     supersedes: []
   status: "Active"
   traceability:
     architecture:
       - "ARCH-LOCAL_STORAGE_PROVIDER"
-      - "ARCH-STORAGE"
     code_annotations:
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
     requirements:
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
       - "REQ-STORAGE_MODE_DEFAULT"
     tests:
       - "tests/unit/local-bookmark-service.test.js"

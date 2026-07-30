@@ -4,8 +4,12 @@ ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
   decision: "`time` = create-time (set once on create from payload when provided, else now; never changed on update). `updated_at` = most-recent-update-time (on create: payload when provided else time; on every update: now). Normalization: missing `updated_at` -> `updated_at = time`. Pinboard: `updated_at = time` always."
   detail_file: "architecture-decisions/ARCH-BOOKMARK_CREATE_UPDATE_TIMES.yaml"
   implementation_approach:
-    details: []
-    summary: "Keep `time` as create-time (ISO8601). Add `updated_at` as most-recent-update-time. On read, if bookmark has no `updated_at`, set `updated_at = time`. Pinboard: when parsing API response or building bookmark, set `updated_at = time`. Local/file/sync: on create set both to now; on update keep time, set updated_at to now."
+    details:
+      - "BrowserBookmarkService follows same create/update time rules as local/file/sync"
+      - "Normalization: missing updated_at defaults to time"
+      - "time set once on create; never changed on update"
+      - "updated_at set on create and every update"
+    summary: "Keep time as create-time (ISO8601). Add updated_at as most-recent-update-time. On read, if bookmark has no updated_at, set updated_at = time. Pinboard: when parsing API response or building bookmark, set updated_at = time. Local/file/sync/browser: on create set both to now (or honor import payload); on update keep time, set updated_at to now."
   metadata:
     created:
       author: "AI Agent"
@@ -13,7 +17,7 @@ ARCH-BOOKMARK_CREATE_UPDATE_TIMES:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Create path honors import payload times"
+      reason: "ARCH corpus Phase 4: create/update times include browser"
     last_validated:
       date: "2026-02-18"
       result: "pass"

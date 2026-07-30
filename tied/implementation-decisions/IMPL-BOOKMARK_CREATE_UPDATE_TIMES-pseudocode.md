@@ -16,6 +16,10 @@ Local/File/Sync saveBookmark(data):
     KEEP existing time; SET updated_at = now
   PERSIST
 
+# Browser (Store B): Chrome owns dateAdded; on read map to time/updated_at (updated_at = time if missing). saveBookmark does not persist payload time/updated_at (no Chrome field).
+Browser getBookmarkForUrl / getAllBookmarks:
+  SET time from Chrome dateAdded (collapsed); SET updated_at = time if missing
+
 # API has no updated_at; set updated_at = time in parse/create; do not send updated_at to API.
 Pinboard:
   parseBookmarkResponse / createEmptyBookmark: SET updated_at = time (API has no updated_at)

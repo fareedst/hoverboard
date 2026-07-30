@@ -49,28 +49,26 @@ IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
   essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_BROWSER_BOOKMARKS-pseudocode.md"
   implementation_approach:
     details:
-      - Data fetch: "chrome.bookmarks.getTree in panel; flattenBookmarkTree(nodes, parentPath) returns flat list with id, url, title, dateAdded, folderPath, parentId"
-      - Filter: "filterBrowserBookmarks(bookmarks, query, folderId) pure; empty query returns all; folderId filters by parentId; case-insensitive substring on title, url, folderPath"
-      - Folder tree: "buildFolderTree(nodes, parentPath) returns tree of { id, title, path, count, children }; count = direct bookmarks in folder"
-      - Panel layout: "same as Tags tree and Browser Tabs; above-list scrolls off; list section fills height; bulk (selectedIds, getSelectedBookmarks, updateBulkButtonStates); undo (undoStack, showUndoMessage); import/export (parseBookmarksHtml/Csv, buildBookmarksHtml/Csv, downloadBlob); inline edit (startInlineEdit, finishEdit); keyboard (setupKeyboardShortcuts, handleBookmarksKeydown); command (manifest open-side-panel-browser-bookmarks)"
-      - Sort: "sortBrowserBookmarks(bookmarks, sortBy, sortAsc) pure; sortBy in date|name|default; sortAsc boolean; persisted in chrome.storage.local (hoverboard_browser_bookmarks_sort)"
-      - UI: "search input; folder dropdown; sort dropdown (date-desc, date-asc, name-asc, name-desc, default); list section; match count; each row shows favicon (chrome favicon API or fallback), title, url, folder path; click url opens chrome.tabs.create"
-    summary: "Panel fetches chrome.bookmarks.getTree; flatten to list; build folder tree with counts; filter by query and folder; render list; click URL opens in new tab."
+      - "Boundary: panel tree UX vs Store B router backend (ARCH-SIDE_PANEL_BROWSER_BOOKMARKS vs ARCH-BROWSER_BOOKMARK_PROVIDER)"
+      - "Data fetch: chrome.bookmarks.getTree in panel; flattenBookmarkTree"
+      - "Filter/sort/folder tree/bulk/import-export as panel-owned chrome.bookmarks operations"
+    summary: "Side-panel Bookmarks tab: direct chrome.bookmarks.getTree UX (flatten, folder tree, filter, open). Distinct from Store B / IMPL-BROWSER_BOOKMARK_SERVICE (BookmarkRouter peer)."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-03-02"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "ARCH close-out: panel vs Store B boundary"
   name: "Side Panel Browser Bookmarks Implementation"
   rationale:
     benefits:
-      - "Testable filterBrowserBookmarks, flattenBookmarkTree, buildFolderTree; panel with list, search, folder filter, click to open"
+      - "Clear boundary from Store B provider"
+      - "Testable flatten/filter/folder tree; panel list UX"
     problems_solved:
       - "No browser bookmarks list in side panel"
-    why: "Implements ARCH-SIDE_PANEL_BROWSER_BOOKMARKS and REQ-SIDE_PANEL_BROWSER_BOOKMARKS with flatten, filter, folder tree, and panel UI."
+    why: "Direct tree UX for Chrome bookmarks; Store B remains the fifth BookmarkRouter backend for Index/Save-to/move."
   related_decisions:
     composed_with:
       - "IMPL-SIDE_PANEL_TABS"
@@ -78,7 +76,7 @@ IMPL-SIDE_PANEL_BROWSER_BOOKMARKS:
       - "ARCH-SIDE_PANEL_BROWSER_BOOKMARKS"
     see_also:
       - "IMPL-BROWSER_BOOKMARK_IMPORT"
-      - "IMPL-SIDE_PANEL_TABS"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
     supersedes: []
   status: "Active"
   traceability:

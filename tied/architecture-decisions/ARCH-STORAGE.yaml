@@ -15,7 +15,7 @@ ARCH-STORAGE:
   cross_references:
     - "REQ-CHROME_STORAGE_USAGE"
     - "REQ-CONFIG_PORTABILITY"
-  decision: "Thin architecture stub for ARCH-STORAGE."
+  decision: "ARCH-STORAGE covers chrome.storage for extension settings and config portability only (sync for settings, local for temp/caches, export/import of config). It does not define bookmark storage backends — those are ARCH-STORAGE_INDEX_AND_ROUTER and the five providers."
   implementation_approach:
     details:
       - "Export/import for config portability"
@@ -28,9 +28,9 @@ ARCH-STORAGE:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
-  name: "Storage Strategy"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: clarify settings vs bookmark backends"
+  name: "Chrome Storage Settings Strategy"
   rationale:
     benefits:
       - "Cross-device settings"
@@ -40,10 +40,14 @@ ARCH-STORAGE:
       - "Settings lost across devices"
     why: "Cross-device sync and privacy preservation"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "REQ-CHROME_STORAGE_USAGE"
+      - "REQ-CONFIG_PORTABILITY"
     informs:
       - "IMPL-STORAGE"
-    see_also: []
+    see_also:
+      - "ARCH-CONFIG_STRUCTURE"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
   status: "Active"
   traceability:
     code_annotations:

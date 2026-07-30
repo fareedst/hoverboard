@@ -1,28 +1,41 @@
 ARCH-CONFIG_STRUCTURE:
   alternatives_considered: []
-  cross_references: []
-  decision: "Thin architecture stub for ARCH-CONFIG_STRUCTURE."
+  cross_references:
+    - "ARCH-AI_TAGGING_CONFIG"
+    - "ARCH-STORAGE"
+    - "REQ-CONFIGURATION"
+  decision: "Umbrella for ConfigManager-owned hoverboard_settings shape and options UI sections. Concrete AI key/provider fields live under ARCH-AI_TAGGING_CONFIG; storageMode under ARCH-STORAGE_INDEX_AND_ROUTER / providers."
   implementation_approach:
-    summary: ""
+    details:
+      - "Central ConfigManager for extension settings"
+      - "Owning children: ARCH-AI_TAGGING_CONFIG, ARCH-STORAGE (settings keys), storageMode on router"
+    summary: "ConfigManager defaultConfig + getStoredSettings/updateConfig; options page sections; chrome.storage.sync/local via ARCH-STORAGE."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: flesh empty shell as umbrella"
   name: "Config Structure"
   rationale:
     why: "Configuration structure architecture"
   related_decisions:
-    depends_on: []
-    informs: []
-    see_also: []
+    depends_on:
+      - "REQ-CONFIGURATION"
+    informs:
+      - "IMPL-STORAGE"
+    see_also:
+      - "ARCH-AI_TAGGING_CONFIG"
+      - "ARCH-STORAGE"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
   status: "Active"
   traceability:
     code_annotations:
       - "ARCH-CONFIG_STRUCTURE"
-    implementation: []
-    requirements: []
+    implementation:
+      - "IMPL-STORAGE"
+    requirements:
+      - "REQ-CONFIGURATION"
     tests: []

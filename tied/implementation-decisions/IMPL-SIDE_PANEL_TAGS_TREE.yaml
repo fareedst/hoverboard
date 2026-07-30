@@ -112,15 +112,15 @@ IMPL-SIDE_PANEL_TAGS_TREE:
       - "Popup: footer button, UIManager emit, PopupController.handleOpenTagsTree bound; sends OPEN_SIDE_PANEL, shows success or delegates error"
       - "Service worker: OPEN_SIDE_PANEL handled in onMessage listener only (no await before open). windowId from _sidePanelWindowId cache; chrome.sidePanel.open({ windowId }) called synchronously. _seedSidePanelWindowCache() seeds cache from active tab's normal window on startup. handleTabActivated updates _sidePanelWindowId when activated tab's window is normal."
       - "ui-action-contract: openTagsTree maps to OPEN_SIDE_PANEL"
-    summary: "Popup button sends OPEN_SIDE_PANEL; SW handles it in onMessage (synchronously, no await) using a cached normal windowId so chrome.sidePanel.open() runs in user-gesture context. Panel loads bookmarks via getAggregatedBookmarksForIndex; applies filter pipeline (time, tags, domain), sort, optional group; config region expandable/collapsible with state and filter/sort/group values persisted; tag selector + tree or grouped sections; click URL → openUrlInNewTab (chrome.tabs.create)."
+    summary: "Popup OPEN_SIDE_PANEL; panel loads getAggregatedBookmarksForIndex (local+file+sync+browser; no Pinboard); filter/sort/group; tag selector + tree; click URL opens new tab."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-21"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "ARCH close-out: aggregate includes Browser"
   name: "Side Panel Tags and Bookmarks Tree Implementation"
   rationale:
     benefits:

@@ -26,8 +26,8 @@ ARCH-EXAMPLE_DECISION:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Normalize token_coverage and validation_evidence keys"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 2: align detail status Template with index"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -41,7 +41,7 @@ ARCH-EXAMPLE_DECISION:
     depends_on: *ref_1
     informs: []
     see_also: []
-  status: "Active"
+  status: "Template"
   token_coverage:
     code_files: []
     tests: []

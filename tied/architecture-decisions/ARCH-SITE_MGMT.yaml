@@ -1,24 +1,34 @@
 ARCH-SITE_MGMT:
   alternatives_considered: []
-  cross_references: []
-  decision: "Thin architecture stub for ARCH-SITE_MGMT."
+  cross_references:
+    - "ARCH-PRIVACY"
+    - "REQ-SITE_MANAGEMENT"
+  decision: "Site management stores per-origin inhibit / feature flags in ConfigManager (hoverboard_settings) so overlay and auto-show respect site lists. Child of ARCH-PRIVACY for privacy-sensitive URL controls."
   implementation_approach:
-    summary: ""
+    details:
+      - "ConfigManager site lists"
+      - "Overlay and icon-click respect inhibit"
+    summary: "Options site management UI writes inhibit lists; content/overlay consult config before show."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: link REQ-SITE_MANAGEMENT and IMPL-SITE_MGMT"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: flesh site management"
   name: "Site Management"
   rationale:
     why: "Site management architecture"
   related_decisions:
-    depends_on: []
-    informs: []
-    see_also: []
+    depends_on:
+      - "REQ-SITE_MANAGEMENT"
+    informs:
+      - "IMPL-SITE_MGMT"
+    see_also:
+      - "ARCH-CONFIG_STRUCTURE"
+      - "ARCH-OVERLAY"
+      - "ARCH-PRIVACY"
   status: "Active"
   traceability:
     code_annotations:

@@ -7,7 +7,7 @@ ARCH-SERVICE_WORKER:
       rejected_reason: "Not V3 compatible"
   cross_references:
     - "REQ-MANIFEST_V3_MIGRATION"
-  decision: "Thin architecture stub for ARCH-SERVICE_WORKER."
+  decision: "Single MV3 service worker hosts MessageHandler, BookmarkRouter init, badge updates, and sidePanel.open. Child of ARCH-MV3_MIGRATION for REQ-MANIFEST_V3_MIGRATION; owns install/activate lifecycle and async message routing (IMPL-SERVICE_WORKER)."
   implementation_approach:
     details:
       - "Extension context integration"
@@ -20,8 +20,8 @@ ARCH-SERVICE_WORKER:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5/6: SW as MV3 child"
   name: "Service Worker Architecture"
   rationale:
     benefits:
@@ -32,11 +32,13 @@ ARCH-SERVICE_WORKER:
       - "V3 compliance"
     why: "V3 requirement, modern async patterns"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "ARCH-MV3_MIGRATION"
     informs:
       - "IMPL-SERVICE_WORKER"
     see_also:
-      - "ARCH-MV3_MIGRATION"
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
   status: "Active"
   traceability:
     code_annotations:

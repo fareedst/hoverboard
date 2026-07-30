@@ -1,5 +1,6 @@
 # [IMPL-SIDE_PANEL_BROWSER_BOOKMARKS] [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS] [REQ-SIDE_PANEL_BROWSER_BOOKMARKS]
-# This block defines the browser bookmarks panel: data fetch, flatten, folder tree, filter, UI, click to open. Implements REQ by listing Chrome bookmarks with folder path and favicon; real-time search; folder filter; implements ARCH by chrome.bookmarks API and visible-list actions.
+# This block defines the browser bookmarks panel: data fetch, flatten, folder tree, filter, UI, click to open. Implements REQ by listing Chrome bookmarks with folder path and favicon; real-time search; folder filter; implements ARCH by direct chrome.bookmarks tree UX.
+# Boundary: this panel is NOT Store B / IMPL-BROWSER_BOOKMARK_SERVICE (BookmarkRouter peer). Panel owns direct tree UI; Store B is the fifth router backend for Index/Save-to/move.
 
 INPUT: searchQuery (string), selectedFolderId (string | null), bookmarks from chrome.bookmarks.getTree
 OUTPUT: visible bookmarks (filtered), click URL opens in new tab

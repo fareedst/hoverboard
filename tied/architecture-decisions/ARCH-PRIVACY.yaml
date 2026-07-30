@@ -1,24 +1,33 @@
 ARCH-PRIVACY:
   alternatives_considered: []
-  cross_references: []
-  decision: "Thin architecture stub for ARCH-PRIVACY."
+  cross_references:
+    - "ARCH-SITE_MGMT"
+    - "REQ-PRIVACY_CONTROLS"
+  decision: "Umbrella for privacy-sensitive settings: inhibit URL / site management, private bookmark flags, and no external storage of credentials beyond configured AI/Pinboard tokens. Owning children: ARCH-SITE_MGMT, ARCH-STORAGE (settings locality)."
   implementation_approach:
-    summary: ""
+    details:
+      - "Owning children: ARCH-SITE_MGMT for inhibit lists"
+      - "Pinboard/AI tokens stay in chrome.storage per ARCH-STORAGE / AI config"
+    summary: "Privacy controls via ConfigManager site lists and bookmark shared/toread/private semantics; no telemetry architecture."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: link REQ-PRIVACY_CONTROLS and IMPL-PRIVACY"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: flesh privacy umbrella"
   name: "Privacy"
   rationale:
     why: "Privacy controls architecture"
   related_decisions:
-    depends_on: []
-    informs: []
-    see_also: []
+    depends_on:
+      - "REQ-PRIVACY_CONTROLS"
+    informs:
+      - "IMPL-PRIVACY"
+    see_also:
+      - "ARCH-SITE_MGMT"
+      - "ARCH-STORAGE"
   status: "Active"
   traceability:
     code_annotations:

@@ -20,7 +20,7 @@ ARCH-ERROR_HANDLING:
       rejected_reason: "Why rejected or why chosen"
   cross_references:
     - "REQ-ERROR_HANDLING"
-  decision: "Thin architecture stub for ARCH-ERROR_HANDLING."
+  decision: "Template placeholder for a project-wide error strategy. Living practice: message envelope errors, provider failure returns, and structured logging (ARCH-STRUCTURED_LOGGING). Keep status Template until real content replaces placeholders."
   implementation_approach:
     details:
       - "Error logging approach"
@@ -33,8 +33,8 @@ ARCH-ERROR_HANDLING:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: Template points at living practice"
   name: "Error Handling Strategy"
   rationale:
     benefits:
@@ -47,7 +47,9 @@ ARCH-ERROR_HANDLING:
       - "REQ-ERROR_HANDLING"
     informs:
       - "IMPL-ERROR_HANDLING"
-    see_also: []
+    see_also:
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-STRUCTURED_LOGGING"
   status: "Template"
   traceability:
     code_annotations:

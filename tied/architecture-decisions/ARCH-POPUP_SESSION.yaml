@@ -13,7 +13,7 @@ ARCH-POPUP_SESSION:
   cross_references:
     - "REQ-POPUP_PERSISTENT_SESSION"
     - "REQ-RECENT_TAGS_SYSTEM"
-  decision: "Thin architecture stub for ARCH-POPUP_SESSION."
+  decision: "Popup stays open across actions: PopupController routes handlers, UIManager/state update without window.close. Primary owner of REQ-POPUP_PERSISTENT_SESSION. Child of umbrella ARCH-UX_CORE for core UX preservation."
   implementation_approach:
     details:
       - "Overlay toggle with GET_OVERLAY_STATE fallback"
@@ -28,8 +28,8 @@ ARCH-POPUP_SESSION:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 6: POPUP_SESSION owns persistent session REQ"
   name: "Popup Session Persistence Architecture"
   rationale:
     benefits:
@@ -40,7 +40,8 @@ ARCH-POPUP_SESSION:
       - "Workflow interruption"
     why: "Multi-action workflows without popup reopening"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "REQ-POPUP_PERSISTENT_SESSION"
     informs:
       - "IMPL-POPUP_SESSION"
     see_also:

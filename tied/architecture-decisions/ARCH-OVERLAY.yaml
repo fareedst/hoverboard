@@ -7,27 +7,24 @@ ARCH-OVERLAY:
         - "Simpler"
       rejected_reason: "Breaks flow"
   cross_references:
+    - "ARCH-OVERLAY_CONTROLS"
     - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
-    - "REQ-OVERLAY_CONTROL_LAYOUT"
-    - "REQ-OVERLAY_REFRESH_ACTION"
     - "REQ-OVERLAY_SYSTEM"
-  decision: "Thin architecture stub for ARCH-OVERLAY."
+  decision: "Parent architecture for the in-page hover overlay system (show/hide, auto-show, transparency, content). Control layout geometry is owned by child ARCH-OVERLAY_CONTROLS; testability by ARCH-OVERLAY_TESTABILITY. REQ-OVERLAY_SYSTEM and REQ-OVERLAY_AUTO_SHOW_CONTROL primary here; layout/refresh REQs primary on ARCH-OVERLAY_CONTROLS."
   implementation_approach:
     details:
       - "Configurable auto-show on page load"
-      - "Fixed control layout (8px, 40px spacing)"
-      - "Hover-based activation"
-      - "Refresh control for current data"
-      - "Transparency controls"
-    summary: "Semi-transparent overlay with hover activation, auto-show controls, refresh action"
+      - "Control layout: see ARCH-OVERLAY_CONTROLS (Close 8px/8px; Refresh 8px/40px; 24px min touch)"
+      - "Hover-based activation and transparency"
+    summary: "Semi-transparent overlay with hover activation and auto-show; delegates fixed control positions to ARCH-OVERLAY_CONTROLS."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 6: overlay parent; defer layout to controls"
   name: "Overlay System Architecture"
   rationale:
     benefits:
@@ -38,10 +35,14 @@ ARCH-OVERLAY:
       - "Intrusive bookmark dialogs"
     why: "Non-intrusive bookmarking interface"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
+      - "REQ-OVERLAY_SYSTEM"
     informs:
       - "IMPL-OVERLAY"
-    see_also: []
+    see_also:
+      - "ARCH-OVERLAY_CONTROLS"
+      - "ARCH-OVERLAY_TESTABILITY"
   status: "Active"
   traceability:
     code_annotations:
@@ -50,7 +51,5 @@ ARCH-OVERLAY:
       - "IMPL-OVERLAY"
     requirements:
       - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
-      - "REQ-OVERLAY_CONTROL_LAYOUT"
-      - "REQ-OVERLAY_REFRESH_ACTION"
       - "REQ-OVERLAY_SYSTEM"
     tests: []

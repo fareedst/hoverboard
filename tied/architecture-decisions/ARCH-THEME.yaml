@@ -2,7 +2,7 @@ ARCH-THEME:
   alternatives_considered: []
   cross_references:
     - "REQ-DARK_THEME"
-  decision: "Thin architecture stub for ARCH-THEME."
+  decision: "Dark theme is the default UI appearance; user toggle persists preference via ConfigManager/chrome.storage and applies CSS variables across popup and side panel."
   implementation_approach:
     details:
       - "Dark theme default"
@@ -15,8 +15,8 @@ ARCH-THEME:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: real decision sentence"
   name: "Theme System Architecture"
   rationale:
     benefits:

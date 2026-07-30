@@ -1,28 +1,37 @@
 ARCH-PROJECT_STRUCTURE:
   alternatives_considered: []
-  cross_references: []
-  decision: "Thin architecture stub for ARCH-PROJECT_STRUCTURE."
+  cross_references:
+    - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+    - "REQ-MAINTAINABILITY"
+  decision: "Umbrella for src/ layout (shared, ui, service-worker, content) and bundled entry points. Concrete packaging lives under ARCH-EXTENSION_BUNDLED_ENTRY_POINTS and ARCH-SHARED_UTILITIES."
   implementation_approach:
-    summary: ""
+    details:
+      - "Owning children: ARCH-EXTENSION_BUNDLED_ENTRY_POINTS, ARCH-SHARED_UTILITIES, ARCH-LANGUAGE_SELECTION"
+    summary: "src/modules by concern; esbuild entry points; shared utilities without UI coupling."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: flesh empty shell as umbrella"
   name: "Project Structure"
   rationale:
     why: "Project structure architecture"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "REQ-MAINTAINABILITY"
     informs: []
-    see_also: []
+    see_also:
+      - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
+      - "ARCH-LANGUAGE_SELECTION"
+      - "ARCH-SHARED_UTILITIES"
   status: "Active"
   traceability:
     code_annotations:
       - "ARCH-PROJECT_STRUCTURE"
     implementation: []
-    requirements: []
+    requirements:
+      - "REQ-MAINTAINABILITY"
     tests: []

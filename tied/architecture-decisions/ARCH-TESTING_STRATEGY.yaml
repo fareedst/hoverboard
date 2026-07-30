@@ -13,7 +13,7 @@ ARCH-TESTING_STRATEGY:
         - "Pro 1"
       rejected_reason: "Why rejected or why chosen"
   cross_references: []
-  decision: "Thin architecture stub for ARCH-TESTING_STRATEGY."
+  decision: "Template placeholder. Living testing architecture is ARCH-UI_TESTABILITY (contracts, inspector, Playwright E2E) plus ARCH-CODE_QUALITY (lint/typecheck/audit). Do not treat this Template as Active practice."
   implementation_approach:
     details:
       - "End-to-end testing approach"
@@ -27,8 +27,8 @@ ARCH-TESTING_STRATEGY:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: Template points at living practice"
   name: "Testing Strategy"
   rationale:
     benefits:
@@ -40,7 +40,9 @@ ARCH-TESTING_STRATEGY:
     depends_on: []
     informs:
       - "IMPL-TESTING"
-    see_also: []
+    see_also:
+      - "ARCH-CODE_QUALITY"
+      - "ARCH-UI_TESTABILITY"
   status: "Template"
   traceability:
     code_annotations:

@@ -2,50 +2,61 @@ ARCH-URL_TAGS_DISPLAY:
   alternatives_considered: []
   benefits: "Normalization at the boundary; all consumers get tags as array and same badge value; popup re-fetches and merges on add/remove; getCurrentBookmark always queries router (no early return for no auth) so popup and badge share same data source; getTagsForUrl message exposes centralized tag storage for tests and UI."
   cross-references: "[REQ-URL_TAGS_DISPLAY](../requirements/REQ-URL_TAGS_DISPLAY.md), [REQ-BADGE_INDICATORS](../requirements/REQ-BADGE_INDICATORS.md), [REQ-PER_BOOKMARK_STORAGE_BACKEND](../requirements/REQ-PER_BOOKMARK_STORAGE_BACKEND.md), [IMPL-URL_TAGS_DISPLAY](../implementation-decisions/IMPL-URL_TAGS_DISPLAY.md)"
-  cross_references: &ref_0
+  cross_references:
     - "REQ-BADGE_INDICATORS"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-URL_TAGS_DISPLAY"
-  decision: "A single logical module owns \"tags for a URL\" and \"badge display value.\" Normalization (tags as array, required fields defaulted) happens at the boundary so badge, popup, and overlay all consume the same contract and never diverge. Storage and retrieval remain in BookmarkRouter and the four providers; this module sits on top and provides display normalization and badge value derivation."
+  decision: "A single logical module owns tags-for-a-URL and badge display value. Normalization (tags as array, required fields defaulted) happens at the boundary so badge, popup, and overlay consume the same contract. Storage and retrieval remain in BookmarkRouter and its five providers (pinboard|local|file|sync|browser); getBookmarkForUrl uses 2C browser exclusion from the best-of race. This module sits on top and provides display normalization and badge value derivation."
   detail_file: "architecture-decisions/ARCH-URL_TAGS_DISPLAY.yaml"
   implementation_approach:
-    details: []
-    summary: "URL-tags-manager module (normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue).\nhandleGetCurrentBookmark always calls router (no short-circuit when no Pinboard auth); returns normalized bookmark; sets needsAuth on result when !hasAuth.\nPopup getBookmarkData only treats as no bookmark when blocked; when needsAuth still uses returned bookmark and tags.\nGET_TAGS_FOR_URL message and handleGetTagsForUrl return tags from getTagsForUrl(bookmarkProvider, url).\nMessage handler and service worker use normalization; BadgeManager uses getBadgeDisplayValue for text/title.\nRouter and four providers own storage; URL-tags module owns display normalization and badge value derivation on top."
+    details:
+      - "Five providers via BookmarkRouter; browser subject to 2C race rule"
+      - "No early return when no Pinboard auth — router still queried"
+      - "normalizeBookmarkForDisplay / getBadgeDisplayValue single source for badge and popup"
+    summary: "URL-tags-manager (normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue). handleGetCurrentBookmark always calls router; sets needsAuth when !hasAuth. Popup uses returned bookmark when needsAuth. GET_TAGS_FOR_URL via getTagsForUrl. BadgeManager uses getBadgeDisplayValue. Router and five providers own storage; URL-tags module owns display normalization."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Close-out: scrub four-provider residue"
     last_validated:
       date: "2026-02-18"
       result: "pass"
       validator: "MCP converter"
   name: "URL Tags and Badge Single Source"
-  problems_solved: "Popup showing no tags when badge correct; add-tag losing prior tags; inconsistent tags shape across pinboard/local/file/sync; popup empty when no Pinboard auth although bookmark in local/file/sync."
+  problems_solved: "Popup showing no tags when badge correct; add-tag losing prior tags; inconsistent tags shape across pinboard/local/file/sync/browser; popup empty when no Pinboard auth although bookmark in local/file/sync/browser."
   rationale:
     benefits:
-      - "Normalization at the boundary; all consumers get tags as array and same badge value; popup re-fetches and merges on add/remove; getCurrentBookmark always queries router (no early return for no auth) so popup and badge share same data source; getTagsForUrl message exposes centralized tag storage for tests and UI."
+      - "Consistent tags shape across pinboard/local/file/sync/browser"
+      - "Popup shows tags when bookmark is in non-Pinboard backends without auth"
     problems_solved:
-      - "Popup showing no tags when badge correct; add-tag losing prior tags; inconsistent tags shape across pinboard/local/file/sync; popup empty when no Pinboard auth although bookmark in local/file/sync."
-    why: "Badge and popup were using the same router but different code paths and validation; popup could reject or show empty tags while badge was correct; adding a tag from popup used in-memory state and overwrote prior tags. When no Pinboard auth, getCurrentBookmark returned early with empty data and popup resolved null, so current tags stayed empty even when the bookmark was in local/file/sync."
+      - "Inconsistent tags shape across providers"
+      - "Popup empty when no Pinboard auth although bookmark in local/file/sync/browser"
+    why: "Badge and popup must share one normalized bookmark/tag contract across all router backends"
   related:
-    - "ARCH-STORAGE_INDEX_AND_ROUTER (router + four providers); ARCH-BADGE (badge system)."
+    - "ARCH-BADGE (badge system)"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER (router + five providers)"
   related_decisions:
-    depends_on: *ref_0
-    informs: []
-    see_also: []
+    depends_on:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    informs:
+      - "IMPL-URL_TAGS_DISPLAY"
+    see_also:
+      - "ARCH-BADGE"
   status: "Active"
-  summary: "A single logical module owns \"tags for a URL\" and \"badge display value.\" Normalization (tags as array, required fields defaulted) happens at the boundary so badge, popup, and overlay all consume the same contract and never diverge. Storage and retrieval remain in BookmarkRouter and the four providers; this module sits on top and provides display normalization and badge value derivation."
+  summary: "URL-tags-manager normalizes display/badge on top of BookmarkRouter and five providers (2C for browser in getBookmarkForUrl)."
   traceability:
     code_annotations:
       - "ARCH-URL_TAGS_DISPLAY"
+    implementation:
+      - "IMPL-URL_TAGS_DISPLAY"
+    requirements:
       - "REQ-BADGE_INDICATORS"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
       - "REQ-URL_TAGS_DISPLAY"
-    implementation: []
-    requirements: *ref_0
-    tests: []
+    tests:
+      - "tests/unit/url-tags-manager.test.js"
   why: "Badge and popup were using the same router but different code paths and validation; popup could reject or show empty tags while badge was correct; adding a tag from popup used in-memory state and overwrote prior tags. When no Pinboard auth, getCurrentBookmark returned early with empty data and popup resolved null, so current tags stayed empty even when the bookmark was in local/file/sync."

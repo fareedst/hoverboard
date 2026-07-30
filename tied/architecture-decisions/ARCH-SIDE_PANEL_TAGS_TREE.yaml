@@ -1,35 +1,30 @@
-# [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE]
-# Architecture: Chrome sidePanel API; single panel page; data from getAggregatedBookmarksForIndex;
-# open from popup via message to SW → chrome.sidePanel.open; UI: tag selector + order, then tree (tag → collapsible URLs); open URL via chrome.tabs.create.
 ARCH-SIDE_PANEL_TAGS_TREE:
   cross_references:
     - "REQ-SIDE_PANEL_TAGS_TREE"
   detail_file: "architecture-decisions/ARCH-SIDE_PANEL_TAGS_TREE.yaml"
   implementation_approach:
     details:
-      - "Config and expanded state persisted in chrome.storage.local"
-      - Config region: "expand/collapse toggle; when expanded shows time field (create | update), time range, tag include filter, domain filter, group-by, sort-by, sort-order, tag display order; when collapsed shows compact bar (e.g. \"Filters & view\" + chevron) to maximize space for bookmarks list"
-      - Data: "no new backend; same bookmarks as local index (local + file + sync; no Pinboard in this view)"
-      - Manifest: "sidePanel permission, side_panel.default_path to panel HTML"
-      - Open flow: "popup footer button → handler sends OPEN_SIDE_PANEL (or equivalent) → SW receives, gets windowId (e.g. from sender or chrome.windows.getCurrent), calls chrome.sidePanel.open({ windowId })"
-      - Panel page: "on load sends getAggregatedBookmarksForIndex; applies filters (time range by create/update, tags include, domain); sorts by chosen axis and direction; optionally groups by create date, update date, tag, or domain; renders tag selector (selected tags + order) and tree or grouped sections (collapsible); click URL → chrome.tabs.create({ url })"
-      - Tag selector: "compact layout (reduced gap, smaller font) to maximize space for bookmarks list; a control toggles between \"all tags\" and \"only checked tags\"; toggle state is part of panel config and persisted in chrome.storage.local"
-    summary: "Chrome sidePanel permission and default_path; panel is a dedicated extension page; data via getAggregatedBookmarksForIndex; popup sends message to SW which calls chrome.sidePanel.open({ windowId }); panel UI has a config region (expand/collapse) and tag selector then hierarchical tree or grouped list; clicking URL calls chrome.tabs.create({ url })."
+      - "Config and expanded state in chrome.storage.local"
+      - "Data: same bookmarks as local index aggregate (local+file+sync+browser; no Pinboard in this view)"
+      - "Open flow: popup → OPEN_SIDE_PANEL → chrome.sidePanel.open"
+      - "Tag selector + hierarchical tree; click URL → chrome.tabs.create"
+    summary: "Chrome sidePanel; data via getAggregatedBookmarksForIndex (local+file+sync+browser; no Pinboard); tag tree UI."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-21"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-25"
-      reason: "Add compact tag selector layout and all/checked toggle with persistence"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 1: tags tree aggregate includes browser"
   name: "Side Panel Tags and Bookmarks Tree Architecture"
   rationale:
     benefits:
-      - "Chrome sidePanel API; panel stays open across tabs; same data source as local bookmarks index (getAggregatedBookmarksForIndex)"
+      - "Includes Browser backend rows with Local/File/Sync"
+      - "Same data source as Local Bookmarks Index (getAggregatedBookmarksForIndex)"
     problems_solved:
       - "Full index page takes over a tab; no tag-centric hierarchy"
-    why: "Side panel provides persistent, non-intrusive view of tags and bookmarks; reuses existing index data."
+    why: "Side panel provides persistent tag-centric view of index-scoped bookmarks including Browser Store B"
   related_decisions:
     depends_on:
       - "REQ-SIDE_PANEL_TAGS_TREE"

@@ -356,15 +356,15 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
   essence_pseudocode: "Local/File/Sync: create -> time=now, updated_at=now; update -> keep time, updated_at=now. Pinboard: updated_at=time; never send to API. Normalize/legacy: updated_at=time if missing.\n"
   implementation_approach:
     details: []
-    summary: "LocalBookmarkService, FileBookmarkService, SyncBookmarkService: createEmptyBookmark and _normalizeBookmark include updated_at; saveBookmark sets time and updated_at on create (both now), preserves time and sets updated_at on update. PinboardService: parseBookmarkResponse and createEmptyBookmark set updated_at = time; do not send updated_at to API. url-tags-manager normalizeBookmarkForDisplay, bookmark-router moveBookmarkToStorage, PopupController empty pin, export/import CSV and JSON include updated_at; legacy read normalizes updated_at = time."
+    summary: "Local/File/Sync/Browser saveBookmark create/update time rules; Pinboard updated_at = time."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Remove safari/ mirror paths"
+      date: "2026-07-29"
+      reason: "ARCH close-out: include Browser"
   name: "Bookmark Create and Update Time Implementation"
   rationale:
     benefits: []
@@ -1505,7 +1505,8 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
         description: "LocalBookmarkService implementation"
   cross_references:
     - "ARCH-LOCAL_STORAGE_PROVIDER"
-    - "ARCH-STORAGE"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
   detail_file: "implementation-decisions/IMPL-LOCAL_BOOKMARK_SERVICE.yaml"
   implementation_approach:
@@ -1521,8 +1522,8 @@ IMPL-LOCAL_BOOKMARK_SERVICE:
       date: "2026-02-13"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-25"
-      reason: "Add message-handler-local-save-recall.test.js; local-bookmark-service shared/toread round-trip. Local storage mode implementation per plan"
+      date: "2026-07-29"
+      reason: "ARCH close-out: untangle ARCH-STORAGE"
     last_validated:
       date: "2026-02-13"
       result: "pass"
@@ -3926,6 +3927,7 @@ IMPL-SYNC_BOOKMARK_SERVICE:
       - path: "src/features/storage/sync-bookmark-service.js"
         description: "SyncBookmarkService implementation"
   cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
     - "ARCH-SYNC_STORAGE_PROVIDER"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
   detail_file: "implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml"
@@ -3937,13 +3939,13 @@ IMPL-SYNC_BOOKMARK_SERVICE:
       date: "2026-02-15"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-15"
-      reason: "Extracted from index to detail file"
+      date: "2026-07-29"
+      reason: "ARCH close-out: drop Fourth framing"
   name: "Sync Bookmark Service"
   rationale:
     benefits:
       - "Sync across Chrome profile devices; quota ~100 KB documented"
-    why: "Fourth storage backend using chrome.storage.sync; same provider contract as LocalBookmarkService"
+    why: "Peer storage backend (sync) under five-provider BookmarkRouter using chrome.storage.sync"
   status: "Active"
 IMPL-TAB_SEARCH_NO_MATCH_UI:
   code_locations:

@@ -2,7 +2,7 @@
 # This block defines the overall feature: side panel tags tree opened from popup; panel shows tag→urls tree; click URL opens in new tab. Implements REQ by providing the side-panel entry and tag-tree UX; implements ARCH by following the open-flow and data-flow decisions.
 INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
 OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
-DATA: bookmarks (from getAggregatedBookmarksForIndex), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
 
 # [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
 # Popup entry: implements requirement "open tags tree from popup" by sending OPEN_SIDE_PANEL. ARCH prescribes message-based open; this block is the popup side.
@@ -26,7 +26,7 @@ SW handleTabActivated: get tab.windowId; get window; IF type === 'normal' THEN _
 _seedSidePanelWindowCache: tabs.query({ active: true }); get window for tab.windowId; IF type === 'normal' THEN _sidePanelWindowId = window.id
 
 # [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE] [IMPL-LOCAL_BOOKMARKS_INDEX]
-# Panel load: implements tag tree data flow; uses getAggregatedBookmarksForIndex then load config, apply filters, sort, group, build tag map and tag list, render. Implements REQ filters/sort/group and config persistence.
+# Panel load: implements tag tree data flow; uses getAggregatedBookmarksForIndex (local+file+sync+browser; no Pinboard) then load config, apply filters, sort, group, build tag map and tag list, render. Implements REQ filters/sort/group and config persistence.
 ON panel page load:
   config = loadPanelConfig()  // expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder
   renderConfigToggle(config.expanded)  // compact bar when collapsed; full controls when expanded

@@ -1,4 +1,5 @@
 ARCH-CODE_QUALITY:
+  decision: "ESLint 10 flat config with Standard via @eslinter/eslint-config-standard; engines.node >= 20.19.0; security:check at audit-level=high with npm overrides for HIGH transitive deps."
   implementation_approach:
     details:
       - ".npmrc legacy-peer-deps=true until @eslinter/eslint-config-standard declares eslint ^10; then re-evaluate and remove if install passes"
@@ -11,7 +12,11 @@ ARCH-CODE_QUALITY:
       - "security:check: npm audit --audit-level=high"
     summary: "ESLint 10 eslint.config.mjs (Standard via @eslinter/eslint-config-standard); Node >= 20.19.0; security:check --audit-level=high; npm overrides for HIGH transitive deps; sharp ^0.35.3; Babel 7.29.7; esbuild ^0.28.1"
   metadata:
-    last_updated: "2026-07-28"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 2: add status; engines already >=20.19.0 in detail"
+  name: "Code Quality Tooling (ESLint and Security Audit)"
   rationale:
     benefits:
       - "Build passes while high/critical still fail validate; Node >= 20.19.0"
@@ -20,6 +25,7 @@ ARCH-CODE_QUALITY:
       - "ESLint 10 removes eslintrc; flat config only"
       - "Moderate vulnerabilities in tooling deps block build if audit-level=moderate"
     why: "Use ESLint 10 flat config with Standard-style preset; run security audit at high severity so builds do not fail on unfixable moderate transitive deps"
+  status: "Active"
   traceability:
     implementation:
       - "IMPL-CODE_STYLE"

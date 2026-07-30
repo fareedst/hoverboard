@@ -2,21 +2,28 @@ ARCH-FILE_BOOKMARK_PROVIDER:
   adapter_abstraction: "readBookmarksFile(), writeBookmarksFile(data). Enables unit tests with in-memory mock; real adapter uses File System Access (directory handle + getFileHandle + createWritable/read) in offscreen or options context."
   alternatives_considered: []
   cross-references: "REQ-FILE_BOOKMARK_STORAGE, ARCH-LOCAL_STORAGE_PROVIDER, IMPL-FILE_BOOKMARK_SERVICE"
-  cross_references: &ref_0 []
-  decision: "A third bookmark storage backend is **file-based**: a single user-chosen directory contains one JSON file (e.g. `hoverboard-bookmarks.json`). The **FileBookmarkService** implements the same provider contract as PinboardService and LocalBookmarkService. File I/O runs in a **document context** (offscreen document or options page) because MV3 service workers cannot use the File System Access API; the directory handle is stored in **IndexedDB**."
+  cross_references:
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-FILE_BOOKMARK_STORAGE"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+  decision: "FileBookmarkService is a BookmarkRouter peer provider (backend id file): one user-chosen directory holds hoverboard-bookmarks.json. Same provider contract as local/sync/browser/pinboard. File I/O runs in a document context (offscreen or options) because MV3 service workers cannot use File System Access; directory handle stored in IndexedDB. Historically described as the third backend after Pinboard and Local."
   detail_file: "architecture-decisions/ARCH-FILE_BOOKMARK_PROVIDER.yaml"
   file_format: "`{ \"version\": 1, \"bookmarks\": { \"<url>\": { ... } } }` — same bookmark shape as local storage."
   implementation_approach:
-    details: []
-    summary: "A third bookmark storage backend is **file-based**: a single user-chosen directory contains one JSON file (e.g. `hoverboard-bookmarks.json`). The **FileBookmarkService** implements the same provider contract as PinboardService and LocalBookmarkService. File I/O runs in a **document context** (offscreen document or options page) because MV3 service workers cannot use the File System Access API; the directory handle is stored in **IndexedDB**."
+    details:
+      - "Adapter abstraction for unit tests with in-memory mock"
+      - "Directory handle in IndexedDB; I/O from offscreen or options"
+      - "File format: { version: 1, bookmarks: { url: bookmark } }"
+      - "Registered in BookmarkRouter VALID_BACKENDS as file"
+    summary: "FileBookmarkService implements provider contract; adapter readBookmarksFile/writeBookmarksFile; real adapter uses File System Access in document context."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 1: File as peer backend"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -24,22 +31,32 @@ ARCH-FILE_BOOKMARK_PROVIDER:
   name: "File-Based Bookmark Provider"
   problem: "No way to store bookmarks in a cloud-synced folder or share a file with ad-hoc groups."
   rationale:
-    benefits: []
-    problems_solved: []
-    why: "See detail file"
+    benefits:
+      - "Cloud-sync friendly single file"
+      - "Same provider contract as other backends"
+    problems_solved:
+      - "No file-based bookmark store"
+    why: "Store bookmarks in a cloud-synced folder or shareable file as a peer backend"
   related:
     - "ARCH-LOCAL_STORAGE_PROVIDER (strategy pattern for providers)"
     - "IMPL-FILE_BOOKMARK_SERVICE (service and adapter implementation)"
   related_decisions:
-    depends_on: *ref_0
-    informs: []
-    see_also: []
+    depends_on:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    informs:
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+    see_also:
+      - "ARCH-LOCAL_STORAGE_PROVIDER"
   solution: "File-based provider with one file per directory; file format versioned for compatibility."
   status: "Active"
-  summary: "A third bookmark storage backend is **file-based**: a single user-chosen directory contains one JSON file (e.g. `hoverboard-bookmarks.json`). The **FileBookmarkService** implements the same provider contract as PinboardService and LocalBookmarkService. File I/O runs in a **document context** (offscreen document or options page) because MV3 service workers cannot use the File System Access API; the directory handle is stored in **IndexedDB**."
+  summary: "File-based BookmarkRouter peer: single JSON file in user directory; FSA in document context; IndexedDB handle."
   traceability:
     code_annotations:
       - "ARCH-FILE_BOOKMARK_PROVIDER"
-    implementation: []
-    requirements: *ref_0
-    tests: []
+    implementation:
+      - "IMPL-FILE_BOOKMARK_SERVICE"
+    requirements:
+      - "REQ-FILE_BOOKMARK_STORAGE"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    tests:
+      - "file-bookmark-service.test.js"

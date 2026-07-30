@@ -31,7 +31,7 @@ ARCH-BROWSER_BOOKMARK_PROVIDER:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Author browser bookmark provider architecture"
+      reason: "ARCH corpus Phase 1: provider depends on router only"
   name: "Browser Bookmarks Storage Provider"
   rationale:
     benefits:
@@ -44,11 +44,10 @@ ARCH-BROWSER_BOOKMARK_PROVIDER:
     depends_on:
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
     informs:
-      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
     see_also:
-      - "ARCH-BROWSER_BOOKMARK_IMPORT"
-      - "ARCH-LOCAL_STORAGE_PROVIDER"
-      - "ARCH-SYNC_STORAGE_PROVIDER"
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "ARCH-SIDE_PANEL_BROWSER_BOOKMARKS"
   status: "Active"
   traceability:
     implementation:

@@ -7,6 +7,8 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
         description: "same contract as local"
       - path: "src/features/storage/sync-bookmark-service.js"
         description: "same contract as local"
+      - path: "src/features/storage/browser-bookmark-service.js"
+        description: "same create/update time rules as local/file/sync"
       - path: "src/features/pinboard/pinboard-service.js"
         description: "parseBookmarkResponse, createEmptyBookmark updated_at = time"
       - path: "src/features/storage/url-tags-manager.js"
@@ -19,7 +21,6 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
         description: "export/import CSV updated_at"
       - path: "src/ui/bookmarks-table/bookmarks-table.js"
         description: "table display updated_at"
-    functions: []
   cross_references:
     - "ARCH-BOOKMARK_CREATE_UPDATE_TIMES"
     - "REQ-BOOKMARK_CREATE_UPDATE_TIMES"
@@ -27,11 +28,12 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
   essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARK_CREATE_UPDATE_TIMES-pseudocode.md"
   implementation_approach:
     details:
+      - "Browser: Chrome dateAdded maps to time on read; updated_at = time if missing; saveBookmark does not persist payload times"
       - "Local/File/Sync create: time = data.time || now; updated_at = data.updated_at || time"
       - "Local/File/Sync update: keep existing time; updated_at = now"
       - "Normalize/display/move/export/import: always include updated_at; if missing (legacy) use updated_at = time"
-      - "Pinboard: API returns only time; set updated_at = time in parseBookmarkResponse/createEmptyBookmark; never send updated_at to API"
-    summary: "Local/File/Sync saveBookmark: on create use non-empty data.time/data.updated_at when provided (import/restore), else now; on update keep existing time and set updated_at = now. Pinboard: updated_at = time; never send updated_at to API. Normalize/export/import always include updated_at (legacy missing -> time)."
+      - "Pinboard: API returns only time; set updated_at = time; never send updated_at to API"
+    summary: "Local/File/Sync: create honors payload times else now; update keeps time. Browser: read maps Chrome dateAdded to time/updated_at. Pinboard: updated_at = time."
   metadata:
     created:
       author: "AI Agent"
@@ -39,7 +41,7 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Create path honors payload time/updated_at for import"
+      reason: "ARCH close-out: Browser time via Chrome dateAdded on read"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -47,19 +49,21 @@ IMPL-BOOKMARK_CREATE_UPDATE_TIMES:
   name: "Bookmark Create and Update Time Implementation"
   rationale:
     benefits:
-      - "Every bookmark has time (create) and updated_at (last update); export/import and display use them"
+      - "Consistent time/updated_at for local/file/sync and Pinboard; Browser surfaces Chrome dateAdded as time on read"
     problems_solved:
-      - "No consistent create/update timestamps across local, file, sync, and Pinboard"
-    why: "Provider-specific rules for setting and normalizing time and updated_at."
+      - "No consistent create/update timestamps across providers"
+    why: "Provider-specific rules; Browser limited by chrome.bookmarks dateAdded."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-FILE_BOOKMARK_SERVICE"
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
       - "IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT"
       - "IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
     depends_on: []
     see_also:
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-FILE_BOOKMARK_SERVICE"
       - "IMPL-LOCAL_BOOKMARK_SERVICE"
       - "IMPL-URL_TAGS_DISPLAY"

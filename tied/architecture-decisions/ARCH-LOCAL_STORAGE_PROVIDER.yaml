@@ -2,48 +2,69 @@ ARCH-LOCAL_STORAGE_PROVIDER:
   alternatives_considered: []
   configmanager: "`storageMode` in default config (default `'local'`) and settings; `getStorageMode()` / `setStorageMode(mode)`; valid values `'pinboard'` | `'local'`."
   cross-references: "REQ-STORAGE_MODE_DEFAULT, ARCH-STORAGE, ARCH-PINBOARD_API, IMPL-LOCAL_BOOKMARK_SERVICE"
-  cross_references: &ref_0 []
-  decision: "The extension supports two bookmark storage modes: **Pinboard (cloud)**, using the Pinboard.in API, and **Local Storage (offline)**, using `chrome.storage.local`. A strategy pattern is used so that `MessageHandler` delegates all bookmark operations to an active **bookmark provider** chosen from user configuration (`storageMode`). The provider can be switched at runtime without reloading the extension."
+  cross_references:
+    - "ARCH-STORAGE"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+    - "REQ-STORAGE_MODE_DEFAULT"
+  decision: "LocalBookmarkService is one of five BookmarkRouter providers (backend id local), backed by chrome.storage.local. Historically the extension offered only Pinboard vs Local via storageMode; the router and StorageIndex now peer Local with pinboard, file, sync, and browser. MessageHandler still delegates through the active bookmarkProvider (the router). Default storage mode remains local (REQ-STORAGE_MODE_DEFAULT)."
   default: "The default storage mode is **local**. This is preferable for most users: no account or API token is required, and the extension works out of the box. Pinboard remains optional; users who want cloud sync can switch to \"Pinboard (cloud)\" in Options > Storage Mode."
   detail_file: "architecture-decisions/ARCH-LOCAL_STORAGE_PROVIDER.yaml"
   implementation_approach:
-    details: []
-    summary: "The extension supports two bookmark storage modes: **Pinboard (cloud)**, using the Pinboard.in API, and **Local Storage (offline)**, using `chrome.storage.local`. A strategy pattern is used so that `MessageHandler` delegates all bookmark operations to an active **bookmark provider** chosen from user configuration (`storageMode`). The provider can be switched at runtime without reloading the extension."
+    details:
+      - "BookmarkRouter delegates by StorageIndex / preferredBackend / defaultStorageMode"
+      - "Default storageMode is local (REQ-STORAGE_MODE_DEFAULT)"
+      - "Historical note: early strategy pattern was Pinboard|Local only; superseded by five-provider router"
+      - "LocalBookmarkService: same contract as other providers; chrome.storage.local key for bookmarks"
+    summary: "LocalBookmarkService implements the provider contract on chrome.storage.local. BookmarkRouter holds it alongside pinboard/file/sync/browser. ConfigManager storageMode default local; Options Storage Mode selects default among five backends."
   messagehandler: "Constructor accepts `bookmarkProvider`; all bookmark operations use `this.bookmarkProvider`; `setBookmarkProvider(provider)` for runtime swap."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 1: Local as one of five backends"
     last_validated:
       date: "2026-02-18"
       result: "pass"
       validator: "MCP converter"
-  name: "Local Storage Bookmark Provider (Strategy Pattern)"
+  name: "Local Storage Bookmark Provider"
   options_page: "Storage Mode section with radio buttons; Authentication section disabled (dimmed) when mode is local."
   problem: "The extension previously depended solely on the Pinboard API; there was no way to use the extension without an external service or to store bookmarks locally."
   rationale:
-    benefits: []
-    problems_solved: []
-    why: "See detail file"
+    benefits:
+      - "Default mode for new users"
+      - "Same provider contract as pinboard/file/sync/browser"
+      - "Works without external API"
+    problems_solved:
+      - "No offline-only option when only Pinboard existed"
+    why: "Provide offline-capable bookmark storage as one peer backend under the five-provider router"
   related:
     - "ARCH-PINBOARD_API (Pinboard provider)"
     - "ARCH-STORAGE (chrome.storage usage)"
     - "IMPL-LOCAL_BOOKMARK_SERVICE (local provider implementation)"
   related_decisions:
-    depends_on: *ref_0
-    informs: []
-    see_also: []
+    depends_on:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    informs:
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+    see_also:
+      - "ARCH-PINBOARD_API"
+      - "ARCH-STORAGE"
   service_worker: "Lazy `initBookmarkProvider()` from config; handles `SWITCH_STORAGE_MODE` by re-running init and responding; badge uses `this.bookmarkProvider`."
   solution: "Introduce a bookmark provider abstraction. Both `PinboardService` and `LocalBookmarkService` implement the same contract (duck-typed). The service worker resolves the active provider from `config.storageMode` and passes it to `MessageHandler`. The options page exposes a Storage Mode control and sends `SWITCH_STORAGE_MODE` so the service worker re-initializes the provider."
   status: "Active"
-  summary: "The extension supports two bookmark storage modes: **Pinboard (cloud)**, using the Pinboard.in API, and **Local Storage (offline)**, using `chrome.storage.local`. A strategy pattern is used so that `MessageHandler` delegates all bookmark operations to an active **bookmark provider** chosen from user configuration (`storageMode`). The provider can be switched at runtime without reloading the extension."
+  summary: "Local is a BookmarkRouter peer provider (chrome.storage.local); historically Pinboard|Local strategy; default storageMode local among five backends."
   traceability:
     code_annotations:
       - "ARCH-LOCAL_STORAGE_PROVIDER"
-    implementation: []
-    requirements: *ref_0
-    tests: []
+    implementation:
+      - "IMPL-LOCAL_BOOKMARK_SERVICE"
+    requirements:
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+      - "REQ-STORAGE_MODE_DEFAULT"
+    tests:
+      - "tests/unit/local-bookmark-service.test.js"
+      - "tests/unit/message-handler-local-save-recall.test.js"

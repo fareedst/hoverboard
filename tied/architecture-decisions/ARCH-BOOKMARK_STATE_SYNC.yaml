@@ -13,7 +13,7 @@ ARCH-BOOKMARK_STATE_SYNC:
       rejected_reason: "Inconsistent UX"
   cross_references:
     - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
-  decision: "Thin architecture stub for ARCH-BOOKMARK_STATE_SYNC."
+  decision: "After bookmark mutations on any router backend, broadcast BOOKMARK_UPDATED with a normalized payload so badge, popup, overlay, and side panel refresh without polling. Surfaces listen and re-fetch via router; preferredBackend/index remain authoritative for which store holds the URL."
   implementation_approach:
     details:
       - "Badge updates from payload"
@@ -27,8 +27,8 @@ ARCH-BOOKMARK_STATE_SYNC:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: multi-backend BOOKMARK_UPDATED"
   name: "Bookmark State Synchronization Architecture"
   rationale:
     benefits:
@@ -39,13 +39,16 @@ ARCH-BOOKMARK_STATE_SYNC:
       - "Race conditions"
     why: "Prevent desynchronized states across UI surfaces"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+      - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
     informs:
       - "IMPL-BOOKMARK_STATE_SYNC"
     see_also:
       - "ARCH-BADGE"
       - "ARCH-MESSAGE_HANDLING"
       - "ARCH-OVERLAY"
+      - "ARCH-POPUP_SESSION"
   status: "Active"
   traceability:
     code_annotations:

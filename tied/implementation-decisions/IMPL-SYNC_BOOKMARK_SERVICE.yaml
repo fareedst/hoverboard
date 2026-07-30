@@ -6,6 +6,7 @@ IMPL-SYNC_BOOKMARK_SERVICE:
     functions: []
   cross_references:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    - "ARCH-SYNC_STORAGE_PROVIDER"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
   detail_file: "implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-SYNC_BOOKMARK_SERVICE-pseudocode.md"
@@ -17,14 +18,16 @@ IMPL-SYNC_BOOKMARK_SERVICE:
       date: "2026-02-15"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "ARCH close-out: drop Fourth framing; prefer ARCH-SYNC_STORAGE_PROVIDER"
   name: "Sync Bookmark Service"
   rationale:
     benefits:
+      - "Same provider contract as LocalBookmarkService"
       - "Sync across Chrome profile devices; quota ~100 KB documented"
-    problems_solved: []
-    why: "Fourth storage backend using chrome.storage.sync; same provider contract as LocalBookmarkService"
+    problems_solved:
+      - "No chrome.storage.sync bookmark peer under BookmarkRouter"
+    why: "Peer storage backend (sync) under five-provider BookmarkRouter using chrome.storage.sync"
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"
@@ -38,6 +41,7 @@ IMPL-SYNC_BOOKMARK_SERVICE:
   traceability:
     architecture:
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
+      - "ARCH-SYNC_STORAGE_PROVIDER"
     code_annotations:
       - "IMPL-SYNC_BOOKMARK_SERVICE"
     requirements:

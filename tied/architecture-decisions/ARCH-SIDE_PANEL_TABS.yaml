@@ -1,5 +1,6 @@
 ARCH-SIDE_PANEL_TABS:
   cross_references:
+    - "REQ-RECENT_TAGS_SYSTEM"
     - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     - "REQ-SIDE_PANEL_TAGS_TREE"
   implementation_approach:
@@ -13,8 +14,8 @@ ARCH-SIDE_PANEL_TABS:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-02"
-      reason: "Tags tree tab scroll: panel scroll container; above-list div scrolls off; tree fills height"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 2: sync REQ-RECENT_TAGS_SYSTEM into detail"
   name: "Side Panel Tabs Architecture"
   rationale:
     benefits:
@@ -26,6 +27,7 @@ ARCH-SIDE_PANEL_TABS:
     why: "One panel page avoids multiple default_path entries; tabs let users switch between popup-equivalent and tags tree without losing context."
   related_decisions:
     depends_on:
+      - "REQ-RECENT_TAGS_SYSTEM"
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
       - "REQ-SIDE_PANEL_TAGS_TREE"
     informs:
@@ -35,18 +37,22 @@ ARCH-SIDE_PANEL_TABS:
     see_also:
       - "ARCH-EXTENSION_BUNDLED_ENTRY_POINTS"
       - "ARCH-SIDE_PANEL_TAGS_TREE"
+      - "ARCH-TAG_SYSTEM"
   status: "Active"
   traceability:
     code_annotations:
       - "ARCH-SIDE_PANEL_TABS"
     implementation:
+      - "IMPL-RECENT_TAGS_POPUP_REFRESH"
       - "IMPL-SIDE_PANEL_BOOKMARK"
       - "IMPL-SIDE_PANEL_TABS"
       - "IMPL-UIManager_SCOPED_ROOT"
     requirements:
+      - "REQ-RECENT_TAGS_SYSTEM"
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
       - "REQ-SIDE_PANEL_TAGS_TREE"
     tests:
+      - "tests/integration/window-focus-recent-tags-composition.integration.test.js"
       - "tests/playwright/extension-messaging.spec.js"
       - "tests/unit/side-panel-tabs.test.js"
       - "tests/unit/ui-manager-scoped-root.test.js"

@@ -13,7 +13,7 @@ ARCH-BADGE:
       rejected_reason: "Need dynamic state"
   cross_references:
     - "REQ-BADGE_INDICATORS"
-  decision: "Thin architecture stub for ARCH-BADGE."
+  decision: "BadgeManager sets per-tab badge text/color from getBadgeDisplayValue (ARCH-URL_TAGS_DISPLAY) so toolbar reflects bookmark/tag state for the active URL."
   implementation_approach:
     details:
       - "Bookmark status indicators"
@@ -26,8 +26,8 @@ ARCH-BADGE:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: real decision sentence"
   name: "Badge System Architecture"
   rationale:
     benefits:

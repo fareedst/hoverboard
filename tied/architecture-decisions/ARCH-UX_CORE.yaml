@@ -1,23 +1,23 @@
 ARCH-UX_CORE:
   alternatives_considered: []
   cross_references:
+    - "ARCH-POPUP_SESSION"
     - "REQ-CORE_UX_PRESERVATION"
-    - "REQ-POPUP_PERSISTENT_SESSION"
-  decision: "Thin architecture stub for ARCH-UX_CORE."
+  decision: "Umbrella for core UX preservation (REQ-CORE_UX_PRESERVATION). Popup session persistence (REQ-POPUP_PERSISTENT_SESSION) is owned by child ARCH-POPUP_SESSION; overlay visibility by ARCH-OVERLAY. UX_CORE does not re-specify PopupController routing."
   implementation_approach:
     details:
-      - "Overlay visibility reflected"
-      - "Popup stays open during actions"
-      - "State updates without closing"
-    summary: "Popup session persistence, multi-action support"
+      - "Overlay: ARCH-OVERLAY"
+      - "Popup session: ARCH-POPUP_SESSION"
+      - "Primary REQ: REQ-CORE_UX_PRESERVATION"
+    summary: "Umbrella pointing at ARCH-POPUP_SESSION and ARCH-OVERLAY for concrete persistence and overlay UX."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 6: UX_CORE umbrella vs POPUP_SESSION"
   name: "User Experience Architecture"
   rationale:
     benefits:
@@ -28,10 +28,13 @@ ARCH-UX_CORE:
       - "Tedious workflows"
     why: "Preserve essential user workflows"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "REQ-CORE_UX_PRESERVATION"
     informs:
       - "IMPL-UX_CORE"
-    see_also: []
+    see_also:
+      - "ARCH-OVERLAY"
+      - "ARCH-POPUP_SESSION"
   status: "Active"
   traceability:
     code_annotations:
@@ -40,5 +43,4 @@ ARCH-UX_CORE:
       - "IMPL-UX_CORE"
     requirements:
       - "REQ-CORE_UX_PRESERVATION"
-      - "REQ-POPUP_PERSISTENT_SESSION"
     tests: []

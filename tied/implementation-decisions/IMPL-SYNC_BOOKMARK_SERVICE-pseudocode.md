@@ -1,5 +1,5 @@
-# [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
-# chrome.storage.sync provider; same contract as LocalBookmarkService; quota ~100 KB.
+# [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-SYNC_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+# chrome.storage.sync peer provider under five-provider BookmarkRouter; same contract as LocalBookmarkService; quota ~100 KB.
 # Contract: url/bookmark/tag inputs and provider-shaped outputs; sync key and shape.
 INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
 OUTPUT: bookmark object or list of bookmarks or success/error; same provider contract as LocalBookmarkService

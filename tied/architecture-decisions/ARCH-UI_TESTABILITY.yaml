@@ -1,4 +1,5 @@
 ARCH-UI_TESTABILITY:
+  decision: "Shared ui-action-contract and optional ui-inspector ring buffers; Playwright extension E2E and side-panel snapshot helpers prove popup/SW/content/side-panel action contracts."
   implementation_approach:
     details:
       - "E2E specs: extension-popup.spec.js, extension-messaging.spec.js, extension-evaluation.spec.js, extension-lower.spec.js (run: npm run test:e2e:extension)"
@@ -7,6 +8,12 @@ ARCH-UI_TESTABILITY:
       - "Service worker records each message after handleMessage; popup/content recordAction at start of handlers"
       - E2E snapshot helpers: "snapshotPopup, snapshotOverlay, snapshotOptions, snapshotSidePanel (Bookmark tab + Tags tree tab)"
     summary: "ui-action-contract.js re-exports MESSAGE_TYPES and defines POPUP_ACTION_IDS/OVERLAY_ACTION_IDS; ui-inspector.js provides ring buffers and is wired in SW, popup, content; Playwright extension E2E (IMPL-PLAYWRIGHT_E2E_EXTENSION) covers popup, messaging, evaluation contexts, overlay, options, side panel; E2E snapshot helpers (IMPL-SIDE_PANEL_SNAPSHOT) cover popup, overlay, options, and side panel (Bookmark tab + Tags tree tab) with serializable state shapes."
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 2: ensure detail status Active"
+  name: "UI Testability and Inspection Architecture"
   rationale:
     benefits:
       - "Contract module used by tests and inspector"
@@ -15,6 +22,7 @@ ARCH-UI_TESTABILITY:
       - "No shared contract between popup, content script, and service worker for inspection"
       - "Tests and E2E cannot reliably assert on message flow and UI actions"
     why: "Single source of truth for message types and action IDs; optional inspector for testing and debugging"
+  status: "Active"
   traceability:
     implementation:
       - "IMPL-PLAYWRIGHT_E2E_EXTENSION"

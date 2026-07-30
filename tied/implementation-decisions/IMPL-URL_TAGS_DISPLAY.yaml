@@ -40,8 +40,8 @@ IMPL-URL_TAGS_DISPLAY:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "ARCH close-out: five-backend URL tags language"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -53,10 +53,10 @@ IMPL-URL_TAGS_DISPLAY:
       - "Message handler and service worker use it; popup re-fetches and merges when adding/removing tag"
       - "normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue in one module"
     problems_solved:
-      - "Popup empty when no Pinboard auth although bookmark in local/file/sync"
+      - "Popup empty when no Pinboard auth although bookmark in local/file/sync/browser"
       - "Popup showing no tags when badge correct; adding tag losing prior tags"
-      - "Tags string vs array inconsistency across providers"
-    why: "Single source for tags-for-URL and badge display value; normalization at boundary so badge, popup, overlay use same contract."
+      - "Tags string vs array inconsistency across five providers"
+    why: "Single source for tags-for-URL and badge display value across pinboard/local/file/sync/browser; normalization at boundary."
   related_decisions:
     composed_with:
       - "IMPL-BADGE_REFRESH"

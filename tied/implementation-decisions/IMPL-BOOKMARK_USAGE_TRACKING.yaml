@@ -34,8 +34,8 @@ IMPL-BOOKMARK_USAGE_TRACKING:
       date: "2026-03-03"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "ARCH close-out: five-backend usage note"
     last_validated:
       date: "2026-03-03"
       result: "pass"
@@ -43,10 +43,11 @@ IMPL-BOOKMARK_USAGE_TRACKING:
   name: "Bookmark Usage Tracking Implementation"
   rationale:
     benefits:
-      - "Same URL normalization as rest of storage layer"
-      - "Testable in isolation with storage mocks"
-    problems_solved: []
-    why: "Single module for all usage and graph logic; URL normalization matches bookmark-router cleanUrl; message handler exposes getBookmarkUsage, getBookmarkUsageStats, getBookmarkNavigationGraph."
+      - "Usage/graph store independent of which BookmarkRouter backend owns the pin"
+      - "Works for pinboard/local/file/sync/browser without provider schema changes"
+    problems_solved:
+      - "Avoid coupling visit/graph data to bookmark provider records"
+    why: "Keep usage tracking separate from five bookmark backends so providers stay Pinboard-compatible."
   related_decisions:
     composed_with:
       - "IMPL-MESSAGE_HANDLING"

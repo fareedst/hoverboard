@@ -26,18 +26,19 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
   essence_pseudocode_path: "implementation-decisions/IMPL-BROWSER_BOOKMARK_IMPORT-pseudocode.md"
   implementation_approach:
     details:
-      - "browser-bookmark-import-utils.js: sanitizeTag, folderPathToTags, parseExtraTags, flattenTree (recurse nodes; if node.url push { id, url, title, dateAdded, folderPath })"
-      - "Conflict: getAggregatedBookmarksForIndex (or getLocalBookmarksForIndex) -> existingByUrl; for each selected URL if in existing: Skip->skip; Overwrite->send; Merge->merge tags + existing description/extended then send"
+      - "browser-bookmark-import-utils.js: sanitizeTag, folderPathToTags, parseExtraTags, flattenTree"
+      - "Conflict: getAggregatedBookmarksForIndex -> existingByUrl; Skip/Overwrite/Merge"
+      - "Import to Local|File|Sync only; Browser intentionally excluded as target (source is chrome.bookmarks); Index Import may target Store B"
       - "Tag sanitization: folder path segments and extra tags -> lowercase, non-alphanumeric to underscore, dedupe"
-    summary: "src/ui/browser-bookmark-import/ with HTML (header, toolbar, table, actions), JS (loadBrowserBookmarks, flattenTree, applySearchAndFilter, runImport), CSS; popup and options entry."
+    summary: "Browser Bookmark Import page: getTree source; Import to Local|File|Sync; Browser excluded as Import-to target."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "ARCH close-out: document Browser Import-to exclusion"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -45,10 +46,10 @@ IMPL-BROWSER_BOOKMARK_IMPORT:
   name: "Browser Bookmark Import Implementation"
   rationale:
     benefits:
-      - "getTree + flattenTree with folderPath; toolbar search + folder filter; table with selection; conflict mode (Skip/Overwrite/Merge); folder names + extra tags; Import to dropdown; saveBookmark per row; result message"
+      - "getTree + flattenTree; conflict Skip/Overwrite/Merge; folder+extra tags; Import to Local|File|Sync (Browser excluded); saveBookmark per row"
     problems_solved:
-      - "No UI or logic for importing browser bookmarks into Hoverboard"
-    why: "Implement browser bookmark import page with getTree, flatten, filters, selection, conflict resolution, tags, and saveBookmark loop."
+      - "No UI for importing browser bookmarks into Hoverboard-owned backends"
+    why: "Chrome tree is the source; exclude Browser as Import-to to avoid targeting the same native tree as destination."
   related_decisions:
     composed_with:
       - "IMPL-BOOKMARK_ROUTER"

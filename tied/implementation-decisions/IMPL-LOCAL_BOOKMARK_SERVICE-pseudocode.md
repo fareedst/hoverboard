@@ -1,5 +1,6 @@
-# [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [ARCH-STORAGE] [REQ-STORAGE_MODE_DEFAULT]
-# chrome.storage.local bookmark provider; same contract as Pinboard; keyed by URL.
+# [IMPL-LOCAL_BOOKMARK_SERVICE] [ARCH-LOCAL_STORAGE_PROVIDER] [REQ-STORAGE_MODE_DEFAULT] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
+# chrome.storage.local bookmark provider (one of five BookmarkRouter peers); same contract as Pinboard; keyed by URL.
+# ARCH-STORAGE is settings/portability only — not this bookmark backend.
 # Contract: url/bookmark/tag inputs and provider-shaped outputs; storage key and shape.
 INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
 OUTPUT: bookmark object or list of bookmarks or success/error; shape matches provider contract

@@ -4,18 +4,22 @@ ARCH-SYNC_STORAGE_PROVIDER:
     - "ARCH-STORAGE_INDEX_AND_ROUTER"
     - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     - "REQ-STORAGE_MODE_DEFAULT"
-  decision: "Thin architecture stub for ARCH-SYNC_STORAGE_PROVIDER."
+  decision: "SyncBookmarkService is a BookmarkRouter peer provider (backend id sync) mirroring LocalBookmarkService on chrome.storage.sync (key hoverboard_sync_bookmarks). Quota ~100 KB is a documented constraint. Historically the fourth backend after pinboard/local/file; now one of five peers including browser."
   implementation_approach:
-    summary: "SyncBookmarkService mirrors LocalBookmarkService using chrome.storage.sync and key hoverboard_sync_bookmarks; VALID_BACKENDS and BookmarkRouter extended with sync."
+    details:
+      - "IMPL-SYNC_BOOKMARK_SERVICE implements provider contract"
+      - "Included in getAllBookmarksForIndex and getRecentBookmarks aggregates"
+      - "Key hoverboard_sync_bookmarks in chrome.storage.sync"
+    summary: "SyncBookmarkService on chrome.storage.sync; registered in BookmarkRouter VALID_BACKENDS; same contract as local/file/browser."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
-  name: "Sync Storage Bookmark Provider (Fourth Backend)"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 1: Sync as peer backend"
+  name: "Sync Storage Bookmark Provider"
   rationale:
     benefits:
       - "Quota ~100 KB; documented so users can choose"
@@ -24,9 +28,12 @@ ARCH-SYNC_STORAGE_PROVIDER:
       - "No built-in sync option besides Pinboard"
     why: "Offer bookmarks synced across Chrome profile devices without external API; same provider contract as local/file"
   related_decisions:
-    depends_on: []
-    informs: []
-    see_also: []
+    depends_on:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
+    informs:
+      - "IMPL-SYNC_BOOKMARK_SERVICE"
+    see_also:
+      - "ARCH-LOCAL_STORAGE_PROVIDER"
   status: "Active"
   traceability:
     implementation:

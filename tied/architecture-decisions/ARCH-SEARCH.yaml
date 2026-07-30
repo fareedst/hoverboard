@@ -1,24 +1,37 @@
 ARCH-SEARCH:
   alternatives_considered: []
-  cross_references: []
-  decision: "Thin architecture stub for ARCH-SEARCH."
+  cross_references:
+    - "ARCH-SIDE_PANEL_BOOKMARK_SEARCH"
+    - "ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK"
+    - "REQ-SEARCH_FUNCTIONALITY"
+  decision: "Umbrella for search UX across surfaces. Concrete architectures: ARCH-SIDE_PANEL_BOOKMARK_SEARCH (This Page / By Tag search), ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK (Tabs tab), and client-side search on Local Bookmarks Index / Browser bookmarks panel. No separate cross-surface search engine."
   implementation_approach:
-    summary: ""
+    details:
+      - "ARCH-SIDE_PANEL_BOOKMARK_SEARCH"
+      - "ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK"
+      - "Index page client-side filter; Browser bookmarks panel filterBrowserBookmarks"
+    summary: "Per-surface search owned by side-panel and index ARCH tokens; ARCH-SEARCH points REQ-SEARCH_FUNCTIONALITY at those children."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "LEAP: link REQ-SEARCH_FUNCTIONALITY and IMPL-SEARCH"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: SEARCH umbrella points at children"
   name: "Search"
   rationale:
     why: "Search functionality architecture"
   related_decisions:
-    depends_on: []
-    informs: []
-    see_also: []
+    depends_on:
+      - "REQ-SEARCH_FUNCTIONALITY"
+    informs:
+      - "IMPL-SEARCH"
+    see_also:
+      - "ARCH-LOCAL_BOOKMARKS_INDEX"
+      - "ARCH-SIDE_PANEL_BOOKMARK_SEARCH"
+      - "ARCH-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "ARCH-TAB_SEARCH_NO_MATCH_FEEDBACK"
   status: "Active"
   traceability:
     code_annotations:

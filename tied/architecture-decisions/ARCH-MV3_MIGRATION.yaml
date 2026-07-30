@@ -13,7 +13,7 @@ ARCH-MV3_MIGRATION:
       rejected_reason: "Prefer incremental migration"
   cross_references:
     - "REQ-MANIFEST_V3_MIGRATION"
-  decision: "Thin architecture stub for ARCH-MV3_MIGRATION."
+  decision: "Ship and maintain Manifest V3 (manifest_version 3, service worker background, V3 permissions). ARCH-MV3_MIGRATION owns the REQ-MANIFEST_V3_MIGRATION parent decision; ARCH-SERVICE_WORKER owns SW lifecycle and message routing as the child."
   implementation_approach:
     details:
       - "Preserved content script injection"
@@ -26,8 +26,8 @@ ARCH-MV3_MIGRATION:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5/6: MV3 parent decision"
   name: "Manifest V3 Migration Strategy"
   rationale:
     benefits:
@@ -38,7 +38,8 @@ ARCH-MV3_MIGRATION:
       - "V2 deprecation"
     why: "V3 required for Chrome Web Store, better security/performance"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "REQ-MANIFEST_V3_MIGRATION"
     informs:
       - "IMPL-MV3_MIGRATION"
     see_also:

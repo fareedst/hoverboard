@@ -24,7 +24,7 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Corpus remediation Phase 1: reconcile remaining four-provider prose with five backends"
+      reason: "ARCH corpus Phase 1: break circular depends_on with Browser provider"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -48,13 +48,14 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
     - "IMPL-STORAGE_INDEX, IMPL-BOOKMARK_ROUTER"
   related_decisions:
     depends_on:
-      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-FILE_BOOKMARK_PROVIDER"
       - "ARCH-LOCAL_STORAGE_PROVIDER"
+      - "ARCH-PINBOARD_API"
     informs:
       - "IMPL-BOOKMARK_ROUTER"
       - "IMPL-STORAGE_INDEX"
     see_also:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-MOVE_BOOKMARK_UI"
       - "ARCH-SYNC_STORAGE_PROVIDER"
   status: "Active"

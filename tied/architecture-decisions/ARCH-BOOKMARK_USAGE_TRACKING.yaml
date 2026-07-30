@@ -16,8 +16,8 @@ ARCH-BOOKMARK_USAGE_TRACKING:
       date: "2026-03-03"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-03"
-      reason: "Initial creation"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 4: five backends in usage tracking rationale"
     last_validated:
       date: "2026-03-03"
       result: "pass"
@@ -25,12 +25,12 @@ ARCH-BOOKMARK_USAGE_TRACKING:
   name: "Bookmark Usage Tracking Architecture"
   rationale:
     benefits:
-      - "Referrer captured at visit time via same mechanism as GET_TAB_REFERRERS"
+      - "Referrer captured at visit time via executeScript"
       - "Single source of usage/graph data regardless of which backend stores the bookmark"
     problems_solved:
       - "Avoiding schema changes to existing bookmark providers"
-      - "Where to capture referrer (service worker can executeScript in tab context)"
-    why: "Keep usage and graph data separate from bookmark records so all four backends (pinboard, local, file, sync) remain unchanged and Pinboard-compatible."
+      - "Where to capture referrer"
+    why: "Keep usage and graph data separate from bookmark records so all router-backed providers (pinboard, local, file, sync, browser) remain unchanged and Pinboard-compatible."
   related_decisions:
     depends_on:
       - "REQ-BOOKMARK_USAGE_TRACKING"

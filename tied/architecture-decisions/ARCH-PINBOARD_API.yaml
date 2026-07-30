@@ -15,7 +15,7 @@ ARCH-PINBOARD_API:
   cross_references:
     - "REQ-PINBOARD_COMPATIBILITY"
     - "REQ-SMART_BOOKMARKING"
-  decision: "Thin architecture stub for ARCH-PINBOARD_API."
+  decision: "PinboardService is BookmarkRouter provider #1 (backend id pinboard): token auth against Pinboard API with rate-limit/retry (429) and 401 handling; endpoints posts/get, posts/recent, posts/add, posts/delete. Peered with local/file/sync/browser under ARCH-STORAGE_INDEX_AND_ROUTER."
   implementation_approach:
     details:
       - "401 auth error handling"
@@ -28,8 +28,8 @@ ARCH-PINBOARD_API:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "ARCH corpus Phase 5: Pinboard as provider #1"
   name: "Pinboard API Integration Architecture"
   rationale:
     benefits:
@@ -40,10 +40,12 @@ ARCH-PINBOARD_API:
       - "Rate limiting issues"
     why: "Pinboard API is core data source"
   related_decisions:
-    depends_on: []
+    depends_on:
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
     informs:
       - "IMPL-PINBOARD_API"
-    see_also: []
+    see_also:
+      - "ARCH-LOCAL_STORAGE_PROVIDER"
   status: "Active"
   traceability:
     code_annotations:

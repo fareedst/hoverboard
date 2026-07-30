@@ -7,11 +7,14 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
   cross-references: "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT, IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT"
   cross_references:
     - "REQ-LOCAL_BOOKMARKS_INDEX_IMPORT"
-  decision: "Import is client-side: parse file (CSV/JSON), map to bookmark payload, use existing saveBookmark with preferredBackend; two modes (only new vs overwrite). No new backend message."
+  decision: "Client-side import on the index page via saveBookmark with preferredBackend Local|File|Sync|Browser. Distinct from ARCH-BROWSER_BOOKMARK_IMPORT (Chrome tree source page), which excludes Browser as Import-to because the source is already chrome.bookmarks. Index Import may target Store B so CSV/JSON can land in the browser backend."
   detail_file: "architecture-decisions/ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT.yaml"
   implementation_approach:
-    details: []
-    summary: "Import is implemented entirely on the index page in a dedicated Import fieldset (sibling of Actions for selected). Control order: conflict radios, Import to, Import button last, #import-result. User selects a file (CSV or JSON). CSV matches export format including Time and Updated. Each record is sent via existing saveBookmark with preferredBackend. Create path preserves payload time/updated_at [ARCH-BOOKMARK_CREATE_UPDATE_TIMES]. Only new filters allBookmarks; overwrite upserts. UI shows Importing… then final counts."
+    details:
+      - "Conflict modes Skip/Overwrite/Merge"
+      - "Distinct from Browser Bookmark Import page which excludes Browser as target"
+      - "Import to Local|File|Sync|Browser via preferredBackend"
+    summary: "Import CSV/JSON/Netscape on index page; preferredBackend Local|File|Sync|Browser; reuses saveBookmark."
   metadata:
     created:
       author: "AI Agent"
@@ -19,7 +22,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Import control group + create-time preserve via saveBookmark"
+      reason: "Close-out: restore Index Import Browser target (exclusion only on Browser Bookmark Import page)"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -27,13 +30,12 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
   name: "Local Bookmarks Index Import Architecture"
   rationale:
     benefits:
-      - "CSV format matches export (Title, URL, Tags, Time, Storage, Shared, To read, Notes); JSON accepts array or single object"
-      - "Reuses saveBookmark with preferredBackend (Local | File | Sync) so import targets the chosen storage"
-      - "Two modes (only new vs overwrite) implemented by filtering on in-memory allBookmarks before sending"
-      - Client-side only: "parse file in the index page; no new background message"
+      - "Clear distinction from Browser Bookmark Import page"
+      - "Import into all Hoverboard router backends including Store B"
+      - "Reuses saveBookmark path"
     problems_solved:
-      - "No import path for index data; users could export but not re-import or merge"
-    why: "Support import from file without adding backend complexity; reuse export format and existing save path."
+      - "Need to load bookmarks into Local/File/Sync/Browser from files"
+    why: "Bulk import into router-backed stores including Browser; Browser Bookmark Import page keeps Browser excluded as target"
   related:
     - "ARCH-LOCAL_BOOKMARKS_INDEX (index page this import extends)"
     - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT (same CSV/JSON format as export)"
@@ -47,7 +49,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
       - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"
   status: "Active"
-  summary: "Import is client-side in a dedicated Import control group: parse CSV/JSON (export format), send each record via saveBookmark with preferredBackend; only-new skips URLs in allBookmarks; overwrite sends all. Pending then final result in #import-result. No new backend message."
+  summary: "Import is client-side in a dedicated Import control group: parse CSV/JSON (export format), send each record via saveBookmark with preferredBackend Local|File|Sync|Browser; only-new skips URLs in allBookmarks; overwrite sends all. Pending then final result in #import-result. No new backend message. Distinct from Browser Bookmark Import page (Local|File|Sync only)."
   traceability:
     code_annotations:
       - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"
