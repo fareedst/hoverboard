@@ -292,6 +292,11 @@ IMPL-BADGE:
   essence_pseudocode_path: "implementation-decisions/IMPL-BADGE-pseudocode.md"
   implementation_approach:
     summary: ""
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Full-block three-way sync"
   name: "Badge"
   rationale:
     why: "Badge implementation"
@@ -301,6 +306,8 @@ IMPL-BADGE:
       - "ARCH-BADGE"
     requirements:
       - "REQ-BADGE_INDICATORS"
+    tests:
+      - "tests/unit/badge-manager.test.js"
 IMPL-BADGE_REFRESH:
   code_locations:
     files:
@@ -659,6 +666,11 @@ IMPL-BOOKMARKING:
   essence_pseudocode_path: "implementation-decisions/IMPL-BOOKMARKING-pseudocode.md"
   implementation_approach:
     summary: ""
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Full-block three-way sync"
   name: "Bookmarking"
   rationale:
     why: "Bookmarking implementation"
@@ -669,6 +681,9 @@ IMPL-BOOKMARKING:
       - "ARCH-UX_CORE"
     requirements:
       - "REQ-SMART_BOOKMARKING"
+    tests:
+      - "tests/unit/bookmarking-message-handler.test.js"
+      - "tests/unit/message-handler-contracts.test.js"
 IMPL-BROWSER_BOOKMARK_IMPORT:
   code_locations:
     files:
@@ -4016,6 +4031,11 @@ IMPL-STORAGE:
   essence_pseudocode_path: "implementation-decisions/IMPL-STORAGE-pseudocode.md"
   implementation_approach:
     summary: ""
+  metadata:
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Full-block three-way sync"
   name: "Storage"
   rationale:
     why: "Storage implementation"
@@ -4026,6 +4046,8 @@ IMPL-STORAGE:
     requirements:
       - "REQ-CHROME_STORAGE_USAGE"
       - "REQ-CONFIG_PORTABILITY"
+    tests:
+      - "tests/unit/config-manager.test.js"
 IMPL-STORAGE_INDEX:
   code_locations:
     files:

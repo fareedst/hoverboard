@@ -6,6 +6,371 @@
  * [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE]
  */
 
+/**
+ * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
+ * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] — Every bookmark has time (create) and updated_at (last update); provider-specific set/normalize; export/import include.
+ *
+ * ## PINBOARD
+ *
+ * - [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] — import create preserves CSV/JSON Time and Updated. How: Implements Pinboard behavior for IMPL-BOOKMARK_CREATE_UPDATE_TIMES.
+ * - Contract:
+ *   - INPUT: bookmark data (for save), API response (for Pinboard), raw record (for normalize)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: bookmark with time and updated_at set per provider and context
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: time = create time; updated_at = last update time
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: PINBOARD
+ *   - parseBookmarkResponse / createEmptyBookmark: SET updated_at = time (API has no updated_at)
+ *   - SEND to API: do NOT include updated_at
+ *   - How (sub-block): If missing updated_at set to time (legacy); include updated_at in payload/CSV/JSON.
+ *   - 1. Normalize (url-tags-manager, display, move, export/import):
+ *   - IF bookmark has no updated_at: SET updated_at = time   // legacy
+ *   - ELSE: keep updated_at
+ *   - Include updated_at in payload/CSV/JSON
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_USAGE_TRACKING_UI ===
+ * [IMPL-BOOKMARK_USAGE_TRACKING_UI] [ARCH-BOOKMARK_USAGE_TRACKING_UI] [REQ-BOOKMARK_USAGE_TRACKING] — Block 1: Surface 1 – This Page inline usage section. REQ: UI display of usage; ARCH: three surfaces; IMPL: popup/panel fetch and render.
+ *
+ * ## MAIN
+ *
+ * - 1c. Else: hide usageStatsSection. [REQ-BOOKMARK_USAGE_TRACKING] satisfaction: UI can query and display. How: 2d. Sort comparator: add visits (numeric), lastVisited (string compare).  display and sort.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): Block 2: Surface 2 – Index table Visits and Last Visited columns. ARCH: Index columns; IMPL: merge usage, render, sort.
+ *   - How (sub-block): 2a. On load: after getAggregatedBookmarksForIndex, send getBookmarkUsage() (no url) to get all usage array.
+ *   - How (sub-block): 2b. Build map url -> usage; for each bookmark b, set b.visits = map[b.url]?.visitCount ?? 0, b.lastVisited = map[b.url]?.lastVisitedAt ?? ''.
+ *   - How (sub-block): 2c. renderTableBody: for each row add <td class="col-visits"> and <td class="col-last-visited">; lastVisited uses timeDisplayMode (absolute/age).
+ *   - How (sub-block): Block 3: Surface 3 – Usage side-panel tab. ARCH: Usage tab; IMPL: initUsageTab, fetch stats and graph, render.
+ *   - How (sub-block): 3a. Tab state: TAB_USAGE = 'usage'; TAB_IDS include it; getVisibilityForTab returns usageVisible for activeTab === TAB_USAGE.
+ *   - How (sub-block): 3b. initUsageTab(): send getBookmarkUsageStats({ n: 10 }), getBookmarkNavigationGraph(); render Most Visited list (mostFrequent), Recently Visited list (mostRecent), Navigation Graph (edges grouped by sourceUrl).
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_USAGE_TRACKING_UI ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column; Stores L/F/S/B. Contract: page load and user actions; displayed table and filtered list; state data.
+ *
+ * ## LOAD_LOCAL_BOOKMARKS_INDEX
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: LOAD_LOCAL_BOOKMARKS_INDEX: aggregate first; treat error/success:false as failure even when bookmarks is []; then filter.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_LOCAL_BOOKMARKS_INDEX
+ *   - SEND getAggregatedBookmarksForIndex
+ *   - IF response has error OR success is false OR bookmarks is not an array:
+ *   - SEND getLocalBookmarksForIndex
+ *   - SET allBookmarks = response.bookmarks with storage "local"
+ *   - ELSE:
+ *   - SET allBookmarks = response.bookmarks (each item has storage "local"|"file"|"sync"|"browser")
+ *   - applySearchAndFilter()
+ *   - 1. ON page load:
+ *   - LOAD_LOCAL_BOOKMARKS_INDEX
+ *
+ * ## SHOULD_RELOAD_BOOKMARKS_ON_STORE_CHANGE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: Store checkbox change refilters; if cache empty and at least one store checked, reload (cold SW recovery).
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SHOULD_RELOAD_BOOKMARKS_ON_STORE_CHANGE
+ *   - RETURN allBookmarksLength == 0 AND allowedStoresSize > 0
+ *
+ * ## GET_ALLOWED_STORES
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: getAllowedStores includes browser when #store-browser checked; Move/Import-to targets include browser.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_ALLOWED_STORES
+ *   - SET from checked #store-local|#store-file|#store-sync|#store-browser → { local, file, sync, browser }
+ *   - How (sub-block): Apply stores filter, search, show-only, exclude tags; sort and render.
+ *
+ * ## APPLY_SEARCH_AND_FILTER
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Implements applySearchAndFilter() behavior for IMPL-LOCAL_BOOKMARKS_INDEX.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_SEARCH_AND_FILTER
+ *   - filteredBookmarks = allBookmarks
+ *   - APPLY stores filter (matchStoresFilter, getAllowedStores)
+ *   - APPLY search (text)
+ *   - APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)
+ *   - APPLY exclude tags (matchExcludeTags)
+ *   - SORT by sortKey (e.g. time desc)
+ *   - renderTableBody(filteredBookmarks); updateRowCount()
+ *
+ * ## BULK_DELETE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER] How: Bulk Delete uses row Storage column as preferredBackend; pending/final #delete-result mirrors Import status UX. Orchestrator: runBulkDelete (bookmarks-table-bulk-delete.js) for composition-testable wiring.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BULK_DELETE
+ *   - IF selectedUrls empty: RETURN
+ *   - runBulkDelete(urls, bookmarksByUrl, sendMessage, confirmFn, #delete-result, onAfterDelete):
+ *   - titles = descriptions for selected URLs from bookmarksByUrl
+ *   - IF NOT confirmFn(buildDeleteConfirmMessage(count, titles)): RETURN cancelled
+ *   - setDeleteResultPending(#delete-result)  # "Deleting…" warning color
+ *   - FOR each url IN urls:
+ *   - bookmark = lookup url in bookmarksByUrl
+ *   - payload = buildDeletePayload(bookmark)  # { url, preferredBackend from storage }
+ *   - SEND deleteBookmark with data = payload
+ *   - COUNT ok / fail from response
+ *   - onAfterDelete()  # CLEAR selectedUrls; loadBookmarks(); updateMoveControlsState()
+ *   - setDeleteResultFinal(#delete-result, formatDeleteResultMessage({ deleted: ok, failed: fail }))
+ *   - How (sub-block): buildDeletePayload(bookmark):
+ *   - IF bookmark missing or no url: RETURN null
+ *   - RETURN { url: bookmark.url, preferredBackend: lowercase(bookmark.storage) OR "local" }
+ *
+ * ## OPEN_BOOKMARKS_INDEX_TAB
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: concurrent cold-start messages share one in-flight initBookmarkProvider promise (createProviderInitMutex). OPEN_BOOKMARKS_INDEX_TAB: create index tab then dismiss already-open side panel (tab-create only; not page refresh). How: SW owns create+broadcast so popup/command/menu share one path; panel closes via REQUEST_SIDE_PANEL_CLOSE (icon-toggle semantics).
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OPEN_BOOKMARKS_INDEX_TAB
+ *   - url = runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html')
+ *   - tabs.create({ url })
+ *   - runtime.sendMessage({ type: REQUEST_SIDE_PANEL_CLOSE })
+ *   - How (sub-block): Entry points that call OPEN_BOOKMARKS_INDEX_TAB (not options href):
+ *   - 1. ON OPEN_BOOKMARKS_INDEX message: OPEN_BOOKMARKS_INDEX_TAB
+ *   - 2. ON command open-bookmarks-index: OPEN_BOOKMARKS_INDEX_TAB
+ *   - 3. ON context menu hoverboard-open-bookmarks-index: OPEN_BOOKMARKS_INDEX_TAB
+ *   - 4. Popup: bookmarksIndexBtn -> openBookmarksIndex -> SEND OPEN_BOOKMARKS_INDEX
+ *   - 5. Options: bookmarks-index-link href -> extension URL (no dismiss; out of scope)
+ *   - How (sub-block): Index page init must NOT send REQUEST_SIDE_PANEL_CLOSE (refresh must not re-dismiss after icon reopen).
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS ===
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] — Add/delete tags to selected bookmarks; parseTagsInput, mergeTags, removeTags, selectionStillVisible; saveBookmark per row. Parse comma-separated input; trim and dedupe case-insensitive.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] How: Logical block for IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - 1. parseTagsInput(raw): IF !raw || !raw.trim() RETURN []; parts = raw.split(',').map(s => s.trim()).filter(Boolean); seen = Set(); result = []; FOR p IN parts: low = p.toLowerCase(); IF !seen.has(low): seen.add(low); result.push(p); RETURN result
+ *   - How (sub-block): Merge new tags with existing; case-insensitive dedupe.
+ *   - 2. mergeTags(existingTags, newTags): existing = existingTags || []; new = newTags || []; lowerSet = Set(existing.map(t => String(t).toLowerCase())); result = [...existing]; FOR tag IN new: t = tag.trim(); IF t && !lowerSet.has(t.toLowerCase()): result.push(t); lowerSet.add(t.toLowerCase()); RETURN result
+ *   - How (sub-block): Remove given tags from existing list (case-insensitive).
+ *   - 3. removeTags(existingTags, tagsToRemove): removeSet = Set(tagsToRemove.map(t => String(t).trim().toLowerCase()).filter(Boolean)); RETURN existing.filter(t => !removeSet.has(String(t).toLowerCase()))
+ *   - How (sub-block): Return set of selected URLs that remain in filtered list.
+ *   - 4. selectionStillVisible(selectedUrls, filteredBookmarks): visibleUrls = Set(filteredBookmarks.map(b => b.url).filter(Boolean)); RETURN new Set([...selectedUrls].filter(url => visibleUrls.has(url)))
+ *   - How (sub-block): For each selected URL merge new tags and send saveBookmark; refresh and restore selection for still-visible.
+ *   - 5. addTagsToSelected(): newTags = parseTagsInput(addTagsInput.value); IF newTags.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildAddTagsPayload(b, newTags); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = ""; updateMoveControlsState()
+ *   - How (sub-block): For each selected URL remove tags and send saveBookmark; refresh and restore selection for still-visible.
+ *   - 6. deleteTagsFromSelected(): tagsToRemove = parseTagsInput(addTagsInput.value); IF tagsToRemove.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildRemoveTagsPayload(b, tagsToRemove); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = ""; updateMoveControlsState()
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT ===
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] — Export all/displayed/selected to CSV; buildCsv and programmatic download. Contract: scope and bookmark sets; CSV download and column shape.
+ *
+ * ## EXPORT_BOOKMARKS
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] How: Implements exportBookmarks(scope) behavior for IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.
+ * - Contract:
+ *   - INPUT: scope ('all' | 'displayed' | 'selected'), allBookmarks, filteredBookmarks, selectedUrls (set)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: CSV file download (Blob -> object URL -> <a download> click -> revoke)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: CSV header + rows; columns description, url, tags, time, storage, shared, toread, extended
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: EXPORT_BOOKMARKS
+ *   - IF scope = 'all': source = allBookmarks
+ *   - IF scope = 'displayed': source = filteredBookmarks
+ *   - IF scope = 'selected': source = allBookmarks FILTER url IN selectedUrls
+ *   - csvString = buildCsv(source)   // header row + one row per bookmark; escape quotes; storage Local|File|Sync|Browser
+ *   - filename = "hoverboard-bookmarks-{scope}-{ISO date}.csv"
+ *   - blob = new Blob([csvString]); url = createObjectURL(blob)
+ *   - trigger <a download=filename href=url> click; revokeObjectURL(url)
+ *   - How (sub-block): Disable export buttons when scope has no data.
+ *
+ * ## UPDATE_EXPORT_BUTTON_STATE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT] [REQ-LOCAL_BOOKMARKS_INDEX_EXPORT] How: Implements updateExportButtonState() behavior for IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT.
+ * - Contract:
+ *   - INPUT: scope ('all' | 'displayed' | 'selected'), allBookmarks, filteredBookmarks, selectedUrls (set)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: CSV file download (Blob -> object URL -> <a download> click -> revoke)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: CSV header + rows; columns description, url, tags, time, storage, shared, toread, extended
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: UPDATE_EXPORT_BUTTON_STATE
+ *   - DISABLE "Export selected" when selectedUrls.size === 0
+ *   - DISABLE "Export displayed" when filteredBookmarks.length === 0
+ *   - DISABLE "Export all" when allBookmarks.length === 0
+ *   - (called when selection or filter changes, e.g. from updateMoveControlsState)
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT ===
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] — Separate Import control group below Actions for selected; CSV/JSON import; Only new or Overwrite; saveBookmark per row; pending then final result in #import-result. Contract: file and mode and backend; counts and refreshed table; Import button is last control before result.
+ *
+ * ## RUN_IMPORT
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT] [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT] [REQ-LOCAL_BOOKMARKS_INDEX_IMPORT] — group is independent of selection actions. How: Implements runImport(file) behavior for IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT.
+ * - Contract:
+ *   - INPUT: file (CSV or JSON), mode (Only new | Overwrite), preferredBackend (Local | File | Sync | Browser), allBookmarks (existing set for "Only new")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: imported count, skipped count, failed count; refreshed table; #import-result pending then final | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: rows = array of { url, description, tags, time, updated_at, shared, toread, extended }; existingByUrl = set of url from allBookmarks
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_IMPORT
+ *   - text = read file as text
+ *   - rows = parseImportFile(text, filename)   // CSV -> parseCsv; JSON -> normalize array; skip empty url
+ *   - IF rows empty: SHOW error in #import-result (not pending/final success); RETURN
+ *   - IF mode = "Only new": rows = rows FILTER url NOT IN existingByUrl
+ *   - SHOW "Importing…" in #import-result WITH class is-pending   // accepted; warning color
+ *   - imported = 0; skipped = 0; failed = 0
+ *   - FOR each row IN rows:
+ *   - payload = { ...row, preferredBackend }   // includes time, updated_at from file when present
+ *   - response = SEND saveBookmark(payload)
+ *   - IF response.success: imported++
+ *   - ELSE: failed++
+ *   - loadBookmarks()   // refresh table
+ *   - SHOW "Imported N, skipped M, K failed" in #import-result WITH class is-final   // success color; clear is-pending
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE ===
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] — Regex find-and-replace on selected fields; applyRegexReplace (pure); regexReplaceSelected sends saveBookmark when changed. Pure function: build payload and set changed iff any selected field value changed.
+ *
+ * ## APPLY_REGEX_REPLACE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] How: Implements applyRegexReplace(bookmark, patternStr, replacementStr, options { title, url, tags, notes }) behavior for IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_REGEX_REPLACE
+ *   - TRY reg = new RegExp(patternStr, 'g')
+ *   - CATCH e RETURN { payload: null, error: e.message }
+ *   - IF !bookmark || !bookmark.url RETURN { payload: null, error: 'missing bookmark or url' }
+ *   - IF !patternStr || !patternStr.trim() RETURN { payload: null, error: 'empty pattern' }
+ *   - IF !options.title && !options.url && !options.tags && !options.notes RETURN { payload: null, error: 'no fields selected' }
+ *   - origDesc = String(bookmark.description ?? ''); origUrl = String(bookmark.url ?? ''); origTags = [...]; origExt = String(bookmark.extended ?? '')
+ *   - desc = origDesc; u = origUrl; tagsArr = [...]; ext = origExt
+ *   - TRY IF options.title: desc = desc.replace(reg, replacementStr); IF options.url: u = u.replace(reg, replacementStr); IF options.tags: tagsArr = ...; IF options.notes: ext = ext.replace(reg, replacementStr)
+ *   - CATCH e RETURN { payload: null, error: e.message }
+ *   - changed = (opts.title && desc !== origDesc) || (opts.url && u !== origUrl) || (opts.tags && tagsArr differs from origTags) || (opts.notes && ext !== origExt)
+ *   - payload = { url, description: desc, tags: tagsArr, extended: ext, preferredBackend, ...time/updated_at/shared/toread }
+ *   - RETURN { payload, error: null, changed }
+ *   - How (sub-block): Per selected URL apply regex; save only when changed; refresh and restore selection.
+ *
+ * ## REGEX_REPLACE_SELECTED
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] How: Implements regexReplaceSelected() behavior for IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: REGEX_REPLACE_SELECTED
+ *   - patternStr = regexInput.value.trim(); replacementStr = replacementInput.value
+ *   - IF !patternStr || selectedUrls.size === 0 RETURN
+ *   - options = { title, url, tags, notes } from checkboxes
+ *   - IF no field selected: show error; RETURN
+ *   - TRY RegExp(patternStr); CATCH: show error; RETURN
+ *   - byUrl = Map(allBookmarks: url -> bookmark)
+ *   - FOR url IN selectedUrls: b = byUrl.get(url); IF !b CONTINUE; result = applyRegexReplace(b, patternStr, replacementStr, options); IF result.error show and RETURN; IF !result.payload CONTINUE; IF result.changed === false CONTINUE; SEND saveBookmark(result.payload)
+ *   - urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); selectionStillVisible; renderTableBody(); clear error; updateMoveControlsState()
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE ===
+ */
 import { matchStoresFilter, parseTimeRangeValue, inTimeRange, matchExcludeTags as matchExcludeTagsFilter, getShowOnlyDefaultState, parseTagsInput, buildAddTagsPayload, buildRemoveTagsPayload, buildAddTagsConfirmMessage, buildRemoveTagsConfirmMessage, selectionStillVisible, applyRegexReplace, mergeUsageIntoBookmarks } from './bookmarks-table-filter.js'
 import { buildCsv, parseCsv } from './bookmarks-table-csv.js'
 import { formatTimeAbsolute, formatTimeAge } from './bookmarks-table-time.js'

@@ -1,3 +1,1021 @@
+/**
+ * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_USAGE_TRACKING ===
+ * [IMPL-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [REQ-BOOKMARK_USAGE_TRACKING] — Record visit and optional referrer; debounce; persist usage + nav edges in chrome.storage.local.
+ *
+ * ## RECORD_VISIT
+ *
+ * - [IMPL-BOOKMARK_USAGE_TRACKING] [ARCH-BOOKMARK_USAGE_TRACKING] [REQ-BOOKMARK_USAGE_TRACKING] How: Implements recordVisit(url, referrer?) behavior for IMPL-BOOKMARK_USAGE_TRACKING.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: RECORD_VISIT
+ *   - url = cleanUrl(url); if !url return
+ *   - IF now - _lastRecordedVisit[url] < DEBOUNCE_MS return  // debounce
+ *   - _lastRecordedVisit[url] = now
+ *   - usage = read usage[url] or create { visitCount:0, firstVisitedAt:'', lastVisitedAt:'', recentVisits:[] }
+ *   - usage.visitCount++; usage.lastVisitedAt = now; if !usage.firstVisitedAt then usage.firstVisitedAt = now
+ *   - usage.recentVisits = [now, ...usage.recentVisits].slice(0, RECENT_VISITS_CAP)
+ *   - write usage map
+ *   - IF referrer: ref = cleanUrl(referrer); IF ref && ref !== url && /^https?:/.test(ref): add/increment edge ref→url; write edges map
+ *   - 1. getUsage(url), getAllUsage(): read from storage; return normalized records
+ *   - 2. getMostFrequent(n), getMostRecent(n): sort by visitCount / lastVisitedAt; return top n
+ *   - 3. getInboundLinks(url): edges[url] or []
+ *   - 4. getOutboundLinks(url): all edges where sourceUrl === url (scan edges map)
+ *   - 5. getNavigationGraph(): all edges as { sourceUrl, targetUrl, count, ... }
+ *   - 6. clearUsage(url): delete usage[url]; delete edges[url]; remove url from any edge as sourceUrl
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_USAGE_TRACKING ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-FILE_STORAGE_TYPED_PATH ===
+ * [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] — User-typed path for file storage; Options persist path; native host read/write; initBookmarkProvider path vs picker. Contract: path input and storage; persisted path and file I/O via native host.
+ *
+ * ## RESOLVE_FILE_PATH
+ *
+ * - [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] How: Implements resolveFilePath(path) behavior for IMPL-FILE_STORAGE_TYPED_PATH.
+ * - Contract:
+ *   - INPUT: path string (user-typed, default ~/.hoverboard); read/write requests with path
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted path in hoverboard_file_storage_path; file contents read/written via native host
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: hoverboard_file_storage_path (storage); path -> if dir then path/hoverboard-bookmarks.json else path as file
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RESOLVE_FILE_PATH
+ *   - path = expand_tilde(path)  // IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE
+ *   - IF path ends with .json: RETURN path AS file
+ *   - ELSE: RETURN path + "/hoverboard-bookmarks.json"
+ *   - How (sub-block): Send native message to helper for read/write; return result.
+ *
+ * ## READ_BOOKMARKS_FILE
+ *
+ * - [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] How: Implements readBookmarksFile(path), writeBookmarksFile(path, data) behavior for IMPL-FILE_STORAGE_TYPED_PATH.
+ * - Contract:
+ *   - INPUT: path string (user-typed, default ~/.hoverboard); read/write requests with path
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted path in hoverboard_file_storage_path; file contents read/written via native host
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: hoverboard_file_storage_path (storage); path -> if dir then path/hoverboard-bookmarks.json else path as file
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: READ_BOOKMARKS_FILE
+ *   - path = resolveFilePath(path)
+ *   - SEND native message (type, path) to helper; helper reads/writes file; RETURN result
+ *   - How (sub-block): Prefer path adapter when path set; else picker adapter.
+ *
+ * ## INIT_BOOKMARK_PROVIDER
+ *
+ * - [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] How: Implements initBookmarkProvider() behavior for IMPL-FILE_STORAGE_TYPED_PATH.
+ * - Contract:
+ *   - INPUT: path string (user-typed, default ~/.hoverboard); read/write requests with path
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted path in hoverboard_file_storage_path; file contents read/written via native host
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: hoverboard_file_storage_path (storage); path -> if dir then path/hoverboard-bookmarks.json else path as file
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: INIT_BOOKMARK_PROVIDER
+ *   - IF path set in storage: USE NativeHostFileBookmarkAdapter(path)
+ *   - ELSE IF picker configured: USE MessageFileBookmarkAdapter
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-FILE_STORAGE_TYPED_PATH ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column; Stores L/F/S/B. Contract: page load and user actions; displayed table and filtered list; state data.
+ *
+ * ## LOAD_LOCAL_BOOKMARKS_INDEX
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: LOAD_LOCAL_BOOKMARKS_INDEX: aggregate first; treat error/success:false as failure even when bookmarks is []; then filter.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_LOCAL_BOOKMARKS_INDEX
+ *   - SEND getAggregatedBookmarksForIndex
+ *   - IF response has error OR success is false OR bookmarks is not an array:
+ *   - SEND getLocalBookmarksForIndex
+ *   - SET allBookmarks = response.bookmarks with storage "local"
+ *   - ELSE:
+ *   - SET allBookmarks = response.bookmarks (each item has storage "local"|"file"|"sync"|"browser")
+ *   - applySearchAndFilter()
+ *   - 1. ON page load:
+ *   - LOAD_LOCAL_BOOKMARKS_INDEX
+ *
+ * ## SHOULD_RELOAD_BOOKMARKS_ON_STORE_CHANGE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: Store checkbox change refilters; if cache empty and at least one store checked, reload (cold SW recovery).
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SHOULD_RELOAD_BOOKMARKS_ON_STORE_CHANGE
+ *   - RETURN allBookmarksLength == 0 AND allowedStoresSize > 0
+ *
+ * ## GET_ALLOWED_STORES
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: getAllowedStores includes browser when #store-browser checked; Move/Import-to targets include browser.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_ALLOWED_STORES
+ *   - SET from checked #store-local|#store-file|#store-sync|#store-browser → { local, file, sync, browser }
+ *   - How (sub-block): Apply stores filter, search, show-only, exclude tags; sort and render.
+ *
+ * ## APPLY_SEARCH_AND_FILTER
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Implements applySearchAndFilter() behavior for IMPL-LOCAL_BOOKMARKS_INDEX.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_SEARCH_AND_FILTER
+ *   - filteredBookmarks = allBookmarks
+ *   - APPLY stores filter (matchStoresFilter, getAllowedStores)
+ *   - APPLY search (text)
+ *   - APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)
+ *   - APPLY exclude tags (matchExcludeTags)
+ *   - SORT by sortKey (e.g. time desc)
+ *   - renderTableBody(filteredBookmarks); updateRowCount()
+ *
+ * ## BULK_DELETE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER] How: Bulk Delete uses row Storage column as preferredBackend; pending/final #delete-result mirrors Import status UX. Orchestrator: runBulkDelete (bookmarks-table-bulk-delete.js) for composition-testable wiring.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BULK_DELETE
+ *   - IF selectedUrls empty: RETURN
+ *   - runBulkDelete(urls, bookmarksByUrl, sendMessage, confirmFn, #delete-result, onAfterDelete):
+ *   - titles = descriptions for selected URLs from bookmarksByUrl
+ *   - IF NOT confirmFn(buildDeleteConfirmMessage(count, titles)): RETURN cancelled
+ *   - setDeleteResultPending(#delete-result)  # "Deleting…" warning color
+ *   - FOR each url IN urls:
+ *   - bookmark = lookup url in bookmarksByUrl
+ *   - payload = buildDeletePayload(bookmark)  # { url, preferredBackend from storage }
+ *   - SEND deleteBookmark with data = payload
+ *   - COUNT ok / fail from response
+ *   - onAfterDelete()  # CLEAR selectedUrls; loadBookmarks(); updateMoveControlsState()
+ *   - setDeleteResultFinal(#delete-result, formatDeleteResultMessage({ deleted: ok, failed: fail }))
+ *   - How (sub-block): buildDeletePayload(bookmark):
+ *   - IF bookmark missing or no url: RETURN null
+ *   - RETURN { url: bookmark.url, preferredBackend: lowercase(bookmark.storage) OR "local" }
+ *
+ * ## OPEN_BOOKMARKS_INDEX_TAB
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: concurrent cold-start messages share one in-flight initBookmarkProvider promise (createProviderInitMutex). OPEN_BOOKMARKS_INDEX_TAB: create index tab then dismiss already-open side panel (tab-create only; not page refresh). How: SW owns create+broadcast so popup/command/menu share one path; panel closes via REQUEST_SIDE_PANEL_CLOSE (icon-toggle semantics).
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OPEN_BOOKMARKS_INDEX_TAB
+ *   - url = runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html')
+ *   - tabs.create({ url })
+ *   - runtime.sendMessage({ type: REQUEST_SIDE_PANEL_CLOSE })
+ *   - How (sub-block): Entry points that call OPEN_BOOKMARKS_INDEX_TAB (not options href):
+ *   - 1. ON OPEN_BOOKMARKS_INDEX message: OPEN_BOOKMARKS_INDEX_TAB
+ *   - 2. ON command open-bookmarks-index: OPEN_BOOKMARKS_INDEX_TAB
+ *   - 3. ON context menu hoverboard-open-bookmarks-index: OPEN_BOOKMARKS_INDEX_TAB
+ *   - 4. Popup: bookmarksIndexBtn -> openBookmarksIndex -> SEND OPEN_BOOKMARKS_INDEX
+ *   - 5. Options: bookmarks-index-link href -> extension URL (no dismiss; out of scope)
+ *   - How (sub-block): Index page init must NOT send REQUEST_SIDE_PANEL_CLOSE (refresh must not re-dismiss after icon reopen).
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-URL_TAGS_DISPLAY ===
+ * [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND] — normalizeBookmarkForDisplay, getBookmarkForDisplay, getTagsForUrl, getBadgeDisplayValue; handler and popup use router and re-fetch. Contract: bookmark or provider+url; normalized bookmark, tags, or badge value.
+ *
+ * ## NORMALIZE_BOOKMARK_FOR_DISPLAY
+ *
+ * - [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements normalizeBookmarkForDisplay(bookmark) behavior for IMPL-URL_TAGS_DISPLAY.
+ * - Contract:
+ *   - INPUT: bookmark (raw from provider), provider + url + title (for getBookmarkForDisplay), provider + url (for getTagsForUrl)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: normalized bookmark (tags array), tags array, badge display value (text, tagCount, flags)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: single module url-tags-manager; used by message-handler, service-worker, badge-manager, popup, bookmark-router
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: NORMALIZE_BOOKMARK_FOR_DISPLAY
+ *   - IF bookmark null: RETURN null or empty shape
+ *   - tags = bookmark.tags IF array ELSE (bookmark.tags split by spaces or [])
+ *   - RETURN { ...bookmark, tags, ...requiredDefaults }
+ *   - How (sub-block): Get raw from provider and normalize; caller sets needsAuth.
+ *
+ * ## GET_BOOKMARK_FOR_DISPLAY
+ *
+ * - [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements getBookmarkForDisplay(provider, url, title) behavior for IMPL-URL_TAGS_DISPLAY.
+ * - Contract:
+ *   - INPUT: bookmark (raw from provider), provider + url + title (for getBookmarkForDisplay), provider + url (for getTagsForUrl)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: normalized bookmark (tags array), tags array, badge display value (text, tagCount, flags)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: single module url-tags-manager; used by message-handler, service-worker, badge-manager, popup, bookmark-router
+ *   - EFFECTS: Async
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_BOOKMARK_FOR_DISPLAY
+ *   - raw = AWAIT provider.getBookmarkForUrl(url)
+ *   - RETURN normalizeBookmarkForDisplay(raw); caller sets needsAuth when !hasAuth
+ *   - How (sub-block): Get bookmark for url and return tags array.
+ *
+ * ## GET_TAGS_FOR_URL
+ *
+ * - [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements getTagsForUrl(provider, url) behavior for IMPL-URL_TAGS_DISPLAY.
+ * - Contract:
+ *   - INPUT: bookmark (raw from provider), provider + url + title (for getBookmarkForDisplay), provider + url (for getTagsForUrl)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: normalized bookmark (tags array), tags array, badge display value (text, tagCount, flags)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: single module url-tags-manager; used by message-handler, service-worker, badge-manager, popup, bookmark-router
+ *   - EFFECTS: Async
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_TAGS_FOR_URL
+ *   - bookmark = AWAIT getBookmarkForDisplay(provider, url, null)
+ *   - RETURN bookmark?.tags ?? []
+ *   - How (sub-block): Normalize and return text, tagCount, isPrivate, isToRead, isBookmarked, title.
+ *
+ * ## GET_BADGE_DISPLAY_VALUE
+ *
+ * - [IMPL-URL_TAGS_DISPLAY] [ARCH-URL_TAGS_DISPLAY] [REQ-URL_TAGS_DISPLAY] [REQ-BADGE_INDICATORS] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements getBadgeDisplayValue(bookmark, config) behavior for IMPL-URL_TAGS_DISPLAY.
+ * - Contract:
+ *   - INPUT: bookmark (raw from provider), provider + url + title (for getBookmarkForDisplay), provider + url (for getTagsForUrl)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: normalized bookmark (tags array), tags array, badge display value (text, tagCount, flags)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: single module url-tags-manager; used by message-handler, service-worker, badge-manager, popup, bookmark-router
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_BADGE_DISPLAY_VALUE
+ *   - normalized = normalizeBookmarkForDisplay(bookmark)
+ *   - RETURN { text, tagCount, isPrivate, isToRead, isBookmarked, title }
+ *   - How (sub-block): Handler and popup and router usage (same IMPL set).
+ *   - 1. Message handler: handleGetCurrentBookmark always via getBookmarkForDisplay(router)
+ *   - 2. Message handler: handleGetTagsForUrl returns getTagsForUrl
+ *   - 3. Popup: getBookmarkData null only when blocked; re-fetch tags before add/remove
+ *   - 4. Router: _hasTags/_isEmptyBookmark use normalizeBookmarkForDisplay
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-URL_TAGS_DISPLAY ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-BADGE_REFRESH ===
+ * [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] — Service worker refreshes badge after saveTag, deleteTag, saveBookmark so icon reflects tag count and flags.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] How: Logical block for IMPL-BADGE_REFRESH.
+ * - Contract:
+ *   - INPUT: message result (after processMessage) with type saveTag | deleteTag | saveBookmark
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: badge updated for the affected tab (icon label and optional private/toread indicators)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: handleMessage in service worker; updateBadgeForTab(tab)
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): Resolve tab (sender.tab or query active for saveBookmark); call updateBadgeForTab(tab).
+ *   - 1. AFTER processMessage(message) succeeds:
+ *   - 2.   IF message.type IN [saveTag, deleteTag, saveBookmark]:
+ *   - 3.     tab = sender.tab IF present
+ *   - 4.     IF no tab AND message.type = saveBookmark: tab = query active tab
+ *   - 5.     IF tab: updateBadgeForTab(tab)
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-BADGE_REFRESH ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-CONTEXT_MENU_QUICK_ACCESS ===
+ * [IMPL-CONTEXT_MENU_QUICK_ACCESS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY] — This block defines context menu for quick access. Implements REQ "context menu" with same four actions as commands; implements ARCH by having SW own context menu.
+ *
+ * ## SETUP_CONTEXT_MENUS
+ *
+ * - [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_QUICK_ACCESS] How: setupContextMenus: creates parent and four children so REQ "context menu with parent Hoverboard and four items" is satisfied. Call on install (handleInstall) so menus appear after install.
+ * - Contract:
+ *   - INPUT: user right-clicks (any context); user selects one of four Hoverboard menu items
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: same as extension commands (side panel, options, bookmarks index, or import opens)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SETUP_CONTEXT_MENUS
+ *   - api = browser.contextMenus || chrome.contextMenus
+ *   - IF !api THEN RETURN
+ *   - api.removeAll(() => {  // idempotent: clear then create so update does not duplicate
+ *   - api.create({ id: 'hoverboard-root', title: 'Hoverboard', contexts: ['all'] })
+ *   - api.create({ id: 'hoverboard-open-side-panel', parentId: 'hoverboard-root', title: 'Open side panel', contexts: ['all'] })
+ *   - api.create({ id: 'hoverboard-open-options', parentId: 'hoverboard-root', title: 'Open options', contexts: ['all'] })
+ *   - api.create({ id: 'hoverboard-open-bookmarks-index', parentId: 'hoverboard-root', title: 'Open bookmarks index', contexts: ['all'] })
+ *   - api.create({ id: 'hoverboard-open-import', parentId: 'hoverboard-root', title: 'Open browser bookmark import', contexts: ['all'] })
+ *   - })
+ *
+ * ## BLOCK_2
+ *
+ * - [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-CONTEXT_MENU_QUICK_ACCESS] How: onClicked: implements same four actions as command handler so REQ and ARCH are satisfied (single behavior, multiple entry points).
+ * - Contract:
+ *   - INPUT: user right-clicks (any context); user selects one of four Hoverboard menu items
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: same as extension commands (side panel, options, bookmarks index, or import opens)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BLOCK_2
+ *   - 1. api.onClicked.addListener((info, tab) => {
+ *   - 2.   SWITCH info.menuItemId:
+ *   - 3.     "hoverboard-open-side-panel": same as open-side-panel command (chrome.sidePanel.open({ windowId: this._sidePanelWindowId }))
+ *   - 4.     "hoverboard-open-options": chrome.runtime.openOptionsPage()
+ *   - 5.     "hoverboard-open-bookmarks-index": OPEN_BOOKMARKS_INDEX_TAB  # [IMPL-LOCAL_BOOKMARKS_INDEX]
+ *   - 6.     "hoverboard-open-import": chrome.tabs.create({ url: chrome.runtime.getURL('src/ui/browser-bookmark-import/browser-bookmark-import.html') })
+ *   - 7. })
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-CONTEXT_MENU_QUICK_ACCESS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-EXTENSION_COMMANDS ===
+ * [IMPL-EXTENSION_COMMANDS] [ARCH-QUICK_ACCESS_ENTRY] [REQ-QUICK_ACCESS_ENTRY] — Extension commands for quick access; SW owns command handling. Contract: shortcut in; one of four targets opens.
+ *
+ * ## MANIFEST_JSON
+ *
+ * - [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS] How: Manifest: four commands so Chrome shows them in chrome://extensions/shortcuts; user can reassign.
+ * - Contract:
+ *   - INPUT: user presses assigned shortcut (or default Ctrl+Shift+B/O/M/I)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel opens, or options page opens, or bookmarks index tab opens, or import page tab opens
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: command names (open-side-panel, open-options, open-bookmarks-index, open-import); SW onCommand handler
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: MANIFEST_JSON
+ *   - "commands": {
+ *   - "open-side-panel": { "suggested_key": { "default": "Ctrl+Shift+B" }, "description": "Open Hoverboard side panel" },
+ *   - "open-options": { "suggested_key": { "default": "Ctrl+Shift+O" }, "description": "Open Hoverboard options" },
+ *   - "open-bookmarks-index": { "suggested_key": { "default": "Ctrl+Shift+M" }, "description": "Open bookmarks index" },
+ *   - "open-import": { "suggested_key": { "default": "Ctrl+Shift+I" }, "description": "Open browser bookmark import" }
+ *   - }
+ *
+ * ## HANDLE_COMMAND
+ *
+ * - [REQ-QUICK_ACCESS_ENTRY] [ARCH-QUICK_ACCESS_ENTRY] [IMPL-EXTENSION_COMMANDS] How: SW onCommand: handle each command; side panel via _sidePanelWindowId; openOptionsPage and tabs.create for options, index, import.
+ * - Contract:
+ *   - INPUT: user presses assigned shortcut (or default Ctrl+Shift+B/O/M/I)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel opens, or options page opens, or bookmarks index tab opens, or import page tab opens
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: command names (open-side-panel, open-options, open-bookmarks-index, open-import); SW onCommand handler
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: HANDLE_COMMAND
+ *   - SWITCH command:
+ *   - "open-side-panel": windowId = this._sidePanelWindowId; IF windowId != null AND chrome.sidePanel?.open THEN chrome.sidePanel.open({ windowId })
+ *   - "open-side-panel-bookmark": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'bookmark' }); THEN sidePanel.open({ windowId })
+ *   - "open-side-panel-tags-tree": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'tagsTree' }); THEN sidePanel.open({ windowId })
+ *   - "open-side-panel-browser-tabs": chrome.storage.local.set({ hoverboard_sidepanel_active_tab: 'browserTabs' }); THEN sidePanel.open({ windowId })
+ *   - "open-options": chrome.runtime.openOptionsPage()
+ *   - "open-bookmarks-index": OPEN_BOOKMARKS_INDEX_TAB  # tabs.create + REQUEST_SIDE_PANEL_CLOSE [IMPL-LOCAL_BOOKMARKS_INDEX]
+ *   - "open-import": chrome.tabs.create({ url: ... browser-bookmark-import.html })
+ *   - How (sub-block): Side panel: storage.onChanged for SIDE_PANEL_TAB_STORAGE_KEY → switchTab(newValue) when panel already open.
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-EXTENSION_COMMANDS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-ICON_CLICK_BEHAVIOR ===
+ * [IMPL-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [REQ-ICON_CLICK_BEHAVIOR] — Icon click opens side panel (default) or popup; when side panel, click toggles (close if already open).
+ *
+ * ## _SEED_ICON_CLICK_PREFERENCE_CACHE
+ *
+ * - [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] How: Manifest: no default_popup so onClicked fires. Config: iconClickOpensSidePanel default true; schema optional boolean. Options: toggle bound to iconClickOpensSidePanel; load and save with other settings. SW: cache preference so handler stays synchronous (user gesture required for sidePanel.open).
+ * - Contract:
+ *   - INPUT: user clicks extension toolbar icon
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel opens or closes (toggle) when option enabled; else popup opens
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: SW _iconClickOpensSidePanel (cached), _sidePanelWindowId; panel _sidePanelLoadTime; MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: _SEED_ICON_CLICK_PREFERENCE_CACHE
+ *   - getConfig().then(c => this._iconClickOpensSidePanel = c.iconClickOpensSidePanel)
+ *   - storage.onChanged.addListener(changes, areaName => IF areaName === 'local' AND changes.hoverboard_settings THEN getConfig().then(...))
+ *
+ * ## HANDLE_ACTION_CLICK
+ *
+ * - [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] How: SW: listener passes tab from Chrome into handleActionClick(tab). SW handleActionClick(tab): prefer clicked window; Chrome requires sidePanel.open() in same synchronous user-gesture stack.
+ * - Contract:
+ *   - INPUT: user clicks extension toolbar icon
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel opens or closes (toggle) when option enabled; else popup opens
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: SW _iconClickOpensSidePanel (cached), _sidePanelWindowId; panel _sidePanelLoadTime; MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: HANDLE_ACTION_CLICK
+ *   - openSidePanel = (this._iconClickOpensSidePanel !== false)
+ *   - IF NOT openSidePanel: action.openPopup(); RETURN
+ *   - IF NOT sidePanel.open available: action.openPopup(); RETURN
+ *   - How (sub-block): # [IMPL-ICON_CLICK_BEHAVIOR] Prefer clicked window: use tab from onClicked when provided, else cache.
+ *   - clickedWindowId = tab?.windowId != null ? tab.windowId : null
+ *   - cachedWindowId = this._sidePanelWindowId
+ *   - useWindowId = clickedWindowId != null ? clickedWindowId : cachedWindowId
+ *   - IF useWindowId != null:
+ *   - IF clickedWindowId != null AND NOT _isRestrictedForSidePanel(tab?.url): this._sidePanelWindowId = clickedWindowId
+ *   - sidePanel.open({ windowId: useWindowId }); windows.update(useWindowId, { focused: true }); sendMessage(REQUEST_SIDE_PANEL_CLOSE); RETURN
+ *   - How (sub-block): # [IMPL-ICON_CLICK_BEHAVIOR] Cold start: no tab and no cache; do NOT call sidePanel.open in async callback (gesture would be lost). Seed cache for next click; open popup as fallback.
+ *   - tabs.query({ active: true, currentWindow: true }, (tabs) =>
+ *   - tabFromQuery = tabs?.[0]
+ *   - IF tabFromQuery?.windowId != null AND NOT _isRestrictedForSidePanel(tabFromQuery.url): this._sidePanelWindowId = tabFromQuery.windowId
+ *   - )
+ *   - action.openPopup()
+ *
+ * ## BIND_TOGGLE_CLOSE_REQUEST
+ *
+ * - [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] How: Side panel: on REQUEST_SIDE_PANEL_CLOSE close if visible and open long enough (toggle).
+ * - Contract:
+ *   - INPUT: user clicks extension toolbar icon
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel opens or closes (toggle) when option enabled; else popup opens
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: SW _iconClickOpensSidePanel (cached), _sidePanelWindowId; panel _sidePanelLoadTime; MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BIND_TOGGLE_CLOSE_REQUEST
+ *   - runtime.onMessage.addListener(message =>
+ *   - IF message?.type !== REQUEST_SIDE_PANEL_CLOSE RETURN
+ *   - IF document.visibilityState !== 'visible' RETURN
+ *   - IF (Date.now() - _sidePanelLoadTime) < 300 RETURN
+ *   - window.close())
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-ICON_CLICK_BEHAVIOR ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BROWSER_TABS ===
+ * [IMPL-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_BROWSER_TABS] — This block defines the browser tabs panel: data fetch, search scope, filter, UI, copy URLs, close with confirm. Implements REQ by listing tabs with title/URL/referrer and optional pageText/importantTags; scope-aware filter; implements ARCH by chrome.tabs + scripting and visible-list actions.
+ *
+ * ## FILTER_BROWSER_TABS
+ *
+ * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: Data fetch: panel queries chrome.tabs; windowScope selects query. Referrer via GET_TAB_REFERRERS (SW executeScript per tab). When searchScope is pageText or importantTags, panel sends GET_TABS_PAGE_TEXT or GET_TABS_IMPORTANT_TAGS with tab list; SW executeScript per tab returns tabId→string map; panel merges into allTabs. Show loading state during pageText/importantTags fetch. Implements "list from current or all windows", "collect referrer", "search in page text or important tags". filterBrowserTabs(tabs, query, scope): pure function. Empty query returns all. scope tabInfo → match title, url, referrer; scope pageText → match tab.pageText; scope importantTags → match tab.importantTags. Case-insensitive substring. Implements "filter by search term" and "search in selected scope".
+ * - Contract:
+ *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: visible tabs (filtered), copy URLs to clipboard with count, close visible tabs after confirm with count
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: tabs = [{ id, windowId, title, url, referrer, pageText?, importantTags? }], visibleTabs = filterBrowserTabs(tabs, searchQuery, searchScope)
+ *   - EFFECTS: Async, Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: FILTER_BROWSER_TABS
+ *   - q = String(query).trim().toLowerCase()
+ *   - IF q === '' RETURN tabs
+ *   - IF scope === 'tabInfo': RETURN tabs WHERE (t.title??'').toLowerCase().includes(q) OR (t.url??'').toLowerCase().includes(q) OR (t.referrer??'').toLowerCase().includes(q)
+ *   - IF scope === 'pageText': RETURN tabs WHERE (t.pageText??'').toLowerCase().includes(q)
+ *   - IF scope === 'importantTags': RETURN tabs WHERE (t.importantTags??'').toLowerCase().includes(q)
+ *   - RETURN tabs
+ *
+ * ## MERGE_BOOKMARK_REPLY_INTO_TAB
+ *
+ * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: UI: window scope toggle; search-scope control (Tab info | Page text | Elements, default Tab info); control groups with very narrow margins; Title/URL/Block above filter textbox; on searchScope change, if pageText or importantTags fetch that data and merge; search input; on input visibleTabs = filterBrowserTabs(allTabs, searchQuery, searchScope); re-render. Multi-row card per tab. Implements "search scope selection", "filter by selected scope". List display mode: user chooses what each list item shows (title only, URL only, or full block). Default block. In non-block mode text is clickable to focus window/tab; remove icon after text. Implements "choose how each tab is shown" and "clickable text in title/url mode". Remove from display: session-scoped hidden set; remove icon in all modes (after text in title/url, before Tags in block). Refresh clears. Implements "remove from displayed list". Close single tab: per-row close-tab button before window id (block: before ids line; title/url: before focus link). Remove button unchanged (after tab id / after link). ON click (data-action=closeTab): chrome.tabs.remove(tabId); then remove from allTabs and re-render or loadTabs(). Focus on click: in block mode ids line (.browser-tabs-card-ids-link); in title/url mode the text (.browser-tabs-card-focus-link). Both have data-window-id and data-tab-id. On click (delegated): read ids; if valid, chrome.windows.update(windowId, { focused: true }); chrome.tabs.update(tabId, { active: true }). Bookmark tags + row flags: after allTabs built (referrers merged), FOR each tab WHERE url is http(s): reply = getCurrentBookmark({ url, title }); mergeBookmarkReplyIntoTab(tab, reply). In RENDER show "Tags: " + join(tab.bookmarkTags) or "—" plus to-read/private indicators when flags are true. How: apply getCurrentBookmark reply to a tab row — tags array plus boolean bookmarkToread / bookmarkPrivate from toread/shared (trim + case-insensitive; defaults toread=no, shared=yes). Clear all three when reply missing, unsuccessful, or blocked.
+ * - Contract:
+ *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: visible tabs (filtered), copy URLs to clipboard with count, close visible tabs after confirm with count
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: listDisplayMode = 'block' | 'title' | 'url' (default 'block')
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MERGE_BOOKMARK_REPLY_INTO_TAB
+ *   - IF NOT reply OR NOT reply.success OR NOT reply.data OR reply.data.blocked:
+ *   - tab.bookmarkTags = []; tab.bookmarkToread = false; tab.bookmarkPrivate = false; RETURN
+ *   - d = reply.data
+ *   - tab.bookmarkTags = Array.isArray(d.tags) ? d.tags : []
+ *   - exists = !!d.exists
+ *   - tab.bookmarkToread = exists AND (trim+lower(d.toread ?? 'no') === 'yes')
+ *   - tab.bookmarkPrivate = exists AND (trim+lower(d.shared ?? 'yes') === 'no')
+ *
+ * ## BUILD_BOOKMARK_TOGGLES_MARKUP
+ *
+ * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: render inline to-read indicator and private indicator when tab.bookmarkToread / tab.bookmarkPrivate are true (classes browser-tabs-card-toggle-toread / -private inside .browser-tabs-card-toggles).
+ * - Contract:
+ *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: visible tabs (filtered), copy URLs to clipboard with count, close visible tabs after confirm with count
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: tabs = [{ id, windowId, title, url, referrer, pageText?, importantTags? }], visibleTabs = filterBrowserTabs(tabs, searchQuery, searchScope)
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_BOOKMARK_TOGGLES_MARKUP
+ *   - parts = []
+ *   - IF tab.bookmarkToread: parts.push span.browser-tabs-card-toggle-toread (title/aria "To read")
+ *   - IF tab.bookmarkPrivate: parts.push span.browser-tabs-card-toggle-private (title/aria "Private")
+ *   - IF parts empty: RETURN ''
+ *   - RETURN span.browser-tabs-card-toggles wrapping parts
+ *   - 1. RENDER (per card, with tags): include buildBookmarkTogglesMarkup(tab) near Tags line
+ *
+ * ## REFRESH_BOOKMARK_DISPLAY_FOR_ALL_TABS
+ *
+ * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: post-batch bookmark refresh — after Set/Clear to-read or Add tags, re-query getCurrentBookmark for every tab in allTabs and mergeBookmarkReplyIntoTab so tags and indicators match storage; then applyFilter().
+ * - Contract:
+ *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: visible tabs (filtered), copy URLs to clipboard with count, close visible tabs after confirm with count | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: tabs = [{ id, windowId, title, url, referrer, pageText?, importantTags? }], visibleTabs = filterBrowserTabs(tabs, searchQuery, searchScope)
+ *   - EFFECTS: Async, Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: REFRESH_BOOKMARK_DISPLAY_FOR_ALL_TABS
+ *   - FOR each tab in allTabs:
+ *   - IF tab.url is not http(s): mergeBookmarkReplyIntoTab(tab, { success: false }); CONTINUE
+ *   - reply = AWAIT getCurrentBookmark({ url: tab.url, title: tab.title })
+ *   - mergeBookmarkReplyIntoTab(tab, reply)  // on error: merge with { success: false }
+ *   - applyFilter()
+ *
+ * ## BLOCK_5
+ *
+ * - [REQ-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: Copy URLs / Copy Records / Close: unchanged; act on visibleTabs. Close tabs with tag(s): from visibleTabs take those with Array.isArray(tab.bookmarkTags) && tab.bookmarkTags.length > 0; confirm; chrome.tabs.remove each; then loadTabs(). Close tabs without tags: from visibleTabs take those with !tab.bookmarkTags || !Array.isArray(tab.bookmarkTags) || tab.bookmarkTags.length === 0; confirm; remove each; then loadTabs(). Refresh: clear hidden set then loadTabs() so list repopulates and all tabs can reappear. Batch bookmark actions: Set to-read (fetch then merge to preserve tags; create if missing), Clear to-read (skip if no bookmark), Add tags (create if missing; use reply.data.url). Only http(s) URLs. After each batch, AWAIT refreshBookmarkDisplayForAllTabs() so row tags and to-read/private indicators match storage. SW returns handler response as-is; handler getCurrentBookmark returns plain dataOut. Panel structure: same scroll behavior as Tags tree. Panel (#browserTabsPanel) is the scroll container. First child .browser-tabs-above-list (flex: none): header, window scope, search scope, filter, message, stats line (#browserTabsStats), batch bookmark, actions. Second child .browser-tabs-list-section (min-height: 100%, overflow-y: auto): Title/URL/Block control row immediately above #browserTabsList. Above block scrolls off; list section fills visible height and scrolls list. Implements "Title/URL/Block above list" and "stats line above Tags". Stats line: above batch bookmark (Tags) section, element #browserTabsStats. Display counts from getDisplayedTabs(): displayWindows = unique windowIds in getDisplayedTabs(), displayTabs = getDisplayedTabs().length. Totals from loadTabs: totalWindows = (await chrome.windows.getAll()).length, totalTabs = (await chrome.tabs.query({})).length. Update stats on renderList() and after loadTabs(). Format e.g. "Windows: displayWindows / totalWindows · Tabs: displayTabs / totalTabs". When APIs unavailable (e.g. tests) use 0 or fallback. Implements "stats line showing display group vs all open". Sections and tooltips: controls grouped into sections (Scope, Filter & display, Batch bookmark, List actions, Window actions). Stats line above Batch bookmark. Title/URL/Block in list section above #browserTabsList. Every control has title and where helpful aria-label. Implements "sections for UI controls" and "tooltips on controls". Favicon: allTabs preserve favIconUrl from chrome.tabs. RENDER: each card shows img.browser-tabs-card-favicon with src=tab.favIconUrl (fallback when empty to avoid broken img). Block mode: favicon before title; title/url mode: favicon before the clickable text. Elements: label + textbox only; always use textbox value (parseImportantTagSources); when empty use default list. Textbox persisted in chrome.storage.local on blur; on load populate from storage or default. Control groups: narrow margins (browser-tabs-control-group). Gather: move displayed tabs into current window. currentWindowId = (await chrome.windows.getCurrent()).id; FOR each tab in getDisplayedTabs(): IF tab.windowId !== currentWindowId THEN chrome.tabs.move(tab.id, { windowId: currentWindowId, index: -1 }); show "Gathered N tabs" or "All visible tabs already in this window"; loadTabs(). Distribute: each displayed tab in its own window; skip if already only tab in window. FOR each tab in getDisplayedTabs(): tabsInWindow = await chrome.tabs.query({ windowId: tab.windowId }); IF tabsInWindow.length > 1: chrome.windows.create({ tabId: tab.id }); show "Distributed N tabs"; loadTabs().
+ * - Contract:
+ *   - INPUT: windowScope (currentWindow | all), searchScope (tabInfo | pageText | importantTags), searchQuery (string), tabs list from chrome.tabs
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: visible tabs (filtered), copy URLs to clipboard with count, close visible tabs after confirm with count
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: tab.favIconUrl from query
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BLOCK_5
+ *   - 1. ON Copy button click: urls = visibleTabs.map(t => t.url); navigator.clipboard.writeText(urls.join('\n')); showToastOrMessage("Copied " + urls.length + " URLs")
+ *   - 2. ON Copy Records button click: yamlString = buildRecordsYamlForCopy(visibleTabs); navigator.clipboard.writeText(yamlString); showToastOrMessage("Copied " + visibleTabs.length + " record(s)")
+ *   - 3. ON Close button click: IF visibleTabs.length === 0 return; IF NOT confirm("Close " + visibleTabs.length + " tabs?") return; FOR each tab in visibleTabs: chrome.tabs.remove(tab.id); show "Closed N tabs"
+ *   - 4. ON Close tagged button click: toClose = visibleTabs.filter(t => Array.isArray(t.bookmarkTags) && t.bookmarkTags.length > 0); IF toClose.length === 0 show message and return; IF NOT confirm("Close N tab(s) with tag(s)?") return; FOR each tab in toClose: chrome.tabs.remove(tab.id); await loadTabs(); show "Closed N tabs"
+ *   - 5. ON Close untagged button click: toClose = visibleTabs.filter(t => !Array.isArray(t.bookmarkTags) || t.bookmarkTags.length === 0); IF toClose.length === 0 show message and return; IF NOT confirm("Close N tab(s) without tags?") return; FOR each tab in toClose: chrome.tabs.remove(tab.id); await loadTabs(); show "Closed N tabs"
+ *   - 6. ON Refresh button click: hiddenTabIds.clear(); loadTabs()
+ *   - 7. ON Set to-read button click: FOR each tab in getDisplayedTabs() WHERE tab.url is http(s): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.data.exists AND reply.data.url: saveBookmark({ ...reply.data, toread: 'yes' }); ELSE: urlToSave = reply.data.url || tab.url; saveBookmark({ url: urlToSave, description: tab.title ?? '', tags: [], toread: 'yes', preferredBackend: 'local' }); AWAIT refreshBookmarkDisplayForAllTabs(); show "Set to-read for N tabs"
+ *   - 8. ON Clear to-read button click: FOR each tab in getDisplayedTabs(): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.success AND reply.data AND NOT reply.data.blocked AND reply.data.exists: saveBookmark({ ...reply.data, toread: 'no' }); ELSE skip; AWAIT refreshBookmarkDisplayForAllTabs(); show "Cleared to-read for N tabs"
+ *   - 9. ON Add tags button click: newTags = parseTagsInput(tagsInput.value); IF newTags.length === 0 return; FOR each tab in getDisplayedTabs() WHERE tab.url is http(s): reply = getCurrentBookmark({ url: tab.url, title: tab.title }); IF reply.success AND reply.data AND reply.data.url AND NOT reply.data.blocked: IF reply.data.exists: payload = buildAddTagsPayload(reply.data, newTags); saveBookmark(payload); ELSE: urlToSave = reply.data.url || tab.url; saveBookmark({ url: urlToSave, description: tab.title ?? '', tags: newTags, preferredBackend: 'local' }); AWAIT refreshBookmarkDisplayForAllTabs(); clear tagsInput; show "Added tags for N tabs"
+ *   - 10. PANEL LAYOUT: browserTabsPanel = scroll container (overflow-y: auto); browser-tabs-above-list = flex none (contains stats line above batch bookmark section); browser-tabs-list-section = min-height 100% overflow-y auto; first child of list-section = Title|URL|Block radio row; second child = #browserTabsList.
+ *   - 11. DATA (in loadTabs): totalWindows, totalTabs from chrome.windows.getAll and chrome.tabs.query({})
+ *   - 12. updateStatsLine(): displayed = getDisplayedTabs(); displayW = new Set(displayed.map(t => t.windowId)).size; displayT = displayed.length; set #browserTabsStats text to "Windows: displayW / totalWindows · Tabs: displayT / totalTabs"; call from renderList and after loadTabs
+ *   - 13. SECTIONS: section.browser-tabs-section-scope, section.browser-tabs-section-filter, stats line (above bookmark section), section.browser-tabs-section-bookmark, section.browser-tabs-section-actions, section.browser-tabs-section-window. Within sections use .browser-tabs-control-group with margin 0.125rem 0 for tight grouping. Order in Filter & display: (1) filter textbox, (2) Elements (label + textbox). In list section: (1) Title | URL | Block row, (2) #browserTabsList.
+ *   - 14. TOOLTIPS: title attribute (and aria-label) on each button, input, label group describing use
+ *   - 15. RENDER: <img class="browser-tabs-card-favicon" src="..." alt=""> before title/url in all modes; fallback src or hide when no favicon
+ *   - 16. parseImportantTagSources(str): return str.trim().split(',').map(s => s.trim()).filter(Boolean)
+ *   - 17. ON load: read storage for textbox; populate input or default
+ *   - 18. ON GET_TABS_IMPORTANT_TAGS: data.tabs; data.importantTagSources = parseImportantTagSources(textboxValue); IF empty THEN default list (DEFAULT_IMPORTANT_TAG_SOURCES)
+ *   - 19. ON Gather button click: displayed = getDisplayedTabs(); currentWin = await chrome.windows.getCurrent(); moved = 0; FOR each tab in displayed: IF tab.windowId !== currentWin.id: await chrome.tabs.move(tab.id, { windowId: currentWin.id, index: -1 }); moved++; show message; loadTabs()
+ *   - 20. ON Distribute button click: displayed = getDisplayedTabs(); distributed = 0; FOR each tab in displayed: list = await chrome.tabs.query({ windowId: tab.windowId }); IF list.length > 1: await chrome.windows.create({ tabId: tab.id }); distributed++; show message; loadTabs()
+ *
+ * ## TABS_CREATE_PREFERRED_BACKEND
+ *
+ * - [IMPL-SIDE_PANEL_BROWSER_TABS] [ARCH-SIDE_PANEL_BROWSER_TABS] [REQ-SIDE_PANEL_BROWSER_TABS] How: Product rule — batch/create from Tabs panel uses preferredBackend local (not Options defaultStorageMode); changing this needs dedicated CITDP.
+ * - Contract:
+ *   - INPUT: create payload for missing bookmark from tab URL
+ *   - PRE: tab url is http(s)
+ *   - OUTPUT: saveBookmark payload with preferredBackend local
+ *   - POST:
+ *     - success => new bookmarks from Tabs land in Local store unless an existing bookmark was updated in place
+ *   - CONTROL: preferredBackend fixed to local for create-from-tabs; Options defaultStorageMode is not consulted on this path
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: TABS_CREATE_PREFERRED_BACKEND
+ *   - 1. WHEN creating a bookmark because none exists for tab URL: SET preferredBackend = 'local'
+ *   - 2. WHEN updating an existing bookmark (exists): preserve existing backend via saveBookmark merge (no preferredBackend override required)
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BROWSER_TABS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS ===
+ * [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] — Tab source toggle and recently closed tabs integration. Extends IMPL-SIDE_PANEL_BROWSER_TABS with open | recentlyClosed | both.
+ *
+ * ## NORMALIZE_CLOSED_SESSIONS
+ *
+ * - [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] How: normalizeClosedSessions(sessions): pure. Flatten Session[] from getRecentlyClosed; each tab: id=sessionId, sessionId, title, url, lastModified, isClosed=true, referrer='', pageText='', importantTags=''. Window sessions: recurse into tabs.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: tabSource = 'open' | 'recentlyClosed' | 'both' (default 'open')
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: NORMALIZE_CLOSED_SESSIONS
+ *   - result = []; FOR each s in sessions: IF s.tab: result.push({ id: s.tab.sessionId, sessionId: s.tab.sessionId, title: s.tab.title??'', url: s.tab.url??'', lastModified: s.lastModified, isClosed: true, referrer: '', pageText: '', importantTags: '' }); IF s.window && s.window.tabs: FOR each t in s.window.tabs: result.push({ id: t.sessionId, sessionId: t.sessionId, title: t.title??'', url: t.url??'', lastModified: s.lastModified, isClosed: true, referrer: '', pageText: '', importantTags: '' }); RETURN result
+ *
+ * ## BLOCK_2
+ *
+ * - [REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS] [ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS] [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS] How: GET_RECENTLY_CLOSED_TABS (SW): sessions = chrome.sessions.getRecentlyClosed({ maxResults: 25 }); tabs = normalizeClosedSessions(sessions); RETURN { success: true, data: tabs } loadTabs: when tabSource=open: existing chrome.tabs path. When recentlyClosed: sendMessage GET_RECENTLY_CLOSED_TABS; allTabs = response.data. When both: openTabs = chrome.tabs.query; closedTabs = GET_RECENTLY_CLOSED_TABS; allTabs = openTabs.concat(closedTabs). Scope restriction: when tabSource includes recentlyClosed, searchScope forced to tabInfo; Page text and Elements disabled with note. Restore: closed tab card has data-action=restoreTab data-session-id. ON click: chrome.sessions.restore(sessionId); loadTabs(). Open tab keeps data-action=closeTab. buildRecordsYamlForCopy: for closed tabs include sessionId and lastModified; id may be sessionId string. hiddenTabIds: use tab.id (numeric for open, sessionId string for closed). getDisplayedTabs filters by !hiddenTabIds.has(t.id). Sessions API check: if !chrome.sessions: hide tab source options recentlyClosed and both; show only Open. Gather/Distribute: when tabSource=recentlyClosed or all displayed are closed, hide or disable Gather and Distribute. Close: only for open tabs. toClose = visibleTabs.filter(t => !t.isClosed); confirm; chrome.tabs.remove each; loadTabs()
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: tabSource = 'open' | 'recentlyClosed' | 'both' (default 'open')
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BLOCK_2
+ *   - 1. ON GET_RECENTLY_CLOSED_TABS (service worker): sessions = AWAIT chrome.sessions.getRecentlyClosed({ maxResults: 25 }); tabs = normalizeClosedSessions(sessions); RETURN { success: true, data: tabs }
+ *   - 2. ON loadTabs: IF tabSource === 'open': (existing path); IF tabSource === 'recentlyClosed': allTabs = AWAIT sendMessage(GET_RECENTLY_CLOSED_TABS).data; IF tabSource === 'both': openTabs = AWAIT chrome.tabs.query(...); closedTabs = AWAIT sendMessage(GET_RECENTLY_CLOSED_TABS).data; allTabs = openTabs.concat(closedTabs)
+ *   - 3. IF tabSource !== 'open': searchScope = 'tabInfo'; disable pageText/importantTags radios; show note
+ *   - 4. RENDER (closed tab): Restore button (data-action=restoreTab, data-session-id); no Close button
+ *   - 5. ON restoreTab click: sessionId = data-session-id; AWAIT chrome.sessions.restore(sessionId); loadTabs()
+ *   - 6. buildRecordsYamlForCopy: IF tab.isClosed: add sessionId, lastModified to YAML entry
+ *   - 7. IF !chrome.sessions: tabSourceOptions = ['open'] only
+ *   - 8. IF tabSource === 'recentlyClosed' OR (tabSource === 'both' AND getDisplayedTabs().every(t => t.isClosed)): hide Gather, Distribute
+ *   - 9. ON Close: toClose = visibleTabs.filter(t => !t.isClosed); confirm; FOR each in toClose: chrome.tabs.remove(t.id); loadTabs()
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TAGS_TREE ===
+ * [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE] — This block defines the overall feature: side panel tags tree opened from popup; panel shows tag→urls tree; click URL opens in new tab. Implements REQ by providing the side-panel entry and tag-tree UX; implements ARCH by following the open-flow and data-flow decisions.
+ *
+ * ## BUILD_TAG_TO_BOOKMARKS
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: Popup entry: implements requirement "open tags tree from popup" by sending OPEN_SIDE_PANEL. ARCH prescribes message-based open; this block is the popup side. SW open in user gesture: implements requirement that side panel opens in response to user click. chrome.sidePanel.open() may only be called in user gesture (no await). So: maintain cached normal windowId; on OPEN_SIDE_PANEL handle in onMessage synchronously (no await before open). Implements ARCH open flow. Panel load: implements tag tree data flow; uses getAggregatedBookmarksForIndex (local+file+sync+browser; no Pinboard) then load config, apply filters, sort, group, build tag map and tag list, render. Implements REQ filters/sort/group and config persistence. When panel is tabbed, Tags tree is second tab; load/render runs on tab select or first show. initTagsTreeTab(options) is callable from side-panel.js when user selects Tags tree tab; optional currentBookmarkTags syncs tag selector to current bookmark. Implements "Tags tree tab" in tabbed panel and "tag selector matches current bookmark; tree shows only bookmarks that share at least one tag". Placeholder/demo mode (?demo=1 or ?screenshot=1): loadPlaceholderForScreenshot uses tagsTreePlaceholderBookmarks (tags-tree-demo-data.js), a rich set (25+ bookmarks, 15+ tags, time/updated_at, extended) so the By Tag demo GIF shows tag selector, tree, filters and search. Set rawBookmarks so tag toggle invokes refreshFromConfig; then tagToBookmarks, allTags, selectedTagOrder; hide load error and empty state; renderTagSelector(); renderTree(). buildTagToBookmarks: implements requirement "tag-based tree" by producing Map<tag, [{ title, url }]> from bookmarks. One pass; trim/dedupe per tag.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_TAG_TO_BOOKMARKS
+ *   - result = new Map()
+ *   - FOR each b in bookmarks:
+ *   - tags = Array.isArray(b.tags) ? b.tags : []; title = b.description || b.url || ''
+ *   - FOR each tag in tags:
+ *   - tagKey = String(tag).trim(); IF empty skip
+ *   - IF result has no key tagKey THEN result[tagKey] = []; result[tagKey].push({ title, url: b.url })
+ *   - RETURN result
+ *
+ * ## GET_ALL_TAGS_FROM_BOOKMARKS
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: getAllTagsFromBookmarks: implements tag selector data by returning sorted unique tags from bookmarks.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_ALL_TAGS_FROM_BOOKMARKS
+ *   - set = new Set(); FOR each b in bookmarks: FOR each t in (b.tags || []): set.add(String(t).trim())
+ *   - RETURN sorted Array.from(set)
+ *
+ * ## GET_TAGS_TO_DISPLAY
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: Tag list view mode: implements "user can switch between all tags and only checked tags; choice persisted". showAllTags boolean in config; when true display allTags, when false display selectedTagOrder filtered by allTags (avoid stale tags). Persisted in panel config.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_TAGS_TO_DISPLAY
+ *   - IF showAllTags THEN RETURN allTags
+ *   - allSet = Set(allTags); RETURN selectedTagOrder filtered to items IN allSet (preserve order)
+ *
+ * ## RENDER_TAG_SELECTOR
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: renderTagSelector: implements tag selection and order UI and compact layout. Renders checkboxes for visibleTags = getTagsToDisplay(allTags, selectedTagOrder, config.showAllTags); on checkbox change save selectedTagOrder and refreshFromConfig; toggle change updates showAllTags, savePanelConfig, renderTagSelector only.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RENDER_TAG_SELECTOR
+ *   - visibleTags = getTagsToDisplay(allTags, selectedTagOrder, config.showAllTags)
+ *   - render list of tags (visibleTags) with selection state (checked iff in selectedTagOrder) and compact layout; on change save selectedTagOrder and refreshFromConfig
+ *   - 1. ON tag list view toggle: config.showAllTags = NOT config.showAllTags; savePanelConfig(config); renderTagSelector()
+ *
+ * ## RENDER_TREE
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: renderTree: implements collapsible URL lists per tag; each section has tag label + toggle + list of title+URL.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RENDER_TREE
+ *   - FOR each tag in selectedTagOrder: entries = tagToBookmarks.get(tag) || []; render section (tag + toggle + list); store url for click
+ *
+ * ## BLOCK_6
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: refreshFromConfig: syncConfigFromControls; savePanelConfig; IF !rawBookmarks or length 0 RETURN (no re-render). filterState = getFilterStateForTagsTree(panelConfig, selectedTagOrder); filtered = applyFilters(rawBookmarks, filterState); sorted = sortBookmarks(filtered, ...); matchingBookmarks = search filter or sorted; IF groupBy !== 'none' renderGrouped ELSE tagToBookmarks = buildTagToBookmarks(matchingBookmarks, allTags); renderTagSelector(); renderTree(); updateSearchCount; scrollToMatch. Config expand/collapse: implements requirement that config region is expandable for use and collapsible to maximize bookmarks space; toggle loads/saves expanded state; when collapsed only compact bar visible; when expanded show full filter and display controls. Filter pipeline: implements requirement to filter by create/update time range, tags include, and domain. Apply in sequence: time range (field + startMs/endMs), then tags include (bookmark must have at least one tag in set), then domains (URL hostname in set). Empty set or null bounds mean no filter for that step. getDomainFromUrl: implements domain filter/group by returning hostname from URL; invalid or empty URL returns empty string; no throw. filterByTimeRange: implements time range filter; uses bookmark time or updated_at per field; null start/end means no bound; inclusive. filterByTagsInclude: implements tags include filter; empty tagSet = all pass; otherwise bookmark must have at least one tag (case-insensitive) in set. filterByDomains: implements domain filter; empty domainSet = all pass; otherwise bookmark's getDomainFromUrl(url) in domainSet (case-insensitive). sortBookmarks: implements display sort by chosen axis (time, updated_at, tag, domain) and direction (sortAsc). For time use ms; for tag use first tag or ''; for domain use getDomainFromUrl. groupBookmarksBy: implements display group by; returns structure for sectioned render (e.g. Map<groupKey, bookmark[]>). groupBy in 'none' | 'time' | 'updated_at' | 'tag' | 'domain'; bucket keys for date (e.g. date string); per-tag or per-domain one key per value. renderGrouped: implements collapsible sectioned display when groupBy not none; each section has header (toggle) and list of bookmark links; click URL opens in new tab. loadPanelConfig / savePanelConfig: implements config state persistence; read/write expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags to chrome.storage.local. showAllTags defaults true for backward compatibility. openUrlInNewTab / ON click URL: implements "click-to-open in new tab" requirement via chrome.tabs.create({ url }). Tags tree panel layout: panel (#tagsTreePanel) is the scroll container so the above-list div can scroll off the page; .tree-section has min-height 100% so it consumes full visible height when the div is scrolled off and scrolls its list. Implements "tab content fills vertical space" for Tags tree tab. DOM: #tagsTreePanel > .tags-tree-above-list > (header, config-section, search-section, tag-selector-section) + .tree-section
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BLOCK_6
+ *   - 1. refreshFromConfig(): syncConfigFromControls(); savePanelConfig(); IF !rawBookmarks or rawBookmarks.length === 0 RETURN; filterState = getFilterStateForTagsTree(panelConfig, selectedTagOrder); filtered = applyFilters(rawBookmarks, filterState); sorted = sortBookmarks(filtered, panelConfig.sortBy, panelConfig.sortAsc); matchingBookmarks = searchQuery ? filterBookmarksBySearch(sorted, searchQuery) : sorted; IF panelConfig.groupBy !== 'none' THEN renderGrouped(matchingBookmarks) ELSE tagToBookmarks = buildTagToBookmarks(matchingBookmarks, allTags); renderTagSelector(); renderTree(); updateSearchCount(); scrollToMatch(searchMatchIndex)
+ *   - 2. ON config toggle click: config.expanded = NOT config.expanded; savePanelConfig(config); renderConfigToggle(config.expanded); show or hide config content
+ *   - 3. applyFilters(bookmarks, config): list = bookmarks; list = filterByTimeRange(list, config.timeField, config.timeStart, config.timeEnd); list = filterByTagsInclude(list, config.tagsInclude); list = filterByDomains(list, config.domains); RETURN list
+ *   - 4. getDomainFromUrl(url): IF !url or !String(url).trim() RETURN ''; TRY parse url; RETURN hostname (lowercase) OR ''
+ *   - 5. filterByTimeRange(bookmarks, field, startMs, endMs): RETURN bookmarks WHERE inTimeRange(b, field, startMs, endMs)  // inTimeRange: get ms from b; if null return false; if startMs and ms < startMs return false; if endMs and ms > endMs return false; return true
+ *   - 6. filterByTagsInclude(bookmarks, tagSet): IF !tagSet or size 0 RETURN bookmarks; RETURN bookmarks WHERE (b.tags normalized) INTERSECT tagSet non-empty
+ *   - 7. filterByDomains(bookmarks, domainSet): IF !domainSet or size 0 RETURN bookmarks; RETURN bookmarks WHERE getDomainFromUrl(b.url) in domainSet
+ *   - 8. sortBookmarks(bookmarks, sortBy, sortAsc): sort list by sortBy key; if sortAsc ascending else descending; RETURN sorted array
+ *   - 9. groupBookmarksBy(bookmarks, groupBy): IF groupBy === 'none' RETURN null or flat; result = Map(); FOR b in bookmarks: key = keyFor(b, groupBy); append b to result[key]; RETURN result
+ *   - 10. renderGrouped(grouped, config): FOR each groupKey in grouped: render section header (groupKey + toggle); render list of title+URL; store url for click → openUrlInNewTab(url)
+ *   - 11. loadPanelConfig(): get from chrome.storage.local; RETURN defaults for missing keys (showAllTags default true)
+ *   - 12. savePanelConfig(config): chrome.storage.local.set(config keyed by storage keys)
+ *   - 13. ON click URL in tree: url = event target url; openUrlInNewTab(url)  // openUrlInNewTab(url) => chrome.tabs.create({ url })
+ *   - 14. CSS #tagsTreePanel: display block; flex 1 1 0; min-height 0; overflow-y auto; background var(--color-background)
+ *   - 15. CSS .tags-tree-above-list: flex none (natural height; scrolls off with panel scroll)
+ *   - 16. CSS .tree-section: min-height 100%; overflow-y auto
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TAGS_TREE ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-UI_INSPECTOR ===
+ * [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] — recordMessage/recordAction ring buffers; getLastMessages/getLastActions; debug-gated. Contract: message or action in; ring buffers and getters; enabled flag.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] How: Logical block for IMPL-UI_INSPECTOR.
+ * - Contract:
+ *   - INPUT: message (recordMessage); action (recordAction); gated by DEBUG_HOVERBOARD_UI or setEnabled(true)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: ring buffers of last N messages and last N actions; getLastMessages(), getLastActions()
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: message ring buffer; action ring buffer; enabled flag
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): Append to buffer when enabled; drop oldest if full.
+ *   - 1. recordMessage(msg): IF enabled: APPEND to message buffer; DROP oldest if full
+ *   - 2. recordAction(action): IF enabled: APPEND to action buffer; DROP oldest if full
+ *   - How (sub-block): Return copy of buffers.
+ *   - 3. getLastMessages(), getLastActions(): RETURN copy of buffer(s)
+ *   - How (sub-block): Service-worker records message; PopupController/content record action.
+ *   - 4. Wiring: service-worker after handle message -> recordMessage; PopupController/content-main on action -> recordAction
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-UI_INSPECTOR ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-DEV_COMMAND_INSPECTION ===
+ * [IMPL-DEV_COMMAND_INSPECTION] [REQ-UI_INSPECTION] [REQ-URL_TAGS_DISPLAY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] — DEV_COMMAND routing for current bookmark, tags, backend, and storage snapshot (debug-gated). Contract: message shape, returned data, and handler locations.
+ *
+ * ## PROCESS_DEV_COMMAND
+ *
+ * - [IMPL-DEV_COMMAND_INSPECTION] [REQ-UI_INSPECTION] [REQ-URL_TAGS_DISPLAY] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements processDevCommand(cmd) behavior for IMPL-DEV_COMMAND_INSPECTION.
+ * - Contract:
+ *   - INPUT: DEV_COMMAND message with subcommand (getCurrentBookmark | getTagsForUrl | getStorageBackendForUrl | getStorageSnapshot); optional url/context
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: current bookmark for URL, tags for URL, backend for URL, or storage key list (SW only); gated by DEBUG_HOVERBOARD_UI
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: MessageHandler.processDevCommand; service worker getStorageSnapshot
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: PROCESS_DEV_COMMAND
+ *   - IF subcommand getCurrentBookmark: RETURN bookmarkRouter.getBookmarkForUrl(url) or current tab url
+ *   - IF getTagsForUrl: RETURN tags for url
+ *   - IF getStorageBackendForUrl: RETURN storageIndex.getBackendForUrl(url)
+ *   - IF getStorageSnapshot (SW): RETURN list of storage key names only
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-DEV_COMMAND_INSPECTION ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SERVICE_WORKER ===
+ * [IMPL-SERVICE_WORKER] [ARCH-SERVICE_WORKER] [REQ-MANIFEST_V3_MIGRATION] — How: MV3 service worker owns messaging, badge, recent-tags memory, and lifecycle wake/sleep.
+ *
+ * ## SERVICE_WORKER_MAIN
+ *
+ * - [IMPL-SERVICE_WORKER] [ARCH-SERVICE_WORKER] [REQ-MANIFEST_V3_MIGRATION] How: wire listeners once; delegate business logic to validated modules.
+ * - Contract:
+ *   - INPUT: chrome.runtime.onMessage; install/activate; alarms; port connections
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: routed handler results; badge updates; persisted recent-tags snapshot; keep-alive while async work runs
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: src/core/service-worker.js; MessageHandler; RecentTagsMemoryManager; updateBadgeForTab
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SERVICE_WORKER_MAIN
+ *   - ON install/activate: AWAIT initManagers()
+ *   - ON message (msg, sender, sendResponse):
+ *   - result = AWAIT handleMessage(msg, sender)
+ *   - sendResponse(result); RETURN true
+ *   - ON alarm: AWAIT runDeferredTasks()
+ *   - RETURN
+ *   - How (sub-block): How: after processMessage success for bookmark/tag mutations, refresh badge.
+ *
+ * ## HANDLE_MESSAGE
+ *
+ * - [IMPL-SERVICE_WORKER] [ARCH-SERVICE_WORKER] [REQ-MANIFEST_V3_MIGRATION] How: Implements handleMessage(msg, sender) behavior for IMPL-SERVICE_WORKER.
+ * - Contract:
+ *   - INPUT: chrome.runtime.onMessage; install/activate; alarms; port connections
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: routed handler results; badge updates; persisted recent-tags snapshot; keep-alive while async work runs
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: src/core/service-worker.js; MessageHandler; RecentTagsMemoryManager; updateBadgeForTab
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: HANDLE_MESSAGE
+ *   - result = AWAIT messageHandler.processMessage(msg, sender)
+ *   - IF result.ok AND isMutation(msg.type): AWAIT updateBadgeForTab(resolveTab(sender, msg))
+ *   - RETURN result
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SERVICE_WORKER ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-EXT_IDENTITY ===
+ * [IMPL-EXT_IDENTITY] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] — How: present Hoverboard as a Chromium extension with content-script injection and Pinboard-compatible UX surfaces.
+ *
+ * ## BOOTSTRAP_EXTENSION
+ *
+ * - [IMPL-EXT_IDENTITY] [ARCH-EXT_IDENTITY] [REQ-EXTENSION_IDENTITY] How: MV3 entry points register once; content script bootstraps page UI when URL allowed.
+ * - Contract:
+ *   - INPUT: extension install/load; manifest entry points (service worker, content scripts, popup, options, side panel)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: loaded extension identity (name, permissions, entry points); content scripts on matching pages
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: manifest.json; src/core/service-worker.js; content script entry; browser API shim (IMPL-CROSS_BROWSER)
+ *   - EFFECTS: Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BOOTSTRAP_EXTENSION
+ *   - REGISTER service worker message listeners
+ *   - ON content script load: IF URL not inhibited THEN init overlay/hover surface
+ *   - EXPOSE popup / side panel / options as user-facing surfaces
+ *   - RETURN
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-EXT_IDENTITY ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-MV3_MIGRATION ===
+ * [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] — How: keep store-compatible Manifest V3: service worker replaces background page; preserve messaging and APIs.
+ *
+ * ## MV3_BACKGROUND_RUNTIME
+ *
+ * - [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] How: service worker owns listeners; async message replies use return true / Promise patterns.
+ * - Contract:
+ *   - INPUT: extension lifecycle events; chrome.runtime / chrome.storage / chrome.action calls
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: service-worker-backed background behavior equivalent to prior MV2 background page contracts
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: manifest_version 3; src/core/service-worker.js; ARCH-SERVICE_WORKER lifecycle patterns
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MV3_BACKGROUND_RUNTIME
+ *   - ON install/activate: init shared managers (config, tags memory, badge)
+ *   - ON message: DELEGATE to MessageHandler; KEEP channel alive until AWAIT completes
+ *   - ON alarm/idle as needed: wake worker for deferred work
+ *   - RETURN
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-MV3_MIGRATION ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-PLAYWRIGHT_E2E_EXTENSION ===
+ * [IMPL-PLAYWRIGHT_E2E_EXTENSION] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-THIS_PAGE_TAG_SORT] [REQ-AI_TAGGING_POPUP] — How: build unpacked extension then drive Chromium persistent context for popup, messaging, overlay, options, side panel E2E.
+ *
+ * ## LAUNCH_EXTENSION_CONTEXT
+ *
+ * - [IMPL-PLAYWRIGHT_E2E_EXTENSION] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] How: global setup builds extension; fixture launches persistent context and resolves extension id.
+ * - Contract:
+ *   - INPUT: npm run test:e2e:extension; playwright.extension.config.js; built dist/ extension
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: pass/fail Playwright reports for extension surfaces; getExtensionId for page evaluation | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: tests/playwright/global-setup.js; extension-fixture.js; extension-*.spec.js
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: LAUNCH_EXTENSION_CONTEXT
+ *   - AWAIT buildExtensionDist()
+ *   - context = launchPersistentContext(userDataDir, args with --load-extension)
+ *   - extensionId = AWAIT getExtensionId(context)
+ *   - RETURN { context, extensionId }
+ *   - How (sub-block): How: specs open popup/side panel/options pages and assert messaging/UI contracts without rewriting product logic.
+ *
+ * ## RUN_EXTENSION_SPECS
+ *
+ * - [IMPL-PLAYWRIGHT_E2E_EXTENSION] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-THIS_PAGE_TAG_SORT] [REQ-AI_TAGGING_POPUP] How: Implements RUN_EXTENSION_SPECS behavior for IMPL-PLAYWRIGHT_E2E_EXTENSION.
+ * - Contract:
+ *   - INPUT: npm run test:e2e:extension; playwright.extension.config.js; built dist/ extension
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: pass/fail Playwright reports for extension surfaces; getExtensionId for page evaluation | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: tests/playwright/global-setup.js; extension-fixture.js; extension-*.spec.js
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: RUN_EXTENSION_SPECS
+ *   - FOR each extension-*.spec: use LAUNCH_EXTENSION_CONTEXT; exercise surface; ASSERT expectations
+ *   - RETURN
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-PLAYWRIGHT_E2E_EXTENSION ===
+ */
 // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Service worker implementation for Manifest V3 migration
 /**
  * Hoverboard Extension - Service Worker (Manifest V3)

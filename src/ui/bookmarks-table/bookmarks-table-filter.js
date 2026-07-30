@@ -5,6 +5,93 @@
  * @param {string} storageFilterValue - '' (All) | 'local' | 'file' | 'sync'
  * @returns {boolean}
  */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS ===
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] — Add/delete tags to selected bookmarks; parseTagsInput, mergeTags, removeTags, selectionStillVisible; saveBookmark per row. Parse comma-separated input; trim and dedupe case-insensitive.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [ARCH-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] [REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS] How: Logical block for IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - 1. parseTagsInput(raw): IF !raw || !raw.trim() RETURN []; parts = raw.split(',').map(s => s.trim()).filter(Boolean); seen = Set(); result = []; FOR p IN parts: low = p.toLowerCase(); IF !seen.has(low): seen.add(low); result.push(p); RETURN result
+ *   - How (sub-block): Merge new tags with existing; case-insensitive dedupe.
+ *   - 2. mergeTags(existingTags, newTags): existing = existingTags || []; new = newTags || []; lowerSet = Set(existing.map(t => String(t).toLowerCase())); result = [...existing]; FOR tag IN new: t = tag.trim(); IF t && !lowerSet.has(t.toLowerCase()): result.push(t); lowerSet.add(t.toLowerCase()); RETURN result
+ *   - How (sub-block): Remove given tags from existing list (case-insensitive).
+ *   - 3. removeTags(existingTags, tagsToRemove): removeSet = Set(tagsToRemove.map(t => String(t).trim().toLowerCase()).filter(Boolean)); RETURN existing.filter(t => !removeSet.has(String(t).toLowerCase()))
+ *   - How (sub-block): Return set of selected URLs that remain in filtered list.
+ *   - 4. selectionStillVisible(selectedUrls, filteredBookmarks): visibleUrls = Set(filteredBookmarks.map(b => b.url).filter(Boolean)); RETURN new Set([...selectedUrls].filter(url => visibleUrls.has(url)))
+ *   - How (sub-block): For each selected URL merge new tags and send saveBookmark; refresh and restore selection for still-visible.
+ *   - 5. addTagsToSelected(): newTags = parseTagsInput(addTagsInput.value); IF newTags.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildAddTagsPayload(b, newTags); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = ""; updateMoveControlsState()
+ *   - How (sub-block): For each selected URL remove tags and send saveBookmark; refresh and restore selection for still-visible.
+ *   - 6. deleteTagsFromSelected(): tagsToRemove = parseTagsInput(addTagsInput.value); IF tagsToRemove.length === 0 RETURN; urls = Array.from(selectedUrls); byUrl = Map(allBookmarks: url -> bookmark); FOR url IN urls: b = byUrl.get(url); IF !b CONTINUE; payload = buildRemoveTagsPayload(b, tagsToRemove); IF payload SEND saveBookmark(payload); urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); FOR url IN selectionStillVisible(urlsToRestore, filteredBookmarks): selectedUrls.add(url); renderTableBody(); addTagsInput.value = ""; updateMoveControlsState()
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_ADD_TAGS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE ===
+ * [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] — Regex find-and-replace on selected fields; applyRegexReplace (pure); regexReplaceSelected sends saveBookmark when changed. Pure function: build payload and set changed iff any selected field value changed.
+ *
+ * ## APPLY_REGEX_REPLACE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] How: Implements applyRegexReplace(bookmark, patternStr, replacementStr, options { title, url, tags, notes }) behavior for IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_REGEX_REPLACE
+ *   - TRY reg = new RegExp(patternStr, 'g')
+ *   - CATCH e RETURN { payload: null, error: e.message }
+ *   - IF !bookmark || !bookmark.url RETURN { payload: null, error: 'missing bookmark or url' }
+ *   - IF !patternStr || !patternStr.trim() RETURN { payload: null, error: 'empty pattern' }
+ *   - IF !options.title && !options.url && !options.tags && !options.notes RETURN { payload: null, error: 'no fields selected' }
+ *   - origDesc = String(bookmark.description ?? ''); origUrl = String(bookmark.url ?? ''); origTags = [...]; origExt = String(bookmark.extended ?? '')
+ *   - desc = origDesc; u = origUrl; tagsArr = [...]; ext = origExt
+ *   - TRY IF options.title: desc = desc.replace(reg, replacementStr); IF options.url: u = u.replace(reg, replacementStr); IF options.tags: tagsArr = ...; IF options.notes: ext = ext.replace(reg, replacementStr)
+ *   - CATCH e RETURN { payload: null, error: e.message }
+ *   - changed = (opts.title && desc !== origDesc) || (opts.url && u !== origUrl) || (opts.tags && tagsArr differs from origTags) || (opts.notes && ext !== origExt)
+ *   - payload = { url, description: desc, tags: tagsArr, extended: ext, preferredBackend, ...time/updated_at/shared/toread }
+ *   - RETURN { payload, error: null, changed }
+ *   - How (sub-block): Per selected URL apply regex; save only when changed; refresh and restore selection.
+ *
+ * ## REGEX_REPLACE_SELECTED
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [ARCH-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] [REQ-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE] How: Implements regexReplaceSelected() behavior for IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: REGEX_REPLACE_SELECTED
+ *   - patternStr = regexInput.value.trim(); replacementStr = replacementInput.value
+ *   - IF !patternStr || selectedUrls.size === 0 RETURN
+ *   - options = { title, url, tags, notes } from checkboxes
+ *   - IF no field selected: show error; RETURN
+ *   - TRY RegExp(patternStr); CATCH: show error; RETURN
+ *   - byUrl = Map(allBookmarks: url -> bookmark)
+ *   - FOR url IN selectedUrls: b = byUrl.get(url); IF !b CONTINUE; result = applyRegexReplace(b, patternStr, replacementStr, options); IF result.error show and RETURN; IF !result.payload CONTINUE; IF result.changed === false CONTINUE; SEND saveBookmark(result.payload)
+ *   - urlsToRestore = Set(selectedUrls); selectedUrls.clear(); loadBookmarks(); selectionStillVisible; renderTableBody(); clear error; updateMoveControlsState()
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX_REGEX_REPLACE ===
+ */
 export function matchStorageFilter (bookmark, storageFilterValue) {
   if (!storageFilterValue || !storageFilterValue.trim()) return true
   const effective = (bookmark.storage || 'local').trim().toLowerCase()

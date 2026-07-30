@@ -1,3 +1,119 @@
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SELECTION_TO_TAG_INPUT ===
+ * [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] — Prefill tag input from page selection on popup open; GET_PAGE_SELECTION and normalizeSelectionForTagInput. Contract: selection via message; tag input prefilled.
+ *
+ * ## NORMALIZE_SELECTION_FOR_TAG_INPUT
+ *
+ * - [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] How: Implements normalizeSelectionForTagInput(selection, maxWords) behavior for IMPL-SELECTION_TO_TAG_INPUT.
+ * - Contract:
+ *   - INPUT: none at popup open (selection read from page via message); raw selection string (normalizeSelectionForTagInput)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: tag input field prefilled with normalized words (side effect) | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: current tab; newTagInput element; maxWords = 8
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: NORMALIZE_SELECTION_FOR_TAG_INPUT
+ *   - text = replace non-word non-space chars with space in selection
+ *   - text = collapse spaces, trim
+ *   - words = split text on whitespace
+ *   - RETURN first maxWords words joined by space
+ *   - How (sub-block): Request selection; if present set tag input to normalized value.
+ *   - 1. popup loadInitialData (after loadSuggestedTags or loadRecentTags):
+ *   - TRY response = sendToTab(GET_PAGE_SELECTION)
+ *   - ON timeout or failure LEAVE tag input unchanged, RETURN
+ *   - raw = response.data.selection
+ *   - IF raw non-empty:
+ *   - normalized = normalizeSelectionForTagInput(raw, 8)
+ *   - setTagInputValue(normalized)
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SELECTION_TO_TAG_INPUT ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-UI_INSPECTOR ===
+ * [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] — recordMessage/recordAction ring buffers; getLastMessages/getLastActions; debug-gated. Contract: message or action in; ring buffers and getters; enabled flag.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] How: Logical block for IMPL-UI_INSPECTOR.
+ * - Contract:
+ *   - INPUT: message (recordMessage); action (recordAction); gated by DEBUG_HOVERBOARD_UI or setEnabled(true)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: ring buffers of last N messages and last N actions; getLastMessages(), getLastActions()
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: message ring buffer; action ring buffer; enabled flag
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): Append to buffer when enabled; drop oldest if full.
+ *   - 1. recordMessage(msg): IF enabled: APPEND to message buffer; DROP oldest if full
+ *   - 2. recordAction(action): IF enabled: APPEND to action buffer; DROP oldest if full
+ *   - How (sub-block): Return copy of buffers.
+ *   - 3. getLastMessages(), getLastActions(): RETURN copy of buffer(s)
+ *   - How (sub-block): Service-worker records message; PopupController/content record action.
+ *   - 4. Wiring: service-worker after handle message -> recordMessage; PopupController/content-main on action -> recordAction
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-UI_INSPECTOR ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-AI_TAGGING_READABILITY ===
+ * [IMPL-AI_TAGGING_READABILITY] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] — Extract main content from document: Readability when available, else title + body.innerText; cap at maxLength.
+ *
+ * ## EXTRACT_PAGE_CONTENT
+ *
+ * - [IMPL-AI_TAGGING_READABILITY] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] How: Implements extractPageContent(document) behavior for IMPL-AI_TAGGING_READABILITY.
+ * - Contract:
+ *   - INPUT: document (or run in page context)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: { title: string, textContent: string }
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: maxLength (e.g. 16000)
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: EXTRACT_PAGE_CONTENT
+ *   - clone = document.cloneNode(true)
+ *   - result = Readability.parse(clone)  // @mozilla/readability
+ *   - IF result:
+ *   - title = result.title ?? document.title
+ *   - text = result.textContent ?? ''
+ *   - ELSE:
+ *   - title = document.title
+ *   - text = document.body ? document.body.innerText : ''
+ *   - IF text.length > maxLength THEN text = text.slice(0, maxLength)
+ *   - RETURN { title, textContent: text }
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-AI_TAGGING_READABILITY ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-DEBUG_PANEL ===
+ * [IMPL-DEBUG_PANEL] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] — Debug logging by category and debug panel showing last actions, messages, and current bookmark/backend. Contract: inputs, outputs, and data for logging and panel.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-DEBUG_PANEL] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] How: Logical block for IMPL-DEBUG_PANEL.
+ * - Contract:
+ *   - INPUT: LOG_CATEGORIES (ui, message, overlay, storage); optional debug panel open
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: debugLogger.trace/debug in message-handler, PopupController, content-main; debug panel shows last actions, last messages, current bookmark/tags/backend
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: debug-logger.js; debug.html + debug.js; inspector ring buffers
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): Logging: emit trace/debug when category enabled.
+ *   - 1. Logging: WHEN category enabled: debugLogger.trace(msg) or debugLogger.debug(msg) with category
+ *   - How (sub-block): Debug panel: on load request last actions/messages/current bookmark and render.
+ *   - 2. Debug panel (debug.html): ON load SEND DEV_COMMAND getLastActions/getLastMessages/getCurrentBookmark (or getStorageSnapshot); RENDER in panel
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-DEBUG_PANEL ===
+ */
 // [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION]: Content script implementation for V3 injection patterns
 /**
  * Hoverboard Content Script - Main Entry Point

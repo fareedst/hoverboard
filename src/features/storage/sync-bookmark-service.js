@@ -1,10 +1,115 @@
 /**
- * [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND]
- * Bookmark provider backed by chrome.storage.sync (synced across Chrome profile devices); quota ~100 KB.
- * Provider contract: getBookmarkForUrl, getRecentBookmarks, saveBookmark, deleteBookmark, saveTag, deleteTag, testConnection.
- * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] time = create-time, updated_at = most-recent-update-time.
+ * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
+ * [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] — Every bookmark has time (create) and updated_at (last update); provider-specific set/normalize; export/import include.
+ *
+ * ## PINBOARD
+ *
+ * - [IMPL-BOOKMARK_CREATE_UPDATE_TIMES] [ARCH-BOOKMARK_CREATE_UPDATE_TIMES] [REQ-BOOKMARK_CREATE_UPDATE_TIMES] — import create preserves CSV/JSON Time and Updated. How: Implements Pinboard behavior for IMPL-BOOKMARK_CREATE_UPDATE_TIMES.
+ * - Contract:
+ *   - INPUT: bookmark data (for save), API response (for Pinboard), raw record (for normalize)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: bookmark with time and updated_at set per provider and context
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: time = create time; updated_at = last update time
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: PINBOARD
+ *   - parseBookmarkResponse / createEmptyBookmark: SET updated_at = time (API has no updated_at)
+ *   - SEND to API: do NOT include updated_at
+ *   - How (sub-block): If missing updated_at set to time (legacy); include updated_at in payload/CSV/JSON.
+ *   - 1. Normalize (url-tags-manager, display, move, export/import):
+ *   - IF bookmark has no updated_at: SET updated_at = time   // legacy
+ *   - ELSE: keep updated_at
+ *   - Include updated_at in payload/CSV/JSON
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_CREATE_UPDATE_TIMES ===
  */
-
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SYNC_BOOKMARK_SERVICE ===
+ * [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-SYNC_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] — chrome.storage.sync peer provider under five-provider BookmarkRouter; same contract as LocalBookmarkService; quota ~100 KB. Contract: url/bookmark/tag inputs and provider-shaped outputs; sync key and shape.
+ *
+ * ## GET_BOOKMARK_FOR_URL
+ *
+ * - [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-SYNC_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements getBookmarkForUrl(url) behavior for IMPL-SYNC_BOOKMARK_SERVICE.
+ * - Contract:
+ *   - INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: bookmark object or list of bookmarks or success/error; same provider contract as LocalBookmarkService | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: chrome.storage.sync key = hoverboard_sync_bookmarks; value = object keyed by URL -> bookmark (quota ~100 KB)
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_BOOKMARK_FOR_URL
+ *   - bookmarks = LOAD bookmarks
+ *   - RETURN bookmarks[normalize(url)] or null
+ *   - How (sub-block): Merge data and persist to sync.
+ *
+ * ## SAVE_BOOKMARK
+ *
+ * - [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-SYNC_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements saveBookmark(data) behavior for IMPL-SYNC_BOOKMARK_SERVICE.
+ * - Contract:
+ *   - INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: bookmark object or list of bookmarks or success/error; same provider contract as LocalBookmarkService | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: chrome.storage.sync key = hoverboard_sync_bookmarks; value = object keyed by URL -> bookmark (quota ~100 KB)
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SAVE_BOOKMARK
+ *   - bookmarks = LOAD bookmarks
+ *   - bookmarks[normalize(data.url)] = merge(data into bookmark shape)
+ *   - PERSIST bookmarks to chrome.storage.sync
+ *   - RETURN { success: true }
+ *   - How (sub-block): Update bookmarks/tags and persist; return success.
+ *
+ * ## DELETE_BOOKMARK
+ *
+ * - [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-SYNC_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements deleteBookmark(url), saveTag(data), deleteTag(data) behavior for IMPL-SYNC_BOOKMARK_SERVICE.
+ * - Contract:
+ *   - INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: bookmark object or list of bookmarks or success/error; same provider contract as LocalBookmarkService | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: chrome.storage.sync key = hoverboard_sync_bookmarks; value = object keyed by URL -> bookmark (quota ~100 KB)
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: DELETE_BOOKMARK
+ *   - UPDATE bookmarks; PERSIST;       RETURN { success: true }
+ *   - How (sub-block): Sort by time descending and return first count.
+ *
+ * ## GET_RECENT_BOOKMARKS
+ *
+ * - [IMPL-SYNC_BOOKMARK_SERVICE] [ARCH-SYNC_STORAGE_PROVIDER] [ARCH-STORAGE_INDEX_AND_ROUTER] [REQ-PER_BOOKMARK_STORAGE_BACKEND] How: Implements getRecentBookmarks(count) behavior for IMPL-SYNC_BOOKMARK_SERVICE.
+ * - Contract:
+ *   - INPUT: url (string), bookmark data (for save), tag data (for saveTag/deleteTag), count (for getRecentBookmarks)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: bookmark object or list of bookmarks or success/error; same provider contract as LocalBookmarkService | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: chrome.storage.sync key = hoverboard_sync_bookmarks; value = object keyed by URL -> bookmark (quota ~100 KB)
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_RECENT_BOOKMARKS
+ *   - list = values(LOAD bookmarks); SORT BY time DESCENDING; RETURN list[0..count-1]
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SYNC_BOOKMARK_SERVICE ===
+ */
 import { TagService } from '../tagging/tag-service.js'
 import { debugLog, debugError } from '../../shared/utils.js'
 

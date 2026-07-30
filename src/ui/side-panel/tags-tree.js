@@ -1,11 +1,374 @@
 /**
- * [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE]
- * Side panel entry script. Load bookmarks, load config, apply filter/sort/group, render config toggle and controls, tag selector, tree or grouped list; click URL opens in new tab.
+ * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BOOKMARK_SEARCH ===
+ * [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_BOOKMARK_SEARCH] — This block defines the search feature: pure filter plus panel UI. Implements REQ by providing search, count, and Next/Previous; implements ARCH by client-side filter and scroll/highlight.
  *
- * [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH]
- * Search over displayed list; count; Next/Previous with scroll and highlight.
+ * ## FILTER_BOOKMARKS_BY_SEARCH
+ *
+ * - [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] How: filterBookmarksBySearch: implements "search displayed list by text" by returning bookmarks where query (trimmed, case-insensitive) appears in description, url, tags (joined), or extended. Empty/whitespace query returns full list.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: FILTER_BOOKMARKS_BY_SEARCH
+ *   - q = String(query).trim().toLowerCase()
+ *   - IF q === '' RETURN bookmarks
+ *   - RETURN bookmarks WHERE bookmarkMatches(b, q)
+ *
+ * ## BOOKMARK_MATCHES
+ *
+ * - [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [REQ-SIDE_PANEL_BOOKMARK_SEARCH] How: Implements bookmarkMatches(b, q) behavior for IMPL-SIDE_PANEL_BOOKMARK_SEARCH.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: BOOKMARK_MATCHES
+ *   - title = (b.description ?? '').toLowerCase()
+ *   - url = (b.url ?? '').toLowerCase()
+ *   - tags = (b.tags ?? []).join(' ').toLowerCase()
+ *   - extended = (b.extended ?? '').toLowerCase()
+ *   - RETURN title.includes(q) OR url.includes(q) OR tags.includes(q) OR extended.includes(q)
+ *
+ * ## BLOCK_3
+ *
+ * - [REQ-SIDE_PANEL_BOOKMARK_SEARCH] [ARCH-SIDE_PANEL_BOOKMARK_SEARCH] [IMPL-SIDE_PANEL_BOOKMARK_SEARCH] How: Pipeline integration: after applyFilters and sortBookmarks, if searchQuery.trim() then matchingBookmarks = filterBookmarksBySearch(displayedBookmarks, searchQuery); else matchingBookmarks = displayedBookmarks. Build tagToBookmarks or grouped from matchingBookmarks. Implements "filter displayed list" and "count of matching records". Search UI: search input, count span, Previous/Next buttons. Implements "display count" and "advance to next/previous record". Render: each bookmark link gets data-search-index = flat index in display order so Nth match can be found. Implements "scroll and highlight" by finding element with data-search-index === searchMatchIndex, scrollIntoView, classList.add('search-current'); clear previous highlight.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BLOCK_3
+ *   - 1. ON refresh / load: displayedBookmarks = sortBookmarks(applyFilters(rawBookmarks, filterState), sortBy, sortAsc)
+ *   - 2.   IF searchQuery.trim(): matchingBookmarks = filterBookmarksBySearch(displayedBookmarks, searchQuery)
+ *   - 3.   ELSE: matchingBookmarks = displayedBookmarks
+ *   - 4.   build tree/grouped from matchingBookmarks; display count = matchingBookmarks.length
+ *   - 5. searchInput: on input/change set searchQuery; re-run pipeline; set searchMatchIndex = 0; update searchCount text ("N matches" or "No matches")
+ *   - 6. searchCount: textContent = matchingBookmarks.length === 0 ? "No matches" : matchingBookmarks.length + " matches"
+ *   - 7. searchPrev: searchMatchIndex = (searchMatchIndex - 1 + total) % total; scrollToMatch(searchMatchIndex); setHighlight(searchMatchIndex)
+ *   - 8. searchNext: searchMatchIndex = (searchMatchIndex + 1) % total; scrollToMatch(searchMatchIndex); setHighlight(searchMatchIndex)
+ *   - 9. WHEN rendering tree or grouped: for each bookmark link set data-search-index = index (0-based in display order)
+ *   - 10. scrollToMatch(idx): links = querySelectorAll('.tree-bookmark-link[data-search-index]'); el = links[idx]; IF el THEN el.scrollIntoView({ block: 'nearest' }); remove .search-current from all; el.classList.add('search-current')
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_BOOKMARK_SEARCH ===
  */
-
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TABS ===
+ * [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] — Tabbed side panel: tab bar, panels, persist, init This Page / By Tag / browser Tabs; recent-tags refresh on window focus while Bookmark tab active (same loadRecentTags contract as [IMPL-RECENT_TAGS_POPUP_REFRESH]); single page + scoped popup root per ARCH-SIDE_PANEL_TABS.
+ *
+ * ## GET_TAGS_TREE_INIT_OPTIONS
+ *
+ * - [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE] How: pure helper for By Tag init — { currentBookmarkTags } from controller.currentPin.tags via normalizeTags; lives in side-panel-tab-state.js.
+ * - Contract:
+ *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_TAGS_TREE_INIT_OPTIONS
+ *   - IF controller missing: RETURN { currentBookmarkTags: [] }
+ *   - raw = controller.normalizeTags(controller.currentPin?.tags) || []
+ *   - RETURN { currentBookmarkTags: Array.isArray(raw) ? raw : [] }
+ *
+ * ## BIND_WINDOW_FOCUS_RECENT_TAGS_REFRESH
+ *
+ * - [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [ARCH-TAG_SYSTEM] [REQ-RECENT_TAGS_SYSTEM] [IMPL-RECENT_TAGS_POPUP_REFRESH] How: cross-IMPL — invokes PopupController.loadRecentTags() (async; same family as popup). chrome.windows.getCurrent callback does not await the returned promise (fire-and-forget; matches production side-panel.js). Register after bindTabChangeRefresh on panel load. Focus to this window (not WINDOW_ID_NONE), getCurrent id match; sync guards via shouldInvokeLoadRecentTagsOnWindowFocusSync in side-panel-tab-state.js (matches unit tests); no-op without chrome.windows. Phase G: exported for composition tests; setActiveTabForTest sets activeTab in tests only.
+ * - Contract:
+ *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BIND_WINDOW_FOCUS_RECENT_TAGS_REFRESH
+ *   - hasWindowsApi = !!(onFocusChanged AND getCurrent); IF NOT hasWindowsApi: RETURN
+ *   - REGISTER onFocusChanged(windowId):
+ *   - IF windowId === WINDOW_ID_NONE: RETURN
+ *   - getCurrent → IF runtime.lastError OR window id mismatch: RETURN
+ *   - IF NOT shouldInvokeLoadRecentTagsOnWindowFocusSync({ hasWindowsApi, activeTab, isInitialized: controller?.isInitialized, isLoading: controller?.isLoading }): RETURN
+ *   - controller.loadRecentTags()  // async; not AWAIT in callback (S09.GREEN LEAP alignment)
+ *
+ * ## SHOULD_INVOKE_LOAD_RECENT_TAGS_ON_WINDOW_FOCUS_SYNC
+ *
+ * - --- Phase H E2E-only boundary [REQ-RECENT_TAGS_SYSTEM] [IMPL-SIDE_PANEL_TABS] --- How: Cross-window "return focus to this browser window → Recent Tags refresh" is e2e_only: phase_h_window_focus_recent_tags_cross_window (multi-window + real onFocusChanged). Phase G: tests/integration/window-focus-recent-tags-composition.integration.test.js. This Page Recent Tags mount in chrome-extension:// side-panel.html is e2e_only: phase_h_side_panel_recent_tags_extension_document — tests/playwright/extension-side-panel-recent-tags-e2e.spec.js. How: pure predicate for window-focus recent refresh sync gates (tested in side-panel-tabs.test.js); implementation is single boolean AND (same semantics as chained IFs). Token set aligned with side-panel-tab-state.js and tests (S09.SYNC).
+ * - Contract:
+ *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SHOULD_INVOKE_LOAD_RECENT_TAGS_ON_WINDOW_FOCUS_SYNC
+ *   - RETURN !!(hasWindowsApi AND activeTab === "bookmark" AND isInitialized AND NOT isLoading)
+ *
+ * ## SWITCH_TAB
+ *
+ * - [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE] How: onActivated/onUpdated — refreshPopupData updates controller.currentPin; By Tag visible → refreshTagsTreeTabIfVisible / setSelectedTagsFromCurrentBookmark. How: persist activeTab; showPanel; tagsTree branch passes currentBookmarkTags / setSelectedTagsFromCurrentBookmark; returning to bookmark when already inited → refreshPopupData.
+ * - Contract:
+ *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SWITCH_TAB
+ *   - wasBookmarkInited = bookmarkTabInited
+ *   - activeTab = tabId
+ *   - chrome.storage.local.set({ hoverboard_sidepanel_active_tab: tabId })
+ *   - showPanel(activeTab)
+ *   - IF tabId === "tagsTree": currentTags = controller.normalizeTags(controller.currentPin?.tags) OR []; wasTagsTreeInited = tagsTreeTabInited; initTabIfNeeded(tabId, { currentBookmarkTags: currentTags }); IF wasTagsTreeInited: setSelectedTagsFromCurrentBookmark(currentTags)
+ *   - ELSE IF tabId === "browserTabs": initTabIfNeeded("browserTabs")
+ *   - ELSE: initTabIfNeeded(tabId)
+ *   - IF tabId === "bookmark" AND wasBookmarkInited AND popupComponents.controller: popupComponents.controller.refreshPopupData()
+ *
+ * ## SHOW_PANEL
+ *
+ * - [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SIDE_PANEL_BROWSER_TABS] How: toggle visibility of #bookmarkPanel / #tagsTreePanel / #browserTabsPanel so exactly one content panel shows.
+ * - Contract:
+ *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SHOW_PANEL
+ *   - IF activeTab === "bookmark": #bookmarkPanel visible, #tagsTreePanel hidden, #browserTabsPanel hidden
+ *   - ELSE IF activeTab === "tagsTree": #tagsTreePanel visible, #bookmarkPanel hidden, #browserTabsPanel hidden
+ *   - ELSE IF activeTab === "browserTabs": #browserTabsPanel visible, #bookmarkPanel hidden, #tagsTreePanel hidden
+ *
+ * ## INIT_TAB_IF_NEEDED
+ *
+ * - [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] How: header row — setSidePanelVersion / initSidePanelVersion; no-op if #side-panel-version missing; guards for tests without chrome.runtime. How: CSS flex column on body + .side-panel-content flex 1 so tab content fills viewport. How: composed_with — single init of popup stack in #bookmarkPanel; pre: DOM ready; post: controller + loadInitialData + setupEventListeners; wires footer By Tag → switchTab("tagsTree").
+ * - Contract:
+ *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: INIT_TAB_IF_NEEDED
+ *   - IF bookmarkTabInited RETURN
+ *   - bookmarkTabInited = true
+ *   - uiSystem = AWAIT UISystem.init(); popupComponents = uiSystem.createPopup({ container: document.getElementById('bookmarkPanel'), errorHandler, config })
+ *   - AWAIT popupComponents.controller.loadInitialData()
+ *   - popupComponents.uiManager.setupEventListeners()
+ *   - // Wire "By Tag" in footer to switchTab("tagsTree") when in panel context
+ *
+ * ## INIT_TAB_IF_NEEDED
+ *
+ * - [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE] How: composed_with — lazy initTagsTreeTab(options); currentBookmarkTags aligns selector after loadBookmarks; depends on bookmark tab controller when switching from This Page.
+ * - Contract:
+ *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: INIT_TAB_IF_NEEDED
+ *   - IF tagsTreeTabInited RETURN
+ *   - tagsTreeTabInited = true
+ *   - initTagsTreeTab(options)  // load getAggregatedBookmarksForIndex; if options.currentBookmarkTags set, apply at end of loadBookmarks
+ *
+ * ## INIT_TAB_IF_NEEDED
+ *
+ * - [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_BROWSER_TABS] [IMPL-SIDE_PANEL_BROWSER_TABS] How: composed_with — initBrowserTabsTab once; chrome.tabs list + optional referrers; visibility when activeTab === "browserTabs".
+ * - Contract:
+ *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: INIT_TAB_IF_NEEDED
+ *   - IF browserTabsTabInited RETURN
+ *   - browserTabsTabInited = true
+ *   - initBrowserTabsTab()  // load tabs, referrers; render #browserTabsPanel list; bind search input, Copy button, Close button
+ *   - How (sub-block): Phase G: switchTabForTest(tabId) and resetBrowserTabsTabInitedForTest() exported for composition tests — same switchTab → initTabIfNeeded("browserTabs") path without clicking .side-panel-tab (no UI).
+ *
+ * ## BLOCK_9
+ *
+ * - --- Composition: composed_with [IMPL-SIDE_PANEL_BOOKMARK] [IMPL-SIDE_PANEL_TAGS_TREE] --- How: Ordering: runInitialTabInit may await initBookmarkTab before By Tag so controller exists for getTagsTreeInitOptions. Shared DATA: popupComponents.controller (currentPin, normalizeTags) for both This Page and By Tag sync. Collision: bindTabChangeRefresh refreshPopupData and bindWindowFocusRecentTagsRefresh loadRecentTags can run close together — both read currentPin; safe (idempotent UI updates). Cross-IMPL: loadRecentTags matches  message path to  / .
+ * - Contract:
+ *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: one panel visible; This Page, By Tag, or browser Tabs content shown; selected tab persisted
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: activeTab ("bookmark" | "tagsTree" | "browserTabs"), bookmarkTabInited (boolean), tagsTreeTabInited (boolean), browserTabsTabInited (boolean), storage key hoverboard_sidepanel_active_tab. TAB_BROWSER_TABS = "browserTabs"; TAB_IDS includes browserTabs.
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BLOCK_9
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TABS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TAGS_TREE ===
+ * [IMPL-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [REQ-SIDE_PANEL_TAGS_TREE] — This block defines the overall feature: side panel tags tree opened from popup; panel shows tag→urls tree; click URL opens in new tab. Implements REQ by providing the side-panel entry and tag-tree UX; implements ARCH by following the open-flow and data-flow decisions.
+ *
+ * ## BUILD_TAG_TO_BOOKMARKS
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: Popup entry: implements requirement "open tags tree from popup" by sending OPEN_SIDE_PANEL. ARCH prescribes message-based open; this block is the popup side. SW open in user gesture: implements requirement that side panel opens in response to user click. chrome.sidePanel.open() may only be called in user gesture (no await). So: maintain cached normal windowId; on OPEN_SIDE_PANEL handle in onMessage synchronously (no await before open). Implements ARCH open flow. Panel load: implements tag tree data flow; uses getAggregatedBookmarksForIndex (local+file+sync+browser; no Pinboard) then load config, apply filters, sort, group, build tag map and tag list, render. Implements REQ filters/sort/group and config persistence. When panel is tabbed, Tags tree is second tab; load/render runs on tab select or first show. initTagsTreeTab(options) is callable from side-panel.js when user selects Tags tree tab; optional currentBookmarkTags syncs tag selector to current bookmark. Implements "Tags tree tab" in tabbed panel and "tag selector matches current bookmark; tree shows only bookmarks that share at least one tag". Placeholder/demo mode (?demo=1 or ?screenshot=1): loadPlaceholderForScreenshot uses tagsTreePlaceholderBookmarks (tags-tree-demo-data.js), a rich set (25+ bookmarks, 15+ tags, time/updated_at, extended) so the By Tag demo GIF shows tag selector, tree, filters and search. Set rawBookmarks so tag toggle invokes refreshFromConfig; then tagToBookmarks, allTags, selectedTagOrder; hide load error and empty state; renderTagSelector(); renderTree(). buildTagToBookmarks: implements requirement "tag-based tree" by producing Map<tag, [{ title, url }]> from bookmarks. One pass; trim/dedupe per tag.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BUILD_TAG_TO_BOOKMARKS
+ *   - result = new Map()
+ *   - FOR each b in bookmarks:
+ *   - tags = Array.isArray(b.tags) ? b.tags : []; title = b.description || b.url || ''
+ *   - FOR each tag in tags:
+ *   - tagKey = String(tag).trim(); IF empty skip
+ *   - IF result has no key tagKey THEN result[tagKey] = []; result[tagKey].push({ title, url: b.url })
+ *   - RETURN result
+ *
+ * ## GET_ALL_TAGS_FROM_BOOKMARKS
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: getAllTagsFromBookmarks: implements tag selector data by returning sorted unique tags from bookmarks.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_ALL_TAGS_FROM_BOOKMARKS
+ *   - set = new Set(); FOR each b in bookmarks: FOR each t in (b.tags || []): set.add(String(t).trim())
+ *   - RETURN sorted Array.from(set)
+ *
+ * ## GET_TAGS_TO_DISPLAY
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: Tag list view mode: implements "user can switch between all tags and only checked tags; choice persisted". showAllTags boolean in config; when true display allTags, when false display selectedTagOrder filtered by allTags (avoid stale tags). Persisted in panel config.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_TAGS_TO_DISPLAY
+ *   - IF showAllTags THEN RETURN allTags
+ *   - allSet = Set(allTags); RETURN selectedTagOrder filtered to items IN allSet (preserve order)
+ *
+ * ## RENDER_TAG_SELECTOR
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: renderTagSelector: implements tag selection and order UI and compact layout. Renders checkboxes for visibleTags = getTagsToDisplay(allTags, selectedTagOrder, config.showAllTags); on checkbox change save selectedTagOrder and refreshFromConfig; toggle change updates showAllTags, savePanelConfig, renderTagSelector only.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RENDER_TAG_SELECTOR
+ *   - visibleTags = getTagsToDisplay(allTags, selectedTagOrder, config.showAllTags)
+ *   - render list of tags (visibleTags) with selection state (checked iff in selectedTagOrder) and compact layout; on change save selectedTagOrder and refreshFromConfig
+ *   - 1. ON tag list view toggle: config.showAllTags = NOT config.showAllTags; savePanelConfig(config); renderTagSelector()
+ *
+ * ## RENDER_TREE
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: renderTree: implements collapsible URL lists per tag; each section has tag label + toggle + list of title+URL.
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RENDER_TREE
+ *   - FOR each tag in selectedTagOrder: entries = tagToBookmarks.get(tag) || []; render section (tag + toggle + list); store url for click
+ *
+ * ## BLOCK_6
+ *
+ * - [REQ-SIDE_PANEL_TAGS_TREE] [ARCH-SIDE_PANEL_TAGS_TREE] [IMPL-SIDE_PANEL_TAGS_TREE] How: refreshFromConfig: syncConfigFromControls; savePanelConfig; IF !rawBookmarks or length 0 RETURN (no re-render). filterState = getFilterStateForTagsTree(panelConfig, selectedTagOrder); filtered = applyFilters(rawBookmarks, filterState); sorted = sortBookmarks(filtered, ...); matchingBookmarks = search filter or sorted; IF groupBy !== 'none' renderGrouped ELSE tagToBookmarks = buildTagToBookmarks(matchingBookmarks, allTags); renderTagSelector(); renderTree(); updateSearchCount; scrollToMatch. Config expand/collapse: implements requirement that config region is expandable for use and collapsible to maximize bookmarks space; toggle loads/saves expanded state; when collapsed only compact bar visible; when expanded show full filter and display controls. Filter pipeline: implements requirement to filter by create/update time range, tags include, and domain. Apply in sequence: time range (field + startMs/endMs), then tags include (bookmark must have at least one tag in set), then domains (URL hostname in set). Empty set or null bounds mean no filter for that step. getDomainFromUrl: implements domain filter/group by returning hostname from URL; invalid or empty URL returns empty string; no throw. filterByTimeRange: implements time range filter; uses bookmark time or updated_at per field; null start/end means no bound; inclusive. filterByTagsInclude: implements tags include filter; empty tagSet = all pass; otherwise bookmark must have at least one tag (case-insensitive) in set. filterByDomains: implements domain filter; empty domainSet = all pass; otherwise bookmark's getDomainFromUrl(url) in domainSet (case-insensitive). sortBookmarks: implements display sort by chosen axis (time, updated_at, tag, domain) and direction (sortAsc). For time use ms; for tag use first tag or ''; for domain use getDomainFromUrl. groupBookmarksBy: implements display group by; returns structure for sectioned render (e.g. Map<groupKey, bookmark[]>). groupBy in 'none' | 'time' | 'updated_at' | 'tag' | 'domain'; bucket keys for date (e.g. date string); per-tag or per-domain one key per value. renderGrouped: implements collapsible sectioned display when groupBy not none; each section has header (toggle) and list of bookmark links; click URL opens in new tab. loadPanelConfig / savePanelConfig: implements config state persistence; read/write expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags to chrome.storage.local. showAllTags defaults true for backward compatibility. openUrlInNewTab / ON click URL: implements "click-to-open in new tab" requirement via chrome.tabs.create({ url }). Tags tree panel layout: panel (#tagsTreePanel) is the scroll container so the above-list div can scroll off the page; .tree-section has min-height 100% so it consumes full visible height when the div is scrolled off and scrolls its list. Implements "tab content fills vertical space" for Tags tree tab. DOM: #tagsTreePanel > .tags-tree-above-list > (header, config-section, search-section, tag-selector-section) + .tree-section
+ * - Contract:
+ *   - INPUT: user click in popup (open Tags tree); panel page load; user actions in panel (select/reorder tags, expand/collapse, click URL)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel visible; tag selector and hierarchical tree rendered; URL opens in new tab on click
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: bookmarks (from getAggregatedBookmarksForIndex = local+file+sync+browser; no Pinboard), config (expanded, timeField, timeStart, timeEnd, tagsInclude, domains, groupBy, sortBy, sortAsc, selectedTagOrder, showAllTags), filtered bookmarks, tagToBookmarks (Map tag → [{ title, url }]), allTags (string[]), collapsedTags/collapsedSections (Set), panel DOM refs
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BLOCK_6
+ *   - 1. refreshFromConfig(): syncConfigFromControls(); savePanelConfig(); IF !rawBookmarks or rawBookmarks.length === 0 RETURN; filterState = getFilterStateForTagsTree(panelConfig, selectedTagOrder); filtered = applyFilters(rawBookmarks, filterState); sorted = sortBookmarks(filtered, panelConfig.sortBy, panelConfig.sortAsc); matchingBookmarks = searchQuery ? filterBookmarksBySearch(sorted, searchQuery) : sorted; IF panelConfig.groupBy !== 'none' THEN renderGrouped(matchingBookmarks) ELSE tagToBookmarks = buildTagToBookmarks(matchingBookmarks, allTags); renderTagSelector(); renderTree(); updateSearchCount(); scrollToMatch(searchMatchIndex)
+ *   - 2. ON config toggle click: config.expanded = NOT config.expanded; savePanelConfig(config); renderConfigToggle(config.expanded); show or hide config content
+ *   - 3. applyFilters(bookmarks, config): list = bookmarks; list = filterByTimeRange(list, config.timeField, config.timeStart, config.timeEnd); list = filterByTagsInclude(list, config.tagsInclude); list = filterByDomains(list, config.domains); RETURN list
+ *   - 4. getDomainFromUrl(url): IF !url or !String(url).trim() RETURN ''; TRY parse url; RETURN hostname (lowercase) OR ''
+ *   - 5. filterByTimeRange(bookmarks, field, startMs, endMs): RETURN bookmarks WHERE inTimeRange(b, field, startMs, endMs)  // inTimeRange: get ms from b; if null return false; if startMs and ms < startMs return false; if endMs and ms > endMs return false; return true
+ *   - 6. filterByTagsInclude(bookmarks, tagSet): IF !tagSet or size 0 RETURN bookmarks; RETURN bookmarks WHERE (b.tags normalized) INTERSECT tagSet non-empty
+ *   - 7. filterByDomains(bookmarks, domainSet): IF !domainSet or size 0 RETURN bookmarks; RETURN bookmarks WHERE getDomainFromUrl(b.url) in domainSet
+ *   - 8. sortBookmarks(bookmarks, sortBy, sortAsc): sort list by sortBy key; if sortAsc ascending else descending; RETURN sorted array
+ *   - 9. groupBookmarksBy(bookmarks, groupBy): IF groupBy === 'none' RETURN null or flat; result = Map(); FOR b in bookmarks: key = keyFor(b, groupBy); append b to result[key]; RETURN result
+ *   - 10. renderGrouped(grouped, config): FOR each groupKey in grouped: render section header (groupKey + toggle); render list of title+URL; store url for click → openUrlInNewTab(url)
+ *   - 11. loadPanelConfig(): get from chrome.storage.local; RETURN defaults for missing keys (showAllTags default true)
+ *   - 12. savePanelConfig(config): chrome.storage.local.set(config keyed by storage keys)
+ *   - 13. ON click URL in tree: url = event target url; openUrlInNewTab(url)  // openUrlInNewTab(url) => chrome.tabs.create({ url })
+ *   - 14. CSS #tagsTreePanel: display block; flex 1 1 0; min-height 0; overflow-y auto; background var(--color-background)
+ *   - 15. CSS .tags-tree-above-list: flex none (natural height; scrolls off with panel scroll)
+ *   - 16. CSS .tree-section: min-height 100%; overflow-y auto
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SIDE_PANEL_TAGS_TREE ===
+ */
 import { buildTagToBookmarks, getAllTagsFromBookmarks, getFilterStateForTagsTree, getTagsToDisplay, intersectionTagOrder, mergePreferredTagSpelling, openUrlInNewTab } from './tags-tree-data.js'
 import { applyFilters, sortBookmarks, groupBookmarksBy, filterBookmarksBySearch } from './tags-tree-filter.js'
 import { parseTimeRangeValue } from '../bookmarks-table/bookmarks-table-filter.js'

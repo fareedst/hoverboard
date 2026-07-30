@@ -1,7 +1,8 @@
 IMPL-BOOKMARKING:
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: "src/core/message-handler.js"
+        description: "SAVE/DELETE/GET bookmark message handling"
   cross_references:
     - "ARCH-MESSAGE_HANDLING"
     - "ARCH-UX_CORE"
@@ -17,7 +18,7 @@ IMPL-BOOKMARKING:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync: tests + code_locations"
   name: "Bookmarking"
   rationale:
     why: "Bookmarking implementation"
@@ -34,4 +35,6 @@ IMPL-BOOKMARKING:
       - "IMPL-BOOKMARKING"
     requirements:
       - "REQ-SMART_BOOKMARKING"
-    tests: []
+    tests:
+      - "tests/unit/bookmarking-message-handler.test.js"
+      - "tests/unit/message-handler-contracts.test.js"

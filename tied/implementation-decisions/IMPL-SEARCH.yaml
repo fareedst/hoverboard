@@ -1,7 +1,8 @@
 IMPL-SEARCH:
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: "src/features/search/tab-search-service.js"
+        description: "Tab search service"
   cross_references:
     - "ARCH-SEARCH"
     - "REQ-SEARCH_FUNCTIONALITY"
@@ -16,7 +17,7 @@ IMPL-SEARCH:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync"
   name: "Search"
   rationale:
     why: "Search implementation"
@@ -32,4 +33,6 @@ IMPL-SEARCH:
       - "IMPL-SEARCH"
     requirements:
       - "REQ-SEARCH_FUNCTIONALITY"
-    tests: []
+    tests:
+      - "tests/unit/tab-search-no-match-ui.test.js"
+      - "tests/unit/tab-search-service.test.js"

@@ -2,8 +2,7 @@ IMPL-SERVICE_WORKER:
   code_locations:
     files:
       - path: "src/core/service-worker.js"
-        description: "MV3 service worker entry"
-    functions: []
+        description: "MV3 service worker"
   cross_references:
     - "ARCH-SERVICE_WORKER"
     - "REQ-MANIFEST_V3_MIGRATION"
@@ -18,7 +17,7 @@ IMPL-SERVICE_WORKER:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync"
   name: "Service Worker"
   rationale:
     why: "Service worker implementation"
@@ -34,4 +33,6 @@ IMPL-SERVICE_WORKER:
       - "IMPL-SERVICE_WORKER"
     requirements:
       - "REQ-MANIFEST_V3_MIGRATION"
-    tests: []
+    tests:
+      - "tests/unit/service-worker-messaging-routing.test.js"
+      - "tests/unit/service-worker-quick-access.test.js"

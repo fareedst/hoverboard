@@ -1,7 +1,10 @@
 IMPL-PRIVACY:
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: "src/config/config-manager.js"
+        description: "Privacy/inhibit settings"
+      - path: "src/ui/popup/PopupController.js"
+        description: "Private/shared UI"
   cross_references:
     - "ARCH-PRIVACY"
     - "REQ-PRIVACY_CONTROLS"
@@ -16,7 +19,7 @@ IMPL-PRIVACY:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync"
   name: "Privacy"
   rationale:
     why: "Privacy implementation"
@@ -32,4 +35,6 @@ IMPL-PRIVACY:
       - "IMPL-PRIVACY"
     requirements:
       - "REQ-PRIVACY_CONTROLS"
-    tests: []
+    tests:
+      - "tests/unit/config-manager.test.js"
+      - "tests/unit/popup-checkbox.test.js"

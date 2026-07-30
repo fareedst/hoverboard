@@ -1,7 +1,10 @@
 IMPL-UX_CORE:
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: "src/ui/popup/PopupController.js"
+        description: "Core popup UX"
+      - path: "src/features/content/overlay-manager.js"
+        description: "Overlay UX"
   cross_references:
     - "ARCH-UX_CORE"
     - "REQ-CORE_UX_PRESERVATION"
@@ -17,7 +20,7 @@ IMPL-UX_CORE:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync"
   name: "UX Core"
   rationale:
     why: "Core UX implementation"
@@ -34,4 +37,6 @@ IMPL-UX_CORE:
     requirements:
       - "REQ-CORE_UX_PRESERVATION"
       - "REQ-POPUP_PERSISTENT_SESSION"
-    tests: []
+    tests:
+      - "tests/unit/popup-checkbox.test.js"
+      - "tests/unit/popup-close-behavior.test.js"

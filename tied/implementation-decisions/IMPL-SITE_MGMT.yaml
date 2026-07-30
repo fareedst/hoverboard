@@ -1,7 +1,10 @@
 IMPL-SITE_MGMT:
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: "src/config/config-manager.js"
+        description: "Inhibit/allow site lists"
+      - path: "src/features/content/content-script.js"
+        description: "Content bootstrap site check"
   cross_references:
     - "ARCH-SITE_MGMT"
     - "REQ-SITE_MANAGEMENT"
@@ -16,7 +19,7 @@ IMPL-SITE_MGMT:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync"
   name: "Site Management"
   rationale:
     why: "Site management implementation"
@@ -32,4 +35,5 @@ IMPL-SITE_MGMT:
       - "IMPL-SITE_MGMT"
     requirements:
       - "REQ-SITE_MANAGEMENT"
-    tests: []
+    tests:
+      - "tests/unit/config-manager.test.js"

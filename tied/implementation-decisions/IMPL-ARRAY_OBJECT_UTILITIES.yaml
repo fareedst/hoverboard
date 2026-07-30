@@ -2,8 +2,7 @@ IMPL-ARRAY_OBJECT_UTILITIES:
   code_locations:
     files:
       - path: "src/shared/utils.js"
-        description: "arrayUtils, objectUtils"
-    functions: []
+        description: "arrayUtils objectUtils"
   cross_references:
     - "ARCH-SHARED_UTILITIES"
     - "REQ-SHARED_UTILITIES"
@@ -20,8 +19,8 @@ IMPL-ARRAY_OBJECT_UTILITIES:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Full-block three-way sync"
   name: "Array and Object Utilities"
   rationale:
     benefits:
@@ -44,4 +43,5 @@ IMPL-ARRAY_OBJECT_UTILITIES:
     requirements:
       - "REQ-SHARED_UTILITIES"
     test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: shared array/object utils exercised indirectly by other tested modules."
-    tests: []
+    tests:
+      - "tests/unit/shared-utils.test.js"

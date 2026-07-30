@@ -4,6 +4,187 @@
  * String results from MAIN extract are normalized to { tag, relevance, inPageFrequency } for UIManager / sort.
  */
 
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
+ * [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] — Placeholder screenshot flow: seed storage, fake tab params, data-screenshot-ready, handleGetCurrentBookmark prefers data.url. Contract: URL params and seed; placeholder UI and script capture.
+ * 
+ * ## MAIN
+ * 
+ * - [IMPL-SCREENSHOT_MODE] [REQ-LOCAL_BOOKMARKS_INDEX] How: Rich placeholder data: 15+ bookmarks so index and By Tag tree look robust; hero Pinboard entry with 6+ tags and non-empty extended for This Page view. Side panel: open with ?screenshot=1&url=screenshotPopupUrl&title=screenshotPopupTitle so Bookmark tab shows Pinboard bookmark (same doc, PopupController reads window.location.search).
+ * - Contract:
+ *   - INPUT: ?screenshot=1&url=...&title=... (popup/side panel); seed JSON (local bookmarks, storage index, theme); optional --seed=path
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: popup/index/side panel rendered with placeholder data; data-screenshot-ready attribute; script can capture screenshot
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: PopupController._screenshotMode; handleGetCurrentBookmark prefers data.url when http(s); placeholderStorageSeed
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - 1. localBookmarks: BUILD object keyed by URL; Pinboard entry HAS tags.length >= 6, extended non-empty, toread 'yes'; total entries >= 15; mix of toread yes/no; storageIndex one key per localBookmarks URL, value 'local'
+ *   - How (sub-block): Await seed; open popup/index; wait for ready; check store-local for index; capture.
+ *   - 2. Script: SEED chrome.storage.local/sync (await set); optional LOAD seed from file; OPEN popup or index; WAIT for [data-screenshot-ready="true"]; CHECK #store-local for index; CAPTURE screenshot
+ *   - How (sub-block): Use URL params as fake tab; set data-screenshot-ready in finally.
+ *   - 3. Popup load: IF screenshot=1 and url param: USE param as fake tab url/title; SKIP getCurrentTab; IN finally SET data-screenshot-ready on #mainInterface
+ *   - How (sub-block): Prefer data.url as targetUrl when http(s) so popup-as-tab gets correct bookmark.
+ *   - 4. handleGetCurrentBookmark: IF data.url present and http(s): USE as targetUrl so popup-as-tab gets bookmark for screenshot URL
+ *   - 5. Side panel URL: GOTO side-panel.html?screenshot=1&url=encode(screenshotPopupUrl)&title=encode(screenshotPopupTitle); SET viewport width 360 (or 240); WAIT for tab content; CAPTURE screenshot (This Page, then By Tag, Tabs, etc.); output side-panel-bookmark.png, side-panel-tags-tree.png, side-panel-tabs.png
+ *   - 6. record-demo-side-panel-this-page: SEED chrome.storage.local with placeholderStorageSeed via options page; GOTO side-panel.html?screenshot=1&url=...&title=...; record frames; assemble GIF
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-SCREENSHOT_MODE ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SUGGESTED_TAGS ===
+ * [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] — Summary: Suggested tags from page — overlay TagService.extractSuggestedTagsFromContent; Chromium popup via MAIN-world snippet global and IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags (inject, normalize, filter, UIManager handoff).
+ * 
+ * ## EXTRACT_SUGGESTED_TAGS
+ * 
+ * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [REQ-THIS_PAGE_TAG_SORT] How: How — cross-IMPL: Popup path depends on IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags; ordering invariant — executeScript file (snippet) then func (global extractor); shared data — raw array from page world; post — NORMALIZE_SUGGESTED_ROWS then filters then updateSuggestedTags(rows); on error or non-http(s) — updateSuggestedTags([]). How — composed_with IMPL-SELECTION_TO_TAG_INPUT: pre — suggested chips rendered in UIManager; post — selection/tag-input add flows attach to chip DOM per IMPL-SELECTION_TO_TAG_INPUT (shared surface only; no ordering constraint on extraction).
+ * - Contract:
+ *   - INPUT: active page document (implicit)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: array of { tag: string, relevance: number, inPageFrequency: number }; tag sanitized by snippet inline rules; canonical case per pickBetterSuggestedOriginalCase rank
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: noise set; delimiter regex MUST match TagService tokenization (ARCH-SUGGESTED_TAGS tokenizer sync)
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: EXTRACT_SUGGESTED_TAGS
+ *   - IF document invalid THEN RETURN []
+ *   - TRY:
+ *   - allTexts = GATHER_SOURCES(document, url)
+ *   - IF allTexts empty THEN RETURN []
+ *   - words = TOKENIZE(join allTexts) using shared delimiter regex
+ *   - FOR each token: increment wordFrequency(lower); update originalCaseMap with pickBetterSuggestedOriginalCase
+ *   - sortedEntries = SORT wordFrequency by count desc then key asc
+ *   - sortedWords = PLUCK canonical string per key from originalCaseMap
+ *   - How (sub-block): # [IMPL-SUGGESTED_TAGS] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION]
+ *   - How (sub-block): # How — map each candidate through TagService.sanitizeTag (overlay path delegates to IMPL-TAG_SYSTEM).
+ *   - sanitized = MAP each sortedWord through SANITIZE_OVERLAY (= TagService.sanitizeTag)
+ *   - unique = DEDUPE exact adjacent duplicates preserving order
+ *   - RETURN slice(unique, 0, limit)
+ *   - CATCH:
+ *   - RETURN []
+ *   - How (sub-block): How — Cross-path note (S06.3): overlay sanitizeTag vs snippet inline sanitizer may differ on edge characters; tokenizer must remain identical. See ARCH-SUGGESTED_TAGS.
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-SUGGESTED_TAGS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-THIS_PAGE_TAG_SORT ===
+ * [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] — Summary: Three-way chip sort when tagSortToggle present; frequency map from storage; popup suggested rows from two-step MAIN inject; uses tag-chip-sort.sortTagChipRows.
+ * 
+ * ## REFRESH_TAG_FREQUENCY_MAP_FOR_SORT
+ * 
+ * - [IMPL-THIS_PAGE_TAG_SORT] [IMPL-UIManager_SCOPED_ROOT] [ARCH-SIDE_PANEL_TABS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-THIS_PAGE_TAG_SORT] How: How — cross-IMPL depends on IMPL-UIManager_SCOPED_ROOT: tagSortToggle and chip containers resolve under scoped container in side panel; pre — UIManager constructed with container=bookmarkPanel and cacheElements completed; post — non-null elements.tagSortToggle enables sort UI; shared data — this.elements from IMPL-UIManager_SCOPED_ROOT. How — cross-IMPL depends on IMPL-SUGGESTED_TAGS MAIN-world path: snippet registers global; ordering — loadSuggestedTags runs file inject then func inject before NORMALIZE; shared data — raw extraction array; post — filtered rows passed to UIManager.updateSuggestedTags. How — NORMALIZE_SUGGESTED_ROWS + FILTER_INVALID_ROWS: PopupController maps MAIN extract to rows; trim string/object tags; omit entries empty after trim; then FILTER_NOT_ON_CURRENT_BOOKMARK. How — FILTER_NOT_ON_CURRENT_BOOKMARK(rows, currentTagsNormalizedLower): drop row where lower(row.tag) in set.
+ * - Contract:
+ *   - INPUT: raw (array of strings and/or objects from page world)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: array of { tag: string, relevance: number, inPageFrequency: number } | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: tagFrequencyMap (tag string -> count from hoverboard_tag_frequency); suggested rows { tag, relevance?, inPageFrequency? } after normalize
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: REFRESH_TAG_FREQUENCY_MAP_FOR_SORT
+ *   - IF NOT chrome.storage.local THEN RETURN
+ *   - TRY:
+ *   - AWAIT get hoverboard_tag_frequency
+ *   - map = _normalizeHoverboardTagFrequencyMap(raw)
+ *   - uiManager.setTagFrequencyMapForSort(map)
+ *   - CATCH:
+ *   - debugError; RETURN
+ *   - How (sub-block): How — loadSuggestedTags (invokes IMPL-SUGGESTED_TAGS page-world contract; ordering explicit).
+ * 
+ * ## LOAD_SUGGESTED_TAGS
+ * 
+ * - [IMPL-THIS_PAGE_TAG_SORT] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] How: Implements loadSuggestedTags() behavior for IMPL-THIS_PAGE_TAG_SORT.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_SUGGESTED_TAGS
+ *   - IF no tab id OR url not http(s) THEN updateSuggestedTags([]); RETURN
+ *   - TRY:
+ *   - TRY executeScript MAIN files [suggested-tags-main-world-snippet.js]; ON fileErr log non-fatal CONTINUE
+ *   - AWAIT executeScript MAIN func -> globalThis.__hoverboardExtractSuggestedTagsWithRelevance()
+ *   - rows = NORMALIZE_SUGGESTED_ROWS(result)
+ *   - rows = FILTER_INVALID_ROWS(rows)
+ *   - rows = FILTER_NOT_ON_CURRENT_BOOKMARK(rows, currentPinTagsLowerSet)
+ *   - updateSuggestedTags(rows)
+ *   - CATCH scriptError:
+ *   - debugError; updateSuggestedTags([])
+ *   - How (sub-block): How — setTagFrequencyMapForSort: merge into tagFrequencyMap; caller redraws.
+ *   - How (sub-block): How — getEffectiveTagSortMode: IF no tagSortToggle element THEN RETURN null; ELSE RETURN mode from segment state.
+ *   - How (sub-block): How — updateCurrentTags / updateRecentTags / _paintSuggestedTags: IF getEffectiveTagSortMode() null THEN paint source order; ELSE build rows with displayKey=tagChipDisplayAndAddValue, bookmarkFreq, suggested relevance; sortTagChipRows(mode); paint.
+ *   - How (sub-block): How — Comparators (tag-chip-sort): alphabetical by displayKey localeCompare lower tie stableIndex; frequency by bookmarkFreq desc; relevance by relevance desc then bookmarkFreq then inPageFrequency.
+ *   - How (sub-block): How — loadInitialData: AWAIT refreshTagFrequencyMapForSort before first updateCurrentTags; AWAIT loadRecentTags before AWAIT loadSuggestedTags (PopupController orchestration binding).
+ *   - How (sub-block): How — setupEventListeners: click [data-sort-mode] under tagSortToggle -> setTagSortMode if isTagChipSortMode.
+ * 
+ * ## SIDE_PANEL_TAG_SORT_TOOLBAR_E2E
+ * 
+ * - [IMPL-THIS_PAGE_TAG_SORT] [IMPL-PLAYWRIGHT_E2E_EXTENSION] [ARCH-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT] How: How — E2E-only surface (phase_h_e2e_only_surface): Playwright chrome-extension:// side panel; complements JSDOM composition tests.
+ * - Contract:
+ *   - INPUT: context / caller args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SIDE_PANEL_TAG_SORT_TOOLBAR_E2E
+ *   - PRE: open side-panel.html; bookmarkPanel visible
+ *   - ASSERT tagSortToggle visible
+ *   - ON click frequency segment: aria-pressed matches selection
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-THIS_PAGE_TAG_SORT ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-AI_TAGGING_POPUP_UI ===
+ * [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-STORAGE_MODE_DEFAULT] — Popup "Tag with AI" flow: get page content, get AI tags, split by session, create/update bookmark with default backend, update suggested tags.
+ * 
+ * ## ON_TAG_WITH_AI_CLICK
+ * 
+ * - [IMPL-AI_TAGGING_POPUP_UI] [ARCH-AI_TAGGING_FLOW] [REQ-AI_TAGGING_POPUP] [REQ-STORAGE_MODE_DEFAULT] How: Implements onTagWithAiClick() behavior for IMPL-AI_TAGGING_POPUP_UI.
+ * - Contract:
+ *   - INPUT: user click "Tag with AI"
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: bookmark updated; suggested tags updated | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: ON_TAG_WITH_AI_CLICK
+ *   - IF !config.aiApiKey or !currentTab.url.startsWith('http') THEN show message; RETURN
+ *   - content = await sendToSW({ type: 'GET_PAGE_CONTENT', data: { tabId } })  // SW uses scripting.executeScript in tab
+ *   - IF !content?.textContent THEN show (content.error if content.success === false else generic error); RETURN
+ *   - aiTags = await sendToSW({ type: 'GET_AI_TAGS', data: { text: content.textContent, limit: config.aiTagLimit } })
+ *   - sessionSet = new Set(await sendToSW({ type: 'getSessionTags' }))
+ *   - inSession = aiTags.filter(t => sessionSet.has(t.toLowerCase()))
+ *   - suggested = aiTags.filter(t => !sessionSet.has(t.toLowerCase()))
+ *   - bookmark = await getCurrentBookmark()
+ *   - defaultBackend = await configManager.getStorageMode()
+ *   - IF !bookmark?.time:
+ *   - create bookmark with url, title, tags: inSession, preferredBackend: defaultBackend
+ *   - ELSE:
+ *   - merged = merge(bookmark.tags, inSession)  // dedupe case-insensitive
+ *   - saveBookmark({ ...bookmark, tags: merged, preferredBackend: bookmark backend or defaultBackend })
+ *   - updateSuggestedTags(suggested)  // so AI tags appear first in Suggested section
+ *   - refresh bookmark state / badge
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-AI_TAGGING_POPUP_UI ===
+ */
 import { PopupController } from '../../src/ui/popup/PopupController.js'
 import { UIManager } from '../../src/ui/popup/UIManager.js'
 import { StateManager } from '../../src/ui/popup/StateManager.js'

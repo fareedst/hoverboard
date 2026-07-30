@@ -4,6 +4,247 @@
  * (no unexpected throw) and unknown type throws. Sender context tests for GET_TAB_ID / GET_CURRENT_BOOKMARK.
  */
 
+/**
+ * === IMPL-FULL-BLOCK: IMPL-BOOKMARKING ===
+ * [IMPL-BOOKMARKING] [ARCH-UX_CORE] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] — How: create/update/delete bookmarks via MessageHandler without leaving the page; tag suggestions remain available.
+ * 
+ * ## SAVE_BOOKMARK
+ * 
+ * - [IMPL-BOOKMARKING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] How: validate envelope/data then route save through storage backend; broadcast update on success.
+ * - Contract:
+ *   - INPUT: saveBookmark / deleteBookmark / getCurrentBookmark messages (url, title, tags, shared, toread, description)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted bookmark on preferred backend; BOOKMARK_UPDATED broadcast; UI-facing success/error payload | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: MessageHandler; BookmarkRouter / pinboard / local / file / sync / browser providers; overlay and popup callers
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SAVE_BOOKMARK
+ *   - validated = validateMessageData(message)
+ *   - IF invalid: RETURN error payload
+ *   - result = AWAIT bookmarkRouter.save(validated)
+ *   - IF result.ok: BROADCAST BOOKMARK_UPDATED
+ *   - RETURN result
+ *   - How (sub-block): How: load current bookmark for URL for overlay/popup display.
+ * 
+ * ## GET_CURRENT_BOOKMARK
+ * 
+ * - [IMPL-BOOKMARKING] [ARCH-UX_CORE] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] How: Implements GET_CURRENT_BOOKMARK(url) behavior for IMPL-BOOKMARKING.
+ * - Contract:
+ *   - INPUT: saveBookmark / deleteBookmark / getCurrentBookmark messages (url, title, tags, shared, toread, description)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted bookmark on preferred backend; BOOKMARK_UPDATED broadcast; UI-facing success/error payload | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: MessageHandler; BookmarkRouter / pinboard / local / file / sync / browser providers; overlay and popup callers
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_CURRENT_BOOKMARK
+ *   - RETURN AWAIT bookmarkRouter.get(url) OR empty bookmark view
+ *   - How (sub-block): How: delete bookmark for URL and notify listeners.
+ * 
+ * ## DELETE_BOOKMARK
+ * 
+ * - [IMPL-BOOKMARKING] [ARCH-UX_CORE] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] How: Implements DELETE_BOOKMARK(url) behavior for IMPL-BOOKMARKING.
+ * - Contract:
+ *   - INPUT: saveBookmark / deleteBookmark / getCurrentBookmark messages (url, title, tags, shared, toread, description)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted bookmark on preferred backend; BOOKMARK_UPDATED broadcast; UI-facing success/error payload | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: MessageHandler; BookmarkRouter / pinboard / local / file / sync / browser providers; overlay and popup callers
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: DELETE_BOOKMARK
+ *   - result = AWAIT bookmarkRouter.delete(url)
+ *   - IF result.ok: BROADCAST BOOKMARK_UPDATED
+ *   - RETURN result
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-BOOKMARKING ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-MESSAGE_HANDLING ===
+ * [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] — Central message allowlist + validation + handler dispatch; recent-tag message types delegate to [IMPL-TAG_SYSTEM] TagService and SW recentTagsMemory policy per ARCH-TAG_SYSTEM. Contract: Promise result or reject on validation; recent handlers return safe shapes on internal failure.
+ * 
+ * ## SEND
+ * 
+ * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] How: client-side validate type/payload; dispatch to background; return Promise (path for popup/content/offscreen callers).
+ * - Contract:
+ *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: Promise resolving to handler result or rejecting on validation/routing error | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: MESSAGE_TYPES allowlist; handler map type → async fn; TagService instance for tag/recent paths
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: SEND
+ *   - VALIDATE message.type in allowlist
+ *   - VALIDATE payload shape
+ *   - ROUTE to handler for message.type
+ *   - handler(message) -> result; RETURN Promise.resolve(result)
+ *   - ON error: RETURN Promise.reject; optional log
+ * 
+ * ## HANDLE_GET_RECENT_BOOKMARKS
+ * 
+ * - How: SW entry resolves handler by message.type; missing handler → reject or structured error per router; AWAIT handler(data, senderUrl); optional BOOKMARK_UPDATED broadcast after mutating handlers ([REQ-BOOKMARK_STATE_SYNCHRONIZATION]).
+ * - Contract:
+ *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: Promise resolving to handler result or rejecting on validation/routing error | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: MESSAGE_TYPES allowlist; handler map type → async fn; TagService instance for tag/recent paths
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: HANDLE_GET_RECENT_BOOKMARKS
+ *   - recentTags = AWAIT tagService.getUserRecentTagsExcludingCurrent(data?.currentTags OR [])
+ *   - RETURN { ...data, recentTags }
+ *   - How (sub-block): How: addTagToRecent — validate tagName + currentSiteUrl; tagService.addTagToUserRecentList; structured { success } / error (same REQ/ARCH/IMPL cross-IMPL set as handleGetRecentBookmarks).
+ * 
+ * ## HANDLE_ADD_TAG_TO_RECENT
+ * 
+ * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] How: Implements handleAddTagToRecent(data) behavior for IMPL-MESSAGE_HANDLING.
+ * - Contract:
+ *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: Promise resolving to handler result or rejecting on validation/routing error | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: MESSAGE_TYPES allowlist; handler map type → async fn; TagService instance for tag/recent paths
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: HANDLE_ADD_TAG_TO_RECENT
+ *   - VALIDATE tagName AND currentSiteUrl present
+ *   - success = AWAIT tagService.addTagToUserRecentList(tagName, currentSiteUrl)
+ *   - RETURN { success } OR { success: false, error: message }
+ *   - How (sub-block): How: getUserRecentTags message — raw policy list for diagnostics/tools; TRY/CATCH → { recentTags: [], error } on failure.
+ * 
+ * ## HANDLE_GET_USER_RECENT_TAGS
+ * 
+ * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-RECENT_TAGS_SYSTEM] [ARCH-TAG_SYSTEM] How: Implements handleGetUserRecentTags(data) behavior for IMPL-MESSAGE_HANDLING.
+ * - Contract:
+ *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: Promise resolving to handler result or rejecting on validation/routing error | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: MESSAGE_TYPES allowlist; handler map type → async fn; TagService instance for tag/recent paths
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: HANDLE_GET_USER_RECENT_TAGS
+ *   - TRY: RETURN { recentTags: AWAIT tagService.getUserRecentTags() }
+ *   - CATCH: LOG; RETURN { recentTags: [], error }
+ * 
+ * ## BLOCK_5
+ * 
+ * - --- Composition: composed_with [IMPL-POPUP_MESSAGE_TIMEOUT] [IMPL-BOOKMARK_STATE_SYNC] --- How: Ordering: client send may apply timeout/retry () before this IMPL’s send completes. Post successful bookmark mutations,  may broadcast; recent-tag handlers are read/mutation for user-recent only unless caller chains. Shared DATA: single MessageHandler TagService reference; no second recentTagsMemory writer.
+ * - Contract:
+ *   - INPUT: message { type, payload/data }; sender (tab/popup/background)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: Promise resolving to handler result or rejecting on validation/routing error | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: MESSAGE_TYPES allowlist; handler map type → async fn; TagService instance for tag/recent paths
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BLOCK_5
+ *   - How (sub-block): --- Cross-IMPL ---
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-MESSAGE_HANDLING ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-RUNTIME_VALIDATION ===
+ * [IMPL-RUNTIME_VALIDATION] [ARCH-MESSAGE_HANDLING] [ARCH-CONFIG_STRUCTURE] [REQ-CODE_QUALITY] — How: validate message envelopes/data and merged config with Zod at processMessage entry and getConfig merge.
+ * 
+ * ## VALIDATE_INCOMING_MESSAGE
+ * 
+ * - [IMPL-RUNTIME_VALIDATION] [ARCH-MESSAGE_HANDLING] [REQ-CODE_QUALITY] How: validate envelope then per-type data schema before handler body runs.
+ * - Contract:
+ *   - INPUT: raw chrome.runtime messages; merged config objects from storage
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: accepted typed payloads or structured validation errors; config rejected when schema fails | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: src/shared/message-schemas.js; ConfigManager Zod schemas; MessageHandler.processMessage
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: VALIDATE_INCOMING_MESSAGE
+ *   - envelope = validateMessageEnvelope(message)
+ *   - IF envelope fails: RETURN error
+ *   - data = validateMessageData(message.type, message.data)
+ *   - IF data fails: RETURN error
+ *   - RETURN { type, data }
+ *   - How (sub-block): How: after merge, parse config; on failure return defaults/error path without throwing to UI callers.
+ * 
+ * ## VALIDATE_MERGED_CONFIG
+ * 
+ * - [IMPL-RUNTIME_VALIDATION] [ARCH-MESSAGE_HANDLING] [ARCH-CONFIG_STRUCTURE] [REQ-CODE_QUALITY] How: Implements VALIDATE_MERGED_CONFIG(merged) behavior for IMPL-RUNTIME_VALIDATION.
+ * - Contract:
+ *   - INPUT: raw chrome.runtime messages; merged config objects from storage
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: accepted typed payloads or structured validation errors; config rejected when schema fails | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: src/shared/message-schemas.js; ConfigManager Zod schemas; MessageHandler.processMessage
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: VALIDATE_MERGED_CONFIG
+ *   - parsed = configSchema.safeParse(merged)
+ *   - IF NOT parsed.success: LOG; RETURN fallback OR error
+ *   - RETURN parsed.data
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-RUNTIME_VALIDATION ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-DEBUG_PANEL ===
+ * [IMPL-DEBUG_PANEL] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] — Debug logging by category and debug panel showing last actions, messages, and current bookmark/backend. Contract: inputs, outputs, and data for logging and panel.
+ * 
+ * ## MAIN
+ * 
+ * - [IMPL-DEBUG_PANEL] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] How: Logical block for IMPL-DEBUG_PANEL.
+ * - Contract:
+ *   - INPUT: LOG_CATEGORIES (ui, message, overlay, storage); optional debug panel open
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: debugLogger.trace/debug in message-handler, PopupController, content-main; debug panel shows last actions, last messages, current bookmark/tags/backend
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: debug-logger.js; debug.html + debug.js; inspector ring buffers
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): Logging: emit trace/debug when category enabled.
+ *   - 1. Logging: WHEN category enabled: debugLogger.trace(msg) or debugLogger.debug(msg) with category
+ *   - How (sub-block): Debug panel: on load request last actions/messages/current bookmark and render.
+ *   - 2. Debug panel (debug.html): ON load SEND DEV_COMMAND getLastActions/getLastMessages/getCurrentBookmark (or getStorageSnapshot); RENDER in panel
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-DEBUG_PANEL ===
+ */
 import { MessageHandler, MESSAGE_TYPES } from '../../src/core/message-handler.js'
 
 // Minimal mock provider used across contract tests

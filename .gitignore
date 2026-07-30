@@ -53,3 +53,4 @@ test-results
 COMMIT_MSG_QUICK_ACCESS.txt
 COMMIT_*.txt
 TODO.md
+scripts/__pycache__

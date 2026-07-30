@@ -1,9 +1,89 @@
 /**
- * Content Script Main Module [IMPL-OVERLAY] [ARCH-OVERLAY]
- * Coordinates all content script functionality with modern architecture.
- * Bootstraps OverlayManager, HoverSystem, ContentInjector; ties to REQ-OVERLAY_SYSTEM.
+ * === IMPL-FULL-BLOCK: IMPL-OVERLAY ===
+ * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION] — Overlay show/hide, DOM injection, close/refresh controls, auto-show. Contract: show/hide and auto-show and theme; overlay state and controls.
+ *
+ * ## SHOW
+ *
+ * - [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION] How: Implements show() behavior for IMPL-OVERLAY.
+ * - Contract:
+ *   - INPUT: show/hide command; optional auto-show condition; theme vars
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: overlay visible/hidden; DOM injected; controls (close, refresh) created
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: overlay root element; content container; control elements; visibility state
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SHOW
+ *   - CREATE overlay root (or reuse); INJECT into document body
+ *   - APPLY theme CSS variables; RENDER content (bookmark form, etc.)
+ *   - createCloseButton(); createRefreshButton(); ATTACH handlers
+ *   - SET visibility = true
+ *   - How (sub-block): Remove overlay or hide; set visibility false.
+ *
+ * ## HIDE
+ *
+ * - [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION] How: Implements hide() behavior for IMPL-OVERLAY.
+ * - Contract:
+ *   - INPUT: show/hide command; optional auto-show condition; theme vars
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: overlay visible/hidden; DOM injected; controls (close, refresh) created
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: overlay root element; content container; control elements; visibility state
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: HIDE
+ *   - REMOVE overlay from DOM (or set display none); SET visibility = false
+ *   - How (sub-block): Show when message or storage condition met.
+ *   - 1. Auto-show: IF condition (e.g. message or storage): show()
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-OVERLAY ===
  */
-
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SITE_MGMT ===
+ * [IMPL-SITE_MGMT] [ARCH-SITE_MGMT] [REQ-SITE_MANAGEMENT] — How: manage per-site allow/inhibit rules so overlay and automation respect site list configuration.
+ *
+ * ## EVALUATE_SITE_POLICY
+ *
+ * - [IMPL-SITE_MGMT] [ARCH-SITE_MGMT] [REQ-SITE_MANAGEMENT] How: match URL against inhibit/allow lists; content bootstrap consults decision before show.
+ * - Contract:
+ *   - INPUT: site list entries; current page URL; ConfigManager site-management keys
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: allow or inhibit decision for content UI; persisted site list updates from options/UI
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: ConfigManager; IMPL-URL_INHIBITION; options/site management UI
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: EVALUATE_SITE_POLICY
+ *   - rules = AWAIT configManager.getSiteRules()
+ *   - IF matchesInhibit(url, rules): RETURN inhibited
+ *   - RETURN allowed
+ *   - How (sub-block): How: persist site list edits from settings UI.
+ *
+ * ## UPDATE_SITE_LIST
+ *
+ * - [IMPL-SITE_MGMT] [ARCH-SITE_MGMT] [REQ-SITE_MANAGEMENT] How: Implements UPDATE_SITE_LIST(entries) behavior for IMPL-SITE_MGMT.
+ * - Contract:
+ *   - INPUT: site list entries; current page URL; ConfigManager site-management keys
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: allow or inhibit decision for content UI; persisted site list updates from options/UI
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: ConfigManager; IMPL-URL_INHIBITION; options/site management UI
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: UPDATE_SITE_LIST
+ *   - AWAIT configManager.setSiteRules(entries)
+ *   - RETURN ok
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SITE_MGMT ===
+ */
 import { HoverSystem } from './hover-system.js'
 import { OverlayManager } from './overlay-manager.js'
 import { ContentInjector } from './content-injector.js'

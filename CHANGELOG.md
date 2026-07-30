@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **IMPL full-block three-way sync** ([PROC-IMPL_PSEUDOCODE_TOKENS], [PROC-IMPL_CODE_TEST_SYNC]) – Propagated Active sidecar H2 bodies (lead + Contract + PROCEDURE) into production and unit-test loci; authored `tied/docs/source-file-impl-traceability.md`; added `scripts/sync_impl_full_blocks.py`; patched unit gaps for bookmarking, native-host installer, badge UPDATE_BADGE_FOR_TAB, and shared utils. Working: `tied/working/IMPL_CODE_TEST_SYNC_20260729210000-plan.md`.
+
 - **IMPL corpus remediation** ([PROC-PSEUDOCODE_VALIDATION], [PROC-IMPL_PSEUDOCODE_TOKENS]) – Vendored `templates/impl-essence-pseudocode-template.md`; all Active IMPL sidecars uplifted to H2 + PRE/POST/EFFECTS (SHAPE-003..006 fields where applicable); index↔detail `essence_pseudocode_path` + traceability sync; thin-stub decisions cleared; Template/Deferred/YAML-only methodology IMPL policy. Working: `tied/working/IMPL_CORPUS_REVIEW_20260729204500-plan.md`.
 
 - **ARCH corpus remediation LEAP** ([ARCH-STORAGE_INDEX_AND_ROUTER], [ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT], [ARCH-BROWSER_BOOKMARK_IMPORT], [ARCH-SIDE_PANEL_BROWSER_BOOKMARKS], [ARCH-STORAGE], [IMPL-SIDE_PANEL_TAGS_TREE], [IMPL-BOOKMARK_CREATE_UPDATE_TIMES], [IMPL-LOCAL_BOOKMARK_SERVICE], [IMPL-SYNC_BOOKMARK_SERVICE], [REQ-URL_TAGS_DISPLAY]) – Project ARCH corpus aligned to five backends; settings-vs-backends (`ARCH-STORAGE`); panel vs Store B; Index Import-to includes Browser (exclusion only on Browser Bookmark Import page); related IMPL sidecars/YAML + light REQ/vocab; overlay Close 8/8 Refresh 8/40. CITDP: `tied/working/ARCH_CORPUS_REVIEW_20260729185454-plan.md`.

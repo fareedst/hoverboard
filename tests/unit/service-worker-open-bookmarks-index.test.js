@@ -123,7 +123,9 @@ describe('[REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-LOCAL_BOOKMARKS_INDEX] Index page mu
       join(process.cwd(), 'src/ui/bookmarks-table/bookmarks-table.js'),
       'utf8'
     )
-    expect(src).not.toMatch(/REQUEST_SIDE_PANEL_CLOSE/)
-    expect(src).not.toMatch(/OPEN_BOOKMARKS_INDEX/)
+    // Strip block comments: 1B forbids executable sends, not IMPL-FULL-BLOCK documentation.
+    const executable = src.replace(/\/\*[\s\S]*?\*\//g, '')
+    expect(executable).not.toMatch(/REQUEST_SIDE_PANEL_CLOSE/)
+    expect(executable).not.toMatch(/OPEN_BOOKMARKS_INDEX/)
   })
 })

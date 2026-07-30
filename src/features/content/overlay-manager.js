@@ -1,8 +1,305 @@
 /**
- * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION] Overlay show/hide, content, controls.
- * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] On toggle/save send message to backend then broadcast BOOKMARK_UPDATED.
+ * === IMPL-FULL-BLOCK: IMPL-BOOKMARK_STATE_SYNC ===
+ * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] — BOOKMARK_UPDATED broadcast after overlay persist; popup and badge refresh so state is consistent.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] How: Logical block for IMPL-BOOKMARK_STATE_SYNC.
+ * - Contract:
+ *   - INPUT: user actions (overlay toggle, tag save/delete, bookmark save); processMessage result
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: consistent bookmark state across overlay, popup, badge
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: overlay state, popup state, badge state; BOOKMARK_UPDATED broadcast
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): Send message to backend; on success broadcast BOOKMARK_UPDATED.
+ *   - 1. ON overlay toggle (saveBookmark / saveTag / deleteTag):
+ *   - 2.   SEND message to backend; await processMessage result
+ *   - 3.   BROADCAST BOOKMARK_UPDATED (so other surfaces can refresh)
+ *   - How (sub-block): Re-fetch bookmark state for current URL.
+ *   - 4. PopupController (listener for BOOKMARK_UPDATED):
+ *   - 5.   ON BOOKMARK_UPDATED: refresh popup data (re-fetch bookmark state for current URL)
+ *   - How (sub-block): On saveTag/deleteTag/saveBookmark result compare tab URL state and update icon/count.
+ *   - 6. Badge manager:
+ *   - 7.   ON message result (saveTag | deleteTag | saveBookmark): compare current tab URL state with stored state; UPDATE badge icon/count
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_STATE_SYNC ===
  */
-
+/**
+ * === IMPL-FULL-BLOCK: IMPL-OVERLAY ===
+ * [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION] — Overlay show/hide, DOM injection, close/refresh controls, auto-show. Contract: show/hide and auto-show and theme; overlay state and controls.
+ *
+ * ## SHOW
+ *
+ * - [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION] How: Implements show() behavior for IMPL-OVERLAY.
+ * - Contract:
+ *   - INPUT: show/hide command; optional auto-show condition; theme vars
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: overlay visible/hidden; DOM injected; controls (close, refresh) created
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: overlay root element; content container; control elements; visibility state
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: SHOW
+ *   - CREATE overlay root (or reuse); INJECT into document body
+ *   - APPLY theme CSS variables; RENDER content (bookmark form, etc.)
+ *   - createCloseButton(); createRefreshButton(); ATTACH handlers
+ *   - SET visibility = true
+ *   - How (sub-block): Remove overlay or hide; set visibility false.
+ *
+ * ## HIDE
+ *
+ * - [IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_AUTO_SHOW_CONTROL] [REQ-OVERLAY_REFRESH_ACTION] How: Implements hide() behavior for IMPL-OVERLAY.
+ * - Contract:
+ *   - INPUT: show/hide command; optional auto-show condition; theme vars
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: overlay visible/hidden; DOM injected; controls (close, refresh) created
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: overlay root element; content container; control elements; visibility state
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: HIDE
+ *   - REMOVE overlay from DOM (or set display none); SET visibility = false
+ *   - How (sub-block): Show when message or storage condition met.
+ *   - 1. Auto-show: IF condition (e.g. message or storage): show()
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-OVERLAY ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-OVERLAY_CONTROLS ===
+ * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] — Close and refresh buttons with fixed position, 24px min touch target, ARIA, theme vars. Contract: parent and theme and callback; control elements and styles.
+ *
+ * ## CREATE_CLOSE_BUTTON
+ *
+ * - Layout contract [ARCH-OVERLAY]/[ARCH-OVERLAY_CONTROLS]: Close at top/right 8/8 (px from edges). How: Implements createCloseButton() behavior for IMPL-OVERLAY_CONTROLS.
+ * - Contract:
+ *   - INPUT: parent element; theme CSS variables; callback (close/refresh)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: control elements with fixed position, min 24px touch target, ARIA, keyboard handlers
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: inline styles (position absolute); theme vars for colors; ARIA labels/roles
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: CREATE_CLOSE_BUTTON
+ *   - CREATE button; SET position top 8px right 8px, size (min 24px); SET aria-label
+ *   - APPLY theme vars; ATTACH click -> callback; ATTACH key (Escape)
+ *   - RETURN element
+ *   - How (sub-block): Create refresh button with position, size, ARIA, theme, click handler.
+ *
+ * ## CREATE_REFRESH_BUTTON
+ *
+ * - Layout contract [ARCH-OVERLAY]/[ARCH-OVERLAY_CONTROLS]: Refresh at top/right 8/40 (px from edges). How: Implements createRefreshButton() behavior for IMPL-OVERLAY_CONTROLS.
+ * - Contract:
+ *   - INPUT: parent element; theme CSS variables; callback (close/refresh)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: control elements with fixed position, min 24px touch target, ARIA, keyboard handlers
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: inline styles (position absolute); theme vars for colors; ARIA labels/roles
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: CREATE_REFRESH_BUTTON
+ *   - CREATE button; SET position top 8px right 40px, size; SET aria-label
+ *   - APPLY theme vars; ATTACH click -> callback
+ *   - RETURN element
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-OVERLAY_CONTROLS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SUGGESTED_TAGS ===
+ * [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] — Summary: Suggested tags from page — overlay TagService.extractSuggestedTagsFromContent; Chromium popup via MAIN-world snippet global and IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags (inject, normalize, filter, UIManager handoff).
+ *
+ * ## EXTRACT_SUGGESTED_TAGS
+ *
+ * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [REQ-THIS_PAGE_TAG_SORT] How: How — cross-IMPL: Popup path depends on IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags; ordering invariant — executeScript file (snippet) then func (global extractor); shared data — raw array from page world; post — NORMALIZE_SUGGESTED_ROWS then filters then updateSuggestedTags(rows); on error or non-http(s) — updateSuggestedTags([]). How — composed_with IMPL-SELECTION_TO_TAG_INPUT: pre — suggested chips rendered in UIManager; post — selection/tag-input add flows attach to chip DOM per IMPL-SELECTION_TO_TAG_INPUT (shared surface only; no ordering constraint on extraction).
+ * - Contract:
+ *   - INPUT: active page document (implicit)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: array of { tag: string, relevance: number, inPageFrequency: number }; tag sanitized by snippet inline rules; canonical case per pickBetterSuggestedOriginalCase rank
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: noise set; delimiter regex MUST match TagService tokenization (ARCH-SUGGESTED_TAGS tokenizer sync)
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: EXTRACT_SUGGESTED_TAGS
+ *   - IF document invalid THEN RETURN []
+ *   - TRY:
+ *   - allTexts = GATHER_SOURCES(document, url)
+ *   - IF allTexts empty THEN RETURN []
+ *   - words = TOKENIZE(join allTexts) using shared delimiter regex
+ *   - FOR each token: increment wordFrequency(lower); update originalCaseMap with pickBetterSuggestedOriginalCase
+ *   - sortedEntries = SORT wordFrequency by count desc then key asc
+ *   - sortedWords = PLUCK canonical string per key from originalCaseMap
+ *   - How (sub-block): # [IMPL-SUGGESTED_TAGS] [IMPL-TAG_SYSTEM] [ARCH-TAG_SYSTEM] [REQ-TAG_INPUT_SANITIZATION]
+ *   - How (sub-block): # How — map each candidate through TagService.sanitizeTag (overlay path delegates to IMPL-TAG_SYSTEM).
+ *   - sanitized = MAP each sortedWord through SANITIZE_OVERLAY (= TagService.sanitizeTag)
+ *   - unique = DEDUPE exact adjacent duplicates preserving order
+ *   - RETURN slice(unique, 0, limit)
+ *   - CATCH:
+ *   - RETURN []
+ *   - How (sub-block): How — Cross-path note (S06.3): overlay sanitizeTag vs snippet inline sanitizer may differ on edge characters; tokenizer must remain identical. See ARCH-SUGGESTED_TAGS.
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SUGGESTED_TAGS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-UI_TESTABILITY_HOOKS ===
+ * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] — setOnMessageProcessed, setOnAction, setOnStateChange so tests assert without DOM. Contract: callbacks set by tests; message/action/state trigger callbacks.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Logical block for IMPL-UI_TESTABILITY_HOOKS.
+ * - Contract:
+ *   - INPUT: optional callback fn (set by tests); message (processMessage); popup/overlay action or state change
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: test can assert on message payload, action id, state without DOM
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: MessageHandler._onMessageProcessed; PopupController._onAction, _onStateChange; OverlayManager._onStateChange
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): After processMessage invoke callback with msg/result.
+ *   - 1. MessageHandler: AFTER processMessage(msg): IF _onMessageProcessed: CALL with msg/result
+ *   - How (sub-block): On action/state change invoke callbacks.
+ *   - 2. PopupController: ON action: IF _onAction: CALL with actionId; ON state change: IF _onStateChange: CALL with state
+ *   - 3. OverlayManager: ON visibility/content change: IF _onStateChange: CALL with { visible, contentSnapshot }
+ *   - How (sub-block): Set callbacks, trigger, assert args.
+ *   - 4. Tests: SET callbacks; TRIGGER message/action; ASSERT callback invoked with expected args
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-UI_TESTABILITY_HOOKS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-RUNTIME_VALIDATION ===
+ * [IMPL-RUNTIME_VALIDATION] [ARCH-MESSAGE_HANDLING] [ARCH-CONFIG_STRUCTURE] [REQ-CODE_QUALITY] — How: validate message envelopes/data and merged config with Zod at processMessage entry and getConfig merge.
+ *
+ * ## VALIDATE_INCOMING_MESSAGE
+ *
+ * - [IMPL-RUNTIME_VALIDATION] [ARCH-MESSAGE_HANDLING] [REQ-CODE_QUALITY] How: validate envelope then per-type data schema before handler body runs.
+ * - Contract:
+ *   - INPUT: raw chrome.runtime messages; merged config objects from storage
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: accepted typed payloads or structured validation errors; config rejected when schema fails | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: src/shared/message-schemas.js; ConfigManager Zod schemas; MessageHandler.processMessage
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: VALIDATE_INCOMING_MESSAGE
+ *   - envelope = validateMessageEnvelope(message)
+ *   - IF envelope fails: RETURN error
+ *   - data = validateMessageData(message.type, message.data)
+ *   - IF data fails: RETURN error
+ *   - RETURN { type, data }
+ *   - How (sub-block): How: after merge, parse config; on failure return defaults/error path without throwing to UI callers.
+ *
+ * ## VALIDATE_MERGED_CONFIG
+ *
+ * - [IMPL-RUNTIME_VALIDATION] [ARCH-MESSAGE_HANDLING] [ARCH-CONFIG_STRUCTURE] [REQ-CODE_QUALITY] How: Implements VALIDATE_MERGED_CONFIG(merged) behavior for IMPL-RUNTIME_VALIDATION.
+ * - Contract:
+ *   - INPUT: raw chrome.runtime messages; merged config objects from storage
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: accepted typed payloads or structured validation errors; config rejected when schema fails | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: src/shared/message-schemas.js; ConfigManager Zod schemas; MessageHandler.processMessage
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: VALIDATE_MERGED_CONFIG
+ *   - parsed = configSchema.safeParse(merged)
+ *   - IF NOT parsed.success: LOG; RETURN fallback OR error
+ *   - RETURN parsed.data
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-RUNTIME_VALIDATION ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-UX_CORE ===
+ * [IMPL-UX_CORE] [ARCH-UX_CORE] [REQ-CORE_UX_PRESERVATION] [REQ-POPUP_PERSISTENT_SESSION] — How: preserve multi-action popup/overlay workflows; popup session stays open across successive actions.
+ *
+ * ## HANDLE_POPUP_ACTION
+ *
+ * - [IMPL-UX_CORE] [ARCH-UX_CORE] [REQ-POPUP_PERSISTENT_SESSION] How: after action success, refresh live data in place instead of closing the popup.
+ * - Contract:
+ *   - INPUT: popup/overlay user actions (save, tag, toggle, refresh); session lifecycle events
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: UI remains usable for chained actions; no forced auto-close after success; core overlay/popup behaviors retained | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: PopupController; UIManager; overlay-manager; ARCH-POPUP_SESSION / IMPL-POPUP_SESSION composition
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: HANDLE_POPUP_ACTION
+ *   - result = AWAIT dispatch(action)
+ *   - IF result.ok: REFRESH_POPUP_STATE(); KEEP popup open
+ *   - ELSE: SHOW error; KEEP popup open
+ *   - RETURN result
+ *   - How (sub-block): How: overlay continues to support close/refresh/tag without regressing core show/hide UX.
+ *
+ * ## PRESERVE_OVERLAY_CORE
+ *
+ * - [IMPL-UX_CORE] [ARCH-UX_CORE] [REQ-CORE_UX_PRESERVATION] [REQ-POPUP_PERSISTENT_SESSION] How: Implements PRESERVE_OVERLAY_CORE behavior for IMPL-UX_CORE.
+ * - Contract:
+ *   - INPUT: popup/overlay user actions (save, tag, toggle, refresh); session lifecycle events
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: UI remains usable for chained actions; no forced auto-close after success; core overlay/popup behaviors retained
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: PopupController; UIManager; overlay-manager; ARCH-POPUP_SESSION / IMPL-POPUP_SESSION composition
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: PRESERVE_OVERLAY_CORE
+ *   - SHOW/HIDE overlay per config and site policy
+ *   - RETAIN close and refresh controls (IMPL-OVERLAY_CONTROLS)
+ *   - RETURN
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-UX_CORE ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-OVERLAY_TEST_HARNESS ===
+ * [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] — Mock DOM with auto-registration by className/id and classList tracking for overlay tests. Contract: test setup and overlay create calls; mock registry and classList log.
+ *
+ * ## MAIN
+ *
+ * - [IMPL-OVERLAY_TEST_HARNESS] [ARCH-OVERLAY_TESTABILITY] [REQ-OVERLAY_SYSTEM] [REQ-OVERLAY_CONTROL_LAYOUT] How: Logical block for IMPL-OVERLAY_TEST_HARNESS.
+ * - Contract:
+ *   - INPUT: test setup (no real DOM); overlay manager create calls
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: mock DOM with auto-registered className/id; classList/attribute operations trackable
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: mock element registry (by className, id); classList add/remove log
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): Register element when className or id is assigned.
+ *   - 1. ON element creation / property assign (className, id):
+ *   - 2.   REGISTER element in registry by className and id
+ *   - How (sub-block): Record classList operations for assertions.
+ *   - 3. classList.add/remove: RECORD operation for assertions
+ *   - How (sub-block): Create mock document/body; inject overlay; run show; assert registry and classList.
+ *   - 4. Test setup: CREATE mock document/body; INJECT overlay into mock; RUN show(); ASSERT registry and classList state
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-OVERLAY_TEST_HARNESS ===
+ */
 import { Logger } from '../../shared/logger.js'
 import { VisibilityControls } from '../../ui/components/VisibilityControls.js'
 import { MessageClient } from './message-client.js'

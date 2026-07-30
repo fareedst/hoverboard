@@ -1,7 +1,10 @@
 IMPL-THEME:
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: "src/ui/popup/PopupController.js"
+        description: "Theme apply/persist"
+      - path: "src/config/config-manager.js"
+        description: "Theme settings"
   cross_references:
     - "ARCH-THEME"
     - "REQ-DARK_THEME"
@@ -16,7 +19,7 @@ IMPL-THEME:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync"
   name: "Theme"
   rationale:
     why: "Theme implementation"
@@ -32,4 +35,5 @@ IMPL-THEME:
       - "IMPL-THEME"
     requirements:
       - "REQ-DARK_THEME"
-    tests: []
+    tests:
+      - "tests/unit/dark-theme-default.test.js"

@@ -1,12 +1,144 @@
 /**
- * Modern Logger - Replaces legacy debug.js and console.js
- * Provides structured logging with levels and context
+ * === IMPL-FULL-BLOCK: IMPL-LOG_LEVEL_CONFIG ===
+ * [IMPL-LOG_LEVEL_CONFIG] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] — getLogLevel from environment; production => warn, else debug; used by shouldLog. Contract: no input; returns current log level; env and defaults.
  *
- * [IMPL-LOGGER_CONTEXT_LEVELS] Structured logging with context and levels
- * [IMPL-LOG_LEVEL_CONFIG] Environment-aware log level configuration
- * [IMPL-LOGGER_LEGACY] Legacy compatibility for gradual migration
+ * ## GET_LOG_LEVEL
+ *
+ * - [IMPL-LOG_LEVEL_CONFIG] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Implements getLogLevel() behavior for IMPL-LOG_LEVEL_CONFIG.
+ * - Contract:
+ *   - INPUT: none (reads environment)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: current log level (e.g. "debug" | "info" | "warn" | "error") | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: NODE_ENV or browser equivalent; production => warn, else => debug
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_LOG_LEVEL
+ *   - env = read NODE_ENV or process.env (browser fallback)
+ *   - IF env = "production": RETURN "warn"
+ *   - RETURN "debug" (or override from config)
+ *   - How (sub-block): Logger.shouldLog(level): emit only if level >= getLogLevel().
+ *   - 1. Used by Logger.shouldLog(level): IF level >= getLogLevel() then emit else skip.
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOG_LEVEL_CONFIG ===
  */
-
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOGGER_CONTEXT_LEVELS ===
+ * [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] — Logger with context, shouldLog, formatMessage, debug/info/warn/error; default logger and createLogger. Contract: context and level/args in; formatted line out; uses getLogLevel.
+ *
+ * ## LOGGER
+ *
+ * - [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Implements Logger(context) behavior for IMPL-LOGGER_CONTEXT_LEVELS.
+ * - Contract:
+ *   - INPUT: context (string), level (debug|info|warn|error), message/args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: formatted log line to console (or transport); no return
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: Logger instance; getLogLevel() from IMPL-LOG_LEVEL_CONFIG
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: LOGGER
+ *   - this.context = context
+ *   - How (sub-block): Compare level to getLogLevel(); return true if should emit.
+ *
+ * ## SHOULD_LOG
+ *
+ * - [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Implements shouldLog(level) behavior for IMPL-LOGGER_CONTEXT_LEVELS.
+ * - Contract:
+ *   - INPUT: context (string), level (debug|info|warn|error), message/args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: formatted log line to console (or transport); no return
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: Logger instance; getLogLevel() from IMPL-LOG_LEVEL_CONFIG
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: SHOULD_LOG
+ *   - minLevel = getLogLevel()
+ *   - RETURN level >= minLevel (by severity order)
+ *   - How (sub-block): Prefix with context and level; format args.
+ *
+ * ## FORMAT_MESSAGE
+ *
+ * - [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Implements formatMessage(level, ...args) behavior for IMPL-LOGGER_CONTEXT_LEVELS.
+ * - Contract:
+ *   - INPUT: context (string), level (debug|info|warn|error), message/args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: formatted log line to console (or transport); no return
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: Logger instance; getLogLevel() from IMPL-LOG_LEVEL_CONFIG
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: FORMAT_MESSAGE
+ *   - RETURN "[context] level: args..." or structured format
+ *   - How (sub-block): Emit only when shouldLog(level); output formatMessage.
+ *
+ * ## DEBUG
+ *
+ * - [IMPL-LOGGER_CONTEXT_LEVELS] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Implements debug(...), info(...), warn(...), error(...) behavior for IMPL-LOGGER_CONTEXT_LEVELS.
+ * - Contract:
+ *   - INPUT: context (string), level (debug|info|warn|error), message/args
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: formatted log line to console (or transport); no return | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: Logger instance; getLogLevel() from IMPL-LOG_LEVEL_CONFIG
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: DEBUG
+ *   - IF shouldLog(level): OUTPUT formatMessage(level, ...args)
+ *   - 1. logger = default Logger; createLogger(context) = new Logger(context).
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOGGER_CONTEXT_LEVELS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOGGER_LEGACY ===
+ * [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] — log() and noisy() for legacy compatibility; log maps to debug; noisy always emits. Contract: context and args in; log line out.
+ *
+ * ## LOG
+ *
+ * - [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Implements log(context, ...args) behavior for IMPL-LOGGER_LEGACY.
+ * - Contract:
+ *   - INPUT: context (string), ...args (message or interpolated values)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: log line to console
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: log and noisy in same logger module
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: LOG
+ *   - CALL default logger.debug or createLogger(context).debug(...args)
+ *   - (Same as Logger.debug so level filtering applies)
+ *   - How (sub-block): Emit regardless of level; for migration/debug; remove when call sites use Logger.
+ *
+ * ## NOISY
+ *
+ * - [IMPL-LOGGER_LEGACY] [ARCH-STRUCTURED_LOGGING] [REQ-STRUCTURED_LOGGING] How: Implements noisy(context, ...args) behavior for IMPL-LOGGER_LEGACY.
+ * - Contract:
+ *   - INPUT: context (string), ...args (message or interpolated values)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: log line to console
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: log and noisy in same logger module
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: NOISY
+ *   - EMIT log line regardless of level (or at debug)
+ *   - Used for temporary migration/debug; can be removed when call sites use Logger directly.
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOGGER_LEGACY ===
+ */
 export class Logger {
   constructor (context = 'Hoverboard') {
     // IMPL-LOGGER_CONTEXT_LEVELS: Context-based logging for component identification

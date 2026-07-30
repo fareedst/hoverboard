@@ -3,6 +3,449 @@
  * Handles user configuration with validation and persistence
  */
 
+/**
+ * === IMPL-FULL-BLOCK: IMPL-FILE_STORAGE_TYPED_PATH ===
+ * [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] — User-typed path for file storage; Options persist path; native host read/write; initBookmarkProvider path vs picker. Contract: path input and storage; persisted path and file I/O via native host.
+ *
+ * ## RESOLVE_FILE_PATH
+ *
+ * - [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] How: Implements resolveFilePath(path) behavior for IMPL-FILE_STORAGE_TYPED_PATH.
+ * - Contract:
+ *   - INPUT: path string (user-typed, default ~/.hoverboard); read/write requests with path
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted path in hoverboard_file_storage_path; file contents read/written via native host
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: hoverboard_file_storage_path (storage); path -> if dir then path/hoverboard-bookmarks.json else path as file
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: RESOLVE_FILE_PATH
+ *   - path = expand_tilde(path)  // IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE
+ *   - IF path ends with .json: RETURN path AS file
+ *   - ELSE: RETURN path + "/hoverboard-bookmarks.json"
+ *   - How (sub-block): Send native message to helper for read/write; return result.
+ *
+ * ## READ_BOOKMARKS_FILE
+ *
+ * - [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] How: Implements readBookmarksFile(path), writeBookmarksFile(path, data) behavior for IMPL-FILE_STORAGE_TYPED_PATH.
+ * - Contract:
+ *   - INPUT: path string (user-typed, default ~/.hoverboard); read/write requests with path
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted path in hoverboard_file_storage_path; file contents read/written via native host
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: hoverboard_file_storage_path (storage); path -> if dir then path/hoverboard-bookmarks.json else path as file
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: READ_BOOKMARKS_FILE
+ *   - path = resolveFilePath(path)
+ *   - SEND native message (type, path) to helper; helper reads/writes file; RETURN result
+ *   - How (sub-block): Prefer path adapter when path set; else picker adapter.
+ *
+ * ## INIT_BOOKMARK_PROVIDER
+ *
+ * - [IMPL-FILE_STORAGE_TYPED_PATH] [ARCH-FILE_BOOKMARK_PROVIDER] [REQ-FILE_BOOKMARK_STORAGE] How: Implements initBookmarkProvider() behavior for IMPL-FILE_STORAGE_TYPED_PATH.
+ * - Contract:
+ *   - INPUT: path string (user-typed, default ~/.hoverboard); read/write requests with path
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted path in hoverboard_file_storage_path; file contents read/written via native host
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: hoverboard_file_storage_path (storage); path -> if dir then path/hoverboard-bookmarks.json else path as file
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: INIT_BOOKMARK_PROVIDER
+ *   - IF path set in storage: USE NativeHostFileBookmarkAdapter(path)
+ *   - ELSE IF picker configured: USE MessageFileBookmarkAdapter
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-FILE_STORAGE_TYPED_PATH ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
+ * [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] — Index page: getAggregatedBookmarksForIndex (fallback getLocalBookmarksForIndex), filter pipeline, table with Storage column; Stores L/F/S/B. Contract: page load and user actions; displayed table and filtered list; state data.
+ *
+ * ## LOAD_LOCAL_BOOKMARKS_INDEX
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: LOAD_LOCAL_BOOKMARKS_INDEX: aggregate first; treat error/success:false as failure even when bookmarks is []; then filter.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_LOCAL_BOOKMARKS_INDEX
+ *   - SEND getAggregatedBookmarksForIndex
+ *   - IF response has error OR success is false OR bookmarks is not an array:
+ *   - SEND getLocalBookmarksForIndex
+ *   - SET allBookmarks = response.bookmarks with storage "local"
+ *   - ELSE:
+ *   - SET allBookmarks = response.bookmarks (each item has storage "local"|"file"|"sync"|"browser")
+ *   - applySearchAndFilter()
+ *   - 1. ON page load:
+ *   - LOAD_LOCAL_BOOKMARKS_INDEX
+ *
+ * ## SHOULD_RELOAD_BOOKMARKS_ON_STORE_CHANGE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: Store checkbox change refilters; if cache empty and at least one store checked, reload (cold SW recovery).
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SHOULD_RELOAD_BOOKMARKS_ON_STORE_CHANGE
+ *   - RETURN allBookmarksLength == 0 AND allowedStoresSize > 0
+ *
+ * ## GET_ALLOWED_STORES
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: getAllowedStores includes browser when #store-browser checked; Move/Import-to targets include browser.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_ALLOWED_STORES
+ *   - SET from checked #store-local|#store-file|#store-sync|#store-browser → { local, file, sync, browser }
+ *   - How (sub-block): Apply stores filter, search, show-only, exclude tags; sort and render.
+ *
+ * ## APPLY_SEARCH_AND_FILTER
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [ARCH-STORAGE_INDEX_AND_ROUTER] [ARCH-BROWSER_BOOKMARK_PROVIDER] [REQ-LOCAL_BOOKMARKS_INDEX] [REQ-BROWSER_BOOKMARK_STORAGE] How: Implements applySearchAndFilter() behavior for IMPL-LOCAL_BOOKMARKS_INDEX.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: APPLY_SEARCH_AND_FILTER
+ *   - filteredBookmarks = allBookmarks
+ *   - APPLY stores filter (matchStoresFilter, getAllowedStores)
+ *   - APPLY search (text)
+ *   - APPLY show-only (tags, toread, private, time range; getShowOnlyDefaultState for Clear)
+ *   - APPLY exclude tags (matchExcludeTags)
+ *   - SORT by sortKey (e.g. time desc)
+ *   - renderTableBody(filteredBookmarks); updateRowCount()
+ *
+ * ## BULK_DELETE
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] [IMPL-BOOKMARK_ROUTER] How: Bulk Delete uses row Storage column as preferredBackend; pending/final #delete-result mirrors Import status UX. Orchestrator: runBulkDelete (bookmarks-table-bulk-delete.js) for composition-testable wiring.
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BULK_DELETE
+ *   - IF selectedUrls empty: RETURN
+ *   - runBulkDelete(urls, bookmarksByUrl, sendMessage, confirmFn, #delete-result, onAfterDelete):
+ *   - titles = descriptions for selected URLs from bookmarksByUrl
+ *   - IF NOT confirmFn(buildDeleteConfirmMessage(count, titles)): RETURN cancelled
+ *   - setDeleteResultPending(#delete-result)  # "Deleting…" warning color
+ *   - FOR each url IN urls:
+ *   - bookmark = lookup url in bookmarksByUrl
+ *   - payload = buildDeletePayload(bookmark)  # { url, preferredBackend from storage }
+ *   - SEND deleteBookmark with data = payload
+ *   - COUNT ok / fail from response
+ *   - onAfterDelete()  # CLEAR selectedUrls; loadBookmarks(); updateMoveControlsState()
+ *   - setDeleteResultFinal(#delete-result, formatDeleteResultMessage({ deleted: ok, failed: fail }))
+ *   - How (sub-block): buildDeletePayload(bookmark):
+ *   - IF bookmark missing or no url: RETURN null
+ *   - RETURN { url: bookmark.url, preferredBackend: lowercase(bookmark.storage) OR "local" }
+ *
+ * ## OPEN_BOOKMARKS_INDEX_TAB
+ *
+ * - [IMPL-LOCAL_BOOKMARKS_INDEX] [ARCH-LOCAL_BOOKMARKS_INDEX] [REQ-LOCAL_BOOKMARKS_INDEX] How: concurrent cold-start messages share one in-flight initBookmarkProvider promise (createProviderInitMutex). OPEN_BOOKMARKS_INDEX_TAB: create index tab then dismiss already-open side panel (tab-create only; not page refresh). How: SW owns create+broadcast so popup/command/menu share one path; panel closes via REQUEST_SIDE_PANEL_CLOSE (icon-toggle semantics).
+ * - Contract:
+ *   - INPUT: none (page load); user actions (search, filter, sort, selection, export/move/delete/import)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: displayed table of bookmarks with Storage column; filtered/sorted list
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: allBookmarks (array with storage field), filteredBookmarks, selectedUrls (set), sortKey, timeColumnSource, timeDisplayMode; store checkboxes local|file|sync|browser
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OPEN_BOOKMARKS_INDEX_TAB
+ *   - url = runtime.getURL('src/ui/bookmarks-table/bookmarks-table.html')
+ *   - tabs.create({ url })
+ *   - runtime.sendMessage({ type: REQUEST_SIDE_PANEL_CLOSE })
+ *   - How (sub-block): Entry points that call OPEN_BOOKMARKS_INDEX_TAB (not options href):
+ *   - 1. ON OPEN_BOOKMARKS_INDEX message: OPEN_BOOKMARKS_INDEX_TAB
+ *   - 2. ON command open-bookmarks-index: OPEN_BOOKMARKS_INDEX_TAB
+ *   - 3. ON context menu hoverboard-open-bookmarks-index: OPEN_BOOKMARKS_INDEX_TAB
+ *   - 4. Popup: bookmarksIndexBtn -> openBookmarksIndex -> SEND OPEN_BOOKMARKS_INDEX
+ *   - 5. Options: bookmarks-index-link href -> extension URL (no dismiss; out of scope)
+ *   - How (sub-block): Index page init must NOT send REQUEST_SIDE_PANEL_CLOSE (refresh must not re-dismiss after icon reopen).
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-LOCAL_BOOKMARKS_INDEX ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-AI_TAG_TEST ===
+ * [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] — Minimal API request to verify key; return { ok } or { ok, error }; used by Options and Popup Test button.
+ *
+ * ## TEST_AI_API_KEY
+ *
+ * - [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] How: Implements testAiApiKey(apiKey, provider) behavior for IMPL-AI_TAG_TEST.
+ * - Contract:
+ *   - INPUT: apiKey (string), provider ('openai' | 'gemini')
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: { ok: boolean, error?: string } | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: Http
+ *   - TERMINATION: total
+ * - PROCEDURE: TEST_AI_API_KEY
+ *   - IF !apiKey or !provider RETURN { ok: false, error: 'Missing key or provider' }
+ *   - IF provider === 'openai':
+ *   - res = fetch('https://api.openai.com/v1/models', { headers: { Authorization: 'Bearer ' + apiKey } })
+ *   - IF res.ok RETURN { ok: true }
+ *   - IF res.status === 401 or 403 RETURN { ok: false, error: 'Invalid API key' }
+ *   - RETURN { ok: false, error: res.statusText or 'Request failed' }
+ *   - IF provider === 'gemini':
+ *   - res = fetch('https://generativelanguage.googleapis.com/v1beta/models?key=' + apiKey)
+ *   - IF res.ok RETURN { ok: true }
+ *   - IF res.status === 400 or 403 RETURN { ok: false, error: 'Invalid API key' }
+ *   - RETURN { ok: false, error: res.statusText or 'Request failed' }
+ *   - RETURN { ok: false, error: 'Unknown provider' }
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-AI_TAG_TEST ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-ICON_CLICK_BEHAVIOR ===
+ * [IMPL-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [REQ-ICON_CLICK_BEHAVIOR] — Icon click opens side panel (default) or popup; when side panel, click toggles (close if already open).
+ *
+ * ## _SEED_ICON_CLICK_PREFERENCE_CACHE
+ *
+ * - [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] How: Manifest: no default_popup so onClicked fires. Config: iconClickOpensSidePanel default true; schema optional boolean. Options: toggle bound to iconClickOpensSidePanel; load and save with other settings. SW: cache preference so handler stays synchronous (user gesture required for sidePanel.open).
+ * - Contract:
+ *   - INPUT: user clicks extension toolbar icon
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel opens or closes (toggle) when option enabled; else popup opens
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: SW _iconClickOpensSidePanel (cached), _sidePanelWindowId; panel _sidePanelLoadTime; MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: _SEED_ICON_CLICK_PREFERENCE_CACHE
+ *   - getConfig().then(c => this._iconClickOpensSidePanel = c.iconClickOpensSidePanel)
+ *   - storage.onChanged.addListener(changes, areaName => IF areaName === 'local' AND changes.hoverboard_settings THEN getConfig().then(...))
+ *
+ * ## HANDLE_ACTION_CLICK
+ *
+ * - [REQ-ICON_CLICK_BEHAVIOR] [ARCH-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] How: SW: listener passes tab from Chrome into handleActionClick(tab). SW handleActionClick(tab): prefer clicked window; Chrome requires sidePanel.open() in same synchronous user-gesture stack.
+ * - Contract:
+ *   - INPUT: user clicks extension toolbar icon
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel opens or closes (toggle) when option enabled; else popup opens
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: SW _iconClickOpensSidePanel (cached), _sidePanelWindowId; panel _sidePanelLoadTime; MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: HANDLE_ACTION_CLICK
+ *   - openSidePanel = (this._iconClickOpensSidePanel !== false)
+ *   - IF NOT openSidePanel: action.openPopup(); RETURN
+ *   - IF NOT sidePanel.open available: action.openPopup(); RETURN
+ *   - How (sub-block): # [IMPL-ICON_CLICK_BEHAVIOR] Prefer clicked window: use tab from onClicked when provided, else cache.
+ *   - clickedWindowId = tab?.windowId != null ? tab.windowId : null
+ *   - cachedWindowId = this._sidePanelWindowId
+ *   - useWindowId = clickedWindowId != null ? clickedWindowId : cachedWindowId
+ *   - IF useWindowId != null:
+ *   - IF clickedWindowId != null AND NOT _isRestrictedForSidePanel(tab?.url): this._sidePanelWindowId = clickedWindowId
+ *   - sidePanel.open({ windowId: useWindowId }); windows.update(useWindowId, { focused: true }); sendMessage(REQUEST_SIDE_PANEL_CLOSE); RETURN
+ *   - How (sub-block): # [IMPL-ICON_CLICK_BEHAVIOR] Cold start: no tab and no cache; do NOT call sidePanel.open in async callback (gesture would be lost). Seed cache for next click; open popup as fallback.
+ *   - tabs.query({ active: true, currentWindow: true }, (tabs) =>
+ *   - tabFromQuery = tabs?.[0]
+ *   - IF tabFromQuery?.windowId != null AND NOT _isRestrictedForSidePanel(tabFromQuery.url): this._sidePanelWindowId = tabFromQuery.windowId
+ *   - )
+ *   - action.openPopup()
+ *
+ * ## BIND_TOGGLE_CLOSE_REQUEST
+ *
+ * - [REQ-ICON_CLICK_BEHAVIOR] [IMPL-ICON_CLICK_BEHAVIOR] How: Side panel: on REQUEST_SIDE_PANEL_CLOSE close if visible and open long enough (toggle).
+ * - Contract:
+ *   - INPUT: user clicks extension toolbar icon
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: side panel opens or closes (toggle) when option enabled; else popup opens
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: SW _iconClickOpensSidePanel (cached), _sidePanelWindowId; panel _sidePanelLoadTime; MESSAGE_TYPES.REQUEST_SIDE_PANEL_CLOSE
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: BIND_TOGGLE_CLOSE_REQUEST
+ *   - runtime.onMessage.addListener(message =>
+ *   - IF message?.type !== REQUEST_SIDE_PANEL_CLOSE RETURN
+ *   - IF document.visibilityState !== 'visible' RETURN
+ *   - IF (Date.now() - _sidePanelLoadTime) < 300 RETURN
+ *   - window.close())
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-ICON_CLICK_BEHAVIOR ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-AI_CONFIG_OPTIONS ===
+ * [IMPL-AI_CONFIG_OPTIONS] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] — Options page exposes and persists AI API key, provider, and tag limit; load/save from config; no key = feature disabled elsewhere.
+ *
+ * ## LOAD_SETTINGS
+ *
+ * - [IMPL-AI_CONFIG_OPTIONS] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] How: Implements loadSettings() behavior for IMPL-AI_CONFIG_OPTIONS.
+ * - Contract:
+ *   - INPUT: user edits in options (apiKey, provider, optional limit)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted config; Test result (ok or error message) | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: LOAD_SETTINGS
+ *   - settings = getStoredSettings()
+ *   - SET aiApiKey input = settings.aiApiKey ?? ''
+ *   - SET provider select = settings.aiProvider ?? 'openai'
+ *   - SET limit input = settings.aiTagLimit ?? 64
+ *   - How (sub-block): How: collect trim/number from form and persist via updateConfig.
+ *
+ * ## SAVE_SETTINGS
+ *
+ * - [IMPL-AI_CONFIG_OPTIONS] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] How: Implements saveSettings() behavior for IMPL-AI_CONFIG_OPTIONS.
+ * - Contract:
+ *   - INPUT: user edits in options (apiKey, provider, optional limit)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted config; Test result (ok or error message) | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: SAVE_SETTINGS
+ *   - settings = { aiApiKey: trim(aiApiKey input), aiProvider: provider select value, aiTagLimit: number(limit input) }
+ *   - updateConfig(settings)
+ *
+ * ## BLOCK_3
+ *
+ * - [IMPL-AI_TAG_TEST] [ARCH-AI_TAGGING_CONFIG] [REQ-AI_TAGGING_CONFIG] How: Nested block: options-page "Test API key" button; require key, call testAiApiKey(apiKey, provider), show "API key OK" or error.
+ * - Contract:
+ *   - INPUT: user edits in options (apiKey, provider, optional limit)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: persisted config; Test result (ok or error message) | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: Http, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BLOCK_3
+ *   - 1. on Test click:
+ *   - 2.   apiKey = trim(aiApiKey input)
+ *   - 3.   provider = provider select value
+ *   - 4.   IF !apiKey THEN show error; RETURN
+ *   - 5.   result = testAiApiKey(apiKey, provider)  // or send message to SW
+ *   - 6.   IF result.ok THEN show success ELSE show result.error
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-AI_CONFIG_OPTIONS ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-CONFIG_MIGRATION ===
+ * [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] — Auth token in sync storage; getAuthToken, setAuthToken, hasAuth, getAuthParam; options save writes token.
+ *
+ * ## GET_AUTH_TOKEN
+ *
+ * - [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] How: Implements getAuthToken() behavior for IMPL-CONFIG_MIGRATION.
+ * - Contract:
+ *   - INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: auth stored in sync storage; default config (retry settings)
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_AUTH_TOKEN
+ *   - TRY LOAD auth from sync storage
+ *   - RETURN token or null
+ *
+ * ## SET_AUTH_TOKEN
+ *
+ * - [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] How: Implements setAuthToken(token) behavior for IMPL-CONFIG_MIGRATION.
+ * - Contract:
+ *   - INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: auth stored in sync storage; default config (retry settings)
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: SET_AUTH_TOKEN
+ *   - WRITE token to sync storage (auth key)
+ *
+ * ## HAS_AUTH
+ *
+ * - [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] How: Implements hasAuth() behavior for IMPL-CONFIG_MIGRATION.
+ * - Contract:
+ *   - INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: auth stored in sync storage; default config (retry settings)
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: HAS_AUTH
+ *   - RETURN getAuthToken() !== null
+ *
+ * ## GET_AUTH_PARAM
+ *
+ * - [IMPL-CONFIG_MIGRATION] [ARCH-CONFIG_STRUCTURE] [REQ-CONFIG_PORTABILITY] How: Implements getAuthParam(name) behavior for IMPL-CONFIG_MIGRATION.
+ * - Contract:
+ *   - INPUT: token string (setAuthToken); none (getAuthToken, hasAuth, getAuthParam)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: token or null (getAuthToken); boolean (hasAuth); param value (getAuthParam)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: auth stored in sync storage; default config (retry settings)
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_AUTH_PARAM
+ *   - LOAD default config or stored config
+ *   - RETURN value for name (e.g. retry count)
+ *   - How (sub-block): Read token from UI; setAuthToken(token).
+ *   - 1. on save settings (options UI):
+ *   - READ token from UI
+ *   - setAuthToken(token)
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-CONFIG_MIGRATION ===
+ */
 import { ConfigManager } from '../../config/config-manager.js'
 import { PinboardService } from '../../features/pinboard/pinboard-service.js'
 import { testAiApiKey } from '../../features/ai/ai-api-test.js'

@@ -27,6 +27,10 @@ Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with 
 | **pseudo-code sidecar** | md detail | `tied/implementation-decisions/IMPL-*-pseudocode.md` |
 | **block lead comment** | header comment | First comment on each block; literal-copy to tests/code |
 | **three-way alignment** | sync | IMPL block lead ↔ test comment ↔ code comment |
+| **full-block duplication** | full block paste, comment dump | Hoverboard policy: copy lead + Contract + PROCEDURE into `src/` and primary unit-test loci (vs default block-lead-only); see writing guide § Full block duplication and [`../docs/source-file-impl-traceability.md`](../docs/source-file-impl-traceability.md) |
+| **source-file IMPL traceability** | in-file IMPL copy policy | Repo policy for which files carry full-block comments, placement, and drift direction IMPL → comment → code |
+| **sync_impl_full_blocks** | full-block sync script | [`scripts/sync_impl_full_blocks.py`](../../scripts/sync_impl_full_blocks.py) — inject or `--check` Active H2 presence in mapped loci |
+| **IMPL-FULL-BLOCK marker** | FULL-BLOCK wrapper | Comment delimiters `=== IMPL-FULL-BLOCK: IMPL-* ===` / `=== END IMPL-FULL-BLOCK: … ===` around injected bodies |
 | **UPPER_SNAKE block name** | procedure name (ambiguous) | Preferred **domain** term becomes block identifier |
 | **CITDP record** | citdp file | `tied/citdp/CITDP-*.yaml` |
 | **per-request checklist copy** | checklist yaml | Never run completion against canonical checklist in `tied/docs/` |
@@ -54,6 +58,8 @@ Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with 
 | Pseudo-code template | `templates/impl-essence-pseudocode-template.md` | [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) |
 | CITDP record | `tied/citdp/CITDP-REQ-{TOKEN}.yaml` (pattern) | [PROC-CITDP](../docs/processes.md) |
 | Validation checklist | `tied/docs/pseudocode-validation-checklist.yaml` | [PROC-PSEUDOCODE_VALIDATION](../docs/processes.md) |
+| Source-file IMPL traceability policy | `tied/docs/source-file-impl-traceability.md` | [PROC-IMPL_CODE_TEST_SYNC](../docs/processes.md) |
+| Full-block sync script | `scripts/sync_impl_full_blocks.py` | [PROC-IMPL_CODE_TEST_SYNC](../docs/processes.md) |
 | Domain vocab index | `tied/vocab/*.md` | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 | Vocab routing index (PRELOAD) | `tied/vocab/routing.md` | [PROC-VOCABULARY_INDEX](../docs/processes.md) |
 
@@ -118,7 +124,10 @@ Prefer in `essence_pseudocode` (not domain terms):
 | EFFECTS | IMPL grammar keywords |
 | essence_pseudocode | Preferred terms |
 | FAILURE_MODES | IMPL grammar keywords |
+| full-block duplication | Preferred terms |
+| Full-block sync script | Naming bridge |
 | IMPL grammar vocabulary | Domain vs grammar |
+| IMPL-FULL-BLOCK marker | Preferred terms |
 | LEAP | Preferred terms |
 | per-request checklist copy | Preferred terms |
 | POST | IMPL grammar keywords |
@@ -130,11 +139,14 @@ Prefer in `essence_pseudocode` (not domain terms):
 | SHAPE-004 | Preferred terms |
 | SHAPE-005 | Preferred terms |
 | SHAPE-006 | Preferred terms |
+| source-file IMPL traceability | Preferred terms |
+| Source-file IMPL traceability policy | Naming bridge |
 | sub-vocabulary-sync | Pseudo-code blocks |
 | sub-vocabulary-sync PRELOAD | Preferred terms |
 | sub-vocabulary-sync RECORD | Preferred terms |
 | sub-vocabulary-sync RESOLVE | Preferred terms |
 | sub-vocabulary-sync VALIDATE | Preferred terms |
+| sync_impl_full_blocks | Preferred terms |
 | TERMINATION | IMPL grammar keywords |
 | three-way alignment | Preferred terms |
 | UPPER_SNAKE block name | Preferred terms |

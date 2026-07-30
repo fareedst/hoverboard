@@ -9,6 +9,442 @@
  * [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] DOM utilities for extension content scripts
  */
 
+/**
+ * === IMPL-FULL-BLOCK: IMPL-SELECTION_TO_TAG_INPUT ===
+ * [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] — Prefill tag input from page selection on popup open; GET_PAGE_SELECTION and normalizeSelectionForTagInput. Contract: selection via message; tag input prefilled.
+ *
+ * ## NORMALIZE_SELECTION_FOR_TAG_INPUT
+ *
+ * - [IMPL-SELECTION_TO_TAG_INPUT] [ARCH-SELECTION_TO_TAG_INPUT] [REQ-SELECTION_TO_TAG_INPUT] [REQ-TAG_MANAGEMENT] How: Implements normalizeSelectionForTagInput(selection, maxWords) behavior for IMPL-SELECTION_TO_TAG_INPUT.
+ * - Contract:
+ *   - INPUT: none at popup open (selection read from page via message); raw selection string (normalizeSelectionForTagInput)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: tag input field prefilled with normalized words (side effect) | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - DATA: current tab; newTagInput element; maxWords = 8
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: NORMALIZE_SELECTION_FOR_TAG_INPUT
+ *   - text = replace non-word non-space chars with space in selection
+ *   - text = collapse spaces, trim
+ *   - words = split text on whitespace
+ *   - RETURN first maxWords words joined by space
+ *   - How (sub-block): Request selection; if present set tag input to normalized value.
+ *   - 1. popup loadInitialData (after loadSuggestedTags or loadRecentTags):
+ *   - TRY response = sendToTab(GET_PAGE_SELECTION)
+ *   - ON timeout or failure LEAVE tag input unchanged, RETURN
+ *   - raw = response.data.selection
+ *   - IF raw non-empty:
+ *   - normalized = normalizeSelectionForTagInput(raw, 8)
+ *   - setTagInputValue(normalized)
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-SELECTION_TO_TAG_INPUT ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-ARRAY_OBJECT_UTILITIES ===
+ * [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] — Array and object helpers: unique, chunk, compact; deepClone, isEmpty, pick; pure, no mutation.
+ *
+ * ## UNIQUE
+ *
+ * - [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements unique(arr) behavior for IMPL-ARRAY_OBJECT_UTILITIES.
+ * - Contract:
+ *   - INPUT: array or object; optional keys (for pick), size (for chunk)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: transformed array or object; no mutation of inputs
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: pure functions; same file as urlUtils, textUtils
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: UNIQUE
+ *   - RETURN array of distinct elements (order preserved or by first occurrence)
+ *
+ * ## CHUNK
+ *
+ * - [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements chunk(arr, size) behavior for IMPL-ARRAY_OBJECT_UTILITIES.
+ * - Contract:
+ *   - INPUT: array or object; optional keys (for pick), size (for chunk)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: transformed array or object; no mutation of inputs
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: pure functions; same file as urlUtils, textUtils
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: CHUNK
+ *   - SPLIT arr into subarrays of length size; last chunk may be shorter
+ *   - RETURN array of chunks
+ *
+ * ## COMPACT
+ *
+ * - [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements compact(arr) behavior for IMPL-ARRAY_OBJECT_UTILITIES.
+ * - Contract:
+ *   - INPUT: array or object; optional keys (for pick), size (for chunk)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: transformed array or object; no mutation of inputs
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: pure functions; same file as urlUtils, textUtils
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: COMPACT
+ *   - RETURN array with falsy elements removed (false, null, undefined, 0, "", NaN)
+ *
+ * ## DEEP_CLONE
+ *
+ * - [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements deepClone(obj) behavior for IMPL-ARRAY_OBJECT_UTILITIES.
+ * - Contract:
+ *   - INPUT: array or object; optional keys (for pick), size (for chunk)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: transformed array or object; no mutation of inputs
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: pure functions; same file as urlUtils, textUtils
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: DEEP_CLONE
+ *   - RETURN deep copy of obj (nested objects/arrays copied recursively)
+ *
+ * ## IS_EMPTY
+ *
+ * - [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements isEmpty(obj) behavior for IMPL-ARRAY_OBJECT_UTILITIES.
+ * - Contract:
+ *   - INPUT: array or object; optional keys (for pick), size (for chunk)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: transformed array or object; no mutation of inputs
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: pure functions; same file as urlUtils, textUtils
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: IS_EMPTY
+ *   - IF obj is null or undefined: RETURN true
+ *   - FOR each enumerable key: IF any exists RETURN false
+ *   - RETURN true
+ *
+ * ## PICK
+ *
+ * - [IMPL-ARRAY_OBJECT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements pick(obj, keys) behavior for IMPL-ARRAY_OBJECT_UTILITIES.
+ * - Contract:
+ *   - INPUT: array or object; optional keys (for pick), size (for chunk)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: transformed array or object; no mutation of inputs
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: pure functions; same file as urlUtils, textUtils
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: PICK
+ *   - result = {}
+ *   - FOR each key IN keys: IF obj[key] present THEN result[key] = obj[key]
+ *   - RETURN result
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-ARRAY_OBJECT_UTILITIES ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-CROSS_BROWSER ===
+ * [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] — Chrome-first browser API shim; shared `browser` export for messaging and storage helpers. Contract: callers import { browser } from safari-shim (via utils); Promise-friendly messaging.
+ *
+ * ## INITIALIZE_BROWSER_API
+ *
+ * - [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] How: Implements initializeBrowserAPI() behavior for IMPL-CROSS_BROWSER.
+ * - Contract:
+ *   - INPUT: chrome (or future browser) extension APIs; caller operations (sendMessage, tabs, storage)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: unified `browser` object with Promise wrappers, retry, and storage helpers
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: src/shared/safari-shim.js; re-export from src/shared/utils.js
+ *   - EFFECTS: Async, Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: INITIALIZE_BROWSER_API
+ *   - IF chrome is defined: browser = chrome; RETURN
+ *   - IF window.browser (polyfill): browser = window.browser; RETURN
+ *   - browser = createMinimalBrowserAPI()
+ *   - How (sub-block): Wrap messaging/tabs with retries and Promise API for Chrome service worker and content scripts.
+ *   - 1. safariEnhancements (browser API shim):
+ *   - PROVIDE runtime.sendMessage / tabs.* with retry and Promise behavior
+ *   - PROVIDE storage helpers (quota monitoring, graceful degradation) for Chromium storage
+ *   - DO NOT attach Safari-only platform metadata on messages (Safari product deferred)
+ *   - How (sub-block): Reserved hooks for deferred multi-browser; Safari product not active.
+ *
+ * ## PLATFORM_UTILS
+ *
+ * - [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] How: Implements platformUtils behavior for IMPL-CROSS_BROWSER.
+ * - Contract:
+ *   - INPUT: chrome (or future browser) extension APIs; caller operations (sendMessage, tabs, storage)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: unified `browser` object with Promise wrappers, retry, and storage helpers
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: src/shared/safari-shim.js; re-export from src/shared/utils.js
+ *   - EFFECTS: Async, Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: PLATFORM_UTILS
+ *   - isSafari(): RETURN false  # reserved; Safari App Extension deferred
+ *   - isChrome(): RETURN chrome is defined
+ *   - isFirefox(): RETURN browser.runtime.getBrowserInfo is a function
+ *   - getPlatform():
+ *   - IF isChrome(): RETURN "chrome"
+ *   - IF isFirefox(): RETURN "firefox"
+ *   - RETURN "unknown"
+ *   - How (sub-block): Call sites use shim export, not raw chrome only, for future expansion readiness.
+ *   - 1. ON service worker / content / message-handler import:
+ *   - USE browser from safari-shim (or utils re-export)
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-CROSS_BROWSER ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-DOM_UTILITIES ===
+ * [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] — DOM helpers: waitForElement (MutationObserver), createElement, and pin form helpers. Contract: inputs and outputs for each utility.
+ *
+ * ## WAIT_FOR_ELEMENT
+ *
+ * - [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements waitForElement(container, selector, options) behavior for IMPL-DOM_UTILITIES.
+ * - Contract:
+ *   - INPUT: selector (waitForElement); tag and attrs (createElement); form data (createPinFromFormData / validatePinFormData)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: element or null (waitForElement); element (createElement); pin object or validation result | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: WAIT_FOR_ELEMENT
+ *   - IF element = container.querySelector(selector) THEN RETURN resolve(element)
+ *   - observer = new MutationObserver(callback)
+ *   - observer.observe(container, { childList, subtree })
+ *   - ON mutation: IF element = container.querySelector(selector) THEN resolve(element), disconnect observer
+ *   - ON timeout (if given): reject or resolve null, disconnect observer
+ *   - How (sub-block): Create element with tag and attributes.
+ *
+ * ## CREATE_ELEMENT
+ *
+ * - [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements createElement(tag, attrs) behavior for IMPL-DOM_UTILITIES.
+ * - Contract:
+ *   - INPUT: selector (waitForElement); tag and attrs (createElement); form data (createPinFromFormData / validatePinFormData)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: element or null (waitForElement); element (createElement); pin object or validation result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: CREATE_ELEMENT
+ *   - el = document.createElement(tag)
+ *   - FOR each attr in attrs: SET el[attr] or setAttribute
+ *   - RETURN el
+ *   - How (sub-block): Build pin object from form fields.
+ *
+ * ## CREATE_PIN_FROM_FORM_DATA
+ *
+ * - [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements createPinFromFormData(formData) behavior for IMPL-DOM_UTILITIES.
+ * - Contract:
+ *   - INPUT: selector (waitForElement); tag and attrs (createElement); form data (createPinFromFormData / validatePinFormData)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: element or null (waitForElement); element (createElement); pin object or validation result
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: CREATE_PIN_FROM_FORM_DATA
+ *   - BUILD pin object from form fields (url, description, tags, etc.)
+ *   - RETURN pin object
+ *   - How (sub-block): Validate required fields and formats for pin/form.
+ *
+ * ## VALIDATE_PIN_FORM_DATA
+ *
+ * - [IMPL-DOM_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements validatePinFormData(formData or pin) behavior for IMPL-DOM_UTILITIES.
+ * - Contract:
+ *   - INPUT: selector (waitForElement); tag and attrs (createElement); form data (createPinFromFormData / validatePinFormData)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: element or null (waitForElement); element (createElement); pin object or validation result | { error: OperationFailed }
+ *   - POST:
+ *     - success => block outputs match OUTPUT success shape
+ *     - error OperationFailed => no silent partial commit beyond documented best-effort
+ *   - FAILURE_MODES: OperationFailed
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: VALIDATE_PIN_FORM_DATA
+ *   - CHECK required fields and formats
+ *   - RETURN valid boolean or validation errors
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-DOM_UTILITIES ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-TEXT_UTILITIES ===
+ * [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] — truncate, normalizeText, escapeHtml for UI and user input. Contract: string and optional maxLen; truncated/normalized/escaped string.
+ *
+ * ## TRUNCATE
+ *
+ * - [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements truncate(str, maxLen) behavior for IMPL-TEXT_UTILITIES.
+ * - Contract:
+ *   - INPUT: string and optional max length (truncate); string (normalizeText, escapeHtml)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: string (truncated, normalized, or HTML-escaped)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: ellipsis string (e.g. "…")
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: TRUNCATE
+ *   - IF str.length <= maxLen RETURN str
+ *   - RETURN str.slice(0, maxLen) + ellipsis
+ *   - How (sub-block): Trim and collapse whitespace; normalize Unicode.
+ *
+ * ## NORMALIZE_TEXT
+ *
+ * - [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements normalizeText(str) behavior for IMPL-TEXT_UTILITIES.
+ * - Contract:
+ *   - INPUT: string and optional max length (truncate); string (normalizeText, escapeHtml)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: string (truncated, normalized, or HTML-escaped)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: ellipsis string (e.g. "…")
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: NORMALIZE_TEXT
+ *   - NORMALIZE whitespace and Unicode (e.g. trim, collapse spaces) for display or comparison
+ *   - RETURN normalized string
+ *   - How (sub-block): Encode <, >, &, " for safe textContent/attribute use.
+ *
+ * ## ESCAPE_HTML
+ *
+ * - [IMPL-TEXT_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements escapeHtml(str) behavior for IMPL-TEXT_UTILITIES.
+ * - Contract:
+ *   - INPUT: string and optional max length (truncate); string (normalizeText, escapeHtml)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: string (truncated, normalized, or HTML-escaped)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: ellipsis string (e.g. "…")
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: ESCAPE_HTML
+ *   - ENCODE characters that are significant in HTML (e.g. <, >, &, ") so string is safe for textContent or attribute use
+ *   - RETURN encoded string
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-TEXT_UTILITIES ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-TIME_ASYNC_UTILITIES ===
+ * [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] — delay (Promise), formatTimestamp, getRelativeTime for API/UI. Contract: ms or timestamp in; Promise or formatted/relative string out.
+ *
+ * ## DELAY
+ *
+ * - [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements delay(ms) behavior for IMPL-TIME_ASYNC_UTILITIES.
+ * - Contract:
+ *   - INPUT: milliseconds (delay); timestamp (formatTimestamp, getRelativeTime)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: Promise that resolves after ms (delay); formatted date string (formatTimestamp); relative time string (getRelativeTime)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: current time for relative calculation
+ *   - EFFECTS: Async
+ *   - TERMINATION: total
+ * - PROCEDURE: DELAY
+ *   - RETURN new Promise such that resolve() is called after ms (e.g. setTimeout(resolve, ms))
+ *   - How (sub-block): Convert to locale date/time string.
+ *
+ * ## FORMAT_TIMESTAMP
+ *
+ * - [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements formatTimestamp(ts) behavior for IMPL-TIME_ASYNC_UTILITIES.
+ * - Contract:
+ *   - INPUT: milliseconds (delay); timestamp (formatTimestamp, getRelativeTime)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: Promise that resolves after ms (delay); formatted date string (formatTimestamp); relative time string (getRelativeTime)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: current time for relative calculation
+ *   - EFFECTS: Async
+ *   - TERMINATION: total
+ * - PROCEDURE: FORMAT_TIMESTAMP
+ *   - CONVERT timestamp to display format (e.g. locale date/time string)
+ *   - RETURN formatted string
+ *   - How (sub-block): Return "X s/m/h/d ago" from delta.
+ *
+ * ## GET_RELATIVE_TIME
+ *
+ * - [IMPL-TIME_ASYNC_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements getRelativeTime(ts) behavior for IMPL-TIME_ASYNC_UTILITIES.
+ * - Contract:
+ *   - INPUT: milliseconds (delay); timestamp (formatTimestamp, getRelativeTime)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: Promise that resolves after ms (delay); formatted date string (formatTimestamp); relative time string (getRelativeTime)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: current time for relative calculation
+ *   - EFFECTS: Async
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_RELATIVE_TIME
+ *   - delta = now - ts
+ *   - IF delta in seconds/minutes/hours/days THEN RETURN "X s/m/h/d ago" (or similar)
+ *   - RETURN human-readable relative string
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-TIME_ASYNC_UTILITIES ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-URL_UTILITIES ===
+ * [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] — processUrl (strip hash), isValidUrl, getDomain for bookmark management. Contract: url string in; normalized url or boolean or domain out.
+ *
+ * ## PROCESS_URL
+ *
+ * - [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements processUrl(url) behavior for IMPL-URL_UTILITIES.
+ * - Contract:
+ *   - INPUT: url (string)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: normalized url (processUrl), boolean (isValidUrl), domain string (getDomain)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: pure functions in same file as arrayUtils, objectUtils, textUtils
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: PROCESS_URL
+ *   - IF url empty or invalid: RETURN url or default
+ *   - OPTIONALLY strip hash, trailing slash, normalize scheme
+ *   - RETURN normalized url string
+ *   - How (sub-block): Parse with URL constructor or regex; return true if valid.
+ *
+ * ## IS_VALID_URL
+ *
+ * - [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements isValidUrl(url) behavior for IMPL-URL_UTILITIES.
+ * - Contract:
+ *   - INPUT: url (string)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: normalized url (processUrl), boolean (isValidUrl), domain string (getDomain)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: pure functions in same file as arrayUtils, objectUtils, textUtils
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: IS_VALID_URL
+ *   - TRY parse url with URL constructor (or regex)
+ *   - RETURN true if valid else false
+ *   - How (sub-block): Parse and return hostname or host.
+ *
+ * ## GET_DOMAIN
+ *
+ * - [IMPL-URL_UTILITIES] [ARCH-SHARED_UTILITIES] [REQ-SHARED_UTILITIES] How: Implements getDomain(url) behavior for IMPL-URL_UTILITIES.
+ * - Contract:
+ *   - INPUT: url (string)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: normalized url (processUrl), boolean (isValidUrl), domain string (getDomain)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: pure functions in same file as arrayUtils, objectUtils, textUtils
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: GET_DOMAIN
+ *   - parsed = parse url
+ *   - RETURN parsed.hostname or parsed.host or ""
+ *
+ * === END IMPL-FULL-BLOCK: IMPL-URL_UTILITIES ===
+ */
 // [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER]
 // Chrome-first browser API re-export from safari-shim.js (historical filename; browser API shim).
 // Prefer import { browser } from './utils' (or safari-shim) for Promise-friendly messaging.

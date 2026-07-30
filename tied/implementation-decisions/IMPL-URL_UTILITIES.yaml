@@ -3,7 +3,6 @@ IMPL-URL_UTILITIES:
     files:
       - path: "src/shared/utils.js"
         description: "urlUtils"
-    functions: []
   cross_references:
     - "ARCH-SHARED_UTILITIES"
     - "REQ-SHARED_UTILITIES"
@@ -21,8 +20,8 @@ IMPL-URL_UTILITIES:
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Full-block three-way sync"
   name: "URL Utilities"
   rationale:
     benefits:
@@ -47,4 +46,5 @@ IMPL-URL_UTILITIES:
     requirements:
       - "REQ-SHARED_UTILITIES"
     test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: URL helpers exercised indirectly by storage and content."
-    tests: []
+    tests:
+      - "tests/unit/shared-utils.test.js"

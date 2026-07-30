@@ -5,8 +5,8 @@
 
 ## Deferred for future CITDP
 
-1. **§3a literal block-lead copy into all tests/code**  
-   This corpus pass upgrades IMPL sidecars only. Propagating verbatim block leads into every matching test and production locus is a follow-up under `[PROC-IMPL_PSEUDOCODE_TOKENS]`.
+1. **§3a literal block-lead / full-block copy into all tests/code** — **DONE** (2026-07-29)  
+   Follow-up completed in `tied/working/IMPL_CODE_TEST_SYNC_20260729210000-plan.md` (full-block mode).
 
 2. **Wire Side Panel Browser Bookmarks through BookmarkRouter**  
    Dual path (direct `chrome.bookmarks` vs Store B) remains documented; unification is product/architecture work.

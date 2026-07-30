@@ -2,12 +2,11 @@ IMPL-NATIVE_HOST_INSTALLER:
   code_locations:
     files:
       - path: "native_host/install.sh"
-        description: "macOS/Linux installer"
+        description: "POSIX installer"
       - path: "native_host/install.ps1"
         description: "Windows installer"
-      - path: "native_host/com.hoverboard.native_host.json.template"
-        description: "Manifest template"
-    functions: []
+      - path: "src/features/storage/native-host-file-bookmark-adapter.js"
+        description: "Adapter locus carrying full-block marker"
   cross_references:
     - "ARCH-NATIVE_HOST"
     - "REQ-NATIVE_HOST_WRAPPER"
@@ -22,8 +21,8 @@ IMPL-NATIVE_HOST_INSTALLER:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-29"
+      reason: "Full-block three-way sync"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -51,4 +50,5 @@ IMPL-NATIVE_HOST_INSTALLER:
     requirements:
       - "REQ-NATIVE_HOST_WRAPPER"
     test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: native host installer and platform setup."
-    tests: []
+    tests:
+      - "tests/unit/native-host-installer.test.js"

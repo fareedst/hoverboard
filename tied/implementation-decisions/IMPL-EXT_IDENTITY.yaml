@@ -1,7 +1,10 @@
 IMPL-EXT_IDENTITY:
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: "src/core/service-worker.js"
+        description: "Extension SW entry"
+      - path: "src/ui/index.js"
+        description: "UI entry"
   cross_references:
     - "ARCH-EXT_IDENTITY"
     - "REQ-EXTENSION_IDENTITY"
@@ -16,7 +19,7 @@ IMPL-EXT_IDENTITY:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync"
   name: "Extension Identity"
   rationale:
     why: "Extension identity implementation"
@@ -32,4 +35,5 @@ IMPL-EXT_IDENTITY:
       - "IMPL-EXT_IDENTITY"
     requirements:
       - "REQ-EXTENSION_IDENTITY"
-    tests: []
+    tests:
+      - "tests/unit/service-worker-messaging-routing.test.js"

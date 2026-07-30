@@ -1,8 +1,106 @@
 /**
- * [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] Badge refresh on overlay/popup changes.
- * Unit tests for service worker refreshing the badge after saveTag, deleteTag, and saveBookmark.
+ * === IMPL-FULL-BLOCK: IMPL-BADGE_REFRESH ===
+ * [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] — Service worker refreshes badge after saveTag, deleteTag, saveBookmark so icon reflects tag count and flags.
+ * 
+ * ## MAIN
+ * 
+ * - [IMPL-BADGE_REFRESH] [ARCH-BADGE] [REQ-BADGE_INDICATORS] How: Logical block for IMPL-BADGE_REFRESH.
+ * - Contract:
+ *   - INPUT: message result (after processMessage) with type saveTag | deleteTag | saveBookmark
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: badge updated for the affected tab (icon label and optional private/toread indicators)
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: handleMessage in service worker; updateBadgeForTab(tab)
+ *   - EFFECTS: IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): Resolve tab (sender.tab or query active for saveBookmark); call updateBadgeForTab(tab).
+ *   - 1. AFTER processMessage(message) succeeds:
+ *   - 2.   IF message.type IN [saveTag, deleteTag, saveBookmark]:
+ *   - 3.     tab = sender.tab IF present
+ *   - 4.     IF no tab AND message.type = saveBookmark: tab = query active tab
+ *   - 5.     IF tab: updateBadgeForTab(tab)
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-BADGE_REFRESH ===
  */
-
+/**
+ * === IMPL-FULL-BLOCK: IMPL-CROSS_BROWSER ===
+ * [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] — Chrome-first browser API shim; shared `browser` export for messaging and storage helpers. Contract: callers import { browser } from safari-shim (via utils); Promise-friendly messaging.
+ * 
+ * ## INITIALIZE_BROWSER_API
+ * 
+ * - [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] How: Implements initializeBrowserAPI() behavior for IMPL-CROSS_BROWSER.
+ * - Contract:
+ *   - INPUT: chrome (or future browser) extension APIs; caller operations (sendMessage, tabs, storage)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: unified `browser` object with Promise wrappers, retry, and storage helpers
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: src/shared/safari-shim.js; re-export from src/shared/utils.js
+ *   - EFFECTS: Async, Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: INITIALIZE_BROWSER_API
+ *   - IF chrome is defined: browser = chrome; RETURN
+ *   - IF window.browser (polyfill): browser = window.browser; RETURN
+ *   - browser = createMinimalBrowserAPI()
+ *   - How (sub-block): Wrap messaging/tabs with retries and Promise API for Chrome service worker and content scripts.
+ *   - 1. safariEnhancements (browser API shim):
+ *   - PROVIDE runtime.sendMessage / tabs.* with retry and Promise behavior
+ *   - PROVIDE storage helpers (quota monitoring, graceful degradation) for Chromium storage
+ *   - DO NOT attach Safari-only platform metadata on messages (Safari product deferred)
+ *   - How (sub-block): Reserved hooks for deferred multi-browser; Safari product not active.
+ * 
+ * ## PLATFORM_UTILS
+ * 
+ * - [IMPL-CROSS_BROWSER] [ARCH-CROSS_BROWSER] [REQ-CROSS_BROWSER] How: Implements platformUtils behavior for IMPL-CROSS_BROWSER.
+ * - Contract:
+ *   - INPUT: chrome (or future browser) extension APIs; caller operations (sendMessage, tabs, storage)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: unified `browser` object with Promise wrappers, retry, and storage helpers
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: src/shared/safari-shim.js; re-export from src/shared/utils.js
+ *   - EFFECTS: Async, Http, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: PLATFORM_UTILS
+ *   - isSafari(): RETURN false  # reserved; Safari App Extension deferred
+ *   - isChrome(): RETURN chrome is defined
+ *   - isFirefox(): RETURN browser.runtime.getBrowserInfo is a function
+ *   - getPlatform():
+ *   - IF isChrome(): RETURN "chrome"
+ *   - IF isFirefox(): RETURN "firefox"
+ *   - RETURN "unknown"
+ *   - How (sub-block): Call sites use shim export, not raw chrome only, for future expansion readiness.
+ *   - 1. ON service worker / content / message-handler import:
+ *   - USE browser from safari-shim (or utils re-export)
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-CROSS_BROWSER ===
+ */
+/**
+ * === IMPL-FULL-BLOCK: IMPL-MV3_MIGRATION ===
+ * [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] — How: keep store-compatible Manifest V3: service worker replaces background page; preserve messaging and APIs.
+ * 
+ * ## MV3_BACKGROUND_RUNTIME
+ * 
+ * - [IMPL-MV3_MIGRATION] [ARCH-MV3_MIGRATION] [REQ-MANIFEST_V3_MIGRATION] How: service worker owns listeners; async message replies use return true / Promise patterns.
+ * - Contract:
+ *   - INPUT: extension lifecycle events; chrome.runtime / chrome.storage / chrome.action calls
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: service-worker-backed background behavior equivalent to prior MV2 background page contracts
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: manifest_version 3; src/core/service-worker.js; ARCH-SERVICE_WORKER lifecycle patterns
+ *   - EFFECTS: Async, IO
+ *   - TERMINATION: total
+ * - PROCEDURE: MV3_BACKGROUND_RUNTIME
+ *   - ON install/activate: init shared managers (config, tags memory, badge)
+ *   - ON message: DELEGATE to MessageHandler; KEEP channel alive until AWAIT completes
+ *   - ON alarm/idle as needed: wake worker for deferred work
+ *   - RETURN
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-MV3_MIGRATION ===
+ */
 import { jest } from '@jest/globals'
 
 const MESSAGE_TYPES = {

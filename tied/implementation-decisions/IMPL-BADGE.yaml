@@ -1,7 +1,8 @@
 IMPL-BADGE:
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: "src/core/badge-manager.js"
+        description: "BadgeManager UPDATE_BADGE_FOR_TAB"
   cross_references:
     - "ARCH-BADGE"
     - "REQ-BADGE_INDICATORS"
@@ -16,7 +17,7 @@ IMPL-BADGE:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync"
   name: "Badge"
   rationale:
     why: "Badge implementation"
@@ -32,4 +33,5 @@ IMPL-BADGE:
       - "IMPL-BADGE"
     requirements:
       - "REQ-BADGE_INDICATORS"
-    tests: []
+    tests:
+      - "tests/unit/badge-manager.test.js"

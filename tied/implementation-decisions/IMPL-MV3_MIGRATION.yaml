@@ -1,7 +1,8 @@
 IMPL-MV3_MIGRATION:
   code_locations:
-    files: []
-    functions: []
+    files:
+      - path: "src/core/service-worker.js"
+        description: "MV3 service worker"
   cross_references:
     - "ARCH-MV3_MIGRATION"
     - "REQ-MANIFEST_V3_MIGRATION"
@@ -16,7 +17,7 @@ IMPL-MV3_MIGRATION:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "IMPL corpus: replace thin-stub decision; sidecar SHAPE-003 uplift"
+      reason: "Full-block three-way sync"
   name: "MV3 Migration"
   rationale:
     why: "Manifest V3 migration"
@@ -32,4 +33,6 @@ IMPL-MV3_MIGRATION:
       - "IMPL-MV3_MIGRATION"
     requirements:
       - "REQ-MANIFEST_V3_MIGRATION"
-    tests: []
+    tests:
+      - "tests/unit/badge-refresh-service-worker.test.js"
+      - "tests/unit/service-worker-messaging-routing.test.js"

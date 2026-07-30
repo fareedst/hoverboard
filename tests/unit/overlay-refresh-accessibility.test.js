@@ -1,8 +1,74 @@
 /**
- * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_REFRESH_ACTION] [TEST-OVERLAY_REFRESH] Overlay Refresh Button Accessibility - [REQ-UI_INSPECTION] [IMPL-OVERLAY_CONTROLS] [IMPL-UI_TESTABILITY_HOOKS] [ARCH-OVERLAY_TESTABILITY]
- * Accessibility tests for the overlay refresh button (ARIA, keyboard, screen reader).
+ * === IMPL-FULL-BLOCK: IMPL-OVERLAY_CONTROLS ===
+ * [IMPL-OVERLAY_CONTROLS] [ARCH-OVERLAY_CONTROLS] [REQ-OVERLAY_CONTROL_LAYOUT] — Close and refresh buttons with fixed position, 24px min touch target, ARIA, theme vars. Contract: parent and theme and callback; control elements and styles.
+ * 
+ * ## CREATE_CLOSE_BUTTON
+ * 
+ * - Layout contract [ARCH-OVERLAY]/[ARCH-OVERLAY_CONTROLS]: Close at top/right 8/8 (px from edges). How: Implements createCloseButton() behavior for IMPL-OVERLAY_CONTROLS.
+ * - Contract:
+ *   - INPUT: parent element; theme CSS variables; callback (close/refresh)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: control elements with fixed position, min 24px touch target, ARIA, keyboard handlers
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: inline styles (position absolute); theme vars for colors; ARIA labels/roles
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: CREATE_CLOSE_BUTTON
+ *   - CREATE button; SET position top 8px right 8px, size (min 24px); SET aria-label
+ *   - APPLY theme vars; ATTACH click -> callback; ATTACH key (Escape)
+ *   - RETURN element
+ *   - How (sub-block): Create refresh button with position, size, ARIA, theme, click handler.
+ * 
+ * ## CREATE_REFRESH_BUTTON
+ * 
+ * - Layout contract [ARCH-OVERLAY]/[ARCH-OVERLAY_CONTROLS]: Refresh at top/right 8/40 (px from edges). How: Implements createRefreshButton() behavior for IMPL-OVERLAY_CONTROLS.
+ * - Contract:
+ *   - INPUT: parent element; theme CSS variables; callback (close/refresh)
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: control elements with fixed position, min 24px touch target, ARIA, keyboard handlers
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: inline styles (position absolute); theme vars for colors; ARIA labels/roles
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: CREATE_REFRESH_BUTTON
+ *   - CREATE button; SET position top 8px right 40px, size; SET aria-label
+ *   - APPLY theme vars; ATTACH click -> callback
+ *   - RETURN element
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-OVERLAY_CONTROLS ===
  */
-
+/**
+ * === IMPL-FULL-BLOCK: IMPL-UI_TESTABILITY_HOOKS ===
+ * [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] — setOnMessageProcessed, setOnAction, setOnStateChange so tests assert without DOM. Contract: callbacks set by tests; message/action/state trigger callbacks.
+ * 
+ * ## MAIN
+ * 
+ * - [IMPL-UI_TESTABILITY_HOOKS] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-MODULE_VALIDATION] How: Logical block for IMPL-UI_TESTABILITY_HOOKS.
+ * - Contract:
+ *   - INPUT: optional callback fn (set by tests); message (processMessage); popup/overlay action or state change
+ *   - PRE: caller supplies valid inputs for this block; dependencies wired
+ *   - OUTPUT: test can assert on message payload, action id, state without DOM
+ *   - POST:
+ *     - success => block outputs match OUTPUT shape
+ *   - DATA: MessageHandler._onMessageProcessed; PopupController._onAction, _onStateChange; OverlayManager._onStateChange
+ *   - DATA_TRANSITION: mutable DATA updated per PROCEDURE steps on success paths
+ *   - EFFECTS: IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: MAIN
+ *   - How (sub-block): After processMessage invoke callback with msg/result.
+ *   - 1. MessageHandler: AFTER processMessage(msg): IF _onMessageProcessed: CALL with msg/result
+ *   - How (sub-block): On action/state change invoke callbacks.
+ *   - 2. PopupController: ON action: IF _onAction: CALL with actionId; ON state change: IF _onStateChange: CALL with state
+ *   - 3. OverlayManager: ON visibility/content change: IF _onStateChange: CALL with { visible, contentSnapshot }
+ *   - How (sub-block): Set callbacks, trigger, assert args.
+ *   - 4. Tests: SET callbacks; TRIGGER message/action; ASSERT callback invoked with expected args
+ * 
+ * === END IMPL-FULL-BLOCK: IMPL-UI_TESTABILITY_HOOKS ===
+ */
 import { OverlayManager } from '../../src/features/content/overlay-manager.js'
 const { createMockDocument } = require('../utils/mock-dom')
 
