@@ -68,17 +68,12 @@ IMPL-SIDE_PANEL_TABS:
   essence_pseudocode_path: "implementation-decisions/IMPL-SIDE_PANEL_TABS-pseudocode.md"
   implementation_approach:
     details:
-      - "manifest side_panel.default_path → side-panel.html"
-      - "On browser tab change (onActivated/onUpdated): if controller exists always call refreshPopupData() so currentPin is for new tab; then refresh By Tag tab when visible via refreshTagsTreeTabIfVisible (setSelectedTagsFromCurrentBookmark)"
-      - "Recommended E2E (IMPL-SIDE_PANEL_TABS): after loading side panel, assert header row has left text matching Hoverboard v* and right text matching YYYY-MM-DD HH:mm."
-      - "S08 testability: bindWindowFocusRecentTagsRefresh — full two-window recent-tags sync (REQ-RECENT_TAGS_SYSTEM) is e2e_only for end-to-end proof; e2e_only_reason: requires live Chromium extension host with chrome.sidePanel + chrome.windows.onFocusChanged across multiple browser windows and real SW messaging; unit/integration cover guards and loadRecentTags via mocks (tests/unit/side-panel-tabs.test.js)."
-      - "S10 Phase G: tests/integration/browser-tabs-tab-composition.integration.test.js exercises runInitialTabInit(TAB_BROWSER_TABS) and switchTabForTest(TAB_BROWSER_TABS) → initBrowserTabsTab (mocked); resetBrowserTabsTabInitedForTest clears one-shot guard."
-      - "S10 Phase G: tests/integration/window-focus-recent-tags-composition.integration.test.js exercises bindWindowFocusRecentTagsRefresh wiring (onFocusChanged → getCurrent → shouldInvokeLoadRecentTagsOnWindowFocusSync → loadRecentTags) without UI; setActiveTabForTest drives activeTab for guard branches."
-      - "S12 REQ-MODULE_VALIDATION: (1) side-panel-tab-state.js pure predicate shouldInvokeLoadRecentTagsOnWindowFocusSync — unit tests in tests/unit/side-panel-tabs.test.js; (2) side-panel.js bindWindowFocusRecentTagsRefresh wiring — composition tests in tests/integration/window-focus-recent-tags-composition.integration.test.js; (3) browser Tabs tab init binding — tests/integration/browser-tabs-tab-composition.integration.test.js; (4) This Page Recent Tags mount in extension document — Playwright tests/playwright/extension-side-panel-recent-tags-e2e.spec.js; cross-window focus refresh remains e2e_only per phase_h_window_focus_recent_tags_cross_window."
-      - "Side panel header: single line with left \"Hoverboard v{version}\" (or \"Hoverboard\" if no version) and right build time UTC (YYYY-MM-DD HH:mm); elements #side-panel-title-version (left) and #side-panel-version (right); flex row, space-between."
-      - "Storage key e.g. hoverboard_sidepanel_active_tab; values \"bookmark\" | \"tagsTree\" | \"browserTabs\""
-      - "Tab buttons: data-tab=\"bookmark\", data-tab=\"tagsTree\", data-tab=\"browserTabs\"; click handler switches panel, saves to storage, runs init for that tab if not yet inited"
-      - "This Page init runs once (guard); By Tag init can re-run on each show or once"
+      - "BIND_TAB_CHANGE_REFRESH: setRefreshAttribution(tabChange) then refreshPopupData; non-scriptable tabs skip chrome.scripting via CLASSIFY_SCRIPT_INJECTION_URL; composition tests/integration/side-panel-tab-change-injection.integration.test.js."
+      - "No Web Store E2E: platform forbids scripting that target (unit/composition-only classification)."
+      - "S08 testability: bindWindowFocusRecentTagsRefresh — full two-window recent-tags sync (REQ-RECENT_TAGS_SYSTEM) is e2e_only for end-to-end proof; e2e_only_reason: requires live Chromium extension host with multi-window focus."
+      - "S12 REQ-MODULE_VALIDATION: side-panel-tab-state.js pure predicates unit-tested; bindWindowFocusRecentTagsRefresh composition-tested."
+      - "Storage key hoverboard_sidepanel_active_tab; values bookmark | tagsTree | browserTabs"
+      - "Tab buttons data-tab bookmark|tagsTree|browserTabs; click switches panel, persists, lazy-inits"
     summary: "side-panel.html: tab bar; panels #bookmarkPanel, #tagsTreePanel, #browserTabsPanel; persist hoverboard_sidepanel_active_tab; lazy init This Page / By Tag / Tabs; bindTabChangeRefresh and bindWindowFocusRecentTagsRefresh (REQ-RECENT_TAGS_SYSTEM) when Bookmark tab active; composed_with IMPL-SIDE_PANEL_BOOKMARK, IMPL-SIDE_PANEL_TAGS_TREE, IMPL-SIDE_PANEL_BROWSER_TABS."
   metadata:
     created:
@@ -86,13 +81,17 @@ IMPL-SIDE_PANEL_TABS:
       date: "2026-02-25"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-30"
+      reason: "BIND_TAB_CHANGE_REFRESH + composition coverage; no Web Store E2E (platform constraint)"
   name: "Side Panel Tabs Implementation"
   phase_h_side_panel_recent_tags_extension_document:
     e2e_only_reason: "This Page Recent Tags must be validated in a real chrome-extension:// side-panel.html document — scoped UIManager resolves data-popup-ref under #bookmarkPanel and paints after PopupController.loadInitialData with live chrome.runtime messaging to the service worker. Jest and Phase G composition tests mock runtime/controller and do not load the bundled extension page in Chromium."
     playwright_spec: "tests/playwright/extension-side-panel-recent-tags-e2e.spec.js"
     testability: "e2e_only"
+  phase_h_tab_change_nonscriptable_inject:
+    composition_spec: "tests/integration/side-panel-tab-change-injection.integration.test.js"
+    e2e_only_reason: "Chrome forbids scripting the extensions gallery / Web Store; a real Web Store E2E cannot exercise inject skip. Unit classifier + composition bindTabChangeRefresh against PopupController prechecks cover the path."
+    testability: "unit_and_composition"
   phase_h_window_focus_recent_tags_cross_window:
     e2e_only_reason: "REQ-RECENT_TAGS_SYSTEM cross-window refresh depends on chrome.windows.onFocusChanged when focus moves between separate browser windows; the Playwright extension fixture uses one persistent Chromium window (extra pages are tabs, not OS-level multi-window focus parity). bindWindowFocusRecentTagsRefresh wiring and sync guards are covered by tests/integration/window-focus-recent-tags-composition.integration.test.js."
     testability: "e2e_only"
@@ -126,8 +125,10 @@ IMPL-SIDE_PANEL_TABS:
       - "REQ-RECENT_TAGS_SYSTEM"
       - "REQ-SIDE_PANEL_BROWSER_TABS"
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     tests:
       - "tests/integration/browser-tabs-tab-composition.integration.test.js"
+      - "tests/integration/side-panel-tab-change-injection.integration.test.js"
       - "tests/integration/window-focus-recent-tags-composition.integration.test.js"
       - "tests/playwright/extension-messaging.spec.js"
       - "tests/playwright/extension-side-panel-recent-tags-e2e.spec.js"

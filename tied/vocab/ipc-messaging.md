@@ -151,6 +151,9 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 - **sendToTab vs sendMessage** — Overlay/toggle often targets the active tab; CRUD goes to SW.
 - **runtime validation** — Zod (or equivalent) at processMessage for critical types.
 - **broadcast sync** — `BOOKMARK_UPDATED` / `TAG_UPDATED` keep popup, overlay, and side panel aligned.
+- **observer listener** — A `runtime.onMessage` listener that only watches broadcasts (e.g. `BOOKMARK_UPDATED` in popup and side panel) and never answers a message. Must be declared **synchronous** and return `undefined`: from Chrome 144 a listener that returns a promise is treated as answering, and an `async` listener with no return resolves `undefined`, which Chrome delivers to the sender as `null`.
+- **response-channel race** — Every extension context receives each `runtime.sendMessage`; the first context to answer wins. An observer listener that answers by accident beats the SW reply, so senders see `null` instead of the handler result.
+- **missing response** — A `null` or `undefined` reply where a handler result was expected. Callers unwrap with `unwrapMessageResponse` and record a `messageResponseMissing` inspector action rather than dereferencing `response.success`.
 
 ---
 
@@ -162,6 +165,7 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 | Recent bookmarks handler | `handleGetRecentBookmarks` | [IMPL-MESSAGE_HANDLING](../implementation-decisions/IMPL-MESSAGE_HANDLING.yaml) |
 | Action contract map | `POPUP_ACTION_TO_MESSAGE` | [IMPL-UI_ACTION_CONTRACT](../implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml) |
 | Envelope validate | `validateMessageEnvelope` / `validateMessageData` | [IMPL-RUNTIME_VALIDATION](../implementation-decisions/IMPL-RUNTIME_VALIDATION.yaml) |
+| Missing response unwrap | `unwrapMessageResponse` / `isMissingMessageResponse` / `readMessageResponse` | [IMPL-MESSAGE_HANDLING](../implementation-decisions/IMPL-MESSAGE_HANDLING.yaml) |
 
 ---
 
@@ -174,10 +178,14 @@ Handled in content-main (names as strings): `TOGGLE_HOVER`, `HIDE_OVERLAY`, `REF
 | envelope | Preferred terms |
 | MESSAGE_TYPES | Preferred terms |
 | MessageHandler | Named concepts |
+| missing response | Named concepts |
 | NATIVE_PING | File / native |
+| observer listener | Named concepts |
 | OPEN_SIDE_PANEL | Catalog |
 | POPUP_ACTION_TO_MESSAGE | Preferred terms |
 | processMessage | Pseudo-code block names |
 | READ_FILE_BOOKMARKS | File / native |
+| response-channel race | Named concepts |
+| unwrapMessageResponse | Pseudo-code block names |
 | service worker (SW) | Preferred terms |
 | TAG_UPDATED | Catalog |

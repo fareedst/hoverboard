@@ -16,7 +16,7 @@ const debugLog = (message, data = null) => {
 }
 
 export class VisibilityControls {
-  constructor(document, onSettingsChange) {
+  constructor (document, onSettingsChange) {
     this.document = document
     this.onSettingsChange = onSettingsChange || (() => {})
     this.logger = new Logger('VisibilityControls')
@@ -38,7 +38,7 @@ export class VisibilityControls {
    * Create the visibility controls UI
    * @returns {HTMLElement} Controls container element
    */
-  createControls() {
+  createControls () {
     const container = this.document.createElement('div')
     container.className = 'hoverboard-visibility-controls'
     container.innerHTML = this.getControlsHTML()
@@ -55,7 +55,7 @@ export class VisibilityControls {
    * Generate HTML for the controls
    * @returns {string} HTML string
    */
-  getControlsHTML() {
+  getControlsHTML () {
     return `
       <div class="visibility-controls-header">
         <span class="controls-title">Display</span>
@@ -102,7 +102,7 @@ export class VisibilityControls {
   /**
    * Attach event listeners to control elements
    */
-  attachEventListeners() {
+  attachEventListeners () {
     if (!this.controlsElement) return
 
     // Toggle controls panel
@@ -135,7 +135,7 @@ export class VisibilityControls {
   /**
    * Toggle the controls panel visibility
    */
-  toggleControlsPanel() {
+  toggleControlsPanel () {
     this.isCollapsed = !this.isCollapsed
     const panel = this.controlsElement?.querySelector('.visibility-controls-panel')
     const toggleIcon = this.controlsElement?.querySelector('.toggle-icon')
@@ -154,7 +154,7 @@ export class VisibilityControls {
   /**
    * Toggle between light and dark themes
    */
-  toggleTheme() {
+  toggleTheme () {
     this.settings.textTheme = this.settings.textTheme === 'light-on-dark'
       ? 'dark-on-light'
       : 'light-on-dark'
@@ -169,7 +169,7 @@ export class VisibilityControls {
    * Set transparency enabled state
    * @param {boolean} enabled
    */
-  setTransparencyEnabled(enabled) {
+  setTransparencyEnabled (enabled) {
     this.settings.transparencyEnabled = enabled
     this.updateOpacityControlState()
     this.notifySettingsChange()
@@ -181,7 +181,7 @@ export class VisibilityControls {
    * Set background opacity value
    * @param {number} opacity - Opacity value 0-100
    */
-  setBackgroundOpacity(opacity) {
+  setBackgroundOpacity (opacity) {
     this.settings.backgroundOpacity = Math.max(10, Math.min(100, opacity))
     this.updateOpacityDisplay()
     this.notifySettingsChange()
@@ -192,7 +192,7 @@ export class VisibilityControls {
   /**
    * Update theme display elements
    */
-  updateThemeDisplay() {
+  updateThemeDisplay () {
     const themeIcon = this.controlsElement?.querySelector('.theme-icon')
     const themeText = this.controlsElement?.querySelector('.theme-text')
 
@@ -206,7 +206,7 @@ export class VisibilityControls {
   /**
    * Update opacity control state and display
    */
-  updateOpacityControlState() {
+  updateOpacityControlState () {
     const opacityGroup = this.controlsElement?.querySelector('.opacity-group')
     const opacitySlider = this.controlsElement?.querySelector('.opacity-slider')
 
@@ -222,7 +222,7 @@ export class VisibilityControls {
   /**
    * Update opacity value display
    */
-  updateOpacityDisplay() {
+  updateOpacityDisplay () {
     const opacityValue = this.controlsElement?.querySelector('.opacity-value')
     const opacitySlider = this.controlsElement?.querySelector('.opacity-slider')
 
@@ -238,7 +238,7 @@ export class VisibilityControls {
   /**
    * Update all control states to match current settings
    */
-  updateControlsState() {
+  updateControlsState () {
     this.updateThemeDisplay()
     this.updateOpacityControlState()
     this.updateOpacityDisplay()
@@ -253,7 +253,7 @@ export class VisibilityControls {
    * Get current visibility settings
    * @returns {Object} Current settings object
    */
-  getSettings() {
+  getSettings () {
     return { ...this.settings }
   }
 
@@ -261,7 +261,7 @@ export class VisibilityControls {
    * Set visibility settings
    * @param {Object} newSettings - Settings to apply
    */
-  setSettings(newSettings) {
+  setSettings (newSettings) {
     this.settings = { ...this.settings, ...newSettings }
     this.updateControlsState()
     debugLog('Settings updated', this.settings)
@@ -270,7 +270,7 @@ export class VisibilityControls {
   /**
    * Notify parent component of settings change
    */
-  notifySettingsChange() {
+  notifySettingsChange () {
     this.onSettingsChange(this.getSettings())
   }
 
@@ -278,7 +278,7 @@ export class VisibilityControls {
    * Get CSS styles for the controls
    * @returns {string} CSS styles
    */
-  getControlsCSS() {
+  getControlsCSS () {
     return `
       .hoverboard-visibility-controls {
         position: absolute;
@@ -468,7 +468,7 @@ export class VisibilityControls {
   /**
    * Destroy the controls and clean up
    */
-  destroy() {
+  destroy () {
     if (this.controlsElement) {
       this.controlsElement.remove()
       this.controlsElement = null

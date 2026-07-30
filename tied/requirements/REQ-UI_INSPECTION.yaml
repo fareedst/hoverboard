@@ -1,9 +1,16 @@
 REQ-UI_INSPECTION:
+  acceptance_criteria:
+    - criterion: "Expected non-scriptable inject skips are observable as injectionOutcome actions (phase, reason, trigger)"
+    - criterion: "Missing runtime replies are observable as messageResponseMissing actions (type) instead of uncaught TypeErrors"
+    - criterion: "When enabled, recent messages and actions are available via getLastMessages/getLastActions"
   category: "Non-Functional"
   metadata:
     author: "AI Agent"
     created: "2026-02-17"
-    last_updated: "2026-02-25"
+    last_updated:
+      author: "AI Agent"
+      date: "2026-07-30"
+      reason: "Observable injectionOutcome and messageResponseMissing actions"
     reason: "Add messaging protocol test traceability (ARCH-MESSAGE_HANDLING, IMPL-MESSAGE_HANDLING)"
   name: "UI Inspection and Testability"
   priority: "P1"
@@ -34,24 +41,19 @@ REQ-UI_INSPECTION:
   status: "Implemented"
   traceability:
     architecture:
-      - "ARCH-MESSAGE_HANDLING"
       - "ARCH-UI_TESTABILITY"
     code_annotations:
-      - "ARCH-UI_TESTABILITY"
-      - "IMPL-UI_ACTION_CONTRACT"
-      - "IMPL-UI_INSPECTOR"
       - "REQ-UI_INSPECTION"
     implementation:
-      - "IMPL-MESSAGE_HANDLING"
-      - "IMPL-PLAYWRIGHT_E2E_EXTENSION"
-      - "IMPL-SIDE_PANEL_SNAPSHOT"
-      - "IMPL-UI_ACTION_CONTRACT"
       - "IMPL-UI_INSPECTOR"
     tests:
       - "tests/playwright/extension-messaging.spec.js"
+      - "tests/unit/content-message-response-missing.test.js"
       - "tests/unit/content-messaging-contracts.test.js"
       - "tests/unit/message-handler-contracts.test.js"
+      - "tests/unit/message-response-unwrap.test.js"
       - "tests/unit/message-type-drift.test.js"
+      - "tests/unit/popup-injection-outcome.test.js"
       - "tests/unit/popup-message-contract.test.js"
       - "tests/unit/service-worker-messaging-routing.test.js"
   validation_criteria:

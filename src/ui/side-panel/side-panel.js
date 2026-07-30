@@ -342,7 +342,7 @@
  *
  * ## SWITCH_TAB
  *
- * - [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE] How: onActivated/onUpdated — refreshPopupData updates controller.currentPin; By Tag visible → refreshTagsTreeTabIfVisible / setSelectedTagsFromCurrentBookmark. How: persist activeTab; showPanel; tagsTree branch passes currentBookmarkTags / setSelectedTagsFromCurrentBookmark; returning to bookmark when already inited → refreshPopupData.
+ * - [IMPL-SIDE_PANEL_TABS] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [IMPL-SIDE_PANEL_TAGS_TREE] How: persist activeTab; showPanel; tagsTree branch passes currentBookmarkTags / setSelectedTagsFromCurrentBookmark; returning to bookmark when already inited → refreshPopupData. Tab-change refresh contract is BIND_TAB_CHANGE_REFRESH (below).
  * - Contract:
  *   - INPUT: panel page load; user click on tab ("This Page", "By Tag", or "Tabs")
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
@@ -362,6 +362,27 @@
  *   - ELSE IF tabId === "browserTabs": initTabIfNeeded("browserTabs")
  *   - ELSE: initTabIfNeeded(tabId)
  *   - IF tabId === "bookmark" AND wasBookmarkInited AND popupComponents.controller: popupComponents.controller.refreshPopupData()
+ *
+ * ## BIND_TAB_CHANGE_REFRESH
+ *
+ * - [IMPL-SIDE_PANEL_TABS] [IMPL-POPUP_SESSION] [ARCH-SIDE_PANEL_TABS] [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] How: onActivated/onUpdated → setRefreshAttribution(trigger=tabChange, surface=side_panel) then refreshPopupData. Bookmark path always refreshes; inject/suggested-tags use CLASSIFY_SCRIPT_INJECTION_URL so gallery/restricted tabs never call chrome.scripting. Exported bindTabChangeRefresh for composition tests (mirror bindWindowFocusRecentTagsRefresh). Observable: ui-inspector injectionOutcome with trigger tabChange.
+ * - Contract:
+ *   - INPUT: chrome.tabs.onActivated / onUpdated events; PopupController instance
+ *   - PRE: controller and tabs APIs available when binding; refresh attribution helpers wired
+ *   - OUTPUT: void; This Page refresh scheduled; injectionOutcome when inject skipped
+ *   - POST:
+ *     - success => refreshPopupData invoked with tabChange attribution
+ *     - non-scriptable active tab => no chrome.scripting.executeScript / insertCSS; bookmark fields still update
+ *   - FAILURE_MODES: RefreshFailed (controller path; logged)
+ *   - DATA: controller._refreshTrigger ("tabChange"); controller._refreshSurface ("side_panel")
+ *   - DATA_TRANSITION: on tab change, currentPin/tags refresh; suggested tags empty on expected skip
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: BIND_TAB_CHANGE_REFRESH
+ *   - ON tabs.onActivated OR (tabs.onUpdated status complete):
+ *   -   controller.setRefreshAttribution({ trigger: "tabChange", surface: "side_panel" })
+ *   -   AWAIT controller.refreshPopupData()
+ *   -   # inject prechecks inside loadSuggestedTags / updateOverlayState / injectContentScript
  *
  * ## SHOW_PANEL
  *
@@ -607,6 +628,7 @@ import { initBrowserBookmarksTab } from './browser-bookmarks-panel.js'
 import { initUsageTab } from './usage-panel.js'
 import { init, popup } from '../index.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
+import { recordAction } from '../../shared/ui-inspector.js'
 import { ConfigManager } from '../../config/config-manager.js'
 
 const bookmarkPanelEl = document.getElementById('bookmarkPanel')
@@ -845,24 +867,28 @@ async function loadPersistedTab () {
 /**
  * [REQ-SIDE_PANEL_POPUP_EQUIVALENT] [ARCH-SIDE_PANEL_TABS] [IMPL-SIDE_PANEL_TABS]
  * Register tab listeners so both tabs refresh for current tab when active browser tab changes or completes. Always refresh controller (refreshPopupData) when panel has controller; then refresh Bookmark tab UI when visible, and Tags tree tab (tag selector and tree) when visible.
+ * Non-scriptable active tabs still refresh bookmark path; inject/suggested-tags skip via classifyScriptInjectionUrl.
+ * Exported for Phase G composition tests (mirror bindWindowFocusRecentTagsRefresh).
  */
-async function onTabChangeRefresh () {
+async function onTabChangeRefresh (source = 'onActivated') {
   if (!popupComponents?.controller) return
-  await popupComponents.controller.refreshPopupData()
+  const c = popupComponents.controller
+  recordAction('tabChangeRefresh', { source, tabId: c.currentTab?.id }, 'side-panel')
+  await c.refreshPopupData({ trigger: 'tabChange', surface: 'side-panel' })
   // Bookmark tab UI already updated by refreshPopupData(); refresh Tags tree when visible.
   refreshTagsTreeTabIfVisible()
 }
 
-function bindTabChangeRefresh () {
+export function bindTabChangeRefresh () {
   const tabsApi = typeof chrome !== 'undefined' && chrome.tabs ? chrome.tabs : null
-  if (!tabsApi) return
+  if (!tabsApi?.onActivated?.addListener || !tabsApi?.onUpdated?.addListener) return
   tabsApi.onActivated.addListener(() => {
-    onTabChangeRefresh()
+    onTabChangeRefresh('onActivated')
   })
   tabsApi.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status !== 'complete' || !tab?.url) return
     tabsApi.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs?.[0]?.id === tabId) onTabChangeRefresh()
+      if (tabs?.[0]?.id === tabId) onTabChangeRefresh('onUpdated')
     })
   })
 }

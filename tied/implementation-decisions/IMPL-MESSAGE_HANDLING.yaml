@@ -5,7 +5,20 @@ IMPL-MESSAGE_HANDLING:
         description: "Message service"
       - path: "src/core/message-handler.js"
         description: "Message handler"
-    functions: []
+      - path: "src/shared/message-response.js"
+        description: "Null-tolerant reply unwrap (UNWRAP_MESSAGE_RESPONSE)"
+      - path: "src/features/content/content-main.js"
+        description: "readMessageResponse callers"
+    functions:
+      - name: "unwrapMessageResponse"
+        description: "Unwrap { success, data } or plain payload; missing reply -> null"
+        file: "src/shared/message-response.js"
+      - name: "readMessageResponse"
+        description: "Unwrap plus messageResponseMissing inspector action and debugWarn"
+        file: "src/shared/message-response.js"
+      - name: "isMissingMessageResponse"
+        description: "null/undefined missing reply predicate"
+        file: "src/shared/message-response.js"
   cross_references:
     - "ARCH-MESSAGE_HANDLING"
     - "ARCH-TAG_SYSTEM"
@@ -19,16 +32,17 @@ IMPL-MESSAGE_HANDLING:
       - "Error handling"
       - "Input validation"
       - "Messaging protocol tests validate SW routing, MessageHandler contracts, content/offscreen/popup contracts, MessageClient retry, and type drift (see traceability.tests and docs/architecture/extension-messaging-protocols.md)"
+      - "Observer listeners stay synchronous; senders unwrap replies via readMessageResponse and record messageResponseMissing"
       - "Standardized message types"
-    summary: "Message service with type validation, routing, error handling"
+    summary: "Message service with type validation, routing, error handling; senders tolerate a missing (null) reply from a response-channel race"
   metadata:
     created:
       author: "AI Agent"
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-30"
+      reason: "UNWRAP_MESSAGE_RESPONSE + content-main readMessageResponse coverage"
   name: "Message Handling System Implementation"
   rationale:
     benefits:
@@ -49,7 +63,6 @@ IMPL-MESSAGE_HANDLING:
   traceability:
     architecture:
       - "ARCH-MESSAGE_HANDLING"
-      - "ARCH-TAG_SYSTEM"
     code_annotations:
       - "IMPL-MESSAGE_HANDLING"
     requirements:
@@ -59,15 +72,18 @@ IMPL-MESSAGE_HANDLING:
     tests:
       - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/playwright/extension-messaging.spec.js"
+      - "tests/unit/content-message-response-missing.test.js"
       - "tests/unit/content-messaging-contracts.test.js"
       - "tests/unit/message-client.test.js"
       - "tests/unit/message-handler-contracts.test.js"
       - "tests/unit/message-handler-local-save-recall.test.js"
       - "tests/unit/message-handler-runtime-validation.test.js"
+      - "tests/unit/message-response-unwrap.test.js"
       - "tests/unit/message-schemas.test.js"
       - "tests/unit/message-service.test.js"
       - "tests/unit/message-type-drift.test.js"
       - "tests/unit/module-import-fix.test.js"
       - "tests/unit/offscreen-file-bookmark-messaging.test.js"
       - "tests/unit/popup-message-contract.test.js"
+      - "tests/unit/runtime-message-listener-contract.test.js"
       - "tests/unit/service-worker-messaging-routing.test.js"

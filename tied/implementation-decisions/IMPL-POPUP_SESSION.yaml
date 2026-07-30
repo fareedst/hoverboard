@@ -2,9 +2,11 @@ IMPL-POPUP_SESSION:
   code_locations:
     files:
       - path: "src/ui/popup/PopupController.js"
-        description: "Popup controller"
+        description: "Popup controller; inject prechecks; observer listeners"
       - path: "src/ui/popup/UIManager.js"
         description: "UI manager"
+      - path: "src/shared/script-injection-eligibility.js"
+        description: "classifyScriptInjectionUrl / classifyScriptInjectionError"
     functions:
       - name: "handleShowHoverboard"
         description: "Overlay toggle handler"
@@ -15,6 +17,15 @@ IMPL-POPUP_SESSION:
       - name: "updateShowHoverButtonState"
         description: "Button state updater"
         file: "src/ui/popup/UIManager.js"
+      - name: "classifyScriptInjectionUrl"
+        description: "Pure URL inject eligibility classifier"
+        file: "src/shared/script-injection-eligibility.js"
+      - name: "canInjectIntoTab"
+        description: "Precheck using classifier"
+        file: "src/ui/popup/PopupController.js"
+      - name: "loadSuggestedTags"
+        description: "Suggested tags with inject skip"
+        file: "src/ui/popup/PopupController.js"
   cross_references:
     - "ARCH-POPUP_SESSION"
     - "REQ-POPUP_PERSISTENT_SESSION"
@@ -22,20 +33,23 @@ IMPL-POPUP_SESSION:
   essence_pseudocode_path: "implementation-decisions/IMPL-POPUP_SESSION-pseudocode.md"
   implementation_approach:
     details:
+      - "CLASSIFY_SCRIPT_INJECTION_URL in src/shared/script-injection-eligibility.js (restricted_scheme / extensions_gallery / missing_url)"
       - "GET_OVERLAY_STATE fallback"
       - "Inline notifications"
+      - "Observer BOOKMARK_UPDATED paths return undefined; refresh in detached promises"
       - "PopupController handlers await async work"
+      - "SKIP_NON_SCRIPTABLE_INJECT records injectionOutcome; expected skips use debugLog/warn not debugError"
       - "StateManager mutations"
       - "UIManager updates"
-    summary: "PopupController routing with StateManager, UIManager, no window.close"
+    summary: "PopupController session: StateManager/UIManager, no window.close; CLASSIFY_SCRIPT_INJECTION_URL shared eligibility; synchronous BOOKMARK_UPDATED observer listeners; injectionOutcome on expected skips."
   metadata:
     created:
       author: "AI Agent"
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-30"
+      reason: "CLASSIFY_SCRIPT_INJECTION_URL + dual BOOKMARK_UPDATED observer procedures"
   name: "Popup Session Persistence Implementation"
   rationale:
     benefits:
@@ -63,3 +77,7 @@ IMPL-POPUP_SESSION:
     tests:
       - "tests/unit/popup-checkbox.test.js"
       - "tests/unit/popup-close-behavior.test.js"
+      - "tests/unit/popup-injection-outcome.test.js"
+      - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/runtime-message-listener-contract.test.js"
+      - "tests/unit/script-injection-eligibility.test.js"

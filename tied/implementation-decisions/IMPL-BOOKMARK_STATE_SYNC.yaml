@@ -4,10 +4,20 @@ IMPL-BOOKMARK_STATE_SYNC:
       - path: "src/features/content/overlay-manager.js"
         description: "Overlay manager"
       - path: "src/ui/popup/PopupController.js"
-        description: "Popup controller"
+        description: "Dual BOOKMARK_UPDATED observer listeners"
       - path: "src/core/badge-manager.js"
         description: "Badge manager"
-    functions: []
+      - path: "src/shared/message-response.js"
+        description: "Null-tolerant reply unwrap for content senders"
+      - path: "src/features/content/content-main.js"
+        description: "readMessageResponse on getTabId/getOptions/getCurrentBookmark"
+    functions:
+      - name: "applyExternalBookmarkUpdate"
+        description: "Constructor-path detached refresh"
+        file: "src/ui/popup/PopupController.js"
+      - name: "refreshOnExternalBookmarkUpdate"
+        description: "setupRealTimeUpdates detached full refresh"
+        file: "src/ui/popup/PopupController.js"
   cross_references:
     - "ARCH-BOOKMARK_STATE_SYNC"
     - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
@@ -17,17 +27,19 @@ IMPL-BOOKMARK_STATE_SYNC:
     details:
       - "Badge compares states"
       - "BOOKMARK_UPDATED broadcast"
+      - "Content senders use readMessageResponse so null replies never throw on .success"
+      - "OBSERVER_BOOKMARK_UPDATED_APPLY_EXTERNAL: constructor sync listener; detached applyExternalBookmarkUpdate"
+      - "OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH: setupRealTimeUpdates sync listener; detached refreshPopupData + updateOverlayState"
       - "Overlay toggle handlers persist via saveBookmark"
-      - "PopupController listener refreshes data"
-    summary: "BOOKMARK_UPDATED broadcast with overlay persist, popup refresh, badge update"
+    summary: "BOOKMARK_UPDATED broadcast with overlay persist, popup refresh, badge update; the popup/side-panel watcher is a synchronous observer listener"
   metadata:
     created:
       author: "AI Agent"
       date: "2025-07-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-30"
+      reason: "Dual observer procedures OBSERVER_BOOKMARK_UPDATED_APPLY_EXTERNAL and FULL_REFRESH"
   name: "Bookmark State Synchronization Implementation"
   rationale:
     benefits:
@@ -55,5 +67,8 @@ IMPL-BOOKMARK_STATE_SYNC:
       - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
     tests:
       - "tests/unit/badge-manager.test.js"
+      - "tests/unit/content-message-response-missing.test.js"
+      - "tests/unit/message-response-unwrap.test.js"
+      - "tests/unit/runtime-message-listener-contract.test.js"
       - "tests/unit/tag-synchronization.test.js"
       - "tests/unit/toggle-synchronization.test.js"

@@ -1,11 +1,14 @@
 REQ-SIDE_PANEL_POPUP_EQUIVALENT:
   category: "Functional"
   detail_file: "requirements/REQ-SIDE_PANEL_POPUP_EQUIVALENT.yaml"
+  implementation_approach:
+    details:
+      - "Tab-change This Page refresh (bindTabChangeRefresh): bookmark path updates for the active tab; non-scriptable / gallery URLs must not attempt content scripting; suggested tags empty on expected skip (unit+composition; no Web Store E2E — platform forbids scripting that target)."
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-03-27"
-      reason: "Document This Page tag label casing toggle (original | lower | upper) and validation coverage"
+      date: "2026-07-30"
+      reason: "Add non-scriptable tab-change refresh satisfaction criterion"
   name: "Side Panel Popup Equivalent with Tabs"
   priority: "P1"
   rationale:
@@ -33,6 +36,7 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
     - criterion: "In This Page tab, \"By Tag\" (or equivalent) switches to the By Tag tab instead of opening the panel again"
     - criterion: "In upper mode, chip labels use String toUpperCase; add-from-chip stores the uppercased string"
     - criterion: "Last-selected tab is persisted and restored when the panel is reopened"
+    - criterion: "On tab-change This Page refresh, non-scriptable active tabs (restricted schemes or extensions gallery) still refresh bookmark fields but must not run content/suggested-tags scripting"
     - criterion: "Only one tab content is visible at a time; switching tabs shows the corresponding panel"
     - criterion: "Side panel has a tab bar with \"This Page\" and \"By Tag\""
     - criterion: "Side panel header shows extension version and compile time (UTC YYYY-MM-DD HH:mm) after the title (e.g. element #side-panel-version)."
@@ -54,6 +58,7 @@ REQ-SIDE_PANEL_POPUP_EQUIVALENT:
       - "IMPL-SIDE_PANEL_TABS"
       - "IMPL-UIManager_SCOPED_ROOT"
     tests:
+      - "tests/integration/side-panel-tab-change-injection.integration.test.js"
       - "tests/playwright/extension-messaging.spec.js"
       - "tests/unit/side-panel-initial-tab-init.test.js"
       - "tests/unit/side-panel-tabs.test.js"

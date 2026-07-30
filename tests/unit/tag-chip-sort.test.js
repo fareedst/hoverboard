@@ -40,7 +40,9 @@
  *   - EFFECTS: Async, Http, IO, State
  *   - TERMINATION: total
  * - PROCEDURE: LOAD_SUGGESTED_TAGS
- *   - IF no tab id OR url not http(s) THEN updateSuggestedTags([]); RETURN
+ *   - IF no tab id THEN updateSuggestedTags([]); RETURN
+ *   - classif = classifyScriptInjectionUrl(tab.url)
+ *   - IF NOT classif.injectable THEN recordAction injectionOutcome(phase=suggested_tags, reason=classif.reason); updateSuggestedTags([]); RETURN
  *   - TRY:
  *   - TRY executeScript MAIN files [suggested-tags-main-world-snippet.js]; ON fileErr log non-fatal CONTINUE
  *   - AWAIT executeScript MAIN func -> globalThis.__hoverboardExtractSuggestedTagsWithRelevance()
@@ -49,6 +51,8 @@
  *   - rows = FILTER_NOT_ON_CURRENT_BOOKMARK(rows, currentPinTagsLowerSet)
  *   - updateSuggestedTags(rows)
  *   - CATCH scriptError:
+ *   - expected = classifyScriptInjectionError(scriptError)
+ *   - IF expected: recordAction injectionOutcome(reason=expected); updateSuggestedTags([]); RETURN
  *   - debugError; updateSuggestedTags([])
  *   - How (sub-block): How — setTagFrequencyMapForSort: merge into tagFrequencyMap; caller redraws.
  *   - How (sub-block): How — getEffectiveTagSortMode: IF no tagSortToggle element THEN RETURN null; ELSE RETURN mode from segment state.

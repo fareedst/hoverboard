@@ -1,0 +1,75 @@
+CITDP-REQ-BOOKMARK_STATE_SYNC-observer-listener-null-response:
+  CITDP-REQ-BOOKMARK_STATE_SYNC-observer-listener-null-response:
+    change_definition:
+      current_behavior: "PopupController registers two chrome.runtime.onMessage listeners as async arrow functions that only act on BOOKMARK_UPDATED. From Chrome 144 a listener returning a promise is treated as answering the message; an async listener with no return implicitly resolves undefined and Chrome sends null to the sender. With popup or side panel open, that null wins the race against the service worker reply for content-script messages (getTabId, getOptions, getCurrentBookmark), so content-main throws 'Cannot read properties of null (reading success)' and page data, config, and tabId are lost on the active tab."
+      desired_behavior: "Observer listeners are synchronous: they filter by message type, run refresh work in a detached promise, and return undefined so they never claim the response channel. Callers of runtime messaging treat null or undefined as a missing response via shared unwrapMessageResponse/readMessageResponse, record a messageResponseMissing inspector action, and fall back to defaults instead of throwing."
+      non_goals:
+        - "Change MessageService content-side listener that returns true"
+        - "Chrome version detection or feature probing"
+        - "Remove duplicate BOOKMARK_UPDATED refresh paths in PopupController"
+        - "Rewrite MessageClient retry or timeout policy"
+      success_criteria:
+        - "tied_validate_consistency ok"
+        - "Unit: BOOKMARK_UPDATED still triggers refresh after the sync listener returns"
+        - "Unit: both observer paths (applyExternalBookmarkUpdate and refreshOnExternalBookmarkUpdate) covered"
+        - "Unit: content-script tabId/config/page-data paths tolerate a null reply, keep defaults, and record messageResponseMissing"
+        - "Unit: every PopupController runtime.onMessage listener returns undefined (never a promise) for unrelated message types"
+        - "Unit: unwrapMessageResponse maps null/undefined to null and unwraps { success, data } and plain payloads"
+      unchanged_behavior: "BOOKMARK_UPDATED still refreshes popup and side panel state; service worker response shapes unchanged; content-script message contract unchanged."
+    completion_criteria:
+      verification_gate_notes: "Unit suites green (listener contract, unwrap, content-message-response-missing); CHANGELOG Unreleased Fixed entry; tied_validate_consistency; no Web Store E2E required for this stream."
+    impact_analysis:
+      modules_or_boundaries: "src/ui/popup/PopupController.js (constructor observer listener, setupRealTimeUpdates); new src/shared/message-response.js; src/features/content/content-main.js (initializeTabId, loadConfiguration, loadCurrentPageData, getOptions); src/shared/ui-inspector.js messageResponseMissing action; vocab ipc-messaging."
+      tied_tokens_affected:
+        - "ARCH-MESSAGE_HANDLING"
+        - "IMPL-BOOKMARK_STATE_SYNC"
+        - "IMPL-MESSAGE_HANDLING"
+        - "IMPL-POPUP_SESSION"
+        - "IMPL-UI_INSPECTOR"
+        - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+        - "REQ-POPUP_PERSISTENT_SESSION"
+        - "REQ-UI_INSPECTION"
+      tied_tokens_new: []
+    leap_feedback:
+      divergences_from_analysis: "none"
+      record_status: "complete"
+      tied_stack_updates_required: []
+    record_identity:
+      change_request_id: "REQ-BOOKMARK_STATE_SYNC-observer-listener-null-response"
+      primary_tokens:
+        - "ARCH-MESSAGE_HANDLING"
+        - "IMPL-BOOKMARK_STATE_SYNC"
+        - "IMPL-MESSAGE_HANDLING"
+        - "IMPL-POPUP_SESSION"
+        - "IMPL-UI_INSPECTOR"
+        - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+        - "REQ-POPUP_PERSISTENT_SESSION"
+        - "REQ-UI_INSPECTION"
+      procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+      recorded_at: "2026-07-30"
+      title: "Popup/side-panel BOOKMARK_UPDATED observer listeners must not answer other messages"
+    risk_analysis:
+      risks:
+        - id: "R1"
+          description: "Detached refresh promise loses error reporting"
+          likelihood: "low"
+          mitigation: "catch inside the detached chain and debugError as before"
+          residual: "low"
+          severity: "low"
+        - id: "R2"
+          description: "Other contexts add async listeners later and reintroduce the hijack"
+          likelihood: "medium"
+          mitigation: "Unit contract test asserts listeners never return a promise; vocab records the observer listener rule"
+          residual: "low"
+          severity: "high"
+        - id: "R3"
+          description: "Null-tolerant unwrap masks a real service worker failure"
+          likelihood: "low"
+          mitigation: "messageResponseMissing inspector action plus debugWarn on every missing reply"
+          residual: "low"
+          severity: "medium"
+    tdd_sequence:
+      summary: "CITDP + vocab + LEAP -> RED listener contract and unwrap tests -> sync observer listeners and shared unwrap -> content-main wiring -> green -> CHANGELOG"
+    test_strategy:
+      matrix_notes: "Unit only for Chrome 144 promise-response semantics (cannot reproduce in jsdom/Playwright). content-message-response-missing.test.js covers content-main fallback; listener contract covers both observer paths."
+      summary: "Unit: runtime-message-listener-contract.test.js for both observer paths; message-response-unwrap.test.js; content-message-response-missing.test.js for content-script fallback and inspector action."

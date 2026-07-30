@@ -224,8 +224,8 @@
 
 **🧪 Testing**:
 - `test-visibility-controls.html` - Component testing environment
-- `options-browser-test.html` - Options page functionality testing
 - `test-config-visibility.html` - ConfigManager backend testing
+- Options page: production `src/ui/options/options.html` → `options.js` (browser harness removed)
 
 **📖 Documentation**:
 - **Implementation**: Complete task tracking in `docs/context/feature-tracking.md` ([IMPL-OVERLAY] [ARCH-OVERLAY] [REQ-CORE_UX_PRESERVATION] (was UI-VIS-001)/002)

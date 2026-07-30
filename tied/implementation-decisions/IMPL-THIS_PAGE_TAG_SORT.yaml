@@ -53,8 +53,8 @@ IMPL-THIS_PAGE_TAG_SORT:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-30"
+      reason: "LOAD_SUGGESTED_TAGS uses classifyScriptInjectionError (not isExpectedNonScriptableError)"
   name: "This Page tag sort implementation"
   phase_h_e2e_only_surface:
     e2e_only_reason: "Chromium MV3 chrome-extension:// side panel page loads the production side-panel bundle in the extension origin; JSDOM composition tests cannot load unpacked extension HTML, reproduce the Chromium side-panel host (layout, hit targets, focus), or exercise chrome.runtime in that document. Binding logic remains covered by tests/integration/this-page-tag-sort-composition.integration.test.js."
@@ -101,9 +101,7 @@ IMPL-THIS_PAGE_TAG_SORT:
     architecture:
       - "ARCH-THIS_PAGE_TAG_SORT"
     code_annotations:
-      - "ARCH-THIS_PAGE_TAG_SORT"
       - "IMPL-THIS_PAGE_TAG_SORT"
-      - "REQ-THIS_PAGE_TAG_SORT"
     requirements:
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
@@ -111,8 +109,10 @@ IMPL-THIS_PAGE_TAG_SORT:
     tests:
       - "tests/integration/this-page-tag-sort-composition.integration.test.js"
       - "tests/playwright/extension-this-page-tag-sort.spec.js"
+      - "tests/unit/popup-injection-outcome.test.js"
       - "tests/unit/popup-refresh-tag-frequency-map.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/script-injection-eligibility.test.js"
       - "tests/unit/tag-chip-sort.test.js"
       - "tests/unit/uIManager-tag-case-folding.test.js"
   validation_evidence:

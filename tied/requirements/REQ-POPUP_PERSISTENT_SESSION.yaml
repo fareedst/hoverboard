@@ -1,14 +1,18 @@
 REQ-POPUP_PERSISTENT_SESSION:
+  acceptance_criteria:
+    - criterion: "External BOOKMARK_UPDATED refreshes This Page data while the session stays open"
+    - criterion: "Session observers do not steal runtime replies intended for the service worker"
+    - criterion: "User actions update state and UI without closing the popup/side-panel window"
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-POPUP_PERSISTENT_SESSION)."
+  description: "Popup (and side-panel This Page) remain open across bookmark actions; live updates apply without window.close. Observer listeners for BOOKMARK_UPDATED must not answer other messages."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-30"
+      reason: "Observer listener criterion for persistent popup/side-panel session"
   name: "Popup Session Persistence"
   priority: "P1"
   rationale:
@@ -31,14 +35,15 @@ REQ-POPUP_PERSISTENT_SESSION:
   status: "Implemented"
   traceability:
     architecture:
-      - "ARCH-UX_CORE"
+      - "ARCH-POPUP_SESSION"
     code_annotations:
       - "REQ-POPUP_PERSISTENT_SESSION"
     implementation:
-      - "IMPL-UX_CORE"
+      - "IMPL-POPUP_SESSION"
     tests:
-      - "Popup close behavior tests"
-      - "Popup live data tests"
+      - "tests/unit/popup-checkbox.test.js"
+      - "tests/unit/popup-close-behavior.test.js"
+      - "tests/unit/runtime-message-listener-contract.test.js"
   validation_criteria:
     - method: "Unit tests"
       coverage: "Handler paths never call closePopup, update overlay state, handle errors"

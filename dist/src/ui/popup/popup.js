@@ -1059,6 +1059,16 @@ function debugError(component, message, ...args) {
     }
   }
 }
+function debugWarn(component, message, ...args) {
+  if (DEBUG_CONFIG.enabled) {
+    const prefix = `${DEBUG_CONFIG.prefix} [${component}]`;
+    if (args.length > 0) {
+      console.warn(prefix, message, ...args);
+    } else {
+      console.warn(prefix, message);
+    }
+  }
+}
 var DEBUG_CONFIG;
 var init_utils = __esm({
   "src/shared/utils.js"() {
@@ -18879,6 +18889,59 @@ var ErrorHandler = class {
 
 // src/ui/popup/PopupController.js
 init_utils();
+
+// src/shared/script-injection-eligibility.js
+function classifyScriptInjectionUrl(url2) {
+  if (typeof url2 !== "string") {
+    return { injectable: false, reason: "missing_url" };
+  }
+  const trimmed = url2.trim();
+  if (!trimmed) {
+    return { injectable: false, reason: "missing_url" };
+  }
+  const lower = trimmed.toLowerCase();
+  if (lower.startsWith("chrome://") || lower.startsWith("chrome-extension://") || lower.startsWith("edge://") || lower.startsWith("about:") || lower.startsWith("devtools://") || lower.startsWith("view-source:")) {
+    return { injectable: false, reason: "restricted_scheme" };
+  }
+  if (isExtensionsGalleryUrl(trimmed)) {
+    return { injectable: false, reason: "extensions_gallery" };
+  }
+  if (!lower.startsWith("http://") && !lower.startsWith("https://")) {
+    return { injectable: false, reason: "restricted_scheme" };
+  }
+  return { injectable: true, reason: "ok" };
+}
+function isExtensionsGalleryUrl(url2) {
+  if (typeof url2 !== "string" || !url2.trim()) return false;
+  let parsed;
+  try {
+    parsed = new URL(url2.trim());
+  } catch {
+    return false;
+  }
+  const host = parsed.hostname.toLowerCase();
+  const path = parsed.pathname.toLowerCase();
+  if (host === "chromewebstore.google.com") return true;
+  if (host === "chrome.google.com" && (path === "/webstore" || path.startsWith("/webstore/"))) return true;
+  if (host === "microsoftedge.microsoft.com" && (path === "/addons" || path.startsWith("/addons/"))) return true;
+  return false;
+}
+function classifyScriptInjectionError(error48) {
+  const msg = error48 && typeof error48 === "object" && "message" in error48 ? String(
+    /** @type {{ message?: unknown }} */
+    error48.message || ""
+  ) : String(error48 || "");
+  const lower = msg.toLowerCase();
+  if (lower.includes("extensions gallery cannot be scripted")) {
+    return "extensions_gallery";
+  }
+  if (lower.includes("chrome://") || lower.includes("chrome-extension://") || lower.includes("cannot be scripted") || lower.includes("cannot access contents of url") || lower.includes("extension manifest must request permission")) {
+    return "restricted_scheme";
+  }
+  return null;
+}
+
+// src/ui/popup/PopupController.js
 init_config_manager();
 
 // src/shared/ui-inspector.js
@@ -19242,25 +19305,11 @@ var PopupController = class {
     this.setupAutoRefresh();
     this.setupRealTimeUpdates();
     if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
-      chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-        if (message.type === "BOOKMARK_UPDATED") {
-          try {
-            debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data");
-            if (this.currentTab && this.currentTab.url) {
-              const updatedPin = await this.getBookmarkData(this.currentTab.url);
-              this.currentPin = updatedPin;
-              this.stateManager.setState({ currentPin: this.currentPin });
-              this.uiManager.updatePrivateStatus(this.currentPin?.shared === "no");
-              this.uiManager.updateReadLaterStatus(this.currentPin?.toread === "yes");
-              const normalizedTags = this.normalizeTags(this.currentPin?.tags);
-              await this.refreshTagFrequencyMapForSort();
-              this.uiManager.updateCurrentTags(normalizedTags);
-              this.uiManager.showSuccess("Bookmark updated from another window");
-            }
-          } catch (error48) {
-            debugError("[TOGGLE_SYNC_POPUP] Failed to update popup on BOOKMARK_UPDATED:", error48);
-          }
-        }
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message?.type !== "BOOKMARK_UPDATED") return;
+        this.applyExternalBookmarkUpdate().catch((error48) => {
+          debugError("[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] Detached applyExternalBookmarkUpdate failed:", error48);
+        });
       });
     }
     debugLog("[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] PopupController constructor called", { platform: navigator.userAgent });
@@ -19581,12 +19630,22 @@ var PopupController = class {
       debugLog("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Loading suggested tags from page content");
       if (!this.currentTab || !this.currentTab.id) {
         debugLog("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] No current tab, skipping suggested tags");
+        this._recordInjectionOutcome({
+          phase: "suggested_tags",
+          reason: "missing_url",
+          injectable: false
+        });
         this.uiManager.updateSuggestedTags([]);
         return;
       }
-      const url2 = (this.currentTab.url || "").trim();
-      if (!url2.startsWith("http://") && !url2.startsWith("https://")) {
-        debugLog("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Tab URL not injectable (chrome-extension://, chrome://, etc.), skipping suggested tags");
+      const classif = classifyScriptInjectionUrl(this.currentTab.url);
+      if (!classif.injectable) {
+        debugLog("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Tab URL not injectable, skipping suggested tags:", classif.reason);
+        this._recordInjectionOutcome({
+          phase: "suggested_tags",
+          reason: classif.reason,
+          injectable: false
+        });
         this.uiManager.updateSuggestedTags([]);
         return;
       }
@@ -19623,7 +19682,24 @@ var PopupController = class {
           this.uiManager.updateSuggestedTags([]);
         }
       } catch (scriptError) {
-        debugError("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:", scriptError);
+        const expectedReason = classifyScriptInjectionError(scriptError);
+        if (expectedReason) {
+          debugWarn("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Expected non-scriptable skip:", expectedReason, scriptError);
+          this._recordInjectionOutcome({
+            phase: "suggested_tags",
+            reason: expectedReason,
+            injectable: false,
+            errorMessage: scriptError?.message
+          });
+        } else {
+          debugError("[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:", scriptError);
+          this._recordInjectionOutcome({
+            phase: "suggested_tags",
+            reason: "ok",
+            injectable: true,
+            errorMessage: scriptError?.message
+          });
+        }
         this.uiManager.updateSuggestedTags([]);
       }
     } catch (error48) {
@@ -19960,7 +20036,12 @@ var PopupController = class {
                 });
               }, 1e3);
             }).catch((error48) => {
-              debugError("Content script injection failed:", error48);
+              const expectedReason = classifyScriptInjectionError(error48);
+              if (expectedReason) {
+                debugWarn("Content script injection failed (non-scriptable):", expectedReason, error48);
+              } else {
+                debugError("Content script injection failed:", error48);
+              }
               rejectOnce(new Error(`Failed to inject content script: ${error48.message}`));
             });
             return;
@@ -19992,10 +20073,35 @@ var PopupController = class {
     });
   }
   /**
-   * Check if we can inject into a tab
+   * Check if we can inject into a tab (shared non-scriptable URL classifier).
+   * [IMPL-POPUP_SESSION] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT]
    */
   canInjectIntoTab(tab) {
-    return tab.url && !tab.url.startsWith("chrome://") && !tab.url.startsWith("chrome-extension://") && !tab.url.startsWith("edge://") && !tab.url.startsWith("about:");
+    return classifyScriptInjectionUrl(tab?.url).injectable;
+  }
+  /**
+   * [IMPL-UI_INSPECTOR] Record structured injectionOutcome for tests / debug.
+   * @param {{ phase: string, reason: string, injectable: boolean, errorMessage?: string, tabId?: number }} partial
+   */
+  _recordInjectionOutcome(partial2) {
+    const url2 = this.currentTab?.url || "";
+    let urlHost = "";
+    try {
+      if (url2) urlHost = new URL(url2).hostname;
+    } catch (_) {
+      urlHost = "";
+    }
+    const surface = this._refreshSurface || "popup";
+    const trigger = this._refreshTrigger || "other";
+    recordAction("injectionOutcome", {
+      phase: partial2.phase,
+      trigger,
+      tabId: partial2.tabId ?? this.currentTab?.id,
+      urlHost,
+      reason: partial2.reason,
+      injectable: !!partial2.injectable,
+      ...partial2.errorMessage ? { errorMessage: partial2.errorMessage } : {}
+    }, surface);
   }
   /**
    * Inject content script into tab
@@ -20012,9 +20118,34 @@ var PopupController = class {
         files: ["src/features/content/content-main.js"]
       });
       debugLog("Content script injection completed:", results);
+      this._recordInjectionOutcome({
+        phase: "inject",
+        reason: "ok",
+        injectable: true,
+        tabId
+      });
       return results;
     } catch (error48) {
-      debugError("Content script injection error:", error48);
+      const expectedReason = classifyScriptInjectionError(error48);
+      if (expectedReason) {
+        debugWarn("Content script injection skipped (non-scriptable):", expectedReason, error48);
+        this._recordInjectionOutcome({
+          phase: "inject",
+          reason: expectedReason,
+          injectable: false,
+          tabId,
+          errorMessage: error48?.message
+        });
+      } else {
+        debugError("Content script injection error:", error48);
+        this._recordInjectionOutcome({
+          phase: "inject",
+          reason: "ok",
+          injectable: true,
+          tabId,
+          errorMessage: error48?.message
+        });
+      }
       throw error48;
     }
   }
@@ -20946,7 +21077,18 @@ var PopupController = class {
    * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Update popup UI to reflect overlay state
    */
   async updateOverlayState() {
-    if (!this.currentTab || !this.canInjectIntoTab(this.currentTab)) {
+    if (!this.currentTab) {
+      this.uiManager.updateShowHoverButtonState(false);
+      return;
+    }
+    const classif = classifyScriptInjectionUrl(this.currentTab.url);
+    if (!classif.injectable) {
+      debugLog("[IMPL-POPUP_SESSION] Skipping overlay state on non-scriptable URL:", classif.reason);
+      this._recordInjectionOutcome({
+        phase: "overlay_state",
+        reason: classif.reason,
+        injectable: false
+      });
       this.uiManager.updateShowHoverButtonState(false);
       return;
     }
@@ -20958,7 +21100,24 @@ var PopupController = class {
       this.uiManager.updateShowHoverButtonState(stateData.isVisible);
       debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Updated overlay state:", stateData);
     } catch (error48) {
-      debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Failed to update overlay state:", error48);
+      const expectedReason = classifyScriptInjectionError(error48);
+      if (expectedReason) {
+        debugWarn("[IMPL-POPUP_SESSION] Overlay state skip (non-scriptable):", expectedReason, error48);
+        this._recordInjectionOutcome({
+          phase: "overlay_state",
+          reason: expectedReason,
+          injectable: false,
+          errorMessage: error48?.message
+        });
+      } else {
+        debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Failed to update overlay state:", error48);
+        this._recordInjectionOutcome({
+          phase: "overlay_state",
+          reason: "ok",
+          injectable: true,
+          errorMessage: error48?.message
+        });
+      }
       this.uiManager.updateShowHoverButtonState(false);
     }
   }
@@ -21016,11 +21175,14 @@ var PopupController = class {
   }
   /**
    * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Manual refresh capability
+   * @param {{ trigger?: string, surface?: string }} [opts]
    */
-  async refreshPopupData() {
-    recordAction(POPUP_ACTION_IDS.refreshData, void 0, "popup");
-    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.refreshData, payload: void 0 });
-    debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Starting manual refresh");
+  async refreshPopupData(opts = {}) {
+    this._refreshTrigger = opts.trigger || "other";
+    this._refreshSurface = opts.surface || "popup";
+    recordAction(POPUP_ACTION_IDS.refreshData, { trigger: this._refreshTrigger }, this._refreshSurface);
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.refreshData, payload: { trigger: this._refreshTrigger } });
+    debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Starting manual refresh", this._refreshTrigger);
     try {
       this.setLoading(true);
       await this.loadInitialData();
@@ -21032,6 +21194,8 @@ var PopupController = class {
       this.uiManager.showError("Failed to refresh data");
     } finally {
       this.setLoading(false);
+      this._refreshTrigger = null;
+      this._refreshSurface = null;
     }
   }
   /**
@@ -21057,17 +21221,46 @@ var PopupController = class {
    */
   setupRealTimeUpdates() {
     if (typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.onMessage) {
-      chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-        if (message.type === "BOOKMARK_UPDATED") {
-          debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data");
-          try {
-            await this.refreshPopupData();
-            await this.updateOverlayState();
-          } catch (error48) {
-            debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Failed to refresh on update:", error48);
-          }
-        }
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message?.type !== "BOOKMARK_UPDATED") return;
+        this.refreshOnExternalBookmarkUpdate().catch((error48) => {
+          debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Detached refreshOnExternalBookmarkUpdate failed:", error48);
+        });
       });
+    }
+  }
+  /**
+   * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] Detached
+   * current-tab re-fetch for the BOOKMARK_UPDATED observer listener (state, tags, private/read-later).
+   */
+  async applyExternalBookmarkUpdate() {
+    try {
+      debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data");
+      if (!this.currentTab || !this.currentTab.url) return;
+      const updatedPin = await this.getBookmarkData(this.currentTab.url);
+      this.currentPin = updatedPin;
+      this.stateManager.setState({ currentPin: this.currentPin });
+      this.uiManager.updatePrivateStatus(this.currentPin?.shared === "no");
+      this.uiManager.updateReadLaterStatus(this.currentPin?.toread === "yes");
+      const normalizedTags = this.normalizeTags(this.currentPin?.tags);
+      await this.refreshTagFrequencyMapForSort();
+      this.uiManager.updateCurrentTags(normalizedTags);
+      this.uiManager.showSuccess("Bookmark updated from another window");
+    } catch (error48) {
+      debugError("[TOGGLE_SYNC_POPUP] Failed to update popup on BOOKMARK_UPDATED:", error48);
+    }
+  }
+  /**
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Detached refresh for the
+   * BOOKMARK_UPDATED observer listener; errors are logged, never surfaced to the sender.
+   */
+  async refreshOnExternalBookmarkUpdate() {
+    debugLog("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data");
+    try {
+      await this.refreshPopupData();
+      await this.updateOverlayState();
+    } catch (error48) {
+      debugError("[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Failed to refresh on update:", error48);
     }
   }
   /**

@@ -1,4 +1,10 @@
 REQ-BOOKMARK_STATE_SYNCHRONIZATION:
+  acceptance_criteria:
+    - criterion: "After overlay or popup bookmark mutations, popup, badge, and overlay show consistent bookmark state for the active URL"
+    - criterion: "BOOKMARK_UPDATED notifies other surfaces so they refresh without requiring the user to reopen the UI"
+    - criterion: "Canonical messaging terms: tied/vocab/ipc-messaging.md"
+    - criterion: "Content-script callers tolerate a missing (null/undefined) runtime reply: keep safe defaults and remain operable (no crash on response.success)"
+    - criterion: "Surfaces that only observe runtime messages must not claim the response channel for unrelated request/response types"
   category: "Functional"
   description: "Umbrella for badge/popup/overlay bookmark state staying consistent after mutations. Owning logic in REQ-URL_TAGS_DISPLAY, REQ-BADGE_INDICATORS, IMPL-BOOKMARK_STATE_SYNC."
   metadata:
@@ -7,8 +13,8 @@ REQ-BOOKMARK_STATE_SYNCHRONIZATION:
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 5: expand thin stub"
+      date: "2026-07-30"
+      reason: "Null-response tolerance criterion; observer listeners must not starve SW replies"
   name: "Bookmark State Synchronization"
   priority: "P1"
   rationale:
@@ -31,19 +37,24 @@ REQ-BOOKMARK_STATE_SYNCHRONIZATION:
   status: "Implemented"
   traceability:
     architecture:
+      - "ARCH-BOOKMARK_STATE_SYNC"
       - "ARCH-MESSAGE_HANDLING"
     code_annotations:
       - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
     implementation:
+      - "IMPL-BOOKMARK_STATE_SYNC"
       - "IMPL-MESSAGE_HANDLING"
     tests:
-      - "Popup live data tests"
-      - "tests/playwright/extension-messaging.spec.js (popup↔background, content↔background, getTabId round-trip)"
-      - "tests/unit/content-messaging-contracts.test.js (content message contracts)"
-      - "tests/unit/message-handler-contracts.test.js (MessageHandler contracts, BOOKMARK_UPDATED flow)"
-      - "tests/unit/popup-message-contract.test.js (popup → message type)"
-      - "tests/unit/service-worker-messaging-routing.test.js (SW handleMessage routing)"
-      - "Toggle synchronization tests"
+      - "tests/playwright/extension-messaging.spec.js"
+      - "tests/unit/content-message-response-missing.test.js"
+      - "tests/unit/content-messaging-contracts.test.js"
+      - "tests/unit/message-handler-contracts.test.js"
+      - "tests/unit/message-response-unwrap.test.js"
+      - "tests/unit/popup-message-contract.test.js"
+      - "tests/unit/runtime-message-listener-contract.test.js"
+      - "tests/unit/service-worker-messaging-routing.test.js"
+      - "tests/unit/tag-synchronization.test.js"
+      - "tests/unit/toggle-synchronization.test.js"
   validation_criteria:
     - method: "Unit tests"
       coverage: "Toggle synchronization, broadcast handling"

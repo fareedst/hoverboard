@@ -27540,6 +27540,33 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
     if (_actions.length > MAX_ACTIONS) _actions.shift();
   }
 
+  // src/shared/message-response.js
+  init_utils();
+  function isMissingMessageResponse(response) {
+    return response === null || response === void 0;
+  }
+  function unwrapMessageResponse(response) {
+    if (isMissingMessageResponse(response)) return null;
+    if (typeof response === "object" && "success" in /** @type {object} */
+    response) {
+      const envelope = (
+        /** @type {{ success?: unknown, data?: unknown }} */
+        response
+      );
+      return envelope.success ? envelope.data : envelope;
+    }
+    return response;
+  }
+  function readMessageResponse(response, type, surface = "content") {
+    const payload = unwrapMessageResponse(response);
+    if (isMissingMessageResponse(payload)) {
+      recordAction("messageResponseMissing", { type }, surface);
+      debugWarn("MESSAGE-RESPONSE", "No response payload for message type; keeping defaults", type);
+      return null;
+    }
+    return payload;
+  }
+
   // src/features/content/content-main.js
   safariEnhancements.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.type !== "GET_PAGE_CONTENT") return;
@@ -27710,7 +27737,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           type: MESSAGE_TYPES.GET_TAB_ID,
           data: { url: this.pageUrl }
         });
-        const actualResponse = response.success ? response.data : response;
+        const actualResponse = readMessageResponse(response, MESSAGE_TYPES.GET_TAB_ID);
+        if (!actualResponse) return;
         this.tabId = actualResponse.tabId;
         console.log("Content script tab ID:", this.tabId);
       } catch (error48) {
@@ -27722,7 +27750,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         const response = await this.messageClient.sendMessage({
           type: MESSAGE_TYPES.GET_OPTIONS
         });
-        const actualResponse = response.success ? response.data : response;
+        const actualResponse = readMessageResponse(response, MESSAGE_TYPES.GET_OPTIONS);
         if (actualResponse) {
           this.config = { ...this.getDefaultConfig(), ...actualResponse };
           console.log("\u{1F4CB} Configuration loaded:", this.config);
@@ -27781,7 +27809,8 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
           }
         });
         debugLog2("CONTENT-SCRIPT", "Received response:", response);
-        const actualResponse = response.success ? response.data : response;
+        const actualResponse = readMessageResponse(response, MESSAGE_TYPES.GET_CURRENT_BOOKMARK);
+        if (!actualResponse) return;
         if (actualResponse.blocked) {
           debugLog2("CONTENT-SCRIPT", "Site is blocked from processing");
           return;
@@ -28018,8 +28047,7 @@ Set the \`cycles\` parameter to \`"ref"\` to resolve cyclical schemas with defs.
         const response = await this.messageClient.sendMessage({
           type: MESSAGE_TYPES.GET_OPTIONS
         });
-        const actualResponse = response.success ? response.data : response;
-        return actualResponse;
+        return readMessageResponse(response, MESSAGE_TYPES.GET_OPTIONS) || {};
       } catch (error48) {
         console.error("Failed to get options:", error48);
         return {};

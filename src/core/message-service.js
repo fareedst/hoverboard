@@ -23,6 +23,29 @@
  *   - handler(message) -> result; RETURN Promise.resolve(result)
  *   - ON error: RETURN Promise.reject; optional log
  *
+ * ## UNWRAP_MESSAGE_RESPONSE
+ *
+ * - [IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-UI_INSPECTION] How: shared null-tolerant unwrap for runtime replies (src/shared/message-response.js), because any extension context can win the response-channel race and answer null (Chrome 144+ promise-returning listeners / observer listeners that return promises). Callers must not dereference response.success. Observer BOOKMARK_UPDATED paths are IMPL-BOOKMARK_STATE_SYNC OBSERVER_BOOKMARK_UPDATED_APPLY_EXTERNAL and IMPL-POPUP_SESSION OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH.
+ * - Contract:
+ *   - INPUT: response from runtime.sendMessage — { success, data } wrapper, plain payload, or null/undefined missing response; optional type + surface for readMessageResponse
+ *   - PRE: caller awaited the send and handled thrown transport errors separately
+ *   - OUTPUT: unwrapMessageResponse -> payload | null; isMissingMessageResponse -> boolean; readMessageResponse -> payload | null (records messageResponseMissing when missing)
+ *   - POST:
+ *     - success => wrapper returns response.data; non-wrapper object returns response as-is
+ *     - missing response => returns null; readMessageResponse records messageResponseMissing; caller keeps defaults
+ *   - FAILURE_MODES: none (total, no throw)
+ *   - DATA: src/shared/message-response.js; callers in content-main (getTabId, getOptions, getCurrentBookmark)
+ *   - EFFECTS: pure for unwrap/isMissing; State when readMessageResponse records inspector action
+ *   - TERMINATION: total
+ * - PROCEDURE: UNWRAP_MESSAGE_RESPONSE
+ *   - IF isMissingMessageResponse(response): RETURN null
+ *   - IF response is object AND 'success' in response: RETURN response.success ? response.data : response
+ *   - RETURN response
+ *   - How (sub-block): caller guard — missing response is observable, never a crash.
+ *   - 1. CALLER: actual = readMessageResponse(response, type[, surface])
+ *   - 2.   # readMessageResponse = unwrap + IF missing: recordAction messageResponseMissing; debugWarn
+ *   - 3.   IF actual == null: KEEP defaults; RETURN
+ *
  * ## HANDLE_GET_RECENT_BOOKMARKS
  *
  * - How: SW entry resolves handler by message.type; missing handler → reject or structured error per router; AWAIT handler(data, senderUrl); optional BOOKMARK_UPDATED broadcast after mutating handlers ([REQ-BOOKMARK_STATE_SYNCHRONIZATION]).

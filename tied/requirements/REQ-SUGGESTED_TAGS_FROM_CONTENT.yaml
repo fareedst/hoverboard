@@ -4,6 +4,11 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
   "[req-suggested_tags_case_preservation]": "Preserves original case and provides lowercase variants"
   "[req-suggested_tags_deduplication]": "Case-insensitive filtering to exclude tags already in current bookmark"
   "[req-tag_management]": "General tag management infrastructure"
+  acceptance_criteria:
+    - criterion: "Expected inject skips are quiet (no error-level noise) and remain testable via inspector outcomes"
+    - criterion: "Normal injectable http(s) pages continue to receive suggestions"
+    - criterion: "On non-scriptable URLs (restricted schemes, extensions gallery hosts), popup/side-panel show empty suggested tags and do not attempt page scripting"
+    - criterion: "Suggested tags derive from page content sources and appear below recent tags in popup and overlay"
   actual: "Covered by tests/unit/popup-suggested-tags.test.js, tests/unit/suggested-tag-original-case.test.js, tests/integration/this-page-tag-sort-composition.integration.test.js"
   category: "Functional"
   code_annotations: "All functions marked with `[REQ-SUGGESTED_TAGS_FROM_CONTENT]` in comments"
@@ -24,8 +29,8 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "Corpus remediation Phase 4: remove stale no-tests prose; align limits; one-way depends_on"
+      date: "2026-07-30"
+      reason: "Skip suggestions on non-scriptable/gallery URLs without error spam"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -62,10 +67,15 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
     code_annotations:
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     implementation:
+      - "IMPL-POPUP_SESSION"
       - "IMPL-SUGGESTED_TAGS"
+      - "IMPL-THIS_PAGE_TAG_SORT"
     tests:
+      - "tests/integration/side-panel-tab-change-injection.integration.test.js"
       - "tests/integration/this-page-tag-sort-composition.integration.test.js"
+      - "tests/unit/popup-injection-outcome.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/script-injection-eligibility.test.js"
       - "tests/unit/suggested-tag-original-case.test.js"
   validation_criteria:
     - method: "Manual verification"

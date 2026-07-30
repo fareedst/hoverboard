@@ -2,29 +2,37 @@ IMPL-UI_INSPECTOR:
   code_locations:
     files:
       - path: "src/shared/ui-inspector.js"
-        description: "UI inspector"
+        description: "UI inspector ring buffers"
       - path: "src/core/service-worker.js"
         description: "recordMessage wiring"
       - path: "src/ui/popup/PopupController.js"
-        description: "recordAction wiring"
+        description: "recordAction wiring (injectionOutcome)"
       - path: "src/features/content/content-main.js"
-        description: "recordAction wiring"
-    functions: []
+        description: "readMessageResponse callers (messageResponseMissing)"
+      - path: "src/shared/message-response.js"
+        description: "recordAction wiring (messageResponseMissing)"
+    functions:
+      - name: "recordAction"
+        description: "Append action when enabled"
+        file: "src/shared/ui-inspector.js"
+      - name: "readMessageResponse"
+        description: "Records messageResponseMissing on null reply"
+        file: "src/shared/message-response.js"
   cross_references:
     - "ARCH-UI_TESTABILITY"
     - "REQ-UI_INSPECTION"
   detail_file: "implementation-decisions/IMPL-UI_INSPECTOR.yaml"
   essence_pseudocode_path: "implementation-decisions/IMPL-UI_INSPECTOR-pseudocode.md"
   implementation_approach:
-    summary: "src/shared/ui-inspector.js; wired in service-worker (recordMessage), PopupController (recordAction), content-main (recordAction)"
+    summary: "src/shared/ui-inspector.js; wired in service-worker (recordMessage), PopupController (recordAction incl. injectionOutcome), content-main/message-response (messageResponseMissing). Unit coverage for injectionOutcome and messageResponseMissing."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-17"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Wire essence_pseudocode_path sidecar"
+      date: "2026-07-30"
+      reason: "Fix contradictory No unit tests note; RECORD injectionOutcome and messageResponseMissing contracts"
   name: "UI Inspector"
   rationale:
     benefits:
@@ -47,5 +55,8 @@ IMPL-UI_INSPECTOR:
       - "IMPL-UI_INSPECTOR"
     requirements:
       - "REQ-UI_INSPECTION"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: UI inspector and dev tooling."
-    tests: []
+    test_coverage_note: "Unit coverage for injectionOutcome (popup-injection-outcome) and messageResponseMissing (message-response-unwrap, content-message-response-missing). Ring-buffer core remains lightweight tooling."
+    tests:
+      - "tests/unit/content-message-response-missing.test.js"
+      - "tests/unit/message-response-unwrap.test.js"
+      - "tests/unit/popup-injection-outcome.test.js"

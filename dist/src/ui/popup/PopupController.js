@@ -52,12 +52,51 @@
  *   - 1. ON overlay toggle (saveBookmark / saveTag / deleteTag):
  *   - 2.   SEND message to backend; await processMessage result
  *   - 3.   BROADCAST BOOKMARK_UPDATED (so other surfaces can refresh)
- *   - How (sub-block): Re-fetch bookmark state for current URL.
- *   - 4. PopupController (listener for BOOKMARK_UPDATED):
- *   - 5.   ON BOOKMARK_UPDATED: refresh popup data (re-fetch bookmark state for current URL)
  *   - How (sub-block): On saveTag/deleteTag/saveBookmark result compare tab URL state and update icon/count.
- *   - 6. Badge manager:
- *   - 7.   ON message result (saveTag | deleteTag | saveBookmark): compare current tab URL state with stored state; UPDATE badge icon/count
+ *   - 4. Badge manager:
+ *   - 5.   ON message result (saveTag | deleteTag | saveBookmark): compare current tab URL state with stored state; UPDATE badge icon/count
+ *
+ * ## OBSERVER_BOOKMARK_UPDATED_APPLY_EXTERNAL
+ *
+ * - [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [ARCH-MESSAGE_HANDLING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] How: Constructor-path observer listener — synchronous, returns undefined, re-fetches pin/tags via applyExternalBookmarkUpdate in a detached promise. Distinct from setupRealTimeUpdates full refresh (IMPL-POPUP_SESSION OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH). Chrome 144+ treats a promise-returning listener as answering and would deliver null to the SW sender.
+ * - Contract:
+ *   - INPUT: runtime.onMessage envelope (any type); BOOKMARK_UPDATED triggers refresh
+ *   - PRE: PopupController constructed; chrome.runtime.onMessage available when registering
+ *   - OUTPUT: undefined (never a Promise, never sendResponse); pin/tags UI may update asynchronously
+ *   - POST:
+ *     - success => listener returned undefined; unrelated types left the response channel free
+ *     - BOOKMARK_UPDATED => detached applyExternalBookmarkUpdate started (or no-op when no currentTab)
+ *   - FAILURE_MODES: RefreshFailed (caught inside detached chain; debugError; does not answer message)
+ *   - DATA: currentTab; currentPin; UIManager tag/privacy/read-later widgets
+ *   - DATA_TRANSITION: on BOOKMARK_UPDATED success path, currentPin and chip UI updated from re-fetch; else unchanged
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OBSERVER_BOOKMARK_UPDATED_APPLY_EXTERNAL
+ *   - REGISTER runtime.onMessage as synchronous function:
+ *   -   IF message?.type !== 'BOOKMARK_UPDATED': RETURN undefined
+ *   -   START detached applyExternalBookmarkUpdate(); CATCH → debugError
+ *   -   RETURN undefined
+ *
+ * ## OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH
+ *
+ * - [IMPL-BOOKMARK_STATE_SYNC] [IMPL-POPUP_SESSION] [ARCH-BOOKMARK_STATE_SYNC] [ARCH-POPUP_SESSION] [ARCH-MESSAGE_HANDLING] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] [REQ-POPUP_PERSISTENT_SESSION] How: setupRealTimeUpdates observer — synchronous, returns undefined, runs refreshOnExternalBookmarkUpdate (refreshPopupData then updateOverlayState) in a detached promise. Complements constructor applyExternalBookmarkUpdate path; duplicate refresh is an accepted non-goal.
+ * - Contract:
+ *   - INPUT: runtime.onMessage envelope (any type); BOOKMARK_UPDATED triggers full refresh
+ *   - PRE: setupRealTimeUpdates registered; controller may be initialized
+ *   - OUTPUT: undefined; full This Page refresh may run asynchronously
+ *   - POST:
+ *     - success => listener returned undefined; response channel not claimed
+ *     - BOOKMARK_UPDATED => detached refreshPopupData + updateOverlayState started
+ *   - FAILURE_MODES: RefreshFailed (caught inside detached chain; debugError)
+ *   - DATA: PopupController session state; overlay button state
+ *   - DATA_TRANSITION: on success path, bookmark/suggested/overlay UI refreshed; else unchanged
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH
+ *   - REGISTER runtime.onMessage as synchronous function:
+ *   -   IF message?.type !== 'BOOKMARK_UPDATED': RETURN undefined
+ *   -   START detached refreshOnExternalBookmarkUpdate(); CATCH → debugError
+ *   -   RETURN undefined
  *
  * === END IMPL-FULL-BLOCK: IMPL-BOOKMARK_STATE_SYNC ===
  */
@@ -558,6 +597,73 @@
  *   - How (sub-block): On open sync overlay state to StateManager and UIManager.
  *   - 5. ON popup open: SEND GET_OVERLAY_STATE; SYNC state to StateManager and UIManager
  *
+ * ## CLASSIFY_SCRIPT_INJECTION_URL
+ *
+ * - [IMPL-POPUP_SESSION] [IMPL-SUGGESTED_TAGS] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] How: Shared pure classifier in src/shared/script-injection-eligibility.js for browser-forbidden (non-scriptable) URLs vs injectable http(s). Distinct from user inhibit URLs (IMPL-URL_INHIBITION). Used by canInjectIntoTab, loadSuggestedTags, updateOverlayState, injectContentScript.
+ * - Contract:
+ *   - INPUT: url (string | unknown); optional error object for classifyScriptInjectionError
+ *   - PRE: true (total on any input shape)
+ *   - OUTPUT: { injectable: boolean, reason: missing_url | restricted_scheme | extensions_gallery | ok } | classifyScriptInjectionError -> reason | null
+ *   - POST:
+ *     - success => reason codes are closed-set; injectable true only when reason is ok
+ *     - restricted schemes / gallery hosts / missing url => injectable false
+ *   - FAILURE_MODES: none (total, no throw)
+ *   - DATA: gallery host allowlist (chromewebstore.google.com; chrome.google.com/webstore; microsoftedge.microsoft.com/addons)
+ *   - EFFECTS: pure
+ *   - TERMINATION: total
+ * - PROCEDURE: CLASSIFY_SCRIPT_INJECTION_URL
+ *   - IF url not non-empty string: RETURN { injectable: false, reason: missing_url }
+ *   - IF scheme in chrome:// | chrome-extension:// | edge:// | about: | devtools:// | view-source: OR not http(s): RETURN { injectable: false, reason: restricted_scheme }
+ *   - IF isExtensionsGalleryUrl(url): RETURN { injectable: false, reason: extensions_gallery }
+ *   - RETURN { injectable: true, reason: ok }
+ *   - How (sub-block): classifyScriptInjectionError(error) maps Chrome rejection text to extensions_gallery | restricted_scheme | null (unexpected).
+ *
+ * ## SKIP_NON_SCRIPTABLE_INJECT
+ *
+ * - [IMPL-POPUP_SESSION] [IMPL-UI_INSPECTOR] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-UI_INSPECTION] How: Precheck before suggested-tags / overlay-state / content inject — CLASSIFY_SCRIPT_INJECTION_URL; non-scriptable → skip scripting, recordAction injectionOutcome, debugLog/warn (not debugError); unexpected failures remain debugError.
+ * - Contract:
+ *   - INPUT: currentTab.url; phase (suggested_tags | overlay_state | inject); optional refresh trigger/surface
+ *   - PRE: classifier available; ui-inspector may be disabled (recordAction no-ops)
+ *   - OUTPUT: skip (empty suggested / false overlay / no inject) | proceed to scripting | { error: UnexpectedInjectFailed }
+ *   - POST:
+ *     - expected skip => injectionOutcome recorded; no chrome.scripting call; no debugError
+ *     - injectable ok => scripting may proceed
+ *   - FAILURE_MODES: UnexpectedInjectFailed
+ *   - DATA: _refreshTrigger, _refreshSurface for inspector attribution
+ *   - DATA_TRANSITION: on skip, suggested tags cleared or overlay button forced off as phase dictates; else unchanged until inject path runs
+ *   - EFFECTS: IO, State, Async
+ *   - TERMINATION: total
+ * - PROCEDURE: SKIP_NON_SCRIPTABLE_INJECT
+ *   - classif = classifyScriptInjectionUrl(tab.url)
+ *   - IF NOT classif.injectable:
+ *   -   recordAction injectionOutcome { phase, reason: classif.reason, injectable: false, trigger, surface }
+ *   -   debugLog/warn; APPLY phase skip; RETURN
+ *   - TRY scripting path
+ *   - CATCH err:
+ *   -   expected = classifyScriptInjectionError(err)
+ *   -   IF expected: recordAction injectionOutcome { reason: expected }; debugWarn; RETURN
+ *   -   debugError; RETURN error UnexpectedInjectFailed
+ *
+ * ## OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH
+ *
+ * - [IMPL-POPUP_SESSION] [IMPL-BOOKMARK_STATE_SYNC] [ARCH-POPUP_SESSION] [ARCH-MESSAGE_HANDLING] [REQ-POPUP_PERSISTENT_SESSION] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] How: setupRealTimeUpdates BOOKMARK_UPDATED watcher is an observer listener (see IMPL-MESSAGE_HANDLING UNWRAP_MESSAGE_RESPONSE / IMPL-BOOKMARK_STATE_SYNC OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH): sync function, return undefined, detached refreshPopupData then updateOverlayState.
+ * - Contract:
+ *   - INPUT: runtime.onMessage envelope
+ *   - PRE: setupRealTimeUpdates registered
+ *   - OUTPUT: undefined; refresh may run asynchronously
+ *   - POST:
+ *     - success => response channel not claimed
+ *   - FAILURE_MODES: RefreshFailed (caught in detached chain)
+ *   - DATA: PopupController session
+ *   - DATA_TRANSITION: on BOOKMARK_UPDATED success path, This Page + overlay state refreshed
+ *   - EFFECTS: Async, IO, State
+ *   - TERMINATION: total
+ * - PROCEDURE: OBSERVER_BOOKMARK_UPDATED_FULL_REFRESH
+ *   - REGISTER runtime.onMessage as synchronous function:
+ *   -   IF message?.type !== 'BOOKMARK_UPDATED': RETURN undefined
+ *   -   START detached refresh (refreshPopupData then updateOverlayState); CATCH → debugError
+ *   -   RETURN undefined
+ *
  * === END IMPL-FULL-BLOCK: IMPL-POPUP_SESSION ===
  */
 /**
@@ -838,7 +944,7 @@
  *
  * ## EXTRACT_SUGGESTED_TAGS
  *
- * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [REQ-THIS_PAGE_TAG_SORT] How: How — cross-IMPL: Popup path depends on IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags; ordering invariant — executeScript file (snippet) then func (global extractor); shared data — raw array from page world; post — NORMALIZE_SUGGESTED_ROWS then filters then updateSuggestedTags(rows); on error or non-http(s) — updateSuggestedTags([]). How — composed_with IMPL-SELECTION_TO_TAG_INPUT: pre — suggested chips rendered in UIManager; post — selection/tag-input add flows attach to chip DOM per IMPL-SELECTION_TO_TAG_INPUT (shared surface only; no ordering constraint on extraction).
+ * - [IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [ARCH-SUGGESTED_TAGS] [ARCH-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] [REQ-SUGGESTED_TAGS_DEDUPLICATION] [REQ-SUGGESTED_TAGS_CASE_PRESERVATION] [REQ-THIS_PAGE_TAG_SORT] How: How — cross-IMPL: Popup path depends on IMPL-THIS_PAGE_TAG_SORT loadSuggestedTags; ordering invariant — executeScript file (snippet) then func (global extractor); shared data — raw array from page world; post — NORMALIZE_SUGGESTED_ROWS then filters then updateSuggestedTags(rows); on error or non-scriptable URL (IMPL-POPUP_SESSION CLASSIFY_SCRIPT_INJECTION_URL: restricted_scheme / extensions_gallery / missing_url) — updateSuggestedTags([]) + injectionOutcome; no debugError for expected skips. How — composed_with IMPL-SELECTION_TO_TAG_INPUT: pre — suggested chips rendered in UIManager; post — selection/tag-input add flows attach to chip DOM per IMPL-SELECTION_TO_TAG_INPUT (shared surface only; no ordering constraint on extraction).
  * - Contract:
  *   - INPUT: active page document (implicit)
  *   - PRE: caller supplies valid inputs for this block; dependencies wired
@@ -866,6 +972,7 @@
  *   - CATCH:
  *   - RETURN []
  *   - How (sub-block): How — Cross-path note (S06.3): overlay sanitizeTag vs snippet inline sanitizer may differ on edge characters; tokenizer must remain identical. See ARCH-SUGGESTED_TAGS.
+ *   - How (sub-block): How — Popup inject eligibility is CLASSIFY_SCRIPT_INJECTION_URL in IMPL-POPUP_SESSION (shared module); this EXTRACT block covers page-world extraction only.
  *
  * === END IMPL-FULL-BLOCK: IMPL-SUGGESTED_TAGS ===
  */
@@ -977,7 +1084,9 @@
  *   - EFFECTS: Async, Http, IO, State
  *   - TERMINATION: total
  * - PROCEDURE: LOAD_SUGGESTED_TAGS
- *   - IF no tab id OR url not http(s) THEN updateSuggestedTags([]); RETURN
+ *   - IF no tab id THEN updateSuggestedTags([]); RETURN
+ *   - classif = classifyScriptInjectionUrl(tab.url)
+ *   - IF NOT classif.injectable THEN recordAction injectionOutcome(phase=suggested_tags, reason=classif.reason); updateSuggestedTags([]); RETURN
  *   - TRY:
  *   - TRY executeScript MAIN files [suggested-tags-main-world-snippet.js]; ON fileErr log non-fatal CONTINUE
  *   - AWAIT executeScript MAIN func -> globalThis.__hoverboardExtractSuggestedTagsWithRelevance()
@@ -986,6 +1095,8 @@
  *   - rows = FILTER_NOT_ON_CURRENT_BOOKMARK(rows, currentPinTagsLowerSet)
  *   - updateSuggestedTags(rows)
  *   - CATCH scriptError:
+ *   - expected = classifyScriptInjectionError(scriptError)
+ *   - IF expected: recordAction injectionOutcome(reason=expected); updateSuggestedTags([]); RETURN
  *   - debugError; updateSuggestedTags([])
  *   - How (sub-block): How — setTagFrequencyMapForSort: merge into tagFrequencyMap; caller redraws.
  *   - How (sub-block): How — getEffectiveTagSortMode: IF no tagSortToggle element THEN RETURN null; ELSE RETURN mode from segment state.
@@ -1036,6 +1147,40 @@
  *   - 3. getLastMessages(), getLastActions(): RETURN copy of buffer(s)
  *   - How (sub-block): Service-worker records message; PopupController/content record action.
  *   - 4. Wiring: service-worker after handle message -> recordMessage; PopupController/content-main on action -> recordAction
+ *
+ * ## RECORD_INJECTION_OUTCOME
+ *
+ * - [IMPL-UI_INSPECTOR] [IMPL-POPUP_SESSION] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION] [REQ-SUGGESTED_TAGS_FROM_CONTENT] How: Observable contract for script-injection skips and results — PopupController/side-panel recordAction({ actionId: "injectionOutcome", surface, payload: { phase, trigger, tabId, urlHost, reason, injectable, errorMessage? } }). testable when setEnabled(true); used by tabChangeRefresh composition and unit inject precheck tests.
+ * - Contract:
+ *   - INPUT: phase, reason, injectable, optional trigger/surface/tabId/urlHost/errorMessage
+ *   - PRE: recordAction available (no-op when inspector disabled)
+ *   - OUTPUT: action appended when enabled
+ *   - POST:
+ *     - success => last actions include injectionOutcome with closed-set reason codes
+ *   - FAILURE_MODES: none
+ *   - DATA: action ring buffer
+ *   - DATA_TRANSITION: buffer grows (or rotates) when enabled; else unchanged
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: RECORD_INJECTION_OUTCOME
+ *   - recordAction({ actionId: "injectionOutcome", surface, payload })
+ *
+ * ## RECORD_MESSAGE_RESPONSE_MISSING
+ *
+ * - [IMPL-UI_INSPECTOR] [IMPL-MESSAGE_HANDLING] [ARCH-UI_TESTABILITY] [ARCH-MESSAGE_HANDLING] [REQ-UI_INSPECTION] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] How: Observable contract when runtime reply is null/undefined — content-main recordAction({ actionId: "messageResponseMissing", surface: "content", payload: { type } }) instead of throwing on response.success.
+ * - Contract:
+ *   - INPUT: message type string that expected a reply
+ *   - PRE: unwrapMessageResponse returned null; inspector may be disabled
+ *   - OUTPUT: action appended when enabled; caller keeps defaults
+ *   - POST:
+ *     - success => messageResponseMissing observable; no TypeError
+ *   - FAILURE_MODES: none
+ *   - DATA: action ring buffer
+ *   - DATA_TRANSITION: buffer grows when enabled
+ *   - EFFECTS: State
+ *   - TERMINATION: total
+ * - PROCEDURE: RECORD_MESSAGE_RESPONSE_MISSING
+ *   - recordAction({ actionId: "messageResponseMissing", surface: "content", payload: { type } })
  *
  * === END IMPL-FULL-BLOCK: IMPL-UI_INSPECTOR ===
  */
@@ -1230,7 +1375,11 @@
 import { UIManager } from './UIManager.js'
 import { StateManager } from './StateManager.js'
 import { ErrorHandler } from '../../shared/ErrorHandler.js'
-import { debugLog, debugError, normalizeSelectionForTagInput } from '../../shared/utils.js'
+import { debugLog, debugError, debugWarn, normalizeSelectionForTagInput } from '../../shared/utils.js'
+import {
+  classifyScriptInjectionUrl,
+  classifyScriptInjectionError
+} from '../../shared/script-injection-eligibility.js'
 import { ConfigManager } from '../../config/config-manager.js'
 // [IMPL-UI_INSPECTOR] [ARCH-UI_TESTABILITY] [REQ-UI_INSPECTION]
 import { recordAction } from '../../shared/ui-inspector.js'
@@ -1294,29 +1443,14 @@ export class PopupController {
     this.setupRealTimeUpdates()
 
     // [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] Listen for BOOKMARK_UPDATED to refresh popup data.
+    // [ARCH-MESSAGE_HANDLING] Observer listener: synchronous and returns undefined, so it never answers
+    // messages meant for the service worker (a promise return would reply null to the sender).
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-      chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-        if (message.type === 'BOOKMARK_UPDATED') {
-          try {
-            debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data')
-            // [TOGGLE_SYNC_POPUP] Fetch latest bookmark data for current tab
-            if (this.currentTab && this.currentTab.url) {
-              const updatedPin = await this.getBookmarkData(this.currentTab.url)
-              this.currentPin = updatedPin
-              this.stateManager.setState({ currentPin: this.currentPin })
-              // [TOGGLE_SYNC_POPUP] Update UI to reflect new state
-              this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
-              this.uiManager.updateReadLaterStatus(this.currentPin?.toread === 'yes')
-              const normalizedTags = this.normalizeTags(this.currentPin?.tags)
-              await this.refreshTagFrequencyMapForSort()
-              this.uiManager.updateCurrentTags(normalizedTags)
-              // Optionally, show a message to the user
-              this.uiManager.showSuccess('Bookmark updated from another window')
-            }
-          } catch (error) {
-            debugError('[TOGGLE_SYNC_POPUP] Failed to update popup on BOOKMARK_UPDATED:', error)
-          }
-        }
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message?.type !== 'BOOKMARK_UPDATED') return
+        this.applyExternalBookmarkUpdate().catch(error => {
+          debugError('[IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] Detached applyExternalBookmarkUpdate failed:', error)
+        })
       })
     }
     debugLog('[IMPL-MESSAGE_HANDLING] [ARCH-MESSAGE_HANDLING] [REQ-EXTENSION_IDENTITY] PopupController constructor called', { platform: navigator.userAgent })
@@ -1728,14 +1862,24 @@ export class PopupController {
 
       if (!this.currentTab || !this.currentTab.id) {
         debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] No current tab, skipping suggested tags')
+        this._recordInjectionOutcome({
+          phase: 'suggested_tags',
+          reason: 'missing_url',
+          injectable: false
+        })
         this.uiManager.updateSuggestedTags([])
         return
       }
 
-      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] - Skip script injection on restricted URLs (extension pages, chrome://, etc.)
-      const url = (this.currentTab.url || '').trim()
-      if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Tab URL not injectable (chrome-extension://, chrome://, etc.), skipping suggested tags')
+      // [REQ-SUGGESTED_TAGS_FROM_CONTENT] Skip non-scriptable URLs (schemes + extensions gallery)
+      const classif = classifyScriptInjectionUrl(this.currentTab.url)
+      if (!classif.injectable) {
+        debugLog('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Tab URL not injectable, skipping suggested tags:', classif.reason)
+        this._recordInjectionOutcome({
+          phase: 'suggested_tags',
+          reason: classif.reason,
+          injectable: false
+        })
         this.uiManager.updateSuggestedTags([])
         return
       }
@@ -1778,8 +1922,24 @@ export class PopupController {
           this.uiManager.updateSuggestedTags([])
         }
       } catch (scriptError) {
-        // Script injection might fail on certain pages (chrome://, extension pages, etc.)
-        debugError('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:', scriptError)
+        const expectedReason = classifyScriptInjectionError(scriptError)
+        if (expectedReason) {
+          debugWarn('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Expected non-scriptable skip:', expectedReason, scriptError)
+          this._recordInjectionOutcome({
+            phase: 'suggested_tags',
+            reason: expectedReason,
+            injectable: false,
+            errorMessage: scriptError?.message
+          })
+        } else {
+          debugError('[POPUP-CONTROLLER] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Failed to extract suggested tags:', scriptError)
+          this._recordInjectionOutcome({
+            phase: 'suggested_tags',
+            reason: 'ok',
+            injectable: true,
+            errorMessage: scriptError?.message
+          })
+        }
         this.uiManager.updateSuggestedTags([])
       }
     } catch (error) {
@@ -2170,7 +2330,12 @@ export class PopupController {
                 }, 1000)
               })
               .catch(error => {
-                debugError('Content script injection failed:', error)
+                const expectedReason = classifyScriptInjectionError(error)
+                if (expectedReason) {
+                  debugWarn('Content script injection failed (non-scriptable):', expectedReason, error)
+                } else {
+                  debugError('Content script injection failed:', error)
+                }
                 rejectOnce(new Error(`Failed to inject content script: ${error.message}`))
               })
             return
@@ -2209,15 +2374,36 @@ export class PopupController {
   }
 
   /**
-   * Check if we can inject into a tab
+   * Check if we can inject into a tab (shared non-scriptable URL classifier).
+   * [IMPL-POPUP_SESSION] [ARCH-SUGGESTED_TAGS] [REQ-SUGGESTED_TAGS_FROM_CONTENT]
    */
   canInjectIntoTab (tab) {
-    // Don't inject into chrome:// pages or extension pages
-    return tab.url &&
-           !tab.url.startsWith('chrome://') &&
-           !tab.url.startsWith('chrome-extension://') &&
-           !tab.url.startsWith('edge://') &&
-           !tab.url.startsWith('about:')
+    return classifyScriptInjectionUrl(tab?.url).injectable
+  }
+
+  /**
+   * [IMPL-UI_INSPECTOR] Record structured injectionOutcome for tests / debug.
+   * @param {{ phase: string, reason: string, injectable: boolean, errorMessage?: string, tabId?: number }} partial
+   */
+  _recordInjectionOutcome (partial) {
+    const url = this.currentTab?.url || ''
+    let urlHost = ''
+    try {
+      if (url) urlHost = new URL(url).hostname
+    } catch (_) {
+      urlHost = ''
+    }
+    const surface = this._refreshSurface || 'popup'
+    const trigger = this._refreshTrigger || 'other'
+    recordAction('injectionOutcome', {
+      phase: partial.phase,
+      trigger,
+      tabId: partial.tabId ?? this.currentTab?.id,
+      urlHost,
+      reason: partial.reason,
+      injectable: !!partial.injectable,
+      ...(partial.errorMessage ? { errorMessage: partial.errorMessage } : {})
+    }, surface)
   }
 
   /**
@@ -2240,9 +2426,34 @@ export class PopupController {
       })
 
       debugLog('Content script injection completed:', results)
+      this._recordInjectionOutcome({
+        phase: 'inject',
+        reason: 'ok',
+        injectable: true,
+        tabId
+      })
       return results
     } catch (error) {
-      debugError('Content script injection error:', error)
+      const expectedReason = classifyScriptInjectionError(error)
+      if (expectedReason) {
+        debugWarn('Content script injection skipped (non-scriptable):', expectedReason, error)
+        this._recordInjectionOutcome({
+          phase: 'inject',
+          reason: expectedReason,
+          injectable: false,
+          tabId,
+          errorMessage: error?.message
+        })
+      } else {
+        debugError('Content script injection error:', error)
+        this._recordInjectionOutcome({
+          phase: 'inject',
+          reason: 'ok',
+          injectable: true,
+          tabId,
+          errorMessage: error?.message
+        })
+      }
       throw error
     }
   }
@@ -3366,7 +3577,18 @@ export class PopupController {
    * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Update popup UI to reflect overlay state
    */
   async updateOverlayState () {
-    if (!this.currentTab || !this.canInjectIntoTab(this.currentTab)) {
+    if (!this.currentTab) {
+      this.uiManager.updateShowHoverButtonState(false)
+      return
+    }
+    const classif = classifyScriptInjectionUrl(this.currentTab.url)
+    if (!classif.injectable) {
+      debugLog('[IMPL-POPUP_SESSION] Skipping overlay state on non-scriptable URL:', classif.reason)
+      this._recordInjectionOutcome({
+        phase: 'overlay_state',
+        reason: classif.reason,
+        injectable: false
+      })
       this.uiManager.updateShowHoverButtonState(false)
       return
     }
@@ -3384,7 +3606,24 @@ export class PopupController {
 
       debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Updated overlay state:', stateData)
     } catch (error) {
-      debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Failed to update overlay state:', error)
+      const expectedReason = classifyScriptInjectionError(error)
+      if (expectedReason) {
+        debugWarn('[IMPL-POPUP_SESSION] Overlay state skip (non-scriptable):', expectedReason, error)
+        this._recordInjectionOutcome({
+          phase: 'overlay_state',
+          reason: expectedReason,
+          injectable: false,
+          errorMessage: error?.message
+        })
+      } else {
+        debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Failed to update overlay state:', error)
+        this._recordInjectionOutcome({
+          phase: 'overlay_state',
+          reason: 'ok',
+          injectable: true,
+          errorMessage: error?.message
+        })
+      }
       // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Graceful degradation - fallback to default state
       this.uiManager.updateShowHoverButtonState(false)
     }
@@ -3449,11 +3688,14 @@ export class PopupController {
 
   /**
    * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Manual refresh capability
+   * @param {{ trigger?: string, surface?: string }} [opts]
    */
-  async refreshPopupData () {
-    recordAction(POPUP_ACTION_IDS.refreshData, undefined, 'popup')
-    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.refreshData, payload: undefined })
-    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Starting manual refresh')
+  async refreshPopupData (opts = {}) {
+    this._refreshTrigger = opts.trigger || 'other'
+    this._refreshSurface = opts.surface || 'popup'
+    recordAction(POPUP_ACTION_IDS.refreshData, { trigger: this._refreshTrigger }, this._refreshSurface)
+    if (this._onAction) this._onAction({ actionId: POPUP_ACTION_IDS.refreshData, payload: { trigger: this._refreshTrigger } })
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Starting manual refresh', this._refreshTrigger)
     try {
       this.setLoading(true)
       await this.loadInitialData()
@@ -3468,6 +3710,8 @@ export class PopupController {
       this.uiManager.showError('Failed to refresh data')
     } finally {
       this.setLoading(false)
+      this._refreshTrigger = null
+      this._refreshSurface = null
     }
   }
 
@@ -3496,19 +3740,55 @@ export class PopupController {
    * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Enhanced real-time update handling
    */
   setupRealTimeUpdates () {
+    // [ARCH-MESSAGE_HANDLING] Observer listener: synchronous and returns undefined so the service worker
+    // reply wins the response-channel race for getTabId / getOptions / getCurrentBookmark.
     if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
-      chrome.runtime.onMessage.addListener(async (message, sender, sendResponse) => {
-        if (message.type === 'BOOKMARK_UPDATED') {
-          debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data')
-          try {
-            await this.refreshPopupData()
-            // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Update overlay state after bookmark changes
-            await this.updateOverlayState()
-          } catch (error) {
-            debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Failed to refresh on update:', error)
-          }
-        }
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        if (message?.type !== 'BOOKMARK_UPDATED') return
+        this.refreshOnExternalBookmarkUpdate().catch(error => {
+          debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Detached refreshOnExternalBookmarkUpdate failed:', error)
+        })
       })
+    }
+  }
+
+  /**
+   * [IMPL-BOOKMARK_STATE_SYNC] [ARCH-BOOKMARK_STATE_SYNC] [REQ-BOOKMARK_STATE_SYNCHRONIZATION] Detached
+   * current-tab re-fetch for the BOOKMARK_UPDATED observer listener (state, tags, private/read-later).
+   */
+  async applyExternalBookmarkUpdate () {
+    try {
+      debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data')
+      if (!this.currentTab || !this.currentTab.url) return
+
+      // [TOGGLE_SYNC_POPUP] Fetch latest bookmark data for current tab
+      const updatedPin = await this.getBookmarkData(this.currentTab.url)
+      this.currentPin = updatedPin
+      this.stateManager.setState({ currentPin: this.currentPin })
+      // [TOGGLE_SYNC_POPUP] Update UI to reflect new state
+      this.uiManager.updatePrivateStatus(this.currentPin?.shared === 'no')
+      this.uiManager.updateReadLaterStatus(this.currentPin?.toread === 'yes')
+      const normalizedTags = this.normalizeTags(this.currentPin?.tags)
+      await this.refreshTagFrequencyMapForSort()
+      this.uiManager.updateCurrentTags(normalizedTags)
+      this.uiManager.showSuccess('Bookmark updated from another window')
+    } catch (error) {
+      debugError('[TOGGLE_SYNC_POPUP] Failed to update popup on BOOKMARK_UPDATED:', error)
+    }
+  }
+
+  /**
+   * [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Detached refresh for the
+   * BOOKMARK_UPDATED observer listener; errors are logged, never surfaced to the sender.
+   */
+  async refreshOnExternalBookmarkUpdate () {
+    debugLog('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Received BOOKMARK_UPDATED, refreshing data')
+    try {
+      await this.refreshPopupData()
+      // [IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] [TEST-POPUP_CLOSE_BEHAVIOR] Update overlay state after bookmark changes
+      await this.updateOverlayState()
+    } catch (error) {
+      debugError('[IMPL-POPUP_SESSION] [ARCH-POPUP_SESSION] [REQ-POPUP_PERSISTENT_SESSION] Failed to refresh on update:', error)
     }
   }
 

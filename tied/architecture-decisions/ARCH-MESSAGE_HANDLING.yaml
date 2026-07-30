@@ -15,23 +15,26 @@ ARCH-MESSAGE_HANDLING:
     - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
     - "REQ-RECENT_TAGS_SYSTEM"
     - "REQ-SMART_BOOKMARKING"
-  decision: "Centralized MessageHandler in the service worker routes standardized MESSAGE_TYPES (request/response + BOOKMARK_UPDATED broadcasts) across popup, content, and side panel; Zod/runtime validation on envelopes where implemented."
+  decision: "Centralized MessageHandler in the service worker routes standardized MESSAGE_TYPES (request/response + BOOKMARK_UPDATED broadcasts) across popup, content, and side panel; Zod/runtime validation on envelopes where implemented. Only the service worker answers request/response types: contexts that merely observe broadcasts register synchronous observer listeners that return undefined, because a promise-returning listener (including any async listener) is treated as answering and would deliver null to the sender."
   implementation_approach:
     details:
       - "BOOKMARK_UPDATED synchronization"
+      - "Chrome 144+: a promise-returning listener answers the message; observer BOOKMARK_UPDATED listeners must never return a Promise"
       - "Error handling and retry"
       - "getRecentBookmarks returns recentTags from policy-backed TagService.getUserRecentTagsExcludingCurrent"
+      - "Observer listeners are synchronous and return undefined; only the SW answers request/response types"
       - "Request/response pattern"
+      - "Senders unwrap replies with unwrapMessageResponse/readMessageResponse and treat null/undefined as a missing response (messageResponseMissing)"
       - "Standardized message types"
-    summary: "Centralized routing with standardized message format, async handling, BOOKMARK_UPDATED broadcasts; user-recent tag reads/writes use getRecentBookmarks (TagService user-recent path) and addTagToRecent."
+    summary: "Centralized routing with standardized message format, async handling, BOOKMARK_UPDATED broadcasts; user-recent tag reads/writes use getRecentBookmarks (TagService user-recent path) and addTagToRecent. Non-answering listeners stay synchronous and senders tolerate a missing (null) response."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-29"
-      reason: "ARCH corpus Phase 5: real decision sentence"
+      date: "2026-07-30"
+      reason: "Observer listener rule + null-tolerant unwrap in architecture guidance"
   name: "Message Handling Architecture"
   rationale:
     benefits:
@@ -53,20 +56,22 @@ ARCH-MESSAGE_HANDLING:
       - "ARCH-MESSAGE_HANDLING"
     implementation:
       - "IMPL-MESSAGE_HANDLING"
-      - "IMPL-TAG_SYSTEM"
     requirements:
       - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
       - "REQ-RECENT_TAGS_SYSTEM"
       - "REQ-SMART_BOOKMARKING"
     tests:
       - "tests/playwright/extension-messaging.spec.js"
+      - "tests/unit/content-message-response-missing.test.js"
       - "tests/unit/content-messaging-contracts.test.js"
       - "tests/unit/message-handler-contracts.test.js"
       - "tests/unit/message-handler-local-save-recall.test.js"
       - "tests/unit/message-handler-runtime-validation.test.js"
       - "tests/unit/message-handler-url-tags.test.js"
+      - "tests/unit/message-response-unwrap.test.js"
       - "tests/unit/message-schemas.test.js"
       - "tests/unit/message-type-drift.test.js"
       - "tests/unit/popup-message-contract.test.js"
+      - "tests/unit/runtime-message-listener-contract.test.js"
       - "tests/unit/service-worker-messaging-routing.test.js"
       - "tests/unit/tag-recent-behavior.test.js"

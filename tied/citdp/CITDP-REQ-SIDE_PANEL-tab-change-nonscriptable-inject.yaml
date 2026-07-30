@@ -1,0 +1,70 @@
+CITDP-REQ-SIDE_PANEL-tab-change-nonscriptable-inject:
+  CITDP-REQ-SIDE_PANEL-tab-change-nonscriptable-inject:
+    change_definition:
+      current_behavior: "With side panel open, tabs.onActivated/onUpdated calls refreshPopupData → loadSuggestedTags + updateOverlayState → inject. canInjectIntoTab only blocks chrome:// chrome-extension:// edge:// about:. Chrome Web Store https tabs pass precheck; Chrome throws 'The extensions gallery cannot be scripted'; UI swallows but debugError floods HOVERBOARD-DEBUG."
+      desired_behavior: "Shared classifyScriptInjectionUrl treats restricted schemes and extensions gallery hosts as non-scriptable. Precheck skips scripting; records ui-inspector injectionOutcome; expected skips use debugLog/warn not debugError. Tab-change refresh still updates This Page bookmark path. bindTabChangeRefresh exported for composition tests."
+      non_goals:
+        - "Change SW _isRestrictedForSidePanel for panel open"
+        - "Change user inhibit URL list semantics"
+        - "Playwright E2E against real Chrome Web Store"
+        - "Silence unexpected https inject failures (CSP/network)"
+      success_criteria:
+        - "Composition: bindTabChangeRefresh on Web Store URL reaches real PopupController inject prechecks; no executeScript/insertCSS"
+        - "tied_validate_consistency ok"
+        - "Unit: canInjectIntoTab and loadSuggestedTags skip gallery hosts"
+        - "Unit: classifyScriptInjectionUrl reasons missing_url restricted_scheme extensions_gallery ok"
+        - "Unit: injectionOutcome recorded for expected skips; no debugError spam path"
+      unchanged_behavior: "User inhibit URLs; badge/SW tab listeners; normal http(s) inject and suggested tags"
+    completion_criteria:
+      verification_gate_notes: "script-injection-eligibility + popup-injection-outcome unit tests; side-panel-tab-change-injection composition against real prechecks; CHANGELOG Unreleased; tied_validate_consistency; E2E omitted for Web Store (platform forbids scripting that target)."
+    impact_analysis:
+      modules_or_boundaries: "src/shared/script-injection-eligibility.js; PopupController canInjectIntoTab loadSuggestedTags injectContentScript updateOverlayState; side-panel bindTabChangeRefresh; ui-inspector recordAction injectionOutcome; vocab side-panel ui-surfaces config-and-privacy."
+      tied_tokens_affected:
+        - "ARCH-SUGGESTED_TAGS"
+        - "IMPL-POPUP_SESSION"
+        - "IMPL-SIDE_PANEL_TABS"
+        - "IMPL-SUGGESTED_TAGS"
+        - "IMPL-THIS_PAGE_TAG_SORT"
+        - "IMPL-UI_INSPECTOR"
+        - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+        - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+        - "REQ-UI_INSPECTION"
+      tied_tokens_new: []
+    leap_feedback:
+      divergences_from_analysis: "none"
+      record_status: "complete"
+      tied_stack_updates_required: []
+    record_identity:
+      change_request_id: "REQ-SIDE_PANEL-tab-change-nonscriptable-inject"
+      primary_tokens:
+        - "ARCH-SUGGESTED_TAGS"
+        - "IMPL-POPUP_SESSION"
+        - "IMPL-SIDE_PANEL_TABS"
+        - "IMPL-SUGGESTED_TAGS"
+        - "IMPL-THIS_PAGE_TAG_SORT"
+        - "IMPL-UI_INSPECTOR"
+        - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+        - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+        - "REQ-UI_INSPECTION"
+      procedure_token: "PROC-AGENT_REQ_CHECKLIST"
+      recorded_at: "2026-07-30"
+      title: "Side panel tab-change: non-scriptable URL inject guard + instrumentation"
+    risk_analysis:
+      risks:
+        - id: "R1"
+          description: "Gallery host patterns miss a future Web Store URL shape"
+          likelihood: "low"
+          mitigation: "Also classify Chrome error message extensions gallery cannot be scripted as expected"
+          residual: "low"
+          severity: "low"
+        - id: "R2"
+          description: "Over-broad host match blocks normal https pages"
+          likelihood: "low"
+          mitigation: "Host/path allowlist only for known gallery hosts; unit cases for normal https"
+          residual: "low"
+          severity: "medium"
+    tdd_sequence:
+      summary: "CITDP+vocab+LEAP → RED eligibility + injectionOutcome + composition → classifier + PopupController + export bindTabChangeRefresh → green → CHANGELOG"
+    test_strategy:
+      matrix_notes: "Unit + composition only. No E2E: Chrome forbids scripting Web Store; external page not suitable for Playwright fixture. Named platform constraint — classify as unit/composition-only for gallery path."
+      summary: "Unit script-injection-eligibility and popup-injection-outcome; composition side-panel-tab-change-injection.integration.test.js reaches real PopupController prechecks."

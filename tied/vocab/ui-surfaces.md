@@ -26,6 +26,8 @@
 | **quick access** | shortcuts entry | Commands + context menu openers |
 | **icon click opens side panel** | action click | Config `iconClickOpensSidePanel` (default true) |
 | **Quick Actions** | action row | Show Hover, Toggle Privacy, Read Later, Delete |
+| **non-scriptable URL** | cannot inject (alone) | Browser-forbidden scripting target (restricted schemes + extensions gallery); see [`side-panel.md`](side-panel.md); not user **inhibit URL** |
+| **injectionOutcome** | inject log (alone) | UI inspector `recordAction` id for precheck/skip/fail of content or suggested-tags scripting |
 
 ---
 
@@ -71,6 +73,8 @@
 - **quick access** — Manifest `commands` and context-menu entries for side panel, options, index, import, Bookmarks tab.
 - **UI action contract** — Single source of truth mapping action IDs ↔ messages for tests and inspector (`src/shared/ui-action-contract.js`).
 - **CONTENT_MESSAGE_TYPES** — Content-script handled types (`TOGGLE_HOVER`, `HIDE_OVERLAY`, `GET_OVERLAY_STATE`, …).
+- **non-scriptable URL** — Target where inject/suggested-tags scripting must precheck-skip; expected skips record **injectionOutcome**, not error spam.
+- **injectionOutcome** — Structured inspector action (`phase`, `trigger`, `reason`: `missing_url` \| `restricted_scheme` \| `extensions_gallery` \| `ok`).
 
 ---
 
@@ -81,6 +85,8 @@
 | Toggle overlay | handlers for `TOGGLE_HOVER` | [IMPL-OVERLAY](../implementation-decisions/IMPL-OVERLAY.yaml) |
 | Overlay config update | `UPDATE_OVERLAY_CONFIG` | [IMPL-OVERLAY_CONTROLS](../implementation-decisions/IMPL-OVERLAY_CONTROLS.yaml) |
 | Persistent popup | `(proposed) POPUP_SESSION_LIFECYCLE` | [IMPL-POPUP_SESSION](../implementation-decisions/IMPL-POPUP_SESSION.yaml) |
+| Classify script inject URL | `CLASSIFY_SCRIPT_INJECTION_URL` | [IMPL-POPUP_SESSION](../implementation-decisions/IMPL-POPUP_SESSION.yaml) |
+| Record injection outcome | `RECORD_INJECTION_OUTCOME` | [IMPL-UI_INSPECTOR](../implementation-decisions/IMPL-UI_INSPECTOR.yaml) |
 | Icon click toggle | `(proposed) ICON_CLICK_SIDE_PANEL_TOGGLE` | [IMPL-ICON_CLICK_BEHAVIOR](../implementation-decisions/IMPL-ICON_CLICK_BEHAVIOR.yaml) |
 | Action → message map | `POPUP_ACTION_TO_MESSAGE` | [IMPL-UI_ACTION_CONTRACT](../implementation-decisions/IMPL-UI_ACTION_CONTRACT.yaml) |
 
@@ -96,6 +102,8 @@
 | Hoverboard | Preferred terms |
 | hover | Preferred terms |
 | icon click opens side panel | Preferred terms |
+| injectionOutcome | Preferred terms |
+| non-scriptable URL | Preferred terms |
 | overlay | Preferred terms |
 | OVERLAY_ACTION_IDS | Naming bridge |
 | persistent popup session | Named concepts |

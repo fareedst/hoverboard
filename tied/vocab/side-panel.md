@@ -35,6 +35,9 @@
 | **private indicator** | lock icon, shared=no badge | Per-row Tabs card marker when bookmark `shared` is no (`.browser-tabs-card-toggle-private`) |
 | **post-batch bookmark refresh** | reload bookmark flags | After Set/Clear to-read or Add tags, re-query `getCurrentBookmark` for all tabs (`refreshBookmarkDisplayForAllTabs`) |
 | **window-focus Recent Tags refresh** | focus recent tags reload | On This Page, `windows.onFocusChanged` reloads Recent Tags (vs popup `visibilitychange`) |
+| **tab-change This Page refresh** | tab activate refresh | `tabs.onActivated` / `onUpdated(complete)` → `refreshPopupData`; must not script **non-scriptable URL** tabs |
+| **tabChangeRefresh** | tab change action | UI inspector `recordAction` id from `bindTabChangeRefresh` (`source`: `onActivated` \| `onUpdated`) before This Page refresh |
+| **non-scriptable URL** | restricted URL (alone) | Browser forbids content scripting (restricted schemes + Chrome Web Store / extensions gallery hosts) — **not** user **inhibit URL** ([`config-and-privacy.md`](config-and-privacy.md)) |
 | **index-open dismisses side panel** | close on bookmarks index | See [`bookmarks-index.md`](bookmarks-index.md); SW sends `REQUEST_SIDE_PANEL_CLOSE` when creating the index tab |
 
 ---
@@ -68,6 +71,9 @@
 - **to-read / private indicators** — Inline Tabs-row flags from bookmark state after `mergeBookmarkReplyIntoTab`.
 - **post-batch bookmark refresh** — Re-apply bookmark tags/flags to all tab rows after batch bookmark actions.
 - **window-focus Recent Tags refresh** — This Page reloads Recent Tags when the hosting browser window regains focus.
+- **tab-change This Page refresh** — Browser tab activate/navigate-complete refreshes This Page via shared `PopupController`; skips inject on **non-scriptable URL**.
+- **tabChangeRefresh** — Inspector action recorded when side-panel tab listeners schedule This Page refresh (`bindTabChangeRefresh`).
+- **non-scriptable URL** — URL where Chrome rejects scripting (schemes + extensions gallery); distinct from user **inhibit URL**.
 
 ---
 
@@ -80,6 +86,7 @@
 | Merge bookmark into tab row | `mergeBookmarkReplyIntoTab` | [IMPL-SIDE_PANEL_BROWSER_TABS](../implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml) |
 | Post-batch bookmark refresh | `refreshBookmarkDisplayForAllTabs` | [IMPL-SIDE_PANEL_BROWSER_TABS](../implementation-decisions/IMPL-SIDE_PANEL_BROWSER_TABS.yaml) |
 | Window-focus Recent Tags | `bindWindowFocusRecentTagsRefresh` / `shouldInvokeLoadRecentTagsOnWindowFocusSync` | [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) |
+| Tab-change This Page refresh | `BIND_TAB_CHANGE_REFRESH` / `bindTabChangeRefresh` | [IMPL-SIDE_PANEL_TABS](../implementation-decisions/IMPL-SIDE_PANEL_TABS.yaml) |
 | Recently closed | `(proposed) GET_RECENTLY_CLOSED_TABS` | [IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS](../implementation-decisions/IMPL-SIDE_PANEL_RECENTLY_CLOSED_TABS.yaml) |
 | Tags tree | `(proposed) RENDER_TAGS_TREE` | [IMPL-SIDE_PANEL_TAGS_TREE](../implementation-decisions/IMPL-SIDE_PANEL_TAGS_TREE.yaml) |
 | Tab search navigate | `searchAndNavigate` / `findNextTab` | [IMPL-TAB_SEARCH_SERVICE](../implementation-decisions/IMPL-TAB_SEARCH_SERVICE.yaml) |
@@ -98,6 +105,7 @@
 | importantTagSources | Preferred terms |
 | list display mode | Preferred terms |
 | mergeBookmarkReplyIntoTab | Pseudo-code block names |
+| non-scriptable URL | Preferred terms |
 | no-match UX | Preferred terms |
 | One window per tab | Preferred terms |
 | post-batch bookmark refresh | Preferred terms |
@@ -105,6 +113,8 @@
 | Remove from list | Preferred terms |
 | search scope | Preferred terms |
 | side panel | Preferred terms |
+| tab-change This Page refresh | Preferred terms |
+| tabChangeRefresh | Preferred terms |
 | tab source | Preferred terms |
 | Tabs (panel) | Preferred terms |
 | TabSearchService | Named concepts |

@@ -9,7 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Non-scriptable URL inject guard + instrumentation** ([REQ-SUGGESTED_TAGS_FROM_CONTENT], [REQ-SIDE_PANEL_POPUP_EQUIVALENT], [IMPL-POPUP_SESSION], [IMPL-SIDE_PANEL_TABS], [IMPL-UI_INSPECTOR], [ARCH-SUGGESTED_TAGS]) – Shared `classifyScriptInjectionUrl` skips restricted schemes and Chrome Web Store / extensions gallery hosts before suggested-tags or content-script inject; records ui-inspector `injectionOutcome` / side-panel `tabChangeRefresh`; expected skips use debugLog/warn (not debugError). **Tests:** unit `script-injection-eligibility.test.js`, `popup-injection-outcome.test.js`; composition `side-panel-tab-change-injection.integration.test.js` (real PopupController inject prechecks). CITDP: `tied/citdp/CITDP-REQ-SIDE_PANEL-tab-change-nonscriptable-inject.yaml`. **No Web Store E2E** (Chrome forbids scripting that target; unit/composition-only).
+
 - **Browser storage backend (Store B)** ([REQ-BROWSER_BOOKMARK_STORAGE], [ARCH-BROWSER_BOOKMARK_PROVIDER], [IMPL-BROWSER_BOOKMARK_SERVICE], [IMPL-BOOKMARK_ROUTER], [IMPL-STORAGE_INDEX], [IMPL-LOCAL_BOOKMARKS_INDEX]) – Fifth backend `browser` over `chrome.bookmarks`; Index **Browser (B)**; Save-to / default storage mode / move / import; folder-path tags with Chrome root strip; URL collapse; **2C** excludes browser from `getBookmarkForUrl` best-of race (consult via preferred/index/default or empty peers). Unit + MessageHandler composition coverage; E2E not required (provider/router composition). CITDP: `tied/citdp/CITDP-REQ-BROWSER_BOOKMARK_STORAGE.yaml`.
+
+### Removed
+
+- **Dead options-browser harness** – Deleted unused `src/ui/options/options-browser.js` and root `options-browser-test.html`. Production options page remains `options.html` → `options.js`.
 
 ### Changed
 
@@ -22,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **REQ corpus remediation LEAP** ([REQ-PER_BOOKMARK_STORAGE_BACKEND], [REQ-LOCAL_BOOKMARKS_INDEX], [REQ-MOVE_BOOKMARK_STORAGE_UI], [ARCH-STORAGE_INDEX_AND_ROUTER], [ARCH-MOVE_BOOKMARK_UI], [IMPL-MOVE_BOOKMARK_UI], [IMPL-LOCAL_BOOKMARKS_INDEX_IMPORT], [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]) – Sibling storage REQs/ARCH/IMPL and vocab aligned to five backends; index↔detail status sync; Manifest V3 Implemented; suggested-tags cleanup; stub/NFR umbrellas; orphan `REQ-IDENTIFIER` removed; Bookmarks panel vs Store B boundary; Save to only (no dedicated Local/File toggle). CITDP: `tied/working/REQ_CORPUS_REVIEW_20260729132400-plan.md`.
 
 ### Fixed
+
+- **Side panel / popup no longer answer messages meant for the service worker** ([REQ-BOOKMARK_STATE_SYNCHRONIZATION], [REQ-POPUP_PERSISTENT_SESSION], [ARCH-MESSAGE_HANDLING], [IMPL-POPUP_SESSION], [IMPL-BOOKMARK_STATE_SYNC], [IMPL-MESSAGE_HANDLING], [IMPL-UI_INSPECTOR]) – The two `BOOKMARK_UPDATED` watchers in `PopupController` were `async`, so from Chrome 144 they answered every runtime message with `null` and beat the service-worker reply; content scripts then failed with `Cannot read properties of null (reading 'success')` on `getTabId` / `getOptions` / `getCurrentBookmark` whenever the panel or popup was open. They are now synchronous observer listeners that return `undefined` and refresh in a detached promise. Shared `readMessageResponse` (`src/shared/message-response.js`) treats a missing reply as `null`, keeps content-script defaults, and records a `messageResponseMissing` inspector action. **Tests (unit):** `runtime-message-listener-contract.test.js` (both observer paths + source guard against `onMessage.addListener(async`), `message-response-unwrap.test.js`, `content-message-response-missing.test.js`. CITDP: `tied/citdp/CITDP-REQ-BOOKMARK_STATE_SYNC-observer-listener-null-response.yaml`.
 
 - **Local Bookmarks Index CSV Storage Browser label** ([REQ-LOCAL_BOOKMARKS_INDEX_EXPORT], [IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT]) – `buildCsv` emits `Browser` for Store B rows (was falling through to Local). **Tests:** `bookmarks-table-export.test.js`. CITDP: `tied/citdp/CITDP-REQ-LOCAL_BOOKMARKS_INDEX_EXPORT-browser-storage-label.yaml`.
 

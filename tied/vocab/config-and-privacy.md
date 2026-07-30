@@ -18,7 +18,8 @@
 | **Chrome storage settings** ([ARCH-STORAGE](../architecture-decisions/ARCH-STORAGE.yaml)) | storage strategy (alone), bookmark storage | `chrome.storage.sync`/`local` for settings and config portability — **not** bookmark **storage backends** ([`storage-backends.md`](storage-backends.md) / [ARCH-STORAGE_INDEX_AND_ROUTER](../architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml)) |
 | **hoverboard_settings** | settings blob | Primary merged settings object key |
 | **storage mode** | storage backend default | Global default; key `hoverboard_storage_mode`; values `pinboard` \| `local` \| `file` \| `sync` \| `browser` (see [`storage-backends.md`](storage-backends.md); **Browser** ≠ **Local**) |
-| **inhibit URL** / **disabled sites** | blocklist | Domains where extension will not activate |
+| **inhibit URL** / **disabled sites** | blocklist | User-configured domains where extension will not activate — **not** browser **non-scriptable URL** ([`side-panel.md`](side-panel.md) / [`ui-surfaces.md`](ui-surfaces.md)) |
+| **non-scriptable URL** | restricted host (alone) | Chrome forbids scripting (schemes + Web Store / gallery); classifier in `script-injection-eligibility.js`; distinct from **inhibit URL** |
 | **site management** | inhibit list UI | Options section for disabled sites |
 | **URL inhibition** | inhibit on load | Implementation of disabled sites (`INHIBIT_URL`) |
 | **feature flags** | toggles | Config booleans such as `showHoverOnPageLoad` |
@@ -87,6 +88,7 @@
 | feature flags | Preferred terms |
 | hoverboard_settings | Preferred terms |
 | inhibit URL | Preferred terms |
+| non-scriptable URL | Preferred terms |
 | Pinboard API Token | Preferred terms |
 | site management | Preferred terms |
 | storage mode | Preferred terms |

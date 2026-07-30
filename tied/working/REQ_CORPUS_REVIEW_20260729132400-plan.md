@@ -128,3 +128,16 @@ Full exec completed via tied-yaml MCP / `tied-cli.sh`:
 10. Vocab RECORD — demote file↔browser toggle under Save to in `storage-backends.md`.
 11. Code/test — `buildCsv` Storage emits Browser; unit test in `bookmarks-table-export.test.js`; stale popup comment sync.
 12. CHANGELOG Unreleased + proposed commit message (no commit).
+
+## Post-corpus bugfixes (2026-07-30)
+
+Two behavior-changing streams after corpus close-loop; **not** folded into Phase 4 suggested-tags cleanup:
+
+| Stream | CITDP | Tokens (primary) |
+| --- | --- | --- |
+| Chrome 144 observer-listener null response | `tied/citdp/CITDP-REQ-BOOKMARK_STATE_SYNC-observer-listener-null-response.yaml` | `REQ-BOOKMARK_STATE_SYNCHRONIZATION`, `REQ-POPUP_PERSISTENT_SESSION`, `ARCH-MESSAGE_HANDLING`, `IMPL-MESSAGE_HANDLING`, `IMPL-BOOKMARK_STATE_SYNC`, `IMPL-POPUP_SESSION`, `IMPL-UI_INSPECTOR` |
+| Non-scriptable URL inject on tab-change | `tied/citdp/CITDP-REQ-SIDE_PANEL-tab-change-nonscriptable-inject.yaml` | `REQ-SUGGESTED_TAGS_FROM_CONTENT`, `REQ-SIDE_PANEL_POPUP_EQUIVALENT`, `REQ-UI_INSPECTION`, `ARCH-SUGGESTED_TAGS`, `IMPL-POPUP_SESSION`, `IMPL-SIDE_PANEL_TABS`, `IMPL-SUGGESTED_TAGS`, `IMPL-THIS_PAGE_TAG_SORT`, `IMPL-UI_INSPECTOR` |
+
+**Done when (post-corpus):** IMPL contracts + literal block leads aligned; ARCH/REQ/vocab/traceability updated; unit + composition green; no Web Store E2E (named platform constraint); CHANGELOG Unreleased accurate; version metadata consistent; proposed commit message only (no commit unless asked).
+
+**Status (2026-07-30):** Done criteria met for both streams. Unit 104 suites green; integration 7 suites green; Web Store path unit/composition-only; existing Playwright extension E2E blocked in this environment by missing `test-overlay-enhanced.html` webServer fixture (unrelated to these fixes). Version aligned to **3.1.2**. Commit not created (propose only).
