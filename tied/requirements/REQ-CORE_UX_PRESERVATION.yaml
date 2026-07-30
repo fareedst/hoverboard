@@ -1,14 +1,14 @@
 REQ-CORE_UX_PRESERVATION:
   category: "Immutable"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-CORE_UX_PRESERVATION)."
+  description: "Umbrella: preserve core bookmarking UX (pin, tags, private/toread, Save to) across popup and overlay while features evolve."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Core User Experience Preservation"
   priority: "P0"
   rationale:
@@ -22,15 +22,13 @@ REQ-CORE_UX_PRESERVATION:
   related_requirements:
     depends_on: []
     related_to:
-      - "REQ-OVERLAY_SYSTEM"
-      - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
+      - "REQ-USABILITY"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Hover interface activates on webpage hover"
-    - criterion: "Overlay is semi-transparent and non-intrusive"
-    - criterion: "Private bookmark toggle available"
-    - criterion: "Quick bookmark actions available without page navigation"
-    - criterion: "Recent tags system functional"
+    - criterion: "Primary create/update bookmark and tag flows remain available in popup and overlay after feature additions."
+    - criterion: "Umbrella: surface-specific criteria owned by related UX REQs."
   status: "Implemented"
   traceability:
     architecture:

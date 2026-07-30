@@ -1,14 +1,14 @@
 REQ-TAG_MANAGEMENT:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-TAG_MANAGEMENT)."
+  description: "Umbrella for tag add/remove/sanitize/recent across popup, overlay, and index. Owning specifics in TAG_INPUT_SANITIZATION, suggested-tags, and This Page tag sort REQs."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Tag Management"
   priority: "P0"
   rationale:
@@ -22,13 +22,13 @@ REQ-TAG_MANAGEMENT:
   related_requirements:
     depends_on: []
     related_to:
-      - "REQ-RECENT_TAGS_SYSTEM"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
       - "REQ-TAG_INPUT_SANITIZATION"
+      - "REQ-THIS_PAGE_TAG_SORT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Tag editing capabilities"
-    - criterion: "Tag input with suggestions"
-    - criterion: "Tag sanitization"
+    - criterion: "Umbrella: sanitize/suggest/sort details under related tag REQs."
+    - criterion: "Users can add and remove tags on bookmarks from popup/overlay without losing prior tags (with URL_TAGS_DISPLAY)."
   status: "Implemented"
   traceability:
     architecture:

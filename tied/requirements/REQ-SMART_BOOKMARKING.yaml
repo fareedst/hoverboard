@@ -1,14 +1,14 @@
 REQ-SMART_BOOKMARKING:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-SMART_BOOKMARKING)."
+  description: "Umbrella for assisted bookmarking (suggested tags, AI tagging). Owning criteria in suggested-tags and AI tagging REQs."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Smart Bookmarking"
   priority: "P0"
   rationale:
@@ -22,13 +22,11 @@ REQ-SMART_BOOKMARKING:
   related_requirements:
     depends_on: []
     related_to:
-      - "REQ-OVERLAY_SYSTEM"
-      - "REQ-TAG_MANAGEMENT"
+      - "REQ-AI_TAGGING_POPUP"
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Auto-populated fields from page metadata"
-    - criterion: "Bookmark creation without leaving page"
-    - criterion: "Tag suggestions available"
+    - criterion: "Umbrella: assisted tagging features are validated under suggested-tags and AI tagging REQs."
   status: "Implemented"
   traceability:
     architecture:

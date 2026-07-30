@@ -1,14 +1,14 @@
 REQ-OVERLAY_AUTO_SHOW_CONTROL:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-OVERLAY_AUTO_SHOW_CONTROL)."
+  description: "User control for whether overlay auto-shows on page load (Show Hover on page load / site rules)."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Hover Auto-Show Controls"
   priority: "P1"
   rationale:
@@ -23,12 +23,10 @@ REQ-OVERLAY_AUTO_SHOW_CONTROL:
     depends_on: []
     related_to:
       - "REQ-OVERLAY_SYSTEM"
+      - "REQ-SITE_MANAGEMENT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Configuration persists via ConfigManager"
-    - criterion: "Content scripts respect inhibit list and conditions"
-    - criterion: "showHoverOnPageLoad checkbox in popup and options"
-    - criterion: "Updates broadcast to active tabs"
+    - criterion: "User can enable/disable overlay auto-show via settings or site rules."
   status: "Implemented"
   traceability:
     architecture:

@@ -1,14 +1,14 @@
 REQ-SITE_MANAGEMENT:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-SITE_MANAGEMENT)."
+  description: "Options site management for allow/inhibit lists affecting overlay and page features."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Site Management"
   priority: "P1"
   rationale:
@@ -21,12 +21,14 @@ REQ-SITE_MANAGEMENT:
     why: "User control over extension behavior per site"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-CONFIGURATION"
+      - "REQ-OVERLAY_AUTO_SHOW_CONTROL"
+      - "REQ-PRIVACY_CONTROLS"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Disabled sites list persists"
-    - criterion: "Extension respects disabled sites"
-    - criterion: "Sites can be disabled"
+    - criterion: "Canonical site-management terms in tied/vocab/config-and-privacy.md."
+    - criterion: "User can add/remove sites that control overlay auto-show or inhibit behavior."
   status: "Implemented"
   traceability:
     architecture:

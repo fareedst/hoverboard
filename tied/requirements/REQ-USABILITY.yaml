@@ -1,24 +1,26 @@
 REQ-USABILITY:
   category: "Non-Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-USABILITY)."
+  description: "Umbrella NFR for UX clarity across popup, overlay, side panel, and Options."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: placeholder NFR policy"
   name: "Usability"
   priority: "P2"
   rationale:
     why: "Usability requirements"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-CORE_UX_PRESERVATION"
+      - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "REQ-USABILITY documented in TIED"
+    - criterion: "Umbrella: primary bookmarking flows remain operable without leaving the extension chrome; details under related UX REQs."
   status: "Active"
   traceability:
     architecture: []

@@ -4,7 +4,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
   bulk_move: "Move selected to (Local | File | Sync | Browser) + Move button; uses moveBookmarkToStorage message per selected URL [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-BROWSER_BOOKMARK_STORAGE]. Move controls disabled when no selection."
   count_footer: "**Bookmark count at bottom of page and always visible** [REQ-LOCAL_BOOKMARKS_INDEX]: The row count (# bookmarks) lives in a dedicated footer block (.footer-info), the last content in the main container; a .footer-spacer (flex: 1 1 0) before it pushes the footer to the visual bottom when content is short. .footer-info uses position: sticky; bottom: 0 so when content is long the count bar stays visible at the bottom of the viewport while scrolling. html/body min-height: 100vh and body flex column; container flex: 1 and min-height: 100vh."
   cross-references: "REQ-LOCAL_BOOKMARKS_INDEX, IMPL-LOCAL_BOOKMARKS_INDEX, ARCH-STORAGE_INDEX_AND_ROUTER"
-  cross_references: &ref_0 []
+  cross_references: []
   decision: "A single extension page (e.g. bookmarks-table.html) displays a table of local, file, sync, and browser bookmarks (non-Pinboard). Data from getAggregatedBookmarksForIndex (or fallback getLocalBookmarksForIndex). Aggregate responses with error or success:false trigger local fallback even when bookmarks is []. Stores group: Local, File, Sync, Browser (B) checkboxes; default all unchecked. When a store checkbox changes and allBookmarks is empty while at least one store is checked, re-run LOAD_LOCAL_BOOKMARKS_INDEX (store-change reload). SW serializes bookmark provider init (PROVIDER_INIT_MUTEX). Show only / Hide / Table Display groups as before. Actions for selected: Export, Move (Local|File|Sync|Browser), Delete, Import. Storage column; search; sortable columns; launchable URLs. Index open: SW OPEN_BOOKMARKS_INDEX_TAB creates tab then REQUEST_SIDE_PANEL_CLOSE."
   filters: "Stores (checkboxes Local/File/Sync/Browser; empty set → 0 rows). Store checkbox change refilters; if allBookmarks empty and ≥1 store checked, store-change reload re-fetches. Show only / Hide as before. All client-side; applied in order: stores → search → show-only → hide."
   getaggregatedbookmarksforindex: "Handled by calling bookmarkProvider.getAllBookmarksForIndex() when the provider is BookmarkRouter; router aggregates local, file, sync, and browser providers, adds storage local|file|sync|browser, merges and sorts by time desc."
@@ -21,7 +21,7 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "LEAP: Stores Browser (B) and aggregate includes browser"
+      reason: "Corpus remediation Phase 1: fill ARCH-LOCAL_BOOKMARKS_INDEX traceability"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -38,9 +38,14 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
     - "IMPL-LOCAL_BOOKMARKS_INDEX (getAggregatedBookmarksForIndex / getLocalBookmarksForIndex, handler, bookmarks-table UI with Storage column, OPEN_BOOKMARKS_INDEX_TAB)"
     - "REQ-ICON_CLICK_BEHAVIOR (cooperative REQUEST_SIDE_PANEL_CLOSE reused on index open)"
   related_decisions:
-    depends_on: *ref_0
-    informs: []
-    see_also: []
+    depends_on:
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    informs:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    see_also:
+      - "ARCH-LOCAL_STORAGE_PROVIDER"
+      - "ARCH-MESSAGE_HANDLING"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
   search: "One text input; case-insensitive substring match on description, url, tags (joined), extended."
   selection: "First column **Select**: checkboxes per row, header \"select all\" for visible rows. Selected URLs kept in a Set for bulk operations."
   show_only_clear: "**Show only** group includes a **Clear** button that resets all controls in that group to default (empty tags, to-read and private unchecked, time range cleared, time field = Last updated)."
@@ -52,6 +57,12 @@ ARCH-LOCAL_BOOKMARKS_INDEX:
   traceability:
     code_annotations:
       - "ARCH-LOCAL_BOOKMARKS_INDEX"
-    implementation: []
-    requirements: *ref_0
-    tests: []
+    implementation:
+      - "IMPL-LOCAL_BOOKMARKS_INDEX"
+    requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+    tests:
+      - "tests/unit/bookmarks-table-index.test.js"
+      - "tests/unit/bookmarks-table-load.test.js"
+      - "tests/unit/message-handler-bookmarks-index.test.js"

@@ -1,14 +1,14 @@
 REQ-OVERLAY_CONTROL_LAYOUT:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-OVERLAY_CONTROL_LAYOUT)."
+  description: "Overlay control layout and action affordances (OVERLAY_ACTION_IDS)."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Overlay Control Layout"
   priority: "P1"
   rationale:
@@ -22,14 +22,10 @@ REQ-OVERLAY_CONTROL_LAYOUT:
   related_requirements:
     depends_on: []
     related_to:
-      - "REQ-OVERLAY_REFRESH_ACTION"
       - "REQ-OVERLAY_SYSTEM"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "32px spacing, 24px minimum touch targets"
-    - criterion: "Close button at top: 8px; left: 8px; refresh at top: 8px; left: 40px"
-    - criterion: "Full accessibility metadata (title, aria-label, role, tabindex, keyboard handlers)"
-    - criterion: "Theme-aware styling with CSS variables"
+    - criterion: "Overlay exposes bookmark actions in a documented layout; terms in tied/vocab/ui-surfaces.md."
   status: "Implemented"
   traceability:
     architecture:

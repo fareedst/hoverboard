@@ -47,6 +47,7 @@ Examples of cross-topic notes:
 - Non-canonical LEAP proposals never mutate project TIED YAML
 - Local (storage backend) vs Local Bookmarks Index; Sync backend vs bookmark state sync
 - pin / bookmark vs Pinboard; Bookmarks panel vs Hoverboard-stored bookmarks vs index page
+- Bookmarks panel (Chrome tree UI) vs Browser storage backend (Store B / BookmarkRouter peer); Browser Bookmark Import excludes Browser as Import-to target
 - hover / overlay vs product name Hoverboard; Recent Tags vs getRecentBookmarks
 - browser API shim vs Safari App Extension (deferred); API availability check vs Safari product
 

@@ -1,24 +1,26 @@
 REQ-MAINTAINABILITY:
   category: "Non-Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-MAINTAINABILITY)."
+  description: "Umbrella NFR for codebase clarity and tooling. Owning measurable criteria in REQ-CODE_QUALITY."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: link CODE_QUALITY"
   name: "Maintainability"
   priority: "P2"
   rationale:
     why: "Codebase maintainability and clarity"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-CODE_QUALITY"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "REQ-MAINTAINABILITY documented in TIED"
+    - criterion: "Lint and validate scripts keep the tree mergeable (REQ-CODE_QUALITY)."
+    - criterion: "Umbrella: deeper maintainability owned by CODE_QUALITY and TIED module-validation process."
   status: "Active"
   traceability:
     architecture: []

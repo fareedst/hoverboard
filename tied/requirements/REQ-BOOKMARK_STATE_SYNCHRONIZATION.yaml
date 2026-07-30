@@ -1,14 +1,14 @@
 REQ-BOOKMARK_STATE_SYNCHRONIZATION:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-BOOKMARK_STATE_SYNCHRONIZATION)."
+  description: "Umbrella for badge/popup/overlay bookmark state staying consistent after mutations. Owning logic in REQ-URL_TAGS_DISPLAY, REQ-BADGE_INDICATORS, IMPL-BOOKMARK_STATE_SYNC."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Bookmark State Synchronization"
   priority: "P1"
   rationale:
@@ -22,13 +22,12 @@ REQ-BOOKMARK_STATE_SYNCHRONIZATION:
   related_requirements:
     depends_on: []
     related_to:
-      - "REQ-POPUP_PERSISTENT_SESSION"
+      - "REQ-BADGE_INDICATORS"
+      - "REQ-URL_TAGS_DISPLAY"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Badge logic compares states, detects mismatches"
-    - criterion: "Canonical MESSAGE_TYPES and sync message terminology: `tied/vocab/ipc-messaging.md`."
-    - criterion: "Overlay toggles persist via saveBookmark, broadcast BOOKMARK_UPDATED"
-    - criterion: "Popup listens for broadcast, re-fetches data, updates UI"
+    - criterion: "After tag or flag mutations from popup/overlay, badge and This Page views reflect the same bookmark state."
+    - criterion: "Umbrella: detailed sync paths owned by URL_TAGS_DISPLAY and BADGE_INDICATORS."
   status: "Implemented"
   traceability:
     architecture:

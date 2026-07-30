@@ -1,13 +1,14 @@
 REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
   category: "Functional"
+  description: "Side-panel Bookmarks tab manages the Chrome bookmark tree UI (chrome.bookmarks.getTree): search, folders, bulk open/move/delete, import/export HTML/CSV. Distinct from REQ-BROWSER_BOOKMARK_STORAGE, which is the BookmarkRouter peer backend (Store B / Save to Browser) for Hoverboard index aggregate and move/import/export of Hoverboard-managed pins."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-03-02"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-02"
-      reason: "Sync satisfaction criteria for bulk, undo, import/export, inline edit, keyboard, command; extend validation and traceability.tests"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 6: document panel vs Browser-backend boundary"
     last_validated:
       date: "2026-03-02"
       result: "pass"
@@ -24,9 +25,11 @@ REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
   related_requirements:
     depends_on: []
     related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     supersedes: []
   satisfaction_criteria:
+    - criterion: "Boundary: this REQ is Chrome-tree UI in the side panel; REQ-BROWSER_BOOKMARK_STORAGE is BookmarkRouter backend browser (Store B), not this tab"
     - criterion: "Bulk checkbox per row; Select all / Deselect all; Open in tabs/window; Copy URLs; Move to folder; Delete with confirmation; Export selected or all as HTML/CSV"
     - criterion: "Click bookmark URL opens in new tab via chrome.tabs.create"
     - criterion: "Folder sidebar or dropdown shows folder tree with bookmark counts; click folder filters list to that folder"
@@ -36,7 +39,7 @@ REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
     - criterion: "List shows title, URL, favicon, folder path for each bookmark"
     - criterion: "Manifest command open-side-panel-browser-bookmarks opens panel on Bookmarks tab"
     - criterion: "Real-time search (case-insensitive substring) across title, URL, folder path; match count displayed"
-    - criterion: "Session-scoped undo stack; \"Deleted N bookmarks. Undo\" with timed dismiss; undo restores via chrome.bookmarks.create"
+    - criterion: "Session-scoped undo stack; Deleted N bookmarks. Undo with timed dismiss; undo restores via chrome.bookmarks.create"
     - criterion: "Side panel has a tab named Bookmarks that displays Chrome browser bookmarks from chrome.bookmarks.getTree"
     - criterion: "Sort by Date (newest/oldest), Name (A-Z/Z-A), Chrome default order; preference persisted in chrome.storage.local"
   status: "Implemented"

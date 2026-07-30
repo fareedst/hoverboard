@@ -11,7 +11,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "Import control group UX and create-time preserve"
+      reason: "Corpus remediation Phase 1: Import to includes Browser"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -20,14 +20,14 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
   priority: "P1"
   rationale:
     benefits:
-      - "Import to Local | File | Sync so user chooses target storage; uses existing saveBookmark message (no new backend API)"
+      - "Import to Local | File | Sync | Browser so user chooses target storage; uses existing saveBookmark message (no new backend API)"
       - "Same file formats as export (CSV with Title, URL, Tags, Time, Storage, Shared, To read, Notes; JSON array of bookmark objects) for round-trip and portability"
       - Import and overwrite: "full restore or update of records from a file"
       - Import only new: "merge external data without overwriting existing bookmarks (by URL)"
     problems_solved:
       - "No way to bring in bookmarks from external CSV/JSON files (e.g. from another tool or backup)"
       - "No way to restore or merge previously exported bookmark data into the index"
-    why: "Allow users to import bookmarks from a file (CSV or JSON) into the index storage (Local | File | Sync) with control over duplicates."
+    why: "Allow users to import bookmarks from a file (CSV or JSON) into the index storage (Local | File | Sync | Browser) with control over duplicates."
   related_requirements:
     depends_on: []
     related_to:
@@ -39,9 +39,9 @@ REQ-LOCAL_BOOKMARKS_INDEX_IMPORT:
     - criterion: "Import uses existing saveBookmark message; no new backend API."
     - criterion: "On create, imported Time and Updated are retained when present in the file."
     - criterion: "User can choose to import only new records (skip URLs already in index) or import and overwrite existing records."
-    - criterion: "User can select a file (CSV or JSON in export format) and target storage (Local | File | Sync)."
+    - criterion: "User can select a file (CSV or JSON in export format) and target storage (Local | File | Sync | Browser)."
   status: "Implemented"
-  summary: "From the Local Bookmarks Index page Import control group, the user can import bookmarks from a CSV or JSON file. Two modes: Import only new (skip URLs already in the index) and Import and overwrite existing. Import to target (Local | File | Sync). Import button is the final trigger; UI shows pending then imported/skipped/failed counts. New records retain Time and Updated from the file when present. Uses existing saveBookmark message."
+  summary: "From the Local Bookmarks Index page Import control group, the user can import bookmarks from a CSV or JSON file. Two modes: Import only new (skip URLs already in the index) and Import and overwrite existing. Import to target (Local | File | Sync | Browser). Import button is the final trigger; UI shows pending then imported/skipped/failed counts. New records retain Time and Updated from the file when present. Uses existing saveBookmark message."
   traceability:
     architecture:
       - "ARCH-LOCAL_BOOKMARKS_INDEX_IMPORT"

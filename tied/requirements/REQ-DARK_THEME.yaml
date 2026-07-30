@@ -1,14 +1,14 @@
 REQ-DARK_THEME:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-DARK_THEME)."
+  description: "Dark theme support for popup/Options/index surfaces via hoverboard_theme."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Dark Theme Support"
   priority: "P1"
   rationale:
@@ -21,11 +21,13 @@ REQ-DARK_THEME:
     why: "User preference for dark mode"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-CONFIGURATION"
+      - "REQ-USABILITY"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Dark theme available"
-    - criterion: "Theme switches without restart"
+    - criterion: "Umbrella: detailed CSS theming owned by IMPL-POPUP_THEME_CSS and Options theme controls."
+    - criterion: "User can select dark theme and primary UI surfaces honor hoverboard_theme."
   status: "Implemented"
   traceability:
     architecture:

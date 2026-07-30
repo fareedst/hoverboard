@@ -1,14 +1,14 @@
 REQ-OVERLAY_SYSTEM:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-OVERLAY_SYSTEM)."
+  description: "Umbrella for page overlay (Show Hover) chrome: presence, actions, suggested/recent tags. Owning layout/control REQs under overlay family."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Overlay System"
   priority: "P0"
   rationale:
@@ -27,9 +27,7 @@ REQ-OVERLAY_SYSTEM:
       - "REQ-OVERLAY_REFRESH_ACTION"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Non-intrusive positioning"
-    - criterion: "Overlay displays on hover/activation"
-    - criterion: "Semi-transparent design"
+    - criterion: "Umbrella: overlay presence and actions owned by overlay family REQs and ui-surfaces vocab."
   status: "Implemented"
   traceability:
     architecture:

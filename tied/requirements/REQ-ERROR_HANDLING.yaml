@@ -1,24 +1,27 @@
 REQ-ERROR_HANDLING:
   category: "Non-Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-ERROR_HANDLING)."
+  description: "Umbrella NFR for consistent error surfacing across popup, overlay, Options, and service worker."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: placeholder NFR criteria"
   name: "Error Handling"
   priority: "P2"
   rationale:
     why: "Consistent error handling"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-RELIABILITY"
+      - "REQ-USABILITY"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "REQ-ERROR_HANDLING documented in TIED"
+    - criterion: "Umbrella: detailed error UX owned by feature REQs; this token tracks the cross-cutting policy."
+    - criterion: "User-facing failures show a recoverable message rather than silent no-ops on primary save/delete/move paths."
   status: "Active"
   traceability:
     architecture: []

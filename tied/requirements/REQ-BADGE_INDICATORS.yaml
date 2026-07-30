@@ -1,14 +1,14 @@
 REQ-BADGE_INDICATORS:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-BADGE_INDICATORS)."
+  description: "Toolbar badge shows bookmark presence, tag count, and private/to-read indicators; refreshes when tags or flags change from popup or overlay. Owns visual badge contract; shares tag-count source with REQ-URL_TAGS_DISPLAY."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand badge stub with named tests and ARCH/IMPL"
   name: "Badge Indicators"
   priority: "P1"
   rationale:
@@ -21,7 +21,8 @@ REQ-BADGE_INDICATORS:
     why: "Quick visual feedback for bookmark status"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-URL_TAGS_DISPLAY"
     supersedes: []
   satisfaction_criteria:
     - criterion: "Badge refreshes immediately when private or to-read toggle is changed from overlay or popup"
@@ -33,12 +34,17 @@ REQ-BADGE_INDICATORS:
   traceability:
     architecture:
       - "ARCH-BADGE"
+      - "ARCH-URL_TAGS_DISPLAY"
     code_annotations:
       - "REQ-BADGE_INDICATORS"
     implementation:
       - "IMPL-BADGE"
+      - "IMPL-BADGE_REFRESH"
+      - "IMPL-URL_TAGS_DISPLAY"
     tests:
-      - "Badge tests"
+      - "tests/unit/badge-manager.test.js"
+      - "tests/unit/badge-refresh-service-worker.test.js"
+      - "tests/unit/url-tags-manager.test.js"
   validation_criteria:
     - method: "Badge update tests"
       coverage: "State indicator logic"

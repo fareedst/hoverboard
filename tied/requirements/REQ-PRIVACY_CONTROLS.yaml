@@ -1,14 +1,14 @@
 REQ-PRIVACY_CONTROLS:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-PRIVACY_CONTROLS)."
+  description: "Umbrella for inhibit-URL / site privacy controls that suppress overlay or data collection on selected sites."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Privacy Controls"
   priority: "P0"
   rationale:
@@ -21,12 +21,13 @@ REQ-PRIVACY_CONTROLS:
     why: "User privacy and organization needs"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-CONFIGURATION"
+      - "REQ-SITE_MANAGEMENT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Private toggle works"
-    - criterion: "State persists"
-    - criterion: "To-read toggle works"
+    - criterion: "Canonical privacy terms in tied/vocab/config-and-privacy.md."
+    - criterion: "User can inhibit Hoverboard behavior on selected sites via Options site management."
   status: "Implemented"
   traceability:
     architecture:

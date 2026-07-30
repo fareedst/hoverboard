@@ -9,7 +9,7 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "LEAP: add browser as fifth storage backend"
+      reason: "Corpus remediation Phase 1+2: five-backend contract; status Implemented; fill ARCH/IMPL links"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -17,15 +17,16 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
   name: "Per-Bookmark Storage Backend"
   priority: "P1"
   purpose:
-    - "Allow mixing bookmarks across Pinboard, local browser storage, and file."
-    - "Default storage for new bookmarks from config (extended to include 'file')."
+    - "Allow mixing bookmarks across Pinboard, local, file, sync, and browser."
+    - "Default storage for new bookmarks from config (five backends)."
     - "Enable moving a bookmark from one storage method to another (copy to target, delete from source, update index)."
   rationale:
     benefits: []
     problems_solved: []
     why: "See detail file"
   related:
-    - "ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-STORAGE_INDEX, IMPL-BOOKMARK_ROUTER"
+    - "ARCH-STORAGE_INDEX_AND_ROUTER, IMPL-STORAGE_INDEX, IMPL-BOOKMARK_ROUTER, ARCH-BROWSER_BOOKMARK_PROVIDER, IMPL-BROWSER_BOOKMARK_SERVICE"
+    - "REQ-BROWSER_BOOKMARK_STORAGE (fifth backend)"
     - "REQ-MOVE_BOOKMARK_STORAGE_UI (move UI uses getStorageBackendForUrl and moveBookmarkToStorage)"
   related_requirements:
     depends_on: []
@@ -39,14 +40,22 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
     - criterion: "Canonical terms for storage backends, storage index, and BookmarkRouter: tied/vocab/storage-backends.md."
     - criterion: "Migration: existing local bookmarks get index entry local."
     - criterion: "Storage index: key hoverboard_storage_index, shape url to pinboard|local|file|sync|browser; getIndex, setBackendForUrl, getBackendForUrl, removeUrl."
-  status: "Planned"
+  status: "Implemented"
   summary: "Each bookmark is tagged with a storage method: pinboard, local, file, sync, or browser. A storage index maps URL to backend. BookmarkRouter delegates get/save/delete; getRecentBookmarks aggregates all five; getAllBookmarksForIndex aggregates local+file+sync+browser."
   traceability:
-    architecture: []
+    architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+      - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
-    implementation: []
-    tests: []
+    implementation:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
+      - "IMPL-STORAGE_INDEX"
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/storage-index.test.js"
   validation_criteria:
     - method: "Manual verification"
       coverage: "See detail file"

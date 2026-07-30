@@ -18,8 +18,8 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
   metadata:
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Remove safari/ mirror references"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 4: clear stale test_scope; keep acyclic related_to"
   modifiable_decisions: "1. **Rank tie**: When two surface forms tie on mixed/ALLCAPS/lower rank, keep the incumbent. 2. **Sanitization**: sanitizeTag runs after canonical pick (REQ-TAG_INPUT_SANITIZATION). 3. **Tokenizer sync**: Popup MAIN snippet and TagService must share delimiter regex (ARCH-SUGGESTED_TAGS / IMPL-SUGGESTED_TAGS)."
   name: "Suggested Tags Case Preservation"
   no_capitalization_choice: "Users had no way to choose between \"JavaScript\" and \"javascript\" if only one was offered."
@@ -47,8 +47,8 @@ REQ-SUGGESTED_TAGS_CASE_PRESERVATION:
     - criterion: "With tag case mode upper, the same canonical value displays as ALL CAPS (e.g. Apple → APPLE) via existing chip folding."
     - criterion: "Words that appear only in all-lowercase in content still suggest once in that lowercase form."
   status: "Implemented"
-  supersedes: "None\n\n---"
-  test_scope: "(currently **not implemented**; see \"Current Test Gap\" below):"
+  supersedes: ""
+  test_scope: "Unit tests in tests/unit/suggested-tag-original-case.test.js"
   traceability:
     architecture:
       - "ARCH-SUGGESTED_TAGS"

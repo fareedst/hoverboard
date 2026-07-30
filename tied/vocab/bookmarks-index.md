@@ -23,7 +23,7 @@
 | **Browser Bookmark Import** | Chrome import page | Page that copies browser bookmarks into Hoverboard backends |
 | **Netscape Bookmark File Format** | bookmarks.html format | Doctype `NETSCAPE-Bookmark-file-1` |
 | **Use folder names as tags** | folder→tag | Import option mapping folder path to tags |
-| **Import to** | import target | Target backend Local \| File \| Sync \| Browser |
+| **Import to** | import target | Index CSV/JSON import: Local \| File \| Sync \| Browser. **Browser Bookmark Import** page: Local \| File \| Sync only (Browser excluded as target — source is already the Chrome tree) |
 | **regex find-and-replace** | bulk replace | Title / URL / Tags / Notes fields on selection |
 | **index-open dismisses side panel** | close sidebar on index | On Local Bookmarks Index **tab create** (popup / command / context menu) only; broadcast `REQUEST_SIDE_PANEL_CLOSE`. Not on index page refresh. Toolbar icon may reopen the **side panel**. |
 

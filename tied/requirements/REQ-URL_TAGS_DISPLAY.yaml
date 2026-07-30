@@ -10,9 +10,9 @@ REQ-URL_TAGS_DISPLAY:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 6: fill empty traceability.tests from named prose"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -47,7 +47,11 @@ REQ-URL_TAGS_DISPLAY:
       - "REQ-URL_TAGS_DISPLAY"
     implementation:
       - "IMPL-URL_TAGS_DISPLAY"
-    tests: []
+    tests:
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/message-handler-url-tags.test.js"
+      - "tests/unit/popup-live-data.test.js"
+      - "tests/unit/url-tags-manager.test.js"
   validation_criteria:
     - method: "Manual verification"
       coverage: "See detail file"

@@ -1,14 +1,14 @@
 REQ-CHROME_STORAGE_USAGE:
   category: "Immutable"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-CHROME_STORAGE_USAGE)."
+  description: "Umbrella for chrome.storage.local/sync usage for bookmarks, index, and settings keys. Owning keys documented in storage-backends and config vocab."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Chrome Storage API Usage"
   priority: "P0"
   rationale:
@@ -22,13 +22,13 @@ REQ-CHROME_STORAGE_USAGE:
   related_requirements:
     depends_on: []
     related_to:
-      - "REQ-CONFIG_PORTABILITY"
+      - "REQ-CONFIGURATION"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Configuration migration works"
-    - criterion: "No external data collection"
-    - criterion: "Privacy policy compliance"
-    - criterion: "User settings persist across sessions"
+    - criterion: "Bookmark and settings keys use chrome.storage.local or sync as documented in tied/vocab/storage-backends.md and config-and-privacy.md."
+    - criterion: "Umbrella: provider-specific persistence owned by related storage REQs."
   status: "Implemented"
   traceability:
     architecture:

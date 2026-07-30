@@ -1,24 +1,27 @@
 REQ-RELIABILITY:
   category: "Non-Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-RELIABILITY)."
+  description: "Umbrella NFR for storage and messaging reliability. Owning behaviors in storage backend and message-handling REQs."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: placeholder NFR policy"
   name: "Reliability"
   priority: "P2"
   rationale:
     why: "Reliability requirements"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
+      - "REQ-ERROR_HANDLING"
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "REQ-RELIABILITY documented in TIED"
+    - criterion: "Umbrella: provider/router failures must not corrupt the storage index; detailed cases under related storage REQs."
   status: "Active"
   traceability:
     architecture: []

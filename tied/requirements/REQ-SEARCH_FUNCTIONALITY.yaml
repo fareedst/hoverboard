@@ -1,14 +1,14 @@
 REQ-SEARCH_FUNCTIONALITY:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-SEARCH_FUNCTIONALITY)."
+  description: "Umbrella for search across Local Bookmarks Index and side-panel tabs/bookmarks. Owning criteria in index and side-panel REQs."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Search Functionality"
   priority: "P1"
   rationale:
@@ -22,12 +22,12 @@ REQ-SEARCH_FUNCTIONALITY:
   related_requirements:
     depends_on: []
     related_to:
-      - "REQ-TAB_SEARCH_NO_MATCH_UX"
+      - "REQ-LOCAL_BOOKMARKS_INDEX"
+      - "REQ-SIDE_PANEL_BROWSER_BOOKMARKS"
+      - "REQ-SIDE_PANEL_BROWSER_TABS"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Results displayed"
-    - criterion: "Search works"
-    - criterion: "Title search functional"
+    - criterion: "Umbrella: searchable lists exist for index and side-panel surfaces; detailed scopes under related REQs."
   status: "Implemented"
   traceability:
     architecture:

@@ -5,25 +5,31 @@ ARCH-MOVE_BOOKMARK_UI:
   decision: "Popup displays the **current storage backend** for the current tab's bookmark and allows the user to **move** it to another backend (Pinboard, Local, File). Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. When the bookmark is in Local or File, a dedicated control (file ↔ browser toggle) offers one-click move between those two backends; the same move path is used (moveBookmarkToStorage)."
   detail_file: "architecture-decisions/ARCH-MOVE_BOOKMARK_UI.yaml"
   implementation_approach:
-    details: []
-    summary: "Popup displays the **current storage backend** for the current tab's bookmark and allows the user to **move** it to another backend (Pinboard, Local, File). Move is implemented in the router: copy bookmark to target provider, delete from source provider, update storage index. When the bookmark is in Local or File, a dedicated control (file ↔ browser toggle) offers one-click move between those two backends; the same move path is used (moveBookmarkToStorage)."
+    details:
+      - "MessageHandler already has getStorageBackendForUrl and moveBookmarkToStorage handlers"
+      - "Save to backends: pinboard | local | file | sync | browser"
+      - "When not bookmarked: show default storage or disable"
+    summary: "Popup: getStorageBackendForUrl on load; five Save to buttons; on change call moveBookmarkToStorage; save sends preferredBackend."
   metadata:
     created:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 1: Move UI five backends"
     last_validated:
       date: "2026-02-18"
       result: "pass"
       validator: "MCP converter"
   name: "Move Bookmark Storage UI"
   rationale:
-    benefits: []
-    problems_solved: []
-    why: "See detail file"
+    benefits:
+      - "Move = copy to target + delete from source + update index (router)"
+      - "Popup shows current storage and Save to buttons for Pinboard, Local, File, Sync, and Browser"
+    problems_solved:
+      - "No way to change storage after saving"
+    why: "Let user move current bookmark to another storage backend from popup"
   related:
     - "ARCH-STORAGE_INDEX_AND_ROUTER (router.moveBookmarkToStorage)"
     - "IMPL-MOVE_BOOKMARK_UI (popup select and messaging)"

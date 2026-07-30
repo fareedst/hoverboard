@@ -4,7 +4,7 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
   "[req-suggested_tags_case_preservation]": "Preserves original case and provides lowercase variants"
   "[req-suggested_tags_deduplication]": "Case-insensitive filtering to exclude tags already in current bookmark"
   "[req-tag_management]": "General tag management infrastructure"
-  actual: "None implemented (see \"Current Test Gap\" above)"
+  actual: "Covered by tests/unit/popup-suggested-tags.test.js, tests/unit/suggested-tag-original-case.test.js, tests/integration/this-page-tag-sort-composition.integration.test.js"
   category: "Functional"
   code_annotations: "All functions marked with `[REQ-SUGGESTED_TAGS_FROM_CONTENT]` in comments"
   code_locations: "| File | Function/Section | Lines | Description |\n|------|------------------|-------|-------------|\n| `src/features/tagging/tag-service.js` | `extractSuggestedTagsFromContent(document, url, limit)` | ~921-1240 | Core extraction algorithm with meta, emphasis, and structured content (overlay path) |\n| `src/features/content/overlay-manager.js` | Suggested section build in `show()` | ~611-686 | Creates \"Suggested:\" UI section, calls TagService, handles click |\n| `src/ui/popup/PopupController.js` | `loadSuggestedTags()` with MAIN-world inject | ~342-650 | Injects content script extraction logic |\n| `src/ui/popup/UIManager.js` | `updateSuggestedTags(suggestedTags)` | ~410-440 | Renders suggested tags in popup UI |"
@@ -14,7 +14,7 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
   depends_on: "None"
   description: "The extension must intelligently suggest tags based on page content (title, URL, headings, navigation, breadcrumbs, images, and links) to speed up bookmarking workflow. Suggestions appear below recent tags in both the popup and overlay interfaces, allowing users to quickly add relevant tags without manual typing."
   detail_file: "requirements/REQ-SUGGESTED_TAGS_FROM_CONTENT.yaml"
-  expected: "\"Suggested tags tests\" (referenced in requirements.yaml)"
+  expected: "Suggested tags extraction and display tests"
   faster_tagging: "Click-to-add suggestions reduce keystrokes and cognitive load."
   last_updated: "2026-02-13"
   manual_tag_entry_required: "Users previously had to type all tags manually, slowing down bookmarking."
@@ -24,16 +24,16 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       date: "2026-02-18"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Remove safari/ mirror code_locations"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 4: remove stale no-tests prose; align limits; one-way depends_on"
     last_validated:
       date: "2026-02-18"
       result: "pass"
       validator: "MCP converter"
-  modifiable_decisions: "The following design choices are documented in [IMPL-SUGGESTED_TAGS] and can be modified:\n\n1. **Extraction sources and order**: Current order is title → URL → meta keywords/description → headings → emphasis elements → definition terms/table headers → nav → breadcrumbs → images → links. Reordering or adding sources requires changes to both TagService and PopupController inlined script.\n\n2. **Numeric limits**:\n   - Overlay extraction limit: 30 (TagService parameter)\n   - Popup extraction limit: 60 (inlined script)\n   - Emphasis elements cap: 60 (first 60 elements)\n   - Definition terms cap: 40 (first 40 terms)\n   - Table headers cap: 40 (first 40 headers/captions)\n   - Nav links cap: 40 (first 40 links)\n   - Images alt cap: 10 (first 10 images)\n   - Main content links cap: 20 (first 20 links)\n   - Overlay display limit: 15 (slice in overlay-manager.js)\n   - Popup display limit: no explicit cap (all filtered suggestions shown)\n\n3. **URL path filtering**: Excluded segments include `www`, `com`, `org`, `net`, `html`, `htm`, `php`, `asp`, `aspx`, `index`, `home`, `page`, pure numeric segments, and segments shorter than 2 characters.\n\n4. **Noise word list**: Large static English stop word list (200+ words) exists in both TagService and PopupController. Changes must be kept in sync or extraction centralized.\n\n5. **Title attribute priority**: Elements checked for `title` attribute first (element itself, then child elements) before falling back to `textContent`.\n\n6. **Emphasis element selectors**: Extracts from `<strong>`, `<b>`, `<em>`, `<i>`, `<mark>`, `<dfn>`, `<cite>`, `<kbd>`, `<code>` within main content areas (main, article, [role=\"main\"], .main, .content). Adding or removing emphasis elements requires updating selectors in both TagService and PopupController.\n\n---\n\n*Last validated: 2026-02-13 by AI agent (limits increased 100-200%)*"
+  modifiable_decisions: "Numeric limits (aligned with satisfaction_criteria and IMPL-SUGGESTED_TAGS): overlay extraction 30; popup extraction 60; emphasis 60; definition terms 40; table headers 40; nav 40; images alt 10; main links 20; overlay display 15. Extraction source order, URL path filtering, noise word list, title-attribute priority, and emphasis selectors are documented in IMPL-SUGGESTED_TAGS and may change with LEAP."
   name: "Suggested Tags from Page Content"
   no_context-aware_suggestions: "Without page content analysis, users had to recall or invent tags without assistance."
-  no_dedicated_unit_tests: "exist for suggested tags extraction or display. The requirements.yaml references \"Suggested tags tests\", but these have not been implemented. Existing tag-related tests (`tests/unit/tag-storage.test.js`, `tests/unit/tag-recent-tracking.test.js`) cover tag persistence and recent tags but do not test `extractSuggestedTagsFromContent`."
+  no_dedicated_unit_tests: "Superseded: popup-suggested-tags.test.js and suggested-tag-original-case.test.js cover extraction, restricted-URL skip, and display path."
   priority: "P1"
   rationale:
     benefits: []
@@ -42,32 +42,20 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
   recommended_tests_for_future_modification: "1. **Unit test for `TagService.extractSuggestedTagsFromContent`**:\n   - Mock document with title, URL, meta tags, headings, emphasis elements, definition terms, table headers, nav, breadcrumbs, images, links\n   - Verify extraction from each source including new sources:\n     - Meta keywords and description tags\n     - Emphasis elements (strong, b, em, i, mark, dfn, cite, kbd, code)\n     - Definition terms (dt) and table headers (th, caption)\n   - Verify limits: 30 emphasis elements, 20 definition terms, 20 table headers\n   - Verify scope: only main content areas (main, article, [role=\"main\"], .main, .content)\n   - Verify noise filtering and frequency sorting\n   - Verify URL path filtering\n   - Verify title attribute priority\n\n2. **Integration test for overlay display**:\n   - Inject overlay with mock page content including new sources\n   - Verify \"Suggested:\" section appears with correct tags\n   - Verify click adds tag and refreshes display\n\n3. **Integration test for popup display** (implemented in `tests/unit/popup-suggested-tags.test.js`):\n   - Use `chrome.scripting.executeScript.mockResolvedValueOnce([{ result: [...] }])` so the same Jest mock is invoked by the implementation; do not replace the function reference (replacement can be unreliable across workers/suites).\n   - Verify UIManager displays tags in suggestedTagsContainer\n   - Verify deduplication against current tags\n\n4. **Manual testing recommendations**:\n   - **Pages with meta tags**: Blog posts, news articles, documentation with meta keywords/description\n   - **Pages with emphasis**: Technical docs with bold/italic/highlighted/code terms; Wikipedia articles\n   - **Pages with definition lists**: Glossaries, dictionaries, documentation with dl/dt elements\n   - **Pages with tables**: Data tables, comparison charts, specification sheets with th/caption\n   - **Regression testing**: GitHub, Stack Overflow, news sites to verify no degradation\n\n---"
   related_requirements:
     depends_on:
+      - "REQ-TAG_MANAGEMENT"
+    related_to:
       - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
       - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
-      - "REQ-TAG_MANAGEMENT"
-    related_to: []
     supersedes: []
   satisfaction_criteria:
-    - criterion: "- Breadcrumb navigation"
-    - criterion: "- Definition list terms (`<dt>`) within main content (first 20)"
-    - criterion: "- Document title"
-    - criterion: "- H1, H2, H3 headings"
-    - criterion: "- Main content anchor links (first 10)"
-    - criterion: "- Main content images alt text (first 5)"
-    - criterion: "- Meta keywords and description tags"
-    - criterion: "- Navigation links (first 20)"
-    - criterion: "- Semantic emphasis elements within main content: `<strong>`, `<b>`, `<em>`, `<i>`, `<mark>`, `<dfn>`, `<cite>`, `<kbd>`, `<code>` (first 30)"
-    - criterion: "- Table headers and captions (`<th>`, `<caption>`) within main content (first 20)"
-    - criterion: "- URL path segments (filtered for meaningful content)"
-    - criterion: "--"
-    - criterion: "1. **Suggested tags section below recent tags**: Both popup and overlay display a \"Suggested:\" section positioned below the recent tags section."
-    - criterion: "2. **Extracts from title, URL, headings, nav, breadcrumbs, images, links, meta tags, emphasis elements, and structured content**: The extraction algorithm must gather text from:"
-    - criterion: "3. **Prioritizes title attribute over textContent**: When extracting element text, prefer the `title` attribute (on the element or child elements) over `textContent`."
-    - criterion: "4. **Filters noise, counts frequency, sorts by frequency**: Remove common English stop words, count word occurrences, and return suggestions sorted by frequency (descending), then alphabetically."
-    - criterion: "5. **Restricted-URL skip (popup path)**: When the current tab URL is not injectable (e.g. `chrome-extension://`, `chrome://`, `file://`), the popup must not attempt script injection; it must show no suggested tags and must not surface a runtime error (e.g. \"Cannot access contents of url\"). Only `http://` and `https://` URLs are considered injectable for suggested-tag extraction."
+    - criterion: "Extracts from title, URL, meta keywords/description, headings, emphasis (cap 60), definition terms (cap 40), table headers (cap 40), nav links (cap 40), breadcrumbs, images alt (cap 10), main content links (cap 20); overlay extraction limit 30 / popup 60; overlay display limit 15."
+    - criterion: "Filters noise, counts frequency, sorts by frequency (descending) then alphabetically."
+    - criterion: "Prioritizes title attribute over textContent when extracting element text."
+    - criterion: "Restricted-URL skip (popup path): non-injectable URLs show no suggested tags and no runtime error; only http(s) injectable."
+    - criterion: "Suggested tags section below recent tags in popup and overlay."
   status: "Implemented"
   supersedes: "None\n\n---"
-  test_scope: "(currently **not implemented**; see \"Current Test Gap\" below):"
+  test_scope: "Unit and composition tests for popup path and TagService extraction (case preservation suite)."
   traceability:
     architecture:
       - "ARCH-SUGGESTED_TAGS"
@@ -76,7 +64,9 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
     implementation:
       - "IMPL-SUGGESTED_TAGS"
     tests:
+      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/suggested-tag-original-case.test.js"
   validation_criteria:
     - method: "Manual verification"
       coverage: "See detail file"

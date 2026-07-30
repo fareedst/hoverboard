@@ -1,14 +1,14 @@
 REQ-PINBOARD_COMPATIBILITY:
   category: "Immutable"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-PINBOARD_COMPATIBILITY)."
+  description: "Umbrella for Pinboard API field compatibility (url, description, extended, tags, shared, toread) on pinboard backend."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Pinboard API Compatibility"
   priority: "P0"
   rationale:
@@ -21,13 +21,13 @@ REQ-PINBOARD_COMPATIBILITY:
     why: "Pinboard API is the core data source"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+      - "REQ-STORAGE_MODE_DEFAULT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "All current API endpoints functional"
-    - criterion: "Error handling for API failures"
-    - criterion: "Rate limiting respected"
-    - criterion: "Token-based authentication working"
+    - criterion: "Pinboard backend round-trips Pinboard-shaped fields without dropping tags/shared/toread/extended."
+    - criterion: "Umbrella: API details owned by IMPL-PINBOARD_API."
   status: "Implemented"
   traceability:
     architecture:

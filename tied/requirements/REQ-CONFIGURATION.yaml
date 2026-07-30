@@ -1,24 +1,29 @@
 REQ-CONFIGURATION:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-CONFIGURATION)."
+  description: "Umbrella for ConfigManager, Options, and hoverboard_settings. Owning measurable criteria live in REQ-STORAGE_MODE_DEFAULT, REQ-SITE_MANAGEMENT, REQ-PRIVACY_CONTROLS, and related Options REQs."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: NFR/umbrella links owning REQs"
   name: "Configuration"
   priority: "P2"
   rationale:
     why: "Configuration and settings"
   related_requirements:
     depends_on: []
-    related_to: []
+    related_to:
+      - "REQ-CODE_QUALITY"
+      - "REQ-PRIVACY_CONTROLS"
+      - "REQ-SITE_MANAGEMENT"
+      - "REQ-STORAGE_MODE_DEFAULT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Canonical ConfigManager, privacy, and site-management terms: `tied/vocab/config-and-privacy.md`."
+    - criterion: "Canonical ConfigManager, privacy, and site-management terms: tied/vocab/config-and-privacy.md."
+    - criterion: "Umbrella: concrete Options/config behaviors are validated under related_to REQs (storage mode, privacy, site management)."
   status: "Active"
   traceability:
     architecture: []

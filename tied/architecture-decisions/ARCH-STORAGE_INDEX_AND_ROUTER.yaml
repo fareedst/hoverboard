@@ -24,24 +24,39 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
     last_updated:
       author: "AI Agent"
       date: "2026-07-29"
-      reason: "LEAP close-loop: sync summary/traceability with five-provider browser backend"
+      reason: "Corpus remediation Phase 1: reconcile remaining four-provider prose with five backends"
     last_validated:
       date: "2026-02-18"
       result: "pass"
       validator: "MCP converter"
   name: "Storage Index and Bookmark Router"
   rationale:
-    benefits: []
-    problems_solved: []
-    why: "Single global provider cannot support per-bookmark storage; routing by URL enables move and default for new bookmarks.\nDefault storage mode (config) extended to include 'file'; migration seeds index from existing local bookmarks."
+    benefits:
+      - "BookmarkRouter delegates get/save/delete to correct provider; when popup sends preferredBackend, router uses it so save follows the highlight (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)"
+      - "Default storage mode for new bookmarks (config); migration seeds index from existing local bookmarks"
+      - "getAllBookmarksForIndex aggregates local+file+sync+browser; 2C excludes browser from best-of race (REQ-BROWSER_BOOKMARK_STORAGE)"
+      - "getRecentBookmarks aggregates all five"
+      - "Storage index (chrome.storage.local) maps URL -> pinboard|local|file|sync|browser"
+      - "URL-tags/badge module on top of router provides display normalization and single source for tag list and badge value"
+    problems_solved:
+      - "Need to route operations by URL to correct backend"
+      - "Save not following popup-highlighted storage on create/update"
+      - "Single global provider prevents mixing backends"
+    why: "Per-URL storage backend and router so bookmarks can live in pinboard, local, file, sync, or browser; default for new bookmarks from config; popup can send preferred backend so save follows highlight; getBookmarkForUrl uses 2C browser race exclusion."
   related:
     - "ARCH-MOVE_BOOKMARK_UI (move = copy + delete + index update)"
     - "IMPL-STORAGE_INDEX, IMPL-BOOKMARK_ROUTER"
   related_decisions:
-    depends_on: []
-    informs: []
-    see_also:
+    depends_on:
       - "ARCH-BROWSER_BOOKMARK_PROVIDER"
+      - "ARCH-FILE_BOOKMARK_PROVIDER"
+      - "ARCH-LOCAL_STORAGE_PROVIDER"
+    informs:
+      - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-STORAGE_INDEX"
+    see_also:
+      - "ARCH-MOVE_BOOKMARK_UI"
+      - "ARCH-SYNC_STORAGE_PROVIDER"
   status: "Active"
   summary: "Storage index maps URL to pinboard|local|file|sync|browser. BookmarkRouter holds five providers; index aggregation includes browser; getBookmarkForUrl uses 2C exclusion for browser from best-of race."
   traceability:

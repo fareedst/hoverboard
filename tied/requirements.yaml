@@ -405,9 +405,9 @@ REQ-CODE_QUALITY:
       author: "agent"
       date: "2025-02-17"
     last_updated:
-      author: "agent"
-      date: "2025-02-17"
-      reason: "ESLint 9 flat config migration and security check level"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: engines.node match package.json >= 20.19.0"
     last_validated:
       date: "2025-02-17"
       result: "pass"
@@ -431,7 +431,7 @@ REQ-CODE_QUALITY:
     - criterion: "ESLint runs with flat config and Standard preset"
       metric: "eslint.config.mjs present; npm run lint and lint:fix succeed"
     - criterion: "Node.js version documented and enforced for tooling"
-      metric: "package.json engines.node >= 18.18.0"
+      metric: "package.json engines.node >= 20.19.0"
     - criterion: "Security audit does not block build for moderate-only findings"
       metric: "npm run security:check uses --audit-level=high"
   status: "Implemented"
@@ -898,9 +898,9 @@ REQ-LOCAL_BOOKMARKS_INDEX:
       author: "AI Agent"
       date: "2026-02-13T00:00:00.000Z"
     last_updated:
-      author: "Agent"
-      date: "2026-02-20"
-      reason: "Show only Clear, Table Display group, compact layout; getShowOnlyDefaultState tests"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 1: index criteria include Browser aggregate"
     last_validated:
       date: "2026-02-13T00:00:00.000Z"
       result: "pass"
@@ -909,23 +909,25 @@ REQ-LOCAL_BOOKMARKS_INDEX:
   priority: "P1"
   rationale:
     benefits:
-      - "Live data from getAggregatedBookmarksForIndex (local + file) or getLocalBookmarksForIndex fallback; no Pinboard in index"
+      - "Live data from getAggregatedBookmarksForIndex (local + file + sync + browser) or getLocalBookmarksForIndex fallback; no Pinboard in index"
       - "Searchable, filterable, sortable (including by Storage), and launchable (open URL in tab)"
-      - "Single-page index of local and file bookmarks with Storage column (Local | File)"
+      - "Single-page index of non-Pinboard bookmarks with Storage column (Local | File | Sync | Browser)"
     problems_solved:
-      - "No way to browse or search all non-Pinboard bookmarks (local + file) in one place"
+      - "No way to browse or search all non-Pinboard bookmarks (local + file + sync + browser) in one place"
       - "Users need to find and open bookmarks without leaving the extension"
-    why: "Provide a full index of local and file-stored bookmarks with search, filter, sort, Storage column, and launch"
+    why: "Provide a full index of local, file, sync, and browser bookmarks with search, filter, sort, Storage column, and launch"
   related_requirements:
     depends_on: []
     related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-CHROME_STORAGE_USAGE"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-STORAGE_MODE_DEFAULT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Dedicated extension page displays table with search (title/URL/tags/notes), filters (tag, toread, shared), sortable columns including Storage (Local | File), default time desc, URL as link"
+    - criterion: "Dedicated extension page displays table with search (title/URL/tags/notes), filters (tag, toread, shared), Stores L/F/S/B, sortable columns including Storage (Local | File | Sync | Browser), default time desc, URL as link"
     - criterion: "Entry point from popup and/or options opens the index page in a new tab"
-    - criterion: "Primary data via getAggregatedBookmarksForIndex (local + file with storage field); fallback getLocalBookmarksForIndex (LocalBookmarkService only)"
+    - criterion: "Primary data via getAggregatedBookmarksForIndex (local + file + sync + browser with storage field); fallback getLocalBookmarksForIndex (LocalBookmarkService only)"
   status: "Implemented"
   traceability:
     architecture:
@@ -934,15 +936,18 @@ REQ-LOCAL_BOOKMARKS_INDEX:
     code_annotations:
       - "REQ-LOCAL_BOOKMARKS_INDEX"
     implementation:
+      - "IMPL-BOOKMARK_ROUTER"
       - "IMPL-LOCAL_BOOKMARKS_INDEX"
     tests:
       - "tests/unit/bookmarks-table-index.test.js (matchStoresFilter, getShowOnlyDefaultState, etc.)"
+      - "tests/unit/bookmarks-table-load.test.js"
       - "tests/unit/bookmarks-table-time.test.js (formatTimeAbsolute, formatTimeAge)"
+      - "tests/unit/message-handler-bookmarks-index.test.js"
   validation_criteria:
     - method: "Manual verification"
-      coverage: "Index page loads, displays local and file bookmarks with Storage column, search/filter/sort/launch work"
-    - method: "Unit tests (optional)"
-      coverage: "getAllBookmarks returns normalized list; getAggregatedBookmarksForIndex returns local + file with storage field"
+      coverage: "Index page loads, displays local/file/sync/browser bookmarks with Storage column, search/filter/sort/launch work"
+    - method: "Unit tests"
+      coverage: "getAllBookmarks returns normalized list; getAggregatedBookmarksForIndex returns local+file+sync+browser with storage field; matchStoresFilter includes Browser"
 REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS:
   category: "Functional"
   detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX_ADD_TAGS.yaml"
@@ -1152,8 +1157,8 @@ REQ-MANIFEST_V3_MIGRATION:
       date: "2025-07-14T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-13T00:00:00.000Z"
-      reason: "Migrated from STDD to TIED format"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 3: close MV3 as Implemented"
   name: "Manifest V3 Migration"
   priority: "P0"
   rationale:
@@ -1169,11 +1174,11 @@ REQ-MANIFEST_V3_MIGRATION:
     related_to: []
     supersedes: []
   satisfaction_criteria:
-    - criterion: "All V2 functionality preserved in V3"
-    - criterion: "Content script injection patterns maintained"
-    - criterion: "Permissions model updated to V3"
-    - criterion: "Service worker replaces background scripts"
-  status: "Planned"
+    - criterion: "Background is a service worker (not a persistent V2 background page)"
+    - criterion: "manifest.json has manifest_version: 3"
+    - criterion: "No Manifest V2 regression in shipped build"
+    - criterion: "Permissions and content-script injection follow MV3 patterns"
+  status: "Implemented"
   traceability:
     architecture:
       - "ARCH-MV3_MIGRATION"
@@ -1181,7 +1186,8 @@ REQ-MANIFEST_V3_MIGRATION:
       - "REQ-MANIFEST_V3_MIGRATION"
     implementation:
       - "IMPL-MV3_MIGRATION"
-    tests: []
+    tests:
+      - "scripts/validate-manifest.js"
   validation_criteria:
     - method: "Manifest validation"
       coverage: "V3 schema compliance"
@@ -1268,8 +1274,8 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Relink orphan detail file for TIED 2.2.0 consistency"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 1: index five backends + tests"
   name: "Move Bookmark Storage UI"
   priority: "P1"
   rationale:
@@ -1280,17 +1286,16 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
       - "No way to change where a bookmark is stored after saving"
     why: "User can move a bookmark from one storage method to another (Pinboard, Local, File)"
   related_requirements:
-    depends_on:
+    depends_on: []
+    related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
-    related_to: []
+      - "REQ-STORAGE_MODE_DEFAULT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Message getStorageBackendForUrl and moveBookmarkToStorage implemented"
-    - criterion: "Move uses bookmark URL when available; router allows bookmark without time"
-    - criterion: "Options explains default storage for new bookmarks (three-way choice)"
-    - criterion: "Popup shows current bookmark storage (Pinboard | Local | File) and control to move"
-    - criterion: "Save follows the highlight: creating/updating a bookmark from the popup uses the currently selected storage backend (popup sends preferredBackend, router honors it)"
-    - criterion: "UI reflects actual move result (popup uses inner result; no false success)"
+    - criterion: "Index Move selected to supports Local | File | Sync | Browser"
+    - criterion: "Popup Save to shows current bookmark storage and select-one buttons for Pinboard, Local, File, Sync, and Browser"
+    - criterion: "Save follows the highlight via preferredBackend on create/update"
   status: "Implemented"
   traceability:
     architecture:
@@ -1300,9 +1305,10 @@ REQ-MOVE_BOOKMARK_STORAGE_UI:
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
     implementation:
       - "IMPL-BOOKMARK_ROUTER"
-      - "IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL"
       - "IMPL-MOVE_BOOKMARK_UI"
-    tests: []
+    tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"
   validation_criteria:
     - method: "Manual: move bookmark from popup"
     - method: "Unit test move when source bookmark has url but no time [IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL]"
@@ -1316,8 +1322,8 @@ REQ-NATIVE_HOST_WRAPPER:
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-14"
-      reason: "Native host wrapper and installer per plan"
+      date: "2026-07-29"
+      reason: "Corpus remediation: fill native-host-ping tests"
   name: "Native Host Wrapper"
   priority: "P2"
   rationale:
@@ -1347,7 +1353,8 @@ REQ-NATIVE_HOST_WRAPPER:
     implementation:
       - "IMPL-NATIVE_HOST_INSTALLER"
       - "IMPL-NATIVE_HOST_WRAPPER"
-    tests: []
+    tests:
+      - "tests/unit/native-host-ping.test.js"
   validation_criteria:
     - method: "Manual: install, load extension, send ping; receive pong"
       coverage: "macOS first; optional Linux/Windows"
@@ -1548,42 +1555,47 @@ REQ-PER_BOOKMARK_STORAGE_BACKEND:
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-14"
-      reason: "Per-bookmark storage and router per plan"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 1: index criteria five providers"
   name: "Per-Bookmark Storage Backend"
   priority: "P0"
   rationale:
     benefits:
       - "Enables move UI (copy to target, delete from source, update index)"
+      - "Five peer backends including native Browser (chrome.bookmarks)"
       - "Router delegates get/save/delete to correct provider per URL"
       - "Storage index maps URL -> backend; default backend for new bookmarks from config"
     problems_solved:
       - "No way to move a bookmark from one storage to another"
       - "Single global storage mode prevents mixing backends"
-    why: "Each bookmark is tagged with a storage method (pinboard | local | file); routing by URL enables move and default for new bookmarks"
+    why: "Each bookmark is tagged with a storage method (pinboard | local | file | sync | browser); routing by URL enables move and default for new bookmarks"
   related_requirements:
     depends_on:
       - "REQ-FILE_BOOKMARK_STORAGE"
     related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-STORAGE_MODE_DEFAULT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "BookmarkRouter holds four providers (pinboard, local, file, sync); getBookmarkForUrl/saveBookmark/deleteBookmark use index or default"
-    - criterion: "Four backends with distinct behaviors: pinboard (remote API), local (chrome.storage.local), file (file adapter), sync (chrome.storage.sync); per-URL backend and default mode; move between backends"
-    - criterion: "getRecentBookmarks aggregates from all four providers, sorted by time"
+    - criterion: "BookmarkRouter holds five providers (pinboard, local, file, sync, browser); getBookmarkForUrl/saveBookmark/deleteBookmark use index or default; getBookmarkForUrl uses 2C browser race exclusion (REQ-BROWSER_BOOKMARK_STORAGE)"
+    - criterion: "Five backends with distinct behaviors: pinboard (remote API), local (chrome.storage.local), file (file adapter), sync (chrome.storage.sync), browser (chrome.bookmarks); per-URL backend and default mode; move between backends"
+    - criterion: "getRecentBookmarks aggregates from all five providers, sorted by time"
     - criterion: "Migration: existing local bookmarks get index entry 'local'"
-    - criterion: "Storage index in chrome.storage.local (hoverboard_storage_index): url -> pinboard|local|file|sync"
+    - criterion: "Storage index in chrome.storage.local (hoverboard_storage_index): url -> pinboard|local|file|sync|browser"
   status: "Implemented"
   traceability:
     architecture:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
     code_annotations:
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
     implementation:
       - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-STORAGE_INDEX"
     tests:
+      - "tests/integration/message-handler-router-storage.integration.test.js"
       - "tests/unit/bookmark-router.test.js"
       - "tests/unit/storage-index.test.js"
   validation_criteria:
@@ -2098,8 +2110,8 @@ REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
       date: "2026-03-02"
     last_updated:
       author: "AI Agent"
-      date: "2026-03-02"
-      reason: "Initial creation"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 6: related_to Browser storage backend boundary"
     last_validated:
       date: "2026-03-02"
       result: "pass"
@@ -2116,6 +2128,7 @@ REQ-SIDE_PANEL_BROWSER_BOOKMARKS:
   related_requirements:
     depends_on: []
     related_to:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
     supersedes: []
   satisfaction_criteria:
@@ -2285,8 +2298,8 @@ REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
       date: "2026-03-02"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Generalize sessions-unavailable criterion (drop Safari example)"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 2: sync index status to Implemented (detail + unit criteria met)"
   name: "Side Panel Recently Closed Tabs"
   priority: "P1"
   rationale:
@@ -2311,7 +2324,7 @@ REQ-SIDE_PANEL_RECENTLY_CLOSED_TABS:
     - criterion: "User can select tab source: Open tabs (default), Recently closed, or Both"
     - criterion: "When chrome.sessions API is unavailable, tab source options are hidden or disabled"
     - criterion: "When tab source includes closed tabs, Page text and Elements search scopes are restricted or disabled with a note"
-  status: "Planned"
+  status: "Implemented"
   traceability:
     architecture:
       - "ARCH-SIDE_PANEL_RECENTLY_CLOSED_TABS"
@@ -2605,8 +2618,8 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
       date: "2025-07-14T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-13T00:00:00.000Z"
-      reason: "Migrated from STDD to TIED format"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 4: one-way depends; fill tests"
   name: "Suggested Tags Deduplication"
   priority: "P1"
   rationale:
@@ -2618,10 +2631,10 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
       - "Redundant tag suggestions"
     why: "Prevent duplicate suggestions already in current tags"
   related_requirements:
-    depends_on: []
+    depends_on:
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     related_to:
       - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
-      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     supersedes: []
   satisfaction_criteria:
     - criterion: "Case-insensitive comparison with current tags"
@@ -2636,7 +2649,7 @@ REQ-SUGGESTED_TAGS_DEDUPLICATION:
     implementation:
       - "IMPL-SUGGESTED_TAGS"
     tests:
-      - "Suggested tags deduplication tests"
+      - "tests/unit/popup-suggested-tags.test.js"
   validation_criteria:
     - method: "Unit tests"
       coverage: "Case-insensitive filtering logic"
@@ -2649,8 +2662,8 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       date: "2025-07-14T00:00:00.000Z"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-18T00:00:00.000Z"
-      reason: "Add restricted-URL skip criterion; add popup-suggested-tags tests"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 4: index deps and tests"
   name: "Suggested Tags from Page Content"
   priority: "P1"
   rationale:
@@ -2662,11 +2675,11 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
       - "No context-aware suggestions"
     why: "Intelligent tag suggestions speed up bookmarking workflow"
   related_requirements:
-    depends_on: []
+    depends_on:
+      - "REQ-TAG_MANAGEMENT"
     related_to:
       - "REQ-SUGGESTED_TAGS_CASE_PRESERVATION"
       - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
-      - "REQ-TAG_MANAGEMENT"
     supersedes: []
   satisfaction_criteria:
     - criterion: "Extracts from title, URL, meta tags, headings, emphasis elements, definition terms, table headers, nav, breadcrumbs, images, links"
@@ -2682,8 +2695,9 @@ REQ-SUGGESTED_TAGS_FROM_CONTENT:
     implementation:
       - "IMPL-SUGGESTED_TAGS"
     tests:
-      - "Suggested tags tests"
+      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
+      - "tests/unit/suggested-tag-original-case.test.js"
   validation_criteria:
     - method: "Unit tests"
       coverage: "Extraction algorithm, frequency sorting, noise filtering"

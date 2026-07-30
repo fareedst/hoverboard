@@ -1,10 +1,10 @@
 REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
-  at_least_one_format: "CSV (recommended for table-like export; columns include Title, URL, Tags, Time, **Storage**, Shared, To read, Notes); optionally JSON for full record structure."
+  at_least_one_format: "CSV (recommended for table-like export; columns include Title, URL, Tags, Time, **Storage**, Shared, To read, Notes); optionally JSON for full record structure. Storage values: Local | File | Sync | Browser."
   category: "Functional"
   cross-references: "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT, IMPL-LOCAL_BOOKMARKS_INDEX_EXPORT, REQ-LOCAL_BOOKMARKS_INDEX"
   detail_file: "requirements/REQ-LOCAL_BOOKMARKS_INDEX_EXPORT.yaml"
   download: "is triggered client-side (no backend export message)."
-  export_all: "Downloads a file containing every bookmark shown in the index (local + file; same as full list loaded on the page)."
+  export_all: "Downloads a file containing every bookmark shown in the index (local + file + sync + browser; same as full list loaded on the page when all Stores checked)."
   export_control(s): "in the index page UI below the bookmarks table (with Move selected to); clear scope (all, displayed, selected)."
   export_displayed: "Downloads a file containing only the rows currently shown (after search/filter/sort)."
   export_selected: "Downloads a file containing only the currently selected bookmarks (checkbox selection). Button enabled only when at least one bookmark is selected."
@@ -16,9 +16,9 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 1: export scopes include Sync + Browser"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -27,7 +27,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
   priority: "P1"
   purpose:
     - "Allow users to backup or port index data outside the extension."
-    - "Support exporting the full local+file set, the current filtered/sorted view, or only selected bookmarks, including storage location."
+    - "Support exporting the full local+file+sync+browser aggregate, the current filtered/sorted view, or only selected bookmarks, including storage location."
   rationale:
     benefits: []
     problems_solved: []
@@ -43,7 +43,7 @@ REQ-LOCAL_BOOKMARKS_INDEX_EXPORT:
   satisfaction_criteria:
     - criterion: "See detail file"
   status: "Implemented"
-  summary: "From the local bookmarks index page, the user can **export bookmarks as a downloadable file**. Three scopes are supported: **all** (entire list), **displayed** (filtered/sorted rows), **selected** (checkbox-selected rows; button enabled when at least one selected). Export and Move controls are placed **below the bookmarks table**. The file is downloaded client-side (e.g. CSV or JSON). CSV includes a **Storage** column (Local | File | Sync)."
+  summary: "From the local bookmarks index page, the user can **export bookmarks as a downloadable file**. Three scopes are supported: **all** (entire list), **displayed** (filtered/sorted rows), **selected** (checkbox-selected rows; button enabled when at least one selected). Export and Move controls are placed **below the bookmarks table**. The file is downloaded client-side (e.g. CSV or JSON). CSV includes a **Storage** column (Local | File | Sync | Browser)."
   traceability:
     architecture:
       - "ARCH-LOCAL_BOOKMARKS_INDEX_EXPORT"

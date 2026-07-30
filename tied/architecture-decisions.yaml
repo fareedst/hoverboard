@@ -2384,34 +2384,36 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
   detail_file: "architecture-decisions/ARCH-STORAGE_INDEX_AND_ROUTER.yaml"
   implementation_approach:
     details:
-      - "ConfigManager getStorageMode/setStorageMode allow pinboard|local|file|sync; invalid/missing fallback to 'local'"
-      - "getRecentBookmarks: fetch from all four, merge, sort by time, slice"
-      - "Index key: hoverboard_storage_index; getIndex, setBackendForUrl, getBackendForUrl, removeUrl"
+      - "ConfigManager getStorageMode/setStorageMode allow pinboard|local|file|sync|browser; invalid/missing fallback to 'local'"
+      - "getBookmarkForUrl: race pinboard/local/file/sync only; consult browser via resolve or when no other non-empty candidate"
+      - "getRecentBookmarks: fetch from all five, merge, sort by time, slice"
+      - "Index key: hoverboard_storage_index; getIndex, setBackendForUrl, getBackendForUrl, removeUrl; VALID_BACKENDS includes browser"
       - "Router: saveBookmark uses valid data.preferredBackend when provided, else getBackendForUrl(url) or defaultStorageMode"
-    summary: "StorageIndex module; BookmarkRouter holds four providers (pinboard, local, file, sync) and index; MessageHandler uses router as bookmarkProvider (duck-typed). Popup sends preferredBackend on save so save follows highlight. URL-tags-manager normalizes for display."
+    summary: "StorageIndex module; BookmarkRouter holds five providers (pinboard, local, file, sync, browser) and index; MessageHandler uses router as bookmarkProvider (duck-typed). Popup sends preferredBackend on save so save follows highlight. getBookmarkForUrl uses 2C browser exclusion. URL-tags-manager normalizes for display."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-02-14"
     last_updated:
       author: "AI Agent"
-      date: "2026-02-14"
-      reason: "Per-bookmark storage and router per plan"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 1: architecture index five-provider prose"
   name: "Storage Index and Bookmark Router"
   rationale:
     benefits:
       - "BookmarkRouter delegates get/save/delete to correct provider; when popup sends preferredBackend, router uses it so save follows the highlight (REQ-STORAGE_MODE_DEFAULT, REQ-MOVE_BOOKMARK_STORAGE_UI)"
       - "Default storage mode for new bookmarks (config); migration seeds index from existing local bookmarks"
-      - "getRecentBookmarks aggregates all four"
-      - "Storage index (chrome.storage.local) maps URL -> pinboard|local|file|sync"
+      - "getRecentBookmarks aggregates all five"
+      - "Storage index (chrome.storage.local) maps URL -> pinboard|local|file|sync|browser"
       - "URL-tags/badge module on top of router provides display normalization and single source for tag list and badge value"
     problems_solved:
       - "Need to route operations by URL to correct backend"
       - "Save not following popup-highlighted storage on create/update"
       - "Single global provider prevents mixing backends"
-    why: "Per-URL storage backend and router so bookmarks can live in pinboard, local, or file; default for new bookmarks from config; popup can send preferred backend so save follows highlight"
+    why: "Per-URL storage backend and router so bookmarks can live in pinboard, local, file, sync, or browser; default for new bookmarks from config; popup can send preferred backend so save follows highlight"
   related_decisions:
     depends_on:
+      - "ARCH-BROWSER_BOOKMARK_PROVIDER"
       - "ARCH-FILE_BOOKMARK_PROVIDER"
       - "ARCH-LOCAL_STORAGE_PROVIDER"
     informs:
@@ -2419,6 +2421,7 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
       - "IMPL-STORAGE_INDEX"
     see_also:
       - "ARCH-MOVE_BOOKMARK_UI"
+      - "ARCH-SYNC_STORAGE_PROVIDER"
   status: "Active"
   summary: "Storage index maps URL to pinboard|local|file|sync|browser. BookmarkRouter holds five providers; index aggregation includes browser; getBookmarkForUrl uses 2C exclusion for browser from best-of race."
   traceability:
@@ -2426,12 +2429,17 @@ ARCH-STORAGE_INDEX_AND_ROUTER:
       - "ARCH-STORAGE_INDEX_AND_ROUTER"
     implementation:
       - "IMPL-BOOKMARK_ROUTER"
+      - "IMPL-BROWSER_BOOKMARK_SERVICE"
       - "IMPL-STORAGE_INDEX"
     requirements:
+      - "REQ-BROWSER_BOOKMARK_STORAGE"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
+      - "REQ-STORAGE_MODE_DEFAULT"
     tests:
-      - "bookmark-router.test.js"
-      - "storage-index.test.js"
+      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/storage-index.test.js"
 ARCH-STRUCTURED_LOGGING:
   cross_references:
     - "REQ-STRUCTURED_LOGGING"

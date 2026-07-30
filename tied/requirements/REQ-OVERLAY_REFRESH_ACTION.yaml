@@ -1,14 +1,14 @@
 REQ-OVERLAY_REFRESH_ACTION:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-OVERLAY_REFRESH_ACTION)."
+  description: "Overlay refresh action reloads bookmark/tag state for the current page without full navigation."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Overlay Refresh Control"
   priority: "P1"
   rationale:
@@ -22,13 +22,11 @@ REQ-OVERLAY_REFRESH_ACTION:
   related_requirements:
     depends_on: []
     related_to:
-      - "REQ-OVERLAY_CONTROL_LAYOUT"
+      - "REQ-BOOKMARK_STATE_SYNCHRONIZATION"
       - "REQ-OVERLAY_SYSTEM"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Clicking/keybinding requests updated data and re-renders"
-    - criterion: "Errors surface non-destructive messaging"
-    - criterion: "Overlay renders refresh button with tooltip, ARIA label, keyboard handlers"
+    - criterion: "Overlay refresh updates displayed bookmark tags/flags from the current backend state."
   status: "Implemented"
   traceability:
     architecture:

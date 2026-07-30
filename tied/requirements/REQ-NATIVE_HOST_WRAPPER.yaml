@@ -9,9 +9,9 @@ REQ-NATIVE_HOST_WRAPPER:
       author: "MCP converter"
       date: "2026-02-18"
     last_updated:
-      author: "MCP converter"
-      date: "2026-02-18"
-      reason: "Converted from monolithic"
+      author: "AI Agent"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 2: add native-host-ping tests to traceability"
     last_validated:
       date: "2026-02-18"
       result: "pass"
@@ -32,16 +32,18 @@ REQ-NATIVE_HOST_WRAPPER:
     - criterion: "The extension has the `nativeMessaging` permission and can optionally test connectivity (e.g. ping) from the options page or service worker."
     - criterion: "The wrapper delegates to a helper (script or binary) in the same directory when present; otherwise responds with a safe fallback (e.g. ping → pong, or echo)."
     - criterion: "The wrapper resolves its install directory from its executable path and does not depend on any path from the extension."
-  status: "Planned"
+  status: "Implemented"
   traceability:
     architecture:
       - "ARCH-NATIVE_HOST"
     code_annotations:
+      - "IMPL-NATIVE_HOST_WRAPPER"
       - "REQ-NATIVE_HOST_WRAPPER"
     implementation:
       - "IMPL-NATIVE_HOST_INSTALLER"
       - "IMPL-NATIVE_HOST_WRAPPER"
-    tests: []
+    tests:
+      - "tests/unit/native-host-ping.test.js"
   validation_criteria:
     - method: "Manual: Run installer, load extension, send ping; receive pong or echo."
     - method: "Unit tests (optional): Wrapper protocol encode/decode; install-dir resolution."

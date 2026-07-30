@@ -1,14 +1,14 @@
 REQ-TAG_INPUT_SANITIZATION:
   category: "Functional"
-  description: "Thin detail stub created for TIED 2.2.0 consistency (REQ-TAG_INPUT_SANITIZATION)."
+  description: "sanitizeTag normalizes user-entered tags before save (whitespace, forbidden chars). Shared by popup, overlay, import, and suggested-tag paths."
   metadata:
     created:
       author: "AI Agent"
       date: "2026-07-28"
     last_updated:
       author: "AI Agent"
-      date: "2026-07-28"
-      reason: "Create missing detail for TIED 2.2.0"
+      date: "2026-07-29"
+      reason: "Corpus remediation Phase 5: expand thin stub"
   name: "Tag Input Sanitization"
   priority: "P0"
   rationale:
@@ -22,13 +22,12 @@ REQ-TAG_INPUT_SANITIZATION:
   related_requirements:
     depends_on: []
     related_to:
+      - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
       - "REQ-TAG_MANAGEMENT"
     supersedes: []
   satisfaction_criteria:
-    - criterion: "Allows safe characters only"
-    - criterion: "Enforces 50-character max length"
-    - criterion: "Returns null for invalid inputs"
-    - criterion: "sanitizeTag eliminates HTML, encoded markup, special characters"
+    - criterion: "Canonical sanitizeTag term in tied/vocab/tags.md."
+    - criterion: "sanitizeTag strips/normalizes invalid characters before tags are persisted."
   status: "Implemented"
   traceability:
     architecture:

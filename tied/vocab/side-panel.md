@@ -18,7 +18,7 @@
 | **This Page** | Bookmark tab (UI) | Popup-equivalent; `data-tab="bookmark"` |
 | **By Tag** | tags tree (UI) | Hierarchical bookmarks-by-tag; `data-tab="tagsTree"` |
 | **Tabs** (panel) | browser tabs panel | Open/closed tab manager; `data-tab="browserTabs"` |
-| **Bookmarks** (panel) | browser bookmarks panel | Chrome `bookmarks.getTree` UI — **not** Local Bookmarks Index |
+| **Bookmarks** (panel) | browser bookmarks panel | Chrome `bookmarks.getTree` UI — **not** Local Bookmarks Index and **not** **Browser storage (backend)** / Store B ([REQ-BROWSER_BOOKMARK_STORAGE](../requirements/REQ-BROWSER_BOOKMARK_STORAGE.yaml)); panel owns tree UX ([REQ-SIDE_PANEL_BROWSER_BOOKMARKS](../requirements/REQ-SIDE_PANEL_BROWSER_BOOKMARKS.yaml)) |
 | **Usage** (panel) | analytics tab | Most Visited / Recently Visited / Navigation Graph |
 | **tab source** | list source | `open` \| `recentlyClosed` \| `both` |
 | **window scope** | window filter | `currentWindow` \| `all` |
