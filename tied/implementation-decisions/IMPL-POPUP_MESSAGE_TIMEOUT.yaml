@@ -44,6 +44,7 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
       - "IMPL-POPUP_SESSION"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: sendToTab timeout race with fake timers in popup-message-timeout.test.js"
   traceability:
     architecture:
       - "ARCH-MESSAGE_HANDLING"
@@ -52,5 +53,6 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
       - "IMPL-POPUP_MESSAGE_TIMEOUT"
     requirements:
       - "REQ-CORE_UX_PRESERVATION"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: message timeout wrapper around sendMessage."
-    tests: []
+    test_coverage_note: "Unit: sendToTab timeout race"
+    tests:
+      - "tests/unit/popup-message-timeout.test.js"

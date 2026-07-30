@@ -1,0 +1,55 @@
+CITDP-IMPL_THREE_WAY_AUDIT-20260730113900:
+  change_definition:
+    current_behavior: "Active IMPLs with empty traceability.tests; sync_impl_full_blocks re.sub misinterpreted sidecar backslashes; getSelectedStorageBackend allowlist omitted browser so Save-to Browser could not set preferredBackend."
+    desired_behavior: "Empty Active traceability filled with unit suites; full-block re-sync hardened; PROCEDURE thoroughness audited; Save-to allowlist includes browser; composition covers highlight→preferredBackend on save."
+    non_goals:
+      - "ARCH/REQ five-backend Save-to LEAP (already aligned)"
+      - "DEBUG_PANEL panel wiring composition"
+      - "Expand marker_only H2 depth across all remaining gap tokens"
+      - "POPUP_MESSAGE_TIMEOUT composition (timer race unit-pure)"
+    success_criteria:
+      - "Active empty traceability.tests cleared (Deferred Safari only)"
+      - "getSelectedStorageBackend returns browser when pressed"
+      - "tied_validate_consistency ok"
+      - "Unit suite green; composition preferredBackend browser on createBookmark"
+    unchanged_behavior: "Five Save-to backends and preferredBackend already in REQ/ARCH."
+  completion_criteria:
+    verification_gate_notes: "Unit green; composition move-bookmark-preferred-backend; CITDP written; tied_validate_consistency; vocab RECORD for getSelectedStorageBackend and empty Active / PROCEDURE thoroughness terms."
+  impact_analysis:
+    modules_or_boundaries: "PopupController.getSelectedStorageBackend; sync_impl_full_blocks.py; unit suites for previously empty Active IMPLs; IMPL YAML traceability.tests"
+    tied_tokens_affected:
+      - "IMPL-DEV_COMMAND_INSPECTION"
+      - "IMPL-LOGGER_LEGACY"
+      - "IMPL-MOVE_BOOKMARK_UI"
+      - "IMPL-PINBOARD_API"
+      - "IMPL-POPUP_MESSAGE_TIMEOUT"
+      - "IMPL-SIDE_PANEL_SNAPSHOT"
+    tied_tokens_new: []
+  leap_feedback:
+    divergences_from_analysis: "IMPL-MOVE_BOOKMARK_UI sidecar step 13 allowlist wording added to match code; no ARCH/REQ upward LEAP."
+    out_of_scope_notes: "Parent plan ~/.cursor/plans/impl_three-way_alignment_b4b53b70.plan.md; working tied/working/IMPL_THREE_WAY_AUDIT_20260730113900.yaml"
+    record_status: "complete"
+    tied_stack_updates_required: []
+  record_identity:
+    change_request_id: "IMPL_THREE_WAY_AUDIT_20260730113900"
+    primary_tokens:
+      - "IMPL-MOVE_BOOKMARK_UI"
+      - "PROC-IMPL_CODE_TEST_SYNC"
+      - "PROC-IMPL_PSEUDOCODE_TOKENS"
+      - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    procedure_token: "PROC-IMPL_CODE_TEST_SYNC"
+    recorded_at: "2026-07-30"
+    title: "IMPL three-way alignment audit close-out"
+  risk_analysis:
+    risks:
+      - id: "R1"
+        description: "Stale procedure-gaps.json contradicts completed tracker"
+        likelihood: "medium"
+        mitigation: "Supersede snapshot in working tracker; refresh suite lists"
+        residual: "low"
+        severity: "low"
+  tdd_sequence:
+    summary: "Fill traceability → unit RED/green → allowlist fix → sidecar allowlist step → composition preferredBackend → CITDP → validate"
+  test_strategy:
+    matrix_notes: "Logger/debug categories unit-only; pinboard HTTP unit-mocked."
+    summary: "Unit suites for empty Active IMPLs; move-bookmark-ui browser allowlist; composition Save-to→preferredBackend(browser) on createBookmark. E2E unchanged (side-panel snapshot already has e2e)."

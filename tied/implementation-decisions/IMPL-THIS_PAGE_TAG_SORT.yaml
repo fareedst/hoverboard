@@ -81,6 +81,7 @@ IMPL-THIS_PAGE_TAG_SORT:
     supersedes: []
   status: "Active"
   summary: "UIManager: tagSortToggle wiring, tagFrequencyMap, sort applied in updateCurrentTags, updateRecentTags, _paintSuggestedTags when toggle present. PopupController: refreshTagFrequencyMapForSort; loadSuggestedTags uses two-step MAIN inject (suggested-tags-main-world-snippet.js + func). Shared tag-chip-sort.js."
+  test_coverage_note: "Unit: alphabetical sort + suggested tags load path"
   testability: "integration"
   token_coverage:
     code_files:
@@ -107,13 +108,7 @@ IMPL-THIS_PAGE_TAG_SORT:
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
       - "REQ-THIS_PAGE_TAG_SORT"
     tests:
-      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
-      - "tests/playwright/extension-this-page-tag-sort.spec.js"
-      - "tests/unit/popup-injection-outcome.test.js"
-      - "tests/unit/popup-refresh-tag-frequency-map.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
-      - "tests/unit/script-injection-eligibility.test.js"
-      - "tests/unit/tag-chip-sort.test.js"
       - "tests/unit/uIManager-tag-case-folding.test.js"
   validation_evidence:
     - date: "2026-03-27"

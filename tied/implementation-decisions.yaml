@@ -858,6 +858,8 @@ IMPL-CONFIG_BACKUP_RESTORE:
       - "IMPL-CONFIG_BACKUP_RESTORE"
     requirements:
       - "REQ-CONFIG_PORTABILITY"
+    tests:
+      - "tests/unit/config-manager.test.js"
 IMPL-CONFIG_MIGRATION:
   code_locations:
     files:
@@ -1075,6 +1077,8 @@ IMPL-DEBUG_PANEL:
       - "ARCH-UI_TESTABILITY"
     requirements:
       - "REQ-UI_INSPECTION"
+    tests:
+      - "tests/unit/debug-logger.test.js"
 IMPL-DEMO_OVERLAY:
   code_locations:
     files:
@@ -1171,6 +1175,8 @@ IMPL-DEV_COMMAND_INSPECTION:
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
       - "REQ-UI_INSPECTION"
       - "REQ-URL_TAGS_DISPLAY"
+    tests:
+      - "tests/unit/dev-command-inspection.test.js"
 IMPL-DOM_UTILITIES:
   code_locations:
     files:
@@ -1404,6 +1410,8 @@ IMPL-FEATURE_FLAGS:
       - "IMPL-FEATURE_FLAGS"
     requirements:
       - "REQ-CONFIG_PORTABILITY"
+    tests:
+      - "tests/unit/config-manager.test.js"
 IMPL-FILE_BOOKMARK_SERVICE:
   code_locations:
     files:
@@ -1576,6 +1584,8 @@ IMPL-FILE_STORAGE_TYPED_PATH:
       - "IMPL-FILE_STORAGE_TYPED_PATH"
     requirements:
       - "REQ-FILE_BOOKMARK_STORAGE"
+    tests:
+      - "tests/unit/helper-path-normalize.test.js"
 IMPL-ICON_CLICK_BEHAVIOR:
   code_locations:
     files:
@@ -2070,6 +2080,8 @@ IMPL-LOG_LEVEL_CONFIG:
       - "IMPL-LOG_LEVEL_CONFIG"
     requirements:
       - "REQ-STRUCTURED_LOGGING"
+    tests:
+      - "tests/unit/logger.test.js"
 IMPL-LOGGER_CONTEXT_LEVELS:
   code_locations:
     files:
@@ -2113,6 +2125,8 @@ IMPL-LOGGER_CONTEXT_LEVELS:
       - "IMPL-LOGGER_CONTEXT_LEVELS"
     requirements:
       - "REQ-STRUCTURED_LOGGING"
+    tests:
+      - "tests/unit/logger.test.js"
 IMPL-LOGGER_LEGACY:
   code_locations:
     files:
@@ -2156,6 +2170,8 @@ IMPL-LOGGER_LEGACY:
       - "IMPL-LOGGER_LEGACY"
     requirements:
       - "REQ-STRUCTURED_LOGGING"
+    tests:
+      - "tests/unit/logger.test.js"
 IMPL-MCP_FEEDBACK_TOOLS:
   code_locations:
     files:
@@ -2410,6 +2426,9 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
       - "IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL"
     requirements:
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
+    tests:
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/popup-move-bookmark.test.js"
 IMPL-MOVE_BOOKMARK_UI:
   code_locations:
     files:
@@ -2472,8 +2491,10 @@ IMPL-MOVE_BOOKMARK_UI:
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-STORAGE_MODE_DEFAULT"
     tests:
-      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
       - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/move-bookmark-ui.test.js"
+      - "tests/unit/popup-move-bookmark.test.js"
 IMPL-MV3_MIGRATION:
   cross_references: []
   decision: "Manifest V3 service worker background; preserve messaging contracts"
@@ -2806,7 +2827,9 @@ IMPL-PINBOARD_API:
       - "IMPL-PINBOARD_API"
     requirements:
       - "REQ-PINBOARD_COMPATIBILITY"
-    tests: []
+    tests:
+      - "tests/unit/pinboard-bookmark-times.test.js"
+      - "tests/unit/pinboard-service.test.js"
 IMPL-PINBOARD_POSTS_ADD_ENCODING:
   code_locations:
     files:
@@ -2995,7 +3018,8 @@ IMPL-POPUP_MESSAGE_TIMEOUT:
       - "IMPL-POPUP_MESSAGE_TIMEOUT"
     requirements:
       - "REQ-CORE_UX_PRESERVATION"
-    tests: []
+    tests:
+      - "tests/unit/popup-message-timeout.test.js"
 IMPL-POPUP_PANEL_KEYBOARD_QUICK_ACCESS:
   code_locations:
     files:
@@ -4883,6 +4907,8 @@ IMPL-URL_INHIBITION:
       - "IMPL-URL_INHIBITION"
     requirements:
       - "REQ-SITE_MANAGEMENT"
+    tests:
+      - "tests/unit/config-manager.test.js"
 IMPL-URL_TAGS_DISPLAY:
   code_locations:
     files:

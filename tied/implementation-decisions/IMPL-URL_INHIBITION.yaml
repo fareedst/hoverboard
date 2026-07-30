@@ -36,6 +36,7 @@ IMPL-URL_INHIBITION:
       - "IMPL-CONFIG_BACKUP_RESTORE"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: get/add/set inhibit + isUrlAllowed substring in config-manager.test.js"
   traceability:
     architecture:
       - "ARCH-CONFIG_STRUCTURE"
@@ -43,5 +44,6 @@ IMPL-URL_INHIBITION:
       - "IMPL-URL_INHIBITION"
     requirements:
       - "REQ-SITE_MANAGEMENT"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: URL inhibition list and site management."
-    tests: []
+    test_coverage_note: "Unit: inhibit list + isUrlAllowed in config-manager.test.js"
+    tests:
+      - "tests/unit/config-manager.test.js"

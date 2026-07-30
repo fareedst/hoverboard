@@ -174,4 +174,38 @@ describe('helper path normalization [IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE]', 
     expect(content.bookmarks['https://example.com']).toBeDefined()
   })
 
+  test('directory path resolves to hoverboard-bookmarks.json [IMPL-FILE_STORAGE_TYPED_PATH]', async () => {
+    if (!fs.existsSync(helperPath)) return
+    const expectedFile = path.join(tmpDir, 'mydir', 'hoverboard-bookmarks.json')
+    const input = JSON.stringify({
+      type: 'writeBookmarksFile',
+      path: '~/mydir',
+      data: { version: 1, bookmarks: {} }
+    })
+    const { response } = await runHelper(input, { HOME: tmpDir })
+    expect(response.success).toBe(true)
+    expect(fs.existsSync(expectedFile)).toBe(true)
+  })
+
+  test('path ending .json is used as file [IMPL-FILE_STORAGE_TYPED_PATH]', async () => {
+    if (!fs.existsSync(helperPath)) return
+    const file = path.join(tmpDir, 'custom-bookmarks.json')
+    const input = JSON.stringify({
+      type: 'writeBookmarksFile',
+      path: '~/custom-bookmarks.json',
+      data: { version: 1, bookmarks: { 'https://a.test': { url: 'https://a.test', description: '', tags: [], time: '', shared: 'yes', toread: 'no', hash: '' } } }
+    })
+    const { response } = await runHelper(input, { HOME: tmpDir })
+    expect(response.success).toBe(true)
+    expect(fs.existsSync(file)).toBe(true)
+  })
+
+  test('readBookmarksFile missing file returns empty bookmarks [IMPL-FILE_STORAGE_TYPED_PATH]', async () => {
+    if (!fs.existsSync(helperPath)) return
+    const input = JSON.stringify({ type: 'readBookmarksFile', path: '~/missing-dir' })
+    const { response } = await runHelper(input, { HOME: tmpDir })
+    expect(response.type).toBe('readBookmarksFile')
+    expect(response.data.bookmarks).toEqual({})
+  })
+
 })

@@ -344,7 +344,7 @@
  *   - 11.   ELSE: show error from result
  *   - How (sub-block): Set preferredBackend from selected button; send saveBookmark so router uses highlighted storage.
  *   - 12. ON save (createBookmark, addTagsToBookmark, toggle private, toggle read-later):
- *   - 13.   data.preferredBackend = getSelectedStorageBackend()   // button with aria-pressed="true"
+ *   - 13.   data.preferredBackend = getSelectedStorageBackend()   // aria-pressed button; allowlist pinboard|local|file|sync|browser else null
  *   - 14.   SEND saveBookmark(data)   // router uses preferredBackend
  *
  * === END IMPL-FULL-BLOCK: IMPL-MOVE_BOOKMARK_UI ===
@@ -2088,12 +2088,13 @@ export class PopupController {
   /**
    * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Get the storage backend currently selected in the popup UI (highlighted button).
    * Used so save follows the highlight when creating or updating a bookmark.
-   * @returns {string|null} 'pinboard'|'local'|'file'|'sync' or null if not determinable
+   * @returns {string|null} 'pinboard'|'local'|'file'|'sync'|'browser' or null if not determinable
    */
   getSelectedStorageBackend () {
+    // [IMPL-MOVE_BOOKMARK_UI] Five Save-to backends: pinboard | local | file | sync | browser
     const btn = this.uiManager.elements.storageBackendButtons?.querySelector('.storage-backend-btn[aria-pressed="true"]')
     const backend = btn?.getAttribute('data-backend') || null
-    return (backend && ['pinboard', 'local', 'file', 'sync'].includes(backend)) ? backend : null
+    return (backend && ['pinboard', 'local', 'file', 'sync', 'browser'].includes(backend)) ? backend : null
   }
 
   /**

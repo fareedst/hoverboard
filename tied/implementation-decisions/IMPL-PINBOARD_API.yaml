@@ -42,6 +42,7 @@ IMPL-PINBOARD_API:
     see_also: []
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: auth URL, 429 retry, 401 no-retry, no-auth short-circuit in pinboard-service.test.js"
   traceability:
     architecture:
       - "ARCH-PINBOARD_API"
@@ -49,5 +50,7 @@ IMPL-PINBOARD_API:
       - "IMPL-PINBOARD_API"
     requirements:
       - "REQ-PINBOARD_COMPATIBILITY"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: Pinboard API calls covered indirectly by pinboard-bookmark-times.test.js and tag-storage tests."
-    tests: []
+    test_coverage_note: "Unit: auth/retry/401/no-auth in pinboard-service.test.js"
+    tests:
+      - "tests/unit/pinboard-bookmark-times.test.js"
+      - "tests/unit/pinboard-service.test.js"

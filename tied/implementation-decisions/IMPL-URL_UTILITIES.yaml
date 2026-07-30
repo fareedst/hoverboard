@@ -45,6 +45,6 @@ IMPL-URL_UTILITIES:
       - "IMPL-URL_UTILITIES"
     requirements:
       - "REQ-SHARED_UTILITIES"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: URL helpers exercised indirectly by storage and content."
+    test_coverage_note: "Unit: shared-utils.test.js"
     tests:
       - "tests/unit/shared-utils.test.js"

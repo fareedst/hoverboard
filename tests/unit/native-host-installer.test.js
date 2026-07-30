@@ -1,9 +1,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-NATIVE_HOST_INSTALLER ===
  * [IMPL-NATIVE_HOST_INSTALLER] [ARCH-NATIVE_HOST] [REQ-NATIVE_HOST_WRAPPER] — Copy wrapper and helper to install dir; write manifest; register with Chrome/Chromium. Contract: source dir and extension ID and browser; install dir and registration.
- *
+ * 
  * ## MAIN
- *
+ * 
  * - [IMPL-NATIVE_HOST_INSTALLER] [ARCH-NATIVE_HOST] [REQ-NATIVE_HOST_WRAPPER] How: Logical block for IMPL-NATIVE_HOST_INSTALLER.
  * - Contract:
  *   - INPUT: source dir, extension ID, browser (e.g. chrome vs chromium)
@@ -29,6 +29,7 @@
  *   - 10.   COPY native_host.exe and helper.ps1 (or helper.exe) to install_dir
  *   - 11.   WRITE manifest to install_dir
  *   - 12.   CREATE registry key HKCU\Software\Google\Chrome\NativeMessagingHosts\com.hoverboard.native_host (or Chromium) with default value = full path to manifest
+ * 
  * === END IMPL-FULL-BLOCK: IMPL-NATIVE_HOST_INSTALLER ===
  */
 

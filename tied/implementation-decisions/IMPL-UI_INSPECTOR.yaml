@@ -55,8 +55,8 @@ IMPL-UI_INSPECTOR:
       - "IMPL-UI_INSPECTOR"
     requirements:
       - "REQ-UI_INSPECTION"
-    test_coverage_note: "Unit coverage for injectionOutcome (popup-injection-outcome) and messageResponseMissing (message-response-unwrap, content-message-response-missing). Ring-buffer core remains lightweight tooling."
+    test_coverage_note: "Unit: injectionOutcome / messageResponseMissing via inspector recordAction paths"
     tests:
       - "tests/unit/content-message-response-missing.test.js"
-      - "tests/unit/message-response-unwrap.test.js"
       - "tests/unit/popup-injection-outcome.test.js"
+      - "tests/unit/script-injection-eligibility.test.js"

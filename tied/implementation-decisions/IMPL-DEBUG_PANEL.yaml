@@ -44,6 +44,7 @@ IMPL-DEBUG_PANEL:
     see_also: []
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: LOG_CATEGORIES + category filter in debug-logger.test.js; panel DOM is composition/E2E"
   traceability:
     architecture:
       - "ARCH-UI_TESTABILITY"
@@ -51,5 +52,6 @@ IMPL-DEBUG_PANEL:
       - "IMPL-DEBUG_PANEL"
     requirements:
       - "REQ-UI_INSPECTION"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: debug panel UI and debug-logger usage in message-handler/popup/content."
-    tests: []
+    test_coverage_note: "Unit: LOG_CATEGORIES filter in debug-logger.test.js; panel UI composition/E2E"
+    tests:
+      - "tests/unit/debug-logger.test.js"

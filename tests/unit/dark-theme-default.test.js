@@ -82,7 +82,7 @@ const mockDocument = {
   querySelector: () => null
 };
 
-describe('[REQ-DARK_THEME] [IMPL-POPUP_THEME_CSS] Dark Theme Default Implementation', () => {
+describe('[IMPL-THEME] [REQ-DARK_THEME] [IMPL-POPUP_THEME_CSS] Dark Theme Default Implementation', () => {
   let configManager;
   let visibilityControls;
 

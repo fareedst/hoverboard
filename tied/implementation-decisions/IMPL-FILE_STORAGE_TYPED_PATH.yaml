@@ -57,6 +57,7 @@ IMPL-FILE_STORAGE_TYPED_PATH:
       - "IMPL-FILE_STORAGE_HELPER_PATH_NORMALIZE"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: dir→hoverboard-bookmarks.json, .json path, missing read empty in helper-path-normalize.test.js"
   traceability:
     architecture:
       - "ARCH-FILE_BOOKMARK_PROVIDER"
@@ -64,5 +65,6 @@ IMPL-FILE_STORAGE_TYPED_PATH:
       - "IMPL-FILE_STORAGE_TYPED_PATH"
     requirements:
       - "REQ-FILE_BOOKMARK_STORAGE"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: file path typing exercised via file-bookmark-service tests."
-    tests: []
+    test_coverage_note: "Unit: resolve_file dir/json/missing read"
+    tests:
+      - "tests/unit/helper-path-normalize.test.js"

@@ -28,6 +28,7 @@ IMPL-THEME:
     see_also: []
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: ThemeManager setTheme dark; dark-theme-default VisibilityControls"
   traceability:
     architecture:
       - "ARCH-THEME"
@@ -37,3 +38,4 @@ IMPL-THEME:
       - "REQ-DARK_THEME"
     tests:
       - "tests/unit/dark-theme-default.test.js"
+      - "tests/unit/theme-and-search-stubs.test.js"

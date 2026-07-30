@@ -42,6 +42,6 @@ IMPL-ARRAY_OBJECT_UTILITIES:
       - "IMPL-ARRAY_OBJECT_UTILITIES"
     requirements:
       - "REQ-SHARED_UTILITIES"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: shared array/object utils exercised indirectly by other tested modules."
+    test_coverage_note: "Unit: shared-utils.test.js covers array/object PROCEDURES"
     tests:
       - "tests/unit/shared-utils.test.js"

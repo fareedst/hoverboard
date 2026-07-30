@@ -38,6 +38,7 @@ IMPL-LOGGER_LEGACY:
       - "IMPL-LOGGER_CONTEXT_LEVELS"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: log() and noisy flag in logger.test.js"
   traceability:
     architecture:
       - "ARCH-STRUCTURED_LOGGING"
@@ -45,5 +46,6 @@ IMPL-LOGGER_LEGACY:
       - "IMPL-LOGGER_LEGACY"
     requirements:
       - "REQ-STRUCTURED_LOGGING"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: legacy logger fallback exercised indirectly."
-    tests: []
+    test_coverage_note: "Unit: log() and noisy in logger.test.js"
+    tests:
+      - "tests/unit/logger.test.js"

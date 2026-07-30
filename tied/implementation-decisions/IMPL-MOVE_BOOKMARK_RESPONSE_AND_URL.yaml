@@ -51,11 +51,14 @@ IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL:
       - "IMPL-MOVE_BOOKMARK_UI"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: router no-time move; popup response.data unwrap and currentPin.url"
   traceability:
     architecture: []
     code_annotations:
       - "IMPL-MOVE_BOOKMARK_RESPONSE_AND_URL"
     requirements:
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: move bookmark response and URL handling in UI."
-    tests: []
+    test_coverage_note: "Unit: router no-time move; popup unwrap"
+    tests:
+      - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/popup-move-bookmark.test.js"

@@ -40,6 +40,7 @@ IMPL-LOGGER_CONTEXT_LEVELS:
       - "IMPL-LOGGER_LEGACY"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: shouldLog, formatMessage, createLogger in logger.test.js"
   traceability:
     architecture:
       - "ARCH-STRUCTURED_LOGGING"
@@ -47,5 +48,6 @@ IMPL-LOGGER_CONTEXT_LEVELS:
       - "IMPL-LOGGER_CONTEXT_LEVELS"
     requirements:
       - "REQ-STRUCTURED_LOGGING"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: logger context/level API used across codebase."
-    tests: []
+    test_coverage_note: "Unit: shouldLog, formatMessage, createLogger in logger.test.js"
+    tests:
+      - "tests/unit/logger.test.js"

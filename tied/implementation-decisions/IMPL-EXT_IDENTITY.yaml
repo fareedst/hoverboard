@@ -28,6 +28,7 @@ IMPL-EXT_IDENTITY:
     see_also: []
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: manifest name + MV3 service_worker identity assert"
   traceability:
     architecture:
       - "ARCH-EXT_IDENTITY"
@@ -36,4 +37,4 @@ IMPL-EXT_IDENTITY:
     requirements:
       - "REQ-EXTENSION_IDENTITY"
     tests:
-      - "tests/unit/service-worker-messaging-routing.test.js"
+      - "tests/unit/theme-and-search-stubs.test.js"

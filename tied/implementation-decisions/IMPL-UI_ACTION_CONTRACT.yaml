@@ -34,6 +34,7 @@ IMPL-UI_ACTION_CONTRACT:
     see_also: []
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: MESSAGE_TYPES / POPUP_ACTION_IDS / POPUP_ACTION_TO_MESSAGE exports"
   traceability:
     architecture:
       - "ARCH-UI_TESTABILITY"
@@ -42,5 +43,4 @@ IMPL-UI_ACTION_CONTRACT:
     requirements:
       - "REQ-UI_INSPECTION"
     tests:
-      - "tests/unit/content-messaging-contracts.test.js"
-      - "tests/unit/popup-message-contract.test.js"
+      - "tests/unit/ui-action-contract.test.js"

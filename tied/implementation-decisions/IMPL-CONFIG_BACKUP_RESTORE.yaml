@@ -36,6 +36,7 @@ IMPL-CONFIG_BACKUP_RESTORE:
       - "IMPL-URL_INHIBITION"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: exportConfig/importConfig round-trip and inhibitUrls in config-manager.test.js"
   traceability:
     architecture:
       - "ARCH-CONFIG_STRUCTURE"
@@ -43,5 +44,6 @@ IMPL-CONFIG_BACKUP_RESTORE:
       - "IMPL-CONFIG_BACKUP_RESTORE"
     requirements:
       - "REQ-CONFIG_PORTABILITY"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: export/import config and options UI flow."
-    tests: []
+    test_coverage_note: "Unit: export/import in config-manager.test.js"
+    tests:
+      - "tests/unit/config-manager.test.js"

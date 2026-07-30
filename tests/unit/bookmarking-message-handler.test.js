@@ -1,9 +1,9 @@
 /**
  * === IMPL-FULL-BLOCK: IMPL-BOOKMARKING ===
  * [IMPL-BOOKMARKING] [ARCH-UX_CORE] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] — How: create/update/delete bookmarks via MessageHandler without leaving the page; tag suggestions remain available.
- *
+ * 
  * ## SAVE_BOOKMARK
- *
+ * 
  * - [IMPL-BOOKMARKING] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] How: validate envelope/data then route save through storage backend; broadcast update on success.
  * - Contract:
  *   - INPUT: saveBookmark / deleteBookmark / getCurrentBookmark messages (url, title, tags, shared, toread, description)
@@ -23,9 +23,10 @@
  *   - result = AWAIT bookmarkRouter.save(validated)
  *   - IF result.ok: BROADCAST BOOKMARK_UPDATED
  *   - RETURN result
- *
+ *   - How (sub-block): How: load current bookmark for URL for overlay/popup display.
+ * 
  * ## GET_CURRENT_BOOKMARK
- *
+ * 
  * - [IMPL-BOOKMARKING] [ARCH-UX_CORE] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] How: Implements GET_CURRENT_BOOKMARK(url) behavior for IMPL-BOOKMARKING.
  * - Contract:
  *   - INPUT: saveBookmark / deleteBookmark / getCurrentBookmark messages (url, title, tags, shared, toread, description)
@@ -41,9 +42,10 @@
  *   - TERMINATION: total
  * - PROCEDURE: GET_CURRENT_BOOKMARK
  *   - RETURN AWAIT bookmarkRouter.get(url) OR empty bookmark view
- *
+ *   - How (sub-block): How: delete bookmark for URL and notify listeners.
+ * 
  * ## DELETE_BOOKMARK
- *
+ * 
  * - [IMPL-BOOKMARKING] [ARCH-UX_CORE] [ARCH-MESSAGE_HANDLING] [REQ-SMART_BOOKMARKING] How: Implements DELETE_BOOKMARK(url) behavior for IMPL-BOOKMARKING.
  * - Contract:
  *   - INPUT: saveBookmark / deleteBookmark / getCurrentBookmark messages (url, title, tags, shared, toread, description)
@@ -61,6 +63,7 @@
  *   - result = AWAIT bookmarkRouter.delete(url)
  *   - IF result.ok: BROADCAST BOOKMARK_UPDATED
  *   - RETURN result
+ * 
  * === END IMPL-FULL-BLOCK: IMPL-BOOKMARKING ===
  */
 

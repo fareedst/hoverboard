@@ -53,6 +53,7 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       - "IMPL-SIDE_PANEL_TAGS_TREE"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: JSDOM snapshot PROCEDURE; E2E shape contract in popup-snapshot.e2e.test.js"
   traceability:
     architecture:
       - "ARCH-UI_TESTABILITY"
@@ -63,5 +64,5 @@ IMPL-SIDE_PANEL_SNAPSHOT:
       - "REQ-SIDE_PANEL_TAGS_TREE"
       - "REQ-UI_INSPECTION"
     tests:
-      - "tests/e2e/popup-snapshot.e2e.test.js (shape contract)"
-      - "tests/playwright/extension-messaging.spec.js (Side panel snapshot describe block)"
+      - "tests/e2e/popup-snapshot.e2e.test.js"
+      - "tests/unit/side-panel-snapshot.test.js"

@@ -308,7 +308,7 @@ jest.mock('../../src/features/tagging/tag-service.js', () => ({
   TagService: jest.fn().mockImplementation(() => ({}))
 }))
 
-describe('[REQ-SUGGESTED_TAGS_FROM_CONTENT] Popup suggested tags', () => {
+describe('[IMPL-SUGGESTED_TAGS] [IMPL-THIS_PAGE_TAG_SORT] [REQ-SUGGESTED_TAGS_FROM_CONTENT] Popup suggested tags', () => {
   let popupController
   let uiManager
   let errorHandler

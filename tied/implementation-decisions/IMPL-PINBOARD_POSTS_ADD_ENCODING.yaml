@@ -45,6 +45,7 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
       - "IMPL-TAG_SYSTEM"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: buildSaveParams encodeURIComponent for # + & in pinboard-service.test.js"
   traceability:
     architecture:
       - "ARCH-PINBOARD_API"
@@ -53,4 +54,4 @@ IMPL-PINBOARD_POSTS_ADD_ENCODING:
     requirements:
       - "REQ-PINBOARD_COMPATIBILITY"
     tests:
-      - "tag-storage.test.js: should save tag with special characters (#, +, .) with percent-encoded URL"
+      - "tests/unit/pinboard-service.test.js"

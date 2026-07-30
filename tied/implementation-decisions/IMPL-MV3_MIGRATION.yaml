@@ -26,6 +26,7 @@ IMPL-MV3_MIGRATION:
     see_also: []
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: manifest_version 3 assert in theme-and-search-stubs.test.js"
   traceability:
     architecture:
       - "ARCH-MV3_MIGRATION"
@@ -34,5 +35,4 @@ IMPL-MV3_MIGRATION:
     requirements:
       - "REQ-MANIFEST_V3_MIGRATION"
     tests:
-      - "tests/unit/badge-refresh-service-worker.test.js"
-      - "tests/unit/service-worker-messaging-routing.test.js"
+      - "tests/unit/theme-and-search-stubs.test.js"

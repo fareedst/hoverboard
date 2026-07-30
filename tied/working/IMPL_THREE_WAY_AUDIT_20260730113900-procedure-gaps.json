@@ -1,0 +1,303 @@
+{
+  "storage": [
+    {
+      "token": "IMPL-MOVE_BOOKMARK_UI",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/bookmark-router.test.js",
+        "tests/unit/move-bookmark-ui.test.js",
+        "tests/unit/popup-move-bookmark.test.js",
+        "tests/integration/move-bookmark-preferred-backend.integration.test.js"
+      ],
+      "h2": [
+        "MAIN"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 1,
+      "describe_mentions": 1
+    },
+    {
+      "token": "IMPL-PINBOARD_POSTS_ADD_ENCODING",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/pinboard-bookmark-times.test.js",
+        "tests/unit/pinboard-service.test.js"
+      ],
+      "h2": [
+        "BUILD_SAVE_PARAMS"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    }
+  ],
+  "ui": [
+    {
+      "token": "IMPL-DEMO_OVERLAY",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/side-panel-tabs.test.js"
+      ],
+      "h2": [
+        "SET_OVERLAY",
+        "BLOCK_2"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-SEARCH",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/tab-search-service.test.js",
+        "tests/unit/tab-search-no-match-ui.test.js",
+        "tests/unit/theme-and-search-stubs.test.js"
+      ],
+      "h2": [
+        "RUN_SEARCH"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-SIDE_PANEL_SNAPSHOT",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/side-panel-snapshot.test.js",
+        "tests/e2e/popup-snapshot.e2e.test.js"
+      ],
+      "h2": [
+        "MAIN"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 1,
+      "describe_mentions": 1
+    },
+    {
+      "token": "IMPL-SUGGESTED_TAGS",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/uIManager-tag-case-folding.test.js",
+        "tests/unit/popup-close-behavior.test.js",
+        "tests/unit/popup-injection-outcome.test.js"
+      ],
+      "h2": [
+        "EXTRACT_SUGGESTED_TAGS"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-THEME",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/dark-theme-default.test.js",
+        "tests/unit/theme-and-search-stubs.test.js"
+      ],
+      "h2": [
+        "APPLY_THEME",
+        "TOGGLE_THEME"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-THIS_PAGE_TAG_SORT",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/uIManager-tag-case-folding.test.js",
+        "tests/unit/popup-injection-outcome.test.js",
+        "tests/unit/popup-refresh-tag-frequency-map.test.js"
+      ],
+      "h2": [
+        "REFRESH_TAG_FREQUENCY_MAP_FOR_SORT",
+        "LOAD_SUGGESTED_TAGS",
+        "SIDE_PANEL_TAG_SORT_TOOLBAR_E2E"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-UI_ACTION_CONTRACT",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/content-messaging-contracts.test.js",
+        "tests/unit/popup-message-contract.test.js"
+      ],
+      "h2": [
+        "MAIN"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-UX_CORE",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/popup-close-behavior.test.js",
+        "tests/unit/popup-checkbox.test.js"
+      ],
+      "h2": [
+        "HANDLE_POPUP_ACTION",
+        "PRESERVE_OVERLAY_CORE"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    }
+  ],
+  "util": [
+    {
+      "token": "IMPL-AI_CONFIG_OPTIONS",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/config-manager.test.js"
+      ],
+      "h2": [
+        "LOAD_SETTINGS",
+        "SAVE_SETTINGS",
+        "BLOCK_3"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-CODE_STYLE",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/module-import-fix.test.js"
+      ],
+      "h2": [
+        "MAIN"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-DEV_COMMAND_INSPECTION",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/dev-command-inspection.test.js"
+      ],
+      "h2": [
+        "PROCESS_DEV_COMMAND"
+      ],
+      "missing_h2_sample": [
+        "PROCESS_DEV_COMMAND"
+      ],
+      "test_mentions": 5,
+      "describe_mentions": 1
+    },
+    {
+      "token": "IMPL-EXT_IDENTITY",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/service-worker-messaging-routing.test.js"
+      ],
+      "h2": [
+        "BOOTSTRAP_EXTENSION"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-MV3_MIGRATION",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/badge-refresh-service-worker.test.js",
+        "tests/unit/service-worker-messaging-routing.test.js"
+      ],
+      "h2": [
+        "MV3_BACKGROUND_RUNTIME"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-PLAYWRIGHT_E2E_EXTENSION",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/uIManager-tag-case-folding.test.js",
+        "tests/unit/popup-injection-outcome.test.js",
+        "tests/unit/popup-refresh-tag-frequency-map.test.js"
+      ],
+      "h2": [
+        "LAUNCH_EXTENSION_CONTEXT",
+        "RUN_EXTENSION_SPECS"
+      ],
+      "missing_h2_sample": [
+        "LAUNCH_EXTENSION_CONTEXT",
+        "RUN_EXTENSION_SPECS"
+      ],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-PRIVACY",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/popup-checkbox.test.js",
+        "tests/unit/config-manager.test.js"
+      ],
+      "h2": [
+        "APPLY_PRIVACY_CONTROLS"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-SERVICE_WORKER",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/service-worker-messaging-routing.test.js",
+        "tests/unit/service-worker-quick-access.test.js"
+      ],
+      "h2": [
+        "SERVICE_WORKER_MAIN",
+        "HANDLE_MESSAGE"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-SITE_MGMT",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/config-manager.test.js"
+      ],
+      "h2": [
+        "EVALUATE_SITE_POLICY",
+        "UPDATE_SITE_LIST"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    },
+    {
+      "token": "IMPL-TYPESCRIPT_MIGRATION",
+      "severity": "marker_only",
+      "suites": [
+        "tests/unit/message-schemas.test.js"
+      ],
+      "h2": [
+        "TYPECHECK_GATE",
+        "MAINTAIN_CHECKED_SURFACE"
+      ],
+      "missing_h2_sample": [],
+      "test_mentions": 0,
+      "describe_mentions": 0
+    }
+  ]
+}

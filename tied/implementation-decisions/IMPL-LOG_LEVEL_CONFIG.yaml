@@ -38,6 +38,7 @@ IMPL-LOG_LEVEL_CONFIG:
       - "IMPL-LOGGER_LEGACY"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: getLogLevel production vs debug in logger.test.js"
   traceability:
     architecture:
       - "ARCH-STRUCTURED_LOGGING"
@@ -45,5 +46,6 @@ IMPL-LOG_LEVEL_CONFIG:
       - "IMPL-LOG_LEVEL_CONFIG"
     requirements:
       - "REQ-STRUCTURED_LOGGING"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: log level config in options and logger init."
-    tests: []
+    test_coverage_note: "Unit: getLogLevel production vs debug in logger.test.js"
+    tests:
+      - "tests/unit/logger.test.js"

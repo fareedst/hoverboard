@@ -202,7 +202,7 @@ describe('[REQ-SIDE_PANEL_POPUP_EQUIVALENT] UIManager tag case folding', () => {
     expect(removeSpy).toHaveBeenCalledWith('ReadLater')
   })
 
-  test('[REQ-THIS_PAGE_TAG_SORT] default alphabetical sorts current tags by display (case-insensitive)', () => {
+  test('[IMPL-THIS_PAGE_TAG_SORT] [REQ-THIS_PAGE_TAG_SORT] default alphabetical sorts current tags by display (case-insensitive)', () => {
     const ui = new UIManager({
       errorHandler: { handleError: noop },
       stateManager: null,

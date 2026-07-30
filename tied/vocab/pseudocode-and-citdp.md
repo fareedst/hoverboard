@@ -27,6 +27,8 @@ Checklist **`sub-vocabulary-sync`** uses **domain** vocab. Do not conflate with 
 | **pseudo-code sidecar** | md detail | `tied/implementation-decisions/IMPL-*-pseudocode.md` |
 | **block lead comment** | header comment | First comment on each block; literal-copy to tests/code |
 | **three-way alignment** | sync | IMPL block lead ↔ test comment ↔ code comment |
+| **empty Active traceability** | missing tests list, untraced Active IMPL | Active IMPL whose `traceability.tests` is empty (`tests: []`); audit fills unit/composition paths and clears the empty list (Deferred Safari may remain) |
+| **PROCEDURE thoroughness audit** | H2 depth audit, marker_only scan | Check that suites exercise PROCEDURE / H2 blocks (not only that a token marker exists); severity labels such as `marker_only` / `no_suite` / `weak_h2` live in working gap dumps |
 | **full-block duplication** | full block paste, comment dump | Hoverboard policy: copy lead + Contract + PROCEDURE into `src/` and primary unit-test loci (vs default block-lead-only); see writing guide § Full block duplication and [`../docs/source-file-impl-traceability.md`](../docs/source-file-impl-traceability.md) |
 | **source-file IMPL traceability** | in-file IMPL copy policy | Repo policy for which files carry full-block comments, placement, and drift direction IMPL → comment → code |
 | **sync_impl_full_blocks** | full-block sync script | [`scripts/sync_impl_full_blocks.py`](../../scripts/sync_impl_full_blocks.py) — inject or `--check` Active H2 presence in mapped loci |
@@ -122,6 +124,7 @@ Prefer in `essence_pseudocode` (not domain terms):
 | DATA_TRANSITION | IMPL grammar keywords |
 | domain vocabulary | Domain vs grammar |
 | EFFECTS | IMPL grammar keywords |
+| empty Active traceability | Preferred terms |
 | essence_pseudocode | Preferred terms |
 | FAILURE_MODES | IMPL grammar keywords |
 | full-block duplication | Preferred terms |
@@ -133,6 +136,7 @@ Prefer in `essence_pseudocode` (not domain terms):
 | POST | IMPL grammar keywords |
 | PRE | IMPL grammar keywords |
 | pre-contract-grammar | IMPL grammar keywords |
+| PROCEDURE thoroughness audit | Preferred terms |
 | pseudo-code sidecar | Preferred terms |
 | routing.md | Naming bridge |
 | SHAPE-003 | Preferred terms |

@@ -1039,6 +1039,33 @@ describe('ConfigManager', () => {
       
       expect(isAllowed).toBe(true);
     });
+
+    test('setInhibitUrls replaces full list [IMPL-URL_INHIBITION]', async () => {
+      await configManager.setInhibitUrls(['alpha.com', 'beta.com']);
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_inhibit_urls: 'alpha.com\nbeta.com'
+      });
+    });
+
+    test('isUrlAllowed bidirectional substring match [IMPL-URL_INHIBITION]', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_inhibit_urls: 'example.com/path'
+      });
+      // entry contains normalized URL fragment (bidirectional)
+      const blocked = await configManager.isUrlAllowed('https://example.com');
+      expect(blocked).toBe(false);
+    });
+
+    test('isUrlAllowed strips protocol from candidate URL before match [IMPL-URL_INHIBITION]', async () => {
+      // PROCEDURE: normalize candidate by stripping https?://; inhibit entries match as substrings
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_inhibit_urls: 'example.com'
+      });
+      const blocked = await configManager.isUrlAllowed('https://example.com/page');
+      expect(blocked).toBe(false);
+      const allowed = await configManager.isUrlAllowed('https://other.com/page');
+      expect(allowed).toBe(true);
+    });
   });
 
   describe('Configuration Import/Export', () => {
@@ -1086,6 +1113,43 @@ describe('ConfigManager', () => {
       expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
         hoverboard_settings: importData.settings
       });
+    });
+
+    test('export/import round-trip includes inhibitUrls [IMPL-CONFIG_BACKUP_RESTORE]', async () => {
+      const exported = await configManager.exportConfig();
+      expect(exported.inhibitUrls).toEqual(['example.com', 'test.com']);
+      await configManager.importConfig({
+        settings: exported.settings,
+        authToken: 'round-trip-token',
+        inhibitUrls: exported.inhibitUrls
+      });
+      expect(global.chrome.storage.sync.set).toHaveBeenCalledWith({
+        hoverboard_inhibit_urls: 'example.com\ntest.com'
+      });
+    });
+  });
+
+  describe('[IMPL-FEATURE_FLAGS] defaults and settings accessors', () => {
+    test('getDefaultConfiguration includes feature-flag keys [IMPL-FEATURE_FLAGS]', () => {
+      const defaults = configManager.getDefaultConfiguration();
+      expect(defaults).toHaveProperty('hoverShowRecentTags');
+      expect(defaults).toHaveProperty('inhibitSitesOnPageLoad');
+    });
+
+    test('getOptions returns UI-safe subset [IMPL-FEATURE_FLAGS]', async () => {
+      const options = await configManager.getOptions();
+      expect(options).toBeDefined();
+      expect(typeof options).toBe('object');
+      // secrets must not be exposed as auth token field in UI options shape
+      expect(options).not.toHaveProperty('authToken');
+    });
+
+    test('getStoredSettings parses corrupted string JSON [IMPL-FEATURE_FLAGS]', async () => {
+      global.chrome.storage.sync.get.mockResolvedValue({
+        hoverboard_settings: JSON.stringify({ hoverShowRecentTags: false })
+      });
+      const settings = await configManager.getStoredSettings();
+      expect(settings.hoverShowRecentTags).toBe(false);
     });
   });
 

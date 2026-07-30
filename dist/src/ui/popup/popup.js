@@ -19826,12 +19826,12 @@ var PopupController = class {
   /**
    * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] [REQ-STORAGE_MODE_DEFAULT] Get the storage backend currently selected in the popup UI (highlighted button).
    * Used so save follows the highlight when creating or updating a bookmark.
-   * @returns {string|null} 'pinboard'|'local'|'file'|'sync' or null if not determinable
+   * @returns {string|null} 'pinboard'|'local'|'file'|'sync'|'browser' or null if not determinable
    */
   getSelectedStorageBackend() {
     const btn = this.uiManager.elements.storageBackendButtons?.querySelector('.storage-backend-btn[aria-pressed="true"]');
     const backend = btn?.getAttribute("data-backend") || null;
-    return backend && ["pinboard", "local", "file", "sync"].includes(backend) ? backend : null;
+    return backend && ["pinboard", "local", "file", "sync", "browser"].includes(backend) ? backend : null;
   }
   /**
    * [IMPL-MOVE_BOOKMARK_UI] [ARCH-MOVE_BOOKMARK_UI] [REQ-MOVE_BOOKMARK_STORAGE_UI] Get storage backend for URL (pinboard | local | file | sync).

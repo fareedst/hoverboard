@@ -26,6 +26,7 @@ IMPL-SEARCH:
     see_also: []
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: TabSearchService no-match and navigate in theme-and-search-stubs.test.js"
   traceability:
     architecture:
       - "ARCH-SEARCH"
@@ -34,5 +35,5 @@ IMPL-SEARCH:
     requirements:
       - "REQ-SEARCH_FUNCTIONALITY"
     tests:
-      - "tests/unit/tab-search-no-match-ui.test.js"
       - "tests/unit/tab-search-service.test.js"
+      - "tests/unit/theme-and-search-stubs.test.js"

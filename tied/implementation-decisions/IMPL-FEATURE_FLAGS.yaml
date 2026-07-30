@@ -35,6 +35,7 @@ IMPL-FEATURE_FLAGS:
       - "IMPL-CONFIG_MIGRATION"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: defaults, getOptions, getStoredSettings, update/reset in config-manager.test.js"
   traceability:
     architecture:
       - "ARCH-CONFIG_STRUCTURE"
@@ -42,5 +43,6 @@ IMPL-FEATURE_FLAGS:
       - "IMPL-FEATURE_FLAGS"
     requirements:
       - "REQ-CONFIG_PORTABILITY"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: feature-flag config read in options and runtime."
-    tests: []
+    test_coverage_note: "Unit: defaults/getOptions/settings in config-manager.test.js"
+    tests:
+      - "tests/unit/config-manager.test.js"

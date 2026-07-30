@@ -56,6 +56,7 @@ IMPL-MOVE_BOOKMARK_UI:
     supersedes: []
   status: "Active"
   summary: "Popup Save to five select-one buttons (Pinboard, Local, File, Sync, Browser); load backend on data load; on click send moveBookmarkToStorage; on save send preferredBackend so router uses highlighted storage."
+  test_coverage_note: "Unit: aria-pressed, getSelectedStorageBackend includes browser; composition: createBookmark preferredBackend"
   traceability:
     architecture:
       - "ARCH-MOVE_BOOKMARK_UI"
@@ -64,7 +65,9 @@ IMPL-MOVE_BOOKMARK_UI:
     requirements:
       - "REQ-MOVE_BOOKMARK_STORAGE_UI"
       - "REQ-STORAGE_MODE_DEFAULT"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: move bookmark UI flow in side panel/popup."
+    test_coverage_note: "Unit + composition Save-to→preferredBackend incl. browser"
     tests:
-      - "tests/integration/message-handler-router-storage.integration.test.js"
+      - "tests/integration/move-bookmark-preferred-backend.integration.test.js"
       - "tests/unit/bookmark-router.test.js"
+      - "tests/unit/move-bookmark-ui.test.js"
+      - "tests/unit/popup-move-bookmark.test.js"

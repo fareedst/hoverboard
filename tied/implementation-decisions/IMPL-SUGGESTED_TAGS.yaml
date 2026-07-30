@@ -56,6 +56,7 @@ IMPL-SUGGESTED_TAGS:
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: loadSuggestedTags restricted-URL skip and inject path in popup-suggested-tags.test.js"
   token_coverage:
     tests:
       - "tests/integration/this-page-tag-sort-composition.integration.test.js"
@@ -71,11 +72,8 @@ IMPL-SUGGESTED_TAGS:
       - "REQ-SUGGESTED_TAGS_DEDUPLICATION"
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
     tests:
-      - "tests/integration/this-page-tag-sort-composition.integration.test.js"
-      - "tests/unit/popup-injection-outcome.test.js"
       - "tests/unit/popup-suggested-tags.test.js"
       - "tests/unit/script-injection-eligibility.test.js"
-      - "tests/unit/suggested-tag-original-case.test.js"
   validation_evidence:
     - date: "2026-03-27"
       notes: "S06.6 persist: popup-suggested-tags unit tests + tied_validate_consistency"

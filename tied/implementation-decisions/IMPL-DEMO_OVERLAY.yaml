@@ -96,11 +96,6 @@ IMPL-DEMO_OVERLAY:
       - "REQ-SIDE_PANEL_POPUP_EQUIVALENT"
       - "REQ-SIDE_PANEL_TAGS_TREE"
       - "REQ-SUGGESTED_TAGS_FROM_CONTENT"
+    test_coverage_note: "Demo recording scripts exercise overlay paths; not unit-testable product UI (E2E/demo scripts)"
     tests:
-      - "extension-demo-tabs.spec.js: Tabs panel shows filter and Copy Records when opened with hoverboard_sidepanel_active_tab=browserTabs"
-      - "extension-demo-tabs.spec.js: Tabs tab open panel switch to Tabs wait for list optional filter Copy Records"
-      - "extension-messaging.spec.js: side panel opens with Bookmarks tab visible when hoverboard_sidepanel_active_tab is set"
-      - "extension-messaging.spec.js: side panel opens with By Tag tab visible when hoverboard_sidepanel_active_tab is set to tagsTree"
-      - "extension-messaging.spec.js: side panel opens with Tabs tab visible when hoverboard_sidepanel_active_tab is set to browserTabs"
-      - "extension-usage-tracking.spec.js: bookmark panel has Quick Actions, Storage, tag sections, Search Tabs, footer (This Page demo)"
-      - "extension-usage-tracking.spec.js: side panel opens with Usage tab visible when hoverboard_sidepanel_active_tab is set to usage"
+      - "scripts/record-demo-side-panel-this-page.js"

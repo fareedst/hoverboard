@@ -39,6 +39,7 @@ IMPL-DEV_COMMAND_INSPECTION:
     see_also: []
     supersedes: []
   status: "Active"
+  test_coverage_note: "Unit: processDevCommand subcommands in dev-command-inspection.test.js"
   traceability:
     architecture: []
     code_annotations:
@@ -47,5 +48,6 @@ IMPL-DEV_COMMAND_INSPECTION:
       - "REQ-PER_BOOKMARK_STORAGE_BACKEND"
       - "REQ-UI_INSPECTION"
       - "REQ-URL_TAGS_DISPLAY"
-    test_coverage_note: "No unit tests; coverage via E2E or manual. Reason: dev-only command inspection and inspector hooks."
-    tests: []
+    test_coverage_note: "Unit: processDevCommand subcommands"
+    tests:
+      - "tests/unit/dev-command-inspection.test.js"

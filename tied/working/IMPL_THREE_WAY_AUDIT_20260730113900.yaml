@@ -1,0 +1,34 @@
+# IMPL three-way audit tracker
+# Parent plan: impl_three-way_alignment_b4b53b70.plan.md
+close_out:
+  citdp: "tied/citdp/CITDP-IMPL_THREE_WAY_AUDIT-20260730113900.yaml"
+  composition: "tests/integration/move-bookmark-preferred-backend.integration.test.js"
+  procedure_gaps_json: "refreshed suite lists; no remaining no_suite (snapshot no longer stale vs new suites)"
+  sidecar_allowlist: "IMPL-MOVE_BOOKMARK_UI step 13 pinboard|local|file|sync|browser"
+done_when:
+  comments_match_sidecars: "true"
+  empty_active_traceability_cleared: "true"
+  unit_green: "true"
+last_updated: "2026-07-30"
+mode: "full-block-resync-plus-procedure-audit"
+phase0:
+  check: "0/95 missing"
+  script_fix: "re.sub callable repl for sidecar backslashes (e.g. \\HOME)"
+  sync_impl_full_blocks: "completed"
+phase1:
+  empty_traceability_seed: "12"
+  inventory: "completed"
+phase2:
+  contradiction_fixed:
+    - "IMPL-MOVE_BOOKMARK_UI getSelectedStorageBackend allowlist + browser"
+  empty_tests_patched: "completed"
+  storage_audit: "completed"
+  ui_audit: "completed"
+  util_audit: "completed"
+phase3:
+  coverage_gap_report: "empty Active list cleared (only IMPL-SAFARI_ADAPTATION Deferred)"
+  tied_validate_consistency: "ok"
+  traceability_mcp: "completed"
+  unit_tests: "107 suites, 1339 passed, 1 skipped (reconfirmed close-out)"
+status: "completed"
+token: "IMPL_THREE_WAY_AUDIT"

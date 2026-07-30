@@ -188,7 +188,9 @@ def inject_into_file(path: Path, token: str, comment: str, dry_run: bool) -> str
             rf"/\*\*\n \* {re.escape(begin)}.*?{re.escape(end)}\n \*/\n?",
             re.S,
         )
-        new_text, n = pattern.subn(comment, text, count=1)
+        # Use a callable repl so sidecar backslashes (e.g. \HOME) are not
+        # interpreted as re.sub template escapes.
+        new_text, n = pattern.subn(lambda _m: comment, text, count=1)
         if n == 0:
             return "marker-miss"
         action = "replaced"

@@ -461,7 +461,7 @@
  *   - 11.   ELSE: show error from result
  *   - How (sub-block): Set preferredBackend from selected button; send saveBookmark so router uses highlighted storage.
  *   - 12. ON save (createBookmark, addTagsToBookmark, toggle private, toggle read-later):
- *   - 13.   data.preferredBackend = getSelectedStorageBackend()   // button with aria-pressed="true"
+ *   - 13.   data.preferredBackend = getSelectedStorageBackend()   // aria-pressed button; allowlist pinboard|local|file|sync|browser else null
  *   - 14.   SEND saveBookmark(data)   // router uses preferredBackend
  * 
  * === END IMPL-FULL-BLOCK: IMPL-MOVE_BOOKMARK_UI ===
